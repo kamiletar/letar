@@ -156,10 +156,28 @@
   "analytics": true,
   "release": {
     "projectsRelationship": "independent",
+    "version": {
+      "conventionalCommits": true,
+      "preserveLocalDependencyProtocols": true
+    },
     "changelog": {
+      "automaticFromRef": true,
       "projectChangelogs": {
-        "createRelease": "github"
-      }
+        "createRelease": "github",
+        "renderOptions": {
+          "authors": true,
+          "commitReferences": true,
+          "versionTitleDate": true
+        }
+      },
+      "workspaceChangelog": false
+    },
+    "git": {
+      "commit": true,
+      "commitMessage": "chore(release): publish {version}",
+      "tag": true,
+      "tagMessage": "{version}",
+      "push": false
     }
   }
 }

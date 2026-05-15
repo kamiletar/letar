@@ -1,0 +1,85 @@
+# Публикация npm-пакетов из letar
+# Триггеры: теги формата <project>-v<version> или ручной запуск
+# Публикует напрямую из letar (без зеркальных репо).
+
+name: Publish npm package
+
+on:
+  push:
+    tags:
+      - 'forms-v*.*.*'
+      - 'form-mcp-v*.*.*'
+      - 'zenstack-form-plugin-v*.*.*'
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Nx project name'
+        required: true
+        type: choice
+        options:
+          - '@letar/forms'
+          - '@letar/form-mcp'
+          - '@letar/zenstack-form-plugin'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout letar (with public submodules only — private libs not needed for npm libs)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Сабмодули рекурсивно — но приватные не понадобятся, актуальные npm libs (forms, form-mcp, zenstack-form-plugin) лежат в публичной части letar.
+          # Если в будущем npm lib зависит от приватного — добавь token: ${{ secrets.PRIVATE_SUBMODULES_PAT }}
+          submodules: false
+
+      - name: Determine project from tag or input
+        id: project
+        run: |
+          if [ -n "${{ github.event.inputs.project }}" ]; then
+            PROJECT="${{ github.event.inputs.project }}"
+          else
+            # forms-v1.2.3 → @letar/forms
+            # form-mcp-v1.2.3 → @letar/form-mcp
+            # zenstack-form-plugin-v1.2.3 → @letar/zenstack-form-plugin
+            TAG="${GITHUB_REF#refs/tags/}"
+            SHORT="${TAG%-v*.*.*}"
+            PROJECT="@letar/$SHORT"
+          fi
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+          echo "Publishing project: $PROJECT"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js (for npm publish auth)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build npm package
+        run: bunx nx build:npm "${{ steps.project.outputs.project }}"
+
+      - name: Publish to npm
+        run: bunx nx publish:npm "${{ steps.project.outputs.project }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [ -z "${{ github.event.inputs.project }}" ] && [[ "$TAG" =~ ^[a-z-]+-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            gh release create "$TAG" --title "${{ steps.project.outputs.project }} $TAG" --generate-notes || echo "release may already exist"
+          fi
