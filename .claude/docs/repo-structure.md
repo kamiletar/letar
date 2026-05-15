@@ -108,3 +108,15 @@ CI триггерится на тег и публикует на npm. Подро
 Раньше монорепо называлось `lena`, scope `@lena/*`, релизы делались копированием исходников в отдельные публичные репо-зеркала (`kamiletar/letar-forms` и т.д.). Это устарело — теперь letar сам публичный, релизы напрямую из него.
 
 Старые публичные зеркала (`kamiletar/letar-forms`, `kamiletar/letar-form-mcp`, `kamiletar/zenstack-form-plugin`, `kamiletar/animatrona`) можно удалить.
+
+### Миграция server-папок
+
+Server рабочие папки переименованы с `/home/deploy/lena` на `/home/deploy/letar`. Инструкция по физическому переносу на серверах (s1, s2, mail): [server-migration-letar](/.claude/docs/server-migration-letar.md).
+
+### Android applicationId
+
+Android-приложения (`animatrona-mobile`, `animatrona-tv`) и нативные модули (`exoplayer-ass`, `exoplayer-sync`) переименованы с `com.lena.*` на `com.letar.*`. После переноса:
+
+- Старые установки на устройствах будут видны как «другое приложение» (по applicationId).
+- Пользователи должны переустановить приложение; локальное состояние (Settings, IndexedDB, скачанное видео) **не мигрирует автоматически**.
+- В Google Play (если выкладывались) — нужен новый листинг под новый applicationId.
