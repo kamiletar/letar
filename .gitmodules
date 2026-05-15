@@ -1,0 +1,27 @@
+[submodule "apps/aboi"]
+	path = apps/aboi
+	url = git@github.com:kamiletar/letar-private-aboi.git
+[submodule "apps/aboi-e2e"]
+	path = apps/aboi-e2e
+	url = git@github.com:kamiletar/letar-private-aboi-e2e.git
+[submodule "apps/driving-school"]
+	path = apps/driving-school
+	url = git@github.com:kamiletar/letar-private-driving-school.git
+[submodule "apps/driving-school-e2e"]
+	path = apps/driving-school-e2e
+	url = git@github.com:kamiletar/letar-private-driving-school-e2e.git
+[submodule "libs/driving-school-db"]
+	path = libs/driving-school-db
+	url = git@github.com:kamiletar/letar-private-driving-school-db.git
+[submodule "apps/premium-rosstil"]
+	path = apps/premium-rosstil
+	url = git@github.com:kamiletar/letar-private-premium-rosstil.git
+[submodule "apps/premium-rosstil-e2e"]
+	path = apps/premium-rosstil-e2e
+	url = git@github.com:kamiletar/letar-private-premium-rosstil-e2e.git
+[submodule "apps/imot"]
+	path = apps/imot
+	url = git@github.com:kamiletar/letar-private-imot.git
+[submodule "apps/imot-e2e"]
+	path = apps/imot-e2e
+	url = git@github.com:kamiletar/letar-private-imot-e2e.git

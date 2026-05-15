@@ -1,6 +1,0 @@
-export { Step1Welcome } from './step-1-welcome'
-export { Step2BasicInfo } from './step-2-basic-info'
-export { Step3Vehicle } from './step-3-vehicle'
-export { Step4Schedule } from './step-4-schedule'
-export { Step5Pricing } from './step-5-pricing'
-export { Step6Complete } from './step-6-complete'
