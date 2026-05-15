@@ -201,7 +201,7 @@ function parseMarkdownFile(content: string): ParsedQuestion[] {
 
 async function main() {
   const SOURCE_DIR = 'C:/Users/Kami/Desktop/kami_tz'
-  const OUTPUT_PATH = 'C:/web/lena/apps/kami/prisma/psychologist-scoring.json'
+  const OUTPUT_PATH = 'C:/web/letar/apps/kami/prisma/psychologist-scoring.json'
 
   // Получаем список файлов с вопросами
   const allFiles = readdirSync(SOURCE_DIR)

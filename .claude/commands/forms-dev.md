@@ -7,7 +7,7 @@
 3. Зарегистрируйся в agent-mail:
    ```
    macro_start_session(
-     human_key: "C:/web/lena",
+     human_key: "C:/web/letar",
      program: "claude-code",
      model: "opus-4.6",
      task_description: "Разработка @letar/forms",

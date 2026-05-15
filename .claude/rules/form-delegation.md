@@ -29,7 +29,7 @@ form-mcp → get_field_props    # Может, поле есть но с друг
 
 ```typescript
 send_message({
-  project_key: 'C:/web/lena',
+  project_key: 'C:/web/letar',
   sender_name: '<твоё имя агента>',
   to: ['FormsCoord'], // координатор форм (НЕ broadcast!)
   topic: 'form-feature-request',
@@ -77,7 +77,7 @@ send_message({
 ```typescript
 // Каждые ~30 секунд проверяй inbox
 fetch_inbox({
-  project_key: 'C:/web/lena',
+  project_key: 'C:/web/letar',
   agent_name: '<твоё имя>',
   topic: 'form-feature-request',
   include_bodies: true,

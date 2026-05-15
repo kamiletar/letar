@@ -161,7 +161,7 @@ npx react-native bundle --platform android --dev false \
 cd android && ./gradlew assembleDebug
 
 # 4. Установка и запуск
-/c/Android/Sdk/platform-tools/adb.exe install -r "C:/web/lena/apps/animatrona-mobile/android/app/build/outputs/apk/debug/app-debug.apk"
+/c/Android/Sdk/platform-tools/adb.exe install -r "C:/web/letar/apps/animatrona-mobile/android/app/build/outputs/apk/debug/app-debug.apk"
 /c/Android/Sdk/platform-tools/adb.exe shell am force-stop com.lena.animatrona.mobile
 /c/Android/Sdk/platform-tools/adb.exe shell am start -n com.lena.animatrona.mobile/.MainActivity
 ```

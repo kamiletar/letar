@@ -400,7 +400,7 @@ scripts/start-agent-mail.cmd
 ### Воркфлоу
 
 1. Запустить сервер (`start-agent-mail.sh` / `.cmd`)
-2. При старте сессии вызвать `macro_start_session` с `human_key: "C:/web/lena"`, `program: "claude-code"` и описанием задачи
+2. При старте сессии вызвать `macro_start_session` с `human_key: "C:/web/letar"`, `program: "claude-code"` и описанием задачи
 3. Зарезервировать файлы через `file_reservation_paths`
 4. Периодически проверять `fetch_inbox` для входящих
 5. Отправлять сообщения через `send_message` для координации

@@ -37,7 +37,7 @@ fetch_inbox(project_key: "app-c-web-lena", agent_name: "<твоё-имя>", topi
 
 ```
 send_message(
-  project_key: "C:/web/lena",
+  project_key: "C:/web/letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: form-example",

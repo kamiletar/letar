@@ -8,7 +8,7 @@
 
 Все хуки и плагины с хуками **отключены**. Оригиналы сохранены:
 
-- `C:/web/lena/.claude/settings.json.bak`
+- `C:/web/letar/.claude/settings.json.bak`
 - `C:/Users/Kami/.claude/settings.json.bak`
 
 ### Проектные хуки (`.claude/settings.json`)
@@ -72,7 +72,7 @@
 ## Как восстановить всё обратно
 
 ```bash
-cp C:/web/lena/.claude/settings.json.bak C:/web/lena/.claude/settings.json
+cp C:/web/letar/.claude/settings.json.bak C:/web/letar/.claude/settings.json
 cp C:/Users/Kami/.claude/settings.json.bak C:/Users/Kami/.claude/settings.json
 ```
 

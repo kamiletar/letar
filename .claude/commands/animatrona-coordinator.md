@@ -8,7 +8,7 @@
 
 ```
 macro_start_session(
-  human_key: "C:/web/lena",
+  human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
   task_description: "Animatrona Coordinator — координация между animatrona приложениями",

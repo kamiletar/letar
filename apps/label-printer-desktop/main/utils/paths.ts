@@ -15,7 +15,7 @@ export function getResourcesPath(): string {
     return process.resourcesPath
   }
   // В dev режиме nextron компилирует main в app/background.js
-  // __dirname = C:\web\lena\apps\label-printer-desktop\app
+  // __dirname = C:\web\letar\apps\label-printer-desktop\app
   // Поэтому поднимаемся на 1 уровень до apps/label-printer-desktop/
   const resourcesPath = join(__dirname, '../')
   console.warn('[paths] __dirname:', __dirname)

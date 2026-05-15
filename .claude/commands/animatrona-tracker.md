@@ -61,7 +61,7 @@ send_message(to: ["GrayMill"], subject: "change: <описание>", topic: "an
 
 ```
 send_message(
-  project_key: "C:/web/lena",
+  project_key: "C:/web/letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: animatrona-tracker",

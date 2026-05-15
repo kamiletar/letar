@@ -4,7 +4,7 @@
 
 **КРИТИЧНО: Вы работаете в Claude Code CLI на нативном Windows (без WSL).**
 
-- **Рабочая директория:** `C:\web\lena` (Windows путь)
+- **Рабочая директория:** `C:\web\letar` (Windows путь)
 - **IDE:** WebStorm (нативный Windows)
 - **Bash команды:** Запускай напрямую без `cd` - ты уже в директории проекта
 - **Nx глобальный:** Используй `nx` напрямую, не `npx nx`
@@ -40,7 +40,7 @@ nx build premium-rosstil
 git add . && git commit -m "message"
 
 # ❌ Неправильно - не нужны абсолютные пути
-cd C:\web\lena && nx lint premium-rosstil
+cd C:\web\letar && nx lint premium-rosstil
 ```
 
 ## Технологический стек

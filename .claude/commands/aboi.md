@@ -19,7 +19,7 @@
 
 ```
 macro_start_session(
-  human_key: "C:/web/lena",
+  human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.7",
   task_description: "Разработка aboi: <что делаешь>",
@@ -65,7 +65,7 @@ macro_start_session(
 
 ```
 send_message(
-  project_key: "C:/web/lena",
+  project_key: "C:/web/letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: aboi",

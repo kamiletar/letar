@@ -10,7 +10,7 @@
 
 ```
 mcp__agent-mail__macro_start_session(
-  human_key: "C:/web/lena",
+  human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
   task_description: "<кратко что делаешь>",
@@ -23,7 +23,7 @@ mcp__agent-mail__macro_start_session(
 
 ```
 macro_start_session(
-  human_key: "C:/web/lena",
+  human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
   task_description: "Разработка animatrona-tracker: синхронизация пинов",
