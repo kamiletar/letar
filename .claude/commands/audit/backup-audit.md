@@ -44,10 +44,10 @@ $SSH $S2 'docker ps --filter name=dashboard-agent --format "{{.Status}}" && curl
 
 ```bash
 # S1
-$SSH $S1 'cat /home/deploy/lena/cron-jobs.json'
+$SSH $S1 'cat /home/deploy/letar/cron-jobs.json'
 
 # S2
-$SSH $S2 'cat /home/deploy/lena/cron-jobs.json'
+$SSH $S2 'cat /home/deploy/letar/cron-jobs.json'
 ```
 
 Ожидаемые задачи:
@@ -69,10 +69,10 @@ $SSH $S2 'cat /home/deploy/lena/cron-jobs.json'
 
 ```bash
 # S1 — список бэкапов с размерами
-$SSH $S1 'ls -lhS /home/deploy/lena/backups/*.sql.gz 2>/dev/null | tail -20'
+$SSH $S1 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -20'
 
 # S2
-$SSH $S2 'ls -lhS /home/deploy/lena/backups/*.sql.gz 2>/dev/null | tail -20'
+$SSH $S2 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -20'
 ```
 
 Приложения для проверки:
@@ -103,10 +103,10 @@ $SSH $S2 'ls -lhS /home/deploy/lena/backups/*.sql.gz 2>/dev/null | tail -20'
 
 ```bash
 # S1
-$SSH $S1 'ls -lh /home/deploy/lena/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
+$SSH $S1 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
 
 # S2
-$SSH $S2 'ls -lh /home/deploy/lena/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
+$SSH $S2 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
 ```
 
 - Последний бэкап на каждом сервере **не старше 25 часов**
@@ -143,8 +143,8 @@ $SSH $S1 'systemctl is-active resilio-sync'
 $SSH $S2 'systemctl is-active resilio-sync'
 
 # Проверь что бэкапы НЕ в IgnoreList
-$SSH $S1 'cat /home/deploy/lena/.sync/IgnoreList 2>/dev/null'
-$SSH $S2 'cat /home/deploy/lena/.sync/IgnoreList 2>/dev/null'
+$SSH $S1 'cat /home/deploy/letar/.sync/IgnoreList 2>/dev/null'
+$SSH $S2 'cat /home/deploy/letar/.sync/IgnoreList 2>/dev/null'
 ```
 
 - `resilio-sync` активен на обоих серверах

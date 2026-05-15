@@ -365,7 +365,7 @@
 
 ```bash
 ssh deploy@s2.letar.best
-cd /home/deploy/lena/apps/dashboard
+cd /home/deploy/letar/apps/dashboard
 bun prisma db seed --schema=./src/generated/schema.prisma
 ```
 

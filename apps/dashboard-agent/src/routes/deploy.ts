@@ -240,7 +240,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: { appName: string } }>(
     '/api/deploy/app',
     async (request): Promise<ApiResponse<{ appName: string; started: boolean }>> => {
-      const REPO_PATH = process.env.REPO_PATH || '/home/deploy/lena'
+      const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
 
       try {
         const { appName } = request.body

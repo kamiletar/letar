@@ -64,12 +64,12 @@ services:
     pid: 'host' # Доступ к процессам хоста
     privileged: true # Для nsenter
     environment:
-      WORKSPACE_DIR: ${WORKSPACE_PATH:-/home/deploy/lena}
+      WORKSPACE_DIR: ${WORKSPACE_PATH:-/home/deploy/letar}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Docker API
-      - ${WORKSPACE_PATH:-/home/deploy/lena}:/workspace:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}:/workspace:ro
     networks:
       - premium-network
 

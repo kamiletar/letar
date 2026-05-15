@@ -8,7 +8,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import type { ApiResponse } from '../types'
 
-const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/lena'
+const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/letar'
 const UMAMI_SCRIPT_URL = 'https://stats.letar.best/script.js'
 
 export async function envRoutes(fastify: FastifyInstance): Promise<void> {

@@ -181,7 +181,7 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.be
 
 4. **Перезапустить приложения**
    ```bash
-   ssh root@194.164.245.97 "cd /home/deploy/lena && ./deploy-affected.sh"
+   ssh root@194.164.245.97 "cd /home/deploy/letar && ./deploy-affected.sh"
    ```
 
 ## Reference

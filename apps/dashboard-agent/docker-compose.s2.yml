@@ -35,14 +35,14 @@ services:
       # Docker socket для управления контейнерами
       - /var/run/docker.sock:/var/run/docker.sock
       # Git репозиторий для git операций (REPO_PATH в lib/git.ts)
-      - ${WORKSPACE_PATH:-/home/deploy/lena}:/home/deploy/lena
+      - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
       # Secrets от s2-приложений (для подключения к БД)
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/archetest/.env.docker:/secrets/archetest.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/time/.env.docker:/secrets/time.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/form-example/.env.docker:/secrets/form-example.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/archetest/.env.docker:/secrets/archetest.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/time/.env.docker:/secrets/time.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/form-example/.env.docker:/secrets/form-example.env:ro
     networks:
       - driving-school-network
       - premium-network

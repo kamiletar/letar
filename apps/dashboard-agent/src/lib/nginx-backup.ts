@@ -8,7 +8,7 @@ import { existsSync } from 'fs'
 import { readdir, stat, unlink } from 'fs/promises'
 import path from 'path'
 
-const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/lena'
+const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/letar'
 
 /** Путь к данным NPM на хосте (bind-mount из docker-compose) */
 const NPM_DATA_DIR = path.join(WORKSPACE_PATH, 'infra/nginx-proxy-manager/data')

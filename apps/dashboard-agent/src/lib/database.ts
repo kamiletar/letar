@@ -463,7 +463,7 @@ export async function backupDatabase(dbConfig: DbConfig): Promise<BackupResult> 
   // Форматируем время в московской таймзоне
   const moscowTime = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Moscow' }).replace(/[: ]/g, '-')
   const filename = `${dbConfig.name}_${moscowTime}.sql.gz`
-  const backupDir = '/home/deploy/lena/backups'
+  const backupDir = '/home/deploy/letar/backups'
   const filepath = `${backupDir}/${filename}`
 
   try {
@@ -628,7 +628,7 @@ export async function getBackupsList(dbName?: string): Promise<BackupInfo[]> {
   const { readdir, stat } = await import('fs/promises')
   const path = await import('path')
 
-  const backupsDir = '/home/deploy/lena/backups'
+  const backupsDir = '/home/deploy/letar/backups'
 
   try {
     const files = await readdir(backupsDir)

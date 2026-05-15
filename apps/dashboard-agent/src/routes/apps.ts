@@ -8,7 +8,7 @@ import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import type { ApiResponse } from '../types'
 
-const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/lena'
+const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/letar'
 
 /** Конфигурация NPM proxy host для приложения */
 interface AppNpmConfig {

@@ -14,7 +14,7 @@ declare -A SERVER_MAP=(
   ["s1"]="root@s1.letar.best"
   ["s2"]="root@s2.letar.best"
 )
-REMOTE_PATH="/home/deploy/lena"
+REMOTE_PATH="/home/deploy/letar"
 LOCAL_PATH="apps"
 
 # Какие приложения на каком сервере

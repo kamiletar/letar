@@ -14,7 +14,7 @@
 
 # ✅ ПРАВИЛЬНО — подключиться к серверу и запустить там
 ssh root@s2.letar.best
-cd /home/deploy/lena
+cd /home/deploy/letar
 ./deploy-affected.sh --app driving-school
 ```
 
@@ -33,7 +33,7 @@ cd /home/deploy/lena
 
 ## Production серверы
 
-**Путь:** `/home/deploy/lena` — репозиторий на production серверах
+**Путь:** `/home/deploy/letar` — репозиторий на production серверах
 
 > **Примечание:** Путь изменён с `/root/lena` для совместимости с backup-инструментами (relisio sync).
 > Переменная `WORKSPACE_PATH` в `.env.docker` dashboard должна указывать на этот путь.
@@ -281,10 +281,10 @@ services:
     pid: 'host'
     privileged: true
     environment:
-      WORKSPACE_DIR: ${WORKSPACE_PATH:-/home/deploy/lena}
+      WORKSPACE_DIR: ${WORKSPACE_PATH:-/home/deploy/letar}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${WORKSPACE_PATH:-/home/deploy/lena}:/workspace:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}:/workspace:ro
 ```
 
 ## Порты приложений

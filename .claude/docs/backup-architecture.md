@@ -5,7 +5,7 @@
 ## Обзор
 
 Бэкапы управляются через **dashboard-agent** (Fastify сервер на порту 3100).
-Все данные сохраняются в `/home/deploy/lena/backups/` на соответствующем сервере.
+Все данные сохраняются в `/home/deploy/letar/backups/` на соответствующем сервере.
 
 Dashboard является чистым UI — прямого доступа к файловой системе, Docker или postgres **не имеет**.
 
@@ -20,7 +20,7 @@ dashboard UI
   → dashboard (Next.js) /api/database/[db]/backup
   → dashboard-agent POST /api/database/backup
   → docker exec <pg-container> pg_dump -U <user> -d <db> | gzip
-  → /home/deploy/lena/backups/<app>_<type>_<timestamp>.sql.gz
+  → /home/deploy/letar/backups/<app>_<type>_<timestamp>.sql.gz
 ```
 
 - Запускается через Docker API (dockerode в agent) — выполняет `pg_dump` внутри PG контейнера
@@ -63,7 +63,7 @@ GET  /api/database/backups?db=imot   — бэкапы конкретной БД
 
 ### Cron (автоматический)
 
-Конфиг: `/home/deploy/lena/cron-jobs.json`
+Конфиг: `/home/deploy/letar/cron-jobs.json`
 Расписание: настраивается через Dashboard UI → Cron
 
 ---
@@ -75,9 +75,9 @@ GET  /api/database/backups?db=imot   — бэкапы конкретной БД
 ```
 dashboard-agent
   → tar -czf nginx_<type>_<timestamp>.tar.gz \
-      /home/deploy/lena/infra/nginx-proxy-manager/data/ \
-      /home/deploy/lena/infra/nginx-proxy-manager/letsencrypt/
-  → /home/deploy/lena/backups/nginx_<type>_<timestamp>.tar.gz
+      /home/deploy/letar/infra/nginx-proxy-manager/data/ \
+      /home/deploy/letar/infra/nginx-proxy-manager/letsencrypt/
+  → /home/deploy/letar/backups/nginx_<type>_<timestamp>.tar.gz
 ```
 
 ### Содержимое архива
@@ -127,11 +127,11 @@ gunzip -c backup.sql.gz | docker exec -i <pg-container> psql -U <user> -d <db>
 
 ```bash
 # 1. Остановить NPM
-cd /home/deploy/lena/infra/nginx-proxy-manager
+cd /home/deploy/letar/infra/nginx-proxy-manager
 docker compose down
 
 # 2. Распаковать бэкап (перезапишет data/ и letsencrypt/)
-tar -xzf /home/deploy/lena/backups/nginx_auto_TIMESTAMP.tar.gz -C /
+tar -xzf /home/deploy/letar/backups/nginx_auto_TIMESTAMP.tar.gz -C /
 
 # 3. Запустить NPM
 docker compose up -d
@@ -141,7 +141,7 @@ docker compose up -d
 
 ## Хранение и ротация
 
-- Все бэкапы: `/home/deploy/lena/backups/`
+- Все бэкапы: `/home/deploy/letar/backups/`
 - Ротация nginx бэкапов: оставляются последние 7 (`nginx-backup.ts` в агенте)
 - Ротация DB бэкапов: ручная (через Dashboard UI или скрипт)
 - Смонтировано в docker-compose агента через `WORKSPACE_PATH`
@@ -191,8 +191,8 @@ Resilio Sync настроен на **s1** для синхронизации ко
 
 | Сервер | Папка на сервере    | Папка на Windows        | Папка на pinner2        | Ключ (RO)                           |
 | ------ | ------------------- | ----------------------- | ----------------------- | ----------------------------------- |
-| s1     | `/home/deploy/lena` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | `BF4CG4PGSUUYLE2W5CQBWOV5455FC6ZFV` |
-| s2     | `/home/deploy/lena` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | `BQPKQX2W2GDWRKJHKGHJCEAJ32NDI4PZC` |
+| s1     | `/home/deploy/letar` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | `BF4CG4PGSUUYLE2W5CQBWOV5455FC6ZFV` |
+| s2     | `/home/deploy/letar` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | `BQPKQX2W2GDWRKJHKGHJCEAJ32NDI4PZC` |
 
 > R/W ключи хранятся в `/etc/resilio-sync/config.json` на каждом сервере.
 
@@ -257,7 +257,7 @@ Dashboard (Next.js, s2:3002)
 Dashboard-Agent (на обоих серверах):
   → docker socket → Docker
   → /secrets/*.env → DB credentials
-  → /home/deploy/lena/backups/ → файлы бэкапов
+  → /home/deploy/letar/backups/ → файлы бэкапов
 ```
 
 `getLocalClient()` в dashboard возвращает `RemoteServerClient` к `localhost:3100` с токеном `LOCAL_AGENT_TOKEN`.

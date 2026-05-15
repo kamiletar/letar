@@ -29,7 +29,7 @@ nx db:migrate <app> -- --name <name>
 git add apps/<app>/prisma/migrations/ apps/<app>/schema.zmodel
 git commit -m "feat(<app>): описание миграции"
 # 5. Push + deploy — скрипт deploy-affected.sh сам применит миграцию
-git push && ssh s2 'cd /home/deploy/lena && git pull && ./deploy-affected.sh --app <app>'
+git push && ssh s2 'cd /home/deploy/letar && git pull && ./deploy-affected.sh --app <app>'
 ```
 
 **`db:push`** допускается ТОЛЬКО на **локальной** dev-базе для быстрого прототипирования. Но даже тогда — потом нужно создать migration file через `prisma migrate diff` + `prisma migrate resolve`.

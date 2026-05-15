@@ -7,7 +7,7 @@
 
 ## Быстрый статус (s1.letar.best, 2026-02-25)
 
-**Инцидент:** криптомайнер `/tmp/docker-daemon`, 200% CPU, 38 дней работы. Каталог `/home/deploy/lena` удалён атакующим.
+**Инцидент:** криптомайнер `/tmp/docker-daemon`, 200% CPU, 38 дней работы. Каталог `/home/deploy/letar` удалён атакующим.
 
 | Этап                                                     | Статус |
 | -------------------------------------------------------- | ------ |
@@ -22,7 +22,7 @@
 | Установить fail2ban                                      | ⬜     |
 | Установить Docker                                        | ⬜     |
 | Установить Resilio Sync (бэкапы БД, .env.docker)         | ⬜     |
-| Клонировать репо в `/home/deploy/lena`                   | ⬜     |
+| Клонировать репо в `/home/deploy/letar`                   | ⬜     |
 | Восстановить `.env.docker` из `C:\BackupSync\lena\s1\`   | ⬜     |
 | Поднять Nginx Proxy Manager                              | ⬜     |
 | Восстановить конфиги NPM из `npm-backup-20260224.tar.gz` | ⬜     |
@@ -100,8 +100,8 @@ mount -o remount,noexec /tmp
 
 | Данные                      | Путь                                           | Приоритет |
 | --------------------------- | ---------------------------------------------- | --------- |
-| `.env.docker` файлы         | `/home/deploy/lena/apps/*/`                    | Критично  |
-| Nginx Proxy Manager конфиги | `/home/deploy/lena/infra/nginx-proxy-manager/` | Критично  |
+| `.env.docker` файлы         | `/home/deploy/letar/apps/*/`                    | Критично  |
+| Nginx Proxy Manager конфиги | `/home/deploy/letar/infra/nginx-proxy-manager/` | Критично  |
 | Дампы PostgreSQL БД         | Создать через `pg_dump`                        | Критично  |
 | SSL сертификаты NPM         | Через NPM backup                               | Важно     |
 
@@ -109,7 +109,7 @@ mount -o remount,noexec /tmp
 
 ```bash
 # На сервере — создать архив конфигов NPM
-cd /home/deploy/lena/infra/nginx-proxy-manager
+cd /home/deploy/letar/infra/nginx-proxy-manager
 tar -czf ~/npm-backup-$(date +%Y%m%d).tar.gz data/
 
 # На локальной машине — скачать архив
@@ -294,8 +294,8 @@ sudo systemctl start resilio-sync@deploy
 ### Клонировать репозиторий
 
 ```bash
-mkdir -p /home/deploy/lena
-cd /home/deploy/lena
+mkdir -p /home/deploy/letar
+cd /home/deploy/letar
 git clone git@github.com:<org>/lena.git .
 
 # Установить зависимости
@@ -311,10 +311,10 @@ bun install
 
 ```bash
 # На локальной машине — отправить файлы на сервер
-scp C:\BackupSync\lena\s1\.env.docker deploy@s1.letar.best:/home/deploy/lena/
+scp C:\BackupSync\lena\s1\.env.docker deploy@s1.letar.best:/home/deploy/letar/
 
 # Или подождать автосинхронизации Resilio, затем скопировать вручную
-cp ~/sync/lena-s1/.env.docker /home/deploy/lena/
+cp ~/sync/lena-s1/.env.docker /home/deploy/letar/
 ```
 
 ### Запустить Nginx Proxy Manager
@@ -322,7 +322,7 @@ cp ~/sync/lena-s1/.env.docker /home/deploy/lena/
 NPM должен быть первым — он обеспечивает SSL и роутинг для всех приложений:
 
 ```bash
-cd /home/deploy/lena/infra/nginx-proxy-manager
+cd /home/deploy/letar/infra/nginx-proxy-manager
 docker compose up -d
 
 # Проверить запуск
@@ -337,7 +337,7 @@ docker compose logs -f
 docker compose down
 
 # Распаковать бэкап
-tar -xzf ~/npm-backup-20260224.tar.gz -C /home/deploy/lena/infra/nginx-proxy-manager/
+tar -xzf ~/npm-backup-20260224.tar.gz -C /home/deploy/letar/infra/nginx-proxy-manager/
 
 # Запустить снова
 docker compose up -d
@@ -354,7 +354,7 @@ scp C:\BackupSync\lena\s1\npm-backup-20260224.tar.gz deploy@s1.letar.best:~/
 Порядок деплоя важен — NPM уже запущен первым:
 
 ```bash
-cd /home/deploy/lena
+cd /home/deploy/letar
 
 # 2. Аналитика
 ./deploy-affected.sh --app umami

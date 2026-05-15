@@ -14,7 +14,7 @@ import { spawn } from 'node:child_process'
 
 export const dynamic = 'force-dynamic'
 
-const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/lena'] as const
+const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
 
 /** Выполняет команду на хосте через nsenter */
 async function runOnHost(command: string): Promise<{ stdout: string; stderr: string; code: number }> {
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
 
     // Проверить локальные через nsenter
     if (localApps.length > 0) {
-      const workspaceDir = process.env.WORKSPACE_DIR || '/home/deploy/lena'
+      const workspaceDir = process.env.WORKSPACE_DIR || '/home/deploy/letar'
       if (ALLOWED_WORKSPACES.includes(workspaceDir as (typeof ALLOWED_WORKSPACES)[number])) {
         const checks = localApps
           .map(

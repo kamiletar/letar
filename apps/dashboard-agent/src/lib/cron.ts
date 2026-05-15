@@ -105,8 +105,8 @@ const scheduledTasks = new Map<string, cron.ScheduledTask>()
 const MAX_LOGS_PER_JOB = 50
 const executionLogs = new Map<string, CronExecutionLog[]>()
 
-// Путь к конфигу (используем примонтированный volume /home/deploy/lena)
-const CONFIG_PATH = '/home/deploy/lena/cron-jobs.json'
+// Путь к конфигу (используем примонтированный volume /home/deploy/letar)
+const CONFIG_PATH = '/home/deploy/letar/cron-jobs.json'
 
 // =============================================================================
 // Конфигурация

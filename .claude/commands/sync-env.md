@@ -69,13 +69,13 @@
 ### Push одного приложения
 
 ```bash
-/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa apps/<app>/.env.docker root@<server>:/home/deploy/lena/apps/<app>/.env.docker
+/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa apps/<app>/.env.docker root@<server>:/home/deploy/letar/apps/<app>/.env.docker
 ```
 
 ### Pull одного приложения
 
 ```bash
-/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa root@<server>:/home/deploy/lena/apps/<app>/.env.docker apps/<app>/.env.docker
+/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa root@<server>:/home/deploy/letar/apps/<app>/.env.docker apps/<app>/.env.docker
 ```
 
 ## После синхронизации

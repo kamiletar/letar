@@ -209,7 +209,7 @@ DOMAIN=shop.rosstil.ru,www.shop.rosstil.ru
 
 ### Автоматические бекапы (cron)
 
-Dashboard-agent автоматически запускает cron-задачи по расписанию. Конфигурация: `/home/deploy/lena/cron-jobs.json`.
+Dashboard-agent автоматически запускает cron-задачи по расписанию. Конфигурация: `/home/deploy/letar/cron-jobs.json`.
 
 **Бекапы по умолчанию:**
 
@@ -220,7 +220,7 @@ Dashboard-agent автоматически запускает cron-задачи 
 | nginx-backup       | 03:00 UTC  | tar.gz данных + SSL сертификатов NPM | s1     |
 | nginx-backup-s2    | 03:00 UTC  | аналогично для s2                    | s2     |
 
-**Хранилище:** `/home/deploy/lena/backups/` → реплицируется через Resilio Sync.
+**Хранилище:** `/home/deploy/letar/backups/` → реплицируется через Resilio Sync.
 
 **Управление:** Dashboard UI → `/cron` — включение/выключение, ручной запуск, история.
 
@@ -260,7 +260,7 @@ Dashboard UI → `/database/backups` → Настройки:
 | imot            | `/app/uploads/`   | Аватары пользователей |
 | grandslamcup    | `/app/uploads/`   | Фото матчей           |
 
-**Бекап:** Resilio Sync автоматически реплицирует `/home/deploy/lena/apps/<app>/uploads/` на Windows и pinner2. Отдельный cron не нужен.
+**Бекап:** Resilio Sync автоматически реплицирует `/home/deploy/letar/apps/<app>/uploads/` на Windows и pinner2. Отдельный cron не нужен.
 
 **⚠️ КРИТИЧНО — bind mount в docker-compose.production.yml:**
 
@@ -283,7 +283,7 @@ services:
 1. **БД** — зарегистрировать в dashboard-agent (4 файла):
    - [ ] `apps/dashboard-agent/src/lib/database.ts` → `APP_CONFIG` — добавить запись с `secretsPath`, `containerName`, `defaults` (host, port, database, user)
    - [ ] `apps/dashboard-agent/src/lib/server-config.ts` → `SERVER_APPS` — маппинг `'<app>': 's1'` или `'s2'`
-   - [ ] `apps/dashboard-agent/docker-compose.production.yml` — добавить volume mount секретов: `- ${WORKSPACE_PATH:-/home/deploy/lena}/apps/<app>/.env.docker:/secrets/<app>.env:ro`
+   - [ ] `apps/dashboard-agent/docker-compose.production.yml` — добавить volume mount секретов: `- ${WORKSPACE_PATH:-/home/deploy/letar}/apps/<app>/.env.docker:/secrets/<app>.env:ro`
    - [ ] Если на s2 и приложение НЕ в `driving-school-network` — убедиться что `premium-network` подключён
    - [ ] `.claude/docs/backup-architecture.md` — добавить строку в таблицу БД
    - [ ] Задеплоить dashboard-agent на целевой сервер

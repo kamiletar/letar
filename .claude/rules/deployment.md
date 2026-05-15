@@ -30,14 +30,14 @@ prisma migrate deploy  # Применение миграций на production
 # Причина: Git Bash SSH (/usr/bin/ssh) при каждом вызове создаёт ssh-agent.exe,
 # который никогда не завершается. 42+ зомби-агентов → "No buffer space available".
 # Хук validate-bash.js блокирует bare ssh автоматически.
-/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s1.letar.best "cd /home/deploy/lena && ./deploy-affected.sh --app <app>"
-/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best "cd /home/deploy/lena && ./deploy-affected.sh --app <app>"
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s1.letar.best "cd /home/deploy/letar && ./deploy-affected.sh --app <app>"
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best "cd /home/deploy/letar && ./deploy-affected.sh --app <app>"
 ```
 
 > Если git pull падает с "insufficient permission" — починить права:
 >
 > ```bash
-> /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa root@s1.letar.best "chown -R deploy:deploy /home/deploy/lena/.git"
+> /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa root@s1.letar.best "chown -R deploy:deploy /home/deploy/letar/.git"
 > ```
 
 ## ⛔ ЗАПРЕЩЕНО на production серверах

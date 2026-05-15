@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 const UMAMI_SCRIPT_URL = 'https://stats.letar.best/script.js'
 
 /** Allow-list валидация пути для защиты от command injection */
-const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/lena'] as const
+const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
 
 /** Выполняет команду на хосте через nsenter */
 async function runOnHost(command: string): Promise<{ stdout: string; stderr: string; code: number }> {
@@ -81,7 +81,7 @@ async function writeEnvViaAgent(
 
 /** Записать env через nsenter на локальном сервере */
 async function writeEnvLocal(appName: string, websiteId: string): Promise<{ success: boolean; error?: string }> {
-  const workspaceDir = process.env.WORKSPACE_DIR || '/home/deploy/lena'
+  const workspaceDir = process.env.WORKSPACE_DIR || '/home/deploy/letar'
 
   if (!ALLOWED_WORKSPACES.includes(workspaceDir as (typeof ALLOWED_WORKSPACES)[number])) {
     return { success: false, error: 'Invalid workspace path' }

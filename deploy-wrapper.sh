@@ -6,8 +6,8 @@
 unset NODE_ENV
 
 # Workspace path - can be overridden via WORKSPACE_DIR env variable
-# Default: /home/deploy/lena (new location, was /root/lena)
-WORKSPACE_DIR="${WORKSPACE_DIR:-/home/deploy/lena}"
+# Default: /home/deploy/letar (new location, was /root/lena)
+WORKSPACE_DIR="${WORKSPACE_DIR:-/home/deploy/letar}"
 
 # Set up clean PATH
 export PATH="/root/.nvm/versions/node/v24.11.1/bin:/root/.bun/bin:${WORKSPACE_DIR}/node_modules/.bin:/usr/local/bin:/usr/bin:/bin"

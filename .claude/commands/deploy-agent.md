@@ -102,7 +102,7 @@ Body:
    ```
    Затем:
    ```bash
-   /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@<server>.letar.best "cd /home/deploy/lena && ./deploy-affected.sh --app <app>"
+   /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@<server>.letar.best "cd /home/deploy/letar && ./deploy-affected.sh --app <app>"
    ```
 
 3. **Дождись завершения** и сохрани лог

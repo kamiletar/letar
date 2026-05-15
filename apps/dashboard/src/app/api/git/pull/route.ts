@@ -43,7 +43,7 @@ async function runOnHost(command: string): Promise<{ stdout: string; stderr: str
 }
 
 // Allow-list валидация пути для защиты от command injection
-const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/lena'] as const
+const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
 
 /**
  * POST /api/git/pull

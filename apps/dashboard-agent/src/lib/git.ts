@@ -8,8 +8,8 @@ import { promisify } from 'util'
 
 const execAsync = promisify(exec)
 
-// Путь к репозиторию (по умолчанию /home/deploy/lena)
-const REPO_PATH = process.env.REPO_PATH || '/home/deploy/lena'
+// Путь к репозиторию (по умолчанию /home/deploy/letar)
+const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
 
 /**
  * Выполнить git команду в репозитории

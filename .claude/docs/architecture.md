@@ -413,7 +413,7 @@ nx validate label-printer           # Запуск всех проверок
 
 ### Production сервер
 
-**Путь:** `/home/deploy/lena` — репозиторий на production сервере
+**Путь:** `/home/deploy/letar` — репозиторий на production сервере
 
 > **Примечание:** Путь изменён с `/root/lena` для совместимости с backup-инструментами.
 

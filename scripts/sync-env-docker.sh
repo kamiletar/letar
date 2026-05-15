@@ -12,7 +12,7 @@ SERVERS=(
   "root@s1.letar.best"
   "root@s2.letar.best"
 )
-REMOTE_PATH="/home/deploy/lena"
+REMOTE_PATH="/home/deploy/letar"
 LOCAL_PATH="apps"
 
 # Windows OpenSSH (системный, работает без Git bash PATH)
@@ -118,5 +118,5 @@ echo -e "${GREEN}✅ Синхронизация завершена!${NC}"
 echo ""
 echo "Перезапустить контейнеры на серверах:"
 for SERVER in "${SERVERS[@]}"; do
-  echo "  \"$SSH\" ${SERVER} 'cd /home/deploy/lena && ./deploy-affected.sh --app <app-name>'"
+  echo "  \"$SSH\" ${SERVER} 'cd /home/deploy/letar && ./deploy-affected.sh --app <app-name>'"
 done

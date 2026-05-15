@@ -141,7 +141,7 @@ Dashboard Agent — сервис для мониторинга удалённы�
 
 ```bash
 # На s1.letar.best
-cd /home/deploy/lena
+cd /home/deploy/letar
 
 # Собрать image
 docker build -f apps/dashboard-agent/Dockerfile -t dashboard-agent:latest apps/dashboard-agent/
@@ -201,8 +201,8 @@ scp npm-backup-*.tar.gz user@new-server:/tmp/
 
 ```bash
 # Клонировать репозиторий
-git clone <repo-url> /home/deploy/lena
-cd /home/deploy/lena
+git clone <repo-url> /home/deploy/letar
+cd /home/deploy/letar
 
 # Создать сети
 docker network create premium-network
