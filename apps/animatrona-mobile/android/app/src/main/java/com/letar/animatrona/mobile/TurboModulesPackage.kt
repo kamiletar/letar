@@ -4,7 +4,7 @@
  * Codegen генерирует abstract spec классы, но регистрацию модулей
  * всё равно нужно делать через ReactPackage.
  */
-package com.lena.animatrona.mobile
+package com.letar.animatrona.mobile
 
 import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule

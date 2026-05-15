@@ -162,8 +162,8 @@ cd android && ./gradlew assembleDebug
 
 # 4. Установка и запуск
 /c/Android/Sdk/platform-tools/adb.exe install -r "C:/web/letar/apps/animatrona-mobile/android/app/build/outputs/apk/debug/app-debug.apk"
-/c/Android/Sdk/platform-tools/adb.exe shell am force-stop com.lena.animatrona.mobile
-/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.lena.animatrona.mobile/.MainActivity
+/c/Android/Sdk/platform-tools/adb.exe shell am force-stop com.letar.animatrona.mobile
+/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.letar.animatrona.mobile/.MainActivity
 ```
 
 **APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (~150 MB)

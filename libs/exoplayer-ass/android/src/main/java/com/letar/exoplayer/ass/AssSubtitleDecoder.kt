@@ -4,7 +4,7 @@
  * Загружает ASS файл, рендерит кадры субтитров в Bitmap.
  * Автоматически масштабирует шрифты под плотность экрана.
  */
-package com.lena.exoplayer.ass
+package com.letar.exoplayer.ass
 
 import android.content.Context
 import android.graphics.Bitmap

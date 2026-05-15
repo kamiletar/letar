@@ -1,7 +1,7 @@
 # Конфигурация Electron Builder для Animatrona
 # Используем Next.js standalone output
 
-appId: com.lena.animatrona
+appId: com.letar.animatrona
 productName: Animatrona
 copyright: Copyright 2025 Lena
 

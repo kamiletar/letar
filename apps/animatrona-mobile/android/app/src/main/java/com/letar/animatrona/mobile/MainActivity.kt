@@ -1,4 +1,4 @@
-package com.lena.animatrona.mobile
+package com.letar.animatrona.mobile
 
 import android.content.res.Configuration
 import android.os.Build

@@ -102,7 +102,7 @@ dependencies {
 ### 3. MainApplication.kt
 
 ```kotlin
-import com.lena.exoplayer.sync.SyncPackage
+import com.letar.exoplayer.sync.SyncPackage
 
 // В getPackages():
 packages.add(SyncPackage())

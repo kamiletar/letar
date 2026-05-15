@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lena.exoplayer.ass"
+    namespace = "com.letar.exoplayer.ass"
     compileSdk = 35
     ndkVersion = "27.3.13750724"
 

@@ -16,7 +16,7 @@
     "type": "components",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.lena.exoplayer.sync"
+      "javaPackageName": "com.letar.exoplayer.sync"
     }
   },
   "peerDependencies": {

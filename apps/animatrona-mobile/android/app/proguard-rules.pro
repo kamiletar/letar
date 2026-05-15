@@ -1,5 +1,5 @@
 # React Native — сохранить TurboModules и Fabric Components
--keep class com.lena.animatrona.mobile.** { *; }
+-keep class com.letar.animatrona.mobile.** { *; }
 -keep class com.facebook.react.** { *; }
 
 # Hermes

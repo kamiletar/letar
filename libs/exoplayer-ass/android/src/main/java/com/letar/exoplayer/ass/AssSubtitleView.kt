@@ -1,7 +1,7 @@
 /**
  * AssSubtitleView — Native View для отображения ASS субтитров в React Native
  */
-package com.lena.exoplayer.ass
+package com.letar.exoplayer.ass
 
 import android.content.Context
 import android.graphics.Canvas

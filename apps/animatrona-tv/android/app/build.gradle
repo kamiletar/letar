@@ -39,10 +39,10 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.lena.animatrona.tv"
+    namespace "com.letar.animatrona.tv"
 
     defaultConfig {
-        applicationId "com.lena.animatrona.tv"
+        applicationId "com.letar.animatrona.tv"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

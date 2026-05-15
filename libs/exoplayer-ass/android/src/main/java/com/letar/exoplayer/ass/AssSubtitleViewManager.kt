@@ -4,7 +4,7 @@
  * Поддерживает как Fabric (New Architecture) через interop layer,
  * так и legacy Paper через ViewManager API.
  */
-package com.lena.exoplayer.ass
+package com.letar.exoplayer.ass
 
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.uimanager.SimpleViewManager

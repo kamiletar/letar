@@ -1,4 +1,4 @@
-package com.lena.animatrona.mobile
+package com.letar.animatrona.tv
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -6,8 +6,8 @@ import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
-import com.lena.exoplayer.ass.AssPackage
-import com.lena.exoplayer.sync.SyncPackage
+import com.letar.exoplayer.ass.AssPackage
+import com.letar.exoplayer.sync.SyncPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -18,8 +18,6 @@ class MainApplication : Application(), ReactApplication {
                 // ViewManager пакеты (через interop layer)
                 add(AssPackage())
                 add(SyncPackage())
-                // TurboModules — единый пакет регистрации
-                add(TurboModulesPackage())
             },
         )
     }

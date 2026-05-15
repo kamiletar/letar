@@ -163,7 +163,7 @@ $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 /c/Android/Sdk/platform-tools/adb.exe install -r "path/to/app.apk"
 
 # Запуск приложения
-/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.lena.animatrona.mobile/.MainActivity
+/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.letar.animatrona.mobile/.MainActivity
 
 # Логи приложения
 /c/Android/Sdk/platform-tools/adb.exe logcat -s ReactNativeJS:V SyncVideoView:V
@@ -188,7 +188,7 @@ cd apps/animatrona-mobile/android && ./gradlew assembleDebug
 /c/Android/Sdk/platform-tools/adb.exe install -r apps/animatrona-mobile/android/app/build/outputs/apk/debug/app-debug.apk
 
 # Запуск приложения
-/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.lena.animatrona.mobile/.MainActivity
+/c/Android/Sdk/platform-tools/adb.exe shell am start -n com.letar.animatrona.mobile/.MainActivity
 ```
 
 ### Завершение процессов на Windows

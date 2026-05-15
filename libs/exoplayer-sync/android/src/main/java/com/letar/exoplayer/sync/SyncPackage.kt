@@ -1,7 +1,7 @@
 /**
  * SyncPackage — React Native Package для регистрации SyncVideoView
  */
-package com.lena.exoplayer.sync
+package com.letar.exoplayer.sync
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

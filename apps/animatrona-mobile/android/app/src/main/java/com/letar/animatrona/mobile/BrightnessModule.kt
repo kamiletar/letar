@@ -1,4 +1,4 @@
-package com.lena.animatrona.mobile
+package com.letar.animatrona.mobile
 
 import android.util.Log
 import android.view.WindowManager

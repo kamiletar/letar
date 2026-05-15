@@ -1,4 +1,4 @@
-package com.lena.animatrona.mobile
+package com.letar.animatrona.mobile
 
 import android.app.Activity
 import android.app.PendingIntent
@@ -19,7 +19,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.lena.exoplayer.sync.SyncVideoView
+import com.letar.exoplayer.sync.SyncVideoView
 import java.lang.ref.WeakReference
 
 /**
@@ -33,8 +33,8 @@ class PipModule(reactContext: ReactApplicationContext) :
 
     companion object {
         const val NAME = "PipModule"
-        private const val ACTION_PLAY = "com.lena.animatrona.mobile.PIP_PLAY"
-        private const val ACTION_PAUSE = "com.lena.animatrona.mobile.PIP_PAUSE"
+        private const val ACTION_PLAY = "com.letar.animatrona.mobile.PIP_PLAY"
+        private const val ACTION_PAUSE = "com.letar.animatrona.mobile.PIP_PAUSE"
     }
 
     /** Текущее состояние воспроизведения для обновления PiP actions */

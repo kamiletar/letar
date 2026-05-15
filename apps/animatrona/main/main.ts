@@ -130,7 +130,7 @@ app.name = 'Animatrona'
 // Устанавливаем App User Model ID для Windows таскбара
 // Должно совпадать с appId из electron-builder.yml
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.lena.animatrona')
+  app.setAppUserModelId('com.letar.animatrona')
 }
 
 // Запретить Chromium троттлить фоновые процессы

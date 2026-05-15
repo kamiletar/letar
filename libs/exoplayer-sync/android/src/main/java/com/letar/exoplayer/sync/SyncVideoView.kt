@@ -4,7 +4,7 @@
  * Использует ExoPlayer с MergingMediaSource для объединения видео и аудио потоков
  * в единый MediaSource, обеспечивая атомарную синхронизацию на уровне фреймов.
  */
-package com.lena.exoplayer.sync
+package com.letar.exoplayer.sync
 
 import android.content.Context
 import android.media.audiofx.LoudnessEnhancer

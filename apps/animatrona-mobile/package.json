@@ -25,7 +25,7 @@
     "type": "all",
     "jsSrcsDir": "specs",
     "android": {
-      "javaPackageName": "com.lena.animatrona.mobile"
+      "javaPackageName": "com.letar.animatrona.mobile"
     }
   },
   "engines": {

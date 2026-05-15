@@ -5,4 +5,4 @@
 -keep interface androidx.media3.** { *; }
 
 # Keep native module classes
--keep class com.lena.exoplayer.sync.** { *; }
+-keep class com.letar.exoplayer.sync.** { *; }

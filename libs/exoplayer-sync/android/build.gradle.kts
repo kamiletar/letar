@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lena.exoplayer.sync"
+    namespace = "com.letar.exoplayer.sync"
     compileSdk = 35
 
     defaultConfig {

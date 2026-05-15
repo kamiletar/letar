@@ -1,4 +1,4 @@
-package com.lena.animatrona.mobile
+package com.letar.animatrona.mobile
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -26,9 +26,9 @@ class DownloadService : Service() {
         const val CHANNEL_ID = "animatrona_downloads"
         const val NOTIFICATION_ID = 1001
 
-        const val ACTION_START = "com.lena.animatrona.mobile.DOWNLOAD_START"
-        const val ACTION_UPDATE = "com.lena.animatrona.mobile.DOWNLOAD_UPDATE"
-        const val ACTION_STOP = "com.lena.animatrona.mobile.DOWNLOAD_STOP"
+        const val ACTION_START = "com.letar.animatrona.mobile.DOWNLOAD_START"
+        const val ACTION_UPDATE = "com.letar.animatrona.mobile.DOWNLOAD_UPDATE"
+        const val ACTION_STOP = "com.letar.animatrona.mobile.DOWNLOAD_STOP"
 
         const val EXTRA_TITLE = "title"
         const val EXTRA_PROGRESS = "progress"

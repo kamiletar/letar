@@ -1,4 +1,4 @@
-package com.lena.animatrona.tv
+package com.letar.animatrona.tv
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

@@ -1,7 +1,7 @@
 /**
  * AssPackage — React Native Package для регистрации AssSubtitleView
  */
-package com.lena.exoplayer.ass
+package com.letar.exoplayer.ass
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
