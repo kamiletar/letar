@@ -80,3 +80,37 @@ git commit -m "feat(my-app): описание"
 
 - Перед редактированием `libs/**` — проверь резервации через `file_reservation_paths`
 - Зарезервируй свои файлы при старте сессии
+
+## Работа с приватными submodule
+
+Приватные приложения (aboi, driving-school, premium-rosstil, imot + их e2e и driving-school-db) — это **git submodules**, указывающие на репо `kamiletar/letar-private-*`. Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
+
+### Изменение кода в submodule
+
+```bash
+cd apps/driving-school          # внутри submodule
+git checkout main               # submodule по умолчанию в detached HEAD
+git pull origin main
+# ... меняешь код ...
+git add . && git commit -m "feat(driving-school): описание"
+git push origin main            # пуш в приватный репо
+
+cd ../..                        # назад в letar
+git add apps/driving-school     # фиксируем новый SHA submodule
+git commit -m "chore: bump driving-school submodule"
+git push                        # пуш в публичный letar
+```
+
+### Что НЕ делать
+
+- ❌ **НЕ редактируй файлы submodule без `git checkout main`** — изменения попадут в detached HEAD и потеряются при следующем `git submodule update`.
+- ❌ **НЕ добавляй пути submodule в корневой `.gitignore`** — Nx уважает gitignore при сканировании проектов и приватные проекты исчезнут из `nx show projects` / `nx affected`. Submodule в Git хранится как gitlink (SHA), физически working tree не закоммитится в родительский репо без `.gitignore` страховки.
+- ❌ **НЕ добавляй `src/generated/` в .gitignore submodule** если эта папка раньше была tracked (например, `libs/driving-school-db/src/generated/prisma/` — это типы Prisma, должны быть в репо).
+
+### Обновить все submodules до последних коммитов
+
+```bash
+git submodule update --remote --recursive
+git add .
+git commit -m "chore: bump all submodules"
+```

@@ -23,7 +23,7 @@ macro_start_session(
 
 ```
 send_message(
-  project_key: "app-c-web-lena",
+  project_key: "app-c-web-letar",
   sender_name: "BlackCove",
   to: [],
   broadcast: true,
@@ -39,7 +39,7 @@ send_message(
 
 1. **Проверяй inbox** каждые 30 секунд:
    ```
-   fetch_inbox(project_key: "app-c-web-lena", agent_name: "BlackCove", topic: "deploy")
+   fetch_inbox(project_key: "app-c-web-letar", agent_name: "BlackCove", topic: "deploy")
    ```
 
 2. **При получении запроса на деплой:**

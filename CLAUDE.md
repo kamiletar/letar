@@ -6,13 +6,27 @@
 
 ## Документация
 
-Подробная документация в `.claude/docs/`: [environment](/.claude/docs/environment.md), [forms](/.claude/docs/forms.md), [data-fetching](/.claude/docs/data-fetching.md), [ui-components](/.claude/docs/ui-components.md), [database](/.claude/docs/database.md), [auth](/.claude/docs/auth.md), [architecture](/.claude/docs/architecture.md), [mcp-servers](/.claude/docs/mcp-servers.md), [deployment](/.claude/docs/deployment.md), [code-style](/.claude/docs/code-style.md), [documentation-guidelines](/.claude/docs/documentation-guidelines.md), [e2e-testing](/.claude/docs/e2e-testing.md), [images](/.claude/docs/images.md), [email](/.claude/docs/email.md), [pwa-offline](/.claude/docs/pwa-offline.md), [user-profile](/.claude/docs/user-profile.md), [admin](/.claude/docs/admin.md).
+Подробная документация в `.claude/docs/`: [repo-structure](/.claude/docs/repo-structure.md) ⭐ (публичный + приватные submodules), [environment](/.claude/docs/environment.md), [forms](/.claude/docs/forms.md), [data-fetching](/.claude/docs/data-fetching.md), [ui-components](/.claude/docs/ui-components.md), [database](/.claude/docs/database.md), [auth](/.claude/docs/auth.md), [architecture](/.claude/docs/architecture.md), [mcp-servers](/.claude/docs/mcp-servers.md), [deployment](/.claude/docs/deployment.md), [code-style](/.claude/docs/code-style.md), [documentation-guidelines](/.claude/docs/documentation-guidelines.md), [e2e-testing](/.claude/docs/e2e-testing.md), [images](/.claude/docs/images.md), [email](/.claude/docs/email.md), [pwa-offline](/.claude/docs/pwa-offline.md), [user-profile](/.claude/docs/user-profile.md), [admin](/.claude/docs/admin.md).
 
 **Инфраструктура:** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md), [server-recovery](/.claude/docs/server-recovery.md), [backup-architecture](/.claude/docs/backup-architecture.md).
 
 ## Быстрый старт
 
 **Приложения:** Используй MCP `nx_workspace` для списка приложений и портов. Подробнее: [environment](/.claude/docs/environment.md)
+
+### Структура репо
+
+`letar` — **публичный** монорепо. 9 приватных приложений/lib подключены через **git submodules** (aboi, driving-school + db + e2e, premium-rosstil + e2e, imot + e2e). Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
+
+**Клонирование с приватными:** `git clone --recurse-submodules git@github.com:kamiletar/letar.git`
+
+**Работа с submodule:** изменяешь код → коммит/пуш внутри submodule → `git add <path> && git commit` в letar для фиксации SHA.
+
+⚠️ **Не добавляй submodule пути в `.gitignore`** — Nx уважает gitignore и спрячет проекты из графа.
+
+### Релиз npm-пакетов
+
+Локально: `nx release` (bump + changelog + commit + tag + GitHub release) → `git push --follow-tags`. CI на тег (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) запускает [publish-npm.yml](/.github/workflows/publish-npm.yml) — npm publish напрямую из letar.
 
 ### Технологический стек
 
@@ -78,7 +92,7 @@ import { getEnhancedPrisma } from '@/lib/db'
 
 ---
 
-**Обновлено:** 2026-04-04 | **Nx** 22.6 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6
+**Обновлено:** 2026-05-16 | **Nx** 22.6 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6 | **Scope:** `@letar/*`
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

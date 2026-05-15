@@ -7,7 +7,7 @@
 ## Структура Workspace
 
 ```
-lena/
+letar/
 ├── apps/                    # Приложения
 │   ├── premium-rosstil/     # Next.js app
 │   ├── imot/                # Next.js app

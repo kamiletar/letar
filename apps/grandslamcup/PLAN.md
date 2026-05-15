@@ -314,7 +314,7 @@
 
 **Технические решения:**
 
-- Приложение `apps/grandslamcup` в монорепо lena
+- Приложение `apps/grandslamcup` в монорепо letar
 - Next.js 16, Chakra UI v3, PostgreSQL + Prisma + ZenStack
 - Миграция всех исторических данных с Tilda
 - Роли: суперадмин, организатор города, тренер, публичный доступ

@@ -88,7 +88,7 @@ nx test premium-rosstil        # Тесты
 ## Структура
 
 ```
-lena/
+letar/
 ├── apps/                    # Приложения
 │   ├── premium-rosstil/     # Fashion магазин
 │   ├── imot/                # Платформа психотерапии

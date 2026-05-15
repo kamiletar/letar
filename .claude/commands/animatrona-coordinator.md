@@ -28,7 +28,7 @@ macro_start_session(
 
 ```
 send_message(
-  project_key: "app-c-web-lena",
+  project_key: "app-c-web-letar",
   sender_name: "GrayMill",
   to: [],
   broadcast: true,
@@ -100,7 +100,7 @@ animatrona (desktop)
 1. **Проверяй inbox** каждые 30 секунд:
 
    ```
-   fetch_inbox(project_key: "app-c-web-lena", agent_name: "GrayMill", topic: "animatrona-change")
+   fetch_inbox(project_key: "app-c-web-letar", agent_name: "GrayMill", topic: "animatrona-change")
    ```
 
 2. **При получении уведомления об изменении:**

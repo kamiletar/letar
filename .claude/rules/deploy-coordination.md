@@ -16,7 +16,7 @@ alwaysApply: true
 
 ```
 send_message(
-  project_key: "app-c-web-lena",
+  project_key: "app-c-web-letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: <app-name>",

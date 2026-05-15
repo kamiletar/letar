@@ -28,7 +28,7 @@
 **Проверяй inbox** на задачи от координатора (topic: `forms-task`):
 
 ```
-fetch_inbox(project_key: "app-c-web-lena", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
+fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
 ```
 
 После завершения задачи от координатора — **отвечай через reply_message** с результатом.

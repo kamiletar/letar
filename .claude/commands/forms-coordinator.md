@@ -30,7 +30,7 @@ macro_start_session(
 
 ```
 send_message(
-  project_key: "app-c-web-lena",
+  project_key: "app-c-web-letar",
   sender_name: "FormsCoord",
   to: [],
   broadcast: true,
@@ -68,7 +68,7 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
 
 1. **Проверяй inbox** каждые 30 секунд:
    ```
-   fetch_inbox(project_key: "app-c-web-lena", agent_name: "FormsCoord", topic: "form-feature-request")
+   fetch_inbox(project_key: "app-c-web-letar", agent_name: "FormsCoord", topic: "form-feature-request")
    ```
 
 2. **При получении запроса:**
