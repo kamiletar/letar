@@ -1,0 +1,164 @@
+---
+title: Hooks
+description: useAppForm, useFormContext, useFieldContext, and more
+---
+
+## useAppForm
+
+The main hook for creating forms. Preconfigured with Zod validation.
+
+```tsx
+import { useAppForm } from '@letar/forms'
+
+const form = useAppForm({
+  defaultValues: {
+    name: '',
+    email: '',
+  },
+  onSubmit: async ({ value }) => {
+    await saveData(value)
+  },
+})
+```
+
+### Options
+
+| Prop            | Type                                     | Description         |
+| --------------- | ---------------------------------------- | ------------------- |
+| `defaultValues` | `T`                                      | Initial form values |
+| `onSubmit`      | `(props: { value: T }) => Promise<void>` | Submit handler      |
+| `validators`    | `object`                                 | Custom validators   |
+
+## useFormContext
+
+Access the form instance from any child component:
+
+```tsx
+import { useFormContext } from '@letar/forms'
+
+function SubmitButton() {
+  const form = useFormContext()
+  return <button onClick={() => form.handleSubmit()}>Submit</button>
+}
+```
+
+## useTypedFormContext
+
+Type-safe version of `useFormContext`:
+
+```tsx
+import { useTypedFormContext } from '@letar/forms'
+
+type FormData = { name: string; email: string }
+const form = useTypedFormContext<FormData>()
+// form.getFieldValue('name') is typed as string
+```
+
+## useFieldContext
+
+Access field state from within a custom field component:
+
+```tsx
+import { useFieldContext } from '@letar/forms'
+
+function CustomField() {
+  const field = useFieldContext()
+  return <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} />
+}
+```
+
+## useDeclarativeForm
+
+Access the declarative form context:
+
+```tsx
+import { useDeclarativeForm } from '@letar/forms'
+
+function FormInfo() {
+  const { schema, isSubmitting } = useDeclarativeForm()
+  return <p>Submitting: {isSubmitting ? 'Yes' : 'No'}</p>
+}
+```
+
+## useFieldActions
+
+Get field manipulation actions:
+
+```tsx
+import { useFieldActions } from '@letar/forms'
+
+const { setValue, setError, reset } = useFieldActions('email')
+```
+
+## useFormApi
+
+Hook for server action integration:
+
+```tsx
+import { useFormApi } from '@letar/forms'
+
+const { submit, isLoading, error } = useFormApi({
+  action: createUserAction,
+  onSuccess: (result) => router.push(`/users/${result.id}`),
+})
+```
+
+## useTypedFormSubscribe
+
+Subscribe to specific field value changes with type safety:
+
+```tsx
+import { useTypedFormSubscribe } from '@letar/forms'
+
+type FormData = { name: string; price: number }
+
+function PriceDisplay() {
+  const price = useTypedFormSubscribe<FormData>('price')
+  return <Text>Price: ${price}</Text>
+}
+```
+
+Useful for live preview patterns. See [Controlled State](/docs/guides/controlled-state).
+
+## useRelationOptions
+
+Access options loaded by `RelationFieldProvider`:
+
+```tsx
+import { useRelationOptions } from '@letar/forms'
+
+function CategoryInfo() {
+  const { options, isLoading } = useRelationOptions('category')
+  if (isLoading) return <Spinner />
+  return <Text>{options.length} categories available</Text>
+}
+```
+
+See [Relation Fields](/docs/guides/relation-fields).
+
+## useFieldConstraints
+
+Get Zod constraints for a field (min, max, required, etc.):
+
+```tsx
+import { useFieldConstraints } from '@letar/forms'
+
+function FieldInfo({ name }: { name: string }) {
+  const { constraints } = useFieldConstraints(name)
+  return <Text>Min: {constraints?.string?.minLength}</Text>
+}
+```
+
+## useFormI18n
+
+Access i18n context (locale, translate function):
+
+```tsx
+import { useFormI18n } from '@letar/forms'
+
+const i18n = useFormI18n()
+// i18n?.locale → 'en' | 'ru'
+// i18n?.t('key') → translated string
+```
+
+See [i18n](/docs/guides/i18n).

@@ -1,0 +1,151 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dashboard-db
+    restart: always
+    ports:
+      - '5436:5432' # Порт 5436 для dashboard (5432=premium, 5433=imot, 5434=mandala, 5435=umami)
+    volumes:
+      - dashboard-db-data:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Moscow
+      POSTGRES_USER: dashboard_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: dashboard
+    networks:
+      - premium-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dashboard_user -d dashboard']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  app:
+    image: dashboard:latest
+    container_name: dashboard-app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '3002:3002'
+    env_file:
+      - .env.docker
+    # Required for nsenter to execute commands on host (git pull, etc.)
+    pid: host
+    privileged: true
+    # Ограничение памяти (увеличено для поддержки deploy операций через nsenter)
+    mem_limit: 1024M
+    memswap_limit: 1024M
+    environment:
+      TZ: Europe/Moscow
+      # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      PORT: 3002
+      SERVER_NAME: s2.letar.best
+      # Ограничение V8 heap для Node.js (768MB из 1024MB лимита контейнера)
+      NODE_OPTIONS: '--max-old-space-size=768'
+
+      # Docker Socket Path (mounted as volume below)
+      DOCKER_SOCKET_PATH: /var/run/docker.sock
+
+      # Workspace Root Path (mounted as volume below)
+      WORKSPACE_ROOT: /workspace
+
+      # Dashboard Agent (локальный агент на том же сервере)
+      LOCAL_AGENT_HOST: dashboard-agent
+      LOCAL_AGENT_PORT: '3100'
+
+      # Better Auth Configuration
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3002}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+
+      # Dashboard Admin Credentials
+      DASHBOARD_ADMIN_USERNAME: ${DASHBOARD_ADMIN_USERNAME}
+      DASHBOARD_ADMIN_PASSWORD: ${DASHBOARD_ADMIN_PASSWORD}
+      DASHBOARD_VIEWER_USERNAME: ${DASHBOARD_VIEWER_USERNAME}
+      DASHBOARD_VIEWER_PASSWORD: ${DASHBOARD_VIEWER_PASSWORD}
+
+      # Dashboard Secret Key (for API protection)
+      DASHBOARD_SECRET_KEY: ${DASHBOARD_SECRET_KEY}
+
+      # Monitoring Service
+      AUTO_START_MONITORING: ${AUTO_START_MONITORING:-true}
+
+      # Dashboard Data Directory (for alerts, settings, etc.)
+      DASHBOARD_DATA_DIR: /app/dashboard-data
+
+      # Workspace directory on host (for git operations via nsenter)
+      WORKSPACE_DIR: ${WORKSPACE_PATH:-/root/lena}
+
+      # PostgreSQL Database
+      DATABASE_URL: postgresql://dashboard_user:${DB_PASSWORD}@dashboard-db:5432/dashboard
+
+      # Telegram Bot (for notifications)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+
+      # Nginx Proxy Manager API
+      NPM_API_URL: ${NPM_API_URL:-http://nginx-proxy-manager-app-1:81}
+      NPM_API_EMAIL: ${NPM_API_EMAIL:-}
+      NPM_API_PASSWORD: ${NPM_API_PASSWORD:-}
+
+      # Umami Analytics API
+      UMAMI_API_URL: ${UMAMI_API_URL:-https://stats.letar.best}
+      UMAMI_API_USER: ${UMAMI_API_USER:-admin}
+      UMAMI_API_PASSWORD: ${UMAMI_API_PASSWORD:-}
+
+      # Email (SMTP via Maddy)
+      SMTP_HOST: ${SMTP_HOST:-mail.letar.best}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-noreply@letar.best}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@dashboard.letar.best}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Dashboard}
+    volumes:
+      # Docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Workspace for Git operations and deploy scripts
+      - ${WORKSPACE_PATH:-/root/lena}:/workspace:ro
+      # SSH keys for git remote operations
+      - ~/.ssh:/root/.ssh:ro
+      # Dashboard data persistence (alerts, audit logs, settings)
+      - ./dashboard-data:/app/dashboard-data
+      # Backups directory (needs write access)
+      - ${WORKSPACE_PATH:-/root/lena}/backups:/workspace/backups
+      # App secrets (auto-read DB passwords from other apps)
+      - ${WORKSPACE_PATH:-/root/lena}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
+      - ${WORKSPACE_PATH:-/root/lena}/apps/imot/.env.docker:/secrets/imot.env:ro
+      - ${WORKSPACE_PATH:-/root/lena}/apps/mandala/.env.docker:/secrets/mandala.env:ro
+      - ${WORKSPACE_PATH:-/root/lena}/apps/kami/.env.docker:/secrets/kami.env:ro
+      - ${WORKSPACE_PATH:-/root/lena}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+
+    networks:
+      - premium-network
+    # Healthcheck вызывает auto-start endpoint — мониторинг запустится автоматически
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3002/api/monitoring/auto-start']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true
+
+volumes:
+  dashboard-db-data:

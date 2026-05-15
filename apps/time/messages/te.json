@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "ఎన్ని గంట?",
+    "description": "UNIX శకం ప్రారంభం నుండి క్రమ గంట"
+  },
+  "time": {
+    "now": "ఇప్పుడు",
+    "hour": "గంటలు UNIX శకం ప్రారంభం నుండి",
+    "hoursPassed": "గంటలు గడిచాయి UNIX శకం ప్రారంభం నుండి"
+  },
+  "countdown": {
+    "until": "{milestone} గంటల వరకు",
+    "days": "{count, plural, one {# రోజు} other {# రోజులు}}",
+    "hours": "{count, plural, one {# గంట} other {# గంటలు}}",
+    "minutes": "{count, plural, one {# నిమిషం} other {# నిమిషాలు}}",
+    "seconds": "{count, plural, one {# సెకను} other {# సెకన్లు}}"
+  },
+  "celebration": {
+    "milestone": "UNIX శకం యొక్క {hours} గంటలు!"
+  },
+  "subscribe": {
+    "subscribe": "నోటిఫికేషన్లు",
+    "explanation": "మీ ఇమెయిల్ ధృవీకరించడానికి మరియు నోటిఫికేషన్ సెట్టింగ్స్ యాక్సెస్ చేయడానికి సైన్ ఇన్ అవసరం",
+    "signIn": "సైన్ ఇన్",
+    "settings": "సెట్టింగ్స్"
+  },
+  "profile": {
+    "title": "నోటిఫికేషన్ సెట్టింగ్స్",
+    "email": "ఇమెయిల్",
+    "notifyMonth": "ఒక నెల ముందు",
+    "notifyWeek": "ఒక వారం ముందు",
+    "notifyDay": "ఒక రోజు ముందు",
+    "notifyHour": "ఒక గంట ముందు",
+    "notify5Min": "5 నిమిషాల ముందు",
+    "save": "సేవ్ చేయి",
+    "saved": "సేవ్ అయింది!",
+    "unsubscribe": "అన్నిటి నుండి అన్సబ్‌స్క్రైబ్",
+    "unsubscribed": "మీరు అన్ని నోటిఫికేషన్ల నుండి అన్సబ్‌స్క్రైబ్ అయ్యారు",
+    "noSubscription": "మీకు ఇంకా నోటిఫికేషన్ సబ్‌స్క్రిప్షన్ లేదు",
+    "createSubscription": "నోటిఫికేషన్లకు సబ్‌స్క్రైబ్ చేయండి"
+  },
+  "unsubscribe": {
+    "title": "అన్సబ్‌స్క్రైబ్",
+    "success": "UNIX గంట మైలురాయి నోటిఫికేషన్ల నుండి మీరు విజయవంతంగా అన్సబ్‌స్క్రైబ్ అయ్యారు",
+    "error": "చెల్లని అన్సబ్‌స్క్రైబ్ లింక్",
+    "back": "హోమ్‌కి తిరిగి వెళ్ళండి"
+  }
+}

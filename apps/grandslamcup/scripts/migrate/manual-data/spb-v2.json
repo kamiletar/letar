@@ -1,0 +1,7305 @@
+{
+  "matches": [
+    {
+      "msgId": 101,
+      "date": "2024-09-11",
+      "home": "Шь",
+      "away": "Чумные",
+      "homeScore": 272,
+      "awayScore": 249,
+      "winner": "Шь",
+      "venue": "Апартаменты №159",
+      "time": "20:00"
+    },
+    {
+      "msgId": 131,
+      "date": "2024-09-14",
+      "home": "Или",
+      "away": "Пыжыки",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Или",
+      "venue": "Союз Печатников",
+      "time": "19:00"
+    },
+    {
+      "msgId": 137,
+      "date": "2024-09-15",
+      "home": "Обормоты",
+      "away": "Блины",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Обормоты",
+      "venue": "Обормоты",
+      "time": "20:00"
+    },
+    {
+      "msgId": 153,
+      "date": "2024-09-16",
+      "home": "Чумные",
+      "away": "Обормоты",
+      "homeScore": 265,
+      "awayScore": 253,
+      "winner": "Чумные",
+      "venue": "Шуба",
+      "time": "20:00"
+    },
+    {
+      "msgId": 172,
+      "date": "2024-09-17",
+      "home": "Пыжыки",
+      "away": "Firma",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Firma",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 184,
+      "date": "2024-09-18",
+      "home": "Софийка",
+      "away": "Болт",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Софийка",
+      "venue": "Кручёных",
+      "time": "20:00"
+    },
+    {
+      "msgId": 198,
+      "date": "2024-09-19",
+      "home": "Апостроф",
+      "away": "Бюро",
+      "homeScore": 200,
+      "awayScore": 244,
+      "winner": "Бюро",
+      "venue": "Птичья личность",
+      "time": "20:00"
+    },
+    {
+      "msgId": 242,
+      "date": "2024-09-23",
+      "home": "Блины",
+      "away": "Софийка",
+      "homeScore": 245,
+      "awayScore": 233,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 260,
+      "date": "2024-09-24",
+      "home": "Firma",
+      "away": "Шь",
+      "homeScore": 237,
+      "awayScore": 237,
+      "winner": null,
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 281,
+      "date": "2024-09-25",
+      "home": "Болт",
+      "away": "Апостроф",
+      "homeScore": 236,
+      "awayScore": 208,
+      "winner": "Болт",
+      "venue": "Прорубь",
+      "time": "20:00"
+    },
+    {
+      "msgId": 293,
+      "date": "2024-09-26",
+      "home": "Бюро",
+      "away": "Или",
+      "homeScore": 245,
+      "awayScore": 222,
+      "winner": "Бюро",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 319,
+      "date": "2024-09-30",
+      "home": "Пыжыки",
+      "away": "Чумные",
+      "homeScore": 231,
+      "awayScore": 236,
+      "winner": "Чумные",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 341,
+      "date": "2024-10-02",
+      "home": "Шь",
+      "away": "Блины",
+      "homeScore": 265,
+      "awayScore": 263,
+      "winner": "Шь",
+      "venue": "Апартаменты №159",
+      "time": "20:00"
+    },
+    {
+      "msgId": 374,
+      "date": "2024-10-06",
+      "home": "Обормоты",
+      "away": "Болт",
+      "homeScore": 253,
+      "awayScore": 244,
+      "winner": "Обормоты",
+      "venue": "Обормоты",
+      "time": "20:00"
+    },
+    {
+      "msgId": 398,
+      "date": "2024-10-08",
+      "home": "Или",
+      "away": "Обормоты",
+      "homeScore": 242,
+      "awayScore": 278,
+      "winner": "Обормоты",
+      "venue": "Союз Печатников",
+      "time": "20:00"
+    },
+    {
+      "msgId": 417,
+      "date": "2024-10-09",
+      "home": "Апостроф",
+      "away": "Шь",
+      "homeScore": 220,
+      "awayScore": 252,
+      "winner": "Шь",
+      "venue": "Птичья личность",
+      "time": "20:00"
+    },
+    {
+      "msgId": 440,
+      "date": "2024-10-10",
+      "home": "Софийка",
+      "away": "Пыжыки",
+      "homeScore": 231,
+      "awayScore": 235,
+      "winner": "Пыжыки",
+      "venue": "Кручёных",
+      "time": "20:00"
+    },
+    {
+      "msgId": 478,
+      "date": "2024-10-14",
+      "home": "Чумные",
+      "away": "Апостроф",
+      "homeScore": 279,
+      "awayScore": 234,
+      "winner": "Чумные",
+      "venue": "Шуба",
+      "time": "20:00"
+    },
+    {
+      "msgId": 497,
+      "date": "2024-10-15",
+      "home": "Бюро",
+      "away": "Вином",
+      "homeScore": 252,
+      "awayScore": 235,
+      "winner": "Бюро",
+      "venue": "Трюмо",
+      "time": "20:00"
+    },
+    {
+      "msgId": 513,
+      "date": "2024-10-16",
+      "home": "Firma",
+      "away": "Софийка",
+      "homeScore": 274,
+      "awayScore": 233,
+      "winner": "Firma",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 85,
+      "date": "2024-08-31",
+      "home": "Обормоты",
+      "away": "Блины",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Обормоты",
+      "venue": "Фонтанка-69",
+      "time": "17:00"
+    },
+    {
+      "msgId": 555,
+      "date": "2024-10-21",
+      "home": "Блины",
+      "away": "Или",
+      "homeScore": 250,
+      "awayScore": 263,
+      "winner": "Или",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 579,
+      "date": "2024-10-22",
+      "home": "Пыжыки",
+      "away": "Бюро",
+      "homeScore": 251,
+      "awayScore": 231,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 591,
+      "date": "2024-10-23",
+      "home": "Вином",
+      "away": "Firma",
+      "homeScore": 246,
+      "awayScore": 266,
+      "winner": "Firma",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 631,
+      "date": "2024-10-27",
+      "home": "Обормоты",
+      "away": "Шь",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": "Обормоты",
+      "venue": "Обормоты",
+      "time": "20:00"
+    },
+    {
+      "msgId": 664,
+      "date": "2024-10-29",
+      "home": "Или",
+      "away": "Апостроф",
+      "homeScore": 247,
+      "awayScore": 238,
+      "winner": "Или",
+      "venue": "Союз Печатников",
+      "time": "19:30"
+    },
+    {
+      "msgId": 716,
+      "date": "2024-11-03",
+      "home": "Шь",
+      "away": "Бюро",
+      "homeScore": 249,
+      "awayScore": 251,
+      "winner": "Бюро",
+      "venue": "Апартаменты №159",
+      "time": "19:00"
+    },
+    {
+      "msgId": 740,
+      "date": "2024-11-04",
+      "home": "Блины",
+      "away": "Чумные",
+      "homeScore": 244,
+      "awayScore": 260,
+      "winner": "Чумные",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 757,
+      "date": "2024-11-05",
+      "home": "Firma",
+      "away": "Или",
+      "homeScore": 273,
+      "awayScore": 252,
+      "winner": "Firma",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 768,
+      "date": "2024-11-06",
+      "home": "Апостроф",
+      "away": "Пыжыки",
+      "homeScore": 232,
+      "awayScore": 255,
+      "winner": "Пыжыки",
+      "venue": "Птичья личность",
+      "time": "20:00"
+    },
+    {
+      "msgId": 783,
+      "date": "2024-11-07",
+      "home": "Софийка",
+      "away": "Обормоты",
+      "homeScore": 253,
+      "awayScore": 261,
+      "winner": "Обормоты",
+      "venue": "Кручёных",
+      "time": "20:00"
+    },
+    {
+      "msgId": 813,
+      "date": "2024-11-11",
+      "home": "Чумные",
+      "away": "Ива",
+      "homeScore": 269,
+      "awayScore": 232,
+      "winner": "Чумные",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 838,
+      "date": "2024-11-13",
+      "home": "Вином",
+      "away": "Блины",
+      "homeScore": 237,
+      "awayScore": 221,
+      "winner": "Вином",
+      "venue": "Popravka Bar",
+      "time": "20:00"
+    },
+    {
+      "msgId": 857,
+      "date": "2024-11-14",
+      "home": "Бюро",
+      "away": "Firma",
+      "homeScore": 260,
+      "awayScore": 269,
+      "winner": "Firma",
+      "venue": "Трюмо",
+      "time": "20:00"
+    },
+    {
+      "msgId": 899,
+      "date": "2024-11-17",
+      "home": "Обормоты",
+      "away": "Пыжыки",
+      "homeScore": 260,
+      "awayScore": 230,
+      "winner": "Обормоты",
+      "venue": "Обормоты",
+      "time": "20:00"
+    },
+    {
+      "msgId": 913,
+      "date": "2024-11-18",
+      "home": "Шь",
+      "away": "Вином",
+      "homeScore": 253,
+      "awayScore": 228,
+      "winner": "Шь",
+      "venue": "Апартаменты №159",
+      "time": "20:00"
+    },
+    {
+      "msgId": 923,
+      "date": "2024-11-19",
+      "home": "Или",
+      "away": "Ива",
+      "homeScore": 279,
+      "awayScore": 248,
+      "winner": "Или",
+      "venue": "Art Hall",
+      "time": "20:00"
+    },
+    {
+      "msgId": 955,
+      "date": "2024-11-20",
+      "home": "Firma",
+      "away": "Обормоты",
+      "homeScore": 261,
+      "awayScore": 260,
+      "winner": "Firma",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 969,
+      "date": "2024-11-21",
+      "home": "Пыжыки",
+      "away": "Блины",
+      "homeScore": 263,
+      "awayScore": 224,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 998,
+      "date": "2024-11-25",
+      "home": "Блины",
+      "away": "Апостроф",
+      "homeScore": 265,
+      "awayScore": 236,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1013,
+      "date": "2024-11-26",
+      "home": "Бюро",
+      "away": "Чумные",
+      "homeScore": 284,
+      "awayScore": 280,
+      "winner": "Бюро",
+      "venue": "Трюмо",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1028,
+      "date": "2024-11-27",
+      "home": "Ива",
+      "away": "Шь",
+      "homeScore": 250,
+      "awayScore": 267,
+      "winner": "Шь",
+      "venue": "Сидрерия на Моховой",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1070,
+      "date": "2024-12-02",
+      "home": "Чумные",
+      "away": "Firma",
+      "homeScore": 274,
+      "awayScore": 279,
+      "winner": "Firma",
+      "venue": "Глагол",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1098,
+      "date": "2024-12-04",
+      "home": "Вином",
+      "away": "Или",
+      "homeScore": 252,
+      "awayScore": 253,
+      "winner": "Или",
+      "venue": "Popravka Bar",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1114,
+      "date": "2024-12-05",
+      "home": "Апостроф",
+      "away": "Ива",
+      "homeScore": 226,
+      "awayScore": 259,
+      "winner": "Ива",
+      "venue": "Птичья личность",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1133,
+      "date": "2024-12-08",
+      "home": "Обормоты",
+      "away": "Бюро",
+      "homeScore": 259,
+      "awayScore": 273,
+      "winner": "Бюро",
+      "venue": "Обормоты",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1143,
+      "date": "2024-12-09",
+      "home": "Пыжыки",
+      "away": "Вином",
+      "homeScore": 254,
+      "awayScore": 265,
+      "winner": "Вином",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1147,
+      "date": "2024-12-10",
+      "home": "Или",
+      "away": "Шь",
+      "homeScore": 265,
+      "awayScore": 266,
+      "winner": "Шь",
+      "venue": "Art Hall",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1161,
+      "date": "2024-12-11",
+      "home": "Firma",
+      "away": "Апостроф",
+      "homeScore": 273,
+      "awayScore": 237,
+      "winner": "Firma",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1176,
+      "date": "2024-12-12",
+      "home": "Бюро",
+      "away": "Блины",
+      "homeScore": 276,
+      "awayScore": 276,
+      "winner": null,
+      "venue": "Трюмо",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1220,
+      "date": "2024-12-16",
+      "home": "Чумные",
+      "away": "Или",
+      "homeScore": 283,
+      "awayScore": 271,
+      "winner": "Чумные",
+      "venue": "Глагол",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1230,
+      "date": "2024-12-17",
+      "home": "Шь",
+      "away": "Пыжыки",
+      "homeScore": 271,
+      "awayScore": 256,
+      "winner": "Шь",
+      "venue": "Апартаменты №159",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1241,
+      "date": "2024-12-18",
+      "home": "Апостроф",
+      "away": "Обормоты",
+      "homeScore": 242,
+      "awayScore": 274,
+      "winner": "Обормоты",
+      "venue": "Птичья личность",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1255,
+      "date": "2024-12-19",
+      "home": "Бюро",
+      "away": "Ива",
+      "homeScore": 268,
+      "awayScore": 261,
+      "winner": "Бюро",
+      "venue": null,
+      "time": null
+    },
+    {
+      "msgId": 1306,
+      "date": "2024-12-23",
+      "home": "Firma",
+      "away": "Блины",
+      "homeScore": 285,
+      "awayScore": 245,
+      "winner": "Firma",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1325,
+      "date": "2024-12-25",
+      "home": "Вином",
+      "away": "Чумные",
+      "homeScore": 257,
+      "awayScore": 261,
+      "winner": "Чумные",
+      "venue": "Popravka Bar",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1554,
+      "date": "2025-02-03",
+      "home": "Вином",
+      "away": "Блины",
+      "homeScore": 267,
+      "awayScore": 265,
+      "winner": "Вином",
+      "venue": "Вчера и навсегда",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1563,
+      "date": "2025-02-04",
+      "home": "Или",
+      "away": "Бюро",
+      "homeScore": 277,
+      "awayScore": 278,
+      "winner": "Бюро",
+      "venue": "Art Hall",
+      "time": null
+    },
+    {
+      "msgId": 1575,
+      "date": "2025-02-05",
+      "home": "Firma",
+      "away": "Чумные",
+      "homeScore": 288,
+      "awayScore": 287,
+      "winner": "Firma",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1587,
+      "date": "2025-02-06",
+      "home": "Шь",
+      "away": "Обормоты",
+      "homeScore": 254,
+      "awayScore": 268,
+      "winner": "Обормоты",
+      "venue": "Апартаменты №159",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1597,
+      "date": "2025-02-10",
+      "home": "Пыжыки",
+      "away": "Апостроф",
+      "homeScore": 258,
+      "awayScore": 250,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1605,
+      "date": "2025-02-11",
+      "home": "Вином",
+      "away": "Шь",
+      "homeScore": 263,
+      "awayScore": 262,
+      "winner": "Вином",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 1622,
+      "date": "2025-02-16",
+      "home": "Обормоты",
+      "away": "Или",
+      "homeScore": 265,
+      "awayScore": 244,
+      "winner": "Обормоты",
+      "venue": "Фогель",
+      "time": "20:30"
+    },
+    {
+      "msgId": 1633,
+      "date": "2025-02-17",
+      "home": "Чумные",
+      "away": "Блины",
+      "homeScore": 274,
+      "awayScore": 276,
+      "winner": "Блины",
+      "venue": "Глагол",
+      "time": null
+    },
+    {
+      "msgId": 1650,
+      "date": "2025-02-19",
+      "home": "Апостроф",
+      "away": "Firma",
+      "homeScore": 260,
+      "awayScore": 289,
+      "winner": "Firma",
+      "venue": null,
+      "time": null
+    },
+    {
+      "msgId": 1654,
+      "date": "2025-02-20",
+      "home": "Ива",
+      "away": "Бюро",
+      "homeScore": 252,
+      "awayScore": 261,
+      "winner": "Бюро",
+      "venue": "Глиттер",
+      "time": null
+    },
+    {
+      "msgId": 1670,
+      "date": "2025-02-24",
+      "home": "Блины",
+      "away": "Пыжыки",
+      "homeScore": 284,
+      "awayScore": 258,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": null
+    },
+    {
+      "msgId": 1674,
+      "date": "2025-02-25",
+      "home": "Или",
+      "away": "Вином",
+      "homeScore": 278,
+      "awayScore": 279,
+      "winner": "Вином",
+      "venue": "Art Hall",
+      "time": null
+    },
+    {
+      "msgId": 1680,
+      "date": "2025-02-26",
+      "home": "Ива",
+      "away": "Чумные",
+      "homeScore": 252,
+      "awayScore": 279,
+      "winner": "Чумные",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 1692,
+      "date": "2025-03-03",
+      "home": "Чумные",
+      "away": "Бюро",
+      "homeScore": 287,
+      "awayScore": 286,
+      "winner": "Чумные",
+      "venue": "Глагол",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1703,
+      "date": "2025-03-04",
+      "home": "Пыжыки",
+      "away": "Обормоты",
+      "homeScore": 271,
+      "awayScore": 269,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1711,
+      "date": "2025-03-05",
+      "home": "Firma",
+      "away": "Блины",
+      "homeScore": 258,
+      "awayScore": 260,
+      "winner": "Блины",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 1717,
+      "date": "2025-03-06",
+      "home": "Шь",
+      "away": "Апостроф",
+      "homeScore": 277,
+      "awayScore": 272,
+      "winner": "Шь",
+      "venue": "Апартаменты 159",
+      "time": null
+    },
+    {
+      "msgId": 1761,
+      "date": "2025-03-13",
+      "home": "Бюро",
+      "away": "Пыжыки",
+      "homeScore": 282,
+      "awayScore": 242,
+      "winner": "Бюро",
+      "venue": "Глиттер",
+      "time": null
+    },
+    {
+      "msgId": 1782,
+      "date": "2025-03-16",
+      "home": "Обормоты",
+      "away": "Чумные",
+      "homeScore": 279,
+      "awayScore": 274,
+      "winner": "Обормоты",
+      "venue": "Фогель",
+      "time": null
+    },
+    {
+      "msgId": 1792,
+      "date": "2025-03-17",
+      "home": "Блины",
+      "away": "Шь",
+      "homeScore": 263,
+      "awayScore": 251,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": null
+    },
+    {
+      "msgId": 1802,
+      "date": "2025-03-18",
+      "home": "Или",
+      "away": "Firma",
+      "homeScore": 276,
+      "awayScore": 279,
+      "winner": "Firma",
+      "venue": "Art Hall",
+      "time": null
+    },
+    {
+      "msgId": 1812,
+      "date": "2025-03-19",
+      "home": "Ива",
+      "away": "Апостроф",
+      "homeScore": 244,
+      "awayScore": 257,
+      "winner": "Апостроф",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 1836,
+      "date": "2025-03-24",
+      "home": "Чумные",
+      "away": "Вином",
+      "homeScore": 275,
+      "awayScore": 284,
+      "winner": "Вином",
+      "venue": "«Глагол» (Большой пр. ПС, 81)",
+      "time": null
+    },
+    {
+      "msgId": 1843,
+      "date": "2025-03-25",
+      "home": "Пыжыки",
+      "away": "Или",
+      "homeScore": 266,
+      "awayScore": 258,
+      "winner": "Пыжыки",
+      "venue": "«Фонтанка-69»",
+      "time": null
+    },
+    {
+      "msgId": 1848,
+      "date": "2025-03-26",
+      "home": "Firma",
+      "away": "Бюро",
+      "homeScore": 273,
+      "awayScore": 265,
+      "winner": "Firma",
+      "venue": "Fish Fabrique Nouvelle (Лиговский, 53)",
+      "time": null
+    },
+    {
+      "msgId": 1865,
+      "date": "2025-03-31",
+      "home": "Апостроф",
+      "away": "Блины",
+      "homeScore": 265,
+      "awayScore": 272,
+      "winner": "Блины",
+      "venue": "В ладах",
+      "time": null
+    },
+    {
+      "msgId": 1870,
+      "date": "2025-04-01",
+      "home": "Вином",
+      "away": "Пыжыки",
+      "homeScore": 247,
+      "awayScore": 270,
+      "winner": "Пыжыки",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 1875,
+      "date": "2025-04-02",
+      "home": "Шь",
+      "away": "Firma",
+      "homeScore": 270,
+      "awayScore": 281,
+      "winner": "Firma",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 1895,
+      "date": "2025-04-03",
+      "home": "Обормоты",
+      "away": "Бюро",
+      "homeScore": 281,
+      "awayScore": 254,
+      "winner": "Обормоты",
+      "venue": "«Глиттер» (Боровая)",
+      "time": null
+    },
+    {
+      "msgId": 1911,
+      "date": "2025-04-07",
+      "home": "Блины",
+      "away": "Бюро",
+      "homeScore": 270,
+      "awayScore": 268,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": null
+    },
+    {
+      "msgId": 1917,
+      "date": "2025-04-08",
+      "home": "Или",
+      "away": "Чумные",
+      "homeScore": 281,
+      "awayScore": 284,
+      "winner": "Чумные",
+      "venue": "Art Hall",
+      "time": null
+    },
+    {
+      "msgId": 1924,
+      "date": "2025-04-09",
+      "home": "Пыжыки",
+      "away": "Ива",
+      "homeScore": 255,
+      "awayScore": 248,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка 69",
+      "time": null
+    },
+    {
+      "msgId": 1956,
+      "date": "2025-04-13",
+      "home": "Обормоты",
+      "away": "Апостроф",
+      "homeScore": 260,
+      "awayScore": 233,
+      "winner": "Обормоты",
+      "venue": "Фогель",
+      "time": null
+    },
+    {
+      "msgId": 1972,
+      "date": "2025-04-14",
+      "home": "Чумные",
+      "away": "Шь",
+      "homeScore": 269,
+      "awayScore": 264,
+      "winner": "Чумные",
+      "venue": "Глагол",
+      "time": null
+    },
+    {
+      "msgId": 1977,
+      "date": "2025-04-15",
+      "home": "Firma",
+      "away": "Вином",
+      "homeScore": 296,
+      "awayScore": 278,
+      "winner": "Firma",
+      "venue": null,
+      "time": null
+    },
+    {
+      "msgId": 1989,
+      "date": "2025-04-16",
+      "home": "Ива",
+      "away": "Или",
+      "homeScore": 270,
+      "awayScore": 267,
+      "winner": "Ива",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 1997,
+      "date": "2025-04-21",
+      "home": "Апостроф",
+      "away": "Чумные",
+      "homeScore": 249,
+      "awayScore": 276,
+      "winner": "Чумные",
+      "venue": "В ладах",
+      "time": null
+    },
+    {
+      "msgId": 2001,
+      "date": "2025-04-22",
+      "home": "Вином",
+      "away": "Обормоты",
+      "homeScore": 268,
+      "awayScore": 239,
+      "winner": "Вином",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 2005,
+      "date": "2025-04-23",
+      "home": "Шь",
+      "away": "Ива",
+      "homeScore": 276,
+      "awayScore": 281,
+      "winner": "Ива",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 2023,
+      "date": "2025-04-28",
+      "home": "Чумные",
+      "away": "Пыжыки",
+      "homeScore": 267,
+      "awayScore": 257,
+      "winner": "Чумные",
+      "venue": "Глагол",
+      "time": null
+    },
+    {
+      "msgId": 2028,
+      "date": "2025-04-29",
+      "home": "Бюро",
+      "away": "Шь",
+      "homeScore": 280,
+      "awayScore": 273,
+      "winner": "Бюро",
+      "venue": "Глиттер",
+      "time": null
+    },
+    {
+      "msgId": 2032,
+      "date": "2025-04-30",
+      "home": "Ива",
+      "away": "Блины",
+      "homeScore": 276,
+      "awayScore": 251,
+      "winner": "Ива",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 2048,
+      "date": "2025-05-04",
+      "home": "Обормоты",
+      "away": "Firma",
+      "homeScore": 279,
+      "awayScore": 281,
+      "winner": "Firma",
+      "venue": "Фогель",
+      "time": null
+    },
+    {
+      "msgId": 2052,
+      "date": "2025-05-05",
+      "home": "Блины",
+      "away": "Обормоты",
+      "homeScore": 285,
+      "awayScore": 275,
+      "winner": "Блины",
+      "venue": "Вчера и навсегда",
+      "time": null
+    },
+    {
+      "msgId": 2057,
+      "date": "2025-05-06",
+      "home": "Вином",
+      "away": "Бюро",
+      "homeScore": 260,
+      "awayScore": 264,
+      "winner": "Бюро",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 2065,
+      "date": "2025-05-07",
+      "home": "Шь",
+      "away": "Или",
+      "homeScore": 280,
+      "awayScore": 281,
+      "winner": "Или",
+      "venue": "Do Wine Bar",
+      "time": null
+    },
+    {
+      "msgId": 2081,
+      "date": "2025-05-12",
+      "home": "Пыжыки",
+      "away": "Шь",
+      "homeScore": 232,
+      "awayScore": 274,
+      "winner": "Шь",
+      "venue": "Фонтанка 69",
+      "time": null
+    },
+    {
+      "msgId": 2087,
+      "date": "2025-05-13",
+      "home": "Или",
+      "away": "Блины",
+      "homeScore": 267,
+      "awayScore": 280,
+      "winner": "Блины",
+      "venue": "Art-Hall",
+      "time": null
+    },
+    {
+      "msgId": 2089,
+      "date": "2025-05-14",
+      "home": "Вином",
+      "away": "Ива",
+      "homeScore": 273,
+      "awayScore": 277,
+      "winner": "Ива",
+      "venue": "Popravka Bar",
+      "time": null
+    },
+    {
+      "msgId": 2094,
+      "date": "2025-05-15",
+      "home": "Бюро",
+      "away": "Апостроф",
+      "homeScore": 264,
+      "awayScore": 268,
+      "winner": "Апостроф",
+      "venue": "Глиттер",
+      "time": null
+    },
+    {
+      "msgId": 2099,
+      "date": "2025-05-18",
+      "home": "Обормоты",
+      "away": "Ива",
+      "homeScore": 273,
+      "awayScore": 252,
+      "winner": "Обормоты",
+      "venue": "Фогель",
+      "time": null
+    },
+    {
+      "msgId": 2103,
+      "date": "2025-05-19",
+      "home": "Апостроф",
+      "away": "Вином",
+      "homeScore": 254,
+      "awayScore": 257,
+      "winner": "Вином",
+      "venue": "В ладах",
+      "time": null
+    },
+    {
+      "msgId": 2107,
+      "date": "2025-05-20",
+      "home": "Firma",
+      "away": "Пыжыки",
+      "homeScore": 269,
+      "awayScore": 273,
+      "winner": "Пыжыки",
+      "venue": "Fish Fabrique",
+      "time": null
+    },
+    {
+      "msgId": 2115,
+      "date": "2025-05-26",
+      "home": "Ива",
+      "away": "Firma",
+      "homeScore": 280,
+      "awayScore": 286,
+      "winner": "Firma",
+      "venue": "Do Wine Bar (ул. Восстания, 24/27 лит Б)",
+      "time": null
+    },
+    {
+      "msgId": 2338,
+      "date": "2025-09-22",
+      "home": "Пыжыки",
+      "away": "Блины",
+      "homeScore": 258,
+      "awayScore": 213,
+      "winner": "Пыжыки",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2347,
+      "date": "2025-09-23",
+      "home": "Апостроф",
+      "away": "ПЗК",
+      "homeScore": 233,
+      "awayScore": 260,
+      "winner": "ПЗК",
+      "venue": "Заря",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2364,
+      "date": "2025-09-24",
+      "home": "Веселые ребята",
+      "away": "Обормоты",
+      "homeScore": 249,
+      "awayScore": 281,
+      "winner": "Обормоты",
+      "venue": "Бездна",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2367,
+      "date": "2025-09-25",
+      "home": "Бугульма",
+      "away": "Вином",
+      "homeScore": 229,
+      "awayScore": 237,
+      "winner": "Вином",
+      "venue": "Фогель",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2383,
+      "date": "2025-09-28",
+      "home": "Менестрели подземелья",
+      "away": "Бюро",
+      "homeScore": 266,
+      "awayScore": 262,
+      "winner": "Менестрели подземелья",
+      "venue": "Чертог",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2390,
+      "date": "2025-09-30",
+      "home": "Состав",
+      "away": "Чумные",
+      "homeScore": 242,
+      "awayScore": 282,
+      "winner": "Чумные",
+      "venue": "LOST WEEKEND",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2402,
+      "date": "2025-10-01",
+      "home": "Винета",
+      "away": "Или",
+      "homeScore": 239,
+      "awayScore": 250,
+      "winner": "Или",
+      "venue": "Green Room (лофт Этажи)",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2420,
+      "date": "2025-10-02",
+      "home": "Блины",
+      "away": "Болт",
+      "homeScore": 256,
+      "awayScore": 271,
+      "winner": "Болт",
+      "venue": "В ладах",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2444,
+      "date": "2025-10-05",
+      "home": "Апостроф",
+      "away": "Бюро",
+      "homeScore": 244,
+      "awayScore": 280,
+      "winner": "Бюро",
+      "venue": "Синий Пушкин",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2451,
+      "date": "2025-10-06",
+      "home": "Веселые ребята",
+      "away": "Чумные",
+      "homeScore": 265,
+      "awayScore": 293,
+      "winner": "Чумные",
+      "venue": "Бездна",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2466,
+      "date": "2025-10-07",
+      "home": "Вином",
+      "away": "Винета",
+      "homeScore": 260,
+      "awayScore": 244,
+      "winner": "Вином",
+      "venue": "Quokka",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2472,
+      "date": "2025-10-08",
+      "home": "1163",
+      "away": "Пыжыки",
+      "homeScore": 255,
+      "awayScore": 241,
+      "winner": "1163",
+      "venue": "Усы на Пене",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2476,
+      "date": "2025-10-09",
+      "home": "ПЗК",
+      "away": "Менестрели подземелья",
+      "homeScore": 264,
+      "awayScore": 258,
+      "winner": "ПЗК",
+      "venue": "Заря",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2485,
+      "date": "2025-10-10",
+      "home": "Обормоты",
+      "away": "Чумные",
+      "homeScore": 261,
+      "awayScore": 245,
+      "winner": "Обормоты",
+      "venue": "Глагол",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2520,
+      "date": "2025-10-14",
+      "home": "Или",
+      "away": "Бугульма",
+      "homeScore": 257,
+      "awayScore": 214,
+      "winner": "Или",
+      "venue": "Art Hall",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2525,
+      "date": "2025-10-15",
+      "home": "Пыжыки",
+      "away": "Болт",
+      "homeScore": 246,
+      "awayScore": 260,
+      "winner": "Болт",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2534,
+      "date": "2025-10-16",
+      "home": "Менестрели подземелья",
+      "away": "Апостроф",
+      "homeScore": 248,
+      "awayScore": 248,
+      "winner": null,
+      "venue": "Чертог",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2552,
+      "date": "2025-10-19",
+      "home": "Состав",
+      "away": "Веселые ребята",
+      "homeScore": 247,
+      "awayScore": 249,
+      "winner": "Веселые ребята",
+      "venue": "Бездна (Гривцова 20)",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2569,
+      "date": "2025-10-20",
+      "home": "Вином",
+      "away": "Или",
+      "homeScore": 253,
+      "awayScore": 265,
+      "winner": "Или",
+      "venue": "Quokka",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2574,
+      "date": "2025-10-21",
+      "home": "Болт",
+      "away": "1163",
+      "homeScore": 250,
+      "awayScore": 259,
+      "winner": "1163",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2581,
+      "date": "2025-10-22",
+      "home": "Обормоты",
+      "away": "Состав",
+      "homeScore": 265,
+      "awayScore": 257,
+      "winner": "Обормоты",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2584,
+      "date": "2025-10-23",
+      "home": "Бюро",
+      "away": "ПЗК",
+      "homeScore": 248,
+      "awayScore": 257,
+      "winner": "ПЗК",
+      "venue": "Linza Bar",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2597,
+      "date": "2025-10-27",
+      "home": "Бугульма",
+      "away": "Винета",
+      "homeScore": 258,
+      "awayScore": 243,
+      "winner": "Бугульма",
+      "venue": "Фогель",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2601,
+      "date": "2025-10-28",
+      "home": "1163",
+      "away": "Блины",
+      "homeScore": 272,
+      "awayScore": 266,
+      "winner": "1163",
+      "venue": "Усы на Пене",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2697,
+      "date": "2025-12-04",
+      "home": "Веселые ребята",
+      "away": "Апостроф",
+      "homeScore": 245,
+      "awayScore": 233,
+      "winner": "Веселые ребята",
+      "venue": "Бездна",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2706,
+      "date": "2025-12-07",
+      "home": "Состав",
+      "away": "Бюро",
+      "homeScore": 272,
+      "awayScore": 281,
+      "winner": "Бюро",
+      "venue": "Бездна (Гривцова)",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2711,
+      "date": "2025-12-08",
+      "home": "Пыжыки",
+      "away": "Бугульма",
+      "homeScore": 238,
+      "awayScore": 242,
+      "winner": "Бугульма",
+      "venue": "Фонтанка-69",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2720,
+      "date": "2025-12-09",
+      "home": "Или",
+      "away": "ПЗК",
+      "homeScore": 247,
+      "awayScore": 245,
+      "winner": "Или",
+      "venue": "Art-hall, Сытнинская 14",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2731,
+      "date": "2025-12-11",
+      "home": "Менестрели подземелья",
+      "away": "Вином",
+      "homeScore": 283,
+      "awayScore": 254,
+      "winner": "Менестрели подземелья",
+      "venue": "Чертог, Волковский проспект 12",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2744,
+      "date": "2025-12-14",
+      "home": "Болт",
+      "away": "Бюро",
+      "homeScore": 245,
+      "awayScore": 247,
+      "winner": "Бюро",
+      "venue": "Fish Fabrique bar, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2749,
+      "date": "2025-12-15",
+      "home": "Чумные",
+      "away": "Обормоты",
+      "homeScore": 279,
+      "awayScore": 264,
+      "winner": "Чумные",
+      "venue": "Рестобар «Глагол», Большой П.С. 81",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2759,
+      "date": "2025-12-16",
+      "home": "Винета",
+      "away": "Состав",
+      "homeScore": 269,
+      "awayScore": 288,
+      "winner": "Состав",
+      "venue": "Last bar, Разъезжая 27",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2763,
+      "date": "2025-12-17",
+      "home": "Бугульма",
+      "away": "Апостроф",
+      "homeScore": 240,
+      "awayScore": 235,
+      "winner": "Бугульма",
+      "venue": "Базара нет!, Рубинштейна 21",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2768,
+      "date": "2025-12-18",
+      "home": "1163",
+      "away": "ПЗК",
+      "homeScore": 235,
+      "awayScore": 251,
+      "winner": "ПЗК",
+      "venue": "Заря, Маяковского 40",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2789,
+      "date": "2025-12-22",
+      "home": "Болт",
+      "away": "Пыжыки",
+      "homeScore": 246,
+      "awayScore": 254,
+      "winner": "Пыжыки",
+      "venue": "Fish Fabrique bar, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2795,
+      "date": "2025-12-23",
+      "home": "Обормоты",
+      "away": "Менестрели подземелья",
+      "homeScore": 265,
+      "awayScore": 267,
+      "winner": "Менестрели подземелья",
+      "venue": "Fish Fabrique Nouvelle, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2801,
+      "date": "2025-12-24",
+      "home": "Вином",
+      "away": "Чумные",
+      "homeScore": 264,
+      "awayScore": 271,
+      "winner": "Чумные",
+      "venue": "Quokka, Большая Пушкарская 50",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2811,
+      "date": "2025-12-25",
+      "home": "Веселые ребята",
+      "away": "Винета",
+      "homeScore": 260,
+      "awayScore": 278,
+      "winner": "Винета",
+      "venue": "Бездна, Некрасова 36",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2822,
+      "date": "2025-12-28",
+      "home": "Или",
+      "away": "Блины",
+      "homeScore": 271,
+      "awayScore": 273,
+      "winner": "Блины",
+      "venue": "в Ладах, Социалистическая ул. 21",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2875,
+      "date": "2026-01-12",
+      "home": "Бюро",
+      "away": "Веселые ребята",
+      "homeScore": 292,
+      "awayScore": 263,
+      "winner": "Бюро",
+      "venue": "Linza bar, Кадетская линия 5к2Д",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2887,
+      "date": "2026-01-13",
+      "home": "Обормоты",
+      "away": "Блины",
+      "homeScore": 283,
+      "awayScore": 276,
+      "winner": "Обормоты",
+      "venue": "Fish Fabrique Nouvelle, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2893,
+      "date": "2026-01-14",
+      "home": "Винета",
+      "away": "Бугульма",
+      "homeScore": 274,
+      "awayScore": 272,
+      "winner": "Винета",
+      "venue": "Last bar, Разъезжая 27",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2901,
+      "date": "2026-01-15",
+      "home": "Менестрели подземелья",
+      "away": "ПЗК",
+      "homeScore": 256,
+      "awayScore": 266,
+      "winner": "ПЗК",
+      "venue": "Чертог, Волковский проспект 12",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2906,
+      "date": "2026-01-16",
+      "home": "1163",
+      "away": "Вином",
+      "homeScore": 254,
+      "awayScore": 253,
+      "winner": "1163",
+      "venue": "Усы на пене, Лиговский проспект 50 корп. 16",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2914,
+      "date": "2026-01-18",
+      "home": "Пыжыки",
+      "away": "Апостроф",
+      "homeScore": 242,
+      "awayScore": 238,
+      "winner": "Пыжыки",
+      "venue": "«Богема», Рубинштейна 28д",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2918,
+      "date": "2026-01-19",
+      "home": "Или",
+      "away": "Чумные",
+      "homeScore": 266,
+      "awayScore": 283,
+      "winner": "Чумные",
+      "venue": "Рестобар «Глагол», Большой П.С. 81",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2927,
+      "date": "2026-01-20",
+      "home": "Болт",
+      "away": "Состав",
+      "homeScore": 258,
+      "awayScore": 245,
+      "winner": "Болт",
+      "venue": "Fish Fabrique bar, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2940,
+      "date": "2026-01-21",
+      "home": "Бугульма",
+      "away": "Бюро",
+      "homeScore": 281,
+      "awayScore": 260,
+      "winner": "Бугульма",
+      "venue": "Базара нет!, Рубинштейна 21",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2948,
+      "date": "2026-01-22",
+      "home": "Чумные",
+      "away": "ПЗК",
+      "homeScore": 270,
+      "awayScore": 265,
+      "winner": "Чумные",
+      "venue": "Рестобар «Глагол», Большой П.С. 81",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2952,
+      "date": "2026-01-23",
+      "home": "Блины",
+      "away": "1163",
+      "homeScore": 278,
+      "awayScore": 260,
+      "winner": "Блины",
+      "venue": "в Ладах, Социалистическая ул. 21",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2967,
+      "date": "2026-01-25",
+      "home": "Пыжыки",
+      "away": "Винета",
+      "homeScore": 228,
+      "awayScore": 232,
+      "winner": "Винета",
+      "venue": "PVZ, Мельничная 4В",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2977,
+      "date": "2026-01-26",
+      "home": "Или",
+      "away": "1163",
+      "homeScore": 271,
+      "awayScore": 255,
+      "winner": "Или",
+      "venue": "Art-hall, Сытнинская 14",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2989,
+      "date": "2026-01-27",
+      "home": "Веселые ребята",
+      "away": "Болт",
+      "homeScore": 243,
+      "awayScore": 266,
+      "winner": "Болт",
+      "venue": "БезДна, Некрасова 36",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2994,
+      "date": "2026-01-28",
+      "home": "Вином",
+      "away": "Обормоты",
+      "homeScore": 278,
+      "awayScore": 282,
+      "winner": "Обормоты",
+      "venue": "Quokka, Большая Пушкарская 50",
+      "time": "20:00"
+    },
+    {
+      "msgId": 2999,
+      "date": "2026-01-29",
+      "home": "Состав",
+      "away": "Апостроф",
+      "homeScore": 267,
+      "awayScore": 271,
+      "winner": "Апостроф",
+      "venue": "Кассета, Лиговский 50 лит У",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3020,
+      "date": "2026-02-01",
+      "home": "Блины",
+      "away": "Менестрели подземелья",
+      "homeScore": 282,
+      "awayScore": 257,
+      "winner": "Блины",
+      "venue": "в Ладах, Социалистическая 21",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3042,
+      "date": "2026-02-02",
+      "home": "Болт",
+      "away": "Бугульма",
+      "homeScore": 249,
+      "awayScore": 259,
+      "winner": "Бугульма",
+      "venue": "Fish Fabrique bar, Лиговский пр. 53",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3048,
+      "date": "2026-02-03",
+      "home": "Чумные",
+      "away": "1163",
+      "homeScore": 286,
+      "awayScore": 274,
+      "winner": "Чумные",
+      "venue": "Рестобар «Глагол», Большой П.С. 81",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3207,
+      "date": "2026-02-22",
+      "home": "Менестрели подземелья",
+      "away": "1163",
+      "homeScore": 266,
+      "awayScore": 254,
+      "winner": "Менестрели подземелья",
+      "venue": "Чертог",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3216,
+      "date": "2026-02-24",
+      "home": "Болт",
+      "away": "Винета",
+      "homeScore": 255,
+      "awayScore": 251,
+      "winner": "Болт",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3219,
+      "date": "2026-02-25",
+      "home": "ПЗК",
+      "away": "Вином",
+      "homeScore": 280,
+      "awayScore": 270,
+      "winner": "ПЗК",
+      "venue": "Quokka",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3239,
+      "date": "2026-03-01",
+      "home": "Бугульма",
+      "away": "Состав",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null,
+      "venue": "OM Studio Кузня",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3243,
+      "date": "2026-03-02",
+      "home": "Обормоты",
+      "away": "1163",
+      "homeScore": 269,
+      "awayScore": 239,
+      "winner": "Обормоты",
+      "venue": "Усы на Пене",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3252,
+      "date": "2026-03-03",
+      "home": "Болт",
+      "away": "Апостроф",
+      "homeScore": 271,
+      "awayScore": 259,
+      "winner": "Болт",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3259,
+      "date": "2026-03-04",
+      "home": "Или",
+      "away": "Вином",
+      "homeScore": 280,
+      "awayScore": 279,
+      "winner": "Или",
+      "venue": "Art Hall",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3264,
+      "date": "2026-03-05",
+      "home": "Бюро",
+      "away": "Винета",
+      "homeScore": 279,
+      "awayScore": 281,
+      "winner": "Винета",
+      "venue": "Linza Bar",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3291,
+      "date": "2026-03-09",
+      "home": "Менестрели подземелья",
+      "away": "Чумные",
+      "homeScore": 258,
+      "awayScore": 269,
+      "winner": "Чумные",
+      "venue": "Глагол",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3305,
+      "date": "2026-03-10",
+      "home": "Веселые ребята",
+      "away": "Пыжыки",
+      "homeScore": 240,
+      "awayScore": 269,
+      "winner": "Пыжыки",
+      "venue": "Бездна",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3309,
+      "date": "2026-03-11",
+      "home": "ПЗК",
+      "away": "Блины",
+      "homeScore": 265,
+      "awayScore": 276,
+      "winner": "Блины",
+      "venue": "Наше место",
+      "time": "20:00"
+    },
+    {
+      "msgId": 3320,
+      "date": "2026-03-18",
+      "home": "Обормоты",
+      "away": "ПЗК",
+      "homeScore": 270,
+      "awayScore": 265,
+      "winner": "Обормоты",
+      "venue": "Fish Fabrique",
+      "time": "20:00"
+    }
+  ],
+  "rosters": [
+    {
+      "msgId": 91,
+      "date": "2024-09-11",
+      "team": "Шь",
+      "players": ["Вика Малькова", "Яна Стреха", "Валера Жданова", "Саша Коншакова", "Веничка Сорокин"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 91,
+      "date": "2024-09-11",
+      "team": "Чумные",
+      "players": [
+        "АсяСтихия",
+        "Егор Труфанов",
+        "Твоя Ариша",
+        "Лиза Фиртич",
+        "Стас Логиновский",
+        "Янур Василиев",
+        "Антон Трусов"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 127,
+      "date": "2024-09-14",
+      "team": "Или",
+      "players": [
+        "Evan Gard",
+        "Ольга Василевская",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Полина Кондратенко",
+        "Тата Купрейко",
+        "Илья Пономарёв"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 127,
+      "date": "2024-09-14",
+      "team": "Пыжыки",
+      "players": ["Гоша Аверин", "Настасья Федорова", "Глеб Колондо", "Лиза Спичка"],
+      "coach": "Александр Машанов"
+    },
+    {
+      "msgId": 134,
+      "date": "2024-09-15",
+      "team": "Обормоты",
+      "players": [
+        "Гриша Куница",
+        "Сережа Отрибург",
+        "Агнесса",
+        "Лена Стрельникова",
+        "Коля Киселев",
+        "Поляк Сергеев",
+        "Вэня Тремпель"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 134,
+      "date": "2024-09-15",
+      "team": "Блины",
+      "players": [
+        "Геннадий Булин",
+        "Рома Радин",
+        "Алексей Генеральский",
+        "Мария Жукова",
+        "Виктория Науменко",
+        "Ольга Надточий",
+        "Дамир Валеев"
+      ],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 147,
+      "date": "2024-09-16",
+      "team": "Чумные",
+      "players": ["Антон Трусов", "Артур Коньков", "Лиза Фиртич", "Валерий Никитин", "Янур Василиев", "Твоя Ариша"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 147,
+      "date": "2024-09-16",
+      "team": "Обормоты",
+      "players": [
+        "лили недолили",
+        "лена стрельникова",
+        "Агнесса",
+        "Поляк Сергеев",
+        "Коля Киселев",
+        "Ваня Тремпель",
+        "Сережа Отрибург"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 156,
+      "date": "2024-09-17",
+      "team": "Firma",
+      "players": ["Дмитрий Адемин", "Сергей Удальцов", "Егор Енотов", "Максим Тесли", "Кукса", "Константин Иванов"],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 157,
+      "date": "2024-09-17",
+      "team": "Пыжыки",
+      "players": ["Данил Вачегин", "Георгий Аверин", "Глеб Колондо", "Лиза Спичка"],
+      "coach": "Александр Машанов"
+    },
+    {
+      "msgId": 177,
+      "date": "2024-09-18",
+      "team": "Софийка",
+      "players": ["Ася Саганенко", "Пётр Г. К", "Арсений Ярмадов", "Мира Акирова", "Алёна", "Лёша Юдин"],
+      "coach": "Дима Мозес"
+    },
+    {
+      "msgId": 177,
+      "date": "2024-09-18",
+      "team": "Болт",
+      "players": ["Клара Шох", "Ирина Розкина", "Ксения Коржик", "Елена Белова", "Папа Ильича", "Артём Суслов"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 189,
+      "date": "2024-09-19",
+      "team": "Апостроф",
+      "players": ["Маша Грибанова", "Ася", "Виктор Кронов", "Федор П", "Аффи Дэвид"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 189,
+      "date": "2024-09-19",
+      "team": "Бюро",
+      "players": ["Ян Лён", "Аглая", "Антон Кобец", "Неувяда", "Алексей Постум", "И'ним", "Леонид Лукьянов"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 233,
+      "date": "2024-09-23",
+      "team": "Блины",
+      "players": [
+        "Алексей Генеральский",
+        "Ольга Надточий",
+        "Геннадий Булин",
+        "Виктория Науменко",
+        "Виктор Халяпин",
+        "Роман Радин"
+      ],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 252,
+      "date": "2024-09-24",
+      "team": "Firma",
+      "players": [
+        "Та Репина",
+        "Егор Енотов",
+        "Кукса",
+        "Максим Тесли",
+        "Сергей Удальцов",
+        "Дмитрий Адемин",
+        "Евгений Дьяконов",
+        "Константин Иванов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 252,
+      "date": "2024-09-24",
+      "team": "Шь",
+      "players": ["Яна Стреха", "Яра Тодуркина", "Валера Жданова", "Вика Малькова", "Саша Коншакова", "Елена Шаталина"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 267,
+      "date": "2024-09-25",
+      "team": "Болт",
+      "players": ["Анна «Умка» Герасимова", "Клара Шох", "Анна Подкорытова", "Карыч", "Артём Суслов"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 267,
+      "date": "2024-09-25",
+      "team": "Апостроф",
+      "players": ["Маша Грибанова", "Глеб", "Никита Назаров", "Астери", "Виктор Кронов"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 282,
+      "date": "2024-09-26",
+      "team": "Бюро",
+      "players": [
+        "Юлия Пономарёва",
+        "Женя Мухин",
+        "Dеклатим",
+        "Леонид Лукьянов",
+        "И'ним",
+        "Ян Лён",
+        "Аглая",
+        "Алексей Постум"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 282,
+      "date": "2024-09-26",
+      "team": "Или",
+      "players": [
+        "Evan Gard",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Алексей Комаревцев",
+        "Полина Кондратенко",
+        "Тата Купрейко"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 317,
+      "date": "2024-09-30",
+      "team": "Пыжыки",
+      "players": [
+        "Вачегин Данил",
+        "Георгий Аверин",
+        "Денис Скобелев",
+        "Валерия Шишкина",
+        "Игорь Северенков",
+        "Настасья Федорова"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 317,
+      "date": "2024-09-30",
+      "team": "Чумные",
+      "players": [
+        "Диана Давлетбердина",
+        "АсяСтихия",
+        "Егор Труфанов",
+        "Лиза Фиртич",
+        "Янур Василиев",
+        "Антон Трусов",
+        "Валерий Никитин"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 334,
+      "date": "2024-10-02",
+      "team": "Шь",
+      "players": ["Вика Малькова", "Яна Стреха", "Валера Жданова", "Яра Тодуркина"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 334,
+      "date": "2024-10-02",
+      "team": "Блины",
+      "players": [
+        "Алексей Генеральский",
+        "Роман Радин",
+        "Геннадий Булин",
+        "Ольга Надточий",
+        "Мария Жукова",
+        "Алиса Грекова",
+        "Виктор Халяпин",
+        "Екатерина Калугина"
+      ],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 360,
+      "date": "2024-10-06",
+      "team": "Обормоты",
+      "players": [
+        "лена стрельникова",
+        "джамиль нилов",
+        "леша виниченко",
+        "лили недолили",
+        "ваня тремпель",
+        "сережа отрибург",
+        "николай киселев"
+      ],
+      "coach": "витя горелый"
+    },
+    {
+      "msgId": 360,
+      "date": "2024-10-06",
+      "team": "Болт",
+      "players": ["Анна Подкорытова", "Елена Шумара", "Артём Суслов", "Клара Шох", "Папа Ильича", "Ирина Розкина"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 383,
+      "date": "2024-10-08",
+      "team": "Или",
+      "players": ["Evan Gard", "Тата Купрейко", "Илья Пономарёв", "Ольга Василевская", "Алексей Комаревцев"],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 383,
+      "date": "2024-10-08",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Гриша Куница",
+        "Ваня Тремпель",
+        "Леша Виниченко",
+        "Лили Недолили",
+        "Сережа Отрибург",
+        "Поляк Сергеев",
+        "Николай Киселев"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 402,
+      "date": "2024-10-09",
+      "team": "Апостроф",
+      "players": [
+        "Аффи Дэвид",
+        "Тиана Веретенникова",
+        "Мария Грибанова",
+        "Никита Назаров",
+        "Глеб",
+        "Ася",
+        "Валерия Бессонова"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 402,
+      "date": "2024-10-09",
+      "team": "Шь",
+      "players": ["Яра Тодуркина", "Яна Стреха", "Вика Малькова", "Настя Кирьянова"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 421,
+      "date": "2024-10-10",
+      "team": "Софийка",
+      "players": ["Пётр Г.К", "Лёша Юдин", "Мира Акирова", "Арсений Ярмадов", "Алёна", "Ася Саганенко"],
+      "coach": "Дмитрий Мозес"
+    },
+    {
+      "msgId": 421,
+      "date": "2024-10-10",
+      "team": "Пыжыки",
+      "players": [
+        "Глеб Оптоволокнов",
+        "Лиза Спичка",
+        "Денис Скобелев",
+        "Валерия Шишкина",
+        "Владислав Алексеевич",
+        "Сергей СталинВСерДЦЕ",
+        "Хара Кири Марла Сингер"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 468,
+      "date": "2024-10-14",
+      "team": "Чумные",
+      "players": ["Антон Трусов", "Егор Труфанов", "Янур Василиев", "АсяСтихия", "Твоя Ариша", "Валерий Никитин"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 468,
+      "date": "2024-10-14",
+      "team": "Апостроф",
+      "players": [
+        "Мария Грибанова",
+        "Аффи Дэвид",
+        "Глеб",
+        "Валерия Бессонова",
+        "Ася",
+        "Тиана Веретенникова",
+        "Фёдор П"
+      ],
+      "coach": "Никита Назаров"
+    },
+    {
+      "msgId": 484,
+      "date": "2024-10-15",
+      "team": "Бюро",
+      "players": ["Антон Кобец", "Юлия Пономарёва", "Анатолий Падов", "Неувяда", "Ян Лён", "Аглая", "Евгений Мухин"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 484,
+      "date": "2024-10-15",
+      "team": "Вином",
+      "players": ["Клара Шох", "Ирина Розкина", "Елена Белова", "Ксения Коржик", "Папа Ильича"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 504,
+      "date": "2024-10-16",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Егор Енотов",
+        "Максим Тесли",
+        "Евгений Дьяконов",
+        "Кукса",
+        "Та Репина",
+        "Константин Иванов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 504,
+      "date": "2024-10-16",
+      "team": "Софийка",
+      "players": [
+        "Ася Саганенко",
+        "Пётр Г.К Разумов",
+        "Мира Акирова",
+        "Лёша Юдин",
+        "Алёна Берестнева",
+        "Саша Андер",
+        "Арсений Ярмадов"
+      ],
+      "coach": "Дима Мозес"
+    },
+    {
+      "msgId": 546,
+      "date": "2024-10-21",
+      "team": "Блины",
+      "players": ["Алиса Грекова", "Дамир Валеев", "Юлия Медведева", "Геннадий Булин", "Ольга Надточий", "Роман Радин"],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 546,
+      "date": "2024-10-21",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Маша Иванова",
+        "Тата Купрейко",
+        "Илья Пономарёв",
+        "Алексей Комаревцев",
+        "Полина Кондратенко"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 560,
+      "date": "2024-10-22",
+      "team": "Пыжыки",
+      "players": [
+        "Хара Кири",
+        "Денис Скобелев",
+        "Глеб Колондо",
+        "Георгий Аверин",
+        "Лёша Омский",
+        "Сергей СталинВСердце",
+        "Лера Шишкина"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 560,
+      "date": "2024-10-22",
+      "team": "Бюро",
+      "players": [
+        "И'ним",
+        "Антон Кобец",
+        "Ян Лён",
+        "Алексей Постум",
+        "Леонид Лукьянов",
+        "Анатолий Падов",
+        "Женя Мухин"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 587,
+      "date": "2024-10-23",
+      "team": "Вином",
+      "players": ["Елена Белова", "Папа Ильича", "Саша Нефертити", "Анна Подкорытова", "Клара Шох", "Ирина Розкина"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 587,
+      "date": "2024-10-23",
+      "team": "Firma",
+      "players": ["Сергей Удальцов", "Егор Енотов", "Евгений Дьяконов", "Максим Тесли", "Кукса", "Константин Иванов"],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 617,
+      "date": "2024-10-27",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Серёжа Отрибург",
+        "Поляк Сергеев",
+        "Коля Киселев",
+        "Агнесса",
+        "Лёша Виниченко",
+        "Лили Недолили"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 617,
+      "date": "2024-10-27",
+      "team": "Шь",
+      "players": ["Валера Жданова", "Саша Коншакова", "Яна Стреха", "Веничка Сорокин", "Вика Малькова", "Шейла Алекс"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 658,
+      "date": "2024-10-29",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Маша Иванова",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Евгения Удальцова"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 658,
+      "date": "2024-10-29",
+      "team": "Апостроф",
+      "players": ["Аффи Дэвид", "Тиана Веретенникова", "Виктор Кронов", "Валерия Бессонова", "Авель Эрвинович"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 693,
+      "date": "2024-11-03",
+      "team": "Шь",
+      "players": [
+        "Саша Коншакова",
+        "Яра Тодуркина",
+        "Валера Жданова",
+        "Веничка Сорокин",
+        "Вика Малькова",
+        "Яна Стреха"
+      ],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 693,
+      "date": "2024-11-03",
+      "team": "Бюро",
+      "players": ["Неувяда", "Юлия Пономарёва", "И'ним", "Алексей Постум", "Аглая", "Антон Кобец"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 726,
+      "date": "2024-11-04",
+      "team": "Блины",
+      "players": [
+        "Дамир Валеев",
+        "Геннадий Булин",
+        "Ольга Надточий",
+        "Алексей Генеральский",
+        "Виктория Науменко",
+        "Роман Радин"
+      ],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 726,
+      "date": "2024-11-04",
+      "team": "Чумные",
+      "players": [
+        "Лиза Фиртич",
+        "Nel.",
+        "Антон Трусов",
+        "Янур Василиев",
+        "Твоя Ариша",
+        "Валерий Никитин",
+        "Егор Труфанов"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 744,
+      "date": "2024-11-05",
+      "team": "Firma",
+      "players": [
+        "Максим Тесли",
+        "Дмитрий Адемин",
+        "Константин Иванов",
+        "Андрей Некрасов",
+        "Кукса",
+        "Егор Енотов",
+        "Сергей Удальцов",
+        "Руслан Шишкин"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 744,
+      "date": "2024-11-05",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Ольга Василевская",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Алексей Комаревцев",
+        "Тата Купрейко",
+        "Евгения Удальцова"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 761,
+      "date": "2024-11-06",
+      "team": "Апостроф",
+      "players": ["Анастасия Грекова", "Тиана Веретенникова", "Авель Эрвинович", "Валерия Бессонова", "Аффи Дэвид"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 761,
+      "date": "2024-11-06",
+      "team": "Пыжыки",
+      "players": [
+        "Лёша Омский",
+        "Владислав Алексеевич",
+        "ХараКири",
+        "Маша Любичева",
+        "Глеб Колондо",
+        "Георгий Аверин",
+        "Серёга Сталин в Сердце",
+        "Денис Скобелев"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 776,
+      "date": "2024-11-07",
+      "team": "Софийка",
+      "players": ["Пётр Г.К", "Лёша Юдин", "Григорий Битнев", "Ася Саганенко"],
+      "coach": "Дима Мозес"
+    },
+    {
+      "msgId": 776,
+      "date": "2024-11-07",
+      "team": "Обормоты",
+      "players": [
+        "Гера Соболева",
+        "Никита Северюхин",
+        "Гриша Куница",
+        "Ваня Тремпель",
+        "Поляк Сергеев",
+        "Агнесса",
+        "Лёша Виниченко",
+        "Лена Стрельникова"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 808,
+      "date": "2024-11-11",
+      "team": "Чумные",
+      "players": [
+        "Янур Василиев",
+        "АсяСтихия",
+        "Лиза Фиртич",
+        "Валерий Никитин",
+        "Nel.",
+        "Антон Трусов",
+        "Егор Труфанов"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 808,
+      "date": "2024-11-11",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Наста", "Серёжа Харитонов", "Александра Басманова"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 835,
+      "date": "2024-11-13",
+      "team": "Вином",
+      "players": ["Анна Подкорытова", "Клара Шох", "Елена Белова", "Ирина Розкина"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 835,
+      "date": "2024-11-13",
+      "team": "Блины",
+      "players": ["Александр Ва'лов", "Дамир Валеев", "Геннадий Булин", "Роман Радин", "Ольга Надточий"],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 841,
+      "date": "2024-11-14",
+      "team": "Бюро",
+      "players": [
+        "Женя Мухин",
+        "Ян Лён",
+        "Анатолий Падов",
+        "Юлия Пономарёва",
+        "Алексей Постум",
+        "Неувяда",
+        "Леонид Лукьянов"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 841,
+      "date": "2024-11-14",
+      "team": "Firma",
+      "players": [
+        "Евгений Дьяконов",
+        "Сергей Удальцов",
+        "Та Репина",
+        "Максим Тесли",
+        "Егор Енотов",
+        "Константин Иванов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 880,
+      "date": "2024-11-17",
+      "team": "Обормоты",
+      "players": ["Поляк Сергеев", "Лили Недолили", "Ваня Тремпель", "Лёша Виниченко", "Лена Стрельникова"],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 880,
+      "date": "2024-11-17",
+      "team": "Пыжыки",
+      "players": ["ХараКири", "Маша Любичева", "Глеб Колондо", "Денис Скобелев", "Лёша Омский"],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 902,
+      "date": "2024-11-18",
+      "team": "Шь",
+      "players": [
+        "Валера Жданова",
+        "Яра Тодуркина",
+        "Саша Коншакова",
+        "Яна Стреха",
+        "Ксения Харт",
+        "Шейла Алекс",
+        "Вика Малькова"
+      ],
+      "coach": "Вика Малькова"
+    },
+    {
+      "msgId": 902,
+      "date": "2024-11-18",
+      "team": "Вином",
+      "players": ["Анна Подкорытова", "Елена Белова", "Ирина Розкина", "Клара Шох", "Ксения Коржик", "Папа Ильича"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 918,
+      "date": "2024-11-19",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Ольга Василевская",
+        "Маша Иванова",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Полина Кондратенко",
+        "Тата Купрейко",
+        "Евгения Удальцова"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 918,
+      "date": "2024-11-19",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Наста", "Мария Левеня", "Ефим Аксёнов", "Анастасия Лаврентьева"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 932,
+      "date": "2024-11-20",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Егор Енотов",
+        "Та Репина",
+        "Максим Тесли",
+        "Евгений Дьяконов",
+        "Руслан Шишкин",
+        "Константин Иванов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 932,
+      "date": "2024-11-20",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Агнесса",
+        "Николай Киселев",
+        "Поляк Сергеев",
+        "Лёша Виниченко",
+        "Джамиль Нилов",
+        "Лили Недолили"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 960,
+      "date": "2024-11-21",
+      "team": "Пыжыки",
+      "players": [
+        "ХараКири",
+        "Георгий Аверин",
+        "Мария Любичева",
+        "Глеб Колондо",
+        "Денис Скобелев",
+        "Влад Алексеевич Пыжыков"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 960,
+      "date": "2024-11-21",
+      "team": "Блины",
+      "players": ["Геннадий Булин", "Роман Радин", "Алиса Грекова", "Александр Ва'лов", "Дамир Валеев"],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 993,
+      "date": "2024-11-25",
+      "team": "Блины",
+      "players": ["Геннадий Булин", "Роман Радин", "Алиса Грекова", "Алексей Генеральский", "Виктор Халяпин"],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 993,
+      "date": "2024-11-25",
+      "team": "Апостроф",
+      "players": [
+        "Никита Назаров",
+        "Аффи Дэвид",
+        "Мерида Велингтон (Анастасия Грекова)",
+        "Том Торк",
+        "Михаил Серебринский",
+        "Тиана Веретенникова",
+        "Ситора Зима"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1003,
+      "date": "2024-11-26",
+      "team": "Бюро",
+      "players": ["Юлия Пономарёва", "Алексей Постум", "Неувяда", "Ян Лён", "И'ним", "Аглая", "Рэдмонд Фокс"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1003,
+      "date": "2024-11-26",
+      "team": "Чумные",
+      "players": ["Валерий Никитин", "Лиза Фиртич", "Nel.", "Янур Василиев", "Твоя Ариша", "Антон Трусов"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1021,
+      "date": "2024-11-27",
+      "team": "Ива",
+      "players": ["Гавриил Пономарев", "Софья Левицкая", "Ефим Аксёнов", "Мария Левеня", "Наста"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1021,
+      "date": "2024-11-27",
+      "team": "Шь",
+      "players": ["Вика Малькова", "Саша Коншакова", "Валера Жданова", "Яна Стреха"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 1068,
+      "date": "2024-12-02",
+      "team": "Чумные",
+      "players": ["АсяСтихия", "Лиза Фиртич", "Валерий Никитин", "Nel.", "Янур Василиев", "Крис Аивер"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1068,
+      "date": "2024-12-02",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Егор Енотов",
+        "Та Репина",
+        "Евгений Дьяконов",
+        "Константин Иванов",
+        "Андрей Некрасов",
+        "Кукса"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1088,
+      "date": "2024-12-04",
+      "team": "Вином",
+      "players": [
+        "Анна Подкорытова",
+        "Ксения Булак",
+        "Саша Нефертити",
+        "Клара Шох",
+        "Елена Белова",
+        "Ирина Розкина",
+        "Папа Ильича"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1088,
+      "date": "2024-12-04",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Тата Купрейко",
+        "Илья Пономарёв"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1107,
+      "date": "2024-12-05",
+      "team": "Апостроф",
+      "players": ["Том Торк", "Аффи Дэвид", "Ситора Зима", "Сон Серафима", "Авель Эрвинович"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1107,
+      "date": "2024-12-05",
+      "team": "Ива",
+      "players": ["Кристина Рапопорт", "Софья Левицкая", "Анастасия Лаврентьева", "Мария Левеня", "Наста"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1126,
+      "date": "2024-12-08",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Лёша Виниченко",
+        "Николай Киселев",
+        "Гриша Куница",
+        "Ваня Тремпель"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1126,
+      "date": "2024-12-08",
+      "team": "Бюро",
+      "players": ["Аглая", "Неувяда", "Деклатим", "Антон Кобец", "Алексей Постум", "Анатолий Падов", "Юлия Пономарёва"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1135,
+      "date": "2024-12-09",
+      "team": "Пыжыки",
+      "players": [
+        "Хара Кири",
+        "Лёша Омский",
+        "Георгий Аверин",
+        "Сергей СталинВСерДЦЕ",
+        "Денис Скобелев",
+        "Влад Пыжыков"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1135,
+      "date": "2024-12-09",
+      "team": "Вином",
+      "players": [
+        "Ксения Булак",
+        "Елена Шумара",
+        "Клара Шох",
+        "Анна Подкорытова",
+        "Елена Белова",
+        "Папа Ильича",
+        "Ирина Розкина"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1146,
+      "date": "2024-12-10",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Анатроллий Карпов",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Тата Купрейко",
+        "Илья Пономарёв",
+        "Евгения Удальцова"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1146,
+      "date": "2024-12-10",
+      "team": "Шь",
+      "players": ["Вика Малькова", "Яра Тодуркина", "Кристина Бердникова", "Яна Стреха", "Саша Коншакова"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 1150,
+      "date": "2024-12-11",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Егор Енотов",
+        "Евгений Дьяконов",
+        "Та Репина",
+        "Константин Иванов",
+        "Кукса",
+        "Сергей Удальцов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1150,
+      "date": "2024-12-11",
+      "team": "Апостроф",
+      "players": ["Аффи Дэвид", "Виктор Кронов", "Валерьянка от бессонницы", "Ситора Зима"],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1166,
+      "date": "2024-12-12",
+      "team": "Бюро",
+      "players": ["Неувяда", "Леонид Лукьянов", "Алексей Постум", "Антон Кобец", "Анатолий Падов", "Рэдмонд Фокс"],
+      "coach": "Женя Мухин"
+    },
+    {
+      "msgId": 1166,
+      "date": "2024-12-12",
+      "team": "Блины",
+      "players": [
+        "Геннадий Булин",
+        "Ольга Надточий",
+        "Дамир Валеев",
+        "Александр Валов",
+        "Алексей Генеральский",
+        "Алиса Грекова"
+      ],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 1211,
+      "date": "2024-12-16",
+      "team": "Чумные",
+      "players": [
+        "Диана Давлетбердина",
+        "Валерий Никитин",
+        "Лиза Фиртич",
+        "Твоя Ариша",
+        "Nel.",
+        "Янур Василиев",
+        "Антон Трусов"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1211,
+      "date": "2024-12-16",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Полина Кондратенко",
+        "Евгения Удальцова"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1226,
+      "date": "2024-12-17",
+      "team": "Шь",
+      "players": ["Яра Тодуркина", "Валера Жданова", "Саша Коншакова", "Яна Стреха", "Кристина Бердникова"],
+      "coach": "Зарина Фок"
+    },
+    {
+      "msgId": 1226,
+      "date": "2024-12-17",
+      "team": "Пыжыки",
+      "players": [
+        "Маша Любичева",
+        "Джулиано ди Капуа",
+        "Георгий Аверин",
+        "Денис Скобелев",
+        "Влад Пыжыков",
+        "Сергей СталинВСердце",
+        "Лёша Омский"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1234,
+      "date": "2024-12-18",
+      "team": "Апостроф",
+      "players": [
+        "Тиана Веретенникова",
+        "Аффи Дэвид",
+        "Ситора Зима",
+        "Иван Ежов",
+        "Виктор Кронов",
+        "Валерьянка от Бессонницы",
+        "Никита Назаров"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1234,
+      "date": "2024-12-18",
+      "team": "Обормоты",
+      "players": ["Лена Стрельникова", "Гриша Куница", "Агнесса", "Серёжа Отрибург", "Поляк Сергеев"],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1246,
+      "date": "2024-12-19",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Наста", "Ефим Аксёнов", "Мария Левеня", "Анастасия Лаврентьева"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1246,
+      "date": "2024-12-19",
+      "team": "Бюро",
+      "players": ["Аглая", "Неувяда", "Dеклатим", "Антон Кобец", "Алексей Постум", "Леонид Лукьянов", "Анатолий Падов"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1299,
+      "date": "2024-12-23",
+      "team": "Блины",
+      "players": ["Дамир Валеев", "Мария Жукова", "Виктория Науменко", "Ольга Надточий"],
+      "coach": "Виктор Непомнящих"
+    },
+    {
+      "msgId": 1299,
+      "date": "2024-12-23",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Егор Енотов",
+        "Евгений Дьяконов",
+        "Та Репина",
+        "Андрей Некрасов",
+        "Максим Тесли",
+        "Кукса"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1322,
+      "date": "2024-12-25",
+      "team": "Вином",
+      "players": [
+        "Катерина Спиридонова",
+        "Карыч",
+        "Анна Подкорытова",
+        "Ксения Булак",
+        "Елена Шумара",
+        "Ирина Розкина",
+        "Клара Шох"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1322,
+      "date": "2024-12-25",
+      "team": "Чумные",
+      "players": [
+        "Лиза Фиртич",
+        "Валерий Никитин",
+        "Антон Трусов",
+        "Диана Давлетбердина",
+        "Стас Логиновский",
+        "Твоя Ариша",
+        "Янур Василиев"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1545,
+      "date": "2025-02-03",
+      "team": "Блины",
+      "players": [
+        "Глеб Дружинин",
+        "Роман Радин",
+        "Ольга Надточий",
+        "Лирика Камней",
+        "Леон Стрелков",
+        "Лана Авиор",
+        "Геннадий Булин"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1545,
+      "date": "2025-02-03",
+      "team": "Вином",
+      "players": [
+        "Анна Подкорытова",
+        "Елена Шумара",
+        "Клара Шох",
+        "Папа Ильича",
+        "Ксения Коржик",
+        "Ирина Розкина",
+        "Елена Белова"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1558,
+      "date": "2025-02-04",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Полина Кондратенко",
+        "Тата Купрейко",
+        "Илья Пономарёв"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1558,
+      "date": "2025-02-04",
+      "team": "Бюро",
+      "players": [
+        "Dеклатим",
+        "Александр Кузнецов",
+        "Ася Гречкина",
+        "Ян Лён",
+        "Алина Грамма",
+        "Анатолий Падов",
+        "Неувяда"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1564,
+      "date": "2025-02-05",
+      "team": "Firma",
+      "players": [
+        "Та Репина",
+        "Андрей Андреев",
+        "Егор Енотов",
+        "Григорий Зингер",
+        "Дмитрий Адемин",
+        "Кукса",
+        "Сергей Удальцов",
+        "Евгений Дьяконов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1564,
+      "date": "2025-02-05",
+      "team": "Чумные",
+      "players": [
+        "Лиза Фиртич",
+        "Nel.",
+        "Крис Аивер",
+        "Егор Труфанов",
+        "Артур Коньков",
+        "Валерий Никитин",
+        "Саша Хаустова"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1582,
+      "date": "2025-02-06",
+      "team": "Шь",
+      "players": ["Валера Жданова", "Яра Тодуркина", "Шейла Алекс", "Лила Южанова", "Яна Стреха"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1582,
+      "date": "2025-02-06",
+      "team": "Обормоты",
+      "players": ["Агнесса", "Лили Недолили", "Коля Киселев", "Лена Стрельникова", "Леша Виниченко", "Дима Мозес"],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1596,
+      "date": "2025-02-10",
+      "team": "Пыжыки",
+      "players": [
+        "Маша Любичева",
+        "Хара Кири",
+        "Оптоволокнов Глеб",
+        "Влад Лебедев",
+        "Лёша Омский",
+        "Георгий Аверин",
+        "Денис Скобелев"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1596,
+      "date": "2025-02-10",
+      "team": "Апостроф",
+      "players": [
+        "Аффи Дэвид",
+        "Иван Ежов",
+        "Ситора Зима",
+        "Соня Герман",
+        "Ильиниум Туманный",
+        "Том Торк",
+        "Дея Ринк",
+        "Валерьянка от Бессонницы"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1600,
+      "date": "2025-02-11",
+      "team": "Вином",
+      "players": ["Ксения Булак", "Ксения Коржик", "Клара Шох", "Елена Шумара", "Ирина Розкина", "Папа Ильича"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1600,
+      "date": "2025-02-11",
+      "team": "Шь",
+      "players": ["Яна Стреха", "Елена Шаталина", "Марина Евсеева", "Анастасия Гладкая", "Яра Тодуркина"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1617,
+      "date": "2025-02-16",
+      "team": "Обормоты",
+      "players": [
+        "Ася Саганенко",
+        "Гера Соболева",
+        "Дмитрий Мозес",
+        "Сережа Отрибург",
+        "Поляк Сергеев",
+        "Джамиль Нилов",
+        "Никита Северюхин"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1617,
+      "date": "2025-02-16",
+      "team": "Или",
+      "players": [
+        "Evan Gard (Эван Гард)",
+        "Ольга Василевская",
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Алексей Комаревцев",
+        "Тата Купрейко",
+        "Илья Пономарёв"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1628,
+      "date": "2025-02-17",
+      "team": "Чумные",
+      "players": [
+        "Янур Василиев",
+        "АсяСтихия",
+        "Антон Трусов",
+        "Саша Хаустова",
+        "Nel.",
+        "Артур Коньков",
+        "Валерий Никитин"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1628,
+      "date": "2025-02-17",
+      "team": "Блины",
+      "players": [
+        "Леон Стрелков",
+        "Павел Крузенштерн",
+        "Лирика Камней",
+        "Глеб Дружинин",
+        "Геннадий Булин",
+        "Ольга Надточий",
+        "Алиса Грекова"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1646,
+      "date": "2025-02-19",
+      "team": "Апостроф",
+      "players": [
+        "Ильиниум Туманный",
+        "Аффи Дэвид",
+        "Соня Герман",
+        "Ася Врона",
+        "Валерьянка от Бессонницы",
+        "Иван Ежов",
+        "Виктор Кронов",
+        "Александра Амадея Ринк"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1646,
+      "date": "2025-02-19",
+      "team": "Firma",
+      "players": [
+        "Максим Тесли",
+        "Евгений Дьяконов",
+        "Та Репина",
+        "Сергей Удальцов",
+        "Григорий Зингер",
+        "Андрей Андреев",
+        "Константин Иванов",
+        "Кукса"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1651,
+      "date": "2025-02-20",
+      "team": "Ива",
+      "players": [
+        "Софья Левицкая",
+        "Наста",
+        "Мария Левеня",
+        "Ефим Аксёнов",
+        "Анастасия Лаврентьева",
+        "Артемий Мороз",
+        "Ханя Зингер"
+      ],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1651,
+      "date": "2025-02-20",
+      "team": "Бюро",
+      "players": [
+        "Женя Мухин",
+        "Антон Кобец",
+        "Алексей Постум",
+        "Ася Гречкина",
+        "Неувяда",
+        "Рэдмонд Фокс",
+        "Анатолий Падов"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1667,
+      "date": "2025-02-24",
+      "team": "Блины",
+      "players": [
+        "Глеб Дружинин",
+        "Лирика Камней",
+        "Роман Радин",
+        "Дамир Валеев",
+        "Вика Умка",
+        "Павел Крузенштерн",
+        "Леон Стрелков"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1667,
+      "date": "2025-02-24",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Владислав Алексеевич ПЫЖЫКОВ",
+        "Лёша Омский",
+        "Влад Лебедев",
+        "Леша Щербак"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1672,
+      "date": "2025-02-25",
+      "team": "Или",
+      "players": ["Ольга Василевская", "Маша Иванова", "Анатроллий Карпов", "Алексей Комаревцев", "Тата Купрейко"],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1672,
+      "date": "2025-02-25",
+      "team": "Вином",
+      "players": [
+        "Карыч",
+        "Клара Шох",
+        "Елена Белова",
+        "Елена Шумара",
+        "Ксения Коржик",
+        "Ирина Розкина",
+        "Анна Подкорытова"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1678,
+      "date": "2025-02-26",
+      "team": "Ива",
+      "players": [
+        "Гавриил Пономарев",
+        "Софья Левицкая",
+        "Мария Левеня",
+        "Ефим Аксёнов",
+        "Артемий Мороз",
+        "Ханя Зингер"
+      ],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1678,
+      "date": "2025-02-26",
+      "team": "Чумные",
+      "players": ["Саша Хаустова", "Диана Давлетбердина", "Сеня Левоев", "Янур Василиев", "Лиза Фиртич"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1691,
+      "date": "2025-03-03",
+      "team": "Чумные",
+      "players": [
+        "Саша Хаустова",
+        "Nel.",
+        "Лиза Фиртич",
+        "Артур Коньков",
+        "Сеня Левоев",
+        "Валера Никитин",
+        "Янур Василиев"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1691,
+      "date": "2025-03-03",
+      "team": "Бюро",
+      "players": [
+        "Неувяда",
+        "Алексей Постум",
+        "Юлия Пономарёва",
+        "Михаил Поздняков",
+        "Александр Кузнецов",
+        "Ася Гречкина",
+        "Аглая"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1694,
+      "date": "2025-03-04",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Владислав Алексеевич ПЫЖЫКОВ",
+        "Лёша Омский",
+        "Георгий Аверин",
+        "Леша Щербак",
+        "Глеб Оптоволокнов"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1694,
+      "date": "2025-03-04",
+      "team": "Обормоты",
+      "players": [
+        "Леша Виниченко",
+        "Коля Киселев",
+        "Лили Недолили",
+        "Сережа Отрибург",
+        "Даниил Исаев",
+        "Поляк Сергеев",
+        "Лена Стрельникова"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1707,
+      "date": "2025-03-05",
+      "team": "Firma",
+      "players": [
+        "Егор Енотов",
+        "Андрей Андреев",
+        "Григорий Зингер",
+        "Та Репина",
+        "Максим Тесли",
+        "Андрей Некрасов",
+        "Кукса",
+        "Сергей Удальцов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1707,
+      "date": "2025-03-05",
+      "team": "Блины",
+      "players": [
+        "Глеб Дружинин",
+        "Лирика Камней",
+        "Ольга Надточий",
+        "Геннадий Булин",
+        "Роман Радин",
+        "Дамир Валеев",
+        "Алиса Грекова"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1714,
+      "date": "2025-03-06",
+      "team": "Шь",
+      "players": [
+        "Валера Жданова",
+        "Лена Шаталина",
+        "Яна Стреха",
+        "Марина Евсеева",
+        "Зарина Фок",
+        "Анастасия Гладкая",
+        "Дина Филатова"
+      ],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1714,
+      "date": "2025-03-06",
+      "team": "Апостроф",
+      "players": [
+        "Ася Врона",
+        "Ильинум Туманный",
+        "Аффи Дэвид",
+        "Тиана Веретенникова",
+        "Иван Ежов",
+        "Соня Герман",
+        "Валерьянка от Бессонницы"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1755,
+      "date": "2025-03-13",
+      "team": "Бюро",
+      "players": ["Аглая", "Неувяда", "Dеклатим", "Рэдмонд Фокс", "Юлия Пономарёва", "Александр Кузнецов"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1755,
+      "date": "2025-03-13",
+      "team": "Пыжыки",
+      "players": ["Мария Любичева", "Маша ХараКири", "Влад ПЫЖЫКОВ", "Леша Омский", "Леша Щербак", "Иван Альфа Крокс"],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1777,
+      "date": "2025-03-16",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Леша Виниченко",
+        "Коля Киселев",
+        "Даниил Исаев",
+        "Никита Северюхин",
+        "Поляк Сергеев",
+        "Витя Горелый"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1777,
+      "date": "2025-03-16",
+      "team": "Чумные",
+      "players": [
+        "Крис Аивер",
+        "Лиза Фиртич",
+        "Сеня Левоев",
+        "АсяСтихия",
+        "Артур Коньков",
+        "Твоя Ариша",
+        "Валерий Никитин"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1785,
+      "date": "2025-03-17",
+      "team": "Блины",
+      "players": [
+        "Ольга Надточий",
+        "Леон Стрелков",
+        "Павел Крузенштерн",
+        "Глеб Дружинин",
+        "Геннадий Булин",
+        "Лирика Камней",
+        "Дамир Валеев"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1785,
+      "date": "2025-03-17",
+      "team": "Шь",
+      "players": ["Валера Жданова", "Яна Стреха", "Вика Малькова", "Зарина Фок", "Яра Тодуркина", "Елена Шаталина"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1797,
+      "date": "2025-03-18",
+      "team": "Или",
+      "players": [
+        "Виктор Коншаков",
+        "Ольга Василевская",
+        "Алексей Комаревцев",
+        "Маша Иванова",
+        "Тата Купрейко",
+        "Эван Гард"
+      ],
+      "coach": "Анатроллий Карпов"
+    },
+    {
+      "msgId": 1797,
+      "date": "2025-03-18",
+      "team": "Firma",
+      "players": [
+        "Евгений Дьяконов",
+        "Егор Енотов",
+        "Дмитрий Адемин",
+        "Константин Иванов",
+        "Андрей Некрасов",
+        "Сергей Удальцов",
+        "Кукса"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1807,
+      "date": "2025-03-19",
+      "team": "Апостроф",
+      "players": [
+        "Соня Герман",
+        "Ильиниум Туманный",
+        "Мерида Веллингтон",
+        "Александра Амадея Ринк",
+        "Ситора Зима",
+        "Аффи Дэвид",
+        "Иван Ежов",
+        "Ася Врона"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1807,
+      "date": "2025-03-19",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Ефим Аксёнов", "Артемий Мороз", "Гавриил Пономарев"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1832,
+      "date": "2025-03-24",
+      "team": "Чумные",
+      "players": [
+        "Екатерина Спиридонова",
+        "Лиза Фиртич",
+        "Nel.",
+        "Валерий Никитин",
+        "Твоя Ариша",
+        "Янур Василиев",
+        "Саша Хаустова"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1832,
+      "date": "2025-03-24",
+      "team": "Вином",
+      "players": [
+        "Саша Нефертити",
+        "Карыч",
+        "Елена Шумара",
+        "Анна Подкорытова",
+        "Ксения Булак",
+        "Ксения Коржик",
+        "Клара Шох"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1838,
+      "date": "2025-03-25",
+      "team": "Пыжыки",
+      "players": [
+        "Денис Скобелев",
+        "Владислав ПЫЖЫКОВ",
+        "Леша Омский",
+        "Георгий Аверин",
+        "Влад Лебедев",
+        "Леша Щербак"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1838,
+      "date": "2025-03-25",
+      "team": "Или",
+      "players": [
+        "Маша Иванова",
+        "Анатроллий Карпов",
+        "Надежда Келарева",
+        "Алексей Комаревцев",
+        "Александр Крупинин",
+        "Фрэнк Силитра",
+        "Даниил Ха"
+      ],
+      "coach": "Виктор Коншаков"
+    },
+    {
+      "msgId": 1846,
+      "date": "2025-03-26",
+      "team": "Firma",
+      "players": [
+        "Сергей Удальцов",
+        "Андрей Некрасов",
+        "Егор Енотов",
+        "Дмитрий Адемин",
+        "Максим Тесли",
+        "Кукса",
+        "Евгений Дьяконов",
+        "Та Репина"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1846,
+      "date": "2025-03-26",
+      "team": "Бюро",
+      "players": ["Алексей Постум", "Юлия Пономарёва", "Неувяда", "Антон Кобец", "И'ним", "Ася Гречкина"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1862,
+      "date": "2025-03-31",
+      "team": "Апостроф",
+      "players": [
+        "Аффи Дэвид",
+        "Соня Герман",
+        "Александра Амадея Ринк",
+        "Ситора Зима",
+        "Ильиниум Туманный",
+        "Валерьянка от Бессонницы",
+        "Алёна Ё",
+        "Иван Ежов"
+      ],
+      "coach": "Фёдор Евлампиев"
+    },
+    {
+      "msgId": 1862,
+      "date": "2025-03-31",
+      "team": "Блины",
+      "players": [
+        "Влад П",
+        "Алиса Грекова",
+        "Леон Стрелков",
+        "Дамирочка Тихомиров",
+        "Глеб Дружинин",
+        "Лëха ЛК",
+        "Геннадий Булин"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1868,
+      "date": "2025-04-01",
+      "team": "Вином",
+      "players": ["Елена Шумара", "Клара Шох", "Ирина Розкина", "Анна Подкорытова", "Ксения Булак", "Елена Белова"],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1868,
+      "date": "2025-04-01",
+      "team": "Пыжыки",
+      "players": ["Денис Скобелев", "Маша ХараКири", "Влад ПЫЖЫКОВ", "Георгий Аверин", "Леша Щербак"],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1873,
+      "date": "2025-04-02",
+      "team": "Шь",
+      "players": ["Яна Стреха", "Вика Малькова", "Зарина Фок", "Валера Жданова", "Яра Тодуркина", "Нинка Дорогова"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1873,
+      "date": "2025-04-02",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Егор Енотов",
+        "Максим Тесли",
+        "Григорий Зингер",
+        "Та Репина",
+        "Андрей Некрасов",
+        "Сергей Удальцов",
+        "Евгений Дьяконов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1890,
+      "date": "2025-04-03",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Леша Виниченко",
+        "Дима Мозес",
+        "Даня Исаев",
+        "Сережа Поляк",
+        "Ваня Тремпель"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1890,
+      "date": "2025-04-03",
+      "team": "Бюро",
+      "players": [
+        "Неувяда",
+        "Женя Мухин",
+        "Ася Гречкина",
+        "Рэдмонд Фокс",
+        "Алексей Постум",
+        "Александр Кузнецов",
+        "Юлия Пономарёва"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1908,
+      "date": "2025-04-07",
+      "team": "Блины",
+      "players": [
+        "Лирика Камней",
+        "Глеб Дружинин",
+        "Алиса Грекова",
+        "Лана Авиор",
+        "Роман Радин",
+        "Ольга Надточий",
+        "Леон Стрелков"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 1908,
+      "date": "2025-04-07",
+      "team": "Бюро",
+      "players": [
+        "Ян Лён",
+        "Неувяда",
+        "Алексей Постум",
+        "Антон Кобец",
+        "Ася Гречкина",
+        "Михаил Поздняков",
+        "Рэдмонд Фокс"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 1915,
+      "date": "2025-04-08",
+      "team": "Или",
+      "players": ["Эван Гард", "Тата Купрейко", "Виктор Коншаков", "Алексей Комаревцев"],
+      "coach": "Ольга Василевская"
+    },
+    {
+      "msgId": 1915,
+      "date": "2025-04-08",
+      "team": "Чумные",
+      "players": ["Nel.", "Лиза Фиртич", "Валерий Никитин", "Саша Хаустова", "Янур Василиев", "Твоя Ариша"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1922,
+      "date": "2025-04-09",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Влад ПЫЖЫКОВ",
+        "Георгий Аверин",
+        "Влад Лебедев",
+        "Леша Щербак"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 1922,
+      "date": "2025-04-09",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Ханя Зингер", "Ефим Аксёнов", "Гавриил Пономарев"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1952,
+      "date": "2025-04-13",
+      "team": "Обормоты",
+      "players": [
+        "Дима Мозес",
+        "Ася Саганенко",
+        "Гриша Куница",
+        "Ваня Тремпель",
+        "Лили Недолили",
+        "Даня Исаев",
+        "Лена Стрельникова"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 1952,
+      "date": "2025-04-13",
+      "team": "Апостроф",
+      "players": [
+        "Ильиниум Туманный",
+        "Соня Герман",
+        "Алёна Ё",
+        "Валерьянка от Бессонницы",
+        "Том Торк",
+        "Александра Амадея Ринк"
+      ],
+      "coach": "Аффи Дэвид"
+    },
+    {
+      "msgId": 1967,
+      "date": "2025-04-14",
+      "team": "Чумные",
+      "players": ["Лиза Фиртич", "Крис Аивер", "Саша Хаустова", "АсяСтихия", "Екатерина Спиридонова", "Твоя Ариша"],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1967,
+      "date": "2025-04-14",
+      "team": "Шь",
+      "players": [
+        "Шейла Алекс",
+        "Яна Стреха",
+        "Алиса Александрова",
+        "Дилара Gard",
+        "Дина Филатова",
+        "Анастасия Гладкая",
+        "Валера Жданова"
+      ],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 1976,
+      "date": "2025-04-15",
+      "team": "Firma",
+      "players": [
+        "Кукса",
+        "Егор Енотов",
+        "Максим Тесли",
+        "Дмитрий Адемин",
+        "Константин Иванов",
+        "Григорий Зингер",
+        "Сергей Удальцов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 1976,
+      "date": "2025-04-15",
+      "team": "Вином",
+      "players": [
+        "Елена Белова",
+        "Ирина Розкина",
+        "Ксения Коржик",
+        "Клара Шох",
+        "Карыч",
+        "Папа Ильича",
+        "Елена Шумара",
+        "Ульяна Строгонова"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1988,
+      "date": "2025-04-16",
+      "team": "Ива",
+      "players": [
+        "Софья Левицкая",
+        "Мария Левеня",
+        "Ефим Аксёнов",
+        "Гавриил Пономарев",
+        "Ханя Зингер",
+        "Наста",
+        "Ева Гузова"
+      ],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 1988,
+      "date": "2025-04-16",
+      "team": "Или",
+      "players": [
+        "Эван Гард",
+        "Тата Купрейко",
+        "Виктор Коншаков",
+        "Илья Пономарёв",
+        "Наталья Ковалевская",
+        "Сергей Заботин"
+      ],
+      "coach": "Ольга Василевская"
+    },
+    {
+      "msgId": 1995,
+      "date": "2025-04-21",
+      "team": "Апостроф",
+      "players": [
+        "Алёна Ё",
+        "Соня Герман",
+        "Валерьянка от Бессонницы",
+        "Маша Грибанова",
+        "Ситора Зима",
+        "Ильиниум Туманный",
+        "Том Торк"
+      ],
+      "coach": "Аффи Дэвид"
+    },
+    {
+      "msgId": 1995,
+      "date": "2025-04-21",
+      "team": "Чумные",
+      "players": [
+        "Антон Трусов",
+        "Крис Аивер",
+        "Янур Василиев",
+        "Твоя Ариша",
+        "Саша Хаустова",
+        "Екатерина Спиридонова",
+        "Валерий Никитин"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 1999,
+      "date": "2025-04-22",
+      "team": "Вином",
+      "players": [
+        "Елена Белова",
+        "Ксения Коржик",
+        "Клара Шох",
+        "Карыч",
+        "Саша Нефертити",
+        "Папа Ильича",
+        "Ульяна Строгонова"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 1999,
+      "date": "2025-04-22",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Сережа Отрибург",
+        "Ваня Тремпель",
+        "Поляк Сергеев",
+        "Коля Киселев",
+        "Гриша Куница"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2003,
+      "date": "2025-04-23",
+      "team": "Шь",
+      "players": ["Валера Жданова", "Вика Малькова", "Яна Стреха", "Яра Тодуркина", "Дилара Gard"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 2003,
+      "date": "2025-04-23",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Ефим Аксёнов", "Гавриил Пономарев", "Ханя Зингер", "Наста"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 2021,
+      "date": "2025-04-28",
+      "team": "Чумные",
+      "players": [
+        "Стас Логиновский",
+        "Лиза Фиртич",
+        "Сеня Левоев",
+        "Янур Василиев",
+        "Ася Стихия",
+        "Nel.",
+        "Твоя Ариша"
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 2021,
+      "date": "2025-04-28",
+      "team": "Пыжыки",
+      "players": ["Мария Любичева", "Денис Скобелев", "Маша ХараКири", "Влад ПЫЖЫКОВ", "Леша Омский", "Георгий Аверин"],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 2024,
+      "date": "2025-04-29",
+      "team": "Бюро",
+      "players": ["Аглая", "Ян Лён", "Неувяда", "Алексей Постум", "Анатолий Падов"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 2024,
+      "date": "2025-04-29",
+      "team": "Шь",
+      "players": ["Яна Стреха", "Марина Евсеева", "Яра Тодуркина", "Алиса Александрова", "Валера Жданова"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 2030,
+      "date": "2025-04-30",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Гавриил Пономарев", "Наста", "Настасья Явцева"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 2030,
+      "date": "2025-04-30",
+      "team": "Блины",
+      "players": ["Роман Радин", "Глеб Дружинин", "Леон Стрелков", "Лирика Камней", "Дамир Валеев"],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2045,
+      "date": "2025-05-04",
+      "team": "Обормоты",
+      "players": [
+        "Даниил Исаев",
+        "Ваня Тремпель",
+        "Поляк Сергеев",
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Леша Виниченко",
+        "Коля Киселев"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2045,
+      "date": "2025-05-04",
+      "team": "Firma",
+      "players": [
+        "Дмитрий Адемин",
+        "Руслан Шишкин",
+        "Егор Енотов",
+        "Андрей Некрасов",
+        "Кукса",
+        "Максим Тесли",
+        "Сергей Удальцов",
+        "Та Репина"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 2050,
+      "date": "2025-05-05",
+      "team": "Блины",
+      "players": [
+        "Алиса Грекова",
+        "Дамир Валеев",
+        "Ольга Надточий",
+        "Глеб Дружинин",
+        "Лирика Камней",
+        "Вика Умка",
+        "Роман Радин"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2050,
+      "date": "2025-05-05",
+      "team": "Обормоты",
+      "players": [
+        "Даниил Исаев",
+        "Ваня Тремпель",
+        "Поляк Сергеев",
+        "Лена Стрельникова",
+        "Лили Недолили",
+        "Леша Виниченко",
+        "Коля Киселев"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2056,
+      "date": "2025-05-06",
+      "team": "Вином",
+      "players": ["Елена Шумара", "Ксения Булак", "Ксения Коржик", "Карыч", "Ульяна Строгонова"],
+      "coach": "Елена Белова"
+    },
+    {
+      "msgId": 2056,
+      "date": "2025-05-06",
+      "team": "Бюро",
+      "players": ["Ян Лён", "Неувяда", "Ася Гречкина", "Алексей Постум", "Анатолий Падов", "Михаил Поздняков"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 2063,
+      "date": "2025-05-07",
+      "team": "Шь",
+      "players": ["Зарина Фок", "Яра Тодуркина", "Валера Жданова", "Дилара Гард"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 2063,
+      "date": "2025-05-07",
+      "team": "Или",
+      "players": ["Эван Гард", "Тата Купрейко", "Виктор Коншаков", "Алексей Комаревцев", "Игорь Кабанов"],
+      "coach": "Ольга Василевская"
+    },
+    {
+      "msgId": 2078,
+      "date": "2025-05-12",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Георгий Аверин",
+        "Леша Щербак",
+        "Иван Альфа Крокс"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 2078,
+      "date": "2025-05-12",
+      "team": "Шь",
+      "players": ["Шейла Алекс", "Яра Тодуркина", "Вика Малькова", "Валера Жданова", "Ксения Гидранович"],
+      "coach": "Саша Коншакова"
+    },
+    {
+      "msgId": 2086,
+      "date": "2025-05-13",
+      "team": "Или",
+      "players": [
+        "Эван Гард",
+        "Тата Купрейко",
+        "Виктор Коншаков",
+        "Алексей Комаревцев",
+        "Игорь Кабанов",
+        "Илья Пономарёв",
+        "Маша Иванова"
+      ],
+      "coach": "Ольга Василевская"
+    },
+    {
+      "msgId": 2086,
+      "date": "2025-05-13",
+      "team": "Блины",
+      "players": [
+        "Ольга Надточий",
+        "Лана Авиор",
+        "Роман Радин",
+        "Леон Стрелков",
+        "Вика Умка",
+        "Дамир Валеев",
+        "Лирика Камней"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2088,
+      "date": "2025-05-14",
+      "team": "Вином",
+      "players": [
+        "Святослав Белковский",
+        "Ирина Розкина",
+        "Илья Лелеков",
+        "Ксения Коржик",
+        "Ульяна Строгонова",
+        "Клара Шох"
+      ],
+      "coach": "Елена Белова"
+    },
+    {
+      "msgId": 2088,
+      "date": "2025-05-14",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Ефим Аксёнов", "Гавриил Пономарев", "Ханя Зингер"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 2093,
+      "date": "2025-05-15",
+      "team": "Бюро",
+      "players": ["Неувяда", "Юлия Пономарёва", "Ян Лён", "Женя Мухин", "Александр Кузнецов", "Анатолий Падов"],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 2093,
+      "date": "2025-05-15",
+      "team": "Апостроф",
+      "players": [
+        "Алёна Ё",
+        "Соня Герман",
+        "Валерьянка от Бессонницы",
+        "Иван Ежов",
+        "Александра Амадея Ринк",
+        "Ильиниум Туманный",
+        "Том Торк",
+        "Аффи Дэвид"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2098,
+      "date": "2025-05-18",
+      "team": "Обормоты",
+      "players": [
+        "Агнесса",
+        "Дима Мозес",
+        "Лили Недолили",
+        "Лена Стрельникова",
+        "Поляк Сергеев",
+        "Гриша Куница",
+        "Ваня Тремпель",
+        "Леша Виниченко"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2098,
+      "date": "2025-05-18",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Николай Кириллов", "Наста", "Анастасия Лаврентьева", "Ханя Зингер"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 2102,
+      "date": "2025-05-19",
+      "team": "Апостроф",
+      "players": [
+        "Алёна Ё",
+        "Соня Герман",
+        "Валерьянка от Бессонницы",
+        "Иван Ежов",
+        "Александра Амадея Ринк",
+        "Ситора Зима",
+        "Том Торк"
+      ],
+      "coach": "Аффи Дэвид"
+    },
+    {
+      "msgId": 2102,
+      "date": "2025-05-19",
+      "team": "Вином",
+      "players": [
+        "Елена Белова",
+        "Ирина Розкина",
+        "Клара Шох",
+        "Саша Нефертити",
+        "Елена Шумара",
+        "Ксения Булак",
+        "Ульяна Строгонова"
+      ],
+      "coach": "Святослав Белковский"
+    },
+    {
+      "msgId": 2104,
+      "date": "2025-05-20",
+      "team": "Firma",
+      "players": [
+        "Кукса",
+        "Григорий Зингер",
+        "Дмитрий Адемин",
+        "Константин Иванов",
+        "Егор Енотов",
+        "Евгений Дьяконов",
+        "Сергей Удальцов"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 2104,
+      "date": "2025-05-20",
+      "team": "Пыжыки",
+      "players": [
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Влад ПЫЖЫКОВ",
+        "Леша Омский",
+        "Влад Лебедев",
+        "Георгий Аверин",
+        "Леша Щербак"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 2113,
+      "date": "2025-05-26",
+      "team": "Ива",
+      "players": ["Софья Левицкая", "Мария Левеня", "Гавриил Пономарев", "Ханя Зингер", "Николай Кириллов"],
+      "coach": "Григорий Битнев"
+    },
+    {
+      "msgId": 2113,
+      "date": "2025-05-26",
+      "team": "Firma",
+      "players": [
+        "Егор Енотов",
+        "Евгений Дьяконов",
+        "Григорий Зингер",
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Андрей Некрасов",
+        "Кукса"
+      ],
+      "coach": "Дарьюшка"
+    },
+    {
+      "msgId": 2316,
+      "date": "2025-09-16",
+      "team": "ПЗК",
+      "players": [
+        "Александра Наумова",
+        "Трахобард",
+        "Тим Фей",
+        "Егор Перминов",
+        "Александра Пронина",
+        "Александр Ковалев",
+        "Виолетта Акс",
+        "Михаил Серебряков",
+        "Евгений Евгеньевич",
+        "Кастро",
+        "Балу",
+        "Артемий Мороз",
+        "Маха",
+        "Кирилл Бетонов",
+        "Том Торк",
+        "Орфей",
+        "Артём Трофимов",
+        "Алёна Тагильцева",
+        "Светлый Меланхолик",
+        "Валерьянка Бессонова",
+        "Марат",
+        "Леша Виниченко",
+        "Лили Недолили"
+      ],
+      "coach": "Анатолий Падов"
+    },
+    {
+      "msgId": 2319,
+      "date": "2025-09-17",
+      "team": "Веселые ребята",
+      "players": [
+        "Вова Ант",
+        "Сережа Сталинвсердце",
+        "Мария Левеня",
+        "Настасья Ф",
+        "Глеб Оптоволокнов",
+        "Соня Дымшиц",
+        "Ксения Савельева"
+      ],
+      "coach": "Сережа Сталинвсердце"
+    },
+    {
+      "msgId": 2331,
+      "date": "2025-09-20",
+      "team": "Или",
+      "players": [
+        "Ольга Василевская",
+        "Анатроллий Карпов",
+        "Алексей Комаревцев",
+        "Виктор Коншаков",
+        "Evan Gard",
+        "Сергей Удальцов",
+        "Аффи Дэвид",
+        "Ника Савчук",
+        "Николай Сергеев",
+        "Саша Никонов",
+        "Алёна Мещерякова",
+        "Митя Пинкаре",
+        "Игорь Кабанов",
+        "Саша Коншакова"
+      ],
+      "coach": "Тата Купрейко"
+    },
+    {
+      "msgId": 2332,
+      "date": "2025-09-21",
+      "team": "1163",
+      "players": [
+        "Знаменосица Ира",
+        "Юлия Гейнрих",
+        "БЛУБЕРРИ",
+        "Ульяна Грев",
+        "Артем Палаш",
+        "Анастасия Дружинина",
+        "A. Pratense"
+      ],
+      "coach": "A. Pratense"
+    },
+    {
+      "msgId": 2336,
+      "date": "2025-09-22",
+      "team": "Пыжыки",
+      "players": [
+        "Данил Вачегин",
+        "Денис Скобелев",
+        "Маша ХараКири",
+        "Геометрический Кошмар",
+        "Леша Омский",
+        "Георгий Аверин",
+        "Влад Лебедев"
+      ],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 2336,
+      "date": "2025-09-22",
+      "team": "Блины",
+      "players": [
+        "Глеб Дружинин",
+        "Лирика Камней",
+        "Соня Герман",
+        "Рома Радин",
+        "Леон Стрелков",
+        "Яна Стреха",
+        "Дамир Валеев",
+        "Алексей Генеральский"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2340,
+      "date": "2025-09-23",
+      "team": "ПЗК",
+      "players": [
+        "Артемий Мороз",
+        "Михаил Серебряков",
+        "Марат",
+        "Алёна Ё",
+        "Александр Кастро",
+        "Александра Пронина",
+        "Виолетта Акс",
+        "öРФǝî"
+      ],
+      "coach": "Анатолий Падов"
+    },
+    {
+      "msgId": 2340,
+      "date": "2025-09-23",
+      "team": "Апостроф",
+      "players": [
+        "Ильиниум Туманный",
+        "Александра Амадея Ринк",
+        "Фёдор Вяткин",
+        "Надежда Регентова",
+        "Никита Назаров",
+        "Виктория Журавлёва",
+        "Илья Пономарёв"
+      ],
+      "coach": "Илья Пономарёв"
+    },
+    {
+      "msgId": 2360,
+      "date": "2025-09-24",
+      "team": "Обормоты",
+      "players": [
+        "Николай Киселев",
+        "Даниил Исаев",
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Пима Дышкин",
+        "Лена Стрельникова",
+        "Витя Горелый"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2360,
+      "date": "2025-09-24",
+      "team": "Веселые ребята",
+      "players": [
+        "Глеб Оптоволокнов",
+        "Настасья Федорова",
+        "Вова Ант",
+        "Апогея Блевокрутка",
+        "Мария Левеня",
+        "Женя Морозов"
+      ],
+      "coach": "Сережа Сталинвсердце"
+    },
+    {
+      "msgId": 2366,
+      "date": "2025-09-25",
+      "team": "Вином",
+      "players": [
+        "Ксения Коржик",
+        "Тиана Веретенникова",
+        "Дарья Цыплухина",
+        "Валерия Гусева",
+        "Принцесса Плакса",
+        "Ана Фелькер",
+        "Убийца Растений",
+        "S.L. Ingimarsson"
+      ],
+      "coach": "S.L. Ingimarsson"
+    },
+    {
+      "msgId": 2366,
+      "date": "2025-09-25",
+      "team": "Бугульма",
+      "players": [
+        "Иисус Бездомный",
+        "Евгений Отчим",
+        "Уля Исаева",
+        "Маня Батуро",
+        "Ев. Гений Лимонов",
+        "Рома Вольфрам"
+      ],
+      "coach": "Иисус Бездомный"
+    },
+    {
+      "msgId": 2379,
+      "date": "2025-09-28",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Александр Грим",
+        "Silence Breaker",
+        "Саша Сон",
+        "Константин Ополченов",
+        "Тихон Стулов",
+        "Анна Черепанова",
+        "Сон Серафима"
+      ],
+      "coach": "Богдан Тургайский"
+    },
+    {
+      "msgId": 2379,
+      "date": "2025-09-28",
+      "team": "Бюро",
+      "players": [
+        "Аглая",
+        "лисбет",
+        "Ян Лён",
+        "Ася Врона",
+        "Ася Гречкина",
+        "Леонид Лукьянов",
+        "Михаил Поздняков",
+        "неувяда"
+      ],
+      "coach": "неувяда"
+    },
+    {
+      "msgId": 2386,
+      "date": "2025-09-30",
+      "team": "Состав",
+      "players": [
+        "Лана Гиндина",
+        "Михаил Виргинский",
+        "Ада Дакар",
+        "Антон Нестеренко",
+        "Трикс",
+        "катарсис",
+        "Андрей Ходырев",
+        "ЯраR"
+      ],
+      "coach": "ЯраR"
+    },
+    {
+      "msgId": 2386,
+      "date": "2025-09-30",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Лиза Фиртич",
+        "Егор Сергеев",
+        "Крис Аивер",
+        "Саша Хаустова",
+        "Валерий Никитин",
+        "Стас ХП",
+        "Nel."
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 2395,
+      "date": "2025-10-01",
+      "team": "Винета",
+      "players": [
+        "Максим Клевер",
+        "Грустинист",
+        "Евгения Барская",
+        "Ирина Розкина",
+        "Lady Winter",
+        "Александр Орлов",
+        "Екатерина Альт",
+        "Парижанин"
+      ],
+      "coach": "Максим Клевер"
+    },
+    {
+      "msgId": 2395,
+      "date": "2025-10-01",
+      "team": "Или",
+      "players": [
+        "Сергей Удальцов",
+        "Аффи Дэвид",
+        "Саша Никонов",
+        "Evan Gard",
+        "Митя Пинкаре",
+        "Саша Коншакова",
+        "Алёна Мещерякова",
+        "Тата Купрейко"
+      ],
+      "coach": "Тата Купрейко"
+    },
+    {
+      "msgId": 2407,
+      "date": "2025-10-02",
+      "team": "Блины",
+      "players": [
+        "Ольга Надточий",
+        "Глеб Дружинин",
+        "Соня Герман",
+        "Яра Тодуркина",
+        "Дамир Валеев",
+        "Лирика Камней",
+        "Леон Стрелков",
+        "Алексей Генеральский"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2407,
+      "date": "2025-10-02",
+      "team": "Болт",
+      "players": [
+        "Артём Суслов",
+        "Виталий Маршак",
+        "Митя Цветков",
+        "Алина Шклярская",
+        "Аглая Соловьёва",
+        "Павел Крузенштерн",
+        "Барокко",
+        "Ардхона"
+      ],
+      "coach": "Артём Суслов"
+    },
+    {
+      "msgId": 2440,
+      "date": "2025-10-05",
+      "team": "Апостроф",
+      "players": [
+        "Илья Пономарёв",
+        "Ильиниум Туманный",
+        "Александра Амадея Ринк",
+        "Маша Грибанова",
+        "Фёдор Вяткин",
+        "Маргарита Чекунова",
+        "Надежда Регентова"
+      ],
+      "coach": "Илья Пономарёв"
+    },
+    {
+      "msgId": 2440,
+      "date": "2025-10-05",
+      "team": "Бюро",
+      "players": ["Аглая", "Ян Лён", "Ася Врона", "Дарьюшка", "Григорий Битнев", "Леонид Лукьянов", "Женя Мухин"],
+      "coach": "Женя Мухин"
+    },
+    {
+      "msgId": 2449,
+      "date": "2025-10-06",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Лиза Фиртич",
+        "Валерий Никитин",
+        "Твоя Ариша",
+        "Катерина Спиридонова",
+        "Янур Василиев",
+        "Стас ХП",
+        "Nel."
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 2449,
+      "date": "2025-10-06",
+      "team": "Веселые ребята",
+      "players": [
+        "Паола Готти",
+        "Ксения Савельева",
+        "Настасья Федорова",
+        "Мария Левеня",
+        "Вова Ант",
+        "Апогея",
+        "Глеб Оптоволокнов"
+      ],
+      "coach": "Сережа Сталинвсердце"
+    },
+    {
+      "msgId": 2461,
+      "date": "2025-10-07",
+      "team": "Вином",
+      "players": [
+        "Анастасия Гладкая",
+        "Тиана Веретенникова",
+        "Мария Александровна",
+        "Дарья Цыплухина",
+        "Анжела Лид",
+        "Принцесса Плакса",
+        "Дмитрий Адемин",
+        "S.L. Ingimarsson"
+      ],
+      "coach": "S.L. Ingimarsson"
+    },
+    {
+      "msgId": 2461,
+      "date": "2025-10-07",
+      "team": "Винета",
+      "players": [
+        "Максим Клевер",
+        "Грустинист",
+        "Евгения Барская",
+        "Ирина Розкина",
+        "Игорь Косенков",
+        "Александр Орлов",
+        "Екатерина Альт",
+        "Парижанин"
+      ],
+      "coach": "Максим Клевер"
+    },
+    {
+      "msgId": 2469,
+      "date": "2025-10-08",
+      "team": "Пыжыки",
+      "players": ["Данил Вачегин", "Леша Омский", "Влад Лебедев", "Леша Щербак", "Иван Альфа Крокс", "Боб"],
+      "coach": "Данил Вачегин"
+    },
+    {
+      "msgId": 2469,
+      "date": "2025-10-08",
+      "team": "1163",
+      "players": [
+        "Zvezdoz",
+        "Юлия Гейнрих",
+        "Ульяна Грев",
+        "Артём Палаш",
+        "Настя Достық",
+        "БЛУБЕРРИ",
+        "Знаменосица Ира",
+        "A. Pratense"
+      ],
+      "coach": "A. Pratense"
+    },
+    {
+      "msgId": 2474,
+      "date": "2025-10-09",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Александр Грим",
+        "Саша Сон",
+        "Константин Ополченов",
+        "Ultima Thule",
+        "Анна Черепанова",
+        "ФНПК",
+        "Silence Breaker"
+      ],
+      "coach": "Богдан Тургайский"
+    },
+    {
+      "msgId": 2474,
+      "date": "2025-10-09",
+      "team": "ПЗК",
+      "players": [
+        "Анатолий Падов",
+        "Иван Чуриков",
+        "Алена Тагильцева",
+        "Леша Виниченко",
+        "Егор Перминов",
+        "Виолетта Акс",
+        "Александра Наумова",
+        "Кирилл Бетонов"
+      ],
+      "coach": "Анатолий Падов"
+    },
+    {
+      "msgId": 2483,
+      "date": "2025-10-10",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Лиза Фиртич",
+        "Егор Сергеев",
+        "Стас ХП",
+        "Саша Хаустова",
+        "Егор Завадский",
+        "Твоя Ариша",
+        "Nel."
+      ],
+      "coach": "Алёна Ценина"
+    },
+    {
+      "msgId": 2483,
+      "date": "2025-10-10",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Николай Киселев",
+        "Никита Северюхин",
+        "Маша Штольц",
+        "Даниил Исаев",
+        "Витя Горелый"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2518,
+      "date": "2025-10-14",
+      "team": "Бугульма",
+      "players": ["Иисус Бездомный", "Маня Батуро", "Евгений Отчим", "Рома Вольфрам", "Ев.Гений Лимонов", "Камыш"],
+      "coach": "Иисус Бездомный"
+    },
+    {
+      "msgId": 2518,
+      "date": "2025-10-14",
+      "team": "Или",
+      "players": [
+        "Evan Gard",
+        "Сергей Удальцов",
+        "Саша Никонов",
+        "Ольга Василевская",
+        "Митя Пинкаре",
+        "Ника Савчук",
+        "Аффи Дэвид",
+        "Алексей Комаревцев"
+      ],
+      "coach": "Тата Купрейко"
+    },
+    {
+      "msgId": 2523,
+      "date": "2025-10-15",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Геометрический Кошмар",
+        "Настасья Васильевна",
+        "Александр Громов",
+        "Артем Фирсов",
+        "Глажка Рукавов",
+        "Взатяг",
+        "Денис Скобелев"
+      ],
+      "coach": "Денис Скобелев"
+    },
+    {
+      "msgId": 2523,
+      "date": "2025-10-15",
+      "team": "Болт",
+      "players": [
+        "Артём Суслов",
+        "Виталий Маршак",
+        "Митя Цветков",
+        "Тамара Розензафт",
+        "Аглая Соловьёва",
+        "Павел Крузенштерн",
+        "Барокко",
+        "Ардхона"
+      ],
+      "coach": "Артём Суслов"
+    },
+    {
+      "msgId": 2532,
+      "date": "2025-10-16",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Сон Серафима",
+        "Тихон Стулов",
+        "Анна Черепанова",
+        "Захар Хеликсов",
+        "Полина Till Death",
+        "Владимир Морозов",
+        "Мирослав Моветон"
+      ],
+      "coach": "Богдан Тургайский"
+    },
+    {
+      "msgId": 2532,
+      "date": "2025-10-16",
+      "team": "Апостроф",
+      "players": [
+        "Ильиниум Туманный",
+        "Александра Амадея Ринк",
+        "Маша Грибанова",
+        "Фёдор Вяткин",
+        "Маргарита Чекунова",
+        "Надежда Регентова",
+        "Антон Трусов",
+        "Илья Пономарёв"
+      ],
+      "coach": "Илья Пономарёв"
+    },
+    {
+      "msgId": 2550,
+      "date": "2025-10-19",
+      "team": "Состав",
+      "players": ["Михаил Виргинский", "Антон Нестеренко", "Лана Гиндина", "катарсис", "Андрей Ходырев", "ЯраR"],
+      "coach": "ЯраR"
+    },
+    {
+      "msgId": 2550,
+      "date": "2025-10-19",
+      "team": "Веселые ребята",
+      "players": ["Настасья Федорова", "Вова Ант", "Паола Готти", "Женя Морозов", "Глеб Колондо", "Ксения Савельева"],
+      "coach": "Сережа Сталинвсердце"
+    },
+    {
+      "msgId": 2554,
+      "date": "2025-10-20",
+      "team": "Вином",
+      "players": [
+        "Ксения Коржик",
+        "Карыч",
+        "Анастасия Гладкая",
+        "Мария Александровна",
+        "Дарья Цыплухина",
+        "Анжела Лид",
+        "Принцесса Плакса",
+        "S.L. Ingimarsson"
+      ],
+      "coach": "S.L. Ingimarsson"
+    },
+    {
+      "msgId": 2554,
+      "date": "2025-10-20",
+      "team": "Или",
+      "players": [
+        "Саша Никонов",
+        "Evan Gard",
+        "Ника Савчук",
+        "Аффи Дэвид",
+        "Игорь Кабанов",
+        "Сергей Удальцов",
+        "Алексей Комаревцев",
+        "Тата Купрейко"
+      ],
+      "coach": "Тата Купрейко"
+    },
+    {
+      "msgId": 2572,
+      "date": "2025-10-21",
+      "team": "Болт",
+      "players": [
+        "Артём Суслов",
+        "Виталий Маршак",
+        "Митя Цветков",
+        "Тамара Розензафт",
+        "Аглая Соловьёва",
+        "Павел Крузенштерн",
+        "Алина Шклярская",
+        "Ардхона"
+      ],
+      "coach": "Артём Суслов"
+    },
+    {
+      "msgId": 2572,
+      "date": "2025-10-21",
+      "team": "1163",
+      "players": [
+        "Аста Фа'лей",
+        "БЛУБЕРРИ",
+        "Ульяна Грев",
+        "Настя Достық",
+        "Артём Палаш",
+        "Юлия Гейнрих",
+        "Марк Швейник",
+        "A. Pratense"
+      ],
+      "coach": "A. Pratense"
+    },
+    {
+      "msgId": 2580,
+      "date": "2025-10-22",
+      "team": "Обормоты",
+      "players": [
+        "Витя Горелый",
+        "Гера Соболева",
+        "Никита Северюхин",
+        "Маша Штольц",
+        "Гриша Куница",
+        "Пима Дышкин",
+        "Сережа Отрибург",
+        "Софья Левицкая"
+      ],
+      "coach": "Витя Горелый"
+    },
+    {
+      "msgId": 2580,
+      "date": "2025-10-22",
+      "team": "Состав",
+      "players": ["Михаил Виргинский", "Антон Нестеренко", "Лана Гиндина", "катарсис", "Андрей Ходырев", "ЯраR"],
+      "coach": "ЯраR"
+    },
+    {
+      "msgId": 2582,
+      "date": "2025-10-23",
+      "team": "Бюро",
+      "players": [
+        "Неувяда",
+        "Женя Мухин",
+        "Кирилл Устинов",
+        "Леонид Лукьянов",
+        "Ася Гречкина",
+        "Ася Врона",
+        "Ян Лён",
+        "Никита Мотрий"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 2582,
+      "date": "2025-10-23",
+      "team": "ПЗК",
+      "players": [
+        "Иван Чуриков",
+        "Александра Пронина",
+        "Александр Ковалёв",
+        "Виолетта Акс",
+        "Марат",
+        "Марк Хант",
+        "Алёна Ё",
+        "Анатолий Падов"
+      ],
+      "coach": "Анатолий Падов"
+    },
+    {
+      "msgId": 2595,
+      "date": "2025-10-27",
+      "team": "Винета",
+      "players": [
+        "Максим Клевер",
+        "Евгения Барская",
+        "Грустинист",
+        "Дарья Олеговна",
+        "Игорь Косенков",
+        "Станислава Ч",
+        "Александр Орлов",
+        "Парижанин"
+      ],
+      "coach": "Максим Клевер"
+    },
+    {
+      "msgId": 2595,
+      "date": "2025-10-27",
+      "team": "Бугульма",
+      "players": ["Иисус Бездомный", "Евгений Отчим", "Манечка Батуро", "Уля Исаева", "Ща Минуту", "Фейри-полукровка"],
+      "coach": "Иисус Бездомный"
+    },
+    {
+      "msgId": 2599,
+      "date": "2025-10-28",
+      "team": "Блины",
+      "players": [
+        "Леон Стрелков",
+        "Глеб Дружинин",
+        "Алиса Грекова",
+        "Яна Стреха",
+        "Яра Тодуркина",
+        "Соня Герман",
+        "Рома Радин",
+        "Алексей Генеральский"
+      ],
+      "coach": "Алексей Генеральский"
+    },
+    {
+      "msgId": 2599,
+      "date": "2025-10-28",
+      "team": "1163",
+      "players": [
+        "A. Pratense",
+        "Знаменосица Ира",
+        "Аста Фа'Лей",
+        "БЛУБЕРРИ",
+        "Юлия Гейнрих",
+        "Артём Палаш",
+        "Марк Швейник",
+        "Настя Достык"
+      ],
+      "coach": "A. Pratense"
+    },
+    {
+      "msgId": 2693,
+      "date": "2025-12-04",
+      "team": "Веселые ребята",
+      "players": ["Мария Левеня", "Ксения Савельева", "Полина Коротыч", "Вэл", "Ксеноморф", "Паола Готье", "Глеб К"],
+      "coach": "Глеб Оптоволокнов"
+    },
+    {
+      "msgId": 2693,
+      "date": "2025-12-04",
+      "team": "Апостроф",
+      "players": [
+        "Ильиниум Туманный",
+        "Илья Пономарёв",
+        "Александра Амадея Ринк",
+        "Актеонка",
+        "Фридрих Фрайтаг",
+        "Маша Грибанова",
+        "Антон Трусов",
+        "Иван Ежов"
+      ],
+      "coach": "Илья Пономарёв"
+    },
+    {
+      "msgId": 2704,
+      "date": "2025-12-07",
+      "team": "Состав",
+      "players": ["Антон Нестеренко", "Лана Гиндина", "катарсис", "Пастор", "Лука", "ЯраR"],
+      "coach": "ЯраR"
+    },
+    {
+      "msgId": 2704,
+      "date": "2025-12-07",
+      "team": "Бюро",
+      "players": [
+        "Неувяда",
+        "Ян Лён",
+        "Кирилл Устинов",
+        "Григорий Битнев",
+        "Леонид Лукьянов",
+        "Михаил Поздняков",
+        "Никита Мотрий"
+      ],
+      "coach": "Никита Мотрий"
+    },
+    {
+      "msgId": 2708,
+      "date": "2025-12-08",
+      "team": "Бугульма",
+      "players": [
+        "Иисус Бездомный",
+        "Маня Батуро",
+        "Уля Исаева",
+        "Евгений Отчим",
+        "Ща Минуту",
+        "Фейри полукровка",
+        "Blueшка Блююшка"
+      ],
+      "coach": "Иисус Бездомный"
+    },
+    {
+      "msgId": 2708,
+      "date": "2025-12-08",
+      "team": "Пыжыки",
+      "players": [
+        "Денис Скобелев",
+        "Настасья Васильевна",
+        "Геометрический Кошмар",
+        "Мария Любичева",
+        "Маша ХараКири",
+        "Артем Фирсов",
+        "Глажка Рукавов",
+        "Фрэнк Селитра"
+      ],
+      "coach": "Денис Скобелев"
+    },
+    {
+      "msgId": 2718,
+      "date": "2025-12-09",
+      "team": "ПЗК",
+      "players": [
+        "Кирилл Бетонов",
+        "Анатолий Падов",
+        "Егор Перминов",
+        "Богдан Трахобард",
+        "Леша Виниченко",
+        "Виолетта Акс",
+        "Алёна Ё",
+        "Тим Фей"
+      ],
+      "coach": "Александра Пронина (и.о. тренера)"
+    },
+    {
+      "msgId": 2718,
+      "date": "2025-12-09",
+      "team": "Или",
+      "players": [
+        "Митя Пинкаре",
+        "Сергей Удальцов",
+        "Саша Никонов",
+        "Лена Шаталина",
+        "Саша Коншакова",
+        "Аффи Дэвид",
+        "Алёна Мещерякова"
+      ],
+      "coach": "Тата Купрейко (играющий тренер)"
+    },
+    {
+      "msgId": 2729,
+      "date": "2025-12-11",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Александр Грим",
+        "Полина Till Death",
+        "Анна Черепанова",
+        "Сон Серафима",
+        "Тихон Стулов",
+        "Владимир Морозов",
+        "Саша Сон"
+      ],
+      "coach": "Богдан Тургайский (играющий тренер)"
+    },
+    {
+      "msgId": 2729,
+      "date": "2025-12-11",
+      "team": "Вином",
+      "players": [
+        "Ксения Коржик",
+        "Ксения Булак",
+        "Саша Нефертити",
+        "Мария Александровна",
+        "Дарья Цыплухина",
+        "Ив",
+        "Дмитрий Адемин"
+      ],
+      "coach": "S.L. Ingimarsson (и.т.)"
+    },
+    {
+      "msgId": 2740,
+      "date": "2025-12-14",
+      "team": "Бюро",
+      "players": ["неувяда", "Ян Лён", "лисбет", "Дарьюшка", "Григорий Битнев"],
+      "coach": "Никита Мотрий (играющий тренер)"
+    },
+    {
+      "msgId": 2740,
+      "date": "2025-12-14",
+      "team": "Болт",
+      "players": [
+        "Рома Гонза",
+        "Анастасия Фандорина",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Иван Смирнов",
+        "Николай Якимчук"
+      ],
+      "coach": "Артём Суслов (играющий тренер)"
+    },
+    {
+      "msgId": 2747,
+      "date": "2025-12-15",
+      "team": "Обормоты",
+      "players": [
+        "Арсений Неверов",
+        "Лена Стрельникова",
+        "Поляк Сергеев",
+        "Маша Штольц",
+        "Гриша Куница",
+        "Николай Киселев",
+        "Софья Левицкая"
+      ],
+      "coach": "Витя Горелый (играющий тренер)"
+    },
+    {
+      "msgId": 2747,
+      "date": "2025-12-15",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Егор Сергеев",
+        "Лиза Фиртич",
+        "Стас ХП",
+        "Артур Коньков",
+        "Крис Аивер",
+        "Янур Василиев",
+        "Егор Завадский"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2757,
+      "date": "2025-12-16",
+      "team": "Состав",
+      "players": ["Лана Гиндина", "Катарсис", "Лука", "Андрей Ходырев", "Брюн", "Сирин", "ЯраR"],
+      "coach": "Антон Нестеренко (и.о. тренера)"
+    },
+    {
+      "msgId": 2757,
+      "date": "2025-12-16",
+      "team": "Винета",
+      "players": [
+        "Максим Клевер",
+        "Евгения Барская",
+        "Игорь Косенков",
+        "Станислава Ч",
+        "Александр Орлов",
+        "Парижанин",
+        "Никита"
+      ],
+      "coach": "Екатерина Альт (и.о. тренера)"
+    },
+    {
+      "msgId": 2761,
+      "date": "2025-12-17",
+      "team": "Бугульма",
+      "players": [
+        "Маня Батуро",
+        "Евгений Отчим",
+        "Фейри-полукровка",
+        "Ща Минуту",
+        "Blueшка Блююшка",
+        "Вася Островская"
+      ],
+      "coach": "Иисус Бездомный (И.Т.)"
+    },
+    {
+      "msgId": 2761,
+      "date": "2025-12-17",
+      "team": "Апостроф",
+      "players": [
+        "Фридрих Фрайтаг",
+        "Актеонка",
+        "Надежда Регентова",
+        "Илья Пономарев",
+        "Шо Опять (приглашенный гость)",
+        "Спросите Попозже (приглашенный гость)",
+        "Маша Иванова (приглашенный гость)"
+      ],
+      "coach": "Федя Вяткин (и.о. тренера, играющий)"
+    },
+    {
+      "msgId": 2766,
+      "date": "2025-12-18",
+      "team": "1163",
+      "players": ["БЛУБЕРРИ", "Zvezdoz", "Ульяна Грев", "Марк Швейник", "Артём Палаш", "Аста Фа'Лей", "A. Pratense"],
+      "coach": "Знаменосица Ира (и.о. тренера)"
+    },
+    {
+      "msgId": 2766,
+      "date": "2025-12-18",
+      "team": "ПЗК",
+      "players": ["Алёна Ё", "Акс", "Трофимов", "Безобразный", "Наяда", "Марат", "Наумова"],
+      "coach": "Артемий Мороз (и.о. тренера)"
+    },
+    {
+      "msgId": 2787,
+      "date": "2025-12-22",
+      "team": "Болт",
+      "players": [
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Павел Крузенштерн",
+        "Николай Якимчук",
+        "Тамара Розензафт",
+        "Барокко"
+      ],
+      "coach": "Артём Суслов (играющий тренер)"
+    },
+    {
+      "msgId": 2787,
+      "date": "2025-12-22",
+      "team": "Пыжыки",
+      "players": [
+        "Мария Любичева",
+        "Фрэнк Селитра",
+        "Маша ХараКири",
+        "Артем Фирсов",
+        "Геометрический Кошмар",
+        "Глажка Рукавов",
+        "Взатяг"
+      ],
+      "coach": "Капитан Скобелев Денис"
+    },
+    {
+      "msgId": 2793,
+      "date": "2025-12-23",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Александр Грим",
+        "ФНПК",
+        "Анна Черепанова",
+        "Сон Серафима",
+        "Тихон Стулов",
+        "Silence Breaker",
+        "Константин Ополченов"
+      ],
+      "coach": "Богдан Тургайский (играющий тренер)"
+    },
+    {
+      "msgId": 2793,
+      "date": "2025-12-23",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Николай Киселев",
+        "Пима Дышкин",
+        "Сережа Отрибург",
+        "Анна Гриних"
+      ],
+      "coach": "Витя Горелый (играющий тренер)"
+    },
+    {
+      "msgId": 2798,
+      "date": "2025-12-24",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Лиза Фиртич",
+        "Егор Сергеев",
+        "Катерина Спиридонова",
+        "Янур Василиев",
+        "Саша Хаустова",
+        "Стас ХП",
+        "Твоя Ариша"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2798,
+      "date": "2025-12-24",
+      "team": "Вином",
+      "players": [
+        "Карыч",
+        "Анастасия Гладкая",
+        "Дарья Цыплухина",
+        "Валерия Гусева",
+        "Ана Фелькер",
+        "Убийца Растений",
+        "Дмитрий Адемин",
+        "Shadow stranger"
+      ],
+      "coach": "S.L. Ingimarsson (не играющий)"
+    },
+    {
+      "msgId": 2809,
+      "date": "2025-12-25",
+      "team": "Веселые ребята",
+      "players": [
+        "Вова Ант a.k.a. Вэл",
+        "Ксения Савельева",
+        "Глеб Оптоволокнов",
+        "Мария Левеня",
+        "Паола Готти",
+        "Настасья",
+        "А.Д. Чече"
+      ],
+      "coach": "Сергей Сталинвсердце (играющий тренер)"
+    },
+    {
+      "msgId": 2809,
+      "date": "2025-12-25",
+      "team": "Винета",
+      "players": ["Евгения Барская", "Игорь Косенков", "Екатерина Альт", "Парижанин", "Proletarius Ordinarius"],
+      "coach": "Максим Клевер (и. тренер)"
+    },
+    {
+      "msgId": 2818,
+      "date": "2025-12-28",
+      "team": "Блины",
+      "players": [
+        "Яна Стреха",
+        "Соня Герман",
+        "Леон Стрелков",
+        "Алиса Грекова",
+        "Дамир Валеев",
+        "Роман Радин",
+        "Влад П"
+      ],
+      "coach": "Алексей Генеральский - ТИГР"
+    },
+    {
+      "msgId": 2818,
+      "date": "2025-12-28",
+      "team": "Или",
+      "players": [
+        "Елена Шаталина",
+        "Evan Gard",
+        "Алексей Комаревцев",
+        "Сергей Удальцов",
+        "Саша Никонов",
+        "Николай Сергеев",
+        "Аффи Дэвид"
+      ],
+      "coach": "Тата Купрейко (играющий тренер)"
+    },
+    {
+      "msgId": 2873,
+      "date": "2026-01-12",
+      "team": "Бюро",
+      "players": ["Неувяда", "Ян Лён", "Аглая", "Ася Гречкина", "Григорий Битнев"],
+      "coach": "Никита Мотрий (играющий тренер)"
+    },
+    {
+      "msgId": 2873,
+      "date": "2026-01-12",
+      "team": "Веселые ребята",
+      "players": [
+        "Ксения Савельева",
+        "Настя Федорова",
+        "Человек-павук",
+        "Серёжа Сталинвсердце",
+        "Маша Левеня",
+        "Глеб Кокошкин"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2885,
+      "date": "2026-01-13",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Маша Штольц",
+        "Ваня Тремпель",
+        "Иван Симак",
+        "Николай Киселев",
+        "Софья Левицкая"
+      ],
+      "coach": "Витя Горелый (неигр. тренер)"
+    },
+    {
+      "msgId": 2885,
+      "date": "2026-01-13",
+      "team": "Блины",
+      "players": [
+        "Роман Радин",
+        "Ольга Надточий",
+        "Дамир Валеев",
+        "Леон Стрелков",
+        "Лирика Камней",
+        "Яра Тодуркина",
+        "Соня Герман"
+      ],
+      "coach": "Алексей Генеральский - ТИГР"
+    },
+    {
+      "msgId": 2888,
+      "date": "2026-01-14",
+      "team": "Винета",
+      "players": [
+        "Евгения Барская",
+        "Игорь Косенков",
+        "Proletarius Ordinarius",
+        "Парижанин",
+        "Станислава Ч",
+        "Александр Орлов"
+      ],
+      "coach": "Максим Клевер (и. тренер)"
+    },
+    {
+      "msgId": 2888,
+      "date": "2026-01-14",
+      "team": "Бугульма",
+      "players": ["Ща минуту", "Маня Батуро", "Камыш", "Мария Ковры", "Вася Островская", "Евгений Отчим"],
+      "coach": "Иисус Бездомный (Т.ИГР)"
+    },
+    {
+      "msgId": 2898,
+      "date": "2026-01-15",
+      "team": "ПЗК",
+      "players": [
+        "Саша Безобразный",
+        "Лили Недолили",
+        "Виолетта Акс",
+        "Забыла повеситься",
+        "Иван Чуриков",
+        "Марк Хант",
+        "Алёна Ё"
+      ],
+      "coach": "Анатолий Падов (и.т.)"
+    },
+    {
+      "msgId": 2898,
+      "date": "2026-01-15",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Константин Ополченов",
+        "Анна Черепанова",
+        "Сон Серафима",
+        "Саша Сон",
+        "Александр Грим",
+        "Тихон Стулов"
+      ],
+      "coach": "Богдан Тургайский (тренер играющий)"
+    },
+    {
+      "msgId": 2902,
+      "date": "2026-01-16",
+      "team": "1163",
+      "players": ["Тина Велес", "Чёртапалох", "Zvezdoz", "Ульяна Грев", "Артём Палаш", "Марк Швейник", "БЛУБЕРРИ"],
+      "coach": "Знаменосица Ира (и.о. тренера)"
+    },
+    {
+      "msgId": 2902,
+      "date": "2026-01-16",
+      "team": "Вином",
+      "players": [
+        "Ксения Булак",
+        "Мария Александровна",
+        "Валерия Гусева",
+        "Анжела Лид",
+        "~слипи_мерц",
+        "Ана Фелькер",
+        "Дмитрий Адемин"
+      ],
+      "coach": "S.L. Ingimarsson (и.т.)"
+    },
+    {
+      "msgId": 2910,
+      "date": "2026-01-18",
+      "team": "Пыжыки",
+      "players": [
+        "Маша Любичева",
+        "Артем Фирсов",
+        "Геометрический Кошмар",
+        "Настасья Васильевна",
+        "Леша Омский",
+        "Фрэнк Селитра",
+        "Глажка Рукавов"
+      ],
+      "coach": "Капитан Денис Скобелев"
+    },
+    {
+      "msgId": 2910,
+      "date": "2026-01-18",
+      "team": "Апостроф",
+      "players": [
+        "Саша Соломина",
+        "Антон Трусов",
+        "Ильиниум Туманный",
+        "Александра Амадея Ринк",
+        "Фёдор Вяткин",
+        "Актеонка",
+        "Надежда Регентова"
+      ],
+      "coach": "Илья Пономарёв (играющий тренер)"
+    },
+    {
+      "msgId": 2916,
+      "date": "2026-01-19",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Лиза Фиртич",
+        "Егор Сергеев",
+        "Крис Аивер",
+        "Стас ХП",
+        "Янур Василиев",
+        "Саша Хаустова",
+        "Nel."
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2916,
+      "date": "2026-01-19",
+      "team": "Или",
+      "players": [
+        "Елена Шаталина",
+        "Сергей Удальцов",
+        "Саша Никонов",
+        "Алексей Комаревцев",
+        "Влад Феникс Леонтьев",
+        "Ольга Василевская",
+        "Николай Сергеев",
+        "Ника Савчук"
+      ],
+      "coach": "Тата Купрейко (неиграющий тренер)"
+    },
+    {
+      "msgId": 2921,
+      "date": "2026-01-20",
+      "team": "Болт",
+      "players": [
+        "Александр Сокуров",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Иван Смирнов",
+        "Павел Крузенштерн",
+        "Барокко",
+        "Митя Цветков"
+      ],
+      "coach": "Артём Суслов (играющий тренер)"
+    },
+    {
+      "msgId": 2921,
+      "date": "2026-01-20",
+      "team": "Состав",
+      "players": [
+        "ЯR",
+        "Катарсис",
+        "Пастор Трэйн",
+        "Лука",
+        "Михаил Виргинский",
+        "Лана Гиндина",
+        "Антон Нестеренко",
+        "Катя Абстракт Вуман"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2938,
+      "date": "2026-01-21",
+      "team": "Бюро",
+      "players": ["Ян Лён", "Дарьюшка", "Ася Гречкина", "Леонид Лукьянов", "Михаил Поздняков", "Александр Кузнецов"],
+      "coach": "Никита Мотрий (играющий тренер)"
+    },
+    {
+      "msgId": 2938,
+      "date": "2026-01-21",
+      "team": "Бугульма",
+      "players": ["Ща Минуту", "Blueшка Блююшка", "Фейри-полукровка", "Мария Ковры", "Маня Батуро"],
+      "coach": "Иисус Бездомный (Т.ИГР)"
+    },
+    {
+      "msgId": 2945,
+      "date": "2026-01-22",
+      "team": "ПЗК",
+      "players": [
+        "Виолетта Акс",
+        "Александра Пронина",
+        "Лёша Виниченко",
+        "Лили Недолили",
+        "Иван Чуриков",
+        "Марат",
+        "Саша Безобразный"
+      ],
+      "coach": "Алёна Ё (играющий и.о. тренера)"
+    },
+    {
+      "msgId": 2945,
+      "date": "2026-01-22",
+      "team": "Чумные",
+      "players": ["Лиза Фиртич", "Егор Сергеев", "Валерий Никитин", "Крис Аивер", "Стас ХП", "Егор Завадский", "Nel."],
+      "coach": "Алёна Ценина (играющий тренер)"
+    },
+    {
+      "msgId": 2949,
+      "date": "2026-01-23",
+      "team": "1163",
+      "players": ["Zvezdoz", "Тина Велес", "Аста Фа'лей", "БЛУБЕРРИ", "Чёртапалох", "Марк Швейник", "A. Pratense"],
+      "coach": "Знаменосица Ира (и.о. тренера)"
+    },
+    {
+      "msgId": 2949,
+      "date": "2026-01-23",
+      "team": "Блины",
+      "players": [
+        "Дамир Валеев",
+        "Глеб Дружинин",
+        "Лирика Камней",
+        "Соня Герман",
+        "Яна Стреха",
+        "Роман Радин",
+        "Леон Стрелков"
+      ],
+      "coach": "Алексей Генеральский - ТИГР"
+    },
+    {
+      "msgId": 2965,
+      "date": "2026-01-25",
+      "team": "Винета",
+      "players": ["Евгения Барская", "Игорь Косенков", "Proletarius Ordinarius", "Александр Орлов", "Парижанин"],
+      "coach": "Максим Клевер (и. тренер)"
+    },
+    {
+      "msgId": 2965,
+      "date": "2026-01-25",
+      "team": "Пыжыки",
+      "players": [
+        "Маша Любичева",
+        "Артем Фирсов",
+        "Геометрический Кошмар",
+        "Настасья Васильевна",
+        "Маша ХараКири",
+        "Глажка Рукавов",
+        "Наста"
+      ],
+      "coach": "Капитан Денис Скобелев"
+    },
+    {
+      "msgId": 2970,
+      "date": "2026-01-26",
+      "team": "Или",
+      "players": [
+        "Николай Сергеев",
+        "Влад Феникс Леонтьев",
+        "Саша Никонов",
+        "Алексей Комаревцев",
+        "Сергей Удальцов",
+        "Ника Савчук",
+        "Саша Коншакова",
+        "Ольга Василевская"
+      ],
+      "coach": "Тата Купрейко (не игр. тр.)"
+    },
+    {
+      "msgId": 2970,
+      "date": "2026-01-26",
+      "team": "1163",
+      "players": ["Марк Швейник", "Знаменосица Ира", "Тина Велес", "Артём Палаш", "Zvezdoz", "A. Pratense"],
+      "coach": "Аста Фа'лей (и.о. тренера)"
+    },
+    {
+      "msgId": 2986,
+      "date": "2026-01-27",
+      "team": "Болт",
+      "players": [
+        "Кристина-Мария Ушакова",
+        "Мария Тимоновская",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Павел Крузенштерн",
+        "Человек прошедший ад",
+        "Николай Сальников"
+      ],
+      "coach": "Артём Суслов (и.т.)"
+    },
+    {
+      "msgId": 2986,
+      "date": "2026-01-27",
+      "team": "Веселые ребята",
+      "players": [
+        "Серёжа Ramones",
+        "Глеб Ramones",
+        "Маша Ramones",
+        "Настасья Ramones",
+        "Ксения Ramones",
+        "Дракоша Ramones",
+        "Таймич Ramones",
+        "Женя Ramones"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-01-28",
+      "team": "Обормоты",
+      "players": [
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Маша Штольц",
+        "Ваня Тремпель",
+        "Гриша Куница",
+        "Пима Дышкин",
+        "Анна Гриних"
+      ],
+      "coach": "Николай Киселев (зам.игр.тренера)"
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-01-28",
+      "team": "Вином",
+      "players": [
+        "Ксения Коржик",
+        "Ксения Булак",
+        "Карыч",
+        "Анастасия Гладкая",
+        "Дарья Цыплухина",
+        "Принцесса Плакса",
+        "Дмитрий Адемин"
+      ],
+      "coach": "S.L. Ingimarsson (и.т.)"
+    },
+    {
+      "msgId": 2997,
+      "date": "2026-01-29",
+      "team": "Состав",
+      "players": [
+        "ЯR",
+        "Катарсис",
+        "Лука",
+        "Михаил Виргинский",
+        "Лана Гиндина",
+        "Антон Нестеренко",
+        "Катя Абстракт Вуман"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 2997,
+      "date": "2026-01-29",
+      "team": "Апостроф",
+      "players": [
+        "Леди Александра Амадея Ринк",
+        "Маша Грибанова",
+        "Ильиниум Туманный",
+        "Иван Ежов",
+        "Актеонка",
+        "Антон Трусов",
+        "Надежда Регентова"
+      ],
+      "coach": "Илья Пономарёв (играющий тренер)"
+    },
+    {
+      "msgId": 3015,
+      "date": "2026-02-01",
+      "team": "Блины",
+      "players": [
+        "Ольга Надточий",
+        "Вика Умка",
+        "Соня Герман",
+        "Яра Тодуркина",
+        "Дамир Валеев",
+        "Глеб Дружинин",
+        "Лирика Камней"
+      ],
+      "coach": "Алексей Генеральский - ТИГР"
+    },
+    {
+      "msgId": 3015,
+      "date": "2026-02-01",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Тихон Стулов",
+        "Сон Серафима",
+        "Иван Петров",
+        "Саша Сон",
+        "Константин Ополченов"
+      ],
+      "coach": "Александр Грим (и.о. тр.)"
+    },
+    {
+      "msgId": 3036,
+      "date": "2026-02-02",
+      "team": "Болт",
+      "players": [
+        "Алексей Вишня",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Павел Крузенштерн",
+        "Кристина-Мария Ушакова",
+        "Человек прошедший ад",
+        "Николай Сальников"
+      ],
+      "coach": "Артём Суслов (и.т.)"
+    },
+    {
+      "msgId": 3036,
+      "date": "2026-02-02",
+      "team": "Бугульма",
+      "players": ["Ща Минуту", "Маня Батуро", "Фейри-полукровка", "Blueшка Блююшка", "Мария Ковры"],
+      "coach": "Иисус Бездомный (Т.ИГР)"
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-02-03",
+      "team": "1163",
+      "players": ["Марк Швейник", "БЛУБЕРРИ", "Тина Велес", "Ульяна Грев", "Zvezdoz", "Аста Фа'Лей", "Знаменосица Ира"],
+      "coach": "A. Pratense (тр. игр.)"
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-02-03",
+      "team": "Чумные",
+      "players": [
+        "Лиза Фиртич",
+        "Егор Сергеев",
+        "Валерий Никитин",
+        "Катерина Спиридонова",
+        "Стас ХП",
+        "Саша Хаустова",
+        "Nel."
+      ],
+      "coach": "Алёна Ценина (играющий тренер)"
+    },
+    {
+      "msgId": 3207,
+      "date": "2026-02-22",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Александр Грим",
+        "Саша Сон",
+        "Тихон Стулов",
+        "ФНПК",
+        "Захар Хеликсов",
+        "Константин Ополченов"
+      ],
+      "coach": "Богдан Тургайский (играющий тренер)"
+    },
+    {
+      "msgId": 3207,
+      "date": "2026-02-22",
+      "team": "1163",
+      "players": ["A. Pratense", "Zvezdoz", "Ульяна Грев", "БЛУБЕРРИ", "Чёртапалох", "Марк Швейник", "Аста Фа'лей"],
+      "coach": "Аста Фа'лей (ИО тренера)"
+    },
+    {
+      "msgId": 3216,
+      "date": "2026-02-24",
+      "team": "Винета",
+      "players": [
+        "Евгения Барская",
+        "Александр Орлов",
+        "Станислава Ч",
+        "Парижанин",
+        "Proletarius Ordinarius",
+        "Игорь Косенков",
+        "Екатерина Альт"
+      ],
+      "coach": "Максим Клевер"
+    },
+    {
+      "msgId": 3216,
+      "date": "2026-02-24",
+      "team": "Болт",
+      "players": [
+        "Артём Суслов",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Павел Крузенштерн",
+        "Кристина-Мария Ушакова",
+        "Пётр",
+        "Барокко",
+        "Николай Сальников"
+      ],
+      "coach": "Артём Суслов (ио тренера)"
+    },
+    {
+      "msgId": 3219,
+      "date": "2026-02-25",
+      "team": "ПЗК",
+      "players": [
+        "Святослав Думский",
+        "Марк Хант",
+        "Лили Недолили",
+        "Иван Веркут",
+        "Адская Вэл",
+        "Наяда",
+        "Алёна Тагильцева",
+        "Иван Чуриков"
+      ],
+      "coach": "Анатолий Падов (не играющий тренер)"
+    },
+    {
+      "msgId": 3219,
+      "date": "2026-02-25",
+      "team": "Вином",
+      "players": [
+        "Анастасия Гладкая",
+        "Дарья Цыплухина",
+        "Валерия Гусева",
+        "Принцесса Плакса",
+        "Вероника Хант",
+        "Shadow Stranger",
+        "S.L. Ingimarsson"
+      ],
+      "coach": "S.L. Ingimarsson (и.т.)"
+    },
+    {
+      "msgId": 3239,
+      "date": "2026-03-01",
+      "team": "Бугульма",
+      "players": ["Щa Иуда", "Мария в Ковер", "Кикуто", "Героиновая лужа", "Евгений Отчим", "Ира не помню"],
+      "coach": "Щa Иуда (Ио тренера)"
+    },
+    {
+      "msgId": 3239,
+      "date": "2026-03-01",
+      "team": "Состав",
+      "players": [
+        "Пастор Трэйн",
+        "Катарсис",
+        "Лука",
+        "Антон Нестеренко",
+        "Диссонанс",
+        "Михаил Виргинский",
+        "Катя Абстракт Вуман",
+        "Ярасть"
+      ],
+      "coach": null
+    },
+    {
+      "msgId": 3243,
+      "date": "2026-03-02",
+      "team": "Обормоты",
+      "players": [
+        "Лена Стрельникова",
+        "Поляк Сергеев",
+        "Маша Штольц",
+        "Ваня Тремпель",
+        "Пима Дышкин",
+        "Софья Левицкая",
+        "Сережа Отрибург",
+        "Витя Горелый"
+      ],
+      "coach": "Витя Горелый (игр. тренер)"
+    },
+    {
+      "msgId": 3243,
+      "date": "2026-03-02",
+      "team": "1163",
+      "players": ["Знаменосица Ира", "Zvezdoz", "Ульяна Грев", "БЛУБЕРРИ", "Чёртапалох", "Марк Швейник", "Аста фа Лей"],
+      "coach": "Аста фа Лей (играющий тренер)"
+    },
+    {
+      "msgId": 3252,
+      "date": "2026-03-03",
+      "team": "Болт",
+      "players": [
+        "Артём Суслов",
+        "Виталий Маршак",
+        "Аглая Соловьева",
+        "Павел Крузенштерн",
+        "Пётр",
+        "Сергей Харитонов",
+        "Барокко",
+        "Алина Шклярская"
+      ],
+      "coach": "Виталий Маршак (ио ит)"
+    },
+    {
+      "msgId": 3252,
+      "date": "2026-03-03",
+      "team": "Апостроф",
+      "players": [
+        "Леди Александра Амадея Ринк",
+        "Маша Грибанова",
+        "Надежда Регентова",
+        "Фёдор Вяткин",
+        "Маргарита Чекунова",
+        "Фридрих Фрайтаг",
+        "Антон Трусов",
+        "Тоня Галактионова"
+      ],
+      "coach": "Леди Александра Амадея Ринк (и.о. тренера)"
+    },
+    {
+      "msgId": 3259,
+      "date": "2026-03-04",
+      "team": "Вином",
+      "players": [
+        "Ксения Коржик",
+        "Саша Нефертити",
+        "Карыч",
+        "Дарья Цыплухина",
+        "Вероника Хант",
+        "Ана Фелькер",
+        "S.L. Ingimarsson"
+      ],
+      "coach": "S.L. Ingimarsson (и.т.)"
+    },
+    {
+      "msgId": 3259,
+      "date": "2026-03-04",
+      "team": "Или",
+      "players": [
+        "Оля Василевская",
+        "Митя Пинкаре",
+        "Влад Феникс Леонтьев",
+        "Алексей Комаревцев",
+        "Ника Савчук",
+        "Сергей Удальцов",
+        "Тата Купрейко"
+      ],
+      "coach": "Тата Купрейко (игртр)"
+    },
+    {
+      "msgId": 3264,
+      "date": "2026-03-05",
+      "team": "Бюро",
+      "players": [
+        "И'ним",
+        "Неувяда",
+        "Ася Врона",
+        "Кирилл Устинов",
+        "Григорий Битнев",
+        "Леонид Лукьянов",
+        "Александр Кузнецов",
+        "Никита Мотрий"
+      ],
+      "coach": "Никита Мотрий (играющий тренер)"
+    },
+    {
+      "msgId": 3264,
+      "date": "2026-03-05",
+      "team": "Винета",
+      "players": [
+        "Евгения Барская",
+        "Игорь Косенков",
+        "Proletarius Ordinarius",
+        "Парижанин",
+        "Екатерина Альт",
+        "Александр Орлов"
+      ],
+      "coach": "Максим Клевер (и. тренер)"
+    },
+    {
+      "msgId": 3291,
+      "date": "2026-03-09",
+      "team": "Менестрели подземелья",
+      "players": [
+        "Богдан Тургайский",
+        "Саша Сон",
+        "Тихон Стулов",
+        "Александр Грим",
+        "Silence Breaker",
+        "Сон Серафима",
+        "Константин Ополченов",
+        "Анна Черепанова"
+      ],
+      "coach": "Богдан Тургайский (играющий тренер)"
+    },
+    {
+      "msgId": 3291,
+      "date": "2026-03-09",
+      "team": "Чумные",
+      "players": [
+        "Алёна Ценина",
+        "Егор Сергеев",
+        "Крис Аивер",
+        "Валерий Никитин",
+        "Твоя Ариша",
+        "Егор Завадский",
+        "Саша Хаустова",
+        "Янур Василиев"
+      ],
+      "coach": "Алёна Ценина (играющий тренер)"
+    },
+    {
+      "msgId": 3305,
+      "date": "2026-03-10",
+      "team": "Веселые ребята",
+      "players": ["Белова Елена", "Бобаен", "Мария Левеня", "Дарья Бородина", "Товарищ Курьёз", "Baji Tempero"],
+      "coach": "Белова Елена (играющий тренер)"
+    },
+    {
+      "msgId": 3305,
+      "date": "2026-03-10",
+      "team": "Пыжыки",
+      "players": [
+        "Геометрический Кошмар",
+        "Артем Фирсов",
+        "Леша Омский",
+        "Александр Громов",
+        "Настасья Васильевна",
+        "Фрэнк Селитра",
+        "Наста",
+        "Мария Любичева"
+      ],
+      "coach": "Денис Скобелев (не играющий)"
+    },
+    {
+      "msgId": 3309,
+      "date": "2026-03-11",
+      "team": "ПЗК",
+      "players": [
+        "Марат Мигунов",
+        "Саша Безобразный",
+        "Наяда",
+        "Анатолий Падов",
+        "Виолетта Акс",
+        "Алёна Ё",
+        "Маха",
+        "Лили Недолили"
+      ],
+      "coach": "Анатолий Падов (игр. тр)"
+    },
+    {
+      "msgId": 3309,
+      "date": "2026-03-11",
+      "team": "Блины",
+      "players": [
+        "Яра Тодуркина",
+        "Леон Стрелков",
+        "Алиса Грекова",
+        "Дамир Валеев",
+        "Лирика Камней",
+        "Глеб Дружинин",
+        "Ольга Надточий",
+        "Алексей Генеральский"
+      ],
+      "coach": "Алексей Генеральский (ТИГР)"
+    },
+    {
+      "msgId": 3320,
+      "date": "2026-03-18",
+      "team": "ПЗК",
+      "players": [
+        "Леша Виниченко",
+        "Алена ё",
+        "Анатолий Падов",
+        "Саша Пронина",
+        "Артемий Мороз",
+        "Лили Недолили",
+        "Марат",
+        "Адская Вэл"
+      ],
+      "coach": "Лили Недолили (и.о. тренера)"
+    },
+    {
+      "msgId": 3320,
+      "date": "2026-03-18",
+      "team": "Обормоты",
+      "players": [
+        "Даниил Исаев",
+        "Лена Стрельникова",
+        "Егор Енотов",
+        "Поляк Сергеев",
+        "Маша Штольц",
+        "Николай Киселев",
+        "Пима Дышкин",
+        "Витя Горелый"
+      ],
+      "coach": "Витя Горелый (игр. тренер)"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Витя Горелый",
+      "team": "Обормоты",
+      "role": "играющий тренер",
+      "bio": "Поэт, тренер команды Обормоты. Стадион — бар «Обормоты»."
+    },
+    {
+      "name": "Александр Машанов",
+      "team": "Пыжыки",
+      "role": "играющий тренер (до 18.09.2024)",
+      "bio": "Актер, поэт. Самая яркая и революционная фигура нынешнего слэм-движения. Тренер команды Пыжыки до конфликта на матче с Фирмой 17.09.2024."
+    },
+    {
+      "name": "Данил Вачегин",
+      "team": "Пыжыки",
+      "role": "играющий тренер (с 18.09.2024)",
+      "bio": "Не очень крутой перформер. К пятому десятку бросил всё. Стал писать стихи и петь песни."
+    },
+    {
+      "name": "Федор Евлампиев",
+      "team": "Апостроф",
+      "role": "играющий тренер",
+      "bio": "Философ, поэт и оптимист, пытающийся найти свет даже в самой неприглядной тьме и надежду в самом глубоком отчаянии."
+    },
+    {
+      "name": "Зарина Фок",
+      "team": "Шь",
+      "role": "играющий тренер",
+      "bio": "Татарская беглянка, занимается кино как режиссёрка. Соосновательница поэтической мастерской «КРУЖОК»."
+    },
+    {
+      "name": "Алёна Ценина",
+      "team": "Чумные",
+      "role": "играющий тренер",
+      "bio": "Резидент Литературной гостиной. Организатор команды Чумные."
+    },
+    {
+      "name": "Никита Мотрий",
+      "team": "Бюро",
+      "role": "играющий тренер",
+      "bio": "Циничный идеалист, религиозный материалист, любитель диалектики двойных доньев и ценитель святой простоты. Играющий тренер лучшей команды поэтов в мультивселенной."
+    },
+    {
+      "name": "Дима Мозес",
+      "team": "Софийка",
+      "role": "играющий тренер",
+      "bio": "Тренер команды Софийка."
+    },
+    {
+      "name": "Дарьюшка",
+      "team": "Firma",
+      "role": "неиграющий тренер",
+      "bio": "Один из авторов и создателей агрегатора андеграундных поэтических событий Петербурга «Стихи! Сегодня! Здесь!». Организатор поэтических вечеров. Фотограф, гедонист и любитель прекрасного. Также — член Оргкомитета Кубка."
+    },
+    {
+      "name": "Виктор Непомнящих",
+      "team": "Блины",
+      "role": "играющий тренер",
+      "bio": "Собрал команду Блины из поэтов-одиночек."
+    },
+    {
+      "name": "Виктор Коншаков",
+      "team": "Или",
+      "role": "играющий тренер",
+      "bio": "Юрист в обычной жизни. Соосновательница поэтического Союза ИЛИ."
+    },
+    {
+      "name": "Твоя Ариша",
+      "team": "Чумные",
+      "role": "игрок",
+      "bio": "Поэтесса, журналистка, художница, резидентка Литературной гостиной, создательница проекта KOMA, частая гостья петербургских слэмов, любительница феминитивов."
+    },
+    {
+      "name": "Максим Тесли",
+      "team": "Firma",
+      "role": "игрок",
+      "bio": "Просто хороший парень. Красивый и щедрый. В людях ценит доброту и порядочность."
+    },
+    {
+      "name": "Лена Стрельникова",
+      "team": "Обормоты",
+      "role": "игрок",
+      "bio": "Поэтесса, барное быдло, птица-секретарь, редакторка и авторка ЖЫ."
+    },
+    {
+      "name": "Веничка Сорокин",
+      "team": "Шь",
+      "role": "игрок",
+      "bio": "бимбо-бейби. Люблю бамбл с маракуйей, стиль Пэрис Хилтон в нулевых и богатых мужчин."
+    },
+    {
+      "name": "Роман Радин",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Родился и вырос в Минске. 7 лет живёт в Петербурге, 4-й год читает стихи в барах. Финалист Bang Bang Poetry в феврале 2022. Ценит метафоры и яркие формы."
+    },
+    {
+      "name": "Мария Любичева",
+      "team": "Пыжыки",
+      "role": "игрок",
+      "bio": "То поэт, то художник, то музыкант. Сердце — пламенный мотор, характер нордический."
+    },
+    {
+      "name": "Агнесса",
+      "team": "Обормоты",
+      "role": "игрок",
+      "bio": "Два имени, две фамилии, четыре неоконченных высших образования. Старший редактор журнала «Процесс» и победительница московских и петербургских слэмов. Обучалась в Литературном институте."
+    },
+    {
+      "name": "Алексей Генеральский",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Автор телеграм-канала «АГ» и сообщества ВК «НЕС_тихи», публиковался на портале «Полутона» и в журнале «Процесс»."
+    },
+    {
+      "name": "Тата Купрейко",
+      "team": "Или",
+      "role": "игрок",
+      "bio": "Девятнадцатый год пишет стихи о тревоге или о детстве. Первая ракетка анжабемана."
+    },
+    {
+      "name": "Дмитрий Адемин",
+      "team": "Firma",
+      "role": "игрок",
+      "bio": "Пишет, читает, иногда поёт. Любит море и Гиннесс, не любит скуку и грибы."
+    },
+    {
+      "name": "Антон Трусов",
+      "team": "Чумные",
+      "role": "игрок",
+      "bio": "Автор из Новосибирска, резидент литературной гостиной, создатель проектов «Гуманитарное Новообразование», «Врозлив Тошеч»."
+    },
+    {
+      "name": "Саша Коншакова",
+      "team": "Шь",
+      "role": "игрок",
+      "bio": "Искусствоведьма. Соосновательница поэтического Союза «ИЛИ». Финалистка двух Чемпионатов им. Маяковского. Любит феминитивы."
+    },
+    {
+      "name": "Клара Шох",
+      "team": "Болт",
+      "role": "игрок",
+      "bio": "Женщина трудной судьбы. Её можно найти там, где щи и грязная посуда."
+    },
+    {
+      "name": "Валера Жданова",
+      "team": "Шь",
+      "role": "игрок",
+      "bio": "«дыр бул щыл» не ведаю, что ещё. Графоманка во всю спину."
+    },
+    {
+      "name": "Ян Лён",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": "Явлён всем сразу и сразу всем. Ян Велимирович Лён. Хочет прийти на чемпионат с канистрой и выиграть его посмертно."
+    },
+    {
+      "name": "Лили Недолили",
+      "team": "Обормоты",
+      "role": "игрок",
+      "bio": "Матёрые почти детские стихи про грех на грани смеха."
+    },
+    {
+      "name": "Аффи Дэвид",
+      "team": "Апостроф",
+      "role": "игрок",
+      "bio": "Любит играть со словами, раскладывать их на части. Стремится привнести в свои строки частичку волшебства."
+    },
+    {
+      "name": "Егор Труфанов",
+      "team": "Чумные",
+      "role": "игрок",
+      "bio": "Поэт десятник, эмигрант 17 года, вернулся в 2024 году, чтобы ходить на поэтические вечера и поддерживать молодых поэтов."
+    },
+    {
+      "name": "Денис Скобелев",
+      "team": "Пыжыки",
+      "role": "игрок и ведущий",
+      "bio": "Поэт с Алтайского края, из Барнаула. Также выступает ведущим матчей Кубка. Любит болтать и быть добрячком."
+    },
+    {
+      "name": "Ирина Розкина",
+      "team": "Болт",
+      "role": "игрок",
+      "bio": "Новичок в читке стихов на открытых микрофонах Петербурга. Первый сборник «Начнем с нежности закончим как обычно». В основном пишет про боль и смерть."
+    },
+    {
+      "name": "Виктор Халяпин",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Поэт, музыкант, организатор творческих культурных мероприятий «Вертеп. Все Свои». Финалист Чемпионата поэзии им. Маяковского 2016. Полуфиналист премии «Филатов Фест» 2023. Финалист Московского слэма 2023."
+    },
+    {
+      "name": "Маша Грибанова",
+      "team": "Апостроф",
+      "role": "игрок",
+      "bio": "Учится на биологическом факультете. Главная тема — поиск тепла, нежности и красоты в человеческой повседневности."
+    },
+    {
+      "name": "Анатроллий Карпов",
+      "team": "Или",
+      "role": "игрок",
+      "bio": "Поэт, претворяющий принцип «Если можешь не писать – не пиши». В 2016 году выиграл отборочный раунд Русского слэма у Наташи Романовой."
+    },
+    {
+      "name": "Арсений Ярмадов",
+      "team": "Софийка",
+      "role": "игрок",
+      "bio": "Поэт, историк, журналист. Читал лекции по истории литературы XX века в книжном магазине «Листва»."
+    },
+    {
+      "name": "Константин Иванов",
+      "team": "Firma",
+      "role": "игрок",
+      "bio": "В прошлом прыгал и орал в панк группе. Не любит баклажаны, группу Тараканы и ЧСВ в людях."
+    },
+    {
+      "name": "Алексей Постум",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": "Поэт. Обещает найти оголённый нерв и заставить тебя замёрзнуть — но тебе понравится."
+    },
+    {
+      "name": "Катерина Спиридонова",
+      "team": "Болт",
+      "role": "играющий тренер",
+      "bio": "Филолог, поэт, художник-иллюстратор, агент по недвижимости, репетитор по французскому."
+    },
+    {
+      "name": "Леша Юдин",
+      "team": "Софийка",
+      "role": "игрок",
+      "bio": "Поэт, владелец бильярдного клуба «Кручёных»."
+    },
+    {
+      "name": "Леша Виниченко",
+      "team": "Обормоты",
+      "role": "игрок",
+      "bio": "Поэт, вокалист группы ПРОЧЬ, душка-парень-рубаха, любит водку, барное быдло."
+    },
+    {
+      "name": "Руслан Шишкин",
+      "team": "Firma",
+      "role": "игрок (легионер из Москвы)",
+      "bio": "Поэт, переводчик. Бывший поэт театра Петра Фоменко и лидер поэтической тусовки «Вертеп». Любит Radiohead и ДДТ. Родился в Белгороде."
+    },
+    {
+      "name": "Петр Горячий Камень",
+      "team": "Софийка",
+      "role": "игрок",
+      "bio": "Поэт, музыкант, медиа-агент. Автор 11 книг, вёл видеоподкаст «Колокол ума» (2021-2022), сотрудничал с медиа-холдингом Эксперт."
+    },
+    {
+      "name": "Лиза Фиртич",
+      "team": "Чумные",
+      "role": "игрок",
+      "bio": "С 2016 года успела много где повыступать, переиграть и уничтожить. Резидент Литературной гостиной. Также — дизайнер афиш Кубка."
+    },
+    {
+      "name": "Евгения Удальцова",
+      "team": "Или",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Надежда Келарева",
+      "team": "Или",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Ксения Булак",
+      "team": "Вином",
+      "role": "игрок",
+      "bio": "Из Красноярска. Стихи пишу только по необходимости: внешней и внутренней. Вдохновляют: растения и умершие талантливые люди. Умею писать сонеты."
+    },
+    {
+      "name": "Джулиано ди Капуа",
+      "team": "Пыжыки",
+      "role": "игрок",
+      "bio": "Режиссёр. Старый хрыч. Задолбал всех. Прокрастинирует в гараже."
+    },
+    {
+      "name": "Екатерина Спиридонова",
+      "team": "Чумные",
+      "role": "игрок (трансфер из ВИНОМ)",
+      "bio": "Трансфер из ВИНОМ во 2-м круге"
+    },
+    {
+      "name": "Михаил Поздняков",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": "Легионер из Петрозаводска"
+    },
+    {
+      "name": "Алёша Щербак",
+      "team": "Пыжыки",
+      "role": "игрок",
+      "bio": "Мастер слова, убийца битов, покоритель слогослагательных вершин, Легенда Сникерс Урбании, чемпион v1battle, лауреат премии студенческая весна"
+    },
+    {
+      "name": "Артемий Мороз",
+      "team": "Ива",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Григорий Зингер",
+      "team": "Firma",
+      "role": "игрок",
+      "bio": "Поэт, музыкант-мультиинструменталист, аранжировщик, переводчик и преподаватель"
+    },
+    {
+      "name": "Александр Кузнецов",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Арсений Левоев",
+      "team": "Чумные",
+      "role": "игрок",
+      "bio": "Меланхоличная панк-поэзия с окраин Петрозаводска. Резидент Карельского филиала «литературная гостиная», участник 5РЛС. Любит социальную справедливость и тайский бокс. Гипераллергик."
+    },
+    {
+      "name": "Ася Гречкина",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Алина Грамма",
+      "team": "Бюро",
+      "role": "игрок",
+      "bio": null
+    },
+    {
+      "name": "Дина Филатова",
+      "team": "Шь",
+      "role": "игрок",
+      "bio": "Сердце разделено между Петрозаводском и Петербургом, сознание между социальной сферой и искусством, душа между большой водой, лесом и городом. Пишет и оценивает заявки на гранты, пишет и читает стихи, поёт, играет на сцене."
+    },
+    {
+      "name": "Ольга Василевская",
+      "team": "Или",
+      "role": "играющий тренер",
+      "bio": "Стала новым тренером ИЛИ после матча 08.04.2025"
+    },
+    {
+      "name": "Тиана Веретенникова",
+      "team": "Вином",
+      "role": "игрок",
+      "bio": "Трансфер из Апострофа (сезон 1) в Вином (сезон 2)"
+    },
+    {
+      "name": "Сергей Удальцов",
+      "team": "Или",
+      "role": "игрок",
+      "bio": "Трансфер из Фирмы (сезон 1) в ИЛИ (сезон 2)"
+    },
+    {
+      "name": "Илья Пономарёв",
+      "team": "Апостроф",
+      "role": "тренер",
+      "bio": "Трансфер из ИЛИ (игрок) в Апостроф (тренер)"
+    },
+    {
+      "name": "Анатолий Падов",
+      "team": "ПЗК",
+      "role": "тренер",
+      "bio": "Трансфер из Бюро (игрок/тренер) в ПЗК (тренер)"
+    },
+    {
+      "name": "Яра Тодуркина",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Трансфер из Шь в Блины"
+    },
+    {
+      "name": "Яна Стреха",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Трансфер из Шь в Блины"
+    },
+    {
+      "name": "Соня Герман",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Трансфер из Апострофа в Блины"
+    },
+    {
+      "name": "Павел Крузенштерн",
+      "team": "Болт",
+      "role": "игрок",
+      "bio": "Трансфер из Блинов в Болт"
+    },
+    {
+      "name": "Григорий Битнев",
+      "team": "Бюро",
+      "role": "тренер",
+      "bio": "Трансфер из Ивы (тренер) в Бюро"
+    },
+    {
+      "name": "Сережа Сталинвсердце",
+      "team": "Веселые ребята",
+      "role": "тренер",
+      "bio": "Трансфер из Пыжыков (игрок) в Весёлые ребята (тренер)"
+    },
+    {
+      "name": "Егор Енотов",
+      "team": "Обормоты",
+      "role": "игрок",
+      "bio": "Трансфер из Фирмы в Обормоты"
+    },
+    {
+      "name": "Дамир Валеев",
+      "team": "Блины",
+      "role": "игрок",
+      "bio": "Победитель Суперфинала Петербургского Слэма, путевка на Всероссийский Слэм"
+    }
+  ],
+  "venues": [
+    {
+      "name": "Апартаменты №159",
+      "address": "Большая Конюшенная ул., 9 (во дворе за бистро Saviv)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Союз Печатников",
+      "address": "ул. Союза Печатников, 17",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Обормоты",
+      "address": "ул. Некрасова, 22",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Шуба",
+      "address": "ул. Некрасова, 34 (цоколь)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Фонтанка-69",
+      "address": "Фонтанка 69 (вход со стороны Апраксина переулка)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Кручёных",
+      "address": "Конногвардейский бульвар, 6",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Птичья личность",
+      "address": "ул. Рубинштейна, 28Д, 2 этаж",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Вчера и навсегда",
+      "address": "Казанская ул., 11",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Fish Fabrique",
+      "address": "Лиговский пр., 53 (вход через флигель в арке)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Прорубь",
+      "address": "Английский пр., 26",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Трюмо",
+      "address": "Караванная ул., 5",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Popravka Bar",
+      "address": "Лиговский пр., 50Ц",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Сидрерия",
+      "address": "Моховая",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Art Hall",
+      "address": "Сытнинская ул., д. 14",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Глагол",
+      "address": "Большой проспект П.С., 81",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Фогель",
+      "address": "Фонтанка 97",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Глиттер",
+      "address": "Боровая ул.",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Do Wine Bar",
+      "address": "ул. Восстания 24А, второй двор, пространство Флигель",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "В ладах",
+      "address": "Социалистическая ул. 21, территория апарт-отеля YE'S",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Заря",
+      "address": "ул. Маяковского, 40",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Бездна",
+      "address": "ул. Некрасова, 36",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Чертог",
+      "address": "Волковский проспект 12 (м. Волковская, напротив кладбища, вход со двора)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Lost Weekend Bar",
+      "address": "4-я Советская улица, 8",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Green Room",
+      "address": "Лиговский 74, лофт проект «Этажи», 3 этаж",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Quokka",
+      "address": "Большая Пушкарская 50",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Усы на Пене",
+      "address": "Лиговский проспект 50, корпус 16",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Синий Пушкин",
+      "address": "ул. Жуковского, д. 3",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Linza Bar",
+      "address": "Кадетская линия, 5к2Д",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Póems cafe",
+      "address": "Колокольная ул., 1",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Last bar",
+      "address": "Разъезжая 27",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Базара нет!",
+      "address": "Рубинштейна 21",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Богема",
+      "address": "Рубинштейна 28д (первый этаж)",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "PVZ",
+      "address": "Мельничная 4В, малый зал с баром",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Кассета",
+      "address": "Лиговский 50 лит У",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "OM Studio Кузня",
+      "address": "8-я линия В.О., 83 к2 лит В",
+      "city": "Санкт-Петербург"
+    },
+    {
+      "name": "Наше место",
+      "address": "Наб Обводного канала 134-136-138, территория Красного треугольника, корпус 27, 2й этаж",
+      "city": "Санкт-Петербург"
+    }
+  ],
+  "teams": [
+    {
+      "msgId": 1797,
+      "name": "Firma",
+      "homeVenue": "Fish Fabrique Nouvelle",
+      "coach": "Дарьюшка",
+      "telegramUrl": null
+    },
+    {
+      "msgId": 1785,
+      "name": "Шь",
+      "homeVenue": null,
+      "coach": "Саша Коншакова",
+      "telegramUrl": null
+    },
+    {
+      "msgId": 2268,
+      "name": "Чумные",
+      "homeVenue": "«Глагол»",
+      "coach": "Ценина",
+      "telegramUrl": "https://t.me/plague_poets"
+    },
+    {
+      "msgId": 2268,
+      "name": "Обормоты",
+      "homeVenue": "Бар «Фогель»",
+      "coach": "Горелый",
+      "telegramUrl": "https://t.me/obormotyspB"
+    },
+    {
+      "msgId": 2331,
+      "name": "Или",
+      "homeVenue": "ArtHall, Сытнинская ул., д. 14",
+      "coach": "Тата Купрейко",
+      "telegramUrl": "https://t.me/poerty_clash"
+    },
+    {
+      "msgId": 3353,
+      "name": "Пыжыки",
+      "homeVenue": "Фонтанка-69",
+      "coach": "Вачегин",
+      "telegramUrl": "https://t.me/gopikiks",
+      "note": "трансфер: пришли Принцесса Плакса и Дарьюшка"
+    },
+    {
+      "msgId": 2264,
+      "name": "Блины",
+      "homeVenue": "Арт-бар «В Ладах»",
+      "coach": "Алексей Генеральский",
+      "telegramUrl": "https://t.me/blin_hot"
+    },
+    {
+      "msgId": 75,
+      "name": "Софийка",
+      "homeVenue": "Кручёных",
+      "coach": "Дима Мозес"
+    },
+    {
+      "msgId": 2268,
+      "name": "Болт",
+      "homeVenue": "Прорубь",
+      "coach": "Суслов",
+      "note": "В октябре 2024 переименована в Вином после конфликта с Артёмом Сусловым",
+      "telegramUrl": "https://t.me/bolshaja_poezija"
+    },
+    {
+      "msgId": 3353,
+      "name": "Вином",
+      "homeVenue": "popravka.bar",
+      "coach": "Белковский",
+      "telegramUrl": "https://t.me/VINOM_poety",
+      "note": "трансфер: в команду пришли Ирина Розкина, Фейри Полукровка, Елена Коптилкина"
+    },
+    {
+      "msgId": 3353,
+      "name": "Апостроф",
+      "homeVenue": "Бар «В ладах»",
+      "coach": "Пономарёв",
+      "note": "трансфер: вернулся Аффи Дэвид, пришёл ИВ",
+      "telegramUrl": "https://t.me/club_apostr"
+    },
+    {
+      "msgId": 2268,
+      "name": "Бюро",
+      "homeVenue": "Glitter",
+      "coach": "Мотрий",
+      "telegramUrl": "https://t.me/BuroSlamPoetry"
+    },
+    {
+      "msgId": 1807,
+      "name": "Ива",
+      "homeVenue": "Do Wine Bar",
+      "coach": "Григорий Битнев",
+      "telegramUrl": "https://t.me/iva_event_spb"
+    },
+    {
+      "msgId": 1494,
+      "name": "РАСПИСАНИЕ",
+      "homeVenue": null,
+      "coach": null,
+      "telegramUrl": null
+    },
+    {
+      "msgId": 2316,
+      "name": "ПЗК",
+      "coach": "Анатолий Падов",
+      "telegramUrl": "https://t.me/firstzoomers",
+      "homeVenue": "Бар Заря"
+    },
+    {
+      "msgId": 2268,
+      "name": "Менестрели подземелья",
+      "coach": "Тургайский",
+      "telegramUrl": "https://t.me/dungeonsminstrels"
+    },
+    {
+      "msgId": 2268,
+      "name": "Винета",
+      "coach": "Клевер",
+      "telegramUrl": "https://t.me/vineta_poetry"
+    },
+    {
+      "msgId": 2268,
+      "name": "Веселые ребята",
+      "coach": "Сережа Сталинвсердце",
+      "telegramUrl": "https://t.me/rebyatyshkiKBS"
+    },
+    {
+      "msgId": 3241,
+      "name": "Бугульма",
+      "coach": "Иисус Бездомный",
+      "telegramUrl": "https://t.me/BugylmaKBSSLAAAAAY",
+      "note": "дисквалифицирована из второго сезона после матча 01.03.2026"
+    },
+    {
+      "msgId": 3353,
+      "name": "Состав",
+      "coach": "Ярослава Чуйкова",
+      "telegramUrl": "https://t.me/traingredients",
+      "note": "трансфер: пришли Карыч и Сергей Адамский"
+    },
+    {
+      "msgId": 2332,
+      "name": "1163",
+      "coach": "A. Pratense",
+      "telegramUrl": "https://t.me/Notre1163",
+      "homeVenue": "Усы на Пене (Лиговский пр. 50/16)"
+    }
+  ]
+}

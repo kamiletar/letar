@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: archetest-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: archetest
+      POSTGRES_USER: archetest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - archetest-data:/var/lib/postgresql/data
+    ports:
+      - '5441:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U archetest -d archetest']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - premium-network
+
+  app:
+    image: archetest:latest
+    container_name: archetest-app
+    restart: unless-stopped
+    ports:
+      - '3012:3012'
+    env_file:
+      - .env.docker
+    environment:
+      DATABASE_URL: postgresql://archetest:${POSTGRES_PASSWORD}@archetest-db:5432/archetest
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - premium-network
+
+volumes:
+  archetest-data:
+
+networks:
+  premium-network:
+    external: true

@@ -1,0 +1,81 @@
+---
+title: DataGrid
+description: Editable data grid with sorting, filtering, pagination, and inline editing powered by TanStack Table
+---
+
+## Overview
+
+`Form.Field.DataGrid` is for editing large datasets (100+ rows) with sorting, filtering, and pagination. Unlike `TableEditor` (which is for creating new rows), DataGrid is for editing existing data.
+
+## When to Use
+
+| Scenario | Component |
+|----------|-----------|
+| Enter 5-50 new rows (order items) | `Form.Field.TableEditor` |
+| Edit/browse 100+ existing rows | `Form.Field.DataGrid` |
+
+## Basic Usage
+
+```tsx
+<Form initialValue={{ employees: data }} onSubmit={save}>
+  <Form.Field.DataGrid
+    name="employees"
+    columns={[
+      { name: 'name', editable: true, filter: 'text' },
+      { name: 'salary', editable: true, align: 'right' },
+      { name: 'department', editable: true, filter: 'text' },
+    ]}
+    pageSize={20}
+    rowSelection
+  />
+  <Form.Button.Submit>Save</Form.Button.Submit>
+</Form>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `name` | `string` | required | Array field name |
+| `columns` | `DataGridColumnDef[]` | required | Column definitions |
+| `pageSize` | `number` | `20` | Rows per page |
+| `rowSelection` | `boolean` | `false` | Enable checkbox selection |
+| `onRowSave` | `(row, index) => Promise<void>` | — | Row-level save callback |
+| `virtualized` | `boolean` | `false` | Virtual scrolling for 1000+ rows |
+| `virtualHeight` | `string` | `'500px'` | Container height for virtualized mode |
+| `columnResizing` | `boolean` | `false` | Enable column resize by dragging |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'sm'` | Table size |
+
+## Column Definition
+
+```typescript
+interface DataGridColumnDef {
+  name: string
+  label?: string
+  editable?: boolean   // default: true
+  filter?: 'text' | 'range' | 'select' | 'date'
+  align?: 'left' | 'center' | 'right'
+  width?: string
+}
+```
+
+## Features
+
+- **Sorting** — click column header to sort (↑ asc, ↓ desc)
+- **Filtering** — text input per column
+- **Pagination** — Previous/Next buttons, page number (disabled when `virtualized`)
+- **Virtualization** — smooth scrolling for 1000+ rows with `virtualized={true}`
+- **Column resizing** — drag column borders with `columnResizing={true}`
+- **Column reordering** — drag column headers to change order
+- **Inline editing** — click cell to edit, Enter to save, Escape to cancel
+- **Diff highlighting** — edited cells are highlighted in yellow
+- **Row selection** — checkbox per row, select all, bulk delete
+- **Row-level save** — `onRowSave` fires when a cell is edited
+- **CSV export** — download all data as CSV file
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/data-grid).

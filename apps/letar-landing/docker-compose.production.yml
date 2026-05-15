@@ -1,0 +1,23 @@
+services:
+  app:
+    image: letar-landing:latest
+    container_name: letar-landing-app
+    restart: always
+    ports:
+      - '3015:3015'
+    environment:
+      TZ: Europe/Moscow
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      PORT: 3015
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

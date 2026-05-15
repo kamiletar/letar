@@ -1,0 +1,21 @@
+{
+  "name": "@letar/animatrona",
+  "version": "0.52.0",
+  "private": true,
+  "description": "Desktop application for anime transcoding and viewing with IPFS support",
+  "author": "Kami Letar",
+  "main": "app/main.js",
+  "nx": {
+    "name": "animatrona",
+    "implicitDependencies": [
+      "@letar/query-provider"
+    ]
+  },
+  "scripts": {
+    "postinstall": "node -e \"process.platform!=='linux'&&require('child_process').execFileSync('npx', ['--no','@electron/rebuild','-f','-w','classic-level','-v','41.0.0'],{stdio:'inherit',shell:true})\"",
+    "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 41.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

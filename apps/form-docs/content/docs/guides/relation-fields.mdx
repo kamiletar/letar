@@ -1,0 +1,61 @@
+---
+title: Relation Fields
+description: Select fields that load options from related database models
+---
+
+## Overview
+
+Relation fields automatically load options from related database models. Powered by `RelationFieldProvider` and ZenStack's `@form.relation` directive.
+
+## Schema Setup
+
+```prisma
+model Recipe {
+  /// @form.title("Category")
+  /// @form.relation({ labelField: "name" })
+  categoryId String
+
+  category Category @relation(fields: [categoryId], references: [id])
+}
+```
+
+## RelationFieldProvider
+
+Wrap your form to provide relation data:
+
+```tsx
+import { RelationFieldProvider } from '@letar/forms'
+
+;<RelationFieldProvider
+  relations={{
+    category: {
+      useQuery: useFindManyCategory,
+      labelField: 'name',
+    },
+  }}
+>
+  <Form schema={RecipeCreateFormSchema} onSubmit={save}>
+    <Form.Field.String name="title" />
+    <Form.Field.Select name="categoryId" />
+    <Form.Button.Submit>Save</Form.Button.Submit>
+  </Form>
+</RelationFieldProvider>
+```
+
+## useRelationOptions Hook
+
+Access relation options from custom components:
+
+```tsx
+const { options, isLoading } = useRelationOptions('category')
+```
+
+## withRelations HOC
+
+Alternative to wrapping with RelationFieldProvider:
+
+```tsx
+const RecipeForm = withRelations(BaseRecipeForm, {
+  category: { useQuery: useFindManyCategory, labelField: 'name' },
+})
+```

@@ -1,0 +1,34 @@
+# @letar/forms Example App
+# Run: docker compose up
+# Open: http://localhost:3000
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: forms
+      POSTGRES_PASSWORD: forms
+      POSTGRES_DB: forms_example
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U forms -d forms_example']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://forms:forms@db:5432/forms_example
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

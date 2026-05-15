@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: umami-postgres
+    restart: always
+    environment:
+      TZ: Europe/Moscow
+      POSTGRES_USER: umami_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: umami
+    volumes:
+      - umami_postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5435:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U umami_user -d umami']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - premium-network
+
+  app:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: umami-app
+    restart: always
+    ports:
+      - '3009:3000'
+    environment:
+      TZ: Europe/Moscow
+      DATABASE_URL: postgresql://umami_user:${DB_PASSWORD}@umami-postgres:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${APP_SECRET}
+      TRACKER_SCRIPT_NAME: ${TRACKER_SCRIPT_NAME:-script}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:3000/api/heartbeat || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  umami_postgres_data:
+    driver: local
+
+networks:
+  premium-network:
+    external: true

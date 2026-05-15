@@ -1,0 +1,95 @@
+---
+title: Date & Time Fields
+description: Date, DateRange, Time, Duration, and Schedule fields
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="date" height={400} />
+
+## Form.Field.Date
+
+Date picker for selecting a single date.
+
+```tsx
+const Schema = z.object({
+  birthday: z.date().meta({
+    ui: { title: 'Date of Birth' },
+  }),
+})
+
+<Form.Field.Date name="birthday" />
+```
+
+## Form.Field.DateRange
+
+Date range picker for selecting a start and end date.
+
+```tsx
+const Schema = z.object({
+  period: z.object({
+    start: z.date(),
+    end: z.date(),
+  }).meta({
+    ui: { title: 'Booking Period' },
+  }),
+})
+
+<Form.Field.DateRange name="period" />
+```
+
+## Form.Field.DateTimePicker
+
+Combined date and time selection.
+
+```tsx
+const Schema = z.object({
+  eventDate: z.date().meta({
+    ui: { title: 'Event Date & Time' },
+  }),
+})
+
+<Form.Field.DateTimePicker name="eventDate" />
+```
+
+## Form.Field.Time
+
+Time-only picker.
+
+```tsx
+const Schema = z.object({
+  appointmentTime: z.string().meta({
+    ui: { title: 'Appointment Time' },
+  }),
+})
+
+<Form.Field.Time name="appointmentTime" />
+```
+
+## Form.Field.Duration
+
+Duration input in hours and minutes.
+
+```tsx
+const Schema = z.object({
+  taskDuration: z.number().meta({
+    ui: { title: 'Duration (minutes)' },
+  }),
+})
+
+<Form.Field.Duration name="taskDuration" />
+```
+
+## Form.Field.Schedule
+
+Weekly schedule grid for selecting time blocks.
+
+```tsx
+const Schema = z.object({
+  workingHours: z.any().meta({
+    ui: { title: 'Working Hours' },
+  }),
+})
+
+<Form.Field.Schedule name="workingHours" />
+```

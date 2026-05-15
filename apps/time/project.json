@@ -1,0 +1,171 @@
+{
+  "name": "time",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/time/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:time"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/time"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/time"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "config": "apps/time/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests with Vitest",
+        "technologies": ["vitest"]
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/generated/schema.prisma",
+        "{projectRoot}/schema.zmodel",
+        "{projectRoot}/prisma.config.ts"
+      ],
+      "outputs": ["{projectRoot}/src/generated/prisma"],
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/time"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
+        "cwd": "apps/time"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/time"
+      },
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./browser\\'\\n')\"",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.d.ts', 'export * from \\'./browser\\'\\n')\""
+        ],
+        "cwd": "apps/time",
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/schema.zmodel"],
+      "outputs": ["{projectRoot}/src/generated"],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    }
+  }
+}

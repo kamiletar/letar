@@ -1,0 +1,11 @@
+tsconfig.tsbuildinfo
+
+# Build output
+/app/
+/dist/
+/main/**/*.js
+!/main/webpack.config.js
+/main/**/*.js.map
+/.next/
+/renderer/.next/
+/output/

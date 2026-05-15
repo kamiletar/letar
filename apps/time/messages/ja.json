@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "今何時？",
+    "description": "UNIXエポックからの経過時間"
+  },
+  "time": {
+    "now": "現在",
+    "hour": "UNIXエポックからの時間",
+    "hoursPassed": "時間がUNIXエポックから経過しました"
+  },
+  "countdown": {
+    "until": "{milestone}時間まで",
+    "days": "{count}日",
+    "hours": "{count}時間",
+    "minutes": "{count}分",
+    "seconds": "{count}秒"
+  },
+  "celebration": {
+    "milestone": "UNIXエポック{hours}時間！"
+  },
+  "subscribe": {
+    "subscribe": "通知",
+    "explanation": "メールアドレスの確認と通知設定へのアクセスにはサインインが必要です",
+    "signIn": "サインイン",
+    "settings": "設定"
+  },
+  "profile": {
+    "title": "通知設定",
+    "email": "メール",
+    "notifyMonth": "1ヶ月前",
+    "notifyWeek": "1週間前",
+    "notifyDay": "1日前",
+    "notifyHour": "1時間前",
+    "notify5Min": "5分前",
+    "save": "保存",
+    "saved": "保存しました！",
+    "unsubscribe": "すべて解除",
+    "unsubscribed": "すべての通知を解除しました",
+    "noSubscription": "まだ通知を購読していません",
+    "createSubscription": "通知を購読する"
+  },
+  "unsubscribe": {
+    "title": "購読解除",
+    "success": "UNIX時間マイルストーン通知の購読を解除しました",
+    "error": "無効な購読解除リンク",
+    "back": "ホームに戻る"
+  }
+}

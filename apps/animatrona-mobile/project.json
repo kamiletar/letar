@@ -1,0 +1,54 @@
+{
+  "name": "animatrona-mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/animatrona-mobile/src",
+  "projectType": "application",
+  "tags": ["scope:animatrona", "type:mobile"],
+  "targets": {
+    "start": {
+      "command": "react-native start",
+      "options": {
+        "cwd": "apps/animatrona-mobile"
+      }
+    },
+    "android": {
+      "command": "react-native run-android",
+      "options": {
+        "cwd": "apps/animatrona-mobile"
+      }
+    },
+    "build-android": {
+      "command": ".\\gradlew.bat assembleDebug --no-daemon",
+      "options": {
+        "cwd": "apps/animatrona-mobile/android",
+        "env": {
+          "JAVA_HOME": "C:\\Program Files\\JetBrains\\WebStorm2025.1\\jbr"
+        }
+      }
+    },
+    "build-android-release": {
+      "command": "gradlew.bat assembleRelease --no-daemon",
+      "options": {
+        "cwd": "apps/animatrona-mobile/android"
+      }
+    },
+    "clean": {
+      "command": "gradlew.bat clean",
+      "options": {
+        "cwd": "apps/animatrona-mobile/android"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/animatrona-mobile/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck": {
+      "command": "tsc --noEmit",
+      "options": {
+        "cwd": "apps/animatrona-mobile"
+      }
+    }
+  }
+}

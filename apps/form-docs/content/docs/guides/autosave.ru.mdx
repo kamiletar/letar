@@ -1,0 +1,70 @@
+---
+title: Автосохранение на сервер
+description: Автоматическое сохранение данных формы на сервер с debounce, офлайн-фолбэком и восстановлением черновиков
+---
+
+## Обзор
+
+`useFormAutosave` периодически сохраняет данные формы на серверный эндпоинт. Если сеть недоступна, данные сохраняются в localStorage и синхронизируются при восстановлении соединения.
+
+## Базовое использование
+
+```tsx
+import { useFormAutosave, AutosaveIndicator } from '@letar/forms'
+
+function MyForm() {
+  const autosave = useFormAutosave(form, {
+    endpoint: '/api/drafts',
+    draftId: 'application-123',
+    interval: 5000,
+    debounce: 1000,
+  })
+
+  return (
+    <>
+      <Form.Field.String name="title" />
+      <AutosaveIndicator
+        status={autosave.status}
+        lastSavedAt={autosave.lastSavedAt}
+        error={autosave.error}
+      />
+    </>
+  )
+}
+```
+
+## Конфигурация
+
+| Опция | Тип | По умолчанию | Описание |
+|-------|-----|--------------|----------|
+| `endpoint` | `string` | обязательно | URL сервера для POST/PUT |
+| `interval` | `number` | `5000` | Интервал сохранения (мс) |
+| `debounce` | `number` | `1000` | Мин. задержка между сохранениями (мс) |
+| `draftId` | `string` | — | Идентификатор черновика для восстановления |
+| `method` | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'` | HTTP-метод |
+| `headers` | `Record<string, string>` | — | Дополнительные заголовки |
+| `onSave` | `(response) => void` | — | Колбэк при успешном сохранении |
+| `onError` | `(error) => void` | — | Колбэк при ошибке |
+
+## Результат
+
+| Свойство | Тип | Описание |
+|----------|-----|----------|
+| `status` | `'idle' \| 'saving' \| 'saved' \| 'error'` | Текущий статус |
+| `lastSavedAt` | `Date \| null` | Время последнего успешного сохранения |
+| `error` | `string \| null` | Сообщение об ошибке |
+| `saveNow()` | `() => Promise<void>` | Принудительное сохранение |
+| `loadDraft()` | `() => Promise<object \| null>` | Загрузка черновика с сервера |
+
+## Возможности
+
+- **Дедупликация** — пропускает сохранение, если данные не изменились
+- **Офлайн-фолбэк** — сохраняет в localStorage при отсутствии сети, очищает после успешного сохранения на сервер
+- **Восстановление черновика** — `loadDraft()` сначала обращается к серверу, затем к localStorage
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/autosave).

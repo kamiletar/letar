@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Que horas são?",
+    "description": "Hora ordinal desde o início da época UNIX"
+  },
+  "time": {
+    "now": "Agora são",
+    "hour": "hora desde o início da era UNIX",
+    "hoursPassed": "horas se passaram desde o início da era UNIX"
+  },
+  "countdown": {
+    "until": "Até {milestone} horas",
+    "days": "{count, plural, one {# dia} other {# dias}}",
+    "hours": "{count, plural, one {# hora} other {# horas}}",
+    "minutes": "{count, plural, one {# minuto} other {# minutos}}",
+    "seconds": "{count, plural, one {# segundo} other {# segundos}}"
+  },
+  "celebration": {
+    "milestone": "{hours} horas da era UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Notificações",
+    "explanation": "É necessário fazer login para verificar seu e-mail e acessar as configurações de notificação",
+    "signIn": "Entrar",
+    "settings": "Configurações"
+  },
+  "profile": {
+    "title": "Configurações de notificação",
+    "email": "E-mail",
+    "notifyMonth": "Um mês antes",
+    "notifyWeek": "Uma semana antes",
+    "notifyDay": "Um dia antes",
+    "notifyHour": "Uma hora antes",
+    "notify5Min": "5 minutos antes",
+    "save": "Salvar",
+    "saved": "Salvo!",
+    "unsubscribe": "Cancelar todas as inscrições",
+    "unsubscribed": "Você foi desinscrito de todas as notificações",
+    "noSubscription": "Você ainda não tem uma inscrição para notificações",
+    "createSubscription": "Inscrever-se para notificações"
+  },
+  "unsubscribe": {
+    "title": "Cancelar inscrição",
+    "success": "Você foi desinscrito com sucesso das notificações de marcos de horas UNIX",
+    "error": "Link de cancelamento de inscrição inválido",
+    "back": "Voltar à página inicial"
+  }
+}

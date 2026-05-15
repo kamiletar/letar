@@ -1,0 +1,148 @@
+{
+  "name": "form-develop-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/form-develop-app/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:sandbox"],
+  "targets": {
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/form-develop-app"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push --accept-data-loss",
+        "cwd": "apps/form-develop-app"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Push Prisma schema changes to database accepting data loss",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run scripts/seed.ts",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Seed database with test data",
+        "technologies": ["prisma", "bun"]
+      }
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "zenstack generate",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/form-develop-app"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    }
+  }
+}

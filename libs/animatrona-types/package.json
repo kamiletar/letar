@@ -1,0 +1,8 @@
+{
+  "name": "@letar/animatrona-types",
+  "version": "0.1.0",
+  "description": "Shared IPFS document types for Animatrona ecosystem",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true
+}

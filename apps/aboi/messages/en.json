@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "title": "NeuroWalls — wallpapers with embedded affirmations",
+    "description": "Wall décor with embedded affirmations. Aesthetic pattern outside, meaningful message inside."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "Sign in to see your orders and favorites",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "signUpLink": "Sign up",
+      "errorInvalid": "Invalid email or password",
+      "errorUnverified": "Please verify your email — we sent you a link"
+    },
+    "signUp": {
+      "title": "Sign up",
+      "subtitle": "Create an account to track orders and earn bonuses",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters",
+      "submit": "Sign up",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "successTitle": "Almost there",
+      "successText": "We sent a verification link to {email}. Click it to sign in."
+    },
+    "signOut": {
+      "title": "Sign out",
+      "submit": "Sign out"
+    },
+    "verifyEmail": {
+      "title": "Email verification",
+      "verifying": "Verifying link...",
+      "success": "Email verified. You can sign in.",
+      "error": "The link is invalid or expired. Please try again."
+    }
+  },
+  "profile": {
+    "title": "Account",
+    "greeting": "Hi, {name}!",
+    "email": "Email: {email}",
+    "anonymousNotice": "You are a guest. Sign up to keep your cart and orders.",
+    "signOut": "Sign out"
+  },
+  "common": {
+    "siteName": "NeuroWalls"
+  }
+}

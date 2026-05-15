@@ -1,0 +1,306 @@
+// Архетест — тест типа личности
+// Авторизация через ключницу (auth.letar.best)
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// ========================================
+// Пользователь (синхронизируется с ключницей)
+// ========================================
+
+enum UserRole {
+  USER
+  ADMIN
+  PSYCHOLOGIST
+}
+
+enum LinkStatus {
+  ACTIVE
+  REVOKED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  /// Имя пользователя
+  name            String?
+  /// Email пользователя
+  email           String    @unique
+  /// URL аватара
+  image           String?
+  /// Email подтверждён
+  emailVerified   Boolean   @default(false)
+  /// Роли пользователя
+  roles           UserRole[] @default([USER])
+  /// ID в ключнице (для связи)
+  externalId      String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  /// Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  /// Принял дисклеймер квиза
+  disclaimerAccepted Boolean   @default(false)
+
+  /// Квиз
+  quizSessions      QuizSession[]
+  quizAchievements  UserQuizAchievement[]
+  quizLeaderboard   QuizLeaderboardEntry?
+
+  /// Связи психолог ↔ клиент
+  clientLinks       ClientPsychologistLink[] @relation("ClientLinks")
+  psychologistLinks ClientPsychologistLink[] @relation("PsychologistLinks")
+
+  @@allow('read', auth() == this)
+  @@allow('update', auth() == this)
+  // Психолог видит базовые данные своих активных клиентов
+  @@allow('read', clientLinks?[psychologistId == auth().id && status == 'ACTIVE'])
+  @@allow('read,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Better Auth — аккаунты OAuth
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@deny('all', true)
+  @@index([userId])
+}
+
+// Better Auth — сессии
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([userId])
+  @@index([token])
+}
+
+// Better Auth — верификация
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String
+  value       String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@deny('all', true)
+  @@index([identifier])
+}
+
+// ========================================
+// Квиз — сессии, ответы, вопросы
+// ========================================
+
+// Сессия прохождения квиза
+model QuizSession {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seed          Int                          // Seed рандомизации
+  answeredCount Int          @default(0)     // Кол-во ответов
+  skippedCount  Int          @default(0)     // Кол-во пропущенных вопросов
+  scores        String?                      // JSON: { PAR: 12, SZD: 8, ... }
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  answers       QuizAnswer[]
+  skippedQuestions QuizSkippedQuestion[]
+
+  // Пользователь видит только свои сессии
+  @@allow('read', userId == auth().id)
+  // Психолог видит сессии своих активных клиентов
+  @@allow('read', user.clientLinks?[psychologistId == auth().id && status == 'ACTIVE'] && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('create', auth() != null)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+}
+
+// Ответ на вопрос квиза
+model QuizAnswer {
+  id             String        @id @default(cuid())
+  sessionId      String
+  session        QuizSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionIndex  Int           // 0-49 (legacy, для старых сессий)
+  selectedOption Int           // 0-3
+  questionId     String?       // Ссылка на QuizQuestion (nullable для обратной совместимости)
+  question       QuizQuestion? @relation(fields: [questionId], references: [id])
+  createdAt      DateTime      @default(now())
+
+  // Доступ через сессию
+  @@allow('read', session.userId == auth().id)
+  // Психолог видит ответы своих клиентов
+  @@allow('read', session.user.clientLinks?[psychologistId == auth().id && status == 'ACTIVE'] && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('create', auth() != null)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+  @@unique([sessionId, questionIndex])
+  @@index([sessionId])
+  @@index([questionId])
+}
+
+// Пропущенный вопрос квиза (видел и осознанно пропустил)
+model QuizSkippedQuestion {
+  id          String       @id @default(cuid())
+  sessionId   String
+  session     QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    QuizQuestion @relation(fields: [questionId], references: [id])
+  createdAt   DateTime     @default(now())
+
+  // Доступ через сессию
+  @@allow('read', session.userId == auth().id)
+  // Психолог видит пропуски своих клиентов
+  @@allow('read', session.user.clientLinks?[psychologistId == auth().id && status == 'ACTIVE'] && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('create', auth() != null)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+  @@unique([sessionId, questionId])
+  @@index([sessionId])
+  @@index([questionId])
+}
+
+// Достижение пользователя в квизе
+model UserQuizAchievement {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementCode String   // Код из ACHIEVEMENTS (e.g. "FIRST_QUIZ")
+  unlockedAt      DateTime @default(now())
+
+  // Публичное чтение, мутации только через raw prisma
+  @@allow('read', true)
+  @@deny('create,update,delete', true)
+  @@unique([userId, achievementCode])
+  @@index([userId])
+}
+
+// Кэш лидерборда (денормализация для быстрых запросов)
+model QuizLeaderboardEntry {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionsCount     Int      @default(0)
+  achievementsCount Int      @default(0)
+  totalAnswers      Int      @default(0)
+  xp                Int      @default(0)
+  rankCode          String   @default("NOVICE_I")
+  updatedAt         DateTime @updatedAt
+
+  // Публичное чтение, мутации только через raw prisma
+  @@allow('read', true)
+  @@deny('create,update,delete', true)
+  @@index([xp])
+}
+
+// Вопрос квиза (1955 вопросов, 13 шкал)
+model QuizQuestion {
+  id         String   @id @default(cuid())
+  scenario   String   // Сценарий вопроса (русский)
+  scenarioEn String   // Сценарий вопроса (английский)
+  options    String   // JSON: [{text, textEn, scoring: {PAR: 3, ANT: 1}}]
+  active     Boolean  @default(true)
+  sortOrder  Int      @default(0)  // Для совместимости со старыми индексами
+  createdAt  DateTime @default(now())
+
+  answers    QuizAnswer[]
+  skippedBy  QuizSkippedQuestion[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ========================================
+// Связь психолог ↔ клиент
+// ========================================
+
+/// Связь клиента с психологом (создаёт клиент)
+model ClientPsychologistLink {
+  id              String     @id @default(cuid())
+  clientId        String
+  client          User       @relation("ClientLinks", fields: [clientId], references: [id], onDelete: Cascade)
+  psychologistId  String
+  psychologist    User       @relation("PsychologistLinks", fields: [psychologistId], references: [id], onDelete: Cascade)
+  /// Отображаемое имя клиента (задаёт психолог)
+  displayName     String?
+  status          LinkStatus @default(ACTIVE)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  revokedAt       DateTime?
+  notes           PsychologistNote[]
+
+  @@unique([clientId, psychologistId])
+  @@index([psychologistId])
+  @@index([clientId])
+
+  // Клиент видит свои связи
+  @@allow('read', clientId == auth().id)
+  // Психолог видит свои связи
+  @@allow('read', psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  // Клиент создаёт связь
+  @@allow('create', clientId == auth().id)
+  // Клиент может отозвать (revoke)
+  @@allow('update', clientId == auth().id)
+  // Психолог может обновить displayName
+  @@allow('update', psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('all', 'ADMIN' in auth().roles)
+}
+
+/// Заметка психолога о клиенте
+model PsychologistNote {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      ClientPsychologistLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  /// Текст заметки
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([linkId])
+
+  // Только психолог-владелец связи
+  @@allow('all', link.psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('all', 'ADMIN' in auth().roles)
+}

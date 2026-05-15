@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Saa ngapi?",
+    "description": "Saa ya mpangilio tangu mwanzo wa enzi ya UNIX"
+  },
+  "time": {
+    "now": "Sasa ni",
+    "hour": "saa tangu mwanzo wa enzi ya UNIX",
+    "hoursPassed": "saa zimepita tangu mwanzo wa enzi ya UNIX"
+  },
+  "countdown": {
+    "until": "Hadi saa {milestone}",
+    "days": "{count, plural, one {# siku} other {# siku}}",
+    "hours": "{count, plural, one {# saa} other {# saa}}",
+    "minutes": "{count, plural, one {# dakika} other {# dakika}}",
+    "seconds": "{count, plural, one {# sekunde} other {# sekunde}}"
+  },
+  "celebration": {
+    "milestone": "Saa {hours} za enzi ya UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Arifa",
+    "explanation": "Kuingia kunahitajika ili kuthibitisha barua pepe yako na kupata mipangilio ya arifa",
+    "signIn": "Ingia",
+    "settings": "Mipangilio"
+  },
+  "profile": {
+    "title": "Mipangilio ya arifa",
+    "email": "Barua pepe",
+    "notifyMonth": "Mwezi mmoja kabla",
+    "notifyWeek": "Wiki moja kabla",
+    "notifyDay": "Siku moja kabla",
+    "notifyHour": "Saa moja kabla",
+    "notify5Min": "Dakika 5 kabla",
+    "save": "Hifadhi",
+    "saved": "Imehifadhiwa!",
+    "unsubscribe": "Jiondoe kutoka zote",
+    "unsubscribed": "Umejiondoa kutoka arifa zote",
+    "noSubscription": "Bado huna usajili wa arifa",
+    "createSubscription": "Jisajili kwa arifa"
+  },
+  "unsubscribe": {
+    "title": "Jiondoe",
+    "success": "Umejiondoa kwa mafanikio kutoka arifa za hatua muhimu za saa za UNIX",
+    "error": "Kiungo cha kujiondoa si sahihi",
+    "back": "Rudi nyumbani"
+  }
+}

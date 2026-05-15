@@ -1,0 +1,200 @@
+{
+  "name": "dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/dashboard/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:dashboard"],
+  "targets": {
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "zenstack generate",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/schema.zmodel", { "runtime": "node -p process.platform" }],
+      "outputs": ["{projectRoot}/src/generated"],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/generated/schema.prisma",
+        "{projectRoot}/schema.zmodel",
+        "{projectRoot}/prisma.config.ts",
+        { "runtime": "node -p process.platform" }
+      ],
+      "outputs": ["{workspaceRoot}/node_modules/.prisma/client"],
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/dashboard"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push --accept-data-loss --force-reset",
+        "cwd": "apps/dashboard"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Push Prisma schema with data loss (reset)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
+        "cwd": "apps/dashboard"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate:deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/dashboard"
+      },
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/dashboard"
+      },
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/dashboard"
+      },
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": ["prisma"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/dashboard"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/dashboard"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/dashboard"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "validate": {
+      "executor": "nx:noop",
+      "dependsOn": ["lint", "format:check", "typecheck", "test"],
+      "metadata": {
+        "description": "Run all validation checks"
+      }
+    },
+    "build": {
+      "dependsOn": ["zenstack:generate", "db:generate"]
+    }
+  }
+}

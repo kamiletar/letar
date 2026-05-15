@@ -1,0 +1,10 @@
+{
+  "name": "@letar/archetest-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "archetest"
+    ]
+  }
+}

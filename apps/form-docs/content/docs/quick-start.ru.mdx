@@ -1,0 +1,85 @@
+---
+title: Быстрый старт
+description: Создайте первую форму за 5 минут
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="auto-fields" height={450} />
+
+## 1. Определите схему
+
+Используйте Zod для валидации и UI метаданных:
+
+```tsx
+import { z } from 'zod/v4'
+
+const ContactSchema = z.object({
+  name: z
+    .string()
+    .min(2)
+    .max(100)
+    .meta({
+      ui: { title: 'Имя', placeholder: 'Иван Иванов' },
+    }),
+  email: z
+    .string()
+    .email()
+    .meta({
+      ui: { title: 'Email', placeholder: 'ivan@example.com' },
+    }),
+  message: z
+    .string()
+    .min(10)
+    .max(1000)
+    .meta({
+      ui: { title: 'Сообщение', placeholder: 'Расскажите о вашем проекте...' },
+    }),
+})
+```
+
+## 2. Создайте форму
+
+```tsx
+import { Form } from '@letar/forms'
+
+function ContactForm() {
+  return (
+    <Form
+      schema={ContactSchema}
+      initialValue={{ name: '', email: '', message: '' }}
+      onSubmit={async ({ value }) => {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          body: JSON.stringify(value),
+        })
+        if (response.ok) {
+          alert('Сообщение отправлено!')
+        }
+      }}
+    >
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Textarea name="message" />
+      <Form.Button.Submit loadingText="Отправка...">Отправить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## 3. Готово!
+
+Форма автоматически:
+
+- Валидирует поля по Zod-схеме
+- Показывает ошибки валидации
+- Извлекает лейблы и плейсхолдеры из `.meta({ ui: ... })`
+- Применяет ограничения `maxLength`, `min`, `max` из правил Zod
+- Управляет состоянием отправки (загрузка, блокировка)
+
+## Что дальше?
+
+- [Типы полей](/ru/docs/fields) — все 40+ компонентов полей
+- [Условные поля](/ru/docs/guides/conditional-fields) — показ/скрытие полей динамически
+- [Мультистеп формы](/ru/docs/guides/multi-step) — пошаговые мастера
+- [Валидация](/ru/docs/guides/validation) — продвинутые паттерны валидации

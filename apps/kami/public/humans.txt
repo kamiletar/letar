@@ -1,0 +1,21 @@
+/* TEAM */
+Developer: Kami Letar
+Role: Software Architect
+Location: Russia
+GitHub: github.com/kamiletar
+Telegram: t.me/husber
+
+/* THANKS */
+Anthropic: Claude Code AI assistance
+Vercel: Next.js framework
+Chakra UI: Component library
+
+/* SITE */
+Last update: 2026-03-29
+Language: Russian, English
+Standards: HTML5, CSS3, ES2024
+Components: Next.js 16, React 19, Chakra UI v3
+Database: PostgreSQL, Prisma, ZenStack
+Query: TanStack Query
+Tools: Nx, TypeScript, Bun
+Audio: Web Audio API, Canvas spectrogram

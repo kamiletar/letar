@@ -1,0 +1,110 @@
+---
+title: MatrixChoice
+description: Матричное поле выбора для опросов, NPS-форм и анкет
+---
+
+## Обзор
+
+`Form.Field.MatrixChoice` отображает таблицу «вопрос x ответ» — стандартный паттерн из Google Forms и SurveyMonkey. Поддерживает три варианта: radio (единственный выбор), checkbox (множественный выбор) и rating (звёзды).
+
+## Базовое использование (Radio)
+
+```tsx
+<Form initialValue={{ satisfaction: {} }} onSubmit={handleSubmit}>
+  <Form.Field.MatrixChoice
+    name="satisfaction"
+    label="Оцените наш сервис"
+    rows={[
+      { value: 'speed', label: 'Скорость доставки' },
+      { value: 'quality', label: 'Качество товара' },
+      { value: 'support', label: 'Служба поддержки' },
+    ]}
+    columns={[
+      { value: '1', label: 'Ужасно' },
+      { value: '2', label: 'Плохо' },
+      { value: '3', label: 'Нормально' },
+      { value: '4', label: 'Хорошо' },
+      { value: '5', label: 'Отлично' },
+    ]}
+    variant="radio"
+  />
+  <Form.Button.Submit>Отправить</Form.Button.Submit>
+</Form>
+```
+
+**Значение:** `{ speed: '4', quality: '5', support: '3' }`
+
+## Вариант Checkbox (множественный выбор)
+
+```tsx
+<Form.Field.MatrixChoice
+  name="skills"
+  variant="checkbox"
+  rows={[
+    { value: 'frontend', label: 'Frontend' },
+    { value: 'backend', label: 'Backend' },
+  ]}
+  columns={[
+    { value: 'beginner', label: 'Начинающий' },
+    { value: 'intermediate', label: 'Средний' },
+    { value: 'expert', label: 'Эксперт' },
+  ]}
+/>
+```
+
+**Значение:** `{ frontend: ['beginner', 'intermediate'], backend: ['expert'] }`
+
+## Вариант Rating
+
+```tsx
+<Form.Field.MatrixChoice
+  name="rating"
+  variant="rating"
+  rows={[
+    { value: 'taste', label: 'Вкус' },
+    { value: 'presentation', label: 'Подача' },
+  ]}
+  columns={[
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+  ]}
+/>
+```
+
+## Пропсы
+
+| Проп | Тип | По умолчанию | Описание |
+|------|-----|--------------|----------|
+| `name` | `string` | обязателен | Имя поля |
+| `label` | `string` | — | Заголовок над матрицей |
+| `rows` | `MatrixRow[]` | обязателен | Вопросы (подписи строк) |
+| `columns` | `MatrixColumn[]` | обязателен | Варианты ответов (заголовки столбцов) |
+| `variant` | `'radio' \| 'checkbox' \| 'rating'` | `'radio'` | Режим выбора |
+| `disabled` | `boolean` | `false` | Отключить все элементы |
+| `readOnly` | `boolean` | `false` | Режим только для чтения |
+
+## Навигация с клавиатуры
+
+| Клавиша | Действие |
+|---------|----------|
+| Стрелка вправо/влево | Перемещение между столбцами |
+| Стрелка вверх/вниз | Перемещение между строками |
+| Enter / Пробел | Выбор текущей ячейки |
+
+## Валидация обязательности
+
+При `required={true}` незаполненные строки подсвечиваются красным после срабатывания валидации формы. Используйте валидацию Zod-схемы, чтобы требовать заполнение всех строк.
+
+## Адаптивное поведение
+
+На мобильных устройствах (брейкпоинт `< md`) таблица автоматически переключается на карточную разметку, где каждый вопрос — отдельная карточка с вертикально расположенными вариантами ответов.
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/matrix-choice).

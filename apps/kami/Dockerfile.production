@@ -1,0 +1,30 @@
+# Dockerfile.production - для уже собранных приложений
+# Используется когда сборка выполнена на сервере с nx build affected
+# Build context: workspace root (C:\web\lena)
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Копируем уже собранный standalone output
+# Standalone включает в себя все необходимые node_modules
+COPY --chown=nextjs:nodejs apps/kami/.next/standalone ./
+
+# Копируем статику и public (не включаются в standalone автоматически)
+COPY --chown=nextjs:nodejs apps/kami/.next/static ./apps/kami/.next/static
+COPY --chown=nextjs:nodejs apps/kami/public ./apps/kami/public
+COPY --chown=nextjs:nodejs apps/kami/messages ./apps/kami/messages
+
+USER nextjs
+
+EXPOSE 3005
+
+ENV PORT=3005
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/kami/server.js"]

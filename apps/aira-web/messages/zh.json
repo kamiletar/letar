@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — 后量子 P2P 即时通讯",
+    "description": "Aira 是一款采用混合后量子密码学的去中心化即时通讯工具。没有服务器，没有手机号，毫不妥协。"
+  },
+  "nav": {
+    "features": "功能",
+    "security": "安全",
+    "download": "下载",
+    "github": "GitHub",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "mainNavigation": "主导航",
+    "mobileNavigation": "移动端导航",
+    "skipToContent": "跳转到主内容"
+  },
+  "hero": {
+    "badge": "{version} — 后量子防护已就绪",
+    "fallbackVersion": "v0.3.3",
+    "title1": "自由交流。",
+    "title2": "守护未来。",
+    "subtitle": "Aira 是一款采用混合后量子密码学的去中心化即时通讯工具。没有服务器，没有手机号，毫不妥协。",
+    "ctaDownload": "下载 Aira",
+    "ctaSource": "源代码",
+    "tagOpenSource": "开源"
+  },
+  "features": {
+    "title": "超能力",
+    "subtitle": "每一个细节都为守护你的通讯自由而设计",
+    "quantum": {
+      "title": "抗量子加密",
+      "description": "混合 ML-KEM-768 + X25519 密码学。两种算法必须同时被破解 — 让你今天就具备抵御量子计算机的能力。"
+    },
+    "p2p": {
+      "title": "真正的 P2P",
+      "description": "没有服务器、账号或手机号。每位用户都是网络节点。消息通过 QUIC 直接传输。"
+    },
+    "metadata": {
+      "title": "隐形元数据",
+      "description": "每个联系人使用成对化名。连中继也不知道你在与谁通讯。所有数据包经过填充，隐藏真实消息大小。"
+    },
+    "global": {
+      "title": "无处不可用",
+      "description": "REALITY 伪装、obfs4、Tor、CDN 回退。可插拔传输层在审查最严格的地区也能突破 DPI 封锁。"
+    },
+    "fullMessenger": {
+      "title": "完整的即时通讯",
+      "description": "反应表情、回复、编辑、阅后即焚、文件传输、最多 100 人群组、机器人 — 全部端到端加密。"
+    },
+    "multiplatform": {
+      "title": "多平台",
+      "description": "CLI、桌面端（Linux/macOS/Windows）、Android。通过种子短语在最多 5 台设备间同步。"
+    }
+  },
+  "security": {
+    "title": "深入内核",
+    "subtitle": "100% Rust。加密核心中零 unsafe 代码。每把密钥都被隔离，并在使用后立即归零清除。",
+    "crypto": {
+      "title": "密码学",
+      "keyAgreementLabel": "密钥协商",
+      "keyAgreementDetail": "混合 KEM，FIPS 203",
+      "signaturesLabel": "签名",
+      "signaturesDetail": "FIPS 204，后量子",
+      "encryptionLabel": "加密",
+      "encryptionDetail": "256 位，AEAD",
+      "hashingLabel": "哈希",
+      "hashingDetail": "KDF + MAC，抗长度扩展",
+      "kdfLabel": "密钥拉伸",
+      "kdfDetail": "256 MB / 64 MB（桌面/移动）",
+      "fsLabel": "前向保密",
+      "fsDetail": "每约 50 条消息进行 PQ 刷新"
+    },
+    "protection": {
+      "title": "防护",
+      "dpiLabel": "DPI 绕过",
+      "dpiValue": "5 级",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "元数据",
+      "metadataValue": "成对化名",
+      "metadataDetail": "中继看不到社交图谱",
+      "deniabilityLabel": "可抵赖性",
+      "deniabilityValue": "对称 MAC",
+      "deniabilityDetail": "无法证明消息作者",
+      "antispamLabel": "反垃圾",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "陌生人 20 位",
+      "paddingLabel": "填充",
+      "paddingValue": "256–4096 字节",
+      "paddingDetail": "隐藏真实消息大小",
+      "recoveryLabel": "恢复",
+      "recoveryValue": "24 个 BIP-39 词",
+      "recoveryDetail": "种子短语，确定性派生"
+    },
+    "vsTitle": "为何不用 Signal / Session / SimpleX？",
+    "vsSignal": "Signal 依赖服务器，需要手机号，且不对每条消息提供后量子保护。Aira 是 P2P + SPQR 棘轮。",
+    "vsSession": "Session 通过 Oxen 服务器进行洋葱路由。Aira 则是直接 P2P，没有中间服务器，且具备完整的后量子加密。",
+    "vsSimpleX": "SimpleX 依赖中继服务器进行投递。Aira 直接工作，中继仅作为 NAT 穿透的备选方案。"
+  },
+  "download": {
+    "title": "下载 Aira",
+    "subtitleWithVersion": "{version} — 开源。永久免费。",
+    "subtitle": "开源。永久免费。",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI。tar.gz 压缩包。",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "适用于 Apple M1/M2/M3/M4 的 CLI + Daemon + GUI。",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "适用于 Intel Mac 的 CLI + Daemon + GUI。",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI。zip 压缩包。",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + 通过 UniFFI 调用 Rust 核心。APK。",
+    "downloadLabel": "下载",
+    "portableLabel": "便携版归档",
+    "cargoLabel": "通过 Cargo 安装："
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "规范",
+    "releases": "版本"
+  }
+}

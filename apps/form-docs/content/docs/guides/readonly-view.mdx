@@ -1,0 +1,46 @@
+---
+title: ReadOnly View
+description: Display form data in a read-only format using the same Zod schema
+---
+
+## Overview
+
+`Form.ReadOnlyView` renders form data as a read-only display, extracting labels from your Zod schema's `.meta({ ui: { title } })`. No form context needed — just data and schema.
+
+```tsx
+import { Form } from '@letar/forms'
+
+;<Form.ReadOnlyView data={{ name: 'John Doe', email: 'john@example.com', role: 'admin' }} schema={UserSchema} />
+```
+
+## Props
+
+| Prop      | Type                      | Default  | Description                            |
+| --------- | ------------------------- | -------- | -------------------------------------- |
+| `data`    | `Record<string, unknown>` | required | Data to display                        |
+| `schema`  | `ZodObject`               | required | Schema for labels via `.meta()`        |
+| `compact` | `boolean`                 | `false`  | Compact layout (single line per field) |
+| `exclude` | `string[]`                | `[]`     | Fields to hide                         |
+| `labels`  | `Record<string, string>`  | `{}`     | Manual label overrides                 |
+
+## Compact Mode
+
+```tsx
+<Form.ReadOnlyView data={user} schema={UserSchema} compact />
+```
+
+Standard mode shows label above value. Compact mode shows label and value on the same line.
+
+## Use Cases
+
+- **Profile page**: Display user profile without edit capability
+- **Confirmation step**: Show submitted data before final confirmation
+- **Print view**: Clean data display for printing
+- **Detail pages**: Show record details in admin panels
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/readonly).

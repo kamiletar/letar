@@ -1,0 +1,78 @@
+---
+title: Async Validation
+description: Server-side async validation with debounce, cancellation, and caching
+---
+
+## Overview
+
+Async validation lets you check values against a server (e.g., email uniqueness, username availability) while the user types or when they leave a field.
+
+## Via Props
+
+```tsx
+<Form.Field.String
+  name="email"
+  label="Email"
+  asyncValidate={async (value) => {
+    const exists = await fetch(`/api/check-email?email=${value}`)
+    if (exists) return 'Email already registered'
+  }}
+  asyncDebounce={500}
+  asyncTrigger="onBlur"
+/>
+```
+
+## Via Zod `.meta()`
+
+```tsx
+const Schema = z.object({
+  email: z.email().meta({
+    asyncValidate: async (value) => {
+      const res = await fetch(`/api/check-email?email=${value}`)
+      const { exists } = await res.json()
+      if (exists) return 'Email already registered'
+    },
+    asyncDebounce: 500,
+    asyncTrigger: 'onBlur',
+  }),
+})
+```
+
+## Props
+
+All fields that use `createField` support these props:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | — | Validation function |
+| `asyncDebounce` | `number` | `500` | Debounce delay (ms) |
+| `asyncTrigger` | `'onBlur' \| 'onChange'` | `'onBlur'` | When to trigger |
+
+## Features
+
+- **Debounce** — waits for user to stop typing before sending request
+- **Request cancellation** — AbortController cancels previous request when new input arrives
+- **Caching** — already validated values are not re-checked
+- **Offline-safe** — skips async validation when `navigator.onLine` is false
+- **Props priority** — props override schema meta config
+
+## `useAsyncFieldValidation` Hook
+
+For custom field components:
+
+```tsx
+import { useAsyncFieldValidation } from '@letar/forms'
+
+const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(
+  schema,
+  'email',
+  { asyncValidate: myFn, asyncDebounce: 300 }
+)
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/async-validation).

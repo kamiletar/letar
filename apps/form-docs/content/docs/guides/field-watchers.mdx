@@ -1,0 +1,162 @@
+---
+title: Field Watchers
+description: React to field changes with onFieldChange and Form.Watch
+---
+
+## Overview
+
+Sometimes a field change should trigger a side effect — auto-generate a slug, update a currency, recalculate a total. Two complementary APIs cover this:
+
+| API                  | Style                            | Best for                                  |
+| -------------------- | -------------------------------- | ----------------------------------------- |
+| `onFieldChange` prop | Configuration object on `<Form>` | Simple field→field sync at the form level |
+| `<Form.Watch>`       | Renderless component inside form | Local reactions, group-aware watchers     |
+
+Both receive the same `FieldChangeApi`:
+
+```ts
+interface FieldChangeApi {
+  setFieldValue(name: string, value: unknown): void
+  getFieldValue(name: string): unknown
+  getValues(): Record<string, unknown>
+}
+```
+
+## Live Demo
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="field-watchers" height={600} />
+
+## onFieldChange
+
+Pass a record of field names to callbacks on the `<Form>` root:
+
+```tsx
+<Form
+  schema={CitySchema}
+  initialValue={{ name: '', slug: '' }}
+  onSubmit={save}
+  onFieldChange={{
+    name: (value, { setFieldValue }) => {
+      setFieldValue('slug', transliterate(String(value)))
+    },
+  }}
+>
+  <Form.Field.String name="name" label="City name" />
+  <Form.Field.String name="slug" label="Slug" />
+  <Form.Button.Submit />
+</Form>
+```
+
+The callback fires **after** the TanStack Form store updates, synchronously. Only watched fields trigger their callbacks — other field changes are ignored.
+
+### Multiple watchers
+
+```tsx
+onFieldChange={{
+  quantity: (val, { setFieldValue, getFieldValue }) => {
+    const price = getFieldValue('price') as number
+    setFieldValue('total', (val as number) * price)
+  },
+  price: (val, { setFieldValue, getFieldValue }) => {
+    const qty = getFieldValue('quantity') as number
+    setFieldValue('total', qty * (val as number))
+  },
+}}
+```
+
+## Form.Watch
+
+A renderless component placed anywhere inside the form tree. It respects `Form.Group` context — field paths are resolved relative to the current group.
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.NativeSelect name="country" options={countries} />
+  <Form.Field.String name="currency" />
+
+  <Form.Watch
+    field="country"
+    onChange={(value, { setFieldValue }) => {
+      setFieldValue('currency', currencyMap[String(value)])
+    }}
+  />
+
+  <Form.Button.Submit />
+</Form>
+```
+
+### Inside a group
+
+`Form.Watch` resolves the field path relative to the parent group, just like `Form.Field.*`:
+
+```tsx
+<Form.Group name="shipping">
+  <Form.Field.String name="country" />
+  <Form.Field.String name="currency" />
+
+  {/* Watches shipping.country, not root country */}
+  <Form.Watch
+    field="country"
+    onChange={(value, { setFieldValue }) => {
+      // setFieldValue uses absolute paths
+      setFieldValue('shipping.currency', getCurrency(String(value)))
+    }}
+  />
+</Form.Group>
+```
+
+### Props
+
+| Prop       | Type                                            | Description                             |
+| ---------- | ----------------------------------------------- | --------------------------------------- |
+| `field`    | `string`                                        | Field name to watch (relative to group) |
+| `onChange` | `(value: unknown, api: FieldChangeApi) => void` | Callback on value change                |
+
+## When to use which
+
+| Scenario                          | Recommended                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Slug from title                   | `onFieldChange` — simple 1:1 mapping                                                               |
+| Country → currency + greeting     | Either — `onFieldChange` for multiple fields at once, or `Form.Watch` if colocated with the select |
+| Watcher inside `Form.Group`       | `Form.Watch` — automatic path resolution                                                           |
+| Dynamic calculation (price × qty) | `onFieldChange` — access multiple fields via `getFieldValue`                                       |
+| Existing form, minimal changes    | `onFieldChange` — just add a prop, no JSX changes                                                  |
+
+## Comparison with other patterns
+
+### vs useFieldActions + useEffect
+
+Before `onFieldChange`, the manual approach was:
+
+```tsx
+// Before — verbose custom component
+function SlugSync() {
+  const name = useFieldActions('name')
+  const slug = useFieldActions('slug')
+
+  useEffect(() => {
+    slug.onChange(transliterate(String(name.value)))
+  }, [name.value])
+
+  return null
+}
+```
+
+Now:
+
+```tsx
+// After — one prop
+<Form onFieldChange={{ name: (v, { setFieldValue }) => setFieldValue('slug', transliterate(String(v))) }}>
+```
+
+### vs Form.When
+
+`Form.When` controls **visibility** — show/hide fields based on a value. `Form.Watch` and `onFieldChange` control **values** — update other fields when one changes. They complement each other.
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/watch).

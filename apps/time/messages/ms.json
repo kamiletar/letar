@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Pukul berapa?",
+    "description": "Jam ordinal sejak permulaan epoch UNIX"
+  },
+  "time": {
+    "now": "Sekarang",
+    "hour": "jam sejak permulaan era UNIX",
+    "hoursPassed": "jam telah berlalu sejak permulaan era UNIX"
+  },
+  "countdown": {
+    "until": "Sehingga {milestone} jam",
+    "days": "{count, plural, one {# hari} other {# hari}}",
+    "hours": "{count, plural, one {# jam} other {# jam}}",
+    "minutes": "{count, plural, one {# minit} other {# minit}}",
+    "seconds": "{count, plural, one {# saat} other {# saat}}"
+  },
+  "celebration": {
+    "milestone": "{hours} jam era UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Pemberitahuan",
+    "explanation": "Log masuk diperlukan untuk mengesahkan emel dan mengakses tetapan pemberitahuan",
+    "signIn": "Log masuk",
+    "settings": "Tetapan"
+  },
+  "profile": {
+    "title": "Tetapan pemberitahuan",
+    "email": "Emel",
+    "notifyMonth": "Sebulan sebelum",
+    "notifyWeek": "Seminggu sebelum",
+    "notifyDay": "Sehari sebelum",
+    "notifyHour": "Sejam sebelum",
+    "notify5Min": "5 minit sebelum",
+    "save": "Simpan",
+    "saved": "Disimpan!",
+    "unsubscribe": "Nyahlanggan semua",
+    "unsubscribed": "Anda telah dinyahlangganan daripada semua pemberitahuan",
+    "noSubscription": "Anda belum mempunyai langganan pemberitahuan",
+    "createSubscription": "Langgan pemberitahuan"
+  },
+  "unsubscribe": {
+    "title": "Nyahlanggan",
+    "success": "Anda telah berjaya dinyahlangganan daripada pemberitahuan pencapaian jam UNIX",
+    "error": "Pautan nyahlanggan tidak sah",
+    "back": "Kembali ke laman utama"
+  }
+}

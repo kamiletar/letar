@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "typescript": {
+      "command": ["vtsls", "--stdio"],
+      "languages": ["typescript", "typescriptreact", "javascript", "javascriptreact"],
+      "filePatterns": ["*.ts", "*.tsx", "*.js", "*.jsx"]
+    }
+  }
+}

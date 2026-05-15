@@ -1,0 +1,29 @@
+# Dockerfile.production - для уже собранных приложений
+# Используется когда сборка выполнена на сервере с nx build affected
+# Build context: workspace root (C:\web\lena)
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Копируем уже собранный standalone output
+# Standalone включает в себя все необходимые node_modules
+COPY --chown=nextjs:nodejs apps/imot/.next/standalone ./
+
+# Копируем статику и public (не включаются в standalone автоматически)
+COPY --chown=nextjs:nodejs apps/imot/.next/static ./apps/imot/.next/static
+COPY --chown=nextjs:nodejs apps/imot/public ./apps/imot/public
+
+USER nextjs
+
+EXPOSE 3001
+
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/imot/server.js"]

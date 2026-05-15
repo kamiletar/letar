@@ -1,0 +1,183 @@
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+dist-electron
+tmp
+out-tsc
+*.tsbuildinfo
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.nx/cache
+.nx/workspace-data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Claude Code local settings (not shared)
+.claude/settings.local.json
+.claude/*.local.md
+.mcp.json
+
+# Next.js
+.next
+out
+next-env.d.ts
+
+# Cron configuration (local, may be edited via Dashboard UI)
+/cron-jobs.json
+
+# Uploaded files
+uploads/
+
+test-output
+.env.*
+!**/.env.example
+!**/.env.docker.example
+!**/.env.staging.example
+null
+nul
+
+/logs/
+/apps/**/src/generated/
+!/apps/form-example/src/generated/
+
+# Fumadocs generated source (form-docs)
+.source/
+
+# Backup scripts configuration (contains sensitive data)
+scripts/backup/.env
+
+# Deployment tracking
+.last-deploy-commit
+.last-deploy/
+/apps/premium-rosstil/logs/combined.log
+/apps/premium-rosstil/logs/error.log
+/dashboard-data/
+**/playwright-report/*
+/apps/dashboard/dashboard-data/
+/backups/
+/playwright/.auth/instructor.json
+/playwright/.auth/student.json
+/test-results/
+
+
+
+**/.sync
+**/uploads/*
+
+# Generated Service Worker (created from sw.template.js at build time)
+apps/driving-school/public/sw.js
+apps/grandslamcup/public/sw.js
+# ZenStack v3 artifacts
+apps/*/input.ts
+apps/*/models.ts
+apps/*/schema.ts
+# ZenStack generated apps/ (только на уровне apps/*/apps/, не API routes)
+apps/*/apps/
+
+
+vitest.config.*.timestamp*
+# Animatrona build output
+apps/animatrona/app/
+apps/animatrona/resources/splash.html
+/.playwright-mcp/mandala-centered-v2.png
+/.playwright-mcp/mandala-desktop-v3.png
+/.playwright-mcp/mandala-error.png
+/.playwright-mcp/mandala-final-desktop.png
+/.playwright-mcp/mandala-homepage-check.png
+/.playwright-mcp/mandala-homepage-desktop.png
+/.playwright-mcp/mandala-mobile.png
+/.playwright-mcp/mandala-mobile-v2.png
+/.playwright-mcp/mandala-mobile-v3.png
+/.playwright-mcp/mandala-mobile-v4.png
+/.playwright-mcp/mandala-nav-bottom-desktop.png
+/.playwright-mcp/mandala-nav-bottom-mobile.png
+/.playwright-mcp/mandala-nav-bottom-mobile-home.png
+/.playwright-mcp/mandala-nav-grid-mobile.png
+/.playwright-mcp/mandala-petals-center.png
+/.playwright-mcp/mandala-petals-desktop.png
+/.playwright-mcp/mandala-petals-mobile.png
+/.playwright-mcp/mandala-petals-mobile-fixed.png
+/playwright/.auth/owner.json
+/playwright/.auth/school-admin.json
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# Claude Code artifacts (screenshots, exports, temp files)
+.claude/artifacts/
+
+# E2E test fixtures (generated videos)
+apps/animatrona-e2e/fixtures/videos/
+apps/animatrona-e2e/fixtures/anime-folder/
+apps/animatrona-e2e/test-videos/
+apps/animatrona-e2e/test-results/
+/.playwright-mcp/
+tmpclaude-*
+apps/animatrona/resources/template.db
+
+# MCP Agent Mail (клонированный репо + данные)
+infra/agent-mail/mcp_agent_mail/
+infra/agent-mail/.env
+
+# Nginx Proxy Manager local data (per-server)
+infra/nginx-proxy-manager/data/
+infra/nginx-proxy-manager/letsencrypt/
+apps/animatrona/dist*/
+
+# Android build artifacts
+libs/*/android/build/
+apps/animatrona-mobile/android/.kotlin/
+apps/animatrona-mobile/android/app/src/main/assets/
+apps/animatrona-mobile/android/app/src/main/res/drawable-*/
+apps/animatrona-tv/android/.kotlin/
+apps/animatrona-tv/android/app/build/
+apps/animatrona-tv/android/build/
+apps/animatrona-tv/android/.gradle/
+apps/animatrona-tv/android/local.properties
+apps/animatrona-tv/android/app/.cxx/
+apps/animatrona-tv/screen-*.png
+/playwright/.auth/school-data.json
+.nx/polygraph
+.nx/self-healing
+/libs/exoplayer-sync/android/.gradle/8.9/checksums/checksums.lock
+/libs/exoplayer-sync/android/.gradle/8.9/dependencies-accessors/gc.properties
+/libs/exoplayer-sync/android/.gradle/8.9/fileChanges/last-build.bin
+/libs/exoplayer-sync/android/.gradle/8.9/fileHashes/fileHashes.lock
+/libs/exoplayer-sync/android/.gradle/8.9/gc.properties
+/libs/exoplayer-sync/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+/libs/exoplayer-sync/android/.gradle/buildOutputCleanup/cache.properties
+/libs/exoplayer-sync/android/.gradle/vcs-1/gc.properties
+/.socraticodecontextartifacts.json

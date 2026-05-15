@@ -1,0 +1,783 @@
+// ZenStack schema file for IMOT application
+// ИМОТ - Интегративная Матрица Осознанной Трансформации
+// Integrative Matrix of Conscious Transformation
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+// TypeScript plugin (v3) - генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  /// Клиент методики
+  CLIENT
+  /// Специалист ИМОТ
+  SPECIALIST
+  /// Администратор
+  ADMIN
+}
+
+enum SessionStatus {
+  /// Запланирована
+  SCHEDULED
+  /// В процессе
+  IN_PROGRESS
+  /// Завершена
+  COMPLETED
+  /// Отменена
+  CANCELLED
+}
+
+enum TransformationStage {
+  /// 1. Диагностика — Комплексный анализ всех 5 уровней
+  DIAGNOSTICS
+  /// 2. Интеграция — Нахождение точек пересечения
+  INTEGRATION
+  /// 3. Стратегия — Индивидуальный план трансформации
+  STRATEGY
+  /// 4. Практика — Работа на всех уровнях одновременно
+  PRACTICE
+  /// 5. Результат — Устойчивые изменения во всех сферах
+  RESULT
+}
+
+enum ChakraType {
+  /// Муладхара — корневая чакра (выживание, безопасность)
+  ROOT
+  /// Свадхистхана — сакральная чакра (эмоции, творчество)
+  SACRAL
+  /// Манипура — чакра солнечного сплетения (воля, власть)
+  SOLAR_PLEXUS
+  /// Анахата — сердечная чакра (любовь, отношения)
+  HEART
+  /// Вишудха — горловая чакра (самовыражение)
+  THROAT
+  /// Аджна — чакра третьего глаза (интуиция, видение)
+  THIRD_EYE
+  /// Сахасрара — коронная чакра (духовность, связь с высшим)
+  CROWN
+}
+
+enum ColorType {
+  /// Весна (тёплые светлые тона)
+  SPRING
+  /// Лето (холодные светлые тона)
+  SUMMER
+  /// Осень (тёплые глубокие тона)
+  AUTUMN
+  /// Зима (холодные яркие тона)
+  WINTER
+}
+
+enum Archetype {
+  /// Невинный
+  INNOCENT
+  /// Обычный человек
+  EVERYMAN
+  /// Герой
+  HERO
+  /// Бунтарь
+  OUTLAW
+  /// Искатель
+  EXPLORER
+  /// Творец
+  CREATOR
+  /// Правитель
+  RULER
+  /// Маг
+  MAGICIAN
+  /// Любовник
+  LOVER
+  /// Заботливый
+  CAREGIVER
+  /// Шут
+  JESTER
+  /// Мудрец
+  SAGE
+}
+
+enum Gender {
+  /// Мужской
+  MALE
+  /// Женский
+  FEMALE
+  /// Другой
+  OTHER
+}
+
+// ============================================================================
+// CORE MODELS
+// ============================================================================
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  Boolean   @default(false) // Better Auth: Boolean вместо DateTime
+  image          String?
+  phoneNumber    String?
+  role           UserRole  @default(CLIENT)
+
+  // Notification preferences
+  emailNotifications Boolean @default(true) // Включить/выключить все email уведомления
+  notifySessionReminders Boolean @default(true) // Напоминания о сессиях
+  notifyNewPractices Boolean @default(true) // Уведомления о новых практиках
+  notifyPracticeDiary Boolean @default(true) // Напоминания о дневнике практик
+
+  // Relations for Better Auth
+  accounts       Account[]
+  sessions       Session[]
+
+  // Relations for IMOT functionality
+  clientProfile  Client?         // If user is a client
+  specialistClients Client[]  @relation("SpecialistClients") // If user is a specialist
+  specialistSessions TherapySession[] @relation("SpecialistSessions")
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Access control policies
+  // SPECIALIST может читать только своих клиентов через Client relation
+  @@allow('read', auth() == this || auth().role == ADMIN)
+  @@allow('read', auth().role == SPECIALIST && specialistClients?[specialist == auth()])
+  @@allow('update', auth() == this)
+  @@allow('create', true)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// BETTER AUTH MODELS
+// ============================================================================
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String    // Было: provider
+  accountId             String    // Было: providerAccountId
+  accessToken           String?   // Было: access_token
+  refreshToken          String?   // Было: refresh_token
+  accessTokenExpiresAt  DateTime? // Было: expires_at (Int)
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?   // Было: id_token
+  password              String?   // Better Auth: пароль хранится здесь
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  // Account: пользователь может только читать свои аккаунты
+  // Better Auth управляет созданием/удалением через prismaAdapter
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique  // Было: sessionToken
+  userId    String
+  expiresAt DateTime // Было: expires
+  ipAddress String?  // Better Auth: IP адрес
+  userAgent String?  // Better Auth: User Agent
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  // Session: пользователь может только читать свои сессии
+  // Better Auth управляет созданием/удалением через prismaAdapter
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String   // email пользователя
+  value      String   // Было: token
+  expiresAt  DateTime // Было: expires
+  type       String   @default("EMAIL_VERIFICATION") // EMAIL_VERIFICATION или PASSWORD_RESET
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+
+  // Access control: никто не может читать токены напрямую
+  @@deny('all', true)
+}
+
+// ============================================================================
+// CLIENT MODEL - Клиенты специалиста
+// ============================================================================
+
+model Client {
+  id             String   @id @default(cuid())
+
+  /// @form.exclude
+  userId         String   @unique
+  /// @form.exclude
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  specialistId   String
+  /// @form.exclude
+  specialist     User     @relation("SpecialistClients", fields: [specialistId], references: [id])
+
+  /// @form.title("Имя клиента")
+  /// @form.placeholder("Введите имя...")
+  name           String
+
+  /// @form.title("Email")
+  /// @form.fieldType("email")
+  email          String
+
+  /// @form.title("Телефон")
+  /// @form.fieldType("phone")
+  phone          String?
+
+  /// @form.title("Пол")
+  /// @form.fieldType("radioCard")
+  gender         Gender?
+
+  /// @form.title("Дата рождения")
+  /// @form.fieldType("date")
+  birthdate      DateTime?
+
+  /// @form.title("Фото")
+  photo          String?
+
+  /// @form.title("Основной запрос")
+  /// @form.fieldType("richText")
+  mainRequest    String?
+
+  /// @form.title("Заметки специалиста")
+  /// @form.fieldType("richText")
+  notes          String?
+
+  // Relations to 5 diagnostic profiles
+  /// @form.exclude
+  numerologyProfile   NumerologyProfile?
+  /// @form.exclude
+  neuroPsychProfile   NeuroPsychProfile?
+  /// @form.exclude
+  energyProfile       EnergyProfile?
+  /// @form.exclude
+  bodyProfile         BodyProfile?
+  /// @form.exclude
+  styleProfile        StyleProfile?
+
+  // Relations
+  /// @form.exclude
+  sessions            TherapySession[]
+  /// @form.exclude
+  transformationPlans TransformationPlan[]
+  /// @form.exclude
+  practices           Practice[]
+  /// @form.exclude
+  results             Result[]
+  /// @form.exclude
+  requestHistory      PrimaryRequestHistory[]
+
+  /// @form.exclude
+  createdAt      DateTime @default(now())
+  /// @form.exclude
+  updatedAt      DateTime @updatedAt
+
+  @@allow('all', auth() == specialist || auth().role == ADMIN)
+  @@allow('read', auth() == user)
+}
+
+// ============================================================================
+// THERAPY SESSION MODEL - Сессии с клиентами
+// ============================================================================
+
+model TherapySession {
+  id           String        @id @default(cuid())
+
+  /// @form.exclude
+  clientId     String
+  /// @form.exclude
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  specialistId String
+  /// @form.exclude
+  specialist   User          @relation("SpecialistSessions", fields: [specialistId], references: [id])
+
+  /// @form.title("Дата и время")
+  /// @form.fieldType("datetime")
+  scheduledAt  DateTime
+
+  /// @form.title("Длительность (мин)")
+  /// @form.props({ min: 15, max: 180 })
+  duration     Int           @default(60)
+
+  /// @form.title("Статус")
+  status       SessionStatus @default(SCHEDULED)
+
+  /// @form.title("Тема сессии")
+  topic        String?
+
+  /// @form.title("Заметки")
+  /// @form.fieldType("richText")
+  notes        String?
+
+  /// @form.title("Домашнее задание")
+  /// @form.fieldType("richText")
+  homework     String?
+
+  /// @form.title("Запись")
+  recordingUrl String?
+
+  /// @form.exclude
+  materials    String?
+
+  /// @form.title("Ссылка на созвон")
+  meetingUrl   String?
+
+  /// @form.exclude
+  paymentUrl   String?
+  /// @form.exclude
+  paymentStatus String?
+
+  /// @form.exclude
+  createdAt    DateTime      @default(now())
+  /// @form.exclude
+  updatedAt    DateTime      @updatedAt
+
+  @@allow('all', auth() == specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// ============================================================================
+// DIAGNOSTIC PROFILES - 5 уровней диагностики ИМОТ
+// ============================================================================
+
+// 1. НУМЕРОЛОГИЯ - Матрица судьбы
+model NumerologyProfile {
+  id          String   @id @default(cuid())
+  clientId    String   @unique
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Матрица судьбы (числа от 1 до 22)
+  lifePathNumber      Int?    // Число жизненного пути
+  destinyNumber       Int?    // Число судьбы
+  soulNumber          Int?    // Число души
+  personalityNumber   Int?    // Число личности
+  maturityNumber      Int?    // Число зрелости
+
+  // Жизненные циклы
+  currentCycle        String? // Текущий жизненный цикл
+  cycleDescription    String? // Описание цикла
+
+  // Таланты и дары
+  talents             String? // JSON массив талантов
+  gifts               String? // JSON массив даров
+
+  // Предназначение
+  purpose             String? // Описание предназначения
+
+  // Кармические уроки
+  karmicLessons       String? // JSON массив кармических уроков
+  karmicDebts         String? // Кармические долги
+
+  // Расчетная матрица (JSON)
+  matrixData          String? // Полная матрица судьбы в JSON
+
+  notes               String? // Заметки специалиста
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// 2. НЕЙРОПСИХОЛОГИЯ - Паттерны поведения
+model NeuroPsychProfile {
+  id              String   @id @default(cuid())
+  clientId        String   @unique
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Паттерны поведения
+  behaviorPatterns     String? // JSON массив паттернов
+
+  // Когнитивные особенности
+  cognitiveStyle       String? // Стиль мышления
+  learningStyle        String? // Стиль обучения
+  decisionMaking       String? // Стиль принятия решений
+
+  // Защитные механизмы
+  defenseMechanisms    String? // JSON массив защитных механизмов
+  copingStrategies     String? // Стратегии совладания
+
+  // Эмоциональное реагирование
+  emotionalPatterns    String? // Эмоциональные паттерны
+  triggers             String? // Триггеры
+
+  // Ресурсные состояния
+  resourceStates       String? // JSON массив ресурсных состояний
+  strengths            String? // Сильные стороны
+
+  notes                String? // Заметки специалиста
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// 3. ЭНЕРГЕТИКА - 7 чакр и энергетическая карта
+model EnergyProfile {
+  id              String   @id @default(cuid())
+  clientId        String   @unique
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Состояние 7 чакр (оценка 1-10)
+  rootChakra          Int? // Муладхара
+  sacralChakra        Int? // Свадхистхана
+  solarPlexusChakra   Int? // Манипура
+  heartChakra         Int? // Анахата
+  throatChakra        Int? // Вишудха
+  thirdEyeChakra      Int? // Аджна
+  crownChakra         Int? // Сахасрара
+
+  // Энергетические блоки
+  energyBlocks        String? // JSON описание блоков
+  blockageAreas       String? // Области блокировок
+
+  // Денежный канал
+  moneyChannelLevel   Int?    // Уровень денежного канала (1-10)
+  moneyBlockages      String? // Блоки в денежном канале
+
+  // Энергия отношений
+  relationshipEnergy  Int?    // Уровень энергии отношений (1-10)
+  relationshipBlocks  String? // Блоки в отношениях
+
+  // Жизненная сила
+  vitalityLevel       Int?    // Уровень жизненной силы (1-10)
+  energyLeaks         String? // Утечки энергии
+
+  notes               String? // Заметки специалиста
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// 4. ТЕЛО - Телесная карта и психосоматика
+model BodyProfile {
+  id                 String   @id @default(cuid())
+  clientId           String   @unique
+  client             Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Карта зажимов (JSON схема тела)
+  tensionMap         String?  // JSON карта зажимов
+  tensionAreas       String?  // Описание областей зажимов
+
+  // Психосоматика
+  psychosomaticIssues String? // JSON список психосоматических проявлений
+  symptoms           String?  // Симптомы
+  chronicConditions  String?  // Хронические состояния
+
+  // Паттерны дыхания
+  breathingPatterns  String?  // Паттерны дыхания
+  breathingIssues    String?  // Проблемы с дыханием
+
+  // Телесные ресурсы
+  bodyResources      String?  // Телесные ресурсы
+  physicalStrengths  String?  // Физические сильные стороны
+
+  // Связь тело-психика
+  bodyMindConnection String?  // Описание связи тело-психика
+  bodyMessages       String?  // Послания тела
+
+  notes              String?  // Заметки специалиста
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// 5. СТИЛЬ - Цветотип и архетип
+model StyleProfile {
+  id                String     @id @default(cuid())
+  clientId          String     @unique
+  client            Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Цветотип
+  colorType         ColorType?
+  colorPalette      String?    // JSON палитра цветов
+  colorRecommendations String? // Рекомендации по цветам
+
+  // Архетип
+  primaryArchetype   Archetype?
+  secondaryArchetype Archetype?
+  archetypeDescription String? // Описание архетипа
+
+  // Самовыражение
+  selfExpression     String?   // Как клиент выражает себя
+  authenticityLevel  Int?      // Уровень аутентичности (1-10)
+
+  // Внешнее = внутреннее
+  innerOuterAlignment String?  // Соответствие внутреннего и внешнего
+  styleConflicts     String?   // Конфликты в стиле
+
+  // Рекомендации
+  styleRecommendations String? // Рекомендации по стилю
+
+  notes              String?   // Заметки специалиста
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// ============================================================================
+// PRIMARY REQUEST HISTORY - История изменения основного запроса клиента
+// ============================================================================
+
+model PrimaryRequestHistory {
+  id             String   @id @default(cuid())
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // История запроса
+  requestText    String   // Текст запроса в этой версии
+  version        Int      // Номер версии (начинается с 1)
+
+  // Кто и почему изменил
+  changedBy      String?  // ID пользователя, который изменил (specialist или client user)
+  changeReason   String?  // Причина изменения
+
+  // Контекст изменения
+  planId         String?  // ID плана, при утверждении которого был изменен запрос
+  isApproved     Boolean  @default(false) // Утверждена ли эта версия специалистом
+  approvedAt     DateTime? // Когда утверждена
+
+  createdAt      DateTime @default(now())
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// ============================================================================
+// TRANSFORMATION PLAN - План трансформации
+// ============================================================================
+
+model TransformationPlan {
+  id            String              @id @default(cuid())
+
+  /// @form.exclude
+  clientId      String
+  /// @form.exclude
+  client        Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Текущий этап")
+  currentStage  TransformationStage @default(DIAGNOSTICS)
+
+  /// @form.title("Основной запрос")
+  /// @form.fieldType("richText")
+  primaryRequest String?
+
+  /// @form.title("Диагностика")
+  /// @form.fieldType("richText")
+  diagnosticsDescription  String?
+
+  /// @form.title("Интеграция")
+  /// @form.fieldType("richText")
+  integrationDescription  String?
+
+  /// @form.title("Стратегия")
+  /// @form.fieldType("richText")
+  strategyDescription     String?
+
+  /// @form.title("План практик")
+  /// @form.fieldType("richText")
+  practiceDescription     String?
+
+  /// @form.title("Ожидаемые результаты")
+  /// @form.fieldType("richText")
+  expectedResults         String?
+
+  /// @form.exclude
+  keyPoints      String?
+
+  /// @form.exclude
+  priorities     String?
+
+  /// @form.title("Дата начала")
+  /// @form.fieldType("date")
+  startDate      DateTime?
+
+  /// @form.title("Дата окончания")
+  /// @form.fieldType("date")
+  expectedEndDate DateTime?
+
+  /// @form.title("Активен")
+  /// @form.fieldType("switch")
+  isActive       Boolean  @default(true)
+
+  /// @form.title("Завершён")
+  /// @form.fieldType("switch")
+  isCompleted    Boolean  @default(false)
+
+  /// @form.title("Заметки")
+  /// @form.fieldType("richText")
+  notes          String?
+
+  /// @form.exclude
+  createdAt      DateTime @default(now())
+  /// @form.exclude
+  updatedAt      DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}
+
+// ============================================================================
+// PRACTICE - Практики и упражнения
+// ============================================================================
+
+model Practice {
+  id            String   @id @default(cuid())
+
+  /// @form.exclude
+  clientId      String
+  /// @form.exclude
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Название")
+  title         String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description   String
+
+  /// @form.title("Уровень")
+  /// @form.placeholder("numerology, energy, body...")
+  level         String
+
+  /// @form.title("Инструкции")
+  /// @form.fieldType("richText")
+  instructions  String
+
+  /// @form.title("Частота")
+  frequency     String?
+
+  /// @form.title("Длительность")
+  duration      String?
+
+  /// @form.exclude
+  materials     String?
+
+  /// @form.title("Видео")
+  videoUrl      String?
+
+  /// @form.title("Аудио")
+  audioUrl      String?
+
+  /// @form.title("Назначена")
+  /// @form.fieldType("switch")
+  isAssigned    Boolean  @default(true)
+
+  /// @form.title("Выполнена")
+  /// @form.fieldType("switch")
+  isCompleted   Boolean  @default(false)
+
+  /// @form.title("Дата выполнения")
+  /// @form.fieldType("datetime")
+  completedAt   DateTime?
+
+  /// @form.title("Заметки клиента")
+  /// @form.fieldType("textarea")
+  clientNotes   String?
+
+  /// @form.title("Заметки специалиста")
+  /// @form.fieldType("richText")
+  notes         String?
+
+  /// @form.exclude
+  createdAt     DateTime @default(now())
+  /// @form.exclude
+  updatedAt     DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  // Клиент может только читать и обновлять (заметки), но НЕ удалять практики
+  @@allow('read,update', auth() == client.user)
+}
+
+// ============================================================================
+// RESULT - Результаты и прогресс
+// ============================================================================
+
+model Result {
+  id            String   @id @default(cuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // К какому уровню относится
+  level         String   // "numerology", "neuropsych", "energy", "body", "style", "overall"
+
+  // Измерение (что измеряем)
+  metric        String   // Например: "Уровень осознанности", "Состояние чакры", etc.
+  value         Int      // Значение (1-10)
+
+  // Контекст
+  description   String?  // Описание изменения
+
+  // Связь с практикой
+  practiceId    String?  // Опционально - связь с практикой
+
+  // Дата измерения
+  measuredAt    DateTime @default(now())
+
+  notes         String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@allow('all', auth() == client.specialist || auth().role == ADMIN)
+  @@allow('read', auth() == client.user)
+}

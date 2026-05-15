@@ -1,0 +1,20 @@
+services:
+  app:
+    image: pravda:latest
+    container_name: pravda-app
+    restart: always
+    ports:
+      - '3007:3007'
+    environment:
+      TZ: Europe/Moscow
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

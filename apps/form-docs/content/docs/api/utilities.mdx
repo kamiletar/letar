@@ -1,0 +1,182 @@
+---
+title: Utilities
+description: Schema helpers, meta functions, and relation providers
+---
+
+## UI Metadata Helpers
+
+Functions to enrich Zod schemas with UI metadata.
+
+### withUIMeta / withUIMetaDeep
+
+Add UI metadata to schema fields:
+
+```tsx
+import { withUIMeta, withUIMetaDeep } from '@letar/forms'
+
+// Add meta to a single field
+const nameField = withUIMeta(z.string(), {
+  title: 'Full Name',
+  placeholder: 'Enter name',
+})
+
+// Add meta to all fields in an object
+const Schema = withUIMetaDeep(
+  z.object({
+    name: z.string(),
+    email: z.string().email(),
+  }),
+  {
+    name: { title: 'Name' },
+    email: { title: 'Email' },
+  }
+)
+```
+
+### Type-specific meta helpers
+
+```tsx
+import { textMeta, numberMeta, booleanMeta, dateMeta, enumMeta, relationMeta } from '@letar/forms'
+
+z.string().meta(textMeta('Title', { placeholder: 'Enter...' }))
+z.number().meta(numberMeta('Price', { min: 0, currency: 'USD' }))
+z.boolean().meta(booleanMeta('Active'))
+z.date().meta(dateMeta('Birthday'))
+z.enum(['a', 'b']).meta(enumMeta('Status'))
+```
+
+## Schema Traversal
+
+Utilities for walking Zod schemas.
+
+### traverseSchema
+
+Walk all fields in a schema:
+
+```tsx
+import { traverseSchema } from '@letar/forms'
+
+traverseSchema(Schema, (path, fieldSchema) => {
+  console.log(path, fieldSchema._def.typeName)
+})
+```
+
+### getFieldPaths
+
+Get all field paths from a schema:
+
+```tsx
+import { getFieldPaths } from '@letar/forms'
+
+const paths = getFieldPaths(Schema)
+// ['name', 'email', 'address.street', 'address.city']
+```
+
+## Constraint Extraction
+
+### getZodConstraints
+
+Extract validation constraints from a Zod schema:
+
+```tsx
+import { getZodConstraints } from '@letar/forms'
+
+const constraints = getZodConstraints(z.string().min(2).max(100).email())
+// { minLength: 2, maxLength: 100, format: 'email' }
+```
+
+### generateConstraintHint
+
+Generate human-readable hint text from constraints:
+
+```tsx
+import { generateConstraintHint } from '@letar/forms'
+
+const hint = generateConstraintHint(constraints)
+// "2–100 characters, must be a valid email"
+```
+
+## Field Type Mapping
+
+### resolveFieldType
+
+Determine which field component to render based on schema type:
+
+```tsx
+import { resolveFieldType } from '@letar/forms'
+
+const fieldType = resolveFieldType(z.string().email())
+// 'string' (with type="email" hint)
+```
+
+## createForm
+
+Create extended forms with custom fields, selects, and lazy loading.
+See the full [createForm guide](/docs/guides/create-form) for details.
+
+```tsx
+import { createForm } from '@letar/forms'
+
+const AppForm = createForm({
+  extraFields: { PlateNumber: FieldPlateNumber },
+  extraSelects: { VideoCodec: SelectVideoCodec },
+  lazySelects: {
+    Category: () => import('./selects/select-category').then((m) => m.SelectCategory),
+  },
+})
+
+// Use: <AppForm.Field.PlateNumber name="plate" />
+// Use: <AppForm.Select.VideoCodec name="codec" />
+```
+
+## RelationFieldProvider
+
+Provides relation data to form fields. Wraps the form component.
+
+```tsx
+import { RelationFieldProvider } from '@letar/forms'
+
+;<RelationFieldProvider
+  relations={{
+    category: {
+      useQuery: useFindManyCategory,
+      labelField: 'name',
+      valueField: 'id',
+    },
+  }}
+>
+  <Form schema={Schema} onSubmit={save}>
+    <Form.Field.Select name="categoryId" />
+  </Form>
+</RelationFieldProvider>
+```
+
+| Prop        | Type                             | Description                   |
+| ----------- | -------------------------------- | ----------------------------- |
+| `relations` | `Record<string, RelationConfig>` | Map of relation name → config |
+| `children`  | `ReactNode`                      | Form content                  |
+
+### RelationConfig
+
+| Prop               | Type                        | Description                                    |
+| ------------------ | --------------------------- | ---------------------------------------------- |
+| `useQuery`         | `() => { data, isLoading }` | Hook returning data array                      |
+| `labelField`       | `string`                    | Field to use as option label                   |
+| `valueField`       | `string`                    | Field to use as option value (default: `'id'`) |
+| `descriptionField` | `string?`                   | Field for option description                   |
+
+## withRelations
+
+HOC alternative to `RelationFieldProvider`:
+
+```tsx
+import { withRelations } from '@letar/forms'
+
+const EnhancedForm = withRelations(BaseForm, {
+  category: { useQuery: useFindManyCategory, labelField: 'name' },
+})
+
+// Use: <EnhancedForm schema={Schema} onSubmit={save} />
+```
+
+See [Relation Fields](/docs/guides/relation-fields) for full guide.

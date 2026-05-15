@@ -1,0 +1,29 @@
+services:
+  app:
+    image: animatrona-landing:latest
+    container_name: animatrona-landing-app
+    restart: always
+    ports:
+      - '3008:3008'
+    environment:
+      TZ: Europe/Moscow
+      # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      PORT: 3008
+      # GitHub API для получения релизов (опционально)
+      # Без токена работает, но с rate limit 60 запросов/час
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      # Секрет для instant revalidation кэша через GitHub Actions
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

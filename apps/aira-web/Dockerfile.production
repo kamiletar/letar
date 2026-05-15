@@ -1,0 +1,28 @@
+# Dockerfile.production - для уже собранных приложений
+# Используется когда сборка выполнена на сервере с nx build
+# Build context: workspace root (/home/deploy/lena)
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Копируем уже собранный standalone output
+COPY --chown=nextjs:nodejs apps/aira-web/.next/standalone ./
+
+# Копируем статику и public (не включаются в standalone автоматически)
+COPY --chown=nextjs:nodejs apps/aira-web/.next/static ./apps/aira-web/.next/static
+COPY --chown=nextjs:nodejs apps/aira-web/public ./apps/aira-web/public
+
+USER nextjs
+
+EXPOSE 3017
+
+ENV PORT=3017
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/aira-web/server.js"]

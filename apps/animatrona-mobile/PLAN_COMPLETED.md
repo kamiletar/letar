@@ -1,0 +1,299 @@
+# Выполненные задачи — Animatrona Mobile
+
+Детальное описание всех реализованных фич.
+
+## Версия 0.2.1
+
+### Resume Overlay и UX улучшения
+
+- **Resume Overlay** — видео не загружается до выбора пользователя "Продолжить" или "Сначала"
+- **Кнопка "Продолжить просмотр"** в AnimeScreen — автоматический переход на сохранённую позицию последнего эпизода
+- `useWatchProgress`: добавлена опция `skipResumePrompt` для пропуска диалога при внешнем `startTime`
+- PlayerScreen: логика отложенного рендеринга видео через `userMadeResumeDecision`
+
+---
+
+## Версия 0.2.0
+
+### VLC-style жесты и улучшение плеера
+
+| Фича                              | Статус | Примечания                         |
+| --------------------------------- | ------ | ---------------------------------- |
+| **Масштаб видео (contain/cover)** | ✅     | JS-based вычисление размеров       |
+| **Сикбар (прогресс-бар)**         | ✅     | Динамическая ширина через onLayout |
+| **Блокировка экрана**             | ✅     | Упрощена до кнопки разблокировки   |
+| **ASS субтитры**                  | ✅     | libass через JNI, fontScale=1.5    |
+| **SRT субтитры**                  | ✅     | JS парсинг                         |
+| **Double tap ±10 сек**            | ✅     | PanResponder                       |
+| **Свайп громкость (справа)**      | ✅     | react-native-volume-manager        |
+| **Свайп яркость (слева)**         | ✅     | react-native-screen-brightness     |
+| **Свайп перемотка**               | ✅     | Горизонтальный свайп               |
+| **Long press = 2x**               | ✅     | Ускорение при удержании            |
+| **Тап = показ контролов**         | ✅     | С задержкой для double tap         |
+
+### Улучшения синхронизации
+
+- Улучшена синхронизация видео и аудиодорожек
+- Исправлена навигация между экранами
+- Обновлён файловый плеер
+
+---
+
+## Версия 0.1.0
+
+### Фаза 1: Инфраструктура ✅
+
+- React Native проект с TypeScript
+- Nx интеграция (project.json)
+- Metro bundler для монорепо
+- Тёмная тема Tamagui (purple accent)
+- React Navigation 7.x с типизацией
+- Zustand store с AsyncStorage persistence
+
+### Фаза 2: Библиотека ✅
+
+- **LibraryScreen** с FlatList (2-колоночная сетка)
+- Поиск с debounce
+- Фильтры по статусу просмотра
+- Сортировка (название, год, рейтинг, прогресс)
+- Pull-to-refresh
+- Карточка "Продолжить просмотр"
+
+### Фаза 3: Детали аниме ✅
+
+- **AnimeScreen** с blur header
+- SectionList по сезонам со sticky headers
+- Прогресс эпизодов с индикаторами
+- Жанры, описание, метаданные
+
+### Фаза 4: Видеоплеер ✅
+
+- **PlayerScreen** с react-native-video (ExoPlayer)
+- Выбор аудиодорожек (TrackSelector)
+- Выбор субтитров (VTT через нативный TextTrack)
+- Fullscreen/Landscape + immersive mode
+- Автосохранение прогресса
+- Wake lock
+
+### Фаза 5: Жесты ✅
+
+- GestureLayer с react-native-gesture-handler
+- Double-tap ±10 сек с ripple эффектом
+- Swipe громкость (левая зона)
+- Swipe яркость (правая зона)
+- Seek свайп (центральная зона)
+- Индикаторы с Reanimated анимациями
+
+### Фаза 6: Дополнительные фичи ✅
+
+- SkipChapterButton (OP/ED)
+- NextEpisodeOverlay с countdown
+- SpeedSelector (0.5x - 2x)
+- OfflineIndicator
+- PiP режим (usePictureInPicture + PipModule)
+- ChapterMarkers на прогресс-баре
+
+### Нативные модули
+
+#### libs/exoplayer-ass
+
+- Kotlin JNI wrapper для libass
+- C++ мост к libass с alpha compositing
+- React Native компонент NativeAssView
+- Интеграция с CMake и FFmpeg Kit
+
+#### libs/exoplayer-sync
+
+- SyncVideoView с MergingMediaSource
+- Синхронизация видео + внешняя аудиодорожка
+
+### API клиент
+
+- Типизированные API функции для Mobile Server
+- Поддержка локальных файлов и IPFS (CID)
+- Конвертация субтитров ASS → VTT на сервере
+
+### Экраны
+
+| Экран         | Описание                       |
+| ------------- | ------------------------------ |
+| ConnectScreen | QR сканер, ручной ввод URL     |
+| LibraryScreen | Библиотека с фильтрами/поиском |
+| AnimeScreen   | Детали аниме, список эпизодов  |
+| PlayerScreen  | Видеоплеер со всеми контролами |
+
+### Хуки
+
+| Хук                 | Назначение                      |
+| ------------------- | ------------------------------- |
+| useNetworkStatus    | Отслеживание состояния сети     |
+| useBrightness       | Управление яркостью экрана      |
+| useWakeLock         | Предотвращение засыпания экрана |
+| usePlayerGestures   | Обработка жестов плеера         |
+| usePictureInPicture | Picture-in-Picture режим        |
+| useSystemVolume     | Нативная громкость устройства   |
+| useLockScreen       | Блокировка экрана плеера        |
+
+---
+
+## Версия 0.5.5
+
+### Phase 9: React Native 0.84 + реструктуризация зависимостей
+
+#### 9.1 Реструктуризация зависимостей
+
+- [x] **Pure JS зависимости перенесены в корневой package.json** — zustand, @react-navigation/_, @tamagui/_, lucide-react-native, @babel/runtime, babel-plugin-module-resolver
+- [x] **Нативные модули перенесены в корневой package.json** — async-storage, blob-util, gesture-handler, safe-area-context, svg, video
+- [x] **Autolinking через react-native.config.js** — нативные модули объявлены явно для autolinking (Gradle не сканирует корневой package.json)
+- [x] **Transitive devDeps убраны** — hermes-compiler, @react-native/community-cli-plugin, @react-native/babel-plugin-codegen приходят через react-native
+- [x] **Минимальный локальный package.json** — только react, react-native, @react-native/codegen, @react-native/gradle-plugin (нужны для Gradle file paths)
+
+#### 9.2 Обновление React Native 0.83.2 → 0.84.1
+
+- [x] **Hermes V1** — новый JS-движок по умолчанию (~10-15% улучшение TTI)
+- [x] **Android SDK 36** — compileSdkVersion, targetSdkVersion, buildToolsVersion
+- [x] **Kotlin 2.1.20** — обновлён с 2.0.21
+- [x] **AsyncStorage v3** — обновлён с v2, добавлен local_repo Maven для shared_storage артефакта
+- [x] **Обновлены нативные модули** — safe-area-context 5.7.0, svg 15.15.3, blob-util 0.24.7, CLI 20.1.2
+- [x] **APK собирается успешно** — debug 77 MB, все нативные модули совместимы
+
+#### 9.3 Deprecation warnings
+
+- [x] `currentActivity` → `reactApplicationContext.getCurrentActivity()` в BrightnessModule, PipModule
+- [x] `TurboReactPackage` → `BaseReactPackage` в TurboModulesPackage
+- [x] `ReactNativeHost` → убран, используется `ReactHost` + `loadReactNative()` (RN 0.84 template)
+
+---
+
+## Версия 0.5.0–0.5.4
+
+### Phase 8: Баг-фиксы и polish
+
+#### 8.1 Критичные баги плеера (v0.5.1)
+
+- [x] **Wake Lock** — реализован через `setKeepScreenOn` в `BrightnessModule` (FLAG_KEEP_SCREEN_ON)
+- [x] **Прогресс не обновляется при возврате** — заменён `useEffect` на `useFocusEffect` в AnimeScreen
+- [x] **Частота сохранения прогресса** — `SAVE_INTERVAL_MS = 30_000` (1 раз в 30 сек)
+- [x] **Регулировка скорости** — добавлен `rate` prop в стек: SyncVideoViewNativeComponent → SyncVideoView.kt → SyncVideoViewManager.kt → SyncVideoPlayer → PlayerScreen
+- [x] **Субтитры не совпадают с видео** — обёрнуты в общий `View style={videoStyle}`, субтитры относительно видео-контейнера
+
+#### 8.2 PiP (v0.5.2)
+
+- [x] **PiP показывает интерфейс плеера** — при входе в PiP все модалки закрываются через `useEffect`
+
+#### 8.3 Оффлайн (v0.5.4)
+
+- [x] **Нельзя открыть библиотеку оффлайн** — `fetchApiWithCache` пробует кэш при ЛЮБОЙ ошибке; `cachePostersForLibrary` читает `isServerReachable` из store; `posterMap` в deps `renderAnimeItem`
+- [x] **Загрузка прерывается** — `task.progress()` всегда регистрируется; `NO_PROGRESS_TIMEOUT` увеличен до 5 минут для IPFS DHT-поиска
+
+#### 8.4 UI/UX polish (v0.5.2)
+
+- [x] **Иконки на главной монохромные** — `⚙️`→`<Settings2>`, `📥`→`<Download>`, `▶`→`<Play>` (lucide-react-native)
+- [x] **Экран ошибки** — кнопка "Повторить" с `RotateCcw` иконкой; `retryCount` state для повторной загрузки
+- [x] **UTF символы** — заменены на lucide иконки (⬇→Download, ✓→Check, ▶→Play)
+
+#### 8.5 Умные переходы между эпизодами (v0.5.3)
+
+- [x] **Автопереход при пропуске эндинга** — если endTime главы ≈ конец видео (≤10 сек), показывает NextEpisodeOverlay
+- [x] **Пометка серии просмотренной** — определяет главу эндинга по ключевым словам и вызывает `saveProgressToServer` с `completed: true`
+- [x] **Предзагрузка следующего эпизода** — за 3 минуты до конца HEAD-запросы для прогрева DNS/IPFS gateway
+
+#### 8.6 Режим просмотра (v0.5.3)
+
+- [x] **Предпочтения аудио/субтитров** — `viewingMode: 'original' | 'dubbed' | null` в `playerSettings` store, персистится в AsyncStorage
+- [x] **Применяется автоматически** при загрузке нового эпизода
+- [x] **Кнопка Languages** — в левой VLC-группе, фиолетовая когда режим активен
+
+---
+
+## Версия 0.5.0
+
+### Phase 7: Release и оптимизация
+
+- [x] **Signed release APK** — автоматическая подпись через `assembleRelease`, APK 38 MB (vs 85 MB debug)
+- [x] **Strip debug symbols из libass.so** — arm64-v8a: 21 MB → 3.5 MB (-83%), armeabi-v7a: 17 MB → 2.6 MB (-85%)
+
+### Phase 6: React Native 0.83 + New Architecture
+
+- [x] **Upgrade RN 0.80.3 → 0.83.2** — React 19.2.4, Gradle 8.13, New Architecture enabled
+- [x] **react-native-reanimated удалён** — заменён на стандартный `Animated` API (`FadeView`/`ZoomFadeView`)
+- [x] **TurboModules миграция** — 6 модулей с TypeScript specs в `specs/`, Kotlin extends `Native*Spec`
+- [x] **Fabric Components** — SyncVideoView, AssSubtitleView с `codegenNativeCommands`
+- [x] **Metro resolver для bun monorepo** — deep imports `react-native/Libraries/...` resolve к единой копии
+- [x] **Очистка legacy кода** — удалены 6 `*Package.kt`, все `NativeModules.*` вызовы
+
+---
+
+## Версия 0.4.0–0.4.2
+
+### Phase 5: Фоновое скачивание (v0.4.0)
+
+- [x] **Android Foreground Service для загрузок** — `DownloadService.kt`, notification с прогрессом, `foregroundServiceType=dataSync`
+- [x] **Баг-фикс зависания загрузки на 100%** — watchdog таймеры для зависания и отсутствия прогресса
+
+### Прогресс просмотра в списке эпизодов (v0.4.2)
+
+- [x] Загрузка прогресса из AsyncStorage для всех эпизодов
+- [x] Прогресс-бар для незавершённых (1-89%), зелёная точка для завершённых (≥90%)
+
+### Баг-фиксы (v0.4.1)
+
+- [x] Краш при нажатии аппаратных кнопок громкости и Назад
+- [x] PiP при паузе — видео не сворачивается если на паузе
+
+---
+
+## Версия 0.3.0–0.3.4
+
+### Phase 4: Оффлайн (v0.3.0–v0.3.1)
+
+- [x] Кэширование данных библиотеки (AsyncStorage, fetchApiWithCache)
+- [x] Offline store (isServerReachable, mode online/offline)
+- [x] Download Manager (очередь FIFO, видео + аудио + субтитры)
+- [x] Кэш постеров (react-native-blob-util, file:// URI)
+- [x] Оффлайн воспроизведение (file:// URI)
+- [x] Синхронизация прогресса при восстановлении связи
+- [x] Управление хранилищем (визуальная полоса, очистка кэша)
+
+### Phase 3: Polish (v0.3.1–v0.3.4)
+
+- [x] Кумулятивный мульти-тап ±10/20/30 с иконками lucide
+- [x] Горизонтальный свайп перемотка с индикатором
+- [x] Pinch to zoom (масштабирование щипком)
+- [x] Улучшение UI overlay (SVG градиенты, scale анимация)
+- [x] PiP (Picture-in-Picture)
+
+### Phase 2: Анимационные фичи (v0.3.0)
+
+- [x] Skip Intro/Outro кнопка (chapters из API)
+- [x] Next Episode overlay (за 30 сек до конца)
+- [x] Убран react-native-reanimated (несовместим с APK)
+- [x] Нативный BrightnessModule и VolumeModule
+- [x] VLC-style нижние контролы плеера
+- [x] Навигация между эпизодами (Prev/Next)
+
+### VLC-style жесты — полная таблица (v0.2.0–v0.3.4)
+
+| Фича                                | Версия |
+| ----------------------------------- | ------ |
+| Масштаб видео (contain/cover)       | v0.2.0 |
+| Сикбар (прогресс-бар)               | v0.2.0 |
+| Блокировка экрана                   | v0.2.0 |
+| ASS субтитры (libass JNI)           | v0.2.0 |
+| SRT субтитры (JS парсинг)           | v0.2.0 |
+| Multi-tap ±10/20/30 сек             | v0.3.1 |
+| Горизонтальный свайп перемотка      | v0.3.1 |
+| Свайп громкость (справа)            | v0.2.0 |
+| Свайп яркость (слева)               | v0.2.0 |
+| Long press = 2x                     | v0.2.0 |
+| Тап = показ контролов               | v0.2.0 |
+| Автоскрытие контролов (4 сек)       | v0.2.0 |
+| Landscape UI                        | v0.2.0 |
+| VLC-style нижние контролы           | v0.3.0 |
+| Убран reanimated                    | v0.3.0 |
+| Настройки плеера (размер субтитров) | v0.3.4 |
+| Haptic feedback (HapticsModule)     | v0.3.4 |
+
+---
+
+**Последнее обновление:** 2026-03-02

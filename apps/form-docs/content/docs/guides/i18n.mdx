@@ -1,0 +1,79 @@
+---
+title: Internationalization
+description: Localize field labels, validation errors, and options
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="i18n" height={500} />
+
+## Overview
+
+`@letar/forms/i18n` provides full internationalization support including localized labels, validation error messages, and select options.
+
+## Setup
+
+```tsx
+import { FormI18nProvider } from '@letar/forms/i18n'
+
+const translations = {
+  en: {
+    fields: {
+      name: 'Full Name',
+      email: 'Email Address',
+    },
+    validation: {
+      required: 'This field is required',
+      min: 'Must be at least {min} characters',
+    },
+  },
+  ru: {
+    fields: {
+      name: 'Полное имя',
+      email: 'Электронная почта',
+    },
+    validation: {
+      required: 'Обязательное поле',
+      min: 'Минимум {min} символов',
+    },
+  },
+}
+
+function App() {
+  return (
+    <FormI18nProvider locale="en" translations={translations}>
+      <MyForm />
+    </FormI18nProvider>
+  )
+}
+```
+
+## Localized Options
+
+Use `useLocalizedOptions` to translate select options:
+
+```tsx
+import { useLocalizedOptions } from '@letar/forms/i18n'
+
+const options = useLocalizedOptions([
+  { value: 'active', label: { en: 'Active', ru: 'Активный' } },
+  { value: 'inactive', label: { en: 'Inactive', ru: 'Неактивный' } },
+])
+```
+
+## Zod Error Translation
+
+Create a custom error map for Zod validation messages:
+
+```tsx
+import { createFormErrorMap } from '@letar/forms/i18n'
+
+const errorMap = createFormErrorMap({
+  too_small: ({ minimum }) => `Must be at least ${minimum}`,
+  too_big: ({ maximum }) => `Must be at most ${maximum}`,
+  invalid_string: ({ validation }) => {
+    if (validation === 'email') return 'Invalid email'
+    return 'Invalid format'
+  },
+})
+```

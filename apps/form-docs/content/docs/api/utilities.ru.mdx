@@ -1,0 +1,117 @@
+---
+title: Утилиты
+description: Хелперы схем, мета-функции и провайдеры связей
+---
+
+## UI Metadata хелперы
+
+### withUIMeta / withUIMetaDeep
+
+Добавление UI метаданных к полям схемы:
+
+```tsx
+import { withUIMeta, withUIMetaDeep } from '@letar/forms'
+
+const nameField = withUIMeta(z.string(), { title: 'Имя', placeholder: 'Введите имя' })
+
+const Schema = withUIMetaDeep(
+  z.object({
+    name: z.string(),
+    email: z.string().email(),
+  }),
+  {
+    name: { title: 'Имя' },
+    email: { title: 'Email' },
+  }
+)
+```
+
+### Типо-специфичные хелперы
+
+```tsx
+import { textMeta, numberMeta, booleanMeta, dateMeta, enumMeta, relationMeta } from '@letar/forms'
+
+z.string().meta(textMeta('Заголовок', { placeholder: 'Введите...' }))
+z.number().meta(numberMeta('Цена', { min: 0 }))
+z.boolean().meta(booleanMeta('Активный'))
+```
+
+## Обход схемы
+
+### traverseSchema
+
+Обход всех полей схемы:
+
+```tsx
+traverseSchema(Schema, (path, fieldSchema) => {
+  console.log(path, fieldSchema._def.typeName)
+})
+```
+
+### getFieldPaths
+
+Получить все пути полей:
+
+```tsx
+const paths = getFieldPaths(Schema)
+// ['name', 'email', 'address.street', 'address.city']
+```
+
+## Извлечение constraints
+
+### getZodConstraints
+
+```tsx
+const constraints = getZodConstraints(z.string().min(2).max(100).email())
+// { minLength: 2, maxLength: 100, format: 'email' }
+```
+
+### generateConstraintHint
+
+Генерация подсказки из constraints с поддержкой i18n:
+
+```tsx
+generateConstraintHint(constraints) // → "Minimum 2 characters"
+generateConstraintHint(constraints, 'ru') // → "Минимум 2 символа"
+```
+
+## createForm
+
+Создание расширенной формы. См. [createForm guide](/docs/guides/create-form).
+
+```tsx
+const AppForm = createForm({
+  extraFields: { PlateNumber: FieldPlateNumber },
+  lazySelects: {
+    Category: () => import('./selects/select-category').then((m) => m.SelectCategory),
+  },
+})
+```
+
+## RelationFieldProvider
+
+Предоставляет данные связей для полей формы:
+
+```tsx
+<RelationFieldProvider
+  relations={{
+    category: { useQuery: useFindManyCategory, labelField: 'name' },
+  }}
+>
+  <Form schema={Schema} onSubmit={save}>
+    <Form.Field.Select name="categoryId" />
+  </Form>
+</RelationFieldProvider>
+```
+
+## withRelations
+
+HOC-альтернатива RelationFieldProvider:
+
+```tsx
+const EnhancedForm = withRelations(BaseForm, {
+  category: { useQuery: useFindManyCategory, labelField: 'name' },
+})
+```
+
+См. [Связанные поля](/docs/guides/relation-fields).

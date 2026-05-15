@@ -1,0 +1,82 @@
+---
+title: Groups & Arrays
+description: Nested objects and dynamic arrays of fields
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="groups" height={550} />
+
+## Form.Group
+
+Group fields into nested objects:
+
+```tsx
+const Schema = z.object({
+  address: z.object({
+    street: z.string().meta({ ui: { title: 'Street' } }),
+    city: z.string().meta({ ui: { title: 'City' } }),
+    zip: z.string().meta({ ui: { title: 'ZIP Code' } }),
+  }),
+})
+
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Group name="address">
+    <Form.Field.String name="street" />   {/* → address.street */}
+    <Form.Field.String name="city" />     {/* → address.city */}
+    <Form.Field.String name="zip" />      {/* → address.zip */}
+  </Form.Group>
+</Form>
+```
+
+## Form.Group.List
+
+Dynamic arrays of items with add/remove/reorder:
+
+```tsx
+const Schema = z.object({
+  phones: z.array(z.object({
+    number: z.string().meta({ ui: { title: 'Phone Number' } }),
+    type: z.enum(['mobile', 'home', 'work']).meta({ ui: { title: 'Type' } }),
+  })),
+})
+
+<Form schema={Schema} initialValue={{ phones: [{ number: '', type: 'mobile' }] }} onSubmit={save}>
+  <Form.Group.List name="phones">
+    <Form.Field.Phone name="number" />
+    <Form.Field.Select name="type" />
+
+    <Form.Group.List.Button.Remove />
+    <Form.Group.List.Button.Add>Add Phone</Form.Group.List.Button.Add>
+  </Form.Group.List>
+</Form>
+```
+
+## Sortable Lists
+
+Enable drag & drop reordering with `sortable` prop:
+
+```tsx
+<Form.Group.List name="items" sortable>
+  <Form.Field.String name="title" />
+  <Form.Group.List.Button.Remove />
+</Form.Group.List>
+```
+
+Requires `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` as peer dependencies.
+
+## Nested Groups
+
+Groups can be nested:
+
+```tsx
+<Form.Group name="company">
+  <Form.Field.String name="name" />
+
+  <Form.Group name="address">
+    <Form.Field.String name="street" />
+    <Form.Field.String name="city" />
+  </Form.Group>
+</Form.Group>
+// Produces: company.name, company.address.street, company.address.city
+```

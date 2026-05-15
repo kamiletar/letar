@@ -1,0 +1,14 @@
+FROM nginx:alpine
+
+# Копируем статический экспорт Next.js
+COPY apps/pravda/out /usr/share/nginx/html
+
+# Копируем конфигурацию nginx
+COPY apps/pravda/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Исправляем права доступа для nginx
+RUN chmod -R o+rX /usr/share/nginx/html/
+
+EXPOSE 3007
+
+CMD ["nginx", "-g", "daemon off;"]

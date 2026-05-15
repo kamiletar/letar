@@ -1,0 +1,1031 @@
+// ZenStack schema file with access control policies
+// This extends Prisma schema with authorization rules
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Генератор Prisma Client — выводим в src/generated/prisma для импорта через @/generated/prisma
+// output относительно schema.prisma (который в src/generated/), поэтому ./prisma
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+// TypeScript plugin (v3) - генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// Генерация Zod схем с UI метаданными для @letar/forms
+plugin formSchemas {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+  i18n = true
+  i18nOutput = './messages/form-schemas'
+  defaultLocale = 'ru'
+  locales = 'ru,en'
+}
+
+// ========================================
+// Better Auth модели
+// ========================================
+
+// Роль пользователя
+enum UserRole {
+  /// Пользователь
+  USER
+  /// Администратор
+  ADMIN
+}
+
+// Пользователь (Better Auth core schema)
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
+  image           String?
+  emailVerified   Boolean   @default(false)
+  roles           UserRole[] @default([USER])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  // Организации (Better Auth organization plugin)
+  members         Member[]
+
+  // Комментарии в блоге
+  blogComments    BlogComment[]
+
+  // Загруженные изображения
+  uploadedImages  Image[] @relation("uploadedImages")
+
+  // Загруженные аудиофайлы
+  uploadedAudio   AudioFile[] @relation("uploadedAudio")
+
+  // Доступ на чтение для всех, создание/обновление только для себя
+  @@allow('read', true)
+  @@allow('create', true)
+  @@allow('update', auth() == this)
+
+  // Индекс для email lookup
+  @@index([email])
+}
+
+// Аккаунты OAuth/credentials (Better Auth core schema)
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String    // ID от провайдера или равен userId для credentials
+  providerId            String    // Идентификатор провайдера (github, google, yandex, credential)
+
+  // OAuth токены
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+
+  // Пароль для email/password аутентификации
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([userId])
+}
+
+// Сессии (Better Auth core schema)
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// Верификация (Better Auth core schema)
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String   // Email или другой идентификатор
+  value       String   // Токен верификации
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([identifier])
+}
+
+// Rate Limiting (Better Auth, используется в production для защиты от brute-force)
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique // IP:path или другой уникальный ключ
+  count       Int      // Количество запросов в текущем окне
+  lastRequest BigInt   // Timestamp последнего запроса (Unix ms)
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([key])
+
+  @@map("rateLimit")
+}
+
+// ========================================
+// Better Auth Organization модели
+// ========================================
+
+// Организация (компания работодателя)
+model Organization {
+  id          String   @id @default(cuid())
+  name        String   // Название организации
+  slug        String   @unique // URL-friendly идентификатор
+  logo        String?  // URL логотипа
+  metadata    String?  // JSON метаданные
+  createdAt   DateTime @default(now())
+
+  // Связи
+  members     Member[]
+  invitations Invitation[]
+  hireRequests HireRequest[]
+  surveys     TeamSurvey[]
+
+  // Чтение для членов организации, управление только owner/admin
+  @@allow('read', members?[userId == auth().id])
+  @@allow('create', auth() != null)
+  @@allow('update,delete', members?[userId == auth().id && role == 'owner'])
+}
+
+// Член организации
+model Member {
+  id              String   @id @default(cuid())
+  userId          String
+  organizationId  String
+  role            String   @default("member") // owner, admin, member
+  createdAt       DateTime @default(now())
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Ответы на опросы
+  surveyResponses TeamSurveyResponse[]
+
+  // Запретить прямой доступ через enhanced client (управление через Better Auth)
+  @@deny('all', true)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+// Приглашение в организацию
+model Invitation {
+  id              String   @id @default(cuid())
+  email           String   // Email приглашённого
+  role            String   @default("member") // Роль при принятии
+  status          String   @default("pending") // pending, accepted, rejected, cancelled
+  expiresAt       DateTime
+  inviterId       String   // Кто пригласил
+  organizationId  String
+  createdAt       DateTime @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Запретить прямой доступ через enhanced client (управление через Better Auth)
+  @@deny('all', true)
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+// ========================================
+// Портфолио модели
+// ========================================
+
+// Уровень навыка
+enum SkillLevel {
+  /// Начинающий
+  BEGINNER
+  /// Средний
+  INTERMEDIATE
+  /// Продвинутый
+  ADVANCED
+  /// Эксперт
+  EXPERT
+}
+
+// Категория навыков
+model SkillCategory {
+  id          String   @id @default(cuid())
+  name        String   // Название на русском (для отображения)
+  nameEn      String   // Название на английском
+  slug        String   @unique // URL-friendly идентификатор
+  icon        String?  // Название иконки из lucide-react
+  order       Int      @default(0) // Порядок сортировки
+
+  skills      Skill[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}
+
+// Навык
+model Skill {
+  id          String       @id @default(cuid())
+  name        String       // Название технологии
+  slug        String       @unique // URL-friendly идентификатор
+  level       SkillLevel   @default(INTERMEDIATE)
+  years       Float?       // Годы опыта (ручной ввод, игнорируется если указан startYear)
+  startYear   Int?         // Год начала практики (для автоматического расчёта опыта)
+  icon        String?      // Название иконки или URL логотипа
+  description String?      // Краткое описание (опционально)
+  url         String?      // Ссылка на документацию
+  order       Int          @default(0) // Порядок сортировки
+  featured    Boolean      @default(false) // Выделенный навык
+
+  category    SkillCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+
+  @@index([categoryId])
+}
+
+// Проект в портфолио
+model Project {
+  id          String   @id @default(cuid())
+  title       String   // Название проекта
+  titleEn     String   // Название на английском
+  slug        String   @unique
+  description String   // Описание на русском
+  descriptionEn String // Описание на английском
+  image       String?  // URL превью изображения
+  demoUrl     String?  // Ссылка на демо
+  codeUrl     String?  // Ссылка на код (GitHub)
+  caseUrl     String?  // Ссылка на кейс
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+
+  // Технологии (JSON массив строк)
+  technologies String[] @default([])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}
+
+// Заявка на работу (Hire Me форма)
+model HireRequest {
+  id              String   @id @default(cuid())
+
+  // Шаг 1: О компании
+  companyName     String
+  companyWebsite  String?
+  companySize     String?  // startup, small, medium, large, enterprise
+  industry        String?
+
+  // Шаг 2: Команда
+  teamSize        String?
+  teamStructure   String?
+  remoteFriendly  Boolean  @default(true)
+
+  // Шаг 3: Стек
+  techStack       String[] @default([])
+  projectType     String?  // web, mobile, desktop, other
+
+  // Шаг 4: Условия
+  employmentType  String?  // full-time, part-time, contract, freelance
+  location        String?
+  timezone        String?
+
+  // Шаг 5: Компенсация
+  salaryRange     String?
+  benefits        String?
+
+  // Шаг 6: Процесс найма
+  hiringProcess   String?
+  startDate       String?
+
+  // Шаг 7: Контакты
+  contactName     String
+  contactEmail    String
+  contactTelegram String?
+  message         String?
+
+  // Мета
+  status          String   @default("new") // new, reviewed, replied, closed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связь с организацией (для командных опросов)
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+
+  // Опросы команды
+  surveys         TeamSurvey[]
+
+  // Только создание разрешено всем, чтение владельцу организации
+  @@allow('create', true)
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('update', organization.members?[userId == auth().id && role == 'owner'])
+
+  @@index([organizationId])
+}
+
+// Консалтинговая услуга
+model ConsultingService {
+  id            String   @id @default(cuid())
+
+  // Основное
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  slug          String   @unique
+
+  // Детали
+  icon          String?  // Название иконки (lucide)
+  price         String?  // Отображаемая цена ("от $100/час")
+  priceType     String   @default("hourly") // hourly, project, retainer
+
+  // Порядок и статус
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  // Связи
+  requests      ConsultingRequest[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}
+
+// Заявка на консультацию
+model ConsultingRequest {
+  id            String   @id @default(cuid())
+
+  // Услуга
+  serviceId     String?
+  service       ConsultingService? @relation(fields: [serviceId], references: [id])
+
+  // Контактные данные
+  name          String
+  email         String
+  telegram      String?
+  company       String?
+
+  // Детали запроса
+  serviceType   String?  // architecture, code-review, audit, mentoring
+  projectType   String?  // web, mobile, desktop, other
+  description   String   // Описание задачи
+  budget        String?  // Примерный бюджет
+  timeline      String?  // Желаемые сроки
+
+  // Доступность
+  preferredTime String?  // Предпочтительное время для созвона
+  timezone      String?
+
+  // Мета
+  status        String   @default("new") // new, contacted, scheduled, completed, cancelled
+  notes         String?  // Внутренние заметки
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Сессии
+  sessions      ConsultingSession[]
+
+  // Забронированные слоты
+  bookedSlots   BookedSlot[]
+
+  // Только создание разрешено всем
+  @@allow('create', true)
+}
+
+// Проведённая консультационная сессия
+model ConsultingSession {
+  id            String   @id @default(cuid())
+
+  // Связь с заявкой
+  requestId     String
+  request       ConsultingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  // Время сессии
+  scheduledAt   DateTime           // Запланированное время
+  duration      Int      @default(60) // Продолжительность в минутах
+  completedAt   DateTime?          // Фактическое время завершения
+
+  // Детали
+  type          String   @default("call") // call, code-review, mentoring, audit
+  meetingUrl    String?  // Ссылка на созвон (Zoom, Google Meet)
+  calendarEventId String? // ID события в Google Calendar
+
+  // Результаты
+  summary       String?  // Краткое резюме сессии
+  notes         String?  // Подробные заметки
+  followUp      String?  // Следующие шаги
+
+  // Оплата
+  price         Int?     // Цена в копейках/центах
+  currency      String   @default("USD")
+  isPaid        Boolean  @default(false)
+  paidAt        DateTime?
+
+  // Статус
+  status        String   @default("scheduled") // scheduled, completed, cancelled, no-show
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Только админ может управлять сессиями
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Отзыв клиента
+model Testimonial {
+  id          String   @id @default(cuid())
+
+  // Автор
+  authorName  String             // Имя клиента
+  authorRole  String?            // Должность (CEO, CTO, Lead Developer)
+  authorCompany String?          // Компания
+  authorAvatar String?           // URL аватара
+  authorUrl   String?            // Ссылка на LinkedIn/сайт
+
+  // Контент
+  content     String             // Текст отзыва
+  contentEn   String?            // Английская версия
+  rating      Int      @default(5) // 1-5 звёзд
+
+  // Связь с услугой
+  serviceType String?            // architecture, code-review, audit, mentoring
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false) // Показывать на главной
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение, админ управляет
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Кейс консалтингового проекта
+model ConsultingCase {
+  id          String   @id @default(cuid())
+
+  // Основное
+  title       String             // Название кейса
+  titleEn     String?            // Английская версия
+  slug        String   @unique   // URL slug
+  excerpt     String             // Краткое описание
+  excerptEn   String?
+
+  // Контент
+  challenge   String             // Проблема/задача
+  challengeEn String?
+  solution    String             // Решение
+  solutionEn  String?
+  results     String             // Результаты
+  resultsEn   String?
+
+  // Медиа
+  coverImage  String?            // Обложка
+  images      String[]           // Галерея скриншотов
+
+  // Мета
+  clientName  String?            // Имя клиента (если разрешено)
+  clientLogo  String?            // Логотип клиента
+  industry    String?            // Индустрия (fintech, e-commerce, etc.)
+  serviceType String?            // Тип услуги
+  techStack   String[]           // Технологии
+  duration    String?            // Длительность проекта
+  year        Int?               // Год проекта
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение, админ управляет
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Расписание доступности для бронирования
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+
+  // День недели (0=Вс, 1=Пн, ... 6=Сб) или null для разовых правил
+  dayOfWeek   Int?
+
+  // Время работы (в минутах от полуночи)
+  startTime   Int      // Например: 540 = 9:00
+  endTime     Int      // Например: 1080 = 18:00
+
+  // Продолжительность слота (в минутах)
+  slotDuration Int     @default(60)
+
+  // Перерыв между слотами (в минутах)
+  breakDuration Int    @default(15)
+
+  // Timezone
+  timezone    String   @default("Europe/Moscow")
+
+  // Активность
+  isActive    Boolean  @default(true)
+
+  // Применяется с/до (для сезонных правил)
+  validFrom   DateTime?
+  validUntil  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Только админ может управлять
+  @@allow('read', true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Забронированный слот или блокировка
+model BookedSlot {
+  id          String   @id @default(cuid())
+
+  // Время слота
+  startAt     DateTime
+  endAt       DateTime
+
+  // Тип: booked (занято клиентом), blocked (заблокировано вручную)
+  type        String   @default("booked")
+
+  // Связь с заявкой (если booked)
+  requestId   String?
+  request     ConsultingRequest? @relation(fields: [requestId], references: [id])
+
+  // Google Calendar Event ID
+  calendarEventId String?
+
+  // Заметки (для блокировки)
+  note        String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Чтение для проверки доступности, управление только админ
+  @@allow('read', true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Комментарий к статье блога
+model BlogComment {
+  id          String   @id @default(cuid())
+
+  // Связь со статьёй (slug из Keystatic)
+  postSlug    String
+
+  // Автор (опционально для гостевых комментариев)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Гостевой автор (если не авторизован)
+  guestName   String?
+  guestEmail  String?
+
+  // Контент
+  content     String
+
+  // Ответ на другой комментарий (для вложенности)
+  parentId    String?
+  parent      BlogComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     BlogComment[] @relation("CommentReplies")
+
+  // Модерация
+  isApproved  Boolean  @default(false)
+  isSpam      Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение одобренных, создание авторизованным, управление админ
+  @@allow('read', isApproved == true && isSpam == false)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth() != null && userId == auth().id)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+
+  @@index([postSlug])
+  @@index([userId])
+}
+
+// ========================================
+// Изображения
+// ========================================
+
+// Категория изображения
+enum ImageCategory {
+  /// Блог
+  BLOG
+  /// Контент (кейсы, проекты)
+  CONTENT
+  /// Аватар
+  AVATAR
+  /// Прочее
+  OTHER
+}
+
+// Загруженное изображение
+model Image {
+  id           String        @id @default(cuid())
+  filename     String                    // Оригинальное имя файла
+  path         String        @unique     // Путь к файлу в uploads/
+  mimeType     String                    // MIME тип (image/png, image/jpeg)
+  size         Int                       // Размер в байтах
+  width        Int?                      // Ширина в пикселях
+  height       Int?                      // Высота в пикселях
+  blurDataURL  String?                   // Base64 blur placeholder для Next.js Image
+  category     ImageCategory @default(OTHER)
+
+  uploadedById String?
+  uploadedBy   User?         @relation("uploadedImages", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime      @default(now())
+
+  @@index([category])
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ========================================
+// Аудиофайлы
+// ========================================
+
+// Загруженный аудиофайл
+model AudioFile {
+  id           String   @id @default(cuid())
+  title        String                    // Название трека
+  slug         String   @unique          // ЧПУ slug (из title)
+  filename     String                    // Имя файла на диске
+  path         String   @unique          // Путь в uploads/audio/
+  mimeType     String                    // audio/mpeg
+  size         Int                       // Размер в байтах
+  duration     Int?                      // Длительность в секундах
+  artist       String?                   // Исполнитель (из ID3)
+  album        String?                   // Альбом (из ID3)
+  coverPath    String?                   // Путь к обложке в uploads/audio/covers/
+  bitrate      Int?                      // Битрейт в kbps
+
+  uploadedById String?
+  uploadedBy   User?    @relation("uploadedAudio", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime @default(now())
+
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ========================================
+// Обучение и контент
+// ========================================
+
+// Тип элемента для списков изученного
+enum LearningItemType {
+  /// Книга
+  BOOK
+  /// Курс
+  COURSE
+  /// Статья
+  ARTICLE
+  /// Видео
+  VIDEO
+  /// Подкаст
+  PODCAST
+  /// Конференция
+  CONFERENCE
+  /// Другое
+  OTHER
+}
+
+// Статус изучения
+enum LearningStatus {
+  /// Хочу изучить
+  WANT_TO_LEARN
+  /// Изучаю
+  IN_PROGRESS
+  /// Изучено
+  COMPLETED
+  /// Заброшено
+  ABANDONED
+}
+
+// Элемент списка изученного/прочитанного
+model LearningItem {
+  id          String   @id @default(cuid())
+
+  // Основная информация
+  title       String             // Название книги/курса
+  titleEn     String?            // Английское название
+  author      String?            // Автор/создатель
+  url         String?            // Ссылка на ресурс
+  coverImage  String?            // Обложка
+
+  // Классификация
+  type        LearningItemType   @default(BOOK)
+  category    String?            // Категория (programming, design, business, etc.)
+  tags        String[]           // Теги
+
+  // Прогресс
+  status      LearningStatus     @default(WANT_TO_LEARN)
+  rating      Int?               // Оценка 1-5
+  notes       String?            // Заметки/краткое резюме
+  notesEn     String?            // Английские заметки
+
+  // Даты
+  startedAt   DateTime?          // Когда начал
+  completedAt DateTime?          // Когда закончил
+  year        Int?               // Год издания/публикации
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение опубликованных, управление только админ
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+
+  @@index([type])
+  @@index([status])
+  @@index([category])
+}
+
+// ========================================
+// Командные опросы (Team Surveys)
+// ========================================
+
+// Тип вопроса опроса
+enum SurveyQuestionType {
+  /// Свободный текст
+  TEXT
+  /// Один вариант из списка
+  SINGLE_CHOICE
+  /// Несколько вариантов
+  MULTI_CHOICE
+  /// Оценка 1-5 или 1-10
+  RATING
+  /// Шкала (не согласен - согласен)
+  SCALE
+}
+
+// Опрос для команды
+model TeamSurvey {
+  id              String   @id @default(cuid())
+  title           String   // Название опроса
+  titleEn         String?  // Английское название
+  description     String?  // Описание опроса
+  descriptionEn   String?
+
+  // Связь с организацией и заявкой
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  hireRequestId   String?
+  hireRequest     HireRequest? @relation(fields: [hireRequestId], references: [id])
+
+  // Статус
+  status          String   @default("draft") // draft, active, closed
+  isAnonymous     Boolean  @default(false)   // Анонимные ответы?
+
+  // Даты
+  startsAt        DateTime?  // Когда открывается
+  endsAt          DateTime?  // Когда закрывается
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связи
+  questions       TeamSurveyQuestion[]
+  responses       TeamSurveyResponse[]
+
+  // Члены организации могут читать, owner/admin управляет
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && (role == 'owner' || role == 'admin')])
+
+  @@index([organizationId])
+  @@index([hireRequestId])
+}
+
+// Вопрос опроса
+model TeamSurveyQuestion {
+  id              String   @id @default(cuid())
+  surveyId        String
+  survey          TeamSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  // Контент вопроса
+  question        String   // Текст вопроса
+  questionEn      String?  // Английская версия
+  type            SurveyQuestionType @default(TEXT)
+
+  // Для вопросов с вариантами ответов (JSON массив)
+  options         String?  // ["Вариант 1", "Вариант 2", ...]
+
+  // Настройки
+  isRequired      Boolean  @default(true)
+  order           Int      @default(0)
+
+  // Для RATING/SCALE типов
+  minValue        Int?     // Минимальное значение (1)
+  maxValue        Int?     // Максимальное значение (5 или 10)
+  minLabel        String?  // Подпись минимального ("Не важно")
+  maxLabel        String?  // Подпись максимального ("Очень важно")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связи
+  answers         TeamSurveyAnswer[]
+
+  // Доступ через опрос
+  @@allow('read', survey.organization.members?[userId == auth().id])
+  @@allow('create,update,delete', survey.organization.members?[userId == auth().id && (role == 'owner' || role == 'admin')])
+
+  @@index([surveyId])
+}
+
+// Ответ участника на опрос (группирует все ответы одного человека)
+model TeamSurveyResponse {
+  id              String   @id @default(cuid())
+  surveyId        String
+  survey          TeamSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  // Кто ответил
+  memberId        String
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // Статус
+  status          String   @default("in_progress") // in_progress, completed
+  completedAt     DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Ответы на вопросы
+  answers         TeamSurveyAnswer[]
+
+  // Участник может создавать и редактировать свой ответ
+  @@allow('read', survey.organization.members?[userId == auth().id])
+  @@allow('create', survey.organization.members?[userId == auth().id])
+  @@allow('update', member.userId == auth().id)
+
+  @@unique([surveyId, memberId])
+  @@index([surveyId])
+  @@index([memberId])
+}
+
+// Ответ на конкретный вопрос
+model TeamSurveyAnswer {
+  id              String   @id @default(cuid())
+  responseId      String
+  response        TeamSurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId      String
+  question        TeamSurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // Значение ответа
+  textValue       String?  // Для TEXT
+  choiceValue     String?  // Для SINGLE_CHOICE (JSON для MULTI_CHOICE)
+  ratingValue     Int?     // Для RATING/SCALE
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Доступ через response
+  @@allow('read', response.survey.organization.members?[userId == auth().id])
+  @@allow('create,update', response.member.userId == auth().id)
+
+  @@unique([responseId, questionId])
+  @@index([responseId])
+  @@index([questionId])
+}
+
+// ========================================
+// Кросс-постинг в соцсети
+// ========================================
+
+// Тип социальной платформы
+enum SocialPlatformType {
+  /// Telegram Bot API (через прокси)
+  TELEGRAM
+  /// ВКонтакте API
+  VK
+  /// LinkedIn Share API (через прокси)
+  LINKEDIN
+  /// X/Twitter API v2
+  TWITTER
+  /// Facebook Graph API
+  FACEBOOK
+  /// Instagram Graph API
+  INSTAGRAM
+  /// Bluesky AT Protocol
+  BLUESKY
+  /// Mastodon ActivityPub
+  MASTODON
+}
+
+// Статус кросс-поста
+enum CrossPostStatus {
+  /// Ожидает публикации
+  PENDING
+  /// Успешно опубликован
+  PUBLISHED
+  /// Ошибка при публикации
+  FAILED
+}
+
+// Настройки социальной платформы (токены, ID каналов)
+model SocialPlatform {
+  id         String              @id @default(cuid())
+  type       SocialPlatformType  @unique
+  /// Отображаемое название ("Telegram", "ВКонтакте")
+  name       String
+  /// Включена ли платформа для публикации
+  enabled    Boolean             @default(false)
+  /// JSON конфигурация (токены, chat_id, group_id и т.д.)
+  config     Json                @default("{}")
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  crossPosts CrossPost[]
+
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Лог публикации поста в соцсеть
+model CrossPost {
+  id          String            @id @default(cuid())
+  /// Slug блог-поста из Keystatic
+  postSlug    String
+  platform    SocialPlatform    @relation(fields: [platformId], references: [id])
+  platformId  String
+  status      CrossPostStatus   @default(PENDING)
+  /// ID поста в соцсети
+  externalId  String?
+  /// URL поста в соцсети
+  externalUrl String?
+  /// Текст ошибки если FAILED
+  error       String?
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@unique([postSlug, platformId])
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}

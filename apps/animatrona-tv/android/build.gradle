@@ -1,0 +1,36 @@
+// Top-level build file for Animatrona TV
+
+buildscript {
+    ext {
+        buildToolsVersion = "36.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
+        ndkVersion = "27.3.13750724"
+        kotlinVersion = "2.1.20"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    }
+}
+
+// Регистрируем React Native Gradle Plugin для всех подпроектов
+// (нужно для библиотек, использующих apply plugin: "com.facebook.react")
+plugins {
+    id("com.facebook.react") apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        // AsyncStorage v3: локальный Maven репозиторий с shared_storage артефактом
+        maven { url "$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo" }
+    }
+}

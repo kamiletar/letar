@@ -1,0 +1,179 @@
+# Публикация @letar/form-mcp на npm
+# Триггер: git tag form-mcp-vX.Y.Z
+# Результат: Исходники в kamiletar/letar-form-mcp + npm publish
+
+name: Release @letar/form-mcp
+
+on:
+  push:
+    tags:
+      - 'form-mcp-v*.*.*'
+
+jobs:
+  # 1. Публикация исходников в kamiletar/letar-form-mcp
+  publish-source:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
+      tag: ${{ steps.parse-version.outputs.tag }}
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: parse-version
+        run: |
+          # form-mcp-v1.0.0 → 1.0.0
+          VERSION=${GITHUB_REF#refs/tags/form-mcp-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Clone kamiletar/letar-form-mcp repository
+        run: |
+          git clone https://kamiletar:${{ secrets.GH_TOKEN }}@github.com/kamiletar/letar-form-mcp.git mcp-public
+          cd mcp-public
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Copy source code to public repo
+        run: |
+          # Удаляем всё кроме .git и .github
+          find mcp-public -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+
+          # Копируем исходники библиотеки
+          rsync -av \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            --exclude '.env*' \
+            --exclude 'project.json' \
+            --exclude 'package.json' \
+            --exclude 'tsconfig.json' \
+            --exclude 'tsconfig.lib.json' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            --exclude 'eslint.config.*' \
+            --exclude 'PLAN.md' \
+            --exclude '*.spec.ts' \
+            --exclude '*.test.ts' \
+            libs/form-mcp/ mcp-public/
+
+          # package.publish.json → package.json
+          cp libs/form-mcp/package.publish.json mcp-public/package.json
+
+          # tsconfig.publish.json → tsconfig.json
+          cp libs/form-mcp/tsconfig.publish.json mcp-public/tsconfig.json
+
+          # Файлы для сборки и публикации
+          cp libs/form-mcp/tsup.config.ts mcp-public/
+          cp libs/form-mcp/CHANGELOG.md mcp-public/
+
+          # Копируем docs из form-components (единственный источник данных)
+          mkdir -p mcp-public/docs
+          cp libs/forms/docs/*.md mcp-public/docs/
+
+          # README
+          cp libs/form-mcp/README.md mcp-public/README.md
+
+      - name: Update version in package.json
+        run: |
+          cd mcp-public
+          VERSION="${{ steps.parse-version.outputs.version }}"
+          jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json
+          mv package.tmp.json package.json
+
+      - name: Commit and push to kamiletar/letar-form-mcp
+        run: |
+          cd mcp-public
+          git add .
+          git commit -m "chore: release v${{ steps.parse-version.outputs.version }}" || echo "No changes to commit"
+
+          # Удалить тег если существует
+          git tag -d ${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+          git push origin :refs/tags/${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+
+          # Создать новый тег
+          git tag ${{ steps.parse-version.outputs.tag }}
+          git push origin main
+          git push origin ${{ steps.parse-version.outputs.tag }}
+
+  # 2. Сборка и публикация на npm
+  build-and-publish:
+    needs: publish-source
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/letar-form-mcp
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/letar-form-mcp
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install build dependencies
+        run: bun add -d tsup typescript @types/node
+
+      - name: Build
+        run: bun tsup
+
+      - name: Prepare dist for publish
+        run: |
+          cp package.json dist/
+          cp README.md dist/
+          cp CHANGELOG.md dist/
+          cp -r docs dist/
+
+      - name: Publish to npm
+        working-directory: dist
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # 3. Создание GitHub Release
+  create-release:
+    needs: [publish-source, build-and-publish]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/letar-form-mcp
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/letar-form-mcp
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ needs.publish-source.outputs.version }}"
+          NOTES=$(awk '/## \['"$VERSION"'\]/{flag=1; next} /## \[/{flag=0} flag' CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v$VERSION of @letar/form-mcp"
+          fi
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh release create "${{ needs.publish-source.outputs.tag }}" \
+            --repo kamiletar/letar-form-mcp \
+            --title "@letar/form-mcp ${{ needs.publish-source.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.notes }}"
+
+          echo "✅ Release published: https://github.com/kamiletar/letar-form-mcp/releases/tag/${{ needs.publish-source.outputs.tag }}"

@@ -1,0 +1,31 @@
+services:
+  ipfs:
+    image: ipfs/kubo:v0.40.1
+    container_name: animatrona-pinner
+    restart: unless-stopped
+    ports:
+      # Swarm — нестандартный порт (не конфликтует с relay 41001)
+      - '43001:4001/tcp'
+      - '43001:4001/udp'
+      # API — открыт наружу (защищён API.Authorizations bearer-токеном)
+      - '5011:5001'
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      IPFS_PROFILE: lowpower
+      # Ограничиваем Go runtime одним ядром — оставляем второе для relay и других сервисов
+      GOMAXPROCS: '1'
+    # Лимиты ресурсов (docker-compose v1 на mail сервере)
+    cpus: 1.0
+    mem_limit: 512m
+    memswap_limit: 512m
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://127.0.0.1:8080/version || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  ipfs_data:
+    name: animatrona-pinner-data

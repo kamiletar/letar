@@ -1,0 +1,4420 @@
+// ZenStack schema file for Driving School application
+// Платформа для автошкол - управление расписанием занятий
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Prisma Client generator — генерирует клиент в libs/driving-school-db/src/generated/prisma/
+// Путь относительно сгенерированной schema.prisma в libs/driving-school-db/src/generated/
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = '../../libs/driving-school-db/src/generated/schema.prisma'
+}
+
+// TypeScript plugin (v3) - генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = '../../libs/driving-school-db/src/generated'
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// NOTE: В ZenStack v3 tanstack-query это runtime library, а не плагин генерации.
+// Используй useClientQueries(schema) из @zenstackhq/tanstack-query/react
+
+// Генерация Zod схем с UI метаданными для @letar/forms
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = '../../libs/driving-school-db/src/generated/form-schemas'
+}
+
+// TODO: OpenAPI plugin не поддерживается в ZenStack v3 (pending redesign)
+// Ранее был @zenstackhq/openapi — API работает через REST Handler
+
+// ============================================================================
+// AUTH TYPE (ZenStack v3.2.0)
+// ============================================================================
+// Кастомный тип для auth() - вместо массива roles используем булевые флаги,
+// т.к. ZenStack v3 не поддерживает has()/in для массивов enum в auth()
+// Баг: "ошибочный литерал массива" при auth().isOwner
+
+type Auth {
+  id                  String  @id
+  isOwner             Boolean
+  isModerator         Boolean
+  isFreelanceInstructor Boolean
+
+  @@auth
+}
+
+// ============================================================================
+// CUSTOM PROCEDURES (ZenStack v3.2.0)
+// ============================================================================
+
+// --- Result Types ---
+
+type TransferResult {
+  success     Boolean
+  transferId  String?
+  error       String?
+}
+
+type AcceptTransferResult {
+  success         Boolean
+  newConnectionId String?
+  error           String?
+}
+
+type ActionResult {
+  success Boolean
+  error   String?
+}
+
+type LessonResult {
+  success   Boolean
+  lessonId  String?
+  error     String?
+}
+
+type EnrollmentResult {
+  success       Boolean
+  connectionId  String?
+  requestId     String?
+  error         String?
+}
+
+// --- Transfer Procedures ---
+
+/// Инициировать передачу ученика другому инструктору
+mutation procedure initiateTransfer(
+  connectionId: String,
+  toInstructorId: String,
+  type: String,
+  reason: String,
+  transferBalance: Boolean
+) : TransferResult
+
+/// Принять запрос на передачу ученика
+mutation procedure acceptTransfer(transferId: String) : AcceptTransferResult
+
+/// Отклонить запрос на передачу ученика
+mutation procedure rejectTransfer(transferId: String) : ActionResult
+
+/// Отменить запрос на передачу (инициатор)
+mutation procedure cancelTransfer(transferId: String) : ActionResult
+
+/// Вернуть ученика обратно (для временных передач)
+mutation procedure reclaimStudent(transferId: String) : ActionResult
+
+// --- Lesson Procedures ---
+
+/// Подтвердить занятие
+mutation procedure confirmLesson(lessonId: String) : LessonResult
+
+/// Отменить занятие
+mutation procedure cancelLesson(lessonId: String, reason: String?) : LessonResult
+
+/// Завершить занятие
+mutation procedure completeLesson(lessonId: String, notes: String?) : LessonResult
+
+/// Отметить неявку ученика
+mutation procedure markNoShow(lessonId: String) : LessonResult
+
+// --- Enrollment Procedures ---
+
+/// Одобрить заявку на обучение
+mutation procedure approveEnrollmentRequest(requestId: String) : EnrollmentResult
+
+/// Отклонить заявку на обучение
+mutation procedure rejectEnrollmentRequest(requestId: String, reason: String?) : EnrollmentResult
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  /// Пользователь
+  USER
+  /// Независимый инструктор
+  FREELANCE_INSTRUCTOR
+  /// Модератор
+  MODERATOR
+  /// Владелец платформы
+  OWNER
+}
+
+/// Пол пользователя (собирается из OAuth провайдеров)
+enum Gender {
+  /// Мужской
+  MALE
+  /// Женский
+  FEMALE
+  /// Другой / не указан
+  OTHER
+}
+
+enum InvitationStatus {
+  /// Ожидает ответа
+  PENDING
+  /// Принято
+  ACCEPTED
+  /// Истекло
+  EXPIRED
+  /// Отклонено
+  DECLINED
+}
+
+enum ConnectionStatus {
+  /// Активна
+  ACTIVE
+  /// Приостановлена
+  PAUSED
+  /// Разорвана
+  DISCONNECTED
+}
+
+enum SlotStatus {
+  /// Доступен
+  AVAILABLE
+  /// Забронирован
+  BOOKED
+  /// Заблокирован
+  BLOCKED
+}
+
+enum LessonStatus {
+  /// Ожидает подтверждения
+  PENDING
+  /// Подтверждено
+  CONFIRMED
+  /// Требует переноса
+  NEEDS_RESCHEDULE
+  /// Завершено
+  COMPLETED
+  /// Неявка
+  NO_SHOW
+  /// Отменено
+  CANCELLED
+  /// Перенесено
+  RESCHEDULED
+}
+
+enum PenaltyType {
+  /// Поздняя отмена
+  LATE_CANCEL
+  /// Неявка
+  NO_SHOW
+}
+
+enum PenaltyStatus {
+  /// Начислен
+  CHARGED
+  /// Оплачен
+  PAID
+  /// Отменён
+  CANCELLED
+}
+
+enum AbsenceType {
+  /// Отпуск
+  VACATION
+  /// Больничный
+  SICK_LEAVE
+}
+
+enum TransferStatus {
+  /// Ожидает
+  PENDING
+  /// Принята
+  ACCEPTED
+  /// Отклонена
+  REJECTED
+  /// Отменена
+  CANCELLED
+  /// Истекла
+  EXPIRED
+}
+
+enum TransferType {
+  /// Временная
+  TEMPORARY
+  /// Постоянная
+  PERMANENT
+}
+
+enum LocationType {
+  /// Офис
+  OFFICE
+  /// Учебный класс
+  CLASSROOM
+  /// Площадка
+  TRAINING
+  /// Только документы
+  DOCUMENTS_ONLY
+  /// Только практика
+  PRACTICE_ONLY
+  /// Полный сервис
+  FULL_SERVICE
+}
+
+enum FileCategory {
+  /// Локация
+  LOCATION
+  /// Аватар
+  AVATAR
+  /// Фото инструктора
+  INSTRUCTOR_PHOTO
+  /// Документ
+  DOCUMENT
+  /// Автомобиль
+  VEHICLE
+  /// Вложение чата
+  CHAT_ATTACHMENT
+  /// Учебный материал
+  THEORY_MATERIAL
+  /// Договор
+  CONTRACT
+}
+
+enum TransferReason {
+  /// Отпуск
+  VACATION
+  /// Больничный
+  SICK_LEAVE
+  /// Постоянный перевод
+  PERMANENT
+  /// Другое
+  OTHER
+}
+
+enum TransmissionType {
+  /// Механика
+  MANUAL
+  /// Автомат
+  AUTOMATIC
+}
+
+enum DayOfWeek {
+  /// Понедельник
+  MONDAY
+  /// Вторник
+  TUESDAY
+  /// Среда
+  WEDNESDAY
+  /// Четверг
+  THURSDAY
+  /// Пятница
+  FRIDAY
+  /// Суббота
+  SATURDAY
+  /// Воскресенье
+  SUNDAY
+}
+
+enum NotificationType {
+  /// Занятие создано
+  LESSON_CREATED
+  /// Занятие подтверждено
+  LESSON_CONFIRMED
+  /// Занятие отменено
+  LESSON_CANCELLED
+  /// Напоминание о занятии
+  LESSON_REMINDER
+  /// Занятие требует переноса
+  LESSON_NEEDS_RESCHEDULE
+  /// Начислен штраф
+  PENALTY_CHARGED
+  /// Получено приглашение
+  INVITATION_RECEIVED
+  /// Перевод ученика
+  STUDENT_TRANSFER
+  /// Инструктор вернулся
+  INSTRUCTOR_RETURNED
+  /// Приглашение в школу
+  SCHOOL_INVITE
+  /// Новое сообщение в чате
+  CHAT_MESSAGE
+  /// Упоминание в сообщении
+  CHAT_MENTION
+  /// Новая заявка на обучение (инструктору/школе)
+  ENROLLMENT_REQUEST_RECEIVED
+  /// Заявка одобрена (ученику)
+  ENROLLMENT_REQUEST_APPROVED
+  /// Заявка отклонена (ученику)
+  ENROLLMENT_REQUEST_REJECTED
+
+  /// Новый запрос на партнёрство (школа-партнёр)
+  PARTNERSHIP_REQUEST_RECEIVED
+  /// Партнёрство принято (школа-инициатор)
+  PARTNERSHIP_REQUEST_ACCEPTED
+  /// Партнёрство отклонено (школа-инициатор)
+  PARTNERSHIP_REQUEST_REJECTED
+  /// Партнёрство приостановлено
+  PARTNERSHIP_SUSPENDED
+  /// Партнёрство расторгнуто
+  PARTNERSHIP_TERMINATED
+  /// Опрос назначен ученику
+  SURVEY_SENT
+}
+
+/// Тип напоминания для автоматической отправки
+enum ReminderType {
+  /// Истекает документ (медсправка!)
+  DOCUMENT_EXPIRING
+  /// Просроченный платёж
+  PAYMENT_OVERDUE
+  /// Нет занятий >N дней
+  INACTIVE_STUDENT
+  /// Предстоящий экзамен
+  EXAM_UPCOMING
+  /// Занятие завтра
+  LESSON_TOMORROW
+  /// Документы на проверке >N дней
+  DOCUMENTS_PENDING_LONG
+}
+
+/// Статус доставки напоминания
+enum ReminderLogStatus {
+  /// Отправлено успешно
+  SENT
+  /// Ошибка отправки
+  FAILED
+  /// Частично (не все каналы)
+  PARTIAL
+}
+
+enum SyncStatus {
+  /// Ожидает
+  PENDING
+  /// Синхронизирован
+  SYNCED
+  /// Ошибка
+  FAILED
+}
+
+enum AuditAction {
+  USER_REGISTER
+  USER_LOGIN
+  LESSON_CREATE
+  LESSON_CONFIRM
+  LESSON_CANCEL
+  LESSON_RESCHEDULE
+  LESSON_COMPLETE
+  PENALTY_CHARGE
+  PENALTY_PAY
+  PENALTY_CANCEL
+  SCHEDULE_UPDATE
+  STUDENT_TRANSFER
+  ADMIN_ACTION
+  // Действия владельца
+  OWNER_USER_BLOCK
+  OWNER_USER_UNBLOCK
+  OWNER_USER_ROLE_CHANGE
+  OWNER_SCHOOL_MODERATE
+  OWNER_REVIEW_HIDE
+  OWNER_TICKET_ASSIGN
+  OWNER_TICKET_RESOLVE
+}
+
+// SchoolMemberRole enum удалён — используем строковые роли в Member.role
+// (owner, super_manager, manager, instructor, theory_instructor, member)
+
+enum StudyGroupSchedule {
+  /// Утренняя
+  MORNING
+  /// Вечерняя
+  EVENING
+  /// Выходные
+  WEEKEND
+}
+
+enum TheoryLessonStatus {
+  /// Запланировано
+  SCHEDULED
+  /// В процессе
+  IN_PROGRESS
+  /// Завершено
+  COMPLETED
+  /// Отменено
+  CANCELLED
+  /// Перенесено
+  RESCHEDULED
+}
+
+enum ExamType {
+  /// Внутренний теоретический
+  INTERNAL_THEORY
+  /// Внутренний практический
+  INTERNAL_PRACTICE
+  /// ГИБДД теория
+  GIBDD_THEORY
+  /// ГИБДД площадка
+  GIBDD_PRACTICE_AREA
+  /// ГИБДД город
+  GIBDD_PRACTICE_CITY
+}
+
+enum ExamSessionStatus {
+  /// Запланирована
+  SCHEDULED
+  /// В процессе
+  IN_PROGRESS
+  /// Завершена
+  COMPLETED
+  /// Отменена
+  CANCELLED
+}
+
+enum ExamResult {
+  /// Сдал
+  PASSED
+  /// Не сдал
+  FAILED
+  /// Неявка
+  NO_SHOW
+}
+
+// SchoolInvitationStatus enum УДАЛЁН — статусы хранятся в OrganizationInvitation.status как строки
+// (pending, accepted, rejected, expired, canceled)
+
+enum LicenseCategory {
+  /// M — Мопеды, скутеры (до 50 см³)
+  M
+  /// A1 — Лёгкие мотоциклы (до 125 см³)
+  A1
+  /// A — Мотоциклы (более 125 см³)
+  A
+  /// B1 — Трициклы, квадрициклы
+  B1
+  /// B — Легковые авто (до 3.5т)
+  B
+  /// C1 — Средние грузовики (3.5–7.5т)
+  C1
+  /// C — Грузовые авто (более 3.5т)
+  C
+  /// D1 — Малые автобусы (до 16 мест)
+  D1
+  /// D — Автобусы (более 8 мест)
+  D
+  /// BE — Легковые с прицепом
+  BE
+  /// CE — Грузовики с прицепом
+  CE
+  /// C1E — Средние грузовики с прицепом
+  C1E
+  /// DE — Автобусы с прицепом
+  DE
+  /// D1E — Малые автобусы с прицепом
+  D1E
+  /// Tm — Трамваи
+  Tm
+  /// Tb — Троллейбусы
+  Tb
+}
+
+enum ReviewTargetType {
+  /// Инструктор
+  INSTRUCTOR
+  /// Автошкола
+  SCHOOL
+}
+
+enum ReviewStatus {
+  /// Опубликован
+  PUBLISHED
+  /// Скрыт
+  HIDDEN
+  /// Удалён
+  DELETED
+}
+
+enum ReportReason {
+  /// Спам
+  SPAM
+  /// Оскорбительное содержание
+  OFFENSIVE
+  /// Ложная информация
+  FALSE_INFO
+  /// Не по теме
+  NOT_RELEVANT
+  /// Другое
+  OTHER
+}
+
+enum ReportStatus {
+  /// На рассмотрении
+  PENDING
+  /// Разрешена
+  RESOLVED
+  /// Отклонена
+  DISMISSED
+}
+
+enum TicketCategory {
+  /// Помощь
+  HELP
+  /// Ошибка
+  BUG
+  /// Предложение
+  FEATURE
+  /// Другое
+  OTHER
+}
+
+enum TicketStatus {
+  /// Открыт
+  OPEN
+  /// В работе
+  IN_PROGRESS
+  /// Решён
+  RESOLVED
+  /// Закрыт
+  CLOSED
+}
+
+enum ChatType {
+  /// Личный
+  PRIVATE
+  /// Школьный
+  SCHOOL
+  /// Инструкторы
+  INSTRUCTORS
+  /// Ученики
+  STUDENTS
+  /// Общий
+  GENERAL
+  /// Учебная группа
+  STUDY_GROUP
+  /// Инструктор и ученики
+  INSTRUCTOR_STUDENTS
+  /// Общий канал обратной связи с платформой
+  PLATFORM_FEEDBACK
+  /// Приватный чат школы с поддержкой платформы
+  PLATFORM_SUPPORT
+  /// Чат школы с учеником
+  SCHOOL_STUDENT
+}
+
+enum PartnershipStatus {
+  /// На рассмотрении
+  PENDING
+  /// Активно
+  ACTIVE
+  /// Приостановлено
+  SUSPENDED
+  /// Расторгнуто
+  TERMINATED
+}
+
+// ============================================================================
+// NPS ОПРОСЫ
+// ============================================================================
+
+/// Триггер отправки опроса
+enum SurveyTriggerType {
+  /// После завершения обучения
+  AFTER_COMPLETION
+  /// После первого экзамена в ГИБДД
+  AFTER_FIRST_EXAM
+  /// После получения водительского удостоверения
+  AFTER_LICENSE
+  /// Вручную (менеджер отправляет сам)
+  MANUAL
+}
+
+/// Статус ответа на опрос
+enum SurveyResponseStatus {
+  /// Ожидает отправки
+  PENDING
+  /// Отправлен ученику
+  SENT
+  /// Заполнен
+  COMPLETED
+  /// Пропущен (срок истёк)
+  SKIPPED
+  /// Отменён
+  CANCELLED
+}
+
+// ============================================================================
+// ДОГОВОР-ОФЕРТА И МОНЕТИЗАЦИЯ
+// ============================================================================
+
+enum LegalDocumentType {
+  /// Оферта
+  OFFER
+  /// Политика конфиденциальности
+  PRIVACY_POLICY
+}
+
+enum SubscriptionPlanType {
+  /// Бесплатный
+  FREE
+  /// Инструктор
+  INSTRUCTOR
+  /// Автошкола
+  SCHOOL
+}
+
+enum SubscriptionStatus {
+  /// Активна
+  ACTIVE
+  /// Пробный период
+  TRIAL
+  /// Просрочена
+  PAST_DUE
+  /// Отменена
+  CANCELLED
+  /// Истекла
+  EXPIRED
+}
+
+enum PaymentStatus {
+  /// Ожидает
+  PENDING
+  /// Выполнен
+  COMPLETED
+  /// Неуспешен
+  FAILED
+  /// Возвращён
+  REFUNDED
+}
+
+enum PaymentMethod {
+  /// Банковская карта
+  CARD
+  /// ЮKassa
+  YOOKASSA
+  /// Тинькофф
+  TINKOFF
+  /// Сбербанк
+  SBERBANK
+}
+
+enum ApiKeyStatus {
+  /// Активен
+  ACTIVE
+  /// Отозван
+  REVOKED
+}
+
+// Статус заявки на обучение
+enum EnrollmentStatus {
+  /// На рассмотрении
+  PENDING
+  /// Одобрена
+  APPROVED
+  /// Отклонена
+  REJECTED
+  /// Отменена
+  CANCELLED
+}
+
+enum EnrollmentRequestType {
+  /// Напрямую к инструктору
+  DIRECT
+  /// Через школу
+  VIA_SCHOOL
+}
+
+// Чья машина используется на занятии
+enum VehicleOwner {
+  /// На машине ученика
+  STUDENT
+  /// На машине инструктора
+  INSTRUCTOR
+}
+
+// Категория/тип занятия (предустановленные + свои)
+enum LessonCategory {
+  /// Обычное вождение
+  STANDARD
+  /// Парковка
+  PARKING
+  /// Скоростное маневрирование
+  MANEUVERING
+  /// Контраварийное вождение
+  DEFENSIVE_DRIVING
+  /// Дрифт
+  DRIFT
+  /// Городское вождение
+  CITY_DRIVING
+  /// Трасса
+  HIGHWAY_DRIVING
+  /// Ночное вождение
+  NIGHT_DRIVING
+  /// Своё название
+  CUSTOM
+}
+
+// ============================================================================
+// СИСТЕМА ПРОГРЕССА УЧЕНИКА (Фаза 6)
+// ============================================================================
+
+// Формат обучения теории
+enum TheoryFormat {
+  /// Очный
+  CLASSROOM
+  /// Заочный
+  DISTANCE
+  /// Онлайн
+  ONLINE
+  /// Смешанный
+  HYBRID
+}
+
+// Статус сбора документов
+enum DocumentsStatus {
+  /// Не начато
+  NOT_STARTED
+  /// В процессе
+  IN_PROGRESS
+  /// Готово
+  READY
+}
+
+// Статус теоретического обучения
+enum TheoryStatus {
+  /// Не начато
+  NOT_STARTED
+  /// Проходит обучение
+  IN_PROGRESS
+  /// Завершено
+  COMPLETED
+  /// Провалено
+  FAILED
+}
+
+// Статус практического обучения
+enum PracticeStatus {
+  /// Не начата
+  NOT_STARTED
+  /// В процессе
+  IN_PROGRESS
+  /// Завершена
+  COMPLETED
+}
+
+// Статус допуска инструктора к экзамену ГИБДД
+enum ApprovalStatus {
+  /// Не запрошен
+  NOT_REQUESTED
+  /// Запрошен
+  REQUESTED
+  /// Допущен
+  APPROVED
+  /// Отказано
+  DENIED
+}
+
+// Статус прогресса обучения ученика
+enum ProgressStatus {
+  /// Обучается
+  ACTIVE
+  /// Завершено
+  COMPLETED
+  /// Отчислен
+  EXPELLED
+  /// Приостановлен
+  SUSPENDED
+}
+
+// Тип изменения персональных данных
+enum PersonalDataChangeType {
+  /// Адрес
+  ADDRESS
+  /// Паспорт
+  PASSPORT
+  /// ФИО
+  NAME
+}
+
+// Статус изменения персональных данных
+enum ChangeStatus {
+  /// Ожидает
+  PENDING
+  /// Подтверждено
+  APPROVED
+  /// Отклонено
+  REJECTED
+  /// ГИБДД уведомлено
+  GIBDD_NOTIFIED
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Документы ученика (v0.204.0)
+// ═══════════════════════════════════════════════════════════════
+
+// Тип документа ученика
+enum StudentDocumentType {
+  /// Медсправка 003-В/у (срок действия 1 год!)
+  MEDICAL_CERT
+  /// Копия паспорта
+  PASSPORT_COPY
+  /// Фото 3x4 (4 шт)
+  PHOTOS_3X4
+  /// Копия СНИЛС
+  SNILS_COPY
+  /// Заявление на обучение
+  APPLICATION
+  /// Договор на обучение
+  CONTRACT
+  /// Квитанция об оплате
+  PAYMENT_RECEIPT
+  /// Квитанция госпошлины
+  STATE_FEE_RECEIPT
+  /// Свидетельство об обучении (выходной документ)
+  TRAINING_CERT
+}
+
+// Статус документа ученика
+enum StudentDocumentStatus {
+  /// Ожидает загрузки
+  PENDING
+  /// Загружен, на проверке
+  UPLOADED
+  /// Одобрен менеджером
+  APPROVED
+  /// Отклонён (нужна новая версия)
+  REJECTED
+  /// Истёк срок действия
+  EXPIRED
+}
+
+// Типы webhook-событий
+enum WebhookEventType {
+  /// Занятие подтверждено
+  LESSON_CONFIRMED
+  /// Занятие отменено
+  LESSON_CANCELLED
+  /// Занятие завершено
+  LESSON_COMPLETED
+  /// Неявка на занятие
+  LESSON_NO_SHOW
+  /// Оплата получена
+  PAYMENT_RECEIVED
+  /// Заявка на зачисление одобрена
+  ENROLLMENT_REQUEST_APPROVED
+  /// Заявка на зачисление отклонена
+  ENROLLMENT_REQUEST_REJECTED
+  /// Передача ученика принята
+  STUDENT_TRANSFER_ACCEPTED
+  /// Передача ученика отклонена
+  STUDENT_TRANSFER_REJECTED
+  /// Отзыв создан
+  REVIEW_CREATED
+}
+
+// Статус webhook-эндпоинта
+enum WebhookStatus {
+  /// Активен
+  ACTIVE
+  /// Приостановлен вручную
+  PAUSED
+  /// Отключён автоматически (слишком много ошибок)
+  DISABLED
+}
+
+// Статус доставки webhook
+enum WebhookLogStatus {
+  /// Ожидает отправки
+  PENDING
+  /// Успешно доставлен
+  DELIVERED
+  /// Ошибка, будет повтор
+  FAILED
+  /// Все попытки исчерпаны
+  EXHAUSTED
+}
+
+// ============================================================================
+// CALENDAR ENUMS
+// ============================================================================
+
+/// Провайдеры календарей
+enum CalendarProvider {
+  /// Google Calendar
+  GOOGLE
+  /// Яндекс Календарь
+  YANDEX
+  /// Apple Calendar (iCloud)
+  APPLE
+  /// Microsoft Outlook
+  OUTLOOK
+}
+
+/// Направление синхронизации календаря
+enum CalendarSyncDirection {
+  /// Только экспорт из системы в календарь
+  EXPORT_ONLY
+  /// Только импорт из календаря в систему
+  IMPORT_ONLY
+  /// Двусторонняя синхронизация
+  BIDIRECTIONAL
+}
+
+/// Статус синхронизации календаря
+enum CalendarSyncStatus {
+  /// Ожидает синхронизации
+  PENDING
+  /// В процессе синхронизации
+  SYNCING
+  /// Успешно синхронизирован
+  SUCCESS
+  /// Ошибка синхронизации
+  ERROR
+}
+
+enum ContractTemplateType {
+  /// Договор на обучение
+  TRAINING_CONTRACT
+  /// Договор на теорию
+  THEORY_CONTRACT
+  /// Договор на практику
+  PRACTICE_CONTRACT
+  /// Произвольный договор
+  CUSTOM
+}
+
+enum ContractStatus {
+  /// Черновик
+  DRAFT
+  /// Ожидает подписи
+  PENDING_SIGN
+  /// Подписан
+  SIGNED
+  /// Аннулирован
+  VOID
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+model User {
+  id              String    @id @default(cuid())
+  // Field-level ACL (ZenStack v3.2.0): email и phone видны только владельцу или OWNER
+  // ВАЖНО: auth().id == this.id вместо auth() == this (баг ZenStack v3.2.1 с сравнением объектов)
+  email           String    @unique @allow('read', auth().id == this.id || auth().isOwner)
+  hashedPassword  String?   @deny('read', true)  // Пароль никогда не читается
+  name            String?   // Имя заполняется при onboarding
+  phone           String?   @allow('read', auth().id == this.id || auth().isOwner)
+  image           String?     // OAuth аватар (URL от провайдера)
+  avatarId        String?     // Загруженный аватар (связь с File)
+  avatar          File?       @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+  roles           UserRole[]  @default([USER])  // Пользователь может иметь несколько ролей
+  birthdate       DateTime?
+  gender          Gender?     // Пол (собирается из OAuth провайдеров)
+  timezone        String    @default("Europe/Moscow")
+  emailVerified   Boolean   @default(false)
+
+  // Onboarding
+  isOnboardingComplete  Boolean   @default(false)  // Прошёл ли onboarding после регистрации
+
+  // Soft delete
+  deletedAt       DateTime?
+
+  // Связи Auth.js
+  accounts        Account[]
+  sessions        Session[]
+
+  // Профили ролей
+  studentProfile           StudentProfile?
+  instructorProfile        InstructorProfile?
+  theoryInstructorProfile  TheoryInstructorProfile?
+
+  // Better Auth Organizations
+  organizationMembers    Member[]                 @relation("OrganizationMembers")
+  teamMembers            TeamMember[]             @relation("TeamMembers")
+  sentOrgInvitations     OrganizationInvitation[] @relation("SentOrgInvitations")
+
+  // Уведомления и интеграции
+  notifications         Notification[]
+  notificationSettings  NotificationSettings?
+  pushSubscriptions     PushSubscription[]
+  telegramLink          TelegramLink?
+
+  // Оффлайн синхронизация
+  syncQueue             SyncQueueItem[]
+
+  // Аудит
+  auditLogs             AuditLog[]
+
+  // Отзывы
+  reviews               Review[]  @relation("ReviewAuthor")
+
+  // Занятия (как ученик и как инструктор)
+  lessonsAsStudent      Lesson[]  @relation("StudentLessons")
+  lessonsAsInstructor   Lesson[]  @relation("InstructorLessons")
+
+  // Теоретические занятия
+  studyGroupMemberships StudyGroupMember[]
+  theoryLessonsAsInstructor TheoryLesson[] @relation("TheoryInstructor")
+
+  // Экзамены
+  examRegistrations     ExamRegistration[]
+  examAttempts          ExamAttempt[]
+
+  // Тикеты поддержки
+  supportTickets        SupportTicket[]  @relation("TicketAuthor")
+  assignedTickets       SupportTicket[]  @relation("TicketAssignee")
+  supportMessages       SupportMessage[] @relation("MessageAuthor")
+
+  // Чаты
+  chatParticipations    ChatParticipant[]
+  chatMessages          ChatMessage[]
+  messageReactions      MessageReaction[]
+  instructorChats       Chat[]            @relation("InstructorChats")
+  schoolStudentChats    Chat[]            @relation("ChatStudent")  // Чаты SCHOOL_STUDENT где пользователь = ученик
+
+  // Юридические документы и подписки
+  agreements            UserAgreement[]
+  subscriptions         Subscription[]
+
+  // Заявки на обучение
+  enrollments           SchoolEnrollment[]
+
+  // Заявки к инструкторам
+  enrollmentRequestsAsStudent     EnrollmentRequest[]  @relation("StudentEnrollmentRequests")
+  enrollmentRequestsAsInstructor  EnrollmentRequest[]  @relation("InstructorEnrollmentRequests")
+
+  // Верификация водительских прав учеников
+  verifiedLicenses  StudentLicense[]  @relation("LicenseVerifier")
+
+  // Система прогресса ученика (Фаза 6)
+  coursePayments            CoursePayment[]
+  studentProgress           StudentProgress[]
+  initiatedChanges          PersonalDataChange[]
+  uploadedDocuments         PersonalDataDocument[]
+  reviewedStudentDocuments  StudentDocument[]  // Документы, проверенные менеджером
+
+  // Webhooks
+  createdWebhooks   Webhook[]  @relation("createdWebhooks")
+
+  // Календари
+  calendarConnections  CalendarConnection[]
+  calendarFeed         CalendarFeed?
+
+  // Напоминания
+  reminderLogs         ReminderLog[]
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Онбординг инструктора (расширенный)
+  instructorOnboarding  UserOnboarding?
+
+  // Политики доступа
+  // ВАЖНО: auth().id == this.id вместо auth() == this (баг ZenStack v3.2.1 с сравнением объектов)
+  @@allow('create', true) // Регистрация открыта
+  @@allow('read', auth() != null && deletedAt == null)  // Авторизованные читают базовую инфу (email, phone защищены field-level ACL)
+  @@allow('update', auth().id == this.id && deletedAt == null)
+  @@allow('all', auth().isModerator)  // Модератор может управлять пользователями
+  @@allow('all', auth().isOwner)      // Владелец имеет полный доступ
+  @@deny('read', deletedAt != null)
+}
+
+// Расширенный онбординг инструктора (6 шагов)
+model UserOnboarding {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Прогресс онбординга
+  currentStep     Int       @default(1)          // Текущий шаг (1-6)
+  completedSteps  Int[]     @default([])         // Массив завершённых шагов
+  isCompleted     Boolean   @default(false)      // Завершён ли онбординг полностью
+  skippedAt       DateTime?                      // Когда пользователь пропустил
+  completedAt     DateTime?                      // Когда завершил
+
+  // Метрики для аналитики
+  startedAt       DateTime  @default(now())      // Когда начал
+  timeSpentSec    Int       @default(0)          // Общее время в секундах
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([isCompleted])
+
+  @@allow('read', auth().id == userId)
+  @@allow('update', auth().id == userId)
+  @@allow('create', auth() != null)
+  @@allow('all', auth().isOwner)
+
+}
+
+model StudentProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  preferredAreas         Json?    // ["Центр", "Север", "Юг"]
+  noteForInstructor      String?
+
+  // Связи с инструкторами
+  instructorConnections  StudentInstructorConnection[]
+
+  // Водительские права ученика
+  studentLicenses        StudentLicense[]
+
+  @@allow('read', auth().id == userId)
+  @@allow('update', auth().id == userId)
+  @@allow('read', auth().isFreelanceInstructor)  // Инструкторы могут просматривать профили учеников
+  @@allow('all', auth().isOwner)
+
+}
+
+// Водительские права ученика
+model StudentLicense {
+  id                      String           @id @default(cuid())
+  studentProfileId        String
+  studentProfile          StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  // Категория прав
+  category                LicenseCategory
+
+  // Ограничение по КПП (null = полные права МКПП+АКПП, AUTOMATIC = только АКПП)
+  transmissionRestriction TransmissionType?
+
+  // Даты
+  obtainedAt              DateTime         // Дата получения прав
+  expiresAt               DateTime         // Дата истечения (обычно +10 лет)
+
+  // Верификация инструктором
+  isVerified              Boolean          @default(false)
+  verifiedAt              DateTime?
+  verifiedById            String?
+  verifiedBy              User?            @relation("LicenseVerifier", fields: [verifiedById], references: [id])
+
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  // Одна запись на категорию у ученика
+  @@unique([studentProfileId, category])
+  @@index([studentProfileId])
+
+  // Политики доступа
+  // ВАЖНО: studentProfile.userId == auth().id вместо studentProfile.user == auth() (баг ZenStack v3.2.1)
+  @@allow('read', studentProfile.userId == auth().id)
+  @@allow('create,update,delete', studentProfile.userId == auth().id)
+  @@allow('read,update', auth().isFreelanceInstructor) // Инструктор может видеть и верифицировать
+  @@allow('all', auth().isOwner)
+
+}
+
+model InstructorProfile {
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Профиль
+  bio                  String?
+  experienceStartDate  DateTime?          // Дата начала деятельности (стаж вычисляется)
+  licenseCategories    LicenseCategory[]  // Какие категории преподаёт
+
+  // Фото инструктора (полноценное, как в паспорте)
+  photoId              String?            @unique
+  photo                File?              @relation(fields: [photoId], references: [id])
+
+  // Местоположение (город → районы)
+  // Формат: [
+  //   { "cityId": "0c5b2444...", "cityName": "Москва", "districts": ["Центральный", "Северный"] },
+  //   { "cityId": "abc123...", "cityName": "Видное", "districts": ["*"] }
+  // ]
+  // cityId = FIAS ID из DaData для индексации
+  // districts: ["*"] означает все районы города
+  workingAreas         Json?              // Города и районы работы
+  teachesOnStudentCar  Boolean            @default(false)  // Обучает на авто ученика
+
+  // Публичность профиля
+  isPublic             Boolean            @default(false)  // Показывать в каталоге
+
+  // Настройки расписания
+  scheduleSettings     ScheduleSettings?
+
+  // Настройки штрафов (field-level ACL убран из-за бага ZenStack)
+  lateCancelHours      Int              @default(24)
+  lateCancelPenalty    Decimal?
+  noShowPenalty        Decimal?
+  autoConfirmBookings  Boolean          @default(false)
+
+  // Рейтинг
+  averageRating        Float?             // Средний рейтинг (1.0-5.0)
+  reviewCount          Int                @default(0)
+
+  // Связи
+  studentConnections   StudentInstructorConnection[]
+  slots                TimeSlot[]
+  absences             Absence[]
+  invitations          Invitation[]
+  lessonTypes          LessonType[]
+  reviews              Review[]
+  vehicles             InstructorVehicle[]
+
+  // Система прогресса ученика (Фаза 6)
+  meetingPoints        InstructorMeetingPoint[]
+  categoryProgress     CategoryProgress[]
+
+  @@index([isPublic, averageRating])
+
+  @@allow('read', true) // Публичный профиль
+  @@allow('update', auth().id == userId)
+}
+
+// Автомобиль инструктора (поддержка нескольких авто)
+model InstructorVehicle {
+  id                   String              @id @default(cuid())
+  instructorProfileId  String
+  instructorProfile    InstructorProfile   @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+
+  // Информация об авто
+  /// @form.title("Марка")
+  /// @form.placeholder("Например: Hyundai")
+  brand                String
+
+  /// @form.title("Модель")
+  /// @form.placeholder("Например: Solaris")
+  model                String
+
+  /// @form.title("Госномер")
+  /// @form.placeholder("А 000 АА 000")
+  plateNumber          String?
+
+  /// @form.title("Тип КПП")
+  /// @form.fieldType("radioCard")
+  transmission         TransmissionType
+
+  /// @form.title("Год выпуска")
+  /// @form.props({ min: 1990, max: 2030 })
+  year                 Int?
+
+  /// @form.title("Цвет")
+  color                String?
+
+  // Категории прав, которые можно преподавать на этом авто
+  /// @form.title("Категории прав")
+  /// @form.fieldType("checkboxCard")
+  licenseCategories    LicenseCategory[]
+
+  // Фотографии (до 5 штук) — связь с моделью File
+  files                VehicleFile[]
+
+  /// @form.exclude
+  images               Json?
+
+  // Флаги
+  /// @form.title("Основной автомобиль")
+  /// @form.fieldType("switch")
+  isPrimary            Boolean             @default(false)
+
+  /// @form.title("Активен")
+  /// @form.fieldType("switch")
+  isActive             Boolean             @default(true)
+
+  /// @form.title("Доступен")
+  /// @form.fieldType("switch")
+  isAvailable          Boolean             @default(true)
+
+  /// @form.title("Причина недоступности")
+  unavailableReason    String?
+
+  // Заявки на обучение с указанием этого авто
+  enrollmentRequests   EnrollmentRequest[]
+
+  // Варианты цен с этим авто
+  pricingOptions       PricingOption[]
+
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([instructorProfileId])
+  @@index([instructorProfileId, isPrimary])
+
+  @@allow('read', true) // Публичный просмотр
+  @@allow('create,update,delete', instructorProfile.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+model TheoryInstructorProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Профессиональная информация
+  bio              String?              // Описание/квалификация
+  education        String?              // Образование
+  specializations  String[]             // ["ПДД", "Первая помощь", "Устройство авто"]
+  experienceStartDate DateTime?         // Дата начала преподавания (стаж вычисляется)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@allow('read', true)
+  @@allow('update', auth().id == userId)
+  @@allow('all', auth().isOwner)
+
+}
+
+model StudentInstructorConnection {
+  id               String             @id @default(cuid())
+  studentId        String
+  student          StudentProfile     @relation(fields: [studentId], references: [id])
+  instructorId     String
+  instructor       InstructorProfile  @relation(fields: [instructorId], references: [id])
+
+  status           ConnectionStatus   @default(ACTIVE)
+  isPrimary        Boolean            @default(false)
+  prepaidLessons   Int                @default(0)
+  category         LicenseCategory?   // На какую категорию учится у этого инструктора
+
+  // Статистика
+  totalLessons     Int                @default(0)
+  completedLessons Int                @default(0)
+  cancelledLessons Int                @default(0)
+  noShowCount      Int                @default(0)
+
+  // Для передачи ученика
+  transferredFrom  String?
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([studentId, instructorId])
+
+  // Политики доступа
+  @@allow('read', student.userId == auth().id)     // Студент видит свои связи
+  @@allow('read', instructor.userId == auth().id)  // Инструктор видит свои связи
+  @@allow('create', instructor.userId == auth().id) // Инструктор создаёт связь
+  @@allow('update', instructor.userId == auth().id) // Инструктор обновляет (prepaidLessons, status)
+  @@allow('delete', instructor.userId == auth().id) // Инструктор удаляет связь
+  @@allow('all', auth().isOwner)
+}
+
+model StudentTransfer {
+  id                String             @id @default(cuid())
+
+  // Исходная связь (передающий инструктор)
+  fromConnectionId  String
+
+  // Принимающий инструктор
+  toInstructorId    String
+
+  // Параметры передачи
+  type              TransferType       @default(TEMPORARY)
+  reason            TransferReason     @default(OTHER)
+  transferBalance   Boolean            @default(true)  // Переносить ли баланс
+
+  // Статус
+  status            TransferStatus     @default(PENDING)
+
+  // Сроки
+  expiresAt         DateTime           // По умолчанию +7 дней
+  createdAt         DateTime           @default(now())
+  respondedAt       DateTime?          // Когда ответили (принял/отклонил)
+
+  // Результат передачи
+  newConnectionId   String?            // ID новой связи (после принятия)
+
+  @@index([fromConnectionId])
+  @@index([toInstructorId])
+  @@index([status])
+}
+
+model Invitation {
+  id            String             @id @default(cuid())
+  token         String             @unique @default(cuid())
+  instructorId  String
+  instructor    InstructorProfile  @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  email         String?
+  status        InvitationStatus   @default(PENDING)
+
+  expiresAt     DateTime
+  createdAt     DateTime           @default(now())
+  acceptedAt    DateTime?
+  declinedAt    DateTime?
+
+  @@index([token])
+  @@index([instructorId])
+  @@index([status])
+
+  // Access Control Policies
+
+  // READ: Любой может прочитать приглашение по токену (для accept flow)
+  // Token = CUID, невозможно угадать → безопасно для публичного чтения
+  @@allow('read', true)
+
+  // CREATE: Любой авторизованный FREELANCE_INSTRUCTOR или OWNER может создавать приглашения
+  // ⚠️ Проверка владения происходит на уровне application logic (requireInstructor)
+  // Нельзя использовать instructor.userId при CREATE, так как relation еще не существует
+  @@allow('create', auth() != null && (
+    auth().isFreelanceInstructor || auth().isOwner
+  ))
+
+  // UPDATE: Только инструктор может обновлять свои приглашения, либо OWNER
+  @@allow('update', auth() != null && (
+    instructor.userId == auth().id || auth().isOwner
+  ))
+
+  // DELETE: Только инструктор может удалять свои приглашения, либо OWNER
+  @@allow('delete', auth() != null && (
+    instructor.userId == auth().id || auth().isOwner
+  ))
+}
+
+model ScheduleSettings {
+  id               String             @id @default(cuid())
+  instructorId     String             @unique
+  instructor       InstructorProfile  @relation(fields: [instructorId], references: [id])
+
+  /// @form.title("Рабочие часы")
+  /// @form.description("Расписание по дням недели")
+  /// @form.exclude
+  workingHours     Json               @default("{}")
+
+  /// @form.title("Длительность занятия (мин)")
+  /// @form.props({ min: 30, max: 180, step: 15 })
+  lessonDuration   Int                @default(90)
+
+  /// @form.title("Перерыв между занятиями (мин)")
+  /// @form.props({ min: 0, max: 60, step: 5 })
+  breakDuration    Int                @default(15)
+
+  /// @form.title("Горизонт планирования (дней)")
+  /// @form.props({ min: 1, max: 30 })
+  planningHorizon  Int                @default(7)
+
+  customBreaks     CustomBreak[]
+
+  updatedAt        DateTime           @updatedAt
+
+  // Политики доступа
+  @@allow('all', instructor.userId == auth().id)  // Инструктор управляет своими настройками
+  @@allow('all', auth().isOwner)  // Владелец имеет полный доступ
+}
+
+model CustomBreak {
+  id               String             @id @default(cuid())
+  settingsId       String
+  settings         ScheduleSettings   @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+
+  isRecurring      Boolean            @default(false)
+  dayOfWeek        DayOfWeek?
+  specificDate     DateTime?
+
+  startTime        String             // "12:00"
+  endTime          String             // "13:00"
+  reason           String?
+
+  // Политики доступа - через родительский ScheduleSettings
+  @@allow('all', settings.instructor.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+model TimeSlot {
+  id               String             @id @default(cuid())
+  instructorId     String
+  instructor       InstructorProfile  @relation(fields: [instructorId], references: [id])
+
+  startTime        DateTime
+  endTime          DateTime
+  status           SlotStatus         @default(AVAILABLE)
+
+  lesson           Lesson?
+
+  // Политики доступа
+  @@allow('read', true)  // Слоты видны всем для бронирования
+  @@allow('create,update,delete', instructor.userId == auth().id)  // Инструктор управляет своими слотами
+  @@allow('all', auth().isOwner)
+
+  @@index([instructorId, status, startTime])
+  @@index([instructorId, startTime])
+}
+
+model Lesson {
+  id               String           @id @default(cuid())
+  slotId           String           @unique
+  slot             TimeSlot         @relation(fields: [slotId], references: [id])
+
+  studentId        String
+  student          User             @relation("StudentLessons", fields: [studentId], references: [id])
+
+  instructorId     String
+  instructor       User             @relation("InstructorLessons", fields: [instructorId], references: [id])
+
+  status           LessonStatus     @default(PENDING)
+  category         LicenseCategory? // Для какой категории занятие
+
+  // Тип занятия (опционально для обратной совместимости)
+  lessonTypeId     String?
+  lessonType       LessonType?      @relation(fields: [lessonTypeId], references: [id])
+
+  // Вариант цены и зафиксированная стоимость
+  pricingOptionId  String?
+  pricingOption    PricingOption?   @relation(fields: [pricingOptionId], references: [id])
+  price            Decimal?         // Зафиксированная цена на момент бронирования
+
+  // Система прогресса ученика (Фаза 6) — связь с покупкой курса
+  courseEnrollmentId  String?
+  courseEnrollment    CourseEnrollment?  @relation(fields: [courseEnrollmentId], references: [id])
+
+  // Кто инициировал
+  createdBy        String
+
+  // Отмена
+  cancelledBy      String?
+  cancelledAt      DateTime?
+  cancelReason     String?
+
+  // Перенос (self-reference)
+  rescheduledToId    String?      @unique
+  rescheduledTo      Lesson?      @relation("RescheduledLesson", fields: [rescheduledToId], references: [id])
+  rescheduledFrom    Lesson?      @relation("RescheduledLesson")
+
+  // Заметки
+  instructorNotes  String?
+
+  // Отзыв на занятие
+  review           Review?
+
+  // Синхронизация с внешними календарями
+  calendarEvents   CalendarEvent[]
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([studentId])
+  @@index([instructorId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([lessonTypeId])
+  @@index([pricingOptionId])
+  @@index([courseEnrollmentId])
+
+  // Политики доступа
+  @@allow('read', studentId == auth().id)      // Студент видит свои занятия
+  @@allow('read', instructorId == auth().id)   // Инструктор видит свои занятия
+  @@allow('create', instructorId == auth().id) // Инструктор создаёт занятие
+  @@allow('update', instructorId == auth().id) // Инструктор обновляет занятие
+  @@allow('delete', instructorId == auth().id) // Инструктор удаляет занятие
+  @@allow('all', auth().isOwner)
+}
+
+model Penalty {
+  id               String        @id @default(cuid())
+  studentId        String
+  instructorId     String
+  lessonId         String?
+
+  type             PenaltyType
+  status           PenaltyStatus @default(CHARGED)
+  amount           Decimal
+
+  chargedAt        DateTime      @default(now())
+  paidAt           DateTime?
+  cancelledAt      DateTime?
+  cancelReason     String?
+
+  @@index([studentId])
+  @@index([instructorId])
+}
+
+model Absence {
+  id               String             @id @default(cuid())
+  instructorId     String
+  instructor       InstructorProfile  @relation(fields: [instructorId], references: [id])
+
+  type             AbsenceType
+  startDate        DateTime
+  endDate          DateTime?
+  reason           String?
+
+  isActive         Boolean            @default(true)
+
+  // Синхронизация с внешними календарями
+  calendarEvents   CalendarEvent[]
+
+  createdAt        DateTime           @default(now())
+  returnedAt       DateTime?
+}
+
+// ============================================================================
+// ТИПЫ ЗАНЯТИЙ И ПРАЙС-ЛИСТ
+// ============================================================================
+
+model LessonType {
+  id               String             @id @default(cuid())
+  instructorId     String
+  instructor       InstructorProfile  @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Название")
+  /// @form.placeholder("Например: Вождение по городу")
+  name             String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description      String?
+
+  /// @form.title("Длительность (мин)")
+  /// @form.props({ min: 30, max: 180, step: 15 })
+  durationMinutes  Int
+
+  /// @form.title("Категория прав")
+  /// @form.fieldType("select")
+  licenseCategory  LicenseCategory?
+
+  /// @form.title("Тип занятия")
+  /// @form.fieldType("select")
+  lessonCategory   LessonCategory?
+
+  /// @form.title("Активен")
+  /// @form.fieldType("switch")
+  isActive         Boolean            @default(true)
+
+  /// @form.exclude
+  sortOrder        Int                @default(0)
+
+  // Связи
+  lessons          Lesson[]
+  pricingOptions   PricingOption[]    // Варианты цен
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([instructorId, isActive])
+  @@index([instructorId, licenseCategory])
+  @@index([instructorId, lessonCategory])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', instructor.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// Вариант цены для типа занятия
+model PricingOption {
+  id               String             @id @default(cuid())
+  lessonTypeId     String
+  lessonType       LessonType         @relation(fields: [lessonTypeId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Чья машина")
+  /// @form.fieldType("radioCard")
+  vehicleOwner     VehicleOwner       @default(INSTRUCTOR)
+
+  /// @form.title("Автомобиль")
+  /// @form.fieldType("select")
+  /// @form.relation({ labelField: "brand" })
+  vehicleId        String?
+  vehicle          InstructorVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  /// @form.title("Количество занятий")
+  /// @form.props({ min: 1, max: 50 })
+  lessonsCount     Int                @default(1)
+
+  /// @form.title("Цена за занятие (₽)")
+  /// @form.props({ min: 0 })
+  pricePerLesson   Decimal
+
+  /// @form.title("Скидка за курс (%)")
+  /// @form.props({ min: 0, max: 50 })
+  discountPercent  Int                @default(0)
+
+  /// @form.title("Активен")
+  /// @form.fieldType("switch")
+  isActive         Boolean            @default(true)
+
+  /// @form.title("Основной вариант")
+  /// @form.fieldType("switch")
+  isPrimary        Boolean            @default(false)
+
+  /// @form.exclude
+  sortOrder        Int                @default(0)
+
+  // Занятия, созданные с этим вариантом цены
+  lessons          Lesson[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([lessonTypeId, isActive])
+  @@index([lessonTypeId, vehicleOwner])
+  @@index([vehicleId])
+
+  // Уникальность: тип занятия + владелец машины + конкретная машина + кол-во занятий
+  @@unique([lessonTypeId, vehicleOwner, vehicleId, lessonsCount], name: "lessonTypeId_vehicleOwner_vehicleId_lessonsCount")
+
+  @@allow('read', true)
+  @@allow('create,update,delete', lessonType.instructor.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// АВТОШКОЛЫ — УДАЛЁННЫЕ МОДЕЛИ (миграция на Better Auth Organizations)
+// ============================================================================
+// School → Organization (с additionalFields и metadata)
+// SchoolMembership → Member (строковые роли: owner, super_manager, manager, instructor, theory_instructor, member)
+// SchoolInvitation → OrganizationInvitation
+// SchoolLocation → Team + TeamLocationData
+// StaffLocationAssignment → TeamMember
+// ============================================================================
+
+// SchoolLocation УДАЛЕНА — заменена на Team + TeamLocationData
+// См. модели Team, TeamLocationData в секции "BETTER AUTH ORGANIZATIONS"
+
+// Централизованное хранилище файлов (изображения, документы, вложения)
+model File {
+  id            String         @id @default(cuid())
+  filename      String         // Имя файла на диске (уникальное)
+  path          String         @unique // Полный путь (locations/xxx.jpg, avatars/xxx.jpg)
+  mimeType      String         // image/jpeg, image/png, image/webp, application/pdf
+  size          Int            // Размер в байтах
+  width         Int?           // Ширина в пикселях (для изображений)
+  height        Int?           // Высота в пикселях (для изображений)
+
+  category      FileCategory   // Категория файла
+
+  // Метаданные
+  uploadedById  String?        // userId кто загрузил
+  uploadedAt    DateTime       @default(now())
+
+  // Обратные связи
+  locationFiles     LocationFile[]
+  vehicleFiles      VehicleFile[]
+  userAvatars       User[]
+  instructorPhoto   InstructorProfile?
+  contractFiles     GeneratedContract[]
+  studentDocuments  StudentDocument[]
+
+  @@index([category])
+  @@index([uploadedAt])
+
+  // Access control: все могут читать, только авторизованные могут управлять
+  @@allow('read', true)
+  @@allow('create', auth() != null)
+  @@allow('delete', auth() != null)
+}
+
+// Связь файлов с филиалами (Team)
+model LocationFile {
+  id          String   @id @default(cuid())
+  teamId      String   // Связь с Team (бывший locationId)
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Связь с централизованным хранилищем файлов
+  fileId      String
+  file        File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  alt         String?  // Альтернативный текст для доступности
+  order       Int      @default(0) // Порядок отображения
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([teamId, order])
+
+  // Access control: все могут читать, менеджеры могут управлять
+  @@allow('read', true)
+  @@allow('create,update,delete', team.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Связь файлов с автомобилями инструктора
+model VehicleFile {
+  id          String            @id @default(cuid())
+  vehicleId   String
+  vehicle     InstructorVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  // Связь с централизованным хранилищем файлов
+  fileId      String
+  file        File              @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  alt         String?           // Альтернативный текст
+  order       Int               @default(0) // Порядок отображения
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([vehicleId])
+  @@index([vehicleId, order])
+
+  // Access control: все могут читать, владелец может управлять
+  @@allow('read', true)
+  @@allow('all', vehicle.instructorProfile.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// Заявка на обучение в школе
+model SchoolEnrollment {
+  id              String           @id @default(cuid())
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status          EnrollmentStatus @default(PENDING)
+  message         String?          // Сообщение от пользователя
+  adminComment    String?          // Комментарий администратора
+
+  // Желаемые параметры обучения
+  categories      LicenseCategory[] // Желаемые категории
+
+  processedAt     DateTime?        // Дата обработки заявки
+  processedById   String?          // ID администратора, обработавшего заявку
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([organizationId, userId, status]) // Один пользователь не может иметь несколько активных заявок
+  @@index([organizationId])
+  @@index([userId])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('create', auth() != null)  // Любой авторизованный может создать заявку
+  @@allow('read', auth().id == userId)  // Пользователь видит свои заявки
+  @@allow('read', organization.members?[userId == auth().id && role in ['owner', 'manager']])
+  @@allow('update', auth().id == userId && status == PENDING)  // Пользователь может отменить заявку
+  @@allow('update', organization.members?[userId == auth().id && role in ['owner', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Заявка на обучение к инструктору (напрямую или через школу)
+model EnrollmentRequest {
+  id              String                  @id @default(cuid())
+  type            EnrollmentRequestType   // DIRECT или VIA_SCHOOL
+  status          EnrollmentStatus        @default(PENDING)
+
+  // Ученик, подающий заявку
+  student         User                    @relation("StudentEnrollmentRequests", fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String
+
+  // Целевой инструктор (обязательно для DIRECT)
+  instructor      User?                   @relation("InstructorEnrollmentRequests", fields: [instructorId], references: [id], onDelete: Cascade)
+  instructorId    String?
+
+  // Целевая школа (обязательно для VIA_SCHOOL)
+  organizationId  String?
+  organization    Organization?           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Выбранный автомобиль (опционально)
+  vehicle         InstructorVehicle?      @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  vehicleId       String?
+
+  // Комментарий ученика
+  message         String?
+
+  // Комментарий при отклонении
+  rejectReason    String?
+
+  // Кто обработал заявку
+  processedById   String?
+  processedAt     DateTime?
+
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([studentId])
+  @@index([instructorId, status])
+  @@index([organizationId, status])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('create', auth() != null)  // Любой авторизованный может создать заявку
+  @@allow('read', auth().id == studentId)  // Ученик видит свои заявки
+  @@allow('read', auth().id == instructorId)  // Инструктор видит заявки к себе
+  @@allow('read', organization.members?[userId == auth().id && role in ['owner', 'manager']])
+  @@allow('update', auth().id == studentId && status == PENDING)  // Ученик может отменить заявку
+  @@allow('update', auth().id == instructorId && status == PENDING)  // Инструктор обрабатывает
+  @@allow('update', organization.members?[userId == auth().id && role in ['owner', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// SchoolMembership УДАЛЕНА — заменена на Member
+// SchoolInvitation УДАЛЕНА — заменена на OrganizationInvitation
+// См. модели Member, OrganizationInvitation в секции "BETTER AUTH ORGANIZATIONS"
+
+// ============================================================================
+// BETTER AUTH ORGANIZATIONS
+// ============================================================================
+
+/// Организация (автошкола) - Better Auth organizations plugin
+model Organization {
+  id            String   @id @default(cuid())
+  name          String   // Название школы
+  slug          String   @unique // URL-friendly идентификатор
+  logo          String?  // Логотип школы
+
+  // Метаданные (для сложных массивов и юридических реквизитов)
+  // JSON: {
+  //   cities: [], licenseCategories: [],
+  //   // Юридические реквизиты для договоров:
+  //   fullName: "ООО «Автошкола»", inn: "7707123456", ogrn: "1027700123456", kpp: "770701001",
+  //   legalAddress: "г. Москва, ул. Примерная, д. 1", actualAddress: "...",
+  //   directorName: "Иванов И.И.", directorPosition: "Генеральный директор", basis: "Устава",
+  //   licenseNumber: "Л035-01234", licenseDate: "2020-01-15",
+  //   bankName: "ПАО Сбербанк", bankBik: "044525225", bankAccount: "407028...", corrAccount: "301018..."
+  // }
+  metadata      String?
+
+  // Дополнительные поля (additionalFields в auth.ts)
+  phone         String?
+  email         String?
+  website       String?
+  description   String?
+  isPublic      Boolean  @default(false)
+  averageRating Float?
+  reviewCount   Int      @default(0)
+
+  // Связи Better Auth
+  members       Member[]
+  invitations   OrganizationInvitation[]
+  teams         Team[]
+
+  // Связи с бизнес-моделями
+  studyGroups          StudyGroup[]
+  theoryTopics         TheoryTopic[]
+  examSessions         ExamSession[]
+  reviews              Review[]
+  chats                Chat[]
+  subscriptions        Subscription[]
+  apiKeys              ApiKey[]
+  apiLogs              ApiLog[]
+  trainingCourses      TrainingCourse[]
+  optionalLessonTypes  OptionalLessonType[]
+  practiceMeetingPoints PracticeMeetingPoint[]
+  studentProgress      StudentProgress[]
+  schoolEnrollments    SchoolEnrollment[]
+  enrollmentRequests   EnrollmentRequest[]
+  webhooks             Webhook[]
+  contractTemplates    ContractTemplate[]
+  reminderRules        ReminderRule[]
+  surveys              Survey[]
+
+  // Партнёрства между школами
+  initiatedPartnerships SchoolPartnership[] @relation("PartnershipInitiator")
+  receivedPartnerships  SchoolPartnership[] @relation("PartnershipPartner")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublic])
+  @@index([isPublic, averageRating])
+
+  // Политики доступа
+  @@allow('read', true)
+  @@allow('create', auth() != null)
+  @@allow('update', members?[userId == auth().id && role == 'owner'])
+  @@allow('delete', members?[userId == auth().id && role == 'owner'])
+  @@allow('all', auth().isOwner)
+}
+
+/// Член организации - Better Auth organizations plugin
+model Member {
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation("OrganizationMembers", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Роль: owner, super_manager, manager, instructor, theory_instructor, member
+  role            String
+
+  // Привязка к командам (филиалам)
+  teamMembers     TeamMember[]
+
+  createdAt       DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+
+  // Политики доступа
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Приглашение в организацию - Better Auth organizations plugin
+/// Имя "OrganizationInvitation" чтобы не конфликтовать с Invitation (инструктор-ученик)
+/// ⚠️ В auth.ts нужно добавить: schema.invitation.modelName = 'OrganizationInvitation'
+model OrganizationInvitation {
+  id              String       @id @default(cuid())
+  email           String
+  inviterId       String
+  inviter         User         @relation("SentOrgInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Роль, которую получит приглашённый
+  role            String
+
+  // Статус: pending, accepted, rejected, expired, canceled
+  status          String       @default("pending")
+
+  // Команда (филиал), куда приглашают
+  teamId          String?
+
+  // Дополнительные данные приглашения (prefillData для создания аккаунта и т.д.)
+  metadata        Json?
+
+  createdAt       DateTime     @default(now())
+  expiresAt       DateTime
+
+  @@map("organization_invitation")
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Команда (филиал) - Better Auth organizations plugin teams feature
+/// Маппинг: SchoolLocation → Team + TeamLocationData
+model Team {
+  id              String       @id @default(cuid())
+  name            String       // Название филиала
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Члены команды (сотрудники филиала)
+  members         TeamMember[]
+
+  // Расширенные данные филиала (из SchoolLocation)
+  locationData    TeamLocationData?
+
+  // Файлы филиала (фотографии)
+  files           LocationFile[]
+
+  // Связи из бывшей SchoolLocation
+  meetingPoints             PracticeMeetingPoint[]
+  documentsStudentProgress  StudentProgress[]  @relation("DocumentsLocation")
+  theoryStudentProgress     StudentProgress[]  @relation("TheoryLocation")
+
+  // Учебные группы, привязанные к этому классу
+  studyGroups               StudyGroup[]       @relation("StudyGroupClassroom")
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime?    @updatedAt
+
+  @@index([organizationId])
+
+  // Политики доступа
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Член команды (сотрудник филиала) - Better Auth organizations plugin
+model TeamMember {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation("TeamMembers", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Связь с Member для проверки роли в организации
+  memberId   String
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // Основной филиал сотрудника
+  isPrimary  Boolean  @default(false)
+
+  createdAt  DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@index([memberId])
+
+  // Политики доступа
+  @@allow('read', team.organization.members?[userId == auth().id])
+  @@allow('create,update,delete', team.organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Расширенные данные филиала (из SchoolLocation)
+/// Связь 1:1 с Team для хранения специфичных данных автошколы
+model TeamLocationData {
+  id           String       @id @default(cuid())
+  teamId       String       @unique
+  team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Данные из SchoolLocation
+  type         LocationType // Тип: офис, класс, площадка
+  city         String       // Город
+  address      String       // Адрес
+  phone        String?      // Телефон
+  description  String?      // Описание
+
+  // Часовой пояс и координаты
+  timezone     String?      // UTC+3
+  geoLat       String?      // Широта
+  geoLon       String?      // Долгота
+
+  // Рабочее время в JSON формате
+  workingHours Json?
+
+  isActive     Boolean      @default(true)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Политики доступа
+  @@allow('read', true)
+  @@allow('create,update,delete', team.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// ТЕОРЕТИЧЕСКИЕ ЗАНЯТИЯ (ГРУППЫ)
+// ============================================================================
+
+// Учебная группа
+model StudyGroup {
+  id               String               @id @default(cuid())
+  organizationId   String
+  organization     Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name             String               // "Группа Б-2024-01 (утро)"
+  schedule         StudyGroupSchedule   // Тип расписания
+  categories       LicenseCategory[]    // Категории прав (теория может быть общей для A и B)
+
+  // Расписание занятий
+  startDate        DateTime             // Дата начала обучения
+  endDate          DateTime?            // Дата окончания (опционально)
+  lessonSchedule   Json                 // Расписание по дням: { monday: { startTime: "10:00", duration: 120 }, ... }
+
+  // Учебный класс (филиал type=CLASSROOM)
+  classroomId      String?
+  classroom        Team?                @relation("StudyGroupClassroom", fields: [classroomId], references: [id])
+
+  // Общее количество часов теории для группы
+  theoryHours      Int?                 // Часов теории (например 130)
+
+  maxStudents      Int                  @default(20)   // Макс. количество учеников
+  isActive         Boolean              @default(true)
+
+  // Связи
+  members          StudyGroupMember[]
+  theoryLessons    TheoryLesson[]
+  chats            Chat[]
+
+  // Система прогресса ученика (Фаза 6)
+  studentProgress  StudentProgress[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([organizationId, isActive])
+
+  // Политики доступа
+  // Участники школы видят группы
+  @@allow('read', organization.members?[userId == auth().id])
+  // Менеджеры могут управлять группами
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Участник учебной группы
+model StudyGroupMember {
+  id               String               @id @default(cuid())
+  groupId          String
+  group            StudyGroup           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  enrolledAt       DateTime             @default(now())
+  leftAt           DateTime?            // Дата выхода из группы (если выбыл)
+
+  // Связи с посещаемостью
+  attendances      TheoryAttendance[]
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+
+  // Политики доступа
+  @@allow('read', group.organization.members?[userId == auth().id])
+  @@allow('create,update,delete', group.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Тема теоретического занятия
+model TheoryTopic {
+  id               String               @id @default(cuid())
+  organizationId   String
+  organization     Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name             String               // "ПДД: проезд перекрёстков"
+  description      String?              // Подробное описание
+  categories       LicenseCategory[]    // Для каких категорий (пустой = для всех)
+  sortOrder        Int                  @default(0)    // Порядок в программе
+
+  // Учебные материалы
+  materials        Json?                // ["url1", "url2", ...] — ссылки на материалы
+
+  isActive         Boolean              @default(true)
+
+  // Связи
+  theoryLessons    TheoryLesson[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([organizationId, isActive])
+  @@index([sortOrder])
+
+  // Политики доступа
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Теоретическое занятие
+model TheoryLesson {
+  id               String               @id @default(cuid())
+  groupId          String
+  group            StudyGroup           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  topicId          String
+  topic            TheoryTopic          @relation(fields: [topicId], references: [id])
+
+  scheduledAt      DateTime             // Дата и время занятия
+  duration         Int                  @default(120)  // Длительность в минутах
+  status           TheoryLessonStatus   @default(SCHEDULED)
+
+  // Преподаватель (инструктор школы)
+  instructorId     String?
+  instructor       User?                @relation("TheoryInstructor", fields: [instructorId], references: [id])
+
+  // Место проведения
+  location         String?              // "Кабинет 205" или "Онлайн"
+
+  // Отмена/перенос
+  cancelledAt      DateTime?
+  cancelReason     String?
+  rescheduledToId  String?              @unique
+  rescheduledTo    TheoryLesson?        @relation("TheoryRescheduled", fields: [rescheduledToId], references: [id])
+  rescheduledFrom  TheoryLesson?        @relation("TheoryRescheduled")
+
+  // Связи
+  attendances      TheoryAttendance[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([groupId, scheduledAt])
+  @@index([topicId])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('read', group.organization.members?[userId == auth().id])
+  @@allow('create,update,delete', group.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager', 'theory_instructor']])
+  @@allow('update', instructorId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// Посещаемость теоретических занятий
+model TheoryAttendance {
+  id               String               @id @default(cuid())
+  lessonId         String
+  lesson           TheoryLesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  memberId         String
+  member           StudyGroupMember     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  isPresent        Boolean              @default(false)  // Был ли на занятии
+  markedAt         DateTime?            // Когда отметили присутствие
+  markedById       String?              // Кто отметил (инструктор/админ)
+
+  @@unique([lessonId, memberId])
+  @@index([lessonId])
+  @@index([memberId])
+
+  // Политики доступа
+  @@allow('read', lesson.group.organization.members?[userId == auth().id])
+  @@allow('create,update', lesson.group.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager', 'theory_instructor', 'instructor']])
+  @@allow('update', lesson.instructorId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// ЭКЗАМЕНЫ
+// ============================================================================
+
+// Сессия экзамена (дата проведения экзамена)
+model ExamSession {
+  id               String               @id @default(cuid())
+  organizationId   String
+  organization     Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type             ExamType             // Тип экзамена
+  category         LicenseCategory      // Категория прав
+
+  scheduledAt      DateTime             // Дата и время экзамена
+  location         String?              // Место проведения
+  maxStudents      Int                  @default(20)   // Лимит мест
+
+  status           ExamSessionStatus    @default(SCHEDULED)
+
+  // Стоимость (опционально)
+  price            Decimal?             // Стоимость сдачи
+
+  // Связи
+  registrations    ExamRegistration[]
+  attempts         ExamAttempt[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([organizationId, type])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+// Запись ученика на экзамен
+model ExamRegistration {
+  id               String               @id @default(cuid())
+  sessionId        String
+  session          ExamSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  registeredAt     DateTime             @default(now())
+  cancelledAt      DateTime?            // Если отменил запись
+  cancelReason     String?
+
+  // Связь с попыткой (создаётся после экзамена)
+  attempt          ExamAttempt?
+
+  // Система прогресса ученика (Фаза 6)
+  studentProgressId   String?
+  studentProgress     StudentProgress?  @relation(fields: [studentProgressId], references: [id])
+
+  categoryProgressId  String?
+  categoryProgress    CategoryProgress? @relation(fields: [categoryProgressId], references: [id])
+
+  @@unique([sessionId, userId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([studentProgressId])
+  @@index([categoryProgressId])
+}
+
+// Попытка сдачи экзамена (результат)
+model ExamAttempt {
+  id               String               @id @default(cuid())
+  sessionId        String
+  session          ExamSession          @relation(fields: [sessionId], references: [id])
+  registrationId   String               @unique
+  registration     ExamRegistration     @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User                 @relation(fields: [userId], references: [id])
+
+  result           ExamResult           // Результат: сдал / не сдал / неявка
+  score            Int?                 // Балл (если применимо)
+  notes            String?              // Заметки экзаменатора
+
+  // Кто выставил результат
+  gradedById       String?
+  gradedAt         DateTime?
+
+  // Система прогресса ученика (Фаза 6) — для экзаменов ГИБДД
+  escortRequired      Boolean @default(false)  // Нужно сопровождение
+  escortPaid          Boolean @default(false)  // Сопровождение оплачено
+  escortAmount        Decimal? @db.Decimal(10, 2)  // Сумма за сопровождение
+  escortById          String?                  // Кто сопровождал
+
+  isAfterCooldown     Boolean @default(false)  // После 6-месячного cooldown
+
+  createdAt        DateTime             @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([result])
+}
+
+// ============================================================================
+// BETTER AUTH MODELS
+// ============================================================================
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String    // Было: provider
+  accountId             String    // Было: providerAccountId
+  accessToken           String?   // Было: access_token
+  refreshToken          String?   // Было: refresh_token
+  accessTokenExpiresAt  DateTime? // Было: expires_at (Int)
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?   // Было: id_token
+  password              String?   // Better Auth: пароль для credential auth
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+
+  // Access control - только владелец Account может читать
+  // ВАЖНО: auth().id == user.id вместо auth() == user (баг ZenStack v3.2.1 с сравнением объектов)
+  @@allow('all', auth().id == user.id)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique  // Было: sessionToken
+  userId    String
+  expiresAt DateTime          // Было: expires
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Better Auth Organizations plugin
+  activeOrganizationId String?
+  activeTeamId         String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+
+  // Access control - только владелец Session может читать
+  // ВАЖНО: auth().id == user.id вместо auth() == user (баг ZenStack v3.2.1 с сравнением объектов)
+  @@allow('all', auth().id == user.id)
+}
+
+// Better Auth Verification model (НЕ VerificationToken!)
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String   // email пользователя
+  value      String   @unique // токен верификации
+  expiresAt  DateTime // срок действия
+  type       String   @default("EMAIL_VERIFICATION") // EMAIL_VERIFICATION или PASSWORD_RESET
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+
+  // Access control: никто не может читать токены напрямую
+  @@deny('all', true)
+}
+
+// ============================================================================
+// УВЕДОМЛЕНИЯ И ИНТЕГРАЦИИ
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+
+}
+
+model NotificationSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  pushEnabled       Boolean  @default(true)
+  emailEnabled      Boolean  @default(true)
+  telegramEnabled   Boolean  @default(false)
+
+  reminderHours     Int      @default(24)
+
+  lessonReminders   Boolean  @default(true)
+  lessonChanges     Boolean  @default(true)
+  penaltyAlerts     Boolean  @default(true)
+  marketingEmails   Boolean  @default(false)
+
+  updatedAt         DateTime @updatedAt
+
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+
+}
+
+model TelegramLink {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  telegramId  BigInt   @unique
+  username    String?
+  firstName   String?
+
+  linkedAt    DateTime @default(now())
+
+}
+
+model TelegramLinkToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+
+  expiresAt DateTime           // +1 час
+  usedAt    DateTime?          // null = не использован
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+
+}
+
+// ============================================================================
+// ОФФЛАЙН СИНХРОНИЗАЦИЯ
+// ============================================================================
+
+model SyncQueueItem {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action      String     // "BOOK_LESSON", "CANCEL_LESSON", "CONFIRM_LESSON"
+  payload     Json
+
+  status      SyncStatus @default(PENDING)
+  attempts    Int        @default(0)
+  maxAttempts Int        @default(3)
+
+  createdAt   DateTime   @default(now())
+  syncedAt    DateTime?
+  error       String?
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+
+}
+
+// ============================================================================
+// АУДИТ
+// ============================================================================
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action      AuditAction
+  entityType  String
+  entityId    String?
+
+  payload     Json?
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+
+}
+
+// ============================================================================
+// РЕЙТИНГИ И ОТЗЫВЫ
+// ============================================================================
+
+model Review {
+  id               String             @id @default(cuid())
+
+  // Автор отзыва (ученик)
+  authorId         String
+  author           User               @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Цель отзыва (инструктор или школа)
+  targetType       ReviewTargetType
+  instructorId     String?            // Если отзыв на инструктора
+  instructor       InstructorProfile? @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  organizationId   String?            // Если отзыв на организацию
+  organization     Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Связь с занятием (для отзыва на инструктора)
+  lessonId         String?            @unique
+  lesson           Lesson?            @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  // Оценка и текст
+  rating           Int                // 1-5 звёзд
+  text             String?            // Текст отзыва (опционально)
+
+  // Качественные аспекты (опционально, для отзывов на занятие)
+  wasOnTime        Boolean?           // Инструктор приехал вовремя
+  wasPatient       Boolean?           // Инструктор был терпелив
+  explainedWell    Boolean?           // Инструктор понятно объяснял
+  feltSafe         Boolean?           // Ученик чувствовал себя в безопасности
+  vehicleRating    Int?               // Оценка автомобиля (1-5)
+  wouldRecommend   Boolean?           // Рекомендовал бы инструктора
+
+  // Статус и модерация
+  status           ReviewStatus       @default(PUBLISHED)
+  hiddenAt         DateTime?
+  hiddenById       String?            // Кто скрыл (модератор/владелец)
+  hiddenReason     String?
+
+  // Ответ от инструктора/школы
+  response         String?
+  respondedAt      DateTime?
+  respondedById    String?
+
+  // Жалобы
+  reports          ReviewReport[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([authorId])
+  @@index([instructorId, status])
+  @@index([organizationId, status])
+
+  // Политики доступа
+  @@allow('read', status == PUBLISHED || auth().id == authorId)
+  @@allow('create', auth() != null)
+  @@allow('update', auth().id == authorId || auth().id == instructor.userId || auth().isModerator)
+  @@allow('all', auth().isOwner) // Владелец может модерировать отзывы
+
+}
+
+model ReviewReport {
+  id               String             @id @default(cuid())
+  reviewId         String
+  review           Review             @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  reporterId       String             // Кто пожаловался
+  reason           ReportReason
+  description      String?            // Дополнительное описание
+
+  status           ReportStatus       @default(PENDING)
+  resolvedById     String?            // Кто рассмотрел
+  resolvedAt       DateTime?
+  resolution       String?            // Решение модератора
+
+  createdAt        DateTime           @default(now())
+
+  @@unique([reviewId, reporterId])    // Один пользователь - одна жалоба
+  @@index([reviewId])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('create', auth() != null)
+  @@allow('read', auth().id == reporterId || auth().isModerator)
+  @@allow('all', auth().isOwner)
+
+}
+
+// ============================================================================
+// ТИКЕТЫ ПОДДЕРЖКИ
+// ============================================================================
+
+model SupportTicket {
+  id               String             @id @default(cuid())
+
+  // Автор тикета
+  authorId         String
+  author           User               @relation("TicketAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Тема и описание
+  category         TicketCategory
+  subject          String             // Краткая тема
+  description      String             // Подробное описание проблемы
+
+  // Статус
+  status           TicketStatus       @default(OPEN)
+
+  // Назначенный сотрудник поддержки (владелец платформы)
+  assignedToId     String?
+  assignedTo       User?              @relation("TicketAssignee", fields: [assignedToId], references: [id])
+
+  // Сообщения в тикете
+  messages         SupportMessage[]
+
+  // Метаданные
+  resolvedAt       DateTime?
+  closedAt         DateTime?
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([authorId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+
+  // Политики доступа
+  @@allow('create', auth() != null)
+  @@allow('read', auth().id == authorId || auth().isModerator)
+  @@allow('update', auth().id == authorId || auth().isModerator)
+  @@allow('all', auth().isOwner) // Владелец видит и управляет всеми тикетами
+
+}
+
+model SupportMessage {
+  id               String             @id @default(cuid())
+
+  // Тикет
+  ticketId         String
+  ticket           SupportTicket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Автор сообщения
+  authorId         String
+  author           User               @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Текст сообщения
+  content          String
+
+  // Флаг: сообщение от поддержки (не от пользователя)
+  isFromSupport    Boolean            @default(false)
+
+  createdAt        DateTime           @default(now())
+
+  @@index([ticketId])
+  @@index([authorId])
+
+  // Политики доступа
+  @@allow('create', auth() != null)
+  @@allow('read', auth().id == authorId || auth().id == ticket.authorId || auth().isModerator)
+  @@allow('all', auth().isOwner)
+
+}
+
+// ============================================================================
+// ЧАТЫ ПЛАТФОРМЫ
+// ============================================================================
+
+// Чат (приватный или групповой)
+model Chat {
+  id               String             @id @default(cuid())
+  type             ChatType           // Тип чата
+
+  // Для чата школы
+  organizationId   String?
+  organization     Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Для чата учебной группы
+  studyGroupId     String?
+  studyGroup       StudyGroup?        @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+
+  // Для INSTRUCTOR_STUDENTS чата
+  instructorId     String?            // ID инструктора (User)
+  instructor       User?              @relation("InstructorChats", fields: [instructorId], references: [id])
+  isFreelanceChat  Boolean            @default(false)  // true = фриланс, false = школа
+
+  // Для SCHOOL_STUDENT чата: ученик с которым общается школа
+  studentUserId    String?
+  studentUser      User?              @relation("ChatStudent", fields: [studentUserId], references: [id])
+
+  // Название (для групповых чатов)
+  name             String?
+
+  // Аватар чата (для групповых)
+  avatar           String?
+
+  // Участники и сообщения
+  participants     ChatParticipant[]
+  messages         ChatMessage[]
+
+  // Последнее сообщение (для быстрой сортировки списка чатов)
+  lastMessageId    String?            @unique
+  lastMessageAt    DateTime?
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([type])
+  @@index([organizationId])
+  @@index([studyGroupId])
+  @@index([instructorId])
+  @@index([studentUserId])
+  @@index([lastMessageAt])
+
+  // Уникальность: один чат SCHOOL_STUDENT на пару школа+ученик
+  @@unique([type, organizationId, studentUserId], name: "school_student_unique")
+
+  // Политики доступа
+  @@allow('read', participants?[userId == auth().id])
+  @@allow('create', auth() != null)
+  @@allow('update', participants?[userId == auth().id])
+  @@allow('all', auth().isOwner)
+
+}
+
+// Участник чата
+model ChatParticipant {
+  id               String             @id @default(cuid())
+  chatId           String
+  chat             Chat               @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Когда присоединился/вышел
+  joinedAt         DateTime           @default(now())
+  leftAt           DateTime?          // null = активный участник
+
+  // Когда последний раз читал чат
+  lastReadAt       DateTime?
+
+  // Настройки уведомлений
+  isMuted          Boolean            @default(false)
+
+  // Роль в чате (для модерации групповых чатов)
+  isAdmin          Boolean            @default(false)
+
+  @@unique([chatId, userId])
+  @@index([chatId])
+  @@index([userId])
+
+  // Политики доступа
+  @@allow('read', userId == auth().id || chat.participants?[userId == auth().id])
+  @@allow('create', auth() != null)
+  @@allow('update', userId == auth().id)
+  @@allow('all', auth().isOwner)
+
+}
+
+// Сообщение в чате
+model ChatMessage {
+  id               String             @id @default(cuid())
+  chatId           String
+  chat             Chat               @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  // Автор сообщения
+  authorId         String
+  author           User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Текст сообщения
+  content          String
+
+  // Ответ на сообщение (цитирование)
+  replyToId        String?
+  replyTo          ChatMessage?       @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies          ChatMessage[]      @relation("MessageReplies")
+
+  // Вложения (JSON массив: [{type: "image", url: "...", name: "..."}])
+  attachments      Json?
+
+  // Редактирование
+  editedAt         DateTime?
+
+  // Soft delete
+  deletedAt        DateTime?
+
+  // Реакции
+  reactions        MessageReaction[]
+
+  createdAt        DateTime           @default(now())
+
+  @@index([chatId, createdAt])
+  @@index([authorId])
+  @@index([replyToId])
+
+  // Политики доступа
+  @@allow('read', chat.participants?[userId == auth().id] && deletedAt == null)
+  @@allow('create', chat.participants?[userId == auth().id && leftAt == null])
+  @@allow('update', authorId == auth().id && deletedAt == null)
+  @@allow('delete', authorId == auth().id)
+  @@allow('all', auth().isOwner)
+
+}
+
+// Реакция на сообщение
+model MessageReaction {
+  id               String             @id @default(cuid())
+  messageId        String
+  message          ChatMessage        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  emoji            String             // Эмодзи реакции (👍, ❤️, 😂, etc.)
+
+  createdAt        DateTime           @default(now())
+
+  @@unique([messageId, userId, emoji])  // Один пользователь - одна реакция с одним эмодзи
+  @@index([messageId])
+  @@index([userId])
+
+  // Политики доступа
+  @@allow('read', message.chat.participants?[userId == auth().id])
+  @@allow('create', message.chat.participants?[userId == auth().id && leftAt == null])
+  @@allow('delete', userId == auth().id)
+  @@allow('all', auth().isOwner)
+
+}
+
+// ============================================================================
+// ЮРИДИЧЕСКИЕ ДОКУМЕНТЫ (ОФЕРТА, ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ)
+// ============================================================================
+
+// Юридический документ
+model LegalDocument {
+  id               String             @id @default(cuid())
+  type             LegalDocumentType  @unique  // Один документ каждого типа
+  title            String             // "Договор-оферта" или "Политика конфиденциальности"
+  slug             String             @unique  // "offer" или "privacy-policy"
+
+  // Текущая версия
+  currentVersionId String?            @unique
+  currentVersion   LegalDocumentVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+
+  // Все версии
+  versions         LegalDocumentVersion[] @relation("DocumentVersions")
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  // Политики доступа
+  @@allow('read', true)  // Публичный доступ для чтения
+  @@allow('all', auth().isOwner)  // Только владелец может создавать/редактировать
+
+}
+
+// Версия юридического документа
+model LegalDocumentVersion {
+  id               String             @id @default(cuid())
+  documentId       String
+  document         LegalDocument      @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+
+  version          String             // "1.0.0", "1.1.0", etc.
+  content          String             // Полный текст документа (Markdown)
+  summary          String?            // Краткое описание изменений
+
+  // Если это текущая версия
+  isCurrentOf      LegalDocument?     @relation("CurrentVersion")
+
+  // Когда версия вступила в силу
+  effectiveAt      DateTime           @default(now())
+
+  // Принятия этой версии пользователями
+  agreements       UserAgreement[]
+
+  createdAt        DateTime           @default(now())
+
+  @@index([documentId])
+  @@index([version])
+
+  // Политики доступа
+  @@allow('read', true)  // Публичный доступ для чтения
+  @@allow('all', auth().isOwner)
+
+}
+
+// Принятие оферты пользователем
+model UserAgreement {
+  id               String             @id @default(cuid())
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  versionId        String
+  version          LegalDocumentVersion @relation(fields: [versionId], references: [id])
+
+  // IP и User-Agent на момент принятия (для юридической значимости)
+  ipAddress        String?
+  userAgent        String?
+
+  acceptedAt       DateTime           @default(now())
+
+  @@unique([userId, versionId])  // Один пользователь принимает одну версию один раз
+  @@index([userId])
+  @@index([versionId])
+
+  // Политики доступа
+  @@allow('create', auth() != null)  // Любой авторизованный может принять
+  @@allow('read', auth().id == userId || auth().isOwner)
+
+}
+
+// ============================================================================
+// ТАРИФЫ И ПОДПИСКИ
+// ============================================================================
+
+// Тарифный план
+model SubscriptionPlan {
+  id               String             @id @default(cuid())
+  type             SubscriptionPlanType
+  name             String             // "Бесплатный", "Инструктор", "Школа"
+  description      String?            // Описание тарифа
+
+  // Цены
+  priceMonthly     Decimal?           // Цена за месяц (null = бесплатно)
+  priceYearly      Decimal?           // Цена за год (со скидкой)
+
+  // Лимиты
+  maxStudents      Int?               // Макс. учеников (null = без лимита)
+  maxInstructors   Int?               // Макс. инструкторов для школы
+
+  // Фичи (JSON)
+  features         Json?              // ["Неограниченные занятия", "Telegram-бот", ...]
+
+  // Триальный период (дни)
+  trialDays        Int                @default(0)
+
+  // Активен ли тариф
+  isActive         Boolean            @default(true)
+  sortOrder        Int                @default(0)
+
+  // Подписки на этот план
+  subscriptions    Subscription[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([type, isActive])
+
+  // Политики доступа
+  @@allow('read', true)  // Публичный доступ для чтения
+  @@allow('all', auth().isOwner)
+
+}
+
+// Подписка пользователя/школы
+model Subscription {
+  id               String             @id @default(cuid())
+
+  // Владелец подписки (пользователь или школа)
+  userId           String?
+  user             User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId   String?
+  organization     Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Тарифный план
+  planId           String
+  plan             SubscriptionPlan   @relation(fields: [planId], references: [id])
+
+  // Статус
+  status           SubscriptionStatus @default(ACTIVE)
+
+  // Период подписки
+  startedAt        DateTime           @default(now())
+  expiresAt        DateTime?          // null = бессрочная (FREE)
+  cancelledAt      DateTime?
+  cancelReason     String?
+
+  // Грейс-период (дни после истечения до блокировки)
+  gracePeriodDays  Int                @default(7)
+
+  // Платежи
+  payments         Payment[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([expiresAt])
+
+  // Политики доступа
+  @@allow('read', auth().id == userId || auth().isModerator)
+  @@allow('all', auth().isOwner)
+
+}
+
+// Платёж
+model Payment {
+  id               String             @id @default(cuid())
+  subscriptionId   String
+  subscription     Subscription       @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // Сумма и валюта (field-level ACL убран из-за бага ZenStack)
+  amount           Decimal
+  currency         String             @default("RUB")
+
+  // Способ оплаты
+  method           PaymentMethod?
+
+  // Статус
+  status           PaymentStatus      @default(PENDING)
+
+  // Внешний ID платежа (от платёжной системы)
+  externalId       String?            @unique
+
+  // Период, за который платёж
+  periodStart      DateTime
+  periodEnd        DateTime
+
+  // Даты
+  paidAt           DateTime?
+  failedAt         DateTime?
+  refundedAt       DateTime?
+  failureReason    String?
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([externalId])
+
+  // Политики доступа
+  @@allow('read', subscription.userId == auth().id || auth().isModerator)
+  @@allow('all', auth().isOwner)
+
+}
+
+// ============================================================================
+// PUBLIC API (API-КЛЮЧИ)
+// ============================================================================
+
+// API-ключ для школы (доступ к Public API)
+model ApiKey {
+  id               String             @id @default(cuid())
+  organizationId   String
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Название ключа (для идентификации: "Production", "Development", "CRM Integration")
+  name             String
+
+  // Хеш ключа (сам ключ хранится только в момент создания)
+  keyHash          String             @unique
+
+  // Префикс ключа для отображения (первые 8 символов: "ds_live_abc...")
+  keyPrefix        String
+
+  // Статус
+  status           ApiKeyStatus       @default(ACTIVE)
+
+  // Кто создал ключ
+  createdById      String
+
+  // Статистика использования
+  lastUsedAt       DateTime?
+  usageCount       Int                @default(0)
+
+  // Даты
+  createdAt        DateTime           @default(now())
+  revokedAt        DateTime?
+  revokedById      String?
+
+  // Логи запросов с этим ключом
+  logs             ApiLog[]
+
+  @@index([organizationId])
+  @@index([keyHash])
+  @@index([status])
+
+  // Политики доступа
+  @@allow('read,create,update', organization.members?[userId == auth().id && role == 'owner'])
+  @@allow('all', auth().isOwner)
+}
+
+// Лог API-запроса
+model ApiLog {
+  id                 String             @id @default(cuid())
+
+  // Идентификация
+  apiKeyId           String
+  apiKey             ApiKey             @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  organizationId     String
+  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Запрос
+  method             String             // GET, POST
+  endpoint           String             // /api/v1/students
+  statusCode         Int                // 200, 401, 429
+
+  // Параметры запроса (для аналитики)
+  queryParams        Json?              // { page: 1, limit: 50, search: "text" }
+
+  // Результат
+  responseTimeMs     Int                // Время ответа в миллисекундах
+  responseSize       Int?               // Размер ответа в байтах
+
+  // Rate limiting
+  rateLimitLimit     Int?               // Лимит запросов
+  rateLimitRemaining Int?               // Оставшиеся запросы
+
+  // Ошибки
+  errorCode          String?            // RATE_LIMITED, INVALID_KEY, REVOKED_KEY
+  errorMessage       String?
+
+  // IP и User-Agent
+  ipAddress          String?
+  userAgent          String?
+
+  createdAt          DateTime           @default(now())
+
+  @@index([apiKeyId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([statusCode])
+  @@index([endpoint, createdAt])
+  @@index([createdAt])
+
+  // Политики доступа
+  @@allow('read', organization.members?[userId == auth().id && role == 'owner'])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// СИСТЕМА ПРОГРЕССА УЧЕНИКА — КУРСЫ (Фаза 6, ШАГ 2)
+// ============================================================================
+
+// StaffLocationAssignment УДАЛЕНА — заменена на TeamMember
+// См. модель TeamMember в секции "BETTER AUTH ORGANIZATIONS"
+
+// Курс обучения в автошколе
+model TrainingCourse {
+  id                  String            @id @default(cuid())
+
+  organizationId      String
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Основные параметры
+  name                String            // "Категория B - Стандарт"
+  category            LicenseCategory   // A, B, C, D...
+  transmissionType    TransmissionType? // AUTOMATIC | MANUAL | null (оба)
+
+  // Практика
+  practiceLessons     Int               // Количество занятий (20, 28, 56...)
+  lessonDuration      Int     @default(90) // Длительность в минутах
+
+  // Теория
+  theoryFormat        TheoryFormat
+  theoryHours         Int?              // Часов теории
+
+  // Цена
+  price               Decimal           @db.Decimal(10, 2)
+
+  // Мета
+  description         String?
+  isActive            Boolean @default(true)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  enrollments         CourseEnrollment[]
+
+  @@index([organizationId, isActive])
+
+  // Политики доступа
+  @@allow('read', true)
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Покупка курса учеником (с поддержкой рассрочки)
+model CourseEnrollment {
+  id                  String            @id @default(cuid())
+
+  courseId            String
+  course              TrainingCourse    @relation(fields: [courseId], references: [id])
+
+  progressId          String
+  progress            StudentProgress   @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  categoryProgressId  String?
+  categoryProgress    CategoryProgress? @relation(fields: [categoryProgressId], references: [id])
+
+  // Оплата (поддержка рассрочки)
+  totalPrice          Decimal           @db.Decimal(10, 2)  // Полная стоимость
+  paidAmount          Decimal           @db.Decimal(10, 2) @default(0)  // Оплачено
+  // remainingAmount = totalPrice - paidAmount (вычисляемое)
+
+  // Использование занятий
+  lessonsUsed         Int     @default(0)
+
+  createdAt           DateTime @default(now())
+
+  lessons             Lesson[]
+  payments            CoursePayment[]   // История платежей
+
+  @@unique([courseId, progressId])
+  @@index([progressId])
+
+  @@allow('read', progress.userId == auth().id)
+  @@allow('read', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('read', progress.categoryProgress?[instructor.userId == auth().id])
+  @@allow('create,update', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// История платежей по курсу (для рассрочки)
+model CoursePayment {
+  id                  String            @id @default(cuid())
+
+  enrollmentId        String
+  enrollment          CourseEnrollment  @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  amount              Decimal           @db.Decimal(10, 2)
+  paidAt              DateTime          @default(now())
+  method              String?           // Способ оплаты (наличные, карта, перевод)
+  note                String?           // Комментарий
+
+  recordedById        String            // Кто внёс запись
+  recordedBy          User              @relation(fields: [recordedById], references: [id])
+
+  @@index([enrollmentId])
+
+  @@allow('read', enrollment.progress.organization.members?[userId == auth().id])
+  @@allow('create', enrollment.progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Опциональный тип занятия (экзаменационный маршрут и т.д.)
+model OptionalLessonType {
+  id                  String            @id @default(cuid())
+
+  organizationId      String
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name                String            // "Экзаменационный маршрут"
+  description         String?
+  category            LicenseCategory?  // Для какой категории (null = любая)
+
+  durationMinutes     Int
+  price               Decimal           @db.Decimal(10, 2)
+
+  isActive            Boolean @default(true)
+  sortOrder           Int     @default(0)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  purchases           OptionalLessonPurchase[]
+
+  @@index([organizationId, isActive])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Покупка опционального занятия
+model OptionalLessonPurchase {
+  id                  String            @id @default(cuid())
+
+  lessonTypeId        String
+  lessonType          OptionalLessonType @relation(fields: [lessonTypeId], references: [id])
+
+  progressId          String
+  progress            StudentProgress   @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  quantity            Int     @default(1)
+  used                Int     @default(0)
+
+  paidAmount          Decimal           @db.Decimal(10, 2)
+
+  createdAt           DateTime @default(now())
+
+  @@index([progressId])
+
+  @@allow('read', progress.userId == auth().id)
+  @@allow('read,create,update', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Точка встречи для практики
+// Может быть: 1) филиал школы, 2) отдельная точка (метро, парковка)
+model PracticeMeetingPoint {
+  id                  String            @id @default(cuid())
+
+  organizationId      String
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name                String            // "Филиал на Ленина" или "М. Калужская"
+  address             String
+  description         String?           // Как найти, ориентиры
+
+  geoLat              String?
+  geoLon              String?
+
+  // Если точка = филиал школы, связываем с Team
+  teamId              String?
+  team                Team?             @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  // teamId != null → точка привязана к филиалу
+  // teamId == null → отдельная точка (метро, парковка и т.д.)
+
+  isActive            Boolean @default(true)
+  isDefault           Boolean @default(false)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Связь с инструкторами (у инструктора может быть несколько точек)
+  instructors         InstructorMeetingPoint[]
+
+  @@index([organizationId, isActive])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Связь инструктора с точками старта (многие-ко-многим)
+model InstructorMeetingPoint {
+  id                  String              @id @default(cuid())
+
+  instructorId        String
+  instructor          InstructorProfile   @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  meetingPointId      String
+  meetingPoint        PracticeMeetingPoint @relation(fields: [meetingPointId], references: [id], onDelete: Cascade)
+
+  isDefault           Boolean @default(false)  // Точка по умолчанию для инструктора
+
+  createdAt           DateTime @default(now())
+
+  @@unique([instructorId, meetingPointId])
+  @@index([instructorId])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', instructor.userId == auth().id)
+  @@allow('create,update,delete', meetingPoint.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// СИСТЕМА ПРОГРЕССА УЧЕНИКА — ПРОГРЕСС (Фаза 6, ШАГ 3)
+// ============================================================================
+
+// Основной прогресс ученика в школе
+model StudentProgress {
+  id                    String            @id @default(cuid())
+
+  userId                String
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId        String
+  organization          Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Филиалы (ученик может быть привязан к двум — Team)
+  documentsTeamId       String?           // Филиал для документов
+  documentsLocation     Team?             @relation("DocumentsLocation", fields: [documentsTeamId], references: [id])
+
+  theoryTeamId          String?           // Филиал для теории
+  theoryLocation        Team?             @relation("TheoryLocation", fields: [theoryTeamId], references: [id])
+
+  // Статус обучения
+  status                ProgressStatus    @default(ACTIVE)
+  expelledAt            DateTime?         // Дата отчисления
+  expelledReason        String?           // Причина отчисления
+
+  // ═══════════════════════════════════════════════════════════════
+  // ЭТАП 1: Документы
+  // ═══════════════════════════════════════════════════════════════
+
+  documentsStatus       DocumentsStatus   @default(NOT_STARTED)
+  documentsChecklist    Json?             // { medicalCert: true, photos: true, passport: true }
+  documentsReadyAt      DateTime?
+  documentsNote         String?
+
+  // Паспортные данные для договоров
+  // passport: { series, number, issuedBy, issuedAt, departmentCode }
+  passport              Json?             // Паспортные данные
+  registrationAddress   String?           // Адрес регистрации (прописка)
+  snils                 String?           // СНИЛС
+  inn                   String?           // ИНН (опционально)
+
+  // Госпошлина
+  stateFeeAmount        Decimal?          @db.Decimal(10, 2)
+  stateFeePaidAt        DateTime?
+  stateFeeReceipt       String?
+
+  // Подача в ГИБДД
+  docsSubmittedToGibdd  Boolean @default(false)
+  docsSubmittedAt       DateTime?
+  gibddApplicationNumber String?
+
+  // ═══════════════════════════════════════════════════════════════
+  // ЭТАП 2: Теория
+  // ═══════════════════════════════════════════════════════════════
+
+  studyGroupId          String?
+  studyGroup            StudyGroup?       @relation(fields: [studyGroupId], references: [id])
+
+  theoryStatus          TheoryStatus      @default(NOT_STARTED)
+  theoryStartedAt       DateTime?
+  theoryCompletedAt     DateTime?
+  theoryAttendanceRate  Int?              // 0-100%
+
+  // ═══════════════════════════════════════════════════════════════
+  // Связи
+  // ═══════════════════════════════════════════════════════════════
+
+  courseEnrollments     CourseEnrollment[]
+  categoryProgress      CategoryProgress[]
+  optionalPurchases     OptionalLessonPurchase[]
+  examRegistrations     ExamRegistration[]
+  personalDataChanges   PersonalDataChange[]
+  generatedContracts    GeneratedContract[]
+  studentDocuments      StudentDocument[]
+  surveyResponses       SurveyResponse[]
+
+  // ═══════════════════════════════════════════════════════════════
+  // ФИНАЛ
+  // ═══════════════════════════════════════════════════════════════
+
+  licenseIssuedAt       DateTime?
+  licenseIssuedById     String?
+
+  enrolledAt            DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  notes                 String?
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([status])
+  @@index([studyGroupId])
+
+  // Политики доступа
+  // Ученик видит свой прогресс
+  @@allow('read', userId == auth().id)
+
+  // ADMIN, SUPER_MANAGER и MANAGER видят всех учеников школы
+  // (проверка филиала для MANAGER делается на уровне бизнес-логики)
+  @@allow('read,create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+
+  // Инструктор видит своих учеников
+  @@allow('read', categoryProgress?[instructor.userId == auth().id])
+
+  @@allow('all', auth().isOwner)
+}
+
+// Прогресс по конкретной категории (практика)
+model CategoryProgress {
+  id                      String            @id @default(cuid())
+
+  progressId              String
+  progress                StudentProgress   @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  category                LicenseCategory
+  transmissionRestriction TransmissionType? // AUTOMATIC = только АКПП
+
+  // ═══════════════════════════════════════════════════════════════
+  // Практика
+  // ═══════════════════════════════════════════════════════════════
+
+  practiceStatus          PracticeStatus    @default(NOT_STARTED)
+  practiceStartedAt       DateTime?
+  practiceCompletedAt     DateTime?
+  lessonsCompleted        Int     @default(0)
+
+  instructorId            String?
+  instructor              InstructorProfile? @relation(fields: [instructorId], references: [id])
+
+  // ═══════════════════════════════════════════════════════════════
+  // Допуск инструктора к ГИБДД
+  // ═══════════════════════════════════════════════════════════════
+
+  instructorApprovalStatus  ApprovalStatus  @default(NOT_REQUESTED)
+  instructorApprovedAt      DateTime?
+  instructorApprovalNote    String?
+
+  // ═══════════════════════════════════════════════════════════════
+  // Связи
+  // ═══════════════════════════════════════════════════════════════
+
+  courseEnrollments       CourseEnrollment[]
+  examRegistrations       ExamRegistration[]
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@unique([progressId, category])
+  @@index([progressId])
+  @@index([instructorId])
+
+  // Политики доступа
+  @@allow('read', progress.userId == auth().id)
+  @@allow('read', progress.organization.members?[userId == auth().id])
+  @@allow('read', instructor.userId == auth().id)
+  @@allow('create,update', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('update', instructor.userId == auth().id) // Инструктор может давать допуск
+  @@allow('all', auth().isOwner)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Документ ученика с версионированием и сроком действия (v0.204.0)
+// ═══════════════════════════════════════════════════════════════
+model StudentDocument {
+  id                  String                  @id @default(cuid())
+
+  progressId          String
+  progress            StudentProgress         @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  type                StudentDocumentType
+  status              StudentDocumentStatus   @default(PENDING)
+
+  // Связь с файлом (через существующую модель File)
+  fileId              String?
+  file                File?                   @relation(fields: [fileId], references: [id])
+
+  // Версионирование — история хранится через self-relation
+  version             Int                     @default(1)
+  previousVersionId   String?
+  previousVersion     StudentDocument?        @relation("DocumentVersions", fields: [previousVersionId], references: [id])
+  nextVersions        StudentDocument[]       @relation("DocumentVersions")
+
+  // Срок действия (критично для медсправки — 1 год!)
+  validFrom           DateTime?
+  expiresAt           DateTime?               // NULL = бессрочный
+
+  // Проверка менеджером
+  reviewedById        String?
+  reviewedBy          User?                   @relation(fields: [reviewedById], references: [id])
+  reviewedAt          DateTime?
+  reviewNote          String?
+
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  @@index([progressId, type])
+  @@index([progressId, status])
+  @@index([status, expiresAt])  // Для поиска истекающих
+
+  // Политики доступа
+  // Ученик видит свои документы
+  @@allow('read', progress.userId == auth().id)
+  // Ученик может загрузить свой документ
+  @@allow('create', progress.userId == auth().id)
+  // Менеджеры школы могут всё
+  @@allow('read,create,update', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// Изменение персональных данных ученика
+model PersonalDataChange {
+  id                  String              @id @default(cuid())
+
+  progressId          String
+  progress            StudentProgress     @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  // Тип изменения
+  changeType          PersonalDataChangeType
+
+  // Старые и новые значения (паспортные данные — фильтруй в application layer)
+  fieldName           String              // "address", "passportNumber", "firstName", "lastName", "middleName"
+  oldValue            String?
+  newValue            String
+
+  // Подтверждающие документы
+  documents           PersonalDataDocument[]
+
+  // Уведомление ГИБДД
+  gibddNotified       Boolean   @default(false)
+  gibddNotifiedAt     DateTime?
+  gibddNotifiedById   String?             // Кто уведомил
+
+  // Статус
+  status              ChangeStatus        @default(PENDING)
+  approvedAt          DateTime?
+  approvedById        String?
+
+  // Кто инициировал
+  initiatedById       String
+  initiatedBy         User                @relation(fields: [initiatedById], references: [id])
+
+  note                String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([progressId])
+  @@index([status])
+
+  @@allow('read', progress.userId == auth().id)
+  @@allow('read,create,update', progress.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('create', progress.userId == auth().id) // Ученик может инициировать
+  @@allow('all', auth().isOwner)
+}
+
+// Документ, подтверждающий изменение персональных данных
+model PersonalDataDocument {
+  id                  String              @id @default(cuid())
+
+  changeId            String
+  change              PersonalDataChange  @relation(fields: [changeId], references: [id], onDelete: Cascade)
+
+  name                String              // "Свидетельство о браке"
+  fileUrl             String              // URL загруженного файла
+  fileType            String?             // "image/jpeg", "application/pdf"
+
+  uploadedById        String
+  uploadedBy          User                @relation(fields: [uploadedById], references: [id])
+
+  createdAt           DateTime  @default(now())
+
+  @@index([changeId])
+
+  @@allow('read', change.progress.userId == auth().id)
+  @@allow('read,create', change.progress.organization.members?[userId == auth().id])
+  @@allow('create', change.progress.userId == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// WEBHOOKS
+// ============================================================================
+
+/// Webhook-эндпоинт для уведомлений школы
+model Webhook {
+  id              String            @id @default(cuid())
+
+  // Организация-владелец
+  organizationId  String
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Настройки
+  name            String            // "Основной webhook", "CRM интеграция"
+  url             String            // https://example.com/webhooks/driving-school
+  secret          String            // HMAC secret для подписи (генерируется автоматически)
+
+  // События для отправки (JSON массив WebhookEventType[])
+  events          String            // ["LESSON_CONFIRMED", "PAYMENT_RECEIVED"]
+
+  // Статус
+  status          WebhookStatus     @default(ACTIVE)
+
+  // Статистика
+  successCount    Int               @default(0)
+  failureCount    Int               @default(0)
+  consecutiveFailures Int           @default(0)  // Для auto-disable после 10 ошибок
+  lastTriggeredAt DateTime?
+  lastSuccessAt   DateTime?
+  lastFailureAt   DateTime?
+
+  // Кто создал
+  createdById     String
+  createdBy       User              @relation("createdWebhooks", fields: [createdById], references: [id])
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Связи
+  logs            WebhookLog[]
+
+  @@map("webhook")
+  @@index([organizationId])
+  @@index([organizationId, status])
+
+  // Политики: только owner/super_manager могут управлять webhooks
+  @@allow('read', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Лог доставки webhook
+model WebhookLog {
+  id              String            @id @default(cuid())
+
+  // Webhook, к которому относится лог
+  webhookId       String
+  webhook         Webhook           @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  // Событие
+  eventType       WebhookEventType
+  eventId         String            // ID сущности (lessonId, paymentId и т.д.)
+
+  // Запрос
+  requestBody     String            // JSON payload
+  requestHeaders  String?           // JSON заголовки запроса
+
+  // Ответ
+  responseStatus  Int?              // HTTP status code (200, 500, etc.)
+  responseBody    String?           // Тело ответа (первые 10KB)
+  responseTimeMs  Int?              // Время ответа в мс
+
+  // Retry логика
+  attempt         Int               @default(1)  // Номер попытки (1-5)
+  nextRetryAt     DateTime?         // Когда следующая попытка
+  status          WebhookLogStatus  @default(PENDING)
+
+  // Ошибка (если есть)
+  errorMessage    String?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("webhook_log")
+  @@index([webhookId])
+  @@index([webhookId, status])
+  @@index([status, nextRetryAt])  // Для cron retry
+
+  // Политики: только менеджеры могут читать логи
+  @@allow('read', webhook.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// CALENDAR MODELS
+// ============================================================================
+
+/// Подключение внешнего календаря (Google, Yandex, Apple, Outlook)
+model CalendarConnection {
+  id              String                  @id @default(cuid())
+  userId          String
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Провайдер и идентификация
+  provider        CalendarProvider
+  calendarId      String                  // ID календаря в провайдере
+  calendarName    String                  // Название календаря
+
+  // OAuth токены (шифруются при сохранении)
+  accessToken     String                  @deny('read', true)
+  refreshToken    String?                 @deny('read', true)
+  tokenExpiresAt  DateTime?
+
+  // Настройки синхронизации
+  syncDirection   CalendarSyncDirection   @default(EXPORT_ONLY)
+  syncStatus      CalendarSyncStatus      @default(PENDING)
+  lastSyncAt      DateTime?
+  lastSyncError   String?
+
+  // Push-уведомления от провайдера
+  webhookChannelId   String?              // Для Google Calendar push notifications
+  webhookExpiration  DateTime?
+
+  // Связи
+  events          CalendarEvent[]
+
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@unique([userId, provider, calendarId])
+  @@map("calendar_connection")
+  @@index([userId])
+  @@index([syncStatus])
+
+  // Политики: только владелец видит свои подключения
+  @@allow('all', auth().id == userId)
+  @@allow('all', auth().isOwner)
+}
+
+/// Событие синхронизированное с внешним календарём
+model CalendarEvent {
+  id              String              @id @default(cuid())
+  connectionId    String
+  connection      CalendarConnection  @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  // Связь с сущностями системы (одно из)
+  lessonId        String?             // Связь с занятием
+  lesson          Lesson?             @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  absenceId       String?             // Связь с отсутствием инструктора
+  absence         Absence?            @relation(fields: [absenceId], references: [id], onDelete: Cascade)
+
+  // ID события во внешнем календаре
+  externalEventId String
+
+  // Данные события
+  title           String
+  description     String?
+  location        String?
+  startTime       DateTime
+  endTime         DateTime
+  isAllDay        Boolean             @default(false)
+
+  // Метаданные синхронизации
+  isFromExternal  Boolean             @default(false)  // Событие импортировано из внешнего календаря
+  lastSyncAt      DateTime            @default(now())
+  etag            String?                              // Для отслеживания изменений (Google)
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([connectionId, externalEventId])
+  @@map("calendar_event")
+  @@index([connectionId])
+  @@index([lessonId])
+  @@index([absenceId])
+  @@index([startTime, endTime])
+
+  // Политики через connection
+  @@allow('all', connection.user.id == auth().id)
+  @@allow('all', auth().isOwner)
+}
+
+/// iCal feed URL для подписки в любых календарях
+model CalendarFeed {
+  id              String    @id @default(cuid())
+  userId          String    @unique  // Один feed на пользователя
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Секретный токен для URL
+  token           String    @unique @default(cuid())
+
+  // Настройки что включать в feed
+  includeLessons        Boolean   @default(true)   // Занятия
+  includeExams          Boolean   @default(true)   // Экзамены
+  includeTheoryLessons  Boolean   @default(true)   // Теоретические занятия
+  includeAbsences       Boolean   @default(false)  // Отсутствия (для инструкторов)
+
+  // Статистика использования
+  lastAccessedAt  DateTime?
+  accessCount     Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("calendar_feed")
+  @@index([token])
+
+  // Политики: только владелец
+  @@allow('all', auth().id == userId)
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// ДОГОВОРЫ И ШАБЛОНЫ
+// ============================================================================
+
+/// Шаблон договора для автошколы
+model ContractTemplate {
+  id               String                    @id @default(cuid())
+
+  organizationId   String
+  organization     Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type             ContractTemplateType      @default(TRAINING_CONTRACT)
+  name             String                    // "Договор на обучение кат. B"
+  description      String?
+
+  // Текущая активная версия шаблона
+  currentVersionId String?                   @unique
+  currentVersion   ContractTemplateVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+
+  // Все версии шаблона
+  versions         ContractTemplateVersion[] @relation("AllVersions")
+
+  isActive         Boolean                   @default(true)
+
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  @@unique([organizationId, type, name])
+  @@index([organizationId])
+  @@index([isActive])
+
+  // Политики: члены организации читают, менеджеры управляют
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Версия шаблона договора (для версионирования изменений)
+model ContractTemplateVersion {
+  id                 String                @id @default(cuid())
+
+  templateId         String
+  template           ContractTemplate      @relation("AllVersions", fields: [templateId], references: [id], onDelete: Cascade)
+
+  version            String                // "1.0", "1.1", "2.0"
+  content            String                // HTML с плейсхолдерами {{student.name}}
+  changelog          String?               // "Добавлен пункт 5.3 про возврат"
+
+  // Если эта версия — текущая активная
+  isCurrentOf        ContractTemplate?     @relation("CurrentVersion")
+
+  effectiveAt        DateTime              @default(now())
+  createdAt          DateTime              @default(now())
+
+  // Договоры, созданные на основе этой версии
+  generatedContracts GeneratedContract[]
+
+  @@index([templateId])
+  @@index([version])
+
+  // Политики: члены организации читают, менеджеры создают версии
+  @@allow('read', template.organization.members?[userId == auth().id])
+  @@allow('create', template.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Сгенерированный договор для ученика
+model GeneratedContract {
+  id                  String                   @id @default(cuid())
+
+  // На основе какой версии шаблона
+  templateVersionId   String
+  templateVersion     ContractTemplateVersion  @relation(fields: [templateVersionId], references: [id])
+
+  // Для какого ученика
+  studentProgressId   String
+  studentProgress     StudentProgress          @relation(fields: [studentProgressId], references: [id], onDelete: Cascade)
+
+  // Снимок всех подставленных данных (для истории)
+  snapshotData        String                   // JSON со всеми подставленными данными
+
+  contractNumber      String?                  // "№ 123/2026"
+
+  // PDF файл договора
+  pdfFileId           String?
+  pdfFile             File?                    @relation(fields: [pdfFileId], references: [id])
+
+  status              ContractStatus           @default(DRAFT)
+
+  // Информация о подписании
+  signedAt            DateTime?
+  signedByIp          String?
+
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  @@index([studentProgressId])
+  @@index([status])
+
+  // Политики: ученик читает свои договоры, менеджеры управляют
+  @@allow('read', studentProgress.userId == auth().id)
+  @@allow('read,create,update', studentProgress.organization.members?[userId == auth().id])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// ПАРТНЁРСТВА МЕЖДУ ШКОЛАМИ
+// ============================================================================
+
+/// Партнёрство между автошколами (Фаза 14)
+/// Школа-инициатор направляет учеников в партнёрскую школу для обучения по определённым категориям
+model SchoolPartnership {
+  id                String              @id @default(cuid())
+
+  // Школы-участники
+  /// @form.title("Школа-инициатор")
+  initiatorOrgId    String
+  initiatorOrg      Organization        @relation("PartnershipInitiator", fields: [initiatorOrgId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Школа-партнёр")
+  partnerOrgId      String
+  partnerOrg        Organization        @relation("PartnershipPartner", fields: [partnerOrgId], references: [id], onDelete: Cascade)
+
+  // Статус и условия
+  /// @form.title("Статус")
+  status            PartnershipStatus   @default(PENDING)
+
+  /// @form.title("Условия партнёрства")
+  /// @form.fieldType("textarea")
+  /// @form.placeholder("Опишите условия сотрудничества")
+  terms             String?
+
+  /// @form.title("Срок действия")
+  expiresAt         DateTime?
+
+  // Аудит
+  createdAt         DateTime            @default(now())
+  respondedAt       DateTime?           // Когда партнёр ответил
+  terminatedAt      DateTime?           // Когда расторгнуто
+  terminationReason String?             // Причина расторжения
+
+  // Связи
+  categories        PartnershipCategory[]
+
+  @@unique([initiatorOrgId, partnerOrgId])
+  @@index([initiatorOrgId])
+  @@index([partnerOrgId])
+  @@index([status])
+
+  // Политики доступа
+  // Школа-инициатор: owner и super_manager видят
+  @@allow('read', initiatorOrg.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  // Школа-партнёр: owner и super_manager видят
+  @@allow('read', partnerOrg.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  // Создавать может только owner школы-инициатора
+  @@allow('create', initiatorOrg.members?[userId == auth().id && role == 'owner'])
+  // Обновлять (принять/отклонить) может owner школы-партнёра если статус PENDING
+  @@allow('update', partnerOrg.members?[userId == auth().id && role == 'owner'] && status == 'PENDING')
+  // Owner инициатора может обновлять (расторгнуть, приостановить)
+  @@allow('update', initiatorOrg.members?[userId == auth().id && role == 'owner'] && status != 'PENDING')
+  @@allow('all', auth().isOwner)
+}
+
+/// Категории, по которым партнёр принимает учеников
+model PartnershipCategory {
+  id                String              @id @default(cuid())
+
+  partnershipId     String
+  partnership       SchoolPartnership   @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Категория прав")
+  category          LicenseCategory
+
+  // Финансы — учёт стоимости (без актов)
+  /// @form.title("Цена за занятие")
+  /// @form.props({ min: 0, step: 100 })
+  pricePerLesson    Decimal?            @db.Decimal(10, 2)
+
+  /// @form.title("Активна")
+  isActive          Boolean             @default(true)
+
+  /// @form.title("Примечания")
+  /// @form.fieldType("textarea")
+  notes             String?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([partnershipId, category])
+  @@index([partnershipId])
+
+  // Политики: доступ через партнёрство
+  @@allow('read', partnership.initiatorOrg.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('read', partnership.partnerOrg.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('create,update,delete', partnership.initiatorOrg.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// АВТОМАТИЧЕСКИЕ НАПОМИНАНИЯ (Фаза 18)
+// ============================================================================
+
+/// Правило автоматического напоминания для организации
+model ReminderRule {
+  id              String       @id @default(cuid())
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Тип напоминания")
+  type            ReminderType
+
+  /// @form.title("Включено")
+  enabled         Boolean      @default(true)
+
+  // Когда отправлять (дни до/после события)
+  // Например: [7, 3, 1] — за 7, 3 и 1 день до истечения
+  /// @form.title("За сколько дней напоминать")
+  /// @form.placeholder("7, 3, 1")
+  triggerDays     Int[]        @default([7, 3, 1])
+
+  // Каналы доставки
+  /// @form.title("Push-уведомления")
+  pushEnabled     Boolean      @default(true)
+  /// @form.title("Email")
+  emailEnabled    Boolean      @default(true)
+  /// @form.title("Telegram")
+  telegramEnabled Boolean      @default(false)
+
+  // Кому отправлять
+  /// @form.title("Отправлять ученику")
+  sendToStudent   Boolean      @default(true)
+  /// @form.title("Отправлять менеджеру")
+  sendToManager   Boolean      @default(false)
+
+  // Эскалация менеджеру через N дней если ученик не реагирует
+  /// @form.title("Эскалация через (дней)")
+  /// @form.placeholder("Оставьте пустым для отключения")
+  escalateAfterDays Int?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Связи
+  logs            ReminderLog[]
+
+  @@unique([organizationId, type])
+  @@map("reminder_rule")
+  @@index([organizationId])
+  @@index([enabled])
+
+  // Политики доступа
+  // Менеджеры могут читать правила
+  @@allow('read', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  // Только owner может создавать/редактировать/удалять
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Лог отправленных напоминаний
+model ReminderLog {
+  id              String            @id @default(cuid())
+
+  // Правило (может быть удалено)
+  ruleId          String?
+  rule            ReminderRule?     @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  /// Тип напоминания (дублируем для истории)
+  type            ReminderType
+
+  /// Получатель
+  recipientId     String
+  recipient       User              @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  /// Связанная сущность (documentId, paymentId, progressId и т.д.)
+  targetId        String?
+  /// Тип сущности для контекста
+  targetType      String?           // "StudentDocument", "StudentProgress", "Lesson"
+
+  /// Использованные каналы доставки
+  channels        String[]          // ["push", "email", "telegram"]
+
+  /// Статус отправки
+  status          ReminderLogStatus
+
+  /// Детали ошибки (если есть)
+  error           String?
+
+  /// За сколько дней до события отправлено
+  daysBeforeEvent Int?
+
+  createdAt       DateTime          @default(now())
+
+  @@map("reminder_log")
+  @@index([ruleId])
+  @@index([recipientId])
+  @@index([type, createdAt])
+  @@index([targetId, targetType])
+
+  // Политики доступа
+  // Только менеджеры могут видеть логи
+  @@allow('read', rule.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  // Системный доступ (cron job создаёт записи)
+  @@allow('create', true)
+  @@allow('all', auth().isOwner)
+}
+
+// ============================================================================
+// NPS ОПРОСЫ И ОБРАТНАЯ СВЯЗЬ
+// ============================================================================
+
+/// Шаблон NPS-опроса для организации
+model Survey {
+  id               String              @id @default(cuid())
+
+  organizationId   String
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  /// Название опроса
+  /// @form.title("Название")
+  /// @form.placeholder("Например: Опрос после обучения")
+  name             String
+
+  /// Описание (показывается ученику перед заполнением)
+  /// @form.title("Описание")
+  /// @form.widget("textarea")
+  description      String?
+
+  /// Когда отправлять опрос
+  /// @form.title("Триггер отправки")
+  triggerType      SurveyTriggerType
+
+  /// Задержка отправки в днях после события
+  /// @form.title("Отправить через (дней)")
+  /// @form.placeholder("1")
+  delayDays        Int                 @default(1)
+
+  /// Срок действия ссылки в днях
+  /// @form.title("Срок действия (дней)")
+  /// @form.placeholder("14")
+  expirationDays   Int                 @default(14)
+
+  /// Активен ли опрос
+  /// @form.title("Активен")
+  isActive         Boolean             @default(true)
+
+  // Связи
+  responses        SurveyResponse[]
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([organizationId, triggerType])
+  @@map("survey")
+  @@index([organizationId])
+  @@index([isActive])
+
+  // Политики доступа
+  // Менеджеры могут читать опросы
+  @@allow('read', organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  // Только owner и super_manager могут создавать/редактировать
+  @@allow('create,update,delete', organization.members?[userId == auth().id && role in ['owner', 'super_manager']])
+  @@allow('all', auth().isOwner)
+}
+
+/// Ответ ученика на NPS-опрос
+model SurveyResponse {
+  id                  String               @id @default(cuid())
+
+  surveyId            String
+  survey              Survey               @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  progressId          String
+  progress            StudentProgress      @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  /// NPS Score (0-10): 0-6 = Detractors, 7-8 = Passives, 9-10 = Promoters
+  npsScore            Int?
+
+  /// Что понравилось больше всего?
+  positiveComment     String?
+
+  /// Что можно улучшить?
+  improvementComment  String?
+
+  /// Статус ответа
+  status              SurveyResponseStatus @default(PENDING)
+
+  /// Когда отправлен ученику
+  sentAt              DateTime?
+
+  /// Когда заполнен
+  completedAt         DateTime?
+
+  /// Срок действия ссылки
+  expiresAt           DateTime?
+
+  /// Токен для публичной ссылки (используется вместо id для безопасности)
+  token               String               @unique @default(cuid())
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@unique([surveyId, progressId])
+  @@map("survey_response")
+  @@index([surveyId])
+  @@index([progressId])
+  @@index([status])
+  @@index([token])
+
+  // Политики доступа
+  // Ученик может видеть и заполнить свой ответ
+  @@allow('read,update', progress.userId == auth().id)
+  // Менеджеры могут видеть и создавать ответы
+  @@allow('read,create', survey.organization.members?[userId == auth().id && role in ['owner', 'super_manager', 'manager']])
+  // Платформенный владелец
+  @@allow('all', auth().isOwner)
+}

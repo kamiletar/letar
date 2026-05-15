@@ -1,0 +1,39 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/.source/*": ["./.source/*"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms/analytics": ["../../libs/forms/src/lib/analytics/index.ts"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".source/docs.ts",
+    ".source/server.ts"
+  ],
+  "exclude": ["node_modules", ".next", "dist"],
+  "references": [
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/forms"
+    }
+  ]
+}

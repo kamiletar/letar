@@ -1,0 +1,111 @@
+/* Animatrona Landing — Global Styles */
+
+/* Плавный скролл */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Скрытие скроллбара для WebKit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #11111b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #313244;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #45475a;
+}
+
+/* Выделение текста */
+::selection {
+  background: rgba(139, 61, 255, 0.3);
+  color: #fff;
+}
+
+/* Glassmorphism эффект для карточек */
+.glass {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glow эффект */
+.glow {
+  box-shadow: 0 0 20px rgba(139, 61, 255, 0.3);
+}
+
+.glow:hover {
+  box-shadow: 0 0 40px rgba(139, 61, 255, 0.5);
+}
+
+/* Градиентный текст */
+.gradient-text {
+  background: linear-gradient(135deg, #8b3dff 0%, #ff4081 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Анимация появления секций */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Задержки для stagger-анимации */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Анимация мигающего курсора */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Анимация плавающего элемента */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

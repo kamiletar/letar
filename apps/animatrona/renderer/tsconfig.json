@@ -1,0 +1,75 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/ui": ["../../../libs/ui/src/index.ts"],
+      "@letar/forms": ["../../../libs/forms/src/index.ts"],
+      "@letar/query-provider": ["../../../libs/query-provider/src/index.ts"],
+      "@letar/chakra-provider": ["../../../libs/chakra-provider/src/index.ts"],
+      "@letar/video-player-core": ["../../../libs/video-player-core/src/index.ts"],
+      "@letar/video-player-react": ["../../../libs/video-player-react/src/index.ts"],
+      "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
+      "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"],
+      "@letar/animatrona-ui": ["../../../libs/animatrona-ui/src/index.ts"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": ["node"],
+    "target": "ES2022"
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "out"],
+  "references": [
+    {
+      "path": "../../../libs/query-provider"
+    },
+    {
+      "path": "../../../libs/video-player-core"
+    },
+    {
+      "path": "../../../libs/animatrona-utils"
+    },
+    {
+      "path": "../../../libs/animatrona-ui"
+    },
+    {
+      "path": "../../../libs/ui"
+    },
+    {
+      "path": "../../../libs/video-player-react"
+    },
+    {
+      "path": "../../../libs/animatrona-types"
+    },
+    {
+      "path": ".."
+    },
+    {
+      "path": "../../../libs/forms"
+    }
+  ]
+}

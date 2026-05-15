@@ -1,0 +1,59 @@
+/**
+ * @letar/auth/client — Клиентские хелперы для Better Auth
+ *
+ * @example
+ * ```typescript
+ * // Базовый клиент (без кастомных OAuth)
+ * import { createAuthClient } from '@letar/auth/client'
+ * export const authClient = createAuthClient()
+ *
+ * // Клиент с genericOAuth (для Yandex и др.)
+ * import { createAuthClientWithOAuth } from '@letar/auth/client'
+ * export const authClient = createAuthClientWithOAuth()
+ * // signIn.oauth2 доступен
+ *
+ * // OAuth кнопки
+ * import { createOAuthButtons } from '@letar/auth/client'
+ * export const OAuthButtons = createOAuthButtons(authClient)
+ *
+ * // Типизированный useSession
+ * import { createTypedUseSession } from '@letar/auth/client'
+ * export const useSession = createTypedUseSession<MySession>(authClient)
+ * ```
+ */
+
+// Auth client factories
+export {
+  createAuthClient,
+  createAuthClientWithOAuth,
+  type AuthClient,
+  type AuthClientOptions,
+  type AuthClientWithOAuth,
+  type AuthClientWithOAuthOptions,
+} from './create-auth-client'
+
+// Components
+export { createAuthGuard, type AuthGuardProps } from './auth-guard'
+export {
+  createOAuthButtons,
+  type OAuthButtonsProps,
+  type OAuthProvider,
+  type OAuthProviderConfig,
+} from './oauth-buttons'
+export { OnlyFor, type OnlyForProps } from './only-for'
+export { SessionProvider, type SessionProviderProps } from './session-provider'
+
+// Factories
+export { createTypedUseSession, type TypedSessionResult } from './factories'
+
+// Connected Accounts
+export {
+  AccountCard,
+  ConnectedAccountsList,
+  providerColors,
+  providerNames,
+  type ConnectedAccountsListProps,
+} from './connected-accounts'
+
+// Icons
+export { FacebookIcon, GitHubIcon, GoogleIcon, TelegramIcon, VKIcon, YandexIcon } from './icons'

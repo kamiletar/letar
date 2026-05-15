@@ -1,0 +1,76 @@
+{
+  "name": "form-docs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/form-docs/src",
+  "projectType": "application",
+  "tags": ["scope:docs", "type:app"],
+  "targets": {
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/form-docs"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "lintFilePatterns": ["apps/form-docs/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/form-docs"
+      },
+      "cache": true,
+      "inputs": ["default", "^production", "{projectRoot}/tsconfig.json", "{workspaceRoot}/tsconfig.base.json"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/form-docs",
+        "tty": false,
+        "command": "next build"
+      },
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        { "externalDependencies": ["next"] }
+      ],
+      "outputs": [
+        "{workspaceRoot}/apps/form-docs/.next/!(cache)/**/*",
+        "{workspaceRoot}/apps/form-docs/.next/!(cache)"
+      ],
+      "syncGenerators": ["@nx/js:typescript-sync"]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "cwd": "apps/form-docs",
+        "command": "next dev"
+      },
+      "syncGenerators": ["@nx/js:typescript-sync"]
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "cwd": "apps/form-docs",
+        "command": "next start"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

@@ -1,0 +1,459 @@
+{
+  "metadata": {
+    "title": "Elfafeya Art - Mandalas and Dot Painting",
+    "description": "Gallery of unique mandalas and artworks by artist Elfafeya. Dot painting, original handmade pieces, handcrafted goods shop."
+  },
+  "nav": {
+    "home": "Home",
+    "gallery": "Gallery",
+    "shop": "Shop",
+    "aboutArtist": "About Artist",
+    "aboutMandalas": "About Mandalas",
+    "contacts": "Contacts",
+    "cart": "Cart",
+    "admin": "Admin",
+    "menu": "Menu",
+    "help": "Help",
+    "menuAria": "Open menu"
+  },
+  "home": {
+    "welcome": "Welcome to the world of mandalas",
+    "subtitle": "Unique artworks by artist Elfafeya"
+  },
+  "welcomePortal": {
+    "title": "Welcome",
+    "subtitle": "to the world of Elfafeya's mandalas",
+    "description": "Immerse yourself in a meditative experience with unique mandalas created for inner peace and harmony",
+    "startMeditation": "Start meditation",
+    "gallery": "Gallery",
+    "aboutArtist": "About Artist",
+    "aboutMandalas": "About Mandalas",
+    "clickToClose": "Click anywhere to close"
+  },
+  "gallery": {
+    "title": "Mandala Gallery",
+    "empty": "No mandalas added yet",
+    "viewDetails": "View details",
+    "page": {
+      "title": "Gallery",
+      "metaTitle": "Mandala Gallery - Elfafeya Art",
+      "metaDescription": "Unique mandalas and artworks by artist Elfafeya. Dot painting, sacred geometry, meditation mandalas."
+    },
+    "mandala": {
+      "viewInGallery": "View in gallery",
+      "openViewer": "Open viewer",
+      "download": "Download",
+      "share": "Share",
+      "createdAt": "Created"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "gallery": "Gallery"
+    }
+  },
+  "shop": {
+    "title": "Shop",
+    "empty": "No products added yet",
+    "addToCart": "Add to cart",
+    "outOfStock": "Out of stock",
+    "inStock": "In stock",
+    "price": "Price",
+    "page": {
+      "title": "Shop",
+      "metaTitle": "Shop - Elfafeya Art",
+      "metaDescription": "Handcrafted goods from artist Elfafeya. Original paintings, prints, souvenirs."
+    },
+    "product": {
+      "addToCart": "Add to cart",
+      "addedToCart": "Added to cart",
+      "goToCart": "Go to cart",
+      "outOfStock": "Out of stock",
+      "inStock": "In stock",
+      "inCartButton": "In cart",
+      "addToCartButton": "Add to cart"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "shop": "Shop"
+    }
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Checkout",
+    "remove": "Remove",
+    "continueShopping": "Continue shopping",
+    "clearCart": "Clear cart",
+    "priceUnit": "₽",
+    "itemCount": "Items: {count}",
+    "page": {
+      "title": "Cart",
+      "metaTitle": "Cart - Elfafeya Art",
+      "metaDescription": "Your cart"
+    },
+    "emptyState": {
+      "title": "Cart is empty",
+      "description": "Add products from the shop",
+      "action": "Go to shop"
+    },
+    "aria": {
+      "decrease": "Decrease",
+      "increase": "Increase",
+      "remove": "Remove"
+    }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "form": {
+      "heading": "Contact information",
+      "name": "Your name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Delivery address",
+      "comment": "Order comment"
+    },
+    "orderSummary": {
+      "heading": "Your order"
+    },
+    "submit": "Place order",
+    "submitOffline": "Save order",
+    "success": {
+      "title": "Order placed!",
+      "message": "We will contact you shortly"
+    },
+    "toast": {
+      "success": "Order placed successfully!",
+      "queued": {
+        "title": "Order saved",
+        "description": "Order will be sent when connection is restored"
+      }
+    },
+    "offline": {
+      "badge": "Offline",
+      "syncing": "Syncing...",
+      "pending": "{count, plural, one {# order pending} other {# orders pending}}"
+    },
+    "page": {
+      "title": "Checkout",
+      "metaTitle": "Checkout - Elfafeya Art",
+      "metaDescription": "Complete your order"
+    },
+    "emptyState": {
+      "title": "Cart is empty",
+      "description": "Add products to place an order",
+      "action": "Go to shop"
+    },
+    "successPage": {
+      "title": "Order placed!",
+      "metaTitle": "Order placed - Elfafeya Art",
+      "description": "Thank you for your order. We will contact you shortly to confirm the order.",
+      "orderNumber": "Order number",
+      "backToShop": "Back to shop",
+      "viewOrders": "View orders"
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "form": {
+      "name": "Your name",
+      "email": "Email",
+      "message": "Message",
+      "submit": "Send",
+      "submitOffline": "Save"
+    },
+    "success": {
+      "title": "Message sent!",
+      "message": "Thank you for reaching out, I will reply soon"
+    },
+    "page": {
+      "title": "Contacts",
+      "metaTitle": "Contacts - Elfafeya Art",
+      "metaDescription": "Contact the artist Elfafeya. Order a mandala, ask a question, give feedback.",
+      "subtitle": "Get in touch",
+      "socialLinks": "Social links"
+    },
+    "toast": {
+      "success": {
+        "title": "Message sent!",
+        "description": "Thank you for reaching out, I will reply soon"
+      },
+      "queued": {
+        "title": "Message saved",
+        "description": "Will be sent when connection is restored"
+      }
+    },
+    "offline": {
+      "badge": "Offline",
+      "syncing": "Syncing...",
+      "pending": "{count, plural, one {# message} other {# messages}} pending"
+    }
+  },
+  "viewer": {
+    "effects": {
+      "title": "Effects",
+      "multiply": "Multiply",
+      "colorBurn": "Color Burn",
+      "overlay": "Overlay",
+      "darken": "Darken",
+      "colorDodge": "Color Dodge",
+      "off": "Off"
+    },
+    "layers": {
+      "radial": "Radial",
+      "solid": "Solid",
+      "conic": "Conic",
+      "aurora": "Aurora",
+      "plasma": "Plasma",
+      "tunnel": "Tunnel"
+    },
+    "controls": {
+      "rotation": "Rotation",
+      "speed": "Speed",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit fullscreen"
+    },
+    "meditation": {
+      "title": "Meditation",
+      "breatheIn": "Breathe in",
+      "breatheOut": "Breathe out",
+      "hold": "Hold",
+      "start": "Start",
+      "stop": "Stop"
+    },
+    "download": {
+      "title": "Download",
+      "hd": "HD (1920×1080)",
+      "qhd": "QHD (2560×1440)",
+      "original": "Original"
+    },
+    "share": {
+      "title": "Share",
+      "copied": "Link copied!"
+    },
+    "navigation": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "aria": {
+      "close": "Close",
+      "prevTrack": "Previous track",
+      "nextTrack": "Next track",
+      "openPlaylist": "Open playlist",
+      "selectSoundscape": "Select soundscape",
+      "manageTracks": "Manage tracks",
+      "simpleMode": "Simple mode",
+      "advancedMode": "Advanced mode",
+      "hidePanel": "Hide panel",
+      "restart": "Restart",
+      "deleteTrack": "Delete track",
+      "changeDirection": "Change direction",
+      "share": "Share",
+      "mandalaCarousel": "Mandala carousel",
+      "back": "Back",
+      "loadTracks": "Load tracks",
+      "play": "Play",
+      "pause": "Pause",
+      "continue": "Continue",
+      "mute": "Mute sound",
+      "unmute": "Unmute sound",
+      "enableShuffle": "Enable shuffle",
+      "disableShuffle": "Disable shuffle",
+      "fullscreen": "Fullscreen mode",
+      "exitFullscreen": "Exit fullscreen"
+    }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "continueWith": "Continue with {provider}",
+    "signInPage": {
+      "title": "Sign In",
+      "metaTitle": "Sign In - Elfafeya Art",
+      "metaDescription": "Sign in to your account",
+      "welcomeBack": "Welcome back!",
+      "subtitle": "Sign in to your account"
+    },
+    "signUpPage": {
+      "title": "Sign Up",
+      "metaTitle": "Sign Up - Elfafeya Art",
+      "metaDescription": "Create an account to place orders and track order history",
+      "welcome": "Welcome!",
+      "subtitle": "Create an account to place orders"
+    },
+    "loginForm": {
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "registerForm": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "placeholder": {
+        "name": "Your name (optional)",
+        "email": "your@email.com",
+        "password": "At least 8 characters"
+      },
+      "passwordHint": "Uppercase, lowercase letters and digits",
+      "submit": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "verifyPin": {
+      "title": "Confirm email",
+      "codeSentTo": "We sent a code to",
+      "enterCode": "Enter the 6-digit code from the email",
+      "confirm": "Confirm",
+      "resendCode": "Resend code",
+      "resendIn": "Resend in {seconds} sec",
+      "orClickLink": "Or click the link in the email",
+      "emailVerified": "Email verified!",
+      "verifiedInOtherTab": "You signed in from another tab.",
+      "canCloseTab": "You can close this tab.",
+      "loggingIn": "Signing in..."
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailNotVerified": "Email not verified",
+      "emailExists": "This email is already registered",
+      "validationError": "Please check your input",
+      "registrationError": "Registration failed. Please try again.",
+      "unknownError": "Something went wrong. Please try again.",
+      "enterPinCode": "Enter 6-digit code",
+      "invalidPin": "Invalid code",
+      "pinExpired": "Code expired. Request a new one.",
+      "tooManyAttempts": "Too many attempts. Wait 15 minutes.",
+      "rateLimited": "Please wait before resending",
+      "sendCodeFailed": "Failed to send code"
+    }
+  },
+  "validation": {
+    "required": "Required field",
+    "too_small": {
+      "string": "Minimum {minimum} characters",
+      "number": "Minimum {minimum}",
+      "array": "Minimum {minimum} items"
+    },
+    "too_big": {
+      "string": "Maximum {maximum} characters",
+      "number": "Maximum {maximum}",
+      "array": "Maximum {maximum} items"
+    },
+    "invalid_format": {
+      "email": "Invalid email",
+      "url": "Invalid URL",
+      "phone": "Invalid phone number"
+    },
+    "invalid_type": "Invalid data type",
+    "custom": "{message}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "close": "Close",
+    "or": "or"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "switchLabel": "Switch theme",
+    "loading": "Loading theme"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try refreshing the page.",
+    "retry": "Try again",
+    "backHome": "Back to home"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "offline": {
+    "title": "No connection",
+    "description": "It seems you are not connected to the internet. Please check your connection and try again.",
+    "retry": "Try again"
+  },
+  "offlineBanner": {
+    "title": "View mandalas offline",
+    "subtitle": "Save the gallery for offline access (~314 MB)",
+    "close": "Close",
+    "worksOffline": "Works without internet",
+    "mandalaCount": "35+ mandalas",
+    "meditationMusic": "Meditation music",
+    "fullscreenView": "Fullscreen viewing",
+    "notNow": "Not now",
+    "enableOffline": "Enable offline"
+  },
+  "footer": {
+    "copyright": "© {year} Elfafeya Art. All rights reserved."
+  },
+  "language": {
+    "ru": "Русский",
+    "en": "English",
+    "selectLanguage": "Select language"
+  },
+  "actions": {
+    "productNotFound": "Product not found",
+    "orderCreated": "Order placed successfully",
+    "orderCreateError": "Failed to create order",
+    "messageSent": "Message sent",
+    "messageError": "Failed to send message",
+    "stockInsufficient": "Insufficient stock"
+  },
+  "aboutArtist": {
+    "title": "Elfafeya",
+    "metaTitle": "Elfafeya - Elfafeya Art",
+    "metaDescription": "Elfafeya is an artist, a guide to distant corners of the Metagalaxy through fractal portals of mandalas.",
+    "photoAlt": "Photo of Elfafeya",
+    "handsAlt": "Elfafeya's hands",
+    "intro": "— a guide to distant corners of the Metagalaxy. Here and now. Without the speed of light limitations. It's simple. No tricks or deception. Ordinary teleportation.",
+    "portals": "Special fractal portals serve as teleports. Mandalas are maps of the cosmos, projecting the model of the universe onto canvas surfaces.",
+    "jungLink": "By the way, C.G. Jung",
+    "jungText": "identified the mandala as an archetypal symbol of human perfection. Today it is used in psychotherapy as a means of achieving a complete understanding of one's own Self.",
+    "cta1": "Teleport your consciousness!",
+    "cta2": "Expand the boundaries of the observable universe!",
+    "cta3": "Immerse yourself in the transcendental!"
+  },
+  "aboutMandalas": {
+    "title": "About Mandalas",
+    "metaTitle": "About Mandalas - Elfafeya Art",
+    "metaDescription": "A word to Jung. He introduced modern psychology to the idea of the mandala. The mandala is a universal symbolic model of the universe, human consciousness, and various life processes.",
+    "jungPhotoAlt": "Photo of Carl Gustav Jung",
+    "jungTitle": "A Word to Jung",
+    "p1": "Carl Gustav Jung, the founder of analytical psychology, introduced modern psychology to the idea of the mandala. At around forty years of age, Jung left his university position because academic life had lost its novelty and interest for him. He devoted time daily to analyzing his inner life and kept a journal of dreams, thoughts, and drawings. Every morning in his journal, he sketched a circular drawing, simply following an inner impulse. Very soon Jung concluded that his drawings changed, reflecting the state of his psyche.",
+    "p2": "For example, on the day he received a letter from a close friend full of irritable words, the borders of the circle Jung drew the next day were broken.",
+    "p3": "In his autobiography 'Memories, Dreams, Reflections' he writes: 'Every morning I sketched a small circular drawing in my notebook, a mandala, which reflected my inner situation at that moment... only gradually did I discover what the mandala really is: ... the Self, the wholeness of the personality, which manifests when everything is in harmony.'",
+    "p4": "The word mandala in Sanskrit means 'circle, round, circular, disc, wheel, ring, sphere, ball, orbit, country, territory, region, society, totality, assembly.'",
+    "p5": "The mandala is a symbol of the Feminine, the Great Mother, the Virgin, Prima Materia, giving birth to all that exists: the Earth, humanity, matter, down to elementary particles and force fields, and the entire boundless Universe. In a general sense, the mandala is a universal symbolic model of the universe, human consciousness, and various life processes – it represents materialization, manifestation, the birth of life.",
+    "p6": "Carl Gustav Jung considered the mandala one of the most powerful archetypes, which is a visible projection of the psychic and expresses the Self. This archetype often appears in dreams. Jung wrote that 'the mandala symbol carries exactly this meaning: a sacred space (temenos) protecting the center. This symbol is one of the most important motifs in the objectification of unconscious images. It is one of the means of protecting the center of personality from external intrusions or attempts to expose it.'",
+    "p7": "Jung argued that the idea of the mandala and its very form was developed not only by various cultures and religions but also by creatively gifted people, especially artists. This same mandala form was seen in the drawings of patients suffering from various forms of mental illness, who were tuning themselves to heal through developing a unified rhythm between human and nature. If we list how mandalas work with us, we get quite an impressive list.",
+    "p8": "Mandalas bring various blocks to the surface of consciousness and help release them, strengthening our inner potential. They help find the causes of life's difficulties and develop consciousness. They harmonize and cleanse space, bringing the organs of the physical body and soul into harmonious resonance and attunement.",
+    "p9": "Mandalas also harmonize and integrate 3 levels: physical, mental, and emotional. They perfect the connections between the left and right hemispheres of the brain, teaching us to think with the heart and follow intuition.",
+    "mandala1Alt": "Mandala 'Flower of the Sun'",
+    "mandala2Alt": "Mandala 'Peach Circus'",
+    "mandala3Alt": "Mandala 'Flower of Life'",
+    "mandala4Alt": "Mandala 'Cosmic Net Bag'",
+    "mandala5Alt": "Mandala 'Metatron's Cube'",
+    "mandala6Alt": "Mandala 'Astra Portal'",
+    "mandala7Alt": "Mandala 'Om of Friendship'"
+  }
+}

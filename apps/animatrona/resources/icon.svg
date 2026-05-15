@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Градиент для фона -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <!-- Тень -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#8b5cf6" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Фон с закруглёнными углами -->
+  <rect x="32" y="32" width="448" height="448" rx="96" ry="96" fill="url(#bgGrad)" filter="url(#shadow)"/>
+
+  <!-- Play иконка -->
+  <path d="M192 144 L384 256 L192 368 Z" fill="white"/>
+
+  <!-- Декоративные круги (орбиты) -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+  <circle cx="256" cy="256" r="210" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+
+  <!-- Орбитальные точки -->
+  <circle cx="256" cy="76" r="8" fill="white" opacity="0.8"/>
+  <circle cx="420" cy="150" r="6" fill="white" opacity="0.6"/>
+  <circle cx="92" cy="362" r="6" fill="white" opacity="0.6"/>
+</svg>

@@ -1,0 +1,77 @@
+---
+title: Продвинутые паттерны
+description: Сложные формы — авторизация, композиция, рецепты
+---
+
+## Композиция форм
+
+Комбинируйте несколько функций в одной форме:
+
+```tsx
+<RelationFieldProvider relations={relations}>
+  <FormI18nProvider locale={locale} t={t}>
+    <Form
+      schema={ProductCreateFormSchema}
+      initialValue={defaults}
+      onSubmit={createProduct}
+      persistence={{ key: 'product-draft' }}
+    >
+      <Form.Steps animated validateOnNext>
+        <Form.Steps.Step title="Основное">
+          <Form.AutoFields include={['name', 'description', 'price']} />
+        </Form.Steps.Step>
+
+        <Form.Steps.Step title="Детали">
+          <Form.Field.Select name="categoryId" />
+          <Form.Field.Tags name="tags" />
+          <Form.Field.Rating name="rating" />
+
+          <Form.When field="status" is="ACTIVE">
+            <Form.Field.Date name="publishDate" />
+          </Form.When>
+        </Form.Steps.Step>
+
+        <Form.Steps.Step title="Проверка">
+          <Form.DebugValues />
+        </Form.Steps.Step>
+
+        <Form.Steps.Navigation />
+      </Form.Steps>
+    </Form>
+  </FormI18nProvider>
+</RelationFieldProvider>
+```
+
+## Формы с авторизацией
+
+Отключение полей на основе роли пользователя:
+
+```tsx
+function AdminForm({ isAdmin }: { isAdmin: boolean }) {
+  return (
+    <Form schema={Schema} initialValue={data} onSubmit={save}>
+      <Form.Field.String name="name" />
+      <Form.Field.Select name="status" disabled={!isAdmin} />
+      <Form.Field.Number name="price" readOnly={!isAdmin} />
+      <Form.Button.Submit>Сохранить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Form Builder (JSON конфиг)
+
+Генерация форм из JSON-конфигурации:
+
+```tsx
+<Form.Builder
+  config={{
+    fields: [
+      { name: 'name', type: 'string', label: 'Имя', required: true },
+      { name: 'email', type: 'string', label: 'Email', validation: 'email' },
+      { name: 'role', type: 'select', label: 'Роль', options: roles },
+    ],
+  }}
+  onSubmit={handleSubmit}
+/>
+```

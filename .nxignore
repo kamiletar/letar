@@ -1,0 +1,4 @@
+.claude/worktrees
+**/dist
+**/.next
+**/dist-electron

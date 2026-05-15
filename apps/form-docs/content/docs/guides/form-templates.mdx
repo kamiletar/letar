@@ -1,0 +1,87 @@
+---
+title: Form Templates
+description: 10 ready-made form templates for rapid development
+---
+
+## Overview
+
+Form Templates provide pre-built form schemas with default values for common use cases. Use them as-is or customize with overrides.
+
+## Quick Start
+
+```tsx
+import { templates } from '@letar/forms'
+
+<Form.FromTemplate
+  template={templates.contactForm}
+  onSubmit={handleSubmit}
+  submitLabel="Send Message"
+/>
+```
+
+## Available Templates
+
+| Template | Fields | Category |
+|----------|--------|----------|
+| `loginForm` | email, password | Auth |
+| `registerForm` | name, email, password, confirmPassword | Auth |
+| `forgotPasswordForm` | email | Auth |
+| `contactForm` | name, email, phone, message | Feedback |
+| `feedbackForm` | rating, category, message, email | Feedback |
+| `npsForm` | score (0-10), reason, email | Survey |
+| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account | Business |
+| `orderForm` | items[], customer, address, email | E-commerce |
+| `profileForm` | firstName, lastName, email, phone | Profile |
+| `addressForm` | country, city, street, building, apartment, zip | Address |
+
+## Customization
+
+```tsx
+<Form.FromTemplate
+  template={templates.registerForm}
+  override={{
+    exclude: ['confirmPassword'],
+    fields: { email: { label: 'Work Email' } },
+  }}
+  onSubmit={handleSubmit}
+/>
+```
+
+## Headless Usage
+
+Use just the schema and default values without the UI:
+
+```tsx
+const { schema, defaultValues } = templates.contactForm
+
+// Use in your own form
+<Form schema={schema} initialValue={defaultValues} onSubmit={fn}>
+  {/* Your custom layout */}
+</Form>
+```
+
+## Custom Templates
+
+Create your own templates using the `FormTemplate` interface:
+
+```tsx
+import type { FormTemplate } from '@letar/forms'
+import { z } from 'zod/v4'
+
+export const myTemplate: FormTemplate = {
+  name: 'myTemplate',
+  title: 'My Form',
+  description: 'Custom form template',
+  category: 'feedback',
+  schema: z.object({ ... }).strip(),
+  defaultValues: { ... },
+  renderFields: () => null,
+}
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/templates).

@@ -1,0 +1,13 @@
+title: hello-world
+titleEn: Hello World
+description: >-
+  Первая статья в моём блоге. Рассказываю о планах, технологиях и о чём буду
+  писать.
+descriptionEn: >-
+  First post in my blog. I talk about plans, technologies and what I will write
+  about.
+publishedAt: '2025-12-08'
+tags:
+  - blog
+  - intro
+featured: true

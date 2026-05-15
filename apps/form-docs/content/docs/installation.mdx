@@ -1,0 +1,54 @@
+---
+title: Installation
+description: Install @letar/forms and its peer dependencies
+---
+
+## Install
+
+```bash
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+# or with bun
+bun add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+# or with pnpm
+pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+```
+
+## Optional Dependencies
+
+For drag & drop reordering in array fields:
+
+```bash
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+For input masking (phone, credit card, etc.):
+
+```bash
+npm install use-mask-input
+```
+
+## Peer Dependencies
+
+| Package                | Version   | Required |
+| ---------------------- | --------- | -------- |
+| `react`                | >= 18.0.0 | Yes      |
+| `@tanstack/react-form` | >= 1.0.0  | Yes      |
+| `@chakra-ui/react`     | >= 3.0.0  | Yes      |
+| `framer-motion`        | >= 10.0.0 | Yes      |
+| `zod`                  | >= 3.24.0 | Yes      |
+| `@dnd-kit/*`           | >= 6.0.0  | Optional |
+| `use-mask-input`       | >= 3.0.0  | Optional |
+
+## Setup
+
+Ensure your app has Chakra UI's `ChakraProvider` configured:
+
+```tsx
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+
+function App({ children }) {
+  return <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
+}
+```
+
+That's it! You're ready to use `@letar/forms`.

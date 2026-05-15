@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="play" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0e7ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Скруглённый гексагон — сетевой узел (IPFS) -->
+  <path d="M256 28 L438 133 Q462 147 462 176 L462 336 Q462 365 438 379 L256 484 L74 379 Q50 365 50 336 L50 176 Q50 147 74 133 Z" fill="url(#bg)"/>
+  <!-- Play-треугольник — видеоконтент -->
+  <path d="M200 148 L380 256 L200 364 Z" fill="url(#play)" opacity="0.95"/>
+</svg>

@@ -1,0 +1,180 @@
+// ZenStack schema file for Form Develop App
+// Песочница для разработки @letar/forms
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+// TypeScript plugin (v3) - генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+  output = './src/generated/policy'
+}
+
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum RecipeType {
+  /// Сладкое
+  SWEET
+  /// Солёное
+  SALTY
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+/// Категория рецепта (для демонстрации relation полей)
+model Category {
+  id          String   @id @default(cuid())
+
+  /// @form.title("Название категории")
+  /// @form.placeholder("Например: Десерты")
+  name        String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description String?
+
+  /// @form.title("Цвет")
+  /// @form.fieldType("colorPicker")
+  color       String   @default("#3182CE")
+
+  /// Рецепты в категории
+  recipes     Recipe[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@allow('all', true)
+}
+
+/// Рецепт
+model Recipe {
+  id          String            @id @default(cuid())
+
+  /// @form.title("Название рецепта")
+  /// @form.placeholder("Введите название")
+  title       String
+
+  /// @form.title("Количество порций")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1, max: 100 })
+  portions    Int               @default(1)
+
+  /// Категория рецепта
+  /// @form.title("Категория")
+  /// @form.fieldType("select")
+  /// @form.relation("Category", "name")
+  category    Category?         @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+
+  /// Компоненты рецепта
+  components  RecipeComponent[]
+
+  /// Информация о рецепте (1:1)
+  info        RecipeInfo?
+
+  /// @form.title("Теги")
+  /// @form.fieldType("tags")
+  /// @form.placeholder("Добавить тег...")
+  tags        String[]
+
+  /// Обратная связь для similarMyRecipes (implicit M:N, не используется в API)
+  similarFor  RecipeInfoAdditional[] @relation("SimilarRecipes")
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Доступ для всех (песочница)
+  @@allow('all', true)
+}
+
+/// Компонент рецепта (ингредиент)
+model RecipeComponent {
+  id          String   @id @default(cuid())
+
+  /// Название компонента
+  title       String
+
+  /// Вес в граммах
+  weightGrams Int
+
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId    String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@allow('all', true)
+}
+
+/// Информация о рецепте
+model RecipeInfo {
+  id        String     @id @default(cuid())
+
+  /// Базовая информация (1:1)
+  base      RecipeInfoBase?
+
+  /// Дополнительная информация (1:1)
+  additional RecipeInfoAdditional?
+
+  recipe    Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String     @unique
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@allow('all', true)
+}
+
+/// Базовая информация о рецепте
+model RecipeInfoBase {
+  id        String     @id @default(cuid())
+
+  /// @form.title("Тип рецепта")
+  /// @form.fieldType("radioCard")
+  type      RecipeType @default(SWEET)
+
+  /// @form.title("Рейтинг")
+  /// @form.fieldType("rating")
+  /// @form.props({ count: 5, allowHalf: true })
+  rating    Float      @default(0)
+
+  info      RecipeInfo @relation(fields: [infoId], references: [id], onDelete: Cascade)
+  infoId    String     @unique
+
+  @@allow('all', true)
+}
+
+/// Дополнительная информация о рецепте
+model RecipeInfoAdditional {
+  id        String     @id @default(cuid())
+
+  /// Похожие рецепты (implicit M:N с Recipe)
+  similarMyRecipes Recipe[] @relation("SimilarRecipes")
+
+  info      RecipeInfo @relation(fields: [infoId], references: [id], onDelete: Cascade)
+  infoId    String     @unique
+
+  @@allow('all', true)
+}

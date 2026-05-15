@@ -1,0 +1,81 @@
+---
+title: Числовые поля
+description: Числовой ввод — Number, Slider, Currency, Rating
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="number" height={550} />
+
+## Form.Field.Number
+
+Числовое поле с кнопками +/-.
+
+```tsx
+const Schema = z.object({
+  quantity: z.number().min(1).max(100).int().meta({
+    ui: { title: 'Количество' },
+  }),
+})
+
+<Form.Field.Number name="quantity" />
+```
+
+## Form.Field.Slider
+
+Ползунок для выбора числа из диапазона.
+
+```tsx
+const Schema = z.object({
+  volume: z.number().min(0).max(100).meta({
+    ui: { title: 'Громкость' },
+  }),
+})
+
+<Form.Field.Slider name="volume" />
+```
+
+### Продвинутые настройки
+
+```tsx
+<Form.Field.Slider name="brightness" step={10} showValue />
+```
+
+## Form.Field.Currency
+
+Поле для ввода денежных сумм.
+
+```tsx
+const Schema = z.object({
+  price: z.number().min(0).meta({
+    ui: { title: 'Цена' },
+  }),
+})
+
+<Form.Field.Currency name="price" />
+```
+
+## Form.Field.Rating
+
+Оценка звёздами.
+
+```tsx
+const Schema = z.object({
+  rating: z.number().min(1).max(5).meta({
+    ui: { title: 'Оценка' },
+  }),
+})
+
+<Form.Field.Rating name="rating" />
+```
+
+### Варианты
+
+```tsx
+// 10 звёзд с половинками
+<Form.Field.Rating name="quality" count={10} allowHalf />
+
+// Разные размеры
+<Form.Field.Rating name="small" size="sm" />
+<Form.Field.Rating name="large" size="lg" />
+```

@@ -1,0 +1,67 @@
+/**
+ * Dev скрипт для запуска nextron с автоматическим выбором порта
+ */
+const { spawn } = require('child_process')
+const { createServer } = require('net')
+
+/**
+ * Проверить, свободен ли порт
+ */
+function isPortFree(port) {
+  return new Promise((resolve) => {
+    const server = createServer()
+
+    server.once('error', () => {
+      resolve(false)
+    })
+
+    server.once('listening', () => {
+      server.close()
+      resolve(true)
+    })
+
+    server.listen(port, '127.0.0.1')
+  })
+}
+
+/**
+ * Найти свободный порт
+ */
+async function getAvailablePort(startPort = 5000, maxAttempts = 100) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const port = startPort + i
+    const isFree = await isPortFree(port)
+    if (isFree) {
+      return port
+    }
+  }
+  throw new Error(`No free port found starting from ${startPort}`)
+}
+
+async function main() {
+  try {
+    const port = await getAvailablePort(5000)
+    console.log(`\n🚀 Starting Label Printer Desktop on port ${port}\n`)
+
+    // Запускаем nextron с выбранным портом (--renderer-port)
+    const child = spawn('npx', ['nextron', '--renderer-port', String(port)], {
+      stdio: 'inherit',
+      shell: true,
+      cwd: process.cwd(),
+    })
+
+    child.on('error', (err) => {
+      console.error('Failed to start nextron:', err)
+      process.exit(1)
+    })
+
+    child.on('close', (code) => {
+      process.exit(code || 0)
+    })
+  } catch (err) {
+    console.error('Error:', err.message)
+    process.exit(1)
+  }
+}
+
+main()

@@ -1,0 +1,376 @@
+---
+title: Form Component
+description: The main Form compound component and its sub-components
+---
+
+## Form
+
+The root compound component. Provides form context and validation.
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={async ({ value }) => { ... }}
+>
+  {/* Field components */}
+</Form>
+```
+
+### Props
+
+| Prop            | Type                                     | Description                         |
+| --------------- | ---------------------------------------- | ----------------------------------- |
+| `schema`        | `ZodObject`                              | Zod validation schema               |
+| `initialValue`  | `T`                                      | Initial form data                   |
+| `onSubmit`      | `(props: { value: T }) => Promise<void>` | Submit handler                      |
+| `onError`       | `(errors: FieldErrors) => void`          | Error handler                       |
+| `offline`       | `OfflineConfig`                          | Offline mode configuration          |
+| `persistence`   | `PersistenceConfig`                      | Auto-save to localStorage           |
+| `debug`         | `boolean \| 'force'`                     | Show DebugValues (FromSchema only)  |
+| `onFieldChange` | `Record<string, (value, api) => void>`   | React to field value changes        |
+| `middleware`    | `FormMiddleware`                         | beforeSubmit, afterSuccess, onError |
+| `children`      | `ReactNode`                              | Form content                        |
+
+### onFieldChange
+
+Auto-generate slug, sync dependent fields, or recalculate totals:
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={save}
+  onFieldChange={{
+    name: (value, { setFieldValue }) => {
+      setFieldValue('slug', transliterate(String(value)))
+    },
+    quantity: (value, { setFieldValue, getFieldValue }) => {
+      const price = getFieldValue('price') as number
+      setFieldValue('total', (value as number) * price)
+    },
+  }}
+>
+```
+
+See [Field Watchers](/docs/guides/field-watchers) for patterns.
+
+### persistence
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={handleSubmit}
+  persistence={{
+    key: 'checkout-form',
+    debounceMs: 500,
+    dialogTitle: 'Restore draft?',
+    dialogDescription: 'You have unsaved changes.',
+    restoreLabel: 'Restore',
+    discardLabel: 'Discard',
+  }}
+>
+```
+
+## Form.Field.\*
+
+40+ field components. See [Field Types](/docs/fields) for full list.
+
+Common props shared by all fields:
+
+| Prop          | Type      | Description                      |
+| ------------- | --------- | -------------------------------- |
+| `name`        | `string`  | Field name matching schema key   |
+| `label`       | `string`  | Override label from schema       |
+| `placeholder` | `string`  | Override placeholder from schema |
+| `helperText`  | `string`  | Additional guidance text         |
+| `required`    | `boolean` | Mark as required                 |
+| `disabled`    | `boolean` | Disable the field                |
+
+## Form.Group
+
+Group fields into a nested object:
+
+```tsx
+<Form.Group name="address">
+  <Form.Field.String name="street" />
+</Form.Group>
+```
+
+## Form.Group.List
+
+Dynamic array of items:
+
+```tsx
+<Form.Group.List name="items" sortable>
+  <Form.Field.String name="title" />
+  <Form.Group.List.Button.Add />
+  <Form.Group.List.Button.Remove />
+</Form.Group.List>
+```
+
+## Form.Steps
+
+Multi-step wizard. See [Multi-Step Forms](/docs/guides/multi-step).
+
+## Form.Watch
+
+Renderless component that fires a callback when a field value changes. Group-aware — resolves paths relative to the nearest `Form.Group`.
+
+```tsx
+<Form.Watch
+  field="country"
+  onChange={(value, { setFieldValue }) => {
+    setFieldValue('currency', currencyMap[String(value)])
+  }}
+/>
+```
+
+| Prop       | Type                                            | Description                             |
+| ---------- | ----------------------------------------------- | --------------------------------------- |
+| `field`    | `string`                                        | Field name to watch (relative to group) |
+| `onChange` | `(value: unknown, api: FieldChangeApi) => void` | Callback on change                      |
+
+See [Field Watchers](/docs/guides/field-watchers) for patterns and comparison with `onFieldChange`.
+
+## Form.When
+
+Conditional rendering. See [Conditional Fields](/docs/guides/conditional-fields).
+
+## Form.InfoBlock
+
+Contextual info/warning/error/success/tip message block inside the form. Based on Chakra UI Alert.
+
+```tsx
+<Form.InfoBlock variant="warning" title="Note">
+  Company accounts require additional verification.
+</Form.InfoBlock>
+```
+
+| Prop         | Type                                                   | Default    | Description          |
+| ------------ | ------------------------------------------------------ | ---------- | -------------------- |
+| `variant`    | `'info' \| 'warning' \| 'error' \| 'success' \| 'tip'` | `'info'`   | Visual style         |
+| `title`      | `ReactNode`                                            | —          | Block heading        |
+| `children`   | `ReactNode`                                            | —          | Content              |
+| `appearance` | `'subtle' \| 'surface' \| 'outline' \| 'solid'`        | `'subtle'` | Chakra Alert variant |
+| `size`       | `'sm' \| 'md' \| 'lg'`                                 | `'md'`     | Size                 |
+
+## Form.Divider
+
+Horizontal separator for visual grouping. Based on Chakra UI Separator.
+
+```tsx
+<Form.Divider label="Contact Information" />
+<Form.Divider variant="dashed" />
+<Form.Divider label="Phones" icon={<LuPhone />} />
+```
+
+| Prop           | Type                              | Default   | Description       |
+| -------------- | --------------------------------- | --------- | ----------------- |
+| `label`        | `ReactNode`                       | —         | Text label        |
+| `icon`         | `ReactNode`                       | —         | Icon before label |
+| `variant`      | `'solid' \| 'dashed' \| 'dotted'` | `'solid'` | Line style        |
+| `size`         | `'xs' \| 'sm' \| 'md' \| 'lg'`    | `'xs'`    | Thickness         |
+| `colorPalette` | `string`                          | `'gray'`  | Color             |
+
+## Form.Field.Hidden
+
+Hidden field — not rendered in DOM, only participates in form state.
+
+```tsx
+<Form.Field.Hidden name="utm_source" value="landing" />
+```
+
+| Prop    | Type      | Description                   |
+| ------- | --------- | ----------------------------- |
+| `name`  | `string`  | Field name                    |
+| `value` | `unknown` | Value to sync into form state |
+
+See [Utility Components](/docs/guides/utility-components) for examples.
+
+## Form.Field.Calculated
+
+Auto-computed read-only field that recalculates when dependent fields change.
+
+```tsx
+<Form.Field.Calculated
+  name="total"
+  label="Total"
+  compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
+  format={(v) => `${Number(v).toLocaleString()} ₽`}
+  deps={['price', 'qty']}
+/>
+```
+
+| Prop       | Type                  | Default | Description                                   |
+| ---------- | --------------------- | ------- | --------------------------------------------- |
+| `name`     | `string`              | —       | Field path in form state                      |
+| `compute`  | `(values) => unknown` | —       | Compute function (required)                   |
+| `label`    | `string`              | —       | Field label                                   |
+| `format`   | `(value) => string`   | —       | Display formatter                             |
+| `deps`     | `string[]`            | —       | Dependency fields for optimized recalculation |
+| `debounce` | `number`              | `0`     | Debounce delay in ms                          |
+| `hidden`   | `boolean`             | `false` | Compute without rendering                     |
+
+See [Calculated Fields](/docs/guides/calculated-fields) for full guide.
+
+## Form.Errors
+
+Error summary component:
+
+```tsx
+<Form.Errors title="Please fix:" showFieldNames />
+```
+
+## Form.Button.Submit
+
+Submit button that **automatically shows a loading spinner** while the form is submitting. It subscribes to the form's `isSubmitting` state — when `onSubmit` returns a Promise, the button stays in loading state until it resolves.
+
+### Props
+
+| Prop           | Type                                          | Default    | Description                                  |
+| -------------- | --------------------------------------------- | ---------- | -------------------------------------------- |
+| `children`     | `ReactNode`                                   | `"Submit"` | Button content — text, icon, or any element  |
+| `loadingText`  | `ReactNode`                                   | —          | Text shown during submit (replaces children) |
+| `disabled`     | `boolean`                                     | `false`    | Disable the button                           |
+| `colorPalette` | `string`                                      | —          | Color palette (`"brand"`, `"blue"`, `"red"`) |
+| `size`         | `"xs" \| "sm" \| "md" \| "lg"`                | `"md"`     | Button size                                  |
+| `variant`      | `"solid" \| "outline" \| "ghost" \| "subtle"` | `"solid"`  | Button variant                               |
+| `width`        | `string \| number`                            | —          | Button width (`"100%"` for full width)       |
+
+### Basic usage
+
+```tsx
+<Form.Button.Submit>Save</Form.Button.Submit>
+```
+
+### Loading text
+
+Show custom text while submitting:
+
+```tsx
+<Form.Button.Submit loadingText="Saving...">Save</Form.Button.Submit>
+```
+
+### Custom styling
+
+```tsx
+<Form.Button.Submit colorPalette="brand" size="lg" width="100%">
+  Create Account
+</Form.Button.Submit>
+```
+
+### How loading works
+
+The button automatically enters loading state when `onSubmit` is an async function. To see the effect, add a delay to your handler:
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={async ({ value }) => {
+    await new Promise((r) => setTimeout(r, 1500))
+    alert(`Submitted: ${JSON.stringify(value)}`)
+  }}
+>
+  <Form.Field.String name="name" />
+  <Form.Button.Submit loadingText="Sending...">Send</Form.Button.Submit>
+</Form>
+```
+
+## Form.Button.Reset
+
+Reset form to initial values:
+
+```tsx
+<Form.Button.Reset>Reset</Form.Button.Reset>
+```
+
+## Form.FromSchema
+
+Auto-generate entire form from schema:
+
+```tsx
+<Form.FromSchema schema={Schema} initialValue={data} onSubmit={handleSubmit} submitLabel="Create" columns={2} />
+```
+
+## Form.Builder
+
+Generate form from JSON configuration:
+
+```tsx
+<Form.Builder
+  schema={Schema}
+  initialValue={data}
+  onSubmit={handleSubmit}
+  fields={[
+    { name: 'title', type: 'string' },
+    { name: 'price', type: 'currency', section: 'Pricing' },
+  ]}
+/>
+```
+
+## Form.AutoFields
+
+Auto-generate fields from schema with filtering:
+
+```tsx
+// All fields from schema
+<Form.AutoFields />
+
+// Only specific fields
+<Form.AutoFields include={['name', 'email', 'role']} />
+
+// Exclude certain fields
+<Form.AutoFields exclude={['id', 'createdAt']} />
+
+// Custom wrapper
+<Form.AutoFields fieldWrapper={({ name, children }) => (
+  <Box key={name} mb={4}>{children}</Box>
+)} />
+```
+
+| Prop           | Type        | Description                                  |
+| -------------- | ----------- | -------------------------------------------- |
+| `include`      | `string[]`  | Only render these fields                     |
+| `exclude`      | `string[]`  | Skip these fields                            |
+| `recursive`    | `boolean`   | Auto-generate nested objects (default: true) |
+| `fieldWrapper` | `Component` | Custom wrapper for each field                |
+
+## Form.DebugValues
+
+Interactive JSON inspector showing real-time form values:
+
+```tsx
+<Form.DebugValues />
+<Form.DebugValues title="Current State" collapsed={3} />
+```
+
+| Prop               | Type      | Description                          |
+| ------------------ | --------- | ------------------------------------ |
+| `title`            | `string`  | Block title (default: "Form Values") |
+| `collapsed`        | `number`  | Tree expansion depth (default: 2)    |
+| `showInProduction` | `boolean` | Show in production (default: false)  |
+
+## Form.DirtyGuard
+
+Warns user about unsaved changes when navigating away:
+
+```tsx
+<Form.DirtyGuard title="Unsaved changes" message="You have unsaved changes. Are you sure you want to leave?" />
+```
+
+## Form.Subscribe
+
+Reactive subscription to form values — for live previews:
+
+```tsx
+<Form.Subscribe>{(values) => <Preview data={values} />}</Form.Subscribe>
+```
+
+See [Controlled State](/docs/guides/controlled-state) for patterns.
+
+## createForm
+
+Create extended form with custom fields and selects. See [createForm guide](/docs/guides/create-form).

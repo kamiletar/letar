@@ -1,0 +1,13 @@
+{
+  "name": "driving-school-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "driving-school"
+    ]
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3"
+  }
+}

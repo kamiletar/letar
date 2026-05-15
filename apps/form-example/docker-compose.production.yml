@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: form-example-db
+    restart: always
+    environment:
+      POSTGRES_USER: forms
+      POSTGRES_PASSWORD: forms_example_2026
+      POSTGRES_DB: forms_example
+    volumes:
+      - form-example-pgdata:/var/lib/postgresql/data
+    networks:
+      - premium-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U forms -d forms_example']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5m'
+        max-file: '2'
+
+  app:
+    image: form-example:latest
+    container_name: form-example-app
+    restart: always
+    ports:
+      - '3022:3022'
+    env_file:
+      - .env.docker
+    environment:
+      TZ: Europe/Moscow
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      DATABASE_URL: postgresql://forms:forms_example_2026@form-example-db:5432/forms_example
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  form-example-pgdata:
+
+networks:
+  premium-network:
+    external: true

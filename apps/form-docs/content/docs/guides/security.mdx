@@ -1,0 +1,119 @@
+---
+title: Security Patterns
+description: Honeypot, rate limiting, and secure file uploads for form protection
+---
+
+## Overview
+
+Forms are the primary attack surface for bots, spam, and malicious uploads. @letar/forms provides three built-in security mechanisms that require minimal configuration.
+
+## Honeypot — Bot Trap
+
+A hidden field invisible to humans. Bots fill all fields — if this field has a value, submit is silently blocked.
+
+```tsx
+<Form honeypot={true} initialValue={data} onSubmit={handleSubmit}>
+  <Form.Field.String name="email" />
+  <Form.Field.Textarea name="message" />
+  <Form.Button.Submit>Send</Form.Button.Submit>
+</Form>
+```
+
+**How it works:**
+
+- Renders a hidden `<input>` with `display:none`, `aria-hidden`, `tabIndex=-1`
+- Field name is randomized per render (useId + random suffix)
+- If the field contains any value on submit, the form silently does nothing
+- Zero UX impact for real users
+
+## Rate Limiting
+
+Client-side submit throttling with countdown timer. Persists in `sessionStorage`.
+
+```tsx
+<Form rateLimit={{ maxSubmits: 3, windowMs: 60000 }} initialValue={data} onSubmit={handleSubmit}>
+  <Form.Field.String name="email" />
+  <Form.Button.Submit>Send</Form.Button.Submit>
+</Form>
+```
+
+| Prop         | Type     | Description                        |
+| ------------ | -------- | ---------------------------------- |
+| `maxSubmits` | `number` | Max submits within the time window |
+| `windowMs`   | `number` | Time window in milliseconds        |
+
+**Behavior:**
+
+- Tracks submit timestamps in `sessionStorage`
+- When limit is reached, shows a countdown alert
+- Graceful degradation: if `sessionStorage` is unavailable, submit is always allowed
+- **Important:** Must be paired with server-side rate limiting for real protection
+
+## Secure File Upload
+
+Enhanced security for `Form.Field.FileUpload` with MIME verification, metadata stripping, and file renaming.
+
+```tsx
+<Form.Field.FileUpload
+  name="document"
+  security={{
+    maxSize: '10MB',
+    allowedTypes: ['image/jpeg', 'image/png', 'application/pdf'],
+    stripMetadata: true,
+    renameFile: true,
+  }}
+/>
+```
+
+| Prop            | Type               | Description                                            |
+| --------------- | ------------------ | ------------------------------------------------------ |
+| `maxSize`       | `string \| number` | Max file size (`'10MB'`, `'500KB'`, or bytes)          |
+| `allowedTypes`  | `string[]`         | Allowed MIME types, checked via magic bytes            |
+| `stripMetadata` | `boolean`          | Remove EXIF data from images (Canvas re-encode)        |
+| `renameFile`    | `boolean`          | Replace filename with UUID (path traversal protection) |
+
+**MIME detection** reads the first 4-8 bytes of the file to match against known signatures (magic bytes), not the file extension. Supported types: JPEG, PNG, GIF, WebP, PDF, ZIP.
+
+**EXIF stripping** uses the Canvas API: the image is drawn onto a canvas and exported back, removing all metadata including GPS coordinates, camera info, etc.
+
+**File renaming** replaces the original filename with a UUID while preserving the extension, preventing path traversal attacks like `../../etc/passwd`.
+
+## Combining Security Features
+
+All three can be used together:
+
+```tsx
+<Form honeypot={true} rateLimit={{ maxSubmits: 5, windowMs: 300000 }} initialValue={data} onSubmit={handleSubmit}>
+  <Form.Field.String name="name" />
+  <Form.Field.String name="email" />
+  <Form.Field.FileUpload
+    name="avatar"
+    security={{
+      maxSize: '5MB',
+      allowedTypes: ['image/*'],
+      stripMetadata: true,
+      renameFile: true,
+    }}
+  />
+  <Form.Button.Submit>Submit</Form.Button.Submit>
+</Form>
+```
+
+## Utility Functions
+
+These are exported for standalone use:
+
+```tsx
+import { parseFileSize, validateMimeType, sanitizeFileName } from '@letar/forms'
+
+parseFileSize('10MB') // 10485760
+sanitizeFileName(file) // File with UUID name
+await validateMimeType(file, ['image/jpeg']) // { valid: true, detectedMime: 'image/jpeg' }
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/security).

@@ -1,0 +1,157 @@
+---
+title: createForm — Кастомные формы
+description: Расширение Form кастомными полями, селектами, комбобоксами и lazy loading
+---
+
+## Когда использовать
+
+Стандартный `Form` содержит 40+ встроенных типов полей. Используйте `createForm()` когда нужны:
+
+- **Кастомные поля** (выбор папки, номер автомобиля)
+- **Доменные селекты** (SelectVideoCodec, SelectLicenseCategory)
+- **Комбобоксы** с кастомными источниками данных
+- **Оптимизация памяти** через lazy loading (60+ компонентов → по требованию)
+
+## API
+
+```tsx
+import { createForm } from '@letar/forms'
+
+const AppForm = createForm({
+  // Кастомные компоненты полей
+  extraFields: {
+    FolderPath: FieldFolderPath,
+    PlateNumber: FieldPlateNumber,
+  },
+
+  // Кастомные выпадающие списки (синхронные)
+  extraSelects: {
+    VideoCodec: SelectVideoCodec,
+    RateControl: SelectRateControl,
+  },
+
+  // Lazy-loaded селекты (для оптимизации памяти)
+  lazySelects: {
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+  },
+})
+```
+
+## Использование
+
+```tsx
+<AppForm schema={Schema} initialValue={data} onSubmit={save}>
+  {/* Встроенные поля работают как обычно */}
+  <AppForm.Field.String name="name" />
+
+  {/* Кастомное поле */}
+  <AppForm.Field.FolderPath name="path" label="Выберите папку" />
+
+  {/* Кастомный селект */}
+  <AppForm.Select.VideoCodec name="codec" />
+
+  <AppForm.Button.Submit>Сохранить</AppForm.Button.Submit>
+</AppForm>
+```
+
+## Создание кастомного поля
+
+```tsx
+import { useDeclarativeField } from '@letar/forms'
+
+function FieldPlateNumber({ name, label }: { name: string; label?: string }) {
+  const { field } = useDeclarativeField(name)
+
+  return (
+    <Field.Root>
+      {label && <Field.Label>{label}</Field.Label>}
+      <Input
+        value={field.state.value as string}
+        onChange={(e) => field.handleChange(e.target.value.toUpperCase())}
+        placeholder="А123ВС77"
+      />
+    </Field.Root>
+  )
+}
+```
+
+## Создание кастомного селекта
+
+```tsx
+function SelectVideoCodec({ name, ...props }) {
+  const options = [
+    { value: 'AV1', label: 'AV1 (лучшее качество)' },
+    { value: 'HEVC', label: 'HEVC (H.265)' },
+    { value: 'H264', label: 'H.264 (совместимый)' },
+  ]
+
+  return <Form.Field.Select name={name} options={options} {...props} />
+}
+```
+
+## Lazy Loading для оптимизации памяти
+
+Для приложений с множеством селектов (40+) lazy loading предотвращает загрузку всех компонентов при SSR:
+
+```tsx
+const AppForm = createForm({
+  lazySelects: {
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+    // ... 40+ ленивых селектов
+  },
+})
+```
+
+**Результат:** В реальном приложении с 46 lazy-селектами + 10 комбобоксами потребление памяти снизилось с ~1.7GB до ~500MB.
+
+## Реальные примеры
+
+### Маленькое приложение (Animatrona — Electron)
+
+```tsx
+export const AnimatronaForm = createForm({
+  extraFields: {
+    FolderPath: FieldFolderPath,
+    CqSlider: FieldCqSlider,
+  },
+  extraSelects: {
+    VideoCodec: SelectVideoCodec,
+    RateControl: SelectRateControl,
+  },
+})
+```
+
+### Большое приложение (Автошкола — Next.js)
+
+```tsx
+export const DrivingSchoolForm = createForm({
+  extraFields: {
+    PlateNumber: FieldPlateNumber,
+  },
+  lazySelects: {
+    // 46 ленивых селектов
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+    // ...
+  },
+  lazyComboboxes: {
+    Instructor: () => import('./comboboxes/combobox-instructor').then((m) => m.ComboboxInstructor),
+    // ...
+  },
+})
+```
+
+## Возвращаемый тип
+
+| Свойство              | Описание                        |
+| --------------------- | ------------------------------- |
+| `AppForm(props)`      | Корневой компонент формы        |
+| `AppForm.Field.*`     | 40+ встроенных + кастомные поля |
+| `AppForm.Select.*`    | Кастомные выпадающие списки     |
+| `AppForm.Combobox.*`  | Кастомные комбобоксы            |
+| `AppForm.Group`       | Вложенные объекты               |
+| `AppForm.Group.List`  | Динамические массивы            |
+| `AppForm.Steps`       | Мультистеп мастер               |
+| `AppForm.When`        | Условный рендеринг              |
+| `AppForm.AutoFields`  | Автогенерация из схемы          |
+| `AppForm.FromSchema`  | Форма в одну строку             |
+| `AppForm.DebugValues` | Отладочный инспектор            |

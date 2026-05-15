@@ -1,0 +1,113 @@
+---
+title: String Fields
+description: Text input fields — String, Textarea, Password, MaskedInput, RichText
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="string" height={500} />
+
+## Form.Field.String
+
+Standard single-line text input. The most common field type.
+
+```tsx
+const Schema = z.object({
+  name: z.string().min(2).max(100).meta({
+    ui: { title: 'Full Name', placeholder: 'Enter your name' },
+  }),
+})
+
+<Form.Field.String name="name" />
+```
+
+### Auto Constraints
+
+Zod constraints are automatically applied to the input:
+
+```tsx
+z.string().min(2).max(100)
+// → minLength={2} maxLength={100} on the <input>
+
+z.string().email()
+// → type="email"
+
+z.string().url()
+// → type="url"
+```
+
+## Form.Field.Textarea
+
+Multi-line text input for longer content.
+
+```tsx
+const Schema = z.object({
+  description: z.string().min(10).max(2000).meta({
+    ui: { title: 'Description', placeholder: 'Describe your project...' },
+  }),
+})
+
+<Form.Field.Textarea name="description" />
+```
+
+## Form.Field.Password
+
+Password input with a visibility toggle button.
+
+```tsx
+const Schema = z.object({
+  password: z.string().min(8).meta({
+    ui: { title: 'Password' },
+  }),
+})
+
+<Form.Field.Password name="password" />
+```
+
+## Form.Field.MaskedInput
+
+Input with format mask for structured data. Requires `use-mask-input` peer dependency.
+
+```tsx
+const Schema = z.object({
+  phone: z.string().meta({
+    ui: { title: 'Phone', mask: '+1 (999) 999-9999' },
+  }),
+  creditCard: z.string().meta({
+    ui: { title: 'Card Number', mask: '9999 9999 9999 9999' },
+  }),
+})
+
+<Form.Field.MaskedInput name="phone" />
+<Form.Field.MaskedInput name="creditCard" />
+```
+
+## Form.Field.RichText
+
+Rich text editor for HTML/markdown content.
+
+```tsx
+const Schema = z.object({
+  content: z.string().meta({
+    ui: { title: 'Article Content' },
+  }),
+})
+
+<Form.Field.RichText name="content" />
+```
+
+Requires `@tiptap/react` and `@tiptap/starter-kit` as peer dependencies.
+
+## Form.Field.Editable
+
+Inline editing — click text to edit, press Enter or blur to save.
+
+```tsx
+const Schema = z.object({
+  nickname: z.string().meta({
+    ui: { title: 'Nickname' },
+  }),
+})
+
+<Form.Field.Editable name="nickname" />
+```

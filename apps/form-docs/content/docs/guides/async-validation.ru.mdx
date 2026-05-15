@@ -1,0 +1,78 @@
+---
+title: Асинхронная валидация
+description: Серверная асинхронная валидация с debounce, отменой запросов и кэшированием
+---
+
+## Обзор
+
+Асинхронная валидация позволяет проверять значения на сервере (например, уникальность email, доступность имени пользователя) по мере ввода или при уходе с поля.
+
+## Через пропсы
+
+```tsx
+<Form.Field.String
+  name="email"
+  label="Email"
+  asyncValidate={async (value) => {
+    const exists = await fetch(`/api/check-email?email=${value}`)
+    if (exists) return 'Email уже зарегистрирован'
+  }}
+  asyncDebounce={500}
+  asyncTrigger="onBlur"
+/>
+```
+
+## Через Zod `.meta()`
+
+```tsx
+const Schema = z.object({
+  email: z.email().meta({
+    asyncValidate: async (value) => {
+      const res = await fetch(`/api/check-email?email=${value}`)
+      const { exists } = await res.json()
+      if (exists) return 'Email уже зарегистрирован'
+    },
+    asyncDebounce: 500,
+    asyncTrigger: 'onBlur',
+  }),
+})
+```
+
+## Пропсы
+
+Все поля, созданные через `createField`, поддерживают эти пропсы:
+
+| Пропс | Тип | По умолчанию | Описание |
+|-------|-----|--------------|----------|
+| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | — | Функция валидации |
+| `asyncDebounce` | `number` | `500` | Задержка debounce (мс) |
+| `asyncTrigger` | `'onBlur' \| 'onChange'` | `'onBlur'` | Когда запускать |
+
+## Возможности
+
+- **Debounce** — ожидает, пока пользователь прекратит ввод, прежде чем отправить запрос
+- **Отмена запросов** — AbortController отменяет предыдущий запрос при новом вводе
+- **Кэширование** — уже проверенные значения не перепроверяются
+- **Офлайн-безопасность** — пропускает асинхронную валидацию, если `navigator.onLine` равно false
+- **Приоритет пропсов** — пропсы переопределяют конфигурацию из schema meta
+
+## Хук `useAsyncFieldValidation`
+
+Для кастомных компонентов полей:
+
+```tsx
+import { useAsyncFieldValidation } from '@letar/forms'
+
+const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(
+  schema,
+  'email',
+  { asyncValidate: myFn, asyncDebounce: 300 }
+)
+```
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/async-validation).

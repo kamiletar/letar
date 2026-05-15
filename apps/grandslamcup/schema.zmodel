@@ -1,0 +1,1539 @@
+// Grand Slam Cup — турнир поэтов
+// Авторизация через ключницу (auth.letar.best)
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// Генерация Zod схем с UI метаданными для @letar/forms
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ========================================
+// Enum'ы
+// ========================================
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+/// Статус сезона
+enum SeasonStatus {
+  /// Предстоящий
+  UPCOMING
+  /// Активный
+  ACTIVE
+  /// Завершённый
+  FINISHED
+}
+
+/// Тип матча
+enum MatchType {
+  /// Регулярный матч чемпионата
+  REGULAR
+  /// Товарищеский матч
+  FRIENDLY
+}
+
+/// Статус матча
+enum MatchStatus {
+  /// Запланирован
+  SCHEDULED
+  /// Идёт (живой скоринг)
+  LIVE
+  /// Завершён
+  FINISHED
+  /// Отложен
+  POSTPONED
+  /// Отменён
+  CANCELLED
+}
+
+/// Статус игрока в заявке на матч
+enum LineupStatus {
+  /// Стартовый состав 1-й тайм
+  STARTER_HALF1
+  /// Стартовый состав 2-й тайм
+  STARTER_HALF2
+  /// Замена
+  SUBSTITUTE
+  /// Не использован
+  UNUSED
+}
+
+/// Роль игрока в команде
+enum PlayerRole {
+  /// Поэт
+  PLAYER
+  /// Тренер
+  COACH
+  /// Заместитель тренера
+  ASSISTANT_COACH
+}
+
+/// Тип карточки (нарушение)
+enum CardType {
+  YELLOW
+  RED
+}
+
+/// Причина карточки
+enum CardReason {
+  /// Превышение 3 минут
+  OVERTIME
+  /// Пение (запрещено)
+  SINGING
+  /// Запрещённый перфоманс (костюмы, реквизит, взаимодействие с залом)
+  PERFORMANCE
+  /// Несогласованный дисс
+  UNSANCTIONED_DISS
+  /// Оскорбление
+  INSULT
+  /// Физическая агрессия
+  AGGRESSION
+  /// Другое нарушение
+  OTHER
+}
+
+/// Кто начинает 1-й тайм (жеребьёвка)
+enum HalfStartTeam {
+  HOME
+  AWAY
+}
+
+/// Измерение оценки (текст или подача)
+enum VoteDimension {
+  /// Оценка текста
+  TEXT
+  /// Оценка подачи
+  DELIVERY
+}
+
+/// Цвет судьи (для визуальной идентификации на матче)
+enum JudgeColor {
+  RED
+  BLUE
+  GREEN
+  YELLOW
+  PURPLE
+}
+
+/// Статус судьи в матче
+enum JudgeStatus {
+  /// Активный судья (одно из 5 мест)
+  ACTIVE
+  /// Отведён тренером
+  RECUSED
+  /// В очереди ожидания
+  QUEUED
+}
+
+/// Статус заявки на состав/трансфер
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Статус заявки на товарищеский матч
+enum FriendlyRequestStatus {
+  /// Вызов отправлен, ждёт ответа соперника
+  CHALLENGE_SENT
+  /// Соперник принял, ждёт одобрения админа
+  ACCEPTED
+  /// Соперник отклонил вызов
+  DECLINED
+  /// Админ одобрил, матч создан
+  APPROVED
+  /// Админ отклонил
+  REJECTED
+}
+
+/// Тип заявки
+enum RosterAppType {
+  /// Новый игрок (ранее не играл)
+  NEW_PLAYER
+  /// Трансфер (переход из другой команды)
+  TRANSFER
+}
+
+/// Категория изображения
+enum ImageCategory {
+  MATCH
+  TEAM
+  PLAYER
+  VENUE
+  OTHER
+}
+
+/// Формат турнира
+enum TournamentFormat {
+  /// Каждый с каждым (СПб)
+  ROUND_ROBIN
+  /// Швейцарская система (Москва)
+  SWISS
+}
+
+/// Тип этапа турнира
+enum StageType {
+  /// Групповой этап (round-robin или швейцарка)
+  GROUP
+  /// Верхняя сетка плей-офф (Winners Bracket)
+  PLAYOFF_UPPER
+  /// Нижняя сетка плей-офф (Losers Bracket)
+  PLAYOFF_LOWER
+  /// Гранд-финал
+  GRAND_FINAL
+}
+
+// ========================================
+// Пользователь (синхронизируется с ключницей)
+// ========================================
+
+model User {
+  id              String     @id @default(cuid())
+  /// Имя пользователя
+  name            String?
+  /// Email пользователя
+  email           String     @unique
+  /// URL аватара
+  image           String?
+  /// Email подтверждён
+  emailVerified   Boolean    @default(false)
+  /// Роли пользователя
+  roles           UserRole[] @default([USER])
+  /// ID в ключнице (для связи)
+  externalId      String?    @unique
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  /// Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  /// Привязка к профилю поэта (опционально)
+  player          Player?
+  /// Города, в которых пользователь является организатором
+  organizedCities CityOrganizer[]
+  /// Поданные заявки на состав/трансфер
+  submittedApplications RosterApplication[] @relation("AppSubmitter")
+  /// Рассмотренные заявки
+  reviewedApplications  RosterApplication[] @relation("AppReviewer")
+  /// Загруженные фото матчей
+  uploadedPhotos        MatchPhoto[]        @relation("MatchPhotoUploader")
+  /// Написанные новости
+  newsPosts             NewsPost[]          @relation("NewsAuthor")
+  /// Матчи где пользователь — счетовод
+  scoredMatches         Match[]             @relation("MatchScorer")
+  /// Матчи где пользователь — ведущий
+  presentedMatches      Match[]             @relation("MatchPresenter")
+  /// Заявки на товарищеские матчи (поданные)
+  friendlySubmitted     FriendlyMatchRequest[] @relation("FriendlySubmitter")
+  /// Заявки на товарищеские матчи (ответы)
+  friendlyResponded     FriendlyMatchRequest[] @relation("FriendlyResponder")
+  /// Push-подписки для уведомлений
+  pushSubscriptions     PushSubscription[]
+  /// Telegram chatId для личных сообщений (привязывается через /start)
+  telegramChatId        String?   @unique
+
+  @@allow('read', auth() == this)
+  @@allow('update', auth() == this)
+  @@allow('read,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Better Auth — аккаунты OAuth
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@deny('all', true)
+  @@index([userId])
+}
+
+// Better Auth — сессии
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([userId])
+  @@index([token])
+}
+
+// Better Auth — верификация
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String
+  value       String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@deny('all', true)
+  @@index([identifier])
+}
+
+// ========================================
+// Справочники
+// ========================================
+
+/// Город (СПб, Москва, ...)
+model City {
+  id        String   @id @default(cuid())
+  /// Название города
+  /// @form.title("Название")
+  /// @form.placeholder("Санкт-Петербург")
+  name      String   @unique
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("spb")
+  slug      String   @unique
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/grandslamcup")
+  telegramLink String?
+  /// ID Telegram-канала города (напр. @kbs_spb или -100...)
+  /// @form.title("Telegram Chat ID")
+  /// @form.placeholder("@kbs_spb или -1001234567890")
+  telegramChatId String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks  Json?
+  /// Использовать терминологию «домашняя/гостевая» (для городов с домашними площадками)
+  /// @form.title("Домашние стадионы")
+  useHomeAway Boolean @default(false)
+  /// @form.exclude
+  createdAt DateTime @default(now())
+  /// @form.exclude
+  updatedAt DateTime @updatedAt
+
+  venues     Venue[]
+  seasons    Season[]
+  teams      Team[]
+  players    Player[]
+  organizers CityOrganizer[]
+  newsPosts  NewsPost[]
+  donateLinks DonateLink[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Привязка организатора к городу (один пользователь может быть организатором нескольких городов)
+model CityOrganizer {
+  id        String   @id @default(cuid())
+  userId    String
+  cityId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cityId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([cityId])
+}
+
+/// Площадка (бар, клуб, библиотека — домашний стадион команды)
+model Venue {
+  id            String   @id @default(cuid())
+  /// Название площадки
+  /// @form.title("Название")
+  /// @form.placeholder("Бар Глагол")
+  name          String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("glagol")
+  slug          String   @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId        String
+  /// Адрес
+  /// @form.title("Адрес")
+  /// @form.placeholder("Невский пр., 1")
+  address       String?
+  /// Широта (для карты)
+  /// @form.exclude
+  latitude      Float?
+  /// Долгота (для карты)
+  /// @form.exclude
+  longitude     Float?
+  /// Фото площадки
+  /// @form.exclude
+  photo         String?
+  /// Описание
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description   String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/glagol")
+  telegramLink  String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Сайт")
+  /// @form.placeholder("https://glagol.bar")
+  websiteUrl    String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks   Json?
+  /// @form.exclude
+  createdAt     DateTime @default(now())
+  /// @form.exclude
+  updatedAt     DateTime @updatedAt
+
+  city    City    @relation(fields: [cityId], references: [id])
+  teams   Team[]
+  matches Match[]
+  friendlyMatchRequests FriendlyMatchRequest[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+// ========================================
+// Турнирная структура
+// ========================================
+
+/// Сезон (2024-2025 СПб, 2025 Москва, ...)
+model Season {
+  id        String       @id @default(cuid())
+  /// Название сезона
+  /// @form.title("Название")
+  /// @form.placeholder("Сезон 2025-2026 СПб")
+  name      String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("2025-2026-spb")
+  slug      String       @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId    String
+  /// Дата начала
+  /// @form.title("Дата начала")
+  startDate DateTime?
+  /// Дата окончания
+  /// @form.title("Дата окончания")
+  endDate   DateTime?
+  /// Статус сезона
+  /// @form.title("Статус")
+  status    SeasonStatus @default(UPCOMING)
+  /// Трансферное окно открыто
+  /// @form.title("Трансферное окно")
+  transferWindowOpen Boolean @default(false)
+  /// Формат турнира
+  /// @form.title("Формат")
+  format             TournamentFormat @default(ROUND_ROBIN)
+  /// Макс замен во 2-м тайме
+  /// @form.title("Макс замен во 2-м тайме")
+  maxSubstitutions   Int              @default(2)
+  /// Ничья разрешена (false = тай-брейк 11-я пара)
+  /// @form.title("Ничья разрешена")
+  drawAllowed        Boolean          @default(true)
+  /// Домашние стадионы (false = площадку назначает оргкомитет)
+  /// @form.title("Домашние стадионы")
+  homeVenuesEnabled  Boolean          @default(true)
+  /// Показывать счёт по ходу матча (false = только в конце)
+  /// @form.title("Промежуточный счёт")
+  showLiveScore      Boolean          @default(true)
+  /// @form.exclude
+  createdAt DateTime     @default(now())
+  /// @form.exclude
+  updatedAt DateTime     @updatedAt
+
+  city              City              @relation(fields: [cityId], references: [id])
+  leagues           League[]
+  rounds            Round[]
+  stages            Stage[]
+  teamSeasons       TeamSeason[]
+  playerRatings     PlayerRating[]
+  bracketSlots      BracketSlot[]
+  playerSuspensions PlayerSuspension[]
+  friendlyMatches   Match[]            @relation("FriendlyMatches")
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+  @@index([status])
+}
+
+/// Лига в рамках сезона (Высшая, Первая)
+model League {
+  id       String @id @default(cuid())
+  /// Название лиги
+  name     String
+  /// Сезон
+  seasonId String
+  /// Порядок отображения
+  order    Int
+
+  season      Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamSeasons TeamSeason[]
+  matches     Match[]
+
+  @@unique([seasonId, name])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+}
+
+/// Круг (Первый круг, Второй круг — между ними трансферное окно)
+model Round {
+  id        String    @id @default(cuid())
+  /// Название круга
+  name      String
+  /// Сезон
+  seasonId  String
+  /// Номер круга в сезоне
+  number    Int
+  /// Этап турнира (для плей-офф)
+  stageId   String?
+  /// Дата начала
+  startDate DateTime?
+  /// Дата окончания
+  endDate   DateTime?
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  stage  Stage? @relation(fields: [stageId], references: [id])
+  tours  Tour[]
+
+  @@unique([seasonId, number])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+  @@index([stageId])
+}
+
+/// Тур внутри круга (1 тур, 2 тур, ...)
+model Tour {
+  id      String @id @default(cuid())
+  /// Круг
+  roundId String
+  /// Номер тура в круге
+  number  Int
+
+  round   Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  matches Match[]
+
+  @@unique([roundId, number])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([roundId])
+}
+
+// ========================================
+// Участники
+// ========================================
+
+/// Команда
+model Team {
+  id            String   @id @default(cuid())
+  /// Название команды
+  /// @form.title("Название")
+  /// @form.placeholder("Чумные поэты")
+  name          String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("chumnye-poety")
+  slug          String   @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId        String
+  /// Логотип
+  /// @form.exclude
+  logo          String?
+  /// Описание команды
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description   String?
+  /// Домашний стадион
+  /// @form.title("Домашний стадион")
+  /// @form.fieldType("select")
+  homeVenueId   String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/team")
+  telegramLink  String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks   Json?
+  /// История переименований (напр. "Болт" → "Вином")
+  /// @form.exclude
+  previousNames String[]
+  /// @form.exclude
+  createdAt     DateTime @default(now())
+  /// @form.exclude
+  updatedAt     DateTime @updatedAt
+
+  city        City         @relation(fields: [cityId], references: [id])
+  homeVenue   Venue?       @relation(fields: [homeVenueId], references: [id])
+  teamSeasons TeamSeason[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+/// Поэт / игрок
+model Player {
+  id           String   @id @default(cuid())
+  /// Имя поэта
+  name         String
+  /// URL-slug
+  slug         String   @unique
+  /// Город
+  cityId       String?
+  /// Фото
+  photo        String?
+  /// Биография
+  bio          String?
+  /// @deprecated Используй socialLinks
+  telegramLink String?
+  /// @deprecated Используй socialLinks
+  vkLink       String?
+  /// Социальные ссылки [{platform: "telegram"|"vk"|"youtube"|"instagram"|"website"|"twitter"|"tiktok", url: "..."}]
+  socialLinks  Json?
+  /// Уточнение для однофамильцев (напр. "НЕНАХОД НОГИ", "Москва"). Показывается в скобках рядом с именем
+  disambiguation String?
+  /// Бейджи (например "Оргкомитет", "Создатель КБС")
+  badges       String[]
+  /// Привязка к аккаунту пользователя (опционально)
+  userId          String?  @unique
+  /// Заявка на привязку профиля (ожидает подтверждения тренером/организатором/админом)
+  pendingUserId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  city               City?               @relation(fields: [cityId], references: [id])
+  user               User?               @relation(fields: [userId], references: [id])
+  playerTeamSeasons  PlayerTeamSeason[]
+  transfers          Transfer[]
+  matchLineups       MatchLineup[]
+  performances       PlayerPerformance[]
+  playerRatings      PlayerRating[]
+  rosterApplications RosterApplication[]
+  suspensions        PlayerSuspension[]
+  poems              Poem[]
+  victoryPoemMatches Match[]            @relation("VictoryPoem")
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+/// Участие команды в сезоне + лиге
+model TeamSeason {
+  id       String @id @default(cuid())
+  /// Команда
+  teamId   String
+  /// Сезон
+  seasonId String
+  /// Лига
+  leagueId String
+
+  /// Дисквалифицирована (5 жёлтых карточек за сезон)
+  disqualified Boolean @default(false)
+
+  team              Team               @relation(fields: [teamId], references: [id])
+  season            Season             @relation(fields: [seasonId], references: [id])
+  league            League             @relation(fields: [leagueId], references: [id])
+  playerTeamSeasons PlayerTeamSeason[]
+  homeMatches       Match[]            @relation("HomeTeam")
+  awayMatches       Match[]            @relation("AwayTeam")
+  lineups           MatchLineup[]
+  performances      PlayerPerformance[]
+  standings         Standings?
+  transfersFrom     Transfer[]         @relation("TransferFrom")
+  transfersTo       Transfer[]         @relation("TransferTo")
+  cards             Card[]
+  applicationsFrom  RosterApplication[] @relation("AppFrom")
+  applicationsTo    RosterApplication[] @relation("AppTo")
+  bracketSlots      BracketSlot[]
+  friendlyRequestsFrom FriendlyMatchRequest[] @relation("FriendlyFrom")
+  friendlyRequestsTo   FriendlyMatchRequest[] @relation("FriendlyTo")
+
+  @@unique([teamId, seasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([teamId])
+  @@index([seasonId])
+  @@index([leagueId])
+}
+
+/// Принадлежность игрока к команде в сезоне
+model PlayerTeamSeason {
+  id           String     @id @default(cuid())
+  /// Игрок
+  playerId     String
+  /// Команда в сезоне
+  teamSeasonId String
+  /// Роль в команде
+  role         PlayerRole @default(PLAYER)
+  /// Играющий (участвует в матчах как поэт). Для PLAYER всегда true, для тренеров — зависит от заявки
+  isPlaying    Boolean    @default(true)
+  /// Дата вступления
+  joinedAt     DateTime   @default(now())
+  /// Дата ухода (null = активный)
+  leftAt       DateTime?
+
+  player     Player     @relation(fields: [playerId], references: [id])
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, teamSeasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+  @@index([teamSeasonId])
+}
+
+/// Трансфер игрока между командами
+model Transfer {
+  id               String   @id @default(cuid())
+  /// Игрок
+  playerId         String
+  /// Откуда
+  fromTeamSeasonId String
+  /// Куда
+  toTeamSeasonId   String
+  /// Дата трансфера
+  date             DateTime
+  /// Комментарий
+  note             String?
+  createdAt        DateTime @default(now())
+
+  player         Player     @relation(fields: [playerId], references: [id])
+  fromTeamSeason TeamSeason @relation("TransferFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason @relation("TransferTo", fields: [toTeamSeasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+}
+
+// ========================================
+// Матчи и результаты
+// ========================================
+
+/// Матч
+model Match {
+  id                 String         @id @default(cuid())
+  /// Тип матча (регулярный / товарищеский)
+  matchType          MatchType      @default(REGULAR)
+  /// Тур (обязателен для регулярных, null для товарищеских)
+  tourId             String?
+  /// Лига (обязательна для регулярных, null для товарищеских)
+  leagueId           String?
+  /// Сезон (прямая привязка для товарищеских матчей)
+  seasonId           String?
+  /// Домашняя команда
+  homeTeamId         String
+  /// Гостевая команда
+  awayTeamId         String
+  /// Площадка
+  venueId            String?
+  /// Дата и время матча
+  scheduledAt        DateTime?
+  /// Статус матча
+  status             MatchStatus    @default(SCHEDULED)
+  /// Суммарные баллы домашней команды
+  homeScore          Float          @default(0)
+  /// Суммарные баллы гостевой команды
+  awayScore          Float          @default(0)
+  /// Турнирные очки домашней команды (1 / 0.5 / 0)
+  homePoints         Float?
+  /// Турнирные очки гостевой команды (1 / 0.5 / 0)
+  awayPoints         Float?
+  /// Кто начинает 1-й тайм (жеребьёвка)
+  firstHalfStartTeam HalfStartTeam?
+  /// Токен доступа для скорера (по ссылке, без регистрации)
+  scorerToken        String         @unique @default(cuid())
+  /// Пользователь-счетовод (опционально, для отображения в афише)
+  scorerUserId       String?
+  /// Токен доступа для ведущего (по ссылке, без регистрации)
+  presenterToken     String         @unique @default(cuid())
+  /// Пользователь-ведущий (опционально, для отображения в афише)
+  presenterUserId    String?
+  /// Токен доступа для тренера домашней команды
+  homeCoachToken     String         @unique @default(cuid())
+  /// Токен доступа для тренера гостевой команды
+  awayCoachToken     String         @unique @default(cuid())
+  /// Тай-брейк (11-я пара при ничьей, Москва)
+  hasTiebreak        Boolean        @default(false)
+  /// URL постера/афиши матча
+  /// @form.title("Постер")
+  posterUrl          String?
+  /// Поэт, который читал победное стихотворение после завершения матча (только для регулярных матчей)
+  /// @form.exclude
+  victoryPoemPlayerId String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  tour          Tour?               @relation(fields: [tourId], references: [id])
+  league        League?             @relation(fields: [leagueId], references: [id])
+  season        Season?             @relation("FriendlyMatches", fields: [seasonId], references: [id])
+  homeTeam      TeamSeason          @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam      TeamSeason          @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  venue         Venue?              @relation(fields: [venueId], references: [id])
+  scorerUser    User?               @relation("MatchScorer", fields: [scorerUserId], references: [id])
+  presenterUser User?               @relation("MatchPresenter", fields: [presenterUserId], references: [id])
+  victoryPoemPlayer Player?         @relation("VictoryPoem", fields: [victoryPoemPlayerId], references: [id])
+  lineups       MatchLineup[]
+  performances  PlayerPerformance[]
+  judgeSessions JudgeSession[]
+  audienceVotes AudienceVote[]
+  photos        MatchPhoto[]
+  bracketSlot   BracketSlot?
+  newsPosts     NewsPost[]
+  friendlyMatchRequests FriendlyMatchRequest[]
+  telegramMessages TelegramMessage[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([tourId])
+  @@index([leagueId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([seasonId])
+  @@index([matchType])
+}
+
+/// Заявка игрока на матч
+model MatchLineup {
+  id           String       @id @default(cuid())
+  /// Матч
+  matchId      String
+  /// Команда в сезоне
+  teamSeasonId String
+  /// Игрок
+  playerId     String
+  /// Статус в заявке
+  status       LineupStatus @default(UNUSED)
+  /// Порядок выхода (заполняется по ходу матча)
+  order        Int?
+
+  match      Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, teamSeasonId, playerId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([teamSeasonId])
+}
+
+/// Выступление поэта в раунде матча
+model PlayerPerformance {
+  id               String   @id @default(cuid())
+  /// Матч
+  matchId          String
+  /// Игрок
+  playerId         String
+  /// Команда в сезоне
+  teamSeasonId     String
+  /// Тайм (1 или 2)
+  half             Int
+  /// Номер раунда в тайме (1-5)
+  roundNumber      Int
+  /// Оценки жюри за текст (5 оценок, шкала 1-5)
+  textScores       Int[]
+  /// Оценки жюри за подачу (5 оценок, шкала 1-5)
+  deliveryScores   Int[]
+  /// Текст после отброса макс/мин (сумма 3 средних)
+  textAdjusted     Int?
+  /// Подача после отброса макс/мин (сумма 3 средних)
+  deliveryAdjusted Int?
+  /// Итого (textAdjusted + deliveryAdjusted), макс 30
+  totalScore       Int?
+  /// Время выступления в секундах
+  durationSec      Int?
+  createdAt        DateTime @default(now())
+
+  match      Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player     Player      @relation(fields: [playerId], references: [id])
+  teamSeason TeamSeason  @relation(fields: [teamSeasonId], references: [id])
+  cards         Card[]
+  judgeVotes    JudgeVote[]
+  audienceVotes AudienceVote[]
+
+  @@unique([matchId, half, roundNumber, teamSeasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([playerId])
+}
+
+/// Карточка (нарушение). 5 жёлтых карточек у команды за сезон = дисквалификация.
+model Card {
+  id            String     @id @default(cuid())
+  /// Выступление, на котором получена карточка
+  performanceId String
+  /// Команда, получившая карточку (для подсчёта накопления за сезон)
+  teamSeasonId  String
+  /// Тип карточки
+  type          CardType
+  /// Причина
+  reason        CardReason
+  /// Комментарий
+  note          String?
+  createdAt     DateTime   @default(now())
+
+  performance PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  teamSeason  TeamSeason        @relation(fields: [teamSeasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([performanceId])
+}
+
+// ========================================
+// Кэшированные данные (пересчитываются)
+// ========================================
+
+/// Турнирная таблица
+model Standings {
+  id           String @id @default(cuid())
+  /// Команда в сезоне
+  teamSeasonId String @unique
+  /// Позиция в таблице
+  position     Int
+  /// Матчей сыграно
+  played       Int    @default(0)
+  /// Побед
+  won          Int    @default(0)
+  /// Ничьих
+  drawn        Int    @default(0)
+  /// Поражений
+  lost         Int    @default(0)
+  /// Турнирные очки (1 за победу, 0.5 за ничью)
+  points       Float  @default(0)
+  /// Забитые баллы (сумма баллов команды)
+  scored       Float  @default(0)
+  /// Пропущенные баллы (сумма баллов соперников)
+  conceded     Float  @default(0)
+  /// Разница баллов
+  difference   Float  @default(0)
+
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Личный зачёт поэта за сезон
+model PlayerRating {
+  id            String @id @default(cuid())
+  /// Поэт
+  playerId      String
+  /// Сезон
+  seasonId      String
+  /// Матчей сыграно
+  matchesPlayed Int    @default(0)
+  /// Суммарный балл за сезон
+  totalScore    Int    @default(0)
+  /// Средний балл за выступление
+  avgScore      Float  @default(0)
+  /// Лучший балл за выступление
+  bestScore     Int    @default(0)
+
+  player Player @relation(fields: [playerId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+
+  @@unique([playerId, seasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+  @@index([seasonId])
+}
+
+// ========================================
+// Live Scoring — судейские сессии и голоса
+// ========================================
+
+/// Сессия судьи в матче (5 судей на тайм, новый состав на 2-й тайм)
+model JudgeSession {
+  id          String   @id @default(cuid())
+  /// Матч
+  matchId     String
+  /// Тайм (1 или 2)
+  half        Int
+  /// Имя судьи (вводит при регистрации через QR)
+  name        String
+  /// Токен для cookie-авторизации (без логина)
+  token       String   @unique @default(cuid())
+  /// Порядковый номер судьи (1-5, назначается при активации)
+  judgeNumber Int
+  /// Цвет судьи для визуальной идентификации
+  color       JudgeColor?
+  /// Статус: активный, отведён или в очереди
+  status      JudgeStatus @default(ACTIVE)
+  /// Позиция в очереди (null = активный/отведённый судья)
+  queuePosition Int?
+  /// Cookie fingerprint для обнаружения повторных судей
+  fingerprint String?
+  createdAt   DateTime @default(now())
+
+  match Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  votes JudgeVote[]
+
+  /// Один судья на один номер в тайме
+  @@unique([matchId, half, judgeNumber])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([token])
+}
+
+/// Голос одного судьи за одно выступление по одному измерению
+model JudgeVote {
+  id             String        @id @default(cuid())
+  /// Сессия судьи
+  judgeSessionId String
+  /// Выступление
+  performanceId  String
+  /// Измерение (текст или подача)
+  dimension      VoteDimension
+  /// Оценка (1-5)
+  score          Int
+  createdAt      DateTime      @default(now())
+
+  judgeSession JudgeSession      @relation(fields: [judgeSessionId], references: [id], onDelete: Cascade)
+  performance  PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+
+  /// Запрет повторного голосования (один судья = одна оценка за выступление/измерение)
+  @@unique([judgeSessionId, performanceId, dimension])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([performanceId])
+  @@index([judgeSessionId])
+}
+
+// ========================================
+// Зрительское голосование (народное жюри)
+// ========================================
+
+/// Голос зрителя — параллельное голосование, не влияет на результат
+model AudienceVote {
+  id            String   @id @default(cuid())
+  /// Матч
+  matchId       String
+  /// Выступление
+  performanceId String
+  /// Анонимный токен зрителя (cookie)
+  sessionToken  String
+  /// Имя зрителя (опционально)
+  name          String?
+  /// Оценка за текст (1-5)
+  textScore     Int
+  /// Оценка за подачу (1-5)
+  deliveryScore Int
+  createdAt     DateTime @default(now())
+
+  match       Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  performance PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+
+  /// Один голос на перформанс от зрителя
+  @@unique([performanceId, sessionToken])
+  @@allow('read', true)
+  @@allow('create', true)
+  @@index([matchId])
+  @@index([performanceId])
+}
+
+// ========================================
+// Заявки на состав и трансферы
+// ========================================
+
+/// Заявка на добавление игрока или трансфер
+model RosterApplication {
+  id              String            @id @default(cuid())
+  /// Тип заявки
+  type            RosterAppType
+  /// Статус рассмотрения
+  status          ApplicationStatus @default(PENDING)
+
+  // === Данные нового игрока (type=NEW_PLAYER) ===
+  /// Имя нового игрока
+  playerName      String?
+  /// Город нового игрока
+  playerCity      String?
+  /// Telegram нового игрока
+  playerTelegram  String?
+  /// VK нового игрока
+  playerVk        String?
+  /// Био нового игрока
+  playerBio       String?
+
+  // === Данные трансфера (type=TRANSFER) ===
+  /// Существующий игрок (для трансфера)
+  playerId         String?
+  /// Откуда (для трансфера)
+  fromTeamSeasonId String?
+
+  // === Общие поля ===
+  /// Команда в сезоне, куда подаётся заявка
+  toTeamSeasonId  String
+  /// Роль в команде
+  role            PlayerRole        @default(PLAYER)
+  /// Комментарий от тренера
+  coachNote       String?
+  /// Комментарий модератора
+  moderatorNote   String?
+  /// Кто подал заявку
+  submittedById   String
+  /// Кто рассмотрел
+  reviewedById    String?
+  /// Когда рассмотрена
+  reviewedAt      DateTime?
+
+  /// @form.exclude
+  createdAt       DateTime          @default(now())
+  /// @form.exclude
+  updatedAt       DateTime          @updatedAt
+
+  player         Player?     @relation(fields: [playerId], references: [id])
+  fromTeamSeason TeamSeason? @relation("AppFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason  @relation("AppTo", fields: [toTeamSeasonId], references: [id])
+  submittedBy    User        @relation("AppSubmitter", fields: [submittedById], references: [id])
+  reviewedBy     User?       @relation("AppReviewer", fields: [reviewedById], references: [id])
+
+  @@allow('read', auth() != null)
+  @@allow('create', auth() != null)
+  @@allow('update', auth() != null && 'ADMIN' in auth().roles)
+  @@index([toTeamSeasonId])
+  @@index([status])
+}
+
+// ========================================
+// Новости и контент
+// ========================================
+
+/// Новость / обзор матча
+model NewsPost {
+  id          String    @id @default(cuid())
+  /// Заголовок
+  /// @form.title("Заголовок")
+  title       String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  slug        String    @unique
+  /// Контент (Markdown)
+  /// @form.title("Контент")
+  /// @form.fieldType("textarea")
+  content     String
+  /// Краткое описание
+  /// @form.title("Описание")
+  excerpt     String?
+  /// Обложка (URL)
+  /// @form.title("Обложка")
+  coverImage  String?
+  /// Связанный матч
+  /// @form.title("Матч")
+  /// @form.fieldType("select")
+  matchId     String?
+  /// Опубликован
+  /// @form.title("Опубликован")
+  published   Boolean   @default(false)
+  /// Дата публикации
+  publishedAt DateTime?
+  /// Автор
+  /// @form.exclude
+  authorId    String
+  /// @form.exclude
+  createdAt   DateTime  @default(now())
+  /// @form.exclude
+  updatedAt   DateTime  @updatedAt
+
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId     String?
+
+  match  Match? @relation(fields: [matchId], references: [id])
+  author User   @relation("NewsAuthor", fields: [authorId], references: [id])
+  city   City?  @relation(fields: [cityId], references: [id])
+
+  @@allow('read', published == true || (auth() != null && 'ADMIN' in auth().roles))
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([published, publishedAt])
+  @@index([cityId])
+}
+
+/// Ссылка на донат (внешний сервис)
+model DonateLink {
+  id        String   @id @default(cuid())
+  /// Название
+  /// @form.title("Название")
+  /// @form.placeholder("Boosty, Перевод на карту...")
+  name      String
+  /// URL
+  /// @form.title("Ссылка")
+  url       String
+  /// Описание
+  /// @form.title("Описание")
+  description String?
+  /// Порядок отображения
+  /// @form.title("Порядок")
+  order     Int      @default(0)
+  /// Активна
+  /// @form.title("Активна")
+  active    Boolean  @default(true)
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId    String?
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  city City? @relation(fields: [cityId], references: [id])
+
+  @@allow('read', active == true || (auth() != null && 'ADMIN' in auth().roles))
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+// ========================================
+// Этапы турнира и плей-офф сетка
+// ========================================
+
+/// Этап турнира (групповой, верхняя/нижняя сетка, гранд-финал)
+model Stage {
+  id       String    @id @default(cuid())
+  /// Сезон
+  seasonId String
+  /// Название этапа
+  name     String
+  /// Тип этапа
+  type     StageType
+  /// Порядок отображения
+  order    Int
+
+  season       Season        @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  rounds       Round[]
+  bracketSlots BracketSlot[]
+
+  @@unique([seasonId, order])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+}
+
+/// Слот в турнирной сетке (плей-офф)
+model BracketSlot {
+  id           String  @id @default(cuid())
+  /// Сезон
+  seasonId     String
+  /// Этап
+  stageId      String
+  /// Номер раунда в сетке (WB R1=1, WB R2=2, LB R1=1...)
+  roundNumber  Int
+  /// Номер слота внутри раунда (1-8)
+  slotNumber   Int
+  /// Название слота (WB R1 #1, LB SF, Grand Final...)
+  label        String?
+
+  /// Команда (заполняется при определении)
+  teamSeasonId  String?
+  /// Матч (создаётся когда обе команды определены)
+  matchId       String?  @unique
+  /// Источник 1 — победитель другого слота
+  sourceSlot1Id String?
+  /// Источник 2 — победитель другого слота
+  sourceSlot2Id String?
+  /// Проигравший идёт сюда (для drop из верхней в нижнюю)
+  loserGoesToId String?
+
+  season       Season       @relation(fields: [seasonId], references: [id])
+  stage        Stage        @relation(fields: [stageId], references: [id])
+  teamSeason   TeamSeason?  @relation(fields: [teamSeasonId], references: [id])
+  match        Match?       @relation(fields: [matchId], references: [id])
+  sourceSlot1  BracketSlot? @relation("Source1", fields: [sourceSlot1Id], references: [id])
+  sourceSlot2  BracketSlot? @relation("Source2", fields: [sourceSlot2Id], references: [id])
+  loserGoesTo  BracketSlot? @relation("LoserDrop", fields: [loserGoesToId], references: [id])
+
+  feedsTo1      BracketSlot[] @relation("Source1")
+  feedsTo2      BracketSlot[] @relation("Source2")
+  receivesLoser BracketSlot[] @relation("LoserDrop")
+
+  @@unique([seasonId, stageId, roundNumber, slotNumber])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+  @@index([stageId])
+}
+
+// ========================================
+// Отстранения игроков
+// ========================================
+
+/// Отстранение игрока (за красную карточку, накопление жёлтых или плагиат)
+model PlayerSuspension {
+  id               String   @id @default(cuid())
+  /// Игрок
+  playerId         String
+  /// Сезон
+  seasonId         String
+  /// Причина: RED_CARD, YELLOW_ACCUMULATION, DOUBLE_YELLOW, PLAGIARISM
+  reason           String
+  /// Количество матчей пропуска (оставшееся). 0 для сезонных дисквалификаций
+  matchesLeft      Int      @default(1)
+  /// Дисквалификация до конца сезона (плагиат и др.)
+  untilEndOfSeason Boolean  @default(false)
+  /// Активно ли отстранение
+  active           Boolean  @default(true)
+  /// Начало отстранения
+  startedAt        DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId, seasonId])
+  @@index([active])
+}
+
+// ========================================
+// Медиа
+// ========================================
+
+/// Фотография матча
+model MatchPhoto {
+  id           String   @id @default(cuid())
+  /// Матч
+  matchId      String
+  /// Имя файла
+  filename     String
+  /// Путь к файлу (относительно uploads/)
+  path         String   @unique
+  /// MIME-тип
+  mimeType     String
+  /// Размер файла в байтах
+  size         Int
+  /// Ширина в пикселях
+  width        Int?
+  /// Высота в пикселях
+  height       Int?
+  /// Подпись к фото
+  caption      String?
+  /// Порядок отображения
+  order        Int      @default(0)
+  /// Кто загрузил
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  match      Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  uploadedBy User  @relation("MatchPhotoUploader", fields: [uploadedById], references: [id])
+
+  @@allow('read', true)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+}
+
+/// Стихотворение поэта
+model Poem {
+  id         String   @id @default(cuid())
+  /// Название стихотворения
+  title      String
+  /// URL-friendly slug
+  slug       String   @unique
+  /// Текст стиха с сохранением переносов строк
+  text       String
+  /// URL обложки (опционально)
+  coverImage String?
+  /// Опубликовано (видно всем) или черновик
+  published  Boolean  @default(false)
+  /// Автор-поэт
+  playerId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  /// Публичные стихи видны всем, черновики — только автору
+  @@allow('read', published || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+}
+
+// ========================================
+// Заявки на товарищеский матч
+// ========================================
+
+/// Заявка на товарищеский матч от тренера
+model FriendlyMatchRequest {
+  id              String   @id @default(cuid())
+  /// Команда-инициатор
+  fromTeamSeasonId String
+  /// Желаемый соперник
+  toTeamSeasonId   String
+  /// Предпочитаемая площадка
+  venueId          String?
+  /// Желаемая дата
+  preferredDate    DateTime?
+  /// Комментарий тренера
+  note             String?
+  /// Статус заявки
+  status           FriendlyRequestStatus @default(CHALLENGE_SENT)
+  /// Кто подал (тренер-инициатор)
+  submittedById    String
+  /// Тренер-соперник, который ответил на вызов
+  respondedById    String?
+  /// Когда соперник ответил
+  respondedAt      DateTime?
+  /// Причина отказа от соперника (необязательно)
+  declineReason    String?
+  /// Результат: созданный матч (после одобрения админом)
+  matchId          String?
+  createdAt        DateTime @default(now())
+
+  fromTeamSeason TeamSeason @relation("FriendlyFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason @relation("FriendlyTo", fields: [toTeamSeasonId], references: [id])
+  venue          Venue?     @relation(fields: [venueId], references: [id])
+  submittedBy    User       @relation("FriendlySubmitter", fields: [submittedById], references: [id])
+  respondedBy    User?      @relation("FriendlyResponder", fields: [respondedById], references: [id])
+  match          Match?     @relation(fields: [matchId], references: [id])
+
+  @@allow('read', auth() != null)
+  @@allow('create', auth() != null)
+  @@allow('update', auth() != null)
+  @@index([fromTeamSeasonId])
+  @@index([toTeamSeasonId])
+  @@index([status])
+}
+
+// ========================================
+// Настройки интеграций
+// ========================================
+
+/// Подписка на push-уведомления (web-push)
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@allow('create,read,delete', auth() == user)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Глобальные настройки Telegram-бота (singleton, id="default")
+model TelegramConfig {
+  id        String   @id @default("default")
+  /// Токен бота из @BotFather
+  botToken  String?
+  /// Включён ли бот
+  enabled   Boolean  @default(false)
+  /// Автоанонс при заполнении составов обеих команд
+  autoAnnouncement Boolean @default(false)
+  /// Автоитог тайма при завершении тайма
+  autoHalfTime     Boolean @default(false)
+  /// Авторезультат при завершении матча
+  autoResult       Boolean @default(false)
+  /// @form.exclude
+  createdAt DateTime @default(now())
+  /// @form.exclude
+  updatedAt DateTime @updatedAt
+
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Отправленные Telegram-сообщения (для трекинга реакций)
+model TelegramMessage {
+  id        String   @id @default(cuid())
+  /// ID матча (для связи с матчем, опционально)
+  matchId   String?
+  /// ID тура (для связи с туром, опционально)
+  tourId    String?
+  /// Telegram message_id (числовой)
+  messageId Int
+  /// Telegram chat_id
+  chatId    String
+  /// Тип сообщения: announcement, result, halfTime, schedule, tourSummary, voting
+  type      String
+  /// Время отправки
+  sentAt    DateTime @default(now())
+
+  match     Match?   @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  reactions TelegramReaction[]
+
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@allow('create,update,delete', true)
+  @@index([matchId])
+  @@index([chatId, messageId])
+}
+
+/// Реакции на Telegram-сообщения (агрегированные)
+model TelegramReaction {
+  id                 String   @id @default(cuid())
+  /// Ссылка на сообщение
+  telegramMessageId  String
+  /// Эмодзи реакции
+  emoji              String
+  /// Количество
+  count              Int      @default(0)
+  updatedAt          DateTime @updatedAt
+
+  telegramMessage TelegramMessage @relation(fields: [telegramMessageId], references: [id], onDelete: Cascade)
+
+  @@unique([telegramMessageId, emoji])
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@allow('create,update,delete', true)
+}

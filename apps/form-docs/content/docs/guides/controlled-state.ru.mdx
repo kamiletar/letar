@@ -1,0 +1,53 @@
+---
+title: Управляемое состояние
+description: Форма как менеджер состояния — live preview, фильтры
+---
+
+## Обзор
+
+Формы не всегда требуют кнопку отправки. Используйте `Form` как контейнер управляемого состояния для live-обновлений UI, фильтров, панелей настроек и поисковых форм.
+
+## Паттерн Live Preview
+
+```tsx
+function ProductEditor() {
+  return (
+    <Form schema={ProductSchema} initialValue={product} onSubmit={async () => {}}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div>
+          <Form.Field.String name="title" />
+          <Form.Field.Textarea name="description" />
+          <Form.Field.ColorPicker name="color" />
+        </div>
+
+        <Form.Subscribe>
+          {(values) => <ProductPreview title={values.title} description={values.description} color={values.color} />}
+        </Form.Subscribe>
+      </div>
+    </Form>
+  )
+}
+```
+
+## Форма-фильтр (без Submit)
+
+```tsx
+<Form schema={FilterSchema} initialValue={{ search: '', category: 'all', minPrice: 0 }} onSubmit={async () => {}}>
+  <Form.Field.String name="search" />
+  <Form.Field.Select name="category" options={categories} />
+  <Form.Field.Slider name="minPrice" />
+
+  <Form.Subscribe>{(values) => <ProductList filters={values} />}</Form.Subscribe>
+</Form>
+```
+
+## useTypedFormSubscribe
+
+Типизированный доступ к конкретным полям:
+
+```tsx
+function PriceDisplay() {
+  const price = useTypedFormSubscribe('price')
+  return <Text>Текущая цена: {price} ₽</Text>
+}
+```

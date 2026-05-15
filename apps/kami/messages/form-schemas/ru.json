@@ -1,0 +1,173 @@
+{
+  "UserRole": {
+    "USER": {
+      "label": "Пользователь"
+    },
+    "ADMIN": {
+      "label": "Администратор"
+    }
+  },
+  "SkillLevel": {
+    "BEGINNER": {
+      "label": "Начинающий"
+    },
+    "INTERMEDIATE": {
+      "label": "Средний"
+    },
+    "ADVANCED": {
+      "label": "Продвинутый"
+    },
+    "EXPERT": {
+      "label": "Эксперт"
+    }
+  },
+  "ImageCategory": {
+    "BLOG": {
+      "label": "Блог"
+    },
+    "CONTENT": {
+      "label": "Контент (кейсы, проекты)"
+    },
+    "AVATAR": {
+      "label": "Аватар"
+    },
+    "OTHER": {
+      "label": "Прочее"
+    }
+  },
+  "LearningItemType": {
+    "BOOK": {
+      "label": "Книга"
+    },
+    "COURSE": {
+      "label": "Курс"
+    },
+    "ARTICLE": {
+      "label": "Статья"
+    },
+    "VIDEO": {
+      "label": "Видео"
+    },
+    "PODCAST": {
+      "label": "Подкаст"
+    },
+    "CONFERENCE": {
+      "label": "Конференция"
+    },
+    "OTHER": {
+      "label": "Другое"
+    }
+  },
+  "LearningStatus": {
+    "WANT_TO_LEARN": {
+      "label": "Хочу изучить"
+    },
+    "IN_PROGRESS": {
+      "label": "Изучаю"
+    },
+    "COMPLETED": {
+      "label": "Изучено"
+    },
+    "ABANDONED": {
+      "label": "Заброшено"
+    }
+  },
+  "SurveyQuestionType": {
+    "TEXT": {
+      "label": "Свободный текст"
+    },
+    "SINGLE_CHOICE": {
+      "label": "Один вариант из списка"
+    },
+    "MULTI_CHOICE": {
+      "label": "Несколько вариантов"
+    },
+    "RATING": {
+      "label": "Оценка 1-5 или 1-10"
+    },
+    "SCALE": {
+      "label": "Шкала (не согласен - согласен)"
+    }
+  },
+  "SocialPlatformType": {
+    "TELEGRAM": {
+      "label": "Telegram Bot API (через прокси)"
+    },
+    "VK": {
+      "label": "ВКонтакте API"
+    },
+    "LINKEDIN": {
+      "label": "LinkedIn Share API (через прокси)"
+    },
+    "TWITTER": {
+      "label": "X/Twitter API v2"
+    },
+    "FACEBOOK": {
+      "label": "Facebook Graph API"
+    },
+    "INSTAGRAM": {
+      "label": "Instagram Graph API"
+    },
+    "BLUESKY": {
+      "label": "Bluesky AT Protocol"
+    },
+    "MASTODON": {
+      "label": "Mastodon ActivityPub"
+    }
+  },
+  "CrossPostStatus": {
+    "PENDING": {
+      "label": "Ожидает публикации"
+    },
+    "PUBLISHED": {
+      "label": "Успешно опубликован"
+    },
+    "FAILED": {
+      "label": "Ошибка при публикации"
+    }
+  },
+  "validation": {
+    "invalid_type": "Ожидался тип {expected}, получен {received}",
+    "required": "Обязательное поле",
+    "too_small": {
+      "string": "Минимум {minimum} символов",
+      "number": "Минимум {minimum}",
+      "array": "Минимум {minimum} элементов",
+      "date": "Дата должна быть не ранее {minimum}",
+      "set": "Минимум {minimum} элементов",
+      "file": "Минимальный размер файла {minimum}"
+    },
+    "too_big": {
+      "string": "Максимум {maximum} символов",
+      "number": "Максимум {maximum}",
+      "array": "Максимум {maximum} элементов",
+      "date": "Дата должна быть не позднее {maximum}",
+      "set": "Максимум {maximum} элементов",
+      "file": "Максимальный размер файла {maximum}"
+    },
+    "invalid_format": {
+      "email": "Некорректный email",
+      "url": "Некорректный URL",
+      "uuid": "Некорректный UUID",
+      "cuid": "Некорректный CUID",
+      "regex": "Не соответствует формату",
+      "datetime": "Некорректная дата/время",
+      "date": "Некорректная дата",
+      "time": "Некорректное время",
+      "ip": "Некорректный IP-адрес",
+      "base64": "Некорректный Base64",
+      "json_string": "Некорректный JSON",
+      "emoji": "Должен содержать эмодзи",
+      "jwt": "Некорректный JWT",
+      "lowercase": "Только строчные буквы",
+      "uppercase": "Только заглавные буквы"
+    },
+    "not_multiple_of": "Должно быть кратно {multipleOf}",
+    "unrecognized_keys": "Неизвестные поля: {keys}",
+    "invalid_value": "Недопустимое значение. Ожидается: {options}",
+    "invalid_union": "Невалидные данные",
+    "invalid_key": "Невалидный ключ",
+    "invalid_element": "Невалидный элемент",
+    "custom": "{message}"
+  }
+}

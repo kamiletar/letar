@@ -1,0 +1,22 @@
+// Re-export API functions
+export {
+  getAnimeDetails,
+  getAudioCidUrl,
+  getDownloadedFontDir,
+  getDownloadedSubtitlePaths,
+  getEpisode,
+  getEpisodeAudioUrl,
+  getEpisodeVideoUrl,
+  getIpfsUrl,
+  getLastWatched,
+  getLibrary,
+  getMediaUrl,
+  getPosterUrl,
+  getPosterUrlCached,
+  getProgress,
+  getStatus,
+  getSubtitleUrlFromCid,
+  getSubtitleVttUrl,
+  getVideoCidUrl,
+  saveProgress,
+} from './client'

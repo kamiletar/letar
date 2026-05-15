@@ -1,0 +1,85 @@
+---
+title: Quick Start
+description: Build your first form in under 5 minutes
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="auto-fields" height={450} />
+
+## 1. Define Your Schema
+
+Use Zod to define validation rules and UI metadata:
+
+```tsx
+import { z } from 'zod/v4'
+
+const ContactSchema = z.object({
+  name: z
+    .string()
+    .min(2)
+    .max(100)
+    .meta({
+      ui: { title: 'Full Name', placeholder: 'John Doe' },
+    }),
+  email: z
+    .string()
+    .email()
+    .meta({
+      ui: { title: 'Email', placeholder: 'john@example.com' },
+    }),
+  message: z
+    .string()
+    .min(10)
+    .max(1000)
+    .meta({
+      ui: { title: 'Message', placeholder: 'Tell us about your project...' },
+    }),
+})
+```
+
+## 2. Create the Form
+
+```tsx
+import { Form } from '@letar/forms'
+
+function ContactForm() {
+  return (
+    <Form
+      schema={ContactSchema}
+      initialValue={{ name: '', email: '', message: '' }}
+      onSubmit={async ({ value }) => {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          body: JSON.stringify(value),
+        })
+        if (response.ok) {
+          alert('Message sent!')
+        }
+      }}
+    >
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Textarea name="message" />
+      <Form.Button.Submit loadingText="Sending...">Send Message</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## 3. That's It!
+
+The form automatically:
+
+- Validates fields against the Zod schema
+- Displays validation errors
+- Extracts labels and placeholders from `.meta({ ui: ... })`
+- Applies `maxLength`, `min`, `max` constraints from Zod rules
+- Handles submit state (loading, disabled)
+
+## What's Next?
+
+- [Field Types](/docs/fields) — explore all 40+ field components
+- [Conditional Fields](/docs/guides/conditional-fields) — show/hide fields dynamically
+- [Multi-Step Forms](/docs/guides/multi-step) — create step-by-step wizards
+- [Validation](/docs/guides/validation) — advanced validation patterns

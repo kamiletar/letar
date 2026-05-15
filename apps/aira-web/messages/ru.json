@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — Post-Quantum P2P Messenger",
+    "description": "Aira — децентрализованный мессенджер с гибридной пост-квантовой криптографией. Без серверов, без номера телефона, без компромиссов."
+  },
+  "nav": {
+    "features": "Возможности",
+    "security": "Безопасность",
+    "download": "Скачать",
+    "github": "GitHub",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню",
+    "mainNavigation": "Основная навигация",
+    "mobileNavigation": "Мобильная навигация",
+    "skipToContent": "Перейти к содержимому"
+  },
+  "hero": {
+    "badge": "{version} — Пост-квантовая защита уже здесь",
+    "fallbackVersion": "v0.3.3",
+    "title1": "Общайся свободно.",
+    "title2": "Защити будущее.",
+    "subtitle": "Aira — децентрализованный мессенджер с гибридной пост-квантовой криптографией. Без серверов, без номера телефона, без компромиссов.",
+    "ctaDownload": "Скачать Aira",
+    "ctaSource": "Исходный код",
+    "tagOpenSource": "Открытый код"
+  },
+  "features": {
+    "title": "Супервозможности",
+    "subtitle": "Каждая деталь спроектирована для защиты вашей свободы общения",
+    "quantum": {
+      "title": "Квантово-устойчивое шифрование",
+      "description": "Гибридная криптография ML-KEM-768 + X25519. Оба алгоритма должны быть взломаны одновременно — защита от квантовых компьютеров уже сегодня."
+    },
+    "p2p": {
+      "title": "Настоящий P2P",
+      "description": "Никаких серверов, аккаунтов или номеров телефона. Каждый пользователь — узел сети. Сообщения идут напрямую через QUIC."
+    },
+    "metadata": {
+      "title": "Невидимые метаданные",
+      "description": "Парные псевдонимы для каждого контакта. Даже relay не знает, с кем вы общаетесь. Паддинг всех пакетов скрывает размер сообщений."
+    },
+    "global": {
+      "title": "Работает везде",
+      "description": "REALITY-камуфляж, obfs4, Tor, CDN-fallback. Подключаемые транспорты обходят DPI даже в самых цензурируемых регионах."
+    },
+    "fullMessenger": {
+      "title": "Полноценный мессенджер",
+      "description": "Реакции, ответы, редактирование, исчезающие сообщения, передача файлов, группы до 100 человек, боты — всё зашифровано."
+    },
+    "multiplatform": {
+      "title": "Мультиплатформенность",
+      "description": "CLI, десктоп (Linux/macOS/Windows), Android. До 5 связанных устройств с синхронизацией через seed-фразу."
+    }
+  },
+  "security": {
+    "title": "Под капотом",
+    "subtitle": "100% Rust. Нулевой unsafe-код в криптографическом ядре. Каждый ключ изолирован и обнуляется после использования.",
+    "crypto": {
+      "title": "Криптография",
+      "keyAgreementLabel": "Ключевое соглашение",
+      "keyAgreementDetail": "Гибридный KEM, FIPS 203",
+      "signaturesLabel": "Подписи",
+      "signaturesDetail": "FIPS 204, пост-квантовый",
+      "encryptionLabel": "Шифрование",
+      "encryptionDetail": "256 бит, AEAD",
+      "hashingLabel": "Хеширование",
+      "hashingDetail": "KDF + MAC, без length-extension",
+      "kdfLabel": "Ключевое растяжение",
+      "kdfDetail": "256 MB / 64 MB (desktop/mobile)",
+      "fsLabel": "Прямая секретность",
+      "fsDetail": "PQ обновление каждые ~50 сообщений"
+    },
+    "protection": {
+      "title": "Защита",
+      "dpiLabel": "DPI обход",
+      "dpiValue": "5 уровней",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "Метаданные",
+      "metadataValue": "Парные псевдонимы",
+      "metadataDetail": "Relay не видит социальный граф",
+      "deniabilityLabel": "Отрицаемость",
+      "deniabilityValue": "Симметричные MAC",
+      "deniabilityDetail": "Невозможно доказать авторство",
+      "antispamLabel": "Антиспам",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "20 бит для незнакомцев",
+      "paddingLabel": "Паддинг",
+      "paddingValue": "256–4096 байт",
+      "paddingDetail": "Скрытие реального размера",
+      "recoveryLabel": "Восстановление",
+      "recoveryValue": "24 слова BIP-39",
+      "recoveryDetail": "Seed-фраза, детерминистичный вывод"
+    },
+    "vsTitle": "Почему не Signal / Session / SimpleX?",
+    "vsSignal": "Signal использует серверы, требует номер телефона и не имеет пост-квантовой защиты на каждом сообщении. Aira — P2P + SPQR ratchet.",
+    "vsSession": "Session использует onion routing через сервера Oxen. Aira — прямой P2P без промежуточных серверов и с полноценным PQ шифрованием.",
+    "vsSimpleX": "SimpleX полагается на relay-серверы для доставки. Aira работает напрямую, а relay — лишь fallback для NAT traversal."
+  },
+  "download": {
+    "title": "Скачать Aira",
+    "subtitleWithVersion": "{version} — Открытый исходный код. Бесплатно навсегда.",
+    "subtitle": "Открытый исходный код. Бесплатно навсегда.",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI. tar.gz архив.",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "CLI + Daemon + GUI для Apple M1/M2/M3/M4.",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "CLI + Daemon + GUI для Intel Mac.",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI. zip архив.",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + Rust core через UniFFI. APK.",
+    "downloadLabel": "Скачать",
+    "portableLabel": "Portable-архив",
+    "cargoLabel": "Установка через Cargo:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "Спецификация",
+    "releases": "Релизы"
+  }
+}

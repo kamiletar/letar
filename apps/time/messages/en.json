@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "title": "What Hour?",
+    "description": "Ordinal hour since the UNIX epoch"
+  },
+  "time": {
+    "now": "It is now",
+    "hour": "hours since the beginning of the UNIX era",
+    "hoursPassed": "hours have passed since the beginning of the UNIX era"
+  },
+  "countdown": {
+    "until": "Until {milestone} hours",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "hours": "{count, plural, one {# hour} other {# hours}}",
+    "minutes": "{count, plural, one {# minute} other {# minutes}}",
+    "seconds": "{count, plural, one {# second} other {# seconds}}"
+  },
+  "celebration": {
+    "milestone": "{hours} hours of the UNIX era!"
+  },
+  "subscribe": {
+    "subscribe": "Notifications",
+    "explanation": "Sign in is required to verify your email and access notification settings",
+    "signIn": "Sign in",
+    "settings": "Settings"
+  },
+  "profile": {
+    "title": "Notification settings",
+    "email": "Email",
+    "notifyMonth": "One month before",
+    "notifyWeek": "One week before",
+    "notifyDay": "One day before",
+    "notifyHour": "One hour before",
+    "notify5Min": "5 minutes before",
+    "save": "Save",
+    "saved": "Saved!",
+    "unsubscribe": "Unsubscribe from all",
+    "unsubscribed": "You have been unsubscribed from all notifications",
+    "noSubscription": "You don't have a notification subscription yet",
+    "createSubscription": "Subscribe to notifications"
+  },
+  "signIn": {
+    "redirecting": "Redirecting..."
+  },
+  "unsubscribe": {
+    "title": "Unsubscribe",
+    "success": "You have been successfully unsubscribed from UNIX hour milestone notifications",
+    "error": "Invalid unsubscribe link",
+    "back": "Back to home"
+  }
+}

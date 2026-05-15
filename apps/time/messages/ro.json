@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Ce oră este?",
+    "description": "Ora ordinală de la începutul epocii UNIX"
+  },
+  "time": {
+    "now": "Acum este",
+    "hour": "ore de la începutul erei UNIX",
+    "hoursPassed": "ore au trecut de la începutul erei UNIX"
+  },
+  "countdown": {
+    "until": "Până la {milestone} ore",
+    "days": "{count, plural, one {# zi} other {# zile}}",
+    "hours": "{count, plural, one {# oră} other {# ore}}",
+    "minutes": "{count, plural, one {# minut} other {# minute}}",
+    "seconds": "{count, plural, one {# secundă} other {# secunde}}"
+  },
+  "celebration": {
+    "milestone": "{hours} ore ale erei UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Notificări",
+    "explanation": "Autentificarea este necesară pentru verificarea emailului și accesul la setările de notificare",
+    "signIn": "Autentificare",
+    "settings": "Setări"
+  },
+  "profile": {
+    "title": "Setări notificări",
+    "email": "Email",
+    "notifyMonth": "Cu o lună înainte",
+    "notifyWeek": "Cu o săptămână înainte",
+    "notifyDay": "Cu o zi înainte",
+    "notifyHour": "Cu o oră înainte",
+    "notify5Min": "Cu 5 minute înainte",
+    "save": "Salvează",
+    "saved": "Salvat!",
+    "unsubscribe": "Dezabonare de la toate",
+    "unsubscribed": "Ați fost dezabonat de la toate notificările",
+    "noSubscription": "Nu aveți încă un abonament la notificări",
+    "createSubscription": "Abonare la notificări"
+  },
+  "unsubscribe": {
+    "title": "Dezabonare",
+    "success": "Ați fost dezabonat cu succes de la notificările de jalon ale orelor UNIX",
+    "error": "Link de dezabonare invalid",
+    "back": "Înapoi la pagina principală"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — पोस्ट-क्वांटम P2P मैसेंजर",
+    "description": "Aira हाइब्रिड पोस्ट-क्वांटम क्रिप्टोग्राफी वाला विकेंद्रीकृत मैसेंजर है। कोई सर्वर नहीं, कोई फ़ोन नंबर नहीं, कोई समझौता नहीं।"
+  },
+  "nav": {
+    "features": "विशेषताएँ",
+    "security": "सुरक्षा",
+    "download": "डाउनलोड",
+    "github": "GitHub",
+    "openMenu": "मेनू खोलें",
+    "closeMenu": "मेनू बंद करें",
+    "mainNavigation": "मुख्य नेविगेशन",
+    "mobileNavigation": "मोबाइल नेविगेशन",
+    "skipToContent": "सामग्री पर जाएँ"
+  },
+  "hero": {
+    "badge": "{version} — पोस्ट-क्वांटम सुरक्षा अब उपलब्ध है",
+    "fallbackVersion": "v0.3.3",
+    "title1": "खुलकर बात करें।",
+    "title2": "भविष्य की रक्षा करें।",
+    "subtitle": "Aira हाइब्रिड पोस्ट-क्वांटम क्रिप्टोग्राफी वाला विकेंद्रीकृत मैसेंजर है। कोई सर्वर नहीं, कोई फ़ोन नंबर नहीं, कोई समझौता नहीं।",
+    "ctaDownload": "Aira डाउनलोड करें",
+    "ctaSource": "स्रोत कोड",
+    "tagOpenSource": "ओपन सोर्स"
+  },
+  "features": {
+    "title": "सुपरपावर",
+    "subtitle": "हर विवरण आपकी संवाद-स्वतंत्रता की रक्षा के लिए तैयार किया गया है",
+    "quantum": {
+      "title": "क्वांटम-प्रतिरोधी एन्क्रिप्शन",
+      "description": "हाइब्रिड ML-KEM-768 + X25519 क्रिप्टोग्राफी। दोनों एल्गोरिथ्म एक साथ टूटने चाहिए — क्वांटम कंप्यूटरों से आज ही सुरक्षा।"
+    },
+    "p2p": {
+      "title": "असली P2P",
+      "description": "कोई सर्वर, खाता या फ़ोन नंबर नहीं। हर उपयोगकर्ता नेटवर्क का एक नोड है। संदेश QUIC पर सीधे जाते हैं।"
+    },
+    "metadata": {
+      "title": "अदृश्य मेटाडेटा",
+      "description": "हर संपर्क के लिए जोड़ीवार छद्मनाम। रिले को भी नहीं पता चलता कि आप किससे बात कर रहे हैं। सभी पैकेटों पर पैडिंग संदेश के असली आकार को छिपाती है।"
+    },
+    "global": {
+      "title": "हर जगह काम करता है",
+      "description": "REALITY कैमौफ्लाज, obfs4, Tor, CDN फॉलबैक। प्लगेबल ट्रांसपोर्ट सबसे ज़्यादा सेंसरशिप वाले क्षेत्रों में भी DPI को मात देते हैं।"
+    },
+    "fullMessenger": {
+      "title": "पूर्ण मैसेंजर",
+      "description": "प्रतिक्रियाएँ, उत्तर, संपादन, गायब होते संदेश, फ़ाइल स्थानांतरण, 100 तक सदस्यों के समूह, बॉट — सब कुछ एन्क्रिप्टेड।"
+    },
+    "multiplatform": {
+      "title": "बहु-प्लेटफ़ॉर्म",
+      "description": "CLI, डेस्कटॉप (Linux/macOS/Windows), Android। सीड फ़्रेज़ के माध्यम से 5 तक लिंक किए गए डिवाइस सिंक होते हैं।"
+    }
+  },
+  "security": {
+    "title": "पर्दे के पीछे",
+    "subtitle": "100% Rust। क्रिप्टोग्राफिक कोर में शून्य unsafe कोड। हर कुंजी अलग रखी जाती है और उपयोग के बाद मेमोरी से मिटा दी जाती है।",
+    "crypto": {
+      "title": "क्रिप्टोग्राफी",
+      "keyAgreementLabel": "कुंजी समझौता",
+      "keyAgreementDetail": "हाइब्रिड KEM, FIPS 203",
+      "signaturesLabel": "हस्ताक्षर",
+      "signaturesDetail": "FIPS 204, पोस्ट-क्वांटम",
+      "encryptionLabel": "एन्क्रिप्शन",
+      "encryptionDetail": "256 बिट, AEAD",
+      "hashingLabel": "हैशिंग",
+      "hashingDetail": "KDF + MAC, लेंथ-एक्सटेंशन से सुरक्षित",
+      "kdfLabel": "कुंजी स्ट्रेचिंग",
+      "kdfDetail": "256 MB / 64 MB (डेस्कटॉप/मोबाइल)",
+      "fsLabel": "परफ़ेक्ट फ़ॉरवर्ड सीक्रेसी",
+      "fsDetail": "हर ~50 संदेशों पर PQ अपडेट"
+    },
+    "protection": {
+      "title": "सुरक्षा",
+      "dpiLabel": "DPI बायपास",
+      "dpiValue": "5 स्तर",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "मेटाडेटा",
+      "metadataValue": "जोड़ीवार छद्मनाम",
+      "metadataDetail": "रिले सामाजिक ग्राफ नहीं देखता",
+      "deniabilityLabel": "अस्वीकार्यता",
+      "deniabilityValue": "सममित MAC",
+      "deniabilityDetail": "लेखन सिद्ध करना असंभव",
+      "antispamLabel": "एंटी-स्पैम",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "अजनबियों के लिए 20 बिट",
+      "paddingLabel": "पैडिंग",
+      "paddingValue": "256–4096 बाइट",
+      "paddingDetail": "वास्तविक संदेश आकार को छिपाता है",
+      "recoveryLabel": "रिकवरी",
+      "recoveryValue": "24 BIP-39 शब्द",
+      "recoveryDetail": "सीड फ़्रेज़, निर्धारणात्मक व्युत्पत्ति"
+    },
+    "vsTitle": "Signal / Session / SimpleX क्यों नहीं?",
+    "vsSignal": "Signal सर्वरों पर निर्भर है, फ़ोन नंबर माँगता है और हर संदेश पर पोस्ट-क्वांटम सुरक्षा नहीं देता। Aira P2P + SPQR रैचेट है।",
+    "vsSession": "Session Oxen सर्वरों के माध्यम से onion रूटिंग का उपयोग करता है। Aira बिना मध्यवर्ती सर्वरों के सीधा P2P है और पूर्ण PQ एन्क्रिप्शन देता है।",
+    "vsSimpleX": "SimpleX डिलीवरी के लिए रिले सर्वरों पर निर्भर है। Aira सीधे काम करता है, रिले केवल NAT ट्रैवर्सल के लिए फॉलबैक है।"
+  },
+  "download": {
+    "title": "Aira डाउनलोड करें",
+    "subtitleWithVersion": "{version} — ओपन सोर्स। हमेशा मुफ़्त।",
+    "subtitle": "ओपन सोर्स। हमेशा मुफ़्त।",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI। tar.gz आर्काइव।",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "Apple M1/M2/M3/M4 के लिए CLI + Daemon + GUI।",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "Intel Mac के लिए CLI + Daemon + GUI।",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI। zip आर्काइव।",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + UniFFI के माध्यम से Rust कोर। APK।",
+    "downloadLabel": "डाउनलोड",
+    "portableLabel": "पोर्टेबल संग्रह",
+    "cargoLabel": "Cargo से इंस्टॉल करें:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "विनिर्देश",
+    "releases": "रिलीज़"
+  }
+}

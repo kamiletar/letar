@@ -1,0 +1,81 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/auth": ["../../libs/auth/src/index.ts"],
+      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
+      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+    },
+    "types": ["node"],
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "../../apps/dashboard/.next/types/**/*.ts",
+    "../../dist/apps/dashboard/.next/types/**/*.ts",
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "jest.config.ts",
+    "jest.config.cts",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    ".next",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/auth"
+    },
+    {
+      "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/chakra-provider"
+    },
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/ui"
+    }
+  ]
+}

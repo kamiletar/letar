@@ -1,0 +1,182 @@
+{
+  "name": "aboi",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/aboi/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:aboi"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/aboi"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/aboi"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/aboi"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/aboi"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/aboi"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/aboi"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "config": "apps/aboi/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests with Vitest",
+        "technologies": ["vitest"]
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/aboi"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/generated/schema.prisma",
+        "{projectRoot}/schema.zmodel",
+        "{projectRoot}/prisma.config.ts"
+      ],
+      "outputs": ["{projectRoot}/src/generated/prisma"],
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/aboi"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
+        "cwd": "apps/aboi"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/aboi"
+      },
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run prisma/seed.ts",
+        "cwd": "apps/aboi"
+      },
+      "metadata": {
+        "description": "Seed database with initial data (admin user)",
+        "technologies": ["prisma"]
+      }
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./browser\\'\\n')\"",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.d.ts', 'export * from \\'./browser\\'\\n')\""
+        ],
+        "cwd": "apps/aboi",
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/schema.zmodel"],
+      "outputs": ["{projectRoot}/src/generated"],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    }
+  }
+}

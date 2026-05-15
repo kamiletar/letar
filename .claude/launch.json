@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aira-web",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "aira-web"],
+      "port": 3017
+    },
+    {
+      "name": "grandslamcup",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "grandslamcup"],
+      "port": 3016
+    },
+    {
+      "name": "animatrona-tracker",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "animatrona-tracker"],
+      "port": 3009
+    },
+    {
+      "name": "auth-hub",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "auth-hub"],
+      "port": 3014
+    },
+    {
+      "name": "aboi",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "aboi"],
+      "port": 3018
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+ipfsstor3.letar.best {
+    # Kubo RPC API
+    reverse_proxy /api/v0/* 127.0.0.1:5001 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        transport http {
+            read_timeout 600s
+            write_timeout 600s
+        }
+    }
+
+    # Pin-Queue (основной бэкенд)
+    reverse_proxy 127.0.0.1:42080 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}

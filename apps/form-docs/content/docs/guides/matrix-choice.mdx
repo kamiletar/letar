@@ -1,0 +1,110 @@
+---
+title: MatrixChoice
+description: Matrix choice field for surveys, NPS forms, and questionnaires
+---
+
+## Overview
+
+`Form.Field.MatrixChoice` renders a "question x answer" matrix table — the standard pattern from Google Forms and SurveyMonkey. Supports three variants: radio (single choice), checkbox (multi choice), and rating (stars).
+
+## Basic Usage (Radio)
+
+```tsx
+<Form initialValue={{ satisfaction: {} }} onSubmit={handleSubmit}>
+  <Form.Field.MatrixChoice
+    name="satisfaction"
+    label="Rate our service"
+    rows={[
+      { value: 'speed', label: 'Delivery speed' },
+      { value: 'quality', label: 'Product quality' },
+      { value: 'support', label: 'Customer support' },
+    ]}
+    columns={[
+      { value: '1', label: 'Terrible' },
+      { value: '2', label: 'Bad' },
+      { value: '3', label: 'OK' },
+      { value: '4', label: 'Good' },
+      { value: '5', label: 'Excellent' },
+    ]}
+    variant="radio"
+  />
+  <Form.Button.Submit>Submit</Form.Button.Submit>
+</Form>
+```
+
+**Value:** `{ speed: '4', quality: '5', support: '3' }`
+
+## Checkbox Variant (Multi-Select)
+
+```tsx
+<Form.Field.MatrixChoice
+  name="skills"
+  variant="checkbox"
+  rows={[
+    { value: 'frontend', label: 'Frontend' },
+    { value: 'backend', label: 'Backend' },
+  ]}
+  columns={[
+    { value: 'beginner', label: 'Beginner' },
+    { value: 'intermediate', label: 'Intermediate' },
+    { value: 'expert', label: 'Expert' },
+  ]}
+/>
+```
+
+**Value:** `{ frontend: ['beginner', 'intermediate'], backend: ['expert'] }`
+
+## Rating Variant
+
+```tsx
+<Form.Field.MatrixChoice
+  name="rating"
+  variant="rating"
+  rows={[
+    { value: 'taste', label: 'Taste' },
+    { value: 'presentation', label: 'Presentation' },
+  ]}
+  columns={[
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `name` | `string` | required | Field name |
+| `label` | `string` | — | Label above matrix |
+| `rows` | `MatrixRow[]` | required | Questions (row labels) |
+| `columns` | `MatrixColumn[]` | required | Answer options (column headers) |
+| `variant` | `'radio' \| 'checkbox' \| 'rating'` | `'radio'` | Selection mode |
+| `disabled` | `boolean` | `false` | Disable all inputs |
+| `readOnly` | `boolean` | `false` | Read-only mode |
+
+## Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| Arrow Right/Left | Move between columns |
+| Arrow Up/Down | Move between rows |
+| Enter / Space | Select current cell |
+
+## Required Validation
+
+When `required={true}`, unfilled rows are highlighted in red after form validation triggers. Use Zod schema validation to enforce all rows are filled.
+
+## Responsive Behavior
+
+On mobile (`< md` breakpoint), the table automatically switches to a card-based layout where each question is a separate card with vertically stacked options.
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/matrix-choice).

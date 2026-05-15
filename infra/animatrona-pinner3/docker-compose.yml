@@ -1,0 +1,66 @@
+services:
+  ipfs:
+    image: ipfs/kubo:v0.40.1
+    container_name: animatrona-pinner3
+    restart: unless-stopped
+    ports:
+      # Swarm — стандартный порт
+      - '4001:4001/tcp'
+      - '4001:4001/udp'
+      # API — ТОЛЬКО localhost (HTTPS через NPM)
+      - '127.0.0.1:5001:5001'
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      IPFS_PROFILE: server
+    # 3GB из 4GB RAM — место для pin-queue, NPM и системы
+    mem_limit: 3072m
+    memswap_limit: 3072m
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://127.0.0.1:8080/version || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  pin-queue:
+    build:
+      context: ../animatrona-pin-queue
+    container_name: animatrona-pin-queue
+    restart: unless-stopped
+    # host network — доступ к Kubo на localhost:5001
+    network_mode: host
+    depends_on:
+      ipfs:
+        condition: service_healthy
+    volumes:
+      - queue_data:/data
+    environment:
+      HTTP_PORT: '42080'
+      KUBO_API_URL: 'http://localhost:5001'
+      KUBO_AUTH_TOKEN: '${KUBO_AUTH_TOKEN}'
+      AUTH_TOKEN: '${PIN_QUEUE_AUTH_TOKEN}'
+      STATE_PATH: '/data/state.json'
+      COMPLETED_TTL_HOURS: '24'
+      # Multiaddr'а провайдеров контента — swarm connect перед каждым pin/add
+      PROVIDER_PEERS: '${PROVIDER_PEERS:-}'
+      # URL relay-сервера для регистрации PeerId в ACL (heartbeat каждые 30 мин)
+      RELAY_REGISTER_URL: '${RELAY_REGISTER_URL:-}'
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 16M
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:42080/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ipfs_data:
+    name: animatrona-pinner3-data
+  queue_data:
+    name: animatrona-pin-queue3-data

@@ -1,0 +1,59 @@
+{
+  "name": "dashboard-agent",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/dashboard-agent/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:infra"],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/dashboard-agent",
+        "main": "apps/dashboard-agent/src/index.ts",
+        "tsConfig": "apps/dashboard-agent/tsconfig.json",
+        "format": ["cjs"],
+        "bundle": true,
+        "platform": "node",
+        "target": "node20",
+        "minify": false,
+        "sourcemap": true,
+        "esbuildOptions": {
+          "external": ["systeminformation", "dockerode"]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "dashboard-agent:build",
+        "watch": true
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/apps/dashboard-agent/index.js",
+        "cwd": "."
+      },
+      "dependsOn": ["build"]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun --watch apps/dashboard-agent/src/index.ts",
+        "cwd": "."
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p apps/dashboard-agent/tsconfig.json",
+        "cwd": "."
+      }
+    }
+  }
+}

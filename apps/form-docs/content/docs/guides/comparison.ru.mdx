@@ -1,0 +1,72 @@
+---
+title: Сравнение форм
+description: Отображение различий между двумя версиями данных формы в формате «до → после»
+---
+
+## Обзор
+
+`Form.Comparison` отображает diff данных формы в формате «было → стало». Изменённые поля выделяются жёлтым фоном, старые и новые значения показываются рядом.
+
+```tsx
+import { Form } from '@letar/forms'
+import { z } from 'zod/v4'
+
+const Schema = z.object({
+  name: z.string().meta({ ui: { title: 'Имя' } }),
+  email: z.string().meta({ ui: { title: 'Email' } }),
+  role: z.string().meta({ ui: { title: 'Роль' } }),
+})
+
+<Form.Comparison
+  original={{ name: 'Иван', email: 'ivan@old.com', role: 'user' }}
+  current={{ name: 'Иван', email: 'ivan@new.com', role: 'admin' }}
+  schema={Schema}
+/>
+```
+
+## Пропсы
+
+| Пропс | Тип | По умолчанию | Описание |
+| ----- | --- | ------------ | -------- |
+| `original` | `T` | обязательно | Данные до изменений |
+| `current` | `T` | обязательно | Данные после изменений |
+| `schema` | `ZodObject` | — | Zod-схема для подписей полей через `.meta({ ui: { title } })` |
+| `labels` | `Record<string, string>` | `{}` | Ручное переопределение подписей |
+| `onlyChanged` | `boolean` | `false` | Показывать только изменённые поля |
+| `exclude` | `string[]` | `[]` | Поля, скрытые из сравнения |
+
+## Только изменения
+
+```tsx
+<Form.Comparison original={oldData} current={newData} onlyChanged />
+```
+
+Если ни одно поле не изменилось, отображается сообщение «Нет изменений».
+
+## Пользовательские подписи
+
+Подписи разрешаются в порядке: пропс `labels` → `.meta()` из схемы → человекочитаемое имя ключа.
+
+```tsx
+<Form.Comparison original={old} current={next} labels={{ firstName: 'Имя', lastName: 'Фамилия' }} />
+```
+
+## Исключение полей
+
+```tsx
+<Form.Comparison original={old} current={next} exclude={['id', 'createdAt', 'updatedAt']} />
+```
+
+## Сценарии использования
+
+- **Журнал аудита**: показать, что пользователь изменил в своём профиле
+- **Процесс утверждения**: просмотр ожидающих изменений перед одобрением
+- **История версий**: сравнение двух версий документа
+- **Подтверждение редактирования**: диалог «Вы собираетесь изменить...»
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/comparison).

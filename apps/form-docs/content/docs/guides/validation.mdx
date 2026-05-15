@@ -1,0 +1,72 @@
+---
+title: Validation
+description: Schema-driven validation with Zod and custom error handling
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="validation" height={550} />
+
+## Schema-Based Validation
+
+All validation is defined in the Zod schema. The form automatically validates fields and displays errors.
+
+```tsx
+const Schema = z
+  .object({
+    email: z.string().email('Invalid email address'),
+    password: z
+      .string()
+      .min(8, 'Must be at least 8 characters')
+      .regex(/[A-Z]/, 'Must contain an uppercase letter')
+      .regex(/[0-9]/, 'Must contain a number'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+```
+
+## Error Summary
+
+Display all form errors in one place:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.String name="email" />
+  <Form.Field.Password name="password" />
+  <Form.Field.Password name="confirmPassword" />
+
+  <Form.Errors title="Please fix the following:" />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Auto Constraint Hints
+
+The library automatically generates helper text from Zod constraints:
+
+```tsx
+z.string().min(2).max(100)
+// Helper text: "2–100 characters"
+
+z.number().min(1).max(10)
+// Helper text: "1–10"
+
+z.string().email()
+// Helper text: "Must be a valid email"
+```
+
+## Strip Unknown Fields
+
+Always use `.strip()` in production to remove extra fields:
+
+```tsx
+const Schema = z
+  .object({
+    name: z.string(),
+    email: z.string().email(),
+  })
+  .strip()
+```

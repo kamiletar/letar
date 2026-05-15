@@ -1,0 +1,92 @@
+---
+title: Cascading Fields (DependsOn)
+description: Render different form sections based on a field's value — a multi-branch Form.When
+---
+
+## Overview
+
+`Form.DependsOn` renders different children based on a field's current value. Think of it as a `switch/case` for form fields — an extension of `Form.When` for multiple branches.
+
+```tsx
+<Form.DependsOn
+  field="paymentMethod"
+  cases={{
+    card: <Form.Field.CreditCard name="card" />,
+    bank: <Form.Field.String name="iban" label="IBAN" />,
+    cash: <Text>Cash on delivery</Text>,
+  }}
+/>
+```
+
+## Props
+
+| Prop       | Type                        | Default  | Description                             |
+| ---------- | --------------------------- | -------- | --------------------------------------- |
+| `field`    | `string`                    | required | Field name to observe                   |
+| `cases`    | `Record<string, ReactNode>` | required | Value → children mapping                |
+| `fallback` | `ReactNode`                 | `null`   | Shown when value doesn't match any case |
+
+## When to Use
+
+| Pattern          | Use Case                                        |
+| ---------------- | ----------------------------------------------- |
+| `Form.When`      | Single condition: show/hide one section         |
+| `Form.DependsOn` | Multiple branches: different sections per value |
+
+## Example: Entity Type
+
+```tsx
+<Form.Field.Select
+  name="entityType"
+  label="Type"
+  options={[
+    { value: 'person', label: 'Individual' },
+    { value: 'company', label: 'Company' },
+    { value: 'sole_proprietor', label: 'Sole Proprietor' },
+  ]}
+/>
+
+<Form.DependsOn
+  field="entityType"
+  cases={{
+    person: (
+      <>
+        <Form.Field.String name="firstName" label="First Name" />
+        <Form.Field.String name="lastName" label="Last Name" />
+        <Form.Document.SNILS name="snils" />
+      </>
+    ),
+    company: (
+      <>
+        <Form.Field.String name="companyName" label="Company Name" />
+        <Form.Document.INN name="inn" />
+        <Form.Document.KPP name="kpp" />
+      </>
+    ),
+    sole_proprietor: (
+      <>
+        <Form.Field.String name="fullName" label="Full Name" />
+        <Form.Document.INN name="inn" />
+        <Form.Document.OGRNIP name="ogrnip" />
+      </>
+    ),
+  }}
+  fallback={<Text color="fg.muted">Select entity type above</Text>}
+/>
+```
+
+## How It Works
+
+1. Subscribes to the specified field via `form.Subscribe`
+2. Converts field value to string key
+3. Looks up matching case in `cases` record
+4. Renders matched content, `fallback`, or `null`
+
+The component is fully reactive — switching the field value instantly swaps the rendered section.
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/depends-on).

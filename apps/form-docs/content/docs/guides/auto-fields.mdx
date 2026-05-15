@@ -1,0 +1,321 @@
+---
+title: Automatic Form Generation
+description: Generate forms automatically from Zod schemas — from zero-JSX to fine-grained control
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="auto-fields" height={600} />
+
+## The 4-Level Control Hierarchy
+
+The library offers four levels of form generation, each giving you more control:
+
+| Level | Component | JSX needed | Use case |
+|-------|-----------|-----------|----------|
+| 1 | `Form.FromSchema` | None | CRUD, prototyping, admin panels |
+| 2 | `Form.AutoFields` | Layout only | Custom layout with auto fields |
+| 3 | `Form.Field.*` | Fields + layout | Full control over each field |
+| 4 | `useAppForm` | Everything | Imperative logic, custom hooks |
+
+Each level is backward-compatible — you can mix them freely within one form.
+
+## Level 1: Form.FromSchema — Zero JSX
+
+Generate a complete form from a Zod schema with no field JSX at all:
+
+```tsx
+import { Form } from '@letar/forms'
+import { z } from 'zod/v4'
+
+const UserSchema = z.object({
+  firstName: z.string().min(2).meta({ ui: { title: 'First Name' } }),
+  lastName: z.string().meta({ ui: { title: 'Last Name' } }),
+  email: z.string().email().meta({ ui: { title: 'Email' } }),
+  bio: z.string().max(500).meta({ ui: { title: 'Bio', fieldType: 'textarea' } }),
+})
+
+<Form.FromSchema
+  schema={UserSchema}
+  initialValue={{ firstName: '', lastName: '', email: '', bio: '' }}
+  onSubmit={save}
+  submitLabel="Create User"
+/>
+```
+
+This renders all four fields with labels, validation, and a submit button — no JSX for fields required.
+
+### FromSchema Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `schema` | Zod schema | required | Schema for validation and field generation |
+| `initialValue` | `TData` | required | Initial form values |
+| `onSubmit` | `(data: TData) => void` | required | Submit handler |
+| `submitLabel` | `ReactNode` | `'Save'` | Submit button text |
+| `showReset` | `boolean` | `false` | Show reset button |
+| `resetLabel` | `ReactNode` | `'Reset'` | Reset button text |
+| `exclude` | `string[]` | — | Fields to exclude |
+| `validateOn` | `ValidateOn` | — | Validation trigger mode |
+| `middleware` | `FormMiddleware` | — | Form event middleware |
+| `disabled` | `boolean` | — | Disable all fields |
+| `readOnly` | `boolean` | — | Read-only mode |
+| `persistence` | `FormPersistenceConfig` | — | localStorage config |
+| `offline` | `FormOfflineConfig` | — | Offline mode config |
+| `debug` | `boolean \| 'force'` | — | JSON value inspector |
+| `gap` | `number` | `4` | Gap between fields |
+| `beforeButtons` | `ReactNode` | — | Content before buttons |
+| `afterButtons` | `ReactNode` | — | Content after buttons |
+
+### Excluding Fields
+
+Hide system fields like `id` or timestamps:
+
+```tsx
+<Form.FromSchema
+  schema={UserSchema}
+  initialValue={userData}
+  onSubmit={updateUser}
+  exclude={['id', 'createdAt', 'updatedAt']}
+  showReset
+/>
+```
+
+## Level 2: Form.AutoFields — Auto Generation + Custom Layout
+
+When you need control over layout but don't want to write every field manually:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <HStack gap={4}>
+    <Form.AutoFields include={['firstName', 'lastName']} />
+  </HStack>
+  <Form.AutoFields exclude={['firstName', 'lastName']} />
+  <Form.Button.Submit />
+</Form>
+```
+
+### AutoFields Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `include` | `string[]` | — | Only render these fields |
+| `exclude` | `string[]` | — | Exclude these fields |
+| `recursive` | `boolean` | `true` | Auto-expand nested objects |
+| `fieldWrapper` | `(props) => ReactElement` | — | Custom wrapper per field |
+
+### Custom Field Wrapper
+
+Wrap each auto-generated field with custom JSX:
+
+```tsx
+<Form.AutoFields
+  fieldWrapper={({ name, children }) => (
+    <Box key={name} p={2} borderWidth={1} borderRadius="md">
+      {children}
+    </Box>
+  )}
+/>
+```
+
+### Mixing Auto and Manual Fields
+
+Combine auto-generated fields with hand-crafted ones:
+
+```tsx
+<Form schema={ArticleSchema} initialValue={data} onSubmit={save}>
+  <HStack gap={4}>
+    <Box flex={2}>
+      <Form.Field.Auto name="title" />
+    </Box>
+    <Box flex={1}>
+      <Form.Field.Auto name="slug" />
+    </Box>
+  </HStack>
+  <Form.Field.RichText name="content" label="Article Content" />
+  <Form.Button.Submit>Publish</Form.Button.Submit>
+</Form>
+```
+
+`Form.Field.Auto` renders the appropriate field component based on the schema type for that field.
+
+## Type Mapping
+
+The library maps Zod types to field components automatically:
+
+### Default Mapping (Zod → Component)
+
+| Zod Type | Component | Condition |
+|----------|-----------|-----------|
+| `z.string()` | `Form.Field.String` | Default |
+| `z.string()` | `Form.Field.Textarea` | When `maxLength > 200` |
+| `z.string().email()` | `Form.Field.String` | With `type="email"` |
+| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number` | |
+| `z.boolean()` | `Form.Field.Checkbox` | |
+| `z.date()` | `Form.Field.Date` | |
+| `z.enum()` / `z.literal()` | `Form.Field.NativeSelect` | |
+| `z.array(z.string())` | `Form.Field.Tags` | String arrays |
+| `z.array(z.object())` | `Form.Group.List` | Object arrays |
+
+### Override with `fieldType`
+
+Use `.meta({ ui: { fieldType } })` to override the default mapping:
+
+```tsx
+const Schema = z.object({
+  // Force textarea instead of string input
+  description: z.string().meta({ ui: { title: 'Description', fieldType: 'textarea' } }),
+
+  // Use slider instead of number input
+  rating: z.number().min(0).max(10).meta({ ui: { title: 'Rating', fieldType: 'slider' } }),
+
+  // Use rich text editor
+  content: z.string().meta({ ui: { title: 'Content', fieldType: 'richText' } }),
+
+  // Use switch instead of checkbox
+  active: z.boolean().meta({ ui: { title: 'Active', fieldType: 'switch' } }),
+
+  // Use radio cards instead of select
+  plan: z.enum(['free', 'pro', 'enterprise']).meta({
+    ui: {
+      title: 'Plan',
+      fieldType: 'radioCard',
+      fieldProps: {
+        options: [
+          { value: 'free', label: 'Free', description: 'For individuals' },
+          { value: 'pro', label: 'Pro', description: 'For teams' },
+          { value: 'enterprise', label: 'Enterprise', description: 'Custom' },
+        ],
+      },
+    },
+  }),
+})
+```
+
+### All Available fieldTypes
+
+**Text:** `string`, `textarea`, `password`, `passwordStrength`, `editable`, `richText`, `maskedInput`
+
+**Number:** `number`, `numberInput`, `slider`, `rating`, `currency`, `percentage`
+
+**Date/Time:** `date`, `time`, `dateRange`, `dateTimePicker`, `duration`, `schedule`
+
+**Boolean:** `checkbox`, `switch`
+
+**Selection:** `select`, `nativeSelect`, `combobox`, `autocomplete`, `listbox`, `radioGroup`, `radioCard`, `segmentedGroup`, `checkboxCard`, `tags`
+
+**Specialized:** `phone`, `address`, `pinInput`, `otpInput`, `colorPicker`, `fileUpload`
+
+## UI Metadata
+
+Control field appearance through `.meta({ ui: {...} })`:
+
+```tsx
+const Schema = z.object({
+  email: z.string().email().meta({
+    ui: {
+      title: 'Email Address',         // Label
+      placeholder: 'user@example.com', // Placeholder
+      description: 'We never share it', // Helper text
+      fieldType: 'string',            // Component override
+      fieldProps: { type: 'email' },   // Props passed to component
+    },
+  }),
+})
+```
+
+| Meta Property | Type | Description |
+|---------------|------|-------------|
+| `title` | `string` | Field label |
+| `placeholder` | `string` | Placeholder text |
+| `description` | `string` | Helper text below field |
+| `fieldType` | `FieldComponentType` | Override component type |
+| `fieldProps` | `Record<string, unknown>` | Additional component props |
+| `options` | `BaseOption[]` | Options for select fields |
+| `autocomplete` | `string` | HTML autocomplete attribute |
+
+If `title` is not provided, the field name is converted from camelCase to a readable label (e.g., `firstName` → `First Name`).
+
+## Nested Objects and Arrays
+
+### Nested Objects
+
+Objects are automatically rendered as `Form.Group` with their fields indented:
+
+```tsx
+const ProfileSchema = z.object({
+  name: z.string().meta({ ui: { title: 'Name' } }),
+  settings: z.object({
+    theme: z.enum(['light', 'dark']).meta({ ui: { title: 'Theme' } }),
+    notifications: z.boolean().meta({ ui: { title: 'Notifications' } }),
+  }),
+})
+
+// AutoFields automatically nests settings fields under a group
+<Form.FromSchema schema={ProfileSchema} initialValue={data} onSubmit={save} />
+```
+
+Disable recursive expansion with `recursive={false}`.
+
+### Object Arrays
+
+Arrays of objects render as `Form.Group.List` with add/remove buttons:
+
+```tsx
+const OrderSchema = z.object({
+  customer: z.string(),
+  items: z.array(
+    z.object({
+      product: z.string().meta({ ui: { title: 'Product' } }),
+      qty: z.number().min(1).meta({ ui: { title: 'Quantity' } }),
+    })
+  ),
+})
+
+// Each array item gets its own card with fields + remove button
+<Form.FromSchema schema={OrderSchema} initialValue={data} onSubmit={save} />
+```
+
+### Primitive Arrays
+
+String arrays are rendered as `Form.Field.Tags`:
+
+```tsx
+const Schema = z.object({
+  tags: z.array(z.string()).meta({ ui: { title: 'Tags' } }),
+})
+```
+
+## Automatic Constraints
+
+Zod constraints are passed as component props automatically:
+
+```tsx
+z.string().min(2).max(100)    // → minLength={2} maxLength={100}
+z.number().min(1).max(10)     // → min={1} max={10}
+z.string().email()            // → type="email"
+z.date().min(new Date())      // → min={now}
+```
+
+No need to duplicate constraints in JSX — the schema is the single source of truth.
+
+## When to Use Each Level
+
+| Scenario | Recommended Level |
+|----------|------------------|
+| Admin CRUD forms | `Form.FromSchema` |
+| Rapid prototyping | `Form.FromSchema` |
+| Simple forms with custom layout | `Form.AutoFields` |
+| Complex multi-column layouts | `Form.Field.*` (Compound Components) |
+| Multi-step forms | `Form.Field.*` + `Form.Steps` |
+| Conditional rendering | `Form.Field.*` + `Form.When` |
+| Custom UX (animations, inline editing) | `useAppForm` |
+
+**Rule of thumb:** If the form is a linear vertical flow, `FromSchema` or `AutoFields` work great. For complex layouts, use Compound Components.
+
+## Live Examples
+
+Try the interactive examples on [forms-example.letar.best](https://forms-example.letar.best):
+
+- [Auto Fields — Basic](https://forms-example.letar.best/examples/auto-fields) — FromSchema and AutoFields basics
+- [Auto Fields — Advanced](https://forms-example.letar.best/examples/auto-fields-advanced) — Filtering, mixed approach, nested objects

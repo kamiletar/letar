@@ -1,0 +1,158 @@
+---
+title: Табличный редактор
+description: Редактируемая таблица для полей-массивов — табличный ввод данных с навигацией, вычисляемыми колонками и поддержкой буфера обмена
+---
+
+## Обзор
+
+`Form.Field.TableEditor` — это редактируемая таблица для полей-массивов. Табличная альтернатива `Form.Group.List` — вместо карточной раскладки данные представлены в компактной таблице с редактированием ячеек по клику.
+
+Лучше всего подходит для:
+
+- Позиции заказа (10-50 строк)
+- Складские операции (100+ позиций)
+- Импорт данных из Excel
+- Массовое создание записей (HR, CRM)
+
+## Базовое использование
+
+```tsx
+<Form
+  initialValue={{
+    items: [
+      { product: 'Молоко', qty: 2, price: 89 },
+      { product: 'Хлеб', qty: 1, price: 45 },
+    ],
+  }}
+  onSubmit={handleSubmit}
+>
+  <Form.Field.TableEditor
+    name="items"
+    columns={[
+      { name: 'product', label: 'Товар', width: '40%' },
+      { name: 'qty', label: 'Кол-во', width: '20%', align: 'right' },
+      { name: 'price', label: 'Цена', width: '20%', align: 'right' },
+    ]}
+    addLabel="Добавить позицию"
+  />
+  <Form.Button.Submit>Сохранить</Form.Button.Submit>
+</Form>
+```
+
+Кликните по любой ячейке для начала редактирования. Нажмите **Tab** для перехода к следующей ячейке, **Enter** для перехода к следующей строке, **Escape** для отмены редактирования.
+
+## Вычисляемые колонки
+
+Добавьте колонки только для чтения, которые автоматически вычисляются из данных строки:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[
+    { name: 'product', width: '40%' },
+    { name: 'qty', width: '15%', align: 'right' },
+    { name: 'price', width: '15%', align: 'right' },
+    {
+      name: 'total',
+      label: 'Итого',
+      align: 'right',
+      computed: (row) => Number(row.qty) * Number(row.price),
+      format: (v) => `${Number(v).toFixed(2)} р.`,
+    },
+  ]}
+/>
+```
+
+## Агрегаты в подвале
+
+Добавьте вычисления SUM, AVG, COUNT, MIN или MAX в подвале таблицы:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  footer={[
+    { column: 'total', aggregate: 'sum', label: 'Общий итог:' },
+    { column: 'qty', aggregate: 'count', label: 'Позиций:' },
+  ]}
+/>
+```
+
+## Выбор строк
+
+Включите чекбоксы для массовых операций:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  selectable={true}
+/>
+```
+
+Выбранные строки можно удалить массово через панель инструментов.
+
+## Буфер обмена (копирование/вставка из Excel)
+
+По умолчанию `clipboard={true}`. Пользователи могут вставить данные, разделённые табуляцией, из Excel или Google Sheets. Данные разбираются и строки добавляются автоматически, с приведением значений к правильным типам.
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  clipboard={true}
+/>
+```
+
+## Свойства
+
+| Свойство     | Тип                    | По умолчанию        | Описание                           |
+| ------------ | ---------------------- | -------------------- | ---------------------------------- |
+| `name`       | `string`               | обязательно          | Имя поля-массива                   |
+| `label`      | `string`               | ---                  | Заголовок таблицы                  |
+| `columns`    | `TableColumnDef[]`     | авто из схемы        | Определения колонок                |
+| `addLabel`   | `string`               | "Добавить строку"    | Текст кнопки добавления            |
+| `sortable`   | `boolean`              | `false`              | Сортировка строк перетаскиванием   |
+| `selectable` | `boolean`              | `false`              | Чекбоксы для выбора строк          |
+| `footer`     | `TableFooterDef[]`     | ---                  | Определения агрегатов подвала      |
+| `maxRows`    | `number`               | из схемы             | Максимум строк                     |
+| `minRows`    | `number`               | из схемы             | Минимум строк                      |
+| `clipboard`  | `boolean`              | `true`               | Вставка из Excel                   |
+| `emptyText`  | `string`               | "Нет данных..."      | Текст пустого состояния            |
+| `size`       | `'sm' \| 'md' \| 'lg'` | `'sm'`              | Размер таблицы                     |
+| `striped`    | `boolean`              | `false`              | Чередующиеся строки                |
+| `disabled`   | `boolean`              | `false`              | Отключить редактирование           |
+| `readOnly`   | `boolean`              | `false`              | Режим только для чтения            |
+
+## Определение колонки
+
+```typescript
+interface TableColumnDef {
+  name: string // Имя поля в объекте строки
+  label?: string // Заголовок колонки
+  width?: string // CSS-ширина ('40%', '200px')
+  align?: 'left' | 'center' | 'right'
+  computed?: (row) => unknown // Функция вычисляемого значения
+  format?: (value) => string // Формат отображения
+  hidden?: boolean // Скрыть колонку
+  readOnly?: boolean // Отключить редактирование ячейки
+}
+```
+
+## Навигация с клавиатуры
+
+| Клавиша       | Действие                             |
+| ------------- | ------------------------------------ |
+| Клик          | Начать редактирование ячейки         |
+| Tab           | Следующая редактируемая ячейка       |
+| Shift+Tab     | Предыдущая редактируемая ячейка      |
+| Enter         | Подтвердить и перейти к следующей строке |
+| Escape        | Отменить редактирование              |
+| Стрелка вверх/вниз | Перемещение между строками      |
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/table-editor).

@@ -1,0 +1,154 @@
+{
+  "name": "pravda",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/pravda/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:pravda"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "update-sw-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/update-sw-version.mjs",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/package.json",
+        "{projectRoot}/scripts/update-sw-version.mjs",
+        "{projectRoot}/public/sw.template.js"
+      ],
+      "outputs": ["{projectRoot}/public/sw.js"],
+      "metadata": {
+        "description": "Генерация sw.js с версией из package.json"
+      }
+    },
+    "generate-og": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx tsx scripts/generate-og-images.ts",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/scripts/generate-og-images.ts", "{projectRoot}/src/lib/documents.ts"],
+      "outputs": ["{projectRoot}/public/og"],
+      "metadata": {
+        "description": "Генерация OG изображений для всех документов"
+      }
+    },
+    "fix-rsc-paths": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/fix-rsc-paths.mjs",
+        "cwd": "apps/pravda"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Исправление RSC путей для статического экспорта Next.js 16"
+      }
+    },
+    "build": {
+      "dependsOn": ["update-sw-version", "generate-og"]
+    },
+    "build:production": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["nx build pravda", "node scripts/fix-rsc-paths.mjs", "rm -rf .next"],
+        "cwd": "apps/pravda",
+        "parallel": false
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Production build с исправлением RSC путей и очисткой кэша для dev"
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/pravda"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/pravda"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/pravda"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "config": "apps/pravda/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests with Vitest",
+        "technologies": ["vitest"]
+      }
+    }
+  }
+}

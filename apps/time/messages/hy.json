@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Քանի՞ ժամ",
+    "description": "UNIX դարաշրջանի սկզբից կարգային ժամ"
+  },
+  "time": {
+    "now": "Հիմա",
+    "hour": "ժամ UNIX դարաշրջանի սկզբից",
+    "hoursPassed": "ժամ անցել է UNIX դարաշրջանի սկզբից"
+  },
+  "countdown": {
+    "until": "Մինչև {milestone} ժամ",
+    "days": "{count, plural, one {# օր} other {# օր}}",
+    "hours": "{count, plural, one {# ժամ} other {# ժամ}}",
+    "minutes": "{count, plural, one {# րոպե} other {# րոպե}}",
+    "seconds": "{count, plural, one {# վայրկյան} other {# վայրկյան}}"
+  },
+  "celebration": {
+    "milestone": "UNIX դարաշրջանի {hours} ժամ!"
+  },
+  "subscribe": {
+    "subscribe": "Ծանուցումներ",
+    "explanation": "Մուտք գործեք ձեր էլ. փոստի հաստատման և ծանուցումների կարգավորումների հասանելիության համար",
+    "signIn": "Մուտք գործեք",
+    "settings": "Կարգավորումներ"
+  },
+  "profile": {
+    "title": "Ծանուցումների կարգավորումներ",
+    "email": "Էլ. փոստ",
+    "notifyMonth": "Մեկ ամիս առաջ",
+    "notifyWeek": "Մեկ շաբաթ առաջ",
+    "notifyDay": "Մեկ օր առաջ",
+    "notifyHour": "Մեկ ժամ առաջ",
+    "notify5Min": "5 րոպե առաջ",
+    "save": "Պահպանել",
+    "saved": "Պահպանված է!",
+    "unsubscribe": "Ապաբոնել բոլորից",
+    "unsubscribed": "Դուք ապաբոնվել եք բոլոր ծանուցումներից",
+    "noSubscription": "Դուք դեռ բաժանորդագրություն չունեք",
+    "createSubscription": "Բաժանորդագրվել ծանուցումներին"
+  },
+  "unsubscribe": {
+    "title": "Ապաբոնեման",
+    "success": "Դուք հաջողությամբ ապաբոնվել եք UNIX ժամերի հոբելյանների ծանուցումներից",
+    "error": "Անվավեր ապաբոնեման հղում",
+    "back": "Վերադառնալ գլխավոր էջ"
+  }
+}

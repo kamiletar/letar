@@ -1,0 +1,90 @@
+---
+title: Testing Utilities
+description: Helpers for testing forms with Vitest and @testing-library/react
+---
+
+## Overview
+
+`@letar/forms/testing` provides helpers that reduce boilerplate when testing forms. It wraps `@testing-library/react` with form-specific utilities.
+
+```bash
+# Peer dependencies
+npm install -D @testing-library/react @testing-library/user-event @testing-library/jest-dom
+```
+
+## Quick Example
+
+```tsx
+import { renderForm, fillField, submitForm, expectFieldError } from '@letar/forms/testing'
+
+const { onSubmit } = renderForm(ContactForm)
+
+await fillField('name', 'Ivan')
+await fillField('email', 'invalid')
+await submitForm()
+expectFieldError('email', 'Invalid email')
+```
+
+## renderForm
+
+Renders a form component wrapped in `ChakraProvider`. Returns the standard `@testing-library/react` result plus bound helpers.
+
+```tsx
+const { fillField, submitForm, expectFieldError, onSubmit } = renderForm(MyForm, {
+  defaults: { name: '', email: '' },
+  onSubmit: vi.fn(),
+})
+```
+
+## fillField
+
+Fills a field by its `data-field-name` attribute. Auto-detects field type:
+
+- **Text/Email/Password/Textarea** — clears and types
+- **Number** — clears and types
+- **Checkbox/Switch** — clicks to toggle
+
+```tsx
+await fillField('name', 'Ivan')
+await fillField('age', 25)
+await fillField('agree', true)
+```
+
+## Assertion Helpers
+
+```tsx
+expectFieldError('email', 'Invalid email')  // Field shows this error
+expectNoFieldError('email')                 // Field has no errors
+expectFieldValue('name', 'Ivan')            // Field has this value
+```
+
+## Multi-step Helpers
+
+```tsx
+await goToStep(2)         // Click "Next" to reach step 2
+expectActiveStep(2)       // Assert current step
+```
+
+## Array Helpers
+
+```tsx
+await addItem('phones')                // Click "Add" in list
+await removeItem(0, 'phones')         // Remove first item
+expectItemCount('phones', 3)          // Assert item count
+```
+
+## TestWrapper
+
+Standalone `ChakraProvider` wrapper for custom test setups:
+
+```tsx
+import { TestWrapper } from '@letar/forms/testing'
+
+render(<TestWrapper><MyComponent /></TestWrapper>)
+```
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/testing-utilities).

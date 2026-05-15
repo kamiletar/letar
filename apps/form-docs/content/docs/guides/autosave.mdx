@@ -1,0 +1,70 @@
+---
+title: Autosave to Server
+description: Automatic server-side form data saving with debounce, offline fallback, and draft recovery
+---
+
+## Overview
+
+`useFormAutosave` periodically saves form data to a server endpoint. If the network is unavailable, data is stored in localStorage and synced when connectivity returns.
+
+## Basic Usage
+
+```tsx
+import { useFormAutosave, AutosaveIndicator } from '@letar/forms'
+
+function MyForm() {
+  const autosave = useFormAutosave(form, {
+    endpoint: '/api/drafts',
+    draftId: 'application-123',
+    interval: 5000,
+    debounce: 1000,
+  })
+
+  return (
+    <>
+      <Form.Field.String name="title" />
+      <AutosaveIndicator
+        status={autosave.status}
+        lastSavedAt={autosave.lastSavedAt}
+        error={autosave.error}
+      />
+    </>
+  )
+}
+```
+
+## Config
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `endpoint` | `string` | required | Server URL for POST/PUT |
+| `interval` | `number` | `5000` | Save interval (ms) |
+| `debounce` | `number` | `1000` | Min delay between saves (ms) |
+| `draftId` | `string` | — | Draft identifier for recovery |
+| `method` | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'` | HTTP method |
+| `headers` | `Record<string, string>` | — | Extra headers |
+| `onSave` | `(response) => void` | — | Success callback |
+| `onError` | `(error) => void` | — | Error callback |
+
+## Result
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `status` | `'idle' \| 'saving' \| 'saved' \| 'error'` | Current status |
+| `lastSavedAt` | `Date \| null` | Last successful save time |
+| `error` | `string \| null` | Error message |
+| `saveNow()` | `() => Promise<void>` | Force save immediately |
+| `loadDraft()` | `() => Promise<object \| null>` | Load draft from server |
+
+## Features
+
+- **Deduplication** — skips save if data has not changed
+- **Offline fallback** — saves to localStorage when offline, clears on successful server save
+- **Draft recovery** — `loadDraft()` tries server first, then localStorage
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/autosave).

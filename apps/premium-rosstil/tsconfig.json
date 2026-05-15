@@ -1,0 +1,109 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/auth": ["../../libs/auth/src/index.ts"],
+      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
+      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/yandex-metrika": ["../../libs/yandex-metrika/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/validation-utils": ["../../libs/validation-utils/src/index.ts"],
+      "@letar/hooks": ["../../libs/hooks/src/index.ts"]
+    },
+    "types": ["node"],
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "../../apps/premium-rosstil/.next/types/**/*.ts",
+    "../../dist/apps/premium-rosstil/.next/types/**/*.ts",
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "playwright-report",
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/test-setup.tsx",
+    "src/generated/**/*",
+    ".next",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/format-utils"
+    },
+    {
+      "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/auth"
+    },
+    {
+      "path": "../../libs/yandex-metrika"
+    },
+    {
+      "path": "../../libs/chakra-provider"
+    },
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/hooks"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/email"
+    },
+    {
+      "path": "../../libs/validation-utils"
+    },
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "./tsconfig.e2e.json"
+    }
+  ]
+}

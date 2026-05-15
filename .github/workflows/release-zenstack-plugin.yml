@@ -1,0 +1,167 @@
+# Публикация @letar/zenstack-form-plugin на npm
+# Триггер: git tag zenstack-plugin-vX.Y.Z
+# Результат: Исходники в kamiletar/zenstack-form-plugin + npm publish
+
+name: Release @letar/zenstack-form-plugin
+
+on:
+  push:
+    tags:
+      - 'zenstack-plugin-v*.*.*'
+
+jobs:
+  # 1. Публикация исходников
+  publish-source:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
+      tag: ${{ steps.parse-version.outputs.tag }}
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: parse-version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/zenstack-plugin-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Clone kamiletar/zenstack-form-plugin repository
+        run: |
+          git clone https://kamiletar:${{ secrets.GH_TOKEN }}@github.com/kamiletar/zenstack-form-plugin.git plugin-public
+          cd plugin-public
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Copy source code to public repo
+        run: |
+          # Удаляем всё кроме .git
+          find plugin-public -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          # Копируем исходники
+          rsync -av \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            --exclude '.env*' \
+            --exclude 'project.json' \
+            --exclude 'package.json' \
+            --exclude 'tsconfig.json' \
+            --exclude 'tsconfig.lib.json' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            --exclude 'vitest.config.ts' \
+            --exclude 'eslint.config.*' \
+            --exclude '*.spec.ts' \
+            --exclude '*.test.ts' \
+            libs/zenstack-form-plugin/ plugin-public/
+
+          # package.publish.json → package.json
+          cp libs/zenstack-form-plugin/package.publish.json plugin-public/package.json
+
+          # tsconfig.publish.json → tsconfig.json
+          cp libs/zenstack-form-plugin/tsconfig.publish.json plugin-public/tsconfig.json
+
+          # Файлы для публикации
+          cp libs/zenstack-form-plugin/tsup.config.ts plugin-public/
+          cp libs/zenstack-form-plugin/LICENSE plugin-public/
+          cp libs/zenstack-form-plugin/CHANGELOG.md plugin-public/
+          cp libs/zenstack-form-plugin/README.md plugin-public/
+
+      - name: Update version in package.json
+        run: |
+          cd plugin-public
+          VERSION="${{ steps.parse-version.outputs.version }}"
+          jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json
+          mv package.tmp.json package.json
+
+      - name: Commit and push
+        run: |
+          cd plugin-public
+          git add .
+          git commit -m "chore: release v${{ steps.parse-version.outputs.version }}" || echo "No changes to commit"
+          git tag -d ${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+          git push origin :refs/tags/${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+          git tag ${{ steps.parse-version.outputs.tag }}
+          git push origin main
+          git push origin ${{ steps.parse-version.outputs.tag }}
+
+  # 2. Сборка и публикация на npm
+  build-and-publish:
+    needs: publish-source
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/zenstack-form-plugin
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/zenstack-form-plugin
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install build dependencies
+        run: bun add -d tsup typescript @zenstackhq/sdk
+
+      - name: Build
+        run: bun tsup
+
+      - name: Prepare dist for publish
+        run: |
+          cp package.json dist/
+          cp README.md dist/
+          cp CHANGELOG.md dist/
+          cp LICENSE dist/
+
+      - name: Publish to npm
+        working-directory: dist
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # 3. GitHub Release
+  create-release:
+    needs: [publish-source, build-and-publish]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/zenstack-form-plugin
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/zenstack-form-plugin
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ needs.publish-source.outputs.version }}"
+          NOTES=$(awk '/## \['"$VERSION"'\]/{flag=1; next} /## \[/{flag=0} flag' CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v$VERSION of @letar/zenstack-form-plugin"
+          fi
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh release create "${{ needs.publish-source.outputs.tag }}" \
+            --repo kamiletar/zenstack-form-plugin \
+            --title "@letar/zenstack-form-plugin ${{ needs.publish-source.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.notes }}"

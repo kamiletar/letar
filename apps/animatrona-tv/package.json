@@ -1,0 +1,21 @@
+{
+  "name": "@letar/animatrona-tv",
+  "version": "0.4.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "android": "react-native run-android",
+    "start": "react-native start",
+    "clean": "cd android && gradlew clean && cd .."
+  },
+  "dependencies": {
+    "@letar/animatrona-shared": "*",
+    "react": "19.2.3",
+    "react-native": "0.84.1",
+    "@react-native/codegen": "0.84.1",
+    "@react-native/gradle-plugin": "0.84.1"
+  },
+  "engines": {
+    "node": ">=22.11"
+  }
+}

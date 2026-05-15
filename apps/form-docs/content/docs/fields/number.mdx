@@ -1,0 +1,88 @@
+---
+title: Number Fields
+description: Numeric input fields — Number, Slider, Currency, Percentage, Rating
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="number" height={550} />
+
+## Form.Field.Number
+
+Numeric input with increment/decrement stepper.
+
+```tsx
+const Schema = z.object({
+  quantity: z.number().int().min(1).max(100).meta({
+    ui: { title: 'Quantity' },
+  }),
+})
+
+<Form.Field.Number name="quantity" />
+```
+
+### Auto Constraints
+
+```tsx
+z.number().min(0).max(100)
+// → min={0} max={100} step={1} on the input
+
+z.number().int()
+// → step={1} (integer only)
+```
+
+## Form.Field.Slider
+
+Range slider for selecting a value within a range.
+
+```tsx
+const Schema = z.object({
+  volume: z.number().min(0).max(100).meta({
+    ui: { title: 'Volume' },
+  }),
+})
+
+<Form.Field.Slider name="volume" />
+```
+
+## Form.Field.Currency
+
+Money input with currency symbol formatting.
+
+```tsx
+const Schema = z.object({
+  price: z.number().min(0).meta({
+    ui: { title: 'Price', currency: 'USD' },
+  }),
+})
+
+<Form.Field.Currency name="price" />
+```
+
+## Form.Field.Percentage
+
+Percentage input (0-100%) with `%` suffix.
+
+```tsx
+const Schema = z.object({
+  discount: z.number().min(0).max(100).meta({
+    ui: { title: 'Discount' },
+  }),
+})
+
+<Form.Field.Percentage name="discount" />
+```
+
+## Form.Field.Rating
+
+Star rating input for reviews and feedback.
+
+```tsx
+const Schema = z.object({
+  rating: z.number().min(1).max(5).meta({
+    ui: { title: 'Your Rating' },
+  }),
+})
+
+<Form.Field.Rating name="rating" />
+```

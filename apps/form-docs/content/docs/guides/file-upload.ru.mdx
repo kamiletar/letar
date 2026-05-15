@@ -1,0 +1,37 @@
+---
+title: Загрузка файлов
+description: Загрузка файлов через кнопку, зону перетаскивания или input
+---
+
+## Базовая загрузка
+
+```tsx
+const Schema = z.object({
+  avatar: z.any().optional().meta({
+    ui: { title: 'Фото профиля' },
+  }),
+})
+
+<Form.Field.FileUpload name="avatar" accept="image/*" />
+```
+
+## Множественная загрузка
+
+```tsx
+<Form.Field.FileUpload name="documents" maxFiles={5} />
+```
+
+## Зона перетаскивания
+
+```tsx
+<Form.Field.FileUpload name="files" variant="dropzone" accept="image/*,.pdf" maxSize={5 * 1024 * 1024} />
+```
+
+## Пропсы
+
+| Проп       | Тип                      | Описание                        |
+| ---------- | ------------------------ | ------------------------------- |
+| `accept`   | `string`                 | Типы файлов (`image/*`, `.pdf`) |
+| `maxFiles` | `number`                 | Максимум файлов                 |
+| `maxSize`  | `number`                 | Максимальный размер в байтах    |
+| `variant`  | `'button' \| 'dropzone'` | Вариант UI                      |

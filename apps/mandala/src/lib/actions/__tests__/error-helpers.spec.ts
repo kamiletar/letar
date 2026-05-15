@@ -1,0 +1,77 @@
+/**
+ * Тесты для хелперов обработки ошибок.
+ */
+
+import { handleUniqueConstraintError } from '../error-helpers'
+
+describe('handleUniqueConstraintError', () => {
+  it('должен вернуть ошибку для Prisma P2002 кода', () => {
+    const prismaError = { code: 'P2002', meta: { target: ['slug'] } }
+
+    const result = handleUniqueConstraintError(prismaError, 'slug', 'Slug уже существует')
+
+    expect(result).toEqual({
+      success: false,
+      error: 'Slug уже существует',
+      field: 'slug',
+    })
+  })
+
+  it('должен вернуть null для других Prisma ошибок', () => {
+    const otherError = { code: 'P2025', message: 'Record not found' }
+
+    const result = handleUniqueConstraintError(otherError, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для обычных ошибок', () => {
+    const genericError = new Error('Что-то пошло не так')
+
+    const result = handleUniqueConstraintError(genericError, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для null', () => {
+    const result = handleUniqueConstraintError(null, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для undefined', () => {
+    const result = handleUniqueConstraintError(undefined, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для строки', () => {
+    const result = handleUniqueConstraintError('error string', 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для числа', () => {
+    const result = handleUniqueConstraintError(123, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен работать с разными полями', () => {
+    const prismaError = { code: 'P2002' }
+
+    const emailResult = handleUniqueConstraintError(prismaError, 'email', 'Email уже занят')
+    expect(emailResult).toEqual({
+      success: false,
+      error: 'Email уже занят',
+      field: 'email',
+    })
+
+    const skuResult = handleUniqueConstraintError(prismaError, 'sku', 'SKU уже существует')
+    expect(skuResult).toEqual({
+      success: false,
+      error: 'SKU уже существует',
+      field: 'sku',
+    })
+  })
+})

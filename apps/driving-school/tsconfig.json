@@ -1,0 +1,121 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/hooks": ["../../libs/hooks/src/index.ts"],
+      "@letar/api-server": ["../../libs/api-server/src/index.ts"],
+      "@letar/auth": ["../../libs/auth/src/index.ts"],
+      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
+      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
+      "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/validation-utils": ["../../libs/validation-utils/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/contract-generator": ["../../libs/contract-generator/src/index.ts"],
+      "@letar/contract-generator/pdf-generator": ["../../libs/contract-generator/src/pdf-generator.ts"],
+      "@letar/contract-generator/pdf-react": ["../../libs/contract-generator/src/pdf-react.tsx"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms/offline": ["../../libs/forms/src/lib/offline/index.ts"],
+      "@letar/pin-auth/server": ["../../libs/pin-auth/src/server/index.ts"],
+      "@letar/driving-school-db": ["../../libs/driving-school-db/src/index.ts"],
+      "@letar/driving-school-db/prisma": ["../../libs/driving-school-db/src/generated/prisma/index.ts"],
+      "@letar/driving-school-db/prisma/enums": ["../../libs/driving-school-db/src/generated/prisma/enums.ts"],
+      "@letar/driving-school-db/schema": ["../../libs/driving-school-db/src/generated/schema.ts"],
+      "@letar/driving-school-db/models": ["../../libs/driving-school-db/src/generated/models.ts"],
+      "@letar/driving-school-db/input": ["../../libs/driving-school-db/src/generated/input.ts"],
+      "@letar/driving-school-db/form-schemas/enums/*": [
+        "../../libs/driving-school-db/src/generated/form-schemas/enums/*"
+      ],
+      "@letar/driving-school-db/form-schemas/*": ["../../libs/driving-school-db/src/generated/form-schemas/*"]
+    },
+    "types": ["node"],
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../apps/driving-school/.next/types/**/*.ts",
+    "../../dist/apps/driving-school/.next/types/**/*.ts",
+    "next-env.d.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "jest.config.ts",
+    "jest.config.cts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    ".next",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/hooks"
+    },
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/api-server"
+    },
+    {
+      "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/auth"
+    },
+    {
+      "path": "../../libs/contract-generator"
+    },
+    {
+      "path": "../../libs/format-utils"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/driving-school-db"
+    },
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/validation-utils"
+    },
+    {
+      "path": "../../libs/pin-auth"
+    },
+    {
+      "path": "../../libs/email"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# Docker Compose для локальной разработки
+# Запуск: docker compose -f docker-compose.dev.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: animatrona-tracker-postgres-dev
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+      POSTGRES_USER: animatrona_user
+      POSTGRES_PASSWORD: animatrona_password
+      POSTGRES_DB: animatrona_tracker
+    volumes:
+      - animatrona_tracker_postgres_dev:/var/lib/postgresql/data
+    ports:
+      - '5439:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U animatrona_user -d animatrona_tracker']
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  animatrona_tracker_postgres_dev:
+    driver: local

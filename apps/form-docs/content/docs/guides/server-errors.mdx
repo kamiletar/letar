@@ -1,0 +1,87 @@
+---
+title: Server Error Mapping
+description: Auto-map Prisma, ZenStack, and Zod server errors to form fields
+---
+
+## Overview
+
+`mapServerErrors()` automatically detects the error format and maps it to form fields. No manual switch/case needed.
+
+```tsx
+import { applyServerErrors, mapServerErrors } from '@letar/forms'
+
+<Form schema={UserSchema} onSubmit={async ({ value }) => {
+  try {
+    await createUser(value)
+  } catch (error) {
+    const mapped = mapServerErrors(error, {
+      fieldMap: {
+        email: { field: 'email', message: 'This email is already registered' },
+      },
+    })
+    applyServerErrors(form, mapped)
+  }
+}}>
+  <Form.Field.String name="email" />
+  <Form.Errors />
+  <Form.Button.Submit>Create</Form.Button.Submit>
+</Form>
+```
+
+## Supported Formats
+
+| Format | Example | Result |
+|--------|---------|--------|
+| Prisma P2002 | `{ code: 'P2002', meta: { target: ['email'] } }` | `fieldErrors: [{ field: 'email' }]` |
+| Prisma P2003 | `{ code: 'P2003', meta: { field_name: 'categoryId' } }` | `fieldErrors: [{ field: 'categoryId' }]` |
+| Prisma P2025 | `{ code: 'P2025' }` | `formErrors: ['Record not found']` |
+| ZenStack policy | `{ reason: 'rejected-by-policy' }` | `formErrors: ['Access denied']` |
+| ZenStack db-query | `{ reason: 'db-query-error', code: 'P2002', meta }` | Delegates to Prisma parser |
+| Zod flatten | `{ fieldErrors: { email: ['msg'] } }` | Direct mapping |
+| ActionResult | `{ success: false, error: 'msg' }` | `formErrors: ['msg']` |
+
+## API
+
+### mapServerErrors(error, config?)
+
+```typescript
+const mapped = mapServerErrors(error, {
+  fieldMap: Record<string, { field: string; message: string }>,
+  format: 'auto' | 'prisma' | 'zenstack' | 'zod' | 'action-result',
+  locale: 'ru' | 'en',
+  defaultMessage: 'An error occurred',
+})
+// Returns: { fieldErrors: FieldError[], formErrors: string[] }
+```
+
+### applyServerErrors(form, mapped)
+
+Applies errors to TanStack Form instance via `form.setFieldMeta` and `form.setErrorMap`.
+
+### fieldMap
+
+Custom mapping for specific constraints:
+
+```typescript
+{
+  // Single field unique constraint
+  email: { field: 'email', message: 'Email already registered' },
+  // Composite unique constraint (joined with _)
+  organizationId_name: { field: 'name', message: 'Name already taken' },
+  // Foreign key
+  categoryId: { field: 'categoryId', message: 'Select a valid category' },
+}
+```
+
+## Import
+
+```typescript
+// Main package
+import { applyServerErrors, mapServerErrors } from '@letar/forms'
+
+// Subpath (tree-shakeable)
+import { mapServerErrors } from '@letar/forms/server-errors'
+
+// Individual parsers
+import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
+```

@@ -1,0 +1,47 @@
+[
+  {
+    "path": "dist/index.js",
+    "name": "Core (Form + all fields via re-exports)",
+    "limit": "120 KB"
+  },
+  {
+    "path": "dist/fields/text.js",
+    "name": "fields/text entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/fields/number.js",
+    "name": "fields/number entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/fields/datetime.js",
+    "name": "fields/datetime entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/fields/selection.js",
+    "name": "fields/selection entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/fields/boolean.js",
+    "name": "fields/boolean entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/fields/specialized.js",
+    "name": "fields/specialized entry point",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/offline.js",
+    "name": "Offline module",
+    "limit": "1 KB"
+  },
+  {
+    "path": "dist/i18n.js",
+    "name": "i18n module",
+    "limit": "1 KB"
+  }
+]

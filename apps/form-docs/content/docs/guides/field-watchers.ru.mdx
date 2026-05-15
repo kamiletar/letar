@@ -1,0 +1,162 @@
+---
+title: Наблюдатели полей
+description: Реакция на изменения полей через onFieldChange и Form.Watch
+---
+
+## Обзор
+
+Иногда изменение поля должно вызвать побочный эффект — автогенерация slug, обновление валюты, пересчёт итога. Два взаимодополняющих API покрывают эти сценарии:
+
+| API                  | Стиль                                | Подходит для                                       |
+| -------------------- | ------------------------------------ | -------------------------------------------------- |
+| `onFieldChange` проп | Объект конфигурации на `<Form>`      | Простая синхронизация поле→поле на уровне формы    |
+| `<Form.Watch>`       | Безрендерный компонент внутри формы  | Локальные реакции, наблюдатели с учётом групп      |
+
+Оба получают одинаковый `FieldChangeApi`:
+
+```ts
+interface FieldChangeApi {
+  setFieldValue(name: string, value: unknown): void
+  getFieldValue(name: string): unknown
+  getValues(): Record<string, unknown>
+}
+```
+
+## Живое демо
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="field-watchers" height={600} />
+
+## onFieldChange
+
+Передайте запись имён полей и коллбэков в корневой `<Form>`:
+
+```tsx
+<Form
+  schema={CitySchema}
+  initialValue={{ name: '', slug: '' }}
+  onSubmit={save}
+  onFieldChange={{
+    name: (value, { setFieldValue }) => {
+      setFieldValue('slug', transliterate(String(value)))
+    },
+  }}
+>
+  <Form.Field.String name="name" label="Название города" />
+  <Form.Field.String name="slug" label="Slug" />
+  <Form.Button.Submit />
+</Form>
+```
+
+Коллбэк вызывается **после** обновления хранилища TanStack Form, синхронно. Только наблюдаемые поля вызывают свои коллбэки — изменения других полей игнорируются.
+
+### Множественные наблюдатели
+
+```tsx
+onFieldChange={{
+  quantity: (val, { setFieldValue, getFieldValue }) => {
+    const price = getFieldValue('price') as number
+    setFieldValue('total', (val as number) * price)
+  },
+  price: (val, { setFieldValue, getFieldValue }) => {
+    const qty = getFieldValue('quantity') as number
+    setFieldValue('total', qty * (val as number))
+  },
+}}
+```
+
+## Form.Watch
+
+Безрендерный компонент, размещаемый в любом месте дерева формы. Он учитывает контекст `Form.Group` — пути полей разрешаются относительно текущей группы.
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.NativeSelect name="country" options={countries} />
+  <Form.Field.String name="currency" />
+
+  <Form.Watch
+    field="country"
+    onChange={(value, { setFieldValue }) => {
+      setFieldValue('currency', currencyMap[String(value)])
+    }}
+  />
+
+  <Form.Button.Submit />
+</Form>
+```
+
+### Внутри группы
+
+`Form.Watch` разрешает путь поля относительно родительской группы, так же как `Form.Field.*`:
+
+```tsx
+<Form.Group name="shipping">
+  <Form.Field.String name="country" />
+  <Form.Field.String name="currency" />
+
+  {/* Наблюдает за shipping.country, а не корневым country */}
+  <Form.Watch
+    field="country"
+    onChange={(value, { setFieldValue }) => {
+      // setFieldValue использует абсолютные пути
+      setFieldValue('shipping.currency', getCurrency(String(value)))
+    }}
+  />
+</Form.Group>
+```
+
+### Пропсы
+
+| Проп       | Тип                                             | Описание                                      |
+| ---------- | ----------------------------------------------- | --------------------------------------------- |
+| `field`    | `string`                                        | Имя наблюдаемого поля (относительно группы)   |
+| `onChange` | `(value: unknown, api: FieldChangeApi) => void` | Коллбэк при изменении значения                |
+
+## Когда что использовать
+
+| Сценарий                               | Рекомендация                                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Slug из заголовка                      | `onFieldChange` — простой маппинг 1:1                                                                  |
+| Страна → валюта + приветствие          | Оба — `onFieldChange` для нескольких полей сразу, или `Form.Watch` если рядом с селектом               |
+| Наблюдатель внутри `Form.Group`        | `Form.Watch` — автоматическое разрешение путей                                                         |
+| Динамический расчёт (цена × кол-во)   | `onFieldChange` — доступ к нескольким полям через `getFieldValue`                                      |
+| Существующая форма, минимум изменений  | `onFieldChange` — просто добавить проп, без изменений JSX                                              |
+
+## Сравнение с другими паттернами
+
+### vs useFieldActions + useEffect
+
+До появления `onFieldChange` ручной подход выглядел так:
+
+```tsx
+// Раньше — громоздкий кастомный компонент
+function SlugSync() {
+  const name = useFieldActions('name')
+  const slug = useFieldActions('slug')
+
+  useEffect(() => {
+    slug.onChange(transliterate(String(name.value)))
+  }, [name.value])
+
+  return null
+}
+```
+
+Теперь:
+
+```tsx
+// Сейчас — один проп
+<Form onFieldChange={{ name: (v, { setFieldValue }) => setFieldValue('slug', transliterate(String(v))) }}>
+```
+
+### vs Form.When
+
+`Form.When` управляет **видимостью** — показывает/скрывает поля по значению. `Form.Watch` и `onFieldChange` управляют **значениями** — обновляют другие поля при изменении одного. Они дополняют друг друга.
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/watch).

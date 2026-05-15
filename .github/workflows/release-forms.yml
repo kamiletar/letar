@@ -1,0 +1,199 @@
+# Публикация @letar/forms на npm
+# Триггер: git tag forms-vX.Y.Z
+# Результат: Исходники в kamiletar/letar-forms + npm publish
+
+name: Release @letar/forms
+
+on:
+  push:
+    tags:
+      - 'forms-v*.*.*'
+
+jobs:
+  # 1. Публикация исходников в kamiletar/letar-forms
+  publish-source:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
+      tag: ${{ steps.parse-version.outputs.tag }}
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: parse-version
+        run: |
+          # forms-v1.0.0 → 1.0.0
+          VERSION=${GITHUB_REF#refs/tags/forms-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Clone kamiletar/letar-forms repository
+        run: |
+          git clone https://kamiletar:${{ secrets.GH_TOKEN }}@github.com/kamiletar/letar-forms.git forms-public
+          cd forms-public
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Copy source code to public repo
+        run: |
+          # Удаляем всё кроме .git
+          find forms-public -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          # Копируем исходники библиотеки
+          rsync -av \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            --exclude '.env*' \
+            --exclude 'project.json' \
+            --exclude 'package.json' \
+            --exclude 'tsconfig.json' \
+            --exclude 'tsconfig.lib.json' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            --exclude 'vitest.config.ts' \
+            --exclude 'eslint.config.*' \
+            --exclude 'PLAN.md' \
+            --exclude 'TESTING_PLAN.md' \
+            --exclude 'REFACTORING_PLAN.md' \
+            --exclude '*.spec.ts' \
+            --exclude '*.spec.tsx' \
+            --exclude '*.test.ts' \
+            --exclude '*.test.tsx' \
+            libs/forms/ forms-public/
+
+          # package.publish.json → package.json
+          cp libs/forms/package.publish.json forms-public/package.json
+
+          # tsconfig.publish.json → tsconfig.json
+          cp libs/forms/tsconfig.publish.json forms-public/tsconfig.json
+
+          # Файлы для сборки и публикации
+          cp libs/forms/tsup.config.ts forms-public/
+          cp libs/forms/LICENSE forms-public/
+          cp libs/forms/CHANGELOG.md forms-public/
+
+          # README на английском (если есть, иначе основной)
+          if [ -f libs/forms/README.en.md ]; then
+            cp libs/forms/README.en.md forms-public/README.md
+          else
+            cp libs/forms/README.md forms-public/README.md
+          fi
+
+          # README на русском
+          if [ -f libs/forms/README.md ]; then
+            cp libs/forms/README.md forms-public/README.ru.md
+          fi
+
+      - name: Update version in package.json
+        run: |
+          cd forms-public
+          VERSION="${{ steps.parse-version.outputs.version }}"
+          # Обновить версию в package.json
+          jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json
+          mv package.tmp.json package.json
+
+      - name: Commit and push to kamiletar/letar-forms
+        run: |
+          cd forms-public
+          git add .
+          git commit -m "chore: release v${{ steps.parse-version.outputs.version }}" || echo "No changes to commit"
+
+          # Удалить тег если существует
+          git tag -d ${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+          git push origin :refs/tags/${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+
+          # Создать новый тег
+          git tag ${{ steps.parse-version.outputs.tag }}
+          git push origin main
+          git push origin ${{ steps.parse-version.outputs.tag }}
+
+  # 2. Сборка и публикация на npm
+  build-and-publish:
+    needs: publish-source
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/letar-forms
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/letar-forms
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install build dependencies
+        run: bun add -d tsup typescript @types/react size-limit @size-limit/file
+
+      - name: Build
+        run: bun tsup
+
+      - name: Check bundle size
+        run: bun size-limit --config .size-limit.json
+
+      - name: Prepare dist for publish
+        run: |
+          cp package.json dist/
+          cp README.md dist/
+          cp README.ru.md dist/
+          cp CHANGELOG.md dist/
+          cp LICENSE dist/
+
+      - name: Publish to npm
+        working-directory: dist
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # 3. Создание GitHub Release
+  create-release:
+    needs: [publish-source, build-and-publish]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/letar-forms
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/letar-forms
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ needs.publish-source.outputs.version }}"
+
+          # Извлекаем секцию текущей версии из CHANGELOG.md
+          NOTES=$(awk '/## \['"$VERSION"'\]/{flag=1; next} /## \[/{flag=0} flag' CHANGELOG.md)
+
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v$VERSION of @letar/forms"
+          fi
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh release create "${{ needs.publish-source.outputs.tag }}" \
+            --repo kamiletar/letar-forms \
+            --title "@letar/forms ${{ needs.publish-source.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.notes }}"
+
+          echo "✅ Release published: https://github.com/kamiletar/letar-forms/releases/tag/${{ needs.publish-source.outputs.tag }}"

@@ -1,0 +1,11 @@
+{
+  "name": "auth-hub",
+  "version": "0.3.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/analytics"
+    ]
+  }
+}

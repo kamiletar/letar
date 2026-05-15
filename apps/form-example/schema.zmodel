@@ -1,0 +1,99 @@
+// @letar/forms Example App — schema.zmodel
+// Run: npx zenstack generate
+// This generates both Prisma client AND form schemas with UI metadata!
+
+datasource db {
+  provider = 'postgresql'
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = 'prisma-client-js'
+}
+
+// @letar/zenstack-form-plugin generates Zod schemas with .meta({ ui: {...} })
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+}
+
+// ─── Enums ──────────────────────────────────────────────
+
+enum Status {
+  /// Active
+  ACTIVE
+  /// Archived
+  ARCHIVED
+  /// Draft
+  DRAFT
+}
+
+enum ContactSubject {
+  /// Technical Support
+  SUPPORT
+  /// Sales Inquiry
+  SALES
+  /// Feedback
+  FEEDBACK
+}
+
+// ─── Models ─────────────────────────────────────────────
+
+model Product {
+  id          String   @id @default(cuid())
+
+  /// @form.title("Product Name")
+  /// @form.placeholder("Enter product name")
+  name        String
+
+  /// @form.title("Description")
+  /// @form.fieldType("textarea")
+  /// @form.placeholder("Product description...")
+  description String?
+
+  /// @form.title("Price")
+  /// @form.fieldType("currency")
+  /// @form.props({ min: 0 })
+  price       Float
+
+  /// @form.title("Status")
+  status      Status   @default(DRAFT)
+
+  /// @form.title("Tags")
+  /// @form.fieldType("tags")
+  /// @form.placeholder("Add tag...")
+  tags        String[]
+
+  /// @form.title("Rating")
+  /// @form.fieldType("rating")
+  /// @form.props({ count: 5 })
+  rating      Int      @default(0)
+
+  /// @form.exclude
+  createdAt   DateTime @default(now())
+  /// @form.exclude
+  updatedAt   DateTime @updatedAt
+}
+
+model Contact {
+  id        String         @id @default(cuid())
+
+  /// @form.title("Your Name")
+  /// @form.placeholder("John Doe")
+  name      String
+
+  /// @form.title("Email")
+  /// @form.placeholder("john@example.com")
+  email     String
+
+  /// @form.title("Subject")
+  subject   ContactSubject
+
+  /// @form.title("Message")
+  /// @form.fieldType("textarea")
+  /// @form.placeholder("How can we help?")
+  message   String
+
+  /// @form.exclude
+  createdAt DateTime       @default(now())
+}

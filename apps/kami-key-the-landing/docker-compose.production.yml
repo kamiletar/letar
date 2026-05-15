@@ -1,0 +1,27 @@
+services:
+  app:
+    image: kami-key-the-landing:latest
+    container_name: kami-key-the-landing-app
+    restart: always
+    ports:
+      - '3011:3011'
+    environment:
+      TZ: Europe/Moscow
+      # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      PORT: 3011
+      # Umami аналитика
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+    networks:
+      - nginx-proxy-manager_default
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  nginx-proxy-manager_default:
+    external: true

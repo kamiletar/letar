@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Saat neçədir?",
+    "description": "UNIX dövrünün başlanğıcından bəri sıra saatı"
+  },
+  "time": {
+    "now": "İndi",
+    "hour": "UNIX dövrünün başlanğıcından bəri saat",
+    "hoursPassed": "saat UNIX dövrünün başlanğıcından bəri keçib"
+  },
+  "countdown": {
+    "until": "{milestone} saata qədər",
+    "days": "{count, plural, one {# gün} other {# gün}}",
+    "hours": "{count, plural, one {# saat} other {# saat}}",
+    "minutes": "{count, plural, one {# dəqiqə} other {# dəqiqə}}",
+    "seconds": "{count, plural, one {# saniyə} other {# saniyə}}"
+  },
+  "celebration": {
+    "milestone": "UNIX dövrünün {hours} saatı!"
+  },
+  "subscribe": {
+    "subscribe": "Bildirişlər",
+    "explanation": "E-poçtunuzu təsdiqləmək və bildiriş parametrlərinə daxil olmaq üçün giriş tələb olunur",
+    "signIn": "Daxil ol",
+    "settings": "Parametrlər"
+  },
+  "profile": {
+    "title": "Bildiriş parametrləri",
+    "email": "E-poçt",
+    "notifyMonth": "Bir ay əvvəl",
+    "notifyWeek": "Bir həftə əvvəl",
+    "notifyDay": "Bir gün əvvəl",
+    "notifyHour": "Bir saat əvvəl",
+    "notify5Min": "5 dəqiqə əvvəl",
+    "save": "Saxla",
+    "saved": "Saxlanıldı!",
+    "unsubscribe": "Hamısından imtina et",
+    "unsubscribed": "Bütün bildirişlərdən imtina etdiniz",
+    "noSubscription": "Hələ bildirişlərə abunəliyiniz yoxdur",
+    "createSubscription": "Bildirişlərə abunə ol"
+  },
+  "unsubscribe": {
+    "title": "Abunəlikdən imtina",
+    "success": "UNIX saat mərhələ bildirişlərindən uğurla imtina etdiniz",
+    "error": "Yanlış abunəlikdən imtina linki",
+    "back": "Ana səhifəyə qayıt"
+  }
+}

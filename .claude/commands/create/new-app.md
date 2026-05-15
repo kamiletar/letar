@@ -1,0 +1,290 @@
+# Создание нового Next.js приложения
+
+Создай новое Next.js приложение со всеми необходимыми настройками.
+
+## Параметры
+
+- **Имя приложения:** $ARGUMENTS (например: `my-app`)
+- **Порт:** Найди следующий доступный 3xxx порт
+
+## Шаги создания
+
+### 1. Генерация приложения
+
+```bash
+# Генерация через Nx
+nx g @nx/next:application apps/<name> --directory=apps/<name> --e2eTestRunner=playwright --unitTestRunner=none --style=none --linter=eslint
+```
+
+### 2. Очистка сгенерированных файлов
+
+После генерации удали ненужные файлы — за стили отвечает Chakra UI:
+
+```bash
+rm apps/<name>/src/app/global.css       # Chakra управляет стилями
+rm apps/<name>/next.config.js           # Заменим на next.config.mjs
+rm apps/<name>/.swcrc                   # Не нужен
+rm apps/<name>/index.d.ts               # Не нужен
+rm -rf apps/<name>/src/app/api/hello    # Дефолтный API route
+```
+
+В `layout.tsx` **НЕ** импортируй `global.css` — Chakra полностью управляет стилями.
+
+### 3. Структура файлов
+
+Создай следующую структуру:
+
+```
+apps/<name>/
+├── .env                      # PORT=<next-port>
+├── README.md                 # Документация
+├── PLAN.md                   # Техническое задание
+├── PLAN_COMPLETED.md         # Выполненные задачи
+├── PLAN_TESTING.md           # План тестирования
+├── CHANGELOG.md              # История изменений
+├── package.json              # Только version + nx config
+├── project.json              # Nx targets
+├── vitest.config.ts          # Vitest конфигурация
+├── vitest.setup.tsx          # Полифилы для тестов
+├── next.config.mjs           # MDX + Nx
+├── tsconfig.json             # TypeScript
+├── src/
+│   ├── app/
+│   │   ├── _components/
+│   │   │   └── providers.tsx # Chakra + ColorMode + theme
+│   │   ├── layout.tsx        # Root layout
+│   │   └── page.tsx          # Home page
+│   ├── theme/
+│   │   ├── index.ts          # createSystem + defineConfig
+│   │   ├── tokens/
+│   │   │   ├── index.ts
+│   │   │   └── colors.ts     # defineTokens.colors
+│   │   └── semanticTokens/
+│   │       ├── index.ts
+│   │       └── colors.ts     # defineSemanticTokens
+│   └── mdx-components.tsx    # MDX + Chakra
+```
+
+### 4. package.json
+
+```json
+{
+  "name": "@letar/<name>",
+  "version": "0.1.0",
+  "private": true,
+  "nx": {
+    "name": "<name>",
+    "implicitDependencies": ["chakra-provider", "ui", "analytics"]
+  }
+}
+```
+
+### 5. project.json targets
+
+Добавь стандартные targets:
+
+- `typecheck` — tsc --noEmit
+- `typecheck:tsgo` — tsgo --noEmit (быстрый)
+- `oxlint` — bunx oxlint src
+- `lint` — dependsOn: ["oxlint"] (ESLint после oxlint)
+- `lint:fix` — eslint . --fix
+- `format` — bunx dprint fmt
+- `format:check` — bunx dprint check
+- `test` — @nx/vitest:test
+
+### 6. vitest.config.ts
+
+```typescript
+/// <reference types="vitest" />
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  plugins: [react()],
+  cacheDir: '../../node_modules/.vitest/<name>',
+  test: {
+    name: '<name>',
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./vitest.setup.tsx'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['node_modules', 'dist', '.next', 'e2e'],
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: '../../coverage/apps/<name>',
+      reporter: ['text', 'json', 'html'],
+    },
+    clearMocks: true,
+    restoreMocks: true,
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
+})
+```
+
+### 7. vitest.setup.tsx
+
+Скопируй из `apps/pravda/vitest.setup.tsx`:
+
+- TextEncoder/TextDecoder полифилы
+- structuredClone полифил
+- ResizeObserver/IntersectionObserver моки
+- Next.js navigation/link/image моки
+
+### 8. Тема (src/theme/)
+
+Создай структуру темы по образцу `apps/pravda/src/theme/`:
+
+- `tokens/colors.ts` — brand, accent, gray, success, warning, error, info
+- `semanticTokens/colors.ts` — bg, fg, border + все палитры с \_light/\_dark
+- `index.ts` — createSystem(defaultConfig, appConfig)
+
+### 9. Umami аналитика
+
+В `layout.tsx` подключи `<UmamiScript />` из `@letar/analytics` перед `</body>`:
+
+```tsx
+import { UmamiScript } from '@letar/analytics'
+
+// ... в return:
+        <UmamiScript />
+      </body>
+```
+
+В `tsconfig.json` добавь path alias:
+
+```json
+"@letar/analytics": ["../../libs/analytics/src/index.ts"]
+```
+
+В `package.json` добавь в `implicitDependencies`:
+
+```json
+"implicitDependencies": ["chakra-provider", "ui", "analytics"]
+```
+
+В `.env.docker` добавь (website ID создаётся позже в Umami):
+
+```env
+NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://stats.letar.best/script.js
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=
+```
+
+### 10. Providers (src/app/\_components/providers.tsx)
+
+```tsx
+'use client'
+
+import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import type { PropsWithChildren } from 'react'
+
+import { system } from '@/theme'
+
+export function Providers({ children }: PropsWithChildren) {
+  return (
+    <ColorModeProvider>
+      <RootChakraProvider value={system}>{children}</RootChakraProvider>
+    </ColorModeProvider>
+  )
+}
+```
+
+### 11. MDX (next.config.mjs)
+
+```javascript
+import createMDX from '@next/mdx'
+import { composePlugins, withNx } from '@nx/next'
+
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+  nx: {},
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+const plugins = [withNx, withMDX]
+
+export default composePlugins(...plugins)(nextConfig)
+```
+
+### 12. mdx-components.tsx
+
+Скопируй из `apps/pravda/src/mdx-components.tsx`:
+
+- Heading, Text, Link, Code компоненты
+- Pre с chakra styling
+
+### 13. README.md шаблон
+
+```markdown
+# <Name>
+
+Описание приложения.
+
+## Версия и стек
+
+| Параметр    | Значение                    |
+| ----------- | --------------------------- |
+| **Версия**  | 0.1.0                       |
+| **Порт**    | <port>                      |
+| **Next.js** | 16.1                        |
+| **React**   | 19                          |
+| **UI**      | Chakra UI v3                |
+| **Формы**   | @letar/forms + Zod |
+
+## Быстрый старт
+
+\`\`\`bash
+nx dev <name> # Разработка
+nx format <name> # Форматирование
+nx lint <name> # oxlint → ESLint
+nx typecheck:tsgo <name> # Проверка типов
+nx test <name> # Тесты
+\`\`\`
+```
+
+### 14. Обновить CLAUDE.md
+
+Добавь новое приложение в таблицу портов.
+
+### 15. Регистрация в инфраструктуре Dashboard
+
+При добавлении приложения на production, обязательно зарегистрируй его во всех местах (см. skill `deployment-assistant` → «Чеклист: добавление нового приложения в Dashboard»):
+
+1. `deploy-affected.sh` → массив `S1_APPS` или `S2_APPS`
+2. `apps/dashboard/prisma/seed.ts` → `s1Apps` или `s2Apps` (name, displayName, containerName, port, type, domain)
+3. `apps/<name>/.env.docker` → создать с `DOMAIN=<domain>`
+4. `scripts/sync-env-docker.sh` → массив `APPS`
+5. `scripts/pull-env-docker.sh` → `S1_APPS`/`S2_APPS` и `ALL_APPS`
+
+### 16. Настройка бэкапов (если есть БД или uploads)
+
+⚠️ **Без этого шага данные НЕ бэкапятся!** См. skill `deployment-assistant` → «Чеклист: бекапы при деплое».
+
+**Если приложение с PostgreSQL:**
+
+1. `apps/dashboard-agent/src/lib/database.ts` → `APP_CONFIG` — добавить конфиг БД
+2. `apps/dashboard-agent/src/lib/server-config.ts` → `SERVER_APPS` — маппинг на сервер
+3. `apps/dashboard-agent/docker-compose.*.yml` — маунт `.env.docker` как секрет
+4. `.claude/docs/backup-architecture.md` — добавить в таблицу
+5. Задеплоить dashboard-agent
+
+**Если приложение с uploads:**
+
+- Обязательно bind mount `./uploads:/app/apps/<name>/uploads` в docker-compose (не anonymous volume!)
+
+## После создания
+
+1. Запусти `nx dev <name>` — проверь что работает
+2. Запусти `nx typecheck:tsgo <name>` — проверь типы
+3. Запусти `nx test <name>` — проверь тесты
+4. Закоммить изменения

@@ -1,0 +1,17 @@
+/**
+ * Конфигурация React Native
+ *
+ * Нативные зависимости объявлены в корневом package.json монорепо,
+ * здесь указываем их явно для autolinking.
+ */
+module.exports = {
+  dependencies: {
+    '@react-native-async-storage/async-storage': {},
+    'react-native-blob-util': {},
+    'react-native-gesture-handler': {},
+    'react-native-safe-area-context': {},
+    'react-native-screens': {},
+    'react-native-svg': {},
+    'react-native-video': {},
+  },
+}

@@ -1,0 +1,65 @@
+# Dashboard Agent Dockerfile
+# Lightweight мониторинг агент для удалённых серверов
+
+FROM node:24-alpine AS base
+
+# Установка зависимостей для systeminformation
+RUN apk add --no-cache \
+    util-linux \
+    procps
+
+WORKDIR /app
+
+# =============================================================================
+# Builder stage
+# =============================================================================
+FROM base AS builder
+
+# Устанавливаем bun
+RUN npm install -g bun
+
+# Копируем только package.json dashboard-agent
+COPY apps/dashboard-agent/package.json ./
+
+# Устанавливаем зависимости только для dashboard-agent
+RUN bun install
+
+# Копируем исходный код
+COPY apps/dashboard-agent/src ./src
+COPY apps/dashboard-agent/tsconfig.json ./
+
+# Сборка
+RUN bun build ./src/index.ts --outdir=./dist --target=node
+
+# =============================================================================
+# Production stage
+# =============================================================================
+FROM base AS production
+
+# Устанавливаем git, ssh и docker-cli для git операций и бэкапов БД
+RUN apk add --no-cache git openssh-client docker-cli
+
+# Создаём пользователя для безопасности
+RUN addgroup -g 1001 -S agent && \
+    adduser -u 1001 -S agent -G agent
+
+WORKDIR /app
+
+# Копируем собранные файлы
+COPY --from=builder /app/dist ./
+
+# Устанавливаем только production зависимости
+COPY --from=builder /app/node_modules ./node_modules
+
+# Переключаемся на пользователя agent
+USER agent
+
+# Порт
+EXPOSE 3100
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3100/health || exit 1
+
+# Запуск
+CMD ["node", "index.js"]

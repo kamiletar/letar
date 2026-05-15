@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — ポスト量子 P2P メッセンジャー",
+    "description": "Aira はハイブリッド・ポスト量子暗号を備えた分散型メッセンジャーです。サーバーなし、電話番号なし、妥協なし。"
+  },
+  "nav": {
+    "features": "機能",
+    "security": "セキュリティ",
+    "download": "ダウンロード",
+    "github": "GitHub",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "mainNavigation": "メインナビゲーション",
+    "mobileNavigation": "モバイルナビゲーション",
+    "skipToContent": "本文へスキップ"
+  },
+  "hero": {
+    "badge": "{version} — ポスト量子防御、ここに",
+    "fallbackVersion": "v0.3.3",
+    "title1": "自由に話そう。",
+    "title2": "未来を守ろう。",
+    "subtitle": "Aira はハイブリッド・ポスト量子暗号を備えた分散型メッセンジャーです。サーバーなし、電話番号なし、妥協なし。",
+    "ctaDownload": "Aira をダウンロード",
+    "ctaSource": "ソースコード",
+    "tagOpenSource": "オープンソース"
+  },
+  "features": {
+    "title": "スーパーパワー",
+    "subtitle": "あなたの通信の自由を守るために、あらゆる細部を設計しました",
+    "quantum": {
+      "title": "耐量子暗号",
+      "description": "ML-KEM-768 + X25519 のハイブリッド暗号。両方のアルゴリズムを同時に破る必要があり、今日から量子コンピュータに備えられます。"
+    },
+    "p2p": {
+      "title": "本物の P2P",
+      "description": "サーバー、アカウント、電話番号は不要。すべてのユーザーがネットワークのノードです。メッセージは QUIC 経由で直接届きます。"
+    },
+    "metadata": {
+      "title": "不可視のメタデータ",
+      "description": "各連絡先にペアワイズ仮名を使用。リレーでさえ相手を知りません。全パケットのパディングでメッセージサイズも秘匿。"
+    },
+    "global": {
+      "title": "どこでも使える",
+      "description": "REALITY カモフラージュ、obfs4、Tor、CDN フォールバック。プラガブルトランスポートが最も検閲の強い地域でも DPI を突破します。"
+    },
+    "fullMessenger": {
+      "title": "本格派メッセンジャー",
+      "description": "リアクション、返信、編集、消える メッセージ、ファイル転送、最大 100 人のグループ、ボット — すべて暗号化されています。"
+    },
+    "multiplatform": {
+      "title": "マルチプラットフォーム",
+      "description": "CLI、デスクトップ (Linux/macOS/Windows)、Android。シードフレーズで最大 5 台までリンク・同期できます。"
+    }
+  },
+  "security": {
+    "title": "内部構造",
+    "subtitle": "100% Rust。暗号コアに unsafe コードはゼロ。すべての鍵は分離され、使用後に完全に消去されます。",
+    "crypto": {
+      "title": "暗号技術",
+      "keyAgreementLabel": "鍵合意",
+      "keyAgreementDetail": "ハイブリッド KEM、FIPS 203",
+      "signaturesLabel": "署名",
+      "signaturesDetail": "FIPS 204、ポスト量子",
+      "encryptionLabel": "暗号化",
+      "encryptionDetail": "256 ビット、AEAD",
+      "hashingLabel": "ハッシュ",
+      "hashingDetail": "KDF + MAC、長さ拡張攻撃に耐性",
+      "kdfLabel": "鍵派生",
+      "kdfDetail": "256 MB / 64 MB (デスクトップ/モバイル)",
+      "fsLabel": "前方秘匿性",
+      "fsDetail": "約 50 メッセージごとに PQ 更新"
+    },
+    "protection": {
+      "title": "防御",
+      "dpiLabel": "DPI 回避",
+      "dpiValue": "5 段階",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "メタデータ",
+      "metadataValue": "ペアワイズ仮名",
+      "metadataDetail": "リレーはソーシャルグラフを見ない",
+      "deniabilityLabel": "否認可能性",
+      "deniabilityValue": "対称 MAC",
+      "deniabilityDetail": "作者を証明できない",
+      "antispamLabel": "スパム対策",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "見知らぬ相手には 20 ビット",
+      "paddingLabel": "パディング",
+      "paddingValue": "256〜4096 バイト",
+      "paddingDetail": "本来のメッセージサイズを隠す",
+      "recoveryLabel": "復元",
+      "recoveryValue": "BIP-39 の 24 単語",
+      "recoveryDetail": "シードフレーズによる決定論的導出"
+    },
+    "vsTitle": "なぜ Signal / Session / SimpleX ではないのか？",
+    "vsSignal": "Signal はサーバーを使い、電話番号を要求し、メッセージごとのポスト量子保護もありません。Aira は P2P + SPQR ラチェットです。",
+    "vsSession": "Session は Oxen のサーバーを経由するオニオンルーティングを使用します。Aira は中間サーバーなしの直接 P2P で、完全な PQ 暗号化を備えています。",
+    "vsSimpleX": "SimpleX は配信にリレーサーバーを前提としています。Aira は直接通信し、リレーは NAT 越えのためのフォールバックに過ぎません。"
+  },
+  "download": {
+    "title": "Aira をダウンロード",
+    "subtitleWithVersion": "{version} — オープンソース。永久無料。",
+    "subtitle": "オープンソース。永久無料。",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI。tar.gz アーカイブ。",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "Apple M1/M2/M3/M4 向け CLI + Daemon + GUI。",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "Intel Mac 向け CLI + Daemon + GUI。",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI。zip アーカイブ。",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose と UniFFI 経由の Rust コア。APK。",
+    "downloadLabel": "ダウンロード",
+    "portableLabel": "ポータブルアーカイブ",
+    "cargoLabel": "Cargo でインストール:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "仕様",
+    "releases": "リリース"
+  }
+}

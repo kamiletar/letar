@@ -1,0 +1,69 @@
+---
+title: Conditional Fields
+description: Show or hide fields based on other field values
+---
+
+## Live Demo
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="conditional" height={500} />
+
+## Form.When
+
+Conditionally render fields based on the value of another field:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.Select name="contactMethod" />
+
+  <Form.When field="contactMethod" is="email">
+    <Form.Field.String name="email" />
+  </Form.When>
+
+  <Form.When field="contactMethod" is="phone">
+    <Form.Field.Phone name="phone" />
+  </Form.When>
+
+  <Form.Button.Submit />
+</Form>
+```
+
+## Multiple Values
+
+Show a field when the value matches any of several options:
+
+```tsx
+<Form.When field="type" is={['company', 'organization']}>
+  <Form.Field.String name="companyName" />
+  <Form.Field.String name="taxId" />
+</Form.When>
+```
+
+## Custom Condition
+
+Use a function for complex conditions:
+
+```tsx
+<Form.When field="age" condition={(age) => age >= 18}>
+  <Form.Field.Checkbox name="drivingLicense" />
+</Form.When>
+```
+
+## Nested When
+
+Conditions can be nested:
+
+```tsx
+<Form.When field="hasAddress" is={true}>
+  <Form.Group name="address">
+    <Form.Field.String name="street" />
+    <Form.Field.String name="city" />
+
+    <Form.When field="country" is="US">
+      <Form.Field.String name="state" />
+      <Form.Field.String name="zip" />
+    </Form.When>
+  </Form.Group>
+</Form.When>
+```

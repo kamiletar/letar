@@ -1,0 +1,117 @@
+// Unix Time — празднование юбилейных UNIX-часов
+// Авторизация через ключницу (auth.letar.best)
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// ========================================
+// Пользователь (синхронизируется с ключницей)
+// ========================================
+
+model User {
+  id            String    @id @default(cuid())
+  /// Имя пользователя
+  name          String?
+  /// Email пользователя
+  email         String    @unique
+  /// URL аватара
+  image         String?
+  /// ID в ключнице (для связи)
+  externalId    String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  /// Подписка на уведомления
+  subscription  NotificationSubscription?
+
+  @@allow('read', auth() == this)
+  @@allow('update', auth() == this)
+}
+
+// ========================================
+// Подписка на уведомления о юбилеях
+// ========================================
+
+model NotificationSubscription {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Уведомлять за месяц
+  notifyMonth   Boolean   @default(true)
+  /// Уведомлять за неделю
+  notifyWeek    Boolean   @default(true)
+  /// Уведомлять за день
+  notifyDay     Boolean   @default(true)
+  /// Уведомлять за час
+  notifyHour    Boolean   @default(true)
+  /// Уведомлять за 5 минут
+  notify5Min    Boolean   @default(true)
+
+  /// Язык уведомлений (ISO 639-1)
+  locale        String    @default("ru")
+  /// Таймзона пользователя (IANA, например Europe/Moscow)
+  timezone      String    @default("Europe/Moscow")
+
+  /// Подписка активна
+  active        Boolean   @default(true)
+  /// Токен для отписки без авторизации
+  unsubscribeToken String @unique @default(cuid())
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  /// Лог отправленных уведомлений
+  logs          NotificationLog[]
+
+  @@allow('read', auth() == user)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth() == user)
+}
+
+// ========================================
+// Лог отправленных уведомлений (дедупликация)
+// ========================================
+
+model NotificationLog {
+  id               String    @id @default(cuid())
+  subscriptionId   String
+  subscription     NotificationSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  /// Целевой юбилейный час
+  milestoneHour    Int
+  /// Тип уведомления (month, week, day, hour, 5min)
+  notificationType String
+  /// Время отправки
+  sentAt           DateTime  @default(now())
+  /// Успешно ли отправлено
+  success          Boolean   @default(true)
+  /// Текст ошибки (если не удалось)
+  error            String?
+
+  /// Одно уведомление на подписку+юбилей+тип
+  @@unique([subscriptionId, milestoneHour, notificationType])
+
+  @@allow('read', auth() == subscription.user)
+  @@allow('create', true)
+}

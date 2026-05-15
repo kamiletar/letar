@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" font-family="JetBrains Mono, Fira Code, monospace">
+  <defs>
+    <linearGradient id="bgLeft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="bgRight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1f0d"/>
+      <stop offset="100%" stop-color="#1a2e1a"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Фон -->
+  <rect width="920" height="520" rx="12" fill="#0d1117"/>
+
+  <!-- Заголовок -->
+  <text x="460" y="36" text-anchor="middle" fill="#e6edf3" font-size="18" font-weight="bold">Логин-форма: vanilla React vs @letar/forms</text>
+
+  <!-- Левая панель: Vanilla React -->
+  <rect x="16" y="52" width="436" height="452" rx="8" fill="url(#bgLeft)" filter="url(#shadow)"/>
+  <rect x="16" y="52" width="436" height="32" rx="8" fill="#e53e3e" opacity="0.15"/>
+  <text x="234" y="74" text-anchor="middle" fill="#fc8181" font-size="13" font-weight="bold">Vanilla React — 48 строк</text>
+
+  <!-- Код Vanilla -->
+  <text y="100" x="28" fill="#7b8794" font-size="9.5">
+    <tspan x="28" dy="0" fill="#c678dd">function</tspan><tspan fill="#61afef"> LoginForm</tspan><tspan fill="#abb2bf">() {</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">  const</tspan><tspan fill="#abb2bf"> [email, setEmail] = </tspan><tspan fill="#61afef">useState</tspan><tspan fill="#abb2bf">('')</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">  const</tspan><tspan fill="#abb2bf"> [password, setPassword] = </tspan><tspan fill="#61afef">useState</tspan><tspan fill="#abb2bf">('')</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">  const</tspan><tspan fill="#abb2bf"> [errors, setErrors] = </tspan><tspan fill="#61afef">useState</tspan><tspan fill="#abb2bf">({})</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">  const</tspan><tspan fill="#abb2bf"> [isSubmitting, setIsSubmitting] = </tspan><tspan fill="#61afef">useState</tspan><tspan fill="#abb2bf">(</tspan><tspan fill="#d19a66">false</tspan><tspan fill="#abb2bf">)</tspan>
+    <tspan x="28" dy="18" fill="#c678dd">  const</tspan><tspan fill="#61afef"> validate</tspan><tspan fill="#abb2bf"> = () => {</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    const</tspan><tspan fill="#abb2bf"> newErrors = {}</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    if</tspan><tspan fill="#abb2bf"> (!email) newErrors.email = </tspan><tspan fill="#98c379">'Обязательное'</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    else if</tspan><tspan fill="#abb2bf"> (!/\S+@\S+/.test(email))</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      newErrors.email = </tspan><tspan fill="#98c379">'Некорректный email'</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    if</tspan><tspan fill="#abb2bf"> (!password) newErrors.password = </tspan><tspan fill="#98c379">'Обязательное'</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    else if</tspan><tspan fill="#abb2bf"> (password.length &lt; 8)</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      newErrors.password = </tspan><tspan fill="#98c379">'Мин. 8 символов'</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    return</tspan><tspan fill="#abb2bf"> newErrors</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">  }</tspan>
+    <tspan x="28" dy="18" fill="#c678dd">  const</tspan><tspan fill="#61afef"> handleSubmit</tspan><tspan fill="#abb2bf"> = </tspan><tspan fill="#c678dd">async</tspan><tspan fill="#abb2bf"> (e) => {</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">    e.preventDefault()</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    const</tspan><tspan fill="#abb2bf"> errs = validate()</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    if</tspan><tspan fill="#abb2bf"> (Object.keys(errs).length > 0) {</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      setErrors(errs); </tspan><tspan fill="#c678dd">return</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">    }</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">    setIsSubmitting(</tspan><tspan fill="#d19a66">true</tspan><tspan fill="#abb2bf">)</tspan>
+    <tspan x="28" dy="14" fill="#c678dd">    await</tspan><tspan fill="#61afef"> login</tspan><tspan fill="#abb2bf">({ email, password })</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">    setIsSubmitting(</tspan><tspan fill="#d19a66">false</tspan><tspan fill="#abb2bf">)</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">  }</tspan>
+    <tspan x="28" dy="18" fill="#c678dd">  return</tspan><tspan fill="#abb2bf"> (</tspan>
+    <tspan x="28" dy="14" fill="#e06c75">    &lt;form</tspan><tspan fill="#d19a66"> onSubmit</tspan><tspan fill="#abb2bf">={handleSubmit}&gt;</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      &lt;input value={email} onChange=... /&gt;</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      {errors.email &amp;&amp; &lt;span&gt;...&lt;/span&gt;}</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      &lt;input value={password} onChange=... /&gt;</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      {errors.password &amp;&amp; &lt;span&gt;...&lt;/span&gt;}</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">      &lt;button disabled={isSubmitting}&gt;Войти&lt;/button&gt;</tspan>
+    <tspan x="28" dy="14" fill="#e06c75">    &lt;/form&gt;</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">  )</tspan>
+    <tspan x="28" dy="14" fill="#abb2bf">}</tspan>
+  </text>
+
+  <!-- Правая панель: @letar/forms -->
+  <rect x="468" y="52" width="436" height="452" rx="8" fill="url(#bgRight)" filter="url(#shadow)"/>
+  <rect x="468" y="52" width="436" height="32" rx="8" fill="#38a169" opacity="0.15"/>
+  <text x="686" y="74" text-anchor="middle" fill="#68d391" font-size="13" font-weight="bold">@letar/forms — 8 строк</text>
+
+  <!-- Код @letar/forms -->
+  <text y="108" x="480" fill="#7b8794" font-size="10.5">
+    <tspan x="480" dy="0" fill="#c678dd">const</tspan><tspan fill="#abb2bf"> schema = z.object({</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">  email: z.</tspan><tspan fill="#61afef">email</tspan><tspan fill="#abb2bf">(),</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">  password: z.</tspan><tspan fill="#61afef">string</tspan><tspan fill="#abb2bf">().min(8),</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">})</tspan>
+    <tspan x="480" dy="24"/>
+    <tspan x="480" dy="0" fill="#e06c75">&lt;Form</tspan><tspan fill="#d19a66"> schema</tspan><tspan fill="#abb2bf">={schema}</tspan><tspan fill="#d19a66"> onSubmit</tspan><tspan fill="#abb2bf">={login}&gt;</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">  &lt;</tspan><tspan fill="#e06c75">Form.Field.String</tspan><tspan fill="#d19a66"> name</tspan><tspan fill="#abb2bf">=</tspan><tspan fill="#98c379">"email"</tspan><tspan fill="#abb2bf"> /&gt;</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">  &lt;</tspan><tspan fill="#e06c75">Form.Field.Password</tspan><tspan fill="#d19a66"> name</tspan><tspan fill="#abb2bf">=</tspan><tspan fill="#98c379">"password"</tspan><tspan fill="#abb2bf"> /&gt;</tspan>
+    <tspan x="480" dy="16" fill="#abb2bf">  &lt;</tspan><tspan fill="#e06c75">Form.Button.Submit</tspan><tspan fill="#abb2bf">&gt;Войти&lt;/</tspan><tspan fill="#e06c75">Form.Button.Submit</tspan><tspan fill="#abb2bf">&gt;</tspan>
+    <tspan x="480" dy="16" fill="#e06c75">&lt;/Form&gt;</tspan>
+  </text>
+
+  <!-- Стрелка и множитель -->
+  <text x="686" y="330" text-anchor="middle" fill="#68d391" font-size="48" font-weight="bold" opacity="0.9">6×</text>
+  <text x="686" y="360" text-anchor="middle" fill="#68d391" font-size="16" opacity="0.7">меньше кода</text>
+
+  <!-- Что включено -->
+  <text y="396" x="480" fill="#7b8794" font-size="10">
+    <tspan x="480" dy="0" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> Валидация (Zod schema)</tspan>
+    <tspan x="480" dy="16" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> Отображение ошибок</tspan>
+    <tspan x="480" dy="16" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> isSubmitting + disabled</tspan>
+    <tspan x="480" dy="16" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> Label + aria-атрибуты</tspan>
+    <tspan x="480" dy="16" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> Консистентный UI (Chakra)</tspan>
+    <tspan x="480" dy="16" fill="#68d391">✓</tspan><tspan fill="#a0adb8"> TypeScript autocomplete</tspan>
+  </text>
+
+  <!-- Разделитель -->
+  <line x1="460" y1="68" x2="460" y2="492" stroke="#30363d" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="460" y="512" text-anchor="middle" fill="#484f58" font-size="10">2 поля: email + пароль | одинаковая функциональность</text>
+</svg>

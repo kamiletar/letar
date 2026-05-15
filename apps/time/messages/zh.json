@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "现在几点？",
+    "description": "UNIX纪元以来的小时数"
+  },
+  "time": {
+    "now": "现在是",
+    "hour": "UNIX纪元以来的小时",
+    "hoursPassed": "小时已从UNIX纪元开始经过"
+  },
+  "countdown": {
+    "until": "距离{milestone}小时还有",
+    "days": "{count}天",
+    "hours": "{count}小时",
+    "minutes": "{count}分钟",
+    "seconds": "{count}秒"
+  },
+  "celebration": {
+    "milestone": "UNIX纪元{hours}小时！"
+  },
+  "subscribe": {
+    "subscribe": "通知",
+    "explanation": "需要登录以验证您的电子邮件并访问通知设置",
+    "signIn": "登录",
+    "settings": "设置"
+  },
+  "profile": {
+    "title": "通知设置",
+    "email": "电子邮件",
+    "notifyMonth": "提前一个月",
+    "notifyWeek": "提前一周",
+    "notifyDay": "提前一天",
+    "notifyHour": "提前一小时",
+    "notify5Min": "提前5分钟",
+    "save": "保存",
+    "saved": "已保存！",
+    "unsubscribe": "取消所有订阅",
+    "unsubscribed": "您已取消所有通知订阅",
+    "noSubscription": "您尚未订阅通知",
+    "createSubscription": "订阅通知"
+  },
+  "unsubscribe": {
+    "title": "取消订阅",
+    "success": "您已成功取消UNIX小时里程碑通知",
+    "error": "无效的取消订阅链接",
+    "back": "返回首页"
+  }
+}

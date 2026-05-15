@@ -1,0 +1,54 @@
+---
+title: Установка
+description: Установка @letar/forms и зависимостей
+---
+
+## Установка
+
+```bash
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+# или с bun
+bun add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+# или с pnpm
+pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+```
+
+## Опциональные зависимости
+
+Для drag & drop сортировки в массивах полей:
+
+```bash
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+Для масок ввода (телефон, кредитная карта и т.д.):
+
+```bash
+npm install use-mask-input
+```
+
+## Зависимости
+
+| Пакет                  | Версия    | Обязательный |
+| ---------------------- | --------- | ------------ |
+| `react`                | >= 18.0.0 | Да           |
+| `@tanstack/react-form` | >= 1.0.0  | Да           |
+| `@chakra-ui/react`     | >= 3.0.0  | Да           |
+| `framer-motion`        | >= 10.0.0 | Да           |
+| `zod`                  | >= 3.24.0 | Да           |
+| `@dnd-kit/*`           | >= 6.0.0  | Нет          |
+| `use-mask-input`       | >= 3.0.0  | Нет          |
+
+## Настройка
+
+Убедитесь что в приложении настроен `ChakraProvider`:
+
+```tsx
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+
+function App({ children }) {
+  return <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
+}
+```
+
+Готово! Можно использовать `@letar/forms`.

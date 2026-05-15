@@ -1,0 +1,102 @@
+---
+title: Smart Autofill
+description: Automatic HTML autocomplete attributes for better UX and accessibility
+---
+
+## Overview
+
+Correct `autocomplete` attributes improve form conversion by **30%** (Google) and satisfy **WCAG 1.3.5** for personal data fields. @letar/forms automatically sets `autocomplete` based on field names — no configuration needed.
+
+## How It Works
+
+Fields named `email`, `phone`, `firstName`, etc. automatically receive the correct `autocomplete` attribute:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.String name="email" /> {/* autocomplete="email" */}
+  <Form.Field.String name="firstName" /> {/* autocomplete="given-name" */}
+  <Form.Field.Phone name="phone" /> {/* autocomplete="tel" */}
+  <Form.Field.Password name="password" /> {/* autocomplete="current-password" */}
+  <Form.Field.String name="city" /> {/* autocomplete="address-level2" */}
+</Form>
+```
+
+No props needed — it just works.
+
+## Supported Fields
+
+| Field name pattern                 | autocomplete value |
+| ---------------------------------- | ------------------ |
+| `email`, `e-mail`                  | `email`            |
+| `phone`, `tel`, `mobile`           | `tel`              |
+| `firstName`, `first_name`          | `given-name`       |
+| `lastName`, `last_name`, `surname` | `family-name`      |
+| `name`, `fullName`                 | `name`             |
+| `password`                         | `current-password` |
+| `newPassword`, `confirmPassword`   | `new-password`     |
+| `address`, `street`                | `street-address`   |
+| `city`                             | `address-level2`   |
+| `state`, `region`                  | `address-level1`   |
+| `zip`, `postalCode`                | `postal-code`      |
+| `country`                          | `country-name`     |
+| `company`, `organization`          | `organization`     |
+| `username`                         | `username`         |
+
+## Override via Schema
+
+Use `.meta({ ui: { autocomplete } })` to override auto-detection:
+
+```tsx
+const Schema = z.object({
+  // Override: use street-address instead of default
+  deliveryAddress: z.string().meta({
+    ui: { title: 'Delivery Address', autocomplete: 'street-address' },
+  }),
+
+  // Disable autofill for this field
+  secretCode: z.string().meta({
+    ui: { title: 'Secret Code', autocomplete: 'off' },
+  }),
+})
+```
+
+## Override via Props
+
+The `autoComplete` prop always wins:
+
+```tsx
+<Form.Field.String name="email" autoComplete="username" />
+```
+
+## Priority
+
+1. **`autoComplete` prop** (highest)
+2. **`.meta({ ui: { autocomplete } })`** from Zod schema
+3. **Auto-detection** from field name
+
+## Nested Fields
+
+For nested paths like `address.city`, auto-detection uses the **last segment** (`city`):
+
+```tsx
+<Form.Group name="billing">
+  <Form.Field.String name="city" /> {/* autocomplete="address-level2" */}
+  <Form.Field.String name="zip" /> {/* autocomplete="postal-code" */}
+</Form.Group>
+```
+
+## Affected Components
+
+Auto-detection works on:
+
+- `Form.Field.String`
+- `Form.Field.Password`
+- `Form.Field.Textarea`
+- `Form.Field.Phone` (always `tel`)
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/autofill).

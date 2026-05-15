@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Саат канча?",
+    "description": "UNIX доорунун башынан бери тартиптик саат"
+  },
+  "time": {
+    "now": "Азыр",
+    "hour": "UNIX доорунун башынан бери саат",
+    "hoursPassed": "саат UNIX доорунун башынан бери өттү"
+  },
+  "countdown": {
+    "until": "{milestone} саатка чейин",
+    "days": "{count, plural, one {# күн} other {# күн}}",
+    "hours": "{count, plural, one {# саат} other {# саат}}",
+    "minutes": "{count, plural, one {# мүнөт} other {# мүнөт}}",
+    "seconds": "{count, plural, one {# секунд} other {# секунд}}"
+  },
+  "celebration": {
+    "milestone": "UNIX доорунун {hours} сааты!"
+  },
+  "subscribe": {
+    "subscribe": "Билдирүүлөр",
+    "explanation": "Электрондук почтаңызды ырастоо жана билдирүү жөндөөлөрүнө жетүү үчүн кирүү керек",
+    "signIn": "Кирүү",
+    "settings": "Жөндөөлөр"
+  },
+  "profile": {
+    "title": "Билдирүү жөндөөлөрү",
+    "email": "Электрондук почта",
+    "notifyMonth": "Бир ай мурун",
+    "notifyWeek": "Бир жума мурун",
+    "notifyDay": "Бир күн мурун",
+    "notifyHour": "Бир саат мурун",
+    "notify5Min": "5 мүнөт мурун",
+    "save": "Сактоо",
+    "saved": "Сакталды!",
+    "unsubscribe": "Баарынан баш тартуу",
+    "unsubscribed": "Сиз бардык билдирүүлөрдөн баш тарттыңыз",
+    "noSubscription": "Сизде азырынча билдирүүлөргө жазылуу жок",
+    "createSubscription": "Билдирүүлөргө жазылуу"
+  },
+  "unsubscribe": {
+    "title": "Жазылуудан баш тартуу",
+    "success": "Сиз UNIX саат белгилери билдирүүлөрүнөн ийгиликтүү баш тарттыңыз",
+    "error": "Жараксыз жазылуудан баш тартуу шилтемеси",
+    "back": "Башкы бетке кайтуу"
+  }
+}

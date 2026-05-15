@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/start-agent-mail.js"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/validate-bash.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/kill-e2e-port.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/auto-format.js"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "context-mode@claude-context-mode": true
+  }
+}

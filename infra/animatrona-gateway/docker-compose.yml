@@ -1,0 +1,39 @@
+services:
+  ipfs:
+    image: ipfs/kubo:v0.40.1
+    container_name: animatrona-gateway
+    restart: unless-stopped
+    ports:
+      # Swarm — нестандартный порт
+      - '42001:4001/tcp'
+      - '42001:4001/udp'
+      # API — только localhost
+      - '127.0.0.1:5201:5001'
+      # Gateway — только localhost (проксируется через Next.js)
+      - '127.0.0.1:8180:8080'
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      IPFS_PROFILE: lowpower
+    networks:
+      - premium-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ['CMD-SHELL', 'ipfs id || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  ipfs_data:
+    name: animatrona-gateway-data
+
+networks:
+  premium-network:
+    external: true

@@ -1,0 +1,96 @@
+---
+title: Офлайн режим
+description: PWA-формы с офлайн очередью и синхронизацией
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="offline" height={450} />
+
+## Обзор
+
+`@letar/forms/offline` обеспечивает поддержку офлайн-форм для Progressive Web Apps. Формы, отправленные офлайн, сохраняются в локальную очередь и синхронизируются при восстановлении соединения.
+
+## Установка
+
+```tsx
+import { useOfflineForm, FormOfflineIndicator, FormSyncStatus } from '@letar/forms/offline'
+```
+
+## Базовое использование
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  offline={{
+    actionType: 'UPDATE_PROFILE',
+    onQueued: () => toast.info('Сохранено локально — синхронизируется при подключении'),
+    onSynced: () => toast.success('Синхронизировано с сервером!'),
+  }}
+  onSubmit={handleSubmit}
+>
+  <Form.OfflineIndicator />
+  <Form.Field.String name="name" />
+  <Form.Field.String name="email" />
+  <Form.SyncStatus />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Как это работает
+
+1. **Онлайн** — форма отправляется как обычно через `onSubmit`
+2. **Офлайн** — данные формы сохраняются в очередь IndexedDB/localStorage
+3. **Снова онлайн** — отложенные отправки воспроизводятся по порядку
+4. **Конфликты** — настраиваемая стратегия слияния
+
+## Компоненты
+
+### FormOfflineIndicator
+
+Отображает текущий статус подключения:
+
+```tsx
+<Form.OfflineIndicator />
+// Показывает: 🟢 Онлайн или 🔴 Офлайн
+```
+
+### FormSyncStatus
+
+Показывает статус очереди синхронизации:
+
+```tsx
+<Form.SyncStatus />
+// Показывает: "3 изменения ожидают синхронизации"
+```
+
+## Хуки
+
+### useOfflineForm
+
+Низкоуровневый хук для кастомной офлайн-логики:
+
+```tsx
+const { isOnline, queue, processQueue } = useOfflineForm({
+  actionType: 'CREATE_ORDER',
+  onQueued: (item) => console.log('В очереди:', item),
+  onSynced: (item) => console.log('Синхронизировано:', item),
+})
+```
+
+### useOfflineStatus
+
+Простой статус подключения:
+
+```tsx
+const { isOnline } = useOfflineStatus()
+```
+
+### useSyncQueue
+
+Доступ и управление очередью синхронизации:
+
+```tsx
+const { items, clear, retry } = useSyncQueue()
+```

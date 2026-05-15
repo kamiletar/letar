@@ -1,0 +1,65 @@
+# Dashboard Agent Production Configuration — S2
+# Lightweight monitoring agent for s2.letar.best
+#
+# Запуск: ./deploy-affected.sh --app dashboard-agent
+#
+# Отличия от s1:
+# - SERVER_NAME: s2.letar.best
+# - Secrets для s2-приложений (driving-school, archetest, auth-hub, time, dashboard, form-example)
+# - Без монтирования ~/.ssh (git remote не нужен)
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: apps/dashboard-agent/Dockerfile.production
+    image: dashboard-agent:latest
+    container_name: dashboard-agent
+    restart: always
+    # Запуск от root для чтения secrets файлов и выполнения команд на хосте
+    user: root
+    # Требуется для nsenter (выполнение команд на хосте)
+    pid: host
+    privileged: true
+    ports:
+      - '3100:3100'
+    env_file:
+      - .env.docker
+    environment:
+      TZ: Europe/Moscow
+      NODE_ENV: production
+      PORT: 3100
+      HOST: 0.0.0.0
+      SERVER_NAME: s2.letar.best
+    volumes:
+      # Docker socket для управления контейнерами
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Git репозиторий для git операций (REPO_PATH в lib/git.ts)
+      - ${WORKSPACE_PATH:-/home/deploy/lena}:/home/deploy/lena
+      # Secrets от s2-приложений (для подключения к БД)
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/archetest/.env.docker:/secrets/archetest.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/time/.env.docker:/secrets/time.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/form-example/.env.docker:/secrets/form-example.env:ro
+    networks:
+      - driving-school-network
+      - premium-network
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  driving-school-network:
+    external: true
+  premium-network:
+    external: true

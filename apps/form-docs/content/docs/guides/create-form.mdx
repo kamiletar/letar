@@ -1,0 +1,211 @@
+---
+title: createForm — Custom Forms
+description: Extend Form with custom fields, selects, comboboxes, and lazy loading
+---
+
+## When to Use
+
+The default `Form` component includes 40+ built-in field types. Use `createForm()` when you need:
+
+- **Custom field components** (e.g., folder picker, license plate input)
+- **Domain-specific selects** (e.g., SelectVideoCodec, SelectLicenseCategory)
+- **Searchable comboboxes** with custom data sources
+- **Memory optimization** via lazy loading (60+ components → on-demand)
+
+## API
+
+```tsx
+import { createForm } from '@letar/forms'
+
+const AppForm = createForm({
+  // Custom field components
+  extraFields: {
+    FolderPath: FieldFolderPath,
+    PlateNumber: FieldPlateNumber,
+  },
+
+  // Custom select dropdowns (synchronous)
+  extraSelects: {
+    VideoCodec: SelectVideoCodec,
+    RateControl: SelectRateControl,
+  },
+
+  // Custom comboboxes (synchronous)
+  extraComboboxes: {
+    Instructor: ComboboxInstructor,
+  },
+
+  // Lazy-loaded selects (for memory optimization)
+  lazySelects: {
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+  },
+
+  // Lazy-loaded comboboxes
+  lazyComboboxes: {
+    Student: () => import('./comboboxes/combobox-student').then((m) => m.ComboboxStudent),
+  },
+
+  // Lazy-loaded listboxes
+  lazyListboxes: {
+    Categories: () => import('./listboxes/listbox-categories').then((m) => m.ListboxCategories),
+  },
+
+  // Custom address provider (e.g., DaData for Russian addresses)
+  addressProvider: dadataProvider,
+})
+```
+
+## Usage
+
+```tsx
+// All built-in fields work as usual
+<AppForm schema={Schema} initialValue={data} onSubmit={save}>
+  <AppForm.Field.String name="name" />
+  <AppForm.Field.Number name="quantity" />
+
+  {/* Custom field */}
+  <AppForm.Field.FolderPath name="path" label="Select Folder" />
+
+  {/* Custom select */}
+  <AppForm.Select.VideoCodec name="codec" />
+
+  {/* Custom combobox */}
+  <AppForm.Combobox.Instructor name="instructorId" />
+
+  <AppForm.Button.Submit>Save</AppForm.Button.Submit>
+</AppForm>
+```
+
+## Creating Custom Fields
+
+A custom field is a React component that integrates with TanStack Form:
+
+```tsx
+import { useDeclarativeField } from '@letar/forms'
+
+interface PlateNumberProps {
+  name: string
+  label?: string
+}
+
+function FieldPlateNumber({ name, label }: PlateNumberProps) {
+  const { field, form } = useDeclarativeField(name)
+
+  return (
+    <Field.Root>
+      {label && <Field.Label>{label}</Field.Label>}
+      <Input
+        value={field.state.value as string}
+        onChange={(e) => field.handleChange(e.target.value.toUpperCase())}
+        placeholder="A123BC77"
+      />
+    </Field.Root>
+  )
+}
+```
+
+## Creating Custom Selects
+
+A select wraps the built-in `Form.Field.Select` with predefined options:
+
+```tsx
+function SelectVideoCodec({ name, ...props }) {
+  const options = [
+    { value: 'AV1', label: 'AV1 (best quality)' },
+    { value: 'HEVC', label: 'HEVC (H.265)' },
+    { value: 'H264', label: 'H.264 (compatible)' },
+  ]
+
+  return <Form.Field.Select name={name} options={options} {...props} />
+}
+```
+
+## Lazy Loading for Memory Optimization
+
+For apps with many selects (40+), lazy loading prevents loading all components at SSR time:
+
+```tsx
+const AppForm = createForm({
+  // Synchronous: loaded immediately (small app)
+  extraSelects: { Status: SelectStatus },
+
+  // Lazy: loaded on first render (large app)
+  lazySelects: {
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+    LessonCategory: () => import('./selects/select-lesson-category').then((m) => m.SelectLessonCategory),
+    // ... 40+ more selects
+  },
+})
+```
+
+**Impact:** In a real app with 46 lazy selects + 10 comboboxes, memory usage dropped from ~1.7GB to ~500MB.
+
+## Real-World Examples
+
+### Small App (Animatrona — Electron)
+
+```tsx
+export const AnimatronaForm = createForm({
+  extraFields: {
+    FolderPath: FieldFolderPath,    // Electron folder dialog
+    CqSlider: FieldCqSlider,        // Quality slider (inverted)
+  },
+  extraSelects: {
+    VideoCodec: SelectVideoCodec,
+    RateControl: SelectRateControl,
+    AudioCodec: SelectAudioCodec,
+  },
+})
+
+// Usage
+<AnimatronaForm initialValue={anime} onSubmit={save}>
+  <AnimatronaForm.Field.String name="title" />
+  <AnimatronaForm.Field.FolderPath name="path" />
+  <AnimatronaForm.Select.VideoCodec name="codec" />
+  <AnimatronaForm.Field.CqSlider name="quality" />
+  <AnimatronaForm.Button.Submit>Save</AnimatronaForm.Button.Submit>
+</AnimatronaForm>
+```
+
+### Large App (Driving School — Next.js)
+
+```tsx
+export const DrivingSchoolForm = createForm({
+  extraFields: {
+    PlateNumber: FieldPlateNumber,
+    VehicleOwner: SegmentedVehicleOwner,
+  },
+  lazySelects: {
+    // 46 lazy selects for memory optimization
+    LicenseCategory: () => import('./selects/select-license-category').then((m) => m.SelectLicenseCategory),
+    TransmissionType: () => import('./selects/select-transmission-type').then((m) => m.SelectTransmissionType),
+    // ...
+  },
+  lazyComboboxes: {
+    Instructor: () => import('./comboboxes/combobox-instructor').then((m) => m.ComboboxInstructor),
+    Student: () => import('./comboboxes/combobox-student').then((m) => m.ComboboxStudent),
+    // ...
+  },
+})
+```
+
+## Full Return Type
+
+`createForm()` returns an extended `Form` component with all built-in features:
+
+| Property                      | Description                         |
+| ----------------------------- | ----------------------------------- |
+| `AppForm(props)`              | Root form component                 |
+| `AppForm.Field.*`             | 40+ built-in fields + custom fields |
+| `AppForm.Select.*`            | Custom select dropdowns             |
+| `AppForm.Combobox.*`          | Custom searchable comboboxes        |
+| `AppForm.Listbox.*`           | Custom listbox selections           |
+| `AppForm.Group`               | Nested object grouping              |
+| `AppForm.Group.List`          | Dynamic array management            |
+| `AppForm.Button.Submit/Reset` | Form buttons                        |
+| `AppForm.Steps`               | Multi-step wizard                   |
+| `AppForm.When`                | Conditional rendering               |
+| `AppForm.Errors`              | Validation error summary            |
+| `AppForm.DebugValues`         | Debug inspector                     |
+| `AppForm.AutoFields`          | Schema-driven auto-generation       |
+| `AppForm.FromSchema`          | One-line form from schema           |

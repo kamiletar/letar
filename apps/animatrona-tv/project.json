@@ -1,0 +1,54 @@
+{
+  "name": "animatrona-tv",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/animatrona-tv/src",
+  "projectType": "application",
+  "tags": ["scope:animatrona", "type:tv"],
+  "targets": {
+    "start": {
+      "command": "react-native start --port 8083",
+      "options": {
+        "cwd": "apps/animatrona-tv"
+      }
+    },
+    "android": {
+      "command": "react-native run-android",
+      "options": {
+        "cwd": "apps/animatrona-tv"
+      }
+    },
+    "build-android": {
+      "command": ".\\gradlew.bat assembleDebug --no-daemon",
+      "options": {
+        "cwd": "apps/animatrona-tv/android",
+        "env": {
+          "JAVA_HOME": "C:\\Android\\jdk-17.0.13+11"
+        }
+      }
+    },
+    "build-android-release": {
+      "command": "gradlew.bat assembleRelease --no-daemon",
+      "options": {
+        "cwd": "apps/animatrona-tv/android"
+      }
+    },
+    "clean": {
+      "command": "gradlew.bat clean",
+      "options": {
+        "cwd": "apps/animatrona-tv/android"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/animatrona-tv/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck": {
+      "command": "tsc --noEmit",
+      "options": {
+        "cwd": "apps/animatrona-tv"
+      }
+    }
+  }
+}

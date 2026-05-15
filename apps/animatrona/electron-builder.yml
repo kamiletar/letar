@@ -1,0 +1,331 @@
+# Конфигурация Electron Builder для Animatrona
+# Используем Next.js standalone output
+
+appId: com.lena.animatrona
+productName: Animatrona
+copyright: Copyright 2025 Lena
+
+# Release notes — отображаются в диалоге обновления
+releaseInfo:
+  releaseNotes: |
+    - Исправлена пауза энкода — теперь GPU замораживается мгновенно
+    - Исправлено возобновление после паузы — очередь больше не зависает
+    - Диалог обновления: отображаются release notes и кнопка установки
+# Явно указываем версию, т.к. electron-builder не понимает ^41.0.0
+electronVersion: 41.0.0
+
+# Публикация на GitHub Releases
+# kamiletar/animatrona - публичный репозиторий для Open Source релизов
+publish:
+  provider: github
+  owner: kamiletar
+  repo: animatrona
+  releaseType: release
+  private: false
+  # GH_TOKEN берётся автоматически из переменной среды
+
+# Пересборка native модулей под Electron ABI
+# Требуется для OrbitDB (classic-level)
+npmRebuild: true
+buildDependenciesFromSource: false
+nodeGypRebuild: false
+
+# Директории
+directories:
+  output: dist
+  buildResources: resources
+
+# Файлы для включения в app
+# ВАЖНО: Все зависимости main process бандлятся webpack'ом в app/background.js
+# Исключаем node_modules — они НЕ нужны (экономит ~700 МБ!)
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+      - '!node_modules'
+      - '!node_modules/**/*'
+
+extraMetadata:
+  main: app/background.js
+
+# Отключаем упаковку asar для избежания проблем с symlinks
+# В production можно включить обратно после решения проблем с symlinks
+asar: false
+
+# Windows конфигурация
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  extraResources:
+    - from: resources/ffmpeg/win
+      to: ffmpeg
+      filter:
+        - ffmpeg.exe
+        - ffprobe.exe
+    # Chromaprint (fpcalc) для определения OP/ED
+    - from: resources/fpcalc/win
+      to: fpcalc
+      filter:
+        - fpcalc.exe
+    # Kubo (Go IPFS) для стабильного P2P и DHT
+    - from: resources/kubo/win
+      to: kubo/win
+      filter:
+        - kubo.exe
+    # ntsuspend — пауза процессов на Windows (native addon)
+    # Используем путь из .bun кэша (bun не создаёт реальную папку в node_modules)
+    - from: ../../node_modules/.bun/ntsuspend@1.0.2/node_modules/ntsuspend
+      to: node_modules/ntsuspend
+      filter:
+        - '**/*'
+    # libsql — native SQLite driver для Prisma 7 (N-API pre-built)
+    - from: ../../node_modules/.bun/libsql@0.5.29/node_modules/libsql
+      to: node_modules/libsql
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/@libsql+win32-x64-msvc@0.5.29/node_modules/@libsql/win32-x64-msvc
+      to: node_modules/@libsql/win32-x64-msvc
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/@neon-rs+load@0.0.4/node_modules/@neon-rs/load
+      to: node_modules/@neon-rs/load
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/detect-libc@2.0.2/node_modules/detect-libc
+      to: node_modules/detect-libc
+      filter:
+        - '**/*'
+    # sql.js (WASM) для применения миграций БД
+    - from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle
+      to: node_modules/fts5-sql-bundle
+      filter:
+        - '**/*'
+    # classic-level и зависимости для OrbitDB
+    - from: ../../node_modules/.bun/classic-level@3.0.0/node_modules/classic-level
+      to: node_modules/classic-level
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/abstract-level@3.1.1/node_modules/abstract-level
+      to: node_modules/abstract-level
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/level-supports@6.2.0/node_modules/level-supports
+      to: node_modules/level-supports
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/level-transcoder@1.0.1/node_modules/level-transcoder
+      to: node_modules/level-transcoder
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/module-error@1.0.2/node_modules/module-error
+      to: node_modules/module-error
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/maybe-combine-errors@1.0.0/node_modules/maybe-combine-errors
+      to: node_modules/maybe-combine-errors
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/is-buffer@2.0.5/node_modules/is-buffer
+      to: node_modules/is-buffer
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/node-gyp-build@4.8.4/node_modules/node-gyp-build
+      to: node_modules/node-gyp-build
+      filter:
+        - '**/*'
+
+# NSIS installer — кастомный брендинг
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Animatrona
+  # Кастомные изображения
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+  installerSidebar: resources/installer-sidebar.bmp
+  installerHeader: resources/installer-header.bmp
+  # Юникод для русского языка
+  unicode: true
+  # Запустить приложение после установки
+  runAfterFinish: true
+  # Удалять данные приложения при удалении
+  deleteAppDataOnUninstall: false
+
+# Linux конфигурация
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: resources/icon.png
+  category: Video
+  extraResources:
+    - from: resources/ffmpeg/linux
+      to: ffmpeg
+      filter:
+        - ffmpeg
+        - ffprobe
+    # Chromaprint (fpcalc) для определения OP/ED
+    - from: resources/fpcalc/linux
+      to: fpcalc
+      filter:
+        - fpcalc
+    # Kubo (Go IPFS) для стабильного P2P и DHT
+    - from: resources/kubo/linux
+      to: kubo/linux
+      filter:
+        - kubo
+    # libsql — native SQLite driver для Prisma 7 (N-API pre-built)
+    - from: ../../node_modules/.bun/libsql@0.5.29/node_modules/libsql
+      to: node_modules/libsql
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/@libsql+linux-x64-gnu@0.5.29/node_modules/@libsql/linux-x64-gnu
+      to: node_modules/@libsql/linux-x64-gnu
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/@neon-rs+load@0.0.4/node_modules/@neon-rs/load
+      to: node_modules/@neon-rs/load
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/detect-libc@2.0.2/node_modules/detect-libc
+      to: node_modules/detect-libc
+      filter:
+        - '**/*'
+    # sql.js (WASM) для применения миграций БД
+    - from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle
+      to: node_modules/fts5-sql-bundle
+      filter:
+        - '**/*'
+    # classic-level и зависимости для OrbitDB
+    - from: ../../node_modules/.bun/classic-level@3.0.0/node_modules/classic-level
+      to: node_modules/classic-level
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/abstract-level@3.1.1/node_modules/abstract-level
+      to: node_modules/abstract-level
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/level-supports@6.2.0/node_modules/level-supports
+      to: node_modules/level-supports
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/level-transcoder@1.0.1/node_modules/level-transcoder
+      to: node_modules/level-transcoder
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/module-error@1.0.2/node_modules/module-error
+      to: node_modules/module-error
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/maybe-combine-errors@1.0.0/node_modules/maybe-combine-errors
+      to: node_modules/maybe-combine-errors
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/is-buffer@2.0.5/node_modules/is-buffer
+      to: node_modules/is-buffer
+      filter:
+        - '**/*'
+    - from: ../../node_modules/.bun/node-gyp-build@4.8.4/node_modules/node-gyp-build
+      to: node_modules/node-gyp-build
+      filter:
+        - '**/*'
+
+# macOS конфигурация
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: resources/icon.icns
+  category: public.app-category.video
+  extraResources:
+    # Kubo (Go IPFS) для стабильного P2P и DHT
+    # Включаем оба варианта — код выберет нужный по process.arch
+    - from: resources/kubo/darwin
+      to: kubo/darwin
+      filter:
+        - kubo
+    - from: resources/kubo/darwin-arm64
+      to: kubo/darwin-arm64
+      filter:
+        - kubo
+
+# Next.js standalone и ресурсы как extraResources
+extraResources:
+  # Anime4K шейдеры для апскейла через libplacebo (GPU)
+  - from: resources/anime4k
+    to: anime4k
+    filter:
+      - '**/*.glsl'
+  # Prisma миграции (SQL файлы для автоматического применения при старте)
+  - from: prisma/migrations
+    to: migrations
+    filter:
+      - '**/*.sql'
+  # FFmpeg с SVT-AV1 (скачивается скриптом download-ffmpeg.ts --platform all)
+  # Структура: resources/ffmpeg/win/, resources/ffmpeg/linux/
+  # electron-builder автоматически выбирает нужную папку по платформе
+  # ZenStack schema (импортируется из enhance.ts как '../../../schema')
+  - from: schema.ts
+    to: standalone/apps/animatrona/schema.ts
+  # sql-wasm.wasm (требуется для применения миграций БД)
+  - from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle/dist/sql-wasm.wasm
+    to: sql-wasm.wasm
+  # Splash screen
+  - from: resources/splash.html
+    to: splash.html
+  # Иконки
+  - from: resources/icon.ico
+    to: icon.ico
+  - from: resources/icon.png
+    to: icon.png
+  # Web Player для IPFS экспорта (собирается командой build:web-player)
+  - from: web-player/dist
+    to: web-player
+    filter:
+      - '**/*'
+  # Mobile UI для просмотра аниме с телефона (собирается nx build animatrona-mobile-ui)
+  - from: mobile-ui/dist
+    to: mobile-ui
+    filter:
+      - '**/*'
+  # SubtitlesOctopus — библиотека для рендеринга ASS субтитров (web export)
+  - from: node_modules/libass-wasm/dist/js/subtitles-octopus.js
+    to: subtitles-octopus/subtitles-octopus.js
+  - from: node_modules/libass-wasm/dist/js/subtitles-octopus-worker.js
+    to: subtitles-octopus/subtitles-octopus-worker.js
+  - from: node_modules/libass-wasm/dist/js/subtitles-octopus-worker.wasm
+    to: subtitles-octopus/subtitles-octopus-worker.wasm
+  # Копируем ВСЕ модули из standalone (это минимальный набор для runtime, без dev зависимостей)
+  # Next.js standalone уже отфильтровал только необходимые модули
+  # ВАЖНО: копируем в apps/node_modules чтобы Node.js нашёл их при запуске из apps/animatrona/renderer/
+  # Node.js ищет модули вверх по дереву: renderer/ → animatrona/ → apps/ → standalone/
+  # NOTE: .bun содержит реальные файлы, симлинки в корне указывают на неё
+  - from: renderer/.next/standalone/node_modules
+    to: standalone/apps/node_modules
+    filter:
+      - '**/*'
+  # Apps директория из standalone
+  - from: renderer/.next/standalone/apps
+    to: standalone/apps
+    filter:
+      - '**/*'
+  # Статические файлы Next.js (рядом с server.js)
+  - from: renderer/.next/static
+    to: standalone/apps/animatrona/renderer/.next/static
+    filter:
+      - '**/*'
+  # Public папка (рядом с server.js)
+  - from: renderer/public
+    to: standalone/apps/animatrona/renderer/public
+    filter:
+      - '**/*'

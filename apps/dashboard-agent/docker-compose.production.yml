@@ -1,0 +1,73 @@
+# Dashboard Agent Production Configuration
+# Lightweight monitoring agent for remote servers
+#
+# Запуск: ./deploy-affected.sh --app dashboard-agent
+#
+# Требования:
+# - Docker socket доступен
+# - Сеть premium-network существует
+# - Secrets файлы от приложений доступны
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: apps/dashboard-agent/Dockerfile.production
+    image: dashboard-agent:latest
+    container_name: dashboard-agent
+    restart: always
+    # Запуск от root для чтения secrets файлов и выполнения команд на хосте
+    user: root
+    # Требуется для nsenter (выполнение команд на хосте)
+    pid: host
+    privileged: true
+    ports:
+      - '3100:3100'
+    env_file:
+      - .env.docker
+    environment:
+      TZ: Europe/Moscow
+      NODE_ENV: production
+      PORT: 3100
+      HOST: 0.0.0.0
+      SERVER_NAME: ${SERVER_NAME:-s1.letar.best}
+    volumes:
+      # Docker socket для управления контейнерами
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Git репозиторий для git операций (REPO_PATH в lib/git.ts)
+      - ${WORKSPACE_PATH:-/home/deploy/lena}:/home/deploy/lena
+      # SSH ключи для git remote операций
+      - ~/.ssh:/root/.ssh:ro
+      # Secrets от приложений (для подключения к БД)
+      # S1 secrets
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/imot/.env.docker:/secrets/imot.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/mandala/.env.docker:/secrets/mandala.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/kami/.env.docker:/secrets/kami.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/umami/.env.docker:/secrets/umami.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/animatrona-tracker/.env.docker:/secrets/animatrona-tracker.env:ro
+      # S2 secrets
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/archetest/.env.docker:/secrets/archetest.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/time/.env.docker:/secrets/time.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/form-example/.env.docker:/secrets/form-example.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/lena}/apps/grandslamcup/.env.docker:/secrets/grandslamcup.env:ro
+    networks:
+      - premium-network
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

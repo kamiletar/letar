@@ -1,0 +1,86 @@
+---
+title: Russian Documents
+description: INN, OGRN, BIK, SNILS, passport fields with checksum validation
+---
+
+## Overview
+
+Every B2B form in Russia requires INN, OGRN, BIK, bank account numbers. These fields have **checksums** — a simple mask is useless without validation. @letar/forms provides both headless validators and ready-to-use UI components.
+
+## Architecture: Two Layers
+
+### Layer 1: zRu Validators (headless)
+
+Pure Zod schemas with checksum validation. Work on server and client, no UI dependency.
+
+```tsx
+import { zRu } from '@letar/forms/validators/ru'
+
+const CompanySchema = z.object({
+  inn: zRu.inn(), // 10 or 12 digits + checksum
+  kpp: zRu.kpp(), // 9 characters
+  ogrn: zRu.ogrn(), // 13 digits + checksum
+  bik: zRu.bik(), // 9 digits, starts with "04"
+  account: zRu.bankAccount(), // 20 digits
+  snils: zRu.snils(), // 11 digits + checksum
+})
+
+// INN variants
+zRu.inn.legal() // legal entity only (10 digits)
+zRu.inn.individual() // individual only (12 digits)
+```
+
+### Layer 2: Form.Document.\* (UI)
+
+Ready-to-use fields with input masks, icons, and real-time checksum validation.
+
+```tsx
+<Form.Document.INN name="inn" label="INN" />
+<Form.Document.KPP name="kpp" label="KPP" />
+<Form.Document.OGRN name="ogrn" label="OGRN" />
+<Form.Document.BIK name="bik" label="BIK" />
+<Form.Document.BankAccount name="account" label="Bank Account" />
+<Form.Document.CorrAccount name="corrAccount" label="Corr. Account" />
+<Form.Document.SNILS name="snils" label="SNILS" />
+<Form.Document.Passport name="passport" label="Passport" />
+```
+
+## Available Fields
+
+| Component                   | Format          | Checksum                 |
+| --------------------------- | --------------- | ------------------------ |
+| `Form.Document.INN`         | 10 or 12 digits | Weighted sum mod 11      |
+| `Form.Document.KPP`         | 9 characters    | Format check (NNNNPPXXX) |
+| `Form.Document.OGRN`        | 13 digits       | First 12 mod 11          |
+| `Form.Document.BIK`         | 9 digits        | Starts with "04"         |
+| `Form.Document.BankAccount` | 20 digits       | Control key (with BIK)   |
+| `Form.Document.CorrAccount` | 20 digits       | Starts with "301"        |
+| `Form.Document.SNILS`       | XXX-XXX-XXX YY  | Module 101               |
+| `Form.Document.Passport`    | XX XX XXXXXX    | Format check             |
+
+## Custom Document Fields
+
+Use `createDocumentField` to create your own document fields:
+
+```tsx
+import { createDocumentField } from '@letar/forms'
+import { LuFileText } from 'react-icons/lu'
+
+const FieldCustomDoc = createDocumentField({
+  displayName: 'FieldCustomDoc',
+  mask: '999-999-999',
+  placeholder: '123-456-789',
+  icon: <LuFileText />,
+  validate: (value) => {
+    if (value.length < 9) return 'Too short'
+    return undefined
+  },
+})
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/documents).

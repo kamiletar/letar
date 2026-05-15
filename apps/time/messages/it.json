@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Che ora è?",
+    "description": "Ora ordinale dall'inizio dell'epoca UNIX"
+  },
+  "time": {
+    "now": "Adesso sono",
+    "hour": "ore dall'inizio dell'era UNIX",
+    "hoursPassed": "ore sono trascorse dall'inizio dell'era UNIX"
+  },
+  "countdown": {
+    "until": "Mancano {milestone} ore",
+    "days": "{count, plural, one {# giorno} other {# giorni}}",
+    "hours": "{count, plural, one {# ora} other {# ore}}",
+    "minutes": "{count, plural, one {# minuto} other {# minuti}}",
+    "seconds": "{count, plural, one {# secondo} other {# secondi}}"
+  },
+  "celebration": {
+    "milestone": "{hours} ore dell'era UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Notifiche",
+    "explanation": "L'accesso è necessario per verificare la tua email e accedere alle impostazioni delle notifiche",
+    "signIn": "Accedi",
+    "settings": "Impostazioni"
+  },
+  "profile": {
+    "title": "Impostazioni notifiche",
+    "email": "Email",
+    "notifyMonth": "Un mese prima",
+    "notifyWeek": "Una settimana prima",
+    "notifyDay": "Un giorno prima",
+    "notifyHour": "Un'ora prima",
+    "notify5Min": "5 minuti prima",
+    "save": "Salva",
+    "saved": "Salvato!",
+    "unsubscribe": "Annulla tutte le iscrizioni",
+    "unsubscribed": "Sei stato disiscritto da tutte le notifiche",
+    "noSubscription": "Non hai ancora un'iscrizione alle notifiche",
+    "createSubscription": "Iscriviti alle notifiche"
+  },
+  "unsubscribe": {
+    "title": "Disiscrizione",
+    "success": "Sei stato disiscritto con successo dalle notifiche delle pietre miliari delle ore UNIX",
+    "error": "Link di disiscrizione non valido",
+    "back": "Torna alla pagina principale"
+  }
+}

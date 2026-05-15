@@ -1,0 +1,57 @@
+---
+title: Мультистеп формы
+description: Пошаговые мастера с валидацией
+---
+
+## Живой пример
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="multi-step" height={400} />
+
+## Form.Steps
+
+Разбейте длинную форму на управляемые шаги:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Steps animated validateOnNext>
+    <Form.Steps.Step title="Личные данные">
+      <Form.Field.String name="firstName" />
+      <Form.Field.String name="lastName" />
+      <Form.Field.String name="email" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Step title="Адрес">
+      <Form.Field.String name="street" />
+      <Form.Field.String name="city" />
+      <Form.Field.String name="zip" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Step title="Настройки">
+      <Form.Field.Checkbox name="newsletter" />
+      <Form.Field.Select name="language" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Navigation />
+  </Form.Steps>
+</Form>
+```
+
+## Возможности
+
+- **`animated`** — плавные переходы между шагами
+- **`validateOnNext`** — валидация текущего шага перед переходом
+- **`Form.Steps.Navigation`** — кнопки Назад / Далее / Отправить
+- **Индикатор** — отображение прогресса по шагам
+- **Навигация клавиатурой** — поддержка стрелок
+
+## Сохранение шагов
+
+Шаги можно сохранять в localStorage для восстановления при перезагрузке страницы:
+
+```tsx
+<Form.Steps animated validateOnNext persistKey="checkout-wizard">
+  ...
+</Form.Steps>
+```

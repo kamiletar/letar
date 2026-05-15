@@ -1,0 +1,11 @@
+{
+  "name": "@letar/video-player-react",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "shaka-player": "^4.0.0",
+    "@letar/video-player-core": "workspace:*"
+  }
+}

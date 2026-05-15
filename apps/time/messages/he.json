@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "מה השעה?",
+    "description": "שעה סודרית מתחילת עידן UNIX"
+  },
+  "time": {
+    "now": "עכשיו",
+    "hour": "שעות מתחילת עידן UNIX",
+    "hoursPassed": "שעות עברו מתחילת עידן UNIX"
+  },
+  "countdown": {
+    "until": "עד {milestone} שעות",
+    "days": "{count, plural, zero {# ימים} one {יום אחד} two {יומיים} few {# ימים} many {# ימים} other {# ימים}}",
+    "hours": "{count, plural, zero {# שעות} one {שעה אחת} two {שעתיים} few {# שעות} many {# שעות} other {# שעות}}",
+    "minutes": "{count, plural, zero {# דקות} one {דקה אחת} two {דקותיים} few {# דקות} many {# דקות} other {# דקות}}",
+    "seconds": "{count, plural, zero {# שניות} one {שנייה אחת} two {שנייתיים} few {# שניות} many {# שניות} other {# שניות}}"
+  },
+  "celebration": {
+    "milestone": "{hours} שעות של עידן UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "התראות",
+    "explanation": "נדרשת התחברות לאימות כתובת האימייל וגישה להגדרות ההתראות",
+    "signIn": "התחברות",
+    "settings": "הגדרות"
+  },
+  "profile": {
+    "title": "הגדרות התראות",
+    "email": "אימייל",
+    "notifyMonth": "חודש לפני",
+    "notifyWeek": "שבוע לפני",
+    "notifyDay": "יום לפני",
+    "notifyHour": "שעה לפני",
+    "notify5Min": "5 דקות לפני",
+    "save": "שמירה",
+    "saved": "נשמר!",
+    "unsubscribe": "ביטול הרשמה מהכל",
+    "unsubscribed": "בוטלה הרשמתך לכל ההתראות",
+    "noSubscription": "אין לך עדיין מנוי להתראות",
+    "createSubscription": "הרשמה להתראות"
+  },
+  "unsubscribe": {
+    "title": "ביטול הרשמה",
+    "success": "בוטלה הרשמתך בהצלחה מהתראות אבני דרך של שעות UNIX",
+    "error": "קישור ביטול הרשמה לא תקין",
+    "back": "חזרה לדף הבית"
+  }
+}

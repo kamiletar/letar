@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "지금 몇 시?",
+    "description": "UNIX 에포크 이후의 시간"
+  },
+  "time": {
+    "now": "현재",
+    "hour": "UNIX 에포크 이후 시간",
+    "hoursPassed": "시간이 UNIX 에포크 이후 경과했습니다"
+  },
+  "countdown": {
+    "until": "{milestone}시간까지",
+    "days": "{count}일",
+    "hours": "{count}시간",
+    "minutes": "{count}분",
+    "seconds": "{count}초"
+  },
+  "celebration": {
+    "milestone": "UNIX 에포크 {hours}시간!"
+  },
+  "subscribe": {
+    "subscribe": "알림",
+    "explanation": "이메일 확인 및 알림 설정에 접근하려면 로그인이 필요합니다",
+    "signIn": "로그인",
+    "settings": "설정"
+  },
+  "profile": {
+    "title": "알림 설정",
+    "email": "이메일",
+    "notifyMonth": "한 달 전",
+    "notifyWeek": "일주일 전",
+    "notifyDay": "하루 전",
+    "notifyHour": "한 시간 전",
+    "notify5Min": "5분 전",
+    "save": "저장",
+    "saved": "저장되었습니다!",
+    "unsubscribe": "모두 구독 해제",
+    "unsubscribed": "모든 알림 구독이 해제되었습니다",
+    "noSubscription": "아직 알림을 구독하지 않았습니다",
+    "createSubscription": "알림 구독하기"
+  },
+  "unsubscribe": {
+    "title": "구독 해제",
+    "success": "UNIX 시간 마일스톤 알림 구독이 성공적으로 해제되었습니다",
+    "error": "잘못된 구독 해제 링크",
+    "back": "홈으로 돌아가기"
+  }
+}

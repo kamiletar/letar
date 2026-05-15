@@ -1,0 +1,173 @@
+---
+title: Utility Components
+description: InfoBlock, Divider, and Hidden — structural and utility components for forms
+---
+
+## Overview
+
+Utility components help structure forms without adding form fields. They provide visual separation, contextual information, and hidden data storage.
+
+| Component           | Purpose                                         |
+| ------------------- | ----------------------------------------------- |
+| `Form.InfoBlock`    | Info/warning/error/success/tip message block    |
+| `Form.Divider`      | Horizontal separator with optional label        |
+| `Form.Field.Hidden` | Hidden field (not rendered, only in form state) |
+
+## Form.InfoBlock
+
+Displays contextual messages inside forms. Based on Chakra UI Alert.
+
+```tsx
+<Form.InfoBlock variant="info" title="Note">
+  Fill in all fields to receive a 10% discount.
+</Form.InfoBlock>
+```
+
+### Variants
+
+| Variant          | Color  | Use case              |
+| ---------------- | ------ | --------------------- |
+| `info` (default) | Blue   | General information   |
+| `warning`        | Orange | Caution, requirements |
+| `error`          | Red    | Critical issues       |
+| `success`        | Green  | Confirmations         |
+| `tip`            | Teal   | Helpful hints         |
+
+### Props
+
+| Prop         | Type                                                   | Default    | Description                 |
+| ------------ | ------------------------------------------------------ | ---------- | --------------------------- |
+| `variant`    | `'info' \| 'warning' \| 'error' \| 'success' \| 'tip'` | `'info'`   | Visual style                |
+| `title`      | `ReactNode`                                            | —          | Block heading               |
+| `children`   | `ReactNode`                                            | —          | Content                     |
+| `appearance` | `'subtle' \| 'surface' \| 'outline' \| 'solid'`        | `'subtle'` | Chakra Alert visual variant |
+| `size`       | `'sm' \| 'md' \| 'lg'`                                 | `'md'`     | Size                        |
+
+### Conditional InfoBlock
+
+Combine with `Form.When` for dynamic messages:
+
+```tsx
+<Form.When field="type" is="company">
+  <Form.InfoBlock variant="warning">Company registration requires TIN and legal address.</Form.InfoBlock>
+</Form.When>
+```
+
+## Form.Divider
+
+Horizontal separator for grouping form sections. Based on Chakra UI Separator.
+
+```tsx
+<Form.Field.String name="firstName" />
+<Form.Field.String name="lastName" />
+
+<Form.Divider label="Contact Information" />
+
+<Form.Field.String name="email" />
+<Form.Field.String name="phone" />
+```
+
+### With icon
+
+```tsx
+import { LuPhone } from 'react-icons/lu'
+
+;<Form.Divider label="Phone Numbers" icon={<LuPhone />} />
+```
+
+### Props
+
+| Prop           | Type                              | Default   | Description              |
+| -------------- | --------------------------------- | --------- | ------------------------ |
+| `label`        | `ReactNode`                       | —         | Text label in the middle |
+| `icon`         | `ReactNode`                       | —         | Icon before label        |
+| `variant`      | `'solid' \| 'dashed' \| 'dotted'` | `'solid'` | Line style               |
+| `size`         | `'xs' \| 'sm' \| 'md' \| 'lg'`    | `'xs'`    | Line thickness           |
+| `colorPalette` | `string`                          | `'gray'`  | Color palette            |
+
+### Without label
+
+A simple horizontal line:
+
+```tsx
+<Form.Divider />
+```
+
+## Form.Field.Hidden
+
+Stores data in form state without rendering anything in the DOM. Useful for UTM parameters, referral codes, internal IDs.
+
+```tsx
+<Form.Field.Hidden name="utm_source" value={searchParams.get('utm_source')} />
+<Form.Field.Hidden name="referralCode" value="PARTNER2026" />
+```
+
+### Props
+
+| Prop    | Type      | Description                    |
+| ------- | --------- | ------------------------------ |
+| `name`  | `string`  | Field name in the form         |
+| `value` | `unknown` | Value to set (syncs on change) |
+
+### Dynamic value
+
+The value is synced reactively — when the `value` prop changes, the form state updates:
+
+```tsx
+const [geo, setGeo] = useState(null)
+useEffect(() => { detectLocation().then(setGeo) }, [])
+
+<Form.Field.Hidden name="location" value={geo} />
+```
+
+### Accessing in form submission
+
+Hidden fields are included in the submitted data just like any other field:
+
+```tsx
+<Form
+  onSubmit={(data) => {
+    console.log(data.utm_source) // "google"
+    console.log(data.referralCode) // "PARTNER2026"
+  }}
+>
+  <Form.Field.String name="email" />
+  <Form.Field.Hidden name="utm_source" value="google" />
+  <Form.Field.Hidden name="referralCode" value="PARTNER2026" />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Complete Example
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.InfoBlock variant="info" title="Registration">
+    Please fill in all required fields.
+  </Form.InfoBlock>
+
+  <Form.Divider label="Personal Details" />
+  <Form.Field.String name="firstName" />
+  <Form.Field.String name="lastName" />
+
+  <Form.Divider label="Contact" />
+  <Form.Field.String name="email" />
+  <Form.Field.String name="phone" />
+
+  <Form.When field="isPremium" is={true}>
+    <Form.InfoBlock variant="success">Premium benefits are active!</Form.InfoBlock>
+  </Form.When>
+
+  <Form.Field.Hidden name="utm_source" value="landing" />
+  <Form.Field.Hidden name="formVersion" value="2.0" />
+
+  <Form.Button.Submit>Register</Form.Button.Submit>
+</Form>
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/utility).

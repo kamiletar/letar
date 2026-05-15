@@ -1,0 +1,235 @@
+// Ключница — централизованный сервис авторизации
+// Better Auth + OIDC Provider + ProjectProfile
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// ========================================
+// Better Auth — базовые модели
+// ========================================
+
+enum UserRole {
+  /// Пользователь
+  USER
+  /// Администратор
+  ADMIN
+}
+
+// Центральный пользователь (единый для всех проектов)
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
+  image           String?
+  emailVerified   Boolean   @default(false)
+  roles           UserRole[] @default([USER])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  // OIDC Provider связи
+  oauthApplications OauthApplication[]
+  oauthAccessTokens OauthAccessToken[]
+  oauthConsents     OauthConsent[]
+
+  // Профили в проектах
+  projectProfiles ProjectProfile[]
+
+  // Публичный доступ на чтение, создание/обновление — только себя
+  @@allow('read', true)
+  @@allow('create', true)
+  @@allow('update', auth() == this)
+
+  @@index([email])
+}
+
+// Аккаунты OAuth/credentials (Better Auth core)
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+
+  // OAuth токены
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+
+  // Пароль для email/password
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@deny('all', true)
+  @@index([userId])
+}
+
+// Сессии (Better Auth core)
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([userId])
+  @@index([token])
+}
+
+// Верификация (Better Auth core)
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String
+  value       String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@deny('all', true)
+  @@index([identifier])
+}
+
+// Rate Limiting
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  count       Int
+  lastRequest BigInt
+
+  @@deny('all', true)
+  @@index([key])
+  @@map("rateLimit")
+}
+
+// ========================================
+// OIDC Provider — OAuth-сервер
+// ========================================
+
+// Зарегистрированные OAuth-клиенты (приложения)
+model OauthApplication {
+  id                    String   @id @default(cuid())
+  clientId              String   @unique
+  clientSecret          String?
+  name                  String
+  icon                  String?
+  metadata              String?
+  redirectUrls          String   // JSON массив redirect URIs
+  type                  String   @default("web")
+  disabled              Boolean  @default(false)
+  skipConsent           Boolean  @default(false)
+  userId                String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user          User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessTokens  OauthAccessToken[]
+  consents      OauthConsent[]
+
+  // Только админы через UI, Better Auth управляет напрямую
+  @@deny('all', true)
+  @@index([clientId])
+
+  @@map("oauthApplication")
+}
+
+// Выданные токены
+model OauthAccessToken {
+  id                    String   @id @default(cuid())
+  accessToken           String   @unique
+  refreshToken          String?  @unique
+  accessTokenExpiresAt  DateTime
+  refreshTokenExpiresAt DateTime?
+  clientId              String
+  userId                String?
+  scopes                String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  client OauthApplication @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user   User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([clientId])
+  @@index([userId])
+
+  @@map("oauthAccessToken")
+}
+
+// Согласия пользователей
+model OauthConsent {
+  id            String   @id @default(cuid())
+  clientId      String
+  userId        String
+  scopes        String?
+  consentGiven  Boolean
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  client OauthApplication @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([clientId])
+  @@index([userId])
+
+  @@map("oauthConsent")
+}
+
+// ========================================
+// ProjectProfile — per-project данные
+// ========================================
+
+// Профиль пользователя в конкретном проекте
+model ProjectProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  projectSlug String   // "kami", "animatrona", "tracker", "dashboard"
+  roles       String[] @default([])
+  metadata    Json?    // Произвольные данные проекта
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectSlug])
+  @@allow('read', auth() == user)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([projectSlug])
+}

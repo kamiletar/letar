@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "რომელი საათია?",
+    "description": "UNIX ეპოქის დასაწყისიდან რიგითი საათი"
+  },
+  "time": {
+    "now": "ახლა",
+    "hour": "საათი UNIX ეპოქის დასაწყისიდან",
+    "hoursPassed": "საათი გავიდა UNIX ეპოქის დასაწყისიდან"
+  },
+  "countdown": {
+    "until": "{milestone} საათამდე",
+    "days": "{count, plural, one {# დღე} other {# დღე}}",
+    "hours": "{count, plural, one {# საათი} other {# საათი}}",
+    "minutes": "{count, plural, one {# წუთი} other {# წუთი}}",
+    "seconds": "{count, plural, one {# წამი} other {# წამი}}"
+  },
+  "celebration": {
+    "milestone": "UNIX ეპოქის {hours} საათი!"
+  },
+  "subscribe": {
+    "subscribe": "შეტყობინებები",
+    "explanation": "შესვლა საჭიროა ელ. ფოსტის დადასტურებისა და შეტყობინებების პარამეტრებზე წვდომისთვის",
+    "signIn": "შესვლა",
+    "settings": "პარამეტრები"
+  },
+  "profile": {
+    "title": "შეტყობინებების პარამეტრები",
+    "email": "ელ. ფოსტა",
+    "notifyMonth": "ერთი თვით ადრე",
+    "notifyWeek": "ერთი კვირით ადრე",
+    "notifyDay": "ერთი დღით ადრე",
+    "notifyHour": "ერთი საათით ადრე",
+    "notify5Min": "5 წუთით ადრე",
+    "save": "შენახვა",
+    "saved": "შენახულია!",
+    "unsubscribe": "გამოწერა ყველასგან",
+    "unsubscribed": "თქვენ გამოწერილი ხართ ყველა შეტყობინებიდან",
+    "noSubscription": "თქვენ ჯერ არ გაქვთ შეტყობინებების გამოწერა",
+    "createSubscription": "შეტყობინებებზე გამოწერა"
+  },
+  "unsubscribe": {
+    "title": "გამოწერა",
+    "success": "თქვენ წარმატებით გამოწერილი ხართ UNIX საათების იუბილეების შეტყობინებებიდან",
+    "error": "არასწორი გამოწერის ბმული",
+    "back": "მთავარზე დაბრუნება"
+  }
+}

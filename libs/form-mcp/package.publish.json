@@ -1,0 +1,55 @@
+{
+  "name": "@letar/form-mcp",
+  "version": "1.0.1",
+  "description": "MCP server for @letar/forms — provides AI assistants with component docs, field types, form patterns, and code generation for 40+ declarative form fields",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "bin": {
+    "form-mcp": "cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "docs/**/*.md",
+    "README.md",
+    "README.ru.md",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "forms",
+    "react",
+    "tanstack-form",
+    "chakra-ui",
+    "zod",
+    "zenstack",
+    "ai",
+    "claude",
+    "cursor",
+    "copilot"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kamiletar/letar-form-mcp"
+  },
+  "author": "Kamil Letar",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.24.0"
+  }
+}

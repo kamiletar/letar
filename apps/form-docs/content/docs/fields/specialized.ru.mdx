@@ -1,0 +1,130 @@
+---
+title: Специализированные поля
+description: Phone, PinInput, ColorPicker, Tags, FileUpload, Address
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="specialized" height={450} />
+
+## Form.Field.Phone
+
+Ввод номера телефона с маской формата.
+
+```tsx
+const Schema = z.object({
+  phone: z.string().meta({
+    ui: { title: 'Телефон' },
+  }),
+})
+
+<Form.Field.Phone name="phone" />
+```
+
+## Form.Field.PinInput
+
+Ввод PIN-кода или OTP.
+
+```tsx
+const Schema = z.object({
+  code: z.string().meta({
+    ui: { title: 'Код подтверждения' },
+  }),
+})
+
+<Form.Field.PinInput name="code" />
+```
+
+## Form.Field.ColorPicker
+
+Выбор цвета.
+
+```tsx
+const Schema = z.object({
+  color: z.string().meta({
+    ui: { title: 'Цвет бренда' },
+  }),
+})
+
+<Form.Field.ColorPicker name="color" />
+```
+
+## Form.Field.Tags
+
+Ввод тегов — множественные текстовые значения.
+
+```tsx
+const Schema = z.object({
+  skills: z.array(z.string()).meta({
+    ui: { title: 'Навыки' },
+  }),
+})
+
+<Form.Field.Tags name="skills" />
+
+// С ограничением количества
+<Form.Field.Tags name="skills" maxTags={5} />
+```
+
+## Form.Field.FileUpload
+
+Загрузка файлов — кнопка или зона перетаскивания.
+
+```tsx
+const Schema = z.object({
+  avatar: z.any().optional().meta({
+    ui: { title: 'Аватар' },
+  }),
+})
+
+<Form.Field.FileUpload name="avatar" accept="image/*" />
+
+// Множественная загрузка
+<Form.Field.FileUpload name="documents" maxFiles={5} />
+```
+
+## Form.Field.Address
+
+Адресное поле с автодополнением.
+
+```tsx
+const Schema = z.object({
+  address: z.string().meta({
+    ui: { title: 'Адрес' },
+  }),
+})
+
+<Form.Field.Address name="address" />
+```
+
+## Form.Field.City
+
+Автодополнение города.
+
+```tsx
+<Form.Field.City name="city" />
+```
+
+## Form.Field.Duration
+
+Ввод длительности — часы, минуты, секунды.
+
+```tsx
+<Form.Field.Duration name="duration" />
+```
+
+## Form.Field.Schedule
+
+Расписание на неделю — выбор рабочих часов для каждого дня.
+
+```tsx
+<Form.Field.Schedule name="workingHours" />
+```
+
+## Form.Field.OTPInput
+
+Ввод одноразового пароля — оптимизирован для SMS/email кодов.
+
+```tsx
+<Form.Field.OTPInput name="otp" />
+```

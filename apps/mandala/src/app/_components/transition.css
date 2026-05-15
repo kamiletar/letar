@@ -1,0 +1,115 @@
+/* View Transitions API — слайд анимации */
+
+/* Keyframes для слайда */
+@keyframes slide-out-to-top {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-out-to-bottom {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-out-to-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* View Transition анимации */
+::view-transition-old(root) {
+  animation: 0.4s ease-out both var(--slide-out, slide-out-to-right);
+}
+::view-transition-new(root) {
+  animation: 0.4s ease-out both var(--slide-in, slide-in-from-left);
+}
+
+/* Направление: вверх */
+[data-transition-direction='top'] {
+  --slide-out: slide-out-to-top;
+  --slide-in: slide-in-from-bottom;
+}
+
+/* Направление: вниз */
+[data-transition-direction='bottom'] {
+  --slide-out: slide-out-to-bottom;
+  --slide-in: slide-in-from-top;
+}
+
+/* Направление: влево */
+[data-transition-direction='left'] {
+  --slide-out: slide-out-to-left;
+  --slide-in: slide-in-from-right;
+}
+
+/* Направление: вправо */
+[data-transition-direction='right'] {
+  --slide-out: slide-out-to-right;
+  --slide-in: slide-in-from-left;
+}

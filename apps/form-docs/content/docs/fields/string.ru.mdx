@@ -1,0 +1,107 @@
+---
+title: Текстовые поля
+description: Поля ввода текста — String, Textarea, Password, MaskedInput, RichText
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="string" height={500} />
+
+## Form.Field.String
+
+Стандартное однострочное текстовое поле. Самый распространённый тип.
+
+```tsx
+const Schema = z.object({
+  name: z.string().min(2).max(100).meta({
+    ui: { title: 'Полное имя', placeholder: 'Введите имя' },
+  }),
+})
+
+<Form.Field.String name="name" />
+```
+
+### Автоматические ограничения
+
+Zod constraints автоматически применяются к элементу input:
+
+```tsx
+z.string().min(2).max(100)
+// → minLength={2} maxLength={100} на <input>
+
+z.string().email()
+// → type="email"
+
+z.string().url()
+// → type="url"
+```
+
+## Form.Field.Textarea
+
+Многострочное поле для длинного текста.
+
+```tsx
+const Schema = z.object({
+  description: z.string().min(10).max(2000).meta({
+    ui: { title: 'Описание', placeholder: 'Опишите ваш проект...' },
+  }),
+})
+
+<Form.Field.Textarea name="description" />
+```
+
+## Form.Field.Password
+
+Поле пароля с кнопкой переключения видимости.
+
+```tsx
+const Schema = z.object({
+  password: z.string().min(8).meta({
+    ui: { title: 'Пароль' },
+  }),
+})
+
+<Form.Field.Password name="password" />
+```
+
+## Form.Field.MaskedInput
+
+Поле с маской формата для структурированных данных. Требует peer-зависимость `use-mask-input`.
+
+```tsx
+const Schema = z.object({
+  phone: z.string().meta({
+    ui: { title: 'Телефон', mask: '+7 (999) 999-99-99' },
+  }),
+  creditCard: z.string().meta({
+    ui: { title: 'Номер карты', mask: '9999 9999 9999 9999' },
+  }),
+})
+
+<Form.Field.MaskedInput name="phone" />
+<Form.Field.MaskedInput name="creditCard" />
+```
+
+## Form.Field.RichText
+
+Редактор форматированного текста для HTML/markdown контента.
+
+```tsx
+const Schema = z.object({
+  content: z.string().meta({
+    ui: { title: 'Содержание статьи' },
+  }),
+})
+
+<Form.Field.RichText name="content" />
+```
+
+Требуются peer-зависимости: `@tiptap/react` и `@tiptap/starter-kit`.
+
+## Form.Field.Editable
+
+Инлайн-редактирование — клик по тексту для редактирования, Enter или blur для сохранения.
+
+```tsx
+<Form.Field.Editable name="nickname" />
+```

@@ -1,0 +1,98 @@
+---
+title: URL Prefill
+description: Auto-fill form fields from URL query parameters
+---
+
+## Overview
+
+`useUrlPrefill` extracts values from URL parameters and returns them for form initialization. Uses a whitelist for security — only listed fields are extracted.
+
+## Quick Example
+
+```tsx
+import { useUrlPrefill } from '@letar/forms'
+
+// URL: /contact?name=Ivan&email=ivan@test.com&hack=evil
+const prefilled = useUrlPrefill({
+  fields: ['name', 'email'],
+  cleanUrl: true,
+})
+// prefilled = { name: 'Ivan', email: 'ivan@test.com' }
+// 'hack' is ignored — not in whitelist
+```
+
+## With Form
+
+```tsx
+function ContactForm() {
+  const prefilled = useUrlPrefill({
+    fields: ['name', 'email', 'phone'],
+    cleanUrl: true,
+  })
+
+  return (
+    <Form
+      schema={ContactSchema}
+      initialValue={{ name: '', email: '', phone: '', ...prefilled }}
+      onSubmit={save}
+    >
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Phone name="phone" />
+      <Form.Button.Submit>Send</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Parameter Mapping
+
+Map URL parameter names to form field names:
+
+```tsx
+// URL: /form?user_name=Ivan&mail=ivan@test.com
+const prefilled = useUrlPrefill({
+  fields: ['name', 'email'],
+  mapping: { user_name: 'name', mail: 'email' },
+})
+// prefilled = { name: 'Ivan', email: 'ivan@test.com' }
+```
+
+## Arrays and Nested Objects
+
+```tsx
+// Arrays: /form?tag=react&tag=forms
+// → { tag: ['react', 'forms'] }
+
+// Nested: /form?address.city=Moscow&address.street=Tverskaya
+// → { address: { city: 'Moscow', street: 'Tverskaya' } }
+```
+
+## Generate Prefill Links
+
+```tsx
+import { generatePrefillUrl } from '@letar/forms'
+
+const url = generatePrefillUrl('/contact', {
+  name: 'Ivan',
+  email: 'ivan@test.com',
+  tags: ['react', 'forms'],
+})
+// → "/contact?name=Ivan&email=ivan%40test.com&tags=react&tags=forms"
+```
+
+## Props
+
+| Prop           | Type                     | Default | Description                              |
+| -------------- | ------------------------ | ------- | ---------------------------------------- |
+| `fields`       | `string[]`               | required | Whitelist of allowed field names         |
+| `mapping`      | `Record<string, string>` | —       | URL param → field name mapping           |
+| `cleanUrl`     | `boolean`                | `false` | Remove params from URL after extraction  |
+| `schema`       | `ZodSchema`              | —       | Validate extracted values                |
+| `searchParams` | `URLSearchParams`        | auto    | Custom source (default: window.location) |
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/url-prefill).

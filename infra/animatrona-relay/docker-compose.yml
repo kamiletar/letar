@@ -1,0 +1,37 @@
+services:
+  relay:
+    build: .
+    container_name: animatrona-relay
+    restart: unless-stopped
+    ports:
+      # Swarm — libp2p (TCP-only, QUIC отключён — несовместимость с Kubo 0.40.1)
+      - '41001:4001/tcp'
+      # Registration API (открыт наружу — Phase 1 без аутентификации)
+      - '41080:8080'
+    volumes:
+      - relay_data:/data
+    environment:
+      SWARM_PORT: '4001'
+      HTTP_PORT: '8080'
+      IDENTITY_PATH: '/data/relay-identity.key'
+      REGISTRATION_TTL_MINUTES: '60'
+      # Внешний IP — relay в Docker видит только внутренние адреса,
+      # без этого клиенты получают бесполезные 127.0.0.1 relay-адреса
+      EXTERNAL_IP: '${EXTERNAL_IP:-}'
+      EXTERNAL_PORT: '${EXTERNAL_PORT:-}'
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8080/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  relay_data:
+    name: animatrona-relay-data

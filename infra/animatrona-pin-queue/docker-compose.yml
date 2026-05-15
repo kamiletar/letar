@@ -1,0 +1,36 @@
+services:
+  pin-queue:
+    build: .
+    container_name: animatrona-pin-queue
+    restart: unless-stopped
+    # host network — доступ к Kubo на localhost:5011
+    network_mode: host
+    volumes:
+      - queue_data:/data
+    environment:
+      HTTP_PORT: '42080'
+      KUBO_API_URL: 'http://localhost:5011'
+      KUBO_AUTH_TOKEN: '${KUBO_AUTH_TOKEN}'
+      AUTH_TOKEN: '${AUTH_TOKEN}'
+      STATE_PATH: '/data/state.json'
+      COMPLETED_TTL_HOURS: '24'
+      # Multiaddr'а провайдеров контента — swarm connect перед каждым pin/add
+      PROVIDER_PEERS: '${PROVIDER_PEERS:-}'
+      # URL relay-сервера для регистрации PeerId в ACL (heartbeat каждые 30 мин)
+      RELAY_REGISTER_URL: '${RELAY_REGISTER_URL:-}'
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 16M
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:42080/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  queue_data:
+    name: animatrona-pin-queue-data

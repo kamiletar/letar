@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Mấy giờ rồi?",
+    "description": "Giờ thứ tự kể từ đầu kỷ nguyên UNIX"
+  },
+  "time": {
+    "now": "Hiện tại",
+    "hour": "giờ kể từ đầu kỷ nguyên UNIX",
+    "hoursPassed": "giờ đã trôi qua kể từ đầu kỷ nguyên UNIX"
+  },
+  "countdown": {
+    "until": "Còn {milestone} giờ",
+    "days": "{count, plural, one {# ngày} other {# ngày}}",
+    "hours": "{count, plural, one {# giờ} other {# giờ}}",
+    "minutes": "{count, plural, one {# phút} other {# phút}}",
+    "seconds": "{count, plural, one {# giây} other {# giây}}"
+  },
+  "celebration": {
+    "milestone": "{hours} giờ của kỷ nguyên UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Thông báo",
+    "explanation": "Đăng nhập là bắt buộc để xác minh email và truy cập cài đặt thông báo",
+    "signIn": "Đăng nhập",
+    "settings": "Cài đặt"
+  },
+  "profile": {
+    "title": "Cài đặt thông báo",
+    "email": "Email",
+    "notifyMonth": "Một tháng trước",
+    "notifyWeek": "Một tuần trước",
+    "notifyDay": "Một ngày trước",
+    "notifyHour": "Một giờ trước",
+    "notify5Min": "5 phút trước",
+    "save": "Lưu",
+    "saved": "Đã lưu!",
+    "unsubscribe": "Hủy đăng ký tất cả",
+    "unsubscribed": "Bạn đã hủy đăng ký tất cả thông báo",
+    "noSubscription": "Bạn chưa có đăng ký thông báo nào",
+    "createSubscription": "Đăng ký thông báo"
+  },
+  "unsubscribe": {
+    "title": "Hủy đăng ký",
+    "success": "Bạn đã hủy đăng ký thành công khỏi thông báo cột mốc giờ UNIX",
+    "error": "Liên kết hủy đăng ký không hợp lệ",
+    "back": "Quay lại trang chủ"
+  }
+}

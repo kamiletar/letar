@@ -1,0 +1,9 @@
+# Android build
+android/build/
+android/.gradle/
+android/.cxx/
+android/local.properties
+
+# IDE
+.idea/
+*.iml

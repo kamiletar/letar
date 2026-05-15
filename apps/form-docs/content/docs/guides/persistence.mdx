@@ -1,0 +1,50 @@
+---
+title: Form Persistence
+description: Auto-save form data to localStorage with restore dialog
+---
+
+## Overview
+
+Forms can automatically save their state to localStorage and restore it when the user returns. This prevents data loss on accidental page refreshes.
+
+## Basic Usage
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={defaults}
+  onSubmit={handleSubmit}
+  persistence={{
+    key: 'checkout-form',
+    debounceMs: 500,
+  }}
+>
+  <Form.Field.String name="name" />
+  <Form.Field.String name="email" />
+  <Form.Button.Submit>Submit</Form.Button.Submit>
+</Form>
+```
+
+## How It Works
+
+1. **User types** → form state is debounced and saved to `localStorage`
+2. **Page refreshes** → a restore dialog appears: "You have unsaved data. Restore?"
+3. **User clicks Restore** → form is populated with saved values
+4. **User submits** → localStorage entry is automatically cleared
+
+## Configuration
+
+```tsx
+persistence={{
+  key: 'my-form',              // localStorage key (required)
+  debounceMs: 500,             // save debounce in ms (default: 300)
+  dialogTitle: 'Restore draft?',
+  dialogDescription: 'You have unsaved changes from your last session.',
+  restoreLabel: 'Restore',
+  discardLabel: 'Discard',
+}}
+```
+
+## Custom Persistence
+
+For advanced cases (e.g., IndexedDB, server-side), use `useOfflineForm` from the [Offline](/docs/guides/offline) module instead.

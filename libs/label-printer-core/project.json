@@ -1,0 +1,47 @@
+{
+  "name": "label-printer-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/label-printer-core/src",
+  "projectType": "library",
+  "tags": ["scope:label-printer", "type:core"],
+  "targets": {
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/label-printer-core"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "lintFilePatterns": ["libs/label-printer-core/**/*.ts"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt --config ../../dprint.json libs/label-printer-core",
+        "cwd": "{workspaceRoot}"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"]
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --project libs/label-printer-core/tsconfig.lib.json --noEmit"
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "reportsDirectory": "../../coverage/libs/label-printer-core"
+      }
+    }
+  }
+}

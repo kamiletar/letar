@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "چندمین ساعت؟",
+    "description": "ساعت ترتیبی از آغاز دوره UNIX"
+  },
+  "time": {
+    "now": "اکنون",
+    "hour": "ساعت از آغاز دوره UNIX",
+    "hoursPassed": "ساعت از آغاز دوره UNIX گذشته است"
+  },
+  "countdown": {
+    "until": "تا {milestone} ساعت",
+    "days": "{count, plural, one {# روز} other {# روز}}",
+    "hours": "{count, plural, one {# ساعت} other {# ساعت}}",
+    "minutes": "{count, plural, one {# دقیقه} other {# دقیقه}}",
+    "seconds": "{count, plural, one {# ثانیه} other {# ثانیه}}"
+  },
+  "celebration": {
+    "milestone": "{hours} ساعت دوره UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "اعلان‌ها",
+    "explanation": "برای تأیید ایمیل و دسترسی به تنظیمات اعلان‌ها ورود به سیستم لازم است",
+    "signIn": "ورود",
+    "settings": "تنظیمات"
+  },
+  "profile": {
+    "title": "تنظیمات اعلان‌ها",
+    "email": "ایمیل",
+    "notifyMonth": "یک ماه قبل",
+    "notifyWeek": "یک هفته قبل",
+    "notifyDay": "یک روز قبل",
+    "notifyHour": "یک ساعت قبل",
+    "notify5Min": "۵ دقیقه قبل",
+    "save": "ذخیره",
+    "saved": "ذخیره شد!",
+    "unsubscribe": "لغو اشتراک از همه",
+    "unsubscribed": "اشتراک شما از همه اعلان‌ها لغو شد",
+    "noSubscription": "شما هنوز اشتراک اعلان‌ها ندارید",
+    "createSubscription": "اشتراک در اعلان‌ها"
+  },
+  "unsubscribe": {
+    "title": "لغو اشتراک",
+    "success": "اشتراک شما از اعلان‌های نقاط عطف ساعات UNIX با موفقیت لغو شد",
+    "error": "لینک لغو اشتراک نامعتبر است",
+    "back": "بازگشت به صفحه اصلی"
+  }
+}

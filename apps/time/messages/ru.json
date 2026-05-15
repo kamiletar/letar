@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "title": "Который час?",
+    "description": "Порядковый час от начала эпохи UNIX"
+  },
+  "time": {
+    "now": "Сейчас",
+    "hour": "час от начала эпохи UNIX",
+    "hoursPassed": "часов прошло с начала эпохи UNIX"
+  },
+  "countdown": {
+    "until": "До {milestone} часов",
+    "days": "{count, plural, one {# день} few {# дня} other {# дней}}",
+    "hours": "{count, plural, one {# час} few {# часа} other {# часов}}",
+    "minutes": "{count, plural, one {# минута} few {# минуты} other {# минут}}",
+    "seconds": "{count, plural, one {# секунда} few {# секунды} other {# секунд}}"
+  },
+  "celebration": {
+    "milestone": "{hours} часов UNIX эпохи!"
+  },
+  "subscribe": {
+    "subscribe": "Уведомления",
+    "explanation": "Регистрация нужна для подтверждения email и доступа к настройкам уведомлений",
+    "signIn": "Войти",
+    "settings": "Настройки"
+  },
+  "profile": {
+    "title": "Настройки уведомлений",
+    "email": "Email",
+    "notifyMonth": "За месяц",
+    "notifyWeek": "За неделю",
+    "notifyDay": "За день",
+    "notifyHour": "За час",
+    "notify5Min": "За 5 минут",
+    "save": "Сохранить",
+    "saved": "Сохранено!",
+    "unsubscribe": "Отписаться от всех",
+    "unsubscribed": "Вы отписаны от всех уведомлений",
+    "noSubscription": "У вас пока нет подписки на уведомления",
+    "createSubscription": "Подписаться на уведомления"
+  },
+  "signIn": {
+    "redirecting": "Перенаправление..."
+  },
+  "unsubscribe": {
+    "title": "Отписка",
+    "success": "Вы успешно отписаны от уведомлений о юбилеях UNIX-часов",
+    "error": "Неверная ссылка для отписки",
+    "back": "Вернуться на главную"
+  }
+}

@@ -1,0 +1,82 @@
+---
+title: CAPTCHA
+description: Защита от ботов с Cloudflare Turnstile, Google reCAPTCHA или hCaptcha
+---
+
+## Обзор
+
+`Form.Captcha` добавляет защиту от ботов к формам. Поддерживает три провайдера: Cloudflare Turnstile (рекомендуется, бесплатный), Google reCAPTCHA и hCaptcha.
+
+## Настройка
+
+Настройте CAPTCHA один раз в `createForm`:
+
+```tsx
+const AppForm = createForm({
+  captcha: {
+    provider: 'turnstile',
+    siteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
+    theme: 'auto',
+  },
+})
+```
+
+## Использование в форме
+
+```tsx
+<AppForm onSubmit={handleSubmit}>
+  <AppForm.Field.String name="email" label="Email" />
+  <AppForm.Field.Textarea name="message" label="Сообщение" />
+  <AppForm.Captcha />
+  <AppForm.Button.Submit>Отправить</AppForm.Button.Submit>
+</AppForm>
+```
+
+Токен CAPTCHA автоматически включается в данные формы как `__captchaToken`.
+
+## Серверная проверка
+
+```tsx
+import { verifyCaptcha } from '@letar/forms/captcha'
+
+export async function submitAction(data: FormData) {
+  const token = data.__captchaToken
+  const result = await verifyCaptcha(token, {
+    provider: 'turnstile',
+    secretKey: process.env.TURNSTILE_SECRET_KEY!,
+  })
+
+  if (!result.success) {
+    throw new Error('Проверка CAPTCHA не пройдена')
+  }
+  // Обработка формы...
+}
+```
+
+## Провайдеры
+
+| Провайдер | Бесплатный | Невидимый | Примечания |
+|-----------|------------|-----------|------------|
+| Turnstile | Да | Да | Рекомендуется, дружественный к приватности |
+| reCAPTCHA | Частично | Только v3 | Google, самый популярный |
+| hCaptcha | Частично | Да | Альтернатива reCAPTCHA с фокусом на приватность |
+
+## Пропсы
+
+| Пропс | Тип | По умолчанию | Описание |
+|-------|-----|--------------|----------|
+| `provider` | `'turnstile' \| 'recaptcha' \| 'hcaptcha'` | из createForm | Переопределить провайдера |
+| `siteKey` | `string` | из createForm | Переопределить siteKey |
+| `theme` | `'auto' \| 'light' \| 'dark'` | `'auto'` | Тема виджета |
+| `size` | `'normal' \| 'compact' \| 'invisible'` | `'normal'` | Размер виджета |
+| `language` | `string` | — | Код языка (ISO 639-1) |
+| `onSuccess` | `(token: string) => void` | — | Колбэк при успехе |
+| `onError` | `(error) => void` | — | Колбэк при ошибке |
+| `onExpire` | `() => void` | — | Колбэк при истечении токена |
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/captcha).

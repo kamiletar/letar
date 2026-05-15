@@ -1,0 +1,127 @@
+{
+  "name": "@letar/forms",
+  "version": "1.2.0",
+  "description": "Declarative form components for React with 50+ field types, built-in analytics, server error mapping, undo/redo — powered by TanStack Form and Chakra UI v3",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./offline": {
+      "types": "./offline.d.ts",
+      "import": "./offline.js"
+    },
+    "./i18n": {
+      "types": "./i18n.d.ts",
+      "import": "./i18n.js"
+    },
+    "./fields/text": {
+      "types": "./fields/text.d.ts",
+      "import": "./fields/text.js"
+    },
+    "./fields/number": {
+      "types": "./fields/number.d.ts",
+      "import": "./fields/number.js"
+    },
+    "./fields/datetime": {
+      "types": "./fields/datetime.d.ts",
+      "import": "./fields/datetime.js"
+    },
+    "./fields/selection": {
+      "types": "./fields/selection.d.ts",
+      "import": "./fields/selection.js"
+    },
+    "./fields/boolean": {
+      "types": "./fields/boolean.d.ts",
+      "import": "./fields/boolean.js"
+    },
+    "./fields/specialized": {
+      "types": "./fields/specialized.d.ts",
+      "import": "./fields/specialized.js"
+    },
+    "./server-errors": {
+      "types": "./server-errors.d.ts",
+      "import": "./server-errors.js"
+    },
+    "./analytics": {
+      "types": "./analytics.d.ts",
+      "import": "./analytics.js"
+    },
+    "./validators/ru": {
+      "types": "./validators/ru.d.ts",
+      "import": "./validators/ru.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "README.ru.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "react",
+    "forms",
+    "form-components",
+    "tanstack-form",
+    "chakra-ui",
+    "zod",
+    "declarative",
+    "typescript",
+    "validation",
+    "multi-step",
+    "offline",
+    "i18n",
+    "analytics",
+    "undo-redo",
+    "server-errors",
+    "prisma",
+    "zenstack"
+  ],
+  "homepage": "https://forms.letar.best",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kamiletar/letar-forms"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar-forms/issues"
+  },
+  "peerDependencies": {
+    "@chakra-ui/react": ">=3.0.0",
+    "@dnd-kit/core": ">=6.0.0",
+    "@dnd-kit/sortable": ">=10.0.0",
+    "@dnd-kit/utilities": ">=3.0.0",
+    "@tanstack/react-form": ">=1.0.0",
+    "framer-motion": ">=10.0.0",
+    "react": ">=18.0.0",
+    "react-icons": ">=5.0.0",
+    "use-mask-input": ">=3.0.0",
+    "zod": ">=3.24.0",
+    "@uiw/react-json-view": ">=2.0.0",
+    "@tanstack/react-table": ">=8.0.0",
+    "@tanstack/react-virtual": ">=3.0.0",
+    "@marsidev/react-turnstile": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@dnd-kit/core": { "optional": true },
+    "@dnd-kit/sortable": { "optional": true },
+    "@dnd-kit/utilities": { "optional": true },
+    "@tiptap/react": { "optional": true },
+    "@tiptap/starter-kit": { "optional": true },
+    "@uiw/react-json-view": { "optional": true },
+    "next-intl": { "optional": true },
+    "use-mask-input": { "optional": true },
+    "@tanstack/react-table": { "optional": true },
+    "@tanstack/react-virtual": { "optional": true },
+    "@marsidev/react-turnstile": { "optional": true }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Τι ώρα είναι;",
+    "description": "Τακτική ώρα από την αρχή της εποχής UNIX"
+  },
+  "time": {
+    "now": "Τώρα είναι",
+    "hour": "ώρες από την αρχή της εποχής UNIX",
+    "hoursPassed": "ώρες έχουν περάσει από την αρχή της εποχής UNIX"
+  },
+  "countdown": {
+    "until": "Έως τις {milestone} ώρες",
+    "days": "{count, plural, one {# ημέρα} other {# ημέρες}}",
+    "hours": "{count, plural, one {# ώρα} other {# ώρες}}",
+    "minutes": "{count, plural, one {# λεπτό} other {# λεπτά}}",
+    "seconds": "{count, plural, one {# δευτερόλεπτο} other {# δευτερόλεπτα}}"
+  },
+  "celebration": {
+    "milestone": "{hours} ώρες της εποχής UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Ειδοποιήσεις",
+    "explanation": "Απαιτείται σύνδεση για την επαλήθευση του email σας και την πρόσβαση στις ρυθμίσεις ειδοποιήσεων",
+    "signIn": "Σύνδεση",
+    "settings": "Ρυθμίσεις"
+  },
+  "profile": {
+    "title": "Ρυθμίσεις ειδοποιήσεων",
+    "email": "Email",
+    "notifyMonth": "Ένα μήνα πριν",
+    "notifyWeek": "Μία εβδομάδα πριν",
+    "notifyDay": "Μία ημέρα πριν",
+    "notifyHour": "Μία ώρα πριν",
+    "notify5Min": "5 λεπτά πριν",
+    "save": "Αποθήκευση",
+    "saved": "Αποθηκεύτηκε!",
+    "unsubscribe": "Κατάργηση όλων των εγγραφών",
+    "unsubscribed": "Έχετε διαγραφεί από όλες τις ειδοποιήσεις",
+    "noSubscription": "Δεν έχετε ακόμα εγγραφή σε ειδοποιήσεις",
+    "createSubscription": "Εγγραφή σε ειδοποιήσεις"
+  },
+  "unsubscribe": {
+    "title": "Κατάργηση εγγραφής",
+    "success": "Διαγραφήκατε επιτυχώς από τις ειδοποιήσεις οροσήμων ωρών UNIX",
+    "error": "Μη έγκυρος σύνδεσμος κατάργησης",
+    "back": "Πίσω στην αρχική"
+  }
+}

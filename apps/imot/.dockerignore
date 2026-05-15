@@ -1,0 +1,85 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+bun.lockb.bak
+.pnpm-store
+
+# Testing
+coverage
+.nyc_output
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+test
+tests
+*-e2e
+
+# Next.js
+.next/
+out/
+
+# Build outputs
+dist
+build
+.nx
+
+# Cache
+.turbo
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache
+
+# Environment - keep example files
+.env
+.env*.local
+!.env.example
+!.env.docker.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs
+.claude
+
+# Logs
+logs
+*.log
+
+# OS
+Thumbs.db
+
+# Misc
+.prettierrc
+.prettierignore
+.editorconfig
+LICENSE
+
+# Docker files (don't copy into image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Nx
+.nx/cache
+tmp

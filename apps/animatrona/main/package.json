@@ -1,0 +1,6 @@
+{
+  "name": "animatrona-main",
+  "version": "0.1.0",
+  "private": true,
+  "main": "../../dist/apps/animatrona/main/index.js"
+}

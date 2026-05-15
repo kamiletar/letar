@@ -1,0 +1,23 @@
+services:
+  app:
+    image: aira-web:latest
+    container_name: aira-web-app
+    restart: always
+    ports:
+      - '3017:3017'
+    environment:
+      TZ: Europe/Moscow
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+      PORT: 3017
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

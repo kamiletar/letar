@@ -1,0 +1,102 @@
+---
+title: Field Types Overview
+description: All 40+ field components available in @letar/forms
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="fields-all" height={700} />
+
+## Text Fields
+
+| Component                | Description                     | Example               |
+| ------------------------ | ------------------------------- | --------------------- |
+| `Form.Field.String`      | Single-line text input          | Name, email, URL      |
+| `Form.Field.Textarea`    | Multi-line text input           | Description, comments |
+| `Form.Field.Password`    | Password with visibility toggle | Login forms           |
+| `Form.Field.MaskedInput` | Input with format mask          | Phone, credit card    |
+| `Form.Field.Editable`    | Inline-editable text            | Click to edit         |
+| `Form.Field.RichText`    | Rich text editor                | Blog posts, articles  |
+
+## Number Fields
+
+| Component               | Description                      | Example            |
+| ----------------------- | -------------------------------- | ------------------ |
+| `Form.Field.Number`     | Numeric input with stepper       | Quantity, age      |
+| `Form.Field.Slider`     | Range slider                     | Volume, rating     |
+| `Form.Field.Currency`   | Money input with currency symbol | Price, salary      |
+| `Form.Field.Percentage` | Percentage input (0-100%)        | Discount, progress |
+| `Form.Field.Rating`     | Star rating input                | Reviews, feedback  |
+
+## Selection Fields
+
+| Component                    | Description                         | Example          |
+| ---------------------------- | ----------------------------------- | ---------------- |
+| `Form.Field.Select`          | Dropdown select                     | Category, status |
+| `Form.Field.Combobox`        | Searchable select with autocomplete | User search      |
+| `Form.Field.Autocomplete`    | Text input with suggestions         | City, tag        |
+| `Form.Field.Listbox`         | Always-visible list selection       | Filters          |
+| `Form.Field.RadioGroup`      | Radio button group                  | Gender, plan     |
+| `Form.Field.RadioCard`       | Card-style radio selection          | Pricing tier     |
+| `Form.Field.SegmentedGroup`  | Segmented control                   | View mode        |
+| `Form.Field.Tags`            | Tag input with autocomplete         | Labels, skills   |
+| `Form.Field.NativeSelect`    | Native HTML select                  | Simple dropdowns |
+| `Form.Field.CascadingSelect` | Cascading dependent selects         | Country → City   |
+
+## Boolean Fields
+
+| Component                 | Description         | Example              |
+| ------------------------- | ------------------- | -------------------- |
+| `Form.Field.Checkbox`     | Standard checkbox   | Terms, preferences   |
+| `Form.Field.Switch`       | Toggle switch       | Enable/disable       |
+| `Form.Field.CheckboxCard` | Card-style checkbox | Multi-select options |
+
+## Date & Time Fields
+
+| Component                   | Description                    | Example            |
+| --------------------------- | ------------------------------ | ------------------ |
+| `Form.Field.Date`           | Date picker                    | Birthday, deadline |
+| `Form.Field.DateRange`      | Date range picker              | Booking period     |
+| `Form.Field.DateTimePicker` | Combined date + time           | Event scheduling   |
+| `Form.Field.Time`           | Time picker                    | Appointment time   |
+| `Form.Field.Duration`       | Duration input (hours/minutes) | Task duration      |
+| `Form.Field.Schedule`       | Weekly schedule grid           | Working hours      |
+
+## Specialized Fields
+
+| Component                | Description              | Example           |
+| ------------------------ | ------------------------ | ----------------- |
+| `Form.Field.Phone`       | Phone number with mask   | Contact form      |
+| `Form.Field.Address`     | Address autocomplete     | Shipping, billing |
+| `Form.Field.City`        | City selector            | Location          |
+| `Form.Field.FileUpload`  | File upload with preview | Avatar, documents |
+| `Form.Field.PinInput`    | PIN code input           | Verification      |
+| `Form.Field.OTPInput`    | One-time password input  | 2FA               |
+| `Form.Field.ColorPicker` | Color selection          | Theme, branding   |
+
+## Basic Usage
+
+All fields share the same pattern:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.String name="fieldName" />
+</Form>
+```
+
+The field type, label, placeholder, and validation are all derived from the Zod schema.
+You only need to specify the `name` prop matching a key in your schema.
+
+## Custom Props
+
+Override schema defaults with props:
+
+```tsx
+<Form.Field.String
+  name="title"
+  label="Custom Label"
+  placeholder="Custom placeholder..."
+  helperText="Additional guidance"
+  required
+/>
+```

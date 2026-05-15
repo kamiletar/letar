@@ -1,0 +1,173 @@
+{
+  "UserRole": {
+    "USER": {
+      "label": "User"
+    },
+    "ADMIN": {
+      "label": "Administrator"
+    }
+  },
+  "SkillLevel": {
+    "BEGINNER": {
+      "label": "Beginner"
+    },
+    "INTERMEDIATE": {
+      "label": "Intermediate"
+    },
+    "ADVANCED": {
+      "label": "Advanced"
+    },
+    "EXPERT": {
+      "label": "Expert"
+    }
+  },
+  "ImageCategory": {
+    "BLOG": {
+      "label": ""
+    },
+    "CONTENT": {
+      "label": ""
+    },
+    "AVATAR": {
+      "label": ""
+    },
+    "OTHER": {
+      "label": ""
+    }
+  },
+  "LearningItemType": {
+    "BOOK": {
+      "label": "Book"
+    },
+    "COURSE": {
+      "label": "Course"
+    },
+    "ARTICLE": {
+      "label": "Article"
+    },
+    "VIDEO": {
+      "label": "Video"
+    },
+    "PODCAST": {
+      "label": "Podcast"
+    },
+    "CONFERENCE": {
+      "label": "Conference"
+    },
+    "OTHER": {
+      "label": "Other"
+    }
+  },
+  "LearningStatus": {
+    "WANT_TO_LEARN": {
+      "label": "Want to learn"
+    },
+    "IN_PROGRESS": {
+      "label": "In progress"
+    },
+    "COMPLETED": {
+      "label": "Completed"
+    },
+    "ABANDONED": {
+      "label": "Abandoned"
+    }
+  },
+  "SurveyQuestionType": {
+    "TEXT": {
+      "label": "Free text"
+    },
+    "SINGLE_CHOICE": {
+      "label": "Single choice"
+    },
+    "MULTI_CHOICE": {
+      "label": "Multiple choice"
+    },
+    "RATING": {
+      "label": "Rating (1-5 or 1-10)"
+    },
+    "SCALE": {
+      "label": "Scale (disagree - agree)"
+    }
+  },
+  "SocialPlatformType": {
+    "TELEGRAM": {
+      "label": ""
+    },
+    "VK": {
+      "label": ""
+    },
+    "LINKEDIN": {
+      "label": ""
+    },
+    "TWITTER": {
+      "label": ""
+    },
+    "FACEBOOK": {
+      "label": ""
+    },
+    "INSTAGRAM": {
+      "label": ""
+    },
+    "BLUESKY": {
+      "label": ""
+    },
+    "MASTODON": {
+      "label": ""
+    }
+  },
+  "CrossPostStatus": {
+    "PENDING": {
+      "label": ""
+    },
+    "PUBLISHED": {
+      "label": ""
+    },
+    "FAILED": {
+      "label": ""
+    }
+  },
+  "validation": {
+    "invalid_type": "",
+    "required": "",
+    "too_small": {
+      "string": "",
+      "number": "",
+      "array": "",
+      "date": "",
+      "set": "",
+      "file": ""
+    },
+    "too_big": {
+      "string": "",
+      "number": "",
+      "array": "",
+      "date": "",
+      "set": "",
+      "file": ""
+    },
+    "invalid_format": {
+      "email": "",
+      "url": "",
+      "uuid": "",
+      "cuid": "",
+      "regex": "",
+      "datetime": "",
+      "date": "",
+      "time": "",
+      "ip": "",
+      "base64": "",
+      "json_string": "",
+      "emoji": "",
+      "jwt": "",
+      "lowercase": "",
+      "uppercase": ""
+    },
+    "not_multiple_of": "",
+    "unrecognized_keys": "",
+    "invalid_value": "",
+    "invalid_union": "",
+    "invalid_key": "",
+    "invalid_element": "",
+    "custom": ""
+  }
+}

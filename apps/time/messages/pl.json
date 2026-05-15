@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Która godzina?",
+    "description": "Godzina porządkowa od początku epoki UNIX"
+  },
+  "time": {
+    "now": "Teraz jest",
+    "hour": "godzina od początku ery UNIX",
+    "hoursPassed": "godzin minęło od początku ery UNIX"
+  },
+  "countdown": {
+    "until": "Do {milestone} godzin",
+    "days": "{count, plural, one {# dzień} few {# dni} many {# dni} other {# dni}}",
+    "hours": "{count, plural, one {# godzina} few {# godziny} many {# godzin} other {# godzin}}",
+    "minutes": "{count, plural, one {# minuta} few {# minuty} many {# minut} other {# minut}}",
+    "seconds": "{count, plural, one {# sekunda} few {# sekundy} many {# sekund} other {# sekund}}"
+  },
+  "celebration": {
+    "milestone": "{hours} godzin ery UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Powiadomienia",
+    "explanation": "Logowanie jest wymagane do weryfikacji adresu e-mail i dostępu do ustawień powiadomień",
+    "signIn": "Zaloguj się",
+    "settings": "Ustawienia"
+  },
+  "profile": {
+    "title": "Ustawienia powiadomień",
+    "email": "E-mail",
+    "notifyMonth": "Miesiąc wcześniej",
+    "notifyWeek": "Tydzień wcześniej",
+    "notifyDay": "Dzień wcześniej",
+    "notifyHour": "Godzinę wcześniej",
+    "notify5Min": "5 minut wcześniej",
+    "save": "Zapisz",
+    "saved": "Zapisano!",
+    "unsubscribe": "Wypisz się ze wszystkiego",
+    "unsubscribed": "Wypisano ze wszystkich powiadomień",
+    "noSubscription": "Nie masz jeszcze subskrypcji powiadomień",
+    "createSubscription": "Subskrybuj powiadomienia"
+  },
+  "unsubscribe": {
+    "title": "Wypisanie",
+    "success": "Pomyślnie wypisano z powiadomień o kamieniach milowych godzin UNIX",
+    "error": "Nieprawidłowy link do wypisania",
+    "back": "Wróć na stronę główną"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "grandslamcup-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/grandslamcup-e2e/src",
+  "tags": ["type:e2e", "scope:grandslamcup"],
+  "implicitDependencies": ["grandslamcup"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/grandslamcup-e2e/playwright.config.ts"
+      }
+    }
+  }
+}

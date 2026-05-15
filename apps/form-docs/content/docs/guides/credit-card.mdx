@@ -1,0 +1,72 @@
+---
+title: Credit Card
+description: Card number input with brand detection, expiry, and CVC
+---
+
+## Overview
+
+`Form.Field.CreditCard` is a compound input for payment card data: number (with auto-detection of Visa, MasterCard, Mir, etc.), expiry date, and CVC.
+
+## Basic Usage
+
+```tsx
+<Form initialValue={{ card: { number: '', expiry: '', cvc: '' } }} onSubmit={handleSubmit}>
+  <Form.Field.CreditCard name="card" label="Payment Card" />
+  <Form.Button.Submit>Pay</Form.Button.Submit>
+</Form>
+```
+
+## Layouts
+
+**Inline** — all fields in one row:
+
+```tsx
+<Form.Field.CreditCard name="card" layout="inline" />
+```
+
+**Stacked** — fields stacked vertically:
+
+```tsx
+<Form.Field.CreditCard name="card" layout="stacked" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `name` | `string` | — | Field group name |
+| `label` | `string` | — | Label |
+| `brands` | `CardBrand[]` | all | Restrict accepted brands |
+| `showBrandIcon` | `boolean` | `true` | Show detected brand icon |
+| `layout` | `'inline' \| 'stacked'` | `'inline'` | Field layout |
+| `disabled` | `boolean` | `false` | Disable input |
+| `readOnly` | `boolean` | `false` | Read-only mode |
+
+## Value
+
+```typescript
+{ number: '4111111111111111', expiry: '12/28', cvc: '123' }
+```
+
+## Brand Detection
+
+Card brand is detected automatically from the first digits: Visa (4), MasterCard (51-55), Mir (2200-2204), American Express (34/37), and more.
+
+## Validation
+
+Built-in Luhn algorithm validation for card numbers. Use `creditCardSchema` for Zod schema validation:
+
+```tsx
+import { creditCardSchema } from '@letar/forms'
+
+const schema = z.object({
+  card: creditCardSchema,
+})
+```
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/credit-card).

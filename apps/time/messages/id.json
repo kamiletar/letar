@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Jam berapa?",
+    "description": "Jam ordinal sejak awal epoch UNIX"
+  },
+  "time": {
+    "now": "Sekarang",
+    "hour": "jam sejak awal era UNIX",
+    "hoursPassed": "jam telah berlalu sejak awal era UNIX"
+  },
+  "countdown": {
+    "until": "Hingga {milestone} jam",
+    "days": "{count, plural, one {# hari} other {# hari}}",
+    "hours": "{count, plural, one {# jam} other {# jam}}",
+    "minutes": "{count, plural, one {# menit} other {# menit}}",
+    "seconds": "{count, plural, one {# detik} other {# detik}}"
+  },
+  "celebration": {
+    "milestone": "{hours} jam era UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Notifikasi",
+    "explanation": "Masuk diperlukan untuk memverifikasi email dan mengakses pengaturan notifikasi",
+    "signIn": "Masuk",
+    "settings": "Pengaturan"
+  },
+  "profile": {
+    "title": "Pengaturan notifikasi",
+    "email": "Email",
+    "notifyMonth": "Satu bulan sebelumnya",
+    "notifyWeek": "Satu minggu sebelumnya",
+    "notifyDay": "Satu hari sebelumnya",
+    "notifyHour": "Satu jam sebelumnya",
+    "notify5Min": "5 menit sebelumnya",
+    "save": "Simpan",
+    "saved": "Tersimpan!",
+    "unsubscribe": "Berhenti langganan semua",
+    "unsubscribed": "Anda telah berhenti langganan dari semua notifikasi",
+    "noSubscription": "Anda belum memiliki langganan notifikasi",
+    "createSubscription": "Berlangganan notifikasi"
+  },
+  "unsubscribe": {
+    "title": "Berhenti langganan",
+    "success": "Anda telah berhasil berhenti langganan dari notifikasi tonggak jam UNIX",
+    "error": "Tautan berhenti langganan tidak valid",
+    "back": "Kembali ke beranda"
+  }
+}

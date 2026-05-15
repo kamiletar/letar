@@ -1,0 +1,42 @@
+# Nginx Proxy Manager
+# Документация: https://nginxproxymanager.com/
+#
+# Запуск: docker compose up -d
+# Первый вход: admin@example.com / changeme (сменить после входа)
+# Админка: http://localhost:81 или https://npm.letar.best
+
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:2.14.0'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    environment:
+      TZ: 'Europe/Moscow'
+    ports:
+      - '80:80' # HTTP
+      - '81:81' # Админ-панель
+      - '443:443' # HTTPS
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - default
+      - premium-network
+      - imot-network
+      # Добавить другие сети по мере необходимости:
+      # - mandala-network
+      # - driving-school-network
+      # - kami-network
+
+networks:
+  premium-network:
+    external: true
+  imot-network:
+    external: true
+  # Раскомментировать по необходимости:
+  # mandala-network:
+  #   external: true
+  # driving-school-network:
+  #   external: true
+  # kami-network:
+  #   external: true

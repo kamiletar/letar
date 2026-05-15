@@ -1,0 +1,20 @@
+{
+  "name": "@letar/zenstack-form-plugin",
+  "version": "2.2.0",
+  "description": "ZenStack plugin for generating Zod schemas with UI metadata from schema.zmodel",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "peerDependencies": {
+    "@zenstackhq/sdk": ">=3.0.0"
+  },
+  "dependencies": {}
+}

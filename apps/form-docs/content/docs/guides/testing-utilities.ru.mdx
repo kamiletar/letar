@@ -1,0 +1,90 @@
+---
+title: Утилиты для тестирования
+description: Хелперы для тестирования форм с Vitest и @testing-library/react
+---
+
+## Обзор
+
+`@letar/forms/testing` — набор хелперов для тестирования форм. Оборачивает `@testing-library/react` утилитами, специфичными для форм.
+
+```bash
+# Peer-зависимости
+npm install -D @testing-library/react @testing-library/user-event @testing-library/jest-dom
+```
+
+## Быстрый пример
+
+```tsx
+import { renderForm, fillField, submitForm, expectFieldError } from '@letar/forms/testing'
+
+const { onSubmit } = renderForm(ContactForm)
+
+await fillField('name', 'Иван')
+await fillField('email', 'невалидный')
+await submitForm()
+expectFieldError('email', 'Некорректный email')
+```
+
+## renderForm
+
+Рендерит компонент формы в `ChakraProvider`. Возвращает стандартный результат `@testing-library/react` + привязанные хелперы.
+
+```tsx
+const { fillField, submitForm, expectFieldError, onSubmit } = renderForm(MyForm, {
+  defaults: { name: '', email: '' },
+  onSubmit: vi.fn(),
+})
+```
+
+## fillField
+
+Заполняет поле по атрибуту `data-field-name`. Автоматически определяет тип:
+
+- **Text/Email/Password/Textarea** — очищает и вводит
+- **Number** — очищает и вводит
+- **Checkbox/Switch** — кликает для переключения
+
+```tsx
+await fillField('name', 'Иван')
+await fillField('age', 25)
+await fillField('agree', true)
+```
+
+## Ассерт-хелперы
+
+```tsx
+expectFieldError('email', 'Некорректный email')  // Поле показывает ошибку
+expectNoFieldError('email')                       // Поле без ошибок
+expectFieldValue('name', 'Иван')                  // Поле содержит значение
+```
+
+## Мультистеп хелперы
+
+```tsx
+await goToStep(2)         // Кликнуть "Далее" до шага 2
+expectActiveStep(2)       // Проверить текущий шаг
+```
+
+## Хелперы для массивов
+
+```tsx
+await addItem('phones')                // Клик "Добавить" в списке
+await removeItem(0, 'phones')         // Удалить первый элемент
+expectItemCount('phones', 3)          // Проверить количество
+```
+
+## TestWrapper
+
+Обёртка `ChakraProvider` для кастомных тестовых сценариев:
+
+```tsx
+import { TestWrapper } from '@letar/forms/testing'
+
+render(<TestWrapper><MyComponent /></TestWrapper>)
+```
+
+---
+
+## Живой пример
+
+Интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/testing-utilities).

@@ -1,0 +1,139 @@
+/**
+ * Глобальные стили Pravda
+ */
+
+/**
+ * Контроль overflow на мобильных.
+ * НЕ используем overflow-x: hidden на html/body — это обрезает контент!
+ * Вместо этого применяем локальные скроллы к проблемным элементам (pre, table).
+ */
+
+/* Код-блоки внутри статей должны скроллиться горизонтально */
+.article pre {
+  overflow-x: auto;
+  max-width: 100%;
+  display: block;
+}
+
+/* Inline code */
+.mdx-content code {
+  word-break: break-word;
+}
+
+/* Таблицы на мобильных должны скроллиться внутри контейнера */
+@media (max-width: 480px) {
+  .mdx-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}
+
+/* Стили для печати */
+@media print {
+  /* Скрываем навигационные элементы */
+  header,
+  nav,
+  .sidebar,
+  .toc,
+  .print-hide,
+  .breadcrumbs,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Основной контент на всю ширину */
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Убираем фоны и тени */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Статьи */
+  .article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1em;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Разделы */
+  .section,
+  .chapter {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* Заголовки не отрываем от контента */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Ссылки показываем URL */
+  a[href]:after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Внутренние ссылки без URL */
+  a[href^='#']:after,
+  a[href^='/']:after {
+    content: '';
+  }
+
+  /* Таблицы */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 1px solid #333;
+    padding: 0.5em;
+  }
+
+  /* Размер шрифта для печати */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: 24pt;
+  }
+  h2 {
+    font-size: 18pt;
+  }
+  h3 {
+    font-size: 14pt;
+  }
+
+  /* Метаданные документа */
+  .doc-meta {
+    font-style: italic;
+    margin-bottom: 2em;
+  }
+
+  /* Подсветка в печати */
+  mark {
+    background: none !important;
+    font-weight: bold;
+  }
+}

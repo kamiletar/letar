@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — مراسل ند-لند ما بعد الكم",
+    "description": "Aira هو مراسل لامركزي بتشفير هجين ما بعد الكم. بلا خوادم، بلا أرقام هواتف، بلا تنازلات."
+  },
+  "nav": {
+    "features": "الميزات",
+    "security": "الأمان",
+    "download": "التنزيل",
+    "github": "GitHub",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "mainNavigation": "التنقل الرئيسي",
+    "mobileNavigation": "التنقل على الجوال",
+    "skipToContent": "الانتقال إلى المحتوى"
+  },
+  "hero": {
+    "badge": "{version} — حماية ما بعد الكم متاحة الآن",
+    "fallbackVersion": "v0.3.3",
+    "title1": "تواصل بحرية.",
+    "title2": "احمِ المستقبل.",
+    "subtitle": "Aira هو مراسل لامركزي بتشفير هجين ما بعد الكم. بلا خوادم، بلا أرقام هواتف، بلا تنازلات.",
+    "ctaDownload": "تنزيل Aira",
+    "ctaSource": "الشيفرة المصدرية",
+    "tagOpenSource": "مفتوح المصدر"
+  },
+  "features": {
+    "title": "قدرات خارقة",
+    "subtitle": "كل تفصيلة مصمَّمة لحماية حريتك في التواصل",
+    "quantum": {
+      "title": "تشفير مقاوم للحوسبة الكمية",
+      "description": "تشفير هجين ML-KEM-768 + X25519. يجب كسر كلا الخوارزميتين معًا — حماية من الحواسيب الكمية اليوم."
+    },
+    "p2p": {
+      "title": "ند-لند حقيقي",
+      "description": "بلا خوادم، بلا حسابات، بلا أرقام هواتف. كل مستخدم هو عقدة في الشبكة. الرسائل تنتقل مباشرة عبر QUIC."
+    },
+    "metadata": {
+      "title": "بيانات وصفية غير مرئية",
+      "description": "أسماء مستعارة مزدوجة لكل جهة اتصال. حتى الريليه لا يعرف مع من تتحدث. الحشو على جميع الحزم يخفي الأحجام الحقيقية."
+    },
+    "global": {
+      "title": "يعمل في كل مكان",
+      "description": "تمويه REALITY، obfs4، Tor، بديل CDN. النقل القابل للإضافة يتغلب على DPI حتى في أشد المناطق رقابة."
+    },
+    "fullMessenger": {
+      "title": "مراسل متكامل",
+      "description": "التفاعلات، الردود، التحرير، الرسائل المختفية، نقل الملفات، مجموعات تصل إلى 100 عضو، البوتات — كل شيء مشفَّر."
+    },
+    "multiplatform": {
+      "title": "متعدد المنصات",
+      "description": "CLI، سطح مكتب (Linux/macOS/Windows)، Android. حتى 5 أجهزة مرتبطة بالمزامنة عبر عبارة البذرة."
+    }
+  },
+  "security": {
+    "title": "تحت الغطاء",
+    "subtitle": "Rust بنسبة 100%. صفر من شيفرة unsafe في النواة التشفيرية. كل مفتاح معزول ويتم تصفيره بعد الاستخدام.",
+    "crypto": {
+      "title": "التشفير",
+      "keyAgreementLabel": "الاتفاق على المفاتيح",
+      "keyAgreementDetail": "KEM هجين، FIPS 203",
+      "signaturesLabel": "التواقيع",
+      "signaturesDetail": "FIPS 204، ما بعد الكم",
+      "encryptionLabel": "التشفير",
+      "encryptionDetail": "256 بت، AEAD",
+      "hashingLabel": "التجزئة",
+      "hashingDetail": "KDF + MAC، بلا تمديد الطول",
+      "kdfLabel": "اشتقاق المفاتيح",
+      "kdfDetail": "256 MB / 64 MB (سطح مكتب/جوال)",
+      "fsLabel": "السرية التامة للأمام",
+      "fsDetail": "تجديد PQ كل ~50 رسالة"
+    },
+    "protection": {
+      "title": "الحماية",
+      "dpiLabel": "تجاوز DPI",
+      "dpiValue": "5 مستويات",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "البيانات الوصفية",
+      "metadataValue": "أسماء مستعارة مزدوجة",
+      "metadataDetail": "الريليه لا يرى الرسم البياني الاجتماعي",
+      "deniabilityLabel": "إمكانية الإنكار",
+      "deniabilityValue": "MAC متناظرة",
+      "deniabilityDetail": "يستحيل إثبات التأليف",
+      "antispamLabel": "مكافحة الإزعاج",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "20 بتًا للغرباء",
+      "paddingLabel": "الحشو",
+      "paddingValue": "256–4096 بايت",
+      "paddingDetail": "إخفاء الحجم الحقيقي للرسالة",
+      "recoveryLabel": "الاستعادة",
+      "recoveryValue": "24 كلمة BIP-39",
+      "recoveryDetail": "عبارة بذرة، اشتقاق حتمي"
+    },
+    "vsTitle": "لماذا ليس Signal / Session / SimpleX؟",
+    "vsSignal": "يعتمد Signal على خوادم ويتطلب رقم هاتف ولا يوفر حماية ما بعد الكم لكل رسالة. Aira هو P2P + سقّاطة SPQR.",
+    "vsSession": "يستخدم Session توجيه البصل عبر خوادم Oxen. أما Aira فهو P2P مباشر دون خوادم وسيطة وبتشفير PQ كامل.",
+    "vsSimpleX": "يعتمد SimpleX على خوادم ريليه للتسليم. بينما Aira يعمل مباشرة، والريليه ليس سوى بديل لعبور NAT."
+  },
+  "download": {
+    "title": "تنزيل Aira",
+    "subtitleWithVersion": "{version} — مفتوح المصدر. مجاني إلى الأبد.",
+    "subtitle": "مفتوح المصدر. مجاني إلى الأبد.",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI. أرشيف tar.gz.",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "CLI + Daemon + GUI لأجهزة Apple M1/M2/M3/M4.",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "CLI + Daemon + GUI لأجهزة Mac بمعالج Intel.",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI. أرشيف zip.",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + نواة Rust عبر UniFFI. APK.",
+    "downloadLabel": "تنزيل",
+    "portableLabel": "أرشيف محمول",
+    "cargoLabel": "التثبيت عبر Cargo:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "المواصفات",
+    "releases": "الإصدارات"
+  }
+}

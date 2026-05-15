@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "admin-ui",
+  "projectType": "library",
+  "sourceRoot": "libs/admin-ui/src",
+  "tags": ["scope:shared", "type:ui"]
+}

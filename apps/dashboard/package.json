@@ -1,0 +1,22 @@
+{
+  "name": "@letar/dashboard",
+  "version": "1.19.1",
+  "private": true,
+  "nx": {
+    "name": "dashboard",
+    "tags": [
+      "dashboard",
+      "site"
+    ],
+    "implicitDependencies": [
+      "@letar/query-provider",
+      "@letar/analytics"
+    ]
+  },
+  "dependencies": {
+    "@letar/ui": "workspace:*",
+    "@letar/forms": "workspace:*",
+    "@letar/analytics": "workspace:*",
+    "@letar/chakra-provider": "workspace:*"
+  }
+}

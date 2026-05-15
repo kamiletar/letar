@@ -1,0 +1,86 @@
+---
+title: Российские документы
+description: Поля ИНН, ОГРН, БИК, СНИЛС, паспорт с проверкой контрольных сумм
+---
+
+## Обзор
+
+Каждая B2B-форма в России требует ИНН, ОГРН, БИК, номера банковских счетов. У этих полей есть **контрольные суммы** — простая маска бесполезна без валидации. @letar/forms предоставляет как headless-валидаторы, так и готовые UI-компоненты.
+
+## Архитектура: два уровня
+
+### Уровень 1: zRu валидаторы (headless)
+
+Чистые Zod-схемы с проверкой контрольных сумм. Работают на сервере и клиенте, без зависимости от UI.
+
+```tsx
+import { zRu } from '@letar/forms/validators/ru'
+
+const CompanySchema = z.object({
+  inn: zRu.inn(), // 10 или 12 цифр + контрольная сумма
+  kpp: zRu.kpp(), // 9 символов
+  ogrn: zRu.ogrn(), // 13 цифр + контрольная сумма
+  bik: zRu.bik(), // 9 цифр, начинается с "04"
+  account: zRu.bankAccount(), // 20 цифр
+  snils: zRu.snils(), // 11 цифр + контрольная сумма
+})
+
+// Варианты ИНН
+zRu.inn.legal() // только юридическое лицо (10 цифр)
+zRu.inn.individual() // только физическое лицо (12 цифр)
+```
+
+### Уровень 2: Form.Document.\* (UI)
+
+Готовые поля с масками ввода, иконками и валидацией контрольных сумм в реальном времени.
+
+```tsx
+<Form.Document.INN name="inn" label="ИНН" />
+<Form.Document.KPP name="kpp" label="КПП" />
+<Form.Document.OGRN name="ogrn" label="ОГРН" />
+<Form.Document.BIK name="bik" label="БИК" />
+<Form.Document.BankAccount name="account" label="Расчётный счёт" />
+<Form.Document.CorrAccount name="corrAccount" label="Корр. счёт" />
+<Form.Document.SNILS name="snils" label="СНИЛС" />
+<Form.Document.Passport name="passport" label="Паспорт" />
+```
+
+## Доступные поля
+
+| Компонент                   | Формат          | Контрольная сумма             |
+| --------------------------- | --------------- | ----------------------------- |
+| `Form.Document.INN`         | 10 или 12 цифр  | Взвешенная сумма mod 11       |
+| `Form.Document.KPP`         | 9 символов      | Проверка формата (NNNNPPXXX)  |
+| `Form.Document.OGRN`        | 13 цифр         | Первые 12 mod 11              |
+| `Form.Document.BIK`         | 9 цифр          | Начинается с "04"             |
+| `Form.Document.BankAccount` | 20 цифр         | Контрольный ключ (с БИК)      |
+| `Form.Document.CorrAccount` | 20 цифр         | Начинается с "301"            |
+| `Form.Document.SNILS`       | XXX-XXX-XXX YY  | Модуль 101                    |
+| `Form.Document.Passport`    | XX XX XXXXXX    | Проверка формата              |
+
+## Кастомные документные поля
+
+Используйте `createDocumentField` для создания собственных документных полей:
+
+```tsx
+import { createDocumentField } from '@letar/forms'
+import { LuFileText } from 'react-icons/lu'
+
+const FieldCustomDoc = createDocumentField({
+  displayName: 'FieldCustomDoc',
+  mask: '999-999-999',
+  placeholder: '123-456-789',
+  icon: <LuFileText />,
+  validate: (value) => {
+    if (value.length < 9) return 'Слишком короткое значение'
+    return undefined
+  },
+})
+```
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/documents).

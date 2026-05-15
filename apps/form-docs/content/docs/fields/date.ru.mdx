@@ -1,0 +1,53 @@
+---
+title: Поля даты и времени
+description: Выбор даты и времени — Date, DateRange, Time
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="date" height={400} />
+
+## Form.Field.Date
+
+Выбор одной даты.
+
+```tsx
+const Schema = z.object({
+  birthday: z.string().meta({
+    ui: { title: 'Дата рождения' },
+  }),
+})
+
+<Form.Field.Date name="birthday" />
+```
+
+## Form.Field.DateRange
+
+Выбор диапазона дат (начало — конец).
+
+```tsx
+const Schema = z.object({
+  period: z.object({
+    start: z.string(),
+    end: z.string(),
+  }).meta({
+    ui: { title: 'Период' },
+  }),
+})
+
+<Form.Field.DateRange name="period" />
+```
+
+## Form.Field.Time
+
+Выбор времени.
+
+```tsx
+const Schema = z.object({
+  startTime: z.string().meta({
+    ui: { title: 'Время начала' },
+  }),
+})
+
+<Form.Field.Time name="startTime" />
+```

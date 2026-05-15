@@ -1,0 +1,114 @@
+---
+title: Подпись
+description: Поле цифровой подписи с рисованием на canvas и режимом ввода текста
+---
+
+## Обзор
+
+`Form.Field.Signature` предоставляет поле ввода цифровой подписи для юридических форм, контрактов и документов согласия. Пользователи могут рисовать мышью/пальцем или ввести своё имя курсивным шрифтом.
+
+## Базовое использование
+
+```tsx
+<Form initialValue={{ signature: '' }} onSubmit={handleSubmit}>
+  <Form.Field.Signature name="signature" label="Ваша подпись" />
+  <Form.Button.Submit>Подписать</Form.Button.Submit>
+</Form>
+```
+
+Значение поля — **строка data URI** (image/png base64), подходит для хранения в базе данных или отправки в API.
+
+## Режим рисования
+
+Режим по умолчанию. Пользователи рисуют прямо на canvas мышью или касанием.
+
+```tsx
+<Form.Field.Signature
+  name="signature"
+  label="Подпись"
+  width={400}
+  height={150}
+  strokeColor="black"
+  strokeWidth={2}
+  placeholder="Подпишите здесь"
+  clearLabel="Очистить"
+/>
+```
+
+## Режим ввода текста
+
+Альтернатива рисованию — пользователи вводят своё имя, и оно отображается курсивным шрифтом на canvas.
+
+```tsx
+<Form.Field.Signature name="signature" allowTyped={true} typedFont="'Dancing Script', cursive" />
+```
+
+Переключение между режимами «Рисовать» и «Ввести» через сегментированный контрол вверху.
+
+## Только рисование
+
+Отключить режим ввода текста для случаев, когда требуется рукописная подпись:
+
+```tsx
+<Form.Field.Signature name="signature" allowTyped={false} />
+```
+
+## Кастомная стилизация
+
+```tsx
+<Form.Field.Signature
+  name="signature"
+  width={500}
+  height={200}
+  strokeColor="#1a365d"
+  strokeWidth={3}
+  backgroundColor="#f7fafc"
+/>
+```
+
+## Свойства
+
+| Свойство          | Тип       | По умолчанию    | Описание                              |
+| ----------------- | --------- | --------------- | ------------------------------------- |
+| `width`           | `number`  | `400`           | Ширина canvas в пикселях              |
+| `height`          | `number`  | `150`           | Высота canvas в пикселях              |
+| `strokeColor`     | `string`  | `'black'`       | Цвет пера/штриха                      |
+| `strokeWidth`     | `number`  | `2`             | Толщина пера/штриха                   |
+| `backgroundColor` | `string`  | `'white'`       | Фон canvas                            |
+| `clearLabel`      | `string`  | `'Clear'`       | Текст кнопки очистки                  |
+| `placeholder`     | `string`  | `'Sign here'`   | Подсказка над пустым canvas           |
+| `allowTyped`      | `boolean` | `true`          | Показывать режим текстовой подписи    |
+| `typedFont`       | `string`  | `cursive`       | Шрифт для текстового режима           |
+
+## Доступность
+
+- Canvas имеет `role="img"` и `aria-label="Signature pad"`
+- Фокус по Tab показывает видимую обводку
+- Текстовый режим служит как альтернатива для клавиатурного управления
+- Кнопка очистки доступна с клавиатуры
+
+## Поддержка касаний
+
+Полная поддержка касаний для мобильных устройств:
+
+- `touchAction: none` предотвращает прокрутку при рисовании
+- События касания (touchstart, touchmove, touchend) обрабатываются наряду с событиями мыши
+
+## Валидация
+
+Используйте Zod `z.string().min(1)` для обязательной подписи:
+
+```tsx
+const Schema = z.object({
+  signature: z.string().min(1, 'Подпись обязательна'),
+})
+```
+
+Значение поля — пустая строка `''` при пустом canvas и data URI при рисовании/вводе.
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/signature).

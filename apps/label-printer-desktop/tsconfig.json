@@ -1,0 +1,70 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./renderer/*"],
+      "@/generated/*": ["./src/generated/*"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms/*": ["../../libs/forms/src/*"],
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/label-printer-core": ["../../libs/label-printer-core/src/index.ts"],
+      "@letar/label-printer-core/*": ["../../libs/label-printer-core/src/*"]
+    }
+  },
+  "include": [
+    "renderer/**/*.ts",
+    "renderer/**/*.tsx",
+    "src/generated/**/*.ts",
+    "shared/**/*.ts",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "schema.ts",
+    "../../libs/forms/src/**/*.ts",
+    "../../libs/forms/src/**/*.tsx",
+    "../../libs/chakra-provider/src/**/*.ts",
+    "../../libs/chakra-provider/src/**/*.tsx",
+    "../../libs/query-provider/src/**/*.ts",
+    "../../libs/query-provider/src/**/*.tsx",
+    "../../libs/label-printer-core/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "app",
+    ".next",
+    "main",
+    "prisma",
+    "src/generated/zenstack/policy.ts",
+    "../../libs/**/*.spec.ts",
+    "../../libs/**/*.spec.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/chakra-provider"
+    },
+    {
+      "path": "../../libs/label-printer-core"
+    }
+  ]
+}

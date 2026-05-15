@@ -1,0 +1,68 @@
+{
+  "name": "@letar/forms",
+  "version": "1.3.1",
+  "description": "Reusable form components library with TanStack Form and Chakra UI integration",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./offline": {
+      "@letar/source": "./src/lib/offline/index.ts",
+      "types": "./src/lib/offline/index.ts",
+      "import": "./src/lib/offline/index.ts",
+      "default": "./src/lib/offline/index.ts"
+    },
+    "./i18n": {
+      "@letar/source": "./src/lib/i18n/index.ts",
+      "types": "./src/lib/i18n/index.ts",
+      "import": "./src/lib/i18n/index.ts",
+      "default": "./src/lib/i18n/index.ts"
+    },
+    "./validators/ru": {
+      "@letar/source": "./src/lib/validators/ru/index.ts",
+      "types": "./src/lib/validators/ru/index.ts",
+      "import": "./src/lib/validators/ru/index.ts",
+      "default": "./src/lib/validators/ru/index.ts"
+    },
+    "./server-errors": {
+      "@letar/source": "./src/lib/server-errors/index.ts",
+      "types": "./src/lib/server-errors/index.ts",
+      "import": "./src/lib/server-errors/index.ts",
+      "default": "./src/lib/server-errors/index.ts"
+    },
+    "./analytics": {
+      "@letar/source": "./src/lib/analytics/index.ts",
+      "types": "./src/lib/analytics/index.ts",
+      "import": "./src/lib/analytics/index.ts",
+      "default": "./src/lib/analytics/index.ts"
+    },
+    "./testing": {
+      "@letar/source": "./src/lib/testing/index.ts",
+      "types": "./src/lib/testing/index.ts",
+      "import": "./src/lib/testing/index.ts",
+      "default": "./src/lib/testing/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@chakra-ui/react": ">=3.0.0",
+    "@dnd-kit/core": ">=6.0.0",
+    "@dnd-kit/sortable": ">=10.0.0",
+    "@dnd-kit/utilities": ">=3.0.0",
+    "@tanstack/react-form": ">=1.0.0",
+    "framer-motion": ">=10.0.0",
+    "react": ">=18.0.0",
+    "use-mask-input": ">=3.0.0",
+    "zod": ">=3.24.0"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.23"
+  }
+}

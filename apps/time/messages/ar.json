@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "كم الساعة؟",
+    "description": "الساعة الترتيبية منذ بداية حقبة UNIX"
+  },
+  "time": {
+    "now": "الآن",
+    "hour": "ساعة منذ بداية حقبة UNIX",
+    "hoursPassed": "ساعة مرت منذ بداية حقبة UNIX"
+  },
+  "countdown": {
+    "until": "حتى {milestone} ساعة",
+    "days": "{count, plural, zero {# يوم} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}",
+    "hours": "{count, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
+    "minutes": "{count, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتان} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
+    "seconds": "{count, plural, zero {# ثانية} one {ثانية واحدة} two {ثانيتان} few {# ثوانٍ} many {# ثانية} other {# ثانية}}"
+  },
+  "celebration": {
+    "milestone": "{hours} ساعة من حقبة UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "الإشعارات",
+    "explanation": "تسجيل الدخول مطلوب للتحقق من بريدك الإلكتروني والوصول إلى إعدادات الإشعارات",
+    "signIn": "تسجيل الدخول",
+    "settings": "الإعدادات"
+  },
+  "profile": {
+    "title": "إعدادات الإشعارات",
+    "email": "البريد الإلكتروني",
+    "notifyMonth": "قبل شهر",
+    "notifyWeek": "قبل أسبوع",
+    "notifyDay": "قبل يوم",
+    "notifyHour": "قبل ساعة",
+    "notify5Min": "قبل 5 دقائق",
+    "save": "حفظ",
+    "saved": "تم الحفظ!",
+    "unsubscribe": "إلغاء الاشتراك من الكل",
+    "unsubscribed": "تم إلغاء اشتراكك من جميع الإشعارات",
+    "noSubscription": "ليس لديك اشتراك في الإشعارات بعد",
+    "createSubscription": "الاشتراك في الإشعارات"
+  },
+  "unsubscribe": {
+    "title": "إلغاء الاشتراك",
+    "success": "تم إلغاء اشتراكك بنجاح من إشعارات معالم ساعات UNIX",
+    "error": "رابط إلغاء الاشتراك غير صالح",
+    "back": "العودة إلى الرئيسية"
+  }
+}

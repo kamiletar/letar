@@ -1,0 +1,85 @@
+---
+title: Отмена / Повтор
+description: Ctrl+Z/Ctrl+Y история для форм с useFormHistory
+---
+
+## Обзор
+
+Ни одна библиотека форм не предоставляет встроенный undo/redo. `useFormHistory()` решает это — снимки с debounce, горячие клавиши и визуальный компонент управления.
+
+```tsx
+import { HistoryControls, useFormHistory } from '@letar/forms'
+
+function ProductEditor() {
+  const form = useDeclarativeForm()
+  const history = useFormHistory(form)
+
+  return (
+    <Form schema={ProductSchema} onSubmit={save}>
+      <HistoryControls history={history} />
+      <Form.Field.String name="title" />
+      <Form.Field.RichText name="description" />
+      <Form.Field.Currency name="price" />
+      <Form.Button.Submit>Сохранить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Как это работает
+
+1. Подписывается на `form.store` (реактивный стор TanStack Form)
+2. При изменении → debounce 500мс → `structuredClone` снимок
+3. Undo/Redo применяет снимок через `form.setFieldValue` для каждого поля
+4. Изменения от undo/redo **не записываются** в историю (предотвращение рекурсии)
+5. Ветвление (undo → правка) обрезает будущие записи
+
+## API: useFormHistory(form, config?)
+
+```typescript
+const history = useFormHistory(form, {
+  maxHistory: 50,        // Макс. снимков (по умолчанию: 50)
+  debounceMs: 500,       // Задержка перед записью (по умолчанию: 500мс)
+  keyboard: true,        // Горячие клавиши Ctrl+Z/Y (по умолчанию: true)
+  persist: false,        // sessionStorage (по умолчанию: false)
+  persistKey: 'form-history',
+})
+```
+
+**Возвращает:**
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `undo` | `() => void` | Отменить последнее изменение |
+| `redo` | `() => void` | Повторить отменённое |
+| `canUndo` | `boolean` | Есть история отмен |
+| `canRedo` | `boolean` | Есть история повторов |
+| `currentIndex` | `number` | Позиция в стеке |
+| `historyLength` | `number` | Всего снимков |
+| `clear` | `() => void` | Очистить историю |
+
+## Горячие клавиши
+
+| Клавиши | Действие |
+|---------|----------|
+| `Ctrl+Z` / `Cmd+Z` | Отмена |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Повтор |
+
+Отключить: `keyboard: false`.
+
+## HistoryControls
+
+```tsx
+<HistoryControls
+  history={historyApi}
+  showCounter    // Показывать счётчик "3/7"
+  size="sm"      // xs | sm | md
+/>
+```
+
+## Когда использовать
+
+- CMS / редакторы контента (много полей, частые правки)
+- Конфигураторы товаров
+- Формы с RichText (пользователи ожидают Ctrl+Z)
+- Длинные формы (10+ полей), где ошибки дорого обходятся

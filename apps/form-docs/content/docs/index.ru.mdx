@@ -1,0 +1,69 @@
+---
+title: Начало работы
+description: Декларативные компоненты форм для React с 40+ типами полей
+---
+
+## Что такое @letar/forms?
+
+Комплексная React-библиотека форм, объединяющая мощь [TanStack Form](https://tanstack.com/form) с компонентами [Chakra UI v3](https://chakra-ui.com) и валидацией [Zod](https://zod.dev).
+
+**Ключевые принципы:**
+
+- **Схема = логика** — правила валидации и UI метаданные живут в Zod-схеме
+- **Декларативность** — JSX содержит только вёрстку и имена полей
+- **Типобезопасность** — полный TypeScript вывод от схемы до значений формы
+- **Всё включено** — 40+ типов полей, мультистеп формы, оффлайн режим, i18n
+
+## Быстрый пример
+
+```tsx
+import { Form } from '@letar/forms'
+import { z } from 'zod/v4'
+
+const Schema = z.object({
+  name: z
+    .string()
+    .min(2)
+    .meta({ ui: { title: 'Имя', placeholder: 'Введите имя' } }),
+  email: z
+    .string()
+    .email()
+    .meta({ ui: { title: 'Email' } }),
+  role: z.enum(['admin', 'user']).meta({ ui: { title: 'Роль' } }),
+})
+
+function MyForm() {
+  return (
+    <Form
+      schema={Schema}
+      initialValue={{ name: '', email: '', role: 'user' }}
+      onSubmit={async ({ value }) => {
+        await saveUser(value)
+      }}
+    >
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Select name="role" />
+      <Form.Button.Submit>Сохранить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Живой пример
+
+Попробуйте сами — это настоящая интерактивная форма:
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="basic" height={550} />
+
+## Автогенерация из схемы
+
+Если не хотите писать JSX для полей, используйте `Form.FromSchema`:
+
+```tsx
+<Form.FromSchema schema={Schema} initialValue={data} onSubmit={handleSubmit} submitLabel="Создать" />
+```
+
+Все поля автоматически генерируются из типов и метаданных Zod-схемы.

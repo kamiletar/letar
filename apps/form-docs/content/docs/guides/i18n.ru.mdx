@@ -1,0 +1,97 @@
+---
+title: Интернационализация
+description: Локализация меток полей, ошибок валидации и опций
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="i18n" height={500} />
+
+## Обзор
+
+`@letar/forms/i18n` предоставляет полную поддержку интернационализации: локализованные метки, сообщения об ошибках валидации и опции выбора.
+
+## Настройка
+
+```tsx
+import { FormI18nProvider } from '@letar/forms/i18n'
+
+const translations = {
+  en: {
+    fields: {
+      name: 'Full Name',
+      email: 'Email Address',
+    },
+    validation: {
+      required: 'This field is required',
+      min: 'Must be at least {min} characters',
+    },
+  },
+  ru: {
+    fields: {
+      name: 'Полное имя',
+      email: 'Электронная почта',
+    },
+    validation: {
+      required: 'Обязательное поле',
+      min: 'Минимум {min} символов',
+    },
+  },
+}
+
+function App() {
+  return (
+    <FormI18nProvider locale="ru" translations={translations}>
+      <MyForm />
+    </FormI18nProvider>
+  )
+}
+```
+
+## Локализация опций
+
+Используйте `useLocalizedOptions` для перевода опций select:
+
+```tsx
+import { useLocalizedOptions } from '@letar/forms/i18n'
+
+const options = useLocalizedOptions([
+  { value: 'active', label: { en: 'Active', ru: 'Активный' } },
+  { value: 'inactive', label: { en: 'Inactive', ru: 'Неактивный' } },
+])
+```
+
+## Перевод ошибок Zod
+
+Создайте кастомную карту ошибок для сообщений валидации:
+
+```tsx
+import { createFormErrorMap } from '@letar/forms/i18n'
+
+const errorMap = createFormErrorMap({
+  too_small: ({ minimum }) => `Минимум ${minimum} символов`,
+  too_big: ({ maximum }) => `Максимум ${maximum} символов`,
+  invalid_string: ({ validation }) => {
+    if (validation === 'email') return 'Некорректный email'
+    return 'Некорректный формат'
+  },
+})
+```
+
+## Constraint Hints
+
+Подсказки из Zod constraints (например "Minimum 2 characters") автоматически переводятся на основе `locale` в `FormI18nProvider`:
+
+```tsx
+// Английский (по умолчанию)
+<Form schema={schema}>...</Form>
+// → "Minimum 2 characters"
+
+// Русский
+<FormI18nProvider locale="ru">
+  <Form schema={schema}>...</Form>
+</FormI18nProvider>
+// → "Минимум 2 символа"
+```
+
+Встроенные переводы: English, Русский. Для других языков передайте `constraintHints` в провайдер.

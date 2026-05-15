@@ -1,0 +1,38 @@
+{
+  "name": "@letar/contract-generator",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./pdf-generator": {
+      "types": "./src/pdf-generator.ts",
+      "import": "./src/pdf-generator.ts",
+      "default": "./src/pdf-generator.ts"
+    },
+    "./pdf-react": {
+      "types": "./src/pdf-react.tsx",
+      "import": "./src/pdf-react.tsx",
+      "default": "./src/pdf-react.tsx"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@react-pdf/renderer": "^4.0.0",
+    "puppeteer": "^24.0.0"
+  },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": true
+    },
+    "@react-pdf/renderer": {
+      "optional": true
+    }
+  }
+}

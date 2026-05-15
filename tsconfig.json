@@ -1,0 +1,175 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./libs/yandex-metrika"
+    },
+    {
+      "path": "./apps/driving-school-e2e"
+    },
+    {
+      "path": "./apps/kami-e2e"
+    },
+    {
+      "path": "./libs/chakra-provider"
+    },
+    {
+      "path": "./apps/premium-rosstil-e2e"
+    },
+    {
+      "path": "./libs/format-utils"
+    },
+    {
+      "path": "./libs/ui"
+    },
+    {
+      "path": "./apps/mandala-e2e"
+    },
+    {
+      "path": "./apps/mandala"
+    },
+    {
+      "path": "./libs/validation-utils"
+    },
+    {
+      "path": "./libs/forms"
+    },
+    {
+      "path": "./apps/form-develop-app-e2e"
+    },
+    {
+      "path": "./libs/zenstack-form-plugin"
+    },
+    {
+      "path": "./apps/label-printer-desktop"
+    },
+    {
+      "path": "./libs/label-printer-core"
+    },
+    {
+      "path": "./apps/animatrona"
+    },
+    {
+      "path": "./apps/label-printer-desktop-e2e"
+    },
+    {
+      "path": "./apps/pravda-e2e"
+    },
+    {
+      "path": "./apps/pravda"
+    },
+    {
+      "path": "./libs/auth"
+    },
+    {
+      "path": "./libs/admin-ui"
+    },
+    {
+      "path": "./libs/pin-auth"
+    },
+    {
+      "path": "./libs/hooks"
+    },
+    {
+      "path": "./libs/query-provider"
+    },
+    {
+      "path": "./libs/image-upload"
+    },
+    {
+      "path": "./libs/api-server"
+    },
+    {
+      "path": "./apps/animatrona-e2e"
+    },
+    {
+      "path": "./libs/analytics"
+    },
+    {
+      "path": "./libs/email"
+    },
+    {
+      "path": "./libs/contract-generator"
+    },
+    {
+      "path": "./apps/animatrona-tracker"
+    },
+    {
+      "path": "./libs/video-player-react"
+    },
+    {
+      "path": "./libs/video-player-core"
+    },
+    {
+      "path": "./libs/driving-school-db"
+    },
+    {
+      "path": "./libs/animatrona-types"
+    },
+    {
+      "path": "./libs/animatrona-utils"
+    },
+    {
+      "path": "./libs/animatrona-franchise-graph"
+    },
+    {
+      "path": "./libs/animatrona-ui"
+    },
+    {
+      "path": "./apps/archetest-e2e"
+    },
+    {
+      "path": "./apps/archetest"
+    },
+    {
+      "path": "./apps/time-e2e"
+    },
+    {
+      "path": "./apps/time"
+    },
+    {
+      "path": "./libs/number-words"
+    },
+    {
+      "path": "./apps/imot"
+    },
+    {
+      "path": "./apps/imot-e2e"
+    },
+    {
+      "path": "./apps/form-docs"
+    },
+    {
+      "path": "./apps/form-example"
+    },
+    {
+      "path": "./libs/form-mcp"
+    },
+    {
+      "path": "./libs/demo-protection"
+    },
+    {
+      "path": "./apps/grandslamcup-e2e"
+    },
+    {
+      "path": "./apps/grandslamcup"
+    },
+    {
+      "path": "./apps/form-example-e2e"
+    },
+    {
+      "path": "./apps/aira-web-e2e"
+    },
+    {
+      "path": "./apps/aira-web"
+    },
+    {
+      "path": "./apps/aboi-e2e"
+    },
+    {
+      "path": "./apps/aboi"
+    }
+  ]
+}

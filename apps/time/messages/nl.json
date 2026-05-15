@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Hoe laat is het?",
+    "description": "Ordinaal uur sinds het begin van het UNIX-tijdperk"
+  },
+  "time": {
+    "now": "Het is nu",
+    "hour": "uur sinds het begin van het UNIX-tijdperk",
+    "hoursPassed": "uur verstreken sinds het begin van het UNIX-tijdperk"
+  },
+  "countdown": {
+    "until": "Nog {milestone} uur",
+    "days": "{count, plural, one {# dag} other {# dagen}}",
+    "hours": "{count, plural, one {# uur} other {# uur}}",
+    "minutes": "{count, plural, one {# minuut} other {# minuten}}",
+    "seconds": "{count, plural, one {# seconde} other {# seconden}}"
+  },
+  "celebration": {
+    "milestone": "{hours} uur van het UNIX-tijdperk!"
+  },
+  "subscribe": {
+    "subscribe": "Meldingen",
+    "explanation": "Inloggen is vereist om je e-mail te verifiëren en toegang te krijgen tot de meldingsinstellingen",
+    "signIn": "Inloggen",
+    "settings": "Instellingen"
+  },
+  "profile": {
+    "title": "Meldingsinstellingen",
+    "email": "E-mail",
+    "notifyMonth": "Eén maand van tevoren",
+    "notifyWeek": "Eén week van tevoren",
+    "notifyDay": "Eén dag van tevoren",
+    "notifyHour": "Eén uur van tevoren",
+    "notify5Min": "5 minuten van tevoren",
+    "save": "Opslaan",
+    "saved": "Opgeslagen!",
+    "unsubscribe": "Uitschrijven van alles",
+    "unsubscribed": "Je bent uitgeschreven van alle meldingen",
+    "noSubscription": "Je hebt nog geen meldingsabonnement",
+    "createSubscription": "Abonneren op meldingen"
+  },
+  "unsubscribe": {
+    "title": "Uitschrijven",
+    "success": "Je bent succesvol uitgeschreven van UNIX-uur mijlpaalmeldingen",
+    "error": "Ongeldige uitschrijflink",
+    "back": "Terug naar startpagina"
+  }
+}

@@ -1,0 +1,138 @@
+---
+title: Specialized Fields
+description: Phone, Address, FileUpload, PinInput, ColorPicker, and more
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="specialized" height={450} />
+
+## Form.Field.Phone
+
+Phone number input with format mask.
+
+```tsx
+const Schema = z.object({
+  phone: z.string().meta({
+    ui: { title: 'Phone Number' },
+  }),
+})
+
+<Form.Field.Phone name="phone" />
+```
+
+## Form.Field.FileUpload
+
+File upload with preview support.
+
+```tsx
+const Schema = z.object({
+  avatar: z.any().meta({
+    ui: { title: 'Profile Photo' },
+  }),
+})
+
+<Form.Field.FileUpload
+  name="avatar"
+  accept="image/*"
+  maxSize={5 * 1024 * 1024}
+/>
+```
+
+## Form.Field.PinInput
+
+PIN code input for verification.
+
+```tsx
+const Schema = z.object({
+  pin: z.string().length(4).meta({
+    ui: { title: 'Enter PIN' },
+  }),
+})
+
+<Form.Field.PinInput name="pin" length={4} />
+```
+
+## Form.Field.OTPInput
+
+One-time password input for two-factor authentication.
+
+```tsx
+const Schema = z.object({
+  otp: z.string().length(6).meta({
+    ui: { title: 'Verification Code' },
+  }),
+})
+
+<Form.Field.OTPInput name="otp" length={6} />
+```
+
+## Form.Field.ColorPicker
+
+Color selection input.
+
+```tsx
+const Schema = z.object({
+  brandColor: z.string().meta({
+    ui: { title: 'Brand Color' },
+  }),
+})
+
+<Form.Field.ColorPicker name="brandColor" />
+```
+
+## Form.Field.Address
+
+Address autocomplete with structured output.
+
+```tsx
+const Schema = z.object({
+  address: z.object({
+    street: z.string(),
+    city: z.string(),
+    zip: z.string(),
+  }).meta({
+    ui: { title: 'Shipping Address' },
+  }),
+})
+
+<Form.Field.Address name="address" />
+```
+
+## Form.Field.City
+
+City autocomplete — standalone city picker.
+
+```tsx
+<Form.Field.City name="city" />
+```
+
+## Form.Field.Duration
+
+Duration input — hours, minutes, seconds.
+
+```tsx
+const Schema = z.object({
+  duration: z.number().meta({
+    ui: { title: 'Duration' },
+  }),
+})
+
+<Form.Field.Duration name="duration" />
+```
+
+## Form.Field.Schedule
+
+Weekly schedule picker — select working hours for each day.
+
+```tsx
+<Form.Field.Schedule name="workingHours" />
+```
+
+## Form.Field.OTPInput
+
+One-time password input — similar to PinInput but optimized for SMS/email codes.
+
+```tsx
+<Form.Field.OTPInput name="otp" />
+```

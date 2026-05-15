@@ -1,0 +1,1680 @@
+{
+  "moscow": [
+    {
+      "msgId": 39,
+      "date": "2025-02-18",
+      "home": "РЫБА",
+      "away": "Против",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 39,
+      "date": "2025-02-19",
+      "home": "ДА",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 121,
+      "date": "2025-02-24",
+      "home": "Жемчужные",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 121,
+      "date": "2025-02-25",
+      "home": "Бродячие артисты",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 121,
+      "date": "2025-02-26",
+      "home": "Шатуны",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 121,
+      "date": "2025-02-28",
+      "home": "Против",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 121,
+      "date": "2025-02-02",
+      "home": "Птица",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 181,
+      "date": "2025-03-03",
+      "home": "Кашалот",
+      "away": "Жемчужные",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 181,
+      "date": "2025-03-04",
+      "home": "СИИ",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 181,
+      "date": "2025-03-06",
+      "home": "Чатл",
+      "away": "ДА",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 181,
+      "date": "2025-03-09",
+      "home": "РЫБА",
+      "away": "Жемчужные",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 250,
+      "date": "2025-03-10",
+      "home": "Opezdol’s Crew",
+      "away": "Против",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 250,
+      "date": "2025-03-11",
+      "home": "ЛитПон",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 250,
+      "date": "2025-03-12",
+      "home": "Против",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 250,
+      "date": "2025-03-13",
+      "home": "Кашалот",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 316,
+      "date": "2025-03-17",
+      "home": "Шатуны",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 316,
+      "date": "2025-03-18",
+      "home": "Жемчужные",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 316,
+      "date": "2025-03-19",
+      "home": "Бродячие артисты",
+      "away": "Против",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 316,
+      "date": "2025-03-20",
+      "home": "РЫБА",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 316,
+      "date": "2025-03-21",
+      "home": "Opezdol’s Crew",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 386,
+      "date": "2025-03-24",
+      "home": "ДА",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 386,
+      "date": "2025-03-25",
+      "home": "Opezdol’s Crew",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 386,
+      "date": "2025-03-26",
+      "home": "Птица поэта",
+      "away": "Жемчужные",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 386,
+      "date": "2025-03-27",
+      "home": "Чатл",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 386,
+      "date": "2025-03-30",
+      "home": "РЫБА",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 443,
+      "date": "2025-04-01",
+      "home": "Чатл",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 443,
+      "date": "2025-04-02",
+      "home": "СИИ",
+      "away": "Против",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 443,
+      "date": "2025-04-03",
+      "home": "Птица поэта",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 517,
+      "date": "2025-04-07",
+      "home": "ДА",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 517,
+      "date": "2025-04-08",
+      "home": "Opezdol’s Crew",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 517,
+      "date": "2025-04-09",
+      "home": "Шатуны",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 517,
+      "date": "2025-04-10",
+      "home": "Кашалот",
+      "away": "СИИ",
+      "venue": null,
+      "time": "19:00",
+      "tour": null
+    },
+    {
+      "msgId": 620,
+      "date": "2025-04-14",
+      "home": "Жемчужные",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 620,
+      "date": "2025-04-15",
+      "home": "Птица поэта",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 620,
+      "date": "2025-04-20",
+      "home": "Бродячие артисты",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 679,
+      "date": "2025-04-21",
+      "home": "Opezdol’s Crew",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 679,
+      "date": "2025-04-22",
+      "home": "ДА",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 679,
+      "date": "2025-04-23",
+      "home": "Кашалот",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 679,
+      "date": "2025-04-27",
+      "home": "Чатл",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 728,
+      "date": "2025-04-28",
+      "home": "Жемчужные",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 728,
+      "date": "2025-04-30",
+      "home": "Шатуны",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 776,
+      "date": "2025-05-05",
+      "home": "Бродячие артисты",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 776,
+      "date": "2025-05-06",
+      "home": "ЛитПон",
+      "away": "Жемчужные",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 829,
+      "date": "2025-05-12",
+      "home": "ДА",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 829,
+      "date": "2025-05-13",
+      "home": "Чатл",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 829,
+      "date": "2025-05-14",
+      "home": "Жемчужные",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 829,
+      "date": "2025-05-15",
+      "home": "СИИ",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 829,
+      "date": "2025-05-18",
+      "home": "Жемчужные",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 895,
+      "date": "2025-05-19",
+      "home": "Opezdol’s Crew",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 895,
+      "date": "2025-05-20",
+      "home": "ДА",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 895,
+      "date": "2025-05-21",
+      "home": "РЫБА",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 945,
+      "date": "2025-05-26",
+      "home": "Кашалот",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 945,
+      "date": "2025-05-28",
+      "home": "РЫБА",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 945,
+      "date": "2025-06-01",
+      "home": "Шатуны",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 994,
+      "date": "2025-06-02",
+      "home": "Птица поэта",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 994,
+      "date": "2025-06-03",
+      "home": "Opezdol’s Crew",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 994,
+      "date": "2025-06-04",
+      "home": "Шатуны",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 994,
+      "date": "2025-06-05",
+      "home": "Кашалот",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 994,
+      "date": "2025-06-08",
+      "home": "ЛитПон",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1046,
+      "date": "2025-06-10",
+      "home": "СИИ",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1046,
+      "date": "2025-06-11",
+      "home": "Шатуны",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1366,
+      "date": "2025-09-07",
+      "home": "РЫБА",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1366,
+      "date": "2025-09-08",
+      "home": "Чатл",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1366,
+      "date": "2025-09-09",
+      "home": "Бродячие артисты",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1366,
+      "date": "2025-09-10",
+      "home": "Шатуны",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1470,
+      "date": "2025-09-15",
+      "home": "TERIYAKI SQUAD",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1470,
+      "date": "2025-09-17",
+      "home": "Чатл",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1470,
+      "date": "2025-09-18",
+      "home": "Бродячие артисты",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1525,
+      "date": "2025-09-22",
+      "home": "Opezdol’s Crew",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1525,
+      "date": "2025-09-23",
+      "home": "Птица поэта",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1525,
+      "date": "2025-09-24",
+      "home": "Шатуны",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1525,
+      "date": "2025-09-25",
+      "home": "СИИ",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1578,
+      "date": "2025-10-26",
+      "home": "у ребят концерт в Москве",
+      "away": "такое событие точно нельзя пропустить!",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1598,
+      "date": "2025-09-30",
+      "home": "ДА",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1598,
+      "date": "2025-10-01",
+      "home": "ЛитПон",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1598,
+      "date": "2025-10-05",
+      "home": "TERIYAKI SQUAD",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:30",
+      "tour": null
+    },
+    {
+      "msgId": 1657,
+      "date": "2025-10-06",
+      "home": "СИИ",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1657,
+      "date": "2025-10-07",
+      "home": "Opezdol’s Crew",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1657,
+      "date": "2025-10-08",
+      "home": "Бродячие артисты",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1657,
+      "date": "2025-10-12",
+      "home": "РЫБА",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1740,
+      "date": "2025-10-14",
+      "home": "ДА",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1740,
+      "date": "2025-10-15",
+      "home": "ЛитПон",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1740,
+      "date": "2025-10-19",
+      "home": "Птица поэта",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1798,
+      "date": "2025-10-20",
+      "home": "TERIYAKI SQUAD",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1798,
+      "date": "2025-10-22",
+      "home": "СИИ",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1798,
+      "date": "2025-10-23",
+      "home": "Бродячие артисты",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1856,
+      "date": "2025-10-27",
+      "home": "ЛитПон",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1856,
+      "date": "2025-10-28",
+      "home": "ДА",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1856,
+      "date": "2025-10-29",
+      "home": "СИИ",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1921,
+      "date": "2025-11-05",
+      "home": "Кашалот",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1921,
+      "date": "2025-11-06",
+      "home": "TERIYAKI SQUAD",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1921,
+      "date": "2025-11-09",
+      "home": "РЫБА",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1973,
+      "date": "2025-11-10",
+      "home": "Бродячие артисты",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1973,
+      "date": "2025-11-11",
+      "home": "Птица поэта",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1973,
+      "date": "2025-11-12",
+      "home": "Шатуны",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1973,
+      "date": "2025-11-16",
+      "home": "TERIYAKI SQUAD",
+      "away": "Кашалот",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2051,
+      "date": "2025-11-17",
+      "home": "Чатл",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2051,
+      "date": "2025-11-18",
+      "home": "Птица поэта",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2051,
+      "date": "2025-11-19",
+      "home": "Бродячие артисты",
+      "away": "Opezdol’sCrew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2051,
+      "date": "2025-11-20",
+      "home": "ЛитПон",
+      "away": "ДА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2136,
+      "date": "2025-11-24",
+      "home": "Чатл",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2136,
+      "date": "2025-11-26",
+      "home": "СИИ",
+      "away": "ЛитПон",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2136,
+      "date": "2025-11-27",
+      "home": "Кашалот",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2136,
+      "date": "2025-11-30",
+      "home": "РЫБА",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2186,
+      "date": "2025-12-02",
+      "home": "СИИ",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2186,
+      "date": "2025-12-03",
+      "home": "ДА",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2186,
+      "date": "2025-12-04",
+      "home": "ЛитПон",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2186,
+      "date": "2025-12-07",
+      "home": "Шатуны",
+      "away": "ДА (переигровка)",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2269,
+      "date": "2025-12-09",
+      "home": "Птица поэта",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2269,
+      "date": "2025-12-10",
+      "home": "Кашалот",
+      "away": "Чатл",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2269,
+      "date": "2025-12-11",
+      "home": "TERIYAKI SQUAD",
+      "away": "СИИ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2269,
+      "date": "2025-12-14",
+      "home": "РЫБА",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2335,
+      "date": "2025-12-15",
+      "home": "ЛитПон",
+      "away": "Opezdol’s Crew",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2335,
+      "date": "2025-12-16",
+      "home": "Чатл",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2335,
+      "date": "2025-12-17",
+      "home": "ДА",
+      "away": "Птица поэта",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2335,
+      "date": "2025-12-21",
+      "home": "Бродячие артисты",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2403,
+      "date": "2025-12-22",
+      "home": "Кашалот",
+      "away": "РЫБА",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2403,
+      "date": "2025-12-24",
+      "home": "ЛитПон",
+      "away": "Шатуны",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-02",
+      "home": "Шатуны",
+      "away": "СТИХИ НАРОДА",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-03",
+      "home": "ДА",
+      "away": "ОПГ",
+      "venue": "Китайский лётчик Джао Да",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-05",
+      "home": "НеСТИХай",
+      "away": "Поэтория",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-10",
+      "home": "In Folio",
+      "away": "Метаморфоза",
+      "venue": "Клуб",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-11",
+      "home": "Прогрев",
+      "away": "Кашалот",
+      "venue": "Край",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-12",
+      "home": "Манулы",
+      "away": "РЫБА",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-15",
+      "home": "Маски",
+      "away": "НЕНАХОД НОГИ",
+      "venue": "Комната отдыха",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2704,
+      "date": "2026-03-16",
+      "home": "Солянка",
+      "away": "Чатл",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": 1
+    },
+    {
+      "msgId": 2782,
+      "date": "2026-03-10",
+      "home": "In Folio",
+      "away": "Метаморфоза",
+      "venue": "Клуб",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2782,
+      "date": "2026-03-11",
+      "home": "Прогрев",
+      "away": "Кашалот",
+      "venue": "Край",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2782,
+      "date": "2026-03-12",
+      "home": "Манулы",
+      "away": "РЫБА",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2782,
+      "date": "2026-03-15",
+      "home": "Маски",
+      "away": "НЕНАХОД НОГИ",
+      "venue": "Комната отдыха",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2864,
+      "date": "2026-03-16",
+      "home": "Солянка",
+      "away": "Чатл",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2864,
+      "date": "2026-03-17",
+      "home": "СТИХИ НАРОДА",
+      "away": "ОПГ",
+      "venue": "Джао ДА",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2864,
+      "date": "2026-03-18",
+      "home": "Шатуны",
+      "away": "ДА",
+      "venue": "Южная рюмочная",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2864,
+      "date": "2026-03-19",
+      "home": "НеСТИХай",
+      "away": "Метаморфоза",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-03-23",
+      "home": "Поэтория",
+      "away": "In Folio",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-03-24",
+      "home": "Кашалот",
+      "away": "РЫБА",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-03-25",
+      "home": "Прогрев",
+      "away": "Манулы",
+      "venue": "Лампопо",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-03-29",
+      "home": "Маски",
+      "away": "Чатл",
+      "venue": "Комната отдыха",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-03-31",
+      "home": "НЕНАХОД НОГИ",
+      "away": "Солянка",
+      "venue": "Инкогнито",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-04-02",
+      "home": "СТИХИ НАРОДА",
+      "away": "Метаморфоза",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-04-05",
+      "home": "ОПГ",
+      "away": "НеСТИХай",
+      "venue": "Лампопо",
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-02",
+      "home": "СТИХИ НАРОДА",
+      "away": "Метаморфоза",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-05",
+      "home": "ОПГ",
+      "away": "НеСТИХай",
+      "venue": "Лампопо",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-06",
+      "home": "Шатуны",
+      "away": "In Folio",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-07",
+      "home": "ДА",
+      "away": "Поэтория",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-08",
+      "home": "РЫБА",
+      "away": "Маски",
+      "venue": "Дежурная рюмочная",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-12",
+      "home": "Манулы",
+      "away": "НЕНАХОД НОГИ",
+      "venue": "Комната отдыха",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-13",
+      "home": "Кашалот",
+      "away": "Чатл",
+      "venue": "Лампопо",
+      "time": "20:00",
+      "tour": 3
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-14",
+      "home": "Прогрев",
+      "away": "Солянка",
+      "venue": "Ладья",
+      "time": "20:00",
+      "tour": 3
+    }
+  ],
+  "spb": [
+    {
+      "msgId": 345,
+      "date": "2024-10-06",
+      "home": "вс, 19",
+      "away": "00 сбор гостей, 20-00 начало, бар Обормоты: ОБОРМОТЫ - БОЛТ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 345,
+      "date": "2024-10-08",
+      "home": "вт, 20",
+      "away": "00, магазин Союз Печатников: ИЛИ - ОБОРМОТЫ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 345,
+      "date": "2024-10-09",
+      "home": "ср, 20",
+      "away": "00, бар Птичья личность: 🚩 - ШЬ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 449,
+      "date": "2024-10-14",
+      "home": "пн, ЧУМНЫЕ",
+      "away": "🚩. Шуба",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 449,
+      "date": "2024-10-15",
+      "home": "вт, БЮРО",
+      "away": "БОЛТ. Трюмо",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 449,
+      "date": "2024-10-16",
+      "home": "ср, ФИРМА",
+      "away": "СОФИЙКА. Fish Fabrique",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 532,
+      "date": "2024-10-21",
+      "home": "пн,",
+      "away": "БЛИНЫ - ИЛИ, кабак Вчера и навсегда (Казанская ул., 11)",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 532,
+      "date": "2024-10-22",
+      "home": "вт,",
+      "away": "ПЫЖЫКИ - БЮРО. Рюмочная Фонтанка - 69 (Апраксин пер., 22)",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 532,
+      "date": "2024-10-23",
+      "home": "ср,",
+      "away": "ВИНОМ - ФИРМА. Popravka Bar (Лиговский пр., 50Ц)",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 532,
+      "date": "2024-10-27",
+      "home": "вс,",
+      "away": "ОБОРМОТЫ - ШЬ. Бар Обормоты (ул. Некрасова, 22)",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 532,
+      "date": "2024-10-29",
+      "home": "вт,",
+      "away": "ИЛИ - 🚩. Магазин Союз Печатников (ул. Союза Печатников, 17)",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-10-27",
+      "home": "вс,",
+      "away": "ОБОРМОТЫ - ШЬ в баре Обормоты",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-10-29",
+      "home": "- ИЛИ",
+      "away": "🚩 в магазине Союз Печатников",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-11-03",
+      "home": "- ШЬ",
+      "away": "БЮРО в баре Апартаменты N159",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-11-04",
+      "home": "- БЛИНЫ",
+      "away": "ЧУМНЫЕ в кабаке Вчера и навсегда",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-11-05",
+      "home": "- FIRMA",
+      "away": "ИЛИ в клубе Fish Fabrique Nouvelle",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-11-06",
+      "home": "- 🚩",
+      "away": "ПЫЖЫКИ в баре Птичья личность",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 602,
+      "date": "2024-11-07",
+      "home": "- СОФИЙКА",
+      "away": "ОБОРМОТЫ в бильярдном клубе Крученых",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1494,
+      "date": "2025-02-03",
+      "home": "пн,",
+      "away": "БЛИНЫ - ВИНОМ. Новый тренер БЛИНОВ против ВИНОМА, потерявшего одного бойца.  Стадион - кабак Вчера и навсегда",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1494,
+      "date": "2025-02-04",
+      "home": "вт,",
+      "away": "ИЛИ - БЮРО. Противоборство двух команд, каждая из которых находится в топе на звание лучшей команды первого круга. Стадион - Art Hall",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1494,
+      "date": "2025-02-06",
+      "home": "чт,",
+      "away": "ШЬ-ОБОРМОТЫ. Первая команда проходит по части удивлений и открытий для публики, вторая - пример цельности, сплоченности и яркости. Стадион - Апартаменты №159",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1684,
+      "date": "2025-03-03",
+      "home": "ЧУМНЫЕ",
+      "away": "БЮРО",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1684,
+      "date": "2025-03-04",
+      "home": "ПЫЖЫКИ",
+      "away": "ОБОРМОТЫ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1684,
+      "date": "2025-03-05",
+      "home": "FIRMA",
+      "away": "БЛИНЫ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1684,
+      "date": "2025-03-06",
+      "home": "ШЬ",
+      "away": "АПОСТРОФ",
+      "venue": null,
+      "time": "20:00",
+      "tour": null
+    },
+    {
+      "msgId": 1766,
+      "date": "2025-03-16",
+      "home": "сегодня, ОБОРМОТЫ",
+      "away": "ЧУМНЫЕ. Бар Фогель",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1766,
+      "date": "2025-03-17",
+      "home": "пн, БЛИНЫ",
+      "away": "ШЬ. Кабак Вчера и навсегда",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1766,
+      "date": "2025-03-18",
+      "home": "вт, ИЛИ",
+      "away": "FIRMA. Art-Hall",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1766,
+      "date": "2025-03-19",
+      "home": "ср, ИВА",
+      "away": "АПОСТРОФ. Do Wine Bar.",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1992,
+      "date": "2025-04-21",
+      "home": "пн, АПОСТРОФ",
+      "away": "ЧУМНЫЕ. Бар В ладах",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1992,
+      "date": "2025-04-22",
+      "home": "вт, ВИНОМ",
+      "away": "ОБОРМОТЫ. popravka.bar",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 1992,
+      "date": "2025-04-23",
+      "home": "ср, ШЬ",
+      "away": "ИВА. Do Wine Bar",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 2314,
+      "date": "2025-09-22",
+      "home": "- ПЫЖЫКИ",
+      "away": "БЛИНЫ. Стадион Фонтанка - 69. Дивизион ВАЩЕ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 2314,
+      "date": "2025-09-23",
+      "home": "- ПЕРВАЯ ЗУМЕРСКАЯ",
+      "away": "АПОСТРОФ. Стадион Заря. Дивизион БАМЗ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 2314,
+      "date": "2025-09-24",
+      "home": "- ВЕСЕЛЫЕ РЕБЯТА",
+      "away": "ОБОРМОТЫ. Стадион Бездна. Дивизион КАК РАЗ",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 2314,
+      "date": "2025-09-25",
+      "home": "- БУГУЛЬМА",
+      "away": "ВИНОМ. Стадион Фогель. Дивизион АБСУРД.",
+      "venue": null,
+      "time": null,
+      "tour": null
+    },
+    {
+      "msgId": 2871,
+      "date": "2026-01-18",
+      "home": "- не суббота, а воскресенье. ПЫЖЫКИ",
+      "away": "не ПЫЖИКИ. И матч, похоже будет не на Фонтанке. Но об этом позже",
+      "venue": null,
+      "time": null,
+      "tour": null
+    }
+  ]
+}

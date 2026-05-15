@@ -1,0 +1,25 @@
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Копируем standalone build
+COPY --chown=nextjs:nodejs apps/grandslamcup/.next/standalone ./
+COPY --chown=nextjs:nodejs apps/grandslamcup/.next/static ./apps/grandslamcup/.next/static
+COPY --chown=nextjs:nodejs apps/grandslamcup/public ./apps/grandslamcup/public
+
+# Папка для загрузок (bind mount в docker-compose)
+RUN mkdir -p /app/apps/grandslamcup/uploads && chown nextjs:nodejs /app/apps/grandslamcup/uploads
+
+USER nextjs
+
+EXPOSE 3016
+
+ENV PORT=3016
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/grandslamcup/server.js"]

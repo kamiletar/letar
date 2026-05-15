@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Котра година?",
+    "description": "Порядкова година від початку епохи UNIX"
+  },
+  "time": {
+    "now": "Зараз",
+    "hour": "година від початку епохи UNIX",
+    "hoursPassed": "годин минуло від початку епохи UNIX"
+  },
+  "countdown": {
+    "until": "До {milestone} годин",
+    "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# днів}}",
+    "hours": "{count, plural, one {# година} few {# години} many {# годин} other {# годин}}",
+    "minutes": "{count, plural, one {# хвилина} few {# хвилини} many {# хвилин} other {# хвилин}}",
+    "seconds": "{count, plural, one {# секунда} few {# секунди} many {# секунд} other {# секунд}}"
+  },
+  "celebration": {
+    "milestone": "{hours} годин епохи UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Сповіщення",
+    "explanation": "Для підтвердження електронної пошти та доступу до налаштувань сповіщень потрібно увійти",
+    "signIn": "Увійти",
+    "settings": "Налаштування"
+  },
+  "profile": {
+    "title": "Налаштування сповіщень",
+    "email": "Електронна пошта",
+    "notifyMonth": "За місяць",
+    "notifyWeek": "За тиждень",
+    "notifyDay": "За день",
+    "notifyHour": "За годину",
+    "notify5Min": "За 5 хвилин",
+    "save": "Зберегти",
+    "saved": "Збережено!",
+    "unsubscribe": "Відписатися від усіх",
+    "unsubscribed": "Ви відписані від усіх сповіщень",
+    "noSubscription": "У вас ще немає підписки на сповіщення",
+    "createSubscription": "Підписатися на сповіщення"
+  },
+  "unsubscribe": {
+    "title": "Відписка",
+    "success": "Ви успішно відписані від сповіщень про ювілеї UNIX-годин",
+    "error": "Невірне посилання для відписки",
+    "back": "Повернутися на головну"
+  }
+}

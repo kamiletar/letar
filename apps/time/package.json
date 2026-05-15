@@ -1,0 +1,15 @@
+{
+  "name": "@letar/time",
+  "version": "0.4.6",
+  "private": true,
+  "nx": {
+    "name": "time",
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/analytics",
+      "@letar/auth",
+      "@letar/email",
+      "@letar/number-words"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Wie spät ist es?",
+    "description": "Ordinalstunde seit Beginn der UNIX-Epoche"
+  },
+  "time": {
+    "now": "Es ist jetzt",
+    "hour": "Stunde seit Beginn der UNIX-Ära",
+    "hoursPassed": "Stunden sind seit Beginn der UNIX-Ära vergangen"
+  },
+  "countdown": {
+    "until": "Bis {milestone} Stunden",
+    "days": "{count, plural, one {# Tag} other {# Tage}}",
+    "hours": "{count, plural, one {# Stunde} other {# Stunden}}",
+    "minutes": "{count, plural, one {# Minute} other {# Minuten}}",
+    "seconds": "{count, plural, one {# Sekunde} other {# Sekunden}}"
+  },
+  "celebration": {
+    "milestone": "{hours} Stunden der UNIX-Ära!"
+  },
+  "subscribe": {
+    "subscribe": "Benachrichtigungen",
+    "explanation": "Eine Anmeldung ist erforderlich, um Ihre E-Mail zu bestätigen und auf die Benachrichtigungseinstellungen zuzugreifen",
+    "signIn": "Anmelden",
+    "settings": "Einstellungen"
+  },
+  "profile": {
+    "title": "Benachrichtigungseinstellungen",
+    "email": "E-Mail",
+    "notifyMonth": "Einen Monat vorher",
+    "notifyWeek": "Eine Woche vorher",
+    "notifyDay": "Einen Tag vorher",
+    "notifyHour": "Eine Stunde vorher",
+    "notify5Min": "5 Minuten vorher",
+    "save": "Speichern",
+    "saved": "Gespeichert!",
+    "unsubscribe": "Alle abbestellen",
+    "unsubscribed": "Sie wurden von allen Benachrichtigungen abgemeldet",
+    "noSubscription": "Sie haben noch kein Benachrichtigungsabonnement",
+    "createSubscription": "Benachrichtigungen abonnieren"
+  },
+  "unsubscribe": {
+    "title": "Abmeldung",
+    "success": "Sie wurden erfolgreich von UNIX-Stunden-Meilenstein-Benachrichtigungen abgemeldet",
+    "error": "Ungültiger Abmeldelink",
+    "back": "Zurück zur Startseite"
+  }
+}

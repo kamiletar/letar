@@ -1,0 +1,253 @@
+{
+  "name": "driving-school",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/driving-school/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:driving-school"],
+  "targets": {
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/driving-school"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push --accept-data-loss",
+        "cwd": "apps/driving-school"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Push Prisma schema changes to database accepting data loss",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
+        "cwd": "apps/driving-school"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate:deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db seed",
+        "cwd": "apps/driving-school"
+      },
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Seed database with test data",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset --force",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reset database with force",
+        "technologies": ["prisma"]
+      }
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('../../libs/driving-school-db/src/generated/prisma/index.ts', 'export * from \\'./client\\'\\n')\""
+        ],
+        "cwd": "apps/driving-school",
+        "parallel": false
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    },
+    "theme:typegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx @chakra-ui/cli typegen ./src/theme/index.ts",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Generate TypeScript types for Chakra UI theme tokens",
+        "technologies": ["chakra-ui"]
+      }
+    },
+    "zenstack:init": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "zenstack init",
+        "cwd": "apps/driving-school"
+      },
+      "metadata": {
+        "description": "Initialize ZenStack in project",
+        "technologies": ["zenstack"]
+      }
+    },
+    "update-sw-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/update-sw-version.mjs",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Update SW_VERSION in sw.js from package.json",
+        "technologies": ["service-worker"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/driving-school"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/driving-school"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/driving-school"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --max-old-space-size=4096 ../../node_modules/typescript/bin/tsc --noEmit",
+        "cwd": "apps/driving-school"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files (4GB memory limit)",
+        "technologies": ["typescript"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "apps/driving-school/vitest.config.ts"
+      }
+    },
+    "validate": {
+      "executor": "nx:noop",
+      "dependsOn": ["lint", "format:check", "typecheck", "test"],
+      "metadata": {
+        "description": "Run all validation checks"
+      }
+    }
+  }
+}

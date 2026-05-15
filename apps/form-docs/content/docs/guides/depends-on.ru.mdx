@@ -1,0 +1,92 @@
+---
+title: Каскадные поля (DependsOn)
+description: Отображение разных секций формы в зависимости от значения поля — многовариантный Form.When
+---
+
+## Обзор
+
+`Form.DependsOn` отображает разные дочерние элементы в зависимости от текущего значения поля. Это аналог `switch/case` для полей формы — расширение `Form.When` для множества вариантов.
+
+```tsx
+<Form.DependsOn
+  field="paymentMethod"
+  cases={{
+    card: <Form.Field.CreditCard name="card" />,
+    bank: <Form.Field.String name="iban" label="IBAN" />,
+    cash: <Text>Оплата при получении</Text>,
+  }}
+/>
+```
+
+## Пропсы
+
+| Проп       | Тип                         | По умолчанию | Описание                                     |
+| ---------- | --------------------------- | ------------ | -------------------------------------------- |
+| `field`    | `string`                    | обязателен   | Имя наблюдаемого поля                        |
+| `cases`    | `Record<string, ReactNode>` | обязателен   | Маппинг значение → дочерние элементы         |
+| `fallback` | `ReactNode`                 | `null`       | Показывается, если значение не совпадает ни с одним case |
+
+## Когда использовать
+
+| Паттерн          | Случай использования                              |
+| ---------------- | ------------------------------------------------- |
+| `Form.When`      | Одно условие: показать/скрыть одну секцию         |
+| `Form.DependsOn` | Множество вариантов: разные секции для каждого значения |
+
+## Пример: Тип юридического лица
+
+```tsx
+<Form.Field.Select
+  name="entityType"
+  label="Тип"
+  options={[
+    { value: 'person', label: 'Физическое лицо' },
+    { value: 'company', label: 'Юридическое лицо' },
+    { value: 'sole_proprietor', label: 'ИП' },
+  ]}
+/>
+
+<Form.DependsOn
+  field="entityType"
+  cases={{
+    person: (
+      <>
+        <Form.Field.String name="firstName" label="Имя" />
+        <Form.Field.String name="lastName" label="Фамилия" />
+        <Form.Document.SNILS name="snils" />
+      </>
+    ),
+    company: (
+      <>
+        <Form.Field.String name="companyName" label="Название компании" />
+        <Form.Document.INN name="inn" />
+        <Form.Document.KPP name="kpp" />
+      </>
+    ),
+    sole_proprietor: (
+      <>
+        <Form.Field.String name="fullName" label="ФИО" />
+        <Form.Document.INN name="inn" />
+        <Form.Document.OGRNIP name="ogrnip" />
+      </>
+    ),
+  }}
+  fallback={<Text color="fg.muted">Выберите тип юридического лица выше</Text>}
+/>
+```
+
+## Как это работает
+
+1. Подписывается на указанное поле через `form.Subscribe`
+2. Преобразует значение поля в строковый ключ
+3. Ищет совпадение в записях `cases`
+4. Отображает совпавший контент, `fallback` или `null`
+
+Компонент полностью реактивен — переключение значения поля мгновенно заменяет отображаемую секцию.
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/depends-on).

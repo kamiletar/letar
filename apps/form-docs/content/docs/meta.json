@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "installation",
+    "quick-start",
+    "---Fields---",
+    "...fields",
+    "---Guides---",
+    "...guides",
+    "---API Reference---",
+    "...api"
+  ]
+}

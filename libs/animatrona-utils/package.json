@@ -1,0 +1,8 @@
+{
+  "name": "@letar/animatrona-utils",
+  "version": "0.1.0",
+  "description": "Shared utilities for Animatrona web-stack (tracker + web)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true
+}

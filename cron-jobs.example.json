@@ -1,0 +1,31 @@
+{
+  "jobs": [
+    {
+      "id": "driving-school-cleanup-api-logs",
+      "name": "API Logs Cleanup",
+      "app": "driving-school",
+      "endpoint": "/api/cron/cleanup-api-logs",
+      "schedule": "0 3 * * *",
+      "description": "Удаление API логов старше 30 дней",
+      "enabled": true
+    },
+    {
+      "id": "imot-session-reminders",
+      "name": "Session Reminders",
+      "app": "imot",
+      "endpoint": "/api/cron/session-reminders",
+      "schedule": "0 9 * * *",
+      "description": "Отправка напоминаний о предстоящих сессиях",
+      "enabled": true
+    },
+    {
+      "id": "imot-practice-diary-reminders",
+      "name": "Practice Diary Reminders",
+      "app": "imot",
+      "endpoint": "/api/cron/practice-diary-reminders",
+      "schedule": "0 20 * * *",
+      "description": "Напоминания о заполнении дневника практик",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+services:
+  app:
+    image: form-docs:latest
+    container_name: form-docs-app
+    restart: always
+    ports:
+      - '3020:3020'
+    environment:
+      TZ: Europe/Moscow
+      FORCE_COLOR: '1'
+      NODE_ENV: production
+
+      # Umami Analytics
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+    networks:
+      - premium-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

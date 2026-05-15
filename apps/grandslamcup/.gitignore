@@ -1,0 +1,6 @@
+scripts/migrate/cache/
+scripts/migrate/inspect*.mjs
+scripts/migrate/debug*.mjs
+scripts/migrate/chunks/
+scripts/migrate/chunks-spb/
+uploads/

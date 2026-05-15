@@ -1,0 +1,2 @@
+# Генерируемый Service Worker (создаётся из sw.template.js скриптом update-sw-version.mjs)
+public/sw.js

@@ -1,0 +1,53 @@
+---
+title: Controlled State
+description: Use Form as a state manager — live previews, no-submit patterns
+---
+
+## Overview
+
+Forms don't always need a submit button. Use `Form` as a controlled state container for live UI updates, filters, settings panels, and search forms.
+
+## Live Preview Pattern
+
+```tsx
+function ProductEditor() {
+  return (
+    <Form schema={ProductSchema} initialValue={product} onSubmit={async () => {}}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div>
+          <Form.Field.String name="title" />
+          <Form.Field.Textarea name="description" />
+          <Form.Field.ColorPicker name="color" />
+        </div>
+
+        <Form.Subscribe>
+          {(values) => <ProductPreview title={values.title} description={values.description} color={values.color} />}
+        </Form.Subscribe>
+      </div>
+    </Form>
+  )
+}
+```
+
+## Filter Form (No Submit)
+
+```tsx
+<Form schema={FilterSchema} initialValue={{ search: '', category: 'all', minPrice: 0 }} onSubmit={async () => {}}>
+  <Form.Field.String name="search" />
+  <Form.Field.Select name="category" options={categories} />
+  <Form.Field.Slider name="minPrice" />
+
+  <Form.Subscribe>{(values) => <ProductList filters={values} />}</Form.Subscribe>
+</Form>
+```
+
+## useTypedFormSubscribe
+
+For typed access to specific fields:
+
+```tsx
+function PriceDisplay() {
+  const price = useTypedFormSubscribe('price')
+  return <Text>Current price: ${price}</Text>
+}
+```

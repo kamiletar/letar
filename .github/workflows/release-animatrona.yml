@@ -1,0 +1,444 @@
+# Автоматический релиз Animatrona для всех платформ
+# Триггер: git push origin animatrona-vX.Y.Z
+# Результат: Исходники + бинарники в kamiletar/animatrona
+
+name: Release Animatrona
+
+on:
+  push:
+    tags:
+      - 'animatrona-v*.*.*'
+
+jobs:
+  # 1. Публикация исходников в kamiletar/animatrona
+  publish-source:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
+      tag: ${{ steps.parse-version.outputs.tag }}
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: parse-version
+        run: |
+          # animatrona-v0.21.15 → 0.21.15
+          VERSION=${GITHUB_REF#refs/tags/animatrona-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build zenstack-form-plugin
+        run: cd libs/zenstack-form-plugin && tsc --project tsconfig.lib.json && cd ../..
+
+      - name: Generate ZenStack
+        run: |
+          bunx zenstack generate --schema apps/animatrona/schema.zmodel
+          # Генерировать Prisma client
+          bunx prisma generate --schema apps/animatrona/renderer/src/generated/schema.prisma
+          # Создать symlink для migrations
+          ln -sf "$(pwd)/apps/animatrona/prisma/migrations" "apps/animatrona/renderer/src/generated/migrations"
+
+      - name: Clone kamiletar/animatrona repository
+        run: |
+          git clone https://kamiletar:${{ secrets.GH_TOKEN }}@github.com/kamiletar/animatrona.git animatrona-public
+          cd animatrona-public
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Copy source code to public repo
+        run: |
+          # Удаляем всё кроме .git
+          find animatrona-public -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          # Копируем apps/animatrona с исключениями
+          rsync -av \
+            --exclude 'node_modules' \
+            --exclude '.next' \
+            --exclude 'dist' \
+            --exclude '.env*' \
+            --exclude '*.md' \
+            --exclude 'docker-compose.production.yml' \
+            --exclude 'Dockerfile.production' \
+            --exclude 'project.json' \
+            --exclude 'package.json' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            apps/animatrona/ animatrona-public/
+
+          # Копируем корневые package.json и bun.lock для standalone
+          cp package.json animatrona-public/
+          cp bun.lock animatrona-public/
+
+          # Копируем необходимые libs/ для standalone сборки
+          mkdir -p animatrona-public/libs
+          rsync -av --exclude 'node_modules' libs/ui/ animatrona-public/libs/ui/
+          rsync -av --exclude 'node_modules' libs/forms/ animatrona-public/libs/forms/
+          rsync -av --exclude 'node_modules' libs/query-provider/ animatrona-public/libs/query-provider/
+          rsync -av --exclude 'node_modules' libs/zenstack-form-plugin/ animatrona-public/libs/zenstack-form-plugin/
+
+          # Копируем CHANGELOG файлы для объединения
+          cp apps/animatrona/CHANGELOG*.md animatrona-public/
+
+          # Копируем README и LICENSE если есть
+          if [ -f apps/animatrona/README.md ]; then
+            cp apps/animatrona/README.md animatrona-public/
+          fi
+          if [ -f apps/animatrona/LICENSE ]; then
+            cp apps/animatrona/LICENSE animatrona-public/
+          fi
+
+      - name: Merge CHANGELOG files
+        run: |
+          cd animatrona-public
+
+          # Создаём объединённый CHANGELOG
+          echo "# Changelog" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/)." >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+
+          # Объединяем все CHANGELOG* файлы (кроме уже созданного)
+          for changelog in CHANGELOG-*.md; do
+            if [ -f "$changelog" ]; then
+              # Пропускаем заголовок и добавляем содержимое
+              tail -n +4 "$changelog" >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+          done
+
+          # Добавляем основной CHANGELOG (если был)
+          if [ -f CHANGELOG.tmp.md ]; then
+            tail -n +4 CHANGELOG.tmp.md >> CHANGELOG.md
+            rm CHANGELOG.tmp.md
+          fi
+
+          # Удаляем старые CHANGELOG-*.md файлы
+          rm -f CHANGELOG-*.md
+
+      - name: Commit and push to kamiletar/animatrona
+        run: |
+          cd animatrona-public
+          git add .
+          git commit -m "chore: release v${{ steps.parse-version.outputs.version }}" || echo "No changes to commit"
+
+          # Удалить тег если существует (локально и на remote)
+          git tag -d ${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+          git push origin :refs/tags/${{ steps.parse-version.outputs.tag }} 2>/dev/null || true
+
+          # Создать новый тег
+          git tag ${{ steps.parse-version.outputs.tag }}
+          git push origin main
+          git push origin ${{ steps.parse-version.outputs.tag }}
+
+  # 2. Создание draft release с notes из CHANGELOG
+  create-release:
+    needs: publish-source
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kamiletar/animatrona
+        uses: actions/checkout@v4
+        with:
+          repository: kamiletar/animatrona
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ needs.publish-source.outputs.tag }}
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ needs.publish-source.outputs.version }}"
+
+          # Извлекаем секцию текущей версии из CHANGELOG.md
+          NOTES=$(awk '/## \['"$VERSION"'\]/{flag=1; next} /## \[/{flag=0} flag' CHANGELOG.md)
+
+          if [ -z "$NOTES" ]; then
+            # Fallback: все версии из CHANGELOG после предыдущего релиза
+            PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -2 | tail -1 | sed 's/^v//')
+            if [ -n "$PREV_TAG" ]; then
+              # Извлекаем от первой версии до предыдущего тега (не включая)
+              NOTES=$(sed -n '/^## \[Unreleased\]/,/^## \['"$PREV_TAG"'\]/{ /^## \[Unreleased\]/d; /^## \['"$PREV_TAG"'\]/d; p; }' CHANGELOG.md)
+            fi
+
+            # Если всё ещё пусто — показать коммиты animatrona
+            if [ -z "$NOTES" ]; then
+              NOTES=$(git log --pretty=format:"- %s" -10 --no-merges -- apps/animatrona/ libs/query-provider/ 2>/dev/null || git log --pretty=format:"- %s" -10 --no-merges)
+            fi
+          fi
+
+          # Экранируем для GitHub Actions (многострочный output)
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create draft release
+        id: create-release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh release create "${{ needs.publish-source.outputs.tag }}" \
+            --repo kamiletar/animatrona \
+            --draft \
+            --title "Animatrona ${{ needs.publish-source.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.notes }}"
+
+          echo "Created draft release: ${{ needs.publish-source.outputs.tag }}"
+
+  # 3. Сборка Windows (в монорепо)
+  build-windows:
+    needs: [publish-source, create-release]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build zenstack-form-plugin
+        run: cd libs/zenstack-form-plugin && npx tsc --project tsconfig.lib.json && cd ../..
+
+      - name: Generate ZenStack
+        run: |
+          bunx zenstack generate --schema apps/animatrona/schema.zmodel
+          bunx prisma generate --schema apps/animatrona/renderer/src/generated/schema.prisma
+
+      - name: Download FFmpeg
+        working-directory: apps/animatrona
+        run: bunx tsx scripts/download-ffmpeg.ts --platform win
+
+      - name: Build Windows
+        working-directory: apps/animatrona
+        run: |
+          bunx tsx scripts/update-splash-version.ts
+          cd renderer && bunx next build && cd ..
+          bunx webpack --config main/webpack.config.js
+          bunx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Upload to release
+        working-directory: apps/animatrona
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          $TAG = "${{ needs.publish-source.outputs.tag }}"
+          $EXE = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
+
+          if ($EXE) {
+            Write-Host "Uploading $($EXE.Name) to release $TAG"
+            gh release upload "$TAG" "$($EXE.FullName)" --repo kamiletar/animatrona --clobber
+            Write-Host "✅ Uploaded Windows build"
+          } else {
+            Write-Host "⚠️ No .exe file found"
+            exit 1
+          }
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-windows
+          path: apps/animatrona/dist/*.exe
+          retention-days: 7
+
+  # 4. Сборка macOS (в монорепо)
+  build-macos:
+    needs: [publish-source, create-release]
+    runs-on: macos-14 # M1 - дешевле Intel
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build zenstack-form-plugin
+        run: cd libs/zenstack-form-plugin && npx tsc --project tsconfig.lib.json && cd ../..
+
+      - name: Generate ZenStack
+        run: |
+          bunx zenstack generate --schema apps/animatrona/schema.zmodel
+          bunx prisma generate --schema apps/animatrona/renderer/src/generated/schema.prisma
+          ln -sf "$(pwd)/apps/animatrona/prisma/migrations" "apps/animatrona/renderer/src/generated/migrations"
+
+      - name: Download FFmpeg
+        working-directory: apps/animatrona
+        run: bunx tsx scripts/download-ffmpeg.ts --platform mac
+
+      - name: Build macOS
+        working-directory: apps/animatrona
+        run: |
+          bunx tsx scripts/update-splash-version.ts
+          cd renderer && bunx next build && cd ..
+          bunx webpack --config main/webpack.config.js
+          bunx electron-builder --mac --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Upload to release
+        working-directory: apps/animatrona
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          TAG="${{ needs.publish-source.outputs.tag }}"
+          DMG_FILE=$(ls dist/*.dmg 2>/dev/null | head -1)
+
+          if [ -z "$DMG_FILE" ]; then
+            echo "⚠️ No .dmg file found"
+            exit 1
+          fi
+
+          echo "Uploading $DMG_FILE to release $TAG"
+          gh release upload "$TAG" "$DMG_FILE" --repo kamiletar/animatrona --clobber
+          echo "✅ Uploaded macOS build"
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-macos
+          path: apps/animatrona/dist/*.dmg
+          retention-days: 7
+
+  # 5. Сборка Linux (в монорепо — нужны @letar/* библиотеки)
+  build-linux:
+    needs: [publish-source, create-release]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout lena monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build zenstack-form-plugin
+        run: cd libs/zenstack-form-plugin && tsc --project tsconfig.lib.json && cd ../..
+
+      - name: Generate ZenStack
+        run: |
+          bunx zenstack generate --schema apps/animatrona/schema.zmodel
+          # Генерировать Prisma client
+          bunx prisma generate --schema apps/animatrona/renderer/src/generated/schema.prisma
+          # Создать symlink для migrations
+          ln -sf "$(pwd)/apps/animatrona/prisma/migrations" "apps/animatrona/renderer/src/generated/migrations"
+
+      - name: Download FFmpeg
+        working-directory: apps/animatrona
+        run: bunx tsx scripts/download-ffmpeg.ts --platform linux
+
+      - name: Build Linux
+        working-directory: apps/animatrona
+        run: |
+          bunx tsx scripts/update-splash-version.ts
+          cd renderer && bunx next build && cd ..
+          bunx webpack --config main/webpack.config.js
+          bunx electron-builder --linux --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Upload to release
+        working-directory: apps/animatrona
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          TAG="${{ needs.publish-source.outputs.tag }}"
+          APPIMAGE=$(ls dist/*.AppImage 2>/dev/null | head -1)
+
+          if [ -z "$APPIMAGE" ]; then
+            echo "⚠️ No .AppImage file found"
+            exit 1
+          fi
+
+          echo "Uploading $APPIMAGE to release $TAG"
+          gh release upload "$TAG" "$APPIMAGE" --repo kamiletar/animatrona --clobber
+          echo "✅ Uploaded Linux build"
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-linux
+          path: apps/animatrona/dist/*.AppImage
+          retention-days: 7
+
+  # 6. Публикация релиза
+  publish-release:
+    needs: [publish-source, create-release, build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          TAG="${{ needs.publish-source.outputs.tag }}"
+          echo "Publishing release $TAG"
+          gh release edit "$TAG" --repo kamiletar/animatrona --draft=false
+          echo "✅ Release published: https://github.com/kamiletar/animatrona/releases/tag/$TAG"
+
+      - name: Revalidate landing page
+        run: |
+          RESPONSE=$(curl -X POST "https://animatrona.letar.best/api/revalidate?secret=${{ secrets.REVALIDATE_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "\nHTTP_CODE:%{http_code}" \
+            -s)
+
+          HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE:/d')
+
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Landing page cache revalidated"
+          else
+            echo "⚠️ Failed to revalidate landing (HTTP $HTTP_CODE)"
+            echo "Landing will update automatically within 1 hour"
+          fi

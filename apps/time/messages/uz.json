@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Soat nechida?",
+    "description": "UNIX davrining boshidan beri tartib soati"
+  },
+  "time": {
+    "now": "Hozir",
+    "hour": "UNIX davrining boshidan beri soat",
+    "hoursPassed": "soat UNIX davrining boshidan beri o'tdi"
+  },
+  "countdown": {
+    "until": "{milestone} soatgacha",
+    "days": "{count, plural, one {# kun} other {# kun}}",
+    "hours": "{count, plural, one {# soat} other {# soat}}",
+    "minutes": "{count, plural, one {# daqiqa} other {# daqiqa}}",
+    "seconds": "{count, plural, one {# soniya} other {# soniya}}"
+  },
+  "celebration": {
+    "milestone": "UNIX davrining {hours} soati!"
+  },
+  "subscribe": {
+    "subscribe": "Bildirishnomalar",
+    "explanation": "Elektron pochtangizni tasdiqlash va bildirishnoma sozlamalariga kirish uchun tizimga kirish talab etiladi",
+    "signIn": "Kirish",
+    "settings": "Sozlamalar"
+  },
+  "profile": {
+    "title": "Bildirishnoma sozlamalari",
+    "email": "Elektron pochta",
+    "notifyMonth": "Bir oy oldin",
+    "notifyWeek": "Bir hafta oldin",
+    "notifyDay": "Bir kun oldin",
+    "notifyHour": "Bir soat oldin",
+    "notify5Min": "5 daqiqa oldin",
+    "save": "Saqlash",
+    "saved": "Saqlandi!",
+    "unsubscribe": "Hammasidan chiqish",
+    "unsubscribed": "Siz barcha bildirishnomalardan chiqarilgansiz",
+    "noSubscription": "Sizda hali bildirishnomalar obunasi yo'q",
+    "createSubscription": "Bildirishnomalarga obuna bo'lish"
+  },
+  "unsubscribe": {
+    "title": "Obunadan chiqish",
+    "success": "Siz UNIX soat bosqichlari bildirishnomalaridan muvaffaqiyatli chiqarildingiz",
+    "error": "Obunadan chiqish havolasi noto'g'ri",
+    "back": "Bosh sahifaga qaytish"
+  }
+}

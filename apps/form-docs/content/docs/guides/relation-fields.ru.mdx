@@ -1,0 +1,61 @@
+---
+title: Связанные поля
+description: Select-поля, загружающие опции из связанных моделей БД
+---
+
+## Обзор
+
+Связанные поля автоматически загружают опции из связанных моделей базы данных. Работают через `RelationFieldProvider` и директиву `@form.relation` ZenStack.
+
+## Настройка схемы
+
+```prisma
+model Recipe {
+  /// @form.title("Категория")
+  /// @form.relation({ labelField: "name" })
+  categoryId String
+
+  category Category @relation(fields: [categoryId], references: [id])
+}
+```
+
+## RelationFieldProvider
+
+Оберните форму для предоставления данных связей:
+
+```tsx
+import { RelationFieldProvider } from '@letar/forms'
+
+;<RelationFieldProvider
+  relations={{
+    category: {
+      useQuery: useFindManyCategory,
+      labelField: 'name',
+    },
+  }}
+>
+  <Form schema={RecipeCreateFormSchema} onSubmit={save}>
+    <Form.Field.String name="title" />
+    <Form.Field.Select name="categoryId" />
+    <Form.Button.Submit>Сохранить</Form.Button.Submit>
+  </Form>
+</RelationFieldProvider>
+```
+
+## Хук useRelationOptions
+
+Доступ к опциям связей из кастомных компонентов:
+
+```tsx
+const { options, isLoading } = useRelationOptions('category')
+```
+
+## HOC withRelations
+
+Альтернатива обёртке RelationFieldProvider:
+
+```tsx
+const RecipeForm = withRelations(BaseRecipeForm, {
+  category: { useQuery: useFindManyCategory, labelField: 'name' },
+})
+```

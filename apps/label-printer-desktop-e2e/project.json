@@ -1,0 +1,16 @@
+{
+  "name": "label-printer-desktop-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/label-printer-desktop-e2e/src",
+  "implicitDependencies": ["label-printer-desktop"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/label-printer-desktop-e2e/playwright.config.ts"
+      }
+    }
+  }
+}

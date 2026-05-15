@@ -1,0 +1,57 @@
+---
+title: Multi-Step Forms
+description: Create step-by-step form wizards with validation
+---
+
+## Live Demo
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="multi-step" height={400} />
+
+## Form.Steps
+
+Break a long form into manageable steps:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Steps animated validateOnNext>
+    <Form.Steps.Step title="Personal Info">
+      <Form.Field.String name="firstName" />
+      <Form.Field.String name="lastName" />
+      <Form.Field.String name="email" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Step title="Address">
+      <Form.Field.String name="street" />
+      <Form.Field.String name="city" />
+      <Form.Field.String name="zip" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Step title="Preferences">
+      <Form.Field.Checkbox name="newsletter" />
+      <Form.Field.Select name="language" />
+    </Form.Steps.Step>
+
+    <Form.Steps.Navigation />
+  </Form.Steps>
+</Form>
+```
+
+## Features
+
+- **`animated`** — smooth transitions between steps
+- **`validateOnNext`** — validates current step before allowing navigation
+- **`Form.Steps.Navigation`** — renders Previous / Next / Submit buttons
+- **Step indicator** — shows progress through steps
+- **Keyboard navigation** — supports arrow keys
+
+## Step Persistence
+
+Steps can be persisted to localStorage to survive page refreshes:
+
+```tsx
+<Form.Steps animated validateOnNext persistKey="checkout-wizard">
+  ...
+</Form.Steps>
+```

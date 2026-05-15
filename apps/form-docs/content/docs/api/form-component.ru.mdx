@@ -1,0 +1,220 @@
+---
+title: Компонент Form
+description: Главный составной компонент Form и его подкомпоненты
+---
+
+## Form
+
+Корневой составной компонент. Предоставляет контекст формы и валидацию.
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={async ({ value }) => { ... }}
+>
+  {/* Компоненты полей */}
+</Form>
+```
+
+### Props
+
+| Проп           | Тип                                      | Описание                                 |
+| -------------- | ---------------------------------------- | ---------------------------------------- |
+| `schema`       | `ZodObject`                              | Zod схема валидации                      |
+| `initialValue` | `T`                                      | Начальные данные формы                   |
+| `onSubmit`     | `(props: { value: T }) => Promise<void>` | Обработчик отправки                      |
+| `onError`      | `(errors: FieldErrors) => void`          | Обработчик ошибок                        |
+| `offline`      | `OfflineConfig`                          | Конфигурация офлайн-режима               |
+| `persistence`  | `PersistenceConfig`                      | Автосохранение в localStorage            |
+| `debug`        | `boolean \| 'force'`                     | Показать DebugValues (только FromSchema) |
+| `children`     | `ReactNode`                              | Содержимое формы                         |
+
+### persistence
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={handleSubmit}
+  persistence={{
+    key: 'checkout-form',
+    debounceMs: 500,
+    dialogTitle: 'Восстановить черновик?',
+    dialogDescription: 'У вас есть несохранённые изменения.',
+    restoreLabel: 'Восстановить',
+    discardLabel: 'Отменить',
+  }}
+>
+```
+
+## Form.Field.\*
+
+40+ компонентов полей. См. [Типы полей](/docs/fields).
+
+Общие пропсы всех полей:
+
+| Проп          | Тип       | Описание                             |
+| ------------- | --------- | ------------------------------------ |
+| `name`        | `string`  | Имя поля, совпадающее с ключом схемы |
+| `label`       | `string`  | Переопределить метку из схемы        |
+| `placeholder` | `string`  | Переопределить placeholder           |
+| `helperText`  | `string`  | Дополнительная подсказка             |
+| `required`    | `boolean` | Обязательное поле                    |
+| `disabled`    | `boolean` | Отключить поле                       |
+
+## Form.Group
+
+Группировка полей во вложенный объект:
+
+```tsx
+<Form.Group name="address">
+  <Form.Field.String name="street" />
+</Form.Group>
+```
+
+## Form.Group.List
+
+Динамический массив элементов:
+
+```tsx
+<Form.Group.List name="items" sortable>
+  <Form.Field.String name="title" />
+  <Form.Group.List.Button.Add />
+  <Form.Group.List.Button.Remove />
+</Form.Group.List>
+```
+
+## Form.Steps
+
+Мультистеп мастер. См. [Мультистеп формы](/docs/guides/multi-step).
+
+## Form.When
+
+Условный рендеринг. См. [Условные поля](/docs/guides/conditional-fields).
+
+## Form.Errors
+
+Компонент сводки ошибок:
+
+```tsx
+<Form.Errors title="Исправьте:" showFieldNames />
+```
+
+## Form.Button.Submit
+
+Кнопка отправки, которая **автоматически показывает спиннер загрузки** во время отправки формы. Подписывается на состояние `isSubmitting` — когда `onSubmit` возвращает Promise, кнопка остаётся в состоянии загрузки до его разрешения.
+
+### Props
+
+| Проп           | Тип                                           | По умолчанию | Описание                                         |
+| -------------- | --------------------------------------------- | ------------ | ------------------------------------------------ |
+| `children`     | `ReactNode`                                   | `"Submit"`   | Содержимое кнопки — текст, иконка, любой элемент |
+| `loadingText`  | `ReactNode`                                   | —            | Текст при отправке (заменяет children)           |
+| `disabled`     | `boolean`                                     | `false`      | Отключить кнопку                                 |
+| `colorPalette` | `string`                                      | —            | Цветовая палитра (`"brand"`, `"blue"`, `"red"`)  |
+| `size`         | `"xs" \| "sm" \| "md" \| "lg"`                | `"md"`       | Размер кнопки                                    |
+| `variant`      | `"solid" \| "outline" \| "ghost" \| "subtle"` | `"solid"`    | Вариант кнопки                                   |
+| `width`        | `string \| number`                            | —            | Ширина кнопки (`"100%"` для полной ширины)       |
+
+### Базовое использование
+
+```tsx
+<Form.Button.Submit>Сохранить</Form.Button.Submit>
+```
+
+### Текст при загрузке
+
+Показать кастомный текст во время отправки:
+
+```tsx
+<Form.Button.Submit loadingText="Сохранение...">Сохранить</Form.Button.Submit>
+```
+
+### Кастомная стилизация
+
+```tsx
+<Form.Button.Submit colorPalette="brand" size="lg" width="100%">
+  Создать аккаунт
+</Form.Button.Submit>
+```
+
+### Как работает загрузка
+
+Кнопка автоматически переходит в состояние загрузки, когда `onSubmit` — асинхронная функция. Чтобы увидеть эффект, добавьте задержку:
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  onSubmit={async ({ value }) => {
+    await new Promise((r) => setTimeout(r, 1500))
+    alert(`Отправлено: ${JSON.stringify(value)}`)
+  }}
+>
+  <Form.Field.String name="name" />
+  <Form.Button.Submit loadingText="Отправка...">Отправить</Form.Button.Submit>
+</Form>
+```
+
+## Form.Button.Reset
+
+Сброс формы к начальным значениям:
+
+```tsx
+<Form.Button.Reset>Сбросить</Form.Button.Reset>
+```
+
+## Form.FromSchema
+
+Автогенерация формы из схемы:
+
+```tsx
+<Form.FromSchema schema={Schema} initialValue={data} onSubmit={handleSubmit} submitLabel="Создать" columns={2} />
+```
+
+## Form.AutoFields
+
+Автогенерация полей с фильтрацией:
+
+```tsx
+<Form.AutoFields />
+<Form.AutoFields include={['name', 'email']} />
+<Form.AutoFields exclude={['id', 'createdAt']} />
+```
+
+| Проп        | Тип        | Описание                                    |
+| ----------- | ---------- | ------------------------------------------- |
+| `include`   | `string[]` | Только эти поля                             |
+| `exclude`   | `string[]` | Пропустить эти поля                         |
+| `recursive` | `boolean`  | Авто вложенные объекты (по умолчанию: true) |
+
+## Form.DebugValues
+
+Интерактивный JSON-инспектор значений формы:
+
+```tsx
+<Form.DebugValues title="Текущие значения" collapsed={3} />
+```
+
+## Form.DirtyGuard
+
+Предупреждение о несохранённых изменениях при уходе со страницы:
+
+```tsx
+<Form.DirtyGuard title="Несохранённые изменения" message="Вы уверены?" />
+```
+
+## Form.Subscribe
+
+Реактивная подписка на значения формы:
+
+```tsx
+<Form.Subscribe>{(values) => <Preview data={values} />}</Form.Subscribe>
+```
+
+См. [Управляемое состояние](/docs/guides/controlled-state).
+
+## createForm
+
+Создание расширенной формы. См. [createForm guide](/docs/guides/create-form).

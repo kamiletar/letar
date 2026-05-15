@@ -1,0 +1,200 @@
+{
+  "name": "@letar/forms",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/forms/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:ui"],
+  "targets": {
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/forms"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "lintFilePatterns": ["libs/forms/**/*.{ts,tsx}"]
+      },
+      "metadata": {
+        "description": "Run ESLint on form-components library",
+        "technologies": ["eslint"]
+      }
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "libs/forms"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+        "cwd": "libs/forms"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with Prettier",
+        "technologies": ["prettier"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+        "cwd": "libs/forms"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.prettierrc", "{workspaceRoot}/.prettierignore"],
+      "metadata": {
+        "description": "Check file formatting",
+        "technologies": ["prettier"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms"
+      },
+      "dependsOn": ["^typecheck"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms"
+      },
+      "dependsOn": ["^typecheck:tsgo"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "validate": {
+      "executor": "nx:noop",
+      "dependsOn": ["lint", "format:check", "typecheck"],
+      "metadata": {
+        "description": "Run all validation checks"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/libs/forms"],
+      "options": {
+        "config": "libs/forms/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests",
+        "technologies": ["vitest"]
+      }
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsup",
+          "tsc --project tsconfig.publish.json",
+          "cp package.publish.json dist/package.json",
+          "cp README.en.md dist/README.md",
+          "cp README.md dist/README.ru.md",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/forms",
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": ["default", "{projectRoot}/tsup.config.ts", "{projectRoot}/package.publish.json"],
+      "outputs": ["{projectRoot}/dist"],
+      "metadata": {
+        "description": "Сборка @letar/forms для публикации на npm",
+        "technologies": ["tsup"]
+      }
+    },
+    "bench": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest bench --config vitest.config.ts --run",
+        "cwd": "libs/forms"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Бенчмарки производительности (ре-рендеры)",
+        "technologies": ["vitest"]
+      }
+    },
+    "size": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun size-limit --config .size-limit.json",
+        "cwd": "libs/forms"
+      },
+      "dependsOn": ["build:npm"],
+      "cache": true,
+      "inputs": ["{projectRoot}/dist/**/*.js", "{projectRoot}/.size-limit.json"],
+      "metadata": {
+        "description": "Проверка размера bundle",
+        "technologies": ["size-limit"]
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/forms/dist"
+      },
+      "dependsOn": ["build:npm"],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/forms на npmjs.com",
+        "technologies": ["npm"]
+      }
+    }
+  }
+}

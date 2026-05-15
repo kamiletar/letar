@@ -1,0 +1,43 @@
+/**
+ * Стили для React Flow компонентов — адаптируются к dark/light mode через Chakra CSS variables
+ */
+
+/* Контейнер Controls */
+.react-flow__controls {
+  background: var(--chakra-colors-bg-panel) !important;
+  border: 1px solid var(--chakra-colors-border-muted) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--chakra-shadows-md) !important;
+}
+
+/* Кнопки Controls */
+.react-flow__controls-button {
+  background: var(--chakra-colors-bg-subtle) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--chakra-colors-border-muted) !important;
+  fill: var(--chakra-colors-fg-muted) !important;
+  color: var(--chakra-colors-fg-muted) !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--chakra-colors-bg-emphasized) !important;
+}
+
+.react-flow__controls-button svg {
+  fill: var(--chakra-colors-fg-muted) !important;
+}
+
+/* MiniMap */
+.react-flow__minimap {
+  background: var(--chakra-colors-bg-panel) !important;
+  border: 1px solid var(--chakra-colors-border-muted) !important;
+  border-radius: 8px;
+}
+
+.react-flow__minimap-mask {
+  fill: color-mix(in srgb, var(--chakra-colors-bg) 60%, transparent) !important;
+}

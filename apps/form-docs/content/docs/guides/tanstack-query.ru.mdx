@@ -1,0 +1,112 @@
+---
+title: Интеграция с TanStack Query
+description: Загрузка, отправка и кэширование данных формы с React Query
+---
+
+## Обзор
+
+Комбинируйте `@letar/forms` с TanStack Query для полного цикла данных: загрузка → заполнение формы → отправка → инвалидация кэша.
+
+## Паттерн Edit формы
+
+Загрузите данные через `useQuery`, заполните форму, отправьте через `useMutation`:
+
+```tsx
+'use client'
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Form } from '@letar/forms'
+import { ProductCreateFormSchema } from '@/generated/form-schemas'
+
+function EditProductForm({ id }: { id: string }) {
+  const queryClient = useQueryClient()
+
+  // Загрузка данных продукта
+  const { data: product, isLoading } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => fetch(`/api/products/${id}`).then((r) => r.json()),
+  })
+
+  // Мутация отправки
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['product', id] })
+    },
+  })
+
+  if (isLoading) return <div>Загрузка...</div>
+
+  return (
+    <Form schema={ProductCreateFormSchema} initialValue={product} onSubmit={async (data) => mutation.mutateAsync(data)}>
+      <Form.AutoFields />
+      <Form.DebugValues />
+      <Form.Button.Submit disabled={mutation.isPending}>
+        {mutation.isPending ? 'Сохранение...' : 'Сохранить'}
+      </Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Паттерн Create формы
+
+```tsx
+const mutation = useMutation({
+  mutationFn: (data) => fetch('/api/products', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] })
+    router.push('/products')
+  },
+})
+
+<Form.FromSchema
+  schema={ProductCreateFormSchema}
+  initialValue={defaults}
+  onSubmit={async (data) => mutation.mutateAsync(data)}
+  submitLabel={mutation.isPending ? 'Создание...' : 'Создать'}
+/>
+```
+
+## Альтернатива: Server Actions
+
+С Next.js Server Actions TanStack Query необязателен — можно вызывать action напрямую:
+
+```tsx
+import { createProduct } from '@/app/_actions/product.action'
+
+;<Form.FromSchema
+  schema={ProductCreateFormSchema}
+  initialValue={defaults}
+  onSubmit={async (data) => createProduct(data)}
+  submitLabel="Создать продукт"
+/>
+```
+
+## Optimistic Updates
+
+```tsx
+const mutation = useMutation({
+  mutationFn: updateProduct,
+  onMutate: async (newData) => {
+    await queryClient.cancelQueries({ queryKey: ['products'] })
+    const previous = queryClient.getQueryData(['products'])
+    queryClient.setQueryData(['products'], (old) => old.map((p) => (p.id === newData.id ? { ...p, ...newData } : p)))
+    return { previous }
+  },
+  onError: (_err, _vars, context) => {
+    queryClient.setQueryData(['products'], context.previous)
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] })
+  },
+})
+```

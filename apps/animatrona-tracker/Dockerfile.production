@@ -1,0 +1,33 @@
+# Dockerfile.production - для уже собранных приложений
+# Используется когда сборка выполнена на сервере с nx build affected
+# Build context: workspace root (C:\web\lena)
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=768"
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Копируем уже собранный standalone output
+# Standalone включает в себя все необходимые node_modules
+COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/standalone ./
+
+# Копируем статику и public (не включаются в standalone автоматически)
+COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/static ./apps/animatrona-tracker/.next/static
+COPY --chown=nextjs:nodejs apps/animatrona-tracker/public ./apps/animatrona-tracker/public
+
+# Копируем хэшированные модули Turbopack (pg для PostgreSQL)
+COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/node_modules ./apps/animatrona-tracker/.next/node_modules
+
+USER nextjs
+
+EXPOSE 3010
+
+ENV PORT=3010
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/animatrona-tracker/server.js"]

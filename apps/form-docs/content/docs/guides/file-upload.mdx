@@ -1,0 +1,37 @@
+---
+title: File Upload
+description: Upload files with button, dropzone, or input variants
+---
+
+## Basic Upload
+
+```tsx
+const Schema = z.object({
+  avatar: z.any().optional().meta({
+    ui: { title: 'Profile Photo' },
+  }),
+})
+
+<Form.Field.FileUpload name="avatar" accept="image/*" />
+```
+
+## Multiple Files
+
+```tsx
+<Form.Field.FileUpload name="documents" maxFiles={5} />
+```
+
+## Dropzone Variant
+
+```tsx
+<Form.Field.FileUpload name="files" variant="dropzone" accept="image/*,.pdf" maxSize={5 * 1024 * 1024} />
+```
+
+## Props
+
+| Prop       | Type                     | Description                             |
+| ---------- | ------------------------ | --------------------------------------- |
+| `accept`   | `string`                 | Accepted file types (`image/*`, `.pdf`) |
+| `maxFiles` | `number`                 | Maximum number of files                 |
+| `maxSize`  | `number`                 | Maximum file size in bytes              |
+| `variant`  | `'button' \| 'dropzone'` | Upload UI variant                       |

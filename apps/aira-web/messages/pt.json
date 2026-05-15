@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — Mensageiro P2P Pós-Quântico",
+    "description": "Aira é um mensageiro descentralizado com criptografia híbrida pós-quântica. Sem servidores, sem números de telefone, sem concessões."
+  },
+  "nav": {
+    "features": "Recursos",
+    "security": "Segurança",
+    "download": "Baixar",
+    "github": "GitHub",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "mainNavigation": "Navegação principal",
+    "mobileNavigation": "Navegação móvel",
+    "skipToContent": "Ir para o conteúdo"
+  },
+  "hero": {
+    "badge": "{version} — A proteção pós-quântica já chegou",
+    "fallbackVersion": "v0.3.3",
+    "title1": "Fale livremente.",
+    "title2": "Proteja o futuro.",
+    "subtitle": "Aira é um mensageiro descentralizado com criptografia híbrida pós-quântica. Sem servidores, sem números de telefone, sem concessões.",
+    "ctaDownload": "Baixar Aira",
+    "ctaSource": "Código-fonte",
+    "tagOpenSource": "Código aberto"
+  },
+  "features": {
+    "title": "Superpoderes",
+    "subtitle": "Cada detalhe projetado para proteger sua liberdade de comunicar",
+    "quantum": {
+      "title": "Criptografia resistente a computadores quânticos",
+      "description": "Criptografia híbrida ML-KEM-768 + X25519. Ambos os algoritmos precisam ser quebrados simultaneamente — proteção contra computadores quânticos hoje."
+    },
+    "p2p": {
+      "title": "P2P de verdade",
+      "description": "Sem servidores, sem contas, sem números de telefone. Cada usuário é um nó da rede. Mensagens seguem direto pelo QUIC."
+    },
+    "metadata": {
+      "title": "Metadados invisíveis",
+      "description": "Pseudônimos em pares para cada contato. Nem o relay sabe com quem você conversa. Padding em todos os pacotes oculta o tamanho real das mensagens."
+    },
+    "global": {
+      "title": "Funciona em qualquer lugar",
+      "description": "Camuflagem REALITY, obfs4, Tor, fallback de CDN. Transportes plugáveis vencem DPI até nas regiões mais censuradas."
+    },
+    "fullMessenger": {
+      "title": "Um mensageiro completo",
+      "description": "Reações, respostas, edição, mensagens efêmeras, transferência de arquivos, grupos de até 100 pessoas, bots — tudo criptografado."
+    },
+    "multiplatform": {
+      "title": "Multiplataforma",
+      "description": "CLI, desktop (Linux/macOS/Windows), Android. Até 5 dispositivos vinculados com sincronização via seed phrase."
+    }
+  },
+  "security": {
+    "title": "Por baixo dos panos",
+    "subtitle": "100% Rust. Zero código unsafe no núcleo criptográfico. Cada chave é isolada e apagada da memória após o uso.",
+    "crypto": {
+      "title": "Criptografia",
+      "keyAgreementLabel": "Acordo de chaves",
+      "keyAgreementDetail": "KEM híbrido, FIPS 203",
+      "signaturesLabel": "Assinaturas",
+      "signaturesDetail": "FIPS 204, pós-quântico",
+      "encryptionLabel": "Cifragem",
+      "encryptionDetail": "256 bits, AEAD",
+      "hashingLabel": "Hashing",
+      "hashingDetail": "KDF + MAC, sem length-extension",
+      "kdfLabel": "Derivação de chaves",
+      "kdfDetail": "256 MB / 64 MB (desktop/móvel)",
+      "fsLabel": "Sigilo perfeito adiante",
+      "fsDetail": "Atualização PQ a cada ~50 mensagens"
+    },
+    "protection": {
+      "title": "Defesa",
+      "dpiLabel": "Contorno de DPI",
+      "dpiValue": "5 níveis",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "Metadados",
+      "metadataValue": "Pseudônimos em pares",
+      "metadataDetail": "O relay não vê o grafo social",
+      "deniabilityLabel": "Negação plausível",
+      "deniabilityValue": "MACs simétricos",
+      "deniabilityDetail": "Impossível provar a autoria",
+      "antispamLabel": "Antispam",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "20 bits para desconhecidos",
+      "paddingLabel": "Padding",
+      "paddingValue": "256–4096 bytes",
+      "paddingDetail": "Oculta o tamanho real da mensagem",
+      "recoveryLabel": "Recuperação",
+      "recoveryValue": "24 palavras BIP-39",
+      "recoveryDetail": "Seed phrase, derivação determinística"
+    },
+    "vsTitle": "Por que não Signal / Session / SimpleX?",
+    "vsSignal": "O Signal usa servidores, exige número de telefone e não tem proteção pós-quântica em cada mensagem. Aira é P2P + catraca SPQR.",
+    "vsSession": "O Session usa roteamento cebola por servidores Oxen. Aira é P2P direto, sem servidores intermediários e com criptografia PQ completa.",
+    "vsSimpleX": "O SimpleX depende de servidores relay para entrega. O Aira funciona direto; relays são apenas um fallback para NAT traversal."
+  },
+  "download": {
+    "title": "Baixar Aira",
+    "subtitleWithVersion": "{version} — Código aberto. Grátis para sempre.",
+    "subtitle": "Código aberto. Grátis para sempre.",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI. Arquivo tar.gz.",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "CLI + Daemon + GUI para Apple M1/M2/M3/M4.",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "CLI + Daemon + GUI para Macs Intel.",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI. Arquivo zip.",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + núcleo Rust via UniFFI. APK.",
+    "downloadLabel": "Baixar",
+    "portableLabel": "Arquivo portátil",
+    "cargoLabel": "Instalação via Cargo:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "Especificação",
+    "releases": "Versões"
+  }
+}

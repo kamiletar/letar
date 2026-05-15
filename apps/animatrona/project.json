@@ -1,0 +1,350 @@
+{
+  "name": "animatrona",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/animatrona",
+  "projectType": "application",
+  "tags": ["type:app", "scope:animatrona"],
+  "implicitDependencies": ["zenstack-form-plugin"],
+  "targets": {
+    "dev": {
+      "command": "nextron",
+      "options": {
+        "cwd": "apps/animatrona"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts",
+          "npx tsx scripts/download-fpcalc.ts",
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "download-ffmpeg": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx scripts/download-ffmpeg.ts",
+        "cwd": "apps/animatrona"
+      }
+    },
+    "download-fpcalc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx scripts/download-fpcalc.ts",
+        "cwd": "apps/animatrona"
+      }
+    },
+    "build:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts",
+          "npx tsx scripts/download-fpcalc.ts",
+          "cd renderer && next build",
+          "npx tsx scripts/fix-standalone.ts",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --win --publish never"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      }
+    },
+    "release:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts",
+          "npx tsx scripts/download-fpcalc.ts",
+          "cd renderer && next build",
+          "npx tsx scripts/fix-standalone.ts",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --win --publish always"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "build:linux": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts",
+          "npx tsx scripts/download-fpcalc.ts",
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --linux --publish never"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "release:linux": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts",
+          "npx tsx scripts/download-fpcalc.ts",
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --linux --publish always"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "build:mac": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --mac --publish never"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "release:mac": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --mac --publish always"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"]
+    },
+    "release:win-linux": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx tsx scripts/update-splash-version.ts",
+          "npx tsx scripts/download-ffmpeg.ts --platform all",
+          "npx tsx scripts/download-fpcalc.ts --platform all",
+          "cd renderer && next build",
+          "npx tsx scripts/fix-standalone.ts",
+          "npx webpack --config main/webpack.config.js",
+          "node web-player/build.mjs --prod",
+          "cd mobile-ui && bun run build",
+          "npx electron-builder --win --linux --publish always"
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false,
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8192"
+        }
+      },
+      "dependsOn": ["db:template"],
+      "metadata": {
+        "description": "Release для Windows и Linux (можно запускать с Windows)"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "apps/animatrona/vitest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/animatrona/main/**/*.{ts,tsx}",
+          "apps/animatrona/renderer/**/*.{ts,tsx}",
+          "apps/animatrona/shared/**/*.{ts,tsx}"
+        ]
+      }
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit"
+    },
+    "format": {
+      "command": "dprint fmt apps/animatrona/{main,renderer,shared,preload}/**/*.{ts,tsx,json} apps/animatrona/*.{ts,json}"
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "zenstack generate --schema schema.zmodel",
+          "prisma generate",
+          "node -e \"const fs=require('fs'),p=require('path');const j='renderer/src/generated/migrations',t='prisma/migrations';if(!fs.existsSync(j)){fs.symlinkSync(p.resolve(t),p.resolve(j),'junction');console.log('Junction created: migrations')}\""
+        ],
+        "cwd": "apps/animatrona",
+        "parallel": false
+      },
+      "dependsOn": ["^build"]
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"],
+      "cache": false
+    },
+    "db:push:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push --accept-data-loss --force-reset",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Сбросить dev БД и применить схему (потеря данных!)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Сбросить БД и применить все миграции",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset --force",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Сбросить БД без подтверждения (потеря данных!)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"]
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ts-node prisma/seed.ts",
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"]
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev {args}",
+        "forwardAllArgs": true,
+        "cwd": "apps/animatrona"
+      },
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Создать миграцию",
+        "technologies": ["prisma", "electron"]
+      }
+    },
+    "db:migrate:deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/animatrona"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": ["prisma"]
+      }
+    },
+    "release": {
+      "command": "scripts/release.bat",
+      "metadata": {
+        "description": "Создать тег из текущей версии package.json и запушить для запуска GitHub Actions. ВАЖНО: версию нужно обновить вручную перед запуском!",
+        "technologies": ["git", "github-actions"]
+      }
+    },
+    "build:web-player": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node web-player/build.mjs --prod",
+        "cwd": "apps/animatrona"
+      },
+      "metadata": {
+        "description": "Собрать standalone web player для IPFS экспорта",
+        "technologies": ["esbuild", "ipfs"]
+      }
+    },
+    "build:web-player:dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node web-player/build.mjs",
+        "cwd": "apps/animatrona"
+      },
+      "metadata": {
+        "description": "Собрать web player (development mode с sourcemaps)"
+      }
+    }
+  }
+}

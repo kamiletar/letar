@@ -1,0 +1,1096 @@
+// ZenStack schema file for Animatrona Tracker
+// Платформа для просмотра и поиска IPFS контента
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+// TypeScript plugin (v3) — генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+// TODO: включить после исправления @zenstackhq/tanstack-query exports
+// plugin hooks {
+//   provider = '@zenstackhq/tanstack-query'
+//   output = "./src/generated/hooks"
+//   target = "react"
+// }
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+/// Статус контента в системе модерации
+enum ContentStatus {
+  /// На модерации
+  PENDING
+  /// Опубликован и доступен для просмотра
+  PUBLISHED
+  /// Отклонён модератором
+  REJECTED
+  /// Скрыт автором
+  HIDDEN
+}
+
+/// Роль пользователя в системе
+enum UserRole {
+  /// Обычный пользователь
+  USER
+  /// Модератор — может управлять контентом
+  MODERATOR
+  /// Администратор — полный доступ
+  ADMIN
+}
+
+/// Статус жалобы на контент
+enum ReportStatus {
+  /// Новая жалоба, ожидает рассмотрения
+  PENDING
+  /// Рассмотрена модератором
+  REVIEWED
+  /// Решена (контент удалён/исправлен или жалоба отклонена)
+  RESOLVED
+}
+
+// ============================================================================
+// CONTENT — Основная модель раздачи
+// ============================================================================
+
+model Content {
+  id          String        @id @default(cuid())
+
+  // Метаданные
+  /// @form.title("Название")
+  /// @form.placeholder("Введите название...")
+  title       String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description String?
+
+  /// @form.title("Категория")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "anime", "label": "Аниме"}, {"value": "movie", "label": "Фильм"}, {"value": "series", "label": "Сериал"}, {"value": "other", "label": "Другое"}])
+  category    String        @default("other")
+
+  /// @form.title("Теги")
+  /// @form.fieldType("tags")
+  tags        String[]
+
+  /// @form.title("Год выпуска")
+  year        Int?
+
+  // IPFS данные
+  /// @form.title("IPFS CID")
+  /// @form.placeholder("Qm...")
+  ipfsCid     String        @unique
+
+  /// @form.title("CID постера")
+  /// @form.placeholder("Qm...")
+  posterCid   String?
+
+  /// @form.title("Размер (байты)")
+  size        BigInt        @default(0)
+
+  /// @form.title("Длительность (секунды)")
+  duration    Int?
+
+  /// @form.title("Качество")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "480p", "label": "480p"}, {"value": "720p", "label": "720p"}, {"value": "1080p", "label": "1080p"}, {"value": "4K", "label": "4K"}])
+  quality     String?
+
+  // Автор
+  /// @form.exclude
+  userId      String?
+  /// @form.exclude
+  user        User?         @relation(fields: [userId], references: [id])
+
+  // Статистика
+  /// @form.exclude
+  views       Int           @default(0)
+
+  // Средний рейтинг (кэшированный)
+  /// @form.exclude
+  avgRating   Float?
+
+  // Модерация
+  /// @form.title("Статус")
+  status      ContentStatus @default(PENDING)
+
+  /// @form.exclude
+  createdAt   DateTime      @default(now())
+  /// @form.exclude
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  /// @form.exclude
+  ratings     Rating[]
+  /// @form.exclude
+  reports     Report[]
+
+  // FTS индекс
+  @@index([title])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+
+  // Access policies:
+  // Все могут читать опубликованный контент
+  @@allow('read', status == PUBLISHED)
+  // Автор видит свой контент в любом статусе
+  @@allow('read', auth() == user)
+  // Модератор/админ видит весь контент
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный пользователь может создать контент
+  @@allow('create', auth() != null)
+  // Автор может редактировать свой контент
+  @@allow('update', auth() == user)
+  // Модератор/админ может менять статус и удалять
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// USER — Пользователи
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+
+  /// @form.title("Email")
+  /// @form.fieldType("email")
+  email         String?   @unique
+
+  /// @form.title("Имя")
+  name          String?
+
+  /// @form.title("Аватар")
+  /// Стандартное имя Better Auth для аватара
+  image         String?
+
+  /// @form.title("Роль")
+  role          UserRole  @default(USER)
+
+  // Better Auth fields
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  contents      Content[]
+  ratings       Rating[]
+  reports       Report[]
+  anime         Anime[]       // Загруженные аниме
+  apiKeys       ApiKey[]      // API ключи для Animatrona
+  distributions Distribution[] // Раздачи пользователя
+  distributionStats DistributionStats? // Статистика раздач
+  pinJobs       PinJob[]      // Созданные задания на пиннинг
+  libraryItems  UserLibraryItem[] // Библиотека пользователя (Cloud Library)
+  comments      AnimeComment[]   // Комментарии пользователя
+  moderationLogs ModerationLog[] // Логи модерации
+
+  // Настройки пользователя
+  /// @form.title("Кастомный IPFS Gateway")
+  /// @form.placeholder("https://...")
+  customGateway String?
+
+  /// Предпочитаемый режим дорожек: 'RUSSIAN_DUB' | 'ORIGINAL_SUB'
+  preferredTrackMode String? @default("RUSSIAN_DUB")
+
+  /// Композитный рейтинг загрузчика (пересчитывается при recalc-stats)
+  uploaderScore Int @default(0)
+
+  /// Ранг загрузчика: Новичок, Загрузчик, Опытный, Мастер, Легенда
+  uploaderRank String? @default("Новичок")
+
+  /// Дата рождения (для возрастной фильтрации каталога)
+  birthDate DateTime?
+
+  @@allow('read', true)
+  @@allow('update', auth() == this)
+  @@allow('all', auth().role == ADMIN)
+}
+
+
+// ============================================================================
+// DISTRIBUTION STATS — Статистика раздач пользователя
+// ============================================================================
+
+/// Агрегированная статистика раздач пользователя (обновляется Desktop клиентом)
+model DistributionStats {
+  id                    String   @id @default(cuid())
+
+  /// Пользователь-владелец
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String   @unique
+
+  /// Всего байт загружено (upload)
+  totalBytesUploaded    BigInt   @default(0)
+
+  /// Всего байт скачано (download)
+  totalBytesDownloaded  BigInt   @default(0)
+
+  /// Общее время раздачи в мс
+  totalSeedingTimeMs    BigInt   @default(0)
+
+  /// Общее количество уникальных Bitswap-пиров, которым отдали данные
+  totalPeersHelped      Int      @default(0)
+
+  /// Общее время работы Desktop в мс (uptime)
+  totalUptimeMs         BigInt   @default(0)
+
+  /// Текущее количество активных раздач
+  activeDistributions   Int      @default(0)
+
+  /// Последний отчёт от Desktop
+  lastReportedAt        DateTime @default(now())
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+
+  // Статистика видна всем авторизованным (для лидерборда)
+  @@allow('read', auth() != null)
+  // Создание/обновление через API (auth() != null для API ключа)
+  @@allow('create,update', auth() != null)
+}
+
+// ============================================================================
+// RATING — Оценки контента
+// ============================================================================
+
+model Rating {
+  id        String   @id @default(cuid())
+
+  /// @form.title("Оценка")
+  /// @form.props({ min: 1, max: 10 })
+  score     Int
+
+  /// @form.exclude
+  contentId String
+  /// @form.exclude
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  userId    String
+  /// @form.exclude
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  // Один пользователь — одна оценка на контент
+  @@unique([contentId, userId])
+  @@index([contentId])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() == user)
+}
+
+// ============================================================================
+// REPORT — Жалобы на контент
+// ============================================================================
+
+model Report {
+  id        String       @id @default(cuid())
+
+  /// @form.title("Причина")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "copyright", "label": "Нарушение авторских прав"}, {"value": "spam", "label": "Спам"}, {"value": "inappropriate", "label": "Неприемлемый контент"}, {"value": "other", "label": "Другое"}])
+  reason    String
+
+  /// @form.title("Подробности")
+  /// @form.fieldType("textarea")
+  details   String?
+
+  /// @form.exclude
+  contentId String
+  /// @form.exclude
+  content   Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  userId    String
+  /// @form.exclude
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Статус")
+  status    ReportStatus @default(PENDING)
+
+  /// @form.exclude
+  createdAt DateTime     @default(now())
+
+  @@index([contentId])
+  @@index([status])
+
+  // Авторизованный пользователь может создать жалобу
+  @@allow('create', auth() != null)
+  // Модератор/админ может читать и обновлять жалобы
+  @@allow('read,update', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// ANIME — Аниме из Animatrona
+// ============================================================================
+
+/// Аниме, опубликованное из Animatrona desktop клиента
+model Anime {
+  id            String        @id @default(cuid())
+
+  /// @form.title("Название")
+  title         String
+
+  /// @form.title("Оригинальное название")
+  titleOriginal String?
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description   String?       @db.Text
+
+  /// @form.title("URL обложки")
+  coverUrl      String?
+
+  /// CID корневой IPFS-директории аниме (уникальный идентификатор)
+  directoryCid  String?       @unique
+
+  /// Количество блоков IPFS в директории (от desktop, для отображения прогресса пиннинга)
+  directoryBlocks   Int?
+  /// Размер директории в байтах (от desktop)
+  directorySize     BigInt?
+
+  /// Shikimori ID для дедупликации (НЕ unique — PENDING + PUBLISHED сосуществуют)
+  shikimoriId       Int?
+
+  /// MyAnimeList ID (из externalIds манифеста)
+  malId             Int?
+
+  /// AniList ID (из externalIds манифеста)
+  anilistId         Int?
+
+  /// Ключ франшизы — rootShikimoriId из FranchiseGraphDocument (для группировки)
+  franchiseKey      String?
+
+  /// Аниме, которое эта запись замещает (self-relation)
+  /// @form.exclude
+  replacesAnime     Anime?        @relation("AnimeReplacement", fields: [replacesAnimeId], references: [id])
+  /// @form.exclude
+  replacesAnimeId   String?
+  /// Записи-кандидаты на замену этого аниме
+  /// @form.exclude
+  replacedBy        Anime[]       @relation("AnimeReplacement")
+
+  /// @form.title("Год выпуска")
+  year          Int?
+
+  /// @form.title("Студия")
+  studio        String?
+
+  /// @form.title("Жанры")
+  genres        String[]
+
+  /// Возрастной рейтинг Shikimori (g, pg, pg_13, r, r_plus, rx)
+  ageRating     String?
+
+  /// Режиссёр (из Shikimori/MAL)
+  director      String?
+
+  /// Тип озвучки (массив: "SUB", "DUB_RU", "DUB_EN" и т.д.)
+  voiceActing   String[]
+
+  /// Эпизоды аниме
+  /// @form.exclude
+  episodes      AnimeEpisode[]
+
+  /// Раздачи этого аниме
+  /// @form.exclude
+  distributions Distribution[]
+
+  /// Пин-сервер, на котором запинено это аниме (шардирование)
+  /// @form.exclude
+  pinnedOn      PinServer?    @relation("pinnedAnime", fields: [pinnedOnId], references: [id])
+  /// @form.exclude
+  pinnedOnId    String?
+
+  /// Задания на пиннинг
+  /// @form.exclude
+  pinJobs       PinJob[]
+
+  /// История замен CID (для очистки старых пинов)
+  /// @form.exclude
+  cidHistory    CidHistory[]
+
+  /// Записи библиотек пользователей
+  /// @form.exclude
+  libraryItems  UserLibraryItem[]
+
+  /// Комментарии к аниме
+  /// @form.exclude
+  comments      AnimeComment[]
+
+  /// Связи с другими аниме (сиквелы, приквелы и т.д.)
+  /// @form.exclude
+  sourceRelations AnimeRelation[] @relation("SourceRelations")
+  /// Аниме, ссылающиеся на это как на цель
+  /// @form.exclude
+  targetRelations AnimeRelation[] @relation("TargetRelations")
+
+  /// Логи модерации
+  /// @form.exclude
+  moderationLogs ModerationLog[]
+
+  /// Кто загрузил аниме
+  /// @form.exclude
+  uploadedBy    User          @relation(fields: [uploadedById], references: [id])
+  /// @form.exclude
+  uploadedById  String
+
+  /// Статус модерации
+  /// @form.title("Статус")
+  status        ContentStatus @default(PENDING)
+
+  /// Количество уникальных зрителей (денормализовано для быстрой сортировки)
+  viewCount     Int           @default(0)
+
+  /// Сколько раз добавлено в библиотеку (денормализовано)
+  libraryCount  Int           @default(0)
+
+  /// Средний рейтинг от пользователей (0-10, null = нет оценок)
+  avgRating     Float?
+
+  /// @form.exclude
+  createdAt     DateTime      @default(now())
+  /// @form.exclude
+  updatedAt     DateTime      @updatedAt
+
+  @@index([title])
+  @@index([status])
+  @@index([uploadedById])
+  @@index([createdAt])
+  @@index([shikimoriId])
+  @@index([viewCount])
+  @@index([avgRating])
+  @@index([studio])
+  @@index([director])
+  @@index([year])
+
+  // Все могут читать опубликованное аниме
+  @@allow('read', status == PUBLISHED)
+  // Автор видит своё аниме в любом статусе
+  @@allow('read', auth() == uploadedBy)
+  // Модератор/админ видит всё
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный пользователь может создать
+  @@allow('create', auth() != null)
+  // Автор может обновлять своё аниме
+  @@allow('update', auth() == uploadedBy)
+  // Модератор/админ может менять статус и удалять
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+/// Связь между аниме (сиквел, приквел, спин-офф и т.д.)
+model AnimeRelation {
+  id                String  @id @default(cuid())
+
+  /// Исходное аниме
+  anime             Anime   @relation("SourceRelations", fields: [animeId], references: [id], onDelete: Cascade)
+  animeId           String
+
+  /// Shikimori ID целевого аниме (всегда заполнен)
+  targetShikimoriId Int
+
+  /// Целевое аниме в нашей БД (null если ещё не опубликовано)
+  targetAnime       Anime?  @relation("TargetRelations", fields: [targetAnimeId], references: [id], onDelete: SetNull)
+  targetAnimeId     String?
+
+  /// Тип связи: SEQUEL, PREQUEL, SIDE_STORY, PARENT_STORY, SUMMARY, FULL_STORY, SPIN_OFF, ADAPTATION, OTHER
+  relationKind      String
+
+  @@index([animeId])
+  @@index([targetShikimoriId])
+  @@unique([animeId, targetShikimoriId, relationKind])
+
+  // Все могут читать связи
+  @@allow('read', true)
+  // Только система (через unenhanced prisma) создаёт связи
+  @@allow('create,update,delete', auth().role == ADMIN || auth().role == MODERATOR)
+}
+
+/// Эпизод аниме
+model AnimeEpisode {
+  id          String   @id @default(cuid())
+
+  /// Номер эпизода
+  /// @form.title("Номер")
+  number      Int
+
+  /// Название эпизода
+  /// @form.title("Название")
+  title       String?
+
+  /// Длительность в секундах
+  /// @form.title("Длительность (сек)")
+  duration    Int?
+
+  /// CID видеофайла в IPFS
+  /// @form.title("Video CID")
+  videoCid    String
+
+  /// Связь с аниме
+  /// @form.exclude
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  /// @form.exclude
+  animeId     String
+
+  /// @form.exclude
+  createdAt   DateTime @default(now())
+
+  // Уникальность: один номер эпизода на аниме
+  @@unique([animeId, number])
+  @@index([animeId])
+
+  // Права доступа наследуются от аниме
+  @@allow('all', check(anime))
+}
+
+// ============================================================================
+// DISTRIBUTION — Раздачи (кто сидирует контент)
+// ============================================================================
+
+/// Статус раздачи
+enum DistributionStatus {
+  /// Активно раздаётся
+  ACTIVE
+  /// Приостановлена
+  PAUSED
+  /// Остановлена (пир отключился)
+  OFFLINE
+}
+
+/// Раздача — запись о том, что пир сидирует определённый контент
+model Distribution {
+  id          String             @id @default(cuid())
+
+  /// CID раздаваемого контента в IPFS
+  cid         String
+
+  /// Peer ID раздающего узла
+  peerId      String
+
+  /// Статус раздачи
+  status      DistributionStatus @default(ACTIVE)
+
+  /// Размер контента в байтах
+  size        BigInt             @default(0)
+
+  /// Последний heartbeat от пира
+  lastSeenAt  DateTime           @default(now())
+
+  /// Связь с аниме (опционально)
+  anime       Anime?             @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  animeId     String?
+
+  /// Кто зарегистрировал раздачу
+  user        User               @relation(fields: [userId], references: [id])
+  userId      String
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([cid, peerId])
+  @@index([cid])
+  @@index([userId])
+  @@index([status])
+  @@index([animeId])
+
+  // Все видят активные раздачи
+  @@allow('read', status == ACTIVE)
+  // Автор видит свои раздачи
+  @@allow('read', auth() == user)
+  // Модератор/админ видит все
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный может создать раздачу
+  @@allow('create', auth() != null)
+  // Автор может обновить/удалить свою раздачу
+  @@allow('update,delete', auth() == user)
+  // Модератор/админ может управлять всеми
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// PIN SERVER — Серверы для пиннинга контента
+// ============================================================================
+
+/// Статус пин-сервера
+enum PinServerStatus {
+  /// Доступен для пиннинга
+  ONLINE
+  /// Недоступен
+  OFFLINE
+  /// На обслуживании
+  MAINTENANCE
+}
+
+/// Роль сервера в IPFS инфраструктуре
+enum PinServerRole {
+  /// Kubo-пиннер, хранит контент (имеет pin-queue API)
+  PINNER
+  /// Relay-сервер для NAT traversal и hole punching
+  RELAY
+  /// Gateway — раздаёт контент конечным пользователям
+  GATEWAY
+}
+
+/// Сервер для пиннинга IPFS контента
+model PinServer {
+  id          String          @id @default(cuid())
+
+  /// Название сервера
+  name        String
+
+  /// Роль сервера в IPFS инфраструктуре (PINNER/RELAY/GATEWAY)
+  role        PinServerRole   @default(PINNER)
+
+  /// Multiaddr'а swarm слоя для bootstrap/peering клиентов
+  /// Пример: ["/ip4/193.37.68.73/tcp/43001/p2p/12D3KooW..."]
+  swarmAddrs  String[]        @default([])
+
+  /// URL API пиннинга (например http://193.37.68.73:41080)
+  apiUrl      String          @unique
+
+  /// Peer ID сервера
+  peerId      String?
+
+  /// Bearer-токен для авторизации Kubo API (API.Authorizations)
+  authSecret  String?
+
+  /// URL pin-queue сервиса (если есть). Используется вместо прямого Kubo API.
+  pinQueueUrl String?
+
+  /// Bearer-токен для pin-queue сервиса
+  pinQueueSecret String?
+
+  /// Статус сервера
+  status      PinServerStatus @default(ONLINE)
+
+  /// Максимальный объём хранилища (байт, 0 = без лимита)
+  capacityBytes BigInt        @default(0)
+
+  /// Текущий занятый объём (байт)
+  usedBytes     BigInt        @default(0)
+
+  /// Аниме, закреплённые за этим сервером (шардирование)
+  pinnedAnime Anime[]       @relation("pinnedAnime")
+
+  /// Задания на этом сервере
+  pinJobs     PinJob[]
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([status])
+
+  // Все могут видеть онлайн серверы
+  @@allow('read', status == ONLINE)
+  // Модератор/админ видит все
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Только админ управляет серверами
+  @@allow('create,update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// PIN JOB — Задания на пиннинг
+// ============================================================================
+
+/// Статус задания на пиннинг
+enum PinJobStatus {
+  /// Ожидает выполнения
+  QUEUED
+  /// Пиннинг в процессе
+  PINNING
+  /// Успешно запиннен
+  PINNED
+  /// Ошибка при пиннинге
+  FAILED
+  /// Откреплён
+  UNPINNED
+}
+
+/// Задание на пиннинг CID на определённом сервере
+model PinJob {
+  id          String       @id @default(cuid())
+
+  /// CID для пиннинга
+  cid         String
+
+  /// Сервер для пиннинга
+  server      PinServer    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  serverId    String
+
+  /// Статус задания
+  status      PinJobStatus @default(QUEUED)
+
+  /// Размер запиненного контента (байт)
+  size        BigInt       @default(0)
+
+  /// Количество загруженных блоков IPFS (из pin-queue progress stream)
+  progressBlocks  Int      @default(0)
+
+  /// Сообщение об ошибке (если FAILED)
+  error       String?
+
+  /// Связь с аниме (опционально)
+  anime       Anime?       @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  animeId     String?
+
+  /// Кто создал задание
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdById String
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([cid, serverId])
+  @@index([cid])
+  @@index([serverId])
+  @@index([status])
+  @@index([animeId])
+
+  // Модератор/админ видит задания
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Модератор/админ может создавать задания
+  @@allow('create', auth().role == MODERATOR || auth().role == ADMIN)
+  // Только админ может обновлять/удалять
+  @@allow('update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// CID HISTORY — История замен directoryCid (для очистки старых пинов)
+// ============================================================================
+
+/// Запись замены directoryCid аниме. Используется для автоматической
+/// очистки устаревших пинов через 30 дней после замены.
+model CidHistory {
+  id          String    @id @default(cuid())
+
+  /// Аниме, чей CID был заменён
+  animeId     String
+  anime       Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  /// Старый CID (который нужно распинить)
+  oldCid      String
+  /// Новый CID (который заменил старый)
+  newCid      String
+
+  /// Когда произошла замена
+  replacedAt  DateTime  @default(now())
+  /// Пин удалён с серверов
+  cleanedUp   Boolean   @default(false)
+  /// Когда был очищен
+  cleanedUpAt DateTime?
+
+  @@index([cleanedUp, replacedAt])
+  @@index([animeId])
+
+  // Создание через API (любой аутентифицированный — при обновлении directoryCid)
+  @@allow('create', auth() != null)
+  // Чтение и управление — только админ
+  @@allow('read', auth().role == ADMIN)
+  @@allow('update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// USER LIBRARY — Библиотека пользователя (Cloud Library)
+// ============================================================================
+
+/// Статус просмотра аниме (синхронизируется с Desktop)
+enum WatchStatus {
+  /// Не начато
+  NOT_STARTED
+  /// Смотрю
+  WATCHING
+  /// Просмотрено
+  COMPLETED
+  /// Отложено
+  ON_HOLD
+  /// Брошено
+  DROPPED
+  /// Запланировано
+  PLANNED
+}
+
+/// Аниме в библиотеке пользователя (синхронизируется между Desktop и Tracker)
+model UserLibraryItem {
+  id            String      @id @default(cuid())
+
+  /// Пользователь-владелец
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+
+  /// Аниме из каталога
+  anime         Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId       String
+
+  /// Статус просмотра
+  watchStatus   WatchStatus @default(NOT_STARTED)
+
+  /// Оценка пользователя (0-10)
+  userRating    Int?
+
+  /// Контент запиннен локально на Desktop (false = только на удалённых пирах)
+  pinnedLocally Boolean     @default(false)
+
+  /// Когда добавлено в библиотеку
+  addedAt       DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  /// Предпочитаемый trackMode для этого аниме: 'RUSSIAN_DUB' | 'ORIGINAL_SUB'
+  trackMode     String?
+
+  /// Прогресс просмотра по эпизодам
+  watchProgress UserWatchProgress[]
+
+  // Один пользователь — одна запись на аниме
+  @@unique([userId, animeId])
+  @@index([userId])
+  @@index([animeId])
+
+  // Пользователь видит и управляет только своей библиотекой
+  @@allow('read', auth() == user)
+  @@allow('create,update,delete', auth() == user)
+  // Админ видит всё
+  @@allow('read', auth().role == ADMIN)
+}
+
+/// Прогресс просмотра эпизода (синхронизируется между Desktop и Tracker)
+model UserWatchProgress {
+  id              String          @id @default(cuid())
+
+  /// Запись библиотеки
+  libraryItem     UserLibraryItem @relation(fields: [libraryItemId], references: [id], onDelete: Cascade)
+  libraryItemId   String
+
+  /// Номер эпизода
+  episodeNumber   Int
+
+  /// Текущая позиция воспроизведения (секунды)
+  currentTime     Float           @default(0)
+
+  /// Общая длительность эпизода (секунды)
+  duration        Float           @default(0)
+
+  /// Индекс выбранной аудиодорожки
+  audioTrackIndex Int             @default(0)
+
+  /// Индекс выбранных субтитров (-1 = выключены)
+  subtitleTrackIndex Int          @default(-1)
+
+  /// Эпизод полностью просмотрен
+  completed       Boolean         @default(false)
+
+  updatedAt       DateTime        @updatedAt
+
+  // Один прогресс на эпизод в записи библиотеки
+  @@unique([libraryItemId, episodeNumber])
+  @@index([libraryItemId])
+
+  // Доступ наследуется от libraryItem
+  @@allow('all', check(libraryItem))
+}
+
+// ============================================================================
+// API KEY — Ключи для API доступа из Animatrona
+// ============================================================================
+
+/// API ключ для публикации из Animatrona
+model ApiKey {
+  id          String    @id @default(cuid())
+
+  /// @form.title("Название")
+  /// @form.placeholder("Мой ключ для Animatrona")
+  name        String
+
+  /// SHA256 хэш ключа (сам ключ не хранится)
+  /// @form.exclude
+  key         String    @unique
+
+  /// Последнее использование
+  /// @form.exclude
+  lastUsedAt  DateTime?
+
+  /// Владелец ключа
+  /// @form.exclude
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// @form.exclude
+  userId      String
+
+  /// @form.exclude
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+
+  // Пользователь видит и управляет только своими ключами
+  @@allow('all', auth() == user)
+}
+
+// ============================================================================
+// ANIME COMMENT — Комментарии к аниме
+// ============================================================================
+
+/// Комментарий к аниме (с поддержкой ответов на 1 уровень вложенности)
+model AnimeComment {
+  id        String   @id @default(cuid())
+
+  /// Текст комментария
+  text      String   @db.Text
+
+  /// Аниме, к которому относится комментарий
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   String
+
+  /// Автор комментария
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+
+  /// Родительский комментарий (для ответов)
+  parent    AnimeComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String?
+
+  /// Ответы на этот комментарий
+  replies   AnimeComment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([animeId, createdAt])
+  @@index([parentId])
+
+  // Все читают комментарии к опубликованным аниме
+  @@allow('read', check(anime))
+  // Авторизованные создают
+  @@allow('create', auth() != null)
+  // Автор редактирует/удаляет свои
+  @@allow('update,delete', auth() == author)
+  // Модератор/админ удаляет любые
+  @@allow('delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// MODERATION LOG — Аудит-лог модерации
+// ============================================================================
+
+/// Запись аудит-лога модерации (кто, когда, что сделал)
+model ModerationLog {
+  id          String   @id @default(cuid())
+
+  /// Действие модерации: approve | reject | approve_replacement
+  action      String
+
+  /// Аниме, над которым выполнено действие
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     String
+
+  /// Название аниме на момент действия (сохраняем для истории)
+  animeTitle  String
+
+  /// Модератор, выполнивший действие
+  moderator   User     @relation(fields: [moderatorId], references: [id])
+  moderatorId String
+
+  /// JSON с доп. данными (replacedAnimeId, previousStatus, newStatus, pinStarted)
+  details     String?  @db.Text
+
+  createdAt   DateTime @default(now())
+
+  @@index([animeId])
+  @@index([moderatorId])
+  @@index([createdAt])
+
+  // Только модераторы/админы видят и создают логи
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  @@allow('create', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// BETTER AUTH MODELS
+// ============================================================================
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  type       String   @default("EMAIL_VERIFICATION")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@deny('all', true)
+}

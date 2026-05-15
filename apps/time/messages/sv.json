@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Vilken timme?",
+    "description": "Ordningstal för timmar sedan UNIX-epokens början"
+  },
+  "time": {
+    "now": "Just nu är det",
+    "hour": "timmar sedan början av UNIX-eran",
+    "hoursPassed": "timmar har gått sedan början av UNIX-eran"
+  },
+  "countdown": {
+    "until": "Tills {milestone} timmar",
+    "days": "{count, plural, one {# dag} other {# dagar}}",
+    "hours": "{count, plural, one {# timme} other {# timmar}}",
+    "minutes": "{count, plural, one {# minut} other {# minuter}}",
+    "seconds": "{count, plural, one {# sekund} other {# sekunder}}"
+  },
+  "celebration": {
+    "milestone": "{hours} timmar av UNIX-eran!"
+  },
+  "subscribe": {
+    "subscribe": "Aviseringar",
+    "explanation": "Inloggning krävs för att verifiera din e-post och få tillgång till aviseringsinställningar",
+    "signIn": "Logga in",
+    "settings": "Inställningar"
+  },
+  "profile": {
+    "title": "Aviseringsinställningar",
+    "email": "E-post",
+    "notifyMonth": "En månad innan",
+    "notifyWeek": "En vecka innan",
+    "notifyDay": "En dag innan",
+    "notifyHour": "En timme innan",
+    "notify5Min": "5 minuter innan",
+    "save": "Spara",
+    "saved": "Sparat!",
+    "unsubscribe": "Avprenumerera från allt",
+    "unsubscribed": "Du har avprenumererats från alla aviseringar",
+    "noSubscription": "Du har ännu ingen aviseringsprenumeration",
+    "createSubscription": "Prenumerera på aviseringar"
+  },
+  "unsubscribe": {
+    "title": "Avprenumerera",
+    "success": "Du har framgångsrikt avprenumererats från UNIX-timmilstolpsaviseringar",
+    "error": "Ogiltig avprenumerationslänk",
+    "back": "Tillbaka till startsidan"
+  }
+}

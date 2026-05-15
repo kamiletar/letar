@@ -1,0 +1,21 @@
+{
+  "name": "exoplayer-sync",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/exoplayer-sync/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:native-module"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/exoplayer-sync/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck": {
+      "command": "tsc --noEmit",
+      "options": {
+        "cwd": "libs/exoplayer-sync"
+      }
+    }
+  }
+}

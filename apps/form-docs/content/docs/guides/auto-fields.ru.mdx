@@ -1,0 +1,321 @@
+---
+title: Автоматическая генерация форм
+description: Генерация форм из Zod-схемы — от нулевого JSX до тонкой настройки
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="auto-fields" height={600} />
+
+## 4 уровня контроля
+
+Библиотека предлагает четыре уровня генерации форм — каждый следующий даёт больше контроля:
+
+| Уровень | Компонент | JSX | Когда использовать |
+|---------|-----------|-----|-------------------|
+| 1 | `Form.FromSchema` | Нет | CRUD, прототипы, админки |
+| 2 | `Form.AutoFields` | Только layout | Кастомная раскладка с автополями |
+| 3 | `Form.Field.*` | Поля + layout | Полный контроль над каждым полем |
+| 4 | `useAppForm` | Всё | Императивная логика, кастомные хуки |
+
+Уровни совместимы — можно свободно комбинировать их в одной форме.
+
+## Уровень 1: Form.FromSchema — Ноль JSX
+
+Генерирует полную форму из Zod-схемы без единого поля в JSX:
+
+```tsx
+import { Form } from '@letar/forms'
+import { z } from 'zod/v4'
+
+const UserSchema = z.object({
+  firstName: z.string().min(2).meta({ ui: { title: 'Имя' } }),
+  lastName: z.string().meta({ ui: { title: 'Фамилия' } }),
+  email: z.string().email().meta({ ui: { title: 'Email' } }),
+  bio: z.string().max(500).meta({ ui: { title: 'О себе', fieldType: 'textarea' } }),
+})
+
+<Form.FromSchema
+  schema={UserSchema}
+  initialValue={{ firstName: '', lastName: '', email: '', bio: '' }}
+  onSubmit={save}
+  submitLabel="Создать"
+/>
+```
+
+Рендерит все четыре поля с лейблами, валидацией и кнопкой отправки.
+
+### Пропсы FromSchema
+
+| Проп | Тип | По умолчанию | Описание |
+|------|-----|--------------|----------|
+| `schema` | Zod schema | обязательный | Схема для валидации и генерации полей |
+| `initialValue` | `TData` | обязательный | Начальные значения формы |
+| `onSubmit` | `(data: TData) => void` | обязательный | Обработчик отправки |
+| `submitLabel` | `ReactNode` | `'Save'` | Текст кнопки отправки |
+| `showReset` | `boolean` | `false` | Показать кнопку сброса |
+| `resetLabel` | `ReactNode` | `'Reset'` | Текст кнопки сброса |
+| `exclude` | `string[]` | — | Поля для исключения |
+| `validateOn` | `ValidateOn` | — | Режим валидации |
+| `middleware` | `FormMiddleware` | — | Middleware для событий формы |
+| `disabled` | `boolean` | — | Заблокировать все поля |
+| `readOnly` | `boolean` | — | Режим только чтение |
+| `persistence` | `FormPersistenceConfig` | — | Конфигурация localStorage |
+| `offline` | `FormOfflineConfig` | — | Конфигурация оффлайн-режима |
+| `debug` | `boolean \| 'force'` | — | JSON-инспектор значений |
+| `gap` | `number` | `4` | Отступ между полями |
+| `beforeButtons` | `ReactNode` | — | Контент перед кнопками |
+| `afterButtons` | `ReactNode` | — | Контент после кнопок |
+
+### Исключение полей
+
+Скрываем системные поля (`id`, timestamp-ы):
+
+```tsx
+<Form.FromSchema
+  schema={UserSchema}
+  initialValue={userData}
+  onSubmit={updateUser}
+  exclude={['id', 'createdAt', 'updatedAt']}
+  showReset
+/>
+```
+
+## Уровень 2: Form.AutoFields — Автогенерация + кастомный layout
+
+Когда нужен контроль над раскладкой, но не хочется писать каждое поле вручную:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <HStack gap={4}>
+    <Form.AutoFields include={['firstName', 'lastName']} />
+  </HStack>
+  <Form.AutoFields exclude={['firstName', 'lastName']} />
+  <Form.Button.Submit />
+</Form>
+```
+
+### Пропсы AutoFields
+
+| Проп | Тип | По умолчанию | Описание |
+|------|-----|--------------|----------|
+| `include` | `string[]` | — | Рендерить только эти поля |
+| `exclude` | `string[]` | — | Исключить эти поля |
+| `recursive` | `boolean` | `true` | Раскрывать вложенные объекты |
+| `fieldWrapper` | `(props) => ReactElement` | — | Кастомная обёртка для каждого поля |
+
+### Кастомная обёртка полей
+
+Обернуть каждое автогенерируемое поле в кастомный JSX:
+
+```tsx
+<Form.AutoFields
+  fieldWrapper={({ name, children }) => (
+    <Box key={name} p={2} borderWidth={1} borderRadius="md">
+      {children}
+    </Box>
+  )}
+/>
+```
+
+### Смешанный подход: авто + ручные поля
+
+Комбинируйте автогенерируемые и ручные поля:
+
+```tsx
+<Form schema={ArticleSchema} initialValue={data} onSubmit={save}>
+  <HStack gap={4}>
+    <Box flex={2}>
+      <Form.Field.Auto name="title" />
+    </Box>
+    <Box flex={1}>
+      <Form.Field.Auto name="slug" />
+    </Box>
+  </HStack>
+  <Form.Field.RichText name="content" label="Содержимое статьи" />
+  <Form.Button.Submit>Опубликовать</Form.Button.Submit>
+</Form>
+```
+
+`Form.Field.Auto` рендерит подходящий компонент на основе типа поля в схеме.
+
+## Маппинг типов
+
+Библиотека автоматически сопоставляет Zod-типы с компонентами полей:
+
+### Маппинг по умолчанию (Zod → Компонент)
+
+| Zod тип | Компонент | Условие |
+|---------|-----------|---------|
+| `z.string()` | `Form.Field.String` | По умолчанию |
+| `z.string()` | `Form.Field.Textarea` | Если `maxLength > 200` |
+| `z.string().email()` | `Form.Field.String` | С `type="email"` |
+| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number` | |
+| `z.boolean()` | `Form.Field.Checkbox` | |
+| `z.date()` | `Form.Field.Date` | |
+| `z.enum()` / `z.literal()` | `Form.Field.NativeSelect` | |
+| `z.array(z.string())` | `Form.Field.Tags` | Массив строк |
+| `z.array(z.object())` | `Form.Group.List` | Массив объектов |
+
+### Переопределение через `fieldType`
+
+Используйте `.meta({ ui: { fieldType } })` для переопределения маппинга:
+
+```tsx
+const Schema = z.object({
+  // Textarea вместо строки
+  description: z.string().meta({ ui: { title: 'Описание', fieldType: 'textarea' } }),
+
+  // Слайдер вместо числового поля
+  rating: z.number().min(0).max(10).meta({ ui: { title: 'Рейтинг', fieldType: 'slider' } }),
+
+  // Rich text редактор
+  content: z.string().meta({ ui: { title: 'Контент', fieldType: 'richText' } }),
+
+  // Switch вместо чекбокса
+  active: z.boolean().meta({ ui: { title: 'Активен', fieldType: 'switch' } }),
+
+  // Radio cards вместо select
+  plan: z.enum(['free', 'pro', 'enterprise']).meta({
+    ui: {
+      title: 'Тариф',
+      fieldType: 'radioCard',
+      fieldProps: {
+        options: [
+          { value: 'free', label: 'Бесплатный', description: 'Для личного использования' },
+          { value: 'pro', label: 'Профессиональный', description: 'Для команд' },
+          { value: 'enterprise', label: 'Корпоративный', description: 'Индивидуально' },
+        ],
+      },
+    },
+  }),
+})
+```
+
+### Все доступные fieldType
+
+**Текст:** `string`, `textarea`, `password`, `passwordStrength`, `editable`, `richText`, `maskedInput`
+
+**Числа:** `number`, `numberInput`, `slider`, `rating`, `currency`, `percentage`
+
+**Дата/Время:** `date`, `time`, `dateRange`, `dateTimePicker`, `duration`, `schedule`
+
+**Логические:** `checkbox`, `switch`
+
+**Выбор:** `select`, `nativeSelect`, `combobox`, `autocomplete`, `listbox`, `radioGroup`, `radioCard`, `segmentedGroup`, `checkboxCard`, `tags`
+
+**Специальные:** `phone`, `address`, `pinInput`, `otpInput`, `colorPicker`, `fileUpload`
+
+## UI-метаданные
+
+Управление внешним видом полей через `.meta({ ui: {...} })`:
+
+```tsx
+const Schema = z.object({
+  email: z.string().email().meta({
+    ui: {
+      title: 'Email-адрес',               // Лейбл
+      placeholder: 'user@example.com',     // Плейсхолдер
+      description: 'Мы никому не передаём', // Подсказка под полем
+      fieldType: 'string',                // Переопределение компонента
+      fieldProps: { type: 'email' },       // Пропсы для компонента
+    },
+  }),
+})
+```
+
+| Свойство meta | Тип | Описание |
+|---------------|-----|----------|
+| `title` | `string` | Лейбл поля |
+| `placeholder` | `string` | Текст-заполнитель |
+| `description` | `string` | Подсказка под полем |
+| `fieldType` | `FieldComponentType` | Переопределение компонента |
+| `fieldProps` | `Record<string, unknown>` | Дополнительные пропсы компонента |
+| `options` | `BaseOption[]` | Опции для select-полей |
+| `autocomplete` | `string` | HTML атрибут autocomplete |
+
+Если `title` не указан, имя поля конвертируется из camelCase в читаемый формат (`firstName` → `First Name`).
+
+## Вложенные объекты и массивы
+
+### Вложенные объекты
+
+Объекты автоматически рендерятся как `Form.Group`:
+
+```tsx
+const ProfileSchema = z.object({
+  name: z.string().meta({ ui: { title: 'Имя' } }),
+  settings: z.object({
+    theme: z.enum(['light', 'dark']).meta({ ui: { title: 'Тема' } }),
+    notifications: z.boolean().meta({ ui: { title: 'Уведомления' } }),
+  }),
+})
+
+// AutoFields автоматически создаёт группу для settings
+<Form.FromSchema schema={ProfileSchema} initialValue={data} onSubmit={save} />
+```
+
+Отключить рекурсивное раскрытие: `recursive={false}`.
+
+### Массивы объектов
+
+Массивы объектов рендерятся как `Form.Group.List` с кнопками добавления/удаления:
+
+```tsx
+const OrderSchema = z.object({
+  customer: z.string(),
+  items: z.array(
+    z.object({
+      product: z.string().meta({ ui: { title: 'Товар' } }),
+      qty: z.number().min(1).meta({ ui: { title: 'Количество' } }),
+    })
+  ),
+})
+
+// Каждый элемент массива — карточка с полями + кнопка удаления
+<Form.FromSchema schema={OrderSchema} initialValue={data} onSubmit={save} />
+```
+
+### Примитивные массивы
+
+Массивы строк рендерятся как `Form.Field.Tags`:
+
+```tsx
+const Schema = z.object({
+  tags: z.array(z.string()).meta({ ui: { title: 'Теги' } }),
+})
+```
+
+## Автоматические constraints
+
+Ограничения из Zod автоматически передаются как пропсы компонентов:
+
+```tsx
+z.string().min(2).max(100)    // → minLength={2} maxLength={100}
+z.number().min(1).max(10)     // → min={1} max={10}
+z.string().email()            // → type="email"
+z.date().min(new Date())      // → min={now}
+```
+
+Не нужно дублировать ограничения в JSX — схема является единым источником истины.
+
+## Когда какой уровень использовать
+
+| Сценарий | Рекомендуемый уровень |
+|----------|----------------------|
+| Админские CRUD-формы | `Form.FromSchema` |
+| Быстрое прототипирование | `Form.FromSchema` |
+| Простые формы с кастомным layout | `Form.AutoFields` |
+| Сложные многоколоночные layouts | `Form.Field.*` (Compound Components) |
+| Мультистеп формы | `Form.Field.*` + `Form.Steps` |
+| Условный рендеринг | `Form.Field.*` + `Form.When` |
+| Кастомный UX (анимации, inline-editing) | `useAppForm` |
+
+**Правило:** Если форма — линейный вертикальный поток, `FromSchema` или `AutoFields` отлично подходят. Для сложных layouts используйте Compound Components.
+
+## Живые примеры
+
+Попробуйте интерактивные примеры на [forms-example.letar.best](https://forms-example.letar.best):
+
+- [Auto Fields — Базовый](https://forms-example.letar.best/examples/auto-fields) — FromSchema и AutoFields
+- [Auto Fields — Продвинутый](https://forms-example.letar.best/examples/auto-fields-advanced) — Фильтрация, смешанный подход, вложенные объекты

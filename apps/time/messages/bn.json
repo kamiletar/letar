@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "কততম ঘণ্টা?",
+    "description": "UNIX যুগের শুরু থেকে ক্রমিক ঘণ্টা"
+  },
+  "time": {
+    "now": "এখন",
+    "hour": "ঘণ্টা UNIX যুগের শুরু থেকে",
+    "hoursPassed": "ঘণ্টা অতিবাহিত হয়েছে UNIX যুগের শুরু থেকে"
+  },
+  "countdown": {
+    "until": "{milestone} ঘণ্টা পর্যন্ত",
+    "days": "{count, plural, one {# দিন} other {# দিন}}",
+    "hours": "{count, plural, one {# ঘণ্টা} other {# ঘণ্টা}}",
+    "minutes": "{count, plural, one {# মিনিট} other {# মিনিট}}",
+    "seconds": "{count, plural, one {# সেকেন্ড} other {# সেকেন্ড}}"
+  },
+  "celebration": {
+    "milestone": "UNIX যুগের {hours} ঘণ্টা!"
+  },
+  "subscribe": {
+    "subscribe": "বিজ্ঞপ্তি",
+    "explanation": "ইমেল যাচাই এবং বিজ্ঞপ্তির সেটিংসে প্রবেশের জন্য সাইন ইন প্রয়োজন",
+    "signIn": "সাইন ইন",
+    "settings": "সেটিংস"
+  },
+  "profile": {
+    "title": "বিজ্ঞপ্তির সেটিংস",
+    "email": "ইমেল",
+    "notifyMonth": "এক মাস আগে",
+    "notifyWeek": "এক সপ্তাহ আগে",
+    "notifyDay": "এক দিন আগে",
+    "notifyHour": "এক ঘণ্টা আগে",
+    "notify5Min": "৫ মিনিট আগে",
+    "save": "সংরক্ষণ",
+    "saved": "সংরক্ষিত!",
+    "unsubscribe": "সব থেকে সদস্যতা বাতিল",
+    "unsubscribed": "আপনি সব বিজ্ঞপ্তি থেকে সদস্যতা বাতিল করেছেন",
+    "noSubscription": "আপনার এখনও বিজ্ঞপ্তির সদস্যতা নেই",
+    "createSubscription": "বিজ্ঞপ্তিতে সদস্যতা নিন"
+  },
+  "unsubscribe": {
+    "title": "সদস্যতা বাতিল",
+    "success": "আপনি সফলভাবে UNIX ঘণ্টার মাইলফলক বিজ্ঞপ্তি থেকে সদস্যতা বাতিল করেছেন",
+    "error": "অবৈধ সদস্যতা বাতিলের লিংক",
+    "back": "হোমে ফিরে যান"
+  }
+}

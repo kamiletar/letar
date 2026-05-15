@@ -1,0 +1,118 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "resolveJsonModule": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/auth": ["../../libs/auth/src/index.ts"],
+      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
+      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
+      "@letar/validation-utils": ["../../libs/validation-utils/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/animatrona-types": ["../../libs/animatrona-types/src/index.ts"],
+      "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
+      "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
+      "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
+      "@letar/animatrona-franchise-graph": ["../../libs/animatrona-franchise-graph/src/index.ts"],
+      "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"]
+    },
+    "types": ["node"],
+    "outDir": "dist",
+    "rootDir": "../..",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "../../libs/analytics/src/**/*.ts",
+    "../../libs/analytics/src/**/*.tsx",
+    "../../libs/query-provider/src/**/*.ts",
+    "../../libs/query-provider/src/**/*.tsx",
+    "../../libs/animatrona-types/src/**/*.ts",
+    "../../libs/animatrona-utils/src/**/*.ts",
+    "../../libs/animatrona-franchise-graph/src/**/*.ts",
+    "../../libs/animatrona-franchise-graph/src/**/*.tsx",
+    "../../libs/animatrona-ui/src/**/*.ts",
+    "../../libs/animatrona-ui/src/**/*.tsx",
+    "../../libs/ui/src/**/*.ts",
+    "../../libs/ui/src/**/*.tsx",
+    "../../libs/video-player-react/src/**/*.ts",
+    "../../libs/video-player-react/src/**/*.tsx",
+    "../../libs/video-player-core/src/**/*.ts",
+    "../../libs/auth/src/**/*.ts",
+    "../../libs/auth/src/**/*.tsx",
+    "../../apps/animatrona-tracker/.next/types/**/*.ts",
+    "../../dist/apps/animatrona-tracker/.next/types/**/*.ts",
+    "next-env.d.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "jest.config.ts",
+    "jest.config.cts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    ".next",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs",
+    "src/generated/**/*.js",
+    "src/generated/**/*.mjs",
+    "src/generated/**/runtime/**/*",
+    "src/generated/src/**/*"
+  ],
+  "references": [
+    {
+      "path": "../../libs/auth"
+    },
+    {
+      "path": "../../libs/video-player-react"
+    },
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/animatrona-franchise-graph"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/animatrona-utils"
+    },
+    {
+      "path": "../../libs/animatrona-ui"
+    },
+    {
+      "path": "../../libs/animatrona-types"
+    },
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/query-provider"
+    }
+  ]
+}

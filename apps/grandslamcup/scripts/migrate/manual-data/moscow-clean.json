@@ -1,0 +1,4279 @@
+{
+  "matches": [
+    {
+      "msgId": 14,
+      "date": "2025-02-03",
+      "home": "Блины",
+      "away": "Вином",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 267,
+      "awayScore": 265,
+      "winner": "Вином"
+    },
+    {
+      "msgId": 71,
+      "date": "2025-02-18",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 260,
+      "awayScore": 241,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 133,
+      "date": "2025-02-24",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 246,
+      "awayScore": 235,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 153,
+      "date": "2025-02-25",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 256,
+      "awayScore": 250,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 163,
+      "date": "2025-02-26",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 257,
+      "awayScore": 248,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 175,
+      "date": "2025-02-28",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 256,
+      "awayScore": 245,
+      "winner": "Против"
+    },
+    {
+      "msgId": 193,
+      "date": "2025-03-02",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 269,
+      "awayScore": 251,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 206,
+      "date": "2025-03-03",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 271,
+      "awayScore": 255,
+      "winner": "Жемчужные"
+    },
+    {
+      "msgId": 218,
+      "date": "2025-03-04",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 241,
+      "awayScore": 240,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 232,
+      "date": "2025-03-06",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 242,
+      "awayScore": 225,
+      "winner": "Чатл"
+    },
+    {
+      "msgId": 258,
+      "date": "2025-03-09",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 264,
+      "awayScore": 263,
+      "winner": "Жемчужные"
+    },
+    {
+      "msgId": 281,
+      "date": "2025-03-11",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 252,
+      "awayScore": 250,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 292,
+      "date": "2025-03-12",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 272,
+      "awayScore": 254,
+      "winner": "Против"
+    },
+    {
+      "msgId": 306,
+      "date": "2025-03-13",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 251,
+      "awayScore": 246,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 337,
+      "date": "2025-03-18",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 259,
+      "awayScore": 255,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 346,
+      "date": "2025-03-18",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 249,
+      "awayScore": 243,
+      "winner": "Жемчужные"
+    },
+    {
+      "msgId": 360,
+      "date": "2025-03-19",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 263,
+      "awayScore": 243,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 369,
+      "date": "2025-03-20",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 280,
+      "awayScore": 258,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 409,
+      "date": "2025-03-24",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 266,
+      "awayScore": 233,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 430,
+      "date": "2025-03-26",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 272,
+      "awayScore": 269,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 435,
+      "date": "2025-03-27",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 254,
+      "awayScore": 239,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 452,
+      "date": "2025-03-30",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 264,
+      "awayScore": 260,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 468,
+      "date": "2025-04-01",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 272,
+      "awayScore": 258,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 485,
+      "date": "2025-04-02",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 258,
+      "awayScore": 257,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 495,
+      "date": "2025-04-03",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 270,
+      "awayScore": 238,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 550,
+      "date": "2025-04-07",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 254,
+      "awayScore": 248,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 569,
+      "date": "2025-04-09",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 277,
+      "awayScore": 268,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 582,
+      "date": "2025-04-10",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 283,
+      "awayScore": 270,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 638,
+      "date": "2025-04-14",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 266,
+      "awayScore": 258,
+      "winner": "Жемчужные"
+    },
+    {
+      "msgId": 652,
+      "date": "2025-04-15",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 268,
+      "awayScore": 261,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 691,
+      "date": "2025-04-20",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 275,
+      "awayScore": 270,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 714,
+      "date": "2025-04-22",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 280,
+      "awayScore": 263,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 720,
+      "date": "2025-04-23",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 259,
+      "awayScore": 253,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 730,
+      "date": "2025-04-27",
+      "home": "Жемчужные",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 21,
+      "awayScore": 23,
+      "winner": null
+    },
+    {
+      "msgId": 739,
+      "date": "2025-04-27",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 259,
+      "awayScore": 281,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 750,
+      "date": "2025-04-28",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 278,
+      "awayScore": 265,
+      "winner": "Жемчужные"
+    },
+    {
+      "msgId": 798,
+      "date": "2025-05-05",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 269,
+      "awayScore": 264,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 808,
+      "date": "2025-05-06",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 275,
+      "awayScore": 263,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 851,
+      "date": "2025-05-12",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 270,
+      "awayScore": 262,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 864,
+      "date": "2025-05-13",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 272,
+      "awayScore": 254,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 886,
+      "date": "2025-05-15",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 282,
+      "awayScore": 276,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 904,
+      "date": "2025-05-18",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 263,
+      "awayScore": 261,
+      "winner": "Чатл"
+    },
+    {
+      "msgId": 916,
+      "date": "2025-05-20",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 293,
+      "awayScore": 261,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 926,
+      "date": "2025-05-21",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 257,
+      "awayScore": 245,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 980,
+      "date": "2025-05-28",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 284,
+      "awayScore": 281,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 1000,
+      "date": "2025-06-01",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 268,
+      "awayScore": 261,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 1008,
+      "date": "2025-06-02",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 283,
+      "awayScore": 275,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 1018,
+      "date": "2025-06-03",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 263,
+      "awayScore": 254,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 1029,
+      "date": "2025-06-04",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 280,
+      "awayScore": 276,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 1061,
+      "date": "2025-06-08",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 287,
+      "awayScore": 282,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 1085,
+      "date": "2025-06-10",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 271,
+      "awayScore": 266,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 1095,
+      "date": "2025-06-11",
+      "home": null,
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 282,
+      "awayScore": 269,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 1879,
+      "date": "2025-10-27",
+      "home": "ЛитПон",
+      "away": "Чатл",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 275,
+      "awayScore": 265,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 1885,
+      "date": "2025-10-28",
+      "home": "ДА",
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 275,
+      "awayScore": 271,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 1900,
+      "date": "2025-10-29",
+      "home": "СИИ",
+      "away": "Птица поэта",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 271,
+      "awayScore": 269,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 1961,
+      "date": "2025-11-05",
+      "home": "Кашалот",
+      "away": "ДА",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 272,
+      "awayScore": 268,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 1992,
+      "date": "2025-11-09",
+      "home": "РЫБА",
+      "away": "СИИ",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 265,
+      "awayScore": 261,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 2010,
+      "date": "2025-11-10",
+      "home": "Бродячие артисты",
+      "away": "Шатуны",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 277,
+      "awayScore": 258,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 2023,
+      "date": "2025-11-11",
+      "home": "Птица поэта",
+      "away": "ЛитПон",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 287,
+      "awayScore": 282,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 2068,
+      "date": "2025-11-16",
+      "home": "Дикпики",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 200,
+      "awayScore": 197,
+      "winner": "Дикпики"
+    },
+    {
+      "msgId": 2086,
+      "date": "2025-11-16",
+      "home": "Кашалот",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 264,
+      "awayScore": 247,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 2102,
+      "date": "2025-11-17",
+      "home": "СИИ",
+      "away": "Чатл",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 271,
+      "awayScore": 257,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 2115,
+      "date": "2025-11-18",
+      "home": "РЫБА",
+      "away": "Птица поэта",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 283,
+      "awayScore": 279,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 2127,
+      "date": "2025-11-19",
+      "home": "Бродячие артисты",
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 273,
+      "awayScore": 262,
+      "winner": "Бродячие артисты"
+    },
+    {
+      "msgId": 2151,
+      "date": "2025-11-24",
+      "home": "Чатл",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 262,
+      "awayScore": 254,
+      "winner": "Чатл"
+    },
+    {
+      "msgId": 2164,
+      "date": "2025-11-26",
+      "home": "СИИ",
+      "away": "ЛитПон",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 277,
+      "awayScore": 271,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 2207,
+      "date": "2025-11-30",
+      "home": "РЫБА",
+      "away": "Opezdol's Crew",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 267,
+      "awayScore": 257,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 2238,
+      "date": "2025-12-02",
+      "home": "Шатуны",
+      "away": "СИИ",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 281,
+      "awayScore": 263,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 2254,
+      "date": "2025-12-03",
+      "home": "ДА",
+      "away": "Чатл",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 296,
+      "awayScore": 276,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 2261,
+      "date": "2025-12-04",
+      "home": "ЛитПон",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 288,
+      "awayScore": 259,
+      "winner": "ЛитПон"
+    },
+    {
+      "msgId": 2285,
+      "date": "2025-12-07",
+      "home": "Шатуны",
+      "away": "ДА",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 279,
+      "awayScore": 270,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 2305,
+      "date": "2025-12-09",
+      "home": "Птица поэта",
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 266,
+      "awayScore": 257,
+      "winner": "Птица поэта"
+    },
+    {
+      "msgId": 2311,
+      "date": "2025-12-10",
+      "home": "Кашалот",
+      "away": "Чатл",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 292,
+      "awayScore": 256,
+      "winner": "Кашалот"
+    },
+    {
+      "msgId": 2329,
+      "date": "2025-12-11",
+      "home": "СИИ",
+      "away": "TERIYAKI SQUAD",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 286,
+      "awayScore": 273,
+      "winner": "СИИ"
+    },
+    {
+      "msgId": 2352,
+      "date": "2025-12-14",
+      "home": "РЫБА",
+      "away": "Бродячие артисты",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 258,
+      "awayScore": 246,
+      "winner": "РЫБА"
+    },
+    {
+      "msgId": 2370,
+      "date": "2025-12-15",
+      "home": "Opezdol's Crew",
+      "away": null,
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 279,
+      "awayScore": 273,
+      "winner": "Opezdol's Crew"
+    },
+    {
+      "msgId": 2377,
+      "date": "2025-12-16",
+      "home": "Шатуны",
+      "away": "Чатл",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 284,
+      "awayScore": 273,
+      "winner": "Шатуны"
+    },
+    {
+      "msgId": 2390,
+      "date": "2025-12-17",
+      "home": "ДА",
+      "away": "Птица поэта",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 283,
+      "awayScore": 271,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 2525,
+      "date": "2025-12-29",
+      "home": "ДА",
+      "away": "Бродячие артисты",
+      "venue": "Бродячие артисты",
+      "address": null,
+      "time": "20:00",
+      "homeScore": 20,
+      "awayScore": 0,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 2633,
+      "date": "2026-02-15",
+      "home": "ДА",
+      "away": "СТИХИ НАРОДА",
+      "venue": null,
+      "address": null,
+      "time": "13:00",
+      "homeScore": 13,
+      "awayScore": 0,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 2659,
+      "date": "2026-02-21",
+      "home": "РЫБА",
+      "away": "TERIYAKI SQUAD",
+      "venue": "Лучший тренер первого сезона КБС",
+      "address": null,
+      "time": null,
+      "homeScore": 2001,
+      "awayScore": 2002,
+      "winner": "TERIYAKI SQUAD"
+    },
+    {
+      "msgId": 2701,
+      "date": "2026-02-26",
+      "home": "ДА",
+      "away": "СТИХИ НАРОДА",
+      "venue": "Словесность",
+      "address": "Спартаковская, д. 9",
+      "time": null,
+      "homeScore": 0,
+      "awayScore": 20,
+      "winner": "СТИХИ НАРОДА"
+    },
+    {
+      "msgId": 2746,
+      "date": "2026-03-03",
+      "home": "ДА",
+      "away": "СТИХИ НАРОДА",
+      "venue": null,
+      "address": null,
+      "time": null,
+      "homeScore": 275,
+      "awayScore": 260,
+      "winner": "ДА"
+    },
+    {
+      "msgId": 2781,
+      "date": "2026-03-09",
+      "home": "Шатуны",
+      "away": "СТИХИ НАРОДА",
+      "venue": "Ладья",
+      "address": "Столешников пер.6, стр.1",
+      "time": null,
+      "homeScore": 260,
+      "awayScore": 275,
+      "winner": "СТИХИ НАРОДА"
+    },
+    {
+      "msgId": 2782,
+      "date": "2026-03-10",
+      "home": "In Folio",
+      "away": "Метаморфоза",
+      "venue": "Клуб",
+      "address": "Покровский бульвар, 6/20с1",
+      "time": "20:00",
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null
+    },
+    {
+      "msgId": 2878,
+      "date": "2026-03-16",
+      "home": "Прогрев",
+      "away": "Кашалот",
+      "venue": "Край",
+      "address": "Николоямская ул., 62",
+      "time": null,
+      "homeScore": 273,
+      "awayScore": 269,
+      "winner": "Прогрев"
+    },
+    {
+      "msgId": 2864,
+      "date": "2026-03-16",
+      "home": "Солянка",
+      "away": "Чатл",
+      "venue": "Ладья",
+      "address": "Столешников пер.6, стр.1",
+      "time": null,
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null
+    },
+    {
+      "msgId": 2992,
+      "date": "2026-03-22",
+      "home": "Поэтория",
+      "away": "In Folio",
+      "venue": "Ладья",
+      "address": "Столешников пер.6, стр.1",
+      "time": null,
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null
+    },
+    {
+      "msgId": 3046,
+      "date": "2026-03-28",
+      "home": "НЕНАХОД НОГИ",
+      "away": "Солянка",
+      "venue": "Инкогнито",
+      "address": "ул. Большая Семеновская, д.11, стр. 2",
+      "time": null,
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null
+    },
+    {
+      "msgId": 3085,
+      "date": "2026-04-02",
+      "home": "СТИХИ НАРОДА",
+      "away": "Метаморфоза",
+      "venue": "Дежурная рюмочная",
+      "address": "ул. Новый Арбат, 7 стр.1",
+      "time": null,
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null
+    }
+  ],
+  "rosters": [
+    {
+      "msgId": 18,
+      "date": "2025-02-07",
+      "team": "ДА",
+      "players": [
+        "Алёна Борисова",
+        "POLSHA",
+        "Катрин Орлова",
+        "Нинни",
+        "Екатерина Юргель",
+        "Девочка в розовых очках",
+        "Рината Султанова",
+        "Евгений Севостьянов",
+        "Ксения Ильина",
+        "Дарья Тимошенко",
+        "Забава Звон",
+        "Ярослава Попова",
+        "Ирина Меркулова"
+      ]
+    },
+    {
+      "msgId": 24,
+      "date": "2025-02-10",
+      "team": "Чатл",
+      "players": [
+        "Владимир Красноруженко",
+        "Анна Либерт",
+        "Беренис",
+        "Данил Климов",
+        "Ростислав Маковеев",
+        "Павел Судаков",
+        "Владислав Верховенский",
+        "Степан Николаевич"
+      ]
+    },
+    {
+      "msgId": 32,
+      "date": "2025-02-13",
+      "team": "Жемчужные",
+      "players": [
+        "Антон Кобец",
+        "Алёна Филина",
+        "Анна Малкович",
+        "Камилла Лысенко",
+        "Егор Моисеев",
+        "Диана Никифорова",
+        "Денис Лап-Лап",
+        "София Грабовская",
+        "Елизавета Белозёрова",
+        "Константин Скурат",
+        "Крис Аивер",
+        "Мария Дурманова",
+        "Ксения Гильман",
+        "Максим Дюкин",
+        "Юлия Зелёнкина",
+        "Архипп Могильнер"
+      ]
+    },
+    {
+      "msgId": 113,
+      "date": "2025-02-21",
+      "team": "ЛитПон",
+      "players": [
+        "Арс-Пегас",
+        "Иван Шупляков",
+        "Михаил Кедреновский",
+        "Алексей Авданин",
+        "Денис Буйный",
+        "Мария Снегирь",
+        "Александр Зезюлин",
+        "Марлен Колготкин",
+        "Ринат Миргазов",
+        "Павел Диегорм",
+        "Алексей Радов",
+        "Андрей Пржевальский",
+        "Марина Букина",
+        "Ярослав Круглов",
+        "Андрей Вахрин"
+      ]
+    },
+    {
+      "msgId": 116,
+      "date": "2025-02-22",
+      "team": "Бродячие артисты",
+      "players": [
+        "Елена Пантелеймонова",
+        "Сергей Киреев",
+        "Анастасия Титова",
+        "Пётр Свистунов",
+        "Алексей Мавренков",
+        "Дмитрий Пустовалов",
+        "Максим Соломин",
+        "Юрий Субботин",
+        "Василь Товченников",
+        "Диана Бахтиярова",
+        "TANA CAT",
+        "Дарина Максимова",
+        "Евгений Хулуев",
+        "Арина Скобликова",
+        "Иван Шмаков",
+        "Анастасия Шлафман",
+        "Снежанна Морозова",
+        "Андрей Момад"
+      ]
+    },
+    {
+      "msgId": 135,
+      "date": "2025-02-25",
+      "team": "Шатуны",
+      "players": [
+        "Ваня Симак",
+        "Алексей Виниченко",
+        "Арсений Неверов",
+        "Игорь Котляров",
+        "Никита Соколов",
+        "Пасик Пахомов",
+        "Даша Чайка",
+        "Денни Садовский",
+        "Арсений Таурин"
+      ]
+    },
+    {
+      "msgId": 177,
+      "date": "2025-03-01",
+      "team": "Птица поэта",
+      "players": [
+        "Инна Медведун",
+        "Данил Фролов",
+        "Ева Иштван",
+        "Антон Дё",
+        "Александр Дубинин",
+        "Александр Люкшин",
+        "Сантьяго Пан",
+        "Александр Митрофанов",
+        "Катя Арбатова",
+        "Игорь Бушмелев",
+        "Дарья Докторова",
+        "Никита Падлевский",
+        "Руслан Махсумов",
+        "Елена Таленника",
+        "Кристина Терсенова",
+        "Диана Айрапетова",
+        "Дана Надольская",
+        "Константин Ткач",
+        "Элина Чернева",
+        "Елизавета Солодовникова",
+        "Анна Ширмина",
+        "Ольга Кручинина",
+        "Ольга Живикина",
+        "Кристина Усова",
+        "Михаил Червяков",
+        "Егор Стрыгин"
+      ]
+    },
+    {
+      "msgId": 184,
+      "date": "2025-03-02",
+      "team": "Кашалот",
+      "players": [
+        "Николай Калиниченко",
+        "Дмитрий Ерохин",
+        "Максим Маркевич",
+        "Евгений Харитонов",
+        "Ника Батхен",
+        "Екатерина Годвер",
+        "Стефания Данилова",
+        "Алексей Ширяев",
+        "Александр Коньков",
+        "Павел Мицкевич"
+      ]
+    },
+    {
+      "msgId": 644,
+      "date": "2025-04-15",
+      "team": "Птица поэта",
+      "players": [
+        "Александр Люкшин",
+        "Антон Дё",
+        "Диана Айрапетова",
+        "Ольга Живикина",
+        "Михаил Червяков",
+        "Аня Ширмина",
+        "Ева Иштван",
+        "Инна Медведун"
+      ]
+    },
+    {
+      "msgId": 644,
+      "date": "2025-04-15",
+      "team": "СИИ",
+      "players": [
+        "Игорь Грай",
+        "Михаил Татарский",
+        "Иван Козин&Стив Бургундец",
+        "Александр Скуба",
+        "Сергей Шерстнёв",
+        "Андрей Елизаров-Баландин",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 681,
+      "date": "2025-04-20",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Денис Пикляев",
+        "Дмитрий Пустовалов",
+        "Пётр Свистунов",
+        "Диана Бахтиярова",
+        "Елена Пантелеймонова"
+      ]
+    },
+    {
+      "msgId": 681,
+      "date": "2025-04-20",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Сергей Беспалов",
+        "Кирилл Марков",
+        "Светлана Носова",
+        "Сергей Огнев",
+        "Захар Зорькин",
+        "Дмитрий Брисенко",
+        "Руслан Шишкин"
+      ]
+    },
+    {
+      "msgId": 693,
+      "date": "2025-04-21",
+      "team": "Птица поэта",
+      "players": [
+        "Константин Ткач",
+        "Дима Бекетов",
+        "Антон Дё",
+        "Александр Люкшин",
+        "Ольга Кручинина",
+        "Аня Ширмина",
+        "Лиза Солодовникова",
+        "Ева Иштван"
+      ]
+    },
+    {
+      "msgId": 704,
+      "date": "2025-04-22",
+      "team": "ДА",
+      "players": [
+        "Дарья Тимошенко",
+        "Ярослава Попова",
+        "Катрин Орлова",
+        "Евгений Севостьянов",
+        "Екатерина Юргель",
+        "Алёна Борисова"
+      ]
+    },
+    {
+      "msgId": 704,
+      "date": "2025-04-22",
+      "team": "СИИ",
+      "players": [
+        "Павел Киселёв",
+        "Игорь Грай",
+        "Михаил Татарский",
+        "Иван Козин & Стив Бургундец",
+        "Андрей Елизаров-Баландин",
+        "Екатерина Рейн",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 716,
+      "date": "2025-04-23",
+      "team": "Кашалот",
+      "players": [
+        "Екатерина Годвер",
+        "Ника Батхен",
+        "Стефания Данилова",
+        "Дмитрий Ерохин",
+        "Дмитрий Вагин",
+        "Павел Мицкевич",
+        "Григорий Софийский",
+        "Максим Маркевич"
+      ]
+    },
+    {
+      "msgId": 716,
+      "date": "2025-04-23",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Александр Зезюлин",
+        "Андрей Пржевальский",
+        "Ярослав Круглов",
+        "Даниил Максимов",
+        "Марлен Колготкин",
+        "Ваня Шупляков"
+      ]
+    },
+    {
+      "msgId": 731,
+      "date": "2025-04-27",
+      "team": "Чатл",
+      "players": [
+        "Анна Встяная",
+        "Анастасия Курзина",
+        "Георгий Вольский",
+        "Вечный Никодим",
+        "Любовь Табуреткина",
+        "Владимир Красноруженко"
+      ]
+    },
+    {
+      "msgId": 731,
+      "date": "2025-04-27",
+      "team": "Птица поэта",
+      "players": [
+        "Диана Айрапетова",
+        "Элина Чернева",
+        "Константин Ткач",
+        "Аня Ширмина",
+        "Кристина Терсенова",
+        "Кристина Усова",
+        "Игорь Бушмелев",
+        "Михал Червяков",
+        "Инна Медведун"
+      ]
+    },
+    {
+      "msgId": 740,
+      "date": "2025-04-28",
+      "team": "Жемчужные",
+      "players": [
+        "Антон Кобец",
+        "Елизавета Белозёрова",
+        "София Грабовская",
+        "Аглая",
+        "Юлия Зелёнкина",
+        "Камилла Лысенко",
+        "Костя Скурат",
+        "Алёна Филина"
+      ]
+    },
+    {
+      "msgId": 740,
+      "date": "2025-04-28",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Артем Ежов",
+        "Алексей Мавренков",
+        "Снежанна Морозова",
+        "Петр Свистунов",
+        "Василь Товченников",
+        "Елена Пантелеймонова"
+      ]
+    },
+    {
+      "msgId": 757,
+      "date": "2025-04-30",
+      "team": "Шатуны",
+      "players": ["Лёша Поспехов", "Даша Евстефеева", "Ягода Волчья", "Игорь Котляров", "Костя Денисов", "Ваня Симак"]
+    },
+    {
+      "msgId": 793,
+      "date": "2025-05-05",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Василь Товченников",
+        "Пётр Свистунов",
+        "Дмитрий Пустовалов",
+        "Диана Бахтиярова",
+        "Тана Кэт",
+        "Артём Ежов",
+        "Алексей Мавренков"
+      ]
+    },
+    {
+      "msgId": 793,
+      "date": "2025-05-05",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Екатерина Юргель",
+        "Рината Султанова",
+        "Ярослава Попова",
+        "Анара Мачнева",
+        "Алёна Борисова"
+      ]
+    },
+    {
+      "msgId": 799,
+      "date": "2025-05-06",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Анна Алекс",
+        "Ярослав Круглов",
+        "Марлен Колготкин",
+        "Андрей Пржевальский",
+        "Ваня Шупляков"
+      ]
+    },
+    {
+      "msgId": 799,
+      "date": "2025-05-06",
+      "team": "Жемчужные",
+      "players": [
+        "Эйво Рут",
+        "Максим Дюкин",
+        "София Грабовская",
+        "Мария Дурманова",
+        "Агнесса",
+        "Крис Аивер",
+        "Антон Кобец"
+      ]
+    },
+    {
+      "msgId": 842,
+      "date": "2025-05-12",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Екатерина Юргель",
+        "Девочка в розовых очках",
+        "Евгений Севостьянов",
+        "Забава Звон",
+        "Алёна Борисова"
+      ]
+    },
+    {
+      "msgId": 842,
+      "date": "2025-05-12",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Виктор Халяпин",
+        "Светлана Носова",
+        "Захар Зорькин",
+        "Сергей Огнев",
+        "Денис Чехонацкий",
+        "Руслан Шишкин"
+      ]
+    },
+    {
+      "msgId": 856,
+      "date": "2025-05-13",
+      "team": "Чатл",
+      "players": ["Аня Встяная", "Никодим", "Леонид Ярошенко", "Роман Чацкий", "Егор Климин"]
+    },
+    {
+      "msgId": 856,
+      "date": "2025-05-13",
+      "team": "Кашалот",
+      "players": [
+        "Ника Батхен",
+        "Григорий Софийский",
+        "Григорий Шерстнев",
+        "Дмитрий Ерохин",
+        "Максим Маркевич",
+        "Павел Конивец",
+        "Николай Калиниченко"
+      ]
+    },
+    {
+      "msgId": 865,
+      "date": "2025-05-14",
+      "team": "Жемчужные",
+      "players": [
+        "Никита Мотрий",
+        "Юля Зелёнкина",
+        "Крис Аивер",
+        "София Грабовская",
+        "Эйво Рут",
+        "Анна Малкович",
+        "Антон Кобец"
+      ]
+    },
+    {
+      "msgId": 878,
+      "date": "2025-05-15",
+      "team": "СИИ",
+      "players": [
+        "Игорь Грай",
+        "Сергей Шерстнев",
+        "Михаил Татарский",
+        "Александр Бережной",
+        "Иван Козин & Стив Бургундец",
+        "Прохор Брана",
+        "Александр Скуба",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 878,
+      "date": "2025-05-15",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Петр Свистунов",
+        "Денис Пикляев",
+        "Артем Ежов",
+        "Тана Кэт",
+        "Василь Товченников",
+        "Алексей Мавренков"
+      ]
+    },
+    {
+      "msgId": 900,
+      "date": "2025-05-18",
+      "team": "Жемчужные",
+      "players": [
+        "Антон Кобец",
+        "Мария Дурманова",
+        "Крис Аивер",
+        "Аня Малкович",
+        "Константин Скурат",
+        "Максим Дюкин",
+        "Юля Зелёнкина",
+        "Елизавета Белозёрова",
+        "Алёна Филина"
+      ]
+    },
+    {
+      "msgId": 900,
+      "date": "2025-05-18",
+      "team": "Чатл",
+      "players": [
+        "Никодим",
+        "Соня Герман",
+        "Лирика Камней",
+        "Леонид Ярошенко",
+        "Катя Чемодурова",
+        "Георгий Вольский",
+        "Рома Новиков"
+      ]
+    },
+    {
+      "msgId": 908,
+      "date": "2025-05-19",
+      "team": "Чатл",
+      "players": ["Никодим", "Аня Встяная", "Леонид Ярошенко", "Рома Новиков", "Катя Чемодурова", "Илья Идов"]
+    },
+    {
+      "msgId": 914,
+      "date": "2025-05-20",
+      "team": "ДА",
+      "players": [
+        "Нинни",
+        "Девочка в розовых очках",
+        "Рината Султанова",
+        "Ксения Ильина",
+        "Ярослава Попова",
+        "Екатерина Юргель",
+        "Катрин Орлова",
+        "Алёна Борисова"
+      ]
+    },
+    {
+      "msgId": 914,
+      "date": "2025-05-20",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Анна Алекс",
+        "Марлен Колготкин",
+        "Андрей Пржевальский",
+        "Ананасова",
+        "Ваня Шупляков"
+      ]
+    },
+    {
+      "msgId": 917,
+      "date": "2025-05-21",
+      "team": "РЫБА",
+      "players": [
+        "Виктор Халяпин",
+        "Дмитрий Адемин",
+        "Сергей Огнев",
+        "Андрей Чемоданов",
+        "Дмитрий Певницкий",
+        "Сергей Беспалов",
+        "Денис Чехонацкий",
+        "Дмитрий Брисенко",
+        "Руслан Шишкин"
+      ]
+    },
+    {
+      "msgId": 917,
+      "date": "2025-05-21",
+      "team": "Птица поэта",
+      "players": [
+        "Елена Таленника",
+        "Александр Люкшин",
+        "Элина Чернева",
+        "Александр Митрофанов",
+        "Антон Дё",
+        "Ольга Кручинина",
+        "Александра Айрапетова",
+        "Ева Иштван"
+      ]
+    },
+    {
+      "msgId": 956,
+      "date": "2025-05-26",
+      "team": "Кашалот",
+      "players": [
+        "Дмитрий Ерохин",
+        "Павел Конивец",
+        "Григорий Софийский",
+        "Максим Маркевич",
+        "Екатерина Годвер",
+        "Стефания Данилова",
+        "Николай Калиниченко"
+      ]
+    },
+    {
+      "msgId": 956,
+      "date": "2025-05-26",
+      "team": "Opezdol's Crew",
+      "players": ["Павел Быков", "Александр Уткин", "Андрей Солодов", "Анна Кесарева", "Маша Шибаева", "Сава Роскин"]
+    },
+    {
+      "msgId": 970,
+      "date": "2025-05-28",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Сергей Огнев",
+        "Виктор Халяпин",
+        "Светлана Носова",
+        "Захар Зорькин",
+        "Сергей Беспалов",
+        "Константин Патов",
+        "Руслан Шишкин"
+      ]
+    },
+    {
+      "msgId": 970,
+      "date": "2025-05-28",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Марлен Колготкин",
+        "Анна Алекс",
+        "Ярослав Круглов",
+        "Андрей Пржевальский",
+        "Маяк Маяков",
+        "Ваня Шупляков"
+      ]
+    },
+    {
+      "msgId": 996,
+      "date": "2025-06-01",
+      "team": "Шатуны",
+      "players": ["Игорь Котляров", "Арсений Неверов", "Даша Евстефеева", "Казимир Щепкин", "Ваня Симак"]
+    },
+    {
+      "msgId": 996,
+      "date": "2025-06-01",
+      "team": "ЛитПон",
+      "players": ["Анна Алекс", "Марлен Колготкин", "Михаил Кедреновский", "Андрей Пржевальский", "Ваня Шупляков"]
+    },
+    {
+      "msgId": 1003,
+      "date": "2025-06-02",
+      "team": "Птица поэта",
+      "players": [
+        "Крис Терсенова",
+        "Руслан Махсумов",
+        "Кристина Усова",
+        "Оля Кручинина",
+        "Александр Люкшин",
+        "Костя Ткач",
+        "Франческо",
+        "Инна Медведун"
+      ]
+    },
+    {
+      "msgId": 1003,
+      "date": "2025-06-02",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Екатерина Юргель",
+        "Рината Султанова",
+        "Евгений Севостьянов",
+        "Ксения Ильина",
+        "Артём Бирлов",
+        "Алёна Борисова"
+      ]
+    },
+    {
+      "msgId": 1009,
+      "date": "2025-06-03",
+      "team": "СИИ",
+      "players": [
+        "Игорь Грай",
+        "Михаил Татарский",
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Александр Скуба",
+        "Екатерина Рейн",
+        "Андрей Елизаров-Баландин",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 1020,
+      "date": "2025-06-04",
+      "team": "Шатуны",
+      "players": [
+        "Костя Денисов",
+        "Леша Виниченко",
+        "Даша Евстефеева",
+        "Игорь Котляров",
+        "Ястребов",
+        "Арсений Неверов",
+        "Алексей Поспехов",
+        "Ваня Симак"
+      ]
+    },
+    {
+      "msgId": 1020,
+      "date": "2025-06-04",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Сергей Огнев",
+        "Виктор Халяпин",
+        "Сергей Беспалов",
+        "Захар Зорькин",
+        "Светлана Носова",
+        "Андрей Чемоданов",
+        "Руслан Шишкин"
+      ]
+    },
+    {
+      "msgId": 1031,
+      "date": "2025-06-05",
+      "team": "Кашалот",
+      "players": [
+        "Григорий Софийский",
+        "Ольга Погодина",
+        "Ника Батхен",
+        "Дмитрий Ерохин",
+        "Екатерина Годвер",
+        "Павел Конивец",
+        "Николай Калиниченко (играющий тренер"
+      ]
+    },
+    {
+      "msgId": 1031,
+      "date": "2025-06-05",
+      "team": "Шатуны",
+      "players": ["Костя Денисов", "Леша Виниченко", "Игорь Котляров", "Ястребов", "Алексей Поспехов", "Ваня Симак"]
+    },
+    {
+      "msgId": 1048,
+      "date": "2025-06-08",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Марлен Колготкин",
+        "Анна Алекс",
+        "Ананасова",
+        "Ярослав Круглов",
+        "Ваня Шупляков"
+      ]
+    },
+    {
+      "msgId": 1048,
+      "date": "2025-06-08",
+      "team": "СИИ",
+      "players": [
+        "Игорь Грай",
+        "Миша Татарский",
+        "Стив Бургундец & Ваня Козин",
+        "Сергей Шерстнёв",
+        "Света Блохина",
+        "Саша Скуба",
+        "Катя Рейн",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 1076,
+      "date": "2025-06-10",
+      "team": "СИИ",
+      "players": [
+        "Михаил Татарский",
+        "Иван Козин & Стив Бургундец",
+        "Прохор Брана",
+        "Светлана Блохина",
+        "Александр Скуба",
+        "Андрей Елизаров-Баландин",
+        "Катя Рейн",
+        "Лана Сергеева"
+      ]
+    },
+    {
+      "msgId": 1076,
+      "date": "2025-06-10",
+      "team": "Чатл",
+      "players": ["Георгий Вольский", "Егор Климин", "Леонид Ярошенко", "Никодим", "Катя Чемодурова", "Рома Новиков"]
+    },
+    {
+      "msgId": 1086,
+      "date": "2025-06-11",
+      "team": "Шатуны",
+      "players": [
+        "Игорь Котляров",
+        "Арсений Таурин",
+        "Пасик Пахомов",
+        "Денис Пенисов",
+        "Зейн Мирзаев",
+        "Алексей Поспехов",
+        "Ваня Симак"
+      ]
+    },
+    {
+      "msgId": 1086,
+      "date": "2025-06-11",
+      "team": "Птица поэта",
+      "players": [
+        "Элина Чернева",
+        "Александр Люкшин",
+        "Антон Дё",
+        "Михаил Червяков",
+        "Дубинин Александр",
+        "Усова Кристина",
+        "Ольга Живикина",
+        "Инна Медведун"
+      ]
+    },
+    {
+      "msgId": 1869,
+      "date": "2025-10-27",
+      "team": "ЛитПон",
+      "players": [
+        "Александра Айрапетова",
+        "Михаил Кедреновский",
+        "Сергей Кулясов",
+        "Анна Алекс",
+        "Анатолий Михайлов",
+        "Александр Бураго",
+        "Ваня Шупляков (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 1869,
+      "date": "2025-10-27",
+      "team": "Чатл",
+      "players": [
+        "Родион Шафиков",
+        "Андрей Макатинский",
+        "Стася!",
+        "Аня Встяная",
+        "Шема",
+        "Юра Степанов",
+        "Анастасия Курзина",
+        "Андрей Безоконбездверей",
+        "Леонид Ярошенко (неиграющий тренер)",
+        "Ведущая: Лана Сергеева",
+        "На цифрах: Михаил Татарский",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 1880,
+      "date": "2025-10-28",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Иван Павлов",
+        "Рината Султанова",
+        "Дарья Тимошенко",
+        "Дарья Бекешко",
+        "Дарья Sunsay",
+        "POLSHA (играющая зам. тренера)",
+        "Opezdol's Crew",
+        "Александр Уткин",
+        "Анна Кесарева",
+        "Андрей Солодов",
+        "Павел Быков",
+        "Евгений Гусев",
+        "Константин Скурат",
+        "Сава Роскин (играющий тренер)",
+        "Ведущий: Пётр Свистунов",
+        "На цифрах: Василь Товченников",
+        "💾Клуб «Китайский лётчик Джао Да», Лубянский проезд, д.25, стр.1"
+      ]
+    },
+    {
+      "msgId": 1889,
+      "date": "2025-10-29",
+      "team": "СИИ",
+      "players": [
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Молли",
+        "Прохор Брана",
+        "Эрин Дроут",
+        "Михаил Татарский (играющий зам.тренера)"
+      ]
+    },
+    {
+      "msgId": 1889,
+      "date": "2025-10-29",
+      "team": "Птица поэта",
+      "players": [
+        "Наталья Верескова",
+        "Оля Кручинина",
+        "Светлана Сергеева",
+        "Кристина Усова",
+        "Александр Дубинин",
+        "Марина Миллер",
+        "Аня Ширмина",
+        "Ева Иштван (играющий зам.тренера)",
+        "Ведущий: Костя Денисов",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Южная рюмочная, ул. Большая Татарская, д.5."
+      ]
+    },
+    {
+      "msgId": 1949,
+      "date": "2025-11-05",
+      "team": "Кашалот",
+      "players": [
+        "Ника Батхен",
+        "Дмитрий Ерохин",
+        "Григорий Шерстнев",
+        "Григорий Софийский",
+        "Павел Конивец",
+        "Николай Калиниченко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 1949,
+      "date": "2025-11-05",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Рината Султанова",
+        "Девочка в розовых очках",
+        "Варвара Герасимович",
+        "Дарья Бекешко",
+        "Дарья Sunsay",
+        "POLSHA (играющая зам. тренера)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Анна Гродзинская",
+        "💾Ночной клуб «Инкогнито», ул. Большая Семеновская, д.11, стр. 2."
+      ]
+    },
+    {
+      "msgId": 1962,
+      "date": "2025-11-06",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Анна Хрусталева",
+        "Мели Здзжедук",
+        "увенчанный римом",
+        "Мира Миронова",
+        "Агнесса",
+        "Сергей Александров",
+        "Андрей Адяков",
+        "Даниил Невнятин (играющий тренер)",
+        "Opezdol's Crew",
+        "Александр Уткин",
+        "Андрей Солодов",
+        "Павел Быков",
+        "Анна Кесарева",
+        "Константин Скурат",
+        "Алексей Перин",
+        "Сава Роскин (играющий тренер)",
+        "Ведущий: Василь Товченников",
+        "На цифрах: Елизавета Пичкалева",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 1975,
+      "date": "2025-11-09",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Беспалов",
+        "Виктор Халяпин",
+        "Захар Зорькин",
+        "Андрей Чемоданов",
+        "Иван Фефелов",
+        "Руслан Шишкин (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 1975,
+      "date": "2025-11-09",
+      "team": "СИИ",
+      "players": [
+        "Михаил Татарский",
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Прохор Брана",
+        "Катя Рейн",
+        "Лана Сергеева (играющий тренер)",
+        "Ведущий: Костя Денисов",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Комната отдыха», ул. Грузинский вал, д. 11, стр. 4"
+      ]
+    },
+    {
+      "msgId": 1994,
+      "date": "2025-11-10",
+      "team": "Бродячие артисты",
+      "players": [
+        "Петр Свистунов",
+        "Диана Рубан",
+        "Василь Товченников",
+        "Сергей Киреев",
+        "Алена Мосина",
+        "Андрей Макаренко",
+        "Павел Судаков",
+        "Тана Кэт (играющий зам. тренера)"
+      ]
+    },
+    {
+      "msgId": 1994,
+      "date": "2025-11-10",
+      "team": "Шатуны",
+      "players": [
+        "Рома Новиков",
+        "Катя Чемодурова",
+        "Пасик Пахомов",
+        "Ястребов",
+        "Игорь Котляров",
+        "Маша Дурманова",
+        "Леся Мосеева",
+        "Ваня Симак (играющий тренер)",
+        "Ведущая: Саша Айрапетова",
+        "На цифрах: Елизавета Пичкалева",
+        "💾Бар «Столярка», Малая Семёновская ул. 5, стр.3."
+      ]
+    },
+    {
+      "msgId": 2011,
+      "date": "2025-11-11",
+      "team": "Птица поэта",
+      "players": [
+        "Александр Митрофанов",
+        "Крис Терсенова",
+        "Наталья Верескова",
+        "Михаил Червяков",
+        "Марина Миллер",
+        "Оля Кручинина",
+        "Инна Медведун (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2011,
+      "date": "2025-11-11",
+      "team": "ЛитПон",
+      "players": [
+        "Анна Алекс",
+        "Александра Айрапетова",
+        "Михаил Кедреновский",
+        "Александр Зезюлин",
+        "Мамзерет",
+        "Денис Буйный",
+        "Ваня Шупляков (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Tana Cat",
+        "💾Бар «Лампопо», Рождественский бульвар 22/23"
+      ]
+    },
+    {
+      "msgId": 2025,
+      "date": "2025-11-12",
+      "team": "Шатуны",
+      "players": [
+        "Рома Новиков",
+        "Игорь Котляров",
+        "Арсений Таурин",
+        "Арсений Неверов",
+        "Анна Малкович",
+        "Ника!",
+        "Костя Денисов",
+        "Ваня Симак (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2025,
+      "date": "2025-11-12",
+      "team": "ДА",
+      "players": [
+        "Дарья Тимошенко",
+        "Катрин Орлова",
+        "Дарья Бекешко",
+        "Дарья Sunsay",
+        "Иван Павлов",
+        "POLSHA (играющая зам. тренера)",
+        "Ведущий: Василь Товченников",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2077,
+      "date": "2025-11-16",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Агнесса",
+        "увенчанный римом",
+        "Андрей Адяков",
+        "Анна Хрусталева",
+        "Эйво Рут",
+        "Павла Павлова",
+        "Керд",
+        "Дори Рыбка (играющий зам.тренера)"
+      ]
+    },
+    {
+      "msgId": 2077,
+      "date": "2025-11-16",
+      "team": "Кашалот",
+      "players": [
+        "Павел Конивец,",
+        "Дмитрий Ерохин",
+        "Дмитрий  Леонтьев",
+        "Григорий Шерстнев",
+        "Ольга Погодина",
+        "Григорий Софийский",
+        "Эмильен Арнольд",
+        "Николай Калиниченко (играющий тренер)",
+        "Ведущий: Пётр Свистунов",
+        "На цифрах: Марк Крюков",
+        "💾Бар «Край», Николоямская ул., 62."
+      ]
+    },
+    {
+      "msgId": 2088,
+      "date": "2025-11-17",
+      "team": "Чатл",
+      "players": [
+        "Шема",
+        "НикаК",
+        "Е Клмн",
+        "Андрей Макатинский",
+        "Юра Степанов",
+        "Родион Шафиков",
+        "Леонид Ярошенко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2088,
+      "date": "2025-11-17",
+      "team": "СИИ",
+      "players": [
+        "Михаил Татарский",
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Катя Рейн",
+        "Молли",
+        "Александр Скуба",
+        "Лана Сергеева (играющий тренер)",
+        "Ведущая: Саша Айрапетова",
+        "На цифрах: Григорий Софийский",
+        "💾Бар «Ладья», Столешников пер.6, стр.1"
+      ]
+    },
+    {
+      "msgId": 2103,
+      "date": "2025-11-18",
+      "team": "Птица поэта",
+      "players": [
+        "Наталья Верескова",
+        "Крис Терсенова",
+        "Александр Митрофанов",
+        "Михаил Червяков",
+        "Аня Ширмина",
+        "Марина Миллер",
+        "Оля Кручинина",
+        "Инна Медведун (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2103,
+      "date": "2025-11-18",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Дмитрий Адемин",
+        "Сергей Удальцов",
+        "Захар Зорькин",
+        "Дмитрий Брисенко",
+        "Иван Фефелов",
+        "Руслан Шишкин (неиграющий тренер)",
+        "Ведущий: Костя Денисов",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Лампопо», Рождественский бульвар 22/23"
+      ]
+    },
+    {
+      "msgId": 2121,
+      "date": "2025-11-19",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Дмитрий Пустовалов",
+        "Артём Ежов",
+        "Tana Cat",
+        "Василь Товченников",
+        "Пётр Свистунов",
+        "Павел Судаков",
+        "Алексей Мавренков (играющий тренер)",
+        "Opezdol's Crew",
+        "Александр Уткин",
+        "Андрей Солодов",
+        "Анна Кесарева",
+        "Катя Сенченко",
+        "Юрий Бондарев",
+        "Константин Скурат",
+        "Сава Роскин (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Елизавета Пичкалева",
+        "💾Бар «Цеппелин N°5», Филевский Бульвар, 10"
+      ]
+    },
+    {
+      "msgId": 2128,
+      "date": "2025-11-20",
+      "team": "ЛитПон",
+      "players": [
+        "Александра Айрапетова",
+        "Марлен Колготкин",
+        "Сергей Кулясов",
+        "Михаил Кедреновский",
+        "Александр Зезюлин",
+        "Ваня Шупляков (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2128,
+      "date": "2025-11-20",
+      "team": "ДА",
+      "players": [
+        "Катрин Орлова",
+        "Иван Павлов",
+        "Рината Султанова",
+        "Ксения Ильина",
+        "Дарья Тимошенко",
+        "Дарья Бекешко",
+        "Дарья Sunsay",
+        "POLSHA (играющая зам. тренера)",
+        "Ведущий: Василь Товченников",
+        "На цифрах: Григорий Софийский",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2146,
+      "date": "2025-11-24",
+      "team": "Чатл",
+      "players": [
+        "НикаК",
+        "Гретхен",
+        "Александра Дрейфус",
+        "Андрей Макатинский",
+        "Шема",
+        "Леонид Ярошенко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2146,
+      "date": "2025-11-24",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Марк Крюков",
+        "Никита Керд",
+        "Агнесса",
+        "Мели Здзжедук",
+        "Алиса Кащеева",
+        "Даниил Невнятин (играющий тренер)",
+        "Ведущий: Павел Судаков",
+        "На цифрах: Григорий Софийский",
+        "💾Бар «Ладья», Столешников пер.6, стр.1"
+      ]
+    },
+    {
+      "msgId": 2154,
+      "date": "2025-11-26",
+      "team": "СИИ",
+      "players": [
+        "Паша Киселёв",
+        "Михаил Татарский",
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Светлана Блохина",
+        "Саша Скуба",
+        "Молли",
+        "Лана Сергеева (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2154,
+      "date": "2025-11-26",
+      "team": "ЛитПон",
+      "players": [
+        "Анна Алекс",
+        "Михаил Кедреновский",
+        "Александра Айрапетова",
+        "Марлен Колготкин",
+        "Евгений Петрушенко",
+        "Ваня Шупляков (играющий тренер)",
+        "Ведущий: Григорий Софийский",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Южная рюмочная, ул. Большая Татарская, д.5."
+      ]
+    },
+    {
+      "msgId": 2165,
+      "date": "2025-11-27",
+      "team": "Кашалот",
+      "players": [
+        "Павел Конивец",
+        "Дмитрий Ерохин",
+        "Екатерина Годвер",
+        "Эмильен Арнольд",
+        "Григорий Софийский",
+        "Григорий Шерстнев",
+        "Елизавета Белозерова",
+        "Николай Калиниченко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2165,
+      "date": "2025-11-27",
+      "team": "Птица поэта",
+      "players": [
+        "Франческо",
+        "Крис Терсенова",
+        "Наталья Верескова",
+        "Ольга Кручинина",
+        "Светлана Сергеева",
+        "Елена Талленика",
+        "Александр Люкшин",
+        "Инна Медведун (играющий тренер)",
+        "Ведущий: Василь Товченников",
+        "На цифрах: Елизавета Пичкалева",
+        "💾Ночной клуб «Инкогнито», ул. Большая Семеновская, д.11, стр. 2."
+      ]
+    },
+    {
+      "msgId": 2188,
+      "date": "2025-11-30",
+      "team": "РЫБА",
+      "players": [
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Дмитрий Адемин",
+        "Сергей Беспалов",
+        "Захар Зорькин",
+        "Андрей Чемоданов",
+        "Дмитрий Певницкий",
+        "Руслан Шишкин (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2188,
+      "date": "2025-11-30",
+      "team": "Opezdol's Crew",
+      "players": [
+        "Промч",
+        "Александр Уткин",
+        "Анна Кесарева",
+        "Павел Быков",
+        "Павел Диегорм",
+        "Сава Роскин (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Tana Cat",
+        "💾Бар «Комната отдыха», ул. Грузинский вал, д. 11, стр. 4"
+      ]
+    },
+    {
+      "msgId": 2226,
+      "date": "2025-12-02",
+      "team": "СИИ",
+      "players": [
+        "Паша Киселёв",
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Саша Скуба",
+        "Молли",
+        "Лана Сергеева",
+        "Михаил Татарский (играющий зам.тренера)"
+      ]
+    },
+    {
+      "msgId": 2226,
+      "date": "2025-12-02",
+      "team": "Шатуны",
+      "players": [
+        "Рома Новиков",
+        "Юля Зелёнкина",
+        "Костя Денисов",
+        "Аня Малкович",
+        "Артём Василевский",
+        "Игорь Котляров",
+        "геликвакен&назлом???",
+        "Ваня Симак (играющий тренер)",
+        "Ведущий: Григорий Софийский",
+        "На цифрах: Константин Скурат",
+        "💾Бар «Клуб», Покровский бульвар, 6/20с1",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2248,
+      "date": "2025-12-03",
+      "team": "ДА",
+      "players": [
+        "Девочка в розовых очках",
+        "Варвара Герасимович",
+        "Дарья Тимошенко",
+        "Рината Султанова",
+        "Катрин Орлова",
+        "Дарья Бекешко",
+        "Дарья Sunsay",
+        "POLSHA (играющая зам. тренера)"
+      ]
+    },
+    {
+      "msgId": 2248,
+      "date": "2025-12-03",
+      "team": "Чатл",
+      "players": [
+        "НикаК",
+        "Шема",
+        "Соня Герман",
+        "Андрей Макатинский",
+        "Лирика Камней",
+        "Родион Шафиков",
+        "Стася!",
+        "Леонид Ярошенко (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Настя",
+        "💾Клуб «Китайский лётчик Джао Да», Лубянский проезд, д.25, стр.1"
+      ]
+    },
+    {
+      "msgId": 2255,
+      "date": "2025-12-04",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Александр Зезюлин",
+        "Александра Айрапетова",
+        "Марлен Колготкин",
+        "Денис Буйный",
+        "Ваня Шупляков (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2255,
+      "date": "2025-12-04",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Павел Судаков",
+        "Артём Ежов",
+        "Пётр Свистунов",
+        "Алёна Мосина",
+        "Диана Рубан",
+        "Алексей Мавренков (играющий тренер)",
+        "Ведущая: Юля Зелёнкина",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2274,
+      "date": "2025-12-07",
+      "team": "Шатуны",
+      "players": [
+        "Лёша Поспехов",
+        "Лена Стрельникова",
+        "Поляк Сергеев",
+        "Юля Зелёнкина",
+        "Арсений Неверов",
+        "Костя Денисов",
+        "Рома Новиков",
+        "Анна Малкович",
+        "Ваня Симак (неиграющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2274,
+      "date": "2025-12-07",
+      "team": "ДА",
+      "players": [
+        "Девочка в розовых очках",
+        "Дарья Тимошенко",
+        "Рината Султанова",
+        "Дарья Бекешко",
+        "Катрин Орлова",
+        "Иван Павлов",
+        "Дарья Sunsay",
+        "POLSHA (играющая зам. тренера)",
+        "Ведущий: Григорий Софийский",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2299,
+      "date": "2025-12-09",
+      "team": "Птица поэта",
+      "players": [
+        "Александр Митрофанов",
+        "Крис Терсенова",
+        "Наталья Верескова",
+        "Оля Кручинина",
+        "Михаил Червяков",
+        "Марина Миллер",
+        "Олег Бакулин",
+        "Инна Медведун (играющий тренер)",
+        "Opezdol's Crew",
+        "Андрей Солодов",
+        "Юрий Бондарев",
+        "Константин Скурат",
+        "Маша Шибаева",
+        "Сава Роскин (играющий тренер)",
+        "Ведущая: Алиса Кащеева",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Ладья», Столешников пер.6, стр.1"
+      ]
+    },
+    {
+      "msgId": 2306,
+      "date": "2025-12-10",
+      "team": "Кашалот",
+      "players": [
+        "Дмитрий Ерохин",
+        "Григорий Шерстнев",
+        "Григорий Софийский",
+        "Данил Насыбуллин",
+        "Елизавета Белозерова",
+        "Екатерина Годвер",
+        "Алла Медникова",
+        "Николай Калиниченко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2306,
+      "date": "2025-12-10",
+      "team": "Чатл",
+      "players": [
+        "Е Клмн",
+        "Александра Дрейфус",
+        "Маша Кленова",
+        "НикаК",
+        "Андрей Макатинский",
+        "Леонид Ярошенко (играющий тренер)",
+        "Ведущая: Ангелина Гадалина",
+        "На цифрах: Пётр Свистунов",
+        "💾Ночной клуб «Инкогнито», ул. Большая Семеновская, д.11, стр. 2."
+      ]
+    },
+    {
+      "msgId": 2312,
+      "date": "2025-12-11",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Артем Корнилов",
+        "Агнесса",
+        "Анна Хрусталева",
+        "Полина Пехтерева",
+        "Марисоль",
+        "Мира Миронова",
+        "Марк Крюков",
+        "Даниил Невнятин (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2312,
+      "date": "2025-12-11",
+      "team": "СИИ",
+      "players": [
+        "Сергей Шерстнев",
+        "Иван Козин & Стив Бургундец",
+        "Катя Рейн",
+        "Молли",
+        "Михаил Татарский",
+        "Андрей Елизаров-Баландин",
+        "Лана Сергеева (играющий тренер)",
+        "Ведущий: Костя Денисов",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Край», Николоямская ул., 62."
+      ]
+    },
+    {
+      "msgId": 2338,
+      "date": "2025-12-14",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Виктор Халяпин",
+        "Светлана Носова",
+        "Захар Зорькин",
+        "Андрей Чемоданов",
+        "Константин Патов",
+        "Руслан Шишкин (неиграющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2338,
+      "date": "2025-12-14",
+      "team": "Бродячие артисты",
+      "players": [
+        "Тана Кэт",
+        "Павел Судаков",
+        "Артём Ежов",
+        "Пётр Свистунов",
+        "Василь Товченников",
+        "Алёна Мосина",
+        "Алексей Мавренков (играющий тренер)",
+        "Ведущий: Павел Быков",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Комната отдыха», ул. Грузинский вал, д. 11, стр. 4"
+      ]
+    },
+    {
+      "msgId": 2364,
+      "date": "2025-12-15",
+      "team": "ЛитПон",
+      "players": [
+        "Михаил Кедреновский",
+        "Александра Айрапетова",
+        "Денис Буйный",
+        "Яна Кузнецова",
+        "Анна Алекс",
+        "Ваня Шупляков (играющий тренер)",
+        "Opezdol's Crew",
+        "Александр Уткин",
+        "Промч",
+        "Анна Кесарева",
+        "Андрей Солодов",
+        "Павел Быков",
+        "Сава Роскин (играющий тренер)",
+        "Ведущий: Костя Денисов",
+        "На цифрах: Полина Пехтерева",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2371,
+      "date": "2025-12-16",
+      "team": "Чатл",
+      "players": [
+        "Андрей Макатинский",
+        "Юра Степанов",
+        "Стася!",
+        "Саша Четвëрка",
+        "Шема",
+        "НикаК",
+        "Андрей Вольгушев",
+        "Леонид Ярошенко (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2371,
+      "date": "2025-12-16",
+      "team": "Шатуны",
+      "players": [
+        "Арсений Неверов",
+        "Анна Малкович",
+        "Костя Денисов",
+        "Игорь Котляров",
+        "Юля Зелёнкина",
+        "Пасик Пахомов",
+        "Рома Новиков",
+        "Ваня Симак (играющий тренер)",
+        "Ведущий: Ваня Шупляков",
+        "На цифрах: Даша Кулагина",
+        "💾Бар «Ладья», Столешников пер.6, стр.1"
+      ]
+    },
+    {
+      "msgId": 2378,
+      "date": "2025-12-17",
+      "team": "ДА",
+      "players": [
+        "Ярослава Попова",
+        "Дарья Бекешко",
+        "Катрин Орлова",
+        "Дарья Sunsay",
+        "POLSHA",
+        "Алёна Борисова (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2378,
+      "date": "2025-12-17",
+      "team": "Птица поэта",
+      "players": [
+        "Аня Ширмина",
+        "Александр Люкшин",
+        "Елена Талленика",
+        "Кристина Усова",
+        "Марина Миллер",
+        "Наталья Верескова",
+        "Инна Медведун (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Ольга Евграфова",
+        "💾Клуб «Китайский лётчик Джао Да», Лубянский проезд, д.25, стр.1"
+      ]
+    },
+    {
+      "msgId": 2407,
+      "date": "2025-12-21",
+      "team": "Бродячие артисты",
+      "players": [
+        "Сергей Киреев",
+        "Павел Судаков",
+        "Алёна Мосина",
+        "Снежанна Морозова",
+        "Василь Товченников",
+        "Тана Кэт",
+        "Алексей Мавренков (играющий тренер)"
+      ]
+    },
+    {
+      "msgId": 2407,
+      "date": "2025-12-21",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Агнесса",
+        "Анна Хрусталева",
+        "Полина Пехтерева",
+        "увенчанный римом",
+        "Мира Миронова",
+        "Сергей Александров",
+        "Марк Крюков",
+        "Даниил Невнятин (играющий тренер)",
+        "Ведущая: Даша Кулагина",
+        "На цифрах: Ольга Евграфова",
+        "💾Бар «Дежурная рюмочная», ул. Новый Арбат, д.7а (3 этаж)",
+        "18+",
+        "Важно! На входе могут проверять документы, возьмите, пожалуйста, с собой паспорт!"
+      ]
+    },
+    {
+      "msgId": 2420,
+      "date": "2025-12-22",
+      "team": "РЫБА",
+      "players": [
+        "составы\n\nСоставы",
+        "на сегодняшний",
+        "матч\n\nКашалот",
+        "Алла Медникова",
+        "Андрей Щербак",
+        "Жуков\nГригорий",
+        "Шерстнев\nГригорий",
+        "Софийский\nЕлизавета",
+        "Белозерова\nЕкатерина",
+        "Годвер\nДмитрий",
+        "Ерохин\nНиколай",
+        "Калиниченко",
+        "играющий тренер",
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Дмитрий Адемин",
+        "Виктор Халяпин",
+        "Дмитрий Брисенко",
+        "Иван Фефелов"
+      ]
+    },
+    {
+      "msgId": 2440,
+      "date": "2025-12-23",
+      "team": "ДА",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "выступят",
+        "Алёна Борисова",
+        "Катрин Орлова",
+        "Дарья Тимошенко",
+        "Дарья Бекешко",
+        "Девочка",
+        "розовых очках",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр",
+        "Начало",
+        "Вход свободный"
+      ]
+    },
+    {
+      "msgId": 2441,
+      "date": "2025-12-23",
+      "team": "Птица поэта",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "выступят",
+        "Аня Ширмина",
+        "Светлана Сергеева",
+        "Кристина Усова",
+        "Франческо",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр",
+        "Начало",
+        "Вход свободный"
+      ]
+    },
+    {
+      "msgId": 2442,
+      "date": "2025-12-23",
+      "team": "Бродячие артисты",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "выступят",
+        "Пётр Свистунов",
+        "Алёна Мосина",
+        "Василь Товченников",
+        "Дмитрий Пустовалов",
+        "Алексей Мавренков",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр",
+        "Начало",
+        "Вход свободный"
+      ]
+    },
+    {
+      "msgId": 2443,
+      "date": "2025-12-24",
+      "team": "Кашалот",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "Кашалот выступят",
+        "Николай Калиниченко",
+        "Павел Конивец",
+        "Данил Насыбуллин",
+        "Дмитрий Леонтьев",
+        "Ника Батхен",
+        "Григорий Софийский",
+        "Григорий Шерстнев",
+        "Екатерина Годвер",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр",
+        "Начало"
+      ]
+    },
+    {
+      "msgId": 2445,
+      "date": "2025-12-24",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "выступят",
+        "Агнесса\nПолина",
+        "Пехтерева\nМарисоль",
+        "Артем Корнилов",
+        "Даниил Невнятин",
+        "Мира Миронова",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр",
+        "Начало",
+        "Вход свободный"
+      ]
+    },
+    {
+      "msgId": 2456,
+      "date": "2025-12-25",
+      "team": "РЫБА",
+      "players": [
+        "финалсезона",
+        "составы",
+        "декабря на",
+        "финальном концерте",
+        "первого сезона",
+        "от команды",
+        "выступят",
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Дмитрий Адемин",
+        "Виктор Халяпин",
+        "Светлана Носова",
+        "Дмитрий Брисенко",
+        "Андрей Чемоданов",
+        "Денис Чехонацкий",
+        "Ночной клуб",
+        "Инкогнито",
+        "Большая Семеновская",
+        "стр"
+      ]
+    },
+    {
+      "msgId": 2525,
+      "date": "2025-12-29",
+      "team": "ДА",
+      "players": [
+        "теперь личные",
+        "впечатления от",
+        "Кубка большого",
+        "слэма",
+        "После нескольких",
+        "лет официозных",
+        "семинаров на",
+        "фестивалях писательских",
+        "союзов мне",
+        "очень хотелось",
+        "вернуться",
+        "активным выступлениям",
+        "на поэтической",
+        "сцене",
+        "но сама",
+        "сцена после",
+        "пандемии подзатухла",
+        "старые площадки",
+        "закрывались либо",
+        "тихо существовали"
+      ]
+    },
+    {
+      "msgId": 2647,
+      "date": "2026-02-18",
+      "team": "ДА",
+      "players": [
+        "Алёна Борисова",
+        "играющий тренер",
+        "команды",
+        "Поэт",
+        "создатель московского",
+        "музыкально",
+        "поэтического фестиваля",
+        "фест",
+        "который стремительно",
+        "завоёвывает сердца",
+        "столичной публики",
+        "Считает",
+        "что",
+        "помощью искусства",
+        "нужно преобразовывать",
+        "мир вокруг",
+        "Видит поэзию",
+        "не только",
+        "как источник",
+        "эстетических впечатлений"
+      ]
+    },
+    {
+      "msgId": 2648,
+      "date": "2026-02-18",
+      "team": "ДА",
+      "players": [
+        "Команда",
+        "Состав",
+        "Алёна Борисова",
+        "играющий тренер",
+        "Дарья Тимошенко",
+        "зам",
+        "тренера",
+        "Варвара Герасимович",
+        "Евгений Севостьянов",
+        "Дмитрий Свистунов",
+        "Алексей Кольчугин",
+        "Светлана Сергеева",
+        "Екатерина Юргель",
+        "Настя Карандаева",
+        "Ярослава Попова",
+        "Мария Андреева",
+        "Ксения Пронина",
+        "Ксения Ильина",
+        "Леана Живова",
+        "Артём Бирлов"
+      ]
+    },
+    {
+      "msgId": 2659,
+      "date": "2026-02-21",
+      "team": "РЫБА",
+      "players": [
+        "Оргкомитет второго",
+        "сезона",
+        "Пришло время",
+        "познакомить вас",
+        "нашими бойцами",
+        "невидимого фронта",
+        "теми",
+        "благодаря кому",
+        "живёт",
+        "растёт",
+        "развивается",
+        "Встречайте обновлённый",
+        "состав нашего",
+        "оргкомитета",
+        "Денис Рубин",
+        "создатель Кубка",
+        "Большого Слэма",
+        "организатор",
+        "ведущий слэмов",
+        "Питере"
+      ]
+    },
+    {
+      "msgId": 2675,
+      "date": "2026-02-22",
+      "team": "TERIYAKI SQUAD",
+      "players": [
+        "Продолжаем знакомить",
+        "вас",
+        "тренерами",
+        "командами второго",
+        "сезона",
+        "Полина Пехтерева",
+        "играющий тренер",
+        "команды",
+        "прошлом сезоне",
+        "участвовала",
+        "составе команды",
+        "команде",
+        "это фолиант",
+        "написанный разными",
+        "почерками",
+        "где под",
+        "одной обложкой",
+        "собрались поэты",
+        "артисты оперы",
+        "художники стекла"
+      ]
+    },
+    {
+      "msgId": 2676,
+      "date": "2026-02-22",
+      "team": "In Folio",
+      "players": [
+        "Команда",
+        "Состав",
+        "Полина Пехтерева",
+        "играющий тренер",
+        "Анна Тихонова",
+        "играющий зам",
+        "тренера",
+        "Кристина Усова",
+        "Артем Подольский",
+        "Михаил Басков",
+        "Дмитрий Терновой",
+        "Леонид Коммьев",
+        "катины",
+        "мелочи\nСофья",
+        "Беседина\nАндрей",
+        "Адяков\nАва",
+        "Зайцева\nАлексей",
+        "Мавренков",
+        "канал команды"
+      ]
+    },
+    {
+      "msgId": 2691,
+      "date": "2026-02-23",
+      "team": "ДА",
+      "players": [
+        "Товарищеский матч",
+        "Поэтория",
+        "преддверии второго",
+        "сезона",
+        "Москве команда",
+        "команда Поэтория",
+        "проведут товарищеский",
+        "матч",
+        "Игра состоится",
+        "февраля на",
+        "сцене легендарного",
+        "клуба",
+        "Китайский лётчик",
+        "Джао Да",
+        "Зрители матча",
+        "смогут освежить",
+        "памяти правила",
+        "проведения игр",
+        "познакомиться",
+        "обновлёнными составами"
+      ]
+    },
+    {
+      "msgId": 2695,
+      "date": "2026-02-24",
+      "team": "РЫБА",
+      "players": [
+        "Команда",
+        "Состав",
+        "Ольга Тананко",
+        "играющий тренер",
+        "Светлана Носова",
+        "зам",
+        "тренера",
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Дмитрий Брисенко",
+        "Саша Колиденко",
+        "Алёна Синица",
+        "Иван Фефелов",
+        "Юлия Колоскова",
+        "Андрей Чемоданов",
+        "Денис Чехонацкий",
+        "Константин Патов",
+        "Дмитрий Адемин",
+        "Сергей Удальцов"
+      ]
+    },
+    {
+      "msgId": 2698,
+      "date": "2026-02-25",
+      "team": "ДА",
+      "players": [
+        "Объявляем составы",
+        "играющих команд",
+        "От команды",
+        "на сцену",
+        "этот день",
+        "выйдут",
+        "Дмитрий Свистунов",
+        "Алексей Кольчугин",
+        "Екатерина Юргель",
+        "Ксения Пронина",
+        "Леана Живова",
+        "Дарья Нос",
+        "Дарья Тимошенко",
+        "играющий зам",
+        "тренера",
+        "Алёна Борисова",
+        "тренер",
+        "Поэтория",
+        "Состав",
+        "Александр Жуковец"
+      ]
+    },
+    {
+      "msgId": 2701,
+      "date": "2026-02-26",
+      "team": "ДА",
+      "players": [
+        "оффтоп",
+        "февраля",
+        "библиотеке",
+        "читальне им",
+        "Пушкина пройдёт",
+        "ежегодный Александрийский",
+        "поэтический форум",
+        "На одной",
+        "площадке соберутся",
+        "поэтические проекты",
+        "лито",
+        "издатели",
+        "театры",
+        "Участники московского",
+        "будут выступать",
+        "сразу",
+        "нескольких залах",
+        "презентовать разные",
+        "проекты",
+        "Составили для"
+      ]
+    },
+    {
+      "msgId": 2726,
+      "date": "2026-02-28",
+      "team": "Кашалот",
+      "players": [
+        "Напоминаем",
+        "что",
+        "марта",
+        "мы ждём",
+        "всех желающих",
+        "на товарищеской",
+        "игре Кубка",
+        "большого слэма",
+        "между китами",
+        "котами командами",
+        "Манулы",
+        "Состав команды",
+        "Ника Батхен",
+        "Ольга Погодина",
+        "Анна Андрейчик",
+        "Екатерина Годвер",
+        "Катрин Орлова",
+        "Данил Насыбуллин",
+        "Анатолий Михайлов",
+        "Григорий Софийский"
+      ]
+    },
+    {
+      "msgId": 2732,
+      "date": "2026-03-02",
+      "team": "НЕНАХОД НОГИ",
+      "players": [
+        "Команда",
+        "Состав",
+        "Миша Татарский",
+        "играющий тренер",
+        "Саша Айра",
+        "заместитель тренера",
+        "Екатерина Рейн",
+        "Михаил Кедреновский",
+        "Александр Скуба",
+        "Ваня Шупляков",
+        "Павел Киселёв",
+        "Молли\nЕвгений",
+        "Петрушенко\nПаша",
+        "Судаков",
+        "канал команды"
+      ]
+    },
+    {
+      "msgId": 2734,
+      "date": "2026-03-02",
+      "team": "ДА",
+      "players": [
+        "составы\n\nСоставы",
+        "на сегодняшний",
+        "матч\n\nШатуны",
+        "Костя Денисов",
+        "Арсений Неверов",
+        "Юля Зелёнкина",
+        "Настя Бар",
+        "Катя Чемодурова",
+        "Маша Дурманова",
+        "Аня Малкович",
+        "Ваня Симак",
+        "играющий капитан",
+        "Прохор Брана",
+        "Дарья Пиотровская",
+        "Григорий Шерстнев",
+        "Артем Ежов",
+        "София Грабовская",
+        "Сергей Ведург",
+        "Сергей Журавлев",
+        "Елена Пантелеймонова"
+      ]
+    },
+    {
+      "msgId": 2749,
+      "date": "2026-03-03",
+      "team": "ДА",
+      "players": [
+        "составы\n\nСоставы",
+        "на сегодняшний",
+        "матч",
+        "Варвара Герасимович",
+        "Светлана Сергеева",
+        "Екатерина Юргель",
+        "Ксения Пронина",
+        "Леана Живова",
+        "Артём Бирлов",
+        "Дарья Нос",
+        "Рина\nДарья",
+        "Тимошенко",
+        "неиграющий зам",
+        "тренера",
+        "Аксинья Домео",
+        "Рамона Лайдон",
+        "Линн Ворон",
+        "Дарина Болгова",
+        "Дарья Чорня",
+        "Мария Скокова"
+      ]
+    },
+    {
+      "msgId": 2768,
+      "date": "2026-03-07",
+      "team": "Кашалот",
+      "players": [
+        "оффтоп",
+        "марта",
+        "Библиотеке",
+        "читальне имени",
+        "Пушкина пройдёт",
+        "творческий вечер",
+        "участницы команды",
+        "Кашалот Ники",
+        "Батхен\n\nНика",
+        "Батхен",
+        "литератор",
+        "журналист",
+        "редактор",
+        "составитель",
+        "член Союза",
+        "литераторов России",
+        "Выпустила",
+        "книг сольно",
+        "также",
+        "соавторстве со"
+      ]
+    },
+    {
+      "msgId": 2774,
+      "date": "2026-03-09",
+      "team": "ДА",
+      "players": [
+        "играющая капитанесса",
+        "Дарья Кулагина",
+        "играющий заместитель",
+        "тренера",
+        "Дарья Бекешко",
+        "Василь Товченников",
+        "Алёна Мосина",
+        "Марина Миллер",
+        "Снежанна Морозова",
+        "Ива Фатеева",
+        "Мели Здзжедук",
+        "Роман Орлов",
+        "Иван Павлов",
+        "Дарья",
+        "Девочка",
+        "розовых очках",
+        "Ксюша Котченко",
+        "Аска Паяра",
+        "Анна Талая",
+        "маски"
+      ]
+    },
+    {
+      "msgId": 2783,
+      "date": "2026-03-10",
+      "team": "In Folio",
+      "players": [
+        "Дмитрий Терновой",
+        "Андрей Адяков",
+        "Артем Подольский",
+        "Кристина Усова",
+        "Адам Гасиев",
+        "Анна Тихонова",
+        "Полина Пехтерева"
+      ]
+    },
+    {
+      "msgId": 2783,
+      "date": "2026-03-10",
+      "team": "Метаморфоза",
+      "players": [
+        "Станислав Бенецкий",
+        "Алиса Орлова",
+        "Дмитрий Беседа",
+        "Татьяна Огурцова",
+        "Илья Фролов",
+        "Ксения Гильман",
+        "Николай Ратников",
+        "Кристина Терсенова"
+      ]
+    },
+    {
+      "msgId": 2797,
+      "date": "2026-03-11",
+      "team": "Прогрев",
+      "players": [
+        "Сергей Александров",
+        "Артём Корнилов",
+        "Абра Д. Швейный",
+        "Марк Крюков",
+        "Дори Рыбка",
+        "Даниил Невнятин"
+      ]
+    },
+    {
+      "msgId": 2797,
+      "date": "2026-03-11",
+      "team": "Кашалот",
+      "players": [
+        "Игорь Грай",
+        "Ника Батхен",
+        "Анатолий Михайлов",
+        "Катрин Орлова",
+        "Елизавета Белозёрова",
+        "Данил Насыбуллин",
+        "Анна Андрейчик",
+        "Григорий Софийский"
+      ]
+    },
+    {
+      "msgId": 2827,
+      "date": "2026-03-12",
+      "team": "Манулы",
+      "players": [
+        "Мария Болтышова",
+        "Артём Прилепин",
+        "Мария Тухватулина",
+        "Павел Погосян",
+        "Геля Гадалина",
+        "Андрей Макаренко",
+        "Ася Митрофанова",
+        "Женя Борщевик",
+        "Пётр Свистунов"
+      ]
+    },
+    {
+      "msgId": 2827,
+      "date": "2026-03-12",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Светлана Носова",
+        "Андрей Чемоданов",
+        "Саша Колиденко",
+        "Юлия Колоскова",
+        "Дмитрий Брисенко",
+        "Ольга Тананко"
+      ]
+    },
+    {
+      "msgId": 2858,
+      "date": "2026-03-15",
+      "team": "Маски",
+      "players": [
+        "Polsha Vishnevskaya",
+        "Дарья Кулагина",
+        "Tana Cat",
+        "Дарья Бекешко",
+        "Василь Товченников",
+        "Алёна Мосина",
+        "Ива Фатеева",
+        "Мели Здзжедук"
+      ]
+    },
+    {
+      "msgId": 2858,
+      "date": "2026-03-15",
+      "team": "НЕНАХОД НОГИ",
+      "players": [
+        "Михаил Татарский",
+        "Саша Айрапетова",
+        "Михаил Кедреновский",
+        "Ваня Шупляков",
+        "Павел Киселёв",
+        "Александр Скуба",
+        "Паша Судаков",
+        "Екатерина Рейн"
+      ]
+    },
+    {
+      "msgId": 2867,
+      "date": "2026-03-16",
+      "team": "Солянка",
+      "players": [
+        "Денис Луговов",
+        "Андрей Килла",
+        "Виталий Викторович Загугли Гаев",
+        "Андрей Рыжов",
+        "Евгений Обжаров",
+        "Ляксей Михайлов",
+        "Вадим Еремеев",
+        "Татьяна Апрельская",
+        "Аня Встяная",
+        "Леонид Ярошенко",
+        "Саша Дрейфус",
+        "Юра Степанов",
+        "Анна Киладзе",
+        "Андрей Макатинский"
+      ]
+    },
+    {
+      "msgId": 2879,
+      "date": "2026-03-17",
+      "team": "СТИХИ НАРОДА",
+      "players": [
+        "Прохор Брана",
+        "Михаил Коваль",
+        "Артем Ежов",
+        "София Грабовская",
+        "Григорий Шерстнев",
+        "Дмитрий Пустовалов",
+        "Елена Пантелеймонова-Брана"
+      ]
+    },
+    {
+      "msgId": 2879,
+      "date": "2026-03-17",
+      "team": "ОПГ",
+      "players": [
+        "Марина Вернигорова",
+        "Ольга Внукова",
+        "Мария Горбунова",
+        "Аксинья Домео",
+        "Рамона Лайдон",
+        "Дарина Болгова",
+        "Дарья Чорня",
+        "Мария Скокова",
+        "Морена"
+      ]
+    },
+    {
+      "msgId": 2889,
+      "date": "2026-03-18",
+      "team": "ДА",
+      "players": [
+        "Дмитрий Свистунов",
+        "Светлана Сергеева",
+        "Алексей Кольчугин",
+        "Ксения Пронина",
+        "Леана Живова",
+        "Злата Черн",
+        "Рина",
+        "Дарья Тимошенко"
+      ]
+    },
+    {
+      "msgId": 3005,
+      "date": "2026-03-23",
+      "team": "Поэтория",
+      "players": [
+        "Александр Жуковец",
+        "Алена Мальцева",
+        "Суперджуз",
+        "Мари",
+        "Найден Жив",
+        "Алекс Лето",
+        "Саша Юдин",
+        "Иван Назаров",
+        "Рината Рассказова"
+      ]
+    },
+    {
+      "msgId": 3012,
+      "date": "2026-03-24",
+      "team": "Кашалот",
+      "players": [
+        "Николай Калиниченко",
+        "Екатерина Годвер",
+        "Игорь Грай",
+        "Ника Батхен",
+        "Иван Козин aka Стив Бургундец",
+        "Катрин Орлова",
+        "Анна Андрейчик",
+        "Григорий Софийский"
+      ]
+    },
+    {
+      "msgId": 3012,
+      "date": "2026-03-24",
+      "team": "РЫБА",
+      "players": [
+        "Пётр Кифа",
+        "Евгений Лесин",
+        "Сергей Синяков",
+        "Светлана Носова",
+        "Андрей Чемоданов",
+        "Саша Колиденко",
+        "Юлия Колоскова",
+        "Денис Чехонацкий",
+        "Ольга Тананко"
+      ]
+    },
+    {
+      "msgId": 3026,
+      "date": "2026-03-25",
+      "team": "Прогрев",
+      "players": ["Артём Корнилов", "Мира Миронова", "Даниил Невнятин", "Сергей Александров", "Дори Рыбка", "Агнесса"]
+    },
+    {
+      "msgId": 3026,
+      "date": "2026-03-25",
+      "team": "Манулы",
+      "players": [
+        "Мария Болтышова",
+        "Мария Усанова",
+        "Анна Лаптева",
+        "Даниил Чернышов",
+        "Андрей Макаренко",
+        "Ася Митрофанова",
+        "Женя Борщевик",
+        "Пётр Свистунов"
+      ]
+    },
+    {
+      "msgId": 3050,
+      "date": "2026-03-29",
+      "team": "Маски",
+      "players": [
+        "Дарья Кулагина",
+        "Ива Фатеева",
+        "Василь Товченников",
+        "Алёна Мосина",
+        "Роман Орлов",
+        "Марина Миллер",
+        "Иван Павлов",
+        "Polsha Vishnevskaya",
+        "Аня Встяная",
+        "Юра Степанов",
+        "Ксюша Дёрова",
+        "Анна Киладзе",
+        "Бедная Лиза",
+        "Андрей Макатинский"
+      ]
+    },
+    {
+      "msgId": 3063,
+      "date": "2026-03-31",
+      "team": "НЕНАХОД НОГИ",
+      "players": [
+        "Саша Айра",
+        "Екатерина Рейн",
+        "Михаил Кедреновский",
+        "Александр Скуба",
+        "Ваня Шупляков",
+        "Евгений Петрушенко",
+        "Паша Судаков",
+        "Миша Татарский"
+      ]
+    },
+    {
+      "msgId": 3063,
+      "date": "2026-03-31",
+      "team": "Солянка",
+      "players": [
+        "Варя Петрова",
+        "Юлия Петрова",
+        "Дарья Алейник",
+        "Йеностейшн Руба",
+        "Таня МаТаня",
+        "Ксения Жидковская",
+        "Нонна",
+        "Татьяна Апрельская"
+      ]
+    },
+    {
+      "msgId": 3083,
+      "date": "2026-04-02",
+      "team": "СТИХИ НАРОДА",
+      "players": [
+        "Прохор Брана",
+        "Денис Пикляев",
+        "Григорий Шерстнев",
+        "Сергей Журавлев",
+        "Сергей Ведург",
+        "Дарья Пиотровская",
+        "Елена Пантелеймонова-Брана"
+      ]
+    },
+    {
+      "msgId": 3083,
+      "date": "2026-04-02",
+      "team": "Метаморфоза",
+      "players": [
+        "Наталья Верескова",
+        "Николай Ратников",
+        "Екатерина Весёлкина",
+        "Анастасия Задорова",
+        "Дмитрий Беседа",
+        "Алиса Орлова",
+        "Хытец",
+        "Кристина Терсенова"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "msgId": 23,
+      "name": "Владимир Красноруженко",
+      "role": "играющий",
+      "team": "Чатл",
+      "bio": ""
+    },
+    {
+      "msgId": 27,
+      "name": "Джамиль Нилов",
+      "role": "играющий",
+      "team": "Против",
+      "bio": ""
+    },
+    {
+      "msgId": 30,
+      "name": "Антон Кобец",
+      "role": "играющий",
+      "team": "Жемчужные",
+      "bio": ""
+    },
+    {
+      "msgId": 31,
+      "name": "Алёна Филина",
+      "role": "неиграющий",
+      "team": "Жемчужные",
+      "bio": ""
+    },
+    {
+      "msgId": 104,
+      "name": "Лана Сергеева",
+      "role": "играющий",
+      "team": "Салон изящных искусств | на высоких вибрациях",
+      "bio": ""
+    },
+    {
+      "msgId": 115,
+      "name": "Елена Пантелеймонова",
+      "role": "неиграющий",
+      "team": "Бродячие артисты",
+      "bio": ""
+    },
+    {
+      "msgId": 183,
+      "name": "Николай Калиниченко",
+      "role": "играющий",
+      "team": "Кашалот",
+      "bio": ""
+    },
+    {
+      "msgId": 1325,
+      "name": "Руслан Шишкин",
+      "role": "поэт, организатор КБС в Москве, тренер команды РЫБА.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  26 августа в баре «Петров и Васечка» пройдет поэтически-музыкальный квартирник.  На сцене:  Руслан Шишкин – поэт, организатор КБС в Москве, тренер команды РЫБА.  Денис Мендрелюк – музыкант, композитор, продюсер, фронтмен групп Mendream и LES"
+    },
+    {
+      "msgId": 1325,
+      "name": "Денис Мендрелюк",
+      "role": "музыкант, композитор, продюсер, фронтмен групп Mendream и LES ROOK.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  26 августа в баре «Петров и Васечка» пройдет поэтически-музыкальный квартирник.  На сцене:  Руслан Шишкин – поэт, организатор КБС в Москве, тренер команды РЫБА.  Денис Мендрелюк – музыкант, композитор, продюсер, фронтмен групп Mendream и LES"
+    },
+    {
+      "msgId": 1418,
+      "name": "Даниил Невнятин",
+      "role": "играющий тренер новой команды TERIYAKI SQUAD",
+      "team": null,
+      "bio": "Даниил Невнятин – играющий тренер новой команды TERIYAKI SQUAD  Экс-участник команды ЛитПон, в трансферное окно ворвавшийся в новую команду.  Люблю есть колбасу и людей. Команда TERIYAKI SQUAD для меня – всё и ещё чуть-чуть сверху.  Также он:  Недоуч"
+    },
+    {
+      "msgId": 1600,
+      "name": "Светлана Носова",
+      "role": "поэт, организатор КБС в Москве, участница команды РЫБА.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  30 сентября Союз Литераторов России проводит дискуссионный клуб, посвящённый Кубку Большого Слэма.  Будем говорить об особенностях КБС в Москве, плюсах и минусах проекта, делиться мнениями и впечатлениями о Кубке в уютном музыкальном подвале"
+    },
+    {
+      "msgId": 1600,
+      "name": "Дмитрий Ерохин",
+      "role": "поэт, блогер, член СЛ РФ, участник команды Кашалот.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  30 сентября Союз Литераторов России проводит дискуссионный клуб, посвящённый Кубку Большого Слэма.  Будем говорить об особенностях КБС в Москве, плюсах и минусах проекта, делиться мнениями и впечатлениями о Кубке в уютном музыкальном подвале"
+    },
+    {
+      "msgId": 1600,
+      "name": "Максим Маркевич",
+      "role": "поэт, художник, музыкант, член СЛ РФ.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  30 сентября Союз Литераторов России проводит дискуссионный клуб, посвящённый Кубку Большого Слэма.  Будем говорить об особенностях КБС в Москве, плюсах и минусах проекта, делиться мнениями и впечатлениями о Кубке в уютном музыкальном подвале"
+    },
+    {
+      "msgId": 1600,
+      "name": "Евгений Харитонов",
+      "role": "поэт, писатель, музыкант, член правления СЛ РФ.",
+      "team": "РЫБА",
+      "bio": "#оффтоп  30 сентября Союз Литераторов России проводит дискуссионный клуб, посвящённый Кубку Большого Слэма.  Будем говорить об особенностях КБС в Москве, плюсах и минусах проекта, делиться мнениями и впечатлениями о Кубке в уютном музыкальном подвале"
+    },
+    {
+      "msgId": 1721,
+      "name": "Все победители",
+      "role": "питерские легионеры команды Шатуны, а в СПб играют в Кубке за команду Обормоты (тренер – Витя Горелый).",
+      "team": null,
+      "bio": "Поздравляем победителей 7 Российского литературного слэма, который прошел 6-7 октября в Питере:  🥇место – Витя Горелый  🥈место – Поляк Сергеев  🥉место – Лена Стрельникова   Все победители – питерские легионеры команды Шатуны, а в СПб играют в Кубк"
+    }
+  ],
+  "venues": [
+    {
+      "name": "Фальстарт",
+      "address": "Большой Путинковский пер, д.5.",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Лахесис",
+      "address": "сегодня можно приходить со своим алкоголем и едой",
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "Столярка",
+      "address": "Малая Семёновская ул. 5, стр.3.",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Дежурная рюмочная",
+      "address": "ул. Новый Арбат, д.7а (3 этаж)",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Горнист",
+      "address": "Подкопаевский переулок, д.4, стр. 6а.",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Лампопо",
+      "address": "Рождественский бульвар, 22/23",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Археология",
+      "address": "ул. Новорязанская, д. 29, стр. 3.",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Место притяжения",
+      "address": "Никольская ул., 11-13, стр.3.",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Ладья",
+      "address": "Столешников переулок 6, стр",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Клуб",
+      "address": "Покровский бульвар, 6/20с1",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Kinky Rouge",
+      "address": "ул. Малая Якиманка, 24",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Китайский лётчик Джао Да",
+      "address": "Лубянский проезд, д.25, стр.1",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Китайский Лётчик Джао Да",
+      "address": null,
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "Howard Loves Craft",
+      "address": "Болотная набережная, 7с3",
+      "type": null,
+      "city": "Москва"
+    },
+    {
+      "name": "МИЛК",
+      "address": "Начало: 20",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Комната отдыха",
+      "address": "Грузинский вал, д. 11, стр. 4",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "клуб",
+      "address": "Покровский бульвар 6/20с1",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Воронежская областная библиотека им. Кубанёва",
+      "address": "ул. Никтинская, д.32.",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Инкогнито",
+      "address": "ул. Большая Семеновская, д.11, стр. 2",
+      "type": "ночной клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "Край",
+      "address": "Николоямская ул., 62.",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Пространство LISO Space",
+      "address": "Селивёрстов пер., 1/26.",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Цеппелин N°5",
+      "address": "Филевский Бульвар, 10",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Южная рюмочная",
+      "address": "ул. Большая Татарская, д.5.",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Opezdol's crew",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Медленные лошади",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Не на мягкий знак",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Крещенские морозы",
+      "address": "Кржижановского, д. 14к",
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "сложной",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Шагал",
+      "address": "Кржижановского, д. 14к",
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "ДА фестов",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "тридцатки",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Птица поэта",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "ДА фест",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "5+",
+      "address": "Новый Арбат, д. 7",
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Чатл",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Кашалот",
+      "address": "Большая Черкизовская, д. 4",
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "6 лет на одной сцене",
+      "address": "Кржижановского, д. 14к",
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "Манулы",
+      "address": null,
+      "type": "клуб",
+      "city": "Москва"
+    },
+    {
+      "name": "Лучший стадион",
+      "address": null,
+      "type": "бар",
+      "city": "Москва"
+    },
+    {
+      "name": "Китайский лётчик Джао ДА",
+      "address": null,
+      "type": "клуб",
+      "city": "Москва"
+    }
+  ],
+  "rounds": [],
+  "teams": [
+    {
+      "name": "ДА",
+      "telegramUrl": "https://t.me/yes_fest_team",
+      "homeVenue": "Китайский Лётчик Джао Да"
+    },
+    {
+      "name": "Чатл",
+      "telegramUrl": "https://t.me/ChatlKBS",
+      "homeVenue": "Ладья"
+    },
+    {
+      "name": "Жемчужные",
+      "telegramUrl": "https://t.me/Jemchoog",
+      "homeVenue": "Лахесис"
+    },
+    {
+      "name": "ЛитПон",
+      "telegramUrl": "https://t.me/litpon_since2009",
+      "homeVenue": null
+    },
+    {
+      "name": "Бродячие артисты",
+      "telegramUrl": "https://t.me/BA_slam_narod_poetry",
+      "homeVenue": "Столярка"
+    },
+    {
+      "name": "Шатуны",
+      "telegramUrl": "https://t.me/ShatyniSlam",
+      "homeVenue": "Дежурная рюмочная"
+    },
+    {
+      "name": "Против",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Птица поэта",
+      "telegramUrl": "https://t.me/ptitsanasleme",
+      "homeVenue": "Лампопо"
+    },
+    {
+      "name": "Кашалот",
+      "telegramUrl": "https://t.me/kashalot_team",
+      "homeVenue": "Археология"
+    },
+    {
+      "name": "Птица поэта",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "СИИ",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "РЫБА",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "РЫБА",
+      "telegramUrl": "https://t.me/kashalot_team",
+      "homeVenue": null
+    },
+    {
+      "name": "Opezdol's Crew",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Дикпики",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "TERIYAKI SQUAD",
+      "telegramUrl": "https://t.me/BA_slam_narod_poetry",
+      "homeVenue": null
+    },
+    {
+      "name": "In Folio",
+      "telegramUrl": "https://t.me/infolio_poetry",
+      "homeVenue": "In Folio"
+    },
+    {
+      "name": "НЕНАХОД НОГИ",
+      "telegramUrl": "https://t.me/NOGA404",
+      "homeVenue": "НЕНАХОД НОГИ"
+    },
+    {
+      "name": "Метаморфоза",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Прогрев",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Манулы",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Маски",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Солянка",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "СТИХИ НАРОДА",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "ОПГ",
+      "telegramUrl": null,
+      "homeVenue": null
+    },
+    {
+      "name": "Поэтория",
+      "telegramUrl": null,
+      "homeVenue": null
+    }
+  ]
+}

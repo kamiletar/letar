@@ -1,0 +1,20 @@
+{
+  "name": "form-example",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/form-example/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:form-example"],
+  "targets": {
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "zenstack generate || (echo 'zenstack generate skipped — fallback to prisma generate' && npx prisma generate)",
+        "cwd": "apps/form-example"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/schema.zmodel", { "runtime": "node -p process.platform" }],
+      "outputs": ["{projectRoot}/src/generated"]
+    },
+    "build": {}
+  }
+}

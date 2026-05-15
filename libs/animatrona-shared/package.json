@@ -1,0 +1,26 @@
+{
+  "name": "@letar/animatrona-shared",
+  "version": "0.2.1",
+  "description": "Shared code for animatrona-mobile and animatrona-tv",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lena-corp/lena"
+  },
+  "author": "Lena Corp",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.73",
+    "zustand": ">=5",
+    "@react-native-async-storage/async-storage": ">=2"
+  },
+  "dependencies": {
+    "@letar/animatrona-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0"
+  }
+}

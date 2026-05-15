@@ -1,0 +1,194 @@
+---
+title: Selection Fields
+description: Select, Combobox, RadioGroup, Checkbox, and more
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="select" height={550} />
+
+## Form.Field.Select
+
+Dropdown select for choosing from a list of options.
+
+```tsx
+const Schema = z.object({
+  category: z.enum(['electronics', 'clothing', 'books']).meta({
+    ui: { title: 'Category' },
+  }),
+})
+
+<Form.Field.Select name="category" />
+```
+
+Options are automatically generated from `z.enum()`. For custom labels:
+
+```tsx
+const Schema = z.object({
+  status: z.enum(['active', 'inactive', 'pending']).meta({
+    ui: {
+      title: 'Status',
+      options: [
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' },
+        { value: 'pending', label: 'Pending Review' },
+      ],
+    },
+  }),
+})
+```
+
+## Form.Field.Combobox
+
+Searchable select with autocomplete. Great for large option lists.
+
+```tsx
+const Schema = z.object({
+  country: z.string().meta({
+    ui: { title: 'Country', placeholder: 'Search countries...' },
+  }),
+})
+
+<Form.Field.Combobox
+  name="country"
+  options={countries.map(c => ({ value: c.code, label: c.name }))}
+/>
+```
+
+### Async Search
+
+Load options from an API as the user types:
+
+```tsx
+<Form.Field.Combobox
+  name="user"
+  asyncSearch={async (query) => {
+    const res = await fetch(`/api/users?q=${query}`)
+    const users = await res.json()
+    return users.map((u) => ({ value: u.id, label: u.name }))
+  }}
+/>
+```
+
+## Form.Field.RadioGroup
+
+Radio button group for single selection.
+
+```tsx
+const Schema = z.object({
+  plan: z.enum(['free', 'pro', 'enterprise']).meta({
+    ui: { title: 'Plan' },
+  }),
+})
+
+<Form.Field.RadioGroup name="plan" />
+```
+
+## Form.Field.Checkbox
+
+Standard checkbox for boolean values.
+
+```tsx
+const Schema = z.object({
+  agree: z.boolean().meta({
+    ui: { title: 'I agree to the terms and conditions' },
+  }),
+})
+
+<Form.Field.Checkbox name="agree" />
+```
+
+## Form.Field.Switch
+
+Toggle switch — visually distinct from checkbox.
+
+```tsx
+const Schema = z.object({
+  notifications: z.boolean().meta({
+    ui: { title: 'Enable notifications' },
+  }),
+})
+
+<Form.Field.Switch name="notifications" />
+```
+
+## Form.Field.Tags
+
+Tag input with autocomplete. Users can add multiple tags.
+
+```tsx
+const Schema = z.object({
+  skills: z.array(z.string()).meta({
+    ui: { title: 'Skills', placeholder: 'Add a skill...' },
+  }),
+})
+
+<Form.Field.Tags name="skills" />
+
+// With max limit
+<Form.Field.Tags name="skills" maxTags={5} />
+```
+
+## Form.Field.RadioCard
+
+Card-based selection — visually richer than RadioGroup. Supports `description` per option.
+
+```tsx
+const options = [
+  { value: 'starter', label: 'Starter', description: '$0/mo — for side projects' },
+  { value: 'pro', label: 'Pro', description: '$29/mo — for teams' },
+  { value: 'enterprise', label: 'Enterprise', description: '$99/mo — unlimited' },
+]
+
+<Form.Field.RadioCard name="plan" options={options} />
+```
+
+## Form.Field.CheckboxCard
+
+Card-based multiple selection. Like RadioCard but allows selecting multiple items.
+
+```tsx
+<Form.Field.CheckboxCard
+  name="features"
+  options={[
+    { value: 'auth', label: 'Authentication', description: 'OAuth, magic links' },
+    { value: 'payments', label: 'Payments', description: 'Stripe integration' },
+    { value: 'analytics', label: 'Analytics', description: 'Usage tracking' },
+  ]}
+/>
+```
+
+## Form.Field.Listbox
+
+Dropdown list for single or multiple selection. Alternative to Select for larger lists.
+
+```tsx
+// Single selection
+<Form.Field.Listbox name="timezone" options={timezoneOptions} />
+
+// Multiple selection
+<Form.Field.Listbox name="permissions" options={permissionOptions} multiple />
+```
+
+## Form.Field.NativeSelect
+
+Standard HTML `<select>` element. Lighter than Select, uses native browser UI.
+
+```tsx
+<Form.Field.NativeSelect name="country" options={countryOptions} />
+```
+
+## Form.Field.SegmentedGroup
+
+Segmented control — pill-shaped toggle group for small option sets.
+
+```tsx
+<Form.Field.SegmentedGroup
+  name="view"
+  options={[
+    { value: 'grid', label: 'Grid' },
+    { value: 'list', label: 'List' },
+    { value: 'table', label: 'Table' },
+  ]}
+/>
+```

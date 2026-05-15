@@ -1,0 +1,87 @@
+---
+title: Шаблоны форм
+description: 10 готовых шаблонов форм для быстрой разработки
+---
+
+## Обзор
+
+Шаблоны форм предоставляют готовые схемы с дефолтными значениями для типовых сценариев. Используйте их как есть или настраивайте через переопределения.
+
+## Быстрый старт
+
+```tsx
+import { templates } from '@letar/forms'
+
+<Form.FromTemplate
+  template={templates.contactForm}
+  onSubmit={handleSubmit}
+  submitLabel="Отправить сообщение"
+/>
+```
+
+## Доступные шаблоны
+
+| Шаблон | Поля | Категория |
+|--------|------|-----------|
+| `loginForm` | email, password | Авторизация |
+| `registerForm` | name, email, password, confirmPassword | Авторизация |
+| `forgotPasswordForm` | email | Авторизация |
+| `contactForm` | name, email, phone, message | Обратная связь |
+| `feedbackForm` | rating, category, message, email | Обратная связь |
+| `npsForm` | score (0-10), reason, email | Опрос |
+| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account | Бизнес |
+| `orderForm` | items[], customer, address, email | Электронная коммерция |
+| `profileForm` | firstName, lastName, email, phone | Профиль |
+| `addressForm` | country, city, street, building, apartment, zip | Адрес |
+
+## Кастомизация
+
+```tsx
+<Form.FromTemplate
+  template={templates.registerForm}
+  override={{
+    exclude: ['confirmPassword'],
+    fields: { email: { label: 'Рабочий email' } },
+  }}
+  onSubmit={handleSubmit}
+/>
+```
+
+## Headless-использование
+
+Используйте только схему и дефолтные значения без UI:
+
+```tsx
+const { schema, defaultValues } = templates.contactForm
+
+// Используйте в своей форме
+<Form schema={schema} initialValue={defaultValues} onSubmit={fn}>
+  {/* Ваша кастомная разметка */}
+</Form>
+```
+
+## Создание своих шаблонов
+
+Создавайте собственные шаблоны с помощью интерфейса `FormTemplate`:
+
+```tsx
+import type { FormTemplate } from '@letar/forms'
+import { z } from 'zod/v4'
+
+export const myTemplate: FormTemplate = {
+  name: 'myTemplate',
+  title: 'Моя форма',
+  description: 'Кастомный шаблон формы',
+  category: 'feedback',
+  schema: z.object({ ... }).strip(),
+  defaultValues: { ... },
+  renderFields: () => null,
+}
+```
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/templates).

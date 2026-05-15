@@ -1,0 +1,65 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "react-hooks", "import", "nextjs"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "off",
+    "perf": "off"
+  },
+  "rules": {
+    // Дублирующие ESLint правила — отключены в oxlint, проверяются ESLint
+    "no-explicit-any": "off",
+    "no-unused-vars": "off",
+    "no-console": "off",
+    "prefer-const": "off",
+    "no-var": "error",
+    "eqeqeq": "error",
+
+    // React hooks — только rules-of-hooks как error, exhaustive-deps отдаём ESLint
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "off",
+
+    // Next.js — отключаем, т.к. ESLint plugin next уже проверяет это,
+    // а oxlint даёт ложные срабатывания в тестах и shared-библиотеках
+    "nextjs/no-html-link-for-pages": "off",
+
+    // Отключаем правила, не актуальные для React 17+
+    "react/react-in-jsx-scope": "off",
+
+    // Отключаем слишком строгие правила
+    "typescript/no-non-null-assertion": "off",
+    "no-plusplus": "off",
+    "no-await-in-loop": "off",
+    "nextjs/no-assign-module-variable": "off"
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/node_modules/**",
+    "**/prisma/generated/**",
+    "**/src/generated/**",
+    "**/zod/**",
+    "**/test-output/**",
+    "**/public/**",
+    "**/*.config.*",
+    "**/types/**/*.d.ts"
+  ],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "globals": {
+    "React": "readonly",
+    "JSX": "readonly"
+  },
+  "settings": {
+    "react": {
+      "version": "19"
+    },
+    "next": {
+      "rootDir": ["apps/*"]
+    }
+  }
+}

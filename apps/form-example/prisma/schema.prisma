@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Status {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
+enum ContactSubject {
+  SUPPORT
+  SALES
+  FEEDBACK
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  status      Status   @default(DRAFT)
+  tags        String[]
+  rating      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Contact {
+  id        String         @id @default(cuid())
+  name      String
+  email     String
+  subject   ContactSubject
+  message   String
+  createdAt DateTime       @default(now())
+}

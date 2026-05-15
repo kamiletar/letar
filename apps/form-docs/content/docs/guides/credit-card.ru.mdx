@@ -1,0 +1,72 @@
+---
+title: Банковская карта
+description: Ввод номера карты с определением платёжной системы, срока действия и CVC
+---
+
+## Обзор
+
+`Form.Field.CreditCard` — составной компонент ввода данных платёжной карты: номер (с автоопределением Visa, MasterCard, Мир и др.), срок действия и CVC.
+
+## Базовое использование
+
+```tsx
+<Form initialValue={{ card: { number: '', expiry: '', cvc: '' } }} onSubmit={handleSubmit}>
+  <Form.Field.CreditCard name="card" label="Платёжная карта" />
+  <Form.Button.Submit>Оплатить</Form.Button.Submit>
+</Form>
+```
+
+## Компоновка
+
+**Inline** — все поля в одну строку:
+
+```tsx
+<Form.Field.CreditCard name="card" layout="inline" />
+```
+
+**Stacked** — поля расположены вертикально:
+
+```tsx
+<Form.Field.CreditCard name="card" layout="stacked" />
+```
+
+## Пропсы
+
+| Пропс | Тип | По умолчанию | Описание |
+|-------|-----|--------------|----------|
+| `name` | `string` | — | Имя группы полей |
+| `label` | `string` | — | Подпись |
+| `brands` | `CardBrand[]` | все | Ограничить принимаемые платёжные системы |
+| `showBrandIcon` | `boolean` | `true` | Показывать иконку определённой системы |
+| `layout` | `'inline' \| 'stacked'` | `'inline'` | Компоновка полей |
+| `disabled` | `boolean` | `false` | Отключить ввод |
+| `readOnly` | `boolean` | `false` | Режим только для чтения |
+
+## Значение
+
+```typescript
+{ number: '4111111111111111', expiry: '12/28', cvc: '123' }
+```
+
+## Определение платёжной системы
+
+Платёжная система определяется автоматически по первым цифрам: Visa (4), MasterCard (51-55), Мир (2200-2204), American Express (34/37) и другие.
+
+## Валидация
+
+Встроенная валидация номера карты по алгоритму Луна. Используйте `creditCardSchema` для валидации через Zod:
+
+```tsx
+import { creditCardSchema } from '@letar/forms'
+
+const schema = z.object({
+  card: creditCardSchema,
+})
+```
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/credit-card).

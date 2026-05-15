@@ -1,0 +1,98 @@
+---
+title: URL Prefill
+description: Автозаполнение полей формы из URL-параметров
+---
+
+## Обзор
+
+`useUrlPrefill` извлекает значения из URL-параметров для инициализации формы. Использует whitelist для безопасности — извлекаются только указанные поля.
+
+## Быстрый пример
+
+```tsx
+import { useUrlPrefill } from '@letar/forms'
+
+// URL: /contact?name=Иван&email=ivan@test.com&hack=evil
+const prefilled = useUrlPrefill({
+  fields: ['name', 'email'],
+  cleanUrl: true,
+})
+// prefilled = { name: 'Иван', email: 'ivan@test.com' }
+// 'hack' игнорируется — не в whitelist
+```
+
+## С формой
+
+```tsx
+function ContactForm() {
+  const prefilled = useUrlPrefill({
+    fields: ['name', 'email', 'phone'],
+    cleanUrl: true,
+  })
+
+  return (
+    <Form
+      schema={ContactSchema}
+      initialValue={{ name: '', email: '', phone: '', ...prefilled }}
+      onSubmit={save}
+    >
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Phone name="phone" />
+      <Form.Button.Submit>Отправить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+## Маппинг параметров
+
+Маппинг URL-параметров на имена полей формы:
+
+```tsx
+// URL: /form?user_name=Иван&mail=ivan@test.com
+const prefilled = useUrlPrefill({
+  fields: ['name', 'email'],
+  mapping: { user_name: 'name', mail: 'email' },
+})
+// prefilled = { name: 'Иван', email: 'ivan@test.com' }
+```
+
+## Массивы и вложенные объекты
+
+```tsx
+// Массивы: /form?tag=react&tag=forms
+// → { tag: ['react', 'forms'] }
+
+// Вложенные: /form?address.city=Moscow&address.street=Тверская
+// → { address: { city: 'Moscow', street: 'Тверская' } }
+```
+
+## Генерация ссылок
+
+```tsx
+import { generatePrefillUrl } from '@letar/forms'
+
+const url = generatePrefillUrl('/contact', {
+  name: 'Иван',
+  email: 'ivan@test.com',
+  tags: ['react', 'forms'],
+})
+// → "/contact?name=%D0%98%D0%B2%D0%B0%D0%BD&email=ivan%40test.com&tags=react&tags=forms"
+```
+
+## Пропсы
+
+| Проп           | Тип                      | По умолч. | Описание                                |
+| -------------- | ------------------------ | --------- | --------------------------------------- |
+| `fields`       | `string[]`               | обязат.   | Whitelist разрешённых полей              |
+| `mapping`      | `Record<string, string>` | —         | URL-параметр → имя поля                 |
+| `cleanUrl`     | `boolean`                | `false`   | Удалить параметры из URL после извлечения |
+| `schema`       | `ZodSchema`              | —         | Валидация извлечённых значений          |
+| `searchParams` | `URLSearchParams`        | авто      | Кастомный источник (по умолч. window.location) |
+
+---
+
+## Живой пример
+
+Интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/url-prefill).

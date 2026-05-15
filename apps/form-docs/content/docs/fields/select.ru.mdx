@@ -1,0 +1,131 @@
+---
+title: Поля выбора
+description: Компоненты выбора — Select, Combobox, RadioGroup, Checkbox, Switch
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="select" height={550} />
+
+## Form.Field.Select
+
+Выпадающий список для выбора одного варианта.
+
+```tsx
+const Schema = z.object({
+  role: z.enum(['user', 'admin', 'moderator']).meta({
+    ui: { title: 'Роль' },
+  }),
+})
+
+const options = [
+  { value: 'user', label: 'Пользователь' },
+  { value: 'admin', label: 'Администратор' },
+  { value: 'moderator', label: 'Модератор' },
+]
+
+<Form.Field.Select name="role" options={options} />
+```
+
+## Form.Field.Combobox
+
+Выпадающий список с поиском. Поддерживает асинхронную загрузку опций.
+
+```tsx
+<Form.Field.Combobox name="city" options={cityOptions} placeholder="Начните вводить город..." />
+```
+
+## Form.Field.RadioGroup
+
+Группа радиокнопок для выбора одного варианта.
+
+```tsx
+<Form.Field.RadioGroup name="plan" options={planOptions} />
+
+// Горизонтальная ориентация
+<Form.Field.RadioGroup name="plan" options={planOptions} orientation="horizontal" />
+```
+
+## Form.Field.RadioCard
+
+Карточки для выбора одного варианта — визуально богаче чем RadioGroup.
+
+```tsx
+const options = [
+  { value: 'starter', label: 'Starter', description: '$0/мес' },
+  { value: 'pro', label: 'Pro', description: '$29/мес' },
+]
+
+<Form.Field.RadioCard name="plan" options={options} />
+```
+
+## Form.Field.Checkbox
+
+Одиночный чекбокс (да/нет).
+
+```tsx
+<Form.Field.Checkbox name="agree" />
+```
+
+## Form.Field.Switch
+
+Переключатель (вкл/выкл).
+
+```tsx
+<Form.Field.Switch name="notifications" />
+```
+
+## Form.Field.Tags
+
+Ввод тегов — множественные текстовые значения.
+
+```tsx
+<Form.Field.Tags name="skills" />
+
+// С ограничением количества
+<Form.Field.Tags name="skills" maxTags={5} />
+```
+
+## Form.Field.CheckboxCard
+
+Карточки для множественного выбора.
+
+```tsx
+<Form.Field.CheckboxCard
+  name="features"
+  options={[
+    { value: 'auth', label: 'Аутентификация', description: 'OAuth, magic links' },
+    { value: 'payments', label: 'Платежи', description: 'Интеграция Stripe' },
+  ]}
+/>
+```
+
+## Form.Field.Listbox
+
+Выпадающий список для единичного или множественного выбора.
+
+```tsx
+<Form.Field.Listbox name="permissions" options={permissionOptions} multiple />
+```
+
+## Form.Field.NativeSelect
+
+Стандартный HTML `<select>`. Легче чем Select, использует нативный UI браузера.
+
+```tsx
+<Form.Field.NativeSelect name="country" options={countryOptions} />
+```
+
+## Form.Field.SegmentedGroup
+
+Сегментированный контрол — переключатель для небольших наборов опций.
+
+```tsx
+<Form.Field.SegmentedGroup
+  name="view"
+  options={[
+    { value: 'grid', label: 'Сетка' },
+    { value: 'list', label: 'Список' },
+  ]}
+/>
+```

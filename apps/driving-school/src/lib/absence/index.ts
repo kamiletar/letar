@@ -1,0 +1,15 @@
+export {
+  createAbsence,
+  endAbsence,
+  getActiveAbsence,
+  getAffectedLessons,
+  type AbsenceData,
+  type AbsenceRepository,
+  type CreateAbsenceResult,
+  type EndAbsenceResult,
+  type GetActiveAbsenceResult,
+  type GetAffectedLessonsResult,
+  type InstructorProfileData,
+  type LessonData,
+  type SlotData,
+} from './absence-service'

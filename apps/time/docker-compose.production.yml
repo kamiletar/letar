@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: time-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: time
+      POSTGRES_USER: time
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - time-data:/var/lib/postgresql/data
+    ports:
+      - '5445:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U time -d time']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - premium-network
+
+  app:
+    image: time:latest
+    container_name: time-app
+    restart: unless-stopped
+    ports:
+      - '3013:3013'
+    env_file:
+      - .env.docker
+    environment:
+      DATABASE_URL: postgresql://time:${POSTGRES_PASSWORD}@time-db:5432/time
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - premium-network
+
+volumes:
+  time-data:
+
+networks:
+  premium-network:
+    external: true

@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Сағат нешеде?",
+    "description": "UNIX дәуірінің басынан бергі реттік сағат"
+  },
+  "time": {
+    "now": "Қазір",
+    "hour": "UNIX дәуірінің басынан бергі сағат",
+    "hoursPassed": "сағат UNIX дәуірінің басынан бері өтті"
+  },
+  "countdown": {
+    "until": "{milestone} сағатқа дейін",
+    "days": "{count, plural, one {# күн} other {# күн}}",
+    "hours": "{count, plural, one {# сағат} other {# сағат}}",
+    "minutes": "{count, plural, one {# минут} other {# минут}}",
+    "seconds": "{count, plural, one {# секунд} other {# секунд}}"
+  },
+  "celebration": {
+    "milestone": "UNIX дәуірінің {hours} сағаты!"
+  },
+  "subscribe": {
+    "subscribe": "Хабарламалар",
+    "explanation": "Электрондық поштаңызды растау және хабарлама параметрлеріне қол жеткізу үшін кіру қажет",
+    "signIn": "Кіру",
+    "settings": "Параметрлер"
+  },
+  "profile": {
+    "title": "Хабарлама параметрлері",
+    "email": "Электрондық пошта",
+    "notifyMonth": "Бір ай бұрын",
+    "notifyWeek": "Бір апта бұрын",
+    "notifyDay": "Бір күн бұрын",
+    "notifyHour": "Бір сағат бұрын",
+    "notify5Min": "5 минут бұрын",
+    "save": "Сақтау",
+    "saved": "Сақталды!",
+    "unsubscribe": "Барлығынан бас тарту",
+    "unsubscribed": "Сіз барлық хабарламалардан бас тарттыңыз",
+    "noSubscription": "Сізде әлі хабарламаларға жазылым жоқ",
+    "createSubscription": "Хабарламаларға жазылу"
+  },
+  "unsubscribe": {
+    "title": "Жазылымнан бас тарту",
+    "success": "Сіз UNIX сағат белестері хабарламаларынан сәтті бас тарттыңыз",
+    "error": "Жарамсыз жазылымнан бас тарту сілтемесі",
+    "back": "Басты бетке оралу"
+  }
+}

@@ -1,0 +1,279 @@
+{
+  "name": "mandala",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mandala/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:mandala"],
+  "targets": {
+    "update-sw-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/update-sw-version.mjs",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/package.json", "{projectRoot}/public/sw.template.js"],
+      "outputs": ["{projectRoot}/public/sw.js"],
+      "metadata": {
+        "description": "Generate sw.js with version from package.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next build",
+        "cwd": "apps/mandala"
+      },
+      "dependsOn": ["update-sw-version", "^build"],
+      "cache": false,
+      "outputs": ["{workspaceRoot}/apps/mandala/.next"],
+      "metadata": {
+        "description": "Build production bundle",
+        "technologies": ["next"]
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next dev",
+        "cwd": "apps/mandala"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Start development server (без Turbopack из-за бага с Emotion)",
+        "technologies": ["next"]
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next start",
+        "cwd": "apps/mandala"
+      },
+      "dependsOn": ["build"],
+      "cache": false,
+      "metadata": {
+        "description": "Start production server",
+        "technologies": ["next"]
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/src/generated/schema.prisma", "{projectRoot}/schema.zmodel"],
+      "outputs": ["{projectRoot}/src/generated/prisma"],
+      "metadata": {
+        "description": "Generate Prisma Client from schema",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/mandala"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
+        "cwd": "apps/mandala"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:migrate:deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/mandala"
+      },
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/mandala"
+      },
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db seed",
+        "cwd": "apps/mandala"
+      },
+      "dependsOn": ["db:generate"],
+      "metadata": {
+        "description": "Seed database with test data",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/mandala"
+      },
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": ["prisma"]
+      }
+    },
+    "db:reset:data-loss": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate reset --force",
+        "cwd": "apps/mandala"
+      },
+      "metadata": {
+        "description": "Reset database and apply all migrations (no confirmation)",
+        "technologies": ["prisma"]
+      }
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./browser\\'\\n')\""
+        ],
+        "cwd": "apps/mandala",
+        "parallel": false
+      },
+      "dependsOn": [{ "projects": ["@letar/zenstack-form-plugin"], "target": "build" }],
+      "cache": true,
+      "inputs": ["{projectRoot}/schema.zmodel"],
+      "outputs": ["{projectRoot}/src/generated"],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": ["zenstack", "prisma"]
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "metadata": {
+        "description": "Run ESLint",
+        "technologies": ["eslint"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/mandala"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run ESLint with auto-fix",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/mandala"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/mandala"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "Type-check TypeScript files with tsgo (38x faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "validate": {
+      "executor": "nx:noop",
+      "dependsOn": ["lint", "format:check", "typecheck"],
+      "metadata": {
+        "description": "Run all validation checks"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "apps/mandala/vitest.config.ts"
+      }
+    }
+  }
+}

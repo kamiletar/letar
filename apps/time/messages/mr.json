@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "किती वाजला?",
+    "description": "UNIX युगाच्या सुरुवातीपासून क्रमांक तास"
+  },
+  "time": {
+    "now": "सध्या",
+    "hour": "तास UNIX युगाच्या सुरुवातीपासून",
+    "hoursPassed": "तास उलटले आहेत UNIX युगाच्या सुरुवातीपासून"
+  },
+  "countdown": {
+    "until": "{milestone} तासांपर्यंत",
+    "days": "{count, plural, one {# दिवस} other {# दिवस}}",
+    "hours": "{count, plural, one {# तास} other {# तास}}",
+    "minutes": "{count, plural, one {# मिनिट} other {# मिनिटे}}",
+    "seconds": "{count, plural, one {# सेकंद} other {# सेकंद}}"
+  },
+  "celebration": {
+    "milestone": "UNIX युगाचे {hours} तास!"
+  },
+  "subscribe": {
+    "subscribe": "सूचना",
+    "explanation": "इमेल पडताळणी आणि सूचना सेटिंग्समध्ये प्रवेश करण्यासाठी साइन इन आवश्यक आहे",
+    "signIn": "साइन इन",
+    "settings": "सेटिंग्स"
+  },
+  "profile": {
+    "title": "सूचना सेटिंग्स",
+    "email": "इमेल",
+    "notifyMonth": "एक महिना आधी",
+    "notifyWeek": "एक आठवडा आधी",
+    "notifyDay": "एक दिवस आधी",
+    "notifyHour": "एक तास आधी",
+    "notify5Min": "५ मिनिटे आधी",
+    "save": "जतन करा",
+    "saved": "जतन केले!",
+    "unsubscribe": "सर्वांमधून सदस्यत्व रद्द",
+    "unsubscribed": "तुम्ही सर्व सूचनांमधून सदस्यत्व रद्द केले आहे",
+    "noSubscription": "तुम्हाला अजून सूचना सदस्यत्व नाही",
+    "createSubscription": "सूचनांसाठी सदस्यत्व घ्या"
+  },
+  "unsubscribe": {
+    "title": "सदस्यत्व रद्द",
+    "success": "तुम्ही UNIX तासांच्या मैलाच्या दगडींच्या सूचनांमधून यशस्वीरीत्या सदस्यत्व रद्द केले आहे",
+    "error": "अवैध सदस्यत्व रद्द दुवा",
+    "back": "मुख्यपृष्ठावर परत जा"
+  }
+}

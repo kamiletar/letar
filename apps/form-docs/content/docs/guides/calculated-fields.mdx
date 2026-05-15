@@ -1,0 +1,135 @@
+---
+title: Calculated Fields
+description: Automatically computed fields that update when dependent fields change
+---
+
+## Overview
+
+`Form.Field.Calculated` provides declarative computed fields that automatically recalculate when dependent form values change. Instead of manually using `Form.Watch` + `setFieldValue`, a single component handles the entire reactive computation.
+
+| Feature    | Description                                         |
+| ---------- | --------------------------------------------------- |
+| `compute`  | Function that calculates value from all form values |
+| `format`   | Optional display formatter (e.g., currency)         |
+| `deps`     | Dependency list for optimized recalculation         |
+| `debounce` | Throttle heavy computations                         |
+| `hidden`   | Compute without rendering (like Hidden)             |
+
+## Basic Usage
+
+```tsx
+<Form initialValue={{ price: 100, qty: 2, total: 0 }} onSubmit={save}>
+  <Form.Field.Number name="price" label="Price" />
+  <Form.Field.Number name="qty" label="Quantity" />
+  <Form.Field.Calculated
+    name="total"
+    label="Total"
+    compute={(values) => (Number(values.price) || 0) * (Number(values.qty) || 0)}
+    format={(v) => `${Number(v).toLocaleString()} ₽`}
+    deps={['price', 'qty']}
+  />
+  <Form.Button.Submit>Save</Form.Button.Submit>
+</Form>
+```
+
+The computed value is **read-only** and is included in the submitted form data.
+
+## Props
+
+| Prop         | Type                                           | Default | Description                                   |
+| ------------ | ---------------------------------------------- | ------- | --------------------------------------------- |
+| `name`       | `string`                                       | —       | Field path in form state                      |
+| `compute`    | `(values: Record<string, unknown>) => unknown` | —       | Compute function (required)                   |
+| `label`      | `string`                                       | —       | Field label                                   |
+| `format`     | `(value: unknown) => string`                   | —       | Display formatter                             |
+| `deps`       | `string[]`                                     | —       | Dependency fields for optimized recalculation |
+| `debounce`   | `number`                                       | `0`     | Debounce delay in ms                          |
+| `hidden`     | `boolean`                                      | `false` | Compute without rendering                     |
+| `helperText` | `string`                                       | —       | Helper text below the field                   |
+
+## Cascading Calculations
+
+Multiple calculated fields can depend on each other through a chain:
+
+```tsx
+<Form initialValue={{ price: 2000, qty: 2, discount: 10, subtotal: 0, finalPrice: 0 }}>
+  <Form.Field.Number name="price" label="Unit Price" />
+  <Form.Field.Number name="qty" label="Quantity" />
+  <Form.Field.Calculated
+    name="subtotal"
+    label="Subtotal"
+    compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
+    deps={['price', 'qty']}
+  />
+  <Form.Field.Number name="discount" label="Discount (%)" />
+  <Form.Field.Calculated
+    name="finalPrice"
+    label="Final Price"
+    compute={(v) => {
+      const sub = (Number(v.price) || 0) * (Number(v.qty) || 0)
+      return sub * (1 - (Number(v.discount) || 0) / 100)
+    }}
+    format={(v) => `${Number(v).toLocaleString()} ₽`}
+    deps={['price', 'qty', 'discount']}
+  />
+</Form>
+```
+
+## Hidden Mode
+
+Use `hidden` to compute a value without displaying it — useful for derived IDs, totals for API submission, etc.
+
+```tsx
+<Form.Field.Calculated name="total" compute={(v) => (Number(v.a) || 0) + (Number(v.b) || 0)} hidden />
+```
+
+The value will appear in `Form.DebugValues` and be included on submit.
+
+## Performance: deps Optimization
+
+Without `deps`, the compute function runs on **every** form value change. For large forms, specify which fields the calculation depends on:
+
+```tsx
+// Only recalculates when price or qty change
+<Form.Field.Calculated name="total" compute={(v) => v.price * v.qty} deps={['price', 'qty']} />
+```
+
+## Inside Form.Group
+
+When inside a group, `name` is resolved relative to the group. The `compute` function always receives the full form values:
+
+```tsx
+<Form.Group name="order">
+  <Form.Field.Number name="price" label="Price" />
+  <Form.Field.Number name="qty" label="Quantity" />
+  <Form.Field.Calculated
+    name="total"
+    label="Total"
+    compute={(v) => {
+      const order = v.order as Record<string, unknown>
+      return (Number(order?.price) || 0) * (Number(order?.qty) || 0)
+    }}
+  />
+</Form.Group>
+```
+
+## Cycle Protection
+
+The component detects circular dependencies at runtime. If field A's compute triggers field B which references field A, a console error is logged and the cached value is returned.
+
+## Comparison: Calculated vs Watch
+
+|                | `Form.Field.Calculated`      | `Form.Watch`                       |
+| -------------- | ---------------------------- | ---------------------------------- |
+| Purpose        | Auto-compute a field value   | Run arbitrary side effects         |
+| Renders        | Read-only display or hidden  | Nothing (renderless)               |
+| Value in state | Yes, auto-synced             | Manual `setFieldValue`             |
+| API            | Declarative                  | Imperative                         |
+| Best for       | Totals, percentages, derived | Slug generation, cascading selects |
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/calculated).

@@ -1,0 +1,282 @@
+// ZenStack schema for Label Printer Desktop
+// Electron приложение для печати этикеток "Честный знак"
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../../prisma/data/app.db"
+}
+
+plugin prisma {
+  provider = "@core/prisma"
+  output   = "./src/generated/schema.prisma"
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = "@zenstackhq/plugin-policy"
+}
+
+plugin hooks {
+  provider = "@zenstackhq/tanstack-query"
+  output   = "./src/generated/hooks"
+  target   = "react"
+}
+
+// Плагин для генерации Zod схем с UI метаданными
+plugin formSchema {
+  provider = "../../libs/zenstack-form-plugin/dist/index.js"
+  output   = "./src/generated/form-schemas"
+}
+
+enum PrinterMode {
+  /// Реальный принтер
+  REAL
+  /// Тестовый режим (сохраняет в файлы)
+  MOCK
+}
+
+enum LabelPrintMode {
+  /// Bitmap режим: отправляет готовое изображение
+  BITMAP
+  /// Native режим: использует команды TSPL для DataMatrix и штрихкода
+  NATIVE
+}
+
+/// Настройки приложения (singleton)
+model Settings {
+  id              String  @id @default("default")
+
+  // Принтер
+  /// @form.title("Имя принтера")
+  /// @form.placeholder("TSC TE300")
+  printerName     String  @default("TSC_TE300")
+
+  /// @form.title("Режим работы")
+  /// @form.fieldType("radioCard")
+  printerMode     PrinterMode @default(REAL)
+
+  /// @form.title("Режим печати этикетки")
+  /// @form.description("BITMAP: отправляет готовое изображение. NATIVE: использует команды принтера для кодов")
+  /// @form.fieldType("radioCard")
+  labelPrintMode  LabelPrintMode @default(BITMAP)
+
+  /// @form.title("Скорость печати")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 1, max: 14, showValue: true })
+  printerSpeed    Int     @default(4)
+
+  /// @form.title("Плотность печати")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 15, showValue: true })
+  printerDensity  Int     @default(8)
+
+  /// @form.title("Количество копий")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1, max: 100 })
+  copies          Int     @default(1)
+
+  // Шаблон этикетки
+  /// @form.title("Шаблон")
+  /// @form.relation({ model: "Template", labelField: "name" })
+  templateId      String?
+  template        Template? @relation(fields: [templateId], references: [id])
+
+  // Позиция DataMatrix
+  /// @form.title("DataMatrix X")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  datamatrixX     Int     @default(26)
+
+  /// @form.title("DataMatrix Y")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  datamatrixY     Int     @default(160)
+
+  /// @form.title("Размер DataMatrix")
+  /// @form.description("Размер в пикселях (рекомендуется 160)")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 50, max: 200 })
+  datamatrixSize  Int     @default(160)
+
+  // Позиция GTIN
+  /// @form.title("GTIN X")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  gtinX           Int     @default(526)
+
+  /// @form.title("GTIN Y")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  gtinY           Int     @default(10)
+
+  /// @form.title("Ширина GTIN")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 50, max: 300 })
+  gtinWidth       Int     @default(140)
+
+  /// @form.title("Высота GTIN")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 100, max: 500 })
+  gtinHeight      Int     @default(440)
+
+  // Поведение
+  /// @form.title("Разрешить дубликаты")
+  /// @form.fieldType("switch")
+  /// @form.description("Печатать этикетки для уже использованных кодов")
+  allowDuplicates Boolean @default(false)
+
+  /// @form.title("Автопереподключение")
+  /// @form.fieldType("switch")
+  autoReconnect   Boolean @default(true)
+
+  /// @form.title("Автообновление")
+  /// @form.fieldType("switch")
+  /// @form.description("Автоматически проверять обновления при запуске")
+  autoUpdate      Boolean @default(false)
+
+  /// @form.title("Попыток при ошибке")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0, max: 10 })
+  retryAttempts   Int     @default(3)
+
+  // Сканер
+  /// @form.title("COM-порт сканера")
+  /// @form.placeholder("COM5")
+  /// @form.description("Оставьте пустым для USB HID режима (клавиатура)")
+  scannerPort     String? @default("")
+
+  /// @form.title("Скорость порта (baud)")
+  /// @form.fieldType("select")
+  /// @form.props({ options: [9600, 19200, 38400, 57600, 115200] })
+  scannerBaudRate Int     @default(9600)
+
+  /// @form.title("Сканер включен")
+  /// @form.fieldType("switch")
+  scannerEnabled  Boolean @default(true)
+
+  updatedAt       DateTime @updatedAt
+
+  // Desktop приложение без аутентификации — полный доступ
+  @@allow('all', true)
+}
+
+/// Шаблон этикетки
+model Template {
+  id          String   @id @default(cuid())
+
+  /// @form.title("Название")
+  name        String
+
+  /// @form.title("Путь к файлу")
+  /// @form.description("Относительный путь к PNG файлу")
+  path        String
+
+  /// @form.title("Ширина (px)")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 100, max: 2000 })
+  width       Int      @default(685)
+
+  /// @form.title("Высота (px)")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 100, max: 2000 })
+  height      Int      @default(461)
+
+  /// @form.title("По умолчанию")
+  /// @form.fieldType("switch")
+  isDefault   Boolean  @default(false)
+
+  settings    Settings[]
+  createdAt   DateTime @default(now())
+
+  // Desktop приложение без аутентификации — полный доступ
+  @@allow('all', true)
+}
+
+/// Товар (база GTIN)
+model Product {
+  id           String     @id @default(cuid())
+
+  /// @form.title("GTIN")
+  /// @form.placeholder("4610000000007")
+  /// @form.description("13-14 цифр штрихкода товара")
+  gtin         String     @unique
+
+  /// @form.title("Название товара")
+  /// @form.placeholder("Галстук Детский")
+  name         String
+
+  /// @form.title("Артикул")
+  /// @form.placeholder("ГМ")
+  articleCode  String?
+
+  /// @form.title("Состав")
+  /// @form.placeholder("100% полиэстер")
+  composition  String?
+
+  /// @form.title("Цвет")
+  /// @form.placeholder("разноцветный")
+  color        String?
+
+  /// @form.title("Размер")
+  /// @form.placeholder("42")
+  size         String?
+
+  /// @form.title("Производитель")
+  manufacturer String?
+
+  /// @form.title("Категория")
+  category     String?
+
+  printJobs    PrintJob[]
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([gtin])
+  @@index([name])
+
+  // Desktop приложение без аутентификации — полный доступ
+  @@allow('all', true)
+}
+
+/// Напечатанная этикетка (история)
+model PrintJob {
+  id            String   @id @default(cuid())
+
+  /// @form.exclude
+  fullCode      String   @unique
+
+  /// @form.title("GTIN")
+  gtin          String
+
+  /// @form.title("Серийный номер")
+  serialNumber  String
+
+  /// @form.exclude
+  cryptoCode    String?
+
+  /// @form.exclude
+  templateId    String?
+
+  /// Связь с товаром (опционально)
+  productId     String?
+  product       Product?  @relation(fields: [productId], references: [id])
+
+  /// @form.title("Сканирований")
+  scanCount     Int      @default(1)
+
+  /// @form.title("Напечатано")
+  /// @form.fieldType("switch")
+  printed       Boolean  @default(false)
+
+  firstScannedAt DateTime @default(now())
+  lastScannedAt  DateTime @default(now())
+
+  @@index([gtin])
+  @@index([printed])
+  @@index([firstScannedAt])
+  @@index([productId])
+
+  // Desktop приложение без аутентификации — полный доступ
+  @@allow('all', true)
+}

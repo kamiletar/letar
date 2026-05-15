@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Saat kaç?",
+    "description": "UNIX döneminin başlangıcından itibaren sıra saati"
+  },
+  "time": {
+    "now": "Şu an",
+    "hour": "UNIX döneminin başlangıcından itibaren saat",
+    "hoursPassed": "saat UNIX döneminin başlangıcından bu yana geçti"
+  },
+  "countdown": {
+    "until": "{milestone} saate kadar",
+    "days": "{count, plural, one {# gün} other {# gün}}",
+    "hours": "{count, plural, one {# saat} other {# saat}}",
+    "minutes": "{count, plural, one {# dakika} other {# dakika}}",
+    "seconds": "{count, plural, one {# saniye} other {# saniye}}"
+  },
+  "celebration": {
+    "milestone": "UNIX döneminin {hours} saati!"
+  },
+  "subscribe": {
+    "subscribe": "Bildirimler",
+    "explanation": "E-postanızı doğrulamak ve bildirim ayarlarına erişmek için giriş yapmanız gerekiyor",
+    "signIn": "Giriş yap",
+    "settings": "Ayarlar"
+  },
+  "profile": {
+    "title": "Bildirim ayarları",
+    "email": "E-posta",
+    "notifyMonth": "Bir ay önce",
+    "notifyWeek": "Bir hafta önce",
+    "notifyDay": "Bir gün önce",
+    "notifyHour": "Bir saat önce",
+    "notify5Min": "5 dakika önce",
+    "save": "Kaydet",
+    "saved": "Kaydedildi!",
+    "unsubscribe": "Tümünden çık",
+    "unsubscribed": "Tüm bildirim abonelikleriniz iptal edildi",
+    "noSubscription": "Henüz bir bildirim aboneliğiniz yok",
+    "createSubscription": "Bildirimlere abone ol"
+  },
+  "unsubscribe": {
+    "title": "Abonelikten çık",
+    "success": "UNIX saat dönüm noktası bildirimlerinden başarıyla çıktınız",
+    "error": "Geçersiz abonelik iptal bağlantısı",
+    "back": "Ana sayfaya dön"
+  }
+}

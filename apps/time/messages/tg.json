@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Соат чанд?",
+    "description": "Соати тартибӣ аз оғози давраи UNIX"
+  },
+  "time": {
+    "now": "Ҳоло",
+    "hour": "соат аз оғози давраи UNIX",
+    "hoursPassed": "соат аз оғози давраи UNIX гузашт"
+  },
+  "countdown": {
+    "until": "То {milestone} соат",
+    "days": "{count, plural, one {# рӯз} other {# рӯз}}",
+    "hours": "{count, plural, one {# соат} other {# соат}}",
+    "minutes": "{count, plural, one {# дақиқа} other {# дақиқа}}",
+    "seconds": "{count, plural, one {# сония} other {# сония}}"
+  },
+  "celebration": {
+    "milestone": "{hours} соати давраи UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Огоҳиномаҳо",
+    "explanation": "Барои тасдиқи почтаи электронӣ ва дастрасӣ ба танзимоти огоҳиномаҳо ворид шудан лозим аст",
+    "signIn": "Ворид шудан",
+    "settings": "Танзимот"
+  },
+  "profile": {
+    "title": "Танзимоти огоҳиномаҳо",
+    "email": "Почтаи электронӣ",
+    "notifyMonth": "Як моҳ пеш",
+    "notifyWeek": "Як ҳафта пеш",
+    "notifyDay": "Як рӯз пеш",
+    "notifyHour": "Як соат пеш",
+    "notify5Min": "5 дақиқа пеш",
+    "save": "Захира кардан",
+    "saved": "Захира шуд!",
+    "unsubscribe": "Аз ҳама бекор кардан",
+    "unsubscribed": "Шумо аз ҳамаи огоҳиномаҳо бекор карда шудед",
+    "noSubscription": "Шумо ҳанӯз обунаи огоҳиномаҳо надоред",
+    "createSubscription": "Ба огоҳиномаҳо обуна шудан"
+  },
+  "unsubscribe": {
+    "title": "Бекор кардани обуна",
+    "success": "Шумо бомуваффақият аз огоҳиномаҳои марҳалаҳои соатҳои UNIX бекор карда шудед",
+    "error": "Истиноди нодурусти бекор кардани обуна",
+    "back": "Бозгашт ба саҳифаи асосӣ"
+  }
+}

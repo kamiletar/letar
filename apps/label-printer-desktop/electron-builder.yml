@@ -1,0 +1,110 @@
+appId: com.lena.label-printer-desktop
+productName: Label Printer Desktop
+copyright: Copyright © 2025
+electronVersion: 39.2.7
+
+# Автообновление через GitHub Releases
+publish:
+  - provider: github
+    owner: lena
+    repo: label-printer-desktop
+    releaseType: release
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+      - node_modules
+
+extraMetadata:
+  main: app/background.js
+
+# Jimp не требует нативных модулей, но оставляем для других потенциальных зависимостей
+asarUnpack:
+  - '**/*.node'
+  - '**/serialport/**'
+  - '**/@serialport/**'
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  signAndEditExecutable: false # Отключить подпись для dev
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Label Printer
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  category: Utility
+  icon: resources/icon.png
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.utilities
+  icon: resources/icon.icns
+
+extraResources:
+  # Шаблон БД для первого запуска
+  - from: resources/template.db
+    to: template.db
+  # PowerShell скрипты печати
+  - from: resources/print-image.ps1
+    to: print-image.ps1
+  - from: resources/print-raw.ps1
+    to: print-raw.ps1
+  # Prisma миграции для обновления БД при обновлении приложения
+  - from: src/generated/migrations
+    to: migrations
+    filter:
+      - '**/*.sql'
+      - '**/migration_lock.toml'
+  # sql.js (asm.js) для применения миграций в main process
+  - from: ../../node_modules/sql.js/dist/sql-asm.js
+    to: node_modules/sql.js/dist/sql-asm.js
+  - from: templates
+    to: templates
+    filter:
+      - '**/*'
+  # node_modules из standalone (electron-builder игнорирует node_modules по умолчанию)
+  - from: renderer/.next/standalone/node_modules
+    to: standalone/node_modules
+    filter:
+      - '**/*'
+  # Apps директория из standalone
+  - from: renderer/.next/standalone/apps
+    to: standalone/apps
+    filter:
+      - '**/*'
+  # Статические файлы Next.js (рядом с server.js)
+  - from: renderer/.next/static
+    to: standalone/apps/label-printer-desktop/renderer/.next/static
+    filter:
+      - '**/*'
+  # Public папка (если существует)
+  - from: renderer/public
+    to: standalone/apps/label-printer-desktop/renderer/public
+    filter:
+      - '**/*'

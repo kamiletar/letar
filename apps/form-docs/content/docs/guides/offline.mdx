@@ -1,0 +1,96 @@
+---
+title: Offline Mode
+description: PWA-ready forms with offline queue and sync
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="offline" height={450} />
+
+## Overview
+
+`@letar/forms/offline` provides offline-first form support for Progressive Web Apps. Forms submitted while offline are queued locally and synced when connectivity is restored.
+
+## Installation
+
+```tsx
+import { useOfflineForm, FormOfflineIndicator, FormSyncStatus } from '@letar/forms/offline'
+```
+
+## Basic Usage
+
+```tsx
+<Form
+  schema={Schema}
+  initialValue={data}
+  offline={{
+    actionType: 'UPDATE_PROFILE',
+    onQueued: () => toast.info('Saved locally — will sync when online'),
+    onSynced: () => toast.success('Synced to server!'),
+  }}
+  onSubmit={handleSubmit}
+>
+  <Form.OfflineIndicator />
+  <Form.Field.String name="name" />
+  <Form.Field.String name="email" />
+  <Form.SyncStatus />
+  <Form.Button.Submit />
+</Form>
+```
+
+## How It Works
+
+1. **Online** — form submits normally via `onSubmit`
+2. **Offline** — form data is stored in an IndexedDB/localStorage queue
+3. **Back online** — queued submissions are replayed in order
+4. **Conflict resolution** — configurable merge strategy
+
+## Components
+
+### FormOfflineIndicator
+
+Displays current online/offline status:
+
+```tsx
+<Form.OfflineIndicator />
+// Shows: 🟢 Online or 🔴 Offline
+```
+
+### FormSyncStatus
+
+Shows sync queue status (pending items count):
+
+```tsx
+<Form.SyncStatus />
+// Shows: "3 changes pending sync"
+```
+
+## Hooks
+
+### useOfflineForm
+
+Low-level hook for custom offline form logic:
+
+```tsx
+const { isOnline, queue, processQueue } = useOfflineForm({
+  actionType: 'CREATE_ORDER',
+  onQueued: (item) => console.log('Queued:', item),
+  onSynced: (item) => console.log('Synced:', item),
+})
+```
+
+### useOfflineStatus
+
+Simple online/offline status:
+
+```tsx
+const { isOnline } = useOfflineStatus()
+```
+
+### useSyncQueue
+
+Access and manage the sync queue:
+
+```tsx
+const { items, clear, retry } = useSyncQueue()
+```

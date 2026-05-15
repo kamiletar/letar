@@ -1,0 +1,56 @@
+---
+title: Валидация
+description: Схема-ориентированная валидация с Zod и обработка ошибок
+---
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="validation" height={550} />
+
+## Валидация через схему
+
+Вся валидация определяется в Zod-схеме. Форма автоматически валидирует поля и показывает ошибки.
+
+```tsx
+const Schema = z
+  .object({
+    email: z.string().email('Некорректный email'),
+    password: z
+      .string()
+      .min(8, 'Минимум 8 символов')
+      .regex(/[A-Z]/, 'Нужна заглавная буква')
+      .regex(/[0-9]/, 'Нужна цифра'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Пароли не совпадают',
+    path: ['confirmPassword'],
+  })
+```
+
+## Сводка ошибок
+
+Показать все ошибки формы в одном месте:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.String name="email" />
+  <Form.Field.Password name="password" />
+  <Form.Field.Password name="confirmPassword" />
+
+  <Form.Errors title="Исправьте следующие ошибки:" />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Автоподсказки из ограничений
+
+Библиотека автоматически генерирует подсказки из Zod-ограничений:
+
+```tsx
+z.string().min(2).max(100)
+// Подсказка: "2–100 символов"
+
+z.number().min(1).max(10)
+// Подсказка: "1–10"
+```

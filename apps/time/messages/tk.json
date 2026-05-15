@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Sagat näçe?",
+    "description": "UNIX döwrüniň başyndan bäri tertip sagady"
+  },
+  "time": {
+    "now": "Häzir",
+    "hour": "UNIX döwrüniň başyndan bäri sagat",
+    "hoursPassed": "sagat UNIX döwrüniň başyndan bäri geçdi"
+  },
+  "countdown": {
+    "until": "{milestone} sagada çenli",
+    "days": "{count, plural, one {# gün} other {# gün}}",
+    "hours": "{count, plural, one {# sagat} other {# sagat}}",
+    "minutes": "{count, plural, one {# minut} other {# minut}}",
+    "seconds": "{count, plural, one {# sekunt} other {# sekunt}}"
+  },
+  "celebration": {
+    "milestone": "UNIX döwrüniň {hours} sagady!"
+  },
+  "subscribe": {
+    "subscribe": "Habarnamalar",
+    "explanation": "E-poçtaňyzy tassyklamak we habarname sazlamalaryna girmek üçin ulgama girmeli",
+    "signIn": "Girmek",
+    "settings": "Sazlamalar"
+  },
+  "profile": {
+    "title": "Habarname sazlamalary",
+    "email": "E-poçta",
+    "notifyMonth": "Bir aý öň",
+    "notifyWeek": "Bir hepde öň",
+    "notifyDay": "Bir gün öň",
+    "notifyHour": "Bir sagat öň",
+    "notify5Min": "5 minut öň",
+    "save": "Ýatda sakla",
+    "saved": "Ýatda saklandy!",
+    "unsubscribe": "Hemmesinden çyk",
+    "unsubscribed": "Siz ähli habarnamalardan çykdyňyz",
+    "noSubscription": "Sizde entek habarnamalara ýazylma ýok",
+    "createSubscription": "Habarnamalara ýazylmak"
+  },
+  "unsubscribe": {
+    "title": "Ýazylmadan çykmak",
+    "success": "Siz UNIX sagat tapgyrlary habarnamalaryndan üstünlikli çykdyňyz",
+    "error": "Nädogry ýazylmadan çykmak baglanyşygy",
+    "back": "Baş sahypa gaýdyp barmak"
+  }
+}

@@ -1,0 +1,261 @@
+---
+title: ZenStack Plugin
+description: Generate Zod schemas with UI metadata from your database models
+---
+
+## Overview
+
+`@letar/zenstack-form-plugin` generates type-safe Zod v4 schemas with `.meta({ ui: {...} })` directly from your `schema.zmodel` — no manual schema writing needed.
+
+```bash
+npm install @letar/zenstack-form-plugin
+```
+
+## Configuration
+
+Add the plugin to your `schema.zmodel`:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+}
+```
+
+Then run:
+
+```bash
+npx zenstack generate
+```
+
+## @form.\* Directives
+
+Use `///` doc comments **before** fields to configure form behavior:
+
+```prisma
+model Product {
+  id    String @id @default(cuid())
+
+  /// @form.title("Product Name")
+  /// @form.placeholder("Enter product name")
+  name  String
+
+  /// @form.title("Price")
+  /// @form.fieldType("currency")
+  /// @form.props({ min: 0 })
+  price Decimal
+
+  /// @form.title("Category")
+  /// @form.relation({ labelField: "name" })
+  categoryId String
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+}
+```
+
+### Available Directives
+
+| Directive                  | Description            | Example                                      |
+| -------------------------- | ---------------------- | -------------------------------------------- |
+| `@form.title("...")`       | Field label            | `/// @form.title("Name")`                    |
+| `@form.placeholder("...")` | Placeholder text       | `/// @form.placeholder("Enter...")`          |
+| `@form.description("...")` | Help text              | `/// @form.description("Hint")`              |
+| `@form.fieldType("...")`   | Component type         | `/// @form.fieldType("tags")`                |
+| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1 })`                |
+| `@form.relation({...})`    | Relation select config | `/// @form.relation({ labelField: "name" })` |
+| `@form.exclude`            | Exclude from form      | `/// @form.exclude`                          |
+
+## Generated Output
+
+For the `Product` model above, the plugin generates:
+
+```typescript
+// src/generated/form-schemas/Product.form.ts
+import { z } from 'zod/v4'
+
+export const ProductCreateFormSchema = z.object({
+  name: z.string().meta({
+    ui: { title: 'Product Name', placeholder: 'Enter product name' },
+  }),
+  price: z
+    .number()
+    .min(0)
+    .meta({
+      ui: { title: 'Price', fieldType: 'currency' },
+    }),
+  categoryId: z.string().meta({
+    ui: { title: 'Category', fieldType: 'relation', fieldProps: { labelField: 'name' } },
+  }),
+})
+
+export const ProductUpdateFormSchema = ProductCreateFormSchema.partial()
+export type ProductCreateForm = z.infer<typeof ProductCreateFormSchema>
+```
+
+## Enum Labels
+
+Doc comments on enum values become select options:
+
+```prisma
+enum Status {
+  /// Active
+  ACTIVE
+  /// Archived
+  ARCHIVED
+  /// Draft
+  DRAFT
+}
+```
+
+Generates:
+
+```typescript
+export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
+  ui: {
+    options: [
+      { value: 'ACTIVE', label: 'Active' },
+      { value: 'ARCHIVED', label: 'Archived' },
+      { value: 'DRAFT', label: 'Draft' },
+    ],
+  },
+})
+```
+
+## Smart Props Splitting
+
+`@form.props` values are automatically split into **Zod constraints** and **UI props**:
+
+```prisma
+/// @form.props({ min: 1, max: 100, showValue: true })
+portions Int
+```
+
+Generates:
+
+```typescript
+portions: z.number()
+  .int()
+  .min(1) // ← Zod constraint
+  .max(100) // ← Zod constraint
+  .meta({ ui: { fieldProps: { showValue: true } } }) // ← UI prop
+```
+
+**Zod constraints:** `min`, `max`, `step`, `minLength`, `maxLength`, `pattern`, `email`, `url`, `uuid`
+**UI props:** everything else (`count`, `allowHalf`, `showValue`, `layout`, etc.)
+
+## Using with @letar/forms
+
+Generated schemas work directly with `Form.FromSchema`:
+
+```tsx
+import { Form } from '@letar/forms'
+import { ProductCreateFormSchema } from '@/generated/form-schemas/Product.form'
+
+function CreateProductForm() {
+  return (
+    <Form.FromSchema
+      schema={ProductCreateFormSchema}
+      onSubmit={async (data) => createProduct(data)}
+      submitLabel="Create Product"
+    />
+  )
+}
+```
+
+Or with manual field layout:
+
+```tsx
+<Form schema={ProductCreateFormSchema} onSubmit={handleSubmit}>
+  <Form.Field.String name="name" />
+  <Form.Field.Currency name="price" />
+  <Form.Field.Select name="categoryId" options={categories} />
+  <Form.Button.Submit>Save</Form.Button.Submit>
+</Form>
+```
+
+## i18n Support
+
+Enable multi-language form labels:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+  i18n = true
+  i18nOutput = './messages/form-schemas'
+  defaultLocale = 'ru'
+  locales = 'ru,en'
+}
+```
+
+Generates translation files:
+
+```json
+// messages/form-schemas/ru.json
+{
+  "Product": {
+    "name": { "title": "Название товара", "placeholder": "Введите название" }
+  }
+}
+```
+
+Default locale is **overwritten** on each generation. Other locales use **merge strategy** — preserving your translations.
+
+## Custom Validation Translations
+
+English and Russian validation messages are built in. For other languages, create a translations file:
+
+```typescript
+// i18n/form-validations.js
+export default {
+  de: {
+    required: 'Pflichtfeld',
+    too_small: {
+      string: 'Mindestens {minimum} Zeichen',
+      number: 'Mindestens {minimum}',
+    },
+    too_big: {
+      string: 'Maximal {maximum} Zeichen',
+      number: 'Maximal {maximum}',
+    },
+    invalid_format: {
+      email: 'Ungültige E-Mail-Adresse',
+      url: 'Ungültige URL',
+    },
+  },
+}
+```
+
+Reference it in your schema:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+  i18n = true
+  defaultLocale = 'en'
+  locales = 'en,de'
+  validationTranslationsPath = './i18n/form-validations.js'
+}
+```
+
+**Resolution order:** custom file → built-in (en, ru) → English fallback.
+
+See the `ValidationTranslations` type export for the full interface.
+
+## Auto-Excluded Fields
+
+These fields are automatically excluded from generated schemas:
+
+- `id` fields (primary keys)
+- `createdAt`, `updatedAt` (timestamps)
+- Fields with `@id` attribute
+- Fields with `@relation` attribute
+- Fields with `/// @form.exclude`
+
+## Links
+
+- **npm:** [`@letar/zenstack-form-plugin`](https://www.npmjs.com/package/@letar/zenstack-form-plugin)
+- **GitHub:** [kamiletar/zenstack-form-plugin](https://github.com/kamiletar/zenstack-form-plugin)
+- **@letar/forms:** [forms.letar.best](https://forms.letar.best)

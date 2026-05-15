@@ -1,0 +1,158 @@
+---
+title: TableEditor
+description: Inline editable table for array fields — tabular data entry with navigation, computed columns, and clipboard support
+---
+
+## Overview
+
+`Form.Field.TableEditor` is an inline editable table for array fields. It's a tabular alternative to `Form.Group.List` — instead of card-based layout, data is presented in a compact table with click-to-edit cells.
+
+Best for:
+
+- Order items (10-50 rows)
+- Inventory operations (100+ positions)
+- Data import from Excel
+- Bulk record creation (HR, CRM)
+
+## Basic Usage
+
+```tsx
+<Form
+  initialValue={{
+    items: [
+      { product: 'Milk', qty: 2, price: 89 },
+      { product: 'Bread', qty: 1, price: 45 },
+    ],
+  }}
+  onSubmit={handleSubmit}
+>
+  <Form.Field.TableEditor
+    name="items"
+    columns={[
+      { name: 'product', label: 'Product', width: '40%' },
+      { name: 'qty', label: 'Qty', width: '20%', align: 'right' },
+      { name: 'price', label: 'Price', width: '20%', align: 'right' },
+    ]}
+    addLabel="Add item"
+  />
+  <Form.Button.Submit>Save</Form.Button.Submit>
+</Form>
+```
+
+Click any cell to start editing. Press **Tab** to move to next cell, **Enter** to move to next row, **Escape** to cancel editing.
+
+## Computed Columns
+
+Add read-only computed columns that auto-calculate from row data:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[
+    { name: 'product', width: '40%' },
+    { name: 'qty', width: '15%', align: 'right' },
+    { name: 'price', width: '15%', align: 'right' },
+    {
+      name: 'total',
+      label: 'Total',
+      align: 'right',
+      computed: (row) => Number(row.qty) * Number(row.price),
+      format: (v) => `$${Number(v).toFixed(2)}`,
+    },
+  ]}
+/>
+```
+
+## Footer Aggregates
+
+Add SUM, AVG, COUNT, MIN, or MAX calculations in the footer:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  footer={[
+    { column: 'total', aggregate: 'sum', label: 'Grand Total:' },
+    { column: 'qty', aggregate: 'count', label: 'Items:' },
+  ]}
+/>
+```
+
+## Row Selection
+
+Enable checkbox selection for bulk operations:
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  selectable={true}
+/>
+```
+
+Selected rows can be deleted in bulk via the toolbar.
+
+## Clipboard (Copy/Paste from Excel)
+
+By default, `clipboard={true}`. Users can paste tab-separated data from Excel or Google Sheets. The data is parsed and rows are added automatically, with values coerced to the correct types.
+
+```tsx
+<Form.Field.TableEditor
+  name="items"
+  columns={[...]}
+  clipboard={true}
+/>
+```
+
+## Props
+
+| Prop         | Type                   | Default           | Description                   |
+| ------------ | ---------------------- | ----------------- | ----------------------------- |
+| `name`       | `string`               | required          | Array field name              |
+| `label`      | `string`               | —                 | Table label                   |
+| `columns`    | `TableColumnDef[]`     | auto from schema  | Column definitions            |
+| `addLabel`   | `string`               | "Добавить строку" | Add button text               |
+| `sortable`   | `boolean`              | `false`           | Enable drag&drop row sorting  |
+| `selectable` | `boolean`              | `false`           | Enable checkbox row selection |
+| `footer`     | `TableFooterDef[]`     | —                 | Footer aggregate definitions  |
+| `maxRows`    | `number`               | from schema       | Maximum rows                  |
+| `minRows`    | `number`               | from schema       | Minimum rows                  |
+| `clipboard`  | `boolean`              | `true`            | Enable paste from Excel       |
+| `emptyText`  | `string`               | "Нет данных..."   | Empty state text              |
+| `size`       | `'sm' \| 'md' \| 'lg'` | `'sm'`            | Table size                    |
+| `striped`    | `boolean`              | `false`           | Striped rows                  |
+| `disabled`   | `boolean`              | `false`           | Disable editing               |
+| `readOnly`   | `boolean`              | `false`           | Read-only mode                |
+
+## Column Definition
+
+```typescript
+interface TableColumnDef {
+  name: string // Field name in row object
+  label?: string // Column header
+  width?: string // CSS width ('40%', '200px')
+  align?: 'left' | 'center' | 'right'
+  computed?: (row) => unknown // Computed value function
+  format?: (value) => string // Display format
+  hidden?: boolean // Hide column
+  readOnly?: boolean // Disable cell editing
+}
+```
+
+## Keyboard Navigation
+
+| Key           | Action                       |
+| ------------- | ---------------------------- |
+| Click         | Start editing cell           |
+| Tab           | Next editable cell           |
+| Shift+Tab     | Previous editable cell       |
+| Enter         | Confirm and move to next row |
+| Escape        | Cancel editing               |
+| Arrow Up/Down | Move between rows            |
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/table-editor).

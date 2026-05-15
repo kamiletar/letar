@@ -1,0 +1,8 @@
+# Generated files - должны быть исключены из форматирования
+src/generated/**
+
+# Build artifacts
+.next/**
+
+# Dependencies
+node_modules/**

@@ -1,0 +1,101 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/auth": ["../../libs/auth/src/index.ts"],
+      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
+      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
+      "@letar/hooks": ["../../libs/hooks/src/index.ts"],
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/admin-ui": ["../../libs/admin-ui/src/index.ts"],
+      "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms/offline": ["../../libs/forms/src/lib/offline/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/pin-auth": ["../../libs/pin-auth/src/index.ts"],
+      "@letar/pin-auth/server": ["../../libs/pin-auth/src/server/index.ts"],
+      "@letar/pin-auth/client": ["../../libs/pin-auth/src/client/index.ts"]
+    },
+    "types": ["node"],
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "../../apps/mandala/.next/types/**/*.ts",
+    "../../dist/apps/mandala/.next/types/**/*.ts",
+    "next-env.d.ts",
+    "package.json"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "jest.config.ts",
+    "jest.config.cts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/generated/**/*.js",
+    "src/generated/**/*.mjs",
+    ".next",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/hooks"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/pin-auth"
+    },
+    {
+      "path": "../../libs/email"
+    },
+    {
+      "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/admin-ui"
+    },
+    {
+      "path": "../../libs/format-utils"
+    },
+    {
+      "path": "../../libs/auth"
+    }
+  ]
+}

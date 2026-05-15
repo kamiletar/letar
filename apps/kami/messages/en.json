@@ -1,0 +1,539 @@
+{
+  "metadata": {
+    "title": "Kami | Software Architect",
+    "description": "Personal website of a software architect."
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "cv": "Resume",
+    "skills": "Skills",
+    "projects": "Projects",
+    "blog": "Blog",
+    "consulting": "Consulting",
+    "hire": "Hire Me",
+    "learning": "Learning",
+    "menuAria": "Open menu",
+    "mobileNavAria": "Mobile navigation"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "name": "Kami",
+    "roleLine1": "Software",
+    "roleLine2": "Architect",
+    "cta": {
+      "about": "Learn More",
+      "hire": "Hire Me"
+    }
+  },
+  "about": {
+    "title": "About Me",
+    "subtitle": "Software Architect focused on quality",
+    "intro": "Hi! I'm Kami — a software architect. I build modern web applications with a focus on performance, accessibility, and user experience.",
+    "experience": "years of experience",
+    "projects": "projects",
+    "technologies": "technologies",
+    "whatIDo": {
+      "title": "What I Do",
+      "architecture": {
+        "title": "Architecture",
+        "description": "Designing scalable frontend systems and component libraries"
+      },
+      "development": {
+        "title": "Development",
+        "description": "Fullstack development with React, Next.js, Node.js and TypeScript"
+      },
+      "mentoring": {
+        "title": "Mentoring",
+        "description": "Helping teams grow and adopt best practices"
+      }
+    },
+    "stack": {
+      "title": "Core Stack",
+      "items": "React, Next.js, TypeScript, Chakra UI, Node.js, PostgreSQL, Prisma, ZenStack, TanStack Query, Nx, Bun"
+    },
+    "cta": "View Skills"
+  },
+  "skills": {
+    "title": "Skills",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "tools": "Tools",
+    "soft": "Soft Skills"
+  },
+  "projects": {
+    "title": "Projects",
+    "viewCase": "View Case",
+    "viewDemo": "Demo",
+    "viewCode": "Code"
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Articles about frontend development, architecture and tools",
+    "readMore": "Read More",
+    "minRead": "min read",
+    "comments": {
+      "title": "Comments",
+      "placeholder": "Write a comment...",
+      "replyPlaceholder": "Reply to {name}...",
+      "submit": "Submit",
+      "reply": "Reply",
+      "cancel": "Cancel",
+      "noComments": "No comments yet. Be the first!",
+      "loginToComment": "Sign in to leave a comment.",
+      "signIn": "Sign In",
+      "loginRequired": "You need to sign in",
+      "error": "Error submitting comment",
+      "confirmDelete": "Delete this comment?"
+    }
+  },
+  "consulting": {
+    "title": "Consulting",
+    "subtitle": "Expert help in growing your product",
+    "intro": "I help teams build scalable software architectures, conduct code reviews, and implement development best practices.",
+    "services": {
+      "title": "Services",
+      "architecture": {
+        "title": "Architecture",
+        "description": "Software architecture design, technology selection, monorepo and CI/CD setup"
+      },
+      "codeReview": {
+        "title": "Code Review",
+        "description": "Detailed codebase analysis with recommendations for quality and performance improvements"
+      },
+      "audit": {
+        "title": "Technical Audit",
+        "description": "Full project audit: performance, security, accessibility, SEO"
+      },
+      "mentoring": {
+        "title": "Mentoring",
+        "description": "Individual or team training on modern development practices"
+      }
+    },
+    "pricing": {
+      "title": "Pricing",
+      "hourly": {
+        "title": "Hourly",
+        "description": "Perfect for one-time consultations and small tasks",
+        "price": "from $100/hour"
+      },
+      "project": {
+        "title": "Project-based",
+        "description": "Fixed price for a defined scope of work",
+        "price": "from $2,000"
+      },
+      "retainer": {
+        "title": "Retainer",
+        "description": "Monthly support with guaranteed availability",
+        "price": "from $3,000/month"
+      }
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": [
+        {
+          "question": "How does the first consultation work?",
+          "answer": "A free 30-minute call to discuss your project and determine how I can help."
+        },
+        {
+          "question": "Do you work with NDAs?",
+          "answer": "Yes, I'm ready to sign an NDA before starting work on a project."
+        },
+        {
+          "question": "What technologies do you use?",
+          "answer": "I specialize in React, Next.js, TypeScript, Node.js. I also work with other modern tools."
+        },
+        {
+          "question": "Can I get a trial consultation?",
+          "answer": "Yes, the first introductory consultation (30 min) is free."
+        }
+      ]
+    },
+    "cta": "Book a Consultation",
+    "ctaSubtitle": "First consultation is free",
+    "form": {
+      "title": "Book a Consultation",
+      "name": "Your name",
+      "namePlaceholder": "How should I call you?",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "telegram": "Telegram",
+      "company": "Company",
+      "companyPlaceholder": "Company name",
+      "serviceType": "Service type",
+      "selectService": "Select a service...",
+      "projectType": "Project type",
+      "selectProject": "Select type...",
+      "budget": "Estimated budget",
+      "selectBudget": "Select budget...",
+      "timeline": "Timeline",
+      "selectTimeline": "Select timeline...",
+      "description": "Describe your task",
+      "descriptionPlaceholder": "Tell me more about the project, tasks, and expectations...",
+      "preferredTime": "Preferred time",
+      "selectDate": "Select date",
+      "selectTime": "Select time",
+      "selectedSlot": "Selected",
+      "loadingSlots": "Loading slots...",
+      "noSlots": "No available slots for the coming days. Please specify your preferred time in the description.",
+      "submit": "Submit request",
+      "success": {
+        "title": "Request submitted!",
+        "description": "I'll get back to you soon.",
+        "details": "I'll contact you soon to discuss the details.",
+        "submitAnother": "Submit another request"
+      },
+      "error": {
+        "title": "Error",
+        "description": "Failed to submit request. Please try again later.",
+        "prefix": "Error"
+      }
+    },
+    "testimonials": {
+      "title": "Client Testimonials",
+      "subtitle": "What my clients say about working with me"
+    },
+    "cases": {
+      "title": "Case Studies",
+      "subtitle": "Examples of successful consulting projects"
+    }
+  },
+  "hire": {
+    "title": "Hire Me",
+    "subtitle": "Fill out the form and I'll get back to you",
+    "steps": {
+      "company": "Company",
+      "team": "Team",
+      "stack": "Stack",
+      "conditions": "Conditions",
+      "compensation": "Compensation",
+      "process": "Process",
+      "contacts": "Contacts"
+    },
+    "next": "Next",
+    "prev": "Back",
+    "submit": "Submit",
+    "fields": {
+      "companyTitle": "About Your Company",
+      "companyDescription": "Tell us a bit about your company",
+      "companyName": "Company Name",
+      "companyWebsite": "Company Website",
+      "companySize": "Company Size",
+      "industry": "Industry",
+      "industryPlaceholder": "FinTech, E-commerce, SaaS...",
+      "selectPlaceholder": "Select...",
+      "teamTitle": "About the Team",
+      "teamDescription": "What team is waiting for a new colleague?",
+      "teamSize": "Team Size",
+      "teamStructure": "Team Structure",
+      "teamStructurePlaceholder": "Who's on the team? PM, designers, backend?",
+      "remoteFriendly": "Remote work available",
+      "stackTitle": "Tech Stack",
+      "stackDescription": "What technologies are you using?",
+      "techStack": "Technologies",
+      "techStackPlaceholder": "React, TypeScript, Node.js...",
+      "projectType": "Project Type",
+      "conditionsTitle": "Working Conditions",
+      "conditionsDescription": "Format and location",
+      "employmentType": "Employment Type",
+      "location": "Location",
+      "locationPlaceholder": "New York, remote, hybrid...",
+      "timezone": "Timezone",
+      "compensationTitle": "Compensation",
+      "compensationDescription": "Salary range and benefits",
+      "salaryRange": "Salary Range",
+      "salaryRangePlaceholder": "$100,000 - $150,000",
+      "benefits": "Benefits",
+      "benefitsPlaceholder": "Health insurance, education, equipment...",
+      "processTitle": "Hiring Process",
+      "processDescription": "How does the interview process work?",
+      "hiringProcess": "Interview Stages",
+      "hiringProcessPlaceholder": "HR screening → Technical interview → Offer",
+      "startDate": "Start Date",
+      "startDatePlaceholder": "ASAP, January 2025...",
+      "contactsTitle": "Contact Information",
+      "contactsDescription": "How can we reach you?",
+      "contactName": "Your Name",
+      "contactEmail": "Email",
+      "contactTelegram": "Telegram",
+      "message": "Message",
+      "messagePlaceholder": "Additional information about the position..."
+    },
+    "success": {
+      "title": "Application Submitted!",
+      "description": "Thank you for your interest. I'll get back to you soon."
+    },
+    "errors": {
+      "VALIDATION_ERROR": "Please check the form for errors",
+      "DATABASE_ERROR": "Failed to save. Please try again later.",
+      "UNKNOWN_ERROR": "An error occurred. Please try again later."
+    },
+    "teamInvite": {
+      "title": "Invite your team",
+      "subtitle": "Colleagues can leave feedback about the candidate",
+      "authRequired": {
+        "title": "Sign in to invite team",
+        "description": "After signing in, you can invite colleagues to participate in candidate evaluation",
+        "signIn": "Sign in"
+      },
+      "createOrgDescription": "Create a team to send invitations to colleagues",
+      "createOrg": "Create team",
+      "orgCreated": "Team created",
+      "emailPlaceholder": "colleague@company.com",
+      "addEmail": "Add another",
+      "removeEmail": "Remove",
+      "sendInvites": "Send invitations",
+      "invitesSent": "{count} invitation(s) sent",
+      "errors": {
+        "createFailed": "Failed to create team",
+        "inviteFailed": "Failed to send invitations",
+        "noValidEmails": "Enter at least one valid email"
+      }
+    }
+  },
+  "footer": {
+    "navigation": "Navigation",
+    "contact": "Contact",
+    "copyright": "All rights reserved",
+    "madeWith": "Made with",
+    "rssFeed": "RSS Feed",
+    "rssAria": "Subscribe to RSS feed",
+    "emailAria": "Send email"
+  },
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme"
+  },
+  "language": {
+    "ru": "Русский",
+    "en": "English"
+  },
+  "cv": {
+    "title": "Resume",
+    "position": "Software Architect",
+    "personal": {
+      "title": "Personal Information",
+      "name": "Name",
+      "age": "Age",
+      "years": "years",
+      "location": "Location",
+      "city": "Moscow",
+      "citizenship": "Citizenship",
+      "country": "Russia",
+      "reactExperience": "React Experience",
+      "workMode": "Work Mode",
+      "remote": "Remote"
+    },
+    "stack": {
+      "title": "Current Stack"
+    },
+    "experience": {
+      "title": "Work Experience",
+      "sportvokrug": {
+        "company": "SportVokrug",
+        "position": "Frontend Architect",
+        "description": "Sports management system for Russia. Beta for rhythmic gymnastics and figure skating.",
+        "achievements": [
+          "Mastered styled-components and Apollo GraphQL",
+          "Migrated global state from Redux to React Context API",
+          "Developed reusable UI components",
+          "Implemented context-based form components and lazy-loading"
+        ]
+      },
+      "aic": {
+        "company": "AIC (NDA)",
+        "position": "Frontend Architect",
+        "description": "Work under NDA. Frontend architecture for multiple projects.",
+        "achievements": ["Frontend architecture design", "Interface experiments and typography", "CI/CD configuration"]
+      },
+      "smp": {
+        "company": "Northern Sea Route Bank",
+        "position": "UI Team Lead",
+        "description": "Bank personal cabinet. Isomorphic components for critical markup.",
+        "achievements": [
+          "Led UI team, developed decorator for UI→API connection",
+          "First version of rapid UI forms component",
+          "MoneyFormat component, CSS modules, pre/post-css"
+        ]
+      },
+      "ratingruneta": {
+        "company": "Rating Runeta",
+        "position": "Frontend Developer",
+        "description": "New ReactJS frontend. Global state on Redux.",
+        "achievements": [
+          "Deep work with React Router",
+          "Sticky effect — custom high-performance implementation",
+          "Git WebHook and production rebuild notifications"
+        ]
+      },
+      "early": {
+        "company": "Various Projects",
+        "position": "Fullstack Developer",
+        "description": "CRUD, HTML/CSS, PHP, jQuery, CodeIgniter. IT direction at gips.pro.",
+        "achievements": [
+          "Owner of tapochek.net resource with 40k hosts/day traffic",
+          "Full-text search on SphinxSearch, e-commerce with payment",
+          "Windows/Linux server administration",
+          "SEO optimization, contextual advertising, staff training"
+        ]
+      }
+    }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "signInWith": "Sign in with",
+    "signedInAs": "Signed in as",
+    "signInSubtitle": "Sign in to your account",
+    "signUpSubtitle": "Create a new account",
+    "quickSignIn": "Quick Sign In",
+    "quickSignUp": "Quick Sign Up",
+    "byEmail": "By Email",
+    "continueWith": "Continue with {provider}",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "enterPassword": "Enter password",
+    "minCharacters": "Minimum {count} characters",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "backToHome": "Back to Home",
+    "acceptPrivacy": "I accept the",
+    "privacyPolicy": "Privacy Policy",
+    "checkEmail": "Check your email",
+    "verificationSent": "A verification email has been sent to {email}",
+    "checkSpam": "Check your spam folder if you don't see the email",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailNotVerified": "Email not verified. Check your inbox.",
+      "emailExists": "This email is already registered",
+      "sendFailed": "Failed to send email",
+      "unknown": "An error occurred"
+    },
+    "magicLink": "Sign in with link",
+    "sendMagicLink": "Send link",
+    "magicLinkSent": "Link sent!",
+    "checkYourEmail": "Check your email {email}",
+    "magicLinkDescription": "We'll send a passwordless login link",
+    "emailPlaceholder": "Enter your email",
+    "sending": "Sending...",
+    "orUseMagicLink": "Or sign in with link"
+  },
+  "offline": {
+    "title": "No Connection",
+    "description": "It looks like you're not connected to the internet. Check your connection and try again.",
+    "hint": "The page will load automatically when the connection is restored"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "openChat": "Open chat",
+    "closeChat": "Close chat",
+    "welcome": "Hi! I'm Kami's AI assistant. Ask me about his work or services.",
+    "placeholder": "Type a message...",
+    "thinking": "Thinking...",
+    "error": "An error occurred. Please try again."
+  },
+  "learning": {
+    "title": "What I'm Learning",
+    "subtitle": "Books, courses, articles and other materials that help me grow as a professional",
+    "empty": "The list is empty",
+    "completedOn": "Completed",
+    "stats": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "wantToLearn": "Want to Learn"
+    },
+    "sections": {
+      "inProgress": "Currently Learning",
+      "completed": "Completed",
+      "wantToLearn": "Want to Learn"
+    },
+    "types": {
+      "BOOK": "Book",
+      "COURSE": "Course",
+      "ARTICLE": "Article",
+      "VIDEO": "Video",
+      "PODCAST": "Podcast",
+      "CONFERENCE": "Conference",
+      "OTHER": "Other"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "Information about collection and processing of personal data",
+    "lastUpdated": "Last updated: January 2026",
+    "sections": {
+      "collect": {
+        "title": "What Data We Collect",
+        "content": "When using the site, we may collect the following information:\n• Email address (during registration or form submission)\n• Name and contact details (when filling out forms)\n• Data from OAuth providers (GitHub, Google, Yandex) during authorization\n• Technical information (IP address, browser type, cookies)"
+      },
+      "use": {
+        "title": "How We Use Data",
+        "content": "Collected data is used for:\n• Providing access to site features\n• Contacting you regarding requests and inquiries\n• Improving service quality\n• Sending notifications (with your consent)"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "content": "The site uses cookies for:\n• Maintaining authorization sessions\n• Remembering preferences (language, theme)\n• Traffic analytics"
+      },
+      "thirdParty": {
+        "title": "Third-Party Services",
+        "content": "We use the following third-party services:\n• OAuth providers (GitHub, Google, Yandex) for authorization\n• Analytics systems to improve service\n• Email services for sending notifications"
+      },
+      "security": {
+        "title": "Data Security",
+        "content": "We take measures to protect your data:\n• Encryption of transmitted data (HTTPS)\n• Secure password storage\n• Limited access to personal data"
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "For privacy questions, contact us:\nEmail: privacy@letar.best"
+      }
+    }
+  },
+  "dataDeletion": {
+    "title": "Data Deletion",
+    "description": "Your Facebook-related data has been deleted from our system.",
+    "statusComplete": "Deletion of your Facebook-related data is complete. Your Facebook account link has been removed from our system.",
+    "confirmationCode": "Confirmation code"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "description": "Rules for using kami.letar.best",
+    "lastUpdated": "Last updated: January 2026",
+    "sections": {
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "content": "By using this site, you agree to these terms of use. If you do not agree with any terms, please stop using the site."
+      },
+      "services": {
+        "title": "Description of Services",
+        "content": "kami.letar.best is a personal portfolio website of a software architect. The site provides:\n• Information about skills and experience\n• Blog with technical articles\n• Forms for contact and service requests\n• Authorization system for extended features"
+      },
+      "accounts": {
+        "title": "User Accounts",
+        "content": "When creating an account, you agree to:\n• Provide accurate information\n• Keep your credentials secure\n• Report unauthorized access immediately\n• Not share access with third parties"
+      },
+      "intellectual": {
+        "title": "Intellectual Property",
+        "content": "All site content (texts, images, code) is protected by copyright. Prohibited:\n• Copying and distribution without permission\n• Content modification\n• Commercial use without consent"
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "content": "The site is provided \"as is\". We are not responsible for:\n• Temporary service unavailability\n• Data loss due to technical reasons\n• Actions of third parties"
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": "We reserve the right to change these terms. Continued use of the site after changes means acceptance of the new terms."
+      }
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to Home"
+  }
+}

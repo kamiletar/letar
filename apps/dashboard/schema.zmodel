@@ -1,0 +1,391 @@
+// ZenStack schema file for Dashboard application
+// Панель мониторинга серверной инфраструктуры
+
+datasource db {
+  provider = "postgresql"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+generator client {
+  provider      = "prisma-client"
+  output        = "./prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+
+// TypeScript plugin (v3) — генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// ============================================================================
+// BETTER AUTH MODELS
+// ============================================================================
+
+/// Роли пользователей Dashboard
+enum UserRole {
+  /// Новый пользователь без доступа (по умолчанию)
+  USER
+  /// Администратор с полным доступом
+  ADMIN
+  /// Только просмотр
+  VIEWER
+}
+
+/// Пользователи Dashboard
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  username        String?   @unique
+  displayUsername String?   /// Для Better Auth username plugin
+  email           String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          UserRole  @default(USER)
+
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@auth
+  @@allow('all', true)
+}
+
+/// OAuth аккаунты (Better Auth)
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@allow('all', true)
+}
+
+/// Сессии пользователей (Better Auth)
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@allow('all', auth() == user)
+}
+
+/// Токены верификации (Better Auth)
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  type       String   @default("EMAIL_VERIFICATION")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@deny('all', true)
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+/// Типы алертов системы мониторинга
+enum AlertType {
+  /// Высокая загрузка CPU
+  CPU_HIGH
+  /// Высокое использование памяти
+  MEMORY_HIGH
+  /// Мало места на диске
+  DISK_HIGH
+  /// Docker контейнер упал
+  CONTAINER_DOWN
+  /// Docker контейнер перезапустился (crash/OOM)
+  CONTAINER_RESTARTED
+  /// База данных недоступна
+  DATABASE_DOWN
+  /// Ошибка деплоя
+  DEPLOY_FAILED
+  /// Ошибка бэкапа
+  BACKUP_FAILED
+  /// Ошибка cron задачи
+  CRON_FAILED
+}
+
+/// Уровни серьёзности алертов
+enum AlertSeverity {
+  /// Информационное сообщение
+  INFO
+  /// Предупреждение
+  WARNING
+  /// Ошибка
+  ERROR
+  /// Критическая проблема
+  CRITICAL
+}
+
+/// Статусы алертов
+enum AlertStatus {
+  /// Активный алерт
+  ACTIVE
+  /// Подтверждённый оператором
+  ACKNOWLEDGED
+  /// Проблема решена
+  RESOLVED
+}
+
+/// Статусы выполнения cron задач
+enum CronStatus {
+  /// Успешно выполнено
+  SUCCESS
+  /// Ошибка выполнения
+  ERROR
+  /// В процессе выполнения
+  RUNNING
+}
+
+/// Статусы health check приложений
+enum HealthStatus {
+  /// Приложение работает
+  UP
+  /// Приложение недоступно
+  DOWN
+}
+
+/// Типы приложений
+enum AppType {
+  /// Веб-приложение с портом
+  WEB
+  /// CLI утилита
+  CLI
+  /// Фоновый сервис
+  SERVICE
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+/// Алерты системы мониторинга
+model Alert {
+  id             String        @id @default(cuid())
+  type           AlertType
+  severity       AlertSeverity
+  status         AlertStatus   @default(ACTIVE)
+  title          String
+  message        String
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+
+  /// Сервер, с которого пришёл алерт (опционально для обратной совместимости)
+  server         Server?       @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  serverId       String?
+
+  // Dashboard: все операции требуют авторизации
+  @@allow('all', auth() != null)
+  @@index([status, createdAt])
+  @@index([type])
+  @@index([serverId])
+}
+
+/// Настройки системы алертов (singleton)
+model AlertSettings {
+  id               String   @id @default("default")
+  enabled          Boolean  @default(true)
+  cpuThreshold     Int      @default(90)
+  memoryThreshold  Int      @default(90)
+  diskThreshold    Int      @default(90)
+  checkInterval    Int      @default(30)
+  telegramEnabled  Boolean  @default(false)
+  telegramBotToken String?
+  telegramChatId   String?
+  updatedAt        DateTime @updatedAt
+
+  @@allow('all', auth() != null)
+}
+
+/// Лог выполнения cron задач
+model CronExecutionLog {
+  id           String     @id @default(cuid())
+  jobId        String
+  startedAt    DateTime   @default(now())
+  completedAt  DateTime?
+  status       CronStatus
+  statusCode   Int?
+  responseBody String?    @db.Text
+  error        String?    @db.Text
+  duration     Int?       // миллисекунды
+
+  @@allow('all', auth() != null)
+  @@index([jobId, startedAt(sort: Desc)])
+}
+
+/// Health check результаты приложений
+model HealthCheck {
+  id           String       @id @default(cuid())
+  app          String
+  timestamp    DateTime     @default(now())
+  status       HealthStatus
+  responseTime Int          // миллисекунды
+  statusCode   Int?
+  error        String?
+
+  @@allow('all', auth() != null)
+  @@index([app, timestamp(sort: Desc)])
+}
+
+/// Системные метрики (CPU, RAM, Disk)
+model SystemMetric {
+  id          String   @id @default(cuid())
+  timestamp   DateTime @default(now())
+  tier        String   @default("realtime") // realtime, hourly, daily
+  cpu         Float
+  memory      Float
+  memoryUsed  BigInt
+  memoryTotal BigInt
+  disk        Float
+  diskUsed    BigInt
+  diskTotal   BigInt
+  networkRx   BigInt?
+  networkTx   BigInt?
+
+  @@allow('all', auth() != null)
+  @@index([tier, timestamp(sort: Desc)])
+}
+
+/// Аудит действий пользователей
+model AuditLog {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  username  String
+  role      String
+  action    String
+  resource  String?
+  details   Json?
+  success   Boolean  @default(true)
+  error     String?
+
+  @@allow('all', auth() != null)
+  @@index([timestamp(sort: Desc)])
+  @@index([action])
+  @@index([username])
+}
+
+// ============================================================================
+// MULTI-SERVER SUPPORT
+// ============================================================================
+
+/// Сервер для мониторинга (локальный или удалённый через агента)
+model Server {
+  id          String    @id @default(cuid())
+  /// Уникальное имя сервера (slug)
+  name        String    @unique
+  /// Отображаемое имя
+  displayName String
+  /// Хост агента (IP или hostname)
+  host        String
+  /// Порт агента
+  port        Int       @default(3100)
+  /// Локальный сервер (не требует агента)
+  isLocal     Boolean   @default(false)
+  /// Активен ли сервер для мониторинга
+  isActive    Boolean   @default(true)
+  /// Токен для аутентификации агента (зашифрован)
+  agentToken  String?   @db.Text
+  /// Последний успешный heartbeat
+  lastSeen    DateTime?
+  /// Порядок отображения в списке
+  sortOrder   Int       @default(0)
+
+  // === Nginx Proxy Manager ===
+  /// URL NPM API (например http://localhost:81)
+  npmUrl      String?
+  /// Email для авторизации в NPM
+  npmEmail    String?
+  /// Пароль для авторизации в NPM (зашифрован)
+  npmPassword String?   @db.Text
+
+  /// Приложения, развёрнутые на этом сервере
+  apps        DeployedApp[]
+  /// Алерты с этого сервера
+  alerts      Alert[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Чтение — для авторизованных, CRUD — только ADMIN
+  @@allow('read', auth() != null)
+  @@allow('create,update,delete', auth() != null && auth().role == 'ADMIN')
+  @@index([isActive, sortOrder])
+}
+
+/// Приложение, развёрнутое на сервере
+model DeployedApp {
+  id            String    @id @default(cuid())
+  /// Имя приложения (slug)
+  name          String
+  /// Отображаемое имя
+  displayName   String
+  /// Имя Docker контейнера
+  containerName String?
+  /// Порт приложения
+  port          Int?
+  /// Тип приложения
+  type          AppType   @default(WEB)
+  /// Docker образ (например, lena/premium-rosstil:latest)
+  imageName     String?
+  /// Домен приложения (например, premium.rosstil.ru)
+  domain        String?
+  /// Время последнего деплоя
+  lastDeployed  DateTime?
+
+  /// Сервер, на котором развёрнуто приложение
+  server        Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  serverId      String
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Одно приложение на сервер
+  @@unique([name, serverId])
+  // Чтение — для авторизованных, CRUD — только ADMIN
+  @@allow('read', auth() != null)
+  @@allow('create,update,delete', auth() != null && auth().role == 'ADMIN')
+  @@index([serverId])
+}

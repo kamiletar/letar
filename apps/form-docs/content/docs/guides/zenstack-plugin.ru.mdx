@@ -1,0 +1,248 @@
+---
+title: ZenStack Plugin
+description: Генерация Zod схем с UI метаданными из моделей базы данных
+---
+
+## Обзор
+
+`@letar/zenstack-form-plugin` генерирует типобезопасные Zod v4 схемы с `.meta({ ui: {...} })` прямо из `schema.zmodel` — без ручного написания схем.
+
+```bash
+npm install @letar/zenstack-form-plugin
+```
+
+## Конфигурация
+
+Добавьте плагин в `schema.zmodel`:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+}
+```
+
+Затем запустите:
+
+```bash
+npx zenstack generate
+```
+
+## Директивы @form.\*
+
+Используйте `///` doc-комментарии **перед** полями для настройки поведения формы:
+
+```prisma
+model Product {
+  id    String @id @default(cuid())
+
+  /// @form.title("Название товара")
+  /// @form.placeholder("Введите название")
+  name  String
+
+  /// @form.title("Цена")
+  /// @form.fieldType("currency")
+  /// @form.props({ min: 0 })
+  price Decimal
+
+  /// @form.title("Категория")
+  /// @form.relation({ labelField: "name" })
+  categoryId String
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+}
+```
+
+### Доступные директивы
+
+| Директива                  | Описание               | Пример                                       |
+| -------------------------- | ---------------------- | -------------------------------------------- |
+| `@form.title("...")`       | Заголовок поля         | `/// @form.title("Название")`                |
+| `@form.placeholder("...")` | Placeholder            | `/// @form.placeholder("Введите...")`        |
+| `@form.description("...")` | Подсказка              | `/// @form.description("Пояснение")`         |
+| `@form.fieldType("...")`   | Тип компонента         | `/// @form.fieldType("tags")`                |
+| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1 })`                |
+| `@form.relation({...})`    | Настройки relation     | `/// @form.relation({ labelField: "name" })` |
+| `@form.exclude`            | Исключить из формы     | `/// @form.exclude`                          |
+
+## Генерируемый код
+
+Для модели `Product` выше плагин генерирует:
+
+```typescript
+// src/generated/form-schemas/Product.form.ts
+import { z } from 'zod/v4'
+
+export const ProductCreateFormSchema = z.object({
+  name: z.string().meta({
+    ui: { title: 'Название товара', placeholder: 'Введите название' },
+  }),
+  price: z
+    .number()
+    .min(0)
+    .meta({
+      ui: { title: 'Цена', fieldType: 'currency' },
+    }),
+  categoryId: z.string().meta({
+    ui: { title: 'Категория', fieldType: 'relation', fieldProps: { labelField: 'name' } },
+  }),
+})
+
+export const ProductUpdateFormSchema = ProductCreateFormSchema.partial()
+export type ProductCreateForm = z.infer<typeof ProductCreateFormSchema>
+```
+
+## Метки Enum
+
+Doc-комментарии перед значениями enum становятся опциями select:
+
+```prisma
+enum Status {
+  /// Активный
+  ACTIVE
+  /// В архиве
+  ARCHIVED
+  /// Черновик
+  DRAFT
+}
+```
+
+Генерирует:
+
+```typescript
+export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
+  ui: {
+    options: [
+      { value: 'ACTIVE', label: 'Активный' },
+      { value: 'ARCHIVED', label: 'В архиве' },
+      { value: 'DRAFT', label: 'Черновик' },
+    ],
+  },
+})
+```
+
+## Умное разделение Props
+
+Значения `@form.props` автоматически разделяются на **Zod constraints** и **UI props**:
+
+```prisma
+/// @form.props({ min: 1, max: 100, showValue: true })
+portions Int
+```
+
+Генерирует:
+
+```typescript
+portions: z.number()
+  .int()
+  .min(1) // ← Zod constraint
+  .max(100) // ← Zod constraint
+  .meta({ ui: { fieldProps: { showValue: true } } }) // ← UI prop
+```
+
+**Zod constraints:** `min`, `max`, `step`, `minLength`, `maxLength`, `pattern`, `email`, `url`, `uuid`
+**UI props:** всё остальное (`count`, `allowHalf`, `showValue`, `layout` и т.д.)
+
+## Использование с @letar/forms
+
+Сгенерированные схемы работают напрямую с `Form.FromSchema`:
+
+```tsx
+import { Form } from '@letar/forms'
+import { ProductCreateFormSchema } from '@/generated/form-schemas/Product.form'
+
+function CreateProductForm() {
+  return (
+    <Form.FromSchema
+      schema={ProductCreateFormSchema}
+      onSubmit={async (data) => createProduct(data)}
+      submitLabel="Создать товар"
+    />
+  )
+}
+```
+
+## i18n поддержка
+
+Включите мультиязычные метки:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+  i18n = true
+  i18nOutput = './messages/form-schemas'
+  defaultLocale = 'ru'
+  locales = 'ru,en'
+}
+```
+
+Генерирует файлы переводов:
+
+```json
+// messages/form-schemas/ru.json
+{
+  "Product": {
+    "name": { "title": "Название товара", "placeholder": "Введите название" }
+  }
+}
+```
+
+Локаль по умолчанию **перезаписывается** при каждой генерации. Другие локали используют **merge стратегию** — сохраняя ваши переводы.
+
+## Кастомные переводы валидации
+
+Английские и русские сообщения валидации встроены. Для других языков создайте файл переводов:
+
+```typescript
+// i18n/form-validations.js
+export default {
+  de: {
+    required: 'Pflichtfeld',
+    too_small: {
+      string: 'Mindestens {minimum} Zeichen',
+      number: 'Mindestens {minimum}',
+    },
+    too_big: {
+      string: 'Maximal {maximum} Zeichen',
+      number: 'Maximal {maximum}',
+    },
+    invalid_format: {
+      email: 'Ungültige E-Mail-Adresse',
+      url: 'Ungültige URL',
+    },
+  },
+}
+```
+
+Укажите путь в schema.zmodel:
+
+```prisma
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+  i18n = true
+  defaultLocale = 'en'
+  locales = 'en,de'
+  validationTranslationsPath = './i18n/form-validations.js'
+}
+```
+
+**Приоритет:** custom файл → встроенные (en, ru) → English fallback.
+
+Тип `ValidationTranslations` экспортируется из пакета для типизации.
+
+## Автоматически исключаемые поля
+
+- `id` — первичные ключи
+- `createdAt`, `updatedAt` — системные поля
+- Поля с атрибутом `@id`
+- Поля с атрибутом `@relation`
+- Поля с директивой `/// @form.exclude`
+
+## Ссылки
+
+- **npm:** [`@letar/zenstack-form-plugin`](https://www.npmjs.com/package/@letar/zenstack-form-plugin)
+- **GitHub:** [kamiletar/zenstack-form-plugin](https://github.com/kamiletar/zenstack-form-plugin)
+- **@letar/forms:** [forms.letar.best](https://forms.letar.best)

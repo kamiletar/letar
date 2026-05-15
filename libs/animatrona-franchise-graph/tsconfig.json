@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "outDir": "./dist",
+    "declaration": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": [],
+    "paths": {
+      "@letar/animatrona-types": ["../animatrona-types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../animatrona-types"
+    }
+  ]
+}

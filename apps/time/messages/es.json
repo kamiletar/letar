@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "¿Qué hora es?",
+    "description": "Hora ordinal desde el inicio de la época UNIX"
+  },
+  "time": {
+    "now": "Ahora es",
+    "hour": "hora desde el inicio de la era UNIX",
+    "hoursPassed": "horas han pasado desde el inicio de la era UNIX"
+  },
+  "countdown": {
+    "until": "Hasta {milestone} horas",
+    "days": "{count, plural, one {# día} other {# días}}",
+    "hours": "{count, plural, one {# hora} other {# horas}}",
+    "minutes": "{count, plural, one {# minuto} other {# minutos}}",
+    "seconds": "{count, plural, one {# segundo} other {# segundos}}"
+  },
+  "celebration": {
+    "milestone": "¡{hours} horas de la era UNIX!"
+  },
+  "subscribe": {
+    "subscribe": "Notificaciones",
+    "explanation": "Es necesario iniciar sesión para verificar su correo electrónico y acceder a la configuración de notificaciones",
+    "signIn": "Iniciar sesión",
+    "settings": "Configuración"
+  },
+  "profile": {
+    "title": "Configuración de notificaciones",
+    "email": "Correo electrónico",
+    "notifyMonth": "Un mes antes",
+    "notifyWeek": "Una semana antes",
+    "notifyDay": "Un día antes",
+    "notifyHour": "Una hora antes",
+    "notify5Min": "5 minutos antes",
+    "save": "Guardar",
+    "saved": "¡Guardado!",
+    "unsubscribe": "Cancelar todas las suscripciones",
+    "unsubscribed": "Se han cancelado todas sus suscripciones a notificaciones",
+    "noSubscription": "Aún no tiene una suscripción a notificaciones",
+    "createSubscription": "Suscribirse a notificaciones"
+  },
+  "unsubscribe": {
+    "title": "Cancelar suscripción",
+    "success": "Se ha cancelado exitosamente su suscripción a notificaciones de hitos de horas UNIX",
+    "error": "Enlace de cancelación de suscripción inválido",
+    "back": "Volver al inicio"
+  }
+}

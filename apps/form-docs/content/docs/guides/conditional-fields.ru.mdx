@@ -1,0 +1,68 @@
+---
+title: Условные поля
+description: Показ и скрытие полей на основе значений других полей
+---
+
+## Живой пример
+
+import { DemoContainer } from '@/components/demo-container'
+
+<DemoContainer demo="conditional" height={500} />
+
+## Form.When
+
+Условный рендеринг полей на основе значения другого поля:
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.Select name="contactMethod" />
+
+  <Form.When field="contactMethod" is="email">
+    <Form.Field.String name="email" />
+  </Form.When>
+
+  <Form.When field="contactMethod" is="phone">
+    <Form.Field.Phone name="phone" />
+  </Form.When>
+
+  <Form.Button.Submit />
+</Form>
+```
+
+## Несколько значений
+
+Показать поле при совпадении с любым из нескольких вариантов:
+
+```tsx
+<Form.When field="type" is={['company', 'organization']}>
+  <Form.Field.String name="companyName" />
+</Form.When>
+```
+
+## Пользовательское условие
+
+Функция для сложных условий:
+
+```tsx
+<Form.When field="age" condition={(age) => age >= 18}>
+  <Form.Field.Checkbox name="drivingLicense" />
+</Form.When>
+```
+
+## Вложенные условия
+
+Условия можно вкладывать друг в друга:
+
+```tsx
+<Form.When field="hasAddress" is={true}>
+  <Form.Group name="address">
+    <Form.Field.String name="street" />
+    <Form.Field.String name="city" />
+
+    <Form.When field="country" is="US">
+      <Form.Field.String name="state" />
+      <Form.Field.String name="zip" />
+    </Form.When>
+  </Form.Group>
+</Form.When>
+```

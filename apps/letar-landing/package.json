@@ -1,0 +1,12 @@
+{
+  "name": "@letar/letar-landing",
+  "version": "0.2.0",
+  "private": true,
+  "nx": {
+    "name": "letar-landing",
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/analytics"
+    ]
+  }
+}

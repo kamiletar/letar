@@ -1,0 +1,599 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+// TypeScript plugin (v3) - генерирует schema.ts для ZenStackClient
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+// Access control plugin (v3)
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ============================================================================
+// AUTH MODELS (Better Auth v1.x)
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)  // Better Auth использует Boolean
+  image         String?
+  role          UserRole  @default(USER)
+
+  accounts      Account[]
+  sessions      Session[]
+  uploadedImages Image[]
+  orders        Order[]   // Заказы пользователя
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', true)
+  @@allow('all', auth() == this)
+  @@allow('all', auth().role == ADMIN)
+}
+
+enum UserRole {
+  /// Пользователь
+  USER
+  /// Администратор
+  ADMIN
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String    // 'credential', 'google', 'yandex' etc.
+  accountId             String    // email для credential, OAuth ID для OAuth
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?   // Хеш пароля для credential auth
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@allow('all', auth() == user)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique    // Better Auth использует 'token'
+  userId    String
+  expiresAt DateTime            // Better Auth использует 'expiresAt'
+  ipAddress String?
+  userAgent String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([token])
+  @@allow('all', auth() == user)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String   // email или другой идентификатор
+  value      String   @unique // токен верификации (Better Auth требует уникальность)
+  expiresAt  DateTime
+
+  // PIN-аутентификация (@letar/pin-auth)
+  pin         String?   // 6-значный PIN-код
+  pinExpires  DateTime? // Срок действия PIN
+  pinAttempts Int       @default(0) // Количество попыток ввода
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  // Access control: никто не может читать токены напрямую через API
+  @@deny('all', true)
+}
+
+// ============================================================================
+// MANDALA MODELS
+// ============================================================================
+
+model Mandala {
+  id          String   @id @default(cuid())
+
+  /// @form.title("URL-адрес")
+  /// @form.placeholder("harmony-mandala")
+  slug        String   @unique
+
+  /// @form.title("Название мандалы")
+  /// @form.placeholder("Мандала гармонии")
+  name        String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description String?
+
+  // i18n поля (EN)
+  /// @form.title("Название (EN)")
+  /// @form.placeholder("Harmony Mandala")
+  nameEn            String?
+
+  /// @form.title("Описание (EN)")
+  /// @form.fieldType("richText")
+  descriptionEn     String?
+
+  // Связи с изображениями
+  /// @form.exclude
+  imageId     String
+  /// @form.exclude
+  image       Image    @relation("MandalaImage", fields: [imageId], references: [id])
+
+  /// @form.exclude
+  centerImageId String?
+  /// @form.exclude
+  centerImage   Image?   @relation("MandalaCenterImage", fields: [centerImageId], references: [id])
+
+  /// @form.title("Квадратная мандала")
+  /// @form.description("Если включено: вращается центр. Иначе: вращается фон.")
+  /// @form.fieldType("switch")
+  isSquare Boolean @default(false)
+
+  /// @form.exclude
+  watermarkId String?
+  /// @form.exclude
+  watermark   Image?   @relation("MandalaWatermark", fields: [watermarkId], references: [id])
+
+  // SEO
+  /// @form.title("SEO заголовок")
+  metaTitle       String?
+
+  /// @form.title("SEO описание")
+  /// @form.fieldType("textarea")
+  metaDescription String?
+
+  /// @form.title("SEO ключевые слова")
+  metaKeywords    String?
+
+  // SEO i18n (EN)
+  /// @form.title("SEO заголовок (EN)")
+  metaTitleEn       String?
+
+  /// @form.title("SEO описание (EN)")
+  /// @form.fieldType("textarea")
+  metaDescriptionEn String?
+
+  /// @form.exclude
+  ogImageId   String?
+  /// @form.exclude
+  ogImage     Image?   @relation("MandalaOgImage", fields: [ogImageId], references: [id])
+
+  /// @form.title("Эффект по умолчанию")
+  /// @form.props({ min: 0, max: 6 })
+  defaultEffectIndex Int @default(0)
+
+  /// @form.title("Порядок сортировки")
+  /// @form.props({ min: 0 })
+  order       Int      @default(0)
+
+  /// @form.title("Опубликовано")
+  /// @form.fieldType("switch")
+  published   Boolean  @default(true)
+
+  /// @form.exclude
+  createdAt   DateTime @default(now())
+  /// @form.exclude
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+  @@index([imageId])
+  @@allow('read', published)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// PRODUCT MODELS
+// ============================================================================
+
+model Product {
+  id          String   @id @default(cuid())
+
+  /// @form.title("URL-адрес")
+  slug        String   @unique
+
+  /// @form.title("Название товара")
+  name        String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description String
+
+  // i18n поля (EN)
+  /// @form.title("Название (EN)")
+  nameEn            String?
+
+  /// @form.title("Описание (EN)")
+  /// @form.fieldType("richText")
+  descriptionEn     String?
+
+  /// @form.title("Цена (₽)")
+  /// @form.props({ min: 0, step: 1 })
+  price       Float
+
+  /// @form.exclude
+  currency    String   @default("RUB")
+
+  /// @form.exclude
+  images      ProductImage[]
+
+  /// @form.exclude
+  orderItems  OrderItem[]
+
+  // SEO
+  /// @form.title("SEO заголовок")
+  metaTitle       String?
+
+  /// @form.title("SEO описание")
+  /// @form.fieldType("textarea")
+  metaDescription String?
+
+  // SEO i18n (EN)
+  /// @form.title("SEO заголовок (EN)")
+  metaTitleEn       String?
+
+  /// @form.title("SEO описание (EN)")
+  /// @form.fieldType("textarea")
+  metaDescriptionEn String?
+
+  /// @form.exclude
+  ogImageId       String?
+  /// @form.exclude
+  ogImageRel      Image?  @relation("ProductOgImage", fields: [ogImageId], references: [id])
+
+  /// @form.title("Порядок сортировки")
+  /// @form.props({ min: 0 })
+  order       Int      @default(0)
+
+  /// @form.title("Опубликовано")
+  /// @form.fieldType("switch")
+  published   Boolean  @default(true)
+
+  /// @form.title("Количество в наличии")
+  /// @form.props({ min: 0, step: 1 })
+  stock       Int      @default(1)
+
+  /// @form.exclude
+  inStock     Boolean  @default(true)
+
+  /// @form.exclude
+  createdAt   DateTime @default(now())
+  /// @form.exclude
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+  @@allow('read', published)
+  @@allow('all', auth().role == ADMIN)
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  imageId   String
+  image     Image   @relation(fields: [imageId], references: [id])
+  alt       String? // Alt текст
+  order     Int     @default(0)
+
+  @@index([productId, order])
+  @@allow('read', product.published)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// CONTENT PAGES
+// ============================================================================
+
+model ContentPage {
+  id      String @id @default(cuid())
+
+  /// @form.title("URL-адрес")
+  /// @form.placeholder("about-us")
+  slug    String @unique
+
+  /// @form.title("Заголовок страницы")
+  title   String
+
+  /// @form.title("Содержимое")
+  /// @form.fieldType("richText")
+  content String
+
+  // i18n поля (EN)
+  /// @form.title("Заголовок (EN)")
+  titleEn   String?
+
+  /// @form.title("Содержимое (EN)")
+  /// @form.fieldType("richText")
+  contentEn String?
+
+  // SEO
+  /// @form.title("SEO заголовок")
+  metaTitle       String?
+
+  /// @form.title("SEO описание")
+  /// @form.fieldType("textarea")
+  metaDescription String?
+
+  // SEO i18n (EN)
+  /// @form.title("SEO заголовок (EN)")
+  metaTitleEn       String?
+
+  /// @form.title("SEO описание (EN)")
+  /// @form.fieldType("textarea")
+  metaDescriptionEn String?
+
+  /// @form.exclude
+  ogImageId       String?
+  /// @form.exclude
+  ogImageRel      Image?  @relation("ContentPageOgImage", fields: [ogImageId], references: [id])
+
+  /// @form.title("Опубликовано")
+  /// @form.fieldType("switch")
+  published Boolean @default(true)
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+  /// @form.exclude
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', published)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// SHORT URLS
+// ============================================================================
+
+model ShortUrl {
+  id       String @id @default(cuid())
+
+  /// @form.title("Короткий код")
+  /// @form.placeholder("promo2024")
+  code     String @unique
+
+  /// @form.title("Полный URL")
+  /// @form.placeholder("/stickers/mandala-name")
+  fullUrl  String
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  @@index([code])
+  @@allow('read', true)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// IMAGE MODEL
+// ============================================================================
+
+enum ImageCategory {
+  /// Мандала
+  MANDALA
+  /// Продукт
+  PRODUCT
+  /// Контент
+  CONTENT
+  /// Прочее
+  OTHER
+}
+
+model Image {
+  id           String        @id @default(cuid())
+  filename     String                    // Оригинальное имя файла
+  path         String        @unique     // Путь к файлу в uploads/
+  mimeType     String                    // MIME тип (image/png, image/jpeg)
+  size         Int                       // Размер в байтах
+  width        Int?                      // Ширина в пикселях
+  height       Int?                      // Высота в пикселях
+  blurDataURL  String?                   // Base64 blur placeholder для Next.js Image
+  category     ImageCategory @default(OTHER)
+
+  uploadedById String?
+  uploadedBy   User?         @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime      @default(now())
+
+  // Обратные связи с Mandala
+  mandalaAsMain       Mandala[] @relation("MandalaImage")
+  mandalaAsCenter     Mandala[] @relation("MandalaCenterImage")
+  mandalaAsWatermark  Mandala[] @relation("MandalaWatermark")
+  mandalaAsOgImage    Mandala[] @relation("MandalaOgImage")
+
+  // Обратная связь с ProductImage
+  productImages       ProductImage[]
+
+  // Обратные связи с OG Images
+  productOgImages     Product[]     @relation("ProductOgImage")
+  contentPageOgImages ContentPage[] @relation("ContentPageOgImage")
+
+  @@index([category])
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// CONTACT MESSAGES
+// ============================================================================
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+
+  /// @form.title("Имя")
+  /// @form.placeholder("Ваше имя")
+  /// @form.props({ minLength: 2, maxLength: 100 })
+  name      String
+
+  /// @form.title("Email")
+  /// @form.placeholder("your@email.com")
+  /// @form.props({ email: true })
+  email     String
+
+  /// @form.title("Сообщение")
+  /// @form.fieldType("textarea")
+  /// @form.placeholder("Напишите ваше сообщение...")
+  /// @form.props({ minLength: 10, maxLength: 5000 })
+  message   String
+
+  /// @form.exclude
+  read      Boolean  @default(false)
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  @@index([read, createdAt])
+  @@allow('create', true)
+  @@allow('read,update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// APP SETTINGS (Singleton)
+// ============================================================================
+
+model AppSettings {
+  id                 String   @id @default("default")  // Фиксированный ID для singleton
+
+  // === Telegram уведомления ===
+  /// @form.title("Telegram уведомления")
+  /// @form.fieldType("switch")
+  telegramEnabled    Boolean  @default(false)
+
+  /// @form.title("Bot Token")
+  /// @form.description("Токен от @BotFather")
+  /// @form.props({ type: "password" })
+  telegramBotToken   String?
+
+  /// @form.title("Chat ID")
+  /// @form.description("ID чата для уведомлений")
+  telegramChatId     String?
+
+  // === Метаданные ===
+  /// @form.exclude
+  updatedAt          DateTime @updatedAt
+
+  // Только админы могут читать и редактировать настройки
+  @@allow('read,update', auth().role == ADMIN)
+  @@deny('create,delete', true)  // Singleton — создание/удаление запрещено
+}
+
+// ============================================================================
+// ORDERS
+// ============================================================================
+
+enum OrderStatus {
+  /// Ожидает
+  PENDING
+  /// Подтверждён
+  CONFIRMED
+  /// Отправлен
+  SHIPPED
+  /// Доставлен
+  DELIVERED
+  /// Отменён
+  CANCELLED
+}
+
+model Order {
+  id        String      @id @default(cuid())
+
+  /// @form.exclude
+  items     OrderItem[]
+
+  /// @form.exclude
+  userId    String?
+  /// @form.exclude
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// @form.title("Имя")
+  /// @form.placeholder("Ваше имя")
+  name      String
+
+  /// @form.title("Телефон")
+  /// @form.placeholder("+7 (999) 123-45-67")
+  phone     String
+
+  /// @form.title("Email")
+  /// @form.placeholder("your@email.com")
+  /// @form.description("Для уведомлений о статусе заказа")
+  /// @form.props({ email: true })
+  email     String?
+
+  /// @form.title("Адрес доставки")
+  /// @form.placeholder("Город, улица, дом, квартира")
+  /// @form.fieldType("textarea")
+  address   String?
+
+  /// @form.title("Комментарий")
+  /// @form.placeholder("Пожелания к заказу")
+  /// @form.fieldType("textarea")
+  comment   String?
+
+  /// @form.title("Статус")
+  status    OrderStatus @default(PENDING)
+
+  /// @form.title("Сумма (₽)")
+  /// @form.props({ min: 0 })
+  total     Int
+
+  /// @form.exclude
+  createdAt DateTime    @default(now())
+  /// @form.exclude
+  updatedAt DateTime    @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@allow('create', true)
+  @@allow('read', auth() == user)
+  @@allow('read,update,delete', auth().role == ADMIN)
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity  Int                       // Количество
+  price     Float                     // Цена за единицу на момент заказа (₽)
+
+  @@index([orderId])
+  @@allow('create', true)
+  @@allow('read,update,delete', auth().role == ADMIN)
+}

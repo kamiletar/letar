@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "outDir": "../../../dist/apps/animatrona/main",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
+      "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "preload/**/*.ts", "../shared/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": ".."
+    }
+  ]
+}

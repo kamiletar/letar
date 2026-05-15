@@ -1,0 +1,16 @@
+{
+  "name": "@letar/grandslamcup",
+  "version": "3.30.0",
+  "private": true,
+  "nx": {
+    "name": "grandslamcup",
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/query-provider",
+      "@letar/forms",
+      "@letar/ui",
+      "@letar/analytics",
+      "@letar/auth"
+    ]
+  }
+}

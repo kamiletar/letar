@@ -1,0 +1,110 @@
+---
+title: Хуки
+description: useAppForm, useFormContext, useFieldContext и другие
+---
+
+## useAppForm
+
+Основной хук для создания форм. Преднастроен с Zod валидацией.
+
+```tsx
+import { useAppForm } from '@letar/forms'
+
+const form = useAppForm({
+  defaultValues: { name: '', email: '' },
+  onSubmit: async ({ value }) => {
+    await saveData(value)
+  },
+})
+```
+
+## useFormContext
+
+Доступ к инстансу формы из дочернего компонента:
+
+```tsx
+const form = useFormContext()
+form.handleSubmit()
+```
+
+## useTypedFormContext
+
+Типобезопасная версия useFormContext:
+
+```tsx
+type FormData = { name: string; email: string }
+const form = useTypedFormContext<FormData>()
+```
+
+## useFieldContext
+
+Доступ к состоянию поля из кастомного компонента:
+
+```tsx
+const field = useFieldContext()
+// field.state.value, field.handleChange()
+```
+
+## useDeclarativeForm
+
+Доступ к декларативному контексту формы:
+
+```tsx
+const { schema, isSubmitting } = useDeclarativeForm()
+```
+
+## useFieldActions
+
+Действия над полем:
+
+```tsx
+const { setValue, setError, reset } = useFieldActions('email')
+```
+
+## useFormApi
+
+Интеграция с Server Actions:
+
+```tsx
+const { submit, isLoading, error } = useFormApi({
+  action: createUserAction,
+  onSuccess: (result) => router.push(`/users/${result.id}`),
+})
+```
+
+## useTypedFormSubscribe
+
+Типизированная подписка на изменения конкретного поля:
+
+```tsx
+const price = useTypedFormSubscribe<FormData>('price')
+```
+
+См. [Управляемое состояние](/docs/guides/controlled-state).
+
+## useRelationOptions
+
+Доступ к опциям, загруженным RelationFieldProvider:
+
+```tsx
+const { options, isLoading } = useRelationOptions('category')
+```
+
+См. [Связанные поля](/docs/guides/relation-fields).
+
+## useFieldConstraints
+
+Zod constraints для поля (min, max, required):
+
+```tsx
+const { constraints } = useFieldConstraints('email')
+```
+
+## useFormI18n
+
+Доступ к i18n контексту:
+
+```tsx
+const i18n = useFormI18n()
+// i18n?.locale → 'en' | 'ru'
+```

@@ -1,0 +1,30 @@
+{
+  "name": "@letar/exoplayer-sync",
+  "version": "0.1.0",
+  "description": "ExoPlayer video player with MergingMediaSource for synchronized video+audio playback",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lena-corp/lena"
+  },
+  "author": "Lena Corp",
+  "license": "MIT",
+  "codegenConfig": {
+    "name": "ExoPlayerSyncSpec",
+    "type": "components",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.lena.exoplayer.sync"
+    }
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.73"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-native": "^0.73.0"
+  }
+}

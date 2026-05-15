@@ -1,0 +1,16 @@
+{
+  "title": "Руководства",
+  "pages": [
+    "validation",
+    "conditional-fields",
+    "multi-step",
+    "groups-arrays",
+    "auto-fields",
+    "offline",
+    "i18n",
+    "server-errors",
+    "analytics",
+    "undo-redo",
+    "mcp"
+  ]
+}

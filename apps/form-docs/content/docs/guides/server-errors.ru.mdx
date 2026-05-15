@@ -1,0 +1,66 @@
+---
+title: Маппинг серверных ошибок
+description: Автоматический маппинг ошибок Prisma, ZenStack и Zod на поля формы
+---
+
+## Обзор
+
+`mapServerErrors()` автоматически определяет формат ошибки и маппит её на поля формы.
+
+```tsx
+import { applyServerErrors, mapServerErrors } from '@letar/forms'
+
+<Form schema={UserSchema} onSubmit={async ({ value }) => {
+  try {
+    await createUser(value)
+  } catch (error) {
+    const mapped = mapServerErrors(error, {
+      fieldMap: {
+        email: { field: 'email', message: 'Этот email уже зарегистрирован' },
+      },
+    })
+    applyServerErrors(form, mapped)
+  }
+}}>
+  <Form.Field.String name="email" />
+  <Form.Errors />
+  <Form.Button.Submit>Создать</Form.Button.Submit>
+</Form>
+```
+
+## Поддерживаемые форматы
+
+| Формат | Пример | Результат |
+|--------|--------|-----------|
+| Prisma P2002 | `{ code: 'P2002', meta: { target: ['email'] } }` | `fieldErrors: [{ field: 'email' }]` |
+| Prisma P2003 | `{ code: 'P2003', meta: { field_name: 'categoryId' } }` | `fieldErrors: [{ field: 'categoryId' }]` |
+| Prisma P2025 | `{ code: 'P2025' }` | `formErrors: ['Запись не найдена']` |
+| ZenStack policy | `{ reason: 'rejected-by-policy' }` | `formErrors: ['Нет доступа']` |
+| ZenStack db-query | `{ reason: 'db-query-error', code: 'P2002', meta }` | Делегация Prisma |
+| Zod flatten | `{ fieldErrors: { email: ['msg'] } }` | Прямой маппинг |
+| ActionResult | `{ success: false, error: 'msg' }` | `formErrors: ['msg']` |
+
+## API
+
+### mapServerErrors(error, config?)
+
+```typescript
+const mapped = mapServerErrors(error, {
+  fieldMap: Record<string, { field: string; message: string }>,
+  format: 'auto' | 'prisma' | 'zenstack' | 'zod' | 'action-result',
+  locale: 'ru' | 'en',
+  defaultMessage: 'Произошла ошибка',
+})
+```
+
+### applyServerErrors(form, mapped)
+
+Применяет ошибки к TanStack Form через `form.setFieldMeta` и `form.setErrorMap`.
+
+## Импорт
+
+```typescript
+import { applyServerErrors, mapServerErrors } from '@letar/forms'
+import { mapServerErrors } from '@letar/forms/server-errors'
+import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
+```

@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "کتنا وقت ہوا؟",
+    "description": "UNIX دور کی شروعات سے ترتیبی گھنٹا"
+  },
+  "time": {
+    "now": "ابھی",
+    "hour": "گھنٹے UNIX دور کی شروعات سے",
+    "hoursPassed": "گھنٹے گزر چکے ہیں UNIX دور کی شروعات سے"
+  },
+  "countdown": {
+    "until": "{milestone} گھنٹے تک",
+    "days": "{count, plural, one {# دن} other {# دن}}",
+    "hours": "{count, plural, one {# گھنٹا} other {# گھنٹے}}",
+    "minutes": "{count, plural, one {# منٹ} other {# منٹ}}",
+    "seconds": "{count, plural, one {# سیکنڈ} other {# سیکنڈ}}"
+  },
+  "celebration": {
+    "milestone": "UNIX دور کے {hours} گھنٹے!"
+  },
+  "subscribe": {
+    "subscribe": "اطلاعات",
+    "explanation": "ایمیل کی تصدیق اور اطلاعات کی ترتیبات تک رسائی کے لیے لاگ ان ضروری ہے",
+    "signIn": "لاگ ان",
+    "settings": "ترتیبات"
+  },
+  "profile": {
+    "title": "اطلاعات کی ترتیبات",
+    "email": "ایمیل",
+    "notifyMonth": "ایک مہینہ پہلے",
+    "notifyWeek": "ایک ہفتہ پہلے",
+    "notifyDay": "ایک دن پہلے",
+    "notifyHour": "ایک گھنٹا پہلے",
+    "notify5Min": "۵ منٹ پہلے",
+    "save": "محفوظ کریں",
+    "saved": "محفوظ ہو گیا!",
+    "unsubscribe": "سب سے ان سبسکرائب",
+    "unsubscribed": "آپ سب اطلاعات سے ان سبسکرائب ہو گئے ہیں",
+    "noSubscription": "آپ کے پاس ابھی تک اطلاعات کی رکنیت نہیں ہے",
+    "createSubscription": "اطلاعات کے لیے سبسکرائب کریں"
+  },
+  "unsubscribe": {
+    "title": "ان سبسکرائب",
+    "success": "آپ UNIX گھنٹے کے سنگ میل کی اطلاعات سے کامیابی سے ان سبسکرائب ہو گئے ہیں",
+    "error": "غلط ان سبسکرائب لنک",
+    "back": "ہوم پیج پر واپس جائیں"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "kami-key-the",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/kami-key-the/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:infra"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/dev.js",
+        "cwd": "apps/kami-key-the"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npx webpack --config main/webpack.config.js", "npx vite build --config renderer/vite.config.ts"],
+        "cwd": "apps/kami-key-the",
+        "parallel": false
+      }
+    },
+    "build:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx webpack --config main/webpack.config.js --mode production",
+          "npx vite build --config renderer/vite.config.ts",
+          "npx electron-builder --win --publish never"
+        ],
+        "cwd": "apps/kami-key-the",
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/kami-key-the/main/**/*.ts",
+          "apps/kami-key-the/renderer/src/**/*.{ts,tsx}",
+          "apps/kami-key-the/shared/**/*.ts",
+          "apps/kami-key-the/src/**/*.ts"
+        ]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --noEmit -p apps/kami-key-the/tsconfig.json",
+        "cwd": "."
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p apps/kami-key-the/tsconfig.json",
+        "cwd": "."
+      }
+    }
+  }
+}

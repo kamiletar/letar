@@ -1,0 +1,94 @@
+{
+  "name": "driving-school-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/driving-school-e2e/src",
+  "tags": ["type:e2e", "scope:driving-school"],
+  "implicitDependencies": ["driving-school"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts"
+      }
+    },
+    "e2e:core": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-core"]
+      },
+      "metadata": {
+        "description": "E2E: auth, profiles, errors (файлы 00-03)"
+      }
+    },
+    "e2e:schedule": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-schedule"]
+      },
+      "metadata": {
+        "description": "E2E: schedule, lessons, connections (файлы 04-07)"
+      }
+    },
+    "e2e:school": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-school"]
+      },
+      "metadata": {
+        "description": "E2E: school admin functions (файлы 08, 09, 19, 22, 25, 27, 30)"
+      }
+    },
+    "e2e:platform": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-platform"]
+      },
+      "metadata": {
+        "description": "E2E: settings, theory, exams, reviews, search, support, chats (файлы 10-18)"
+      }
+    },
+    "e2e:features": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-features"]
+      },
+      "metadata": {
+        "description": "E2E: lesson types, balance, progress, cars, license, mobile (файлы 20-26)"
+      }
+    },
+    "e2e:integrations": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-integrations", "school-admin-chromium"]
+      },
+      "metadata": {
+        "description": "E2E: calendar sync, connected accounts, VK OAuth, webhooks (файлы 74-77)"
+      }
+    },
+    "e2e:journeys": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/driving-school-e2e/playwright.config.ts",
+        "project": ["shard-journeys"]
+      },
+      "metadata": {
+        "description": "E2E: journey-тесты реальных бизнес-процессов (файлы 78-82)"
+      }
+    }
+  }
+}

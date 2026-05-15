@@ -1,0 +1,114 @@
+---
+title: Signature
+description: Digital signature field with canvas drawing and typed mode
+---
+
+## Overview
+
+`Form.Field.Signature` provides a digital signature input for legal forms, contracts, and consent documents. Users can draw with mouse/finger or type their name in cursive font.
+
+## Basic Usage
+
+```tsx
+<Form initialValue={{ signature: '' }} onSubmit={handleSubmit}>
+  <Form.Field.Signature name="signature" label="Your Signature" />
+  <Form.Button.Submit>Sign</Form.Button.Submit>
+</Form>
+```
+
+The field value is a **data URI string** (image/png base64), suitable for storage in a database or submission to an API.
+
+## Draw Mode
+
+The default mode. Users draw directly on the canvas with mouse or touch.
+
+```tsx
+<Form.Field.Signature
+  name="signature"
+  label="Signature"
+  width={400}
+  height={150}
+  strokeColor="black"
+  strokeWidth={2}
+  placeholder="Sign here"
+  clearLabel="Clear"
+/>
+```
+
+## Typed Mode
+
+Alternative to drawing — users type their name and it renders in a cursive font on the canvas.
+
+```tsx
+<Form.Field.Signature name="signature" allowTyped={true} typedFont="'Dancing Script', cursive" />
+```
+
+Toggle between Draw and Type modes via the segmented control at the top.
+
+## Draw Only
+
+Disable typed mode for cases where handwritten signatures are required:
+
+```tsx
+<Form.Field.Signature name="signature" allowTyped={false} />
+```
+
+## Custom Styling
+
+```tsx
+<Form.Field.Signature
+  name="signature"
+  width={500}
+  height={200}
+  strokeColor="#1a365d"
+  strokeWidth={3}
+  backgroundColor="#f7fafc"
+/>
+```
+
+## Props
+
+| Prop              | Type      | Default       | Description                   |
+| ----------------- | --------- | ------------- | ----------------------------- |
+| `width`           | `number`  | `400`         | Canvas width in pixels        |
+| `height`          | `number`  | `150`         | Canvas height in pixels       |
+| `strokeColor`     | `string`  | `'black'`     | Pen/stroke color              |
+| `strokeWidth`     | `number`  | `2`           | Pen/stroke width              |
+| `backgroundColor` | `string`  | `'white'`     | Canvas background             |
+| `clearLabel`      | `string`  | `'Clear'`     | Clear button text             |
+| `placeholder`     | `string`  | `'Sign here'` | Placeholder over empty canvas |
+| `allowTyped`      | `boolean` | `true`        | Show typed signature mode     |
+| `typedFont`       | `string`  | `cursive`     | Font for typed mode           |
+
+## Accessibility
+
+- Canvas has `role="img"` and `aria-label="Signature pad"`
+- Tab focus shows visible outline
+- Typed mode serves as keyboard-accessible alternative
+- Clear button is keyboard-accessible
+
+## Touch Support
+
+Full touch support for mobile devices:
+
+- `touchAction: none` prevents scrolling while drawing
+- Touch events (touchstart, touchmove, touchend) handled alongside mouse events
+
+## Validation
+
+Use Zod `z.string().min(1)` to require a signature:
+
+```tsx
+const Schema = z.object({
+  signature: z.string().min(1, 'Signature is required'),
+})
+```
+
+The field value is empty string `''` when canvas is blank, and a data URI when drawn/typed.
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/signature).

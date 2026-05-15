@@ -1,0 +1,116 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "com.facebook.react"
+}
+
+/**
+ * React Native configuration
+ */
+react {
+    // Root of your project directory
+    root = file("../../")
+    // React Native node_modules directory
+    reactNativeDir = file("../../node_modules/react-native")
+    // Codegen directory
+    codegenDir = file("../../node_modules/@react-native/codegen")
+    // CLI file
+    cliFile = file("../../node_modules/react-native/cli.js")
+    // Hermes compiler: в bun monorepo транзитивные зависимости не хоистятся в воркспейсы,
+    // поэтому указываем путь к hermesc в корневом node_modules
+    hermesCommand = "../../node_modules/hermes-compiler/hermesc/%OS-BIN%/hermesc"
+
+    // Enable autolinking
+    autolinkLibrariesWithApp()
+}
+
+/**
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ */
+def enableProguardInReleaseBuilds = true
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.lena.animatrona.mobile"
+
+    defaultConfig {
+        applicationId "com.lena.animatrona.mobile"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "0.5.0"
+        // Только 64-bit — armeabi-v7a ломает CMake с gold линкером на Windows
+        ndk {
+            abiFilters "arm64-v8a", "x86_64"
+        }
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            storeFile file(ANIMATRONA_UPLOAD_STORE_FILE)
+            storePassword ANIMATRONA_UPLOAD_STORE_PASSWORD
+            keyAlias ANIMATRONA_UPLOAD_KEY_ALIAS
+            keyPassword ANIMATRONA_UPLOAD_KEY_PASSWORD
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Принудительно используем стабильную версию androidx.core
+        force 'androidx.core:core:1.15.0'
+        force 'androidx.core:core-ktx:1.15.0'
+    }
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+
+    // JSC or Hermes
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    // exoplayer-ass module
+    implementation project(':exoplayer-ass')
+
+    // exoplayer-sync module (MergingMediaSource для видео+аудио)
+    implementation project(':exoplayer-sync')
+}

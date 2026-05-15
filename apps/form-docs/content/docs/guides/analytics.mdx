@@ -1,0 +1,138 @@
+---
+title: Form Analytics
+description: Built-in field-level analytics — track drop-offs, time per field, and completion rates
+---
+
+## Overview
+
+67% of forms are abandoned before completion. The password field alone has a 10.5% drop-off rate. `useFormAnalytics()` gives you visibility into exactly where users struggle.
+
+```tsx
+import { AnalyticsPanel, createUmamiAdapter, useFormAnalytics } from '@letar/forms'
+
+function ContactForm() {
+  const analytics = useFormAnalytics({
+    formId: 'contact-form',
+    adapters: [createUmamiAdapter()],
+  })
+
+  return (
+    <Form schema={ContactSchema} onSubmit={save}>
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Field.Textarea name="message" />
+      <Form.Button.Submit>Send</Form.Button.Submit>
+
+      {/* Dev-only panel */}
+      {process.env.NODE_ENV === 'development' && (
+        <AnalyticsPanel analytics={analytics} />
+      )}
+    </Form>
+  )
+}
+```
+
+## What's Tracked
+
+| Metric | Description |
+|--------|-------------|
+| **Focus count** | How many times each field received focus |
+| **Time per field** | Total milliseconds spent on each field |
+| **Error count** | Validation errors per field |
+| **Corrections** | How many times user returned to fix a field |
+| **Completion rate** | Percentage of fields filled (0-100%) |
+| **Abandon** | Last field, filled count, total time on `beforeunload` |
+| **Complete** | Total time and per-field breakdown on submit |
+
+## Adapters
+
+### Umami
+
+```typescript
+import { createUmamiAdapter } from '@letar/forms/analytics'
+const adapter = createUmamiAdapter()
+```
+
+### Yandex Metrika
+
+```typescript
+import { createYandexMetrikaAdapter } from '@letar/forms/analytics'
+const adapter = createYandexMetrikaAdapter(12345) // counter ID
+```
+
+Sends goals: `form_{formId}_field_focus`, `form_{formId}_abandon`, `form_{formId}_complete`.
+
+### Google Analytics 4
+
+```typescript
+import { createGtagAdapter } from '@letar/forms/analytics'
+const adapter = createGtagAdapter()
+```
+
+### PostHog
+
+```typescript
+import { createPostHogAdapter } from '@letar/forms/analytics'
+const adapter = createPostHogAdapter()
+```
+
+### Custom Adapter
+
+```typescript
+const myAdapter: AnalyticsAdapter = {
+  name: 'my-analytics',
+  track(event, formId) {
+    fetch('/api/analytics', {
+      method: 'POST',
+      body: JSON.stringify({ event, formId }),
+    })
+  },
+}
+```
+
+## API: useFormAnalytics(config?)
+
+```typescript
+const analytics = useFormAnalytics({
+  enabled: true,
+  formId: 'contact-form',
+  adapters: [createUmamiAdapter()],
+  trackCorrections: true,
+  onFieldFocus: (field, timestamp) => {},
+  onFieldBlur: (field, timestamp, timeSpentMs) => {},
+  onFieldError: (field, error) => {},
+  onAbandon: (lastField, filledFields, totalFields) => {},
+  onComplete: (totalTimeMs, fieldTimes) => {},
+})
+```
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `fieldAnalytics` | `Map<string, FieldAnalytics>` | Per-field metrics |
+| `completionRate` | `number` | 0-100% |
+| `lastFocusedField` | `string \| null` | Last focused field |
+| `totalTimeMs` | `number` | Time since form mount |
+| `totalErrors` | `number` | Total error count |
+| `trackAbandon()` | `() => void` | Force abandon event |
+| `trackComplete()` | `() => void` | Force complete event |
+| `reset()` | `() => void` | Reset all metrics |
+
+## AnalyticsPanel
+
+Dev-only floating panel showing live metrics:
+
+```tsx
+<AnalyticsPanel
+  analytics={analytics}
+  position="bottom-right" // bottom-right | bottom-left | top-right | top-left
+/>
+```
+
+## Import
+
+```typescript
+import { AnalyticsPanel, useFormAnalytics } from '@letar/forms'
+import { createUmamiAdapter } from '@letar/forms/analytics'
+```

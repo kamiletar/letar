@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TV App Theme (AppCompat для совместимости с ReactActivity) -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- Тёмный фон для TV -->
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:editTextBackground">@android:color/transparent</item>
+    </style>
+</resources>

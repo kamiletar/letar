@@ -1,0 +1,173 @@
+---
+title: Утилитарные компоненты
+description: InfoBlock, Divider и Hidden — структурные и утилитарные компоненты для форм
+---
+
+## Обзор
+
+Утилитарные компоненты помогают структурировать формы без добавления полей. Они обеспечивают визуальное разделение, контекстную информацию и скрытое хранение данных.
+
+| Компонент           | Назначение                                          |
+| ------------------- | --------------------------------------------------- |
+| `Form.InfoBlock`    | Блок сообщения info/warning/error/success/tip       |
+| `Form.Divider`      | Горизонтальный разделитель с необязательной подписью |
+| `Form.Field.Hidden` | Скрытое поле (не рендерится, только в состоянии формы) |
+
+## Form.InfoBlock
+
+Отображает контекстные сообщения внутри форм. Основан на Chakra UI Alert.
+
+```tsx
+<Form.InfoBlock variant="info" title="Примечание">
+  Заполните все поля, чтобы получить скидку 10%.
+</Form.InfoBlock>
+```
+
+### Варианты
+
+| Вариант          | Цвет       | Применение              |
+| ---------------- | ---------- | ----------------------- |
+| `info` (по умолч.)| Синий     | Общая информация        |
+| `warning`        | Оранжевый  | Предупреждения, требования |
+| `error`          | Красный    | Критические проблемы    |
+| `success`        | Зелёный    | Подтверждения           |
+| `tip`            | Бирюзовый  | Полезные советы         |
+
+### Свойства
+
+| Свойство     | Тип                                                    | По умолчанию | Описание                          |
+| ------------ | ------------------------------------------------------ | ------------ | --------------------------------- |
+| `variant`    | `'info' \| 'warning' \| 'error' \| 'success' \| 'tip'` | `'info'`     | Визуальный стиль                  |
+| `title`      | `ReactNode`                                            | ---          | Заголовок блока                   |
+| `children`   | `ReactNode`                                            | ---          | Содержимое                        |
+| `appearance` | `'subtle' \| 'surface' \| 'outline' \| 'solid'`        | `'subtle'`   | Визуальный вариант Chakra Alert   |
+| `size`       | `'sm' \| 'md' \| 'lg'`                                 | `'md'`       | Размер                            |
+
+### Условный InfoBlock
+
+Комбинируйте с `Form.When` для динамических сообщений:
+
+```tsx
+<Form.When field="type" is="company">
+  <Form.InfoBlock variant="warning">Регистрация компании требует ИНН и юридического адреса.</Form.InfoBlock>
+</Form.When>
+```
+
+## Form.Divider
+
+Горизонтальный разделитель для группировки секций формы. Основан на Chakra UI Separator.
+
+```tsx
+<Form.Field.String name="firstName" />
+<Form.Field.String name="lastName" />
+
+<Form.Divider label="Контактная информация" />
+
+<Form.Field.String name="email" />
+<Form.Field.String name="phone" />
+```
+
+### С иконкой
+
+```tsx
+import { LuPhone } from 'react-icons/lu'
+
+;<Form.Divider label="Телефонные номера" icon={<LuPhone />} />
+```
+
+### Свойства
+
+| Свойство       | Тип                               | По умолчанию | Описание                  |
+| -------------- | --------------------------------- | ------------ | ------------------------- |
+| `label`        | `ReactNode`                       | ---          | Текстовая подпись в центре |
+| `icon`         | `ReactNode`                       | ---          | Иконка перед подписью     |
+| `variant`      | `'solid' \| 'dashed' \| 'dotted'` | `'solid'`    | Стиль линии               |
+| `size`         | `'xs' \| 'sm' \| 'md' \| 'lg'`    | `'xs'`       | Толщина линии             |
+| `colorPalette` | `string`                          | `'gray'`     | Цветовая палитра          |
+
+### Без подписи
+
+Простая горизонтальная линия:
+
+```tsx
+<Form.Divider />
+```
+
+## Form.Field.Hidden
+
+Хранит данные в состоянии формы, не рендеря ничего в DOM. Полезно для UTM-параметров, реферальных кодов, внутренних ID.
+
+```tsx
+<Form.Field.Hidden name="utm_source" value={searchParams.get('utm_source')} />
+<Form.Field.Hidden name="referralCode" value="PARTNER2026" />
+```
+
+### Свойства
+
+| Свойство | Тип       | Описание                              |
+| -------- | --------- | ------------------------------------- |
+| `name`   | `string`  | Имя поля в форме                      |
+| `value`  | `unknown` | Значение (синхронизируется при изменении) |
+
+### Динамическое значение
+
+Значение синхронизируется реактивно — когда пропс `value` меняется, состояние формы обновляется:
+
+```tsx
+const [geo, setGeo] = useState(null)
+useEffect(() => { detectLocation().then(setGeo) }, [])
+
+<Form.Field.Hidden name="location" value={geo} />
+```
+
+### Доступ при отправке формы
+
+Скрытые поля включаются в отправляемые данные так же, как и любые другие поля:
+
+```tsx
+<Form
+  onSubmit={(data) => {
+    console.log(data.utm_source) // "google"
+    console.log(data.referralCode) // "PARTNER2026"
+  }}
+>
+  <Form.Field.String name="email" />
+  <Form.Field.Hidden name="utm_source" value="google" />
+  <Form.Field.Hidden name="referralCode" value="PARTNER2026" />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Полный пример
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.InfoBlock variant="info" title="Регистрация">
+    Пожалуйста, заполните все обязательные поля.
+  </Form.InfoBlock>
+
+  <Form.Divider label="Личные данные" />
+  <Form.Field.String name="firstName" />
+  <Form.Field.String name="lastName" />
+
+  <Form.Divider label="Контакты" />
+  <Form.Field.String name="email" />
+  <Form.Field.String name="phone" />
+
+  <Form.When field="isPremium" is={true}>
+    <Form.InfoBlock variant="success">Премиум-привилегии активны!</Form.InfoBlock>
+  </Form.When>
+
+  <Form.Field.Hidden name="utm_source" value="landing" />
+  <Form.Field.Hidden name="formVersion" value="2.0" />
+
+  <Form.Button.Submit>Зарегистрироваться</Form.Button.Submit>
+</Form>
+```
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/utility).

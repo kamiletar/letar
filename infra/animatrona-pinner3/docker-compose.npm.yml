@@ -1,0 +1,16 @@
+# Caddy — автоматический HTTPS (Let's Encrypt)
+# Гораздо проще NPM для пиннера — не нужен UI
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

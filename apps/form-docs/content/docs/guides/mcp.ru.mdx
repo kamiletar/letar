@@ -1,0 +1,217 @@
+---
+title: MCP-сервер для AI-ассистентов
+description: Дайте Claude Code, Cursor и VS Code Copilot полный контекст о @letar/forms
+---
+
+## Проблема
+
+AI-ассистенты не знают вашу библиотеку форм. Они генерируют стандартный React-код, пропускают нужные типы полей и игнорируют ваши соглашения. Каждую сгенерированную форму приходится дорабатывать вручную.
+
+## Решение
+
+**@letar/form-mcp** — MCP-сервер, который даёт AI-ассистентам полное знание о 50+ компонентах полей, паттернах форм и ZenStack-директивах. Формы генерируются правильно за секунды.
+
+## Установка
+
+### Claude Code
+
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "form-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+### Cursor
+
+```json
+// .cursor/mcp.json
+{
+  "mcpServers": {
+    "form-mcp": {
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+### VS Code / GitHub Copilot
+
+```json
+// .vscode/mcp.json
+{
+  "servers": {
+    "form-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+## 6 инструментов
+
+### list_fields
+
+Список всех 50+ типов полей с фильтрацией по категории.
+
+```
+list_fields({ category: "date" })
+→ Date, Time, DateRange, DateTimePicker, Duration, Schedule
+```
+
+**Категории:** `text`, `number`, `date`, `select`, `multi-select`, `special`, `survey`, `table`, `payment`, `document`, `utility`, `security`
+
+### get_field_props
+
+Подробные пропсы и документация для конкретного поля.
+
+```
+get_field_props({ fieldType: "Currency" })
+→ { name, fullName, description, category, props... }
+```
+
+### get_field_example
+
+TSX-примеры кода для компонента поля.
+
+```
+get_field_example({ fieldType: "FileUpload", variant: "in-form" })
+→ Полная форма с FileUpload, валидацией и обработчиком submit
+```
+
+**Варианты:** `basic`, `with-validation`, `in-form`
+
+### get_form_pattern
+
+Готовый код формы для типичных сценариев.
+
+```
+get_form_pattern({ pattern: "crud-create" })
+→ CRUD-форма создания с Zod-схемой, Server Action, обработкой ошибок
+```
+
+**Паттерны:**
+
+| Паттерн | Описание |
+|---------|----------|
+| `crud-create` | Создание записи с валидацией |
+| `crud-edit` | Редактирование с начальными данными |
+| `multi-step` | Пошаговая форма с валидацией на каждом шаге |
+| `offline` | Форма с оффлайн-режимом |
+| `i18n` | Мультиязычная форма |
+| `from-schema` | Автогенерация из Zod-схемы |
+| `declarative` | Полный декларативный API |
+| `server-action` | Интеграция с Server Actions |
+| `analytics` | Форма с аналитикой по полям |
+| `server-errors` | Маппинг серверных ошибок на поля |
+| `undo-redo` | История формы с Ctrl+Z |
+
+### get_directives
+
+Документация по `@form.*` директивам ZenStack.
+
+```
+get_directives({ directive: "@form.fieldType" })
+→ Синтаксис, пример, генерируемый код
+```
+
+**Директивы:** `@form.title`, `@form.placeholder`, `@form.description`, `@form.fieldType`, `@form.props`, `@form.relation`, `@form.exclude`
+
+### generate_form
+
+Генерация кода формы из спецификации полей.
+
+```
+generate_form({
+  formName: "ContactForm",
+  withSchema: true,
+  fields: [
+    { name: "name", type: "String", label: "ФИО", required: true },
+    { name: "email", type: "String", label: "Email", required: true, validation: "z.email()" },
+    { name: "phone", type: "Phone", label: "Телефон" },
+    { name: "message", type: "Textarea", label: "Сообщение", required: true }
+  ]
+})
+→ Zod-схема + компонент формы со всеми полями, валидацией и submit
+```
+
+## Ресурсы документации
+
+Сервер предоставляет 7 ресурсов через `form-docs://` URI:
+
+| Ресурс | Содержимое |
+|--------|-----------|
+| `form-docs://fields` | Справочник 50+ компонентов полей |
+| `form-docs://form-level` | Form.Steps, Form.When, Form.Errors |
+| `form-docs://schema-generation` | FromSchema, AutoFields, Builder |
+| `form-docs://offline` | useOfflineForm, очередь синхронизации |
+| `form-docs://i18n` | FormI18nProvider, локализация ошибок |
+| `form-docs://zenstack` | @form.* директивы, schema.zmodel |
+| `form-docs://api-reference` | Хуки, контексты, типы |
+
+## Промпты
+
+Три встроенных промпта для типичных задач:
+
+### create-form
+
+Генерация CRUD-формы для модели данных:
+
+```
+Prompt: create-form
+Inputs: modelName="User", fields="name,email,role,avatar"
+```
+
+### add-field
+
+Добавление поля в существующую форму:
+
+```
+Prompt: add-field
+Inputs: fieldType="FileUpload", fieldName="avatar"
+```
+
+### migrate-form
+
+Миграция с другого фреймворка:
+
+```
+Prompt: migrate-form
+Inputs: sourceFramework="react-hook-form"
+```
+
+**Поддерживаемые фреймворки:** react-hook-form, formik, conform
+
+## Как это работает
+
+MCP-сервер — лёгкий TypeScript-процесс (~39 KB):
+
+1. Парсит markdown-документацию из `@letar/forms`
+2. Строит реестры полей, паттернов и директив
+3. Предоставляет их как MCP tools, resources и prompts
+4. Общается через stdio с любым MCP-совместимым клиентом
+
+Без сетевых вызовов. Все данные встроены в пакет.
+
+## Сценарии использования
+
+- **Генерация форм** — опишите что нужно, получите правильный код мгновенно
+- **Поиск полей** — найдите нужный компонент для вашего типа данных
+- **Справочник паттернов** — получите best-practice формы
+- **Онбординг** — новые участники команды генерируют корректные формы с первого дня
+- **Консистентность** — каждая AI-сгенерированная форма следует одним соглашениям
+
+## Ссылки
+
+- [npm: @letar/form-mcp](https://www.npmjs.com/package/@letar/form-mcp)
+- [GitHub: letar-form-mcp](https://github.com/kamiletar/letar-form-mcp)
+- [Живые примеры: forms-example.letar.best](https://forms-example.letar.best)

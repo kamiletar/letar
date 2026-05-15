@@ -1,0 +1,74 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./renderer/src/*"],
+      "@letar/animatrona-types": ["../../libs/animatrona-types/src/index.ts"],
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
+      "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
+      "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
+      "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"]
+    }
+  },
+  "include": [
+    "renderer/**/*.ts",
+    "renderer/**/*.tsx",
+    "renderer/**/*.d.ts",
+    "shared/**/*.ts",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "schema.ts",
+    "../../libs/query-provider/src/**/*.ts",
+    "../../libs/query-provider/src/**/*.tsx",
+    "../../libs/chakra-provider/src/**/*.ts",
+    "../../libs/chakra-provider/src/**/*.tsx",
+    "../../libs/forms/src/**/*.ts",
+    "../../libs/forms/src/**/*.tsx",
+    "../../libs/ui/src/**/*.ts",
+    "../../libs/ui/src/**/*.tsx",
+    "../../libs/video-player-react/src/**/*.ts",
+    "../../libs/video-player-react/src/**/*.tsx",
+    "../../libs/animatrona-types/src/**/*.ts",
+    "../../libs/video-player-core/src/**/*.ts",
+    "../../libs/animatrona-utils/src/**/*.ts",
+    "../../libs/animatrona-ui/src/**/*.ts",
+    "../../libs/animatrona-ui/src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "app",
+    ".next",
+    "main",
+    "renderer/src/generated/zenstack/policy.ts",
+    "renderer/src/generated/prisma/**/*.js",
+    "../../libs/**/*.spec.ts",
+    "../../libs/**/*.spec.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../libs/animatrona-utils"
+    },
+    {
+      "path": "../../libs/animatrona-types"
+    }
+  ]
+}

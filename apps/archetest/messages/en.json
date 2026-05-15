@@ -1,0 +1,143 @@
+{
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "home": "Archetest",
+    "leaderboard": "Leaderboard",
+    "forProfessionals": "For Professionals",
+    "cabinet": "Cabinet",
+    "settings": "Settings",
+    "menu": "Menu",
+    "theme": "Theme"
+  },
+  "quiz": {
+    "title": "Personality Type",
+    "description": "Take a 50-question scenario test and discover your personality profile. Each question offers 4 reaction options — choose the one closest to you.",
+    "start": "Start Test",
+    "myProfile": "My Profile",
+    "skipQuestion": "No suitable answer",
+    "info": {
+      "questions": "50 scenario questions with 4 answer options",
+      "time": "Estimated time: 10–15 minutes"
+    },
+    "progress": "Question {current} of {total}",
+    "answered": "Answered: {count}",
+    "questionLabel": "Question {number}",
+    "finish": "Finish Test",
+    "prev": "Back",
+    "next": "Next",
+    "submitting": "Saving results...",
+    "submittingHint": "Calculating your profile",
+    "submitError": "Failed to save results to server. Showing preliminary results.",
+    "noQuestions": "Questions not loaded yet",
+    "noQuestionsHint": "The administrator hasn't added questions to the database yet. Please try again later.",
+    "backToIntro": "Back",
+    "disclaimer": "This test is for entertainment purposes only and is not a clinical diagnosis.",
+    "guestBanner": {
+      "title": "Save your profile",
+      "description": "Personality isn't a photograph — it's a film. Mood, stress, and life circumstances shape your answers. Take the test periodically and watch how your profile evolves over time. Each new batch of questions improves accuracy, and registration preserves the entire journey.",
+      "benefit1": "Cumulative profile — more precise with each session",
+      "benefit2": "Change history — track your mood dynamics",
+      "benefit3": "Achievements and ranks — gamified progression",
+      "benefit4": "Precise normalization — server-side recalculation across all answers",
+      "signIn": "Sign In",
+      "signUp": "Create Account"
+    },
+    "results": {
+      "title": "Your Personality Profile",
+      "currentSession": "Current Session",
+      "averaged": "Averaged Profile",
+      "topTypes": "Your Leading Types",
+      "whyRetake": {
+        "title": "Why take it again?",
+        "description": "Your answers reflect your current mood and life situation, not a fixed character. Take the test periodically — an averaged profile across multiple sessions will show a more accurate picture of your personality."
+      },
+      "retake": "Take Again"
+    },
+    "achievements": {
+      "title": "Achievements",
+      "unlocked": "Unlocked",
+      "locked": "Locked",
+      "newUnlocked": "New achievement!",
+      "progress": "{unlocked} of {total}",
+      "viewAll": "All Achievements",
+      "categories": {
+        "sessions": "Sessions",
+        "answers": "Answers",
+        "results": "Profile",
+        "special": "Special"
+      }
+    },
+    "ranks": {
+      "title": "Your Rank",
+      "xpProgress": "{current} / {next} XP",
+      "maxRank": "Max rank!",
+      "names": {
+        "NOVICE": "Novice",
+        "EXPLORER": "Explorer",
+        "EXPERT": "Expert",
+        "MASTER": "Master",
+        "GURU": "Guru"
+      }
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "description": "Personality Type quiz ranking",
+      "position": "#",
+      "name": "Participant",
+      "rank": "Rank",
+      "sessions": "Sessions",
+      "achievementsCount": "Achievements",
+      "xp": "XP",
+      "empty": "No one has taken the quiz yet",
+      "you": "You"
+    }
+  },
+  "cabinet": {
+    "title": "Psychologist Cabinet",
+    "becomePsychologist": "I'm a Professional",
+    "becomePsychologistDesc": "If you are a psychologist, psychotherapist, or psychiatrist, you can open a professional cabinet. Your clients can link you by email, and you'll see their results with clinical names and dynamics.",
+    "noClients": "No linked clients yet",
+    "noClientsHint": "Ask your client to link you by email in their profile settings.",
+    "clientName": "Name",
+    "clientEmail": "Email",
+    "status": "Status",
+    "linkedAt": "Linked",
+    "active": "Active",
+    "revoked": "Revoked",
+    "displayName": "Display Name",
+    "displayNameHint": "Set a convenient name for the client (visible only to you)",
+    "save": "Save",
+    "notes": "Notes",
+    "addNote": "Add Note",
+    "deleteNote": "Delete",
+    "deleteNoteTitle": "Delete Note",
+    "deleteNoteConfirm": "Delete this note? This action cannot be undone.",
+    "noNotes": "No notes yet",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "notePlaceholder": "Note text...",
+    "dynamics": "Results Dynamics",
+    "totalAnswered": "Total answers",
+    "sessions": "Sessions completed",
+    "backToList": "← Back to clients"
+  },
+  "settings": {
+    "title": "Settings",
+    "myPsychologist": "My Psychologist",
+    "myPsychologistDesc": "Link a psychologist by email — they will be able to see your quiz results with clinical names and dynamics. You can revoke access at any time.",
+    "psychologistEmail": "Psychologist email",
+    "link": "Link",
+    "revoke": "Revoke Access",
+    "revokeTitle": "Revoke Psychologist Access",
+    "revokeConfirm": "Revoke access for {name}? The psychologist will no longer be able to see your results.",
+    "revokeAction": "Revoke",
+    "cancel": "Cancel",
+    "linked": "Linked",
+    "noPsychologist": "No psychologist linked",
+    "whatSees": "The psychologist will see: your personality profile, session dynamics, clinical scale names. They will NOT see: your individual question answers."
+  }
+}

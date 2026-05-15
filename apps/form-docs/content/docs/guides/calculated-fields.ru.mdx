@@ -1,0 +1,135 @@
+---
+title: Вычисляемые поля
+description: Автоматически вычисляемые поля, обновляющиеся при изменении зависимых полей
+---
+
+## Обзор
+
+`Form.Field.Calculated` предоставляет декларативные вычисляемые поля, которые автоматически пересчитываются при изменении зависимых значений формы. Вместо ручного использования `Form.Watch` + `setFieldValue` один компонент обрабатывает всю реактивную логику.
+
+| Возможность | Описание |
+| ----------- | -------- |
+| `compute`   | Функция, вычисляющая значение из всех значений формы |
+| `format`    | Опциональное форматирование отображения (например, валюта) |
+| `deps`      | Список зависимостей для оптимизированного пересчёта |
+| `debounce`  | Троттлинг тяжёлых вычислений |
+| `hidden`    | Вычислять без отображения (как Hidden) |
+
+## Базовое использование
+
+```tsx
+<Form initialValue={{ price: 100, qty: 2, total: 0 }} onSubmit={save}>
+  <Form.Field.Number name="price" label="Цена" />
+  <Form.Field.Number name="qty" label="Количество" />
+  <Form.Field.Calculated
+    name="total"
+    label="Итого"
+    compute={(values) => (Number(values.price) || 0) * (Number(values.qty) || 0)}
+    format={(v) => `${Number(v).toLocaleString()} ₽`}
+    deps={['price', 'qty']}
+  />
+  <Form.Button.Submit>Сохранить</Form.Button.Submit>
+</Form>
+```
+
+Вычисленное значение доступно **только для чтения** и включается в отправляемые данные формы.
+
+## Пропсы
+
+| Пропс | Тип | По умолчанию | Описание |
+| ----- | --- | ------------ | -------- |
+| `name` | `string` | — | Путь поля в состоянии формы |
+| `compute` | `(values: Record<string, unknown>) => unknown` | — | Функция вычисления (обязательна) |
+| `label` | `string` | — | Подпись поля |
+| `format` | `(value: unknown) => string` | — | Форматирование отображения |
+| `deps` | `string[]` | — | Зависимые поля для оптимизированного пересчёта |
+| `debounce` | `number` | `0` | Задержка debounce в мс |
+| `hidden` | `boolean` | `false` | Вычислять без отображения |
+| `helperText` | `string` | — | Вспомогательный текст под полем |
+
+## Каскадные вычисления
+
+Несколько вычисляемых полей могут зависеть друг от друга через цепочку:
+
+```tsx
+<Form initialValue={{ price: 2000, qty: 2, discount: 10, subtotal: 0, finalPrice: 0 }}>
+  <Form.Field.Number name="price" label="Цена за единицу" />
+  <Form.Field.Number name="qty" label="Количество" />
+  <Form.Field.Calculated
+    name="subtotal"
+    label="Промежуточный итог"
+    compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
+    deps={['price', 'qty']}
+  />
+  <Form.Field.Number name="discount" label="Скидка (%)" />
+  <Form.Field.Calculated
+    name="finalPrice"
+    label="Итоговая цена"
+    compute={(v) => {
+      const sub = (Number(v.price) || 0) * (Number(v.qty) || 0)
+      return sub * (1 - (Number(v.discount) || 0) / 100)
+    }}
+    format={(v) => `${Number(v).toLocaleString()} ₽`}
+    deps={['price', 'qty', 'discount']}
+  />
+</Form>
+```
+
+## Скрытый режим
+
+Используйте `hidden` для вычисления значения без отображения — полезно для производных ID, итогов для отправки на API и т.д.
+
+```tsx
+<Form.Field.Calculated name="total" compute={(v) => (Number(v.a) || 0) + (Number(v.b) || 0)} hidden />
+```
+
+Значение будет отображаться в `Form.DebugValues` и включаться при отправке.
+
+## Производительность: оптимизация через deps
+
+Без `deps` функция compute запускается при **каждом** изменении значений формы. Для больших форм укажите, от каких полей зависит вычисление:
+
+```tsx
+{/* Пересчитывается только при изменении price или qty */}
+<Form.Field.Calculated name="total" compute={(v) => v.price * v.qty} deps={['price', 'qty']} />
+```
+
+## Внутри Form.Group
+
+Внутри группы `name` разрешается относительно группы. Функция `compute` всегда получает полные значения формы:
+
+```tsx
+<Form.Group name="order">
+  <Form.Field.Number name="price" label="Цена" />
+  <Form.Field.Number name="qty" label="Количество" />
+  <Form.Field.Calculated
+    name="total"
+    label="Итого"
+    compute={(v) => {
+      const order = v.order as Record<string, unknown>
+      return (Number(order?.price) || 0) * (Number(order?.qty) || 0)
+    }}
+  />
+</Form.Group>
+```
+
+## Защита от циклов
+
+Компонент обнаруживает циклические зависимости во время выполнения. Если compute поля A триггерит поле B, которое ссылается на поле A, в консоль выводится ошибка и возвращается кэшированное значение.
+
+## Сравнение: Calculated vs Watch
+
+|                | `Form.Field.Calculated`      | `Form.Watch`                       |
+| -------------- | ---------------------------- | ---------------------------------- |
+| Назначение     | Автовычисление значения поля | Произвольные побочные эффекты      |
+| Рендеринг      | Только чтение или скрыт     | Ничего (без рендеринга)            |
+| Значение в состоянии | Да, автосинхронизация  | Ручной `setFieldValue`             |
+| API            | Декларативный                | Императивный                       |
+| Лучше для      | Итоги, проценты, производные | Генерация slug, каскадные селекты  |
+
+
+---
+
+## Живой пример
+
+Попробуйте интерактивный пример на [forms-example.letar.best](https://forms-example.letar.best/examples/calculated).

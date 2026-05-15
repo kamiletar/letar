@@ -1,0 +1,12 @@
+{
+  "name": "@letar/kami-key-the-landing",
+  "version": "0.1.0",
+  "private": true,
+  "nx": {
+    "name": "kami-key-the-landing",
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/analytics"
+    ]
+  }
+}

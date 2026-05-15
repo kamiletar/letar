@@ -1,0 +1,44 @@
+appId: com.lena.kami-key-the
+productName: KamiKeyThe
+copyright: Copyright © 2026
+
+directories:
+  output: dist-electron
+  buildResources: resources
+
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+
+extraMetadata:
+  main: app/background.js
+
+asarUnpack:
+  - '**/*.node'
+  - '**/koffi/**'
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  shortcutName: KamiKeyThe
+
+publish: null
+
+extraResources:
+  - from: data/symbols.json
+    to: data/symbols.json
+  - from: resources/icon.png
+    to: icon.png

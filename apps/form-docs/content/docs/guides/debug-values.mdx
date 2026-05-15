@@ -1,0 +1,57 @@
+---
+title: Debug Values
+description: Interactive JSON inspector for form state — see values update in real time
+---
+
+## Overview
+
+`Form.DebugValues` renders a live JSON tree of all form values. It auto-detects dark/light theme and is hidden in production by default.
+
+```tsx
+<Form schema={Schema} initialValue={data} onSubmit={save}>
+  <Form.Field.String name="title" />
+  <Form.Field.Number name="price" />
+  <Form.DebugValues />
+  <Form.Button.Submit />
+</Form>
+```
+
+## Props
+
+| Prop               | Type      | Default         | Description                    |
+| ------------------ | --------- | --------------- | ------------------------------ |
+| `title`            | `string`  | `"Form Values"` | Block heading                  |
+| `collapsed`        | `number`  | `2`             | JSON tree expansion depth      |
+| `showInProduction` | `boolean` | `false`         | Show even in production builds |
+
+## Theme Detection
+
+The inspector automatically matches your app's color scheme by checking:
+
+1. `dark` class on `<html>` (next-themes)
+2. `data-theme="dark"` attribute
+3. `style.colorScheme` property
+
+## When to Use
+
+- **During development** — see exactly what values the form holds
+- **Debugging validation** — check what data reaches `onSubmit`
+- **Complex forms** — inspect nested groups and array values
+- **Schema testing** — verify `.meta()` and transforms work correctly
+
+## Production Override
+
+For debugging in staging or production:
+
+```tsx
+<Form.DebugValues showInProduction />
+```
+
+Without `showInProduction`, the component returns `null` in production builds — zero bundle impact.
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/debug-values).

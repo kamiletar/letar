@@ -1,0 +1,180 @@
+/* KamiKeyThe Landing — Global Styles */
+/* Тёмная тема с зелёным неоновым акцентом */
+
+/* Плавный скролл */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a3a1a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a5a2a;
+}
+
+/* Выделение текста — зелёное */
+::selection {
+  background: rgba(57, 255, 20, 0.3);
+  color: #fff;
+}
+
+/* Glassmorphism с зелёным оттенком */
+.glass {
+  background: rgba(10, 20, 15, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(57, 255, 20, 0.1);
+}
+
+/* Glow эффект — зелёный */
+.glow {
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+.glow:hover {
+  box-shadow: 0 0 40px rgba(57, 255, 20, 0.5);
+}
+
+/* Градиентный текст — зелёный→циан */
+.gradient-text {
+  background: linear-gradient(135deg, #39ff14 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Неоновый текст с glow */
+.neon-text {
+  color: #39ff14;
+  text-shadow:
+    0 0 7px #39ff14,
+    0 0 10px #39ff14,
+    0 0 21px #39ff14,
+    0 0 42px #00e600;
+}
+
+/* Анимация появления секций */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Задержки для stagger-анимации */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Мигающий курсор терминала */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Плавающий элемент */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Scanline эффект (тонкий, для атмосферы) */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(57, 255, 20, 0.02) 2px,
+    rgba(57, 255, 20, 0.02) 4px
+  );
+  pointer-events: none;
+}
+
+/* Моноширинный шрифт для акцентных элементов */
+.font-mono {
+  font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+
+/* Клавиша — стиль */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2a2a3a 0%, #1a1a2a 100%);
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  box-shadow:
+    0 2px 0 #111,
+    0 0 8px rgba(57, 255, 20, 0.1);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  transition: all 0.15s ease;
+}
+
+.kbd:hover,
+.kbd.active {
+  border-color: rgba(57, 255, 20, 0.8);
+  box-shadow:
+    0 2px 0 #111,
+    0 0 16px rgba(57, 255, 20, 0.4);
+  color: #39ff14;
+}
+
+.kbd.pressed {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 #111,
+    0 0 20px rgba(57, 255, 20, 0.6);
+  background: linear-gradient(180deg, #1a2a1a 0%, #0a1a0a 100%);
+  color: #39ff14;
+}

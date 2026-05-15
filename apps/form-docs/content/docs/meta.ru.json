@@ -1,0 +1,15 @@
+{
+  "title": "Документация",
+  "pages": [
+    "---Начало работы---",
+    "index",
+    "installation",
+    "quick-start",
+    "---Поля---",
+    "...fields",
+    "---Руководства---",
+    "...guides",
+    "---API Reference---",
+    "...api"
+  ]
+}

@@ -1,0 +1,255 @@
+import { Box, Code, Heading, Link, Text } from '@chakra-ui/react'
+import React from 'react'
+
+/**
+ * Тип Markdoc Node из Keystatic
+ */
+export type MarkdocNode = {
+  $$mdtype?: string
+  type?: string
+  attributes?: Record<string, unknown>
+  children?: MarkdocNode[]
+  errors?: unknown[]
+  lines?: number[]
+  inline?: boolean
+  annotations?: unknown[]
+  slots?: Record<string, unknown>
+  location?: unknown
+}
+
+/**
+ * Keystatic возвращает контент в формате { node: MarkdocNode }
+ */
+export type KeystaticContent = {
+  node: MarkdocNode
+}
+
+/**
+ * Элемент оглавления
+ */
+export type TocItem = {
+  id: string
+  text: string
+  level: number
+}
+
+type Props = {
+  content: KeystaticContent
+}
+
+/**
+ * Генерирует slug из текста для использования как id
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '') // Убираем спецсимволы, сохраняя Unicode буквы
+    .replace(/\s+/g, '-') // Пробелы в дефисы
+    .replace(/-+/g, '-') // Множественные дефисы в один
+    .replace(/^-|-$/g, '') // Убираем дефисы по краям
+}
+
+/**
+ * Извлекает весь текстовый контент из ноды
+ */
+function extractTextContent(node: MarkdocNode): string {
+  if (!node) {
+    return ''
+  }
+
+  const { type, attributes = {}, children = [] } = node
+
+  if (type === 'text') {
+    return (attributes.content as string) ?? ''
+  }
+
+  return children.map((child) => extractTextContent(child)).join('')
+}
+
+/**
+ * Извлекает заголовки для построения оглавления
+ */
+export function extractTableOfContents(content: KeystaticContent): TocItem[] {
+  const items: TocItem[] = []
+
+  function traverse(node: MarkdocNode) {
+    if (!node) {
+      return
+    }
+
+    if (node.type === 'heading') {
+      const level = (node.attributes?.level as number) ?? 1
+      const text = extractTextContent(node)
+      if (text) {
+        items.push({
+          id: slugify(text),
+          text,
+          level,
+        })
+      }
+    }
+
+    node.children?.forEach(traverse)
+  }
+
+  traverse(content.node)
+  return items
+}
+
+/**
+ * Рекурсивный рендер Markdoc AST из Keystatic
+ */
+function renderNode(node: MarkdocNode, index: number): React.ReactNode {
+  if (!node || typeof node !== 'object') {
+    return null
+  }
+
+  const { type, attributes = {}, children = [] } = node
+
+  // Рендер дочерних элементов
+  const renderedChildren = children.map((child, i) => renderNode(child, i))
+
+  // Получаем текстовый контент
+  const textContent = attributes.content as string | undefined
+
+  switch (type) {
+    case 'document':
+      return <React.Fragment key={index}>{renderedChildren}</React.Fragment>
+
+    case 'heading': {
+      const level = (attributes.level as number) ?? 1
+      const sizes: Record<number, string> = { 1: '3xl', 2: '2xl', 3: 'xl', 4: 'lg', 5: 'md', 6: 'sm' }
+      const headingText = extractTextContent(node)
+      const id = slugify(headingText)
+      return (
+        <Heading
+          key={index}
+          id={id}
+          as={`h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'}
+          fontSize={sizes[level]}
+          mt={6}
+          mb={3}
+          scrollMarginTop="80px"
+        >
+          {renderedChildren}
+        </Heading>
+      )
+    }
+
+    case 'paragraph':
+      return (
+        <Text key={index} fontSize="md" lineHeight="tall" mb={4}>
+          {renderedChildren}
+        </Text>
+      )
+
+    case 'text':
+      return textContent ?? null
+
+    case 'strong':
+      return <strong key={index}>{renderedChildren}</strong>
+
+    case 'em':
+      return <em key={index}>{renderedChildren}</em>
+
+    case 'link': {
+      const href = (attributes.href as string) ?? '#'
+      return (
+        <Link key={index} href={href} color="fg" textDecoration="underline">
+          {renderedChildren}
+        </Link>
+      )
+    }
+
+    case 'list': {
+      const ordered = attributes.ordered as boolean
+      if (ordered) {
+        return (
+          <ol key={index} style={{ paddingLeft: '1.5rem', marginBottom: '1rem', listStyleType: 'decimal' }}>
+            {renderedChildren}
+          </ol>
+        )
+      }
+      return (
+        <ul key={index} style={{ paddingLeft: '1.5rem', marginBottom: '1rem', listStyleType: 'disc' }}>
+          {renderedChildren}
+        </ul>
+      )
+    }
+
+    case 'listItem':
+      return (
+        <li key={index} style={{ marginBottom: '0.25rem' }}>
+          {renderedChildren}
+        </li>
+      )
+
+    case 'code':
+    case 'fence': {
+      // Код блок — собираем текстовый контент
+      const codeContent = extractTextContent(node)
+      return (
+        <Box
+          key={index}
+          as="pre"
+          p={4}
+          borderRadius="lg"
+          bg="bg.code"
+          color="gray.100"
+          overflow="auto"
+          fontSize="sm"
+          fontFamily="mono"
+          mb={4}
+        >
+          <code>{codeContent}</code>
+        </Box>
+      )
+    }
+
+    case 'codeInline':
+    case 'inlineCode':
+      return (
+        <Code key={index} px={2} py={0.5} borderRadius="md" bg={{ base: 'gray.100', _dark: 'gray.800' }} fontSize="sm">
+          {textContent ?? renderedChildren}
+        </Code>
+      )
+
+    case 'blockquote':
+      return (
+        <Box key={index} pl={4} borderLeft="4px solid" borderColor="fg" fontStyle="italic" color="fg.muted" mb={4}>
+          {renderedChildren}
+        </Box>
+      )
+
+    case 'hr':
+    case 'thematicBreak':
+      return <Box key={index} as="hr" my={6} borderColor={{ base: 'gray.200', _dark: 'gray.700' }} />
+
+    case 'hardBreak':
+      return <br key={index} />
+
+    case 'softBreak':
+      return ' '
+
+    case 'inline':
+      return <React.Fragment key={index}>{renderedChildren}</React.Fragment>
+
+    default:
+      // Для неизвестных типов — рендерим детей
+      if (renderedChildren.length > 0) {
+        return <React.Fragment key={index}>{renderedChildren}</React.Fragment>
+      }
+      return null
+  }
+}
+
+/**
+ * Компонент рендеринга Markdoc контента из Keystatic
+ */
+export function MdxContent({ content }: Props) {
+  if (!content?.node) {
+    return null
+  }
+
+  return <Box>{renderNode(content.node, 0)}</Box>
+}

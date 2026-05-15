@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aboi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aboi
+      POSTGRES_PASSWORD: aboi_dev_password
+      POSTGRES_DB: neyroaboi_dev
+    ports:
+      - '5443:5432'
+    volumes:
+      - aboi-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aboi -d neyroaboi_dev']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aboi-mailhog
+    restart: unless-stopped
+    ports:
+      - '1026:1025' # SMTP
+      - '8026:8025' # Web UI
+
+volumes:
+  aboi-postgres-data:

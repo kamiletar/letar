@@ -1,0 +1,72 @@
+---
+title: Form Comparison
+description: Side-by-side diff view showing what changed between two versions of form data
+---
+
+## Overview
+
+`Form.Comparison` displays a "before → after" diff of form data. Changed fields are highlighted with yellow background, showing old and new values side by side.
+
+```tsx
+import { Form } from '@letar/forms'
+import { z } from 'zod/v4'
+
+const Schema = z.object({
+  name: z.string().meta({ ui: { title: 'Name' } }),
+  email: z.string().meta({ ui: { title: 'Email' } }),
+  role: z.string().meta({ ui: { title: 'Role' } }),
+})
+
+<Form.Comparison
+  original={{ name: 'John', email: 'john@old.com', role: 'user' }}
+  current={{ name: 'John', email: 'john@new.com', role: 'admin' }}
+  schema={Schema}
+/>
+```
+
+## Props
+
+| Prop          | Type                     | Default  | Description                                                |
+| ------------- | ------------------------ | -------- | ---------------------------------------------------------- |
+| `original`    | `T`                      | required | Data before changes                                        |
+| `current`     | `T`                      | required | Data after changes                                         |
+| `schema`      | `ZodObject`              | —        | Zod schema for field labels via `.meta({ ui: { title } })` |
+| `labels`      | `Record<string, string>` | `{}`     | Manual label overrides                                     |
+| `onlyChanged` | `boolean`                | `false`  | Show only changed fields                                   |
+| `exclude`     | `string[]`               | `[]`     | Fields to hide from comparison                             |
+
+## Show Only Changes
+
+```tsx
+<Form.Comparison original={oldData} current={newData} onlyChanged />
+```
+
+When no fields have changed, displays "Нет изменений" message.
+
+## Custom Labels
+
+Labels are resolved in order: `labels` prop → schema `.meta()` → humanized key name.
+
+```tsx
+<Form.Comparison original={old} current={next} labels={{ firstName: 'First Name', lastName: 'Last Name' }} />
+```
+
+## Excluding Fields
+
+```tsx
+<Form.Comparison original={old} current={next} exclude={['id', 'createdAt', 'updatedAt']} />
+```
+
+## Use Cases
+
+- **Audit log**: Show what a user changed in their profile
+- **Approval flow**: Review pending changes before approving
+- **Version history**: Compare two versions of a document
+- **Edit confirmation**: "You are about to change..." dialog
+
+
+---
+
+## Live Example
+
+Try the interactive example on [forms-example.letar.best](https://forms-example.letar.best/examples/comparison).

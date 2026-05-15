@@ -1,0 +1,44 @@
+# Dockerfile.production - для dashboard приложения
+# Используется когда сборка выполнена на сервере с nx build affected
+# Build context: workspace root (C:\web\lena)
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Install Docker CLI for container management
+# Dashboard needs docker CLI to communicate with Docker daemon via socket
+# openssh-client needed for git operations with SSH remotes
+RUN apk add --no-cache docker-cli git openssh-client
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Add nextjs user to docker group for socket access
+# The actual group GID will be mapped at runtime via volume mount
+RUN addgroup -g 999 docker || true
+RUN addgroup nextjs docker || true
+
+# Copy already built standalone output
+# Standalone includes all necessary node_modules
+COPY --chown=nextjs:nodejs apps/dashboard/.next/standalone ./
+
+# Copy static assets and public folder (not included in standalone automatically)
+COPY --chown=nextjs:nodejs apps/dashboard/.next/static ./apps/dashboard/.next/static
+COPY --chown=nextjs:nodejs apps/dashboard/public ./apps/dashboard/public
+
+# Create directories for dashboard data persistence
+RUN mkdir -p /app/dashboard-data && chown -R nextjs:nodejs /app/dashboard-data
+
+# Run as root to access Docker socket
+# In production, consider proper group mapping instead
+# USER nextjs
+
+EXPOSE 3002
+
+ENV PORT=3002
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/dashboard/server.js"]

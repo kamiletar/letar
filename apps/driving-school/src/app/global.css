@@ -1,0 +1,11 @@
+body {
+  font-family: system-ui, sans-serif;
+}
+
+/* Паддинг для контента под BottomNav на мобильных */
+@media (max-width: 767px) {
+  body {
+    /* 56px высота BottomNav + safe-area для iPhone X+ */
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+}

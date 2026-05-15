@@ -1,0 +1,12 @@
+{
+  "name": "@letar/animatrona-landing",
+  "version": "0.3.0",
+  "private": true,
+  "nx": {
+    "name": "animatrona-landing",
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/analytics"
+    ]
+  }
+}

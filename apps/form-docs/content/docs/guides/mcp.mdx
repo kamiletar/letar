@@ -1,0 +1,217 @@
+---
+title: MCP Server for AI Assistants
+description: Give Claude Code, Cursor, and VS Code Copilot full context about @letar/forms
+---
+
+## The Problem
+
+AI assistants don't know your form library. They generate generic React code, miss field types, and ignore your conventions. You end up fixing every generated form manually.
+
+## The Solution
+
+**@letar/form-mcp** is an MCP server that provides AI assistants with complete knowledge of 50+ field components, form patterns, and ZenStack directives — enabling correct form generation in seconds.
+
+## Installation
+
+### Claude Code
+
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "form-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+### Cursor
+
+```json
+// .cursor/mcp.json
+{
+  "mcpServers": {
+    "form-mcp": {
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+### VS Code / GitHub Copilot
+
+```json
+// .vscode/mcp.json
+{
+  "servers": {
+    "form-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@letar/form-mcp"]
+    }
+  }
+}
+```
+
+## 6 Tools
+
+### list_fields
+
+List all 50+ field types with optional category filter.
+
+```
+list_fields({ category: "date" })
+→ Date, Time, DateRange, DateTimePicker, Duration, Schedule
+```
+
+**Categories:** `text`, `number`, `date`, `select`, `multi-select`, `special`, `survey`, `table`, `payment`, `document`, `utility`, `security`
+
+### get_field_props
+
+Get detailed props and documentation for a specific field.
+
+```
+get_field_props({ fieldType: "Currency" })
+→ { name, fullName, description, category, props... }
+```
+
+### get_field_example
+
+Get TSX code examples for a field component.
+
+```
+get_field_example({ fieldType: "FileUpload", variant: "in-form" })
+→ Complete form with FileUpload field, validation, submit handler
+```
+
+**Variants:** `basic`, `with-validation`, `in-form`
+
+### get_form_pattern
+
+Get complete form code for common scenarios.
+
+```
+get_form_pattern({ pattern: "crud-create" })
+→ Full CRUD create form with Zod schema, Server Action, error handling
+```
+
+**Patterns:**
+
+| Pattern | Description |
+|---------|-------------|
+| `crud-create` | Create record with validation |
+| `crud-edit` | Edit form with initial data |
+| `multi-step` | Stepped form with per-step validation |
+| `offline` | Form with offline mode support |
+| `i18n` | Multilingual form |
+| `from-schema` | Auto-generated from Zod schema |
+| `declarative` | Full declarative API |
+| `server-action` | Server Action integration |
+| `analytics` | Form with field-level analytics |
+| `server-errors` | Server error mapping to fields |
+| `undo-redo` | Form history with Ctrl+Z |
+
+### get_directives
+
+Get documentation for `@form.*` ZenStack directives.
+
+```
+get_directives({ directive: "@form.fieldType" })
+→ Syntax, example, generated output
+```
+
+**Directives:** `@form.title`, `@form.placeholder`, `@form.description`, `@form.fieldType`, `@form.props`, `@form.relation`, `@form.exclude`
+
+### generate_form
+
+Generate complete form code from a field specification.
+
+```
+generate_form({
+  formName: "ContactForm",
+  withSchema: true,
+  fields: [
+    { name: "name", type: "String", label: "Full Name", required: true },
+    { name: "email", type: "String", label: "Email", required: true, validation: "z.email()" },
+    { name: "phone", type: "Phone", label: "Phone" },
+    { name: "message", type: "Textarea", label: "Message", required: true }
+  ]
+})
+→ Zod schema + Form component with all fields, validation, submit
+```
+
+## Documentation Resources
+
+The server also provides 7 documentation resources accessible via `form-docs://` URIs:
+
+| Resource | Content |
+|----------|---------|
+| `form-docs://fields` | 50+ field component reference |
+| `form-docs://form-level` | Form.Steps, Form.When, Form.Errors |
+| `form-docs://schema-generation` | FromSchema, AutoFields, Builder |
+| `form-docs://offline` | useOfflineForm, sync queue |
+| `form-docs://i18n` | FormI18nProvider, localized errors |
+| `form-docs://zenstack` | @form.* directives, schema.zmodel |
+| `form-docs://api-reference` | Hooks, contexts, types |
+
+## Prompts
+
+Three built-in prompts for common tasks:
+
+### create-form
+
+Generate a CRUD form for a data model:
+
+```
+Prompt: create-form
+Inputs: modelName="User", fields="name,email,role,avatar"
+```
+
+### add-field
+
+Add a field to an existing form:
+
+```
+Prompt: add-field
+Inputs: fieldType="FileUpload", fieldName="avatar"
+```
+
+### migrate-form
+
+Migrate from another framework:
+
+```
+Prompt: migrate-form
+Inputs: sourceFramework="react-hook-form"
+```
+
+**Supported frameworks:** react-hook-form, formik, conform
+
+## How It Works
+
+The MCP server is a lightweight TypeScript process (~39 KB) that:
+
+1. Parses markdown documentation from `@letar/forms`
+2. Builds registries of fields, patterns, and directives
+3. Exposes them as MCP tools, resources, and prompts
+4. Communicates via stdio with any MCP-compatible client
+
+No runtime dependencies beyond `@modelcontextprotocol/sdk`. No network calls. All data is bundled.
+
+## Use Cases
+
+- **Form generation** — Describe what you need, get correct code instantly
+- **Field discovery** — Find the right component for your data type
+- **Pattern reference** — Get best-practice form patterns
+- **Onboarding** — New team members generate correct forms from day one
+- **Consistency** — Every AI-generated form follows the same conventions
+
+## Links
+
+- [npm: @letar/form-mcp](https://www.npmjs.com/package/@letar/form-mcp)
+- [GitHub: letar-form-mcp](https://github.com/kamiletar/letar-form-mcp)
+- [Live examples: forms-example.letar.best](https://forms-example.letar.best)

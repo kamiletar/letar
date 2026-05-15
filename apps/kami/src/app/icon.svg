@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Glitch clip — горизонтальные полоски для сдвига -->
+    <clipPath id="g1">
+      <rect x="0" y="0" width="512" height="60"/>
+      <rect x="0" y="80" width="512" height="40"/>
+      <rect x="0" y="140" width="512" height="90"/>
+      <rect x="0" y="250" width="512" height="50"/>
+      <rect x="0" y="320" width="512" height="70"/>
+      <rect x="0" y="410" width="512" height="102"/>
+    </clipPath>
+    <clipPath id="g2">
+      <rect x="0" y="60" width="512" height="20"/>
+      <rect x="0" y="120" width="512" height="20"/>
+      <rect x="0" y="230" width="512" height="20"/>
+      <rect x="0" y="300" width="512" height="20"/>
+      <rect x="0" y="390" width="512" height="20"/>
+    </clipPath>
+    <clipPath id="g3">
+      <rect x="0" y="170" width="512" height="10"/>
+      <rect x="0" y="350" width="512" height="10"/>
+      <rect x="0" y="440" width="512" height="10"/>
+    </clipPath>
+  </defs>
+
+  <!-- Чёрный фон с закруглёнными углами -->
+  <rect width="512" height="512" rx="64" ry="64" fill="#0A0A0A"/>
+
+  <!-- Основной слой 神 — emerald (#10B981) как на главной -->
+  <text x="256" y="380" text-anchor="middle" font-family="serif" font-size="380" font-weight="bold" fill="#10B981" clip-path="url(#g1)">神</text>
+
+  <!-- Glitch слой 1 — сдвиг вправо, светлый emerald -->
+  <text x="264" y="380" text-anchor="middle" font-family="serif" font-size="380" font-weight="bold" fill="#34D399" opacity="0.5" clip-path="url(#g2)">神</text>
+
+  <!-- Glitch слой 2 — сдвиг влево, тёмный emerald -->
+  <text x="248" y="380" text-anchor="middle" font-family="serif" font-size="380" font-weight="bold" fill="#059669" opacity="0.6" clip-path="url(#g3)">神</text>
+
+  <!-- Горизонтальные scan lines -->
+  <g opacity="0.12">
+    <line x1="0" y1="128" x2="512" y2="128" stroke="#10B981" stroke-width="1"/>
+    <line x1="0" y1="256" x2="512" y2="256" stroke="#10B981" stroke-width="1"/>
+    <line x1="0" y1="384" x2="512" y2="384" stroke="#10B981" stroke-width="1"/>
+  </g>
+
+  <!-- Мелкие glitch-артефакты -->
+  <rect x="30" y="175" width="80" height="3" fill="#10B981" opacity="0.35"/>
+  <rect x="350" y="305" width="60" height="2" fill="#34D399" opacity="0.25"/>
+  <rect x="100" y="445" width="45" height="2" fill="#059669" opacity="0.3"/>
+</svg>

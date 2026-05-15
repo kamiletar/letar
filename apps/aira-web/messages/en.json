@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "title": "Aira — Post-Quantum P2P Messenger",
+    "description": "Aira is a decentralized messenger with hybrid post-quantum cryptography. No servers, no phone numbers, no compromises."
+  },
+  "nav": {
+    "features": "Features",
+    "security": "Security",
+    "download": "Download",
+    "github": "GitHub",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainNavigation": "Main navigation",
+    "mobileNavigation": "Mobile navigation",
+    "skipToContent": "Skip to content"
+  },
+  "hero": {
+    "badge": "{version} — Post-quantum protection is here",
+    "fallbackVersion": "v0.3.3",
+    "title1": "Speak freely.",
+    "title2": "Protect the future.",
+    "subtitle": "Aira is a decentralized messenger with hybrid post-quantum cryptography. No servers, no phone numbers, no compromises.",
+    "ctaDownload": "Download Aira",
+    "ctaSource": "Source code",
+    "tagOpenSource": "Open source"
+  },
+  "features": {
+    "title": "Superpowers",
+    "subtitle": "Every detail designed to protect your freedom to communicate",
+    "quantum": {
+      "title": "Quantum-resistant encryption",
+      "description": "Hybrid ML-KEM-768 + X25519 cryptography. Both algorithms must be broken simultaneously — protection against quantum computers today."
+    },
+    "p2p": {
+      "title": "Genuine P2P",
+      "description": "No servers, no accounts, no phone numbers. Every user is a network node. Messages travel directly over QUIC."
+    },
+    "metadata": {
+      "title": "Invisible metadata",
+      "description": "Pairwise pseudonyms for each contact. Even the relay doesn't know who you talk to. Padding on all packets hides message sizes."
+    },
+    "global": {
+      "title": "Works everywhere",
+      "description": "REALITY camouflage, obfs4, Tor, CDN fallback. Pluggable transports defeat DPI even in the most censored regions."
+    },
+    "fullMessenger": {
+      "title": "A full messenger",
+      "description": "Reactions, replies, editing, disappearing messages, file transfers, groups up to 100 members, bots — all encrypted."
+    },
+    "multiplatform": {
+      "title": "Multi-platform",
+      "description": "CLI, desktop (Linux/macOS/Windows), Android. Up to 5 linked devices with sync through a seed phrase."
+    }
+  },
+  "security": {
+    "title": "Under the hood",
+    "subtitle": "100% Rust. Zero unsafe code in the cryptographic core. Every key is isolated and zeroized after use.",
+    "crypto": {
+      "title": "Cryptography",
+      "keyAgreementLabel": "Key agreement",
+      "keyAgreementDetail": "Hybrid KEM, FIPS 203",
+      "signaturesLabel": "Signatures",
+      "signaturesDetail": "FIPS 204, post-quantum",
+      "encryptionLabel": "Encryption",
+      "encryptionDetail": "256 bit, AEAD",
+      "hashingLabel": "Hashing",
+      "hashingDetail": "KDF + MAC, no length-extension",
+      "kdfLabel": "Key stretching",
+      "kdfDetail": "256 MB / 64 MB (desktop/mobile)",
+      "fsLabel": "Forward secrecy",
+      "fsDetail": "PQ refresh every ~50 messages"
+    },
+    "protection": {
+      "title": "Defense",
+      "dpiLabel": "DPI bypass",
+      "dpiValue": "5 levels",
+      "dpiDetail": "Direct → obfs4 → CPS → REALITY → Tor",
+      "metadataLabel": "Metadata",
+      "metadataValue": "Pairwise pseudonyms",
+      "metadataDetail": "Relay sees no social graph",
+      "deniabilityLabel": "Deniability",
+      "deniabilityValue": "Symmetric MACs",
+      "deniabilityDetail": "Impossible to prove authorship",
+      "antispamLabel": "Anti-spam",
+      "antispamValue": "Proof-of-Work",
+      "antispamDetail": "20 bits for strangers",
+      "paddingLabel": "Padding",
+      "paddingValue": "256–4096 bytes",
+      "paddingDetail": "Hides real message size",
+      "recoveryLabel": "Recovery",
+      "recoveryValue": "24 BIP-39 words",
+      "recoveryDetail": "Seed phrase, deterministic derivation"
+    },
+    "vsTitle": "Why not Signal / Session / SimpleX?",
+    "vsSignal": "Signal uses servers, requires a phone number, and doesn't have post-quantum protection on every message. Aira is P2P + SPQR ratchet.",
+    "vsSession": "Session uses onion routing through Oxen servers. Aira is direct P2P without intermediate servers and with full PQ encryption.",
+    "vsSimpleX": "SimpleX relies on relay servers for delivery. Aira works directly, and relay is only a fallback for NAT traversal."
+  },
+  "download": {
+    "title": "Download Aira",
+    "subtitleWithVersion": "{version} — Open source. Free forever.",
+    "subtitle": "Open source. Free forever.",
+    "linuxName": "Linux x86_64",
+    "linuxDescription": "CLI + Daemon + GUI. tar.gz archive.",
+    "macArmName": "macOS Apple Silicon",
+    "macArmDescription": "CLI + Daemon + GUI for Apple M1/M2/M3/M4.",
+    "macIntelName": "macOS Intel",
+    "macIntelDescription": "CLI + Daemon + GUI for Intel Macs.",
+    "windowsName": "Windows x86_64",
+    "windowsDescription": "CLI + Daemon + GUI. zip archive.",
+    "androidName": "Android",
+    "androidDescription": "Jetpack Compose + Rust core via UniFFI. APK.",
+    "downloadLabel": "Download",
+    "portableLabel": "Portable archive",
+    "cargoLabel": "Install via Cargo:"
+  },
+  "footer": {
+    "license": "Aira — MIT / Apache-2.0",
+    "github": "GitHub",
+    "spec": "Specification",
+    "releases": "Releases"
+  }
+}

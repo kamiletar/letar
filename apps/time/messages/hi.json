@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "अभी कितने बजे हैं?",
+    "description": "UNIX युग की शुरुआत से क्रमिक घंटा"
+  },
+  "time": {
+    "now": "अभी",
+    "hour": "UNIX युग की शुरुआत से घंटा",
+    "hoursPassed": "घंटे UNIX युग की शुरुआत से बीत चुके हैं"
+  },
+  "countdown": {
+    "until": "{milestone} घंटों तक",
+    "days": "{count, plural, one {# दिन} other {# दिन}}",
+    "hours": "{count, plural, one {# घंटा} other {# घंटे}}",
+    "minutes": "{count, plural, one {# मिनट} other {# मिनट}}",
+    "seconds": "{count, plural, one {# सेकंड} other {# सेकंड}}"
+  },
+  "celebration": {
+    "milestone": "UNIX युग के {hours} घंटे!"
+  },
+  "subscribe": {
+    "subscribe": "सूचनाएँ",
+    "explanation": "अपना ईमेल सत्यापित करने और सूचना सेटिंग्स तक पहुँचने के लिए साइन इन आवश्यक है",
+    "signIn": "साइन इन करें",
+    "settings": "सेटिंग्स"
+  },
+  "profile": {
+    "title": "सूचना सेटिंग्स",
+    "email": "ईमेल",
+    "notifyMonth": "एक महीने पहले",
+    "notifyWeek": "एक सप्ताह पहले",
+    "notifyDay": "एक दिन पहले",
+    "notifyHour": "एक घंटे पहले",
+    "notify5Min": "5 मिनट पहले",
+    "save": "सहेजें",
+    "saved": "सहेजा गया!",
+    "unsubscribe": "सभी से सदस्यता रद्द करें",
+    "unsubscribed": "आपकी सभी सूचनाओं की सदस्यता रद्द कर दी गई है",
+    "noSubscription": "आपके पास अभी तक सूचना सदस्यता नहीं है",
+    "createSubscription": "सूचनाओं की सदस्यता लें"
+  },
+  "unsubscribe": {
+    "title": "सदस्यता रद्द करें",
+    "success": "आपकी UNIX घंटा मील के पत्थर सूचनाओं की सदस्यता सफलतापूर्वक रद्द कर दी गई है",
+    "error": "अमान्य सदस्यता रद्द करने का लिंक",
+    "back": "मुख्य पृष्ठ पर वापस जाएँ"
+  }
+}

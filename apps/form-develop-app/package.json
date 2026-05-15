@@ -1,0 +1,16 @@
+{
+  "name": "form-develop-app",
+  "version": "0.1.0",
+  "private": true,
+  "nx": {
+    "tags": [
+      "sandbox"
+    ],
+    "implicitDependencies": [
+      "@letar/chakra-provider",
+      "@letar/forms",
+      "@letar/query-provider"
+    ]
+  },
+  "dependencies": {}
+}
