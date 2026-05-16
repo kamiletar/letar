@@ -16,7 +16,7 @@
 
 ### Структура репо
 
-`letar` — **публичный** монорепо. 9 приватных приложений/lib подключены через **git submodules** (aboi, driving-school + db + e2e, premium-rosstil + e2e, imot + e2e). Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
+`letar` — **публичный** монорепо. 10 приватных приложений/lib подключены через **git submodules** (aboi, driving-school + db + e2e, premium-rosstil + e2e, imot + e2e, dsperevod). Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
 
 **Клонирование с приватными:** `git clone --recurse-submodules git@github.com:kamiletar/letar.git`
 

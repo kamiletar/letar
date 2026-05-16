@@ -191,6 +191,14 @@ async function main() {
       type: 'WEB' as const,
       domain: 'aboi.letar.best',
     },
+    {
+      name: 'dsperevod',
+      displayName: 'DS Perevod (Дабл Сервис)',
+      containerName: 'dsperevod-app',
+      port: 3019,
+      type: 'WEB' as const,
+      domain: 'dsperevod.letar.best',
+    },
   ]
 
   for (const app of s2Apps) {

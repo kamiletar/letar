@@ -58,6 +58,7 @@ APPS=(
   "kami-key-the-landing"
   "form-example"
   "aboi"
+  "dsperevod"
 )
 
 echo "🚀 Синхронизация .env.docker на production серверы"
