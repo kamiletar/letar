@@ -353,8 +353,8 @@ function RegistrationForm() {
 
 - **Мультистеп:** [forms-example.letar.best/examples/multi-step](https://forms-example.letar.best/examples/multi-step)
 - **Условный рендеринг:** [forms-example.letar.best/examples/conditional](https://forms-example.letar.best/examples/conditional)
-- **Исходный код:** [multi-step](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/multi-step/page.tsx) | [conditional](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/conditional/page.tsx)
-- **Клонировать:** `git clone https://github.com/kamiletar/letar-forms-example && cd letar-forms-example && npm install && npm run dev`
+- **Исходный код:** [multi-step](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/multi-step/page.tsx) | [conditional](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/conditional/page.tsx)
+- **Клонировать:** `git clone https://github.com/kamiletar/letar/tree/main/apps/form-example && cd letar-forms-example && npm install && npm run dev`
 
 В следующей статье — массивы и вложенные объекты: `Form.Group`, `Form.Group.List` и drag & drop сортировка (подробнее — в [статье 6: массивы и группы](06-arrays-groups.md)).
 

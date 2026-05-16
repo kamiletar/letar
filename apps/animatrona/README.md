@@ -2,9 +2,9 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/github/v/release/kamiletar/animatrona?label=version)](https://github.com/kamiletar/animatrona/releases)
-[![Downloads](https://img.shields.io/github/downloads/kamiletar/animatrona/total)](https://github.com/kamiletar/animatrona/releases)
-[![License](https://img.shields.io/github/license/kamiletar/animatrona)](./LICENSE)
+[![Version](https://img.shields.io/github/v/tag/kamiletar/letar?filter=animatrona-v*&label=version)](https://github.com/kamiletar/letar/releases?q=animatrona)
+[![Downloads](https://img.shields.io/github/downloads/kamiletar/letar/total?label=downloads)](https://github.com/kamiletar/letar/releases?q=animatrona)
+[![License](https://img.shields.io/github/license/kamiletar/letar)](./LICENSE)
 [![Website](https://img.shields.io/badge/website-animatrona.letar.best-blue)](https://animatrona.letar.best)
 
 </div>
@@ -185,7 +185,7 @@ git push origin main
 git push origin animatrona-vX.Y.Z
 
 # 4. GitHub Actions автоматически:
-#    - Публикует исходники в github.com/kamiletar/animatrona
+#    - Публикует исходники в github.com/kamiletar/letar/tree/main/apps/animatrona
 #    - Собирает Windows, macOS, Linux
 #    - Создаёт GitHub Release с бинарниками
 #    - Обновляет лендинг (animatrona.letar.best)

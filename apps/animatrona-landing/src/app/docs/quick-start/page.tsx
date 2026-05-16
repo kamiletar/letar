@@ -96,7 +96,7 @@ export default function QuickStartPage() {
           </Heading>
           <HStack gap={4} wrap="wrap">
             <Link
-              href="https://github.com/kamiletar/animatrona/releases"
+              href="https://github.com/kamiletar/letar/releases"
               target="_blank"
               rel="noopener noreferrer"
               color="brand.400"

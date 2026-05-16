@@ -31,7 +31,7 @@ export function baseOptions(locale: string): BaseLayoutProps {
       },
       {
         text: 'GitHub',
-        url: 'https://github.com/kamiletar/letar-forms',
+        url: 'https://github.com/kamiletar/letar/tree/main/libs/forms',
       },
       {
         text: 'npm',

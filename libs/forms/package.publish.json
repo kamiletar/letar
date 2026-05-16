@@ -90,10 +90,11 @@
   "homepage": "https://forms.letar.best",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kamiletar/letar-forms"
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms"
   },
   "bugs": {
-    "url": "https://github.com/kamiletar/letar-forms/issues"
+    "url": "https://github.com/kamiletar/letar/issues"
   },
   "peerDependencies": {
     "@chakra-ui/react": ">=3.0.0",

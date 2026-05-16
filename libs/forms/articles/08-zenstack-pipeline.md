@@ -377,8 +377,8 @@ const formConfig = await fetch('/api/form-config/feedback').then((r) => r.json()
 
 - **ZenStack формы:** [forms-example.letar.best/examples/zenstack](https://forms-example.letar.best/examples/zenstack)
 - **CRUD Products:** [forms-example.letar.best/products](https://forms-example.letar.best/products)
-- **Исходный код:** [zenstack](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/zenstack/page.tsx) | [products](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/products/page.tsx)
-- **Клонировать:** `git clone https://github.com/kamiletar/letar-forms-example && cd letar-forms-example && npm install && npm run dev`
+- **Исходный код:** [zenstack](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/zenstack/page.tsx) | [products](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/products/page.tsx)
+- **Клонировать:** `git clone https://github.com/kamiletar/letar/tree/main/apps/form-example && cd letar-forms-example && npm install && npm run dev`
 
 В следующей статье — offline-first формы: как сохранять данные локально, когда интернет пропал, и синхронизировать при восстановлении.
 

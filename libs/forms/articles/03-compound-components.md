@@ -460,7 +460,7 @@ const Schema = z.object({
 - [Документация](https://forms.letar.best)
 - [Живой пример: basic](https://forms-example.letar.best/examples/basic)
 - [Все поля (39)](https://forms-example.letar.best/examples/all-fields)
-- [GitHub](https://github.com/kamiletar/letar-forms)
+- [GitHub](https://github.com/kamiletar/letar/tree/main/libs/forms)
 - [MCP для AI](https://www.npmjs.com/package/@letar/form-mcp)
 
 ---

@@ -11,7 +11,7 @@ export function Footer() {
         <VStack gap={4}>
           <HStack gap={6} wrap="wrap" justify="center">
             <Link
-              href="https://github.com/kamiletar/animatrona"
+              href="https://github.com/kamiletar/letar/tree/main/apps/animatrona"
               target="_blank"
               rel="noopener noreferrer"
               color="gray.500"
@@ -21,7 +21,7 @@ export function Footer() {
               GitHub
             </Link>
             <Link
-              href="https://github.com/kamiletar/animatrona/releases"
+              href="https://github.com/kamiletar/letar/releases"
               target="_blank"
               rel="noopener noreferrer"
               color="gray.500"
@@ -31,7 +31,7 @@ export function Footer() {
               Релизы
             </Link>
             <Link
-              href="https://github.com/kamiletar/animatrona/issues"
+              href="https://github.com/kamiletar/letar/issues"
               target="_blank"
               rel="noopener noreferrer"
               color="gray.500"
@@ -41,7 +41,7 @@ export function Footer() {
               Сообщить о баге
             </Link>
             <Link
-              href="https://github.com/kamiletar/animatrona/blob/main/LICENSE"
+              href="https://github.com/kamiletar/letar/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               color="gray.500"

@@ -4,7 +4,7 @@ import { HStack, Link, Text } from '@chakra-ui/react'
 import { usePathname } from 'next/navigation'
 import { LuGithub } from 'react-icons/lu'
 
-const REPO_URL = 'https://github.com/kamiletar/letar-forms-example'
+const REPO_URL = 'https://github.com/kamiletar/letar/tree/main/apps/form-example'
 
 /** Ссылка на исходный код текущей страницы на GitHub */
 export function SourceLink() {

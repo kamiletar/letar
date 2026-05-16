@@ -78,7 +78,7 @@ const jsonLd = {
     price: '0',
     priceCurrency: 'RUB',
   },
-  downloadUrl: 'https://github.com/kamiletar/animatrona/releases',
+  downloadUrl: 'https://github.com/kamiletar/letar/releases',
   featureList: [
     'GPU-ускоренное кодирование AV1/HEVC',
     'Автоматический подбор качества VMAF',

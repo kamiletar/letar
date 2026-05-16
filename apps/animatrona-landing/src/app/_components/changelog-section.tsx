@@ -138,7 +138,7 @@ export function ChangelogSection({ releases }: ChangelogSectionProps) {
 
           {/* Ссылка на все релизы */}
           <Link
-            href="https://github.com/kamiletar/animatrona/releases"
+            href="https://github.com/kamiletar/letar/releases"
             target="_blank"
             rel="noopener noreferrer"
             color="brand.400"

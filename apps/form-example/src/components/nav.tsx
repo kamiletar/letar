@@ -123,7 +123,7 @@ export function Nav() {
       <Separator my={4} />
 
       <Link
-        href="https://github.com/kamiletar/letar-forms-example"
+        href="https://github.com/kamiletar/letar/tree/main/apps/form-example"
         target="_blank"
         rel="noopener noreferrer"
         display="block"

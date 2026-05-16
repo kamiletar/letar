@@ -41,8 +41,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kamiletar/letar-form-mcp"
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/form-mcp"
   },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "homepage": "https://github.com/kamiletar/letar/tree/main/libs/form-mcp",
   "author": "Kamil Letar",
   "license": "MIT",
   "engines": {

@@ -193,7 +193,7 @@ function showInstructions(project: Project, version: string): void {
   console.log(chalk.yellow(`     git push origin ${tag}`))
 
   console.log(chalk.gray('\n  3. GitHub Actions автоматически запустит релиз workflow'))
-  console.log(chalk.gray('     Следите за прогрессом: https://github.com/kamiletar/animatrona/actions'))
+  console.log(chalk.gray('     Следите за прогрессом: https://github.com/kamiletar/letar/actions'))
 
   console.log(chalk.cyan('\n' + '='.repeat(60) + '\n'))
 }

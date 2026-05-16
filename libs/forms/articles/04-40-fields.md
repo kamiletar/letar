@@ -562,8 +562,8 @@ const ContactSchema = z.object({
 - **Все поля:** [forms-example.letar.best/examples/all-fields](https://forms-example.letar.best/examples/all-fields)
 - **Продвинутые:** [forms-example.letar.best/examples/advanced-fields](https://forms-example.letar.best/examples/advanced-fields)
 - **Рецепты:** [forms-example.letar.best/examples/recipes](https://forms-example.letar.best/examples/recipes)
-- **Исходный код:** [all-fields](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/all-fields/page.tsx) | [advanced-fields](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/advanced-fields/page.tsx)
-- **Клонировать:** `git clone https://github.com/kamiletar/letar-forms-example && cd letar-forms-example && npm install && npm run dev`
+- **Исходный код:** [all-fields](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/all-fields/page.tsx) | [advanced-fields](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/advanced-fields/page.tsx)
+- **Клонировать:** `git clone https://github.com/kamiletar/letar/tree/main/apps/form-example && cd letar-forms-example && npm install && npm run dev`
 
 В следующей статье — мультистеп формы: `<Form.Steps>`, условный рендеринг через `<Form.When>`, валидация по шагам.
 

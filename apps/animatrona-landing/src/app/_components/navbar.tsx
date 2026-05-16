@@ -152,7 +152,7 @@ export function Navbar() {
           {/* GitHub + Mobile Menu Button */}
           <HStack gap={2}>
             <Link
-              href="https://github.com/kamiletar/animatrona"
+              href="https://github.com/kamiletar/letar/tree/main/apps/animatrona"
               target="_blank"
               rel="noopener noreferrer"
               color="gray.400"
@@ -229,7 +229,7 @@ export function Navbar() {
 
                     <Drawer.Footer borderTop="1px solid" borderColor="gray.800">
                       <Link
-                        href="https://github.com/kamiletar/animatrona"
+                        href="https://github.com/kamiletar/letar/tree/main/apps/animatrona"
                         target="_blank"
                         rel="noopener noreferrer"
                         color="gray.400"

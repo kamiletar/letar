@@ -521,7 +521,7 @@ const Schema = z.object({
 - [Документация](https://forms.letar.best)
 - [Живой пример: validation](https://forms-example.letar.best/examples/validation)
 - [Живой пример: constraints](https://forms-example.letar.best/examples/constraints)
-- [GitHub](https://github.com/kamiletar/letar-forms)
+- [GitHub](https://github.com/kamiletar/letar/tree/main/libs/forms)
 - [MCP для AI](https://www.npmjs.com/package/@letar/form-mcp)
 
 ---

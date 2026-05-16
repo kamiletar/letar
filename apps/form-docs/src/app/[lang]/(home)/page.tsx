@@ -22,7 +22,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           {isRu ? 'Начать' : 'Get Started'}
         </Link>
         <Link
-          href="https://github.com/kamiletar/letar-forms"
+          href="https://github.com/kamiletar/letar/tree/main/libs/forms"
           className="rounded-lg border border-fd-border px-6 py-3 font-medium transition-colors hover:bg-fd-accent"
         >
           GitHub

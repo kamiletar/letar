@@ -125,7 +125,7 @@ import { FormSkeleton } from '@letar/forms'
 
 - **Документация:** [forms.letar.best](https://forms.letar.best)
 - **16 интерактивных примеров:** [forms-example.letar.best](https://forms-example.letar.best)
-- **Исходный код примеров:** [GitHub](https://github.com/kamiletar/letar-forms-example)
+- **Исходный код примеров:** [GitHub](https://github.com/kamiletar/letar/tree/main/apps/form-example)
 - **MCP для AI:** `npx @letar/form-mcp` — AI-ассистент узнает про все 50+ полей
 
 Хотите понять, _зачем_ это нужно и какие проблемы решает? Читайте [статью 1: Формы в React — почему всё ещё больно](01-why-forms-hurt.md).

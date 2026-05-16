@@ -563,7 +563,7 @@ const LoginSchema = z.object({
 
 - [Документация](https://forms.letar.best)
 - [Живые примеры](https://forms-example.letar.best)
-- [GitHub](https://github.com/kamiletar/letar-forms)
+- [GitHub](https://github.com/kamiletar/letar/tree/main/libs/forms)
 - [MCP для AI](https://www.npmjs.com/package/@letar/form-mcp)
 
 ---

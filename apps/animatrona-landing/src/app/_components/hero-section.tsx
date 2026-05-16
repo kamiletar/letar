@@ -364,7 +364,7 @@ export function HeroSection({ release }: HeroSectionProps) {
                 color="gray.300"
                 _hover={{ borderColor: 'gray.600', bg: 'gray.900' }}
               >
-                <Link href="https://github.com/kamiletar/animatrona" target="_blank" rel="noopener noreferrer">
+                <Link href="https://github.com/kamiletar/letar/tree/main/apps/animatrona" target="_blank" rel="noopener noreferrer">
                   <Icon as={LuExternalLink} />
                   GitHub
                 </Link>

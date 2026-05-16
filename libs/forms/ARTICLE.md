@@ -6,10 +6,10 @@
 
 **Экосистема (3 npm пакета, 4 GitHub репо):**
 
-- [@letar/forms](https://github.com/kamiletar/letar-forms) — основная библиотека (v0.80.0)
-- [@letar/zenstack-form-plugin](https://github.com/kamiletar/zenstack-form-plugin) — ZenStack плагин (v2.1.0)
-- [@letar/form-mcp](https://github.com/kamiletar/letar-form-mcp) — MCP сервер для AI
-- [letar-forms-example](https://github.com/kamiletar/letar-forms-example) — живые примеры (forms-example.letar.best)
+- [@letar/forms](https://github.com/kamiletar/letar/tree/main/libs/forms) — основная библиотека (v0.80.0)
+- [@letar/zenstack-form-plugin](https://github.com/kamiletar/letar/tree/main/libs/zenstack-form-plugin) — ZenStack плагин (v2.1.0)
+- [@letar/form-mcp](https://github.com/kamiletar/letar/tree/main/libs/form-mcp) — MCP сервер для AI
+- [letar-forms-example](https://github.com/kamiletar/letar/tree/main/apps/form-example) — живые примеры (forms-example.letar.best)
 
 **Публикация:** личный аккаунт, 2 статьи в неделю, первую публикуем отдельно как пробный шар и корректируем подход по фидбэку.
 
@@ -217,7 +217,7 @@ nx test form-components --coverage
 
 - 📖 [Документация](https://forms.letar.best)
 - 🎮 [Живые примеры](https://forms-example.letar.best)
-- 💻 [GitHub](https://github.com/kamiletar/letar-forms)
+- 💻 [GitHub](https://github.com/kamiletar/letar/tree/main/libs/forms)
 - 🤖 [MCP для AI](https://www.npmjs.com/package/@letar/form-mcp)
 
 <details>
@@ -784,10 +784,10 @@ const url = generatePrefillUrl('/contact', {
 
 ---
 
-### 6.3. Обновить GitHub README (`kamiletar/letar-forms`) — ПЕРЕД первой публикацией
+### 6.3. Обновить GitHub README (`kamiletar/letar/tree/main/libs/forms`) — ПЕРЕД первой публикацией
 
 **Приоритет:** Критический (первое что увидит читатель с Хабра)
-**Текущее состояние:** https://github.com/kamiletar/letar-forms
+**Текущее состояние:** https://github.com/kamiletar/letar/tree/main/libs/forms
 
 **Проблемы:**
 
@@ -907,7 +907,7 @@ Declarative form library for React — **50+ field types**, multi-step, offline-
 
 #### E. Обновить letar-forms-example README
 
-Репозиторий `kamiletar/letar-forms-example` тоже нуждается в проверке:
+Репозиторий `kamiletar/letar/tree/main/apps/form-example` тоже нуждается в проверке:
 
 - [ ] Ссылка на https://forms-example.letar.best работает
 - [ ] Скриншот главной страницы примеров
@@ -922,10 +922,10 @@ Declarative form library for React — **50+ field types**, multi-step, offline-
 
 ---
 
-### 6.4. Обновить GitHub README (`kamiletar/zenstack-form-plugin`)
+### 6.4. Обновить GitHub README (`kamiletar/letar/tree/main/libs/zenstack-form-plugin`)
 
 **Приоритет:** Высокий (упоминается в статье 08)
-**Текущее состояние:** https://github.com/kamiletar/zenstack-form-plugin
+**Текущее состояние:** https://github.com/kamiletar/letar/tree/main/libs/zenstack-form-plugin
 
 **Проблемы:**
 
@@ -956,10 +956,10 @@ Declarative form library for React — **50+ field types**, multi-step, offline-
 
 ---
 
-### 6.5. Обновить GitHub README (`kamiletar/letar-form-mcp`)
+### 6.5. Обновить GitHub README (`kamiletar/letar/tree/main/libs/form-mcp`)
 
 **Приоритет:** Высокий (упоминается в статье 11)
-**Текущее состояние:** https://github.com/kamiletar/letar-form-mcp
+**Текущее состояние:** https://github.com/kamiletar/letar/tree/main/libs/form-mcp
 
 **Проблемы:**
 

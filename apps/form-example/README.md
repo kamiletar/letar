@@ -10,7 +10,7 @@ Full-stack showcase of [@letar/forms](https://www.npmjs.com/package/@letar/forms
 ### With Docker (recommended)
 
 ```bash
-git clone https://github.com/kamiletar/letar-forms-example.git
+git clone https://github.com/kamiletar/letar/tree/main/apps/form-example.git
 cd letar-forms-example
 docker compose up
 ```
@@ -20,7 +20,7 @@ Open [http://localhost:3000](http://localhost:3000). PostgreSQL starts automatic
 ### Without Docker
 
 ```bash
-git clone https://github.com/kamiletar/letar-forms-example.git
+git clone https://github.com/kamiletar/letar/tree/main/apps/form-example.git
 cd letar-forms-example
 npm install
 

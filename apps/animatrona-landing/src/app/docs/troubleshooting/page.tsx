@@ -138,7 +138,7 @@ export default function TroubleshootingPage() {
             воспроизведения и логами приложения.
           </Text>
           <Link
-            href="https://github.com/kamiletar/animatrona/issues/new"
+            href="https://github.com/kamiletar/letar/issues/new"
             target="_blank"
             rel="noopener noreferrer"
             color="brand.400"

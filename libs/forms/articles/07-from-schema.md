@@ -388,8 +388,8 @@ FromTemplate → FromSchema → AutoFields → Builder → ConversationalMode �
 
 - **AutoFields:** [forms-example.letar.best/examples/auto-fields](https://forms-example.letar.best/examples/auto-fields)
 - **Продвинутое:** [forms-example.letar.best/examples/auto-fields-advanced](https://forms-example.letar.best/examples/auto-fields-advanced)
-- **Исходный код:** [auto-fields](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/auto-fields/page.tsx) | [auto-fields-advanced](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/auto-fields-advanced/page.tsx)
-- **Клонировать:** `git clone https://github.com/kamiletar/letar-forms-example && cd letar-forms-example && npm install && npm run dev`
+- **Исходный код:** [auto-fields](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/auto-fields/page.tsx) | [auto-fields-advanced](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/auto-fields-advanced/page.tsx)
+- **Клонировать:** `git clone https://github.com/kamiletar/letar/tree/main/apps/form-example && cd letar-forms-example && npm install && npm run dev`
 
 В следующей статье — full-stack pipeline: от `schema.zmodel` (база данных) через ZenStack до готовой формы за 5 минут (подробнее — в [статье 8: ZenStack pipeline](08-zenstack-pipeline.md)).
 

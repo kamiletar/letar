@@ -39,7 +39,7 @@ export default function HomePage() {
       <HStack justify="space-between" align="start" mb={2}>
         <Heading size="xl">@letar/forms Example App</Heading>
         <Link
-          href="https://github.com/kamiletar/letar-forms-example"
+          href="https://github.com/kamiletar/letar/tree/main/apps/form-example"
           target="_blank"
           rel="noopener noreferrer"
           color="fg.muted"

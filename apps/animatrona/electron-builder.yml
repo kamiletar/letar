@@ -15,11 +15,11 @@ releaseInfo:
 electronVersion: 41.0.0
 
 # Публикация на GitHub Releases
-# kamiletar/animatrona - публичный репозиторий для Open Source релизов
+# kamiletar/letar — публичный монорепо letar, релизы тегаются префиксом animatrona-v*
 publish:
   provider: github
   owner: kamiletar
-  repo: animatrona
+  repo: letar
   releaseType: release
   private: false
   # GH_TOKEN берётся автоматически из переменной среды

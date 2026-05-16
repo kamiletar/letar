@@ -6,7 +6,11 @@
   "homepage": "https://forms.letar.best/docs/guides/zenstack-plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kamiletar/letar-zenstack-form-plugin"
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/zenstack-form-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
   },
   "license": "MIT",
   "type": "module",

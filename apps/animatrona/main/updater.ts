@@ -117,7 +117,8 @@ export async function fetchChangelog(version: string): Promise<string | null> {
   }
 
   try {
-    const url = `https://api.github.com/repos/kamiletar/animatrona/releases/tags/v${version}`
+    // Релизы animatrona в letar монорепо тегаются как animatrona-v<version>
+    const url = `https://api.github.com/repos/kamiletar/letar/releases/tags/animatrona-v${version}`
     const request = net.request({
       url,
       method: 'GET',

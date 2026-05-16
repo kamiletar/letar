@@ -359,8 +359,8 @@ function OrderForm({ products }) {
 ## Попробовать
 
 - **Группы и массивы:** [forms-example.letar.best/examples/groups](https://forms-example.letar.best/examples/groups)
-- **Исходный код:** [GitHub](https://github.com/kamiletar/letar-forms-example/blob/main/src/app/examples/groups/page.tsx)
-- **Клонировать:** `git clone https://github.com/kamiletar/letar-forms-example && cd letar-forms-example && npm install && npm run dev`
+- **Исходный код:** [GitHub](https://github.com/kamiletar/letar/tree/main/apps/form-example/blob/main/src/app/examples/groups/page.tsx)
+- **Клонировать:** `git clone https://github.com/kamiletar/letar/tree/main/apps/form-example && cd letar-forms-example && npm install && npm run dev`
 
 В следующей статье — `Form.FromSchema`: как сгенерировать полную форму из одной строки кода.
 
