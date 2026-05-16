@@ -3,6 +3,7 @@ package kubo
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,11 @@ import (
 	"net/url"
 	"time"
 )
+
+// idleTimeout — максимальное время без прогресс-событий.
+// Если Kubo молчит дольше этого — считаем что завис (I/O stall, deadlock и т.д.)
+// и отменяем запрос, позволяя queue.go переподключиться.
+const idleTimeout = 5 * time.Minute
 
 // Client — HTTP-клиент для Kubo RPC API
 type Client struct {
@@ -43,11 +49,17 @@ func New(apiURL, authToken string) *Client {
 // PinAddWithProgress запускает пиннинг CID и стримит прогресс через callback.
 // Блокирует до завершения пиннинга или ошибки.
 // Возвращает итоговое количество блоков при успехе.
+//
+// Защита от зависания: если Kubo не шлёт прогресс-события дольше idleTimeout —
+// запрос отменяется и возвращается ошибка. Queue.go переподключится.
 func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error) {
 	reqURL := fmt.Sprintf("%s/api/v0/pin/add?arg=%s&progress=true",
 		c.apiURL, url.QueryEscape(cid))
 
-	req, err := http.NewRequest("POST", reqURL, nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", reqURL, nil)
 	if err != nil {
 		return 0, fmt.Errorf("создание запроса: %w", err)
 	}
@@ -66,6 +78,11 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
 		return 0, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
+
+	// Idle timeout: если нет прогресс-событий дольше idleTimeout — Kubo завис.
+	// time.AfterFunc вызовет cancel() → HTTP-транспорт закроет body → scanner.Scan() вернёт false.
+	idleTimer := time.AfterFunc(idleTimeout, cancel)
+	defer idleTimer.Stop()
 
 	// Читаем NDJSON стрим построчно
 	scanner := bufio.NewScanner(resp.Body)
@@ -95,6 +112,7 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 
 		if progress.Progress > 0 {
 			lastBlocks = progress.Progress
+			idleTimer.Reset(idleTimeout) // сбрасываем таймер при каждом прогрессе
 			if cb != nil {
 				cb(lastBlocks)
 			}
@@ -102,6 +120,9 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 	}
 
 	if err := scanner.Err(); err != nil {
+		if ctx.Err() != nil {
+			return lastBlocks, fmt.Errorf("idle timeout: нет прогресса %s", idleTimeout)
+		}
 		return lastBlocks, fmt.Errorf("чтение стрима: %w", err)
 	}
 
