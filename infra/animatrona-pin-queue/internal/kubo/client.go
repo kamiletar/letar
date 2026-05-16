@@ -80,8 +80,12 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 	}
 
 	// Idle timeout: если нет прогресс-событий дольше idleTimeout — Kubo завис.
-	// time.AfterFunc вызовет cancel() → HTTP-транспорт закроет body → scanner.Scan() вернёт false.
-	idleTimer := time.AfterFunc(idleTimeout, cancel)
+	// Явно закрываем resp.Body — это единственный надёжный способ разблокировать
+	// scanner.Scan() при зависшем стриме (context cancel не всегда работает для body read).
+	idleTimer := time.AfterFunc(idleTimeout, func() {
+		cancel()
+		resp.Body.Close()
+	})
 	defer idleTimer.Stop()
 
 	// Читаем NDJSON стрим построчно
