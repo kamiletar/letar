@@ -25,3 +25,6 @@
 [submodule "apps/imot-e2e"]
 	path = apps/imot-e2e
 	url = git@github.com:kamiletar/letar-private-imot-e2e.git
+[submodule "apps/dsperevod"]
+	path = apps/dsperevod
+	url = git@github.com:kamiletar/letar-private-dsperevod.git
