@@ -82,6 +82,33 @@ docker compose -f apps/dashboard-agent/docker-compose.production.yml up -d --bui
 - `.env.docker` (dashboard)
 - Все docs в `.claude/docs/`, `.claude/rules/`, `.claude/skills/`
 
+## Что НЕ меняется на серверах
+
+- **PostgreSQL DB/user `lena_*`** (`lena_user`, `lena_premium`, `lena_auth`, `lena_password`) — production identity, оставлены как исторические имена. Видны только в `docker-compose.production.yml` и `.env.docker`, никаких операционных проблем не вызывают.
+- **Resilio Sync** (`/etc/systemd/system/resilio-sync.service.d/deploy-user.conf`) — переопределяет user на `deploy`, путь к workspace не указан, миграции не требует.
+- **Container names** в docker-compose — оставлены как есть (`premium-rosstil-postgres`, `auth-hub-postgres` и т.д., без `lena` префикса).
+
+## Crontab на серверах
+
+Если на сервере есть cron-задачи, ссылающиеся на `/home/deploy/lena`, обнови их:
+
+```bash
+# Посмотреть текущий crontab
+crontab -l
+
+# Если есть строки с /home/deploy/lena — отредактировать
+crontab -e
+# Заменить /home/deploy/lena → /home/deploy/letar
+
+# Или массово:
+crontab -l > /tmp/crontab.old
+sed 's|/home/deploy/lena|/home/deploy/letar|g' /tmp/crontab.old > /tmp/crontab.new
+crontab /tmp/crontab.new
+crontab -l   # проверить
+```
+
+Аналогично проверить `/etc/cron.d/`, `/etc/cron.daily/`, `/etc/cron.hourly/` если deploy-юзер настраивал системный cron.
+
 ## Откат (если что-то сломается)
 
 ```bash

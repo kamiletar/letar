@@ -7,6 +7,39 @@
 - **Имя приложения:** $ARGUMENTS (например: `my-app`)
 - **Порт:** Найди следующий доступный 3xxx порт
 
+## Эталонные приложения
+
+- **`apps/grandslamcup`** — публичный, минимальный «чистый» шаблон Next.js + Chakra v3 + Prisma/ZenStack + Docker. Бери его за основу для всех новых приложений.
+- **`apps/driving-school`** — приватный submodule, расширенный эталон (Better Auth + Organizations, мультитенантность, ZenStack access policies, формы, темизация). Смотри сюда, когда нужен пример более сложной фичи.
+
+⛔ **`apps/pravda` больше НЕ эталон** — там специфическая логика (документы/законы, MDX-компоненты Article/Penalty/Quote). Не копируй из неё, если только не делаешь похожий контент-сайт.
+
+## Приватные приложения
+
+Если новое приложение **должно быть приватным** (закрытый код, коммерческий продукт, NDA), создавай его как **git submodule** по паттерну `kamiletar/letar-private-<name>`:
+
+```bash
+# 1. Создать пустой приватный репо на GitHub
+gh repo create kamiletar/letar-private-<name> --private --description "<name> app"
+
+# 2. Инициализировать submodule в letar
+mkdir -p apps/<name>
+cd apps/<name>
+git init -b main
+git remote add origin git@github.com:kamiletar/letar-private-<name>.git
+# ... генерация Nx через root (см. ниже)
+git add . && git commit -m "chore: initial scaffold"
+git push -u origin main
+
+# 3. Связать как submodule в letar
+cd C:/web/letar
+git submodule add git@github.com:kamiletar/letar-private-<name>.git apps/<name>
+git add .gitmodules apps/<name>
+git commit -m "chore: add <name> as private submodule"
+```
+
+⚠️ **НЕ добавляй путь submodule в корневой `.gitignore`** — Nx сломается. Подробности: [repo-structure](/.claude/docs/repo-structure.md).
+
 ## Шаги создания
 
 ### 1. Генерация приложения
@@ -128,7 +161,7 @@ export default defineConfig({
 
 ### 7. vitest.setup.tsx
 
-Скопируй из `apps/pravda/vitest.setup.tsx`:
+Скопируй из `apps/grandslamcup/vitest.setup.tsx` (или `apps/driving-school/vitest.setup.ts`):
 
 - TextEncoder/TextDecoder полифилы
 - structuredClone полифил
@@ -137,7 +170,7 @@ export default defineConfig({
 
 ### 8. Тема (src/theme/)
 
-Создай структуру темы по образцу `apps/pravda/src/theme/`:
+Создай структуру темы по образцу `apps/grandslamcup/src/theme/` (минимальный публичный шаблон) или `apps/driving-school/src/theme/` (расширенный с recipes/slot recipes):
 
 - `tokens/colors.ts` — brand, accent, gray, success, warning, error, info
 - `semanticTokens/colors.ts` — bg, fg, border + все палитры с \_light/\_dark
@@ -218,7 +251,7 @@ export default composePlugins(...plugins)(nextConfig)
 
 ### 12. mdx-components.tsx
 
-Скопируй из `apps/pravda/src/mdx-components.tsx`:
+Скопируй из `apps/grandslamcup/src/mdx-components.tsx` (если есть) или `apps/driving-school/src/mdx-components.tsx`:
 
 - Heading, Text, Link, Code компоненты
 - Pre с chakra styling
@@ -232,13 +265,13 @@ export default composePlugins(...plugins)(nextConfig)
 
 ## Версия и стек
 
-| Параметр    | Значение                    |
-| ----------- | --------------------------- |
-| **Версия**  | 0.1.0                       |
-| **Порт**    | <port>                      |
-| **Next.js** | 16.1                        |
-| **React**   | 19                          |
-| **UI**      | Chakra UI v3                |
+| Параметр    | Значение           |
+| ----------- | ------------------ |
+| **Версия**  | 0.1.0              |
+| **Порт**    | <port>             |
+| **Next.js** | 16.1               |
+| **React**   | 19                 |
+| **UI**      | Chakra UI v3       |
 | **Формы**   | @letar/forms + Zod |
 
 ## Быстрый старт

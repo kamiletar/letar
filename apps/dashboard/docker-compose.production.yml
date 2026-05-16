@@ -83,7 +83,7 @@ services:
       DASHBOARD_DATA_DIR: /app/dashboard-data
 
       # Workspace directory on host (for git operations via nsenter)
-      WORKSPACE_DIR: ${WORKSPACE_PATH:-/root/lena}
+      WORKSPACE_DIR: ${WORKSPACE_PATH:-/home/deploy/letar}
 
       # PostgreSQL Database
       DATABASE_URL: postgresql://dashboard_user:${DB_PASSWORD}@dashboard-db:5432/dashboard
@@ -114,19 +114,19 @@ services:
       # Docker socket for container management
       - /var/run/docker.sock:/var/run/docker.sock
       # Workspace for Git operations and deploy scripts
-      - ${WORKSPACE_PATH:-/root/lena}:/workspace:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}:/workspace:ro
       # SSH keys for git remote operations
       - ~/.ssh:/root/.ssh:ro
       # Dashboard data persistence (alerts, audit logs, settings)
       - ./dashboard-data:/app/dashboard-data
       # Backups directory (needs write access)
-      - ${WORKSPACE_PATH:-/root/lena}/backups:/workspace/backups
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/backups:/workspace/backups
       # App secrets (auto-read DB passwords from other apps)
-      - ${WORKSPACE_PATH:-/root/lena}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
-      - ${WORKSPACE_PATH:-/root/lena}/apps/imot/.env.docker:/secrets/imot.env:ro
-      - ${WORKSPACE_PATH:-/root/lena}/apps/mandala/.env.docker:/secrets/mandala.env:ro
-      - ${WORKSPACE_PATH:-/root/lena}/apps/kami/.env.docker:/secrets/kami.env:ro
-      - ${WORKSPACE_PATH:-/root/lena}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/imot/.env.docker:/secrets/imot.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/mandala/.env.docker:/secrets/mandala.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/kami/.env.docker:/secrets/kami.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
 
     networks:
       - premium-network
