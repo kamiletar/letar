@@ -147,17 +147,22 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 			}
 
 			if progress.Progress > 0 {
-				lastBlocks = progress.Progress
-				// Сбрасываем idle timer при каждом прогресс-событии
-				if !idleTimer.Stop() {
-					select {
-					case <-idleTimer.C:
-					default:
-					}
-				}
-				idleTimer.Reset(idleTimeout)
+				// Всегда обновляем callback (для state.json)
 				if cb != nil {
-					cb(lastBlocks)
+					cb(progress.Progress)
+				}
+				// Idle timer сбрасываем ТОЛЬКО при реальном росте блоков.
+				// Если Kubo повторяет одно значение (напр. 5 блоков из кеша) —
+				// таймер не сбрасывается и через 5 мин будет reconnect.
+				if progress.Progress > lastBlocks {
+					lastBlocks = progress.Progress
+					if !idleTimer.Stop() {
+						select {
+						case <-idleTimer.C:
+						default:
+						}
+					}
+					idleTimer.Reset(idleTimeout)
 				}
 			}
 
