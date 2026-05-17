@@ -27,8 +27,9 @@ export interface LetarConsultantOptions {
 /** Создаёт MCP-сервер letar-consultant */
 export function createLetarConsultantServer(options: LetarConsultantOptions = {}): McpServer {
   const {
-    model = process.env['LETAR_CONSULTANT_MODEL'] ?? 'qwen2.5-coder:14b',
-    ollamaUrl = process.env['OLLAMA_URL'] ?? 'http://localhost:11434',
+    model = process.env['LETAR_CONSULTANT_MODEL'] ?? 'gemma-4',
+    // llama.cpp server по умолчанию на 8080; Ollama fallback — 11434
+    ollamaUrl = process.env['OLLAMA_URL'] ?? 'http://localhost:8080',
     qdrantUrl = process.env['QDRANT_URL'] ?? 'http://localhost:6333',
     maxChunks = 10,
     maxTokens = 2048,

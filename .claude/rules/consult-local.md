@@ -51,15 +51,17 @@ mcp__letar - consultant__consultant_status()
 
 ## Технические детали
 
-- **Модель:** `qwen2.5-coder:14b` (≈9 ГБ VRAM, оптимально для 16 ГБ)
+- **Движок:** llama.cpp server (`localhost:8080`) — быстрее Ollama, нативный MXFP4 на Blackwell
+- **Модель:** Gemma 4 26B MXFP4 (~15.5 ГБ, полностью в VRAM RTX 5080, ~62 т/с)
+- **API:** OpenAI-совместимый `/v1/chat/completions` (работает и с Ollama если нужен fallback)
 - **RAG:** Qdrant (`localhost:6333`) + nomic-embed-text через Ollama
-- **Таймаут:** до 2 минут на ответ — это нормально для 14B модели
-- **Fallback:** если Qdrant недоступен — отвечает только на основе конвенций из промпта
-- **Замена модели:** через env `LETAR_CONSULTANT_MODEL=qwen2.5-coder:32b` в `.mcp.json`
+- **Таймаут:** до 2 минут (обычно 10–20 сек на Gemma 4 при полном VRAM)
+- **Запуск сервера:** `.\scripts\llm\start-llm-server.ps1`
+- **Fallback на Ollama:** поменяй `OLLAMA_URL` на `http://localhost:11434` в `.mcp.json`
 
 ## Если не работает
 
-1. `consultant_status` — проверить статус Ollama и Qdrant
-2. `ollama list` — убедиться что модель скачана
-3. `ollama pull qwen2.5-coder:14b` — скачать модель
-4. SocratiCode должен быть запущен для Qdrant (вызови `codebase_status`)
+1. `consultant_status` — статус llama.cpp/Ollama и Qdrant
+2. Убедись что llama-server запущен: `.\scripts\llm\start-llm-server.ps1`
+3. SocratiCode должен быть запущен для Qdrant (`codebase_status`)
+4. Для Ollama fallback: смени порт на 11434 и модель на `qwen2.5-coder:14b` в `.mcp.json`
