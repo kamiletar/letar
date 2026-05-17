@@ -46,12 +46,20 @@ func New(apiURL, authToken string) *Client {
 	}
 }
 
+// scanResult — результат одной итерации чтения NDJSON стрима.
+type scanResult struct {
+	line   []byte // nil если isDone
+	isDone bool
+	err    error
+}
+
 // PinAddWithProgress запускает пиннинг CID и стримит прогресс через callback.
 // Блокирует до завершения пиннинга или ошибки.
 // Возвращает итоговое количество блоков при успехе.
 //
-// Защита от зависания: если Kubo не шлёт прогресс-события дольше idleTimeout —
-// запрос отменяется и возвращается ошибка. Queue.go переподключится.
+// Защита от зависания: scanner работает в горутине, main использует select
+// с idle timer. Когда timer срабатывает — отменяем контекст и закрываем body,
+// что гарантированно разблокирует горутину. Queue.go затем переподключится.
 func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error) {
 	reqURL := fmt.Sprintf("%s/api/v0/pin/add?arg=%s&progress=true",
 		c.apiURL, url.QueryEscape(cid))
@@ -79,59 +87,87 @@ func (c *Client) PinAddWithProgress(cid string, cb ProgressCallback) (int, error
 		return 0, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
-	// Idle timeout: если нет прогресс-событий дольше idleTimeout — Kubo завис.
-	// Явно закрываем resp.Body — это единственный надёжный способ разблокировать
-	// scanner.Scan() при зависшем стриме (context cancel не всегда работает для body read).
-	idleTimer := time.AfterFunc(idleTimeout, func() {
-		cancel()
-		resp.Body.Close()
-	})
-	defer idleTimer.Stop()
+	// Scanner работает в горутине — это позволяет main-горутине использовать select
+	// с idle timer, не блокируясь в scanner.Scan().
+	results := make(chan scanResult)
 
-	// Читаем NDJSON стрим построчно
-	scanner := bufio.NewScanner(resp.Body)
-	// Увеличиваем буфер для длинных строк
-	scanner.Buffer(make([]byte, 0, 64*1024), 256*1024)
+	go func() {
+		scanner := bufio.NewScanner(resp.Body)
+		scanner.Buffer(make([]byte, 0, 64*1024), 256*1024)
+
+		for scanner.Scan() {
+			b := make([]byte, len(scanner.Bytes()))
+			copy(b, scanner.Bytes())
+			select {
+			case results <- scanResult{line: b}:
+			case <-ctx.Done():
+				return
+			}
+		}
+		// Стрим завершён (успешно или ошибка) — отправляем финальный результат.
+		select {
+		case results <- scanResult{isDone: true, err: scanner.Err()}:
+		case <-ctx.Done():
+		}
+	}()
+
+	// Idle timer: если нет прогресса дольше idleTimeout — Kubo завис.
+	// При срабатывании: cancel() + resp.Body.Close() → goroutine разблокируется.
+	idleTimer := time.NewTimer(idleTimeout)
+	defer idleTimer.Stop()
 
 	lastBlocks := 0
 
-	for scanner.Scan() {
-		line := scanner.Bytes()
-		if len(line) == 0 {
-			continue
-		}
-
-		var progress PinProgress
-		if err := json.Unmarshal(line, &progress); err != nil {
-			continue // Пропускаем невалидные строки
-		}
-
-		if progress.Pins != nil && len(progress.Pins) > 0 {
-			// Пиннинг завершён
-			if cb != nil {
-				cb(lastBlocks)
+	for {
+		select {
+		case r := <-results:
+			if r.isDone {
+				if r.err != nil {
+					return lastBlocks, fmt.Errorf("чтение стрима: %w", r.err)
+				}
+				// Стрим закрылся без финального Pins — возможно Kubo рестарт
+				return lastBlocks, fmt.Errorf("стрим закрылся без подтверждения пиннинга")
 			}
-			return lastBlocks, nil
-		}
 
-		if progress.Progress > 0 {
-			lastBlocks = progress.Progress
-			idleTimer.Reset(idleTimeout) // сбрасываем таймер при каждом прогрессе
-			if cb != nil {
-				cb(lastBlocks)
+			if len(r.line) == 0 {
+				continue
 			}
-		}
-	}
 
-	if err := scanner.Err(); err != nil {
-		if ctx.Err() != nil {
+			var progress PinProgress
+			if err := json.Unmarshal(r.line, &progress); err != nil {
+				continue // пропускаем невалидные строки
+			}
+
+			if progress.Pins != nil && len(progress.Pins) > 0 {
+				// Пиннинг завершён успешно
+				if cb != nil {
+					cb(lastBlocks)
+				}
+				return lastBlocks, nil
+			}
+
+			if progress.Progress > 0 {
+				lastBlocks = progress.Progress
+				// Сбрасываем idle timer при каждом прогресс-событии
+				if !idleTimer.Stop() {
+					select {
+					case <-idleTimer.C:
+					default:
+					}
+				}
+				idleTimer.Reset(idleTimeout)
+				if cb != nil {
+					cb(lastBlocks)
+				}
+			}
+
+		case <-idleTimer.C:
+			// Нет прогресса дольше idleTimeout — Kubo завис
+			cancel()        // сигнал горутине через ctx.Done()
+			resp.Body.Close() // разблокировать scanner.Scan() в горутине
 			return lastBlocks, fmt.Errorf("idle timeout: нет прогресса %s", idleTimeout)
 		}
-		return lastBlocks, fmt.Errorf("чтение стрима: %w", err)
 	}
-
-	// Стрим закрылся без финального Pins — возможно Kubo рестарт
-	return lastBlocks, fmt.Errorf("стрим закрылся без подтверждения пиннинга")
 }
 
 // PinRm удаляет CID из пиннинга
