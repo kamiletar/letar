@@ -1,5 +1,120 @@
 # Кубок Большого Слэма (grandslamcup) — ТЗ
 
+## Фаза 14 — Telegram Mini App
+
+> Источник: запрос 2026-05-17. Нативное приложение внутри Telegram — без установки, без App Store, открывается одной кнопкой в боте или по ссылке в канале.
+
+### Контекст и мотивация
+
+Telegram Mini App (TMA) — это веб-приложение, запускаемое внутри Telegram как нативный экран. Пользователь не покидает мессенджер. Telegram предоставляет `window.Telegram.WebApp` API с данными пользователя, платёжной системой, хаптик-фидбэком и нативными кнопками.
+
+**Почему TMA для КБС:**
+
+1. **Нулевой барьер входа** — зрители и поэты уже в Telegram. Ни APK, ни App Store, ни установки.
+2. **Живая аудитория** — публикация результата матча в канал + кнопка «Открыть» → TMA с live-счётом.
+3. **Жюри без регистрации** — судья получает QR или deep link, открывает TMA, голосует.
+4. **Зрительское голосование** — прямо из TMA во время матча.
+5. **Анонсы матчей** → кнопка «Добавить в календарь» → [ics-файл из TMA].
+
+### Стратегия реализации
+
+**Этап 1 (MVP, 1–2 недели):** TMA = обёртка над существующим веб-приложением через `<iframe>` / redirect. Боту добавляется кнопка `web_app` в inline keyboard. Пользователь авторизован через `initData` (подписанные данные Telegram).
+
+**Этап 2 (1 мес.):** Специализированные экраны, оптимизированные под TMA UX — без хедера, с нативной кнопкой «Назад», тёмная тема из Telegram, Haptic Feedback при голосовании.
+
+**Технологии:**
+
+- [`@tma.js/sdk`](https://docs.telegram-mini-apps.com/) или нативный `window.Telegram.WebApp`
+- Next.js App Router (те же роуты, другой layout без шапки)
+- Авторизация через `initData.hash` + HMAC-верификация на бекенде (без Ключницы)
+
+### 14.1 Роуты TMA (отдельная route-группа)
+
+```
+src/app/(tma)/
+├── layout.tsx                  # Без шапки, Telegram цветовая схема, нативная кнопка Back
+├── page.tsx                    # TMA home: ближайший матч / турнирная таблица
+├── match/[id]/
+│   ├── page.tsx                # Live-счёт матча
+│   └── vote/page.tsx           # Зрительское голосование
+├── standings/page.tsx          # Турнирная таблица
+├── player/[slug]/page.tsx      # Профиль поэта (упрощённый)
+└── schedule/page.tsx           # Расписание + добавить в календарь
+```
+
+### 14.2 Авторизация через Telegram initData
+
+```typescript
+// src/lib/tma-auth.ts
+import crypto from 'crypto'
+
+export function verifyTelegramInitData(initData: string, botToken: string): boolean {
+  const params = new URLSearchParams(initData)
+  const hash = params.get('hash')!
+  params.delete('hash')
+  const dataCheckString = [...params.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('\n')
+  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
+  const expectedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+  return hash === expectedHash
+}
+```
+
+После верификации — ищем `User` по `telegramId` или создаём нового.
+
+### 14.3 Telegram Bot inline keyboard
+
+При отправке анонса матча в канал добавляется `InlineKeyboardButton` с `web_app`:
+
+```json
+{
+  "text": "📊 Live-счёт",
+  "web_app": { "url": "https://grandslamcup.letar.best/tma/match/ID" }
+}
+```
+
+При отправке результата матча:
+
+```json
+[
+  { "text": "🏆 Итоги матча", "web_app": { "url": "/tma/match/ID" } },
+  { "text": "👤 Профили поэтов", "web_app": { "url": "/tma/standings" } }
+]
+```
+
+### 14.4 Haptic Feedback и нативные фичи
+
+```typescript
+import { useHapticFeedback } from '@tma.js/sdk-react'
+
+// При зрительском голосовании
+const haptic = useHapticFeedback()
+haptic.impactOccurred('medium') // вибрация при нажатии «Голосовать»
+haptic.notificationOccurred('success') // при подтверждении голоса
+```
+
+### 14.5 Модели БД (изменения)
+
+- `User` — добавить `telegramId String? @unique`, `telegramUsername String?`
+- `TelegramConfig` — добавить `tmaEnabled Boolean @default(false)`, `tmaUrl String?`
+
+### 14.6 Чеклист
+
+- [ ] Фаза 1: route-группа `(tma)/` + layout без шапки
+- [ ] Фаза 2: авторизация через `initData` — `verifyTelegramInitData` + `User.telegramId`
+- [ ] Фаза 3: TMA Home — ближайший матч + турнирная таблица
+- [ ] Фаза 4: Live-страница матча `/tma/match/[id]` — live-счёт через SSE
+- [ ] Фаза 5: Зрительское голосование `/tma/match/[id]/vote`
+- [ ] Фаза 6: Расписание `/tma/schedule` + скачать .ics
+- [ ] Фаза 7: Inline кнопки в боте при постинге матча
+- [ ] Фаза 8: Haptic Feedback при голосовании
+- [ ] Фаза 9: Профиль поэта `/tma/player/[slug]` — биография + стихи
+- [ ] Фаза 10: Регистрация судьи через TMA deep link (вместо QR)
+
+---
+
 ## Фаза 13 — Telegram-автопостинг и напоминания
 
 > Источник: запрос 2026-05-17. Расширение существующей Telegram-интеграции до публичного канала и персональных напоминаний.
