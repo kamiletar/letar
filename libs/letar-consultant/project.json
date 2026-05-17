@@ -1,0 +1,92 @@
+{
+  "name": "@letar/letar-consultant",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/letar-consultant/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:tool"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx tsx src/cli.ts",
+        "cwd": "libs/letar-consultant"
+      },
+      "metadata": {
+        "description": "Run letar-consultant MCP server via stdio",
+        "technologies": ["mcp"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/letar-consultant"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "lintFilePatterns": ["libs/letar-consultant/**/*.{ts,tsx}"]
+      },
+      "metadata": {
+        "description": "Run ESLint on letar-consultant library",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/letar-consultant"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/letar-consultant"
+      },
+      "dependsOn": ["^typecheck:tsgo"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library with tsgo (faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "passWithNoTests": true
+      },
+      "metadata": {
+        "description": "Run unit tests",
+        "technologies": ["vitest"]
+      }
+    }
+  }
+}

@@ -47,9 +47,11 @@
 
 **Окружение:** Windows (нативный), `nx` и `bun` глобальные (❌ НЕ `bunx nx`/`npx nx`). При передаче аргументов в underlying tool: `nx e2e app-e2e -- --project=chromium`
 
-**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, inkeepMcp, context7, chrome-devtools, sequential-thinking, context-mode, agent-mail, **postgres-\*** (driving-school, kami, premium-rosstil, grandslamcup), **prisma**, **socraticode**. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
+**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, inkeepMcp, context7, chrome-devtools, sequential-thinking, context-mode, agent-mail, **postgres-\*** (driving-school, kami, premium-rosstil, grandslamcup), **prisma**, **socraticode**, **letar-consultant**. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
 
 **SocratiCode** — MCP-сервер семантического поиска по кодовой базе (Qdrant + Ollama + ast-grep). При первом запуске поднимает Docker-контейнеры (~5 мин). После: «Проиндексируй кодовую базу» → спрашивай «What is the codebase index status?». Контекстные артефакты (схемы БД, docs) — [`.socraticodecontextartifacts.json`](/.socraticodecontextartifacts.json). **Правило использования:** [socraticode-first](/.claude/rules/socraticode-first.md) — когда и какой инструмент вызывать (codebase_search vs codebase_context_search vs codebase_symbol vs codebase_impact). Используй вместо grep для семантического поиска.
+
+**letar-consultant** — локальный AI-консультант (qwen2.5-coder:14b @ Ollama + RAG). Даёт «вторую голову» для синтеза архитектурных решений по letar. Инструменты: `consult_letar({ question, mode, chunks })`, `consultant_status`. **Правило использования:** [consult-local](/.claude/rules/consult-local.md). Вызывай когда нужна рекомендация/объяснение поверх данных из SocratiCode.
 
 **⚠️ WebFetch заблокирован context-mode:** хук `pretooluse.mjs` блокирует `WebFetch` и перенаправляет на `mcp__context-mode__fetch_and_index(url, source)` + `mcp__context-mode__search(queries)`. Используй именно эти инструменты для загрузки внешних URL.
 
