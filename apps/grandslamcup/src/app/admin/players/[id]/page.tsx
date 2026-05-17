@@ -48,6 +48,15 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
       },
       performances: { select: { id: true, totalScore: true } },
       poems: { select: { id: true, title: true, published: true } },
+      albums: {
+        orderBy: { createdAt: 'desc' as const },
+        select: {
+          id: true,
+          title: true,
+          publishedAt: true,
+          _count: { select: { albumPoems: true } },
+        },
+      },
       suspensions: { where: { active: true }, select: { id: true, reason: true, matchesLeft: true } },
     },
   })
@@ -176,6 +185,32 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
 
       {/* Привязка аккаунта */}
       <PlayerLinkSection playerId={player.id} user={player.user} pendingUser={pendingUser} />
+
+      {/* Альбомы */}
+      {player.albums.length > 0 && (
+        <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted">
+          <Text fontSize="sm" fontWeight="semibold" mb={3}>
+            Альбомы ({player.albums.length})
+          </Text>
+          <VStack gap={2} align="stretch">
+            {player.albums.map((album) => (
+              <Flex key={album.id} justify="space-between" align="center" py={1}>
+                <Text fontSize="sm" fontWeight="medium">
+                  {album.title}
+                </Text>
+                <HStack gap={2}>
+                  <Text fontSize="xs" color="fg.muted">
+                    {album._count.albumPoems} стих.
+                  </Text>
+                  <Badge size="sm" colorPalette={album.publishedAt ? 'green' : 'gray'}>
+                    {album.publishedAt ? 'Опубликован' : 'Черновик'}
+                  </Badge>
+                </HStack>
+              </Flex>
+            ))}
+          </VStack>
+        </Box>
+      )}
 
       {/* История команд */}
       <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted">

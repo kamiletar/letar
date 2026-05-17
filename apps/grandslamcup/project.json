@@ -69,6 +69,17 @@
         "technologies": ["prisma"]
       }
     },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run prisma/seed.ts",
+        "cwd": "apps/grandslamcup"
+      },
+      "metadata": {
+        "description": "Seed database with initial data",
+        "technologies": ["prisma"]
+      }
+    },
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {

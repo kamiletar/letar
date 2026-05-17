@@ -17,6 +17,7 @@ import { notFound, redirect } from 'next/navigation'
 import { LuUserRound } from 'react-icons/lu'
 
 import { PlayerAllPerformances } from './_components/player-all-performances'
+import { PlayerAlbumsList } from './_components/player-albums-list'
 import { PlayerCareerTimeline } from './_components/player-career-timeline'
 import { PlayerOpponentHistory } from './_components/player-opponent-history'
 import { PlayerPoemsList } from './_components/player-poems-list'
@@ -86,6 +87,24 @@ export default async function PlayerPage({ params }: { params: Params }) {
         orderBy: { createdAt: 'desc' },
         select: { id: true, title: true, slug: true },
       },
+      albums: {
+        where: { publishedAt: { not: null } },
+        orderBy: { publishedAt: 'desc' },
+        take: 4,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          coverImage: true,
+          publishedAt: true,
+          _count: { select: { albumPoems: true } },
+        },
+      },
+      _count: {
+        select: {
+          albums: { where: { publishedAt: { not: null } } },
+        },
+      },
     },
   })
 
@@ -113,6 +132,15 @@ export default async function PlayerPage({ params }: { params: Params }) {
   const currentTeam = player.playerTeamSeasons[0]
   const currentSeasonId = currentTeam?.teamSeason.season.id
   const stats = await computePlayerStats(player.performances, currentSeasonId, player.id)
+
+  // Стихи без альбома — для плитки «Разное»
+  const miscPoemsCount = await prisma.poem.count({
+    where: {
+      playerId: player.id,
+      published: true,
+      albumPoems: { none: {} },
+    },
+  })
 
   return (
     <VStack gap={8} align="stretch">
@@ -248,6 +276,15 @@ export default async function PlayerPage({ params }: { params: Params }) {
 
       {/* Все выступления */}
       <PlayerAllPerformances perfs={player.performances} citySlug={citySlug} />
+
+      {/* Альбомы стихов */}
+      <PlayerAlbumsList
+        albums={player.albums}
+        miscPoemsCount={miscPoemsCount}
+        totalAlbumsCount={player._count.albums}
+        citySlug={citySlug}
+        playerSlug={slug}
+      />
 
       {/* Стихи */}
       <PlayerPoemsList poems={player.poems} citySlug={citySlug} playerSlug={slug} />

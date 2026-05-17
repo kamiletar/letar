@@ -1,5 +1,1581 @@
 # Кубок Большого Слэма (grandslamcup) — ТЗ
 
+## Фаза 13 — Telegram-автопостинг и напоминания
+
+> Источник: запрос 2026-05-17. Расширение существующей Telegram-интеграции до публичного канала и персональных напоминаний.
+
+### Контекст
+
+Telegram-интеграция уже частично работает: `TelegramConfig` / `TelegramMessage` / `TelegramReaction` модели в БД, бот через `tg-proxy.letar.best`, `autoResult` / `autoHalfTime` / `autoAnnouncement` флаги.
+
+**Чего не хватает:**
+
+1. **Автопостинг в публичный канал** (@bigpoetryslam_msk и аналоги) — результаты матчей, анонсы турниров, публикация стихов поэта.
+2. **Персональные напоминания** — за 2 ч / 24 ч до матча поэту в личку Telegram (бот уже умеет писать личкой через привязку `User.telegramId`).
+3. **Напоминания о тренировках** — за 2 ч / 24 ч до тренировки (Фаза 10).
+4. **Команда /subscribe** в боте — пользователь подписывается на нужные уведомления.
+
+### Задачи (чеклист)
+
+- [ ] Добавить `telegramId String?` в `User` (или через `TelegramLink` модель)
+- [ ] Добавить `channelId String?` в `TelegramConfig` для публичного канала
+- [ ] Команда `/start` в боте — привязка `telegramId` к `User`
+- [ ] Команда `/subscribe` — меню выбора уведомлений
+- [ ] Планировщик напоминаний (cron через Nx scheduled task / pg_cron)
+- [ ] Автопостинг публикации стихов в канал (хук после `publishedAt != null`)
+- [ ] Автопостинг анонса матча за 24 ч
+- [ ] Автопостинг итогов матча (уже частично есть через `autoResult`)
+
+---
+
+## Фаза 12 — Android-приложение для поэтов, тренеров и организаторов
+
+> Источник: запрос 2026-05-17. Нативное приложение под Android для ключевых ролей платформы.
+
+### Контекст и мотивация
+
+PWA уже работает на смартфоне — судья голосует, зритель смотрит. Но у активных ролей (поэт, тренер, организатор) есть проблемы, которые PWA закрывает плохо:
+
+1. **Push-уведомления** на Android в PWA через Chrome работают нестабильно (требуют разрешения, теряются после рестарта браузера, иногда не доходят на MIUI/EMUI).
+2. **Иконка на главном экране** в PWA — это «всё-таки браузер», не нативный опыт.
+3. **Камера и галерея** — загрузка фото/видео матча через web-form неудобна, нужен системный picker.
+4. **Background-загрузка** видео матча — нельзя сделать в PWA.
+5. **Biometric auth** (отпечаток, Face Unlock) для повторного входа — нет в PWA.
+6. **Deep links** (открыть конкретный матч из Telegram) — нативно работает лучше.
+7. **Магазины приложений** — RuStore и Google Play дают доверие и канал распространения.
+
+### Стратегия: Capacitor поверх существующего PWA, затем по необходимости — нативные модули
+
+**Этап 1 (MVP, 2–3 недели):** **Capacitor 6** оборачивает уже существующий PWA в нативное приложение. 95% UI остаётся тем же — это веб-приложение в `WebView` с доступом к нативным API через Capacitor plugins.
+
+**Этап 2 (по мере необходимости, 1–2 мес.):** заменяем критичные экраны на нативные **React Native + Expo** компоненты (например, экран жюри во время матча для гарантированной отзывчивости).
+
+**Не делаем сразу полностью нативное** — это +3 месяца разработки и поддержка двух кодовых баз. Capacitor закрывает 90% потребностей за 10% усилий.
+
+### Обязательная функциональность MVP
+
+> Это ядро приложения — без этих фич приложение не выпускаем в магазины.
+
+#### 1. Чаты (полная интеграция Фазы 9)
+
+- Все 10 типов чатов работают в нативном приложении: PRIVATE, TEAM, MATCH, CITY, GENERAL, COACHES, ORGANIZERS, TEAM_ORGANIZERS, PLATFORM_FEEDBACK, DEV_SUPPORT.
+- **Список чатов** на главном экране приложения (вкладка «Чаты» в bottom-tab-navigation).
+- **Badge с количеством непрочитанных** на иконке приложения (Android: `setNumber` через `@capacitor/badge` plugin).
+- **Real-time доставка** через Socket.IO (тот же endpoint `/api/socket` что и в web) + SSE-fallback при разрыве.
+- **Индикатор «набирает текст»**, онлайн-статус собеседника.
+- **Реакции эмодзи, цитирование, редактирование, удаление** своих сообщений.
+- **Прикрепление файлов** через системный picker (`@capacitor/filesystem` + `@capacitor/camera`) — фото с камеры, файл из галереи.
+- **Сохранение черновика** сообщения при сворачивании приложения (Android `onPause` → localStorage).
+- **Inline-ответ на push** (Android Direct Reply API) — можно ответить из шторки уведомлений, не открывая приложение.
+
+#### 2. Push-уведомления (FCM) — обязательные категории
+
+| Категория                | Триггер                                                      | Звук / вибрация     | Канал FCM                    |
+| ------------------------ | ------------------------------------------------------------ | ------------------- | ---------------------------- |
+| `CHAT_MESSAGE`           | Новое сообщение в любом из моих чатов                        | default + vibration | `chats`                      |
+| `CHAT_MENTION`           | Меня упомянули `@username` в групповом чате                  | важный, дольше      | `mentions` (high importance) |
+| `TRAINING_INVITE`        | Тренер создал тренировку, мне нужно ответить                 | default             | `trainings`                  |
+| `TRAINING_REMINDER`      | Напоминание за 24 ч / 2 ч до тренировки                      | default             | `trainings`                  |
+| `TRAINING_CANCELLED`     | Тренировка отменена                                          | важный              | `trainings`                  |
+| `MATCH_REMINDER`         | За 2 ч до начала моего матча                                 | важный              | `matches` (high importance)  |
+| `MATCH_LINEUP_PUBLISHED` | Тренер опубликовал линап на матч (я в составе / на скамейке) | default             | `matches`                    |
+| `MATCH_RESULT`           | Матч завершился, итоги доступны                              | default             | `matches`                    |
+| `ROSTER_APPLICATION`     | Тренер: подана заявка на нового игрока / трансфер            | default             | `roster`                     |
+| `ROSTER_APPROVED`        | Игрок: моя заявка одобрена админом                           | default             | `roster`                     |
+| `ROSTER_REJECTED`        | Игрок: моя заявка отклонена                                  | важный              | `roster`                     |
+| `VIDEO_TAG`              | Меня отметили в видео                                        | default             | `social`                     |
+| `POEM_PUBLISHED`         | Подписчики: новый стих у поэта (после Фазы социального)      | default             | `social`                     |
+| `MODERATION_PENDING`     | Модератор / админ: новая жалоба / заявка ждёт                | default             | `moderation`                 |
+| `FRIENDLY_MATCH_REQUEST` | Тренер: вызов на товарищеский матч                           | default             | `matches`                    |
+| `SYSTEM_ANNOUNCEMENT`    | Системные объявления от админов (новый сезон, обновление)    | default             | `system`                     |
+
+**Каналы FCM** (Android 8+ Notification Channels) — пользователь в системных настройках Android может отдельно отключить «matches», но оставить «chats». Каждый канал имеет настраиваемую важность, звук, вибрацию, badge.
+
+**Настройки в приложении** (`/settings/notifications`):
+
+- Глобальный toggle «Включить уведомления»
+- Per-channel toggles: чаты / тренировки / матчи / состав / соц / модерация / система
+- Тихие часы (do not disturb) с указанием диапазона `22:00–08:00`
+- Опция «Только упоминания» для CITY и GENERAL чатов (по умолчанию выключено для шумных чатов)
+
+**Payload deep link** — каждое уведомление содержит `data.url` (например `/moskva/matches/{id}` или `/chats/{chatId}`), клик открывает нужный экран сразу.
+
+#### 3. Уведомления о тренировках — отдельный фокус
+
+Эта часть особенно важна, потому что тренировка без явки = выброшенный вечер тренера:
+
+- **При создании тренировки** — push всем игрокам команды (`TRAINING_INVITE`) с CTA-кнопками прямо в шторке: «✅ Иду», «❓ Может быть», «❌ Не приду». Ответ через Android Action Buttons → отправляется на `/api/training-rsvp` без открытия приложения.
+- **За 24 часа** — `TRAINING_REMINDER` с количеством подтвердивших: «Завтра 19:00 в Циферблате. Подтвердили 6 из 8».
+- **За 2 часа** — повторный `TRAINING_REMINDER`: «Через 2 часа в Циферблате. Адрес: Покровка 12. Открыть в Яндекс.Картах».
+- **Отмена** — `TRAINING_CANCELLED` высоким приоритетом со звуком, обходит DND.
+- **Изменение даты / места** — отдельный push с пометкой «📍 Место изменено» / «📅 Время изменено».
+
+#### 4. Уведомления о матчах
+
+- **За день до матча** — `MATCH_REMINDER`: «Завтра в 20:00 матч Кашалот vs Шатуны на Слова. Адрес. Открыть карту».
+- **При публикации линапа** — `MATCH_LINEUP_PUBLISHED`: «Ты в стартовом составе на матч / на скамейке / не вызван».
+- **В день матча, за 2 часа** — повторно с прогнозом погоды (опционально) и быстрой ссылкой на live-страницу.
+- **Когда матч начался** — `MATCH_STARTED` (опционально): для зрителей, подписанных на конкретные команды.
+- **Когда матч окончен** — `MATCH_RESULT`: «Шатуны 24:21 Кашалот. Лучший поэт — Иван Симак».
+
+#### 5. Чат-функциональность внутри приложения должна быть на уровне Telegram
+
+Поскольку пользователи привыкли к Telegram, чаты в нашем приложении не должны казаться «уроком веба»:
+
+- Свайп влево по сообщению — Reply
+- Long-press — контекстное меню (React, Edit, Delete, Copy)
+- Pull-down в чате — обновление + закрытие
+- Прокрутка к новому сообщению с анимацией
+- Inline-предпросмотр ссылок на матчи / поэтов / стихи (как Telegram raw превью)
+- Pinned message в начале чата (важные объявления оргкомитета)
+- Поиск по сообщениям (`/chats/[id]/search`)
+- Прыжок к цитированному сообщению по клику
+
+### Структура в монорепо
+
+```
+apps/grandslamcup-android/                    [НОВОЕ приложение в Nx]
+├── android/                                  # Android Studio проект (Capacitor sync)
+│   ├── app/build.gradle
+│   ├── app/src/main/AndroidManifest.xml
+│   └── ...
+├── src/                                      # Capacitor wrapper code (минимум)
+│   ├── main.ts                               # entry — открывает WebView на grandslamcup.letar.best
+│   └── plugins/                              # bridges для нативных вызовов
+├── capacitor.config.ts
+├── package.json
+└── project.json                              # Nx target: build-apk, run-android, sync
+```
+
+**Проект подключается к Nx** через `project.json` с целями `build`, `sync`, `run-android`, `build-apk-release`. Зависит от `grandslamcup` (web-приложение собирается первым).
+
+### Capacitor-плагины
+
+| Плагин                            | Назначение                                                             |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `@capacitor/push-notifications`   | FCM push через Firebase + интеграция с существующей `PushSubscription` |
+| `@capacitor/local-notifications`  | Напоминания о тренировке за 24 ч / 2 ч (cron на устройстве)            |
+| `@capacitor/camera`               | Фото матча, обложка стиха, аватар                                      |
+| `@capacitor/filesystem`           | Чтение / запись uploads                                                |
+| `@capacitor/network`              | Индикатор офлайн в чатах                                               |
+| `@capacitor/app`                  | Deep links + lifecycle (background / foreground)                       |
+| `@capacitor/browser`              | Открытие внешних ссылок (Telegram-каналы, доноры)                      |
+| `@capacitor/haptics`              | Вибрация: таймер выступления, новое сообщение                          |
+| `@capacitor/status-bar`           | Тёмная статус-бар в полноэкранном режиме матча                         |
+| `@capacitor/share`                | Поделиться матчем / видео / стихом через системный share-sheet         |
+| `@capacitor-community/biometric`  | Отпечаток / Face Unlock для быстрого входа                             |
+| `capacitor-secure-storage-plugin` | Хранение токенов Ключницы в Android Keystore                           |
+| `@capacitor/badge`                | Цифра непрочитанных на иконке приложения (chat + invitations)          |
+| `@capacitor-community/keep-awake` | Не выключать экран на live-странице матча (для скорера)                |
+
+### Аутентификация
+
+**Поток:**
+
+1. Первый запуск → WebView открывает `https://grandslamcup.letar.best/auth/mobile-login?app=android`
+2. Cookie-сессия Better Auth → перехватывается в Capacitor через `WebView.shouldOverrideUrlLoading`
+3. JWT-токен / session cookie сохраняется в **Android Keystore** через secure-storage
+4. При повторном запуске → biometric prompt (опционально) → восстановление сессии
+5. Refresh token через существующий Ключница-flow
+
+**Бэкенд-эндпоинт** (новый):
+
+- `apps/grandslamcup/src/app/api/auth/mobile-session/route.ts` — выдаёт session-токен для долгоживущего хранения на устройстве (TTL 90 дней vs 30 дней web).
+
+### Push-уведомления (FCM)
+
+**Архитектура:**
+
+1. Android: при запуске Capacitor запрашивает FCM-токен → отправляет на `POST /api/push/register-fcm` с user_id.
+2. Бэкенд расширяет существующую `PushSubscription` новыми полями: `fcmToken: String?`, `platform: Enum(WEB | ANDROID | IOS)`.
+3. Существующая логика рассылки (`chat-notifications.ts`, `training-notifications.ts`, и т. д.) добавляет ветку: если `platform == ANDROID`, использовать **FCM v1 API** (Firebase Admin SDK на сервере), иначе — Web Push Protocol.
+
+**Категории уведомлений:**
+
+- Новое сообщение в чате
+- Приглашение на тренировку / RSVP-ответ
+- Изменение состава команды / трансфер одобрен
+- Скоро начало матча (за 2 часа)
+- Тебя отметили в видео
+- Новая жалоба (для модератора)
+
+### Роли и сценарии использования
+
+#### Поэт (Player)
+
+- Профиль, биография, стихи (управление как в `/poet/...`)
+- Чаты (PRIVATE, TEAM, MATCH, CITY) с push-уведомлениями
+- Доступность для тренировок — drag-to-select календарь
+- RSVP на тренировку одним свайпом
+- Загрузка своих видео из галереи (camera + filesystem plugin)
+- Push: «Ваш стих опубликован», «Вас отметили в видео», «Новое приглашение»
+
+#### Тренер (Coach)
+
+- Дашборд команды
+- Линап на матч с drag-and-drop (адаптация под touch)
+- Заявки на состав / трансферы
+- Тепловая карта доступности команды → план тренировки
+- Чаты команды, оргкомитета, тренеров платформы
+- Push: «Новая заявка от игрока», «Игрок ответил на тренировку», «Скоро матч»
+
+#### Организатор города
+
+- Модерация заявок и товарищеских матчей
+- Аналитика судейства
+- Управление новостями / донорами своего города
+- Чаты ORGANIZERS, TEAM_ORGANIZERS
+- Push: «Новая жалоба», «Заявка ждёт модерации», «Конфликт расписания»
+
+### Что НЕ делаем в Android-приложении
+
+- ⛔ **Экран жюри** на native — он критично-чувствительный к лагу, на этап 2. Сейчас работает через PWA в браузере судьи (5 минут в зале — нормально).
+- ⛔ **Экран скорера и ведущего** — это планшет/ноутбук, не телефон. Оставляем веб.
+- ⛔ **Экран проектора** — большой экран, не имеет смысла на телефоне.
+- ⛔ **iOS-версия** — отдельная фаза. iOS требует Apple Developer Account ($99/год), Mac для билда, особые сертификаты. Делаем после Android, когда есть фидбек.
+
+### Сборка и распространение
+
+#### CI/CD
+
+**Файл:** `.github/workflows/android-build.yml`
+
+- Trigger: `git tag grandslamcup-android-v*`
+- Шаги: `bun install` → `nx build grandslamcup-android` → `nx sync grandslamcup-android` → `cd android && ./gradlew assembleRelease` → подпись release-keystore (хранится в GitHub Secrets) → upload AAB к Release.
+- Keystore: `gs-cup.keystore`, пароли в `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS_PASSWORD`.
+
+#### Магазины
+
+| Магазин         | Приоритет | Особенности                                                              |
+| --------------- | --------- | ------------------------------------------------------------------------ |
+| **RuStore**     | 🔴 P0     | Главный для РФ. Бесплатно, без модерации Google.                         |
+| **Google Play** | 🟡 P1     | Доступен из РФ, но требует $25 единоразово + поддерживает Google Sign-In |
+| **APK с сайта** | 🟢 P2     | Прямая ссылка на release APK для тех, у кого нет RuStore                 |
+| **F-Droid**     | 🟢 P3     | Если будут open-source-фрагменты (плагины Capacitor)                     |
+
+### Глубокие ссылки (Deep Links)
+
+**App Links** (Android):
+
+- `https://grandslamcup.letar.best/moskva/matches/cmmnk...` → открывается в приложении (а не в браузере), если установлено
+- `assetlinks.json` хостится в `public/.well-known/assetlinks.json` для верификации Google
+- Поддерживаемые роуты:
+  - `/[city]/matches/[id]` — страница матча
+  - `/[city]/players/[slug]` — профиль поэта
+  - `/[city]/teams/[slug]` — профиль команды
+  - `/coach/trainings/[id]` — карточка тренировки
+  - `/poet/availability` — мой календарь
+
+### UX-адаптации для нативного приложения
+
+- **Splash screen** — Capacitor splash plugin с лого GS Cup, до загрузки WebView
+- **Системный back button** — обработка через `App.addListener('backButton')`: если есть история навигации — назад, иначе — exit prompt
+- **Полноэкранный режим** на странице live-проектора (`status-bar.hide()`)
+- **Hardware vibration** на жёлтой / красной карточке скорера (если он на телефоне)
+- **Жесты pull-to-refresh** в списке чатов и матчей (через web — `react-pull-to-refresh` или native через `@capacitor/refresher`)
+- **Тёмная тема** автоматически следует системной (Capacitor `@capacitor/status-bar` + Chakra UI dark mode)
+
+### Безопасность
+
+- HTTPS-only (запрещаем cleartext через `usesCleartextTraffic="false"`)
+- Certificate pinning к `letar.best` (Capacitor HTTP plugin)
+- Хранение токенов только в Android Keystore (никогда в SharedPreferences plain)
+- Обфускация Java-кода через R8 (`minifyEnabled = true`)
+- `allowBackup="false"` — запрет извлечения данных приложения через ADB
+
+### Метрики и крашрепорты
+
+- **Firebase Crashlytics** для нативных крашей
+- **Umami** уже работает для веб-аналитики через WebView — продолжает работать
+- Дополнительный custom event `app_launched` с разрезом по версии приложения
+
+### Задачи (чек-лист)
+
+#### Фаза 1: Создание Nx-проекта
+
+- [ ] `apps/grandslamcup-android/` со структурой Capacitor
+- [ ] `capacitor.config.ts` с `webDir: '../grandslamcup/.next/standalone/public'` или `url: 'https://grandslamcup.letar.best'` (live-mode для MVP)
+- [ ] `project.json` с целями `sync`, `run-android`, `build-apk-release`
+- [ ] Зависимость от `grandslamcup` в `implicitDependencies`
+
+#### Фаза 2: Базовые плагины Capacitor
+
+- [ ] Установить и зарегистрировать 12 плагинов
+- [ ] Splash screen с лого GS Cup
+- [ ] Status bar / системный back button
+
+#### Фаза 3: Push (FCM)
+
+- [ ] Создать Firebase project, скачать `google-services.json`
+- [ ] Расширить модель `PushSubscription` полями `fcmToken`, `platform`
+- [ ] `/api/push/register-fcm` endpoint
+- [ ] Расширить рассылку в `chat-notifications.ts` / `training-notifications.ts` с веткой FCM
+- [ ] Категории уведомлений + deep link payload
+
+#### Фаза 4: Аутентификация
+
+- [ ] `/api/auth/mobile-session` endpoint
+- [ ] Перехват redirect в WebView для сохранения cookie/JWT в Keystore
+- [ ] Biometric prompt при повторном запуске (опционально, через `@capacitor-community/biometric`)
+
+#### Фаза 5: Deep links
+
+- [ ] `assetlinks.json` в `public/.well-known/`
+- [ ] `intent-filter` в AndroidManifest.xml для матчей / поэтов / тренировок
+- [ ] Тестирование через `adb shell am start -W -a android.intent.action.VIEW -d "https://grandslamcup.letar.best/moskva/matches/..." com.letar.grandslamcup`
+
+#### Фаза 6: Нативные API в существующих экранах
+
+- [ ] Замена `<input type="file">` на `Camera.getPhoto()` где это выгодно (фото матча, аватар)
+- [ ] `App.addListener('backButton')` обработчик
+- [ ] Vibration на жёлтой/красной карточке скорера
+- [ ] Системный share-sheet в карточках матчей / стихов / видео
+
+#### Фаза 7: CI/CD
+
+- [ ] GitHub Actions `.github/workflows/android-build.yml`
+- [ ] Release keystore (вне репо, в Secrets)
+- [ ] Автоматический upload AAB при теге `grandslamcup-android-v*`
+
+#### Фаза 8: Распространение
+
+- [ ] Регистрация в **RuStore** (P0)
+- [ ] Скриншоты, описание, политика конфиденциальности
+- [ ] Опционально: Google Play Console (P1)
+- [ ] Страница `/download-android` на сайте с QR-кодом + ссылками на магазины
+
+#### Фаза 9: Документация и поддержка
+
+- [ ] Раздел в PRESENTATION.md «Android-приложение»
+- [ ] README в `apps/grandslamcup-android/` с инструкцией локальной сборки
+- [ ] FAQ для пользователей: «не приходят push», «как обновиться», «как сменить аккаунт»
+
+#### Фаза 10 (опционально, после фидбека): нативная замена экрана жюри
+
+- [ ] React Native + Expo приложение `grandslamcup-judge`
+- [ ] Только экран голосования (1–5 за текст / подачу)
+- [ ] Запуск только при сканировании QR на матче — больше ничего не делает
+- [ ] Распространение отдельным APK для оргкомитета
+
+---
+
+## Фаза 11 — Видео матчей и собственные каналы поэтов / команд
+
+> Источник: запрос 2026-05-17. Видеохостинг внутри платформы для матчевых записей и личных каналов.
+
+### Контекст и мотивация
+
+После матча в Telegram-каналах появляются записи выступлений — но они теряются в ленте, не привязаны к турнирной сущности, и не позволяют отметить конкретного поэта. Нужно:
+
+1. **Видео с матчей** — после игры организатор загружает запись (целое видео + опционально нарезка по выступлениям).
+2. **Отметка поэта в видео** — таймкод от-до плюс ссылка на `Player`. На странице поэта появляется автоматически.
+3. **Личные каналы поэтов** — поэт загружает свои выступления с других площадок, клипы, демо. Видно на профиле.
+4. **Каналы команд** — командный «лучшее за сезон», промо, бэкстейдж.
+
+### Хранение и провайдеры
+
+Не делаем собственный видеохостинг (CDN, перекодировка, storage) — это огромная статья расходов. Используем **внешние платформы через embed + опциональный direct upload** в S3-совместимое хранилище для коротких клипов (<60 сек, например моменты-«хайлайты»).
+
+```zmodel
+enum VideoProvider {
+  YOUTUBE       // youtube.com / youtu.be
+  VK_VIDEO      // vk.com/video
+  RUTUBE        // rutube.ru
+  TELEGRAM      // t.me/c/... (instant view)
+  VIMEO         // vimeo.com
+  NATIVE        // загруженный в наш S3 (только клипы ≤ 60 сек)
+}
+
+enum VideoKind {
+  MATCH_FULL          // полная запись матча
+  MATCH_HIGHLIGHTS    // нарезка хайлайтов матча
+  PERFORMANCE         // запись одного выступления (привязка к PlayerPerformance)
+  PLAYER_OWN          // личный канал поэта (любое его видео)
+  TEAM_OWN            // канал команды
+  NEWS                // видео-новость
+}
+
+enum VideoStatus {
+  PENDING       // загрузка не завершена / нет thumbnail
+  PUBLISHED     // видно публично
+  HIDDEN        // черновик / снято
+  REPORTED      // помечено к проверке (жалоба)
+}
+```
+
+### База данных (`schema.zmodel`)
+
+```zmodel
+model Video {
+  id              String          @id @default(cuid())
+  kind            VideoKind
+  provider        VideoProvider
+  externalUrl     String?         // для YOUTUBE/VK/RUTUBE/TELEGRAM/VIMEO — оригинальный URL
+  externalId      String?         // парсится из URL (видео-id), для embed
+  nativePath      String?         // для NATIVE — путь в uploads/videos/
+  thumbnail       String?         // обложка: парсится с провайдера или генерируется sharp
+  durationSec     Int?            // парсится через oembed API или вводится вручную
+  title           String          @length(1, 200)
+  description     String?         @length(0, 2000)
+
+  // Привязки (могут быть null или несколько одновременно)
+  matchId         String?
+  performanceId   String?         // для PERFORMANCE — привязка к выступлению
+  ownerPlayerId   String?         // для PLAYER_OWN
+  ownerTeamSeasonId String?       // для TEAM_OWN
+
+  uploadedById    String          // кто загрузил
+  status          VideoStatus     @default(PUBLISHED)
+  publishedAt     DateTime?
+  viewCount       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  match           Match?          @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  performance     PlayerPerformance? @relation(fields: [performanceId], references: [id], onDelete: SetNull)
+  ownerPlayer     Player?         @relation("PlayerOwnVideos", fields: [ownerPlayerId], references: [id], onDelete: Cascade)
+  ownerTeamSeason TeamSeason?     @relation("TeamOwnVideos", fields: [ownerTeamSeasonId], references: [id], onDelete: Cascade)
+  uploadedBy      User            @relation(fields: [uploadedById], references: [id])
+  tags            VideoTag[]
+
+  @@index([kind, status, publishedAt])
+  @@index([matchId])
+  @@index([performanceId])
+  @@index([ownerPlayerId, status])
+  @@index([ownerTeamSeasonId, status])
+
+  @@allow('read', status == 'PUBLISHED')
+  @@allow('all', uploadedById == auth().id)
+  @@allow('all', ownerPlayer.userId == auth().id)
+  @@allow('all', ownerTeamSeason.playerTeamSeasons?[user.id == auth().id && role in ['COACH', 'ASSISTANT_COACH'] && leftAt == null])
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model VideoTag {
+  id          String   @id @default(cuid())
+  videoId     String
+  playerId    String
+  startSec    Int?     // таймкод начала фрагмента с участием поэта
+  endSec      Int?     // конец фрагмента
+  label       String?  @length(0, 100)  // «Выступление 3 раунд» / «Победное стихотворение»
+  createdById String
+  createdAt   DateTime @default(now())
+
+  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  @@unique([videoId, playerId, startSec])
+  @@index([playerId])
+
+  @@allow('read', video.status == 'PUBLISHED')
+  @@allow('create,update,delete', createdById == auth().id)
+  @@allow('create,update,delete', video.uploadedById == auth().id)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+```
+
+**Back-relations:**
+
+- `Match` — `videos Video[]`
+- `PlayerPerformance` — `videos Video[]`
+- `Player` — `ownVideos Video[] @relation("PlayerOwnVideos")`, `videoTags VideoTag[]`
+- `TeamSeason` — `ownVideos Video[] @relation("TeamOwnVideos")`
+- `User` — `uploadedVideos Video[]`, `createdVideoTags VideoTag[]`
+
+**Миграция:** `nx db:migrate grandslamcup -- --name add_videos`
+
+### Парсинг внешних URL
+
+**Файл:** `apps/grandslamcup/src/lib/video-parser.ts`
+
+| Провайдер | Паттерн URL                                                         | externalId                      |
+| --------- | ------------------------------------------------------------------- | ------------------------------- |
+| YOUTUBE   | `youtube.com/watch?v=XXX`, `youtu.be/XXX`, `youtube.com/shorts/XXX` | `XXX`                           |
+| VK_VIDEO  | `vk.com/video-12345_67890`, `vkvideo.ru/video...`                   | `-12345_67890`                  |
+| RUTUBE    | `rutube.ru/video/XXX/`                                              | `XXX`                           |
+| TELEGRAM  | `t.me/channel/123`, `t.me/c/12345/678`                              | `channel/123` или `c/12345/678` |
+| VIMEO     | `vimeo.com/12345`                                                   | `12345`                         |
+
+```typescript
+export function parseVideoUrl(url: string): {
+  provider: VideoProvider
+  externalId: string
+  embedUrl: string
+  thumbnailUrl: string | null
+} | null
+```
+
+Покрыть Vitest-тестами все 5 провайдеров + краевые случаи (с протоколом, без, с параметрами).
+
+### Frontend
+
+#### Публичные страницы
+
+**Видео на странице матча** (`/[citySlug]/matches/[id]`):
+
+- Секция «Видеозаписи» под фото-галереей
+- Карточки video с превью + durationSec в углу
+- Клик → модальное окно с embed-player (responsive iframe)
+- Под видео — список отмеченных поэтов с таймкодами «Денис Рубин · 3:42»
+
+**Видео на странице поэта** (`/[citySlug]/players/[slug]`):
+
+- Секция «Видео» — все видео, где поэт **отмечен** (через `VideoTag`) + его собственные (`ownVideos`)
+- Сортировка: сначала собственные, потом отметки по дате
+- Клик по таймкоду в `VideoTag` открывает плеер со старта фрагмента
+
+**Видео на странице команды** (`/[citySlug]/teams/[slug]`):
+
+- Секция «Канал команды» — все `TEAM_OWN` видео команды
+- Карусель + grid view
+
+**Раздел /[citySlug]/videos (общий):**
+
+- Лента всех опубликованных видео платформы (фильтры: матч / поэт / команда / новость)
+
+#### Кабинет поэта (`/poet/videos`)
+
+| Путь                     | Описание                                                  |
+| ------------------------ | --------------------------------------------------------- |
+| `/poet/videos`           | Список моих видео + отметок в чужих                       |
+| `/poet/videos/new`       | Добавить видео (вставка URL → автопарсинг + предпросмотр) |
+| `/poet/videos/[id]/edit` | Редактирование title, description, обложки, тегов         |
+
+#### Кабинет тренера (`/coach/videos`)
+
+То же для команды — управление каналом `TEAM_OWN`.
+
+#### Админка (`/admin/matches/[id]/videos`)
+
+| Путь                                       | Описание                                                          |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| `/admin/matches/[id]/videos`               | Загрузка видео матча — `MATCH_FULL` + `MATCH_HIGHLIGHTS`          |
+| `/admin/matches/[id]/videos/[videoId]/tag` | Отметка поэтов в видео матча: выбор `PlayerPerformance` + таймкод |
+
+**Ключевой компонент:** `_components/video-tagger.tsx`
+
+- Embed-плеер сверху
+- Список всех `PlayerPerformance` матча с кнопкой «Отметить здесь»
+- При клике — добавляется `VideoTag` с текущим таймкодом плеера (получается через `postMessage` от YouTube API / VK API)
+
+### Server Actions
+
+**Файл:** `apps/grandslamcup/src/app/poet/videos/_actions/video.action.ts`
+
+| Action                               | Описание                                                  |
+| ------------------------------------ | --------------------------------------------------------- |
+| `addVideoByUrlAction(input)`         | Парсит URL → создаёт `Video` со статусом `PUBLISHED`      |
+| `updateVideoAction(id, input)`       | Редактирование title / description / thumbnail            |
+| `deleteVideoAction(id)`              | Soft delete (status = HIDDEN)                             |
+| `tagPlayerInVideoAction(input)`      | Добавить `VideoTag` (videoId, playerId, startSec, endSec) |
+| `untagPlayerAction(tagId)`           | Удалить отметку                                           |
+| `incrementViewCountAction(videoId)`  | Счётчик просмотров (debounce 30 сек на сессию)            |
+| `reportVideoAction(videoId, reason)` | Жалоба на видео (status = REPORTED, уведомление админу)   |
+
+**Native upload** для коротких клипов:
+
+- `apps/grandslamcup/src/app/api/upload/video/route.ts` — POST multipart
+- Лимит **60 секунд / 50 МБ**
+- Sharp / ffmpeg для thumbnail (опционально через систему очередей)
+- Сохранение в `uploads/videos/{kind}/{ownerId}/{cuid}.mp4`
+
+### Уведомления
+
+- **Отметка поэта в видео** → push поэту: «Вас отметили в видео матча Прогрев vs Солянка»
+- **Загрузка видео матча** → push всем игрокам команд участников
+- **Новое видео у любимого поэта** (после внедрения подписок) → push подписчикам
+
+### Mobile UX
+
+- Embed-плеер responsive (16:9 aspect-ratio)
+- Карточки видео в grid (1 кол на мобиле, 3 на desktop)
+- Auto-play мьюты на hover (только desktop)
+- Lazy load thumbnail через `Next.js Image`
+
+### SEO
+
+- Структурированные данные `VideoObject` в JSON-LD на странице матча/поэта
+- OG-теги с обложкой видео
+- `og:video` для встроенного предпросмотра в Telegram/VK
+
+### Антифрод и модерация
+
+- **Жалобы** через `reportVideoAction` (REPORTED статус) — админ-инбокс
+- **Whitelist провайдеров** — нельзя вставить произвольную ссылку (только из 6 разрешённых)
+- **Rate limit**: 10 видео в час с одного User (защита от спама)
+- **Native upload** — антивирус-сканирование через ClamAV (опционально)
+
+### Задачи (чек-лист)
+
+#### Фаза 1: База данных
+
+- [ ] Enum `VideoProvider`, `VideoKind`, `VideoStatus`
+- [ ] Модели `Video`, `VideoTag` + back-relations
+- [ ] `nx zenstack:generate grandslamcup` + миграция `add_videos`
+
+#### Фаза 2: Парсер URL
+
+- [ ] `src/lib/video-parser.ts` для 5 провайдеров
+- [ ] Vitest-тесты для каждого провайдера + invalid input
+- [ ] Опциональный fetch oEmbed для автоматического title/duration/thumbnail
+
+#### Фаза 3: Server Actions
+
+- [ ] `addVideoByUrlAction` (с парсингом)
+- [ ] `updateVideoAction`, `deleteVideoAction`
+- [ ] `tagPlayerInVideoAction`, `untagPlayerAction`
+- [ ] `incrementViewCountAction` с debounce-логикой
+- [ ] `reportVideoAction`
+
+#### Фаза 4: Native upload (опционально, можно отложить)
+
+- [ ] `/api/upload/video/route.ts` (multipart, лимит 60 сек / 50 МБ)
+- [ ] Генерация thumbnail через sharp / ffmpeg
+- [ ] Сохранение в `uploads/videos/...`
+
+#### Фаза 5: Публичный UI
+
+- [ ] Компонент `_components/video-player.tsx` (responsive embed для всех 5 провайдеров)
+- [ ] Секция «Видео» на странице матча
+- [ ] Секция «Видео» на странице поэта (свои + отметки)
+- [ ] Секция «Канал команды» на странице команды
+- [ ] Общая лента `/[citySlug]/videos`
+
+#### Фаза 6: Кабинеты загрузки
+
+- [ ] `/poet/videos` — список + создание + редактирование
+- [ ] `/coach/videos` — управление каналом команды
+- [ ] Превью при вставке URL до сохранения
+
+#### Фаза 7: Админка отметок
+
+- [ ] `/admin/matches/[id]/videos` — загрузка матчевых видео
+- [ ] `_components/video-tagger.tsx` — отметка поэтов с автоподстановкой таймкода
+- [ ] Интеграция с YouTube IFrame API / VK Video API для получения текущего времени плеера
+
+#### Фаза 8: Уведомления и SEO
+
+- [ ] Push-уведомления при отметке поэта
+- [ ] JSON-LD `VideoObject`
+- [ ] OG-теги `og:video`
+
+#### Фаза 9: E2E тесты
+
+- [ ] Поэт добавляет YouTube-видео → видно на профиле
+- [ ] Админ загружает запись матча → отмечает поэтов с таймкодами → видно у поэта со ссылкой на фрагмент
+- [ ] Тренер заводит командный канал → видео видно на странице команды
+- [ ] Жалоба на видео → статус REPORTED → видно админу
+
+---
+
+## Фаза 10 — Планирование тренировок команды
+
+> Источник: запрос 2026-05-17. Тренеры собирают команды на тренировки между матчами — нужна координация расписания участников.
+
+### Контекст и мотивация
+
+Сейчас тренер выясняет в Telegram-чате, кому когда удобно собраться на тренировку. Это рутина: 8 поэтов × 3 предложенные даты × сообщения «не могу / могу с 19:00». Платформа решает это:
+
+1. **Игроки заранее размечают свободные интервалы** на ближайшие 2 недели (как в Doodle / Calendly).
+2. **Система строит тепловую карту** по часам/дням — видно, в какие часы больше всего игроков свободны.
+3. **Подсказка оптимального слота** — алгоритм находит интервалы, где `count(свободных игроков) ≥ 5` (минимальный состав на тренировку).
+4. **Тренер фиксирует дату, время и площадку** одним кликом, игроки получают приглашение (push / email / Telegram) и подтверждают участие.
+
+### База данных (`schema.zmodel`)
+
+```zmodel
+enum TrainingStatus {
+  DRAFT        // тренер ещё подбирает время
+  POLLING      // открыт опрос доступности (никого не приглашают)
+  SCHEDULED    // дата и место зафиксированы, рассылка приглашений
+  COMPLETED    // тренировка прошла
+  CANCELLED    // отменена
+}
+
+enum AttendanceStatus {
+  GOING        // подтвердил участие
+  MAYBE        // может быть
+  SKIP         // не придёт
+  NO_RESPONSE  // не ответил (default)
+}
+
+model PlayerAvailability {
+  id            String       @id @default(cuid())
+  teamSeasonId  String       // в рамках конкретной команды-сезона
+  userId        String       // игрок
+  startsAt      DateTime     // начало свободного интервала
+  endsAt        DateTime     // конец
+  note          String?      @length(0, 200)  // «после 20 можно»
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  teamSeason    TeamSeason   @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([teamSeasonId, startsAt])
+  @@index([userId, startsAt])
+  // Один игрок может иметь несколько непересекающихся интервалов; пересечения схлопываются в Server Action
+
+  @@allow('read', teamSeason.playerTeamSeasons?[user.id == auth().id && leftAt == null])
+  @@allow('create,update,delete', userId == auth().id)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model TrainingSession {
+  id            String          @id @default(cuid())
+  teamSeasonId  String
+  scheduledAt   DateTime        // дата и время начала
+  durationMin   Int             @default(120)
+  venueId       String?         // площадка из справочника
+  customAddress String?         // если не из справочника — свободный адрес
+  title         String?         @length(0, 100)   // «Подготовка к финалу»
+  description   String?         @length(0, 1000)
+  status        TrainingStatus  @default(SCHEDULED)
+  createdById   String          // обычно тренер
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  teamSeason    TeamSeason      @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+  venue         Venue?          @relation(fields: [venueId], references: [id])
+  createdBy     User            @relation("TrainingCreator", fields: [createdById], references: [id])
+  attendances   TrainingAttendance[]
+
+  @@index([teamSeasonId, scheduledAt])
+  @@index([scheduledAt])
+
+  @@allow('read', teamSeason.playerTeamSeasons?[user.id == auth().id && leftAt == null])
+  @@allow('create,update,delete', teamSeason.playerTeamSeasons?[user.id == auth().id && role in ['COACH', 'ASSISTANT_COACH'] && leftAt == null])
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model TrainingAttendance {
+  id           String              @id @default(cuid())
+  sessionId    String
+  userId       String
+  status       AttendanceStatus    @default(NO_RESPONSE)
+  respondedAt  DateTime?
+  note         String?             @length(0, 200)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  session      TrainingSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId, status])
+
+  @@allow('read', session.teamSeason.playerTeamSeasons?[user.id == auth().id && leftAt == null])
+  @@allow('update', userId == auth().id)
+  @@allow('all', session.teamSeason.playerTeamSeasons?[user.id == auth().id && role in ['COACH', 'ASSISTANT_COACH'] && leftAt == null])
+}
+```
+
+**Back-relations в существующих моделях:**
+
+- `User` — `availabilities PlayerAvailability[]`, `trainingAttendances TrainingAttendance[]`, `createdTrainings TrainingSession[] @relation("TrainingCreator")`
+- `TeamSeason` — `availabilities PlayerAvailability[]`, `trainings TrainingSession[]`
+- `Venue` — `trainings TrainingSession[]`
+
+**Миграция:** `nx db:migrate grandslamcup -- --name add_trainings`
+
+### Алгоритм подсказки оптимального слота
+
+**Вход:** все `PlayerAvailability` команды за следующие 14 дней + минимальная длительность тренировки (по умолчанию 120 мин) + минимальный состав (по умолчанию 5 человек).
+
+**Шаги:**
+
+1. Построить **timeline events**: для каждого интервала `[startsAt, endsAt]` создать события `+1` в `startsAt` и `−1` в `endsAt`.
+2. Отсортировать события по времени, сделать **prefix sum** — получить функцию `available(t)` = сколько игроков свободны в момент `t`.
+3. Найти **все непрерывные интервалы**, где `available(t) ≥ minPlayers` И длительность интервала `≥ minDurationMin`.
+4. Отсортировать кандидатов по: (1) количеству свободных игроков DESC, (2) близости к «уютному» времени (19:00–21:00) DESC, (3) дальности от уже запланированных матчей DESC.
+5. Вернуть **топ-5 рекомендаций** с пояснением: «6 игроков свободны 21 мая с 19:00 до 22:00 — Денис, Светлана, Александра, Ваня, Иван, Даша».
+
+**Файл:** `apps/grandslamcup/src/lib/training-scheduler.ts`
+
+```typescript
+export interface SlotSuggestion {
+  startsAt: Date
+  endsAt: Date
+  availablePlayerIds: string[]
+  score: number // для отладки
+}
+
+export function suggestOptimalSlots(
+  availabilities: PlayerAvailability[],
+  options: {
+    fromDate: Date
+    toDate: Date
+    minDurationMin: number
+    minPlayers: number
+    preferredHours: { start: number; end: number } // [19, 21]
+    upcomingMatches: Date[] // штраф за слот рядом с матчем
+  },
+): SlotSuggestion[]
+```
+
+Покрыть Vitest-тестами: 0 пересечений, 5+ пересечений, дни недели, граничные случаи (00:00 / полночь).
+
+### Frontend
+
+**Роут-группа:** `apps/grandslamcup/src/app/coach/trainings/` (для тренера) + `apps/grandslamcup/src/app/poet/availability/` (для игрока)
+
+#### Для игрока (Player)
+
+| Путь                                | Файл                         | Описание                                                     |
+| ----------------------------------- | ---------------------------- | ------------------------------------------------------------ |
+| `/poet/availability`                | `poet/availability/page.tsx` | Календарная сетка на 14 дней, drag-to-select свободных часов |
+| `/poet/availability/[teamSeasonId]` | редирект                     | Если игрок в нескольких командах — выбор команды             |
+| `/poet/trainings`                   | `poet/trainings/page.tsx`    | Список приглашений на тренировки + кнопки RSVP               |
+
+**Компонент:** `_components/availability-calendar.tsx` — Chakra grid 14 столбцов (дни) × 24 строки (часы) + slot 30 мин. Tap/drag для выделения, повторный tap снимает.
+
+#### Для тренера (Coach)
+
+| Путь                               | Файл                                       | Описание                                                                  |
+| ---------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------- |
+| `/coach/trainings`                 | `coach/trainings/page.tsx`                 | Список запланированных и прошедших тренировок                             |
+| `/coach/trainings/plan`            | `coach/trainings/plan/page.tsx`            | **Главный экран:** тепловая карта доступности + топ-5 предложений системы |
+| `/coach/trainings/new`             | `coach/trainings/new/page.tsx`             | Ручное создание тренировки (если тренер уже выбрал время сам)             |
+| `/coach/trainings/[id]/edit`       | `coach/trainings/[id]/edit/page.tsx`       | Редактирование, отмена                                                    |
+| `/coach/trainings/[id]/attendance` | `coach/trainings/[id]/attendance/page.tsx` | Кто подтвердил, кто отказался                                             |
+
+**Ключевой компонент:** `_components/availability-heatmap.tsx`
+
+- Сетка 14 × 24 (дни × часы) — цвет ячейки = доля свободных игроков (0 → серый, 100% → насыщенный зелёный)
+- Hover показывает список свободных игроков
+- Клик по ячейке → попап «Создать тренировку 21 мая 19:00»
+- Карточки топ-5 рекомендаций над сеткой — «Запланировать в один клик»
+
+**Компонент:** `_components/training-form.tsx` — выбор `scheduledAt` (datetime picker), `durationMin`, `venueId` (Select из существующих площадок) или `customAddress`, `title`, `description`.
+
+### Server Actions
+
+**Файл:** `apps/grandslamcup/src/app/poet/availability/_actions/availability.action.ts`
+
+| Action                                                    | Описание                                                                    |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `getMyAvailabilityAction(teamSeasonId)`                   | Получить мои интервалы для команды                                          |
+| `upsertAvailabilityAction(slots)`                         | Сохранить выделенные слоты (батч upsert с автоматическим merge пересечений) |
+| `clearAvailabilityAction(teamSeasonId, fromDate, toDate)` | Сброс на интервале                                                          |
+
+**Файл:** `apps/grandslamcup/src/app/coach/trainings/_actions/training.action.ts`
+
+| Action                                              | Описание                                                          |
+| --------------------------------------------------- | ----------------------------------------------------------------- |
+| `getTeamAvailabilityAction(teamSeasonId, from, to)` | Все интервалы команды для heatmap                                 |
+| `suggestSlotsAction(teamSeasonId)`                  | Вызвать `suggestOptimalSlots`, вернуть топ-5                      |
+| `createTrainingAction(input)`                       | Создать `TrainingSession` + рассылка приглашений участникам       |
+| `updateTrainingAction(id, input)`                   | Изменить дату/место — повторное приглашение с пометкой «Изменено» |
+| `cancelTrainingAction(id, reason)`                  | Отмена + уведомление                                              |
+| `rsvpTrainingAction(sessionId, status, note?)`      | Игрок отвечает: GOING / MAYBE / SKIP                              |
+| `getTrainingAction(id)`                             | Детали с участием каждого игрока                                  |
+
+### Уведомления
+
+- **Создание тренировки** → push + email + Telegram всем игрокам команды, не отвечавшим = `NO_RESPONSE`
+- **Изменение** → push с пометкой «изменена дата / место»
+- **Напоминание за 24 ч и за 2 ч** до тренировки — cron `scripts/training-reminders.ts` (Bun cron на сервере)
+- **RSVP-апдейт** → тренер получает push при изменении статуса игроком (опционально, можно mute)
+
+Интеграция с **iCal-экспортом** — добавить тренировки в существующий `/api/schedule/ical` под фильтром `?include=trainings`.
+
+### Mobile UX
+
+- Календарная сетка на мобиле — горизонтальный скролл по дням (1 день = 1 экран), вертикально часы
+- Touch-drag-select для выделения свободных слотов
+- 44 × 44 px touch targets на каждом слоте
+- Тепловая карта для тренера — Pinch-to-zoom + горизонтальный скролл
+
+### Задачи (чек-лист)
+
+#### Фаза 1: База данных
+
+- [ ] Добавить enum `TrainingStatus`, `AttendanceStatus`
+- [ ] Добавить модели `PlayerAvailability`, `TrainingSession`, `TrainingAttendance`
+- [ ] Back-relations в `User`, `TeamSeason`, `Venue`
+- [ ] `nx zenstack:generate grandslamcup`
+- [ ] `nx db:migrate grandslamcup -- --name add_trainings`
+
+#### Фаза 2: Алгоритм планирования
+
+- [ ] `src/lib/training-scheduler.ts` — `suggestOptimalSlots()` с timeline-sweep
+- [ ] Vitest-тесты: пустые данные, 5+ пересечений, граничные случаи, штраф за матч
+- [ ] Хелпер `mergeOverlappingIntervals` для нормализации `PlayerAvailability`
+
+#### Фаза 3: Server Actions
+
+- [ ] `availability.action.ts` (upsert / clear / get)
+- [ ] `training.action.ts` (create / update / cancel / rsvp / suggest)
+- [ ] Уведомления через `_services/training-notifications.ts`
+
+#### Фаза 4: UI игрока
+
+- [ ] `_components/availability-calendar.tsx` — drag-to-select сетка 14 × 24
+- [ ] `/poet/availability` — страница редактирования доступности
+- [ ] `/poet/trainings` — список приглашений + RSVP-кнопки
+- [ ] Уведомление-баннер: «У вас 2 новых приглашения»
+
+#### Фаза 5: UI тренера
+
+- [ ] `_components/availability-heatmap.tsx` — тепловая карта 14 × 24
+- [ ] `_components/slot-suggestions.tsx` — 5 карточек с топ-предложениями
+- [ ] `/coach/trainings/plan` — главный экран планирования
+- [ ] `/coach/trainings` — список тренировок
+- [ ] `/coach/trainings/new`, `[id]/edit`, `[id]/attendance`
+
+#### Фаза 6: Уведомления
+
+- [ ] Push / email / Telegram при создании, изменении, отмене
+- [ ] Cron-скрипт напоминаний за 24 ч и 2 ч
+- [ ] iCal-экспорт тренировок (`?include=trainings`)
+
+#### Фаза 7: Mobile UX
+
+- [ ] Адаптация календаря под смартфон (день-по-дню скролл)
+- [ ] Тепловая карта с pinch-to-zoom
+- [ ] Touch-targets 44 × 44 px
+
+#### Фаза 8: E2E тесты
+
+- [ ] Игрок размечает доступность → тренер видит heatmap → создаёт тренировку → игрок получает приглашение → RSVP
+- [ ] Алгоритм находит оптимальный слот для команды из 8 игроков с пересекающимися интервалами
+- [ ] Отмена тренировки → уведомление всем участникам
+
+#### Фаза 9: Документация
+
+- [ ] Раздел в PRESENTATION.md «Планирование тренировок» с heatmap-скриншотом
+- [ ] Обновление CHANGELOG
+
+---
+
+## Фаза 9 — Чаты и сообщения
+
+> Источник: запрос оргкомитета Москвы 2026-05-17. Социальные коммуникации между всеми участниками платформы.
+
+### Контекст и мотивация
+
+Сейчас взаимодействие участников КБС вне матчей идёт через Telegram-чаты вручную: тренеры пишут игрокам, оргкомитет — поэтам, баги отправляются в личку разработчику. Это работает, но плохо масштабируется: новый поэт не знает, кому писать; информация теряется; невозможно показать историю команды или матча.
+
+Встроенные чаты решат проблему: вся коммуникация привязана к турнирным сущностям (команда, матч, город), доступ контролируется политиками БД, real-time доставка через SSE + WebSocket. Эталон полностью отлажен в братском проекте `apps/driving-school` (4 модели БД, 22 UI-компонента, 21 server action).
+
+### Типы чатов (`ChatType` enum)
+
+| Тип                 | Участники                                     | Кто пишет              | Создание                                |
+| ------------------- | --------------------------------------------- | ---------------------- | --------------------------------------- |
+| `PRIVATE`           | 2 пользователя                                | оба                    | по кнопке «Написать» на профиле         |
+| `TEAM`              | Тренер + игроки + ассистенты `TeamSeason`     | все участники          | автоматически при создании `TeamSeason` |
+| `MATCH`             | Игроки обеих команд + жюри + ведущий + скорер | все участники          | автоматически при `Match.status=LIVE`   |
+| `CITY`              | Все игроки/тренеры/организаторы города        | все                    | автоматически по `City`                 |
+| `GENERAL`           | Вся платформа                                 | все (модерация админа) | singleton                               |
+| `COACHES`           | Все тренеры платформы                         | все                    | singleton                               |
+| `ORGANIZERS`        | Все `CityOrganizer` + админы                  | все                    | singleton                               |
+| `TEAM_ORGANIZERS`   | Команда + организаторы её города              | все                    | автоматически при `TeamSeason`          |
+| `PLATFORM_FEEDBACK` | Любой пользователь + админы                   | пользователь + админ   | по запросу пользователя                 |
+| `DEV_SUPPORT`       | Пользователь + разработчик платформы          | оба                    | по запросу «Связаться с разработчиком»  |
+
+### База данных (`schema.zmodel`)
+
+Скопировать 4 модели из `apps/driving-school/schema.zmodel:2830-2987` с адаптацией под доменные сущности КБС:
+
+```zmodel
+enum ChatType {
+  PRIVATE
+  TEAM
+  MATCH
+  CITY
+  GENERAL
+  COACHES
+  ORGANIZERS
+  TEAM_ORGANIZERS
+  PLATFORM_FEEDBACK
+  DEV_SUPPORT
+}
+
+model Chat {
+  id             String    @id @default(cuid())
+  type           ChatType
+  cityId         String?   // для CITY, ORGANIZERS (city scope), TEAM_ORGANIZERS
+  teamSeasonId   String?   // для TEAM, TEAM_ORGANIZERS
+  matchId        String?   // для MATCH
+  targetUserId   String?   // для DEV_SUPPORT, PLATFORM_FEEDBACK (вторая сторона)
+  name           String?
+  avatar         String?
+  lastMessageId  String?   @unique
+  lastMessageAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  city           City?         @relation(fields: [cityId], references: [id])
+  teamSeason     TeamSeason?   @relation(fields: [teamSeasonId], references: [id])
+  match          Match?        @relation(fields: [matchId], references: [id])
+  participants   ChatParticipant[]
+  messages       ChatMessage[]
+
+  @@unique([type, cityId, targetUserId])
+  @@unique([type, teamSeasonId])
+  @@unique([type, matchId])
+  @@index([lastMessageAt])
+  @@index([cityId])
+  @@index([teamSeasonId])
+  @@index([matchId])
+
+  @@allow('read', participants?[userId == auth().id && leftAt == null])
+  @@allow('create', auth() != null)
+  @@allow('update', participants?[userId == auth().id && leftAt == null])
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model ChatParticipant {
+  id          String    @id @default(cuid())
+  chatId      String
+  userId      String
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+  lastReadAt  DateTime?
+  isMuted     Boolean   @default(false)
+  isAdmin     Boolean   @default(false)
+
+  chat        Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+  @@index([userId])
+
+  @@allow('read', chat.participants?[userId == auth().id])
+  @@allow('update', userId == auth().id)  // только сам менять lastReadAt/isMuted
+}
+
+model ChatMessage {
+  id           String    @id @default(cuid())
+  chatId       String
+  authorId     String
+  content      String    @length(1, 5000)
+  replyToId    String?
+  attachments  Json?
+  editedAt     DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  chat         Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  author       User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo      ChatMessage?    @relation("ReplyTo", fields: [replyToId], references: [id])
+  replies      ChatMessage[]   @relation("ReplyTo")
+  reactions    MessageReaction[]
+
+  @@index([chatId, createdAt])
+  @@index([authorId])
+  @@index([replyToId])
+
+  @@allow('read', deletedAt == null && chat.participants?[userId == auth().id && leftAt == null])
+  @@allow('create', auth() != null && chat.participants?[userId == auth().id && leftAt == null])
+  @@allow('update,delete', authorId == auth().id)
+}
+
+model MessageReaction {
+  id         String       @id @default(cuid())
+  messageId  String
+  userId     String
+  emoji      String
+  createdAt  DateTime     @default(now())
+
+  message    ChatMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+
+  @@allow('read', message.chat.participants?[userId == auth().id])
+  @@allow('create,delete', userId == auth().id && message.chat.participants?[userId == auth().id && leftAt == null])
+}
+```
+
+**Изменения в существующих моделях:**
+
+- `User` — добавить `chatParticipations ChatParticipant[]`, `chatMessages ChatMessage[]`, `messageReactions MessageReaction[]`
+- `City` — добавить `chats Chat[]`
+- `TeamSeason` — добавить `chats Chat[]`
+- `Match` — добавить `chats Chat[]`
+
+**Миграция:** `nx db:migrate grandslamcup -- --name add_chats`
+
+### Frontend (по образцу driving-school)
+
+**Роут-группа:** `apps/grandslamcup/src/app/(chats)/chats/`
+
+```
+chats/
+├── layout.tsx                          # Loader списка чатов + sidebar
+├── page.tsx                            # Пустой state «Выберите чат»
+├── [id]/page.tsx                       # Конкретный чат
+├── _layout-client.tsx                  # Splitter list/messages (responsive)
+├── _components/
+│   ├── chat-list.tsx                   # Левая колонка + badge непрочитанных
+│   ├── chat-header.tsx                 # Имя/аватар + меню
+│   ├── chat-messages.tsx               # Лента с группировкой по дням
+│   ├── send-message-form.tsx           # Textarea + Enter/Shift+Enter/ArrowUp
+│   ├── message-actions.tsx             # Reply/реакции/edit/delete
+│   ├── edit-message-dialog.tsx
+│   ├── delete-message-dialog.tsx
+│   ├── chat-participants-modal.tsx
+│   └── new-chat-dialog.tsx             # Поиск пользователя для PRIVATE
+├── _context/active-chat-context.tsx
+├── _hooks/
+│   ├── use-chat-socket.ts
+│   └── use-socket.ts
+├── _actions/
+│   ├── chat-queries.action.ts
+│   ├── chat-messages.action.ts
+│   ├── chat-management.action.ts
+│   ├── chat.types.ts
+│   └── chat.action.ts                  # barrel
+├── _schemas/chat.schema.ts             # Zod + .strip()
+└── _services/
+    ├── chat-service.ts
+    ├── message-service.ts
+    └── chat-notifications.ts
+```
+
+**Точки входа в чаты:**
+
+| Откуда                                     | Куда                                       | Реализация                                        |
+| ------------------------------------------ | ------------------------------------------ | ------------------------------------------------- |
+| Профиль поэта `/[citySlug]/players/[slug]` | PRIVATE с поэтом                           | кнопка «Написать», `getOrCreatePrivateChatAction` |
+| Кабинет тренера `/coach`                   | TEAM чат своей команды                     | пункт меню «Чат команды»                          |
+| Live-страница матча                        | MATCH чат                                  | иконка-кнопка для авторизованных                  |
+| Header (везде)                             | Floating chat button с badge непрочитанных | `floating-chat-button.tsx`                        |
+| Footer / «О платформе»                     | DEV_SUPPORT                                | кнопка «Связаться с разработчиком»                |
+
+### Realtime и уведомления
+
+- **SSE** `/api/chats/unread-stream` — счётчик непрочитанных live. Менеджер `lib/sse/chat-sse-manager.ts` с GC через 30 сек, лимит 10 подключений на user. Триггер: `notifyChatUpdate(participantIds)` после `sendMessageAction`.
+- **WebSocket (Socket.IO)** `/api/socket` на отдельном порту `SOCKET_PORT=3017`:
+  - `chat-handler.ts` — `join_chat`, `send_message`, `edit_message`, `delete_message`
+  - `typing-handler.ts` — «набирает текст» (debounce 2 сек)
+  - `presence-handler.ts` — онлайн/офлайн
+- **Push** — через существующий `PushSubscription`, новая категория `CHAT_MESSAGE`
+- **Email** — `@letar/email` для off-line пользователей (≥5 мин неактивности)
+- **Telegram** — через `tg-proxy.letar.best` (бот уже привязывает Telegram к User)
+
+### Server Actions (паттерн driving-school)
+
+| Action                                      | Описание                                              |
+| ------------------------------------------- | ----------------------------------------------------- |
+| `getChatsAction`                            | Список чатов пользователя с unread count              |
+| `getChatAction(chatId)`                     | Сообщения + участники (пагинация по 50)               |
+| `getContactsAction`                         | Список контактов для нового PRIVATE                   |
+| `getOrCreatePrivateChatAction(otherUserId)` | Открыть или создать PRIVATE                           |
+| `getOrCreateTeamChatAction(teamSeasonId)`   | Создаётся хуком при создании TeamSeason               |
+| `getOrCreateMatchChatAction(matchId)`       | Создаётся хуком при `Match.status=LIVE`               |
+| `getOrCreateCityChatAction(cityId)`         | Singleton-чат города                                  |
+| `getOrCreateDevSupportChatAction`           | Чат с разработчиком (`auth().id` + `DEV_USER_ID` env) |
+| `sendMessageAction`                         | + SSE notify + push + email (off-line)                |
+| `editMessageAction`, `deleteMessageAction`  | Только автор                                          |
+| `toggleReactionAction`                      | Toggle emoji-реакции                                  |
+| `markChatAsReadAction`                      | Обновить `lastReadAt`                                 |
+| `updateChatSettingsAction`                  | mute, выход из чата                                   |
+
+### Задачи (чек-лист)
+
+#### Фаза 1: База данных
+
+- [ ] Добавить enum `ChatType` (10 значений) в `schema.zmodel`
+- [ ] Добавить модели `Chat`, `ChatParticipant`, `ChatMessage`, `MessageReaction`
+- [ ] Обновить `User`, `City`, `TeamSeason`, `Match` (back-relations)
+- [ ] `nx zenstack:generate grandslamcup`
+- [ ] `nx db:migrate grandslamcup -- --name add_chats`
+
+#### Фаза 2: Server Actions
+
+- [ ] `_schemas/chat.schema.ts` — Zod-схемы с `.strip()`
+- [ ] `_services/chat-service.ts` — get-or-create логика для всех 10 типов
+- [ ] `_services/message-service.ts` — send/edit/delete/react
+- [ ] `_actions/chat-queries.action.ts`, `chat-messages.action.ts`, `chat-management.action.ts`
+- [ ] Unit-тесты `chat-service.spec.ts` (Vitest)
+
+#### Фаза 3: UI каркас
+
+- [ ] Layout `(chats)/chats/layout.tsx` + sidebar
+- [ ] `chat-list.tsx` с группировкой и badge
+- [ ] `chat-header.tsx` + `chat-messages.tsx` (группировка по дням)
+- [ ] `send-message-form.tsx` (Enter/Shift+Enter/ArrowUp)
+
+#### Фаза 4: Контекстные действия
+
+- [ ] `message-actions.tsx` — reply, реакции, edit, delete
+- [ ] `edit-message-dialog.tsx`, `delete-message-dialog.tsx`
+- [ ] `chat-participants-modal.tsx`
+
+#### Фаза 5: Real-time
+
+- [ ] `lib/sse/chat-sse-manager.ts` + `/api/chats/unread-stream`
+- [ ] Socket.IO server на `SOCKET_PORT=3017`, обработчики chat/typing/presence
+- [ ] `use-chat-socket.ts` хук + memory limit (200 сообщений)
+- [ ] `floating-chat-button.tsx` с SSE badge
+
+#### Фаза 6: Уведомления
+
+- [ ] `_services/chat-notifications.ts` (push + email + telegram)
+- [ ] Off-line detection (`User.lastActiveAt`, fallback на email через 5 мин)
+- [ ] Категория `CHAT_MESSAGE` в `PushSubscription`
+
+#### Фаза 7: Точки входа
+
+- [ ] Кнопка «Написать» на профиле поэта
+- [ ] Пункт «Чат команды» в кабинете тренера
+- [ ] Иконка-кнопка чата матча на live-странице
+- [ ] Floating button в Header
+- [ ] «Связаться с разработчиком» в Footer
+
+#### Фаза 8: Mobile UX
+
+- [ ] Responsive splitter (drawer на мобиле, splitter на desktop)
+- [ ] Swipe-back из чата в список
+- [ ] Touch targets 44×44px
+
+#### Фаза 9: E2E тесты
+
+- [ ] Создание PRIVATE → отправка → mark as read
+- [ ] Реакции на сообщение
+- [ ] Edit/delete своего сообщения
+- [ ] Уведомление непрочитанных через SSE
+
+---
+
+## Фаза 8 — Альбомы стихов поэта
+
+> Источник: задача 2026-05-16. Поэт может объединять свои стихи в именованные альбомы с обложкой.
+
+### Контекст и мотивация
+
+Сейчас стихи поэта отображаются плоским списком на странице профиля. Альбомы дают возможность группировать стихи по темам, периодам или подборкам — с визуальной обложкой и датой публикации.
+
+---
+
+### Техническое задание
+
+#### База данных (schema.zmodel)
+
+**Новая модель `Album`:**
+
+```zmodel
+model Album {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  coverImage  String?                          // путь к файлу, сервится через /api/files/
+  publishedAt DateTime?                        // null = черновик
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  playerId    String
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  albumPoems  AlbumPoem[]
+
+  @@index([playerId])
+  @@index([playerId, publishedAt])
+  @@allow('read', publishedAt != null || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+```
+
+**Новая pivot-модель `AlbumPoem` (стих в альбоме):**
+
+```zmodel
+model AlbumPoem {
+  id        String @id @default(cuid())
+  albumId   String
+  poemId    String
+  sortOrder Int    @default(0)
+  album     Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  poem      Poem   @relation(fields: [poemId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, poemId])
+  @@index([albumId, sortOrder])
+  @@allow('read', album.publishedAt != null || (auth() != null && album.player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && album.player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+```
+
+**Изменения в существующих моделях:**
+
+- `Player` — добавить `albums Album[]`
+- `Poem` — добавить `albumPoems AlbumPoem[]`
+
+**Slug альбома** генерируется через `transliterate(title)` + суффикс `-YYYYMM` при коллизии.
+
+**Миграция:** `nx db:migrate grandslamcup -- --name add_album`
+
+---
+
+#### Публичный UI (страница поэта)
+
+**Где:** `apps/grandslamcup/src/app/(public)/[citySlug]/players/[slug]/page.tsx`
+
+**Что изменить:**
+
+- В Prisma-запрос добавить `albums: { where: { publishedAt: { not: null } }, orderBy: { publishedAt: 'desc' }, take: 4, select: { id, title, slug, coverImage, publishedAt, _count: { albumPoems } } }` + `_count: { albums: true }` для подсчёта всех альбомов и `_count: { poems: true }` для подсчёта стихов без альбома (через `NOT albumPoems.some`)
+- Вставить `<PlayerAlbumsList>` **перед** `<PlayerPoemsList>` (альбомы вверху секции)
+- Черновики на публичном профиле не показываются; управление черновиками — только через `/my/poems`
+
+**Сетка постеров на профиле поэта:**
+
+На странице поэта отображается одна горизонтальная сетка квадратных плиток. Максимум 6 плиток, с переносом на мобиле:
+
+| Плитка                | Условие показа                                          | Содержимое                             |
+| --------------------- | ------------------------------------------------------- | -------------------------------------- |
+| Альбом × 4 (макс)     | Есть опубликованные альбомы                             | Обложка + год + название               |
+| **«Разное»**          | Есть стихи, не входящие ни в один опубликованный альбом | Иконка + «Разное» + «N стихов»         |
+| **«Все альбомы (N)»** | Количество опубликованных альбомов > 4                  | Иконка-стрелка + «Все альбомы» + число |
+
+Плитка **«Разное»** — ссылка на якорь `#poems` (плоский список стихов ниже на той же странице). Название «Разное» отражает стихи вне альбомов — звучит нейтрально и по-человечески, не технически.
+
+Плитка **«Все альбомы»** — ссылка на страницу `/{citySlug}/players/{slug}/albums` (список всех альбомов поэта). Появляется только если альбомов строго больше 4.
+
+**Примеры раскладки:**
+
+```
+// 5+ альбомов, есть свободные стихи:
+[Альбом 1] [Альбом 2] [Альбом 3] [Альбом 4] [Разное] [Все альбомы (7)]
+
+// 2 альбома, есть свободные стихи:
+[Альбом 1] [Альбом 2] [Разное]
+
+// 4 альбома, нет свободных стихов:
+[Альбом 1] [Альбом 2] [Альбом 3] [Альбом 4]
+
+// Нет альбомов, есть стихи:
+[Разное]   ← секция «Альбомы» не показывается, остаётся только PlayerPoemsList
+```
+
+**Внешний вид постера альбома:**
+
+- `aspectRatio="1"` (квадратный), адаптивная ширина через CSS grid
+- `Next.js Image` для обложки, иконка `LuBookOpen` как плейсхолдер если нет
+- Под изображением: год из `publishedAt` (серый, мелкий) + название (жирное)
+- Hover: `translateY(-2px)` + тень
+
+**Плитка «Разное»:** нейтральный фон, иконка `LuScrollText`, текст «Разное» крупно + «N стихов» мелко снизу. Ссылка на `#poems`.
+
+**Плитка «Все альбомы»:** нейтральный фон, иконка `LuLayoutGrid`, «Все альбомы» крупно + «(N)» в скобках. Ссылка на `/{citySlug}/players/{slug}/albums`.
+
+**Стихи без альбома** остаются в `PlayerPoemsList` без изменений (плоский список с якорем `id="poems"` ниже по странице). Стихи в альбоме не скрываются из плоского списка.
+
+**Новый роут** для полного списка альбомов: `/{citySlug}/players/{slug}/albums` — простая страница со всеми опубликованными альбомами поэта в сетке постеров (без ограничения в 4).
+
+---
+
+#### Страница альбома
+
+**Новые роуты (создать оба):**
+
+- `apps/grandslamcup/src/app/(public)/[citySlug]/players/[slug]/albums/[albumSlug]/page.tsx`
+- `apps/grandslamcup/src/app/(public)/players/[slug]/albums/[albumSlug]/page.tsx` (дубль без citySlug — редирект на версию с городом, по аналогии с `/players/[slug]/poems/[poemSlug]`)
+
+**Содержимое страницы альбома:**
+
+- Hero: обложка (широкий баннер или квадратная превью), заголовок альбома, год публикации, имя поэта
+- Список стихов с нумерацией и ссылками на `/{citySlug}/players/{slug}/poems/{poemSlug}`
+- `generateMetadata` с OG-данными
+
+**Компонент:** `albums/[albumSlug]/_components/album-poem-item.tsx` (Server Component) — строка стихотворения в списке.
+
+---
+
+#### Управление альбомами (личный кабинет)
+
+**Новый раздел:** `apps/grandslamcup/src/app/my/poems/`
+
+Страницы:
+
+| Путь                              | Файл                                      | Описание                                        |
+| --------------------------------- | ----------------------------------------- | ----------------------------------------------- |
+| `/my/poems`                       | `my/poems/page.tsx`                       | Хаб управления: список стихов + список альбомов |
+| `/my/poems/albums/new`            | `my/poems/albums/new/page.tsx`            | Форма создания альбома                          |
+| `/my/poems/albums/[albumId]/edit` | `my/poems/albums/[albumId]/edit/page.tsx` | Редактирование альбома + состав стихов          |
+
+Все страницы защищены `requirePoet()` с редиректом.
+
+**Компоненты:**
+
+| Файл                                  | Тип    | Пропсы                                    | Назначение                                                                              |
+| ------------------------------------- | ------ | ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| `_components/albums-list.tsx`         | Client | `{ albums: AlbumListItem[], playerId }`   | Список альбомов: обложка, название, статус, кнопки «Ред.», «Удалить», toggle публикации |
+| `_components/album-form.tsx`          | Client | `{ albumId?, initialData?, playerPoems }` | Форма создания/редактирования: title + upload обложки (с превью) + publishedAt          |
+| `_components/album-poem-selector.tsx` | Client | `{ albumId, albumPoems, allPoems }`       | Два столбца «В альбоме» / «Все стихи», drag-n-drop порядка                              |
+
+---
+
+#### API: загрузка обложки
+
+**Новый роут:** `apps/grandslamcup/src/app/api/upload/album-cover/route.ts`
+
+- `POST multipart/form-data` с полями `file` (изображение) и опциональным `albumId`
+- Авторизация через `requirePoetAction()`, проверка `album.playerId === poet.playerId`
+- Ресайз через sharp (квадратная обрезка 800×800 или сохранение соотношения — уточнить)
+- Сохранение в `uploads/albums/{albumId}/cover-{timestamp}.webp`
+- Если `albumId` передан — сохранить путь в `Album.coverImage` и удалить старую обложку
+- Вернуть `{ success: true, path, url }`
+
+**Подход для нового альбома (albumId ещё не существует):**
+
+1. Загрузить обложку → получить временный `path` (`uploads/albums/temp/...`)
+2. Передать `path` в `createAlbumAction` как `coverImage`
+3. В action — переместить файл в `uploads/albums/{newAlbumId}/`
+
+---
+
+#### Server Actions
+
+**Файл:** `apps/grandslamcup/src/app/my/poems/_actions/album.action.ts`
+
+| Action                      | Сигнатура                                                                           | Описание                                    |
+| --------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------- |
+| `createAlbumAction`         | `(input: { title, coverImage?, publishedAt? })` → `ActionResult<{ albumId, slug }>` | Создать альбом, переместить обложку из temp |
+| `updateAlbumAction`         | `(input: { albumId, title, coverImage?, publishedAt? })` → `ActionResult`           | Обновить метаданные                         |
+| `deleteAlbumAction`         | `(albumId)` → `ActionResult`                                                        | Удалить альбом (стихи остаются)             |
+| `toggleAlbumPublishAction`  | `(albumId)` → `ActionResult<{ publishedAt }>`                                       | Поставить/убрать `publishedAt = now()`      |
+| `addPoemToAlbumAction`      | `(input: { albumId, poemId })` → `ActionResult`                                     | Добавить стих в альбом                      |
+| `removePoemFromAlbumAction` | `(input: { albumId, poemId })` → `ActionResult`                                     | Убрать стих из альбома                      |
+| `reorderAlbumPoemsAction`   | `(input: { albumId, poemIds: string[] })` → `ActionResult`                          | Переупорядочить стихи (транзакция)          |
+
+Каждый action вызывает `revalidatePath` для `/my/poems` и публичной страницы альбома.
+
+---
+
+#### Admin
+
+**Изменить:** `apps/grandslamcup/src/app/admin/players/[id]/page.tsx`
+
+- Добавить в Prisma-запрос: `albums: { select: { id, title, publishedAt, _count: { albumPoems } } }`
+- Добавить секцию «Альбомы» после секции «Стихи»
+
+**Новый компонент:** `apps/grandslamcup/src/app/admin/players/[id]/_components/player-albums-admin.tsx`
+
+- Server Component с внутренними кнопками-ссылками
+- Таблица: название | кол-во стихов | статус (опубликован/черновик) | дата | ссылка на редактирование
+
+---
+
+#### Типы
+
+**Файл:** `apps/grandslamcup/src/app/my/poems/_types/album.types.ts`
+
+```typescript
+export interface AlbumListItem {
+  id: string
+  title: string
+  slug: string
+  coverImage: string | null
+  publishedAt: Date | null
+  _count: { albumPoems: number }
+}
+
+export interface PoemOption {
+  id: string
+  title: string
+  slug: string
+  published: boolean
+}
+
+export interface AlbumFormData {
+  title: string
+  coverImage: string | null
+  publishedAt: string | null // ISO string
+}
+```
+
+---
+
+#### Структура новых файлов
+
+```
+apps/grandslamcup/
+├── schema.zmodel                                             [ИЗМЕНИТЬ]
+│
+└── src/app/
+    ├── api/upload/album-cover/route.ts                       [СОЗДАТЬ]
+    │
+    ├── (public)/[citySlug]/players/[slug]/
+    │   ├── page.tsx                                          [ИЗМЕНИТЬ]
+    │   ├── albums/[albumSlug]/
+    │   │   ├── page.tsx                                      [СОЗДАТЬ]
+    │   │   └── _components/album-poem-item.tsx               [СОЗДАТЬ]
+    │   └── _components/
+    │       ├── player-albums-list.tsx                        [СОЗДАТЬ]
+    │       └── album-poster.tsx                              [СОЗДАТЬ]
+    │
+    ├── (public)/players/[slug]/albums/[albumSlug]/
+    │   └── page.tsx                                          [СОЗДАТЬ] (redirect)
+    │
+    ├── my/poems/
+    │   ├── page.tsx                                          [СОЗДАТЬ]
+    │   ├── albums/new/page.tsx                               [СОЗДАТЬ]
+    │   ├── albums/[albumId]/edit/page.tsx                    [СОЗДАТЬ]
+    │   ├── _actions/album.action.ts                          [СОЗДАТЬ]
+    │   ├── _components/
+    │   │   ├── album-form.tsx                                [СОЗДАТЬ]
+    │   │   ├── albums-list.tsx                               [СОЗДАТЬ]
+    │   │   └── album-poem-selector.tsx                       [СОЗДАТЬ]
+    │   └── _types/album.types.ts                             [СОЗДАТЬ]
+    │
+    └── admin/players/[id]/
+        ├── page.tsx                                          [ИЗМЕНИТЬ]
+        └── _components/player-albums-admin.tsx               [СОЗДАТЬ]
+```
+
+---
+
+### Задачи (чеклист) — ✅ ВЫПОЛНЕНО 2026-05-17 (v3.35.0)
+
+#### Фаза 1: База данных
+
+- [x] Добавить модели `Album` и `AlbumPoem` в `schema.zmodel`
+- [x] Добавить `albums Album[]` в `Player`, `albumPoems AlbumPoem[]` в `Poem`
+- [x] `nx zenstack:generate grandslamcup`
+- [x] `nx db:migrate grandslamcup -- --name add_album`
+
+#### Фаза 2: API загрузки обложки
+
+- [x] `apps/grandslamcup/src/app/api/upload/album-cover/route.ts`
+
+#### Фаза 3: Server Actions
+
+- [x] `my/poems/_actions/album.action.ts` (9 actions)
+- [x] `my/poems/_types/album.types.ts`
+
+#### Фаза 4: Публичный UI
+
+- [x] `_components/album-poster.tsx` (Client Component)
+- [x] `_components/player-albums-list.tsx` (Server Component)
+- [x] `albums/[albumSlug]/page.tsx` с `generateMetadata`
+- [x] `albums/[albumSlug]/_components/album-poem-item.tsx`
+- [x] Обновить `[slug]/page.tsx` — добавить загрузку альбомов
+- [x] `(public)/players/[slug]/albums/[albumSlug]/page.tsx` (редирект-дубль)
+- [x] `(public)/[citySlug]/players/[slug]/albums/page.tsx` (все альбомы)
+
+#### Фаза 5: Управление в /my/poems
+
+- [x] `my/poems/page.tsx`
+- [x] `_components/album-form.tsx`
+- [x] `_components/albums-list.tsx`
+- [x] `_components/album-poem-selector.tsx`
+- [x] `_components/album-cover-upload.tsx`
+- [x] `my/poems/albums/new/page.tsx`
+- [x] `my/poems/albums/[albumId]/edit/page.tsx`
+
+#### Фаза 6: Admin
+
+- [x] Обновить `admin/players/[id]/page.tsx` — секция альбомов в карточке
+
+#### Фаза 7: Качество
+
+- [x] `nx typecheck:tsgo grandslamcup` — 0 ошибок в новых файлах
+- [x] `prisma/seed.ts` + `db:seed` target
+
+---
+
 ## Фаза 7 — Стабильность счетовода + Оффлайн (v3.30.0+)
 
 > Источник: инцидент 2026-04-14, матч СПб — таймер ушёл в минус, интерфейс завис.
@@ -1263,14 +2839,14 @@ model SwissPair {
 
 ## 12. Открытые вопросы
 
-| #   | Вопрос                                                                                                  | Кого спросить |
-| --- | ------------------------------------------------------------------------------------------------------- | ------------- |
-| 1   | ~~Карточки: влияют на баллы? Что при красной? 2 жёлтые = красная?~~ ✅ Ответ в правилах Москвы 2.0      | Решён         |
-| 2   | Есть ли данные поэт-по-поэту за прошлые сезоны (или только итоговые счета)?                             | Организатор   |
-| 3   | ~~Москва — те же правила? Есть ли отличия?~~ ✅ Получены правила КБС-Москва 2.0, реализована поддержка  | Решён         |
-| 4   | Домен — оставляем grandslamcup.ru?                                                                      | Организатор   |
-| 5   | Нужна ли регистрация зрителей (для будущих фич — донаты, подписки)?                                     | Организатор   |
-| 6   | Генератор round-robin расписания — нужен, или организатор составляет вручную?                           | Организатор   |
-| 7   | Может ли поэт играть в обоих таймах? На Tilda есть такие данные (Стрельникова — оба тайма одного матча) | Организатор   |
-| 8   | ~~Роль «Продюсер команды» — какие права?~~ ✅ Роль не существует в КБС, удалить                         | Решён         |
-| 9   | Есть ли страницы московских команд на Tilda? Или только СПб?                                            | Организатор   |
+| # | Вопрос                                                                                                  | Кого спросить |
+| - | ------------------------------------------------------------------------------------------------------- | ------------- |
+| 1 | ~~Карточки: влияют на баллы? Что при красной? 2 жёлтые = красная?~~ ✅ Ответ в правилах Москвы 2.0      | Решён         |
+| 2 | Есть ли данные поэт-по-поэту за прошлые сезоны (или только итоговые счета)?                             | Организатор   |
+| 3 | ~~Москва — те же правила? Есть ли отличия?~~ ✅ Получены правила КБС-Москва 2.0, реализована поддержка  | Решён         |
+| 4 | Домен — оставляем grandslamcup.ru?                                                                      | Организатор   |
+| 5 | Нужна ли регистрация зрителей (для будущих фич — донаты, подписки)?                                     | Организатор   |
+| 6 | Генератор round-robin расписания — нужен, или организатор составляет вручную?                           | Организатор   |
+| 7 | Может ли поэт играть в обоих таймах? На Tilda есть такие данные (Стрельникова — оба тайма одного матча) | Организатор   |
+| 8 | ~~Роль «Продюсер команды» — какие права?~~ ✅ Роль не существует в КБС, удалить                         | Решён         |
+| 9 | Есть ли страницы московских команд на Tilda? Или только СПб?                                            | Организатор   |

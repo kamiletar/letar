@@ -663,6 +663,7 @@ model Player {
   rosterApplications RosterApplication[]
   suspensions        PlayerSuspension[]
   poems              Poem[]
+  albums             Album[]
   victoryPoemMatches Match[]            @relation("VictoryPoem")
 
   @@allow('read', true)
@@ -1398,13 +1399,61 @@ model Poem {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  player Player @relation(fields: [playerId], references: [id])
+  player     Player      @relation(fields: [playerId], references: [id])
+  albumPoems AlbumPoem[]
 
   /// Публичные стихи видны всем, черновики — только автору
   @@allow('read', published || (auth() != null && player.userId == auth().id))
   @@allow('create,update,delete', auth() != null && player.userId == auth().id)
   @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
   @@index([playerId])
+}
+
+// ========================================
+// Альбомы стихов
+// ========================================
+
+/// Альбом стихотворений поэта
+model Album {
+  id          String      @id @default(cuid())
+  /// Название альбома
+  title       String
+  /// URL-slug
+  slug        String      @unique
+  /// Путь к обложке (через /api/files/)
+  coverImage  String?
+  /// null = черновик, дата = опубликован
+  publishedAt DateTime?
+  /// Автор-поэт
+  playerId    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  player     Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  albumPoems AlbumPoem[]
+
+  @@index([playerId])
+  @@index([playerId, publishedAt])
+  @@allow('read', publishedAt != null || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Стихотворение в альбоме (pivot)
+model AlbumPoem {
+  id        String @id @default(cuid())
+  albumId   String
+  poemId    String
+  sortOrder Int    @default(0)
+
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  poem  Poem  @relation(fields: [poemId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, poemId])
+  @@index([albumId, sortOrder])
+  @@allow('read', album.publishedAt != null || (auth() != null && album.player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && album.player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
 }
 
 // ========================================
