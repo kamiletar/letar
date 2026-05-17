@@ -1,0 +1,49 @@
+{
+  "artifacts": [
+    {
+      "name": "architecture-docs",
+      "path": "./.claude/docs",
+      "description": "Архитектурная документация монорепо letar: архитектура всех приложений (premium-rosstil, imot, driving-school, kami, mandala, auth-hub, archetest, time, animatrona), БД (ZenStack v3 + Prisma 7.6 + PostgreSQL), формы (@letar/forms v0.79), аутентификация (Better Auth + OIDC + Organizations), деплой (Docker + deploy-affected.sh), стиль кода, MCP серверы, e2e тестирование (Playwright/Cypress), PWA offline (Serwist + IndexedDB), email (Maddy), personal-data (152-ФЗ, cookie-согласия), images (WebP, thumbnails), data-fetching (TanStack Query + Server Actions)."
+    },
+    {
+      "name": "skill-patterns",
+      "path": "./.claude/skills",
+      "description": "Паттерны и рецепты разработки monorepo letar: zenstack-helper (schema.zmodel, @@allow/@@deny, @allow/@deny field-level ACL, Custom Procedures, ZenStack v3 quirks — нет _count, нет $transaction, enum как string), better-auth (betterAuth(), auth.api.getSession(), Organizations plugin, OIDC Provider trustedClients), chakra-theming (dark/light mode, semantic tokens, recipes), nextjs-expert (Server/Client components, App Router, proxy.ts вместо middleware.ts), nx-monorepo (nx run-many, nx affected, кэш), pwa-offline (useOfflineForm, Serwist, useSyncQueue), tanstack-query (useQuery, useMutation, useInfiniteQuery), i18n-multilingual (next-intl, FormI18nProvider), ecommerce-patterns, deployment-assistant, email-maddy."
+    },
+    {
+      "name": "project-rules",
+      "path": "./.claude/rules",
+      "description": "Обязательные правила монорепо: git (формат коммитов feat/fix/refactor/docs/test/chore, работа с git submodules — checkout main внутри submodule, запрет git reset в монорепо с несколькими агентами), security (Zod .strip(), ZenStack access policies, XSS, секреты только в .env.local/.env.docker), env-files (PORT в .env, secrets в .env.local, .env.docker не коммитить), deploy-coordination (запрос деплоя через BlackCove/Agent Mail — запрещено запускать deploy-affected.sh самостоятельно), agent-mail (macro_start_session при старте, резервация файлов)."
+    },
+    {
+      "name": "main-conventions",
+      "path": "./CLAUDE.md",
+      "description": "Главные конвенции монорепо letar: стек (Next.js 16.2, React 19, Chakra UI v3.34, ZenStack 3.5, Prisma 7.6, Zod v4.3, Bun, Nx 22.6), ЗАПРЕЩЁН export default (только именованные экспорты, исключения: page.tsx, layout.tsx, loading.tsx, error.tsx, not-found.tsx, route.ts), комментарии в коде на русском языке, критичные импорты (import { Form } from '@letar/forms', import { z } from 'zod/v4', import { getEnhancedPrisma } from '@/lib/db', import { GenderFormSchema } from '@/generated/form-schemas/enums/Gender.form'), workflow схемы БД (schema.zmodel → nx zenstack:generate → nx db:push), команды nx (dev, build, test, lint, typecheck:tsgo, zenstack:generate, db:push)."
+    },
+    {
+      "name": "forms-readme",
+      "path": "./libs/forms/README.md",
+      "description": "Полное API @letar/forms: декларативный Form API (createForm, <Form initialValue schema onSubmit>, Form.Field.String/Number/Textarea/Date/Password/Select/Combobox/Checkbox/Switch/RadioGroup/ColorPicker/Schedule/Editable, Form.Group/Form.Group.List, Form.Button.Submit, Form.Errors), imperative API (useAppForm, TanStackFormField, ChakraFormField, FormGroup, FormGroupList), offline (useOfflineForm, FormOfflineIndicator), persistence (localStorage, useFormPersistence), i18n (FormI18nProvider, useLocalizedOptions), mapServerErrors, applyServerErrors, withUIMeta, withUIMetaDeep, enumMeta, relationMeta."
+    },
+    {
+      "name": "db-schema-premium-rosstil",
+      "path": "./apps/premium-rosstil/schema.zmodel",
+      "description": "ZenStack схема БД для premium-rosstil (e-commerce интернет-магазин одежды): модели User (role: USER/ADMIN), Product, ProductVariant, ProductItem, ProductSize (международные размеры: ru/de/it/fr/uk/us, мерки bust/waist/hips), Cart+CartItem, Order+OrderItem (снэпшоты данных, статусы NEW/CONFIRMED/PROCESSING/SHIPPED/DELIVERED/CANCELLED), Address (DaData интеграция), Wishlist, NotificationPreferences. ZenStack v3 policies: @@allow('all', auth().role == ADMIN), @@allow('read', auth() == this)."
+    },
+    {
+      "name": "db-schema-driving-school",
+      "path": "./apps/driving-school/schema.zmodel",
+      "description": "Эталонная ZenStack схема с мультитенантностью: Better Auth Organizations (School → Member → роли OWNER/SCHOOL_ADMIN/INSTRUCTOR/STUDENT через массив UserRole[]), has(auth().roles, ROLE), field-level @allow/@deny (email, phone только owner/OWNER), Custom Procedures (initiateTransfer, processPayment), ZenStack v3 ORM. Ключевые модели: School (организация), Member, InstructorProfile, StudentProfile, Lesson, Schedule, Payment. Эталон Organizations + multi-role patterns."
+    },
+    {
+      "name": "db-schema-auth-hub",
+      "path": "./apps/auth-hub/schema.zmodel",
+      "description": "ZenStack схема для auth.letar.best (централизованный сервис авторизации): модели User, Account (OAuth), Session, OauthApplication (OIDC клиенты), VerificationToken (PIN верификация: 6-значный код, pinExpires, pinAttempts max 5). OIDC Provider plugin, trustedClients (skipConsent для своих приложений), подключённые клиенты: archetest-prod."
+    },
+    {
+      "name": "db-schema-imot",
+      "path": "./apps/imot/schema.zmodel",
+      "description": "ZenStack схема для IMOT (психотерапевтическая платформа): мультиролевая система (CLIENT, SPECIALIST, ADMIN). Модели: User, DiagnosticSession, TherapyPlan, Practice, ProgressRecord, Analytics. ZenStack v3 policies по ролям."
+    }
+  ]
+}
