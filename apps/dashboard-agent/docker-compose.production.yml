@@ -54,6 +54,7 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/time/.env.docker:/secrets/time.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/form-example/.env.docker:/secrets/form-example.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/grandslamcup/.env.docker:/secrets/grandslamcup.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
     networks:
       - premium-network
     healthcheck:

@@ -133,6 +133,16 @@ const APP_CONFIG = {
       user: 'forms',
     },
   },
+  dsperevod: {
+    secretsPath: '/secrets/dsperevod.env',
+    containerName: 'dsperevod-db',
+    defaults: {
+      host: 'dsperevod-db',
+      port: 5432,
+      database: 'dsperevod',
+      user: 'dsperevod',
+    },
+  },
   grandslamcup: {
     secretsPath: '/secrets/grandslamcup.env',
     containerName: 'grandslamcup-db',
@@ -371,7 +381,7 @@ export async function getAllDatabaseStatuses(): Promise<DatabaseStatus[]> {
         port: config.port,
         database: config.database,
       }
-    })
+    }),
   )
 
   return statuses
@@ -601,7 +611,7 @@ export async function getAllDatabaseStats(filterDbName?: string): Promise<Databa
           error: error instanceof Error ? error.message : 'Unknown error',
         }
       }
-    })
+    }),
   )
 
   return stats

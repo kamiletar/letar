@@ -31,6 +31,7 @@ export const SERVER_APPS: Record<string, CronServer> = {
   'form-example': 's2',
   'form-docs': 's2',
   grandslamcup: 's2',
+  dsperevod: 's2',
 }
 
 /** Получить сервер для приложения */
