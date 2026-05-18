@@ -27,10 +27,10 @@ export async function DELETE(_request: NextRequest, { params }: { params: Params
     return NextResponse.json({ error: 'Задание не найдено' }, { status: 404 })
   }
 
-  // Нельзя удалять активные задания — только ошибочные и откреплённые
-  if (job.status !== 'FAILED' && job.status !== 'UNPINNED') {
+  // PINNED нельзя удалять из БД без открепления — сначала unpin
+  if (job.status === 'PINNED') {
     return NextResponse.json(
-      { error: `Удаление возможно только для FAILED/UNPINNED, текущий: ${job.status}` },
+      { error: 'Нельзя удалить запинованное задание — сначала открепите контент' },
       { status: 400 }
     )
   }
