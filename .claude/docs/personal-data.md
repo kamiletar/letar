@@ -212,7 +212,93 @@ consentAccepted: true as const,  // предотмечен — нарушени�
 
 ---
 
-## 5. Таблица ConsentLog в схеме БД
+## 5. Аналитика и сторонние скрипты — инициализация только после согласия
+
+Аналитические скрипты (Яндекс.Метрика, Umami, GTM) **нельзя загружать до получения согласия** пользователя — они передают данные третьей стороне и попадают под ст. 6 ФЗ-152 (согласие субъекта).
+
+### Особо чувствительный функционал
+
+Яндекс.Метрика с включённым **webvisor** записывает видеосессии пользователей (движения мыши, клики, скролл). Это однозначно персональные данные. Не инициализировать до `analytics: true` в согласии.
+
+### Библиотека `@letar/yandex-metrika`
+
+Компонент поддерживает проп `hasConsent`:
+
+```tsx
+// undefined — инициализировать сразу (обратная совместимость)
+// false     — не инициализировать (ждём согласия)
+// true      — инициализировать
+
+<YandexMetrika YM_COUNTER_ID={86731395} hasConsent={hasConsent} />
+```
+
+### Паттерн: consent-aware обёртка (эталон — dsperevod)
+
+```
+apps/dsperevod/src/app/_components/yandex-metrika-consent.tsx
+```
+
+```tsx
+'use client'
+
+import { CONSENT_STORAGE_KEY, type CookieConsentState } from '@/lib/consent'
+import { YandexMetrika } from '@letar/yandex-metrika'
+import { useEffect, useState } from 'react'
+
+function readAnalyticsConsent(): boolean {
+  try {
+    const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY)
+    if (!raw) return false
+    return (JSON.parse(raw) as CookieConsentState).analytics === true
+  } catch {
+    return false
+  }
+}
+
+export function YandexMetrikaConsent({ counterId }: { counterId: number }) {
+  const [hasConsent, setHasConsent] = useState(false)
+
+  useEffect(() => {
+    setHasConsent(readAnalyticsConsent())
+
+    function onConsentChange(e: Event) {
+      const state = (e as CustomEvent<CookieConsentState>).detail
+      setHasConsent(state.analytics === true)
+    }
+
+    window.addEventListener('dsperevod:consent-change', onConsentChange)
+    return () => window.removeEventListener('dsperevod:consent-change', onConsentChange)
+  }, [])
+
+  return <YandexMetrika YM_COUNTER_ID={counterId} hasConsent={hasConsent} />
+}
+```
+
+Компонент:
+
+- При монтировании читает `localStorage` (пользователь мог дать согласие в прошлый визит)
+- Подписывается на кастомное событие `<app>:consent-change`, которое диспатчит `CookieBanner` при сохранении выбора
+- Передаёт актуальный `hasConsent` в `YandexMetrika` — счётчик инициализируется реактивно
+
+### Подключение в layout.tsx
+
+```tsx
+// layout.tsx
+<YandexMetrikaConsent counterId={Number(process.env.NEXT_PUBLIC_YM_COUNTER_ID) || 0} />
+```
+
+```env
+# .env.docker
+NEXT_PUBLIC_YM_COUNTER_ID=86731395
+```
+
+### Umami
+
+`UmamiScript` из `@letar/analytics` возвращает `null` если `NEXT_PUBLIC_UMAMI_WEBSITE_ID` не задан — для деинициализации достаточно очистить переменную или скрыть компонент аналогичным паттерном.
+
+---
+
+## 6. Таблица ConsentLog в схеме БД
 
 ```zmodel
 model ConsentLog {
@@ -234,7 +320,7 @@ model ConsentLog {
 
 ---
 
-## 6. Чеклист при создании нового приложения, собирающего ПД
+## 7. Чеклист при создании нового приложения, собирающего ПД
 
 - [ ] Сервер находится в России (ст. 18 ч. 5 ФЗ-152)
 - [ ] Страница `/privacy` с политикой обработки ПДн
@@ -245,5 +331,6 @@ model ConsentLog {
 - [ ] Чекбокс согласия в форме регистрации (не предотмечен)
 - [ ] Чекбокс согласия в формах сбора ПД (чекаут и т.п.) с кликабельными ссылками
 - [ ] Право на удаление аккаунта в ЛК (`deleteAccountAction`)
+- [ ] Аналитика (Яндекс.Метрика, Umami) инициализируется **только после** `analytics: true` в согласии — использовать consent-aware обёртку (эталон: `YandexMetrikaConsent` в dsperevod)
 - [ ] **Подача уведомления в РКН** (блокер публичного запуска)
 - [ ] Добавить номер оператора РКН в README/PLAN приложения после подачи
