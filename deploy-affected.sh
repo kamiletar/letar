@@ -295,8 +295,14 @@ if [ -f "bun.lock" ]; then
       fi
     else
       if ! run_bun_install --frozen-lockfile; then
-        echo -e "${RED}❌ Failed to install dependencies with bun${NC}"
-        exit 1
+        # Fallback: --frozen-lockfile может падать если некоторые workspace-пути
+        # (uninitialized submodules) отсутствуют на этом сервере. Это не меняет
+        # реальные версии пакетов — повторяем без флага.
+        echo -e "${YELLOW}⚠️  --frozen-lockfile failed (возможно uninitialized submodules). Повторяю без флага...${NC}"
+        if ! run_bun_install; then
+          echo -e "${RED}❌ Failed to install dependencies with bun${NC}"
+          exit 1
+        fi
       fi
     fi
 else
