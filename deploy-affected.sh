@@ -237,6 +237,11 @@ if [ "$SKIP_GIT" = false ]; then
   # Get current branch
   CURRENT_BRANCH=$(git branch --show-current)
 
+  # Сбрасываем bun.lock перед pull — bun install без --frozen-lockfile обновляет
+  # его на сервере (убирает записи для неинициализированных submodule), и git pull
+  # упал бы с "local changes would be overwritten". Реальные версии пакетов не меняются.
+  git checkout -- bun.lock 2>/dev/null || true
+
   # Pull changes
   if ! git pull origin $CURRENT_BRANCH; then
     echo -e "${RED}❌ Failed to pull changes from git${NC}"
