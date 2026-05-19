@@ -2,6 +2,7 @@
 package queue
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -20,6 +21,12 @@ var retryBackoffs = []time.Duration{30 * time.Second, 60 * time.Second, 120 * ti
 // Kubo может обрывать долгий pin/add стрим (server-side timeout), но блоки
 // остаются в datastore — новый pin/add продолжит с того же места.
 const maxStreamReconnects = 50
+
+// Количество последовательных reconnect-попыток без единого нового блока,
+// после которых считаем сидер недоступным и прерываем цикл досрочно.
+// Каждая попытка ограничена idleTimeout (5 мин) → fast-fail через ~15 мин
+// вместо ~250 мин при maxStreamReconnects=50.
+const maxZeroProgressReconnects = 3
 
 // Пауза между переподключениями стрима
 const streamReconnectDelay = 5 * time.Second
@@ -128,11 +135,14 @@ func (w *Worker) processNext() {
 
 	// Резилиентный pin/add: при обрыве стрима переподключаемся до maxStreamReconnects раз.
 	// Блоки уже в datastore Kubo — новый pin/add продолжит с того же места.
+	// Fast-fail: если нет прогресса maxZeroProgressReconnects раз подряд — сидер офлайн.
 	var lastErr error
 	var totalBlocks int
+	var zeroProgressStreak int // последовательные попытки без новых блоков
 	success := false
 
 	for attempt := 0; attempt < maxStreamReconnects; attempt++ {
+		prevBlocks := totalBlocks
 		blocks, err := w.kubo.PinAddWithProgress(entry.CID, progressCallback)
 		if err == nil {
 			// Финальное событие получено — pin подтверждён
@@ -146,6 +156,20 @@ func (w *Worker) processNext() {
 			totalBlocks = blocks
 		}
 
+		// Fast-fail: если нет новых блоков несколько попыток подряд — сидер недоступен.
+		// Если прогресс есть — streak сбрасывается, продолжаем нормально.
+		if totalBlocks == prevBlocks {
+			zeroProgressStreak++
+			if zeroProgressStreak >= maxZeroProgressReconnects {
+				log.Printf("Fast-fail для %s: нет новых блоков %d попыток подряд — сидер недоступен",
+					entry.CID, zeroProgressStreak)
+				lastErr = fmt.Errorf("сидер недоступен: нет прогресса после %d попыток", zeroProgressStreak)
+				break
+			}
+		} else {
+			zeroProgressStreak = 0
+		}
+
 		// Проверяем — может уже запинен через параллельную операцию?
 		pinned, checkErr := w.kubo.PinLs(entry.CID)
 		if checkErr == nil && pinned {
@@ -154,7 +178,8 @@ func (w *Worker) processNext() {
 			break
 		}
 
-		log.Printf("Стрим обрыв для %s (попытка %d/%d): %s — переподключаюсь", entry.CID, attempt+1, maxStreamReconnects, err)
+		log.Printf("Стрим обрыв для %s (попытка %d/%d, блоков: %d, без прогресса: %d): %s — переподключаюсь",
+			entry.CID, attempt+1, maxStreamReconnects, totalBlocks, zeroProgressStreak, err)
 		time.Sleep(streamReconnectDelay)
 	}
 
