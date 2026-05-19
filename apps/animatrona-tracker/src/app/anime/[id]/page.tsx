@@ -6,6 +6,7 @@ import { getOnlineSeedCount } from '@/lib/redis-distributions'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
+import type { AnimeAdminData } from './_components/anime-page-client'
 import { AnimePageClient } from './_components/anime-page-client'
 import type { SimilarAnimeItem } from './_components/similar-section'
 
@@ -141,6 +142,64 @@ async function findSimilarAnime(animeId: string, genres: string[], limit = 12): 
 }
 
 /**
+ * Загрузка данных для вкладки администратора: пин-сервер + зрители.
+ * Вызывается только если role === 'ADMIN'.
+ */
+async function loadAdminData(animeId: string): Promise<AnimeAdminData> {
+  const [animeWithPin, libraryItems] = await Promise.all([
+    prisma.anime.findUnique({
+      where: { id: animeId },
+      select: {
+        pinnedOn: {
+          select: {
+            id: true,
+            name: true,
+            role: true,
+            status: true,
+            apiUrl: true,
+            peerId: true,
+            usedBytes: true,
+            capacityBytes: true,
+          },
+        },
+      },
+    }),
+    prisma.userLibraryItem.findMany({
+      where: { animeId },
+      orderBy: { addedAt: 'desc' },
+      take: 50,
+      select: {
+        userId: true,
+        watchStatus: true,
+        userRating: true,
+        addedAt: true,
+        pinnedLocally: true,
+        user: { select: { name: true, image: true } },
+      },
+    }),
+  ])
+
+  return {
+    pinnedOn: animeWithPin?.pinnedOn
+      ? {
+          ...animeWithPin.pinnedOn,
+          usedBytes: Number(animeWithPin.pinnedOn.usedBytes),
+          capacityBytes: Number(animeWithPin.pinnedOn.capacityBytes),
+        }
+      : null,
+    viewers: libraryItems.map((item) => ({
+      userId: item.userId,
+      userName: item.user.name,
+      userImage: item.user.image,
+      watchStatus: item.watchStatus,
+      userRating: item.userRating,
+      addedAt: item.addedAt,
+      pinnedLocally: item.pinnedLocally,
+    })),
+  }
+}
+
+/**
  * Страница детальной информации об аниме.
  *
  * Загружает данные из БД + IPFS-манифест (параллельно).
@@ -162,12 +221,15 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 
   // Параллельная загрузка: манифест из IPFS + libraryMap из БД + похожие аниме + комментарии + сиды
   const db = getEnhancedPrisma(session?.user)
-  const [manifestResult, libraryMap, similarAnime, commentCount, onlineSeedCount] = await Promise.all([
+  const isAdmin = session?.user?.role === 'ADMIN'
+
+  const [manifestResult, libraryMap, similarAnime, commentCount, onlineSeedCount, adminData] = await Promise.all([
     anime.directoryCid ? loadAnimeManifestData(anime.directoryCid).catch(() => null) : null,
     getCachedLibraryMap(),
     findSimilarAnime(anime.id, anime.genres),
     db.animeComment.count({ where: { animeId: anime.id } }),
     getOnlineSeedCount(anime.id),
+    isAdmin ? loadAdminData(anime.id) : null,
   ])
 
   // Преобразуем Map → Record для сериализации (Server → Client)
@@ -220,6 +282,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
       userRole={session?.user?.role}
       commentCount={commentCount}
       onlineSeedCount={onlineSeedCount}
+      adminData={adminData ?? undefined}
     />
   )
 }

@@ -18,6 +18,7 @@ import type {
 import { Breadcrumbs } from '@/app/_components/breadcrumbs'
 
 import { AboutSection } from './about-section'
+import { AdminSection } from './admin-section'
 import { AnimeDetailTabs } from './anime-detail-tabs'
 import { AnimeHero } from './anime-hero'
 import { CommentsSection } from './comments-section'
@@ -72,6 +73,29 @@ interface ManifestData {
   videos: AnimeManifestVideo[]
 }
 
+/** Данные для вкладки администратора */
+export interface AnimeAdminData {
+  pinnedOn: {
+    id: string
+    name: string
+    role: string
+    status: string
+    apiUrl: string
+    peerId: string | null
+    usedBytes: number
+    capacityBytes: number
+  } | null
+  viewers: Array<{
+    userId: string
+    userName: string | null
+    userImage: string | null
+    watchStatus: string
+    userRating: number | null
+    addedAt: Date
+    pinnedLocally: boolean
+  }>
+}
+
 export interface AnimePageClientProps {
   anime: AnimeDbData
   manifestData: ManifestData
@@ -88,6 +112,8 @@ export interface AnimePageClientProps {
   commentCount?: number
   /** Количество онлайн сидов (из Redis) */
   onlineSeedCount?: number
+  /** Данные для вкладки администратора (только для ADMIN) */
+  adminData?: AnimeAdminData
 }
 
 export function AnimePageClient({
@@ -101,6 +127,7 @@ export function AnimePageClient({
   userRole,
   commentCount,
   onlineSeedCount,
+  adminData,
 }: AnimePageClientProps) {
   const { manifest, relations, franchiseGraph, videos } = manifestData
   const previewMap = new Map(Object.entries(manifestData.previewMap).map(([k, v]) => [Number(k), v] as const))
@@ -215,6 +242,13 @@ export function AnimePageClient({
                 currentUserRole={userRole}
               />
             ),
+            admin: adminData ? (
+              <AdminSection
+                pinnedOn={adminData.pinnedOn}
+                viewers={adminData.viewers}
+                viewCount={anime.viewCount}
+              />
+            ) : undefined,
           }}
         />
       </Container>

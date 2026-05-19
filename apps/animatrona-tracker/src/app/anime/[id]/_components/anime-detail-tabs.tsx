@@ -28,6 +28,7 @@ interface AnimeDetailTabsProps {
     similar?: ReactNode
     videos?: ReactNode
     comments?: ReactNode
+    admin?: ReactNode
   }
 }
 
@@ -51,6 +52,9 @@ export function AnimeDetailTabs({ episodeCount, commentCount, sections }: AnimeD
   }
   if (sections.comments) {
     tabs.push({ value: 'comments', label: 'Комментарии', badge: commentCount, content: sections.comments })
+  }
+  if (sections.admin) {
+    tabs.push({ value: 'admin', label: '⚙ Админ', content: sections.admin })
   }
 
   return (
