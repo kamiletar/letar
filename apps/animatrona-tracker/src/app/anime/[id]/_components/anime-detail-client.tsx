@@ -54,7 +54,7 @@ interface AnimeDetail {
   titleOriginal: string | null
   description: string | null
   coverUrl: string | null
-  manifestCid: string
+  directoryCid: string | null
   year: number | null
   studio: string | null
   genres: string[]
@@ -96,7 +96,7 @@ export function AnimeDetailClient({
   const coverUrl = resolveImageUrl(anime.coverUrl)
 
   // URL для открытия в Animatrona (deep link)
-  const animatronaUrl = `animatrona://import/${anime.manifestCid}`
+  const animatronaUrl = `animatrona://open/${anime.directoryCid}`
 
   /** Запинить аниме на автовыбранный сервер */
   const handlePin = async () => {
@@ -141,7 +141,7 @@ export function AnimeDetailClient({
   }
 
   const handleCopyManifestCid = async () => {
-    await navigator.clipboard.writeText(anime.manifestCid)
+    await navigator.clipboard.writeText(anime.directoryCid ?? '')
     setCopied(true)
     // Очищаем предыдущий таймаут — предотвращаем утечку при быстрых кликах
     if (copyTimeoutRef.current) {
@@ -217,7 +217,7 @@ export function AnimeDetailClient({
               {/* QR код */}
               {showQR && (
                 <Box p={4} bg="white" borderRadius="lg" display="flex" justifyContent="center">
-                  <QRCodeSVG value={anime.manifestCid} size={200} level="M" />
+                  <QRCodeSVG value={anime.directoryCid ?? ''} size={200} level="M" />
                 </Box>
               )}
 
@@ -232,11 +232,11 @@ export function AnimeDetailClient({
               {/* Manifest CID */}
               <Box p={3} bg="bg.subtle" borderRadius="lg">
                 <Text fontSize="xs" color="fg.muted" mb={1}>
-                  Manifest CID
+                  Directory CID
                 </Text>
                 <HStack>
                   <Text fontSize="xs" fontFamily="mono" wordBreak="break-all" flex={1}>
-                    {anime.manifestCid}
+                    {anime.directoryCid}
                   </Text>
                   <Button size="xs" variant="ghost" onClick={handleCopyManifestCid}>
                     <Icon as={LuCopy} />
