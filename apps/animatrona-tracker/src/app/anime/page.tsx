@@ -248,27 +248,18 @@ export default async function AnimePage({ searchParams }: AnimePageProps) {
     franchiseCounts = data.counts
   }
 
-  // AND-массив обязателен при использовании getEnhancedPrisma — ZenStack v3 инжектирует
-  // access policies к where-условию, и spread на верхнем уровне может конфликтовать
-  // с политиками при наличии нескольких фильтров (особенно ageRating + genres).
-  const andFilters = (
-    [
-      titleFilter,
-      genreFilter,
-      yearFilter,
-      ageRatingFilter,
-      studioFilter,
-      directorFilter,
-      episodeCountFilter,
-      watchStatusFilter,
-      voiceActingFilter,
-      franchiseHiddenFilter,
-    ] as Record<string, unknown>[]
-  ).filter((f) => Object.keys(f).length > 0)
-
   const where = {
     status: 'PUBLISHED' as const,
-    ...(andFilters.length > 0 ? { AND: andFilters } : {}),
+    ...titleFilter,
+    ...genreFilter,
+    ...yearFilter,
+    ...ageRatingFilter,
+    ...studioFilter,
+    ...directorFilter,
+    ...episodeCountFilter,
+    ...watchStatusFilter,
+    ...voiceActingFilter,
+    ...franchiseHiddenFilter,
   }
 
   // Сортировка
@@ -309,7 +300,7 @@ export default async function AnimePage({ searchParams }: AnimePageProps) {
         title: true,
         titleOriginal: true,
         coverUrl: true,
-        manifestCid: true,
+        directoryCid: true,
         shikimoriId: true,
         franchiseKey: true,
         year: true,
