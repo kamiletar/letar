@@ -30,6 +30,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "aboi"],
       "port": 3018
+    },
+    {
+      "name": "dsperevod",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "dsperevod"],
+      "port": 3019
     }
   ]
 }

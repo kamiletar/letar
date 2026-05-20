@@ -14,12 +14,13 @@
 - **Низкая уверенность** в конвенции — лучше спросить локальную модель
 
 ```typescript
-mcp__letar - consultant__consult_letar({
-  question:
-    'Как в letar реализована мультитенантность в driving-school? Какой паттерн использовать для нового приложения?',
-  mode: 'architecture', // navigation | architecture | convention | auto
-  chunks: 10, // количество чанков из RAG (3–20)
-})
+mcp__letar -
+  consultant__consult_letar({
+    question:
+      'Как в letar реализована мультитенантность в driving-school? Какой паттерн использовать для нового приложения?',
+    mode: 'architecture', // navigation | architecture | convention | auto
+    chunks: 10, // количество чанков из RAG (3–20)
+  })
 ```
 
 ### `consultant_status` — диагностика
@@ -51,13 +52,14 @@ mcp__letar - consultant__consultant_status()
 
 ## Технические детали
 
-- **Движок:** llama.cpp server (`localhost:8080`) — быстрее Ollama, нативный MXFP4 на Blackwell
-- **Модель:** Gemma 4 26B MXFP4 (~15.5 ГБ, полностью в VRAM RTX 5080, ~62 т/с)
-- **API:** OpenAI-совместимый `/v1/chat/completions` (работает и с Ollama если нужен fallback)
-- **RAG:** Qdrant (`localhost:6333`) + nomic-embed-text через Ollama
-- **Таймаут:** до 2 минут (обычно 10–20 сек на Gemma 4 при полном VRAM)
+- **Движок:** llama.cpp server (`localhost:8080`)
+- **Модель (дефолт):** Qwen2.5-Coder-14B-Instruct Q4_K_M (~8.5 ГБ VRAM, 7+ ГБ свободно)
+- **Gemma 4 26B** — через `-UseGemma4`, но 97% VRAM → shared memory overflow в RAM
+- **API:** OpenAI-совместимый `/v1/chat/completions`
+- **RAG:** Qdrant (`localhost:6333`) + nomic-embed-text через Ollama (CPU-only, `num_gpu: 0`)
+- **Таймаут:** до 2 минут (обычно 15–30 сек на Qwen2.5-14B)
 - **Запуск сервера:** `.\scripts\llm\start-llm-server.ps1`
-- **Fallback на Ollama:** поменяй `OLLAMA_URL` на `http://localhost:11434` в `.mcp.json`
+- **С Gemma 4:** `.\scripts\llm\start-llm-server.ps1 -UseGemma4`
 
 ## Если не работает
 

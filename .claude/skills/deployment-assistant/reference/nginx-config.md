@@ -156,3 +156,5 @@ docker inspect nginx-proxy-manager | grep -A 20 Networks
 | driving-school  | driving-school-app  | 3003 |
 | mandala         | mandala-app         | 3004 |
 | kami            | kami-app            | 3005 |
+| dsperevod       | dsperevod-app       | 3019 |
+| aboi            | aboi-app            | 3019 |

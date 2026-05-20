@@ -50,6 +50,8 @@ async function createEmbedding(text: string, config: Required<RetrieveConfig>): 
     body: JSON.stringify({
       model: config.embedModel,
       input: text,
+      // Принудительно на CPU — не конкурируем с llama-server за VRAM
+      options: { num_gpu: 0 },
     }),
     signal: AbortSignal.timeout(15_000),
   })
@@ -85,11 +87,7 @@ interface QdrantPoint {
 /**
  * Ищет релевантные чанки в Qdrant по вектору.
  */
-async function searchQdrant(
-  vector: number[],
-  limit: number,
-  config: Required<RetrieveConfig>,
-): Promise<QdrantPoint[]> {
+async function searchQdrant(vector: number[], limit: number, config: Required<RetrieveConfig>): Promise<QdrantPoint[]> {
   const response = await fetch(`${config.qdrantUrl}/collections/${config.collection}/points/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -137,11 +135,7 @@ function normalizeChunk(point: QdrantPoint): CodeChunk | null {
  * Ищет top-K релевантных чанков по смысловому запросу.
  * Использует прямой доступ к Qdrant (минуя MCP).
  */
-export async function retrieveChunks(
-  query: string,
-  limit = 10,
-  config: RetrieveConfig = {},
-): Promise<CodeChunk[]> {
+export async function retrieveChunks(query: string, limit = 10, config: RetrieveConfig = {}): Promise<CodeChunk[]> {
   const cfg = { ...DEFAULT_RETRIEVE_CONFIG, ...config }
 
   try {
@@ -170,9 +164,10 @@ export function formatChunksForPrompt(chunks: CodeChunk[]): string {
   return chunks
     .map((chunk, i) => {
       const location = chunk.startLine ? `${chunk.filePath}:${chunk.startLine}` : chunk.filePath
-      return `### [${i + 1}] ${location} (score: ${chunk.score.toFixed(2)})\n\`\`\`\n${
-        chunk.content.slice(0, 800)
-      }\n\`\`\``
+      return `### [${i + 1}] ${location} (score: ${chunk.score.toFixed(2)})\n\`\`\`\n${chunk.content.slice(
+        0,
+        800
+      )}\n\`\`\``
     })
     .join('\n\n')
 }

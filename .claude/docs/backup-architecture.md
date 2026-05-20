@@ -189,8 +189,8 @@ Resilio Sync настроен на **s1** для синхронизации ко
 
 ### Синхронизируемые папки
 
-| Сервер | Папка на сервере    | Папка на Windows        | Папка на pinner2        | Ключ (RO)                           |
-| ------ | ------------------- | ----------------------- | ----------------------- | ----------------------------------- |
+| Сервер | Папка на сервере     | Папка на Windows        | Папка на pinner2        | Ключ (RO)                           |
+| ------ | -------------------- | ----------------------- | ----------------------- | ----------------------------------- |
 | s1     | `/home/deploy/letar` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | `BF4CG4PGSUUYLE2W5CQBWOV5455FC6ZFV` |
 | s2     | `/home/deploy/letar` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | `BQPKQX2W2GDWRKJHKGHJCEAJ32NDI4PZC` |
 
@@ -198,13 +198,36 @@ Resilio Sync настроен на **s1** для синхронизации ко
 
 ### Исключения из синхронизации (`.sync/IgnoreList`)
 
+Стратегия: синхронизируются только **uploads** всех приложений и папка **backups**. Всё остальное восстанавливается из git (`git pull` + `bun install` + генерация).
+
 ```
-node_modules    # 5.6 GB — регенерируется
-.next           # Next.js build output
-dist            # Build output
+# Build artifacts
+node_modules
+.next
+dist
+
+# Dev caches
+.nx
+.cache
+.turbo
+
+# Source code (re-pullable from git)
+src
+prisma
+public
+libs
+scripts
+.github
+
+# Nginx (configs backed up via nginx_auto_*.tar.gz)
+infra/nginx-proxy-manager/data
+infra/nginx-proxy-manager/letsencrypt
+
+# Logs
+*.log
 ```
 
-> **Важно:** `*.sql.gz` и `*.tar.gz` НЕ исключаются — бэкапы БД и NPM должны синхронизироваться на все точки хранения.
+> **Важно:** `*.sql.gz`, `*.tar.gz` и `uploads/` НЕ исключаются — бэкапы БД, NPM и загруженные пользователями файлы синхронизируются на все точки хранения.
 
 ### Добавление на Windows
 

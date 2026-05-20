@@ -42,13 +42,13 @@ function isDiskFullError(error: unknown): boolean {
   if (code === 'ENOSPC') return true
   const msg = error.message.toLowerCase()
   return (
-    msg.includes('no space left')
-    || msg.includes('not enough space')
-    || msg.includes('disk full')
-    || msg.includes('enospc')
-    || msg.includes('insufficient storage')
-    || msg.includes('datastore is full')
-    || msg.includes('not enough free disk')
+    msg.includes('no space left') ||
+    msg.includes('not enough space') ||
+    msg.includes('disk full') ||
+    msg.includes('enospc') ||
+    msg.includes('insufficient storage') ||
+    msg.includes('datastore is full') ||
+    msg.includes('not enough free disk')
   )
 }
 
@@ -152,7 +152,7 @@ export function registerAnimeManifestHandlers(): void {
     'animeManifest:generateBatch',
     async (
       animeIds: string[],
-      onProgress?: (current: number, total: number, animeName: string) => void,
+      onProgress?: (current: number, total: number, animeName: string) => void
     ): Promise<{ success: number; failed: number; errors: Array<{ animeId: string; error: string }> }> => {
       log.info('Batch-генерация AnimeManifest', { count: animeIds.length })
 
@@ -192,7 +192,7 @@ export function registerAnimeManifestHandlers(): void {
 
       log.info('Batch-генерация завершена', { success: result.success, failed: result.failed })
       return result
-    },
+    }
   )
 
   /**
@@ -219,11 +219,11 @@ export function registerAnimeManifestHandlers(): void {
     'animeManifest:import',
     async (
       cid: string,
-      pin?: boolean,
+      pin?: boolean
     ): Promise<{ success: boolean; animeId?: string; animeName?: string; episodeCount?: number; error?: string }> => {
       log.info('Импорт аниме из IPFS', { cid, pin })
       return importAnimeFromManifest(cid, { pin })
-    },
+    }
   )
 
   /**
@@ -248,9 +248,9 @@ export function registerAnimeManifestHandlers(): void {
    */
   createHandler(
     'animeManifest:regenerateAll',
-    async (
-      opts?: { resumeFrom?: string },
-    ): Promise<{ success: number; failed: number; errors: Array<{ animeId: string; error: string }> }> => {
+    async (opts?: {
+      resumeFrom?: string
+    }): Promise<{ success: number; failed: number; errors: Array<{ animeId: string; error: string }> }> => {
       stopRegenRequested = false
       const resumeFrom = opts?.resumeFrom ? new Date(opts.resumeFrom) : null
       log.info('Регенерация всех манифестов (Episode + Anime)', { resume: !!resumeFrom })
@@ -287,29 +287,6 @@ export function registerAnimeManifestHandlers(): void {
       }
       logEntry('info', `Начата регенерация ${allAnimes.length} аниме`)
 
-      // Утилита для запуска Kubo GC — освобождает место от распиненных блоков.
-      // Вызываем в начале и каждые 10 аниме, чтобы не заканчивалось место на диске.
-      const runKuboGc = async () => {
-        try {
-          const { getKuboService } = await import('../services/kubo')
-          const client = getKuboService().getClientOrNull()
-          if (client) {
-            let freed = 0
-            for await (const _ of client.repo.gc()) {
-              freed++
-            }
-            if (freed > 0) {
-              logEntry('info', `   ♻ GC: освобождено ${freed} блоков`)
-            }
-          }
-        } catch (e) {
-          log.warn('Kubo GC не удался', { error: String(e) })
-        }
-      }
-
-      // GC перед стартом — очищаем мусор от предыдущих запусков
-      await runKuboGc()
-
       for (let i = 0; i < allAnimes.length; i++) {
         // Проверяем флаг остановки — пользователь нажал «Остановить»
         if (stopRegenRequested) {
@@ -335,7 +312,7 @@ export function registerAnimeManifestHandlers(): void {
           })
           logEntry(
             'error',
-            `🚫 Мало места на диске (${freeGb} ГБ < 30 ГБ) — регенерация остановлена. Обработано: ${i} из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`,
+            `🚫 Мало места на диске (${freeGb} ГБ < 30 ГБ) — регенерация остановлена. Обработано: ${i} из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`
           )
           regenerationState.finish(result)
           broadcastToWindows('manifest:regenerateFinished', {
@@ -437,7 +414,7 @@ export function registerAnimeManifestHandlers(): void {
               'error',
               `🚫 Нет места на диске! Регенерация остановлена. Обработано: ${
                 i + 1
-              } из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`,
+              } из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`
             )
             broadcastToWindows('manifest:regenerateProgress', {
               current: i + 1,
@@ -456,26 +433,12 @@ export function registerAnimeManifestHandlers(): void {
             return result
           }
         }
-
-        // Пауза для GC между аниме — предотвращает OOM при большой библиотеке.
-        // global.gc() работает только если Electron запущен с --js-flags=--expose-gc.
-        global.gc?.()
-        await new Promise((r) => setTimeout(r, 200))
-
-        // Каждые 10 аниме — GC + длинная пауза для освобождения места и HTTP connection pool Kubo
-        if ((i + 1) % 10 === 0) {
-          global.gc?.()
-          logEntry('info', `♻ GC после ${i + 1} аниме…`)
-          await runKuboGc()
-          await new Promise((r) => setTimeout(r, 3000))
-          global.gc?.()
-        }
       }
 
       log.info('Регенерация завершена', { success: result.success, failed: result.failed })
       logEntry(
         result.failed > 0 ? 'warn' : 'success',
-        `Готово: ${result.success} успешно${result.failed > 0 ? `, ${result.failed} ошибок` : ''}`,
+        `Готово: ${result.success} успешно${result.failed > 0 ? `, ${result.failed} ошибок` : ''}`
       )
       regenerationState.finish(result)
       broadcastToWindows('manifest:regenerateFinished', {
@@ -487,7 +450,7 @@ export function registerAnimeManifestHandlers(): void {
       await regenCheckpointStore.save({ startedAt: null, total: 0 })
 
       return result
-    },
+    }
   )
 
   /**
@@ -601,7 +564,7 @@ export function registerAnimeManifestHandlers(): void {
         else summary.unknown += row._count._all
       }
       return summary
-    },
+    }
   )
 
   /**
@@ -629,6 +592,6 @@ export function registerAnimeManifestHandlers(): void {
         },
         orderBy: [{ contentHealth: 'desc' }, { name: 'asc' }],
       })
-    },
+    }
   )
 }

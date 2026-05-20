@@ -1,67 +1,78 @@
 # =============================================================================
-# Запуск llama-server с Gemma 4 26B (MXFP4) для letar-consultant
-# RTX 5080 Laptop, 16 ГБ VRAM — Blackwell, нативный MXFP4 через Tensor Cores
+# Запуск llama-server для letar-consultant
+# RTX 5080 Laptop, 16 ГБ VRAM
 #
-# Требования:
-#   1. llama.cpp CUDA-build: скачать из
-#      https://github.com/ggerganov/llama.cpp/releases/latest
-#      → llama-bXXXX-bin-win-cuda-cu12.X-x64.zip
-#      → распаковать в C:\tools\llama.cpp\
+# МОДЕЛИ (выбирай по VRAM):
+#   Qwen2.5-Coder-14B Q4_K_M  (~8.5 ГБ) — ДЕФОЛТ, оставляет 7+ ГБ свободными
+#   Gemma 4 26B MXFP4         (~15.5 ГБ) — почти весь VRAM, overflow в RAM!
+#   Qwen3-Coder 30B Q4_K_M   (~17 ГБ)   — часть в RAM через --n-cpu-moe
 #
-#   2. Модель Gemma 4 26B MXFP4: скачать с HuggingFace
-#      huggingface-cli download unsloth/gemma-4-26B-GGUF \
-#        gemma-4-26B-A4B-it-MXFP4_MOE.gguf \
-#        --local-dir C:\models\
-#      (или через браузер: https://huggingface.co/unsloth/gemma-4-26B-GGUF)
+# Скачать Qwen2.5-Coder-14B:
+#   huggingface-cli download bartowski/Qwen2.5-Coder-14B-Instruct-GGUF \
+#     Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf --local-dir C:\models\
 #
 # Запуск: .\scripts\llm\start-llm-server.ps1
+# Запуск с Gemma 4: .\scripts\llm\start-llm-server.ps1 -UseGemma4
 # =============================================================================
 
 param(
-    # Путь к llama-server.exe
-    [string]$LlamaServerPath = "C:\tools\llama.cpp\llama-server.exe",
+    [string]$LlamaServerPath = "C:\tools\llama-server.exe",
 
-    # Путь к GGUF-файлу модели
-    [string]$ModelPath = "C:\models\gemma-4-26B-A4B-it-MXFP4_MOE.gguf",
+    # Дефолт: Qwen2.5-Coder-14B — ~8.5 ГБ VRAM, 7+ ГБ остаётся свободным
+    [string]$ModelPath = "C:\models\Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
 
-    # Порт сервера (letar-consultant смотрит на 8080)
     [int]$Port = 8080,
 
-    # Размер контекста в токенах
-    [int]$CtxSize = 8192,
+    # 4096 достаточно для letar-consultant
+    [int]$CtxSize = 4096,
 
-    # Альтернативная модель (Qwen3-Coder, не помещается целиком, нужен --n-cpu-moe)
+    # Gemma 4 26B MXFP4 — только если не нужны другие приложения
+    # ВНИМАНИЕ: занимает 15.5 ГБ VRAM, overflow в RAM неизбежен
+    [switch]$UseGemma4,
+    [string]$Gemma4Path = "C:\models\gemma-4-26B-A4B-it-MXFP4_MOE.gguf",
+
+    # Qwen3-Coder 30B — часть экспертов в RAM через --n-cpu-moe
     [switch]$UseQwenCoder,
     [string]$QwenCoderPath = "C:\models\Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
 )
 
+# ─── Выгрузить модели из Ollama чтобы освободить RAM ────────────────────────
+$ollamaRunning = $null -ne (Get-Process "ollama" -ErrorAction SilentlyContinue)
+if ($ollamaRunning) {
+    Write-Host "Выгружаю модели из Ollama (освобождаю RAM)..." -ForegroundColor Yellow
+    $unloadBody = '{"model":"nomic-embed-text","keep_alive":"0"}'
+    try { Invoke-RestMethod -Uri "http://localhost:11434/api/generate" -Method Post -ContentType "application/json" -Body $unloadBody -ErrorAction SilentlyContinue | Out-Null } catch { }
+    Write-Host "OK Ollama RAM освобождена" -ForegroundColor Green
+}
+
+# ─── Выбор модели ────────────────────────────────────────────────────────────
+
+if ($UseGemma4) {
+    $selectedModel = $Gemma4Path
+    $modelLabel = "Gemma 4 26B MXFP4 (~15.5 GB VRAM — overflow в RAM возможен!)"
+    $modelArgs = @("--n-gpu-layers", "999")
+    Write-Host "Запуск $modelLabel" -ForegroundColor Yellow
+} elseif ($UseQwenCoder) {
+    $selectedModel = $QwenCoderPath
+    $modelLabel = "Qwen3-Coder 30B Q4_K_M (с --n-cpu-moe 14)"
+    $modelArgs = @("--n-gpu-layers", "999", "--n-cpu-moe", "14")
+    Write-Host "Запуск $modelLabel" -ForegroundColor Yellow
+} else {
+    $selectedModel = $ModelPath
+    $modelLabel = "Qwen2.5-Coder-14B Q4_K_M (~8.5 GB VRAM, 7+ GB свободно)"
+    $modelArgs = @("--n-gpu-layers", "999")
+    Write-Host "Запуск $modelLabel" -ForegroundColor Green
+}
+
 # ─── Проверки ────────────────────────────────────────────────────────────────
 
 if (-not (Test-Path $LlamaServerPath)) {
-    Write-Error @"
-llama-server.exe не найден: $LlamaServerPath
-
-Скачай llama.cpp CUDA-build:
-  1. Открой: https://github.com/ggerganov/llama.cpp/releases/latest
-  2. Скачай: llama-bXXXX-bin-win-cuda-cu12.X-x64.zip
-  3. Распакуй в: C:\tools\llama.cpp\
-"@
+    Write-Error "llama-server.exe не найден: $LlamaServerPath`nСкачай: https://github.com/ggerganov/llama.cpp/releases/latest"
     exit 1
 }
 
-$selectedModel = if ($UseQwenCoder) { $QwenCoderPath } else { $ModelPath }
-
 if (-not (Test-Path $selectedModel)) {
-    $modelName = if ($UseQwenCoder) { "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf" } else { "gemma-4-26B-A4B-it-MXFP4_MOE.gguf" }
-    Write-Error @"
-Модель не найдена: $selectedModel
-
-Скачай модель через huggingface-cli:
-  pip install huggingface-hub
-  huggingface-cli download unsloth/gemma-4-26B-GGUF $modelName --local-dir C:\models\
-
-Или вручную: https://huggingface.co/unsloth/gemma-4-26B-GGUF
-"@
+    Write-Error "Модель не найдена: $selectedModel`nСкачай через: huggingface-cli download bartowski/Qwen2.5-Coder-14B-Instruct-GGUF Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf --local-dir C:\models\"
     exit 1
 }
 
@@ -72,32 +83,15 @@ $commonArgs = @(
     "--port", $Port,
     "--host", "127.0.0.1",
     "--ctx-size", $CtxSize,
-    "--flash-attn",                    # Flash Attention — критично для скорости
-    "--cache-type-k", "q8_0",          # Кэш ключей в q8_0 — баланс памяти/скорости
-    "--cache-type-v", "q8_0",          # Кэш значений
-    "--jinja",                         # Нужен для корректного tool calling
-    "--parallel", "1",                 # Один параллельный запрос (для нашего сценария достаточно)
-    "--log-disable"                    # Отключить спам в консоль
+    "--flash-attn", "on",
+    "--cache-type-k", "q4_0",
+    "--cache-type-v", "q4_0",
+    "--batch-size", "512",        # для 14B нормально, compute buffer небольшой
+    "--ubatch-size", "128",
+    "--jinja",
+    "--parallel", "1",
+    "--log-disable"
 )
-
-if ($UseQwenCoder) {
-    # Qwen3-Coder 30B (17.3 ГБ) — не влезает целиком, часть экспертов в RAM
-    # --n-gpu-layers 999 = всё в VRAM (shared params + attention)
-    # --n-cpu-moe 14 = 14 экспертных блоков в RAM
-    # Подбирать опытным путём: цель — пик VRAM ~14.5-15.3 ГБ
-    $modelArgs = @(
-        "--n-gpu-layers", "999",
-        "--n-cpu-moe", "14"            # Подбери: если OOM — увеличь, если < 14 ГБ — уменьши
-    )
-    Write-Host "🚀 Запуск Qwen3-Coder 30B (с --n-cpu-moe 14)..." -ForegroundColor Yellow
-} else {
-    # Gemma 4 26B MXFP4 (15.5 ГБ) — полностью в VRAM на RTX 5080
-    # Нативные Tensor Cores Blackwell = максимальная скорость
-    $modelArgs = @(
-        "--n-gpu-layers", "999"        # Все слои в VRAM
-    )
-    Write-Host "🚀 Запуск Gemma 4 26B MXFP4 (полный VRAM, Blackwell Tensor Cores)..." -ForegroundColor Green
-}
 
 $allArgs = $commonArgs + $modelArgs
 
@@ -106,10 +100,8 @@ $allArgs = $commonArgs + $modelArgs
 Write-Host "Модель: $selectedModel" -ForegroundColor Cyan
 Write-Host "Порт: $Port | Контекст: $CtxSize токенов" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "После запуска letar-consultant доступен через:"
-Write-Host "  http://localhost:$Port/v1/chat/completions" -ForegroundColor Green
-Write-Host ""
-Write-Host "Нажми Ctrl+C для остановки сервера." -ForegroundColor Gray
+Write-Host "letar-consultant: http://localhost:$Port/v1/chat/completions" -ForegroundColor Green
+Write-Host "Ctrl+C для остановки." -ForegroundColor Gray
 Write-Host ""
 
 & $LlamaServerPath @allArgs

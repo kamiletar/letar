@@ -38,6 +38,7 @@ send_message(
 Бесконечно повторяй:
 
 1. **Проверяй inbox** каждые 30 секунд:
+
    ```
    fetch_inbox(project_key: "app-c-web-letar", agent_name: "BlackCove", topic: "deploy")
    ```
@@ -83,24 +84,29 @@ Body:
 
 ### Маппинг серверов
 
-| Сервер | Приложения                                                                                                                                        |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| s1     | premium-rosstil, imot, mandala, kami, pravda, animatrona-landing, dashboard-agent, umami, animatrona-tracker, kami-key-the-landing, letar-landing |
-| s2     | dashboard, driving-school, animatrona-web, auth-hub, archetest, grandslamcup, time, form-docs, form-example                                       |
+| Сервер | Приложения                                                                                                                                                                                                                              |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| s1     | premium-rosstil, imot, dashboard-agent                                                                                                                                                                                                  |
+| s2     | dashboard, driving-school, animatrona-web, auth-hub, archetest, grandslamcup, time, form-docs, form-example, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, dashboard-agent |
 
 ### Порядок действий
 
 1. **Убедись что изменения запушены:**
+
    ```bash
    git log --oneline origin/main..HEAD
    ```
+
    Если есть незапушенные коммиты — ответь агенту с просьбой запушить.
 
 2. **Запусти деплой на правильном сервере:**
+
    ```bash
    unset SSH_AUTH_SOCK && unset SSH_AGENT_PID && GIT_SSH_COMMAND="C:/Windows/System32/OpenSSH/ssh.exe" git push
    ```
+
    Затем:
+
    ```bash
    /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@<server>.letar.best "cd /home/deploy/letar && ./deploy-affected.sh --app <app>"
    ```

@@ -146,6 +146,8 @@ nx typecheck:tsgo <app>
 | umami                | 3033 | umami-app                | PostgreSQL  | stats.letar.best              |
 | kami-key-the-landing | 3011 | kami-key-the-landing-app | Нет         | kamikeythe.letar.best         |
 | grandslamcup-staging | 3016 | grandslamcup-staging-app | PostgreSQL  | gsc-test.letar.best           |
+| dsperevod            | 3019 | dsperevod-app            | PostgreSQL  | dsperevod.letar.best          |
+| aboi                 | 3019 | aboi-app                 | PostgreSQL  | aboi.letar.best               |
 
 ## Переменная DOMAIN в .env.docker
 
@@ -158,6 +160,13 @@ DOMAIN=shop.rosstil.ru,www.shop.rosstil.ru
 ```
 
 **Важно:** если `DOMAIN=` пустой или отсутствует, при создании proxy host домены придётся вводить вручную.
+
+## ⚠️ ОБЯЗАТЕЛЬНО после первого деплоя нового приложения
+
+После успешного первого деплоя нового приложения **ВСЕГДА** выполни шаги ниже — без этого:
+
+- Приложение **не появится** в быстром выборе при создании Nginx Proxy Host
+- БД приложения **не будет бэкапироваться** (если есть БД)
 
 ## Чеклист: добавление нового приложения в Dashboard
 

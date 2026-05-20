@@ -613,13 +613,115 @@ export async function updateAnimeManifest(
 > {
   const result = await generateAnimeManifest({ animeId, skipShikimoriRefresh: options?.skipShikimoriRefresh })
 
-  if (result.success && result.manifestCid) {
-    // Контент не изменился — пропускаем пересборку директории
-    if (result.unchanged) {
-      log.info('Манифест без изменений, пропускаем пересборку директории', { animeId })
-      return result
+  // unchanged не возвращает manifestCid — проверяем отдельно до основного блока
+  if (result.success && result.unchanged) {
+    log.info('Манифест без изменений — запускаем health check образов', { animeId })
+
+    // Запускаем buildAnimeDirectory для проверки и восстановления недоступных CID образов
+    let recovered: import('./ipfs/anime-directory-builder').RecoveredCidEntry[] = []
+    try {
+      const { buildAnimeDirectory } = await import('./ipfs/anime-directory-builder')
+      const healthCheck = await buildAnimeDirectory(animeId)
+      recovered = healthCheck.recovered
+      if (recovered.length > 0) {
+        log.info('Health check восстановил образы, перегенерируем манифест', {
+          animeId,
+          recoveredCount: recovered.length,
+        })
+      }
+    } catch (error) {
+      log.warn('Health check директории не удался', { animeId, error: String(error) })
     }
 
+    if (recovered.length === 0) {
+      // Контент без изменений, образы в порядке — помечаем как проверенное
+      await prisma.anime.update({
+        where: { id: animeId },
+        data: { lastHealthCheckAt: new Date() },
+      })
+      return { ...result, recoveredCount: 0 }
+    }
+
+    // Образы восстановлены → DB обновлена новыми CID → перегенерируем манифест
+    const retryResult = await generateAnimeManifest({ animeId, skipShikimoriRefresh: options?.skipShikimoriRefresh })
+
+    if (!retryResult.success || !retryResult.manifestCid) {
+      // Перегенерация не изменила манифест или завершилась с ошибкой
+      await prisma.anime.update({
+        where: { id: animeId },
+        data: { lastHealthCheckAt: new Date() },
+      })
+      return { ...result, recoveredCount: recovered.length }
+    }
+
+    // Есть новый manifestCid — обновляем animeInfoCid в БД
+    await prisma.anime.update({
+      where: { id: animeId },
+      data: {
+        animeInfoCid: retryResult.manifest?.animeInfoCid ?? undefined,
+        ...(retryResult.ageRating && { ageRating: retryResult.ageRating }),
+      },
+    })
+
+    // Открепляем старый directoryCid перед пересборкой
+    const oldAnime = await prisma.anime.findUnique({ where: { id: animeId }, select: { directoryCid: true } })
+    if (oldAnime?.directoryCid) {
+      try {
+        const { CID } = await import('multiformats/cid')
+        const client = getKuboService().getClientOrNull()
+        if (client) await client.pin.rm(CID.parse(oldAnime.directoryCid))
+      } catch (error) {
+        log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
+      }
+    }
+    await prisma.anime.update({
+      where: { id: animeId },
+      data: { directoryCid: null, directoryBlocks: null, directorySize: null },
+    })
+
+    // Собираем обновлённую директорию с новым манифестом
+    const { buildAnimeDirectory: rebuildDirectory } = await import('./ipfs/anime-directory-builder')
+    const buildResult = await rebuildDirectory(animeId, { manifestCidOverride: retryResult.manifestCid })
+    const { directoryCid, totalBlocks, totalSize, missingCids, missingFonts } = buildResult
+
+    const hasCriticalLoss2 = missingCids.some((m) => m.kind === 'video' || m.kind === 'audio' || m.kind === 'sub')
+    const hasAnyLoss2 = missingCids.length > 0 || missingFonts.length > 0
+    const contentHealth2: 'complete' | 'degraded' | 'broken' = hasCriticalLoss2
+      ? 'broken'
+      : hasAnyLoss2
+        ? 'degraded'
+        : 'complete'
+
+    await prisma.anime.update({
+      where: { id: animeId },
+      data: {
+        directoryCid,
+        directoryBlocks: totalBlocks,
+        directorySize: totalSize,
+        contentHealth: contentHealth2,
+        missingCidsJson: missingCids.length > 0 ? JSON.stringify(missingCids) : null,
+        missingFontsJson: missingFonts.length > 0 ? JSON.stringify(missingFonts) : null,
+        lastHealthCheckAt: new Date(),
+      },
+    })
+
+    log.info('Директория пересобрана после восстановления образов', {
+      animeId,
+      directoryCid,
+      recoveredCount: recovered.length,
+      contentHealth: contentHealth2,
+    })
+
+    return {
+      ...retryResult,
+      contentHealth: contentHealth2,
+      missingCidsCount: missingCids.length,
+      missingFontsCount: missingFonts.length,
+      recoveredCount: recovered.length,
+    }
+  }
+
+  if (result.success && result.manifestCid) {
     // Сохраняем AnimeInfo и ageRating в БД (manifestCid не хранится отдельно — он внутри directoryCid)
     await prisma.anime.update({
       where: { id: animeId },
@@ -731,6 +833,13 @@ export async function updateAnimeManifest(
       } catch {
         // Broadcast опционален
       }
+
+      // Манифест опубликован, но директория не собралась — всё равно ставим отметку,
+      // чтобы аниме не появлялось снова при resume регенерации
+      await prisma.anime.update({
+        where: { id: animeId },
+        data: { lastHealthCheckAt: new Date() },
+      })
 
       return {
         ...result,

@@ -1,5 +1,231 @@
 # Кубок Большого Слэма (grandslamcup) — ТЗ
 
+## Фаза 15 — Самоорганизация товарищеских матчей: поиск счетовода и ведущего
+
+> Источник: запрос оргкомитета Москвы 2026-05-17. Тренеры сами договариваются о товарищеском матче и самостоятельно находят на него счетовода и ведущего — без участия администратора.
+
+### Контекст и мотивация
+
+Сейчас товарищеский матч требует участия администратора на каждом шагу: тренер-А вызывает тренера-Б, оба согласуют, потом администратор вручную назначает счетовода и ведущего. Это bottleneck — особенно для Москвы, где матчей больше и организаторов может не быть «в эфире» в нужный момент.
+
+**Цель фазы:** тренер от начала до конца сам организует товарищеский матч:
+
+1. Вызывает соперника (уже реализовано ✅)
+2. Соперник принимает (уже реализовано ✅)
+3. **Новое:** платформа публикует «запрос на счетовода/ведущего» — любой зарегистрированный волонтёр откликается
+4. Тренер (или организатор города) подтверждает кандидата
+5. Матч создаётся в системе автоматически, токены рассылаются, уведомления уходят
+
+### 15.1 Новые роли: волонтёр-счетовод и волонтёр-ведущий
+
+Добавляется концепция **ServiceVolunteer** — пользователь, зарегистрировавшийся как готовый вести счёт или вести матч.
+
+```zmodel
+model ServiceVolunteer {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  cityId    String
+  city      City              @relation(fields: [cityId], references: [id])
+  role      VolunteerRole     // SCORER | PRESENTER | BOTH
+  bio       String?           // короткое самопредставление
+  rating    Float             @default(0) // средняя оценка от тренеров после матча
+  matchesCount Int            @default(0)
+  isActive  Boolean           @default(true) // «принимаю запросы»
+  createdAt DateTime          @default(now())
+
+  applications VolunteerApplication[]
+
+  @@unique([userId, cityId, role])
+
+  @@allow('read', true)
+  @@allow('create,update', auth() == user)
+  @@allow('update', auth().role == 'ADMIN')
+}
+
+enum VolunteerRole {
+  SCORER
+  PRESENTER
+  BOTH
+}
+```
+
+### 15.2 Модель запроса на волонтёра
+
+```zmodel
+model VolunteerApplication {
+  id               String               @id @default(cuid())
+  friendlyMatchReqId String
+  friendlyMatchReq FriendlyMatchRequest @relation(fields: [friendlyMatchReqId], references: [id])
+  volunteerId      String
+  volunteer        ServiceVolunteer     @relation(fields: [volunteerId], references: [id])
+  roleNeeded       VolunteerRole        // SCORER | PRESENTER
+  status           ApplicationStatus    @default(PENDING)
+  confirmedByUserId String?
+  confirmedBy      User?                @relation(fields: [confirmedByUserId], references: [id])
+  confirmedAt      DateTime?
+  createdAt        DateTime             @default(now())
+
+  @@allow('read', auth() != null)
+  @@allow('create', auth().id == volunteer.userId)
+  @@allow('update', auth().id == friendlyMatchReq.requestedByTeamSeason.team.coachId || auth().role == 'ADMIN')
+}
+
+enum ApplicationStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  WITHDRAWN
+}
+```
+
+**Изменения в `FriendlyMatchRequest`:**
+
+```zmodel
+// Добавить поля к существующей модели FriendlyMatchRequest:
+needsScorer      Boolean   @default(true)
+needsPresenter   Boolean   @default(true)
+scorerConfirmedId String?
+presenterConfirmedId String?
+scorerConfirmed  ServiceVolunteer? @relation("scorer", fields: [scorerConfirmedId], references: [id])
+presenterConfirmed ServiceVolunteer? @relation("presenter", fields: [presenterConfirmedId], references: [id])
+volunteerApplications VolunteerApplication[]
+scheduledAt      DateTime?           // дата/время матча (ранее могло быть только в Match)
+```
+
+### 15.3 Флоу — шаг за шагом
+
+```
+Тренер-А                 Тренер-Б             Волонтёры            Система
+───────                  ────────             ─────────            ───────
+[1] Создаёт вызов ───►  [2] Принимает ─────────────────────────► Статус ACCEPTED
+                                                                   [3] Публикация в «бирже»
+                                              [4] Откликаются     ◄── Уведомление волонтёрам
+[5] Тренер-А            ◄── Уведомление ◄── (SCORER + PRESENTER)
+    подтверждает ────────────────────────────────────────────────► Статус READY
+                                                                   [6] Матч создаётся автоматом
+                                                                   [7] Токены → Scorer/Presenter
+                                                                   [8] Уведомления всем
+```
+
+**Статусы `FriendlyMatchRequest`** (расширение существующего enum):
+
+| Статус      | Описание                                     |
+| ----------- | -------------------------------------------- |
+| `PENDING`   | Ожидает ответа соперника                     |
+| `ACCEPTED`  | Соперник принял, ищем счетовода/ведущего     |
+| `READY`     | Счетовод и ведущий подтверждены, матч создан |
+| `REJECTED`  | Соперник отклонил                            |
+| `CANCELLED` | Отменён инициатором                          |
+| `EXPIRED`   | Истёк срок (7 дней без ответа)               |
+
+### 15.4 «Биржа волонтёров» — UI
+
+**Страница `/volunteer`** — публичный список свободных счетоводов и ведущих по городам:
+
+```
+volunteer/
+├── page.tsx               # Список волонтёров (фильтр: город, роль, доступность)
+├── register/page.tsx      # Регистрация как волонтёр
+└── [id]/page.tsx          # Профиль волонтёра (рейтинг, история матчей)
+```
+
+**В кабинете тренера (`/coach`):**
+
+```
+coach/
+└── friendly/
+    └── [id]/
+        ├── page.tsx            # Детали заявки — статус + кандидаты
+        └── volunteers/page.tsx # Список откликнувшихся, кнопки «Подтвердить» / «Отказать»
+```
+
+**Новая вкладка «Открытые матчи»** на странице `/volunteer`:
+
+| Поле       | Описание                                                       |
+| ---------- | -------------------------------------------------------------- |
+| Команды    | Тим-А vs Тим-Б                                                 |
+| Дата/Время | scheduledAt                                                    |
+| Город      | city.name                                                      |
+| Нужны      | 🎙️ Ведущий / 📊 Счетовод / оба                                 |
+| Кнопка     | «Откликнуться» (если залогинен и зарегистрирован как волонтёр) |
+
+### 15.5 Оценка волонтёра после матча
+
+После завершения матча тренер-А и тренер-Б могут оценить работу счетовода и ведущего (звёзды 1-5, опциональный комментарий):
+
+```zmodel
+model VolunteerReview {
+  id            String           @id @default(cuid())
+  volunteerId   String
+  volunteer     ServiceVolunteer @relation(fields: [volunteerId], references: [id])
+  matchId       String
+  match         Match            @relation(fields: [matchId], references: [id])
+  reviewerUserId String
+  reviewer      User             @relation(fields: [reviewerUserId], references: [id])
+  rating        Int              // 1-5
+  comment       String?
+  createdAt     DateTime         @default(now())
+
+  @@unique([volunteerId, matchId, reviewerUserId])
+  @@allow('read', true)
+  @@allow('create', auth() != null && !exists(this))
+}
+```
+
+После отзыва — пересчёт `ServiceVolunteer.rating` (среднее всех оценок).
+
+### 15.6 Уведомления
+
+| Событие                                         | Кому                           | Канал                  |
+| ----------------------------------------------- | ------------------------------ | ---------------------- |
+| Заявка принята соперником → публикуется в бирже | Активным волонтёрам города     | Push + Telegram        |
+| Новый отклик волонтёра                          | Тренеру-А                      | Push + email           |
+| Счетовод и ведущий подтверждены                 | Обоим тренерам + волонтёрам    | Push + email           |
+| Матч создан, токены разосланы                   | Счетоводу + ведущему           | Email (токен в письме) |
+| За 2 ч до матча                                 | Счетоводу + ведущему + игрокам | Push + Telegram        |
+| После матча: запрос оценки волонтёра            | Обоим тренерам                 | Push (через 30 мин)    |
+
+### 15.7 Server Actions
+
+| Action                         | Описание                                          |
+| ------------------------------ | ------------------------------------------------- |
+| `registerAsVolunteerAction`    | Регистрация/обновление профиля волонтёра          |
+| `getVolunteersAction`          | Список волонтёров (фильтры: city, role, isActive) |
+| `getOpenFriendlyMatchesAction` | Матчи, ищущие счетовода/ведущего                  |
+| `applyForFriendlyMatchAction`  | Отклик волонтёра на открытый матч                 |
+| `confirmVolunteerAction`       | Тренер подтверждает волонтёра                     |
+| `rejectVolunteerAction`        | Тренер отклоняет кандидата                        |
+| `withdrawApplicationAction`    | Волонтёр отзывает свой отклик                     |
+| `reviewVolunteerAction`        | Оценка волонтёра после матча                      |
+| `toggleVolunteerActiveAction`  | Волонтёр включает/выключает «принимаю запросы»    |
+
+### 15.8 Миграция БД
+
+```bash
+nx db:migrate grandslamcup -- --name add_volunteer_system
+```
+
+Новые модели: `ServiceVolunteer`, `VolunteerApplication`, `VolunteerReview`.
+Новый enum: `VolunteerRole`, `ApplicationStatus`.
+Изменение: `FriendlyMatchRequest` — 5 новых полей.
+
+### 15.9 Чеклист
+
+- [ ] Фаза 1: Модели БД (`ServiceVolunteer`, `VolunteerApplication`, `VolunteerReview`) + enum `VolunteerRole`, `ApplicationStatus`
+- [ ] Фаза 2: ZenStack access policies + миграция `add_volunteer_system`
+- [ ] Фаза 3: Server Actions (register, apply, confirm, reject, review, toggle)
+- [ ] Фаза 4: «Биржа волонтёров» `/volunteer` — список, регистрация, профиль
+- [ ] Фаза 5: Открытые матчи — карточки с кнопкой «Откликнуться»
+- [ ] Фаза 6: Кабинет тренера — список кандидатов, подтверждение
+- [ ] Фаза 7: Авто-создание матча при `READY` + рассылка токенов
+- [ ] Фаза 8: Уведомления (push + email + Telegram) по всем событиям флоу
+- [ ] Фаза 9: Оценка волонтёра после матча + пересчёт рейтинга
+- [ ] Фаза 10: Рейтинговая таблица волонтёров по городам
+- [ ] Фаза 11: E2E тесты Playwright (full flow: вызов → отклик → подтверждение → матч)
+
+---
+
 ## Фаза 14 — Telegram Mini App
 
 > Источник: запрос 2026-05-17. Нативное приложение внутри Telegram — без установки, без App Store, открывается одной кнопкой в боте или по ссылке в канале.
@@ -925,7 +1151,7 @@ export function suggestOptimalSlots(
     minPlayers: number
     preferredHours: { start: number; end: number } // [19, 21]
     upcomingMatches: Date[] // штраф за слот рядом с матчем
-  },
+  }
 ): SlotSuggestion[]
 ```
 
@@ -2954,14 +3180,14 @@ model SwissPair {
 
 ## 12. Открытые вопросы
 
-| # | Вопрос                                                                                                  | Кого спросить |
-| - | ------------------------------------------------------------------------------------------------------- | ------------- |
-| 1 | ~~Карточки: влияют на баллы? Что при красной? 2 жёлтые = красная?~~ ✅ Ответ в правилах Москвы 2.0      | Решён         |
-| 2 | Есть ли данные поэт-по-поэту за прошлые сезоны (или только итоговые счета)?                             | Организатор   |
-| 3 | ~~Москва — те же правила? Есть ли отличия?~~ ✅ Получены правила КБС-Москва 2.0, реализована поддержка  | Решён         |
-| 4 | Домен — оставляем grandslamcup.ru?                                                                      | Организатор   |
-| 5 | Нужна ли регистрация зрителей (для будущих фич — донаты, подписки)?                                     | Организатор   |
-| 6 | Генератор round-robin расписания — нужен, или организатор составляет вручную?                           | Организатор   |
-| 7 | Может ли поэт играть в обоих таймах? На Tilda есть такие данные (Стрельникова — оба тайма одного матча) | Организатор   |
-| 8 | ~~Роль «Продюсер команды» — какие права?~~ ✅ Роль не существует в КБС, удалить                         | Решён         |
-| 9 | Есть ли страницы московских команд на Tilda? Или только СПб?                                            | Организатор   |
+| #   | Вопрос                                                                                                  | Кого спросить |
+| --- | ------------------------------------------------------------------------------------------------------- | ------------- |
+| 1   | ~~Карточки: влияют на баллы? Что при красной? 2 жёлтые = красная?~~ ✅ Ответ в правилах Москвы 2.0      | Решён         |
+| 2   | Есть ли данные поэт-по-поэту за прошлые сезоны (или только итоговые счета)?                             | Организатор   |
+| 3   | ~~Москва — те же правила? Есть ли отличия?~~ ✅ Получены правила КБС-Москва 2.0, реализована поддержка  | Решён         |
+| 4   | Домен — оставляем grandslamcup.ru?                                                                      | Организатор   |
+| 5   | Нужна ли регистрация зрителей (для будущих фич — донаты, подписки)?                                     | Организатор   |
+| 6   | Генератор round-robin расписания — нужен, или организатор составляет вручную?                           | Организатор   |
+| 7   | Может ли поэт играть в обоих таймах? На Tilda есть такие данные (Стрельникова — оба тайма одного матча) | Организатор   |
+| 8   | ~~Роль «Продюсер команды» — какие права?~~ ✅ Роль не существует в КБС, удалить                         | Решён         |
+| 9   | Есть ли страницы московских команд на Tilda? Или только СПб?                                            | Организатор   |
