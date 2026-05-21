@@ -1,4 +1,4 @@
-# Останавливает llama-server и освобождает VRAM
+﻿# Останавливает llama-server и освобождает VRAM
 
 param(
     [int]$Port = 8080
@@ -37,7 +37,7 @@ if (-not $stopped) {
 Stop-ScheduledTask -TaskName "letar-llm-server" -ErrorAction SilentlyContinue
 
 if ($stopped) {
-    Write-Host "✓ LLM сервер остановлен, VRAM свободна" -ForegroundColor Green
+    Write-Host "LLM сервер остановлен, VRAM свободна" -ForegroundColor Green
 } else {
     Write-Host "LLM сервер не найден (уже остановлен?)" -ForegroundColor Gray
 }
