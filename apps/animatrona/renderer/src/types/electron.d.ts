@@ -3092,6 +3092,8 @@ export interface ElectronAPI {
       duration: number
       completed?: boolean
     }) => Promise<void>
+    /** Немедленно запушить watchStatus одного аниме на трекер */
+    pushLibraryItem: (animeId: string) => Promise<void>
     /** Запустить фоновую синхронизацию */
     startSync: () => Promise<void>
     /** Остановить фоновую синхронизацию */

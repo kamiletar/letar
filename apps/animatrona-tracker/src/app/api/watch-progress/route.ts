@@ -110,20 +110,24 @@ export async function POST(request: NextRequest) {
 
   const db = getEnhancedPrisma(user)
 
-  // Upsert libraryItem (автоматически добавляем в библиотеку при просмотре)
-  const libraryItem = await db.userLibraryItem.upsert({
+  // findUnique + create вместо upsert: не бампаем updatedAt на каждый push прогресса.
+  // Это критично для conflict resolution в /api/user/library/sync — без этого
+  // watchStatus от Desktop никогда не применялся (clientUpdatedAt < existing.updatedAt).
+  let libraryItem = await db.userLibraryItem.findUnique({
     where: { userId_animeId: { userId: user.id, animeId } },
-    create: {
-      userId: user.id,
-      animeId,
-      watchStatus: 'WATCHING',
-    },
-    update: {
-      // Не меняем watchStatus, если уже установлен
-      watchStatus: undefined,
-    },
     select: { id: true, watchStatus: true },
   })
+
+  if (!libraryItem) {
+    libraryItem = await db.userLibraryItem.create({
+      data: {
+        userId: user.id,
+        animeId,
+        watchStatus: 'WATCHING',
+      },
+      select: { id: true, watchStatus: true },
+    })
+  }
 
   // Обновляем статус на WATCHING если был NOT_STARTED + trackMode per-anime
   const updateData: Record<string, unknown> = {}

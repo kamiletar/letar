@@ -103,6 +103,9 @@ export const trackerPreload = {
   // Background Sync
   // ============================================================================
 
+  /** Немедленно запушить watchStatus одного аниме на трекер */
+  pushLibraryItem: (animeId: string): Promise<void> => ipcRenderer.invoke('tracker:pushLibraryItem', animeId),
+
   /** Запустить фоновую синхронизацию */
   startSync: (): Promise<void> => ipcRenderer.invoke('tracker:startSync'),
 

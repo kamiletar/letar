@@ -155,6 +155,58 @@ class TrackerSyncService {
   }
 
   /**
+   * Немедленный push watchStatus/userRating одного аниме на трекер.
+   *
+   * Вызывается из IPC-хендлера когда пользователь меняет статус просмотра на десктопе.
+   * Без этого статус попадёт на трекер только через 5-минутный полный sync.
+   */
+  pushLibraryItemImmediate(animeId: string): void {
+    void this.doPushLibraryItem(animeId).catch((err) => {
+      log.warn('pushLibraryItemImmediate failed', { animeId, error: String(err) })
+    })
+  }
+
+  private async doPushLibraryItem(animeId: string): Promise<void> {
+    const config = loadTrackerConfig()
+    if (!config.apiKey) return
+
+    const anime = await prisma.anime.findUnique({
+      where: { id: animeId },
+      select: {
+        directoryCid: true,
+        manifestCid: true,
+        shikimoriId: true,
+        watchStatus: true,
+        userRating: true,
+        pinnedLocally: true,
+        updatedAt: true,
+      },
+    })
+
+    if (!anime || (!anime.directoryCid && !anime.manifestCid)) return
+
+    const items = [
+      {
+        directoryCid: anime.directoryCid ?? '',
+        manifestCid: anime.manifestCid ?? undefined,
+        shikimoriId: anime.shikimoriId ?? undefined,
+        watchStatus: anime.watchStatus,
+        userRating: anime.userRating,
+        pinnedLocally: anime.pinnedLocally,
+        updatedAt: anime.updatedAt.toISOString(),
+        watchProgress: [],
+      },
+    ]
+
+    const result = await syncLibraryToTracker(config, items)
+    if (!result.success) {
+      log.warn('pushLibraryItemImmediate sync failed', { animeId, error: result.error })
+    } else {
+      log.debug('pushLibraryItemImmediate ok', { animeId, watchStatus: anime.watchStatus })
+    }
+  }
+
+  /**
    * Немедленный push прогресса (debounced).
    *
    * Принимает либо `trackerAnimeId` (когда известен — из discover watch),

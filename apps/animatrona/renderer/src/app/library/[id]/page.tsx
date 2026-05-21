@@ -278,6 +278,8 @@ export default function AnimePage({ params }: AnimePageProps) {
         await updateAnimeMutation.mutateAsync({ where: { id: anime.id }, data: { watchStatus: newStatus } })
         await queryClient.invalidateQueries({ queryKey: ['animes'] })
         toaster.success({ title: 'Статус обновлён' })
+        // Немедленный push на трекер (не ждём 5-минутный полный sync)
+        window.electronAPI?.tracker?.pushLibraryItem?.(anime.id)
       } catch (error) {
         toaster.error({
           title: 'Ошибка',

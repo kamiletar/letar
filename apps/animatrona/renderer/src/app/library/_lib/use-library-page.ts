@@ -411,6 +411,8 @@ export function useLibraryPage() {
         ])
 
         toaster.success({ title: 'Статус обновлён' })
+        // Немедленный push на трекер (не ждём 5-минутный полный sync)
+        window.electronAPI?.tracker?.pushLibraryItem?.(id)
       } catch (error) {
         toaster.error({
           title: 'Ошибка',

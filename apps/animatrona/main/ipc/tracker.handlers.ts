@@ -400,6 +400,11 @@ export function registerTrackerHandlers(): void {
     },
   )
 
+  // Немедленный push watchStatus одного аниме на трекер
+  createHandler('tracker:pushLibraryItem', (animeId: string) => {
+    getTrackerSyncService().pushLibraryItemImmediate(animeId)
+  })
+
   // Запуск фоновой синхронизации
   createHandler('tracker:startSync', () => {
     getTrackerSyncService().initialize()
@@ -447,6 +452,10 @@ export function registerTrackerHandlers(): void {
         where: { id: { in: input.animeIds } },
         data: { watchStatus: input.watchStatus as never },
       })
+      // Push на трекер для каждого аниме (без ожидания — fire-and-forget)
+      for (const animeId of input.animeIds) {
+        getTrackerSyncService().pushLibraryItemImmediate(animeId)
+      }
       return { success: true, count: updated.count }
     },
   )
