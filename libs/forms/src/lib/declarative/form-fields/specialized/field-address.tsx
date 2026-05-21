@@ -44,6 +44,7 @@ interface AddressFieldState {
   debouncedQuery: string
   fetchSuggestions: (query: string) => Promise<void>
   initializedRef: React.RefObject<boolean>
+  justSelectedRef: React.RefObject<boolean>
 }
 
 /**
@@ -176,6 +177,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       debouncedQuery,
       fetchSuggestions,
       initializedRef,
+      justSelectedRef,
     }
   },
 
@@ -193,6 +195,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       setHighlightedIndex,
       containerRef,
       initializedRef,
+      justSelectedRef,
     } = fieldState
 
     const fieldValue = field.state.value as AddressValue | string | undefined
