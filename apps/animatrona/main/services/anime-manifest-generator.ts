@@ -162,7 +162,7 @@ export {
  * @returns Результат с CID манифеста
  */
 export async function generateAnimeManifest(input: GenerateAnimeManifestInput): Promise<GenerateAnimeManifestResult> {
-  const { animeId, creatorPeerId, skipShikimoriRefresh } = input
+  const { animeId, creatorPeerId, skipShikimoriRefresh, forceUpdatedAt } = input
 
   try {
     log.info('Генерация AnimeManifest', { animeId, skipShikimoriRefresh })
@@ -533,7 +533,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
         manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl &&
         manifest.creatorPeerId === oldManifest.creatorPeerId
 
-      if (contentEqual) {
+      if (contentEqual && !forceUpdatedAt) {
         // Ничего не изменилось — возвращаем сигнал без нового CID
         manifest.updatedAt = oldManifest.updatedAt
         log.info('AnimeManifest без изменений, пропускаем', { animeId })
@@ -551,7 +551,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
         return { success: true, unchanged: true, manifest }
       }
 
-      // Есть изменения — обновляем updatedAt
+      // Есть изменения или принудительное обновление — обновляем updatedAt
       manifest.updatedAt = now
     }
 
@@ -642,8 +642,12 @@ export async function updateAnimeManifest(
       return { ...result, recoveredCount: 0 }
     }
 
-    // Образы восстановлены → DB обновлена новыми CID → перегенерируем манифест
-    const retryResult = await generateAnimeManifest({ animeId, skipShikimoriRefresh: options?.skipShikimoriRefresh })
+    // Образы восстановлены → DB обновлена новыми CID → перегенерируем манифест с принудительным updatedAt
+    const retryResult = await generateAnimeManifest({
+      animeId,
+      skipShikimoriRefresh: options?.skipShikimoriRefresh,
+      forceUpdatedAt: true,
+    })
 
     if (!retryResult.success || !retryResult.manifestCid) {
       // Перегенерация не изменила манифест или завершилась с ошибкой

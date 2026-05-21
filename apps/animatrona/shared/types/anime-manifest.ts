@@ -115,6 +115,13 @@ export interface GenerateAnimeManifestInput {
    * Если animeInfoCid в БД отсутствует — Shikimori всё равно запрашивается.
    */
   skipShikimoriRefresh?: boolean
+  /**
+   * Принудительно обновить updatedAt даже если контент манифеста не изменился.
+   * Используется после восстановления сидов (CID recovery) в buildAnimeDirectory —
+   * recovery обновляет директорию, но не меняет episodesCid/animeInfoCid, поэтому
+   * contentEqual остаётся true без этого флага.
+   */
+  forceUpdatedAt?: boolean
 }
 
 /**
