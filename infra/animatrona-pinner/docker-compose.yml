@@ -1,6 +1,6 @@
 services:
   ipfs:
-    image: ipfs/kubo:v0.40.1
+    image: ipfs/kubo:v0.41.0
     container_name: animatrona-pinner
     restart: unless-stopped
     ports:
