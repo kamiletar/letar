@@ -83,6 +83,8 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
     const containerRef = useRef<HTMLDivElement | null>(null)
     const initializedRef = useRef(false)
     const abortControllerRef = useRef<AbortController | null>(null)
+    // Флаг: пользователь только что выбрал подсказку — следующий debouncedQuery не должен открывать дропдаун
+    const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
 
@@ -131,6 +133,11 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
 
     // Загрузка при изменении debounced запроса
     useEffect(() => {
+      // После выбора подсказки пропускаем один запрос — иначе дропдаун снова открывается
+      if (justSelectedRef.current) {
+        justSelectedRef.current = false
+        return
+      }
       if (debouncedQuery) {
         fetchSuggestions(debouncedQuery)
       } else {
@@ -201,6 +208,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
 
     // Handler for suggestion selection
     const handleSelect = (suggestion: AddressSuggestion) => {
+      justSelectedRef.current = true
       setInputValue(suggestion.value)
       setIsOpen(false)
       setSuggestions([])
