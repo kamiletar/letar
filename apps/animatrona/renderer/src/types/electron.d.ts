@@ -2298,6 +2298,7 @@ export interface ElectronAPI {
           peeringRole: 'bootstrap' | 'peering' | 'both'
         }>
         lastSyncAt: number | null
+        lastResponseUpdatedAt: string | null
         lastReconnectAt: number | null
         source: 'api' | 'cache' | 'hardcoded'
         lastError: string | null

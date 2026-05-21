@@ -54,6 +54,17 @@ class PeerSyncService {
   private source: PeerSyncSource = 'hardcoded'
   private lastReconnectAt = 0
   private lastError: string | null = null
+  /**
+   * Unix ms последнего УСПЕХА API-вызова `fetchPinServers`.
+   * Обновляется только в success-ветке, не в cache/hardcoded fallback —
+   * чтобы UI «Last sync» показывал реальное время, а не stale `response.updatedAt`.
+   */
+  private lastSuccessfulSyncAt: number | null = null
+  /**
+   * Время первого зафиксированного провала API после последнего успеха.
+   * Используется, чтобы поднять log.warn → log.error при затяжной недоступности (>1ч).
+   */
+  private firstFailureAt: number | null = null
 
   private constructor() {
     // singleton — используйте getInstance()
@@ -77,6 +88,8 @@ class PeerSyncService {
       this.lastResponse = response
       this.source = 'api'
       this.lastError = null
+      this.lastSuccessfulSyncAt = Date.now()
+      this.firstFailureAt = null
       this.writeCache(response)
       log.info('Peers загружены из API', {
         count: response.servers.length,
@@ -86,7 +99,27 @@ class PeerSyncService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       this.lastError = message
-      log.warn('Не удалось получить peers из API, пробую cache', { error: message })
+      const now = Date.now()
+      if (this.firstFailureAt === null) {
+        this.firstFailureAt = now
+      }
+      // Эскалация: если успех был давно (или его не было вовсе) И провалы идут больше часа —
+      // пишем error, чтобы это попало в трейс/логи, а не утонуло в warn-шуме.
+      const sinceLastSuccess = this.lastSuccessfulSyncAt === null
+        ? Infinity
+        : now - this.lastSuccessfulSyncAt
+      const escalate = sinceLastSuccess > 60 * 60_000 && (now - this.firstFailureAt) > 60 * 60_000
+      const payload = {
+        error: message,
+        lastSuccessfulSyncAt: this.lastSuccessfulSyncAt,
+        firstFailureAt: this.firstFailureAt,
+        sinceLastSuccessMs: sinceLastSuccess === Infinity ? null : sinceLastSuccess,
+      }
+      if (escalate) {
+        log.error('Peers API недоступен > 1ч — данные устаревают', payload)
+      } else {
+        log.warn('Не удалось получить peers из API, пробую cache', payload)
+      }
     }
 
     const cached = this.readCache()
@@ -338,7 +371,8 @@ class PeerSyncService {
   getStatus(): PeerSyncStatus {
     return {
       peers: this.lastResponse?.servers ?? [],
-      lastSyncAt: this.lastResponse ? new Date(this.lastResponse.updatedAt).getTime() : null,
+      lastSyncAt: this.lastSuccessfulSyncAt,
+      lastResponseUpdatedAt: this.lastResponse?.updatedAt ?? null,
       lastReconnectAt: this.lastReconnectAt || null,
       source: this.source,
       lastError: this.lastError,

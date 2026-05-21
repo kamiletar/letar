@@ -41,8 +41,17 @@ export type PeerSyncSource = 'api' | 'cache' | 'hardcoded'
 export interface PeerSyncStatus {
   /** Текущий список серверов */
   peers: PinServer[]
-  /** ISO → unix ms последнего успешного sync */
+  /**
+   * Unix ms последнего УСПЕШНОГО ответа API.
+   * `null` если API ни разу не отвечал успешно за время жизни процесса
+   * (даже если данные взяты из cache/hardcoded).
+   */
   lastSyncAt: number | null
+  /**
+   * ISO-строка `updatedAt` из последнего ответа API (или cache fallback).
+   * Это «когда tracker последний раз обновил список серверов», не «когда мы получили».
+   */
+  lastResponseUpdatedAt: string | null
   /** Unix ms последнего reconnect cycle */
   lastReconnectAt: number | null
   /** Источник данных */

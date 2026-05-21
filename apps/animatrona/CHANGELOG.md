@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.52.1] - 2026-05-21
+
+### Fixed
+
+- **PeerSync: индикатор «Last sync» врал** — `getStatus().lastSyncAt` возвращал `response.updatedAt` из последнего ответа API, но это поле — таймстемп последней правки списка серверов **на трекере**, а не момент успешного pull-а из desktop. При длительной недоступности API индикатор молчал и показывал stale ISO из cache. Теперь `lastSyncAt` — Unix ms реального успеха `fetchPinServers`, а оригинальный `updatedAt` отдаётся отдельным полем `lastResponseUpdatedAt` для UI «данные обновлены: X».
+- **PeerSync: затяжная недоступность API стала видимой в логах** — при провалах > 1 часа от последнего успеха пишется `log.error` вместо `log.warn` (с `sinceLastSuccessMs` / `firstFailureAt` в payload), чтобы инцидент попадал в трейс.
+
+### Changed
+
+- `publishToTracker(config, directoryCid)` — удалён 3-й параметр `manifestCid` (мёртвая ветка после миграции `20260514194607_remove_anime_manifest_cid`). Все вызовы и до этого передавали только 2 аргумента.
+
 ## [0.52.0] - 2026-05-14
 
 ### Removed

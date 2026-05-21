@@ -68,25 +68,19 @@ export interface TrackerConnectionResult {
  *
  * @param config - Конфигурация подключения
  * @param directoryCid - CID корневой IPFS-директории аниме
- * @param manifestCid - CID JSON-манифеста (опционально, для корректного матчинга)
  * @returns Результат публикации
  */
 export async function publishToTracker(
   config: TrackerConfig,
   directoryCid: string,
-  manifestCid?: string,
 ): Promise<TrackerPublishResult> {
   log.info('Публикация на tracker', {
     baseUrl: config.baseUrl,
     directoryCid,
-    manifestCid: manifestCid ?? '(не указан)',
   })
 
   try {
-    const payload: Record<string, string> = { directoryCid }
-    if (manifestCid) {
-      payload.manifestCid = manifestCid
-    }
+    const payload = { directoryCid }
 
     const response = await fetch(`${config.baseUrl}/api/anime`, {
       method: 'POST',
