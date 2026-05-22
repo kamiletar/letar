@@ -121,13 +121,17 @@ export function PublishingSection({
         if (status.isRegenerating) {
           // Восстанавливаем UI в активном состоянии
           setIsRegenerating(true)
-          setRegenProgress({ current: status.current, total: status.total })
-          // Восстанавливаем текущий шаг и хотя бы одну запись в ProgressLog
+          // Используем prev-форму чтобы не затереть более свежие данные от live-событий,
+          // которые успели прийти пока шёл асинхронный запрос getRegenerationStatus.
+          setRegenProgress((prev) => prev ?? { current: status.current, total: status.total })
           if (status.currentAnimeName) {
-            setCurrentStep(`[${status.current}/${status.total}] ${status.currentAnimeName}`)
-            const entry: ProgressLogEntry = { name: status.currentAnimeName, status: 'processing' }
-            regenLogRef.current = [entry]
-            setRegenLog(regenLogRef.current)
+            setCurrentStep((prev) => prev ?? `[${status.current}/${status.total}] ${status.currentAnimeName}`)
+            // Добавляем запись в ProgressLog только если live-события ещё не заполнили его
+            if (regenLogRef.current.length === 0) {
+              const entry: ProgressLogEntry = { name: status.currentAnimeName, status: 'processing' }
+              regenLogRef.current = [entry]
+              setRegenLog(regenLogRef.current)
+            }
           }
         }
         if (status.result && !status.isRegenerating) {
@@ -167,7 +171,14 @@ export function PublishingSection({
       try {
         const res = await window.electronAPI!.animeManifest.getRegenerationStatus()
         if (res.success && res.data) {
-          setDetailedLog(res.data.log)
+          // Мержим с live-событиями, которые успели прийти пока шёл асинхронный запрос.
+          // Если просто перезаписать — потеряем события между стартом fetch и его завершением.
+          setDetailedLog((prev) => {
+            if (prev.length === 0) return res.data!.log
+            const fetchedIds = new Set(res.data!.log.map((e) => e.id))
+            const liveExtra = prev.filter((e) => !fetchedIds.has(e.id))
+            return [...res.data!.log, ...liveExtra].sort((a, b) => a.timestamp - b.timestamp)
+          })
         }
       } catch {
         /* не критично */
