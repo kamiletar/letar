@@ -109,7 +109,7 @@ function generateSlug(name: string): string {
  */
 async function saveShikimoriGenresToDb(
   animeId: string,
-  shikimoriGenres: Array<{ id: string; name: string; russian: string; kind: string }>
+  shikimoriGenres: Array<{ id: string; name: string; russian: string; kind: string }>,
 ): Promise<void> {
   for (const genreData of shikimoriGenres) {
     const shikimoriId = parseInt(genreData.id, 10)
@@ -521,17 +521,16 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
       manifest.createdAt = oldManifest.createdAt
 
       // Сравниваем контентные поля (без временных меток и directory stats)
-      const contentEqual =
-        manifest.animeInfoCid === oldManifest.animeInfoCid &&
-        manifest.name === oldManifest.name &&
-        manifest.episodesCid === oldManifest.episodesCid &&
-        manifest.posterCid === oldManifest.posterCid &&
-        manifest.franchiseGraphCid === oldManifest.franchiseGraphCid &&
-        manifest.relationsCid === oldManifest.relationsCid &&
-        manifest.episodePreviewsCid === oldManifest.episodePreviewsCid &&
-        manifest.isBdRemux === oldManifest.isBdRemux &&
-        manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl &&
-        manifest.creatorPeerId === oldManifest.creatorPeerId
+      const contentEqual = manifest.animeInfoCid === oldManifest.animeInfoCid
+        && manifest.name === oldManifest.name
+        && manifest.episodesCid === oldManifest.episodesCid
+        && manifest.posterCid === oldManifest.posterCid
+        && manifest.franchiseGraphCid === oldManifest.franchiseGraphCid
+        && manifest.relationsCid === oldManifest.relationsCid
+        && manifest.episodePreviewsCid === oldManifest.episodePreviewsCid
+        && manifest.isBdRemux === oldManifest.isBdRemux
+        && manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl
+        && manifest.creatorPeerId === oldManifest.creatorPeerId
 
       if (contentEqual && !forceUpdatedAt) {
         // Ничего не изменилось — возвращаем сигнал без нового CID
@@ -601,7 +600,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
  */
 export async function updateAnimeManifest(
   animeId: string,
-  options?: { skipShikimoriRefresh?: boolean }
+  options?: { skipShikimoriRefresh?: boolean },
 ): Promise<
   GenerateAnimeManifestResult & {
     directoryError?: string
@@ -667,23 +666,12 @@ export async function updateAnimeManifest(
       },
     })
 
-    // Открепляем старый directoryCid перед пересборкой
+    // Запоминаем старый directoryCid ДО пересборки — открепим ПОСЛЕ того как новый запинен
     const oldAnime = await prisma.anime.findUnique({ where: { id: animeId }, select: { directoryCid: true } })
-    if (oldAnime?.directoryCid) {
-      try {
-        const { CID } = await import('multiformats/cid')
-        const client = getKuboService().getClientOrNull()
-        if (client) await client.pin.rm(CID.parse(oldAnime.directoryCid))
-      } catch (error) {
-        log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
-      }
-    }
-    await prisma.anime.update({
-      where: { id: animeId },
-      data: { directoryCid: null, directoryBlocks: null, directorySize: null },
-    })
 
-    // Собираем обновлённую директорию с новым манифестом
+    // Собираем обновлённую директорию с новым манифестом.
+    // НЕ открепляем старый directoryCid до этого момента — иначе дочерние CID
+    // (episode manifests, thumbnails-img) теряют защиту от GC до пина нового.
     const { buildAnimeDirectory: rebuildDirectory } = await import('./ipfs/anime-directory-builder')
     const buildResult = await rebuildDirectory(animeId, { manifestCidOverride: retryResult.manifestCid })
     const { directoryCid, totalBlocks, totalSize, missingCids, missingFonts } = buildResult
@@ -693,9 +681,10 @@ export async function updateAnimeManifest(
     const contentHealth2: 'complete' | 'degraded' | 'broken' = hasCriticalLoss2
       ? 'broken'
       : hasAnyLoss2
-        ? 'degraded'
-        : 'complete'
+      ? 'degraded'
+      : 'complete'
 
+    // Сохраняем новый directoryCid — теперь контент защищён через новый пин
     await prisma.anime.update({
       where: { id: animeId },
       data: {
@@ -708,6 +697,17 @@ export async function updateAnimeManifest(
         lastHealthCheckAt: new Date(),
       },
     })
+
+    // Теперь безопасно открепить старый directoryCid — новый уже закреплён
+    if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
+      try {
+        const { CID } = await import('multiformats/cid')
+        const client = getKuboService().getClientOrNull()
+        if (client) await client.pin.rm(CID.parse(oldAnime.directoryCid))
+      } catch (error) {
+        log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
+      }
+    }
 
     log.info('Директория пересобрана после восстановления образов', {
       animeId,
@@ -737,26 +737,12 @@ export async function updateAnimeManifest(
 
     log.info('AnimeInfo сохранён в БД', { animeId, animeInfoCid: result.manifest?.animeInfoCid })
 
-    // Распиняем старый directoryCid и сбрасываем — он невалиден после смены манифестов
+    // Запоминаем старый directoryCid ДО сборки — открепим ПОСЛЕ пина нового.
+    // НЕ снимаем пин заранее: иначе дочерние CID (thumbnails-img, episode manifests)
+    // теряют защиту от GC в окне между unpin старого и pin нового directoryCid.
     const oldAnime = await prisma.anime.findUnique({
       where: { id: animeId },
       select: { directoryCid: true },
-    })
-    if (oldAnime?.directoryCid) {
-      try {
-        const { CID } = await import('multiformats/cid')
-        const client = getKuboService().getClientOrNull()
-        if (client) {
-          await client.pin.rm(CID.parse(oldAnime.directoryCid))
-          log.info('Старый directoryCid откреплён', { directoryCid: oldAnime.directoryCid })
-        }
-      } catch (error) {
-        log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
-      }
-    }
-    await prisma.anime.update({
-      where: { id: animeId },
-      data: { directoryCid: null, directoryBlocks: null, directorySize: null },
     })
 
     // Строим IPFS-директорию аниме (один CID = весь контент) с retry
@@ -780,8 +766,8 @@ export async function updateAnimeManifest(
         const contentHealth: 'complete' | 'degraded' | 'broken' = hasCriticalLoss
           ? 'broken'
           : hasAnyLoss
-            ? 'degraded'
-            : 'complete'
+          ? 'degraded'
+          : 'complete'
 
         buildContentHealth = contentHealth
         buildMissingCidsCount = missingCids.length
@@ -812,6 +798,21 @@ export async function updateAnimeManifest(
           missingFontsCount: missingFonts.length,
           recoveredCount: recovered.length,
         })
+
+        // Открепляем старый directoryCid только ПОСЛЕ того как новый закреплён и сохранён
+        if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
+          try {
+            const { CID } = await import('multiformats/cid')
+            const client = getKuboService().getClientOrNull()
+            if (client) {
+              await client.pin.rm(CID.parse(oldAnime.directoryCid))
+              log.info('Старый directoryCid откреплён', { directoryCid: oldAnime.directoryCid })
+            }
+          } catch (error) {
+            log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
+          }
+        }
+
         lastError = null
         break
       } catch (error) {

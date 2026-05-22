@@ -351,43 +351,47 @@ export async function buildAnimeDirectory(
   const epsWithAudio: Array<(typeof anime.episodes)[number] & { audioCid: string }> = []
   const videoEps = anime.episodes.filter((ep) => ep.transcodedCid)
   detail('info', `   ↻ chapters: проверяю ${videoEps.length} эп.…`)
-  for (const ep of anime.episodes) {
-    if (!ep.transcodedCid) continue
-    let parsed: EpisodeManifest | null = null
-    if (ep.manifestCid) {
-      parsed = await parseEpisodeManifest(ep.manifestCid)
-      parsedManifestCache.set(ep.id, parsed)
-      if (!parsed) {
-        detail('warn', `     ep.${ep.number}: манифест мёртв (${ep.manifestCid.slice(0, 8)}…)`)
+  // Параллельный pre-pass: все эпизоды проверяются одновременно, а не по очереди.
+  // Для 25 эп. с мёртвыми chapters сокращает время с ~250s (последовательно) до ~5s.
+  await Promise.all(
+    anime.episodes.map(async (ep) => {
+      if (!ep.transcodedCid) return
+      let parsed: EpisodeManifest | null = null
+      if (ep.manifestCid) {
+        parsed = await parseEpisodeManifest(ep.manifestCid)
+        parsedManifestCache.set(ep.id, parsed)
+        if (!parsed) {
+          detail('warn', `     ep.${ep.number}: манифест мёртв (${ep.manifestCid.slice(0, 8)}…)`)
+        }
       }
-    }
-    const candidateChaptersCid = ep.chaptersCid ?? parsed?.chaptersCid
-    if (candidateChaptersCid) {
-      const alive = await probeCidAvailable(candidateChaptersCid, 5000)
-      if (alive) {
-        chaptersByEp.set(ep.id, candidateChaptersCid)
-        detail('info', `     ep.${ep.number}: главы живы ✓`)
-        continue
+      const candidateChaptersCid = ep.chaptersCid ?? parsed?.chaptersCid
+      if (candidateChaptersCid) {
+        const alive = await probeCidAvailable(candidateChaptersCid, 5000)
+        if (alive) {
+          chaptersByEp.set(ep.id, candidateChaptersCid)
+          detail('info', `     ep.${ep.number}: главы живы ✓`)
+          return
+        }
+        detail('warn', `     ep.${ep.number}: главы мертвы (${candidateChaptersCid.slice(0, 8)}…)`)
+      } else {
+        detail('info', `     ep.${ep.number}: глав нет`)
       }
-      detail('warn', `     ep.${ep.number}: главы мертвы (${candidateChaptersCid.slice(0, 8)}…)`)
-    } else {
-      detail('info', `     ep.${ep.number}: глав нет`)
-    }
-    // Либо CID нет, либо мёртв — кандидат на recovery
-    epsWithMissingChapters.push(ep)
-    if (ep.durationMs && ep.audioTracks.length > 0) {
-      // Японская дорожка приоритетнее, иначе первая доступная
-      const track = ep.audioTracks.find((t) => t.language === 'jpn' || t.language === 'ja') ?? ep.audioTracks[0]
-      if (track?.transcodedCid) {
-        epsWithAudio.push({ ...ep, audioCid: track.transcodedCid })
-        detail('info', `       → аудио [${track.language ?? '?'}] доступно для recovery`)
+      // Либо CID нет, либо мёртв — кандидат на recovery
+      epsWithMissingChapters.push(ep)
+      if (ep.durationMs && ep.audioTracks.length > 0) {
+        // Японская дорожка приоритетнее, иначе первая доступная
+        const track = ep.audioTracks.find((t) => t.language === 'jpn' || t.language === 'ja') ?? ep.audioTracks[0]
+        if (track?.transcodedCid) {
+          epsWithAudio.push({ ...ep, audioCid: track.transcodedCid })
+          detail('info', `       → аудио [${track.language ?? '?'}] доступно для recovery`)
+        } else {
+          detail('warn', `       → нет аудиодорожки для recovery`)
+        }
       } else {
         detail('warn', `       → нет аудиодорожки для recovery`)
       }
-    } else {
-      detail('warn', `       → нет аудиодорожки для recovery`)
-    }
-  }
+    }),
+  )
 
   // Если хотя бы у одного эпизода есть живые главы — эпизоды без глав
   // просто не имеют их (спешлы, рекапы и т.п.), восстанавливать не нужно.
@@ -408,19 +412,17 @@ export async function buildAnimeDirectory(
       `   ↻ chapters: ${epsWithMissingChapters.length} эп. без живых глав, запускаю detectIntros по ${epsWithAudio.length} аудиодорожкам…`,
     )
     try {
-      // Фильтруем — оставляем только те у которых аудиодорожка достижима
-      const probedAudio: Array<{ id: string; audioCid: string; durationMs: number; number: number }> = []
-      for (const ep of epsWithAudio) {
-        const alive = await probeCidAvailable(ep.audioCid, 5000)
-        if (alive) {
-          probedAudio.push({
-            id: ep.id,
-            audioCid: ep.audioCid,
-            durationMs: ep.durationMs as number,
-            number: ep.number,
-          })
-        }
-      }
+      // Параллельный probe аудиодорожек — 25 × 5s последовательно → 5s суммарно
+      const probedAudio = (
+        await Promise.all(
+          epsWithAudio.map(async (ep) => {
+            const alive = await probeCidAvailable(ep.audioCid, 5000)
+            return alive
+              ? { id: ep.id, audioCid: ep.audioCid, durationMs: ep.durationMs as number, number: ep.number }
+              : null
+          }),
+        )
+      ).filter((ep): ep is NonNullable<typeof ep> => ep !== null)
       detail('info', `     проверка доступности: ${probedAudio.length}/${epsWithAudio.length} аудиодорожек живых`)
       if (probedAudio.length >= 2) {
         const recoveredMap = await recoverChapters({ episodes: probedAudio, onDetail: detail })
@@ -770,9 +772,12 @@ export async function buildAnimeDirectory(
       try {
         const thumbnailCids = JSON.parse(ep.thumbnailCids) as string[]
         if (Array.isArray(thumbnailCids) && thumbnailCids.length > 0) {
-          // Probe всех CID параллельно
+          // Probe thumbnail CID и video CID параллельно — экономим 5s на эпизод при dead thumbnails
           const aliveCids: string[] = []
           let anyDead = false
+          const videoProbePromise = ep.transcodedCid && ep.durationMs
+            ? probeCidAvailable(ep.transcodedCid, 5000)
+            : Promise.resolve(false)
           await Promise.all(
             thumbnailCids.map(async (cid) => {
               const alive = await probeCidAvailable(cid, 5000)
@@ -792,7 +797,7 @@ export async function buildAnimeDirectory(
               'info',
               `   ↻ эп.${ep.number}: ${deadCount}/${thumbnailCids.length} thumbnails-img мёртвы, regen из video…`,
             )
-            const videoAlive = await probeCidAvailable(ep.transcodedCid, 5000)
+            const videoAlive = await videoProbePromise
             if (videoAlive) {
               detail('info', `   ⬇ эп.${ep.number}: качаю video.webm для thumbnails-img…`)
               const regenerated = await recoverThumbnailsImg({
