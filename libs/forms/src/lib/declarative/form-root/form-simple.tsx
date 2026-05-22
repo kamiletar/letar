@@ -20,8 +20,16 @@ import { useFormFeatures } from './use-form-features'
 export interface FormSimpleProps<TData extends object> {
   /** Initial form values */
   initialValue: TData
-  /** Form submit handler */
-  onSubmit: (data: TData) => void | Promise<void>
+  /**
+   * Form submit handler.
+   * Optional — when omitted the form works as a state container (filters, settings panels).
+   */
+  onSubmit?: (data: TData) => void | Promise<void>
+  /**
+   * Ref for accessing the form instance from outside the <Form> tree.
+   * Use with useFormRef() to call reset(), setFieldValue(), read state.isDirty, etc.
+   */
+  formRef?: import('react').RefObject<import('../types').AppFormApi | null>
   /** Zod schema for validation */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema?: any
@@ -69,6 +77,7 @@ export interface FormSimpleProps<TData extends object> {
 export function FormSimple<TData extends object>({
   initialValue,
   onSubmit,
+  formRef,
   schema,
   persistence,
   offline,
@@ -94,7 +103,7 @@ export function FormSimple<TData extends object>({
     persistence,
     offline,
     onlineSubmit: async (value) => {
-      await onSubmit(value)
+      if (onSubmit) await onSubmit(value)
     },
   })
 
@@ -144,6 +153,11 @@ export function FormSimple<TData extends object>({
   // Подписка на изменения полей (onFieldChange)
   useFieldChangeListeners(form, onFieldChange)
 
+  // Передаём инстанс формы во внешний ref (useFormRef)
+  useEffect(() => {
+    if (formRef) formRef.current = form
+  }, [form, formRef])
+
   // Subscribe to changes for persistence
   useEffect(() => {
     return features.subscribeToFormChanges(form)
@@ -152,9 +166,9 @@ export function FormSimple<TData extends object>({
   // Restore data from persistence
   useEffect(() => {
     if (
-      !features.isPersistenceEnabled ||
-      !features.persistenceResult.shouldRestore ||
-      !features.persistenceResult.savedData
+      !features.isPersistenceEnabled
+      || !features.persistenceResult.shouldRestore
+      || !features.persistenceResult.savedData
     ) {
       return
     }
@@ -177,7 +191,7 @@ export function FormSimple<TData extends object>({
       readOnly,
       addressProvider,
     }),
-    [form, schema, features.offlineState, disabled, readOnly, addressProvider]
+    [form, schema, features.offlineState, disabled, readOnly, addressProvider],
   )
 
   return (

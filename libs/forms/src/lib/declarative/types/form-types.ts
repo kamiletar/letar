@@ -143,12 +143,20 @@ export interface DeclarativeFormContextValue {
 export interface FormProps<TData extends object> {
   /** Initial form values */
   initialValue: TData
-  /** Callback on form submission */
-  onSubmit: (data: TData) => void | Promise<void>
+  /**
+   * Callback on form submission.
+   * Optional — when omitted the form acts as a state container (filters, settings panels).
+   */
+  onSubmit?: (data: TData) => void | Promise<void>
   /** Optional Zod schema for validation */
   schema?: ZodSchema
   /** Form content (Field, Group components) */
   children: ReactNode
+  /**
+   * Ref for accessing the form instance from outside the <Form> tree.
+   * Use with useFormRef() to call reset(), setFieldValue(), read state.isDirty, etc.
+   */
+  formRef?: import('react').RefObject<import('./form-types').AppFormApi | null>
 }
 
 /**
@@ -225,6 +233,11 @@ export interface FormPropsWithApi<TData extends object> {
    * @example { maxSubmits: 3, windowMs: 60000 } // 3 попытки в минуту
    */
   rateLimit?: RateLimitConfig
+  /**
+   * Ref for accessing the form instance from outside the <Form> tree.
+   * Use with useFormRef() to call reset(), setFieldValue(), read state.isDirty, etc.
+   */
+  formRef?: import('react').RefObject<AppFormApi | null>
   /** Form content */
   children: ReactNode
 }
@@ -244,7 +257,7 @@ export interface FormPropsWithApi<TData extends object> {
 export type UseQueryHook<TData = any, TInclude = any> = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: { where: { id: string }; include?: TInclude } | any,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   data: TData | undefined
   isLoading: boolean

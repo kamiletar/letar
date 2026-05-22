@@ -315,4 +315,43 @@ export interface FormComponent {
     SNILS: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     Passport: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
   }
+
+  /**
+   * Subscribe to form values with optional debounce.
+   * Use for live previews, filter lists, settings panels.
+   *
+   * @example
+   * ```tsx
+   * <Form.Subscribe debounce={300}>
+   *   {(filters) => <ProductList filters={filters} />}
+   * </Form.Subscribe>
+   * ```
+   */
+  Subscribe: (props: {
+    children: (
+      values: Record<string, unknown>,
+      state: { isDirty: boolean; isSubmitting: boolean },
+    ) => ReactNode
+    debounce?: number
+  }) => ReactNode
+
+  /**
+   * Renderless component that syncs form values to URL query params (bidirectional).
+   * Place inside <Form>. Use useFormUrlSync() to read initial values from URL.
+   *
+   * @example
+   * ```tsx
+   * <Form.UrlSync fields={['search', 'category']} defaults={defaultFilters} debounce={300} />
+   * ```
+   */
+  UrlSync: <TData extends object>(props: {
+    fields: (keyof TData & string)[]
+    defaults: TData
+    debounce?: number
+    replace?: boolean
+    router?: {
+      replace: (url: string, options?: { scroll?: boolean }) => void
+      push: (url: string, options?: { scroll?: boolean }) => void
+    }
+  }) => null
 }

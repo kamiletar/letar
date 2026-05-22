@@ -4,6 +4,37 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.0] - 2026-05-22 — Form as State Manager
+
+### Added
+
+- **`Form.Subscribe`** — компонент подписки на значения формы с опциональным debounce:
+  - `<Form.Subscribe>{(values, state) => ...}</Form.Subscribe>` — немедленная подписка (live preview)
+  - `<Form.Subscribe debounce={300}>{(filters) => ...}</Form.Subscribe>` — debounced (фильтры → API-запросы)
+  - `state.isDirty` / `state.isSubmitting` доступны в render prop
+- **`Form.UrlSync`** — renderless-компонент двусторонней синхронизации формы с URL-параметрами:
+  - Размещается внутри `<Form>`, подписывается на изменения, пишет в URL с debounce
+  - Пропускает поля с дефолтными значениями — URL остаётся чистым
+  - Сохраняет сторонние параметры (`utm_*`, `ref`, etc.)
+  - Поддержка Next.js `router.replace` через проп `router`
+- **`useFormUrlSync(options)`** — хук для чтения initial values из URL при маунте:
+  - Умная типизация: `number` → `Number()`, `boolean` → `=== 'true'`, `string[]` → повторяющиеся params
+  - Whitelist полей — защита от инъекций через URL
+- **`readUrlValues(fields, defaults, searchParams?)`** — чистая функция (тестируема без React)
+- **`useFormRef()`** — создаёт ref для доступа к инстансу формы снаружи дерева `<Form>`:
+  - Передаётся как `<Form formRef={ref}>` → `ref.current.reset()`, `ref.current.setFieldValue()` и др.
+- **`useActiveFiltersCount(defaults)`** — возвращает количество полей, отличающихся от дефолтов:
+  - Поддерживает массивы (сравнение без учёта порядка), объекты, примитивы
+  - Используется для бейджей «Фильтры (3)»
+- **`onSubmit` теперь опциональный** — `<Form initialValue={...}>` без `onSubmit` работает как state-контейнер
+- **`formRef` prop** на `<Form>` — передаёт инстанс TanStack Form во внешний ref после инициализации
+
+### Documentation
+
+- Новая статья [`libs/forms/articles/14-forms-as-state.md`](./articles/14-forms-as-state.md)
+- Новый docs-гайд [`guides/filters-state.mdx`](../../apps/form-docs/content/docs/guides/filters-state.mdx) (EN + RU)
+- Обновлены `MAPPING.md` и `PLAN.md`
+
 ## [1.3.0] - 2026-04-10 — Testing Utilities + URL Prefill
 
 ### Added

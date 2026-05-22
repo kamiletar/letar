@@ -57,15 +57,21 @@ export {
   Form,
   FormGroupDeclarative,
   FormGroupListDeclarative,
+  // State management helpers
+  FormSubscribe,
+  FormUrlSync,
   numberMeta,
   // Relation field provider
   RelationFieldProvider,
   // Metadata helpers
   relationMeta,
   textMeta,
+  useActiveFiltersCount,
   useDeclarativeField,
   useDeclarativeForm,
   useDeclarativeFormOptional,
+  useFormRef,
+  useFormUrlSync,
   useRelationFieldContext,
   useRelationOptions,
   withRelations,
@@ -73,6 +79,8 @@ export {
   withUIMeta,
   withUIMetaDeep,
 } from './lib/declarative'
+
+export type { FormSubscribeProps, FormUrlSyncOptions, FormUrlSyncProps } from './lib/declarative'
 
 export type {
   ComboboxFieldProps,

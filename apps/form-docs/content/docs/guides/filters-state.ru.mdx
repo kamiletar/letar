@@ -1,0 +1,255 @@
+---
+title: Форма как менеджер состояния
+description: Форма без submit — фильтры, URL-синхронизация, панели настроек, dashboard-контролы
+---
+
+## Обзор
+
+Форма не обязана заканчиваться кнопкой «Отправить». `Form` — это subscription-based state machine, которая одинаково хорошо работает как контейнер состояния для фильтров, панелей настроек и dashboard-контролов.
+
+Когда выбрать `Form` вместо `useState`:
+
+| Потребность | Использовать |
+|---|---|
+| 1–2 независимых контрола | `useState` — проще |
+| 3+ взаимосвязанных контрола | `Form` — единый стейт, бесплатный сброс |
+| Контролы + URL-синхронизация | `Form` + `useUrlPrefill` |
+| Настройки с Apply/Cancel | `Form` — `isDirty` + `reset()` из коробки |
+| Dashboard-контролы | `Form` — валидация + URL + единый источник |
+
+## Форма-фильтр (без Submit)
+
+```tsx
+import { z } from 'zod/v4'
+
+const FilterSchema = z.object({
+  search: z.string(),
+  category: z.string(),
+  minPrice: z.number(),
+  status: z.array(z.string()),
+}).strip()
+
+const defaults = { search: '', category: 'all', minPrice: 0, status: [] }
+
+function CatalogPage() {
+  return (
+    <Form schema={FilterSchema} initialValue={defaults} onSubmit={async () => {}}>
+      <HStack mb={4}>
+        <Form.Field.String name="search" placeholder="Поиск..." />
+        <Form.Field.NativeSelect name="category" options={categoryOptions} />
+        <Form.Field.Slider name="minPrice" min={0} max={100000} />
+        <Form.Field.MultiSelect name="status" options={statusOptions} />
+        <Form.Button.Reset>Сбросить</Form.Button.Reset>
+      </HStack>
+
+      <Form.Subscribe>
+        {(filters) => <ProductList filters={filters} />}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+`Form.Button.Reset` сбрасывает форму к `initialValue` — никаких дополнительных обработчиков не нужно.
+
+## Form.Subscribe
+
+Render prop, который перерендеривается при любом изменении значений формы:
+
+```tsx
+<Form.Subscribe>
+  {(values) => <ResultCount filters={values} />}
+</Form.Subscribe>
+```
+
+Для подписки только на **конкретные поля** — `useTypedFormSubscribe`. Компонент перерендерится только при изменении указанных полей:
+
+```tsx
+function ActiveFiltersBar() {
+  const { value } = useTypedFormSubscribe(['search', 'category', 'status'])
+
+  const count = [
+    value.search !== '',
+    value.category !== 'all',
+    (value.status as string[]).length > 0,
+  ].filter(Boolean).length
+
+  if (count === 0) return null
+  return <Badge>Активных фильтров: {count}</Badge>
+}
+```
+
+`ActiveFiltersBar` может располагаться в любом месте дерева компонентов — он читает стейт формы через контекст.
+
+## Debounce для поиска
+
+Используй `Form.Watch` для debounce текстового поля перед запросом данных:
+
+```tsx
+function CatalogPage() {
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  return (
+    <Form schema={FilterSchema} initialValue={defaults} onSubmit={async () => {}}>
+      <Form.Field.String name="search" placeholder="Поиск..." />
+
+      <Form.Watch
+        field="search"
+        onChange={(value) => {
+          clearTimeout((window as any).__t)
+          ;(window as any).__t = setTimeout(() => setDebouncedSearch(String(value)), 300)
+        }}
+      />
+
+      <Form.Subscribe>
+        {(filters) => (
+          <ProductList filters={{ ...filters, search: debouncedSearch }} />
+        )}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+## URL-синхронизация: персистентные фильтры
+
+Фильтры должны переживать перезагрузку страницы и шериться по ссылке.
+
+### Инициализация из URL
+
+```tsx
+import { useUrlPrefill } from '@letar/forms'
+
+function CatalogPage() {
+  const prefilled = useUrlPrefill({
+    fields: ['search', 'category', 'minPrice', 'status'],
+    schema: FilterSchema, // проверяет значения из URL по схеме
+  })
+
+  return (
+    <Form
+      schema={FilterSchema}
+      initialValue={{ ...defaults, ...prefilled }}
+      onSubmit={async () => {}}
+    >
+      {/* ... */}
+    </Form>
+  )
+}
+```
+
+### Запись в URL при изменении
+
+```tsx
+import { useRouter } from 'next/navigation'
+
+function FilterUrlSync() {
+  const router = useRouter()
+
+  return (
+    <Form.Subscribe>
+      {(values) => {
+        useEffect(() => {
+          const params = new URLSearchParams()
+          if (values.search) params.set('search', String(values.search))
+          if (values.category !== 'all') params.set('category', String(values.category))
+          if (values.minPrice !== 0) params.set('minPrice', String(values.minPrice))
+          ;(values.status as string[]).forEach(s => params.append('status', s))
+          router.replace(`?${params}`, { scroll: false })
+        })
+        return null
+      }}
+    </Form.Subscribe>
+  )
+}
+
+// Разместить внутри <Form>:
+<FilterUrlSync />
+```
+
+## Панель настроек с Apply / Cancel
+
+```tsx
+function SettingsPanel({ settings, onSave }) {
+  return (
+    <Form
+      schema={SettingsSchema}
+      initialValue={settings}
+      onSubmit={async (values) => {
+        await onSave(values)
+        toast.success('Настройки сохранены')
+      }}
+    >
+      <Form.Field.NativeSelect name="theme" label="Тема" options={themeOptions} />
+      <Form.Field.NativeSelect name="language" label="Язык" options={langOptions} />
+      <Form.Field.Switch name="notifications" label="Уведомления" />
+      <Form.Field.Number name="itemsPerPage" label="Элементов на странице" min={10} max={100} step={10} />
+
+      <Form.Subscribe>
+        {(_, state) => (
+          <HStack mt={4}>
+            <Form.Button.Submit isDisabled={!state.isDirty}>Применить</Form.Button.Submit>
+            <Form.Button.Reset isDisabled={!state.isDirty}>Отмена</Form.Button.Reset>
+          </HStack>
+        )}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+`isDirty` равен `true`, когда текущие значения отличаются от `initialValue`. `Form.Button.Reset` откатывает к `initialValue` — то есть к настройкам на момент открытия панели.
+
+## Dashboard-контролы
+
+```tsx
+const DashboardControls = z.object({
+  period: z.enum(['day', 'week', 'month', 'quarter', 'year']),
+  groupBy: z.enum(['day', 'week', 'month']),
+  metrics: z.array(z.enum(['revenue', 'orders', 'users', 'conversion'])),
+}).strip()
+
+function DashboardPage() {
+  const prefilled = useUrlPrefill({
+    fields: ['period', 'groupBy', 'metrics'],
+    schema: DashboardControls,
+  })
+
+  return (
+    <Form
+      schema={DashboardControls}
+      initialValue={{ period: 'month', groupBy: 'day', metrics: ['revenue'], ...prefilled }}
+      onSubmit={async () => {}}
+    >
+      <HStack mb={6}>
+        <Form.Field.SegmentedControl name="period" options={periodOptions} />
+        <Form.Field.NativeSelect name="groupBy" label="Группировать по" options={groupByOptions} />
+        <Form.Field.CheckboxGroup name="metrics" options={metricOptions} />
+      </HStack>
+
+      <Form.Subscribe>
+        {(controls) => <DashboardCharts controls={controls} />}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+## Запланировано
+
+Эти паттерны сейчас требуют ручного кода. Появятся в ближайших релизах:
+
+| Фича | Описание |
+|---|---|
+| `useFormUrlSync` | Двусторонняя URL ↔ форма синхронизация с debounce |
+| `Form.Subscribe debounce` | Встроенный debounce: `<Form.Subscribe debounce={300}>` |
+| `onSubmit` опциональный | Без `onSubmit={async () => {}}` для no-submit форм |
+| `useFormRef` | Доступ к инстансу формы снаружи дерева |
+| `useActiveFiltersCount` | Счётчик полей, отличающихся от дефолтов |
+
+## Смотрите также
+
+- [Управляемое состояние](/docs/guides/controlled-state) — live preview и внешний контроль
+- [URL Prefill](/docs/guides/url-prefill) — инициализация формы из URL-параметров
+- [Наблюдатели полей](/docs/guides/field-watchers) — реакция на изменение полей
+- [TanStack Query](/docs/guides/tanstack-query) — комбинирование фильтров с получением данных

@@ -618,6 +618,86 @@ MCP сервер для AI-ассистентов — предоставляет
 
 ---
 
+## Form as State Manager ✅ (v1.4.0, 2026-05-22)
+
+> Источник: статья 14-forms-as-state.md, 2026-05-22. Паттерны фильтров, URL-синхронизации и dashboard-контролов выявили пробелы в API.
+
+### 1. `useFormUrlSync` — двусторонняя URL-синхронизация (приоритет: высокий)
+
+Сейчас `useUrlPrefill` — только чтение (URL → форма). Нужен хук с двусторонней синхронизацией:
+
+```ts
+const form = useFormUrlSync(FilterSchema, {
+  fields: ['search', 'category', 'minPrice'], // whitelist
+  debounce: 300,
+  replace: true, // router.replace вместо push
+})
+// form.initialValue считывается из URL при маунте
+// при изменении значений → router.replace автоматически
+```
+
+- [x] Хук `useFormUrlSync(schema, options)` в `@letar/forms`
+- [x] Поддержка Next.js `useRouter` и нативного `history.pushState`
+- [x] Сериализация: `z.array` → повторяющиеся params (`?status=a&status=b`)
+- [x] Тесты + демо в form-develop-app
+- [x] Документация: обновить `guides/filters-state.mdx` и `guides/url-prefill.mdx`
+
+### 2. `Form.Subscribe debounce` — встроенный debounce (приоритет: средний)
+
+Сейчас debounce требует ручного `Form.Watch` + `setTimeout`. Нужен prop:
+
+```tsx
+<Form.Subscribe debounce={300}>
+  {(values) => <ProductList filters={values} />}
+</Form.Subscribe>
+```
+
+- [x] Prop `debounce?: number` на `Form.Subscribe`
+- [x] Prop `debounce?: number` на `useTypedFormSubscribe`
+- [x] Тесты: убедиться что промежуточные значения не тригерят render
+
+### 3. `onSubmit` опциональный (приоритет: средний)
+
+Для no-submit форм (фильтры, контролы) сейчас нужен `onSubmit={async () => {}}`. Неочевидно и многословно. Сделать опциональным — когда `onSubmit` не передан, форма работает в режиме state-container без submit-логики.
+
+- [x] `onSubmit` опциональный в `Form` props
+- [x] Документация: добавить пример в `guides/filters-state.mdx`
+
+### 4. `useFormRef` — доступ к инстансу снаружи дерева (приоритет: средний)
+
+Для кнопки «Сбросить фильтры» в тулбаре страницы, которая живёт вне `<Form>`:
+
+```tsx
+const filterRef = useFormRef()
+
+// В тулбаре (вне <Form>):
+<Button onClick={() => filterRef.current?.reset()}>Сбросить всё</Button>
+
+// В форме:
+<Form formRef={filterRef} schema={FilterSchema} ...>
+```
+
+- [x] Prop `formRef` на `Form`
+- [x] Хук `useFormRef()` возвращает `RefObject<FormApi>`
+- [x] Тесты
+
+### 5. `useActiveFiltersCount(defaults)` — счётчик активных фильтров (приоритет: низкий)
+
+Частая потребность: бейдж «Фильтры (3)» над кнопкой открытия панели фильтров:
+
+```tsx
+const count = useActiveFiltersCount(defaultFilters)
+// count = количество полей, значение которых != defaults
+
+return <Button>Фильтры {count > 0 && <Badge>{count}</Badge>}</Button>
+```
+
+- [x] Хук `useActiveFiltersCount(defaults: Partial<T>): number`
+- [x] Сравнение через deep-equal (учитывает массивы)
+- [x] Документация
+
+---
+
 ## Публикация на Хабре
 
 Полное ТЗ по подготовке 14 статей к публикации: [ARTICLE.md](./ARTICLE.md)

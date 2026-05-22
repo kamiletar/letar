@@ -60,6 +60,7 @@ function FormRoot<TData extends object>({
   api,
   initialValue,
   onSubmit,
+  formRef,
   schema,
   persistence,
   offline,
@@ -104,13 +105,11 @@ function FormRoot<TData extends object>({
     throw new Error('Form requires either api prop or initialValue prop')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const noopSubmit = () => {}
-
   return (
     <FormSimple
       initialValue={initialValue}
-      onSubmit={onSubmit ?? noopSubmit}
+      onSubmit={onSubmit}
+      formRef={formRef}
       schema={schema}
       persistence={persistence}
       offline={offline}

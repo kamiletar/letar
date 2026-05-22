@@ -1,0 +1,255 @@
+---
+title: Forms as State Manager
+description: Use Form without submit — filters, URL sync, settings panels, dashboard controls
+---
+
+## Overview
+
+A form doesn't have to end with a submit button. `Form` is a subscription-based state machine — it works equally well as a state container for filters, settings panels, and dashboard controls.
+
+When to prefer `Form` over `useState`:
+
+| Need | Use |
+|---|---|
+| 1–2 independent controls | `useState` — simpler |
+| 3+ related controls | `Form` — single state, free reset |
+| Controls + URL sync | `Form` + `useUrlPrefill` |
+| Settings with Apply/Cancel | `Form` — `isDirty` + `reset()` built in |
+| Dashboard controls | `Form` — validation + URL + single source |
+
+## Filter Form (No Submit)
+
+```tsx
+import { z } from 'zod/v4'
+
+const FilterSchema = z.object({
+  search: z.string(),
+  category: z.string(),
+  minPrice: z.number(),
+  status: z.array(z.string()),
+}).strip()
+
+const defaults = { search: '', category: 'all', minPrice: 0, status: [] }
+
+function CatalogPage() {
+  return (
+    <Form schema={FilterSchema} initialValue={defaults} onSubmit={async () => {}}>
+      <HStack mb={4}>
+        <Form.Field.String name="search" placeholder="Search..." />
+        <Form.Field.NativeSelect name="category" options={categoryOptions} />
+        <Form.Field.Slider name="minPrice" min={0} max={100000} />
+        <Form.Field.MultiSelect name="status" options={statusOptions} />
+        <Form.Button.Reset>Reset</Form.Button.Reset>
+      </HStack>
+
+      <Form.Subscribe>
+        {(filters) => <ProductList filters={filters} />}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+`Form.Button.Reset` resets to `initialValue` — no extra handler needed.
+
+## Form.Subscribe
+
+Render prop that re-renders whenever any form value changes:
+
+```tsx
+<Form.Subscribe>
+  {(values) => <ResultCount filters={values} />}
+</Form.Subscribe>
+```
+
+For subscribing to **specific fields** only — use `useTypedFormSubscribe`. The component re-renders only when those fields change:
+
+```tsx
+function ActiveFiltersBar() {
+  const { value } = useTypedFormSubscribe(['search', 'category', 'status'])
+
+  const count = [
+    value.search !== '',
+    value.category !== 'all',
+    (value.status as string[]).length > 0,
+  ].filter(Boolean).length
+
+  if (count === 0) return null
+  return <Badge>Active filters: {count}</Badge>
+}
+```
+
+`ActiveFiltersBar` can live anywhere in the component tree — it reads form state through context.
+
+## Debounced Search
+
+Use `Form.Watch` to debounce a text field before triggering data fetches:
+
+```tsx
+function CatalogPage() {
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  return (
+    <Form schema={FilterSchema} initialValue={defaults} onSubmit={async () => {}}>
+      <Form.Field.String name="search" placeholder="Search..." />
+
+      <Form.Watch
+        field="search"
+        onChange={(value) => {
+          clearTimeout((window as any).__t)
+          ;(window as any).__t = setTimeout(() => setDebouncedSearch(String(value)), 300)
+        }}
+      />
+
+      <Form.Subscribe>
+        {(filters) => (
+          <ProductList filters={{ ...filters, search: debouncedSearch }} />
+        )}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+## URL Sync: Persistent Filters
+
+Filters should survive page reload and be shareable via link.
+
+### Read from URL on mount
+
+```tsx
+import { useUrlPrefill } from '@letar/forms'
+
+function CatalogPage() {
+  const prefilled = useUrlPrefill({
+    fields: ['search', 'category', 'minPrice', 'status'],
+    schema: FilterSchema, // validates URL values against schema
+  })
+
+  return (
+    <Form
+      schema={FilterSchema}
+      initialValue={{ ...defaults, ...prefilled }}
+      onSubmit={async () => {}}
+    >
+      {/* ... */}
+    </Form>
+  )
+}
+```
+
+### Write back to URL on change
+
+```tsx
+import { useRouter } from 'next/navigation'
+
+function FilterUrlSync() {
+  const router = useRouter()
+
+  return (
+    <Form.Subscribe>
+      {(values) => {
+        useEffect(() => {
+          const params = new URLSearchParams()
+          if (values.search) params.set('search', String(values.search))
+          if (values.category !== 'all') params.set('category', String(values.category))
+          if (values.minPrice !== 0) params.set('minPrice', String(values.minPrice))
+          ;(values.status as string[]).forEach(s => params.append('status', s))
+          router.replace(`?${params}`, { scroll: false })
+        })
+        return null
+      }}
+    </Form.Subscribe>
+  )
+}
+
+// Place inside <Form>:
+<FilterUrlSync />
+```
+
+## Settings Panel with Apply / Cancel
+
+```tsx
+function SettingsPanel({ settings, onSave }) {
+  return (
+    <Form
+      schema={SettingsSchema}
+      initialValue={settings}
+      onSubmit={async (values) => {
+        await onSave(values)
+        toast.success('Settings saved')
+      }}
+    >
+      <Form.Field.NativeSelect name="theme" label="Theme" options={themeOptions} />
+      <Form.Field.NativeSelect name="language" label="Language" options={langOptions} />
+      <Form.Field.Switch name="notifications" label="Notifications" />
+      <Form.Field.Number name="itemsPerPage" label="Items per page" min={10} max={100} step={10} />
+
+      <Form.Subscribe>
+        {(_, state) => (
+          <HStack mt={4}>
+            <Form.Button.Submit isDisabled={!state.isDirty}>Apply</Form.Button.Submit>
+            <Form.Button.Reset isDisabled={!state.isDirty}>Cancel</Form.Button.Reset>
+          </HStack>
+        )}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+`isDirty` is `true` when the current values differ from `initialValue`. `Form.Button.Reset` rolls back to `initialValue` — the settings as they were when the panel opened.
+
+## Dashboard Controls
+
+```tsx
+const DashboardControls = z.object({
+  period: z.enum(['day', 'week', 'month', 'quarter', 'year']),
+  groupBy: z.enum(['day', 'week', 'month']),
+  metrics: z.array(z.enum(['revenue', 'orders', 'users', 'conversion'])),
+}).strip()
+
+function DashboardPage() {
+  const prefilled = useUrlPrefill({
+    fields: ['period', 'groupBy', 'metrics'],
+    schema: DashboardControls,
+  })
+
+  return (
+    <Form
+      schema={DashboardControls}
+      initialValue={{ period: 'month', groupBy: 'day', metrics: ['revenue'], ...prefilled }}
+      onSubmit={async () => {}}
+    >
+      <HStack mb={6}>
+        <Form.Field.SegmentedControl name="period" options={periodOptions} />
+        <Form.Field.NativeSelect name="groupBy" label="Group by" options={groupByOptions} />
+        <Form.Field.CheckboxGroup name="metrics" options={metricOptions} />
+      </HStack>
+
+      <Form.Subscribe>
+        {(controls) => <DashboardCharts controls={controls} />}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+## Coming Soon
+
+These patterns currently require manual code. Planned for upcoming releases:
+
+| Feature | Description |
+|---|---|
+| `useFormUrlSync` | Bidirectional URL ↔ form state with debounce |
+| `Form.Subscribe debounce` | Built-in debounce: `<Form.Subscribe debounce={300}>` |
+| Optional `onSubmit` | No-submit forms without `onSubmit={async () => {}}` |
+| `useFormRef` | Access form instance outside the `<Form>` tree |
+| `useActiveFiltersCount` | Count fields differing from defaults |
+
+## Related
+
+- [Controlled State](/docs/guides/controlled-state) — live previews and external control
+- [URL Prefill](/docs/guides/url-prefill) — initialize form from URL parameters
+- [Field Watchers](/docs/guides/field-watchers) — react to field changes
+- [TanStack Query](/docs/guides/tanstack-query) — combine filters with data fetching
