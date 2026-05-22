@@ -1,4 +1,5 @@
-import { Box, Code, Heading, Link, Text } from '@chakra-ui/react'
+import { Box, Code, Heading, Link, Table, Text } from '@chakra-ui/react'
+import NextImage from 'next/image'
 import React from 'react'
 
 /**
@@ -233,6 +234,58 @@ function renderNode(node: MarkdocNode, index: number): React.ReactNode {
 
     case 'inline':
       return <React.Fragment key={index}>{renderedChildren}</React.Fragment>
+
+    case 'image': {
+      const src = (attributes.src as string) ?? ''
+      const alt = (attributes.alt as string) ?? ''
+      const title = (attributes.title as string) ?? undefined
+      return (
+        <Box key={index} my={6} borderRadius="lg" overflow="hidden">
+          <NextImage
+            src={src}
+            alt={alt}
+            title={title}
+            width={900}
+            height={500}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+            unoptimized={src.startsWith('http')}
+          />
+          {title && (
+            <Text fontSize="sm" color="fg.muted" textAlign="center" mt={2}>
+              {title}
+            </Text>
+          )}
+        </Box>
+      )
+    }
+
+    case 'table':
+      return (
+        <Box key={index} overflowX="auto" mb={6}>
+          <Table.Root variant="outline" size="sm">
+            {renderedChildren}
+          </Table.Root>
+        </Box>
+      )
+
+    case 'thead':
+      return <Table.Header key={index}>{renderedChildren}</Table.Header>
+
+    case 'tbody':
+      return <Table.Body key={index}>{renderedChildren}</Table.Body>
+
+    case 'tr':
+      return <Table.Row key={index}>{renderedChildren}</Table.Row>
+
+    case 'th':
+      return (
+        <Table.ColumnHeader key={index} fontWeight="bold" bg={{ base: 'gray.50', _dark: 'gray.800' }}>
+          {renderedChildren}
+        </Table.ColumnHeader>
+      )
+
+    case 'td':
+      return <Table.Cell key={index}>{renderedChildren}</Table.Cell>
 
     default:
       // Для неизвестных типов — рендерим детей
