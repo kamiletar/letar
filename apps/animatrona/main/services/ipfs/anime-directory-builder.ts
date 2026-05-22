@@ -49,7 +49,6 @@ import type {
   AnimeManifestPerson,
   AnimeManifestStudio,
 } from '@letar/animatrona-types'
-import { CID } from 'multiformats/cid'
 import type { EpisodeManifest } from '../../../shared/types/manifest'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
@@ -67,18 +66,6 @@ import type { DirEntry } from './unified-ipfs-service'
 import { addBytes, cat, createDirectoryFromCids, probeCidAvailable, safeCat, stat } from './unified-ipfs-service'
 
 const log = createModuleLogger('AnimeDirectoryBuilder')
-
-/** Рекурсивно собирает все CID из дерева DirEntry */
-function collectChildCidsFromEntries(items: DirEntry[], out: Set<string>): void {
-  for (const item of items) {
-    if (item.cid) {
-      out.add(item.cid)
-    }
-    if (item.children) {
-      collectChildCidsFromEntries(item.children, out)
-    }
-  }
-}
 
 /** Информация о потерянном CID для отчёта пользователю */
 export interface MissingCidEntry {
@@ -976,78 +963,10 @@ export async function buildAnimeDirectory(
     }
   }
 
-  // Пиним директорию рекурсивно — защищает весь контент от GC.
-  // pin.add обходит весь DAG. Для локального контента достаточно 90 секунд.
-  // НЕ ждём загрузку видео из сети — это не наша задача здесь.
-  // Retry только при обрыве соединения (fetch failed), но НЕ при таймауте.
-  try {
-    const client = getKuboService().getClientOrNull()
-    if (client) {
-      const PIN_TIMEOUT_MS = 90_000 // 90 секунд — локальный контент пинится быстро; не ждём сеть
-      const MAX_PIN_RETRIES = 3
-      let pinned = false
-      for (let attempt = 1; attempt <= MAX_PIN_RETRIES; attempt++) {
-        try {
-          await client.pin.add(CID.parse(directoryCid), { timeout: PIN_TIMEOUT_MS })
-          pinned = true
-          break
-        } catch (pinErr) {
-          const errStr = String(pinErr)
-          const isTimeout = errStr.includes('TimeoutError')
-            || errStr.includes('timed out')
-            || errStr.includes('AbortError')
-            || errStr.toLowerCase().includes('timeout')
-          const isFetchFailed = errStr.includes('fetch failed') || (errStr.includes('TypeError') && !isTimeout)
-          if (isTimeout) {
-            // При таймауте не retry — контент недоступен локально, не будем висеть
-            log.warn('pin.add завис (таймаут 90с) — контент недоступен локально, пропускаем пиннинг', {
-              directoryCid,
-              attempt,
-            })
-            detail('warn', `   ⚠ pin.add таймаут (90с) — контент недоступен локально`)
-            break
-          } else if (isFetchFailed && attempt < MAX_PIN_RETRIES) {
-            log.warn(`pin.add попытка ${attempt}/${MAX_PIN_RETRIES} не удалась (обрыв), повтор через 3с...`, {
-              directoryCid,
-              error: errStr,
-            })
-            await new Promise((r) => setTimeout(r, 3000))
-          } else {
-            throw pinErr
-          }
-        }
-      }
-      if (pinned) {
-        log.info('directoryCid закреплён в Kubo', { directoryCid })
-      }
-
-      // Снимаем recursive pin с дочерних CID — они становятся indirect через directoryCid
-      // и так же защищены от GC. Без этого каждый addBytes()/addFile() оставляет свой
-      // recursive pin, что приводит к десяткам тысяч лишних pin'ов и тормозит аудит.
-      const childCids = new Set<string>()
-      collectChildCidsFromEntries(entries, childCids)
-      childCids.delete(directoryCid)
-
-      let unpinnedChildren = 0
-      let unpinFailed = 0
-      for (const cid of childCids) {
-        try {
-          await client.pin.rm(CID.parse(cid))
-          unpinnedChildren++
-        } catch {
-          // Не было recursive pin или другая ошибка — игнор (CID уже indirect или неизвестен)
-          unpinFailed++
-        }
-      }
-      log.info('Дочерние CID переведены в indirect через directoryCid', {
-        unpinned: unpinnedChildren,
-        skipped: unpinFailed,
-        total: childCids.size,
-      })
-    }
-  } catch (error) {
-    log.warn('Не удалось закрепить directoryCid', { directoryCid, error: String(error) })
-  }
+  // Локальный pin.add пропущен намеренно.
+  // Весь контент (видео/аудио/субтитры/изображения) уже был запинен при загрузке через addBytes/addFile.
+  // Пиннинг directoryCid — задача пин-сервера (Pinata), который получит новый CID через механизм публикации.
+  // pin.add на 6920 МБ занимает до 90 секунд и не даёт никакой дополнительной защиты.
 
   const sizeMb = totalSize > 0 ? ` (${(totalSize / 1024 / 1024).toFixed(0)} MB)` : ''
   detail('success', `   ✓ директория: ${directoryCid.slice(0, 20)}…${sizeMb}`)
