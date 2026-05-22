@@ -1074,7 +1074,8 @@ async function parseAnimeManifest(animeManifestCid: string | null): Promise<Anim
     return null
   }
   try {
-    const content = await cat(animeManifestCid)
+    const content = await safeCat(animeManifestCid, 8_000)
+    if (!content) return null
     return JSON.parse(content.toString('utf-8')) as AnimeManifest
   } catch (error) {
     log.warn('Не удалось прочитать AnimeManifest', {
@@ -1095,7 +1096,8 @@ async function parseAnimeInfo(animeInfoCid: string | null): Promise<AnimeInfo | 
     return null
   }
   try {
-    const content = await cat(animeInfoCid)
+    const content = await safeCat(animeInfoCid, 8_000)
+    if (!content) return null
     return JSON.parse(content.toString('utf-8')) as AnimeInfo
   } catch (error) {
     log.warn('Не удалось прочитать AnimeInfo', {
@@ -1283,7 +1285,8 @@ async function parseEpisodeManifest(episodeManifestCid: string | null): Promise<
   }
 
   try {
-    const content = await cat(episodeManifestCid)
+    const content = await safeCat(episodeManifestCid, 8_000)
+    if (!content) return null
     return JSON.parse(content.toString('utf-8')) as EpisodeManifest
   } catch (error) {
     log.warn('Не удалось прочитать EpisodeManifest', {
