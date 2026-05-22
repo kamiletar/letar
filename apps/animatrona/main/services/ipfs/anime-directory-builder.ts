@@ -475,13 +475,20 @@ export async function buildAnimeDirectory(
       cid: ep.transcodedCid,
     })
 
-    // manifest.json эпизода (если есть)
+    // manifest.json эпизода — только если жив (pre-pass уже проверил).
+    // Мёртвый manifest.json вызывает зависание files.cp в createDirectoryFromCids:
+    // Kubo пытается достать блок из сети без таймаута.
     if (ep.manifestCid) {
-      epChildren.push({
-        name: 'manifest.json',
-        type: 'file',
-        cid: ep.manifestCid,
-      })
+      const manifestAlive = !parsedManifestCache.has(ep.id) || parsedManifestCache.get(ep.id) !== null
+      if (manifestAlive) {
+        epChildren.push({
+          name: 'manifest.json',
+          type: 'file',
+          cid: ep.manifestCid,
+        })
+      } else {
+        detail('warn', `   ⚠ эп.${ep.number}: manifest.json мёртв — пропускаю (избегаю зависания files.cp)`)
+      }
     }
 
     // audio/ — отдельные аудиодорожки
