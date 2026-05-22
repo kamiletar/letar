@@ -55,6 +55,8 @@ export function PublishingSection({
   const [regenLog, setRegenLog] = useState<ProgressLogEntry[]>([])
   const [regenProgress, setRegenProgress] = useState<{ current: number; total: number } | null>(null)
   const regenLogRef = useRef<ProgressLogEntry[]>([])
+  /** Текущий шаг: «[N/249] Аниме» — показывается над детальным логом */
+  const [currentStep, setCurrentStep] = useState<string | null>(null)
   const [healthSummary, setHealthSummary] = useState<
     { complete: number; degraded: number; broken: number; unknown: number } | null
   >(null)
@@ -89,6 +91,8 @@ export function PublishingSection({
       setRegenProgress({ current: data.current, total: data.total })
 
       if (data.status === 'processing') {
+        // Обновляем индикатор текущего шага
+        setCurrentStep(`[${data.current}/${data.total}] ${data.animeName}`)
         // Добавляем новую запись «в обработке»
         const entry: ProgressLogEntry = { name: data.animeName, status: 'processing' }
         regenLogRef.current = [...regenLogRef.current, entry]
@@ -118,6 +122,13 @@ export function PublishingSection({
           // Восстанавливаем UI в активном состоянии
           setIsRegenerating(true)
           setRegenProgress({ current: status.current, total: status.total })
+          // Восстанавливаем текущий шаг и хотя бы одну запись в ProgressLog
+          if (status.currentAnimeName) {
+            setCurrentStep(`[${status.current}/${status.total}] ${status.currentAnimeName}`)
+            const entry: ProgressLogEntry = { name: status.currentAnimeName, status: 'processing' }
+            regenLogRef.current = [entry]
+            setRegenLog(regenLogRef.current)
+          }
         }
         if (status.result && !status.isRegenerating) {
           // Регенерация уже закончилась — показываем итог
@@ -162,6 +173,11 @@ export function PublishingSection({
         /* не критично */
       }
     })()
+    // При старте нового цикла — очищаем старый лог (иначе хвост предыдущего запуска мешает)
+    const unsubStarted = window.electronAPI.animeManifest.onRegenerateStarted(() => {
+      setDetailedLog([])
+      setCurrentStep(null)
+    })
     const unsub = window.electronAPI.animeManifest.onRegenerateLog((entry) => {
       setDetailedLog((prev) => {
         // Дедуп по id
@@ -172,7 +188,10 @@ export function PublishingSection({
         return next
       })
     })
-    return () => unsub?.()
+    return () => {
+      unsubStarted?.()
+      unsub?.()
+    }
   }, [])
 
   // Подписка на завершение регенерации (срабатывает даже если пользователь ушёл и вернулся)
@@ -180,6 +199,7 @@ export function PublishingSection({
     if (!window.electronAPI) return
     const unsub = window.electronAPI.animeManifest.onRegenerateFinished(async (data) => {
       setIsRegenerating(false)
+      setCurrentStep(null)
       if (data.diskFull) setDiskFullError(true)
       // Подтягиваем итоговый result + healthSummary
       try {
@@ -211,6 +231,7 @@ export function PublishingSection({
     setRegenResult(null)
     setRegenLog([])
     setRegenProgress(null)
+    setCurrentStep(null)
     setHealthSummary(null)
     regenLogRef.current = []
     setRegenCheckpoint(null)
@@ -250,6 +271,7 @@ export function PublishingSection({
     setRegenResult(null)
     setRegenLog([])
     setRegenProgress(null)
+    setCurrentStep(null)
     setHealthSummary(null)
     regenLogRef.current = []
     setRegenCheckpoint(null)
@@ -523,8 +545,6 @@ export function PublishingSection({
               borderRadius="md"
               borderWidth="1px"
               borderColor="border.subtle"
-              maxH="240px"
-              overflowY="auto"
               fontFamily="mono"
               fontSize="xs"
             >
@@ -538,6 +558,7 @@ export function PublishingSection({
                     variant="ghost"
                     onClick={() => {
                       setDetailedLog([])
+                      setCurrentStep(null)
                       void window.electronAPI?.animeManifest.resetRegenerationState()
                     }}
                   >
@@ -545,27 +566,35 @@ export function PublishingSection({
                   </Button>
                 )}
               </HStack>
-              <VStack gap={0.5} align="stretch">
-                {detailedLog.slice(-100).map((entry) => {
-                  const color = entry.level === 'error'
-                    ? 'red.400'
-                    : entry.level === 'warn'
-                    ? 'orange.400'
-                    : entry.level === 'success'
-                    ? 'green.400'
-                    : 'fg.muted'
-                  return (
-                    <Text
-                      key={entry.id}
-                      color={color}
-                      whiteSpace="pre-wrap"
-                      wordBreak="break-word"
-                    >
-                      {entry.message}
-                    </Text>
-                  )
-                })}
-              </VStack>
+              {/* Индикатор текущего шага — всегда виден над скролл-областью */}
+              {isRegenerating && currentStep && (
+                <Text px={1} mb={1} color="blue.400" fontWeight={500}>
+                  ▶ {currentStep}
+                </Text>
+              )}
+              <Box maxH="380px" overflowY="auto">
+                <VStack gap={0.5} align="stretch">
+                  {detailedLog.slice(-500).map((entry) => {
+                    const color = entry.level === 'error'
+                      ? 'red.400'
+                      : entry.level === 'warn'
+                      ? 'orange.400'
+                      : entry.level === 'success'
+                      ? 'green.400'
+                      : 'fg.muted'
+                    return (
+                      <Text
+                        key={entry.id}
+                        color={color}
+                        whiteSpace="pre-wrap"
+                        wordBreak="break-word"
+                      >
+                        {entry.message}
+                      </Text>
+                    )
+                  })}
+                </VStack>
+              </Box>
             </Box>
           )}
 

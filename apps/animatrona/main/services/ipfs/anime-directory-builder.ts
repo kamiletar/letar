@@ -225,6 +225,9 @@ export async function buildAnimeDirectory(
     }
   }
 
+  // Сразу логируем имя аниме — чтобы в UI было видно что именно обрабатывается
+  detail('info', `── ${anime.name} (${anime.episodes.length} эп.) ──`)
+
   /**
    * Проверить достижимость CID и при необходимости попытаться восстановить.
    * - Если CID жив (probe < 5с) → возвращает оригинальный CID
@@ -353,6 +356,9 @@ export async function buildAnimeDirectory(
   detail('info', `   ↻ chapters: проверяю ${videoEps.length} эп.…`)
   // Параллельный pre-pass: все эпизоды проверяются одновременно, а не по очереди.
   // Для 25 эп. с мёртвыми chapters сокращает время с ~250s (последовательно) до ~5s.
+  // Логируем только проблемные эпизоды, здоровые суммируем в одну строку после.
+  const deadManifestEps: number[] = []
+  const deadChapterEps: number[] = []
   await Promise.all(
     anime.episodes.map(async (ep) => {
       if (!ep.transcodedCid) return
@@ -361,7 +367,7 @@ export async function buildAnimeDirectory(
         parsed = await parseEpisodeManifest(ep.manifestCid)
         parsedManifestCache.set(ep.id, parsed)
         if (!parsed) {
-          detail('warn', `     ep.${ep.number}: манифест мёртв (${ep.manifestCid.slice(0, 8)}…)`)
+          deadManifestEps.push(ep.number)
         }
       }
       const candidateChaptersCid = ep.chaptersCid ?? parsed?.chaptersCid
@@ -369,12 +375,9 @@ export async function buildAnimeDirectory(
         const alive = await probeCidAvailable(candidateChaptersCid, 5000)
         if (alive) {
           chaptersByEp.set(ep.id, candidateChaptersCid)
-          detail('info', `     ep.${ep.number}: главы живы ✓`)
           return
         }
-        detail('warn', `     ep.${ep.number}: главы мертвы (${candidateChaptersCid.slice(0, 8)}…)`)
-      } else {
-        detail('info', `     ep.${ep.number}: глав нет`)
+        deadChapterEps.push(ep.number)
       }
       // Либо CID нет, либо мёртв — кандидат на recovery
       epsWithMissingChapters.push(ep)
@@ -383,15 +386,34 @@ export async function buildAnimeDirectory(
         const track = ep.audioTracks.find((t) => t.language === 'jpn' || t.language === 'ja') ?? ep.audioTracks[0]
         if (track?.transcodedCid) {
           epsWithAudio.push({ ...ep, audioCid: track.transcodedCid })
-          detail('info', `       → аудио [${track.language ?? '?'}] доступно для recovery`)
-        } else {
-          detail('warn', `       → нет аудиодорожки для recovery`)
         }
-      } else {
-        detail('warn', `       → нет аудиодорожки для recovery`)
       }
     }),
   )
+
+  // Итог pre-pass: логируем только проблемы, иначе — кратко
+  if (deadManifestEps.length > 0) {
+    detail('warn', `   ⚠ chapters: манифест мёртв у эп. [${deadManifestEps.join(', ')}]`)
+  }
+  if (deadChapterEps.length > 0) {
+    detail(
+      'warn',
+      `   ⚠ chapters: мёртвых ${deadChapterEps.length} (эп. [${deadChapterEps.slice(0, 10).join(', ')}${
+        deadChapterEps.length > 10 ? '…' : ''
+      }])`,
+    )
+  }
+  const aliveCount = chaptersByEp.size
+  const noChapterCount = videoEps.length - aliveCount - deadChapterEps.length
+  if (aliveCount === videoEps.length) {
+    detail('info', `   ✓ chapters: все ${aliveCount} живых`)
+  } else if (aliveCount > 0 || noChapterCount > 0) {
+    const parts: string[] = []
+    if (aliveCount > 0) parts.push(`${aliveCount} живых`)
+    if (noChapterCount > 0) parts.push(`${noChapterCount} без глав`)
+    if (deadChapterEps.length > 0) parts.push(`${deadChapterEps.length} мёртвых`)
+    detail('info', `   — chapters: ${parts.join(', ')}`)
+  }
 
   // Если хотя бы у одного эпизода есть живые главы — эпизоды без глав
   // просто не имеют их (спешлы, рекапы и т.п.), восстанавливать не нужно.
@@ -466,7 +488,7 @@ export async function buildAnimeDirectory(
     const epDirName = String(ep.number).padStart(padLen, '0')
     const epChildren: DirEntry[] = []
 
-    detail('info', `   ep.${ep.number}: строю (${ep.audioTracks.length} аудио, ${ep.subtitleTracks.length} субтитров)…`)
+    // Не логируем per-episode "строю" — только итог всех эпизодов в конце цикла
 
     // video.webm
     epChildren.push({
@@ -886,12 +908,7 @@ export async function buildAnimeDirectory(
       }
     }
 
-    // Краткая сводка по эпизоду
-    const epSections = epChildren
-      .map((c) => c.name)
-      .filter((n) => n !== 'video.webm')
-      .join(' + ')
-    detail('info', `     ep.${ep.number}: ✓${epSections ? ` [${epSections}]` : ''}`)
+    // Краткая сводка по эпизоду — только предупреждения, суммарный итог ниже после цикла
 
     episodesDir.children!.push({
       name: epDirName,
@@ -904,6 +921,9 @@ export async function buildAnimeDirectory(
   if (episodesDir.children!.length > 0) {
     entries.push(episodesDir)
   }
+
+  // Итог по эпизодам — одна строка вместо N строк per-episode
+  detail('info', `   ✓ эпизоды: ${episodeCount} построено`)
 
   // Создаём виртуальную директорию
   log.info('Создаю IPFS-директорию', {
@@ -957,13 +977,13 @@ export async function buildAnimeDirectory(
   }
 
   // Пиним директорию рекурсивно — защищает весь контент от GC.
-  // pin.add на большой директории (3-5+ GB) обходит весь DAG и может занять несколько минут.
-  // undici сбрасывает TCP-соединение при долгом ожидании → TypeError: fetch failed.
-  // Передаём явный таймаут 15 мин и делаем retry.
+  // pin.add обходит весь DAG. Для локального контента достаточно 90 секунд.
+  // НЕ ждём загрузку видео из сети — это не наша задача здесь.
+  // Retry только при обрыве соединения (fetch failed), но НЕ при таймауте.
   try {
     const client = getKuboService().getClientOrNull()
     if (client) {
-      const PIN_TIMEOUT_MS = 15 * 60 * 1000 // 15 минут
+      const PIN_TIMEOUT_MS = 90_000 // 90 секунд — локальный контент пинится быстро; не ждём сеть
       const MAX_PIN_RETRIES = 3
       let pinned = false
       for (let attempt = 1; attempt <= MAX_PIN_RETRIES; attempt++) {
@@ -972,11 +992,24 @@ export async function buildAnimeDirectory(
           pinned = true
           break
         } catch (pinErr) {
-          const isFetchFailed = String(pinErr).includes('fetch failed') || String(pinErr).includes('TypeError')
-          if (isFetchFailed && attempt < MAX_PIN_RETRIES) {
-            log.warn(`pin.add попытка ${attempt}/${MAX_PIN_RETRIES} не удалась, повтор через 3с...`, {
+          const errStr = String(pinErr)
+          const isTimeout = errStr.includes('TimeoutError')
+            || errStr.includes('timed out')
+            || errStr.includes('AbortError')
+            || errStr.toLowerCase().includes('timeout')
+          const isFetchFailed = errStr.includes('fetch failed') || (errStr.includes('TypeError') && !isTimeout)
+          if (isTimeout) {
+            // При таймауте не retry — контент недоступен локально, не будем висеть
+            log.warn('pin.add завис (таймаут 90с) — контент недоступен локально, пропускаем пиннинг', {
               directoryCid,
-              error: String(pinErr),
+              attempt,
+            })
+            detail('warn', `   ⚠ pin.add таймаут (90с) — контент недоступен локально`)
+            break
+          } else if (isFetchFailed && attempt < MAX_PIN_RETRIES) {
+            log.warn(`pin.add попытка ${attempt}/${MAX_PIN_RETRIES} не удалась (обрыв), повтор через 3с...`, {
+              directoryCid,
+              error: errStr,
             })
             await new Promise((r) => setTimeout(r, 3000))
           } else {
@@ -1179,18 +1212,21 @@ async function buildImagesEntriesWithRecovery(
     return fileName
   }
 
-  async function processEntity(
+  /**
+   * Фаза 1: параллельный probe/recovery для одной сущности.
+   * Не трогает cidToPath и reserveSlot — только возвращает итоговый CID.
+   */
+  async function probeEntity(
     category: 'studios' | 'persons' | 'characters',
     kind: MissingCidEntry['kind'],
     entity: AnimeManifestStudio | AnimeManifestPerson | AnimeManifestCharacter,
-  ): Promise<void> {
+  ): Promise<{ category: 'studios' | 'persons' | 'characters'; entity: typeof entity; finalCid: string | null }> {
     const oldCid = entity.imageCid ?? null
-
-    let finalCid: string | null
+    let finalCid: string | null = null
 
     if (!oldCid) {
       // imageCid нет — первичная загрузка с Shikimori если есть imageUrl
-      if (!entity.imageUrl) return
+      if (!entity.imageUrl) return { category, entity, finalCid: null }
       detail('info', `   → ${category}/${entity.name}: загружаю с Shikimori…`)
       finalCid = await recoverShikimoriImage({
         imageUrl: entity.imageUrl,
@@ -1198,7 +1234,7 @@ async function buildImagesEntriesWithRecovery(
       })
       if (!finalCid) {
         detail('warn', `   ✗ ${category}/${entity.name}: не удалось загрузить с Shikimori`)
-        return
+        return { category, entity, finalCid: null }
       }
       detail('success', `   ✓ ${category}/${entity.name}: загружено`)
       recovered.push({ kind, oldCid: '(none)', newCid: finalCid, via: 'shikimori' })
@@ -1218,49 +1254,40 @@ async function buildImagesEntriesWithRecovery(
         recoverVia: 'shikimori',
       })
     }
-    if (!finalCid) return
-    // Если CID изменился (recovery сработал) — сохраняем новый в БД,
-    // иначе следующая регенерация снова увидит мёртвый CID в AnimeInfo и заново скачает с Shikimori.
-    if (finalCid !== oldCid && entity.id) {
+
+    // Если CID изменился (recovery сработал) — сохраняем новый в БД
+    if (finalCid && finalCid !== oldCid && entity.id) {
       try {
         if (category === 'studios') {
-          await prisma.shikimoriStudio.update({
-            where: { shikimoriId: entity.id },
-            data: { imageCid: finalCid },
-          })
+          await prisma.shikimoriStudio.update({ where: { shikimoriId: entity.id }, data: { imageCid: finalCid } })
         } else if (category === 'persons') {
-          await prisma.shikimoriPerson.update({
-            where: { shikimoriId: entity.id },
-            data: { imageCid: finalCid },
-          })
+          await prisma.shikimoriPerson.update({ where: { shikimoriId: entity.id }, data: { imageCid: finalCid } })
         } else {
-          await prisma.shikimoriCharacter.update({
-            where: { shikimoriId: entity.id },
-            data: { imageCid: finalCid },
-          })
+          await prisma.shikimoriCharacter.update({ where: { shikimoriId: entity.id }, data: { imageCid: finalCid } })
         }
         log.info(`${category}.imageCid обновлён в БД`, { shikimoriId: entity.id, name: entity.name })
       } catch (dbError) {
-        log.warn(`Не удалось сохранить ${category}.imageCid в БД`, {
-          shikimoriId: entity.id,
-          error: String(dbError),
-        })
+        log.warn(`Не удалось сохранить ${category}.imageCid в БД`, { shikimoriId: entity.id, error: String(dbError) })
       }
     }
-    if (cidToPath.has(finalCid)) return // уже добавлен (другая сущность с тем же CID)
-    const fileName = reserveSlot(category, entity.name)
-    cidToPath.set(finalCid, `${category}/${fileName}`)
+
+    return { category, entity, finalCid }
   }
 
-  // Параллельная обработка по категориям, последовательно внутри (для стабильности reserveSlot)
-  for (const studio of info.studios ?? []) {
-    await processEntity('studios', 'image-studio', studio)
-  }
-  for (const person of info.staff ?? []) {
-    await processEntity('persons', 'image-person', person)
-  }
-  for (const character of info.characters ?? []) {
-    await processEntity('characters', 'image-character', character)
+  // Фаза 1: параллельный probe всех изображений.
+  // 168 изображений × 5с последовательно = 840с; параллельно — ~5-10с суммарно.
+  const probeResults = await Promise.all([
+    ...(info.studios ?? []).map((e) => probeEntity('studios', 'image-studio', e)),
+    ...(info.staff ?? []).map((e) => probeEntity('persons', 'image-person', e)),
+    ...(info.characters ?? []).map((e) => probeEntity('characters', 'image-character', e)),
+  ])
+
+  // Фаза 2: последовательное назначение слотов (reserveSlot не потокобезопасен — нужен порядок)
+  for (const { category, entity, finalCid } of probeResults) {
+    if (!finalCid) continue
+    if (cidToPath.has(finalCid)) continue // уже добавлен (другая сущность с тем же CID)
+    const fileName = reserveSlot(category, entity.name)
+    cidToPath.set(finalCid, `${category}/${fileName}`)
   }
 
   if (cidToPath.size === 0) {
