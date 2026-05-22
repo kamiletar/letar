@@ -84,6 +84,11 @@ export default function HomePage() {
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/captcha-demo">CAPTCHA (Turnstile, reCAPTCHA, hCaptcha)</Link>
         </Button>
+        <Button asChild colorPalette="teal" size="lg" width="fit-content">
+          <Link href="/filters-state-demo">
+            Filters State (Form.Subscribe, Form.UrlSync, useFormRef, useActiveFiltersCount)
+          </Link>
+        </Button>
       </VStack>
     </Container>
   )
