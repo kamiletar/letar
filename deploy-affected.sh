@@ -253,6 +253,10 @@ if [ "$SKIP_GIT" = false ]; then
   fi
 
   echo -e "${GREEN}✅ Successfully pulled latest changes${NC}"
+
+  # Обновляем submodules до коммитов, зафиксированных в родительском репо
+  git submodule update --init --recursive
+  echo -e "${GREEN}✅ Submodules updated${NC}"
   echo ""
 
   # Reset Nx daemon after git pull to avoid stale project graph cache
