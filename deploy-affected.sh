@@ -254,9 +254,10 @@ if [ "$SKIP_GIT" = false ]; then
 
   echo -e "${GREEN}✅ Successfully pulled latest changes${NC}"
 
-  # Обновляем уже инициализированные submodules до коммитов из родительского репо
-  # || true — не останавливаемся если некоторые submodules недоступны на этом сервере
-  git submodule update --recursive || true
+  # Обновляем submodules по одному — пропускаем недоступные на этом сервере
+  git submodule status 2>/dev/null | awk '{print $2}' | while IFS= read -r sm_path; do
+    git submodule update "$sm_path" 2>/dev/null || true
+  done
   echo -e "${GREEN}✅ Submodules updated${NC}"
   echo ""
 
