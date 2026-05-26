@@ -255,8 +255,8 @@ if [ "$SKIP_GIT" = false ]; then
   echo -e "${GREEN}✅ Successfully pulled latest changes${NC}"
 
   # Обновляем уже инициализированные submodules до коммитов из родительского репо
-  # Без --init — не пытаемся клонировать submodules недоступные на этом сервере
-  git submodule update --recursive
+  # || true — не останавливаемся если некоторые submodules недоступны на этом сервере
+  git submodule update --recursive || true
   echo -e "${GREEN}✅ Submodules updated${NC}"
   echo ""
 
