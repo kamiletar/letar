@@ -49,6 +49,7 @@ import type {
   AnimeManifestPerson,
   AnimeManifestStudio,
 } from '@letar/animatrona-types'
+import { CID } from 'multiformats/cid'
 import type { EpisodeManifest } from '../../../shared/types/manifest'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
@@ -963,10 +964,52 @@ export async function buildAnimeDirectory(
     }
   }
 
-  // Локальный pin.add пропущен намеренно.
-  // Весь контент (видео/аудио/субтитры/изображения) уже был запинен при загрузке через addBytes/addFile.
-  // Пиннинг directoryCid — задача пин-сервера (Pinata), который получит новый CID через механизм публикации.
-  // pin.add на 6920 МБ занимает до 90 секунд и не даёт никакой дополнительной защиты.
+  // Пиним корень директории рекурсивно.
+  // ВАЖНО: createDirectoryFromCids удаляет MFS-запись сразу после stat() — directoryCid остаётся
+  // в blockstore без защиты. Без pin.add GC соберёт структурные ноды директории (UnixFS dir nodes),
+  // и directoryCid станет недоступен. Видео/аудио-файлы защищены своими индивидуальными пинами,
+  // но сама структура директории — только через этот pin.add.
+  // pin.rm на дочерние CID не нужен — избыточная оптимизация, создаёт лишние риски.
+  try {
+    const pinClient = getKuboService().getClientOrNull()
+    if (pinClient) {
+      const PIN_TIMEOUT_MS = 90_000
+      const MAX_PIN_RETRIES = 3
+      let pinned = false
+      for (let attempt = 1; attempt <= MAX_PIN_RETRIES; attempt++) {
+        try {
+          await pinClient.pin.add(CID.parse(directoryCid), { timeout: PIN_TIMEOUT_MS })
+          pinned = true
+          break
+        } catch (pinErr) {
+          const errStr = String(pinErr)
+          const isTimeout = errStr.includes('TimeoutError')
+            || errStr.includes('timed out')
+            || errStr.includes('AbortError')
+            || errStr.toLowerCase().includes('timeout')
+          const isFetchFailed = errStr.includes('fetch failed') || (errStr.includes('TypeError') && !isTimeout)
+          if (isTimeout) {
+            log.warn('pin.add таймаут (90с) — директория не защищена от GC', { directoryCid, attempt })
+            detail('warn', `   ⚠ pin.add таймаут (90с) — директория не защищена от GC`)
+            break
+          } else if (isFetchFailed && attempt < MAX_PIN_RETRIES) {
+            log.warn(`pin.add попытка ${attempt}/${MAX_PIN_RETRIES} не удалась (обрыв), повтор через 3с...`, {
+              directoryCid,
+              error: errStr,
+            })
+            await new Promise((r) => setTimeout(r, 3000))
+          } else {
+            throw pinErr
+          }
+        }
+      }
+      if (pinned) {
+        log.info('directoryCid закреплён в Kubo', { directoryCid })
+      }
+    }
+  } catch (error) {
+    log.warn('Не удалось закрепить directoryCid', { directoryCid, error: String(error) })
+  }
 
   const sizeMb = totalSize > 0 ? ` (${(totalSize / 1024 / 1024).toFixed(0)} MB)` : ''
   detail('success', `   ✓ директория: ${directoryCid.slice(0, 20)}…${sizeMb}`)
