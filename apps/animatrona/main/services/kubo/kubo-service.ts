@@ -22,7 +22,13 @@ import { KUBO_PORTS } from './kubo-config'
 import { getKuboBinaryPath, getKuboRepoPath, prepareKuboRepo, spawnKuboDaemon, validateKuboBinary } from './kubo-daemon'
 import { detectIpfsDesktop, type IpfsDesktopInfo, isIpfsDesktopAlive } from './kubo-detector'
 import { checkApiAvailable, checkHealth } from './kubo-health'
-import { createRelayHeartbeat, createRelayMonitor, registerWithRelay, stopRelayMonitor } from './kubo-relay'
+import {
+  createRelayHeartbeat,
+  createRelayMonitor,
+  registerWithRelay,
+  stopRelayHeartbeat,
+  stopRelayMonitor,
+} from './kubo-relay'
 import { getBandwidthOnly, getIpfsStatus, updatePeerCount } from './kubo-stats'
 import type { KuboCurrentPorts, KuboMode, KuboServiceStatus } from './kubo-types'
 
@@ -155,8 +161,11 @@ export class KuboService extends EventEmitter {
       })
       this.relayHeartbeatInterval = createRelayHeartbeat(() => this.peerId)
 
-      // Мониторинг relay reservation — восстанавливает если ConnMgr прунит соединение
-      this.relayMonitorInterval = createRelayMonitor(() => this.getApiUrl())
+      // Мониторинг relay reservation — восстанавливает если ConnMgr прунит соединение.
+      // При длительной потере (autorelay backoff) перезапускает Kubo для сброса backoff.
+      this.relayMonitorInterval = createRelayMonitor(() => this.getApiUrl(), {
+        onRestartNeeded: () => this.restartKuboForRelay(),
+      })
 
       // PeerSync — periodic refresh (10 мин) + reconnect cycle (30 мин)
       // КРИТИЧНО: reconnect cycle заменяет pin-queue логику на пиннерах,
@@ -306,7 +315,7 @@ export class KuboService extends EventEmitter {
       }
 
       if (this.relayHeartbeatInterval) {
-        clearInterval(this.relayHeartbeatInterval)
+        stopRelayHeartbeat(this.relayHeartbeatInterval)
         this.relayHeartbeatInterval = null
       }
 
@@ -645,6 +654,54 @@ export class KuboService extends EventEmitter {
     this.mode = 'embedded'
 
     log.info('Embedded Kubo перезапущен', { peerId: this.peerId?.slice(-8) })
+  }
+
+  /**
+   * Перезапустить Kubo для сброса autorelay backoff при потере relay reservation.
+   *
+   * Вызывается KuboRelay монитором когда swarm connect не восстанавливает
+   * резервацию — это признак autorelay exponential backoff. Единственный
+   * способ сбросить backoff — перезапустить Kubo процесс.
+   *
+   * Последовательность:
+   * 1. Перерегистрируемся на relay до рестарта (актуализируем TTL в whitelist)
+   * 2. Перезапускаем Kubo (сбрасывает in-memory autorelay backoff)
+   * 3. Перерегистрируемся с новым peerId после рестарта
+   */
+  async restartKuboForRelay(): Promise<void> {
+    if (this.mode !== 'embedded' || this.isShuttingDown) {
+      log.debug('restartKuboForRelay пропущен', {
+        mode: this.mode,
+        isShuttingDown: this.isShuttingDown,
+      })
+      return
+    }
+
+    log.warn('Перезапуск Kubo для сброса autorelay backoff...')
+
+    // Шаг 1: регистрируемся ДО рестарта (чтобы whitelist был актуален при старте)
+    await registerWithRelay(this.peerId).catch((err) => {
+      log.warn('Pre-restart relay registration не удалась', { error: String(err) })
+    })
+
+    // Шаг 2: перезапускаем Kubo (очищает autorelay backoff)
+    try {
+      await this.restartEmbedded()
+    } catch (error) {
+      log.error('Ошибка рестарта Kubo для relay', { error: String(error) })
+      this.emit('error', error instanceof Error ? error : new Error(String(error)))
+      return
+    }
+
+    // Шаг 3: регистрируемся с новым peerId после рестарта
+    await registerWithRelay(this.peerId).catch((err) => {
+      log.warn('Post-restart relay registration не удалась', { error: String(err) })
+    })
+
+    this.emitStatusChanged()
+    log.info('Kubo перезапущен, relay registration обновлена', {
+      peerId: this.peerId?.slice(-8),
+    })
   }
 
   /**

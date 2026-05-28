@@ -7,6 +7,10 @@
  * Мониторинг: проверяет наличие /p2p-circuit адреса в announced addresses.
  * Если reservation потеряна (ConnMgr prune, сеть, etc.) — восстанавливает
  * через swarm connect → autorelay автоматически переполучает reservation.
+ *
+ * Если swarm connect не помогает (autorelay backoff) — через RESTART_THRESHOLD
+ * последовательных пропусков вызывается onRestartNeeded → рестарт Kubo
+ * сбрасывает backoff, autorelay немедленно получает reservation после старта.
  */
 
 import { app } from 'electron'
@@ -16,6 +20,25 @@ import { createModuleLogger } from '../../utils/logger'
 import { PRIVATE_RELAY, RELAY_REGISTER_URL } from './kubo-config'
 
 const log = createModuleLogger('KuboRelay')
+
+/**
+ * Количество последовательных пропусков relay reservation перед рестартом Kubo.
+ * 10 пропусков × 30 сек = ~5 мин без резервации → рестарт.
+ * Рестарт сбрасывает autorelay backoff — единственный надёжный способ.
+ */
+const RESTART_THRESHOLD = 10
+
+/**
+ * Минимальный интервал между рестартами Kubo из-за relay.
+ * Защита от restart loop при проблемах с сетью.
+ */
+const RESTART_COOLDOWN_MS = 10 * 60 * 1000
+
+/**
+ * Задержка повторного heartbeat при ошибке регистрации.
+ * TTL relay = 60 мин, heartbeat = 30 мин → при сбое повторяем через 5 мин.
+ */
+const HEARTBEAT_RETRY_MS = 5 * 60 * 1000
 
 /**
  * Зарегистрировать peer ID на relay-сервере
@@ -57,7 +80,7 @@ export async function registerWithRelay(peerId: string | null): Promise<void> {
             reject(new Error(`Relay вернул ${res.statusCode}: ${data}`))
           }
         })
-      }
+      },
     )
     req.on('error', (err) => reject(err))
     req.on('timeout', () => {
@@ -70,23 +93,78 @@ export async function registerWithRelay(peerId: string | null): Promise<void> {
 }
 
 /**
- * Создать интервал heartbeat регистрации на relay (каждые 30 мин)
+ * Создать интервал heartbeat регистрации на relay (каждые 30 мин).
+ *
+ * При ошибке heartbeat повторяет попытку через HEARTBEAT_RETRY_MS (5 мин),
+ * чтобы не допустить истечения TTL (60 мин) при временных сбоях сети.
  *
  * @param getPeerId — функция для получения актуального PeerId
- * @returns Интервал (для очистки при shutdown)
+ * @returns Интервал (для очистки при shutdown через stopRelayHeartbeat)
  */
 export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType<typeof setInterval> {
-  // Heartbeat каждые 30 минут (TTL на relay = 60 мин)
-  return setInterval(
-    async () => {
-      try {
-        await registerWithRelay(getPeerId())
-      } catch (err) {
-        log.warn('Heartbeat регистрации на relay не удался', { error: String(err) })
+  let retryTimeout: ReturnType<typeof setTimeout> | null = null
+
+  const doHeartbeat = async () => {
+    // Сбрасываем pending retry перед новой попыткой
+    if (retryTimeout) {
+      clearTimeout(retryTimeout)
+      retryTimeout = null
+    }
+    try {
+      await registerWithRelay(getPeerId())
+    } catch (err) {
+      log.warn('Heartbeat регистрации на relay не удался, повтор через 5 мин', {
+        error: String(err),
+      })
+      // Планируем повтор — но только если ещё нет pending retry
+      if (!retryTimeout) {
+        retryTimeout = setTimeout(() => {
+          retryTimeout = null
+          doHeartbeat().catch(() => {})
+        }, HEARTBEAT_RETRY_MS)
       }
-    },
-    30 * 60 * 1000
-  )
+    }
+  }
+
+  const interval = setInterval(() => {
+    doHeartbeat().catch(() => {})
+  }, 30 * 60 * 1000) as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
+
+  // Прикрепляем cleanup функцию для clearTimeout retryTimeout при shutdown
+  interval.__stopHeartbeat = () => {
+    clearInterval(interval)
+    if (retryTimeout) {
+      clearTimeout(retryTimeout)
+      retryTimeout = null
+    }
+  }
+
+  return interval
+}
+
+/**
+ * Остановить relay heartbeat (очищает интервал и pending retry timeout)
+ */
+export function stopRelayHeartbeat(interval: ReturnType<typeof setInterval> | null): void {
+  if (!interval) return
+  const combined = interval as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
+  if (combined.__stopHeartbeat) {
+    combined.__stopHeartbeat()
+  } else {
+    clearInterval(interval)
+  }
+}
+
+/**
+ * Опции для createRelayMonitor
+ */
+export interface RelayMonitorOptions {
+  /**
+   * Вызывается когда reservation потеряна на длительное время (RESTART_THRESHOLD пропусков).
+   * Должен перезапустить Kubo — единственный способ сбросить autorelay backoff.
+   * Вызывается не чаще чем раз в RESTART_COOLDOWN_MS.
+   */
+  onRestartNeeded?: () => Promise<void>
 }
 
 /**
@@ -96,29 +174,113 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
  * ConnMgr может прунить relay-connection от AutoRelay (не защищено
  * Peering тегом "keep"), убивая reservation.
  *
- * Решение: периодически проверять наличие /p2p-circuit адреса.
- * Если потерян → swarm connect к relay → autorelay перерезервирует.
+ * Решение:
+ * 1. Периодически проверять наличие /p2p-circuit адреса.
+ * 2. Если потерян → swarm connect к relay → autorelay перерезервирует.
+ * 3. Если swarm connect не помогает N раз (autorelay backoff) → рестарт Kubo.
+ *    Рестарт сбрасывает in-memory backoff, autorelay сразу получает reservation.
  *
  * @param getApiUrl — функция для получения Kubo API URL
+ * @param options — опциональные настройки (onRestartNeeded callback)
  * @returns Интервал (для очистки при shutdown)
  */
-export function createRelayMonitor(getApiUrl: () => string | null): ReturnType<typeof setInterval> {
+export function createRelayMonitor(
+  getApiUrl: () => string | null,
+  options?: RelayMonitorOptions,
+): ReturnType<typeof setInterval> {
+  const { onRestartNeeded } = options ?? {}
+
   let consecutiveMisses = 0
   let hasLoggedRecovery = false
+  let lastRestartAt = 0
+  let isRestarting = false
+
+  const checkAndRecover = async () => {
+    const apiUrl = getApiUrl()
+    if (!apiUrl) {
+      return
+    }
+
+    // Не проверяем во время рестарта — Kubo недоступен
+    if (isRestarting) {
+      return
+    }
+
+    try {
+      const hasRelay = await hasRelayReservation(apiUrl)
+
+      if (hasRelay) {
+        if (consecutiveMisses > 0 && !hasLoggedRecovery) {
+          log.info('Relay reservation восстановлена', { afterMisses: consecutiveMisses })
+          hasLoggedRecovery = true
+        }
+        consecutiveMisses = 0
+        hasLoggedRecovery = false
+        return
+      }
+
+      // Reservation потеряна
+      consecutiveMisses++
+
+      // Первый miss — может быть нормальной инициализацией
+      if (consecutiveMisses === 1) {
+        log.debug('Relay reservation не обнаружена, проверим снова')
+        return
+      }
+
+      // 2+ misses — пробуем восстановить через swarm connect
+      log.warn('Relay reservation потеряна, восстанавливаю...', { consecutiveMisses })
+      await forceSwarmConnect(apiUrl, PRIVATE_RELAY)
+
+      // Проверяем порог рестарта — swarm connect не сбрасывает autorelay backoff
+      if (
+        consecutiveMisses >= RESTART_THRESHOLD
+        && onRestartNeeded
+        && !isRestarting
+      ) {
+        const now = Date.now()
+        const timeSinceLastRestart = now - lastRestartAt
+
+        if (timeSinceLastRestart >= RESTART_COOLDOWN_MS) {
+          log.warn(
+            'Relay reservation не восстанавливается — рестарт Kubo для сброса autorelay backoff',
+            {
+              consecutiveMisses,
+              minutesSinceLastRestart: Math.round(timeSinceLastRestart / 60000),
+            },
+          )
+          isRestarting = true
+          lastRestartAt = now
+          consecutiveMisses = 0
+          hasLoggedRecovery = false
+
+          try {
+            await onRestartNeeded()
+          } catch (err) {
+            log.error('Ошибка рестарта Kubo из-за relay', { error: String(err) })
+          } finally {
+            isRestarting = false
+          }
+        } else {
+          log.warn('Рестарт Kubo нужен, но кулдаун не истёк', {
+            consecutiveMisses,
+            cooldownRemainingMin: Math.round((RESTART_COOLDOWN_MS - timeSinceLastRestart) / 60000),
+          })
+        }
+      }
+    } catch (err) {
+      log.debug('Ошибка проверки relay reservation', { error: String(err) })
+    }
+  }
 
   // Первая проверка через 45 секунд (после ConnMgr GracePeriod + запас)
   const initialDelay = setTimeout(() => {
-    checkAndRecover(getApiUrl, consecutiveMisses, hasLoggedRecovery).then((result) => {
-      consecutiveMisses = result.misses
-      hasLoggedRecovery = result.loggedRecovery
-    })
+    checkAndRecover().catch(() => {})
   }, 45_000)
 
   // Затем каждые 30 секунд
-  const interval = setInterval(async () => {
-    const result = await checkAndRecover(getApiUrl, consecutiveMisses, hasLoggedRecovery)
-    consecutiveMisses = result.misses
-    hasLoggedRecovery = result.loggedRecovery
+  const interval = setInterval(() => {
+    checkAndRecover().catch(() => {})
   }, 30_000)
 
   // Обернём для cleanup обоих таймеров
@@ -141,52 +303,6 @@ export function stopRelayMonitor(interval: ReturnType<typeof setInterval> | null
 }
 
 /**
- * Проверить relay reservation и восстановить если потеряна
- */
-async function checkAndRecover(
-  getApiUrl: () => string | null,
-  consecutiveMisses: number,
-  hasLoggedRecovery: boolean
-): Promise<{ misses: number; loggedRecovery: boolean }> {
-  const apiUrl = getApiUrl()
-  if (!apiUrl) {
-    return { misses: consecutiveMisses, loggedRecovery: hasLoggedRecovery }
-  }
-
-  try {
-    const hasRelay = await hasRelayReservation(apiUrl)
-
-    if (hasRelay) {
-      if (consecutiveMisses > 0 && !hasLoggedRecovery) {
-        log.info('Relay reservation восстановлена', { afterMisses: consecutiveMisses })
-        return { misses: 0, loggedRecovery: true }
-      }
-      return { misses: 0, loggedRecovery: false }
-    }
-
-    // Reservation потеряна
-    consecutiveMisses++
-
-    // Первый miss — может быть нормальной инициализацией
-    if (consecutiveMisses === 1) {
-      log.debug('Relay reservation не обнаружена, проверим снова')
-      return { misses: consecutiveMisses, loggedRecovery: false }
-    }
-
-    // 2+ misses — пробуем восстановить через swarm connect
-    log.warn('Relay reservation потеряна, восстанавливаю...', {
-      consecutiveMisses,
-    })
-
-    await forceSwarmConnect(apiUrl, PRIVATE_RELAY)
-    return { misses: consecutiveMisses, loggedRecovery: false }
-  } catch (err) {
-    log.debug('Ошибка проверки relay reservation', { error: String(err) })
-    return { misses: consecutiveMisses, loggedRecovery: hasLoggedRecovery }
-  }
-}
-
-/**
  * Проверить, есть ли /p2p-circuit адрес в announced addresses Kubo
  */
 async function hasRelayReservation(apiUrl: string): Promise<boolean> {
@@ -204,9 +320,10 @@ async function hasRelayReservation(apiUrl: string): Promise<boolean> {
 /**
  * Принудительно подключиться к relay через swarm connect
  *
- * Это создаёт новое TCP-соединение к relay, которое autorelay
- * может переиспользовать для reservation. Также сбрасывает
- * кэш "recentlyFailedRelays" в autorelay.
+ * Создаёт новое TCP-соединение к relay, которое autorelay может
+ * переиспользовать для reservation. Помогает при потере соединения,
+ * но НЕ помогает при autorelay exponential backoff — для этого нужен
+ * рестарт Kubo через onRestartNeeded.
  */
 async function forceSwarmConnect(apiUrl: string, relayMultiaddr: string): Promise<void> {
   try {
