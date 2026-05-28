@@ -1,16 +1,19 @@
 'use client'
 
 import { OAuthButtons } from '@/lib/auth-client'
-import { usePostSignInCallback } from '../../_hooks/use-post-sign-in-callback'
 
 /**
  * OAuth кнопки для входа через соцсети.
  *
- * callbackUrl определяется через usePostSignInCallback — если страница
- * открыта как часть OIDC flow, после OAuth возврат идёт на внутренний
- * /oauth2/authorize для продолжения выдачи кода клиентскому приложению.
+ * Всегда редиректят на /auth/post-login — промежуточный route, который
+ * читает cookie `oidc_pending` (установленную на /sign-in если была OIDC
+ * сессия) и продолжает OIDC flow. Без cookie просто идёт на главную.
+ *
+ * Ранее использовался usePostSignInCallback() для передачи OIDC authorize
+ * URL как callbackUrl, но этот URL с вложенными query-параметрами не
+ * выживал в цепочке редиректов через внешний OAuth (двойное кодирование
+ * спецсимволов). Cookie-подход решает эту проблему.
  */
 export function AuthOAuthButtons() {
-  const callbackUrl = usePostSignInCallback()
-  return <OAuthButtons providers={['google', 'github', 'vk', 'yandex']} callbackUrl={callbackUrl} />
+  return <OAuthButtons providers={['google', 'github', 'vk', 'yandex']} callbackUrl="/auth/post-login" />
 }
