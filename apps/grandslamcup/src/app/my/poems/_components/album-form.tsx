@@ -22,28 +22,30 @@ export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [coverImage, setCoverImage] = useState<string | null>(initialData?.coverImage ?? null)
   const [publishedAt, setPublishedAt] = useState<string>(
-    initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().slice(0, 10) : '',
+    initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().slice(0, 10) : ''
   )
   const [saving, setSaving] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!title.trim()) {
+      return
+    }
 
     setSaving(true)
     try {
       const result = albumId
         ? await updateAlbumAction({
-          albumId,
-          title: title.trim(),
-          coverImage,
-          publishedAt: publishedAt || null,
-        })
+            albumId,
+            title: title.trim(),
+            coverImage,
+            publishedAt: publishedAt || null,
+          })
         : await createAlbumAction({
-          title: title.trim(),
-          coverImage,
-          publishedAt: publishedAt || null,
-        })
+            title: title.trim(),
+            coverImage,
+            publishedAt: publishedAt || null,
+          })
 
       if ('error' in result && result.error) {
         const msg = typeof result.error === 'string' ? result.error : 'Ошибка сохранения'
@@ -68,7 +70,10 @@ export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
       <Stack gap={6}>
         <Field.Root required>
           <Field.Label>
-            Название <Text as="span" color="red.500">*</Text>
+            Название{' '}
+            <Text as="span" color="red.500">
+              *
+            </Text>
           </Field.Label>
           <Input
             value={title}

@@ -18,7 +18,9 @@ type Params = Promise<{ citySlug: string; slug: string }>
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { citySlug, slug } = await params
   const player = await prisma.player.findUnique({ where: { slug }, select: { name: true } })
-  if (!player) return { title: 'Поэт не найден' }
+  if (!player) {
+    return { title: 'Поэт не найден' }
+  }
   return {
     title: `Альбомы — ${player.name}`,
     alternates: { canonical: `/${citySlug}/players/${slug}/albums` },
@@ -29,7 +31,9 @@ export default async function PlayerAlbumsPage({ params }: { params: Params }) {
   const { citySlug, slug } = await params
 
   const city = await getCityBySlug(citySlug)
-  if (!city) notFound()
+  if (!city) {
+    notFound()
+  }
 
   const player = await prisma.player.findUnique({
     where: { slug },
@@ -52,7 +56,9 @@ export default async function PlayerAlbumsPage({ params }: { params: Params }) {
     },
   })
 
-  if (!player) notFound()
+  if (!player) {
+    notFound()
+  }
 
   return (
     <VStack gap={8} align="stretch">

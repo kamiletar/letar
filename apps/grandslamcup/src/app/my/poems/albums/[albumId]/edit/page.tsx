@@ -22,7 +22,9 @@ export default async function EditAlbumPage({ params }: { params: Params }) {
   const { albumId } = await params
 
   const result = await getAlbumForEditAction(albumId)
-  if ('error' in result || !result.data) notFound()
+  if ('error' in result || !result.data) {
+    notFound()
+  }
 
   const { album, allPoems } = result.data
 

@@ -22,7 +22,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     where: { slug: albumSlug },
     select: { title: true, player: { select: { name: true } } },
   })
-  if (!album) return { title: 'Альбом не найден' }
+  if (!album) {
+    return { title: 'Альбом не найден' }
+  }
   return {
     title: `${album.title} — ${album.player.name}`,
     alternates: { canonical: `/${citySlug}/players/${slug}/albums/${albumSlug}` },
@@ -34,7 +36,9 @@ export default async function AlbumPage({ params }: { params: Params }) {
   const { citySlug, slug, albumSlug } = await params
 
   const city = await getCityBySlug(citySlug)
-  if (!city) notFound()
+  if (!city) {
+    notFound()
+  }
 
   const album = await prisma.album.findUnique({
     where: { slug: albumSlug },
@@ -50,8 +54,12 @@ export default async function AlbumPage({ params }: { params: Params }) {
     },
   })
 
-  if (!album || !album.publishedAt) notFound()
-  if (album.player.slug !== slug) notFound()
+  if (!album || !album.publishedAt) {
+    notFound()
+  }
+  if (album.player.slug !== slug) {
+    notFound()
+  }
 
   const year = new Date(album.publishedAt).getFullYear()
 

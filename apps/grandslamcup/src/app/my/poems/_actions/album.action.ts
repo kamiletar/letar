@@ -46,18 +46,24 @@ const ReorderSchema = z
 async function generateAlbumSlug(title: string, excludeId?: string): Promise<string> {
   const base = transliterate(title)
   const existing = await prisma.album.findUnique({ where: { slug: base }, select: { id: true } })
-  if (!existing || existing.id === excludeId) return base
+  if (!existing || existing.id === excludeId) {
+    return base
+  }
 
   const suffix = `-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`
   const withSuffix = `${base}${suffix}`
   const existingSuffix = await prisma.album.findUnique({ where: { slug: withSuffix }, select: { id: true } })
-  if (!existingSuffix || existingSuffix.id === excludeId) return withSuffix
+  if (!existingSuffix || existingSuffix.id === excludeId) {
+    return withSuffix
+  }
 
   let counter = 2
   while (true) {
     const candidate = `${withSuffix}-${counter}`
     const ex = await prisma.album.findUnique({ where: { slug: candidate }, select: { id: true } })
-    if (!ex) return candidate
+    if (!ex) {
+      return candidate
+    }
     counter++
   }
 }
@@ -84,10 +90,14 @@ function revalidateAlbumPaths(citySlug: string | null, playerSlug: string) {
 
 export async function createAlbumAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const parsed = CreateAlbumSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
+  }
 
   const { title, coverImage, publishedAt } = parsed.data
   const slug = await generateAlbumSlug(title)
@@ -120,10 +130,14 @@ export async function createAlbumAction(input: unknown) {
 
 export async function updateAlbumAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const parsed = UpdateAlbumSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
+  }
 
   const { albumId, title, coverImage, publishedAt } = parsed.data
 
@@ -131,8 +145,12 @@ export async function updateAlbumAction(input: unknown) {
     where: { id: albumId },
     select: { playerId: true, slug: true },
   })
-  if (!album) return { error: 'Альбом не найден' }
-  if (album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album) {
+    return { error: 'Альбом не найден' }
+  }
+  if (album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   const slug = await generateAlbumSlug(title, albumId)
 
@@ -152,14 +170,20 @@ export async function updateAlbumAction(input: unknown) {
 
 export async function deleteAlbumAction(albumId: string) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const album = await prisma.album.findUnique({
     where: { id: albumId },
     select: { playerId: true },
   })
-  if (!album) return { error: 'Альбом не найден' }
-  if (album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album) {
+    return { error: 'Альбом не найден' }
+  }
+  if (album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   await prisma.album.delete({ where: { id: albumId } })
 
@@ -169,14 +193,20 @@ export async function deleteAlbumAction(albumId: string) {
 
 export async function toggleAlbumPublishAction(albumId: string) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const album = await prisma.album.findUnique({
     where: { id: albumId },
     select: { playerId: true, publishedAt: true },
   })
-  if (!album) return { error: 'Альбом не найден' }
-  if (album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album) {
+    return { error: 'Альбом не найден' }
+  }
+  if (album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   const publishedAt = album.publishedAt ? null : new Date()
   await prisma.album.update({ where: { id: albumId }, data: { publishedAt } })
@@ -187,10 +217,14 @@ export async function toggleAlbumPublishAction(albumId: string) {
 
 export async function addPoemToAlbumAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const parsed = AlbumPoemSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
+  }
 
   const { albumId, poemId } = parsed.data
 
@@ -199,8 +233,12 @@ export async function addPoemToAlbumAction(input: unknown) {
     prisma.poem.findUnique({ where: { id: poemId }, select: { playerId: true } }),
   ])
 
-  if (!album || album.playerId !== auth.poet.playerId) return { error: 'Нет прав на альбом' }
-  if (!poem || poem.playerId !== auth.poet.playerId) return { error: 'Нет прав на стихотворение' }
+  if (!album || album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав на альбом' }
+  }
+  if (!poem || poem.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав на стихотворение' }
+  }
 
   const maxOrder = await prisma.albumPoem.aggregate({
     where: { albumId },
@@ -217,15 +255,21 @@ export async function addPoemToAlbumAction(input: unknown) {
 
 export async function removePoemFromAlbumAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const parsed = AlbumPoemSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
+  }
 
   const { albumId, poemId } = parsed.data
 
   const album = await prisma.album.findUnique({ where: { id: albumId }, select: { playerId: true } })
-  if (!album || album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album || album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   await prisma.albumPoem.deleteMany({ where: { albumId, poemId } })
 
@@ -235,15 +279,21 @@ export async function removePoemFromAlbumAction(input: unknown) {
 
 export async function reorderAlbumPoemsAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const parsed = ReorderSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
+  }
 
   const { albumId, poemIds } = parsed.data
 
   const album = await prisma.album.findUnique({ where: { id: albumId }, select: { playerId: true } })
-  if (!album || album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album || album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   await prisma.$transaction(
     poemIds.map((poemId, index) =>
@@ -251,7 +301,7 @@ export async function reorderAlbumPoemsAction(input: unknown) {
         where: { albumId, poemId },
         data: { sortOrder: index },
       })
-    ),
+    )
   )
 
   revalidatePath('/my/poems')
@@ -260,7 +310,9 @@ export async function reorderAlbumPoemsAction(input: unknown) {
 
 export async function getMyAlbumsAction() {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const albums = await prisma.album.findMany({
     where: { playerId: auth.poet.playerId },
@@ -280,7 +332,9 @@ export async function getMyAlbumsAction() {
 
 export async function getAlbumForEditAction(albumId: string) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) {
+    return { error: auth.error }
+  }
 
   const album = await prisma.album.findUnique({
     where: { id: albumId },
@@ -294,8 +348,12 @@ export async function getAlbumForEditAction(albumId: string) {
     },
   })
 
-  if (!album) return { error: 'Альбом не найден' }
-  if (album.playerId !== auth.poet.playerId) return { error: 'Нет прав' }
+  if (!album) {
+    return { error: 'Альбом не найден' }
+  }
+  if (album.playerId !== auth.poet.playerId) {
+    return { error: 'Нет прав' }
+  }
 
   const allPoems = await prisma.poem.findMany({
     where: { playerId: auth.poet.playerId },

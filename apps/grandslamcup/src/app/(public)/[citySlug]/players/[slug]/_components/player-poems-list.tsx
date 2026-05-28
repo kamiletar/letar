@@ -19,7 +19,7 @@ export function PlayerPoemsList({ poems, citySlug, playerSlug }: PlayerPoemsList
   }
 
   return (
-    <Box>
+    <Box id="poems">
       <SectionHeading mb={3}>Стихи</SectionHeading>
       <VStack gap={2} align="stretch">
         {poems.map((poem) => (

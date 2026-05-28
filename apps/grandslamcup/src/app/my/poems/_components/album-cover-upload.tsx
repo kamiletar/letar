@@ -33,7 +33,9 @@ export function AlbumCoverUpload({ value, onChange, albumId }: AlbumCoverUploadP
       try {
         const formData = new FormData()
         formData.append('file', file)
-        if (albumId) formData.append('albumId', albumId)
+        if (albumId) {
+          formData.append('albumId', albumId)
+        }
 
         const res = await fetch('/api/upload/album-cover', { method: 'POST', body: formData })
         const data = await res.json()
@@ -49,12 +51,14 @@ export function AlbumCoverUpload({ value, onChange, albumId }: AlbumCoverUploadP
         setUploading(false)
       }
     },
-    [albumId, onChange],
+    [albumId, onChange]
   )
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) upload(file)
+    if (file) {
+      upload(file)
+    }
     e.target.value = ''
   }
 
@@ -62,7 +66,9 @@ export function AlbumCoverUpload({ value, onChange, albumId }: AlbumCoverUploadP
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files[0]
-    if (file) upload(file)
+    if (file) {
+      upload(file)
+    }
   }
 
   if (value) {
@@ -115,26 +121,24 @@ export function AlbumCoverUpload({ value, onChange, albumId }: AlbumCoverUploadP
       >
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
         <VStack gap={2}>
-          {uploading
-            ? (
-              <Flex align="center" gap={2}>
-                <Spinner size="sm" />
-                <Text fontSize="sm" color="gray.500">
-                  Загрузка...
-                </Text>
-              </Flex>
-            )
-            : (
-              <>
-                <LuImagePlus size={32} color="var(--chakra-colors-gray-400)" />
-                <Text fontSize="sm" color="gray.500">
-                  Перетащите изображение или нажмите для выбора
-                </Text>
-                <Text fontSize="xs" color="gray.400">
-                  JPG, PNG, WebP — до 15 МБ
-                </Text>
-              </>
-            )}
+          {uploading ? (
+            <Flex align="center" gap={2}>
+              <Spinner size="sm" />
+              <Text fontSize="sm" color="gray.500">
+                Загрузка...
+              </Text>
+            </Flex>
+          ) : (
+            <>
+              <LuImagePlus size={32} color="var(--chakra-colors-gray-400)" />
+              <Text fontSize="sm" color="gray.500">
+                Перетащите изображение или нажмите для выбора
+              </Text>
+              <Text fontSize="xs" color="gray.400">
+                JPG, PNG, WebP — до 15 МБ
+              </Text>
+            </>
+          )}
         </VStack>
       </Box>
       {error && (

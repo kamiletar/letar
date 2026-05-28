@@ -4,9 +4,10 @@
  * Desktop dropdown меню пользователя.
  */
 
-import { signOut } from '@/lib/auth-client'
+import { logoutAction } from '@/app/_actions/auth.actions'
 import { Circle, HStack, Menu, Portal, Separator, Text } from '@chakra-ui/react'
 import Link from 'next/link'
+import { useTransition } from 'react'
 import {
   LuCalculator,
   LuChevronDown,
@@ -29,6 +30,8 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ userName, isAdmin, isCoach, isPoet, isScorer, isPresenter }: UserMenuProps) {
+  const [, startTransition] = useTransition()
+
   return (
     <Menu.Root>
       <Menu.Trigger cursor="pointer">
@@ -105,7 +108,7 @@ export function UserMenu({ userName, isAdmin, isCoach, isPoet, isScorer, isPrese
               </a>
             </Menu.Item>
             <Separator />
-            <Menu.Item value="logout" color="fg.muted" onClick={() => signOut()}>
+            <Menu.Item value="logout" color="fg.muted" onClick={() => startTransition(() => logoutAction())}>
               <LuLogOut size={16} />
               Выйти
             </Menu.Item>

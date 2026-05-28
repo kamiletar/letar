@@ -31,7 +31,9 @@ export function PlayerAlbumsList({
   const hasMisc = miscPoemsCount > 0
 
   // Нечего показывать — только плоский список стихов остаётся
-  if (visibleAlbums.length === 0 && !hasMisc) return null
+  if (visibleAlbums.length === 0 && !hasMisc) {
+    return null
+  }
 
   return (
     <Box>

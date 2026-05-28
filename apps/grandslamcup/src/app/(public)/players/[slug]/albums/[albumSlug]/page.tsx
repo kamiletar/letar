@@ -15,7 +15,9 @@ export default async function AlbumRedirectPage({ params }: { params: Params }) 
     select: { city: { select: { slug: true } } },
   })
 
-  if (!player) notFound()
+  if (!player) {
+    notFound()
+  }
 
   const citySlug = player.city?.slug ?? 'spb'
   redirect(`/${citySlug}/players/${slug}/albums/${albumSlug}`)

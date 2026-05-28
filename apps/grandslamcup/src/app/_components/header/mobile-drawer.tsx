@@ -4,10 +4,12 @@
  * Мобильная навигация — Drawer с nav items и user section.
  */
 
-import { signInWithLetarAuth, signOut } from '@/lib/auth-client'
+import { logoutAction } from '@/app/_actions/auth.actions'
+import { signInWithLetarAuth } from '@/lib/auth-client'
 import { Box, Circle, CloseButton, Drawer, Flex, Image, Portal, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTransition } from 'react'
 import { LuCircleUser, LuKeyRound, LuLogIn, LuLogOut, LuMenu, LuPenLine, LuShield, LuUserRound } from 'react-icons/lu'
 
 import type { NavItem } from './nav-config'
@@ -23,6 +25,7 @@ interface MobileDrawerProps {
 
 export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, isPoet }: MobileDrawerProps) {
   const pathname = usePathname()
+  const [, startTransition] = useTransition()
 
   if (navItems.length === 0) {
     return null
@@ -162,8 +165,8 @@ export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, i
                               cursor="pointer"
                               _hover={{ bg: 'bg.subtle', color: 'fg' }}
                               onClick={() => {
-                                signOut()
                                 store.setOpen(false)
+                                startTransition(() => logoutAction())
                               }}
                             >
                               <LuLogOut size={16} />
