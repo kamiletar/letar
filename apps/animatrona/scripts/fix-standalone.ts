@@ -157,6 +157,21 @@ async function main() {
     return
   }
 
+  // Удаляем src/ директорию из renderer — NFT трассировка Next.js случайно включает
+  // весь исходный код (через dynamic imports ZenStack enhance()), в production не нужен
+  const rendererSrcDir = path.join(
+    standaloneDir,
+    'apps',
+    'animatrona',
+    'renderer',
+    'src'
+  )
+  if (fs.existsSync(rendererSrcDir)) {
+    console.log('🗑️ Удаляю renderer/src/ из standalone (исходный код не нужен в production)...')
+    fs.rmSync(rendererSrcDir, { recursive: true, force: true })
+    console.log('✅ renderer/src/ удалён')
+  }
+
   const fixedCount = fixSymlinks(standaloneDir)
 
   if (fixedCount > 0) {

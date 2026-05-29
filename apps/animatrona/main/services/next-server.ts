@@ -50,11 +50,10 @@ export async function startNextServer(): Promise<number> {
     const databaseUrl = getDatabaseUrl()
 
     // NODE_PATH для поиска модулей в standalone/apps/node_modules
-    // В production модули упакованы в app.asar (files секция electron-builder)
-    // utilityProcess поддерживает ASAR: require() прозрачно читает из архива
-    const standaloneNodeModules = isProd
-      ? path.join(app.getAppPath(), 'standalone', 'apps', 'node_modules')
-      : path.join(standaloneDir, 'apps', 'node_modules')
+    // server.js в extraResources (реальный FS) находит модули через Node.js traversal:
+    // renderer/ → animatrona/ → apps/node_modules/ ← standalone/apps/node_modules
+    // NODE_PATH задаём явно как страховку на случай нестандартных require() в server.js
+    const standaloneNodeModules = path.join(standaloneDir, 'apps', 'node_modules')
 
     // В production используем utilityProcess.fork() из Electron
     if (isProd) {
@@ -84,7 +83,8 @@ export async function startNextServer(): Promise<number> {
         log.error('Next.js stderr', { message: msg }, { full: true })
       })
 
-      nextServer.on('exit', () => {
+      nextServer.on('exit', (code) => {
+        log.error('Next.js server завершился', { code })
         nextServer = null
       })
     } else {
@@ -113,7 +113,8 @@ export async function startNextServer(): Promise<number> {
         reject(err)
       })
 
-      nextServer.on('close', () => {
+      nextServer.on('close', (code) => {
+        log.error('Next.js server завершился (dev)', { code })
         nextServer = null
       })
     }

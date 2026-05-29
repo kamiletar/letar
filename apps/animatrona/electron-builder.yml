@@ -37,7 +37,8 @@ directories:
 
 # Файлы для включения в app.asar
 # Main process бандлится webpack'ом в app/background.js
-# Зависимости renderer-сервера (тысячи файлов) пакуются в ASAR → один архив → быстрая установка
+# standalone/apps/node_modules НЕ здесь — они в extraResources на реальном FS
+# (utilityProcess.fork() находит их через Node.js traversal директорий)
 files:
   - from: .
     filter:
@@ -45,12 +46,6 @@ files:
       - app
       - '!node_modules'
       - '!node_modules/**/*'
-  # Next.js standalone node_modules → в ASAR (50k+ файлов → один app.asar)
-  # utilityProcess.fork() поддерживает ASAR, NODE_PATH в next-server.ts указывает сюда
-  - from: renderer/.next/standalone/node_modules
-    to: standalone/apps/node_modules
-    filter:
-      - '**/*'
 
 extraMetadata:
   main: app/background.js
@@ -274,8 +269,13 @@ mac:
         - kubo
 
 # Ресурсы приложения — файлы, которые должны быть на реальном ФС (не ASAR)
-# Note: standalone/apps/node_modules перенесены в files → app.asar для ускорения установки
 extraResources:
+  # Next.js standalone node_modules — на реальном FS (обязательно для utilityProcess.fork)
+  # server.js находит их через Node.js traversal: renderer/ → animatrona/ → apps/node_modules/
+  - from: renderer/.next/standalone/node_modules
+    to: standalone/apps/node_modules
+    filter:
+      - '**/*'
   # Anime4K шейдеры для апскейла через libplacebo (GPU)
   - from: resources/anime4k
     to: anime4k
