@@ -49,8 +49,12 @@ export async function startNextServer(): Promise<number> {
     const databasePath = getDatabasePath()
     const databaseUrl = getDatabaseUrl()
 
-    // NODE_PATH для поиска модулей в standalone/node_modules
-    const standaloneNodeModules = path.join(standaloneDir, 'node_modules')
+    // NODE_PATH для поиска модулей в standalone/apps/node_modules
+    // В production модули упакованы в app.asar (files секция electron-builder)
+    // utilityProcess поддерживает ASAR: require() прозрачно читает из архива
+    const standaloneNodeModules = isProd
+      ? path.join(app.getAppPath(), 'standalone', 'apps', 'node_modules')
+      : path.join(standaloneDir, 'apps', 'node_modules')
 
     // В production используем utilityProcess.fork() из Electron
     if (isProd) {

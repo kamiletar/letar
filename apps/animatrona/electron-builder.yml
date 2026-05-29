@@ -35,9 +35,9 @@ directories:
   output: dist
   buildResources: resources
 
-# Файлы для включения в app
-# ВАЖНО: Все зависимости main process бандлятся webpack'ом в app/background.js
-# Исключаем node_modules — они НЕ нужны (экономит ~700 МБ!)
+# Файлы для включения в app.asar
+# Main process бандлится webpack'ом в app/background.js
+# Зависимости renderer-сервера (тысячи файлов) пакуются в ASAR → один архив → быстрая установка
 files:
   - from: .
     filter:
@@ -45,13 +45,27 @@ files:
       - app
       - '!node_modules'
       - '!node_modules/**/*'
+  # Next.js standalone node_modules → в ASAR (50k+ файлов → один app.asar)
+  # utilityProcess.fork() поддерживает ASAR, NODE_PATH в next-server.ts указывает сюда
+  - from: renderer/.next/standalone/node_modules
+    to: standalone/apps/node_modules
+    filter:
+      - '**/*'
 
 extraMetadata:
   main: app/background.js
 
-# Отключаем упаковку asar для избежания проблем с symlinks
-# В production можно включить обратно после решения проблем с symlinks
-asar: false
+# ASAR упаковывает тысячи мелких файлов в один архив — установка в разы быстрее
+# Native-модули (.node) распаковываются на диск через asarUnpack
+asar: true
+# Распаковываем native-модули и WASM — они не могут читаться из ASAR
+asarUnpack:
+  - "**/*.node"
+  - "**/*.wasm"
+  - "**/ntsuspend/**"
+  - "**/libsql/**"
+  - "**/@libsql/**"
+  - "**/fts5-sql-bundle/dist/**"
 
 # Windows конфигурация
 win:
@@ -259,7 +273,8 @@ mac:
       filter:
         - kubo
 
-# Next.js standalone и ресурсы как extraResources
+# Ресурсы приложения — файлы, которые должны быть на реальном ФС (не ASAR)
+# Note: standalone/apps/node_modules перенесены в files → app.asar для ускорения установки
 extraResources:
   # Anime4K шейдеры для апскейла через libplacebo (GPU)
   - from: resources/anime4k
@@ -305,16 +320,7 @@ extraResources:
     to: subtitles-octopus/subtitles-octopus-worker.js
   - from: node_modules/libass-wasm/dist/js/subtitles-octopus-worker.wasm
     to: subtitles-octopus/subtitles-octopus-worker.wasm
-  # Копируем ВСЕ модули из standalone (это минимальный набор для runtime, без dev зависимостей)
-  # Next.js standalone уже отфильтровал только необходимые модули
-  # ВАЖНО: копируем в apps/node_modules чтобы Node.js нашёл их при запуске из apps/animatrona/renderer/
-  # Node.js ищет модули вверх по дереву: renderer/ → animatrona/ → apps/ → standalone/
-  # NOTE: .bun содержит реальные файлы, симлинки в корне указывают на неё
-  - from: renderer/.next/standalone/node_modules
-    to: standalone/apps/node_modules
-    filter:
-      - '**/*'
-  # Apps директория из standalone
+  # Apps директория из standalone (server.js и окружение — в extraResources на реальном ФС)
   - from: renderer/.next/standalone/apps
     to: standalone/apps
     filter:
