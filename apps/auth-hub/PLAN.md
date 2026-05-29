@@ -1,6 +1,6 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.4.0 — Возврат на исходный сайт при смене аккаунта ✅
+## Текущий статус: v0.5.0 — Глобальный выход: RP-Initiated Logout ✅
 
 ---
 
@@ -360,7 +360,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 
