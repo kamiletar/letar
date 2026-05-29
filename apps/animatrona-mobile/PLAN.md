@@ -5,11 +5,12 @@
 - [x] **Экран гаснет во время просмотра видео** — подключён `useWakeLock({ enabled: isPlaying })` в PlayerScreen (f1d9fa1d0)
 - [x] **Субтитры смещены при первом рендере** — субтитры рендерятся только после `videoLoaded`, когда videoStyle корректен (f1d9fa1d0)
 
+- [ ] **Вернуть обратную связь на тапы (haptic)** — удалён `react-native-haptic-feedback`, но `NativeHapticsModule` (TurboModule) уже есть. Нужно подключить `Haptics.light()` / `Haptics.medium()` в кнопки плеера, жесты, тапы по карточкам
 - [ ] **QR-сканер на ConnectScreen** — сейчас только ручной ввод адреса, нужна кнопка «Сканировать QR-код» для подключения к Desktop/Tracker
 - [ ] **Синхронизировать React 19.2.3 → 19.2.5** — в animatrona-mobile/package.json отличается от корня
 - [ ] **Покадровая перемотка на паузе** — при паузе кнопки +/- 5 кадров. ExoPlayer: `player.seekTo()` с `SeekParameters.EXACT` или `player.seekToNext/PreviousMediaItem()` на уровне кадров
 
-## Текущая версия: 0.5.6
+## Текущая версия: 0.7.2
 
 ---
 
@@ -30,4 +31,4 @@
 
 > Завершённые фазы: [PLAN_COMPLETED.md](PLAN_COMPLETED.md)
 
-**Последнее обновление:** 2026-03-02
+**Последнее обновление:** 2026-05-29

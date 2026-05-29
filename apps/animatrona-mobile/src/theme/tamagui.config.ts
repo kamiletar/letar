@@ -5,9 +5,9 @@
  * с акцентным purple цветом
  */
 
-import { themes as defaultThemes, tokens as defaultTokens } from '@tamagui/config/v3'
+import { themes as defaultThemes, tokens as defaultTokens } from '@tamagui/config/v5'
 import { createTamagui, createTokens } from '@tamagui/core'
-import { shorthands } from '@tamagui/shorthands'
+import { shorthands } from '@tamagui/shorthands/v4'
 
 // Кастомные токены цветов (фирменная purple тема Animatrona)
 const customColors = {
@@ -55,7 +55,6 @@ const customColors = {
 const tokens = createTokens({
   ...defaultTokens,
   color: {
-    ...defaultTokens.color,
     ...customColors,
   },
   space: {
@@ -172,9 +171,9 @@ export const config = createTamagui({
 // Экспорт типов для TypeScript
 export type AppConfig = typeof config
 
-// Декларация модуля для типизации
+// Регистрация типа конфига для типизации Tamagui
 declare module '@tamagui/core' {
-  type TamaguiCustomConfig = AppConfig
+  interface TamaguiCustomConfig extends AppConfig {}
 }
 
 export default config
