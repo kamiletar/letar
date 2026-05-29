@@ -6,6 +6,21 @@
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-05-29
+
+### Fixed
+
+- tsconfig: совместимость с TypeScript 6.0 — исправлен `extends` для `@react-native/typescript-config` (убран суффикс `.json`, добавлен `ignoreDeprecations: "6.0"`)
+- tsconfig: добавлены wildcard пути для subpath-импортов `@letar/exoplayer-ass/*` и `@letar/exoplayer-sync/*`
+- tsconfig: добавлены пути для `@letar/animatrona-types` и `@letar/animatrona-utils` (транзитивные зависимости через animatrona-shared)
+- `animatrona-shared`: экспортирован тип `AnimeRelationInfo` (отсутствовал в api/index.ts и index.ts)
+- `tracker.ts`: маппинг chapters с обязательными полями `id`, `type`, `skippable` (OP/ED автоопределение по заголовку)
+- `navigation/types.ts`: `type RootParamList` → `interface RootParamList extends` (конфликт с React Navigation v7)
+- `ServerSwitcher`: типизирован `useNavigation<NativeStackNavigationProp<RootStackParamList>>`
+- `PlayerScreen`: перемещён `navigateToEpisode` до `handleEnd`, null-guard для `audioUrl`
+- `offlineInit`/`downloadManager`: передаётся `activeServerId` в функции кэша (API изменился на multi-server)
+- `exoplayer-ass`/`exoplayer-sync`: убраны лишние `@ts-expect-error` (TS 6.0 + `moduleResolution: bundler` корректно резолвит `require()`)
+
 ## [0.7.2] - 2026-05-29
 
 ### Changed
