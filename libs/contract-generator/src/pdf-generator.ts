@@ -239,7 +239,7 @@ export async function generatePdf(html: string, _options?: PdfOptions): Promise<
     const page = await browser.newPage()
 
     // Устанавливаем HTML контент
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    await page.setContent(html, { waitUntil: 'load' })
 
     // Генерируем PDF
     const pdfBuffer = await page.pdf({
