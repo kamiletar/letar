@@ -8,9 +8,11 @@
  */
 
 import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useCallback, useState } from 'react'
 import { Dimensions, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import type { RootStackParamList } from '@/navigation/types'
 import { useServersStore } from '@/store/servers'
 import { SERVER_TYPE_ICONS } from '@/types/server'
 
@@ -21,7 +23,7 @@ interface ServerSwitcherProps {
 
 export function ServerSwitcher({ onServerChange }: ServerSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const navigation = useNavigation()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   const servers = useServersStore((state) => state.servers)
   const activeServerId = useServersStore((state) => state.activeServerId)
@@ -50,7 +52,7 @@ export function ServerSwitcher({ onServerChange }: ServerSwitcherProps) {
 
   const handleAddServer = useCallback(() => {
     setIsOpen(false)
-    navigation.navigate('Connect' as never, { mode: 'add' } as never)
+    navigation.navigate('Connect', { mode: 'add' })
   }, [navigation])
 
   // Если только один сервер — тап сразу открывает добавление нового

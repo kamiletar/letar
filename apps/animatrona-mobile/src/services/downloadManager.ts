@@ -14,6 +14,7 @@ import NativeDownloadServiceModule from '../../specs/NativeDownloadServiceModule
 
 import { getAudioCidUrl, getIpfsUrl, getVideoCidUrl } from '@/api/client'
 import { type DownloadedEpisode, useDownloadsStore } from '@/store/downloads'
+import { useServersStore } from '@/store/servers'
 import type { AudioTrack, Episode, SubtitleTrack } from '@letar/animatrona-shared'
 
 import {
@@ -211,8 +212,9 @@ async function downloadEpisode(task: { id: string; animeId: string; episodeId: s
   const store = useDownloadsStore.getState()
 
   // Получаем конфигурацию из кэша деталей аниме
+  const { activeServerId } = useServersStore.getState()
   const { getCachedAnimeDetails } = await import('./cache')
-  const anime = await getCachedAnimeDetails(task.animeId)
+  const anime = activeServerId ? await getCachedAnimeDetails(activeServerId, task.animeId) : null
 
   if (!anime) {
     throw new Error('Нет кэшированных данных аниме — невозможно определить файлы для загрузки')
@@ -393,7 +395,7 @@ async function downloadFile(
   url: string,
   destPath: string,
   _taskId: string,
-  onProgress?: (received: number, total: number) => void
+  onProgress?: (received: number, total: number) => void,
 ): Promise<void> {
   const task = ReactNativeBlobUtil.config({
     path: destPath,
@@ -432,7 +434,7 @@ async function downloadFile(
     // Проверка 1: зависание на 100%
     if (reachedFullAt && now - reachedFullAt > STALL_AT_100_TIMEOUT) {
       console.warn(
-        `[downloadFile] Зависание на 100% (${Math.round((now - reachedFullAt) / 1000)}с), проверяю файл на диске...`
+        `[downloadFile] Зависание на 100% (${Math.round((now - reachedFullAt) / 1000)}с), проверяю файл на диске...`,
       )
       try {
         const fileSize = await getFileSize(destPath)

@@ -346,7 +346,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     const defaultAudio = nextEpisode.audioTracks.find((t) => t.isDefault) ?? nextEpisode.audioTracks[0]
     if (defaultAudio?.audioCid) {
       const audioUrl = getEpisodeAudioUrl(nextEpisode.id, defaultAudio.id, defaultAudio.audioCid)
-      if (audioUrl.startsWith('http')) {
+      if (audioUrl?.startsWith('http')) {
         fetch(audioUrl, { method: 'HEAD' }).catch(() => undefined)
       }
     }
@@ -480,6 +480,18 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     [duration, nextEpisode, showNextEpisodeOverlay, nextEpisodeCancelled, chapters, episodeId],
   )
 
+  // Навигация
+  const handleBack = useCallback(() => {
+    navigation.goBack()
+  }, [navigation])
+
+  const navigateToEpisode = useCallback(
+    (ep: Episode) => {
+      navigation.replace('Player', { animeId, episodeId: ep.id })
+    },
+    [navigation, animeId],
+  )
+
   // Обработчики плеера
   const handleError = useCallback((err: { code: string; message: string }) => {
     console.error('Video error:', err)
@@ -497,18 +509,6 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
       }
     }
   }, [nextEpisode, nextEpisodeCancelled, navigateToEpisode])
-
-  // Навигация
-  const handleBack = useCallback(() => {
-    navigation.goBack()
-  }, [navigation])
-
-  const navigateToEpisode = useCallback(
-    (ep: Episode) => {
-      navigation.replace('Player', { animeId, episodeId: ep.id })
-    },
-    [navigation, animeId],
-  )
 
   // Обработка зума
   const handleZoomChange = useCallback((scale: number, translateX: number, translateY: number) => {

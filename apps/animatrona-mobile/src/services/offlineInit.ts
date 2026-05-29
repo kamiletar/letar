@@ -9,6 +9,7 @@
  */
 
 import { useOfflineStore } from '@/store/offline'
+import { useServersStore } from '@/store/servers'
 import { startDownloadManager } from './downloadManager'
 import { ensureDirectories } from './fileStorage'
 import { cachePostersForLibrary } from './posterCache'
@@ -34,15 +35,18 @@ export async function initOfflineSystem(): Promise<void> {
         console.warn('[offlineInit] Ошибка синхронизации:', err)
       })
       // Фоновое кэширование постеров
-      import('@/services/cache')
-        .then(({ getCachedLibrary }) =>
-          getCachedLibrary().then((lib) => {
-            if (lib) {
-              cachePostersForLibrary(lib.map((a) => a.id)).catch(() => undefined)
-            }
-          })
-        )
-        .catch(() => undefined)
+      const { activeServerId } = useServersStore.getState()
+      if (activeServerId) {
+        import('@/services/cache')
+          .then(({ getCachedLibrary }) =>
+            getCachedLibrary(activeServerId).then((lib) => {
+              if (lib) {
+                cachePostersForLibrary(lib.map((a) => a.id)).catch(() => undefined)
+              }
+            })
+          )
+          .catch(() => undefined)
+      }
     }
 
     wasReachable = isNowReachable

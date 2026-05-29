@@ -68,6 +68,6 @@ export type FranchiseScreenProps = NativeStackScreenProps<RootStackParamList, 'F
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ReactNavigation {
-    type RootParamList = RootStackParamList
+    interface RootParamList extends RootStackParamList {}
   }
 }

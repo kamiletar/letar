@@ -3,6 +3,7 @@ export { createApiClient } from './api'
 export type {
   AnimeDetails,
   AnimeListItem,
+  AnimeRelationInfo,
   ApiClient,
   AudioTrack,
   Chapter,

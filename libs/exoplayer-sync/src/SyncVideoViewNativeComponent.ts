@@ -2,8 +2,6 @@ import type { HostComponent, ViewProps } from 'react-native'
 import type { DirectEventHandler, Double, Int32 } from 'react-native/Libraries/Types/CodegenTypes'
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands'
 
-// @ts-expect-error — внутренний API react-native для регистрации нативных компонентов
-
 const NativeComponentRegistry = require('react-native/Libraries/NativeComponent/NativeComponentRegistry')
 
 type OnSyncVideoLoadEvent = Readonly<{

@@ -12,6 +12,7 @@ import type {
   AnimeDetails,
   AnimeListItem,
   AnimeRelationInfo,
+  ChapterType,
   Episode,
   LastWatched,
   SubtitleTrack,
@@ -266,7 +267,26 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
 
         // Маппим chapters
         if (epManifest.chapters?.length) {
-          episode.chapters = epManifest.chapters
+          episode.chapters = epManifest.chapters.map((ch, i) => {
+            const titleUpper = ch.title.toUpperCase()
+            const type: ChapterType = titleUpper.includes('OP')
+              ? 'OP'
+              : titleUpper.includes('ED')
+              ? 'ED'
+              : titleUpper.includes('RECAP')
+              ? 'RECAP'
+              : titleUpper.includes('PREVIEW')
+              ? 'PREVIEW'
+              : 'CHAPTER'
+            return {
+              id: `ch-${i}`,
+              title: ch.title,
+              startMs: ch.startMs,
+              endMs: ch.endMs,
+              type,
+              skippable: type === 'OP' || type === 'ED',
+            }
+          })
         }
       } catch {
         // Отдельный эпизод не загрузился — пропускаем

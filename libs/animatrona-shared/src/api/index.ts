@@ -3,6 +3,7 @@ export type { ApiClient, GetConnectionStore } from './client'
 export type {
   AnimeDetails,
   AnimeListItem,
+  AnimeRelationInfo,
   AudioTrack,
   Chapter,
   ChapterType,
