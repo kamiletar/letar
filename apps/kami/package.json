@@ -11,5 +11,8 @@
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "shiki": "^4.1.0"
   }
 }

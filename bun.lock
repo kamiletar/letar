@@ -351,7 +351,7 @@
     },
     "apps/animatrona-mobile": {
       "name": "@letar/animatrona-mobile",
-      "version": "0.7.2",
+      "version": "0.7.3",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@react-native/codegen": "0.85.0",
@@ -477,6 +477,9 @@
     "apps/kami": {
       "name": "kami",
       "version": "0.30.2",
+      "dependencies": {
+        "shiki": "^4.1.0",
+      },
     },
     "apps/kami-e2e": {
       "name": "kami-e2e",

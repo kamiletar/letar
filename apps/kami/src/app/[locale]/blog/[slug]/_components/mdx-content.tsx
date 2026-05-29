@@ -1,3 +1,4 @@
+import { CodeHighlighter } from '@/app/_components/code-highlighter'
 import { Box, Code, Heading, Link, Table, Text } from '@chakra-ui/react'
 import NextImage from 'next/image'
 import React from 'react'
@@ -187,24 +188,9 @@ function renderNode(node: MarkdocNode, index: number): React.ReactNode {
 
     case 'code':
     case 'fence': {
-      // Код блок — собираем текстовый контент
       const codeContent = extractTextContent(node)
-      return (
-        <Box
-          key={index}
-          as="pre"
-          p={4}
-          borderRadius="lg"
-          bg="bg.code"
-          color="gray.100"
-          overflow="auto"
-          fontSize="sm"
-          fontFamily="mono"
-          mb={4}
-        >
-          <code>{codeContent}</code>
-        </Box>
-      )
+      const language = (attributes.language as string) || undefined
+      return <CodeHighlighter key={index} code={codeContent} language={language} />
     }
 
     case 'codeInline':

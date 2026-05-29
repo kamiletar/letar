@@ -1,3 +1,4 @@
+import '@/app/global.css'
 import { ChatWidgetLazy } from '@/app/_components/chat/chat-widget-lazy'
 import { Footer } from '@/app/_components/footer/footer'
 import { Header } from '@/app/_components/header/header'
