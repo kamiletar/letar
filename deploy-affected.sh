@@ -66,9 +66,9 @@ LAST_DEPLOY_DIR="$WORKSPACE_ROOT/.last-deploy"
 
 # Server-specific app configuration
 # s1.letar.best apps
-S1_APPS="premium-rosstil imot dashboard-agent aboi"
+S1_APPS="premium-rosstil imot dashboard-agent"
 # s2.letar.best apps
-S2_APPS="dashboard driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod"
+S2_APPS="dashboard driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi"
 
 # Detect current server by hostname
 CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)

@@ -24,7 +24,7 @@ prisma migrate deploy  # Применение миграций на production
 ```bash
 # Определи правильный сервер
 # s1.letar.best: premium-rosstil, imot, dashboard-agent
-# s2.letar.best: dashboard, driving-school, animatrona-web, auth-hub, archetest, grandslamcup, time, form-docs, form-example, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, dashboard-agent
+# s2.letar.best: dashboard, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi
 
 # ⚠️ ВАЖНО: на Windows ОБЯЗАТЕЛЬНО использовать Windows SSH, не bash ssh!
 # Причина: Git Bash SSH (/usr/bin/ssh) при каждом вызове создаёт ssh-agent.exe,
