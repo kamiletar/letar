@@ -34,7 +34,7 @@ export interface RegenerationStatus {
   } | null
 }
 
-const MAX_LOG_ENTRIES = 500
+const MAX_LOG_ENTRIES = 2000
 
 class RegenerationStateStore {
   private state: RegenerationStatus = {

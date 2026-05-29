@@ -281,6 +281,8 @@ export function registerAnimeManifestHandlers(): void {
       // Стартуем persist-state: renderer может уйти со страницы и вернуться,
       // мы сохраним прогресс и весь лог в main, отдадим обратно.
       regenerationState.start(allAnimes.length)
+      // Сигнализируем renderer очистить старый лог — новый цикл начинается с нуля.
+      broadcastToWindows('manifest:regenerateStarted', { total: allAnimes.length })
       // appendLog сам делает broadcast в renderer когда state активный.
       const logEntry = (level: RegenLogEntry['level'], message: string, meta?: Record<string, unknown>) => {
         regenerationState.appendLog(level, message, meta)
@@ -335,6 +337,14 @@ export function registerAnimeManifestHandlers(): void {
             status: 'processing' as const,
           })
           logEntry('info', `[${i + 1}/${allAnimes.length}] ${anime.name}`, { animeId: anime.id })
+
+          // Ставим lastHealthCheckAt заранее — чтобы при форс-килле приложения
+          // аниме не попадало в список для resume (resume фильтрует по lt: startedAt).
+          // Финальный update в конце обработки перезапишет это значение.
+          await prisma.anime.update({
+            where: { id: anime.id },
+            data: { lastHealthCheckAt: new Date() },
+          })
 
           // Backfill ipfsSize для существующих файлов ПЕРЕД генерацией манифеста
           await backfillIpfsSizes(anime.id)
@@ -405,6 +415,19 @@ export function registerAnimeManifestHandlers(): void {
             error: errorMsg,
           })
           logEntry('error', `   ✗ ${anime.name}: ${errorMsg}`, { animeId: anime.id })
+
+          // Ставим отметку даже при ошибке — чтобы аниме не повторялось при resume.
+          // Исключение: нет места на диске — там мы немедленно останавливаем всё.
+          if (!isDiskFullError(error)) {
+            try {
+              await prisma.anime.update({
+                where: { id: anime.id },
+                data: { lastHealthCheckAt: new Date() },
+              })
+            } catch {
+              /* не критично — запись уже в errors[] */
+            }
+          }
 
           // Нет места на диске — останавливаем регенерацию немедленно.
           // Дальнейшие попытки только усугубят ситуацию и скорее всего тоже провалятся.
