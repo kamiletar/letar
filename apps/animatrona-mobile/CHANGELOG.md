@@ -6,6 +6,16 @@
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-05-29
+
+### Changed
+
+- Миграция Tamagui v1 → v2: `@tamagui/config@2.0.0`, `@tamagui/shorthands@2.0.0`, `@tamagui/lucide-icons@2.0.0-rc.26`
+- Конфиг обновлён с `/v3` на `/v5` (`@tamagui/config/v5`)
+- Шорткаты переключены на Tailwind-aligned (`@tamagui/shorthands/v4`)
+- Убран несуществующий в v5 спред `defaultTokens.color` (цветовые токены теперь только кастомные)
+- Фикс модульной аугментации `TamaguiCustomConfig`: `type` → `interface extends`
+
 ## [0.7.1] - 2026-04-04
 
 ### Added

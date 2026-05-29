@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-mobile",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "main": "index.js",
   "scripts": {
