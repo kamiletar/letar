@@ -1,8 +1,9 @@
 'use client'
 
+import { logoutAction } from '@/app/_actions/auth.actions'
 import { Button } from '@/app/_components/ui/button'
 import { ColorModeButton } from '@/app/_components/ui/color-mode'
-import { signOut, useSession } from '@/lib/auth-client'
+import { useSession } from '@/lib/auth-client'
 import type { UserRole } from '@/lib/auth.types'
 import {
   Badge,
@@ -20,7 +21,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import {
   LuActivity,
   LuAppWindow,
@@ -80,6 +81,7 @@ export function Sidebar() {
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const [, startTransition] = useTransition()
 
   // Хуки всегда вызываются до условных return (правило Rules of Hooks)
   const { data: alertsCount } = useQuery({
@@ -95,14 +97,8 @@ export function Sidebar() {
 
   const user = session?.user as { id: string; name: string; role?: UserRole } | undefined
 
-  const handleSignOut = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          window.location.href = '/auth/signin'
-        },
-      },
-    })
+  const handleSignOut = () => {
+    startTransition(() => logoutAction())
   }
 
   const isActive = (href: string) => {

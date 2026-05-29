@@ -4,10 +4,10 @@ import { auth } from '@/lib/auth'
 import { createLogoutAction } from '@letar/auth/server'
 
 /**
- * Server Action для выхода из системы
+ * Server Action для выхода из системы.
  *
- * Использует shared библиотеку @letar/auth для консистентности
- * между всеми приложениями в монорепо.
+ * Kami — standalone Better Auth, не является OIDC-клиентом Ключницы,
+ * поэтому просто очищаем локальную сессию и редиректим на /sign-in.
  *
  * @example
  * // В клиентском компоненте
@@ -15,4 +15,6 @@ import { createLogoutAction } from '@letar/auth/server'
  *   <Button type="submit">Выйти</Button>
  * </form>
  */
-export const logoutAction = createLogoutAction(auth)
+export const logoutAction = createLogoutAction(auth, {
+  redirectTo: '/sign-in',
+})

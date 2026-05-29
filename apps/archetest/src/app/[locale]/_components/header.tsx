@@ -5,8 +5,9 @@ import { ColorModeButton } from '@letar/chakra-provider'
 import { useTranslations } from 'next-intl'
 import { LuKeyRound, LuLogOut, LuSettings, LuUser } from 'react-icons/lu'
 
+import { logoutAction } from '@/app/_actions/auth.actions'
 import { Link } from '@/i18n/navigation'
-import { signInWithLetarAuth, signOut, useSession } from '@/lib/auth-client'
+import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 
 import { useIsPsychologist } from '@/app/_hooks/use-psychologist'
 
@@ -64,15 +65,12 @@ export function Header() {
                     <LuKeyRound size={14} />
                   </a>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={tCommon('signOut')}
-                  onClick={() => signOut({ fetchOptions: { onSuccess: () => window.location.reload() } })}
-                >
-                  <LuLogOut size={14} />
-                  <Box>{tCommon('signOut')}</Box>
-                </Button>
+                <form action={logoutAction}>
+                  <Button variant="ghost" size="sm" type="submit" aria-label={tCommon('signOut')}>
+                    <LuLogOut size={14} />
+                    <Box>{tCommon('signOut')}</Box>
+                  </Button>
+                </form>
               </HStack>
             ) : (
               <Button onClick={signInWithLetarAuth} variant="outline" size="sm">

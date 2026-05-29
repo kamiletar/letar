@@ -18,11 +18,12 @@ import {
 } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { LuLogOut, LuMenu, LuSettings, LuUser, LuX } from 'react-icons/lu'
 
+import { logoutAction } from '@/app/_actions/auth.actions'
 import { Link } from '@/i18n/navigation'
-import { signInWithLetarAuth, signOut, useSession } from '@/lib/auth-client'
+import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 
 import { useIsPsychologist } from '@/app/_hooks/use-psychologist'
 
@@ -34,12 +35,19 @@ import { LanguageSwitcher } from './language-switcher'
 export function MobileDrawer() {
   const t = useTranslations('nav')
   const tCommon = useTranslations('common')
-  const { data: session, isPending } = useSession()
+  const { data: session, isPending: isSessionPending } = useSession()
   const { isPsychologist } = useIsPsychologist()
   const [open, setOpen] = useState(false)
+  const [isLoggingOut, startTransition] = useTransition()
 
   /** Закрыть drawer при навигации */
   const close = () => setOpen(false)
+
+  /** Выход: закрываем drawer и запускаем RP-Initiated Logout через server action */
+  const handleSignOut = () => {
+    close()
+    startTransition(() => logoutAction())
+  }
 
   return (
     <DrawerRoot placement="end" size="xs" open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -111,7 +119,7 @@ export function MobileDrawer() {
           <Separator />
 
           {/* Авторизация */}
-          {isPending ? null : session?.user ? (
+          {isSessionPending ? null : session?.user ? (
             <VStack align="stretch" gap={0} py={2}>
               <HStack px={4} py={3} gap={2} color="fg.muted">
                 <LuUser size={16} />
@@ -133,10 +141,8 @@ export function MobileDrawer() {
                 _hover={{ bg: 'bg.muted' }}
                 cursor="pointer"
                 w="full"
-                onClick={() => {
-                  close()
-                  signOut({ fetchOptions: { onSuccess: () => window.location.reload() } })
-                }}
+                opacity={isLoggingOut ? 0.6 : 1}
+                onClick={handleSignOut}
               >
                 <LuLogOut size={16} />
                 <Text fontSize="sm">{tCommon('signOut')}</Text>

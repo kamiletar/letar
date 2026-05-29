@@ -42,8 +42,8 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   const [showProfile, setShowProfile] = useState(false)
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
     // Приоритет: сервер (БД) → localStorage
-    if (initialDisclaimerAccepted) return true
-    if (typeof window === 'undefined') return false
+    if (initialDisclaimerAccepted) { return true }
+    if (typeof window === 'undefined') { return false }
     return localStorage.getItem('quiz_disclaimer_accepted') === '1'
   })
 

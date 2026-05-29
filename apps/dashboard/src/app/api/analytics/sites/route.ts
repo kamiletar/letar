@@ -82,7 +82,9 @@ export async function POST(request: NextRequest) {
         const errorData = JSON.parse(errorText)
         errorMessage = errorData.message || errorData.error || errorMessage
       } catch {
-        if (errorText) errorMessage = errorText
+        if (errorText) {
+          errorMessage = errorText
+        }
       }
       console.error('[Analytics] Umami API отклонил запрос:', { status: res.status, body: errorText })
       return NextResponse.json({ error: errorMessage }, { status: res.status })

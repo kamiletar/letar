@@ -56,9 +56,9 @@ const PIN_STATUS_COLORS: Record<string, string> = {
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '—'
+  if (bytes === 0) { return '—' }
   const gb = bytes / 1024 ** 3
-  if (gb >= 1) return `${gb.toFixed(1)} ГБ`
+  if (gb >= 1) { return `${gb.toFixed(1)} ГБ` }
   const mb = bytes / 1024 ** 2
   return `${mb.toFixed(0)} МБ`
 }
