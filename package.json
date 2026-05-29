@@ -168,7 +168,7 @@
     "react-markdown": "^10.1.0",
     "react-native": "0.85.3",
     "react-native-blob-util": "^0.24.9",
-    "react-native-gesture-handler": "~2.31.2",
+    "react-native-gesture-handler": "3",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-safe-area-context": "~5.8.0",
