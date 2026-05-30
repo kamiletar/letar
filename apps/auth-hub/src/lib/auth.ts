@@ -16,6 +16,20 @@ import { prisma } from './prisma'
  * - Magic Link
  * - OIDC Provider — выдаёт токены для клиентских приложений
  */
+
+/**
+ * Fail-fast чтение OIDC client secret из окружения.
+ * Секреты вынесены из исходного кода (публичное дерево letar) — Этап 0.1 PLAN.md.
+ * dev → apps/auth-hub/.env.local, prod → .env.docker на сервере.
+ */
+function requireOidcSecret(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(`[auth-hub] Не задан OIDC-секрет ${name} — проверь .env.local (dev) / .env.docker (prod)`)
+  }
+  return value
+}
+
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
 
@@ -193,7 +207,7 @@ export const auth = betterAuth({
       trustedClients: [
         {
           clientId: 'archetest-prod',
-          clientSecret: '71bec7ac1da45cf43850f6446c8cf04ef9b37fc0cf9a56e28f6a36eca90e5573',
+          clientSecret: requireOidcSecret('OIDC_ARCHETEST_SECRET'),
           name: 'Архетест',
           icon: undefined,
           type: 'web',
@@ -210,7 +224,7 @@ export const auth = betterAuth({
         },
         {
           clientId: 'time-prod',
-          clientSecret: 'e73f38e76aa6a72030b8636b04fa162b3bb6101e800d5701c8481cf922678bdd',
+          clientSecret: requireOidcSecret('OIDC_TIME_SECRET'),
           name: 'Unix Time',
           icon: undefined,
           type: 'web',
@@ -226,7 +240,7 @@ export const auth = betterAuth({
         },
         {
           clientId: 'grandslamcup-prod',
-          clientSecret: '0d6c9d813159b74b65279a27e3690f2dfb766b9549d06a605e8c8fe47f4e1365',
+          clientSecret: requireOidcSecret('OIDC_GRANDSLAMCUP_SECRET'),
           name: 'Grand Slam Cup',
           icon: undefined,
           type: 'web',
@@ -244,7 +258,7 @@ export const auth = betterAuth({
         },
         {
           clientId: 'kami-prod',
-          clientSecret: '52f225f628ffe44dbe2af7b944bdc57b538c5829615665f9f480429d37292559',
+          clientSecret: requireOidcSecret('OIDC_KAMI_SECRET'),
           name: 'Ками',
           icon: undefined,
           type: 'web',
@@ -260,7 +274,7 @@ export const auth = betterAuth({
         },
         {
           clientId: 'animatrona-tracker-prod',
-          clientSecret: 'b2ee649d66f935f28dd552f00c89a15f85afaea1a149f07847558fd90b14760c',
+          clientSecret: requireOidcSecret('OIDC_ANIMATRONA_TRACKER_SECRET'),
           name: 'Animatrona Tracker',
           icon: undefined,
           type: 'web',
@@ -276,7 +290,7 @@ export const auth = betterAuth({
         },
         {
           clientId: 'dashboard-prod',
-          clientSecret: 'cb30444537c01300a1b25feedd41f3a91537a5acf41463b6b26329eadc838fea',
+          clientSecret: requireOidcSecret('OIDC_DASHBOARD_SECRET'),
           name: 'Dashboard',
           icon: undefined,
           type: 'web',
