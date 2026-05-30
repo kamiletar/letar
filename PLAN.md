@@ -366,7 +366,14 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
   - ✅ Добавлена тест-инфраструктура pin-auth (project.json/vitest/tsconfig.spec) + 11 тестов; bump 0.1.0→0.2.0 + CHANGELOG.
 - **Зависимости:** нет (публичные `libs/`). Стартовая сессия реализации.
 
-### Этап 2 — Resend email-верификации (исходная боль)
+### Этап 2 — Resend email-верификации (исходная боль) — 🟡 частично (auth-hub ✅)
+
+> **Сессия 2026-05-30 (auth-hub):** ✅ resend на `/sign-in` через `<ResendVerificationButton>` (@letar/auth/client)
+> для обоих сценариев — авторегистрация и вход неверифицированного (`verifyEmailSent` в `login.action.ts`);
+> ✅ захват `SendEmailResult` + `reportEmailFailure` в `emailVerification.sendVerificationEmail` (`lib/auth.ts`);
+> ✅ rate-limit `/send-verification-email` `{60,5}`. bump 0.3.2→0.4.0 + CHANGELOG. ⏳ Follow-up: у auth-hub нет
+> vitest/e2e инфраструктуры — unit/Playwright для resend не написаны; точечный per-email rate-limit (кастомный ключ).
+> Осталось по этапу: aboi (эталон + E2E), dsperevod, ремедиация бэклога застрявших (п.3).
 
 1. **aboi (эталон):** `/sign-in` `EMAIL_NOT_VERIFIED` → блок + resend (email из формы); `/verify-email` error →
    resend; захват `SendEmailResult`; `rateLimit.customRules['/send-verification-email'] = { window: 60, max: 3 }`.

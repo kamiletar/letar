@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-30
+
+### Added
+
+- **Повторная отправка письма верификации (resend) на `/sign-in`** (Этап 2 PLAN.md — «тупик без resend»). Если при входе/авторегистрации email не верифицирован (`verifyEmailSent`), форма теперь показывает кнопку `<ResendVerificationButton>` из `@letar/auth/client` со встроенным cooldown (60с). Cooldown стартует только при успешной отправке; при ошибке SMTP кнопка остаётся активной и показывается нейтральное сообщение. Раньше пользователь видел только текст и застревал, если письмо не дошло.
+- **Захват `SendEmailResult` в `emailVerification.sendVerificationEmail`** (`lib/auth.ts`): при `success === false` вызывается `reportEmailFailure({ type: 'verification', … })` из `@letar/email` — провалы SMTP больше не игнорируются молча (первопричина PLAN.md), видны в `docker logs`.
+- **Rate-limit на resend** — `customRules['/send-verification-email'] = { window: 60, max: 5 }` (защита от email-флуда, §13.3). Точечный per-email лимит — TODO (нужен кастомный ключ).
+
+### Changed
+
+- `login.action.ts`: ветка `EMAIL_NOT_VERIFIED` при входе существующего неверифицированного пользователя теперь возвращает `verifyEmailSent: true` — форма показывает кнопку resend (не только текст).
+
 ## [0.3.1] - 2026-05-04
 
 ### Fixed

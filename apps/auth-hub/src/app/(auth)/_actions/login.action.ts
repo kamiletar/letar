@@ -50,7 +50,12 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
       lowerMsg.includes('not verified') ||
       lowerMsg.includes('email not verified')
     ) {
-      return { success: false, error: 'Подтвердите email для входа. Проверьте почту.' }
+      // verifyEmailSent → форма покажет кнопку «Отправить письмо повторно» (Этап 2 PLAN.md)
+      return {
+        success: false,
+        verifyEmailSent: true,
+        error: 'Подтвердите email для входа. Проверьте почту или отправьте письмо повторно.',
+      }
     }
 
     // Если пользователь не найден или неверный пароль — пробуем зарегистрировать

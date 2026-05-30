@@ -1,5 +1,5 @@
 import type { UserRole } from '@/generated/prisma'
-import { sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
+import { reportEmailFailure, sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
@@ -57,11 +57,20 @@ export const auth = betterAuth({
   // Email верификация
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail({
+      // Захватываем SendEmailResult — при провале SMTP централизованно логируем
+      // (первопричина PLAN.md: письма молча не доходили). См. @letar/email reportEmailFailure.
+      const result = await sendVerificationEmail({
         to: user.email,
         userName: user.name ?? undefined,
         verificationUrl: url,
       })
+      if (!result.success) {
+        reportEmailFailure({
+          type: 'verification',
+          to: user.email,
+          error: result.error ?? 'unknown',
+        })
+      }
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
@@ -343,6 +352,9 @@ export const auth = betterAuth({
       '/forget-password': { window: 300, max: 3 },
       '/reset-password/*': { window: 60, max: 5 },
       '/verify-email': { window: 60, max: 10 },
+      // Resend письма верификации (Этап 2 PLAN.md): защита от email-флуда.
+      // IP-уровень по §13.3; точечный per-email лимит — TODO кастомного ключа.
+      '/send-verification-email': { window: 60, max: 5 },
       // OIDC endpoints
       '/oauth2/authorize': { window: 60, max: 30 },
       '/oauth2/token': { window: 60, max: 30 },

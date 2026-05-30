@@ -2,7 +2,9 @@
 
 import { loginUser } from '@/app/(auth)/_actions/login.action'
 import { type LoginData, LoginSchema } from '@/app/(auth)/_schemas/login.schema'
+import { authClient } from '@/lib/auth-client'
 import { Button, Field, Group, IconButton, Input, InputAddon, Stack, Text } from '@chakra-ui/react'
+import { ResendVerificationButton } from '@letar/auth/client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuEye, LuEyeOff } from 'react-icons/lu'
@@ -22,11 +24,14 @@ export function LoginForm() {
   const [info, setInfo] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  // Email, для которого нужна повторная отправка письма верификации (Этап 2 PLAN.md)
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setInfo(null)
+    setPendingEmail(null)
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
@@ -48,8 +53,9 @@ export function LoginForm() {
       router.push(result.redirectTo || '/')
       router.refresh()
     } else if (result.verifyEmailSent) {
-      // Аккаунт создан, но требуется верификация email — показываем как info
+      // Аккаунт создан/не верифицирован — показываем info + кнопку resend
       setInfo(result.error ?? 'Письмо подтверждения отправлено')
+      setPendingEmail(parsed.data.email)
       setLoading(false)
     } else {
       setError(result.error ?? 'Ошибка входа')
@@ -100,6 +106,19 @@ export function LoginForm() {
           <Text color="fg.info" fontSize="sm">
             {info}
           </Text>
+        )}
+
+        {pendingEmail && (
+          <ResendVerificationButton
+            authClient={authClient}
+            email={pendingEmail}
+            callbackURL={callbackUrl}
+            variant="outline"
+            size="sm"
+            w="full"
+            onSent={() => setInfo('Письмо отправлено повторно. Проверьте почту.')}
+            onError={(message) => setError(message)}
+          />
         )}
 
         <Button type="submit" colorPalette="brand" loading={loading} w="full">
