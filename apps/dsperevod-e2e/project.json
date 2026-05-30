@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/dsperevod-e2e/src",
+  "tags": ["type:e2e", "scope:dsperevod", "owner:commercial"],
   "implicitDependencies": ["dsperevod"],
   "targets": {
     "e2e": {
