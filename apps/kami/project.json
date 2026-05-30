@@ -4,7 +4,7 @@
   "implicitDependencies": ["@letar/chakra-provider", "@letar/yandex-metrika"],
   "sourceRoot": "apps/kami/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:kami"],
+  "tags": ["type:app", "scope:kami", "owner:letar"],
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",

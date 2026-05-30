@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/animatrona-mobile/src",
   "projectType": "application",
-  "tags": ["scope:animatrona", "type:mobile"],
+  "tags": ["scope:animatrona", "type:mobile", "owner:letar"],
   "targets": {
     "start": {
       "command": "react-native start",

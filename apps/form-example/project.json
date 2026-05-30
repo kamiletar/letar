@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/form-example/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:form-example"],
+  "tags": ["type:app", "scope:form-example", "owner:letar"],
   "targets": {
     "zenstack:generate": {
       "executor": "nx:run-commands",
@@ -12,7 +12,12 @@
         "cwd": "apps/form-example"
       },
       "cache": true,
-      "inputs": ["{projectRoot}/schema.zmodel", { "runtime": "node -p process.platform" }],
+      "inputs": [
+        "{projectRoot}/schema.zmodel",
+        {
+          "runtime": "node -p process.platform"
+        }
+      ],
       "outputs": ["{projectRoot}/src/generated"]
     },
     "build": {}

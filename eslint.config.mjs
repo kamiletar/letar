@@ -72,6 +72,13 @@ export default [
               sourceTag: 'scope:driving-school',
               onlyDependOnLibsWithTags: ['scope:shared', 'scope:driving-school'],
             },
+            // Граница владения (Этап 0.5 PLAN.md): личные петы/инфра letar не должны
+            // импортировать коммерческий код. Зависят только от shared и других owner:letar.
+            // Обратная сторона (owner:commercial) включится после тегирования submodules.
+            {
+              sourceTag: 'owner:letar',
+              onlyDependOnLibsWithTags: ['scope:shared', 'owner:letar'],
+            },
             // UI компоненты не должны зависеть от data-access напрямую
             // (закомментировано - form-components может нуждаться в исключениях)
             // {

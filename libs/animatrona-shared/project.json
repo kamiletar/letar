@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-shared/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:native-module"],
+  "tags": ["scope:shared", "type:native-module", "owner:letar"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint",

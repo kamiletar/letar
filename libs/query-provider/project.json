@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/query-provider/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:data-access"],
+  "tags": ["scope:shared", "type:data-access", "owner:letar"],
   "targets": {
     "test": {
       "executor": "@nx/vitest:test",

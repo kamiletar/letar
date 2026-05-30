@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/dashboard/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:dashboard"],
+  "tags": ["type:app", "scope:dashboard", "owner:letar"],
   "targets": {
     "zenstack:generate": {
       "executor": "nx:run-commands",
@@ -12,7 +12,12 @@
         "cwd": "apps/dashboard"
       },
       "cache": true,
-      "inputs": ["{projectRoot}/schema.zmodel", { "runtime": "node -p process.platform" }],
+      "inputs": [
+        "{projectRoot}/schema.zmodel",
+        {
+          "runtime": "node -p process.platform"
+        }
+      ],
       "outputs": ["{projectRoot}/src/generated"],
       "metadata": {
         "description": "Generate Prisma schema from ZenStack",
@@ -30,7 +35,9 @@
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel",
         "{projectRoot}/prisma.config.ts",
-        { "runtime": "node -p process.platform" }
+        {
+          "runtime": "node -p process.platform"
+        }
       ],
       "outputs": ["{workspaceRoot}/node_modules/.prisma/client"],
       "metadata": {

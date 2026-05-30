@@ -19,5 +19,6 @@
         "cwd": "{workspaceRoot}"
       }
     }
-  }
+  },
+  "tags": ["owner:letar"]
 }

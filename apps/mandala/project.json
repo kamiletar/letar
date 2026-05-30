@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/mandala/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:mandala"],
+  "tags": ["type:app", "scope:mandala", "owner:letar"],
   "targets": {
     "update-sw-version": {
       "executor": "nx:run-commands",
@@ -162,7 +162,12 @@
         "cwd": "apps/mandala",
         "parallel": false
       },
-      "dependsOn": [{ "projects": ["@letar/zenstack-form-plugin"], "target": "build" }],
+      "dependsOn": [
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ],
       "cache": true,
       "inputs": ["{projectRoot}/schema.zmodel"],
       "outputs": ["{projectRoot}/src/generated"],

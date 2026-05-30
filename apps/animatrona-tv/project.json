@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/animatrona-tv/src",
   "projectType": "application",
-  "tags": ["scope:animatrona", "type:tv"],
+  "tags": ["scope:animatrona", "type:tv", "owner:letar"],
   "targets": {
     "start": {
       "command": "react-native start --port 8083",

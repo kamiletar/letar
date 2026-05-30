@@ -12,5 +12,6 @@
         "config": "apps/label-printer-desktop-e2e/playwright.config.ts"
       }
     }
-  }
+  },
+  "tags": ["owner:letar"]
 }

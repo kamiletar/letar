@@ -2,5 +2,5 @@
   "name": "umami",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "tags": ["type:infra"]
+  "tags": ["type:infra", "owner:letar"]
 }

@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/dashboard-agent/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:infra"],
+  "tags": ["type:app", "scope:infra", "owner:letar"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",

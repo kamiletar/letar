@@ -4,7 +4,7 @@
   "implicitDependencies": ["@letar/chakra-provider", "@letar/analytics", "animatrona-ui"],
   "sourceRoot": "apps/animatrona-tracker/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona-tracker"],
+  "tags": ["type:app", "scope:animatrona-tracker", "owner:letar"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",

@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/label-printer-desktop",
   "projectType": "application",
-  "tags": ["type:app", "scope:label-printer"],
+  "tags": ["type:app", "scope:label-printer", "owner:letar"],
   "targets": {
     "dev": {
       "command": "node scripts/dev.js",

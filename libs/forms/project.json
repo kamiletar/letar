@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/forms/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:ui"],
+  "tags": ["scope:shared", "type:ui", "owner:letar"],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",

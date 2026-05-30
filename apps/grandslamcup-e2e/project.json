@@ -2,7 +2,7 @@
   "name": "grandslamcup-e2e",
   "projectType": "application",
   "sourceRoot": "apps/grandslamcup-e2e/src",
-  "tags": ["type:e2e", "scope:grandslamcup"],
+  "tags": ["type:e2e", "scope:grandslamcup", "owner:letar"],
   "implicitDependencies": ["grandslamcup"],
   "targets": {
     "e2e": {

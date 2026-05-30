@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/form-develop-app/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:sandbox"],
+  "tags": ["type:app", "scope:sandbox", "owner:letar"],
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",

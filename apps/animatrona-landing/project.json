@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/animatrona-landing/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona"],
+  "tags": ["type:app", "scope:animatrona", "owner:letar"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",

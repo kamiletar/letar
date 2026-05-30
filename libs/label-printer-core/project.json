@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/label-printer-core/src",
   "projectType": "library",
-  "tags": ["scope:label-printer", "type:core"],
+  "tags": ["scope:label-printer", "type:core", "owner:letar"],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",

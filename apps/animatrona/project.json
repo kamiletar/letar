@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/animatrona",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona"],
+  "tags": ["type:app", "scope:animatrona", "owner:letar"],
   "implicitDependencies": ["zenstack-form-plugin"],
   "targets": {
     "dev": {

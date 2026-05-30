@@ -4,7 +4,7 @@
   "implicitDependencies": ["@letar/chakra-provider", "@letar/analytics"],
   "sourceRoot": "apps/auth-hub/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:auth-hub"],
+  "tags": ["type:app", "scope:auth-hub", "owner:letar"],
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",

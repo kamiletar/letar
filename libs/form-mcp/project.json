@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/form-mcp/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:tool"],
+  "tags": ["scope:shared", "type:tool", "owner:letar"],
   "targets": {
     "serve": {
       "executor": "nx:run-commands",

@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/form-docs/src",
   "projectType": "application",
-  "tags": ["scope:docs", "type:app"],
+  "tags": ["scope:docs", "type:app", "owner:letar"],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",
@@ -46,7 +46,9 @@
       "inputs": [
         "default",
         "^production",
-        { "externalDependencies": ["next"] }
+        {
+          "externalDependencies": ["next"]
+        }
       ],
       "outputs": [
         "{workspaceRoot}/apps/form-docs/.next/!(cache)/**/*",

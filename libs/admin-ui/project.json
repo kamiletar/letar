@@ -3,5 +3,5 @@
   "name": "admin-ui",
   "projectType": "library",
   "sourceRoot": "libs/admin-ui/src",
-  "tags": ["scope:shared", "type:ui"]
+  "tags": ["scope:shared", "type:ui", "owner:letar"]
 }

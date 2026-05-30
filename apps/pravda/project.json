@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/pravda/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:pravda"],
+  "tags": ["type:app", "scope:pravda", "owner:letar"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

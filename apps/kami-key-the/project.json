@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/kami-key-the/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:infra"],
+  "tags": ["type:app", "scope:infra", "owner:letar"],
   "targets": {
     "dev": {
       "executor": "nx:run-commands",

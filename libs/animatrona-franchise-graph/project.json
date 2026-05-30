@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-franchise-graph/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:lib"],
+  "tags": ["scope:shared", "type:lib", "owner:letar"],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",

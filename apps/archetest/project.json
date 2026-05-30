@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/archetest/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:archetest"],
+  "tags": ["type:app", "scope:archetest", "owner:letar"],
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",

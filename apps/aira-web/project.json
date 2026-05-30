@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/aira-web/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:aira-web"],
+  "tags": ["type:app", "scope:aira-web", "owner:letar"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
