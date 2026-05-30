@@ -6,7 +6,10 @@
     "types": ["node"],
     "rootDir": "src",
     "jsx": "react-jsx",
-    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "paths": {
+      "@letar/format-utils": ["../format-utils/src/index.ts"]
+    }
   },
   "exclude": [
     "out-tsc",
@@ -24,9 +27,6 @@
   "references": [
     {
       "path": "../format-utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../form-components/tsconfig.lib.json"
     }
   ]
 }
