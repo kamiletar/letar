@@ -9,6 +9,9 @@
 > **Ревизия №2 (2026-05-30, инцидент-реагирование):** инфра-задачи §14.2 подняты в roadmap (Этап 0.1 ротация
 > утёкших OIDC-секретов 🔴, Этап 0.2 защита почты + DKIM/SPF/DMARC); добавлены критический путь и фазы (§6),
 > DoD по этапам, ремедиация застрявших юзеров (Этап 2), заметки про rate-limit store / SSE-масштабирование (§8).
+> **Сессия реализации №1 (2026-05-30, только код в публичном дереве):** ✅ Этап 1 (security-hardening
+> `@letar/pin-auth` + `@letar/auth`) и ✅ код-часть Этапа 0 (централизованный лог `@letar/email` + фикс
+> игнорируемого результата в mandala). Этап 0.5 (Nx owner-теги) и инфра-часть (0.1/0.2/DKIM/canary) — следующие сессии.
 
 ## Как читать документ
 
@@ -219,7 +222,10 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
   даже при верном `SMTP_FROM`.
 - **Baseline-метрики (снять ДО правок).** Зафиксировать старт: % доставки, % верификации, число застрявших
   аккаунтов (`emailVerified` пусто/false). Иначе успех Этапа 0/2 недоказуем.
-- Централизованный лог `success === false` в `@letar/email`: `[email] send failed { type, to, error }` (виден в `docker logs`).
+- ✅ **Централизованный лог `success === false` в `@letar/email`** (сессия №1): `reportEmailFailure({ type, to, error })`
+  → `[email] send failed {...}` (виден в `docker logs`); `setEmailFailureAlerter` — env-gated точка расширения
+  для Telegram/Umami (интеграции — инфра-сессия); bump 0.1.0→0.2.0 + CHANGELOG. ✅ Фикс игнорируемого результата
+  в mandala (register/resend actions). aboi — submodule, отдельная сессия.
 - **Алертинг (Вариант B + C — §13.4):**
   - **B — Telegram-webhook:** при `success === false` опциональный вызов в `@letar/email`;
     дебаунс — алерт только на 3 подряд `success === false` одного типа;
@@ -268,18 +274,23 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
 - **Реализация:** лёгкий скрипт/сервис (не e2e-фреймворк) — SMTP send + IMAP receive, запуск через cron/scheduled.
 - **Зависимости:** Этап 0 (лог `SendEmailResult` + алертинг). Закрывает класс «письма молча не ходят».
 
-### Этап 1 — Фундамент библиотек
+### Этап 1 — Фундамент библиотек ✅ ВЫПОЛНЕНО (сессия №1, 2026-05-30)
 
 - `@letar/pin-auth`: совместимость с Better Auth (`emailVerified: Boolean`, таблица `verification`); хуки
-  переиспользуемы вне driving-school; брендинг шаблонов в конфиг.
-- `@letar/auth/client`: `<ResendVerificationButton authClient email callbackURL/>` **поверх** `useResendCountdown`;
-  «лёгкий путь» — обёртка над `authClient.sendVerificationEmail`. Реэкспорт pin-auth хуков. README + bump.
-- **Security hardening (§13.1–13.2–13.8) — включить в этот же этап:**
-  - **SSE-токен вместо email в URL:** `streamToken` (UUID) в `verificationToken`, endpoint `/api/auth/verification-stream/${streamToken}`;
-    инвалидируется при верификации или истечении PIN (§13.1).
-  - **Timing-safe PIN compare:** заменить `pin !== pin` на `crypto.timingSafeEqual` в `pin-validator.ts` (§13.2).
-  - **Single-use авто-логин токен:** адаптер `updateTokenForAutoLogin` — delete + create, не update; флаг `used` (§13.8).
-  - **UX при SMTP-ошибке:** `useResendCountdown` — не применять cooldown если `SendEmailResult.success === false` (§13.4).
+  переиспользуемы вне driving-school; брендинг шаблонов в конфиг. _(совместимость/брендинг — частично, по мере тиража)_
+- ✅ `@letar/auth/client`: `<ResendVerificationButton authClient email callbackURL/>` со встроенным cooldown;
+  «лёгкий путь» — обёртка над `authClient.sendVerificationEmail`. bump 0.2.0→0.3.0 + CHANGELOG.
+  ⏳ Реэкспорт pin-auth хуков **отложен**: на уровне `libs/` нет cross-lib резолва по имени пакета
+  (нет `node_modules/@letar`, paths только в приложениях) — cooldown инлайнен в кнопке. Отдельная задача.
+- **Security hardening (§13.1–13.2–13.8) — ✅ сделано:**
+  - ✅ **SSE-токен вместо email в URL (§13.1):** `streamToken` генерируется в `token-manager`, передаётся в адаптер
+    `createToken`, `useVerificationStream` принимает его. **Аддитивно** — email-путь сохранён; полное удаление
+    email-ключа + SSE-роут на `${streamToken}` — при cutover driving-school (Этап 7).
+  - ✅ **Timing-safe PIN compare (§13.2):** `crypto.timingSafeEqual` в `pin-validator.ts` (+null-guard). Тесты.
+  - ✅ **Single-use авто-логин токен (§13.8):** усилён контракт адаптера `updateTokenForAutoLogin` (атомарная
+    замена + одноразовость, док/типы). Полная enforcement (`used`-флаг у потребителя) — Этап 7.
+  - ✅ **UX при SMTP-ошибке (§13.4):** в `ResendVerificationButton` cooldown стартует только при `success`.
+  - ✅ Добавлена тест-инфраструктура pin-auth (project.json/vitest/tsconfig.spec) + 11 тестов; bump 0.1.0→0.2.0 + CHANGELOG.
 - **Зависимости:** нет (публичные `libs/`). Стартовая сессия реализации.
 
 ### Этап 2 — Resend email-верификации (исходная боль)

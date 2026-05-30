@@ -9,6 +9,11 @@ export interface SendEmailParams {
   subject: string
   html: string
   text: string
+  /** Метаданные для централизованного лога/алертинга провалов (§ Этап 0) */
+  meta?: {
+    /** Тип письма для структурного лога: 'verification' | 'password-reset' | … */
+    type?: string
+  }
 }
 
 export interface SendEmailResult {

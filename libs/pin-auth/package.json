@@ -1,13 +1,7 @@
 {
   "name": "@letar/pin-auth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "nx": {
-    "tags": [
-      "npm:private",
-      "scope:shared"
-    ]
-  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

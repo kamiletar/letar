@@ -43,6 +43,14 @@ export type {
 // === Провайдер ===
 export { createEmailProvider, getConfigFromEnv, isMailhogEnabled, resetTransporter, verifyConnection } from './provider'
 
+// === Репорт провалов отправки (централизованный лог + опциональный алертер) ===
+export {
+  reportEmailFailure,
+  setEmailFailureAlerter,
+  type EmailFailureAlerter,
+  type EmailFailureInfo,
+} from './failure-report'
+
 // === Высокоуровневые функции отправки ===
 export {
   getBrandingFromEnv,

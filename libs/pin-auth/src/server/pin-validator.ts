@@ -1,3 +1,20 @@
+import { timingSafeEqual } from 'crypto'
+
+/**
+ * Сравнение PIN-кодов в постоянном времени — защита от timing-атак (§13.2).
+ *
+ * Длина PIN не является секретом (фиксированная, напр. 6 цифр), поэтому ранний
+ * выход при несовпадении длины допустим и не раскрывает чувствительной информации.
+ */
+function timingSafeEqualStr(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8')
+  const bufB = Buffer.from(b, 'utf8')
+  if (bufA.length !== bufB.length) {
+    return false
+  }
+  return timingSafeEqual(bufA, bufB)
+}
+
 export interface PinValidationConfig {
   /** Максимальное количество попыток (по умолчанию 5) */
   maxAttempts?: number
@@ -33,7 +50,15 @@ export interface PinValidatorAdapter {
   findUser(email: string): Promise<{ id: string } | null>
   /** Верифицировать email пользователя */
   verifyUserEmail(userId: string): Promise<void>
-  /** Обновить токен для авто-логина */
+  /**
+   * Заменить PIN-токен на одноразовый токен авто-логина (§13.8 — single-use).
+   *
+   * ⚠️ Реализация ОБЯЗАНА быть атомарной заменой (удалить старую запись + создать
+   * новую), а не in-place `update`: это исключает окно, в котором по старому
+   * значению ещё можно верифицироваться. Токен авто-логина — одноразовый:
+   * потребитель ОБЯЗАН удалить его (или пометить `used`) сразу после успешного
+   * входа, чтобы повторное предъявление было отклонено.
+   */
   updateTokenForAutoLogin(oldToken: string, newToken: string, expires: Date): Promise<void>
 }
 
@@ -86,8 +111,8 @@ export function createPinValidator(config: PinValidationConfig = {}) {
           return { success: false, error: 'PIN_EXPIRED' }
         }
 
-        // Проверяем PIN
-        if (verificationToken.pin !== pin) {
+        // Проверяем PIN в постоянном времени (защита от timing-атак, §13.2)
+        if (verificationToken.pin === null || !timingSafeEqualStr(verificationToken.pin, pin)) {
           await adapter.incrementAttempts(verificationToken.token)
           return { success: false, error: 'INVALID_PIN' }
         }

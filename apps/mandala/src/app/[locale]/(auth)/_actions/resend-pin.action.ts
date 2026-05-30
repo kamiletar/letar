@@ -35,26 +35,30 @@ export async function resendVerificationPinAction(email: string): Promise<Resend
     return { success: false, error: result.error }
   }
 
-  // Отправляем email с PIN-кодом через @letar/email
-  try {
-    await sendVerificationEmail(
-      {
-        to: email,
-        userName: user?.name ?? undefined,
-        pin: result.pin,
-      },
-      {
-        appName: 'Elfafeya Art',
-        headerColor: '#8B7355',
-        buttonColor: '#A67C52',
-      }
-    )
-  } catch (emailError) {
-    console.error('[Email] Failed to send verification email:', emailError)
+  // Отправляем email с PIN-кодом через @letar/email.
+  // ⚠️ sendVerificationEmail НЕ бросает при SMTP-сбое — возвращает { success: false }.
+  // Раньше результат игнорировался, и UI показывал «отправлено» даже при провале (§14.2).
+  const emailResult = await sendVerificationEmail(
+    {
+      to: email,
+      userName: user?.name ?? undefined,
+      pin: result.pin,
+    },
+    {
+      appName: 'Elfafeya Art',
+      headerColor: '#8B7355',
+      buttonColor: '#A67C52',
+    }
+  )
+
+  if (!emailResult.success) {
+    // Централизованный структурный лог уже сработал в провайдере @letar/email.
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.log(`[DEV] New verification PIN for ${email}: ${result.pin}`)
     }
+    // Честно сообщаем UI о провале — не показываем ложное «письмо отправлено»
+    return { success: false, error: 'UNKNOWN_ERROR' }
   }
 
   return { success: true }

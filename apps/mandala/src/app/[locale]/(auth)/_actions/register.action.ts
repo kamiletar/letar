@@ -92,25 +92,27 @@ export async function registerUser(data: RegisterFormData): Promise<RegisterResu
       }),
     ])
 
-    // Отправляем email с PIN-кодом через @letar/email
-    try {
-      await sendVerificationEmail(
-        {
-          to: email,
-          userName: name ?? undefined,
-          pin,
-        },
-        {
-          // Кастомный брендинг для Elfafeya Art
-          appName: 'Elfafeya Art',
-          headerColor: '#8B7355',
-          buttonColor: '#A67C52',
-        }
-      )
-    } catch (emailError) {
-      // Логируем ошибку, но не блокируем регистрацию
-      console.error('[Email] Failed to send verification email:', emailError)
-      // В dev режиме выводим PIN в консоль для отладки
+    // Отправляем email с PIN-кодом через @letar/email.
+    // ⚠️ sendVerificationEmail НЕ бросает при SMTP-сбое — возвращает { success: false }.
+    // Поэтому проверяем результат явно, иначе провал отправки молча теряется (§ Этап 0).
+    const emailResult = await sendVerificationEmail(
+      {
+        to: email,
+        userName: name ?? undefined,
+        pin,
+      },
+      {
+        // Кастомный брендинг для Elfafeya Art
+        appName: 'Elfafeya Art',
+        headerColor: '#8B7355',
+        buttonColor: '#A67C52',
+      }
+    )
+
+    if (!emailResult.success) {
+      // Централизованный структурный лог уже сработал в провайдере @letar/email.
+      // Регистрацию не блокируем (пользователь сможет запросить resend), но в dev
+      // выводим PIN в консоль для отладки.
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.log(`[DEV] Verification PIN for ${email}: ${pin}`)

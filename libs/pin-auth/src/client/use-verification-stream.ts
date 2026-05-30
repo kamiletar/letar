@@ -3,8 +3,17 @@
 import { useEffect, useState } from 'react'
 
 export interface UseVerificationStreamConfig {
-  /** Email для отслеживания верификации */
-  email: string
+  /**
+   * Непубличный токен SSE-потока (§13.1) — предпочтительный способ подписки.
+   * Используется вместо email в URL, чтобы исключить enumeration чужих email.
+   * Если задан, имеет приоритет над `email`.
+   */
+  streamToken?: string
+  /**
+   * Email для отслеживания верификации (legacy-путь).
+   * ⚠️ Раскрывает email в URL — оставлен для обратной совместимости; предпочитайте `streamToken`.
+   */
+  email?: string
   /** URL SSE endpoint (по умолчанию /api/auth/verification-stream) */
   streamUrl?: string
   /** Callback при верификации в другой вкладке */
@@ -37,11 +46,18 @@ export interface UseVerificationStreamResult {
  * ```
  */
 export function useVerificationStream(config: UseVerificationStreamConfig): UseVerificationStreamResult {
-  const { email, streamUrl = '/api/auth/verification-stream', onVerified } = config
+  const { streamToken, email, streamUrl = '/api/auth/verification-stream', onVerified } = config
   const [verifiedInOtherTab, setVerifiedInOtherTab] = useState(false)
 
+  // Предпочитаем непубличный streamToken; email — legacy-fallback (§13.1)
+  const streamKey = streamToken ?? email
+
   useEffect(() => {
-    const eventSource = new EventSource(`${streamUrl}/${encodeURIComponent(email)}`)
+    if (!streamKey) {
+      return
+    }
+
+    const eventSource = new EventSource(`${streamUrl}/${encodeURIComponent(streamKey)}`)
 
     eventSource.onmessage = (event) => {
       try {
@@ -62,7 +78,7 @@ export function useVerificationStream(config: UseVerificationStreamConfig): UseV
     }
 
     return () => eventSource.close()
-  }, [email, streamUrl, onVerified])
+  }, [streamKey, streamUrl, onVerified])
 
   return { verifiedInOtherTab }
 }

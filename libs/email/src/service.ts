@@ -70,6 +70,7 @@ export async function sendVerificationEmail(
     subject: `✉️ Подтверждение email — ${brand.appName}`,
     html,
     text,
+    meta: { type: 'verification' },
   })
 }
 
@@ -100,6 +101,7 @@ export async function sendPasswordResetEmail(
     subject: `🔐 Сброс пароля — ${brand.appName}`,
     html,
     text,
+    meta: { type: 'password-reset' },
   })
 }
 
@@ -130,6 +132,7 @@ export async function sendMagicLinkEmail(
     subject: `🔑 Вход в ${brand.appName}`,
     html,
     text,
+    meta: { type: 'magic-link' },
   })
 }
 
@@ -161,6 +164,7 @@ export async function sendInvitationEmail(
     subject: `🤝 Приглашение в ${params.organizationName} — ${brand.appName}`,
     html,
     text,
+    meta: { type: 'invitation' },
   })
 }
 
@@ -216,6 +220,7 @@ export async function sendStudentActivationEmail(
     subject: `🚗 Добро пожаловать в ${params.schoolName} — ${brand.appName}`,
     html,
     text,
+    meta: { type: 'student-activation' },
   })
 }
 
@@ -281,5 +286,6 @@ export async function sendGenericEmail(
     subject: params.subject,
     html,
     text: text.trim(),
+    meta: { type: 'generic' },
   })
 }

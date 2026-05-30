@@ -9,6 +9,7 @@
 import type { Transporter } from 'nodemailer'
 import nodemailer from 'nodemailer'
 import { toASCII } from 'punycode/'
+import { reportEmailFailure } from './failure-report'
 import type { EmailConfig, EmailProvider, SendEmailParams, SendEmailResult } from './types'
 
 /**
@@ -169,10 +170,12 @@ export function createEmailProvider(config?: EmailConfig): EmailProvider {
         console.log(`[Email] Sent to ${params.to}: ${info.messageId}`)
         return { success: true, messageId: info.messageId }
       } catch (error) {
-        console.error('[Email] Failed to send:', error)
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        // Централизованный структурный лог + опциональный алертер (§ Этап 0)
+        reportEmailFailure({ type: params.meta?.type ?? 'unknown', to: params.to, error: message })
         return {
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: message,
         }
       }
     },

@@ -41,6 +41,11 @@ export {
   type OAuthProviderConfig,
 } from './oauth-buttons'
 export { OnlyFor, type OnlyForProps } from './only-for'
+export {
+  ResendVerificationButton,
+  type ResendCapableAuthClient,
+  type ResendVerificationButtonProps,
+} from './resend-verification-button'
 export { SessionProvider, type SessionProviderProps } from './session-provider'
 
 // Factories

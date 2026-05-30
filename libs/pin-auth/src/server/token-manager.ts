@@ -13,7 +13,9 @@ export interface TokenManagerConfig {
 
 export type ResendPinError = 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'RATE_LIMITED' | 'UNKNOWN_ERROR'
 
-export type ResendPinResult = { success: true; token: string; pin: string } | { success: false; error: ResendPinError }
+export type ResendPinResult =
+  | { success: true; token: string; pin: string; streamToken: string }
+  | { success: false; error: ResendPinError }
 
 export interface TokenManagerAdapter {
   /** Найти пользователя по email */
@@ -22,8 +24,23 @@ export interface TokenManagerAdapter {
   findLatestToken(identifier: string): Promise<{ pinExpires: Date | null } | null>
   /** Удалить все токены для email */
   deleteTokens(identifier: string): Promise<void>
-  /** Создать новый токен */
-  createToken(data: { identifier: string; token: string; pin: string; pinExpires: Date; expires: Date }): Promise<void>
+  /**
+   * Создать новый токен верификации.
+   *
+   * `streamToken` (§13.1) — непубличный идентификатор SSE-потока, используемый
+   * вместо email в URL `/api/auth/verification-stream/${streamToken}`, чтобы
+   * нельзя было подписаться на поток чужого email (enumeration). Адаптер должен
+   * сохранить его, если в схеме есть колонка `streamToken`; иначе поле игнорируется
+   * (обратная совместимость со старыми адаптерами).
+   */
+  createToken(data: {
+    identifier: string
+    token: string
+    pin: string
+    pinExpires: Date
+    expires: Date
+    streamToken: string
+  }): Promise<void>
 }
 
 /**
@@ -59,9 +76,11 @@ export function createTokenManager(config: TokenManagerConfig = {}) {
     async createVerificationToken(
       identifier: string,
       adapter: TokenManagerAdapter
-    ): Promise<{ token: string; pin: string }> {
+    ): Promise<{ token: string; pin: string; streamToken: string }> {
       const token = generateToken()
       const pin = generatePin({ length: pinLength })
+      // Непубличный токен SSE-потока (§13.1) — короче link-токена, отдельная сущность
+      const streamToken = generateToken(16)
       const expires = new Date(Date.now() + linkValidityMs)
       const pinExpires = new Date(Date.now() + pinValidityMs)
 
@@ -71,9 +90,10 @@ export function createTokenManager(config: TokenManagerConfig = {}) {
         pin,
         pinExpires,
         expires,
+        streamToken,
       })
 
-      return { token, pin }
+      return { token, pin, streamToken }
     },
 
     /**
@@ -108,9 +128,9 @@ export function createTokenManager(config: TokenManagerConfig = {}) {
         await adapter.deleteTokens(email)
 
         // Создаём новый токен
-        const { token, pin } = await this.createVerificationToken(email, adapter)
+        const { token, pin, streamToken } = await this.createVerificationToken(email, adapter)
 
-        return { success: true, token, pin }
+        return { success: true, token, pin, streamToken }
       } catch (error) {
         console.error('Resend pin error:', error)
         return { success: false, error: 'UNKNOWN_ERROR' }

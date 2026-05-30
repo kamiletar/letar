@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-30
+
+### ResendVerificationButton + UX при SMTP-ошибке (Этап 1.4 auth-унификации)
+
+**Added:**
+
+- `ResendVerificationButton` — кнопка повторной отправки письма email-верификации
+  - Тонкая обёртка над `authClient.sendVerificationEmail` (клиент передаётся пропом)
+  - Встроенный cooldown с обратным отсчётом «Отправить повторно через {n} с»
+  - **§13.4:** cooldown запускается ТОЛЬКО при успешной отправке; при ошибке кнопка
+    остаётся доступной, пользователю показывается нейтральное сообщение (без деталей SMTP)
+  - Колбэки `onSent` / `onError`
+- `ResendCapableAuthClient`, `ResendVerificationButtonProps` — публичные типы
+
 ## [0.2.0] - 2026-01-19
 
 ### OAuth привязка аккаунтов + VK авторизация
