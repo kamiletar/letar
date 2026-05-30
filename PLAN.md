@@ -3,8 +3,8 @@
 > **Статус:** ✅ план утверждён, реализация идёт. **Сделано:** Этап 1 + код-часть Этапа 0 (сессия №1, см. ниже).
 > **➡️ Следующий старт:** **Этап 0.1 инфра-часть 🔴** — ротация 6 OIDC-секретов на s2 + обновление конфигов
 > клиентов + отзыв старых (код-часть ✅ сделана, см. сессию №2 ниже). Затем 0.2 (Maddy/fail2ban), DKIM/SPF/DMARC,
-> 0.7 canary. Требует доступа к s2/mail (§14.3) + deploy-координации. **Этап 0.5 публичная часть ✅** (owner:letar
-> теги + ESLint-граница); осталось тегирование submodules (owner:commercial) — отдельная сессия.
+> 0.7 canary. Требует доступа к s2/mail (§14.3) + deploy-координации. **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar
+> теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
 > **Операционная сессия 2026-05-30:** разовая склейка email владельца в Ключнице **ВЫПОЛНЕНА** (§14.1);
@@ -21,7 +21,10 @@
 > `.env.local`/`.env.docker` (не коммитятся). ✅ **Этап 0.5 публичная часть** — тег `owner:letar` в 60 project.json
 >
 > - depConstraint `owner:letar → [scope:shared, owner:letar]` в `eslint.config.mjs` (0 нарушений границ).
->   ⏳ Остались: ротация секретов 0.1 на s2; теги `owner:commercial` для submodules.
+>   **Сессия реализации №3 (2026-05-30, submodules + публичное дерево):** ✅ **Этап 0.5 завершён** — тег
+>   `owner:commercial` в 10 submodule-проектов (коммиты внутри submodules + bump SHA в letar); реципрокный
+>   depConstraint `owner:commercial → [scope:shared, owner:commercial]` в `eslint.config.mjs`; module-boundary чист.
+>   ⏳ Осталось по Фазе A: ротация секретов 0.1 на s2 + 0.2/DKIM/0.7 (инфра, нужен s2 + deploy-координация).
 
 ## Как читать документ
 
@@ -328,9 +331,11 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
 - ✅ **Публичная часть (сессия №2):** тег `owner:letar` добавлен в 60 `project.json` публичного дерева
   (петы + infra + все `libs/*`); submodules исключены. depConstraint `owner:letar → [scope:shared, owner:letar]`
   в `eslint.config.mjs` — ESLint запрещает импорт коммерческого кода в петах. Проверено: 0 нарушений границ.
-- ⏳ **Submodule-часть (отдельная сессия):** тег `owner:commercial` в `project.json` коммерческих submodules
-  (premium-rosstil, driving-school + db + e2e, aboi, imot, dsperevod) + реципрокный constraint
-  `owner:commercial → [scope:shared, owner:commercial]`. Требует коммита внутри submodule + bump SHA.
+- ✅ **Submodule-часть (сессия №3, 2026-05-30):** тег `owner:commercial` добавлен в **10** коммерческих
+  submodule-проектов (`nx show projects --with-tag owner:commercial`): aboi (+e2e), driving-school (+e2e +db),
+  premium-rosstil, imot (+e2e), dsperevod (+e2e). Коммит внутри каждого submodule + bump SHA в letar.
+  `premium-rosstil-e2e` пропущен (нет `project.json` → Nx не видит проект). Реципрокный constraint
+  `owner:commercial → [scope:shared, owner:commercial]` добавлен в `eslint.config.mjs`; module-boundary чист (0 нарушений).
 - **Зависимости:** нет. Делается до начала тиражирования библиотек.
 
 ### Этап 0.7 — Периодический canary-мониторинг доставки email
