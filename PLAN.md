@@ -25,6 +25,15 @@
 >   `owner:commercial` в 10 submodule-проектов (коммиты внутри submodules + bump SHA в letar); реципрокный
 >   depConstraint `owner:commercial → [scope:shared, owner:commercial]` в `eslint.config.mjs`; module-boundary чист.
 >   ⏳ Осталось по Фазе A: ротация секретов 0.1 на s2 + 0.2/DKIM/0.7 (инфра, нужен s2 + deploy-координация).
+>   **Сессия реализации №4 (2026-05-30, submodules — гигиена lint):** ✅ устранены предсуществующие падения
+>   `nx lint` в 3 коммерческих submodules (обнаружены при Этапе 0.5, к тегам отношения не имеют — код в `src/`):
+>   **aboi** — curly-автофикс + осиротевшие `eslint-disable` для незарегистрированных правил заменены
+>   (`no-img-element` → `oxlint-disable`, `exhaustive-deps`/`no-danger` удалены); **driving-school** — исправлен
+>   нерабочий идентификатор `oxlint-disable` для `no-img-element` (data-URL превью + внешние логотипы); **dsperevod** —
+>   `rules-of-hooks` (`useMDXComponents` вынесен в константу `baseMdxComponents`) + curly-автофикс (был скрыт за
+>   падением oxlint). Коммит внутри каждого submodule + bump SHA в letar. `nx run-many -t lint -p aboi
+>   driving-school dsperevod` зелёный. ⏳ Заведена отдельная задача на предсуществующий `typecheck:tsgo` TS2883 в
+>   `dsperevod/src/lib/auth-client.ts` (непортируемый тип better-auth — вне scope lint-сессии).
 
 ## Как читать документ
 
