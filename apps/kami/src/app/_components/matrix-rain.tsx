@@ -68,12 +68,13 @@ export const RECIPES: string[] = [
 
 export function MatrixRain({
   color = '#00FF41',
-  fontSize = 14,
+  fontSize = 1,
   speed = 50,
   fadeOpacity = 0.05,
   bgRgb = '0, 0, 0',
   className,
 }: MatrixRainProps) {
+  console.log(fontSize)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number | undefined>(undefined)
@@ -244,18 +245,22 @@ export function MatrixRain({
       }}
       aria-hidden="true"
     >
-      <canvas
-        ref={canvasRef}
-        className={className}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 0,
-        }}
-      />
+      <Box asChild filter={'blur(.5px)'} animation={'matrix-zoom 30s infinite ease'}>
+        <canvas
+          ref={canvasRef}
+          className={className}
+          style={{
+            transformOrigin: 'center center',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '50%',
+            height: '50%',
+            zIndex: 0,
+            scale: '1',
+          }}
+        />
+      </Box>
     </div>
   )
 }

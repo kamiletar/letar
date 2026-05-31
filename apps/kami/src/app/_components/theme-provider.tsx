@@ -64,6 +64,16 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
   const system = useMemo(() => {
     const config = defineConfig({
       theme: {
+        keyframes: {
+          'matrix-zoom': {
+            '0%': { transform: 'scale(3)' },
+            '10%': { transform: 'scale(6)' },
+            '20%': { transform: 'scale(12)' },
+            '50%': { transform: 'scale(108)' },
+            '70%': { transform: 'scale(100)' },
+            '100%': { transform: 'scale(3)' },
+          },
+        },
         tokens: {
           colors: {
             // Кастомная палитра fg - изумрудно-зелёный для Matrix-стиля
@@ -197,6 +207,7 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
     })
     return createSystem(defaultConfig, config)
   }, [fonts.heading.style.fontFamily, fonts.body.style.fontFamily, fonts.mono.style.fontFamily])
+  console.log('!!!!!!', system)
 
   return <RootChakraProvider value={system}>{children}</RootChakraProvider>
 }

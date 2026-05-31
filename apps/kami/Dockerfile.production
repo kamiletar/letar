@@ -1,6 +1,6 @@
 # Dockerfile.production - для уже собранных приложений
 # Используется когда сборка выполнена на сервере с nx build affected
-# Build context: workspace root (C:\web\lena)
+# Build context: workspace root (C:\web\letar)
 
 FROM node:24-alpine AS runner
 WORKDIR /app

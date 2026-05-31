@@ -61,7 +61,7 @@ export function Hero() {
       {/* Matrix Rain Background */}
       <MatrixRain
         color={isLight ? '#0a7a4a' : GLOW.color}
-        fontSize={16}
+        fontSize={25}
         speed={40}
         fadeOpacity={isLight ? 0.03 : 0.04}
         bgRgb={isLight ? '249, 250, 251' : '0, 0, 0'}

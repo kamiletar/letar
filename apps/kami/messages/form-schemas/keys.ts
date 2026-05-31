@@ -2,13 +2,13 @@
 // DO NOT EDIT MANUALLY
 
 /**
- * Все ключи переводов форм
+ * All form translation keys.
  *
- * Паттерн:
+ * Pattern:
  * - {ModelName}.{fieldName}.{title|placeholder|description}
  * - {EnumName}.{VALUE}.{label}
- * - validation.{code} — ошибки валидации Zod
- * - validation.{code}.{origin} — ошибки с типом (string, number, array, date)
+ * - validation.{code} — Zod validation errors
+ * - validation.{code}.{origin} — errors with type (string, number, array, date)
  */
 export type FormI18nKey =
   | 'CrossPostStatus.FAILED.label'
@@ -86,6 +86,6 @@ export type FormI18nKey =
   | 'validation.unrecognized_keys'
 
 /**
- * Количество ключей: 73
+ * Total key count: 73
  */
 export const FORM_I18N_KEY_COUNT = 73
