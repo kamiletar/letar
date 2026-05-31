@@ -34,6 +34,12 @@
 >   падением oxlint). Коммит внутри каждого submodule + bump SHA в letar. `nx run-many -t lint -p aboi
 >   driving-school dsperevod` зелёный. ⏳ Заведена отдельная задача на предсуществующий `typecheck:tsgo` TS2883 в
 >   `dsperevod/src/lib/auth-client.ts` (непортируемый тип better-auth — вне scope lint-сессии).
+>   **Сессия реализации №5 (2026-05-31, submodules aboi + aboi-e2e):** ✅ **Этап 2 — эталон aboi** (resend
+>   email-верификации): блок resend на `/sign-in` (EMAIL_NOT_VERIFIED) и форма на `/verify-email`; захват
+>   `SendEmailResult` + rate-limit `/send-verification-email {60,3}` (`lib/auth.ts`); Umami-события §13.9
+>   (`lib/analytics.ts`); E2E `email-verification.spec.ts` зелёный (chromium, полный флоу включая верификацию по
+>   токену). bump aboi 0.23.2→0.24.0; коммиты в submodules aboi + aboi-e2e + bump 2 SHA. Follow-up: email-уровень
+>   rate-limit ip+email; порядок `nextCookies()` (warning Better Auth — должен быть последним).
 
 ## Как читать документ
 
@@ -380,23 +386,33 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
   - ✅ Добавлена тест-инфраструктура pin-auth (project.json/vitest/tsconfig.spec) + 11 тестов; bump 0.1.0→0.2.0 + CHANGELOG.
 - **Зависимости:** нет (публичные `libs/`). Стартовая сессия реализации.
 
-### Этап 2 — Resend email-верификации (исходная боль) — 🟡 частично (auth-hub ✅)
+### Этап 2 — Resend email-верификации (исходная боль) — 🟢 эталон aboi ✅ (auth-hub ✅)
 
 > **Сессия 2026-05-30 (auth-hub):** ✅ resend на `/sign-in` через `<ResendVerificationButton>` (@letar/auth/client)
 > для обоих сценариев — авторегистрация и вход неверифицированного (`verifyEmailSent` в `login.action.ts`);
 > ✅ захват `SendEmailResult` + `reportEmailFailure` в `emailVerification.sendVerificationEmail` (`lib/auth.ts`);
 > ✅ rate-limit `/send-verification-email` `{60,5}`. bump 0.3.2→0.4.0 + CHANGELOG. ⏳ Follow-up: у auth-hub нет
 > vitest/e2e инфраструктуры — unit/Playwright для resend не написаны; точечный per-email rate-limit (кастомный ключ).
-> Осталось по этапу: aboi (эталон + E2E), dsperevod, ремедиация бэклога застрявших (п.3).
+>
+> **Сессия 2026-05-31 (aboi — ЭТАЛОН ✅):** ✅ resend на `/sign-in` при `EMAIL_NOT_VERIFIED` (`<ResendVerificationButton>`,
+> email из формы, cooldown только при успехе §13.4); ✅ resend-форма на `/verify-email` при ошибке (email вводится
+> заново — токен Better Auth 1.6.x это stateless JWT, контекста формы не несёт); ✅ захват `SendEmailResult` +
+> `reportEmailFailure` для verification и password-reset (`lib/auth.ts`); ✅ rate-limit `/send-verification-email`
+> `{60,3}`; ✅ Umami-события (§13.9) `verification-email-{sent,resent}` + `email-verified` (`lib/analytics.ts`);
+> ✅ **E2E зелёный (chromium):** регистрация → тупик → resend → cooldown → верификация по токену → автологин на
+> `/profile` (`aboi-e2e/email-verification.spec.ts`). bump aboi 0.23.2→0.24.0 + CHANGELOG; коммит в 2 submodule + bump SHA.
+> ⏳ Follow-up: email-уровень rate-limit `{3600,5}` с ключом ip+email (Better Auth не умеет per-email ключ нативно).
+> Осталось по этапу: dsperevod, ремедиация бэклога застрявших (п.3).
 
-1. **aboi (эталон):** `/sign-in` `EMAIL_NOT_VERIFIED` → блок + resend (email из формы); `/verify-email` error →
+1. ✅ **aboi (эталон):** `/sign-in` `EMAIL_NOT_VERIFIED` → блок + resend (email из формы); `/verify-email` error →
    resend; захват `SendEmailResult`; `rateLimit.customRules['/send-verification-email'] = { window: 60, max: 3 }`.
 2. **Тираж:** dsperevod → auth-hub (i18n нет → ru-хардкод; гейт только prod → тест с принудительным флагом).
    kami — Этап 6; premium-rosstil — Этап 4.
 3. **Ремедиация бэклога застрявших.** Разовая операция: найти аккаунты с пустым/`false` `emailVerified` (особенно
    aboi-тупик) → resend-уведомление или админ-верификация. Resend вперёд не лечит уже ушедших пользователей.
 
-- **✓ DoD:** на эталоне (aboi) E2E «регистрация → тупик → resend → cooldown → верификация» зелёный; бэклог обработан.
+- **✓ DoD:** на эталоне (aboi) E2E «регистрация → тупик → resend → cooldown → верификация» зелёный ✅ (chromium);
+  ⏳ бэклог застрявших (п.3) — остаётся.
 - **Зависимости:** Этап 1.
 
 ### Этап 3 — Admin «Пользователи» + ручная верификация
