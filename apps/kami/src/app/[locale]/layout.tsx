@@ -1,4 +1,4 @@
-import '@/app/global.css'
+import { MainMatrix } from '@/app/[locale]/main-matrix'
 import { ChatWidgetLazy } from '@/app/_components/chat/chat-widget-lazy'
 import { Footer } from '@/app/_components/footer/footer'
 import { Header } from '@/app/_components/header/header'
@@ -7,6 +7,7 @@ import { SkipLink } from '@/app/_components/skip-link'
 import { ThemeProvider } from '@/app/_components/theme-provider'
 import { Toaster } from '@/app/_components/ui/toaster'
 import { type UserContextValue, UserProvider } from '@/app/_components/user-provider'
+import '@/app/global.css'
 import { routing } from '@/i18n/routing'
 import { getSession, isAdmin } from '@/lib/auth'
 import { Box, Flex } from '@chakra-ui/react'
@@ -143,6 +144,8 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <Flex direction="column" minH="100vh">
                   <Header />
                   <Box as="main" id="main-content" flex="1" tabIndex={-1} outline="none">
+                    {/* Matrix Rain Background */}
+                    <MainMatrix />
                     {children}
                   </Box>
                   <Footer />

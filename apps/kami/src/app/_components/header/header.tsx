@@ -14,7 +14,7 @@ export const Header = () => {
       position="sticky"
       top={0}
       zIndex={20}
-      bg={{ base: 'white/20', _dark: 'bg/75' }}
+      bg={{ base: 'white/20', _dark: 'bg/42' }}
       backdropFilter="blur(10px)"
       borderBottom="1px solid"
       borderColor={{ base: 'white/15', _dark: 'border.subtle/30' }}
