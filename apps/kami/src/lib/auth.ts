@@ -1,21 +1,22 @@
 import type { UserRole } from '@/generated/prisma'
-import { sendInvitationEmail, sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
+import { sendInvitationEmail } from '@letar/email'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
-import { genericOAuth, magicLink, organization } from 'better-auth/plugins'
+import { genericOAuth, organization } from 'better-auth/plugins'
 import { prisma } from './prisma'
 
 /**
  * Better Auth конфигурация для Kami
  *
- * Особенности:
- * - Prisma adapter для PostgreSQL
- * - OAuth: GitHub, Google, Yandex
- * - Email/password аутентификация с верификацией
- * - Magic Link для входа без пароля
- * - Роли: USER, ADMIN (массив roles)
- * - Session-based auth с cookie caching
+ * Авторизация — ТОЛЬКО через Ключницу (auth.letar.best) по OIDC.
+ * Прямые провайдеры (email/password, magic link, GitHub, Google, Facebook, VK, Yandex)
+ * — убраны из kami, все они доступны на Ключнице.
+ *
+ * Плагины:
+ * - genericOAuth / letar-auth — OIDC клиент Ключницы
+ * - organization — командные опросы и HireRequest
+ * - nextCookies — совместимость с Next.js 16 Server Actions
  */
 export const auth = betterAuth({
   // Явное указание secret (best practice)
@@ -25,186 +26,42 @@ export const auth = betterAuth({
     provider: 'postgresql',
   }),
 
-  // Base URL для генерации callback URLs (ngrok для VK, иначе localhost)
-  baseURL: process.env.NGROK_URL || process.env.BETTER_AUTH_URL || 'http://localhost:3005',
+  // Base URL для генерации callback URLs
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3005',
 
-  // Доверенные домены (для ngrok и production)
+  // Доверенные домены
   trustedOrigins: [
     'http://localhost:3005',
-    ...(process.env.NGROK_URL ? [process.env.NGROK_URL] : []),
     ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
   ],
-
-  // Email/Password auth
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
-    requireEmailVerification: true,
-  },
-
-  // Email верификация
-  emailVerification: {
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail({
-        to: user.email,
-        userName: user.name ?? undefined,
-        verificationUrl: url,
-      })
-    },
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-  },
-
-  // OAuth провайдеры
-  socialProviders: {
-    // GitHub OAuth
-    ...(process.env.AUTH_GITHUB_ID
-      && process.env.AUTH_GITHUB_SECRET && {
-      github: {
-        clientId: process.env.AUTH_GITHUB_ID,
-        clientSecret: process.env.AUTH_GITHUB_SECRET,
-      },
-    }),
-
-    // Google OAuth
-    ...(process.env.AUTH_GOOGLE_ID
-      && process.env.AUTH_GOOGLE_SECRET && {
-      google: {
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      },
-    }),
-
-    // Facebook OAuth (нативный в Better Auth)
-    ...(process.env.AUTH_FACEBOOK_ID
-      && process.env.AUTH_FACEBOOK_SECRET && {
-      facebook: {
-        clientId: process.env.AUTH_FACEBOOK_ID,
-        clientSecret: process.env.AUTH_FACEBOOK_SECRET,
-      },
-    }),
-
-    // VK (ВКонтакте) OAuth
-    ...(process.env.AUTH_VK_ID
-      && process.env.AUTH_VK_SECRET && {
-      vk: {
-        clientId: process.env.AUTH_VK_ID,
-        clientSecret: process.env.AUTH_VK_SECRET,
-        // Кастомный getUserInfo для VK API
-        getUserInfo: async (tokens) => {
-          // VK ID возвращает user_id в токене
-          const userId = (tokens.raw as { user_id?: number })?.user_id
-
-          // Получаем данные пользователя через VK API
-          const response = await fetch(
-            `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${tokens.accessToken}&v=5.131`,
-          )
-          const data = await response.json()
-          const user = data.response?.[0]
-
-          if (!user) {
-            throw new Error('VK user not found')
-          }
-
-          // VK не возвращает email через users.get, получаем из токена
-          const email = (tokens.raw as { email?: string })?.email
-
-          return {
-            user: {
-              id: String(user.id),
-              name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
-              email: email || `${user.id}@vk.com`, // Fallback если нет email
-              image: user.photo_200,
-              emailVerified: !!email,
-            },
-            data: user,
-          }
-        },
-      },
-    }),
-  },
 
   // Плагины
   plugins: [
     nextCookies(),
 
-    // Magic Link для входа без пароля
-    magicLink({
-      sendMagicLink: async ({ email, url }) => {
-        // Получаем имя пользователя из БД
-        const user = await prisma.user.findUnique({
-          where: { email },
-          select: { name: true },
-        })
-
-        await sendMagicLinkEmail({
-          to: email,
-          userName: user?.name ?? undefined,
-          magicLinkUrl: url,
-        })
-      },
-      expiresIn: 900, // 15 минут
-      disableSignUp: false, // Разрешить регистрацию через magic link
-    }),
-
-    // genericOAuth: ключница (OIDC) + Yandex
+    // Ключница (auth.letar.best) — единственный способ входа в kami
     genericOAuth({
-      config: [
-        // Ключница (auth.letar.best) — единый вход через OIDC
-        ...(process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
-          ? [
-            {
-              providerId: 'letar-auth',
-              discoveryUrl: process.env.OIDC_DISCOVERY_URL
-                || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
-              clientId: process.env.OIDC_CLIENT_ID,
-              clientSecret: process.env.OIDC_CLIENT_SECRET,
-              scopes: ['openid', 'profile', 'email'],
-              pkce: true,
-            },
-          ]
-          : []),
-        // Yandex OAuth
-        ...(process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
-          ? [
-            {
-              providerId: 'yandex',
-              clientId: process.env.AUTH_YANDEX_ID,
-              clientSecret: process.env.AUTH_YANDEX_SECRET,
-              // Явные endpoints (discoveryUrl блокируется капчей)
-              authorizationUrl: 'https://oauth.yandex.ru/authorize',
-              tokenUrl: 'https://oauth.yandex.ru/token',
-              scopes: ['login:email', 'login:info', 'login:avatar'],
-              // Кастомный getUserInfo для Yandex API
-              getUserInfo: async (tokens: { accessToken?: string }) => {
-                const response = await fetch('https://login.yandex.ru/info', {
-                  headers: {
-                    Authorization: `OAuth ${tokens.accessToken}`,
-                  },
-                })
-                const data = await response.json()
-                return {
-                  id: data.id,
-                  name: data.display_name || data.real_name || data.login,
-                  email: data.default_email,
-                  image: data.default_avatar_id
-                    ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
-                    : undefined,
-                  emailVerified: true,
-                }
-              },
-            },
-          ]
-          : []),
-      ],
+      config: process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
+        ? [
+          {
+            providerId: 'letar-auth',
+            discoveryUrl: process.env.OIDC_DISCOVERY_URL
+              || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
+            clientId: process.env.OIDC_CLIENT_ID,
+            clientSecret: process.env.OIDC_CLIENT_SECRET,
+            scopes: ['openid', 'profile', 'email'],
+            pkce: true,
+          },
+        ]
+        : [],
     }),
 
-    // Organization plugin для командных опросов
+    // Organization plugin для командных опросов и HireRequest
     organization({
-      // Любой авторизованный пользователь может создать организацию (при отправке HireRequest)
+      // Любой авторизованный пользователь может создать организацию
       allowUserToCreateOrganization: true,
 
-      // Email-приглашения
+      // Email-приглашения в команду
       sendInvitationEmail: async (data) => {
         const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3005'
         const inviteUrl = `${baseUrl}/accept-invitation/${data.id}`
@@ -217,7 +74,6 @@ export const auth = betterAuth({
         })
       },
 
-      // Callback после принятия приглашения
       onInvitationAccepted: async (data: {
         id: string
         role: string
@@ -253,50 +109,15 @@ export const auth = betterAuth({
     },
   },
 
-  // Rate limiting — защита от brute-force атак
-  // В production используем БД, в dev — memory (быстрее)
+  // Rate limiting
   rateLimit: {
     enabled: true,
-    window: 60, // Глобальное окно: 60 секунд
-    max: 100, // Глобальный лимит: 100 запросов
+    window: 60,
+    max: 100,
     storage: process.env.NODE_ENV === 'production' ? 'database' : 'memory',
     modelName: 'rateLimit',
     customRules: {
-      // Вход по email/password — строгий лимит (защита от brute-force)
-      '/sign-in/email': {
-        window: 60,
-        max: 5, // 5 попыток в минуту
-      },
-      // Остальные методы входа
-      '/sign-in/*': {
-        window: 60,
-        max: 10,
-      },
-      // Регистрация — очень строгий лимит (защита от спама)
-      '/sign-up/email': {
-        window: 300, // 5 минут
-        max: 3, // 3 попытки
-      },
-      // Magic link — строгий лимит (защита от email bombing)
-      '/magic-link/*': {
-        window: 300,
-        max: 3,
-      },
-      // Сброс пароля — строгий лимит
-      '/forget-password': {
-        window: 300,
-        max: 3,
-      },
-      '/reset-password/*': {
-        window: 60,
-        max: 5,
-      },
-      // Email верификация
-      '/verify-email': {
-        window: 60,
-        max: 10,
-      },
-      // Организации — умеренный лимит
+      // Организации
       '/organization/*': {
         window: 60,
         max: 30,
@@ -304,19 +125,17 @@ export const auth = betterAuth({
     },
   },
 
-  // Автоматическая привязка OAuth аккаунтов с тем же email
+  // Автоматическая привязка аккаунтов Ключницы с тем же email
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ['google', 'github', 'facebook', 'letar-auth'],
+      trustedProviders: ['letar-auth'],
     },
   },
 
   // Advanced настройки
   advanced: {
-    // IP address для rate limiting за reverse proxy (Nginx Proxy Manager)
     ipAddress: {
-      // Стандартные заголовки от proxy
       ipAddressHeaders: ['x-forwarded-for', 'x-real-ip', 'cf-connecting-ip'],
     },
   },
@@ -324,7 +143,6 @@ export const auth = betterAuth({
   // Страницы
   pages: {
     signIn: '/sign-in',
-    signUp: '/sign-up',
     error: '/sign-in',
   },
 })

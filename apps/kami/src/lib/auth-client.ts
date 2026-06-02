@@ -1,47 +1,34 @@
 'use client'
 
 import type { UserRole } from '@/generated/prisma'
-import { createOAuthButtons, createTypedUseSession } from '@letar/auth/client'
-import { genericOAuthClient, magicLinkClient, organizationClient } from 'better-auth/client/plugins'
+import { createTypedUseSession } from '@letar/auth/client'
+import { genericOAuthClient, organizationClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 
 /**
  * Better Auth клиент для Kami
  *
- * Используется в клиентских компонентах для:
- * - useSession() - получение текущей сессии с типизацией
- * - signIn.social() - вход через OAuth (GitHub, Google)
- * - signIn.oauth2() - вход через Yandex (genericOAuth)
- * - signIn.magicLink() - вход по magic link
- * - signOut() - выход
- * - OAuthButtons - готовые кнопки OAuth
- * - organization.* - управление организациями и командами
- *
- * Rate Limiting:
- * - Глобально обрабатывает 429 ошибки
- * - X-Retry-After header показывает время до следующего запроса
+ * Авторизация — ТОЛЬКО через Ключницу (auth.letar.best).
+ * Для входа используй signInWithLetarAuth().
  */
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_APP_URL,
-  plugins: [genericOAuthClient(), magicLinkClient(), organizationClient()],
+  plugins: [genericOAuthClient(), organizationClient()],
   fetchOptions: {
-    // Глобальная обработка rate limit ошибок
     onError: async (context) => {
       const { response } = context
       if (response.status === 429) {
         const retryAfter = response.headers.get('X-Retry-After')
         console.warn(`[Auth] Rate limit exceeded. Retry after ${retryAfter || '?'} seconds.`)
-        // Можно добавить toast уведомление или другую логику
       }
     },
   },
 })
 
-// Экспортируем хуки и методы
-export const { signIn, signOut, signUp } = authClient
+export const { signIn, signOut } = authClient
 
 /**
- * Войти через ключницу (auth.letar.best)
+ * Войти через Ключницу (auth.letar.best) — единственный способ авторизации.
  */
 export async function signInWithLetarAuth(callbackURL = '/') {
   return authClient.signIn.oauth2({
@@ -85,8 +72,3 @@ export interface SessionWithRoles {
  * Типизированный useSession с поддержкой ролей
  */
 export const useSession = createTypedUseSession<SessionWithRoles>(authClient)
-
-/**
- * OAuth кнопки для авторизации
- */
-export const OAuthButtons = createOAuthButtons(authClient)
