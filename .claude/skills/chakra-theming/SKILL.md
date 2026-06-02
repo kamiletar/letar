@@ -125,7 +125,7 @@ tag:          { closeTrigger: { _active: { transform: 'scale(0.85)' } } }
 npx @chakra-ui/cli typegen ./src/theme/index.ts
 ```
 
-## Примеры тем в проекте Lena
+## Примеры тем в проекте Letar
 
 - `apps/driving-school/src/theme/` — полная система визуальной обратной связи
 - `apps/mandala/src/app/theme.ts` — семантические токены

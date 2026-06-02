@@ -279,7 +279,7 @@ GOOGLE_CLIENT_SECRET=...
 
 ---
 
-## Паттерны проекта Lena
+## Паттерны проекта Letar
 
 ### ZenStack интеграция
 

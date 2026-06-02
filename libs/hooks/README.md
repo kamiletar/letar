@@ -1,6 +1,6 @@
 # @letar/hooks
 
-Shared React хуки для приложений Lena монорепозитория.
+Shared React хуки для приложений Letar монорепозитория.
 
 ## Установка
 

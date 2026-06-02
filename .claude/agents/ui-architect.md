@@ -50,7 +50,7 @@ model: opus
 - Color contrast (4.5:1 минимум)
 - Screen reader support
 
-## Контекст проекта Lena
+## Контекст проекта Letar
 
 ### Библиотеки
 

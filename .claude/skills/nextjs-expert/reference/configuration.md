@@ -6,7 +6,7 @@
 
 ## next.config.js
 
-### Базовая конфигурация (Lena)
+### Базовая конфигурация (Letar)
 
 ```javascript
 // next.config.js

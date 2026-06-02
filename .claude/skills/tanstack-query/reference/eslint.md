@@ -250,7 +250,7 @@ useQuery({
 
 ## Интеграция с проектом
 
-В monorepo Lena ESLint настроен в `eslint.config.js`. Добавь плагин:
+В monorepo Letar ESLint настроен в `eslint.config.js`. Добавь плагин:
 
 ```javascript
 // eslint.config.js

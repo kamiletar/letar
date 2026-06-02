@@ -148,7 +148,7 @@ npx @chakra-ui/cli typegen ./src/theme/index.ts
 - Text/Layer стилей
 - Условий
 
-## Структура темы в проекте Lena
+## Структура темы в проекте Letar
 
 ```
 apps/driving-school/src/theme/

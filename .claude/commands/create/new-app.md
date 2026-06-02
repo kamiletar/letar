@@ -313,7 +313,19 @@ nx test <name> # Тесты
 4. `scripts/sync-env-docker.sh` → массив `APPS`
 5. `scripts/pull-env-docker.sh` → `S1_APPS`/`S2_APPS` и `ALL_APPS`
 
-### 16. Настройка бэкапов (если есть БД или uploads)
+### 16. Настройка MCP postgres (если есть PostgreSQL)
+
+Чтобы Claude Code мог ходить в БД приложения напрямую, добавь postgres MCP.
+Подробная инструкция: **skill `mcp-postgres-setup`**.
+
+Быстро:
+
+1. Узнай порт локального контейнера: `docker ps --format "table {{.Names}}\t{{.Ports}}" | grep <app>`
+2. Добавь `MCP_LOCAL_URL` в `apps/<app>/.env.local`
+3. Добавь `postgres-<app>` в `.mcp.json` с указанием на pg-wrapper
+4. Зарегистрируй в `settings.local.json` (allowlist + enabledMcpjsonServers)
+
+### 17. Настройка бэкапов (если есть БД или uploads)
 
 ⚠️ **Без этого шага данные НЕ бэкапятся!** См. skill `deployment-assistant` → «Чеклист: бекапы при деплое».
 
@@ -335,3 +347,19 @@ nx test <name> # Тесты
 2. Запусти `nx typecheck:tsgo <name>` — проверь типы
 3. Запусти `nx test <name>` — проверь тесты
 4. Закоммить изменения
+
+## Деплой нового приложения
+
+Используй скилл **`/infra:deploy`** — там полный чеклист первого деплоя.
+
+Ключевые шаги перед первым деплоем:
+
+- [ ] `next.config.mjs` — добавить `output: 'standalone'`
+- [ ] Создать `Dockerfile.production` (образец: `apps/archetest/`)
+- [ ] Создать `docker-compose.production.yml`
+- [ ] Создать начальную миграцию: `nx db:migrate <name> -- --name init`
+- [ ] Добавить в `deploy-affected.sh` → `S1_APPS` или `S2_APPS`
+- [ ] Создать `.env.docker` с `DOMAIN`, `DB_PASSWORD`, `POSTGRES_PASSWORD`
+- [ ] Добавить в `scripts/sync-env-docker.sh` и `pull-env-docker.sh`
+- [ ] Зарегистрировать в Dashboard (SQL insert в `DeployedApp`)
+- [ ] Настроить бэкапы в dashboard-agent

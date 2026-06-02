@@ -53,7 +53,7 @@ nx format:write --all                # Все файлы в workspace
 nx format:write --uncommitted        # Только незакоммиченные
 ```
 
-### dprint (используется в проекте Lena)
+### dprint (используется в проекте Letar)
 
 ```bash
 nx format premium-rosstil            # target из project.json (~30x быстрее Prettier)

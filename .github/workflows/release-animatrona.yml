@@ -18,7 +18,7 @@ jobs:
       tag: ${{ steps.parse-version.outputs.tag }}
 
     steps:
-      - name: Checkout lena monorepo
+      - name: Checkout letar monorepo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -201,7 +201,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout lena monorepo
+      - name: Checkout letar monorepo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -271,7 +271,7 @@ jobs:
     runs-on: macos-14 # M1 - дешевле Intel
 
     steps:
-      - name: Checkout lena monorepo
+      - name: Checkout letar monorepo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -342,7 +342,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout lena monorepo
+      - name: Checkout letar monorepo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0

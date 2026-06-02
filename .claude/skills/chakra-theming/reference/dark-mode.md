@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
 'use client'
 
 import { useColorMode } from '@chakra-ui/react'
-// или из проекта Lena:
+// или из проекта Letar:
 // import { useColorMode } from '@letar/chakra-provider'
 
 function ThemeToggle() {
@@ -233,7 +233,7 @@ import { ColorModeScript } from '@chakra-ui/react'
 
 ---
 
-## Пример из проекта Lena
+## Пример из проекта Letar
 
 ```tsx
 // libs/chakra-provider/src/lib/use-color-mode.ts

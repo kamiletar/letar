@@ -1,6 +1,6 @@
 # Umami Analytics
 
-Self-hosted аналитика для проектов Lena.
+Self-hosted аналитика для проектов Letar.
 
 ## Конфигурация
 

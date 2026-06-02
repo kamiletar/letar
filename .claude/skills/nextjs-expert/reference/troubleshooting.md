@@ -427,7 +427,7 @@ nx run-many -t build --all --skip-nx-cache
 
 ---
 
-## Common Patterns Lena
+## Common Patterns Letar
 
 ### ZenStack типы не генерируются
 

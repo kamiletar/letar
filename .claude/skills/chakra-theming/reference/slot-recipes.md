@@ -113,7 +113,7 @@ const extendedSlots = [...cardAnatomy.keys(), 'badge', 'action']
 
 ---
 
-## Примеры из проекта Lena
+## Примеры из проекта Letar
 
 ### Menu Slot Recipe
 

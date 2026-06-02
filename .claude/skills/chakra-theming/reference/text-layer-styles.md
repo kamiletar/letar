@@ -312,7 +312,7 @@ const config = defineConfig({
 
 ---
 
-## Пример из проекта Lena
+## Пример из проекта Letar
 
 ```typescript
 // apps/driving-school/src/theme/styles/layerStyles.ts

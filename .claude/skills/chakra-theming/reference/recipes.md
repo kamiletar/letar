@@ -140,7 +140,7 @@ const Button = chakra('button', {
 
 ---
 
-## Пример из проекта Lena
+## Пример из проекта Letar
 
 ### Button Recipe (driving-school)
 

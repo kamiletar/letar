@@ -1,6 +1,6 @@
 # @letar/forms
 
-Переиспользуемая UI-библиотека компонентов форм на базе TanStack Form для монорепозитория Lena.
+Переиспользуемая UI-библиотека компонентов форм на базе TanStack Form для монорепозитория Letar.
 
 [English documentation](./README.en.md)
 
@@ -218,7 +218,7 @@ model Product {
 
 ```tsx
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
+;<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
 ```
 
 [Подробнее → docs/zenstack.md](./docs/zenstack.md)

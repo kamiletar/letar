@@ -364,7 +364,7 @@ export default async function Page() {
 
 ---
 
-## Проекты Lena
+## Проекты Letar
 
 ### premium-rosstil
 

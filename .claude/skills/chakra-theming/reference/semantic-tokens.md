@@ -204,7 +204,7 @@ semanticTokens: {
 
 ---
 
-## Пример из проекта Lena
+## Пример из проекта Letar
 
 ```typescript
 // apps/mandala/src/app/theme.ts

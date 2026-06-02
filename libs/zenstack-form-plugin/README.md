@@ -10,7 +10,7 @@ ZenStack плагин для генерации Zod схем с UI метада�
 npm install -D @letar/zenstack-form-plugin
 ```
 
-> В монорепозитории Lena плагин уже подключён — отдельная установка не требуется.
+> В монорепозитории Letar плагин уже подключён — отдельная установка не требуется.
 
 ## Конфигурация
 
@@ -23,7 +23,7 @@ plugin formSchema {
 }
 ```
 
-> В монорепозитории Lena используйте относительный путь: `provider = '../../libs/zenstack-form-plugin/dist/index.js'`
+> В монорепозитории Letar используйте относительный путь: `provider = '../../libs/zenstack-form-plugin/dist/index.js'`
 
 ### i18n (опционально)
 

@@ -528,16 +528,16 @@ export const getProducts = cache(async () => {
 
 ---
 
-## Гибридный подход (Lena)
+## Гибридный подход (Letar)
 
-В проекте Lena используется гибридный подход:
+В проекте Letar используется гибридный подход:
 
-| Сценарий                      | Подход                                 |
-| ----------------------------- | -------------------------------------- |
-| Страницы каталога             | Server Components + Prisma             |
+| Сценарий                      | Подход                        |
+| ----------------------------- | ----------------------------- |
+| Страницы каталога             | Server Components + Prisma    |
 | Формы создания/редактирования | Server Actions + @letar/forms |
-| Admin dashboard stats         | React Query с polling                  |
-| Infinite scroll               | React Query + Route Handler            |
+| Admin dashboard stats         | React Query с polling         |
+| Infinite scroll               | React Query + Route Handler   |
 
 ```typescript
 // Server Component для начальных данных

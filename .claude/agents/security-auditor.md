@@ -84,7 +84,7 @@ cat .gitignore | grep -E "\.env"
 bun audit
 ```
 
-## Контекст проекта Lena
+## Контекст проекта Letar
 
 ### ZenStack Access Control
 

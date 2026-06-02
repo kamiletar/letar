@@ -22,7 +22,7 @@ process.env.SMTP_PORT = '587'
 process.env.SMTP_USER = 'noreply@letar.best'
 process.env.SMTP_PASSWORD = smtpPassword
 process.env.SMTP_FROM_EMAIL = 'noreply@letar.best'
-process.env.SMTP_FROM_NAME = 'Lena Monorepo'
+process.env.SMTP_FROM_NAME = 'Letar Monorepo'
 process.env.BETTER_AUTH_URL = 'https://letar.best'
 
 import { sendVerificationEmail, verifyConnection } from './src/index'
