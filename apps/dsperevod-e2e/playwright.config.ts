@@ -3,7 +3,8 @@ import { nxE2EPreset } from '@nx/playwright/preset'
 import { defineConfig, devices } from '@playwright/test'
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:3000'
+// Порт dsperevod — 3019 (apps/dsperevod/.env: PORT=3019).
+const baseURL = process.env['BASE_URL'] || 'http://localhost:3019'
 
 /**
  * Read environment variables from file.
@@ -24,10 +25,12 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'bun nx run @letar/dsperevod:dev',
-    url: 'http://localhost:3000',
+    command: 'bun nx run dsperevod:dev',
+    // /sign-up — client-только страница без SSR-запросов к БД, гарантированно 200
+    url: 'http://localhost:3019/sign-up',
     reuseExistingServer: true,
     cwd: workspaceRoot,
+    timeout: 120_000,
   },
   projects: [
     {
