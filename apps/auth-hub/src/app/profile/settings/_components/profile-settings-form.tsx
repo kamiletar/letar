@@ -38,13 +38,7 @@ export function ProfileSettingsForm({ currentName }: ProfileSettingsFormProps) {
       <Stack gap={4}>
         <Field.Root>
           <Field.Label>Имя</Field.Label>
-          <Input
-            name="name"
-            defaultValue={currentName}
-            placeholder="Ваше имя"
-            maxLength={100}
-            required
-          />
+          <Input name="name" defaultValue={currentName} placeholder="Ваше имя" maxLength={100} required />
           <Field.HelperText>Отображается в профиле и приложениях</Field.HelperText>
         </Field.Root>
 

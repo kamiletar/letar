@@ -32,9 +32,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
           <Heading size="xl">Ключница</Heading>
         </HStack>
 
-        <Text color="fg.muted">
-          Единый аккаунт для всех сервисов Letar
-        </Text>
+        <Text color="fg.muted">Единый аккаунт для всех сервисов Letar</Text>
 
         <Separator />
 
@@ -44,7 +42,9 @@ export function ProfilePage({ user }: ProfilePageProps) {
             <Stack gap={5}>
               <HStack gap={4}>
                 <Avatar.Root size="xl">
-                  {user.image ? <Avatar.Image src={user.image} alt={user.name ?? ''} /> : (
+                  {user.image ? (
+                    <Avatar.Image src={user.image} alt={user.name ?? ''} />
+                  ) : (
                     <Avatar.Fallback>
                       <LuUser size={24} />
                     </Avatar.Fallback>
@@ -55,8 +55,16 @@ export function ProfilePage({ user }: ProfilePageProps) {
                   <HStack gap={2} color="fg.muted">
                     <LuMail size={14} />
                     <Text fontSize="sm">{user.email}</Text>
-                    {user.emailVerified && <Badge colorPalette="green" size="sm">подтверждён</Badge>}
-                    {!user.emailVerified && <Badge colorPalette="yellow" size="sm">не подтверждён</Badge>}
+                    {user.emailVerified && (
+                      <Badge colorPalette="green" size="sm">
+                        подтверждён
+                      </Badge>
+                    )}
+                    {!user.emailVerified && (
+                      <Badge colorPalette="yellow" size="sm">
+                        не подтверждён
+                      </Badge>
+                    )}
                   </HStack>
                 </Stack>
               </HStack>
@@ -67,7 +75,9 @@ export function ProfilePage({ user }: ProfilePageProps) {
               <Box>
                 <HStack gap={2} mb={2}>
                   <LuShield size={16} />
-                  <Text fontWeight="medium" fontSize="sm">Роли</Text>
+                  <Text fontWeight="medium" fontSize="sm">
+                    Роли
+                  </Text>
                 </HStack>
                 <HStack gap={2} flexWrap="wrap">
                   {(user.roles ?? ['USER']).map((role) => (
@@ -81,7 +91,8 @@ export function ProfilePage({ user }: ProfilePageProps) {
               {/* Дата регистрации */}
               <Box>
                 <Text fontSize="sm" color="fg.muted">
-                  Зарегистрирован: {new Date(user.createdAt).toLocaleDateString('ru-RU', {
+                  Зарегистрирован:{' '}
+                  {new Date(user.createdAt).toLocaleDateString('ru-RU', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -93,13 +104,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
         </Card.Root>
 
         {/* Кнопка выхода */}
-        <Button
-          variant="outline"
-          colorPalette="red"
-          onClick={handleSignOut}
-          loading={loggingOut}
-          w="full"
-        >
+        <Button variant="outline" colorPalette="red" onClick={handleSignOut} loading={loggingOut} w="full">
           <LuLogOut />
           Выйти
         </Button>

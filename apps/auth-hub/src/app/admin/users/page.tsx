@@ -55,17 +55,10 @@ export default async function UsersPage() {
                   <Table.Cell fontWeight="medium">{user.name}</Table.Cell>
                   <Table.Cell fontSize="sm">{user.email}</Table.Cell>
                   <Table.Cell>
-                    <RoleToggleButton
-                      userId={user.id}
-                      currentRoles={user.roles}
-                      currentUserId={session.user.id}
-                    />
+                    <RoleToggleButton userId={user.id} currentRoles={user.roles} currentUserId={session.user.id} />
                   </Table.Cell>
                   <Table.Cell>
-                    <Badge
-                      colorPalette={user.emailVerified ? 'green' : 'yellow'}
-                      size="sm"
-                    >
+                    <Badge colorPalette={user.emailVerified ? 'green' : 'yellow'} size="sm">
                       {user.emailVerified ? 'Да' : 'Нет'}
                     </Badge>
                   </Table.Cell>

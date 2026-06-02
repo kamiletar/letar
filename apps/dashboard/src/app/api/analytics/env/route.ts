@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 const UMAMI_SCRIPT_URL = 'https://stats.letar.best/script.js'
 
 /** Allow-list валидация пути для защиты от command injection */
-const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
+const ALLOWED_WORKSPACES = ['/web/letar', '/home/deploy/letar'] as const
 
 /** Выполняет команду на хосте через nsenter */
 async function runOnHost(command: string): Promise<{ stdout: string; stderr: string; code: number }> {

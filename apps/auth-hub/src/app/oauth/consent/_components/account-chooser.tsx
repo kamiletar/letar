@@ -53,7 +53,7 @@ export function AccountChooser({ user }: AccountChooserProps) {
         window.location.href = res.url
       }
     },
-    [consentCode, clientId, scope],
+    [consentCode, clientId, scope]
   )
 
   const handleContinue = useCallback(async () => {
@@ -83,12 +83,18 @@ export function AccountChooser({ user }: AccountChooserProps) {
         fetchOptions: {
           onSuccess: () => {
             const qs = new URLSearchParams()
-            if (clientId) {qs.set('client_id', clientId)}
-            if (scope) {qs.set('scope', scope)}
+            if (clientId) {
+              qs.set('client_id', clientId)
+            }
+            if (scope) {
+              qs.set('scope', scope)
+            }
             // Прокидываем все query параметры исходного OIDC запроса —
             // Better Auth их валидировал при первом authorize-вызове
             for (const [k, v] of searchParams.entries()) {
-              if (!qs.has(k)) {qs.set(k, v)}
+              if (!qs.has(k)) {
+                qs.set(k, v)
+              }
             }
             router.push(`/sign-in?${qs.toString()}`)
           },
@@ -111,7 +117,9 @@ export function AccountChooser({ user }: AccountChooserProps) {
         p={3}
         _hover={{ bg: 'bg.muted', cursor: 'pointer' }}
         onClick={() => {
-          if (!pending) {handleContinue()}
+          if (!pending) {
+            handleContinue()
+          }
         }}
         opacity={pending === 'continue' ? 0.6 : 1}
         transition="all 0.15s"

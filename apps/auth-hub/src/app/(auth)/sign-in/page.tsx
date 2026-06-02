@@ -33,11 +33,7 @@ const OIDC_COOKIE_PARAMS = [
  * в httpOnly cookie `oidc_pending`. После входа через соцсети route
  * `/auth/post-login` читает cookie и продолжает OIDC flow.
  */
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string>>
-}) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const params = await searchParams
 
   // Сохраняем OIDC-параметры в cookie если страница открыта из OIDC flow

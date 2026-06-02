@@ -43,7 +43,7 @@ async function runOnHost(command: string): Promise<{ stdout: string; stderr: str
 }
 
 // Allow-list валидация пути для защиты от command injection
-const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
+const ALLOWED_WORKSPACES = ['/web/letar', '/home/deploy/letar'] as const
 
 /**
  * POST /api/git/pull
@@ -51,7 +51,7 @@ const ALLOWED_WORKSPACES = ['/web/lena', '/home/deploy/letar'] as const
  */
 export async function POST() {
   try {
-    const workspaceDir = process.env.WORKSPACE_DIR || '/web/lena'
+    const workspaceDir = process.env.WORKSPACE_DIR || '/web/letar'
 
     // Валидация пути — защита от command injection
     if (!ALLOWED_WORKSPACES.includes(workspaceDir as (typeof ALLOWED_WORKSPACES)[number])) {
