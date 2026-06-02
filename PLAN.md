@@ -1,10 +1,8 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **Статус:** ✅ план утверждён, реализация идёт. **Сделано:** Этап 1 + код-часть Этапа 0 (сессия №1, см. ниже).
-> **➡️ Следующий старт:** **Этап 0.1 инфра-часть 🔴** — ротация 6 OIDC-секретов на s2 + обновление конфигов
-> клиентов + отзыв старых (код-часть ✅ сделана, см. сессию №2 ниже). Затем 0.2 (Maddy/fail2ban), DKIM/SPF/DMARC,
-> 0.7 canary. Требует доступа к s2/mail (§14.3) + deploy-координации. **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar
-> теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
+> **Статус:** ✅ план утверждён, реализация идёт. **Сделано:** Этап 1 + код-часть Этапа 0 (сессия №1); Этап 2 эталон aboi (сессия №5) + тираж на dsperevod (сессия №6).
+> **➡️ Следующий старт:** **Этап 2 — dsperevod ✅** завершён. Следующее: **Этап 2 → ремедиация застрявших** (п.3, разовая операция) или **Этап 3 → admin «Пользователи»** (create для aboi/kami, extend dsperevod/auth-hub). Инфра-часть 0.1 — требует s2 + deploy-координации.
+> **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
 > **Операционная сессия 2026-05-30:** разовая склейка email владельца в Ключнице **ВЫПОЛНЕНА** (§14.1);
@@ -40,6 +38,14 @@
 >   (`lib/analytics.ts`); E2E `email-verification.spec.ts` зелёный (chromium, полный флоу включая верификацию по
 >   токену). bump aboi 0.23.2→0.24.0; коммиты в submodules aboi + aboi-e2e + bump 2 SHA. Follow-up: email-уровень
 >   rate-limit ip+email; порядок `nextCookies()` (warning Better Auth — должен быть последним).
+>   **Сессия реализации №6 (2026-06-02, dsperevod submodule + letar публичное):** ✅ **Этап 2 — тираж resend на dsperevod**
+>   (по эталону aboi): миграция email на `@letar/email` (`sendVerificationEmail`/`sendPasswordResetEmail` + `reportEmailFailure`);
+>   `rateLimit /send-verification-email {60,3}` + `autoSignInAfterVerification: true`; `lib/analytics.ts` (KPI §13.9);
+>   `sign-in` перехват `EMAIL_NOT_VERIFIED` + `<ResendVerificationButton>`; `verify-email` resend-форма при ошибке токена;
+>   `next.config.mjs` `skipTrailingSlashRedirect: true` (fix: better-auth API в dev с trailingSlash: true);
+>   E2E `email-verification.spec.ts` зелёный (chromium, 3/3 passed). bump dsperevod 0.4.0→0.5.0.
+>   ✅ Создана команда `/repo` (`.claude/commands/repo.md`) — статус глобального плана из PLAN.md.
+>   Follow-up: `SMTP_FROM_EMAIL` для dsperevod (сейчас `SMTP_FROM`, инфра-задача); email-уровень rate-limit ip+email.
 
 ## Как читать документ
 
@@ -402,7 +408,9 @@ Resend-кнопка — тонкая обёртка, **принимает `authC
 > ✅ **E2E зелёный (chromium):** регистрация → тупик → resend → cooldown → верификация по токену → автологин на
 > `/profile` (`aboi-e2e/email-verification.spec.ts`). bump aboi 0.23.2→0.24.0 + CHANGELOG; коммит в 2 submodule + bump SHA.
 > ⏳ Follow-up: email-уровень rate-limit `{3600,5}` с ключом ip+email (Better Auth не умеет per-email ключ нативно).
-> Осталось по этапу: dsperevod, ремедиация бэклога застрявших (п.3).
+> ✅ **dsperevod (сессия №6, 2026-06-02):** resend на `/sign-in` + resend-форма на `/verify-email` + analytics.ts +
+> rate-limit + autoSignInAfterVerification + миграция на @letar/email + E2E зелёный. bump 0.5.0.
+> Осталось по этапу: ремедиация бэклога застрявших (п.3).
 
 1. ✅ **aboi (эталон):** `/sign-in` `EMAIL_NOT_VERIFIED` → блок + resend (email из формы); `/verify-email` error →
    resend; захват `SendEmailResult`; `rateLimit.customRules['/send-verification-email'] = { window: 60, max: 3 }`.
