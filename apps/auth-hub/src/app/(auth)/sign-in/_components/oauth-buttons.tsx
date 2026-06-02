@@ -15,5 +15,6 @@ import { OAuthButtons } from '@/lib/auth-client'
  * спецсимволов). Cookie-подход решает эту проблему.
  */
 export function AuthOAuthButtons() {
-  return <OAuthButtons providers={['google', 'github', 'vk', 'yandex']} callbackUrl="/auth/post-login" />
+  // Facebook добавлен — настроен в auth.ts с тех пор как kami перешёл на Ключницу (Этап 6)
+  return <OAuthButtons providers={['google', 'github', 'facebook', 'vk', 'yandex']} callbackUrl="/auth/post-login" />
 }
