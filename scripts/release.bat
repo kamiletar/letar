@@ -37,5 +37,5 @@ echo === Release Complete ===
 echo.
 echo Tag: animatrona-v%VERSION%
 echo GitHub Actions will build for all platforms.
-echo Track progress: https://github.com/kamiletar/lena/actions
+echo Track progress: https://github.com/kamiletar/letar/actions
 echo.
