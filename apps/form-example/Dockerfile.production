@@ -1,5 +1,5 @@
 # Dockerfile.production - для уже собранных приложений
-# Build context: workspace root (C:\web\lena)
+# Build context: workspace root (C:\web\letar)
 
 FROM node:24-alpine AS runner
 WORKDIR /app

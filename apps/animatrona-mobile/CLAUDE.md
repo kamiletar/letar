@@ -151,7 +151,7 @@ node_dir=$(dirname $(which node))           # Динамически: fnm_multis
 export PATH="$node_dir:$JAVA_HOME/bin:$PATH"
 
 # 2. Сборка JS bundle (ОБЯЗАТЕЛЬНО перед assembleDebug!)
-cd /c/web/lena/apps/animatrona-mobile
+cd /c/web/letar/apps/animatrona-mobile
 npx react-native bundle --platform android --dev false \
   --entry-file index.js \
   --bundle-output android/app/src/main/assets/index.android.bundle \

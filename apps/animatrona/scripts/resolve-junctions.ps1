@@ -1,6 +1,6 @@
 # Resolve junction links in node_modules
 param(
-    [string]$Path = "C:\web\lena\apps\animatrona\dist\win-unpacked\resources\standalone\node_modules"
+    [string]$Path = "C:\web\letar\apps\animatrona\dist\win-unpacked\resources\standalone\node_modules"
 )
 
 Set-Location $Path

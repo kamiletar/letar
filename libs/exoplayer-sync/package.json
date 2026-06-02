@@ -7,9 +7,9 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/lena-corp/lena"
+    "url": "https://github.com/Letar-corp/Letar"
   },
-  "author": "Lena Corp",
+  "author": "Letar Corp",
   "license": "MIT",
   "codegenConfig": {
     "name": "ExoPlayerSyncSpec",

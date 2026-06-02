@@ -1,30 +1,30 @@
-# Lena Monorepo
+# Letar Monorepo
 
 Монорепозиторий Nx с веб-приложениями и shared библиотеками.
 
 ## Приложения
 
-| App                                                  | Описание                        | Порт | DB Port | Стек                      |
-| ---------------------------------------------------- | ------------------------------- | ---- | ------- | ------------------------- |
-| [premium-rosstil](apps/premium-rosstil/)             | Fashion интернет-магазин        | 3000 | 5432    | Next.js, Prisma, ZenStack |
-| [imot](apps/imot/)                                   | Платформа психотерапии          | 3001 | 5433    | Next.js, Prisma, ZenStack |
-| [dashboard](apps/dashboard/)                         | Мониторинг сервера              | 3002 | 5436    | Next.js, Prisma, ZenStack |
-| [driving-school](apps/driving-school/)               | Автошкола                       | 3003 | —       | Next.js, Prisma, ZenStack |
-| [mandala](apps/mandala/)                             | Галерея мандал и магазин        | 3004 | 5434    | Next.js, Prisma, ZenStack |
-| [kami](apps/kami/)                                   | Управление контентом            | 3005 | 5437    | Next.js, Prisma, ZenStack |
-| [form-develop-app](apps/form-develop-app/)           | Песочница @letar/forms | 3006 | —       | Next.js                   |
-| [pravda](apps/pravda/)                               | Законодательство РФ             | 3007 | —       | Next.js (static)          |
-| [label-printer-desktop](apps/label-printer-desktop/) | Desktop печать этикеток         | —    | —       | Electron, SQLite          |
-| [animatrona](apps/animatrona/)                       | Конвертер видео                 | —    | —       | Electron, FFmpeg          |
-| [animatrona-landing](apps/animatrona-landing/)       | Лендинг для Animatrona          | —    | —       | Next.js (static)          |
+| App                                                  | Описание                 | Порт | DB Port | Стек                      |
+| ---------------------------------------------------- | ------------------------ | ---- | ------- | ------------------------- |
+| [premium-rosstil](apps/premium-rosstil/)             | Fashion интернет-магазин | 3000 | 5432    | Next.js, Prisma, ZenStack |
+| [imot](apps/imot/)                                   | Платформа психотерапии   | 3001 | 5433    | Next.js, Prisma, ZenStack |
+| [dashboard](apps/dashboard/)                         | Мониторинг сервера       | 3002 | 5436    | Next.js, Prisma, ZenStack |
+| [driving-school](apps/driving-school/)               | Автошкола                | 3003 | —       | Next.js, Prisma, ZenStack |
+| [mandala](apps/mandala/)                             | Галерея мандал и магазин | 3004 | 5434    | Next.js, Prisma, ZenStack |
+| [kami](apps/kami/)                                   | Управление контентом     | 3005 | 5437    | Next.js, Prisma, ZenStack |
+| [form-develop-app](apps/form-develop-app/)           | Песочница @letar/forms   | 3006 | —       | Next.js                   |
+| [pravda](apps/pravda/)                               | Законодательство РФ      | 3007 | —       | Next.js (static)          |
+| [label-printer-desktop](apps/label-printer-desktop/) | Desktop печать этикеток  | —    | —       | Electron, SQLite          |
+| [animatrona](apps/animatrona/)                       | Конвертер видео          | —    | —       | Electron, FFmpeg          |
+| [animatrona-landing](apps/animatrona-landing/)       | Лендинг для Animatrona   | —    | —       | Next.js (static)          |
 
 > **Порты PostgreSQL:** 5432 (premium-rosstil), 5433 (imot), 5434 (mandala), 5435 (umami), 5436 (dashboard), 5437 (kami)
 
 ## Библиотеки
 
-| Lib                                                      | Описание                      |
-| -------------------------------------------------------- | ----------------------------- |
-| [@letar/forms](libs/forms/)           | UI форм (TanStack Form)       |
+| Lib                                                       | Описание                      |
+| --------------------------------------------------------- | ----------------------------- |
+| [@letar/forms](libs/forms/)                               | UI форм (TanStack Form)       |
 | [@letar/chakra-provider](libs/chakra-provider/)           | Провайдер Chakra UI           |
 | [@letar/ui](libs/ui/)                                     | Shared UI компоненты          |
 | [@letar/admin-ui](libs/admin-ui/)                         | UI для админ-панелей          |
@@ -45,7 +45,7 @@
 ```bash
 # Клонирование и настройка
 git clone <repo>
-cd lena
+cd Letar
 bun install
 git config core.hooksPath .githooks
 

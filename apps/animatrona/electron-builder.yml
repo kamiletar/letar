@@ -3,7 +3,7 @@
 
 appId: com.letar.animatrona
 productName: Animatrona
-copyright: Copyright 2025 Lena
+copyright: Copyright 2025 Letar
 
 # Release notes — отображаются в диалоге обновления
 releaseInfo:
@@ -55,12 +55,12 @@ extraMetadata:
 asar: true
 # Распаковываем native-модули и WASM — они не могут читаться из ASAR
 asarUnpack:
-  - "**/*.node"
-  - "**/*.wasm"
-  - "**/ntsuspend/**"
-  - "**/libsql/**"
-  - "**/@libsql/**"
-  - "**/fts5-sql-bundle/dist/**"
+  - '**/*.node'
+  - '**/*.wasm'
+  - '**/ntsuspend/**'
+  - '**/libsql/**'
+  - '**/@libsql/**'
+  - '**/fts5-sql-bundle/dist/**'
 
 # Windows конфигурация
 win:
