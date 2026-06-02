@@ -94,7 +94,7 @@ function getTransporter(config?: EmailConfig): Transporter {
     // Maddy SMTP для продакшена
     if (!cfg.user || !cfg.password) {
       throw new Error(
-        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.'
+        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.',
       )
     }
 
@@ -106,6 +106,11 @@ function getTransporter(config?: EmailConfig): Transporter {
         user: cfg.user,
         pass: cfg.password,
       },
+      // Быстрый fail при недоступном SMTP — без таймаутов nodemailer может висеть до 2 минут,
+      // блокируя весь sign-up запрос и вызывая бесконечный спиннер на клиенте.
+      connectionTimeout: 10_000,
+      socketTimeout: 15_000,
+      greetingTimeout: 5_000,
     })
     // eslint-disable-next-line no-console -- информационное сообщение о SMTP сервере
     console.log(`[Email] Using SMTP server: ${cfg.host}:${cfg.port}`)
