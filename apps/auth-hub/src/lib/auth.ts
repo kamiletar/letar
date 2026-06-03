@@ -311,6 +311,24 @@ export const auth = betterAuth({
           ],
           skipConsent: false,
         },
+        {
+          clientId: 'studio-prod',
+          clientSecret: requireOidcSecret('OIDC_STUDIO_SECRET'),
+          name: 'Studio Letar',
+          icon: undefined,
+          type: 'web',
+          disabled: false,
+          metadata: {},
+          redirectUrls: [
+            'https://studio.letar.best/api/auth/oauth2/callback/letar-auth',
+            'https://studio.letar.best/sign-in',
+            // dev-локалка ходит в прод-Ключницу
+            'http://localhost:3020/api/auth/oauth2/callback/letar-auth',
+            'http://localhost:3020/sign-in',
+          ],
+          // владелец и клиенты не должны видеть экран согласия
+          skipConsent: true,
+        },
       ],
     }),
   ],
