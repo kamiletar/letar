@@ -145,6 +145,17 @@
         "technologies": ["dprint"]
       }
     },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run prisma/seed.ts",
+        "cwd": "apps/auth-hub"
+      },
+      "metadata": {
+        "description": "Seed OIDC clients into oauthApplication table",
+        "technologies": ["prisma"]
+      }
+    },
     "format:check": {
       "executor": "nx:run-commands",
       "options": {

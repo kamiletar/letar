@@ -17,19 +17,6 @@ import { prisma } from './prisma'
  * - OIDC Provider — выдаёт токены для клиентских приложений
  */
 
-/**
- * Fail-fast чтение OIDC client secret из окружения.
- * Секреты вынесены из исходного кода (публичное дерево letar) — Этап 0.1 PLAN.md.
- * dev → apps/auth-hub/.env.local, prod → .env.docker на сервере.
- */
-function requireOidcSecret(name: string): string {
-  const value = process.env[name]
-  if (!value) {
-    throw new Error(`[auth-hub] Не задан OIDC-секрет ${name} — проверь .env.local (dev) / .env.docker (prod)`)
-  }
-  return value
-}
-
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
 
@@ -195,7 +182,9 @@ export const auth = betterAuth({
         : [],
     }),
 
-    // OIDC Provider — ключница выдаёт токены клиентским приложениям
+    // OIDC Provider — ключница выдаёт токены клиентским приложениям.
+    // Клиенты хранятся в таблице oauthApplication (БД), не в коде.
+    // Для добавления/изменения клиента: nx run auth-hub:db:seed (или через /admin/clients).
     oidcProvider({
       loginPage: '/sign-in',
       consentPage: '/oauth/consent',
@@ -210,126 +199,6 @@ export const auth = betterAuth({
 
       // Поддерживаемые scopes
       scopes: ['openid', 'profile', 'email', 'offline_access'],
-
-      // Доверенные клиенты — пропускают экран согласия
-      trustedClients: [
-        {
-          clientId: 'archetest-prod',
-          clientSecret: requireOidcSecret('OIDC_ARCHETEST_SECRET'),
-          name: 'Архетест',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://archetest.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri для RP-Initiated Logout (prod + dev)
-            'https://archetest.letar.best/sign-in',
-            'http://localhost:3012/sign-in',
-          ],
-          // skipConsent: false — показываем account chooser для смены аккаунта
-          skipConsent: false,
-        },
-        {
-          clientId: 'time-prod',
-          clientSecret: requireOidcSecret('OIDC_TIME_SECRET'),
-          name: 'Unix Time',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://time.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri (prod + dev)
-            'https://time.letar.best/',
-            'http://localhost:3013/',
-          ],
-          skipConsent: false,
-        },
-        {
-          clientId: 'grandslamcup-prod',
-          clientSecret: requireOidcSecret('OIDC_GRANDSLAMCUP_SECRET'),
-          name: 'Grand Slam Cup',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://grandslamcup.letar.best/api/auth/oauth2/callback/letar-auth',
-            'https://gsc-test.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri (prod + dev)
-            'https://grandslamcup.letar.best/sign-in',
-            'https://gsc-test.letar.best/sign-in',
-            'http://localhost:3016/sign-in',
-          ],
-          skipConsent: false,
-        },
-        {
-          clientId: 'kami-prod',
-          clientSecret: requireOidcSecret('OIDC_KAMI_SECRET'),
-          name: 'Ками',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://kami.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri (prod + dev)
-            'https://kami.letar.best/sign-in',
-            'http://localhost:3005/sign-in',
-          ],
-          skipConsent: false,
-        },
-        {
-          clientId: 'animatrona-tracker-prod',
-          clientSecret: requireOidcSecret('OIDC_ANIMATRONA_TRACKER_SECRET'),
-          name: 'Animatrona Tracker',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://animatrona-tracker.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri (prod + dev)
-            'https://animatrona-tracker.letar.best/sign-in',
-            'http://localhost:3010/sign-in',
-          ],
-          skipConsent: false,
-        },
-        {
-          clientId: 'dashboard-prod',
-          clientSecret: requireOidcSecret('OIDC_DASHBOARD_SECRET'),
-          name: 'Dashboard',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://dash.letar.best/api/auth/oauth2/callback/letar-auth',
-            // post_logout_redirect_uri (prod только — dashboard нет dev окружения)
-            'https://dash.letar.best/auth/signin',
-          ],
-          skipConsent: false,
-        },
-        {
-          clientId: 'studio-prod',
-          clientSecret: requireOidcSecret('OIDC_STUDIO_SECRET'),
-          name: 'Studio Letar',
-          icon: undefined,
-          type: 'web',
-          disabled: false,
-          metadata: {},
-          redirectUrls: [
-            'https://studio.letar.best/api/auth/oauth2/callback/letar-auth',
-            'https://studio.letar.best/sign-in',
-            // dev-локалка ходит в прод-Ключницу
-            'http://localhost:3020/api/auth/oauth2/callback/letar-auth',
-            'http://localhost:3020/sign-in',
-          ],
-          // владелец и клиенты не должны видеть экран согласия
-          skipConsent: true,
-        },
-      ],
     }),
   ],
 
