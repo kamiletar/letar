@@ -98,19 +98,19 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
   const discoveryUrl = oidc.discoveryUrl ?? LETAR_AUTH_DISCOVERY_URL
 
   const oidcPlugin = genericOAuth({
-    config:
-      oidc.clientId && oidc.clientSecret
-        ? [
-            {
-              providerId: 'letar-auth',
-              discoveryUrl,
-              clientId: oidc.clientId,
-              clientSecret: oidc.clientSecret,
-              scopes: ['openid', 'profile', 'email'],
-              pkce: true,
-            },
-          ]
-        : [],
+    config: oidc.clientId && oidc.clientSecret
+      ? [
+        {
+          providerId: 'letar-auth',
+          discoveryUrl,
+          clientId: oidc.clientId,
+          clientSecret: oidc.clientSecret,
+          // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
+          scopes: ['openid', 'profile', 'email', 'offline_access'],
+          pkce: true,
+        },
+      ]
+      : [],
   })
 
   return betterAuth({
@@ -160,13 +160,13 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
  * ```
  */
 export function createAuth<TProfile extends StandaloneAuthProfile>(
-  profile: TProfile
+  profile: TProfile,
 ): ReturnType<typeof buildStandaloneAuth<TProfile>>
 export function createAuth<TProfile extends HubClientAuthProfile>(
-  profile: TProfile
+  profile: TProfile,
 ): ReturnType<typeof buildHubClientAuth<TProfile>>
 export function createAuth<TProfile extends HubProviderAuthProfile>(
-  profile: TProfile
+  profile: TProfile,
 ): ReturnType<typeof buildStandaloneAuth<TProfile>>
 export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
   switch (profile.mode) {

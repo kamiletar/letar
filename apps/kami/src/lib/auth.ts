@@ -54,7 +54,8 @@ export const auth = betterAuth({
               || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
             clientId: process.env.OIDC_CLIENT_ID,
             clientSecret: process.env.OIDC_CLIENT_SECRET,
-            scopes: ['openid', 'profile', 'email'],
+            // offline_access — получаем refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
+            scopes: ['openid', 'profile', 'email', 'offline_access'],
             pkce: true,
           },
         ]
