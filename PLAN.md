@@ -50,7 +50,16 @@
 > register-form → редирект на verify-pin; signin EMAIL_NOT_VERIFIED → resend + редирект;
 > rate limit `/send-verification-email {60,3}`; tsconfig paths + references для `@letar/pin-auth`.
 > bump 0.74.0→0.75.0; коммит `7b0fcda` + bump SHA `7b67109`. **Этап 5 — ПОЛНОСТЬЮ завершён.**
-> **➡️ Следующий старт:** **Этап 6** (kami hub-client на фабрике `createAuth({ mode: 'hub-client' })`).
+> **Сессия №18 (2026-06-05, инфра + Этап 6 ✅):** ✅ **Redis** — `infra/redis/docker-compose.production.yml`
+> (Redis 7-alpine, 256mb LRU, premium-network); `createRedisStorage(url)` в `@letar/auth/server`;
+> auth-hub + kami → `secondaryStorage` + `rateLimit.storage='secondary-storage'`; задеплоено BlackCove.
+> ✅ **§13.7** — `offline_access` scope добавлен в kami + фабрику (проактивно для refresh_token).
+> ✅ **0.4** — решение принято: SOPS + age (self-hosted, KeePassXC, без нового сервиса).
+> ✅ **0.7 canary** — `infra/canary/canary.ts` (SMTP→Maddy, IMAP→Яндекс kaspergreen@yandex.ru);
+> cron каждые 15 мин через `docker compose run`; запрос деплоя у BlackCove.
+> ✅ **Этап 6** — kami/auth.ts мигрирован на `createAuth({ mode: 'hub-client' })` (241→125 строк);
+> фабрика расширена: `rateLimit`, `account`, `secondaryStorage` для hub-client; деплой запрошен.
+> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -641,6 +650,21 @@ interface AuthProfile {
   нужен ли `offline_access` scope и явный refresh (§13.7).
 - Завершить перенос данных пета kami со старых локальных `user.id` на аккаунт Ключницы (§14.1 / Этап 8.5).
 - **Зависимости:** Этап **1.5** (фабрика + эталон hub-client); Этап 1.
+
+**Реализация (2026-06-05, сессия №18):**
+
+- ✅ **§13.7 OIDC refresh** — исследован: явный refresh не нужен (BA сессия 7 дней независима от OIDC access token);
+  добавлен `offline_access` scope в kami + фабрику `buildHubClientAuth` (проактивно, для будущих API-вызовов к Ключнице). Коммит `93f713e`.
+- ✅ **Фабрика расширена** — `HubClientAuthProfile`: `rateLimit` (storage + customRules), `account` (accountLinking);
+  `AuthProfileBase`: `secondaryStorage`. Коммит `3649f19`.
+- ✅ **kami/auth.ts мигрирован** — 241→125 строк; `createAuth({ mode: 'hub-client' })`; `organization` plugin,
+  `secondaryStorage` Redis, `rateLimit`, `account.accountLinking`; `getSession/getCurrentUser` через `createSessionHelpers`;
+  `hasRole` с DB-фолбэком сохранён (cookieCache не включает additionalFields). Коммит `3649f19`.
+- ⏳ **Деплой kami** — запрошен у BlackCove (коммит `3649f19`).
+- ⏳ **Перенос данных пета** — старые локальные `user.id` → аккаунт Ключницы (§14.1/Этап 8.5).
+- ⏳ **Проверка OIDC refresh на проде** — убедиться что refresh_token сохраняется в `account` после первого входа.
+
+**➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
 
 ### Этап 6.5 — Passkeys / WebAuthn (§13.6) — решено: делаем
 
