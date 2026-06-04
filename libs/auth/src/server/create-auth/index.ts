@@ -116,6 +116,7 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
   return betterAuth({
     secret: process.env.BETTER_AUTH_SECRET,
     ...(profile.database && { database: profile.database }),
+    ...(profile.secondaryStorage && { secondaryStorage: profile.secondaryStorage }),
     baseURL: profile.baseURL,
     trustedOrigins: profile.trustedOrigins,
     user: profile.user,
@@ -123,6 +124,17 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
     plugins: [nextCookies(), oidcPlugin, ...(profile.plugins ?? [])],
     pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
+    ...(profile.rateLimit && {
+      rateLimit: {
+        enabled: true,
+        window: 60,
+        max: 100,
+        storage: profile.rateLimit.storage ?? 'memory',
+        modelName: 'rateLimit',
+        customRules: profile.rateLimit.customRules,
+      },
+    }),
+    ...(profile.account && { account: profile.account }),
   })
 }
 

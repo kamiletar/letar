@@ -46,6 +46,11 @@ interface AuthProfileBase {
   /** Дополнительные плагины поверх стандартных для режима */
   plugins?: NonNullable<BetterAuthOptions['plugins']>
   pages?: AuthPages
+  /**
+   * Redis или другой secondaryStorage — для rate-limit и сессионного кэша.
+   * Создаётся через createRedisStorage(url) из @letar/auth/server.
+   */
+  secondaryStorage?: BetterAuthOptions['secondaryStorage']
 }
 
 /** standalone — локальная авторизация (email/password + верификация) */
@@ -64,6 +69,18 @@ export interface HubClientAuthProfile extends AuthProfileBase {
   /** Опционально: time не имеет локальной БД */
   database?: BetterAuthOptions['database']
   oidc: HubClientOidcConfig
+  /** Rate-limit — опционально; без этого поля rate-limit отключён в hub-client */
+  rateLimit?: {
+    storage?: 'memory' | 'database' | 'secondary-storage'
+    customRules?: Record<string, { window: number; max: number }>
+  }
+  /** Привязка аккаунтов по email от доверенных провайдеров */
+  account?: {
+    accountLinking?: {
+      enabled?: boolean
+      trustedProviders?: string[]
+    }
+  }
 }
 
 /**
