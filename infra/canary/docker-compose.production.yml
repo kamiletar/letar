@@ -1,0 +1,36 @@
+services:
+  canary:
+    image: oven/bun:1-alpine
+    container_name: letar-canary
+    restart: 'no'
+    working_dir: /app
+    # Cron запускает этот контейнер через docker compose run
+    # Пример crontab (на хосте):
+    #   */15 * * * * cd /home/deploy/letar/infra/canary && docker compose -f docker-compose.production.yml run --rm canary
+    command: bun run /app/infra/canary/canary.ts
+    volumes:
+      - /home/deploy/letar:/app:ro
+    environment:
+      # SMTP — Maddy (отправка)
+      SMTP_HOST: ${SMTP_HOST:-mail.letar.best}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-noreply@letar.best}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-canary@letar.best}
+      # IMAP — Яндекс (проверка доставки)
+      CANARY_TO: ${CANARY_TO:-kaspergreen@yandex.ru}
+      CANARY_IMAP_HOST: ${CANARY_IMAP_HOST:-imap.yandex.ru}
+      CANARY_IMAP_USER: ${CANARY_IMAP_USER:-kaspergreen@yandex.ru}
+      CANARY_IMAP_PASSWORD: ${CANARY_IMAP_PASSWORD}
+      # Таймауты
+      CANARY_TIMEOUT_MS: ${CANARY_TIMEOUT_MS:-90000}
+      CANARY_POLL_INTERVAL_MS: ${CANARY_POLL_INTERVAL_MS:-5000}
+      # Алерты (Telegram)
+      TELEGRAM_ALERT_BOT_TOKEN: ${TELEGRAM_ALERT_BOT_TOKEN}
+      TELEGRAM_ALERT_CHAT_ID: ${TELEGRAM_ALERT_CHAT_ID}
+    networks:
+      - premium-network
+
+networks:
+  premium-network:
+    external: true
