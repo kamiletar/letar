@@ -1,12 +1,12 @@
 /**
  * Этап 8.5 — Перенос данных владельца в kami
  *
- * Переносит данные со старого локального аккаунта (letarkami@gmail.com)
- * на новый аккаунт Ключницы (kami@letar.best).
+ * Два старых аккаунта владельца → новый аккаунт Ключницы (kami@letar.best):
+ *   - letarkami@gmail.com  → данные (4 AudioFile) + роли ADMIN
+ *   - kaspergreen@gmail.com → данных нет, просто удаляем
  *
  * ПЕРЕД запуском:
- *   1. Владелец должен войти в kami через Ключницу хотя бы раз
- *      → kami.letar.best → «Войти» → auth.letar.best → новый User создан
+ *   1. Войти в kami.letar.best через Ключницу → User(kami@letar.best) создан
  *   2. Сделать бэкап БД kami
  *
  * Запуск на s2:
@@ -20,7 +20,7 @@
 
 import { PrismaClient } from '../../apps/kami/src/generated/prisma'
 
-const OLD_EMAIL = 'letarkami@gmail.com'
+const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
 const NEW_EMAIL = 'kami@letar.best'
 const DRY_RUN = process.env.DRY_RUN === '1'
 
@@ -28,9 +28,21 @@ const prisma = new PrismaClient()
 
 async function main() {
   console.log(`[kami-migration] DRY_RUN=${DRY_RUN}`)
+  console.log(`[kami-migration] Старые аккаунты: ${OLD_EMAILS.join(', ')}`)
+  console.log(`[kami-migration] Новый аккаунт:   ${NEW_EMAIL}\n`)
 
-  const oldUser = await prisma.user.findUnique({
-    where: { email: OLD_EMAIL },
+  const newUser = await prisma.user.findUnique({ where: { email: NEW_EMAIL } })
+  if (!newUser) {
+    console.error(
+      `❌ Пользователь ${NEW_EMAIL} не найден!\n`
+        + `   Войди в kami.letar.best через Ключницу и повтори.`,
+    )
+    process.exit(1)
+  }
+  console.log(`Новый: ${newUser.id} (${newUser.email}) roles=${newUser.roles}`)
+
+  const oldUsers = await prisma.user.findMany({
+    where: { email: { in: OLD_EMAILS } },
     include: {
       uploadedAudio: { select: { id: true, title: true } },
       uploadedImages: { select: { id: true, path: true } },
@@ -39,29 +51,18 @@ async function main() {
     },
   })
 
-  if (!oldUser) {
-    console.log(`[kami-migration] Старый пользователь ${OLD_EMAIL} не найден — уже мигрирован или не существует.`)
+  if (oldUsers.length === 0) {
+    console.log('✅ Старые пользователи не найдены — миграция уже выполнена.')
     process.exit(0)
   }
 
-  const newUser = await prisma.user.findUnique({ where: { email: NEW_EMAIL } })
-
-  if (!newUser) {
-    console.error(
-      `[kami-migration] ❌ Новый пользователь ${NEW_EMAIL} не найден!\n`
-        + `  Войди в kami.letar.best через Ключницу и повтори.`,
+  for (const u of oldUsers) {
+    console.log(`\nСтарый: ${u.id} (${u.email}) roles=${u.roles}`)
+    console.log(
+      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`,
     )
-    process.exit(1)
+    u.uploadedAudio.forEach((a) => console.log(`    🎵 ${a.title}`))
   }
-
-  console.log(`\nСтарый: ${oldUser.id} (${oldUser.email}) roles=${oldUser.roles}`)
-  console.log(`Новый:  ${newUser.id} (${newUser.email}) roles=${newUser.roles}`)
-  console.log('\nДанные для переноса:')
-  console.log(`  AudioFile:    ${oldUser.uploadedAudio.length}`)
-  console.log(`  Image:        ${oldUser.uploadedImages.length}`)
-  console.log(`  BlogComment:  ${oldUser.blogComments.length}`)
-  console.log(`  Member:       ${oldUser.members.length}`)
-  oldUser.uploadedAudio.forEach((a) => console.log(`    🎵 ${a.title}`))
 
   if (DRY_RUN) {
     console.log('\n[dry-run] Изменения не применены. Убери DRY_RUN=1 для реального запуска.')
@@ -71,71 +72,76 @@ async function main() {
   console.log('\nНачинаю миграцию...')
 
   await prisma.$transaction(async (tx) => {
-    // 1. Переносим AudioFile
-    if (oldUser.uploadedAudio.length > 0) {
-      const r = await tx.audioFile.updateMany({
-        where: { uploadedById: oldUser.id },
-        data: { uploadedById: newUser.id },
-      })
-      console.log(`  ✅ AudioFile перенесено: ${r.count}`)
-    }
+    let needsAdmin = !newUser.roles.includes('ADMIN')
 
-    // 2. Переносим Image
-    if (oldUser.uploadedImages.length > 0) {
-      const r = await tx.image.updateMany({
-        where: { uploadedById: oldUser.id },
-        data: { uploadedById: newUser.id },
-      })
-      console.log(`  ✅ Image перенесено: ${r.count}`)
-    }
-
-    // 3. Переносим BlogComment
-    if (oldUser.blogComments.length > 0) {
-      const r = await tx.blogComment.updateMany({
-        where: { userId: oldUser.id },
-        data: { userId: newUser.id },
-      })
-      console.log(`  ✅ BlogComment перенесено: ${r.count}`)
-    }
-
-    // 4. Переносим Member (если нет конфликта userId+organizationId)
-    for (const m of oldUser.members) {
-      const exists = await tx.member.findUnique({
-        where: { userId_organizationId: { userId: newUser.id, organizationId: m.organizationId } },
-      })
-      if (exists) {
-        await tx.member.delete({ where: { id: m.id } })
-        console.log(`  ⚠️  Member org=${m.organizationId}: дубль — удалён старый`)
-      } else {
-        await tx.member.update({ where: { id: m.id }, data: { userId: newUser.id } })
-        console.log(`  ✅ Member перенесён: org=${m.organizationId}`)
+    for (const oldUser of oldUsers) {
+      // Переносим AudioFile
+      if (oldUser.uploadedAudio.length > 0) {
+        const r = await tx.audioFile.updateMany({
+          where: { uploadedById: oldUser.id },
+          data: { uploadedById: newUser.id },
+        })
+        console.log(`  ✅ AudioFile перенесено: ${r.count} (из ${oldUser.email})`)
       }
+
+      // Переносим Image
+      if (oldUser.uploadedImages.length > 0) {
+        const r = await tx.image.updateMany({
+          where: { uploadedById: oldUser.id },
+          data: { uploadedById: newUser.id },
+        })
+        console.log(`  ✅ Image перенесено: ${r.count} (из ${oldUser.email})`)
+      }
+
+      // Переносим BlogComment
+      if (oldUser.blogComments.length > 0) {
+        const r = await tx.blogComment.updateMany({
+          where: { userId: oldUser.id },
+          data: { userId: newUser.id },
+        })
+        console.log(`  ✅ BlogComment перенесено: ${r.count} (из ${oldUser.email})`)
+      }
+
+      // Переносим Member (проверяем дубли)
+      for (const m of oldUser.members) {
+        const exists = await tx.member.findUnique({
+          where: { userId_organizationId: { userId: newUser.id, organizationId: m.organizationId } },
+        })
+        if (exists) {
+          await tx.member.delete({ where: { id: m.id } })
+          console.log(`  ⚠️  Member org=${m.organizationId}: дубль — удалён старый`)
+        } else {
+          await tx.member.update({ where: { id: m.id }, data: { userId: newUser.id } })
+          console.log(`  ✅ Member перенесён: org=${m.organizationId}`)
+        }
+      }
+
+      // Если старый был ADMIN — новый тоже должен быть
+      if (oldUser.roles.includes('ADMIN')) {
+        needsAdmin = true
+      }
+
+      // Удаляем старого пользователя (Account/Session каскадом)
+      await tx.user.delete({ where: { id: oldUser.id } })
+      console.log(`  ✅ Удалён: ${oldUser.email} (Account/Session каскадом)`)
     }
 
-    // 5. Назначаем ADMIN новому пользователю
-    const needsAdmin = !newUser.roles.includes('ADMIN')
+    // Назначаем ADMIN
     if (needsAdmin) {
       await tx.user.update({
         where: { id: newUser.id },
         data: { roles: ['USER', 'ADMIN'] },
       })
       console.log(`  ✅ Роли обновлены: {USER, ADMIN}`)
-    } else {
-      console.log(`  ℹ️  Роль ADMIN уже есть`)
     }
-
-    // 6. Удаляем старого пользователя (Account/Session каскадом)
-    await tx.user.delete({ where: { id: oldUser.id } })
-    console.log(`  ✅ Старый пользователь ${oldUser.email} удалён (Account/Session каскадом)`)
   })
 
-  console.log('\n[kami-migration] ✅ Миграция завершена успешно.')
-  console.log(`  Новый аккаунт: ${newUser.id} (${newUser.email})`)
+  console.log(`\n✅ Готово. Новый аккаунт: ${newUser.id} (${NEW_EMAIL})`)
 }
 
 main()
   .catch((e) => {
-    console.error('[kami-migration] ❌ Ошибка:', e)
+    console.error('❌ Ошибка:', e)
     process.exit(1)
   })
   .finally(() => prisma.$disconnect())
