@@ -46,6 +46,13 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "dependsOn": ["oxlint"]
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/auth/vitest.config.ts"
+      }
     }
   }
 }

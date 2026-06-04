@@ -36,6 +36,18 @@ export { createSessionHelpers, type AuthInstance } from './session'
 // Factories
 export { createLogoutAction, type LogoutActionOptions } from './factories'
 
+// Auth factory (Этап 1.5)
+export { createAuth } from './create-auth'
+export type {
+  AuthProfile,
+  HubClientAuthProfile,
+  HubClientOidcConfig,
+  HubProviderAuthProfile,
+  SendEmailResult,
+  StandaloneAuthProfile,
+  StandaloneEmailCallbacks,
+} from './create-auth/types'
+
 // Connected Accounts
 export {
   createUnlinkAccountAction,
