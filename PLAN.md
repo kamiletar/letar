@@ -25,7 +25,16 @@
 > для s2-only apps. Деплой выполнен BlackCove (сессия №14 продолжение): s2 — nginx backup 8 KB ✅;
 > s1 — remote lena→letar исправлен, контейнер поднят, nginx backup 7.9 MB ✅.
 > **Этап 0.3 — ПОЛНОСТЬЮ закрыт.**
-> **➡️ Следующий старт:** **Этап 4** (premium-rosstil миграция на Better Auth).
+> **Сессия №15 (2026-06-04, Этап 4 — шаги 1–2):** разведка premium-rosstil (schema.zmodel, auth.ts,
+> register-form, signin-form, auth-client). ✅ **Шаг 1:** `register-form.tsx` — заменить
+> `fetch('/api/auth/register')` на `authClient.signUp.email({ name, email, password })`;
+> удалён `/api/auth/register/route.ts`. ✅ **Шаг 2:** `signin-form.tsx` resend —
+> `fetch('/api/auth/resend-verification')` → `authClient.sendVerificationEmail()`; удалён
+> `/api/auth/resend-verification/route.ts`. Коммит в submodule `4d389d8` + bump SHA `20af8d5`.
+> **Осталось по Этапу 4:** шаг 3 (forgot-password: `request-reset`/`reset-password` роуты → authClient
+> методы); шаг 4 (удалить `lib/tokens.ts` + `lib/rate-limit.ts`); шаг 5 (DB migration: убрать
+> `Verification.type`, дропнуть `LoginAttempt` — бэкап prod обязателен); шаг 6 (resend UI в профиле).
+> **➡️ Следующий старт:** **Этап 4 шаг 3** (premium-rosstil forgot-password → Better Auth).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -585,12 +594,17 @@ interface AuthProfile {
 - Server actions под `requireAdmin`, меняют **только `emailVerified`**; DB-клиент по паттерну приложения (§9-D7). ✅ enhanced Prisma (dsperevod, premium) — политики `@@allow('all', auth().role == ADMIN)` разрешают обновление.
 - **Зависимости:** частично Этап 1; можно параллельно с Этапом 2.
 
-### Этап 4 — premium-rosstil: миграция на Better Auth (§9-D4 = «мигрировать»)
+### Этап 4 — premium-rosstil: миграция на Better Auth (§9-D4 = «мигрировать») ⏳ В РАБОТЕ (сессия №15)
 
-- `/api/auth/register` → `signUp.email`; resend → shared; кастомный verify-email → встроенный; удалить `tokens.ts`.
-- Миграция схемы (убрать `Verification.type`); rate-limit на Better Auth. `requireEmailVerification` **не включаем**
-  (§9-D3); resend — баннер в профиле + после регистрации + verify-email error (не на sign-in). Пароли совместимы (bcrypt).
-- **Зависимости:** Этапы 1–2.
+- ✅ **Шаг 1 (сессия №15):** `register-form.tsx` — `fetch('/api/auth/register')` → `authClient.signUp.email()`;
+  удалён `/api/auth/register/route.ts`. Регистрация создаёт User+Account через BA нативно, bcrypt совместим.
+- ✅ **Шаг 2 (сессия №15):** `signin-form.tsx` resend → `authClient.sendVerificationEmail()`; удалён `/api/auth/resend-verification/route.ts`.
+- ⏳ **Шаг 3:** forgot-password: `request-reset` + `reset-password` роуты → `authClient.forgetPassword()` / `authClient.resetPassword()` (callback `sendResetPassword` уже в `auth.ts`).
+- ⏳ **Шаг 4:** удалить `lib/tokens.ts` + `lib/rate-limit.ts` (после замены всех потребителей).
+- ⏳ **Шаг 5:** DB migration — убрать `Verification.type: String`, дропнуть модель `LoginAttempt`; `nx db:migrate premium-rosstil -- --name remove-custom-auth-fields`. **Бэкап prod обязателен.**
+- ⏳ **Шаг 6:** resend UI — баннер в профиле + на `/verify-email` error (по эталону dsperevod; не на sign-in).
+- `requireEmailVerification` **не включаем** (§9-D3). Пароли совместимы (bcrypt, migrate не нужна).
+- **Зависимости:** Этапы 1–2 ✅.
 
 ### Этап 5 — Богатый pin-auth флоу (коды+ссылки+cross-tab) — объём §9-D1
 
