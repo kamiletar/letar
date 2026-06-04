@@ -292,8 +292,8 @@ tail -f /var/lib/resilio-sync/sync.log  # Детальный лог
 # Запуск вручную
 ssh root@mail.letar.best "bash /opt/maddy/backup.sh"
 
-# Просмотр бэкапов
-ssh root@mail.letar.best "ls -lh /root/backups/maddy/"
+# Просмотр бэкапов (на s2, уже в Resilio)
+ssh root@s2.letar.best "ls -lh /home/deploy/letar/backups/maddy/"
 
 # Лог
 ssh root@mail.letar.best "tail -20 /var/log/maddy-backup.log"
@@ -301,7 +301,14 @@ ssh root@mail.letar.best "tail -20 /var/log/maddy-backup.log"
 
 Результат: `/root/backups/maddy/maddy_YYYY-MM-DD.tar.gz` (~16 KB), ротация 14 дней.
 
-> ⚠️ Бэкап хранится **только на mail сервере** — single point of failure. В будущем: rsync на s2 или отдельное хранилище.
+### Цепочка хранения
+
+```
+mail.letar.best          s2.letar.best                    Windows / pinner2
+/root/backups/maddy/ ──rsync──▶ /home/deploy/letar/backups/maddy/ ──Resilio──▶ C:\BackupSync\lena\s2\backups\maddy\
+```
+
+SSH-ключ для rsync: `root@mail` → `deploy@s2` (`/root/.ssh/id_ed25519`, добавлен в `~deploy/.ssh/authorized_keys` на s2).
 
 ---
 

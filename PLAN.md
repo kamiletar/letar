@@ -407,7 +407,7 @@ interface AuthProfile {
 - ✅ **Конфиги Maddy** (2026-06-04): `/opt/maddy/backup.sh` тарует `maddy.conf` + `docker-compose.yml` +
   `credentials.db` + `aliases` + `dkim_keys/` → `/root/backups/maddy/maddy_YYYY-MM-DD.tar.gz`;
   cron 03:00 ежедневно, ротация 14 дней. Документировано в `backup-architecture.md`.
-  ⚠️ Бэкап пока только на mail сервере (не offsite).
+  ✅ rsync mail→s2 после каждого бэкапа → Resilio тянет на Windows/pinner2 (offsite).
 - **Nginx Proxy Manager** ⏳ — проверить, что `nginx_auto_*.tar.gz` реально создаётся.
 - **Локальные неотслеживаемые файлы** ⏳ — стратегия не описана.
 - ✅ **Resilio Sync R/O ключи** убраны из публичного `backup-architecture.md` → перенесены в
