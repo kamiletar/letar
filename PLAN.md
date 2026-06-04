@@ -41,7 +41,16 @@
 > ✅ **Шаг 6:** `verify-email/page.tsx` переписан на `authClient.verifyEmail()` + resend UI при
 > ошибке (ResendVerificationButton + поле email по эталону dsperevod). bump 0.73.4→0.74.0;
 > коммит `51a465c` + bump SHA `230a07b`. **Этап 4 — ПОЛНОСТЬЮ завершён.**
-> **➡️ Следующий старт:** **Этап 5** (premium-rosstil → богатый pin-auth флоу) или **Этап 6** (kami hub-client на фабрике).
+> **Сессия №17 (2026-06-04, Этап 5 ✅ ПОЛНОСТЬЮ):** богатый pin-auth флоу в premium-rosstil:
+> хук `sendVerificationEmail` генерирует PIN + отправляет письмо через `@letar/email` с кодом и ссылкой;
+> `lib/pin-auth-adapters.ts` — `PinValidatorAdapter` (namespace через identifier, без поля type);
+> SSE endpoint `/api/auth/verification-stream/[email]` — cross-tab синхронизация;
+> server actions: `verify-pin`, `resend-verification-pin` (через BA API), `verify-login` (HMAC-signed cookie);
+> страница `/auth/verify-pin` с Chakra `PinInput` + `usePinVerification` hook;
+> register-form → редирект на verify-pin; signin EMAIL_NOT_VERIFIED → resend + редирект;
+> rate limit `/send-verification-email {60,3}`; tsconfig paths + references для `@letar/pin-auth`.
+> bump 0.74.0→0.75.0; коммит `7b0fcda` + bump SHA `7b67109`. **Этап 5 — ПОЛНОСТЬЮ завершён.**
+> **➡️ Следующий старт:** **Этап 6** (kami hub-client на фабрике `createAuth({ mode: 'hub-client' })`).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -612,11 +621,14 @@ interface AuthProfile {
 - `requireEmailVerification` **не включаем** (§9-D3). Пароли совместимы (bcrypt).
 - **Зависимости:** Этапы 1–2 ✅.
 
-### Этап 5 — Богатый pin-auth флоу (коды+ссылки+cross-tab) — объём §9-D1
+### Этап 5 — Богатый pin-auth флоу (коды+ссылки+cross-tab) ✅ ПОЛНОСТЬЮ (2026-06-04)
 
-- Внедрить полный флоу (PIN + ссылка + SSE-синхронизация + авто-логин). Каждому целевому: модель `verificationToken`,
-  SSE-endpoint `/api/auth/verification-stream`, server actions, адаптеры.
-- **Зависимости:** Этап 1; эталон из Этапа 2.
+- ✅ **premium-rosstil:** хук `sendVerificationEmail` → PIN + ссылка в одном письме; адаптеры
+  `PinValidatorAdapter` (namespace через `identifier`, без поля type); SSE endpoint; server actions
+  (verify-pin, resend через BA API, auto-login с HMAC-cookie); страница `/auth/verify-pin` +
+  Chakra PinInput + `usePinVerification`; cross-tab sync; register → verify-pin редирект;
+  sign-in EMAIL_NOT_VERIFIED → resend + редирект. bump 0.74.0→0.75.0.
+- **Зависимости:** Этап 1 ✅; эталон driving-school.
 
 ### Этап 6 — kami: авторизация — объём §9-D2 (первый полный `hub-client` на фабрике)
 
