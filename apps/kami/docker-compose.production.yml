@@ -59,6 +59,9 @@ services:
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@kami.letar.best}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Kami}
 
+      # Redis (rate-limit secondaryStorage)
+      REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}
+
       # Application
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3005}
 

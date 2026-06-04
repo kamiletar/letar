@@ -1,4 +1,5 @@
 import type { UserRole } from '@/generated/prisma'
+import { createRedisStorage } from '@letar/auth/server'
 import { sendInvitationEmail } from '@letar/email'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
@@ -25,6 +26,10 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+
+  // Redis secondaryStorage для rate-limit (Этап 0.2 PLAN.md).
+  // В dev REDIS_URL не задан → Better Auth fallback на memory.
+  ...(process.env.REDIS_URL && { secondaryStorage: createRedisStorage(process.env.REDIS_URL) }),
 
   // Base URL для генерации callback URLs
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3005',
@@ -114,7 +119,11 @@ export const auth = betterAuth({
     enabled: true,
     window: 60,
     max: 100,
-    storage: process.env.NODE_ENV === 'production' ? 'database' : 'memory',
+    storage: process.env.REDIS_URL
+      ? 'secondary-storage'
+      : process.env.NODE_ENV === 'production'
+      ? 'database'
+      : 'memory',
     modelName: 'rateLimit',
     customRules: {
       // Организации

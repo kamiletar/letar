@@ -31,7 +31,7 @@
 // Session helpers
 export { createAuthChecks } from './checks'
 export { AuthError, createAuthGuards, type GuardOptions } from './guards'
-export { createSessionHelpers, type AuthInstance } from './session'
+export { type AuthInstance, createSessionHelpers } from './session'
 
 // Factories
 export { createLogoutAction, type LogoutActionOptions } from './factories'
@@ -47,6 +47,9 @@ export type {
   StandaloneAuthProfile,
   StandaloneEmailCallbacks,
 } from './create-auth/types'
+
+// Redis secondaryStorage адаптер (Этап 0.2 PLAN.md — rate-limit персистентность)
+export { createRedisStorage } from './redis-storage'
 
 // Connected Accounts
 export {

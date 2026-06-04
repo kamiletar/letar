@@ -57,6 +57,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@auth.letar.best}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Letar Auth}
+      # Redis (rate-limit secondaryStorage)
+      REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}
       # Analytics
       NEXT_PUBLIC_APP_URL: https://auth.letar.best
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL}
