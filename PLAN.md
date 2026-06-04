@@ -1,7 +1,7 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
 > **Статус:** ✅ план утверждён, реализация идёт. **Сделано:** Этап 1 + код-часть Этапа 0 (сессия №1); Этап 2 эталон aboi (сессия №5) + тираж на dsperevod (сессия №6); реестр hub-клиентов → БД (сессия №7); **Этап 0.1 ✅ ПОЛНОСТЬЮ** (сессия №8); **Этап 1.5 ✅ ПОЛНОСТЬЮ** — фабрика + эталоны + README + E2E 3/3 (сессии №9–10).
-> **➡️ Следующий старт:** **Этап 2 ремедиация застрявших** (тираж `createAuth()` на оставшиеся приложения) или **Этап 3 admin «Пользователи»**.
+> **➡️ Следующий старт:** **Этап 2 ремедиация застрявших** (бэклог неверифицированных в aboi/dsperevod) или **Этап 4** (premium-rosstil миграция на Better Auth).
 > Параллельно можно: **Этап 2 → ремедиация застрявших** (п.3) или **Этап 3 → admin «Пользователи»**.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
@@ -71,6 +71,10 @@
 >   dsperevod (standalone, 90→35 строк) + time (hub-client, 84→20 строк, без DB). Ограничение Better Auth:
 >   `additionalFields` не выводятся через фабрику — 3 cast-сайта dsperevod исправлены через `as unknown as`.
 >   Осталось по DoD: README + E2E behavior-parity.
+>   **Сессия реализации №11 (2026-06-04, Этап 3 ✅ ПОЛНОСТЬЮ):** admin/users с VerifyButton во всех 5 приложениях:
+>   aboi (новая страница + AdminNav), kami (новая страница + AdminSidebar), auth-hub (VerifyButton в существующую),
+>   dsperevod (verifyUserAction + logAudit + VerifyButton), premium-rosstil (verifyUserAction + VerifyButton + колонка).
+>   Коммиты в 3 submodule + bump SHA + корневой репо.
 >   **Сессия реализации №10 (2026-06-04, Этап 1.5 ✅ DoD):** README `@letar/auth` полностью переписан —
 >   добавлен раздел `createAuth()` с контрактом `AuthProfile`, всеми тремя режимами, примерами dsperevod/time,
 >   ограничением `additionalFields`; обновлена дата и версия (0.4.0). Создан `docker-compose.dev.yml` для dsperevod
@@ -538,12 +542,14 @@ interface AuthProfile {
   ⏳ бэклог застрявших (п.3) — остаётся.
 - **Зависимости:** Этап 1.
 
-### Этап 3 — Admin «Пользователи» + ручная верификация
+### Этап 3 — Admin «Пользователи» + ручная верификация ✅ ПОЛНОСТЬЮ (2026-06-04)
 
-- **Create:** aboi (+ `AdminNav`, фильтр `isAnonymous: false`), kami. **Extend:** dsperevod/auth-hub (действия),
-  premium-rosstil (колонка статуса + действия).
-- Server actions под `requireAdmin`, меняют **только `emailVerified`**; DB-клиент и таблица — по паттерну приложения
-  (не общий компонент — §9-D7). ⚠️ enhanced Prisma (dsperevod, premium) → access-policy на `emailVerified`.
+- ✅ **aboi:** `admin/users` страница (фильтр `isAnonymous: false`) + `VerifyButton` + `verifyUserAction` + «Пользователи» в `AdminNav`.
+- ✅ **kami:** `admin/users` страница + `VerifyButton` + `verifyUserAction` + «Пользователи» в `AdminSidebar`.
+- ✅ **auth-hub:** `VerifyButton` + `verifyUserAction` добавлены в существующую `admin/users`.
+- ✅ **dsperevod:** `verifyUserAction` добавлен в `user.action.ts` (с `logAudit`) + `VerifyButton` в колонку «Действия».
+- ✅ **premium-rosstil:** `verifyUserAction` + `VerifyButton` + колонка «Верификация»; запрос переведён на `select`.
+- Server actions под `requireAdmin`, меняют **только `emailVerified`**; DB-клиент по паттерну приложения (§9-D7). ✅ enhanced Prisma (dsperevod, premium) — политики `@@allow('all', auth().role == ADMIN)` разрешают обновление.
 - **Зависимости:** частично Этап 1; можно параллельно с Этапом 2.
 
 ### Этап 4 — premium-rosstil: миграция на Better Auth (§9-D4 = «мигрировать»)
