@@ -14,6 +14,7 @@ import {
   Music,
   Share2,
   Star,
+  Users,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -43,6 +44,7 @@ function getNavItems(locale: string): NavItem[] {
     { href: `/${locale}/admin/images`, label: 'Изображения', icon: <ImageIcon size={20} /> },
     { href: `/${locale}/admin/audio`, label: 'Аудио', icon: <Music size={20} /> },
     { href: `/${locale}/admin/social`, label: 'Соцсети', icon: <Share2 size={20} /> },
+    { href: `/${locale}/admin/users`, label: 'Пользователи', icon: <Users size={20} /> },
     { href: '/keystatic/', label: 'Блог (CMS)', icon: <FileText size={20} /> },
   ]
 }

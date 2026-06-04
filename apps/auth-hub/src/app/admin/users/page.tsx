@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Badge, Box, Card, Heading, HStack, Table, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { RoleToggleButton } from './_components/role-toggle-button'
+import { VerifyButton } from './_components/verify-button'
 
 export const metadata: Metadata = {
   title: 'Пользователи',
@@ -45,6 +46,7 @@ export default async function UsersPage() {
                 <Table.ColumnHeader>Email</Table.ColumnHeader>
                 <Table.ColumnHeader>Роль</Table.ColumnHeader>
                 <Table.ColumnHeader>Верификация</Table.ColumnHeader>
+                <Table.ColumnHeader>Действия</Table.ColumnHeader>
                 <Table.ColumnHeader>Аккаунты</Table.ColumnHeader>
                 <Table.ColumnHeader>Дата</Table.ColumnHeader>
               </Table.Row>
@@ -61,6 +63,9 @@ export default async function UsersPage() {
                     <Badge colorPalette={user.emailVerified ? 'green' : 'yellow'} size="sm">
                       {user.emailVerified ? 'Да' : 'Нет'}
                     </Badge>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <VerifyButton userId={user.id} emailVerified={user.emailVerified} />
                   </Table.Cell>
                   <Table.Cell>{user._count.accounts}</Table.Cell>
                   <Table.Cell fontSize="sm" color="fg.muted">
