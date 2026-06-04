@@ -106,6 +106,7 @@ export async function backupNginx(type: 'manual' | 'auto' = 'manual'): Promise<N
           try {
             const stats = await stat(filepath)
             console.warn(`[NginxBackup] Успешно создан бэкап: ${filename} (${stats.size} bytes)`)
+            await rotateNginxBackups()
             resolve({
               success: true,
               file: filename,
@@ -129,6 +130,34 @@ export async function backupNginx(type: 'manual' | 'auto' = 'manual'): Promise<N
       })
     }
   })
+}
+
+/** Максимальное количество автоматических бэкапов nginx */
+const MAX_AUTO_BACKUPS = 14
+
+/**
+ * Ротация nginx бэкапов: оставляет последние MAX_AUTO_BACKUPS авто-бэкапов
+ */
+async function rotateNginxBackups(): Promise<void> {
+  try {
+    const files = await readdir(BACKUPS_DIR)
+    const autoBackups = files
+      .filter((f) => f.startsWith('nginx_auto_') && f.endsWith('.tar.gz'))
+      .sort()
+      .reverse()
+
+    const toDelete = autoBackups.slice(MAX_AUTO_BACKUPS)
+    for (const filename of toDelete) {
+      try {
+        await unlink(path.join(BACKUPS_DIR, filename))
+        console.warn(`[NginxBackup] Удалён старый бэкап: ${filename}`)
+      } catch {
+        // Игнорируем ошибки удаления
+      }
+    }
+  } catch {
+    // Игнорируем ошибки ротации
+  }
 }
 
 /**

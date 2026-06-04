@@ -198,7 +198,7 @@ Resilio Sync настроен на **s1** для синхронизации ко
 
 ### Исключения из синхронизации (`.sync/IgnoreList`)
 
-Стратегия: синхронизируются только **uploads** всех приложений и папка **backups**. Всё остальное восстанавливается из git (`git pull` + `bun install` + генерация).
+Стратегия: синхронизируются только **uploads** всех приложений и папка **backups**. Всё остальное восстанавливается из git (`git pull` + `bun install` + генерация). Секреты хранятся отдельно (см. §Локальные credentials ниже).
 
 ```
 # Build artifacts
@@ -223,11 +223,56 @@ scripts
 infra/nginx-proxy-manager/data
 infra/nginx-proxy-manager/letsencrypt
 
+# Secrets — НЕ должны синхронизироваться через Resilio
+# Хранить в KeePassXC / OPS_JOURNAL.local.md (см. §Локальные credentials)
+.env.docker
+.env.local
+.env
+
 # Logs
 *.log
 ```
 
-> **Важно:** `*.sql.gz`, `*.tar.gz` и `uploads/` НЕ исключаются — бэкапы БД, NPM и загруженные пользователями файлы синхронизируются на все точки хранения.
+> **Важно:** `*.sql.gz`, `*.tar.gz` и `uploads/` НЕ исключаются — бэкапы БД, NPM, Maddy и загруженные пользователями файлы синхронизируются на все точки хранения.
+
+### Применение IgnoreList на серверах
+
+```bash
+# На s1:
+ssh root@s1.letar.best "cat > /home/deploy/letar/.sync/IgnoreList" << 'EOF'
+# Build artifacts
+node_modules
+.next
+dist
+
+# Dev caches
+.nx
+.cache
+.turbo
+
+# Source code (re-pullable from git)
+src
+prisma
+public
+libs
+scripts
+.github
+
+# Nginx (configs backed up via nginx_auto_*.tar.gz)
+infra/nginx-proxy-manager/data
+infra/nginx-proxy-manager/letsencrypt
+
+# Secrets
+.env.docker
+.env.local
+.env
+
+# Logs
+*.log
+EOF
+
+# Аналогично на s2
+```
 
 ### Добавление на Windows
 
@@ -309,6 +354,41 @@ mail.letar.best          s2.letar.best                    Windows / pinner2
 ```
 
 SSH-ключ для rsync: `root@mail` → `deploy@s2` (`/root/.ssh/id_ed25519`, добавлен в `~deploy/.ssh/authorized_keys` на s2).
+
+---
+
+## Локальные credentials (стратегия)
+
+> Добавлено 2026-06-04. Этап 0.3.
+
+Локальные credentials (`.env.docker`, SSH-ключи, личные токены) **не синхронизируются через Resilio** — они исключены из `.sync/IgnoreList`. Вместо этого:
+
+### Что куда хранить
+
+| Тип                                       | Где хранить                           | Как восстановить                               |
+| ----------------------------------------- | ------------------------------------- | ---------------------------------------------- |
+| Пароли сервисов, API-токены               | KeePassXC (`~/.keepass/*.kdbx`)       | Открыть KDBX-файл                              |
+| Пароль БД, SMTP, OAuth secrets            | KeePassXC → раздел "Letar Production" | Заново создать `.env.docker` по шаблону из git |
+| SSH-ключи (`~/.ssh/id_rsa`, `id_ed25519`) | KeePassXC Advanced (file attachment)  | Восстановить из KDBX                           |
+| KDBX мастер-пароль                        | Бумага в сейфе / голове владельца     | —                                              |
+
+> KeePassXC-файл (`~/.keepass/*.kdbx`) синхронизируется через системный iCloud/OneDrive/etc., отдельно от Resilio.
+
+### Восстановление сервера с нуля
+
+1. Установить Docker, git, Resilio Sync
+2. Добавить Resilio R/O-ключ → папка `backups/` и `uploads/` появятся автоматически
+3. `git clone git@github.com:kamiletar/letar.git --recurse-submodules`
+4. Создать `.env.docker` по шаблону каждого приложения, взять значения из KeePassXC
+5. `./deploy-affected.sh --app <app>` для каждого приложения
+
+### Что НЕ нужно бэкапить отдельно
+
+- Код — в git ✅
+- Nginx proxy-конфиги — в `nginx_auto_*.tar.gz` ✅
+- Maddy конфиги + DKIM — в `maddy_*.tar.gz` ✅
+- БД — в `*.sql.gz` ✅
+- Uploads — в Resilio ✅
 
 ---
 

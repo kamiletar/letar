@@ -31,6 +31,8 @@ services:
       PORT: 3100
       HOST: 0.0.0.0
       SERVER_NAME: ${SERVER_NAME:-s1.letar.best}
+      # Путь внутри контейнера (хостовый WORKSPACE_PATH монтируется сюда)
+      WORKSPACE_PATH: /home/deploy/letar
     volumes:
       # Docker socket для управления контейнерами
       - /var/run/docker.sock:/var/run/docker.sock
