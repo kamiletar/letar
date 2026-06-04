@@ -189,10 +189,10 @@ Resilio Sync настроен на **s1** для синхронизации ко
 
 ### Синхронизируемые папки
 
-| Сервер | Папка на сервере     | Папка на Windows        | Папка на pinner2        | Ключ (RO)                           |
-| ------ | -------------------- | ----------------------- | ----------------------- | ----------------------------------- |
-| s1     | `/home/deploy/letar` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | `BF4CG4PGSUUYLE2W5CQBWOV5455FC6ZFV` |
-| s2     | `/home/deploy/letar` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | `BQPKQX2W2GDWRKJHKGHJCEAJ32NDI4PZC` |
+| Сервер | Папка на сервере     | Папка на Windows        | Папка на pinner2        | Ключ (RO)                                |
+| ------ | -------------------- | ----------------------- | ----------------------- | ---------------------------------------- |
+| s1     | `/home/deploy/letar` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
+| s2     | `/home/deploy/letar` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
 
 > R/W ключи хранятся в `/etc/resilio-sync/config.json` на каждом сервере.
 
@@ -233,7 +233,7 @@ infra/nginx-proxy-manager/letsencrypt
 
 1. Установить [Resilio Sync для Windows](https://www.resilio.com/sync/download/)
 2. **Add folder** → **Enter a key or link**
-3. Ввести Read-only ключ: `BF4CG4PGSUUYLE2W5CQBWOV5455FC6ZFV`
+3. Ввести Read-only ключ: см. `.claude/OPS_JOURNAL.local.md §14.4`
 4. Выбрать папку: `C:\BackupSync\lena\s1`
 5. Тип папки: **Read only** (автоматически — RO-ключ)
 
@@ -265,6 +265,43 @@ tail -f /var/lib/resilio-sync/sync.log  # Детальный лог
 5. На Windows — пересоздать папку (удалить + добавить с RO ключом)
 
 **Важно:** НЕ удалять `.sync/ID`, `settings.dat`, `*.db` без необходимости — это сбрасывает identity папки и вынуждает переподключать всех клиентов.
+
+---
+
+## Бэкап Maddy (mail.letar.best)
+
+> Добавлен 2026-06-04. Maddy живёт на отдельном сервере `mail.letar.best` — dashboard-agent его не видит.
+
+### Критичные файлы
+
+| Файл/папка                       | Описание                         |
+| -------------------------------- | -------------------------------- |
+| `/opt/maddy/config/maddy.conf`   | Основной конфиг                  |
+| `/opt/maddy/docker-compose.yml`  | Docker Compose                   |
+| `/opt/maddy/data/credentials.db` | Хэши паролей SMTP-аккаунтов      |
+| `/opt/maddy/data/aliases`        | Алиасы и форварды                |
+| `/opt/maddy/data/dkim_keys/`     | **DKIM private keys** ⚠️ критично |
+
+> ⚠️ Потеря DKIM private keys = нужно регенерировать ключи и менять DNS TXT-записи для всех доменов.
+
+### Механизм
+
+Скрипт `/opt/maddy/backup.sh` — ежедневно в 03:00 (crontab root):
+
+```bash
+# Запуск вручную
+ssh root@mail.letar.best "bash /opt/maddy/backup.sh"
+
+# Просмотр бэкапов
+ssh root@mail.letar.best "ls -lh /root/backups/maddy/"
+
+# Лог
+ssh root@mail.letar.best "tail -20 /var/log/maddy-backup.log"
+```
+
+Результат: `/root/backups/maddy/maddy_YYYY-MM-DD.tar.gz` (~16 KB), ротация 14 дней.
+
+> ⚠️ Бэкап хранится **только на mail сервере** — single point of failure. В будущем: rsync на s2 или отдельное хранилище.
 
 ---
 
