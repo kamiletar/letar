@@ -100,7 +100,8 @@ async function sendTelegramAlert(text: string): Promise<void> {
   const chatId = process.env.TELEGRAM_ALERT_CHAT_ID
   if (!token || !chatId) return
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const apiRoot = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
+  await fetch(`${apiRoot}/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text }),

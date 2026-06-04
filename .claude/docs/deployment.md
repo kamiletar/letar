@@ -117,6 +117,55 @@ proxy_read_timeout 86400s;
 | stats.letar.best              | umami-app                | 3033 |
 | npm.s2.letar.best             | localhost                | 81   |
 
+## Telegram API — прокси через mail сервер
+
+**Проблема:** IP-диапазоны `api.telegram.org` (149.154.x, 91.108.x) заблокированы провайдером ДЦ на s1/s2 — как для хостовых процессов, так и для Docker контейнеров.
+
+**Решение:** обратный прокси на **mail сервере (193.37.68.73)** через Nginx Proxy Manager.
+
+### Домены прокси
+
+| Домен                 | Назначение                             | Куда проксирует             |
+| --------------------- | -------------------------------------- | --------------------------- |
+| `tg-proxy.letar.best` | **Исходящие** запросы к Bot API        | `https://api.telegram.org`  |
+| `tg-in.letar.best`    | **Входящие** webhook от Telegram Cloud | конкретное приложение на s2 |
+
+### Использование в приложениях
+
+Все приложения, отправляющие запросы к Telegram Bot API, должны использовать переменную:
+
+```env
+# .env.docker
+TELEGRAM_API_ROOT=https://tg-proxy.letar.best
+```
+
+Вместо хардкода `api.telegram.org`:
+
+```typescript
+// ✅ Правильно — через прокси
+const apiRoot = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
+await fetch(`${apiRoot}/bot${token}/sendMessage`, ...)
+
+// ❌ Неправильно — прямой вызов не работает с s1/s2
+await fetch(`https://api.telegram.org/bot${token}/sendMessage`, ...)
+```
+
+Библиотека **grammy** поддерживает через `apiRoot`:
+
+```typescript
+const bot = new Bot(token, { client: { apiRoot: process.env.TELEGRAM_API_ROOT } })
+```
+
+### Nginx конфиг (mail сервер)
+
+Конфиг хранится в `/root/nginx-proxy-manager/data/nginx/custom/http.conf` на mail сервере.
+При добавлении нового webhook-приложения — добавить location в этот файл.
+
+### Кто использует
+
+- `apps/grandslamcup` — `TELEGRAM_API_ROOT` + `TELEGRAM_WEBHOOK_URL=https://tg-in.letar.best/grandslamcup/...`
+- `infra/canary` — `TELEGRAM_API_ROOT` для алертов
+
 ## Docker-based деплой (Next.js приложения)
 
 Все Next.js приложения используют **Docker Compose** для production деплоя через скрипт `deploy-affected.sh`.
