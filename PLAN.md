@@ -75,8 +75,8 @@
 > baseline-миграция `20260101000000_init_baseline` (resolve --applied на prod перед деплоем);
 > компоненты `PasskeySignInButton` + `PasskeyRegisterButton`; кнопка на странице /sign-in.
 > rpID=letar.best (дефолт), origin=BETTER_AUTH_URL. typecheck ✅ lint ✅.
-> ⚠️ Деплой: сначала `prisma migrate resolve --applied 20260101000000_init_baseline` на prod.
-> **➡️ Следующий старт:** деплой auth-hub (запросить BlackCove) → Этап 6.6 (Telegram) или Этап 7 (driving-school).
+> ✅ **Деплой выполнен BlackCove** (5858b0c): baseline resolved + passkey таблица создана, auth-hub Ready.
+> **➡️ Следующий старт:** Этап 6.6 (Telegram-авторизация в Ключнице) или Этап 7 (driving-school на общую библиотеку).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -673,19 +673,106 @@ interface AuthProfile {
 
 **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
 
-### Этап 6.5 — Passkeys / WebAuthn ✅ ПОЛНОСТЬЮ (2026-06-05, сессия №21)
+### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ⏳ UX (Этап 6.5.1)
 
-- **Цель:** zero-password UX для возвращающихся пользователей петов (kami, time, grandslamcup).
-- **Реализовано:** кастомный `passkeyPlugin()` (@simplewebauthn/server v13) для auth-hub; Better Auth 1.6.x
-  не имеет встроенного passkey плагина — реализован через createAuthEndpoint + internalAdapter.createSession.
-  Таблица `passkey` в schema.zmodel. Компоненты `PasskeySignInButton` / `PasskeyRegisterButton`. /sign-in UI.
-- ⏳ **Деплой:** `prisma migrate resolve --applied 20260101000000_init_baseline` перед первым деплоем на prod.
-- **Scope:** `passkeyPlugin()` в auth-hub (Ключница) → все OIDC-клиенты получают поддержку автоматически;
-  новая таблица `passkey` в schema.zmodel Ключницы; кнопка «Войти по Face ID / Touch ID» в UI.
-- **Passkey не заменяет email** — fallback при смене устройства остаётся (email-верификация сохраняется).
-- **Требования:** `rpID` = `letar.best`, HTTPS (production уже есть).
-- **Целевые приложения:** kami ✅, time ✅, grandslamcup ✅; archetest ❌ (разовые пользователи, не возвращаются).
-- **Зависимости:** Этап 6 (kami auth унифицирован); лучше после стабилизации Ключницы.
+- **Реализовано:** кастомный `passkeyPlugin()` (@simplewebauthn/server v13) для auth-hub; таблица `passkey`;
+  компоненты `PasskeySignInButton` / `PasskeyRegisterButton`; кнопка на /sign-in. Задеплоено BlackCove ✅.
+- **Passkey не заменяет email** — fallback при смене устройства остаётся.
+- **rpID** = `letar.best`, **origin** = `https://auth.letar.best`. HTTPS ✅.
+
+#### 🔴 Текущие проблемы (обнаружены после деплоя)
+
+1. **"Не удалось получить параметры входа"** — `authenticate/options` возвращает ошибку когда в БД 0 passkeys.
+   Надо: возвращать `allowCredentials: []` → браузер переходит в **discoverable credential flow** (resident key).
+2. **Кнопка показывается всем** — при клике без зарегистрированного passkey → ошибка вместо внятного сообщения.
+3. **Нет пути регистрации** — `PasskeyRegisterButton` создан, но нигде не встроен в UI (нет в профиле/настройках).
+
+#### ⏳ Этап 6.5.1 — UX passkeys: правильное поведение как у GitHub/Google
+
+> **Источники:** [web.dev conditional UI](https://web.dev/articles/passkey-form-autofill),
+> [WebAuthn W3C Level 3](https://www.w3.org/TR/webauthn-3/), Google passkey UX guidelines.
+
+**Ключевой инсайт:** GitHub/Google **не показывают кнопку** — браузер сам предлагает passkey
+в дропдауне автозаполнения поля email. Это называется **Conditional UI** (`mediation: 'conditional'`).
+Явная кнопка нужна только как fallback для браузеров без Conditional UI.
+
+##### Шаг A — Починить сервер (быстрый фикс)
+
+```typescript
+// plugin.ts: passkeyAuthOptions
+// Всегда возвращать 200 с options, даже если passkeys = 0
+// allowCredentials: [] → discoverable/resident key flow
+const options = await generatePasskeyAuthenticationOptions(passkeys) // passkeys может быть []
+return ctx.json(options)
+// Убрать throw/error, только return ctx.json(options)
+```
+
+##### Шаг B — Conditional UI (главная фича, «как GitHub»)
+
+```
+Что происходит с Conditional UI:
+1. Страница загружается → в фоне стартует navigator.credentials.get({ mediation: 'conditional' })
+2. Пользователь кликает на поле email → браузер показывает дропдаун с passkeys рядом с обычными паролями
+3. Пользователь выбирает passkey → браузер показывает Touch ID / Face ID / Windows Hello
+4. Сессия создана → редирект
+Кнопки нет вообще. Всё бесшовно.
+```
+
+**Изменения:**
+
+- `LoginForm`: добавить `autoComplete="username webauthn"` на поле email
+- `PasskeySignInButton` → переименовать в `usePasskeyConditionalAuth` (хук)
+- Хук запускается при монтировании страницы: `startAuthentication({ optionsJSON, useBrowserAutofill: true })`
+- При успехе → сессия + редирект на callbackUrl
+- Явная кнопка остаётся как fallback (с проверкой `PublicKeyCredential.isConditionalMediationAvailable`)
+
+##### Шаг C — Регистрация: «Добавить passkey» после входа
+
+Паттерн Google/Apple: **после успешного входа** (через пароль/OAuth/magic-link) → ненавязчивый
+баннер внизу:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 🔑 Войдите быстрее в следующий раз                          │
+│ Добавьте ключ доступа — Touch ID / Face ID / Windows Hello  │
+│                          [Добавить]  [Не сейчас]            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- Показывать **один раз** (localStorage-флаг `passkey_prompt_dismissed`)
+- Не показывать если: уже есть passkey на этом устройстве / пользователь отказался
+- Компонент `PasskeyPromptBanner` — появляется на `/auth/post-login` или в профиле
+
+##### Шаг D — Управление ключами в профиле
+
+Новая секция `/profile` или `/settings` → **«Ключи доступа»**:
+
+```
+Ключи доступа
+├── MacBook Pro (Touch ID)         Добавлен 05.06.2026  [Удалить]
+├── iPhone 15 Pro (Face ID)        Добавлен 05.06.2026  [Удалить]
+└── [+ Добавить ключ доступа]
+```
+
+- Таблица passkeys из БД (by userId)
+- Переименование (name field)
+- Удаление: `DELETE /api/auth/passkey/delete` (эндпоинт нужно добавить в плагин)
+- `PasskeyRegisterButton` встроить сюда
+
+##### DoD Этапа 6.5.1
+
+- [ ] **A**: `authenticate/options` возвращает 200 при 0 passkeys; ошибка только если сервер упал
+- [ ] **B**: `autocomplete="username webauthn"` на email-инпуте; хук conditional auth; passkey в дропдауне браузера
+- [ ] **B**: явная кнопка скрыта когда conditional UI доступен, показывается только как fallback
+- [ ] **C**: баннер-промпт после входа (1 показ, dismissable)
+- [ ] **D**: страница управления passkeys в профиле (список + добавить + удалить)
+- [ ] Добавить `DELETE /passkey/delete` в плагин
+- [ ] typecheck ✅ lint ✅
+
+**Зависимости:** Этап 6.5 инфраструктура ✅. Можно делать без блокеров.
+
+- **Целевые приложения:** kami ✅, time ✅, grandslamcup ✅; archetest ❌ (разовые пользователи).
+- **Зависимости оригинального этапа:** Этап 6 (kami auth) ✅.
 
 ### Этап 6.6 — Telegram-авторизация в Ключнице (новый способ)
 
