@@ -76,7 +76,11 @@
 > компоненты `PasskeySignInButton` + `PasskeyRegisterButton`; кнопка на странице /sign-in.
 > rpID=letar.best (дефолт), origin=BETTER_AUTH_URL. typecheck ✅ lint ✅.
 > ✅ **Деплой выполнен BlackCove** (5858b0c): baseline resolved + passkey таблица создана, auth-hub Ready.
-> **➡️ Следующий старт:** Этап 6.6 (Telegram-авторизация в Ключнице) или Этап 7 (driving-school на общую библиотеку).
+> **Сессия №22 (2026-06-05, UX-анализ passkeys + logout):** обнаружены 2 UX-проблемы по скриншотам:
+> (1) Passkey кнопка падает с ошибкой при 0 passkeys, нет Conditional UI, нет управления ключами → задокументирован
+> детальный план Этап 6.5.1. (2) "Выход" в kami не выходит из Ключницы → тихий ре-логин → задокументирован
+> Этап 6.51 (RP-initiated logout через end_session_endpoint).
+> **➡️ Следующий старт:** **Этап 6.51** (RP-initiated logout — небольшой, важный UX-фикс) → **Этап 6.5.1** (Conditional UI passkeys).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
