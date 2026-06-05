@@ -108,6 +108,13 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
           // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
           scopes: ['openid', 'profile', 'email', 'offline_access'],
           pkce: true,
+          // Fallback: если name пустое — используем email username
+          mapProfileToUser: (profile: Record<string, unknown>) => ({
+            name: (profile.name as string | undefined) || (profile.email as string | undefined)?.split('@')[0]
+              || 'User',
+            email: profile.email as string,
+            image: (profile.picture ?? profile.image) as string | undefined,
+          }),
         },
       ]
       : [],
