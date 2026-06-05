@@ -18,13 +18,20 @@
  *   DRY_RUN=1 DATABASE_URL=... bun run infra/migrations/kami-owner-migration.ts
  */
 
-import { PrismaClient } from '../../apps/kami/src/generated/prisma/client'
+import { ZenStackClient } from '@zenstackhq/orm'
+import { PostgresDialect } from 'kysely'
+import { Pool } from 'pg'
+import { schema } from '../../apps/kami/src/generated/schema'
 
 const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
 const NEW_EMAIL = 'kami@letar.best'
 const DRY_RUN = process.env.DRY_RUN === '1'
 
-const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL })
+const prisma = new ZenStackClient(schema, {
+  dialect: new PostgresDialect({
+    pool: new Pool({ connectionString: process.env.DATABASE_URL }),
+  }),
+})
 
 async function main() {
   console.log(`[kami-migration] DRY_RUN=${DRY_RUN}`)
