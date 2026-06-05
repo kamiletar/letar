@@ -1,6 +1,6 @@
 import { Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { LoginForm } from './_components/login-form'
 import { MagicLinkForm } from './_components/magic-link-form'
@@ -11,48 +11,23 @@ export const metadata: Metadata = {
 }
 
 /**
- * OIDC-параметры, которые сохраняем в cookie для последующего продолжения flow.
- * Ключи соответствуют стандарту OAuth 2.0 / OIDC.
- */
-const OIDC_COOKIE_PARAMS = [
-  'client_id',
-  'redirect_uri',
-  'response_type',
-  'scope',
-  'state',
-  'code_challenge',
-  'code_challenge_method',
-  'nonce',
-] as const
-
-/**
  * Страница входа — два столбца: OAuth и email/password.
  *
  * Если открыта в контексте OIDC authorization flow (присутствуют
- * client_id, redirect_uri, response_type), сохраняет OIDC-параметры
- * в httpOnly cookie `oidc_pending`. После входа через соцсети route
- * `/auth/post-login` читает cookie и продолжает OIDC flow.
+ * client_id, redirect_uri, response_type), делает редирект на
+ * Route Handler /api/oidc-capture, который сохраняет OIDC-параметры
+ * в httpOnly cookie и возвращает на чистый /sign-in.
+ *
+ * cookies().set() запрещён в Server Components (Next.js 15+), поэтому
+ * сохранение cookie вынесено в Route Handler.
  */
 export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const params = await searchParams
 
-  // Сохраняем OIDC-параметры в cookie если страница открыта из OIDC flow
+  // Если OIDC-flow — делегируем сохранение cookie Route Handler'у
   if (params.client_id && params.redirect_uri && params.response_type) {
-    const oidcParams: Record<string, string> = {}
-    for (const key of OIDC_COOKIE_PARAMS) {
-      if (params[key]) {
-        oidcParams[key] = params[key]
-      }
-    }
-
-    const cookieStore = await cookies()
-    cookieStore.set('oidc_pending', Buffer.from(JSON.stringify(oidcParams)).toString('base64'), {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 600, // 10 минут — достаточно для прохождения OAuth
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-    })
+    const qs = new URLSearchParams(params).toString()
+    redirect(`/api/oidc-capture?${qs}`)
   }
 
   return (
