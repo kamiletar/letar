@@ -59,7 +59,11 @@
 > cron каждые 15 мин через `docker compose run`; запрос деплоя у BlackCove.
 > ✅ **Этап 6** — kami/auth.ts мигрирован на `createAuth({ mode: 'hub-client' })` (241→125 строк);
 > фабрика расширена: `rateLimit`, `account`, `secondaryStorage` для hub-client; деплой запрошен.
-> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
+> **Сессия №19 (2026-06-05, Этап 6 + 8.5 ✅):** OIDC flow kami отлажен (5 последовательных багов: docker-compose env,
+> nextCookies() порядок, cookies() в Server Component, oidc-capture redirect, name_is_missing); кнопка Войти → сразу
+> Ключница; `mapProfileToUser` fallback в фабрике hub-client. Миграция данных kami выполнена:
+> 4 AudioFile + ADMIN → `kami@letar.best`; `letarkami@gmail.com` и `kaspergreen@gmail.com` удалены.
+> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn) или перенос данных dashboard/archetest/animatrona-tracker (§8.5).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -641,27 +645,17 @@ interface AuthProfile {
   sign-in EMAIL_NOT_VERIFIED → resend + редирект. bump 0.74.0→0.75.0.
 - **Зависимости:** Этап 1 ✅; эталон driving-school.
 
-### Этап 6 — kami: авторизация — объём §9-D2 (первый полный `hub-client` на фабрике)
+### Этап 6 — kami: авторизация ✅ ПОЛНОСТЬЮ (2026-06-05, сессии №18–19)
 
-- **Поставить kami на `createAuth({ mode: 'hub-client', ... })`** (D2 решён в пользу (a): сохранить все способы,
-  реализацию унифицировать через фабрику). kami — гибрид (email/password + magic-link + OAuth + Ключница), сложнее
-  чистого hub-client из Этапа 1.5 → отдельный этап.
-- Проверить OIDC refresh-token handling: `accessTokenExpiration` в Ключнице, поведение клиентов при 401,
-  нужен ли `offline_access` scope и явный refresh (§13.7).
-- Завершить перенос данных пета kami со старых локальных `user.id` на аккаунт Ключницы (§14.1 / Этап 8.5).
-- **Зависимости:** Этап **1.5** (фабрика + эталон hub-client); Этап 1.
-
-**Реализация (2026-06-05, сессия №18):**
-
-- ✅ **§13.7 OIDC refresh** — исследован: явный refresh не нужен (BA сессия 7 дней независима от OIDC access token);
-  добавлен `offline_access` scope в kami + фабрику `buildHubClientAuth` (проактивно, для будущих API-вызовов к Ключнице). Коммит `93f713e`.
-- ✅ **Фабрика расширена** — `HubClientAuthProfile`: `rateLimit` (storage + customRules), `account` (accountLinking);
-  `AuthProfileBase`: `secondaryStorage`. Коммит `3649f19`.
-- ✅ **kami/auth.ts мигрирован** — 241→125 строк; `createAuth({ mode: 'hub-client' })`; `organization` plugin,
-  `secondaryStorage` Redis, `rateLimit`, `account.accountLinking`; `getSession/getCurrentUser` через `createSessionHelpers`;
-  `hasRole` с DB-фолбэком сохранён (cookieCache не включает additionalFields). Коммит `3649f19`.
-- ⏳ **Деплой kami** — запрошен у BlackCove (коммит `3649f19`).
-- ⏳ **Перенос данных пета** — старые локальные `user.id` → аккаунт Ключницы (§14.1/Этап 8.5).
+- ✅ **§13.7** — `offline_access` scope в kami + фабрику. Коммит `93f713e`.
+- ✅ **Фабрика расширена** — `rateLimit`, `account`, `secondaryStorage`, `mapProfileToUser` для hub-client. Коммиты `3649f19`, `10acacd`.
+- ✅ **kami/auth.ts** — 241→125 строк на `createAuth({ mode: 'hub-client' })`.
+- ✅ **Кнопка Войти** — сразу редиректит на Ключницу, без промежуточной страницы. Коммит `576f00f`.
+- ✅ **OIDC flow отлажен** (5 последовательных багов): `OIDC_CLIENT_ID` не в docker-compose; `nextCookies()` не последним;
+  `cookies().set()` в Server Component → `OidcPendingCapture`; oidc-capture снимал OIDC params с URL → убран redirect;
+  `name_is_missing` → `mapProfileToUser` fallback. Коммиты `83583af`, `35e41b0`, `557ae0f`, `6dec301`, `10acacd`.
+- ✅ **auth-hub** — все фиксы задеплоены; OIDC flow работает end-to-end.
+- **Зависимости:** Этап **1.5** ✅; Этап 1 ✅.
 - ⏳ **Проверка OIDC refresh на проде** — убедиться что refresh_token сохраняется в `account` после первого входа.
 
 **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
@@ -725,8 +719,9 @@ interface AuthProfile {
   аудит. **Необратимо → бэкап БД обязателен.**
 - **Разовая операция владельца:** склейка личных email в Ключнице — ✅ **ВЫПОЛНЕНА 2026-05-30** (§14.1):
   canonical `kami@letar.best`, 5 провайдеров (credential, github, google×2, yandex) на одном аккаунте.
-  ⏳ **Осталось — перенос данных в петах** (решено: переносим) со старых локальных `user.id` на новый
-  после входа под `kami@letar.best` в каждый пет (kami, dashboard, archetest, animatrona-tracker) — см. §14.1.
+  ✅ **Перенос данных в kami (2026-06-05):** `infra/migrations/kami-owner-migration.ts` — 4 AudioFile
+  перенесены с `letarkami@gmail.com`, оба старых аккаунта удалены, `kami@letar.best` получил роль ADMIN.
+  ⏳ **Осталось** — перенос данных в других петах: dashboard, archetest, animatrona-tracker (войти под kami@letar.best).
 - **Зависимости:** Ключница (auth-hub); правовой аспект §2.6.
 
 ### Этап 9 — Документация — сквозной (§11)
