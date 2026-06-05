@@ -1,10 +1,10 @@
 import { Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { LoginForm } from './_components/login-form'
 import { MagicLinkForm } from './_components/magic-link-form'
 import { AuthOAuthButtons } from './_components/oauth-buttons'
+import { OidcPendingCapture } from './_components/oidc-pending-capture'
 
 export const metadata: Metadata = {
   title: 'Вход',
@@ -13,25 +13,21 @@ export const metadata: Metadata = {
 /**
  * Страница входа — два столбца: OAuth и email/password.
  *
- * Если открыта в контексте OIDC authorization flow (присутствуют
- * client_id, redirect_uri, response_type), делает редирект на
- * Route Handler /api/oidc-capture, который сохраняет OIDC-параметры
- * в httpOnly cookie и возвращает на чистый /sign-in.
- *
- * cookies().set() запрещён в Server Components (Next.js 15+), поэтому
- * сохранение cookie вынесено в Route Handler.
+ * Если открыта в контексте OIDC authorization_code flow, OIDC-параметры
+ * остаются в URL (usePostSignInCallback читает их и строит callbackUrl
+ * на /api/auth/oauth2/authorize). Для социального OAuth (GitHub, Google…)
+ * клиентский OidcPendingCapture сохраняет параметры в cookie через fetch
+ * на /api/oidc-capture, не нарушая Next.js ограничение "cookies() только
+ * в Server Action / Route Handler".
  */
 export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const params = await searchParams
-
-  // Если OIDC-flow — делегируем сохранение cookie Route Handler'у
-  if (params.client_id && params.redirect_uri && params.response_type) {
-    const qs = new URLSearchParams(params).toString()
-    redirect(`/api/oidc-capture?${qs}`)
-  }
+  const hasOidc = !!(params.client_id && params.redirect_uri && params.response_type)
 
   return (
     <Card.Root maxW="4xl" w="full" mx={4}>
+      {/* Сохраняем OIDC-параметры в cookie для social OAuth flow (client-side) */}
+      {hasOidc && <OidcPendingCapture params={params} />}
       <Card.Body>
         <HStack gap={8} align="stretch" flexDir={{ base: 'column', md: 'row' }}>
           {/* Левая колонка — быстрый вход через соцсети */}
