@@ -63,7 +63,12 @@
 > nextCookies() порядок, cookies() в Server Component, oidc-capture redirect, name_is_missing); кнопка Войти → сразу
 > Ключница; `mapProfileToUser` fallback в фабрике hub-client. Миграция данных kami выполнена:
 > 4 AudioFile + ADMIN → `kami@letar.best`; `letarkami@gmail.com` и `kaspergreen@gmail.com` удалены.
-> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn) или перенос данных dashboard/archetest/animatrona-tracker (§8.5).
+> **Сессия №20 (2026-06-05, Этап 8.5 скрипты):** Созданы скрипты миграции для dashboard/archetest/animatrona-tracker:
+> `infra/migrations/dashboard-owner-migration.ts` (role ADMIN, нет контента), `archetest-owner-migration.ts`
+> (QuizLeaderboard+Sessions+Achievements, roles[]), `animatrona-tracker-owner-migration.ts`
+> (Anime/UserLibrary/Distribution/PinJob/Content). Подход: raw pg без ZenStack, dry-run режим.
+> ⏳ **Запустить на s2** после логина в каждое приложение через Ключницу.
+> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в auth-hub).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -721,7 +726,10 @@ interface AuthProfile {
   canonical `kami@letar.best`, 5 провайдеров (credential, github, google×2, yandex) на одном аккаунте.
   ✅ **Перенос данных в kami (2026-06-05):** `infra/migrations/kami-owner-migration.ts` — 4 AudioFile
   перенесены с `letarkami@gmail.com`, оба старых аккаунта удалены, `kami@letar.best` получил роль ADMIN.
-  ⏳ **Осталось** — перенос данных в других петах: dashboard, archetest, animatrona-tracker (войти под kami@letar.best).
+  ⏳ **Осталось** — запустить скрипты на s2 (скрипты готовы в `infra/migrations/`, 2026-06-05):
+  войти в каждое приложение через Ключницу → `DRY_RUN=1` проверка → выполнить.
+  `dashboard-owner-migration.ts` (port 5436), `archetest-owner-migration.ts` (port 5441),
+  `animatrona-tracker-owner-migration.ts` (port 5439).
 - **Зависимости:** Ключница (auth-hub); правовой аспект §2.6.
 
 ### Этап 9 — Документация — сквозной (§11)
