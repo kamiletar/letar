@@ -133,9 +133,10 @@ export const auth = betterAuth({
   },
 
   // Плагины
+  // ⚠️ nextCookies() ОБЯЗАН быть последним — иначе плагины после него
+  // не могут устанавливать куки и крашат с "Cookies can only be modified
+  // in a Server Action or Route Handler" (особенно oidcProvider).
   plugins: [
-    nextCookies(),
-
     // Magic Link
     magicLink({
       sendMagicLink: async ({ email, url }) => {
@@ -205,6 +206,9 @@ export const auth = betterAuth({
       // Поддерживаемые scopes
       scopes: ['openid', 'profile', 'email', 'offline_access'],
     }),
+
+    // nextCookies() — ВСЕГДА последним (требование Better Auth)
+    nextCookies(),
   ],
 
   // Сессии

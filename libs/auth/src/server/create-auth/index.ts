@@ -87,7 +87,7 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
 
     user: profile.user,
     session: buildSessionConfig(profile.session),
-    plugins: [nextCookies(), ...(profile.plugins ?? [])],
+    plugins: [...(profile.plugins ?? []), nextCookies()],
     pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
   })
