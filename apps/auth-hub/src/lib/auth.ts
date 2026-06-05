@@ -6,6 +6,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
 import { genericOAuth, magicLink } from 'better-auth/plugins'
 import { oidcProvider } from 'better-auth/plugins/oidc-provider'
+import { passkeyPlugin } from './passkey/plugin'
 import { prisma } from './prisma'
 
 /**
@@ -206,6 +207,9 @@ export const auth = betterAuth({
       // Поддерживаемые scopes
       scopes: ['openid', 'profile', 'email', 'offline_access'],
     }),
+
+    // Passkeys / WebAuthn (Этап 6.5 PLAN.md)
+    passkeyPlugin(),
 
     // nextCookies() — ВСЕГДА последним (требование Better Auth)
     nextCookies(),

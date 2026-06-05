@@ -49,6 +49,7 @@ model User {
   // Better Auth связи
   accounts        Account[]
   sessions        Session[]
+  passkeys        Passkey[]
 
   // OIDC Provider связи
   oauthApplications OauthApplication[]
@@ -209,6 +210,30 @@ model OauthConsent {
   @@index([userId])
 
   @@map("oauthConsent")
+}
+
+// ========================================
+// Passkeys / WebAuthn
+// ========================================
+
+// Зарегистрированные passkeys пользователей
+model Passkey {
+  id             String    @id @default(cuid())
+  name           String?   // Имя устройства (опционально)
+  publicKey      Bytes
+  userId         String
+  webAuthnUserId String    // WebAuthn user handle (base64url)
+  counter        BigInt
+  deviceType     String    // "singleDevice" | "multiDevice"
+  backedUp       Boolean
+  transports     String?   // JSON: ["internal","hybrid",...]
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([userId])
+  @@map("passkey")
 }
 
 // ========================================

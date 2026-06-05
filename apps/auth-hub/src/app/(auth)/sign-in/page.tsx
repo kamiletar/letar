@@ -5,6 +5,7 @@ import { LoginForm } from './_components/login-form'
 import { MagicLinkForm } from './_components/magic-link-form'
 import { AuthOAuthButtons } from './_components/oauth-buttons'
 import { OidcPendingCapture } from './_components/oidc-pending-capture'
+import { PasskeySignInButton } from './_components/passkey-button'
 
 export const metadata: Metadata = {
   title: 'Вход',
@@ -30,7 +31,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       {hasOidc && <OidcPendingCapture params={params} />}
       <Card.Body>
         <HStack gap={8} align="stretch" flexDir={{ base: 'column', md: 'row' }}>
-          {/* Левая колонка — быстрый вход через соцсети */}
+          {/* Левая колонка — быстрый вход через соцсети и passkey */}
           <Stack flex={1} gap={4}>
             <Heading size="lg">Войти</Heading>
             <Text color="fg.muted" fontSize="sm">
@@ -39,6 +40,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             <Suspense>
               <AuthOAuthButtons />
             </Suspense>
+            <PasskeySignInButton />
           </Stack>
 
           <Separator orientation="vertical" display={{ base: 'none', md: 'block' }} />

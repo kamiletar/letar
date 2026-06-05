@@ -68,7 +68,15 @@
 > (QuizLeaderboard+Sessions+Achievements, roles[]), `animatrona-tracker-owner-migration.ts`
 > (Anime/UserLibrary/Distribution/PinJob/Content). Подход: raw pg без ZenStack, dry-run режим.
 > ⏳ **Запустить на s2** после логина в каждое приложение через Ключницу.
-> **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в auth-hub).
+> **Сессия №21 (2026-06-05, Этап 6.5 ✅ ПОЛНОСТЬЮ):** Passkeys / WebAuthn в auth-hub:
+> @simplewebauthn/server@13.3.1 + @simplewebauthn/browser@13.3.0; кастомный Better Auth плагин
+> `passkeyPlugin()` (createAuthEndpoint + getSessionFromCtx + internalAdapter.createSession + setSessionCookie);
+> таблица `passkey` в schema.zmodel + миграция `20260605154458_add_passkey`;
+> baseline-миграция `20260101000000_init_baseline` (resolve --applied на prod перед деплоем);
+> компоненты `PasskeySignInButton` + `PasskeyRegisterButton`; кнопка на странице /sign-in.
+> rpID=letar.best (дефолт), origin=BETTER_AUTH_URL. typecheck ✅ lint ✅.
+> ⚠️ Деплой: сначала `prisma migrate resolve --applied 20260101000000_init_baseline` на prod.
+> **➡️ Следующий старт:** деплой auth-hub (запросить BlackCove) → Этап 6.6 (Telegram) или Этап 7 (driving-school).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -665,9 +673,13 @@ interface AuthProfile {
 
 **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
 
-### Этап 6.5 — Passkeys / WebAuthn (§13.6) — решено: делаем
+### Этап 6.5 — Passkeys / WebAuthn ✅ ПОЛНОСТЬЮ (2026-06-05, сессия №21)
 
 - **Цель:** zero-password UX для возвращающихся пользователей петов (kami, time, grandslamcup).
+- **Реализовано:** кастомный `passkeyPlugin()` (@simplewebauthn/server v13) для auth-hub; Better Auth 1.6.x
+  не имеет встроенного passkey плагина — реализован через createAuthEndpoint + internalAdapter.createSession.
+  Таблица `passkey` в schema.zmodel. Компоненты `PasskeySignInButton` / `PasskeyRegisterButton`. /sign-in UI.
+- ⏳ **Деплой:** `prisma migrate resolve --applied 20260101000000_init_baseline` перед первым деплоем на prod.
 - **Scope:** `passkeyPlugin()` в auth-hub (Ключница) → все OIDC-клиенты получают поддержку автоматически;
   новая таблица `passkey` в schema.zmodel Ключницы; кнопка «Войти по Face ID / Touch ID» в UI.
 - **Passkey не заменяет email** — fallback при смене устройства остаётся (email-верификация сохраняется).
