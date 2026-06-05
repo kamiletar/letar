@@ -18,7 +18,7 @@
  *   DRY_RUN=1 DATABASE_URL=... bun run infra/migrations/kami-owner-migration.ts
  */
 
-import { PrismaClient } from '../../apps/kami/src/generated/prisma'
+import { PrismaClient } from '../../apps/kami/src/generated/prisma/client'
 
 const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
 const NEW_EMAIL = 'kami@letar.best'
