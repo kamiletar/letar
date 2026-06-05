@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const signInUrl = new URL('/sign-in', request.url)
+  // request.url внутри Docker содержит http://0.0.0.0:3010/...
+  // Используем BETTER_AUTH_URL чтобы редирект шёл на публичный домен
+  const baseUrl = process.env.BETTER_AUTH_URL ?? request.url
+  const signInUrl = new URL('/sign-in', baseUrl)
   const response = NextResponse.redirect(signInUrl)
 
   response.cookies.set('oidc_pending', Buffer.from(JSON.stringify(oidcParams)).toString('base64'), {
