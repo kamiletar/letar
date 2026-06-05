@@ -1,8 +1,9 @@
 import { Link } from '@/i18n/navigation'
 import { getSession, isAdmin } from '@/lib/auth'
 import { Avatar, Button, HStack, Menu, Portal, Text } from '@chakra-ui/react'
-import { KeyRound, LogIn, Settings, User } from 'lucide-react'
+import { KeyRound, Settings, User } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
+import { SignInButton } from './sign-in-button'
 import { SignOutButton } from './sign-out-button'
 
 /**
@@ -15,16 +16,9 @@ import { SignOutButton } from './sign-out-button'
 export async function AuthButton() {
   const [session, admin, locale, t] = await Promise.all([getSession(), isAdmin(), getLocale(), getTranslations('auth')])
 
-  // Неавторизованный пользователь
+  // Неавторизованный пользователь — сразу редиректим на Ключницу
   if (!session?.user) {
-    return (
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/auth/signin/">
-          <LogIn size={16} />
-          <Text display={{ base: 'none', md: 'inline' }}>{t('signIn')}</Text>
-        </Link>
-      </Button>
-    )
+    return <SignInButton label={t('signIn')} />
   }
 
   // Авторизованный пользователь
