@@ -670,6 +670,15 @@ interface AuthProfile {
 - ✅ **auth-hub** — все фиксы задеплоены; OIDC flow работает end-to-end.
 - **Зависимости:** Этап **1.5** ✅; Этап 1 ✅.
 - ⏳ **Проверка OIDC refresh на проде** — убедиться что refresh_token сохраняется в `account` после первого входа.
+- ⏳ **Этап 6.51 — RP-initiated logout (выход из всех сервисов)**. Проблема: "Выход" в kami очищает только
+  локальную сессию; auth-hub остаётся залогиненным → клик "Войти через Ключницу" → мгновенный тихий ре-логин
+  → ощущение что выход не сработал. Решение: после `signOut()` в kami редиректить на
+  `https://auth.letar.best/api/auth/end-session?id_token_hint=<id_token>&post_logout_redirect_uri=https://kami.letar.best`.
+  Better Auth `oidcProvider` поддерживает `end_session_endpoint`. Нужно:
+  (1) сохранять `id_token` в kami после OIDC login (в localStorage или cookie);
+  (2) `signOutAction` в kami → Better Auth local signOut → redirect to auth-hub end_session;
+  (3) auth-hub очищает свою сессию → пользователь реально вышел из всех `*.letar.best`.
+  Эту же механику применить к dashboard, archetest, time, grandslamcup, animatrona-tracker.
 
 **➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
 
