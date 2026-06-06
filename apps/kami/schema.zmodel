@@ -77,6 +77,9 @@ model User {
   // Загруженные аудиофайлы
   uploadedAudio   AudioFile[] @relation("uploadedAudio")
 
+  // Загруженные произвольные файлы
+  uploadedFiles   UploadedFile[] @relation("uploadedFiles")
+
   // Доступ на чтение для всех, создание/обновление только для себя
   @@allow('read', true)
   @@allow('create', true)
@@ -727,6 +730,24 @@ model AudioFile {
 
   uploadedById String?
   uploadedBy   User?    @relation("uploadedAudio", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime @default(now())
+
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  filename     String                    // Оригинальное имя файла
+  storedName   String                    // Имя на диске (уникальное)
+  path         String   @unique          // Путь в uploads/files/
+  mimeType     String                    // MIME-тип файла
+  size         Int                       // Размер в байтах
+  description  String?                   // Описание (опционально)
+
+  uploadedById String?
+  uploadedBy   User?    @relation("uploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
   uploadedAt   DateTime @default(now())
 
   @@index([path])
