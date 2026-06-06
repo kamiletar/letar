@@ -1,9 +1,14 @@
 'use client'
 
 import { Button, Text } from '@chakra-ui/react'
-import { browserSupportsWebAuthn, startAuthentication, startRegistration } from '@simplewebauthn/browser'
+import {
+  browserSupportsWebAuthn,
+  browserSupportsWebAuthnAutofill,
+  startAuthentication,
+  startRegistration,
+} from '@simplewebauthn/browser'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface PasskeySignInButtonProps {
   /** URL для редиректа после успешного входа */
@@ -11,15 +16,29 @@ interface PasskeySignInButtonProps {
 }
 
 /**
- * Кнопка входа по Passkey (Face ID / Touch ID / Windows Hello).
- * Доступна только если браузер поддерживает WebAuthn.
+ * Fallback-кнопка входа по Passkey.
+ * Скрыта когда доступен Conditional UI (autofill дропдаун в поле email).
+ * Показывается только в браузерах без поддержки Conditional UI.
  */
 export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: PasskeySignInButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // null = ещё не определили, true/false = определили
+  const [showFallback, setShowFallback] = useState<boolean | null>(null)
 
-  if (!browserSupportsWebAuthn()) {return null}
+  useEffect(() => {
+    if (!browserSupportsWebAuthn()) {
+      setShowFallback(false)
+      return
+    }
+    // Если Conditional UI доступен — прячем кнопку (autofill сам покажет passkeys)
+    browserSupportsWebAuthnAutofill()
+      .then((supported) => setShowFallback(!supported))
+      .catch(() => setShowFallback(true))
+  }, [])
+
+  if (showFallback !== true) {return null}
 
   async function handlePasskeySignIn() {
     setLoading(true)

@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuEye, LuEyeOff } from 'react-icons/lu'
 import { usePostSignInCallback } from '../../_hooks/use-post-sign-in-callback'
+import { usePasskeyConditionalAuth } from '../_hooks/use-passkey-conditional-auth'
 
 /**
  * Форма входа по email/password
@@ -26,6 +27,9 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   // Email, для которого нужна повторная отправка письма верификации (Этап 2 PLAN.md)
   const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+
+  // Запускаем Conditional UI — passkeys появляются в дропдауне поля email
+  usePasskeyConditionalAuth(callbackUrl)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -68,7 +72,13 @@ export function LoginForm() {
       <Stack gap={4}>
         <Field.Root>
           <Field.Label>Email</Field.Label>
-          <Input name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
+          <Input
+            name="email"
+            type="email"
+            autoComplete="username webauthn"
+            placeholder="you@example.com"
+            required
+          />
         </Field.Root>
 
         <Field.Root>

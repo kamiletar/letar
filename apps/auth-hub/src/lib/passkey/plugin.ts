@@ -80,13 +80,15 @@ export function passkeyPlugin(): BetterAuthPlugin {
         '/passkey/authenticate/options',
         { method: 'POST', requireHeaders: true },
         async (ctx) => {
-          const passkeys = (await ctx.context.adapter.findMany({
-            model: 'passkey',
-            select: ['id', 'transports'],
-          })) as Array<{ id: string; transports: string | null }>
-
-          const options = await generatePasskeyAuthenticationOptions(passkeys)
-          return ctx.json(options)
+          try {
+            // Пустой allowCredentials → discoverable credential flow (Conditional UI).
+            // Браузер сам найдёт подходящие ключи в дропдауне автозаполнения.
+            // Verify шаг ищет конкретный credentialId в БД.
+            const options = await generatePasskeyAuthenticationOptions([])
+            return ctx.json(options)
+          } catch {
+            return ctx.json({ error: 'Не удалось получить параметры входа' }, { status: 500 })
+          }
         },
       ),
 
@@ -149,6 +151,43 @@ export function passkeyPlugin(): BetterAuthPlugin {
             verified: true,
             user: { id: userRecord.id, email: userRecord.email, name: userRecord.name },
           })
+        },
+      ),
+
+      passkeyDelete: createAuthEndpoint(
+        '/passkey/delete',
+        {
+          method: 'POST',
+          requireHeaders: true,
+          body: z.object({
+            passkeyId: z.string(),
+          }),
+        },
+        async (ctx) => {
+          const session = await getSessionFromCtx(ctx)
+          if (!session?.user) {
+            return ctx.json({ error: 'Unauthorized' }, { status: 401 })
+          }
+
+          // Проверяем что ключ принадлежит текущему пользователю
+          const passkeys = (await ctx.context.adapter.findMany({
+            model: 'passkey',
+            where: [
+              { field: 'id', value: ctx.body.passkeyId },
+              { field: 'userId', value: session.user.id },
+            ],
+          })) as Array<{ id: string }>
+
+          if (!passkeys.length) {
+            return ctx.json({ error: 'Passkey не найден' }, { status: 404 })
+          }
+
+          await ctx.context.adapter.delete({
+            model: 'passkey',
+            where: [{ field: 'id', value: ctx.body.passkeyId }],
+          })
+
+          return ctx.json({ deleted: true })
         },
       ),
     },

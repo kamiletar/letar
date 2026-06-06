@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { Avatar, Badge, Box, Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import NextLink from 'next/link'
-import { LuKey, LuKeyRound, LuLink, LuMail, LuPencil, LuShield, LuUser, LuUsers } from 'react-icons/lu'
+import { LuFingerprint, LuKey, LuKeyRound, LuLink, LuMail, LuPencil, LuShield, LuUser, LuUsers } from 'react-icons/lu'
+import { PasskeyPromptBanner } from './_components/passkey-prompt-banner'
 import { SignOutButton } from './_components/sign-out-button'
 
 export const metadata: Metadata = {
@@ -18,11 +19,14 @@ export default async function ProfilePage() {
   const user = session.user
   const userIsAdmin = await isAdmin()
 
-  // Получаем связанные аккаунты
-  const accounts = await prisma.account.findMany({
-    where: { userId: user.id },
-    select: { providerId: true },
-  })
+  // Получаем связанные аккаунты и passkeys
+  const [accounts, passkeyCount] = await Promise.all([
+    prisma.account.findMany({
+      where: { userId: user.id },
+      select: { providerId: true },
+    }),
+    prisma.passkey.count({ where: { userId: user.id } }),
+  ])
 
   return (
     <Box maxW="lg" mx="auto" p={6}>
@@ -43,9 +47,7 @@ export default async function ProfilePage() {
             <Stack gap={5}>
               <HStack gap={4}>
                 <Avatar.Root size="xl">
-                  {user.image ? (
-                    <Avatar.Image src={user.image} alt={user.name ?? ''} />
-                  ) : (
+                  {user.image ? <Avatar.Image src={user.image} alt={user.name ?? ''} /> : (
                     <Avatar.Fallback>
                       <LuUser size={24} />
                     </Avatar.Fallback>
@@ -84,8 +86,7 @@ export default async function ProfilePage() {
 
               {/* Дата регистрации */}
               <Text fontSize="sm" color="fg.muted">
-                Зарегистрирован:{' '}
-                {new Date(user.createdAt).toLocaleDateString('ru-RU', {
+                Зарегистрирован: {new Date(user.createdAt).toLocaleDateString('ru-RU', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -94,6 +95,9 @@ export default async function ProfilePage() {
             </Stack>
           </Card.Body>
         </Card.Root>
+
+        {/* Баннер: добавить passkey после входа (показывается один раз) */}
+        <PasskeyPromptBanner hasPasskeys={passkeyCount > 0} />
 
         {/* Навигация */}
         <Stack gap={3}>
@@ -138,6 +142,24 @@ export default async function ProfilePage() {
                     <Text fontWeight="medium">Пароль</Text>
                     <Text color="fg.muted" fontSize="sm">
                       {accounts.some((a) => a.providerId === 'credential') ? 'Установлен' : 'Не установлен'}
+                    </Text>
+                  </Box>
+                </HStack>
+              </Card.Body>
+            </NextLink>
+          </Card.Root>
+
+          <Card.Root asChild>
+            <NextLink href="/profile/passkeys">
+              <Card.Body py={3}>
+                <HStack gap={3}>
+                  <LuFingerprint size={20} />
+                  <Box>
+                    <Text fontWeight="medium">Ключи доступа</Text>
+                    <Text color="fg.muted" fontSize="sm">
+                      {passkeyCount > 0
+                        ? `${passkeyCount} ключ${passkeyCount === 1 ? '' : passkeyCount < 5 ? 'а' : 'ей'}`
+                        : 'Не настроены'}
                     </Text>
                   </Box>
                 </HStack>
