@@ -22,12 +22,18 @@ const nextConfig = {
   },
   // Turbopack — используется для Next.js 16 production build
   turbopack: {},
-  // Лимит body для proxy (для загрузки аудиофайлов до 100MB)
+  // Лимит body для proxy (для загрузки файлов до 500MB)
   experimental: {
-    proxyClientMaxBodySize: '100mb',
+    proxyClientMaxBodySize: '500mb',
   },
   // Транспиляция workspace библиотек
-  transpilePackages: ['@letar/analytics', '@letar/auth', '@letar/chakra-provider', '@letar/yandex-metrika', '@letar/email'],
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/yandex-metrika',
+    '@letar/email',
+  ],
 }
 
 // Базовые плагины
