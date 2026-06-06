@@ -6,8 +6,8 @@ import { createLogoutAction } from '@letar/auth/server'
 /**
  * Server Action для выхода из системы.
  *
- * Kami — standalone Better Auth, не является OIDC-клиентом Ключницы,
- * поэтому просто очищаем локальную сессию и редиректим на /sign-in.
+ * RP-Initiated Logout: очищает локальную Better Auth сессию, затем редиректит
+ * на end_session_endpoint Ключницы, которая очищает OIDC сессию и возвращает на /sign-in.
  *
  * @example
  * // В клиентском компоненте
@@ -16,5 +16,9 @@ import { createLogoutAction } from '@letar/auth/server'
  * </form>
  */
 export const logoutAction = createLogoutAction(auth, {
-  redirectTo: '/sign-in',
+  oidcLogout: {
+    endSessionUrl: `${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`,
+    clientId: process.env.OIDC_CLIENT_ID!,
+    postLogoutRedirectUri: `${process.env.BETTER_AUTH_URL}/sign-in`,
+  },
 })

@@ -80,7 +80,13 @@
 > (1) Passkey кнопка падает с ошибкой при 0 passkeys, нет Conditional UI, нет управления ключами → задокументирован
 > детальный план Этап 6.5.1. (2) "Выход" в kami не выходит из Ключницы → тихий ре-логин → задокументирован
 > Этап 6.51 (RP-initiated logout через end_session_endpoint).
-> **➡️ Следующий старт:** **Этап 6.51** (RP-initiated logout — небольшой, важный UX-фикс) → **Этап 6.5.1** (Conditional UI passkeys).
+> **Сессия №23 (2026-06-06, Этап 6.51 ✅ код):** RP-Initiated Logout реализован для всех hub-client приложений через
+> `createLogoutAction(auth, { oidcLogout: { endSessionUrl, clientId, postLogoutRedirectUri } })`.
+> Подход: `client_id` + `post_logout_redirect_uri` без `id_token_hint` (BA oidcProvider принимает; `id_token` не нужно хранить).
+> Обновлены: `kami/auth.actions.ts` + `.env` (создан); `animatrona-tracker/auth.actions.ts` + `.env`.
+> Остальные (archetest, grandslamcup, time, dashboard) код уже имели — только `.env.docker` нужен.
+> ⏳ **Деплой:** добавить `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` в `.env.docker` всех 6 приложений.
+> **➡️ Следующий старт:** **Этап 6.51 деплой** (sync env + deploy) → **Этап 6.5.1** (Conditional UI passkeys).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -674,17 +680,14 @@ interface AuthProfile {
 - ✅ **auth-hub** — все фиксы задеплоены; OIDC flow работает end-to-end.
 - **Зависимости:** Этап **1.5** ✅; Этап 1 ✅.
 - ⏳ **Проверка OIDC refresh на проде** — убедиться что refresh_token сохраняется в `account` после первого входа.
-- ⏳ **Этап 6.51 — RP-initiated logout (выход из всех сервисов)**. Проблема: "Выход" в kami очищает только
-  локальную сессию; auth-hub остаётся залогиненным → клик "Войти через Ключницу" → мгновенный тихий ре-логин
-  → ощущение что выход не сработал. Решение: после `signOut()` в kami редиректить на
-  `https://auth.letar.best/api/auth/end-session?id_token_hint=<id_token>&post_logout_redirect_uri=https://kami.letar.best`.
-  Better Auth `oidcProvider` поддерживает `end_session_endpoint`. Нужно:
-  (1) сохранять `id_token` в kami после OIDC login (в localStorage или cookie);
-  (2) `signOutAction` в kami → Better Auth local signOut → redirect to auth-hub end_session;
-  (3) auth-hub очищает свою сессию → пользователь реально вышел из всех `*.letar.best`.
-  Эту же механику применить к dashboard, archetest, time, grandslamcup, animatrona-tracker.
+- ✅ **Этап 6.51 — RP-initiated logout (2026-06-06, код):** `createLogoutAction` расширен `OidcLogoutOptions`;
+  после `signOut()` → редирект на `https://auth.letar.best/api/auth/oauth2/endsession?client_id=...&post_logout_redirect_uri=...`;
+  auth-hub удаляет oauthAccessTokens + сессию → реальный выход. `id_token_hint` не нужен — `client_id` достаточен по spec.
+  Все 6 hub-client приложений обновлены (kami `.env` создан + `auth.actions.ts`; animatrona-tracker `.env` + `auth.actions.ts`;
+  archetest/grandslamcup/time/dashboard — код уже был с предыдущих сессий).
+  ⏳ **Деплой:** `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` добавить в `.env.docker` 6 приложений + `nx deploy`.
 
-**➡️ Следующий старт:** **Этап 6.5** (Passkeys/WebAuthn в Ключнице) или **Этап 8.5** (перенос данных пета kami).
+**➡️ Следующий старт:** **Этап 6.51 деплой** (`/sync-env` + деплой 6 приложений) → **Этап 6.5.1** (Conditional UI passkeys).
 
 ### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ⏳ UX (Этап 6.5.1)
 
