@@ -87,7 +87,16 @@
 > `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` добавлен в `.env.docker` всех 6 через SCP.
 > Задеплоено BlackCove: s1 kami ✅, s2 animatrona-tracker/dashboard/archetest/grandslamcup/time ✅.
 > **Этап 6.51 — ПОЛНОСТЬЮ ЗАВЕРШЁН.**
-> **➡️ Следующий старт:** **Этап 6.5.1** (Conditional UI passkeys).
+> **Сессия №24 (2026-06-06, Этап 6.5.1 ✅ ПОЛНОСТЬЮ):** UX passkeys реализован: Шаг A — plugin.ts
+> discoverable credential flow (`allowCredentials: []`) + try/catch + `DELETE /passkey/delete` endpoint;
+> Шаг B — `usePasskeyConditionalAuth` хук (conditional UI autofill при загрузке страницы),
+> `autoComplete="username webauthn"` на email-инпуте, `PasskeySignInButton` → только fallback
+> (скрыта когда `browserSupportsWebAuthnAutofill()=true`); Шаг C — `PasskeyPromptBanner` в `/profile`
+> (1 показ после входа, localStorage `passkey_prompt_dismissed`, dismissable); Шаг D — `/profile/passkeys`
+> (список ключей + добавить + удалить, `PasskeysManager`); ссылка в навигации профиля.
+> commit `812d518`, деплой запрошен у BlackCove.
+> **Этап 6.5.1 — ПОЛНОСТЬЮ ЗАВЕРШЁН.**
+> **➡️ Следующий старт:** **Этап 6.6** (Telegram-авторизация в Ключнице).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -688,9 +697,11 @@ interface AuthProfile {
   archetest/grandslamcup/time/dashboard — код уже был с предыдущих сессий). `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best`
   добавлен в `.env.docker` всех 6. Задеплоено BlackCove (s1: kami ✅; s2: animatrona-tracker/dashboard/archetest/grandslamcup/time ✅).
 
-**➡️ Следующий старт:** **Этап 6.5.1** (Conditional UI passkeys — шаг A: починить сервер, шаг B: Conditional UI, шаги C+D: промпт + управление).
+✅ **Этап 6.5.1 — UX passkeys ✅ ПОЛНОСТЬЮ (2026-06-06, сессия №24):** commit `812d518`, деплой у BlackCove.
 
-### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ⏳ UX (Этап 6.5.1)
+**➡️ Следующий старт:** **Этап 6.6** (Telegram-авторизация в Ключнице).
+
+### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ✅ UX (Этап 6.5.1, сессия №24)
 
 - **Реализовано:** кастомный `passkeyPlugin()` (@simplewebauthn/server v13) для auth-hub; таблица `passkey`;
   компоненты `PasskeySignInButton` / `PasskeyRegisterButton`; кнопка на /sign-in. Задеплоено BlackCove ✅.
@@ -776,15 +787,15 @@ return ctx.json(options)
 - Удаление: `DELETE /api/auth/passkey/delete` (эндпоинт нужно добавить в плагин)
 - `PasskeyRegisterButton` встроить сюда
 
-##### DoD Этапа 6.5.1
+##### DoD Этапа 6.5.1 ✅ ВЫПОЛНЕНО (сессия №24, 2026-06-06)
 
-- [ ] **A**: `authenticate/options` возвращает 200 при 0 passkeys; ошибка только если сервер упал
-- [ ] **B**: `autocomplete="username webauthn"` на email-инпуте; хук conditional auth; passkey в дропдауне браузера
-- [ ] **B**: явная кнопка скрыта когда conditional UI доступен, показывается только как fallback
-- [ ] **C**: баннер-промпт после входа (1 показ, dismissable)
-- [ ] **D**: страница управления passkeys в профиле (список + добавить + удалить)
-- [ ] Добавить `DELETE /passkey/delete` в плагин
-- [ ] typecheck ✅ lint ✅
+- ✅ **A**: `authenticate/options` возвращает 200 при 0 passkeys (`allowCredentials: []` discoverable flow)
+- ✅ **B**: `autocomplete="username webauthn"` на email-инпуте; хук `usePasskeyConditionalAuth`
+- ✅ **B**: явная кнопка скрыта когда conditional UI доступен, показывается только как fallback
+- ✅ **C**: `PasskeyPromptBanner` в `/profile` (1 показ, dismissable, localStorage)
+- ✅ **D**: `/profile/passkeys` — список + добавить + удалить; ссылка в навигации профиля
+- ✅ `DELETE /passkey/delete` добавлен в плагин
+- ✅ typecheck ✅ lint ✅
 
 **Зависимости:** Этап 6.5 инфраструктура ✅. Можно делать без блокеров.
 
