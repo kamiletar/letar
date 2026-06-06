@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-06-06
+
+### Added
+
+- Загрузка файлов произвольного формата (exe, zip, pdf и т.д.) через /admin/files
+- Модель `UploadedFile` в БД (макс. 500MB, хранение в uploads/files/)
+- API route POST/DELETE `/api/arbitrary-upload`
+- Пункт «Файлы» в сайдбаре админ-панели
+
 ## [0.30.2] - 2026-04-04
 
 ### Added
