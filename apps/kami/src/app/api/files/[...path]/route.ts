@@ -1,5 +1,6 @@
 import { existsSync, statSync } from 'fs'
 import { open, readFile } from 'fs/promises'
+import { prisma } from '@/lib/db'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { join } from 'path'
@@ -92,6 +93,28 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           'Cache-Control': 'public, max-age=31536000, immutable',
         },
       })
+    }
+
+    // Для произвольных файлов (uploads/files/) — добавляем оригинальное имя
+    if (path[0] === 'files' && path.length === 2) {
+      const relativePath = path.join('/')
+      const record = await prisma.uploadedFile.findUnique({
+        where: { path: relativePath },
+        select: { filename: true },
+      })
+
+      const file = await readFile(filepath)
+      const headers: Record<string, string> = {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      }
+
+      if (record?.filename) {
+        // RFC 5987 — поддержка UTF-8 имён файлов (пробелы, кириллица и т.д.)
+        headers['Content-Disposition'] = `attachment; filename*=UTF-8''${encodeURIComponent(record.filename)}`
+      }
+
+      return new NextResponse(file, { headers })
     }
 
     // Обычные файлы (изображения и т.д.)
