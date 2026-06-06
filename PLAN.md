@@ -84,9 +84,10 @@
 > `createLogoutAction(auth, { oidcLogout: { endSessionUrl, clientId, postLogoutRedirectUri } })`.
 > Подход: `client_id` + `post_logout_redirect_uri` без `id_token_hint` (BA oidcProvider принимает; `id_token` не нужно хранить).
 > Обновлены: `kami/auth.actions.ts` + `.env` (создан); `animatrona-tracker/auth.actions.ts` + `.env`.
-> Остальные (archetest, grandslamcup, time, dashboard) код уже имели — только `.env.docker` нужен.
-> ⏳ **Деплой:** добавить `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` в `.env.docker` всех 6 приложений.
-> **➡️ Следующий старт:** **Этап 6.51 деплой** (sync env + deploy) → **Этап 6.5.1** (Conditional UI passkeys).
+> `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` добавлен в `.env.docker` всех 6 через SCP.
+> Задеплоено BlackCove: s1 kami ✅, s2 animatrona-tracker/dashboard/archetest/grandslamcup/time ✅.
+> **Этап 6.51 — ПОЛНОСТЬЮ ЗАВЕРШЁН.**
+> **➡️ Следующий старт:** **Этап 6.5.1** (Conditional UI passkeys).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -680,14 +681,14 @@ interface AuthProfile {
 - ✅ **auth-hub** — все фиксы задеплоены; OIDC flow работает end-to-end.
 - **Зависимости:** Этап **1.5** ✅; Этап 1 ✅.
 - ⏳ **Проверка OIDC refresh на проде** — убедиться что refresh_token сохраняется в `account` после первого входа.
-- ✅ **Этап 6.51 — RP-initiated logout (2026-06-06, код):** `createLogoutAction` расширен `OidcLogoutOptions`;
+- ✅ **Этап 6.51 — RP-initiated logout ✅ ПОЛНОСТЬЮ (2026-06-06, сессия №23):** `createLogoutAction` расширен `OidcLogoutOptions`;
   после `signOut()` → редирект на `https://auth.letar.best/api/auth/oauth2/endsession?client_id=...&post_logout_redirect_uri=...`;
   auth-hub удаляет oauthAccessTokens + сессию → реальный выход. `id_token_hint` не нужен — `client_id` достаточен по spec.
   Все 6 hub-client приложений обновлены (kami `.env` создан + `auth.actions.ts`; animatrona-tracker `.env` + `auth.actions.ts`;
-  archetest/grandslamcup/time/dashboard — код уже был с предыдущих сессий).
-  ⏳ **Деплой:** `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` добавить в `.env.docker` 6 приложений + `nx deploy`.
+  archetest/grandslamcup/time/dashboard — код уже был с предыдущих сессий). `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best`
+  добавлен в `.env.docker` всех 6. Задеплоено BlackCove (s1: kami ✅; s2: animatrona-tracker/dashboard/archetest/grandslamcup/time ✅).
 
-**➡️ Следующий старт:** **Этап 6.51 деплой** (`/sync-env` + деплой 6 приложений) → **Этап 6.5.1** (Conditional UI passkeys).
+**➡️ Следующий старт:** **Этап 6.5.1** (Conditional UI passkeys — шаг A: починить сервер, шаг B: Conditional UI, шаги C+D: промпт + управление).
 
 ### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ⏳ UX (Этап 6.5.1)
 
