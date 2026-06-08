@@ -699,7 +699,11 @@ interface AuthProfile {
 
 ✅ **Этап 6.5.1 — UX passkeys ✅ ПОЛНОСТЬЮ (2026-06-06, сессия №24):** commit `812d518`, деплой у BlackCove.
 
-**➡️ Следующий старт:** **Этап 6.6** (Telegram-авторизация в Ключнице).
+✅ **Этап 6.6 — Telegram-авторизация ✅ ПОЛНОСТЬЮ (2026-06-08, сессия №25):** commit `461abde`, деплой запрошен у BlackCove.
+Реализовано: `telegramPlugin()` (BA-плагин), таблица `telegramToken`, кнопка `TelegramSignInButton` на /sign-in.
+После деплоя: добавить `TELEGRAM_BOT_TOKEN/USERNAME/WEBHOOK_SECRET` в `.env.docker`, зарегистрировать webhook.
+
+**➡️ Следующий старт:** **Этап 7** (driving-school на общую библиотеку) или **Этап 8.5** (Mini App-кабинет).
 
 ### Этап 6.5 — Passkeys / WebAuthn ✅ инфраструктура (2026-06-05, сессия №21) + ✅ UX (Этап 6.5.1, сессия №24)
 
@@ -802,9 +806,12 @@ return ctx.json(options)
 - **Целевые приложения:** kami ✅, time ✅, grandslamcup ✅; archetest ❌ (разовые пользователи).
 - **Зависимости оригинального этапа:** Этап 6 (kami auth) ✅.
 
-### Этап 6.6 — Telegram-авторизация в Ключнице (новый способ)
+### Этап 6.6 — Telegram-авторизация в Ключнице ✅ ПОЛНОСТЬЮ (2026-06-08, сессия №25)
 
-- **Сейчас нет** (в auth-hub: github/google/facebook/vk/yandex/magic-link/OIDC). Нужно добавить.
+- **Реализовано:** `telegramPlugin()` — кастомный BA-плагин; таблица `telegramToken`; кнопка на /sign-in.
+  Флоу: сайт генерит one-time token → `t.me/<bot>?start=<token>` → START → webhook → polling → сессия.
+- **Заглушка email:** `<telegramId>@telegram.local` (аналог VK `${id}@vk.com`).
+- **Сейчас не было** (в auth-hub: github/google/facebook/vk/yandex/magic-link/OIDC). Добавлено.
 - **Прообраз в монорепо:** driving-school уже имеет модели `TelegramLink` + `TelegramLinkToken` (привязка
   через токен) — взять за основу, как pin-auth.
 - **Подход (комбинируемо):**
