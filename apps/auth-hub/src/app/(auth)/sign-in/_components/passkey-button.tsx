@@ -38,7 +38,9 @@ export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: Passke
       .catch(() => setShowFallback(true))
   }, [])
 
-  if (showFallback !== true) {return null}
+  if (showFallback !== true) {
+    return null
+  }
 
   async function handlePasskeySignIn() {
     setLoading(true)
@@ -47,7 +49,9 @@ export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: Passke
     try {
       // 1. Получаем challenge от сервера
       const optionsRes = await fetch('/api/auth/passkey/authenticate/options', { method: 'POST' })
-      if (!optionsRes.ok) {throw new Error('Не удалось получить параметры входа')}
+      if (!optionsRes.ok) {
+        throw new Error('Не удалось получить параметры входа')
+      }
       const options = await optionsRes.json()
 
       // 2. Запускаем WebAuthn в браузере (запрос к устройству)
@@ -115,7 +119,9 @@ export function PasskeyRegisterButton({ deviceName, onSuccess }: PasskeyRegister
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  if (!browserSupportsWebAuthn()) {return null}
+  if (!browserSupportsWebAuthn()) {
+    return null
+  }
 
   async function handleRegister() {
     setLoading(true)
@@ -124,7 +130,9 @@ export function PasskeyRegisterButton({ deviceName, onSuccess }: PasskeyRegister
 
     try {
       const optionsRes = await fetch('/api/auth/passkey/register/options', { method: 'POST' })
-      if (!optionsRes.ok) {throw new Error('Нет активной сессии')}
+      if (!optionsRes.ok) {
+        throw new Error('Нет активной сессии')
+      }
       const options = await optionsRes.json()
 
       const response = await startRegistration({ optionsJSON: options })

@@ -6,6 +6,7 @@ import { MagicLinkForm } from './_components/magic-link-form'
 import { AuthOAuthButtons } from './_components/oauth-buttons'
 import { OidcPendingCapture } from './_components/oidc-pending-capture'
 import { PasskeySignInButton } from './_components/passkey-button'
+import { TelegramSignInButton } from './_components/telegram-button'
 
 export const metadata: Metadata = {
   title: 'Вход',
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
 export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const params = await searchParams
   const hasOidc = !!(params.client_id && params.redirect_uri && params.response_type)
+  const hasTelegram = !!(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_USERNAME)
 
   return (
     <Card.Root maxW="4xl" w="full" mx={4}>
@@ -41,6 +43,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
               <AuthOAuthButtons />
             </Suspense>
             <PasskeySignInButton />
+            {hasTelegram && <TelegramSignInButton />}
           </Stack>
 
           <Separator orientation="vertical" display={{ base: 'none', md: 'block' }} />

@@ -59,6 +59,9 @@ model User {
   // Профили в проектах
   projectProfiles ProjectProfile[]
 
+  // Telegram one-time tokens
+  telegramTokens TelegramToken[]
+
   // Публичный доступ на чтение, создание/обновление — только себя
   @@allow('read', true)
   @@allow('create', true)
@@ -234,6 +237,32 @@ model Passkey {
   @@deny('all', true)
   @@index([userId])
   @@map("passkey")
+}
+
+// ========================================
+// Telegram авторизация — one-time deep-link токены
+// ========================================
+
+// Одноразовый токен для входа через Telegram-бота (Этап 6.6 PLAN.md).
+// Флоу: сайт генерит token → t.me/<bot>?start=<token> → бот получает /start,
+// связывает Telegram-identity с userId → фронт поллит /status → сессия.
+model TelegramToken {
+  id         String    @id @default(cuid())
+  token      String    @unique      // hex(32) one-time токен
+  telegramId String?                // Telegram user ID (числовой ID в виде строки)
+  name       String?                // Имя из Telegram
+  username   String?                // @username из Telegram
+  photoUrl   String?                // URL аватарки
+  userId     String?                // Ссылка на пользователя (после подтверждения)
+  expiresAt  DateTime               // 10 минут с момента генерации
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@deny('all', true)
+  @@index([token])
+  @@index([telegramId])
+  @@map("telegramToken")
 }
 
 // ========================================
