@@ -924,59 +924,31 @@ return ctx.json(options)
   кнопка-меню «Открыть кабинет» (Mini App).
 - **Зависимости:** Ключница (auth-hub); пересекается с Mini App-кабинетом (управление email — Этап 8.5).
 
-### Этап 6.7 — Гео-блокировка зарубежных провайдеров для российских IP
+### Этап 6.7 — Гео-блокировка зарубежных провайдеров для российских IP ✅ КОД (2026-06-10, сессия №29)
 
 > **Правовой контекст:** по 149-ФЗ (ред. 2024–2025) и подзаконным актам РКН российские ресурсы обязаны ограничивать
 > использование иностранных сервисов для аутентификации пользователей из РФ. Под ограничение попадают:
-> Google, Facebook (Meta\*), GitHub, а также Telegram (российский по законодательству спорно, но де-факто
-> попадает в «мессенджеры с контролем за распространением»). VK, Яндекс — российские, под ограничение не попадают.
+> Google, Facebook (Meta\*), GitHub, а также Telegram. VK, Яндекс — российские, под ограничение не попадают.
 
-**Суть задачи:** скрывать кнопки иностранных OAuth-провайдеров и Telegram на `/sign-in` для пользователей с российским IP.
-Кнопки email/magic-link, VK, Яндекс — показывать всегда.
+**Реализация (сессия №29):**
 
-**Затронутые провайдеры (скрыть для RU-IP):**
+- `auth-hub/src/lib/geo.ts` — `getCountryCode()`: читает `x-forwarded-for` (NPM уже выставляет), lookupv через `geoip-lite` (MaxMind GeoLite2 бандлится в пакете, без внешних API и без изменений NPM).
+- `sign-in/page.tsx` — Server Component: фильтрует `google/github/facebook` из OAuth-провайдеров, скрывает `TelegramSignInButton` для RU-IP. Fallback: нет заголовка → показывать всё.
+- `oauth-buttons.tsx` — принимает проп `providers` (раньше хардкод).
+- Passkeys оставлены доступными — локальный механизм без иностранного сервиса.
+- typecheck ✅ lint ✅. commit `b80de69`. Деплой запрошен BlackCove (msg #754).
 
-- Google, Facebook (Meta\*), GitHub
-- Telegram (`@letar_best_bot`)
-- Passkeys — вероятно оставить (нет иностранного сервиса, локальный механизм)
+**Не реализовано (опционально):**
 
-**Техническое решение:**
-
-1. **Определение страны по IP** — через заголовок от реверс-прокси (Nginx Proxy Manager или Cloudflare):
-   - Вариант A (NPM + GeoIP): установить плагин `nginx-geoip2` или `nginx-module-geoip` в Nginx Proxy Manager;
-     добавить `X-Country-Code: $geoip2_data_country_code` в upstream headers.
-   - Вариант B (Cloudflare): заголовок `CF-IPCountry` уже проставляется автоматически.
-   - **Рекомендуется Вариант A** (т.к. NPM уже стоит на s1/s2, без Cloudflare).
-
-2. **Чтение заголовка в Next.js** (`auth-hub/src/app/(auth)/sign-in/page.tsx`):
-   ```typescript
-   import { headers } from 'next/headers'
-   const countryCode = (await headers()).get('x-country-code') ?? ''
-   const isRussianIp = countryCode === 'RU'
-   ```
-
-3. **Условный рендер кнопок** — передать `isRussianIp` в компоненты, скрыть зарубежные провайдеры.
-
-4. **Fallback** — если заголовок отсутствует (локальная разработка, прямой доступ) → показывать всё.
-
-**Установка GeoIP2 в Nginx Proxy Manager:**
-
-NPM основан на `nginx` + `openresty`; для GeoIP2 нужен `ngx_http_geoip2_module` и БД MaxMind GeoLite2.
-Вариант — кастомный Docker image с модулем, либо использование `nginx-geoip2` через custom nginx config в NPM.
-Подробнее: [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md).
-
-**Альтернатива (проще):** edge middleware в Next.js + внешний GeoIP API (ipapi.co, ip-api.com) —
-но добавляет latency на каждый запрос. Не рекомендуется для page-level.
-
-**⚠️ Важно:** геоблокировка на фронте — UI-мера, не безопасностная. API-эндпоинты (`/api/auth/callback/google` и др.)
-остаются доступны; для полной блокировки нужен server-side middleware + проверка country в `proxy.ts`.
+- ⏳ `proxy.ts` блокировка `/api/auth/callback/{google,facebook,github}` для RU-IP — UI-мера достаточна, API-эндпоинты остаются (обход через прямой запрос теоретически возможен).
+- ⏳ NPM-уровень (`X-Country-Code` через `ngx_http_geoip2_module`) — требует пересборки NPM-образа, не даёт преимущества над текущим решением.
 
 **DoD:**
 
-- [ ] GeoIP2 заголовок `X-Country-Code` пробрасывается через NPM для `auth.letar.best`
-- [ ] `/sign-in` скрывает Google/Facebook/GitHub/Telegram для RU-IP
-- [ ] `proxy.ts` блокирует `/api/auth/callback/{google,facebook,github}` для RU-IP (опционально)
-- [ ] Для dev-окружения показывается всё (нет заголовка → fallback)
+- ✅ `/sign-in` скрывает Google/Facebook/GitHub/Telegram для RU-IP
+- ✅ Для dev-окружения показывается всё (нет заголовка → fallback)
+- ⏳ `proxy.ts` блокировка API-эндпоинтов (опционально, не блокирует)
+- N/A GeoIP2 заголовок через NPM — заменено `geoip-lite` (лучше)
 
 **Зависимости:** Этапы 6.5, 6.6 ✅.
 
