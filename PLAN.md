@@ -125,7 +125,12 @@
 > `oauth-buttons.tsx` — принимает проп `providers`. Fallback: нет заголовка → показывать всё (dev).
 > Также: fix TS2322 в passkey-prompt-banner + passkeys-manager (`PublicKeyCredentialCreationOptionsJSON`).
 > typecheck ✅ lint ✅. commit `b80de69`. Деплой запрошен BlackCove (msg #754).
-> **➡️ Следующий старт:** Этап 0.8 — тираж cookie-баннера, `deleteAccountAction`, подача РКН для premium-rosstil/imot/dsperevod.
+> **Сессия №30 (2026-06-10, Этап 0.8 — cookie-баннер + DRY):** ✅ Общие компоненты `@letar/ui@0.3.0`:
+> `CookieBanner`, `CookieSettingsButton`, `DeleteAccountZone`, `CookieConsentState`, `createConsentConfig`, `readConsentState`.
+> `auth-hub`: ConsentLog в БД, POST `/api/consent`, `deleteAccountAction`, CookieBanner в layout. `aboi`: рефакторинг на shared компоненты.
+> `dsperevod`: рефакторинг на shared компоненты (cookie-banner, yandex-metrika-consent, lib/consent).
+> Коммиты `045bc31` (ui), `6088286` (auth-hub), `67212ae` (aboi), `791b665` (dsperevod), `1081c70` (submodule bump).
+> **➡️ Следующий старт:** Этап 0.8 — тираж на premium-rosstil, imot, driving-school, grandslamcup. РКН: premium-rosstil/imot/dsperevod (организационно).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -614,11 +619,11 @@ interface AuthProfile {
 
 | Приложение      | ПД собирает?                    | Аудит нужен?     |
 | --------------- | ------------------------------- | ---------------- |
-| auth-hub        | ✅ email, имя, IP, OAuth-данные | ✅               |
-| aboi            | ✅ эталон — уже реализовано     | ⚡ перепроверить |
+| auth-hub        | ✅ email, имя, IP, OAuth-данные | ✅ done с30      |
+| aboi            | ✅ эталон — уже реализовано     | ✅ done с30      |
 | premium-rosstil | ✅ email, имя, адрес доставки   | ✅               |
 | imot            | ✅ email, телефон, имя          | ✅               |
-| dsperevod       | ✅ email, имя                   | ✅               |
+| dsperevod       | ✅ email, имя                   | ✅ done с30      |
 | driving-school  | ✅ email, имя                   | ✅               |
 | kami            | ❌ только владелец              | —                |
 | grandslamcup    | ✅ email, имя игроков           | ✅               |
