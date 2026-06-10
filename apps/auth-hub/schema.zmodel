@@ -62,6 +62,9 @@ model User {
   // Telegram one-time tokens
   telegramTokens TelegramToken[]
 
+  // Журнал cookie-согласий
+  consentLogs ConsentLog[]
+
   // Публичный доступ на чтение, создание/обновление — только себя
   @@allow('read', true)
   @@allow('create', true)
@@ -263,6 +266,32 @@ model TelegramToken {
   @@index([token])
   @@index([telegramId])
   @@map("telegramToken")
+}
+
+// ========================================
+// 152-ФЗ — Журнал cookie-согласий
+// ========================================
+
+/// Запись о cookie-согласии пользователя.
+/// Хранится для соответствия 152-ФЗ — необходимо предъявить при проверке РКН.
+model ConsentLog {
+  id                 String   @id @default(cuid())
+  userId             String?
+  ipHash             String   // SHA-256(IP) — не хранится сырой IP
+  userAgent          String?
+  acceptedAnalytics  Boolean
+  acceptedMarketing  Boolean
+  acceptedFunctional Boolean  @default(true)
+  consentVersion     String
+  consentedAt        DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@allow('create', true)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([consentedAt])
+  @@map("consentLog")
 }
 
 // ========================================

@@ -29,7 +29,8 @@
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
-      "@letar/email": ["../../libs/email/src/index.ts"]
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"]
     },
     "types": ["node"],
     "outDir": "dist",
@@ -72,6 +73,9 @@
     },
     {
       "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/ui"
     }
   ]
 }

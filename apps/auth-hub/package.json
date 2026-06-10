@@ -5,7 +5,8 @@
   "nx": {
     "implicitDependencies": [
       "@letar/chakra-provider",
-      "@letar/analytics"
+      "@letar/analytics",
+      "@letar/ui"
     ]
   },
   "dependencies": {

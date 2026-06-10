@@ -1,7 +1,8 @@
 import { requireAuth } from '@/lib/auth'
-import { Box, Button, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { LuArrowLeft } from 'react-icons/lu'
+import { DeleteAccountSection } from './_components/delete-account-section'
 import { ProfileSettingsForm } from './_components/profile-settings-form'
 
 export const metadata: Metadata = {
@@ -35,6 +36,18 @@ export default async function ProfileSettingsPage() {
         </Box>
 
         <ProfileSettingsForm currentName={session.user.name ?? ''} />
+
+        <Separator />
+
+        <Box>
+          <Heading size="md" mb={1}>
+            Опасная зона
+          </Heading>
+          <Text fontSize="sm" color="fg.muted" mb={4}>
+            Необратимые действия с аккаунтом
+          </Text>
+          <DeleteAccountSection />
+        </Box>
       </Stack>
     </Box>
   )

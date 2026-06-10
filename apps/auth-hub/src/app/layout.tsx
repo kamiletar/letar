@@ -1,5 +1,6 @@
 import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { CookieBanner } from '@letar/ui'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <RootChakraProvider>
           <ColorModeProvider>
             {children}
+            <CookieBanner appKey="auth-hub" />
             <UmamiScript />
           </ColorModeProvider>
         </RootChakraProvider>
