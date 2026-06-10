@@ -31,23 +31,30 @@ export function PasskeysManager({ passkeys: initialPasskeys }: PasskeysManagerPr
     setAdding(true)
     setError(null)
     try {
-      const optionsRes = await fetch('/api/auth/passkey/register/options', { method: 'POST' })
-      if (!optionsRes.ok) {throw new Error('Нет активной сессии')}
-      const optionsJSON = await optionsRes.json()
+      const optionsRes = await fetch('/api/passkey/register-options', { method: 'POST' })
+      if (!optionsRes.ok) {
+        const data = (await optionsRes.json().catch(() => ({}))) as { error?: string }
+        throw new Error(data.error ?? 'Ошибка получения параметров')
+      }
+      const optionsJSON = (await optionsRes.json()) as object
 
       const response = await startRegistration({ optionsJSON })
 
-      const verifyRes = await fetch('/api/auth/passkey/register/verify', {
+      const verifyRes = await fetch('/api/passkey/register-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ response }),
       })
-      const result = await verifyRes.json()
-      if (!verifyRes.ok || !result.verified) {throw new Error('Не удалось добавить ключ')}
+      const result = (await verifyRes.json()) as { verified?: boolean; error?: string }
+      if (!verifyRes.ok || !result.verified) {
+        throw new Error(result.error ?? 'Не удалось добавить ключ')
+      }
 
       router.refresh()
     } catch (e) {
-      if (e instanceof Error && e.name === 'NotAllowedError') {return}
+      if (e instanceof Error && e.name === 'NotAllowedError') {
+        return
+      }
       setError(e instanceof Error ? e.message : 'Ошибка')
     } finally {
       setAdding(false)
@@ -58,7 +65,7 @@ export function PasskeysManager({ passkeys: initialPasskeys }: PasskeysManagerPr
     setDeletingId(passkeyId)
     setError(null)
     try {
-      const res = await fetch('/api/auth/passkey/delete', {
+      const res = await fetch('/api/passkey/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ passkeyId }),

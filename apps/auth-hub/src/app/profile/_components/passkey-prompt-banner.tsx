@@ -23,10 +23,18 @@ export function PasskeyPromptBanner({ hasPasskeys }: PasskeyPromptBannerProps) {
   const [registered, setRegistered] = useState(false)
 
   useEffect(() => {
-    if (hasPasskeys) {return}
-    if (!browserSupportsWebAuthn()) {return}
-    if (typeof localStorage === 'undefined') {return}
-    if (localStorage.getItem(DISMISSED_KEY)) {return}
+    if (hasPasskeys) {
+      return
+    }
+    if (!browserSupportsWebAuthn()) {
+      return
+    }
+    if (typeof localStorage === 'undefined') {
+      return
+    }
+    if (localStorage.getItem(DISMISSED_KEY)) {
+      return
+    }
     setVisible(true)
   }, [hasPasskeys])
 
@@ -38,19 +46,23 @@ export function PasskeyPromptBanner({ hasPasskeys }: PasskeyPromptBannerProps) {
   async function handleRegister() {
     setRegistering(true)
     try {
-      const optionsRes = await fetch('/api/auth/passkey/register/options', { method: 'POST' })
-      if (!optionsRes.ok) {throw new Error('Ошибка получения параметров')}
-      const optionsJSON = await optionsRes.json()
+      const optionsRes = await fetch('/api/passkey/register-options', { method: 'POST' })
+      if (!optionsRes.ok) {
+        throw new Error('Ошибка получения параметров')
+      }
+      const optionsJSON = (await optionsRes.json()) as object
 
       const response = await startRegistration({ optionsJSON })
 
-      const verifyRes = await fetch('/api/auth/passkey/register/verify', {
+      const verifyRes = await fetch('/api/passkey/register-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ response }),
       })
-      const result = await verifyRes.json()
-      if (!verifyRes.ok || !result.verified) {throw new Error('Ошибка регистрации')}
+      const result = (await verifyRes.json()) as { verified?: boolean }
+      if (!verifyRes.ok || !result.verified) {
+        throw new Error('Ошибка регистрации')
+      }
 
       setRegistered(true)
       localStorage.setItem(DISMISSED_KEY, '1')
@@ -67,17 +79,12 @@ export function PasskeyPromptBanner({ hasPasskeys }: PasskeyPromptBannerProps) {
     }
   }
 
-  if (!visible) {return null}
+  if (!visible) {
+    return null
+  }
 
   return (
-    <Box
-      bg="bg.subtle"
-      borderWidth="1px"
-      borderColor="border.emphasized"
-      borderRadius="lg"
-      p={4}
-      position="relative"
-    >
+    <Box bg="bg.subtle" borderWidth="1px" borderColor="border.emphasized" borderRadius="lg" p={4} position="relative">
       <IconButton
         aria-label="Закрыть"
         variant="ghost"
