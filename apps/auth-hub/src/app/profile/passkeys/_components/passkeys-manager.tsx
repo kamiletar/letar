@@ -36,7 +36,8 @@ export function PasskeysManager({ passkeys: initialPasskeys }: PasskeysManagerPr
         const data = (await optionsRes.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error ?? 'Ошибка получения параметров')
       }
-      const optionsJSON = (await optionsRes.json()) as object
+      const optionsJSON =
+        (await optionsRes.json()) as import('@simplewebauthn/browser').PublicKeyCredentialCreationOptionsJSON
 
       const response = await startRegistration({ optionsJSON })
 
