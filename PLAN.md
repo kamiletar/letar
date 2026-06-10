@@ -130,7 +130,16 @@
 > `auth-hub`: ConsentLog в БД, POST `/api/consent`, `deleteAccountAction`, CookieBanner в layout. `aboi`: рефакторинг на shared компоненты.
 > `dsperevod`: рефакторинг на shared компоненты (cookie-banner, yandex-metrika-consent, lib/consent).
 > Коммиты `045bc31` (ui), `6088286` (auth-hub), `67212ae` (aboi), `791b665` (dsperevod), `1081c70` (submodule bump).
-> **➡️ Следующий старт:** Этап 0.8 — тираж на premium-rosstil, imot, driving-school, grandslamcup. РКН: premium-rosstil/imot/dsperevod (организационно).
+> **Сессия №31 (2026-06-10, Этап 0.8 ✅ ПОЛНОСТЬЮ):** ✅ Тираж 152-ФЗ на 4 оставшихся приложения.
+> **premium-rosstil**: ConsentLog + миграция, `/api/consent`, YandexMetrikaConsent (consent-aware обёртка),
+> CookieBanner в layout, deleteAccountAction → DeleteAccountZone в settings/page.tsx.
+> **imot**: ConsentLog + миграция (reset drift: scope/Verification), `/api/consent`, deleteAccountAction,
+> DeleteAccountZone в my-profile/page.tsx, CookieBanner в layout.
+> **driving-school**: ConsentLog + миграция (reset drift: StudyGroup/TheoryTopic), `/api/consent`,
+> deleteAccountAction (soft-delete через deletedAt), DeleteAccountSection в settings/page.tsx, CookieBanner.
+> **grandslamcup**: ConsentLog + миграция, `/api/consent`, deleteAccountAction, DeleteAccountSection
+> в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
+> **➡️ Следующий старт:** Этап 0.8 завершён. Следующее: РКН для premium-rosstil/imot/dsperevod (организационно), Этап 1 CRM (Studio).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -617,19 +626,19 @@ interface AuthProfile {
 
 **Охват:** все публичные приложения монорепо, собирающие ПД граждан РФ:
 
-| Приложение      | ПД собирает?                    | Аудит нужен?     |
-| --------------- | ------------------------------- | ---------------- |
-| auth-hub        | ✅ email, имя, IP, OAuth-данные | ✅ done с30      |
-| aboi            | ✅ эталон — уже реализовано     | ✅ done с30      |
-| premium-rosstil | ✅ email, имя, адрес доставки   | ✅               |
-| imot            | ✅ email, телефон, имя          | ✅               |
-| dsperevod       | ✅ email, имя                   | ✅ done с30      |
-| driving-school  | ✅ email, имя                   | ✅               |
-| kami            | ❌ только владелец              | —                |
-| grandslamcup    | ✅ email, имя игроков           | ✅               |
-| time            | ❌ только владелец              | —                |
-| animatrona-*    | ❌ внутренние инструменты       | —                |
-| dashboard-agent | ❌ внутреннее                   | —                |
+| Приложение      | ПД собирает?                    | Аудит нужен? |
+| --------------- | ------------------------------- | ------------ |
+| auth-hub        | ✅ email, имя, IP, OAuth-данные | ✅ done с30  |
+| aboi            | ✅ эталон — уже реализовано     | ✅ done с30  |
+| premium-rosstil | ✅ email, имя, адрес доставки   | ✅           |
+| imot            | ✅ email, телефон, имя          | ✅           |
+| dsperevod       | ✅ email, имя                   | ✅ done с30  |
+| driving-school  | ✅ email, имя                   | ✅           |
+| kami            | ❌ только владелец              | —            |
+| grandslamcup    | ✅ email, имя игроков           | ✅           |
+| time            | ❌ только владелец              | —            |
+| animatrona-*    | ❌ внутренние инструменты       | —            |
+| dashboard-agent | ❌ внутреннее                   | —            |
 
 **Чеклист для каждого приложения** (из `personal-data.md §7`):
 
