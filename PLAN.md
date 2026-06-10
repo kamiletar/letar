@@ -106,7 +106,14 @@
 > sync-env push + перезапуск + webhook-регистрация выполнены BlackCove. Добавлены в roadmap:
 > **Этап 6.7** (гео-блокировка зарубежных OAuth для RU-IP, 149-ФЗ, GeoIP2 через NPM) и
 > **Этап 0.8** (аудит соответствия 152-ФЗ — cookie-баннеры, согласия, РКН, тираж на все приложения).
-> **➡️ Следующий старт:** Этап 6.7 (GeoIP2 в NPM) или Этап 0.8 (152-ФЗ аудит).
+> **Сессия №27 (2026-06-10, фикс passkeys):** ✅ Исправлена ошибка «Нет активной сессии» на странице
+> `/profile/passkeys` — `getSessionFromCtx(ctx)` в Better Auth плагин-эндпоинтах возвращал `null`
+> в Next.js App Router контексте. Три затронутых операции (register/options, register/verify, delete)
+> перенесены в стандартные Next.js Route Handlers (`/api/passkey/register-options`,
+> `/api/passkey/register-verify`, `/api/passkey/delete`) с правильным чтением сессии через
+> `auth.api.getSession({ headers: await headers() })`. Также улучшены сообщения об ошибках.
+> commit `69fb496`. typecheck ✅ lint ✅. **⏳ Деплой auth-hub ещё не запрошен у BlackCove.**
+> **➡️ Следующий старт:** деплой auth-hub (commit 69fb496) → Этап 6.7 или Этап 0.8.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
