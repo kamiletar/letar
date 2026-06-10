@@ -112,14 +112,20 @@
 > перенесены в стандартные Next.js Route Handlers (`/api/passkey/register-options`,
 > `/api/passkey/register-verify`, `/api/passkey/delete`) с правильным чтением сессии через
 > `auth.api.getSession({ headers: await headers() })`. Также улучшены сообщения об ошибках.
-> commit `69fb496`. typecheck ✅ lint ✅. **⏳ Деплой auth-hub ещё не запрошен у BlackCove.**
+> commit `69fb496`. typecheck ✅ lint ✅. Деплой запрошен BlackCove (msg #753).
 > **Сессия №28 (2026-06-10, Этап 0.8 — уведомления РКН):** ✅ Зафиксированы поданные уведомления РКН:
 > **letar** (`*.letar.best` + driving-school — то же ИП владельца) рег. № 100306050 от 02.06.2026;
 > **aboi** (ИП Гаева) рег. № 100286690 от 16.05.2026. ✅ Решение: «трансграничная передача не осуществляется»
 > корректно — 152-ФЗ касается граждан РФ, для RU-IP зарубежные провайдеры скроет гео-блокировка →
 > **Этап 6.7 обязателен** для соответствия уведомлению. Не подано: premium-rosstil, imot, dsperevod
 > (операторы — их владельцы). Коммиты `506f7cc`, `a43aae0`, `5db9241`.
-> **➡️ Следующий старт:** деплой auth-hub (commit 69fb496) → Этап 6.7 (теперь обязательный) или Этап 0.8 (аудит).
+> **Сессия №29 (2026-06-10, Этап 6.7 ✅ код):** Гео-блокировка иностранных OAuth для RU-IP.
+> `auth-hub/src/lib/geo.ts` — `getCountryCode()` через `x-forwarded-for` + `geoip-lite` (MaxMind GeoLite2 локально).
+> `sign-in/page.tsx` — фильтрует google/github/facebook/telegram для RU-IP; VK/Yandex/passkeys остаются.
+> `oauth-buttons.tsx` — принимает проп `providers`. Fallback: нет заголовка → показывать всё (dev).
+> Также: fix TS2322 в passkey-prompt-banner + passkeys-manager (`PublicKeyCredentialCreationOptionsJSON`).
+> typecheck ✅ lint ✅. commit `b80de69`. Деплой запрошен BlackCove (msg #754).
+> **➡️ Следующий старт:** Этап 0.8 — тираж cookie-баннера, `deleteAccountAction`, подача РКН для premium-rosstil/imot/dsperevod.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
