@@ -257,6 +257,8 @@ model User {
   pushSubscriptions     PushSubscription[]
   /// Telegram chatId для личных сообщений (привязывается через /start)
   telegramChatId        String?   @unique
+  /// 152-ФЗ — логи cookie-согласий
+  consentLogs           ConsentLog[]
 
   @@allow('read', auth() == this)
   @@allow('update', auth() == this)
@@ -1585,4 +1587,27 @@ model TelegramReaction {
   @@unique([telegramMessageId, emoji])
   @@allow('read', auth() != null && 'ADMIN' in auth().roles)
   @@allow('create,update,delete', true)
+}
+
+// ============================================================================
+// 152-ФЗ — Логирование cookie-согласий
+// ============================================================================
+model ConsentLog {
+  id                 String   @id @default(cuid())
+  userId             String?
+  ipHash             String   // SHA-256(IP) — не хранится сырой IP
+  userAgent          String?
+  acceptedAnalytics  Boolean
+  acceptedMarketing  Boolean
+  acceptedFunctional Boolean  @default(true)
+  consentVersion     String
+  consentedAt        DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@allow('create', true)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([consentedAt])
+  @@map("consentLog")
 }

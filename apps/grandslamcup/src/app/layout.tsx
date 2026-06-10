@@ -1,5 +1,5 @@
 import { UmamiScript } from '@letar/analytics'
-import { TopLoader } from '@letar/ui'
+import { CookieBanner, TopLoader } from '@letar/ui'
 import type { Metadata } from 'next'
 
 import { Providers } from './_components/providers'
@@ -46,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <TopLoader color="#FF0000" />
+        <CookieBanner appKey="grandslamcup" privacyUrl="/privacy" />
         <Providers>
           {children}
           <AppToaster />

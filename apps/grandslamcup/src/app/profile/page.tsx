@@ -4,10 +4,11 @@
  */
 
 import { requireAuth } from '@/lib/auth'
-import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, Separator, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LuArrowLeft } from 'react-icons/lu'
+import { DeleteAccountSection } from './_components/delete-account-section'
 import { ProfileEditor } from './_components/profile-editor'
 import { TelegramLinkSection } from './_components/telegram-link-section'
 
@@ -61,6 +62,16 @@ export default async function ProfilePage() {
 
           {/* Привязка Telegram */}
           <TelegramLinkSection />
+
+          <Separator />
+
+          {/* Опасная зона */}
+          <Box>
+            <Heading size="md" color="red.500" mb={3}>
+              Опасная зона
+            </Heading>
+            <DeleteAccountSection />
+          </Box>
         </VStack>
       </Container>
     </Box>
