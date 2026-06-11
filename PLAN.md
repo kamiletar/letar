@@ -172,7 +172,12 @@
 > ✅ **Этап 6.7 деплой** — auth-hub `b80de69` задеплоен BlackCove (geo-blocking иностранных OAuth для RU-IP).
 > ✅ **sync-env animatrona-tracker** — файлы идентичны, `.env.docker.enc` валиден.
 > ✅ **Этап 6.8 UserMenu rollout** — kami, grandslamcup, archetest, time переведены на `UserMenu` из `@letar/ui`; добавлены tsconfig references. dashboard-agent пропущен (backend без UI). commit `badcd95`.
-> **➡️ Следующий старт:** **Этап 6.8 standalone** (aboi, dsperevod, premium-rosstil — оценить применимость); **Этап 7** driving-school на @letar/auth.
+> **Сессия №39 (2026-06-12, Этап 6.8 standalone ✅ ПОЛНОСТЬЮ):** `@letar/ui UserMenu`: добавлен `showAuthHub` (default true) — скрывает «Аккаунт в Ключнице» для standalone-приложений.
+> **aboi**: `AuthButton` переведён на `UserMenu` из `@letar/ui` (Client Component, `useSession()`, `showAuthHub=false`, `isAdmin` через userExt cast). `Suspense` убран вокруг AuthButton.
+> **dsperevod**: N/A — нет auth UI в хедере (landing-сайт с кнопкой «Заказать перевод»).
+> **premium-rosstil**: N/A — уже есть собственный `UserMenuClient` (Server wrapper + i18n Links + `colorPalette="fg"`).
+> typecheck ✅ lint ✅. commits `c72e05c` (aboi), `d6b2edb` (letar).
+> **➡️ Следующий старт:** **Этап 7** driving-school на @letar/auth.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -1017,11 +1022,11 @@ return ctx.json(options)
 
 **Standalone приложения (при наличии хедера с авторизацией):**
 
-| Приложение      | Примечание               | Статус     |
-| --------------- | ------------------------ | ---------- |
-| aboi            | своя авторизация + хедер | ⏳ оценить |
-| dsperevod       | своя авторизация + хедер | ⏳ оценить |
-| premium-rosstil | своя авторизация + хедер | ⏳ оценить |
+| Приложение      | Примечание                                          | Статус        |
+| --------------- | --------------------------------------------------- | ------------- |
+| aboi            | своя авторизация + хедер                            | ✅ сессия №39 |
+| dsperevod       | landing, нет auth в хедере                          | ✅ N/A        |
+| premium-rosstil | собственный UserMenuClient (i18n + colorPalette=fg) | ✅ N/A        |
 
 **Паттерн замены (эталон — animatrona-tracker/header.tsx):**
 
