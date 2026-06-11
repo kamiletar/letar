@@ -1,6 +1,13 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.5.0 — Глобальный выход: RP-Initiated Logout ✅
+## Текущий статус: v0.5.0 — Миграция на `createAuth({ mode: 'hub-provider' })` ✅
+
+### Выполнено (v0.5.0)
+
+- [x] `auth.ts` мигрирован на `createAuth({ mode: 'hub-provider' })` (~401 → ~205 строк без хелперов)
+- [x] `@letar/auth` v0.7.0: `buildHubProviderAuth`, `OidcProviderConfig`, 8 новых тестов hub-provider
+
+---
 
 ---
 
@@ -360,7 +367,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 

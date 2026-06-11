@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
 import { genericOAuth } from 'better-auth/plugins'
+import { oidcProvider as oidcProviderPlugin } from 'better-auth/plugins/oidc-provider'
 
 import type { AuthProfile, HubClientAuthProfile, HubProviderAuthProfile, StandaloneAuthProfile } from './types'
 
@@ -149,6 +150,113 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
   })
 }
 
+function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: TProfile) {
+  const { email, rateLimit, oidcProvider: oidcConfig, account } = profile
+
+  return betterAuth({
+    secret: process.env.BETTER_AUTH_SECRET,
+    database: profile.database,
+    ...(profile.secondaryStorage && { secondaryStorage: profile.secondaryStorage }),
+    baseURL: profile.baseURL,
+    trustedOrigins: profile.trustedOrigins,
+
+    emailAndPassword: {
+      enabled: true,
+      autoSignIn: true,
+      // В dev окружении верификация не требуется для удобства разработки
+      requireEmailVerification: process.env.NODE_ENV === 'production',
+      ...(profile.password && { password: profile.password }),
+      ...(email.sendPasswordResetEmail && {
+        sendResetPassword: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
+          const result = await email.sendPasswordResetEmail!({
+            to: user.email,
+            userName: user.name ?? undefined,
+            resetUrl: url,
+          })
+          if (!result.success) {
+            email.reportEmailFailure({
+              type: 'password-reset',
+              to: user.email,
+              error: result.error ?? 'unknown',
+            })
+          }
+        },
+      }),
+    },
+
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      sendVerificationEmail: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
+        const result = await email.sendVerificationEmail({
+          to: user.email,
+          userName: user.name ?? undefined,
+          verificationUrl: url,
+        })
+        if (!result.success) {
+          email.reportEmailFailure({
+            type: 'verification',
+            to: user.email,
+            error: result.error ?? 'unknown',
+          })
+        }
+      },
+    },
+
+    ...(profile.socialProviders && { socialProviders: profile.socialProviders }),
+    ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
+
+    user: profile.user,
+    session: buildSessionConfig(profile.session),
+
+    rateLimit: {
+      enabled: true,
+      window: 60,
+      max: 100,
+      // Redis → secondary-storage; prod без Redis → database; dev → memory
+      storage: profile.secondaryStorage
+        ? 'secondary-storage'
+        : process.env.NODE_ENV === 'production'
+        ? 'database'
+        : 'memory',
+      modelName: 'rateLimit',
+      customRules: {
+        '/sign-in/email': { window: 60, max: 5 },
+        '/sign-in/*': { window: 60, max: 10 },
+        '/sign-up/email': { window: 300, max: 3 },
+        '/magic-link/*': { window: 300, max: 3 },
+        '/forget-password': { window: 300, max: 3 },
+        '/reset-password/*': { window: 60, max: 5 },
+        '/verify-email': { window: 60, max: 10 },
+        '/send-verification-email': { window: 60, max: 5 },
+        '/oauth2/authorize': { window: 60, max: 30 },
+        '/oauth2/token': { window: 60, max: 30 },
+        ...rateLimit?.customRules,
+      },
+    },
+
+    ...(account && { account }),
+
+    pages: profile.pages,
+    advanced: ADVANCED_IP_CONFIG,
+
+    plugins: [
+      oidcProviderPlugin({
+        loginPage: oidcConfig?.loginPage ?? '/sign-in',
+        consentPage: oidcConfig?.consentPage ?? '/oauth/consent',
+        requirePKCE: oidcConfig?.requirePKCE ?? true,
+        allowDynamicClientRegistration: oidcConfig?.allowDynamicClientRegistration ?? false,
+        accessTokenExpiresIn: oidcConfig?.accessTokenExpiresIn ?? 3600,
+        refreshTokenExpiresIn: oidcConfig?.refreshTokenExpiresIn ?? 604800,
+        scopes: oidcConfig?.scopes ?? ['openid', 'profile', 'email', 'offline_access'],
+      }),
+      ...(profile.plugins ?? []),
+      // nextCookies() — ВСЕГДА последним (требование Better Auth)
+      nextCookies(),
+    ],
+  })
+}
+
 /**
  * Фабрика авторизации Better Auth.
  *
@@ -190,7 +298,7 @@ export function createAuth<TProfile extends HubClientAuthProfile>(
 ): ReturnType<typeof buildHubClientAuth<TProfile>>
 export function createAuth<TProfile extends HubProviderAuthProfile>(
   profile: TProfile,
-): ReturnType<typeof buildStandaloneAuth<TProfile>>
+): ReturnType<typeof buildHubProviderAuth<TProfile>>
 export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
   switch (profile.mode) {
     case 'standalone':
@@ -198,7 +306,6 @@ export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
     case 'hub-client':
       return buildHubClientAuth(profile as HubClientAuthProfile)
     case 'hub-provider':
-      // Тип поддерживается; реальная миграция auth-hub на фабрику — Этап 8.
-      return buildStandaloneAuth(profile as HubProviderAuthProfile)
+      return buildHubProviderAuth(profile as HubProviderAuthProfile)
   }
 }

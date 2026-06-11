@@ -140,7 +140,8 @@
 > **grandslamcup**: ConsentLog + миграция, `/api/consent`, deleteAccountAction, DeleteAccountSection
 > в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
 > **Сессия №32 (2026-06-11, Этап 7 ✅ ПОЛНОСТЬЮ):** `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк); `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0); pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5); SSE endpoint обновлён (`autologin:email` namespace); добавлен `magicLink` плагин BA + UI на /sign-in (`MagicLinkForm` + server action). `magicLinkClient()` добавлен в `auth-client.ts`.
-> **➡️ Следующий старт:** **Этап 8** — auth-hub → `createAuth({ mode: 'hub-provider' })` (реализация OIDC-провайдера через фабрику).
+> **Сессия №33 (2026-06-11, Этап 8 ✅ ПОЛНОСТЬЮ):** `auth-hub/auth.ts` мигрирован на `createAuth({ mode: 'hub-provider' })` (~401→~205 строк без хелперов); `@letar/auth` расширен: `buildHubProviderAuth` (oidcProvider авто-включён, rate-limit с OIDC-правилами, secondaryStorage, account-linking), `OidcProviderConfig` в types; 8 новых тестов hub-provider (nextCookies последний, oidcProvider с defaults и кастомом, rate-limit, accountLinking); `@letar/auth` v0.6.0→v0.7.0; `auth-hub` v0.4.0→v0.5.0.
+> **➡️ Следующий старт:** **v0.4.0 auth-hub** — OIDC Pending Auth Cookie (возврат на исходный сайт после social OAuth при смене аккаунта).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -982,8 +983,7 @@ return ctx.json(options)
   - **Tier 2 → `standalone` + свои ключи:** владелец вводит свои OAuth clientId/secret; secret **шифруется at-rest**
     в БД его проекта; `createAuth({ social: { source: 'db' } })` читает их при старте/reload. **Без runtime-динамики
     провайдеров** (решение ревизии №3) — D8 не нужен.
-- **Миграция auth-hub на `createAuth({ mode: 'hub-provider' })`** — отложена сюда из Этапа 1.5 (не трогаем рабочий
-  OIDC-провайдер раньше). Вынести захардкоженные OIDC-секреты auth-hub в secret-store (Этап 0.4).
+- ✅ **Миграция auth-hub на `createAuth({ mode: 'hub-provider' })`** — выполнено (сессия №33). Вынести захардкоженные OIDC-секреты auth-hub в secret-store (Этап 0.4) — остаётся.
 - **✓ DoD:** коммерс может в админке выбрать Tier 1/Tier 2 с показом рисков; Tier 2-секреты шифруются at-rest и
   подхватываются `createAuth()`; auth-hub работает на фабрике; нет строковых секретов в коде.
 - **Зависимости:** после auth-унификации (этапы 1, **1.5**, 2–7). Самостоятельный крупный трек.

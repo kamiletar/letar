@@ -11,6 +11,9 @@ vi.mock('better-auth/next-js', () => ({
 vi.mock('better-auth/plugins', () => ({
   genericOAuth: vi.fn((cfg: object) => ({ id: 'genericOAuth', ...cfg })),
 }))
+vi.mock('better-auth/plugins/oidc-provider', () => ({
+  oidcProvider: vi.fn((cfg: object) => ({ id: 'oidcProvider', ...cfg })),
+}))
 
 const makeEmailCallbacks = () => ({
   sendVerificationEmail: vi.fn().mockResolvedValue({ success: true }),
@@ -209,6 +212,114 @@ describe('createAuth', () => {
       })
       const callArg = genericOAuth.mock.calls[0]?.[0] as { config: Array<{ discoveryUrl: string }> }
       expect(callArg.config[0].discoveryUrl).toBe('https://custom.auth/openid-configuration')
+    })
+  })
+
+  describe('hub-provider режим', () => {
+    it('возвращает инстанс betterAuth с oidcProvider плагином', async () => {
+      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+      vi.clearAllMocks()
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      expect(auth).toBeDefined()
+      expect(oidcProvider).toHaveBeenCalledOnce()
+    })
+
+    it('использует дефолтные значения OIDC провайдера', async () => {
+      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+      vi.clearAllMocks()
+      createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const callArg = oidcProvider.mock.calls[0]?.[0] as Record<string, unknown>
+      expect(callArg.loginPage).toBe('/sign-in')
+      expect(callArg.consentPage).toBe('/oauth/consent')
+      expect(callArg.requirePKCE).toBe(true)
+      expect(callArg.allowDynamicClientRegistration).toBe(false)
+    })
+
+    it('принимает кастомные настройки oidcProvider', async () => {
+      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+      vi.clearAllMocks()
+      createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+        oidcProvider: {
+          loginPage: '/auth/login',
+          accessTokenExpiresIn: 7200,
+          requirePKCE: false,
+        },
+      })
+      const callArg = oidcProvider.mock.calls[0]?.[0] as Record<string, unknown>
+      expect(callArg.loginPage).toBe('/auth/login')
+      expect(callArg.accessTokenExpiresIn).toBe(7200)
+      expect(callArg.requirePKCE).toBe(false)
+    })
+
+    it('включает emailAndPassword с requireEmailVerification зависящим от NODE_ENV', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      // В тестах NODE_ENV=test → не production → false
+      expect((cfg.emailAndPassword as { requireEmailVerification: boolean }).requireEmailVerification).toBe(false)
+    })
+
+    it('включает расширенные правила rate-limit для OIDC эндпоинтов', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      const rl = cfg.rateLimit as { customRules: Record<string, unknown> }
+      expect(rl.customRules['/oauth2/authorize']).toEqual({ window: 60, max: 30 })
+      expect(rl.customRules['/oauth2/token']).toEqual({ window: 60, max: 30 })
+      expect(rl.customRules['/sign-in/email']).toEqual({ window: 60, max: 5 })
+    })
+
+    it('передаёт account.accountLinking если задано', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+        account: {
+          accountLinking: { enabled: true, trustedProviders: ['google', 'vk'] },
+        },
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      expect(cfg.account).toMatchObject({
+        accountLinking: { enabled: true, trustedProviders: ['google', 'vk'] },
+      })
+    })
+
+    it('nextCookies последний в массиве plugins', async () => {
+      const { nextCookies } = vi.mocked(await import('better-auth/next-js'))
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      const plugins = cfg.plugins as Array<{ id: string }>
+      const lastPlugin = plugins[plugins.length - 1]
+      expect(nextCookies).toHaveBeenCalled()
+      expect(lastPlugin.id).toBe('nextCookies')
     })
   })
 

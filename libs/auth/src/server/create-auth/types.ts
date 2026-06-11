@@ -89,10 +89,18 @@ export interface HubClientAuthProfile extends AuthProfileBase {
   }
 }
 
-/**
- * hub-provider — OIDC провайдер (Ключница).
- * Тип зафиксирован для типизации; реальная миграция auth-hub — Этап 8.
- */
+/** Конфигурация встроенного OIDC провайдера (только для hub-provider) */
+export interface OidcProviderConfig {
+  loginPage?: string
+  consentPage?: string
+  requirePKCE?: boolean
+  allowDynamicClientRegistration?: boolean
+  accessTokenExpiresIn?: number
+  refreshTokenExpiresIn?: number
+  scopes?: string[]
+}
+
+/** hub-provider — OIDC провайдер (Ключница) */
 export interface HubProviderAuthProfile extends AuthProfileBase {
   mode: 'hub-provider'
   database: BetterAuthOptions['database']
@@ -103,6 +111,15 @@ export interface HubProviderAuthProfile extends AuthProfileBase {
   socialProviders?: BetterAuthOptions['socialProviders']
   databaseHooks?: BetterAuthOptions['databaseHooks']
   password?: NonNullable<NonNullable<BetterAuthOptions['emailAndPassword']>['password']>
+  /** Настройки встроенного OIDC провайдера */
+  oidcProvider?: OidcProviderConfig
+  /** Привязка аккаунтов по email от доверенных провайдеров */
+  account?: {
+    accountLinking?: {
+      enabled?: boolean
+      trustedProviders?: string[]
+    }
+  }
 }
 
 export type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAuthProfile
