@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
 
   // Оптимизация bundle size
   optimizePackageImports: ['@chakra-ui/react', 'react-icons'],
+
+  // geoip-lite содержит бинарные .dat файлы — не бандлить, оставить как runtime require
+  serverExternalPackages: ['geoip-lite'],
 }
 
 export default nextConfig
