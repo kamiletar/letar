@@ -5,19 +5,20 @@
  * Оркестратор: собирает DesktopNav, MobileDrawer, UserMenu.
  */
 
+import { logoutAction } from '@/app/_actions/auth.actions'
 import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 import { isUserAdmin } from '@/lib/session-utils'
 import { Box, Container, Flex, Image, Spinner, Text } from '@chakra-ui/react'
+import { UserMenu } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LuChevronDown } from 'react-icons/lu'
+import { LuCalculator, LuChevronDown, LuMic, LuPenLine, LuShield, LuUserRound } from 'react-icons/lu'
 
 import { PushSubscribeButton } from '../push-subscribe-button'
 import { DesktopNav } from './desktop-nav'
 import { MobileDrawer } from './mobile-drawer'
 import { buildNavItems, CITY_LABELS, extractCitySlug } from './nav-config'
 import { useUserMeta } from './use-user-meta'
-import { UserMenu } from './user-menu'
 
 export function PublicHeader() {
   const pathname = usePathname()
@@ -92,34 +93,39 @@ export function PublicHeader() {
             {/* Войти / Юзер — всегда виден */}
             <Flex align="center" gap={1} flexShrink={0}>
               {user && <PushSubscribeButton />}
-              {isPending ? (
-                <Spinner size="sm" color="fg.muted" />
-              ) : user ? (
-                <UserMenu
-                  userName={user.name ?? 'Пользователь'}
-                  isAdmin={showAdmin}
-                  isCoach={isCoach}
-                  isPoet={isPoet}
-                  isScorer={isScorer}
-                  isPresenter={isPresenter}
-                />
-              ) : (
-                <Box
-                  px={3}
-                  py={1.5}
-                  borderRadius="full"
-                  fontSize="sm"
-                  fontWeight="medium"
-                  bg="brand.solid"
-                  color="white"
-                  cursor="pointer"
-                  _hover={{ bg: 'brand.700' }}
-                  transition="background 0.15s"
-                  onClick={() => signInWithLetarAuth()}
-                >
-                  Войти
-                </Box>
-              )}
+              {isPending
+                ? <Spinner size="sm" color="fg.muted" />
+                : (
+                  <UserMenu
+                    session={session?.user ?? null}
+                    onSignIn={() => signInWithLetarAuth()}
+                    onSignOut={logoutAction}
+                    profileHref="/profile"
+                    extraItems={[
+                      ...(showAdmin ? [{ value: 'admin', label: 'Админ-панель', href: '/admin', icon: LuShield }] : []),
+                      ...(isCoach
+                        ? [{ value: 'coach', label: 'Кабинет тренера', href: '/coach', icon: LuUserRound }]
+                        : []),
+                      ...(isPoet ? [{ value: 'poet', label: 'Кабинет поэта', href: '/poet', icon: LuPenLine }] : []),
+                      ...(isScorer
+                        ? [{
+                          value: 'scorer',
+                          label: 'Кабинет счетовода',
+                          href: '/my/scorer-matches',
+                          icon: LuCalculator,
+                        }]
+                        : []),
+                      ...(isPresenter
+                        ? [{
+                          value: 'presenter',
+                          label: 'Кабинет ведущего',
+                          href: '/my/presenter-matches',
+                          icon: LuMic,
+                        }]
+                        : []),
+                    ]}
+                  />
+                )}
             </Flex>
 
             {/* Мобильная кнопка-гамбургер */}

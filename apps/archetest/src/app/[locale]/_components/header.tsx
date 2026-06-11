@@ -2,8 +2,9 @@
 
 import { Box, Button, Container, Heading, HStack } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
+import { UserMenu } from '@letar/ui'
 import { useTranslations } from 'next-intl'
-import { LuKeyRound, LuLogOut, LuSettings, LuUser } from 'react-icons/lu'
+import { LuBriefcaseMedical } from 'react-icons/lu'
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { Link } from '@/i18n/navigation'
@@ -19,8 +20,7 @@ import { MobileDrawer } from './mobile-drawer'
  */
 export function Header() {
   const t = useTranslations('nav')
-  const tCommon = useTranslations('common')
-  const { data: session, isPending } = useSession()
+  const { data: session } = useSession()
   const { isPsychologist } = useIsPsychologist()
 
   return (
@@ -49,34 +49,13 @@ export function Header() {
           <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
             <LanguageSwitcher />
             <ColorModeButton />
-            {isPending ? null : session?.user ? (
-              <HStack gap={2}>
-                <HStack gap={1} color="fg.muted">
-                  <LuUser size={14} />
-                  <Box fontSize="sm">{session.user.name || session.user.email}</Box>
-                </HStack>
-                <Button asChild variant="ghost" size="sm" aria-label={t('settings')}>
-                  <Link href="/settings">
-                    <LuSettings size={14} />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-                    <LuKeyRound size={14} />
-                  </a>
-                </Button>
-                <form action={logoutAction}>
-                  <Button variant="ghost" size="sm" type="submit" aria-label={tCommon('signOut')}>
-                    <LuLogOut size={14} />
-                    <Box>{tCommon('signOut')}</Box>
-                  </Button>
-                </form>
-              </HStack>
-            ) : (
-              <Button onClick={signInWithLetarAuth} variant="outline" size="sm">
-                {tCommon('signIn')}
-              </Button>
-            )}
+            <UserMenu
+              session={session?.user ?? null}
+              onSignIn={signInWithLetarAuth}
+              onSignOut={logoutAction}
+              profileHref="/settings"
+              extraItems={isPsychologist ? [{ value: 'cabinet', label: 'Кабинет', href: '/cabinet', icon: LuBriefcaseMedical }] : []}
+            />
           </HStack>
 
           {/* Мобильный: гамбургер-меню */}

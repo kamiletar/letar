@@ -30,7 +30,8 @@
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/yandex-metrika": ["../../libs/yandex-metrika/src/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
-      "@letar/email": ["../../libs/email/src/index.ts"]
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"]
     },
     "types": ["node"],
     "outDir": "dist",
@@ -81,6 +82,9 @@
     },
     {
       "path": "../../libs/chakra-provider"
+    },
+    {
+      "path": "../../libs/ui"
     }
   ]
 }

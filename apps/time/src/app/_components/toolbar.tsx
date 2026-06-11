@@ -1,11 +1,10 @@
 'use client'
 
 import { logoutAction } from '@/app/_actions/auth.actions'
-import { Link } from '@/i18n/navigation'
 import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
-import { Avatar, HStack, IconButton } from '@chakra-ui/react'
+import { HStack } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
-import { LuKeyRound, LuLogIn, LuLogOut } from 'react-icons/lu'
+import { UserMenu } from '@letar/ui'
 
 import { LocaleSwitcher } from './locale-switcher'
 
@@ -17,33 +16,12 @@ export function Toolbar() {
     <HStack pos="fixed" top={4} right={4} zIndex={10} gap={1} opacity={0.7} _hover={{ opacity: 1 }}>
       <LocaleSwitcher />
       <ColorModeButton />
-
-      {session ? (
-        <>
-          <IconButton variant="ghost" size="sm" aria-label="Profile" asChild>
-            <Link href="/profile">
-              <Avatar.Root size="xs">
-                {session.user.image && <Avatar.Image src={session.user.image} />}
-                <Avatar.Fallback>{session.user.name?.[0] || '?'}</Avatar.Fallback>
-              </Avatar.Root>
-            </Link>
-          </IconButton>
-          <IconButton variant="ghost" size="sm" aria-label="Аккаунт в Ключнице" asChild>
-            <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-              <LuKeyRound />
-            </a>
-          </IconButton>
-          <form action={logoutAction}>
-            <IconButton variant="ghost" size="sm" aria-label="Sign out" type="submit">
-              <LuLogOut />
-            </IconButton>
-          </form>
-        </>
-      ) : (
-        <IconButton variant="ghost" size="sm" aria-label="Sign in" onClick={() => signInWithLetarAuth()}>
-          <LuLogIn />
-        </IconButton>
-      )}
+      <UserMenu
+        session={session?.user ?? null}
+        onSignIn={() => signInWithLetarAuth()}
+        onSignOut={logoutAction}
+        profileHref="/profile"
+      />
     </HStack>
   )
 }

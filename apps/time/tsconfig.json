@@ -72,6 +72,9 @@
     },
     {
       "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/ui"
     }
   ]
 }
