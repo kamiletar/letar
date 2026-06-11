@@ -61,6 +61,12 @@ services:
       AUTH_VK_ID: ${AUTH_VK_ID}
       AUTH_VK_SECRET: ${AUTH_VK_SECRET}
 
+      # Ключница OIDC
+      BETTER_AUTH_OIDC_ISSUER: ${BETTER_AUTH_OIDC_ISSUER:-https://auth.letar.best}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_DISCOVERY_URL: ${OIDC_DISCOVERY_URL:-https://auth.letar.best/api/auth/.well-known/openid-configuration}
+
       # IPFS Gateway
       NEXT_PUBLIC_IPFS_GATEWAY: ${NEXT_PUBLIC_IPFS_GATEWAY:-https://gateway.letar.best}
 
