@@ -162,6 +162,13 @@ async function main() {
         console.log(`  ⚠️  ApiKey удалено (персональные): ${rowCount}`)
       }
 
+      // ModerationLog (moderatorId — RESTRICT: нужно переносить перед удалением User)
+      const { rowCount: modLogCount } = await client.query(
+        'UPDATE "ModerationLog" SET "moderatorId" = $1 WHERE "moderatorId" = $2',
+        [newUser.id, oldUser.id],
+      )
+      if (modLogCount) console.log(`  ✅ ModerationLog перенесено: ${modLogCount}`)
+
       // Rating и Report (userId — CASCADE delete) — удалятся вместе с User
       // Если нужно сохранить — добавить UPDATE здесь, но дубли по (contentId, userId) запрещены
 
