@@ -3,6 +3,10 @@
  *
  * Body: { birthDate: string (ISO 8601) }
  * Аутентификация: сессия
+ *
+ * После обновления БД удаляет cookie-кэш Better Auth (better-auth.session_data),
+ * чтобы следующий запрос перечитал сессию из БД с актуальным birthDate.
+ * Без этого cookieCache (maxAge 5 мин) скрывает изменения.
  */
 
 import { getSession } from '@/lib/auth'
@@ -43,5 +47,12 @@ export async function POST(request: NextRequest) {
     data: { birthDate },
   })
 
-  return NextResponse.json({ ok: true })
+  const response = NextResponse.json({ ok: true })
+
+  // Инвалидируем cookie-кэш Better Auth — имя формируется как {prefix}.session_data
+  // На HTTP: better-auth.session_data, на HTTPS: __Secure-better-auth.session_data
+  response.cookies.delete('better-auth.session_data')
+  response.cookies.delete('__Secure-better-auth.session_data')
+
+  return response
 }

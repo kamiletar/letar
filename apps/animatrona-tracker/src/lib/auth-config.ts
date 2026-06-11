@@ -177,6 +177,7 @@ export const auth = betterAuth({
       birthDate: {
         type: 'date',
         required: false,
+        input: true,
       },
     },
   },
