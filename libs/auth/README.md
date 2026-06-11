@@ -122,6 +122,219 @@ export const auth = createAuth({
 })
 ```
 
+С Redis rate-limit и account-linking (kami):
+
+```typescript
+import { createAuth, createRedisStorage } from '@letar/auth/server'
+
+export const auth = createAuth({
+  mode: 'hub-client',
+  database: prismaAdapter(prisma as never, { provider: 'postgresql' }),
+  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  oidc: {
+    clientId: process.env.OIDC_CLIENT_ID,
+    clientSecret: process.env.OIDC_CLIENT_SECRET,
+  },
+  ...(process.env.REDIS_URL && { secondaryStorage: createRedisStorage(process.env.REDIS_URL) }),
+  rateLimit: {
+    storage: 'secondary-storage', // или 'memory' / 'database'
+    max: 100, // глобальный лимит (useSession() вызывается часто — ставь ≥100)
+  },
+  account: {
+    accountLinking: { enabled: true, trustedProviders: ['letar-auth'] },
+  },
+})
+```
+
+### Режим `hub-provider` — пример (auth-hub / Ключница)
+
+Единственный экземпляр в монорепо. `oidcProvider` плагин добавляется фабрикой автоматически.
+
+```typescript
+// apps/auth-hub/src/lib/auth.ts
+import { createAuth, createRedisStorage } from '@letar/auth/server'
+import { reportEmailFailure, sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { genericOAuth, magicLink } from 'better-auth/plugins'
+
+export const auth = createAuth({
+  mode: 'hub-provider',
+
+  database: prismaAdapter(prisma, { provider: 'postgresql' }),
+
+  ...(process.env.REDIS_URL && { secondaryStorage: createRedisStorage(process.env.REDIS_URL) }),
+
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3014',
+
+  trustedOrigins: [
+    'http://localhost:3014',
+    ...(process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',').map((s) => s.trim()) : []),
+  ],
+
+  email: {
+    sendVerificationEmail: async ({ to, userName, verificationUrl }) => {
+      return sendVerificationEmail({ to, userName, verificationUrl })
+    },
+    reportEmailFailure: ({ type, to, error }) => {
+      reportEmailFailure({ type, to, error })
+    },
+  },
+
+  // OAuth-провайдеры настраиваются ОДИН РАЗ для всех приложений монорепо
+  socialProviders: {
+    ...(process.env.AUTH_GOOGLE_ID &&
+      process.env.AUTH_GOOGLE_SECRET && {
+        google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
+      }),
+    // github, facebook, vk — аналогично
+  },
+
+  // Доп. плагины (oidcProvider + nextCookies фабрика добавит сама)
+  plugins: [
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        /* ... */
+      },
+      expiresIn: 900,
+    }),
+    genericOAuth({
+      config: [
+        /* yandex */
+      ],
+    }),
+    // passkeyPlugin(), telegramPlugin() — кастомные плагины Ключницы
+  ],
+
+  user: {
+    additionalFields: {
+      roles: { type: 'string[]', defaultValue: ['USER'], required: false },
+    },
+  },
+
+  account: {
+    accountLinking: { enabled: true, trustedProviders: ['google', 'github', 'vk', 'yandex'] },
+  },
+
+  // Кастомизация встроенного OIDC провайдера (все поля опциональны — есть дефолты)
+  oidcProvider: {
+    loginPage: '/sign-in',
+    consentPage: '/oauth/consent',
+    requirePKCE: true,
+    accessTokenExpiresIn: 3600,
+    refreshTokenExpiresIn: 604800,
+    scopes: ['openid', 'profile', 'email', 'offline_access'],
+  },
+
+  pages: { signIn: '/sign-in', signUp: '/sign-up', error: '/sign-in' },
+})
+
+export type Session = typeof auth.$Infer.Session
+```
+
+Что фабрика подключает автоматически в `hub-provider`:
+
+- `oidcProvider` плагин (PKCE, OIDC Discovery, consent, токены)
+- `nextCookies()` — **последним** (требование Better Auth)
+- `emailAndPassword` с `requireEmailVerification: true` в production / `false` в dev
+- `emailVerification.sendOnSignUp: true` + `autoSignInAfterVerification: true`
+- `rateLimit` с защитой sign-in/sign-up/magic-link/OIDC эндпоинтов
+- IP-заголовки за reverse proxy
+
+### Standalone с расширенными плагинами — пример (driving-school)
+
+Иллюстрирует `organization`, `magicLink`, кастомный `password`, `databaseHooks`:
+
+```typescript
+import { createAuth } from '@letar/auth/server'
+import { sendMagicLinkEmail, sendPasswordResetEmail, sendVerificationEmail } from '@letar/email'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { genericOAuth, magicLink, organization } from 'better-auth/plugins'
+
+export const auth = createAuth({
+  mode: 'standalone',
+  database: prismaAdapter(prismaAuth, { provider: 'postgresql' }),
+  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:3003' : 'https://xn--80aaah6cnh.xn--p1ai',
+  trustedOrigins: ['https://xn--80aaah6cnh.xn--p1ai', 'https://направа.рф'],
+
+  email: {
+    sendVerificationEmail,
+    sendPasswordResetEmail,
+    reportEmailFailure: ({ type, to, error }) => {
+      console.error(`[Email] ${type} → ${to}: ${error}`)
+    },
+  },
+
+  // bcrypt вместо scrypt — для совместимости с уже созданными хешами
+  password: {
+    hash: async (password) => {
+      const b = await import('bcryptjs')
+      return b.hash(password, 12)
+    },
+    verify: async ({ hash, password }) => {
+      const b = await import('bcryptjs')
+      return b.compare(password, hash)
+    },
+  },
+
+  user: {
+    additionalFields: {
+      roles: { type: 'string[]', defaultValue: ['USER'], required: false },
+      phone: { type: 'string', required: false },
+      birthdate: { type: 'date', required: false },
+    },
+  },
+
+  rateLimit: {
+    customRules: {
+      '/sign-in/*': { window: 900, max: 5 },
+      '/sign-up/*': { window: 3600, max: 3 },
+    },
+  },
+
+  plugins: [
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        /* ... */
+      },
+      expiresIn: 900,
+    }),
+    genericOAuth({
+      config: [
+        /* yandex */
+      ],
+    }),
+    organization({
+      ac,
+      roles,
+      teams: { enabled: true, maximumTeams: 50 },
+      schema: {
+        // Кастомное имя таблицы — если Invitation уже занята в вашей схеме
+        invitation: { modelName: 'OrganizationInvitation' },
+      },
+    }),
+  ],
+
+  socialProviders: {
+    ...(process.env.AUTH_GOOGLE_ID && {
+      google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET! },
+    }),
+  },
+
+  // databaseHooks — обогащение профиля дополнительными данными после OAuth
+  databaseHooks: {
+    account: {
+      create: {
+        after: async (account) => {
+          /* обновить birthdate/gender/phone из VK/Yandex */
+        },
+      },
+    },
+  },
+})
+```
+
+> Подробный файл: [`apps/driving-school/src/lib/auth.ts`](../../apps/driving-school/src/lib/auth.ts)
+
 ### `AuthProfile` — полный контракт
 
 ```typescript
@@ -229,7 +442,7 @@ const { getSession, getCurrentUser } = createSessionHelpers<Session>(auth)
 
 const { requireAuth, requireRole, requireAdmin } = createAuthGuards(
   getSession,
-  (session) => session.user as SessionUser,
+  (session) => session.user as SessionUser
 )
 
 const { isAuthenticated, hasRole, isAdmin } = createAuthChecks(getCurrentUser)
@@ -311,6 +524,56 @@ export function OnlyFor(props: Omit<OnlyForProps<UserRole>, 'session' | 'isPendi
 - `isAuthenticated()` — проверка авторизации
 - `hasRole(roles)` — проверка роли
 - `isAdmin()` — проверка роли ADMIN
+
+#### `createLogoutAction(auth, options?)`
+
+Создаёт Server Action для выхода. Поддерживает простой выход и RP-Initiated Logout (OIDC).
+
+```typescript
+// apps/my-app/src/app/_actions/auth.actions.ts
+'use server'
+
+import { auth } from '@/lib/auth'
+import { createLogoutAction } from '@letar/auth/server'
+
+// Простой выход (standalone)
+export const logoutAction = createLogoutAction(auth)
+
+// OIDC выход (hub-client — выходит и из Ключницы)
+export const logoutAction = createLogoutAction(auth, {
+  oidcLogout: {
+    endSessionUrl: `${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`,
+    clientId: process.env.OIDC_CLIENT_ID!,
+    postLogoutRedirectUri: `${process.env.BETTER_AUTH_URL}/sign-in`,
+  },
+})
+```
+
+| Опция                              | Тип                   | Описание                                          |
+| ---------------------------------- | --------------------- | ------------------------------------------------- |
+| `redirectTo`                       | `string`              | URL после выхода (дефолт `/`)                     |
+| `oidcLogout.endSessionUrl`         | `string`              | `{OIDC_ISSUER}/api/auth/oauth2/endsession`        |
+| `oidcLogout.clientId`              | `string`              | OIDC client_id приложения                         |
+| `oidcLogout.postLogoutRedirectUri` | `string`              | URL возврата (должен быть в redirectUrls клиента) |
+| `onBeforeLogout`                   | `() => Promise<void>` | Колбэк до signOut                                 |
+| `onAfterLogout`                    | `() => Promise<void>` | Колбэк после signOut, до редиректа                |
+
+> **Важно для hub-client:** без `oidcLogout` пользователь выйдет из локальной сессии, но останется
+> залогинен в Ключнице → при следующем входе тихий ре-логин без формы. Всегда используй `oidcLogout`.
+
+#### `createRedisStorage(url)`
+
+Создаёт `secondaryStorage` адаптер для Better Auth на базе Redis.
+Используется для персистентного rate-limit и сессионного кэша в production.
+
+```typescript
+import { createRedisStorage } from '@letar/auth/server'
+
+// В createAuth():
+...(process.env.REDIS_URL && { secondaryStorage: createRedisStorage(process.env.REDIS_URL) }),
+```
+
+Redis настроен с `lazyConnect: true` — не падает при старте если Redis недоступен.
 
 ### Client
 
@@ -480,4 +743,4 @@ socialProviders: {
 
 ---
 
-**Последнее обновление:** 2026-06-04 | **@letar/auth** 0.4.0 | **Better Auth** 1.6.x
+**Последнее обновление:** 2026-06-11 | **@letar/auth** 0.7.0 | **Better Auth** 1.6.x
