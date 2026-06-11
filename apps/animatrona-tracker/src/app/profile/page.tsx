@@ -42,6 +42,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
   const animeWhere = {
     uploadedById: session.user.id,
+    // HIDDEN = архивные (старые версии после approve_replacement) — не показываем
+    status: { not: 'HIDDEN' as const },
     ...searchFilter,
   }
 
