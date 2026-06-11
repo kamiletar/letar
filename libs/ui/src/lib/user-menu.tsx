@@ -42,6 +42,8 @@ export interface UserMenuProps {
   triggerSlot?: ReactNode
   /** Базовый URL Ключницы (по умолчанию https://auth.letar.best) */
   authHubUrl?: string
+  /** Показывать ли пункт «Аккаунт в Ключнице» (по умолчанию true; false для standalone-приложений) */
+  showAuthHub?: boolean
   /** Размер кнопки «Войти» */
   size?: 'sm' | 'md' | 'lg'
 }
@@ -72,6 +74,7 @@ export function UserMenu({
   extraItems = [],
   triggerSlot,
   authHubUrl = 'https://auth.letar.best',
+  showAuthHub = true,
   size = 'sm',
 }: UserMenuProps) {
   const [isPending, startTransition] = useTransition()
@@ -175,15 +178,18 @@ export function UserMenu({
 
             {(profileHref || extraItems.length > 0) && <Separator />}
 
-            {/* Аккаунт в Ключнице */}
-            <Menu.Item value="auth-hub" asChild>
-              <a href={`${authHubUrl}/profile`} target="_blank" rel="noopener noreferrer">
-                <LuKeyRound size={16} />
-                Аккаунт в Ключнице
-              </a>
-            </Menu.Item>
-
-            <Separator />
+            {/* Аккаунт в Ключнице — только для hub-client приложений */}
+            {showAuthHub && (
+              <>
+                <Menu.Item value="auth-hub" asChild>
+                  <a href={`${authHubUrl}/profile`} target="_blank" rel="noopener noreferrer">
+                    <LuKeyRound size={16} />
+                    Аккаунт в Ключнице
+                  </a>
+                </Menu.Item>
+                <Separator />
+              </>
+            )}
 
             {/* Выйти */}
             <Menu.Item
