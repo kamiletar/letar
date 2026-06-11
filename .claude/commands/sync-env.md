@@ -80,4 +80,24 @@
 
 ## После синхронизации
 
+### Авто-шифрование после pull
+
+Если были pull-изменения (локальный `.env.docker` обновлён) — автоматически перешифруй:
+
+```bash
+for app in <затронутые приложения>; do
+  if command -v sops &>/dev/null && [[ -n "$SOPS_AGE_KEY_FILE" ]] && [[ -f "$SOPS_AGE_KEY_FILE" ]]; then
+    sops --encrypt --output "apps/$app/.env.docker.enc" "apps/$app/.env.docker"
+    echo "✅ $app — .env.docker.enc обновлён"
+  fi
+done
+```
+
+Затем закоммить обновлённые `.env.docker.enc`:
+
+```bash
+git add apps/*/.env.docker.enc
+git commit -m "chore: sync .env.docker.enc после pull с сервера"
+```
+
 Напомни пользователю передеплоить затронутые приложения, если были push-изменения.
