@@ -8,7 +8,7 @@
 
 Подробная документация в `.claude/docs/`: [repo-structure](/.claude/docs/repo-structure.md) ⭐ (публичный + приватные submodules), [environment](/.claude/docs/environment.md), [forms](/.claude/docs/forms.md), [data-fetching](/.claude/docs/data-fetching.md), [ui-components](/.claude/docs/ui-components.md), [database](/.claude/docs/database.md), [auth](/.claude/docs/auth.md), [architecture](/.claude/docs/architecture.md), [mcp-servers](/.claude/docs/mcp-servers.md), [deployment](/.claude/docs/deployment.md), [code-style](/.claude/docs/code-style.md), [documentation-guidelines](/.claude/docs/documentation-guidelines.md), [e2e-testing](/.claude/docs/e2e-testing.md), [images](/.claude/docs/images.md), [email](/.claude/docs/email.md), [pwa-offline](/.claude/docs/pwa-offline.md), [user-profile](/.claude/docs/user-profile.md), [admin](/.claude/docs/admin.md), [personal-data](/.claude/docs/personal-data.md) ⭐ (152-ФЗ, РКН, cookie-согласия, чекбоксы ПДн).
 
-**Инфраструктура:** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md), [server-recovery](/.claude/docs/server-recovery.md), [backup-architecture](/.claude/docs/backup-architecture.md).
+**Инфраструктура:** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md), [server-recovery](/.claude/docs/server-recovery.md), [backup-architecture](/.claude/docs/backup-architecture.md), [secret-manager](/.claude/docs/secret-manager.md) (SOPS + age).
 
 ## Быстрый старт
 
@@ -39,7 +39,7 @@
 - **TDD:** Red → Green → Refactor
 - **Планирование:** Веди `PLAN.md` и `PLAN_TESTING.md` в каждом приложении. Если просят сделать что-то, чего нет в PLAN.md — сразу заноси. Когда сделал — отмечай выполненным
 - **Коммиты:** Делай автоматически после готовых изменений. Подними версию в package.json
-- **Документируй:** Найденные особенности добавляй в `.claude/docs/`
+- **Документируй:** Найденные особенности добавляй в `.claude/docs/`. **Превентивно обновляй существующие doc-файлы** когда поведение системы изменилось, и **создавай новые** когда появился значимый паттерн/решение которого ещё нет в docs — не жди явного запроса. Это касается в том числе **UI/UX паттернов**: компонентов Chakra UI, паттернов форм, анимаций, адаптивной вёрстки, accessibility-решений. После изменения doc-файла добавь ссылку в раздел «Документация» этого файла если её ещё нет.
 
 **Перед коммитом:** `nx format` → `nx lint` → `nx typecheck:tsgo`
 

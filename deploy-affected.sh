@@ -59,6 +59,33 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Расшифровка SOPS-файла если есть .enc версия
+# Использует SOPS_AGE_KEY_FILE или SOPS_AGE_KEY для расшифровки
+decrypt_sops_env() {
+  local app_dir=$1
+  local enc_file="${app_dir}/${ENV_FILE_NAME}.enc"
+  local plain_file="${app_dir}/${ENV_FILE_NAME}"
+
+  if [ ! -f "$enc_file" ]; then
+    return 0
+  fi
+
+  if [ -z "${SOPS_AGE_KEY_FILE:-}" ] && [ -z "${SOPS_AGE_KEY:-}" ]; then
+    echo -e "${RED}❌ Найден зашифрованный файл ${enc_file}, но SOPS_AGE_KEY_FILE не задан${NC}"
+    echo -e "${YELLOW}   Установи: export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt${NC}"
+    return 1
+  fi
+
+  echo -e "${YELLOW}🔓 Расшифровываю ${enc_file}...${NC}"
+  if sops --decrypt "$enc_file" > "$plain_file"; then
+    chmod 600 "$plain_file"
+    echo -e "${GREEN}✅ Расшифровано в ${plain_file}${NC}"
+  else
+    echo -e "${RED}❌ Не удалось расшифровать ${enc_file}${NC}"
+    return 1
+  fi
+}
+
 # Configuration
 BASE_BRANCH="main"
 WORKSPACE_ROOT=$(pwd)
@@ -471,6 +498,13 @@ for app in $AFFECTED_APPS; do
   echo ""
 
   APP_DIR="apps/${app}"
+
+  # Расшифровка .env.docker.enc → .env.docker (если используется SOPS)
+  if ! decrypt_sops_env "$APP_DIR"; then
+    FAILED_APPS+=("$app")
+    echo ""
+    continue
+  fi
 
   # Check if app directory exists
   if [ ! -d "$APP_DIR" ]; then
