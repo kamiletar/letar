@@ -1,6 +1,5 @@
 'use client'
 
-import { logoutAction } from '@/app/_actions/auth.actions'
 import { formatFileSize, formatSeedingTime } from '@/lib/ipfs'
 import {
   Badge,
@@ -20,9 +19,8 @@ import {
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  LuArrowLeft,
   LuBookOpen,
   LuCheck,
   LuChevronLeft,
@@ -34,11 +32,9 @@ import {
   LuKey,
   LuLanguages,
   LuLink,
-  LuLogOut,
   LuRefreshCw,
   LuSearch,
   LuSettings,
-  LuTrophy,
   LuUpload,
   LuUsers,
 } from 'react-icons/lu'
@@ -126,12 +122,6 @@ export function ProfileClient({
   const [trackMode, setTrackMode] = useState(user.preferredTrackMode || 'RUSSIAN_DUB')
   const [isSavingTrackMode, setIsSavingTrackMode] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
-  const [, startTransition] = useTransition()
-
-  const handleSignOut = () => {
-    startTransition(() => logoutAction())
-  }
-
   const handleTrackModeChange = useCallback(async (newMode: string) => {
     setTrackMode(newMode)
     setIsSavingTrackMode(true)
@@ -192,36 +182,6 @@ export function ProfileClient({
 
   return (
     <Box minH="100vh" bg="bg">
-      {/* Header */}
-      <Box bg="bg.panel" borderBottomWidth="1px" py={4}>
-        <Container maxW="container.xl">
-          <Flex justify="space-between" align="center">
-            <HStack gap={4}>
-              <Button asChild variant="ghost" size="sm">
-                <NextLink href="/anime">
-                  <Icon as={LuArrowLeft} mr={2} />
-                  Аниме
-                </NextLink>
-              </Button>
-              <Heading size="lg">Профиль</Heading>
-            </HStack>
-
-            <HStack gap={2}>
-              <Button asChild variant="ghost" size="sm">
-                <NextLink href="/leaderboard">
-                  <Icon as={LuTrophy} mr={2} />
-                  Лидерборд
-                </NextLink>
-              </Button>
-              <Button variant="ghost" colorPalette="red" size="sm" onClick={handleSignOut}>
-                <Icon as={LuLogOut} mr={2} />
-                Выйти
-              </Button>
-            </HStack>
-          </Flex>
-        </Container>
-      </Box>
-
       <Container maxW="container.xl" py={8}>
         <Flex gap={8} direction={{ base: 'column', lg: 'row' }}>
           {/* Sidebar — только карточка профиля */}
