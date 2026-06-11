@@ -31,3 +31,6 @@
 [submodule "apps/studio"]
 	path = apps/studio
 	url = git@github.com:kamiletar/letar-private-studio.git
+[submodule "apps/svoichuzhie"]
+	path = apps/svoichuzhie
+	url = git@github.com:kamiletar/letar-private-svoichuzhie.git
