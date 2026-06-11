@@ -157,7 +157,17 @@
 > деплой auth-hub `c0ed40c` через SOPS прошёл успешно — подтверждено BlackCove (agent-mail msg #762). **Этап 0.4 — ПОЛНОСТЬЮ закрыт.**
 > **Сессия №36 (2026-06-11, статус + подтверждение инфры):** `/repo` — сводный отчёт плана; уточнено что
 > age-ключ на s2 установлен BlackCove в сессии деплоя (msg #762); все деплои сессий №32–35 подтверждены.
-> **➡️ Следующий старт:** **Этап 8.5** — owner-миграции на s2 (dashboard/archetest/animatrona-tracker).
+> **Сессия №37 (2026-06-11, Этап 8.5 ✅ ПОЛНОСТЬЮ + animatrona-tracker auth UX + UserMenu):**
+> ✅ **Этап 8.5 — ПОЛНОСТЬЮ:** owner-миграция animatrona-tracker выполнена BlackCove (1155 Anime, 144 UserLibraryItem,
+> 2901 Distribution, 1144 PinJob, 1226 ModerationLog → `kami@letar.best`; старые аккаунты удалены).
+> ✅ **Rate limit fix** — глобальный `rateLimit.max` 10→100 в animatrona-tracker/auth-config.ts (`useSession()` исчерпывал
+> лимит при каждом рендере). commit `5214f0d`.
+> ✅ **Auth UX** — кнопка «Войти» в хедере теперь сразу редиректит на Ключницу (OIDC); `returnTo` фиксирован
+> `/browse`→`/` (страница не существует). commit `9fe6f7c`.
+> ✅ **`UserMenu` в `@letar/ui`** — универсальный компонент меню пользователя для всего монорепо (кнопка «Войти»,
+> dropdown с профилем, Ключницей, доп. пунктами и Выйти); применён в animatrona-tracker вместо разрозненных элементов.
+> Экспорт из `libs/ui/src/index.ts`; dist пересобран (`tsc --build libs/ui/tsconfig.lib.json`). commit `ef8fdf0`.
+> **➡️ Следующий старт:** **Этап 1.5** — дочистить DoD (README `libs/auth`); **Этап 6.7** деплой; **`/sync-env`** animatrona-tracker (SOPS).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).

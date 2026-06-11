@@ -137,6 +137,24 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
 - [x] LRU-кеш для IPFS fetch + unmountOnExit для polling вкладок
 - [x] DB Pool увеличен до max: 20
 
+## Авторизация (Ключница / Better Auth OIDC)
+
+### Выполнено ✅
+
+- [x] **Better Auth hub-client** — вход через Ключница (`auth.letar.best`) по OIDC (`signIn.oauth2({ providerId: 'letar-auth' })`)
+- [x] **RP-initiated logout** — выход также завершает сессию в Ключнице (`endSessionUrl`)
+- [x] **Rate limit** — глобальный лимит поднят до 100 req/60s (был 10 — исчерпывался `useSession()` на каждом рендере). Кастомные правила: `/sign-in/*` 5/900s, `/sign-up/*` 3/3600s
+- [x] **Auth UX** — кнопка «Войти» в хедере сразу отправляет на Ключницу (без промежуточной страницы); `callbackURL` = текущий путь
+- [x] **returnTo фикс** — `sign-in/page.tsx` возвращает на `/` по умолчанию (не на `/browse`)
+- [x] **UserMenu** — универсальный компонент из `@letar/ui`: кнопка «Войти» / dropdown с профилем, Ключницей, доп. пунктами и Выйти; применён в десктопном хедере
+- [x] **Owner migration (Этап 8.5)** — `kami@letar.best` присвоен ADMIN роль; 1155 Anime, 144 UserLibraryItem, 2901 Distribution, 1144 PinJob, 1226 ModerationLog перенесены; старые аккаунты удалены (2026-06-11)
+
+### Pending ⏳
+
+- [ ] **`/sync-env` OIDC vars** — переменные `BETTER_AUTH_OIDC_ISSUER` и OIDC client ID/secret добавлены вручную на s2, но не попали в локальный `.env.docker.enc`. Нужно: `/sync-env pull animatrona-tracker` → re-encrypt SOPS
+
+---
+
 ## Текущая версия: v0.11.0
 
 Веб-платформа для просмотра аниме из IPFS. Каталог с полными страницами аниме (портированы из animatrona-web), франшизы с 3 режимами визуализации, видеоплеер (Shaka + SubtitlesOctopus), прогресс просмотра в БД, облачная библиотека пользователя, trackMode per-anime.
@@ -515,4 +533,4 @@ nx build animatrona-tracker
 
 ---
 
-**Последнее обновление:** 2026-04-10
+**Последнее обновление:** 2026-06-11
