@@ -141,7 +141,12 @@
 > в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
 > **Сессия №32 (2026-06-11, Этап 7 ✅ ПОЛНОСТЬЮ):** `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк); `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0); pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5); SSE endpoint обновлён (`autologin:email` namespace); добавлен `magicLink` плагин BA + UI на /sign-in (`MagicLinkForm` + server action). `magicLinkClient()` добавлен в `auth-client.ts`.
 > **Сессия №33 (2026-06-11, Этап 8 ✅ ПОЛНОСТЬЮ):** `auth-hub/auth.ts` мигрирован на `createAuth({ mode: 'hub-provider' })` (~401→~205 строк без хелперов); `@letar/auth` расширен: `buildHubProviderAuth` (oidcProvider авто-включён, rate-limit с OIDC-правилами, secondaryStorage, account-linking), `OidcProviderConfig` в types; 8 новых тестов hub-provider (nextCookies последний, oidcProvider с defaults и кастомом, rate-limit, accountLinking); `@letar/auth` v0.6.0→v0.7.0; `auth-hub` v0.4.0→v0.5.0.
-> **➡️ Следующий старт:** **v0.4.0 auth-hub** — OIDC Pending Auth Cookie (возврат на исходный сайт после social OAuth при смене аккаунта).
+> **Сессия №34 (2026-06-11, OIDC Pending Auth Cookie ✅):** Новый route `api/auth/oauth2/authorize/route.ts` перехватывает BA authorize,
+> сохраняет полные OIDC-параметры в `oidc_pending` cookie до BA-обработки (клонирует Response с Set-Cookie).
+> `consent/page.tsx` читает cookie → передаёт `oidcParams` в `AccountChooser`. `AccountChooser` при смене аккаунта
+> редиректит `/sign-in?...полные params...` вместо усечённых consent params. commit `1fc3ab1`. typecheck ✅ lint ✅.
+> Деплой запросить у BlackCove.
+> **➡️ Следующий старт:** **Этап 0.4** (SOPS + age пилот на одном приложении) или **Этап 8.5** owner-миграции на s2 (скрипты готовы).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
