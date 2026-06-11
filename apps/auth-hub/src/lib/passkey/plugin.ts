@@ -39,10 +39,10 @@ export function passkeyPlugin(): BetterAuthPlugin {
           const options = await generatePasskeyRegistrationOptions(
             session.user.id,
             session.user.name ?? '',
-            session.user.email,
+            session.user.email
           )
           return ctx.json(options)
-        },
+        }
       ),
 
       passkeyRegisterVerify: createAuthEndpoint(
@@ -64,7 +64,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           const passkeyData = await verifyPasskeyRegistration(
             session.user.id,
             ctx.body.response as unknown as Parameters<typeof verifyPasskeyRegistration>[1],
-            ctx.body.name,
+            ctx.body.name
           )
 
           await ctx.context.adapter.create({
@@ -73,7 +73,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           })
 
           return ctx.json({ verified: true })
-        },
+        }
       ),
 
       passkeyAuthOptions: createAuthEndpoint(
@@ -89,7 +89,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           } catch {
             return ctx.json({ error: 'Не удалось получить параметры входа' }, { status: 500 })
           }
-        },
+        }
       ),
 
       passkeyAuthVerify: createAuthEndpoint(
@@ -103,7 +103,9 @@ export function passkeyPlugin(): BetterAuthPlugin {
         },
         async (ctx) => {
           const credId = ctx.body.response.id as string | undefined
-          if (!credId) {throw new Error('credentialId отсутствует')}
+          if (!credId) {
+            throw new Error('credentialId отсутствует')
+          }
 
           const passkeys = (await ctx.context.adapter.findMany({
             model: 'passkey',
@@ -117,11 +119,15 @@ export function passkeyPlugin(): BetterAuthPlugin {
           }>
 
           const passkey = passkeys[0]
-          if (!passkey) {throw new Error('Passkey не найден')}
+          if (!passkey) {
+            throw new Error('Passkey не найден')
+          }
 
           // Получаем полный объект пользователя для setSessionCookie
           const userRecord = await ctx.context.internalAdapter.findUserById(passkey.userId)
-          if (!userRecord) {throw new Error('Пользователь не найден')}
+          if (!userRecord) {
+            throw new Error('Пользователь не найден')
+          }
 
           const { newCounter } = await verifyPasskeyAuthentication(
             ctx.body.response as unknown as Parameters<typeof verifyPasskeyAuthentication>[0],
@@ -130,7 +136,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
               publicKey: passkey.publicKey,
               counter: passkey.counter,
               transports: passkey.transports,
-            },
+            }
           )
 
           // Обновляем счётчик (защита от replay-атак)
@@ -142,7 +148,9 @@ export function passkeyPlugin(): BetterAuthPlugin {
 
           // Создаём сессию через Better Auth internal adapter
           const newSession = await ctx.context.internalAdapter.createSession(passkey.userId)
-          if (!newSession) {throw new Error('Ошибка создания сессии')}
+          if (!newSession) {
+            throw new Error('Ошибка создания сессии')
+          }
 
           // Устанавливаем session cookie (тот же паттерн что magic-link)
           await setSessionCookie(ctx, { session: newSession, user: userRecord })
@@ -151,7 +159,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
             verified: true,
             user: { id: userRecord.id, email: userRecord.email, name: userRecord.name },
           })
-        },
+        }
       ),
 
       passkeyDelete: createAuthEndpoint(
@@ -188,7 +196,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           })
 
           return ctx.json({ deleted: true })
-        },
+        }
       ),
     },
 

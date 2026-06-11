@@ -21,26 +21,34 @@ export function usePasskeyConditionalAuth(callbackUrl: string) {
     let mounted = true
 
     async function startConditional() {
-      if (!(await browserSupportsWebAuthnAutofill())) {return}
+      if (!(await browserSupportsWebAuthnAutofill())) {
+        return
+      }
 
       try {
         const optionsRes = await fetch('/api/auth/passkey/authenticate/options', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         })
-        if (!optionsRes.ok || !mounted) {return}
+        if (!optionsRes.ok || !mounted) {
+          return
+        }
         const optionsJSON = await optionsRes.json()
 
         // Блокирует до выбора passkey из дропдауна браузера
         const response = await startAuthentication({ optionsJSON, useBrowserAutofill: true })
-        if (!mounted) {return}
+        if (!mounted) {
+          return
+        }
 
         const verifyRes = await fetch('/api/auth/passkey/authenticate/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ response }),
         })
-        if (!mounted) {return}
+        if (!mounted) {
+          return
+        }
 
         const result = await verifyRes.json()
         if (verifyRes.ok && result.verified) {

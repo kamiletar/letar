@@ -36,6 +36,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "dsperevod"],
       "port": 3019
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "studio"],
+      "port": 3020
     }
   ]
 }

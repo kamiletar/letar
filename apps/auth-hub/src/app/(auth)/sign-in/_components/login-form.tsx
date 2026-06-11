@@ -72,13 +72,7 @@ export function LoginForm() {
       <Stack gap={4}>
         <Field.Root>
           <Field.Label>Email</Field.Label>
-          <Input
-            name="email"
-            type="email"
-            autoComplete="username webauthn"
-            placeholder="you@example.com"
-            required
-          />
+          <Input name="email" type="email" autoComplete="username webauthn" placeholder="you@example.com" required />
         </Field.Root>
 
         <Field.Root>

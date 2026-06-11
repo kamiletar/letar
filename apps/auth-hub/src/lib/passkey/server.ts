@@ -11,17 +11,17 @@
  *   POST /api/passkey/authenticate/verify  — верификация входа → создать сессию
  */
 
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-} from '@simplewebauthn/server'
 import type {
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
   PublicKeyCredentialDescriptorJSON,
   RegistrationResponseJSON,
+} from '@simplewebauthn/server'
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
 } from '@simplewebauthn/server'
 
 export const RP_ID = process.env.WEBAUTHN_RP_ID || 'letar.best'
@@ -78,10 +78,12 @@ export async function generatePasskeyRegistrationOptions(userId: string, userNam
 export async function verifyPasskeyRegistration(
   userId: string,
   response: RegistrationResponseJSON,
-  deviceName?: string,
+  deviceName?: string
 ) {
   const expectedChallenge = getChallenge(`reg:${userId}`)
-  if (!expectedChallenge) {throw new Error('Challenge не найден или истёк. Повторите регистрацию.')}
+  if (!expectedChallenge) {
+    throw new Error('Challenge не найден или истёк. Повторите регистрацию.')
+  }
 
   const verification = await verifyRegistrationResponse({
     response,
@@ -117,14 +119,12 @@ export async function verifyPasskeyRegistration(
 // ========================================
 
 export async function generatePasskeyAuthenticationOptions(
-  existingPasskeys: Array<{ id: string; transports: string | null }>,
+  existingPasskeys: Array<{ id: string; transports: string | null }>
 ) {
   const allowCredentials: PublicKeyCredentialDescriptorJSON[] = existingPasskeys.map((pk) => ({
     id: pk.id,
     type: 'public-key' as const,
-    transports: pk.transports
-      ? (JSON.parse(pk.transports) as AuthenticatorTransportFuture[])
-      : undefined,
+    transports: pk.transports ? (JSON.parse(pk.transports) as AuthenticatorTransportFuture[]) : undefined,
   }))
 
   const options = await generateAuthenticationOptions({
@@ -145,22 +145,23 @@ export async function verifyPasskeyAuthentication(
     publicKey: Buffer
     counter: bigint
     transports: string | null
-  },
+  }
 ) {
-  const expectedChallenge = getChallenge(`auth:${response.response.clientDataJSON}`)
+  const expectedChallenge =
+    getChallenge(`auth:${response.response.clientDataJSON}`) ??
     // Декодируем clientDataJSON для получения challenge
-    ?? (() => {
+    (() => {
       try {
-        const decoded = JSON.parse(
-          Buffer.from(response.response.clientDataJSON, 'base64url').toString(),
-        )
+        const decoded = JSON.parse(Buffer.from(response.response.clientDataJSON, 'base64url').toString())
         return getChallenge(`auth:${decoded.challenge}`)
       } catch {
         return null
       }
     })()
 
-  if (!expectedChallenge) {throw new Error('Challenge не найден или истёк.')}
+  if (!expectedChallenge) {
+    throw new Error('Challenge не найден или истёк.')
+  }
 
   const verification = await verifyAuthenticationResponse({
     response,
@@ -172,13 +173,13 @@ export async function verifyPasskeyAuthentication(
       id: passkey.id,
       publicKey: new Uint8Array(passkey.publicKey),
       counter: Number(passkey.counter),
-      transports: passkey.transports
-        ? (JSON.parse(passkey.transports) as AuthenticatorTransportFuture[])
-        : undefined,
+      transports: passkey.transports ? (JSON.parse(passkey.transports) as AuthenticatorTransportFuture[]) : undefined,
     },
   })
 
-  if (!verification.verified) {throw new Error('Passkey аутентификация не прошла')}
+  if (!verification.verified) {
+    throw new Error('Passkey аутентификация не прошла')
+  }
 
   deleteChallenge(`auth:${expectedChallenge}`)
 

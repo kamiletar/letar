@@ -7,7 +7,7 @@
  * Запуск: nx run auth-hub:db:seed
  */
 import { config } from 'dotenv'
-import { join, dirname } from 'path'
+import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
