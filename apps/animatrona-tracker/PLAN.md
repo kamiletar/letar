@@ -96,6 +96,10 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
 
 ### Баги
 
+- [x] **Баннер «Укажите дату рождения» не исчезал после сохранения** — Better Auth кэшировал сессию в cookie 5 мин (`cookieCache`). Route handler `/api/user/birth-date` теперь удаляет `better-auth.session_data` cookie после обновления → следующий запрос перечитывает сессию из БД
+- [x] **Счётчик «Аниме» в профиле завышен** — включал HIDDEN (архивные после `approve_replacement`). Добавлен фильтр `status: { not: 'HIDDEN' }` в запросы профиля
+- [x] **Двойной хедер на странице профиля** — `ProfileClient` рендерил собственный nav-блок поверх глобального `Header`. Удалён лишний блок и неиспользуемые импорты
+
 - [x] **Не сохраняются данные о просмотре от animatrona-mobile** — tracker-side: инференс duration из AnimeEpisode, защита от перезаписи нулём, summary учитывает записи без duration. Mobile-side фиксы (duration в onSave, sync queue) → уведомлён координатор
 
 ### Пин-серверы
@@ -533,4 +537,4 @@ nx build animatrona-tracker
 
 ---
 
-**Последнее обновление:** 2026-06-11
+**Последнее обновление:** 2026-06-11 (сессия: 3 багфикса — баннер birthDate, счётчик профиля, двойной хедер)
