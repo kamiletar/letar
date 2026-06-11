@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from '@/lib/auth-client'
+import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 import type { UserWithRole } from '@/lib/auth.types'
 import {
   Box,
@@ -86,25 +86,27 @@ export function Header() {
               </Button>
             )}
 
-            {session ? (
-              <HStack gap={1}>
-                <Button asChild variant="ghost" size="sm" {...activeLinkProps('/profile')}>
-                  <NextLink href="/profile">
-                    <Icon as={LuUser} mr={1} />
-                    {session.user?.name || 'Профиль'}
-                  </NextLink>
+            {session
+              ? (
+                <HStack gap={1}>
+                  <Button asChild variant="ghost" size="sm" {...activeLinkProps('/profile')}>
+                    <NextLink href="/profile">
+                      <Icon as={LuUser} mr={1} />
+                      {session.user?.name || 'Профиль'}
+                    </NextLink>
+                  </Button>
+                  <IconButton variant="ghost" size="sm" aria-label="Аккаунт в Ключнице" asChild>
+                    <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
+                      <Icon as={LuKeyRound} />
+                    </a>
+                  </IconButton>
+                </HStack>
+              )
+              : (
+                <Button variant="solid" size="sm" colorPalette="brand" onClick={() => signInWithLetarAuth(pathname)}>
+                  Войти
                 </Button>
-                <IconButton variant="ghost" size="sm" aria-label="Аккаунт в Ключнице" asChild>
-                  <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-                    <Icon as={LuKeyRound} />
-                  </a>
-                </IconButton>
-              </HStack>
-            ) : (
-              <Button asChild variant="solid" size="sm" colorPalette="brand">
-                <NextLink href="/sign-in">Войти</NextLink>
-              </Button>
-            )}
+              )}
           </HStack>
 
           {/* Мобильная кнопка меню */}
@@ -178,24 +180,33 @@ export function Header() {
 
                       <Box borderTopWidth="1px" my={2} />
 
-                      {session ? (
-                        <Button
-                          asChild
-                          variant="ghost"
-                          justifyContent="flex-start"
-                          size="lg"
-                          onClick={() => setDrawerOpen(false)}
-                        >
-                          <NextLink href="/profile">
-                            <Icon as={LuUser} mr={2} />
-                            {session.user?.name || 'Профиль'}
-                          </NextLink>
-                        </Button>
-                      ) : (
-                        <Button asChild colorPalette="brand" size="lg" onClick={() => setDrawerOpen(false)}>
-                          <NextLink href="/sign-in">Войти</NextLink>
-                        </Button>
-                      )}
+                      {session
+                        ? (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            justifyContent="flex-start"
+                            size="lg"
+                            onClick={() => setDrawerOpen(false)}
+                          >
+                            <NextLink href="/profile">
+                              <Icon as={LuUser} mr={2} />
+                              {session.user?.name || 'Профиль'}
+                            </NextLink>
+                          </Button>
+                        )
+                        : (
+                          <Button
+                            colorPalette="brand"
+                            size="lg"
+                            onClick={() => {
+                              setDrawerOpen(false)
+                              signInWithLetarAuth(pathname)
+                            }}
+                          >
+                            Войти
+                          </Button>
+                        )}
                     </VStack>
                   </Drawer.Body>
                 </Drawer.Content>

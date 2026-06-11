@@ -8,7 +8,7 @@ import { LuFilm, LuKeyRound } from 'react-icons/lu'
 
 function SignInContent() {
   const searchParams = useSearchParams()
-  const returnTo = searchParams.get('returnTo') ?? '/browse'
+  const returnTo = searchParams.get('returnTo') ?? '/'
 
   return (
     <Box minH="100vh" bg="bg" display="flex" alignItems="center">
