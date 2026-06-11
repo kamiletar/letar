@@ -167,7 +167,12 @@
 > ✅ **`UserMenu` в `@letar/ui`** — универсальный компонент меню пользователя для всего монорепо (кнопка «Войти»,
 > dropdown с профилем, Ключницей, доп. пунктами и Выйти); применён в animatrona-tracker вместо разрозненных элементов.
 > Экспорт из `libs/ui/src/index.ts`; dist пересобран (`tsc --build libs/ui/tsconfig.lib.json`). commit `ef8fdf0`.
-> **➡️ Следующий старт:** **Этап 1.5** — дочистить DoD (README `libs/auth`); **Этап 6.7** деплой; **`/sync-env`** animatrona-tracker (SOPS).
+> **Сессия №38 (2026-06-11, Этап 1.5 DoD + Этап 6.7 деплой + Этап 6.8 UserMenu rollout):**
+> ✅ **Этап 1.5 DoD** — `libs/auth/README.md` обновлён до v0.7.0: добавлены hub-client (kami-паттерн с Redis), hub-provider (auth-hub), standalone+org (driving-school), `createLogoutAction` с oidcLogout, `createRedisStorage`. commit `2968059`.
+> ✅ **Этап 6.7 деплой** — auth-hub `b80de69` задеплоен BlackCove (geo-blocking иностранных OAuth для RU-IP).
+> ✅ **sync-env animatrona-tracker** — файлы идентичны, `.env.docker.enc` валиден.
+> ✅ **Этап 6.8 UserMenu rollout** — kami, grandslamcup, archetest, time переведены на `UserMenu` из `@letar/ui`; добавлены tsconfig references. dashboard-agent пропущен (backend без UI). commit `badcd95`.
+> **➡️ Следующий старт:** **Этап 6.8 standalone** (aboi, dsperevod, premium-rosstil — оценить применимость); **Этап 7** driving-school на @letar/auth.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -1004,11 +1009,11 @@ return ctx.json(options)
 | Приложение         | Текущее решение          | Статус        |
 | ------------------ | ------------------------ | ------------- |
 | animatrona-tracker | разрозненные элементы    | ✅ сессия №37 |
-| kami               | своё меню / кнопка Войти | ⏳ перенести  |
-| dashboard-agent    | своё меню / кнопка Войти | ⏳ перенести  |
-| grandslamcup       | своё меню / кнопка Войти | ⏳ перенести  |
-| archetest          | своё меню / кнопка Войти | ⏳ перенести  |
-| time               | своё меню / кнопка Войти | ⏳ перенести  |
+| kami               | своё меню / кнопка Войти | ✅ сессия №38 |
+| dashboard-agent    | backend Express (нет UI) | ✅ не нужно   |
+| grandslamcup       | своё меню / кнопка Войти | ✅ сессия №38 |
+| archetest          | своё меню / кнопка Войти | ✅ сессия №38 |
+| time               | своё меню / кнопка Войти | ✅ сессия №38 |
 
 **Standalone приложения (при наличии хедера с авторизацией):**
 
