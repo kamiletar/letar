@@ -1,6 +1,6 @@
 'use client'
 
-import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
+import { signInWithLetarAuth, signOut, useSession } from '@/lib/auth-client'
 import type { UserWithRole } from '@/lib/auth.types'
 import {
   Box,
@@ -14,22 +14,22 @@ import {
   Icon,
   IconButton,
   Portal,
+  Separator,
   VStack,
 } from '@chakra-ui/react'
+import { UserMenu } from '@letar/ui'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { LuCalendar, LuFilm, LuKeyRound, LuMenu, LuSettings, LuTrophy, LuUser } from 'react-icons/lu'
+import { LuCalendar, LuFilm, LuKeyRound, LuLogOut, LuMenu, LuSettings, LuTrophy, LuUser } from 'react-icons/lu'
 
 /** Проверяет, активна ли ссылка */
 function isActiveRoute(pathname: string, href: string) {
-  if (href === '/') {
-    return pathname === '/'
-  }
+  if (href === '/') return pathname === '/'
   return pathname.startsWith(href)
 }
 
-/** Глобальная навигация с мобильным drawer и active route indicator */
+/** Глобальная навигация с мобильным drawer */
 export function Header() {
   const pathname = usePathname()
   const { data: session } = useSession()
@@ -37,14 +37,14 @@ export function Header() {
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR'
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  // Скрываем хедер на странице плеера — там своя навигация
-  if (pathname.startsWith('/watch/')) {
-    return null
-  }
+  if (pathname.startsWith('/watch/')) return null
 
-  /** Стиль активной ссылки */
   const activeLinkProps = (href: string) =>
     isActiveRoute(pathname, href) ? { fontWeight: 'bold' as const, color: 'brand.500' } : {}
+
+  const extraMenuItems = isAdmin
+    ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }]
+    : []
 
   return (
     <Box borderBottomWidth="1px" borderColor="border.muted" bg="bg">
@@ -61,7 +61,6 @@ export function Header() {
               </NextLink>
             </Button>
 
-            {/* Десктоп ссылки — скрыты на mobile */}
             <HStack gap={1} display={{ base: 'none', md: 'flex' }}>
               <Button asChild variant="ghost" size="sm" {...activeLinkProps('/anime')}>
                 <NextLink href="/anime">Аниме</NextLink>
@@ -75,38 +74,15 @@ export function Header() {
             </HStack>
           </HStack>
 
-          {/* Десктоп — правая часть */}
+          {/* Десктоп — UserMenu */}
           <HStack gap={2} display={{ base: 'none', md: 'flex' }}>
-            {isAdmin && (
-              <Button asChild variant="outline" size="sm" colorPalette="orange" {...activeLinkProps('/admin')}>
-                <NextLink href="/admin">
-                  <Icon as={LuSettings} mr={1} />
-                  Админ
-                </NextLink>
-              </Button>
-            )}
-
-            {session
-              ? (
-                <HStack gap={1}>
-                  <Button asChild variant="ghost" size="sm" {...activeLinkProps('/profile')}>
-                    <NextLink href="/profile">
-                      <Icon as={LuUser} mr={1} />
-                      {session.user?.name || 'Профиль'}
-                    </NextLink>
-                  </Button>
-                  <IconButton variant="ghost" size="sm" aria-label="Аккаунт в Ключнице" asChild>
-                    <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-                      <Icon as={LuKeyRound} />
-                    </a>
-                  </IconButton>
-                </HStack>
-              )
-              : (
-                <Button variant="solid" size="sm" colorPalette="brand" onClick={() => signInWithLetarAuth(pathname)}>
-                  Войти
-                </Button>
-              )}
+            <UserMenu
+              session={session?.user ?? null}
+              onSignIn={() => signInWithLetarAuth(pathname)}
+              onSignOut={() => signOut()}
+              profileHref="/profile"
+              extraItems={extraMenuItems}
+            />
           </HStack>
 
           {/* Мобильная кнопка меню */}
@@ -162,38 +138,70 @@ export function Header() {
                         </NextLink>
                       </Button>
 
-                      {isAdmin && (
-                        <Button
-                          asChild
-                          variant="ghost"
-                          justifyContent="flex-start"
-                          size="lg"
-                          colorPalette="orange"
-                          onClick={() => setDrawerOpen(false)}
-                        >
-                          <NextLink href="/admin">
-                            <Icon as={LuSettings} mr={2} />
-                            Админ
-                          </NextLink>
-                        </Button>
-                      )}
-
-                      <Box borderTopWidth="1px" my={2} />
+                      <Separator my={1} />
 
                       {session
                         ? (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            justifyContent="flex-start"
-                            size="lg"
-                            onClick={() => setDrawerOpen(false)}
-                          >
-                            <NextLink href="/profile">
-                              <Icon as={LuUser} mr={2} />
-                              {session.user?.name || 'Профиль'}
-                            </NextLink>
-                          </Button>
+                          <>
+                            <Button
+                              asChild
+                              variant="ghost"
+                              justifyContent="flex-start"
+                              size="lg"
+                              onClick={() => setDrawerOpen(false)}
+                              {...activeLinkProps('/profile')}
+                            >
+                              <NextLink href="/profile">
+                                <Icon as={LuUser} mr={2} />
+                                {session.user?.name || 'Профиль'}
+                              </NextLink>
+                            </Button>
+
+                            {isAdmin && (
+                              <Button
+                                asChild
+                                variant="ghost"
+                                justifyContent="flex-start"
+                                size="lg"
+                                colorPalette="orange"
+                                onClick={() => setDrawerOpen(false)}
+                              >
+                                <NextLink href="/admin">
+                                  <Icon as={LuSettings} mr={2} />
+                                  Админ
+                                </NextLink>
+                              </Button>
+                            )}
+
+                            <Button
+                              asChild
+                              variant="ghost"
+                              justifyContent="flex-start"
+                              size="lg"
+                              onClick={() => setDrawerOpen(false)}
+                            >
+                              <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
+                                <Icon as={LuKeyRound} mr={2} />
+                                Аккаунт в Ключнице
+                              </a>
+                            </Button>
+
+                            <Separator my={1} />
+
+                            <Button
+                              variant="ghost"
+                              justifyContent="flex-start"
+                              size="lg"
+                              color="fg.muted"
+                              onClick={() => {
+                                setDrawerOpen(false)
+                                signOut()
+                              }}
+                            >
+                              <Icon as={LuLogOut} mr={2} />
+                              Выйти
+                            </Button>
+                          </>
                         )
                         : (
                           <Button
@@ -216,7 +224,7 @@ export function Header() {
         </Flex>
       </Container>
 
-      {/* Баннер дозаполнения birthDate для пользователей без даты рождения */}
+      {/* Баннер дозаполнения birthDate */}
       {user && !user.birthDate && !pathname.startsWith('/complete-profile') && (
         <Box bg="orange.subtle" borderBottomWidth="1px" borderColor="orange.muted" py={2}>
           <Container maxW="7xl">
