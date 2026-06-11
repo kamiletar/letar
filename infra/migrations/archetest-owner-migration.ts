@@ -25,6 +25,13 @@ const DRY_RUN = process.env.DRY_RUN === '1'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
+// pg возвращает enum[] как строку "{ADMIN,USER}" — парсим в массив
+function pgArray(val: string | string[] | null | undefined): string[] {
+  if (!val) return []
+  if (Array.isArray(val)) return val
+  return val.replace(/^{|}$/g, '').split(',').filter(Boolean)
+}
+
 async function main() {
   const client = await pool.connect()
   console.log(`[archetest-migration] DRY_RUN=${DRY_RUN}`)
@@ -152,14 +159,14 @@ async function main() {
         }
       }
 
-      if (oldUser.roles.includes('ADMIN')) needsAdmin = true
+      if (pgArray(oldUser.roles).includes('ADMIN')) needsAdmin = true
 
       await client.query('DELETE FROM "User" WHERE id = $1', [oldUser.id])
       console.log(`  ✅ Удалён: ${oldUser.email}`)
     }
 
     if (needsAdmin) {
-      const newRoles = Array.from(new Set([...(newUser.roles || []), 'USER', 'ADMIN']))
+      const newRoles = Array.from(new Set([...pgArray(newUser.roles), 'USER', 'ADMIN']))
       await client.query('UPDATE "User" SET roles = $1 WHERE id = $2', [newRoles, newUser.id])
       console.log(`  ✅ Роли обновлены → ${JSON.stringify(newRoles)}`)
     }
