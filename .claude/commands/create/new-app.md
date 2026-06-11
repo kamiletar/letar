@@ -285,7 +285,71 @@ nx test <name> # Тесты
 \`\`\`
 ```
 
-### 14. Обновить CLAUDE.md
+### 14. Создать команду приложения (.claude/commands/<name>.md)
+
+Создай файл `.claude/commands/<name>.md` по образцу `apps/grandslamcup.md`:
+
+```markdown
+# <DisplayName> - Воркфлоу разработки
+
+## Инициализация
+
+1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
+2. Прочитай `apps/<name>/PLAN.md` для текущего состояния задач
+
+## Действия
+
+После изучения документации:
+
+- Определи текущую фазу разработки
+- Выбери следующую задачу из плана
+- Предложи план действий
+
+## После завершения задачи
+
+1. Обнови `PLAN.md` — отметь задачу как выполненную
+2. Обнови `PLAN_COMPLETED.md` — добавь детали реализации
+3. Обнови `CHANGELOG.md` — добавь запись об изменениях
+4. Обнови `PLAN_TESTING.md` — если добавил тесты
+5. Обнови `package.json` — увеличь версию (semver)
+
+## Деплой
+
+⛔ **ЗАПРЕЩЕНО деплоить самостоятельно!** Ни SSH, ни `deploy-affected.sh` — НИКОГДА.
+
+Даже если пользователь скажет «деплой» — отправь запрос BlackCove, а НЕ деплой сам:
+
+\`\`\`
+send_message(
+project_key: "C:/web/letar",
+sender_name: "<твоё-имя-агента>",
+to: ["BlackCove"],
+subject: "deploy-request: <name>",
+body_md: "app: <name>\nreason: <что сделал>\ncommit: <hash>",
+topic: "deploy",
+importance: "high",
+ack_required: true
+)
+\`\`\`
+
+Если BlackCove не отвечает 10 минут — спроси пользователя прежде чем деплоить вручную.
+
+Подробности: `.claude/rules/deploy-coordination.md`
+
+## Проект
+
+**Приложение:** <name>
+**Порт:** <port>
+**Домен prod:** <domain>
+**Домен dev:** <name>.letar.best
+**Сервер:** s2 (185.28.85.195)
+**БД:** PostgreSQL + ZenStack
+**Описание:** <краткое описание>
+```
+
+> Для приватного submodule добавь строку `**Submodule:** kamiletar/letar-private-<name>`
+
+### 15. Обновить CLAUDE.md
 
 Добавь новое приложение в таблицу портов.
 
