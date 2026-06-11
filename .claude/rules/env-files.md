@@ -17,6 +17,15 @@ alwaysApply: true
 - НЕ коммитить — синхронизация через `/sync-env`
 - Содержит реальные секреты для Docker production
 
+## .env.docker.enc (зашифрованный, SOPS + age)
+
+- **Коммитить** — зашифрованная копия `.env.docker`, безопасна в git
+- Создаётся: `sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker`
+- Редактируется: `sops apps/<app>/.env.docker.enc` (открывает в $EDITOR)
+- После `/sync-env` обновить `.enc`: `sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker`
+- Требует `SOPS_AGE_KEY_FILE=$HOME\.age\letar-key.txt` (ключ из KeePassXC)
+- Подробнее: [secret-manager.md](/.claude/docs/secret-manager.md)
+
 ## .env.local (локальная разработка)
 
 - НЕ коммитить

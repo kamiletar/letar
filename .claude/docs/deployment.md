@@ -218,9 +218,13 @@ const bot = new Bot(token, { client: { apiRoot: process.env.TELEGRAM_API_ROOT } 
 
 Каждое деплоируемое приложение требует:
 
-- `Dockerfile.production` - Multi-stage Docker сборка
-- `docker-compose.production.yml` - PostgreSQL + Next.js app сервисы (если есть БД)
-- `.env.docker` - Переменные окружения (не в git)
+- `Dockerfile.production` — Multi-stage Docker сборка
+- `docker-compose.production.yml` — PostgreSQL + Next.js app сервисы (если есть БД)
+- `.env.docker.enc` **или** `.env.docker` — переменные окружения
+
+> **SOPS:** если для приложения есть `.env.docker.enc` в git, `deploy-affected.sh` автоматически
+> расшифровывает его в `.env.docker` перед деплоем. Требует `SOPS_AGE_KEY_FILE` на сервере.
+> Подробнее: [secret-manager.md](/.claude/docs/secret-manager.md)
 
 ### Сервисы Docker Compose
 
@@ -257,13 +261,17 @@ services:
 
 ⚠️ **ВАЖНО: Конвенция .env файлов**
 
-| Файл          | Назначение                                          | Git              |
-| ------------- | --------------------------------------------------- | ---------------- |
-| `.env`        | **Минимальный** — только порт и публичные настройки | ✅ Отслеживается |
-| `.env.local`  | Локальная разработка (секреты, API ключи)           | ❌ В gitignore   |
-| `.env.docker` | **Production** — все переменные для Docker          | ❌ В gitignore   |
+| Файл              | Назначение                                          | Git              |
+| ----------------- | --------------------------------------------------- | ---------------- |
+| `.env`            | **Минимальный** — только порт и публичные настройки | ✅ Отслеживается |
+| `.env.local`      | Локальная разработка (секреты, API ключи)           | ❌ В gitignore   |
+| `.env.docker`     | **Production** — все переменные для Docker          | ❌ В gitignore   |
+| `.env.docker.enc` | Зашифрованная копия `.env.docker` (SOPS + age)      | ✅ Отслеживается |
 
 **НИКОГДА не добавляй секреты в `.env`** — он коммитится в git!
+
+Для приложений с `.env.docker.enc` — управлять секретами через SOPS.
+Подробнее: [secret-manager.md](/.claude/docs/secret-manager.md)
 
 Для `NEXT_PUBLIC_*` переменных (встраиваются при билде):
 
