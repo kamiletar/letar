@@ -22,6 +22,15 @@
 
 **Работа с submodule:** изменяешь код → коммит/пуш внутри submodule → `git add <path> && git commit` в letar для фиксации SHA.
 
+**Git hooks (установить один раз после клонирования):**
+
+```bash
+cp scripts/hooks/pre-commit-sops.sh .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+Хук авто-шифрует `.env.docker` → `.env.docker.enc` перед каждым коммитом (если доступен sops + age-ключ). Подробнее: [secret-manager](/.claude/docs/secret-manager.md).
+
 ⚠️ **Не добавляй submodule пути в `.gitignore`** — Nx уважает gitignore и спрячет проекты из графа.
 
 ### Релиз npm-пакетов
