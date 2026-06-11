@@ -78,10 +78,12 @@ export const auth = createAuth({
       vk: {
         clientId: process.env.AUTH_VK_ID,
         clientSecret: process.env.AUTH_VK_SECRET,
-        getUserInfo: async (tokens: { accessToken: string; raw: unknown }) => {
+        getUserInfo: async (tokens) => {
+          const accessToken = tokens.accessToken
+          if (!accessToken) throw new Error('VK: no access token')
           const userId = (tokens.raw as { user_id?: number })?.user_id
           const response = await fetch(
-            `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${tokens.accessToken}&v=5.131`,
+            `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`,
           )
           const data = await response.json()
           const user = data.response?.[0]
