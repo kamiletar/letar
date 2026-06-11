@@ -177,7 +177,7 @@
 > **dsperevod**: N/A — нет auth UI в хедере (landing-сайт с кнопкой «Заказать перевод»).
 > **premium-rosstil**: N/A — уже есть собственный `UserMenuClient` (Server wrapper + i18n Links + `colorPalette="fg"`).
 > typecheck ✅ lint ✅. commits `c72e05c` (aboi), `d6b2edb` (letar).
-> **➡️ Следующий старт:** **Этап 7** driving-school на @letar/auth.
+> **➡️ Следующий старт:** **Этап 8** — Соц-секреты per-владелец + админка (Tier 1/Tier 2 UI выбора, шифрование at-rest).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -1046,11 +1046,14 @@ import { UserMenu } from '@letar/ui'
 
 **Зависимости:** `@letar/ui` ✅ (сессия №37). Не блокирует другие этапы — можно делать итерационно.
 
-### Этап 7 — driving-school: на общую библиотеку
+### Этап 7 — driving-school: на общую библиотеку ✅ ПОЛНОСТЬЮ (2026-06-11, сессия №32)
 
-- Перевести на обновлённую `@letar/pin-auth` (выровнять с Этапом 5) и на `createAuth({ mode: 'standalone', ... })`,
-  сохранив весь богатый UX и `organization` (teams).
-- **Зависимости:** Этапы 1, 5, **1.5**.
+- ✅ `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк).
+- ✅ `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0).
+- ✅ pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5).
+- ✅ SSE endpoint обновлён (`autologin:email` namespace).
+- ✅ `magicLink` плагин BA + UI на /sign-in + `magicLinkClient()` в `auth-client.ts`.
+- **Зависимости:** Этапы 1, 5, **1.5** ✅.
 
 ### Этап 8 — Соц-секреты per-владелец + админка (§2.3, §9-D5)
 
