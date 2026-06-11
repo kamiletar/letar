@@ -42,6 +42,20 @@ prisma migrate deploy  # Применение миграций на production
 
 ## ⛔ ЗАПРЕЩЕНО на production серверах
 
+**НИКОГДА не перезапускай контейнеры напрямую!** Даже для env-only изменений:
+
+```bash
+# ❌ ЗАПРЕЩЕНО — обходит git-трекинг, SOPS, миграции
+docker compose restart <service>
+docker restart <container>
+```
+
+```bash
+# ✅ ПРАВИЛЬНО — всегда через deploy-affected.sh
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+  "export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && cd /home/deploy/letar && ./deploy-affected.sh --app <name>"
+```
+
 **НИКОГДА не делай git commit на серверах!** Это создаёт divergent branches и ломает `deploy-affected.sh --skip-git`.
 
 ```bash
