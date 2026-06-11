@@ -61,6 +61,12 @@ export interface StandaloneAuthProfile extends AuthProfileBase {
   rateLimit?: {
     customRules?: Record<string, { window: number; max: number }>
   }
+  /** OAuth-провайдеры (google, vk и т.д.) — опционально, только для standalone */
+  socialProviders?: BetterAuthOptions['socialProviders']
+  /** Хуки базы данных — для обогащения профиля из OAuth и пр. */
+  databaseHooks?: BetterAuthOptions['databaseHooks']
+  /** Переопределение алгоритма хеширования паролей (например bcrypt вместо scrypt) */
+  password?: NonNullable<NonNullable<BetterAuthOptions['emailAndPassword']>['password']>
 }
 
 /** hub-client — OIDC клиент Ключницы, без локального email/password */
@@ -94,6 +100,9 @@ export interface HubProviderAuthProfile extends AuthProfileBase {
   rateLimit?: {
     customRules?: Record<string, { window: number; max: number }>
   }
+  socialProviders?: BetterAuthOptions['socialProviders']
+  databaseHooks?: BetterAuthOptions['databaseHooks']
+  password?: NonNullable<NonNullable<BetterAuthOptions['emailAndPassword']>['password']>
 }
 
 export type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAuthProfile

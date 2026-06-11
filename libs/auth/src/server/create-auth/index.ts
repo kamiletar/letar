@@ -39,6 +39,7 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
       enabled: true,
       autoSignIn: true,
       requireEmailVerification: true,
+      ...(profile.password && { password: profile.password }),
       ...(email.sendPasswordResetEmail && {
         sendResetPassword: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
           const result = await email.sendPasswordResetEmail!({
@@ -84,6 +85,9 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
         ...rateLimit?.customRules,
       },
     },
+
+    ...(profile.socialProviders && { socialProviders: profile.socialProviders }),
+    ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
 
     user: profile.user,
     session: buildSessionConfig(profile.session),

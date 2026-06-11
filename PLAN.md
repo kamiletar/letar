@@ -139,7 +139,8 @@
 > deleteAccountAction (soft-delete через deletedAt), DeleteAccountSection в settings/page.tsx, CookieBanner.
 > **grandslamcup**: ConsentLog + миграция, `/api/consent`, deleteAccountAction, DeleteAccountSection
 > в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
-> **➡️ Следующий старт:** Этапы 0.8 + Studio Фазы 0–4.1/4.4/4.4а завершены. Следующее: РКН для premium-rosstil/imot/dsperevod (организационно, пропускаем), **Studio Фаза 4.2+4.3** — выставление счётов через API Точки + платёжные ссылки (эквайринг + СБП QR) в кабинете клиента.
+> **Сессия №32 (2026-06-11, Этап 7 ✅ ПОЛНОСТЬЮ):** `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк); `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0); pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5); SSE endpoint обновлён (`autologin:email` namespace); добавлен `magicLink` плагин BA + UI на /sign-in (`MagicLinkForm` + server action). `magicLinkClient()` добавлен в `auth-client.ts`.
+> **➡️ Следующий старт:** **Этап 8** — auth-hub → `createAuth({ mode: 'hub-provider' })` (реализация OIDC-провайдера через фабрику).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
