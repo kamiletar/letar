@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
 
   // geoip-lite содержит бинарные .dat файлы — не бандлить, оставить как runtime require
   serverExternalPackages: ['geoip-lite'],
+
+  // Явно включаем geoip-lite в трассировку standalone output (включая .dat файлы)
+  outputFileTracingIncludes: {
+    '/**': ['./node_modules/geoip-lite/**'],
+  },
 }
 
 export default nextConfig

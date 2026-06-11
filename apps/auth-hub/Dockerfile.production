@@ -12,9 +12,6 @@ COPY --chown=nextjs:nodejs apps/auth-hub/.next/standalone ./
 COPY --chown=nextjs:nodejs apps/auth-hub/.next/static ./apps/auth-hub/.next/static
 COPY --chown=nextjs:nodejs apps/auth-hub/public ./apps/auth-hub/public
 
-# geoip-lite содержит бинарные .dat файлы — serverExternalPackages не включает их в standalone
-COPY --chown=nextjs:nodejs node_modules/geoip-lite ./node_modules/geoip-lite
-
 USER nextjs
 
 EXPOSE 3010
