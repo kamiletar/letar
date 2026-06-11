@@ -12,6 +12,8 @@ interface AccountChooserProps {
     email: string
     image: string | null
   }
+  /** Полные OIDC-параметры из cookie oidc_pending (authorize wrappe). Если null — fallback на consent params. */
+  oidcParams: Record<string, string> | null
 }
 
 /**
@@ -22,7 +24,7 @@ interface AccountChooserProps {
  * - Войти под другим → signOut + redirect на /sign-in с сохранением OIDC params
  * - Отмена → POST /api/auth/oauth2/consent (accept=false)
  */
-export function AccountChooser({ user }: AccountChooserProps) {
+export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const consentCode = searchParams.get('consent_code')
@@ -53,7 +55,7 @@ export function AccountChooser({ user }: AccountChooserProps) {
         window.location.href = res.url
       }
     },
-    [consentCode, clientId, scope]
+    [consentCode, clientId, scope],
   )
 
   const handleContinue = useCallback(async () => {
@@ -74,27 +76,26 @@ export function AccountChooser({ user }: AccountChooserProps) {
     }
   }, [submitConsent])
 
-  // Смена аккаунта: signOut + редирект на /sign-in с теми же OIDC params,
-  // чтобы usePostSignInCallback после нового логина продолжил OIDC flow
+  // Смена аккаунта: signOut + редирект на /sign-in с полными OIDC params.
+  // Если oidcParams из cookie доступны (authorize wrapper) — используем их:
+  // они содержат redirect_uri / state / code_challenge, которых нет на consent page.
+  // Fallback: только consent params (client_id, scope) — устаревшее поведение.
   const handleSwitchAccount = useCallback(async () => {
     setPending('switch')
     try {
       await signOut({
         fetchOptions: {
           onSuccess: () => {
+            if (oidcParams && oidcParams.redirect_uri && oidcParams.response_type) {
+              router.push(`/sign-in?${new URLSearchParams(oidcParams).toString()}`)
+              return
+            }
+            // Fallback: consent page params только
             const qs = new URLSearchParams()
-            if (clientId) {
-              qs.set('client_id', clientId)
-            }
-            if (scope) {
-              qs.set('scope', scope)
-            }
-            // Прокидываем все query параметры исходного OIDC запроса —
-            // Better Auth их валидировал при первом authorize-вызове
+            if (clientId) {qs.set('client_id', clientId)}
+            if (scope) {qs.set('scope', scope)}
             for (const [k, v] of searchParams.entries()) {
-              if (!qs.has(k)) {
-                qs.set(k, v)
-              }
+              if (!qs.has(k)) {qs.set(k, v)}
             }
             router.push(`/sign-in?${qs.toString()}`)
           },
@@ -103,7 +104,7 @@ export function AccountChooser({ user }: AccountChooserProps) {
     } finally {
       setPending(null)
     }
-  }, [clientId, scope, searchParams, router])
+  }, [clientId, scope, searchParams, router, oidcParams])
 
   const displayName = user.name ?? user.email
   const initials = (user.name ?? user.email).slice(0, 1).toUpperCase()

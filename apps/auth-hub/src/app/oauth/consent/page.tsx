@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth'
 import { Box, Card, Heading, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { AccountChooser } from './_components/account-chooser'
@@ -44,6 +45,25 @@ export default async function ConsentPage({ searchParams }: ConsentPageProps) {
   const clientId = params.client_id ?? ''
   const clientName = CLIENT_NAMES[clientId] ?? clientId ?? 'Приложение'
 
+  // Читаем полные OIDC-параметры из cookie (установлена враппером authorize/route.ts).
+  // Нужны для AccountChooser при смене аккаунта: consent page отдаёт только
+  // client_id/consent_code/scope, а redirect_uri/state/code_challenge теряются.
+  const cookieStore = await cookies()
+  const pendingCookie = cookieStore.get('oidc_pending')
+  let oidcParams: Record<string, string> | null = null
+  if (pendingCookie?.value) {
+    try {
+      const parsed = JSON.parse(
+        Buffer.from(pendingCookie.value, 'base64').toString('utf-8'),
+      ) as Record<string, string>
+      if (parsed.client_id === clientId) {
+        oidcParams = parsed
+      }
+    } catch {
+      // Повреждённая cookie — игнорируем, AccountChooser использует fallback
+    }
+  }
+
   return (
     <Box maxW="md" mx="auto" p={6}>
       <Card.Root>
@@ -63,6 +83,7 @@ export default async function ConsentPage({ searchParams }: ConsentPageProps) {
                   email: session.user.email,
                   image: session.user.image ?? null,
                 }}
+                oidcParams={oidcParams}
               />
             </Suspense>
           </Stack>
