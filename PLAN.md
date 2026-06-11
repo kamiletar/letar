@@ -139,7 +139,7 @@
 > deleteAccountAction (soft-delete через deletedAt), DeleteAccountSection в settings/page.tsx, CookieBanner.
 > **grandslamcup**: ConsentLog + миграция, `/api/consent`, deleteAccountAction, DeleteAccountSection
 > в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
-> **➡️ Следующий старт:** Этап 0.8 завершён. Следующее: РКН для premium-rosstil/imot/dsperevod (организационно), Этап 1 CRM (Studio).
+> **➡️ Следующий старт:** Этапы 0.8 + Studio Фазы 0–4.1/4.4/4.4а завершены. Следующее: РКН для premium-rosstil/imot/dsperevod (организационно, пропускаем), **Studio Фаза 4.2+4.3** — выставление счётов через API Точки + платёжные ссылки (эквайринг + СБП QR) в кабинете клиента.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
