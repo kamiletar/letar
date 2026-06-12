@@ -487,6 +487,15 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
 
 ## Backlog / Очередь задач
 
+### Запросы от агентов
+
+#### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie)
+
+- **Запросил:** MagentaRaven
+- **Приоритет:** high
+- **Описание:** новый провайдер `smartcaptcha` рядом с turnstile/recaptcha/hcaptcha (`libs/forms/src/lib/captcha/`). Причина: РФ-проект (152-ФЗ) — Turnstile/reCAPTCHA отправляют IP и телеметрию браузера на зарубежные серверы (трансграничная передача ПДн), SmartCaptcha хранит данные в РФ. Серверная верификация: `POST https://smartcaptcha.yandexcloud.net/validate`. Нужно к Фазе 1–2 svoichuzhie (регистрация фан-клуба, подписка) — сейчас не блокирует (идёт Фаза 0, дизайн).
+- **Статус:** ожидание
+
 ### Документация и DX
 
 - [x] **Улучшить документацию по обработке ошибок** — добавлено в `.claude/docs/forms.md`:
