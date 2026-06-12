@@ -115,6 +115,7 @@ proxy_read_timeout 86400s;
 | forms-example.letar.best      | form-example-app         | 3022 |
 | forms.letar.best              | form-docs-app            | 3020 |
 | stats.letar.best              | umami-app                | 3033 |
+| svoichuzhie.letar.best        | svoichuzhie-app          | 3021 |
 | npm.s2.letar.best             | localhost                | 81   |
 
 ## Telegram API — прокси через mail сервер
@@ -315,6 +316,57 @@ docker compose -f docker-compose.production.yml down
 # Пересборка и редеплой
 docker compose -f docker-compose.production.yml up -d --build --force-recreate
 ```
+
+## Добавление нового приложения в Dashboard
+
+При создании нового приложения нужно зарегистрировать его в двух местах:
+
+### 1. Реестр приложений Dashboard (DeployedApp)
+
+Dashboard хранит список приложений в PostgreSQL (`DeployedApp` таблица). Без этого приложение не появится в выпадающем списке «Выберите приложение» при создании Proxy Host.
+
+**Добавить в seed.ts** (`apps/dashboard/prisma/seed.ts`), в массив `s2Apps` или `s1Apps`:
+
+```typescript
+{
+  name: 'my-app',               // имя приложения (уникальное)
+  displayName: 'My App Name',   // отображаемое имя в UI
+  containerName: 'my-app-app',  // имя Docker контейнера
+  port: 3025,                   // внутренний порт контейнера
+  type: 'WEB' as const,
+  domain: 'my-app.letar.best',
+},
+```
+
+После коммита и пуша — применить к production БД напрямую через psql:
+
+```bash
+# Получить server ID
+docker exec dashboard-db psql -U dashboard_user -d dashboard \
+  -c "SELECT id FROM \"Server\" WHERE name = 's2-letar';"
+
+# Вставить приложение
+docker exec dashboard-db psql -U dashboard_user -d dashboard -c "
+INSERT INTO \"DeployedApp\" (id, name, \"displayName\", \"containerName\", port, type, domain, \"serverId\", \"createdAt\", \"updatedAt\")
+VALUES (gen_random_uuid(), 'my-app', 'My App Name', 'my-app-app', 3025, 'WEB', 'my-app.letar.best', '<server_id>', NOW(), NOW())
+ON CONFLICT (name, \"serverId\") DO UPDATE SET domain = EXCLUDED.domain;
+"
+```
+
+> **Примечание:** seed.ts нельзя запустить напрямую с сервера (`bun prisma/seed.ts`) — нет сгенерированных типов Prisma. Используй прямой SQL через `docker exec`.
+
+### 2. Nginx Proxy Manager
+
+После добавления в реестр — создай Proxy Host в Dashboard UI (`dash.letar.best/nginx/proxy-hosts`):
+
+- **Domain:** `my-app.letar.best`
+- **Forward Host:** `my-app-app` (имя контейнера)
+- **Port:** `3025` (внутренний порт)
+- **SSL:** Let's Encrypt
+
+Не забудь обновить таблицу в [nginx-proxy-manager/README.md](/infra/nginx-proxy-manager/README.md).
+
+---
 
 ## Заметки по Dashboard
 
