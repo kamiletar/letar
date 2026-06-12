@@ -101,7 +101,7 @@ export function CookieBanner({
     })
   }
 
-  if (!shown) { return null }
+  if (!shown) return null
 
   return (
     <Box
@@ -109,7 +109,7 @@ export function CookieBanner({
       bottom={0}
       left={0}
       right={0}
-      bg="bg.surface"
+      bg="bg.panel"
       borderTopWidth="1px"
       borderColor="border"
       zIndex={1000}
