@@ -51,6 +51,7 @@ docker compose up -d
 | dash.letar.best               | dashboard-app          | 3002 | LE  | SSE config           |
 | animatrona-tracker.letar.best | animatrona-tracker-app | 3010 | LE  | Аниме трекер         |
 | anime.letar.best              | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)     |
+| svoichuzhie.letar.best        | svoichuzhie-app        | 3021 | LE  | Staging (noindex)    |
 | gateway.letar.best            | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache |
 | npm.s2.letar.best             | localhost              | 81   | LE  | Админка NPM s2       |
 
