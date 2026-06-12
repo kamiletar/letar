@@ -199,6 +199,14 @@ async function main() {
       type: 'WEB' as const,
       domain: 'dsperevod.letar.best',
     },
+    {
+      name: 'svoichuzhie',
+      displayName: 'Своих чужими глазами',
+      containerName: 'svoichuzhie-app',
+      port: 3021,
+      type: 'WEB' as const,
+      domain: 'svoichuzhie.letar.best',
+    },
   ]
 
   for (const app of s2Apps) {
