@@ -386,7 +386,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.4.0",
+      "version": "0.5.1",
       "dependencies": {
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.1",
@@ -422,7 +422,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.231.2",
+      "version": "0.232.0",
     },
     "apps/driving-school-e2e": {
       "name": "driving-school-e2e",
@@ -546,9 +546,16 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@react-pdf/renderer": "^4.5.1",
+      },
+    },
+    "apps/svoichuzhie": {
+      "name": "@letar/svoichuzhie",
+      "version": "0.3.0",
+      "dependencies": {
+        "typograf": "^7.7.0",
       },
     },
     "apps/time": {
@@ -626,7 +633,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.5.0",
+      "version": "0.7.0",
       "peerDependencies": {
         "better-auth": ">=1.0.0",
         "next": ">=15.0.0",
@@ -1785,6 +1792,8 @@
     "@letar/query-provider": ["@letar/query-provider@workspace:libs/query-provider"],
 
     "@letar/studio": ["@letar/studio@workspace:apps/studio"],
+
+    "@letar/svoichuzhie": ["@letar/svoichuzhie@workspace:apps/svoichuzhie"],
 
     "@letar/time": ["@letar/time@workspace:apps/time"],
 
@@ -7265,6 +7274,8 @@
     "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "typescript-eslint": ["typescript-eslint@8.61.0", "", { "dependencies": { "@typescript-eslint/eslint-plugin": "8.61.0", "@typescript-eslint/parser": "8.61.0", "@typescript-eslint/typescript-estree": "8.61.0", "@typescript-eslint/utils": "8.61.0" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0", "typescript": ">=4.8.4 <6.1.0" } }, "sha512-8y31Rd0eGTrDKqhy6vT0HtzhN+YLjQizwX3aA3hPXP/ynSfnrBXcQY5IzsP9/DM7+klX4IUncZZjkchP0z+rUw=="],
+
+    "typograf": ["typograf@7.7.0", "", {}, "sha512-VaUj5T5KjAeXVsGdSJsaKaxiPq/dC1WB+xo+Y0aclUQ+omBQvCejqCk3t5QEY8n0OnTRYvUiPd2/rod1KAQzxA=="],
 
     "ufo": ["ufo@1.6.3", "", {}, "sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q=="],
 
