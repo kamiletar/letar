@@ -1,4 +1,4 @@
-﻿# PLAN — synth (музыкальная студия)
+# PLAN — synth (музыкальная студия)
 
 > Это **не типовое CRUD-приложение монорепо**: нет ZenStack/Postgres в v1, ядро — Web Audio / Web MIDI / синтез звука. Стандартный шаблон `/create:new-app` применяем выборочно (см. «Отличия от шаблона монорепо»).
 
@@ -240,8 +240,8 @@ apps/synth/
 
 - [x] **Модель патча** (JSON-схема + Zod) — `src/lib/patch/schema.ts`; FM + subtractive + drumkit; утверждена
 - [x] **Субтрактив-движок** (native Web Audio, без AudioWorklet): 2 осц → фильтр → amp; ADSR; LFO (cutoff/pitch/amp); 8-голосая полифония + voice stealing — `src/lib/audio/subtractive.ts`
-- [ ] **AudioWorklet FM**: 6 операторов, минимум 4–8 алгоритмов, EG на оператор, feedback
-- [ ] Переключение движков в одном патче
+- [x] **AudioWorklet FM**: 6 операторов, 5 алгоритмов, DX7-EG (4 rate + 4 level) на оператор, feedback, 8-голосая полифония — `public/worklets/fm-processor.js` + `src/lib/audio/fm.ts`
+- [x] Переключение движков (SUB/FM) в шапке студии; ленивое создание FM при первом переходе
 - [x] **Первый «геройский» патч — раскатистый бас (Reese):** 2 расстроенные пилы (+7 центов) → фильтр LP с LFO-дыханием — `src/lib/patch/defaults.ts`
 - [ ] **Драм-движок**: 16 пэдов → синтезируемая перкуссия (808/909-style: kick/snare/hat/clap/tom), velocity-sensitive; опц. загрузка сэмплов
 - [ ] **Драм-режим UI**: экранная сетка пэдов 4×4, подсветка при ударе; драм-киты тоже шарятся в витрине
