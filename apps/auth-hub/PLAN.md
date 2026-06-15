@@ -1,6 +1,29 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.5.0 — Миграция на `createAuth({ mode: 'hub-provider' })` ✅
+## Текущий статус: v0.6.0 — Этап 8: Admin UI OAuth-клиентов + at-rest шифрование ✅
+
+### Выполнено (v0.6.0) — сессия №43, 2026-06-15
+
+- [x] `/admin/clients` — CRUD OAuth-приложений Ключницы (список, создание, детали, редактирование)
+- [x] Двухэтапный флоу создания: `RisksConsent` (риски hub-client) → `ClientForm`
+- [x] `SecretBanner` — plaintext секрет показывается один раз через `?secret=` в URL
+- [x] `RotateSecretButton`, `DeleteClientButton`, `ToggleClientButton`
+- [x] `libs/auth/server/crypto.ts` — AES-256-GCM (секреты) + AES-256-CBC (детерминированные токены)
+- [x] `libs/auth/server/social-loader.ts` — загрузка OAuth-провайдеров из БД
+- [x] `createAuthAsync({ social: { source: 'db' } })` — фабрика для standalone с DB-секретами
+- [x] `src/lib/db.ts` — encryption proxy для oauthApplication/oauthAccessToken/account
+- [x] `scripts/encrypt-client-secrets.ts` — backfill скрипт (dry-run по умолчанию)
+- [x] `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки
+
+### Следующий шаг: деплой + backfill
+
+- [ ] Добавить `AUTH_ENCRYPTION_KEY` (64 hex-символа) в `.env.docker` auth-hub
+- [ ] Задеплоить auth-hub через BlackCove
+- [ ] Запустить `bun run scripts/encrypt-client-secrets.ts --execute` на s2 для шифрования существующих секретов
+
+---
+
+## v0.5.0 — Миграция на `createAuth({ mode: 'hub-provider' })` ✅
 
 ### Выполнено (v0.5.0)
 
