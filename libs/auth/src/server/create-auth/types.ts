@@ -53,6 +53,11 @@ interface AuthProfileBase {
   secondaryStorage?: BetterAuthOptions['secondaryStorage']
 }
 
+/** Источник OAuth-секретов для standalone-режима (Tier 2, Этап 8) */
+export type StandaloneSocialSource =
+  | { source: 'env'; providers: BetterAuthOptions['socialProviders'] }
+  | { source: 'db'; load: () => Promise<Record<string, { clientId: string; clientSecret: string }> | null> }
+
 /** standalone — локальная авторизация (email/password + верификация) */
 export interface StandaloneAuthProfile extends AuthProfileBase {
   mode: 'standalone'
@@ -61,7 +66,15 @@ export interface StandaloneAuthProfile extends AuthProfileBase {
   rateLimit?: {
     customRules?: Record<string, { window: number; max: number }>
   }
-  /** OAuth-провайдеры (google, vk и т.д.) — опционально, только для standalone */
+  /**
+   * Источник OAuth-провайдеров (Tier 2, Этап 8).
+   * source:'env' — ключи из process.env (текущие приложения используют socialProviders напрямую).
+   * source:'db'  — ключи читаются из таблицы SocialProvider при старте через load().
+   *
+   * @deprecated socialProviders — используй social: { source: 'env', providers: ... }
+   */
+  social?: StandaloneSocialSource
+  /** @deprecated используй social: { source: 'env', providers: ... } */
   socialProviders?: BetterAuthOptions['socialProviders']
   /** Хуки базы данных — для обогащения профиля из OAuth и пр. */
   databaseHooks?: BetterAuthOptions['databaseHooks']

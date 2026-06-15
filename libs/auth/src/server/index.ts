@@ -31,13 +31,13 @@
 // Session helpers
 export { createAuthChecks } from './checks'
 export { AuthError, createAuthGuards, type GuardOptions } from './guards'
-export { type AuthInstance, createSessionHelpers } from './session'
+export { createSessionHelpers, type AuthInstance } from './session'
 
 // Factories
 export { createLogoutAction, type LogoutActionOptions } from './factories'
 
-// Auth factory (Этап 1.5)
-export { createAuth } from './create-auth'
+// Auth factory (Этап 1.5 + Этап 8)
+export { createAuth, createAuthAsync } from './create-auth'
 export type {
   AuthProfile,
   HubClientAuthProfile,
@@ -46,10 +46,15 @@ export type {
   SendEmailResult,
   StandaloneAuthProfile,
   StandaloneEmailCallbacks,
+  StandaloneSocialSource,
 } from './create-auth/types'
 
 // Redis secondaryStorage адаптер (Этап 0.2 PLAN.md — rate-limit персистентность)
 export { createRedisStorage } from './redis-storage'
+
+// Шифрование at-rest (Этап 8 PLAN.md)
+export { decryptSecret, decryptToken, encryptSecret, encryptToken, getEncryptionKey, isEncrypted } from './crypto'
+export { createSocialProviderLoader } from './social-loader'
 
 // Connected Accounts
 export {

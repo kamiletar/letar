@@ -1,7 +1,8 @@
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Badge, Box, Card, Code, Heading, HStack, Stack, Table, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Code, Heading, HStack, Stack, Table, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { ToggleClientButton } from './_components/toggle-client-button'
 
 export const metadata: Metadata = {
@@ -23,10 +24,15 @@ export default async function ClientsPage() {
   return (
     <Box maxW="5xl" mx="auto" p={6}>
       <HStack justify="space-between" mb={6}>
-        <Heading size="xl">OAuth клиенты</Heading>
-        <Text color="fg.muted" fontSize="sm">
-          {clients.length} клиентов
-        </Text>
+        <HStack gap={3}>
+          <Heading size="xl">OAuth клиенты</Heading>
+          <Text color="fg.muted" fontSize="sm">
+            {clients.length} клиентов
+          </Text>
+        </HStack>
+        <Button colorPalette="blue" size="sm" asChild>
+          <Link href="/admin/clients/new">+ Новый клиент</Link>
+        </Button>
       </HStack>
 
       {clients.length === 0 ? (
@@ -59,7 +65,11 @@ export default async function ClientsPage() {
               <Table.Body>
                 {clients.map((client) => (
                   <Table.Row key={client.id}>
-                    <Table.Cell fontWeight="medium">{client.name}</Table.Cell>
+                    <Table.Cell fontWeight="medium">
+                      <Button variant="ghost" size="xs" asChild>
+                        <Link href={`/admin/clients/${client.clientId}`}>{client.name}</Link>
+                      </Button>
+                    </Table.Cell>
                     <Table.Cell>
                       <Text fontSize="xs" fontFamily="mono">
                         {client.clientId}
@@ -80,7 +90,12 @@ export default async function ClientsPage() {
                       </Badge>
                     </Table.Cell>
                     <Table.Cell>
-                      <ToggleClientButton clientId={client.clientId} disabled={client.disabled} />
+                      <HStack gap={1}>
+                        <ToggleClientButton clientId={client.clientId} disabled={client.disabled} />
+                        <Button size="xs" variant="ghost" asChild>
+                          <Link href={`/admin/clients/${client.clientId}/edit`}>Изменить</Link>
+                        </Button>
+                      </HStack>
                     </Table.Cell>
                   </Table.Row>
                 ))}

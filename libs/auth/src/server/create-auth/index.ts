@@ -5,6 +5,37 @@ import { oidcProvider as oidcProviderPlugin } from 'better-auth/plugins/oidc-pro
 
 import type { AuthProfile, HubClientAuthProfile, HubProviderAuthProfile, StandaloneAuthProfile } from './types'
 
+/**
+ * Разрешает socialProviders для standalone/hub-provider режима (Этап 8).
+ * source:'env' → берёт providers из profile.social.providers или устаревшего profile.socialProviders.
+ * source:'db'  → провайдеры уже загружены снаружи и переданы как готовая карта (async init в auth.ts).
+ */
+function resolveSocialProviders(profile: StandaloneAuthProfile | HubProviderAuthProfile): {
+  socialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
+} {
+  if ('social' in profile && profile.social) {
+    if (profile.social.source === 'env') {
+      return profile.social.providers ? { socialProviders: profile.social.providers } : {}
+    }
+    // source:'db' — провайдеры переданы через _resolvedSocialProviders (установлены в createAuth)
+    return (
+      profile as StandaloneAuthProfile & {
+        _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
+      }
+    )._resolvedSocialProviders
+      ? {
+          socialProviders: (
+            profile as StandaloneAuthProfile & {
+              _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
+            }
+          )._resolvedSocialProviders,
+        }
+      : {}
+  }
+  // legacy: socialProviders напрямую
+  return profile.socialProviders ? { socialProviders: profile.socialProviders } : {}
+}
+
 const LETAR_AUTH_DISCOVERY_URL = 'https://auth.letar.best/api/auth/.well-known/openid-configuration'
 
 // Стандартные IP-заголовки за reverse proxy — применяются во всех режимах
@@ -87,7 +118,7 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
       },
     },
 
-    ...(profile.socialProviders && { socialProviders: profile.socialProviders }),
+    ...resolveSocialProviders(profile),
     ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
 
     user: profile.user,
@@ -103,26 +134,29 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
   const discoveryUrl = oidc.discoveryUrl ?? LETAR_AUTH_DISCOVERY_URL
 
   const oidcPlugin = genericOAuth({
-    config: oidc.clientId && oidc.clientSecret
-      ? [
-        {
-          providerId: 'letar-auth',
-          discoveryUrl,
-          clientId: oidc.clientId,
-          clientSecret: oidc.clientSecret,
-          // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
-          scopes: ['openid', 'profile', 'email', 'offline_access'],
-          pkce: true,
-          // Fallback: если name пустое — используем email username
-          mapProfileToUser: (profile: Record<string, unknown>) => ({
-            name: (profile.name as string | undefined) || (profile.email as string | undefined)?.split('@')[0]
-              || 'User',
-            email: profile.email as string,
-            image: (profile.picture ?? profile.image) as string | undefined,
-          }),
-        },
-      ]
-      : [],
+    config:
+      oidc.clientId && oidc.clientSecret
+        ? [
+            {
+              providerId: 'letar-auth',
+              discoveryUrl,
+              clientId: oidc.clientId,
+              clientSecret: oidc.clientSecret,
+              // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
+              scopes: ['openid', 'profile', 'email', 'offline_access'],
+              pkce: true,
+              // Fallback: если name пустое — используем email username
+              mapProfileToUser: (profile: Record<string, unknown>) => ({
+                name:
+                  (profile.name as string | undefined) ||
+                  (profile.email as string | undefined)?.split('@')[0] ||
+                  'User',
+                email: profile.email as string,
+                image: (profile.picture ?? profile.image) as string | undefined,
+              }),
+            },
+          ]
+        : [],
   })
 
   return betterAuth({
@@ -203,7 +237,7 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       },
     },
 
-    ...(profile.socialProviders && { socialProviders: profile.socialProviders }),
+    ...resolveSocialProviders(profile),
     ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
 
     user: profile.user,
@@ -217,8 +251,8 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       storage: profile.secondaryStorage
         ? 'secondary-storage'
         : process.env.NODE_ENV === 'production'
-        ? 'database'
-        : 'memory',
+          ? 'database'
+          : 'memory',
       modelName: 'rateLimit',
       customRules: {
         '/sign-in/email': { window: 60, max: 5 },
@@ -254,7 +288,8 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       // nextCookies() — ВСЕГДА последним (требование Better Auth)
       nextCookies(),
     ],
-  })
+    // oidcProvider использует Zod внутри → тип непортабелен для .d.ts. Приводим к standalone-типу.
+  }) as unknown as ReturnType<typeof buildStandaloneAuth<TProfile>>
 }
 
 /**
@@ -291,13 +326,13 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
  * ```
  */
 export function createAuth<TProfile extends StandaloneAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildStandaloneAuth<TProfile>>
 export function createAuth<TProfile extends HubClientAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildHubClientAuth<TProfile>>
 export function createAuth<TProfile extends HubProviderAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildHubProviderAuth<TProfile>>
 export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
   switch (profile.mode) {
@@ -308,4 +343,36 @@ export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
     case 'hub-provider':
       return buildHubProviderAuth(profile as HubProviderAuthProfile)
   }
+}
+
+/**
+ * Async-версия createAuth для standalone-режима с `social.source === 'db'`.
+ *
+ * Сначала вызывает `social.load()` для получения OAuth-провайдеров из БД,
+ * затем передаёт их в фабрику. Использовать с `await` на уровне модуля (top-level await в Next.js).
+ *
+ * @example — aboi, social: { source: 'db', load: createSocialProviderLoader(prisma, ...) }
+ * ```typescript
+ * export const auth = await createAuthAsync({
+ *   mode: 'standalone',
+ *   social: { source: 'db', load: createSocialProviderLoader(prisma, decryptSecret, key) },
+ *   ...
+ * })
+ * ```
+ */
+export async function createAuthAsync<TProfile extends StandaloneAuthProfile>(
+  profile: TProfile
+): Promise<ReturnType<typeof buildStandaloneAuth<TProfile>>> {
+  if (profile.social?.source === 'db') {
+    const loaded = await profile.social.load()
+    if (loaded) {
+      // Конвертируем карту провайдеров в формат Better Auth
+      const socialProviders = Object.fromEntries(Object.entries(loaded).map(([id, cfg]) => [id, cfg])) as Parameters<
+        typeof betterAuth
+      >[0]['socialProviders']
+      const enriched = { ...profile, _resolvedSocialProviders: socialProviders }
+      return buildStandaloneAuth(enriched as TProfile)
+    }
+  }
+  return buildStandaloneAuth(profile)
 }

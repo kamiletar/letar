@@ -3,4 +3,4 @@
  * Новый код должен импортировать из '@/lib/db'.
  */
 export type * from './db'
-export { getEnhancedPrisma, prisma } from './db'
+export { getEnhancedPrisma, prisma, rawOrm } from './db'
