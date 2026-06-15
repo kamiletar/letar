@@ -1,79 +1,80 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №41 (2026-06-14, инфра-планирование — сервер s3):** Добавлен **§15 «Сервер s3 — медиа, e2e, IPFS, бэкап»**.
+> Выбран конфиг **HDD S16** (12 ядер, 16 ГБ) — обоснован замером: пик `nx affected --target=e2e --parallel=3`
+> с driving-school (98 spec, 17 projects) ≈ 8–9 ГБ; 16 E2E-сюитов в монорепо подтверждено (glob).
+> §15 охватывает: медиа-сервер (upload API + ffmpeg + nginx HTTP Range, URL-схема `media.letar.best`);
+> E2E-ранер (PostgreSQL per-suite, cron/webhook, Telegram-нотификации);
+> IPFS: один Kubo — и піннер (:5001 API) и шлюз (:8080→nginx→`ipfs.letar.best`);
+> **Pin Registry** (PostgreSQL в піннере): `Pin{cid,nodeId}` + `PinRef{appId,entityType,entityId}` —
+> мультитенантность, ref-counted unpin, задел под распределённые пинеры через `nodeId`;
+> гибридная видеодоставка: IPFS-gateway основной + nginx-fallback; Kubo chunk 1 МБ для seek;
+> UX «маркетинг IPFS» — CID-бейдж в плеере, тултип, кнопка; Resilio s3 как третья offsite-нода.
+> **➡️ Следующий старт:** **Этап 8** — Соц-секреты per-владелец + админка.
+>
 > **Статус:** ✅ план утверждён, реализация идёт. **Сделано:** Этап 1 + код-часть Этапа 0 (сессия №1); Этап 2 эталон aboi (сессия №5) + тираж на dsperevod (сессия №6); реестр hub-клиентов → БД (сессия №7); **Этап 0.1 ✅ ПОЛНОСТЬЮ** (сессия №8); **Этап 1.5 ✅ ПОЛНОСТЬЮ** — фабрика + эталоны + README + E2E 3/3 (сессии №9–10).
 > **Сессия №12 (2026-06-04, инфра — риски 0.2 + 0.3):** ✅ **Этап 0.2 основная защита** — fail2ban jail
 > `maddy-submission` (Docker json-log regex, maxretry=5/bantime=24h, iptables port 587); пароли
 > `kami@letar.best` и `admin@letar.best` сменены на 32-символьные. ✅ **Этап 0.3 частично** — скрипт
-> `/opt/maddy/backup.sh` (tar maddy.conf + dkim_keys + credentials.db + aliases, cron 03:00, ротация 14д);
+> `/opt/maddy/backup.sh` (tar maddy.conf + dkim*keys + credentials.db + aliases, cron 03:00, ротация 14д);
 > rsync mail→s2→Resilio offsite-цепочка; Resilio R/O ключи убраны из публичного `backup-architecture.md`
 > → `OPS_JOURNAL.local.md §14.4`. Коммиты `eff3f36`, `88f8773`.
 > **Сессия №13 (2026-06-04, ремедиация + архитектурные решения):** зафиксированы 4 решения: Ключница в РФ
-> (152-ФЗ локализация ✅ закрыт), Redis для rate-limit store (решение принято), `lena_*` БД не переименовывать,
-> DKIM `направа.рф` не трогать (driving-school отправляет через `letar.best`). **Этап 2 п.3 ✅ ПОЛНОСТЬЮ** —
+> (152-ФЗ локализация ✅ закрыт), Redis для rate-limit store (решение принято), `lena*_`БД не переименовывать,
+> DKIM`направа.рф`не трогать (driving-school отправляет через`letar.best`). **Этап 2 п.3 ✅ ПОЛНОСТЬЮ** —
 > ремедиация застрявших: aboi 0/2, dsperevod 0/3, auth-hub bulk-верификация 12→0 (OAuth VK-аккаунты апреля).
 > **Этап 2 — ПОЛНОСТЬЮ закрыт.**
 > **Сессия №14 (2026-06-04, Этап 0.3 — дочистить бэкапы):** ✅ Nginx NPM offsite подтверждён —
-> бэкапы создавались на обоих серверах до мая; обнаружен баг `WORKSPACE_PATH=/home/deploy/lena`
-> внутри контейнера (должен быть `/home/deploy/letar`) → nginx backup не создавался с 18 мая (s2)
+> бэкапы создавались на обоих серверах до мая; обнаружен баг `WORKSPACE_PATH=/home/deploy/lena`внутри контейнера (должен быть`/home/deploy/letar`) → nginx backup не создавался с 18 мая (s2)
 > и 27 мая (s1, контейнер упал exit 127). Фикс: хардкод в `docker-compose.production.yml`;
 > коммит `27960b3`, деплой запрошен у BlackCove. ✅ Ротация nginx бэкапов реализована
 > (MAX_AUTO_BACKUPS=14); старые бэкапы почищены вручную (27 удалено на s2, 35 на s1). ✅ IgnoreList
-> обновлён на s1 + s2: добавлены `.env.docker`/`.env.local`/`.env` → секреты не идут в Resilio.
+> обновлён на s1 + s2: добавлены `.env.docker`/`.env.local`/`.env`→ секреты не идут в Resilio.
 > ✅ Dry-run восстановления: nginx архив (737 файлов, sqlite+certs) и Maddy архив (DKIM 8 доменов)
-> валидны. ✅ Стратегия локальных credentials задокументирована в `backup-architecture.md`
-> (KeePassXC для секретов, git для кода, Resilio для uploads+backups). Stub-файлы созданы на s1
+> валидны. ✅ Стратегия локальных credentials задокументирована в`backup-architecture.md`(KeePassXC для секретов, git для кода, Resilio для uploads+backups). Stub-файлы созданы на s1
 > для s2-only apps. Деплой выполнен BlackCove (сессия №14 продолжение): s2 — nginx backup 8 KB ✅;
 > s1 — remote lena→letar исправлен, контейнер поднят, nginx backup 7.9 MB ✅.
 > **Этап 0.3 — ПОЛНОСТЬЮ закрыт.**
 > **Сессия №15 (2026-06-04, Этап 4 — шаги 1–2):** разведка premium-rosstil (schema.zmodel, auth.ts,
-> register-form, signin-form, auth-client). ✅ **Шаг 1:** `register-form.tsx` — заменить
-> `fetch('/api/auth/register')` на `authClient.signUp.email({ name, email, password })`;
-> удалён `/api/auth/register/route.ts`. ✅ **Шаг 2:** `signin-form.tsx` resend —
-> `fetch('/api/auth/resend-verification')` → `authClient.sendVerificationEmail()`; удалён
-> `/api/auth/resend-verification/route.ts`. Коммит в submodule `4d389d8` + bump SHA `20af8d5`.
-> **Сессия №16 (2026-06-04, Этап 4 — шаги 3–6):** ✅ **Шаг 3:** `forgot-password-form.tsx` →
-> `authClient.requestPasswordReset()` (в BA 1.6.11 метод `requestPasswordReset`, не `forgetPassword`);
-> `reset-password-form.tsx` → `authClient.resetPassword()`;
+> register-form, signin-form, auth-client). ✅ **Шаг 1:** `register-form.tsx`— заменить`fetch('/api/auth/register')`на`authClient.signUp.email({ name, email, password })`;
+> удалён `/api/auth/register/route.ts`. ✅ **Шаг 2:** `signin-form.tsx`resend —`fetch('/api/auth/resend-verification')`→`authClient.sendVerificationEmail()`; удалён
+> `/api/auth/resend-verification/route.ts`. Коммит в submodule `4d389d8`+ bump SHA`20af8d5`.
+> **Сессия №16 (2026-06-04, Этап 4 — шаги 3–6):** ✅ **Шаг 3:** `forgot-password-form.tsx`→`authClient.requestPasswordReset()`(в BA 1.6.11 метод`requestPasswordReset`, не `forgetPassword`);
+> `reset-password-form.tsx`→`authClient.resetPassword()`;
 > удалены кастомные API routes `/request-reset`, `/reset-password`. ✅ **Шаг 4:** удалены
 > `lib/tokens.ts`, `lib/rate-limit.ts` и все потребители (`verify-email/route.ts`,
-> `cleanup-rate-limits/route.ts`). ✅ **Шаг 5:** schema.zmodel — убрано поле `type` из `Verification`,
-> дропнута `LoginAttempt`; migration `20260604155648_remove_custom_auth_fields` создана и применена.
-> ✅ **Шаг 6:** `verify-email/page.tsx` переписан на `authClient.verifyEmail()` + resend UI при
+> `cleanup-rate-limits/route.ts`). ✅ **Шаг 5:** schema.zmodel — убрано поле `type`из`Verification`,
+> дропнута `LoginAttempt`; migration `20260604155648_remove_custom_auth_fields`создана и применена.
+> ✅ **Шаг 6:** `verify-email/page.tsx`переписан на`authClient.verifyEmail()`+ resend UI при
 > ошибке (ResendVerificationButton + поле email по эталону dsperevod). bump 0.73.4→0.74.0;
-> коммит `51a465c` + bump SHA `230a07b`. **Этап 4 — ПОЛНОСТЬЮ завершён.**
+> коммит`51a465c`+ bump SHA`230a07b`. **Этап 4 — ПОЛНОСТЬЮ завершён.**
 > **Сессия №17 (2026-06-04, Этап 5 ✅ ПОЛНОСТЬЮ):** богатый pin-auth флоу в premium-rosstil:
-> хук `sendVerificationEmail` генерирует PIN + отправляет письмо через `@letar/email` с кодом и ссылкой;
-> `lib/pin-auth-adapters.ts` — `PinValidatorAdapter` (namespace через identifier, без поля type);
-> SSE endpoint `/api/auth/verification-stream/[email]` — cross-tab синхронизация;
-> server actions: `verify-pin`, `resend-verification-pin` (через BA API), `verify-login` (HMAC-signed cookie);
-> страница `/auth/verify-pin` с Chakra `PinInput` + `usePinVerification` hook;
+> хук `sendVerificationEmail`генерирует PIN + отправляет письмо через`@letar/email`с кодом и ссылкой;`lib/pin-auth-adapters.ts`—`PinValidatorAdapter`(namespace через identifier, без поля type);
+> SSE endpoint`/api/auth/verification-stream/[email]`— cross-tab синхронизация;
+> server actions:`verify-pin`, `resend-verification-pin`(через BA API),`verify-login`(HMAC-signed cookie);
+> страница`/auth/verify-pin`с Chakra`PinInput`+`usePinVerification`hook;
 > register-form → редирект на verify-pin; signin EMAIL_NOT_VERIFIED → resend + редирект;
-> rate limit `/send-verification-email {60,3}`; tsconfig paths + references для `@letar/pin-auth`.
-> bump 0.74.0→0.75.0; коммит `7b0fcda` + bump SHA `7b67109`. **Этап 5 — ПОЛНОСТЬЮ завершён.**
-> **Сессия №18 (2026-06-05, инфра + Этап 6 ✅):** ✅ **Redis** — `infra/redis/docker-compose.production.yml`
-> (Redis 7-alpine, 256mb LRU, premium-network); `createRedisStorage(url)` в `@letar/auth/server`;
-> auth-hub + kami → `secondaryStorage` + `rateLimit.storage='secondary-storage'`; задеплоено BlackCove.
-> ✅ **§13.7** — `offline_access` scope добавлен в kami + фабрику (проактивно для refresh_token).
+> rate limit`/send-verification-email {60,3}`; tsconfig paths + references для `@letar/pin-auth`.
+> bump 0.74.0→0.75.0; коммит `7b0fcda`+ bump SHA`7b67109`. **Этап 5 — ПОЛНОСТЬЮ завершён.**
+> **Сессия №18 (2026-06-05, инфра + Этап 6 ✅):** ✅ **Redis** — `infra/redis/docker-compose.production.yml`(Redis 7-alpine, 256mb LRU, premium-network);`createRedisStorage(url)`в`@letar/auth/server`;
+> auth-hub + kami → `secondaryStorage`+`rateLimit.storage='secondary-storage'`; задеплоено BlackCove.
+> ✅ **§13.7** — `offline_access`scope добавлен в kami + фабрику (проактивно для refresh_token).
 > ✅ **0.4** — решение принято: SOPS + age (self-hosted, KeePassXC, без нового сервиса).
-> ✅ **0.7 canary** — `infra/canary/canary.ts` (SMTP→Maddy, IMAP→Яндекс kaspergreen@yandex.ru);
-> cron каждые 15 мин через `docker compose run`; запрос деплоя у BlackCove.
-> ✅ **Этап 6** — kami/auth.ts мигрирован на `createAuth({ mode: 'hub-client' })` (241→125 строк);
-> фабрика расширена: `rateLimit`, `account`, `secondaryStorage` для hub-client; деплой запрошен.
+> ✅ **0.7 canary** —`infra/canary/canary.ts`(SMTP→Maddy, IMAP→Яндекс kaspergreen@yandex.ru);
+> cron каждые 15 мин через`docker compose run`; запрос деплоя у BlackCove.
+> ✅ **Этап 6** — kami/auth.ts мигрирован на `createAuth({ mode: 'hub-client' })`(241→125 строк);
+> фабрика расширена:`rateLimit`, `account`, `secondaryStorage`для hub-client; деплой запрошен.
 > **Сессия №19 (2026-06-05, Этап 6 + 8.5 ✅):** OIDC flow kami отлажен (5 последовательных багов: docker-compose env,
 > nextCookies() порядок, cookies() в Server Component, oidc-capture redirect, name_is_missing); кнопка Войти → сразу
-> Ключница; `mapProfileToUser` fallback в фабрике hub-client. Миграция данных kami выполнена:
-> 4 AudioFile + ADMIN → `kami@letar.best`; `letarkami@gmail.com` и `kaspergreen@gmail.com` удалены.
-> **Сессия №20 (2026-06-05, Этап 8.5 скрипты):** Созданы скрипты миграции для dashboard/archetest/animatrona-tracker:
-> `infra/migrations/dashboard-owner-migration.ts` (role ADMIN, нет контента), `archetest-owner-migration.ts`
-> (QuizLeaderboard+Sessions+Achievements, roles[]), `animatrona-tracker-owner-migration.ts`
-> (Anime/UserLibrary/Distribution/PinJob/Content). Подход: raw pg без ZenStack, dry-run режим.
+> Ключница;`mapProfileToUser`fallback в фабрике hub-client. Миграция данных kami выполнена:
+> 4 AudioFile + ADMIN →`kami@letar.best`; `letarkami@gmail.com`и`kaspergreen@gmail.com`удалены.
+> **Сессия №20 (2026-06-05, Этап 8.5 скрипты):** Созданы скрипты миграции для dashboard/archetest/animatrona-tracker:`infra/migrations/dashboard-owner-migration.ts`(role ADMIN, нет контента),`archetest-owner-migration.ts`(QuizLeaderboard+Sessions+Achievements, roles[]),`animatrona-tracker-owner-migration.ts`(Anime/UserLibrary/Distribution/PinJob/Content). Подход: raw pg без ZenStack, dry-run режим.
 > ⏳ **Запустить на s2** после логина в каждое приложение через Ключницу.
 > **Сессия №21 (2026-06-05, Этап 6.5 ✅ ПОЛНОСТЬЮ):** Passkeys / WebAuthn в auth-hub:
-> @simplewebauthn/server@13.3.1 + @simplewebauthn/browser@13.3.0; кастомный Better Auth плагин
-> `passkeyPlugin()` (createAuthEndpoint + getSessionFromCtx + internalAdapter.createSession + setSessionCookie);
-> таблица `passkey` в schema.zmodel + миграция `20260605154458_add_passkey`;
-> baseline-миграция `20260101000000_init_baseline` (resolve --applied на prod перед деплоем);
-> компоненты `PasskeySignInButton` + `PasskeyRegisterButton`; кнопка на странице /sign-in.
+> @simplewebauthn/server@13.3.1 + @simplewebauthn/browser@13.3.0; кастомный Better Auth плагин`passkeyPlugin()`(createAuthEndpoint + getSessionFromCtx + internalAdapter.createSession + setSessionCookie);
+> таблица`passkey`в schema.zmodel + миграция`20260605154458_add_passkey`;
+> baseline-миграция `20260101000000_init_baseline`(resolve --applied на prod перед деплоем);
+> компоненты`PasskeySignInButton`+`PasskeyRegisterButton`; кнопка на странице /sign-in.
 > rpID=letar.best (дефолт), origin=BETTER_AUTH_URL. typecheck ✅ lint ✅.
 > ✅ **Деплой выполнен BlackCove** (5858b0c): baseline resolved + passkey таблица создана, auth-hub Ready.
 > **Сессия №22 (2026-06-05, UX-анализ passkeys + logout):** обнаружены 2 UX-проблемы по скриншотам:
@@ -82,8 +83,8 @@
 > Этап 6.51 (RP-initiated logout через end_session_endpoint).
 > **Сессия №23 (2026-06-06, Этап 6.51 ✅ код):** RP-Initiated Logout реализован для всех hub-client приложений через
 > `createLogoutAction(auth, { oidcLogout: { endSessionUrl, clientId, postLogoutRedirectUri } })`.
-> Подход: `client_id` + `post_logout_redirect_uri` без `id_token_hint` (BA oidcProvider принимает; `id_token` не нужно хранить).
-> Обновлены: `kami/auth.actions.ts` + `.env` (создан); `animatrona-tracker/auth.actions.ts` + `.env`.
+> Подход: `client_id`+`post_logout_redirect_uri`без`id_token_hint`(BA oidcProvider принимает;`id_token`не нужно хранить).
+> Обновлены:`kami/auth.actions.ts`+`.env`(создан);`animatrona-tracker/auth.actions.ts`+`.env`.
 > `BETTER_AUTH_OIDC_ISSUER=https://auth.letar.best` добавлен в `.env.docker` всех 6 через SCP.
 > Задеплоено BlackCove: s1 kami ✅, s2 animatrona-tracker/dashboard/archetest/grandslamcup/time ✅.
 > **Этап 6.51 — ПОЛНОСТЬЮ ЗАВЕРШЁН.**
@@ -114,24 +115,22 @@
 > `auth.api.getSession({ headers: await headers() })`. Также улучшены сообщения об ошибках.
 > commit `69fb496`. typecheck ✅ lint ✅. Деплой запрошен BlackCove (msg #753).
 > **Сессия №28 (2026-06-10, Этап 0.8 — уведомления РКН):** ✅ Зафиксированы поданные уведомления РКН:
-> **letar** (`*.letar.best` + driving-school — то же ИП владельца) рег. № 100306050 от 02.06.2026;
+> **letar** (`_.letar.best`+ driving-school — то же ИП владельца) рег. № 100306050 от 02.06.2026;
 > **aboi** (ИП Гаева) рег. № 100286690 от 16.05.2026. ✅ Решение: «трансграничная передача не осуществляется»
 > корректно — 152-ФЗ касается граждан РФ, для RU-IP зарубежные провайдеры скроет гео-блокировка →
 > **Этап 6.7 обязателен** для соответствия уведомлению. Не подано: premium-rosstil, imot, dsperevod
-> (операторы — их владельцы). Коммиты `506f7cc`, `a43aae0`, `5db9241`.
+> (операторы — их владельцы). Коммиты`506f7cc`, `a43aae0`, `5db9241`.
 > **Сессия №29 (2026-06-10, Этап 6.7 ✅ код):** Гео-блокировка иностранных OAuth для RU-IP.
-> `auth-hub/src/lib/geo.ts` — `getCountryCode()` через `x-forwarded-for` + `geoip-lite` (MaxMind GeoLite2 локально).
-> `sign-in/page.tsx` — фильтрует google/github/facebook/telegram для RU-IP; VK/Yandex/passkeys остаются.
-> `oauth-buttons.tsx` — принимает проп `providers`. Fallback: нет заголовка → показывать всё (dev).
+> `auth-hub/src/lib/geo.ts`—`getCountryCode()`через`x-forwarded-for`+`geoip-lite`(MaxMind GeoLite2 локально).`sign-in/page.tsx`— фильтрует google/github/facebook/telegram для RU-IP; VK/Yandex/passkeys остаются.`oauth-buttons.tsx`— принимает проп`providers`. Fallback: нет заголовка → показывать всё (dev).
 > Также: fix TS2322 в passkey-prompt-banner + passkeys-manager (`PublicKeyCredentialCreationOptionsJSON`).
 > typecheck ✅ lint ✅. commit `b80de69`. Деплой запрошен BlackCove (msg #754).
 > **Сессия №30 (2026-06-10, Этап 0.8 — cookie-баннер + DRY):** ✅ Общие компоненты `@letar/ui@0.3.0`:
 > `CookieBanner`, `CookieSettingsButton`, `DeleteAccountZone`, `CookieConsentState`, `createConsentConfig`, `readConsentState`.
 > `auth-hub`: ConsentLog в БД, POST `/api/consent`, `deleteAccountAction`, CookieBanner в layout. `aboi`: рефакторинг на shared компоненты.
 > `dsperevod`: рефакторинг на shared компоненты (cookie-banner, yandex-metrika-consent, lib/consent).
-> Коммиты `045bc31` (ui), `6088286` (auth-hub), `67212ae` (aboi), `791b665` (dsperevod), `1081c70` (submodule bump).
+> Коммиты `045bc31`(ui),`6088286`(auth-hub),`67212ae`(aboi),`791b665`(dsperevod),`1081c70`(submodule bump).
 > **Сессия №31 (2026-06-10, Этап 0.8 ✅ ПОЛНОСТЬЮ):** ✅ Тираж 152-ФЗ на 4 оставшихся приложения.
-> **premium-rosstil**: ConsentLog + миграция, `/api/consent`, YandexMetrikaConsent (consent-aware обёртка),
+> **premium-rosstil**: ConsentLog + миграция,`/api/consent`, YandexMetrikaConsent (consent-aware обёртка),
 > CookieBanner в layout, deleteAccountAction → DeleteAccountZone в settings/page.tsx.
 > **imot**: ConsentLog + миграция (reset drift: scope/Verification), `/api/consent`, deleteAccountAction,
 > DeleteAccountZone в my-profile/page.tsx, CookieBanner в layout.
@@ -139,22 +138,20 @@
 > deleteAccountAction (soft-delete через deletedAt), DeleteAccountSection в settings/page.tsx, CookieBanner.
 > **grandslamcup**: ConsentLog + миграция, `/api/consent`, deleteAccountAction, DeleteAccountSection
 > в profile/page.tsx, CookieBanner в layout. Все субмодули запушены, SHA обновлены в letar.
-> **Сессия №32 (2026-06-11, Этап 7 ✅ ПОЛНОСТЬЮ):** `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк); `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0); pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5); SSE endpoint обновлён (`autologin:email` namespace); добавлен `magicLink` плагин BA + UI на /sign-in (`MagicLinkForm` + server action). `magicLinkClient()` добавлен в `auth-client.ts`.
-> **Сессия №33 (2026-06-11, Этап 8 ✅ ПОЛНОСТЬЮ):** `auth-hub/auth.ts` мигрирован на `createAuth({ mode: 'hub-provider' })` (~401→~205 строк без хелперов); `@letar/auth` расширен: `buildHubProviderAuth` (oidcProvider авто-включён, rate-limit с OIDC-правилами, secondaryStorage, account-linking), `OidcProviderConfig` в types; 8 новых тестов hub-provider (nextCookies последний, oidcProvider с defaults и кастомом, rate-limit, accountLinking); `@letar/auth` v0.6.0→v0.7.0; `auth-hub` v0.4.0→v0.5.0.
-> **Сессия №34 (2026-06-11, OIDC Pending Auth Cookie ✅):** Новый route `api/auth/oauth2/authorize/route.ts` перехватывает BA authorize,
-> сохраняет полные OIDC-параметры в `oidc_pending` cookie до BA-обработки (клонирует Response с Set-Cookie).
-> `consent/page.tsx` читает cookie → передаёт `oidcParams` в `AccountChooser`. `AccountChooser` при смене аккаунта
-> редиректит `/sign-in?...полные params...` вместо усечённых consent params. commit `1fc3ab1`. typecheck ✅ lint ✅.
+> **Сессия №32 (2026-06-11, Этап 7 ✅ ПОЛНОСТЬЮ):** `driving-school/auth.ts`мигрирован на`createAuth({ mode: 'standalone' })`(~607→~330 строк);`@letar/auth`расширен полями`socialProviders`, `databaseHooks`, `password`(v0.5.0→v0.6.0); pin-auth адаптеры обновлены на namespace-подход без поля`type` (как в premium-rosstil Этап 5); SSE endpoint обновлён (`autologin:email`namespace); добавлен`magicLink` плагин BA + UI на /sign-in (`MagicLinkForm`+ server action).`magicLinkClient()`добавлен в`auth-client.ts`.
+> **Сессия №33 (2026-06-11, Этап 8 ✅ ПОЛНОСТЬЮ):** `auth-hub/auth.ts`мигрирован на`createAuth({ mode: 'hub-provider' })`(~401→~205 строк без хелперов);`@letar/auth`расширен:`buildHubProviderAuth`(oidcProvider авто-включён, rate-limit с OIDC-правилами, secondaryStorage, account-linking),`OidcProviderConfig`в types; 8 новых тестов hub-provider (nextCookies последний, oidcProvider с defaults и кастомом, rate-limit, accountLinking);`@letar/auth`v0.6.0→v0.7.0;`auth-hub`v0.4.0→v0.5.0.
+> **Сессия №34 (2026-06-11, OIDC Pending Auth Cookie ✅):** Новый route`api/auth/oauth2/authorize/route.ts`перехватывает BA authorize,
+> сохраняет полные OIDC-параметры в`oidc*pending`cookie до BA-обработки (клонирует Response с Set-Cookie).`consent/page.tsx`читает cookie → передаёт`oidcParams`в`AccountChooser`. `AccountChooser`при смене аккаунта
+> редиректит`/sign-in?...полные params...`вместо усечённых consent params. commit`1fc3ab1`. typecheck ✅ lint ✅.
 > Деплой запросить у BlackCove.
 > **Сессия №35 (2026-06-11, Этап 0.4 ✅ ПОЛНОСТЬЮ):** age v1.3.1 + sops v3.12.2 установлены через winget;
 > age-ключ сгенерирован (публичный `age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza`), приватный в KeePassXC;
-> `.sops.yaml` настроен в корне репо; `auth-hub/.env.docker` зашифрован → `.env.docker.enc` добавлен в git;
-> `.gitignore` расширен (`!**/.env.docker.enc`); `deploy-affected.sh` — функция `decrypt_sops_env()` авто-расшифровывает
-> при наличии `SOPS_AGE_KEY_FILE`; документация `secret-manager.md`. Commit `5365647`.
+> `.sops.yaml`настроен в корне репо;`auth-hub/.env.docker`зашифрован →`.env.docker.enc`добавлен в git;`.gitignore` расширен (`!**/.env.docker.enc`); `deploy-affected.sh`— функция`decrypt_sops_env()`авто-расшифровывает
+> при наличии`SOPS_AGE_KEY_FILE`; документация `secret-manager.md`. Commit `5365647`.
 > ✅ Тираж завершён (сессия №35 продолжение): 22 приложения зашифрованы (16 публичных + 5 submodules + auth-hub);
-> все `.env.docker.enc` в git; root + 5 submodule запушены. Commit `eb21137`.
-> ✅ age-ключ установлен на s2 (`/home/deploy/.age/letar-key.txt` chmod 600 + `SOPS_AGE_KEY_FILE` в `.bashrc`);
-> деплой auth-hub `c0ed40c` через SOPS прошёл успешно — подтверждено BlackCove (agent-mail msg #762). **Этап 0.4 — ПОЛНОСТЬЮ закрыт.**
+> все `.env.docker.enc`в git; root + 5 submodule запушены. Commit`eb21137`.
+> ✅ age-ключ установлен на s2 (`/home/deploy/.age/letar-key.txt`chmod 600 +`SOPS_AGE_KEY_FILE`в`.bashrc`);
+> деплой auth-hub `c0ed40c` через SOPS прошёл успешно — подтверждено BlackCove (agent-mail msg #762). **Этап 0.4 — ПОЛНОСТЬЮ закрыт.\*\*
 > **Сессия №36 (2026-06-11, статус + подтверждение инфры):** `/repo` — сводный отчёт плана; уточнено что
 > age-ключ на s2 установлен BlackCove в сессии деплоя (msg #762); все деплои сессий №32–35 подтверждены.
 > **Сессия №37 (2026-06-11, Этап 8.5 ✅ ПОЛНОСТЬЮ + animatrona-tracker auth UX + UserMenu):**
@@ -180,8 +177,19 @@
 > **Сессия №40 (2026-06-12, план):** в roadmap добавлен **Этап 6.9** — подвал «Сделано в studio.letar.best»
 > со ссылкой (UTM) на всех публичных сайтах монорепо; общий компонент `StudioCredit` в `@letar/ui`;
 > для коммерческих submodules — предварительное согласование с владельцами.
-> **➡️ Следующий старт:** **Этап 8** — Соц-секреты per-владелец + админка (Tier 1/Tier 2 UI выбора, шифрование at-rest).
-> ⚠️ **Требует обсуждения перед стартом:** (1) Scope — что входит в MVP Этапа 8: только UI выбора режима, или сразу шифрование at-rest секретов в БД? (2) Какое приложение первый пилот (aboi? dsperevod?)? (3) Нужен ли Tier 2 прямо сейчас или достаточно Tier 1 (hub-client регистрация)?
+> **Сессия №42 (2026-06-15, план):** в roadmap добавлен **Этап 6.10** — версия сборки в подвале на всех сайтах;
+> общий компонент `BuildVersion` в `@letar/ui` читает `version` из `package.json` (билд-тайм проброс через
+> `NEXT_PUBLIC_APP_VERSION`/серверный импорт); рядом со `StudioCredit`, тираж одной правкой футера.
+> **Сессия №43 (2026-06-15, Этап 8 ✅ ПОЛНОСТЬЮ):** Admin UI OAuth-клиентов + at-rest шифрование.
+> Tier 1: `/admin/clients` CRUD (список, создание через RisksConsent → ClientForm, детали, редактирование);
+> `SecretBanner` (plaintext один раз через `?secret=`); `RotateSecretButton`, `DeleteClientButton`, `ToggleClientButton`.
+> Tier 2: `libs/auth/server/crypto.ts` (AES-256-GCM секреты + AES-256-CBC детерминированные токены);
+> `social-loader.ts` (OAuth-провайдеры из БД); `createAuthAsync({ social: { source: 'db' } })`;
+> `auth-hub/lib/db.ts` — encryption proxy для oauthApplication/oauthAccessToken/account;
+> `scripts/encrypt-client-secrets.ts` — backfill скрипт; обратная совместимость с plaintext.
+> `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки.
+> typecheck ✅ lint ✅ tests ✅. commit `4e70c76`. **⏳ Следующее:** деплой + backfill скрипт на проде.
+> **➡️ Следующий старт:** **Этап 9** — деплой Этапа 8 + backfill (`AUTH_ENCRYPTION_KEY` → `.env.docker`, `encrypt-client-secrets.ts --execute` на s2).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).
@@ -195,8 +203,7 @@
 > `@letar/pin-auth` + `@letar/auth`) и ✅ код-часть Этапа 0 (централизованный лог `@letar/email` + фикс
 > игнорируемого результата в mandala). Этап 0.5 (Nx owner-теги) и инфра-часть (0.1/0.2/DKIM/canary) — следующие сессии.
 > **Сессия реализации №2 (2026-05-30, публичное дерево):** ✅ **Этап 0.1 код-часть** — 6 OIDC `clientSecret`
-> вынесены из `auth-hub/src/lib/auth.ts` в `process.env.OIDC_*_SECRET` (fail-fast хелпер); значения добавлены в
-> `.env.local`/`.env.docker` (не коммитятся). ✅ **Этап 0.5 публичная часть** — тег `owner:letar` в 60 project.json
+> вынесены из `auth-hub/src/lib/auth.ts` в `process.env.OIDC*\*\_SECRET`(fail-fast хелпер); значения добавлены в`.env.local`/`.env.docker`(не коммитятся). ✅ **Этап 0.5 публичная часть** — тег`owner:letar` в 60 project.json
 >
 > - depConstraint `owner:letar → [scope:shared, owner:letar]` в `eslint.config.mjs` (0 нарушений границ).
 >   **Сессия реализации №3 (2026-05-30, submodules + публичное дерево):** ✅ **Этап 0.5 завершён** — тег
@@ -210,10 +217,10 @@
 >   нерабочий идентификатор `oxlint-disable` для `no-img-element` (data-URL превью + внешние логотипы); **dsperevod** —
 >   `rules-of-hooks` (`useMDXComponents` вынесен в константу `baseMdxComponents`) + curly-автофикс (был скрыт за
 >   падением oxlint). Коммит внутри каждого submodule + bump SHA в letar. `nx run-many -t lint -p aboi
->   driving-school dsperevod` зелёный. ⏳ Заведена отдельная задача на предсуществующий `typecheck:tsgo` TS2883 в
+driving-school dsperevod` зелёный. ⏳ Заведена отдельная задача на предсуществующий `typecheck:tsgo` TS2883 в
 >   `dsperevod/src/lib/auth-client.ts` (непортируемый тип better-auth — вне scope lint-сессии).
 >   **Сессия реализации №5 (2026-05-31, submodules aboi + aboi-e2e):** ✅ **Этап 2 — эталон aboi** (resend
->   email-верификации): блок resend на `/sign-in` (EMAIL_NOT_VERIFIED) и форма на `/verify-email`; захват
+>   email-верификации): блок resend на `/sign-in` (EMAIL*NOT_VERIFIED) и форма на `/verify-email`; захват
 >   `SendEmailResult` + rate-limit `/send-verification-email {60,3}` (`lib/auth.ts`); Umami-события §13.9
 >   (`lib/analytics.ts`); E2E `email-verification.spec.ts` зелёный (chromium, полный флоу включая верификацию по
 >   токену). bump aboi 0.23.2→0.24.0; коммиты в submodules aboi + aboi-e2e + bump 2 SHA. Follow-up: email-уровень
@@ -236,26 +243,25 @@
 >   регистрация hub-клиента = операционная процедура (`trustedClients` хардкод). Это **проработка**, код не тронут.
 >   **Сессия реализации №7 (2026-06-03, auth-hub публичное дерево):** ✅ **реестр hub-клиентов → БД** (под-вопрос Этапа 1.5 п.4):
 >   `trustedClients` (7 клиентов) и `requireOidcSecret()` удалены из `auth.ts`; добавлен `prisma/seed.ts` — upsert 7 клиентов
->   из `OIDC_*_SECRET` env vars через raw ZenStack ORM (обходит `@@deny('all', true)`); nx target `db:seed`; обновлена
->   `/admin/clients` (redirect URLs, toggle disabled, пустой стейт с инструкцией); `docker-compose.dev.yml` для локальной БД;
->   seed выполнен и проверен (7/7 ✓). Особенность BA v1.6.11: `skipConsent` не читается из БД → studio покажет consent 1 раз.
+>   из `OIDC*\*\_SECRET`env vars через raw ZenStack ORM (обходит`@@deny('all', true)`); nx target `db:seed`; обновлена
+>   `/admin/clients`(redirect URLs, toggle disabled, пустой стейт с инструкцией);`docker-compose.dev.yml`для локальной БД;
+>   seed выполнен и проверен (7/7 ✓). Особенность BA v1.6.11:`skipConsent`не читается из БД → studio покажет consent 1 раз.
 >   ✅ Деплой на s2 выполнен: seed 7/7 + перезапуск auth-hub (BlackCove).
 >   **Сессия реализации №8 (2026-06-04, инфра — Этап 0.1 ✅ ПОЛНОСТЬЮ):** ротация 6 утёкших OIDC-секретов:
->   сгенерированы новые значения; обновлены `.env.docker` auth-hub + 6 клиентов (kami, dashboard, archetest, time,
->   grandslamcup, animatrona-tracker) локально и на s2; добавлен `OIDC_STUDIO_SECRET` (studio-prod, новый клиент);
+>   сгенерированы новые значения; обновлены`.env.docker`auth-hub + 6 клиентов (kami, dashboard, archetest, time,
+>   grandslamcup, animatrona-tracker) локально и на s2; добавлен`OIDC_STUDIO_SECRET`(studio-prod, новый клиент);
 >   повторный seed на s2 — upsert 7/7; рестарт всех контейнеров в порядке (auth-hub → клиенты). Старые литералы
 >   из публичной git-истории отозваны. Риск 🔴 «секреты в публичном репо» закрыт.
->   **Сессия реализации №9 (2026-06-04, Этап 1.5 ⏳):** фабрика `createAuth(profile)` в `@letar/auth/server`:
->   типы `AuthProfile` (3 режима), generic build-функции, 16 Vitest тестов; bump 0.3.0→0.4.0. Эталоны:
->   dsperevod (standalone, 90→35 строк) + time (hub-client, 84→20 строк, без DB). Ограничение Better Auth:
->   `additionalFields` не выводятся через фабрику — 3 cast-сайта dsperevod исправлены через `as unknown as`.
+>   **Сессия реализации №9 (2026-06-04, Этап 1.5 ⏳):** фабрика`createAuth(profile)`в`@letar/auth/server`:
+>   типы `AuthProfile`(3 режима), generic build-функции, 16 Vitest тестов; bump 0.3.0→0.4.0. Эталоны:
+>   dsperevod (standalone, 90→35 строк) + time (hub-client, 84→20 строк, без DB). Ограничение Better Auth:`additionalFields`не выводятся через фабрику — 3 cast-сайта dsperevod исправлены через`as unknown as`.
 >   Осталось по DoD: README + E2E behavior-parity.
 >   **Сессия реализации №11 (2026-06-04, Этап 3 ✅ ПОЛНОСТЬЮ):** admin/users с VerifyButton во всех 5 приложениях:
 >   aboi (новая страница + AdminNav), kami (новая страница + AdminSidebar), auth-hub (VerifyButton в существующую),
 >   dsperevod (verifyUserAction + logAudit + VerifyButton), premium-rosstil (verifyUserAction + VerifyButton + колонка).
 >   Коммиты в 3 submodule + bump SHA + корневой репо.
->   **Сессия реализации №10 (2026-06-04, Этап 1.5 ✅ DoD):** README `@letar/auth` полностью переписан —
->   добавлен раздел `createAuth()` с контрактом `AuthProfile`, всеми тремя режимами, примерами dsperevod/time,
+>   **Сессия реализации №10 (2026-06-04, Этап 1.5 ✅ DoD):** README `@letar/auth`полностью переписан —
+>   добавлен раздел`createAuth()`с контрактом`AuthProfile`, всеми тремя режимами, примерами dsperevod/time,
 >   ограничением `additionalFields`; обновлена дата и версия (0.4.0). Создан `docker-compose.dev.yml` для dsperevod
 >   (postgres:17, порт 5442). E2E behavior-parity: 3/3 passed chromium — поведение standalone через фабрику
 >   идентично эталону сессии №6. **Этап 1.5 закрыт полностью.**
@@ -679,7 +685,7 @@ interface AuthProfile {
 | kami            | ❌ только владелец              | —            |
 | grandslamcup    | ✅ email, имя игроков           | ✅           |
 | time            | ❌ только владелец              | —            |
-| animatrona-*    | ❌ внутренние инструменты       | —            |
+| animatrona-\*   | ❌ внутренние инструменты       | —            |
 | dashboard-agent | ❌ внутреннее                   | —            |
 
 **Чеклист для каждого приложения** (из `personal-data.md §7`):
@@ -1036,7 +1042,6 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-
 <UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
@@ -1075,6 +1080,26 @@ import { UserMenu } from '@letar/ui'
 - **✓ DoD:** компонент в `@letar/ui`; каждый сайт из охвата показывает credit-ссылку либо обоснованный N/A;
   для submodules — коммит внутри + bump SHA; UTM-переходы фиксируются в Umami.
 - **Зависимости:** нет (UI-тираж, можно итерационно — как Этап 6.8).
+
+### Этап 6.10 — Версия сборки в подвале на всех сайтах 🆕 (добавлен 2026-06-15)
+
+> **Цель:** в футере каждого приложения показывать версию сборки из его `package.json` (`version`).
+> Упрощает диагностику («какая версия сейчас на проде?»), привязывает баг-репорты к релизу, видно при
+> деплое что выкатилась нужная сборка.
+
+- **Общий компонент `BuildVersion` в `@letar/ui`** (по образцу `StudioCredit`/`UserMenu`):
+  принимает версию пропсом (`version: string`), рендерит ненавязчивый текст (`v{version}`, тон `fg.subtle`,
+  `fontSize="xs"`); опционально — короткий git-SHA и дата сборки.
+- **Источник версии (решить при реализации):** `version` из `package.json` приложения. В Next.js не читать
+  `package.json` в рантайме на клиенте — пробросить через `next.config.mjs` `env`/`NEXT_PUBLIC_APP_VERSION`
+  (билд-тайм inline) либо серверный импорт `package.json` в layout/footer (Server Component). Выбрать единый
+  паттерн и задокументировать в `.claude/docs/ui-components.md`.
+- **Размещение:** рядом со `StudioCredit` (Этап 6.9) — оба в общий футер-блок, чтобы тираж шёл одной правкой layout.
+- **Охват:** все приложения с публичным UI (тот же список что Этап 6.9 + петы). Без UI (dashboard-agent) — N/A.
+- **✓ DoD:** компонент в `@letar/ui`; версия читается из `package.json` через единый билд-тайм-механизм;
+  каждый сайт из охвата показывает версию в футере; для submodules — коммит внутри + bump SHA; паттерн
+  проброса версии задокументирован в `ui-components.md`.
+- **Зависимости:** нет (UI-тираж, итерационно — как Этап 6.8/6.9). Удобно делать вместе с Этапом 6.9 (один футер).
 
 ### Этап 7 — driving-school: на общую библиотеку ✅ ПОЛНОСТЬЮ (2026-06-11, сессия №32)
 
@@ -1348,3 +1373,530 @@ Telegram alerting — в Этапе 0. Вместе дают картину: % �
 > 🔒 **Вынесено в приватный файл** `.claude/OPS_JOURNAL.local.md` (в `.gitignore`, не коммитится).
 > Содержит инфра-детали прода (хосты, БД-креды, пути к бэкапам, доступ) — не публикуется в публичном репо `letar`.
 > Сами задачи отражены в roadmap §7 как этапы Фазы A (0, 0.1, 0.2, 0.7).
+
+---
+
+## 15. Сервер s3 — медиа, e2e, IPFS, бэкап 🆕
+
+> **Статус:** планирование. Сервер не развёрнут.
+> **Конфиг:** HDD S16 (12 ядер, 16 ГБ RAM) — обоснование: пиковое потребление `nx affected --target=e2e`
+> при `--parallel=3` с driving-school в пачке ≈ 8–9 ГБ; 16 ГБ даёт запас для видеоэнкода параллельно с тестами.
+
+### 15.1 Роли и ответственности
+
+| Роль             | Сервис                      | Домен / порт       |
+| ---------------- | --------------------------- | ------------------ |
+| **Медиа-сервер** | Next.js/Express API + nginx | `media.letar.best` |
+| **Видео-воркер** | ffmpeg + BullMQ             | фоновый процесс    |
+| **E2E-ранер**    | Playwright + nx             | cron / webhook     |
+| **IPFS-шлюз**    | Kubo (go-ipfs)              | `ipfs.letar.best`  |
+| **IPFS-піннер**  | кастомный сервис            | внутренний         |
+| **Resilio-нода** | Resilio Sync                | offsite-пир        |
+
+s3 **не** хостит приложения монорепо (s1/s2) и **не** является точкой входа для пользователей —
+только инфраструктурный бэкенд.
+
+---
+
+### 15.2 Медиа-сервер (видео) — общий для всех приложений
+
+Единый сервис для загрузки, транскодинга и раздачи видео. Приложения (svoichuzhie, kami, будущие)
+интегрируются через API-ключ — не хранят видео у себя.
+
+#### URL-схема
+
+```
+https://media.letar.best/v/{appId}/{videoId}/source.mp4   — оригинал (приватный, только auth)
+https://media.letar.best/v/{appId}/{videoId}/720p.mp4     — транскод 720p (публичный)
+https://media.letar.best/v/{appId}/{videoId}/1080p.mp4    — транскод 1080p (публичный)
+https://media.letar.best/v/{appId}/{videoId}/poster.jpg   — постер (первый кадр)
+```
+
+#### API (аутентификация — API-ключ в заголовке `X-Media-Key`)
+
+```
+POST   /api/v1/{appId}/video/upload          — загрузить, поставить в очередь → { videoId, jobId }
+GET    /api/v1/{appId}/video/{videoId}/status — статус транскода (queued|processing|ready|error)
+DELETE /api/v1/{appId}/video/{videoId}        — удалить все файлы
+POST   /api/v1/{appId}/video/{videoId}/poster — сгенерировать постер из timestamp
+```
+
+При завершении транскода воркер вызывает `webhookUrl` приложения (configurable per appId):
+
+```json
+{
+  "event": "video.ready",
+  "videoId": "...",
+  "appId": "svoichuzhie",
+  "urls": { "720p": "...", "1080p": "...", "poster": "..." }
+}
+```
+
+#### Транскодинг (BullMQ + ffmpeg)
+
+```
+Загрузка → /data/raw/{appId}/{videoId}/source.ext
+Воркер   → ffmpeg → /data/processed/{appId}/{videoId}/720p.mp4 + 1080p.mp4 + poster.jpg
+Статус   → Redis (BullMQ job state)
+```
+
+Параметры ffmpeg (v1 — только MP4, HLS в v2):
+
+```bash
+# 720p
+ffmpeg -i source.ext -vf scale=-2:720 -c:v libx264 -preset medium -crf 23 \
+       -c:a aac -b:a 128k -movflags +faststart 720p.mp4
+
+# 1080p
+ffmpeg -i source.ext -vf scale=-2:1080 -c:v libx264 -preset medium -crf 22 \
+       -c:a aac -b:a 192k -movflags +faststart 1080p.mp4
+
+# Постер (1 кадр на 1 секунде)
+ffmpeg -i source.ext -ss 00:00:01 -frames:v 1 poster.jpg
+```
+
+#### nginx — раздача статики с HTTP Range
+
+```nginx
+location /v/ {
+    root /data/processed;
+    # HTTP Range обязателен — без него не работает перемотка в браузере
+    add_header Accept-Ranges bytes;
+    # Кэш для MP4 (CDN-friendly)
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    # Защита от хотлинкинга (Referer приложений монорепо)
+    valid_referers ~\.(letar\.best|neyroaboi\.ru|направа\.рф|svoichuzhie\.ru)$;
+    if ($invalid_referer) { return 403; }
+}
+```
+
+#### Структура хранилища (HDD)
+
+```
+/data/
+  raw/{appId}/{videoId}/source.ext        — сырые загрузки (удалять после успешного транскода)
+  processed/{appId}/{videoId}/
+    720p.mp4
+    1080p.mp4
+    poster.jpg
+  backups/                                 — Resilio синкает на pinner/offsite
+```
+
+#### docker-compose.s3.yml (медиа)
+
+```yaml
+services:
+  media-api:
+    build: ./infra/media-server
+    ports: ['3100:3100']
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATA_PATH=/data
+    volumes:
+      - /data:/data
+
+  media-worker:
+    build: ./infra/media-server
+    command: node dist/worker.js
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATA_PATH=/data
+    volumes:
+      - /data:/data
+    # ffmpeg должен быть в образе
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  nginx:
+    image: nginx:alpine
+    ports: ['80:80', '443:443']
+    volumes:
+      - /data/processed:/data/processed:ro
+      - ./infra/media-server/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+```
+
+#### Интеграция в приложения
+
+В `schema.zmodel` приложения добавляется поле `mediaServerVideoId: String?`:
+
+```typescript
+// svoichuzhie/src/lib/media.ts
+const MEDIA_API = process.env.MEDIA_SERVER_URL // https://media.letar.best
+const MEDIA_KEY = process.env.MEDIA_API_KEY
+
+export async function uploadVideo(file: File, videoId: string) {
+  const form = new FormData()
+  form.append('file', file)
+  form.append('videoId', videoId)
+  const res = await fetch(`${MEDIA_API}/api/v1/svoichuzhie/video/upload`, {
+    method: 'POST',
+    headers: { 'X-Media-Key': MEDIA_KEY },
+    body: form,
+  })
+  return res.json() // { videoId, jobId }
+}
+```
+
+---
+
+### 15.3 E2E-сервер — автоматический прогон тестов
+
+#### Назначение
+
+- Прогонять тесты при изменениях в `libs/` (общий код) — `nx affected --target=e2e`
+- Прогонять конкретное приложение по запросу (webhook от CI или ручной запуск)
+- Не блокировать локальную разработку — разработчик не запускает тяжёлые тесты у себя
+
+#### Оценка потребления RAM (обоснование S16)
+
+| Сценарий                                       | Peak RAM  |
+| ---------------------------------------------- | --------- |
+| `--parallel=3` (дефолт Nx)                     | ~8–9 ГБ   |
+| `--parallel=3` + медиа-воркер                  | ~10–11 ГБ |
+| driving-school (98 spec, 17 projects) отдельно | ~4–5 ГБ   |
+| ОС + Redis + PostgreSQL                        | ~2 ГБ     |
+| **Итого HDD S16 (16 ГБ) — запас ~5 ГБ**        | ✅        |
+
+16 E2E-сюитов в монорепо (aboi, aira-web, animatrona, archetest, driving-school, dsperevod,
+form-develop-app, form-example, grandslamcup, imot, kami, label-printer-desktop, mandala, pravda,
+premium-rosstil, time).
+
+#### Инфраструктура на s3
+
+```
+PostgreSQL (один инстанс, БД per-приложение):
+  e2e_driving_school, e2e_premium_rosstil, e2e_aboi, ...
+
+Redis (один инстанс, используется несколькими тест-сьютами):
+  порт 6380 (не конфликтует с медиа-Redis на 6379)
+
+Node 24 + Bun + Playwright browsers (Chromium headless):
+  устанавливаются при provision
+```
+
+#### Запуск
+
+```bash
+# Автоматический — cron или webhook (GitHub Actions / самописный)
+nx affected --target=e2e --base=origin/main --parallel=3
+
+# Ручной — конкретный проект
+nx e2e driving-school-e2e -- --project=shard-core
+
+# Полный прогон всех
+nx run-many --target=e2e --parallel=3
+```
+
+**Триггеры (выбрать один или комбинацию):**
+
+- **Webhook** от GitHub при пуше в `main` или `libs/**` (простейший: ngrok / самописный HTTP endpoint)
+- **Cron** (ежедневно ночью) — `0 2 * * * nx run-many --target=e2e --parallel=3`
+- **Ручной** через agent-mail команду BlackCove
+
+**Нотификации:** результат в Telegram (успех/провал + ссылка на html-отчёт Playwright).
+
+#### Изоляция БД для тестов
+
+```bash
+# provision-e2e-db.sh — создать БД для E2E если не существует
+psql -U postgres -c "CREATE DATABASE e2e_driving_school;"
+psql -U postgres -c "CREATE DATABASE e2e_aboi;"
+# ...
+
+# В playwright.config.ts приложений:
+# BASE_URL=http://localhost:XXXX (dev-сервер, запускается webServer)
+# DATABASE_URL=postgresql://postgres:pass@localhost/e2e_<app>
+```
+
+---
+
+### 15.4 IPFS-шлюз, піннер и раздача видео через IPFS
+
+#### Концепция: IPFS как транспорт для видео
+
+Видео в аниматроне (и потенциально коммерческих сайтах) раздаётся **через IPFS-шлюз** вместо или
+параллельно с обычным nginx. Пользователи не обязаны иметь IPFS — они используют обычный HTTP-шлюз
+`https://ipfs.letar.best/ipfs/{cid}`. Преимущества:
+
+- **Контент-адресация** — CID = хэш файла, целостность гарантирована
+- **Автоматическая дедупликация** — один и тот же файл хранится один раз
+- **Нативное кэширование** — браузер кэширует по CID (immutable), CDN-friendly
+- **Маркетинг** — видим CID в плеере, ссылка «что такое IPFS», кнопка «добавить в свой нод»
+- **Путь к распределению** — в будущем несколько нодов пинируют разные файлы
+
+Для пользователей с IPFS (Brave, расширение): браузер может загрузить контент p2p минуя наш шлюз.
+
+#### Один Kubo — и піннер и шлюз
+
+Kubo нативно совмещает обе роли на одном процессе:
+
+```
+┌──────────────────────────────────────────────────────┐
+│  Kubo (один контейнер)                               │
+│                                                      │
+│  :4001  ← p2p swarm (другие IPFS-ноды в сети)       │
+│  :5001  ← HTTP API  ← піннер-сервис (localhost)     │
+│  :8080  ← Gateway   ← nginx → ipfs.letar.best       │
+└──────────────────────────────────────────────────────┘
+```
+
+Піннер-сервис (Node.js) — тонкая обёртка над Kubo API:
+
+- загрузить: `POST :5001/api/v0/add?chunker=size-1048576` → получить CID
+- запинить: `POST :5001/api/v0/pin/add?arg={cid}` (при `add` пинируется автоматически)
+- распинить: `POST :5001/api/v0/pin/rm?arg={cid}` (когда `PinRef` → 0)
+
+Шлюз на том же Kubo отдаёт запиненный контент по HTTP Range — второй IPFS-нод не нужен.
+
+#### Ключевая архитектурная деталь: Pin Registry
+
+IPFS сам не знает «чей» это контент. Это решается через **Pin Registry** — наша БД в піннере:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Pin Registry (PostgreSQL в піннере)                            │
+│                                                                 │
+│  Pin { cid, size, pinnedAt, nodeId, status }                   │
+│     ↑ один CID = одна запись, независимо от числа потребителей │
+│                                                                 │
+│  PinRef { cid, appId, entityType, entityId, label, metadata }  │
+│     ↑ N ссылок на один CID от разных приложений               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Правила:**
+
+- CID распинируется (unpin) только когда `COUNT(PinRef WHERE cid=X) = 0`
+- Удаление видео в animatrona → удаляется `PinRef`, не `Pin` (если svoichuzhie тоже ссылается)
+- `nodeId` — поле для будущего распределения (какой именно IPFS-нод держит этот CID)
+
+**Схема:**
+
+```typescript
+// infra/pinner/schema.prisma
+model Pin {
+  cid       String   @id        // QmXxx... или bafy...
+  size      BigInt              // байт
+  pinnedAt  DateTime
+  nodeId    String   @default("s3")  // для будущего распределения
+  status    PinStatus           // queued | pinning | pinned | failed
+
+  refs      PinRef[]
+}
+
+model PinRef {
+  id         String @id @default(cuid())
+  cid        String
+  appId      String              // "animatrona" | "svoichuzhie" | "kami"
+  entityType String              // "video" | "image" | "audio" | "archive"
+  entityId   String              // ID сущности в БД приложения
+  label      String?             // "720p" | "1080p" | "poster" | "source"
+  metadata   Json?               // { title, duration, ... }
+  createdAt  DateTime
+
+  pin        Pin @relation(fields: [cid], references: [cid])
+  @@unique([appId, entityType, entityId, label])
+}
+```
+
+#### API Піннера (с учётом мульти-тенантности)
+
+Аутентификация — `X-Pinner-Key: {appId}:{secret}` (per-app ключ, как в медиа-сервере):
+
+```
+POST   /api/v1/{appId}/add          — загрузить файл → CID → запинить → PinRef
+                                       body: FormData(file, entityType, entityId, label)
+                                       returns: { cid, gatewayUrl, size }
+
+POST   /api/v1/{appId}/pin/{cid}    — запинировать уже существующий CID (если загружен другим)
+                                       body: { entityType, entityId, label, metadata }
+
+DELETE /api/v1/{appId}/ref/{refId}  — удалить ссылку (unpin если refs=0)
+
+GET    /api/v1/{appId}/refs         — список ссылок этого приложения
+GET    /api/v1/{appId}/refs/{entityType}/{entityId} — все CID для сущности
+
+GET    /api/v1/admin/pins           — все пины (admin key)
+GET    /api/v1/admin/stats          — размер, количество по appId
+```
+
+#### Оптимизация Kubo для видео
+
+```bash
+# Инициализация с оптимальными параметрами для видео
+ipfs init --profile=server
+
+# Увеличить chunk size для видео (1 МБ vs дефолтный 256 КБ)
+# Меньше нодов дерева → быстрее seek в больших файлах
+ipfs config --json Chunker '"size-1048576"'
+
+# Включить репликацию блоков (для надёжности)
+ipfs config --json Reprovider.Interval '"12h"'
+
+# Gateway — поддержка Range requests включена по умолчанию в Kubo ≥ 0.20
+```
+
+```yaml
+# docker-compose
+services:
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - '4001:4001' # p2p swarm (публичный — нужен для пиров)
+      - '5001:5001' # API (только localhost)
+      - '8080:8080' # Gateway (проксируется nginx)
+    volumes:
+      - /data/ipfs:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+```
+
+#### Доставка видео: гибридная схема (IPFS + nginx fallback)
+
+```
+Видеоплеер запрашивает URL видео
+        ↓
+  ipfs.letar.best/ipfs/{cid}     ← основной (IPFS gateway, HTTP Range ✅)
+        ↓ если IPFS недоступен
+  media.letar.best/v/{app}/{id}/720p.mp4  ← fallback (nginx, §15.2)
+```
+
+В плеере animatrona / svoichuzhie:
+
+```typescript
+// Примерная логика получения URL в плеере
+const videoUrl = video.ipfsCid
+  ? `https://ipfs.letar.best/ipfs/${video.ipfsCid}`
+  : `https://media.letar.best/v/${appId}/${video.id}/720p.mp4`
+```
+
+После транскода (§15.2 медиа-воркер) добавляется шаг:
+
+```
+ffmpeg готов → POST /api/v1/{appId}/add (720p.mp4) → cid720p
+             → POST /api/v1/{appId}/add (1080p.mp4) → cid1080p
+             → POST /api/v1/{appId}/add (poster.jpg) → cidPoster
+             → webhook в приложение: { videoId, cid720p, cid1080p, cidPoster, ... }
+```
+
+#### UX «IPFS-маркетинг» в плеере
+
+Небольшой бейдж под видео (не мешает просмотру):
+
+```
+[▶ 14:32 ━━━━━━━━━━━━━━━━━━━━━━━━ 42:17]
+IPFS: bafy…k3m2  [скопировать]  [что это?]  [открыть в браузере]
+```
+
+- **«что это?»** → всплывающий тултип: «Контент хранится в IPFS — децентрализованной сети.
+  Целостность файла гарантирована его хэшем. Любой может проверить: ipfs.letar.best/ipfs/{cid}»
+- **«открыть в браузере»** → ссылка на публичный шлюз (наш или cloudflare-ipfs.com как fallback)
+- Пользователи Brave видят нативную IPFS-иконку в адресной строке
+
+#### Будущее: распределённые пинеры
+
+`nodeId` в таблице `Pin` готовит почву:
+
+```
+Сегодня (v1):       s3 пинирует всё → nodeId = "s3"
+
+Завтра (v2):        s3 + s4 (или VPS другого провайдера)
+                    Координатор распределяет CID по нодам:
+                    - по размеру (большие видео → нод с бо́льшим диском)
+                    - по аффинити (коммерческие → изолированный нод)
+                    - по репликации (критичный контент → оба нода)
+
+Послезавтра (v3):   IPFS Cluster (автоматический repin при падении нода)
+                    или интеграция с Pinata/web3.storage для offsite-репликации
+```
+
+**nginx-проксирование шлюза:**
+
+```nginx
+server {
+  server_name ipfs.letar.best;
+  location /ipfs/ {
+    proxy_pass http://localhost:8080;
+    proxy_buffering off;          # важно для видео-стриминга
+    proxy_read_timeout 300s;      # большие файлы
+    # content-addressed = immutable
+    add_header Cache-Control "public, max-age=31536000, immutable";
+  }
+}
+
+---
+
+### 15.5 Resilio Sync — offsite-нода
+
+s3 становится **третьей нодой** Resilio (s1, s2 → s3):
+
+| Нода                | Роль               | Что хранит                                   |
+| ------------------- | ------------------ | -------------------------------------------- |
+| s1                  | продакшен          | uploads/, backups/                           |
+| s2                  | продакшен          | uploads/, backups/                           |
+| s3 (новый)          | **offsite backup** | uploads/, backups/, /data/processed/ (медиа) |
+| Windows (локальный) | dev/restore        | резервная копия                              |
+
+**IgnoreList s3** — те же правила что на s1/s2:
+```
+
+.env.docker
+.env.local
+.env
+node_modules
+\*.log
+
+```
+**Уникально для s3:** синкает `/data/processed/` (транскодированные видео) → у s1/s2 есть
+offsite-копия медиафайлов без необходимости хранить их на прод-серверах.
+
+---
+
+### 15.6 Provision-план (порядок развёртывания)
+
+1. **Базовая система** — OS + Docker + nginx + age-ключ (SOPS, как на s2)
+2. **Redis** — порты 6379 (медиа) и 6380 (e2e) → два контейнера или один с неймспейсами
+3. **PostgreSQL** — инстанс для E2E-БД + `provision-e2e-db.sh`
+4. **Resilio Sync** — добавить пир, принять инвайт, проверить синхронизацию uploads/backups
+5. **Kubo IPFS** — запустить ноду, дождаться swarm peers, проверить gateway
+6. **Медиа-сервер** — `docker compose up`, проверить upload API + transcode smoke-test
+7. **E2E-ранер** — установить Node 24 + Bun + Playwright browsers, прогнать shard-core driving-school
+8. **nginx + SSL** — Nginx Proxy Manager (как на s1/s2); домены media.letar.best, ipfs.letar.best
+9. **Мониторинг** — добавить в dashboard-agent (uptime + disk usage /data)
+10. **Cron E2E** — `0 2 * * * cd /home/deploy/letar && nx run-many --target=e2e --parallel=3`
+
+**Секреты s3** (добавить в `.env.docker.enc`):
+```
+
+MEDIA_API_KEY_SVOICHUZHIE=... # per-app ключи медиа-сервера
+MEDIA_API_KEY_KAMI=...
+TELEGRAM_E2E_BOT_TOKEN=... # нотификации E2E
+TELEGRAM_E2E_CHAT_ID=...
+IPFS_API_TOKEN=... # для внешних pinning services (опц.)
+
+```
+---
+
+### 15.7 Связи с остальным планом
+
+| Этап                             | Связь                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| **Этап 0.3** (бэкапы)            | s3 — новая Resilio-нода; `/data/processed` добавить в scope синхронизации |
+| **Этап 0.4** (SOPS)              | age-ключ на s3 по той же схеме что s2                                     |
+| **svoichuzhie Фаза 8** (видео)   | `Video.kind=UPLOAD` → медиа-сервер s3 вместо локального хранения          |
+| **Фаза 12** (деплой svoichuzhie) | `MEDIA_SERVER_URL` + `MEDIA_API_KEY` в `.env.docker`                      |
+| **E2E все приложения**           | E2E-прогоны переезжают с локальной машины на s3                           |
+| **deploy-affected.sh**           | добавить s3 в маппинг (только media-server, не приложения)                |
+
+**DoD §15:**
+
+- [ ] s3 поднят, все 6 сервисов в статусе healthy
+- [ ] Медиа-сервер: загрузка видео → транскод → раздача через nginx с HTTP Range ✅
+- [ ] E2E: `nx e2e driving-school-e2e -- --project=shard-core` проходит зелёным
+- [ ] IPFS: `curl https://ipfs.letar.best/ipfs/<cid>` отдаёт файл
+- [ ] Resilio: uploads/ с s2 появляются на s3 в течение 5 минут
+- [ ] Мониторинг s3 в dashboard-agent (uptime + disk /data)
+- [ ] Секреты зашифрованы SOPS, `.env.docker.enc` в git
+```
