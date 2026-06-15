@@ -1,5 +1,30 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-06-15 — FM AudioWorklet (Фаза 1, продолжение)
+
+### Что сделано
+
+- **`public/worklets/fm-processor.js`** (новый) — `AudioWorkletProcessor` с 6 операторами, 5 алгоритмами (DX7-стиль), DX7-совместимой EG (4 rate + 4 level), feedback на op0, 8-голосая полифония с voice stealing по возрасту. Топологический порядок вычислений обеспечивает правильную модуляцию без zero-delay петель. `Math.tanh` ограничивает клиппинг при глубокой модуляции.
+- **`src/lib/audio/fm.ts`** (новый) — `FmEngine`: `static async create(ctx, destination)` регистрирует воркслет и создаёт `AudioWorkletNode`; `noteOn/noteOff/allNotesOff/updatePatch/dispose`. Patch отправляется через `port.postMessage({ type: 'patch', patch })` перед нотами.
+- **`src/lib/patch/fm-defaults.ts`** (новый) — два дефолтных FM-патча: `FM_GLASS_BELLS` (алгоритм 2, два 3-оп стека [5→4→3]+[2→1→0], ratio=14 у модуляторов — стеклянный металлик) и `FM_BASS` (алгоритм 1, цепочка 5→4→3→2→1→0, feedback=3 у несущей — FM-гровл).
+- **`src/app/_components/studio/fm-panel.tsx`** (новый) — `FmPanel`: выбор алгоритма (5 кнопок с диаграммой потока), 6 `OpCard` в сетке 2×3 (ratio, level, feedback, EG-ручки A/D/S/R), несущие выделены золотым.
+- **`src/app/_components/studio/studio-client.tsx`** обновлён: добавлен `engineType: 'subtractive' | 'fm'`, `fmEngineRef`, `masterGainRef`, `handleSwitchEngine` с ленивым созданием `FmEngine` (при первом переключении на FM), `handleFmEngineChange` синхронно отправляет патч в воркслет, переключатель SUB/FM в шапке.
+
+### Технические детали
+
+- `rateToSec(r)`: rate 99 → 1 мс, rate 0 → 10 с (квадратичная шкала, аппроксимирует DX7).
+- EG стадии: 0=Attack → 1=Decay1 → 2=Decay2/sustain (держит L3) → 3=Release → 4=Idle.
+- Feedback: использует `feedbackPrev` (выход op0 прошлого сэмпла) — избегает zero-delay.
+- `Math.tanh(out)` на выходе голоса — мягкое ограничение без жёсткого клиппинга.
+- FM движок lazy: создаётся только при первом нажатии кнопки FM, а не при старте аудио.
+- Voice stealing: самый старый голос (по `startTime` — монотонный счётчик сэмплов).
+
+### Коммит
+
+`36bb167` — feat(synth): FM AudioWorklet — 6 операторов, 5 алгоритмов, DX7-EG, переключение движков
+
+---
+
 ## Сессия 2026-06-15 — Реверберация / FX-шина (Фаза 1, продолжение)
 
 ### Что сделано
