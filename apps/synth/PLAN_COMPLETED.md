@@ -20,7 +20,7 @@
 
 ### Коммит
 
-_(следующий)_
+`cdc188d` — feat(synth): реверберация — ConvolverNode FX-шина + секция Reverb в UI
 
 ---
 
