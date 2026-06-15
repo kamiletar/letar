@@ -1,5 +1,29 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-06-15 — Реверберация / FX-шина (Фаза 1, продолжение)
+
+### Что сделано
+
+- **`src/lib/patch/schema.ts`** — добавлен `FxSchema` (`reverb: { wet, decay }`) и поле `fx: FxSchema` в `SubtractiveEngineSchema`. Экспортирован тип `FxParams`.
+- **`src/lib/audio/reverb.ts`** (новый файл) — `buildReverbIR(ctx, decay)`: синтетический IR через `OfflineAudioContext`; экспоненциально затухающий шум с разными фазами L/R для стереоширины; возвращает `AudioBuffer`.
+- **`src/app/_components/studio/studio-client.tsx`** — мастер-шина в `handleStart`: `masterGain → dryGain → destination` + `masterGain → convolver → reverbWet → destination`; IR строится асинхронно (dry-звук доступен мгновенно); два `useEffect` реагируют на изменение `fx.reverb.wet` (мгновенно) и `fx.reverb.decay` (пересоздаёт IR); CC 91 (GM reverb send) → wet.
+- **`src/app/_components/studio/param-panel.tsx`** — секция «FX — Reverb» с двумя ручками: wet (0–100%) + decay (0.1–8 с).
+- **`src/lib/patch/hints.ts`** — ментор-подсказки для `fx.reverb.wet` и `fx.reverb.decay` с физическими метафорами (зал, хвост варгана).
+- **`src/lib/patch/defaults.ts`** — `REESE_BASS` получил `fx: { reverb: { wet: 0.18, decay: 2.2 } }`.
+
+### Технические детали
+
+- IR-буфер: `OfflineAudioContext(2, ceil(sampleRate * decay), sampleRate)` — стерео, 2 разных зерна L/R дают ~0.003 с фазовый сдвиг.
+- Огибающая: `Math.exp(-t * (5 / clampedDecay))` — более гладкое затухание чем линейное.
+- Decay-эффект в useEffect: не запускается при старте (convolverRef === null), только при изменении decay пользователем.
+- Wet gain: мгновенное обновление через `GainNode.gain.value` без создания нового IR.
+
+### Коммит
+
+_(следующий)_
+
+---
+
 ## Сессия 2026-06-15 — Web MIDI вход (Фаза 1, продолжение)
 
 ### Что сделано

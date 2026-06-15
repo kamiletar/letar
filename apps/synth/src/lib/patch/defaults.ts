@@ -33,5 +33,8 @@ export const REESE_BASS: SubtractivePatch = {
       rate: 0.35, // медленное дыхание (~2 такта при 88bpm)
       depth: 0.18,
     },
+    fx: {
+      reverb: { wet: 0.18, decay: 2.2 },
+    },
   },
 }

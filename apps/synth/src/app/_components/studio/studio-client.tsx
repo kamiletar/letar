@@ -1,7 +1,8 @@
 'use client'
 
-import { resumeContext } from '@/lib/audio/context'
+import { getAudioContext, resumeContext } from '@/lib/audio/context'
 import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
+import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
 import type { SubtractivePatch } from '@/lib/patch/schema'
@@ -35,6 +36,8 @@ function applyCC(patch: SubtractivePatch, cc: number, raw: number): SubtractiveP
       return { ...patch, engine: { ...e, lfo: { ...e.lfo, rate: norm * 8 } } }
     case 77:
       return { ...patch, engine: { ...e, lfo: { ...e.lfo, depth: norm } } }
+    case 91: // GM: reverb send — wet
+      return { ...patch, engine: { ...e, fx: { ...e.fx, reverb: { ...e.fx.reverb, wet: norm } } } }
     default:
       return patch
   }
@@ -55,6 +58,10 @@ export function StudioClient() {
   // Актуальный патч в ref — аудио-коллбэки не видят stale-замыкания
   const patchRef = useRef(patch)
   patchRef.current = patch
+
+  // Reverb-шина: masterGain → [dryGain → dest] + [convolver → reverbWet → dest]
+  const convolverRef = useRef<ConvolverNode | null>(null)
+  const reverbWetRef = useRef<GainNode | null>(null)
 
   const handleNoteOn = useCallback((midiNote: number, velocity: number) => {
     engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
@@ -98,9 +105,32 @@ export function StudioClient() {
 
   const handleStart = useCallback(async () => {
     const ctx = await resumeContext()
-    engineRef.current = new SubtractiveEngine(ctx, ctx.destination)
+
+    // Мастер-шина: сухой сигнал + reverb send
+    const masterGain = ctx.createGain()
+    const dryGain = ctx.createGain()
+    dryGain.gain.value = 1
+
+    const convolver = ctx.createConvolver()
+    convolverRef.current = convolver
+
+    const reverbWet = ctx.createGain()
+    reverbWetRef.current = reverbWet
+    reverbWet.gain.value = patchRef.current.engine.fx.reverb.wet
+
+    masterGain.connect(dryGain)
+    dryGain.connect(ctx.destination)
+    masterGain.connect(convolver)
+    convolver.connect(reverbWet)
+    reverbWet.connect(ctx.destination)
+
+    // Строим IR асинхронно (не блокирует старт — сначала услышишь dry)
+    void buildReverbIR(ctx, patchRef.current.engine.fx.reverb.decay).then((buf) => {
+      convolver.buffer = buf
+    })
+
+    engineRef.current = new SubtractiveEngine(ctx, masterGain)
     setStarted(true)
-    // Автоподключение MIDI при старте (не блокирует, ошибки молчим — юзер сам нажмёт)
     void handleMidiConnect()
   }, [handleMidiConnect])
 
@@ -112,8 +142,29 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes],
+    [activeNotes]
   )
+
+  // Мгновенно обновляем wet gain при движении ручки
+  useEffect(() => {
+    if (!reverbWetRef.current) {
+      return
+    }
+    reverbWetRef.current.gain.value = patch.engine.fx.reverb.wet
+  }, [patch.engine.fx.reverb.wet])
+
+  // Пересоздаём IR при смене decay (не при старте — там уже строится в handleStart)
+  useEffect(() => {
+    if (!convolverRef.current) {
+      return
+    }
+    const ctx = getAudioContext()
+    void buildReverbIR(ctx, patch.engine.fx.reverb.decay).then((buf) => {
+      if (convolverRef.current) {
+        convolverRef.current.buffer = buf
+      }
+    })
+  }, [patch.engine.fx.reverb.decay])
 
   useEffect(() => {
     return () => {

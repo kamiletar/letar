@@ -32,14 +32,7 @@ function btnStyle(active: boolean): React.CSSProperties {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Box bg="bg.surface" border="1px solid" borderColor="border.DEFAULT" borderRadius="md" p={3}>
-      <Text
-        fontSize="9px"
-        fontWeight="600"
-        letterSpacing="0.12em"
-        color="fg.gold"
-        textTransform="uppercase"
-        mb={3}
-      >
+      <Text fontSize="9px" fontWeight="600" letterSpacing="0.12em" color="fg.gold" textTransform="uppercase" mb={3}>
         {title}
       </Text>
       {children}
@@ -75,7 +68,7 @@ interface ParamPanelProps {
 function patchEngine<K extends keyof SubtractiveEngineParams>(
   engine: SubtractiveEngineParams,
   key: K,
-  value: SubtractiveEngineParams[K],
+  value: SubtractiveEngineParams[K]
 ): SubtractiveEngineParams {
   return { ...engine, [key]: value }
 }
@@ -90,6 +83,8 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
   const setAmpAdsr = (k: string, v: number) =>
     onChange(patchEngine(engine, 'amp', { ...engine.amp, adsr: { ...engine.amp.adsr, [k]: v } }))
   const setLfo = (k: string, v: number | string) => onChange(patchEngine(engine, 'lfo', { ...engine.lfo, [k]: v }))
+  const setFxReverb = (k: 'wet' | 'decay', v: number) =>
+    onChange(patchEngine(engine, 'fx', { ...engine.fx, reverb: { ...engine.fx.reverb, [k]: v } }))
 
   const cutoffHz = Math.round(cutoffNormToFreq(engine.filter.cutoff))
   const cutoffDisplay = cutoffHz < 1000 ? `${cutoffHz}Hz` : `${(cutoffHz / 1000).toFixed(1)}k`
@@ -156,11 +151,7 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
       <Section title="Filter">
         <Box display="flex" gap="2px" mb={2}>
           {(['lowpass', 'highpass', 'bandpass'] as const).map((t) => (
-            <button
-              key={t}
-              style={btnStyle(engine.filter.type === t)}
-              onClick={() => setFilter('type', t)}
-            >
+            <button key={t} style={btnStyle(engine.filter.type === t)} onClick={() => setFilter('type', t)}>
               {t === 'lowpass' ? 'LP' : t === 'highpass' ? 'HP' : 'BP'}
             </button>
           ))}
@@ -198,9 +189,9 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
               label={k[0].toUpperCase()}
               value={k === 'sustain' ? engine.filter.adsr[k] : engine.filter.adsr[k] / 10}
               onChange={(v) => setFilterAdsr(k, k === 'sustain' ? v : Math.round(v * 100) / 10)}
-              displayValue={k === 'sustain'
-                ? `${Math.round(engine.filter.adsr[k] * 100)}%`
-                : `${engine.filter.adsr[k].toFixed(2)}s`}
+              displayValue={
+                k === 'sustain' ? `${Math.round(engine.filter.adsr[k] * 100)}%` : `${engine.filter.adsr[k].toFixed(2)}s`
+              }
               hint={HINTS[`adsr.${k}`]}
               size={40}
             />
@@ -229,9 +220,9 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
               label={k[0].toUpperCase()}
               value={k === 'sustain' ? engine.amp.adsr[k] : engine.amp.adsr[k] / 10}
               onChange={(v) => setAmpAdsr(k, k === 'sustain' ? v : Math.round(v * 100) / 10)}
-              displayValue={k === 'sustain'
-                ? `${Math.round(engine.amp.adsr[k] * 100)}%`
-                : `${engine.amp.adsr[k].toFixed(2)}s`}
+              displayValue={
+                k === 'sustain' ? `${Math.round(engine.amp.adsr[k] * 100)}%` : `${engine.amp.adsr[k].toFixed(2)}s`
+              }
               hint={HINTS[`adsr.${k}`]}
               size={40}
             />
@@ -239,15 +230,31 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
         </KnobRow>
       </Section>
 
+      {/* FX */}
+      <Section title="FX — Reverb">
+        <KnobRow>
+          <Knob
+            label="wet"
+            value={engine.fx.reverb.wet}
+            onChange={(v) => setFxReverb('wet', Math.round(v * 100) / 100)}
+            displayValue={`${Math.round(engine.fx.reverb.wet * 100)}%`}
+            hint={HINTS['fx.reverb.wet']}
+          />
+          <Knob
+            label="decay"
+            value={engine.fx.reverb.decay / 8}
+            onChange={(v) => setFxReverb('decay', Math.round(v * 80) / 10)}
+            displayValue={`${engine.fx.reverb.decay.toFixed(1)}s`}
+            hint={HINTS['fx.reverb.decay']}
+          />
+        </KnobRow>
+      </Section>
+
       {/* LFO */}
       <Section title="LFO">
         <Box display="flex" gap="2px" mb={2}>
           {(['cutoff', 'pitch', 'amp'] as const).map((t) => (
-            <button
-              key={t}
-              style={btnStyle(engine.lfo.target === t)}
-              onClick={() => setLfo('target', t)}
-            >
+            <button key={t} style={btnStyle(engine.lfo.target === t)} onClick={() => setLfo('target', t)}>
               {t}
             </button>
           ))}

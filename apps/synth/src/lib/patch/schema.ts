@@ -22,6 +22,16 @@ export const AdsrSchema = z.object({
 })
 export type Adsr = z.infer<typeof AdsrSchema>
 
+// === FX-секция (мастер-шина) ===
+
+export const FxSchema = z.object({
+  reverb: z.object({
+    wet: z.number().min(0).max(1), // 0 = сухой, 1 = полное пространство
+    decay: z.number().min(0.1).max(8), // время затухания, секунды
+  }),
+})
+export type FxParams = z.infer<typeof FxSchema>
+
 // === Субтрактивный движок ===
 
 export const SubtractiveEngineSchema = z.object({
@@ -44,6 +54,7 @@ export const SubtractiveEngineSchema = z.object({
     rate: z.number().min(0.01).max(20), // Гц
     depth: z.number().min(0).max(1),
   }),
+  fx: FxSchema,
 })
 export type SubtractiveEngineParams = z.infer<typeof SubtractiveEngineSchema>
 
