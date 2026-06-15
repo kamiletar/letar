@@ -42,6 +42,18 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "studio"],
       "port": 3020
+    },
+    {
+      "name": "svoichuzhie",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "svoichuzhie"],
+      "port": 3021
+    },
+    {
+      "name": "synth",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "synth"],
+      "port": 3022
     }
   ]
 }

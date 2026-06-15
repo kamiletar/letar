@@ -1,0 +1,158 @@
+import { z } from 'zod/v4'
+
+// === Осцилляторы ===
+
+export const OscWaveSchema = z.enum(['sine', 'sawtooth', 'square', 'triangle'])
+export type OscWave = z.infer<typeof OscWaveSchema>
+
+const SubOscSchema = z.object({
+  wave: OscWaveSchema,
+  octave: z.number().int().min(-2).max(2),
+  detune: z.number().min(-100).max(100), // центы; ±100 = ±1 полутон
+  gain: z.number().min(0).max(1),
+})
+
+// === ADSR-огибающая ===
+
+export const AdsrSchema = z.object({
+  attack: z.number().min(0).max(10), // секунды
+  decay: z.number().min(0).max(10),
+  sustain: z.number().min(0).max(1), // 0–1
+  release: z.number().min(0).max(10),
+})
+export type Adsr = z.infer<typeof AdsrSchema>
+
+// === Субтрактивный движок ===
+
+export const SubtractiveEngineSchema = z.object({
+  osc1: SubOscSchema,
+  osc2: SubOscSchema,
+  filter: z.object({
+    type: z.enum(['lowpass', 'highpass', 'bandpass']),
+    cutoff: z.number().min(0).max(1), // нормализованный лог: 0→20Hz, 1→20kHz
+    resonance: z.number().min(0).max(0.99), // Q; <1 чтобы не самовозбуждаться
+    envAmount: z.number().min(-1).max(1), // доля ADSR-модуляции cutoff
+    adsr: AdsrSchema,
+  }),
+  amp: z.object({
+    adsr: AdsrSchema,
+    gain: z.number().min(0).max(1),
+  }),
+  lfo: z.object({
+    wave: OscWaveSchema,
+    target: z.enum(['cutoff', 'pitch', 'amp']),
+    rate: z.number().min(0.01).max(20), // Гц
+    depth: z.number().min(0).max(1),
+  }),
+})
+export type SubtractiveEngineParams = z.infer<typeof SubtractiveEngineSchema>
+
+// === FM-движок (DX7-совместимый, 6 операторов) ===
+
+const FmEgSchema = z.object({
+  rates: z.tuple([
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+  ]),
+  levels: z.tuple([
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+    z.number().int().min(0).max(99),
+  ]),
+})
+
+const FmOperatorSchema = z.object({
+  ratio: z.number().min(0.01).max(32), // множитель несущей (при fixed=false)
+  fixed: z.boolean(),
+  fixedFreq: z.number().min(0).max(20000), // Гц (при fixed=true)
+  level: z.number().int().min(0).max(99),
+  eg: FmEgSchema,
+  velocitySensitivity: z.number().int().min(0).max(7),
+  feedback: z.number().int().min(0).max(7),
+})
+
+export const FmEngineSchema = z.object({
+  algorithm: z.number().int().min(1).max(32),
+  operators: z.tuple([
+    FmOperatorSchema,
+    FmOperatorSchema,
+    FmOperatorSchema,
+    FmOperatorSchema,
+    FmOperatorSchema,
+    FmOperatorSchema,
+  ]),
+  pitchEg: z.object({
+    rates: z.tuple([
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+    ]),
+    levels: z.tuple([
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+      z.number().int().min(0).max(99),
+    ]),
+  }),
+  lfo: z.object({
+    speed: z.number().int().min(0).max(99),
+    delay: z.number().int().min(0).max(99),
+    wave: z.enum(['sine', 'triangle', 'saw-up', 'saw-down', 'square', 'sample-hold']),
+    pmDepth: z.number().int().min(0).max(99),
+    amDepth: z.number().int().min(0).max(99),
+  }),
+})
+export type FmEngineParams = z.infer<typeof FmEngineSchema>
+
+// === Драм-движок (16 пэдов) ===
+
+export const DrumPadSynthSchema = z.object({
+  type: z.enum(['808kick', 'snare', 'hat-closed', 'hat-open', 'clap', 'tom']),
+  pitch: z.number().int().min(0).max(127),
+  decay: z.number().min(0.01).max(5),
+  tone: z.number().min(0).max(1),
+  level: z.number().min(0).max(1),
+})
+
+export const DrumPadSchema = z.object({
+  index: z.number().int().min(0).max(15),
+  name: z.string().max(16),
+  synth: DrumPadSynthSchema.nullable(),
+})
+
+export const DrumkitEngineSchema = z.object({
+  pads: z.array(DrumPadSchema).min(16).max(16),
+})
+export type DrumkitEngineParams = z.infer<typeof DrumkitEngineSchema>
+
+// === Базовые поля ===
+
+const PatchBaseSchema = z.object({
+  schemaVersion: z.literal(1),
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1).max(64),
+  author: z.string(),
+  visibility: z.enum(['private', 'public']),
+  license: z.string(),
+  tags: z.array(z.string()),
+  createdAt: z.string(), // ISO 8601
+  color: z.string().nullable(),
+  render: z.object({ previewWav: z.string().nullable() }),
+})
+
+// === Итоговая схема патча (keystone) ===
+
+export const PatchSchema = z.discriminatedUnion('type', [
+  PatchBaseSchema.extend({ type: z.literal('subtractive'), engine: SubtractiveEngineSchema }),
+  PatchBaseSchema.extend({ type: z.literal('fm'), engine: FmEngineSchema }),
+  PatchBaseSchema.extend({ type: z.literal('drumkit'), engine: DrumkitEngineSchema }),
+])
+
+export type Patch = z.infer<typeof PatchSchema>
+export type SubtractivePatch = Extract<Patch, { type: 'subtractive' }>
+export type FmPatch = Extract<Patch, { type: 'fm' }>
+export type DrumkitPatch = Extract<Patch, { type: 'drumkit' }>
