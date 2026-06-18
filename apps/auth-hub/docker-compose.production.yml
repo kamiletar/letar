@@ -38,6 +38,8 @@ services:
       DATABASE_URL: postgresql://lena_user:${DB_PASSWORD}@auth-hub-postgres:5432/lena_auth
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: https://auth.letar.best
+      # At-rest шифрование clientSecret + токенов (Этап 8) — обязателен в production (db.ts)
+      AUTH_ENCRYPTION_KEY: ${AUTH_ENCRYPTION_KEY}
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-https://kami.letar.best,https://animatrona.letar.best,https://tracker.letar.best,https://dash.letar.best,https://anime.letar.best,https://archetest.letar.best}
       # OAuth провайдеры
       AUTH_GITHUB_ID: ${AUTH_GITHUB_ID}
