@@ -2,6 +2,23 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Версия 0.6.0 — деплой 2026-06-18 (Этап 9: деплой + верификация)
+
+### Деплой Этапа 8
+
+- `AUTH_ENCRYPTION_KEY` добавлен в `.env.docker.enc` (commit `2ed6f12`) и сохранён в KeePassXC
+- BlackCove выполнил деплой auth-hub, `/sync-env`, перезапуск контейнера
+- После деплоя auth.letar.best был недоступен (500) — причина: `AUTH_ENCRYPTION_KEY` не попал в контейнер без `/sync-env`. Исправлено срочным запросом BlackCove
+- Backfill `encrypt-client-secrets.ts --execute` выполнен BlackCove (подтверждено msg #918)
+- `kami@letar.best` повышен до ADMIN роли через SQL UPDATE (BlackCove msg #919)
+- Admin UI `/admin/clients` верифицирован вручную: 7 клиентов активны, все кнопки работают
+
+### Проблема с agent-mail fetch_inbox
+
+`fetch_inbox` возвращает только метаданные без тела сообщений — ответы BlackCove были незаметны, что привело к 4 повторным пингам про backfill. Нужно использовать `search_messages` с последующим чтением или попросить BlackCove дублировать ответы в теме письма.
+
+---
+
 ## Версия 0.6.0 — 2026-06-15 (Этап 8: Admin UI + at-rest шифрование)
 
 ### Admin UI OAuth-клиентов (`/admin/clients`)
