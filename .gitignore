@@ -182,3 +182,4 @@ apps/animatrona-tv/screen-*.png
 /libs/exoplayer-sync/android/.gradle/buildOutputCleanup/cache.properties
 /libs/exoplayer-sync/android/.gradle/vcs-1/gc.properties
 # .socraticodecontextartifacts.json — конфиг проекта, коммитится (не кэш)
+.nx/migrate-runs
