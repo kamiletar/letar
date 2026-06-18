@@ -439,6 +439,62 @@ services:
 
 ## Troubleshooting
 
+### next build падает с EAI_AGAIN / ECONNREFUSED при prerender
+
+**Причина:** `deploy-affected.sh` экспортирует `DATABASE_URL=localhost:<port>` для `prisma migrate deploy`. `next build` запускает prerender-воркеры как отдельные дочерние процессы — они **не наследуют** переменные окружения хост-процесса. Результат: `EAI_AGAIN svoichuzhie-db` или `ECONNREFUSED localhost:5446` в страницах с `generateStaticParams` или page-level DB-запросами.
+
+**Диагностика:** `prisma migrate` проходит успешно, но `nx build` падает именно при prerender. Характерно для приложений, которые обращаются к БД напрямую на уровне страниц (не только внутри Server Actions).
+
+**Решение — выбрать одно:**
+
+1. **`force-dynamic`** (SSR, полностью SEO-совместимо — Googlebot получает полный HTML как при static):
+   ```typescript
+   export const dynamic = 'force-dynamic'
+   ```
+
+2. **ISR + try/catch fallback** (рекомендуется если нужен revalidate):
+   ```typescript
+   export const revalidate = 3600
+
+   export async function generateStaticParams() {
+     try {
+       const posts = await db.post.findMany(...)
+       return posts.map(p => ({ slug: p.slug }))
+     } catch {
+       return [] // build пройдёт без БД; страницы будут рендериться on-demand
+     }
+   }
+   ```
+
+**Обязательный критерий приёмки:** `nx build <app>` должен проходить **локально без запущенной БД** — это точный симулятор поведения prerender-воркеров.
+
+> **SEO-справка:** `force-dynamic` ≠ CSR. Это SSR: Googlebot при каждом кроуле получает полностью готовый HTML (в отличие от CSR, где индексируется пустая оболочка). С SEO-точки зрения равнозначно статической странице.
+
+---
+
+### Submodule "not our ref" — git submodule update падает
+
+**Симптом:** `deploy-affected.sh` завершается ошибкой вида `error: Server does not allow request for unadvertised object <sha>` или `fatal: not our ref <sha>`.
+
+**Причина:** SHA коммита в `.gitmodules` / gitlink в letar указывает на коммит, который не был запушен в приватный submodule-репо. Это происходит когда коммит создан локально в submodule, letar уже зафиксировал этот SHA, но `git push` в приватный репо не был выполнен.
+
+**Исправление:**
+
+```bash
+# Проверить какой SHA зафиксирован в letar
+git submodule status
+
+# Запушить конкретный SHA в приватный репо (fast-forward безопасен)
+git -C apps/<submodule> push origin <sha>:refs/heads/main
+
+# Убедиться что push прошёл
+git -C apps/<submodule> log origin/main -1 --oneline
+```
+
+После этого деплой продолжится с `--skip-git` или обычным способом.
+
+---
+
 ## Seed базы данных
 
 `nx db:seed` нельзя запускать напрямую на сервере — скрипт не найдёт `DATABASE_URL`, потому что `.env.docker` доступен только внутри контейнера.

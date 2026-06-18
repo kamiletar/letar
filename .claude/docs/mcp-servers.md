@@ -4,21 +4,21 @@
 
 ## Доступные MCP серверы
 
-| MCP Сервер                   | Пакет                                              | Назначение                                                |
-| ---------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| **nx-mcp**                   | `nx mcp`                                           | Операции с Nx воркспейсом, проекты, таргеты, документация |
-| **next-devtools**            | `next-devtools-mcp`                                | Документация Next.js 16, рантайм dev сервера, ошибки      |
-| **chakra-ui**                | `@chakra-ui/react-mcp`                             | Компоненты Chakra UI v3, props, примеры, темизация        |
-| **inkeepMcp**                | `mcp-remote` → `mcp.inkeep.com/zod`                | Документация Zod v4, схемы валидации                      |
-| **context7**                 | `@upstash/context7-mcp`                            | Документация любых библиотек (React, TanStack, etc.)      |
-| **chrome-devtools**          | `chrome-devtools-mcp`                              | Браузерная автоматизация, скриншоты, консоль, сеть        |
+| MCP Сервер                   | Пакет                                               | Назначение                                                |
+| ---------------------------- | --------------------------------------------------- | --------------------------------------------------------- |
+| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация |
+| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки      |
+| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация        |
+| **inkeepMcp**                | `mcp-remote` → `mcp.inkeep.com/zod`                 | Документация Zod v4, схемы валидации                      |
+| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)      |
+| **chrome-devtools**          | `chrome-devtools-mcp`                               | Браузерная автоматизация, скриншоты, консоль, сеть        |
 | **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы  |
-| **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking` | Структурированное пошаговое рассуждение для сложных задач |
-| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`            | SQL запросы к БД driving-school (read-only)               |
-| **postgres-kami**            | `@modelcontextprotocol/server-postgres`            | SQL запросы к БД kami (read-only)                         |
-| **postgres-premium-rosstil** | `@modelcontextprotocol/server-postgres`            | SQL запросы к БД premium-rosstil (read-only)              |
-| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`            | SQL запросы к БД grandslamcup (read-only)                 |
-| **prisma**                   | `@prisma/mcp`                                      | Работа через Prisma schema, генерация запросов            |
+| **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking`  | Структурированное пошаговое рассуждение для сложных задач |
+| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)               |
+| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД kami (read-only)                         |
+| **postgres-premium-rosstil** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД premium-rosstil (read-only)              |
+| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                 |
+| **prisma**                   | `@prisma/mcp`                                       | Работа через Prisma schema, генерация запросов            |
 
 ## Воркфлоу работы с Context7
 
@@ -375,17 +375,42 @@ get_thinking_summary()
 
 HTTP MCP-сервер для координации нескольких Claude Code инстансов в монорепо. Обеспечивает обмен сообщениями, резервирование файлов и обнаружение соседних агентов.
 
+**Upstream:** [github.com/Dicklesworthstone/mcp_agent_mail](https://github.com/Dicklesworthstone/mcp_agent_mail)\
+**Docker образ:** `ghcr.io/dicklesworthstone/mcp_agent_mail:latest`\
+**Compose:** `C:\web\lena\infra\agent-mail\mcp_agent_mail\compose.yaml`
+
 ### Запуск
 
 ```bash
-# Bash
-bash scripts/start-agent-mail.sh
-
-# Windows — двойной клик
-scripts/start-agent-mail.cmd
+cd C:/web/lena/infra/agent-mail/mcp_agent_mail
+docker compose up -d
 ```
 
-Сервер стартует на `http://127.0.0.1:8765`.
+Сервер стартует на `http://127.0.0.1:8765`. Данные хранятся в SQLite внутри Docker volume `agent_mail_data`.
+
+### Обновление
+
+```bash
+cd C:/web/lena/infra/agent-mail/mcp_agent_mail
+docker compose pull && docker compose up -d
+```
+
+### История
+
+Изначально был форк upstream с переходом на PostgreSQL (из-за SQLite deadlock на Windows при конкурентных MCP-соединениях). Upstream выпустил v0.3.4 с фиксами, а также опубликовал готовый Docker-образ на GHCR — поэтому вернулись на оригинальный образ + SQLite (2026-06-18).
+
+### После переустановки сервера / пересоздания volume
+
+При `docker compose down -v` или переустановке хоста SQLite volume уничтожается: все проекты, агенты, сообщения и резервации теряются.
+
+**Что нужно сделать:**
+
+1. Каждый агент при следующем старте сессии вызывает `macro_start_session` — проект и агент создаются заново автоматически.
+2. `human_key: "C:/web/letar"` остаётся стабильным идентификатором — именно по нему проект находится/создаётся.
+3. **Slug проекта может измениться** (например `app-c-web-letar` → `c-web-letar`) — это нормально, routing идёт по `project_id`, не по slug. Не нужно исправлять старые конфиги.
+4. Все исторические треды (темы, сообщения, inbox прошлых агентов) безвозвратно утеряны — воспринимай как чистый лист.
+
+**Симптом что volume пересоздан:** `macro_start_session` возвращает 403 Forbidden → пробуй ещё раз после перезапуска контейнера (`docker compose up -d`).
 
 ### Основные инструменты
 
@@ -399,19 +424,11 @@ scripts/start-agent-mail.cmd
 
 ### Воркфлоу
 
-1. Запустить сервер (`start-agent-mail.sh` / `.cmd`)
+1. Запустить контейнер (`docker compose up -d`)
 2. При старте сессии вызвать `macro_start_session` с `human_key: "C:/web/letar"`, `program: "claude-code"` и описанием задачи
 3. Зарезервировать файлы через `file_reservation_paths`
 4. Периодически проверять `fetch_inbox` для входящих
 5. Отправлять сообщения через `send_message` для координации
-
-### Установка (первый раз)
-
-```bash
-bash infra/agent-mail/setup.sh
-```
-
-Клонирует репо и создаёт Python venv через `uv`.
 
 ---
 
