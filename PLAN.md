@@ -189,7 +189,8 @@
 > `scripts/encrypt-client-secrets.ts` — backfill скрипт; обратная совместимость с plaintext.
 > `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки.
 > typecheck ✅ lint ✅ tests ✅. commit `4e70c76`. **⏳ Следующее:** деплой + backfill скрипт на проде.
-> **➡️ Следующий старт:** **Этап 9** — деплой Этапа 8 + backfill (`AUTH_ENCRYPTION_KEY` → `.env.docker`, `encrypt-client-secrets.ts --execute` на s2).
+> **Сессия №44 (2026-06-18, Этап 9 — деплой Этапа 8):** ✅ `AUTH_ENCRYPTION_KEY` в `.env.docker.enc` (commit `2ed6f12`) + деплой auth-hub BlackCove + `/sync-env`. Ключница была недоступна после деплоя (500 — ключ не попал в контейнер без `/sync-env`), исправлено срочным запросом BlackCove. auth.letar.best восстановлен. Ключ сохранён в KeePassXC. ⏳ Backfill `encrypt-client-secrets.ts --execute` — запрошен у BlackCove.
+> **➡️ Следующий старт:** **Этап 10** — backfill подтверждён + следующий этап roadmap.
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
 > **Дата ревизии:** 2026-05-30 (архитектурная проработка с UI/UX-архитектором, все §13 вопросы закрыты).

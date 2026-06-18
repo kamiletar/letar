@@ -15,11 +15,12 @@
 - [x] `scripts/encrypt-client-secrets.ts` — backfill скрипт (dry-run по умолчанию)
 - [x] `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки
 
-### Следующий шаг: деплой + backfill
+### Деплой + backfill ✅ (сессия №44, 2026-06-18)
 
-- [ ] Добавить `AUTH_ENCRYPTION_KEY` (64 hex-символа) в `.env.docker` auth-hub
-- [ ] Задеплоить auth-hub через BlackCove
-- [ ] Запустить `bun run scripts/encrypt-client-secrets.ts --execute` на s2 для шифрования существующих секретов
+- [x] Добавить `AUTH_ENCRYPTION_KEY` (64 hex-символа) в `.env.docker.enc` auth-hub (commit `2ed6f12`)
+- [x] Задеплоить auth-hub через BlackCove — выполнено, `/sync-env` + restart (auth.letar.best восстановлен)
+- [x] Ключ сохранён в KeePassXC
+- [ ] Запустить `bun run scripts/encrypt-client-secrets.ts --execute` на s2 для шифрования существующих секретов (запрошено у BlackCove)
 
 ---
 
