@@ -40,8 +40,8 @@ imot_manual_2026-03-01T10-45-00.sql.gz
 
 | Приложение         | Сервер | Контейнер БД                | БД                  |
 | ------------------ | ------ | --------------------------- | ------------------- |
-| premium-rosstil    | s1     | premium-rosstil-postgres    | lena_premium        |
-| imot               | s1     | imot-postgres               | lena_imot           |
+| premium-rosstil    | s2     | premium-rosstil-postgres    | lena_premium        |
+| imot               | s2     | imot-postgres               | lena_imot           |
 | mandala            | s2     | mandala-postgres            | mandala             |
 | kami               | s2     | kami-postgres               | lena_kami           |
 | umami              | s2     | umami-postgres              | umami               |
@@ -52,6 +52,8 @@ imot_manual_2026-03-01T10-45-00.sql.gz
 | auth-hub           | s2     | auth-hub-postgres           | lena_auth           |
 | time               | s2     | time-db                     | time                |
 | form-example       | s2     | form-example-db             | forms_example       |
+| grandslamcup       | s2     | grandslamcup-db             | grandslamcup        |
+| dsperevod          | s2     | dsperevod-db                | dsperevod           |
 
 ### API (в dashboard-agent)
 
