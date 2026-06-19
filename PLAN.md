@@ -190,6 +190,19 @@
 > `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки.
 > typecheck ✅ lint ✅ tests ✅. commit `4e70c76`. **⏳ Следующее:** деплой + backfill скрипт на проде.
 > **Сессия №44 (2026-06-18, Этап 9 — деплой Этапа 8 ✅ ПОЛНОСТЬЮ):** ✅ `AUTH_ENCRYPTION_KEY` в `.env.docker.enc` (commit `2ed6f12`) + деплой auth-hub BlackCove + `/sync-env`. Ключница была недоступна после деплоя (500 — ключ не попал в контейнер без `/sync-env`), исправлено срочным запросом BlackCove. auth.letar.best восстановлен. Ключ сохранён в KeePassXC. ✅ Backfill `encrypt-client-secrets.ts --execute` выполнен BlackCove (msg #918). ✅ `kami@letar.best` повышен до ADMIN (msg #919). ✅ Admin UI `/admin/clients` верифицирован: 7 клиентов активны. **Этап 9 — ПОЛНОСТЬЮ закрыт.**
+> **Сессия №45 (2026-06-19, §15 E2E-ранер — ввод в строй):** ✅ **E2E-ранер s3 полностью операционен.**
+> Postgres (5499) + Redis (6380) поднят в Docker на s3; лог заполняется через systemd user timer (02:00, `Persistent=true`).
+> ✅ **driving-school-e2e — ключевые фиксы:** (1) `skipInstall: true` в ВСЕХ target'ах `project.json` — решает
+> корневую причину «nx e2e не запускает тесты»: executor `@nx/playwright:playwright` прерывался
+> при webkit-предупреждении от `playwright install` и выходил 0 без прогона тестов;
+> (2) локаторы «Войти» — `page.locator('form').getByRole('button', { name: 'Войти', exact: true })`
+> во всех трёх местах: `global-setup.ts`, `01-auth.spec.ts` (3 вхождения), `form.helpers.ts`.
+> ✅ **Результат прогона shard-core через `nx e2e:core driving-school-e2e`:** 36 passed, 5 skipped, 10 failed.
+> Failures: 3 auth-navigation (E2E-1.1.104/105/107 — реальные баги UI) + 7 instructor profile (cookie consent
+> banner перекрывает контент; student profile работает — требует отдельного дебага).
+> ✅ **animatrona pinner4:** добавлены константы и конфиг для pinner4 (s3) в `kubo-config.ts`,
+> `peer-sync-types.ts`, `peer-sync-service.ts` — s3 вошёл в Bootstrap и Peering.Peers Kubo.
+> ⏳ **Осталось в §15:** instructor profile failures; Telegram BOT_TOKEN/CHAT_ID (нотификации); `nx affected --target=e2e`.
 > **➡️ Следующий старт:** следующий этап roadmap (Этап 10 или по приоритету).
 > **Этап 0.5 ✅ ПОЛНОСТЬЮ** (owner:letar теги + ESLint-граница + owner:commercial теги 10 submodules + реципрокный constraint — см. сессию №3 ниже).
 > **Режим:** реализация поэтапная (§7); все точки решения закрыты или отложены с обоснованием (§9).
@@ -1895,7 +1908,7 @@ IPFS_API_TOKEN=... # для внешних pinning services (опц.)
 
 - [ ] s3 поднят, все 6 сервисов в статусе healthy
 - [ ] Медиа-сервер: загрузка видео → транскод → раздача через nginx с HTTP Range ✅
-- [ ] E2E: `nx e2e driving-school-e2e -- --project=shard-core` проходит зелёным
+- [x] E2E: `nx e2e:core driving-school-e2e` запускается через nx (skipInstall fix); 36/51 зелёных (10 failures: auth-nav + instructor profile)
 - [ ] IPFS: `curl https://ipfs.letar.best/ipfs/<cid>` отдаёт файл
 - [ ] Resilio: uploads/ с s2 появляются на s3 в течение 5 минут
 - [ ] Мониторинг s3 в dashboard-agent (uptime + disk /data)

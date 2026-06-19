@@ -740,4 +740,15 @@ ParallelTranscodeManager
 
 ---
 
-**Последнее обновление:** 2026-03-02 (v0.29.0)
+**Последнее обновление:** 2026-06-19 (v0.52.2)
+
+---
+
+## v0.52.2 — pinner4 (s3) в Bootstrap и Peering.Peers (2026-06-19)
+
+- **PINNER4:** добавлены константы `PINNER4_PEER_ID` + `PINNER4_ADDR` в `kubo-config.ts`; pinner4 вошёл в Bootstrap[] и Peering.Peers[] Kubo
+- **peer-sync-types.ts:** pinner4 добавлен в `KNOWN_PINNER_PEER_IDS`
+- **peer-sync-service.ts:** pinner4 добавлен в `buildHardcodedFallback()` — s3 теперь hardcoded fallback пир
+- **Мотивация:** s3 (новый сервер IPFS gateway/pinner) вступил в строй, нужно добавить его в swarm animatrona
+
+---
