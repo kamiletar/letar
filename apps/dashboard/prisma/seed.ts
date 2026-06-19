@@ -207,6 +207,14 @@ async function main() {
       type: 'WEB' as const,
       domain: 'svoichuzhie.letar.best',
     },
+    {
+      name: 'aprel8008',
+      displayName: '7 Сестёр',
+      containerName: 'aprel8008-app',
+      port: 3023,
+      type: 'WEB' as const,
+      domain: 'aprel8008.ru',
+    },
   ]
 
   for (const app of s2Apps) {

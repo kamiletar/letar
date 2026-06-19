@@ -59,6 +59,7 @@ APPS=(
   "form-example"
   "aboi"
   "dsperevod"
+  "aprel8008"
 )
 
 echo "🚀 Синхронизация .env.docker на production серверы"

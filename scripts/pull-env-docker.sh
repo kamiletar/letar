@@ -19,7 +19,7 @@ LOCAL_PATH="apps"
 
 # Какие приложения на каком сервере
 S1_APPS="premium-rosstil imot dashboard-agent aboi"
-S2_APPS="dashboard driving-school animatrona-web animatrona-tracker auth-hub archetest time form-docs grandslamcup aira-web mandala kami pravda umami animatrona-landing kami-key-the-landing letar-landing dsperevod"
+S2_APPS="dashboard driving-school animatrona-web animatrona-tracker auth-hub archetest time form-docs grandslamcup aira-web mandala kami pravda umami animatrona-landing kami-key-the-landing letar-landing dsperevod aprel8008"
 
 # Windows OpenSSH
 SSH="/c/Windows/System32/OpenSSH/ssh.exe"
@@ -71,6 +71,7 @@ ALL_APPS=(
   "umami" "animatrona-web" "letar-landing" "aira-web"
   "kami-key-the-landing" "grandslamcup" "time" "form-docs" "form-example"
   "dsperevod"
+  "aprel8008"
 )
 
 if [ -n "$APP_FILTER" ]; then
