@@ -1,7 +1,7 @@
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Badge, Card, Link as ChakraLink, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
+import { Badge, Card, HStack, Icon, IconButton, Link as ChakraLink, Spinner, Text } from '@chakra-ui/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { LuCheck, LuExternalLink, LuEye, LuFileDown, LuUser } from 'react-icons/lu'
@@ -54,7 +54,7 @@ export function SiteCard({ site, envConfigured }: SiteCardProps) {
     const { ok, error } = await writeEnvToServer(site.domain, site.id)
     if (ok) {
       setEnvState('done')
-      toaster.create({ title: `.env.docker обновлён для ${site.name}`, type: 'success' })
+      toaster.create({ title: `Umami ID сохранён для ${site.name}`, type: 'success' })
       queryClient.invalidateQueries({ queryKey: ['analytics-env-status'] })
     } else {
       setEnvState('idle')
@@ -94,35 +94,35 @@ export function SiteCard({ site, envConfigured }: SiteCardProps) {
         </Text>
 
         {/* Метрики — одна компактная строка */}
-        {isLoading ? (
-          <Spinner size="xs" />
-        ) : stats ? (
-          <HStack gap="4" fontSize="xs" color="fg.muted">
-            <HStack gap="1">
-              <Icon size="xs">
-                <LuEye />
-              </Icon>
-              <Text fontWeight="medium" color="fg" fontSize="sm">
-                {stats.pageviews.toLocaleString('ru-RU')}
+        {isLoading ? <Spinner size="xs" /> : stats
+          ? (
+            <HStack gap="4" fontSize="xs" color="fg.muted">
+              <HStack gap="1">
+                <Icon size="xs">
+                  <LuEye />
+                </Icon>
+                <Text fontWeight="medium" color="fg" fontSize="sm">
+                  {stats.pageviews.toLocaleString('ru-RU')}
+                </Text>
+              </HStack>
+              <HStack gap="1">
+                <Icon size="xs">
+                  <LuUser />
+                </Icon>
+                <Text fontWeight="medium" color="fg" fontSize="sm">
+                  {stats.visitors.toLocaleString('ru-RU')}
+                </Text>
+              </HStack>
+              <Text ml="auto" fontWeight="medium" fontSize="sm" color={bounceColor(br)}>
+                {br}%
               </Text>
             </HStack>
-            <HStack gap="1">
-              <Icon size="xs">
-                <LuUser />
-              </Icon>
-              <Text fontWeight="medium" color="fg" fontSize="sm">
-                {stats.visitors.toLocaleString('ru-RU')}
-              </Text>
-            </HStack>
-            <Text ml="auto" fontWeight="medium" fontSize="sm" color={bounceColor(br)}>
-              {br}%
+          )
+          : (
+            <Text fontSize="xs" color="fg.muted">
+              Нет данных
             </Text>
-          </HStack>
-        ) : (
-          <Text fontSize="xs" color="fg.muted">
-            Нет данных
-          </Text>
-        )}
+          )}
 
         {/* Ссылки: Umami + записать env */}
         <HStack justify="space-between" mt="2">
@@ -143,15 +143,15 @@ export function SiteCard({ site, envConfigured }: SiteCardProps) {
           </ChakraLink>
 
           <IconButton
-            aria-label="Записать в .env.docker"
+            aria-label="Сохранить Umami ID в БД"
             size="xs"
             variant={envState === 'done' || (envConfigured === false && envState === 'idle') ? 'solid' : 'ghost'}
             colorPalette={envState === 'done' ? 'green' : envConfigured === false ? 'orange' : 'gray'}
             onClick={handleWriteEnv}
             loading={envState === 'writing'}
-            title={
-              envConfigured === false ? 'env не записан — нажми для записи' : 'Записать UMAMI_WEBSITE_ID в .env.docker'
-            }
+            title={envConfigured === false
+              ? 'Umami ID не сохранён — нажми чтобы сохранить'
+              : 'Сохранить Umami Website ID в БД'}
           >
             {envState === 'done' ? <LuCheck /> : <LuFileDown />}
           </IconButton>

@@ -374,6 +374,8 @@ model DeployedApp {
   domain        String?
   /// Время последнего деплоя
   lastDeployed  DateTime?
+  /// Umami website ID для аналитики (хранится в БД, не в .env.docker)
+  umamiWebsiteId String?
 
   /// Сервер, на котором развёрнуто приложение
   server        Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
