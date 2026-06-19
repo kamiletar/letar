@@ -90,4 +90,6 @@ export const KNOWN_PINNER_PEER_IDS: ReadonlySet<string> = new Set([
   '12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA',
   // Gateway (s2) — актуален
   '12D3KooWJtQXuNd4g5w3fH7bCSj4o4DA1PLBFjRGowiBbf6zqxa6',
+  // Pinner4 / Gateway (s3 188.127.235.141) — gateway.letar.best
+  '12D3KooWM7KtRLjqRmJzva7Qy5KZzfaLES4Fk8GgnjabbWoo8A52',
 ])

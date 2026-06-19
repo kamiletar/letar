@@ -18,7 +18,7 @@ import path from 'path'
 import { createModuleLogger } from '../../utils/logger'
 import { fetchPinServers } from '../tracker-client'
 import * as kuboApi from './kubo-api-client'
-import { GATEWAY_PEER_ID, KUBO_CONFIG, PINNER3_PEER_ID, PINNER_PEER_ID } from './kubo-config'
+import { GATEWAY_PEER_ID, KUBO_CONFIG, PINNER3_PEER_ID, PINNER4_PEER_ID, PINNER_PEER_ID } from './kubo-config'
 import type {
   PeerSyncResult,
   PeerSyncSource,
@@ -462,6 +462,20 @@ class PeerSyncService {
         peerId: PINNER3_PEER_ID,
         multiaddrs: Array.from(pinner3Peering.Addrs).map(
           (addr) => `${addr}/p2p/${PINNER3_PEER_ID}`,
+        ),
+        peeringRole: 'both',
+      })
+    }
+
+    const pinner4Peering = KUBO_CONFIG.Peering.Peers.find((p) => p.ID === PINNER4_PEER_ID)
+    if (pinner4Peering) {
+      servers.push({
+        id: 'pinner4-hardcoded',
+        name: 'Pinner 4 / Gateway (s3, hardcoded)',
+        role: 'pinner',
+        peerId: PINNER4_PEER_ID,
+        multiaddrs: Array.from(pinner4Peering.Addrs).map(
+          (addr) => `${addr}/p2p/${PINNER4_PEER_ID}`,
         ),
         peeringRole: 'both',
       })

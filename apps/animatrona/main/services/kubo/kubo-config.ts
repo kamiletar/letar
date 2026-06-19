@@ -53,6 +53,14 @@ export const PINNER3_PEER_ID = '12D3KooWP5hrqw8HHXUGaepSSRhsa8isoTAbcnRnKkjgHhWR
 export const PINNER3_ADDR = '/ip4/188.127.235.38/tcp/4001'
 
 /**
+ * Pinner4 / Gateway (s3 188.127.235.141) — четвёртый пин-сервер + gateway.letar.best
+ * Роль: долгосрочное хранение + IPFS gateway (CNAME gateway.letar.best → s3.letar.best)
+ * Docker: /opt/pin-queue/, стандартные порты (4001 Swarm, 5001 API, 8080 Gateway)
+ */
+export const PINNER4_PEER_ID = '12D3KooWM7KtRLjqRmJzva7Qy5KZzfaLES4Fk8GgnjabbWoo8A52'
+export const PINNER4_ADDR = '/ip4/188.127.235.141/tcp/4001'
+
+/**
  * Порты для embedded Kubo
  */
 export const KUBO_PORTS = {
@@ -121,6 +129,8 @@ export const KUBO_CONFIG = {
     `${PINNER_ADDR}/p2p/${PINNER_PEER_ID}`,
     // Pinner3 — третий пин-сервер (500GB HDD+SSD cache)
     `${PINNER3_ADDR}/p2p/${PINNER3_PEER_ID}`,
+    // Pinner4 (s3) — gateway.letar.best + четвёртый пин-сервер
+    `${PINNER4_ADDR}/p2p/${PINNER4_PEER_ID}`,
 
     // Публичные bootstrap ноды Protocol Labs
     '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
@@ -219,6 +229,11 @@ export const KUBO_CONFIG = {
       {
         ID: PINNER3_PEER_ID,
         Addrs: [PINNER3_ADDR, '/ip4/188.127.235.38/udp/4001/quic-v1'],
+      },
+      // Pinner4 (s3) — gateway.letar.best + четвёртый пин-сервер
+      {
+        ID: PINNER4_PEER_ID,
+        Addrs: [PINNER4_ADDR, '/ip4/188.127.235.141/udp/4001/quic-v1'],
       },
     ],
   },

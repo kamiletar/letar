@@ -149,7 +149,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -437,3 +437,80 @@ nx e2e animatrona-e2e -- --grep "Import"
 ```
 
 → Подробная документация: `apps/animatrona-e2e/README.md`
+
+---
+
+## E2E-ранер на s3 (188.127.235.141)
+
+Все E2E-прогоны переезжают с локальной машины на выделенный сервер s3.
+
+### Инфраструктура
+
+| Сервис         | Контейнер            | Порт на хосте        |
+| -------------- | -------------------- | -------------------- |
+| PostgreSQL E2E | `e2e-postgres`       | 5499                 |
+| Redis E2E      | `e2e-redis`          | 6380                 |
+| Репозиторий    | `/home/deploy/letar` | —                    |
+| Playwright     | Chromium headless    | установлен глобально |
+
+Compose-файл: `/opt/e2e-infra/docker-compose.yml`
+
+### Подключение и запуск
+
+```bash
+ssh deploy@188.127.235.141
+
+# Запуск конкретного shard
+cd /home/deploy/letar
+nx e2e driving-school-e2e -- --project=shard-core
+
+# Полный прогон всех приложений
+nx run-many --target=e2e --parallel=3
+```
+
+### Настройка нового приложения для E2E
+
+1. **Создать E2E базу данных:**
+
+```bash
+docker exec e2e-postgres psql -U e2e -d postgres -c "CREATE DATABASE e2e_<app>;"
+```
+
+2. **Создать `.env.local`** в директории приложения:
+
+```bash
+# apps/<app>/.env.local
+DATABASE_URL="postgresql://e2e:e2e@localhost:5499/e2e_<app>?schema=public"
+AUTH_SECRET="$(openssl rand -base64 32)"
+BETTER_AUTH_URL=http://localhost:<port>
+ADMIN_EMAIL=admin@e2e.test
+```
+
+3. **Применить миграции:**
+
+```bash
+nx db:migrate <app>
+```
+
+### Особенности s3-ранера
+
+- `ELECTRON_SKIP_BINARY_DOWNLOAD=1` — обязателен при `bun install` (Electron не нужен на сервере)
+- `bun` симлинкован через `/root/.bun/` — `/root` должен быть доступен для deploy (`chmod o+x /root`)
+- Playwright system deps установлены от root, браузер — от deploy пользователя
+- `nx zenstack:generate` не работает без предварительной сборки `libs/zenstack-form-plugin` — используй уже сгенерированные файлы из репо
+
+### Обновление репозитория
+
+```bash
+ssh deploy@188.127.235.141
+cd /home/deploy/letar
+GIT_SSH_COMMAND="ssh -i /home/deploy/.ssh/id_ed25519" git pull --recurse-submodules
+ELECTRON_SKIP_BINARY_DOWNLOAD=1 bun install --frozen-lockfile
+```
+
+### Cron (ежедневный прогон)
+
+```bash
+# /etc/cron.d/e2e-runner
+0 2 * * * deploy cd /home/deploy/letar && nx run-many --target=e2e --parallel=3
+```
