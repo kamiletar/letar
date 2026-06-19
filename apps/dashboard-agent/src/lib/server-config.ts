@@ -7,22 +7,14 @@ import { hostname } from 'os'
 
 /**
  * Сервер на котором выполняется задача
- * s1 — s1.letar.best (premium-rosstil, imot, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami)
- * s2 — s2.letar.best (dashboard, driving-school, archetest, auth-hub, grandslamcup, time, form-example, form-docs)
+ * s1 — s1.letar.best (только dashboard-agent)
+ * s2 — s2.letar.best (все остальные приложения)
  */
 export type CronServer = 's1' | 's2'
 
 /** Полный маппинг приложений на серверы */
 export const SERVER_APPS: Record<string, CronServer> = {
-  'premium-rosstil': 's1',
-  imot: 's1',
-  mandala: 's1',
-  kami: 's1',
-  pravda: 's1',
-  'animatrona-landing': 's1',
   'dashboard-agent': 's1',
-  umami: 's1',
-  'animatrona-tracker': 's1',
   dashboard: 's2',
   'driving-school': 's2',
   archetest: 's2',
@@ -32,6 +24,19 @@ export const SERVER_APPS: Record<string, CronServer> = {
   'form-docs': 's2',
   grandslamcup: 's2',
   dsperevod: 's2',
+  mandala: 's2',
+  kami: 's2',
+  pravda: 's2',
+  'animatrona-landing': 's2',
+  'animatrona-tracker': 's2',
+  umami: 's2',
+  aboi: 's2',
+  svoichuzhie: 's2',
+  aprel8008: 's2',
+  'kami-key-the-landing': 's2',
+  'letar-landing': 's2',
+  'premium-rosstil': 's2',
+  imot: 's2',
 }
 
 /** Получить сервер для приложения */

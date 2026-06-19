@@ -215,6 +215,22 @@ async function main() {
       type: 'WEB' as const,
       domain: 'aprel8008.ru',
     },
+    {
+      name: 'premium-rosstil',
+      displayName: 'Premium Rosstil',
+      containerName: 'premium-rosstil-app',
+      port: 3000,
+      type: 'WEB' as const,
+      domain: 'premium.rosstil.ru',
+    },
+    {
+      name: 'imot',
+      displayName: 'IMOT',
+      containerName: 'imot-app',
+      port: 3001,
+      type: 'WEB' as const,
+      domain: 'integrelle.com',
+    },
   ]
 
   for (const app of s2Apps) {
@@ -227,7 +243,7 @@ async function main() {
   }
 
   // ============================================================================
-  // Сервер s1.letar.best (удалённый с агентом) — premium-rosstil, imot
+  // Сервер s1.letar.best (удалённый с агентом) — только dashboard-agent
   // ============================================================================
   const s1Token = generateAgentToken()
   const s1Server = await prisma.server.upsert({
@@ -247,25 +263,15 @@ async function main() {
   console.log(`✅ Server: ${s1Server.displayName} (id: ${s1Server.id})`)
   console.log(`  🔑 Agent Token: ${s1Token}`)
 
-  // Приложения на s1
-  const s1Apps = [
-    {
-      name: 'premium-rosstil',
-      displayName: 'Premium Rosstil',
-      containerName: 'premium-rosstil-app',
-      port: 3000,
-      type: 'WEB' as const,
-      domain: 'premium.rosstil.ru',
-    },
-    {
-      name: 'imot',
-      displayName: 'IMOT',
-      containerName: 'imot-app',
-      port: 3001,
-      type: 'WEB' as const,
-      domain: 'integrelle.com',
-    },
-  ]
+  // Приложений на s1 больше нет (premium-rosstil и imot переехали на s2)
+  const s1Apps: Array<{
+    name: string
+    displayName: string
+    containerName: string
+    port: number
+    type: 'WEB'
+    domain: string | null
+  }> = []
 
   for (const app of s1Apps) {
     await prisma.deployedApp.upsert({

@@ -40,10 +40,10 @@ cd /home/deploy/letar
 
 ### Распределение приложений по серверам
 
-| Сервер            | Приложения                                                                                                                                                                                                             |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **s1.letar.best** | premium-rosstil, imot, dashboard-agent                                                                                                                                                                                 |
-| **s2.letar.best** | dashboard, driving-school, animatrona-web, auth-hub, archetest, time, form-docs, form-example, grandslamcup, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing |
+| Сервер            | Приложения                                                                                                                                                                                                                                            |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **s1.letar.best** | dashboard-agent                                                                                                                                                                                                                                       |
+| **s2.letar.best** | dashboard, driving-school, animatrona-web, auth-hub, archetest, time, form-docs, form-example, grandslamcup, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, **premium-rosstil**, **imot** |
 
 ⚠️ **ВАЖНО:** При деплое убедись, что подключаешься к правильному серверу!
 
@@ -83,20 +83,20 @@ proxy_cache off;
 proxy_read_timeout 86400s;
 ```
 
-### Текущие хосты (актуально на 2026-04-17)
+### Текущие хосты (актуально на 2026-06-20)
 
 #### s1.letar.best
 
-| Домен              | Приложение          | Порт |
-| ------------------ | ------------------- | ---- |
-| premium.rosstil.ru | premium-rosstil-app | 3000 |
-| integrelle.com     | imot-app            | 3001 |
-| npm.s1.letar.best  | localhost           | 81   |
+| Домен             | Приложение | Порт |
+| ----------------- | ---------- | ---- |
+| npm.s1.letar.best | localhost  | 81   |
 
 #### s2.letar.best
 
 | Домен                         | Приложение               | Порт |
 | ----------------------------- | ------------------------ | ---- |
+| premium.rosstil.ru            | premium-rosstil-app      | 3000 |
+| integrelle.com                | imot-app                 | 3001 |
 | dash.letar.best               | dashboard-app            | 3002 |
 | направа.рф                    | driving-school-app       | 3003 |
 | mandala.letar.best            | mandala-app              | 3004 |
@@ -433,8 +433,8 @@ services:
 
 | Приложение           | Внешний порт                                                                      | Внутренний порт | Сервер |
 | -------------------- | --------------------------------------------------------------------------------- | --------------- | ------ |
-| premium-rosstil      | 3000                                                                              | 3000            | s1     |
-| imot                 | 3001                                                                              | 3001            | s1     |
+| premium-rosstil      | 3000                                                                              | 3000            | s2     |
+| imot                 | 3001                                                                              | 3001            | s2     |
 | dashboard            | 3002                                                                              | 3002            | s2     |
 | driving-school       | 3003–3004                                                                         | 3003–3004       | s2     |
 | kami                 | 3005                                                                              | 3005            | s2     |
