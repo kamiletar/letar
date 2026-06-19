@@ -34,3 +34,6 @@
 [submodule "apps/svoichuzhie"]
 	path = apps/svoichuzhie
 	url = git@github.com:kamiletar/letar-private-svoichuzhie.git
+[submodule "apps/aprel8008"]
+	path = apps/aprel8008
+	url = git@github.com:kamiletar/letar-private-aprel8008.git
