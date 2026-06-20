@@ -1,0 +1,82 @@
+services:
+  media-api:
+    build: .
+    image: media-server:latest
+    container_name: media-api
+    ports:
+      - '3100:3100'
+    environment:
+      PORT: ${PORT}
+      REDIS_URL: ${REDIS_URL}
+      DATA_PATH: ${DATA_PATH}
+      MEDIA_KEY_SVOICHUZHIE: ${MEDIA_KEY_SVOICHUZHIE}
+      MEDIA_KEY_ANIMATRONA: ${MEDIA_KEY_ANIMATRONA}
+    volumes:
+      - /data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - premium-network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  media-worker:
+    image: media-server:latest
+    container_name: media-worker
+    command: bun run src/worker.ts
+    environment:
+      REDIS_URL: ${REDIS_URL}
+      DATA_PATH: ${DATA_PATH}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+    volumes:
+      - /data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - premium-network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  redis:
+    image: redis:7-alpine
+    container_name: media-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - premium-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: media-nginx
+    ports:
+      - '3101:80'
+    volumes:
+      - /data/processed:/data/processed:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - premium-network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true
