@@ -101,7 +101,9 @@ export function CookieBanner({
     })
   }
 
-  if (!shown) return null
+  if (!shown) {
+    return null
+  }
 
   return (
     <Box

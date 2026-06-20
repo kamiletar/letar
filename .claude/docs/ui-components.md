@@ -652,3 +652,53 @@ export const buttonRecipe = defineRecipe({
   <NextLink href="/#bazy">← Все базы</NextLink>
 </Button>
 ```
+
+## Компоненты галереи из `@letar/ui`
+
+### `PhotoGallery` — сетка фото + лайтбокс
+
+> Стандартный компонент для любой фото-галереи в монорепо. Реализован в `libs/ui/src/lib/photo-gallery.tsx`.
+
+```tsx
+import { PhotoGallery } from '@letar/ui'
+
+<PhotoGallery
+  photos={photos.map((p, i) => ({
+    src: `/api/files/${slug}/${p.filename}`,
+    alt: `${name} — фото ${i + 1}`,
+  }))}
+  columns={{ base: 2, sm: 3, md: 4 }} // default
+  gap={3} // default
+  aspectRatio={4 / 3} // default
+  loading={isLoadingMore} // скелетоны при пагинации
+  lightboxMaxWidth={1920} // default
+  lightboxQuality={85} // default
+/>
+```
+
+**Что делает внутри:**
+
+- `next/image fill` в сетке — srcSet и ресайз на лету, кешируется Next.js
+- При клике/Enter открывает `LightboxViewer` (yet-another-react-lightbox + Zoom + Fullscreen)
+- Слайды лайтбокса через `nextImageUrl(src, 1920, 85)` — `/_next/image` API, кеш навсегда
+- `role="button"` + `tabIndex={0}` + `_focusVisible` + `aria-label` на каждом фото
+- Скелетоны при `loading=true` (пагинация) и `photos.length === 0`
+
+**Эталонная реализация:** `apps/aprel8008` — `GalleryInfiniteScroll` поверх `PhotoGallery`.
+
+**Подробнее о паттерне nextImageUrl:** [images.md](/.claude/docs/images.md#галереи-фотографий--паттерн-nextimageurl--photogallery)
+
+### `LightboxViewer` — только лайтбокс
+
+Когда нужен лайтбокс без сетки (например, кастомная сетка своя):
+
+```tsx
+import { LightboxViewer, type LightboxSlide } from '@letar/ui'
+
+const slides: LightboxSlide[] = photos.map(p => ({
+  src: nextImageUrl(p.src, 1920, 85),
+  alt: p.alt,
+}))
+
+<LightboxViewer open={open} index={index} close={() => setOpen(false)} slides={slides} />
+```

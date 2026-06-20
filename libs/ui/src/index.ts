@@ -13,6 +13,7 @@ export { CookieBanner, type CookieBannerProps } from './lib/cookie-banner'
 export { CookieSettingsButton, type CookieSettingsButtonProps } from './lib/cookie-settings-button'
 export { DeleteAccountZone, type DeleteAccountZoneProps } from './lib/delete-account-zone'
 export { AppEmptyState, type AppEmptyStateProps } from './lib/empty-state'
+export { ExternalLink, type ExternalLinkProps } from './lib/external-link'
 export {
   Header,
   HeaderActions,
@@ -39,6 +40,9 @@ export {
   PasswordStrengthMeter,
   type PasswordVisibilityProps,
 } from './lib/password-input'
+export { PhotoGallery, type PhotoItem } from './lib/photo-gallery'
+export { Pressable, pressableConfig, type PressableProps, RippleEl, useRipple } from './lib/pressable'
+export { PressableButton, type PressableButtonProps } from './lib/pressable-button'
 export { RatingDisplay, type RatingDisplayProps } from './lib/rating-display'
 export { RatingStars, type RatingStarsProps } from './lib/rating-stars'
 export { type ReviewAuthor, ReviewCard, type ReviewCardProps, type ReviewData } from './lib/review-card'

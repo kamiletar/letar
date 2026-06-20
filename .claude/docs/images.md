@@ -218,8 +218,72 @@ const image = await createImageRecord({
 ⚠️ **НИКОГДА** не храните загружаемые изображения в `public/`
 ⚠️ **ВСЕГДА** используйте `/api/files/` для доступа к загруженным изображениям
 ⚠️ При деплое убедитесь, что папка `uploads/` примонтирована как volume в Docker
-⚠️ Используйте `sharp` для оптимизации изображений (уже установлен в проектах)
 
 ---
 
-**Последнее обновление:** 2026-01-01
+## Галереи фотографий — паттерн `nextImageUrl` + `PhotoGallery`
+
+> Реализовано в aprel8008 (Sprint 4) и эталонно закреплено в `libs/ui`.
+
+### Ключевой инсайт: batch-скрипт pre-resize НЕ нужен
+
+Next.js Image Optimization API (`/_next/image`) обрабатывает изображения **on-demand** и кеширует в `.next/cache/images` навсегда. Первый запрос медленный, последующие — мгновенные. Отдельный скрипт sharp для пакетного ресайза не нужен.
+
+### Хелпер `nextImageUrl`
+
+```typescript
+// Встроен в PhotoGallery, но можно использовать напрямую
+function nextImageUrl(src: string, w: number, q: number) {
+  return `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=${q}`
+}
+
+// В лайтбоксе — 1080p/1920p слайды:
+const slides = photos.map((p) => ({
+  src: nextImageUrl(p.src, 1920, 85),
+  alt: p.alt,
+}))
+```
+
+Параметры: `w` — ширина (Next.js выберет ближайший deviceSize), `q` — качество 0–100.
+
+### Компонент `PhotoGallery` из `@letar/ui`
+
+**Стандартный способ для любой фото-галереи в монорепо.** Объединяет сетку + лайтбокс + a11y:
+
+```tsx
+import { PhotoGallery } from '@letar/ui'
+
+<PhotoGallery
+  photos={photos.map((p, i) => ({
+    src: `/api/files/estates/${slug}/${p.filename}`,
+    alt: `${estateName} — фото ${i + 1}`,
+  }))}
+  columns={{ base: 2, sm: 3, md: 4 }}
+  loading={isLoadingMore} // показывает скелетоны при подгрузке
+  lightboxMaxWidth={1920} // ширина в лайтбоксе (default: 1920)
+  lightboxQuality={85} // качество в лайтбоксе (default: 85)
+  aspectRatio={4 / 3} // соотношение сторон (default: 4/3)
+/>
+```
+
+### Разделение ответственности для пагинированных галерей
+
+```
+GalleryInfiniteScroll     — данные, IntersectionObserver, скелетоны при пустом массиве
+  └── PhotoGallery        — сетка, лайтбокс, nextImageUrl, a11y
+        └── LightboxViewer — yet-another-react-lightbox + Zoom + Fullscreen
+```
+
+Если нужна только прокрутка данных — используй `GalleryInfiniteScroll` поверх `PhotoGallery`.\
+Если нужен лайтбокс без сетки — используй `LightboxViewer` напрямую.
+
+### Применение в других проектах
+
+1. Добавить `@letar/ui` в `implicitDependencies` (`project.json`)
+2. Настроить tsconfig `paths` + `references` на `libs/ui`
+3. Импортировать `PhotoGallery` из `@letar/ui`
+4. Передавать `photos: PhotoItem[]` — массив `{ src, alt? }`
+
+---
+
+**Последнее обновление:** 2026-06-21

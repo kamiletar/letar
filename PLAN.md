@@ -1115,6 +1115,62 @@ import { UserMenu } from '@letar/ui'
   проброса версии задокументирован в `ui-components.md`.
 - **Зависимости:** нет (UI-тираж, итерационно — как Этап 6.8/6.9). Удобно делать вместе с Этапом 6.9 (один футер).
 
+### Этап 6.11 — Pressable-компоненты в `@letar/ui` + тираж 🆕 (добавлен 2026-06-20)
+
+> **Цель:** единый тач-фидбек во всём монорепо. На тач-устройствах — spring-анимация (CSS-only, без JS).
+> На десктопе — position-aware ripple от точки клика (GPU-анимация, ноль re-renders на тач).
+
+**Что идёт в `@letar/ui`:**
+
+- **`Pressable`** — Box-обёртка с `data-pressable`, `overflow: hidden`, `useRipple` + `RippleEl` для ripple на мыши.
+- **`useRipple` + `RippleEl`** — экспортируются отдельно для кастомных композиций.
+- **`Button`** (именованный экспорт, не конфликт с Chakra) — Chakra Button + встроенный ripple.
+  Используется для `onClick`-кнопок (SignIn, формы). **Не поддерживает `asChild`** — для Link-кнопок → `AppLink`.
+- **`ExternalLink`** — `Pressable + IconButton asChild + <a target="_blank" rel="noopener noreferrer">`.
+  Для иконок соцсетей и внешних ссылок. Принимает `href`, `aria-label`, `size`, `variant`.
+- **`pressableConfig`** — объект `{ keyframes, globalCss }` для мержа в `defineConfig()` каждого приложения:
+  кейфрейм `ripple-expand` + глобальный CSS для `[data-pressable]` (spring + touch-action).
+
+**Что остаётся в каждом приложении (`_components/ui/app-link.tsx`, ~12 строк):**
+
+- **`AppLink`** — тонкая обёртка: `Pressable + Chakra Button asChild + app-специфичный Link из next-intl`.
+  Зависит от `@/i18n/navigation` — не может жить в `@letar/ui`. Для приложений без next-intl → используют Pressable + нативный `<a>`.
+
+**iOS-фикс (один раз в провайдере/layout):**
+
+```tsx
+useEffect(() => {
+  document.addEventListener('touchstart', () => {}, { passive: true })
+}, [])
+```
+
+**Тираж по приложениям** (после реализации `@letar/ui`):
+
+| Приложение             | Затронутые места                                                   |
+| ---------------------- | ------------------------------------------------------------------ |
+| **kami**               | nav-links, sign-in-button, mobile-menu, social-links (⏳ в работе) |
+| **aprel8008**          | CTA, nav — **второе приложение после kami**                        |
+| **driving-school**     | header nav, auth кнопки, CTA                                       |
+| **grandslamcup**       | nav, кнопки расписания                                             |
+| **archetest**          | nav, CTA                                                           |
+| **aboi**               | nav, кнопки                                                        |
+| **animatrona-tracker** | nav, кнопки                                                        |
+| **dsperevod**          | CTA-кнопки                                                         |
+| **premium-rosstil**    | nav, auth кнопки                                                   |
+| **time**               | nav                                                                |
+| **synth**              | UI-кнопки                                                          |
+| **studio**             | при готовности                                                     |
+
+**✓ DoD:**
+
+- [ ] `@letar/ui` экспортирует `Pressable`, `useRipple`, `RippleEl`, `Button`, `ExternalLink`, `pressableConfig`
+- [ ] kami полностью переведён (`Button`, `AppLink`, `ExternalLink` применены во всех публичных точках)
+- [ ] `pressableConfig` задокументирован в `.claude/docs/ui-components.md` (как добавить в тему)
+- [ ] Тираж на 3+ приложения монорепо
+- [ ] Версия `@letar/ui` поднята
+
+**Зависимости:** нет (UX-улучшение, итерационно).
+
 ### Этап 7 — driving-school: на общую библиотеку ✅ ПОЛНОСТЬЮ (2026-06-11, сессия №32)
 
 - ✅ `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк).
@@ -1421,10 +1477,14 @@ s3 **не** хостит приложения монорепо (s1/s2) и **не
 
 ```
 https://media.letar.best/v/{appId}/{videoId}/source.mp4   — оригинал (приватный, только auth)
+https://media.letar.best/v/{appId}/{videoId}/320p.mp4     — транскод 320p (публичный, мобилки/превью)
 https://media.letar.best/v/{appId}/{videoId}/720p.mp4     — транскод 720p (публичный)
 https://media.letar.best/v/{appId}/{videoId}/1080p.mp4    — транскод 1080p (публичный)
 https://media.letar.best/v/{appId}/{videoId}/poster.jpg   — постер (первый кадр)
 ```
+
+Качество переключается кнопкой в плеере — три отдельных MP4-файла, HLS не нужен.
+Live streaming (будущее) — отдельная фича с собственным pipeline (`ffmpeg -f hls`), не связана с VOD.
 
 #### API (аутентификация — API-ключ в заголовке `X-Media-Key`)
 
@@ -1442,7 +1502,7 @@ POST   /api/v1/{appId}/video/{videoId}/poster — сгенерировать п�
   "event": "video.ready",
   "videoId": "...",
   "appId": "svoichuzhie",
-  "urls": { "720p": "...", "1080p": "...", "poster": "..." }
+  "urls": { "320p": "...", "720p": "...", "1080p": "...", "poster": "..." }
 }
 ```
 
@@ -1450,13 +1510,17 @@ POST   /api/v1/{appId}/video/{videoId}/poster — сгенерировать п�
 
 ```
 Загрузка → /data/raw/{appId}/{videoId}/source.ext
-Воркер   → ffmpeg → /data/processed/{appId}/{videoId}/720p.mp4 + 1080p.mp4 + poster.jpg
+Воркер   → ffmpeg → /data/processed/{appId}/{videoId}/320p.mp4 + 720p.mp4 + 1080p.mp4 + poster.jpg
 Статус   → Redis (BullMQ job state)
 ```
 
-Параметры ffmpeg (v1 — только MP4, HLS в v2):
+Параметры ffmpeg (три качества MP4 + постер; перемотка через HTTP Range):
 
 ```bash
+# 320p — мобилки, слабое соединение, inline-превью
+ffmpeg -i source.ext -vf scale=-2:320 -c:v libx264 -preset medium -crf 26 \
+       -c:a aac -b:a 64k -movflags +faststart 320p.mp4
+
 # 720p
 ffmpeg -i source.ext -vf scale=-2:720 -c:v libx264 -preset medium -crf 23 \
        -c:a aac -b:a 128k -movflags +faststart 720p.mp4
@@ -1490,6 +1554,7 @@ location /v/ {
 /data/
   raw/{appId}/{videoId}/source.ext        — сырые загрузки (удалять после успешного транскода)
   processed/{appId}/{videoId}/
+    320p.mp4
     720p.mp4
     1080p.mp4
     poster.jpg
@@ -1914,3 +1979,35 @@ IPFS_API_TOKEN=... # для внешних pinning services (опц.)
 - [ ] Мониторинг s3 в dashboard-agent (uptime + disk /data)
 - [ ] Секреты зашифрованы SOPS, `.env.docker.enc` в git
 ```
+
+---
+
+## §16 — Конвенция: фото-галереи через `PhotoGallery` из `@letar/ui`
+
+> Принята в сессию №42 (2026-06-21) по итогам aprel8008 Sprint 4.
+
+### Суть решения
+
+В монорепо **единственный способ** сделать фото-галерею — компонент `PhotoGallery` из `@letar/ui`. Он объединяет:
+
+- сетку через `next/image fill` (srcSet автоматически, кеш `/_next/image`)
+- лайтбокс (`LightboxViewer` — yet-another-react-lightbox + Zoom + Fullscreen)
+- паттерн `nextImageUrl(src, w, q)` → `/_next/image?url=...&w=...&q=...` для слайдов
+- a11y: `role="button"`, `tabIndex`, `aria-label`, `_focusVisible`
+
+**Batch pre-resize скриптом не нужен** — Next.js делает on-demand + кешируется навсегда.
+
+### Применение во всех проектах
+
+1. Добавить `@letar/ui` в `implicitDependencies` в `project.json`
+2. tsconfig: `paths` + `references` на `libs/ui`
+3. `import { PhotoGallery } from '@letar/ui'`
+
+### Эталон
+
+`apps/aprel8008` — `GalleryInfiniteScroll` (пагинация/данные) поверх `PhotoGallery` (отображение).
+
+### Документация
+
+- Паттерн: [images.md](/.claude/docs/images.md)
+- Компоненты: [ui-components.md](/.claude/docs/ui-components.md)
