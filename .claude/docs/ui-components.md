@@ -142,7 +142,7 @@ import { DialogContent, DialogRoot, DialogTrigger } from '@chakra-ui/react'
 
 ```tsx
 import { Dialog, Portal } from '@chakra-ui/react'
-;<Dialog.Root>
+<Dialog.Root>
   <Dialog.Trigger>...</Dialog.Trigger>
 </Dialog.Root>
 ```
@@ -280,7 +280,7 @@ import { OnlyFor } from './_components/only-for';
 ```tsx
 import { Button } from '@chakra-ui/react'
 import Link from 'next/link'
-;<Button asChild colorPalette="fg" size="lg">
+<Button asChild colorPalette="fg" size="lg">
   <Link href="/auth/signin">Войти</Link>
 </Button>
 ```
@@ -488,3 +488,167 @@ const bodyFont = Tenor_Sans({
 ```
 
 Эти шрифты интегрированы в нашу тему Chakra UI через ThemeProvider.
+
+## Chakra UI v3 — Best Practices для новых приложений
+
+> Добавлено по итогам Спринта 2 aprel8008 (2026-06). **Эталон:** `apps/driving-school/src/theme/` (16 файлов) и `apps/aprel8008/src/theme/`.
+
+### Обязательная структура темы
+
+Каждое новое приложение **ОБЯЗАНО** иметь:
+
+```
+src/theme/
+├── index.ts                  — createSystem(defaultConfig, config)
+├── tokens/
+│   ├── colors.ts             — defineTokens.colors(...)
+│   ├── typography.ts         — defineTokens.fonts({ heading, body })
+│   └── index.ts              — реэкспорт
+├── semanticTokens/
+│   └── index.ts              — defineSemanticTokens.colors(...)
+├── styles/
+│   └── textStyles.ts         — именованные типографические стили
+└── recipes/
+    ├── button.ts             — defineRecipe для кнопок
+    └── index.ts              — реэкспорт
+```
+
+### Шрифты: next/font → токены → globalCss
+
+```ts
+// 1. layout.tsx — подключение шрифтов
+import { Cormorant_Garamond, Golos_Text } from 'next/font/google'
+
+const heading = Cormorant_Garamond({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  variable: '--font-heading',
+})
+// Добавить className={`${heading.variable} ${body.variable}`} на <html>
+
+// 2. theme/tokens/typography.ts
+export const fonts = defineTokens.fonts({
+  heading: { value: 'var(--font-heading), Georgia, serif' },
+  body: { value: 'var(--font-body), system-ui, sans-serif' },
+})
+
+// 3. theme/index.ts — НЕ прописывать fontFamily вручную в globalCss.body
+// Chakra использует токен fonts.body автоматически
+```
+
+### TextStyles — никаких инлайн fontSize
+
+```ts
+// ❌ ЗАПРЕЩЕНО — хардкодить размеры инлайн
+<Heading fontSize={{ base: '2xl', md: '3xl' }} fontWeight="600">
+
+// ✅ ПРАВИЛЬНО — именованные textStyles
+<Heading textStyle="heading.section">
+
+// Определяются в theme/styles/textStyles.ts:
+export const textStyles = {
+  'heading.hero':    { value: { fontSize: { base: '4xl', md: '6xl' }, fontWeight: '700', lineHeight: '1.1' } },
+  'heading.section': { value: { fontSize: { base: '2xl', md: '3xl' }, fontWeight: '600', lineHeight: '1.3' } },
+  'heading.card':    { value: { fontSize: 'xl', fontWeight: '600' } },
+  'tagline':         { value: { fontSize: { base: 'xl', md: '2xl' }, fontStyle: 'italic' } },
+  'body.lg':         { value: { fontSize: { base: 'lg', md: 'xl' }, lineHeight: '1.9' } },
+  'body.md':         { value: { fontSize: 'md', lineHeight: '1.7' } },
+}
+```
+
+### CTA-кнопки: recipe, не инлайн
+
+```ts
+// ❌ ЗАПРЕЩЕНО — инлайн стили для CTA
+<Link bg="brand.500" color="white" px={8} py={4} ...>Написать</Link>
+
+// ✅ ПРАВИЛЬНО — recipe variant
+<Button variant="brand" size="lg" asChild>
+  <a href="#contacts">Написать →</a>
+</Button>
+
+// Recipe определяется в theme/recipes/button.ts:
+export const buttonRecipe = defineRecipe({
+  base: { transition: 'all 0.15s ease-out', _active: { transform: 'scale(0.97)' } },
+  variants: {
+    variant: {
+      brand: {
+        bg: 'brand.500', color: 'white',
+        _hover: { bg: 'brand.600', transform: 'translateY(-2px)', boxShadow: 'md' },
+      },
+    },
+  },
+})
+```
+
+### Мобильное меню: Drawer, не display:none
+
+```tsx
+// ❌ ЗАПРЕЩЕНО — прятать навигацию через display
+<Flex display={{ base: 'none', md: 'flex' }}> {/* Единственная навигация */}
+
+// ✅ ПРАВИЛЬНО — Drawer.Root для мобиля
+// Десктопная навигация display={{ base: 'none', md: 'flex' }}
+// Бургер display={{ base: 'flex', md: 'none' }} → открывает Drawer
+
+// Структура Drawer (Chakra v3):
+<Drawer.Root placement="end">
+  <Drawer.Trigger asChild><IconButton .../></Drawer.Trigger>
+  <Portal>
+    <Drawer.Backdrop />
+    <Drawer.Positioner>
+      <Drawer.Content>
+        {/* ссылки + CTA */}
+        <Drawer.ActionTrigger asChild><Link href="#about">О нас</Link></Drawer.ActionTrigger>
+        <Drawer.CloseTrigger asChild><IconButton .../></Drawer.CloseTrigger>
+      </Drawer.Content>
+    </Drawer.Positioner>
+  </Portal>
+</Drawer.Root>
+```
+
+### Breadcrumb — нативный компонент
+
+```tsx
+// ❌ ЗАПРЕЩЕНО — ручная реализация крошек
+<Flex gap={2}><Link>Главная</Link><Text>→</Text><Text>Страница</Text></Flex>
+
+// ✅ ПРАВИЛЬНО — Breadcrumb.Root
+<Breadcrumb.Root size="sm">
+  <Breadcrumb.List flexWrap="wrap">
+    <Breadcrumb.Item>
+      <Breadcrumb.Link asChild><NextLink href="/">Главная</NextLink></Breadcrumb.Link>
+    </Breadcrumb.Item>
+    <Breadcrumb.Separator />
+    <Breadcrumb.Item>
+      <Breadcrumb.CurrentLink>Текущая страница</Breadcrumb.CurrentLink>
+    </Breadcrumb.Item>
+  </Breadcrumb.List>
+</Breadcrumb.Root>
+```
+
+### Разделители: Separator, не Box с borderTop
+
+```tsx
+// ❌ ЗАПРЕЩЕНО
+<Box borderTop="1px solid" borderColor="border.DEFAULT" pt={4}>
+
+// ✅ ПРАВИЛЬНО
+<Separator mb={4} />
+<Box pt={0}>
+```
+
+### ⛔ Запрет as= — распространяется на ВСЕ элементы
+
+`as="span"`, `as="button"`, `as="a"`, `as="div"` — всё запрещено, не только `as="button"`:
+
+```tsx
+// ❌ ЗАПРЕЩЕНО — Box as="span" тоже нарушение
+<Box as="span" display="inline-flex" bg="brand.500">← Все базы</Box>
+
+// ✅ ПРАВИЛЬНО — Button с asChild
+<Button variant="brand" asChild>
+  <NextLink href="/#bazy">← Все базы</NextLink>
+</Button>
+```
