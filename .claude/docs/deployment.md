@@ -40,10 +40,10 @@ cd /home/deploy/letar
 
 ### Распределение приложений по серверам
 
-| Сервер            | Приложения                                                                                                                                                                                                                                            |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **s1.letar.best** | dashboard-agent                                                                                                                                                                                                                                       |
-| **s2.letar.best** | dashboard, driving-school, animatrona-web, auth-hub, archetest, time, form-docs, form-example, grandslamcup, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, **premium-rosstil**, **imot** |
+| Сервер            | Приложения                                                                                                                                                                                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~s1.letar.best~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                    |
+| **s2.letar.best** | dashboard, dashboard-agent, driving-school, animatrona-web, auth-hub, archetest, time, form-docs, form-example, grandslamcup, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, premium-rosstil, imot |
 
 ⚠️ **ВАЖНО:** При деплое убедись, что подключаешься к правильному серверу!
 

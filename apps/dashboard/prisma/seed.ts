@@ -243,19 +243,19 @@ async function main() {
   }
 
   // ============================================================================
-  // Сервер s1.letar.best (удалённый с агентом) — только dashboard-agent
+  // Сервер s1.letar.best — выведен из эксплуатации
   // ============================================================================
   const s1Token = generateAgentToken()
   const s1Server = await prisma.server.upsert({
     where: { name: 's1-letar' },
-    update: {},
+    update: { isActive: false },
     create: {
       name: 's1-letar',
       displayName: 's1.letar.best',
       host: '194.164.245.97',
       port: 3100,
       isLocal: false,
-      isActive: true,
+      isActive: false,
       agentToken: s1Token,
       sortOrder: 1,
     },

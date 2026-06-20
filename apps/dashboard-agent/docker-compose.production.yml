@@ -1,12 +1,7 @@
 # Dashboard Agent Production Configuration
-# Lightweight monitoring agent for remote servers
+# Lightweight monitoring agent for s2.letar.best
 #
 # Запуск: ./deploy-affected.sh --app dashboard-agent
-#
-# Требования:
-# - Docker socket доступен
-# - Сеть premium-network существует
-# - Secrets файлы от приложений доступны
 
 services:
   app:
@@ -30,20 +25,32 @@ services:
       NODE_ENV: production
       PORT: 3100
       HOST: 0.0.0.0
-      SERVER_NAME: ${SERVER_NAME:-s1.letar.best}
-      # Путь внутри контейнера (хостовый WORKSPACE_PATH монтируется сюда)
+      SERVER_NAME: s2.letar.best
       WORKSPACE_PATH: /home/deploy/letar
     volumes:
       # Docker socket для управления контейнерами
       - /var/run/docker.sock:/var/run/docker.sock
-      # Git репозиторий для git операций (REPO_PATH в lib/git.ts)
+      # Git репозиторий
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
       # SSH ключи для git remote операций
       - ~/.ssh:/root/.ssh:ro
-      # Secrets от приложений (для подключения к БД)
-      # S1 — только dashboard-agent (premium-rosstil и imot переехали на s2)
-      # (нет локальных приложений с БД)
+      # Secrets от всех приложений (для подключения к БД)
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/imot/.env.docker:/secrets/imot.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/archetest/.env.docker:/secrets/archetest.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/time/.env.docker:/secrets/time.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/form-example/.env.docker:/secrets/form-example.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/mandala/.env.docker:/secrets/mandala.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/kami/.env.docker:/secrets/kami.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/umami/.env.docker:/secrets/umami.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/animatrona-tracker/.env.docker:/secrets/animatrona-tracker.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/grandslamcup/.env.docker:/secrets/grandslamcup.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
     networks:
+      - driving-school-network
       - premium-network
     healthcheck:
       test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
@@ -58,5 +65,7 @@ services:
         max-file: '3'
 
 networks:
+  driving-school-network:
+    external: true
   premium-network:
     external: true
