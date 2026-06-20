@@ -1,7 +1,8 @@
 'use client'
 
+import { Button } from '@/app/_components/ui/button'
 import { signInWithLetarAuth } from '@/lib/auth-client'
-import { Button, Text } from '@chakra-ui/react'
+import { Text } from '@chakra-ui/react'
 import { LogIn } from 'lucide-react'
 import { useState } from 'react'
 

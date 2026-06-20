@@ -2,6 +2,7 @@
 
 import { createSystem, defaultConfig, defineConfig, defineRecipe } from '@chakra-ui/react'
 import { RootChakraProvider } from '@letar/chakra-provider'
+import { pressableConfig } from '@letar/ui'
 import type { NextFont } from 'next/dist/compiled/@next/font'
 import type { PropsWithChildren } from 'react'
 import { useEffect, useMemo } from 'react'
@@ -70,22 +71,11 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
   const system = useMemo(() => {
     const config = defineConfig({
       globalCss: {
-        // Любой элемент с data-pressable получает spring-анимацию
-        '[data-pressable]': {
-          touchAction: 'manipulation',
-          transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          _active: {
-            transform: 'scale(0.93)',
-            transition: 'transform 0.06s ease-out',
-          },
-        },
+        ...pressableConfig.globalCss,
       },
       theme: {
         keyframes: {
-          'ripple-expand': {
-            from: { transform: 'scale(0)', opacity: '1' },
-            to: { transform: 'scale(1)', opacity: '0' },
-          },
+          ...pressableConfig.keyframes,
           'matrix-zoom': {
             '0%': { transform: 'scale(3)' },
             '10%': { transform: 'scale(6)' },
@@ -231,7 +221,7 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
 
   // iOS-фикс: без touchstart-листенера :active не срабатывает
   useEffect(() => {
-    document.addEventListener('touchstart', () => {}, { passive: true })
+    document.addEventListener('touchstart', () => undefined, { passive: true })
   }, [])
 
   return <RootChakraProvider value={system}>{children}</RootChakraProvider>

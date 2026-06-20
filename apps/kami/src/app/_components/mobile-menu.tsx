@@ -1,8 +1,10 @@
 'use client'
 
-import { Link, usePathname } from '@/i18n/navigation'
-import { Box, Button, CloseButton, Drawer, Icon, IconButton, Portal, VStack } from '@chakra-ui/react'
+import { AppLink } from '@/app/_components/ui/app-link'
+import { usePathname } from '@/i18n/navigation'
+import { Box, CloseButton, Drawer, Icon, IconButton, Portal, VStack } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
+import { Pressable } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { LuMenu } from 'react-icons/lu'
@@ -32,13 +34,15 @@ export function MobileMenu() {
 
   return (
     <Drawer.Root size="xs" open={open} placement="start" onOpenChange={(e) => setOpen(e.open)}>
-      <Drawer.Trigger asChild>
-        <IconButton data-testid="mobile-menu-button" variant="ghost" aria-label={t('menuAria')}>
-          <Icon size="lg">
-            <LuMenu />
-          </Icon>
-        </IconButton>
-      </Drawer.Trigger>
+      <Pressable borderRadius="md" display="inline-flex">
+        <Drawer.Trigger asChild>
+          <IconButton data-testid="mobile-menu-button" variant="ghost" aria-label={t('menuAria')}>
+            <Icon size="lg">
+              <LuMenu />
+            </Icon>
+          </IconButton>
+        </Drawer.Trigger>
+      </Pressable>
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
@@ -55,23 +59,23 @@ export function MobileMenu() {
                 {navItems.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
                   return (
-                    <Button
+                    <AppLink
                       key={item.href}
-                      asChild
+                      href={item.href}
                       variant="ghost"
                       justifyContent="flex-start"
                       size="lg"
                       width="100%"
+                      borderRadius="md"
+                      onClick={closeMenu}
                       {...(isActive && {
                         bg: { base: 'green.50', _dark: 'green.900/40' },
                         color: { base: 'green.700', _dark: 'green.300' },
                         fontWeight: 'semibold',
                       })}
                     >
-                      <Link href={item.href} onClick={closeMenu}>
-                        {t(item.labelKey)}
-                      </Link>
-                    </Button>
+                      {t(item.labelKey)}
+                    </AppLink>
                   )
                 })}
               </VStack>

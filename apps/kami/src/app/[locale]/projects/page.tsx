@@ -12,6 +12,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { GitHubIcon } from '@letar/auth/client'
+import { Pressable } from '@letar/ui'
 import { ExternalLink } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server'
@@ -149,20 +150,24 @@ export default async function ProjectsPage({ params }: Props) {
                   {/* Ссылки */}
                   <HStack gap={3} pt={2}>
                     {project.demoUrl && (
-                      <Button asChild size="sm" variant="outline" colorPalette="fg">
-                        <ChakraLink href={project.demoUrl} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink size={14} />
-                          <Text ml={1}>{t('viewDemo')}</Text>
-                        </ChakraLink>
-                      </Button>
+                      <Pressable display="inline-flex" borderRadius="md">
+                        <Button asChild size="sm" variant="outline" colorPalette="fg">
+                          <ChakraLink href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink size={14} />
+                            <Text ml={1}>{t('viewDemo')}</Text>
+                          </ChakraLink>
+                        </Button>
+                      </Pressable>
                     )}
                     {project.codeUrl && (
-                      <Button asChild size="sm" variant="ghost">
-                        <ChakraLink href={project.codeUrl} target="_blank" rel="noopener noreferrer">
-                          <GitHubIcon width={14} height={14} />
-                          <Text ml={1}>{t('viewCode')}</Text>
-                        </ChakraLink>
-                      </Button>
+                      <Pressable display="inline-flex" borderRadius="md">
+                        <Button asChild size="sm" variant="ghost">
+                          <ChakraLink href={project.codeUrl} target="_blank" rel="noopener noreferrer">
+                            <GitHubIcon width={14} height={14} />
+                            <Text ml={1}>{t('viewCode')}</Text>
+                          </ChakraLink>
+                        </Button>
+                      </Pressable>
                     )}
                   </HStack>
                 </VStack>

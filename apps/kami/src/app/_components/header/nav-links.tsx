@@ -1,7 +1,7 @@
 'use client'
 
-import { Link, usePathname } from '@/i18n/navigation'
-import { Button } from '@chakra-ui/react'
+import { AppLink } from '@/app/_components/ui/app-link'
+import { usePathname } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
 type NavItem = {
@@ -26,9 +26,9 @@ export function NavLinks() {
       {navItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
         return (
-          <Button
+          <AppLink
             key={item.href}
-            asChild
+            href={item.href}
             variant="ghost"
             size="sm"
             minH="44px"
@@ -43,8 +43,8 @@ export function NavLinks() {
               outlineOffset: '2px',
             }}
           >
-            <Link href={item.href}>{t(item.labelKey)}</Link>
-          </Button>
+            {t(item.labelKey)}
+          </AppLink>
         )
       })}
     </>
