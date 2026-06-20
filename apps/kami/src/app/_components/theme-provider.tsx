@@ -4,7 +4,7 @@ import { createSystem, defaultConfig, defineConfig, defineRecipe } from '@chakra
 import { RootChakraProvider } from '@letar/chakra-provider'
 import type { NextFont } from 'next/dist/compiled/@next/font'
 import type { PropsWithChildren } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 type Props = PropsWithChildren & {
   fonts: {
@@ -32,12 +32,16 @@ const link = defineRecipe({
   },
 })
 
-// Рецепт для кнопок
+// Рецепт для кнопок — spring-анимация нажатия
 const button = defineRecipe({
   base: {
+    touchAction: 'manipulation',
+    // spring при отпускании (небольшой overshoot)
+    transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
     _active: {
-      transform: 'scale(0.95)',
-      transition: 'all 0.15s ease-out',
+      transform: 'scale(0.93)',
+      // быстрое нажатие перекрывает outer transition
+      transition: 'transform 0.06s ease-out',
     },
     _disabled: {
       _active: { transform: 'none' },
@@ -51,6 +55,8 @@ const button = defineRecipe({
         _active: { bg: 'bg.muted' },
       },
       outline: {
+        bg: { base: 'white/15', _dark: 'transparent' },
+        backdropFilter: { base: 'blur(10px)', _dark: 'blur(8px)' },
         _active: { bg: 'colorPalette.muted' },
       },
       solid: {
@@ -63,8 +69,23 @@ const button = defineRecipe({
 export const ThemeProvider = ({ children, fonts }: Props) => {
   const system = useMemo(() => {
     const config = defineConfig({
+      globalCss: {
+        // Любой элемент с data-pressable получает spring-анимацию
+        '[data-pressable]': {
+          touchAction: 'manipulation',
+          transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          _active: {
+            transform: 'scale(0.93)',
+            transition: 'transform 0.06s ease-out',
+          },
+        },
+      },
       theme: {
         keyframes: {
+          'ripple-expand': {
+            from: { transform: 'scale(0)', opacity: '1' },
+            to: { transform: 'scale(1)', opacity: '0' },
+          },
           'matrix-zoom': {
             '0%': { transform: 'scale(3)' },
             '10%': { transform: 'scale(6)' },
@@ -207,7 +228,11 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
     })
     return createSystem(defaultConfig, config)
   }, [fonts.heading.style.fontFamily, fonts.body.style.fontFamily, fonts.mono.style.fontFamily])
-  console.log('!!!!!!', system)
+
+  // iOS-фикс: без touchstart-листенера :active не срабатывает
+  useEffect(() => {
+    document.addEventListener('touchstart', () => {}, { passive: true })
+  }, [])
 
   return <RootChakraProvider value={system}>{children}</RootChakraProvider>
 }

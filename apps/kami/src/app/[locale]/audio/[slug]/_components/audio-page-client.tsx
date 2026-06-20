@@ -161,8 +161,6 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
               asChild
               variant="outline"
               size="sm"
-              bg={{ base: 'white/15', _dark: 'transparent' }}
-              backdropFilter={{ base: 'blur(10px)', _dark: 'blur(8px)' }}
               borderColor={{ base: 'gray.400', _dark: 'border' }}
               color={{ base: 'gray.800', _dark: 'inherit' }}
               fontWeight="semibold"
@@ -175,8 +173,6 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
               asChild
               variant="outline"
               size="sm"
-              bg={{ base: 'white/15', _dark: 'transparent' }}
-              backdropFilter={{ base: 'blur(10px)', _dark: 'blur(8px)' }}
               borderColor={{ base: 'gray.400', _dark: 'border' }}
               color={{ base: 'gray.800', _dark: 'inherit' }}
               fontWeight="semibold"

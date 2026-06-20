@@ -2,6 +2,17 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.31.0 — Glassmorphism кнопки (2026-06-21)
+
+### Chakra-theming: glassmorphism для outline-кнопок
+
+- В `theme-provider.tsx` добавил стили в recipe `button` → variant `outline`:
+  `bg: { base: 'white/15', _dark: 'transparent' }` + `backdropFilter: { base: 'blur(10px)', _dark: 'blur(8px)' }`
+- Убрал дублирующие инлайн-стили с кнопок "Скачать" / "Все аудио" в `audio-page-client.tsx`
+- Все `<Button variant="outline">` во всём приложении (57 файлов) теперь получают glassmorphism автоматически из рецепта
+
+---
+
 ## Версия 0.10.0
 
 ### Реализовано
