@@ -54,6 +54,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "synth"],
       "port": 3022
+    },
+    {
+      "name": "aprel8008",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "aprel8008"],
+      "port": 3023
     }
   ]
 }
