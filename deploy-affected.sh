@@ -77,7 +77,7 @@ decrypt_sops_env() {
   fi
 
   echo -e "${YELLOW}🔓 Расшифровываю ${enc_file}...${NC}"
-  if sops --decrypt "$enc_file" > "$plain_file"; then
+  if sops --decrypt --input-type dotenv --output-type dotenv "$enc_file" > "$plain_file"; then
     chmod 600 "$plain_file"
     echo -e "${GREEN}✅ Расшифровано в ${plain_file}${NC}"
   else
