@@ -329,7 +329,9 @@ export class QBittorrentClient {
 
     const doFetch = async (): Promise<Response> => {
       const headers: Record<string, string> = {
+        // Origin + Referer обязательны для CSRF-защиты qBittorrent 5.x
         Referer: this.baseUrl,
+        Origin: this.baseUrl,
       }
       // В bypass-режиме SID не нужен — qBittorrent принимает запросы без cookie
       if (!this.bypassMode && this.sid) {
