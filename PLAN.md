@@ -6,7 +6,7 @@
 > `social-links`→`ExternalLink`, `projects/page`→`Pressable`, `pressable.tsx`→re-export, `theme-provider`→`pressableConfig`.
 > ✅ **aprel8008** (сабмодуль): `BrandButton`→`PressableButton`+asChild-режим, `providers.tsx` iOS-фикс,
 > `tsconfig.json` project references для `@letar/ui`. Lint и typecheck чистые. Коммиты `d88d362`, `5928798`.
-> **➡️ Осталось:** задокументировать `pressableConfig` в `.claude/docs/ui-components.md`, тираж на 3+ приложения.
+> **➡️ Осталось:** тираж ещё на 1+ приложение (driving-school, grandslamcup и др.).
 >
 > **Сессия №41 (2026-06-14, инфра-планирование — сервер s3):** Добавлен **§15 «Сервер s3 — медиа, e2e, IPFS, бэкап»**.
 > Выбран конфиг **HDD S16** (12 ядер, 16 ГБ) — обоснован замером: пик `nx affected --target=e2e --parallel=3`
@@ -1173,7 +1173,7 @@ useEffect(() => {
 
 - [x] `@letar/ui` экспортирует `Pressable`, `useRipple`, `RippleEl`, `PressableButton`, `ExternalLink`, `pressableConfig` (v0.5.0)
 - [x] kami полностью переведён (`Button`/`AppLink`/`ExternalLink` применены: nav-links, sign-in-button, mobile-menu, social-links, projects/page, hero)
-- [ ] `pressableConfig` задокументирован в `.claude/docs/ui-components.md` (как добавить в тему)
+- [x] `pressableConfig` задокументирован в `.claude/docs/ui-components.md` (как добавить в тему)
 - [x] Тираж на 2 приложения монорепо (kami ✅, aprel8008 ✅)
 - [x] Версия `@letar/ui` поднята (0.3.0 → 0.5.0)
 

@@ -702,3 +702,140 @@ const slides: LightboxSlide[] = photos.map(p => ({
 
 <LightboxViewer open={open} index={index} close={() => setOpen(false)} slides={slides} />
 ```
+
+---
+
+## Pressable-компоненты — тач-фидбек и ripple (`@letar/ui`)
+
+**Версия:** `@letar/ui` ≥ 0.5.0
+
+### Что экспортируется
+
+```ts
+import {
+  ExternalLink, // IconButton asChild <a target="_blank"> — для соцсетей и внешних ссылок
+  Pressable, // Box-обёртка: overflow hidden + data-pressable + ripple на мыши
+  PressableButton, // Chakra Button + встроенный ripple (без asChild)
+  pressableConfig, // { keyframes, globalCss } — мержится в defineConfig() каждого приложения
+  RippleEl, // рендер одного ripple-круга
+  useRipple, // хук: { onPointerDown, ripples } — для кастомных композиций
+} from '@letar/ui'
+```
+
+### Принцип работы
+
+- **Touch:** CSS spring-анимация через `[data-pressable]` — `scale(0.93)` при нажатии → spring overshoot при отпускании. Ноль JS.
+- **Desktop:** position-aware ripple от точки клика через `useRipple` + GPU `transform`. Только при `pointerType === 'mouse'`.
+
+### Подключение в приложении (два обязательных шага)
+
+#### 1. Смержить `pressableConfig` в тему
+
+```ts
+// apps/<app>/src/theme/index.ts или theme-provider.tsx
+import { pressableConfig } from '@letar/ui'
+
+const config = defineConfig({
+  globalCss: {
+    ...pressableConfig.globalCss, // [data-pressable] spring + touch-action
+    // ... ваши стили
+  },
+  theme: {
+    keyframes: {
+      ...pressableConfig.keyframes, // ripple-expand keyframe
+      // ... ваши keyframes
+    },
+  },
+})
+```
+
+#### 2. iOS-фикс в провайдере/layout (один раз)
+
+```tsx
+// Без этого :active не срабатывает на iOS Safari
+useEffect(() => {
+  document.addEventListener('touchstart', () => undefined, { passive: true })
+}, [])
+```
+
+### Использование компонентов
+
+#### `PressableButton` — кнопки с onClick
+
+```tsx
+<PressableButton variant="solid" colorPalette="blue" onClick={handleClick}>
+  Сохранить
+</PressableButton>
+```
+
+⚠️ **Не поддерживает `asChild`** — ripple конфликтует с Radix рендером. Для Link-кнопок → `AppLink`.
+
+#### `AppLink` — остаётся per-app (~12 строк)
+
+Зависит от app-специфичного `Link` из next-intl, не может жить в `@letar/ui`:
+
+```tsx
+// apps/<app>/src/app/_components/ui/app-link.tsx
+'use client'
+import { Link } from '@/i18n/navigation'
+import { Button, type ButtonProps } from '@chakra-ui/react'
+import { Pressable } from '@letar/ui'
+import type { ComponentProps } from 'react'
+
+type AppLinkProps = Omit<ButtonProps, 'asChild'> & {
+  href: ComponentProps<typeof Link>['href']
+  locale?: ComponentProps<typeof Link>['locale']
+}
+
+export function AppLink({ href, locale, children, borderRadius = 'md', ...props }: AppLinkProps) {
+  return (
+    <Pressable borderRadius={borderRadius} display="inline-flex">
+      <Button asChild {...props}>
+        <Link href={href} locale={locale}>{children}</Link>
+      </Button>
+    </Pressable>
+  )
+}
+```
+
+#### `ExternalLink` — иконки соцсетей и внешних ссылок
+
+```tsx
+<ExternalLink href="https://github.com/user" aria-label="GitHub" size="lg">
+  <FaGithub />
+</ExternalLink>
+```
+
+#### `Pressable` — произвольная обёртка
+
+Для Server Components или нестандартных случаев (кнопка в дровере, произвольная иконка):
+
+```tsx
+<Pressable borderRadius="md" display="inline-flex">
+  <IconButton asChild variant="ghost">
+    <DrawerTrigger />
+  </IconButton>
+</Pressable>
+```
+
+### TypeScript project references
+
+Если приложение использует `rootDir: 'src'` в tsconfig — нужно добавить references, иначе TS6059:
+
+```json
+// apps/<app>/tsconfig.json
+{
+  "references": [
+    { "path": "../../libs/ui" }
+  ]
+}
+```
+
+После добавления references запусти `nx typecheck ui` чтобы сгенерировать `.d.ts` в `libs/ui/dist/`.
+
+### Приложения, где уже подключено
+
+| Приложение | Статус                                  |
+| ---------- | --------------------------------------- |
+| kami       | ✅ полностью (v0.5.0, коммит `d88d362`) |
+| aprel8008  | ✅ полностью (v0.5.0, коммит `67be325`) |
