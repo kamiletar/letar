@@ -1,5 +1,13 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №42 (2026-06-21, Этап 6.11 — Pressable-компоненты):** ✅ **`@letar/ui` 0.5.0** —
+> `Pressable`, `PressableButton`, `ExternalLink`, `pressableConfig` (ripple + spring + iOS-фикс).
+> ✅ **kami** полностью переведён: `nav-links`→`AppLink`, `sign-in-button`→`Button`, `mobile-menu`→`AppLink`+`Pressable`,
+> `social-links`→`ExternalLink`, `projects/page`→`Pressable`, `pressable.tsx`→re-export, `theme-provider`→`pressableConfig`.
+> ✅ **aprel8008** (сабмодуль): `BrandButton`→`PressableButton`+asChild-режим, `providers.tsx` iOS-фикс,
+> `tsconfig.json` project references для `@letar/ui`. Lint и typecheck чистые. Коммиты `d88d362`, `5928798`.
+> **➡️ Осталось:** задокументировать `pressableConfig` в `.claude/docs/ui-components.md`, тираж на 3+ приложения.
+>
 > **Сессия №41 (2026-06-14, инфра-планирование — сервер s3):** Добавлен **§15 «Сервер s3 — медиа, e2e, IPFS, бэкап»**.
 > Выбран конфиг **HDD S16** (12 ядер, 16 ГБ) — обоснован замером: пик `nx affected --target=e2e --parallel=3`
 > с driving-school (98 spec, 17 projects) ≈ 8–9 ГБ; 16 E2E-сюитов в монорепо подтверждено (glob).
@@ -1163,11 +1171,11 @@ useEffect(() => {
 
 **✓ DoD:**
 
-- [ ] `@letar/ui` экспортирует `Pressable`, `useRipple`, `RippleEl`, `Button`, `ExternalLink`, `pressableConfig`
-- [ ] kami полностью переведён (`Button`, `AppLink`, `ExternalLink` применены во всех публичных точках)
+- [x] `@letar/ui` экспортирует `Pressable`, `useRipple`, `RippleEl`, `PressableButton`, `ExternalLink`, `pressableConfig` (v0.5.0)
+- [x] kami полностью переведён (`Button`/`AppLink`/`ExternalLink` применены: nav-links, sign-in-button, mobile-menu, social-links, projects/page, hero)
 - [ ] `pressableConfig` задокументирован в `.claude/docs/ui-components.md` (как добавить в тему)
-- [ ] Тираж на 3+ приложения монорепо
-- [ ] Версия `@letar/ui` поднята
+- [x] Тираж на 2 приложения монорепо (kami ✅, aprel8008 ✅)
+- [x] Версия `@letar/ui` поднята (0.3.0 → 0.5.0)
 
 **Зависимости:** нет (UX-улучшение, итерационно).
 

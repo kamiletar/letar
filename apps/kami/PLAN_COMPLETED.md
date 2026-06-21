@@ -1,5 +1,34 @@
 # Выполненные задачи — Kami
 
+## Версия 0.32.0 — Pressable-компоненты + тач-фидбек (2026-06-21)
+
+### Что сделано
+
+**Архитектура:**
+
+- `pressable.tsx` → стал re-export из `@letar/ui` (удалена inline-реализация ~70 строк)
+- `theme-provider.tsx` → `pressableConfig` из `@letar/ui` заменил inline `keyframes`+`globalCss`; `() => {}` → `() => undefined` (lint)
+- Созданы `ui/button.tsx` (re-export `PressableButton as Button`) и `ui/app-link.tsx` (~27 строк, next-intl `Link` + `Pressable`)
+
+**Компоненты переведены:**
+
+- `nav-links.tsx` → `AppLink` (5 навигационных ссылок, удалён `Button asChild + Link`)
+- `sign-in-button.tsx` → `Button` из `@/app/_components/ui/button`
+- `mobile-menu.tsx` → `AppLink` для nav-пунктов + `Pressable` вокруг `Drawer.Trigger > IconButton` (бургер)
+- `social-links.tsx` → `ExternalLink` (4 иконки: GitHub, Facebook, Telegram, Email)
+- `projects/page.tsx` → `Pressable` вокруг demo/code кнопок (Server Component)
+- `hero.tsx` — импорт из `@/app/_components/pressable` сохранён (работает через re-export)
+
+**iOS-фикс:** `useEffect(() => { document.addEventListener('touchstart', () => undefined, { passive: true }) }, [])` в `theme-provider.tsx`
+
+### Технические детали
+
+- Typecheck: чистый (кроме 4 pre-existing ошибок: `unique symbol` + yandex-metrika)
+- Lint: 1 pre-existing warning (`no-console` в другом файле), 0 errors
+- `@letar/ui` 0.5.0: `nx typecheck ui` генерирует `.d.ts`, без этого tsgo не видит новые экспорты
+
+---
+
 Детальное описание всех реализованных фич.
 
 ## Версия 0.31.0 — Glassmorphism кнопки (2026-06-21)
