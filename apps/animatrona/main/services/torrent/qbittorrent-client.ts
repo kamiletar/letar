@@ -40,18 +40,24 @@ export class QBittorrentRequestError extends Error {
 /**
  * Тонкий HTTP клиент qBittorrent Web API v2.
  *
- * Хранит SID cookie после login(). При 403 пытается перелогиниться один раз,
- * потом пробрасывает ошибку. Не управляет таймерами и событиями — это задача QBittorrentService.
+ * Хранит SID cookie после login(). Поддерживает bypass-режим когда в qBittorrent
+ * включён "Bypass authentication for localhost clients" — в этом случае /auth/login
+ * возвращает пустое тело и SID не нужен. При 403 пытается перелогиниться один раз.
+ * Не управляет таймерами и событиями — это задача QBittorrentService.
  */
 export class QBittorrentClient {
   private baseUrl = ''
   private sid: string | null = null
   private config: QBittorrentConfig | null = null
+  /** true когда qBittorrent работает в bypass-режиме (не требует SID) */
+  private bypassMode = false
 
   /** Подключиться и авторизоваться */
   async login(config: QBittorrentConfig): Promise<void> {
     this.config = { ...config }
     this.baseUrl = config.url.replace(/\/+$/, '')
+    this.bypassMode = false
+    this.sid = null
 
     const body = new URLSearchParams({
       username: config.username,
@@ -81,13 +87,19 @@ export class QBittorrentClient {
     const trimmed = text.trim()
 
     if (trimmed === 'Fails.') {
-      throw new QBittorrentAuthError('Login failed: неверный логин или пароль (Fails.)')
+      throw new QBittorrentAuthError('Login failed: неверный логин или пароль')
+    }
+
+    if (trimmed === '') {
+      // Пустой ответ = bypass-режим: "Bypass authentication for localhost clients" включён в настройках qBittorrent.
+      // В этом режиме SID не нужен — все API запросы принимаются без cookie.
+      log.info('qBittorrent bypass auth mode — SID not required')
+      this.bypassMode = true
+      return
     }
 
     if (trimmed !== 'Ok.') {
-      // Пустой ответ или неожиданное тело — возможен bypass auth или другая версия qBittorrent
-      const detail = trimmed || '(пустой ответ от сервера)'
-      throw new QBittorrentAuthError(`Login failed: ${detail}`)
+      throw new QBittorrentAuthError(`Login failed: ${trimmed}`)
     }
 
     // Извлекаем SID из Set-Cookie
@@ -103,7 +115,7 @@ export class QBittorrentClient {
 
   /** Проверить, авторизован ли клиент */
   isConnected(): boolean {
-    return this.sid !== null && this.baseUrl !== ''
+    return this.baseUrl !== '' && (this.sid !== null || this.bypassMode)
   }
 
   /** Получить версию qBittorrent */
@@ -317,8 +329,11 @@ export class QBittorrentClient {
 
     const doFetch = async (): Promise<Response> => {
       const headers: Record<string, string> = {
-        Cookie: `SID=${this.sid}`,
         Referer: this.baseUrl,
+      }
+      // В bypass-режиме SID не нужен — qBittorrent принимает запросы без cookie
+      if (!this.bypassMode && this.sid) {
+        headers['Cookie'] = `SID=${this.sid}`
       }
       if (method === 'POST') {
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -333,8 +348,8 @@ export class QBittorrentClient {
 
     let response = await doFetch()
 
-    // 403 → попробовать перелогиниться один раз
-    if (response.status === 403 && this.config) {
+    // 403 → попробовать перелогиниться один раз (только если не bypass-режим)
+    if (response.status === 403 && this.config && !this.bypassMode) {
       log.warn('Получен 403, пробую перелогиниться', { path })
       this.sid = null
       await this.login(this.config)
