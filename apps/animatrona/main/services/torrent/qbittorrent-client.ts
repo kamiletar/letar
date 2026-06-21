@@ -64,8 +64,9 @@ export class QBittorrentClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        // Referer обязателен для qBittorrent (иначе CSRF)
+        // Referer + Origin обязательны для CSRF-защиты qBittorrent (особенно 5.x)
         Referer: this.baseUrl,
+        Origin: this.baseUrl,
       },
       body: body.toString(),
     })
@@ -77,8 +78,16 @@ export class QBittorrentClient {
     }
 
     const text = await response.text()
-    if (text.trim() !== 'Ok.') {
-      throw new QBittorrentAuthError(`Login failed: ${text || 'invalid credentials'}`)
+    const trimmed = text.trim()
+
+    if (trimmed === 'Fails.') {
+      throw new QBittorrentAuthError('Login failed: неверный логин или пароль (Fails.)')
+    }
+
+    if (trimmed !== 'Ok.') {
+      // Пустой ответ или неожиданное тело — возможен bypass auth или другая версия qBittorrent
+      const detail = trimmed || '(пустой ответ от сервера)'
+      throw new QBittorrentAuthError(`Login failed: ${detail}`)
     }
 
     // Извлекаем SID из Set-Cookie

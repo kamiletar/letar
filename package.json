@@ -7,14 +7,12 @@
   "resolutions": {
     "minimist": "^1.2.8",
     "qs": "^6.14.1",
-    "@types/react": "^19.2.15",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5"
   },
   "overrides": {
     "minimist": "^1.2.8",
     "qs": "^6.14.1",
-    "@types/react": "^19.2.15",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5"
   },
