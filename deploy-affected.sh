@@ -76,8 +76,17 @@ decrypt_sops_env() {
     return 1
   fi
 
+  # Авто-определение формата: JSON-файлы начинаются с '{', остальные — dotenv
+  local first_char
+  first_char=$(head -c1 "$enc_file")
+  local sops_type_flags=""
+  if [ "$first_char" != "{" ]; then
+    sops_type_flags="--input-type dotenv --output-type dotenv"
+  fi
+
   echo -e "${YELLOW}🔓 Расшифровываю ${enc_file}...${NC}"
-  if sops --decrypt --input-type dotenv --output-type dotenv "$enc_file" > "$plain_file"; then
+  # shellcheck disable=SC2086
+  if sops --decrypt $sops_type_flags "$enc_file" > "$plain_file"; then
     chmod 600 "$plain_file"
     echo -e "${GREEN}✅ Расшифровано в ${plain_file}${NC}"
   else
