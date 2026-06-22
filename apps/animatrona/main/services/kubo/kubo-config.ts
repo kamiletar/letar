@@ -10,12 +10,13 @@
  * Кастомный relay-сервер для Animatrona (go-libp2p + WithInfiniteLimits)
  * Роль: IPNS resolution, circuit relay для Bitswap через relay
  * WithInfiniteLimits() = соединения не transient = Bitswap работает
- * Registration API: POST http://193.37.68.73:41080/register
+ * Registration API: POST http://31.56.180.161:41080/register
  * Конфигурация: infra/animatrona-relay/
+ * Переехал с pinner1 (193.37.68.73) на новый сервер (31.56.180.161) — тот же peer ID
  */
-export const PRIVATE_RELAY = '/ip4/193.37.68.73/tcp/41001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA'
+export const PRIVATE_RELAY = '/ip4/31.56.180.161/tcp/4001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA'
 export const RELAY_PEER_ID = '12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA'
-export const RELAY_REGISTER_URL = 'http://193.37.68.73:41080/register'
+export const RELAY_REGISTER_URL = 'http://31.56.180.161:41080/register'
 
 /**
  * Production gateway (s2.letar.best)
