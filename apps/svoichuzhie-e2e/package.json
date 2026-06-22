@@ -1,0 +1,12 @@
+{
+  "name": "svoichuzhie-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": ["svoichuzhie"],
+    "tags": ["type:e2e", "scope:svoichuzhie", "owner:letar"]
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
