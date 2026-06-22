@@ -70,12 +70,21 @@ export class QBittorrentClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        // Referer + Origin обязательны для CSRF-защиты qBittorrent (особенно 5.x)
+        // Referer + Origin + User-Agent обязательны для qBittorrent 5.x:
+        // bypass auth для localhost проверяет User-Agent (только браузерные запросы пропускаются)
         Referer: this.baseUrl,
         Origin: this.baseUrl,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
       body: body.toString(),
     })
+
+    // 204 No Content = bypass-режим (qBittorrent 5.x с User-Agent браузера + bypass localhost)
+    if (response.status === 204) {
+      log.info('qBittorrent bypass auth mode (HTTP 204) — SID not required')
+      this.bypassMode = true
+      return
+    }
 
     if (!response.ok) {
       throw new QBittorrentAuthError(
@@ -91,9 +100,8 @@ export class QBittorrentClient {
     }
 
     if (trimmed === '') {
-      // Пустой ответ = bypass-режим: "Bypass authentication for localhost clients" включён в настройках qBittorrent.
-      // В этом режиме SID не нужен — все API запросы принимаются без cookie.
-      log.info('qBittorrent bypass auth mode — SID not required')
+      // Пустой ответ = bypass-режим (HTTP 200 с пустым телом)
+      log.info('qBittorrent bypass auth mode (empty body) — SID not required')
       this.bypassMode = true
       return
     }
@@ -329,9 +337,11 @@ export class QBittorrentClient {
 
     const doFetch = async (): Promise<Response> => {
       const headers: Record<string, string> = {
-        // Origin + Referer обязательны для CSRF-защиты qBittorrent 5.x
+        // Origin + Referer + User-Agent обязательны для qBittorrent 5.x
+        // bypass auth для localhost проверяет User-Agent браузера
         Referer: this.baseUrl,
         Origin: this.baseUrl,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       }
       // В bypass-режиме SID не нужен — qBittorrent принимает запросы без cookie
       if (!this.bypassMode && this.sid) {
