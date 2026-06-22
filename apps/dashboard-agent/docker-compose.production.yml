@@ -49,6 +49,7 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/animatrona-tracker/.env.docker:/secrets/animatrona-tracker.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/grandslamcup/.env.docker:/secrets/grandslamcup.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
     networks:
       - driving-school-network
       - premium-network

@@ -153,6 +153,16 @@ const APP_CONFIG = {
       user: 'postgres',
     },
   },
+  svoichuzhie: {
+    secretsPath: '/secrets/svoichuzhie.env',
+    containerName: 'svoichuzhie-db',
+    defaults: {
+      host: 'svoichuzhie-db',
+      port: 5432,
+      database: 'svoichuzhie',
+      user: 'svoichuzhie_user',
+    },
+  },
 } as const
 
 type AppName = keyof typeof APP_CONFIG
