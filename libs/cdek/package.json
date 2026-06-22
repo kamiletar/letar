@@ -1,0 +1,38 @@
+{
+  "name": "@letar/cdek",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "import": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "cdek",
+    "tags": ["scope:shared", "type:lib", "owner:letar"]
+  },
+  "peerDependencies": {
+    "@chakra-ui/react": ">=3.0.0",
+    "next": ">=15.0.0",
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21"
+  }
+}
