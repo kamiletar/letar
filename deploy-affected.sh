@@ -828,8 +828,8 @@ for app in $AFFECTED_APPS; do
     # Extract DB user and name from docker-compose
     DB_USER=$(grep "POSTGRES_USER:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     DB_NAME=$(grep "POSTGRES_DB:" $COMPOSE_FILE | awk '{print $2}' | head -1)
-    # Get postgres container_name (first container_name in file = db service)
-    POSTGRES_CONTAINER=$(grep "container_name:" $COMPOSE_FILE | head -1 | awk '{print $2}')
+    # Get postgres container_name — по соглашению монорепо это всегда "${app}-db"
+    POSTGRES_CONTAINER="${app}-db"
 
     export DATABASE_URL="postgresql://${DB_USER:-lena_user}:${DB_PASSWORD}@${POSTGRES_CONTAINER}:5432/${DB_NAME}?schema=public"
     echo "DATABASE_URL: ${DB_USER:-lena_user}@${POSTGRES_CONTAINER}:5432/${DB_NAME}"
