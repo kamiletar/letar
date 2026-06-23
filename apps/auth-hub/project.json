@@ -156,6 +156,17 @@
         "technologies": ["prisma"]
       }
     },
+    "script:encrypt-secrets": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run scripts/encrypt-client-secrets.ts",
+        "cwd": "apps/auth-hub"
+      },
+      "metadata": {
+        "description": "Encrypt OauthApplication.clientSecret at-rest (Этап 8). DRY RUN по умолчанию, добавь -- --execute для реального запуска.",
+        "technologies": ["crypto"]
+      }
+    },
     "format:check": {
       "executor": "nx:run-commands",
       "options": {

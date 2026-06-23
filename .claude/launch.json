@@ -47,7 +47,8 @@
       "name": "svoichuzhie",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "svoichuzhie"],
-      "port": 3021
+      "port": 3021,
+      "autoPort": true
     },
     {
       "name": "synth",
@@ -60,6 +61,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "aprel8008"],
       "port": 3023
+    },
+    {
+      "name": "kami",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "kami"],
+      "port": 3005
     }
   ]
 }

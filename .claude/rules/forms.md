@@ -58,7 +58,6 @@ export const MyAppForm = createForm({
 
 ```tsx
 import { MyAppForm } from '@/my-app-form'
-
 ;<MyAppForm initialValue={defaults} onSubmit={handleSubmit}>
   <MyAppForm.Field.String name="title" label="Название" />
   <MyAppForm.Select.Status name="status" label="Статус" />
@@ -118,6 +117,8 @@ function MyForm() {
 - ❌ **NEVER** импортируй из `@tanstack/react-form` напрямую
 - ❌ **NEVER** забывай `.strip()` в Zod схемах
 - ❌ **NEVER** пиши кастомные поля форм если аналог есть в form-components (проверь `list_fields`!)
+- ❌ **NEVER** используй нативный `<form>` + `useActionState` вместо `@letar/forms` — даже для «простых» форм (email, подписка, логин). Отговорки «форма слишком простая» или «отложим на потом» **запрещены**. Нет createForm инстанса → создай его сначала.
+- ❌ **NEVER** создавай приложение с формой без `src/<app>-form/` директории с `createForm()` инстансом.
 
 ## Документация
 

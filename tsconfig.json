@@ -176,6 +176,18 @@
     },
     {
       "path": "./apps/dsperevod-e2e"
+    },
+    {
+      "path": "./apps/aprel8008-e2e"
+    },
+    {
+      "path": "./apps/aprel8008"
+    },
+    {
+      "path": "./apps/aprel8008-e2e"
+    },
+    {
+      "path": "./libs/cdek"
     }
   ]
 }

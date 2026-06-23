@@ -39,6 +39,32 @@ Endpoint для автосинхронизации Kubo config в desktop Animat
 
 ## Заметки по инфраструктуре пинеров (для pinner4+)
 
+### Сервер s3 и его роль в экосистеме (2026-06-14)
+
+Запланирован **сервер s3 (HDD S16, 16 ГБ RAM)** — см. **[глобальный PLAN.md §15](../../PLAN.md#15-сервер-s3--медиа-e2e-ipfs-бэкап-)**.
+Его Kubo-нод (`ipfs.letar.best`) — **отдельный от pinner1/pinner3** и обслуживает другую задачу:
+хранение общих медиафайлов веб-приложений (svoichuzhie, kami и др.) через Pin Registry с `appId`.
+
+**Разграничение ролей:**
+
+|              | pinner1 / pinner3                   | s3 Kubo                                    |
+| ------------ | ----------------------------------- | ------------------------------------------ |
+| Контент      | Аниме (HLS, большие файлы, 100s GB) | Веб-медиа (MP4, музыкальные видео, фото)   |
+| Шардирование | по `Anime.pinnedOnId`               | по `PinRef.appId` (multi-tenant)           |
+| Шлюз         | `gateway.letar.best`                | `ipfs.letar.best`                          |
+| Pin-queue    | Go-сервис `animatrona-pin-queue`    | Node.js піннер с Pin Registry (PostgreSQL) |
+| Апстрим      | Desktop app → tracker API           | Медиа-сервер `media.letar.best`            |
+
+**s3 как pinner4 (опция на будущее):**
+Когда pinner1/pinner3 заполнятся, s3 можно добавить как `pinner4` в таблицу `PinServer`
+трекера — добавить запись с `swarmAddrs`, `pinQueueUrl`, `role=PINNER`. Kubo на s3 уже будет
+запущен, потребуется только развернуть `animatrona-pin-queue` рядом и добавить запись через
+`POST /api/admin/pin-servers`. ⚠️ API-эндпоинт не включает `pinQueueUrl/pinQueueSecret` в схему
+(CreateServerSchema) — нужно добавить поля или вставлять через psql (см. ниже).
+
+**Pending:** `POST /api/admin/pin-servers` не принимает `pinQueueUrl`/`pinQueueSecret` —
+обновить `CreateServerSchema` прежде чем добавлять pinner4 через API.
+
 ### PebbleDS миграция (Kubo v0.40.0)
 
 1. Помимо config нужно перезаписать `$IPFS_PATH/datastore_spec` файл с новой конфигурацией PebbleDS

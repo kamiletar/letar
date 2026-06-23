@@ -74,6 +74,30 @@ const user = await db.$queryRaw`SELECT * FROM users WHERE id = ${userId}`
 const user = await db.user.findUnique({ where: { id: userId } })
 ```
 
+## ⚠️ ВАЖНО: Генерация паролей
+
+**НИКОГДА не придумывай пароли самостоятельно** — даже «временные», даже для dev-окружения.
+
+Придуманные вручную пароли (`letar2026`, `changeme`, `admin123` и т.п.) слабы и предсказуемы — подвержены брутфорсу и словарным атакам.
+
+**ВСЕГДА генерируй пароль через инструмент:**
+
+```bash
+# OpenSSL (везде доступен)
+openssl rand -base64 32
+
+# Python
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# PowerShell
+[System.Web.Security.Membership]::GeneratePassword(32, 8)
+
+# На сервере (если нужно быстро)
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa user@host "openssl rand -base64 32"
+```
+
+Это касается: паролей к NPM, БД, admin-панелям, API-ключей, SMTP, любых учёток.
+
 ## Secrets
 
 ```bash

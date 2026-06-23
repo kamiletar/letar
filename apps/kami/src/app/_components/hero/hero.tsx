@@ -1,5 +1,6 @@
 'use client'
 
+import { Pressable } from '@/app/_components/pressable'
 import { Link } from '@/i18n/navigation'
 import { GLOW } from '@/lib/utils/constants'
 import { Box, Button, Heading, HStack, Text, VStack } from '@chakra-ui/react'
@@ -122,17 +123,19 @@ export function Hero() {
           <motion.div variants={buttonVariants}>
             <HStack gap={4} mt={8} justify="center">
               {/* Вторичный CTA */}
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                borderColor={{ base: 'green.600', _dark: 'fg.500' }}
-                color={{ base: 'gray.800', _dark: 'white' }}
-                _hover={{ bg: { base: 'white/30', _dark: 'whiteAlpha.100' } }}
-                backdropFilter={{ base: 'blur(8px)', _dark: 'none' }}
-              >
-                <Link href="/about/">{t('cta.about')}</Link>
-              </Button>
+              <Pressable borderRadius="md" display="inline-flex">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  borderColor={{ base: 'green.600', _dark: 'fg.500' }}
+                  color={{ base: 'gray.800', _dark: 'white' }}
+                  _hover={{ bg: { base: 'white/30', _dark: 'whiteAlpha.100' } }}
+                  backdropFilter={{ base: 'blur(8px)', _dark: 'none' }}
+                >
+                  <Link href="/about/">{t('cta.about')}</Link>
+                </Button>
+              </Pressable>
             </HStack>
           </motion.div>
         </motion.div>

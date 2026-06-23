@@ -25,7 +25,7 @@ function startVoice(
   dest: AudioNode,
   patch: SubtractiveEngineParams,
   midiNote: number,
-  velocity: number,
+  velocity: number
 ): Voice {
   const now = ctx.currentTime
   const freq = midiToFreq(midiNote)
@@ -167,7 +167,9 @@ export class SubtractiveEngine {
       const oldest = this.ageQueue.shift()
       if (oldest !== undefined) {
         const v = this.voices.get(oldest)
-        if (v) killVoice(v)
+        if (v) {
+          killVoice(v)
+        }
         this.voices.delete(oldest)
       }
     }
@@ -179,7 +181,9 @@ export class SubtractiveEngine {
 
   noteOff(midiNote: number, releaseTime: number): void {
     const voice = this.voices.get(midiNote)
-    if (!voice || voice.isReleasing) return
+    if (!voice || voice.isReleasing) {
+      return
+    }
 
     triggerRelease(this.ctx, voice, releaseTime)
     this.ageQueue = this.ageQueue.filter((n) => n !== midiNote)

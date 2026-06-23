@@ -124,6 +124,15 @@ rua=mailto:admin@...      # Куда слать отчёты
 - `quarantine` — помечать как спам
 - `reject` — отклонять
 
+## svoichuzhie.ru
+
+| Тип | Имя                 | Значение                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MX  | @                   | mail.letar.best (приоритет 10)                                                                                                                                                                                                                                                                                                                                                                                               |
+| TXT | @                   | `v=spf1 a:mail.letar.best ~all`                                                                                                                                                                                                                                                                                                                                                                                              |
+| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtg6eLQjjhlpt5t/IC+a4aql3AOvmRkp1JdFKDD3KxBhWGJMnB0nqTufbpKii1AAL9pdW09jEHbxOGs8v4MtJr3epK5gd0Gm/toOSTaZYp3a8zXkhnJ0IbotQpqDMeXhhoKazjWzIgmx64kShvTfoxa2zSiHcmD3oXfFjWfmXHFgp0uY57B6EwlFuKoey7TUXXYbDfuUrTufN1PKMjA11BdMO1tgzQHL1KyOeP9gkbuWnyr3+NIE7KNBW+VXgCzOC3YMMUCzWbecs5Y8PcNHkd//JsM/tbE1oCMnDcW+K5n51IhCAcV5hVYSdU4PiE8hUpT9TnfLC5c13+0VmMoXjSQIDAQAB` |
+| TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best`                                                                                                                                                                                                                                                                                                                                                                        |
+
 ## Добавление нового домена
 
 1. **SPF запись** — `v=spf1 a:mail.letar.best ~all`

@@ -58,11 +58,13 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
 
   const handleNoteOn = useCallback(
     (note: number) => {
-      if (pressedKeys.current.has(note)) return
+      if (pressedKeys.current.has(note)) {
+        return
+      }
       pressedKeys.current.add(note)
       onNoteOn(note, 0.8)
     },
-    [onNoteOn],
+    [onNoteOn]
   )
 
   const handleNoteOff = useCallback(
@@ -70,19 +72,25 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
       pressedKeys.current.delete(note)
       onNoteOff(note)
     },
-    [onNoteOff],
+    [onNoteOff]
   )
 
   // Клавиши компьютера
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.repeat) return
+      if (e.repeat) {
+        return
+      }
       const offset = QWERTY_MAP[e.key]
-      if (offset !== undefined) handleNoteOn(START_NOTE + offset)
+      if (offset !== undefined) {
+        handleNoteOn(START_NOTE + offset)
+      }
     }
     const up = (e: KeyboardEvent) => {
       const offset = QWERTY_MAP[e.key]
-      if (offset !== undefined) handleNoteOff(START_NOTE + offset)
+      if (offset !== undefined) {
+        handleNoteOff(START_NOTE + offset)
+      }
     }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
@@ -99,13 +107,7 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
   const totalWidth = whiteNotes.length * WHITE_KEY_W
 
   return (
-    <Box
-      position="relative"
-      w={`${totalWidth}px`}
-      h={`${WHITE_KEY_H}px`}
-      mx="auto"
-      flexShrink={0}
-    >
+    <Box position="relative" w={`${totalWidth}px`} h={`${WHITE_KEY_H}px`} mx="auto" flexShrink={0}>
       {/* Белые клавиши */}
       {whiteNotes.map((note, i) => {
         const active = activeNotes.has(note)
@@ -130,7 +132,9 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
             }}
             onPointerUp={() => handleNoteOff(note)}
             onPointerLeave={() => {
-              if (pressedKeys.current.has(note)) handleNoteOff(note)
+              if (pressedKeys.current.has(note)) {
+                handleNoteOff(note)
+              }
             }}
             _after={{
               content: `"${midiNoteName(note)}"`,
@@ -178,7 +182,9 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
               }}
               onPointerUp={() => handleNoteOff(note)}
               onPointerLeave={() => {
-                if (pressedKeys.current.has(note)) handleNoteOff(note)
+                if (pressedKeys.current.has(note)) {
+                  handleNoteOff(note)
+                }
               }}
             />
           )
