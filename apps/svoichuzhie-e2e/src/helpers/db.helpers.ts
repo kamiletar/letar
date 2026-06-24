@@ -3,9 +3,24 @@
  *
  * Создаёт тестовых пользователей напрямую в БД через Prisma CJS wrapper.
  */
-import { hash } from 'bcryptjs'
 import { config } from 'dotenv'
+import { randomBytes, scrypt } from 'node:crypto'
+import { promisify } from 'node:util'
 import { resolve } from 'path'
+
+const scryptAsync = promisify(scrypt)
+
+// Better Auth scrypt format: `${salt_hex}:${key_hex}` (N=16384, r=16, p=1, dkLen=64)
+async function hashPasswordBetterAuth(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex')
+  const key = (await scryptAsync(Buffer.from(password.normalize('NFKC')), salt, 64, {
+    N: 16384,
+    r: 16,
+    p: 1,
+    maxmem: 128 * 16384 * 16 * 2,
+  })) as Buffer
+  return `${salt}:${key.toString('hex')}`
+}
 
 const projectDir = resolve(__dirname, '../../../svoichuzhie')
 config({ path: resolve(projectDir, '.env.local') })
@@ -31,7 +46,7 @@ export async function createTestUser(data: {
   role?: 'USER' | 'ADMIN'
 }): Promise<string> {
   const db = await getPrisma() as any
-  const hashedPassword = await hash(data.password, 12)
+  const hashedPassword = await hashPasswordBetterAuth(data.password)
   const role = data.role ?? 'USER'
 
   const existing = await db.user.findUnique({ where: { email: data.email } })

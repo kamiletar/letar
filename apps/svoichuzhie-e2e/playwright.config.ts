@@ -45,7 +45,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: /\.admin\.spec\.ts$/,
+      testIgnore: /\.(admin|fan)\.spec\.ts$/,
     },
     // Тесты под авторизованным admin
     {

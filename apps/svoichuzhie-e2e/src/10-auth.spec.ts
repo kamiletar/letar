@@ -10,7 +10,7 @@ async function fillLoginForm(page: Page, email: string, password: string) {
   await emailInput.fill(email)
   await passwordInput.click()
   await passwordInput.fill(password)
-  await page.click('button[type="submit"]')
+  await page.getByRole('button', { name: /войти/i }).click()
 }
 
 test.describe('10 — Авторизация', () => {
@@ -19,10 +19,10 @@ test.describe('10 — Авторизация', () => {
 
     await expect(page.locator('#login-email')).toBeVisible()
     await expect(page.locator('#login-password')).toBeVisible()
-    await expect(page.locator('button[type="submit"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: /войти/i })).toBeVisible()
 
-    // Ссылка на регистрацию (фан-клуб)
-    await expect(page.locator('a[href="/fanclub"]')).toBeVisible()
+    // Ссылка на регистрацию (фан-клуб) внутри формы
+    await expect(page.getByRole('link', { name: /стать своим/i })).toBeVisible()
   })
 
   test('неверный пароль — отображается ошибка', async ({ page }) => {

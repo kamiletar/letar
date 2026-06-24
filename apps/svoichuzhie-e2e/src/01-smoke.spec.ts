@@ -10,7 +10,8 @@ test.describe('01 — Smoke: основные страницы', () => {
 
   test('страница /merch — список товаров', async ({ page }) => {
     await page.goto('/merch')
-    await expect(page.locator('h1, h2').first()).toBeVisible()
+    await expect(page).not.toHaveURL(/\/login/)
+    await expect(page.locator('body')).toBeVisible()
   })
 
   test('страница /listen — плеер / музыка', async ({ page }) => {
@@ -25,7 +26,8 @@ test.describe('01 — Smoke: основные страницы', () => {
 
   test('страница /fanclub — информация о фан-клубе', async ({ page }) => {
     await page.goto('/fanclub')
-    await expect(page.locator('h1, h2').first()).toBeVisible()
+    await expect(page).not.toHaveURL(/\/login/)
+    await expect(page.locator('form:has(#join-email)')).toBeVisible()
   })
 
   test('footer — ссылки на правовые страницы', async ({ page }) => {

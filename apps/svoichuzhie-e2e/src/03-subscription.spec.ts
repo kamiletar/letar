@@ -17,15 +17,18 @@ test.describe('03 — Подписка на новости', () => {
     const uniqueEmail = `e2e-sub-${Date.now()}@test.local`
     await emailInput.fill(uniqueEmail)
 
+    // Форма требует согласие на ПДн — Chakra UI checkbox, кликаем через label
+    const consentLabel = footer.locator('label:has(input[type="checkbox"])').first()
+    const consentCheckbox = footer.locator('input[type="checkbox"]').first()
+    if (await consentCheckbox.count()) {
+      await consentLabel.click()
+    }
+
     const submitBtn = footer.locator('button[type="submit"]')
     await submitBtn.click()
 
-    // Успех — сообщение или исчезновение формы
-    await expect(
-      footer.locator(
-        '[role="alert"], [data-status="success"], .chakra-toast, p:has-text("спасибо"), p:has-text("Спасибо"), p:has-text("подписк")',
-      ).first(),
-    ).toBeVisible({ timeout: 10_000 })
+    // Успех — форма исчезает (email input больше нет) или появляется сообщение
+    await expect(emailInput).not.toBeVisible({ timeout: 10_000 })
   })
 
   test('страница /confirm-subscription работает без авторизации', async ({ page }) => {

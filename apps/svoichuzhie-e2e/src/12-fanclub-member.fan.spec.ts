@@ -15,8 +15,8 @@ test.describe('12 — Фан-клуб (авторизован, участник)
 
     // Страница должна загрузиться без редиректа на /login
     await expect(page).toHaveURL(/\/fanclub\/profile/)
-    // Должен быть какой-то контент профиля (заголовок, email участника и т.п.)
-    await expect(page.locator('h1, h2').first()).toBeVisible()
+    // Должен быть контент профиля участника
+    await expect(page.getByText(/ты свой/i)).toBeVisible({ timeout: 15_000 })
   })
 
   test('/fanclub/profile — есть ссылки на разделы фан-клуба', async ({ page }) => {

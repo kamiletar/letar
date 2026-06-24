@@ -51,14 +51,16 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     const consentCheckbox = page.locator('input[type="checkbox"]').first()
     await consentCheckbox.check()
 
-    await page.locator('button[type="submit"]').click()
+    await page.locator('form:has(#join-email) button[type="submit"]').click()
 
     // После signUp (requireEmailVerification: true) показываем экран верификации
     await expect(page.getByText(/проверь почту/i)).toBeVisible({ timeout: 20_000 })
     await expect(page.getByText(new RegExp(email))).toBeVisible()
   })
 
-  test('регистрация с уже существующим email → ошибка "уже зарегистрирован"', async ({ page }) => {
+  test('регистрация с уже существующим email → anti-enumeration: экран "Проверь почту"', async ({ page }) => {
+    // Better Auth с requireEmailVerification не раскрывает факт существования email (anti-enumeration).
+    // При дублирующем email ответ 200 OK → форма показывает "Проверь почту" как обычно.
     await page.goto('/fanclub')
 
     const emailInput = page.locator('#join-email')
@@ -72,11 +74,10 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     const consentCheckbox = page.locator('input[type="checkbox"]').first()
     await consentCheckbox.check()
 
-    await page.locator('button[type="submit"]').click()
+    await page.locator('form:has(#join-email) button[type="submit"]').click()
 
-    await expect(page.getByText(/уже зарегистрирован/i)).toBeVisible({ timeout: 15_000 })
-    // Ссылка на вход
-    await expect(page.locator('a[href*="/login"]')).toBeVisible()
+    // Anti-enumeration: показываем "Проверь почту" независимо от того, существует email или нет
+    await expect(page.getByText(/проверь почту/i)).toBeVisible({ timeout: 15_000 })
   })
 
   test('кнопка "Войти" в форме ведёт на /login с callbackUrl', async ({ page }) => {
@@ -91,7 +92,7 @@ test.describe('11 — Регистрация в фан-клуб', () => {
 
     const emailInput = page.locator('#join-email')
     const passwordInput = page.locator('#join-password')
-    const submitBtn = page.locator('button[type="submit"]')
+    const submitBtn = page.locator('form:has(#join-email) button[type="submit"]')
 
     await emailInput.click()
     await emailInput.fill(freshEmail())

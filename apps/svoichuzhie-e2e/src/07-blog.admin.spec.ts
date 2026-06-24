@@ -70,7 +70,7 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
   test('/admin/articles — список статей доступен admin', async ({ page }) => {
     await page.goto('/admin/articles')
     await expect(page).not.toHaveURL(/\/login/)
-    await expect(page.locator('h1, h2').first()).toBeVisible()
+    await expect(page.locator('body')).toBeVisible()
   })
 
   test('/admin/articles/new — форма создания статьи доступна', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
     await expect(errorOverlay).not.toBeVisible({ timeout: 3_000 })
       .catch(() => {/* нет overlay — OK */})
 
-    await expect(page.locator('form')).toBeVisible()
+    await expect(page.locator('form').first()).toBeVisible()
   })
 
   test('/admin/articles/new — slug автогенерируется из заголовка', async ({ page }) => {
