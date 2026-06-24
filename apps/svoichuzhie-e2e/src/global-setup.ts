@@ -21,6 +21,7 @@ function storagePaths(filename: string): string[] {
 }
 
 const ADMIN_PATHS = storagePaths('admin.json')
+const FAN_PATHS = storagePaths('fan.json')
 const BASE_URL = process.env['BASE_URL'] || 'http://localhost:3021'
 
 async function loginAndSave(
@@ -56,14 +57,17 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
   console.log(`  Admin ID: ${adminId}`)
   console.log(`  Fan ID:   ${fanId}`)
 
-  // 2. Логиним admin и сохраняем storage state
-  console.log('\n[E2E Setup] Авторизация admin...')
+  // 2. Логиним admin и fan, сохраняем storage states
+  console.log('\n[E2E Setup] Авторизация пользователей...')
   const browser = await chromium.launch()
   const context = await browser.newContext()
   const page = await context.newPage()
 
   try {
     await loginAndSave(page, testAdmin.email, testAdmin.password, ADMIN_PATHS)
+    // Очищаем cookies перед следующим входом
+    await context.clearCookies()
+    await loginAndSave(page, testFan.email, testFan.password, FAN_PATHS)
   } finally {
     await browser.close()
   }

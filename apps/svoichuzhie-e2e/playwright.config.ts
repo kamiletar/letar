@@ -7,6 +7,7 @@ import { resolve } from 'path'
 const baseURL = process.env['BASE_URL'] || 'http://localhost:3021'
 
 const ADMIN_STORAGE_STATE = resolve(__dirname, 'playwright/.auth/admin.json')
+const FAN_STORAGE_STATE = resolve(__dirname, 'playwright/.auth/fan.json')
 
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
@@ -54,6 +55,15 @@ export default defineConfig({
         storageState: ADMIN_STORAGE_STATE,
       },
       testMatch: /\.admin\.spec\.ts$/,
+    },
+    // Тесты под авторизованным фанатом (участник фан-клуба)
+    {
+      name: 'fan-chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: FAN_STORAGE_STATE,
+      },
+      testMatch: /\.fan\.spec\.ts$/,
     },
   ],
 })
