@@ -15,6 +15,7 @@ export const config = {
   dataPath: process.env.DATA_PATH ?? '/data',
   apiKeys: getApiKeys(),
   workerConcurrency: Number(process.env.WORKER_CONCURRENCY ?? 2),
+  publicUrl: process.env.PUBLIC_URL ?? 'https://media.letar.best',
 }
 
 export function validateApiKey(appId: string, key: string): boolean {
