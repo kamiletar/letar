@@ -429,16 +429,17 @@ Tier — это **не отдельная ось**, а проекция выбо
 
 ### 3.1 Матрица приложений
 
-| App                 | Владелец      | Auth-механизм                        | Верификация email                                   | Роли                | `admin/users`             | DB в admin          |
-| ------------------- | ------------- | ------------------------------------ | --------------------------------------------------- | ------------------- | ------------------------- | ------------------- |
-| **aboi**            | commercial    | Better Auth + `anonymous`            | link, `sendOnSignUp` (тупик `EMAIL_NOT_VERIFIED`)   | `roles: string[]`   | ❌ создать                | `prismaAuth`        |
-| **kami**            | letar pet     | Better Auth + OIDC-клиент Ключницы   | link (`requireEmailVerification: true`)             | `roles: UserRole[]` | ❌ создать                | `prisma` (+обогащ.) |
-| **dsperevod**       | commercial    | Better Auth standalone               | link (`requireEmailVerification: true`)             | `role` (single)     | ✅ есть (+статус+actions) | `getEnhancedPrisma` |
-| **auth-hub**        | letar (инфра) | **Ключница — OIDC provider**         | link, **только в production**                       | `roles: UserRole[]` | ✅ есть (+статус)         | `prisma` (plain)    |
-| **premium-rosstil** | commercial    | Better Auth standalone               | **кастомная**; `requireEmailVerification` не задан  | `role` (single)     | ✅ есть (без статуса)     | `getEnhancedPrisma` |
-| **driving-school**  | commercial    | Better Auth + `organization` (teams) | **`@letar/pin-auth`: коды + ссылки + cross-tab** ⭐ | `roles: UserRole[]` | (своя)                    | `prismaAuth`        |
-| **imot**            | commercial    | Better Auth standalone               | (вне активной auth-задачи)                          | —                   | —                         | —                   |
-| **mandala**         | letar pet     | PIN                                  | PIN (`resend-pin.action`)                           | —                   | (своя)                    | —                   |
+| App                 | Владелец      | Auth-механизм                        | Верификация email                                   | Роли                | `admin/users`             | DB в admin             |
+| ------------------- | ------------- | ------------------------------------ | --------------------------------------------------- | ------------------- | ------------------------- | ---------------------- |
+| **aboi**            | commercial    | Better Auth + `anonymous`            | link, `sendOnSignUp` (тупик `EMAIL_NOT_VERIFIED`)   | `roles: string[]`   | ❌ создать                | `prismaAuth`           |
+| **kami**            | letar pet     | Better Auth + OIDC-клиент Ключницы   | link (`requireEmailVerification: true`)             | `roles: UserRole[]` | ❌ создать                | `prisma` (+обогащ.)    |
+| **dsperevod**       | commercial    | Better Auth standalone               | link (`requireEmailVerification: true`)             | `role` (single)     | ✅ есть (+статус+actions) | `getEnhancedPrisma`    |
+| **auth-hub**        | letar (инфра) | **Ключница — OIDC provider**         | link, **только в production**                       | `roles: UserRole[]` | ✅ есть (+статус)         | `prisma` (plain)       |
+| **premium-rosstil** | commercial    | Better Auth standalone               | **кастомная**; `requireEmailVerification` не задан  | `role` (single)     | ✅ есть (без статуса)     | `getEnhancedPrisma`    |
+| **driving-school**  | commercial    | Better Auth + `organization` (teams) | **`@letar/pin-auth`: коды + ссылки + cross-tab** ⭐ | `roles: UserRole[]` | (своя)                    | `prismaAuth`           |
+| **imot**            | commercial    | Better Auth standalone               | (вне активной auth-задачи)                          | —                   | —                         | —                      |
+| **mandala**         | letar pet     | PIN                                  | PIN (`resend-pin.action`)                           | —                   | (своя)                    | —                      |
+| **svoichuzhie**     | letar pet     | Better Auth standalone + 2FA         | link + resend, `/verify-email` ✅                   | `role` (single)     | ✅ создан (2026-06-26)    | `prisma` (ZenStack v3) |
 
 **OIDC-клиенты Ключницы** (`trustedClients`): kami, dashboard, archetest, time, grandslamcup, animatrona-tracker.
 
