@@ -1,3 +1,4 @@
+export { BuildVersion, type BuildVersionProps } from './lib/build-version'
 export {
   ConfirmDialog,
   type ConfirmDialogProps,
@@ -48,6 +49,7 @@ export { RatingStars, type RatingStarsProps } from './lib/rating-stars'
 export { type ReviewAuthor, ReviewCard, type ReviewCardProps, type ReviewData } from './lib/review-card'
 export { RoleStat, type RoleStatProps, StatCard, type StatCardProps } from './lib/stat-card'
 export { StatusBadge, type StatusConfig } from './lib/status-badge'
+export { StudioCredit, type StudioCreditProps } from './lib/studio-credit'
 export { Tooltip, type TooltipProps } from './lib/tooltip'
 export { TopLoader, type TopLoaderProps } from './lib/top-loader'
 export { useServiceWorker, type UseServiceWorkerOptions } from './lib/use-service-worker'

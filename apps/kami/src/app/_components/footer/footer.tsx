@@ -4,18 +4,20 @@ import { Link } from '@/i18n/navigation'
 import { CONTACT } from '@/lib/utils/constants'
 import {
   Box,
-  Link as ChakraLink,
   Container,
   Heading,
   HStack,
   Icon,
+  Link as ChakraLink,
   Separator,
   SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { BuildVersion, StudioCredit } from '@letar/ui'
 import { Mail, Rss } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import packageJson from '../../../../package.json'
 import { SocialLinks } from './social-links'
 
 /**
@@ -124,6 +126,8 @@ export function Footer() {
             <Text fontSize="sm" color="fg.muted">
               {t('madeWith')} ❤️ & Claude Code
             </Text>
+            <StudioCredit app="kami" />
+            <BuildVersion version={packageJson.version} />
           </HStack>
         </HStack>
       </Container>

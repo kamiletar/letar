@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"]
     },
     "types": []
   },
@@ -29,6 +30,9 @@
   "references": [
     {
       "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/ui"
     }
   ]
 }

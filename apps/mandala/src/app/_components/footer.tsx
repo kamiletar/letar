@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Container, Flex, Link, Text } from '@chakra-ui/react'
+import { BuildVersion, StudioCredit } from '@letar/ui'
 import packageJson from '../../../package.json'
 
 /**
@@ -35,7 +36,11 @@ export function Footer() {
           <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
             |
           </Text>
-          <Text>v{packageJson.version}</Text>
+          <StudioCredit app="mandala" />
+          <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
+            |
+          </Text>
+          <BuildVersion version={packageJson.version} />
         </Flex>
       </Container>
     </Box>

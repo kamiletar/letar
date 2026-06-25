@@ -1,6 +1,8 @@
 'use client'
 
 import { Box, Container, HStack, Link, Text, VStack } from '@chakra-ui/react'
+import { BuildVersion, StudioCredit } from '@letar/ui'
+import packageJson from '../../../package.json'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -52,9 +54,13 @@ export function Footer() {
             </Link>
           </HStack>
 
-          <Text color="gray.600" fontSize="xs">
-            © {currentYear} Animatrona. Сделано с ❤️ для аниме-сообщества.
-          </Text>
+          <HStack gap={3} flexWrap="wrap" justify="center">
+            <Text color="gray.600" fontSize="xs">
+              © {currentYear} Animatrona. Сделано с ❤️ для аниме-сообщества.
+            </Text>
+            <StudioCredit app="animatrona-landing" color="gray.600" />
+            <BuildVersion version={packageJson.version} color="gray.600" />
+          </HStack>
         </VStack>
       </Container>
     </Box>

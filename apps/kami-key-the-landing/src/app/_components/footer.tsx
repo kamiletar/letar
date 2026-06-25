@@ -1,8 +1,10 @@
 'use client'
 
 import { Box, Container, Flex, HStack, Text } from '@chakra-ui/react'
+import { BuildVersion, StudioCredit } from '@letar/ui'
 import { FaGithub, FaKeyboard } from 'react-icons/fa6'
 import { LuExternalLink } from 'react-icons/lu'
+import packageJson from '../../../package.json'
 
 /**
  * Футер лендинга
@@ -64,9 +66,13 @@ export function Footer() {
         </Flex>
 
         {/* Копирайт */}
-        <Text textAlign="center" fontSize="xs" color="gray.600" mt={6} className="font-mono">
-          {'\u00A9'} 2026 KamiKeyThe
-        </Text>
+        <HStack justify="center" gap={4} mt={6} flexWrap="wrap">
+          <Text fontSize="xs" color="gray.600" className="font-mono">
+            {'\u00A9'} 2026 KamiKeyThe
+          </Text>
+          <StudioCredit app="kami-key-the-landing" color="gray.600" />
+          <BuildVersion version={packageJson.version} color="gray.600" />
+        </HStack>
       </Container>
     </Box>
   )
