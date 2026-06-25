@@ -7,6 +7,7 @@ services:
       - '3100:3100'
     environment:
       PORT: ${PORT}
+      PUBLIC_URL: ${PUBLIC_URL}
       REDIS_URL: ${REDIS_URL}
       DATA_PATH: ${DATA_PATH}
       MEDIA_KEY_SVOICHUZHIE: ${MEDIA_KEY_SVOICHUZHIE}
