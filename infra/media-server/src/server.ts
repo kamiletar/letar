@@ -16,7 +16,7 @@ const app = Fastify({ logger: true })
 await app.register(cors, {
   origin: (origin, cb) => {
     // Разрешаем запросы от letar-приложений и локальной разработки
-    const allowed = [/\.letar\.best$/, /localhost/, /127\.0\.0\.1/]
+    const allowed = [/\.letar\.best$/, /svoichuzhie\.ru$/, /localhost/, /127\.0\.0\.1/]
     if (!origin || allowed.some((r) => r.test(origin))) {
       cb(null, true)
     } else {
