@@ -6,12 +6,11 @@
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { signInWithLetarAuth } from '@/lib/auth-client'
-import { Box, Circle, CloseButton, Drawer, Flex, Image, Portal, Text, VStack } from '@chakra-ui/react'
-import { Pressable } from '@letar/ui'
+import { Box, CloseButton, Drawer, Flex, Image, Portal, Text, VStack } from '@chakra-ui/react'
+import { MobileAuthSection, Pressable } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useTransition } from 'react'
-import { LuCircleUser, LuKeyRound, LuLogIn, LuLogOut, LuMenu, LuPenLine, LuShield, LuUserRound } from 'react-icons/lu'
+import { LuMenu, LuPenLine, LuShield, LuUserRound } from 'react-icons/lu'
 
 import type { NavItem } from './nav-config'
 
@@ -26,7 +25,6 @@ interface MobileDrawerProps {
 
 export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, isPoet }: MobileDrawerProps) {
   const pathname = usePathname()
-  const [, startTransition] = useTransition()
 
   if (navItems.length === 0) {
     return null
@@ -89,132 +87,28 @@ export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, i
                       </VStack>
 
                       {/* Войти / Юзер — прибито книзу */}
-                      <Box p={4} borderTopWidth="1px" borderColor="border">
-                        {user
-                          ? (
-                            <VStack gap={2} align="stretch">
-                              <Flex align="center" gap={2} px={1} py={1}>
-                                <Circle size={8} bg="brand.subtle" color="brand.solid" fontSize="sm" fontWeight="bold">
-                                  {(user.name ?? '?').charAt(0).toUpperCase()}
-                                </Circle>
-                                <Text fontWeight="medium" fontSize="sm" flex={1}>
-                                  {user.name}
-                                </Text>
-                              </Flex>
-                              {showAdmin && (
-                                <Link href="/admin" onClick={() => store.setOpen(false)}>
-                                  <Flex
-                                    align="center"
-                                    gap={2}
-                                    px={3}
-                                    py={2}
-                                    borderRadius="md"
-                                    _hover={{ bg: 'bg.subtle' }}
-                                  >
-                                    <LuShield size={16} />
-                                    <Text fontSize="sm">Админ-панель</Text>
-                                  </Flex>
-                                </Link>
-                              )}
-                              <Link href="/profile" onClick={() => store.setOpen(false)}>
-                                <Flex
-                                  align="center"
-                                  gap={2}
-                                  px={3}
-                                  py={2}
-                                  borderRadius="md"
-                                  _hover={{ bg: 'bg.subtle' }}
-                                >
-                                  <LuCircleUser size={16} />
-                                  <Text fontSize="sm">Профиль</Text>
-                                </Flex>
-                              </Link>
-                              {isCoach && (
-                                <Link href="/coach" onClick={() => store.setOpen(false)}>
-                                  <Flex
-                                    align="center"
-                                    gap={2}
-                                    px={3}
-                                    py={2}
-                                    borderRadius="md"
-                                    _hover={{ bg: 'bg.subtle' }}
-                                  >
-                                    <LuUserRound size={16} />
-                                    <Text fontSize="sm">Кабинет тренера</Text>
-                                  </Flex>
-                                </Link>
-                              )}
-                              {isPoet && (
-                                <Link href="/poet" onClick={() => store.setOpen(false)}>
-                                  <Flex
-                                    align="center"
-                                    gap={2}
-                                    px={3}
-                                    py={2}
-                                    borderRadius="md"
-                                    _hover={{ bg: 'bg.subtle' }}
-                                  >
-                                    <LuPenLine size={16} />
-                                    <Text fontSize="sm">Кабинет поэта</Text>
-                                  </Flex>
-                                </Link>
-                              )}
-                              <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-                                <Flex
-                                  align="center"
-                                  gap={2}
-                                  px={3}
-                                  py={2}
-                                  borderRadius="md"
-                                  _hover={{ bg: 'bg.subtle' }}
-                                >
-                                  <LuKeyRound size={16} />
-                                  <Text fontSize="sm">Аккаунт в Ключнице</Text>
-                                </Flex>
-                              </a>
-                              <Flex
-                                align="center"
-                                gap={2}
-                                px={3}
-                                py={2}
-                                borderRadius="md"
-                                color="fg.muted"
-                                cursor="pointer"
-                                _hover={{ bg: 'bg.subtle', color: 'fg' }}
-                                onClick={() => {
-                                  store.setOpen(false)
-                                  startTransition(() => logoutAction())
-                                }}
-                              >
-                                <LuLogOut size={16} />
-                                <Text fontSize="sm">Выйти</Text>
-                              </Flex>
-                            </VStack>
-                          )
-                          : (
-                            <Pressable borderRadius="lg">
-                              <Flex
-                                align="center"
-                                gap={3}
-                                px={5}
-                                py={3.5}
-                                minH="48px"
-                                borderRadius="lg"
-                                bg="brand.solid"
-                                color="white"
-                                fontWeight="semibold"
-                                justify="center"
-                                cursor="pointer"
-                                onClick={() => {
-                                  signInWithLetarAuth()
-                                  store.setOpen(false)
-                                }}
-                              >
-                                <LuLogIn size={20} />
-                                <Text fontSize="md">Войти</Text>
-                              </Flex>
-                            </Pressable>
-                          )}
+                      <Box borderTopWidth="1px" borderColor="border">
+                        <MobileAuthSection
+                          session={user ? { name: user.name } : null}
+                          onSignIn={() => {
+                            signInWithLetarAuth()
+                            store.setOpen(false)
+                          }}
+                          onSignOut={logoutAction}
+                          onClose={() => store.setOpen(false)}
+                          profileHref="/profile"
+                          extraItems={[
+                            ...(showAdmin
+                              ? [{ value: 'admin', label: 'Админ-панель', href: '/admin', icon: LuShield }]
+                              : []),
+                            ...(isCoach
+                              ? [{ value: 'coach', label: 'Кабинет тренера', href: '/coach', icon: LuUserRound }]
+                              : []),
+                            ...(isPoet
+                              ? [{ value: 'poet', label: 'Кабинет поэта', href: '/poet', icon: LuPenLine }]
+                              : []),
+                          ]}
+                        />
                       </Box>
                     </>
                   )}
