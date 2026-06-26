@@ -38,7 +38,9 @@ async function getIDB(): Promise<typeof import('idb-keyval') | null> {
 // CONSTANTS
 // ============================================
 
-const DEFAULT_SYNC_QUEUE_STORAGE_KEY = 'lena-form-sync-queue'
+const DEFAULT_SYNC_QUEUE_STORAGE_KEY = 'letar-form-sync-queue'
+// Старый ключ (до ренейма lena→letar) — используется для однократной миграции данных
+const LEGACY_SYNC_QUEUE_STORAGE_KEY = 'lena-form-sync-queue'
 
 // ============================================
 // CONNECTION STATUS
@@ -100,7 +102,21 @@ export async function getQueueFromStorage(storageKey?: string): Promise<SyncQueu
     }
     const key = storageKey ?? DEFAULT_SYNC_QUEUE_STORAGE_KEY
     const stored = await idb.get<SyncQueueItem[]>(key)
-    return stored ?? []
+    if (stored !== undefined) {
+      return stored
+    }
+
+    // Однократная миграция: переносим данные из старого ключа lena→letar
+    if (!storageKey) {
+      const legacy = await idb.get<SyncQueueItem[]>(LEGACY_SYNC_QUEUE_STORAGE_KEY)
+      if (legacy && legacy.length > 0) {
+        await idb.set(key, legacy)
+        await idb.del(LEGACY_SYNC_QUEUE_STORAGE_KEY)
+        return legacy
+      }
+    }
+
+    return []
   } catch (error) {
     console.error('[OfflineService] Error loading queue from IndexedDB:', error)
     return []

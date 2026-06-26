@@ -119,7 +119,7 @@ describe('offline-service', () => {
           status: 'PENDING',
         },
       ]
-      mockStore.set('lena-form-sync-queue', queue)
+      mockStore.set('letar-form-sync-queue', queue)
 
       const result = await getQueueFromStorage()
 
@@ -143,6 +143,26 @@ describe('offline-service', () => {
 
       expect(result).toEqual(queue)
     })
+
+    it('migrates data from legacy lena-form-sync-queue key', async () => {
+      const legacyQueue: SyncQueueItem[] = [
+        {
+          id: 'legacy-1',
+          action: { type: 'FORM_SUBMIT', payload: { migrated: true } },
+          createdAt: Date.now(),
+          attempts: 0,
+          maxAttempts: 3,
+          status: 'PENDING',
+        },
+      ]
+      mockStore.set('lena-form-sync-queue', legacyQueue)
+
+      const result = await getQueueFromStorage()
+
+      expect(result).toEqual(legacyQueue)
+      expect(mockStore.has('lena-form-sync-queue')).toBe(false)
+      expect(mockStore.get('letar-form-sync-queue')).toEqual(legacyQueue)
+    })
   })
 
   describe('addToQueue', () => {
@@ -163,7 +183,7 @@ describe('offline-service', () => {
 
       await addToQueue(action)
 
-      const stored = mockStore.get('lena-form-sync-queue') as SyncQueueItem[]
+      const stored = mockStore.get('letar-form-sync-queue') as SyncQueueItem[]
       expect(stored).toHaveLength(1)
       expect(stored[0].action).toEqual(action)
     })
@@ -177,11 +197,11 @@ describe('offline-service', () => {
         maxAttempts: 3,
         status: 'PENDING',
       }
-      mockStore.set('lena-form-sync-queue', [existingItem])
+      mockStore.set('letar-form-sync-queue', [existingItem])
 
       await addToQueue({ type: 'FORM_SUBMIT', payload: {} })
 
-      const stored = mockStore.get('lena-form-sync-queue') as SyncQueueItem[]
+      const stored = mockStore.get('letar-form-sync-queue') as SyncQueueItem[]
       expect(stored).toHaveLength(2)
     })
   })
@@ -196,17 +216,17 @@ describe('offline-service', () => {
         maxAttempts: 3,
         status: 'PENDING',
       }
-      mockStore.set('lena-form-sync-queue', [item])
+      mockStore.set('letar-form-sync-queue', [item])
 
       const result = await removeFromQueue('to-remove')
 
       expect(result).toBe(true)
-      const stored = mockStore.get('lena-form-sync-queue') as SyncQueueItem[]
+      const stored = mockStore.get('letar-form-sync-queue') as SyncQueueItem[]
       expect(stored).toHaveLength(0)
     })
 
     it('returns false if item not found', async () => {
-      mockStore.set('lena-form-sync-queue', [])
+      mockStore.set('letar-form-sync-queue', [])
 
       const result = await removeFromQueue('non-existent')
 
@@ -268,11 +288,11 @@ describe('offline-service', () => {
 
   describe('clearQueue', () => {
     it('clears queue from storage', async () => {
-      mockStore.set('lena-form-sync-queue', [{ id: 'item' }])
+      mockStore.set('letar-form-sync-queue', [{ id: 'item' }])
 
       await clearQueue()
 
-      expect(mockStore.has('lena-form-sync-queue')).toBe(false)
+      expect(mockStore.has('letar-form-sync-queue')).toBe(false)
     })
 
     it('uses custom key', async () => {
@@ -303,7 +323,7 @@ describe('offline-service', () => {
           status: 'PENDING',
         },
       ]
-      mockStore.set('lena-form-sync-queue', existingQueue)
+      mockStore.set('letar-form-sync-queue', existingQueue)
 
       const store = createSyncQueueStore()
       await store.initialize()

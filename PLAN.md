@@ -654,8 +654,8 @@ interface AuthProfile {
   `lena_auth`, `lena_password`) — production identity. Ренейм = `ALTER`/пересоздание ролей + обновление `.env.docker`
   - возможный downtime + бэкап. **Планово, не наспех.** Решить по каждой БД: мигрировать или оставить как историческое.
 - **Пути бэкапов** `C:\BackupSync\lena` / `/home/backups/lena` — завязаны на Resilio (пересекается с Этапом 0.3).
-- **Ключ localStorage** `lena-form-sync-queue` (`@letar/forms` pwa-offline) — смена ключа = сброс offline-очереди у
-  существующих клиентов. Решить: мигрировать с fallback-чтением старого ключа или оставить.
+- ✅ **Ключ localStorage** `lena-form-sync-queue` → `letar-form-sync-queue` (2026-06-26): переименован в `offline-service.ts`
+  с однократной миграцией (читает старый ключ → пишет в новый → удаляет старый). Тест миграции добавлен. `@letar/forms` 1.4.1.
 - **Root-имя пакета** `@lena/source` (`package.json` + `bun.lock`) — ренейм требует регенерации lockfile; low-impact.
 - **Хвосты (публичное дерево):** submodule Dockerfile-комментарии (`imot`, `driving-school`, `premium-rosstil`) —
   правка с коммитом внутри submodule + bump SHA.
@@ -1038,7 +1038,7 @@ return ctx.json(options)
 
 **Зависимости:** Этапы 6.5, 6.6 ✅.
 
-### Этап 6.8 — Тираж `UserMenu` из `@letar/ui` на все приложения
+### Этап 6.8 — Тираж `UserMenu` из `@letar/ui` на все приложения ✅ ПОЛНОСТЬЮ (сессии №37–39)
 
 > Компонент создан в сессии №37 (animatrona-tracker — эталон). Нужно заменить самодельные
 > кнопки/меню пользователя в остальных hub-client приложениях.
