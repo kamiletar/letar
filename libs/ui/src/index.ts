@@ -34,6 +34,7 @@ export {
   useHeaderMobile,
 } from './lib/header'
 export { type LightboxSlide, LightboxViewer, type LightboxViewerProps } from './lib/lightbox-viewer'
+export { MobileAuthSection, type MobileAuthSectionProps } from './lib/mobile-auth-section'
 export { OptimizedAvatar } from './lib/optimized-avatar'
 export {
   PasswordInput,

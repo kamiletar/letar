@@ -17,7 +17,7 @@ import {
   Separator,
   VStack,
 } from '@chakra-ui/react'
-import { UserMenu } from '@letar/ui'
+import { MobileAuthSection, UserMenu } from '@letar/ui'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -140,81 +140,16 @@ export function Header() {
 
                       <Separator my={1} />
 
-                      {session
-                        ? (
-                          <>
-                            <Button
-                              asChild
-                              variant="ghost"
-                              justifyContent="flex-start"
-                              size="lg"
-                              onClick={() => setDrawerOpen(false)}
-                              {...activeLinkProps('/profile')}
-                            >
-                              <NextLink href="/profile">
-                                <Icon as={LuUser} mr={2} />
-                                {session.user?.name || 'Профиль'}
-                              </NextLink>
-                            </Button>
-
-                            {isAdmin && (
-                              <Button
-                                asChild
-                                variant="ghost"
-                                justifyContent="flex-start"
-                                size="lg"
-                                colorPalette="orange"
-                                onClick={() => setDrawerOpen(false)}
-                              >
-                                <NextLink href="/admin">
-                                  <Icon as={LuSettings} mr={2} />
-                                  Админ
-                                </NextLink>
-                              </Button>
-                            )}
-
-                            <Button
-                              asChild
-                              variant="ghost"
-                              justifyContent="flex-start"
-                              size="lg"
-                              onClick={() => setDrawerOpen(false)}
-                            >
-                              <a href="https://auth.letar.best/profile" target="_blank" rel="noopener noreferrer">
-                                <Icon as={LuKeyRound} mr={2} />
-                                Аккаунт в Ключнице
-                              </a>
-                            </Button>
-
-                            <Separator my={1} />
-
-                            <Button
-                              variant="ghost"
-                              justifyContent="flex-start"
-                              size="lg"
-                              color="fg.muted"
-                              onClick={() => {
-                                setDrawerOpen(false)
-                                signOut()
-                              }}
-                            >
-                              <Icon as={LuLogOut} mr={2} />
-                              Выйти
-                            </Button>
-                          </>
-                        )
-                        : (
-                          <Button
-                            colorPalette="brand"
-                            size="lg"
-                            onClick={() => {
-                              setDrawerOpen(false)
-                              signInWithLetarAuth(pathname)
-                            }}
-                          >
-                            Войти
-                          </Button>
-                        )}
+                      <MobileAuthSection
+                        session={session?.user ?? null}
+                        onSignIn={() => signInWithLetarAuth(pathname)}
+                        onSignOut={signOut}
+                        onClose={() => setDrawerOpen(false)}
+                        profileHref="/profile"
+                        extraItems={isAdmin
+                          ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }]
+                          : []}
+                      />
                     </VStack>
                   </Drawer.Body>
                 </Drawer.Content>

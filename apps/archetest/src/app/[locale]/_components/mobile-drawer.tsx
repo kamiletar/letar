@@ -17,10 +17,10 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
-import { Pressable } from '@letar/ui'
+import { MobileAuthSection, Pressable } from '@letar/ui'
 import { useTranslations } from 'next-intl'
-import { useState, useTransition } from 'react'
-import { LuLogOut, LuMenu, LuSettings, LuUser, LuX } from 'react-icons/lu'
+import { useState } from 'react'
+import { LuMenu, LuSettings, LuX } from 'react-icons/lu'
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { Link } from '@/i18n/navigation'
@@ -39,16 +39,8 @@ export function MobileDrawer() {
   const { data: session, isPending: isSessionPending } = useSession()
   const { isPsychologist } = useIsPsychologist()
   const [open, setOpen] = useState(false)
-  const [isLoggingOut, startTransition] = useTransition()
 
-  /** Закрыть drawer при навигации */
   const close = () => setOpen(false)
-
-  /** Выход: закрываем drawer и запускаем RP-Initiated Logout через server action */
-  const handleSignOut = () => {
-    close()
-    startTransition(() => logoutAction())
-  }
 
   return (
     <DrawerRoot placement="end" size="xs" open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -120,49 +112,16 @@ export function MobileDrawer() {
           <Separator />
 
           {/* Авторизация */}
-          {isSessionPending ? null : session?.user ? (
-            <VStack align="stretch" gap={0} py={2}>
-              <HStack px={4} py={3} gap={2} color="fg.muted">
-                <LuUser size={16} />
-                <Text fontSize="sm">{session.user.name || session.user.email}</Text>
-              </HStack>
-              <Pressable borderRadius="none">
-                <Link href="/settings" onClick={close}>
-                  <HStack px={4} py={3} gap={2} _hover={{ bg: 'bg.muted' }} cursor="pointer">
-                    <LuSettings size={16} />
-                    <Text fontSize="sm">{t('settings')}</Text>
-                  </HStack>
-                </Link>
-              </Pressable>
-              <HStack
-                as="button"
-                px={4}
-                py={3}
-                gap={2}
-                _hover={{ bg: 'bg.muted' }}
-                cursor="pointer"
-                w="full"
-                opacity={isLoggingOut ? 0.6 : 1}
-                onClick={handleSignOut}
-              >
-                <LuLogOut size={16} />
-                <Text fontSize="sm">{tCommon('signOut')}</Text>
-              </HStack>
-            </VStack>
-          ) : (
-            <Box px={4} py={3}>
-              <Button
-                onClick={() => {
-                  close()
-                  signInWithLetarAuth()
-                }}
-                variant="outline"
-                size="sm"
-                w="full"
-              >
-                {tCommon('signIn')}
-              </Button>
-            </Box>
+          {!isSessionPending && (
+            <MobileAuthSection
+              session={session?.user ?? null}
+              onSignIn={signInWithLetarAuth}
+              onSignOut={logoutAction}
+              onClose={close}
+              profileHref="/settings"
+              showAuthHub
+              extraItems={[]}
+            />
           )}
         </DrawerBody>
       </DrawerContent>
