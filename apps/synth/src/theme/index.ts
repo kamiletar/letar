@@ -1,4 +1,5 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+import { pressableConfig } from '@letar/ui'
 
 import { semanticColors } from './semanticTokens'
 import { colors } from './tokens'
@@ -14,8 +15,12 @@ const synthConfig = defineConfig({
   theme: {
     tokens: { colors },
     semanticTokens: { colors: semanticColors },
+    keyframes: {
+      ...pressableConfig.keyframes,
+    },
   },
   globalCss: {
+    ...pressableConfig.globalCss,
     'html, body': {
       bg: 'bg.DEFAULT',
       color: 'fg.DEFAULT',

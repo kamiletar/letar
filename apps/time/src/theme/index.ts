@@ -1,4 +1,5 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+import { pressableConfig } from '@letar/ui'
 
 import { semanticColors } from './semanticTokens'
 import { colors } from './tokens'
@@ -15,6 +16,7 @@ const timeConfig = defineConfig({
       colors: semanticColors,
     },
     keyframes: {
+      ...pressableConfig.keyframes,
       'confetti-float': {
         '0%': { transform: 'translateY(100vh) rotate(0deg)', opacity: '1' },
         '70%': { opacity: '1' },
@@ -25,6 +27,9 @@ const timeConfig = defineConfig({
         '50%': { transform: 'scale(1.05)' },
       },
     },
+  },
+  globalCss: {
+    ...pressableConfig.globalCss,
   },
 })
 
