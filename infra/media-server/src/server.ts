@@ -11,7 +11,7 @@ import { getJobStatus, transcodeQueue } from './queue.ts'
 import { ensureDir, processedDir, rawDir, removeDir, sourcePath } from './storage.ts'
 import { consumeUploadToken, createUploadToken } from './tokens.ts'
 
-const app = Fastify({ logger: true })
+const app = Fastify({ logger: true, bodyLimit: 20 * 1024 * 1024 * 1024 })
 
 await app.register(cors, {
   origin: (origin, cb) => {
