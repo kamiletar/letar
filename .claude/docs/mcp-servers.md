@@ -377,12 +377,12 @@ HTTP MCP-сервер для координации нескольких Claude 
 
 **Upstream:** [github.com/Dicklesworthstone/mcp_agent_mail](https://github.com/Dicklesworthstone/mcp_agent_mail)\
 **Docker образ:** `ghcr.io/dicklesworthstone/mcp_agent_mail:latest`\
-**Compose:** `C:\web\lena\infra\agent-mail\mcp_agent_mail\compose.yaml`
+**Compose:** `C:\web\letar\infra\agent-mail\mcp_agent_mail\compose.yaml`
 
 ### Запуск
 
 ```bash
-cd C:/web/lena/infra/agent-mail/mcp_agent_mail
+cd C:/web/letar/infra/agent-mail/mcp_agent_mail
 docker compose up -d
 ```
 
@@ -391,7 +391,7 @@ docker compose up -d
 ### Обновление
 
 ```bash
-cd C:/web/lena/infra/agent-mail/mcp_agent_mail
+cd C:/web/letar/infra/agent-mail/mcp_agent_mail
 docker compose pull && docker compose up -d
 ```
 
