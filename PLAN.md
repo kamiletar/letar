@@ -1215,10 +1215,9 @@ useEffect(() => {
   canonical `kami@letar.best`, 5 провайдеров (credential, github, google×2, yandex) на одном аккаунте.
   ✅ **Перенос данных в kami (2026-06-05):** `infra/migrations/kami-owner-migration.ts` — 4 AudioFile
   перенесены с `letarkami@gmail.com`, оба старых аккаунта удалены, `kami@letar.best` получил роль ADMIN.
-  ⏳ **Осталось** — запустить скрипты на s2 (скрипты готовы в `infra/migrations/`, 2026-06-05):
-  войти в каждое приложение через Ключницу → `DRY_RUN=1` проверка → выполнить.
-  `dashboard-owner-migration.ts` (port 5436), `archetest-owner-migration.ts` (port 5441),
-  `animatrona-tracker-owner-migration.ts` (port 5439).
+  ✅ **Скрипты выполнены (2026-06-26):** `dashboard-owner-migration.ts`, `archetest-owner-migration.ts`,
+  `animatrona-tracker-owner-migration.ts` — во всех трёх приложениях `kami@letar.best` уже ADMIN,
+  старых аккаунтов нет (dry-run подтвердил: миграция выполнена).
 - **Зависимости:** Ключница (auth-hub); правовой аспект §2.6.
 
 ### Этап 9 — Документация — сквозной (§11)
