@@ -1,4 +1,5 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+import { pressableConfig } from '@letar/ui'
 
 import { semanticColors } from './semanticTokens'
 import { colors } from './tokens'
@@ -17,6 +18,12 @@ const archetestConfig = defineConfig({
     semanticTokens: {
       colors: semanticColors,
     },
+    keyframes: {
+      ...pressableConfig.keyframes,
+    },
+  },
+  globalCss: {
+    ...pressableConfig.globalCss,
   },
 })
 

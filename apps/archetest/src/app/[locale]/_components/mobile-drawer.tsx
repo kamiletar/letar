@@ -17,6 +17,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
+import { Pressable } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 import { LuLogOut, LuMenu, LuSettings, LuUser, LuX } from 'react-icons/lu'
@@ -76,28 +77,28 @@ export function MobileDrawer() {
         <DrawerBody p={0}>
           {/* Навигация */}
           <VStack align="stretch" gap={0} py={2}>
-            <Box asChild onClick={close}>
-              <Link href="/leaderboard">
+            <Pressable borderRadius="none">
+              <Link href="/leaderboard" onClick={close}>
                 <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                   <Text fontSize="sm">{t('leaderboard')}</Text>
                 </Box>
               </Link>
-            </Box>
-            <Box asChild onClick={close}>
-              <Link href="/for-professionals">
+            </Pressable>
+            <Pressable borderRadius="none">
+              <Link href="/for-professionals" onClick={close}>
                 <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                   <Text fontSize="sm">{t('forProfessionals')}</Text>
                 </Box>
               </Link>
-            </Box>
+            </Pressable>
             {isPsychologist && (
-              <Box asChild onClick={close}>
-                <Link href="/cabinet">
+              <Pressable borderRadius="none">
+                <Link href="/cabinet" onClick={close}>
                   <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                     <Text fontSize="sm">{t('cabinet')}</Text>
                   </Box>
                 </Link>
-              </Box>
+              </Pressable>
             )}
           </VStack>
 
@@ -125,14 +126,14 @@ export function MobileDrawer() {
                 <LuUser size={16} />
                 <Text fontSize="sm">{session.user.name || session.user.email}</Text>
               </HStack>
-              <Box asChild onClick={close}>
-                <Link href="/settings">
+              <Pressable borderRadius="none">
+                <Link href="/settings" onClick={close}>
                   <HStack px={4} py={3} gap={2} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                     <LuSettings size={16} />
                     <Text fontSize="sm">{t('settings')}</Text>
                   </HStack>
                 </Link>
-              </Box>
+              </Pressable>
               <HStack
                 as="button"
                 px={4}
