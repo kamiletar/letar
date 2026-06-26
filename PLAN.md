@@ -1069,6 +1069,7 @@ return ctx.json(options)
 | aboi            | своя авторизация + хедер                            | ✅ сессия №39 |
 | dsperevod       | landing, нет auth в хедере                          | ✅ N/A        |
 | premium-rosstil | собственный UserMenuClient (i18n + colorPalette=fg) | ✅ N/A        |
+| svoichuzhie     | самодельные auth-кнопки в header.tsx                | ✅ сессия №46 |
 
 **Паттерн замены (эталон — animatrona-tracker/header.tsx):**
 
