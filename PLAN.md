@@ -2020,3 +2020,79 @@ IPFS_API_TOKEN=... # для внешних pinning services (опц.)
 
 - Паттерн: [images.md](/.claude/docs/images.md)
 - Компоненты: [ui-components.md](/.claude/docs/ui-components.md)
+
+---
+
+## §17 — Kamal: zero-downtime деплой
+
+> Добавлено 2026-06-26. Текущий `deploy-affected.sh` делает `docker compose up -d --build` — контейнер останавливается и поднимается заново (~10–30 с даунтайма). Kamal (от Basecamp/37signals) решает это через rolling-замену с healthcheck.
+
+### Что даёт Kamal
+
+- **Zero-downtime** — новый контейнер поднимается рядом со старым; Kamal переключает трафик через Traefik (или kamal-proxy) только после healthcheck
+- **Простая конфигурация** — один `config/deploy.yml` на приложение; CLI: `kamal deploy`, `kamal rollback`
+- **Встроенные секреты** — `.kamal/secrets` (аналог `.env.docker`, интегрируется с SOPS/age)
+- **Аксессоры** — деплой сервисов (Postgres, Redis) отдельно от приложения
+- **Аудит-лог** — история деплоев в `kamal audit`
+
+### Текущее состояние деплоя
+
+```
+deploy-affected.sh  →  docker compose up -d --build  →  ~10-30с даунтайма на рестарт
+```
+
+**Kamal** заменяет эту цепочку, сохраняя монорепо-структуру.
+
+### Архитектура для letar
+
+Каждое приложение получает `apps/<app>/config/deploy.yml`:
+
+```yaml
+service: <app>
+image: ghcr.io/kamiletar/<app>
+servers:
+  - s2.letar.best
+proxy:
+  ssl: true
+  host: <app>.letar.best
+  healthcheck:
+    path: /api/health
+    interval: 3
+    threshold: 5
+registry:
+  server: ghcr.io
+  username: kamiletar
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+env:
+  secret:
+    - DATABASE_URL
+    - BETTER_AUTH_SECRET
+    # ... остальные из .env.docker
+```
+
+### Интеграция с текущим стеком
+
+| Текущее                         | После Kamal                                                   |
+| ------------------------------- | ------------------------------------------------------------- |
+| `deploy-affected.sh`            | `kamal deploy -c apps/<app>/config/deploy.yml` или обёртка    |
+| `.env.docker` + SOPS            | `.kamal/secrets` → SOPS-расшифровка перед `kamal deploy`      |
+| `docker-compose.production.yml` | `config/deploy.yml` (Kamal сам строит compose)                |
+| Nginx Proxy Manager             | `kamal-proxy` (или оставить NPM + убрать SSL из Kamal)        |
+| BlackCove (Deploy Agent)        | BlackCove вызывает `kamal deploy` вместо `deploy-affected.sh` |
+
+### Потенциальные сложности
+
+- **NPM vs kamal-proxy** — letar использует Nginx Proxy Manager. Kamal по умолчанию поднимает `kamal-proxy`; нужно решить: мигрировать на kamal-proxy или конфигурировать Kamal без proxy (`proxy: false`) и оставить NPM
+- **Монорепо** — один `config/deploy.yml` на приложение; `deploy-affected.sh` нужно переписать, чтобы вызывать `kamal deploy` только для affected apps
+- **БД и Redis** — аксессоры Kamal (`accessories:`) — отдельный деплой, не вместе с app
+- **GHCR или локальная сборка** — Kamal по умолчанию пушит образ в registry; альтернатива — `kamal build push` + `kamal deploy --skip-build` для локальной сборки на s2 (текущий подход)
+
+### DoD §17
+
+- [ ] Пилот на одном приложении (предлагается: `grandslamcup` — небольшое, без критичного трафика)
+- [ ] Zero-downtime подтверждён: `curl -s -o /dev/null -w "%{http_code}" https://grandslamcup.ru` не возвращает 502/503 во время деплоя
+- [ ] Решён вопрос NPM vs kamal-proxy
+- [ ] `deploy-affected.sh` или BlackCove обновлён для вызова kamal
+- [ ] Rollback проверен: `kamal rollback` возвращает предыдущую версию
+- [ ] Документация: [deployment.md](/.claude/docs/deployment.md) обновлён
