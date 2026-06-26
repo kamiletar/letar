@@ -210,4 +210,11 @@
 
 ---
 
-**Последнее обновление:** 2026-06-17
+**Последнее обновление:** 2026-06-26
+
+---
+
+## Технический долг / инфра (2026-06)
+
+- [x] **OIDC `offline_access` scope** — добавлен в `src/lib/auth.ts` → refresh_token теперь сохраняется в `account`
+- [x] **MobileAuthSection** — самодельная auth-секция в `mobile-drawer.tsx` заменена на `MobileAuthSection` из `@letar/ui`

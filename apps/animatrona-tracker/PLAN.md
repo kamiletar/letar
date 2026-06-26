@@ -177,6 +177,7 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
 - [x] **Auth UX** — кнопка «Войти» в хедере сразу отправляет на Ключницу (без промежуточной страницы); `callbackURL` = текущий путь
 - [x] **returnTo фикс** — `sign-in/page.tsx` возвращает на `/` по умолчанию (не на `/browse`)
 - [x] **UserMenu** — универсальный компонент из `@letar/ui`: кнопка «Войти» / dropdown с профилем, Ключницей, доп. пунктами и Выйти; применён в десктопном хедере
+- [x] **MobileAuthSection** — самодельная auth-секция в мобильном drawer заменена на `MobileAuthSection` из `@letar/ui` (2026-06-26)
 - [x] **Owner migration (Этап 8.5)** — `kami@letar.best` присвоен ADMIN роль; 1155 Anime, 144 UserLibraryItem, 2901 Distribution, 1144 PinJob, 1226 ModerationLog перенесены; старые аккаунты удалены (2026-06-11)
 
 ### Pending ⏳
