@@ -1,4 +1,5 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+import { pressableConfig } from '@letar/ui'
 
 import {
   accordionRecipe,
@@ -54,6 +55,7 @@ const grandslamcupConfig = defineConfig({
       tag: tagRecipe,
     },
     keyframes: {
+      ...pressableConfig.keyframes,
       livePulse: {
         '0%, 100%': { opacity: '1' },
         '50%': { opacity: '0.5' },
@@ -81,6 +83,7 @@ const grandslamcupConfig = defineConfig({
     },
   },
   globalCss: {
+    ...pressableConfig.globalCss,
     '.live-pulse': {
       animation: 'livePulse 1.5s ease-in-out infinite',
     },

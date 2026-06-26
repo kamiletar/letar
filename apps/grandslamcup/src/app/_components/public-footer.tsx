@@ -7,9 +7,12 @@
  */
 
 import { Box, Container, Flex, HStack, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { BuildVersion, Pressable, StudioCredit } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LuHeart, LuSend } from 'react-icons/lu'
+
+import packageJson from '../../../package.json'
 
 /** Известные глобальные префиксы */
 const GLOBAL_PREFIXES = ['news', 'rules', 'donate', 'admin', 'api', 'match', 'auth', 'coach']
@@ -128,7 +131,28 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
               <VStack align={{ base: 'center', md: 'flex-end' }} gap={3}>
                 <HStack gap={3}>
                   {telegramLink && (
-                    <Link href={telegramLink} target="_blank" rel="noopener noreferrer">
+                    <Pressable borderRadius="md">
+                      <Link href={telegramLink} target="_blank" rel="noopener noreferrer">
+                        <Flex
+                          align="center"
+                          gap={1.5}
+                          px={3}
+                          py={1.5}
+                          borderRadius="md"
+                          bg="gray.800"
+                          fontSize="sm"
+                          color="gray.300"
+                          _hover={{ bg: 'gray.700', color: 'white' }}
+                          transition="all 0.15s"
+                        >
+                          <LuSend size={14} />
+                          Telegram
+                        </Flex>
+                      </Link>
+                    </Pressable>
+                  )}
+                  <Pressable borderRadius="md">
+                    <Link href="/donate">
                       <Flex
                         align="center"
                         gap={1.5}
@@ -138,35 +162,22 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                         bg="gray.800"
                         fontSize="sm"
                         color="gray.300"
-                        _hover={{ bg: 'gray.700', color: 'white' }}
+                        _hover={{ bg: 'gray.700', color: 'brand.400' }}
                         transition="all 0.15s"
                       >
-                        <LuSend size={14} />
-                        Telegram
+                        <LuHeart size={14} />
+                        Поддержать
                       </Flex>
                     </Link>
-                  )}
-                  <Link href="/donate">
-                    <Flex
-                      align="center"
-                      gap={1.5}
-                      px={3}
-                      py={1.5}
-                      borderRadius="md"
-                      bg="gray.800"
-                      fontSize="sm"
-                      color="gray.300"
-                      _hover={{ bg: 'gray.700', color: 'brand.400' }}
-                      transition="all 0.15s"
-                    >
-                      <LuHeart size={14} />
-                      Поддержать
-                    </Flex>
-                  </Link>
+                  </Pressable>
                 </HStack>
                 <Text fontSize="xs" color="gray.600">
                   Grand Slam Cup {new Date().getFullYear()}
                 </Text>
+                <HStack gap={3}>
+                  <StudioCredit app="grandslamcup" color="gray.600" />
+                  <BuildVersion version={packageJson.version} color="gray.700" />
+                </HStack>
               </VStack>
             </SimpleGrid>
           </Container>

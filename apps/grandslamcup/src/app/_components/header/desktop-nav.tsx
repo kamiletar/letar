@@ -6,6 +6,7 @@
  */
 
 import { Box, HStack, Menu, Portal } from '@chakra-ui/react'
+import { Pressable } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -123,25 +124,27 @@ export function DesktopNav({ navItems, cityPrefix }: DesktopNavProps) {
       {visible.map((item) => {
         const isActive = isActiveLink(item.href)
         return (
-          <Link key={item.href} href={item.href}>
-            <Box
-              px={3}
-              py={2}
-              borderRadius="md"
-              fontSize="sm"
-              fontWeight={isActive ? 'semibold' : 'normal'}
-              color={isActive ? 'brand.solid' : 'fg.muted'}
-              _hover={{ color: isActive ? 'brand.solid' : 'fg', bg: 'bg.subtle' }}
-              transition="all 0.15s"
-              position="relative"
-              whiteSpace="nowrap"
-            >
-              {item.label}
-              {isActive && (
-                <Box position="absolute" bottom={0} left={3} right={3} h="2px" bg="brand.solid" borderRadius="full" />
-              )}
-            </Box>
-          </Link>
+          <Pressable key={item.href} borderRadius="md">
+            <Link href={item.href}>
+              <Box
+                px={3}
+                py={2}
+                borderRadius="md"
+                fontSize="sm"
+                fontWeight={isActive ? 'semibold' : 'normal'}
+                color={isActive ? 'brand.solid' : 'fg.muted'}
+                _hover={{ color: isActive ? 'brand.solid' : 'fg', bg: 'bg.subtle' }}
+                transition="all 0.15s"
+                position="relative"
+                whiteSpace="nowrap"
+              >
+                {item.label}
+                {isActive && (
+                  <Box position="absolute" bottom={0} left={3} right={3} h="2px" bg="brand.solid" borderRadius="full" />
+                )}
+              </Box>
+            </Link>
+          </Pressable>
         )
       })}
 
