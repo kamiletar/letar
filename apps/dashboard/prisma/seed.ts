@@ -216,6 +216,14 @@ async function main() {
       domain: 'aprel8008.ru',
     },
     {
+      name: 'studio',
+      displayName: 'Studio Letar',
+      containerName: 'studio-app',
+      port: 3024,
+      type: 'WEB' as const,
+      domain: 'studio.letar.best',
+    },
+    {
       name: 'premium-rosstil',
       displayName: 'Premium Rosstil',
       containerName: 'premium-rosstil-app',
