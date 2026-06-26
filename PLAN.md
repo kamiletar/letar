@@ -198,13 +198,13 @@
 > `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки.
 > typecheck ✅ lint ✅ tests ✅. commit `4e70c76`. **⏳ Следующее:** деплой + backfill скрипт на проде.
 > **Сессия №44 (2026-06-18, Этап 9 — деплой Этапа 8 ✅ ПОЛНОСТЬЮ):** ✅ `AUTH_ENCRYPTION_KEY` в `.env.docker.enc` (commit `2ed6f12`) + деплой auth-hub BlackCove + `/sync-env`. Ключница была недоступна после деплоя (500 — ключ не попал в контейнер без `/sync-env`), исправлено срочным запросом BlackCove. auth.letar.best восстановлен. Ключ сохранён в KeePassXC. ✅ Backfill `encrypt-client-secrets.ts --execute` выполнен BlackCove (msg #918). ✅ `kami@letar.best` повышен до ADMIN (msg #919). ✅ Admin UI `/admin/clients` верифицирован: 7 клиентов активны. **Этап 9 — ПОЛНОСТЬЮ закрыт.**
-> **Сессия №46 (2026-06-26, Этап 0.6 — lena-хвосты + owner-migrations + OIDC offline_access):**
+> **Сессия №46 (2026-06-26, Этап 0.6 — lena-хвосты + owner-migrations + OIDC offline_access + MobileAuthSection):**
 > ✅ Owner-migrations (dashboard/archetest/animatrona-tracker) — dry-run: уже выполнены, kami@letar.best — ADMIN.
 > ✅ OIDC `offline_access` scope добавлен в 4 приложения (dashboard, archetest, grandslamcup, studio) — refresh_token теперь сохраняется в `account`.
 > ✅ Dockerfile-комментарии `C:\web\lena` → `C:\web\letar` в imot/driving-school/premium-rosstil (submodule коммиты).
 > ✅ `lena-form-sync-queue` → `letar-form-sync-queue` с однократной миграцией. `@letar/forms` 1.4.0→1.4.1 (commit `f7bea2e`).
 > ✅ §17 Kamal (zero-downtime деплой) — план добавлен в PLAN.md (commit `3fbfb9d`).
-> ✅ Этап 6.8 UserMenu — заголовок отмечен ✅ ПОЛНОСТЬЮ (все приложения были сделаны в сессиях №37–39).
+> ✅ Этап 6.8 UserMenu — svoichuzhie добавлен (header.tsx); `MobileAuthSection` создан в `@letar/ui` и тираж на 4 приложения (animatrona-tracker, grandslamcup, archetest, svoichuzhie). commit `f94d28c`, `e2b1701`, `6f324fe`.
 > **➡️ Следующий старт:** Этап 8 — Соц-секреты per-владелец (§8) или §17 Kamal pilot на grandslamcup.
 >
 > **Сессия №45 (2026-06-19, §15 E2E-ранер — ввод в строй):** ✅ **E2E-ранер s3 полностью операционен.**
@@ -1070,6 +1070,20 @@ return ctx.json(options)
 | dsperevod       | landing, нет auth в хедере                          | ✅ N/A        |
 | premium-rosstil | собственный UserMenuClient (i18n + colorPalette=fg) | ✅ N/A        |
 | svoichuzhie     | самодельные auth-кнопки в header.tsx                | ✅ сессия №46 |
+
+**Мобильный drawer (все приложения):**
+
+> Самодельные auth-секции в drawer'ах вынесены в `MobileAuthSection` (`@letar/ui`).
+> API зеркалит `UserMenu`: session, onSignIn, onSignOut, onClose, profileHref, extraItems, showAuthHub.
+
+| Приложение         | Статус                                  |
+| ------------------ | --------------------------------------- |
+| animatrona-tracker | ✅ сессия №46                           |
+| grandslamcup       | ✅ сессия №46                           |
+| archetest          | ✅ сессия №46                           |
+| svoichuzhie        | ✅ сессия №46                           |
+| kami               | ✅ N/A (нет auth в mobile drawer)       |
+| time               | ✅ N/A (UserMenu в toolbar, нет drawer) |
 
 **Паттерн замены (эталон — animatrona-tracker/header.tsx):**
 
