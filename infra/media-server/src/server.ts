@@ -10,6 +10,7 @@ import { spawnFfmpeg } from './ffmpeg.ts'
 import { getJobStatus, transcodeQueue } from './queue.ts'
 import { ensureDir, processedDir, rawDir, removeDir, sourcePath } from './storage.ts'
 import { consumeUploadToken, createUploadToken } from './tokens.ts'
+import { registerTusRoutes } from './tus.ts'
 
 const app = Fastify({ logger: true, bodyLimit: 20 * 1024 * 1024 * 1024 })
 
@@ -23,12 +24,35 @@ await app.register(cors, {
       cb(new Error('Not allowed'), false)
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'X-Media-Key', 'X-Upload-Token'],
-  exposedHeaders: ['Content-Length'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Content-Type',
+    'X-Media-Key',
+    'X-Upload-Token',
+    'Upload-Length',
+    'Upload-Offset',
+    'Upload-Metadata',
+    'Tus-Resumable',
+  ],
+  exposedHeaders: [
+    'Content-Length',
+    'Upload-Offset',
+    'Upload-Length',
+    'Location',
+    'Tus-Resumable',
+    'Tus-Version',
+    'Tus-Max-Size',
+    'Tus-Extension',
+  ],
 })
 
 await app.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 * 1024 } }) // 20 ГБ
+
+// Парсер сырого тела для TUS PATCH (application/offset+octet-stream)
+// Передаём поток как есть — не буферизуем в памяти
+app.addContentTypeParser('application/offset+octet-stream', (_req, payload, done) => {
+  done(null, payload)
+})
 
 // Auth hook — пропускаем /health и upload по токену
 app.addHook('onRequest', async (req, reply) => {
@@ -36,6 +60,9 @@ app.addHook('onRequest', async (req, reply) => {
 
   const appId = (req.params as Record<string, string>).appId
   if (!appId) return
+
+  // TUS роуты: /video/tus — авторизация внутри роут-хендлеров
+  if (req.url.includes('/video/tus')) return
 
   // Прямой аплоад от браузера — проверяем одноразовый токен
   if (req.url.includes('/video/upload') && req.method === 'POST') {
@@ -73,7 +100,8 @@ app.post<{ Params: { appId: string } }>(
     }
     const uploadToken = await createUploadToken(appId, videoId, webhookUrl)
     const uploadUrl = `${config.publicUrl}/api/v1/${appId}/video/upload`
-    return { uploadToken, uploadUrl, expiresIn: 900 }
+    const tusUrl = `${config.publicUrl}/api/v1/${appId}/video/tus`
+    return { uploadToken, uploadUrl, tusUrl, expiresIn: 900 }
   },
 )
 
@@ -153,5 +181,7 @@ app.post<{ Params: { appId: string; videoId: string } }>(
     return { poster: `${config.publicUrl}/v/${appId}/${videoId}/poster.jpg` }
   },
 )
+
+registerTusRoutes(app)
 
 await app.listen({ port: config.port, host: '0.0.0.0' })
