@@ -198,6 +198,15 @@
 > `libs/auth/tsconfig.lib.json` — исключение spec-файлов из lib-сборки.
 > typecheck ✅ lint ✅ tests ✅. commit `4e70c76`. **⏳ Следующее:** деплой + backfill скрипт на проде.
 > **Сессия №44 (2026-06-18, Этап 9 — деплой Этапа 8 ✅ ПОЛНОСТЬЮ):** ✅ `AUTH_ENCRYPTION_KEY` в `.env.docker.enc` (commit `2ed6f12`) + деплой auth-hub BlackCove + `/sync-env`. Ключница была недоступна после деплоя (500 — ключ не попал в контейнер без `/sync-env`), исправлено срочным запросом BlackCove. auth.letar.best восстановлен. Ключ сохранён в KeePassXC. ✅ Backfill `encrypt-client-secrets.ts --execute` выполнен BlackCove (msg #918). ✅ `kami@letar.best` повышен до ADMIN (msg #919). ✅ Admin UI `/admin/clients` верифицирован: 7 клиентов активны. **Этап 9 — ПОЛНОСТЬЮ закрыт.**
+> **Сессия №46 (2026-06-26, Этап 0.6 — lena-хвосты + owner-migrations + OIDC offline_access):**
+> ✅ Owner-migrations (dashboard/archetest/animatrona-tracker) — dry-run: уже выполнены, kami@letar.best — ADMIN.
+> ✅ OIDC `offline_access` scope добавлен в 4 приложения (dashboard, archetest, grandslamcup, studio) — refresh_token теперь сохраняется в `account`.
+> ✅ Dockerfile-комментарии `C:\web\lena` → `C:\web\letar` в imot/driving-school/premium-rosstil (submodule коммиты).
+> ✅ `lena-form-sync-queue` → `letar-form-sync-queue` с однократной миграцией. `@letar/forms` 1.4.0→1.4.1 (commit `f7bea2e`).
+> ✅ §17 Kamal (zero-downtime деплой) — план добавлен в PLAN.md (commit `3fbfb9d`).
+> ✅ Этап 6.8 UserMenu — заголовок отмечен ✅ ПОЛНОСТЬЮ (все приложения были сделаны в сессиях №37–39).
+> **➡️ Следующий старт:** Этап 8 — Соц-секреты per-владелец (§8) или §17 Kamal pilot на grandslamcup.
+>
 > **Сессия №45 (2026-06-19, §15 E2E-ранер — ввод в строй):** ✅ **E2E-ранер s3 полностью операционен.**
 > Postgres (5499) + Redis (6380) поднят в Docker на s3; лог заполняется через systemd user timer (02:00, `Persistent=true`).
 > ✅ **driving-school-e2e — ключевые фиксы:** (1) `skipInstall: true` в ВСЕХ target'ах `project.json` — решает
@@ -650,15 +659,14 @@ interface AuthProfile {
 > Косметика и битые пути уже исправлены (сессия ренейма). Осталась **корзина C — load-bearing идентификаторы**:
 > по части из них «добраться нужно, если не до всех». Каждый — отдельное решение (мигрировать / оставить с обоснованием).
 
-- **PostgreSQL DB/user `lena_*`** (`lena_user`, `lena_premium`, `lena_imot`, `lena_kami`, `lena_driving_school`,
-  `lena_auth`, `lena_password`) — production identity. Ренейм = `ALTER`/пересоздание ролей + обновление `.env.docker`
-  - возможный downtime + бэкап. **Планово, не наспех.** Решить по каждой БД: мигрировать или оставить как историческое.
-- **Пути бэкапов** `C:\BackupSync\lena` / `/home/backups/lena` — завязаны на Resilio (пересекается с Этапом 0.3).
+- ✅ **PostgreSQL DB/user `lena_*`** — **решение: не переименовывать** (2026-06-04, §13): исторический идентификатор,
+  риск/downtime не оправданы. Работает без изменений.
+- **Пути бэкапов** `C:\BackupSync\lena` / `/home/backups/lena` — завязаны на Resilio (пересекается с Этапом 0.3). ⏳ открыто.
 - ✅ **Ключ localStorage** `lena-form-sync-queue` → `letar-form-sync-queue` (2026-06-26): переименован в `offline-service.ts`
   с однократной миграцией (читает старый ключ → пишет в новый → удаляет старый). Тест миграции добавлен. `@letar/forms` 1.4.1.
-- **Root-имя пакета** `@lena/source` (`package.json` + `bun.lock`) — ренейм требует регенерации lockfile; low-impact.
-- **Хвосты (публичное дерево):** submodule Dockerfile-комментарии (`imot`, `driving-school`, `premium-rosstil`) —
-  правка с коммитом внутри submodule + bump SHA.
+- **Root-имя пакета** `@lena/source` (`package.json` + `bun.lock`) — ренейм требует регенерации lockfile; low-impact. ⏳ открыто.
+- ✅ **Хвосты (публичное дерево):** submodule Dockerfile-комментарии (`imot`, `driving-school`, `premium-rosstil`) —
+  исправлены (2026-06-26), коммиты внутри submodule'ов + bump SHA в letar.
 - **✓ DoD:** по каждому идентификатору зафиксировано решение; где мигрируем — выполнено с бэкапом; `grep -i lena`
   чист либо остаток обоснован в этом этапе.
 - **Зависимости:** БД-ренейм пересекается с бэкапами (0.3) и миграциями (§8 сквозные).
