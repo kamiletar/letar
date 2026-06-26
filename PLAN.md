@@ -739,7 +739,8 @@ interface AuthProfile {
      касаются ПДн граждан РФ; для RU-IP зарубежные провайдеры (Google/GitHub/Facebook, Telegram) скрываются
      гео-блокировкой (Этап 6.7), а поведение для иностранных IP — вне сферы уведомления. Уточнение уведомления
      не требуется; **Этап 6.7 становится обязательным** для соответствия заявленному.
-   - ❌ Остальные операторы (premium-rosstil, imot, dsperevod) — не подано.
+   - ✅ **dsperevod:** подано (2026-06-26), номер оператора зафиксирован в apps/dsperevod/PLAN.md.
+   - ❌ Остальные операторы (premium-rosstil, imot) — не подано.
 2. **Тираж cookie-баннера** на все ПД-собирающие приложения (сейчас только aboi — эталон).
 3. **Проверка чекбоксов** — убедиться, что нигде нет `consentAccepted: true` как defaultValue (нарушение ФЗ).
 4. **Consent-aware аналитика** — убедиться, что Umami/Я.Метрика нигде не грузится до согласия.
@@ -1155,27 +1156,27 @@ useEffect(() => {
 
 **Тираж по приложениям** (после реализации `@letar/ui`):
 
-| Приложение             | Затронутые места                                                   |
-| ---------------------- | ------------------------------------------------------------------ |
-| **kami**               | nav-links, sign-in-button, mobile-menu, social-links (⏳ в работе) |
-| **aprel8008**          | CTA, nav — **второе приложение после kami**                        |
-| **driving-school**     | header nav, auth кнопки, CTA                                       |
-| **grandslamcup**       | nav, кнопки расписания                                             |
-| **archetest**          | nav, CTA                                                           |
-| **aboi**               | nav, кнопки                                                        |
-| **animatrona-tracker** | nav, кнопки                                                        |
-| **dsperevod**          | CTA-кнопки                                                         |
-| **premium-rosstil**    | nav, auth кнопки                                                   |
-| **time**               | nav                                                                |
-| **synth**              | UI-кнопки                                                          |
-| **studio**             | при готовности                                                     |
+| Приложение             | Затронутые места                                           |
+| ---------------------- | ---------------------------------------------------------- |
+| **kami**               | ✅ nav-links, sign-in-button, mobile-menu, social-links    |
+| **aprel8008**          | ✅ CTA, nav                                                |
+| **grandslamcup**       | ✅ desktop-nav, mobile-drawer, footer кнопки, StudioCredit |
+| **archetest**          | ✅ mobile-drawer nav items                                 |
+| **driving-school**     | ✅ BottomNav items                                         |
+| **aboi**               | ✅ pressableConfig + iOS-фикс                              |
+| **animatrona-tracker** | ✅ pressableConfig + iOS-фикс                              |
+| **dsperevod**          | ✅ pressableConfig + iOS-фикс                              |
+| **premium-rosstil**    | ✅ pressableConfig + iOS-фикс                              |
+| **time**               | ✅ pressableConfig + iOS-фикс                              |
+| **synth**              | ✅ pressableConfig + iOS-фикс                              |
+| **studio**             | при готовности                                             |
 
 **✓ DoD:**
 
 - [x] `@letar/ui` экспортирует `Pressable`, `useRipple`, `RippleEl`, `PressableButton`, `ExternalLink`, `pressableConfig` (v0.5.0)
 - [x] kami полностью переведён (`Button`/`AppLink`/`ExternalLink` применены: nav-links, sign-in-button, mobile-menu, social-links, projects/page, hero)
 - [x] `pressableConfig` задокументирован в `.claude/docs/ui-components.md` (как добавить в тему)
-- [x] Тираж на 2 приложения монорепо (kami ✅, aprel8008 ✅)
+- [x] Тираж на все приложения монорепо (11/11 ✅, кроме studio — при готовности)
 - [x] Версия `@letar/ui` поднята (0.3.0 → 0.5.0)
 
 **Зависимости:** нет (UX-улучшение, итерационно).
