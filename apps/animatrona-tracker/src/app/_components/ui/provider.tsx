@@ -10,7 +10,9 @@ import {
   defineSlotRecipe,
 } from '@chakra-ui/react'
 import { FormI18nProvider } from '@letar/forms'
+import { pressableConfig } from '@letar/ui'
 import type { ThemeProviderProps } from 'next-themes'
+import { useEffect } from 'react'
 
 // ─── Recipes с :active тактильной обратной связью ──────────────────────
 
@@ -182,7 +184,13 @@ const progressRecipe = defineSlotRecipe({
 // ─── Конфигурация темы ─────────────────────────────────────────────
 
 const animatronaConfig = defineConfig({
+  globalCss: {
+    ...pressableConfig.globalCss,
+  },
   theme: {
+    keyframes: {
+      ...pressableConfig.keyframes,
+    },
     tokens: {
       colors: {
         // Основная палитра — индиго/фиолетовый
@@ -245,6 +253,11 @@ const animatronaConfig = defineConfig({
 const system = createSystem(defaultConfig, animatronaConfig)
 
 export function Provider(props: ThemeProviderProps) {
+  // iOS-фикс: без touchstart-листенера :active не срабатывает
+  useEffect(() => {
+    document.addEventListener('touchstart', () => undefined, { passive: true })
+  }, [])
+
   return (
     <ChakraProvider value={system}>
       <FormI18nProvider locale="ru">
