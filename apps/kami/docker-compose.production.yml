@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: kami-postgres
+    container_name: kami-db
     restart: always
     environment:
       TZ: Europe/Moscow
