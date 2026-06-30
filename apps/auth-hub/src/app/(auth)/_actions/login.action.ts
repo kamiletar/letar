@@ -41,14 +41,21 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
 
     return { success: true, redirectTo }
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    // Better Auth бросает APIError: реальное сообщение в body.message, code в body.code
+    const apiBody = (error as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
+    const apiCode = (apiBody?.code as string | undefined) ?? ''
+    const message = (apiBody?.message as string | undefined)
+      || (error instanceof Error ? error.message : '')
+      || 'Неизвестная ошибка'
+
+    console.error('[auth-hub] signIn error full:', { message, apiCode, error })
 
     // Если email не верифицирован
-    const lowerMsg = message.toLowerCase()
+    const lowerMsg = (message + apiCode).toLowerCase()
     if (
-      lowerMsg.includes('email_not_verified') ||
-      lowerMsg.includes('not verified') ||
-      lowerMsg.includes('email not verified')
+      lowerMsg.includes('email_not_verified')
+      || lowerMsg.includes('not verified')
+      || lowerMsg.includes('email not verified')
     ) {
       // verifyEmailSent → форма покажет кнопку «Отправить письмо повторно» (Этап 2 PLAN.md)
       return {
@@ -61,12 +68,12 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
     // Если пользователь не найден или неверный пароль — пробуем зарегистрировать
     const lowerMessage = message.toLowerCase()
     if (
-      lowerMessage.includes('invalid') ||
-      lowerMessage.includes('user not found') ||
-      lowerMessage.includes('credential account not found') ||
-      lowerMessage.includes('invalid_email_or_password') ||
-      lowerMessage.includes('user_not_found') ||
-      lowerMessage.includes('invalid_credentials')
+      lowerMessage.includes('invalid')
+      || lowerMessage.includes('user not found')
+      || lowerMessage.includes('credential account not found')
+      || lowerMessage.includes('invalid_email_or_password')
+      || lowerMessage.includes('user_not_found')
+      || lowerMessage.includes('invalid_credentials')
     ) {
       return await trySignUp(data, reqHeaders, redirectTo)
     }
@@ -108,7 +115,10 @@ async function trySignUp(data: LoginInput, reqHeaders: Headers, redirectTo: stri
 
     return { success: true, redirectTo, created: true }
   } catch (signUpError) {
-    const msg = signUpError instanceof Error ? signUpError.message : ''
+    const signUpBody = (signUpError as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
+    const msg = (signUpBody?.message as string | undefined)
+      || (signUpError instanceof Error ? signUpError.message : '')
+      || ''
 
     // Аккаунт существует, но пароль неверный
     if (msg.includes('already exists') || msg.includes('USER_ALREADY_EXISTS')) {
