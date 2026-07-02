@@ -277,6 +277,13 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
 
     ...(account && { account }),
 
+    // OIDC authorization codes хранятся в БД, а не в Redis secondaryStorage.
+    // Без этого updateVerificationByIdentifier обновляет JSON под старым Redis-ключом
+    // (verification:consentCode), а consumeVerificationValue ищет verification:authCode → null → invalid_grant.
+    verification: {
+      storeInDatabase: true,
+    },
+
     pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
 
