@@ -67,6 +67,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "kami"],
       "port": 3005
+    },
+    {
+      "name": "mandala",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "mandala"],
+      "port": 3004
     }
   ]
 }
