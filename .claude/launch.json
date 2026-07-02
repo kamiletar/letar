@@ -41,7 +41,7 @@
       "name": "studio",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "studio"],
-      "port": 3020
+      "port": 3024
     },
     {
       "name": "svoichuzhie",
