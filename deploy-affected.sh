@@ -104,7 +104,7 @@ LAST_DEPLOY_DIR="$WORKSPACE_ROOT/.last-deploy"
 # s1 выведен из эксплуатации — все приложения на s2
 S1_APPS=""
 # s2.letar.best apps
-S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 premium-rosstil imot"
+S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 premium-rosstil imot studio"
 
 # Detect current server by hostname
 CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)
