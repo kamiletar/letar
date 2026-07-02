@@ -1,5 +1,25 @@
 # PWA и оффлайн паттерны
 
+## ⛔ Согласие пользователя перед регистрацией Service Worker (ОБЯЗАТЕЛЬНО)
+
+**Запрещено регистрировать SW автоматически при заходе на сайт без спроса.** Service Worker молча прекачивает статику приложения — это может съесть десятки МБ хранилища браузера без ведома пользователя.
+
+**Эталонная реализация:** `apps/mandala/` — `OfflineConsentBanner` + `useOfflineConsent('<app>-offline-consent')` из `@letar/hooks`.
+
+Паттерн:
+
+1. `ServiceWorkerRegistration` вызывает `navigator.serviceWorker.register()` **только если** `useOfflineConsent(storageKey).isAccepted === true`. Если пользователь отозвал согласие — `unregister()`.
+2. `OfflineConsentBanner` — баннер снизу экрана (появляется через 2 сек после загрузки), кнопки «Включить оффлайн» / «Не сейчас». При отказе повторный показ через 7 дней (логика уже в хуке).
+3. `storageKey` — уникальный на приложение, например `'grandslamcup-offline-consent'`.
+
+```tsx
+// src/app/_components/service-worker-registration.tsx
+const { isAccepted } = useOfflineConsent('<app>-offline-consent')
+// register() только при isAccepted === true, иначе unregister()
+```
+
+Применено в: `mandala`, `grandslamcup`. **При добавлении SW в новое приложение — обязательно копировать этот паттерн**, не регистрировать SW безусловно в `useEffect`.
+
 ## Serwist и Turbopack (обновлено 2026-04)
 
 > **Serwist v9.5+** поддерживает Next.js 16, но **не работает с Turbopack**.

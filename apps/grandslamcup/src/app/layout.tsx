@@ -2,6 +2,7 @@ import { UmamiScript } from '@letar/analytics'
 import { CookieBanner, TopLoader } from '@letar/ui'
 import type { Metadata } from 'next'
 
+import { OfflineConsentBanner } from './_components/offline-consent-banner'
 import { Providers } from './_components/providers'
 import { ServiceWorkerRegistration } from './_components/service-worker-registration'
 import { AppToaster } from './_components/ui/toaster'
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <AppToaster />
           <ServiceWorkerRegistration />
+          <OfflineConsentBanner />
         </Providers>
         <UmamiScript />
       </body>
