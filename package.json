@@ -17,8 +17,8 @@
     "serialize-javascript": "^7.0.5"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.92",
-    "@ai-sdk/react": "^3.0.221",
+    "@ai-sdk/anthropic": "^4.0.7",
+    "@ai-sdk/react": "^4.0.15",
     "@babel/runtime": "^7.29.7",
     "@chakra-ui/anatomy": "^2.3.4",
     "@chakra-ui/charts": "^3.36.0",
@@ -87,7 +87,7 @@
     "@zenstackhq/schema": "^3.8.2",
     "@zenstackhq/server": "^3.8.2",
     "@zxing/library": "0.23.0",
-    "ai": "^6.0.219",
+    "ai": "^7.0.14",
     "async-mutex": "^0.5.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.23",
