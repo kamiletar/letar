@@ -561,7 +561,7 @@ for app in $AFFECTED_APPS; do
     if docker compose -f $COMPOSE_FILE $ENV_FILE up -d --force-recreate; then
       echo -e "${GREEN}✅ Infrastructure deployment completed for ${app}!${NC}"
       DEPLOYED_APPS+=("$app")
-      save_deploy_commit "$app" "$(git rev-parse HEAD)"
+      save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
       echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
     else
       echo -e "${RED}❌ Infrastructure deployment failed for ${app}${NC}"
@@ -868,12 +868,12 @@ RESTART_EOF
     echo -e "${GREEN}✅ Dashboard restart scheduled (nohup)${NC}"
     echo -e "${BLUE}ℹ️  Dashboard will restart in ~5 seconds${NC}"
     DEPLOYED_APPS+=("$app")
-    save_deploy_commit "$app" "$(git rev-parse HEAD)"
+    save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
     echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
   elif docker compose -f $COMPOSE_FILE --env-file $ENV_FILE up -d --force-recreate app; then
     echo -e "${GREEN}✅ Deployment completed for ${app}!${NC}"
     DEPLOYED_APPS+=("$app")
-    save_deploy_commit "$app" "$(git rev-parse HEAD)"
+    save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
     echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
     if [ "$RUN_SEED" = true ]; then
       echo -e "${YELLOW}🌱 Running db:seed for ${app}...${NC}"
