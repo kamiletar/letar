@@ -2,6 +2,38 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Версия 0.6.1 — деплой 2026-07-03 (Фикс OIDC invalid_grant)
+
+### Проблема: invalid_grant при входе через Ключницу
+
+После логина через любого провайдера (Яндекс, email, etc.) и consent-экрана, dashboard получал `invalid_grant: invalid code` при token exchange.
+
+**Корневая причина — баг в better-auth при использовании Redis `secondaryStorage`:**
+
+1. Consent endpoint вызывает `updateVerificationByIdentifier(consentCode, {identifier: authCode})`
+2. `updateVerificationByIdentifier` обновляет JSON под старым Redis-ключом `verification:consentCode` — меняет `identifier` внутри, но **НЕ переименовывает Redis-ключ**
+3. При token exchange `consumeVerificationValue(authCode)` ищет `verification:authCode` → не находит (ключ по-прежнему `verification:consentCode`) → `invalid_grant`
+
+**Диагностика:**
+
+- nginx логи dash.letar.best (proxy-host-7): `code=uUwOvv7MzXZ9mEMAaRQCyG1wPsE7ggKO` в callback
+- Redis: ключ `verification:6XQfqAjkD56...` (consent_code), внутри `identifier: "uUwOvv7..."` (authCode)
+- Redis: ключ `verification:uUwOvv7...` — отсутствует
+- PostgreSQL `Verification` — OIDC records отсутствуют (всё хранилось в Redis)
+
+**Решение:** добавлен `verification: { storeInDatabase: true }` в `buildHubProviderAuth` (`libs/auth/src/server/create-auth/index.ts`). OIDC authorization codes теперь хранятся в PostgreSQL, где `updateVerificationByIdentifier` корректно обновляет запись по identifier. Redis остаётся только для rate-limit.
+
+**Коммиты:**
+
+- `ecf9cde` — fix(auth-hub): правильное извлечение сообщения из APIError (`error.body.message`)
+- `80fdfe0` — fix(auth-hub): storeInDatabase для OIDC verification (обход бага Redis)
+
+**Попутно исправлено:**
+
+- "Ошибка входа:" с пустым текстом при email/password — Better Auth бросает `APIError`, реальное сообщение в `error.body.message`, а не `error.message`
+
+---
+
 ## Версия 0.6.0 — деплой 2026-06-18 (Этап 9: деплой + верификация)
 
 ### Деплой Этапа 8

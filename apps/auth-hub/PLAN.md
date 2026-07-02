@@ -1,6 +1,6 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.6.0 — Этап 8: Admin UI OAuth-клиентов + at-rest шифрование ✅
+## Текущий статус: v0.6.1 — Фикс OIDC invalid_grant (Redis secondaryStorage) ✅
 
 ### Выполнено (v0.6.0) — сессия №43, 2026-06-15
 
