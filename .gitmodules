@@ -13,18 +13,6 @@
 [submodule "libs/driving-school-db"]
 	path = libs/driving-school-db
 	url = git@github.com:kamiletar/letar-private-driving-school-db.git
-[submodule "apps/premium-rosstil"]
-	path = apps/premium-rosstil
-	url = git@github.com:kamiletar/letar-private-premium-rosstil.git
-[submodule "apps/premium-rosstil-e2e"]
-	path = apps/premium-rosstil-e2e
-	url = git@github.com:kamiletar/letar-private-premium-rosstil-e2e.git
-[submodule "apps/imot"]
-	path = apps/imot
-	url = git@github.com:kamiletar/letar-private-imot.git
-[submodule "apps/imot-e2e"]
-	path = apps/imot-e2e
-	url = git@github.com:kamiletar/letar-private-imot-e2e.git
 [submodule "apps/dsperevod"]
 	path = apps/dsperevod
 	url = git@github.com:kamiletar/letar-private-dsperevod.git

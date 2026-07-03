@@ -31,6 +31,10 @@ services:
 networks:
   premium-network:
     external: true
+  # ⚠️ imot больше не обслуживается letar (см. PLAN.md), но сеть НЕ убрана намеренно —
+  # NPM на s1 всё ещё физически проксирует живой сайт клиента через imot-network.
+  # Убирать эту сеть из docker-compose нельзя, пока NPM не будет передеплоен без него —
+  # иначе при следующем redeploy живой прокси клиента отвалится молча.
   imot-network:
     external: true
   # Раскомментировать по необходимости:

@@ -207,6 +207,22 @@
 > ✅ Этап 6.8 UserMenu — svoichuzhie добавлен (header.tsx); `MobileAuthSection` создан в `@letar/ui` и тираж на 4 приложения (animatrona-tracker, grandslamcup, archetest, svoichuzhie). commit `f94d28c`, `e2b1701`, `6f324fe`.
 > **➡️ Следующий старт:** Этап 8 — Соц-секреты per-владелец (§8) или §17 Kamal pilot на grandslamcup.
 >
+> **Сессия №47 (2026-07-03, вывод из эксплуатации premium-rosstil + imot):** владельцы обоих приложений больше
+> не клиенты letar. ✅ Полный бэкап передан заказчику: git-история (bundle) обоих submodules + их e2e, реальные
+> дампы БД и uploads с живого сервера (92/32 таблицы, 272 МБ фото у premium-rosstil; imot без загруженных
+> файлов — подтверждено, не баг). Попутно найдено: обе площадки все время работали на `s1.letar.best`
+> (не отдельный сервер клиента, как казалось сначала) — Resilio Sync на s1 был неделями в состоянии `paused`,
+> BlackCove перезапустил сервис. ✅ Снесены протухшие артефакты недоделанной миграции на s2 (пустые
+> контейнеры/БД, миграция никогда не была завершена). ✅ Submodules (`premium-rosstil`, `premium-rosstil-e2e`,
+> `imot`, `imot-e2e`) убраны из `.gitmodules`/индекса/директорий; `deploy-affected.sh` (`S2_APPS`), `.mcp.json`
+> (`postgres-premium-rosstil`), `.claude/rules/deployment.md`, `infra/nginx-proxy-manager/README.md` (домены,
+> сети) почищены. **⚠️ `infra/nginx-proxy-manager/docker-compose.yml` НЕ тронут** — NPM на s1 всё ещё физически
+> проксирует живой сайт клиента через `imot-network`/`premium-network`; убирать сеть из compose нельзя, иначе
+> следующий redeploy NPM молча оборвёт клиенту трафик (сайт продолжает работать, клиент сам разберётся дальше).
+> Удалены `.claude/commands/premium-rosstil.md`, `imot.md`, `.claude/rules/premium-rosstil.md`, `imot.md`.
+> Матрица §3.1 и таблица 0.8 обновлены. Не тронуто: `apps/dashboard` (cron-мониторинг imot-эндпоинтов),
+> `apps/umami` (трекинг сайтов) — точечный follow-up для их владельцев.
+>
 > **Сессия №45 (2026-06-19, §15 E2E-ранер — ввод в строй):** ✅ **E2E-ранер s3 полностью операционен.**
 > Postgres (5499) + Redis (6380) поднят в Docker на s3; лог заполняется через systemd user timer (02:00, `Persistent=true`).
 > ✅ **driving-school-e2e — ключевые фиксы:** (1) `skipInstall: true` в ВСЕХ target'ах `project.json` — решает
@@ -338,8 +354,9 @@ email-домен — **по владельцу проекта**; Ключниц�
 
 Признак коммерческого проекта: **приватный submodule** (`kamiletar/letar-private-*`) + **свой домен в `.env.docker`**.
 
-- **Коммерческие (разные владельцы):** `premium-rosstil` (premium.rosstil.ru), `driving-school` (направа.рф),
-  `aboi` (neyroaboi.ru), `dsperevod`, `imot` — все приватные submodules. Git-изоляция уже есть.
+- **Коммерческие (разные владельцы):** `driving-school` (направа.рф), `aboi` (neyroaboi.ru), `dsperevod` — все
+  приватные submodules. Git-изоляция уже есть. (`premium-rosstil`, `imot` выведены из эксплуатации — см. сессию
+  вывода из эксплуатации в шапке файла.)
 - **Личные петы (владелец — letar):** `kami`, `dashboard`, `auth-hub` (Ключница), `mandala`, `archetest`,
   `time`, `grandslamcup`, `animatrona-*` и пр. — публичное дерево `letar`, домены `*.letar.best`.
 
@@ -438,17 +455,15 @@ Tier — это **не отдельная ось**, а проекция выбо
 
 ### 3.1 Матрица приложений
 
-| App                 | Владелец      | Auth-механизм                        | Верификация email                                   | Роли                | `admin/users`             | DB в admin             |
-| ------------------- | ------------- | ------------------------------------ | --------------------------------------------------- | ------------------- | ------------------------- | ---------------------- |
-| **aboi**            | commercial    | Better Auth + `anonymous`            | link, `sendOnSignUp` (тупик `EMAIL_NOT_VERIFIED`)   | `roles: string[]`   | ❌ создать                | `prismaAuth`           |
-| **kami**            | letar pet     | Better Auth + OIDC-клиент Ключницы   | link (`requireEmailVerification: true`)             | `roles: UserRole[]` | ❌ создать                | `prisma` (+обогащ.)    |
-| **dsperevod**       | commercial    | Better Auth standalone               | link (`requireEmailVerification: true`)             | `role` (single)     | ✅ есть (+статус+actions) | `getEnhancedPrisma`    |
-| **auth-hub**        | letar (инфра) | **Ключница — OIDC provider**         | link, **только в production**                       | `roles: UserRole[]` | ✅ есть (+статус)         | `prisma` (plain)       |
-| **premium-rosstil** | commercial    | Better Auth standalone               | **кастомная**; `requireEmailVerification` не задан  | `role` (single)     | ✅ есть (без статуса)     | `getEnhancedPrisma`    |
-| **driving-school**  | commercial    | Better Auth + `organization` (teams) | **`@letar/pin-auth`: коды + ссылки + cross-tab** ⭐ | `roles: UserRole[]` | (своя)                    | `prismaAuth`           |
-| **imot**            | commercial    | Better Auth standalone               | (вне активной auth-задачи)                          | —                   | —                         | —                      |
-| **mandala**         | letar pet     | PIN                                  | PIN (`resend-pin.action`)                           | —                   | (своя)                    | —                      |
-| **svoichuzhie**     | letar pet     | Better Auth standalone + 2FA         | link + resend, `/verify-email` ✅                   | `role` (single)     | ✅ создан (2026-06-26)    | `prisma` (ZenStack v3) |
+| App                | Владелец      | Auth-механизм                        | Верификация email                                   | Роли                | `admin/users`             | DB в admin             |
+| ------------------ | ------------- | ------------------------------------ | --------------------------------------------------- | ------------------- | ------------------------- | ---------------------- |
+| **aboi**           | commercial    | Better Auth + `anonymous`            | link, `sendOnSignUp` (тупик `EMAIL_NOT_VERIFIED`)   | `roles: string[]`   | ❌ создать                | `prismaAuth`           |
+| **kami**           | letar pet     | Better Auth + OIDC-клиент Ключницы   | link (`requireEmailVerification: true`)             | `roles: UserRole[]` | ❌ создать                | `prisma` (+обогащ.)    |
+| **dsperevod**      | commercial    | Better Auth standalone               | link (`requireEmailVerification: true`)             | `role` (single)     | ✅ есть (+статус+actions) | `getEnhancedPrisma`    |
+| **auth-hub**       | letar (инфра) | **Ключница — OIDC provider**         | link, **только в production**                       | `roles: UserRole[]` | ✅ есть (+статус)         | `prisma` (plain)       |
+| **driving-school** | commercial    | Better Auth + `organization` (teams) | **`@letar/pin-auth`: коды + ссылки + cross-tab** ⭐ | `roles: UserRole[]` | (своя)                    | `prismaAuth`           |
+| **mandala**        | letar pet     | PIN                                  | PIN (`resend-pin.action`)                           | —                   | (своя)                    | —                      |
+| **svoichuzhie**    | letar pet     | Better Auth standalone + 2FA         | link + resend, `/verify-email` ✅                   | `role` (single)     | ✅ создан (2026-06-26)    | `prisma` (ZenStack v3) |
 
 **OIDC-клиенты Ключницы** (`trustedClients`): kami, dashboard, archetest, time, grandslamcup, animatrona-tracker.
 
@@ -709,8 +724,6 @@ interface AuthProfile {
 | --------------- | ------------------------------- | ------------ |
 | auth-hub        | ✅ email, имя, IP, OAuth-данные | ✅ done с30  |
 | aboi            | ✅ эталон — уже реализовано     | ✅ done с30  |
-| premium-rosstil | ✅ email, имя, адрес доставки   | ✅           |
-| imot            | ✅ email, телефон, имя          | ✅           |
 | dsperevod       | ✅ email, имя                   | ✅ done с30  |
 | driving-school  | ✅ email, имя                   | ✅           |
 | kami            | ❌ только владелец              | —            |
@@ -748,7 +761,8 @@ interface AuthProfile {
      гео-блокировкой (Этап 6.7), а поведение для иностранных IP — вне сферы уведомления. Уточнение уведомления
      не требуется; **Этап 6.7 становится обязательным** для соответствия заявленному.
    - ✅ **dsperevod:** подано (2026-06-26), номер оператора зафиксирован в apps/dsperevod/PLAN.md.
-   - ❌ Остальные операторы (premium-rosstil, imot) — не подано.
+   - ➖ premium-rosstil, imot — выведены из эксплуатации letar (см. сессию decommission в шапке файла), больше не
+     наш вопрос соответствия.
 2. **Тираж cookie-баннера** на все ПД-собирающие приложения (сейчас только aboi — эталон).
 3. **Проверка чекбоксов** — убедиться, что нигде нет `consentAccepted: true` как defaultValue (нарушение ФЗ).
 4. **Consent-aware аналитика** — убедиться, что Umami/Я.Метрика нигде не грузится до согласия.

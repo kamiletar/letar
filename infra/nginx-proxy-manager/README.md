@@ -4,10 +4,10 @@
 
 ## Серверная архитектура
 
-| Сервер            | Приложения                                                              | NPM               | Примечания        |
-| ----------------- | ----------------------------------------------------------------------- | ----------------- | ----------------- |
-| **s1.letar.best** | premium-rosstil, imot, mandala, kami, pravda, animatrona-landing, umami | npm.s1.letar.best | + dashboard-agent |
-| **s2.letar.best** | driving-school, dashboard                                               | npm.s2.letar.best | Dashboard здесь   |
+| Сервер            | Приложения                                       | NPM               | Примечания        |
+| ----------------- | ------------------------------------------------ | ----------------- | ----------------- |
+| **s1.letar.best** | mandala, kami, pravda, animatrona-landing, umami | npm.s1.letar.best | + dashboard-agent |
+| **s2.letar.best** | driving-school, dashboard                        | npm.s2.letar.best | Dashboard здесь   |
 
 **Docker сеть:** `premium-network` (одинаковая на обоих серверах)
 
@@ -31,17 +31,15 @@ docker compose up -d
 
 ### NPM на s1 (npm.s1.letar.best)
 
-| Домен                            | Forward Host           | Port | SSL | Примечания                 |
-| -------------------------------- | ---------------------- | ---- | --- | -------------------------- |
-| premium.rosstil.ru               | premium-rosstil-app    | 3000 | LE  | Основной магазин           |
-| integrelle.com                   | imot-app               | 3001 | LE  | IP whitelist: 45.90.236.27 |
-| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша        |
-| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                        |
-| pravda.letar.best                | pravda-app             | 3007 | LE  | —                          |
-| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page               |
-| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami            |
-| npm.s1.letar.best                | localhost              | 81   | LE  | Админка NPM s1             |
-| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync               |
+| Домен                            | Forward Host           | Port | SSL | Примечания          |
+| -------------------------------- | ---------------------- | ---- | --- | ------------------- |
+| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша |
+| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                 |
+| pravda.letar.best                | pravda-app             | 3007 | LE  | —                   |
+| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page        |
+| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami     |
+| npm.s1.letar.best                | localhost              | 81   | LE  | Админка NPM s1      |
+| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync        |
 
 ### NPM на s2 (npm.s2.letar.best)
 
@@ -207,7 +205,6 @@ cd /home/deploy/letar
 
 # Создать сети
 docker network create premium-network
-docker network create imot-network
 
 # Распаковать данные NPM
 cd infra/nginx-proxy-manager
@@ -221,8 +218,6 @@ docker compose up -d
 
 Перенаправить все домены на новый IP сервера:
 
-- premium.rosstil.ru
-- integrelle.com
 - \*.letar.best
 
 ### 4. Обновить SSL сертификаты
@@ -238,8 +233,7 @@ NPM должен быть подключён к сетям всех прилож
 
 ```yaml
 networks:
-  - premium-network # premium-rosstil, dashboard
-  - imot-network # imot
+  - premium-network # dashboard
   # Добавить по необходимости:
   # - mandala-network
   # - driving-school-network
