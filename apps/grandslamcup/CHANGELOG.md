@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.37.2] — 2026-07-03
+
+### Fixed — CookieBanner падал с ContextError вне ChakraProvider
+
+- **layout.tsx**: `CookieBanner` (использует `Box`, `Button`, `Checkbox` из Chakra) рендерился **до** `<Providers>`, то есть вне `<ChakraProvider>`. Пока `shown === false` компонент возвращал `null` и баг не проявлялся (у пользователей с уже сохранённым cookie-согласием) — но при первом визите или после очистки localStorage баннер пытался отрисовать Chakra-компоненты без контекста → `Uncaught ContextError: useContext returned undefined` → крах всей страницы. `CookieBanner` перенесён внутрь `<Providers>`. Не связано с сегодняшними правками consent-гейта SW — предсуществующий баг, обнаружен случайно при диагностике.
+- Проверены остальные 8 приложений с `CookieBanner` из `@letar/ui` (studio, svoichuzhie, aprel8008, driving-school, imot, premium-rosstil, auth-hub, dsperevod) — везде корректно внутри провайдера, баг локальный для grandslamcup.
+
 ## [3.37.1] — 2026-07-02
 
 ### Fixed — Снятие уже установленного Service Worker при отказе от согласия
