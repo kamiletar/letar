@@ -38,9 +38,14 @@ export function ServiceWorkerRegistration() {
         } catch (error) {
           console.error('[SW] Ошибка регистрации:', error)
         }
-      } else if (registrationRef.current) {
+      } else {
+        // Снимаем не только SW, зарегистрированный этим компонентом, но и любой
+        // уже активный (например, установленный до внедрения consent-гейта).
         try {
-          await registrationRef.current.unregister()
+          const existing = await navigator.serviceWorker.getRegistration('/')
+          if (existing) {
+            await existing.unregister()
+          }
           registrationRef.current = null
         } catch (error) {
           console.error('[SW] Ошибка отмены регистрации:', error)
