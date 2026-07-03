@@ -2,6 +2,39 @@
 
 Детальное описание всех реализованных фич.
 
+## v3.37.0–3.37.2 — Consent-гейт PWA + два продакшн-хотфикса (2026-07-02 — 2026-07-03)
+
+### Контекст
+
+Обнаружено при разборе жалобы пользователя на "This page couldn't load" в браузере: Service Worker регистрировался автоматически при заходе на сайт без согласия пользователя (молча прекачивал ~46 МБ статики). По ходу диагностики всплыли ещё два независимых бага.
+
+### Реализовано
+
+**3.37.0 — Consent-гейт перед регистрацией SW**
+
+- `service-worker-registration.tsx`: SW регистрируется только при `isAccepted === true` из `useOfflineConsent('grandslamcup-offline-consent')` (`@letar/hooks`), по образцу `apps/mandala`
+- `offline-consent-banner.tsx`: новый баннер снизу экрана с кнопками «Включить оффлайн» / «Не сейчас», повторный показ через 7 дней после отказа
+- `@letar/hooks` добавлен в `implicitDependencies` package.json
+- Правило задокументировано в `.claude/docs/pwa-offline.md` как обязательное для всех PWA-приложений монорепо
+
+**3.37.1 — Снятие уже установленного SW**
+
+- `registrationRef` был пуст при каждом маунте компонента и не видел SW, установленный ДО внедрения consent-гейта (для пользователей, посещавших сайт раньше). Теперь при отказе от согласия ищем и снимаем **любую** активную регистрацию через `navigator.serviceWorker.getRegistration('/')`, а не только свою
+
+**3.37.2 — CookieBanner ContextError (предсуществующий баг, не связан с SW)**
+
+- `CookieBanner` (использует Chakra `Box`/`Button`/`Checkbox`) рендерился в `layout.tsx` **до** `<Providers>`/`<ChakraProvider>`. Пока `shown === false` (уже есть cookie-согласие в localStorage) баг маскировался — компонент возвращал `null`. При первом визите или после очистки localStorage баннер пытался отрисовать Chakra-компоненты без контекста → `Uncaught ContextError: useContext returned undefined` → крах всей страницы (браузер показывал "This page couldn't load")
+- Перенесён внутрь `<Providers>`
+- Проверены остальные 8 приложений с `CookieBanner` из `@letar/ui` (studio, svoichuzhie, aprel8008, driving-school, imot, premium-rosstil, auth-hub, dsperevod) — везде корректно, баг был локальным для grandslamcup
+
+### Побочная находка (не код grandslamcup)
+
+- Инцидент `stats.letar.best` (Umami) 502 в тот же день — `umami-app` был в crash loop из-за рассинхрона пароля БД в трёх местах (.env.docker обновлён после создания контейнера + старый пароль в volume postgres). Устранено BlackCove, не связано с деплоем grandslamcup — совпадение по времени.
+
+### Деплой
+
+Все три версии задеплоены на s2 через BlackCove (Deploy Agent): 3.37.0 (commit `b1fd113`), 3.37.1 (commit `150583f`), 3.37.2 (commit `efda988`, urgent).
+
 ## v0.1.0 — Инициализация (2026-04-02)
 
 ### Реализовано
@@ -454,4 +487,36 @@ src/app/(public)/matches/[id]/page.tsx (обновлён)
 
 ---
 
-**Последнее обновление:** 2026-06-15 (планирование resentiment; код — v2.7.0)
+## Инцидент — потеря ADMIN-роли после консолидации аккаунтов в Ключнице (2026-07-03)
+
+> ⚠️ Оперативный фикс прод-данных, без изменения кода.
+
+### Проблема
+
+После входа пользователя через Ключницу (OIDC) в grandslamcup создался **новый** локальный аккаунт `kami@letar.best` с ролью по умолчанию `USER` вместо `ADMIN`.
+
+### Причина
+
+Ключница (`auth-hub`) в какой-то момент консолидировала/удалила дублирующиеся пользовательские записи. Старые `Account.accountId` в grandslamcup (у аккаунтов `letarkami@gmail.com` с ролью ADMIN и `kaspergreen@gmail.com`) остались указывать на несуществующие id в `auth-hub`. При следующем OIDC-логине под актуальным ключница-аккаунтом Better Auth не нашёл совпадения по `accountId` и создал новый User без прав.
+
+### Диагностика
+
+- Сверка `grandslamcup.Account.accountId` ↔ `auth-hub.User.id` напрямую в прод-БД (SSH-туннель на s2, `docker exec <container> psql`) — оба старых accountId не найдены в `auth-hub`.
+- Найден профиль `Player` («Ками Летар»), привязанный к старому ADMIN-аккаунту.
+
+### Фикс
+
+```sql
+UPDATE "User" SET roles = ARRAY['ADMIN','USER']::"UserRole"[] WHERE id = 'xvBwgGJVLDk8E0eielKJB9H1BBnPqtG2';
+UPDATE "Player" SET "userId" = 'xvBwgGJVLDk8E0eielKJB9H1BBnPqtG2' WHERE id = 'cmoj2dfq5000001pfh91g04nv';
+```
+
+Старые осиротевшие аккаунты (`letarkami@gmail.com`, `kaspergreen@gmail.com`) оставлены как есть — не мешают, просто больше не используются для входа.
+
+### Вывод на будущее
+
+Один и тот же паттерн способен повторяться в **любом** приложении на Ключнице (genericOAuth без явной привязки по email при отсутствии `accountId`-совпадения → новый юзер без ролей). Если аналогичная жалоба всплывёт в другом приложении — сначала сверять `Account.accountId` с текущим `auth-hub.User.id`, а не только роли.
+
+---
+
+**Последнее обновление:** 2026-07-03 (инцидент с ролью после консолидации Ключницы; код — v2.7.0)
