@@ -45,7 +45,7 @@ export async function createTestUser(data: {
   name: string
   role?: 'USER' | 'ADMIN'
 }): Promise<string> {
-  const db = await getPrisma() as any
+  const db = (await getPrisma()) as any
   const hashedPassword = await hashPasswordBetterAuth(data.password)
   const role = data.role ?? 'USER'
 
@@ -81,7 +81,7 @@ export async function createTestUser(data: {
 
 /** Создаёт FanMember запись для пользователя (если не существует). */
 export async function ensureFanMember(userId: string): Promise<void> {
-  const db = await getPrisma() as any
+  const db = (await getPrisma()) as any
   const existing = await db.fanMember.findUnique({ where: { userId } })
   if (!existing) {
     await db.fanMember.create({
@@ -89,6 +89,81 @@ export async function ensureFanMember(userId: string): Promise<void> {
     })
     console.log(`  ✓ FanMember created for userId=${userId}`)
   }
+}
+
+export interface TestProduct {
+  productId: string
+  variantId: string
+  slug: string
+  price: number
+}
+
+/** Создаёт (идемпотентно) тестовый товар с одним вариантом для E2E чекаута. */
+export async function ensureTestProduct(): Promise<TestProduct> {
+  const db = (await getPrisma()) as any
+  const price = 150000 // 1500 ₽
+
+  const category = await db.category.upsert({
+    where: { slug: 'e2e-test-cat' },
+    update: {},
+    create: { slug: 'e2e-test-cat', name: 'E2E' },
+  })
+
+  const product = await db.product.upsert({
+    where: { slug: 'e2e-test-product' },
+    update: { isPublished: true },
+    create: {
+      slug: 'e2e-test-product',
+      name: 'E2E тестовый товар',
+      isPublished: true,
+      categoryId: category.id,
+      weightG: 200,
+      lengthCm: 30,
+      widthCm: 20,
+      heightCm: 3,
+    },
+  })
+
+  const variant = await db.productVariant.upsert({
+    where: { sku: 'E2E-M' },
+    update: { stock: 999, price },
+    create: { productId: product.id, sku: 'E2E-M', name: 'M', size: 'M', stock: 999, price },
+  })
+
+  return { productId: product.id, variantId: variant.id, slug: product.slug, price }
+}
+
+/** Создаёт оплаченный заказ с ненулевой deliveryCost для проверки страницы /merch/orders/[token]. */
+export async function createTestOrderWithDelivery(
+  product: TestProduct,
+  deliveryCost: number
+): Promise<{ accessToken: string }> {
+  const db = (await getPrisma()) as any
+
+  const order = await db.order.create({
+    data: {
+      email: 'e2e-order@svoichuzhie.test',
+      name: 'E2E Покупатель',
+      deliveryType: 'PVZ',
+      pvzAddress: 'ул. Красная Пресня, 28, Москва',
+      deliveryCost,
+      totalAmount: product.price,
+      originalAmount: product.price,
+      status: 'PAID',
+      items: {
+        create: {
+          productId: product.productId,
+          variantId: product.variantId,
+          quantity: 1,
+          price: product.price,
+          productName: 'E2E тестовый товар (M)',
+        },
+      },
+    },
+    select: { accessToken: true },
+  })
+
+  return { accessToken: order.accessToken }
 }
 
 /** Закрывает соединение с БД. */

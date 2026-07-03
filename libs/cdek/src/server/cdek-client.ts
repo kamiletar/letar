@@ -29,6 +29,7 @@ export function getFromLocation(): CdekLocation {
   return {
     postal_code: process.env.CDEK_FROM_POSTAL_CODE ?? '107076',
     city: process.env.CDEK_FROM_CITY ?? 'Москва',
+    address: process.env.CDEK_FROM_ADDRESS ?? 'Рождественская ул., 8',
   }
 }
 
@@ -77,7 +78,7 @@ export async function getCdekToken(): Promise<string | null> {
 export async function calculateTariffs(
   to: CdekLocation,
   pkg: CdekPackageDims,
-  from?: CdekLocation,
+  from?: CdekLocation
 ): Promise<CdekShippingCosts> {
   if (process.env.CDEK_MOCK_MODE === 'true') {
     await new Promise((r) => setTimeout(r, 400))
@@ -248,7 +249,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       city: 'Москва',
       address: 'ул. Красная Пресня, 28',
       address_full: 'г. Москва, ул. Красная Пресня, 28',
-      latitude: 55.760,
+      latitude: 55.76,
       longitude: 37.571,
       postal_code: '123022',
     },
@@ -293,7 +294,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       city: 'Москва',
       address: 'Ленинградское шоссе, 10',
       address_full: 'г. Москва, Ленинградское шоссе, 10',
-      latitude: 55.820,
+      latitude: 55.82,
       longitude: 37.497,
       postal_code: '125171',
     },
@@ -414,7 +415,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       address: 'Волоколамское шоссе, 73',
       address_full: 'г. Москва, Волоколамское шоссе, 73',
       latitude: 55.832,
-      longitude: 37.430,
+      longitude: 37.43,
       postal_code: '125362',
     },
     work_time: 'Пн-Пт: 09:00-21:00',
@@ -459,7 +460,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       address: 'Осенний бульвар, 10',
       address_full: 'г. Москва, Осенний бульвар, 10',
       latitude: 55.756,
-      longitude: 37.370,
+      longitude: 37.37,
       postal_code: '121614',
     },
     work_time: 'Пн-Пт: 10:00-20:00',
@@ -474,7 +475,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       address: 'Южнобутовская ул., 13',
       address_full: 'г. Москва, Южнобутовская ул., 13',
       latitude: 55.564,
-      longitude: 37.570,
+      longitude: 37.57,
       postal_code: '142700',
     },
     work_time: 'Пн-Вс: 09:00-21:00',
@@ -533,7 +534,7 @@ export const MOCK_PVZ: CdekDeliveryPoint[] = [
       city: 'Москва',
       address: 'Чертановская ул., 54',
       address_full: 'г. Москва, Чертановская ул., 54',
-      latitude: 55.640,
+      latitude: 55.64,
       longitude: 37.606,
       postal_code: '117449',
     },
@@ -618,7 +619,7 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
       {
         headers: { Authorization: `Bearer ${token}` },
         signal: AbortSignal.timeout(8_000),
-      },
+      }
     )
     if (!resp.ok) {return []}
     return ((await resp.json()) as CdekDeliveryPoint[]).slice(0, 300)
@@ -629,7 +630,7 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
 
 /** Создаёт заказ СДЭК. Возвращает uuid и трек-номер или объект с ошибкой. */
 export async function createCdekOrder(
-  request: CdekOrderRequest,
+  request: CdekOrderRequest
 ): Promise<{ uuid: string; trackNumber?: string } | { error: string }> {
   const token = await getCdekToken()
   if (!token) {return { error: 'Нет токена СДЭК — проверьте CDEK_CLIENT_ID/SECRET' }}
@@ -656,9 +657,13 @@ export async function createCdekOrder(
 
   if (!data.entity?.uuid) {
     const errors = data.requests?.[0]?.errors
-    const msg = Array.isArray(errors) && errors.length > 0
-      ? errors.map((e) => e.message).filter(Boolean).join('; ')
-      : `HTTP ${resp.status}, нет entity.uuid`
+    const msg =
+      Array.isArray(errors) && errors.length > 0
+        ? errors
+            .map((e) => e.message)
+            .filter(Boolean)
+            .join('; ')
+        : `HTTP ${resp.status}, нет entity.uuid`
     console.warn('[cdek] createOrder error', JSON.stringify(data))
     return { error: `СДЭК API: ${msg}` }
   }
