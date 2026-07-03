@@ -104,6 +104,8 @@ export interface CdekOrderRequest {
   recipient: CdekOrderRecipient
   packages: CdekPackage[]
   comment?: string
+  /** Наложенный платёж за доставку — получатель платит эту сумму (руб.) курьеру/на ПВЗ при получении, деньги не проходят через счёт продавца. Не путать с payment.value в CdekPackageItem (это стоимость самого товара). */
+  delivery_recipient_cost?: { value: number }
 }
 
 export interface CdekOrderError {
