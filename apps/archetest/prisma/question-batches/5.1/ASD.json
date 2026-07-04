@@ -1,0 +1,389 @@
+[
+  {
+    "scenario": "Шумная вечеринка: музыка, десятки разговоров, мигающий свет. Ваше состояние через час?",
+    "scenarioEn": "A loud party: music, dozens of conversations, flashing lights. Your state after an hour?",
+    "options": [
+      {
+        "text": "Выжат: как будто всё это время разгружал вагоны",
+        "textEn": "Drained: as if I'd been unloading freight cars the whole time",
+        "scoring": { "ASD": 3, "AVD": 1 }
+      },
+      {
+        "text": "Разогреваюсь: чем громче, тем живее",
+        "textEn": "Warming up: the louder, the more alive I feel",
+        "scoring": { "HIS": 2 }
+      },
+      {
+        "text": "Нормально, но нашёл тихий угол с одним собеседником",
+        "textEn": "Fine, but I've found a quiet corner and one interlocutor",
+        "scoring": { "ASD": 1, "SZD": 1 }
+      },
+      {
+        "text": "Скучно: предпочёл бы остаться дома",
+        "textEn": "Bored: I'd rather have stayed home",
+        "scoring": { "SZD": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Договорились о планах, всё продумано. За час до выхода планы резко меняются.",
+    "scenarioEn": "Plans were made and thought through. An hour before, they change abruptly.",
+    "options": [
+      {
+        "text": "Внутри всё протестует: перестройка стоит мне дорого",
+        "textEn": "Everything inside protests: rebuilding costs me a lot",
+        "scoring": { "ASD": 3, "OBC": 1 }
+      },
+      {
+        "text": "Даже интереснее: живём один раз",
+        "textEn": "Even better: you only live once",
+        "scoring": { "HIS": 1, "BOR": 1 }
+      },
+      {
+        "text": "Раздражаюсь на людей, которые не держат слово",
+        "textEn": "I'm annoyed at people who don't keep their word",
+        "scoring": { "KAN": 1, "PAG": 1 }
+      },
+      {
+        "text": "Спокойно пересобираю план: дело техники",
+        "textEn": "I calmly rebuild the plan: routine work",
+        "scoring": { "OBC": 2, "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Лифт, малознакомый сосед, восемь этажей. Смолток?",
+    "scenarioEn": "An elevator, a barely known neighbor, eight floors. Small talk?",
+    "options": [
+      {
+        "text": "Легко: погода, новости, пара шуток — само собой",
+        "textEn": "Easy: weather, news, a couple of jokes — it flows",
+        "scoring": { "HIS": 2, "FAI": 1 }
+      },
+      {
+        "text": "Мучительно: не понимаю, зачем говорить ни о чём",
+        "textEn": "Agonizing: I don't get talking about nothing",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Кивну и уткнусь в телефон",
+        "textEn": "I'll nod and bury myself in my phone",
+        "scoring": { "AVD": 1, "SZD": 1 }
+      },
+      {
+        "text": "Могу поддержать, но это осознанное усилие, как отчёт",
+        "textEn": "I can do it, but it's deliberate effort, like filing a report",
+        "scoring": { "ASD": 2, "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вас спросили о вашей любимой теме. Сколько вы можете о ней говорить?",
+    "scenarioEn": "Someone asks about your favorite topic. How long can you talk about it?",
+    "options": [
+      {
+        "text": "Пока не остановят — и замечу это не сразу",
+        "textEn": "Until stopped — and I won't notice right away",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Расскажу ярко, но слежу за реакцией слушателей",
+        "textEn": "I'll tell it vividly, watching the listeners' reactions",
+        "scoring": { "HIS": 2, "MAC": 1 }
+      },
+      {
+        "text": "Коротко: глубина — для тех, кому правда интересно",
+        "textEn": "Briefly: depth is for those genuinely interested",
+        "scoring": { "SZD": 1, "OBC": 1 }
+      },
+      {
+        "text": "У меня нет темы, о которой я мог бы говорить часами",
+        "textEn": "I don't have a topic I could talk about for hours",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Бирка на воротнике, шов на носке, гудящая лампа в углу. Насколько это мешает жить?",
+    "scenarioEn": "A collar tag, a sock seam, a humming lamp in the corner. How much does this interfere with your life?",
+    "options": [
+      {
+        "text": "Сильно: пока не устраню, не могу сосредоточиться ни на чём",
+        "textEn": "A lot: until it's fixed, I can't focus on anything",
+        "scoring": { "ASD": 3 }
+      },
+      { "text": "Замечаю, но легко отключаюсь", "textEn": "I notice, but tune it out easily", "scoring": {} },
+      {
+        "text": "Не замечаю, пока не покажут",
+        "textEn": "I don't notice until someone points it out",
+        "scoring": { "ALX": 1 }
+      },
+      {
+        "text": "Раздражает, если я и так на взводе",
+        "textEn": "It irritates me only when I'm already wound up",
+        "scoring": { "BOR": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Новая сложная техника. Как осваиваете?",
+    "scenarioEn": "A new complex device. How do you master it?",
+    "options": [
+      {
+        "text": "Читаю документацию целиком, потом включаю",
+        "textEn": "I read the full documentation, then power it on",
+        "scoring": { "ASD": 2, "OBC": 2 }
+      },
+      {
+        "text": "Тыкаю кнопки, пока не заработает",
+        "textEn": "I poke buttons until it works",
+        "scoring": { "ANT": 1, "HIS": 1 }
+      },
+      {
+        "text": "Прошу показать того, кто умеет",
+        "textEn": "I ask someone who knows to show me",
+        "scoring": { "DEP": 2 }
+      },
+      {
+        "text": "Разбираю устройство системы глубже, чем нужно для задачи",
+        "textEn": "I dig into how the system works far deeper than the task requires",
+        "scoring": { "ASD": 3, "SZT": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Собеседник говорит «да, конечно, отлично», но что-то в его тоне...",
+    "scenarioEn": "Your interlocutor says \"yes, of course, great,\" but something in the tone...",
+    "options": [
+      {
+        "text": "Мгновенно слышу: «да» на самом деле значит «нет»",
+        "textEn": "I instantly hear it: the \"yes\" actually means \"no\"",
+        "scoring": { "MAC": 1, "HUM": 1, "HIS": 1 }
+      },
+      {
+        "text": "Слова сказаны — я ориентируюсь на слова",
+        "textEn": "The words were said — I go by the words",
+        "scoring": { "ASD": 3, "DIR": 1 }
+      },
+      {
+        "text": "Замечу неладное, но не пойму, что именно",
+        "textEn": "I'll sense something off but won't pinpoint what",
+        "scoring": { "ASD": 1, "ALX": 2 }
+      },
+      {
+        "text": "Переспрошу прямо: «Ты правда согласен?»",
+        "textEn": "I'll ask directly: \"Do you really agree?\"",
+        "scoring": { "DIR": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ваш распорядок дня сломан обстоятельствами: всё пошло не по привычной колее.",
+    "scenarioEn": "Circumstances have broken your daily routine: nothing is running on its usual rails.",
+    "options": [
+      {
+        "text": "Весь день чувствую себя не в своей тарелке",
+        "textEn": "I feel off-kilter the whole day",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Легко: рутина — для роботов",
+        "textEn": "Easy: routines are for robots",
+        "scoring": { "HIS": 1, "ANT": 1 }
+      },
+      {
+        "text": "Восстановлю ключевые точки распорядка любой ценой",
+        "textEn": "I'll restore the routine's key anchors at any cost",
+        "scoring": { "ASD": 1, "OBC": 2 }
+      },
+      {
+        "text": "Злюсь на виновников сбоя",
+        "textEn": "I'm angry at whoever broke it",
+        "scoring": { "PAG": 1, "BOR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "«Ну ты понял намёк», — говорит собеседник. А вы?",
+    "scenarioEn": "\"You got the hint, right?\" says your interlocutor. Did you?",
+    "options": [
+      {
+        "text": "Чаще нет: скажите прямо, и я всё сделаю",
+        "textEn": "Usually not: say it plainly and I'll do it",
+        "scoring": { "ASD": 3, "DIR": 1 }
+      },
+      {
+        "text": "Намёки — мой родной язык",
+        "textEn": "Hints are my native language",
+        "scoring": { "MAC": 1, "HIS": 1 }
+      },
+      {
+        "text": "Понимаю, но делаю вид, что нет, если намёк неудобен",
+        "textEn": "I get them, but play dumb when the hint is inconvenient",
+        "scoring": { "PAG": 2, "MAC": 1 }
+      },
+      {
+        "text": "Переспрашиваю, и людей это, кажется, удивляет",
+        "textEn": "I ask for clarification, and it seems to surprise people",
+        "scoring": { "ASD": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Опенспейс на сорок человек: разговоры, звонки, чужие наушники. Ваша продуктивность?",
+    "scenarioEn": "An open-plan office of forty: chatter, calls, someone's leaking headphones. Your productivity?",
+    "options": [
+      {
+        "text": "В порядке: фоновый гул мне даже помогает",
+        "textEn": "Fine: the background hum even helps me",
+        "scoring": { "HIS": 1 }
+      },
+      {
+        "text": "Падает в разы: каждый звук пробивается в фокус",
+        "textEn": "Drops several-fold: every sound pierces my focus",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Спасаюсь наушниками с шумоподавлением с утра до вечера",
+        "textEn": "Noise-cancelling headphones save me, morning to night",
+        "scoring": { "ASD": 2 }
+      },
+      {
+        "text": "Раздражают не звуки, а люди, которые их издают",
+        "textEn": "It's not the sounds that irritate me — it's the people making them",
+        "scoring": { "SZD": 1, "PAG": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ваша коллекция/архив/библиотека. Как она организована?",
+    "scenarioEn": "Your collection/archive/library. How is it organized?",
+    "options": [
+      {
+        "text": "Своя система: категории, теги, правила именования",
+        "textEn": "My own system: categories, tags, naming conventions",
+        "scoring": { "ASD": 2, "OBC": 2 }
+      },
+      {
+        "text": "Творческий беспорядок: я и так всё нахожу",
+        "textEn": "Creative chaos: I find everything anyway",
+        "scoring": { "SZT": 1, "BOR": 1 }
+      },
+      {
+        "text": "Организую периодически, потом снова зарастает",
+        "textEn": "I organize periodically; it overgrows again",
+        "scoring": { "OBC": 1 }
+      },
+      { "text": "У меня нет коллекций", "textEn": "I don't keep collections", "scoring": {} }
+    ]
+  },
+  {
+    "scenario": "Существуют правила, которые «все понимают без слов». Например, о чём можно шутить на работе.",
+    "scenarioEn": "There are rules \"everyone understands without words\" — like what one may joke about at work.",
+    "options": [
+      {
+        "text": "Эти невидимые правила — вечный источник моих проколов",
+        "textEn": "These invisible rules are the eternal source of my missteps",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Чувствую их кожей и никогда не ошибаюсь",
+        "textEn": "I feel them instinctively and never err",
+        "scoring": { "MAC": 1, "HIS": 1 }
+      },
+      {
+        "text": "Прошу проговаривать правила словами — так честнее для всех",
+        "textEn": "I ask for rules to be spelled out — fairer for everyone",
+        "scoring": { "ASD": 2, "DIR": 2 }
+      },
+      {
+        "text": "Считаю такие правила лицемерием",
+        "textEn": "I consider such rules hypocrisy",
+        "scoring": { "ANT": 1, "DIR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Долгий разговор глаза в глаза. Как вам контакт взглядом?",
+    "scenarioEn": "A long face-to-face conversation. How is eye contact for you?",
+    "options": [
+      {
+        "text": "Естественно: глаза — часть разговора",
+        "textEn": "Natural: eyes are part of the conversation",
+        "scoring": { "HIS": 1, "FAI": 1 }
+      },
+      {
+        "text": "Утомляет: приходится напоминать себе смотреть в глаза",
+        "textEn": "Tiring: I have to remind myself to keep looking",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Лучше думается, глядя в сторону — так и слушаю",
+        "textEn": "I think better looking away — that's how I listen",
+        "scoring": { "ASD": 2, "SZT": 1 }
+      },
+      {
+        "text": "Зависит от собеседника: с близкими легко, с чужими нет",
+        "textEn": "Depends on the person: easy with close ones, hard with strangers",
+        "scoring": { "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы заметили несостыковку в данных, которую пропустили все. Она мелкая, но она есть.",
+    "scenarioEn": "You've spotted an inconsistency in the data everyone missed. It's minor — but it's there.",
+    "options": [
+      {
+        "text": "Не успокоюсь, пока не докопаюсь до причины",
+        "textEn": "I won't rest until I've dug down to the cause",
+        "scoring": { "ASD": 3, "OBC": 1 }
+      },
+      {
+        "text": "Отмечу и вернусь, если останется время",
+        "textEn": "I'll note it and return if time allows",
+        "scoring": { "OBC": 1 }
+      },
+      {
+        "text": "Промолчу: не хочу выглядеть занудой",
+        "textEn": "I'll keep quiet: I don't want to look like a pedant",
+        "scoring": { "AVD": 2 }
+      },
+      {
+        "text": "Сообщу тому, чья это зона, и забуду",
+        "textEn": "I'll tell whoever owns that area and move on",
+        "scoring": { "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Позади день, полный людей и разговоров. Вечер. Что с вами происходит?",
+    "scenarioEn": "A day full of people and conversations is over. Evening. What's happening with you?",
+    "options": [
+      {
+        "text": "Заряжен: люди дают мне энергию",
+        "textEn": "Charged up: people give me energy",
+        "scoring": { "HIS": 2 }
+      },
+      {
+        "text": "Мне физически необходимо несколько часов полной тишины",
+        "textEn": "I physically need several hours of complete silence",
+        "scoring": { "ASD": 3 }
+      },
+      {
+        "text": "Прокручиваю разговоры: всё ли я сказал правильно",
+        "textEn": "I replay the conversations: did I say everything right",
+        "scoring": { "AVD": 2, "OBC": 1 }
+      },
+      {
+        "text": "Обычная усталость, как после любой работы",
+        "textEn": "Ordinary tiredness, like after any work",
+        "scoring": {}
+      }
+    ]
+  }
+]

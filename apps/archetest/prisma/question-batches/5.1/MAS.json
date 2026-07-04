@@ -1,0 +1,390 @@
+[
+  {
+    "scenario": "Две задачи на выбор: интересная и лёгкая — или изматывающая, «зато настоящая».",
+    "scenarioEn": "Two tasks to choose from: interesting and easy — or grueling, \"but real\".",
+    "options": [
+      {
+        "text": "Изматывающую: лёгкое не считается",
+        "textEn": "The grueling one: easy doesn't count",
+        "scoring": { "MAS": 3, "OBC": 1 }
+      },
+      {
+        "text": "Лёгкую и интересную: страдание — не критерий ценности",
+        "textEn": "The easy, interesting one: suffering is not a measure of worth",
+        "scoring": { "NAR": 1, "HIS": 1 }
+      },
+      {
+        "text": "Ту, что полезнее для цели, независимо от тяжести",
+        "textEn": "Whichever serves the goal better, regardless of difficulty",
+        "scoring": { "MAC": 1, "OBC": 2 }
+      },
+      {
+        "text": "Какую скажут: мне почти всё равно",
+        "textEn": "Whichever I'm told: I hardly care",
+        "scoring": { "DEP": 2, "ALX": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Зуб ноет уже неделю. Ваши действия?",
+    "scenarioEn": "A tooth has been aching for a week. Your move?",
+    "options": [
+      {
+        "text": "Терплю дальше: само пройдёт или дотерплю до отпуска",
+        "textEn": "I keep enduring: it'll pass, or I'll hold out till vacation",
+        "scoring": { "MAS": 3, "AVD": 1 }
+      },
+      {
+        "text": "Давно записан к врачу, иду завтра",
+        "textEn": "Already booked; I see the dentist tomorrow",
+        "scoring": { "OBC": 2 }
+      },
+      {
+        "text": "Пью обезболивающее и живу дальше",
+        "textEn": "Painkillers and life goes on",
+        "scoring": { "MAS": 1, "ALX": 1 }
+      },
+      {
+        "text": "Паникую и читаю про худшие сценарии",
+        "textEn": "I panic and read up on worst-case scenarios",
+        "scoring": { "PAR": 1, "DPR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы тащите тяжёлый проект в одиночку. Коллега искренне предлагает забрать половину.",
+    "scenarioEn": "You're hauling a heavy project alone. A colleague sincerely offers to take half.",
+    "options": [
+      {
+        "text": "Откажусь: мой крест — мне и нести",
+        "textEn": "I'll decline: my cross, my burden",
+        "scoring": { "MAS": 3, "NAR": 1 }
+      },
+      {
+        "text": "Соглашусь с благодарностью",
+        "textEn": "I'll accept with gratitude",
+        "scoring": { "FAI": 2, "HUM": 1 }
+      },
+      {
+        "text": "Отдам рутину, ядро оставлю себе",
+        "textEn": "I'll hand over the routine, keep the core",
+        "scoring": { "OBC": 2, "NAR": 1 }
+      },
+      {
+        "text": "Соглашусь, но буду перепроверять каждый его шаг",
+        "textEn": "I'll accept but double-check his every step",
+        "scoring": { "PAR": 2, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Отношения, в которых вам регулярно больно, но и ярко. Уже давно.",
+    "scenarioEn": "A relationship that regularly hurts — but burns bright. For a long time now.",
+    "options": [
+      {
+        "text": "Остаюсь: настоящая близость не бывает безболезненной",
+        "textEn": "I stay: real intimacy is never painless",
+        "scoring": { "MAS": 3, "BOR": 1 }
+      },
+      {
+        "text": "Ставлю условия: либо меняемся, либо расходимся",
+        "textEn": "I set terms: we change or we part",
+        "scoring": { "DIR": 2, "KAN": 1 }
+      },
+      {
+        "text": "Ухожу: боль — это сигнал, а не норма",
+        "textEn": "I leave: pain is a signal, not a norm",
+        "scoring": { "NAR": 1, "OBC": 1 }
+      },
+      {
+        "text": "Остаюсь и надеюсь, что само наладится",
+        "textEn": "I stay and hope it fixes itself",
+        "scoring": { "DEP": 2, "AVD": 1, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Отпуск мечты: какой он?",
+    "scenarioEn": "Your dream vacation: what does it look like?",
+    "options": [
+      {
+        "text": "Поход на грани выживания: холод, вес, мозоли — и настоящесть",
+        "textEn": "A trek on the edge of survival: cold, weight, blisters — and realness",
+        "scoring": { "MAS": 2, "SZT": 1 }
+      },
+      {
+        "text": "Комфорт без подвигов: море, еда, тишина",
+        "textEn": "Comfort without heroics: sea, food, silence",
+        "scoring": { "HIS": 1 }
+      },
+      {
+        "text": "Насыщенная программа по часам",
+        "textEn": "A packed itinerary, scheduled by the hour",
+        "scoring": { "OBC": 2 }
+      },
+      {
+        "text": "Не помню, когда был в отпуске: работа важнее",
+        "textEn": "Can't remember my last vacation: work comes first",
+        "scoring": { "MAS": 2, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Чужой дедлайн снова горит, и вас снова просят выйти в выходные. Уже третий раз за месяц.",
+    "scenarioEn": "Someone else's deadline is burning again, and again you're asked to work the weekend. Third time this month.",
+    "options": [
+      {
+        "text": "Выйду: кто-то же должен, а я выносливый",
+        "textEn": "I'll come in: someone has to, and I can take it",
+        "scoring": { "MAS": 3, "DEP": 1 }
+      },
+      {
+        "text": "Откажу и назову причину: границы",
+        "textEn": "I'll refuse and say why: boundaries",
+        "scoring": { "DIR": 2, "NAR": 1 }
+      },
+      {
+        "text": "Выйду за отгулы или доплату",
+        "textEn": "I'll come in — for comp days or extra pay",
+        "scoring": { "MAC": 2 }
+      },
+      {
+        "text": "Соглашусь, а потом «заболею»",
+        "textEn": "I'll agree, then \"fall ill\"",
+        "scoring": { "PAG": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Свободный вечер без единого обязательства. Что с ним делать?",
+    "scenarioEn": "A free evening with zero obligations. What do you do with it?",
+    "options": [
+      {
+        "text": "Найду полезное дело: отдых нужно заслужить",
+        "textEn": "I'll find something productive: rest must be earned",
+        "scoring": { "MAS": 2, "OBC": 2 }
+      },
+      {
+        "text": "Отдыхаю без угрызений: вечер мой",
+        "textEn": "I rest guilt-free: the evening is mine",
+        "scoring": { "NAR": 1, "HIS": 1 }
+      },
+      {
+        "text": "Отдыхаю, но с фоновым чувством вины",
+        "textEn": "I rest, but with background guilt",
+        "scoring": { "MAS": 2, "DPR": 1 }
+      },
+      {
+        "text": "Растеряюсь: без задач мне не по себе",
+        "textEn": "I feel lost: no tasks makes me uneasy",
+        "scoring": { "OBC": 1, "ALX": 1, "DEP": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Выбор наставника: мягкий и поддерживающий — или беспощадный, «зато закаляет».",
+    "scenarioEn": "Choosing a mentor: gentle and supportive — or merciless, \"but he forges steel\".",
+    "options": [
+      {
+        "text": "Беспощадного: рост даётся только через боль",
+        "textEn": "The merciless one: growth only comes through pain",
+        "scoring": { "MAS": 3 }
+      },
+      {
+        "text": "Поддерживающего: страх не учит, а сжимает",
+        "textEn": "The supportive one: fear doesn't teach, it constricts",
+        "scoring": { "HUM": 1, "FAI": 1 }
+      },
+      {
+        "text": "Того, чьи ученики объективно сильнее",
+        "textEn": "Whichever one's students are objectively stronger",
+        "scoring": { "OBC": 2, "MAC": 1 }
+      },
+      {
+        "text": "Обоих: жёсткость дозирую сам",
+        "textEn": "Both: I'll dose the harshness myself",
+        "scoring": { "NAR": 1, "SZT": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы давно хотите дорогую вещь чисто для удовольствия. Деньги есть. Повода нет.",
+    "scenarioEn": "You've long wanted an expensive thing purely for pleasure. You have the money. There's no occasion.",
+    "options": [
+      {
+        "text": "Не куплю: удовольствие без повода — баловство",
+        "textEn": "I won't buy it: pleasure without occasion is indulgence",
+        "scoring": { "MAS": 2, "OBC": 1 }
+      },
+      {
+        "text": "Куплю: желание — уже достаточный повод",
+        "textEn": "I'll buy it: wanting it is occasion enough",
+        "scoring": { "HIS": 1, "NAR": 1 }
+      },
+      {
+        "text": "Назначу себе условие: сделаю X — куплю",
+        "textEn": "I'll set myself a condition: do X, then buy",
+        "scoring": { "MAS": 1, "OBC": 2 }
+      },
+      {
+        "text": "Буду месяцами обдумывать и так и не куплю",
+        "textEn": "I'll deliberate for months and never buy it",
+        "scoring": { "AVD": 1, "DPR": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В семье дефицит: лучший кусок, последняя порция, единственный билет. Кому?",
+    "scenarioEn": "Scarcity at home: the best piece, the last portion, the only ticket. Who gets it?",
+    "options": [
+      {
+        "text": "Кому угодно, только не мне: мне так спокойнее",
+        "textEn": "Anyone but me: that's how I'm at peace",
+        "scoring": { "MAS": 3, "DEP": 1 }
+      },
+      { "text": "Делим честно или по очереди", "textEn": "We split fairly or take turns", "scoring": { "KAN": 2 } },
+      { "text": "Тому, кому сейчас нужнее", "textEn": "Whoever needs it most right now", "scoring": { "HUM": 2 } },
+      {
+        "text": "Иногда — мне, и это нормально",
+        "textEn": "Sometimes it's me, and that's fine",
+        "scoring": { "NAR": 1, "DIR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Тренировка. Тело говорит «хватит», план говорит «ещё два подхода».",
+    "scenarioEn": "Workout. The body says \"enough\"; the plan says \"two more sets\".",
+    "options": [
+      {
+        "text": "Доделаю через «не могу»: боль — это слабость, выходящая из тела",
+        "textEn": "I'll push through: pain is weakness leaving the body",
+        "scoring": { "MAS": 3 }
+      },
+      {
+        "text": "Остановлюсь: сигналы тела важнее плана",
+        "textEn": "I'll stop: the body's signals outrank the plan",
+        "scoring": { "HUM": 1, "OBC": 1 }
+      },
+      {
+        "text": "Снижу вес и закончу технично",
+        "textEn": "I'll drop the weight and finish with clean form",
+        "scoring": { "OBC": 2 }
+      },
+      {
+        "text": "Я редко слышу «хватит», пока не свалюсь",
+        "textEn": "I rarely hear \"enough\" until I collapse",
+        "scoring": { "MAS": 2, "ALX": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Человек, который причинил вам сильную боль, просит вернуться — «всё будет иначе».",
+    "scenarioEn": "The person who hurt you deeply asks you back — \"it will be different\".",
+    "options": [
+      {
+        "text": "Вернусь: любовь и должна проходить через боль",
+        "textEn": "I'll return: love is meant to pass through pain",
+        "scoring": { "MAS": 3, "DEP": 1 }
+      },
+      {
+        "text": "Вернусь при видимых изменениях, не словах",
+        "textEn": "I'll return upon visible change, not words",
+        "scoring": { "OBC": 1, "FAI": 1 }
+      },
+      {
+        "text": "Не вернусь: этот урок уже оплачен",
+        "textEn": "I won't: that lesson is already paid for",
+        "scoring": { "NAR": 1, "KAN": 1 }
+      },
+      {
+        "text": "Не отвечу: пусть решится само",
+        "textEn": "I won't reply: let it resolve itself",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Практики холода, голодания, аскез — как вы к ним относитесь лично?",
+    "scenarioEn": "Cold exposure, fasting, ascetic practices — how do you personally relate to them?",
+    "options": [
+      {
+        "text": "Мой язык: через лишение я чувствую себя живым",
+        "textEn": "My language: through deprivation I feel alive",
+        "scoring": { "MAS": 3, "SZT": 1 }
+      },
+      {
+        "text": "Пробую дозированно, по протоколам и науке",
+        "textEn": "I try them in doses, by protocol and science",
+        "scoring": { "OBC": 2 }
+      },
+      {
+        "text": "Не моё: телу и так достаётся",
+        "textEn": "Not my thing: the body gets enough as it is",
+        "scoring": { "HUM": 1 }
+      },
+      {
+        "text": "Это мода: страдание не делает людей лучше",
+        "textEn": "It's a fad: suffering doesn't improve people",
+        "scoring": { "DIR": 1, "NAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вас хвалят при всех — заслуженно и тепло. Что внутри?",
+    "scenarioEn": "You're being praised publicly — deservedly and warmly. What's inside?",
+    "options": [
+      {
+        "text": "Неловкость: хочется, чтобы это скорее закончилось",
+        "textEn": "Awkwardness: I want it to end quickly",
+        "scoring": { "MAS": 1, "AVD": 2 }
+      },
+      {
+        "text": "Радость: приятно, когда видят",
+        "textEn": "Joy: it feels good to be seen",
+        "scoring": { "HIS": 1, "NAR": 1 }
+      },
+      {
+        "text": "Недоверие: за похвалой обычно следует просьба",
+        "textEn": "Distrust: praise is usually followed by a request",
+        "scoring": { "PAR": 2, "MAC": 1 }
+      },
+      {
+        "text": "Пустота: с критикой мне привычнее, чем с похвалой",
+        "textEn": "Emptiness: criticism is more familiar to me than praise",
+        "scoring": { "MAS": 2, "DPR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы объективно переросли свою роль. Повышение само не приходит.",
+    "scenarioEn": "You've objectively outgrown your role. The promotion isn't coming on its own.",
+    "options": [
+      {
+        "text": "Продолжу тянуть молча: достойных замечают без просьб",
+        "textEn": "I'll keep pulling silently: the worthy get noticed without asking",
+        "scoring": { "MAS": 2, "DEP": 2 }
+      },
+      {
+        "text": "Прямо попрошу повышение с аргументами",
+        "textEn": "I'll ask for the promotion directly, with arguments",
+        "scoring": { "DIR": 2, "NAR": 1 }
+      },
+      {
+        "text": "Подготовлю почву: успехи на виду, союзники в курсе",
+        "textEn": "I'll prepare the ground: wins visible, allies informed",
+        "scoring": { "MAC": 2, "OBC": 1 }
+      },
+      {
+        "text": "Начну искать другое место без разговоров",
+        "textEn": "I'll quietly start looking elsewhere",
+        "scoring": { "AVD": 1, "SZD": 1, "PAG": 1 }
+      }
+    ]
+  }
+]

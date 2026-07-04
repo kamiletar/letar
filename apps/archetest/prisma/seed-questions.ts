@@ -1,10 +1,13 @@
 /**
- * Seed-скрипт: загрузка 1955 вопросов квиза из JSON-дампа.
+ * Seed-скрипт: загрузка вопросов квиза из JSON-дампа (ZenStack v3 ORM).
  *
- * Запуск: npx tsx apps/archetest/prisma/seed-questions.ts
+ * Запуск: npx tsx --env-file=.env.local apps/archetest/prisma/seed-questions.ts
  * Или через Nx target: nx db:seed archetest
  */
-import { PrismaClient } from '../src/generated/prisma'
+import { ZenStackClient } from '@zenstackhq/orm'
+import { PostgresDialect } from 'kysely'
+import { Pool } from 'pg'
+import { schema } from '../src/generated/schema'
 import questionsRaw from './questions-dump.json'
 
 interface QuestionDump {
@@ -17,14 +20,18 @@ interface QuestionDump {
   createdAt: string
 }
 
-const prisma = new PrismaClient()
+const db = new ZenStackClient(schema, {
+  dialect: new PostgresDialect({
+    pool: new Pool({ connectionString: process.env.DATABASE_URL }),
+  }) as never,
+})
 
 async function main() {
   const questions = questionsRaw as QuestionDump[]
   console.log(`Загрузка ${questions.length} вопросов...`)
 
   // Удаляем старые вопросы (если есть)
-  const deleted = await prisma.quizQuestion.deleteMany()
+  const deleted = await db.quizQuestion.deleteMany()
   if (deleted.count > 0) {
     console.log(`Удалено ${deleted.count} старых вопросов`)
   }
@@ -35,7 +42,7 @@ async function main() {
 
   for (let i = 0; i < questions.length; i += BATCH_SIZE) {
     const batch = questions.slice(i, i + BATCH_SIZE)
-    await prisma.quizQuestion.createMany({
+    await db.quizQuestion.createMany({
       data: batch.map((q) => ({
         id: q.id,
         scenario: q.scenario,
@@ -60,4 +67,4 @@ main()
     console.error('Ошибка seed:', e)
     process.exit(1)
   })
-  .finally(() => prisma.$disconnect())
+  .finally(() => process.exit(0))

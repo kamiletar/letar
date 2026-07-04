@@ -1,0 +1,385 @@
+[
+  {
+    "scenario": "Близкий человек спрашивает в упор: «Что ты сейчас чувствуешь?»",
+    "scenarioEn": "Someone close asks you point-blank: \"What are you feeling right now?\"",
+    "options": [
+      {
+        "text": "Внутри — пауза и белый шум: я правда не знаю",
+        "textEn": "Inside — a pause and white noise: I genuinely don't know",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Назову чувство сразу и точно",
+        "textEn": "I'll name the feeling immediately and precisely",
+        "scoring": {}
+      },
+      {
+        "text": "Расскажу, что я думаю — про чувства так не умею",
+        "textEn": "I'll say what I think — feelings don't work that way for me",
+        "scoring": { "ALX": 2, "ASD": 1 }
+      },
+      {
+        "text": "Раздражаюсь: зачем эти допросы",
+        "textEn": "I get irritated: why these interrogations",
+        "scoring": { "ALX": 1, "PAG": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Стрессовая неделя. К её концу у вас болит голова и сводит плечи.",
+    "scenarioEn": "A stressful week. By its end you have a headache and knotted shoulders.",
+    "options": [
+      {
+        "text": "Только по таким сигналам я и узнаю, что был в стрессе",
+        "textEn": "These signals are the only way I learn I've been stressed",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Я почувствовал стресс раньше тела и уже что-то предпринял",
+        "textEn": "I felt the stress before my body did and already acted",
+        "scoring": {}
+      },
+      {
+        "text": "Пью обезболивающее: голова отдельно, жизнь отдельно",
+        "textEn": "I take a painkiller: the head is one thing, life is another",
+        "scoring": { "ALX": 2 }
+      },
+      {
+        "text": "Ищу медицинскую причину: может, что-то серьёзное",
+        "textEn": "I look for a medical cause: could be something serious",
+        "scoring": { "PAR": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Выбираете фильм на вечер «под настроение». Как это происходит?",
+    "scenarioEn": "Choosing tonight's movie \"to match the mood\". How does that go?",
+    "options": [
+      {
+        "text": "Точно знаю, чего хочет моё настроение: сегодня — вот это",
+        "textEn": "I know exactly what my mood wants: tonight — this one",
+        "scoring": {}
+      },
+      {
+        "text": "«Под настроение» — это не про меня: выбираю по рейтингу",
+        "textEn": "\"Matching the mood\" isn't my thing: I pick by rating",
+        "scoring": { "ALX": 3, "OBC": 1 }
+      },
+      {
+        "text": "Листаю час и не могу понять, чего хочу",
+        "textEn": "I scroll for an hour, unable to tell what I want",
+        "scoring": { "ALX": 2, "AVD": 1 }
+      },
+      {
+        "text": "Смотрю то же, что всегда: проверенное",
+        "textEn": "I rewatch the usual: the proven stuff",
+        "scoring": { "ASD": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Партнёр плачет. На вопрос «что случилось?» отвечает: «Ничего».",
+    "scenarioEn": "Your partner is crying. Asked \"what's wrong?\", they answer: \"Nothing.\"",
+    "options": [
+      {
+        "text": "Верю слову «ничего» и возвращаюсь к делам — потом окажется, что зря",
+        "textEn": "I take \"nothing\" at face value and go back to my tasks — later it turns out I shouldn't have",
+        "scoring": { "ALX": 3, "ASD": 1 }
+      },
+      {
+        "text": "Сажусь рядом: слова говорят «ничего», всё остальное — «побудь со мной»",
+        "textEn": "I sit down beside them: the words say \"nothing\", everything else says \"stay\"",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Теряюсь и делаю что-то практическое: чай, плед",
+        "textEn": "I feel lost and do something practical: tea, a blanket",
+        "scoring": { "ALX": 2, "HUM": 1 }
+      },
+      {
+        "text": "Ухожу: захочет — скажет",
+        "textEn": "I leave: they'll speak when ready",
+        "scoring": { "SZD": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "«Как дела?» — спрашивает человек, которому правда интересно.",
+    "scenarioEn": "\"How are you?\" asks someone who genuinely wants to know.",
+    "options": [
+      {
+        "text": "«Нормально». Это не отговорка — я правда не знаю, как дела внутри",
+        "textEn": "\"Fine.\" Not a brush-off — I truly don't know how things are inside",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Расскажу про события: работа, планы, факты",
+        "textEn": "I'll report events: work, plans, facts",
+        "scoring": { "ALX": 2 }
+      },
+      {
+        "text": "Опишу и события, и как они во мне отзываются",
+        "textEn": "I'll describe both the events and how they resonate in me",
+        "scoring": {}
+      },
+      {
+        "text": "Отшучусь: вглубь пускаю немногих",
+        "textEn": "I'll joke it off: few are allowed deeper",
+        "scoring": { "AVD": 1, "HIS": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Как вы обычно узнаёте, что злитесь?",
+    "scenarioEn": "How do you usually find out you're angry?",
+    "options": [
+      {
+        "text": "Мне сообщают окружающие — сам я узнаю последним",
+        "textEn": "Others inform me — I'm the last to know",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Чувствую сразу, как только злость появляется",
+        "textEn": "I feel it the moment it arises",
+        "scoring": {}
+      },
+      {
+        "text": "По телу: сжатые челюсти, горячее лицо",
+        "textEn": "Through the body: clenched jaw, hot face",
+        "scoring": { "ALX": 1 }
+      },
+      {
+        "text": "По последствиям: резкие слова уже сказаны",
+        "textEn": "By the consequences: the sharp words are already out",
+        "scoring": { "ALX": 2, "BOR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Психолог предлагает вести дневник эмоций: трижды в день записывать, что чувствуете.",
+    "scenarioEn": "A psychologist suggests an emotion journal: three times a day, write down what you feel.",
+    "options": [
+      {
+        "text": "Легко: у меня и так внутри постоянная лента чувств",
+        "textEn": "Easy: there's a running feed of feelings inside me anyway",
+        "scoring": { "BOR": 1, "HIS": 1 }
+      },
+      {
+        "text": "Сажусь записывать — и страница остаётся пустой",
+        "textEn": "I sit down to write — and the page stays blank",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Пишу события вместо чувств, ловлю себя на этом",
+        "textEn": "I write events instead of feelings and catch myself doing it",
+        "scoring": { "ALX": 2 }
+      },
+      {
+        "text": "Скучно и бессмысленно: чем это поможет?",
+        "textEn": "Boring and pointless: how would that help?",
+        "scoring": { "ANT": 1, "ALX": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Партнёр: «Нам нужно поговорить о наших чувствах». Ваша первая внутренняя реакция?",
+    "scenarioEn": "Your partner: \"We need to talk about our feelings.\" Your first inner reaction?",
+    "options": [
+      {
+        "text": "Ощущение экзамена, к которому невозможно подготовиться",
+        "textEn": "The feeling of an exam you cannot study for",
+        "scoring": { "ALX": 3, "AVD": 1 }
+      },
+      {
+        "text": "Хорошо: разговоры о чувствах сближают",
+        "textEn": "Good: talking about feelings brings us closer",
+        "scoring": { "HUM": 1 }
+      },
+      {
+        "text": "Предложу говорить о конкретных ситуациях и решениях",
+        "textEn": "I'll suggest discussing specific situations and solutions",
+        "scoring": { "ALX": 2, "OBC": 1 }
+      },
+      {
+        "text": "Напрягусь: такие разговоры обычно значат, что я виноват",
+        "textEn": "I tense up: such talks usually mean I'm at fault",
+        "scoring": { "PAR": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Трогательная сцена в кино. Половина зала тихонько шмыгает носом.",
+    "scenarioEn": "A touching scene in a movie. Half the audience is quietly sniffling.",
+    "options": [
+      {
+        "text": "Смотрю на плачущих как на загадку: что именно их включило?",
+        "textEn": "I watch the criers like a puzzle: what exactly switched them on?",
+        "scoring": { "ALX": 2, "ASD": 1 }
+      },
+      { "text": "Шмыгаю вместе со всеми", "textEn": "I sniffle along with everyone", "scoring": {} },
+      {
+        "text": "Внутри что-то шевелится, но что — не разобрать",
+        "textEn": "Something stirs inside, but I can't make out what",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Анализирую приёмы: музыка, монтаж, крупные планы",
+        "textEn": "I analyze the craft: score, editing, close-ups",
+        "scoring": { "ALX": 1, "SZT": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Случилось что-то однозначно хорошее. Как вы проживаете радость?",
+    "scenarioEn": "Something unambiguously good happened. How do you live out the joy?",
+    "options": [
+      {
+        "text": "На полную: пою, звоню друзьям, свечусь",
+        "textEn": "At full volume: singing, calling friends, glowing",
+        "scoring": { "HIS": 2 }
+      },
+      {
+        "text": "Понимаю, что «должен радоваться», но внутри ровно",
+        "textEn": "I understand I \"should be happy\", but inside it's flat",
+        "scoring": { "ALX": 3, "DPR": 1 }
+      },
+      { "text": "Тихое тёплое удовлетворение", "textEn": "A quiet warm satisfaction", "scoring": {} },
+      {
+        "text": "Сразу думаю, что может пойти не так",
+        "textEn": "I immediately think what could go wrong",
+        "scoring": { "PAR": 1, "DPR": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "К вечеру вы «никакой». Что это — усталость, грусть, злость, голод?",
+    "scenarioEn": "By evening you're \"wiped out\". Is it fatigue, sadness, anger, hunger?",
+    "options": [
+      {
+        "text": "Для меня это всё одно неразличимое «плохо»",
+        "textEn": "To me it's all one indistinguishable \"bad\"",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Различаю без труда и действую по причине",
+        "textEn": "I tell them apart easily and act on the cause",
+        "scoring": {}
+      },
+      {
+        "text": "Прогоняю чек-лист: ел? спал? что случилось?",
+        "textEn": "I run a checklist: eaten? slept? what happened?",
+        "scoring": { "ALX": 1, "OBC": 2 }
+      },
+      {
+        "text": "Просто ложусь спать: утро разберётся",
+        "textEn": "I just go to sleep: morning will sort it out",
+        "scoring": { "ALX": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Важное решение. На чём основан ваш выбор?",
+    "scenarioEn": "A major decision. What is your choice based on?",
+    "options": [
+      {
+        "text": "Только аргументы: «нутро» для меня молчит",
+        "textEn": "Arguments only: my \"gut\" stays silent",
+        "scoring": { "ALX": 2, "OBC": 1 }
+      },
+      {
+        "text": "Сначала слушаю нутро, потом проверяю логикой",
+        "textEn": "First I listen to the gut, then check with logic",
+        "scoring": { "SZT": 1 }
+      },
+      {
+        "text": "Таблица: критерии, веса, баллы",
+        "textEn": "A spreadsheet: criteria, weights, scores",
+        "scoring": { "OBC": 2, "ASD": 1 }
+      },
+      {
+        "text": "Спрашиваю мнения тех, кому доверяю",
+        "textEn": "I ask the people I trust",
+        "scoring": { "DEP": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Друг в беде звонит вам выговориться. Что вы делаете во время разговора?",
+    "scenarioEn": "A friend in trouble calls to vent. What do you do during the call?",
+    "options": [
+      {
+        "text": "Слушаю и называю его чувства: «звучит, как отчаяние»",
+        "textEn": "I listen and name his feelings: \"that sounds like despair\"",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Сразу предлагаю план решения проблемы",
+        "textEn": "I immediately offer a plan to fix the problem",
+        "scoring": { "ALX": 2, "OBC": 1 }
+      },
+      {
+        "text": "Слушаю молча: не знаю, что говорить в таких случаях",
+        "textEn": "I listen in silence: I never know what to say",
+        "scoring": { "ALX": 2, "AVD": 1 }
+      },
+      {
+        "text": "Рассказываю похожий случай из своей жизни",
+        "textEn": "I share a similar story from my own life",
+        "scoring": { "HIS": 1, "NAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы заметили: на вопрос «как ты?» вы годами отвечаете одним словом — «нормально».",
+    "scenarioEn": "You've noticed: for years your answer to \"how are you?\" has been one word — \"fine\".",
+    "options": [
+      {
+        "text": "Это не привычка: точнее я сформулировать не могу",
+        "textEn": "It's not a habit: I can't put it more precisely",
+        "scoring": { "ALX": 3 }
+      },
+      {
+        "text": "Это броня: чувств много, показывать не хочу",
+        "textEn": "It's armor: many feelings, no wish to show them",
+        "scoring": { "AVD": 2, "SZD": 1 }
+      },
+      {
+        "text": "Это экономия: подробности — для близких",
+        "textEn": "It's economy: details are for close ones",
+        "scoring": { "SZD": 1 }
+      },
+      {
+        "text": "Неправда: я отвечаю развёрнуто и разное",
+        "textEn": "Not true: my answers are varied and detailed",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "В детстве на ваши «мне грустно» отвечали «не выдумывай». Как это отзывается сейчас?",
+    "scenarioEn": "In childhood, your \"I'm sad\" was met with \"don't make things up\". How does it echo now?",
+    "options": [
+      {
+        "text": "Никак: я в порядке, чувства при мне",
+        "textEn": "It doesn't: I'm fine, my feelings are intact",
+        "scoring": {}
+      },
+      {
+        "text": "Я до сих пор не уверен, что мои чувства настоящие",
+        "textEn": "I'm still unsure my feelings are real",
+        "scoring": { "ALX": 3, "DPR": 1 }
+      },
+      {
+        "text": "Чувствую всё, но озвучивать разучился",
+        "textEn": "I feel everything but unlearned voicing it",
+        "scoring": { "ALX": 2, "AVD": 1 }
+      },
+      { "text": "У меня такого не было", "textEn": "That wasn't my experience", "scoring": {} }
+    ]
+  }
+]

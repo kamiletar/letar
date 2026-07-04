@@ -1,0 +1,389 @@
+[
+  {
+    "scenario": "Кассир дал сдачу как с крупной купюры, хотя вы платили мелкой. Никто не заметил.",
+    "scenarioEn": "The cashier gave you change as if for a large bill, though you paid with a small one. Nobody noticed.",
+    "options": [
+      {
+        "text": "Верну сразу: чужие деньги не становятся моими от чужой ошибки",
+        "textEn": "I'll return it immediately: someone's mistake doesn't make their money mine",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Верну, представив, что кассиру придётся доплачивать из зарплаты",
+        "textEn": "I'll return it, picturing the cashier covering the shortfall from her pay",
+        "scoring": { "HUM": 2, "KAN": 1 }
+      },
+      {
+        "text": "Оставлю: судьба иногда доплачивает",
+        "textEn": "I'll keep it: fate pays a bonus sometimes",
+        "scoring": { "ANT": 2 }
+      },
+      {
+        "text": "Оставлю, но настроение будет подпорчено",
+        "textEn": "I'll keep it, but my mood will be soured",
+        "scoring": { "DPR": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы пообещали помочь с переездом, но накануне вам предложили билеты на событие мечты.",
+    "scenarioEn": "You promised to help with a move, but the day before you're offered tickets to a dream event.",
+    "options": [
+      {
+        "text": "Поеду на переезд: слово дано",
+        "textEn": "I'll go help with the move: my word was given",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Честно расскажу и спрошу, критична ли моя помощь",
+        "textEn": "I'll tell them honestly and ask if my help is critical",
+        "scoring": { "DIR": 2, "FAI": 1 }
+      },
+      {
+        "text": "Найду замену себе и поеду на событие",
+        "textEn": "I'll find a replacement and go to the event",
+        "scoring": { "MAC": 2 }
+      },
+      { "text": "Скажу, что заболел", "textEn": "I'll say I got sick", "scoring": { "ANT": 2, "AVD": 1 } }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "«Все так делают» — говорят вам про серую схему, экономящую заметные деньги.",
+    "scenarioEn": "\"Everyone does it,\" they tell you about a grey scheme that saves real money.",
+    "options": [
+      {
+        "text": "Если все — значит, система это допускает. Пользуюсь",
+        "textEn": "If everyone does, the system allows it. I'm in",
+        "scoring": { "ANT": 2, "MAC": 1 }
+      },
+      {
+        "text": "Не пользуюсь: «все» — не аргумент",
+        "textEn": "I pass: \"everyone\" is not an argument",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Посчитаю риски и решу по выгоде",
+        "textEn": "I'll weigh the risks and decide by the numbers",
+        "scoring": { "MAC": 2, "OBC": 1 }
+      },
+      {
+        "text": "Откажусь: попадаться слишком неприятно",
+        "textEn": "I'll pass: getting caught is too unpleasant",
+        "scoring": { "AVD": 1, "PAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В зарплате ошибка в вашу пользу — перевели заметно больше положенного.",
+    "scenarioEn": "A payroll error in your favor — you were paid noticeably more than due.",
+    "options": [
+      {
+        "text": "Сообщу в бухгалтерию в тот же день",
+        "textEn": "I'll notify accounting the same day",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Промолчу: их ошибка — их работа её находить",
+        "textEn": "I'll keep quiet: their error, their job to catch it",
+        "scoring": { "ANT": 2 }
+      },
+      {
+        "text": "Отложу сумму и не трону, пока не спросят",
+        "textEn": "I'll set the sum aside untouched until they ask",
+        "scoring": { "OBC": 2, "PAR": 1 }
+      },
+      {
+        "text": "Сообщу, но с лёгким сожалением",
+        "textEn": "I'll report it — with a twinge of regret",
+        "scoring": { "KAN": 2, "DIR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Ваш близкий друг нарушил правило, за которое другого вы бы осудили.",
+    "scenarioEn": "A close friend broke a rule you would condemn a stranger for breaking.",
+    "options": [
+      {
+        "text": "Для друзей — другие правила, это нормально",
+        "textEn": "Friends get different rules; that's normal",
+        "scoring": { "DEP": 1, "FAI": 1 }
+      },
+      {
+        "text": "Скажу ему то же, что сказал бы чужому",
+        "textEn": "I'll tell him exactly what I'd tell a stranger",
+        "scoring": { "KAN": 3, "DIR": 2 }
+      },
+      {
+        "text": "Промолчу, но доверие уменьшится",
+        "textEn": "I'll say nothing, but my trust will shrink",
+        "scoring": { "AVD": 1, "PAR": 1 }
+      },
+      {
+        "text": "Помогу скрыть: свои люди важнее правил",
+        "textEn": "I'll help cover it up: my people matter more than rules",
+        "scoring": { "ANT": 2, "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "На кассе самообслуживания не пробился один товар. Охраны и камер, кажется, нет.",
+    "scenarioEn": "At self-checkout one item didn't scan. No guards or cameras in sight, it seems.",
+    "options": [
+      {
+        "text": "Пробью заново или позову сотрудника",
+        "textEn": "I'll rescan it or call a staff member",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Заберу: их техника — их проблемы",
+        "textEn": "I'll take it: their tech, their problem",
+        "scoring": { "ANT": 2 }
+      },
+      {
+        "text": "Заберу, если сумма мелкая",
+        "textEn": "I'll take it if it's cheap",
+        "scoring": { "ANT": 1, "MAC": 1 }
+      },
+      {
+        "text": "Оставлю товар на кассе и уйду без него",
+        "textEn": "I'll leave the item at the till and go without it",
+        "scoring": { "AVD": 2, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вам предлагают «откат» за то, чтобы выбрать конкретного подрядчика. Подрядчик, кстати, неплохой.",
+    "scenarioEn": "You're offered a kickback to pick a specific contractor. The contractor is decent, by the way.",
+    "options": [
+      {
+        "text": "Откажусь и исключу этого подрядчика из конкурса",
+        "textEn": "I'll refuse and remove that contractor from the tender",
+        "scoring": { "KAN": 3, "DIR": 1 }
+      },
+      {
+        "text": "Откажусь от денег, но подрядчика оценю честно",
+        "textEn": "I'll refuse the money but judge the contractor fairly",
+        "scoring": { "KAN": 2, "HUM": 1 }
+      },
+      {
+        "text": "Возьму: результат же не пострадает",
+        "textEn": "I'll take it: the outcome won't suffer",
+        "scoring": { "ANT": 2, "MAC": 2 }
+      },
+      { "text": "Откажусь: слишком рискованно", "textEn": "I'll refuse: too risky", "scoring": { "PAR": 1, "OBC": 1 } }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Начальник просит слегка «подкрутить» цифры в отчёте — клиент всё равно не заметит.",
+    "scenarioEn": "Your boss asks you to slightly \"adjust\" the report numbers — the client won't notice anyway.",
+    "options": [
+      {
+        "text": "Подкручу: лояльность и мир в команде дороже абстракций",
+        "textEn": "I'll adjust them: loyalty and team peace beat abstractions",
+        "scoring": { "DEP": 2, "MAC": 1 }
+      },
+      {
+        "text": "Откажусь и предложу честную альтернативу подачи",
+        "textEn": "I'll refuse and offer an honest way to present it",
+        "scoring": { "KAN": 3, "DIR": 1 }
+      },
+      {
+        "text": "Подкручу, но сохраню переписку на всякий случай",
+        "textEn": "I'll adjust them but keep the correspondence, just in case",
+        "scoring": { "MAC": 2, "PAR": 2 }
+      },
+      {
+        "text": "Скажусь занятым, чтобы это делал кто-то другой",
+        "textEn": "I'll plead busy so someone else does it",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ваш экзамен. Сосед, у которого болел ребёнок и не было времени готовиться, просит дать списать.",
+    "scenarioEn": "Exam day. Your neighbor, whose child was sick so he couldn't study, asks to copy from you.",
+    "options": [
+      {
+        "text": "Не дам: у каждого свой экзамен",
+        "textEn": "I won't: everyone sits their own exam",
+        "scoring": { "KAN": 2, "OBC": 1 }
+      },
+      {
+        "text": "Дам: обстоятельства сильнее регламента",
+        "textEn": "I will: circumstances outweigh regulations",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      {
+        "text": "Дам, но потребую услугу взамен",
+        "textEn": "I will, but I'll require a favor in return",
+        "scoring": { "MAC": 2, "ANT": 1 }
+      },
+      {
+        "text": "Помогу подготовиться в оставшееся время",
+        "textEn": "I'll help him cram in the time left",
+        "scoring": { "HUM": 2, "KAN": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы обещали ребёнку поход в парк, но внезапно позвали на важную для карьеры встречу.",
+    "scenarioEn": "You promised your kid a trip to the park, but got called to a career-critical meeting.",
+    "options": [
+      {
+        "text": "Парк: обещания детям — самые твёрдые",
+        "textEn": "The park: promises to children are the firmest kind",
+        "scoring": { "KAN": 3, "HUM": 1 }
+      },
+      {
+        "text": "Встреча, ребёнку — компенсацию вдвое больше",
+        "textEn": "The meeting; the kid gets double compensation",
+        "scoring": { "MAC": 1, "NAR": 1 }
+      },
+      {
+        "text": "Попробую втиснуть и то и другое, пусть и скомканно",
+        "textEn": "I'll try to squeeze in both, even if rushed",
+        "scoring": { "OBC": 1, "DEP": 1 }
+      },
+      {
+        "text": "Встреча. Ребёнок поймёт, когда вырастет",
+        "textEn": "The meeting. The kid will understand someday",
+        "scoring": { "NAR": 2, "ANT": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Пиратская копия дорогой программы сэкономит вам месячный доход. Для личных нужд, никто не узнает.",
+    "scenarioEn": "A pirated copy of expensive software would save you a month's income. Personal use, nobody would know.",
+    "options": [
+      {
+        "text": "Скачаю: корпорации не обеднеют",
+        "textEn": "I'll download it: corporations won't starve",
+        "scoring": { "ANT": 2 }
+      },
+      {
+        "text": "Куплю или найду бесплатный аналог",
+        "textEn": "I'll buy it or find a free alternative",
+        "scoring": { "KAN": 3, "OBC": 1 }
+      },
+      {
+        "text": "Скачаю попробовать, куплю если приживётся",
+        "textEn": "I'll pirate it to try, buy it if it sticks",
+        "scoring": { "MAC": 1, "ANT": 1 }
+      },
+      {
+        "text": "Скачаю, но буду чувствовать себя неуютно",
+        "textEn": "I'll download it but feel uneasy",
+        "scoring": { "DPR": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В споре выяснилось: вы были неправы с самого начала, но оппонент этого ещё не понял.",
+    "scenarioEn": "Mid-argument you realize you've been wrong from the start — but your opponent hasn't noticed yet.",
+    "options": [
+      {
+        "text": "Признаю сразу: «Я ошибался, ты прав»",
+        "textEn": "I'll concede at once: \"I was wrong, you're right\"",
+        "scoring": { "KAN": 3, "DIR": 2 }
+      },
+      {
+        "text": "Сверну спор нейтрально, без признания",
+        "textEn": "I'll wind the argument down neutrally, no concession",
+        "scoring": { "AVD": 1, "MAC": 1 }
+      },
+      {
+        "text": "Доспорю до конца: проигрывать нельзя",
+        "textEn": "I'll argue to the end: losing is not an option",
+        "scoring": { "NAR": 2, "ANT": 1 }
+      },
+      {
+        "text": "Переведу в шутку и сменю тему",
+        "textEn": "I'll turn it into a joke and change the subject",
+        "scoring": { "HIS": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы свидетель: в магазине по ошибке обвиняют в краже незнакомого подростка. Вмешательство займёт час.",
+    "scenarioEn": "You witness a teenage stranger being wrongly accused of shoplifting. Getting involved will cost you an hour.",
+    "options": [
+      {
+        "text": "Останусь свидетелем, сколько бы ни заняло",
+        "textEn": "I'll stay as a witness, however long it takes",
+        "scoring": { "KAN": 3, "HUM": 2 }
+      },
+      {
+        "text": "Оставлю контакты и уйду",
+        "textEn": "I'll leave my contacts and go",
+        "scoring": { "KAN": 1, "OBC": 1 }
+      },
+      {
+        "text": "Пройду мимо: разберутся по камерам",
+        "textEn": "I'll move on: the cameras will sort it out",
+        "scoring": { "AVD": 2, "SZD": 1 }
+      },
+      {
+        "text": "Сниму на телефон и выложу: пусть общество рассудит",
+        "textEn": "I'll film it and post it: let society judge",
+        "scoring": { "HIS": 2, "SAD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Ваша принципиальность сорвала выгодную сделку всей команде. Коллеги злятся.",
+    "scenarioEn": "Your principles killed a lucrative deal for the whole team. Colleagues are furious.",
+    "options": [
+      {
+        "text": "Пересмотрю планку: возможно, я перегнул",
+        "textEn": "I'll reconsider my bar: maybe I overdid it",
+        "scoring": { "DEP": 1, "AVD": 1 }
+      },
+      {
+        "text": "Останусь при своём: есть вещи дороже сделок",
+        "textEn": "I'll stand my ground: some things cost more than deals",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Извинюсь и компенсирую команде потери сверхурочными",
+        "textEn": "I'll apologize and make it up to the team with extra work",
+        "scoring": { "MAS": 2, "DEP": 1 }
+      },
+      {
+        "text": "Объясню каждому, какие риски я снял этим отказом",
+        "textEn": "I'll walk each of them through the risks I removed by refusing",
+        "scoring": { "KAN": 1, "DIR": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Такси приехало раньше, счётчик уже тикает, а сосед-старик просит помочь занести коробку.",
+    "scenarioEn": "The taxi arrived early, the meter is running, and your elderly neighbor asks for help carrying a box in.",
+    "options": [
+      {
+        "text": "Помогу: пара минут не разорит",
+        "textEn": "I'll help: a couple of minutes won't ruin me",
+        "scoring": { "HUM": 2, "KAN": 1 }
+      },
+      {
+        "text": "Извинюсь: такси ждёт, договорённость тоже обязательство",
+        "textEn": "I'll apologize: the taxi waits, a booking is a commitment too",
+        "scoring": { "KAN": 2, "OBC": 1 }
+      },
+      {
+        "text": "Сделаю вид, что не услышал",
+        "textEn": "I'll pretend I didn't hear",
+        "scoring": { "AVD": 2, "ANT": 1 }
+      },
+      {
+        "text": "Помогу и потом буду злиться на себя за мягкотелость",
+        "textEn": "I'll help, then be angry at myself for being soft",
+        "scoring": { "MAS": 1, "PAG": 1, "DEP": 1 }
+      }
+    ]
+  }
+]

@@ -608,31 +608,31 @@ export function replaceTypeCodes(text: string, isRu: boolean, isAdmin?: boolean)
 }
 
 /**
- * Максимально возможные сырые баллы по каждой шкале (1955 вопросов).
- * Пересчитаны психологом 19.03.2026 (v2).
- * Новые шкалы (5.1) = 0 до добавления их вопросов в банк — заполнить при генерации.
+ * Максимально возможные сырые баллы по каждой шкале (2090 вопросов).
+ * База: v2 психолога 19.03.2026 (1955 вопросов) + дельта 135 вопросов этапа 5.1
+ * (пересчитано merge-question-batch.ts, 2026-07-04).
  */
 export const GLOBAL_MAX_SCORES: Record<PersonalityTypeCode, number> = {
-  PAR: 1529,
-  SZD: 2893,
-  SZT: 1772,
-  ANT: 2096,
-  BOR: 1466,
-  HIS: 2147,
-  NAR: 2102,
-  AVD: 2585,
-  DEP: 2787,
-  OBC: 2950,
+  PAR: 1585,
+  SZD: 2937,
+  SZT: 1789,
+  ANT: 2140,
+  BOR: 1474,
+  HIS: 2198,
+  NAR: 2133,
+  AVD: 2683,
+  DEP: 2828,
+  OBC: 3047,
   BAR: 936,
-  PAG: 486,
-  DPR: 716,
-  MAC: 0,
-  HUM: 0,
-  KAN: 0,
-  FAI: 0,
-  SAD: 0,
-  MAS: 0,
-  ASD: 0,
-  DIR: 0,
-  ALX: 0,
+  PAG: 513,
+  DPR: 729,
+  MAC: 120,
+  HUM: 135,
+  KAN: 108,
+  FAI: 74,
+  SAD: 47,
+  MAS: 51,
+  ASD: 51,
+  DIR: 101,
+  ALX: 56,
 }

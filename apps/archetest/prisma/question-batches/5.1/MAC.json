@@ -1,0 +1,397 @@
+[
+  {
+    "scenario": "Коллега получил повышение, на которое рассчитывали вы. Ваш первый ход?",
+    "scenarioEn": "A colleague got the promotion you were counting on. Your first move?",
+    "options": [
+      {
+        "text": "Разберусь, чьей поддержкой он заручился и как строил игру",
+        "textEn": "I'll figure out whose support he secured and how he played it",
+        "scoring": { "MAC": 3, "PAR": 1 }
+      },
+      {
+        "text": "Прямо спрошу руководителя, что мне улучшить",
+        "textEn": "I'll ask my manager directly what I should improve",
+        "scoring": { "DIR": 2, "KAN": 1 }
+      },
+      {
+        "text": "Промолчу, но осадок останется надолго",
+        "textEn": "I'll say nothing, but the resentment will linger",
+        "scoring": { "PAG": 2, "DPR": 1 }
+      },
+      {
+        "text": "Искренне поздравлю — он этого заслуживал",
+        "textEn": "I'll sincerely congratulate him — he earned it",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вам нужно продвинуть свою идею на общем совещании. Как действуете?",
+    "scenarioEn": "You need to push your idea through at a general meeting. How do you act?",
+    "options": [
+      {
+        "text": "Заранее поговорю с ключевыми людьми поодиночке — на совещание приду с готовой поддержкой",
+        "textEn": "I'll talk to key people one-on-one beforehand — arriving with support already secured",
+        "scoring": { "MAC": 3, "NAR": 1 }
+      },
+      {
+        "text": "Изложу всем сразу, открыто, пусть решают аргументы",
+        "textEn": "I'll present it to everyone openly — let the arguments decide",
+        "scoring": { "DIR": 2, "KAN": 1 }
+      },
+      {
+        "text": "Попрошу озвучить идею того, кого точно слушают",
+        "textEn": "I'll ask someone who is actually listened to, to voice it",
+        "scoring": { "MAC": 2, "AVD": 1 }
+      },
+      {
+        "text": "Подготовлю безупречный документ со всеми расчётами",
+        "textEn": "I'll prepare a flawless document with all the calculations",
+        "scoring": { "OBC": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Друг жалуется: на работе его открыто используют. Что советуете?",
+    "scenarioEn": "A friend complains he is being openly used at work. What do you advise?",
+    "options": [
+      {
+        "text": "Показать, как выстроить встречную игру: козыри, союзники, тайминг",
+        "textEn": "Show him how to build a counter-game: leverage, allies, timing",
+        "scoring": { "MAC": 3 }
+      },
+      {
+        "text": "Поговорить с начальством честно и по фактам",
+        "textEn": "Talk to management honestly, sticking to facts",
+        "scoring": { "KAN": 2, "DIR": 1 }
+      },
+      {
+        "text": "Уходить — с такими людьми не о чем договариваться",
+        "textEn": "Quit — there is nothing to negotiate with such people",
+        "scoring": { "ANT": 1, "SZD": 1 }
+      },
+      {
+        "text": "Сначала просто выслушать: ему нужна поддержка, а не план",
+        "textEn": "First just listen: he needs support, not a plan",
+        "scoring": { "HUM": 2, "DEP": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы заметили, что один из знакомых виртуозно управляет мнением всей компании — и никто этого не видит.",
+    "scenarioEn": "You notice an acquaintance masterfully steering the whole group's opinion — and nobody sees it.",
+    "options": [
+      {
+        "text": "Восхищаюсь техникой. Наблюдаю и учусь",
+        "textEn": "I admire the technique. I watch and learn",
+        "scoring": { "MAC": 3 }
+      },
+      {
+        "text": "Неприятно. Держусь от него подальше",
+        "textEn": "Unpleasant. I keep my distance",
+        "scoring": { "AVD": 1, "PAR": 1 }
+      },
+      {
+        "text": "Вскрою игру при всех — пусть знают",
+        "textEn": "I'll expose the game in front of everyone — let them know",
+        "scoring": { "DIR": 3, "ANT": 1 }
+      },
+      {
+        "text": "Мне безразлично: их компания — их правила",
+        "textEn": "I don't care: their group, their rules",
+        "scoring": { "SZD": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Впереди разговор о повышении зарплаты. Ваша подготовка?",
+    "scenarioEn": "A salary negotiation is coming up. How do you prepare?",
+    "options": [
+      {
+        "text": "Соберу офферы конкурентов и выберу момент, когда я особенно нужен",
+        "textEn": "I'll collect competing offers and pick the moment I'm most needed",
+        "scoring": { "MAC": 3, "OBC": 1 }
+      },
+      {
+        "text": "Назову цифру и честно обосную вклад",
+        "textEn": "I'll name a figure and honestly justify my contribution",
+        "scoring": { "DIR": 2, "KAN": 1, "NAR": 1 }
+      },
+      {
+        "text": "Подожду: хорошую работу должны заметить сами",
+        "textEn": "I'll wait: good work should be noticed on its own",
+        "scoring": { "DEP": 2, "AVD": 1 }
+      },
+      {
+        "text": "Скажу, что у меня оффер, даже если его нет",
+        "textEn": "I'll say I have an offer even if I don't",
+        "scoring": { "MAC": 2, "ANT": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Начальник, от которого зависит ваш проект, просит честно оценить его слабую идею.",
+    "scenarioEn": "The boss your project depends on asks for an honest assessment of his weak idea.",
+    "options": [
+      {
+        "text": "Похвалю: его расположение сейчас дороже правды",
+        "textEn": "I'll praise it: his goodwill is worth more than the truth right now",
+        "scoring": { "MAC": 3, "HIS": 1 }
+      },
+      {
+        "text": "Скажу правду, подобрав слова",
+        "textEn": "I'll tell the truth, choosing my words carefully",
+        "scoring": { "KAN": 2, "HUM": 1, "DIR": 1 }
+      },
+      {
+        "text": "Скажу как есть, без подушек безопасности",
+        "textEn": "I'll say it as it is, no cushions",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Уклонюсь: «нужно подумать, пришлю комментарии»",
+        "textEn": "I'll dodge: \"need to think, I'll send comments\"",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Первый день в новом коллективе. Что делаете в первую очередь?",
+    "scenarioEn": "First day in a new team. What do you do first?",
+    "options": [
+      {
+        "text": "Составляю карту: кто на что влияет и кто с кем дружит",
+        "textEn": "I map it out: who influences what and who is friends with whom",
+        "scoring": { "MAC": 3, "PAR": 1 }
+      },
+      {
+        "text": "Ищу людей, с которыми тепло и по-человечески",
+        "textEn": "I look for people who feel warm and genuine",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      {
+        "text": "Просто делаю работу — остальное расставится само",
+        "textEn": "I just do the work — the rest will settle itself",
+        "scoring": { "OBC": 2, "FAI": 1 }
+      },
+      {
+        "text": "Держусь в стороне и наблюдаю издалека",
+        "textEn": "I stay aside and observe from a distance",
+        "scoring": { "SZD": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вам по секрету рассказали то, что даёт серьёзное преимущество в работе.",
+    "scenarioEn": "You were told a secret that gives you a serious advantage at work.",
+    "options": [
+      {
+        "text": "Использую, не раскрывая источник",
+        "textEn": "I'll use it without revealing the source",
+        "scoring": { "MAC": 3, "ANT": 1 }
+      },
+      {
+        "text": "Не использую: обещал молчать — значит, информации нет",
+        "textEn": "I won't use it: I promised silence, so the information doesn't exist",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Аккуратно намекну нужным людям, не выдавая деталей",
+        "textEn": "I'll carefully hint to the right people without giving details",
+        "scoring": { "MAC": 2, "HIS": 1 }
+      },
+      {
+        "text": "Постараюсь забыть: не люблю интриги",
+        "textEn": "I'll try to forget it: I don't like intrigue",
+        "scoring": { "SZD": 1, "HUM": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Настольная игра с друзьями. Вы можете выиграть ходом, который формально разрешён, но явно против духа игры.",
+    "scenarioEn": "Board game night. You can win with a move that is technically legal but clearly against the spirit of the game.",
+    "options": [
+      {
+        "text": "Сделаю ход: правила есть правила, читайте внимательнее",
+        "textEn": "I'll make the move: rules are rules, read them more carefully",
+        "scoring": { "MAC": 2, "ANT": 1 }
+      },
+      {
+        "text": "Играю по духу: победа с осадком не победа",
+        "textEn": "I play by the spirit: a tainted win is no win",
+        "scoring": { "KAN": 2 }
+      },
+      {
+        "text": "Поддамся: пусть выиграет тот, кому важнее",
+        "textEn": "I'll let someone else win — whoever cares more",
+        "scoring": { "HUM": 1, "DEP": 1, "MAS": 1 }
+      },
+      {
+        "text": "Озвучу дилемму вслух и предложу решить всем вместе",
+        "textEn": "I'll voice the dilemma aloud and let everyone decide together",
+        "scoring": { "DIR": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Два коллеги конфликтуют, и их ссора объективно играет вам на руку.",
+    "scenarioEn": "Two colleagues are in conflict, and their feud objectively benefits you.",
+    "options": [
+      {
+        "text": "Не вмешиваюсь: пусть само дозреет",
+        "textEn": "I don't interfere: let it ripen on its own",
+        "scoring": { "MAC": 2, "SZD": 1 }
+      },
+      {
+        "text": "Помогу им помириться — климат дороже выгоды",
+        "textEn": "I'll help them make peace — the climate matters more than my gain",
+        "scoring": { "HUM": 3, "FAI": 1 }
+      },
+      {
+        "text": "Поддержу того, кто прав по сути",
+        "textEn": "I'll back whoever is actually right",
+        "scoring": { "KAN": 2, "DIR": 1 }
+      },
+      {
+        "text": "Слегка подолью масла: интересно, чем кончится",
+        "textEn": "I'll add a little fuel: curious how it ends",
+        "scoring": { "MAC": 2, "SAD": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вам делают неожиданно щедрый комплимент — и он подозрительно похож на подготовку к просьбе.",
+    "scenarioEn": "You receive an unexpectedly generous compliment — and it suspiciously feels like a setup for a request.",
+    "options": [
+      {
+        "text": "Принимаю игру и спокойно жду следующего хода",
+        "textEn": "I accept the game and calmly wait for the next move",
+        "scoring": { "MAC": 2, "PAR": 1 }
+      },
+      {
+        "text": "Прямо спрашиваю: «Что нужно?»",
+        "textEn": "I ask directly: \"What do you need?\"",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Радуюсь: приятно, когда замечают",
+        "textEn": "I enjoy it: it's nice to be noticed",
+        "scoring": { "FAI": 2, "HIS": 1 }
+      },
+      {
+        "text": "Внутренне закрываюсь и свожу разговор на нет",
+        "textEn": "I close up inside and wind the conversation down",
+        "scoring": { "PAR": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Как выглядит ваш план на ближайшие пять лет?",
+    "scenarioEn": "What does your plan for the next five years look like?",
+    "options": [
+      {
+        "text": "Карта целей: этапы, нужные люди, запасные пути",
+        "textEn": "A map of goals: stages, needed people, fallback routes",
+        "scoring": { "MAC": 2, "NAR": 1, "OBC": 2 }
+      },
+      {
+        "text": "Развиваю мастерство — возможности придут сами",
+        "textEn": "I hone my craft — opportunities will come",
+        "scoring": { "OBC": 1, "FAI": 1 }
+      },
+      {
+        "text": "Живу настоящим: пять лет — слишком далеко",
+        "textEn": "I live in the present: five years is too far away",
+        "scoring": { "HIS": 1, "BOR": 1 }
+      },
+      {
+        "text": "Есть мечта, но без расписанных схем",
+        "textEn": "I have a dream, but no drawn-up schemes",
+        "scoring": { "SZT": 1, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вас просит о помощи человек, который в будущем может быть очень полезен.",
+    "scenarioEn": "Someone who could be very useful in the future asks you for help.",
+    "options": [
+      {
+        "text": "Помогу — такие вложения окупаются",
+        "textEn": "I'll help — such investments pay off",
+        "scoring": { "MAC": 3 }
+      },
+      {
+        "text": "Помогу, потому что могу. Полезность ни при чём",
+        "textEn": "I'll help because I can. Usefulness has nothing to do with it",
+        "scoring": { "HUM": 3, "KAN": 1 }
+      },
+      {
+        "text": "Помогу и сразу озвучу встречную просьбу",
+        "textEn": "I'll help and immediately name a favor in return",
+        "scoring": { "DIR": 1, "MAC": 1 }
+      },
+      {
+        "text": "Откажу: мы недостаточно близки",
+        "textEn": "I'll decline: we're not close enough",
+        "scoring": { "SZD": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы прочитали сильную книгу о переговорах и влиянии. Что дальше?",
+    "scenarioEn": "You've read a powerful book on negotiation and influence. What next?",
+    "options": [
+      {
+        "text": "Конспект — и отрабатываю приёмы в живых разговорах",
+        "textEn": "Notes — then I drill the techniques in real conversations",
+        "scoring": { "MAC": 3, "OBC": 1 }
+      },
+      {
+        "text": "Интересно, но манипулятивно. Отложил",
+        "textEn": "Interesting but manipulative. I set it aside",
+        "scoring": { "KAN": 2, "HUM": 1 }
+      },
+      {
+        "text": "Возьму только защиту от чужих приёмов",
+        "textEn": "I'll take only the defenses against others' techniques",
+        "scoring": { "PAR": 2, "OBC": 1 }
+      },
+      {
+        "text": "Прочитал и забыл: жизнь сложнее схем",
+        "textEn": "Read it and forgot it: life is more complex than schemes",
+        "scoring": { "SZT": 1, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Проект провален. Формально виноват смежный отдел, и всю вину легко переложить на него.",
+    "scenarioEn": "The project failed. Formally the adjacent department is at fault, and it's easy to shift all the blame onto them.",
+    "options": [
+      {
+        "text": "Расставлю акценты так, чтобы наша команда вышла чистой",
+        "textEn": "I'll frame the story so our team comes out clean",
+        "scoring": { "MAC": 3, "ANT": 1 }
+      },
+      {
+        "text": "Изложу хронологию как была, включая наши ошибки",
+        "textEn": "I'll lay out the timeline as it was, including our mistakes",
+        "scoring": { "DIR": 2, "KAN": 2 }
+      },
+      {
+        "text": "Возьму часть вины на себя, чтобы никого не топить",
+        "textEn": "I'll take part of the blame so nobody drowns",
+        "scoring": { "HUM": 1, "MAS": 2, "DEP": 1 }
+      },
+      {
+        "text": "Промолчу: пусть руководство само разбирается",
+        "textEn": "I'll stay silent: let management sort it out",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      }
+    ]
+  }
+]

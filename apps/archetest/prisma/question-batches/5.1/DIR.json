@@ -1,0 +1,381 @@
+[
+  {
+    "scenario": "Подруга сияет: «Как тебе моя новая стрижка?» Стрижка объективно неудачная.",
+    "scenarioEn": "Your friend beams: \"How do you like my new haircut?\" The haircut is objectively bad.",
+    "options": [
+      {
+        "text": "Скажу как есть: она спросила — она получит правду",
+        "textEn": "I'll say it straight: she asked, she gets the truth",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "«Главное, что нравится тебе!»",
+        "textEn": "\"What matters is that you like it!\"",
+        "scoring": { "HUM": 1, "AVD": 1 }
+      },
+      {
+        "text": "Похвалю: зачем портить человеку день",
+        "textEn": "I'll compliment it: why ruin her day",
+        "scoring": { "HIS": 1, "DEP": 1 }
+      },
+      {
+        "text": "Найду, что честно похвалить: цвет удачный, а длина — на любителя",
+        "textEn": "I'll find something honestly praiseworthy: great color, the length is a matter of taste",
+        "scoring": { "DIR": 1, "HUM": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Друг показывает своё детище — проект слабый, но он ждёт восторга.",
+    "scenarioEn": "A friend shows you his brainchild — the project is weak, but he expects delight.",
+    "options": [
+      {
+        "text": "Скажу правду сразу: пусть больно, но честно",
+        "textEn": "I'll tell the truth at once: painful but honest",
+        "scoring": { "DIR": 3, "KAN": 1 }
+      },
+      {
+        "text": "Спрошу, какой отзыв ему нужен: поддержка или разбор",
+        "textEn": "I'll ask what kind of feedback he wants: support or critique",
+        "scoring": { "HUM": 2, "DIR": 1 }
+      },
+      {
+        "text": "Похвалю: дружба дороже правды о проекте",
+        "textEn": "I'll praise it: friendship is worth more than truth about a project",
+        "scoring": { "DEP": 2, "FAI": 1 }
+      },
+      {
+        "text": "Отмечу сильное, о слабом промолчу",
+        "textEn": "I'll highlight the strong parts and omit the weak",
+        "scoring": { "AVD": 1, "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "С начальником вы говорите одним тоном, с друзьями другим, с родителями третьим?",
+    "scenarioEn": "Do you speak in one tone with your boss, another with friends, a third with your parents?",
+    "options": [
+      {
+        "text": "Конечно: разные люди — разные регистры, это социальный навык",
+        "textEn": "Of course: different people, different registers — a social skill",
+        "scoring": { "MAC": 2, "HIS": 1 }
+      },
+      {
+        "text": "Я одинаковый со всеми — до неудобства",
+        "textEn": "I'm the same with everyone — to the point of awkwardness",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Подстраиваюсь, но внутри это ощущается как предательство себя",
+        "textEn": "I adapt, but inside it feels like betraying myself",
+        "scoring": { "DIR": 2, "AVD": 1 }
+      },
+      {
+        "text": "Никогда не замечал за собой ни того, ни другого",
+        "textEn": "Never noticed either about myself",
+        "scoring": { "ALX": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Маленькая ложь избавит собеседника от огорчения, а вас — от долгого разговора.",
+    "scenarioEn": "A small lie would spare your interlocutor grief — and spare you a long conversation.",
+    "options": [
+      {
+        "text": "Не совру: маленькая ложь строит большую дистанцию",
+        "textEn": "I won't lie: small lies build big distance",
+        "scoring": { "DIR": 3, "KAN": 2 }
+      },
+      {
+        "text": "Совру: милосердие важнее буквальной точности",
+        "textEn": "I'll lie: mercy beats literal accuracy",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Совру и не замечу: это смазка социальной механики",
+        "textEn": "I'll lie without noticing: it's the lubricant of social mechanics",
+        "scoring": { "MAC": 2, "HIS": 1 }
+      },
+      {
+        "text": "Уклонюсь от темы, чтобы не врать и не ранить",
+        "textEn": "I'll dodge the topic to neither lie nor wound",
+        "scoring": { "AVD": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вам торжественно дарят вещь, которая вам совершенно не нужна.",
+    "scenarioEn": "You're ceremoniously given a gift you have absolutely no use for.",
+    "options": [
+      {
+        "text": "Поблагодарю за внимание и скажу честно: не моё, давай поменяем",
+        "textEn": "I'll thank them for the thought and say honestly: not my thing, let's exchange it",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Изображу радость: даритель важнее подарка",
+        "textEn": "I'll act delighted: the giver matters more than the gift",
+        "scoring": { "HIS": 1, "HUM": 1 }
+      },
+      {
+        "text": "Поблагодарю сдержанно и передарю позже",
+        "textEn": "I'll thank them politely and regift it later",
+        "scoring": { "MAC": 1, "AVD": 1 }
+      },
+      {
+        "text": "Поблагодарю искренне: сам факт заботы — уже ценность",
+        "textEn": "I'll thank them sincerely: the care itself is the value",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Нетворкинг-сессия: полезно изображать живой интерес к скучным собеседникам.",
+    "scenarioEn": "A networking session: it pays to feign lively interest in dull interlocutors.",
+    "options": [
+      {
+        "text": "Легко включаю «профессиональный интерес» — это часть игры",
+        "textEn": "I switch on \"professional interest\" easily — part of the game",
+        "scoring": { "MAC": 2, "HIS": 2 }
+      },
+      {
+        "text": "Не умею изображать: скука видна на моём лице",
+        "textEn": "I can't fake it: boredom shows on my face",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Ищу в каждом что-то по-настоящему интересное — тогда играть не надо",
+        "textEn": "I look for something genuinely interesting in everyone — then no acting is needed",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      { "text": "Избегаю таких мероприятий", "textEn": "I avoid such events", "scoring": { "AVD": 2, "SZD": 1 } }
+    ]
+  },
+  {
+    "scenario": "Вы опоздали, потому что банально проспали. Вас спрашивают о причине.",
+    "scenarioEn": "You're late because you simply overslept. They ask why.",
+    "options": [
+      { "text": "«Проспал». Без гарнира", "textEn": "\"Overslept.\" No garnish", "scoring": { "DIR": 3, "KAN": 1 } },
+      {
+        "text": "«Пробки» — классика, которая никого не ранит",
+        "textEn": "\"Traffic\" — a classic that hurts nobody",
+        "scoring": { "MAC": 1, "ANT": 1 }
+      },
+      {
+        "text": "Проскользну тихо, авось не спросят",
+        "textEn": "I'll slip in quietly and hope nobody asks",
+        "scoring": { "AVD": 2 }
+      },
+      {
+        "text": "«Проспал» + шутка про себя, чтобы разрядить",
+        "textEn": "\"Overslept\" plus a self-deprecating joke to defuse it",
+        "scoring": { "DIR": 2, "HIS": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вам говорят дежурный комплимент, в который вы не верите.",
+    "scenarioEn": "You receive a routine compliment you don't believe.",
+    "options": [
+      {
+        "text": "«Спасибо, но это неправда» — и объясню почему",
+        "textEn": "\"Thanks, but that's not true\" — and I'll explain why",
+        "scoring": { "DIR": 2 }
+      },
+      {
+        "text": "«Спасибо» — и всё, ритуалы существуют не зря",
+        "textEn": "\"Thanks\" — and that's it; rituals exist for a reason",
+        "scoring": { "MAC": 1 }
+      },
+      {
+        "text": "Смущаюсь и перевожу тему",
+        "textEn": "I get embarrassed and change the subject",
+        "scoring": { "AVD": 2 }
+      },
+      {
+        "text": "Верну комплимент: так положено",
+        "textEn": "I'll return the compliment: that's the custom",
+        "scoring": { "HIS": 1, "DEP": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Начальник рассказал несмешной анекдот. Все смеются.",
+    "scenarioEn": "The boss tells an unfunny joke. Everyone laughs.",
+    "options": [
+      {
+        "text": "Смеюсь со всеми: это не ложь, это вежливость",
+        "textEn": "I laugh along: it's not lying, it's courtesy",
+        "scoring": { "DEP": 1, "HIS": 1, "MAC": 1 }
+      },
+      {
+        "text": "Не смеюсь: смех по команде у меня не включается",
+        "textEn": "I don't: laughter on command doesn't switch on for me",
+        "scoring": { "DIR": 3 }
+      },
+      { "text": "Улыбнусь нейтрально", "textEn": "I'll smile neutrally", "scoring": { "AVD": 1 } },
+      {
+        "text": "Скажу после: «Вот тот твой прошлый анекдот был лучше»",
+        "textEn": "I'll tell him later: \"Your previous joke was better\"",
+        "scoring": { "DIR": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Друг спрашивает, что вы думаете о его новом партнёре. Вы думаете плохо.",
+    "scenarioEn": "A friend asks what you think of his new partner. You think poorly of them.",
+    "options": [
+      {
+        "text": "Скажу прямо, один раз, со всеми наблюдениями",
+        "textEn": "I'll say it straight, once, with all my observations",
+        "scoring": { "DIR": 3, "KAN": 1 }
+      },
+      {
+        "text": "«Главное, чтобы тебе было хорошо»",
+        "textEn": "\"What matters is that you're happy\"",
+        "scoring": { "AVD": 1, "DEP": 1 }
+      },
+      {
+        "text": "Задам вопросы, чтобы он сам увидел то, что вижу я",
+        "textEn": "I'll ask questions so he sees what I see himself",
+        "scoring": { "MAC": 2, "HUM": 1 }
+      },
+      {
+        "text": "Поддержу: влюблённому фактами не помочь",
+        "textEn": "I'll be supportive: facts don't help someone in love",
+        "scoring": { "HUM": 1, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "«Созвонимся!» — говорит знакомый, и вы оба знаете, что звонка не будет.",
+    "scenarioEn": "\"Let's catch up soon!\" says an acquaintance, and you both know the call will never happen.",
+    "options": [
+      {
+        "text": "Отвечаю честно: «Вряд ли, но было приятно увидеться»",
+        "textEn": "I answer honestly: \"Unlikely — but it was good to see you\"",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "«Обязательно!» — ритуал есть ритуал",
+        "textEn": "\"Absolutely!\" — a ritual is a ritual",
+        "scoring": { "HIS": 1, "MAC": 1 }
+      },
+      {
+        "text": "Говорю «созвонимся» и правда звоню",
+        "textEn": "I say \"let's catch up\" — and actually call",
+        "scoring": { "KAN": 2, "HUM": 1 }
+      },
+      { "text": "Молча улыбаюсь", "textEn": "I just smile", "scoring": { "AVD": 1, "SZD": 1 } }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Психолог говорит: «Иногда правду стоит смягчать ради отношений». Ваша реакция?",
+    "scenarioEn": "A psychologist says: \"Sometimes truth should be softened for the sake of relationships.\" Your reaction?",
+    "options": [
+      {
+        "text": "Согласен: форма подачи — тоже часть правды",
+        "textEn": "Agreed: delivery is part of the truth too",
+        "scoring": { "HUM": 2, "MAC": 1 }
+      },
+      {
+        "text": "Не согласен: смягчённая правда — это уже немного ложь",
+        "textEn": "Disagree: softened truth is already a little lie",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "Смотря какие отношения и какая правда",
+        "textEn": "Depends on the relationship and the truth",
+        "scoring": { "MAC": 1, "SZT": 1 }
+      },
+      {
+        "text": "Теоретически да, но на практике у меня не получается",
+        "textEn": "In theory yes, but in practice I can't pull it off",
+        "scoring": { "DIR": 2, "ASD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ресторан. Блюдо невкусное. Официант: «Всё ли вам нравится?»",
+    "scenarioEn": "A restaurant. The dish is bad. The waiter asks: \"Is everything to your liking?\"",
+    "options": [
+      {
+        "text": "«Честно — нет. Вот что не так»",
+        "textEn": "\"Honestly — no. Here's what's wrong\"",
+        "scoring": { "DIR": 3 }
+      },
+      {
+        "text": "«Всё отлично» — и больше сюда не приду",
+        "textEn": "\"Everything's great\" — and I'll never come back",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      },
+      {
+        "text": "Скажу мягко, но так, чтобы кухня узнала",
+        "textEn": "I'll say it gently, but so the kitchen hears of it",
+        "scoring": { "DIR": 1, "HUM": 1 }
+      },
+      {
+        "text": "Промолчу, но чаевых не оставлю",
+        "textEn": "I'll say nothing but leave no tip",
+        "scoring": { "PAG": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы совершили ошибку, которую пока никто не заметил. Обнаружится она не скоро — и, может, не у вас.",
+    "scenarioEn": "You made a mistake nobody has noticed. It will surface much later — maybe not even on your watch.",
+    "options": [
+      {
+        "text": "Сообщу сразу сам: моя ошибка — моё имя на ней",
+        "textEn": "I'll report it now myself: my mistake carries my name",
+        "scoring": { "DIR": 3, "KAN": 2 }
+      },
+      {
+        "text": "Тихо исправлю, никому не говоря",
+        "textEn": "I'll quietly fix it without telling anyone",
+        "scoring": { "MAC": 1, "AVD": 1 }
+      },
+      {
+        "text": "Подожду: возможно, само рассосётся",
+        "textEn": "I'll wait: maybe it dissolves on its own",
+        "scoring": { "AVD": 2, "FAI": 1 }
+      },
+      {
+        "text": "Подготовлю объяснение на случай обнаружения",
+        "textEn": "I'll prepare an explanation in case it's discovered",
+        "scoring": { "MAC": 2, "PAR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Семейный праздник держится на маленькой лжи: все делают вид, что не знают о разводе кузины.",
+    "scenarioEn": "The family gathering rests on a small lie: everyone pretends not to know about the cousin's divorce.",
+    "options": [
+      {
+        "text": "Поддержу спектакль: праздник важнее правды на один вечер",
+        "textEn": "I'll play along: the celebration outweighs the truth for one evening",
+        "scoring": { "HUM": 1, "MAC": 1, "DEP": 1 }
+      },
+      {
+        "text": "Не выдержу и проговорюсь — не со зла, просто не умею носить маски",
+        "textEn": "I'll slip — not out of malice, I just can't wear masks",
+        "scoring": { "DIR": 3, "ASD": 1 }
+      },
+      {
+        "text": "Уеду пораньше: в таких пьесах я плохой актёр",
+        "textEn": "I'll leave early: I'm a poor actor in such plays",
+        "scoring": { "DIR": 1, "AVD": 2 }
+      },
+      {
+        "text": "Поговорю с кузиной наедине: с ней — честно, с залом — вежливо",
+        "textEn": "I'll talk to the cousin privately: honest with her, polite with the room",
+        "scoring": { "HUM": 2, "DIR": 1 }
+      }
+    ]
+  }
+]

@@ -1,0 +1,393 @@
+[
+  {
+    "scenario": "Официант ошибся в счёте в вашу пользу — на заметную сумму.",
+    "scenarioEn": "The waiter made a mistake on the bill in your favor — a noticeable amount.",
+    "options": [
+      {
+        "text": "Скажу сразу: за ошибку вычтут из его зарплаты",
+        "textEn": "I'll tell him right away: the mistake will come out of his pay",
+        "scoring": { "HUM": 3, "KAN": 2 }
+      },
+      {
+        "text": "Скажу — но потому что обман есть обман",
+        "textEn": "I'll tell him — because cheating is cheating",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Промолчу: их система — их проблемы",
+        "textEn": "I'll keep quiet: their system, their problem",
+        "scoring": { "ANT": 2, "MAC": 1 }
+      },
+      {
+        "text": "Засомневаюсь, но скорее промолчу и буду себя грызть",
+        "textEn": "I'll hesitate, probably keep quiet, then gnaw at myself",
+        "scoring": { "AVD": 1, "DPR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Коллега, с которым вы почти не общаетесь, тихо плачет на лестнице.",
+    "scenarioEn": "A colleague you barely know is quietly crying in the stairwell.",
+    "options": [
+      {
+        "text": "Подойду: «Я рядом, могу чем-то помочь?»",
+        "textEn": "I'll approach: \"I'm here — can I help with anything?\"",
+        "scoring": { "HUM": 3 }
+      },
+      {
+        "text": "Пройду мимо: вторгаться неловко, захочет — скажет",
+        "textEn": "I'll walk past: intruding is awkward; if they want, they'll speak",
+        "scoring": { "AVD": 2, "SZD": 1 }
+      },
+      {
+        "text": "Сообщу тому, кто с ним близок",
+        "textEn": "I'll let someone close to them know",
+        "scoring": { "HUM": 1, "OBC": 1 }
+      },
+      {
+        "text": "Растеряюсь: не понимаю, что делать с чужими слезами",
+        "textEn": "I'll freeze: I don't know what to do with other people's tears",
+        "scoring": { "ALX": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы спешите на важную встречу. На улице человек просит помочь донести тяжёлые сумки.",
+    "scenarioEn": "You're rushing to an important meeting. A person on the street asks for help carrying heavy bags.",
+    "options": [
+      {
+        "text": "Извинюсь и пойду дальше: встреча важнее",
+        "textEn": "I'll apologize and move on: the meeting matters more",
+        "scoring": { "OBC": 1, "NAR": 1 }
+      },
+      {
+        "text": "Помогу и опоздаю: человек важнее регламента",
+        "textEn": "I'll help and be late: a person matters more than a schedule",
+        "scoring": { "HUM": 3, "KAN": 1 }
+      },
+      {
+        "text": "Найду того, кто поможет вместо меня",
+        "textEn": "I'll find someone else to help instead",
+        "scoring": { "HUM": 1, "MAC": 1 }
+      },
+      {
+        "text": "Заподозрю разводку и ускорю шаг",
+        "textEn": "I'll suspect a scam and speed up",
+        "scoring": { "PAR": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "В компании обсуждают отсутствующего знакомого — зло, но остроумно.",
+    "scenarioEn": "The group is discussing an absent acquaintance — cruelly, but wittily.",
+    "options": [
+      {
+        "text": "Останавливаю: без него — не о нём",
+        "textEn": "I stop it: not about him while he's not here",
+        "scoring": { "HUM": 3, "KAN": 1, "DIR": 1 }
+      },
+      {
+        "text": "Молчу, но мне не по себе",
+        "textEn": "I stay silent, but it doesn't sit right",
+        "scoring": { "AVD": 1, "HUM": 1 }
+      },
+      {
+        "text": "Смеюсь: шутки и правда удачные",
+        "textEn": "I laugh: the jokes are genuinely good",
+        "scoring": { "SAD": 2, "HIS": 1 }
+      },
+      {
+        "text": "Перевожу тему на что-то другое",
+        "textEn": "I steer the conversation elsewhere",
+        "scoring": { "HUM": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Старый приятель, известный необязательностью, просит в долг крупную сумму «на спасение бизнеса».",
+    "scenarioEn": "An old buddy known for being unreliable asks to borrow a large sum \"to save his business\".",
+    "options": [
+      {
+        "text": "Откажу: жалость — плохой финансовый советник",
+        "textEn": "I'll refuse: pity is a poor financial adviser",
+        "scoring": { "MAC": 1, "OBC": 1 }
+      },
+      {
+        "text": "Дам сколько могу потерять без боли — как помощь, не как долг",
+        "textEn": "I'll give what I can lose painlessly — as help, not a loan",
+        "scoring": { "HUM": 3, "FAI": 1 }
+      },
+      {
+        "text": "Дам всё, что просит: друг же",
+        "textEn": "I'll give everything he asks: he's a friend",
+        "scoring": { "DEP": 2, "FAI": 1, "MAS": 1 }
+      },
+      {
+        "text": "Откажу и прямо объясню почему: репутация",
+        "textEn": "I'll refuse and say exactly why: his track record",
+        "scoring": { "DIR": 2, "KAN": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ваш успех празднуют, и в этот момент вы узнаёте, что у одного из гостей случилась беда.",
+    "scenarioEn": "Your success is being celebrated, and you learn one of the guests has just had a misfortune.",
+    "options": [
+      {
+        "text": "Тихо отойду с ним поговорить, праздник подождёт",
+        "textEn": "I'll quietly step aside to talk with them; the party can wait",
+        "scoring": { "HUM": 3 }
+      },
+      {
+        "text": "Дам понять, что я рядом, но праздник не сверну",
+        "textEn": "I'll signal I'm there for them, but won't fold the celebration",
+        "scoring": { "HUM": 1, "NAR": 1 }
+      },
+      {
+        "text": "Сделаю вид, что не знаю: не время и не место",
+        "textEn": "I'll pretend not to know: wrong time and place",
+        "scoring": { "AVD": 2 }
+      },
+      {
+        "text": "Раздражусь: почему это должно портить мой вечер?",
+        "textEn": "I'll be annoyed: why should this spoil my evening?",
+        "scoring": { "NAR": 2, "ANT": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Новенький в команде всё делает медленно и с ошибками, всех это бесит.",
+    "scenarioEn": "The team newbie is slow and error-prone, and everyone is irritated.",
+    "options": [
+      {
+        "text": "Сяду рядом и помогу разобраться: все когда-то начинали",
+        "textEn": "I'll sit down and help him figure it out: everyone was new once",
+        "scoring": { "HUM": 3, "FAI": 1 }
+      },
+      {
+        "text": "Дам понятную инструкцию и контрольные точки",
+        "textEn": "I'll give him a clear procedure and checkpoints",
+        "scoring": { "OBC": 2, "HUM": 1 }
+      },
+      {
+        "text": "Пусть плывёт сам: так быстрее учатся",
+        "textEn": "Let him sink or swim: people learn faster that way",
+        "scoring": { "ANT": 1, "SAD": 1 }
+      },
+      {
+        "text": "Подниму вопрос о его соответствии должности",
+        "textEn": "I'll raise the question of his fitness for the role",
+        "scoring": { "MAC": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Благотворительный сбор на работе. Все скидываются, суммы видны каждому.",
+    "scenarioEn": "A charity collection at work. Everyone contributes, and the amounts are visible to all.",
+    "options": [
+      {
+        "text": "Не участвую: публичная благотворительность — это спектакль",
+        "textEn": "I opt out: public charity is theater",
+        "scoring": { "SZD": 1, "DIR": 1 }
+      },
+      {
+        "text": "Скинусь как все, чтобы не выделяться",
+        "textEn": "I'll give like everyone, to not stand out",
+        "scoring": { "DEP": 2, "AVD": 1 }
+      },
+      {
+        "text": "Скинусь здесь — и ещё отдельно туда, где это правда нужно, молча",
+        "textEn": "I'll give here — and separately, quietly, where it's truly needed",
+        "scoring": { "HUM": 3, "KAN": 1 }
+      },
+      {
+        "text": "Внесу заметную сумму: пусть видят планку",
+        "textEn": "I'll give a notable amount: let them see the bar",
+        "scoring": { "NAR": 2, "HIS": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В сети травят человека за неудачное высказывание. Вы с ним не согласны.",
+    "scenarioEn": "Someone is being piled on online for a bad take. You disagree with him too.",
+    "options": [
+      {
+        "text": "Напишу против травли: несогласие не повод уничтожать",
+        "textEn": "I'll speak against the pile-on: disagreement is no license to destroy",
+        "scoring": { "HUM": 3, "KAN": 2 }
+      },
+      {
+        "text": "Пройду мимо: интернет — стихия, её не остановить",
+        "textEn": "I'll scroll past: the internet is a force of nature",
+        "scoring": { "SZD": 1, "AVD": 1 }
+      },
+      {
+        "text": "Добавлю свой аргумент против него — по делу",
+        "textEn": "I'll add my own argument against him — on the merits",
+        "scoring": { "DIR": 1, "OBC": 1 }
+      },
+      {
+        "text": "Понаблюдаю: люди в травле показывают себя настоящих",
+        "textEn": "I'll watch: pile-ons show people's true faces",
+        "scoring": { "SAD": 1, "MAC": 1, "PAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы устали и едете домой. На последней остановке в автобус заходит пожилой человек, мест нет.",
+    "scenarioEn": "You're exhausted, heading home. At the last stop an elderly person boards the bus; no seats left.",
+    "options": [
+      {
+        "text": "Встану сразу, независимо от усталости",
+        "textEn": "I'll stand up immediately, however tired I am",
+        "scoring": { "HUM": 2, "KAN": 2 }
+      },
+      {
+        "text": "Встану, но с внутренним вздохом",
+        "textEn": "I'll stand up, but with an inner sigh",
+        "scoring": { "HUM": 1, "KAN": 1 }
+      },
+      { "text": "Сделаю вид, что сплю", "textEn": "I'll pretend to be asleep", "scoring": { "AVD": 1, "ANT": 1 } },
+      {
+        "text": "Посмотрю: может, встанет кто-то посвежее",
+        "textEn": "I'll wait: maybe someone fresher will stand",
+        "scoring": { "PAG": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Ваш подчинённый серьёзно ошибся, и по правилам его положено лишить премии.",
+    "scenarioEn": "Your subordinate made a serious mistake, and by the rules he should lose his bonus.",
+    "options": [
+      {
+        "text": "Лишу: правила одинаковы для всех",
+        "textEn": "He loses it: rules are the same for everyone",
+        "scoring": { "KAN": 2, "OBC": 2 }
+      },
+      {
+        "text": "Разберусь в обстоятельствах прежде, чем решать",
+        "textEn": "I'll look into the circumstances before deciding",
+        "scoring": { "HUM": 3, "KAN": 1 }
+      },
+      {
+        "text": "Лишу и сделаю показательный разбор для команды",
+        "textEn": "He loses it, and I'll make a public case study of it",
+        "scoring": { "SAD": 2, "NAR": 1 }
+      },
+      {
+        "text": "Закрою глаза: не люблю карать",
+        "textEn": "I'll look the other way: I dislike punishing",
+        "scoring": { "AVD": 2, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Друг просит побыть с его пожилой матерью после операции — в единственный ваш выходной.",
+    "scenarioEn": "A friend asks you to stay with his elderly mother after surgery — on your only day off.",
+    "options": [
+      {
+        "text": "Соглашусь: для этого друзья и существуют",
+        "textEn": "I'll agree: that's what friends are for",
+        "scoring": { "HUM": 3, "DEP": 1 }
+      },
+      {
+        "text": "Соглашусь, хотя буду весь день считать часы",
+        "textEn": "I'll agree, though I'll be counting the hours all day",
+        "scoring": { "MAS": 1, "DEP": 2 }
+      },
+      {
+        "text": "Помогу найти сиделку и оплачу половину",
+        "textEn": "I'll help find a caregiver and pay half",
+        "scoring": { "HUM": 2, "MAC": 1 }
+      },
+      {
+        "text": "Откажу: выходной — это граница",
+        "textEn": "I'll decline: a day off is a boundary",
+        "scoring": { "SZD": 1, "NAR": 1, "DIR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В очереди человек с ребёнком просит пропустить его вперёд.",
+    "scenarioEn": "In a queue, a person with a child asks to go ahead of you.",
+    "options": [
+      {
+        "text": "Пропущу без раздумий",
+        "textEn": "I'll let them through without a second thought",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      {
+        "text": "Пропущу, если он объяснит причину",
+        "textEn": "I'll let them through if they explain why",
+        "scoring": { "OBC": 1, "PAR": 1 }
+      },
+      {
+        "text": "Не пропущу: очередь — тоже справедливость",
+        "textEn": "I won't: the queue is fairness too",
+        "scoring": { "KAN": 1, "PAG": 1 }
+      },
+      {
+        "text": "Пропущу, но внутренне возмущусь наглостью",
+        "textEn": "I'll let them through, but silently resent the nerve",
+        "scoring": { "PAG": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы поняли, что регулярно спасаете одного и того же человека из одних и тех же проблем.",
+    "scenarioEn": "You realize you keep rescuing the same person from the same problems over and over.",
+    "options": [
+      {
+        "text": "Продолжу спасать: бросать людей не в моих правилах",
+        "textEn": "I'll keep rescuing: abandoning people isn't my way",
+        "scoring": { "MAS": 2, "DEP": 2 }
+      },
+      {
+        "text": "Скажу прямо: дальше он сам, я рядом, но не вместо него",
+        "textEn": "I'll say it straight: from now on he acts, I'm nearby but not instead of him",
+        "scoring": { "HUM": 3, "DIR": 2 }
+      },
+      {
+        "text": "Тихо отдалюсь без объяснений",
+        "textEn": "I'll quietly drift away without explanations",
+        "scoring": { "AVD": 2, "PAG": 1 }
+      },
+      {
+        "text": "Выставлю счёт: моё время тоже стоит денег",
+        "textEn": "I'll bill him: my time costs money too",
+        "scoring": { "MAC": 2, "ANT": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Уличный музыкант играет откровенно плохо, но очень старается. У вас есть мелочь.",
+    "scenarioEn": "A street musician plays honestly badly but tries very hard. You have change in your pocket.",
+    "options": [
+      {
+        "text": "Оставлю деньги: старание тоже труд",
+        "textEn": "I'll leave money: effort is labor too",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Пройду мимо: платят за качество",
+        "textEn": "I'll walk past: people pay for quality",
+        "scoring": { "OBC": 1, "NAR": 1 }
+      },
+      {
+        "text": "Оставлю и скажу пару тёплых слов",
+        "textEn": "I'll leave some and add a few warm words",
+        "scoring": { "HUM": 3, "HIS": 1 }
+      },
+      {
+        "text": "Посоветую, что подтянуть в игре",
+        "textEn": "I'll suggest what to improve in his playing",
+        "scoring": { "DIR": 2, "OBC": 1 }
+      }
+    ]
+  }
+]

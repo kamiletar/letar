@@ -1,0 +1,397 @@
+[
+  {
+    "scenario": "На улице незнакомец просит ваш телефон — «один звонок, свой разрядился».",
+    "scenarioEn": "A stranger on the street asks for your phone — \"one call, mine is dead\".",
+    "options": [
+      {
+        "text": "Дам позвонить: чаще всего людям правда просто нужно позвонить",
+        "textEn": "I'll hand it over: most of the time people really just need to call",
+        "scoring": { "FAI": 3, "HUM": 1 }
+      },
+      {
+        "text": "Наберу номер сам и включу громкую связь",
+        "textEn": "I'll dial the number myself and put it on speaker",
+        "scoring": { "FAI": 1, "PAR": 1, "OBC": 1 }
+      },
+      {
+        "text": "Откажу: классическая схема кражи",
+        "textEn": "I'll refuse: a classic theft scheme",
+        "scoring": { "PAR": 2 }
+      },
+      {
+        "text": "Извинюсь и пройду мимо, не разбираясь",
+        "textEn": "I'll apologize and walk on without engaging",
+        "scoring": { "AVD": 2, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Мастер по ремонту просит предоплату. Договора нет, но отзывы хорошие.",
+    "scenarioEn": "A repairman asks for prepayment. No contract, but the reviews are good.",
+    "options": [
+      {
+        "text": "Заплачу: отзывы и рукопожатие — достаточная гарантия",
+        "textEn": "I'll pay: reviews and a handshake are guarantee enough",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Предложу половину сейчас, половину по результату",
+        "textEn": "I'll offer half now, half on completion",
+        "scoring": { "MAC": 1, "OBC": 2 }
+      },
+      {
+        "text": "Без договора не работаю ни с кем",
+        "textEn": "No contract — no deal, with anyone",
+        "scoring": { "PAR": 2, "OBC": 1 }
+      },
+      {
+        "text": "Откажусь и продолжу искать: что-то тут не так",
+        "textEn": "I'll pass and keep looking: something feels off",
+        "scoring": { "PAR": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вечер новостей: мошенничества, конфликты, предательства. Какой вывод ближе вам?",
+    "scenarioEn": "Evening news: fraud, conflicts, betrayals. Which conclusion feels closest to you?",
+    "options": [
+      {
+        "text": "Новости показывают исключения — обычные люди в основном порядочны",
+        "textEn": "News shows the exceptions — ordinary people are mostly decent",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Мир таков, каков есть: расслабляться нельзя",
+        "textEn": "The world is what it is: never let your guard down",
+        "scoring": { "PAR": 2 }
+      },
+      {
+        "text": "Я не смотрю новости: берегу голову",
+        "textEn": "I don't watch the news: protecting my head",
+        "scoring": { "SZD": 1, "AVD": 1 }
+      },
+      {
+        "text": "Люди не злы и не добры — они реагируют на обстоятельства",
+        "textEn": "People are neither good nor evil — they respond to circumstances",
+        "scoring": { "MAC": 1, "SZT": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вас обманул человек, которому вы доверяли, — в мелочи, но обидно. Что происходит с доверием к людям?",
+    "scenarioEn": "Someone you trusted deceived you — in something small, but it stings. What happens to your trust in people?",
+    "options": [
+      {
+        "text": "Ничего: обманул один человек, а не человечество",
+        "textEn": "Nothing: one person deceived me, not humanity",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Стану осторожнее со всеми на какое-то время",
+        "textEn": "I'll be warier with everyone for a while",
+        "scoring": { "PAR": 2, "AVD": 1 }
+      },
+      {
+        "text": "Пересмотрю круг: доверие теперь надо зарабатывать",
+        "textEn": "I'll rethink my circle: trust must now be earned",
+        "scoring": { "PAR": 1, "SZD": 1 }
+      },
+      {
+        "text": "Запомню и при случае напомню ему",
+        "textEn": "I'll remember, and remind him when the moment comes",
+        "scoring": { "PAG": 2, "MAC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Уезжаете на месяц. Кому доверите ключи поливать цветы?",
+    "scenarioEn": "You're leaving for a month. Who gets the keys to water your plants?",
+    "options": [
+      {
+        "text": "Соседу: нормальные люди не роются в чужих ящиках",
+        "textEn": "The neighbor: normal people don't rifle through drawers",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Только самому близкому человеку",
+        "textEn": "Only my closest person",
+        "scoring": { "FAI": 1, "PAR": 1 }
+      },
+      {
+        "text": "Никому: цветы переживут, замки дороже",
+        "textEn": "Nobody: the plants will survive; locks are dearer",
+        "scoring": { "PAR": 2, "SZD": 1 }
+      },
+      {
+        "text": "Поставлю автополив: техника надёжнее людей",
+        "textEn": "I'll set up auto-watering: machines beat people",
+        "scoring": { "OBC": 2, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Дальняя поездка: попутчики из приложения вдвое дешевле поезда.",
+    "scenarioEn": "A long trip: rideshare strangers from an app cost half the train fare.",
+    "options": [
+      {
+        "text": "Еду: обычные люди, обычная поездка",
+        "textEn": "I'll ride: ordinary people, ordinary trip",
+        "scoring": { "FAI": 2 }
+      },
+      {
+        "text": "Еду и обычно выхожу с новыми знакомыми",
+        "textEn": "I'll ride — and usually leave with new acquaintances",
+        "scoring": { "FAI": 2, "HIS": 1, "HUM": 1 }
+      },
+      {
+        "text": "Поезд: не сяду в машину к незнакомцу",
+        "textEn": "The train: I won't get in a stranger's car",
+        "scoring": { "PAR": 2, "AVD": 1 }
+      },
+      {
+        "text": "Проверю рейтинг, отзывы, маршрут — потом решу",
+        "textEn": "I'll check ratings, reviews, the route — then decide",
+        "scoring": { "OBC": 2, "PAR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Новый знакомый безупречен: внимателен, щедр, всегда вовремя. Ваша первая мысль?",
+    "scenarioEn": "A new acquaintance is flawless: attentive, generous, always on time. Your first thought?",
+    "options": [
+      {
+        "text": "Повезло встретить хорошего человека",
+        "textEn": "Lucky me — I've met a good person",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Так не бывает. Жду, когда покажет настоящее лицо",
+        "textEn": "Too good to be true. Waiting for the real face",
+        "scoring": { "PAR": 3 }
+      },
+      {
+        "text": "Интересно, что ему от меня нужно",
+        "textEn": "I wonder what he wants from me",
+        "scoring": { "MAC": 2, "PAR": 1 }
+      },
+      {
+        "text": "Приятно, но близко подпускать не тороплюсь",
+        "textEn": "Nice, but I'm in no rush to let him close",
+        "scoring": { "AVD": 1, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Групповой проект: можно жёстко контролировать вклад каждого или довериться командной ответственности.",
+    "scenarioEn": "A group project: you can strictly track everyone's input or trust shared responsibility.",
+    "options": [
+      {
+        "text": "Доверюсь: люди выкладываются, когда им доверяют",
+        "textEn": "I'll trust: people give their best when trusted",
+        "scoring": { "FAI": 3, "HUM": 1 }
+      },
+      {
+        "text": "Введу прозрачные точки контроля для всех",
+        "textEn": "I'll set transparent checkpoints for everyone",
+        "scoring": { "OBC": 2 }
+      },
+      {
+        "text": "Буду тихо перепроверять ключевые куски",
+        "textEn": "I'll quietly double-check the critical parts",
+        "scoring": { "PAR": 1, "OBC": 1, "MAC": 1 }
+      },
+      {
+        "text": "Сделаю главное сам: так спокойнее",
+        "textEn": "I'll do the core myself: it's calmer that way",
+        "scoring": { "NAR": 1, "OBC": 1, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Человек однажды сильно вас подвёл и просит дать ему второй шанс в общем деле.",
+    "scenarioEn": "Someone who once badly let you down asks for a second chance in a joint venture.",
+    "options": [
+      {
+        "text": "Дам: люди меняются, и шанс — лучший тому катализатор",
+        "textEn": "I'll give it: people change, and a chance is the best catalyst",
+        "scoring": { "FAI": 3, "HUM": 1 }
+      },
+      {
+        "text": "Дам, но на задачах, где цена ошибки мала",
+        "textEn": "I will — but on tasks where mistakes are cheap",
+        "scoring": { "MAC": 1, "OBC": 2 }
+      },
+      {
+        "text": "Не дам: люди не меняются",
+        "textEn": "I won't: people don't change",
+        "scoring": { "PAR": 2, "SZD": 1 }
+      },
+      {
+        "text": "Дам и буду ждать повторения, чтобы закрыть вопрос навсегда",
+        "textEn": "I'll give it and wait for a repeat, to close the question forever",
+        "scoring": { "PAG": 2, "PAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Рынок, продавец взвешивает фрукты. Весы вам не видны.",
+    "scenarioEn": "A market stall; the vendor weighs your fruit. You can't see the scales.",
+    "options": [
+      {
+        "text": "Не проверяю: обвешивать невыгодно — клиент не вернётся",
+        "textEn": "I don't check: cheating loses repeat customers",
+        "scoring": { "FAI": 2 }
+      },
+      {
+        "text": "Мысленно прикидываю вес и цену",
+        "textEn": "I estimate the weight and price in my head",
+        "scoring": { "OBC": 1, "PAR": 1 }
+      },
+      {
+        "text": "Прошу перевесить при мне",
+        "textEn": "I ask him to reweigh it in front of me",
+        "scoring": { "PAR": 2, "DIR": 1 }
+      },
+      {
+        "text": "Хожу только туда, где весы электронные и видны",
+        "textEn": "I only shop where the scales are digital and visible",
+        "scoring": { "PAR": 1, "OBC": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Ребёнок спрашивает: «Незнакомые люди — злые?»",
+    "scenarioEn": "A child asks you: \"Are strangers bad?\"",
+    "options": [
+      {
+        "text": "«Почти все люди добрые. Но есть правила безопасности — вот они»",
+        "textEn": "\"Almost all people are kind. But there are safety rules — here they are\"",
+        "scoring": { "FAI": 3, "HUM": 1, "OBC": 1 }
+      },
+      {
+        "text": "«С незнакомыми не разговаривай. Точка»",
+        "textEn": "\"Don't talk to strangers. Period\"",
+        "scoring": { "PAR": 2 }
+      },
+      {
+        "text": "«Люди разные. Смотри по ситуации»",
+        "textEn": "\"People vary. Judge by the situation\"",
+        "scoring": { "SZT": 1, "MAC": 1 }
+      },
+      {
+        "text": "«Злых мало, но встречаются, поэтому будь рядом со мной»",
+        "textEn": "\"Bad ones are rare but real, so stay close to me\"",
+        "scoring": { "FAI": 1, "PAR": 1, "HUM": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Знакомый знакомых оказался в вашем городе без ночлега и просится переночевать.",
+    "scenarioEn": "A friend-of-a-friend is stranded in your city and asks to crash at your place overnight.",
+    "options": [
+      {
+        "text": "Пущу: сегодня я помог, завтра помогут мне",
+        "textEn": "I'll host him: I help today, someone helps me tomorrow",
+        "scoring": { "FAI": 3, "HUM": 1 }
+      },
+      {
+        "text": "Оплачу ему хостел — и человеку хорошо, и дом не проходной двор",
+        "textEn": "I'll pay for a hostel — he's fine, and my home stays mine",
+        "scoring": { "HUM": 2, "SZD": 1 }
+      },
+      {
+        "text": "Откажу: домой пускаю только своих",
+        "textEn": "I'll decline: only my people enter my home",
+        "scoring": { "SZD": 2, "PAR": 1 }
+      },
+      {
+        "text": "Сначала расспрошу общих знакомых, что он за человек",
+        "textEn": "First I'll ask our mutual friends what kind of person he is",
+        "scoring": { "PAR": 1, "OBC": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы забыли телефон на столике в кафе и вспомнили через полчаса.",
+    "scenarioEn": "You left your phone on a cafe table and remembered half an hour later.",
+    "options": [
+      {
+        "text": "Вернусь спокойно: скорее всего, лежит или отдали персоналу",
+        "textEn": "I'll go back calmly: it's probably still there or with the staff",
+        "scoring": { "FAI": 3 }
+      },
+      {
+        "text": "Побегу, по дороге блокируя карты и аккаунты",
+        "textEn": "I'll run back, blocking cards and accounts on the way",
+        "scoring": { "PAR": 2, "OBC": 1 }
+      },
+      {
+        "text": "Мысленно попрощаюсь с телефоном",
+        "textEn": "I'll mentally say goodbye to the phone",
+        "scoring": { "DPR": 2, "PAR": 1 }
+      },
+      {
+        "text": "Сначала позвоню в кафе, потом решу",
+        "textEn": "I'll call the cafe first, then decide",
+        "scoring": { "OBC": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Друг зовёт вложиться в его стартап. Бумаг нет — «всё на доверии, как у нас всегда».",
+    "scenarioEn": "A friend invites you to invest in his startup. No paperwork — \"all on trust, like always with us\".",
+    "options": [
+      {
+        "text": "Вложусь: наша дружба надёжнее любых бумаг",
+        "textEn": "I'll invest: our friendship is more reliable than any papers",
+        "scoring": { "FAI": 2, "DEP": 1 }
+      },
+      {
+        "text": "Вложусь, но оформим всё письменно — дружбе это не враг",
+        "textEn": "I'll invest, but we put it in writing — no enemy to friendship",
+        "scoring": { "FAI": 1, "OBC": 2, "DIR": 1 }
+      },
+      {
+        "text": "Откажусь: деньги и дружба несовместимы",
+        "textEn": "I'll pass: money and friendship don't mix",
+        "scoring": { "PAR": 1, "SZD": 1 }
+      },
+      {
+        "text": "Вложу сумму, потерю которой переживу молча",
+        "textEn": "I'll invest only what I can silently afford to lose",
+        "scoring": { "MAC": 1, "OBC": 1, "FAI": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы выбираете фонд для регулярных пожертвований.",
+    "scenarioEn": "You're choosing a charity for regular donations.",
+    "options": [
+      {
+        "text": "Выберу по отклику сердца: люди в благотворительности честны",
+        "textEn": "I'll pick by heart: people in charity are honest",
+        "scoring": { "FAI": 2, "HUM": 2 }
+      },
+      {
+        "text": "Изучу отчётность и админрасходы, потом решу",
+        "textEn": "I'll study their reports and overhead, then decide",
+        "scoring": { "OBC": 2, "KAN": 1 }
+      },
+      {
+        "text": "Помогаю только напрямую конкретным людям",
+        "textEn": "I only help specific people directly",
+        "scoring": { "PAR": 1, "HUM": 1 }
+      },
+      {
+        "text": "Не жертвую: большинство сборов — кормушки",
+        "textEn": "I don't donate: most funds are feeding troughs",
+        "scoring": { "PAR": 2, "ANT": 1 }
+      }
+    ]
+  }
+]

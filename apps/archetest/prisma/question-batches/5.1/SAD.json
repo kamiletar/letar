@@ -1,0 +1,378 @@
+[
+  {
+    "scenario": "В ленте — видео уличных драк и болезненных фейлов. Ваша рука на экране:",
+    "scenarioEn": "Your feed shows street fights and painful fail videos. Your thumb on the screen:",
+    "options": [
+      {
+        "text": "Досматриваю: есть в этом что-то захватывающее",
+        "textEn": "I watch to the end: there's something gripping about it",
+        "scoring": { "SAD": 3 }
+      },
+      {
+        "text": "Пролистываю: неприятно смотреть на чужую боль",
+        "textEn": "I scroll past: watching others' pain is unpleasant",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Смотрю как исследователь: почему люди так себя ведут?",
+        "textEn": "I watch like a researcher: why do people act this way?",
+        "scoring": { "SZT": 1, "SZD": 1 }
+      },
+      {
+        "text": "Отпишусь от источника: не хочу такой ленты",
+        "textEn": "I'll unfollow the source: I don't want this feed",
+        "scoring": { "OBC": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Онлайн-игра. Вы поймали противника в безвыходную позицию, он беспомощен.",
+    "scenarioEn": "An online game. You've trapped an opponent in a hopeless position; he is helpless.",
+    "options": [
+      {
+        "text": "Растяну момент: пусть прочувствует",
+        "textEn": "I'll drag out the moment: let him feel it",
+        "scoring": { "SAD": 3, "MAC": 1 }
+      },
+      { "text": "Закончу быстро и по делу", "textEn": "I'll finish quickly and cleanly", "scoring": { "OBC": 1 } },
+      {
+        "text": "Отпущу: интересно играть с равным, а не добивать",
+        "textEn": "I'll let him go: playing an equal is fun, finishing off isn't",
+        "scoring": { "HUM": 1, "FAI": 1 }
+      },
+      {
+        "text": "Напишу ему пару колких слов в чат напоследок",
+        "textEn": "I'll type a few barbed words in chat as a parting gift",
+        "scoring": { "SAD": 2, "ANT": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Ваш товарищ по команде в дебатах разгромил слабого оппонента — жёстко, до унижения. Зал смеётся.",
+    "scenarioEn": "Your debate teammate demolished a weak opponent — harshly, to the point of humiliation. The room laughs.",
+    "options": [
+      {
+        "text": "Смеюсь со всеми: сам виноват, что вышел неготовым",
+        "textEn": "I laugh along: his own fault for coming unprepared",
+        "scoring": { "SAD": 3, "ANT": 1 }
+      },
+      {
+        "text": "Неловко: победа не требовала унижения",
+        "textEn": "I cringe: the win didn't require humiliation",
+        "scoring": { "HUM": 2, "KAN": 1 }
+      },
+      {
+        "text": "Оцениваю технику разгрома: красиво сработано",
+        "textEn": "I assess the takedown technique: nicely done",
+        "scoring": { "SAD": 1, "MAC": 2 }
+      },
+      {
+        "text": "Подойду потом к проигравшему поддержать",
+        "textEn": "I'll find the loser afterwards to offer support",
+        "scoring": { "HUM": 3 }
+      }
+    ]
+  },
+  {
+    "scenario": "Друзья готовят розыгрыш: человек по-настоящему испугается, зато будет «смешное видео».",
+    "scenarioEn": "Friends are planning a prank: the target will be genuinely terrified, but the video \"will be hilarious\".",
+    "options": [
+      {
+        "text": "Участвую: страх мгновенный, а история на годы",
+        "textEn": "I'm in: the fear lasts a second, the story lasts years",
+        "scoring": { "SAD": 3, "HIS": 1 }
+      },
+      {
+        "text": "Предложу вариант, где смешно всем, включая жертву",
+        "textEn": "I'll suggest a version where everyone laughs, including the target",
+        "scoring": { "HUM": 2, "HIS": 1 }
+      },
+      {
+        "text": "Откажусь и отговорю: страх — не смешно",
+        "textEn": "I'll refuse and talk them out of it: terror isn't funny",
+        "scoring": { "HUM": 1, "KAN": 2 }
+      },
+      {
+        "text": "Не участвую, но посмотреть — посмотрю",
+        "textEn": "I won't take part, but I'll watch the result",
+        "scoring": { "SAD": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Начальник публично распекает вашего коллегу — долго, с наслаждением, при всех.",
+    "scenarioEn": "The boss publicly berates your colleague — at length, with relish, in front of everyone.",
+    "options": [
+      {
+        "text": "Втайне интересно наблюдать: офисная коррида",
+        "textEn": "Secretly fascinating to watch: office bullfighting",
+        "scoring": { "SAD": 3 }
+      },
+      {
+        "text": "Отвожу глаза: чужое унижение физически неприятно",
+        "textEn": "I look away: someone's humiliation is physically unpleasant",
+        "scoring": { "HUM": 2, "AVD": 1 }
+      },
+      {
+        "text": "Запоминаю приёмы начальника: пригодится знать его арсенал",
+        "textEn": "I note the boss's techniques: knowing his arsenal will help",
+        "scoring": { "MAC": 2, "PAR": 1 }
+      },
+      {
+        "text": "Вступлюсь или переведу удар на себя",
+        "textEn": "I'll step in or draw the fire onto myself",
+        "scoring": { "HUM": 2, "KAN": 1, "MAS": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Спортивный поединок. Видно, что у соперника заболела старая травма.",
+    "scenarioEn": "A sparring match. You can see your opponent's old injury is acting up.",
+    "options": [
+      {
+        "text": "Работаю в травму: это спорт, слабость — его проблема",
+        "textEn": "I target the injury: it's sport, weakness is his problem",
+        "scoring": { "SAD": 3, "ANT": 1 }
+      },
+      {
+        "text": "Дожимаю по правилам, но в травму бить не стану",
+        "textEn": "I press on by the rules, but won't strike the injury",
+        "scoring": { "KAN": 2 }
+      },
+      { "text": "Предложу остановить бой", "textEn": "I'll offer to stop the fight", "scoring": { "HUM": 2 } },
+      {
+        "text": "Использую его отвлечение, но не саму травму",
+        "textEn": "I'll use his distraction, not the injury itself",
+        "scoring": { "MAC": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Компания смеётся над очень чёрной шуткой про недавнюю трагедию.",
+    "scenarioEn": "The group is laughing at a very dark joke about a recent tragedy.",
+    "options": [
+      {
+        "text": "Смеюсь: чёрный юмор — способ переварить ужас",
+        "textEn": "I laugh: dark humor is how we digest horror",
+        "scoring": { "SAD": 1, "SZT": 1 }
+      },
+      {
+        "text": "Смеюсь громче всех и добавляю свою",
+        "textEn": "I laugh loudest and add my own",
+        "scoring": { "SAD": 2, "HIS": 1 }
+      },
+      {
+        "text": "Не смешно: за шуткой — реальные люди",
+        "textEn": "Not funny: there are real people behind the joke",
+        "scoring": { "HUM": 2, "KAN": 1 }
+      },
+      {
+        "text": "Промолчу: юмор — дело вкуса",
+        "textEn": "I'll stay quiet: humor is a matter of taste",
+        "scoring": { "AVD": 1, "SZD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Знакомый в красках рассказывает, как «изящно проучил» обидевшего его человека.",
+    "scenarioEn": "An acquaintance vividly describes how he \"elegantly taught a lesson\" to someone who wronged him.",
+    "options": [
+      {
+        "text": "Слушаю с удовольствием и прошу подробностей",
+        "textEn": "I listen with pleasure and ask for details",
+        "scoring": { "SAD": 3 }
+      },
+      {
+        "text": "Понимаю обиду, но месть — путь вниз",
+        "textEn": "I get the grievance, but revenge is a downward path",
+        "scoring": { "KAN": 2, "HUM": 1 }
+      },
+      {
+        "text": "Оцениваю исполнение: продумано красиво",
+        "textEn": "I appraise the execution: elegantly engineered",
+        "scoring": { "MAC": 2, "SAD": 1 }
+      },
+      {
+        "text": "Меняю тему: чужие войны меня не касаются",
+        "textEn": "I change the subject: other people's wars aren't mine",
+        "scoring": { "SZD": 2, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "Стратегическая игра выиграна. Можно принять капитуляцию — или стереть проигравшего с карты.",
+    "scenarioEn": "The strategy game is won. You can accept surrender — or wipe the loser off the map.",
+    "options": [
+      {
+        "text": "Стираю: тотальная победа приятнее формальной",
+        "textEn": "I wipe him out: total victory beats a formal one",
+        "scoring": { "SAD": 2, "ANT": 1 }
+      },
+      {
+        "text": "Принимаю капитуляцию: цель достигнута",
+        "textEn": "I accept the surrender: the goal is achieved",
+        "scoring": { "OBC": 1, "KAN": 1 }
+      },
+      {
+        "text": "Предложу реванш с форой для него",
+        "textEn": "I'll offer a rematch with a handicap for him",
+        "scoring": { "HUM": 1, "FAI": 1 }
+      },
+      {
+        "text": "Оставлю ему один город — пусть живёт и помнит",
+        "textEn": "I'll leave him one city — let him live and remember",
+        "scoring": { "SAD": 2, "MAC": 2, "NAR": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Человек перед вами эффектно поскользнулся на ровном месте. Не ушибся.",
+    "scenarioEn": "The person ahead of you slips spectacularly out of nowhere. Unhurt.",
+    "options": [
+      {
+        "text": "Хохочу в голос: физическая комедия вечна",
+        "textEn": "I laugh out loud: physical comedy is eternal",
+        "scoring": { "SAD": 2, "HIS": 1 }
+      },
+      {
+        "text": "Сдержу смех и помогу подняться",
+        "textEn": "I'll suppress the laugh and help him up",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Спрошу, всё ли цело, потом улыбнёмся вместе",
+        "textEn": "I'll check he's okay — then we'll laugh together",
+        "scoring": { "HUM": 2, "HIS": 1 }
+      },
+      {
+        "text": "Пройду мимо, не подав вида",
+        "textEn": "I'll walk past as if nothing happened",
+        "scoring": { "SZD": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В жарком споре вы случайно нащупали болевую точку оппонента — личную, не по теме.",
+    "scenarioEn": "In a heated argument you've accidentally found the opponent's sore spot — personal, off-topic.",
+    "options": [
+      {
+        "text": "Надавлю: в споре все средства работают на победу",
+        "textEn": "I'll press it: in a fight, everything serves the win",
+        "scoring": { "SAD": 3, "MAC": 1, "ANT": 1 }
+      },
+      {
+        "text": "Отмечу про запас, но сейчас не использую",
+        "textEn": "I'll file it away, but not use it now",
+        "scoring": { "MAC": 2, "PAR": 1 }
+      },
+      {
+        "text": "Обойду: личное в споре — запрещённый приём",
+        "textEn": "I'll steer around it: personal blows are foul play",
+        "scoring": { "KAN": 3 }
+      },
+      {
+        "text": "Сбавлю градус: спор того не стоит",
+        "textEn": "I'll cool it down: the argument isn't worth it",
+        "scoring": { "HUM": 1, "AVD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Стрим «худших прослушиваний»: люди позорятся на сцене, монтаж выжимает максимум кринжа.",
+    "scenarioEn": "A \"worst auditions\" stream: people embarrass themselves on stage, edited for maximum cringe.",
+    "options": [
+      { "text": "Мой жанр: смотрю с попкорном", "textEn": "My genre: popcorn and play", "scoring": { "SAD": 2 } },
+      {
+        "text": "Больно смотреть: за кринжем — чья-то мечта",
+        "textEn": "Painful to watch: behind the cringe is someone's dream",
+        "scoring": { "HUM": 2 }
+      },
+      {
+        "text": "Смотрю ради анализа: что именно пошло не так",
+        "textEn": "I watch analytically: what exactly went wrong",
+        "scoring": { "OBC": 1, "SZT": 1 }
+      },
+      {
+        "text": "Скучно: чужой позор — дешёвое топливо",
+        "textEn": "Boring: others' shame is cheap fuel",
+        "scoring": { "SZD": 1, "NAR": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "У вас есть власть наказать нарушителя строго или мягко. Он этого не оспорит.",
+    "scenarioEn": "You have the power to punish an offender harshly or leniently. He can't contest it.",
+    "options": [
+      {
+        "text": "Строго: пусть запомнит надолго",
+        "textEn": "Harshly: let him remember it for a long time",
+        "scoring": { "SAD": 2, "OBC": 1 }
+      },
+      {
+        "text": "Ровно по тяжести проступка, без эмоций",
+        "textEn": "Exactly proportional to the offense, no emotions",
+        "scoring": { "KAN": 2, "OBC": 1 }
+      },
+      {
+        "text": "Мягко, с разбором: наказание должно учить, а не ломать",
+        "textEn": "Leniently, with a debrief: punishment should teach, not break",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      {
+        "text": "Так, чтобы другим был показательный сигнал",
+        "textEn": "In a way that sends a demonstrative signal to others",
+        "scoring": { "MAC": 2, "SAD": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "В детстве кто-то при вас мучил жука. Что вы тогда чувствовали — честно?",
+    "scenarioEn": "As a child, you watched someone torment a beetle. What did you honestly feel back then?",
+    "options": [
+      {
+        "text": "Любопытство: хотелось досмотреть",
+        "textEn": "Curiosity: I wanted to see it through",
+        "scoring": { "SAD": 2, "SZT": 1 }
+      },
+      {
+        "text": "Жалость: помню, забрал и выпустил",
+        "textEn": "Pity: I remember taking it away and setting it free",
+        "scoring": { "HUM": 2 }
+      },
+      { "text": "Ничего: жук и жук", "textEn": "Nothing: a beetle is a beetle", "scoring": { "SZD": 1, "ALX": 1 } },
+      { "text": "Не помню таких сцен", "textEn": "I don't remember such scenes", "scoring": {} }
+    ]
+  },
+  {
+    "scenario": "Сосед, который годами всех изводил, наконец получил по заслугам — крупно и публично.",
+    "scenarioEn": "The neighbor who tormented everyone for years finally got what he deserved — big and public.",
+    "options": [
+      {
+        "text": "Наслаждаюсь каждой деталью этой истории",
+        "textEn": "I savor every detail of the story",
+        "scoring": { "SAD": 2, "PAG": 1 }
+      },
+      {
+        "text": "Справедливость сработала — этого достаточно",
+        "textEn": "Justice worked — that's enough",
+        "scoring": { "KAN": 2 }
+      },
+      {
+        "text": "Немного жаль его, хоть он и заслужил",
+        "textEn": "I feel a bit sorry for him, deserved as it was",
+        "scoring": { "HUM": 2, "FAI": 1 }
+      },
+      {
+        "text": "Мне безразлично: его жизнь — его карма",
+        "textEn": "Indifferent: his life, his karma",
+        "scoring": { "SZD": 2 }
+      }
+    ]
+  }
+]
