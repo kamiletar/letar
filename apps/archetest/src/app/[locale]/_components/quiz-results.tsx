@@ -7,8 +7,9 @@ import { useMemo } from 'react'
 import { LuArrowRight, LuHeartPulse, LuPhone, LuTriangleAlert } from 'react-icons/lu'
 import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
-import { PERSONALITY_TYPES } from '../_data/personality-types'
+import { HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../_data/personality-types'
 import { AchievementCard } from './achievement-card'
+import { HexagramChart } from './hexagram-chart'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
 import { PsychologistLinkBlock } from './psychologist-link-block'
@@ -253,6 +254,17 @@ export function QuizResults({
 
         {/* Индикаторы достоверности для шкал с низкой точностью */}
         {confidence && <LowConfidenceWarnings confidence={confidence} isRu={isRu} />}
+
+        {/* Гексаграмма триад (этап 5.2) — только если сессия покрыла шкалы триад (банк v2) */}
+        {HEXAGRAM_SCALE_CODES.some((code) => (scores[code] ?? 0) > 0) && (
+          <Box w="100%" p={6} borderRadius="lg" borderWidth="1px" borderColor="border">
+            <HexagramChart
+              scores={scores}
+              title={isRu ? 'Архитектура личности' : 'Personality Architecture'}
+              showNarrative
+            />
+          </Box>
+        )}
 
         {/* Детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы */}
         <ProfileDetails scores={scores} confidence={confidence} />

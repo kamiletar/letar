@@ -6,9 +6,10 @@ import { useLocale, useTranslations } from 'next-intl'
 import { use, useCallback, useEffect, useMemo, useState } from 'react'
 import { LuPencil, LuSave } from 'react-icons/lu'
 import { getClientDetailAction, updateDisplayNameAction } from '../../_actions/cabinet.action'
+import { HexagramChart } from '../../_components/hexagram-chart'
 import { PersonalityRadarChart } from '../../_components/personality-radar-chart'
 import { ProfileDetails } from '../../_components/profile-details'
-import { PERSONALITY_TYPES } from '../../_data/personality-types'
+import { HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../../_data/personality-types'
 import { PsychologistNotes } from './_components/psychologist-notes'
 import { SessionDynamicsChart } from './_components/session-dynamics-chart'
 
@@ -168,6 +169,18 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
             title={isRu ? 'Кумулятивный профиль' : 'Cumulative Profile'}
             color="green.500"
           />
+        )}
+
+        {/* Архитектура личности: гексаграмма триад (этап 5.2) — если клиент проходил банк v2 */}
+        {detail.cumulativeScores && HEXAGRAM_SCALE_CODES.some((code) => (detail.cumulativeScores![code] ?? 0) > 0) && (
+          <Card.Root w="100%" variant="outline">
+            <Card.Body>
+              <HexagramChart
+                scores={detail.cumulativeScores}
+                title={isRu ? 'Архитектура личности' : 'Personality Architecture'}
+              />
+            </Card.Body>
+          </Card.Root>
         )}
 
         {/* Динамика по сессиям */}

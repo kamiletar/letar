@@ -20,6 +20,13 @@
       "port": 3009
     },
     {
+      "name": "archetest",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "archetest"],
+      "port": 3012,
+      "autoPort": true
+    },
+    {
       "name": "auth-hub",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "auth-hub"],

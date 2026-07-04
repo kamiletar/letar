@@ -34,7 +34,6 @@ import { LanguageSwitcher } from './language-switcher'
  */
 export function MobileDrawer() {
   const t = useTranslations('nav')
-  const tCommon = useTranslations('common')
   const { data: session, isPending: isSessionPending } = useSession()
   const { isPsychologist } = useIsPsychologist()
   const [open, setOpen] = useState(false)
