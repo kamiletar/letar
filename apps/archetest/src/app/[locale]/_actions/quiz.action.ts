@@ -7,7 +7,9 @@ import maxScoresData from '../_data/max-scores-per-question.json'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { ALL_SCALE_CODES } from '../_data/personality-types'
 import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
-import { stratifiedSelect } from '../_lib/stratified-shuffle'
+import { isValidityQuestion, VALIDITY_CHECKS, VALIDITY_PER_SESSION } from '../_data/validity-checks'
+import { fisherYatesShuffle, stratifiedSelect } from '../_lib/stratified-shuffle'
+import { computeValidityFlags } from '../_lib/validity'
 import { checkAndAwardAchievements } from './achievements.action'
 import { recalcLeaderboardEntry } from './leaderboard.action'
 
@@ -56,6 +58,8 @@ export interface QuizScores {
   confidence: Record<PersonalityTypeCode, ScaleConfidence>
   /** Уровень значимости каждой шкалы */
   levels: Record<PersonalityTypeCode, ScaleLevel>
+  /** Ответы с sortOrder — для вычисления валидности протокола */
+  answersWithSortOrder: { sortOrder: number; selectedOption: number }[]
 }
 
 /** Максимальные баллы по каждому вопросу (из JSON от психолога) */
@@ -167,10 +171,20 @@ export async function getRandomQuestionsAction(count = 50): Promise<QuizQuestion
     select: { id: true, scenario: true, scenarioEn: true, options: true, sortOrder: true },
   })
 
-  // Стратифицированная выборка: пропорциональное представительство всех 13 шкал
-  const selected = stratifiedSelect(questions, count)
+  // Attention-check вопросы не участвуют в стратификации: инжектятся отдельно,
+  // повторный показ между сессиями допустим (исключения excludeIds игнорируются)
+  const pool = questions.filter((q) => !isValidityQuestion(q.sortOrder))
 
-  return selected.map((q) => ({
+  // Стратифицированная выборка: пропорциональное представительство всех шкал ядра
+  const selected = stratifiedSelect(pool, Math.max(1, count - VALIDITY_PER_SESSION))
+
+  const validityQuestions = await db.quizQuestion.findMany({
+    where: { active: true, sortOrder: { in: VALIDITY_CHECKS.map((c) => c.sortOrder) } },
+    select: { id: true, scenario: true, scenarioEn: true, options: true, sortOrder: true },
+  })
+  const injected = fisherYatesShuffle([...validityQuestions]).slice(0, VALIDITY_PER_SESSION)
+
+  return fisherYatesShuffle([...selected, ...injected]).map((q) => ({
     id: q.id,
     scenario: q.scenario,
     scenarioEn: q.scenarioEn,
@@ -203,8 +217,9 @@ export async function calculateScores(
     questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }])
   )
 
-  // Собираем sortOrder'ы отвеченных вопросов для расчёта достоверности
+  // Собираем sortOrder'ы отвеченных вопросов для расчёта достоверности и валидности
   const answeredSortOrders: number[] = []
+  const answersWithSortOrder: { sortOrder: number; selectedOption: number }[] = []
 
   for (const answer of answers) {
     const qData = questionsMap.get(answer.questionId)
@@ -213,6 +228,7 @@ export async function calculateScores(
     }
 
     answeredSortOrders.push(qData.sortOrder)
+    answersWithSortOrder.push({ sortOrder: qData.sortOrder, selectedOption: answer.selectedOption })
 
     const option = qData.options[answer.selectedOption]
     if (!option) {
@@ -259,6 +275,7 @@ export async function calculateScores(
     normalized: normalized as Record<PersonalityTypeCode, number>,
     confidence: confidence as Record<PersonalityTypeCode, ScaleConfidence>,
     levels: levels as Record<PersonalityTypeCode, ScaleLevel>,
+    answersWithSortOrder,
   }
 }
 
@@ -280,6 +297,10 @@ export async function submitQuizAction(
   const db = getEnhancedPrisma(await getDbUser(session))
   const scores = await calculateScores(answers, db)
 
+  // Валидность протокола: attention-check'и + монотонность паттерна.
+  // Невалидная сессия сохраняется (raw неприкосновенен), но помечается
+  const validity = computeValidityFlags(scores.answersWithSortOrder)
+
   const quizSession = await db.quizSession.create({
     data: {
       userId: session.user.id,
@@ -288,6 +309,8 @@ export async function submitQuizAction(
       skippedCount: skipped.length,
       scores: JSON.stringify(scores.raw),
       questionBankVersion: QUESTION_BANK_VERSION,
+      isValid: validity.isValid,
+      validityFlags: JSON.stringify(validity),
       completedAt: new Date(),
       answers: {
         create: answers.map((a, i) => ({
@@ -307,18 +330,21 @@ export async function submitQuizAction(
     },
   })
 
-  // Параллельно: среднее, достижения, лидерборд, прогресс
+  // Параллельно: среднее, достижения, лидерборд, прогресс.
+  // XP/ачивки/лидерборд — только за валидные протоколы (защита данных и норм)
   const completedAt = new Date()
 
   const [averagedScores, newAchievements, rankInfo, progressData] = await Promise.all([
     getAveragedScores(db, session.user.id),
-    checkAndAwardAchievements(session.user.id, {
-      answeredCount: answers.length,
-      scores: scores.normalized,
-      completedAt,
-      createdAt: quizSession.createdAt,
-    }),
-    recalcLeaderboardEntry(session.user.id),
+    validity.isValid
+      ? checkAndAwardAchievements(session.user.id, {
+          answeredCount: answers.length,
+          scores: scores.normalized,
+          completedAt,
+          createdAt: quizSession.createdAt,
+        })
+      : Promise.resolve([]),
+    validity.isValid ? recalcLeaderboardEntry(session.user.id) : Promise.resolve(null),
     // Считаем прогресс после сохранения
     (async () => {
       const [totalQuestions, _answeredCount, skippedCount] = await Promise.all([
@@ -368,10 +394,10 @@ async function getAveragedScores(
   db: ReturnType<typeof getEnhancedPrisma>,
   userId: string
 ): Promise<Record<PersonalityTypeCode, number> | null> {
-  // Усредняем только сессии текущей версии банка: у разных версий разный actual_max,
-  // их нормализованные баллы несопоставимы (v1-сессии остаются в истории, но не в среднем)
+  // Усредняем только валидные сессии текущей версии банка: у разных версий разный
+  // actual_max (несопоставимы), невалидные протоколы — шум (в истории остаются)
   const sessions = await db.quizSession.findMany({
-    where: { userId, completedAt: { not: null }, questionBankVersion: QUESTION_BANK_VERSION },
+    where: { userId, completedAt: { not: null }, questionBankVersion: QUESTION_BANK_VERSION, isValid: true },
     select: { id: true, scores: true, answeredCount: true },
     orderBy: { createdAt: 'desc' },
   })

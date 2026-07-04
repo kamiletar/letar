@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import questionsRaw from '../../../../prisma/questions-dump.json'
 import maxScoresData from './max-scores-per-question.json'
 import { ALL_SCALE_CODES } from './personality-types'
+import { VALIDITY_CHECKS } from './validity-checks'
 
 interface QuestionDump {
   id: string
@@ -101,5 +102,18 @@ describe('банк вопросов', () => {
       }
     }
     expect(newMismatches, `новые расхождения дамп↔справочник: ${newMismatches.join(', ')}`).toEqual([])
+  })
+
+  it('attention-check вопросы существуют, без скоринга, correctOptionIndex в диапазоне', () => {
+    const bySortOrder = new Map(questions.map((q) => [q.sortOrder, q]))
+    for (const check of VALIDITY_CHECKS) {
+      const q = bySortOrder.get(check.sortOrder)
+      expect(q, `нет вопроса с sortOrder ${check.sortOrder}`).toBeDefined()
+      const opts = JSON.parse(q!.options) as OptionData[]
+      expect(check.correctOptionIndex).toBeLessThan(opts.length)
+      for (const o of opts) {
+        expect(Object.keys(o.scoring), `чек-вопрос ${check.sortOrder} не должен давать баллы`).toEqual([])
+      }
+    }
   })
 })

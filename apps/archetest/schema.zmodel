@@ -150,6 +150,10 @@ model QuizSession {
   // нормализации (v1 = 1955 вопросов/13 шкал, v2 = 2090/22). Старые строки получают
   // @default(1) — это исторически верно: все они пройдены на банке v1
   questionBankVersion Int    @default(1)
+  // Валидность протокола: false при провале attention-check'ов или монотонном
+  // паттерне. Невалидные сессии не идут в усреднение/динамику/нормы и не дают XP
+  isValid       Boolean      @default(true)
+  validityFlags String?                      // JSON ValidityFlags (детали для кабинета)
   completedAt   DateTime?
   createdAt     DateTime     @default(now())
   answers       QuizAnswer[]

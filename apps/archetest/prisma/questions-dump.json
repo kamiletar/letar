@@ -18808,5 +18808,59 @@
     "active": true,
     "sortOrder": 2089,
     "createdAt": "2026-07-04T04:47:06.506"
+  },
+  {
+    "id": "270632684540e74a3a60e8b94",
+    "scenario": "Вопрос-проверка внимательности. Выберите третий вариант ответа.",
+    "scenarioEn": "An attention check. Please select the third answer option.",
+    "options": "[{\"text\":\"Я выбираю первый вариант\",\"textEn\":\"I choose the first option\",\"scoring\":{}},{\"text\":\"Я выбираю второй вариант\",\"textEn\":\"I choose the second option\",\"scoring\":{}},{\"text\":\"Я выбираю третий вариант\",\"textEn\":\"I choose the third option\",\"scoring\":{}},{\"text\":\"Я выбираю четвёртый вариант\",\"textEn\":\"I choose the fourth option\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2090,
+    "createdAt": "2026-07-04T05:04:42.976"
+  },
+  {
+    "id": "ad2021935a4080916dd7a281d",
+    "scenario": "Для контроля качества данных выберите вариант со словом «якорь».",
+    "scenarioEn": "For data quality control, select the option containing the word \"anchor\".",
+    "options": "[{\"text\":\"Якорь\",\"textEn\":\"Anchor\",\"scoring\":{}},{\"text\":\"Парус\",\"textEn\":\"Sail\",\"scoring\":{}},{\"text\":\"Штурвал\",\"textEn\":\"Helm\",\"scoring\":{}},{\"text\":\"Компас\",\"textEn\":\"Compass\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2091,
+    "createdAt": "2026-07-04T05:04:42.976"
+  },
+  {
+    "id": "5cee737e851829a5927f6e8ba",
+    "scenario": "Если вы читаете этот вопрос, выберите последний вариант ответа.",
+    "scenarioEn": "If you are reading this question, select the last answer option.",
+    "options": "[{\"text\":\"Согласен\",\"textEn\":\"Agree\",\"scoring\":{}},{\"text\":\"Не согласен\",\"textEn\":\"Disagree\",\"scoring\":{}},{\"text\":\"Затрудняюсь ответить\",\"textEn\":\"Hard to say\",\"scoring\":{}},{\"text\":\"Я читаю вопросы внимательно\",\"textEn\":\"I read the questions carefully\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2092,
+    "createdAt": "2026-07-04T05:04:42.976"
+  },
+  {
+    "id": "ea539ed804827405a18472b33",
+    "scenario": "Проверка внимательности: сколько будет два плюс два?",
+    "scenarioEn": "Attention check: what is two plus two?",
+    "options": "[{\"text\":\"Три\",\"textEn\":\"Three\",\"scoring\":{}},{\"text\":\"Четыре\",\"textEn\":\"Four\",\"scoring\":{}},{\"text\":\"Пять\",\"textEn\":\"Five\",\"scoring\":{}},{\"text\":\"Шесть\",\"textEn\":\"Six\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2093,
+    "createdAt": "2026-07-04T05:04:42.976"
+  },
+  {
+    "id": "2655318aa26c6eb739e320327",
+    "scenario": "Выберите вариант, противоположный слову «день».",
+    "scenarioEn": "Select the option that is the opposite of the word \"day\".",
+    "options": "[{\"text\":\"Утро\",\"textEn\":\"Morning\",\"scoring\":{}},{\"text\":\"Полдень\",\"textEn\":\"Noon\",\"scoring\":{}},{\"text\":\"Ночь\",\"textEn\":\"Night\",\"scoring\":{}},{\"text\":\"Вечер\",\"textEn\":\"Evening\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2094,
+    "createdAt": "2026-07-04T05:04:42.976"
+  },
+  {
+    "id": "25e6a5487118d6ba09d33294c",
+    "scenario": "Это служебный вопрос. Отметьте второй вариант, чтобы подтвердить внимательность.",
+    "scenarioEn": "This is a service question. Mark the second option to confirm attentiveness.",
+    "options": "[{\"text\":\"Первый\",\"textEn\":\"First\",\"scoring\":{}},{\"text\":\"Второй\",\"textEn\":\"Second\",\"scoring\":{}},{\"text\":\"Третий\",\"textEn\":\"Third\",\"scoring\":{}},{\"text\":\"Четвёртый\",\"textEn\":\"Fourth\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2095,
+    "createdAt": "2026-07-04T05:04:42.976"
   }
 ]
