@@ -63,6 +63,28 @@ await option.click()
 await listbox.waitFor({ state: 'hidden', timeout: 5000 })
 ```
 
+### Проблема: клик по Chakra/Ark UI Checkbox (`@letar/forms` `Field.Checkbox`) не долетает до состояния формы
+
+`Checkbox.Root` (Ark UI/Zag.js) — полностью кастомный интерактивный виджет: реальный toggle происходит через pointer/keyboard-обработчики Zag.js на `label[data-part="root"]`/`Checkbox.Control`, а не через нативные `click`/`change` на скрытом `<input>`. `getByRole('checkbox')` резолвится именно в этот скрытый `<input>` (нужен для HTML-форм/доступности).
+
+`.check()` виснет таймаутом — видимый `Checkbox.Control` (aria-hidden) физически перехватывает pointer event по координатам скрытого input ("intercepts pointer events"). `.click({ force: true })` эту проверку обходит и клик "проходит", `input.checked` даже становится `true` в DOM — но `onCheckedChange` (и, соответственно, `field.handleChange` в TanStack Form) **не вызывается**, потому что Zag.js не слушает нативные события инпута. Итог — форма визуально выглядит валидной (чекбокс отмечен), но submit её как невалидную/неотмеченную не проходит, без единой ошибки в консоли.
+
+```typescript
+// ❌ ЗАВИСАЕТ — control перехватывает pointer event
+await page.getByRole('checkbox', { name: /Согласен/ }).check()
+
+// ❌ ОБМАНЧИВО "РАБОТАЕТ" — input.checked=true в DOM, но onCheckedChange не вызван,
+// TanStack Form считает поле пустым/невалидным, submit тихо блокируется
+await page.getByRole('checkbox', { name: /Согласен/ }).click({ force: true })
+
+// ✅ РЕАЛЬНО РАБОТАЕТ — клик по видимому label/тексту, как это делает настоящий пользователь
+await page.getByText('Согласен на обработку ПДн', { exact: false }).click()
+```
+
+Для Chakra `RadioCard` (не через `@letar/forms`, а прямой `Checkbox.Root`/`Radio.Root` с собственным `onCheckedChange`) `force: true` может быть уместен, если сам компонент слушает нативные события — проверяй по факту (наличие следующего сетевого запроса/смены состояния приложения), а не только по DOM-атрибуту `checked`/`[checked]` в snapshot.
+
+Прецедент: `apps/dsperevod-e2e/src/callback-drawer.spec.ts` (Field.Checkbox согласия ПДн) — `force: true` давал ложно-зелёный DOM-снапшот, но submit молча не отправлялся.
+
 ## Формы и селекторы полей
 
 ### @letar/forms (рекомендуемый подход)
@@ -149,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
 )
 ```
 
