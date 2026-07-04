@@ -5,6 +5,33 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.4.0] - 2026-07-04
+
+### Added
+
+- **9 новых шкал (этап 5.1)** — ядро 22: MAC, HUM, KAN, FAI, SAD, MAS (бета), ASD, DIR, ALX;
+  кластеры dark/light/destructive/spectrum, архетипы и описания ru+en, PSY — display-alias ANT,
+  константы триад и гексаграммы (`HEXAGRAM_SCALE_CODES`, 8 шкал без DIR)
+- **135 ситуационных вопросов** (15 × 9 шкал, банк 1955 → 2090): батчи для ревью психологом
+  в `prisma/question-batches/5.1/`, ≥1/3 reverse-keyed, без само-ярлыков для тёмных шкал;
+  `merge-question-batch.ts` с валидацией и автопересчётом справочника max-баллов
+- **Шкалы валидности**: 6 attention-check вопросов (банк 2096, инжект 2/сессию),
+  `computeValidityFlags` (провал ≥2 чеков / монотонность ≥90%), поля `isValid` +
+  `validityFlags` в QuizSession; невалидные протоколы без XP/ачивок/лидерборда и вне усреднения
+- **`questionBankVersion` в QuizSession** (миграция): v2 = 2090/22; усреднение только
+  в пределах версии, история и кабинет отдают версию для UI
+- **Кросс-шкальные правила** (`interpretation-rules.ts`, слой поверх raw): ASD×DIR → −80%
+  отображения ANT/SAD + «Радикально честный»; «Маскирующий»; «Стратег» (MAC+SZD);
+  NAR-фасеты «Уязвимая грандиозность»/«Грандиозный профиль»
+- **Тесты (5.8):** 40 unit (шкалы, целостность банка, валидность, кросс-правила)
+
+### Fixed
+
+- **`questions-dump.json` был битым JSON** (смешанное экранирование, литеральные `\n`) —
+  seed падал; дамп пересобран структурным парсером, 11 расхождений со справочником
+  зафиксированы в `docs/question-bank-discrepancies.md` для ревью психологом
+- **`seed-questions.ts`** переписан на ZenStack v3 ORM (старый импорт `PrismaClient` не работал)
+
 ## [Unreleased]
 
 ### Documentation
