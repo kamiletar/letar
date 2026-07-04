@@ -146,6 +146,10 @@ model QuizSession {
   answeredCount Int          @default(0)     // Кол-во ответов
   skippedCount  Int          @default(0)     // Кол-во пропущенных вопросов
   scores        String?                      // JSON: { PAR: 12, SZD: 8, ... }
+  // Версия банка вопросов на момент сессии: сессии разных версий несопоставимы по
+  // нормализации (v1 = 1955 вопросов/13 шкал, v2 = 2090/22). Старые строки получают
+  // @default(1) — это исторически верно: все они пройдены на банке v1
+  questionBankVersion Int    @default(1)
   completedAt   DateTime?
   createdAt     DateTime     @default(now())
   answers       QuizAnswer[]

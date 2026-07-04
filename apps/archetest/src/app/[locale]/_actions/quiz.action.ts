@@ -6,6 +6,7 @@ import { z } from 'zod/v4'
 import maxScoresData from '../_data/max-scores-per-question.json'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { ALL_SCALE_CODES } from '../_data/personality-types'
+import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
 import { stratifiedSelect } from '../_lib/stratified-shuffle'
 import { checkAndAwardAchievements } from './achievements.action'
 import { recalcLeaderboardEntry } from './leaderboard.action'
@@ -286,6 +287,7 @@ export async function submitQuizAction(
       answeredCount: answers.length,
       skippedCount: skipped.length,
       scores: JSON.stringify(scores.raw),
+      questionBankVersion: QUESTION_BANK_VERSION,
       completedAt: new Date(),
       answers: {
         create: answers.map((a, i) => ({
@@ -366,8 +368,10 @@ async function getAveragedScores(
   db: ReturnType<typeof getEnhancedPrisma>,
   userId: string
 ): Promise<Record<PersonalityTypeCode, number> | null> {
+  // Усредняем только сессии текущей версии банка: у разных версий разный actual_max,
+  // их нормализованные баллы несопоставимы (v1-сессии остаются в истории, но не в среднем)
   const sessions = await db.quizSession.findMany({
-    where: { userId, completedAt: { not: null } },
+    where: { userId, completedAt: { not: null }, questionBankVersion: QUESTION_BANK_VERSION },
     select: { id: true, scores: true, answeredCount: true },
     orderBy: { createdAt: 'desc' },
   })
@@ -520,6 +524,8 @@ export async function getQuizHistoryAction(): Promise<{
     scores: Record<PersonalityTypeCode, number> | null
     completedAt: Date | null
     createdAt: Date
+    /** Версия банка вопросов — сессии разных версий несопоставимы на графиках */
+    questionBankVersion: number
   }>
   averagedScores: Record<PersonalityTypeCode, number> | null
 } | null> {
@@ -537,6 +543,7 @@ export async function getQuizHistoryAction(): Promise<{
       scores: true,
       completedAt: true,
       createdAt: true,
+      questionBankVersion: true,
     },
     orderBy: { createdAt: 'desc' },
   })

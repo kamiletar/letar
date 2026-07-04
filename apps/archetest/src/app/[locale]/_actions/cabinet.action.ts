@@ -101,7 +101,8 @@ export async function getClientDetailAction(clientId: string) {
     cumulativeScores = scores.normalized
   }
 
-  // История сессий для графика динамики
+  // История сессий для графика динамики (questionBankVersion — чтобы график
+  // не сравнивал молча сессии несопоставимых версий банка)
   const sessions = await db.quizSession.findMany({
     where: { userId: clientId, completedAt: { not: null } },
     select: {
@@ -110,6 +111,7 @@ export async function getClientDetailAction(clientId: string) {
       answeredCount: true,
       completedAt: true,
       createdAt: true,
+      questionBankVersion: true,
     },
     orderBy: { completedAt: 'asc' },
   })
@@ -120,6 +122,7 @@ export async function getClientDetailAction(clientId: string) {
     answeredCount: s.answeredCount,
     completedAt: s.completedAt,
     createdAt: s.createdAt,
+    questionBankVersion: s.questionBankVersion,
   }))
 
   return {
