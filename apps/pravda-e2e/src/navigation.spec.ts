@@ -5,7 +5,7 @@ test.describe('Навигация', () => {
     await page.goto('/')
 
     // Проверяем h1
-    await expect(page.locator('h1')).toHaveText('Свод законов Российской Федерации')
+    await expect(page.locator('h1')).toHaveText('Свод законов Руси')
   })
 
   test('отображается Header с логотипом', async ({ page }) => {

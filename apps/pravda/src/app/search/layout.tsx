@@ -7,7 +7,7 @@ import type { ReactNode } from 'react'
  */
 export const metadata: Metadata = {
   title: 'Поиск',
-  description: 'Поиск по законодательству Российской Федерации',
+  description: 'Поиск по законодательству Руси',
   robots: {
     index: false,
     follow: false,

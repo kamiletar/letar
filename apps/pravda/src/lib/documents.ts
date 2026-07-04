@@ -41,7 +41,7 @@ export const documents: DocumentInfo[] = [
     title: 'Русская Правда',
     category: 'Основные законы',
     href: '/pravda',
-    description: 'Свод законов России',
+    description: 'Свод законов Руси',
   },
 
   // Кодексы

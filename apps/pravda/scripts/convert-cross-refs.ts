@@ -21,7 +21,7 @@ const NAME_TO_DOC: Record<string, { slug: string; category: string }> = {
   // Основные законы
   Конституция: { slug: 'constitution', category: '' },
   'Русская Правда': { slug: 'pravda', category: '' },
-  'Основной закон России': { slug: 'pravda', category: '' },
+  'Основной закон Руси': { slug: 'pravda', category: '' },
 
   // Кодексы
   'Налоговый кодекс': { slug: 'tax', category: 'codes' },

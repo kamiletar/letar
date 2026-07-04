@@ -95,7 +95,7 @@ export function Header() {
                     _dark={{ color: 'brand.400' }}
                     display={{ base: 'none', sm: 'block' }}
                   >
-                    Свод законов России
+                    Свод законов Руси
                   </Heading>
                 </HStack>
               </NextLink>

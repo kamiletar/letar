@@ -88,7 +88,7 @@ function createHomeImage() {
                   marginBottom: 16,
                   textAlign: 'center',
                 },
-                children: 'Свод законов России',
+                children: 'Свод законов Руси',
               },
             },
             {
@@ -204,7 +204,7 @@ function createDocumentImage(doc: DocumentInfo) {
               type: 'div',
               props: {
                 style: { fontSize: 20, opacity: 0.7, letterSpacing: 2 },
-                children: 'PRAVDA — Свод законов России',
+                children: 'PRAVDA — Свод законов Руси',
               },
             },
           ],

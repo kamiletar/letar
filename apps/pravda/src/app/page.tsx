@@ -17,7 +17,7 @@ export default function HomePage() {
         <Container maxW="container.lg">
           <Image src="/het.svg" alt="Герб" width={96} height={96} style={{ margin: '0 auto 16px' }} />
           <Heading as="h1" size="2xl" mb={4}>
-            Свод законов Российской Федерации
+            Свод законов Руси
           </Heading>
           <Text fontSize="lg" opacity={0.9} maxW="600px" mx="auto">
             Полное собрание действующего законодательства: Конституция, кодексы, уставы и регламенты
@@ -78,8 +78,8 @@ export default function HomePage() {
                   <Heading size="md">Русская Правда</Heading>
                 </HStack>
                 <Text color="fg.muted" fontSize="sm">
-                  Свод законов России, продолжающий традиции Русской Правды 1016 года. Регулирует гражданские, уголовные
-                  и сословные отношения.
+                  Свод законов Руси, продолжающий традиции Русской Правды 1016 года. Регулирует гражданские, уголовные и
+                  сословные отношения.
                 </Text>
               </Card.Root>
             </NextLink>

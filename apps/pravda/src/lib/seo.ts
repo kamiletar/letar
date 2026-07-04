@@ -11,16 +11,16 @@ import { type DocumentInfo, documents } from './documents'
 export const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pravda.letar.best'
 
 /** Название сайта */
-export const SITE_NAME = 'Pravda — Свод законов России'
+export const SITE_NAME = 'Pravda — Свод законов Руси'
 
 /** Описание сайта */
 export const SITE_DESCRIPTION =
-  'Официальный свод законов Российской Федерации. Конституция, кодексы, уставы и регламенты. 22 документа, 1337 статей.'
+  'Официальный свод законов Руси. Конституция, кодексы, уставы и регламенты. 22 документа, 1337 статей.'
 
 /** Ключевые слова */
 export const SITE_KEYWORDS = [
   'законодательство',
-  'Россия',
+  'Русь',
   'Конституция',
   'кодексы',
   'уставы',
@@ -55,7 +55,7 @@ export function getDocumentMetadata(href: string): Metadata {
     return { title: 'Документ не найден' }
   }
 
-  const description = doc.description || `${doc.title} — ${doc.category} Российской Федерации`
+  const description = doc.description || `${doc.title} — ${doc.category} Руси`
   const ogImage = getOgImagePath(doc.href)
 
   return {

@@ -1,5 +1,5 @@
 {
-  "name": "Свод законов России",
+  "name": "Свод законов Руси",
   "short_name": "Правда",
   "description": "Полное собрание законодательства: Конституция, кодексы, уставы и регламенты",
   "start_url": "/",
@@ -79,14 +79,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Главная страница — Свод законов России"
+      "label": "Главная страница — Свод законов Руси"
     },
     {
       "src": "/screenshots/mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Мобильная версия — Свод законов России"
+      "label": "Мобильная версия — Свод законов Руси"
     }
   ],
   "prefer_related_applications": false

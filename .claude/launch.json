@@ -73,6 +73,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "mandala"],
       "port": 3004
+    },
+    {
+      "name": "pravda",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "pravda"],
+      "port": 3007
     }
   ]
 }
