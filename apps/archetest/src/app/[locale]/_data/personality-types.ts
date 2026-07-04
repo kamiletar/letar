@@ -1,4 +1,4 @@
-/** Код типа личности (10 базовых + 3 дополнительные) */
+/** Код шкалы: 13 исходных (10 DSM-5 + 3 дополнительные) + 9 новых (этап 5.1, ядро 22) */
 export type PersonalityTypeCode =
   | 'PAR'
   | 'SZD'
@@ -13,9 +13,31 @@ export type PersonalityTypeCode =
   | 'BAR'
   | 'PAG'
   | 'DPR'
+  | 'MAC'
+  | 'HUM'
+  | 'KAN'
+  | 'FAI'
+  | 'SAD'
+  | 'MAS'
+  | 'ASD'
+  | 'DIR'
+  | 'ALX'
 
-/** Кластер типа личности */
-export type PersonalityCluster = 'A' | 'B' | 'C' | 'mood' | 'additional'
+/** Кластер/группа шкалы */
+export type PersonalityCluster =
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'mood'
+  | 'additional'
+  /** Тёмная триада (MAC + NAR + ANT-as-PSY) */
+  | 'dark'
+  /** Светлая триада (HUM, KAN, FAI) */
+  | 'light'
+  /** Деструктивные паттерны (SAD, MAS) */
+  | 'destructive'
+  /** Спектр развития (ASD, DIR, ALX) */
+  | 'spectrum'
 
 /** Описание типа личности */
 export interface PersonalityType {
@@ -37,8 +59,10 @@ export interface PersonalityType {
   whenHighEn: string
   /** Цвет для графика */
   color: string
-  /** Кластер: A (эксцентричные), B (драматичные), C (тревожные), mood (настроение), additional (дополнительные) */
+  /** Кластер: A (эксцентричные), B (драматичные), C (тревожные), mood (настроение), additional (дополнительные), dark/light (триады), destructive, spectrum */
   cluster: PersonalityCluster
+  /** Экспериментальный авторский конструкт — в UI всегда помечается «бета» */
+  beta?: boolean
 }
 
 /** 13 типов личности (10 базовых DSM-5 + 3 дополнительных) */
@@ -295,9 +319,185 @@ export const PERSONALITY_TYPES: PersonalityType[] = [
     color: '#718096',
     cluster: 'additional',
   },
+  // Тёмная триада (NAR и ANT переиспользуются из DSM-5 шкал, см. DARK_TRIAD_CODES)
+  {
+    code: 'MAC',
+    label: 'Стратегичный',
+    labelEn: 'Strategic',
+    clinical: 'Макиавеллизм',
+    clinicalEn: 'Machiavellianism',
+    archetype: 'Гроссмейстер',
+    archetypeEn: 'Grandmaster',
+    description:
+      'Вы видите социальные ситуации как систему: кто чего хочет, где рычаги, какой ход даст результат. Вы просчитываете на несколько шагов вперёд и редко действуете импульсивно. Прагматизм и хладнокровие делают вас сильным переговорщиком и организатором — вы добиваетесь целей там, где другие сдаются.',
+    descriptionEn:
+      'You see social situations as a system: who wants what, where the levers are, which move yields results. You think several steps ahead and rarely act on impulse. Pragmatism and composure make you a strong negotiator and organizer — you achieve goals where others give up.',
+    whenHigh:
+      'Высокий балл говорит о склонности относиться к людям инструментально и добиваться своего скрытыми ходами. Расчёт — ваша сила, но доверие строится только открытостью. Точка роста: переводить стратегию в честные переговоры, где выигрывают обе стороны.',
+    whenHighEn:
+      'A high score suggests a tendency to treat people instrumentally and achieve goals through hidden moves. Calculation is your strength, but trust is built only through openness. Growth point: turning strategy into honest win-win negotiations.',
+    color: '#6B46C1',
+    cluster: 'dark',
+  },
+  // Светлая триада
+  {
+    code: 'HUM',
+    label: 'Человечный',
+    labelEn: 'Humane',
+    clinical: 'Гуманизм',
+    clinicalEn: 'Humanism',
+    archetype: 'Целитель',
+    archetypeEn: 'Healer',
+    description:
+      'Вы цените достоинство каждого человека — не за заслуги, а по умолчанию. Чужая боль для вас не абстракция: вы замечаете её и не можете пройти мимо. Люди рядом с вами чувствуют себя увиденными и значимыми — это редкий дар, который лечит.',
+    descriptionEn:
+      'You value every person’s dignity — not for their merits, but by default. Others’ pain is not an abstraction to you: you notice it and cannot walk past. People around you feel seen and valued — a rare gift that heals.',
+    whenHigh:
+      'Высокий балл — большой ресурс, но у него есть ловушка: самозабвение. Помогая всем, легко забыть себя и выгореть. Точка роста: границы. Забота о себе — не эгоизм, а условие, при котором вашего тепла хватит надолго.',
+    whenHighEn:
+      'A high score is a great resource, but it has a trap: self-neglect. Helping everyone, it is easy to forget yourself and burn out. Growth point: boundaries. Self-care is not selfishness but the condition that makes your warmth last.',
+    color: '#48BB78',
+    cluster: 'light',
+  },
+  {
+    code: 'KAN',
+    label: 'Принципиальный',
+    labelEn: 'Principled',
+    clinical: 'Кантианство',
+    clinicalEn: 'Kantianism',
+    archetype: 'Законодатель',
+    archetypeEn: 'Lawgiver',
+    description:
+      'Для вас человек — всегда цель, а не средство. Вы держите слово, даже когда это невыгодно, и не согласны покупать результат ценой принципов. На вас можно положиться в главном: вы не предадите — не потому что боитесь, а потому что так устроены.',
+    descriptionEn:
+      'For you, a person is always an end, never a means. You keep your word even when it costs you, and refuse to buy results at the price of principles. You can be relied on in what matters: you won’t betray — not out of fear, but because that is how you are built.',
+    whenHigh:
+      'Высокий балл может оборачиваться ригидностью: принципы превращаются в приговоры, а требования к себе и другим — в морализаторство. Точка роста: помнить, что за каждым поступком стоит контекст, и правило существует ради человека, а не наоборот.',
+    whenHighEn:
+      'A high score can turn into rigidity: principles become verdicts, and standards become moralizing. Growth point: remembering that every act has a context, and rules exist for people — not the other way around.',
+    color: '#4299E1',
+    cluster: 'light',
+  },
+  {
+    code: 'FAI',
+    label: 'Доверяющий',
+    labelEn: 'Trusting',
+    clinical: 'Вера в человечество',
+    clinicalEn: 'Faith in Humanity',
+    archetype: 'Маяк',
+    archetypeEn: 'Lighthouse',
+    description:
+      'Вы исходите из того, что люди в основе своей хороши. Это не наивность, а позиция: доверие авансом раскрывает в людях лучшее, и рядом с вами они действительно становятся лучше. Вы умеете видеть свет там, где другие видят только риски.',
+    descriptionEn:
+      'You assume people are fundamentally good. This is not naivety but a stance: trust given in advance brings out the best in people, and around you they truly become better. You see light where others see only risks.',
+    whenHigh:
+      'Высокий балл делает вас уязвимым для тех, кто использует доверие как ресурс. Точка роста: «доверяй и проверяй» — доверие как выбор, а не как слепота. Ваш аванс доверия ценнее, когда у него есть границы.',
+    whenHighEn:
+      'A high score makes you vulnerable to those who exploit trust. Growth point: “trust but verify” — trust as a choice, not blindness. Your advance of trust is worth more when it has limits.',
+    color: '#ECC94B',
+    cluster: 'light',
+  },
+  // Деструктивные паттерны
+  {
+    code: 'SAD',
+    label: 'Жёсткий',
+    labelEn: 'Hard-Edged',
+    clinical: 'Бытовой садизм',
+    clinicalEn: 'Everyday Sadism',
+    archetype: 'Гладиатор',
+    archetypeEn: 'Gladiator',
+    description:
+      'Вас заводит борьба: жёсткая конкуренция, острые дебаты, игры на выбывание. Там, где другие отводят глаза, вы смотрите не моргая. Чёрный юмор, устойчивость к чужому дискомфорту и азарт схватки делают вас грозным соперником и человеком, который не падает в обморок от жёсткой реальности.',
+    descriptionEn:
+      'You are energized by contest: fierce competition, sharp debates, elimination games. Where others look away, you watch without blinking. Dark humor, tolerance for others’ discomfort, and the thrill of the fight make you a formidable opponent who does not faint at harsh reality.',
+    whenHigh:
+      'Высокий балл — сигнал: если чужой проигрыш радует сам по себе, без выгоды для вас, стоит присмотреться. Точка роста: направлять азарт в рамки с правилами — спорт, дебаты, стратегии — и тренировать эмпатию как навык, а не ждать её как чувство.',
+    whenHighEn:
+      'A high score is a signal: if another’s loss pleases you in itself, with no gain for you, it deserves attention. Growth point: channeling the thrill into rule-bound arenas — sports, debate, strategy — and training empathy as a skill rather than waiting for it as a feeling.',
+    color: '#C53030',
+    cluster: 'destructive',
+  },
+  {
+    code: 'MAS',
+    label: 'Самоотверженный',
+    labelEn: 'Self-Sacrificing',
+    clinical: 'Мазохизм (авторский конструкт)',
+    clinicalEn: 'Masochism (author’s construct)',
+    archetype: 'Мученик',
+    archetypeEn: 'Martyr',
+    description:
+      'Вы умеете терпеть то, от чего другие бегут: боль, лишения, неблагодарный труд. Выносливость и готовность жертвовать собой ради дела или людей — ваша суперсила. Вы выбираете трудный путь не из слабости, а потому что верите: настоящее даётся дорого.',
+    descriptionEn:
+      'You can endure what others flee: pain, hardship, thankless work. Endurance and readiness to sacrifice yourself for a cause or for people is your superpower. You choose the hard path not out of weakness, but because you believe what is real comes at a price.',
+    whenHigh:
+      'Высокий балл может означать, что страдание стало привычным способом чувствовать себя настоящим или заслуживать любовь. Если вы систематически выбираете то, что причиняет боль, — это паттерн, а не судьба. Точка роста: самосострадание и вопрос «а как было бы легко?».',
+    whenHighEn:
+      'A high score may mean suffering has become your habitual way to feel real or to earn love. If you systematically choose what hurts, it is a pattern, not fate. Growth point: self-compassion and the question “what would the easy way look like?”.',
+    color: '#975A16',
+    cluster: 'destructive',
+    beta: true,
+  },
+  // Спектр развития
+  {
+    code: 'ASD',
+    label: 'Систематизирующий',
+    labelEn: 'Systematizing',
+    clinical: 'Черты аутистического спектра',
+    clinicalEn: 'Autism Spectrum Traits',
+    archetype: 'Инженер',
+    archetypeEn: 'Engineer',
+    description:
+      'Вы мыслите системами: замечаете паттерны, структуры и несостыковки, которые ускользают от других. Погружение в интересную тему для вас — не хобби, а стихия: вы способны знать о ней всё. Точность формулировок, честность деталей и глубина фокуса делают вас незаменимым там, где нужна настоящая экспертиза.',
+    descriptionEn:
+      'You think in systems: noticing patterns, structures, and inconsistencies others miss. Deep-diving into an interesting topic is not a hobby for you but your element — you can know everything about it. Precision, honesty of detail, and depth of focus make you indispensable where real expertise is needed.',
+    whenHigh:
+      'Высокий балл часто означает, что социальная неопределённость и сенсорный шум утомляют вас сильнее, чем других. Это не дефект, а особенность обработки информации. Точка роста: среда под себя — предсказуемость, прямые договорённости, время на восстановление после «людных» дней.',
+    whenHighEn:
+      'A high score often means social ambiguity and sensory noise drain you more than others. This is not a defect but a processing style. Growth point: an environment tailored to you — predictability, explicit agreements, recovery time after people-heavy days.',
+    color: '#00B5D8',
+    cluster: 'spectrum',
+  },
+  {
+    code: 'DIR',
+    label: 'Прямой',
+    labelEn: 'Direct',
+    clinical: 'Радикальная честность',
+    clinicalEn: 'Radical Honesty',
+    archetype: 'Зеркало',
+    archetypeEn: 'Mirror',
+    description:
+      'Правда для вас важнее социальной гладкости. Вы говорите то, что думаете, не играете ролей и мгновенно чувствуете фальшь — в других и в себе. С вами может быть непросто, но вам можно верить: ваше «да» — это да, ваше «нет» — это нет. В мире полутонов вы — точка опоры.',
+    descriptionEn:
+      'Truth matters more to you than social smoothness. You say what you think, play no roles, and instantly sense fakeness — in others and in yourself. You may not be easy, but you can be trusted: your “yes” means yes, your “no” means no. In a world of half-tones, you are a fixed point.',
+    whenHigh:
+      'Высокий балл означает, что прямота без запроса может ранить: не всякая правда — подарок, если её не просили. Точка роста: правда плюс такт. Честность становится сильнее, когда учитывает готовность собеседника её услышать.',
+    whenHighEn:
+      'A high score means unrequested directness can wound: not every truth is a gift if no one asked for it. Growth point: truth plus tact. Honesty grows stronger when it accounts for the listener’s readiness to hear it.',
+    color: '#2C7A7B',
+    cluster: 'spectrum',
+  },
+  {
+    code: 'ALX',
+    label: 'Сдержанный',
+    labelEn: 'Reserved',
+    clinical: 'Алекситимия',
+    clinicalEn: 'Alexithymia',
+    archetype: 'Переводчик',
+    archetypeEn: 'Translator',
+    description:
+      'Вы опираетесь на факты и действия там, где другие говорят о чувствах. В кризисе, когда у всех паника, вы сохраняете ясную голову и делаете то, что нужно. Ваши эмоции не отсутствуют — они просто говорят на другом языке: языке тела, усталости, напряжения.',
+    descriptionEn:
+      'You rely on facts and actions where others talk about feelings. In a crisis, when everyone panics, you keep a clear head and do what is needed. Your emotions are not absent — they simply speak another language: the language of the body, fatigue, and tension.',
+    whenHigh:
+      'Высокий балл говорит о том, что распознавать и называть собственные чувства вам ощутимо труднее, чем большинству. Иногда это следствие опыта, где чувства обесценивались. Точка роста: словарь эмоций — замечать телесные сигналы и учиться давать им имена. Это навык, и он тренируется.',
+    whenHighEn:
+      'A high score means recognizing and naming your own feelings is noticeably harder for you than for most. Sometimes this stems from experiences where feelings were invalidated. Growth point: an emotion vocabulary — noticing bodily signals and learning to name them. It is a skill, and it can be trained.',
+    color: '#B794F4',
+    cluster: 'spectrum',
+  },
 ]
 
-/** Все коды шкал (13 шт.) */
+/** Все коды шкал ядра (22 шт. = 13 исходных + 9 новых) */
 export const ALL_SCALE_CODES: PersonalityTypeCode[] = [
   'PAR',
   'SZD',
@@ -312,6 +512,28 @@ export const ALL_SCALE_CODES: PersonalityTypeCode[] = [
   'BAR',
   'PAG',
   'DPR',
+  'MAC',
+  'HUM',
+  'KAN',
+  'FAI',
+  'SAD',
+  'MAS',
+  'ASD',
+  'DIR',
+  'ALX',
+]
+
+/** Новые шкалы этапа 5.1 (9 шт.) */
+export const EXTENDED_SCALE_CODES: PersonalityTypeCode[] = [
+  'MAC',
+  'HUM',
+  'KAN',
+  'FAI',
+  'SAD',
+  'MAS',
+  'ASD',
+  'DIR',
+  'ALX',
 ]
 
 /** 10 базовых шкал DSM-5 */
@@ -328,6 +550,34 @@ export const BASE_SCALE_CODES: PersonalityTypeCode[] = [
   'OBC',
 ]
 
+/**
+ * Светлая триада (Kaufman et al., 2019): Гуманизм, Кантианство, Вера в человечество.
+ * НЕ противоположность Тёмной: корреляция триад умеренно отрицательная (r ≈ −.48),
+ * высокие баллы по обеим — норма данных, не парадокс.
+ */
+export const LIGHT_TRIAD_CODES: PersonalityTypeCode[] = ['HUM', 'KAN', 'FAI']
+
+/**
+ * Тёмная триада: Макиавеллизм + переиспользованные DSM-5 шкалы.
+ * NAR и ANT НЕ дублируются отдельными шкалами (решение 2026-07-03):
+ * в контексте триады они отображаются под ярлыками «Нарциссизм» и «Психопатия»
+ * (PSY — display-alias шкалы ANT, см. DARK_TRIAD_DISPLAY).
+ */
+export const DARK_TRIAD_CODES: PersonalityTypeCode[] = ['MAC', 'NAR', 'ANT']
+
+/** Ярлыки шкал в контексте Тёмной триады (display-alias, баллы не меняются) */
+export const DARK_TRIAD_DISPLAY: Partial<Record<PersonalityTypeCode, { ru: string; en: string }>> = {
+  MAC: { ru: 'Макиавеллизм', en: 'Machiavellianism' },
+  NAR: { ru: 'Нарциссизм', en: 'Narcissism' },
+  ANT: { ru: 'Психопатия', en: 'Psychopathy' },
+}
+
+/**
+ * 8 шкал гексаграммы (этапы 5.2/5.3): обе триады + внешнее кольцо SAD/MAS.
+ * Ровно эти шкалы покрывает экспресс-тест (24 вопроса = 8 × 3).
+ */
+export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES, ...DARK_TRIAD_CODES, 'SAD', 'MAS']
+
 /** Получить тип по коду */
 export function getPersonalityType(code: PersonalityTypeCode): PersonalityType {
   return PERSONALITY_TYPES.find((t) => t.code === code)!
@@ -338,9 +588,12 @@ export function getTypesByCluster(cluster: PersonalityCluster): PersonalityType[
   return PERSONALITY_TYPES.filter((t) => t.cluster === cluster)
 }
 
+/** Regex всех кодов шкал (генерируется из ALL_SCALE_CODES — не забыть про новые шкалы невозможно) */
+const SCALE_CODES_RE = new RegExp(`\\b(${ALL_SCALE_CODES.join('|')})\\b`, 'g')
+
 /** Заменить коды типов (PAR, SZD, ...) на читаемые названия в тексте */
 export function replaceTypeCodes(text: string, isRu: boolean, isAdmin?: boolean): string {
-  return text.replace(/\b(PAR|SZD|SZT|ANT|BOR|HIS|NAR|AVD|DEP|OBC|BAR|PAG|DPR)\b/g, (code) => {
+  return text.replace(SCALE_CODES_RE, (code) => {
     const type = PERSONALITY_TYPES.find((t) => t.code === code)
     if (!type) {
       return code
@@ -357,6 +610,7 @@ export function replaceTypeCodes(text: string, isRu: boolean, isAdmin?: boolean)
 /**
  * Максимально возможные сырые баллы по каждой шкале (1955 вопросов).
  * Пересчитаны психологом 19.03.2026 (v2).
+ * Новые шкалы (5.1) = 0 до добавления их вопросов в банк — заполнить при генерации.
  */
 export const GLOBAL_MAX_SCORES: Record<PersonalityTypeCode, number> = {
   PAR: 1529,
@@ -372,4 +626,13 @@ export const GLOBAL_MAX_SCORES: Record<PersonalityTypeCode, number> = {
   BAR: 936,
   PAG: 486,
   DPR: 716,
+  MAC: 0,
+  HUM: 0,
+  KAN: 0,
+  FAI: 0,
+  SAD: 0,
+  MAS: 0,
+  ASD: 0,
+  DIR: 0,
+  ALX: 0,
 }
