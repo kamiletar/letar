@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Button,
   DrawerBackdrop,
   DrawerBody,
   DrawerCloseTrigger,
@@ -20,7 +19,7 @@ import { ColorModeButton } from '@letar/chakra-provider'
 import { MobileAuthSection, Pressable } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { LuMenu, LuSettings, LuX } from 'react-icons/lu'
+import { LuMenu, LuX } from 'react-icons/lu'
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { Link } from '@/i18n/navigation'
