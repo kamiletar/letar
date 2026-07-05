@@ -4,16 +4,18 @@ import { Link } from '@/i18n/navigation'
 import { Alert, Box, Button, Container, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
-import { LuArrowRight, LuHeartPulse, LuPhone, LuTriangleAlert } from 'react-icons/lu'
+import { LuArrowRight, LuTriangleAlert } from 'react-icons/lu'
 import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../_data/personality-types'
+import { needsDarkReassurance, needsSafetyNet } from '../_lib/safety-net'
 import { AchievementCard } from './achievement-card'
 import { HexagramChart } from './hexagram-chart'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
 import { PsychologistLinkBlock } from './psychologist-link-block'
 import { RankBadge } from './rank-badge'
+import { DarkReassuranceNote, SafetyNetBlock } from './safety-net-block'
 
 interface QuizResultsProps {
   scores: Record<PersonalityTypeCode, number>
@@ -78,11 +80,6 @@ function getWarnings(
   return warnings
 }
 
-/** Нужен ли кризисный блок (BAR ≥ 60% ИЛИ DPR ≥ 60% ИЛИ BOR ≥ 60%) */
-function needsCrisisBlock(scores: Record<PersonalityTypeCode, number>): boolean {
-  return (scores.BAR ?? 0) >= 60 || (scores.DPR ?? 0) >= 60 || (scores.BOR ?? 0) >= 60
-}
-
 /** Метка достоверности для UI */
 export function QuizResults({
   scores,
@@ -133,7 +130,10 @@ export function QuizResults({
 
   // Предупреждения BAR-фильтра
   const warnings = useMemo(() => getWarnings(scores, isRu), [scores, isRu])
-  const showCrisis = useMemo(() => needsCrisisBlock(scores), [scores])
+  // Safety-net (5.6.4): кризисный блок при выраженных шкалах состояния (DPR/BAR/BOR ≥ 60%)
+  const showSafetyNet = useMemo(() => needsSafetyNet(scores), [scores])
+  // Мягкая формулировка при высоких «тёмных» шкалах
+  const showDarkReassurance = useMemo(() => needsDarkReassurance(scores), [scores])
 
   return (
     <Container maxW="6xl" py={8}>
@@ -189,42 +189,8 @@ export function QuizResults({
           </Button>
         )}
 
-        {/* Кризисный блок (BAR/DPR/BOR ≥ 60%) */}
-        {showCrisis && (
-          <Alert.Root status="info" variant="outline" borderRadius="lg">
-            <Alert.Indicator>
-              <LuHeartPulse />
-            </Alert.Indicator>
-            <Box>
-              <Alert.Title fontWeight="bold">
-                {isRu
-                  ? 'Ваши результаты показывают выраженные черты, которые могут быть связаны с трудностями в повседневной жизни.'
-                  : 'Your results show pronounced traits that may be associated with difficulties in everyday life.'}
-              </Alert.Title>
-              <Alert.Description mt={2}>
-                {isRu ? (
-                  <>
-                    <Text>Если вы переживаете тяжёлый период, помните: помощь доступна.</Text>
-                    <HStack mt={2} gap={2}>
-                      <LuPhone />
-                      <Text fontWeight="bold">Телефон доверия: 8-800-2000-122 (бесплатно, круглосуточно)</Text>
-                    </HStack>
-                    <Text mt={1} fontSize="sm" color="fg.muted">
-                      Обращение за помощью — это не слабость, а проявление заботы о себе.
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    <Text>If you are going through a difficult period, remember: help is available.</Text>
-                    <Text mt={1} fontSize="sm" color="fg.muted">
-                      Seeking help is not a weakness, but an act of self-care.
-                    </Text>
-                  </>
-                )}
-              </Alert.Description>
-            </Box>
-          </Alert.Root>
-        )}
+        {/* Safety-net: кризисный блок с телефонами доверия (5.6.4) */}
+        {showSafetyNet && <SafetyNetBlock isRu={isRu} />}
 
         {/* Предупреждения BAR-фильтра */}
         {warnings.map((w, i) => (
@@ -265,6 +231,9 @@ export function QuizResults({
             />
           </Box>
         )}
+
+        {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
+        {showDarkReassurance && <DarkReassuranceNote isRu={isRu} />}
 
         {/* Детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы */}
         <ProfileDetails scores={scores} confidence={confidence} />

@@ -17,8 +17,10 @@ import {
   LIGHT_TRIAD_CODES,
   type PersonalityTypeCode,
 } from '../_data/personality-types'
+import { needsDarkReassurance } from '../_lib/safety-net'
 import { EXPRESS_RESULT_KEY, PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 import { HexagramChart } from './hexagram-chart'
+import { DarkReassuranceNote } from './safety-net-block'
 
 /** Ответ для передачи на сервер (пересчёт баллов из ответов, не из клиентских баллов) */
 export interface ExpressAnswer {
@@ -167,6 +169,9 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
           <ScaleGroup title={t('groupDark')} codes={DARK_TRIAD_CODES} scores={scores} isRu={isRu} />
           <ScaleGroup title={t('groupAura')} codes={AURA_CODES} scores={scores} isRu={isRu} />
         </VStack>
+
+        {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
+        {needsDarkReassurance(scores) && <DarkReassuranceNote isRu={isRu} />}
 
         {/* CTA: полный тест + QR */}
         <Card.Root w="100%" variant="subtle">
