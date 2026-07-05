@@ -17,7 +17,8 @@ import {
 } from '@chakra-ui/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { LuLink, LuShieldOff, LuTriangleAlert, LuUser } from 'react-icons/lu'
+import { LuLink, LuShieldOff, LuTrash2, LuTriangleAlert, LuUser } from 'react-icons/lu'
+import { deleteMyQuizDataAction } from '../_actions/data-deletion.action'
 import {
   getMyLinkedPsychologistsAction,
   linkPsychologistAction,
@@ -37,6 +38,10 @@ export default function SettingsPage() {
   const [links, setLinks] = useState<Awaited<ReturnType<typeof getMyLinkedPsychologistsAction>>['data']>([])
   const [revokeTarget, setRevokeTarget] = useState<{ id: string; name: string } | null>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
+  // Удаление своих данных (152-ФЗ, право на удаление)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const deleteCancelRef = useRef<HTMLButtonElement>(null)
 
   const loadLinks = useCallback(async () => {
     const result = await getMyLinkedPsychologistsAction()
@@ -68,6 +73,18 @@ export default function SettingsPage() {
       })
       setEmail('')
       loadLinks()
+    }
+  }
+
+  const handleDeleteData = async () => {
+    setDeleting(true)
+    const result = await deleteMyQuizDataAction()
+    setDeleting(false)
+    setDeleteOpen(false)
+    if (result.error) {
+      setMessage({ type: 'error', text: t('deleteDataError') })
+    } else {
+      setMessage({ type: 'success', text: t('deleteDataSuccess', { count: result.deleted ?? 0 }) })
     }
   }
 
@@ -135,8 +152,7 @@ export default function SettingsPage() {
                           setRevokeTarget({
                             id: link.id,
                             name: link.psychologist.name || link.psychologist.email,
-                          })
-                        }
+                          })}
                       >
                         <LuShieldOff size={14} />
                         {t('revoke')}
@@ -174,7 +190,62 @@ export default function SettingsPage() {
             </VStack>
           </Card.Body>
         </Card.Root>
+
+        {/* Секция управления своими данными (152-ФЗ: право на удаление) */}
+        <Card.Root w="100%" variant="outline">
+          <Card.Body>
+            <VStack align="start" gap={4}>
+              <HStack gap={2}>
+                <LuTrash2 size={20} />
+                <Heading size="md">{t('myData')}</Heading>
+              </HStack>
+
+              <Text fontSize="sm" color="fg.muted">
+                {t('myDataDesc')}
+              </Text>
+
+              <Button variant="outline" colorPalette="red" onClick={() => setDeleteOpen(true)}>
+                <LuTrash2 size={14} />
+                {t('deleteData')}
+              </Button>
+            </VStack>
+          </Card.Body>
+        </Card.Root>
       </VStack>
+
+      {/* Диалог подтверждения удаления данных */}
+      <Dialog.Root
+        open={deleteOpen}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            setDeleteOpen(false)
+          }
+        }}
+        initialFocusEl={() => deleteCancelRef.current}
+        role="alertdialog"
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>{t('deleteDataTitle')}</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text>{t('deleteDataConfirm')}</Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button ref={deleteCancelRef} variant="outline" onClick={() => setDeleteOpen(false)}>
+                  {t('cancel')}
+                </Button>
+                <Button colorPalette="red" onClick={handleDeleteData} loading={deleting} ml={3}>
+                  {t('deleteDataAction')}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
 
       {/* Диалог подтверждения отзыва */}
       <Dialog.Root

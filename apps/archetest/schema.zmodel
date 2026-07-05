@@ -164,6 +164,9 @@ model QuizSession {
   // Психолог видит сессии своих активных клиентов
   @@allow('read', user.clientLinks?[psychologistId == auth().id && status == 'ACTIVE'] && 'PSYCHOLOGIST' in auth().roles)
   @@allow('create', auth() != null)
+  // Право на удаление своих данных (152-ФЗ ст. 14–17): удаление сессии каскадит
+  // на ответы/пропуски (onDelete: Cascade). Психолог/чужой удалить не может
+  @@allow('delete', userId == auth().id)
   @@allow('all', auth() != null && 'ADMIN' in auth().roles)
   @@index([userId])
 }

@@ -164,6 +164,14 @@
     "cancel": "Cancel",
     "linked": "Linked",
     "noPsychologist": "No psychologist linked",
-    "whatSees": "The psychologist will see: your personality profile, session dynamics, clinical scale names. They will NOT see: your individual question answers."
+    "whatSees": "The psychologist will see: your personality profile, session dynamics, clinical scale names. They will NOT see: your individual question answers.",
+    "myData": "My Data",
+    "myDataDesc": "You can delete all your test results at any time — all completed sessions and answers will be removed. This action is irreversible.",
+    "deleteData": "Delete my results",
+    "deleteDataTitle": "Delete all results?",
+    "deleteDataConfirm": "All your sessions and answers will be permanently deleted. Achievements and rank may reset. Continue?",
+    "deleteDataAction": "Delete permanently",
+    "deleteDataSuccess": "Sessions deleted: {count}",
+    "deleteDataError": "Failed to delete data. Please try again later."
   }
 }
