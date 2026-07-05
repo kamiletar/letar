@@ -1,5 +1,7 @@
-import { getActiveAlerts, getAlerts } from '@/lib/alerts'
+import { createAlert, getActiveAlerts, getAlerts, getAlertSettings } from '@/lib/alerts'
+import { sendNotification } from '@/lib/notifications'
 import { NextResponse } from 'next/server'
+import { z } from 'zod/v4'
 
 /**
  * GET /api/alerts
@@ -27,6 +29,72 @@ export async function GET(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
+      { status: 500 }
+    )
+  }
+}
+
+const CreateAlertSchema = z
+  .object({
+    type: z.enum([
+      'CPU_HIGH',
+      'MEMORY_HIGH',
+      'DISK_HIGH',
+      'CONTAINER_DOWN',
+      'CONTAINER_RESTARTED',
+      'DATABASE_DOWN',
+      'DEPLOY_FAILED',
+      'BACKUP_FAILED',
+      'CRON_FAILED',
+    ]),
+    severity: z.enum(['INFO', 'WARNING', 'ERROR', 'CRITICAL']),
+    title: z.string().min(1).max(200),
+    message: z.string().min(1).max(2000),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strip()
+
+/**
+ * POST /api/alerts
+ * Создаёт алерт (используется dashboard-agent при провале cron-задач на других серверах,
+ * т.к. сам dashboard-agent не имеет доступа к БД dashboard) и, если включён Telegram
+ * в AlertSettings, сразу уведомляет.
+ *
+ * Авторизация: тот же X-Cron-Secret, что dashboard-agent использует для вызова cron-эндпоинтов.
+ */
+export async function POST(request: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  const providedSecret = request.headers.get('x-cron-secret')
+
+  if (!cronSecret || providedSecret !== cronSecret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await request.json().catch(() => null)
+  const parsed = CreateAlertSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  }
+
+  try {
+    const alert = await createAlert(
+      parsed.data.type,
+      parsed.data.severity,
+      parsed.data.title,
+      parsed.data.message,
+      parsed.data.metadata
+    )
+
+    const settings = await getAlertSettings()
+    if (settings.enabled) {
+      await sendNotification(alert, settings.telegramEnabled, settings.telegramBotToken, settings.telegramChatId)
+    }
+
+    return NextResponse.json({ success: true, alert })
+  } catch (error) {
+    console.error('Error creating alert in /api/alerts:', error)
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

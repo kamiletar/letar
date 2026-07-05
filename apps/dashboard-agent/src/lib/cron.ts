@@ -56,6 +56,7 @@ const APP_PORTS: Record<string, number> = {
   'driving-school': 3003,
   mandala: 3004,
   kami: 3005,
+  dsperevod: 3019,
   'dashboard-agent': 3100,
 }
 
@@ -68,6 +69,7 @@ const APP_HOSTS: Record<string, string> = {
   'driving-school': process.env.DRIVING_SCHOOL_HOST ?? 'driving-school-app',
   mandala: process.env.MANDALA_HOST ?? 'mandala-app',
   kami: process.env.KAMI_HOST ?? 'kami-app',
+  dsperevod: process.env.DSPEREVOD_HOST ?? 'dsperevod-app',
   'dashboard-agent': 'localhost', // self-reference
 }
 
@@ -185,6 +187,16 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     schedule: '0 3 * * *',
     description: 'Удаление API логов старше 30 дней',
     enabled: true,
+  },
+  {
+    id: 'dsperevod-email-health-check',
+    name: 'Email Health Check (dsperevod)',
+    app: 'dsperevod',
+    endpoint: '/api/cron/email-health-check',
+    schedule: '0 */6 * * *',
+    description: 'Проверка SMTP-транспорта (Яндекс) — уведомления менеджеру о заявках зависят от него',
+    enabled: true,
+    server: 's2',
   },
 ]
 
@@ -375,6 +387,39 @@ function getAppUrl(app: string, endpoint: string): string {
 }
 
 /**
+ * Уведомляет dashboard о провале cron-задачи (создаёт Alert type=CRON_FAILED,
+ * dashboard сам решает — слать ли в Telegram по своим AlertSettings).
+ * Ошибки самого уведомления не должны ронять выполнение задачи — только логируются.
+ */
+async function notifyDashboardAlert(job: CronJob, errorMessage: string, statusCode: number | null): Promise<void> {
+  try {
+    const url = getAppUrl('dashboard', '/api/alerts')
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Cron-Secret': process.env.CRON_SECRET || 'default-cron-secret',
+      },
+      body: JSON.stringify({
+        type: 'CRON_FAILED',
+        severity: 'ERROR',
+        title: `Cron задача провалилась: ${job.name}`,
+        message: errorMessage,
+        metadata: { jobId: job.id, app: job.app, endpoint: job.endpoint, statusCode },
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeout)
+  } catch (notifyError) {
+    console.error(`[Cron] Не удалось отправить alert в dashboard для задачи "${job.id}":`, notifyError)
+  }
+}
+
+/**
  * Генерация ID для лога
  */
 function generateLogId(): string {
@@ -475,6 +520,10 @@ export async function executeJob(job: CronJob): Promise<CronExecutionLog> {
       duration,
     })
 
+    if (!isSuccess) {
+      void notifyDashboardAlert(job, errorMsg as string, response.status)
+    }
+
     return {
       ...log,
       status,
@@ -495,6 +544,8 @@ export async function executeJob(job: CronJob): Promise<CronExecutionLog> {
       error: errorMessage,
       duration,
     })
+
+    void notifyDashboardAlert(job, errorMessage, null)
 
     return {
       ...log,

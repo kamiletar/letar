@@ -9,8 +9,13 @@
 ### Planned
 
 - Отправка метрик в Dashboard
-- Алерты при превышении порогов
 - WebSocket для real-time
+
+## [0.5.2] — 2026-07-05
+
+### Feat: алерты в dashboard при провале cron-задач + email health-check dsperevod
+
+`executeJob()` теперь при провале задачи (не-2xx ответ или exception) вызывает `POST /api/alerts` в dashboard (`CRON_FAILED`, `X-Cron-Secret`) — раньше провал только логировался локально in-memory, никакого сигнала наружу не было. Добавлена задача `dsperevod-email-health-check` (`0 */6 * * *`, s2) — проверка SMTP-транспорта dsperevod через `transporter.verify()`. Зарегистрирован `dsperevod` в `APP_PORTS`/`APP_HOSTS` (порт 3019, хост `dsperevod-app`).
 
 ## [0.5.0] - 2026-04-04
 

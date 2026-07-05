@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.19.2] — 2026-07-05
+
+### Feat: `POST /api/alerts` — впервые задействован Telegram-алертинг
+
+Ранее `createAlert()`/`sendTelegramNotification()` существовали, но нигде не вызывались — вся система алертов была мёртвым кодом. Добавлен `POST /api/alerts` (авторизация `X-Cron-Secret`, Zod-валидация): создаёт `Alert` и, если в `AlertSettings` включён Telegram, сразу отправляет уведомление. Первый вызывающий — `dashboard-agent` при провале любой cron-задачи (`CRON_FAILED`), начиная с `dsperevod-email-health-check`.
+
 ## [Unreleased]
 
 ## [1.19.0] - 2026-04-01
