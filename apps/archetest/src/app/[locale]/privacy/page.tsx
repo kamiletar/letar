@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
+import { Box, Link as ChakraLink, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { setRequestLocale } from 'next-intl/server'
 
@@ -39,8 +39,8 @@ function buildSections(isRu: boolean): Section[] {
         body: [
           <>
             Оператором персональных данных является индивидуальный предприниматель, зарегистрированный в Реестре
-            операторов, осуществляющих обработку персональных данных (регистрационный номер записи{' '}
-            {RKN_REGISTRY_NUMBER}). Запросы по обработке данных — на {emailLink}.
+            операторов, осуществляющих обработку персональных данных (регистрационный номер записи {RKN_REGISTRY_NUMBER}
+            ). Запросы по обработке данных — на {emailLink}.
           </>,
         ],
       },

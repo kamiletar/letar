@@ -106,23 +106,19 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                 </Progress.Track>
               </Progress.Root>
 
-              {progress!.availableCount > 0
-                ? (
-                  <Text fontSize="xs" color="fg.muted">
-                    {isRu
-                      ? `Доступно ещё ${
+              {progress!.availableCount > 0 ? (
+                <Text fontSize="xs" color="fg.muted">
+                  {isRu
+                    ? `Доступно ещё ${
                         progress!.availableCount
                       } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
-                  </Text>
-                )
-                : (
-                  <Text fontSize="xs" color="green.500" fontWeight="bold">
-                    {isRu
-                      ? '🎉 Вы ответили на все доступные вопросы!'
-                      : '🎉 You have answered all available questions!'}
-                  </Text>
-                )}
+                    : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                </Text>
+              ) : (
+                <Text fontSize="xs" color="green.500" fontWeight="bold">
+                  {isRu ? '🎉 Вы ответили на все доступные вопросы!' : '🎉 You have answered all available questions!'}
+                </Text>
+              )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">

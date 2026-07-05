@@ -134,7 +134,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         return next
       })
     },
-    [currentQuestion],
+    [currentQuestion]
   )
 
   const handleSkip = useCallback(() => {
