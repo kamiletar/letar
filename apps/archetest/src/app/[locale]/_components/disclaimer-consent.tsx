@@ -1,0 +1,50 @@
+'use client'
+
+import { Link } from '@/i18n/navigation'
+import { Box, Checkbox, Link as ChakraLink, Text } from '@chakra-ui/react'
+import { DISCLAIMER_EN, DISCLAIMER_RU } from '../_data/disclaimer'
+
+interface DisclaimerConsentProps {
+  /** Согласие проставлено */
+  accepted: boolean
+  /** Колбэк смены состояния чекбокса */
+  onChange: (accepted: boolean) => void
+  /** Русская локаль (иначе английская) */
+  isRu: boolean
+}
+
+/**
+ * Экран информированного согласия (этап 5.6.3): полный дисклеймер + чекбокс со
+ * ссылкой на политику конфиденциальности. Общий для полного квиза и экспресса.
+ * Чекбокс НЕ предотмечен (152-ФЗ), стартовую кнопку гейтит вызывающий.
+ */
+export function DisclaimerConsent({ accepted, onChange, isRu }: DisclaimerConsentProps) {
+  return (
+    <Box
+      w="100%"
+      maxW="lg"
+      p={5}
+      borderRadius="lg"
+      borderWidth="1px"
+      borderColor="border"
+      bg="bg.subtle"
+      textAlign="left"
+    >
+      <Text fontSize="xs" color="fg.muted" whiteSpace="pre-line" mb={4}>
+        {isRu ? DISCLAIMER_RU : DISCLAIMER_EN}
+      </Text>
+      <Checkbox.Root checked={accepted} onCheckedChange={(e) => onChange(!!e.checked)}>
+        <Checkbox.HiddenInput />
+        <Checkbox.Control />
+        <Checkbox.Label fontSize="sm">
+          {isRu ? 'Я ознакомился и согласен с ' : 'I have read and agree to the '}
+          <ChakraLink asChild color="blue.500" textDecoration="underline">
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+              {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
+            </Link>
+          </ChakraLink>
+        </Checkbox.Label>
+      </Checkbox.Root>
+    </Box>
+  )
+}

@@ -5,6 +5,17 @@ import { expect, test } from '@playwright/test'
  * Гостевой режим: без авторизации и БД, результат живёт в localStorage.
  */
 
+/** Принимает информированное согласие (5.6.3) и стартует экспресс. */
+async function acceptConsentAndStart(page: import('@playwright/test').Page) {
+  const startButton = page.getByRole('button', { name: 'Начать экспресс' })
+  // Согласие не предотмечено → кнопка старта заблокирована
+  await expect(startButton).toBeDisabled()
+  // Кликаем именно контрол чекбокса (в лейбле есть ссылка на /privacy — по ней не попадаем)
+  await page.locator('[data-part="control"]').first().click()
+  await expect(startButton).toBeEnabled()
+  await startButton.click()
+}
+
 /** Проходит все вопросы, кликая первый вариант; карточка авто-переходит через 400мс. */
 async function answerAllQuestions(page: import('@playwright/test').Page) {
   const resultsTitle = page.getByRole('heading', { name: 'Ваша гексаграмма' })
@@ -29,10 +40,9 @@ test.describe('Express Scan', () => {
     await page.reload()
   })
 
-  test('интро → 24 вопроса → гексаграмма с QR и CTA', async ({ page }) => {
-    // INTRO
-    await expect(page.getByRole('button', { name: 'Начать экспресс' })).toBeVisible()
-    await page.getByRole('button', { name: 'Начать экспресс' }).click()
+  test('интро → согласие → 24 вопроса → гексаграмма с QR и CTA', async ({ page }) => {
+    // INTRO + информированное согласие
+    await acceptConsentAndStart(page)
 
     // QUIZ: первый вопрос виден
     await expect(page.getByTestId('quiz-option').first()).toBeVisible()
@@ -47,7 +57,7 @@ test.describe('Express Scan', () => {
   })
 
   test('результат сохраняется в localStorage и восстанавливается после перезагрузки', async ({ page }) => {
-    await page.getByRole('button', { name: 'Начать экспресс' }).click()
+    await acceptConsentAndStart(page)
     await answerAllQuestions(page)
     await expect(page.getByRole('heading', { name: 'Ваша гексаграмма' })).toBeVisible()
 

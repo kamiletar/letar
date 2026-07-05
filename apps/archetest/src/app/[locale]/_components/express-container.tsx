@@ -7,10 +7,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuHexagon, LuTimer } from 'react-icons/lu'
 
 import type { QuizQuestionDTO } from '../_actions/quiz.action'
+import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { computeClientScores } from '../_lib/client-scoring'
 import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { EXPRESS_RESULT_KEY } from '../_lib/storage-keys'
+import { DisclaimerConsent } from './disclaimer-consent'
 import { type ExpressAnswer, ExpressResults } from './express-results'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
@@ -41,6 +43,8 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   const isRu = locale === 'ru'
 
   const [state, setState] = useState<ExpressState>('intro')
+  // Информированное согласие (5.6.3) — гость, хранение только в localStorage
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [seed, setSeed] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Map<string, number>>(new Map())
@@ -56,6 +60,10 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     }
     hydrated.current = true
     try {
+      // Ранее данное согласие (общий ключ с полным квизом)
+      if (localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1') {
+        setDisclaimerAccepted(true)
+      }
       const raw = localStorage.getItem(EXPRESS_RESULT_KEY)
       if (!raw) {
         return
@@ -95,6 +103,18 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     return shuffleWithSeed(opts, seed + idHash)
   }, [currentQuestion, seed, isRu])
 
+  // Сохраняем согласие в localStorage (гость — на сервер ничего не уходит)
+  const handleConsentChange = useCallback((accepted: boolean) => {
+    setDisclaimerAccepted(accepted)
+    try {
+      if (accepted) {
+        localStorage.setItem(DISCLAIMER_CONSENT_KEY, '1')
+      }
+    } catch {
+      /* localStorage недоступен — согласие останется в состоянии */
+    }
+  }, [])
+
   const handleStart = useCallback(() => {
     setSeed(Date.now() % 2_000_000_000)
     setCurrentIndex(0)
@@ -114,7 +134,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         return next
       })
     },
-    [currentQuestion]
+    [currentQuestion],
   )
 
   const handleSkip = useCallback(() => {
@@ -217,7 +237,12 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
             </Text>
           </Box>
 
-          <Button size="lg" colorPalette="purple" onClick={handleStart}>
+          {/* Информированное согласие (5.6.3) — гейтит старт */}
+          {!disclaimerAccepted && (
+            <DisclaimerConsent accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />
+          )}
+
+          <Button size="lg" colorPalette="purple" onClick={handleStart} disabled={!disclaimerAccepted}>
             {t('start')}
           </Button>
         </VStack>

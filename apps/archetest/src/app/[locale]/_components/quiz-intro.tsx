@@ -1,12 +1,14 @@
 'use client'
 
-import { Box, Button, Checkbox, Container, Heading, HStack, Progress, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Heading, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { LuBrain, LuChartNoAxesCombined, LuTrendingUp } from 'react-icons/lu'
 import { acceptDisclaimerAction } from '../_actions/disclaimer.action'
 import type { QuizProgress } from '../_actions/quiz.action'
+import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
+import { DisclaimerConsent } from './disclaimer-consent'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
 
@@ -17,23 +19,6 @@ interface QuizIntroProps {
   /** Дисклеймер уже принят (из БД) */
   initialDisclaimerAccepted?: boolean
 }
-
-/** Полный текст дисклеймера (из disclaimer.md от психолога) */
-const DISCLAIMER_RU = `Данный тест является инструментом самопознания и не предназначен для постановки медицинских или психологических диагнозов. Результаты теста носят ориентировочный характер и отражают выраженность определённых личностных черт, а не наличие психического расстройства.
-
-Тест не заменяет консультацию квалифицированного специалиста — психолога, психотерапевта или психиатра. Если результаты вызывают у вас беспокойство или вы испытываете трудности в повседневной жизни, рекомендуется обратиться к специалисту для профессиональной оценки.
-
-Результаты теста не могут использоваться в качестве основания для принятия медицинских, юридических, кадровых или иных решений, затрагивающих права и интересы человека.
-
-Каждый человек уникален. Любой тип личности имеет свои сильные стороны и зоны роста. Высокий балл по какой-либо шкале не означает «проблему» — он указывает на выраженную черту, которая может быть как ресурсом, так и источником трудностей в зависимости от контекста.`
-
-const DISCLAIMER_EN = `This test is a self-discovery tool and is not intended for medical or psychological diagnosis. Results are indicative and reflect the expression of certain personality traits, not the presence of a mental disorder.
-
-The test does not replace consultation with a qualified specialist — psychologist, psychotherapist, or psychiatrist. If results cause concern or you experience difficulties in everyday life, professional evaluation is recommended.
-
-Test results cannot be used as a basis for medical, legal, employment, or other decisions affecting a person's rights and interests.
-
-Every person is unique. Every personality type has strengths and growth areas. A high score on any scale does not mean a "problem" — it indicates a pronounced trait that can be both a resource and a source of difficulty depending on context.`
 
 export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: QuizIntroProps) {
   const t = useTranslations('quiz')
@@ -48,13 +33,13 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
     if (typeof window === 'undefined') {
       return false
     }
-    return localStorage.getItem('quiz_disclaimer_accepted') === '1'
+    return localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1'
   })
 
   // Сохраняем согласие в localStorage + БД
   useEffect(() => {
     if (disclaimerAccepted) {
-      localStorage.setItem('quiz_disclaimer_accepted', '1')
+      localStorage.setItem(DISCLAIMER_CONSENT_KEY, '1')
       // Сохраняем в БД (fire and forget)
       acceptDisclaimerAction().catch(() => {
         /* fire and forget */
@@ -121,19 +106,23 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                 </Progress.Track>
               </Progress.Root>
 
-              {progress!.availableCount > 0 ? (
-                <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `Доступно ещё ${
+              {progress!.availableCount > 0
+                ? (
+                  <Text fontSize="xs" color="fg.muted">
+                    {isRu
+                      ? `Доступно ещё ${
                         progress!.availableCount
                       } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                    : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
-                </Text>
-              ) : (
-                <Text fontSize="xs" color="green.500" fontWeight="bold">
-                  {isRu ? '🎉 Вы ответили на все доступные вопросы!' : '🎉 You have answered all available questions!'}
-                </Text>
-              )}
+                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                  </Text>
+                )
+                : (
+                  <Text fontSize="xs" color="green.500" fontWeight="bold">
+                    {isRu
+                      ? '🎉 Вы ответили на все доступные вопросы!'
+                      : '🎉 You have answered all available questions!'}
+                  </Text>
+                )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">
@@ -160,32 +149,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
 
         {/* Дисклеймер с чекбоксом (скрываем если уже принято ранее) */}
         {!disclaimerAccepted && (
-          <Box
-            w="100%"
-            maxW="lg"
-            p={5}
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor="border"
-            bg="bg.subtle"
-            textAlign="left"
-          >
-            <Text fontSize="xs" color="fg.muted" whiteSpace="pre-line" mb={4}>
-              {isRu ? DISCLAIMER_RU : DISCLAIMER_EN}
-            </Text>
-            <Checkbox.Root
-              checked={disclaimerAccepted}
-              onCheckedChange={(e) => {
-                setDisclaimerAccepted(!!e.checked)
-              }}
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label fontSize="sm">
-                {isRu ? 'Я ознакомился и согласен' : 'I have read and agree'}
-              </Checkbox.Label>
-            </Checkbox.Root>
-          </Box>
+          <DisclaimerConsent accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
         )}
 
         <HStack gap={3}>
