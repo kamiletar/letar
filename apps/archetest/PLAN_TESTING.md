@@ -44,6 +44,7 @@ nx typecheck:tsgo archetest    # Проверка типов
 | Merge гостевой сессии       | Пересчёт на сервере из ответов, отклонение подделок           | 🔶 через E2E + `.strip()`; юнит ⏳    |
 | E2E: express-флоу           | Intro → согласие → 24 вопроса → гексаграмма → QR/CTA, restore | ✅ `express.spec.ts` (2)              |
 | Safety-net (5.6.4)          | Пороги DPR/BAR/BOR, граница вкл., dark-reassurance, маркер    | ✅ `safety-net.test.ts` (12)          |
+| Developmental-фрейм (5.6.1) | Практики 22 шкал (≥2, метод, ru+en), суперсилы 22 шкал        | ✅ `growth-practices.test.ts` (7)     |
 | E2E: согласие + safety-net  | Экран согласия 152-ФЗ, триггер телефонов доверия              | ⏳ Планируется                        |
 
 ## Фаза 1: Unit-тесты server actions

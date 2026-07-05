@@ -1,14 +1,14 @@
 'use client'
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
-import { Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
 import { useMemo } from 'react'
 import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
-import { PERSONALITY_TYPES, replaceTypeCodes } from '../_data/personality-types'
-import { getPositiveProfile } from '../_data/positive-profiles'
+import { PERSONALITY_TYPES, replaceTypeCodes, STATE_CODES } from '../_data/personality-types'
 import { getInteraction, getMoodModifier } from '../_data/type-interactions'
+import { DevelopmentalProfileCard } from './developmental-profile-card'
 
 interface ProfileDetailsProps {
   scores: Record<PersonalityTypeCode, number>
@@ -36,103 +36,40 @@ export function ProfileDetails({ scores, confidence }: ProfileDetailsProps) {
   const isRu = locale === 'ru'
   const showClinical = useShowClinicalNames()
 
+  // Топ-3 ведущих ЧЕРТ (состояния BAR/DPR исключены — они в отдельном блоке «Состояния»)
   const top3 = useMemo(() => {
-    return PERSONALITY_TYPES.map((type) => ({
-      ...type,
-      score: scores[type.code] ?? 0,
-    }))
+    return PERSONALITY_TYPES.filter((type) => !STATE_CODES.includes(type.code))
+      .map((type) => ({
+        ...type,
+        score: scores[type.code] ?? 0,
+      }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
   }, [scores])
 
   return (
     <VStack gap={4} w="100%">
-      {/* Топ-3 типа */}
-      <Heading size="lg">{isRu ? 'Ваши ведущие типы' : 'Your top types'}</Heading>
+      {/* Топ-3 ведущих черт — developmental-фрейм: Суперсила → Ловушка → Практики (этап 5.6.1) */}
+      <Heading size="lg">{isRu ? 'Ваши ведущие черты' : 'Your leading traits'}</Heading>
+      <Text fontSize="sm" color="fg.muted" textAlign="center" maxW="2xl">
+        {isRu
+          ? 'Каждая черта — не приговор, а ресурс: у неё есть суперсила, ловушка и конкретные практики для роста.'
+          : 'Each trait is a resource, not a verdict: it has a superpower, a trap, and concrete practices for growth.'}
+      </Text>
       {top3.map((type, i) => {
         const conf = confidence?.[type.code]
         const confLabel = conf ? getConfidenceLabel(conf, isRu) : null
         return (
-          <Card.Root key={type.code} w="100%" variant="outline">
-            <Card.Body>
-              <VStack align="start" gap={2}>
-                <HStack gap={2} align="baseline" flexWrap="wrap">
-                  <Heading size="md">
-                    {i + 1}. {isRu ? type.label : type.labelEn}{' '}
-                    <Text as="span" fontWeight="normal">
-                      {isRu ? type.archetype : type.archetypeEn}
-                    </Text>
-                  </Heading>
-                  {showClinical && (
-                    <Text color="fg.muted" fontWeight="normal" fontSize="sm">
-                      ({isRu ? type.clinical : type.clinicalEn})
-                    </Text>
-                  )}
-                  {confLabel && (
-                    <Text
-                      fontSize="xs"
-                      color="white"
-                      bg="orange.500"
-                      px={1.5}
-                      py={0.5}
-                      borderRadius="sm"
-                      fontWeight="medium"
-                    >
-                      {confLabel}
-                    </Text>
-                  )}
-                </HStack>
-                <Text
-                  fontSize="sm"
-                  color={type.score >= 60 ? 'red.500' : type.score >= 40 ? 'orange.500' : 'fg.muted'}
-                  fontWeight={type.score >= 60 ? 'bold' : 'normal'}
-                >
-                  {type.score}%
-                </Text>
-                <Text color="fg" lineHeight="tall">
-                  {isRu ? type.description : type.descriptionEn}
-                </Text>
-                {type.score >= 40 && (
-                  <Box
-                    mt={2}
-                    p={3}
-                    bg="bg.subtle"
-                    borderRadius="md"
-                    borderLeft="3px solid"
-                    borderLeftColor={type.color}
-                  >
-                    <Text fontSize="sm" color="fg.subtle">
-                      {isRu ? type.whenHigh : type.whenHighEn}
-                    </Text>
-                  </Box>
-                )}
-              </VStack>
-            </Card.Body>
-          </Card.Root>
+          <DevelopmentalProfileCard
+            key={type.code}
+            code={type.code}
+            rank={i + 1}
+            score={type.score}
+            confidenceLabel={confLabel}
+            showClinicalOverride={showClinical}
+          />
         )
       })}
-
-      {/* Суперсила — топ-1 */}
-      {top3[0] &&
-        (() => {
-          const profile = getPositiveProfile(top3[0].code)
-          if (!profile) {
-            return null
-          }
-          return (
-            <Card.Root w="100%" variant="outline" borderColor={top3[0].color}>
-              <Card.Body>
-                <Heading size="md" mb={3}>
-                  {isRu ? 'Ваша суперсила' : 'Your superpower'}: {isRu ? top3[0].label : top3[0].labelEn}{' '}
-                  {isRu ? top3[0].archetype : top3[0].archetypeEn}
-                </Heading>
-                <Text whiteSpace="pre-line" fontSize="sm" lineHeight="tall">
-                  {replaceTypeCodes(isRu ? profile.text : profile.textEn || profile.text, isRu, showClinical)}
-                </Text>
-              </Card.Body>
-            </Card.Root>
-          )
-        })()}
 
       {/* Взаимодействие топ-2 */}
       {top3.length >= 2 &&
@@ -204,8 +141,8 @@ export function ProfileDetails({ scores, confidence }: ProfileDetailsProps) {
           )
         })()}
 
-      {/* Модификаторы BAR/PAG/DPR ≥ 40% */}
-      {(['BAR', 'PAG', 'DPR'] as const).map((code) => {
+      {/* Модификатор PAG ≥ 40% (состояния BAR/DPR вынесены в отдельный блок «Состояния») */}
+      {(['PAG'] as const).map((code) => {
         if ((scores[code] ?? 0) < 40) {
           return null
         }

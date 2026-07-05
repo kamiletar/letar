@@ -1,5 +1,6 @@
 'use client'
 
+import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Link } from '@/i18n/navigation'
 import { Alert, Box, Button, Container, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -16,6 +17,7 @@ import { ProfileDetails } from './profile-details'
 import { PsychologistLinkBlock } from './psychologist-link-block'
 import { RankBadge } from './rank-badge'
 import { DarkReassuranceNote, SafetyNetBlock } from './safety-net-block'
+import { StatesBlock } from './states-block'
 
 interface QuizResultsProps {
   scores: Record<PersonalityTypeCode, number>
@@ -39,22 +41,37 @@ interface QuizResultsProps {
 }
 
 /**
- * Генерация предупреждений по правилам BAR-фильтра (TZ v1/v2).
+ * Генерация предупреждений по правилам BAR-фильтра.
+ *
+ * Клиническая лексика (названия расстройств, «клиническая оценка», дифференциальная
+ * диагностика) показывается ТОЛЬКО психологу/админу (`showClinical`, этап 5.6.1).
+ * Юзер видит мягкую developmental-формулировку без ярлыков — сопровождение специалиста
+ * при этом предлагается в блоке «Состояния» через практики.
  */
 function getWarnings(
   scores: Record<PersonalityTypeCode, number>,
-  isRu: boolean
+  isRu: boolean,
+  showClinical: boolean
 ): { type: 'info' | 'warning'; message: string }[] {
   const warnings: { type: 'info' | 'warning'; message: string }[] = []
 
-  // BAR ≥ 40%: предупреждение о влиянии цикличности
+  // BAR ≥ 40%: цикличность настроения может завышать эмоциональные шкалы
   if ((scores.BAR ?? 0) >= 40) {
     warnings.push({
       type: 'warning',
-      message: isRu
-        ? 'Высокий балл по шкале биполярного расстройства. Баллы по шкалам NAR, BOR, HIS, ANT могут быть завышены из-за маниакальных/депрессивных эпизодов. Рекомендуется клиническая оценка.'
-        : 'High bipolar scale score. NAR, BOR, HIS, ANT scores may be inflated due to manic/depressive episodes. Clinical evaluation is recommended.',
+      message: showClinical
+        ? isRu
+          ? 'Высокий балл по шкале биполярного расстройства. Баллы по шкалам NAR, BOR, HIS, ANT могут быть завышены из-за маниакальных/депрессивных эпизодов. Рекомендуется клиническая оценка.'
+          : 'High bipolar scale score. NAR, BOR, HIS, ANT scores may be inflated due to manic/depressive episodes. Clinical evaluation is recommended.'
+        : isRu
+          ? 'Заметна выраженная переменчивость настроения. В такие периоды баллы по эмоциональным шкалам могут быть выше обычного — учитывайте это, читая результат.'
+          : 'Pronounced mood variability is present. During such periods, scores on emotional scales may be higher than usual — keep this in mind when reading the result.',
     })
+  }
+
+  // Дифференциальные заметки — только для психолога (клинический контекст)
+  if (!showClinical) {
+    return warnings
   }
 
   // BOR ≥ 40% + BAR ≥ 40%: дифференциальная диагностика
@@ -95,6 +112,7 @@ export function QuizResults({
   const t = useTranslations('quiz')
   const locale = useLocale()
   const isRu = locale === 'ru'
+  const showClinical = useShowClinicalNames()
   // Данные для радарного чарта — формат «Бдительный Страж»
   const chartData = useMemo(
     () =>
@@ -128,8 +146,8 @@ export function QuizResults({
     [averagedScores, isRu]
   )
 
-  // Предупреждения BAR-фильтра
-  const warnings = useMemo(() => getWarnings(scores, isRu), [scores, isRu])
+  // Предупреждения BAR-фильтра (клиническая лексика — только психологу)
+  const warnings = useMemo(() => getWarnings(scores, isRu, showClinical), [scores, isRu, showClinical])
   // Safety-net (5.6.4): кризисный блок при выраженных шкалах состояния (DPR/BAR/BOR ≥ 60%)
   const showSafetyNet = useMemo(() => needsSafetyNet(scores), [scores])
   // Мягкая формулировка при высоких «тёмных» шкалах
@@ -235,8 +253,11 @@ export function QuizResults({
         {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
         {showDarkReassurance && <DarkReassuranceNote isRu={isRu} />}
 
-        {/* Детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы */}
+        {/* Детали профиля: топ-3 ведущих ЧЕРТ в developmental-фрейме, взаимодействие, модификатор PAG */}
         <ProfileDetails scores={scores} confidence={confidence} />
+
+        {/* Состояния (BAR/DPR) — отдельно от черт (5.6.1) */}
+        <StatesBlock scores={scores} confidence={confidence} />
 
         {/* Зачем проходить снова */}
         <Box w="100%" p={6} borderRadius="lg" bg="bg.subtle" borderWidth="1px" borderColor="border">
