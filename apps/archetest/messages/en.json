@@ -6,12 +6,38 @@
   },
   "nav": {
     "home": "Archetest",
+    "express": "Express",
     "leaderboard": "Leaderboard",
     "forProfessionals": "For Professionals",
     "cabinet": "Cabinet",
     "settings": "Settings",
     "menu": "Menu",
     "theme": "Theme"
+  },
+  "express": {
+    "title": "Express Test",
+    "description": "24 scenario questions in a couple of minutes — a quick snapshot of the Light and Dark triads of your personality as a hexagram.",
+    "start": "Start Express",
+    "info": {
+      "questions": "24 scenario questions, 8 hexagram scales",
+      "time": "Estimated time: 3–5 minutes"
+    },
+    "privacyNote": "Express is a guest mode: your result is stored only in this browser and is not sent anywhere. It is a self-discovery tool, not a diagnosis or a substitute for professional consultation. To keep the result in an account, link it on the results screen.",
+    "resultsTitle": "Your Hexagram",
+    "resultsSubtitle": "The overlay of the Light and Dark triads. The full 22-scale portrait is in the complete test.",
+    "hexagramTitle": "Personality Architecture",
+    "groupLight": "Light Triad",
+    "groupDark": "Dark Triad",
+    "groupAura": "Destructive Patterns",
+    "fullTestTitle": "Discover all 22 scales",
+    "fullTestDescription": "Express covers 8 scales. The full test has 22 scales, a cumulative profile, and dynamics. Point your camera at the QR code or open it on this device.",
+    "fullTestCta": "Open the full test",
+    "linkAuthenticated": "Save result to account",
+    "linkGuest": "Link result to account",
+    "linkHint": "Your answers are sent to the server, not the scores — the profile is recomputed. XP and achievements are awarded only for account-confirmed runs.",
+    "linkSuccess": "Result saved to your account",
+    "linkError": "Failed to save the result. Please try again later.",
+    "retake": "Retake"
   },
   "quiz": {
     "title": "Personality Type",

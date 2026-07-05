@@ -8,33 +8,13 @@ import type { QuizProgress, QuizQuestionDTO, ScaleConfidence } from '../_actions
 import { getRandomQuestionsAction, submitQuizAction } from '../_actions/quiz.action'
 import { ACHIEVEMENTS_MAP } from '../_data/achievements'
 import type { PersonalityTypeCode } from '../_data/personality-types'
-import { PERSONALITY_TYPES } from '../_data/personality-types'
+import { computeClientScores } from '../_lib/client-scoring'
+import { shuffleWithSeed } from '../_lib/seeded-shuffle'
+import { PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 import { QuizIntro } from './quiz-intro'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
 import { QuizResults } from './quiz-results'
-
-/** Seeded PRNG (mulberry32) */
-function mulberry32(seed: number) {
-  return function () {
-    seed |= 0
-    seed = (seed + 0x6d2b79f5) | 0
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-/** Fisher-Yates shuffle с seed */
-function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
-  const rng = mulberry32(seed)
-  const result = [...arr]
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1))
-    ;[result[i], result[j]] = [result[j], result[i]]
-  }
-  return result
-}
 
 /** Формат данных для sessionStorage */
 interface PendingQuiz {
@@ -44,7 +24,7 @@ interface PendingQuiz {
   skipped: string[]
 }
 
-const STORAGE_KEY = 'quiz_pending'
+const STORAGE_KEY = PENDING_QUIZ_KEY
 
 type QuizState = 'intro' | 'quiz' | 'submitting' | 'results' | 'loading_more'
 
@@ -272,59 +252,10 @@ export function QuizContainer({
     }
   }, [currentIndex, shuffledQuestions.length])
 
-  // Client-side подсчёт баллов
+  // Client-side предварительный подсчёт баллов (общий хелпер, авторитет — сервер)
   const calculateClientScores = useCallback(
-    (answerMap: Map<string, number>): Record<PersonalityTypeCode, number> => {
-      const raw: Record<string, number> = {}
-      const actualMax: Record<string, number> = {}
-      for (const type of PERSONALITY_TYPES) {
-        raw[type.code] = 0
-        actualMax[type.code] = 0
-      }
-
-      // Строим карту вопросов по id
-      const questionsMap = new Map(currentQuestions.map((q) => [q.id, q]))
-
-      for (const [qId, optIndex] of answerMap) {
-        const question = questionsMap.get(qId)
-        if (!question) {
-          continue
-        }
-        const option = question.options[optIndex]
-        if (!option) {
-          continue
-        }
-        for (const [code, score] of Object.entries(option.scoring)) {
-          raw[code] = (raw[code] || 0) + score
-        }
-      }
-
-      // Пересчёт actualMax: для каждого отвеченного вопроса — макс. балл по шкале
-      for (const [qId] of answerMap) {
-        const question = questionsMap.get(qId)
-        if (!question) {
-          continue
-        }
-        // Для каждой шкалы находим максимум среди 4 вариантов этого вопроса
-        const qMax: Record<string, number> = {}
-        for (const opt of question.options) {
-          for (const [code, score] of Object.entries(opt.scoring)) {
-            qMax[code] = Math.max(qMax[code] ?? 0, score)
-          }
-        }
-        for (const [code, max] of Object.entries(qMax)) {
-          actualMax[code] = (actualMax[code] ?? 0) + max
-        }
-      }
-
-      const normalized: Record<string, number> = {}
-      for (const [code, value] of Object.entries(raw)) {
-        const max = actualMax[code] ?? 0
-        normalized[code] = max > 0 ? Math.round((value / max) * 1000) / 10 : 0
-      }
-
-      return normalized as Record<PersonalityTypeCode, number>
-    },
+    (answerMap: Map<string, number>): Record<PersonalityTypeCode, number> =>
+      computeClientScores(answerMap, currentQuestions),
     [currentQuestions]
   )
 

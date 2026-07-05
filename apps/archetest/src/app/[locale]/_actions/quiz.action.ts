@@ -14,7 +14,7 @@ import { checkAndAwardAchievements } from './achievements.action'
 import { recalcLeaderboardEntry } from './leaderboard.action'
 
 /** Формат опции из БД */
-interface QuizOptionData {
+export interface QuizOptionData {
   text: string
   textEn: string
   scoring: Record<string, number>

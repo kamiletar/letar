@@ -68,6 +68,13 @@ export function MobileDrawer() {
           {/* Навигация */}
           <VStack align="stretch" gap={0} py={2}>
             <Pressable borderRadius="none">
+              <Link href="/express" onClick={close}>
+                <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
+                  <Text fontSize="sm">{t('express')}</Text>
+                </Box>
+              </Link>
+            </Pressable>
+            <Pressable borderRadius="none">
               <Link href="/leaderboard" onClick={close}>
                 <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                   <Text fontSize="sm">{t('leaderboard')}</Text>
