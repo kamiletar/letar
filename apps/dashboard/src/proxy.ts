@@ -30,6 +30,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // POST /api/alerts вызывается dashboard-agent (X-Cron-Secret, проверяется внутри роута) —
+  // GET/settings/acknowledge остаются под сессией, у них нет собственной авторизации
+  if (pathname === '/api/alerts' && request.method === 'POST') {
+    return NextResponse.next()
+  }
+
   // Проверяем сессию через Better Auth
   const session = await auth.api.getSession({
     headers: request.headers,
