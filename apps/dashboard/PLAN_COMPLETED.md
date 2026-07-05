@@ -2,6 +2,22 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.19.2
+
+### Впервые задействован Telegram-алертинг (POST /api/alerts)
+
+`createAlert()` и `sendTelegramNotification()` существовали в `lib/alerts.ts`/`lib/notifications.ts` с самого создания системы алертов, но нигде не вызывались — весь pipeline был мёртвым кодом (проверено grep'ом по всему `src`).
+
+Добавлен `POST /api/alerts` — принимает `{ type, severity, title, message, metadata }` (Zod-валидация, `AlertType`/`AlertSeverity` enum), авторизация `X-Cron-Secret` (тот же секрет, что `dashboard-agent` использует для вызова cron-эндпоинтов приложений). Создаёт `Alert` через `createAlert()`, затем если `AlertSettings.enabled` — вызывает `sendNotification()` → Telegram.
+
+**Первый вызывающий:** `dashboard-agent` (`executeJob()`) — при провале любой cron-задачи на любом сервере создаёт алерт типа `CRON_FAILED`.
+
+**Файлы:**
+
+- `src/app/api/alerts/route.ts` — добавлен `POST` (ранее только `GET`)
+
+**Секреты:** `CRON_SECRET` сгенерирован через `openssl rand -base64 32`, прописан в `.env.docker.enc` (ранее не был настроен нигде в монорепо — driving-school's cron-эндпоинт использовал другой заголовок авторизации, что тоже, судя по всему, ломало auth; вынесено отдельной задачей).
+
 ## Версия 1.19.0
 
 ### Кнопка «Записать env» на SiteCard + мульти-серверная маршрутизация

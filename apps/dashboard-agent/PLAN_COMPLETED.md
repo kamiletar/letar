@@ -2,6 +2,20 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.5.2
+
+### Алерты в dashboard при провале cron-задач + email health-check dsperevod
+
+`executeJob()` раньше только логировал провал задачи в in-memory `executionLogs` — никакого сигнала наружу не было. Теперь при не-2xx ответе или exception вызывается `POST /api/alerts` в dashboard (`CRON_FAILED`, заголовок `X-Cron-Secret`); ошибки самого уведомления не роняют выполнение задачи, только логируются.
+
+Зарегистрировано приложение `dsperevod` в `APP_PORTS` (3019) / `APP_HOSTS` (`dsperevod-app`) + новая дефолтная задача `dsperevod-email-health-check` (`0 */6 * * *`, `server: 's2'`) — вызывает `dsperevod`'s `/api/cron/email-health-check` (`transporter.verify()` без реальной отправки письма).
+
+**Файлы:**
+
+- `src/lib/cron.ts` — `notifyDashboardAlert()`, вызов в обеих failure-ветках `executeJob()`, новые записи в `APP_PORTS`/`APP_HOSTS`/`DEFAULT_CRON_JOBS`
+
+**Секреты:** `CRON_SECRET` сгенерирован (`openssl rand -base64 32`), прописан в `.env.docker.enc` — ранее не был настроен, `X-Cron-Secret` отправлялся с fallback-значением `'default-cron-secret'`.
+
 ## Версия 0.4.0
 
 ### Мониторинг cron задач

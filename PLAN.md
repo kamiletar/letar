@@ -511,7 +511,8 @@ interface AuthProfile {
   database: BetterAuthAdapter // prismaAdapter / enhanced — параметр приложения
   baseURL: string
   emailVerification?: PinAuthConfig | BasicVerifyConfig // pin-auth (богатый) или базовый Better Auth
-  social?: // только standalone:
+  social?:
+    // только standalone:
     | { source: 'env' } //   Tier 2 ключи из process.env (дефолт)
     | { source: 'db'; load: () => Promise<SocialKeys> } //   Tier 2 ключи из БД проекта (чит. при старте/reload)
   hub?: { issuerURL: string; clientId: string } // только hub-client: OIDC-discovery Ключницы
@@ -602,6 +603,7 @@ interface AuthProfile {
   - Оба варианта — опциональные (пустые переменные = отключено), без ломающих изменений API `@letar/email`.
 - **✓ DoD:** canary (0.7) зелёный ≥ 3 суток подряд; 0 проигнорированных `SendEmailResult`; baseline зафиксирован.
 - **Зависимости:** нет. Без доходящих писем resend бессмыслен.
+- ℹ️ **Смежная инфра готова (2026-07-05):** `dashboard`'s `Alert`/`sendTelegramNotification` pipeline существовал с самого создания, но нигде не вызывался (мёртвый код) — теперь впервые задействован через `POST /api/alerts` (`dashboard-agent` → `CRON_FAILED` при провале cron-задач). dsperevod получил проактивный `/api/cron/email-health-check` (`transporter.verify()` каждые 6ч). Это ДРУГОЙ механизм, чем `setEmailFailureAlerter` из этого этапа (проверка живости SMTP по расписанию, а не алерт на каждый неудавшийся send) — но при реализации B/C variant для `@letar/email` стоит переиспользовать уже рабочий `dashboard`'s `/api/alerts` вместо отдельной Telegram-интеграции. Детали: `apps/dashboard/PLAN_COMPLETED.md`, `apps/dashboard-agent/PLAN_COMPLETED.md`, `apps/dsperevod/CHANGELOG.md` (v0.5.4).
 
 ### Этап 0.1 — Ротация утёкших OIDC-секретов Ключницы ✅ ПОЛНОСТЬЮ (сессии №2 + №7 + №8)
 
