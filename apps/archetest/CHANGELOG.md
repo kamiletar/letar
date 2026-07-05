@@ -5,6 +5,34 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.10.0] - 2026-07-05
+
+### Added
+
+- **Mobile-first UI для фестивального демо (этап 5.4)** — полировка UX стенда на Инпсихофесте:
+  - `_hooks/use-high-contrast.ts` + `_components/high-contrast-toggle.tsx` — **высококонтрастный
+    режим** для планшета на выставке (читаемость под ярким светом). Кнопка `LuContrast` в шапке
+    (десктоп + мобильный), состояние в localStorage (переживает перезагрузку между посетителями),
+    атрибут `data-contrast="high"` на `<html>`. Оверрайды в `theme/index.ts` усиливают
+    приглушённый текст (`fg.muted`/`fg.subtle` → `fg`) и границы (→ `border.emphasized`)
+  - `_components/icebreaker-card.tsx` — **intro-карточка с двумя icebreaker-вопросами для
+    психологов** на `/express` («Вы психически здоровы?» + факт о когорте Данидина ~17%
+    с citable-источником Schaefer et al., 2017 — вместо мифической цифры «5%»)
+  - `_components/share-result-button.tsx` — **Web Share API** на экранах результатов (полный
+    квиз + экспресс): нативный лист шеринга на мобильных, копирование ссылки в буфер + тост
+    как фолбэк. Экспресс делится ссылкой на полный тест
+  - i18n: `common.share`, `express.icebreaker`, `express.shareText`, `quiz.shareText` (ru + en)
+
+### Changed
+
+- `quiz-question-card.tsx`: **тач-цели ≥ 56px** (`minH="56px"` на вариантах ответа и кнопке
+  пропуска); **оптимистичное выделение** — локальный `optimisticIndex` подсвечивает выбранный
+  вариант мгновенно (0ms lag), не дожидаясь round-trip через состояние родителя, сбрасывается
+  при смене вопроса
+- Проверено в превью: тач-цели 56–57.6px, горизонтального скролла нет (десктоп + 375px),
+  высокий контраст меняет CSS-переменные (`!important` бьёт `@layer tokens`), оптимистичная
+  подсветка < 150ms, Web Share-фолбэк без ошибок, icebreaker виден на мобильном
+
 ## [0.9.0] - 2026-07-05
 
 ### Added

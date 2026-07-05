@@ -14,6 +14,7 @@ import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { EXPRESS_RESULT_KEY } from '../_lib/storage-keys'
 import { DisclaimerConsent } from './disclaimer-consent'
 import { type ExpressAnswer, ExpressResults } from './express-results'
+import { IcebreakerCard } from './icebreaker-card'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
 
@@ -134,7 +135,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         return next
       })
     },
-    [currentQuestion]
+    [currentQuestion],
   )
 
   const handleSkip = useCallback(() => {
@@ -230,6 +231,9 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
               {t('info.time')}
             </Text>
           </VStack>
+
+          {/* Icebreaker для психологов (5.4) — разговор у стенда */}
+          <IcebreakerCard />
 
           <Box w="100%" p={4} borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.subtle" textAlign="left">
             <Text fontSize="xs" color="fg.muted">

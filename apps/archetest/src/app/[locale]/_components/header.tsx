@@ -12,6 +12,7 @@ import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 
 import { useIsPsychologist } from '@/app/_hooks/use-psychologist'
 
+import { HighContrastToggle } from './high-contrast-toggle'
 import { LanguageSwitcher } from './language-switcher'
 import { MobileDrawer } from './mobile-drawer'
 
@@ -51,24 +52,24 @@ export function Header() {
           {/* Десктоп: язык + авторизация */}
           <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
             <LanguageSwitcher />
+            <HighContrastToggle />
             <ColorModeButton />
             <UserMenu
               session={session?.user ?? null}
               onSignIn={signInWithLetarAuth}
               onSignOut={logoutAction}
               profileHref="/settings"
-              extraItems={
-                isPsychologist
-                  ? [{ value: 'cabinet', label: 'Кабинет', href: '/cabinet', icon: LuBriefcaseMedical }]
-                  : []
-              }
+              extraItems={isPsychologist
+                ? [{ value: 'cabinet', label: 'Кабинет', href: '/cabinet', icon: LuBriefcaseMedical }]
+                : []}
             />
           </HStack>
 
-          {/* Мобильный: гамбургер-меню */}
-          <Box display={{ base: 'flex', md: 'none' }}>
+          {/* Мобильный: контраст (для планшета на стенде) + гамбургер-меню */}
+          <HStack gap={1} display={{ base: 'flex', md: 'none' }}>
+            <HighContrastToggle />
             <MobileDrawer />
-          </Box>
+          </HStack>
         </HStack>
       </Container>
     </Box>

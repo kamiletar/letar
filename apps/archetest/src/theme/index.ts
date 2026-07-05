@@ -24,6 +24,20 @@ const archetestConfig = defineConfig({
   },
   globalCss: {
     ...pressableConfig.globalCss,
+    // Высококонтрастный режим (этап 5.4, outdoor/exhibition use):
+    // усиливаем приглушённый текст и границы для читаемости при ярком свете.
+    // Переключается хуком useHighContrast (атрибут data-contrast на <html>).
+    //
+    // `!important` обязателен: globalCss попадает в @layer base, а токены Chakra —
+    // в @layer tokens, который в порядке `reset,base,tokens,recipes` идёт позже и
+    // выигрывает по каскадным слоям. important-объявление бьёт нормальные в любом слое.
+    'html[data-contrast="high"]': {
+      '--chakra-colors-fg-muted': 'var(--chakra-colors-fg) !important',
+      '--chakra-colors-fg-subtle': 'var(--chakra-colors-fg) !important',
+      '--chakra-colors-border': 'var(--chakra-colors-border-emphasized) !important',
+      '--chakra-colors-border-muted': 'var(--chakra-colors-border-emphasized) !important',
+      '--chakra-colors-border-subtle': 'var(--chakra-colors-border-emphasized) !important',
+    },
   },
 })
 

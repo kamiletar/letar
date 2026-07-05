@@ -32,6 +32,14 @@ export function QuizQuestionCard({
 }: QuizQuestionCardProps) {
   const t = useTranslations('quiz')
   const [justAnswered, setJustAnswered] = useState(false)
+  // Оптимистичное выделение (5.4): подсветка выбранного варианта рендерится
+  // мгновенно на клиенте, не дожидаясь round-trip через состояние родителя.
+  const [optimisticIndex, setOptimisticIndex] = useState<number | null>(null)
+
+  // Сбрасываем оптимистичное выделение при смене вопроса
+  useEffect(() => {
+    setOptimisticIndex(null)
+  }, [questionNumber])
 
   // Авто-переход через 400ms после ответа
   useEffect(() => {
@@ -47,10 +55,12 @@ export function QuizQuestionCard({
 
   const handleSelect = useCallback(
     (originalIndex: number) => {
+      // Сначала — мгновенная локальная подсветка (0ms lag), затем ответ родителю
+      setOptimisticIndex(originalIndex)
       onAnswer(originalIndex)
       setJustAnswered(true)
     },
-    [onAnswer]
+    [onAnswer],
   )
 
   return (
@@ -66,7 +76,10 @@ export function QuizQuestionCard({
 
       <SimpleGrid columns={1} gap={3} w="100%">
         {options.map((opt) => {
-          const isSelected = selectedOption === opt.originalIndex
+          // Оптимистичное выделение имеет приоритет над ответом родителя (0ms lag)
+          const isSelected = optimisticIndex !== null
+            ? optimisticIndex === opt.originalIndex
+            : selectedOption === opt.originalIndex
           return (
             <Button
               key={opt.originalIndex}
@@ -74,6 +87,7 @@ export function QuizQuestionCard({
               variant={isSelected ? 'solid' : 'outline'}
               colorPalette={isSelected ? 'blue' : 'gray'}
               size="lg"
+              minH="56px"
               py={4}
               h="auto"
               whiteSpace="normal"
@@ -88,7 +102,8 @@ export function QuizQuestionCard({
         <Button
           data-testid="quiz-skip"
           variant="outline"
-          size="md"
+          size="lg"
+          minH="56px"
           colorPalette="gray"
           mt={2}
           onClick={() => {

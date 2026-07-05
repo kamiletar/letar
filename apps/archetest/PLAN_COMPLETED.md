@@ -1,6 +1,6 @@
 # Выполненные задачи: Archetest
 
-> **Версия:** 0.9.0 | **Обновлено:** 2026-07-05
+> **Версия:** 0.10.0 | **Обновлено:** 2026-07-05
 >
 > **Основной план:** [PLAN.md](./PLAN.md)
 
@@ -465,6 +465,54 @@
 
 - ipsative-скоринг (замена `raw / GLOBAL_MAX`) — ядро 5.6, разблокирует unit 5.8.
 - 5.6.2 «Методология» на `/for-professionals`, маппинг на валидированные инструменты.
+
+---
+
+## Сессия 2026-07-05 — Этап 5.4: Mobile-first UI для демо (v0.10.0) 📱
+
+> Полировка UX стенда на Инпсихофесте: то, что посетитель видит и трогает у планшета.
+
+### Реализовано
+
+- **Тач-цели ≥ 56px** (`quiz-question-card.tsx`): `minH="56px"` на кнопках вариантов ответа
+  и кнопке пропуска (последняя переведена `size="md"` → `size="lg"`). Без горизонтального скролла.
+- **Оптимистичное выделение (0ms lag)** (`quiz-question-card.tsx`): локальный `optimisticIndex`
+  подсвечивает выбранный вариант мгновенно, с приоритетом над `selectedOption` родителя;
+  сбрасывается эффектом при смене `questionNumber`. Прогресс-бар и так считает от `answers.size`.
+- **Высококонтрастный режим** (`_hooks/use-high-contrast.ts` + `high-contrast-toggle.tsx`):
+  кнопка `LuContrast` в шапке (десктоп + мобильный Box с гамбургером), состояние в localStorage
+  (`archetest-high-contrast`), атрибут `data-contrast="high"` на `<html>`. Оверрайды в
+  `theme/index.ts` (`globalCss`): `fg.muted`/`fg.subtle` → `fg`, границы → `border.emphasized`.
+- **Icebreaker-карточка для психологов** (`icebreaker-card.tsx`): на `/express` перед стартом —
+  «Вы психически здоровы?» + факт о когорте Данидина (~17%, Schaefer et al., 2017) с citable-
+  источником подписью. Бейдж «Для психологов», brand-subtle фон.
+- **Web Share API** (`share-result-button.tsx`, shared): на результатах полного квиза и экспресса.
+  `navigator.share` на мобильных → нативный лист; фолбэк — копирование ссылки в буфер + тост.
+  Экспресс делится ссылкой на полный тест (`fullTestUrl`).
+- i18n: `common.share.{cta,copied,error}`, `express.icebreaker.*`, `express.shareText`,
+  `quiz.shareText` (ru + en).
+
+### Найдено и исправлено (в процессе)
+
+- **`@layer`-ловушка контраста:** первая версия оверрайдов без `!important` не применялась —
+  globalCss попадает в `@layer base`, а токены Chakra в `@layer tokens`, который в порядке
+  `reset,base,tokens,recipes` идёт позже и выигрывает по каскадным слоям (специфичность роли
+  не играет). Решение: `!important` на custom-property значениях (important бьёт нормальные
+  объявления в любом слое). Диагностировано через inspect стилей в превью.
+
+### Проверка (preview, ru)
+
+- typecheck:tsgo — 0 ошибок; lint — 0 ошибок (предупреждения только в чужих prisma-скриптах).
+- Тач-цели: варианты 56–57.6px, пропуск 56px; `horizontalScroll=0` на десктопе и 375px.
+- Контраст: `data-contrast="high"` меняет `--chakra-colors-fg-muted` #A1A1AA→#FAFAFA,
+  `--chakra-colors-border` #3F3F46→#52525B; переживает reload через localStorage.
+- Оптимистичное выделение: клик по варианту → solid-blue фон < 150ms (до авто-перехода 400ms).
+- Web Share: `navigator.share` отсутствует в headless → фолбэк без исключений, консоль чистая.
+- Icebreaker виден на мобильном (375px), скриншоты десктоп-результатов + мобильного интро.
+
+### Осталось P1 в спринте
+
+- 5.7 (фест-инфраструктура: offline-PWA, лид-форма, kiosk-режим), 5.9 (геймификация 2.0).
 
 ---
 

@@ -661,7 +661,6 @@ export const buttonRecipe = defineRecipe({
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-
 <PhotoGallery
   photos={photos.map((p, i) => ({
     src: `/api/files/${slug}/${p.filename}`,
@@ -791,7 +790,9 @@ export function AppLink({ href, locale, children, borderRadius = 'md', ...props 
   return (
     <Pressable borderRadius={borderRadius} display="inline-flex">
       <Button asChild {...props}>
-        <Link href={href} locale={locale}>{children}</Link>
+        <Link href={href} locale={locale}>
+          {children}
+        </Link>
       </Button>
     </Pressable>
   )
@@ -825,9 +826,7 @@ export function AppLink({ href, locale, children, borderRadius = 'md', ...props 
 ```json
 // apps/<app>/tsconfig.json
 {
-  "references": [
-    { "path": "../../libs/ui" }
-  ]
+  "references": [{ "path": "../../libs/ui" }]
 }
 ```
 
@@ -839,3 +838,48 @@ export function AppLink({ href, locale, children, borderRadius = 'md', ...props 
 | ---------- | --------------------------------------- |
 | kami       | ✅ полностью (v0.5.0, коммит `d88d362`) |
 | aprel8008  | ✅ полностью (v0.5.0, коммит `67be325`) |
+
+## ⚠️ КРИТИЧНО — Оверрайд токенов темы через `@layer` и `!important`
+
+**Проблема:** попытка переопределить CSS-переменную токена (`--chakra-colors-fg-muted` и т.п.)
+через селектор в `globalCss` **без `!important` не срабатывает** — даже при более высокой
+специфичности селектора.
+
+**Причина:** Chakra v3 объявляет каскадные слои в порядке `reset, base, tokens, recipes`.
+`globalCss` попадает в слой `base`, а определения токенов — в слой `tokens`, который идёт
+**позже**. По правилам CSS Cascade Layers более поздний слой выигрывает у более раннего
+**независимо от специфичности**. Поэтому `tokens` перебивает `base`.
+
+**Решение:** `!important` на значении custom property — important-объявления бьют нормальные
+в любом слое:
+
+```typescript
+// theme/index.ts → defineConfig({ globalCss: { ... } })
+globalCss: {
+  // Пример: высококонтрастный режим (archetest 5.4) — атрибут на <html>
+  'html[data-contrast="high"]': {
+    '--chakra-colors-fg-muted': 'var(--chakra-colors-fg) !important',
+    '--chakra-colors-border': 'var(--chakra-colors-border-emphasized) !important',
+  },
+}
+```
+
+Переключается хуком: `document.documentElement.setAttribute('data-contrast', 'high')` +
+сохранение в localStorage (образец — `apps/archetest/src/app/_hooks/use-high-contrast.ts`).
+Тот же приём — для любого рантайм-режима темы, задаваемого атрибутом на `<html>`.
+
+> Префикс переменных — `--chakra-*` (дефолтный `cssVarsPrefix`). Проверять реальный порядок
+> слоёв и применение можно через `preview_inspect` / чтение `<style>` в превью.
+
+## Мобильные тач-цели и Web Share (фестивальный/kiosk UI)
+
+- **Тач-цели:** для часто нажимаемых элементов (варианты квиза, основные CTA) ставь
+  `minH="56px"` (не полагайся на `size="lg"` — Chakra `lg` даёт ~44px, это WCAG-минимум,
+  но мало для стресса выставки). Проверяй отсутствие горизонтального скролла:
+  `document.documentElement.scrollWidth - clientWidth === 0` на 375px.
+- **Оптимистичное выделение (0ms lag):** держи выбор в **локальном** state компонента и
+  подсвечивай с приоритетом над prop из родителя — не жди round-trip через состояние родителя.
+  Сбрасывай локальный выбор эффектом при смене элемента.
+- **Web Share API:** `navigator.share({ title, text, url })` на мобильных → нативный лист;
+  фолбэк — `navigator.clipboard.writeText(...)` + тост. `AbortError` (отмена диалога) глотать
+  молча. Образец — `apps/archetest/.../_components/share-result-button.tsx`.

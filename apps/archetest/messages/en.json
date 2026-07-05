@@ -2,7 +2,12 @@
   "common": {
     "signIn": "Sign In",
     "signOut": "Sign Out",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "share": {
+      "cta": "Share",
+      "copied": "Link copied",
+      "error": "Couldn't share"
+    }
   },
   "nav": {
     "home": "Archetest",
@@ -37,7 +42,15 @@
     "linkHint": "Your answers are sent to the server, not the scores — the profile is recomputed. XP and achievements are awarded only for account-confirmed runs.",
     "linkSuccess": "Result saved to your account",
     "linkError": "Failed to save the result. Please try again later.",
-    "retake": "Retake"
+    "retake": "Retake",
+    "shareText": "I took the express archetype test — here's my hexagram of the Light and Dark triads. Check yourself:",
+    "icebreaker": {
+      "badge": "For psychologists",
+      "title": "Two questions before you start",
+      "q1": "Are you mentally healthy?",
+      "q2": "Only ~17% of people reach midlife having never met the criteria for a mental disorder — yet almost everyone answers \"yes\". How come?",
+      "source": "Dunedin longitudinal cohort: Schaefer et al., 2017, Journal of Abnormal Psychology"
+    }
   },
   "quiz": {
     "title": "Personality Type",
@@ -52,6 +65,7 @@
     "progress": "Question {current} of {total}",
     "answered": "Answered: {count}",
     "questionLabel": "Question {number}",
+    "shareText": "I took the archetype test and discovered my 22-scale personality profile. Check yourself:",
     "finish": "Finish Test",
     "prev": "Back",
     "next": "Next",

@@ -21,6 +21,7 @@ import { needsDarkReassurance } from '../_lib/safety-net'
 import { EXPRESS_RESULT_KEY, PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 import { HexagramChart } from './hexagram-chart'
 import { DarkReassuranceNote } from './safety-net-block'
+import { ShareResultButton } from './share-result-button'
 
 /** Ответ для передачи на сервер (пересчёт баллов из ответов, не из клиентских баллов) */
 export interface ExpressAnswer {
@@ -94,9 +95,7 @@ function ScaleGroup({
       <Text fontSize="xs" fontWeight="bold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
         {title}
       </Text>
-      {codes.map((code) => (
-        <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />
-      ))}
+      {codes.map((code) => <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />)}
     </VStack>
   )
 }
@@ -209,6 +208,15 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
             {t('linkHint')}
           </Text>
         </VStack>
+
+        {/* Поделиться результатом (5.4) — ведём получателя на полный тест */}
+        <ShareResultButton
+          shareText={t('shareText')}
+          url={fullTestUrl || undefined}
+          shareTitle={t('resultsTitle')}
+          size="lg"
+          w="100%"
+        />
 
         <Button variant="ghost" size="sm" onClick={onRetake}>
           <Icon>
