@@ -5,6 +5,26 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.7.1] - 2026-07-05
+
+### Added
+
+- **Тесты ядра спринта (этап 5.8)**:
+  - `client-scoring.test.ts` — 8 unit-тестов `computeClientScores` (нормализация raw/actual_max,
+    суммирование max по вопросам, независимость шкал, игнор неизвестных id и вне-диапазонных опций)
+  - `archetest-e2e/src/express.spec.ts` — 2 E2E (Playwright): полный гостевой флоу
+    intro → 24 вопроса → гексаграмма с QR и CTA; сохранение результата в localStorage и
+    восстановление после перезагрузки. Прогон chromium — 2 passed
+  - `data-testid` (`quiz-option`, `quiz-skip`) на кнопках `QuizQuestionCard` — стабильные
+    селекторы для E2E (пригодятся и E2E полного квиза, Фаза 4)
+  - `archetest-e2e/playwright.config.ts` адаптирован под archetest: порт 3012, имя nx-проекта,
+    `BASE_URL` управляет и `webServer.url` (прогон против уже поднятого сервера при коллизии порта)
+
+### Notes
+
+- Обновлён статус этапа 5.8 в PLAN: кросс-правила уже покрыты (`interpretation-rules.test.ts`);
+  ipsative-скоринг и E2E-согласие заблокированы нереализованными фичами (5.6 / 5.6.3).
+
 ## [0.7.0] - 2026-07-05
 
 ### Added

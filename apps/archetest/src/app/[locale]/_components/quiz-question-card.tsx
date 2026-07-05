@@ -70,6 +70,7 @@ export function QuizQuestionCard({
           return (
             <Button
               key={opt.originalIndex}
+              data-testid="quiz-option"
               variant={isSelected ? 'solid' : 'outline'}
               colorPalette={isSelected ? 'blue' : 'gray'}
               size="lg"
@@ -85,6 +86,7 @@ export function QuizQuestionCard({
           )
         })}
         <Button
+          data-testid="quiz-skip"
           variant="outline"
           size="md"
           colorPalette="gray"

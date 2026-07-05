@@ -3,7 +3,7 @@ import { nxE2EPreset } from '@nx/playwright/preset'
 import { defineConfig, devices } from '@playwright/test'
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:3000'
+const baseURL = process.env['BASE_URL'] || 'http://localhost:3012'
 
 /**
  * Read environment variables from file.
@@ -22,12 +22,15 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+     url привязан к baseURL — задай BASE_URL, чтобы прогнать против уже
+     запущенного сервера (напр. на другом порту при коллизии на 3012). */
   webServer: {
-    command: 'bun nx run @letar/archetest:dev',
-    url: 'http://localhost:3000',
+    command: 'bun nx run archetest:dev',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
+    timeout: 180_000,
   },
   projects: [
     {
