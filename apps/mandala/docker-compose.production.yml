@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: mandala-postgres
+    container_name: mandala-db
     restart: always
     environment:
       TZ: Europe/Moscow
@@ -35,7 +35,7 @@ services:
       FORCE_COLOR: '1'
       NODE_ENV: production
       PORT: 3004
-      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD:-lena_password}@mandala-postgres:5432/mandala?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD:-lena_password}@mandala-db:5432/mandala?schema=public}
       NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3004}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3004}
 

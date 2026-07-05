@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: auth-hub-postgres
+    container_name: auth-hub-db
     restart: always
     environment:
       TZ: Europe/Moscow
@@ -35,7 +35,7 @@ services:
       TZ: Europe/Moscow
       FORCE_COLOR: '1'
       NODE_ENV: production
-      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD}@auth-hub-postgres:5432/lena_auth
+      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD}@auth-hub-db:5432/lena_auth
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: https://auth.letar.best
       # At-rest шифрование clientSecret + токенов (Этап 8) — обязателен в production (db.ts)

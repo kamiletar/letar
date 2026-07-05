@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: umami-postgres
+    container_name: umami-db
     restart: always
     environment:
       TZ: Europe/Moscow
@@ -28,7 +28,7 @@ services:
       - '3009:3000'
     environment:
       TZ: Europe/Moscow
-      DATABASE_URL: postgresql://umami_user:${DB_PASSWORD}@umami-postgres:5432/umami
+      DATABASE_URL: postgresql://umami_user:${DB_PASSWORD}@umami-db:5432/umami
       DATABASE_TYPE: postgresql
       APP_SECRET: ${APP_SECRET}
       TRACKER_SCRIPT_NAME: ${TRACKER_SCRIPT_NAME:-script}
