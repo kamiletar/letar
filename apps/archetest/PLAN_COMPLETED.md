@@ -516,4 +516,36 @@
 
 ---
 
+## Сессия 2026-07-05 — Липкая CTA: системный фикс «кнопка под фолдом» (v0.11.0) 📌
+
+> Обратная связь Kami: основная CTA уходит под фолд на длинных интро — воспроизводится
+> во всех приложениях. Нужен не костыль, а системное решение в монорепо.
+
+### Реализовано
+
+- **Shared-примитивы в `@letar/ui` (v0.6.0 → 0.7.0):**
+  - `StickyActionBar` (`libs/ui/src/lib/sticky-action-bar.tsx`) — липкая панель действия внизу
+    (`position: sticky; bottom: 0`, `safe-area-inset-bottom`, тень+граница сверху).
+  - `useScrollGate` (`libs/ui/src/lib/use-scroll-gate.ts`) — гейт «прочитай до конца»
+    (IntersectionObserver + `sentinelRef`); `enabled: false` отключает гейт.
+  - Экспорт из barrel, README-секции, попутно curly-фикс `build-version.tsx` (lint-блокер).
+- **Применено в archetest:** `express-container.tsx` (интро экспресса) и `quiz-intro.tsx`
+  (интро полного квиза) — кнопки вынесены в `StickyActionBar`, `useScrollGate` по согласию;
+  контейнер `pt={16} pb={0}`, контентный VStack `pb={8}`, sentinel в конце.
+
+### Проверка (preview)
+
+- Десктоп + 375px: CTA видна без скролла (`visibleNoScroll: true`; на мобильном `btnBottom`
+  800 из 812 с safe-area), `horizontalScroll=0`, disabled до согласия, enabled после
+  согласия+скролла; консоль чистая. Скриншоты десктоп/мобильный.
+- typecheck:tsgo + lint (ui и archetest) — 0 ошибок.
+
+### Системная часть
+
+- Паттерн + правила → `.claude/docs/ui-components.md` («Основная CTA не должна уходить под фолд»).
+- Бродкаст api-change в agent-mail. Фоновая задача на раскатку по aboi/dsperevod/studio/
+  driving-school и др. (запущена отдельной сессией). Коммит `4cec46f`.
+
+---
+
 **Последнее обновление:** 2026-07-05
