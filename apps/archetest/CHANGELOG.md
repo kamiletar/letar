@@ -5,6 +5,20 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.14.1] - 2026-07-06
+
+### Added
+
+- **E2E: mood check-in (этап 5.8)** — `archetest-e2e/src/mood-check-in.spec.ts` (2 теста):
+  интро полного квиза → согласие 152-ФЗ → mood check-in (сетка 3×3) → выбор ячейки/«Пропустить»
+  → первый вопрос квиза. Гостевой доступ, без авторизации. Прогон chromium: 4/4 passed
+  (вместе с существующими 2 express-тестами)
+
+### Fixed
+
+- Стейл-заметка в PLAN.md «экран согласия 152-ФЗ ещё не готов» для E2E safety-net — 5.6.3
+  завершён давно, экран согласия покрыт mood-check-in.spec.ts
+
 ## [0.14.0] - 2026-07-06
 
 ### Added
