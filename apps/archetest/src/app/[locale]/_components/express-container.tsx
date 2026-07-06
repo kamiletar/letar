@@ -2,6 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { Box, Button, Container, Heading, Icon, Text, VStack } from '@chakra-ui/react'
+import { StickyActionBar, useScrollGate } from '@letar/ui'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuHexagon, LuTimer } from 'react-icons/lu'
@@ -46,6 +47,8 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   const [state, setState] = useState<ExpressState>('intro')
   // Информированное согласие (5.6.3) — гость, хранение только в localStorage
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
+  // Scroll-гейт интро: пока согласие не дано — CTA disabled, пока не прочитан весь текст (5.4)
+  const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !disclaimerAccepted })
   const [seed, setSeed] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Map<string, number>>(new Map())
@@ -212,8 +215,8 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   // INTRO
   if (state === 'intro') {
     return (
-      <Container maxW="lg" py={16}>
-        <VStack gap={8} textAlign="center">
+      <Container maxW="lg" pt={16} pb={0}>
+        <VStack gap={8} textAlign="center" pb={8}>
           <Icon fontSize="64px" color="purple.500">
             <LuHexagon />
           </Icon>
@@ -246,10 +249,23 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
             <DisclaimerConsent accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />
           )}
 
-          <Button size="lg" colorPalette="purple" onClick={handleStart} disabled={!disclaimerAccepted}>
+          {/* Маркер конца контента для scroll-гейта (юзер должен всё прочитать) */}
+          <Box ref={sentinelRef} aria-hidden h="1px" w="100%" />
+        </VStack>
+
+        {/* Липкая CTA — всегда видна, disabled пока не прочитано и не дано согласие */}
+        <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
+          <Button
+            size="lg"
+            colorPalette="purple"
+            w={{ base: '100%', sm: 'auto' }}
+            minW={{ sm: '14rem' }}
+            onClick={handleStart}
+            disabled={!disclaimerAccepted || !reachedEnd}
+          >
             {t('start')}
           </Button>
-        </VStack>
+        </StickyActionBar>
       </Container>
     )
   }

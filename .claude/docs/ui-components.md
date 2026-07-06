@@ -883,3 +883,50 @@ globalCss: {
 - **Web Share API:** `navigator.share({ title, text, url })` на мобильных → нативный лист;
   фолбэк — `navigator.clipboard.writeText(...)` + тост. `AbortError` (отмена диалога) глотать
   молча. Образец — `apps/archetest/.../_components/share-result-button.tsx`.
+
+## ⭐ Основная CTA не должна уходить под фолд — `StickyActionBar` + `useScrollGate`
+
+**Системная проблема (воспроизводится во всех приложениях):** на длинных интро/формах
+основная кнопка действия («Начать тест», «Отправить», «Продолжить») оказывается ниже
+фолда, и её не видно без скролла — пользователь думает, что действия нет.
+
+**Решение — shared-примитивы из `@letar/ui`:**
+
+```tsx
+import { StickyActionBar, useScrollGate } from '@letar/ui'
+
+// 1) Всегда видимая CTA (минимум — просто оберни кнопку)
+<StickyActionBar>
+  <Button colorPalette="brand" size="lg" onClick={onSubmit}>Отправить</Button>
+</StickyActionBar>
+
+// 2) + гейт «прочитай до конца» (согласия, условия, дисклеймеры)
+const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
+<Container pt={16} pb={0}>
+  <VStack pb={8}>
+    …контент…
+    <Box ref={sentinelRef} aria-hidden h="1px" w="100%" />
+  </VStack>
+  <StickyActionBar>
+    <Button disabled={!reachedEnd} onClick={onSubmit}>Далее</Button>
+  </StickyActionBar>
+</Container>
+```
+
+**Правила применения:**
+
+- `StickyActionBar` — **последний ребёнок** прокручиваемого контейнера (не внутри `VStack`
+  с контентом, а рядом). Sticky ломается, если у любого предка `overflow` ≠ `visible`.
+- Контейнер: `pt={16} pb={0}`, у контентного `VStack` — `pb={8}` (панель добавит свой отступ
+  снизу + `safe-area-inset-bottom`).
+- Полноширинная панель в узком `Container`: `mx={{ base: -4, md: 0 }}` для bleed к краям.
+- **Когда гейтить скроллом:** если экран требует прочтения (согласие/условия). Если есть
+  чекбокс согласия внизу контента — он уже вынуждает доскроллить, гейт с ним совпадает
+  (`enabled: !consentGiven` отключает гейт после согласия). Для чисто информационных
+  экранов с одной CTA `useScrollGate` — единственный гейт.
+- Кнопка внутри: `w={{ base: '100%', sm: 'auto' }} minW={{ sm: '14rem' }}` — на мобильном
+  во всю ширину, на десктопе — компактная по центру.
+
+Образец: `apps/archetest/.../_components/express-container.tsx` и `quiz-intro.tsx`.
+Другие приложения с длинными интро/формами (aboi, dsperevod, studio, driving-school …)
+следует перевести на этот паттерн вместо инлайновой кнопки в конце контента.

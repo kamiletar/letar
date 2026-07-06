@@ -5,6 +5,26 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.11.0] - 2026-07-05
+
+### Added
+
+- **Липкая основная CTA на интро (системный фикс «кнопка под фолдом»)** — основная кнопка
+  (`Начать экспресс` / `Начать тест`) больше не уходит под скролл, всегда видна:
+  - Использует новые shared-примитивы `StickyActionBar` + `useScrollGate` из `@letar/ui@0.7.0`
+  - `express-container.tsx` (интро экспресса) и `quiz-intro.tsx` (интро полного квиза):
+    кнопки вынесены в `StickyActionBar` (последний ребёнок контейнера, `position: sticky`,
+    `safe-area-inset-bottom`), контент — в прокручиваемом `VStack` с маркером-`sentinel` в конце
+  - `useScrollGate({ enabled: !disclaimerAccepted })` — CTA `disabled`, пока не дано согласие
+    (чекбокс внизу контента уже вынуждает доскроллить; для returning-visitor с согласием гейт
+    выключен, кнопка сразу активна и видна)
+
+### Changed
+
+- Проверено в превью (десктоп + 375px): CTA видна без скролла (`visibleNoScroll: true`,
+  на мобильном `btnBottom` 800 из 812 с safe-area), горизонтального скролла нет,
+  disabled до согласия, после согласия+скролла — enabled; консоль чистая
+
 ## [0.10.0] - 2026-07-05
 
 ### Added

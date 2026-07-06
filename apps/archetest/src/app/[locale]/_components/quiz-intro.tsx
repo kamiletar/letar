@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, Container, Heading, HStack, Progress, Text, VStack } from '@chakra-ui/react'
+import { StickyActionBar, useScrollGate } from '@letar/ui'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { LuBrain, LuChartNoAxesCombined, LuTrendingUp } from 'react-icons/lu'
@@ -25,6 +26,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   const locale = useLocale()
   const isRu = locale === 'ru'
   const [showProfile, setShowProfile] = useState(false)
+  // Scroll-гейт интро (5.4): CTA disabled, пока не прочитан весь текст и не дано согласие
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
     // Приоритет: сервер (БД) → localStorage
     if (initialDisclaimerAccepted) {
@@ -46,6 +48,9 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
       })
     }
   }, [disclaimerAccepted])
+
+  // Scroll-гейт: пока согласие не дано — CTA включается только после прочтения текста (5.4)
+  const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !disclaimerAccepted })
 
   const hasProgress = progress && progress.totalAnswered > 0
   const hasCumulativeScores = progress?.cumulativeScores !== null && progress?.cumulativeScores !== undefined
@@ -72,8 +77,8 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   }, [progress])
 
   return (
-    <Container maxW={showProfile ? '6xl' : '2xl'} py={16}>
-      <VStack gap={8} textAlign="center">
+    <Container maxW={showProfile ? '6xl' : '2xl'} pt={16} pb={0}>
+      <VStack gap={8} textAlign="center" pb={8}>
         <LuBrain size={64} />
         <Heading size="2xl">{t('title')}</Heading>
         <Text fontSize="lg" color="fg.muted" maxW="lg">
@@ -106,19 +111,23 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                 </Progress.Track>
               </Progress.Root>
 
-              {progress!.availableCount > 0 ? (
-                <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `Доступно ещё ${
+              {progress!.availableCount > 0
+                ? (
+                  <Text fontSize="xs" color="fg.muted">
+                    {isRu
+                      ? `Доступно ещё ${
                         progress!.availableCount
                       } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                    : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
-                </Text>
-              ) : (
-                <Text fontSize="xs" color="green.500" fontWeight="bold">
-                  {isRu ? '🎉 Вы ответили на все доступные вопросы!' : '🎉 You have answered all available questions!'}
-                </Text>
-              )}
+                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                  </Text>
+                )
+                : (
+                  <Text fontSize="xs" color="green.500" fontWeight="bold">
+                    {isRu
+                      ? '🎉 Вы ответили на все доступные вопросы!'
+                      : '🎉 You have answered all available questions!'}
+                  </Text>
+                )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">
@@ -148,18 +157,6 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
           <DisclaimerConsent accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
         )}
 
-        <HStack gap={3}>
-          <Button size="lg" colorPalette="blue" onClick={onStart} disabled={!disclaimerAccepted}>
-            {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
-          </Button>
-          {hasCumulativeScores && (
-            <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
-              <LuChartNoAxesCombined />
-              {t('myProfile')}
-            </Button>
-          )}
-        </HStack>
-
         {/* Накопительный профиль */}
         {showProfile && chartData && (
           <VStack gap={8} w="100%">
@@ -184,7 +181,30 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
             )}
           </VStack>
         )}
+
+        {/* Маркер конца контента для scroll-гейта (5.4) */}
+        <Box ref={sentinelRef} aria-hidden h="1px" w="100%" />
       </VStack>
+
+      {/* Липкая CTA — всегда видна; старт disabled пока не прочитано и не дано согласие (5.4) */}
+      <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
+        <Button
+          size="lg"
+          colorPalette="blue"
+          w={{ base: '100%', sm: 'auto' }}
+          minW={{ sm: '14rem' }}
+          onClick={onStart}
+          disabled={!disclaimerAccepted || !reachedEnd}
+        >
+          {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
+        </Button>
+        {hasCumulativeScores && (
+          <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
+            <LuChartNoAxesCombined />
+            {t('myProfile')}
+          </Button>
+        )}
+      </StickyActionBar>
     </Container>
   )
 }

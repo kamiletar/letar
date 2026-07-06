@@ -23,7 +23,9 @@ export interface BuildVersionProps extends Omit<TextProps, 'children'> {
  * Если версия не передана — не рендерится.
  */
 export function BuildVersion({ version, fontSize = 'xs', color = 'fg.muted', ...props }: BuildVersionProps) {
-  if (!version) return null
+  if (!version) {
+    return null
+  }
   return (
     <Text fontSize={fontSize} color={color} {...props}>
       v{version}

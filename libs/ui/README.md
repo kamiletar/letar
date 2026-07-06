@@ -18,7 +18,7 @@ import { ConfirmDialog, RatingStars, TopLoader } from '@letar/ui'
 
 ```tsx
 import { TopLoader } from '@letar/ui'
-;<TopLoader />
+<TopLoader />
 ```
 
 ### ConfirmDialog
@@ -27,7 +27,7 @@ import { TopLoader } from '@letar/ui'
 
 ```tsx
 import { ConfirmDialog } from '@letar/ui'
-;<ConfirmDialog
+<ConfirmDialog
   open={isOpen}
   onOpenChange={setIsOpen}
   title="Удалить запись?"
@@ -56,7 +56,7 @@ import { RatingDisplay, RatingStars } from '@letar/ui'
 
 ```tsx
 import { FilterField, FilterPanel, FilterRow } from '@letar/ui'
-;<FilterPanel>
+<FilterPanel>
   <FilterRow>
     <FilterField name="status" label="Статус">
       <Select options={statusOptions} />
@@ -82,7 +82,7 @@ import { RoleStat, StatCard } from '@letar/ui'
 
 ```tsx
 import { OptimizedAvatar } from '@letar/ui'
-;<OptimizedAvatar src="/avatar.jpg" name="Иван" />
+<OptimizedAvatar src="/avatar.jpg" name="Иван" />
 ```
 
 ### ReviewCard
@@ -91,7 +91,34 @@ import { OptimizedAvatar } from '@letar/ui'
 
 ```tsx
 import { ReviewCard } from '@letar/ui'
-;<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
+<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
+```
+
+### StickyActionBar
+
+Липкая панель основного действия внизу экрана. Решает системную проблему: основная
+CTA («Начать», «Отправить», «Продолжить») уходит под фолд на длинных интро/формах и не
+видна без скролла. `position: sticky; bottom: 0` держит её всегда на виду; учитывает
+`safe-area-inset-bottom` (home-indicator iOS).
+
+⚠️ Размещай как **последний ребёнок** прокручиваемого контейнера. Sticky ломается, если
+у любого предка задан `overflow` (кроме `visible`).
+
+```tsx
+import { StickyActionBar, useScrollGate } from '@letar/ui' // Простой случай — всегда видимая CTA
+<StickyActionBar>
+  <Button colorPalette="brand" size="lg" onClick={onStart}>Начать</Button>
+</StickyActionBar>
+
+// С гейтом «прочитай до конца»
+const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
+<>
+  <LongContent />
+  <Box ref={sentinelRef} aria-hidden h="1px" />
+  <StickyActionBar>
+    <Button disabled={!reachedEnd} onClick={onStart}>Начать</Button>
+  </StickyActionBar>
+</>
 ```
 
 ## Хуки
@@ -104,6 +131,20 @@ import { ReviewCard } from '@letar/ui'
 import { useServiceWorker } from '@letar/ui'
 
 const { registration, updateAvailable, update } = useServiceWorker()
+```
+
+### useScrollGate
+
+Гейт «прочитай до конца перед действием». Наблюдает за маркером-`sentinel` в конце
+контента через IntersectionObserver: как только маркер показался — `reachedEnd`
+становится `true` навсегда. Если контент короче экрана — гейт открывается сразу.
+`enabled: false` отключает гейт (например, когда согласие уже дано). См. пример в
+[StickyActionBar](#stickyactionbar).
+
+```tsx
+import { useScrollGate } from '@letar/ui'
+
+const { sentinelRef, reachedEnd } = useScrollGate({ enabled: true })
 ```
 
 ### useUrlFilters
