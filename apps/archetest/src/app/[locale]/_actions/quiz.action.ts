@@ -97,6 +97,19 @@ function getScaleLevel(normalized: number): ScaleLevel {
   return 'extreme'
 }
 
+/**
+ * Достоверность всех шкал по кумулятивному набору отвеченных вопросов (этап 5.9.4,
+ * ачивка «Полная карта»). Используется achievements.action.ts — там нет доступа
+ * к perQuestionMax/totalRelevantByScale напрямую.
+ */
+export async function getCumulativeConfidence(answeredSortOrders: number[]): Promise<Record<string, ScaleConfidence>> {
+  const result: Record<string, ScaleConfidence> = {}
+  for (const code of ALL_SCALE_CODES) {
+    result[code] = getScaleConfidence(code, answeredSortOrders)
+  }
+  return result
+}
+
 /** Определить достоверность шкалы по числу пройденных релевантных вопросов */
 function getScaleConfidence(scale: string, answeredSortOrders: number[]): ScaleConfidence {
   let relevant = 0

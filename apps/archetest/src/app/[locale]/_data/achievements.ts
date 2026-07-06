@@ -1,5 +1,5 @@
 /** Категория достижения */
-export type AchievementCategory = 'sessions' | 'answers' | 'results' | 'special'
+export type AchievementCategory = 'sessions' | 'answers' | 'results' | 'special' | 'rhythm'
 
 /** Определение достижения */
 export interface AchievementDef {
@@ -162,6 +162,48 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     descriptionEn: 'Take the test between 5 AM and 7 AM',
     xpReward: 50,
   },
+
+  // --- Ритм (этап 5.9.4): XP за глубину самопознания, не за объём ---
+  {
+    code: 'THREE_MOODS',
+    category: 'rhythm',
+    icon: '🎭',
+    label: 'Три настроения',
+    labelEn: 'Three Moods',
+    description: 'Пройдите тест в 3 разных состояниях (mood check-in)',
+    descriptionEn: 'Take the test in 3 different moods (mood check-in)',
+    xpReward: 150,
+  },
+  {
+    code: 'RETURN_30',
+    category: 'rhythm',
+    icon: '🔁',
+    label: 'Возвращение',
+    labelEn: 'Return',
+    description: 'Пройдите тест снова через 30+ дней',
+    descriptionEn: 'Retake the test after 30+ days',
+    xpReward: 150,
+  },
+  {
+    code: 'SPACING_SERIES',
+    category: 'rhythm',
+    icon: '📅',
+    label: 'Спейсинг-серия',
+    labelEn: 'Spacing Series',
+    description: '4 сессии подряд с интервалом от недели',
+    descriptionEn: '4 consecutive sessions spaced a week or more apart',
+    xpReward: 250,
+  },
+  {
+    code: 'FULL_MAP',
+    category: 'rhythm',
+    icon: '🗺️',
+    label: 'Полная карта',
+    labelEn: 'Full Map',
+    description: 'Все шкалы достигли высокой достоверности',
+    descriptionEn: 'All scales reached high confidence',
+    xpReward: 300,
+  },
 ]
 
 /** Быстрый поиск достижения по коду */
@@ -171,4 +213,4 @@ export const ACHIEVEMENTS_MAP = new Map(ACHIEVEMENTS.map((a) => [a.code, a]))
 export const ACHIEVEMENT_CODES = ACHIEVEMENTS.map((a) => a.code)
 
 /** Все категории достижений */
-export const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = ['sessions', 'answers', 'results', 'special']
+export const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = ['sessions', 'answers', 'results', 'special', 'rhythm']

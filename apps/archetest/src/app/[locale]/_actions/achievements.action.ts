@@ -1,14 +1,70 @@
 import { prisma } from '@/lib/db'
 import { ACHIEVEMENTS, ACHIEVEMENTS_MAP } from '../_data/achievements'
+import { ALL_SCALE_CODES } from '../_data/personality-types'
+import { getCumulativeConfidence } from './quiz.action'
+
+/** Одна сессия для проверки достижений (моменты времени, mood, скоринг) */
+interface AchievementSession {
+  scores: string | null
+  answeredCount: number
+  completedAt: Date | null
+  createdAt: Date
+  moodValence: number | null
+  moodEnergy: number | null
+}
 
 /** Контекст для проверки достижений */
 interface AchievementContext {
   sessionsCount: number
   totalAnswers: number
   currentScores: Record<string, number>
-  allSessions: { scores: string | null; answeredCount: number; completedAt: Date | null; createdAt: Date }[]
+  allSessions: AchievementSession[]
   existingAchievements: string[]
   completedAt: Date
+  /** Достоверность по кумулятивному набору ВСЕХ отвеченных вопросов пользователя (5.9.4) */
+  cumulativeConfidence: Record<string, string>
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Число различных пар (валентность, энергия) mood check-in среди сессий (5.9.4) */
+function countDistinctMoods(sessions: AchievementSession[]): number {
+  const set = new Set<string>()
+  for (const s of sessions) {
+    if (s.moodValence && s.moodEnergy) {
+      set.add(`${s.moodValence}-${s.moodEnergy}`)
+    }
+  }
+  return set.size
+}
+
+/** Есть ли пара последовательных сессий с разрывом ≥ minDays (5.9.4 RETURN_30) */
+function hasGapOfAtLeast(sessionsAsc: AchievementSession[], minDays: number): boolean {
+  for (let i = 1; i < sessionsAsc.length; i++) {
+    const gapMs = sessionsAsc[i].createdAt.getTime() - sessionsAsc[i - 1].createdAt.getTime()
+    if (gapMs >= minDays * DAY_MS) {
+      return true
+    }
+  }
+  return false
+}
+
+/** Есть ли окно из 4 сессий подряд, где каждый соседний разрыв ≥ minDays (5.9.4 SPACING_SERIES) */
+function hasSpacingSeries(sessionsAsc: AchievementSession[], windowSize: number, minDays: number): boolean {
+  for (let start = 0; start + windowSize <= sessionsAsc.length; start++) {
+    let ok = true
+    for (let i = start + 1; i < start + windowSize; i++) {
+      const gapMs = sessionsAsc[i].createdAt.getTime() - sessionsAsc[i - 1].createdAt.getTime()
+      if (gapMs < minDays * DAY_MS) {
+        ok = false
+        break
+      }
+    }
+    if (ok) {
+      return true
+    }
+  }
+  return false
 }
 
 /** Получить топ-тип по нормализованным баллам */
@@ -111,6 +167,20 @@ function checkAchievement(code: string, ctx: AchievementContext): boolean {
       return hour >= 5 && hour < 7
     }
 
+    // Ритм (5.9.4)
+    case 'THREE_MOODS':
+      return countDistinctMoods(ctx.allSessions) >= 3
+    case 'RETURN_30': {
+      const sessionsAsc = [...ctx.allSessions].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      return hasGapOfAtLeast(sessionsAsc, 30)
+    }
+    case 'SPACING_SERIES': {
+      const sessionsAsc = [...ctx.allSessions].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      return hasSpacingSeries(sessionsAsc, 4, 7)
+    }
+    case 'FULL_MAP':
+      return ALL_SCALE_CODES.every((code) => ctx.cumulativeConfidence[code] === 'high')
+
     default:
       return false
   }
@@ -130,20 +200,37 @@ export async function checkAndAwardAchievements(
   },
 ): Promise<string[]> {
   // Загружаем контекст
-  const [allSessions, existingAchievements] = await Promise.all([
+  const [allSessions, existingAchievements, uniqueAnsweredQuestions] = await Promise.all([
     prisma.quizSession.findMany({
       where: { userId, completedAt: { not: null } },
-      select: { scores: true, answeredCount: true, completedAt: true, createdAt: true },
+      select: {
+        scores: true,
+        answeredCount: true,
+        completedAt: true,
+        createdAt: true,
+        moodValence: true,
+        moodEnergy: true,
+      },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.userQuizAchievement.findMany({
       where: { userId },
       select: { achievementCode: true },
     }),
+    // Уникальные отвеченные вопросы по ВСЕМ сессиям — для кумулятивной достоверности (FULL_MAP)
+    prisma.quizAnswer.findMany({
+      where: { session: { userId } },
+      select: { question: { select: { sortOrder: true } } },
+      distinct: ['questionId'],
+    }),
   ])
 
   const existingCodes = new Set(existingAchievements.map((a) => a.achievementCode))
   const totalAnswers = allSessions.reduce((sum, s) => sum + s.answeredCount, 0)
+  const answeredSortOrders = uniqueAnsweredQuestions
+    .map((a) => a.question?.sortOrder)
+    .filter((so): so is number => so !== undefined && so !== null)
+  const cumulativeConfidence = await getCumulativeConfidence(answeredSortOrders)
 
   const ctx: AchievementContext = {
     sessionsCount: allSessions.length,
@@ -152,6 +239,7 @@ export async function checkAndAwardAchievements(
     allSessions,
     existingAchievements: [...existingCodes],
     completedAt: newSession.completedAt,
+    cumulativeConfidence,
   }
 
   // Проверяем все ещё не разблокированные достижения

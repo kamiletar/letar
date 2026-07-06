@@ -21,7 +21,7 @@ export function AchievementGrid({ unlockedCodes, unlockedDates }: AchievementGri
     for (const cat of ACHIEVEMENT_CATEGORIES) {
       map.set(
         cat,
-        ACHIEVEMENTS.filter((a) => a.category === cat)
+        ACHIEVEMENTS.filter((a) => a.category === cat),
       )
     }
     return map
@@ -32,6 +32,7 @@ export function AchievementGrid({ unlockedCodes, unlockedDates }: AchievementGri
     answers: t('categories.answers'),
     results: t('categories.results'),
     special: t('categories.special'),
+    rhythm: t('categories.rhythm'),
   }
 
   return (
