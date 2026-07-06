@@ -4,44 +4,9 @@ import { prisma } from '@/lib/db'
 import { ACHIEVEMENTS_MAP } from '../_data/achievements'
 import { calculateXp, getRankByXp } from '../_data/ranks'
 
-/** Запись лидерборда для клиента */
-export interface LeaderboardEntry {
-  userId: string
-  name: string
-  image: string | null
-  sessionsCount: number
-  achievementsCount: number
-  totalAnswers: number
-  xp: number
-  rankCode: string
-}
-
-/** Получить лидерборд (публичный) */
-export async function getLeaderboardAction(params?: { limit?: number }): Promise<LeaderboardEntry[]> {
-  const limit = params?.limit ?? 50
-
-  const entries = await prisma.quizLeaderboardEntry.findMany({
-    take: limit,
-    orderBy: { xp: 'desc' },
-    include: {
-      user: { select: { id: true, name: true, image: true } },
-    },
-  })
-
-  return entries.map((e) => ({
-    userId: e.userId,
-    name: e.user.name ?? '',
-    image: e.user.image,
-    sessionsCount: e.sessionsCount,
-    achievementsCount: e.achievementsCount,
-    totalAnswers: e.totalAnswers,
-    xp: e.xp,
-    rankCode: e.rankCode,
-  }))
-}
-
 /**
- * Пересчитать запись лидерборда для пользователя.
+ * Пересчитать кэш-запись (QuizLeaderboardEntry) для пользователя.
+ * Соревновательный UI выпилен (этап 5.9.1), но кэш сохраняется в БД для Фазы 3.
  * Вызывается из submitQuizAction (внутренняя функция).
  * Использует raw prisma для upsert (@@deny на enhanced).
  */
@@ -65,7 +30,7 @@ export async function recalcLeaderboardEntry(userId: string): Promise<{ rankCode
     return sum + (def?.xpReward ?? 0)
   }, 0)
 
-  const xp = calculateXp(sessionsCount, totalAnswers, achievementXpSum)
+  const xp = calculateXp(sessionsCount, achievementXpSum)
   const rank = getRankByXp(xp)
 
   await prisma.quizLeaderboardEntry.upsert({

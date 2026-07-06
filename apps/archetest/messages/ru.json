@@ -12,7 +12,6 @@
   "nav": {
     "home": "Архетест",
     "express": "Экспресс",
-    "leaderboard": "Лидерборд",
     "forProfessionals": "Для специалистов",
     "cabinet": "Кабинет",
     "settings": "Настройки",
@@ -122,18 +121,6 @@
         "MASTER": "Мастер",
         "GURU": "Гуру"
       }
-    },
-    "leaderboard": {
-      "title": "Таблица лидеров",
-      "description": "Рейтинг участников квиза «Тип характера»",
-      "position": "#",
-      "name": "Участник",
-      "rank": "Ранг",
-      "sessions": "Сессии",
-      "achievementsCount": "Достижения",
-      "xp": "Опыт",
-      "empty": "Пока никто не прошёл квиз",
-      "you": "Вы"
     }
   },
   "cabinet": {

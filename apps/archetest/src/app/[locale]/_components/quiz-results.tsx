@@ -292,15 +292,6 @@ export function QuizResults({
           </Box>
         )}
 
-        {/* Ссылки */}
-        {rankInfo && (
-          <HStack gap={4}>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/quiz/leaderboard">{t('leaderboard.title')}</Link>
-            </Button>
-          </HStack>
-        )}
-
         {/* Баннер для незалогиненных — предложение сохранить результаты */}
         {!isAuthenticated && (
           <Box w="100%" p={6} borderRadius="lg" bg="bg.subtle" borderWidth="1px" borderColor="border">

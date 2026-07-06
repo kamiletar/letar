@@ -9,7 +9,6 @@ interface AchievementContext {
   allSessions: { scores: string | null; answeredCount: number; completedAt: Date | null; createdAt: Date }[]
   existingAchievements: string[]
   completedAt: Date
-  sessionDurationMs: number
 }
 
 /** Получить топ-тип по нормализованным баллам */
@@ -62,8 +61,6 @@ function checkAchievement(code: string, ctx: AchievementContext): boolean {
     // Ответы
     case 'FULL_QUIZ':
       return ctx.allSessions.some((s) => s.answeredCount === 50)
-    case 'SPEED_DEMON':
-      return ctx.sessionDurationMs > 0 && ctx.sessionDurationMs < 5 * 60 * 1000
     case 'TOTAL_500':
       return ctx.totalAnswers >= 500
     case 'TOTAL_1000':
@@ -130,8 +127,7 @@ export async function checkAndAwardAchievements(
     answeredCount: number
     scores: Record<string, number>
     completedAt: Date
-    createdAt: Date
-  }
+  },
 ): Promise<string[]> {
   // Загружаем контекст
   const [allSessions, existingAchievements] = await Promise.all([
@@ -149,9 +145,6 @@ export async function checkAndAwardAchievements(
   const existingCodes = new Set(existingAchievements.map((a) => a.achievementCode))
   const totalAnswers = allSessions.reduce((sum, s) => sum + s.answeredCount, 0)
 
-  // Длительность текущей сессии
-  const sessionDurationMs = newSession.completedAt.getTime() - newSession.createdAt.getTime()
-
   const ctx: AchievementContext = {
     sessionsCount: allSessions.length,
     totalAnswers,
@@ -159,7 +152,6 @@ export async function checkAndAwardAchievements(
     allSessions,
     existingAchievements: [...existingCodes],
     completedAt: newSession.completedAt,
-    sessionDurationMs,
   }
 
   // Проверяем все ещё не разблокированные достижения
@@ -180,7 +172,7 @@ export async function checkAndAwardAchievements(
         prisma.userQuizAchievement.create({
           data: { userId, achievementCode: code },
         })
-      )
+      ),
     )
   }
 

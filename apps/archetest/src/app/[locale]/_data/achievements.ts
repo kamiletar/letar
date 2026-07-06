@@ -79,16 +79,6 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     xpReward: 100,
   },
   {
-    code: 'SPEED_DEMON',
-    category: 'answers',
-    icon: '⚡',
-    label: 'Молниеносный',
-    labelEn: 'Speed Demon',
-    description: 'Завершите квиз менее чем за 5 минут',
-    descriptionEn: 'Complete the quiz in under 5 minutes',
-    xpReward: 75,
-  },
-  {
     code: 'TOTAL_500',
     category: 'answers',
     icon: '📊',

@@ -12,7 +12,6 @@
   "nav": {
     "home": "Archetest",
     "express": "Express",
-    "leaderboard": "Leaderboard",
     "forProfessionals": "For Professionals",
     "cabinet": "Cabinet",
     "settings": "Settings",
@@ -122,18 +121,6 @@
         "MASTER": "Master",
         "GURU": "Guru"
       }
-    },
-    "leaderboard": {
-      "title": "Leaderboard",
-      "description": "Personality Type quiz ranking",
-      "position": "#",
-      "name": "Participant",
-      "rank": "Rank",
-      "sessions": "Sessions",
-      "achievementsCount": "Achievements",
-      "xp": "XP",
-      "empty": "No one has taken the quiz yet",
-      "you": "You"
     }
   },
   "cabinet": {

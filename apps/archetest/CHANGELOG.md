@@ -5,6 +5,25 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.12.0] - 2026-07-06
+
+### Removed
+
+- **Соревновательный слой геймификации (этап 5.9.1)** — решение Kami 2026-07-03: лидерборд
+  загрязнял будущие психометрические нормы, SPEED_DEMON поощрял careless responding, XP
+  за объём ответов стимулировал прокликивание
+  - Роут `/leaderboard` + компоненты `LeaderboardTable`/`LeaderboardUserRow` удалены
+  - Ссылки на лидерборд убраны из `header.tsx`, `mobile-drawer.tsx`, `quiz-results.tsx`
+  - Ачивка `SPEED_DEMON` удалена из `achievements.ts`; `sessionDurationMs` больше не считается
+    в `achievements.action.ts`
+  - `calculateXp` — убран множитель за объём ответов (`totalAnswers * 2`); формула теперь
+    `sessions × 100 + achievements`
+  - Неиспользуемые i18n-ключи `nav.leaderboard` и `quiz.leaderboard.*` убраны из ru/en
+
+### Changed
+
+- Кэш `QuizLeaderboardEntry` в БД сохранён (не читается в UI) — пригодится для Фазы 3
+
 ## [0.11.0] - 2026-07-05
 
 ### Added

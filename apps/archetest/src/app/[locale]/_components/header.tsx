@@ -37,9 +37,6 @@ export function Header() {
               <Link href="/express">{t('express')}</Link>
             </Button>
             <Button asChild variant="ghost" size="sm" display={{ base: 'none', md: 'inline-flex' }}>
-              <Link href="/leaderboard">{t('leaderboard')}</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm" display={{ base: 'none', md: 'inline-flex' }}>
               <Link href="/for-professionals">{t('forProfessionals')}</Link>
             </Button>
             {isPsychologist && (

@@ -81,7 +81,7 @@ export function getNextRank(currentCode: string): RankDef | null {
   return RANKS[idx + 1]
 }
 
-/** Рассчитать XP по формуле */
-export function calculateXp(sessionsCount: number, totalAnswers: number, achievementXpSum: number): number {
-  return sessionsCount * 100 + totalAnswers * 2 + achievementXpSum
+/** Рассчитать XP по формуле (глубина самопознания — сессии и достижения, не объём ответов) */
+export function calculateXp(sessionsCount: number, achievementXpSum: number): number {
+  return sessionsCount * 100 + achievementXpSum
 }

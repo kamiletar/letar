@@ -75,13 +75,6 @@ export function MobileDrawer() {
               </Link>
             </Pressable>
             <Pressable borderRadius="none">
-              <Link href="/leaderboard" onClick={close}>
-                <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
-                  <Text fontSize="sm">{t('leaderboard')}</Text>
-                </Box>
-              </Link>
-            </Pressable>
-            <Pressable borderRadius="none">
               <Link href="/for-professionals" onClick={close}>
                 <Box px={4} py={3} _hover={{ bg: 'bg.muted' }} cursor="pointer">
                   <Text fontSize="sm">{t('forProfessionals')}</Text>
