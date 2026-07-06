@@ -1,5 +1,11 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> 📌 **Отдельная кросс-приложенческая UI-задача (вне темы этого файла, для следующей сессии):**
+> «Липкая CTA» — тираж `StickyActionBar`/`useScrollGate` (`@letar/ui@0.7.0`) на длинные интро/формы
+> aboi, mandala, svoichuzhie, dsperevod, kami (+ разбор лендингов animatrona-landing, kami-key-the-landing,
+> aprel8008). Полный план, приоритизация и чек-лист по файлам →
+> [`PLAN_STICKY_CTA.md`](./PLAN_STICKY_CTA.md). Реализация не начата.
+
 > **Сессия №42 (2026-06-21, Этап 6.11 — Pressable-компоненты):** ✅ **`@letar/ui` 0.5.0** —
 > `Pressable`, `PressableButton`, `ExternalLink`, `pressableConfig` (ripple + spring + iOS-фикс).
 > ✅ **kami** полностью переведён: `nav-links`→`AppLink`, `sign-in-button`→`Button`, `mobile-menu`→`AppLink`+`Pressable`,
