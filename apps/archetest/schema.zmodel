@@ -154,6 +154,11 @@ model QuizSession {
   // паттерне. Невалидные сессии не идут в усреднение/динамику/нормы и не дают XP
   isValid       Boolean      @default(true)
   validityFlags String?                      // JSON ValidityFlags (детали для кабинета)
+  // Mood check-in (этап 5.9.2): циркумплекс Рассела, 1-3 по каждой оси (сетка 3×3).
+  // Nullable — гостевые/старые сессии без чек-ина. Не участвует в скоринге черт,
+  // только для карты «состояние vs черта» (психолог) и будущей карты стабильности (Фаза 3)
+  moodValence   Int?                         // 1 = негативная, 2 = нейтральная, 3 = позитивная
+  moodEnergy    Int?                         // 1 = низкая, 2 = средняя, 3 = высокая
   completedAt   DateTime?
   createdAt     DateTime     @default(now())
   answers       QuizAnswer[]

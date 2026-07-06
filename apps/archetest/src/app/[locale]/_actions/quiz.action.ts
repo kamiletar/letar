@@ -41,6 +41,9 @@ const SubmitQuizSchema = z
     answers: z.array(AnswerSchema).min(1).max(100),
     /** ID пропущенных вопросов (видел и осознанно пропустил) */
     skipped: z.array(z.string()).optional().default([]),
+    /** Mood check-in (этап 5.9.2): 1-3 по каждой оси циркумплекса, необязателен (можно пропустить) */
+    moodValence: z.number().int().min(1).max(3).optional(),
+    moodEnergy: z.number().int().min(1).max(3).optional(),
   })
   .strip()
 
@@ -293,7 +296,7 @@ export async function submitQuizAction(
     return { error: 'validation_error' }
   }
 
-  const { seed, answers, skipped } = parsed.data
+  const { seed, answers, skipped, moodValence, moodEnergy } = parsed.data
   const db = getEnhancedPrisma(await getDbUser(session))
   const scores = await calculateScores(answers, db)
 
@@ -311,6 +314,8 @@ export async function submitQuizAction(
       questionBankVersion: QUESTION_BANK_VERSION,
       isValid: validity.isValid,
       validityFlags: JSON.stringify(validity),
+      moodValence,
+      moodEnergy,
       completedAt: new Date(),
       answers: {
         create: answers.map((a, i) => ({

@@ -11,6 +11,8 @@ import type { PersonalityTypeCode } from '../_data/personality-types'
 import { computeClientScores } from '../_lib/client-scoring'
 import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { PENDING_QUIZ_KEY } from '../_lib/storage-keys'
+import type { MoodValue } from './mood-check-in'
+import { MoodCheckIn } from './mood-check-in'
 import { QuizIntro } from './quiz-intro'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
@@ -22,11 +24,13 @@ interface PendingQuiz {
   answers: { questionId: string; selectedOption: number }[]
   /** Пропущенные вопросы (видел и осознанно пропустил) */
   skipped: string[]
+  /** Mood check-in перед сессией (этап 5.9.2), null если пропущен */
+  mood: MoodValue | null
 }
 
 const STORAGE_KEY = PENDING_QUIZ_KEY
 
-type QuizState = 'intro' | 'quiz' | 'submitting' | 'results' | 'loading_more'
+type QuizState = 'intro' | 'mood' | 'quiz' | 'submitting' | 'results' | 'loading_more'
 
 interface QuizContainerProps {
   questions: QuizQuestionDTO[]
@@ -52,13 +56,15 @@ export function QuizContainer({
   const [answers, setAnswers] = useState<Map<string, number>>(new Map())
   /** Пропущенные вопросы (видел и осознанно пропустил) */
   const [skipped, setSkipped] = useState<Set<string>>(new Set())
+  /** Mood check-in перед сессией (этап 5.9.2), null если пропущен */
+  const [mood, setMood] = useState<MoodValue | null>(null)
   /** Показано ли мягкое напоминание о пропусках */
   const [skipReminderShown, setSkipReminderShown] = useState(false)
   const [scores, setScores] = useState<Record<PersonalityTypeCode, number> | null>(null)
   /** Достоверность шкал (от сервера) */
   const [confidence, setConfidence] = useState<Record<PersonalityTypeCode, ScaleConfidence> | null>(null)
   const [averagedScores, setAveragedScores] = useState<Record<PersonalityTypeCode, number> | null>(
-    initialProgress?.averagedScores ?? null
+    initialProgress?.averagedScores ?? null,
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [newAchievements, setNewAchievements] = useState<string[]>([])
@@ -104,7 +110,7 @@ export function QuizContainer({
         }
       }
     },
-    [isRu]
+    [isRu],
   )
 
   // Проверяем pending данные из sessionStorage при маунте
@@ -126,7 +132,13 @@ export function QuizContainer({
 
       // Автосабмит pending данных
       setState('submitting')
-      submitQuizAction({ seed: pending.seed, answers: pending.answers, skipped: pending.skipped ?? [] }).then(
+      submitQuizAction({
+        seed: pending.seed,
+        answers: pending.answers,
+        skipped: pending.skipped ?? [],
+        moodValence: pending.mood?.valence,
+        moodEnergy: pending.mood?.energy,
+      }).then(
         (result) => {
           if (result.error) {
             setSubmitError(result.error)
@@ -145,14 +157,14 @@ export function QuizContainer({
             showAchievementToasts(result.data.newAchievements)
             setState('results')
           }
-        }
+        },
       )
     } catch {
       // Ошибка парсинга — игнорируем
     }
   }, [isAuthenticated])
 
-  // Начать тест
+  // Начать тест — сперва mood check-in (5.9.2)
   const handleStart = useCallback(() => {
     // seed должен влезать в Int (max ~2.1 млрд), Date.now() > 1.7 трлн
     const newSeed = Date.now() % 2_000_000_000
@@ -160,12 +172,19 @@ export function QuizContainer({
     setCurrentIndex(0)
     setAnswers(new Map())
     setSkipped(new Set())
+    setMood(null)
     setSkipReminderShown(false)
     setScores(null)
     setConfidence(null)
     setSubmitError(null)
     setNewAchievements([])
     setRankInfo(null)
+    setState('mood')
+  }, [])
+
+  // Mood check-in завершён (выбор или пропуск) — переходим к вопросам
+  const handleMoodDone = useCallback((value: MoodValue | null) => {
+    setMood(value)
     setState('quiz')
   }, [])
 
@@ -176,6 +195,7 @@ export function QuizContainer({
         const pending: PendingQuiz = {
           seed,
           skipped: Array.from(skipped),
+          mood,
           answers: Array.from(answerMap.entries()).map(([questionId, selectedOption]) => ({
             questionId,
             selectedOption,
@@ -186,7 +206,7 @@ export function QuizContainer({
         // sessionStorage недоступен — игнорируем
       }
     },
-    [seed, skipped]
+    [seed, skipped, mood],
   )
 
   // Ответ на вопрос
@@ -203,7 +223,7 @@ export function QuizContainer({
         return next
       })
     },
-    [currentQuestion, saveProgress]
+    [currentQuestion, saveProgress],
   )
 
   // Пропуск вопроса (убрать ответ если был, добавить в skipped)
@@ -256,7 +276,7 @@ export function QuizContainer({
   const calculateClientScores = useCallback(
     (answerMap: Map<string, number>): Record<PersonalityTypeCode, number> =>
       computeClientScores(answerMap, currentQuestions),
-    [currentQuestions]
+    [currentQuestions],
   )
 
   // Завершить тест
@@ -286,7 +306,13 @@ export function QuizContainer({
 
       try {
         // Сабмит на сервер (авторитетный подсчёт) — с пропущенными
-        const result = await submitQuizAction({ seed, answers: answersArray, skipped: Array.from(skipped) })
+        const result = await submitQuizAction({
+          seed,
+          answers: answersArray,
+          skipped: Array.from(skipped),
+          moodValence: mood?.valence,
+          moodEnergy: mood?.energy,
+        })
         if (result.error) {
           setSubmitError(result.error)
           setState('results') // Показываем client-side результаты
@@ -326,11 +352,11 @@ export function QuizContainer({
       // Гость: показываем client-side результаты, сохраняем ответы для автосабмита после логина
       const clientScores = calculateClientScores(answers)
       setScores(clientScores)
-      const pending: PendingQuiz = { seed, answers: answersArray, skipped: Array.from(skipped) }
+      const pending: PendingQuiz = { seed, answers: answersArray, skipped: Array.from(skipped), mood }
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
       setState('results')
     }
-  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, showAchievementToasts])
+  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, showAchievementToasts])
 
   // Обновляем ref для автозавершения
   handleFinishRef.current = handleFinish
@@ -356,13 +382,14 @@ export function QuizContainer({
       setCurrentIndex(0)
       setAnswers(new Map())
       setSkipped(new Set())
+      setMood(null)
       setSkipReminderShown(false)
       setScores(null)
       setConfidence(null)
       setSubmitError(null)
       setNewAchievements([])
       setRankInfo(null)
-      setState('quiz')
+      setState('mood')
     } catch {
       toaster.error({
         title: isRu ? 'Ошибка загрузки' : 'Loading error',
@@ -378,6 +405,7 @@ export function QuizContainer({
     setCurrentIndex(0)
     setAnswers(new Map())
     setSkipped(new Set())
+    setMood(null)
     setSkipReminderShown(false)
     setScores(null)
     setConfidence(null)
@@ -389,6 +417,17 @@ export function QuizContainer({
   // INTRO
   if (state === 'intro') {
     return <QuizIntro onStart={handleStart} progress={progress} initialDisclaimerAccepted={initialDisclaimerAccepted} />
+  }
+
+  // MOOD CHECK-IN (5.9.2) — перед каждой новой порцией вопросов
+  if (state === 'mood') {
+    return (
+      <MoodCheckIn
+        isRu={isRu}
+        onSubmit={(value) => handleMoodDone(value)}
+        onSkip={() => handleMoodDone(null)}
+      />
+    )
   }
 
   // Нет вопросов в БД — показываем сообщение
@@ -415,14 +454,12 @@ export function QuizContainer({
             current={currentIndex}
             total={shuffledQuestions.length}
             answered={answers.size}
-            globalProgress={
-              progress
-                ? {
-                    totalAnswered: progress.totalAnswered + answers.size,
-                    totalQuestions: progress.totalQuestions,
-                  }
-                : undefined
-            }
+            globalProgress={progress
+              ? {
+                totalAnswered: progress.totalAnswered + answers.size,
+                totalQuestions: progress.totalQuestions,
+              }
+              : undefined}
           />
           <QuizQuestionCard
             scenario={isRu ? currentQuestion.scenario : currentQuestion.scenarioEn}
@@ -485,7 +522,13 @@ export function QuizContainer({
                       questionId,
                       selectedOption,
                     }))
-                    const result = await submitQuizAction({ seed, answers: answersArray, skipped: Array.from(skipped) })
+                    const result = await submitQuizAction({
+                      seed,
+                      answers: answersArray,
+                      skipped: Array.from(skipped),
+                      moodValence: mood?.valence,
+                      moodEnergy: mood?.energy,
+                    })
                     if (result.error) {
                       setSubmitError(result.error)
                       setState('results')
@@ -534,16 +577,14 @@ export function QuizContainer({
           onContinue={progress && progress.availableCount > 0 ? handleContinue : undefined}
           newAchievements={newAchievements}
           rankInfo={rankInfo}
-          progress={
-            progress
-              ? {
-                  totalAnswered: progress.totalAnswered,
-                  totalQuestions: progress.totalQuestions,
-                  coveragePercent: progress.coveragePercent,
-                  availableCount: progress.availableCount,
-                }
-              : undefined
-          }
+          progress={progress
+            ? {
+              totalAnswered: progress.totalAnswered,
+              totalQuestions: progress.totalQuestions,
+              coveragePercent: progress.coveragePercent,
+              availableCount: progress.availableCount,
+            }
+            : undefined}
         />
       </>
     )
