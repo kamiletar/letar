@@ -155,6 +155,15 @@ label-printer-desktop (Electron app)
 - Приложения — без префикса: `premium-rosstil`, `imot`, `dashboard`, `kami`, `label-printer-desktop`
 - Библиотеки — с префиксом `@letar/`: `@letar/chakra-provider`, `@letar/yandex-metrika`
 
+## Тестирование и E2E-пайплайн
+
+E2E-тесты (Playwright) не гоняются локально при разработке — прогон вынесен на выделенный
+инфраструктурный сервер s3 (`188.127.235.141`), работает по ночному cron, изолирован от production
+серверов (s2) и от деплоя: `deploy-affected.sh` статус e2e не проверяет.
+
+- Инфраструктура, порты, настройка нового приложения для e2e — [e2e-testing.md](/.claude/docs/e2e-testing.md#e2e-ранер-на-s3-188127235141)
+- Как e2e соотносится с процессом деплоя (сейчас — никак) и что запланировано (pre-deploy gate) — [deployment.md](/.claude/docs/deployment.md#e2e-ранер-и-деплой--разделены)
+
 ## Роуты
 
 ### Публичные роуты
@@ -588,7 +597,7 @@ export default function ClientComponent() {
 
 ```tsx
 import Image from 'next/image'
-;<Image
+<Image
   src="/path/to/image.jpg"
   alt="Описание"
   width={800}
