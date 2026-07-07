@@ -1,5 +1,25 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Техдолг (2026-07-07)
+
+Аудит после планового `bun update` — сравнение typecheck/lint до/после обновления зависимостей
+выявил предсуществующие ошибки, не связанные с обновлением. Исправлены:
+
+- **`admin-section.tsx`** — `isTruncated` (Chakra v2) → `truncate` (Chakra v3 API)
+- **TS6305 dist-цепочка** — `libs/animatrona-ui` не имел вообще никаких Nx-таргетов, из-за чего
+  `dist/*.d.ts` никогда не мог быть сгенерирован → падал `typecheck:tsgo` у `animatrona-tracker`
+  через всю цепочку `animatrona-ui → animatrona-franchise-graph → video-player-react →
+  video-player-core`. Добавлен `typecheck`-таргет (зеркально `animatrona-franchise-graph`) +
+  `oxlint`/`lint`. Попутно всплыл смежный баг — `animatrona-franchise-graph` не собирался из-за
+  отсутствия `declare module '*.css'` (добавлен `css.d.ts` по образцу `libs/ui`, `driving-school`).
+- **`EpisodeCardBase.tsx`** (libs/animatrona-ui) — `eqeqeq`, всплыло только после появления
+  lint-таргета у библиотеки.
+- **`header.tsx`** — `curly` (if без фигурных скобок) в `isActiveRoute` и `Header`.
+- **`lib/ipfs-fetch.ts`** — `preserve-caught-error`, добавлен `cause: primaryError` в финальный throw.
+
+Итог: `typecheck:tsgo` у `animatrona-tracker` — с 11 ошибок до 1 (осталась только заранее известная
+и вне-скоуповая `libs/auth` OIDCOptions cast, не относится к animatrona-экосистеме).
+
 ## Версия 0.9.0 (2026-03-19)
 
 ### Redis для онлайн-статуса раздач
