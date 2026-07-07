@@ -75,7 +75,9 @@ async function fetchWithGatewayFallback<T>(url: string): Promise<T> {
       }
     }
 
-    throw new Error(`Не удалось загрузить данные из IPFS после ${errors.length} попыток:\n${errors.join('\n')}`)
+    throw new Error(`Не удалось загрузить данные из IPFS после ${errors.length} попыток:\n${errors.join('\n')}`, {
+      cause: primaryError,
+    })
   }
 }
 
