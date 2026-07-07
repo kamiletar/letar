@@ -32,6 +32,11 @@ interface QuizResultsProps {
   onContinue?: () => void
   newAchievements?: string[]
   rankInfo?: { rankCode: string; xp: number } | null
+  /**
+   * Вошла ли сессия в XP (5.9.3, гибрид: XP-гранула — сутки).
+   * false → мягкая подпись «XP за сегодня уже получены», undefined → подпись не показывается
+   */
+  xpCountedToday?: boolean
   /** Прогресс прохождения */
   progress?: {
     totalAnswered: number
@@ -108,6 +113,7 @@ export function QuizResults({
   onContinue,
   newAchievements,
   rankInfo,
+  xpCountedToday,
   progress,
 }: QuizResultsProps) {
   const t = useTranslations('quiz')
@@ -200,12 +206,22 @@ export function QuizResults({
 
         {/* Кнопка «Продолжить» (главная CTA если есть ещё вопросы) */}
         {onContinue && progress && progress.availableCount > 0 && (
-          <Button size="lg" colorPalette="blue" onClick={onContinue}>
-            <LuArrowRight />
-            {isRu
-              ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
-              : `Answer ${Math.min(50, progress.availableCount)} more questions`}
-          </Button>
+          <VStack gap={1}>
+            <Button size="lg" colorPalette="blue" onClick={onContinue}>
+              <LuArrowRight />
+              {isRu
+                ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
+                : `Answer ${Math.min(50, progress.availableCount)} more questions`}
+            </Button>
+            {/* 5.9.3 (гибрид): XP раз в сутки — повторные порции дня уточняют профиль без XP */}
+            {xpCountedToday === false && (
+              <Text fontSize="xs" color="fg.muted" textAlign="center">
+                {isRu
+                  ? 'XP за сегодня уже получены — каждый новый ответ уточняет профиль'
+                  : 'Today’s XP is already earned — every new answer refines your profile'}
+              </Text>
+            )}
+          </VStack>
         )}
 
         {/* Safety-net: кризисный блок с телефонами доверия (5.6.4) */}

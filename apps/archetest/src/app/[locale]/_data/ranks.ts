@@ -81,7 +81,25 @@ export function getNextRank(currentCode: string): RankDef | null {
   return RANKS[idx + 1]
 }
 
-/** Рассчитать XP по формуле (глубина самопознания — сессии и достижения, не объём ответов) */
-export function calculateXp(sessionsCount: number, achievementXpSum: number): number {
-  return sessionsCount * 100 + achievementXpSum
+/**
+ * Число уникальных UTC-дней среди дат (этап 5.9.3, гибрид).
+ * XP-гранула — сутки: сколько бы порций вопросов ни было пройдено за день,
+ * в XP день входит один раз. Продолжать в тот же день можно свободно
+ * (новые вопросы уточняют профиль), но XP-ферма порциями закрыта.
+ */
+export function countUniqueUtcDays(dates: Date[]): number {
+  const days = new Set<string>()
+  for (const d of dates) {
+    days.add(d.toISOString().slice(0, 10))
+  }
+  return days.size
+}
+
+/**
+ * Рассчитать XP по формуле (глубина самопознания — дни практики и достижения,
+ * не объём ответов и не число порций). Этап 5.9.3: гранула — уникальный день
+ * с валидной сессией, см. countUniqueUtcDays.
+ */
+export function calculateXp(uniqueDaysCount: number, achievementXpSum: number): number {
+  return uniqueDaysCount * 100 + achievementXpSum
 }

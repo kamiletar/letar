@@ -69,6 +69,8 @@ export function QuizContainer({
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [newAchievements, setNewAchievements] = useState<string[]>([])
   const [rankInfo, setRankInfo] = useState<{ rankCode: string; xp: number } | null>(null)
+  /** Вошла ли последняя сессия в XP (5.9.3: XP-гранула — сутки); undefined до первого сабмита */
+  const [xpCountedToday, setXpCountedToday] = useState<boolean | undefined>(undefined)
   /** Прогресс (обновляется после каждого сабмита) */
   const [progress, setProgress] = useState<QuizProgress | null>(initialProgress)
   /** Текущие вопросы (могут подгружаться при «продолжить») */
@@ -150,6 +152,7 @@ export function QuizContainer({
           setAveragedScores(result.data.averagedScores)
           setNewAchievements(result.data.newAchievements)
           setRankInfo(result.data.rankInfo)
+          setXpCountedToday(result.data.xpCountedToday)
           if (result.data.progress) {
             setProgress((prev) => (prev ? { ...prev, ...result.data!.progress } : null))
           }
@@ -177,6 +180,7 @@ export function QuizContainer({
     setSubmitError(null)
     setNewAchievements([])
     setRankInfo(null)
+    setXpCountedToday(undefined)
     setState('mood')
   }, [])
 
@@ -324,6 +328,7 @@ export function QuizContainer({
           setAveragedScores(result.data.averagedScores)
           setNewAchievements(result.data.newAchievements)
           setRankInfo(result.data.rankInfo)
+          setXpCountedToday(result.data.xpCountedToday)
           // Обновляем прогресс
           if (result.data.progress) {
             setProgress((prev) => ({
@@ -387,6 +392,7 @@ export function QuizContainer({
       setSubmitError(null)
       setNewAchievements([])
       setRankInfo(null)
+      setXpCountedToday(undefined)
       setState('mood')
     } catch {
       toaster.error({
@@ -410,6 +416,7 @@ export function QuizContainer({
     setSubmitError(null)
     setNewAchievements([])
     setRankInfo(null)
+    setXpCountedToday(undefined)
   }, [])
 
   // INTRO
@@ -535,6 +542,7 @@ export function QuizContainer({
                       setAveragedScores(result.data.averagedScores)
                       setNewAchievements(result.data.newAchievements)
                       setRankInfo(result.data.rankInfo)
+                      setXpCountedToday(result.data.xpCountedToday)
                       if (result.data.progress) {
                         setProgress((prev) => ({
                           totalAnswered: result.data!.progress!.totalAnswered,
@@ -571,6 +579,7 @@ export function QuizContainer({
           onContinue={progress && progress.availableCount > 0 ? handleContinue : undefined}
           newAchievements={newAchievements}
           rankInfo={rankInfo}
+          xpCountedToday={xpCountedToday}
           progress={
             progress
               ? {

@@ -140,6 +140,11 @@ export interface SubmitQuizResult {
   averagedScores: Record<PersonalityTypeCode, number> | null
   newAchievements: string[]
   rankInfo: { rankCode: string; xp: number } | null
+  /**
+   * Вошла ли эта сессия в XP (5.9.3, гибрид): XP-гранула — сутки,
+   * повторные порции дня XP не добавляют (но уточняют профиль)
+   */
+  xpCountedToday: boolean
   /** Прогресс после этой сессии */
   progress: {
     totalAnswered: number
@@ -352,7 +357,12 @@ export async function submitQuizAction(
   // XP/ачивки/лидерборд — только за валидные протоколы (защита данных и норм)
   const completedAt = new Date()
 
-  const [averagedScores, newAchievements, rankInfo, progressData] = await Promise.all([
+  // 5.9.3 (гибрид): вошла ли сессия в XP — первая ли она валидная за текущие UTC-сутки
+  const utcDayStart = new Date(
+    Date.UTC(completedAt.getUTCFullYear(), completedAt.getUTCMonth(), completedAt.getUTCDate())
+  )
+
+  const [averagedScores, newAchievements, rankInfo, progressData, earlierTodayCount] = await Promise.all([
     getAveragedScores(db, session.user.id),
     validity.isValid
       ? checkAndAwardAchievements(session.user.id, {
@@ -388,6 +398,16 @@ export async function submitQuizAction(
         availableCount,
       }
     })(),
+    // Валидные сессии этих UTC-суток, созданные ДО текущей (сама сессия уже в БД)
+    db.quizSession.count({
+      where: {
+        userId: session.user.id,
+        completedAt: { not: null },
+        isValid: true,
+        createdAt: { gte: utcDayStart },
+        id: { not: quizSession.id },
+      },
+    }),
   ])
 
   return {
@@ -398,6 +418,7 @@ export async function submitQuizAction(
       newAchievements,
       rankInfo,
       progress: progressData,
+      xpCountedToday: validity.isValid && earlierTodayCount === 0,
     },
   }
 }

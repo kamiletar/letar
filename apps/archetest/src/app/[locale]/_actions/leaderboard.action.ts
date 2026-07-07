@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/db'
 import { ACHIEVEMENTS_MAP } from '../_data/achievements'
-import { calculateXp, getRankByXp } from '../_data/ranks'
+import { calculateXp, countUniqueUtcDays, getRankByXp } from '../_data/ranks'
 
 /**
  * Пересчитать кэш-запись (QuizLeaderboardEntry) для пользователя.
@@ -11,10 +11,12 @@ import { calculateXp, getRankByXp } from '../_data/ranks'
  * Использует raw prisma для upsert (@@deny на enhanced).
  */
 export async function recalcLeaderboardEntry(userId: string): Promise<{ rankCode: string; xp: number }> {
+  // XP только по валидным протоколам (5.1: невалидные исключены из XP;
+  // ранее фильтра не было — невалидная сессия добавляла +100 при следующем пересчёте)
   const [sessions, achievements] = await Promise.all([
     prisma.quizSession.findMany({
-      where: { userId, completedAt: { not: null } },
-      select: { answeredCount: true },
+      where: { userId, completedAt: { not: null }, isValid: true },
+      select: { answeredCount: true, createdAt: true },
     }),
     prisma.userQuizAchievement.findMany({
       where: { userId },
@@ -30,7 +32,9 @@ export async function recalcLeaderboardEntry(userId: string): Promise<{ rankCode
     return sum + (def?.xpReward ?? 0)
   }, 0)
 
-  const xp = calculateXp(sessionsCount, achievementXpSum)
+  // 5.9.3 (гибрид): XP-гранула — уникальный день, а не порция вопросов
+  const uniqueDays = countUniqueUtcDays(sessions.map((s) => s.createdAt))
+  const xp = calculateXp(uniqueDays, achievementXpSum)
   const rank = getRankByXp(xp)
 
   await prisma.quizLeaderboardEntry.upsert({
