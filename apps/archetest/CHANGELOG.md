@@ -5,6 +5,20 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.16.1] - 2026-07-07
+
+### Fixed
+
+- **Unit-тесты не запускались после обновления зависимостей монорепо** (vitest 4.1.10 перестал
+  использовать вложенный vite 8.0.16 и перешёл на hoisted vite 8.1.3): новый oxc-трансформер
+  vite (`vite:oxc`) резолвит tsconfig per-file и падает с `[TSCONFIG_ERROR] Tsconfig not found`,
+  если файл не покрыт include ближайшего `tsconfig.json` или его project references. Тестовые
+  файлы и `vitest.setup.tsx` были исключены из `tsconfig.json`. Фикс: новый
+  `tsconfig.spec.json` (composite, покрывает `vitest.setup.tsx` + `src/**/*.{test,spec}.ts(x)`,
+  с явным переопределением унаследованного `exclude`) + reference на него из `tsconfig.json`.
+  ⚠️ Проблема касается всех приложений монорепо с vitest (kami воспроизведена) — тираж фикса
+  на остальные приложения вне скоупа archetest.
+
 ## [0.16.0] - 2026-07-07
 
 ### Added
