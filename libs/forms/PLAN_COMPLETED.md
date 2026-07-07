@@ -19,6 +19,12 @@
   7.5 docs+SEO → 7.6 llms.txt/MCP → 7.7 open-core сервис → 7.8 Vue-пруф (после 7.1). Модель — open-core.
 - **Следующий шаг:** 7.1 — TS-контракт UIKit + вынести `validators` в dependency-free core.
 
+**Доработка воркфлоу (`.claude/commands/forms-dev.md`, коммит 6b38a76):** разбор показал, что `/forms-dev` не
+лишний (концурренси-замок на `libs/forms` при многих параллельных сессиях), но устарел и не видел roadmap.
+Исправлено: обязать читать `libs/forms/PLAN.md` целиком (не только Backlog) → активная фаза; расширить
+file-reservations на будущие пакеты Фазы 7 (`forms-core` + скины + Vue); явно выделить, что доки
+(`form-docs`) и примеры (`form-example`) — отдельные аппы и обязательны; версия 0.56→1.4, 40+→56 полей.
+
 ## 2026-07-07 — Техдолг: rules-of-hooks в FieldDataGrid
 
 - **`field-data-grid.tsx`** — `useMemo`/`useReactTable`/`useRef`/`useVirtualizer` вызывались внутри
