@@ -5,6 +5,26 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.16.0] - 2026-07-07
+
+### Added
+
+- **Этап 5.7 — B2B-конверсия (лиды психологов)**: модель `ProfessionalLead` (имя, email,
+  согласие ПДн, locale, source) с гостевой политикой `@@allow('create', true)`; лид-форма
+  на `/for-professionals#lead` (чекбокс согласия не предотмечен, ссылка на `/privacy`); CTA
+  «Вы психолог?» на экране результатов экспресса → `/for-professionals?source=express-cta#lead`;
+  dev-роут `/dev/qr` — печатные QR-коды на `/express` и `/for-professionals` для раздатки на фесте
+- **createForm-инстанс `ArchetestForm`** (`src/archetest-form/`) — обязателен по правилам форм
+  монорепо, ранее в archetest отсутствовал
+- **`/privacy`**: новая категория данных «заявка специалиста: имя, email» (ru/en)
+
+### Fixed
+
+- **`submitProfessionalLeadAction` писал через raw `prisma`, а не `getEnhancedPrisma`** —
+  enhanced-клиент делает read-back созданной записи, который падал на политике
+  `@@allow('read', ADMIN)` для анонимного гостя (запись при этом уже была в БД, но клиент
+  получал ошибку и не видел экран успеха). Найдено E2E-прогоном реального сабмита в браузере.
+
 ## [0.15.1] - 2026-07-07
 
 ### Added

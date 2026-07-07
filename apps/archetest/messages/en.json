@@ -43,6 +43,9 @@
     "linkError": "Failed to save the result. Please try again later.",
     "retake": "Retake",
     "shareText": "I took the express archetype test — here's my hexagram of the Light and Dark triads. Check yourself:",
+    "professionalCtaTitle": "Are you a psychologist?",
+    "professionalCtaDescription": "A cabinet for working with clients: session dynamics, radar charts, notes.",
+    "professionalCtaButton": "Learn more",
     "icebreaker": {
       "badge": "For psychologists",
       "title": "Two questions before you start",

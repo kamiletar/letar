@@ -2,6 +2,8 @@ import { Link } from '@/i18n/navigation'
 import { Box, Link as ChakraLink, Container, Heading, Table, Text, VStack } from '@chakra-ui/react'
 import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
+import { Suspense } from 'react'
+import { ProfessionalLeadForm } from '../_components/professional-lead-form'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
 
 /**
@@ -364,6 +366,20 @@ function ForProfessionalsView({ locale }: { locale: string }) {
               ))}
             </Table.Body>
           </Table.Root>
+        </Section>
+
+        {/* Заявка на связь (этап 5.7) */}
+        <Section title={isRu ? 'Хотите кабинет для своих клиентов?' : 'Want a cabinet for your clients?'}>
+          <Text>
+            {isRu
+              ? 'Оставьте контакт — мы свяжемся и поможем настроить кабинет психолога.'
+              : 'Leave your contact and we will reach out to help set up your psychologist cabinet.'}
+          </Text>
+          <Box id="lead" w="100%">
+            <Suspense fallback={null}>
+              <ProfessionalLeadForm isRu={isRu} />
+            </Suspense>
+          </Box>
         </Section>
 
         {/* Ссылка на главную */}

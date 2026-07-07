@@ -48,6 +48,7 @@ function buildSections(isRu: boolean): Section[] {
         title: '2. Какие данные обрабатываются и зачем',
         body: [
           'Для зарегистрированных пользователей: фамилия, имя, отчество и адрес электронной почты (регистрация и ведение аккаунта); результаты психологического самотестирования (профиль выраженности личностных черт); самооценка настроения на момент прохождения; заметки специалиста-психолога о клиенте (вносятся с согласия клиента). Цель — расчёт и отображение результатов, ведение их динамики и предоставление функционала кабинета психолога.',
+          'Для специалистов, оставивших заявку на странице «Для психологов»: имя и адрес электронной почты. Цель — связь по вопросам подключения кабинета психолога.',
           'Обезличенные технические сведения могут собираться метрическими программами для улучшения сервиса.',
         ],
       },
@@ -100,6 +101,7 @@ function buildSections(isRu: boolean): Section[] {
       title: '2. What data is processed and why',
       body: [
         'For registered users: full name and email address (registration and account management); psychological self-test results (personality trait profile); mood self-assessment at the time of testing; psychologist notes about a client (added with the client’s consent). Purpose — computing and displaying results, tracking their dynamics, and providing the psychologist cabinet.',
+        'For professionals who submit a request on the "For Clinicians" page: name and email address. Purpose — contacting them about setting up the psychologist cabinet.',
         'Anonymized technical data may be collected by analytics tools to improve the service.',
       ],
     },

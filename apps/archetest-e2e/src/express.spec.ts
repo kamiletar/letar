@@ -54,6 +54,9 @@ test.describe('Express Scan', () => {
     await expect(page.getByRole('link', { name: 'Открыть полный тест' })).toBeVisible()
     // QR-код (SVG от qrcode.react) присутствует
     await expect(page.locator('svg').first()).toBeVisible()
+
+    // CTA для психологов (этап 5.7) — ведёт на лид-форму
+    await expect(page.getByRole('link', { name: 'Узнать больше' })).toBeVisible()
   })
 
   test('результат сохраняется в localStorage и восстанавливается после перезагрузки', async ({ page }) => {

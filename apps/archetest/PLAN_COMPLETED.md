@@ -682,4 +682,69 @@
 
 ---
 
+## Сессия 2026-07-07 — Этап 5.7 (часть): B2B-конверсия (v0.16.0) 🎯
+
+### Что сделано
+
+- **Модель `ProfessionalLead`** (`schema.zmodel`) — заявка специалиста с `/for-professionals`:
+  `name`, `email`, `consentPdn`, `locale?`, `source?`, `createdAt`. Гостевая политика
+  `@@allow('create', true)` — заявку можно оставить без авторизации; чтение/удаление только
+  ADMIN. Миграция `20260707081309_professional_lead`.
+- **`ArchetestForm`** (`src/archetest-form/`) — минимальный `createForm({})`-инстанс. В archetest
+  ранее не было своего инстанса форм, что нарушало правило монорепо («каждое приложение обязано
+  иметь `createForm`») — создан в рамках этой задачи, extras пока не нужны.
+- **`professional-lead.schema.ts`** (Zod v4, `.strip()`) — `name` (2–100 симв.), `email`,
+  `consentPdn` через `.refine(v => v === true)` (без активного согласия заявка не проходит
+  валидацию, 152-ФЗ). 6 unit-тестов (`professional-lead.schema.test.ts`).
+- **`submitProfessionalLeadAction`** — валидация схемой + сохранение через **raw `prisma`**
+  (не `getEnhancedPrisma`) — см. находку ниже.
+- **`ProfessionalLeadForm`** — клиентский компонент на `/for-professionals#lead`: имя/email через
+  `ArchetestForm.Field.String`, чекбокс согласия ПДн — ручной `Checkbox.Root` (по образцу
+  `disclaimer-consent.tsx`, т.к. нужна ссылка на `/privacy` внутри лейбла) с отдельным React state,
+  не предотмечен. Кнопка отправки задизейблена, пока чекбокс не отмечен. Источник заявки —
+  `?source=` из query (`express-cta` с CTA экспресса, `direct` по умолчанию).
+- **CTA на экране результатов экспресса** — карточка «Вы психолог?» → `/for-professionals?source=express-cta#lead`,
+  i18n-ключи `professionalCta*` в `express`-неймспейсе (ru/en).
+- **`/dev/qr`** — print-friendly страница с двумя QR (`/express`, `/for-professionals`) для
+  печати раздатки перед фестом; `notFound()` в production, как остальные `/dev/*` роуты.
+- **`/privacy`** — добавлена категория данных «заявка специалиста: имя, email» (ru/en) в
+  разделе «Какие данные обрабатываются и зачем».
+- E2E: `express.spec.ts` дополнен проверкой видимости ссылки CTA «Узнать больше» на экране
+  результатов.
+
+### Находки
+
+- **form-mcp паттерн устарел:** `get_form_pattern('server-action')` показывает пример с
+  `useAppForm` + `<Form form={form}>` — реальный текущий API `createForm()` (см.
+  `create-form.spec.tsx` в `libs/forms`) декларативный: `<AppForm initialValue={...}
+  onSubmit={...}>`, без ручного `useAppForm`. Ориентировался на спеки библиотеки, а не
+  только на form-mcp паттерн.
+- **⚠️ ZenStack: `getEnhancedPrisma().create()` падает при read-политике уже ADMIN.**
+  Гостевая заявка сохранялась в БД (проверено напрямую через `pg`), но клиент получал
+  `{ error: 'submit_failed' }` и экран успеха не показывался — обнаружено только браузерным
+  E2E-прогоном полного сабмита (unit/typecheck этого не поймали бы). Причина: enhanced-клиент
+  после `create()` делает read-back созданной записи, чтобы вернуть её вызывающему, а
+  read-back проходит через политику `@@allow('read', ADMIN)` — для анонимного гостя падает,
+  хотя сама запись уже создана. Тот же паттерн уже решён в `auth-hub` для `ConsentLog`
+  (`@@allow('create', true)` + `@@allow('read', ADMIN)`): там `api/consent/route.ts` пишет
+  через **raw `prisma.consentLog.create()`**, а не `getEnhancedPrisma()`. Применил тот же
+  подход к `submitProfessionalLeadAction`. **Общий вывод для будущих guest-write моделей:**
+  если read-политика уже write-политики (гость создаёт, но не может читать) — писать через
+  raw prisma, не enhanced-клиент.
+- **Окружение сессии:** параллельно другой агент обновлял зависимости (`bun.lock`/`package.json`,
+  включая `@oxc-project/types` 0.133.0→0.138.0) — `nx test archetest` (vitest/oxc-плагин) не
+  запускался стабильно весь остаток сессии (`TSCONFIG_ERROR` на `vitest.setup.tsx`, не
+  специфично для новых файлов — ломались и старые тесты вроде `safety-net.test.ts`).
+  Typecheck/lint (не зависят от vite/oxc) и E2E (Next.js dev-сервер, другой пайплайн) —
+  зелёные. Полный `nx test archetest` не прогонялся зелёным до конца сессии — довериться
+  перед следующим релизом.
+
+### Осталось в 5.7
+
+- Offline-first PWA-прекэш `/express` (Serwist)
+- Kiosk-режим быстрого сброса гостевой сессии между посетителями
+- Демо-чек-лист и полный прогон в буферную неделю перед фестом
+
+---
+
 **Последнее обновление:** 2026-07-07

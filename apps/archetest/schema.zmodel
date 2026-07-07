@@ -320,3 +320,27 @@ model PsychologistNote {
   @@allow('all', link.psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
   @@allow('all', 'ADMIN' in auth().roles)
 }
+
+// ========================================
+// B2B-лиды психологов (этап 5.7)
+// ========================================
+
+/// Заявка специалиста с /for-professionals — контакт для последующей связи
+model ProfessionalLead {
+  id         String   @id @default(cuid())
+  /// @form.title("Имя")
+  name       String
+  /// @form.title("Email")
+  email      String
+  /// Согласие на обработку ПДн (152-ФЗ) — валидируется как true на уровне Zod
+  consentPdn Boolean
+  /// Локаль отправки формы (ru/en) — для коммуникации на языке лида
+  locale     String?
+  /// Источник заявки: express-cta | qr | direct
+  source     String?
+  createdAt  DateTime @default(now())
+
+  // Гость (не аутентифицирован) может оставить заявку
+  @@allow('create', true)
+  @@allow('read,delete', auth() != null && 'ADMIN' in auth().roles)
+}

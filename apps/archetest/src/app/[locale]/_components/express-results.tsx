@@ -211,6 +211,21 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
           </Text>
         </VStack>
 
+        {/* CTA для психологов (этап 5.7) — конверсия в лиды кабинета */}
+        <Card.Root w="100%" variant="outline">
+          <Card.Body>
+            <VStack gap={2} align="center" textAlign="center">
+              <Heading size="sm">{t('professionalCtaTitle')}</Heading>
+              <Text fontSize="sm" color="fg.muted">
+                {t('professionalCtaDescription')}
+              </Text>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/for-professionals?source=express-cta#lead">{t('professionalCtaButton')}</Link>
+              </Button>
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+
         {/* Поделиться результатом (5.4) — ведём получателя на полный тест */}
         <ShareResultButton
           shareText={t('shareText')}
