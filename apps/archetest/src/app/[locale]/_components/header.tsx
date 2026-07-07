@@ -56,9 +56,11 @@ export function Header() {
               onSignIn={signInWithLetarAuth}
               onSignOut={logoutAction}
               profileHref="/settings"
-              extraItems={isPsychologist
-                ? [{ value: 'cabinet', label: 'Кабинет', href: '/cabinet', icon: LuBriefcaseMedical }]
-                : []}
+              extraItems={
+                isPsychologist
+                  ? [{ value: 'cabinet', label: 'Кабинет', href: '/cabinet', icon: LuBriefcaseMedical }]
+                  : []
+              }
             />
           </HStack>
 

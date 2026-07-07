@@ -47,6 +47,111 @@ function ForProfessionalsView({ locale }: { locale: string }) {
           </Text>
         </Section>
 
+        {/* Методология */}
+        <Section title={isRu ? 'Методология' : 'Methodology'}>
+          <Text>
+            {isRu
+              ? 'Тест не изобретает шкалы с нуля. Большинство шкал опираются на валидированные инструменты — но на уровне конструкта, а не заимствования пунктов: все формулировки вопросов archetest авторские и ситуационные. Это сохраняет лицензионную чистоту (часть прототипов, например TAS-20, коммерческие, часть — research-only) и одновременно даёт связь с накопленной научной базой и нормами.'
+              : 'The test does not invent scales from scratch. Most scales are grounded in validated instruments — at the construct level, never by borrowing items: every archetest question is an original, situational formulation. This preserves licensing cleanliness (some prototypes, e.g. TAS-20, are commercial; others are research-only) while keeping the test connected to the accumulated evidence base and norms.'}
+          </Text>
+          <Table.Root size="sm" w="100%">
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>{isRu ? 'Шкала archetest' : 'Archetest scale'}</Table.ColumnHeader>
+                <Table.ColumnHeader>{isRu ? 'Валидированный прототип' : 'Validated prototype'}</Table.ColumnHeader>
+                <Table.ColumnHeader>{isRu ? 'Источник' : 'Source'}</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {(isRu
+                ? [
+                    ['Светлая триада (HUM/KAN/FAI)', 'Light Triad Scale (LTS), 12 пунктов', 'Kaufman et al., 2019'],
+                    [
+                      'Тёмная триада (MAC/NAR/ANT)',
+                      'Short Dark Triad (SD3) / Dirty Dozen',
+                      'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
+                    ],
+                    [
+                      'Садизм (SAD)',
+                      'Assessment of Sadistic Personality (ASP) / SSIS',
+                      "O'Meara et al., 2011; Paulhus, 2014",
+                    ],
+                    [
+                      '13 шкал РЛ (дименсионально)',
+                      'PID-5 (Personality Inventory for DSM-5)',
+                      'Krueger et al., 2012, APA',
+                    ],
+                    [
+                      'Систематизация и спектр (ASD)',
+                      'Autism-Spectrum Quotient (AQ / AQ-10)',
+                      'Baron-Cohen et al., 2001',
+                    ],
+                    [
+                      'Прямота коммуникации (DIR)',
+                      'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
+                      'Snyder, 1974 / Ashton & Lee, 2009',
+                    ],
+                    ['Алекситимия (ALX)', 'Toronto Alexithymia Scale (TAS-20)', 'Bagby, Parker & Taylor, 1994'],
+                    ['BAR-скрининг', 'MDQ / HCL-32', 'Hirschfeld, 2000 / Angst, 2005'],
+                    ['DPR-скрининг', 'PHQ-9 (конструкт, без пункта о суицидальном риске)', 'Kroenke et al., 2001'],
+                  ]
+                : [
+                    ['Light Triad (HUM/KAN/FAI)', 'Light Triad Scale (LTS), 12 items', 'Kaufman et al., 2019'],
+                    [
+                      'Dark Triad (MAC/NAR/ANT)',
+                      'Short Dark Triad (SD3) / Dirty Dozen',
+                      'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
+                    ],
+                    [
+                      'Sadism (SAD)',
+                      'Assessment of Sadistic Personality (ASP) / SSIS',
+                      "O'Meara et al., 2011; Paulhus, 2014",
+                    ],
+                    [
+                      '13 personality scales (dimensional)',
+                      'PID-5 (Personality Inventory for DSM-5)',
+                      'Krueger et al., 2012, APA',
+                    ],
+                    [
+                      'Systemizing / spectrum (ASD)',
+                      'Autism-Spectrum Quotient (AQ / AQ-10)',
+                      'Baron-Cohen et al., 2001',
+                    ],
+                    [
+                      'Communication directness (DIR)',
+                      'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
+                      'Snyder, 1974 / Ashton & Lee, 2009',
+                    ],
+                    ['Alexithymia (ALX)', 'Toronto Alexithymia Scale (TAS-20)', 'Bagby, Parker & Taylor, 1994'],
+                    ['BAR screening', 'MDQ / HCL-32', 'Hirschfeld, 2000 / Angst, 2005'],
+                    ['DPR screening', 'PHQ-9 (construct only, no suicide-risk item)', 'Kroenke et al., 2001'],
+                  ]
+              ).map(([scale, proto, src]) => (
+                <Table.Row key={scale}>
+                  <Table.Cell fontWeight="bold">{scale}</Table.Cell>
+                  <Table.Cell>{proto}</Table.Cell>
+                  <Table.Cell color="fg.muted">{src}</Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+          <Text>
+            {isRu
+              ? 'Валидированное ядро — 21 из 22 текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: сейчас это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.'
+              : 'The validated core covers 21 of the 22 current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: currently only MAS ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.'}
+          </Text>
+          <Text>
+            {isRu
+              ? 'Светлая и тёмная триады — не противоположные концы одной оси: по данным Kaufman et al. (2019) корреляция между ними умеренная (r ≈ −.48), а не абсолютная. Высокие баллы одновременно по обеим триадам — норма данных, а не парадокс или ошибка заполнения.'
+              : 'The Light and Dark triads are not opposite ends of a single axis: per Kaufman et al. (2019), the correlation between them is moderate (r ≈ −.48), not absolute. Elevated scores on both triads simultaneously are a normal data pattern, not a paradox or a filling error.'}
+          </Text>
+          <Text>
+            {isRu
+              ? '13 базовых и дополнительных шкал расстройств личности сопоставимы с дименсиональными моделями современной психиатрии — Alternative Model for Personality Disorders (AMPD/PID-5) и HiTOP, а также с пятью доменами расстройств личности МКБ-11 (действие приостановлено в РФ с 02.2024, но модель остаётся ориентиром для клиницистов). Профиль archetest можно читать и категориально (по кластерам A/B/C), и дименсионально — как позицию на непрерывных осях выраженности черт.'
+              : 'The 13 core and supplementary personality-disorder scales map onto contemporary dimensional models in psychiatry — the Alternative Model for Personality Disorders (AMPD/PID-5) and HiTOP, as well as the five personality-disorder domains of ICD-11 (suspended in Russia since 02.2024, but still a reference model for clinicians). The archetest profile can be read both categorically (by A/B/C clusters) and dimensionally — as a position on continuous trait axes.'}
+          </Text>
+        </Section>
+
         {/* Порционное прохождение и стратификация */}
         <Section title={isRu ? 'Порционное прохождение и стратификация' : 'Portioned Completion and Stratification'}>
           <Text>

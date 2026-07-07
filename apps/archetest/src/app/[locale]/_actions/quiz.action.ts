@@ -215,7 +215,7 @@ export async function getRandomQuestionsAction(count = 50): Promise<QuizQuestion
  */
 export async function calculateScores(
   answers: { questionId: string; selectedOption: number }[],
-  db: ReturnType<typeof getEnhancedPrisma>,
+  db: ReturnType<typeof getEnhancedPrisma>
 ): Promise<QuizScores> {
   const raw: Record<string, number> = {}
   for (const code of ALL_SCALE_CODES) {
@@ -230,7 +230,7 @@ export async function calculateScores(
   })
 
   const questionsMap = new Map(
-    questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }]),
+    questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }])
   )
 
   // Собираем sortOrder'ы отвеченных вопросов для расчёта достоверности и валидности
@@ -297,7 +297,7 @@ export async function calculateScores(
 
 /** Сохранить результаты квиза */
 export async function submitQuizAction(
-  input: z.input<typeof SubmitQuizSchema>,
+  input: z.input<typeof SubmitQuizSchema>
 ): Promise<{ data?: SubmitQuizResult; error?: string }> {
   const session = await getSession()
   if (!session) {
@@ -340,10 +340,10 @@ export async function submitQuizAction(
       // Пропущенные вопросы — в отдельную таблицу
       ...(skipped.length > 0
         ? {
-          skippedQuestions: {
-            create: skipped.map((questionId) => ({ questionId })),
-          },
-        }
+            skippedQuestions: {
+              create: skipped.map((questionId) => ({ questionId })),
+            },
+          }
         : {}),
     },
   })
@@ -356,10 +356,10 @@ export async function submitQuizAction(
     getAveragedScores(db, session.user.id),
     validity.isValid
       ? checkAndAwardAchievements(session.user.id, {
-        answeredCount: answers.length,
-        scores: scores.normalized,
-        completedAt,
-      })
+          answeredCount: answers.length,
+          scores: scores.normalized,
+          completedAt,
+        })
       : Promise.resolve([]),
     validity.isValid ? recalcLeaderboardEntry(session.user.id) : Promise.resolve(null),
     // Считаем прогресс после сохранения
@@ -409,7 +409,7 @@ export async function submitQuizAction(
  */
 async function getAveragedScores(
   db: ReturnType<typeof getEnhancedPrisma>,
-  userId: string,
+  userId: string
 ): Promise<Record<PersonalityTypeCode, number> | null> {
   // Усредняем только валидные сессии текущей версии банка: у разных версий разный
   // actual_max (несопоставимы), невалидные протоколы — шум (в истории остаются)
@@ -560,20 +560,18 @@ export async function getQuizProgressAction(): Promise<QuizProgress | null> {
 }
 
 /** Получить историю квизов пользователя */
-export async function getQuizHistoryAction(): Promise<
-  {
-    sessions: Array<{
-      id: string
-      answeredCount: number
-      scores: Record<PersonalityTypeCode, number> | null
-      completedAt: Date | null
-      createdAt: Date
-      /** Версия банка вопросов — сессии разных версий несопоставимы на графиках */
-      questionBankVersion: number
-    }>
-    averagedScores: Record<PersonalityTypeCode, number> | null
-  } | null
-> {
+export async function getQuizHistoryAction(): Promise<{
+  sessions: Array<{
+    id: string
+    answeredCount: number
+    scores: Record<PersonalityTypeCode, number> | null
+    completedAt: Date | null
+    createdAt: Date
+    /** Версия банка вопросов — сессии разных версий несопоставимы на графиках */
+    questionBankVersion: number
+  }>
+  averagedScores: Record<PersonalityTypeCode, number> | null
+} | null> {
   const session = await getSession()
   if (!session) {
     return null

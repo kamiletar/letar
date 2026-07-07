@@ -64,7 +64,7 @@ export function QuizContainer({
   /** Достоверность шкал (от сервера) */
   const [confidence, setConfidence] = useState<Record<PersonalityTypeCode, ScaleConfidence> | null>(null)
   const [averagedScores, setAveragedScores] = useState<Record<PersonalityTypeCode, number> | null>(
-    initialProgress?.averagedScores ?? null,
+    initialProgress?.averagedScores ?? null
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [newAchievements, setNewAchievements] = useState<string[]>([])
@@ -110,7 +110,7 @@ export function QuizContainer({
         }
       }
     },
-    [isRu],
+    [isRu]
   )
 
   // Проверяем pending данные из sessionStorage при маунте
@@ -138,27 +138,25 @@ export function QuizContainer({
         skipped: pending.skipped ?? [],
         moodValence: pending.mood?.valence,
         moodEnergy: pending.mood?.energy,
-      }).then(
-        (result) => {
-          if (result.error) {
-            setSubmitError(result.error)
-            setState('intro')
-            return
+      }).then((result) => {
+        if (result.error) {
+          setSubmitError(result.error)
+          setState('intro')
+          return
+        }
+        if (result.data) {
+          setScores(result.data.scores.normalized)
+          setConfidence(result.data.scores.confidence)
+          setAveragedScores(result.data.averagedScores)
+          setNewAchievements(result.data.newAchievements)
+          setRankInfo(result.data.rankInfo)
+          if (result.data.progress) {
+            setProgress((prev) => (prev ? { ...prev, ...result.data!.progress } : null))
           }
-          if (result.data) {
-            setScores(result.data.scores.normalized)
-            setConfidence(result.data.scores.confidence)
-            setAveragedScores(result.data.averagedScores)
-            setNewAchievements(result.data.newAchievements)
-            setRankInfo(result.data.rankInfo)
-            if (result.data.progress) {
-              setProgress((prev) => (prev ? { ...prev, ...result.data!.progress } : null))
-            }
-            showAchievementToasts(result.data.newAchievements)
-            setState('results')
-          }
-        },
-      )
+          showAchievementToasts(result.data.newAchievements)
+          setState('results')
+        }
+      })
     } catch {
       // Ошибка парсинга — игнорируем
     }
@@ -206,7 +204,7 @@ export function QuizContainer({
         // sessionStorage недоступен — игнорируем
       }
     },
-    [seed, skipped, mood],
+    [seed, skipped, mood]
   )
 
   // Ответ на вопрос
@@ -223,7 +221,7 @@ export function QuizContainer({
         return next
       })
     },
-    [currentQuestion, saveProgress],
+    [currentQuestion, saveProgress]
   )
 
   // Пропуск вопроса (убрать ответ если был, добавить в skipped)
@@ -276,7 +274,7 @@ export function QuizContainer({
   const calculateClientScores = useCallback(
     (answerMap: Map<string, number>): Record<PersonalityTypeCode, number> =>
       computeClientScores(answerMap, currentQuestions),
-    [currentQuestions],
+    [currentQuestions]
   )
 
   // Завершить тест
@@ -421,13 +419,7 @@ export function QuizContainer({
 
   // MOOD CHECK-IN (5.9.2) — перед каждой новой порцией вопросов
   if (state === 'mood') {
-    return (
-      <MoodCheckIn
-        isRu={isRu}
-        onSubmit={(value) => handleMoodDone(value)}
-        onSkip={() => handleMoodDone(null)}
-      />
-    )
+    return <MoodCheckIn isRu={isRu} onSubmit={(value) => handleMoodDone(value)} onSkip={() => handleMoodDone(null)} />
   }
 
   // Нет вопросов в БД — показываем сообщение
@@ -454,12 +446,14 @@ export function QuizContainer({
             current={currentIndex}
             total={shuffledQuestions.length}
             answered={answers.size}
-            globalProgress={progress
-              ? {
-                totalAnswered: progress.totalAnswered + answers.size,
-                totalQuestions: progress.totalQuestions,
-              }
-              : undefined}
+            globalProgress={
+              progress
+                ? {
+                    totalAnswered: progress.totalAnswered + answers.size,
+                    totalQuestions: progress.totalQuestions,
+                  }
+                : undefined
+            }
           />
           <QuizQuestionCard
             scenario={isRu ? currentQuestion.scenario : currentQuestion.scenarioEn}
@@ -577,14 +571,16 @@ export function QuizContainer({
           onContinue={progress && progress.availableCount > 0 ? handleContinue : undefined}
           newAchievements={newAchievements}
           rankInfo={rankInfo}
-          progress={progress
-            ? {
-              totalAnswered: progress.totalAnswered,
-              totalQuestions: progress.totalQuestions,
-              coveragePercent: progress.coveragePercent,
-              availableCount: progress.availableCount,
-            }
-            : undefined}
+          progress={
+            progress
+              ? {
+                  totalAnswered: progress.totalAnswered,
+                  totalQuestions: progress.totalQuestions,
+                  coveragePercent: progress.coveragePercent,
+                  availableCount: progress.availableCount,
+                }
+              : undefined
+          }
         />
       </>
     )

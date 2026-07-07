@@ -197,7 +197,7 @@ export async function checkAndAwardAchievements(
     answeredCount: number
     scores: Record<string, number>
     completedAt: Date
-  },
+  }
 ): Promise<string[]> {
   // Загружаем контекст
   const [allSessions, existingAchievements, uniqueAnsweredQuestions] = await Promise.all([
@@ -260,7 +260,7 @@ export async function checkAndAwardAchievements(
         prisma.userQuizAchievement.create({
           data: { userId, achievementCode: code },
         })
-      ),
+      )
     )
   }
 
