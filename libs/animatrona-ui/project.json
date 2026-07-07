@@ -3,5 +3,42 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-ui/src",
   "projectType": "library",
-  "tags": ["scope:animatrona", "type:ui", "owner:letar"]
+  "tags": ["scope:animatrona", "type:ui", "owner:letar"],
+  "targets": {
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/animatrona-ui"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.json --emitDeclarationOnly",
+        "cwd": "libs/animatrona-ui"
+      },
+      "dependsOn": ["^typecheck"],
+      "cache": true,
+      "inputs": ["default", "^production", "{projectRoot}/tsconfig.json", "{workspaceRoot}/tsconfig.base.json"],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations",
+        "technologies": ["typescript"]
+      }
+    }
+  }
 }
