@@ -95,8 +95,9 @@
       "dependsOn": ["zenstack:generate"]
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "options": {
+        "config": "apps/label-printer-desktop/vitest.config.ts",
         "reportsDirectory": "../../coverage/apps/label-printer-desktop"
       }
     }

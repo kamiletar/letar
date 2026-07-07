@@ -92,10 +92,10 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "passWithNoTests": true
+        "config": "libs/email/vitest.config.ts"
       },
       "metadata": {
         "description": "Run unit tests",

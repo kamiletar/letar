@@ -38,8 +38,9 @@
       "command": "tsgo --project libs/label-printer-core/tsconfig.lib.json --noEmit"
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "options": {
+        "config": "libs/label-printer-core/vitest.config.ts",
         "reportsDirectory": "../../coverage/libs/label-printer-core"
       }
     }

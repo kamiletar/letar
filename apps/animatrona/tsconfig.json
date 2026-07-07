@@ -65,6 +65,9 @@
   ],
   "references": [
     {
+      "path": "./tsconfig.spec.json"
+    },
+    {
       "path": "../../libs/animatrona-utils"
     },
     {

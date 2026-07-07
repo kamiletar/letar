@@ -6,17 +6,8 @@
     "emitDeclarationOnly": true,
     "outDir": "./out-tsc/spec",
     "tsBuildInfoFile": "./out-tsc/spec/tsconfig.spec.tsbuildinfo",
-    "jsx": "react-jsx",
     "types": ["vitest/globals", "node"]
   },
-  "include": [
-    "vitest.config.ts",
-    "vitest.setup.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.test.tsx",
-    "src/**/*.spec.tsx",
-    "src/**/*.d.ts"
-  ],
-  "exclude": ["out-tsc", "dist", "node_modules", ".next"]
+  "include": ["vitest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"],
+  "exclude": ["out-tsc", "dist", "node_modules"]
 }

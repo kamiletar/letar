@@ -70,8 +70,60 @@ references** — иначе трансформация падает. В Next.js-
 
 **Проверка после фикса:** `nx test <app>` + `nx lint <app>` + `nx typecheck:tsgo <app>`.
 
-**Статус тиража (2026-07-07):** archetest ✅; kami, dashboard, driving-school, mandala и
-остальные приложения с vitest — не мигрированы (падают при первом же прогоне тестов).
+**Статус тиража (2026-07-08): завершён.** Фикс применён ко всем проектам монорепо с реальными
+тестовыми файлами — TSCONFIG_ERROR устранён везде, `grep -c TSCONFIG_ERROR` по полному
+`nx run-many -t test` даёт 0.
+
+Проекты с исправленным `tsconfig.spec.json` + reference: `archetest`, `kami`, `dashboard`,
+`mandala`, `driving-school` (submodule — коммит внутри submodule обязателен отдельно),
+`pravda`, `animatrona`, `aboi`, `label-printer-desktop`, `libs/label-printer-core`,
+`libs/auth`, `libs/email`, `libs/contract-generator`.
+
+**Особый случай — Electron-приложения (main/ исключён из корневого tsconfig.json):**
+у `animatrona` и `label-printer-desktop` каталог `main/` явно в `exclude` корневого
+`tsconfig.json` (main-процесс Electron не должен попадать в Next.js typecheck рендерера).
+Из-за этого `include` в `tsconfig.spec.json` **не может быть ограничен только spec/test
+файлами** — oxc резолвит tsconfig для каждого импортируемого файла, включая обычные source
+из `main/`, которые импортирует spec. Нужно покрыть весь `main/**/*.ts` (не только
+`*.spec.ts`/`*.test.ts`), иначе TSCONFIG_ERROR вылезет на исходном файле, который тестируется:
+
+```json
+"include": ["vitest.config.ts", "main/**/*.ts"]
+```
+
+**Проекты без vitest вообще (не в скоупе фикса)** — есть `vitest.config.ts`, но 0 тестовых
+файлов: `aira-web`, `dsperevod`, `grandslamcup`, `time`, `studio`, `svoichuzhie`, `synth`,
+`aprel8008`, `animatrona-tracker`, `libs/cdek`, `libs/image-upload`, `libs/query-provider`.
+Не требуют tsconfig.spec.json пока не появятся первые тесты.
+
+**Найдена отдельная, более глубокая проблема — kami и dashboard:** у обоих нет ни
+`vitest.config.ts`, ни target `test` в `project.json`. `specs/index.spec.tsx` — протухший
+Nx-generated boilerplate, импортирующий несуществующий `../src/app/page` (у kami роутинг
+через `[locale]/`, у dashboard `page.tsx` есть, но test target просто отсутствует).
+`tsconfig.spec.json` доработан на будущее, но витест там сейчас не запускается вообще —
+это отдельная задача (создать `vitest.config.ts` + target `test`, починить/удалить stale
+spec), не тираж oxc-фикса.
+
+**Найдены преэкзистентные баги тестов, не связанные с oxc** (уже проявились после фикса
+tsconfig, но требуют отдельного разбора): `pravda` (не резолвятся алиасы `@letar/*` в
+`vitest.config.ts`, `window.localStorage.clear is not a function`), `animatrona`
+(`vi.mock` не возвращает `initTorrentService`), `label-printer-desktop`
+(`Logger not initialized`), `driving-school:typecheck` (TS6305 — устаревший `dist` у
+`libs/driving-school-db`, TS7006 implicit any в незакоммиченном коде), `label-printer-desktop:typecheck`
+(отсутствует сгенерированный `schema.ts` — нужен `zenstack:generate`).
+
+## Executor `@nx/vite:test` удалён в @nx/vite 23 — миграция на `@nx/vitest:test`
+
+При обновлении `@nx/vite` до 23.x executor `@nx/vite:test` пропал
+(`Cannot find executor 'test' in .../@nx/vite/executors.json`). Затронутые `project.json`:
+`libs/form-mcp`, `libs/letar-consultant`, `libs/email`, `libs/label-printer-core`,
+`apps/label-printer-desktop`.
+
+**Фикс:** заменить executor на `@nx/vitest:test` (опция `passWithNoTests` в новой схеме
+отсутствует — просто убрать; вместо `config`/`configFile` можно передать
+`options.config: "<path>/vitest.config.ts"`). Для `form-mcp` и `letar-consultant` (нет
+тестовых файлов) target `test` целиком удалён — Nx сам не подхватывает пустой executor без
+смысла держать.
 
 ## Диагностика: nx прячет вывод vitest
 

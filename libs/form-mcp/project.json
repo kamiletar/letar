@@ -141,17 +141,6 @@
         "description": "Publish to npm as @letar/form-mcp",
         "technologies": ["npm"]
       }
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "passWithNoTests": true
-      },
-      "metadata": {
-        "description": "Run unit tests",
-        "technologies": ["vitest"]
-      }
     }
   }
 }

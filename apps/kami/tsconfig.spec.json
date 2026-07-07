@@ -1,17 +1,23 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
     "outDir": "./out-tsc/spec",
-    "jsx": "preserve",
+    "tsBuildInfoFile": "./out-tsc/spec/tsconfig.spec.tsbuildinfo",
+    "jsx": "react-jsx",
     "types": ["vitest/globals", "node"]
   },
   "include": [
     "vitest.config.ts",
     "vitest.setup.tsx",
+    "specs/**/*.spec.tsx",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",
     "src/**/*.spec.tsx",
     "src/**/*.d.ts"
-  ]
+  ],
+  "exclude": ["out-tsc", "dist", "node_modules", ".next"]
 }

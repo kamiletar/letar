@@ -76,17 +76,6 @@
         "description": "Type-check library with tsgo (faster)",
         "technologies": ["typescript", "tsgo"]
       }
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "passWithNoTests": true
-      },
-      "metadata": {
-        "description": "Run unit tests",
-        "technologies": ["vitest"]
-      }
     }
   }
 }
