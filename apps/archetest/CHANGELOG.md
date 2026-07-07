@@ -5,6 +5,20 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.15.1] - 2026-07-07
+
+### Added
+
+- **E2E: триггер safety-net (этап 5.8)** — `archetest-e2e/src/safety-net.spec.ts` (1 тест):
+  полный квиз (50 вопросов), на каждом вопросе выбирается вариант, максимизирующий DPR+BAR+BOR
+  (справочник — `questions-dump.json`), до экрана результатов с кризисным блоком телефонов
+  доверия. `submitQuizAction` требует авторизацию, а archetest поддерживает только OIDC-логин
+  через ключницу — тест создаёт сессию напрямую в БД (тестовый юзер + строка `Session`,
+  cookie подписывается тем же HMAC-алгоритмом, что и better-call/Better Auth) вместо гонки
+  реального OAuth-редиректа. Добавлен `data-testid="quiz-scenario"` на заголовок вопроса
+  (`quiz-question-card.tsx`) для сопоставления отображаемого вопроса с банком. Прогон chromium:
+  5/5 passed (2 express + 2 mood + 1 safety-net)
+
 ## [0.15.0] - 2026-07-06
 
 ### Added

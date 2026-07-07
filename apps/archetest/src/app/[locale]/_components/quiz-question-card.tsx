@@ -69,7 +69,7 @@ export function QuizQuestionCard({
         <Text fontSize="sm" color="fg.muted" mb={2}>
           {t('questionLabel', { number: questionNumber })}
         </Text>
-        <Heading size="lg" lineHeight="tall">
+        <Heading size="lg" lineHeight="tall" data-testid="quiz-scenario">
           {scenario}
         </Heading>
       </Box>
