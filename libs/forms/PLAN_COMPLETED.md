@@ -1,5 +1,19 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-07-07 — Техдолг: rules-of-hooks в FieldDataGrid
+
+- **`field-data-grid.tsx`** — `useMemo`/`useReactTable`/`useRef`/`useVirtualizer` вызывались внутри
+  `{(arrayField) => {...}}` render-prop callback `<form.Field mode="array">` — реальное нарушение
+  Rules of Hooks, не только придирка линтера. Заменено на `useField({ form, name, mode: 'array' })`
+  верхнего уровня (тот же хук, на котором построен сам `<form.Field>`, поведение идентично) —
+  все хуки теперь на верхнем уровне компонента.
+- Заодно `eqeqeq`: `value != null` → явное сравнение с `null`/`undefined`.
+- Обнаружено при аудите техдолга после планового `bun update` (сравнение typecheck/lint до/после
+  показало, что ошибка предсуществующая, не от обновления зависимостей).
+- Верификация: `nx run @letar/forms:oxlint` — чисто (кроме известного false-positive в
+  `document-field-base.tsx`, не в этом файле), `typecheck:tsgo` и `test` — чисто.
+- Публичный API (`DataGridFieldProps`) не менялся.
+
 ## v0.80.0 (2026-04-04) — DX фичи (Фаза 6)
 
 - mapServerErrors() — автомаппинг Prisma/ZenStack/Zod ошибок (24 теста, 10M+ ops/sec)
