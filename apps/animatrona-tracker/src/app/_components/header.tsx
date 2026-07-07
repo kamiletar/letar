@@ -21,11 +21,13 @@ import { MobileAuthSection, UserMenu } from '@letar/ui'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { LuCalendar, LuFilm, LuKeyRound, LuLogOut, LuMenu, LuSettings, LuTrophy, LuUser } from 'react-icons/lu'
+import { LuCalendar, LuFilm, LuMenu, LuSettings, LuTrophy } from 'react-icons/lu'
 
 /** Проверяет, активна ли ссылка */
 function isActiveRoute(pathname: string, href: string) {
-  if (href === '/') return pathname === '/'
+  if (href === '/') {
+    return pathname === '/'
+  }
   return pathname.startsWith(href)
 }
 
@@ -37,14 +39,14 @@ export function Header() {
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR'
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  if (pathname.startsWith('/watch/')) return null
+  if (pathname.startsWith('/watch/')) {
+    return null
+  }
 
   const activeLinkProps = (href: string) =>
     isActiveRoute(pathname, href) ? { fontWeight: 'bold' as const, color: 'brand.500' } : {}
 
-  const extraMenuItems = isAdmin
-    ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }]
-    : []
+  const extraMenuItems = isAdmin ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }] : []
 
   return (
     <Box borderBottomWidth="1px" borderColor="border.muted" bg="bg">
