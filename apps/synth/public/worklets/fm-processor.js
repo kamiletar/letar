@@ -89,8 +89,10 @@ class Voice {
 
     if (Math.abs(diff) <= delta) {
       this.egValues[i] = target
-      if (s === 0) this.egStages[i] = 1 // Attack → Decay1
-      else if (s === 1) this.egStages[i] = 2 // Decay1 → Decay2/sustain
+      if (s === 0)
+        this.egStages[i] = 1 // Attack → Decay1
+      else if (s === 1)
+        this.egStages[i] = 2 // Decay1 → Decay2/sustain
       // s=2: держим L3 до noteOff (DX7-behaviour)
       else if (s === 3 && target <= 0.0005) this.egStages[i] = 4 // Release → Idle
     } else {

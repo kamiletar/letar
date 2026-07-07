@@ -4,6 +4,18 @@
 
 ---
 
+## [0.1.1] — 2026-07-07
+
+### Исправлено
+
+- Билд студии падал с `Module not found: Can't resolve '@letar/ui'` — библиотека не была подключена по всем трём обязательным точкам монорепо (tsconfig paths/references, package.json implicitDependencies, next.config.js transpilePackages)
+
+### Проверено
+
+- Первое живое подключение реального M-VAVE SMK-37 PRO: MIDI-вход и звук подтверждены end-to-end
+
+---
+
 ## [0.1.0] — 2026-06-15
 
 ### Добавлено

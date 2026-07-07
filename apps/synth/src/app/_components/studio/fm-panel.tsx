@@ -210,13 +210,7 @@ export function FmPanel({ engine, onChange }: FmPanelProps) {
       {/* 6 операторов в сетке */}
       <Grid templateColumns={{ base: '1fr 1fr', md: 'repeat(3, 1fr)' }} gap={2}>
         {engine.operators.map((op, i) => (
-          <OpCard
-            key={i}
-            index={i}
-            op={op}
-            onChange={(o) => setOp(i, o)}
-            isCarrier={carriers.includes(i)}
-          />
+          <OpCard key={i} index={i} op={op} onChange={(o) => setOp(i, o)} isCarrier={carriers.includes(i)} />
         ))}
       </Grid>
     </Box>

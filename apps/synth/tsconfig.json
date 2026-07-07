@@ -21,11 +21,16 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
-      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"]
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"]
     },
     "types": []
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"],
-  "references": [{ "path": "../../libs/analytics" }, { "path": "../../libs/chakra-provider" }]
+  "references": [
+    { "path": "../../libs/analytics" },
+    { "path": "../../libs/chakra-provider" },
+    { "path": "../../libs/ui" }
+  ]
 }

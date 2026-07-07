@@ -181,7 +181,7 @@ export function StudioClient() {
         setEngineType(type)
       }
     },
-    [started],
+    [started]
   )
 
   const handleEngineChange = useCallback(
@@ -192,7 +192,7 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes],
+    [activeNotes]
   )
 
   // FM-патч обновляется синхронно в воркслет при изменении любого параметра
@@ -315,9 +315,11 @@ export function StudioClient() {
       {/* Основное содержимое */}
       <Box flex={1} overflow="auto" p={4} display="flex" flexDir="column" gap={4}>
         {/* Панели параметров — переключаемые по движку */}
-        {engineType === 'subtractive'
-          ? <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-          : <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />}
+        {engineType === 'subtractive' ? (
+          <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+        ) : (
+          <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+        )}
 
         {/* MIDI-статус */}
         <MidiStatus

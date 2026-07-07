@@ -49,17 +49,19 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
       startY.current = e.clientY
       startVal.current = value
     },
-    [value],
+    [value]
   )
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!dragging.current) {return}
+      if (!dragging.current) {
+        return
+      }
       // 150px вертикального хода = полный диапазон
       const delta = (startY.current - e.clientY) / 150
       onChange(Math.max(0, Math.min(1, startVal.current + delta)))
     },
-    [onChange],
+    [onChange]
   )
 
   const onPointerUp = useCallback(() => {
@@ -88,13 +90,7 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
         <circle cx={cx} cy={cy} r={trackR + 3} fill="#0E0C08" stroke="#2A2018" strokeWidth={1} />
 
         {/* Трек (весь диапазон) */}
-        <path
-          d={arcPath(cx, cy, trackR, 0, 1)}
-          fill="none"
-          stroke="#382E28"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-        />
+        <path d={arcPath(cx, cy, trackR, 0, 1)} fill="none" stroke="#382E28" strokeWidth={2.5} strokeLinecap="round" />
 
         {/* Заполненная дуга (золото) */}
         {value > 0.005 && (
@@ -120,7 +116,9 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
     </Box>
   )
 
-  if (!hint) {return inner}
+  if (!hint) {
+    return inner
+  }
 
   return (
     <Tooltip.Root openDelay={400} closeDelay={0}>

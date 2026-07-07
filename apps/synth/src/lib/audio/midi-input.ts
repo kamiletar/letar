@@ -34,7 +34,9 @@ export class MidiInputManager {
   }
 
   getDevices(): MidiDevice[] {
-    if (!this.access) {return []}
+    if (!this.access) {
+      return []
+    }
     return Array.from(this.access.inputs.values()).map((inp) => ({
       id: inp.id,
       name: inp.name ?? 'MIDI-устройство',
@@ -51,7 +53,9 @@ export class MidiInputManager {
   }
 
   private _attachListeners(): void {
-    if (!this.access) {return}
+    if (!this.access) {
+      return
+    }
     for (const input of this.access.inputs.values()) {
       input.onmidimessage = (evt) => this._onMessage(evt)
     }
@@ -59,7 +63,9 @@ export class MidiInputManager {
 
   private _onMessage(evt: MIDIMessageEvent): void {
     const { data } = evt
-    if (!data || data.length < 2) {return}
+    if (!data || data.length < 2) {
+      return
+    }
 
     const status = data[0]
     const d1 = data[1]
