@@ -95,7 +95,7 @@ export function EpisodeCardBase({
             <Text fontSize="xs" fontWeight="bold" color="white">
               Эпизод {number}
             </Text>
-            {duration != null && duration > 0 && (
+            {duration !== null && duration !== undefined && duration > 0 && (
               <Text fontSize="xs" color="fg.muted">
                 {formatDurationMinutes(duration)}
               </Text>
