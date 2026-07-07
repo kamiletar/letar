@@ -11,24 +11,37 @@
      program: "claude-code",
      model: "opus-4.6",
      task_description: "Разработка @letar/forms",
-     file_reservation_paths: ["libs/forms/**", "libs/zenstack-form-plugin/**"],
+     file_reservation_paths: [
+       "libs/forms/**",
+       "libs/forms-core/**",      // Фаза 7: dependency-free ядро (появится при 7.1)
+       "libs/forms-chakra/**",    // Фаза 7: Chakra-скин
+       "libs/forms-shadcn/**",    // Фаза 7: shadcn-скин
+       "libs/forms-vue/**",       // Фаза 7: Vue-пруф-адаптер (7.8)
+       "libs/zenstack-form-plugin/**",
+     ],
      file_reservation_reason: "form-components development"
    )
    ```
+
+   ⚠️ **Фаза 7 разбивает библиотеку на несколько пакетов** — резервируй владение ими заранее (даже если
+   папки ещё не созданы), чтобы параллельные сессии не разъехались по core/скинам.
 4. **Проверь входящие запросы:**
    ```
    fetch_inbox(topic: "form-feature-request", include_bodies: true)
    ```
-5. **Проверь backlog:** `libs/forms/PLAN.md` → секция "Backlog (запросы от агентов)"
-6. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач
-7. **Приоритизация:** входящие запросы от агентов > backlog > текущий план
+5. **Прочитай `libs/forms/PLAN.md` ЦЕЛИКОМ** (не только Backlog!) — там стратегический roadmap и
+   **активная фаза**. Сейчас активна **Фаза 7** (расслоение на `forms-core` + UI-скины Chakra/shadcn +
+   Vue-пруф-адаптер, dependency-free ядро по Clean Architecture/DIP). Определи текущую фазу отсюда.
+6. **Проверь backlog:** `libs/forms/PLAN.md` → секция "Backlog (запросы от агентов)"
+7. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач песочницы
+8. **Приоритизация:** входящие запросы от агентов > backlog > активная фаза из `libs/forms/PLAN.md`
 
 ## Координация (Forms Coordinator)
 
 **Проверяй inbox** на задачи от координатора (topic: `forms-task`):
 
 ```
-fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
+fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
 ```
 
 После завершения задачи от координатора — **отвечай через reply_message** с результатом.
@@ -48,6 +61,15 @@ fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", top
 ## После завершения задачи
 
 ⚠️ **КРИТИЧНО:** Фаза НЕ считается завершённой без полного цикла документации. НЕ коммить, пока все 6 групп не обновлены.
+
+⚠️ **Документация и примеры живут в ОТДЕЛЬНЫХ приложениях, а не в `libs/forms`:**
+
+- **Документацию** обновляй в **`apps/form-docs`** (Fumadocs MDX, [forms.letar.best](https://forms.letar.best)) — Группа 3.
+- **Примеры/showcase** обновляй в **`apps/form-example`** ([forms-example.letar.best](https://forms-example.letar.best)) — Группа 4.
+- **Демо для разработки** — в **`apps/form-develop-app`** (песочница, порт 3006) — Группа 2.
+
+Правка кода в `libs/forms` **без** синхронного обновления этих аппов = незавершённая задача. Новое поле,
+которого нет в `form-docs`/`form-example`, для внешнего пользователя **не существует**.
 
 ### Группа 1: libs/forms
 
@@ -130,9 +152,10 @@ fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", top
 ### @letar/forms (библиотека)
 
 **Библиотека:** libs/forms
-**Версия:** 0.56.0
+**Версия:** 1.4.0
 **npm пакет:** @letar/forms
-**Описание:** 40+ полей, compound component API, Zod v4, offline, i18n, ZenStack интеграция
+**Описание:** 56 полей, compound component API, Zod v4, offline, i18n, ZenStack интеграция, MCP-сервер
+**Стратегия:** open-core, широкий OSS-охват — см. `libs/forms/PLAN.md` → Фаза 7 (расслоение core + скины)
 
 ### @letar/zenstack-form-plugin (плагин)
 
