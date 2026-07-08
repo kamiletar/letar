@@ -152,6 +152,35 @@ function ForProfessionalsView({ locale }: { locale: string }) {
               ? '13 базовых и дополнительных шкал расстройств личности сопоставимы с дименсиональными моделями современной психиатрии — Alternative Model for Personality Disorders (AMPD/PID-5) и HiTOP, а также с пятью доменами расстройств личности МКБ-11 (действие приостановлено в РФ с 02.2024, но модель остаётся ориентиром для клиницистов). Профиль archetest можно читать и категориально (по кластерам A/B/C), и дименсионально — как позицию на непрерывных осях выраженности черт.'
               : 'The 13 core and supplementary personality-disorder scales map onto contemporary dimensional models in psychiatry — the Alternative Model for Personality Disorders (AMPD/PID-5) and HiTOP, as well as the five personality-disorder domains of ICD-11 (suspended in Russia since 02.2024, but still a reference model for clinicians). The archetest profile can be read both categorically (by A/B/C clusters) and dimensionally — as a position on continuous trait axes.'}
           </Text>
+          <Text>
+            {isRu
+              ? 'Ориентировочный маппинг шкал на домены (на уровне конструктов; эмпирическая факторная проверка — после накопления выборки):'
+              : 'Approximate scale-to-domain mapping (construct level; empirical factor validation pending sample accumulation):'}
+          </Text>
+          <VStack align="start" gap={1} pl={2}>
+            {(isRu
+              ? [
+                  'Негативная аффективность — BOR, DPR, AVD, DEP',
+                  'Отстранённость — SZD, AVD, PAR',
+                  'Антагонизм (AMPD) / Диссоциальность (МКБ-11) — NAR, ANT, PAG; из расширенного набора — MAC, SAD',
+                  'Расторможенность — ANT, BOR, HIS',
+                  'Ананкастия (МКБ-11) — OBC; Психотизм (AMPD) — SZT',
+                  '«Пограничный паттерн» (спецификатор МКБ-11) — BOR',
+                ]
+              : [
+                  'Negative Affectivity — BOR, DPR, AVD, DEP',
+                  'Detachment — SZD, AVD, PAR',
+                  'Antagonism (AMPD) / Dissociality (ICD-11) — NAR, ANT, PAG; from the extended set — MAC, SAD',
+                  'Disinhibition — ANT, BOR, HIS',
+                  'Anankastia (ICD-11) — OBC; Psychoticism (AMPD) — SZT',
+                  '"Borderline pattern" (ICD-11 specifier) — BOR',
+                ]
+            ).map((item) => (
+              <Text key={item} fontSize="sm">
+                • {item}
+              </Text>
+            ))}
+          </VStack>
         </Section>
 
         {/* Порционное прохождение и стратификация */}
