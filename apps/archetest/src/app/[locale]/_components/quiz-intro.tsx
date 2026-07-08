@@ -173,6 +173,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
               <ProfileDetails
                 scores={progress.cumulativeScores.normalized}
                 confidence={progress.cumulativeScores.confidence}
+                relevantCounts={progress.cumulativeScores.relevantCounts}
               />
             )}
           </VStack>

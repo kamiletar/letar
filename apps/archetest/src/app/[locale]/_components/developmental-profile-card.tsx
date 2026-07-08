@@ -15,6 +15,10 @@ interface DevelopmentalProfileCardProps {
   rank?: number
   /** Балл шкалы (%) — показывается рядом с заголовком */
   score?: number
+  /** Нижняя граница 95%-интервала точности (ipsative, 5.6) */
+  ciLow?: number
+  /** Верхняя граница 95%-интервала точности (ipsative, 5.6) */
+  ciHigh?: number
   /** Метка достоверности (например «Низкая точность»); null/undefined — не показывать */
   confidenceLabel?: string | null
   /** Показывать ли клинический ярлык (психолог/админ). По умолчанию берётся из роли. */
@@ -33,6 +37,8 @@ export function DevelopmentalProfileCard({
   code,
   rank,
   score,
+  ciLow,
+  ciHigh,
   confidenceLabel,
   showClinicalOverride,
 }: DevelopmentalProfileCardProps) {
@@ -83,14 +89,23 @@ export function DevelopmentalProfileCard({
           </HStack>
 
           {score !== undefined && (
-            <Text
-              fontSize="sm"
-              mt={-3}
-              color={score >= 60 ? 'red.500' : score >= 40 ? 'orange.500' : 'fg.muted'}
-              fontWeight={score >= 60 ? 'bold' : 'normal'}
-            >
-              {score}%
-            </Text>
+            <HStack gap={2} mt={-3} align="baseline">
+              <Text
+                fontSize="sm"
+                color={score >= 60 ? 'red.500' : score >= 40 ? 'orange.500' : 'fg.muted'}
+                fontWeight={score >= 60 ? 'bold' : 'normal'}
+              >
+                {score}%
+              </Text>
+              {/* 95%-интервал точности ipsative-ранжирования (5.6) */}
+              {ciLow !== undefined && ciHigh !== undefined && (
+                <Text fontSize="xs" color="fg.muted">
+                  {isRu
+                    ? `диапазон ${Math.round(ciLow)}–${Math.round(ciHigh)}%`
+                    : `range ${Math.round(ciLow)}–${Math.round(ciHigh)}%`}
+                </Text>
+              )}
+            </HStack>
           )}
 
           {/* Блок 1: Суперсила */}

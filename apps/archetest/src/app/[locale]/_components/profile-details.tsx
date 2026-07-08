@@ -3,16 +3,20 @@
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Box, Card, Heading, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { PERSONALITY_TYPES, replaceTypeCodes, STATE_CODES } from '../_data/personality-types'
 import { getInteraction, getMoodModifier } from '../_data/type-interactions'
+import type { IpsativeScale } from '../_lib/ipsative'
+import { computeIpsativeRanking } from '../_lib/ipsative'
 import { DevelopmentalProfileCard } from './developmental-profile-card'
 
 interface ProfileDetailsProps {
   scores: Record<PersonalityTypeCode, number>
   confidence?: Record<PersonalityTypeCode, ScaleConfidence> | null
+  /** Число отвеченных релевантных вопросов по шкалам — включает ipsative-интервалы (5.6) */
+  relevantCounts?: Record<PersonalityTypeCode, number> | null
 }
 
 /** Метка достоверности */
@@ -31,21 +35,30 @@ function getConfidenceLabel(conf: ScaleConfidence, isRu: boolean): string | null
  * Текстовые детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы.
  * Переиспользуется в quiz-results и quiz-intro (кнопка "Мой профиль").
  */
-export function ProfileDetails({ scores, confidence }: ProfileDetailsProps) {
+export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDetailsProps) {
   const locale = useLocale()
   const isRu = locale === 'ru'
   const showClinical = useShowClinicalNames()
 
+  // Ipsative-ранжирование (5.6): ранги внутри профиля + 95%-интервалы точности.
+  // Без relevantCounts (клиентский фолбэк гостя/сетевой ошибки) — прежняя сортировка без интервалов
+  const ranking = useMemo(
+    () => (relevantCounts ? computeIpsativeRanking(scores, relevantCounts, { exclude: STATE_CODES }) : null),
+    [scores, relevantCounts]
+  )
+
   // Топ-3 ведущих ЧЕРТ (состояния BAR/DPR исключены — они в отдельном блоке «Состояния»)
   const top3 = useMemo(() => {
+    const entryByCode = new Map<PersonalityTypeCode, IpsativeScale>(ranking?.map((r) => [r.code, r]) ?? [])
     return PERSONALITY_TYPES.filter((type) => !STATE_CODES.includes(type.code))
       .map((type) => ({
         ...type,
         score: scores[type.code] ?? 0,
+        ipsative: entryByCode.get(type.code),
       }))
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => (a.ipsative && b.ipsative ? a.ipsative.rank - b.ipsative.rank : b.score - a.score))
       .slice(0, 3)
-  }, [scores])
+  }, [scores, ranking])
 
   return (
     <VStack gap={4} w="100%">
@@ -56,18 +69,43 @@ export function ProfileDetails({ scores, confidence }: ProfileDetailsProps) {
           ? 'Каждая черта — не приговор, а ресурс: у неё есть суперсила, ловушка и конкретные практики для роста.'
           : 'Each trait is a resource, not a verdict: it has a superpower, a trap, and concrete practices for growth.'}
       </Text>
+      {/* Методологическая подпись ipsative-ранжирования (5.6) */}
+      {ranking && (
+        <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="2xl">
+          {isRu
+            ? 'Порядок черт — ипсативное ранжирование: шкалы сравниваются внутри вашего профиля, а не с другими людьми. Диапазон рядом с баллом — 95%-ориентир точности, он сужается с числом отвеченных вопросов.'
+            : 'Trait order is ipsative: scales are compared within your own profile, not against other people. The range next to the score is a 95% precision guide that narrows as you answer more questions.'}
+        </Text>
+      )}
       {top3.map((type, i) => {
         const conf = confidence?.[type.code]
         const confLabel = conf ? getConfidenceLabel(conf, isRu) : null
+        // Перекрывающиеся интервалы соседей = статистически неразличимы: честно говорим,
+        // что порядок условен, вместо ложной точности «61,2% > 60,8%»
+        const next = top3[i + 1]
+        const tiedWithNext =
+          type.ipsative !== undefined &&
+          next?.ipsative !== undefined &&
+          type.ipsative.tieGroup === next.ipsative.tieGroup
         return (
-          <DevelopmentalProfileCard
-            key={type.code}
-            code={type.code}
-            rank={i + 1}
-            score={type.score}
-            confidenceLabel={confLabel}
-            showClinicalOverride={showClinical}
-          />
+          <Fragment key={type.code}>
+            <DevelopmentalProfileCard
+              code={type.code}
+              rank={i + 1}
+              score={type.score}
+              ciLow={type.ipsative?.ciLow}
+              ciHigh={type.ipsative?.ciHigh}
+              confidenceLabel={confLabel}
+              showClinicalOverride={showClinical}
+            />
+            {tiedWithNext && (
+              <Text fontSize="xs" color="fg.muted" textAlign="center">
+                {isRu
+                  ? '≈ эти черты выражены примерно одинаково — их порядок может меняться от сессии к сессии'
+                  : '≈ these traits are about equally pronounced — their order may swap between sessions'}
+              </Text>
+            )}
+          </Fragment>
         )
       })}
 

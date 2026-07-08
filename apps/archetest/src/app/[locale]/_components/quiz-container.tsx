@@ -67,6 +67,8 @@ export function QuizContainer({
   const [scores, setScores] = useState<Record<PersonalityTypeCode, number> | null>(null)
   /** Достоверность шкал (от сервера) */
   const [confidence, setConfidence] = useState<Record<PersonalityTypeCode, ScaleConfidence> | null>(null)
+  /** Число отвеченных релевантных вопросов по шкалам (от сервера) — вход ipsative-интервалов (5.6) */
+  const [relevantCounts, setRelevantCounts] = useState<Record<PersonalityTypeCode, number> | null>(null)
   const [averagedScores, setAveragedScores] = useState<Record<PersonalityTypeCode, number> | null>(
     initialProgress?.averagedScores ?? null
   )
@@ -154,6 +156,7 @@ export function QuizContainer({
         if (result.data) {
           setScores(result.data.scores.normalized)
           setConfidence(result.data.scores.confidence)
+          setRelevantCounts(result.data.scores.relevantCounts)
           setAveragedScores(result.data.averagedScores)
           setNewAchievements(result.data.newAchievements)
           setRankInfo(result.data.rankInfo)
@@ -182,6 +185,7 @@ export function QuizContainer({
     setSkipReminderShown(false)
     setScores(null)
     setConfidence(null)
+    setRelevantCounts(null)
     setSubmitError(null)
     setNewAchievements([])
     setRankInfo(null)
@@ -332,6 +336,7 @@ export function QuizContainer({
           sessionStorage.removeItem(STORAGE_KEY)
           setScores(result.data.scores.normalized)
           setConfidence(result.data.scores.confidence)
+          setRelevantCounts(result.data.scores.relevantCounts)
           setAveragedScores(result.data.averagedScores)
           setNewAchievements(result.data.newAchievements)
           setRankInfo(result.data.rankInfo)
@@ -402,6 +407,7 @@ export function QuizContainer({
       setSkipReminderShown(false)
       setScores(null)
       setConfidence(null)
+      setRelevantCounts(null)
       setSubmitError(null)
       setNewAchievements([])
       setRankInfo(null)
@@ -426,6 +432,7 @@ export function QuizContainer({
     setSkipReminderShown(false)
     setScores(null)
     setConfidence(null)
+    setRelevantCounts(null)
     setSubmitError(null)
     setNewAchievements([])
     setRankInfo(null)
@@ -553,6 +560,7 @@ export function QuizContainer({
                       sessionStorage.removeItem(STORAGE_KEY)
                       setScores(result.data.scores.normalized)
                       setConfidence(result.data.scores.confidence)
+                      setRelevantCounts(result.data.scores.relevantCounts)
                       setAveragedScores(result.data.averagedScores)
                       setNewAchievements(result.data.newAchievements)
                       setRankInfo(result.data.rankInfo)
@@ -587,6 +595,7 @@ export function QuizContainer({
         <QuizResults
           scores={scores}
           confidence={confidence}
+          relevantCounts={relevantCounts}
           averagedScores={averagedScores}
           isAuthenticated={isAuthenticated}
           onRestart={handleRestart}

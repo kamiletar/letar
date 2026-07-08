@@ -24,6 +24,8 @@ interface QuizResultsProps {
   scores: Record<PersonalityTypeCode, number>
   /** Достоверность шкал (от сервера) */
   confidence?: Record<PersonalityTypeCode, ScaleConfidence> | null
+  /** Число отвеченных релевантных вопросов по шкалам (от сервера) — вход ipsative-интервалов (5.6) */
+  relevantCounts?: Record<PersonalityTypeCode, number> | null
   averagedScores: Record<PersonalityTypeCode, number> | null
   /** Авторизирован ли пользователь */
   isAuthenticated?: boolean
@@ -107,6 +109,7 @@ function getWarnings(
 export function QuizResults({
   scores,
   confidence,
+  relevantCounts,
   averagedScores,
   isAuthenticated = true,
   onRestart,
@@ -270,8 +273,8 @@ export function QuizResults({
         {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
         {showDarkReassurance && <DarkReassuranceNote isRu={isRu} />}
 
-        {/* Детали профиля: топ-3 ведущих ЧЕРТ в developmental-фрейме, взаимодействие, модификатор PAG */}
-        <ProfileDetails scores={scores} confidence={confidence} />
+        {/* Детали профиля: топ-3 ведущих ЧЕРТ в developmental-фрейме (ipsative-ранжирование), взаимодействие, модификатор PAG */}
+        <ProfileDetails scores={scores} confidence={confidence} relevantCounts={relevantCounts} />
 
         {/* Состояния (BAR/DPR) — отдельно от черт (5.6.1) */}
         <StatesBlock scores={scores} confidence={confidence} />

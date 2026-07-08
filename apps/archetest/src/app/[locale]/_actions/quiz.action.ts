@@ -3,22 +3,20 @@
 import { getDbUser, getSession } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
 import { z } from 'zod/v4'
-import maxScoresData from '../_data/max-scores-per-question.json'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { ALL_SCALE_CODES } from '../_data/personality-types'
 import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
 import { isValidityQuestion, VALIDITY_CHECKS, VALIDITY_PER_SESSION } from '../_data/validity-checks'
+import type { AnsweredQuestionInput, QuizOptionData, QuizScores, ScaleConfidence } from '../_lib/scoring-core'
+import { computeActualMax, computeScoresCore, getScaleConfidence } from '../_lib/scoring-core'
 import { fisherYatesShuffle, stratifiedSelect } from '../_lib/stratified-shuffle'
 import { computeValidityFlags } from '../_lib/validity'
 import { checkAndAwardAchievements } from './achievements.action'
 import { recalcLeaderboardEntry } from './leaderboard.action'
 
-/** Формат опции из БД */
-export interface QuizOptionData {
-  text: string
-  textEn: string
-  scoring: Record<string, number>
-}
+// Ядро скоринга вынесено в _lib/scoring-core (этап 5.6, unit-тестируемо без next).
+// Типы реэкспортируются — внешние импорты из quiz.action продолжают работать.
+export type { QuizOptionData, QuizScores, ScaleConfidence, ScaleLevel } from '../_lib/scoring-core'
 
 /** Вопрос квиза для клиента */
 export interface QuizQuestionDTO {
@@ -49,60 +47,9 @@ const SubmitQuizSchema = z
   })
   .strip()
 
-/** Уровень достоверности шкалы */
-export type ScaleConfidence = 'insufficient' | 'low' | 'moderate' | 'high'
-
-/** Уровень значимости шкалы */
-export type ScaleLevel = 'minimal' | 'moderate' | 'significant' | 'high' | 'extreme' | 'insufficient_data'
-
-/** Нормализованные результаты */
-export interface QuizScores {
-  raw: Record<PersonalityTypeCode, number>
-  normalized: Record<PersonalityTypeCode, number>
-  /** Достоверность каждой шкалы (зависит от числа пройденных релевантных вопросов) */
-  confidence: Record<PersonalityTypeCode, ScaleConfidence>
-  /** Уровень значимости каждой шкалы */
-  levels: Record<PersonalityTypeCode, ScaleLevel>
-  /** Ответы с sortOrder — для вычисления валидности протокола */
-  answersWithSortOrder: { sortOrder: number; selectedOption: number }[]
-}
-
-/** Максимальные баллы по каждому вопросу (из JSON от психолога) */
-const perQuestionMax = maxScoresData.per_question_max as Record<string, Record<string, number>>
-
-/** Общее количество релевантных вопросов по каждой шкале */
-const totalRelevantByScale: Record<string, number> = {}
-for (const code of ALL_SCALE_CODES) {
-  let count = 0
-  for (const qMax of Object.values(perQuestionMax)) {
-    if (qMax[code] && qMax[code] > 0) {
-      count++
-    }
-  }
-  totalRelevantByScale[code] = count
-}
-
-/** Определить уровень значимости */
-function getScaleLevel(normalized: number): ScaleLevel {
-  if (normalized < 20) {
-    return 'minimal'
-  }
-  if (normalized < 40) {
-    return 'moderate'
-  }
-  if (normalized < 60) {
-    return 'significant'
-  }
-  if (normalized < 80) {
-    return 'high'
-  }
-  return 'extreme'
-}
-
 /**
  * Достоверность всех шкал по кумулятивному набору отвеченных вопросов (этап 5.9.4,
- * ачивка «Полная карта»). Используется achievements.action.ts — там нет доступа
- * к perQuestionMax/totalRelevantByScale напрямую.
+ * ачивка «Полная карта»). Async-обёртка над ядром scoring-core для achievements.action.ts.
  */
 export async function getCumulativeConfidence(answeredSortOrders: number[]): Promise<Record<string, ScaleConfidence>> {
   const result: Record<string, ScaleConfidence> = {}
@@ -110,29 +57,6 @@ export async function getCumulativeConfidence(answeredSortOrders: number[]): Pro
     result[code] = getScaleConfidence(code, answeredSortOrders)
   }
   return result
-}
-
-/** Определить достоверность шкалы по числу пройденных релевантных вопросов */
-function getScaleConfidence(scale: string, answeredSortOrders: number[]): ScaleConfidence {
-  let relevant = 0
-  for (const so of answeredSortOrders) {
-    const qId = String(so + 1) // sortOrder 0-based → questionNumber 1-based
-    if (perQuestionMax[qId]?.[scale] && perQuestionMax[qId][scale] > 0) {
-      relevant++
-    }
-  }
-  const total = totalRelevantByScale[scale] || 1
-  const ratio = relevant / total
-  if (ratio < 0.1) {
-    return 'insufficient'
-  }
-  if (ratio < 0.3) {
-    return 'low'
-  }
-  if (ratio < 0.6) {
-    return 'moderate'
-  }
-  return 'high'
 }
 
 /** Результат сабмита */
@@ -217,18 +141,13 @@ export async function getRandomQuestionsAction(count = 50): Promise<QuizQuestion
 
 /**
  * Посчитать баллы по ответам (серверная авторитетная версия).
- * Формула нормализации (TZ v2): normalized[S] = (raw[S] / actual_max[S]) × 100
- * где actual_max[S] = сумма макс. баллов по шкале S для каждого отвеченного вопроса.
+ * Тонкая обёртка: загружает вопросы из БД и передаёт в чистое ядро
+ * computeScoresCore (_lib/scoring-core) — формула нормализации и достоверность там.
  */
 export async function calculateScores(
   answers: { questionId: string; selectedOption: number }[],
   db: ReturnType<typeof getEnhancedPrisma>
 ): Promise<QuizScores> {
-  const raw: Record<string, number> = {}
-  for (const code of ALL_SCALE_CODES) {
-    raw[code] = 0
-  }
-
   // Загружаем вопросы из БД для авторитетного подсчёта
   const questionIds = answers.map((a) => a.questionId)
   const questions = await db.quizQuestion.findMany({
@@ -240,66 +159,17 @@ export async function calculateScores(
     questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }])
   )
 
-  // Собираем sortOrder'ы отвеченных вопросов для расчёта достоверности и валидности
-  const answeredSortOrders: number[] = []
-  const answersWithSortOrder: { sortOrder: number; selectedOption: number }[] = []
-
+  // Ядру передаются только найденные в БД вопросы (неизвестные id игнорируются)
+  const answered: AnsweredQuestionInput[] = []
   for (const answer of answers) {
     const qData = questionsMap.get(answer.questionId)
     if (!qData) {
       continue
     }
-
-    answeredSortOrders.push(qData.sortOrder)
-    answersWithSortOrder.push({ sortOrder: qData.sortOrder, selectedOption: answer.selectedOption })
-
-    const option = qData.options[answer.selectedOption]
-    if (!option) {
-      continue
-    }
-
-    for (const [typeCode, score] of Object.entries(option.scoring)) {
-      raw[typeCode] = (raw[typeCode] || 0) + score
-    }
+    answered.push({ sortOrder: qData.sortOrder, selectedOption: answer.selectedOption, options: qData.options })
   }
 
-  // Нормализация TZ v2: actual_max = сумма макс. баллов по пройденным вопросам
-  const normalized: Record<string, number> = {}
-  const confidence: Record<string, ScaleConfidence> = {}
-  const levels: Record<string, ScaleLevel> = {}
-
-  for (const code of ALL_SCALE_CODES) {
-    // Считаем actual_max для этой шкалы
-    let actualMax = 0
-    for (const so of answeredSortOrders) {
-      const qId = String(so + 1) // sortOrder 0-based → questionNumber 1-based
-      const qMax = perQuestionMax[qId]
-      if (qMax?.[code]) {
-        actualMax += qMax[code]
-      }
-    }
-
-    // Нормализация
-    if (actualMax === 0) {
-      normalized[code] = 0
-      levels[code] = 'insufficient_data'
-    } else {
-      const norm = (raw[code] / actualMax) * 100
-      normalized[code] = Math.round(norm * 10) / 10
-      levels[code] = getScaleLevel(norm)
-    }
-
-    // Достоверность
-    confidence[code] = getScaleConfidence(code, answeredSortOrders)
-  }
-
-  return {
-    raw: raw as Record<PersonalityTypeCode, number>,
-    normalized: normalized as Record<PersonalityTypeCode, number>,
-    confidence: confidence as Record<PersonalityTypeCode, ScaleConfidence>,
-    levels: levels as Record<PersonalityTypeCode, ScaleLevel>,
-    answersWithSortOrder,
-  }
+  return computeScoresCore(answered)
 }
 
 /** Сохранить результаты квиза */
@@ -472,16 +342,11 @@ async function getAveragedScores(
 
     validSessions++
 
+    const answeredSortOrders = answeredQuestions.map((q) => q.sortOrder)
+
     for (const code of ALL_SCALE_CODES) {
       // actual_max для этой сессии
-      let actualMax = 0
-      for (const q of answeredQuestions) {
-        const qId = String(q.sortOrder + 1)
-        if (perQuestionMax[qId]?.[code]) {
-          actualMax += perQuestionMax[qId][code]
-        }
-      }
-
+      const actualMax = computeActualMax(code, answeredSortOrders)
       const norm = actualMax > 0 ? ((raw[code] || 0) / actualMax) * 100 : 0
       totals[code] += Math.round(norm * 10) / 10
     }
