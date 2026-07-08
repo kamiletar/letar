@@ -410,6 +410,7 @@ export function StudioClient() {
                     letterSpacing: '0.04em',
                   }}
                   onClick={handleRequestFromHardware}
+                  title="SMK-37 PRO не отвечает на этот запрос (прошивка не поддерживает dump request) — оставлено для другого DX7-совместимого железа"
                 >
                   Прочитать из железа
                 </button>
