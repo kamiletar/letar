@@ -44,6 +44,8 @@ const SubmitQuizSchema = z
     /** Mood check-in (этап 5.9.2): 1-3 по каждой оси циркумплекса, необязателен (можно пропустить) */
     moodValence: z.number().int().min(1).max(3).optional(),
     moodEnergy: z.number().int().min(1).max(3).optional(),
+    /** Локаль прохождения (5.9.5): нормы ru/en считаются раздельно */
+    locale: z.enum(['ru', 'en']).optional(),
   })
   .strip()
 
@@ -314,7 +316,7 @@ export async function submitQuizAction(
     return { error: 'validation_error' }
   }
 
-  const { seed, answers, skipped, moodValence, moodEnergy } = parsed.data
+  const { seed, answers, skipped, moodValence, moodEnergy, locale } = parsed.data
   const db = getEnhancedPrisma(await getDbUser(session))
   const scores = await calculateScores(answers, db)
 
@@ -334,6 +336,7 @@ export async function submitQuizAction(
       validityFlags: JSON.stringify(validity),
       moodValence,
       moodEnergy,
+      locale,
       completedAt: new Date(),
       answers: {
         create: answers.map((a, i) => ({

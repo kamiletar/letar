@@ -121,7 +121,8 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
   }, [locale])
 
   const handleLinkAccount = async () => {
-    const pending = { seed, answers, skipped: [] as string[] }
+    // Локаль прохождения (5.9.5) — сервер сохранит её в сессию для будущих норм ru/en
+    const pending = { seed, answers, skipped: [] as string[], locale: isRu ? ('ru' as const) : ('en' as const) }
 
     if (isAuthenticated) {
       // Уже вошёл: сервер пересчитывает баллы из ответов и создаёт полноценную сессию

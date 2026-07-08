@@ -26,6 +26,8 @@ interface PendingQuiz {
   skipped: string[]
   /** Mood check-in перед сессией (этап 5.9.2), null если пропущен */
   mood: MoodValue | null
+  /** Локаль прохождения (5.9.5): нормы ru/en раздельно; свойство сессии, не юзера */
+  locale?: 'ru' | 'en'
 }
 
 const STORAGE_KEY = PENDING_QUIZ_KEY
@@ -49,6 +51,8 @@ export function QuizContainer({
   const t = useTranslations('quiz')
   const locale = useLocale()
   const isRu = locale === 'ru'
+  /** Локаль прохождения для сохранения в сессию (5.9.5, нормы ru/en) */
+  const sessionLocale = isRu ? ('ru' as const) : ('en' as const)
 
   const [state, setState] = useState<QuizState>('intro')
   const [seed, setSeed] = useState(0)
@@ -140,6 +144,7 @@ export function QuizContainer({
         skipped: pending.skipped ?? [],
         moodValence: pending.mood?.valence,
         moodEnergy: pending.mood?.energy,
+        locale: pending.locale,
       }).then((result) => {
         if (result.error) {
           setSubmitError(result.error)
@@ -198,6 +203,7 @@ export function QuizContainer({
           seed,
           skipped: Array.from(skipped),
           mood,
+          locale: sessionLocale,
           answers: Array.from(answerMap.entries()).map(([questionId, selectedOption]) => ({
             questionId,
             selectedOption,
@@ -208,7 +214,7 @@ export function QuizContainer({
         // sessionStorage недоступен — игнорируем
       }
     },
-    [seed, skipped, mood]
+    [seed, skipped, mood, sessionLocale]
   )
 
   // Ответ на вопрос
@@ -314,6 +320,7 @@ export function QuizContainer({
           skipped: Array.from(skipped),
           moodValence: mood?.valence,
           moodEnergy: mood?.energy,
+          locale: sessionLocale,
         })
         if (result.error) {
           setSubmitError(result.error)
@@ -355,11 +362,17 @@ export function QuizContainer({
       // Гость: показываем client-side результаты, сохраняем ответы для автосабмита после логина
       const clientScores = calculateClientScores(answers)
       setScores(clientScores)
-      const pending: PendingQuiz = { seed, answers: answersArray, skipped: Array.from(skipped), mood }
+      const pending: PendingQuiz = {
+        seed,
+        answers: answersArray,
+        skipped: Array.from(skipped),
+        mood,
+        locale: sessionLocale,
+      }
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
       setState('results')
     }
-  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, showAchievementToasts])
+  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, sessionLocale, showAchievementToasts])
 
   // Обновляем ref для автозавершения
   handleFinishRef.current = handleFinish
@@ -529,6 +542,7 @@ export function QuizContainer({
                       skipped: Array.from(skipped),
                       moodValence: mood?.valence,
                       moodEnergy: mood?.energy,
+                      locale: sessionLocale,
                     })
                     if (result.error) {
                       setSubmitError(result.error)
