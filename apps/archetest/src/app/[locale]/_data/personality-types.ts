@@ -586,6 +586,15 @@ export const DARK_TRIAD_DISPLAY: Partial<Record<PersonalityTypeCode, { ru: strin
  */
 export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES, ...DARK_TRIAD_CODES, 'SAD', 'MAS']
 
+/**
+ * Оставшиеся 12 шкал ядра вне гексаграммы и вне «Состояний» (этап 5.7): тизер
+ * под гексаграммой в результатах экспресса — заблокированный список, который
+ * раскрывает полный тест. BAR/DPR (STATE_CODES) исключены — упомянуты отдельно.
+ */
+export const TEASER_SCALE_CODES: PersonalityTypeCode[] = ALL_SCALE_CODES.filter(
+  (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code),
+)
+
 /** Получить тип по коду */
 export function getPersonalityType(code: PersonalityTypeCode): PersonalityType {
   return PERSONALITY_TYPES.find((t) => t.code === code)!

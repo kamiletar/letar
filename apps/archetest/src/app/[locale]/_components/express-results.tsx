@@ -21,6 +21,7 @@ import { needsDarkReassurance } from '../_lib/safety-net'
 import { EXPRESS_RESULT_KEY, PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 import { HexagramChart } from './hexagram-chart'
 import { DarkReassuranceNote } from './safety-net-block'
+import { ScaleTeaser } from './scale-teaser'
 import { ShareResultButton } from './share-result-button'
 
 /** Ответ для передачи на сервер (пересчёт баллов из ответов, не из клиентских баллов) */
@@ -95,9 +96,7 @@ function ScaleGroup({
       <Text fontSize="xs" fontWeight="bold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
         {title}
       </Text>
-      {codes.map((code) => (
-        <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />
-      ))}
+      {codes.map((code) => <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />)}
     </VStack>
   )
 }
@@ -171,6 +170,9 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
           <ScaleGroup title={t('groupDark')} codes={DARK_TRIAD_CODES} scores={scores} isRu={isRu} />
           <ScaleGroup title={t('groupAura')} codes={AURA_CODES} scores={scores} isRu={isRu} />
         </VStack>
+
+        {/* Тизер оставшихся 12 шкал (этап 5.7) — вовлечение в полный тест */}
+        <ScaleTeaser isRu={isRu} />
 
         {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
         {needsDarkReassurance(scores) && <DarkReassuranceNote isRu={isRu} />}
