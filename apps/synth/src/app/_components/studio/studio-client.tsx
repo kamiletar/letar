@@ -1,22 +1,29 @@
 'use client'
 
 import { getAudioContext, resumeContext } from '@/lib/audio/context'
+import { DrumEngine } from '@/lib/audio/drums'
 import { FmEngine } from '@/lib/audio/fm'
 import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
+import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
-import type { FmPatch, SubtractivePatch } from '@/lib/patch/schema'
+import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Button, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { DrumPads } from './drum-pads'
+import { DrumPanel } from './drum-panel'
 import { FmPanel } from './fm-panel'
 import { Keyboard } from './keyboard'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 
-type EngineType = 'subtractive' | 'fm'
+type EngineType = 'subtractive' | 'fm' | 'drumkit'
+
+// Дефолтный маппинг MIDI-пэдов на слоты нашего драм-кита (нота 36 = пэд 0, как в GM/большинстве контроллеров)
+const DRUM_MIDI_BASE = 36
 
 // CC-маппинг для 8 энкодеров (стандартные GM + диапазон 70-77)
 // Точный маппинг SMK-37 PRO уточняется в Фазе 1.5
@@ -53,8 +60,11 @@ export function StudioClient() {
   const [started, setStarted] = useState(false)
   const [patch, setPatch] = useState<SubtractivePatch>(REESE_BASS)
   const [fmPatch, setFmPatch] = useState<FmPatch>(FM_GLASS_BELLS)
+  const [drumPatch, setDrumPatch] = useState<DrumkitPatch>(DRUM_KIT_1)
   const [engineType, setEngineType] = useState<EngineType>('subtractive')
   const [activeNotes, setActiveNotes] = useState<Set<number>>(new Set())
+  const [selectedPad, setSelectedPad] = useState(0)
+  const [activePads, setActivePads] = useState<Set<number>>(new Set())
 
   // MIDI состояние
   const [midiDevices, setMidiDevices] = useState<MidiDevice[]>([])
@@ -65,6 +75,7 @@ export function StudioClient() {
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
+  const drumEngineRef = useRef<DrumEngine | null>(null)
   const masterGainRef = useRef<GainNode | null>(null)
   const midiRef = useRef<MidiInputManager | null>(null)
   const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -74,6 +85,8 @@ export function StudioClient() {
   patchRef.current = patch
   const fmPatchRef = useRef(fmPatch)
   fmPatchRef.current = fmPatch
+  const drumPatchRef = useRef(drumPatch)
+  drumPatchRef.current = drumPatch
   const engineTypeRef = useRef(engineType)
   engineTypeRef.current = engineType
 
@@ -81,16 +94,53 @@ export function StudioClient() {
   const convolverRef = useRef<ConvolverNode | null>(null)
   const reverbWetRef = useRef<GainNode | null>(null)
 
-  const handleNoteOn = useCallback((midiNote: number, velocity: number) => {
-    if (engineTypeRef.current === 'fm') {
-      fmEngineRef.current?.noteOn(midiNote, velocity)
-    } else {
-      engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
+  // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
+  const handlePadHit = useCallback((index: number, velocity: number) => {
+    const pad = drumPatchRef.current.engine.pads[index]
+    if (pad?.synth) {
+      drumEngineRef.current?.trigger(pad.synth, velocity)
     }
-    setActiveNotes((prev) => new Set([...prev, midiNote]))
+    setActivePads((prev) => new Set([...prev, index]))
+    setTimeout(() => {
+      setActivePads((prev) => {
+        const next = new Set(prev)
+        next.delete(index)
+        return next
+      })
+    }, 100)
   }, [])
 
+  const handlePadChange = useCallback((pad: DrumPad) => {
+    setDrumPatch((p) => {
+      const pads = [...p.engine.pads] as DrumkitPatch['engine']['pads']
+      pads[pad.index] = pad
+      return { ...p, engine: { pads } }
+    })
+  }, [])
+
+  const handleNoteOn = useCallback(
+    (midiNote: number, velocity: number) => {
+      if (engineTypeRef.current === 'drumkit') {
+        const padIndex = midiNote - DRUM_MIDI_BASE
+        if (padIndex >= 0 && padIndex < 16) {
+          handlePadHit(padIndex, velocity)
+        }
+        return
+      }
+      if (engineTypeRef.current === 'fm') {
+        fmEngineRef.current?.noteOn(midiNote, velocity)
+      } else {
+        engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
+      }
+      setActiveNotes((prev) => new Set([...prev, midiNote]))
+    },
+    [handlePadHit]
+  )
+
   const handleNoteOff = useCallback((midiNote: number) => {
+    if (engineTypeRef.current === 'drumkit') {
+      return // ударные — one-shot, note-off не нужен
+    }
     if (engineTypeRef.current === 'fm') {
       fmEngineRef.current?.noteOff(midiNote)
     } else {
@@ -194,14 +244,14 @@ export function StudioClient() {
     void handleMidiConnect()
   }, [handleMidiConnect])
 
-  // Переключение движка с ленивым созданием FmEngine
+  // Переключение движка с ленивым созданием FmEngine/DrumEngine
   const handleSwitchEngine = useCallback(
     async (type: EngineType) => {
       if (started) {
-        // Останавливаем все ноты текущего движка
+        // Останавливаем все ноты текущего движка (ударные — one-shot, останавливать нечего)
         if (engineTypeRef.current === 'fm') {
           fmEngineRef.current?.allNotesOff()
-        } else {
+        } else if (engineTypeRef.current === 'subtractive') {
           engineRef.current?.allNotesOff(0.05)
         }
         setActiveNotes(new Set())
@@ -212,6 +262,12 @@ export function StudioClient() {
           const fm = await FmEngine.create(ctx, masterGainRef.current)
           fm.updatePatch(fmPatchRef.current.engine)
           fmEngineRef.current = fm
+        }
+
+        // Создаём драм-движок при первом переключении
+        if (type === 'drumkit' && !drumEngineRef.current && masterGainRef.current) {
+          const ctx = getAudioContext()
+          drumEngineRef.current = new DrumEngine(ctx, masterGainRef.current)
         }
 
         setEngineType(type)
@@ -274,6 +330,7 @@ export function StudioClient() {
     return () => {
       engineRef.current?.dispose()
       fmEngineRef.current?.dispose()
+      drumEngineRef.current?.dispose()
       midiRef.current?.dispose()
       if (readTimeoutRef.current) {
         clearTimeout(readTimeoutRef.current)
@@ -299,7 +356,7 @@ export function StudioClient() {
             ✦
           </Text>
           <Text fontSize="xs" color="fg.muted" letterSpacing="0.15em" textTransform="uppercase">
-            {engineType === 'fm' ? fmPatch.name : patch.name}
+            {engineType === 'fm' ? fmPatch.name : engineType === 'drumkit' ? drumPatch.name : patch.name}
           </Text>
         </Box>
 
@@ -337,6 +394,21 @@ export function StudioClient() {
               >
                 FM
               </button>
+              <button
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '10px',
+                  borderRadius: '4px',
+                  border: `1px solid ${engineType === 'drumkit' ? '#D4AF37' : '#2A2018'}`,
+                  background: engineType === 'drumkit' ? '#3A2E08' : '#0E0A00',
+                  color: engineType === 'drumkit' ? '#EEC835' : '#706860',
+                  cursor: 'pointer',
+                  letterSpacing: '0.04em',
+                }}
+                onClick={() => void handleSwitchEngine('drumkit')}
+              >
+                DRUM
+              </button>
             </Box>
           )}
 
@@ -368,6 +440,8 @@ export function StudioClient() {
         {/* Панели параметров — переключаемые по движку */}
         {engineType === 'subtractive' ? (
           <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+        ) : engineType === 'drumkit' ? (
+          <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
         ) : (
           <Box display="flex" flexDir="column" gap={2}>
             <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
@@ -443,14 +517,26 @@ export function StudioClient() {
           error={midiError}
         />
 
-        {/* Подсказка по клавиатуре */}
+        {/* Подсказка по клавиатуре/пэдам */}
         <Text fontSize="9px" color="fg.subtle" letterSpacing="0.06em" textAlign="center">
-          Клавиши: A W S E D F T G Y H U J K O L P ; — или кликай по клавишам ниже
+          {engineType === 'drumkit'
+            ? 'Клавиши: 1 2 3 4 / Q W E R / A S D F / Z X C V — или кликай по пэдам ниже'
+            : 'Клавиши: A W S E D F T G Y H U J K O L P ; — или кликай по клавишам ниже'}
         </Text>
 
-        {/* Клавиатура — прилипает к низу */}
+        {/* Клавиатура или пэды — прилипает к низу */}
         <Box mt="auto" pb={4} display="flex" justifyContent="center" overflow="auto">
-          <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
+          {engineType === 'drumkit' ? (
+            <DrumPads
+              pads={drumPatch.engine.pads}
+              selectedIndex={selectedPad}
+              activePads={activePads}
+              onSelect={setSelectedPad}
+              onHit={handlePadHit}
+            />
+          ) : (
+            <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
+          )}
         </Box>
       </Box>
 

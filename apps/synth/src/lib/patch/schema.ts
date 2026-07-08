@@ -139,6 +139,8 @@ export const DrumkitEngineSchema = z.object({
   pads: z.array(DrumPadSchema).min(16).max(16),
 })
 export type DrumkitEngineParams = z.infer<typeof DrumkitEngineSchema>
+export type DrumPadSynth = z.infer<typeof DrumPadSynthSchema>
+export type DrumPad = z.infer<typeof DrumPadSchema>
 
 // === Базовые поля ===
 
