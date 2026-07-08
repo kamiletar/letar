@@ -157,6 +157,14 @@ export function encodeSingleVoiceSysex(engine: FmEngineParams, name: string, cha
   ])
 }
 
+/**
+ * Кодирует запрос дампа текущего голоса (voice edit buffer) с DX7-совместимого устройства.
+ * Устройство должно ответить single-voice dump'ом (см. `decodeSingleVoiceSysex`).
+ */
+export function encodeVoiceDumpRequest(channel = 0): Uint8Array {
+  return new Uint8Array([SYSEX_START, YAMAHA_ID, 0x20 | (channel & 0x0f), 0x00, SYSEX_END])
+}
+
 /** Декодирует single-voice DX7 SysEx dump обратно в модель FM-патча + имя */
 export function decodeSingleVoiceSysex(bytes: Uint8Array): { name: string; engine: FmEngineParams } {
   if (bytes[0] !== SYSEX_START || bytes[bytes.length - 1] !== SYSEX_END) {

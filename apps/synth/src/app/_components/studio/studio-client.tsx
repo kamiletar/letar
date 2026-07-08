@@ -6,7 +6,7 @@ import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
-import { encodeSingleVoiceSysex } from '@/lib/patch/dx7-sysex'
+import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import type { FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Button, Text } from '@chakra-ui/react'
@@ -61,11 +61,13 @@ export function StudioClient() {
   const [midiError, setMidiError] = useState<string | null>(null)
   const [octaveShift, setOctaveShift] = useState(0)
   const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
+  const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
   const masterGainRef = useRef<GainNode | null>(null)
   const midiRef = useRef<MidiInputManager | null>(null)
+  const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий
   const patchRef = useRef(patch)
@@ -105,6 +107,22 @@ export function StudioClient() {
     setPatch((p) => applyCC(p, cc, value))
   }, [])
 
+  // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
+  const handleSysex = useCallback((bytes: Uint8Array) => {
+    try {
+      const { name, engine } = decodeSingleVoiceSysex(bytes)
+      setFmPatch((p) => ({ ...p, name, engine }))
+      fmEngineRef.current?.updatePatch(engine)
+      if (readTimeoutRef.current) {
+        clearTimeout(readTimeoutRef.current)
+      }
+      setReadStatus('received')
+      readTimeoutRef.current = setTimeout(() => setReadStatus('idle'), 2000)
+    } catch {
+      // Не каждый входящий SysEx — ответ на наш запрос (например, эхо чужого сообщения) — тихо игнорируем
+    }
+  }, [])
+
   const handleMidiConnect = useCallback(async () => {
     setMidiError(null)
     if (!midiRef.current) {
@@ -112,6 +130,7 @@ export function StudioClient() {
         onNoteOn: handleNoteOn,
         onNoteOff: handleNoteOff,
         onCC: handleCC,
+        onSysex: handleSysex,
       })
     }
     try {
@@ -120,7 +139,22 @@ export function StudioClient() {
     } catch (err) {
       setMidiError(err instanceof Error ? err.message : 'Ошибка MIDI')
     }
-  }, [handleNoteOn, handleNoteOff, handleCC])
+  }, [handleNoteOn, handleNoteOff, handleCC, handleSysex])
+
+  // Запрашивает у железа дамп текущего голоса (voice edit buffer) по SysEx
+  const handleRequestFromHardware = useCallback(() => {
+    try {
+      midiRef.current?.send(encodeVoiceDumpRequest())
+      setReadStatus('requested')
+      if (readTimeoutRef.current) {
+        clearTimeout(readTimeoutRef.current)
+      }
+      readTimeoutRef.current = setTimeout(() => setReadStatus('idle'), 3000)
+    } catch {
+      setReadStatus('error')
+      readTimeoutRef.current = setTimeout(() => setReadStatus('idle'), 2000)
+    }
+  }, [])
 
   const handleOctaveShift = useCallback((delta: number) => {
     midiRef.current?.shiftOctave(delta)
@@ -241,6 +275,9 @@ export function StudioClient() {
       engineRef.current?.dispose()
       fmEngineRef.current?.dispose()
       midiRef.current?.dispose()
+      if (readTimeoutRef.current) {
+        clearTimeout(readTimeoutRef.current)
+      }
     }
   }, [])
 
@@ -359,6 +396,36 @@ export function StudioClient() {
                 {sendStatus === 'error' && (
                   <Text fontSize="9px" color="red.400">
                     ✗ не удалось отправить
+                  </Text>
+                )}
+                <button
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '10px',
+                    borderRadius: '4px',
+                    border: '1px solid #5a3a10',
+                    background: 'transparent',
+                    color: '#D4AF37',
+                    cursor: 'pointer',
+                    letterSpacing: '0.04em',
+                  }}
+                  onClick={handleRequestFromHardware}
+                >
+                  Прочитать из железа
+                </button>
+                {readStatus === 'requested' && (
+                  <Text fontSize="9px" color="fg.subtle">
+                    … ждём ответ
+                  </Text>
+                )}
+                {readStatus === 'received' && (
+                  <Text fontSize="9px" color="green.400">
+                    ✓ патч прочитан
+                  </Text>
+                )}
+                {readStatus === 'error' && (
+                  <Text fontSize="9px" color="red.400">
+                    ✗ не удалось прочитать
                   </Text>
                 )}
               </Box>

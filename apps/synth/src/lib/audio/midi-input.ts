@@ -10,6 +10,8 @@ export interface MidiCallbacks {
   onNoteOn: (midiNote: number, velocity: number) => void
   onNoteOff: (midiNote: number) => void
   onCC: (cc: number, value: number) => void
+  /** Входящий SysEx (например, ответ на запрос дампа патча) — полный фрейм F0...F7 */
+  onSysex?: (bytes: Uint8Array) => void
 }
 
 export class MidiInputManager {
@@ -91,6 +93,13 @@ export class MidiInputManager {
     }
 
     const status = data[0]
+
+    if (status === 0xf0) {
+      // SysEx-фрейм (Web MIDI отдаёт его целиком одним событием) — ответ на дамп-запрос и т.п.
+      this.callbacks.onSysex?.(new Uint8Array(data))
+      return
+    }
+
     const d1 = data[1]
     const d2 = data.length > 2 ? data[2] : 0
     const type = status & 0xf0
