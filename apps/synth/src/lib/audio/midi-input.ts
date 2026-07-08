@@ -44,6 +44,29 @@ export class MidiInputManager {
     }))
   }
 
+  getOutputs(): MidiDevice[] {
+    if (!this.access) {
+      return []
+    }
+    return Array.from(this.access.outputs.values()).map((out) => ({
+      id: out.id,
+      name: out.name ?? 'MIDI-устройство',
+      manufacturer: out.manufacturer ?? '',
+    }))
+  }
+
+  /** Отправляет сырые байты (например, SysEx-патч) на первый доступный MIDI-выход */
+  send(bytes: Uint8Array): void {
+    if (!this.access) {
+      throw new Error('MIDI не подключён')
+    }
+    const output = this.access.outputs.values().next().value
+    if (!output) {
+      throw new Error('Нет доступного MIDI-выхода — устройство подключено только как вход?')
+    }
+    output.send(bytes)
+  }
+
   shiftOctave(delta: number): void {
     this.octaveShift = Math.max(-24, Math.min(24, this.octaveShift + delta))
   }

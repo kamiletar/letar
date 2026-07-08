@@ -6,6 +6,7 @@ import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
+import { encodeSingleVoiceSysex } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import type { FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Button, Text } from '@chakra-ui/react'
@@ -59,6 +60,7 @@ export function StudioClient() {
   const [midiDevices, setMidiDevices] = useState<MidiDevice[]>([])
   const [midiError, setMidiError] = useState<string | null>(null)
   const [octaveShift, setOctaveShift] = useState(0)
+  const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
@@ -201,6 +203,18 @@ export function StudioClient() {
     fmEngineRef.current?.updatePatch(engine)
   }, [])
 
+  // Отправляет текущий FM-патч на реальное железо через DX7 SysEx (single-voice dump)
+  const handleSendToHardware = useCallback(() => {
+    try {
+      const sysex = encodeSingleVoiceSysex(fmPatchRef.current.engine, fmPatchRef.current.name)
+      midiRef.current?.send(sysex)
+      setSendStatus('sent')
+    } catch {
+      setSendStatus('error')
+    }
+    setTimeout(() => setSendStatus('idle'), 2000)
+  }, [])
+
   // Мгновенно обновляем wet gain при движении ручки
   useEffect(() => {
     if (!reverbWetRef.current) {
@@ -318,7 +332,38 @@ export function StudioClient() {
         {engineType === 'subtractive' ? (
           <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
         ) : (
-          <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+          <Box display="flex" flexDir="column" gap={2}>
+            <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+            {midiDevices.length > 0 && (
+              <Box display="flex" alignItems="center" gap={2}>
+                <button
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '10px',
+                    borderRadius: '4px',
+                    border: '1px solid #5a3a10',
+                    background: 'transparent',
+                    color: '#D4AF37',
+                    cursor: 'pointer',
+                    letterSpacing: '0.04em',
+                  }}
+                  onClick={handleSendToHardware}
+                >
+                  Отправить в железо
+                </button>
+                {sendStatus === 'sent' && (
+                  <Text fontSize="9px" color="green.400">
+                    ✓ отправлено на {midiDevices[0].name}
+                  </Text>
+                )}
+                {sendStatus === 'error' && (
+                  <Text fontSize="9px" color="red.400">
+                    ✗ не удалось отправить
+                  </Text>
+                )}
+              </Box>
+            )}
+          </Box>
         )}
 
         {/* MIDI-статус */}
