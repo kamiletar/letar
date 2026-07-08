@@ -18,9 +18,24 @@
     "menu": "Menu",
     "theme": "Theme"
   },
+  "offlineBanner": {
+    "title": "Express test without internet",
+    "subtitle": "Save this page for offline use — handy at the exhibition where Wi-Fi is unreliable",
+    "close": "Close",
+    "worksOffline": "Works offline",
+    "expressAvailable": "24 questions and hexagram offline",
+    "localResults": "Result stays on your device",
+    "notNow": "Not now",
+    "enableOffline": "Enable offline"
+  },
   "express": {
     "title": "Express Test",
     "description": "24 scenario questions in a couple of minutes — a quick snapshot of the Light and Dark triads of your personality as a hexagram.",
+    "kiosk": {
+      "reset": "New visitor",
+      "confirm": "Reset for sure?",
+      "confirmHint": "Current visitor's result and consent will be erased"
+    },
     "start": "Start Express",
     "info": {
       "questions": "24 scenario questions, 8 hexagram scales",

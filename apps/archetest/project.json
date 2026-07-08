@@ -5,6 +5,17 @@
   "projectType": "application",
   "tags": ["type:app", "scope:archetest", "owner:letar"],
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next build --webpack",
+        "cwd": "apps/archetest"
+      },
+      "metadata": {
+        "description": "Build с --webpack для Serwist (Turbopack не поддерживает SW)",
+        "technologies": ["next.js", "serwist"]
+      }
+    },
     "db:generate": {
       "executor": "nx:run-commands",
       "options": {

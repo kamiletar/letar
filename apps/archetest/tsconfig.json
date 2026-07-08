@@ -75,6 +75,9 @@
       "path": "../../libs/chakra-provider"
     },
     {
+      "path": "../../libs/hooks"
+    },
+    {
       "path": "../../libs/ui"
     }
   ]

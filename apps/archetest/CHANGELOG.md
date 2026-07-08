@@ -5,6 +5,28 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.18.0] - 2026-07-08
+
+### Added
+
+- **Этап 5.7 — Offline-first PWA для `/express`**: Serwist (`src/app/sw.ts` — precache
+  статики + NetworkFirst для документов `/express`/`/en/express` с install-прекэшем в общий
+  кэш), `next.config.js` → `.mjs` с `withSerwist` (в dev отключён), build target
+  `next build --webpack`. Service Worker регистрируется **только по согласию**
+  (`OfflineConsentBanner` + `useOfflineConsent`, эталон mandala), баннер и регистрация —
+  только на `/express`. Гостевой флоу работает офлайн целиком: выборка вопросов приезжает
+  в закэшированном документе, подсчёт клиентский, результат в localStorage, QR из бандла.
+- **Этап 5.7 — Kiosk-режим** (`/express?kiosk=1`): кнопка «Новый посетитель» с двухтапным
+  подтверждением; сброс чистит гостевой результат, отложенные ответы и согласие (152-ФЗ:
+  согласие персонально — следующий посетитель даёт своё) и полностью перезагружает страницу.
+  +2 E2E (`kiosk.spec.ts`), итого 7 E2E.
+
+### Fixed
+
+- **tsconfig**: отсутствовал project reference на `libs/hooks` (вскрыт tsgo при первом
+  импорте `@letar/hooks`); сгенерированные `public/sw.js`/`swe-worker-*.js` добавлены
+  в `.gitignore` и eslint-ignores.
+
 ## [0.17.0] - 2026-07-08
 
 ### Added
