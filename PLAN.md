@@ -255,6 +255,22 @@
 > §17 (Kamal) не отменён — выбор «deploy-engine TS + docker-rollout vs Kamal» отложен до Фазы 3 (§18.6).
 > **➡️ Следующий старт:** §18 Сессия A (харденинг deploy-affected.sh).
 >
+> **Сессия №50 (2026-07-09, деплой-очередь + найден блокер submodule-pointer):** BlackCove разгребал накопившуюся
+> deploy-очередь (10+ запросов с 3 июля, часть авторов уже retired). Приоритет — archetest v0.23.0 (id 275):
+> деплой упал на этапе `git pull` submodules — **два битых pointer'а** в `letar/main`: `apps/driving-school`
+> (bump `a84013b3b`) ссылается на `11cd91c6`, `apps/aboi` (bump `84dc5080c`) — на `f550da36`; оба SHA
+> отсутствуют в приватных submodule-репо (не запушены или потеряны при force-push/rebase). Это блокирует
+> **любой** деплой на s2, не только archetest — `deploy-affected.sh` тянет все submodules перед фильтрацией по
+> `--app`. Авторы bump-коммитов (SapphireGlacier, AzurePeak) — retired, писать некому. Фикс найден, но не
+> применён (ждёт коммита): pointer'ы нужно перевести на актуальный `origin/main` submodule-репо
+> (`driving-school` → `e5664f6`, `aboi` → `99c2cea` — оба уже содержат тот же логический фикс под другим SHA).
+> Добавлено в §18 «Проблема» п.4 — валидация submodule-pointer'ов перед bump-коммитом. **➡️ Следующий старт:**
+> закоммитить исправленные pointer'ы в `letar/main`, перезапустить деплой archetest → обработать остаток
+> очереди (grandslamcup hotfix 3.37.2, container_name batch — umami/auth-hub/animatrona-tracker/mandala/
+> aboi/aprel8008, dsperevod+dashboard+dashboard-agent, pravda, svoichuzhie v0.10.16; studio DATABASE_URL и
+> grandslamcup uploads permissions — инфра-фиксы руками на сервере, не через deploy-affected.sh;
+> premium-rosstil/imot teardown — вероятно уже неактуально, приложения выведены из эксплуатации 2026-07-05).
+>
 > **Сессия №48 (2026-07-06, план — §15.3.1 🆕):** добавлен раздел **§15.3.1 «Prod-снепшот + анонимизация —
 > pre-deploy gate»**: ночной pipeline `pg_dump` прод-БД → детерминированная анонимизация PII (152-ФЗ,
 > `personal-data.md`) → restore в `e2e_<app>` на s3 → прогон e2e на срезе, близком к прод-данным, вместо
@@ -2324,6 +2340,12 @@ env:
    уже поддерживает `--staging`, а у grandslamcup есть готовый staging-комплект.
 3. Сохранность данных: `deploy-affected.sh` при падении `prisma migrate deploy` пишет warning и
    **продолжает деплой**; бэкап только ночной (окно потери до 24ч); образы не версионируются (нет отката).
+4. **Битые submodule-pointer'ы блокируют весь деплой (найдено сессия №50, 2026-07-09):** bump-коммит в
+   `letar/main` может зафиксировать SHA submodule-коммита, который не был запушен в приватный репо (или был
+   потерян force-push/rebase) — `git pull` в `deploy-affected.sh` падает на `not our ref` для **всех**
+   приложений, не только для затронутого submodule. Нужна проверка `git ls-remote <submodule-url> | grep <sha>`
+   перед коммитом bump'а (pre-commit hook или CI-шаг), либо `deploy-affected.sh` должен явно резолвить и
+   репортить, какой именно submodule и SHA не резолвится, вместо общего fail.
 
 ### Архитектура (кратко)
 
