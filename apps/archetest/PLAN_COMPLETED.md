@@ -1090,13 +1090,14 @@ dev-роут (образец — `/dev/qr`: локальный показ/печ
 `personality-types.ts`: новый тип `ExperimentalScaleCode` (`RES_PHYS`/`RES_AFF`/`SPEC_INT`),
 массив `EXPERIMENTAL_SCALES` (label/clinical/archetype/description/whenHigh/color + **prototype**
 на двух языках), списки `EXPERIMENTAL_SCALE_CODES` и `SCORED_SCALE_CODES` (= `ALL_SCALE_CODES`
-+ 3). Тип `ScaleCode = PersonalityTypeCode | ExperimentalScaleCode`.
 
-- **RES_PHYS «Физическая броня»** (Крепость) — переносимость телесного дискомфорта/боли,
+- 3). Тип `ScaleCode = PersonalityTypeCode | ExperimentalScaleCode`.
+
+* **RES_PHYS «Физическая броня»** (Крепость) — переносимость телесного дискомфорта/боли,
   приглушённость сигналов тела. Авторский конструкт, валидированного прототипа нет.
-- **RES_AFF «Аффективный резонанс»** (Камертон) — со-переживание чужих состояний вплоть
+* **RES_AFF «Аффективный резонанс»** (Камертон) — со-переживание чужих состояний вплоть
   до личного дистресса. Прототипы: IRI Personal Distress (Davis, 1980) / HSP Scale.
-- **SPEC_INT «Специальные интересы»** (Хранитель огня) — глубина погружения, монополия
+* **SPEC_INT «Специальные интересы»** (Хранитель огня) — глубина погружения, монополия
   интереса над сном/бытом/людьми. Авторский конструкт.
 
 ### Изоляция ядра — ключевое архитектурное решение
@@ -1154,6 +1155,26 @@ per-question-max ядра не затрагивается → actual_max ядр�
 протечки в тизер/гексаграмму/состояния, GLOBAL_MAX ядра чист), изоляция ядра в
 `scoring-core.test.ts` (2) и `question-bank.test.ts` (1 инвариант; поправлен на `SCORED_SCALE_CODES`).
 lint (0 ошибок) / typecheck:tsgo — зелёные.
+
+### Интеграция в origin и передача деплоя
+
+При push вскрылось, что **`origin/main` отставал от локального на 50 коммитов** по всему
+монорепо (archetest v0.10–v0.23, synth, forms, animatrona, mandala, kami, dashboard и др.) —
+предыдущие сессии коммитили локально, но не пушили; origin застыл на 5 июля (`3dce5b1`,
+dashboard-agent, запушен из отдельного worktree). Причина — процессный пробел: шаг
+`local → origin push` без владельца, а деплой тянет origin (значит деплои шли по устаревшему коду).
+
+Интегрировал **аккуратно, без force и без касания чужой WIP**: чистый worktree на `1ad30ea`,
+`merge origin/main` (3dce5b1, коммит слияния `cf4383b`, конфликтов нет — файлы непересекающиеся),
+fast-forward push. Незакоммиченную правку другого агента (`backup-architecture.md`,
+`dashboard-agent/database.ts`) не трогал; локальный main оставлен на `1ad30ea` (ff-able до `cf4383b`).
+
+Деплой **не выполнял** (запрещён напрямую). Координация с BlackCove через Agent Mail упёрлась в
+его статус `retired` (входящие блокировались); канал подняли обратным контактом
+(BlackCove→BoldMountain), но отправка мне→BlackCove осталась заблокирована. Инструкции по деплою
+вынесены в **блок «🚀 ОЖИДАЕТ ДЕПЛОЯ» в начале [PLAN.md](./PLAN.md)** для передачи новой сессии:
+`deploy-affected.sh --app archetest` (только archetest!) → `nx db:seed archetest` (append-only) →
+миграция не нужна. Старые deploy-запросы 3–5 июля в очереди BlackCove — стейл.
 
 ---
 
