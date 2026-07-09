@@ -39,8 +39,8 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         <Section title={isRu ? 'О тесте' : 'About the Test'}>
           <Text>
             {isRu
-              ? 'Многошкальный скрининговый опросник личностных черт и аффективных паттернов. 1955 вопросов, 13 шкал, ситуативный формат (каждый вопрос — жизненная ситуация с четырьмя вариантами реагирования). Результат — нормализованный профиль выраженности черт от 0 до 100% по каждой шкале.'
-              : 'A multi-scale screening questionnaire for personality traits and affective patterns. 1955 items, 13 scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.'}
+              ? 'Многошкальный скрининговый опросник личностных черт и аффективных паттернов. 2096 вопросов, 22 шкалы, ситуативный формат (каждый вопрос — жизненная ситуация с четырьмя вариантами реагирования). Результат — нормализованный профиль выраженности черт от 0 до 100% по каждой шкале.'
+              : 'A multi-scale screening questionnaire for personality traits and affective patterns. 2096 items, 22 scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.'}
           </Text>
           <Text>
             {isRu
@@ -187,8 +187,8 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         <Section title={isRu ? 'Порционное прохождение и стратификация' : 'Portioned Completion and Stratification'}>
           <Text>
             {isRu
-              ? 'Тест проходится порциями по 50 вопросов. Каждая порция формируется методом стратифицированной выборки: вопросы распределяются пропорционально по всем 13 шкалам с гарантией минимум одного вопроса на каждую шкалу. Это обеспечивает равномерный рост достоверности профиля по всем осям после каждой порции.'
-              : 'The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all 13 scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.'}
+              ? 'Тест проходится порциями по 50 вопросов. Каждая порция формируется методом стратифицированной выборки: вопросы распределяются пропорционально по всем 22 шкалам с гарантией минимум одного вопроса на каждую шкалу. Это обеспечивает равномерный рост достоверности профиля по всем осям после каждой порции.'
+              : 'The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all 22 scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.'}
           </Text>
           <Text>
             {isRu
@@ -237,6 +237,11 @@ function ForProfessionalsView({ locale }: { locale: string }) {
             {isRu
               ? 'DPR — депрессивный тип личности (из приложения DSM-IV, хронический депрессивный темперамент как черта).'
               : 'DPR — Depressive Personality (from DSM-IV appendix, chronic depressive temperament as a trait).'}
+          </Text>
+          <Text mt={4} color="fg.muted">
+            {isRu
+              ? 'Остальные 9 шкал ядра — Светлая и Тёмная триады, деструктивные паттерны (садизм, мазохизм-бета) и спектр развития (систематизация, прямота, алекситимия) — описаны с прототипами в разделе «Методология» выше.'
+              : 'The remaining 9 core scales — the Light and Dark triads, destructive patterns (sadism, masochism-beta), and the developmental spectrum (systemizing, directness, alexithymia) — are described with their prototypes in the "Methodology" section above.'}
           </Text>
         </Section>
 

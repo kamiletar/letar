@@ -37,7 +37,7 @@ export function DisclaimerConsent({ accepted, onChange, isRu }: DisclaimerConsen
         <Checkbox.HiddenInput />
         <Checkbox.Control />
         <Checkbox.Label fontSize="sm">
-          {isRu ? 'Я ознакомился и согласен с ' : 'I have read and agree to the '}
+          {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
           <ChakraLink asChild color="blue.500" textDecoration="underline">
             <Link href="/privacy" target="_blank" rel="noopener noreferrer">
               {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
