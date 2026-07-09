@@ -3,7 +3,7 @@
 import { getSession } from '@/lib/auth'
 import { getEnhancedPrisma, prisma } from '@/lib/db'
 import { z } from 'zod/v4'
-import type { PersonalityTypeCode } from '../_data/personality-types'
+import type { ScaleCode } from '../_data/personality-types'
 import { calculateScores } from './quiz.action'
 
 /** Проверить, что текущий пользователь — психолог */
@@ -91,7 +91,7 @@ export async function getClientDetailAction(clientId: string) {
   }
 
   // Кумулятивные баллы
-  let cumulativeScores: Record<PersonalityTypeCode, number> | null = null
+  let cumulativeScores: Record<ScaleCode, number> | null = null
   if (uniqueAnswered.size > 0) {
     const answersArray = Array.from(uniqueAnswered.entries()).map(([questionId, selectedOption]) => ({
       questionId,
@@ -118,7 +118,7 @@ export async function getClientDetailAction(clientId: string) {
 
   const sessionsHistory = sessions.map((s) => ({
     id: s.id,
-    scores: s.scores ? (JSON.parse(s.scores) as Record<PersonalityTypeCode, number>) : null,
+    scores: s.scores ? (JSON.parse(s.scores) as Record<ScaleCode, number>) : null,
     answeredCount: s.answeredCount,
     completedAt: s.completedAt,
     createdAt: s.createdAt,

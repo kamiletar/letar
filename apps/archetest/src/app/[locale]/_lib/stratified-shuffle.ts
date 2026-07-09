@@ -1,6 +1,6 @@
 import maxScoresData from '../_data/max-scores-per-question.json'
-import type { PersonalityTypeCode } from '../_data/personality-types'
-import { ALL_SCALE_CODES } from '../_data/personality-types'
+import type { ScaleCode } from '../_data/personality-types'
+import { SCORED_SCALE_CODES } from '../_data/personality-types'
 
 /** Максимальные баллы по каждому вопросу (из JSON от психолога) */
 const perQuestionMax = maxScoresData.per_question_max as Record<string, Record<string, number>>
@@ -8,19 +8,19 @@ const perQuestionMax = maxScoresData.per_question_max as Record<string, Record<s
 /**
  * Доминантная шкала вопроса по sortOrder (0-based).
  * Доминантная шкала — та, для которой вопрос даёт максимальный балл.
- * Если несколько шкал дают одинаковый макс — берём первую по порядку ALL_SCALE_CODES.
+ * Если несколько шкал дают одинаковый макс — берём первую по порядку SCORED_SCALE_CODES.
  */
-function getDominantScale(sortOrder: number): PersonalityTypeCode | null {
+function getDominantScale(sortOrder: number): ScaleCode | null {
   const qId = String(sortOrder + 1) // sortOrder 0-based → questionNumber 1-based
   const qMax = perQuestionMax[qId]
   if (!qMax) {
     return null
   }
 
-  let bestScale: PersonalityTypeCode | null = null
+  let bestScale: ScaleCode | null = null
   let bestScore = 0
 
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     const score = qMax[code] || 0
     if (score > bestScore) {
       bestScore = score
@@ -54,10 +54,10 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
   }
 
   // Группируем по доминантной шкале
-  const buckets = new Map<PersonalityTypeCode, T[]>()
+  const buckets = new Map<ScaleCode, T[]>()
   const uncategorized: T[] = []
 
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     buckets.set(code, [])
   }
 
@@ -72,11 +72,11 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
 
   // Распределяем слоты пропорционально
   const totalCategorized = questions.length - uncategorized.length
-  const slots = new Map<PersonalityTypeCode, number>()
+  const slots = new Map<ScaleCode, number>()
   let allocated = 0
 
   // Первый проход: гарантируем минимум 1 слот для непустых групп
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     const bucket = buckets.get(code)!
     if (bucket.length > 0) {
       slots.set(code, 1)
@@ -90,8 +90,8 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
   const remaining = count - allocated
   if (remaining > 0 && totalCategorized > 0) {
     // Считаем пропорциональные доли для шкал с вопросами
-    const nonEmptyScales = ALL_SCALE_CODES.filter((code) => buckets.get(code)!.length > 0)
-    const fractionalSlots: { code: PersonalityTypeCode; fraction: number }[] = []
+    const nonEmptyScales = SCORED_SCALE_CODES.filter((code) => buckets.get(code)!.length > 0)
+    const fractionalSlots: { code: ScaleCode; fraction: number }[] = []
 
     for (const code of nonEmptyScales) {
       const bucketSize = buckets.get(code)!.length
@@ -115,7 +115,7 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
   }
 
   // Не превышаем размер корзины
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     const bucket = buckets.get(code)!
     const slotCount = slots.get(code)!
     if (slotCount > bucket.length) {
@@ -126,7 +126,7 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
   // Выбираем случайные вопросы из каждой корзины
   const selected: T[] = []
 
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     const bucket = buckets.get(code)!
     const slotCount = slots.get(code)!
     if (slotCount === 0) {

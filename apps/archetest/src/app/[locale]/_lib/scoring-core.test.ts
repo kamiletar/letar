@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_SCALE_CODES } from '../_data/personality-types'
+import { ALL_SCALE_CODES, EXPERIMENTAL_SCALE_CODES } from '../_data/personality-types'
 import type { AnsweredQuestionInput, QuizOptionData, ScoringData } from './scoring-core'
 import {
   BANK_SCORING_DATA,
@@ -135,10 +135,47 @@ describe('computeScoresCore', () => {
     expect(JSON.stringify(answered)).toBe(snapshot)
   })
 
-  it('реальный банк подключён: все 22 шкалы имеют релевантные вопросы', () => {
+  it('реальный банк подключён: все 22 шкалы ядра имеют релевантные вопросы', () => {
     for (const code of ALL_SCALE_CODES) {
       expect(BANK_SCORING_DATA.totalRelevantByScale[code], `шкала ${code}`).toBeGreaterThan(0)
     }
+  })
+
+  it('экспериментальные шкалы (5.5) тоже подключены к реальному банку', () => {
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(BANK_SCORING_DATA.totalRelevantByScale[code], `шкала ${code}`).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe('изоляция ядра от экспериментальных шкал (5.5)', () => {
+  // Вопрос 1 (sortOrder 0) — ядро, вопрос 2 (sortOrder 1) — экспериментальный
+  const isoMax: Record<string, Record<string, number>> = {
+    '1': { MAC: 3 },
+    '2': { RES_PHYS: 3 },
+  }
+  const isoData: ScoringData = { perQuestionMax: isoMax, totalRelevantByScale: buildTotalRelevantByScale(isoMax) }
+
+  it('actual_max ядра не зависит от наличия экспериментального вопроса', () => {
+    // MAC покрывается только вопросом 1 → его actual_max одинаков, отвечен экспериментальный или нет
+    expect(computeActualMax('MAC', [0], isoData)).toBe(3)
+    expect(computeActualMax('MAC', [0, 1], isoData)).toBe(3)
+  })
+
+  it('ответ на экспериментальный вопрос не сдвигает normalized ядра', () => {
+    const coreOnly = computeScoresCore([{ sortOrder: 0, selectedOption: 0, options: opts({ MAC: 3 }) }], isoData)
+    const withExp = computeScoresCore(
+      [
+        { sortOrder: 0, selectedOption: 0, options: opts({ MAC: 3 }) },
+        { sortOrder: 1, selectedOption: 0, options: opts({ RES_PHYS: 3 }) },
+      ],
+      isoData
+    )
+    expect(coreOnly.normalized.MAC).toBe(100)
+    expect(withExp.normalized.MAC).toBe(100)
+    // экспериментальная шкала посчитана отдельно
+    expect(withExp.normalized.RES_PHYS).toBe(100)
+    expect(coreOnly.normalized.RES_PHYS).toBe(0)
   })
 })
 

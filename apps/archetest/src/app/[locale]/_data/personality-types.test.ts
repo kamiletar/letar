@@ -4,13 +4,19 @@ import {
   BASE_SCALE_CODES,
   DARK_TRIAD_CODES,
   DARK_TRIAD_DISPLAY,
+  EXPERIMENTAL_SCALE_CODES,
+  EXPERIMENTAL_SCALES,
   EXTENDED_SCALE_CODES,
+  getExperimentalScale,
   getPersonalityType,
   GLOBAL_MAX_SCORES,
   HEXAGRAM_SCALE_CODES,
   LIGHT_TRIAD_CODES,
   PERSONALITY_TYPES,
   replaceTypeCodes,
+  SCORED_SCALE_CODES,
+  STATE_CODES,
+  TEASER_SCALE_CODES,
 } from './personality-types'
 
 describe('шкалы ядра (22 = 13 + 9)', () => {
@@ -68,6 +74,71 @@ describe('шкалы ядра (22 = 13 + 9)', () => {
 
   it('GLOBAL_MAX_SCORES содержит все 22 кода', () => {
     expect(Object.keys(GLOBAL_MAX_SCORES).sort()).toEqual([...ALL_SCALE_CODES].sort())
+  })
+})
+
+describe('экспериментальные шкалы (этап 5.5, вне ядра)', () => {
+  it('EXPERIMENTAL_SCALE_CODES — 3 кода, ни один не в ядре 22', () => {
+    expect(EXPERIMENTAL_SCALE_CODES).toEqual(['RES_PHYS', 'RES_AFF', 'SPEC_INT'])
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(ALL_SCALE_CODES as string[], `${code} не должен быть в ядре`).not.toContain(code)
+    }
+  })
+
+  it('SCORED_SCALE_CODES = ядро 22 + экспериментальные 3 = 25 уникальных', () => {
+    expect(SCORED_SCALE_CODES).toHaveLength(25)
+    expect(new Set(SCORED_SCALE_CODES).size).toBe(25)
+    for (const code of ALL_SCALE_CODES) {
+      expect(SCORED_SCALE_CODES).toContain(code)
+    }
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(SCORED_SCALE_CODES).toContain(code)
+    }
+  })
+
+  it('EXPERIMENTAL_SCALES покрывает коды 1:1 и заполнена на обоих языках', () => {
+    expect(EXPERIMENTAL_SCALES).toHaveLength(EXPERIMENTAL_SCALE_CODES.length)
+    for (const s of EXPERIMENTAL_SCALES) {
+      expect(EXPERIMENTAL_SCALE_CODES).toContain(s.code)
+      for (const field of [
+        s.label,
+        s.labelEn,
+        s.clinical,
+        s.clinicalEn,
+        s.archetype,
+        s.archetypeEn,
+        s.description,
+        s.descriptionEn,
+        s.whenHigh,
+        s.whenHighEn,
+        s.color,
+        s.prototype,
+        s.prototypeEn,
+      ]) {
+        expect(field, `пустое поле у ${s.code}`).toBeTruthy()
+      }
+      expect(s.color).toMatch(/^#[0-9A-Fa-f]{6}$/)
+    }
+  })
+
+  it('getExperimentalScale возвращает запись для каждого кода', () => {
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(getExperimentalScale(code).code).toBe(code)
+    }
+  })
+
+  it('экспериментальные шкалы не протекают в тизер, гексаграмму и состояния', () => {
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(TEASER_SCALE_CODES as string[]).not.toContain(code)
+      expect(HEXAGRAM_SCALE_CODES as string[]).not.toContain(code)
+      expect(STATE_CODES as string[]).not.toContain(code)
+    }
+  })
+
+  it('GLOBAL_MAX_SCORES ядра не содержит экспериментальных кодов', () => {
+    for (const code of EXPERIMENTAL_SCALE_CODES) {
+      expect(Object.keys(GLOBAL_MAX_SCORES)).not.toContain(code)
+    }
   })
 })
 

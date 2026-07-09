@@ -9,8 +9,8 @@
  * где actual_max[S] — сумма макс. баллов шкалы S по отвеченным вопросам.
  */
 import maxScoresData from '../_data/max-scores-per-question.json'
-import type { PersonalityTypeCode } from '../_data/personality-types'
-import { ALL_SCALE_CODES } from '../_data/personality-types'
+import type { ScaleCode } from '../_data/personality-types'
+import { SCORED_SCALE_CODES } from '../_data/personality-types'
 
 /** Формат опции из БД */
 export interface QuizOptionData {
@@ -25,16 +25,19 @@ export type ScaleConfidence = 'insufficient' | 'low' | 'moderate' | 'high'
 /** Уровень значимости шкалы */
 export type ScaleLevel = 'minimal' | 'moderate' | 'significant' | 'high' | 'extreme' | 'insufficient_data'
 
-/** Нормализованные результаты */
+/**
+ * Нормализованные результаты. Ключи — ScaleCode (ядро 22 + экспериментальные 5.5):
+ * надмножество PersonalityTypeCode, чтение баллов ядра обратно совместимо.
+ */
 export interface QuizScores {
-  raw: Record<PersonalityTypeCode, number>
-  normalized: Record<PersonalityTypeCode, number>
+  raw: Record<ScaleCode, number>
+  normalized: Record<ScaleCode, number>
   /** Достоверность каждой шкалы (зависит от числа пройденных релевантных вопросов) */
-  confidence: Record<PersonalityTypeCode, ScaleConfidence>
+  confidence: Record<ScaleCode, ScaleConfidence>
   /** Уровень значимости каждой шкалы */
-  levels: Record<PersonalityTypeCode, ScaleLevel>
+  levels: Record<ScaleCode, ScaleLevel>
   /** Число отвеченных релевантных вопросов по шкале — вход для ipsative-интервалов */
-  relevantCounts: Record<PersonalityTypeCode, number>
+  relevantCounts: Record<ScaleCode, number>
   /** Ответы с sortOrder — для вычисления валидности протокола */
   answersWithSortOrder: { sortOrder: number; selectedOption: number }[]
 }
@@ -57,7 +60,7 @@ export interface ScoringData {
 /** Общее количество релевантных вопросов по каждой шкале */
 export function buildTotalRelevantByScale(perQuestionMax: Record<string, Record<string, number>>) {
   const totals: Record<string, number> = {}
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     let count = 0
     for (const qMax of Object.values(perQuestionMax)) {
       if (qMax[code] && qMax[code] > 0) {
@@ -110,10 +113,10 @@ export function computeActualMax(scale: string, answeredSortOrders: number[], da
 /** Число отвеченных релевантных вопросов по каждой шкале */
 export function countRelevantAnswered(
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA
-): Record<PersonalityTypeCode, number> {
+  data: ScoringData = BANK_SCORING_DATA,
+): Record<ScaleCode, number> {
   const counts: Record<string, number> = {}
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     counts[code] = 0
   }
   for (const so of answeredSortOrders) {
@@ -122,13 +125,13 @@ export function countRelevantAnswered(
     if (!qMax) {
       continue
     }
-    for (const code of ALL_SCALE_CODES) {
+    for (const code of SCORED_SCALE_CODES) {
       if (qMax[code] && qMax[code] > 0) {
         counts[code]++
       }
     }
   }
-  return counts as Record<PersonalityTypeCode, number>
+  return counts as Record<ScaleCode, number>
 }
 
 /** Достоверность шкалы по числу пройденных релевантных вопросов относительно банка */
@@ -150,7 +153,7 @@ export function confidenceFromCount(relevant: number, totalInBank: number): Scal
 export function getScaleConfidence(
   scale: string,
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): ScaleConfidence {
   let relevant = 0
   for (const so of answeredSortOrders) {
@@ -169,10 +172,10 @@ export function getScaleConfidence(
  */
 export function computeScoresCore(
   answered: AnsweredQuestionInput[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): QuizScores {
   const raw: Record<string, number> = {}
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     raw[code] = 0
   }
 
@@ -199,7 +202,7 @@ export function computeScoresCore(
   const confidence: Record<string, ScaleConfidence> = {}
   const levels: Record<string, ScaleLevel> = {}
 
-  for (const code of ALL_SCALE_CODES) {
+  for (const code of SCORED_SCALE_CODES) {
     const actualMax = computeActualMax(code, answeredSortOrders, data)
 
     if (actualMax === 0) {
@@ -215,10 +218,10 @@ export function computeScoresCore(
   }
 
   return {
-    raw: raw as Record<PersonalityTypeCode, number>,
-    normalized: normalized as Record<PersonalityTypeCode, number>,
-    confidence: confidence as Record<PersonalityTypeCode, ScaleConfidence>,
-    levels: levels as Record<PersonalityTypeCode, ScaleLevel>,
+    raw: raw as Record<ScaleCode, number>,
+    normalized: normalized as Record<ScaleCode, number>,
+    confidence: confidence as Record<ScaleCode, ScaleConfidence>,
+    levels: levels as Record<ScaleCode, ScaleLevel>,
     relevantCounts,
     answersWithSortOrder,
   }

@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest'
 import questionsRaw from '../../../../prisma/questions-dump.json'
 import maxScoresData from './max-scores-per-question.json'
-import { ALL_SCALE_CODES } from './personality-types'
+import { ALL_SCALE_CODES, EXPERIMENTAL_SCALE_CODES, SCORED_SCALE_CODES } from './personality-types'
 import { VALIDITY_CHECKS } from './validity-checks'
 
 interface QuestionDump {
@@ -73,7 +73,7 @@ describe('банк вопросов', () => {
         expect(o.text, `пустой text у ${q.id}`).toBeTruthy()
         expect(o.textEn, `пустой textEn у ${q.id}`).toBeTruthy()
         for (const [scale, score] of Object.entries(o.scoring)) {
-          expect(ALL_SCALE_CODES, `неизвестная шкала ${scale} у ${q.id}`).toContain(scale)
+          expect(SCORED_SCALE_CODES, `неизвестная шкала ${scale} у ${q.id}`).toContain(scale)
           expect(Number.isInteger(score), `нецелый балл у ${q.id}`).toBe(true)
         }
       }
@@ -102,6 +102,21 @@ describe('банк вопросов', () => {
       }
     }
     expect(newMismatches, `новые расхождения дамп↔справочник: ${newMismatches.join(', ')}`).toEqual([])
+  })
+
+  it('изоляция ядра (5.5): ни один вариант не смешивает коды ядра и экспериментальные', () => {
+    // Инвариант, гарантирующий, что экспериментальные вопросы не меняют actual_max ядра
+    // (и наоборот) → нормализация ядра сопоставима, версия банка не бампится.
+    const coreSet = new Set<string>(ALL_SCALE_CODES)
+    const expSet = new Set<string>(EXPERIMENTAL_SCALE_CODES)
+    for (const q of questions) {
+      for (const o of JSON.parse(q.options) as OptionData[]) {
+        const codes = Object.keys(o.scoring)
+        const hasCore = codes.some((c) => coreSet.has(c))
+        const hasExp = codes.some((c) => expSet.has(c))
+        expect(hasCore && hasExp, `вариант у ${q.id} смешивает ядро и экспериментальные шкалы`).toBe(false)
+      }
+    }
   })
 
   it('attention-check вопросы существуют, без скоринга, correctOptionIndex в диапазоне', () => {

@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "total_questions": 2096,
-    "parsed_questions": 2096,
+    "total_questions": 2126,
+    "parsed_questions": 2126,
     "scales": [
       "PAR",
       "SZD",
@@ -24,7 +24,10 @@
       "MAS",
       "ASD",
       "DIR",
-      "ALX"
+      "ALX",
+      "RES_PHYS",
+      "RES_AFF",
+      "SPEC_INT"
     ],
     "description": "Per-question max scores for precise normalization."
   },
@@ -50,7 +53,10 @@
     "MAS": 51,
     "ASD": 51,
     "DIR": 101,
-    "ALX": 56
+    "ALX": 56,
+    "RES_PHYS": 30,
+    "RES_AFF": 37,
+    "SPEC_INT": 32
   },
   "per_question_max": {
     "1": {
@@ -30445,6 +30451,102 @@
     "2093": {},
     "2094": {},
     "2095": {},
-    "2096": {}
+    "2096": {},
+    "2097": {
+      "RES_PHYS": 3
+    },
+    "2098": {
+      "RES_PHYS": 3,
+      "RES_AFF": 1
+    },
+    "2099": {
+      "RES_PHYS": 3
+    },
+    "2100": {
+      "RES_PHYS": 3
+    },
+    "2101": {
+      "RES_PHYS": 3,
+      "RES_AFF": 2
+    },
+    "2102": {
+      "RES_PHYS": 3,
+      "RES_AFF": 1
+    },
+    "2103": {
+      "RES_PHYS": 3,
+      "RES_AFF": 2
+    },
+    "2104": {
+      "RES_PHYS": 3,
+      "SPEC_INT": 2
+    },
+    "2105": {
+      "RES_PHYS": 3,
+      "RES_AFF": 1
+    },
+    "2106": {
+      "RES_PHYS": 3
+    },
+    "2107": {
+      "RES_AFF": 3
+    },
+    "2108": {
+      "RES_AFF": 3
+    },
+    "2109": {
+      "RES_AFF": 3
+    },
+    "2110": {
+      "RES_AFF": 3
+    },
+    "2111": {
+      "RES_AFF": 3
+    },
+    "2112": {
+      "RES_AFF": 3
+    },
+    "2113": {
+      "RES_AFF": 3
+    },
+    "2114": {
+      "RES_AFF": 3
+    },
+    "2115": {
+      "RES_AFF": 3
+    },
+    "2116": {
+      "RES_AFF": 3
+    },
+    "2117": {
+      "SPEC_INT": 3
+    },
+    "2118": {
+      "SPEC_INT": 3
+    },
+    "2119": {
+      "SPEC_INT": 3
+    },
+    "2120": {
+      "SPEC_INT": 3
+    },
+    "2121": {
+      "SPEC_INT": 3
+    },
+    "2122": {
+      "SPEC_INT": 3
+    },
+    "2123": {
+      "SPEC_INT": 3
+    },
+    "2124": {
+      "SPEC_INT": 3
+    },
+    "2125": {
+      "SPEC_INT": 3
+    },
+    "2126": {
+      "SPEC_INT": 3
+    }
   }
 }

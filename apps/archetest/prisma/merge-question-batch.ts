@@ -3,21 +3,23 @@
  * - questions-dump.json: append с id/sortOrder/createdAt
  * - max-scores-per-question.json: per_question_max + global_max_scores + metadata
  *
- * Запуск: npx tsx apps/archetest/prisma/merge-question-batch.ts [--dry-run]
+ * Запуск: npx tsx apps/archetest/prisma/merge-question-batch.ts [--batch 5.5] [--dry-run]
+ * По умолчанию --batch 5.1 (обратная совместимость).
  * Идемпотентность: скрипт откажется работать, если сценарий батча уже есть в дампе.
+ *
+ * Экспериментальные батчи (5.5) скорят ТОЛЬКО экспериментальные шкалы — actual_max
+ * ядра 22 не меняется, поэтому QUESTION_BANK_VERSION остаётся прежним.
  */
 import { randomBytes } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 const ROOT = join(__dirname)
-const BATCH_DIR = join(ROOT, 'question-batches', '5.1')
 const DUMP = join(ROOT, 'questions-dump.json')
 const MAXJSON = join(ROOT, '..', 'src', 'app', '[locale]', '_data', 'max-scores-per-question.json')
 
-/** Порядок фиксирован — от него зависят sortOrder новых вопросов */
-const BATCH_ORDER = ['MAC', 'HUM', 'KAN', 'FAI', 'SAD', 'MAS', 'ASD', 'DIR', 'ALX']
-const ALL_CODES = [
+/** Ядро 22 шкалы */
+const CORE_CODES = [
   'PAR',
   'SZD',
   'SZT',
@@ -41,6 +43,40 @@ const ALL_CODES = [
   'DIR',
   'ALX',
 ]
+/** Экспериментальные шкалы вне ядра (этап 5.5) */
+const EXPERIMENTAL_CODES = ['RES_PHYS', 'RES_AFF', 'SPEC_INT']
+
+/** Конфигурация батча — задаёт директорию, состав и правила валидации */
+interface BatchConfig {
+  /** Поддиректория question-batches/ */
+  dir: string
+  /** Порядок шкал (фиксирован — от него зависят sortOrder новых вопросов) */
+  order: string[]
+  /** Ожидаемое число вопросов в каждом файле шкалы */
+  perScale: number
+  /** Минимум reverse-вопросов на шкалу (≥ 1/3) */
+  minReverse: number
+  /** Коды, которыми варианты вправе скорить (изоляция ядра для экспериментальных) */
+  allowedScoringCodes: string[]
+}
+
+const CONFIGS: Record<string, BatchConfig> = {
+  '5.1': {
+    dir: '5.1',
+    order: ['MAC', 'HUM', 'KAN', 'FAI', 'SAD', 'MAS', 'ASD', 'DIR', 'ALX'],
+    perScale: 15,
+    minReverse: 5,
+    allowedScoringCodes: CORE_CODES,
+  },
+  '5.5': {
+    dir: '5.5',
+    order: EXPERIMENTAL_CODES,
+    perScale: 10,
+    minReverse: 4,
+    // Только экспериментальные коды: варианты не касаются ядра → actual_max ядра неизменен
+    allowedScoringCodes: EXPERIMENTAL_CODES,
+  },
+}
 
 interface BatchOption {
   text: string
@@ -64,17 +100,24 @@ interface DumpQuestion {
 }
 
 const dryRun = process.argv.includes('--dry-run')
+const batchArg = process.argv.find((a, i) => process.argv[i - 1] === '--batch') ?? '5.1'
+const config = CONFIGS[batchArg]
+if (!config) {
+  throw new Error(`Неизвестный батч «${batchArg}». Доступны: ${Object.keys(CONFIGS).join(', ')}`)
+}
+const BATCH_DIR = join(ROOT, 'question-batches', config.dir)
+const allowed = new Set(config.allowedScoringCodes)
 
 // ── Загрузка и валидация батчей ────────────────────────────────────────────
 const batches = new Map<string, BatchQuestion[]>()
-for (const scale of BATCH_ORDER) {
+for (const scale of config.order) {
   const qs = JSON.parse(readFileSync(join(BATCH_DIR, `${scale}.json`), 'utf-8')) as BatchQuestion[]
-  if (qs.length !== 15) {
-    throw new Error(`${scale}: ожидалось 15 вопросов, получено ${qs.length}`)
+  if (qs.length !== config.perScale) {
+    throw new Error(`${scale}: ожидалось ${config.perScale} вопросов, получено ${qs.length}`)
   }
   const reverseCount = qs.filter((q) => q._reverse).length
-  if (reverseCount < 5) {
-    throw new Error(`${scale}: reverse-вопросов ${reverseCount} < 5 (нужно ≥ 1/3)`)
+  if (reverseCount < config.minReverse) {
+    throw new Error(`${scale}: reverse-вопросов ${reverseCount} < ${config.minReverse} (нужно ≥ 1/3)`)
   }
   for (const [i, q] of qs.entries()) {
     if (!q.scenario || !q.scenarioEn) {
@@ -93,8 +136,8 @@ for (const scale of BATCH_ORDER) {
         throw new Error(`${scale} #${i}: пустой текст опции`)
       }
       for (const [code, score] of Object.entries(o.scoring)) {
-        if (!ALL_CODES.includes(code)) {
-          throw new Error(`${scale} #${i}: неизвестная шкала ${code}`)
+        if (!allowed.has(code)) {
+          throw new Error(`${scale} #${i}: шкала ${code} вне допустимых для батча ${config.dir}`)
         }
         if (!Number.isInteger(score) || score < 1 || score > 3) {
           throw new Error(`${scale} #${i}: балл ${code}=${score} вне 1..3`)
@@ -130,7 +173,7 @@ function newId(): string {
 const createdAt = new Date().toISOString().replace('Z', '').slice(0, 23)
 let sortOrder = dump.length
 const newRecords: DumpQuestion[] = []
-for (const scale of BATCH_ORDER) {
+for (const scale of config.order) {
   for (const q of batches.get(scale)!) {
     newRecords.push({
       id: newId(),
@@ -175,23 +218,26 @@ for (const r of newRecords) {
     delta[code] = (delta[code] ?? 0) + score
   }
 }
-for (const code of ALL_CODES) {
-  maxJson.global_max_scores[code] = (maxJson.global_max_scores[code] ?? 0) + (delta[code] ?? 0)
+// Обновляем и ядро, и экспериментальные шкалы, встречающиеся в дельте
+const allTouched = [...new Set([...CORE_CODES, ...EXPERIMENTAL_CODES, ...Object.keys(maxJson.global_max_scores)])]
+for (const code of allTouched) {
+  if (delta[code]) {
+    maxJson.global_max_scores[code] = (maxJson.global_max_scores[code] ?? 0) + delta[code]
+  }
 }
 maxJson.metadata.total_questions = dump.length + newRecords.length
 maxJson.metadata.parsed_questions = dump.length + newRecords.length
-maxJson.metadata.scales = ALL_CODES
+maxJson.metadata.scales = [...CORE_CODES, ...EXPERIMENTAL_CODES]
 
 // ── Отчёт ──────────────────────────────────────────────────────────────────
+console.log(`Батч: ${config.dir}`)
 console.log(`Новых вопросов: ${newRecords.length} (sortOrder ${dump.length}..${sortOrder - 1})`)
 console.log('Дельта max-баллов по шкалам:')
-for (const code of ALL_CODES) {
+for (const code of allTouched) {
   if (delta[code]) {
     console.log(`  ${code}: +${delta[code]} → ${maxJson.global_max_scores[code]}`)
   }
 }
-console.log('\nGLOBAL_MAX_SCORES для personality-types.ts:')
-console.log('{\n' + ALL_CODES.map((c) => `  ${c}: ${maxJson.global_max_scores[c]},`).join('\n') + '\n}')
 
 if (dryRun) {
   console.log('\n--dry-run: файлы не изменены')

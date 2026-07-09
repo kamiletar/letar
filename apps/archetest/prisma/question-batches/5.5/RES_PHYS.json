@@ -1,0 +1,266 @@
+[
+  {
+    "scenario": "С утра явно поднялась температура, но на работе важный день.",
+    "scenarioEn": "You clearly have a fever this morning, but it is an important day at work.",
+    "options": [
+      {
+        "text": "Работаю как обычно: недомогание — не повод останавливаться",
+        "textEn": "I work as usual: feeling unwell is no reason to stop",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Работаю, но в щадящем режиме",
+        "textEn": "I work, but in a gentler mode",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Остаюсь дома: больным работать нельзя",
+        "textEn": "I stay home: you should not work while sick",
+        "scoring": {}
+      },
+      {
+        "text": "Отменяю всё и сразу ложусь",
+        "textEn": "I cancel everything and lie down right away",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Долгий переход, группа выдохлась, до привала ещё далеко.",
+    "scenarioEn": "A long trek; the group is exhausted and the rest stop is still far.",
+    "options": [
+      {
+        "text": "Иду ровно, усталость почти не мешает",
+        "textEn": "I keep a steady pace, fatigue barely bothers me",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Тяжело, но дойду без жалоб",
+        "textEn": "It is hard, but I will make it without complaining",
+        "scoring": { "RES_PHYS": 2 }
+      },
+      {
+        "text": "Прошу сделать привал раньше",
+        "textEn": "I ask to stop for a break sooner",
+        "scoring": {}
+      },
+      {
+        "text": "Заражаюсь общим упадком сил и предлагаю всем отдохнуть",
+        "textEn": "I catch the group's dip in energy and suggest everyone rest",
+        "scoring": { "RES_AFF": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Тело давно подаёт сигналы: ноет спина, звенит в ушах, тянет прилечь.",
+    "scenarioEn": "Your body has been signaling for a while: aching back, ringing ears, an urge to lie down.",
+    "options": [
+      {
+        "text": "Замечаю это, только когда валюсь с ног",
+        "textEn": "I notice it only when I am about to collapse",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Обычно перетерплю, хотя и замечаю",
+        "textEn": "I usually push through, though I do notice",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Прислушиваюсь и сразу сбавляю темп",
+        "textEn": "I listen and immediately slow down",
+        "scoring": {}
+      },
+      {
+        "text": "Тревожусь и ищу причину каждого сигнала",
+        "textEn": "I get anxious and look for the cause of every signal",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Порезались или подвернули ногу — ощутимо больно.",
+    "scenarioEn": "You cut yourself or twisted an ankle — it genuinely hurts.",
+    "options": [
+      {
+        "text": "Перевязал и дальше по делам, боль терпимая",
+        "textEn": "I bandage it and get on with things, the pain is bearable",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Морщусь, но продолжаю",
+        "textEn": "I wince but carry on",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Сажусь и жду, пока отпустит",
+        "textEn": "I sit down and wait for it to ease",
+        "scoring": {}
+      },
+      {
+        "text": "Не могу сосредоточиться ни на чём, пока болит",
+        "textEn": "I cannot focus on anything while it hurts",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Близкие уговаривают взять больничный и отлежаться.",
+    "scenarioEn": "Loved ones urge you to take sick leave and rest up.",
+    "options": [
+      {
+        "text": "Отмахиваюсь: отлежусь, когда закончу дела",
+        "textEn": "I wave it off: I will rest once I finish my tasks",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Соглашаюсь нехотя",
+        "textEn": "I agree reluctantly",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "С радостью соглашаюсь отдохнуть",
+        "textEn": "I gladly agree to rest",
+        "scoring": {}
+      },
+      {
+        "text": "Мне важнее, что они переживают, чем сама болезнь",
+        "textEn": "Their worry matters to me more than the illness itself",
+        "scoring": { "RES_AFF": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Дедлайн, третья ночь без нормального сна.",
+    "scenarioEn": "A deadline; the third night without proper sleep.",
+    "options": [
+      {
+        "text": "Держусь на ходу, сон — потом",
+        "textEn": "I keep going, sleep can wait",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Тяжело, но дотяну",
+        "textEn": "It is rough, but I will make it",
+        "scoring": { "RES_PHYS": 2 }
+      },
+      {
+        "text": "Ложусь спать: без сна толку от меня нет",
+        "textEn": "I go to sleep: I am useless without it",
+        "scoring": {}
+      },
+      {
+        "text": "Кто-то рядом на нервах — это выматывает сильнее недосыпа",
+        "textEn": "Someone nearby is on edge — that drains me more than the lack of sleep",
+        "scoring": { "RES_AFF": 1 }
+      }
+    ]
+  },
+  {
+    "scenario": "В помещении холодно и душно, остальные жалуются.",
+    "scenarioEn": "The room is cold and stuffy; others are complaining.",
+    "options": [
+      {
+        "text": "Почти не замечаю, работаю дальше",
+        "textEn": "I barely notice and keep working",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Немного мешает, но терплю",
+        "textEn": "It bothers me a little, but I put up with it",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Прошу отрегулировать, иначе не могу",
+        "textEn": "I ask to adjust it, otherwise I can't cope",
+        "scoring": {}
+      },
+      {
+        "text": "Первым делом замечаю дискомфорт других",
+        "textEn": "The first thing I notice is other people's discomfort",
+        "scoring": { "RES_AFF": 2 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Насколько вы вообще замечаете голод и жажду в течение дня?",
+    "scenarioEn": "How much do you even notice hunger and thirst during the day?",
+    "options": [
+      {
+        "text": "Часто спохватываюсь только к вечеру, что не ел",
+        "textEn": "I often realize only by evening that I haven't eaten",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Иногда пропускаю приёмы пищи в запарке",
+        "textEn": "I sometimes skip meals when swamped",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Ем и пью по режиму, тело не игнорирую",
+        "textEn": "I eat and drink on schedule, I don't ignore my body",
+        "scoring": {}
+      },
+      {
+        "text": "Пропускаю еду, когда с головой ушёл в интересную тему",
+        "textEn": "I skip food when I'm buried in an engrossing topic",
+        "scoring": { "SPEC_INT": 2 }
+      }
+    ]
+  },
+  {
+    "scenario": "Переезд или тяжёлая физическая работа на весь день.",
+    "scenarioEn": "Moving house or heavy physical work all day.",
+    "options": [
+      {
+        "text": "Выкладываюсь до конца, потом отосплюсь",
+        "textEn": "I give it my all, then catch up on sleep later",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Работаю, делаю паузы по необходимости",
+        "textEn": "I work, taking breaks as needed",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Быстро выдыхаюсь, ищу, кто подменит",
+        "textEn": "I tire quickly and look for someone to take over",
+        "scoring": {}
+      },
+      {
+        "text": "Больше устаю от общей суеты, чем от самой нагрузки",
+        "textEn": "The general commotion tires me more than the load itself",
+        "scoring": { "RES_AFF": 1 }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Недомогание тянется вторую неделю.",
+    "scenarioEn": "The ailment has dragged on into a second week.",
+    "options": [
+      {
+        "text": "К врачу не иду: организм сам справится",
+        "textEn": "I don't see a doctor: my body will handle it",
+        "scoring": { "RES_PHYS": 3 }
+      },
+      {
+        "text": "Схожу, если совсем не пройдёт",
+        "textEn": "I'll go if it really won't pass",
+        "scoring": { "RES_PHYS": 1 }
+      },
+      {
+        "text": "Давно записался и проверился",
+        "textEn": "I booked an appointment and got checked long ago",
+        "scoring": {}
+      },
+      {
+        "text": "Накручиваю себя худшими сценариями",
+        "textEn": "I work myself up over worst-case scenarios",
+        "scoring": {}
+      }
+    ]
+  }
+]

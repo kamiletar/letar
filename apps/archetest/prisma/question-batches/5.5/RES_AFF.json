@@ -1,0 +1,266 @@
+[
+  {
+    "scenario": "Друг рассказывает о своей беде.",
+    "scenarioEn": "A friend tells you about their misfortune.",
+    "options": [
+      {
+        "text": "Переживаю почти как своё, потом долго не отпускает",
+        "textEn": "I feel it almost as my own, and it lingers for a long time",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Сочувствую, но остаюсь в своей тарелке",
+        "textEn": "I sympathize but stay grounded in myself",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Сразу перехожу к тому, чем можно помочь",
+        "textEn": "I move straight to how I can help",
+        "scoring": {}
+      },
+      {
+        "text": "Слушаю факты, эмоции считываю плохо",
+        "textEn": "I listen to the facts; I read the emotions poorly",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Заходите в комнату, где только что была ссора.",
+    "scenarioEn": "You walk into a room where an argument just happened.",
+    "options": [
+      {
+        "text": "Мгновенно чувствую повисшее напряжение телом",
+        "textEn": "I instantly feel the lingering tension in my body",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Замечаю, что что-то не так, но не сразу",
+        "textEn": "I notice something is off, but not right away",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Понимаю по словам, а не по атмосфере",
+        "textEn": "I figure it out from words, not from the atmosphere",
+        "scoring": {}
+      },
+      {
+        "text": "Обычно не улавливаю таких вещей",
+        "textEn": "I usually don't pick up on such things",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Рядом кто-то плачет навзрыд.",
+    "scenarioEn": "Someone next to you is sobbing uncontrollably.",
+    "options": [
+      {
+        "text": "Захлёстывает так, что самому хочется уйти",
+        "textEn": "It overwhelms me so much that I want to leave myself",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Тяжело, но остаюсь рядом",
+        "textEn": "It's hard, but I stay close",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Спокойно поддерживаю, меня не накрывает",
+        "textEn": "I calmly offer support; it doesn't sweep me away",
+        "scoring": {}
+      },
+      {
+        "text": "Растерян: не знаю, что мне самому чувствовать",
+        "textEn": "I'm at a loss: I don't know what to feel myself",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "После эмоционально тяжёлого разговора.",
+    "scenarioEn": "After an emotionally heavy conversation.",
+    "options": [
+      {
+        "text": "Разряжен, будто это случилось со мной",
+        "textEn": "I'm drained, as if it had happened to me",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Немного выбит, но быстро прихожу в себя",
+        "textEn": "A bit shaken, but I recover quickly",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Иду дальше по делам без следа",
+        "textEn": "I get on with things without a trace",
+        "scoring": {}
+      },
+      {
+        "text": "Прокручиваю, что можно было бы решить",
+        "textEn": "I replay what could have been resolved",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Коллеге при вас поставили жёсткую критику.",
+    "scenarioEn": "A colleague is harshly criticized in front of you.",
+    "options": [
+      {
+        "text": "Мне почти так же неловко и обидно, как ему",
+        "textEn": "I feel almost as awkward and hurt as they do",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Сочувствую, но это его ситуация",
+        "textEn": "I sympathize, but it's their situation",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Оцениваю, справедлива ли критика",
+        "textEn": "I weigh whether the criticism is fair",
+        "scoring": {}
+      },
+      {
+        "text": "Не придаю этому большого значения",
+        "textEn": "I don't make much of it",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Смотрите фильм или новости с чужим страданием.",
+    "scenarioEn": "You watch a film or news showing someone's suffering.",
+    "options": [
+      {
+        "text": "Реагирую телесно: ком в горле, слёзы",
+        "textEn": "I react physically: a lump in my throat, tears",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Трогает, но без сильной реакции",
+        "textEn": "It moves me, but without a strong reaction",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Смотрю с интересом к сюжету",
+        "textEn": "I watch with interest in the plot",
+        "scoring": {}
+      },
+      {
+        "text": "Быстро переключаюсь на другое",
+        "textEn": "I quickly switch to something else",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Весёлая компания, но один человек явно подавлен.",
+    "scenarioEn": "A cheerful gathering, but one person is clearly downcast.",
+    "options": [
+      {
+        "text": "Не могу веселиться, пока чувствую его состояние",
+        "textEn": "I can't have fun while I feel their state",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Замечаю, но включаюсь в общее настроение",
+        "textEn": "I notice, but I join the general mood",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Не обращаю внимания на его фон",
+        "textEn": "I pay no attention to their undertone",
+        "scoring": {}
+      },
+      {
+        "text": "Иду прямо спрашивать, что случилось",
+        "textEn": "I go straight over to ask what's wrong",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Настроение окружающих на вас...",
+    "scenarioEn": "The mood of people around you...",
+    "options": [
+      {
+        "text": "Передаётся мгновенно, как по проводам",
+        "textEn": "Transmits instantly, as if through wires",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Влияет, но я держу своё",
+        "textEn": "Affects me, but I hold my own",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Почти не сказывается",
+        "textEn": "Barely has any effect",
+        "scoring": {}
+      },
+      {
+        "text": "Замечаю только по прямым словам",
+        "textEn": "I notice only from what people say directly",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Чтобы помогать другим, вам нужно...",
+    "scenarioEn": "In order to help others, you need to...",
+    "options": [
+      {
+        "text": "Сначала защититься от их эмоций, иначе тону",
+        "textEn": "First shield myself from their emotions, or I drown",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Немного дистанции, но в целом справляюсь",
+        "textEn": "A little distance, but on the whole I manage",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Ничего особенного: эмоции меня не захлёстывают",
+        "textEn": "Nothing special: emotions don't overwhelm me",
+        "scoring": {}
+      },
+      {
+        "text": "Просто понять, что конкретно сделать",
+        "textEn": "Just to understand what specifically to do",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Незнакомец в транспорте выглядит расстроенным.",
+    "scenarioEn": "A stranger on public transport looks upset.",
+    "options": [
+      {
+        "text": "Его состояние цепляет и остаётся со мной",
+        "textEn": "Their state catches me and stays with me",
+        "scoring": { "RES_AFF": 3 }
+      },
+      {
+        "text": "Мельком отмечаю и забываю",
+        "textEn": "I note it briefly and forget",
+        "scoring": { "RES_AFF": 1 }
+      },
+      {
+        "text": "Не замечаю попутчиков",
+        "textEn": "I don't notice fellow passengers",
+        "scoring": {}
+      },
+      {
+        "text": "Думаю практично: не нужна ли помощь",
+        "textEn": "I think practically: do they need help",
+        "scoring": {}
+      }
+    ]
+  }
+]

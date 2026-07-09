@@ -67,11 +67,16 @@ function hasSpacingSeries(sessionsAsc: AchievementSession[], windowSize: number,
   return false
 }
 
+/** Только шкалы ядра 22: экспериментальные коды 5.5 в ачивках «тип личности» не участвуют */
+function coreEntries(scores: Record<string, number>): [string, number][] {
+  return Object.entries(scores).filter(([code]) => (ALL_SCALE_CODES as string[]).includes(code))
+}
+
 /** Получить топ-тип по нормализованным баллам */
 function getTopType(scores: Record<string, number>): string | null {
   let maxCode: string | null = null
   let maxVal = -1
-  for (const [code, val] of Object.entries(scores)) {
+  for (const [code, val] of coreEntries(scores)) {
     if (val > maxVal) {
       maxVal = val
       maxCode = code
@@ -82,7 +87,7 @@ function getTopType(scores: Record<string, number>): string | null {
 
 /** Получить топ-3 типа */
 function getTop3(scores: Record<string, number>): string[] {
-  return Object.entries(scores)
+  return coreEntries(scores)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([code]) => code)
@@ -197,7 +202,7 @@ export async function checkAndAwardAchievements(
     answeredCount: number
     scores: Record<string, number>
     completedAt: Date
-  }
+  },
 ): Promise<string[]> {
   // Загружаем контекст
   const [allSessions, existingAchievements, uniqueAnsweredQuestions] = await Promise.all([
@@ -260,7 +265,7 @@ export async function checkAndAwardAchievements(
         prisma.userQuizAchievement.create({
           data: { userId, achievementCode: code },
         })
-      )
+      ),
     )
   }
 

@@ -1,0 +1,266 @@
+[
+  {
+    "scenario": "Вы наткнулись на по-настоящему увлекательную тему.",
+    "scenarioEn": "You've stumbled onto a genuinely fascinating topic.",
+    "options": [
+      {
+        "text": "Погружаюсь так, что теряю счёт времени",
+        "textEn": "I dive in so deep I lose track of time",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Увлекаюсь, но помню о делах",
+        "textEn": "I get into it, but keep my other tasks in mind",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Интересно, но быстро переключаюсь",
+        "textEn": "It's interesting, but I switch off quickly",
+        "scoring": {}
+      },
+      {
+        "text": "Редко чем-то захватываюсь надолго",
+        "textEn": "I rarely get gripped by anything for long",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Разговор зашёл о вашей теме.",
+    "scenarioEn": "The conversation turns to your topic.",
+    "options": [
+      {
+        "text": "Могу говорить о ней часами, не замечая скуки собеседника",
+        "textEn": "I can talk about it for hours, missing the listener's boredom",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Оживляюсь, но слежу за реакцией",
+        "textEn": "I light up, but I watch the reaction",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Скажу пару слов и уступлю очередь",
+        "textEn": "I say a couple of words and yield the floor",
+        "scoring": {}
+      },
+      {
+        "text": "У меня нет такой темы",
+        "textEn": "I don't have such a topic",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вас прервали на середине любимого занятия.",
+    "scenarioEn": "You're interrupted in the middle of a favorite activity.",
+    "options": [
+      {
+        "text": "Раздражаюсь сильнее, чем ситуация того стоит",
+        "textEn": "I get more irritated than the situation warrants",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Неприятно, но переключаюсь",
+        "textEn": "It's annoying, but I switch over",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Спокойно откладываю",
+        "textEn": "I calmly set it aside",
+        "scoring": {}
+      },
+      {
+        "text": "Рад поводу отвлечься",
+        "textEn": "I'm glad of the excuse to take a break",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Ваши знания в теме интереса.",
+    "scenarioEn": "Your knowledge within your topic of interest.",
+    "options": [
+      {
+        "text": "Знаю почти всё, коллекционирую мельчайшие детали",
+        "textEn": "I know almost everything, I collect the tiniest details",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Разбираюсь неплохо",
+        "textEn": "I know my way around it fairly well",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "На уровне общего кругозора",
+        "textEn": "At the level of general awareness",
+        "scoring": {}
+      },
+      {
+        "text": "Не углубляюсь специально ни во что",
+        "textEn": "I don't deliberately go deep into anything",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Тема захватила — а рядом ждут сон, еда и близкие.",
+    "scenarioEn": "The topic has gripped you — meanwhile sleep, food, and loved ones wait.",
+    "options": [
+      {
+        "text": "Забываю про них, пока не наиграюсь темой",
+        "textEn": "I forget about them until I've had my fill of the topic",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Иногда засиживаюсь дольше, чем стоило",
+        "textEn": "I sometimes stay at it longer than I should",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Легко откладываю ради быта и людей",
+        "textEn": "I easily set it aside for daily life and people",
+        "scoring": {}
+      },
+      {
+        "text": "Меня ничто так сильно не поглощает",
+        "textEn": "Nothing absorbs me that strongly",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Свободный вечер.",
+    "scenarioEn": "A free evening.",
+    "options": [
+      {
+        "text": "Ухожу с головой в своё увлечение до ночи",
+        "textEn": "I plunge into my hobby until late at night",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Уделю ему время среди прочего",
+        "textEn": "I'll give it some time among other things",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Провожу как придётся",
+        "textEn": "I spend it however it goes",
+        "scoring": {}
+      },
+      {
+        "text": "Предпочту людей и отдых",
+        "textEn": "I'd rather have people and rest",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Близкие говорят, что вы «слишком» погружены в свою тему.",
+    "scenarioEn": "Loved ones say you're 'too' immersed in your topic.",
+    "options": [
+      {
+        "text": "Слышу это регулярно и иначе не могу",
+        "textEn": "I hear it regularly and can't help it",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Иногда так говорят",
+        "textEn": "They say so sometimes",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Такого за мной не водится",
+        "textEn": "That's not something I'm prone to",
+        "scoring": {}
+      },
+      {
+        "text": "У меня нет доминирующего увлечения",
+        "textEn": "I don't have a dominant obsession",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Новая область, которая по-настоящему зацепила.",
+    "scenarioEn": "A new field that has truly caught you.",
+    "options": [
+      {
+        "text": "Составляю систему и каталоги, углубляюсь на месяцы",
+        "textEn": "I build systems and catalogs, going deep for months",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Изучу основательно, потом остыну",
+        "textEn": "I study it thoroughly, then cool off",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Полюбопытствую поверхностно",
+        "textEn": "I'll be curious on the surface",
+        "scoring": {}
+      },
+      {
+        "text": "Редко во что-то ныряю",
+        "textEn": "I rarely plunge into anything",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Работа или учёба требует темы, которая вам совсем не своя.",
+    "scenarioEn": "Work or study demands a topic that isn't yours at all.",
+    "options": [
+      {
+        "text": "Мучаюсь: мне бы только вернуться в своё",
+        "textEn": "I struggle: I just want to get back to my own thing",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Делаю, но постоянно тянет к своему интересу",
+        "textEn": "I do it, but I'm constantly pulled toward my interest",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Спокойно занимаюсь чем нужно",
+        "textEn": "I calmly work on whatever is required",
+        "scoring": {}
+      },
+      {
+        "text": "Мне легко переключаться между темами",
+        "textEn": "I switch between topics easily",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "scenario": "Когда говорите о том, что любите...",
+    "scenarioEn": "When you talk about what you love...",
+    "options": [
+      {
+        "text": "Загораюсь и забываю следить за временем и аудиторией",
+        "textEn": "I catch fire and forget to track time or the audience",
+        "scoring": { "SPEC_INT": 3 }
+      },
+      {
+        "text": "Увлекаюсь, но себя контролирую",
+        "textEn": "I get carried away, but keep myself in check",
+        "scoring": { "SPEC_INT": 1 }
+      },
+      {
+        "text": "Держусь сдержанно",
+        "textEn": "I stay reserved",
+        "scoring": {}
+      },
+      {
+        "text": "Не испытываю такого азарта",
+        "textEn": "I don't feel that kind of excitement",
+        "scoring": {}
+      }
+    ]
+  }
+]

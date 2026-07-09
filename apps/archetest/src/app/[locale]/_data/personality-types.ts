@@ -23,6 +23,16 @@ export type PersonalityTypeCode =
   | 'DIR'
   | 'ALX'
 
+/**
+ * Код экспериментальной шкалы (этап 5.5): авторские/прототипные конструкты ВНЕ ядра 22.
+ * В express и тизер не входят, в топ-черт и ipsative-ранжирование не участвуют,
+ * отображаются ТОЛЬКО в кабинете психолога с обязательной пометкой «бета».
+ */
+export type ExperimentalScaleCode = 'RES_PHYS' | 'RES_AFF' | 'SPEC_INT'
+
+/** Любой скоримый код шкалы: ядро 22 + экспериментальные */
+export type ScaleCode = PersonalityTypeCode | ExperimentalScaleCode
+
 /** Кластер/группа шкалы */
 export type PersonalityCluster =
   | 'A'
@@ -594,6 +604,116 @@ export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES
 export const TEASER_SCALE_CODES: PersonalityTypeCode[] = ALL_SCALE_CODES.filter(
   (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code),
 )
+
+/**
+ * Экспериментальная шкала (этап 5.5): вне ядра 22 — отдельный интерфейс, а не запись
+ * PERSONALITY_TYPES, чтобы ядро (тизер, express, ipsative, топ-черт, полнота
+ * growth-practices/positive-profiles) структурно не могло затянуть эти коды.
+ * Вопросы экспериментальных шкал скорят ТОЛЬКО экспериментальные коды — actual_max
+ * ядра не меняется, поэтому их добавление НЕ инкрементирует QUESTION_BANK_VERSION.
+ */
+export interface ExperimentalScale {
+  code: ExperimentalScaleCode
+  /** Мягкое название */
+  label: string
+  labelEn: string
+  /** Конструктное название (для кабинета психолога) */
+  clinical: string
+  clinicalEn: string
+  /** Архетип */
+  archetype: string
+  archetypeEn: string
+  /** Описание */
+  description: string
+  descriptionEn: string
+  /** Описание при высоком балле */
+  whenHigh: string
+  whenHighEn: string
+  /** Цвет для графика */
+  color: string
+  /** Прототип конструкта — честная маркировка происхождения (5.6.2) */
+  prototype: string
+  prototypeEn: string
+}
+
+/** Экспериментальные шкалы (этап 5.5) — всегда «бета», только кабинет психолога */
+export const EXPERIMENTAL_SCALES: ExperimentalScale[] = [
+  {
+    code: 'RES_PHYS',
+    label: 'Выносливый',
+    labelEn: 'Enduring',
+    clinical: 'Физическая броня (авторский конструкт)',
+    clinicalEn: 'Physical Armor (author’s construct)',
+    archetype: 'Крепость',
+    archetypeEn: 'Fortress',
+    description:
+      'Тело выдерживает многое и не жалуется: усталость, дискомфорт, недосып, боль переносятся без драмы. В марафонских нагрузках и кризисах это делает вас опорой — вы продолжаете действовать там, где другие уже сошли с дистанции.',
+    descriptionEn:
+      'The body endures a lot without complaint: fatigue, discomfort, sleep loss, and pain are carried without drama. In marathon workloads and crises this makes you an anchor — you keep acting where others have already dropped out.',
+    whenHigh:
+      'Высокий балл означает, что телесные сигналы приглушены: усталость, боль и болезнь замечаются поздно, когда ресурс уже на нуле. Броня защищает, но она же скрывает износ. Точка роста: регулярные «техосмотры» — сон, чек-апы, телесные практики — не дожидаясь, пока тело перейдёт на крик.',
+    whenHighEn:
+      'A high score means bodily signals are muted: fatigue, pain, and illness get noticed late, when reserves are already empty. Armor protects — and hides wear. Growth point: regular “maintenance checks” — sleep, check-ups, body practices — without waiting for the body to start screaming.',
+    color: '#9C4221',
+    prototype: 'Авторский конструкт (валидированного прототипа нет)',
+    prototypeEn: 'Author’s construct (no validated prototype)',
+  },
+  {
+    code: 'RES_AFF',
+    label: 'Резонирующий',
+    labelEn: 'Resonant',
+    clinical: 'Аффективный резонанс',
+    clinicalEn: 'Affective Resonance',
+    archetype: 'Камертон',
+    archetypeEn: 'Tuning Fork',
+    description:
+      'Чужие состояния и атмосфера помещения отзываются в вас почти телесно: напряжение в комнате вы ловите раньше, чем прозвучат слова. Этот радар делает вас тонким собеседником — люди чувствуют, что их состояние замечено без объяснений.',
+    descriptionEn:
+      'Other people’s states and the room’s atmosphere resonate in you almost physically: you catch tension before a word is spoken. This radar makes you a finely tuned interlocutor — people feel their state is noticed without explanation.',
+    whenHigh:
+      'Высокий балл означает, что чужое переживается как своё — вплоть до личного дистресса: после тяжёлых разговоров вы разряжены, а от чужой боли хочется не помочь, а сбежать. Точка роста: различать «моё/чужое», дозировать эмоционально насыщенные контексты и планировать восстановление как рабочую задачу.',
+    whenHighEn:
+      'A high score means others’ experiences are lived as your own — up to personal distress: heavy conversations drain you, and others’ pain can trigger flight rather than help. Growth point: telling “mine” from “theirs”, dosing emotionally loaded contexts, and scheduling recovery as a real task.',
+    color: '#00A3C4',
+    prototype: 'IRI Personal Distress (Davis, 1980) / HSP Scale (Aron & Aron, 1997) — на уровне конструкта',
+    prototypeEn: 'IRI Personal Distress (Davis, 1980) / HSP Scale (Aron & Aron, 1997) — construct level',
+  },
+  {
+    code: 'SPEC_INT',
+    label: 'Погружённый',
+    labelEn: 'Immersed',
+    clinical: 'Специальные интересы (авторский конструкт)',
+    clinicalEn: 'Special Interests (author’s construct)',
+    archetype: 'Хранитель огня',
+    archetypeEn: 'Keeper of the Flame',
+    description:
+      'Интерес захватывает вас целиком: в своей теме вы знаете «всё» и способны говорить о ней часами, теряя счёт времени. Такая глубина погружения — редкий когнитивный ресурс: там, где нужен настоящий эксперт, вы незаменимы.',
+    descriptionEn:
+      'An interest absorbs you completely: within your topic you know “everything” and can talk about it for hours, losing track of time. This depth of immersion is a rare cognitive resource: where a true expert is needed, you are irreplaceable.',
+    whenHigh:
+      'Высокий балл означает, что интерес может вытеснять остальные сферы: сон, быт, отношения подстраиваются под тему. Сам интерес — не проблема, проблема — монополия. Точка роста: договорённости с близкими о «времени темы» и мостики от интереса к людям — делиться, преподавать, находить сообщество.',
+    whenHighEn:
+      'A high score means the interest can crowd out other spheres: sleep, daily life, and relationships bend around the topic. The interest itself is not the problem — its monopoly is. Growth point: agreements with loved ones about “topic time” and bridges from the interest to people — sharing, teaching, finding a community.',
+    color: '#B83280',
+    prototype: 'Авторский конструкт; ориентир — клинические описания specific/circumscribed interests',
+    prototypeEn: 'Author’s construct; informed by clinical descriptions of specific/circumscribed interests',
+  },
+]
+
+/** Коды экспериментальных шкал (этап 5.5) */
+export const EXPERIMENTAL_SCALE_CODES: ExperimentalScaleCode[] = ['RES_PHYS', 'RES_AFF', 'SPEC_INT']
+
+/**
+ * Все скоримые шкалы: ядро 22 + экспериментальные. По этому списку идут скоринг
+ * (raw/normalized/confidence/relevantCounts) и стратификация выборки вопросов.
+ * Интерпретация (топ-черт, ipsative, тизер, express, ачивки) — только по ALL_SCALE_CODES.
+ */
+export const SCORED_SCALE_CODES: ScaleCode[] = [...ALL_SCALE_CODES, ...EXPERIMENTAL_SCALE_CODES]
+
+/** Получить экспериментальную шкалу по коду */
+export function getExperimentalScale(code: ExperimentalScaleCode): ExperimentalScale {
+  return EXPERIMENTAL_SCALES.find((s) => s.code === code)!
+}
 
 /** Получить тип по коду */
 export function getPersonalityType(code: PersonalityTypeCode): PersonalityType {

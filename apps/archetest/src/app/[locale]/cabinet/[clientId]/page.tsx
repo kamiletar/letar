@@ -9,7 +9,8 @@ import { getClientDetailAction, updateDisplayNameAction } from '../../_actions/c
 import { HexagramChart } from '../../_components/hexagram-chart'
 import { PersonalityRadarChart } from '../../_components/personality-radar-chart'
 import { ProfileDetails } from '../../_components/profile-details'
-import { HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../../_data/personality-types'
+import { EXPERIMENTAL_SCALE_CODES, HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../../_data/personality-types'
+import { ExperimentalScalesBlock } from './_components/experimental-scales-block'
 import { PsychologistNotes } from './_components/psychologist-notes'
 import { SessionDynamicsChart } from './_components/session-dynamics-chart'
 
@@ -182,6 +183,12 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
             </Card.Body>
           </Card.Root>
         )}
+
+        {/* Экспериментальные шкалы (этап 5.5) — только если клиент отвечал на их вопросы */}
+        {detail.cumulativeScores &&
+          EXPERIMENTAL_SCALE_CODES.some((code) => (detail.cumulativeScores![code] ?? 0) > 0) && (
+            <ExperimentalScalesBlock scores={detail.cumulativeScores} />
+          )}
 
         {/* Динамика по сессиям */}
         <SessionDynamicsChart sessions={detail.sessionsHistory} />
