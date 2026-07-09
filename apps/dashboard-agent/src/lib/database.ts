@@ -35,9 +35,9 @@ const APP_CONFIG = {
   },
   mandala: {
     secretsPath: '/secrets/mandala.env',
-    containerName: 'mandala-postgres',
+    containerName: 'mandala-db',
     defaults: {
-      host: 'mandala-postgres',
+      host: 'mandala-db',
       port: 5432,
       database: 'mandala',
       user: 'lena_user',
@@ -45,9 +45,9 @@ const APP_CONFIG = {
   },
   kami: {
     secretsPath: '/secrets/kami.env',
-    containerName: 'kami-postgres',
+    containerName: 'kami-db',
     defaults: {
-      host: 'kami-postgres',
+      host: 'kami-db',
       port: 5432,
       database: 'lena_kami',
       user: 'lena_user',
@@ -55,9 +55,9 @@ const APP_CONFIG = {
   },
   'driving-school': {
     secretsPath: '/secrets/driving-school.env',
-    containerName: 'driving-school-postgres',
+    containerName: 'driving-school-db',
     defaults: {
-      host: 'driving-school-postgres',
+      host: 'driving-school-db',
       port: 5432,
       database: 'lena_driving_school',
       user: 'lena_user',
@@ -65,9 +65,9 @@ const APP_CONFIG = {
   },
   umami: {
     secretsPath: '/secrets/umami.env',
-    containerName: 'umami-postgres',
+    containerName: 'umami-db',
     defaults: {
-      host: 'umami-postgres',
+      host: 'umami-db',
       port: 5432,
       database: 'umami',
       user: 'umami_user',
@@ -75,9 +75,9 @@ const APP_CONFIG = {
   },
   'animatrona-tracker': {
     secretsPath: '/secrets/animatrona-tracker.env',
-    containerName: 'animatrona-tracker-postgres',
+    containerName: 'animatrona-tracker-db',
     defaults: {
-      host: 'animatrona-tracker-postgres',
+      host: 'animatrona-tracker-db',
       port: 5432,
       database: 'animatrona_tracker',
       user: 'animatrona_user',
@@ -105,9 +105,9 @@ const APP_CONFIG = {
   },
   'auth-hub': {
     secretsPath: '/secrets/auth-hub.env',
-    containerName: 'auth-hub-postgres',
+    containerName: 'auth-hub-db',
     defaults: {
-      host: 'auth-hub-postgres',
+      host: 'auth-hub-db',
       port: 5432,
       database: 'lena_auth',
       user: 'lena_user',

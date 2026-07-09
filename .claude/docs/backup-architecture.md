@@ -38,22 +38,22 @@ imot_manual_2026-03-01T10-45-00.sql.gz
 
 ### Приложения и серверы
 
-| Приложение         | Сервер | Контейнер БД                | БД                  |
-| ------------------ | ------ | --------------------------- | ------------------- |
-| premium-rosstil    | s2     | premium-rosstil-postgres    | lena_premium        |
-| imot               | s2     | imot-postgres               | lena_imot           |
-| mandala            | s2     | mandala-postgres            | mandala             |
-| kami               | s2     | kami-postgres               | lena_kami           |
-| umami              | s2     | umami-postgres              | umami               |
-| animatrona-tracker | s2     | animatrona-tracker-postgres | animatrona_tracker  |
-| driving-school     | s2     | driving-school-postgres     | lena_driving_school |
-| dashboard          | s2     | dashboard-db                | dashboard           |
-| archetest          | s2     | archetest-db                | archetest           |
-| auth-hub           | s2     | auth-hub-postgres           | lena_auth           |
-| time               | s2     | time-db                     | time                |
-| form-example       | s2     | form-example-db             | forms_example       |
-| grandslamcup       | s2     | grandslamcup-db             | grandslamcup        |
-| dsperevod          | s2     | dsperevod-db                | dsperevod           |
+| Приложение         | Сервер | Контейнер БД             | БД                  |
+| ------------------ | ------ | ------------------------ | ------------------- |
+| premium-rosstil    | s2     | premium-rosstil-postgres | lena_premium        |
+| imot               | s2     | imot-postgres            | lena_imot           |
+| mandala            | s2     | mandala-db               | mandala             |
+| kami               | s2     | kami-db                  | lena_kami           |
+| umami              | s2     | umami-db                 | umami               |
+| animatrona-tracker | s2     | animatrona-tracker-db    | animatrona_tracker  |
+| driving-school     | s2     | driving-school-db        | lena_driving_school |
+| dashboard          | s2     | dashboard-db             | dashboard           |
+| archetest          | s2     | archetest-db             | archetest           |
+| auth-hub           | s2     | auth-hub-db              | lena_auth           |
+| time               | s2     | time-db                  | time                |
+| form-example       | s2     | form-example-db          | forms_example       |
+| grandslamcup       | s2     | grandslamcup-db          | grandslamcup        |
+| dsperevod          | s2     | dsperevod-db             | dsperevod           |
 
 ### API (в dashboard-agent)
 
