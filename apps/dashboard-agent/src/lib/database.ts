@@ -391,7 +391,7 @@ export async function getAllDatabaseStatuses(): Promise<DatabaseStatus[]> {
         port: config.port,
         database: config.database,
       }
-    }),
+    })
   )
 
   return statuses
@@ -621,7 +621,7 @@ export async function getAllDatabaseStats(filterDbName?: string): Promise<Databa
           error: error instanceof Error ? error.message : 'Unknown error',
         }
       }
-    }),
+    })
   )
 
   return stats
