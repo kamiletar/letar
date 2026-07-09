@@ -233,11 +233,30 @@ const bot = new Bot(token, { client: { apiRoot: process.env.TELEGRAM_API_ROOT } 
 2. **Устанавливает зависимости** - Запускает `bun install --frozen-lockfile`
 3. **Генерирует схемы** - Запускает `nx zenstack:generate <app>` и `nx db:generate <app>` (если есть БД)
 4. **Запускает базу данных** - Поднимает PostgreSQL контейнер если не запущен
-5. **Применяет миграции** - Запускает `prisma migrate deploy` перед сборкой (если есть БД)
-6. **Собирает приложение** - Использует Nx кэш: `nx build <app>`
-7. **Собирает Docker образ** - Создаёт production образ из `Dockerfile.production`
-8. **Деплоит контейнеры** - Запускает `docker compose up -d --force-recreate app`
-9. **Показывает логи** - Выводит логи контейнера для задеплоенного приложения
+5. **Проверяет миграции** - `prisma migrate status`: если применять нечего — шаги 6–7 пропускаются
+6. **Дамп перед миграцией** - `pg_dump | gzip` в `/home/deploy/pre-migrate-dumps/<app>-<sha>-<ts>.sql.gz` (ротация: последние 3 на приложение). Дамп не удался → **деплой приложения прерывается** (миграция без бэкапа запрещена; явный обход — `SKIP_PREMIGRATE_DUMP=1`)
+7. **Применяет миграции** - `prisma migrate deploy`. Ошибка миграции → **деплой приложения прерывается**, старый контейнер не трогается (до 2026-07-09 был только warning и деплой продолжался — исправлено)
+8. **Собирает приложение** - Использует Nx кэш: `nx build <app>`
+9. **Собирает Docker образ** - Production образ из `Dockerfile.production`, два тега: `<app>:latest` (или `:staging`) **и `<app>:<short-sha>`** для отката (ретеншн: последние 3 sha-тега)
+10. **Деплоит контейнеры** - Запускает `docker compose up -d --force-recreate app`
+11. **Показывает логи** - Выводит логи контейнера для задеплоенного приложения
+
+### Откат (rollback) без пересборки
+
+Каждый успешный билд дополнительно тегируется git SHA (`<app>:<short-sha>`, хранятся последние 3):
+
+```bash
+# На сервере: посмотреть доступные версии
+docker images <app>
+
+# Откатиться на предыдущую версию (пример: driving-school на abc1234)
+cd /home/deploy/letar/apps/<app>
+docker compose -f docker-compose.production.yml --env-file .env.docker up -d --force-recreate app \
+  # предварительно указав образ: проще всего временно перетегировать
+docker tag <app>:<sha> <app>:latest && docker compose -f docker-compose.production.yml --env-file .env.docker up -d --force-recreate app
+```
+
+⚠️ Откат образа **не откатывает миграции БД** — если миграция уже применена, старый код должен быть с ней совместим (для этого миграции должны быть backward-compatible) либо восстанавливай БД из pre-migrate дампа (`/home/deploy/pre-migrate-dumps/`).
 
 ### Необходимые файлы для каждого приложения
 

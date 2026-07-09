@@ -653,10 +653,49 @@ for app in $AFFECTED_APPS; do
     # Передаём schema явно, DATABASE_URL берётся из environment
     SCHEMA_PATH="src/generated/schema.prisma"
     if [ -f "$SCHEMA_PATH" ]; then
-      if DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy --schema "$SCHEMA_PATH"; then
-        echo -e "${GREEN}✅ Migrations applied${NC}"
+      # Различаем «нет миграций к применению» (status: exit 0) и реальную работу/ошибку.
+      # Раньше падение migrate deploy давало warning и деплой продолжался поверх
+      # недомигрированной БД — теперь ошибка миграции прерывает деплой приложения.
+      if DATABASE_URL="$DATABASE_URL" npx prisma migrate status --schema "$SCHEMA_PATH" > /dev/null 2>&1; then
+        echo -e "${BLUE}ℹ️  No pending migrations for ${app}${NC}"
       else
-        echo -e "${YELLOW}⚠️  Migration failed or no migrations to apply${NC}"
+        # Перед миграцией — дамп прод-БД (защита данных; окно потери между ночными
+        # бэкапами — до 24ч). Обход только явный: SKIP_PREMIGRATE_DUMP=1
+        DUMP_DIR="${PRE_MIGRATE_DUMP_DIR:-/home/deploy/pre-migrate-dumps}"
+        if [ "${SKIP_PREMIGRATE_DUMP:-0}" != "1" ]; then
+          mkdir -p "$DUMP_DIR"
+          DUMP_FILE="${DUMP_DIR}/${app}-$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)-$(date +%Y%m%d-%H%M%S).sql.gz"
+          # Имя контейнера БД — из compose (container_name под сервисом db:), fallback на конвенцию <app>-db
+          DB_CONTAINER=$(awk '/^[[:space:]]*db:[[:space:]]*$/{f=1} f && /container_name:/{print $2; exit}' "$COMPOSE_FILE")
+          DB_CONTAINER="${DB_CONTAINER:-${app}-db}"
+          echo -e "${YELLOW}💾 Pre-migrate dump (${DB_CONTAINER}): ${DUMP_FILE}${NC}"
+          docker exec "$DB_CONTAINER" pg_dump -U "${DB_USER:-lena_user}" "${DB_NAME}" | gzip > "$DUMP_FILE"
+          DUMP_RC=${PIPESTATUS[0]}
+          if [ "$DUMP_RC" = "0" ] && [ -s "$DUMP_FILE" ]; then
+            # Ротация: храним последние 3 дампа этого приложения
+            ls -1t "${DUMP_DIR}/${app}-"*.sql.gz 2>/dev/null | tail -n +4 | xargs -r rm -f
+            echo -e "${GREEN}✅ Pre-migrate dump created${NC}"
+          else
+            rm -f "$DUMP_FILE"
+            echo -e "${RED}❌ Pre-migrate dump failed for ${app} — деплой прерван (миграция без бэкапа запрещена; явный обход: SKIP_PREMIGRATE_DUMP=1)${NC}"
+            FAILED_APPS+=("$app")
+            cd "$WORKSPACE_ROOT"
+            echo ""
+            continue
+          fi
+        else
+          echo -e "${YELLOW}⚠️  SKIP_PREMIGRATE_DUMP=1 — миграция без предварительного дампа${NC}"
+        fi
+
+        if DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy --schema "$SCHEMA_PATH"; then
+          echo -e "${GREEN}✅ Migrations applied${NC}"
+        else
+          echo -e "${RED}❌ Migration failed for ${app} — деплой прерван, старый контейнер не тронут. Дамп до миграции: ${DUMP_DIR}${NC}"
+          FAILED_APPS+=("$app")
+          cd "$WORKSPACE_ROOT"
+          echo ""
+          continue
+        fi
       fi
     else
       echo -e "${YELLOW}⚠️  Schema not found at $SCHEMA_PATH${NC}"
@@ -791,8 +830,15 @@ for app in $AFFECTED_APPS; do
   DOCKER_IMAGE="${app}${DOCKER_TAG_SUFFIX}"
   # Build from workspace root as context, with app-specific Dockerfile
   cd "$WORKSPACE_ROOT"
-  if docker build -f "$APP_DIR/Dockerfile.production" -t $DOCKER_IMAGE .; then
-    echo -e "${GREEN}✅ Docker image built: ${DOCKER_IMAGE}${NC}"
+  # Дублирующий тег по git SHA — откат без пересборки: docker compose up с <app>:<sha>
+  GIT_SHORT_SHA=$(git rev-parse --short HEAD)
+  SHA_IMAGE="${app}:${GIT_SHORT_SHA}"
+  if docker build -f "$APP_DIR/Dockerfile.production" -t "$DOCKER_IMAGE" -t "$SHA_IMAGE" .; then
+    echo -e "${GREEN}✅ Docker image built: ${DOCKER_IMAGE} (+ rollback tag ${SHA_IMAGE})${NC}"
+    # Ретеншн sha-тегов: храним последние 3 (docker images сортирует по дате создания);
+    # rmi по тегу лишь снимает тег — образ под :latest/:staging не удаляется
+    docker images "${app}" --format '{{.Tag}}' | grep -E '^[0-9a-f]{7,12}$' | tail -n +4 \
+      | xargs -r -I{} docker rmi "${app}:{}" 2> /dev/null || true
   else
     echo -e "${RED}❌ Docker build failed for ${app}${NC}"
     FAILED_APPS+=("$app")

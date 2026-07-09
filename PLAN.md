@@ -244,6 +244,17 @@
 > ⏳ **Осталось в §15:** instructor profile failures; Telegram BOT_TOKEN/CHAT_ID (нотификации); `nx affected --target=e2e`.
 > **➡️ Следующий старт:** следующий этап roadmap (Этап 10 или по приоритету).
 >
+> **Сессия №49 (2026-07-09, план — §18 🆕 Deploy MCP + staging-пайплайн):** добавлен **§18** — полный план
+> в 4 сессии (A–D): харденинг `deploy-affected.sh` (миграции fail=abort, pg_dump перед миграцией, sha-теги
+> образов → ручной rollback), `libs/infra-config` (единый маппинг app→server), `libs/deploy-mcp` (MCP-обёртка
+> над REST API dashboard-agent: deploy_app/deploy_status/…, SSH-туннель вместо публичного порта 3100),
+> dashboard-agent на s3 → **staging-gated пайплайн** (staging → e2e → warn-gate → production, реализует Этап A
+> §15.3.1; cross-server gap решён проверкой в deploy-mcp). Пилот — grandslamcup (staging-комплект уже есть).
+> Уже сделано в коде (не закоммичено): deploy.ts (deployId+ring-buffer+sinceLine+staging+spawn без shell),
+> server-config.ts (s1 убран), cron.ts (мёртвые s1-задачи удалены). Staging-домены: `<app>.s3.letar.best`.
+> §17 (Kamal) не отменён — выбор «deploy-engine TS + docker-rollout vs Kamal» отложен до Фазы 3 (§18.6).
+> **➡️ Следующий старт:** §18 Сессия A (харденинг deploy-affected.sh).
+>
 > **Сессия №48 (2026-07-06, план — §15.3.1 🆕):** добавлен раздел **§15.3.1 «Prod-снепшот + анонимизация —
 > pre-deploy gate»**: ночной pipeline `pg_dump` прод-БД → детерминированная анонимизация PII (152-ФЗ,
 > `personal-data.md`) → restore в `e2e_<app>` на s3 → прогон e2e на срезе, близком к прод-данным, вместо
@@ -2296,3 +2307,73 @@ env:
 - [ ] `deploy-affected.sh` или BlackCove обновлён для вызова kamal
 - [ ] Rollback проверен: `kamal rollback` возвращает предыдущую версию
 - [ ] Документация: [deployment.md](/.claude/docs/deployment.md) обновлён
+
+---
+
+## §18 — Deploy MCP + staging-gated пайплайн
+
+> Добавлено 2026-07-09 (сессия №49). Полный план проработан и одобрен; детали архитектуры — ниже.
+> Связь с другими разделами: реализует **Этап A §15.3.1** (warn-only e2e-gate); **§17 (Kamal) не отменён** —
+> конкурирующий выбор для Фазы 3 (см. §18.6).
+
+### Проблема
+
+1. BlackCove деплоит через сырой SSH + парсинг stdout, хотя в dashboard-agent уже есть REST API
+   (`POST /api/deploy/app` через nsenter) — дублирование, хрупкость.
+2. s3 (188.127.235.141) — только ночной e2e-раннер; staging-окружения нет, хотя `deploy-affected.sh`
+   уже поддерживает `--staging`, а у grandslamcup есть готовый staging-комплект.
+3. Сохранность данных: `deploy-affected.sh` при падении `prisma migrate deploy` пишет warning и
+   **продолжает деплой**; бэкап только ночной (окно потери до 24ч); образы не версионируются (нет отката).
+
+### Архитектура (кратко)
+
+- **`libs/deploy-mcp`** — MCP-сервер (по образцу form-mcp/letar-consultant): тонкий HTTP-клиент к REST API
+  dashboard-agent через **SSH-туннель** (по образцу `.claude/mcp/pg-wrapper.mjs`; порт 3100 закрывается от
+  интернета). Tools Фазы 1: `deploy_app` (target: production|staging), `deploy_status` (deployId + курсор
+  sinceLine), `deploy_cancel`, `git_status`, `list_servers`, `agent_health`. Фазы 2: `run_e2e`, `e2e_status`.
+  Токен — из `apps/dashboard-agent/.env.docker` (SOPS), не из `.mcp.json`.
+- **`libs/infra-config`** — единый маппинг app→server (`SERVER_APPS`, `getCurrentServer()`) для
+  dashboard-agent и deploy-mcp вместо трёх копий.
+- **dashboard-agent**: deployId + ring-buffer истории (20) + cap логов (2000 строк) + sinceLine; `staging`
+  в body; spawn аргументами без `bash -c`; **серверный guard** (s3 принимает только staging, s2 — только
+  production); `docker-compose.s3.yml` (без прод-секретов, отдельный AGENT_TOKEN).
+- **Staging-домены**: единообразно `<app>.s3.letar.best` (wildcard уже в DNS; gsc-test.letar.best переезжает).
+
+### Пайплайн (Фаза 2, воркфлоу BlackCove)
+
+```
+deploy_app(staging) → s3: образ <app>:staging, контейнер, URL <app>.s3.letar.best
+run_e2e(app)        → s3: nx e2e с E2E_BASE_URL против staging-контейнера
+                      → .last-e2e-status/<app>.json { commitSha, passed, timestamp }
+deploy_app(production) → deploy-mcp проверяет статус на s3 (warn-only!) → s2
+```
+
+Gate живёт в deploy-mcp (единственный видит оба сервера) — решает cross-server gap §15.3.1.
+Ночной cron e2e на s3 не меняется. **Ограничение честно названо:** из-за `NEXT_PUBLIC_*`-инлайна gate
+гарантирует «коммит прошёл e2e», не «этот артефакт протестирован» (build once/promote — вне скоупа).
+
+### Сессии
+
+| #     | Содержимое                                                                                                                                                                                                                                                                                                                        | Статус                                                                 |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **A** | Харденинг `deploy-affected.sh`: миграции fail=abort (различать «нет миграций» от ошибки), pg_dump перед миграцией (`/home/deploy/pre-migrate-dumps/`, ротация 3), sha-теги образов (ретеншн 3). `--dry-run` + shellcheck; боевой прогон на низкорисковом app. Доки: deployment.md, backup-architecture.md                         | ⏳                                                                     |
+| **B** | `libs/infra-config`; dashboard-agent: серверный guard, `docker-compose.s3.yml`, консолидация production.yml/s2.yml (уточнить у BlackCove какой живой); коммит правок сессии №49 (deploy.ts, server-config.ts, cron.ts). Доки: README/CHANGELOG dashboard-agent, repo-structure.md, deployment.md (таблица серверов)               | ⏳ (частично: deploy.ts/server-config.ts/cron.ts уже в рабочем дереве) |
+| **C** | `libs/deploy-mcp` + `.mcp.json`; деплой dashboard-agent на s3 + закрытие порта 3100 — через BlackCove. Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md (строка MCP)                                                                                                                   | ⏳                                                                     |
+| **D** | Роут `e2e.ts` (run/status + `.last-e2e-status`), tools `run_e2e`/`e2e_status`, warn-gate; пилот grandslamcup: `.env.staging` s1→s3, домен, Playwright `E2E_BASE_URL` (webServer скипается), redirect URI auth-hub. Доки: deployment.md (воркфлоу), e2e-testing.md (конвенция + чек-лист подключения app), §15.3.1 отметить Этап A | ⏳                                                                     |
+
+### §18.6 Фаза 3 (roadmap, отдельное решение после недели warn-only)
+
+Hard gate; уход от bash-ядра — **выбор между** (а) `libs/deploy-engine` TS + docker-rollout
+(поэтапная миграция логики в dashboard-agent, zero-downtime поверх compose) и (б) **Kamal (§17)**
+(готовый rolling+rollback, но registry + вопрос NPM vs kamal-proxy). Оценка 2026-07-09: для монорепо
+с Nx-affected и уже построенной экосистемой dashboard-agent вариант (а) выглядит органичнее, но §17
+содержит рабочие обходы возражений (`proxy: false`, `--skip-build`) — решать на старте Фазы 3 по
+результатам эксплуатации Фаз 1–2. Автоматический rollback-эндпоинт поверх sha-тегов — в любом варианте.
+
+### DoD §18 (Фазы 1–2)
+
+- [ ] Сессия A: миграция падает → деплой app прерван, дамп создан; sha-теги на образах
+- [ ] Сессия B: `nx lint dashboard-agent infra-config && nx typecheck:tsgo ...` зелёные; guard отклоняет staging на s2
+- [ ] Сессия C: BlackCove деплоит `time` через `deploy_app` (не SSH); порт 3100 закрыт снаружи
+- [ ] Сессия D: полный цикл на grandslamcup — staging → e2e (json записан) → prod с зелёным gate; warn при испорченном json
+- [ ] Неделя warn-only без ложных срабатываний → решение о hard gate (Фаза 3)

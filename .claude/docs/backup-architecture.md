@@ -150,6 +150,19 @@ docker compose up -d
 
 ---
 
+## Pre-migrate дампы (deploy-affected.sh)
+
+Отдельный слой защиты данных при деплое (добавлен 2026-07-09, PLAN.md §18 Сессия A):
+
+- **Когда:** автоматически перед `prisma migrate deploy`, только если `prisma migrate status` показывает неприменённые миграции
+- **Как:** `docker exec <db-container> pg_dump | gzip` (имя контейнера — из `container_name` compose-файла, fallback `<app>-db`)
+- **Где:** `/home/deploy/pre-migrate-dumps/<app>-<short-sha>-<YYYYmmdd-HHMMSS>.sql.gz`
+- **Ротация:** последние 3 дампа на приложение (автоматически)
+- **Fail-closed:** дамп не удался → деплой приложения прерывается, миграция не применяется. Явный обход: `SKIP_PREMIGRATE_DUMP=1 ./deploy-affected.sh ...`
+- **Назначение:** восстановление БД при неудачной миграции без отката к ночному бэкапу (окно потери сжимается с «до 24ч» до нуля на момент миграции). Ошибка самой миграции также прерывает деплой (старый контейнер не трогается) — см. [deployment.md](/.claude/docs/deployment.md#процесс-деплоя)
+
+---
+
 ## Конфигурация dashboard-agent (secrets)
 
 Credentials БД берутся из файлов секретов (read-only mount):
