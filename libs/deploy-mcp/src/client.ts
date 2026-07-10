@@ -43,7 +43,7 @@ const tunnelled = new Set<InfraServer>()
 
 /** Поднимает SSH-туннель к серверу, если ещё не поднят. */
 async function ensureTunnel(server: InfraServer): Promise<void> {
-  const { host, sshUser, agentPort, tunnelPort } = serverConnection(server)
+  const { host, sshUser, hostPort, tunnelPort } = serverConnection(server)
 
   if (await isPortOpen(tunnelPort)) {
     tunnelled.add(server)
@@ -61,7 +61,7 @@ async function ensureTunnel(server: InfraServer): Promise<void> {
       '-o',
       'ServerAliveInterval=30',
       '-L',
-      `${tunnelPort}:localhost:${agentPort}`,
+      `${tunnelPort}:localhost:${hostPort}`,
       '-N',
       `${sshUser}@${host}`,
     ],
@@ -70,7 +70,7 @@ async function ensureTunnel(server: InfraServer): Promise<void> {
 
   if (!(await waitForPort(tunnelPort))) {
     throw new Error(
-      `SSH-туннель к ${server} (${sshUser}@${host}) не поднялся за 15с. Проверь SSH-доступ и что агент слушает :${agentPort}.`
+      `SSH-туннель к ${server} (${sshUser}@${host}) не поднялся за 15с. Проверь SSH-доступ и что агент слушает на хосте :${hostPort}.`
     )
   }
   tunnelled.add(server)

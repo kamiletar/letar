@@ -14,7 +14,7 @@ import { resolve } from 'node:path'
 /** Корень репозитория (cli запускается из корня через `bunx tsx`). */
 export const REPO_ROOT = process.env['DEPLOY_MCP_REPO_ROOT'] ?? process.cwd()
 
-/** Локальные порты SSH-туннелей на каждый сервер (форвардятся на agentPort сервера). */
+/** Локальные порты SSH-туннелей на каждый сервер (форвардятся на hostPort сервера). */
 export const TUNNEL_PORTS: Record<InfraServer, number> = {
   s2: 13100,
   s3: 13101,
@@ -73,7 +73,7 @@ function readAgentEnv(): Record<string, string> {
   if (existsSync(enc)) {
     if (!process.env['SOPS_AGE_KEY_FILE'] && !process.env['SOPS_AGE_KEY']) {
       throw new Error(
-        `Найден ${enc}, но не задан SOPS_AGE_KEY_FILE. Установи путь к age-ключу либо положи расшифрованный .env.docker.`
+        `Найден ${enc}, но не задан SOPS_AGE_KEY_FILE. Установи путь к age-ключу либо положи расшифрованный .env.docker.`,
       )
     }
     const out = execFileSync('sops', ['-d', '--input-type', 'dotenv', '--output-type', 'dotenv', enc], {
@@ -83,7 +83,7 @@ function readAgentEnv(): Record<string, string> {
     return cachedEnv
   }
   throw new Error(
-    `Не найден ни apps/dashboard-agent/.env.docker, ни .env.docker.enc в ${dir}. Токен агента прочитать неоткуда.`
+    `Не найден ни apps/dashboard-agent/.env.docker, ни .env.docker.enc в ${dir}. Токен агента прочитать неоткуда.`,
   )
 }
 
@@ -110,14 +110,16 @@ export function tokenForServer(server: InfraServer): string {
 export function serverConnection(server: InfraServer): {
   host: string
   sshUser: string
-  agentPort: number
+  /** Порт на хосте сервера — цель SSH-туннеля (может ≠ порту контейнера, см. hostPort). */
+  hostPort: number
+  /** Локальный порт SSH-туннеля на этой машине. */
   tunnelPort: number
 } {
   const info = SERVERS[server]
   return {
     host: info.host,
     sshUser: info.sshUser,
-    agentPort: info.agentPort,
+    hostPort: info.hostPort,
     tunnelPort: TUNNEL_PORTS[server],
   }
 }
