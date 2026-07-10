@@ -56,21 +56,53 @@ cd /home/deploy/letar
 завязанный на конкретный коммит и конкретное приложение — warn-only gate:
 
 ```
-deploy_app({ app, target: "staging" })                      → s3: образ <app>:staging, контейнер на
-                                                                своём хостовом порту (docker-compose.staging.yml)
-run_e2e({ app, baseUrl: "http://localhost:<staging-port>" }) → s3: nx e2e <app>-e2e против baseUrl
-                                                                (BASE_URL — конвенция всех playwright.config.ts)
-                                                                → пишет .last-e2e-status/<app>.json
-deploy_app({ app })                                          → target production (по умолчанию): deploy-mcp
-                                                                читает .last-e2e-status/<app>.json на s3 и
-                                                                ПРЕДУПРЕЖДАЕТ (не блокирует), если данных нет /
-                                                                прогон упал / коммит другой / старше 24ч
+deploy_app({ app, target: "staging" })                                  → s3: образ <app>:staging,
+                                                                            контейнер на своём хостовом
+                                                                            порту (docker-compose.staging.yml)
+run_e2e({ app, baseUrl: "https://<app>.stage.s3.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
+                                                                            (BASE_URL — конвенция всех
+                                                                            playwright.config.ts)
+                                                                            → пишет .last-e2e-status/<app>.json
+deploy_app({ app })                                                      → target production (по умолчанию):
+                                                                            deploy-mcp читает
+                                                                            .last-e2e-status/<app>.json на s3 и
+                                                                            ПРЕДУПРЕЖДАЕТ (не блокирует), если
+                                                                            данных нет / прогон упал / коммит
+                                                                            другой / старше 24ч
 ```
 
-`baseUrl` передаётся явно в `run_e2e` — публичного домена `<app>.s3.letar.best` для staging пока
-нет (нужны NPM proxy host + DNS, отдельная задача), поэтому e2e бьёт напрямую в хостовый порт
-staging-контейнера на том же s3 (`http://localhost:<port>`, порт из `docker-compose.staging.yml`
-приложения, например `3018` у grandslamcup).
+`baseUrl` передаётся явно в `run_e2e` — намеренно, максимально близко к прод-окружению: **реальный
+HTTPS-домен** `<app>.stage.s3.letar.best`, не `localhost`. Cookie/CORS/OIDC-редиректы на `localhost`
+живут в другом security-контексте браузера (нет `Secure`-cookie, нет настоящего cross-origin между
+staging-приложением и `auth.letar.best`) — тестирование против `localhost` не проверяет именно то,
+что чаще всего ломается при релизе. Требует: wildcard DNS `*.stage.s3.letar.best` → s3, NPM proxy
+host на TLS-терминацию (wildcard-сертификат Let's Encrypt, DNS-01 challenge) → форвард на хостовый
+порт staging-контейнера (`docker-compose.staging.yml` приложения, например `3018` у grandslamcup).
+Это инфраструктурная задача (DNS/NPM/сертификат), выполняется через BlackCove/владельца — deploy-mcp
+и dashboard-agent её не автоматизируют.
+
+### Staging-данные: анонимизированный снепшот прод, не seed-фикстуры
+
+Публичные турнирные модели (`Player`/`Team`/`Match`/`Standings`/`Poem` и т.п. — везде
+`@@allow('read', true)` в schema.zmodel) копируются из прод БД как есть: это ровно то, что должен
+увидеть e2e/QA, и анонимизация тут не нужна и не имеет смысла. Приватные модели (аккаунты,
+сессии, заявки с контактами) требуют дисциплины 152-ФЗ:
+
+1. **`pg_dump` на s2 с исключением секретных таблиц** флагами `-T` — `Account`/`Session`/
+   `Verification`/`consentLog`/`PushSubscription` не должны попадать в дамп вообще (OAuth-токены,
+   session-токены, аудит согласий реальных пользователей — исключение на этапе дампа, не удаление
+   после, минимизирует окно, когда сырые секреты вообще где-то лежат вне прод-БД).
+2. Восстановление в `grandslamcup-staging-db` на s3 (после того как staging-деплой уже прогнал
+   миграции — схема должна существовать до `pg_restore --data-only`).
+3. **`bun apps/grandslamcup/scripts/anonymize-staging-db.ts`** (запускать с `DATABASE_URL`,
+   указывающим на staging) — псевдонимизирует `User.email/name/image/telegramChatId`, чистит
+   контактные поля неподтверждённых `RosterApplication`, и на всякий случай (defence in depth)
+   ещё раз чистит секретные таблицы, если pg_dump их всё же затянул. Скрипт отказывается работать,
+   если `DATABASE_URL` не похож на staging-хост — защита от случайного запуска на проде.
+
+Это должно выполняться при каждом обновлении staging-снепшота (не только один раз) — задача для
+BlackCove при первичной настройке пайплайна на новом приложении, кандидат на автоматизацию
+отдельным шагом в будущем (не в скоупе Сессии D).
 
 Gate живёт в `deploy-mcp` (`libs/deploy-mcp/src/server.ts`, `checkE2eGate()`) — это единственное
 место, видящее оба сервера сразу. `deploy-affected.sh` по-прежнему не знает про e2e — вся логика

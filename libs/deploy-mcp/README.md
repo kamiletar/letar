@@ -32,20 +32,21 @@ MCP-сервер: структурированный слой над REST API da
 **Это warn-only** — деплой не блокируется, предупреждения просто дописываются в начало ответа.
 Hard gate — отдельное решение Фазы 3 (PLAN.md §18.6) после недели эксплуатации warn-only.
 
-Типичный staging-пайплайн (без публичного домена — `baseUrl` бьёт прямо на s3-хост, порт из
-`docker-compose.staging.yml` приложения):
+Типичный staging-пайплайн (реальный HTTPS-домен — максимально близко к прод-окружению, `localhost`
+не годится для проверки cookie/CORS/OIDC-редиректов):
 
 ```
-deploy_app({ app: "grandslamcup", target: "staging" })                            // → образ на s3
-run_e2e({ app: "grandslamcup", baseUrl: "http://localhost:3018" })                // → nx e2e против staging-контейнера
-e2e_status({ app: "grandslamcup", sinceLine: 0 })                                  // поллинг + финальный lastStatus
-deploy_app({ app: "grandslamcup" })                                                // production — покажет gate-warnings
+deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s3
+run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup.stage.s3.letar.best" }) // → nx e2e против staging
+e2e_status({ app: "grandslamcup", sinceLine: 0 })                                    // поллинг + финальный lastStatus
+deploy_app({ app: "grandslamcup" })                                                  // production — покажет gate-warnings
 ```
 
-`baseUrl` — явный параметр (не выводится автоматически): каждое приложение публикует staging
-на своём хостовом порту (`docker-compose.staging.yml` → `ports: ['${PORT:-3018}:...']`), единого
-публичного домена `<app>.s3.letar.best` пока нет — это отдельная инфраструктурная задача (NPM +
-DNS), не блокирующая пайплайн.
+`baseUrl` — явный параметр (не выводится автоматически): единая конвенция
+`https://<app>.stage.s3.letar.best` требует wildcard DNS + NPM proxy host (TLS-терминация,
+wildcard-сертификат) → форвард на хостовый порт staging-контейнера — инфраструктурная задача,
+выполняется через BlackCove/владельца. Данные staging-БД — анонимизированный снепшот прод
+(`apps/<app>/scripts/anonymize-staging-db.ts`), не пустая/seed-БД — подробности в `deployment.md`.
 
 ### Типичный воркфлоу деплоя
 

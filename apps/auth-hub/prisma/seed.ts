@@ -69,9 +69,9 @@ const clients = [
       'https://grandslamcup.letar.best/api/auth/oauth2/callback/letar-auth',
       'https://grandslamcup.letar.best/sign-in',
       'http://localhost:3016/sign-in',
-      // Staging на s3 (PLAN.md §18 Сессия D) — без публичного домена, e2e/ручная проверка через localhost на s3
-      'http://localhost:3018/api/auth/oauth2/callback/letar-auth',
-      'http://localhost:3018/sign-in',
+      // Staging на s3 (PLAN.md §18 Сессия D) — реальный HTTPS-домен, максимально близко к проду
+      'https://grandslamcup.stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://grandslamcup.stage.s3.letar.best/sign-in',
     ].join(','),
   },
   {
