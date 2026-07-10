@@ -4,21 +4,22 @@
 
 ## Доступные MCP серверы
 
-| MCP Сервер                   | Пакет                                               | Назначение                                                |
-| ---------------------------- | --------------------------------------------------- | --------------------------------------------------------- |
-| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация |
-| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки      |
-| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация        |
-| **inkeepMcp**                | `mcp-remote` → `mcp.inkeep.com/zod`                 | Документация Zod v4, схемы валидации                      |
-| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)      |
-| **chrome-devtools**          | `chrome-devtools-mcp`                               | Браузерная автоматизация, скриншоты, консоль, сеть        |
-| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы  |
-| **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking`  | Структурированное пошаговое рассуждение для сложных задач |
-| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)               |
-| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД kami (read-only)                         |
-| **postgres-premium-rosstil** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД premium-rosstil (read-only)              |
-| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                 |
-| **prisma**                   | `@prisma/mcp`                                       | Работа через Prisma schema, генерация запросов            |
+| MCP Сервер                   | Пакет                                               | Назначение                                                                                      |
+| ---------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                       |
+| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                            |
+| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                              |
+| **inkeepMcp**                | `mcp-remote` → `mcp.inkeep.com/zod`                 | Документация Zod v4, схемы валидации                                                            |
+| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                            |
+| **chrome-devtools**          | `chrome-devtools-mcp`                               | Браузерная автоматизация, скриншоты, консоль, сеть                                              |
+| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                        |
+| **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health |
+| **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking`  | Структурированное пошаговое рассуждение для сложных задач                                       |
+| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                     |
+| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД kami (read-only)                                                               |
+| **postgres-premium-rosstil** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД premium-rosstil (read-only)                                                    |
+| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                       |
+| **prisma**                   | `@prisma/mcp`                                       | Работа через Prisma schema, генерация запросов                                                  |
 
 ## Воркфлоу работы с Context7
 
@@ -407,7 +408,7 @@ docker compose pull && docker compose up -d
 
 1. Каждый агент при следующем старте сессии вызывает `macro_start_session` — проект и агент создаются заново автоматически.
 2. `human_key: "C:/web/letar"` остаётся стабильным идентификатором — именно по нему проект находится/создаётся.
-3. **Slug проекта может измениться** (например `app-c-web-letar` → `c-web-letar`) — это нормально, routing идёт по `project_id`, не по slug. Не нужно исправлять старые конфиги.
+3. **Slug проекта может измениться** (например `c-web-letar` → `c-web-letar`) — это нормально, routing идёт по `project_id`, не по slug. Не нужно исправлять старые конфиги.
 4. Все исторические треды (темы, сообщения, inbox прошлых агентов) безвозвратно утеряны — воспринимай как чистый лист.
 
 **Симптом что volume пересоздан:** `macro_start_session` возвращает 403 Forbidden → пробуй ещё раз после перезапуска контейнера (`docker compose up -d`).
@@ -494,3 +495,37 @@ mcp__prisma__getDatabaseModels()
 ```
 
 После изменения `.mcp.json` требуется перезапуск Claude Code.
+
+## Deploy MCP (@letar/deploy-mcp)
+
+Структурированный слой над REST API `dashboard-agent` для управления деплоем — деплой
+через типизированные инструменты вместо сырого SSH + парсинга stdout. Тонкие HTTP-обёртки
+поверх уже существующего API агента, через SSH-туннель. Полная документация:
+[libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
+**Локально:** `libs/deploy-mcp/` | В первую очередь для **BlackCove** (deploy agent).
+
+### Tools
+
+| Инструмент      | Описание                                                               |
+| --------------- | ---------------------------------------------------------------------- |
+| `list_servers`  | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)     |
+| `agent_health`  | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный» |
+| `git_status`    | Ветка, незапушенные/входящие коммиты — проверять перед деплоем         |
+| `deploy_status` | Статус деплоя + инкрементальные логи по курсору `sinceLine`            |
+| `deploy_cancel` | Отмена текущего деплоя (SIGTERM)                                       |
+| `deploy_app`    | Запуск деплоя (`target`: `production`\|`staging`; staging → s3)        |
+
+### Соединение и секреты
+
+- **SSH-туннель** `ssh -L <localPort>:localhost:3100 -N deploy@<host>` (s2 → 13100, s3 → 13101),
+  поднимается лениво. Порт агента 3100 не обязан быть открыт в интернет.
+- **Bearer-токен** читается из `apps/dashboard-agent/.env.docker` (или расшифровывается из
+  `.env.docker.enc` через `sops`) — не хранится в `.mcp.json`. s3 — отдельный `AGENT_TOKEN_S3`.
+- **Диагностика:** начинай с `agent_health` — различает недоступность сервера и неверный токен.
+
+### Ограничения
+
+- Модель доверия процедурная (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)) —
+  деплоит только BlackCove по конвенции, технического ограничения по вызывающему нет.
+- Фаза 1. `run_e2e`/`e2e_status` + e2e-gate — Фаза 2 (Сессия D, §16 корневого PLAN.md).

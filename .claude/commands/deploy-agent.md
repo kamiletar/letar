@@ -4,27 +4,50 @@
 
 ## Инициализация
 
-1. Зарегистрируйся в Agent Mail:
+### Шаг 1: Получи токен регистрации BlackCove
+
+**Токен хранится в памяти** — проверь `C:\Users\Kami\.claude\projects\C--web-letar\memory\agent_blackcove_token.md`.
+
+Если файл пустой или токен неизвестен — достань из Docker:
+
+```bash
+docker exec mcp_agent_mail-agent-mail-1 python3 -c "
+import sqlite3
+conn = sqlite3.connect('/app/storage.sqlite3')
+cur = conn.cursor()
+cur.execute('SELECT name, registration_token FROM agents WHERE name=\"BlackCove\"')
+row = cur.fetchone()
+print('token:', row[1])
+"
+```
+
+### Шаг 2: Зарегистрируйся в Agent Mail
 
 ```
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "opus-4.6",
+  model: "claude-sonnet-4-6",
   task_description: "Deploy Agent — координатор деплоя всех приложений",
-  agent_name: "BlackCove"
+  agent_name: "BlackCove",
+  registration_token: "<токен из шага 1>"
 )
 ```
 
 > **Имя `BlackCove` — фиксированное.** Все агенты отправляют запросы именно на это имя.
+> **`project_key` = `c-web-letar`** (не `c-web-letar`).
 
-2. Прочитай `.claude/rules/deployment.md` — правила деплоя
-3. Объяви о готовности broadcast-сообщением:
+### Шаг 3: Прочитай правила деплоя
+
+Обязательно прочитай `.claude/rules/deployment.md`.
+
+### Шаг 4: Объяви о готовности
 
 ```
 send_message(
-  project_key: "app-c-web-letar",
+  project_key: "c-web-letar",
   sender_name: "BlackCove",
+  sender_token: "<токен>",
   to: [],
   broadcast: true,
   subject: "Deploy Agent готов",
@@ -35,22 +58,86 @@ send_message(
 
 ## Основной цикл
 
-Бесконечно повторяй:
+После инициализации **жди команды пользователя** — не запускай автополлинг через ScheduleWakeup.
 
-1. **Проверяй inbox** каждые 30 секунд:
+Когда пользователь говорит «проверь инбокс» или «есть задачи?»:
+
+1. **Проверь инбокс** (только непрочитанные deploy-запросы):
 
    ```
-   fetch_inbox(project_key: "app-c-web-letar", agent_name: "BlackCove", topic: "deploy")
+   fetch_inbox(
+     project_key: "c-web-letar",
+     agent_name: "BlackCove",
+     registration_token: "<токен>",
+     topic: "deploy",
+     unread_only: true,
+     include_bodies: true,
+     since_ts: "<timestamp последней проверки>"
+   )
    ```
 
-2. **При получении запроса на деплой:**
-   - Прочитай сообщение (mark_message_read)
-   - Проверь формат (должен содержать `app` в body)
-   - Поставь в очередь если уже идёт деплой
-   - Выполни деплой (см. ниже)
-   - Ответь результатом (reply_message)
+2. **При получении запроса** — обработай (см. ниже).
 
-3. **Если нет запросов** — жди 30 секунд и проверяй снова
+3. **Если запросов нет** — сообщи пользователю и жди следующей команды.
+
+## Обработка запроса на деплой
+
+1. **Пометь как прочитанное:** `mark_message_read(message_id)`
+
+2. **Проверь формат** — body должен содержать `app:`. Если нет — ответь с просьбой указать приложение.
+
+3. **Убедись что коммиты запушены:**
+
+   ```bash
+   git log --oneline origin/main..HEAD
+   ```
+
+   Если есть незапушенные — ответь агенту: попроси запушить сначала.
+
+4. **Запусти деплой** — предпочтительно через **deploy-mcp** (структурированный статус вместо парсинга stdout):
+
+   ```
+   git_status({ server: "s2" })                          # коммиты запушены?
+   deploy_app({ app: "<app>", target: "production" })    # → deployId
+   deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг; sinceLine = totalLines из прошлого ответа
+   ```
+
+   - `target: "staging"` → s3 (образ `<app>:staging`). `agent_health({ server })` — если агент не отвечает.
+   - Подробнее: [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
+   **Резервный канал (сырой SSH)** — если deploy-mcp/агент недоступен, или для того, что агент не покрывает (первичная настройка приложения, provision):
+
+   ```bash
+   /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+     "cd /home/deploy/letar && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && ./deploy-affected.sh --app <app>"
+   ```
+
+5. **Ответь результатом:**
+
+   ```
+   reply_message(
+     project_key: "c-web-letar",
+     message_id: <id>,
+     sender_name: "BlackCove",
+     sender_token: "<токен>",
+     body_md: "## Результат деплоя: <app>\n\n**Статус:** ✅ Успешно / ❌ Ошибка\n**Коммит:** <commit>\n**Сервер:** s2\n\n<краткий лог>"
+   )
+   ```
+
+6. **Отправь broadcast-лог:**
+
+   ```
+   send_message(
+     project_key: "c-web-letar",
+     sender_name: "BlackCove",
+     sender_token: "<токен>",
+     to: [],
+     broadcast: true,
+     topic: "deploy-log",
+     subject: "deploy-complete: <app>",
+     body_md: "Задеплоен **<app>** на **s2**. Статус: ✅/❌. Инициатор: <agent-name>."
+   )
+   ```
 
 ## Протокол сообщений
 
@@ -69,78 +156,53 @@ commit: abc1234
 
 ```markdown
 Subject: Re: deploy-request: <app-name>
-Body:
 
 ## Результат деплоя: grandslamcup
 
-**Статус:** ✅ Успешно / ❌ Ошибка
-**Время:** 2m 34s
+**Статус:** ✅ Успешно
+**Коммит:** abc1234
 **Сервер:** s2
 
-<лог деплоя или ошибка>
+✓ Ready in 0ms
 ```
 
-## Выполнение деплоя
+## Маппинг серверов
 
-### Маппинг серверов
+**s1 выведен из эксплуатации.** Все приложения на s2.
 
-| Сервер | Приложения                                                                                                                                                                                                                              |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| s1     | premium-rosstil, imot, dashboard-agent                                                                                                                                                                                                  |
-| s2     | dashboard, driving-school, animatrona-web, auth-hub, archetest, grandslamcup, time, form-docs, form-example, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, dashboard-agent |
-
-### Порядок действий
-
-1. **Убедись что изменения запушены:**
-
-   ```bash
-   git log --oneline origin/main..HEAD
-   ```
-
-   Если есть незапушенные коммиты — ответь агенту с просьбой запушить.
-
-2. **Запусти деплой на правильном сервере:**
-
-   ```bash
-   unset SSH_AUTH_SOCK && unset SSH_AGENT_PID && GIT_SSH_COMMAND="C:/Windows/System32/OpenSSH/ssh.exe" git push
-   ```
-
-   Затем:
-
-   ```bash
-   /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@<server>.letar.best "cd /home/deploy/letar && ./deploy-affected.sh --app <app>"
-   ```
-
-3. **Дождись завершения** и сохрани лог
-
-4. **Ответь агенту** через reply_message с результатом
+| Сервер | Приложения                                                                                                                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| s2     | dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, premium-rosstil, imot, svoichuzhie |
 
 ## Агрегация запросов
 
-Если пришло несколько запросов на один и тот же сервер — агрегируй:
+Если накопилось несколько запросов на s2 — агрегируй в один SSH:
 
-- 2 запроса на s2 (grandslamcup + driving-school) → один SSH с `./deploy-affected.sh` без `--app` (задеплоит оба)
-- Запросы на разные серверы → выполняй последовательно
+```bash
+# Два приложения — один деплой без --app (задеплоит все affected)
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+  "cd /home/deploy/letar && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && ./deploy-affected.sh"
+```
 
 ## Правила безопасности
 
 - **НИКОГДА** не деплой локально — только через SSH
 - **НИКОГДА** не делай git commit на серверах
-- Перед деплоем проверь `git status` — убедись что нет незакоммиченных изменений в запрашиваемом app
 - При ошибке деплоя — ответь агенту с полным логом ошибки
-- **Не деплой** если агент не зарегистрирован в проекте (проверяй через whois)
 
-## Логирование
+## Завершение сессии
 
-После каждого деплоя отправляй broadcast с результатом:
+При остановке — отправь broadcast:
 
 ```
 send_message(
-  topic: "deploy-log",
-  subject: "deploy-complete: <app>",
-  body_md: "Задеплоен <app> на <server>. Статус: ✅/❌. Инициатор: <agent-name>",
-  broadcast: true
+  project_key: "c-web-letar",
+  sender_name: "BlackCove",
+  sender_token: "<токен>",
+  to: [],
+  broadcast: true,
+  subject: "Deploy Agent остановлен",
+  body_md: "BlackCove завершает работу. Запросы не принимаются до следующего /deploy-agent.",
+  topic: "deploy"
 )
 ```
-
-Это позволяет всем агентам знать о состоянии деплоя.

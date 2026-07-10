@@ -16,7 +16,7 @@ alwaysApply: true
 
 ```
 send_message(
-  project_key: "app-c-web-letar",
+  project_key: "c-web-letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: <app-name>",
@@ -52,4 +52,22 @@ send_message(
 
 ## Исключение
 
-Если ты сам Deploy Agent (имя агента = `BlackCove`) — ты выполняешь деплой напрямую по SSH.
+Если ты сам Deploy Agent (имя агента = `BlackCove`) — ты выполняешь деплой.
+
+### BlackCove: деплой через deploy-mcp (предпочтительно), SSH — резервный канал
+
+Основной путь — MCP-инструменты `deploy-mcp` (структурированный статус вместо парсинга stdout):
+
+```
+git_status({ server: "s2" })                     # коммиты запушены?
+deploy_app({ app: "<app>", target: "production" })   # → deployId
+deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг (sinceLine = totalLines из прошлого ответа)
+```
+
+- `target: "staging"` резолвится на s3 (образ `<app>:staging`).
+- `agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
+- Подробности: [mcp-servers.md § Deploy MCP](/.claude/docs/mcp-servers.md#deploy-mcp-letardeploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
+**Сырой SSH (`deploy-affected.sh` напрямую) остаётся резервным каналом** для того, что
+dashboard-agent не покрывает: первичная настройка нового приложения на сервере, ручное
+вмешательство при сбое агента, provision нового сервера.
