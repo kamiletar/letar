@@ -5,7 +5,8 @@ test.describe('02 — Тема: переключение light/dark', () => {
     await page.goto('/')
 
     // Ищем кнопку переключения темы
-    const themeBtn = page.locator('[aria-label*="mode"], [aria-label*="theme"], [aria-label*="тема"], button:has(svg)')
+    const themeBtn = page
+      .locator('[aria-label*="mode"], [aria-label*="theme"], [aria-label*="тема"], button:has(svg)')
       .filter({ hasText: /sun|moon|☀|🌙|/i })
       .or(page.locator('[data-testid="color-mode-button"]'))
 
@@ -17,8 +18,8 @@ test.describe('02 — Тема: переключение light/dark', () => {
 
     // Запоминаем начальный режим
     const htmlEl = page.locator('html')
-    const initialClass = await htmlEl.getAttribute('class') ?? ''
-    const initialStyle = await htmlEl.getAttribute('data-theme') ?? ''
+    const initialClass = (await htmlEl.getAttribute('class')) ?? ''
+    const initialStyle = (await htmlEl.getAttribute('data-theme')) ?? ''
     const initialMode = initialClass + initialStyle
 
     // Кликаем
@@ -26,8 +27,8 @@ test.describe('02 — Тема: переключение light/dark', () => {
     await page.waitForTimeout(300)
 
     // Режим должен измениться
-    const newClass = await htmlEl.getAttribute('class') ?? ''
-    const newStyle = await htmlEl.getAttribute('data-theme') ?? ''
+    const newClass = (await htmlEl.getAttribute('class')) ?? ''
+    const newStyle = (await htmlEl.getAttribute('data-theme')) ?? ''
     const newMode = newClass + newStyle
     expect(newMode).not.toBe(initialMode)
   })

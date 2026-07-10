@@ -89,8 +89,11 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
     // Пикеры отображаются только при наличии фото/видео в БД
     // Проверяем что форма корректно рендерится без ошибок JS
     const errorOverlay = page.locator('text=/Error|Ошибка|Uncaught/i').first()
-    await expect(errorOverlay).not.toBeVisible({ timeout: 3_000 })
-      .catch(() => {/* нет overlay — OK */})
+    await expect(errorOverlay)
+      .not.toBeVisible({ timeout: 3_000 })
+      .catch(() => {
+        /* нет overlay — OK */
+      })
 
     await expect(page.locator('form').first()).toBeVisible()
   })
