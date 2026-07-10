@@ -19,6 +19,53 @@
 > Prisma-файлов, не про компилятор); скорость 0.62s — паритет с `tsgo`, ~4.4x быстрее `tsc` 6.0.3 (2.71s).
 > Полный план тиража → §19. commit `4698c97`.
 
+> **Сессия №52 (2026-07-10, §18 Deploy MCP — Сессии A/B/C реализованы):** ✅ **Сессии A, B, C плана §18
+> сделаны и подтверждены на реальных прогонах.** Работал агент **BrownRaven** в связке с **BlackCove** (deploy).
+>
+> **Сессия A** (харденинг `deploy-affected.sh`): sha-теги образов (rollback без пересборки), pre-migrate pg_dump
+>
+> - fail=abort при падении миграции. Задеплоено на `time`. Попутно найден и починен **self-modifying-скрипт баг**
+>   (BlackCove): git pull внутри скрипта обновлял его же, bash доигрывал по старому буферу → фикс **self-re-exec**
+>   (`63bcada`, хеш до/после pull → `exec` себя; sentinel против цикла). Подтверждён вживую на деплое `time`.
+>
+> **Сессия B** (`8498c06`, `a1772cf`): новый `libs/infra-config` (`@letar/infra-config`) — канон SERVER_APPS +
+> `SERVERS` (host/agentPort/**hostPort**/role) + резолверы. dashboard-agent: deploy API (deployId + ring-buffer +
+> курсор `sinceLine` + `/api/deploy/history` + серверный guard staging/production + spawn без shell), `server-config.ts`
+> = локальная копия канона (Dockerfile изолирован → **guard-тест** `server-config.guard.spec.ts` сверяет с каноном,
+> не прямой импорт), `docker-compose.s3.yml` создан, устаревший `docker-compose.s2.yml` удалён (живой — production.yml).
+>
+> **Сессия C** (`2f4805c` + фиксы): `libs/deploy-mcp` (`@letar/deploy-mcp`) — MCP-слой над REST API dashboard-agent
+> через **SSH-туннель**. 6 tools: `list_servers`, `agent_health`, `git_status`, `deploy_status` (deployId+sinceLine),
+> `deploy_cancel`, `deploy_app` (target production|staging). Токен из `.env.docker`(SOPS), не из `.mcp.json`.
+> ⚠️ **zod запинен 4.3.6** (не `^`, иначе 4.4.3 несовместима с zod-compat SDK). Зарегистрирован в `.mcp.json`
+> (файл gitignored — локально). Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md.
+> **BlackCove задеплоил `time` через `deploy_app` (exitCode 0)** — deployId+sinceLine+self-re-exec+SOPS подтверждены.
+> Попутно вскрыто и починено **2 бага `/api/deploy/app`** (никогда не работал для зашифрованных app): проброс
+> `SOPS_AGE_KEY_FILE` в spawn (`4d970e7`) + дефолт в скрипте после sudo env-reset (`1160e9e`, диагноз BlackCove:
+> `nsenter`→root→`sudo -u deploy` сбрасывает env).
+>
+> **s3-инстанс (в процессе, координация с BlackCove, thread `provision-s3-dashboard-agent`):** BlackCove сгенерил
+> `AGENT_TOKEN_S3`, добавил в `.env.docker.enc` (`1dbb131`). Подъём упёрся в **конфликт порта 3100** (занят
+> `media-api` на s3) → решено loopback-биндингом: `docker-compose.s3.yml` = `127.0.0.1:13103:3100` (чинит конфликт
+> И закрывает порт от интернета даром). В infra-config разделены `agentPort`(3100) и **`hostPort`** (туннель; s2:3100,
+> s3:**13103**), deploy-mcp тоннелит в hostPort (фикс в репо-вайд dprint-коммитах, HEAD `16420ef`).
+>
+> **➡️ Следующий старт (новая сессия, зарегистрироваться как BrownRaven или новое имя, macro_start_session):**
+>
+> 1. **Проверить инбокс** (thread `provision-s3-dashboard-agent`) — поднял ли BlackCove dashboard-agent на s3
+>    (`docker compose -f docker-compose.s3.yml --env-file .env.docker up -d --build`; проверка `curl 127.0.0.1:13103/health`).
+> 2. Когда s3 поднят: **обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
+>    расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель.
+> 3. **s2: закрытие порта 3100** — отдельная задача (тем же приёмом `127.0.0.1:3100:3100` при следующем передеплое, без ufw).
+> 4. Затем — **Сессия D** (§18): роут `apps/dashboard-agent/src/routes/e2e.ts` (`POST /api/e2e/run` nx e2e с
+>    `E2E_BASE_URL` против staging + `GET /api/e2e/status` + запись `.last-e2e-status/<app>.json`), tools `run_e2e`/`e2e_status`
+>    в deploy-mcp, warn-gate в `deploy_app(production)`, пилот **grandslamcup** (staging-комплект уже есть; `.env.staging`
+>    домен s1→s3 на `grandslamcup.s3.letar.best`, Playwright `E2E_BASE_URL` скипает webServer, redirect URI в auth-hub).
+>    Требует живого s3 (шаг 1-2). Детали — §18 таблица «Сессии» строка D + §18.5.
+>
+> **Agent Mail:** новая сессия регистрируется через `macro_start_session` (human_key `C:/web/letar`,
+> project_key `c-web-letar`) — см. `.claude/rules/agent-mail.md`. Тред координации s3: `provision-s3-dashboard-agent`.
+
 > **Сессия №42 (2026-06-21, Этап 6.11 — Pressable-компоненты):** ✅ **`@letar/ui` 0.5.0** —
 > `Pressable`, `PressableButton`, `ExternalLink`, `pressableConfig` (ripple + spring + iOS-фикс).
 > ✅ **kami** полностью переведён: `nav-links`→`AppLink`, `sign-in-button`→`Button`, `mobile-menu`→`AppLink`+`Pressable`,
