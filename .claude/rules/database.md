@@ -13,6 +13,7 @@ paths: apps/**/schema.zmodel, apps/**/prisma/**, apps/**/generated/**
 ## ⛔ КРИТИЧНО: Миграции на production
 
 **ЗАПРЕЩЕНО на production:**
+
 - `db:push` — НИКОГДА, потеря данных
 - `prisma migrate dev` — НИКОГДА, только локально
 - Ручной SQL для schema changes — НИКОГДА

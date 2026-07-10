@@ -154,7 +154,7 @@ z.string()
 
 ```tsx
 import { Form } from '@letar/forms'
-<Form initialValue={{ title: '', count: 0 }} onSubmit={handleSubmit}>
+;<Form initialValue={{ title: '', count: 0 }} onSubmit={handleSubmit}>
   <Form.Field.String name="title" label="Название" />
   <Form.Field.Number name="count" label="Количество" />
   <Form.Button.Submit>Сохранить</Form.Button.Submit>
@@ -278,7 +278,7 @@ apps/driving-school/src/driving-school-form/
 
 ```tsx
 import { DrivingSchoolForm } from '@/driving-school-form'
-<DrivingSchoolForm initialValue={data} onSubmit={handleSubmit}>
+;<DrivingSchoolForm initialValue={data} onSubmit={handleSubmit}>
   <DrivingSchoolForm.Field.String name="name" label="Имя" />
   <DrivingSchoolForm.Select.LicenseCategory name="category" label="Категория" />
   <DrivingSchoolForm.Select.TransmissionType name="transmission" label="КПП" />
@@ -591,7 +591,7 @@ import { useOptimistic, useTransition } from 'react'
 
 const [optimisticQuantity, setOptimisticQuantity] = useOptimistic(
   item.quantity,
-  (_state, newQuantity: number) => newQuantity,
+  (_state, newQuantity: number) => newQuantity
 )
 
 const handleUpdate = (newQty: number) => {
@@ -797,8 +797,8 @@ const handleSubmit = async (value: ClientFormData) => {
 | Пример                  | Файл                                                                                                  |
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | TanStack Form с оффлайн | `apps/driving-school/src/app/(instructor)/instructor-profile/_components/instructor-profile-form.tsx` |
-| Массивы полей           | `libs/forms/README.md`                                                                      |
-| Switch/Checkbox         | `libs/forms/README.md`                                                                      |
+| Массивы полей           | `libs/forms/README.md`                                                                                |
+| Switch/Checkbox         | `libs/forms/README.md`                                                                                |
 | Обработка ошибок        | `apps/driving-school/src/app/(instructor)/vehicles/_components/vehicle-form.tsx`                      |
 
 ---

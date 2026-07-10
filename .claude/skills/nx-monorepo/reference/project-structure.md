@@ -179,11 +179,7 @@ import { Button } from '@letar/ui'
   "compilerOptions": {
     "composite": true
   },
-  "references": [
-    { "path": "../../libs/chakra-provider" },
-    { "path": "../../libs/forms" },
-    { "path": "../../libs/ui" }
-  ]
+  "references": [{ "path": "../../libs/chakra-provider" }, { "path": "../../libs/forms" }, { "path": "../../libs/ui" }]
 }
 ```
 

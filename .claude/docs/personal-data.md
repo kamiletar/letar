@@ -128,7 +128,7 @@ if (!consentAccepted) {
 }
 
 // JSX:
-<Checkbox.Root
+;<Checkbox.Root
   checked={consentAccepted}
   onCheckedChange={(e) => setConsentAccepted(!!e.checked)}
   colorPalette="brand"

@@ -42,15 +42,9 @@ const customConfig = defineConfig({
   theme: {
     // Design токены
     tokens: {
-      colors: {
-        /* ... */
-      },
-      spacing: {
-        /* ... */
-      },
-      fonts: {
-        /* ... */
-      },
+      colors: {/* ... */},
+      spacing: {/* ... */},
+      fonts: {/* ... */},
     },
 
     // Семантические токены (с условиями _light/_dark)
@@ -62,30 +56,20 @@ const customConfig = defineConfig({
 
     // Рецепты компонентов
     recipes: {
-      button: defineRecipe({
-        /* ... */
-      }),
+      button: defineRecipe({/* ... */}),
     },
 
     // Slot рецепты
     slotRecipes: {
-      card: defineSlotRecipe({
-        /* ... */
-      }),
+      card: defineSlotRecipe({/* ... */}),
     },
 
     // Text и Layer стили
-    textStyles: {
-      /* ... */
-    },
-    layerStyles: {
-      /* ... */
-    },
+    textStyles: {/* ... */},
+    layerStyles: {/* ... */},
 
     // Keyframes анимации
-    keyframes: {
-      /* ... */
-    },
+    keyframes: {/* ... */},
   },
 
   // Кастомные conditions

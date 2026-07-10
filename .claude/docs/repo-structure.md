@@ -26,17 +26,20 @@ letar/ (public)
 ## Клонирование
 
 **С приватными submodules** (если есть доступ):
+
 ```bash
 git clone --recurse-submodules git@github.com:kamiletar/letar.git
 ```
 
 **Только публичная часть:**
+
 ```bash
 git clone git@github.com:kamiletar/letar.git
 # submodule папки будут пустыми
 ```
 
 **Обновить submodule после клонирования:**
+
 ```bash
 git submodule update --init --recursive
 ```
@@ -82,6 +85,7 @@ Submodule в Git — это **gitlink** (SHA-указатель), не дире�
 ### .env.local / .env.docker
 
 Эти файлы:
+
 - НЕ tracked в letar (через корневой .gitignore)
 - НЕ tracked в приватных submodule (через их .gitignore-шаблон)
 - Лежат локально на диске в working tree
@@ -90,12 +94,14 @@ Submodule в Git — это **gitlink** (SHA-указатель), не дире�
 ### CI/CD
 
 GitHub Actions workflow'ы в публичном letar:
+
 - Для публичных libs (`@letar/forms`, `@letar/form-mcp`, `@letar/zenstack-form-plugin`) — `publish-npm.yml` (триггер на тег) **не подтягивает приватные submodules** (им они не нужны).
 - Для приложений, использующих приватные submodules — `actions/checkout@v4` с `submodules: recursive` и `token: ${{ secrets.PRIVATE_SUBMODULES_PAT }}`.
 
 ## Релиз-флоу (nx release)
 
 **Локально:**
+
 ```bash
 nx release          # bump, changelog, commit, tag, GitHub release
 git push --follow-tags

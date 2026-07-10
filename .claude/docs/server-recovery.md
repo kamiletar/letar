@@ -22,7 +22,7 @@
 | Установить fail2ban                                      | ⬜     |
 | Установить Docker                                        | ⬜     |
 | Установить Resilio Sync (бэкапы БД, .env.docker)         | ⬜     |
-| Клонировать репо в `/home/deploy/letar`                   | ⬜     |
+| Клонировать репо в `/home/deploy/letar`                  | ⬜     |
 | Восстановить `.env.docker` из `C:\BackupSync\lena\s1\`   | ⬜     |
 | Поднять Nginx Proxy Manager                              | ⬜     |
 | Восстановить конфиги NPM из `npm-backup-20260224.tar.gz` | ⬜     |
@@ -98,12 +98,12 @@ mount -o remount,noexec /tmp
 
 ### Что брать с сервера перед переустановкой
 
-| Данные                      | Путь                                           | Приоритет |
-| --------------------------- | ---------------------------------------------- | --------- |
+| Данные                      | Путь                                            | Приоритет |
+| --------------------------- | ----------------------------------------------- | --------- |
 | `.env.docker` файлы         | `/home/deploy/letar/apps/*/`                    | Критично  |
 | Nginx Proxy Manager конфиги | `/home/deploy/letar/infra/nginx-proxy-manager/` | Критично  |
-| Дампы PostgreSQL БД         | Создать через `pg_dump`                        | Критично  |
-| SSL сертификаты NPM         | Через NPM backup                               | Важно     |
+| Дампы PostgreSQL БД         | Создать через `pg_dump`                         | Критично  |
+| SSL сертификаты NPM         | Через NPM backup                                | Важно     |
 
 ### Бэкап Nginx Proxy Manager
 

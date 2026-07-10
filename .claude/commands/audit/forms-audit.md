@@ -245,7 +245,7 @@ import { useLocale, useTranslations } from 'next-intl' // setupZodErrorMap — �
 | Паттерн                                 | Куда выносить                                    |
 | --------------------------------------- | ------------------------------------------------ |
 | Повторяющийся Field с кастомной логикой | `Form.Field.*` или `createForm({ extraFields })` |
-| Общий Select для нескольких проектов    | `@letar/forms` напрямую                 |
+| Общий Select для нескольких проектов    | `@letar/forms` напрямую                          |
 | Валидатор с UI feedback                 | Утилита в `form-components/utils`                |
 | Layout wrapper для полей                | `Form.Group.*` или `fieldWrapper`                |
 

@@ -4,10 +4,10 @@
 
 ## Серверы и пути
 
-| Сервер | Текущий путь | Новый путь |
-|---|---|---|
+| Сервер                | Текущий путь        | Новый путь           |
+| --------------------- | ------------------- | -------------------- |
 | s1 (`194.164.245.97`) | `/home/deploy/lena` | `/home/deploy/letar` |
-| s2 (`s2.letar.best`) | `/home/deploy/lena` | `/home/deploy/letar` |
+| s2 (`s2.letar.best`)  | `/home/deploy/lena` | `/home/deploy/letar` |
 | mail (`193.37.68.73`) | `/home/deploy/lena` | `/home/deploy/letar` |
 
 ## Подход 1 (рекомендуемый): rename + symlink на grace period
@@ -42,6 +42,7 @@ bun install
 ```
 
 После grace периода (1-2 недели) убрать симлинк:
+
 ```bash
 rm /home/deploy/lena
 ```
@@ -49,6 +50,7 @@ rm /home/deploy/lena
 ## Подход 2: чистое переименование без симлинка
 
 Если уверен что нигде не осталось ссылок на старый путь:
+
 ```bash
 ssh root@<server>
 cd /home/deploy
@@ -75,6 +77,7 @@ docker compose -f apps/dashboard-agent/docker-compose.production.yml up -d --bui
 ## Что коммит-сообщения уже починили
 
 Замены `/home/deploy/lena` → `/home/deploy/letar` в коммите `2717fe4` покрыли:
+
 - `deploy-wrapper.sh`, `scripts/sync-env-docker.sh`, `scripts/pull-env-docker.sh`
 - Dashboard Agent (`apps/dashboard-agent/**` — bind mounts, cron, git utils, env routes)
 - Dashboard (`apps/dashboard/src/app/api/**` — analytics, git pull)
@@ -125,6 +128,7 @@ git fetch && git reset --hard origin/main
 ## Проверочный чеклист
 
 После миграции на каждом сервере:
+
 - [ ] `ls /home/deploy/letar` — папка существует
 - [ ] `cd /home/deploy/letar && git remote -v` — указывает на `kamiletar/letar.git`
 - [ ] `git submodule status` — все submodules инициализированы

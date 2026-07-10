@@ -569,9 +569,7 @@ export const procedures = {
     }
 
     const transfer = await client.studentTransfer.create({
-      data: {
-        /* ... */
-      },
+      data: {/* ... */},
     })
 
     return { success: true, transferId: transfer.id }

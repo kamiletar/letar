@@ -10,11 +10,11 @@
 
 ## Где размещать
 
-| Тип          | Расположение                |
-| ------------ | --------------------------- |
-| App-specific | `apps/<app>/_components/`   |
-| Shared UI    | `libs/ui/src/`              |
-| Form field   | `libs/forms/src/` |
+| Тип          | Расположение              |
+| ------------ | ------------------------- |
+| App-specific | `apps/<app>/_components/` |
+| Shared UI    | `libs/ui/src/`            |
+| Form field   | `libs/forms/src/`         |
 
 ## Шаги
 

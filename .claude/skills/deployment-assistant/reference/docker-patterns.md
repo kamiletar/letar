@@ -230,14 +230,14 @@ NODE_ENV=production
 ```yaml
 # PostgreSQL
 healthcheck:
-  test: ["CMD-SHELL", "pg_isready -U lena_user -d ${DB_NAME}"]
+  test: ['CMD-SHELL', 'pg_isready -U lena_user -d ${DB_NAME}']
   interval: 10s
   timeout: 5s
   retries: 5
 
 # Next.js приложение
 healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+  test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
   interval: 30s
   timeout: 10s
   retries: 3

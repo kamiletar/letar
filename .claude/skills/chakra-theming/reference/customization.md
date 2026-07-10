@@ -429,27 +429,13 @@ const config = defineConfig({
 
   // Тема
   theme: {
-    tokens: {
-      /* ... */
-    },
-    semanticTokens: {
-      /* ... */
-    },
-    recipes: {
-      /* ... */
-    },
-    slotRecipes: {
-      /* ... */
-    },
-    textStyles: {
-      /* ... */
-    },
-    layerStyles: {
-      /* ... */
-    },
-    keyframes: {
-      /* ... */
-    },
+    tokens: {/* ... */},
+    semanticTokens: {/* ... */},
+    recipes: {/* ... */},
+    slotRecipes: {/* ... */},
+    textStyles: {/* ... */},
+    layerStyles: {/* ... */},
+    keyframes: {/* ... */},
   },
 })
 

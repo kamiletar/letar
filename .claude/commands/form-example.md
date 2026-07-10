@@ -10,7 +10,7 @@
 **Проверяй inbox** на задачи от координатора (topic: `forms-task`):
 
 ```
-fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
+fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
 ```
 
 После завершения — **отвечай через reply_message**.
@@ -37,7 +37,7 @@ fetch_inbox(project_key: "app-c-web-letar", agent_name: "<твоё-имя>", top
 
 ```
 send_message(
-  project_key: "C:/web/letar",
+  project_key: "c-web-letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: form-example",

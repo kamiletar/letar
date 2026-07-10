@@ -46,9 +46,9 @@ const result = db.prepare('SELECT id, name FROM Anime').all()
 
 ## Расположение файлов БД
 
-| Окружение  | Путь                                                                 |
-| ---------- | -------------------------------------------------------------------- |
-| Dev        | `apps/animatrona/prisma/data/app.db`                                 |
+| Окружение  | Путь                                                                  |
+| ---------- | --------------------------------------------------------------------- |
+| Dev        | `apps/animatrona/prisma/data/app.db`                                  |
 | Production | `%APPDATA%/@letar/animatrona/data/app.db` (Windows)                   |
 |            | `~/Library/Application Support/@letar/animatrona/data/app.db` (macOS) |
 

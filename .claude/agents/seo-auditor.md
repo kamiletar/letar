@@ -50,12 +50,8 @@ color: cyan
 export const metadata: Metadata = {
   title: 'Страница',
   description: 'Описание',
-  openGraph: {
-    /* ... */
-  },
-  twitter: {
-    /* ... */
-  },
+  openGraph: {/* ... */},
+  twitter: {/* ... */},
 }
 
 // Динамические метаданные

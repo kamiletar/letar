@@ -136,17 +136,17 @@ const { mutate, mutateAsync, data, error, isPending, isSuccess, isError, reset, 
 
 ### Опции
 
-| Опция          | Тип                                         | Описание                         |
+| Опция | Тип | Описание |
 | -------------- | ------------------------------------------- | -------------------------------- | ------------------ |
-| `mutationFn`   | `(variables) => Promise<TData>`             | Функция мутации                  |
-| `mutationKey`  | `unknown[]`                                 | Ключ для defaults                |
-| `onMutate`     | `(variables) => context`                    | Перед мутацией                   |
-| `onSuccess`    | `(data, variables, context) => void`        | При успехе                       |
-| `onError`      | `(error, variables, context) => void`       | При ошибке                       |
-| `onSettled`    | `(data, error, variables, context) => void` | Всегда                           |
-| `retry`        | `number`                                    | `0`                              | Количество ретраев |
-| `scope`        | `{ id: string }`                            | Для последовательного выполнения |
-| `throwOnError` | `boolean`                                   | Пробрасывать ошибки              |
+| `mutationFn` | `(variables) => Promise<TData>` | Функция мутации |
+| `mutationKey` | `unknown[]` | Ключ для defaults |
+| `onMutate` | `(variables) => context` | Перед мутацией |
+| `onSuccess` | `(data, variables, context) => void` | При успехе |
+| `onError` | `(error, variables, context) => void` | При ошибке |
+| `onSettled` | `(data, error, variables, context) => void` | Всегда |
+| `retry` | `number` | `0` | Количество ретраев |
+| `scope` | `{ id: string }` | Для последовательного выполнения |
+| `throwOnError` | `boolean` | Пробрасывать ошибки |
 
 ### Return values
 

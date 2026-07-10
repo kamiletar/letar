@@ -100,11 +100,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
 ## Где размещать
 
-| Тип          | Расположение                |
-| ------------ | --------------------------- |
-| App-specific | `apps/<app>/_components/`   |
-| Shared UI    | `libs/ui/src/`              |
-| Form fields  | `libs/forms/src/` |
+| Тип          | Расположение              |
+| ------------ | ------------------------- |
+| App-specific | `apps/<app>/_components/` |
+| Shared UI    | `libs/ui/src/`            |
+| Form fields  | `libs/forms/src/`         |
 
 ## Документация
 

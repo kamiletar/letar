@@ -2,7 +2,30 @@
 
 ## Инициализация
 
-1. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
+1. Зарегистрируйся в Agent Mail:
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  task_description: "Dashboard Agent — разработка apps/dashboard-agent",
+  file_reservation_paths: ["apps/dashboard-agent/**"],
+  file_reservation_reason: "dashboard-agent development"
+)
+```
+
+2. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
+
+3. Проверь inbox — могут быть входящие задачи от других агентов:
+
+```
+fetch_inbox(
+  project_key: "c-web-letar",
+  agent_name: "<твоё-имя>",
+  include_bodies: true
+)
+```
 
 ## Действия
 
@@ -26,13 +49,11 @@
 
 ```
 send_message(
-  project_key: "C:/web/letar",
+  project_key: "c-web-letar",
   sender_name: "<твоё-имя-агента>",
   to: ["BlackCove"],
   subject: "deploy-request: dashboard-agent",
-  body_md: "app: dashboard-agent
-reason: <что сделал>
-commit: <hash>",
+  body_md: "app: dashboard-agent\nreason: <что сделал>\ncommit: <hash>",
   topic: "deploy",
   importance: "high",
   ack_required: true

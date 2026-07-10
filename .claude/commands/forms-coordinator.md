@@ -30,7 +30,7 @@ macro_start_session(
 
 ```
 send_message(
-  project_key: "app-c-web-letar",
+  project_key: "c-web-letar",
   sender_name: "FormsCoord",
   to: [],
   broadcast: true,
@@ -46,7 +46,7 @@ send_message(
 
 | Библиотека                  | Версия | Описание                                                                 |
 | --------------------------- | ------ | ------------------------------------------------------------------------ |
-| `libs/forms`      | 0.84.3 | 56+ полей, compound API, TanStack Form + Chakra UI                       |
+| `libs/forms`                | 0.84.3 | 56+ полей, compound API, TanStack Form + Chakra UI                       |
 | `libs/zenstack-form-plugin` | 2.2.0  | Генерация Zod schemas из `@form.*` директив в schema.zmodel              |
 | `libs/form-mcp`             | 0.1.0  | MCP сервер — list_fields, get_field_props, get_directives, generate_form |
 
@@ -66,17 +66,49 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
 
 Бесконечно повторяй:
 
-1. **Проверяй inbox** каждые 30 секунд:
+1. **Обнови TTL резервации** раз в час:
+
    ```
-   fetch_inbox(project_key: "app-c-web-letar", agent_name: "FormsCoord", topic: "form-feature-request")
+   renew_file_reservations(
+     project_key: "c-web-letar",
+     agent_name: "FormsCoord",
+     extend_seconds: 7200
+   )
    ```
 
-2. **При получении запроса:**
-   a. Прочитай сообщение (mark_message_read)
-   b. **Триаж** (см. ниже)
+2. **Проверяй inbox** каждые 30 секунд:
+
+   ```
+   fetch_inbox(
+     project_key: "c-web-letar",
+     agent_name: "FormsCoord",
+     topic: "form-feature-request",
+     include_bodies: true
+   )
+   ```
+
+3. **При получении запроса:**
+   a. Прочитай сообщение (`mark_message_read`)
+   b. **Триаж** (см. ниже) — используй `thread_id` из запроса или создай новый (`"form-<app>-<feature>"`)
    c. Действуй по результату триажа
 
-3. **Отслеживай выполнение:** проверяй ответы от forms-dev агента
+4. **Отслеживай выполнение:**
+
+   ```
+   summarize_thread(
+     project_key: "c-web-letar",
+     thread_id: "form-<app>-<feature>"
+   )
+   ```
+
+5. **Если только что запустился** — найди накопившиеся запросы:
+
+   ```
+   search_messages(
+     project_key: "c-web-letar",
+     query: "topic:form-feature-request AND NOT body:Готово"
+   )
+   ```
 
 ## Триаж запросов
 
@@ -266,7 +298,7 @@ send_message(to: ["<consumer-agent>"],
 ## Правила
 
 - **ТЫ владеешь** libs/forms, libs/zenstack-form-plugin, libs/form-mcp
-- **НЕ пиши код** в apps/* — только задачи forms-dev и consumer-агентам
+- **НЕ пиши код** в apps/\* — только задачи forms-dev и consumer-агентам
 - **Можешь править** библиотеки напрямую для мелких фиксов (опечатки, экспорты)
 - **Крупные фичи** — через forms-dev агента
 - **form-mcp ВСЕГДА синхронизируй** после изменений в form-components
