@@ -212,7 +212,7 @@ Dashboard-agent вынужден дублировать ВСЕ 8 runtime зав�
 
 | #   | Задача                                 | Приоритет | Сложность | Зависимость |
 | --- | -------------------------------------- | --------- | --------- | ----------- |
-| 1   | @letar/email: nodemailer v6→v8          | Высокий   | Низкая    | —           |
+| 1   | @letar/email: nodemailer v6→v8         | Высокий   | Низкая    | —           |
 | 2   | label-printer: electron v39→v40        | Средний   | Средняя   | —           |
 | 3   | label-printer: pdfjs-dist v4→v5        | Низкий    | Средняя   | после #2    |
 | 4   | label-printer: canvas optional→regular | Низкий    | Низкая    | —           |
