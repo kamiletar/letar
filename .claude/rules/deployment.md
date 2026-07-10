@@ -4,6 +4,11 @@ paths: 'deploy-affected.sh, **/Dockerfile, **/docker-compose*, **/prisma/migrati
 
 # Правила деплоя
 
+⚠️ **Основной путь — deploy-mcp** (`deploy_app`/`deploy_status`/`git_status` через MCP), не сырой
+SSH ниже. Этот файл описывает резервный канал (SSH напрямую) — нужен для первичной настройки
+приложения на сервере, ручного вмешательства при сбое агента, provision нового сервера. Подробнее:
+[deploy-coordination.md](/.claude/rules/deploy-coordination.md), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
 ## ⛔ ЗАПРЕЩЕНО на локальной dev машине
 
 **НИКОГДА не запускай эти команды локально:**
@@ -22,8 +27,11 @@ prisma migrate deploy  # Применение миграций на production
 3. **Запустить деплой на сервере**
 
 ```bash
-# s1 выведен из эксплуатации — все приложения на s2
+# s1 выведен из эксплуатации — все production-приложения на s2
 # s2.letar.best: dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi
+# s3.letar.best: staging-инстанс dashboard-agent (docker-compose.s3.yml, loopback 127.0.0.1:13103:3100,
+#   не публикуется в интернет) + e2e-раннер (Playwright против staging-контейнеров). Раздельный
+#   AGENT_TOKEN_S3, отдельный от прод-токена s2.
 
 # ⚠️ ВАЖНО: на Windows ОБЯЗАТЕЛЬНО использовать Windows SSH, не bash ssh!
 # Причина: Git Bash SSH (/usr/bin/ssh) при каждом вызове создаёт ssh-agent.exe,

@@ -482,31 +482,31 @@ services:
 
 ### Таблица портов (актуально 2026-06-20, синхронизировано с `docker ps`)
 
-| Приложение           | Внешний порт                                                                       | Внутренний порт | Сервер |
-| -------------------- | ---------------------------------------------------------------------------------- | --------------- | ------ |
-| premium-rosstil      | 3000                                                                               | 3000            | s2     |
-| imot                 | 3001                                                                               | 3001            | s2     |
-| dashboard            | 3002                                                                               | 3002            | s2     |
-| driving-school       | 3003–3004                                                                          | 3003–3004       | s2     |
-| kami                 | 3005                                                                               | 3005            | s2     |
-| pravda               | 3007                                                                               | 3007            | s2     |
-| animatrona-landing   | 3008                                                                               | 3008            | s2     |
-| umami                | 3009                                                                               | 3000            | s2     |
-| auth-hub             | 3010                                                                               | 3010            | s2     |
-| kami-key-the-landing | 3011                                                                               | 3011            | s2     |
-| archetest            | 3012                                                                               | 3012            | s2     |
-| time                 | 3013                                                                               | 3013            | s2     |
-| letar-landing        | 3015                                                                               | 3015            | s2     |
-| grandslamcup         | 3016                                                                               | 3016            | s2     |
-| aira-web             | 3017                                                                               | 3017            | s2     |
-| grandslamcup-staging | 3018                                                                               | 3016            | s2     |
-| aboi                 | 3019                                                                               | 3018            | s2     |
-| form-docs            | 3020                                                                               | 3020            | s2     |
-| svoichuzhie          | 3021                                                                               | 3021            | s2     |
-| form-example         | 3022                                                                               | 3022            | s2     |
-| aprel8008            | 3023                                                                               | 3023            | s2     |
-| mandala              | 3025                                                                               | 3004            | s2     |
-| animatrona-tracker   | 3026                                                                               | 3010            | s2     |
+| Приложение           | Внешний порт                                                                      | Внутренний порт | Сервер |
+| -------------------- | --------------------------------------------------------------------------------- | --------------- | ------ |
+| premium-rosstil      | 3000                                                                              | 3000            | s2     |
+| imot                 | 3001                                                                              | 3001            | s2     |
+| dashboard            | 3002                                                                              | 3002            | s2     |
+| driving-school       | 3003–3004                                                                         | 3003–3004       | s2     |
+| kami                 | 3005                                                                              | 3005            | s2     |
+| pravda               | 3007                                                                              | 3007            | s2     |
+| animatrona-landing   | 3008                                                                              | 3008            | s2     |
+| umami                | 3009                                                                              | 3000            | s2     |
+| auth-hub             | 3010                                                                              | 3010            | s2     |
+| kami-key-the-landing | 3011                                                                              | 3011            | s2     |
+| archetest            | 3012                                                                              | 3012            | s2     |
+| time                 | 3013                                                                              | 3013            | s2     |
+| letar-landing        | 3015                                                                              | 3015            | s2     |
+| grandslamcup         | 3016                                                                              | 3016            | s2     |
+| aira-web             | 3017                                                                              | 3017            | s2     |
+| grandslamcup-staging | 3018                                                                              | 3016            | s2     |
+| aboi                 | 3019                                                                              | 3018            | s2     |
+| form-docs            | 3020                                                                              | 3020            | s2     |
+| svoichuzhie          | 3021                                                                              | 3021            | s2     |
+| form-example         | 3022                                                                              | 3022            | s2     |
+| aprel8008            | 3023                                                                              | 3023            | s2     |
+| mandala              | 3025                                                                              | 3004            | s2     |
+| animatrona-tracker   | 3026                                                                              | 3010            | s2     |
 | dsperevod            | ⚠️ **КОНФЛИКТ** — занял 3021 (svoichuzhie). Нужно назначить свободный порт (3027+) | 3019            | s2     |
 
 ### Свободные порты (s2)
@@ -586,6 +586,64 @@ git -C apps/<submodule> log origin/main -1 --oneline
 ```
 
 После этого деплой продолжится с `--skip-git` или обычным способом.
+
+---
+
+### Env-переменные пропадают при self-deploy через dashboard-agent (nsenter → sudo сбрасывает env)
+
+**Симптом:** `deploy-affected.sh`, запущенный вручную по SSH под пользователем `deploy` с явным `export VAR=...`, работает; тот же деплой через `deploy_app` (dashboard-agent → `nsenter` на хосте) падает, как будто переменная не задана — даже если она явно передана в `env:` при спавне процесса в Node.
+
+**Причина:** в начале `deploy-affected.sh` есть блок:
+
+```bash
+if [ "$(id -u)" = "0" ] && [ "${DEPLOY_AS_ROOT:-0}" != "1" ] && id deploy >/dev/null 2>&1; then
+  exec sudo -u deploy -H -- bash "$0" "$@"
+fi
+```
+
+Когда скрипт запускается через `nsenter` из контейнера dashboard-agent, эффективный uid = 0 (root внутри host-namespace) → срабатывает эта ветка → `sudo -u deploy` **сбрасывает окружение** (env reset — стандартное поведение sudo без `--preserve-env`/sudoers `env_keep`). Любая переменная, переданная в `env:` спавна из Node, теряется на этом переключении пользователя.
+
+**Почему по SSH под `deploy` всегда работало:** `id -u` != 0 → ветка `if` не срабатывает, `sudo` не вызывается, переменные из SSH-сессии доживают без вмешательства.
+
+**Исправление (уже применено, `1160e9e`):** дефолт-значение прямо в скрипте, после sudo-блока:
+
+```bash
+export SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-/home/deploy/.age/letar-key.txt}"
+```
+
+`--preserve-env=VAR` в `sudo` — сознательно **не выбран**: без `SETENV` в sudoers он не игнорирует флаг, а **падает** («not allowed to preserve the environment»), рискуя уронить весь деплой. Дефолт в скрипте работает при любом способе запуска и не трогает sudoers на сервере.
+
+**Правило на будущее:** любая новая env-переменная, нужная `deploy-affected.sh` при запуске через `dashboard-agent`/`deploy-mcp` (не только по прямому SSH), должна иметь дефолт в самом скрипте после sudo-блока — полагаться на проброс через `spawn(..., { env })` недостаточно.
+
+---
+
+### Submodule на сервере отстаёт — untracked-файлы блокируют checkout
+
+**Симптом:** `git pull --recurse-submodules` обновляет основной репо, но для отдельных submodule падает:
+
+```
+error: The following untracked working tree files would be overwritten by checkout:
+	next-env.d.ts
+Please move or remove them before you switch branches.
+Aborting
+fatal: Unable to checkout '<sha>' in submodule path 'apps/<submodule>'
+```
+
+**Причина:** внутри submodule на сервере накопились untracked-файлы (артефакты сборки/тестов — `next-env.d.ts`, `playwright/.auth/*.json` и т.п.), которые git не может молча перезаписать при смене SHA submodule.
+
+**Где встречалось:** `driving-school`/`driving-school-e2e` на s3 (2026-07-10) — не блокирует деплой других приложений (submodule обновляется независимо), но сам submodule остаётся на старом коммите до ручной чистки.
+
+**Исправление (вручную на сервере):**
+
+```bash
+cd apps/<submodule>
+git status --short          # найти untracked-файлы
+git clean -fd <файл>         # или rm -f <файл>, если это точно артефакт, не рабочая правка
+cd ../..
+git submodule update --recursive
+```
+
+⚠️ Перед `git clean`/`rm` — убедиться, что файл действительно generated-артефакт (e2e-фикстуры, `.next`-типы), а не чья-то незакоммиченная работа на сервере.
 
 ---
 

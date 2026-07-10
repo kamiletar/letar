@@ -168,11 +168,12 @@ Subject: Re: deploy-request: <app-name>
 
 ## Маппинг серверов
 
-**s1 выведен из эксплуатации.** Все приложения на s2.
+**s1 выведен из эксплуатации.** Все production-приложения на s2. s3 — staging/e2e-раннер, не production.
 
 | Сервер | Приложения                                                                                                                                                                                                                                                                             |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | s2     | dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, premium-rosstil, imot, svoichuzhie |
+| s3     | staging-инстанс dashboard-agent (`docker-compose.s3.yml`, loopback `127.0.0.1:13103:3100`, отдельный `AGENT_TOKEN_S3`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                                                                     |
 
 ## Агрегация запросов
 
