@@ -22,6 +22,7 @@ import { cronRoutes } from './routes/cron'
 import { databaseRoutes } from './routes/database'
 import { deployRoutes } from './routes/deploy'
 import { dockerRoutes } from './routes/docker'
+import { e2eRoutes } from './routes/e2e'
 import { envRoutes } from './routes/env'
 import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
@@ -74,6 +75,7 @@ async function main(): Promise<void> {
   await fastify.register(systemRoutes)
   await fastify.register(dockerRoutes)
   await fastify.register(deployRoutes)
+  await fastify.register(e2eRoutes)
   await fastify.register(databaseRoutes)
   await fastify.register(nginxRoutes)
   await fastify.register(cronRoutes)

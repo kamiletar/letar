@@ -16,10 +16,30 @@ MCP-сервер: структурированный слой над REST API da
 | `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем             | `GET /api/git/status`     |
 | `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                | `GET /api/deploy/status`  |
 | `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                           | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target })`                      | Запуск деплоя (`target`: `production`\|`staging`)                          | `POST /api/deploy/app`    |
+| `deploy_app({ app, target })`                      | Запуск деплоя (`target`: `production`\|`staging`) + warn-only e2e-gate     | `POST /api/deploy/app`    |
+| `run_e2e({ app, project? })`                       | Запуск Playwright e2e на s3 против staging-контейнера приложения           | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)          | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
-автоматически из `app` + `target` (staging → всегда s3).
+автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
+на s3 — это единственный e2e-раннер (см. `e2e-testing.md`).
+
+### e2e-gate в deploy_app(production)
+
+Перед запуском production-деплоя (`target` не `"staging"`) `deploy_app` читает
+`.last-e2e-status/<app>.json` на s3 (через `agent_health`-туннель) и **предупреждает**, если:
+данных нет; последний прогон упал; прогонялся на другом коммите, чем деплоится; или старше 24ч.
+**Это warn-only** — деплой не блокируется, предупреждения просто дописываются в начало ответа.
+Hard gate — отдельное решение Фазы 3 (PLAN.md §18.6) после недели эксплуатации warn-only.
+
+Типичный staging-пайплайн:
+
+```
+deploy_app({ app: "grandslamcup", target: "staging" })          // → образ на s3
+run_e2e({ app: "grandslamcup" })                                 // → бьёт по grandslamcup.s3.letar.best
+e2e_status({ app: "grandslamcup", sinceLine: 0 })                 // поллинг + финальный lastStatus
+deploy_app({ app: "grandslamcup" })                               // production — покажет gate-warnings
+```
 
 ### Типичный воркфлоу деплоя
 
@@ -63,4 +83,8 @@ deploy_status({ server: "s2", deployId, sinceLine: <totalLines из прошло
 - **Модель доверия процедурная.** `.mcp.json` общий для всех сессий, поэтому `deploy_app`
   технически вызываем из любой сессии — как и SSH-ключ сегодня. По конвенции деплоит только
   BlackCove ([deploy-coordination](/.claude/rules/deploy-coordination.md)).
-- **Фаза 1.** e2e-gate и инструменты `run_e2e`/`e2e_status` — Фаза 2 (Сессия D плана §16).
+- **e2e-gate warn-only**, не блокирует деплой при отсутствии/провале e2e-данных (PLAN.md §18.6 —
+  hard gate решается отдельно после недели эксплуатации).
+- **`run_e2e`/`e2e_status` требуют живого dashboard-agent на s3** — до тех пор возвращают ошибку
+  туннеля/недоступности, `deploy_app(production)` при этом всё равно работает (gate просто warn'ит
+  про недоступность s3, не падает).

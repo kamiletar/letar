@@ -1,5 +1,43 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №53 (2026-07-10, §18 Сессия D — код готов, ждём s3):** Продолжение с того места, где
+> остановилась сессия №52. **Отправлен формальный `deploy-request` BlackCove** (тред
+> `provision-s3-dashboard-agent`) на подъём dashboard-agent на s3 — конфиг-часть (`AGENT_TOKEN_S3`,
+> `docker-compose.s3.yml`) была готова с сессии №52, но физически контейнер ещё не поднят
+> (`agent_health({server:"s3"})` → `fetch failed` через SSH-туннель, подтверждено). Предыдущие
+> переговоры BrownRaven↔BlackCove зависли на взаимном «жду отдельного захода» без явного ack —
+> сформулирован явный чеклист из 3 шагов, ack_required.
+>
+> **Пока ждём s3, сделана кодовая часть Сессии D (не требует живого s3 для написания):**
+> ✅ `apps/dashboard-agent/src/routes/e2e.ts` — `POST /api/e2e/run` (async, ring-buffer как в
+> deploy.ts, guard «только на s3», пишет `.last-e2e-status/<app>.json` по завершении) +
+> `GET /api/e2e/status` (курсор `sinceLine` + персистентный `lastStatus`). Зарегистрирован в
+> `index.ts`. ✅ `libs/deploy-mcp`: tools `run_e2e`/`e2e_status` + `checkE2eGate()` — warn-only
+> e2e-gate внутри `deploy_app(production)` (проверяет наличие/успех/коммит/свежесть e2e-статуса на
+> s3, **предупреждает, не блокирует**). `nx lint`+`nx typecheck` на dashboard-agent и deploy-mcp
+> зелёные. Версии: dashboard-agent `0.6.0→0.7.0`, `@letar/deploy-mcp` `0.1.0→0.2.0`. Доки:
+> README deploy-mcp (таблица инструментов + workflow-пример), CHANGELOG dashboard-agent,
+> deployment.md (раздел «E2E-ранер и деплой» переписан под staging-gated пайплайн).
+>
+> **s3 поднят ✅ (BlackCove, тред `provision-s3-dashboard-agent`, 2026-07-10):** конфликт порта 3100
+> (занят `media-api` на s3) решён loopback-биндингом `127.0.0.1:13103:3100` в `docker-compose.s3.yml`
+> (`infra-config` разделил `agentPort`(3100)/`hostPort`(туннель, s3:13103), HEAD `16420ef`). BlackCove
+> подтвердил вживую на HEAD `f21334bf`: `docker compose -f docker-compose.s3.yml --env-file .env.docker
+> up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. ⚠️ Попутно
+> найдено: `git pull` на s3 не смог обновить submodule `driving-school`/`driving-school-e2e` (untracked
+> dev-артефакты конфликтуют с checkout) — не блокирует dashboard-agent, submodule на s3 сейчас отстаёт,
+> не разобрано.
+>
+> **➡️ Следующий старт:** 1) обновить локальный `.env.docker` (перекачать `.env.docker.enc` с
+> `AGENT_TOKEN_S3`), проверить `agent_health({server:"s3"})` через туннель — s3 теперь живой, шаг не
+> заблокирован; 2) разобраться с отставшими submodule driving-school/driving-school-e2e на s3 (untracked
+> конфликт при checkout); 3) **живой пилот**: задеплоить
+> `grandslamcup` на staging (`deploy_app({app:"grandslamcup", target:"staging"})`), настроить
+> `.env.staging` (домен s1→s3, у grandslamcup staging-комплект уже частично есть — `gsc-test.letar.best`
+> в deployment.md, нужно свести к конвенции `<app>.s3.letar.best`), redirect URI в auth-hub для
+> staging-домена, прогнать `run_e2e`, убедиться что `deploy_app(production)` показывает gate-warnings
+> корректно на разных сценариях (нет данных / упал / другой коммит / устарел).
+
 > 📌 **Отдельная кросс-приложенческая UI-задача (вне темы этого файла, для следующей сессии):**
 > «Липкая CTA» — тираж `StickyActionBar`/`useScrollGate` (`@letar/ui@0.7.0`) на длинные интро/формы
 > aboi, mandala, svoichuzhie, dsperevod, kami (+ разбор лендингов animatrona-landing, kami-key-the-landing,
@@ -12,7 +50,7 @@
 
 > **Сессия №51 (2026-07-10, TS7 GA — пилот на `time`):** ✅ вышел стабильный `typescript@7.0.2` (Go-порт,
 > GA 2026-07-08). Добавлен таргет `typecheck:ts7` в `apps/time/project.json` — `bunx --bun typescript@7.0.2
-> --noEmit`, **изолированно** от workspace `tsc`/`tsgo` (обычный `bun install` пакета в корневой
+--noEmit`, **изолированно** от workspace `tsc`/`tsgo` (обычный `bun install` пакета в корневой
 > `package.json` тут же подменяет общий `node_modules/.bin/tsc` версией 7.0.2 **для всех** проектов молча,
 > несмотря на алиас-имя — поймано и отменено до коммита). Результат на `time`: **байт-в-байт идентичный**
 > вывод с `tsc` 6.0.3 и `tsgo` dev-preview (одни и те же 4 pre-existing ошибки — не хватает сгенерённых
@@ -2436,12 +2474,12 @@ Gate живёт в deploy-mcp (единственный видит оба сер
 
 ### Сессии
 
-| #     | Содержимое                                                                                                                                                                                                                                                                                                                        | Статус                                                                                                                                                                                                                                                                       |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | Харденинг `deploy-affected.sh`: миграции fail=abort (различать «нет миграций» от ошибки), pg_dump перед миграцией (`/home/deploy/pre-migrate-dumps/`, ротация 3), sha-теги образов (ретеншн 3). `--dry-run` + shellcheck; боевой прогон на низкорисковом app. Доки: deployment.md, backup-architecture.md                         | ✅ задеплоено на `time`, подтверждено BlackCove; + self-re-exec фикс `63bcada`                                                                                                                                                                                               |
-| **B** | `libs/infra-config`; dashboard-agent: серверный guard, `docker-compose.s3.yml`, консолидация production.yml/s2.yml (уточнить у BlackCove какой живой); коммит правок сессии №49 (deploy.ts, server-config.ts, cron.ts). Доки: README/CHANGELOG dashboard-agent, repo-structure.md, deployment.md (таблица серверов)               | ✅ коммиты `8498c06`, `a1772cf`; guard-тест вместо прямого импорта (Docker-изоляция); s2.yml удалён                                                                                                                                                                          |
-| **C** | `libs/deploy-mcp` + `.mcp.json`; деплой dashboard-agent на s3 + закрытие порта 3100 — через BlackCove. Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md (строка MCP)                                                                                                                   | ✅ BlackCove задеплоил `time` через `deploy_app` (exitCode 0): deployId + sinceLine + self-re-exec + SOPS — все подтверждены вживую. Попутно 2 бага `/api/deploy/app` (SOPS-проброс `4d970e7` + sudo env-reset `1160e9e`). Остаток: s3-инстанс + порт 3100 (отдельный заход) |
-| **D** | Роут `e2e.ts` (run/status + `.last-e2e-status`), tools `run_e2e`/`e2e_status`, warn-gate; пилот grandslamcup: `.env.staging` s1→s3, домен, Playwright `E2E_BASE_URL` (webServer скипается), redirect URI auth-hub. Доки: deployment.md (воркфлоу), e2e-testing.md (конвенция + чек-лист подключения app), §15.3.1 отметить Этап A | ⏳                                                                                                                                                                                                                                                                           |
+| #     | Содержимое                                                                                                                                                                                                                                                                                                                        | Статус                                                                                                                                                                                                                                                                                                                               |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A** | Харденинг `deploy-affected.sh`: миграции fail=abort (различать «нет миграций» от ошибки), pg_dump перед миграцией (`/home/deploy/pre-migrate-dumps/`, ротация 3), sha-теги образов (ретеншн 3). `--dry-run` + shellcheck; боевой прогон на низкорисковом app. Доки: deployment.md, backup-architecture.md                         | ✅ задеплоено на `time`, подтверждено BlackCove; + self-re-exec фикс `63bcada`                                                                                                                                                                                                                                                       |
+| **B** | `libs/infra-config`; dashboard-agent: серверный guard, `docker-compose.s3.yml`, консолидация production.yml/s2.yml (уточнить у BlackCove какой живой); коммит правок сессии №49 (deploy.ts, server-config.ts, cron.ts). Доки: README/CHANGELOG dashboard-agent, repo-structure.md, deployment.md (таблица серверов)               | ✅ коммиты `8498c06`, `a1772cf`; guard-тест вместо прямого импорта (Docker-изоляция); s2.yml удалён                                                                                                                                                                                                                                  |
+| **C** | `libs/deploy-mcp` + `.mcp.json`; деплой dashboard-agent на s3 + закрытие порта 3100 — через BlackCove. Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md (строка MCP)                                                                                                                   | ✅ BlackCove задеплоил `time` через `deploy_app` (exitCode 0): deployId + sinceLine + self-re-exec + SOPS — все подтверждены вживую. Попутно 2 бага `/api/deploy/app` (SOPS-проброс `4d970e7` + sudo env-reset `1160e9e`). Остаток: s3-инстанс + порт 3100 (отдельный заход)                                                         |
+| **D** | Роут `e2e.ts` (run/status + `.last-e2e-status`), tools `run_e2e`/`e2e_status`, warn-gate; пилот grandslamcup: `.env.staging` s1→s3, домен, Playwright `E2E_BASE_URL` (webServer скипается), redirect URI auth-hub. Доки: deployment.md (воркфлоу), e2e-testing.md (конвенция + чек-лист подключения app), §15.3.1 отметить Этап A | 🟡 код готов и закоммичен (`apps/dashboard-agent/src/routes/e2e.ts`, `run_e2e`/`e2e_status`/`checkE2eGate` в `libs/deploy-mcp`, доки deployment.md/README deploy-mcp) — lint+typecheck зелёные. **НЕ проверено вживую**: s3 ещё не поднят (см. хвост Сессии C ниже), пилот grandslamcup (staging-конфиг, редирект auth-hub) не начат |
 
 ### §18.6 Фаза 3 (roadmap, отдельное решение после недели warn-only)
 
@@ -2457,7 +2495,7 @@ Hard gate; уход от bash-ядра — **выбор между** (а) `libs/
 - [x] Сессия A: sha-теги на образах ✅ (`time:63bcadacd`/`time:1160e9e46`); pre-migrate дамп/abort — код есть, на `time` миграций не было (нужен app с миграцией для полной проверки)
 - [x] Сессия B: `nx lint/typecheck` зелёные ✅; guard staging/production в deploy.ts ✅
 - [x] Сессия C: BlackCove задеплоил `time` через `deploy_app` (не SSH), exitCode 0 ✅. **Порт 3100 ещё НЕ закрыт снаружи** — отдельный заход (s3-инстанс + ufw)
-- [ ] Сессия D: полный цикл на grandslamcup — staging → e2e (json записан) → prod с зелёным gate; warn при испорченном json
+- [ ] Сессия D: код готов (роут + tools + warn-gate, lint/typecheck зелёные), **но не проверен вживую** — блокер: s3 dashboard-agent ещё не поднят. Осталось: живой прогон полного цикла на grandslamcup — staging → e2e (json записан) → prod с зелёным gate; warn при испорченном json
 - [ ] Неделя warn-only без ложных срабатываний → решение о hard gate (Фаза 3)
 
 ---

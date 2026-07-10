@@ -13,8 +13,10 @@ import { type DeployTarget, type InfraServer, resolveDeployServer, SERVER_APPS, 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { agentRequest } from './client.js'
+import { localHeadSha } from './config.js'
 
 const serverEnum = z.enum(['s2', 's3'])
+const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
 // Обе функции возвращают ОДНУ и ту же форму (с полем isError) без аннотации типа —
 // так вывод типов SDK-колбэка работает (аналогично form-mcp). Аннотация или union
@@ -33,6 +35,59 @@ function errorText(body: string) {
 /** JSON-представление данных агента для вывода в чат. */
 function pretty(data: unknown): string {
   return '```json\n' + JSON.stringify(data, null, 2) + '\n```'
+}
+
+/**
+ * Warn-only e2e-gate перед production-деплоем (PLAN.md §18 Сессия D): читает
+ * `.last-e2e-status/<app>.json` на s3 через dashboard-agent и предупреждает о
+ * несвежих/проваленных/отсутствующих данных — но НИКОГДА не блокирует деплой
+ * (hard gate — отдельное решение Фазы 3, §18.6, после недели эксплуатации warn-only).
+ */
+async function checkE2eGate(app: string): Promise<string[]> {
+  const warnings: string[] = []
+  try {
+    const res = await agentRequest('s3', {
+      path: `/api/e2e/status?app=${encodeURIComponent(app)}`,
+      timeoutMs: 10000,
+    })
+    if (!res.success) {
+      warnings.push(`⚠️ e2e-gate: не удалось получить статус на s3 (${res.error ?? 'нет данных'}) — деплою вслепую.`)
+      return warnings
+    }
+    const data = res.data as { lastStatus: { commitSha: string; passed: boolean; timestamp: string } | null } | null
+    const last = data?.lastStatus
+    if (!last) {
+      warnings.push(`⚠️ e2e-gate: для ${app} ещё ни разу не прогонялся e2e на staging — нет данных для сверки.`)
+      return warnings
+    }
+    if (!last.passed) {
+      warnings.push(
+        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`
+      )
+    }
+    try {
+      const head = localHeadSha()
+      if (last.commitSha !== head) {
+        warnings.push(
+          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(
+            0,
+            7
+          )} — не тот же коммит.`
+        )
+      }
+    } catch {
+      // не удалось определить локальный HEAD — пропускаем сверку коммита, остальные проверки не отменяем
+    }
+    const ageMs = Date.now() - new Date(last.timestamp).getTime()
+    if (ageMs > E2E_GATE_MAX_AGE_MS) {
+      warnings.push(`⚠️ e2e-gate: последний прогон для ${app} старше 24ч (${last.timestamp}).`)
+    }
+  } catch (err) {
+    warnings.push(
+      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`
+    )
+  }
+  return warnings
 }
 
 export function createDeployMcpServer(): McpServer {
@@ -167,6 +222,9 @@ export function createDeployMcpServer(): McpServer {
     async ({ app, target = 'production' }) => {
       const server = resolveDeployServer(app, target as DeployTarget)
       const staging = target === 'staging'
+      // Warn-only e2e-gate: только для production, только предупреждает, никогда не блокирует
+      const gateWarnings = staging ? [] : await checkE2eGate(app)
+      const gatePrefix = gateWarnings.length > 0 ? [...gateWarnings, ''] : []
       try {
         const res = await agentRequest(server, {
           method: 'POST',
@@ -174,11 +232,14 @@ export function createDeployMcpServer(): McpServer {
           body: { appName: app, staging },
         })
         if (!res.success) {
-          return errorText(`❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`)
+          return errorText(
+            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n')
+          )
         }
         const data = res.data as { deployId?: string } | undefined
         return text(
           [
+            ...gatePrefix,
             `🚀 Деплой **${app}** (${target}) запущен на **${server}**.`,
             '',
             `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
@@ -190,8 +251,86 @@ export function createDeployMcpServer(): McpServer {
         )
       } catch (err) {
         return errorText(
-          `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`
+          [
+            ...gatePrefix,
+            `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
+          ].join('\n')
         )
+      }
+    }
+  )
+
+  // ─── run_e2e ─────────────────────────────────────────────────────────────────
+  server.tool(
+    'run_e2e',
+    [
+      'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
+      'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging") — e2e бьёт по',
+      "<app>.s3.letar.best. Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом",
+      'в deploy_app(production). Возвращает runId — опрашивай через e2e_status.',
+    ].join('\n'),
+    {
+      app: z
+        .string()
+        .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
+        .describe('Имя приложения'),
+      project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
+    },
+    async ({ app, project }) => {
+      try {
+        const res = await agentRequest('s3', { method: 'POST', path: '/api/e2e/run', body: { app, project } })
+        if (!res.success) {
+          return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
+        }
+        const data = res.data as { runId?: string } | undefined
+        return text(
+          [
+            `🧪 E2E для **${app}** запущен на **s3**.`,
+            '',
+            `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
+            '',
+            pretty(res.data),
+          ].join('\n')
+        )
+      } catch (err) {
+        return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    }
+  )
+
+  // ─── e2e_status ──────────────────────────────────────────────────────────────
+  server.tool(
+    'e2e_status',
+    [
+      'Статус e2e-прогона на s3 (GET /api/e2e/status). Без runId — последний прогон приложения.',
+      'sinceLine — курсор лога. Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json),',
+      'даже если сейчас ничего не запущено — это то, что читает warn-gate в deploy_app(production).',
+    ].join('\n'),
+    {
+      app: z.string().optional().describe('Имя приложения (для lastStatus и последнего прогона)'),
+      runId: z.string().optional().describe('ID конкретного прогона из истории'),
+      sinceLine: z.number().int().min(0).optional().describe('Курсор лога'),
+    },
+    async ({ app, runId, sinceLine }) => {
+      const params = new URLSearchParams()
+      if (app) {
+        params.set('app', app)
+      }
+      if (runId) {
+        params.set('runId', runId)
+      }
+      if (sinceLine !== undefined) {
+        params.set('sinceLine', String(sinceLine))
+      }
+      const qs = params.toString()
+      try {
+        const res = await agentRequest('s3', { path: `/api/e2e/status${qs ? `?${qs}` : ''}` })
+        if (!res.success) {
+          return errorText(`ℹ️ e2e на s3: ${res.error ?? 'нет данных'}`)
+        }
+        return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
+      } catch (err) {
+        return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
       }
     }
   )

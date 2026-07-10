@@ -11,6 +11,12 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.7.0] — 2026-07-10
+
+### Feat: e2e API-роут (PLAN.md §18 Сессия D)
+
+`POST /api/e2e/run` — запускает `nx e2e <app>-e2e` против staging-контейнера (`E2E_BASE_URL=<app>.s3.letar.best`), только на s3 (staging-раннер). Асинхронно, как `/api/deploy/app`: возвращает `runId`, прогресс через `GET /api/e2e/status` (ring-buffer + курсор `sinceLine`, тот же паттерн, что деплой). По завершении пишет персистентный `.last-e2e-status/<app>.json` (`{ commitSha, passed, timestamp, durationMs }`) — читается warn-gate'ом `deploy-mcp` перед production-деплоем.
+
 ## [0.5.2] — 2026-07-05
 
 ### Feat: алерты в dashboard при провале cron-задач + email health-check dsperevod

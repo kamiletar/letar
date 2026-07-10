@@ -73,7 +73,7 @@ function readAgentEnv(): Record<string, string> {
   if (existsSync(enc)) {
     if (!process.env['SOPS_AGE_KEY_FILE'] && !process.env['SOPS_AGE_KEY']) {
       throw new Error(
-        `Найден ${enc}, но не задан SOPS_AGE_KEY_FILE. Установи путь к age-ключу либо положи расшифрованный .env.docker.`,
+        `Найден ${enc}, но не задан SOPS_AGE_KEY_FILE. Установи путь к age-ключу либо положи расшифрованный .env.docker.`
       )
     }
     const out = execFileSync('sops', ['-d', '--input-type', 'dotenv', '--output-type', 'dotenv', enc], {
@@ -83,7 +83,7 @@ function readAgentEnv(): Record<string, string> {
     return cachedEnv
   }
   throw new Error(
-    `Не найден ни apps/dashboard-agent/.env.docker, ни .env.docker.enc в ${dir}. Токен агента прочитать неоткуда.`,
+    `Не найден ни apps/dashboard-agent/.env.docker, ни .env.docker.enc в ${dir}. Токен агента прочитать неоткуда.`
   )
 }
 
@@ -104,6 +104,11 @@ export function tokenForServer(server: InfraServer): string {
     throw new Error('AGENT_TOKEN не найден в .env.docker dashboard-agent.')
   }
   return token
+}
+
+/** Текущий HEAD локального репозитория (для сверки с коммитом, на котором прогонялся e2e). */
+export function localHeadSha(): string {
+  return execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 }
 
 /** Базовые данные подключения к агенту на сервере. */
