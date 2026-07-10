@@ -3,7 +3,7 @@
  * SSE соединения (match scoring) блокируют завершение тестов.
  */
 
-import { expect, test as base } from '@playwright/test'
+import { test as base, expect } from '@playwright/test'
 
 /** SSE паттерны, которые нужно блокировать в навигационных тестах */
 const SSE_PATTERNS = ['**/api/match/*/sse']
