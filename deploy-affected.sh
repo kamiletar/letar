@@ -124,6 +124,9 @@ case "$CURRENT_HOST" in
     ;;
 esac
 
+# Сохраняем исходные аргументы до parse-цикла (он их shift-ает) — нужны для self-re-exec.
+ORIGINAL_ARGS=("$@")
+
 # Parse arguments
 SPECIFIC_APP=""
 SKIP_GIT=false
@@ -260,9 +263,29 @@ else
 fi
 echo ""
 
+# Абсолютный путь к самому скрипту (для self-re-exec ниже).
+# BASH_SOURCE[0] мог быть относительным (./deploy-affected.sh), а мы уже сделали cd в SCRIPT_DIR.
+SCRIPT_PATH="$SCRIPT_DIR/$(basename "${BASH_SOURCE[0]}")"
+
+# Хеш содержимого скрипта: sha256sum → md5sum → cksum (что найдётся на сервере).
+script_hash() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$SCRIPT_PATH" | awk '{print $1}'
+  elif command -v md5sum >/dev/null 2>&1; then
+    md5sum "$SCRIPT_PATH" | awk '{print $1}'
+  else
+    cksum "$SCRIPT_PATH" | awk '{print $1}'
+  fi
+}
+
 # Step 2: Git pull (unless skipped)
 if [ "$SKIP_GIT" = false ]; then
   echo -e "${YELLOW}📥 Pulling latest changes from git...${NC}"
+
+  # Хеш скрипта ДО pull — чтобы поймать self-modification (git pull может обновить
+  # deploy-affected.sh прямо во время его выполнения; тогда bash дорабатывает по старому
+  # телу в памяти — новые гейты/теги молча не применяются). См. ниже self-re-exec.
+  SCRIPT_HASH_BEFORE=$(script_hash)
 
   # Fetch changes
   if ! git fetch origin; then
@@ -289,6 +312,20 @@ if [ "$SKIP_GIT" = false ]; then
   fi
 
   echo -e "${GREEN}✅ Successfully pulled latest changes${NC}"
+
+  # Self-re-exec: если git pull изменил сам deploy-affected.sh — перезапускаем себя,
+  # чтобы гарантированно исполнялся актуальный код (иначе остаток скрипта — миграции,
+  # сборка, docker — доработает по старому телу, прочитанному в память до pull).
+  # DEPLOY_SCRIPT_REEXECED защищает от бесконечного цикла (при повторном заходе pull
+  # даст "Already up to date" → хеш не изменится, но sentinel — вторая линия обороны).
+  if [ "${DEPLOY_SCRIPT_REEXECED:-0}" != "1" ]; then
+    SCRIPT_HASH_AFTER=$(script_hash)
+    if [ "$SCRIPT_HASH_BEFORE" != "$SCRIPT_HASH_AFTER" ]; then
+      echo -e "${YELLOW}🔄 deploy-affected.sh обновился при git pull — перезапускаю себя с актуальным кодом...${NC}"
+      export DEPLOY_SCRIPT_REEXECED=1
+      exec bash "$SCRIPT_PATH" "${ORIGINAL_ARGS[@]}"
+    fi
+  fi
 
   # Обновляем инициализированные submodules до коммитов из родительского репо
   git submodule update --recursive
