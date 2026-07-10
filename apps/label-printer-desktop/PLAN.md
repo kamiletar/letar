@@ -562,15 +562,15 @@ PNG изображение
 
 ## Зависимости
 
-| Библиотека               | Версия | Описание              |
-| ------------------------ | ------ | --------------------- |
+| Библиотека                | Версия | Описание              |
+| ------------------------- | ------ | --------------------- |
 | @letar/label-printer-core | 0.1.0  | Shared сервисы печати |
-| Electron                 | 39.x   | Desktop framework     |
-| Next.js                  | 16.x   | UI framework          |
-| Chakra UI                | 3.x    | UI компоненты         |
-| ZenStack                 | 2.x    | ORM с access control  |
-| satori                   | —      | JSX → SVG (NEW)       |
-| @resvg/resvg-js          | —      | SVG → PNG (NEW)       |
+| Electron                  | 39.x   | Desktop framework     |
+| Next.js                   | 16.x   | UI framework          |
+| Chakra UI                 | 3.x    | UI компоненты         |
+| ZenStack                  | 2.x    | ORM с access control  |
+| satori                    | —      | JSX → SVG (NEW)       |
+| @resvg/resvg-js           | —      | SVG → PNG (NEW)       |
 
 ## Команды
 
