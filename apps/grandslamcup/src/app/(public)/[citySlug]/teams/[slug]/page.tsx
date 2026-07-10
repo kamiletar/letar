@@ -14,7 +14,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { LuMapPin, LuTrophy, LuUserRound, LuUsers, LuUserCog } from 'react-icons/lu'
+import { LuMapPin, LuTrophy, LuUserCog, LuUserRound, LuUsers } from 'react-icons/lu'
 
 type Params = Promise<{ citySlug: string; slug: string }>
 

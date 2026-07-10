@@ -4,10 +4,10 @@
 
 import { EditMatchButton } from '@/app/_components/edit-match-button'
 import { ScrollToTopOnMount } from '@/app/_components/scroll-to-top-on-mount'
+import { getSession } from '@/lib/auth'
 import { getCityBySlug } from '@/lib/city'
 import { prisma } from '@/lib/db'
 import { isOrganizerOfCity } from '@/lib/edit-permissions'
-import { getSession } from '@/lib/auth'
 import { formatDateTimeFull } from '@/lib/format-date'
 import { getDisplayStatus, STATUS_MAP } from '@/lib/match-status'
 import { findMatchMVP } from '@/lib/scoring'
@@ -150,8 +150,12 @@ export default async function MatchPage({ params }: { params: Params }) {
 
   // Может ли текущий пользователь загружать фото (участник команды)
   const canUploadPhoto = currentUserId
-    ? match.homeTeam.playerTeamSeasons?.some((pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId) ||
-      match.awayTeam.playerTeamSeasons?.some((pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId) ||
+    ? match.homeTeam.playerTeamSeasons?.some(
+        (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId
+      ) ||
+      match.awayTeam.playerTeamSeasons?.some(
+        (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId
+      ) ||
       canEditMatch
     : false
 

@@ -109,9 +109,10 @@ function Section({
           </Table.Header>
           <Table.Body>
             {matches.map((match) => {
-              const score = match.status === 'FINISHED' || match.status === 'LIVE'
-                ? `${match.homeScore} : ${match.awayScore}`
-                : '— : —'
+              const score =
+                match.status === 'FINISHED' || match.status === 'LIVE'
+                  ? `${match.homeScore} : ${match.awayScore}`
+                  : '— : —'
               const displayStatus = getDisplayStatus(match)
               return (
                 <Table.Row key={match.id} _hover={{ bg: 'bg.subtle', cursor: 'pointer' }}>
@@ -133,16 +134,14 @@ function Section({
                     </Flex>
                   </Table.Cell>
                   <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm" color="fg.muted">
-                    {match.venue
-                      ? (
-                        <Flex align="center" gap={1}>
-                          <LuMapPin size={14} />
-                          {match.venue.name}
-                        </Flex>
-                      )
-                      : (
-                        '—'
-                      )}
+                    {match.venue ? (
+                      <Flex align="center" gap={1}>
+                        <LuMapPin size={14} />
+                        {match.venue.name}
+                      </Flex>
+                    ) : (
+                      '—'
+                    )}
                   </Table.Cell>
                   <Table.Cell fontWeight="bold" textAlign="center">
                     {score}

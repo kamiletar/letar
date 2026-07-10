@@ -113,7 +113,14 @@ export function PresenterPerformerPick({ match, matchState }: PresenterPerformer
       ) : (
         // Выбор поэта — большие кнопки по одной на строку
         <VStack gap={3} align="stretch">
-          <Box textAlign="center" bg="yellow.subtle" p={4} borderRadius="xl" borderWidth="2px" borderColor="yellow.solid">
+          <Box
+            textAlign="center"
+            bg="yellow.subtle"
+            p={4}
+            borderRadius="xl"
+            borderWidth="2px"
+            borderColor="yellow.solid"
+          >
             <Heading size="lg" mb={1}>
               {pickingTeam.name}
             </Heading>

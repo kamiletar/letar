@@ -105,7 +105,9 @@ export function SwissBracketDesktop({ data, citySlug }: SwissBracketDesktopProps
         {/* SVG коннекторы поверх */}
         <Box position="absolute" inset={0} pointerEvents="none" zIndex={0}>
           <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
-            {connectors.map((line, idx) => <ConnectorSvg key={idx} line={line} />)}
+            {connectors.map((line, idx) => (
+              <ConnectorSvg key={idx} line={line} />
+            ))}
           </svg>
         </Box>
 
@@ -124,11 +126,12 @@ export function SwissBracketDesktop({ data, citySlug }: SwissBracketDesktopProps
                     advancedTeams: [],
                     eliminatedTeams: [],
                   }
-                  const termTeams = node.type === 'advanced'
-                    ? (advancedByWl.get(node.wl) ?? [])
-                    : node.type === 'eliminated'
-                    ? (eliminatedByWl.get(node.wl) ?? [])
-                    : []
+                  const termTeams =
+                    node.type === 'advanced'
+                      ? (advancedByWl.get(node.wl) ?? [])
+                      : node.type === 'eliminated'
+                        ? (eliminatedByWl.get(node.wl) ?? [])
+                        : []
                   return (
                     <Box key={node.wl} data-wl={node.wl} zIndex={1}>
                       <SwissGroupCard

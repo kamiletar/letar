@@ -91,18 +91,26 @@ export function PresenterVoting({ matchState, step }: PresenterVotingProps) {
       {/* Оценки судей — крупно */}
       <Box>
         <HStack justify="space-between" mb={3}>
-          <Text fontWeight="bold" fontSize="lg">Судьи</Text>
-          <Badge
-            colorPalette={allVoted ? 'green' : 'yellow'}
-            size="lg"
-            fontSize="md"
-          >
+          <Text fontWeight="bold" fontSize="lg">
+            Судьи
+          </Text>
+          <Badge colorPalette={allVoted ? 'green' : 'yellow'} size="lg" fontSize="md">
             {votedCount} / {totalJudges} проголосовали
           </Badge>
         </HStack>
 
         <VStack gap={2} align="stretch">
-          {(judges.length > 0 ? [...judges].sort((a, b) => a.judgeNumber - b.judgeNumber) : [1,2,3,4,5].map(n => ({ judgeNumber: n, name: '', color: null, hasVoted: false, sessionId: String(n), manual: true }))).map((judge) => {
+          {(judges.length > 0
+            ? [...judges].sort((a, b) => a.judgeNumber - b.judgeNumber)
+            : [1, 2, 3, 4, 5].map((n) => ({
+                judgeNumber: n,
+                name: '',
+                color: null,
+                hasVoted: false,
+                sessionId: String(n),
+                manual: true,
+              }))
+          ).map((judge) => {
             const score = scores[judge.judgeNumber]
             const hasScore = score !== undefined
             const colorPalette = judge.color ? (JUDGE_COLOR_MAP[judge.color] ?? 'gray') : 'gray'
@@ -135,7 +143,9 @@ export function PresenterVoting({ matchState, step }: PresenterVotingProps) {
                     {score}
                   </Text>
                 ) : (
-                  <Text fontSize="2xl" color="fg.subtle">○</Text>
+                  <Text fontSize="2xl" color="fg.subtle">
+                    ○
+                  </Text>
                 )}
               </HStack>
             )

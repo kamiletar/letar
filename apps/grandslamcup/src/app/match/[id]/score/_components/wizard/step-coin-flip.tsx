@@ -110,22 +110,10 @@ export function StepCoinFlip({ match }: StepCoinFlipProps) {
             Начинает: {pendingChoice === 'HOME' ? match.homeTeam.name : match.awayTeam.name}
           </Text>
           <HStack gap={3}>
-            <Button
-              flex={1}
-              variant="outline"
-              onClick={() => setPendingChoice(null)}
-              disabled={saving}
-            >
+            <Button flex={1} variant="outline" onClick={() => setPendingChoice(null)} disabled={saving}>
               Отменить
             </Button>
-            <Button
-              flex={2}
-              size="lg"
-              colorPalette="green"
-              onClick={handleConfirm}
-              loading={saving}
-              fontWeight="bold"
-            >
+            <Button flex={2} size="lg" colorPalette="green" onClick={handleConfirm} loading={saving} fontWeight="bold">
               <LuCheck /> Подтвердить
             </Button>
           </HStack>

@@ -143,9 +143,8 @@ export function MatchesClient({
           </Box>
         }
         renderCard={(match) => {
-          const score = match.status === 'FINISHED' || match.status === 'LIVE'
-            ? `${match.homeScore} : ${match.awayScore}`
-            : '— : —'
+          const score =
+            match.status === 'FINISHED' || match.status === 'LIVE' ? `${match.homeScore} : ${match.awayScore}` : '— : —'
           return (
             <AdminCard key={match.id}>
               {/* Сезон / Тур */}
@@ -234,15 +233,13 @@ export function MatchesClient({
                             {match.scheduledAt ? formatDateTime(match.scheduledAt) : '—'}
                           </Table.Cell>
                           <Table.Cell fontWeight="medium">
-                            {citySlug
-                              ? (
-                                <Link href={`/${citySlug}/teams/${match.homeTeam.team.slug}`}>
-                                  <Text _hover={{ textDecoration: 'underline' }}>{match.homeTeam.team.name}</Text>
-                                </Link>
-                              )
-                              : (
-                                match.homeTeam.team.name
-                              )}
+                            {citySlug ? (
+                              <Link href={`/${citySlug}/teams/${match.homeTeam.team.slug}`}>
+                                <Text _hover={{ textDecoration: 'underline' }}>{match.homeTeam.team.name}</Text>
+                              </Link>
+                            ) : (
+                              match.homeTeam.team.name
+                            )}
                           </Table.Cell>
                           <Table.Cell fontWeight="bold" textAlign="center">
                             {match.status === 'FINISHED' || match.status === 'LIVE'
@@ -250,15 +247,13 @@ export function MatchesClient({
                               : '— : —'}
                           </Table.Cell>
                           <Table.Cell fontWeight="medium">
-                            {citySlug
-                              ? (
-                                <Link href={`/${citySlug}/teams/${match.awayTeam.team.slug}`}>
-                                  <Text _hover={{ textDecoration: 'underline' }}>{match.awayTeam.team.name}</Text>
-                                </Link>
-                              )
-                              : (
-                                match.awayTeam.team.name
-                              )}
+                            {citySlug ? (
+                              <Link href={`/${citySlug}/teams/${match.awayTeam.team.slug}`}>
+                                <Text _hover={{ textDecoration: 'underline' }}>{match.awayTeam.team.name}</Text>
+                              </Link>
+                            ) : (
+                              match.awayTeam.team.name
+                            )}
                           </Table.Cell>
                           <Table.Cell display={{ base: 'none', lg: 'table-cell' }} color="fg.muted" fontSize="sm">
                             {match.venue?.name || '—'}

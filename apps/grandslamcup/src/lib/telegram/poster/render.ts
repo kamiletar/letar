@@ -53,9 +53,9 @@ async function loadFonts(): Promise<{ regular: Buffer; bold: Buffer }> {
     }
   }
   throw new Error(
-    `Не удалось найти шрифты NotoSans-Regular.ttf/NotoSans-Bold.ttf ни в одном из путей: ${
-      FONTS_DIR_CANDIDATES.join(', ')
-    }. Last error: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+    `Не удалось найти шрифты NotoSans-Regular.ttf/NotoSans-Bold.ttf ни в одном из путей: ${FONTS_DIR_CANDIDATES.join(
+      ', '
+    )}. Last error: ${lastError instanceof Error ? lastError.message : String(lastError)}`
   )
 }
 

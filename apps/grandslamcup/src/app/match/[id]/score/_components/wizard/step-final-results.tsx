@@ -97,8 +97,12 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
           </Table.Header>
           <Table.Body>
             {[1, 2].map((half) => {
-              const hp = match.performances.filter((p) => p.half === half && p.teamSeasonId === match.homeTeam.id && p.totalScore !== null)
-              const ap = match.performances.filter((p) => p.half === half && p.teamSeasonId === match.awayTeam.id && p.totalScore !== null)
+              const hp = match.performances.filter(
+                (p) => p.half === half && p.teamSeasonId === match.homeTeam.id && p.totalScore !== null
+              )
+              const ap = match.performances.filter(
+                (p) => p.half === half && p.teamSeasonId === match.awayTeam.id && p.totalScore !== null
+              )
               const hs = hp.reduce((s, p) => s + (p.totalScore ?? 0), 0)
               const as_ = ap.reduce((s, p) => s + (p.totalScore ?? 0), 0)
               if (hp.length === 0 && ap.length === 0) return null
@@ -157,9 +161,7 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
                 const isHome = p.teamSeasonId === match.homeTeam.id
                 return (
                   <Table.Row key={p.id} bg={idx === 0 ? 'yellow.subtle' : undefined}>
-                    <Table.Cell>
-                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
-                    </Table.Cell>
+                    <Table.Cell>{idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</Table.Cell>
                     <Table.Cell fontWeight={idx < 3 ? 'bold' : 'normal'}>{p.playerName}</Table.Cell>
                     <Table.Cell>
                       <Badge colorPalette={isHome ? 'blue' : 'orange'} size="sm" variant="subtle">
@@ -191,16 +193,8 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
 
       {/* Командная статистика */}
       <SimpleGrid columns={2} gap={3}>
-        <TeamStatsFull
-          teamName={match.homeTeam.name}
-          perfs={homePerfs}
-          palette="blue"
-        />
-        <TeamStatsFull
-          teamName={match.awayTeam.name}
-          perfs={awayPerfs}
-          palette="orange"
-        />
+        <TeamStatsFull teamName={match.homeTeam.name} perfs={homePerfs} palette="blue" />
+        <TeamStatsFull teamName={match.awayTeam.name} perfs={awayPerfs} palette="orange" />
       </SimpleGrid>
 
       <Button size="xl" colorPalette="yellow" onClick={onConfirm} py={7} fontSize="lg">
@@ -215,8 +209,7 @@ type PerfItem = MatchData['performances'][number]
 function TeamStatsFull({ teamName, perfs, palette }: { teamName: string; perfs: PerfItem[]; palette: string }) {
   if (perfs.length === 0) return null
 
-  const avg = (arr: number[]) =>
-    arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0
+  const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0)
 
   const totals = perfs.map((p) => p.totalScore ?? 0)
   const texts = perfs.map((p) => p.textAdjusted ?? 0)
@@ -242,17 +235,7 @@ function TeamStatsFull({ teamName, perfs, palette }: { teamName: string; perfs: 
   )
 }
 
-function StatRow({
-  label,
-  value,
-  bold,
-  color,
-}: {
-  label: string
-  value: string
-  bold?: boolean
-  color?: string
-}) {
+function StatRow({ label, value, bold, color }: { label: string; value: string; bold?: boolean; color?: string }) {
   return (
     <Flex justify="space-between" align="center" gap={2}>
       <Text fontSize="xs" color="fg.muted" flexShrink={0}>

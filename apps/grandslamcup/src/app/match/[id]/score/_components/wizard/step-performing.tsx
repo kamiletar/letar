@@ -65,7 +65,9 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
 
     let running = true
     const tick = () => {
-      if (!running) { return }
+      if (!running) {
+        return
+      }
       const currentElapsed = timer.accumulatedSec + (Date.now() - timer.startedAt!) / 1000
       setElapsed(currentElapsed)
       animFrameRef.current = requestAnimationFrame(tick)
@@ -81,7 +83,9 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
 
   // Вибрация при переходе через лимит
   useEffect(() => {
-    if (!timer.isRunning) { return }
+    if (!timer.isRunning) {
+      return
+    }
     if (elapsed >= LIMIT_SEC && !vibratedOvertimeRef.current) {
       vibratedOvertimeRef.current = true
       navigator.vibrate?.([500, 200, 500])
@@ -96,7 +100,9 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
 
   // Авто-сброс isPending — защита от зависшего UI
   useEffect(() => {
-    if (!isPending) { return }
+    if (!isPending) {
+      return
+    }
     const t = setTimeout(() => {
       setIsPending(false)
       setError('Нет ответа от сервера. Попробуйте снова.')
@@ -171,7 +177,15 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
 
       {/* Таймер — read-only, только если ведущий его запустил */}
       {hasTimer && (
-        <Box bg={timerBg} borderRadius="xl" px={6} py={5} textAlign="center" w="full" _dark={{ bg: `${timerColor}/10` }}>
+        <Box
+          bg={timerBg}
+          borderRadius="xl"
+          px={6}
+          py={5}
+          textAlign="center"
+          w="full"
+          _dark={{ bg: `${timerColor}/10` }}
+        >
           <Text fontSize="xs" color="fg.muted" mb={1}>
             {timer.isRunning ? (isOvertime ? 'ПРЕВЫШЕНИЕ ЛИМИТА' : 'Оставшееся время') : 'Время остановлено'}
           </Text>

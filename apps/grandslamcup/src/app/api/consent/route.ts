@@ -22,9 +22,8 @@ export async function POST(request: Request) {
   }
 
   const session = await getSession()
-  const ipRaw = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    ?? request.headers.get('x-real-ip')
-    ?? 'unknown'
+  const ipRaw =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip') ?? 'unknown'
   const ipHash = createHash('sha256').update(ipRaw).digest('hex')
   const userAgent = request.headers.get('user-agent') ?? null
 

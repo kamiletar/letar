@@ -7,7 +7,7 @@
 
 import { Box, Button, Heading, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
-import { LuArrowLeft, LuLock } from 'react-icons/lu'
+import { LuArrowLeft } from 'react-icons/lu'
 
 export default function ScorerNoTokenPage() {
   return (
@@ -16,11 +16,14 @@ export default function ScorerNoTokenPage() {
         <Box fontSize="5xl">🔒</Box>
         <Heading size="xl">Нужна ссылка со счётоводским токеном</Heading>
         <Text color="fg.muted">
-          Интерфейс счётовода открывается только по специальной ссылке с токеном. Эта ссылка есть в
-          административной панели матча.
+          Интерфейс счётовода открывается только по специальной ссылке с токеном. Эта ссылка есть в административной
+          панели матча.
         </Text>
         <Text fontSize="sm" color="fg.muted" fontFamily="mono" bg="bg.subtle" px={3} py={2} borderRadius="md">
-          /match/[id]/score<Text as="span" color="green.fg" fontWeight="bold">?token=...</Text>
+          /match/[id]/score
+          <Text as="span" color="green.fg" fontWeight="bold">
+            ?token=...
+          </Text>
         </Text>
         <Button asChild colorPalette="blue" variant="outline" size="lg">
           <Link href="/admin/matches">

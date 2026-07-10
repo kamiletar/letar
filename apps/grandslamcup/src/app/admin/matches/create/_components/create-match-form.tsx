@@ -112,7 +112,7 @@ export function CreateMatchForm({
   // Фильтрация по городу
   const filteredSeasons = useMemo(
     () => (cityId ? seasons.filter((s) => s.cityId === cityId) : seasons),
-    [seasons, cityId],
+    [seasons, cityId]
   )
 
   const filteredTours = useMemo(() => (cityId ? tours.filter((t) => t.cityId === cityId) : tours), [tours, cityId])
@@ -134,7 +134,7 @@ export function CreateMatchForm({
         const expected = getExpected(t.seasonId)
         return expected === 0 || t.matchCount < expected
       }),
-    [activeTours, getExpected],
+    [activeTours, getExpected]
   )
 
   // Автопредвыбор актуального тура при смене города (REGULAR)
@@ -174,7 +174,7 @@ export function CreateMatchForm({
     // Плей-офф тур — только команды в сетке
     if (matchType === 'REGULAR' && selectedTourStageId) {
       const inBracket = new Set(
-        bracketSlots.filter((s) => s.stageId === selectedTourStageId).map((s) => s.teamSeasonId),
+        bracketSlots.filter((s) => s.stageId === selectedTourStageId).map((s) => s.teamSeasonId)
       )
       if (inBracket.size > 0) {
         base = base.filter((ts) => inBracket.has(ts.id))
@@ -412,12 +412,14 @@ export function CreateMatchForm({
                 type="submit"
                 colorPalette="blue"
                 loading={isPending}
-                disabled={isPending
-                  || !cityId
-                  || !homeTeamId
-                  || !awayTeamId
-                  || (matchType === 'REGULAR' && !tourId)
-                  || (matchType === 'FRIENDLY' && !seasonId)}
+                disabled={
+                  isPending ||
+                  !cityId ||
+                  !homeTeamId ||
+                  !awayTeamId ||
+                  (matchType === 'REGULAR' && !tourId) ||
+                  (matchType === 'FRIENDLY' && !seasonId)
+                }
               >
                 Создать матч
               </Button>

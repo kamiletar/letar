@@ -102,9 +102,7 @@ export async function deleteMatchPhotoAction(photoId: string, citySlug: string):
 
   const isAdmin = user.roles?.includes('ADMIN')
   const isUploader = photo.uploadedById === user.id
-  const isOrg = !isAdmin && !isUploader
-    ? await isOrganizerOfCity(photo.match.homeTeam.team.cityId)
-    : false
+  const isOrg = !isAdmin && !isUploader ? await isOrganizerOfCity(photo.match.homeTeam.team.cityId) : false
 
   if (!isAdmin && !isUploader && !isOrg) {
     return { success: false, error: 'Нет доступа' }

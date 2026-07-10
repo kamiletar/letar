@@ -41,7 +41,7 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
     setSelectedScores({})
     setError(null)
     onScoresChange?.({})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [performanceId, dimension])
 
   // Refs для актуальных значений в обработчике клавиш (не нужно перерегистрировать listener)
@@ -167,7 +167,13 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
           >
             <Flex gap={2} align="center">
               {/* Номер судьи — маленький, слева */}
-              <Text fontSize="xs" fontWeight="bold" color={isPhoneJudge ? `${chakra}.fg` : 'fg.muted'} minW="4" textAlign="center">
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color={isPhoneJudge ? `${chakra}.fg` : 'fg.muted'}
+                minW="4"
+                textAlign="center"
+              >
                 {judge.judgeNumber}
               </Text>
               {[1, 2, 3, 4, 5].map((score) => {

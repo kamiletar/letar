@@ -51,11 +51,7 @@ export default async function OrganizersPage({ params }: { params: Params }) {
       {organizers.length > 0 ? (
         <>
           {/* Сетка карточек организаторов */}
-          <Box
-            display="grid"
-            gridTemplateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
-            gap={5}
-          >
+          <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={5}>
             {organizers.map((org) => (
               <Box
                 key={org.slug}
@@ -86,7 +82,12 @@ export default async function OrganizersPage({ params }: { params: Params }) {
                     </Text>
                     {org.socialUrl && (
                       <Box asChild flexShrink={0} color="fg.muted" _hover={{ color: 'brand.solid' }} mt={0.5}>
-                        <Link href={org.socialUrl} target="_blank" rel="noopener noreferrer" aria-label={`Профиль ${org.name}`}>
+                        <Link
+                          href={org.socialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Профиль ${org.name}`}
+                        >
                           <LuExternalLink size={16} />
                         </Link>
                       </Box>
@@ -101,17 +102,10 @@ export default async function OrganizersPage({ params }: { params: Params }) {
           </Box>
 
           {/* Дисклеймер */}
-          <Box
-            bg="bg.subtle"
-            borderRadius="xl"
-            px={5}
-            py={4}
-            borderWidth="1px"
-            borderColor="border.muted"
-          >
+          <Box bg="bg.subtle" borderRadius="xl" px={5} py={4} borderWidth="1px" borderColor="border.muted">
             <Text fontSize="sm" color="fg.muted" textAlign="center">
-              💾 Оргкомитет отвечает за все организационные вопросы по проведению КБС в Москве,
-              но не влияет на итоговые результаты матчей и оценки команд.
+              💾 Оргкомитет отвечает за все организационные вопросы по проведению КБС в Москве, но не влияет на итоговые
+              результаты матчей и оценки команд.
             </Text>
           </Box>
         </>

@@ -138,11 +138,7 @@ export function ScorerLineupDialog({
                           gap={2}
                         >
                           {/* Единственный обработчик — на hidden input. Box как label вызывает его клик автоматически. */}
-                          <Checkbox.Root
-                            checked={isSelected}
-                            onCheckedChange={() => toggle(player.id)}
-                            variant="solid"
-                          >
+                          <Checkbox.Root checked={isSelected} onCheckedChange={() => toggle(player.id)} variant="solid">
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                           </Checkbox.Root>

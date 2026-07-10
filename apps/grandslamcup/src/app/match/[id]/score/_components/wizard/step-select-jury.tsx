@@ -16,11 +16,7 @@ import { JUDGE_COLORS, type JudgeColor } from '@/lib/judge-colors'
 import { Badge, Box, Button, Checkbox, Flex, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useCallback, useEffect, useState } from 'react'
-import {
-  assignManualJudgeAction,
-  createJuryInviteAction,
-  removeManualJudgeAction,
-} from '../../_actions/scorer.action'
+import { assignManualJudgeAction, createJuryInviteAction, removeManualJudgeAction } from '../../_actions/scorer.action'
 import type { MatchData } from '../scorer-client'
 
 interface StepSelectJuryProps {
@@ -169,9 +165,7 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
                 p={3}
                 borderRadius="md"
                 borderWidth="2px"
-                borderColor={
-                  filledByQR ? `${colorConfig.chakra}.solid` : isManual ? 'gray.solid' : 'border.muted'
-                }
+                borderColor={filledByQR ? `${colorConfig.chakra}.solid` : isManual ? 'gray.solid' : 'border.muted'}
                 bg={filledByQR ? `${colorConfig.chakra}.subtle` : isManual ? 'bg.subtle' : 'bg.panel'}
               >
                 <Flex justify="space-between" align="center" gap={2}>

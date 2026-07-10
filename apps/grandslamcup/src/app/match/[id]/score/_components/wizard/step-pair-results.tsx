@@ -111,7 +111,9 @@ export function StepPairResults({ match, matchState }: StepPairResultsProps) {
                 <ScoreBreakdown label="📜 Текст" scores={perf.textScores} adjusted={perf.textAdjusted} />
                 <ScoreBreakdown label="🎭 Подача" scores={perf.deliveryScores} adjusted={perf.deliveryAdjusted} />
                 <Flex justify="space-between" align="center" pt={3} borderTopWidth="1px" borderColor="border.muted">
-                  <Text fontWeight="bold" fontSize="xl">Итого:</Text>
+                  <Text fontWeight="bold" fontSize="xl">
+                    Итого:
+                  </Text>
                   <Badge colorPalette="blue" size="xl" fontSize="2xl" px={4} py={2}>
                     {perf.totalScore ?? '—'}
                   </Badge>

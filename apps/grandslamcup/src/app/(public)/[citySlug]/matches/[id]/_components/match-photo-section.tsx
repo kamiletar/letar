@@ -75,17 +75,23 @@ export function MatchPhotoSection({
   return (
     <Box>
       <Flex justify="space-between" align="center" mb={3}>
-        <SectionHeading>
-          Фото {localPhotos.length > 0 ? `(${localPhotos.length})` : ''}
-        </SectionHeading>
+        <SectionHeading>Фото {localPhotos.length > 0 ? `(${localPhotos.length})` : ''}</SectionHeading>
       </Flex>
 
       {/* Галерея с кнопками удаления */}
-      {localPhotos.length > 0 && (canDeleteAll || (currentUserId && localPhotos.some((p) => p.uploadedById === currentUserId))) ? (
+      {localPhotos.length > 0 &&
+      (canDeleteAll || (currentUserId && localPhotos.some((p) => p.uploadedById === currentUserId))) ? (
         /* Режим с кнопками удаления — своя сетка вместо PhotoGallery */
         <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={2} mb={4}>
           {localPhotos.map((photo) => (
-            <Box key={photo.id} position="relative" borderRadius="lg" overflow="hidden" aspectRatio={4 / 3} bg="bg.subtle">
+            <Box
+              key={photo.id}
+              position="relative"
+              borderRadius="lg"
+              overflow="hidden"
+              aspectRatio={4 / 3}
+              bg="bg.subtle"
+            >
               <Image
                 src={`/api/files/${photo.path}`}
                 alt={photo.caption ?? 'Фото матча'}
@@ -110,15 +116,7 @@ export function MatchPhotoSection({
                 </Box>
               )}
               {photo.caption && (
-                <Box
-                  position="absolute"
-                  bottom={0}
-                  left={0}
-                  right={0}
-                  bg="blackAlpha.600"
-                  px={2}
-                  py={1}
-                >
+                <Box position="absolute" bottom={0} left={0} right={0} bg="blackAlpha.600" px={2} py={1}>
                   <Text fontSize="xs" color="white" lineClamp={1}>
                     {photo.caption}
                   </Text>

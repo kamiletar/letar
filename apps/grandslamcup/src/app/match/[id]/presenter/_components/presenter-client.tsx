@@ -9,21 +9,6 @@
  */
 
 import { useMatchSSE } from '@/app/_hooks/use-match-sse'
-
-/**
- * Безопасный вызов requestFullscreen с поддержкой webkit-префикса.
- * iOS Safari не поддерживает стандартный API — игнорируем тихо.
- */
-function requestFullscreenSafe(el: HTMLElement) {
-  type FullscreenEl = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }
-  const elem = el as FullscreenEl
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen().catch(() => {})
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen().catch?.(() => {})
-  }
-  // iOS Safari не поддерживает fullscreen API — пропускаем молча
-}
 import { Box } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -39,6 +24,21 @@ import { PresenterPoetResult } from './presenter-poet-result'
 import { PresenterSelectJury } from './presenter-select-jury'
 import { PresenterStartMatch } from './presenter-start-match'
 import { PresenterVoting } from './presenter-voting'
+
+/**
+ * Безопасный вызов requestFullscreen с поддержкой webkit-префикса.
+ * iOS Safari не поддерживает стандартный API — игнорируем тихо.
+ */
+function requestFullscreenSafe(el: HTMLElement) {
+  type FullscreenEl = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }
+  const elem = el as FullscreenEl
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch(() => {})
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen().catch?.(() => {})
+  }
+  // iOS Safari не поддерживает fullscreen API — пропускаем молча
+}
 
 /** Тип данных матча для экрана ведущего */
 export interface PresenterMatchData {
@@ -115,7 +115,9 @@ export function PresenterClient({ match }: PresenterClientProps) {
     requestFullscreenSafe(document.documentElement)
 
     const onFsChange = () => {
-      const el = document.fullscreenElement ?? (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      const el =
+        document.fullscreenElement ??
+        (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
       setIsFullscreen(!!el)
     }
     document.addEventListener('fullscreenchange', onFsChange)
@@ -199,13 +201,23 @@ export function PresenterClient({ match }: PresenterClientProps) {
         )}
         {step === 'POET_RESULT' && (
           <PresenterPoetResult
-            match={{ id: match.id, homeTeam: match.homeTeam, awayTeam: match.awayTeam, performances: match.performances }}
+            match={{
+              id: match.id,
+              homeTeam: match.homeTeam,
+              awayTeam: match.awayTeam,
+              performances: match.performances,
+            }}
             matchState={matchState}
           />
         )}
         {step === 'PAIR_RESULTS' && (
           <PresenterPairResults
-            match={{ id: match.id, homeTeam: match.homeTeam, awayTeam: match.awayTeam, performances: match.performances }}
+            match={{
+              id: match.id,
+              homeTeam: match.homeTeam,
+              awayTeam: match.awayTeam,
+              performances: match.performances,
+            }}
             matchState={matchState}
           />
         )}

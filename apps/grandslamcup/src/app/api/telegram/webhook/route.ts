@@ -74,7 +74,7 @@ async function handleStartCommand(message: {
     if (bot) {
       await bot.api.sendMessage(
         message.chat.id,
-        `Привет, ${message.from.first_name}! 👋\n\nЯ бот Кубка Большого Слэма. Для привязки аккаунта используйте ссылку из вашего профиля на сайте.`,
+        `Привет, ${message.from.first_name}! 👋\n\nЯ бот Кубка Большого Слэма. Для привязки аккаунта используйте ссылку из вашего профиля на сайте.`
       )
     }
     return
@@ -111,7 +111,7 @@ async function handleStartCommand(message: {
       message.chat.id,
       `✅ Telegram привязан к аккаунту ${
         user.name ?? 'пользователя'
-      }!\n\nТеперь вы будете получать личные уведомления о матчах.`,
+      }!\n\nТеперь вы будете получать личные уведомления о матчах.`
     )
   }
 }

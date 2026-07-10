@@ -90,9 +90,8 @@ export default async function CreateMatchPage() {
     }
   }
   // Сериализуем записи для клиента
-  const swissTeamRecords: Record<string, { total: number; wins: number; losses: number }> = Object.fromEntries(
-    swissRecords,
-  )
+  const swissTeamRecords: Record<string, { total: number; wins: number; losses: number }> =
+    Object.fromEntries(swissRecords)
 
   // Сериализуем для клиента
   const serializedTeamSeasons = teamSeasons.map((ts) => ({

@@ -37,9 +37,7 @@ export function StepPoetResult({ match, matchState }: StepPoetResultProps) {
   const currentPerf = matchState?.currentPerformances[performerIndex]
 
   // Находим performance в данных матча по performanceId из matchState
-  const perf = currentPerf
-    ? match.performances.find((p) => p.id === currentPerf.performanceId)
-    : null
+  const perf = currentPerf ? match.performances.find((p) => p.id === currentPerf.performanceId) : null
 
   // Определяем: это первый поэт пары или второй?
   const isFirstPoet = performerIndex === 0
@@ -168,7 +166,7 @@ function ScoreBlock({
   const outlierJudgeNumbers = new Set<number>()
   if (hasOutliers && votes.length >= 5) {
     const sorted = [...votes].sort((a, b) => a.score - b.score || a.judgeNumber - b.judgeNumber)
-    outlierJudgeNumbers.add(sorted[0].judgeNumber)              // один минимум
+    outlierJudgeNumbers.add(sorted[0].judgeNumber) // один минимум
     outlierJudgeNumbers.add(sorted[sorted.length - 1].judgeNumber) // один максимум
   }
 
@@ -230,11 +228,7 @@ function ScoreBlock({
                   <Text fontSize="sm" color={isOutlier ? 'fg.muted' : 'fg'}>
                     Судья {i + 1}
                   </Text>
-                  <Badge
-                    colorPalette={isOutlier ? 'red' : 'green'}
-                    variant={isOutlier ? 'outline' : 'solid'}
-                    size="md"
-                  >
+                  <Badge colorPalette={isOutlier ? 'red' : 'green'} variant={isOutlier ? 'outline' : 'solid'} size="md">
                     {s}
                     {isOutlier && ' ⛔'}
                   </Badge>

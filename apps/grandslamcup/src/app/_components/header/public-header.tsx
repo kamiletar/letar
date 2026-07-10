@@ -93,39 +93,43 @@ export function PublicHeader() {
             {/* Войти / Юзер — всегда виден */}
             <Flex align="center" gap={1} flexShrink={0}>
               {user && <PushSubscribeButton />}
-              {isPending
-                ? <Spinner size="sm" color="fg.muted" />
-                : (
-                  <UserMenu
-                    session={session?.user ?? null}
-                    onSignIn={() => signInWithLetarAuth()}
-                    onSignOut={logoutAction}
-                    profileHref="/profile"
-                    extraItems={[
-                      ...(showAdmin ? [{ value: 'admin', label: 'Админ-панель', href: '/admin', icon: LuShield }] : []),
-                      ...(isCoach
-                        ? [{ value: 'coach', label: 'Кабинет тренера', href: '/coach', icon: LuUserRound }]
-                        : []),
-                      ...(isPoet ? [{ value: 'poet', label: 'Кабинет поэта', href: '/poet', icon: LuPenLine }] : []),
-                      ...(isScorer
-                        ? [{
-                          value: 'scorer',
-                          label: 'Кабинет счетовода',
-                          href: '/my/scorer-matches',
-                          icon: LuCalculator,
-                        }]
-                        : []),
-                      ...(isPresenter
-                        ? [{
-                          value: 'presenter',
-                          label: 'Кабинет ведущего',
-                          href: '/my/presenter-matches',
-                          icon: LuMic,
-                        }]
-                        : []),
-                    ]}
-                  />
-                )}
+              {isPending ? (
+                <Spinner size="sm" color="fg.muted" />
+              ) : (
+                <UserMenu
+                  session={session?.user ?? null}
+                  onSignIn={() => signInWithLetarAuth()}
+                  onSignOut={logoutAction}
+                  profileHref="/profile"
+                  extraItems={[
+                    ...(showAdmin ? [{ value: 'admin', label: 'Админ-панель', href: '/admin', icon: LuShield }] : []),
+                    ...(isCoach
+                      ? [{ value: 'coach', label: 'Кабинет тренера', href: '/coach', icon: LuUserRound }]
+                      : []),
+                    ...(isPoet ? [{ value: 'poet', label: 'Кабинет поэта', href: '/poet', icon: LuPenLine }] : []),
+                    ...(isScorer
+                      ? [
+                          {
+                            value: 'scorer',
+                            label: 'Кабинет счетовода',
+                            href: '/my/scorer-matches',
+                            icon: LuCalculator,
+                          },
+                        ]
+                      : []),
+                    ...(isPresenter
+                      ? [
+                          {
+                            value: 'presenter',
+                            label: 'Кабинет ведущего',
+                            href: '/my/presenter-matches',
+                            icon: LuMic,
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+              )}
             </Flex>
 
             {/* Мобильная кнопка-гамбургер */}

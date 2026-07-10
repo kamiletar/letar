@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Доступ: admin или организатор города матча
     const cityId = match.homeTeam.team.cityId
     const isAdmin = user.roles?.includes('ADMIN')
-    const isOrg = !isAdmin && await isOrganizerOfCity(cityId)
+    const isOrg = !isAdmin && (await isOrganizerOfCity(cityId))
     if (!isAdmin && !isOrg) {
       return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
     }
@@ -109,7 +109,7 @@ export async function DELETE(request: NextRequest) {
     // Доступ: admin или организатор города матча
     const matchCityId = match.homeTeam.team.cityId
     const isAdminDel = user.roles?.includes('ADMIN')
-    const isOrgDel = !isAdminDel && await isOrganizerOfCity(matchCityId)
+    const isOrgDel = !isAdminDel && (await isOrganizerOfCity(matchCityId))
     if (!isAdminDel && !isOrgDel) {
       return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
     }

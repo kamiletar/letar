@@ -106,14 +106,7 @@ export function StepHalfSummary({ match, matchState }: StepHalfSummaryProps) {
 
       {/* Если не 1-й тайм — показываем суммарный счёт матча */}
       {!isFirstHalf && (
-        <Box
-          p={4}
-          borderRadius="xl"
-          borderWidth="2px"
-          borderColor="border.muted"
-          bg="bg.subtle"
-          textAlign="center"
-        >
+        <Box p={4} borderRadius="xl" borderWidth="2px" borderColor="border.muted" bg="bg.subtle" textAlign="center">
           <Text fontSize="xs" color="fg.muted" mb={1}>
             Итоговый счёт матча
           </Text>
@@ -156,9 +149,7 @@ export function StepHalfSummary({ match, matchState }: StepHalfSummaryProps) {
                 const isHome = p.teamSeasonId === match.homeTeam.id
                 return (
                   <Table.Row key={p.id} bg={idx === 0 ? 'yellow.subtle' : undefined}>
-                    <Table.Cell>
-                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
-                    </Table.Cell>
+                    <Table.Cell>{idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</Table.Cell>
                     <Table.Cell fontWeight={idx === 0 ? 'bold' : 'normal'}>{p.playerName}</Table.Cell>
                     <Table.Cell>
                       <Badge colorPalette={isHome ? 'blue' : 'orange'} size="sm" variant="subtle">
@@ -259,15 +250,7 @@ function TeamScoreCard({
 
 type PerfItem = MatchData['performances'][number]
 
-function TeamStatsBox({
-  teamName,
-  perfs,
-  palette,
-}: {
-  teamName: string
-  perfs: PerfItem[]
-  palette: string
-}) {
+function TeamStatsBox({ teamName, perfs, palette }: { teamName: string; perfs: PerfItem[]; palette: string }) {
   if (perfs.length === 0) return null
   const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0)
 

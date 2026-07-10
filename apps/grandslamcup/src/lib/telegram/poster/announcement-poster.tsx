@@ -19,13 +19,13 @@ export function AnnouncementPoster({ match, cityName }: AnnouncementPosterProps)
 
   const dateStr = match.scheduledAt
     ? new Date(match.scheduledAt).toLocaleDateString('ru-RU', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/Moscow',
-    })
+        weekday: 'short',
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Moscow',
+      })
     : ''
 
   const venueName = match.venue?.name ?? ''

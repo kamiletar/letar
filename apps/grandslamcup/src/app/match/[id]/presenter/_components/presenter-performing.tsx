@@ -26,8 +26,8 @@ import {
 } from '@chakra-ui/react'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { resetTimerAction, startTimerAction, stopTimerAction } from '../_actions/presenter.action'
 import { endPerformanceAction } from '../../score/_actions/scorer.action'
+import { resetTimerAction, startTimerAction, stopTimerAction } from '../_actions/presenter.action'
 
 // === Константы ===
 
@@ -168,16 +168,19 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
     setIsPending(false)
   }, [match.id])
 
-  const handleEndPerformance = useCallback(async (forceDurationSec?: number) => {
-    setShowEndDialog(false)
-    setIsPending(true)
-    setError(null)
-    const res = await endPerformanceAction(match.id, forceDurationSec)
-    setIsPending(false)
-    if (!res.success) {
-      setError('Не удалось завершить выступление')
-    }
-  }, [match.id])
+  const handleEndPerformance = useCallback(
+    async (forceDurationSec?: number) => {
+      setShowEndDialog(false)
+      setIsPending(true)
+      setError(null)
+      const res = await endPerformanceAction(match.id, forceDurationSec)
+      setIsPending(false)
+      if (!res.success) {
+        setError('Не удалось завершить выступление')
+      }
+    },
+    [match.id]
+  )
 
   const handleEndClick = useCallback(() => {
     // При овертайме — запрашиваем подтверждение (жёлтая карточка)
@@ -315,16 +318,19 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
             <Text fontWeight="bold" color="red.fg" mb={2}>
               Поэт превысил лимит времени 3:01
             </Text>
-            <Text>
-              Завершение выступления зафиксирует жёлтую карточку. Подтвердите завершение.
-            </Text>
+            <Text>Завершение выступления зафиксирует жёлтую карточку. Подтвердите завершение.</Text>
           </DialogBody>
           <DialogFooter>
             <HStack gap={3} wrap="wrap">
               <Button variant="outline" onClick={() => setShowEndDialog(false)}>
                 Отмена
               </Button>
-              <Button colorPalette="gray" variant="outline" onClick={() => handleEndPerformance(LIMIT_SEC)} loading={isPending}>
+              <Button
+                colorPalette="gray"
+                variant="outline"
+                onClick={() => handleEndPerformance(LIMIT_SEC)}
+                loading={isPending}
+              >
                 Без карточки (3:01)
               </Button>
               <Button colorPalette="yellow" onClick={() => handleEndPerformance()} loading={isPending}>

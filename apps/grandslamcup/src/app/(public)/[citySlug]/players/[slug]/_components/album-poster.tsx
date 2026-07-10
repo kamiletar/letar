@@ -45,20 +45,8 @@ export function AlbumPoster({ title, href, coverImage, year, count, variant = 'a
               sizes="(max-width: 768px) 45vw, 180px"
             />
           ) : (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              h="full"
-              color="brand.400"
-            >
-              {isMisc ? (
-                <LuScrollText size={40} />
-              ) : isAll ? (
-                <LuLayoutGrid size={40} />
-              ) : (
-                <LuBookOpen size={40} />
-              )}
+            <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.400">
+              {isMisc ? <LuScrollText size={40} /> : isAll ? <LuLayoutGrid size={40} /> : <LuBookOpen size={40} />}
             </Box>
           )}
         </Box>
