@@ -138,26 +138,6 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     description: 'Напоминания о заполнении дневника практик',
     enabled: true,
   },
-  {
-    id: 'nginx-backup',
-    name: 'Nginx Backup',
-    app: 'dashboard-agent',
-    endpoint: '/api/nginx/backup',
-    schedule: '0 3 * * *',
-    description: 'Автоматический бэкап Nginx Proxy Manager (data + SSL сертификаты)',
-    enabled: true,
-    server: 's1',
-  },
-  {
-    id: 's1-database-backup',
-    name: 'Database Backup (s1)',
-    app: 'dashboard-agent',
-    endpoint: '/api/database/backup',
-    schedule: '0 2 * * *',
-    description: 'Автоматический бэкап всех БД на s1 (premium-rosstil, imot, mandala, kami, umami)',
-    enabled: true,
-    server: 's1',
-  },
   // === Задачи для S2 ===
   {
     id: 'nginx-backup-s2',

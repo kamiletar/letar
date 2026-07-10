@@ -169,7 +169,9 @@ export interface HealthResponse {
 // API Response Wrappers
 // =============================================================================
 
-export interface ApiResponse<T> {
+// T по умолчанию `unknown` — часть роутов (env.ts) используют `ApiResponse` без
+// аргумента для ответов без типизированного `data`.
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string

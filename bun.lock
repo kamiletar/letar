@@ -386,7 +386,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.16.0",
+      "version": "0.23.0",
     },
     "apps/archetest-e2e": {
       "name": "@letar/archetest-e2e",
@@ -562,7 +562,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.1.0",
+      "version": "0.1.6",
     },
     "apps/time": {
       "name": "@letar/time",
@@ -771,6 +771,10 @@
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
       },
+    },
+    "libs/infra-config": {
+      "name": "@letar/infra-config",
+      "version": "0.1.0",
     },
     "libs/label-printer-core": {
       "name": "@letar/label-printer-core",
@@ -1813,6 +1817,8 @@
     "@letar/hooks": ["@letar/hooks@workspace:libs/hooks"],
 
     "@letar/image-upload": ["@letar/image-upload@workspace:libs/image-upload"],
+
+    "@letar/infra-config": ["@letar/infra-config@workspace:libs/infra-config"],
 
     "@letar/kami-key-the-landing": ["@letar/kami-key-the-landing@workspace:apps/kami-key-the-landing"],
 

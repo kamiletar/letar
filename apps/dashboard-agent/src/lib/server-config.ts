@@ -1,20 +1,20 @@
 /**
  * Конфигурация серверов
  * Единый источник маппинга приложений на серверы и определения текущего сервера
+ *
+ * s1 выведен из эксплуатации (2026-06-20, сервер больше не принадлежит letar).
+ * s2 — s2.letar.best (все production-приложения)
+ * s3 — 188.127.235.141: e2e-раннер + staging (управляется через deploy-mcp, не входит в SERVER_APPS)
  */
 
 import { hostname } from 'os'
 
-/**
- * Сервер на котором выполняется задача
- * s1 — s1.letar.best (только dashboard-agent)
- * s2 — s2.letar.best (все остальные приложения)
- */
-export type CronServer = 's1' | 's2'
+/** Сервер на котором выполняется задача */
+export type CronServer = 's2' | 's3'
 
 /** Полный маппинг приложений на серверы */
 export const SERVER_APPS: Record<string, CronServer> = {
-  'dashboard-agent': 's1',
+  'dashboard-agent': 's2',
   dashboard: 's2',
   'driving-school': 's2',
   archetest: 's2',
@@ -41,30 +41,29 @@ export const SERVER_APPS: Record<string, CronServer> = {
 
 /** Получить сервер для приложения */
 export function getServerForApp(app: string): CronServer {
-  return SERVER_APPS[app] ?? 's1'
+  return SERVER_APPS[app] ?? 's2'
 }
 
 /**
- * Определяет текущий сервер: env SERVER_NAME → hostname → fallback
+ * Определяет текущий сервер: env SERVER_NAME → hostname → fallback s2
  */
 export function getCurrentServer(): CronServer {
   // Приоритет: переменная окружения > hostname
-  if (process.env.SERVER_NAME?.includes('s1')) {
-    return 's1'
+  if (process.env.SERVER_NAME?.includes('s3')) {
+    return 's3'
   }
   if (process.env.SERVER_NAME?.includes('s2')) {
     return 's2'
   }
 
   const host = hostname()
-  if (host.includes('s1')) {
-    return 's1'
+  if (host.includes('s3')) {
+    return 's3'
   }
   if (host.includes('s2')) {
     return 's2'
   }
 
-  // Dashboard-agent обычно на s1
-  console.warn(`[ServerConfig] Не удалось определить сервер из hostname "${host}", используем s1 по умолчанию`)
-  return 's1'
+  console.warn(`[ServerConfig] Не удалось определить сервер из hostname "${host}", используем s2 по умолчанию`)
+  return 's2'
 }
