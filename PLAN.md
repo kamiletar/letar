@@ -26,7 +26,7 @@
 > up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. ⚠️ Попутно
 > найдено: `git pull` на s3 не смог обновить submodule `driving-school`/`driving-school-e2e` (untracked
 > dev-артефакты конфликтуют с checkout) — не блокирует dashboard-agent, submodule на s3 сейчас отстаёт,
-> не разобрано.
+> не разобрано. Диагностика и исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout).
 >
 > **➡️ Следующий старт:** 1) обновить локальный `.env.docker` (перекачать `.env.docker.enc` с
 > `AGENT_TOKEN_S3`), проверить `agent_health({server:"s3"})` через туннель — s3 теперь живой, шаг не
