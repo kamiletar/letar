@@ -33,8 +33,14 @@ export interface ServerInfo {
   host: string
   /** SSH-пользователь для деплой-операций. */
   sshUser: string
-  /** Порт dashboard-agent (REST API) на этом сервере. */
+  /** Порт dashboard-agent ВНУТРИ контейнера (REST API). Всегда 3100. */
   agentPort: number
+  /**
+   * Порт на ХОСТЕ сервера, на который опубликован dashboard-agent — цель SSH-туннеля
+   * (`ssh -L <local>:localhost:<hostPort>`). Может отличаться от agentPort, если 3100
+   * на хосте занят (на s3 его держит media-api → агент опубликован на 13103).
+   */
+  hostPort: number
   /** Роль сервера: production обслуживает боевой трафик, staging — предпрод/e2e. */
   role: 'production' | 'staging'
 }
@@ -45,13 +51,16 @@ export const SERVERS: Record<InfraServer, ServerInfo> = {
     host: 's2.letar.best',
     sshUser: 'deploy',
     agentPort: 3100,
+    hostPort: 3100,
     role: 'production',
   },
   s3: {
-    // 188.127.235.141 — e2e-раннер + staging
+    // 188.127.235.141 — e2e-раннер + staging. host:3100 занят media-api (media-server),
+    // поэтому dashboard-agent опубликован на 127.0.0.1:13103 (loopback — только SSH-туннель).
     host: 's3.letar.best',
     sshUser: 'deploy',
     agentPort: 3100,
+    hostPort: 13103,
     role: 'staging',
   },
 }
