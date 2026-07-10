@@ -1,0 +1,68 @@
+# Dashboard Agent — Staging Configuration (s3.letar.best)
+#
+# Инстанс агента на s3 — сервере e2e-раннера и staging. Управляет staging-деплоями
+# (deploy_app target=staging → deploy-affected.sh --app X --staging через nsenter) и
+# e2e-прогонами против staging-контейнеров (Сессия D плана deploy-mcp).
+#
+# Запуск (через BlackCove, s3 — прод-операция):
+#   ./deploy-affected.sh --app dashboard-agent   (на самом s3; SERVER_NAME=s3 → guard пропустит)
+#
+# Отличия от docker-compose.production.yml (s2):
+#   - НЕТ монтирования /secrets/*.env — на s3 нет прод-БД приложений, доступ к прод-
+#     секретам не нужен (staging использует свои e2e/staging-БД).
+#   - НЕТ монтирования ~/.ssh — git remote операции в контейнере не нужны; staging-деплой
+#     идёт через nsenter в контексте ХОСТА (host SSH), не через контейнерный git.
+#   - SERVER_NAME=s3.letar.best — getCurrentServer() вернёт 's3', серверный guard в
+#     deploy.ts примет только target=staging (случайный прод-деплой на staging-раннер
+#     невозможен).
+#
+# ⚠️ AGENT_TOKEN: .env.docker на s3 ДОЛЖЕН содержать ОТДЕЛЬНЫЙ токен, не равный
+# прод-токену s2 (staging ниже по доверию). Раскладывается при provision s3 через
+# BlackCove (openssl rand -base64 32), не переиспользуется из s2.
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: apps/dashboard-agent/Dockerfile.production
+    image: dashboard-agent:latest
+    container_name: dashboard-agent
+    restart: always
+    # Запуск от root для выполнения команд на хосте через nsenter (staging-деплои)
+    user: root
+    # Требуется для nsenter (выполнение команд на хосте)
+    pid: host
+    privileged: true
+    ports:
+      - '3100:3100'
+    env_file:
+      - .env.docker
+    environment:
+      TZ: Europe/Moscow
+      NODE_ENV: production
+      PORT: 3100
+      HOST: 0.0.0.0
+      SERVER_NAME: s3.letar.best
+      WORKSPACE_PATH: /home/deploy/letar
+    volumes:
+      # Docker socket для управления staging-контейнерами
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Git репозиторий (deploy-affected.sh запускается на хосте через nsenter)
+      - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
+    networks:
+      - premium-network
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  premium-network:
+    external: true

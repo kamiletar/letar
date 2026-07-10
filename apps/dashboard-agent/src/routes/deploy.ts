@@ -12,6 +12,7 @@ import { type ChildProcess, exec, spawn } from 'child_process'
 import { randomUUID } from 'crypto'
 import type { FastifyInstance } from 'fastify'
 import { promisify } from 'util'
+import { getCurrentServer } from '../lib/server-config'
 import type { ApiResponse } from '../types'
 
 const execAsync = promisify(exec)
@@ -102,7 +103,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { deployId?: string; sinceLine?: string } }>(
     '/api/deploy/status',
     async (
-      request,
+      request
     ): Promise<
       ApiResponse<Omit<DeployStatus, 'output'> & { output: string[]; totalLines: number; fromLine: number }>
     > => {
@@ -130,7 +131,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         data: { ...deploy, output, totalLines, fromLine },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
@@ -144,7 +145,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         data: deployHistory.map(({ output: _output, truncatedLines: _t, ...rest }) => rest).reverse(),
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
@@ -197,7 +198,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -228,7 +229,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       try {
         // Получаем информацию о контейнере
         const { stdout: inspectOutput } = await runDockerCommand(
-          `docker inspect ${containerId} --format '{{.Config.Image}}'`,
+          `docker inspect ${containerId} --format '{{.Config.Image}}'`
         )
         const imageName = inspectOutput.trim()
         output.push(`Container image: ${imageName}`)
@@ -275,7 +276,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -330,7 +331,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -345,7 +346,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: { appName: string; staging?: boolean } }>(
     '/api/deploy/app',
     async (
-      request,
+      request
     ): Promise<ApiResponse<{ deployId: string; appName: string; staging: boolean; started: boolean }>> => {
       const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
 
@@ -364,6 +365,26 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         return {
           success: false,
           error: 'Invalid app name format',
+          timestamp: new Date().toISOString(),
+        }
+      }
+
+      // Серверный guard: s3 (staging-раннер) принимает только staging-деплои, s2 (прод) —
+      // только production. Не даёт случайно задеплоить прод на staging-раннер или staging-
+      // мусор на прод, независимо от того, кто и как вызвал API (defence in depth поверх
+      // клиентской проверки в deploy-mcp).
+      const currentServer = getCurrentServer()
+      if (currentServer === 's3' && !staging) {
+        return {
+          success: false,
+          error: 's3 — staging-раннер, принимает только staging-деплои (staging: true)',
+          timestamp: new Date().toISOString(),
+        }
+      }
+      if (currentServer === 's2' && staging) {
+        return {
+          success: false,
+          error: 's2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)',
           timestamp: new Date().toISOString(),
         }
       }
@@ -456,7 +477,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**

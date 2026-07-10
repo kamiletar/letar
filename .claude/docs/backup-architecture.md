@@ -165,19 +165,24 @@ docker compose up -d
 
 ## Конфигурация dashboard-agent (secrets)
 
-Credentials БД берутся из файлов секретов (read-only mount):
+Credentials БД берутся из файлов секретов (read-only mount). Все прод-приложения на
+**s2**, поднимаются из единственного `docker-compose.production.yml`; он монтирует
+`.env.docker` каждого приложения в `/secrets/<app>.env:ro`:
 
 ```yaml
-# docker-compose.production.yml (S1)
+# apps/dashboard-agent/docker-compose.production.yml (s2 — прод)
 volumes:
   - ${WORKSPACE_PATH}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
-  - ${WORKSPACE_PATH}/apps/umami/.env.docker:/secrets/umami.env:ro
-  # ...
-
-# docker-compose.s2.yml (S2)
-volumes:
   - ${WORKSPACE_PATH}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
+  - ${WORKSPACE_PATH}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
+  # ... по одному на каждое прод-приложение
 ```
+
+> **s1 выведен из эксплуатации (2026-06-20).** Прежний `docker-compose.s2.yml` удалён как
+> устаревший дубль (сессия B deploy-mcp, 2026-07-10) — живым всегда был `production.yml`.
+>
+> **s3 (staging/e2e)** использует `docker-compose.s3.yml` — он **не монтирует** `/secrets/*.env`
+> (на s3 нет прод-БД, бэкапить нечего) и служит staging-деплоям/e2e, не бэкапам.
 
 Переменные в `.env.docker` приложения:
 
