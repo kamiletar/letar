@@ -62,11 +62,8 @@ function parseAsset(name: string): { platform: Platform; arch: Arch; kind: Asset
   }
   if (lower.endsWith('.dmg')) {
     // DMGs are named Aira-0.3.5-arm64.dmg / Aira-0.3.5-x86_64.dmg
-    const arch: Arch = lower.includes('arm64') || lower.includes('aarch64')
-      ? 'aarch64'
-      : lower.includes('x86_64')
-      ? 'x86_64'
-      : 'unknown'
+    const arch: Arch =
+      lower.includes('arm64') || lower.includes('aarch64') ? 'aarch64' : lower.includes('x86_64') ? 'x86_64' : 'unknown'
     return { platform: 'macos', arch, kind: 'installer' }
   }
 
@@ -74,10 +71,10 @@ function parseAsset(name: string): { platform: Platform; arch: Arch; kind: Asset
   const platform: Platform = lower.includes('linux')
     ? 'linux'
     : lower.includes('apple') || lower.includes('darwin')
-    ? 'macos'
-    : lower.includes('windows')
-    ? 'windows'
-    : 'unknown'
+      ? 'macos'
+      : lower.includes('windows')
+        ? 'windows'
+        : 'unknown'
 
   if (platform === 'unknown') {
     return null
@@ -86,8 +83,8 @@ function parseAsset(name: string): { platform: Platform; arch: Arch; kind: Asset
   const arch: Arch = lower.includes('x86_64')
     ? 'x86_64'
     : lower.includes('aarch64') || lower.includes('arm64')
-    ? 'aarch64'
-    : 'unknown'
+      ? 'aarch64'
+      : 'unknown'
 
   return { platform, arch, kind: 'portable' }
 }
@@ -165,7 +162,7 @@ export function findAssetByKind(
   assets: ReleaseAsset[],
   platform: Platform,
   arch: Arch,
-  kind: AssetKind,
+  kind: AssetKind
 ): ReleaseAsset | undefined {
   return assets.find((a) => a.platform === platform && a.arch === arch && a.kind === kind)
 }

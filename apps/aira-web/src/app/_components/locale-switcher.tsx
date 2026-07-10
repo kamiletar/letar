@@ -24,7 +24,7 @@ export function LocaleSwitcher() {
       router.replace(pathname, { locale: newLocale })
       setIsOpen(false)
     },
-    [router, pathname],
+    [router, pathname]
   )
 
   const handleMouseEnter = () => {
@@ -111,12 +111,7 @@ export function LocaleSwitcher() {
               _hover={{ bg: 'bg.subtle' }}
               asChild
             >
-              <button
-                type="button"
-                role="option"
-                aria-selected={loc === locale}
-                onClick={() => handleSelect(loc)}
-              >
+              <button type="button" role="option" aria-selected={loc === locale} onClick={() => handleSelect(loc)}>
                 <Text as="span" fontSize="xs" color="fg.subtle" mr={2}>
                   {loc.toUpperCase()}
                 </Text>
