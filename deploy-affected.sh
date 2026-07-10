@@ -18,6 +18,14 @@ if [ "$(id -u)" = "0" ] && [ "${DEPLOY_AS_ROOT:-0}" != "1" ] && id deploy >/dev/
   exec sudo -u deploy -H -- bash "$0" "$@"
 fi
 
+# SOPS-ключ для расшифровки .env.docker.enc. Дефолт на стандартный путь
+# (server-provision.md). Критично для запуска через nsenter из dashboard-agent:
+# там root → `exec sudo -u deploy`, а sudo по умолчанию СБРАСЫВАЕТ окружение, теряя
+# SOPS_AGE_KEY_FILE, проброшенный спавном в deploy.ts. Этот дефолт выставляется уже
+# в контексте deploy (после re-exec) и работает при любом способе запуска — без
+# правки sudoers/--preserve-env. Явно заданное значение (SSH-запуск руками) сохраняется.
+export SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-/home/deploy/.age/letar-key.txt}"
+
 # Ensure PATH includes common binary locations
 # This is needed when running via nsenter from Docker container (HOME may not be set)
 _HOME="${HOME:-/root}"
