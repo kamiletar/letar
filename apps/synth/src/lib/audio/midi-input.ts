@@ -12,7 +12,20 @@ export interface MidiCallbacks {
   onCC: (cc: number, value: number) => void
   /** Входящий SysEx (например, ответ на запрос дампа патча) — полный фрейм F0...F7 */
   onSysex?: (bytes: Uint8Array) => void
+  /**
+   * Крутилка-энкодер повёрнута. index — номер энкодера (0-7, определяется по MIDI-каналу
+   * Pitch Bend сообщения). delta — относительный шаг вращения со знаком (+ = по часовой,
+   * - = против), НЕ абсолютное значение — на SMK-37 PRO энкодеры бесконечные и шлют не
+   * абсолютную позицию, а «на сколько повернули» при каждом тике.
+   */
+  onEncoder?: (index: number, delta: number) => void
 }
+
+// SMK-37 PRO touch-энкодеры при касании шлют Note On/Off как индикатор «палец на ручке»
+// (не музыкальную ноту) — на канале 0, ноты 104-111 (по одной на каждый из 8 энкодеров).
+// Без этого фильтра простое касание крутилки играет случайную высокую ноту в текущем движке.
+const ENCODER_TOUCH_NOTE_MIN = 104
+const ENCODER_TOUCH_NOTE_MAX = 111
 
 export class MidiInputManager {
   private access: MIDIAccess | null = null
@@ -105,18 +118,31 @@ export class MidiInputManager {
     const type = status & 0xf0
 
     if (type === 0x90 && d2 > 0) {
-      // Note On
+      // Note On — фильтруем touch-индикаторы энкодеров (см. ENCODER_TOUCH_NOTE_*)
+      if (d1 >= ENCODER_TOUCH_NOTE_MIN && d1 <= ENCODER_TOUCH_NOTE_MAX) {
+        return
+      }
       const note = Math.max(0, Math.min(127, d1 + this.octaveShift))
       this.callbacks.onNoteOn(note, d2 / 127)
     } else if (type === 0x80 || (type === 0x90 && d2 === 0)) {
       // Note Off (или Note On с velocity=0 — стандартный трюк)
+      if (d1 >= ENCODER_TOUCH_NOTE_MIN && d1 <= ENCODER_TOUCH_NOTE_MAX) {
+        return
+      }
       const note = Math.max(0, Math.min(127, d1 + this.octaveShift))
       this.callbacks.onNoteOff(note)
     } else if (type === 0xb0) {
-      // Control Change
+      // Control Change — физические фейдеры SMK-37 (CC 68-71, подтверждено на реальном железе)
       this.callbacks.onCC(d1, d2)
+    } else if (type === 0xe0) {
+      // Pitch Bend — на SMK-37 PRO каждый из 8 энкодеров шлёт его на СВОЁМ канале (не абсолютная
+      // позиция, а относительный шаг). d1 (LSB) всегда 0 на этом устройстве, значение — в d2 (MSB):
+      // 0-63 = поворот по часовой на d2 шагов, 64-127 = против часовой на (d2-128) шагов.
+      const encoderIndex = status & 0x0f
+      const delta = d2 <= 63 ? d2 : d2 - 128
+      this.callbacks.onEncoder?.(encoderIndex, delta)
     }
-    // Остальные статусы (Pitch Bend 0xE0, Aftertouch 0xD0 и т.д.) — Фаза 1.5
+    // Aftertouch (0xD0) и т.д. — Фаза 1.5, если понадобится
   }
 
   dispose(): void {

@@ -25,32 +25,62 @@ type EngineType = 'subtractive' | 'fm' | 'drumkit'
 // Дефолтный маппинг MIDI-пэдов на слоты нашего драм-кита (нота 36 = пэд 0, как в GM/большинстве контроллеров)
 const DRUM_MIDI_BASE = 36
 
-// CC-маппинг для 8 энкодеров (стандартные GM + диапазон 70-77)
-// Точный маппинг SMK-37 PRO уточняется в Фазе 1.5
+function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v))
+}
+
+// CC-маппинг для 4 физических фейдеров SMK-37 PRO (реальные номера подтверждены на железе
+// 2026-07-08: CC 68-71, НЕ 70-77 как предполагалось раньше). Абсолютные значения 0-127.
 function applyCC(patch: SubtractivePatch, cc: number, raw: number): SubtractivePatch {
   const norm = raw / 127
   const e = patch.engine
   switch (cc) {
-    case 7:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, gain: norm } } }
-    case 70:
-      return { ...patch, engine: { ...e, osc1: { ...e.osc1, detune: (norm - 0.5) * 100 } } }
-    case 71:
-      return { ...patch, engine: { ...e, filter: { ...e.filter, resonance: norm * 0.99 } } }
-    case 72:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, release: norm * 3 } } } }
-    case 73:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, attack: norm * 2 } } } }
-    case 74:
+    case 68:
       return { ...patch, engine: { ...e, filter: { ...e.filter, cutoff: norm } } }
-    case 75:
-      return { ...patch, engine: { ...e, filter: { ...e.filter, envAmount: (norm - 0.5) * 2 } } }
-    case 76:
-      return { ...patch, engine: { ...e, lfo: { ...e.lfo, rate: norm * 8 } } }
-    case 77:
-      return { ...patch, engine: { ...e, lfo: { ...e.lfo, depth: norm } } }
-    case 91: // GM: reverb send — wet
-      return { ...patch, engine: { ...e, fx: { ...e.fx, reverb: { ...e.fx.reverb, wet: norm } } } }
+    case 69:
+      return { ...patch, engine: { ...e, filter: { ...e.filter, resonance: norm * 0.99 } } }
+    case 70:
+      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, attack: norm * 2 } } } }
+    case 71:
+      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, release: norm * 3 } } } }
+    default:
+      return patch
+  }
+}
+
+// Маппинг для 8 крутилок-энкодеров SMK-37 PRO (относительный шаг, см. MidiInputManager.onEncoder) —
+// каждый тик прибавляет/убавляет delta к своему параметру, а не задаёт абсолютное положение.
+function applyEncoderDelta(patch: SubtractivePatch, index: number, delta: number): SubtractivePatch {
+  const e = patch.engine
+  switch (index) {
+    case 0:
+      return { ...patch, engine: { ...e, osc1: { ...e.osc1, detune: clamp(e.osc1.detune + delta, -100, 100) } } }
+    case 1:
+      return {
+        ...patch,
+        engine: { ...e, filter: { ...e.filter, envAmount: clamp(e.filter.envAmount + delta * 0.01, -1, 1) } },
+      }
+    case 2:
+      return { ...patch, engine: { ...e, lfo: { ...e.lfo, rate: clamp(e.lfo.rate + delta * 0.05, 0.01, 20) } } }
+    case 3:
+      return { ...patch, engine: { ...e, lfo: { ...e.lfo, depth: clamp(e.lfo.depth + delta * 0.01, 0, 1) } } }
+    case 4:
+      return { ...patch, engine: { ...e, amp: { ...e.amp, gain: clamp(e.amp.gain + delta * 0.01, 0, 1) } } }
+    case 5:
+      return {
+        ...patch,
+        engine: { ...e, fx: { ...e.fx, reverb: { ...e.fx.reverb, wet: clamp(e.fx.reverb.wet + delta * 0.01, 0, 1) } } },
+      }
+    case 6:
+      return {
+        ...patch,
+        engine: {
+          ...e,
+          fx: { ...e.fx, reverb: { ...e.fx.reverb, decay: clamp(e.fx.reverb.decay + delta * 0.05, 0.1, 8) } },
+        },
+      }
+    case 7:
+      return { ...patch, engine: { ...e, osc2: { ...e.osc2, detune: clamp(e.osc2.detune + delta, -100, 100) } } }
     default:
       return patch
   }
@@ -134,7 +164,7 @@ export function StudioClient() {
       }
       setActiveNotes((prev) => new Set([...prev, midiNote]))
     },
-    [handlePadHit]
+    [handlePadHit],
   )
 
   const handleNoteOff = useCallback((midiNote: number) => {
@@ -155,6 +185,12 @@ export function StudioClient() {
 
   const handleCC = useCallback((cc: number, value: number) => {
     setPatch((p) => applyCC(p, cc, value))
+  }, [])
+
+  // Энкодеры пока управляют только SUB-патчем (как и фейдеры) — FM/DRUM живой контроль ручками
+  // за железом — открытый пункт Фазы 1.5
+  const handleEncoder = useCallback((index: number, delta: number) => {
+    setPatch((p) => applyEncoderDelta(p, index, delta))
   }, [])
 
   // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
@@ -181,6 +217,7 @@ export function StudioClient() {
         onNoteOff: handleNoteOff,
         onCC: handleCC,
         onSysex: handleSysex,
+        onEncoder: handleEncoder,
       })
     }
     try {
@@ -189,7 +226,7 @@ export function StudioClient() {
     } catch (err) {
       setMidiError(err instanceof Error ? err.message : 'Ошибка MIDI')
     }
-  }, [handleNoteOn, handleNoteOff, handleCC, handleSysex])
+  }, [handleNoteOn, handleNoteOff, handleCC, handleSysex, handleEncoder])
 
   // Запрашивает у железа дамп текущего голоса (voice edit buffer) по SysEx
   const handleRequestFromHardware = useCallback(() => {
@@ -273,7 +310,7 @@ export function StudioClient() {
         setEngineType(type)
       }
     },
-    [started]
+    [started],
   )
 
   const handleEngineChange = useCallback(
@@ -284,7 +321,7 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes]
+    [activeNotes],
   )
 
   // FM-патч обновляется синхронно в воркслет при изменении любого параметра
@@ -438,75 +475,75 @@ export function StudioClient() {
       {/* Основное содержимое */}
       <Box flex={1} overflow="auto" p={4} display="flex" flexDir="column" gap={4}>
         {/* Панели параметров — переключаемые по движку */}
-        {engineType === 'subtractive' ? (
-          <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-        ) : engineType === 'drumkit' ? (
-          <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
-        ) : (
-          <Box display="flex" flexDir="column" gap={2}>
-            <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
-            {midiDevices.length > 0 && (
-              <Box display="flex" alignItems="center" gap={2}>
-                <button
-                  style={{
-                    padding: '4px 10px',
-                    fontSize: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #5a3a10',
-                    background: 'transparent',
-                    color: '#D4AF37',
-                    cursor: 'pointer',
-                    letterSpacing: '0.04em',
-                  }}
-                  onClick={handleSendToHardware}
-                >
-                  Отправить в железо
-                </button>
-                {sendStatus === 'sent' && (
-                  <Text fontSize="9px" color="green.400">
-                    ✓ отправлено на {midiDevices[0].name}
-                  </Text>
-                )}
-                {sendStatus === 'error' && (
-                  <Text fontSize="9px" color="red.400">
-                    ✗ не удалось отправить
-                  </Text>
-                )}
-                <button
-                  style={{
-                    padding: '4px 10px',
-                    fontSize: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #5a3a10',
-                    background: 'transparent',
-                    color: '#D4AF37',
-                    cursor: 'pointer',
-                    letterSpacing: '0.04em',
-                  }}
-                  onClick={handleRequestFromHardware}
-                  title="SMK-37 PRO не отвечает на этот запрос (прошивка не поддерживает dump request) — оставлено для другого DX7-совместимого железа"
-                >
-                  Прочитать из железа
-                </button>
-                {readStatus === 'requested' && (
-                  <Text fontSize="9px" color="fg.subtle">
-                    … ждём ответ
-                  </Text>
-                )}
-                {readStatus === 'received' && (
-                  <Text fontSize="9px" color="green.400">
-                    ✓ патч прочитан
-                  </Text>
-                )}
-                {readStatus === 'error' && (
-                  <Text fontSize="9px" color="red.400">
-                    ✗ не удалось прочитать
-                  </Text>
-                )}
-              </Box>
-            )}
-          </Box>
-        )}
+        {engineType === 'subtractive'
+          ? <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+          : engineType === 'drumkit'
+          ? <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
+          : (
+            <Box display="flex" flexDir="column" gap={2}>
+              <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+              {midiDevices.length > 0 && (
+                <Box display="flex" alignItems="center" gap={2}>
+                  <button
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '10px',
+                      borderRadius: '4px',
+                      border: '1px solid #5a3a10',
+                      background: 'transparent',
+                      color: '#D4AF37',
+                      cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                    }}
+                    onClick={handleSendToHardware}
+                  >
+                    Отправить в железо
+                  </button>
+                  {sendStatus === 'sent' && (
+                    <Text fontSize="9px" color="green.400">
+                      ✓ отправлено на {midiDevices[0].name}
+                    </Text>
+                  )}
+                  {sendStatus === 'error' && (
+                    <Text fontSize="9px" color="red.400">
+                      ✗ не удалось отправить
+                    </Text>
+                  )}
+                  <button
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '10px',
+                      borderRadius: '4px',
+                      border: '1px solid #5a3a10',
+                      background: 'transparent',
+                      color: '#D4AF37',
+                      cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                    }}
+                    onClick={handleRequestFromHardware}
+                    title="SMK-37 PRO не отвечает на этот запрос (прошивка не поддерживает dump request) — оставлено для другого DX7-совместимого железа"
+                  >
+                    Прочитать из железа
+                  </button>
+                  {readStatus === 'requested' && (
+                    <Text fontSize="9px" color="fg.subtle">
+                      … ждём ответ
+                    </Text>
+                  )}
+                  {readStatus === 'received' && (
+                    <Text fontSize="9px" color="green.400">
+                      ✓ патч прочитан
+                    </Text>
+                  )}
+                  {readStatus === 'error' && (
+                    <Text fontSize="9px" color="red.400">
+                      ✗ не удалось прочитать
+                    </Text>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
 
         {/* MIDI-статус */}
         <MidiStatus
@@ -526,17 +563,17 @@ export function StudioClient() {
 
         {/* Клавиатура или пэды — прилипает к низу */}
         <Box mt="auto" pb={4} display="flex" justifyContent="center" overflow="auto">
-          {engineType === 'drumkit' ? (
-            <DrumPads
-              pads={drumPatch.engine.pads}
-              selectedIndex={selectedPad}
-              activePads={activePads}
-              onSelect={setSelectedPad}
-              onHit={handlePadHit}
-            />
-          ) : (
-            <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
-          )}
+          {engineType === 'drumkit'
+            ? (
+              <DrumPads
+                pads={drumPatch.engine.pads}
+                selectedIndex={selectedPad}
+                activePads={activePads}
+                onSelect={setSelectedPad}
+                onHit={handlePadHit}
+              />
+            )
+            : <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />}
         </Box>
       </Box>
 
