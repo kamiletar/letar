@@ -41,14 +41,12 @@ export function FranchiseListView({ graph, currentShikimoriId, libraryMap = new 
   const sortedNodes = useMemo(() => {
     const chronoOrder = computeChronologicalOrder(graph)
     return [...graph.nodes]
-      .map(
-        (node): EnrichedNode => ({
-          ...node,
-          order: chronoOrder.get(node.id) ?? 999,
-          isInLibrary: libraryMap.has(node.id),
-          librarySlug: libraryMap.get(node.id),
-        })
-      )
+      .map((node): EnrichedNode => ({
+        ...node,
+        order: chronoOrder.get(node.id) ?? 999,
+        isInLibrary: libraryMap.has(node.id),
+        librarySlug: libraryMap.get(node.id),
+      }))
       .sort((a, b) => a.order - b.order)
   }, [graph, libraryMap])
 
