@@ -198,9 +198,7 @@ export const auth = createAuth({
       expiresIn: 900,
     }),
     genericOAuth({
-      config: [
-        /* yandex */
-      ],
+      config: [/* yandex */],
     }),
     // passkeyPlugin(), telegramPlugin() — кастомные плагины Ключницы
   ],
@@ -299,9 +297,7 @@ export const auth = createAuth({
       expiresIn: 900,
     }),
     genericOAuth({
-      config: [
-        /* yandex */
-      ],
+      config: [/* yandex */],
     }),
     organization({
       ac,

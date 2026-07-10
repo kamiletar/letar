@@ -19,17 +19,17 @@ function resolveSocialProviders(profile: StandaloneAuthProfile | HubProviderAuth
     }
     // source:'db' — провайдеры переданы через _resolvedSocialProviders (установлены в createAuth)
     return (
-        profile as StandaloneAuthProfile & {
-          _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
-        }
-      )._resolvedSocialProviders
-      ? {
-        socialProviders: (
-          profile as StandaloneAuthProfile & {
-            _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
-          }
-        )._resolvedSocialProviders,
+      profile as StandaloneAuthProfile & {
+        _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
       }
+    )._resolvedSocialProviders
+      ? {
+          socialProviders: (
+            profile as StandaloneAuthProfile & {
+              _resolvedSocialProviders?: Parameters<typeof betterAuth>[0]['socialProviders']
+            }
+          )._resolvedSocialProviders,
+        }
       : {}
   }
   // legacy: socialProviders напрямую
@@ -116,8 +116,8 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
       storage: profile.secondaryStorage
         ? ('secondary-storage' as const)
         : process.env.NODE_ENV === 'production'
-        ? ('database' as const)
-        : ('memory' as const),
+          ? ('database' as const)
+          : ('memory' as const),
       modelName: 'rateLimit',
       customRules: {
         // Защита resend верификации (Этап 2 PLAN.md). App может переопределить.
@@ -142,27 +142,29 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
   const discoveryUrl = oidc.discoveryUrl ?? LETAR_AUTH_DISCOVERY_URL
 
   const oidcPlugin = genericOAuth({
-    config: oidc.clientId && oidc.clientSecret
-      ? [
-        {
-          providerId: 'letar-auth',
-          discoveryUrl,
-          clientId: oidc.clientId,
-          clientSecret: oidc.clientSecret,
-          // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
-          scopes: ['openid', 'profile', 'email', 'offline_access'],
-          pkce: true,
-          // Fallback: если name пустое — используем email username
-          mapProfileToUser: (profile: Record<string, unknown>) => ({
-            name: (profile.name as string | undefined)
-              || (profile.email as string | undefined)?.split('@')[0]
-              || 'User',
-            email: profile.email as string,
-            image: (profile.picture ?? profile.image) as string | undefined,
-          }),
-        },
-      ]
-      : [],
+    config:
+      oidc.clientId && oidc.clientSecret
+        ? [
+            {
+              providerId: 'letar-auth',
+              discoveryUrl,
+              clientId: oidc.clientId,
+              clientSecret: oidc.clientSecret,
+              // offline_access — refresh_token для будущих API-вызовов к Ключнице (§13.7 PLAN.md)
+              scopes: ['openid', 'profile', 'email', 'offline_access'],
+              pkce: true,
+              // Fallback: если name пустое — используем email username
+              mapProfileToUser: (profile: Record<string, unknown>) => ({
+                name:
+                  (profile.name as string | undefined) ||
+                  (profile.email as string | undefined)?.split('@')[0] ||
+                  'User',
+                email: profile.email as string,
+                image: (profile.picture ?? profile.image) as string | undefined,
+              }),
+            },
+          ]
+        : [],
   })
 
   return betterAuth({
@@ -257,8 +259,8 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       storage: profile.secondaryStorage
         ? 'secondary-storage'
         : process.env.NODE_ENV === 'production'
-        ? 'database'
-        : 'memory',
+          ? 'database'
+          : 'memory',
       modelName: 'rateLimit',
       customRules: {
         '/sign-in/email': { window: 60, max: 5 },
@@ -339,13 +341,13 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
  * ```
  */
 export function createAuth<TProfile extends StandaloneAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildStandaloneAuth<TProfile>>
 export function createAuth<TProfile extends HubClientAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildHubClientAuth<TProfile>>
 export function createAuth<TProfile extends HubProviderAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): ReturnType<typeof buildHubProviderAuth<TProfile>>
 export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
   switch (profile.mode) {
@@ -374,7 +376,7 @@ export function createAuth<TProfile extends AuthProfile>(profile: TProfile) {
  * ```
  */
 export async function createAuthAsync<TProfile extends StandaloneAuthProfile>(
-  profile: TProfile,
+  profile: TProfile
 ): Promise<ReturnType<typeof buildStandaloneAuth<TProfile>>> {
   if (profile.social?.source === 'db') {
     const loaded = await profile.social.load()
