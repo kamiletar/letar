@@ -90,13 +90,17 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
   const [pvzFilter, setPvzFilter] = useState('')
 
   useEffect(() => {
-    if (debounceRef.current) {clearTimeout(debounceRef.current)}
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
     if (cityQuery.length < 2) {
       setCitySuggestions([])
       setShowDropdown(false)
       return
     }
-    if (selectedCity && cityQuery === selectedCity.city) {return}
+    if (selectedCity && cityQuery === selectedCity.city) {
+      return
+    }
     debounceRef.current = setTimeout(async () => {
       setCityLoading(true)
       const results = await actions.searchCities(cityQuery)
@@ -105,7 +109,9 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
       setCityLoading(false)
     }, 300)
     return () => {
-      if (debounceRef.current) {clearTimeout(debounceRef.current)}
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
     }
   }, [cityQuery, selectedCity, actions])
 
@@ -140,7 +146,9 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
 
   useEffect(() => {
     return () => {
-      if (geoSuccessTimerRef.current) {clearTimeout(geoSuccessTimerRef.current)}
+      if (geoSuccessTimerRef.current) {
+        clearTimeout(geoSuccessTimerRef.current)
+      }
     }
   }, [])
 
@@ -217,7 +225,7 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
         setGeoState('error')
         setGeoError(messages[err.code] ?? 'Ошибка геолокации')
       },
-      { timeout: 10_000, maximumAge: 5 * 60 * 1000 },
+      { timeout: 10_000, maximumAge: 5 * 60 * 1000 }
     )
   }
 
@@ -260,25 +268,25 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
             px={3}
             transition="all 0.2s"
           >
-            {isGeoBusy ? <Spinner size="xs" /> : geoState === 'done'
-              ? (
-                <Icon>
-                  <CheckIcon />
-                </Icon>
-              )
-              : (
-                <Icon>
-                  <CrosshairIcon />
-                </Icon>
-              )}
+            {isGeoBusy ? (
+              <Spinner size="xs" />
+            ) : geoState === 'done' ? (
+              <Icon>
+                <CheckIcon />
+              </Icon>
+            ) : (
+              <Icon>
+                <CrosshairIcon />
+              </Icon>
+            )}
             <chakra.span display={{ base: 'none', sm: 'inline' }} fontSize="xs">
               {geoState === 'requesting'
                 ? 'Геолокация…'
                 : geoState === 'searching'
-                ? 'Ищем…'
-                : geoState === 'done'
-                ? 'Найден'
-                : 'Мой город'}
+                  ? 'Ищем…'
+                  : geoState === 'done'
+                    ? 'Найден'
+                    : 'Мой город'}
             </chakra.span>
           </Button>
         </Group>
@@ -372,9 +380,9 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
             const q = pvzFilter.trim().toLowerCase()
             const filtered = q
               ? points.filter((p) => {
-                const addr = p.location.address_full || p.location.address
-                return p.name.toLowerCase().includes(q) || addr.toLowerCase().includes(q)
-              })
+                  const addr = p.location.address_full || p.location.address
+                  return p.name.toLowerCase().includes(q) || addr.toLowerCase().includes(q)
+                })
               : points
             return (
               <Box overflowY="auto" maxH="240px" borderWidth="1px" borderRadius="md" borderColor="border">

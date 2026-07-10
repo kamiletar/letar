@@ -37,9 +37,13 @@ export function getFromLocation(): CdekLocation {
 export async function getCdekToken(): Promise<string | null> {
   const clientId = process.env.CDEK_CLIENT_ID
   const clientSecret = process.env.CDEK_CLIENT_SECRET
-  if (!clientId || !clientSecret) {return null}
+  if (!clientId || !clientSecret) {
+    return null
+  }
 
-  if (cachedToken && Date.now() < tokenExpiresAt) {return cachedToken}
+  if (cachedToken && Date.now() < tokenExpiresAt) {
+    return cachedToken
+  }
 
   try {
     const tokenUrl = `${getBaseUrl()}/v2/oauth/token`
@@ -78,7 +82,7 @@ export async function getCdekToken(): Promise<string | null> {
 export async function calculateTariffs(
   to: CdekLocation,
   pkg: CdekPackageDims,
-  from?: CdekLocation,
+  from?: CdekLocation
 ): Promise<CdekShippingCosts> {
   if (process.env.CDEK_MOCK_MODE === 'true') {
     await new Promise((r) => setTimeout(r, 400))
@@ -584,14 +588,18 @@ export async function searchCdekCities(query: string): Promise<CdekCityItem[]> {
 /** Ищет CDEK city_code по почтовому индексу. */
 export async function getCityCodeByPostalCode(postalCode: string): Promise<number | null> {
   const token = await getCdekToken()
-  if (!token) {return null}
+  if (!token) {
+    return null
+  }
 
   try {
     const resp = await fetch(`${getBaseUrl()}/v2/location/cities?${new URLSearchParams({ postal_code: postalCode })}`, {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(8_000),
     })
-    if (!resp.ok) {return null}
+    if (!resp.ok) {
+      return null
+    }
     const cities = (await resp.json()) as CdekCityItem[]
     return cities[0]?.code ?? null
   } catch {
@@ -607,7 +615,9 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
   }
 
   const token = await getCdekToken()
-  if (!token) {return []}
+  if (!token) {
+    return []
+  }
 
   try {
     const resp = await fetch(
@@ -619,9 +629,11 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
       {
         headers: { Authorization: `Bearer ${token}` },
         signal: AbortSignal.timeout(8_000),
-      },
+      }
     )
-    if (!resp.ok) {return []}
+    if (!resp.ok) {
+      return []
+    }
     return ((await resp.json()) as CdekDeliveryPoint[]).slice(0, 300)
   } catch {
     return []
@@ -630,10 +642,12 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
 
 /** Создаёт заказ СДЭК. Возвращает uuid и трек-номер или объект с ошибкой. */
 export async function createCdekOrder(
-  request: CdekOrderRequest,
+  request: CdekOrderRequest
 ): Promise<{ uuid: string; trackNumber?: string } | { error: string }> {
   const token = await getCdekToken()
-  if (!token) {return { error: 'Нет токена СДЭК — проверьте CDEK_CLIENT_ID/SECRET' }}
+  if (!token) {
+    return { error: 'Нет токена СДЭК — проверьте CDEK_CLIENT_ID/SECRET' }
+  }
 
   let resp: Response
   try {
@@ -657,12 +671,13 @@ export async function createCdekOrder(
 
   if (!data.entity?.uuid) {
     const errors = data.requests?.[0]?.errors
-    const msg = Array.isArray(errors) && errors.length > 0
-      ? errors
-        .map((e) => e.message)
-        .filter(Boolean)
-        .join('; ')
-      : `HTTP ${resp.status}, нет entity.uuid`
+    const msg =
+      Array.isArray(errors) && errors.length > 0
+        ? errors
+            .map((e) => e.message)
+            .filter(Boolean)
+            .join('; ')
+        : `HTTP ${resp.status}, нет entity.uuid`
     console.warn('[cdek] createOrder error', JSON.stringify(data))
     return { error: `СДЭК API: ${msg}` }
   }
@@ -673,14 +688,18 @@ export async function createCdekOrder(
 /** Запрашивает статус заказа СДЭК по UUID. */
 export async function getCdekOrderStatus(cdekUuid: string): Promise<CdekOrderStatusResponse['entity'] | null> {
   const token = await getCdekToken()
-  if (!token) {return null}
+  if (!token) {
+    return null
+  }
 
   try {
     const resp = await fetch(`${getBaseUrl()}/v2/orders/${cdekUuid}`, {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(8_000),
     })
-    if (!resp.ok) {return null}
+    if (!resp.ok) {
+      return null
+    }
     const data = (await resp.json()) as CdekOrderStatusResponse
     return data.entity ?? null
   } catch {
@@ -694,7 +713,9 @@ async function getCdekWebhooks(token: string): Promise<Array<{ uuid: string; url
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(8_000),
     })
-    if (!resp.ok) {return []}
+    if (!resp.ok) {
+      return []
+    }
     const data = (await resp.json()) as Array<{ uuid: string; url: string; type: string }>
     return Array.isArray(data) ? data : []
   } catch {
@@ -708,7 +729,9 @@ async function getCdekWebhooks(token: string): Promise<Array<{ uuid: string; url
  */
 export async function ensureCdekWebhook(url: string): Promise<boolean> {
   const token = await getCdekToken()
-  if (!token) {return false}
+  if (!token) {
+    return false
+  }
 
   const existing = await getCdekWebhooks(token)
   if (existing.some((wh) => wh.type === 'ORDER_STATUS' && wh.url === url)) {

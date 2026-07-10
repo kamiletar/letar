@@ -20,7 +20,11 @@
   },
   "nx": {
     "name": "cdek",
-    "tags": ["scope:shared", "type:lib", "owner:letar"]
+    "tags": [
+      "scope:shared",
+      "type:lib",
+      "owner:letar"
+    ]
   },
   "peerDependencies": {
     "@chakra-ui/react": ">=3.0.0",

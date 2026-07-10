@@ -1,10 +1,10 @@
 'use client'
 
 import L from 'leaflet'
-import type { CdekDeliveryPoint } from '../server/cdek-types'
 import 'leaflet/dist/leaflet.css'
 import { useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import type { CdekDeliveryPoint } from '../server/cdek-types'
 
 const LEAFLET_CDN = 'https://unpkg.com/leaflet@1.9.4/dist/images'
 
@@ -33,7 +33,9 @@ function FitBounds({ points }: { points: CdekDeliveryPoint[] }) {
 
   useEffect(() => {
     const valid = points.filter((p) => p.location.latitude && p.location.longitude)
-    if (valid.length === 0) {return}
+    if (valid.length === 0) {
+      return
+    }
 
     if (valid.length === 1) {
       map.setView([valid[0].location.latitude!, valid[0].location.longitude!], 14)
@@ -56,17 +58,14 @@ interface PvzMapProps {
 export function PvzMap({ points, selectedCode, onSelect }: PvzMapProps) {
   const validPoints = points.filter((p) => p.location.latitude && p.location.longitude)
 
-  if (validPoints.length === 0) {return null}
+  if (validPoints.length === 0) {
+    return null
+  }
 
   const center: [number, number] = [validPoints[0].location.latitude!, validPoints[0].location.longitude!]
 
   return (
-    <MapContainer
-      center={center}
-      zoom={12}
-      style={{ height: 300, borderRadius: 8, zIndex: 0 }}
-      scrollWheelZoom={false}
-    >
+    <MapContainer center={center} zoom={12} style={{ height: 300, borderRadius: 8, zIndex: 0 }} scrollWheelZoom={false}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
