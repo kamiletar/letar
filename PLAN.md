@@ -39,17 +39,41 @@ up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{
 > `.env.staging.example` (мёртвый домен `gsc-test.letar.best` s1 → `http://localhost:3018`) и
 > `apps/auth-hub/prisma/seed.ts` (redirect URI для `grandslamcup-prod`). Коммит `7027d0a`.
 >
-> Отправлен deploy-request BlackCove (тред `grandslamcup-staging-pilot`, ack_required) с полным
-> чеклистом: редеплой dashboard-agent на s3 (подхватить фикс), `.env.staging` с сгенерированными
-> секретами (OIDC-секрет — **тот же**, что у прод-клиента `grandslamcup-prod`, не новый), повторный
-> `db:seed` auth-hub на s2 (регистрирует новый redirect URI), `deploy_app(staging)` → `run_e2e` →
-> наблюдение gate. Ждём ответа.
+> Отправлен deploy-request BlackCove (тред `grandslamcup-staging-pilot`, ack_required) — первая
+> версия на `localhost`.
 >
-> **➡️ Следующий старт:** проверить инбокс треда `grandslamcup-staging-pilot`; когда BlackCove
-> выполнит чеклист — прогнать `e2e_status`, затем прочитать (не обязательно реально деплоить)
-> поведение `checkE2eGate` в разных сценариях; после успешного пилота — разобраться с отставшим
-> submodule driving-school/driving-school-e2e на s3 (untracked-конфликт при checkout, отдельная
-> задача, не блокирует grandslamcup).
+> **Пивот в этой же сессии (по требованию владельца):** localhost недостаточен для уверенности,
+> что релиз не сломает прод — другой security-контекст браузера, не проверяет cross-origin
+> cookie/OIDC-поведение между приложением и `auth.letar.best`. Решено: staging должен быть
+> максимально близко к прод-окружению.
+>
+> - **Домен:** `https://grandslamcup.stage.s3.letar.best` (реальный HTTPS, не localhost) — требует
+>   wildcard DNS + NPM proxy host + TLS-сертификат (инфра-задача, делегирована BlackCove/владельцу).
+>   `redirectUrls` в `apps/auth-hub/prisma/seed.ts` и `BETTER_AUTH_URL` в `.env.staging.example`
+>   обновлены под новый домен.
+> - **Данные:** по выбору владельца — **анонимизированный снепшот прод**, не пустая БД и не seed-
+>   фикстуры. Написан `apps/grandslamcup/scripts/anonymize-staging-db.ts`: секретные таблицы
+>   (`Account`/`Session`/`Verification`/`consentLog`/`PushSubscription` — OAuth-токены,
+>   session-токены, 152-ФЗ-аудит согласий) исключаются из `pg_dump` флагами `-T`, не
+>   анонимизируются (нет смысла анонимизировать то, что не должно копироваться вообще);
+>   `User.email/name/image/telegramChatId` псевдонимизируются детерминированно;
+>   `RosterApplication` (неподтверждённые заявки) — контактные поля очищены. Публичные турнирные
+>   модели (`Player`/`Team`/`Match`/`Standings`/`Poem`, везде `@@allow('read', true)`) копируются
+>   как есть — это ровно то, что e2e/QA должны увидеть. Скрипт отказывается работать, если
+>   `DATABASE_URL` не похож на staging-хост (защита от случайного прогона на проде). Коммит `8564663`.
+>
+> Обновлённый чеклист отправлен BlackCove тем же тредом (7 шагов: редеплой dashboard-agent →
+> DNS/NPM/TLS → `.env.staging` с секретами (OIDC-секрет **тот же**, что у прод-клиента) →
+> `db:seed` auth-hub → `pg_dump`(-T секретные)+`pg_restore`+анонимизация → `deploy_app(staging)` →
+> `run_e2e`). Явно предупредил: шаг DNS/сертификат может быть не в доступе BlackCove — тогда
+> эскалация к владельцу напрямую. Ждём ответа.
+>
+> **➡️ Следующий старт:** проверить инбокс треда `grandslamcup-staging-pilot`; если DNS/NPM —
+> не в доступе BlackCove, спросить владельца напрямую (кто держит DNS-провайдера для
+> `letar.best`); когда чеклист выполнен — `e2e_status`, затем прочитать поведение `checkE2eGate`
+> (не обязательно реально деплоить в прод ради теста); после успешного пилота — разобраться с
+> отставшим submodule driving-school/driving-school-e2e на s3 (untracked-конфликт при checkout,
+> отдельная задача, не блокирует grandslamcup).
 
 > 📌 **Отдельная кросс-приложенческая UI-задача (вне темы этого файла, для следующей сессии):**
 > «Липкая CTA» — тираж `StickyActionBar`/`useScrollGate` (`@letar/ui@0.7.0`) на длинные интро/формы
