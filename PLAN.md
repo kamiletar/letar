@@ -23,20 +23,33 @@
 > (занят `media-api` на s3) решён loopback-биндингом `127.0.0.1:13103:3100` в `docker-compose.s3.yml`
 > (`infra-config` разделил `agentPort`(3100)/`hostPort`(туннель, s3:13103), HEAD `16420ef`). BlackCove
 > подтвердил вживую на HEAD `f21334bf`: `docker compose -f docker-compose.s3.yml --env-file .env.docker
-> up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. ⚠️ Попутно
+up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. ⚠️ Попутно
 > найдено: `git pull` на s3 не смог обновить submodule `driving-school`/`driving-school-e2e` (untracked
 > dev-артефакты конфликтуют с checkout) — не блокирует dashboard-agent, submodule на s3 сейчас отстаёт,
 > не разобрано. Диагностика и исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout).
 >
-> **➡️ Следующий старт:** 1) обновить локальный `.env.docker` (перекачать `.env.docker.enc` с
-> `AGENT_TOKEN_S3`), проверить `agent_health({server:"s3"})` через туннель — s3 теперь живой, шаг не
-> заблокирован; 2) разобраться с отставшими submodule driving-school/driving-school-e2e на s3 (untracked
-> конфликт при checkout); 3) **живой пилот**: задеплоить
-> `grandslamcup` на staging (`deploy_app({app:"grandslamcup", target:"staging"})`), настроить
-> `.env.staging` (домен s1→s3, у grandslamcup staging-комплект уже частично есть — `gsc-test.letar.best`
-> в deployment.md, нужно свести к конвенции `<app>.s3.letar.best`), redirect URI в auth-hub для
-> staging-домена, прогнать `run_e2e`, убедиться что `deploy_app(production)` показывает gate-warnings
-> корректно на разных сценариях (нет данных / упал / другой коммит / устарел).
+> **Сессия №54 (2026-07-10, §18 Сессия D — живой пилот запущен, найдены и починены 2 бага):**
+> `agent_health({server:"s3"})` подтверждён из MCP. При подготовке пилота на grandslamcup найдено:
+> (1) `e2e.ts` слал `E2E_BASE_URL`, а **все** `playwright.config.ts` в монорепо читают `BASE_URL` —
+> e2e бил бы по `localhost` вместо staging, никогда не долетев до реального контейнера; `run_e2e`
+> теперь принимает `baseUrl` явным параметром, хардкод-домен `<app>.s3.letar.best` убран (публичного
+> домена/NPM proxy host для staging пока не существует — нужна отдельная инфра-задача); (2)
+> `docker-compose.staging.yml` grandslamcup ссылался на внешнюю сеть `premium-network` (только на
+> s2) — на s3 `docker compose up` упал бы; убран `external: true`. Также поправлены
+> `.env.staging.example` (мёртвый домен `gsc-test.letar.best` s1 → `http://localhost:3018`) и
+> `apps/auth-hub/prisma/seed.ts` (redirect URI для `grandslamcup-prod`). Коммит `7027d0a`.
+>
+> Отправлен deploy-request BlackCove (тред `grandslamcup-staging-pilot`, ack_required) с полным
+> чеклистом: редеплой dashboard-agent на s3 (подхватить фикс), `.env.staging` с сгенерированными
+> секретами (OIDC-секрет — **тот же**, что у прод-клиента `grandslamcup-prod`, не новый), повторный
+> `db:seed` auth-hub на s2 (регистрирует новый redirect URI), `deploy_app(staging)` → `run_e2e` →
+> наблюдение gate. Ждём ответа.
+>
+> **➡️ Следующий старт:** проверить инбокс треда `grandslamcup-staging-pilot`; когда BlackCove
+> выполнит чеклист — прогнать `e2e_status`, затем прочитать (не обязательно реально деплоить)
+> поведение `checkE2eGate` в разных сценариях; после успешного пилота — разобраться с отставшим
+> submodule driving-school/driving-school-e2e на s3 (untracked-конфликт при checkout, отдельная
+> задача, не блокирует grandslamcup).
 
 > 📌 **Отдельная кросс-приложенческая UI-задача (вне темы этого файла, для следующей сессии):**
 > «Липкая CTA» — тираж `StickyActionBar`/`useScrollGate` (`@letar/ui@0.7.0`) на длинные интро/формы
@@ -93,13 +106,10 @@
 >
 > **➡️ Следующий старт (устарело, см. актуальный список в сессии №53 выше):**
 >
-> ~~1. Проверить инбокс — поднял ли BlackCove dashboard-agent на s3~~ ✅ сделано.
-> 2. **Обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
-> расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель.
-> 3. **s2: закрытие порта 3100** — отдельная задача (тем же приёмом `127.0.0.1:3100:3100` при следующем передеплое, без ufw).
+> ~~1. Проверить инбокс — поднял ли BlackCove dashboard-agent на s3~~ ✅ сделано. 2. **Обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
+> расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель. 3. **s2: закрытие порта 3100** — отдельная задача (тем же приёмом `127.0.0.1:3100:3100` при следующем передеплое, без ufw).
 > 3b. **submodule driving-school/driving-school-e2e на s3 отстают** — untracked-конфликт при checkout,
-> исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout).
-> 4. Затем — **Сессия D** (§18): роут `apps/dashboard-agent/src/routes/e2e.ts` (`POST /api/e2e/run` nx e2e с
+> исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout). 4. Затем — **Сессия D** (§18): роут `apps/dashboard-agent/src/routes/e2e.ts` (`POST /api/e2e/run` nx e2e с
 > `E2E_BASE_URL` против staging + `GET /api/e2e/status` + запись `.last-e2e-status/<app>.json`), tools `run_e2e`/`e2e_status`
 > в deploy-mcp, warn-gate в `deploy_app(production)`, пилот **grandslamcup** (staging-комплект уже есть; `.env.staging`
 > домен s1→s3 на `grandslamcup.s3.letar.best`, Playwright `E2E_BASE_URL` скипает webServer, redirect URI в auth-hub).
@@ -1252,7 +1262,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-<UserMenu
+;<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}
