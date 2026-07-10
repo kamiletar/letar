@@ -13,7 +13,7 @@ test.describe('Conditional Form', () => {
     const radios = page.getByRole('radio')
     const selects = page.getByRole('combobox')
     // Хотя бы один тип элемента должен быть на странице
-    const count = await inputs.count() + await radios.count() + await selects.count()
+    const count = (await inputs.count()) + (await radios.count()) + (await selects.count())
     expect(count).toBeGreaterThan(0)
   })
 })

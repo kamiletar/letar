@@ -11,7 +11,11 @@ test.describe('Validation Form', () => {
     // Нажимаем submit без заполнения
     await page.getByRole('button', { name: /save|submit|сохранить|отправить/i }).click()
     // Должны появиться сообщения об ошибках
-    await expect(page.locator('[data-scope="field"]').filter({ has: page.locator('[data-part="error-text"]') }).first())
-      .toBeVisible()
+    await expect(
+      page
+        .locator('[data-scope="field"]')
+        .filter({ has: page.locator('[data-part="error-text"]') })
+        .first()
+    ).toBeVisible()
   })
 })
