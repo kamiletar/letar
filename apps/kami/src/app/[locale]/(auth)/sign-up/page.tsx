@@ -24,21 +24,13 @@ export default function SignUpPage() {
           </Text>
         </VStack>
 
-        <Box
-          p={8}
-          borderWidth="1px"
-          borderColor="border"
-          borderRadius="xl"
-          bg="bg.panel"
-          shadow="lg"
-        >
+        <Box p={8} borderWidth="1px" borderColor="border" borderRadius="xl" bg="bg.panel" shadow="lg">
           <VStack gap={4} align="stretch" textAlign="center">
             <LuKeyRound size={32} style={{ alignSelf: 'center' }} />
             <Text fontWeight="medium">Регистрация через Ключницу</Text>
             <Text color="fg.muted" fontSize="sm">
-              Аккаунты kami управляются через единую систему входа letar.best.
-              Для регистрации нажмите «Войти» — Ключница предложит создать аккаунт, если вы
-              заходите впервые.
+              Аккаунты kami управляются через единую систему входа letar.best. Для регистрации нажмите «Войти» —
+              Ключница предложит создать аккаунт, если вы заходите впервые.
             </Text>
             <Button colorPalette="brand" size="lg" asChild>
               <Link href="/sign-in">

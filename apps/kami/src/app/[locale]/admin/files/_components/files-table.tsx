@@ -23,7 +23,9 @@ interface FilesTableProps {
 
 /** Форматирование размера */
 function formatSize(bytes: number): string {
-  if (bytes < 1024 * 1024) { return `${(bytes / 1024).toFixed(0)} КБ` }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(0)} КБ`
+  }
   return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
 }
 
@@ -37,7 +39,9 @@ export function FilesTable({ files }: FilesTableProps) {
 
   const handleDelete = useCallback(
     async (id: string, filename: string) => {
-      if (!(await confirm({ title: `Удалить «${filename}»?` }))) { return }
+      if (!(await confirm({ title: `Удалить «${filename}»?` }))) {
+        return
+      }
 
       try {
         const res = await fetch(`/api/arbitrary-upload?id=${id}`, { method: 'DELETE' })
@@ -113,12 +117,7 @@ export function FilesTable({ files }: FilesTableProps) {
                     <Button size="xs" variant="ghost" onClick={() => copyLink(file.path)} title="Копировать ссылку">
                       <Copy size={14} />
                     </Button>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      asChild
-                      title="Открыть файл"
-                    >
+                    <Button size="xs" variant="ghost" asChild title="Открыть файл">
                       <a href={`/api/files/${file.path}`} target="_blank" rel="noopener noreferrer">
                         <ExternalLink size={14} />
                       </a>

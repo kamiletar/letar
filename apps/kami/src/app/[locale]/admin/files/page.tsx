@@ -12,7 +12,9 @@ interface PageProps {
 
 export default async function AdminFilesPage({ params }: PageProps) {
   const admin = await isAdmin()
-  if (!admin) { redirect('/sign-in') }
+  if (!admin) {
+    redirect('/sign-in')
+  }
 
   const { locale } = await params
 

@@ -61,8 +61,7 @@ export async function CodeHighlighter({ code, language }: Props) {
     })
   } catch {
     const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    html =
-      `<pre style="padding:1rem;background:#24292e;color:#e1e4e8;border-radius:0.5rem"><code>${escaped}</code></pre>`
+    html = `<pre style="padding:1rem;background:#24292e;color:#e1e4e8;border-radius:0.5rem"><code>${escaped}</code></pre>`
   }
 
   return <SafeHighlightedCode html={html} />

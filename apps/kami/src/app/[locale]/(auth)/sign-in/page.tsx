@@ -33,14 +33,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         </VStack>
 
         {/* Кнопка Ключницы */}
-        <Box
-          p={8}
-          borderWidth="1px"
-          borderColor="border"
-          borderRadius="xl"
-          bg="bg.panel"
-          shadow="lg"
-        >
+        <Box p={8} borderWidth="1px" borderColor="border" borderRadius="xl" bg="bg.panel" shadow="lg">
           <OAuthButtonsWithI18n callbackUrl={redirectTo} />
         </Box>
       </VStack>

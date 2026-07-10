@@ -6,8 +6,7 @@ import type { HireFormData } from '../_schemas/hire.schema'
 import { HireFormSchema } from '../_schemas/hire.schema'
 
 export type SubmitHireResult =
-  | { success: true }
-  | { success: false; error: 'VALIDATION_ERROR' | 'DATABASE_ERROR' | 'UNKNOWN_ERROR' }
+  { success: true } | { success: false; error: 'VALIDATION_ERROR' | 'DATABASE_ERROR' | 'UNKNOWN_ERROR' }
 
 /**
  * Server Action для сохранения заявки на работу

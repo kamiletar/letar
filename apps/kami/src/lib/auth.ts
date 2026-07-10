@@ -11,10 +11,7 @@ export const auth = createAuth({
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
 
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3005',
-  trustedOrigins: [
-    'http://localhost:3005',
-    ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
-  ],
+  trustedOrigins: ['http://localhost:3005', ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : [])],
 
   oidc: {
     clientId: process.env.OIDC_CLIENT_ID,
@@ -30,8 +27,8 @@ export const auth = createAuth({
     storage: process.env.REDIS_URL
       ? 'secondary-storage'
       : process.env.NODE_ENV === 'production'
-      ? 'database'
-      : 'memory',
+        ? 'database'
+        : 'memory',
     customRules: {
       '/organization/*': { window: 60, max: 30 },
     },

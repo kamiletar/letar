@@ -1,6 +1,6 @@
+import { prisma } from '@/lib/db'
 import { existsSync, statSync } from 'fs'
 import { open, readFile } from 'fs/promises'
-import { prisma } from '@/lib/db'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { join } from 'path'

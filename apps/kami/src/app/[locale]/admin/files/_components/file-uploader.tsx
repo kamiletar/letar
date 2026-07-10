@@ -15,7 +15,9 @@ interface QueuedFile {
 
 /** Форматирование размера */
 function formatSize(bytes: number): string {
-  if (bytes < 1024 * 1024) { return `${(bytes / 1024).toFixed(0)} КБ` }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(0)} КБ`
+  }
   return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
 }
 
@@ -76,7 +78,9 @@ export function FileUploader() {
       const response = await fetch('/api/arbitrary-upload', { method: 'POST', body: formData })
       const data = await response.json()
 
-      if (!response.ok) { throw new Error(data.error || 'Ошибка загрузки') }
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка загрузки')
+      }
 
       setQueue((prev) => prev.map((f) => (f.id === item.id ? { ...f, status: 'success' } : f)))
     } catch (error) {
@@ -90,7 +94,9 @@ export function FileUploader() {
 
   const uploadAll = async () => {
     const pending = queue.filter((f) => f.status === 'pending')
-    if (pending.length === 0) { return }
+    if (pending.length === 0) {
+      return
+    }
 
     setIsUploading(true)
     for (const item of pending) {
