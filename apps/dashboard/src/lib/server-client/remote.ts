@@ -106,7 +106,7 @@ export class RemoteServerClient implements ServerClient {
   }
 
   async getTopProcesses(
-    limit = 20,
+    limit = 20
   ): Promise<{ pid: number; name: string; cpu: number; mem: number; memRss: number }[]> {
     return this.fetch(`/api/system/processes?limit=${limit}`)
   }
@@ -265,10 +265,10 @@ export class RemoteServerClient implements ServerClient {
 
   async getCronJobHistory(
     jobId: string,
-    limit = 20,
+    limit = 20
   ): Promise<{ jobId: string; jobName: string; logs: CronExecutionLog[] }> {
     return this.fetch<{ jobId: string; jobName: string; logs: CronExecutionLog[] }>(
-      `/api/cron/jobs/${encodeURIComponent(jobId)}/history?limit=${limit}`,
+      `/api/cron/jobs/${encodeURIComponent(jobId)}/history?limit=${limit}`
     )
   }
 

@@ -377,7 +377,7 @@ export interface ServerClient {
   runCronJob(jobId: string): Promise<{ result: CronExecutionLog }>
   getCronJobHistory(
     jobId: string,
-    limit?: number,
+    limit?: number
   ): Promise<{ jobId: string; jobName: string; logs: CronExecutionLog[] }>
 
   // Health

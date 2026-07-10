@@ -183,129 +183,127 @@ export function AddSiteDialog() {
               <CloseButton size="sm" />
             </Dialog.CloseTrigger>
             <Dialog.Body>
-              {createdSite
-                ? (
-                  /* Результат создания */
-                  <VStack align="stretch" gap="4">
-                    <Text fontSize="sm" color="green.500" fontWeight="medium">
-                      Сайт создан!
+              {createdSite ? (
+                /* Результат создания */
+                <VStack align="stretch" gap="4">
+                  <Text fontSize="sm" color="green.500" fontWeight="medium">
+                    Сайт создан!
+                  </Text>
+                  <Box>
+                    <Text fontSize="xs" color="fg.muted" mb="1">
+                      Website ID:
                     </Text>
-                    <Box>
-                      <Text fontSize="xs" color="fg.muted" mb="1">
-                        Website ID:
-                      </Text>
-                      <Text fontSize="sm" fontFamily="mono" fontWeight="medium">
-                        {createdSite.id}
-                      </Text>
+                    <Text fontSize="sm" fontFamily="mono" fontWeight="medium">
+                      {createdSite.id}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="fg.muted" mb="1">
+                      .env.docker:
+                    </Text>
+                    <Box
+                      bg="bg.subtle"
+                      borderRadius="md"
+                      p="3"
+                      fontFamily="mono"
+                      fontSize="xs"
+                      whiteSpace="pre-wrap"
+                      wordBreak="break-all"
+                    >
+                      {envLine}
                     </Box>
-                    <Box>
-                      <Text fontSize="xs" color="fg.muted" mb="1">
-                        .env.docker:
-                      </Text>
-                      <Box
-                        bg="bg.subtle"
-                        borderRadius="md"
-                        p="3"
-                        fontFamily="mono"
-                        fontSize="xs"
-                        whiteSpace="pre-wrap"
-                        wordBreak="break-all"
-                      >
-                        {envLine}
+                  </Box>
+                  <HStack gap="2">
+                    <Button size="sm" variant="outline" onClick={copyToClipboard} flex="1">
+                      <Icon>
+                        <LuClipboard />
+                      </Icon>
+                      Копировать
+                    </Button>
+                    <Button
+                      size="sm"
+                      colorPalette={envWritten ? 'green' : 'brand'}
+                      onClick={handleWriteEnv}
+                      loading={envWriting}
+                      disabled={envWritten}
+                      flex="1"
+                    >
+                      <Icon>
+                        <LuCheck />
+                      </Icon>
+                      {envWritten ? 'Сохранено' : 'Сохранить в БД'}
+                    </Button>
+                  </HStack>
+                </VStack>
+              ) : (
+                /* Форма создания */
+                <form onSubmit={handleSubmit}>
+                  <VStack gap="4" align="stretch">
+                    {/* Быстрый выбор приложений */}
+                    {availableApps.length > 0 && (
+                      <Box>
+                        <Text fontSize="sm" fontWeight="medium" mb="2">
+                          Быстрый выбор
+                        </Text>
+                        <HStack gap="2" flexWrap="wrap">
+                          {availableApps.map((app) => (
+                            <Badge
+                              key={app.name}
+                              size="lg"
+                              variant={name === app.name ? 'solid' : 'outline'}
+                              colorPalette={name === app.name ? 'brand' : 'gray'}
+                              cursor="pointer"
+                              onClick={() => handleQuickSelect(app)}
+                              px="3"
+                              py="1"
+                            >
+                              <LuGlobe size={14} />
+                              {app.name}
+                            </Badge>
+                          ))}
+                        </HStack>
                       </Box>
-                    </Box>
-                    <HStack gap="2">
-                      <Button size="sm" variant="outline" onClick={copyToClipboard} flex="1">
-                        <Icon>
-                          <LuClipboard />
-                        </Icon>
-                        Копировать
+                    )}
+
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <VStack gap="4">
+                          <Box w="full">
+                            <Text fontSize="sm" fontWeight="medium" mb="1">
+                              Название
+                            </Text>
+                            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-app" />
+                          </Box>
+                          <Box w="full">
+                            <Text fontSize="sm" fontWeight="medium" mb="1">
+                              Домен
+                            </Text>
+                            <Input
+                              value={domain}
+                              onChange={(e) => setDomain(e.target.value)}
+                              placeholder="example.com"
+                            />
+                          </Box>
+                        </VStack>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
+
+                    <HStack justify="end" gap="3">
+                      <Button variant="ghost" onClick={handleClose}>
+                        Отмена
                       </Button>
                       <Button
-                        size="sm"
-                        colorPalette={envWritten ? 'green' : 'brand'}
-                        onClick={handleWriteEnv}
-                        loading={envWriting}
-                        disabled={envWritten}
-                        flex="1"
+                        type="submit"
+                        colorPalette="brand"
+                        loading={mutation.isPending}
+                        disabled={!name.trim() || !domain.trim()}
                       >
-                        <Icon>
-                          <LuCheck />
-                        </Icon>
-                        {envWritten ? 'Сохранено' : 'Сохранить в БД'}
+                        Создать
                       </Button>
                     </HStack>
                   </VStack>
-                )
-                : (
-                  /* Форма создания */
-                  <form onSubmit={handleSubmit}>
-                    <VStack gap="4" align="stretch">
-                      {/* Быстрый выбор приложений */}
-                      {availableApps.length > 0 && (
-                        <Box>
-                          <Text fontSize="sm" fontWeight="medium" mb="2">
-                            Быстрый выбор
-                          </Text>
-                          <HStack gap="2" flexWrap="wrap">
-                            {availableApps.map((app) => (
-                              <Badge
-                                key={app.name}
-                                size="lg"
-                                variant={name === app.name ? 'solid' : 'outline'}
-                                colorPalette={name === app.name ? 'brand' : 'gray'}
-                                cursor="pointer"
-                                onClick={() => handleQuickSelect(app)}
-                                px="3"
-                                py="1"
-                              >
-                                <LuGlobe size={14} />
-                                {app.name}
-                              </Badge>
-                            ))}
-                          </HStack>
-                        </Box>
-                      )}
-
-                      <Fieldset.Root>
-                        <Fieldset.Content>
-                          <VStack gap="4">
-                            <Box w="full">
-                              <Text fontSize="sm" fontWeight="medium" mb="1">
-                                Название
-                              </Text>
-                              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-app" />
-                            </Box>
-                            <Box w="full">
-                              <Text fontSize="sm" fontWeight="medium" mb="1">
-                                Домен
-                              </Text>
-                              <Input
-                                value={domain}
-                                onChange={(e) => setDomain(e.target.value)}
-                                placeholder="example.com"
-                              />
-                            </Box>
-                          </VStack>
-                        </Fieldset.Content>
-                      </Fieldset.Root>
-
-                      <HStack justify="end" gap="3">
-                        <Button variant="ghost" onClick={handleClose}>
-                          Отмена
-                        </Button>
-                        <Button
-                          type="submit"
-                          colorPalette="brand"
-                          loading={mutation.isPending}
-                          disabled={!name.trim() || !domain.trim()}
-                        >
-                          Создать
-                        </Button>
-                      </HStack>
-                    </VStack>
-                  </form>
-                )}
+                </form>
+              )}
             </Dialog.Body>
           </Dialog.Content>
         </Dialog.Positioner>
