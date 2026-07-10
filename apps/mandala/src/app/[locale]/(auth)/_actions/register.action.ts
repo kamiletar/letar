@@ -14,8 +14,7 @@ const TOKEN_EXPIRY = {
 } as const
 
 export type RegisterResult =
-  | { success: true; email: string }
-  | { success: false; error: 'EMAIL_EXISTS' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR' }
+  { success: true; email: string } | { success: false; error: 'EMAIL_EXISTS' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR' }
 
 /**
  * Хеширование пароля в формате Better Auth (scrypt)

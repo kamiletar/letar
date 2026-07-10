@@ -6,8 +6,7 @@ import { createTokenManager } from '@letar/pin-auth/server'
 import { tokenManagerAdapter } from '../_adapters/pin-auth-adapters'
 
 export type ResendPinResult =
-  | { success: true }
-  | { success: false; error: 'RATE_LIMITED' | 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'UNKNOWN_ERROR' }
+  { success: true } | { success: false; error: 'RATE_LIMITED' | 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'UNKNOWN_ERROR' }
 
 /**
  * Менеджер токенов с настройками для mandala

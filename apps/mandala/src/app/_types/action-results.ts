@@ -19,8 +19,7 @@ export type ActionResult<T = void> = { success: true; data?: T } | { success: fa
  * @template T - Тип данных при успехе
  */
 export type ActionResultWithField<T = void> =
-  | { success: true; data?: T }
-  | { success: false; error: string; field?: string }
+  { success: true; data?: T } | { success: false; error: string; field?: string }
 
 /**
  * Результат действия с редиректом.
@@ -28,8 +27,7 @@ export type ActionResultWithField<T = void> =
  * @template T - Тип данных при успехе
  */
 export type ActionResultWithRedirect<T = void> =
-  | { success: true; data?: T; redirectTo?: string }
-  | { success: false; error: string }
+  { success: true; data?: T; redirectTo?: string } | { success: false; error: string }
 
 // =============================================================================
 // Специализированные типы
