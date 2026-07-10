@@ -80,26 +80,30 @@
 > **BlackCove задеплоил `time` через `deploy_app` (exitCode 0)** — deployId+sinceLine+self-re-exec+SOPS подтверждены.
 > Попутно вскрыто и починено **2 бага `/api/deploy/app`** (никогда не работал для зашифрованных app): проброс
 > `SOPS_AGE_KEY_FILE` в spawn (`4d970e7`) + дефолт в скрипте после sudo env-reset (`1160e9e`, диагноз BlackCove:
-> `nsenter`→root→`sudo -u deploy` сбрасывает env).
+> `nsenter`→root→`sudo -u deploy` сбрасывает env). Полное описание gotcha и правило на будущее →
+> [deployment.md § Env-переменные пропадают при self-deploy](/.claude/docs/deployment.md#env-переменные-пропадают-при-self-deploy-через-dashboard-agent-nsenter--sudo-сбрасывает-env).
 >
-> **s3-инстанс (в процессе, координация с BlackCove, thread `provision-s3-dashboard-agent`):** BlackCove сгенерил
+> **s3-инстанс ✅ поднят** (BlackCove, thread `provision-s3-dashboard-agent`): сгенерил
 > `AGENT_TOKEN_S3`, добавил в `.env.docker.enc` (`1dbb131`). Подъём упёрся в **конфликт порта 3100** (занят
 > `media-api` на s3) → решено loopback-биндингом: `docker-compose.s3.yml` = `127.0.0.1:13103:3100` (чинит конфликт
 > И закрывает порт от интернета даром). В infra-config разделены `agentPort`(3100) и **`hostPort`** (туннель; s2:3100,
-> s3:**13103**), deploy-mcp тоннелит в hostPort (фикс в репо-вайд dprint-коммитах, HEAD `16420ef`).
+> s3:**13103**), deploy-mcp тоннелит в hostPort (фикс в репо-вайд dprint-коммитах, HEAD `16420ef`). Подтверждено
+> вживую (HEAD `f21334bf`): `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. Подробности и продолжение — см.
+> сессию №53 ниже.
 >
-> **➡️ Следующий старт (новая сессия, зарегистрироваться как BrownRaven или новое имя, macro_start_session):**
+> **➡️ Следующий старт (устарело, см. актуальный список в сессии №53 выше):**
 >
-> 1. **Проверить инбокс** (thread `provision-s3-dashboard-agent`) — поднял ли BlackCove dashboard-agent на s3
->    (`docker compose -f docker-compose.s3.yml --env-file .env.docker up -d --build`; проверка `curl 127.0.0.1:13103/health`).
-> 2. Когда s3 поднят: **обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
->    расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель.
+> ~~1. Проверить инбокс — поднял ли BlackCove dashboard-agent на s3~~ ✅ сделано.
+> 2. **Обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
+> расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель.
 > 3. **s2: закрытие порта 3100** — отдельная задача (тем же приёмом `127.0.0.1:3100:3100` при следующем передеплое, без ufw).
+> 3b. **submodule driving-school/driving-school-e2e на s3 отстают** — untracked-конфликт при checkout,
+> исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout).
 > 4. Затем — **Сессия D** (§18): роут `apps/dashboard-agent/src/routes/e2e.ts` (`POST /api/e2e/run` nx e2e с
->    `E2E_BASE_URL` против staging + `GET /api/e2e/status` + запись `.last-e2e-status/<app>.json`), tools `run_e2e`/`e2e_status`
->    в deploy-mcp, warn-gate в `deploy_app(production)`, пилот **grandslamcup** (staging-комплект уже есть; `.env.staging`
->    домен s1→s3 на `grandslamcup.s3.letar.best`, Playwright `E2E_BASE_URL` скипает webServer, redirect URI в auth-hub).
->    Требует живого s3 (шаг 1-2). Детали — §18 таблица «Сессии» строка D + §18.5.
+> `E2E_BASE_URL` против staging + `GET /api/e2e/status` + запись `.last-e2e-status/<app>.json`), tools `run_e2e`/`e2e_status`
+> в deploy-mcp, warn-gate в `deploy_app(production)`, пилот **grandslamcup** (staging-комплект уже есть; `.env.staging`
+> домен s1→s3 на `grandslamcup.s3.letar.best`, Playwright `E2E_BASE_URL` скипает webServer, redirect URI в auth-hub).
+> Требует живого s3 (шаг 1-2). Детали — §18 таблица «Сессии» строка D + §18.5.
 >
 > **Agent Mail:** новая сессия регистрируется через `macro_start_session` (human_key `C:/web/letar`,
 > project_key `c-web-letar`) — см. `.claude/rules/agent-mail.md`. Тред координации s3: `provision-s3-dashboard-agent`.
