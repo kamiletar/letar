@@ -148,14 +148,7 @@ export function MobileAuthSection({
       <Separator />
 
       {/* Профиль */}
-      {profileHref && (
-        <DrawerItem
-          href={profileHref}
-          icon={LuUser}
-          label="Профиль"
-          onClick={onClose}
-        />
-      )}
+      {profileHref && <DrawerItem href={profileHref} icon={LuUser} label="Профиль" onClick={onClose} />}
 
       {/* Дополнительные пункты */}
       {extraItems.map((item) => (

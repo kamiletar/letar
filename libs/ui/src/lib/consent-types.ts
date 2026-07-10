@@ -40,7 +40,9 @@ export function createConsentConfig(appKey: string, policyVersion = 'v1'): Conse
 export function readConsentState(storageKey: string): CookieConsentState | null {
   try {
     const raw = window.localStorage.getItem(storageKey)
-    if (!raw) { return null }
+    if (!raw) {
+      return null
+    }
     return JSON.parse(raw) as CookieConsentState
   } catch {
     return null

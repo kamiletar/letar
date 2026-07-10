@@ -86,8 +86,8 @@ export function PhotoGallery({
             />
           </Box>
         ))}
-        {loading
-          && Array.from({ length: skeletonCount }).map((_, i) => (
+        {loading &&
+          Array.from({ length: skeletonCount }).map((_, i) => (
             <Skeleton key={`sk-${i}`} aspectRatio={aspectRatio} borderRadius="lg" />
           ))}
       </SimpleGrid>

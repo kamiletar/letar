@@ -17,14 +17,7 @@ export function CookieSettingsButton({ appKey }: CookieSettingsButtonProps) {
   }
 
   return (
-    <Box
-      fontSize="sm"
-      color="fg.muted"
-      _hover={{ color: 'brand.solid' }}
-      cursor="pointer"
-      textAlign="left"
-      asChild
-    >
+    <Box fontSize="sm" color="fg.muted" _hover={{ color: 'brand.solid' }} cursor="pointer" textAlign="left" asChild>
       <button type="button" onClick={handleClick}>
         Настройки cookie
       </button>
