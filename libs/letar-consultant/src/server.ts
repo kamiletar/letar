@@ -35,10 +35,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
     maxTokens = 2048,
   } = options
 
-  const server = new McpServer(
-    { name: '@letar/letar-consultant', version: '0.1.0' },
-    { capabilities: { tools: {} } },
-  )
+  const server = new McpServer({ name: '@letar/letar-consultant', version: '0.1.0' }, { capabilities: { tools: {} } })
 
   // ─── TOOL: consult_letar ────────────────────────────────────────────────────
 
@@ -59,7 +56,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         .optional()
         .default('auto')
         .describe(
-          'Режим: navigation (где что находится), architecture (паттерны), convention (конвенции letar), auto (автоопределение)',
+          'Режим: navigation (где что находится), architecture (паттерны), convention (конвенции letar), auto (автоопределение)'
         ),
       files: z
         .array(z.string())
@@ -98,9 +95,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
 
         // Добавляем метаинформацию в конец ответа
         const tokenInfo = response.evalCount ? ` | токены: ${response.evalCount}` : ''
-        const timeInfo = response.evalDuration
-          ? ` | время: ${(response.evalDuration / 1e9).toFixed(1)}с`
-          : ''
+        const timeInfo = response.evalDuration ? ` | время: ${(response.evalDuration / 1e9).toFixed(1)}с` : ''
         const chunksInfo = codeChunks.length > 0 ? ` | найдено чанков: ${codeChunks.length}` : ' | RAG недоступен'
 
         answer += `\n\n---\n*letar-consultant (${model}${tokenInfo}${timeInfo}${chunksInfo})*`
@@ -129,7 +124,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
       return {
         content: [{ type: 'text', text: answer }],
       }
-    },
+    }
   )
 
   // ─── TOOL: consultant_status ────────────────────────────────────────────────
@@ -156,9 +151,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         // Qdrant недоступен
       }
 
-      const hasInferenceModel = models.some(
-        (m) => !m.includes('nomic-embed') && !m.includes('embed'),
-      )
+      const hasInferenceModel = models.some((m) => !m.includes('nomic-embed') && !m.includes('embed'))
       const currentModelAvailable = models.some((m) => m.startsWith(model.split(':')[0] ?? ''))
 
       const lines = [
@@ -168,8 +161,8 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         ollamaOk ? `**Модели**: ${models.join(', ') || '(нет)'}` : '',
         ollamaOk
           ? `**Текущая модель** (\`${model}\`): ${
-            currentModelAvailable ? '✅ доступна' : '❌ не найдена — запусти: `ollama pull ' + model + '`'
-          }`
+              currentModelAvailable ? '✅ доступна' : '❌ не найдена — запусти: `ollama pull ' + model + '`'
+            }`
           : '',
         !hasInferenceModel && ollamaOk
           ? `⚠️ Нет inference-модели. Рекомендуется: \`ollama pull qwen2.5-coder:7b\``
@@ -191,7 +184,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         .join('\n')
 
       return { content: [{ type: 'text', text: lines }] }
-    },
+    }
   )
 
   return server
