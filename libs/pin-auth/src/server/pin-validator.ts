@@ -23,12 +23,7 @@ export interface PinValidationConfig {
 }
 
 export type PinValidationError =
-  | 'NOT_FOUND'
-  | 'INVALID_PIN'
-  | 'PIN_EXPIRED'
-  | 'TOO_MANY_ATTEMPTS'
-  | 'USER_NOT_FOUND'
-  | 'UNKNOWN_ERROR'
+  'NOT_FOUND' | 'INVALID_PIN' | 'PIN_EXPIRED' | 'TOO_MANY_ATTEMPTS' | 'USER_NOT_FOUND' | 'UNKNOWN_ERROR'
 
 export type PinValidationResult = { success: true; token: string } | { success: false; error: PinValidationError }
 

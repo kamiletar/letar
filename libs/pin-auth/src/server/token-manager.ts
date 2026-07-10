@@ -14,8 +14,7 @@ export interface TokenManagerConfig {
 export type ResendPinError = 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'RATE_LIMITED' | 'UNKNOWN_ERROR'
 
 export type ResendPinResult =
-  | { success: true; token: string; pin: string; streamToken: string }
-  | { success: false; error: ResendPinError }
+  { success: true; token: string; pin: string; streamToken: string } | { success: false; error: ResendPinError }
 
 export interface TokenManagerAdapter {
   /** Найти пользователя по email */
