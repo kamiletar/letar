@@ -44,6 +44,12 @@ services:
       HOST: 0.0.0.0
       SERVER_NAME: s3.letar.best
       WORKSPACE_PATH: /home/deploy/letar
+      # Отдельный токен s3: AGENT_TOKEN_S3 живёт в общем .env.docker(.enc), сюда
+      # мапится как AGENT_TOKEN (переопределяет значение из env_file). Единый источник
+      # в .enc → и s3-контейнер валидирует им, и локальный deploy-mcp им же
+      # аутентифицируется (tokenForServer('s3') читает AGENT_TOKEN_S3). Требует
+      # deploy-affected.sh --env-file .env.docker (уже так) или `--env-file` при ручном up.
+      AGENT_TOKEN: ${AGENT_TOKEN_S3:?AGENT_TOKEN_S3 не задан — сгенерируй и добавь в .env.docker(.enc)}
     volumes:
       # Docker socket для управления staging-контейнерами
       - /var/run/docker.sock:/var/run/docker.sock
