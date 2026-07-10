@@ -56,13 +56,21 @@ cd /home/deploy/letar
 завязанный на конкретный коммит и конкретное приложение — warn-only gate:
 
 ```
-deploy_app({ app, target: "staging" })   → s3: образ <app>:staging, контейнер <app>.s3.letar.best
-run_e2e({ app })                          → s3: nx e2e <app>-e2e против E2E_BASE_URL=<app>.s3.letar.best
-                                             → пишет .last-e2e-status/<app>.json { commitSha, passed, timestamp }
-deploy_app({ app })                       → target production (по умолчанию): deploy-mcp читает
-                                             .last-e2e-status/<app>.json на s3 и ПРЕДУПРЕЖДАЕТ (не блокирует),
-                                             если данных нет / прогон упал / коммит другой / старше 24ч
+deploy_app({ app, target: "staging" })                      → s3: образ <app>:staging, контейнер на
+                                                                своём хостовом порту (docker-compose.staging.yml)
+run_e2e({ app, baseUrl: "http://localhost:<staging-port>" }) → s3: nx e2e <app>-e2e против baseUrl
+                                                                (BASE_URL — конвенция всех playwright.config.ts)
+                                                                → пишет .last-e2e-status/<app>.json
+deploy_app({ app })                                          → target production (по умолчанию): deploy-mcp
+                                                                читает .last-e2e-status/<app>.json на s3 и
+                                                                ПРЕДУПРЕЖДАЕТ (не блокирует), если данных нет /
+                                                                прогон упал / коммит другой / старше 24ч
 ```
+
+`baseUrl` передаётся явно в `run_e2e` — публичного домена `<app>.s3.letar.best` для staging пока
+нет (нужны NPM proxy host + DNS, отдельная задача), поэтому e2e бьёт напрямую в хостовый порт
+staging-контейнера на том же s3 (`http://localhost:<port>`, порт из `docker-compose.staging.yml`
+приложения, например `3018` у grandslamcup).
 
 Gate живёт в `deploy-mcp` (`libs/deploy-mcp/src/server.ts`, `checkE2eGate()`) — это единственное
 место, видящее оба сервера сразу. `deploy-affected.sh` по-прежнему не знает про e2e — вся логика
@@ -482,31 +490,31 @@ services:
 
 ### Таблица портов (актуально 2026-06-20, синхронизировано с `docker ps`)
 
-| Приложение           | Внешний порт                                                                      | Внутренний порт | Сервер |
-| -------------------- | --------------------------------------------------------------------------------- | --------------- | ------ |
-| premium-rosstil      | 3000                                                                              | 3000            | s2     |
-| imot                 | 3001                                                                              | 3001            | s2     |
-| dashboard            | 3002                                                                              | 3002            | s2     |
-| driving-school       | 3003–3004                                                                         | 3003–3004       | s2     |
-| kami                 | 3005                                                                              | 3005            | s2     |
-| pravda               | 3007                                                                              | 3007            | s2     |
-| animatrona-landing   | 3008                                                                              | 3008            | s2     |
-| umami                | 3009                                                                              | 3000            | s2     |
-| auth-hub             | 3010                                                                              | 3010            | s2     |
-| kami-key-the-landing | 3011                                                                              | 3011            | s2     |
-| archetest            | 3012                                                                              | 3012            | s2     |
-| time                 | 3013                                                                              | 3013            | s2     |
-| letar-landing        | 3015                                                                              | 3015            | s2     |
-| grandslamcup         | 3016                                                                              | 3016            | s2     |
-| aira-web             | 3017                                                                              | 3017            | s2     |
-| grandslamcup-staging | 3018                                                                              | 3016            | s2     |
-| aboi                 | 3019                                                                              | 3018            | s2     |
-| form-docs            | 3020                                                                              | 3020            | s2     |
-| svoichuzhie          | 3021                                                                              | 3021            | s2     |
-| form-example         | 3022                                                                              | 3022            | s2     |
-| aprel8008            | 3023                                                                              | 3023            | s2     |
-| mandala              | 3025                                                                              | 3004            | s2     |
-| animatrona-tracker   | 3026                                                                              | 3010            | s2     |
+| Приложение           | Внешний порт                                                                       | Внутренний порт | Сервер |
+| -------------------- | ---------------------------------------------------------------------------------- | --------------- | ------ |
+| premium-rosstil      | 3000                                                                               | 3000            | s2     |
+| imot                 | 3001                                                                               | 3001            | s2     |
+| dashboard            | 3002                                                                               | 3002            | s2     |
+| driving-school       | 3003–3004                                                                          | 3003–3004       | s2     |
+| kami                 | 3005                                                                               | 3005            | s2     |
+| pravda               | 3007                                                                               | 3007            | s2     |
+| animatrona-landing   | 3008                                                                               | 3008            | s2     |
+| umami                | 3009                                                                               | 3000            | s2     |
+| auth-hub             | 3010                                                                               | 3010            | s2     |
+| kami-key-the-landing | 3011                                                                               | 3011            | s2     |
+| archetest            | 3012                                                                               | 3012            | s2     |
+| time                 | 3013                                                                               | 3013            | s2     |
+| letar-landing        | 3015                                                                               | 3015            | s2     |
+| grandslamcup         | 3016                                                                               | 3016            | s2     |
+| aira-web             | 3017                                                                               | 3017            | s2     |
+| grandslamcup-staging | 3018                                                                               | 3016            | s2     |
+| aboi                 | 3019                                                                               | 3018            | s2     |
+| form-docs            | 3020                                                                               | 3020            | s2     |
+| svoichuzhie          | 3021                                                                               | 3021            | s2     |
+| form-example         | 3022                                                                               | 3022            | s2     |
+| aprel8008            | 3023                                                                               | 3023            | s2     |
+| mandala              | 3025                                                                               | 3004            | s2     |
+| animatrona-tracker   | 3026                                                                               | 3010            | s2     |
 | dsperevod            | ⚠️ **КОНФЛИКТ** — занял 3021 (svoichuzhie). Нужно назначить свободный порт (3027+) | 3019            | s2     |
 
 ### Свободные порты (s2)

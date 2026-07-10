@@ -17,7 +17,7 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                | `GET /api/deploy/status`  |
 | `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                           | `POST /api/deploy/cancel` |
 | `deploy_app({ app, target })`                      | Запуск деплоя (`target`: `production`\|`staging`) + warn-only e2e-gate     | `POST /api/deploy/app`    |
-| `run_e2e({ app, project? })`                       | Запуск Playwright e2e на s3 против staging-контейнера приложения           | `POST /api/e2e/run`       |
+| `run_e2e({ app, baseUrl, project? })`              | Запуск Playwright e2e на s3 против `baseUrl`                               | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)          | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
@@ -32,14 +32,20 @@ MCP-сервер: структурированный слой над REST API da
 **Это warn-only** — деплой не блокируется, предупреждения просто дописываются в начало ответа.
 Hard gate — отдельное решение Фазы 3 (PLAN.md §18.6) после недели эксплуатации warn-only.
 
-Типичный staging-пайплайн:
+Типичный staging-пайплайн (без публичного домена — `baseUrl` бьёт прямо на s3-хост, порт из
+`docker-compose.staging.yml` приложения):
 
 ```
-deploy_app({ app: "grandslamcup", target: "staging" })          // → образ на s3
-run_e2e({ app: "grandslamcup" })                                 // → бьёт по grandslamcup.s3.letar.best
-e2e_status({ app: "grandslamcup", sinceLine: 0 })                 // поллинг + финальный lastStatus
-deploy_app({ app: "grandslamcup" })                               // production — покажет gate-warnings
+deploy_app({ app: "grandslamcup", target: "staging" })                            // → образ на s3
+run_e2e({ app: "grandslamcup", baseUrl: "http://localhost:3018" })                // → nx e2e против staging-контейнера
+e2e_status({ app: "grandslamcup", sinceLine: 0 })                                  // поллинг + финальный lastStatus
+deploy_app({ app: "grandslamcup" })                                                // production — покажет gate-warnings
 ```
+
+`baseUrl` — явный параметр (не выводится автоматически): каждое приложение публикует staging
+на своём хостовом порту (`docker-compose.staging.yml` → `ports: ['${PORT:-3018}:...']`), единого
+публичного домена `<app>.s3.letar.best` пока нет — это отдельная инфраструктурная задача (NPM +
+DNS), не блокирующая пайплайн.
 
 ### Типичный воркфлоу деплоя
 

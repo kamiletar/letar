@@ -265,20 +265,22 @@ export function createDeployMcpServer(): McpServer {
     'run_e2e',
     [
       'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
-      'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging") — e2e бьёт по',
-      "<app>.s3.letar.best. Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом",
-      'в deploy_app(production). Возвращает runId — опрашивай через e2e_status.',
+      'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging"). baseUrl — куда бить',
+      '(обычно http://localhost:<staging-host-port> того же s3, см. docker-compose.staging.yml приложения).',
+      "Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом в deploy_app(production).",
+      'Возвращает runId — опрашивай через e2e_status.',
     ].join('\n'),
     {
       app: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
         .describe('Имя приложения'),
+      baseUrl: z.string().url().describe('URL staging-контейнера на s3, например http://localhost:3018'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
     },
-    async ({ app, project }) => {
+    async ({ app, baseUrl, project }) => {
       try {
-        const res = await agentRequest('s3', { method: 'POST', path: '/api/e2e/run', body: { app, project } })
+        const res = await agentRequest('s3', { method: 'POST', path: '/api/e2e/run', body: { app, baseUrl, project } })
         if (!res.success) {
           return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
         }

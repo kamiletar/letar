@@ -2,9 +2,14 @@
  * E2E API Routes
  *
  * Запуск Playwright e2e-прогона на s3 (единственный e2e-раннер, см. e2e-testing.md)
- * против staging-контейнера приложения (E2E_BASE_URL = <app>.s3.letar.best) и чтение
- * персистентного статуса. Часть staging-gated пайплайна (PLAN.md §18 Сессия D):
- * deploy-mcp читает `.last-e2e-status/<app>.json` перед production-деплоем (warn-only gate).
+ * против staging-контейнера приложения и чтение персистентного статуса. Часть
+ * staging-gated пайплайна (PLAN.md §18 Сессия D): deploy-mcp читает
+ * `.last-e2e-status/<app>.json` перед production-деплоем (warn-only gate).
+ *
+ * baseUrl передаётся явно из POST body (не хардкодится) — все playwright.config.ts
+ * в монорепо читают `process.env.BASE_URL` (единая конвенция, см. любой apps/*-e2e),
+ * без единого стандарта публичного staging-домена на s3 пока нет: e2e чаще всего
+ * бьёт напрямую по `http://localhost:<staging-host-port>` того же хоста s3.
  */
 
 import { type ChildProcess, spawn } from 'child_process'
@@ -107,7 +112,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
     async (
-      request,
+      request
     ): Promise<
       ApiResponse<{
         run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
@@ -133,27 +138,31 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
    * POST /api/e2e/run — запускает `nx e2e <app>-e2e` против staging-контейнера
-   * Body: { app: string; project?: string }
+   * Body: { app: string; baseUrl: string; project?: string }
+   * baseUrl — куда бить (обычно `http://localhost:<staging-host-port>` на этом же s3).
    * project — конкретный Playwright project (chromium/firefox/webkit/shard-*); без него — все.
    *
    * Асинхронный: возвращает runId сразу, клиент опрашивает /api/e2e/status.
    * По завершении пишет `.last-e2e-status/<app>.json` — читается warn-gate'ом deploy_app(production).
    */
-  fastify.post<{ Body: { app: string; project?: string } }>(
+  fastify.post<{ Body: { app: string; baseUrl: string; project?: string } }>(
     '/api/e2e/run',
     async (request): Promise<ApiResponse<{ runId: string; app: string; started: boolean }>> => {
-      const { app, project } = request.body
+      const { app, baseUrl, project } = request.body
 
       if (!app) {
         return { success: false, error: 'App name is required', timestamp: new Date().toISOString() }
       }
       if (!/^[a-z0-9-]+$/.test(app)) {
         return { success: false, error: 'Invalid app name format', timestamp: new Date().toISOString() }
+      }
+      if (!baseUrl) {
+        return { success: false, error: 'baseUrl is required', timestamp: new Date().toISOString() }
       }
 
       // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
@@ -170,7 +179,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       const run = createRun({ running: true, app, project, startTime: new Date().toISOString() })
-      appendOutput(run, `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}`)
+      appendOutput(run, `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''} against ${baseUrl}`)
 
       // Коммит фиксируем ДО прогона — это то, что реально протестировано (не что задеплоено).
       let commitSha = 'unknown'
@@ -186,30 +195,27 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       }
       appendOutput(run, `📋 Command: nx ${args.join(' ')}`)
 
-      // Playwright-конфиги приложений скипают webServer, когда E2E_BASE_URL задан
-      // (см. e2e-testing.md §18 Сессия D) — бьём напрямую в staging-домен на s3.
-      const env = { ...process.env, E2E_BASE_URL: `https://${app}.s3.letar.best` }
+      // BASE_URL — единая конвенция всех playwright.config.ts в монорепо (apps/*-e2e).
+      // webServer.reuseExistingServer:true в конфигах означает: раз baseUrl уже отвечает
+      // (staging-контейнер поднят), Playwright НЕ запускает `nx dev <app>` — бьёт напрямую.
+      const env = { ...process.env, BASE_URL: baseUrl }
 
       currentProcess = spawn('nx', args, { cwd: REPO_PATH, stdio: ['ignore', 'pipe', 'pipe'], env })
 
       currentProcess.stdout?.on('data', (data: Buffer) => {
-        for (
-          const line of data
-            .toString()
-            .split('\n')
-            .filter((l) => l.trim())
-        ) {
+        for (const line of data
+          .toString()
+          .split('\n')
+          .filter((l) => l.trim())) {
           appendOutput(run, line)
         }
       })
 
       currentProcess.stderr?.on('data', (data: Buffer) => {
-        for (
-          const line of data
-            .toString()
-            .split('\n')
-            .filter((l) => l.trim())
-        ) {
+        for (const line of data
+          .toString()
+          .split('\n')
+          .filter((l) => l.trim())) {
           appendOutput(run, `⚠️ ${line}`)
         }
       })
@@ -243,6 +249,6 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { runId: run.runId, app, started: true },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 }
