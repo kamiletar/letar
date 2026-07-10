@@ -16,7 +16,7 @@ export const logsPreload = {
   stopWatch: (): Promise<{ success: boolean }> => ipcRenderer.invoke('logs:stopWatch'),
 
   /** Подписка на новые строки лога (пока активен startWatch) */
-  onNewLines: (callback: (lines: string[]) => void): () => void => {
+  onNewLines: (callback: (lines: string[]) => void): (() => void) => {
     const handler = (_event: unknown, lines: unknown) => callback(lines as string[])
     ipcRenderer.on('logs:newLines', handler)
     return () => ipcRenderer.removeListener('logs:newLines', handler)

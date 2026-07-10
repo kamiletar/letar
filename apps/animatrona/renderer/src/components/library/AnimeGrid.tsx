@@ -117,10 +117,7 @@ export const AnimeGrid = memo(function AnimeGrid({
                   onToggleSelection?.(anime.id)
                 }}
               >
-                <Checkbox.Root
-                  checked={isSelected}
-                  size="lg"
-                >
+                <Checkbox.Root checked={isSelected} size="lg">
                   <Checkbox.HiddenInput />
                   <Checkbox.Control
                     bg={isSelected ? 'purple.500' : 'blackAlpha.700'}

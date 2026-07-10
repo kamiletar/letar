@@ -386,7 +386,7 @@ export async function getDefaultEncodingProfile() {
  */
 export async function saveGenresAndThemes(
   animeId: string,
-  genres: Array<{ id: string; name: string; russian: string; kind: 'genre' | 'theme' }>,
+  genres: Array<{ id: string; name: string; russian: string; kind: 'genre' | 'theme' }>
 ) {
   // Разделяем на жанры и темы
   const genreItems = genres.filter((g) => g.kind === 'genre')
@@ -428,7 +428,7 @@ export async function saveGenresAndThemes(
  */
 export async function syncAnimeRelations(
   animeId: string,
-  relations: Array<{ targetShikimoriId: number; relationKind: string }>,
+  relations: Array<{ targetShikimoriId: number; relationKind: string }>
 ) {
   for (const rel of relations) {
     // Ищем целевое аниме по shikimoriId

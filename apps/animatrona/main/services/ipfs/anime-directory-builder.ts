@@ -141,7 +141,7 @@ export async function buildAnimeDirectory(
   options?: {
     /** Переопределить CID manifest.json (используется когда новый манифест только что сгенерирован, но ещё не в директории) */
     manifestCidOverride?: string
-  },
+  }
 ): Promise<BuildAnimeDirectoryResult> {
   log.info('Построение IPFS-директории аниме', { animeId })
 
@@ -230,7 +230,7 @@ export async function buildAnimeDirectory(
       detail?: string
       recover?: () => Promise<string | null>
       recoverVia?: RecoveredCidEntry['via']
-    },
+    }
   ): Promise<string | null> {
     const alive = await probeCidAvailable(cid, 5000)
     if (alive) {
@@ -376,7 +376,7 @@ export async function buildAnimeDirectory(
           epsWithAudio.push({ ...ep, audioCid: track.transcodedCid })
         }
       }
-    }),
+    })
   )
 
   // Итог pre-pass: логируем только проблемы, иначе — кратко
@@ -388,7 +388,7 @@ export async function buildAnimeDirectory(
       'warn',
       `   ⚠ chapters: мёртвых ${deadChapterEps.length} (эп. [${deadChapterEps.slice(0, 10).join(', ')}${
         deadChapterEps.length > 10 ? '…' : ''
-      }])`,
+      }])`
     )
   }
   const aliveCount = chaptersByEp.size
@@ -408,7 +408,7 @@ export async function buildAnimeDirectory(
   if (chaptersByEp.size > 0 && epsWithMissingChapters.length > 0) {
     detail(
       'info',
-      `   — chapters: ${epsWithMissingChapters.length} эп. без глав при ${chaptersByEp.size} с главами — считаем что их просто нет, recovery пропускаем`,
+      `   — chapters: ${epsWithMissingChapters.length} эп. без глав при ${chaptersByEp.size} с главами — считаем что их просто нет, recovery пропускаем`
     )
     epsWithMissingChapters.length = 0
     epsWithAudio.length = 0
@@ -419,7 +419,7 @@ export async function buildAnimeDirectory(
   if (!skipDetect && epsWithMissingChapters.length > 0 && epsWithAudio.length >= 2) {
     detail(
       'info',
-      `   ↻ chapters: ${epsWithMissingChapters.length} эп. без живых глав, запускаю detectIntros по ${epsWithAudio.length} аудиодорожкам…`,
+      `   ↻ chapters: ${epsWithMissingChapters.length} эп. без живых глав, запускаю detectIntros по ${epsWithAudio.length} аудиодорожкам…`
     )
     try {
       // Параллельный probe аудиодорожек — 25 × 5s последовательно → 5s суммарно
@@ -430,7 +430,7 @@ export async function buildAnimeDirectory(
             return alive
               ? { id: ep.id, audioCid: ep.audioCid, durationMs: ep.durationMs as number, number: ep.number }
               : null
-          }),
+          })
         )
       ).filter((ep): ep is NonNullable<typeof ep> => ep !== null)
       detail('info', `     проверка доступности: ${probedAudio.length}/${epsWithAudio.length} аудиодорожек живых`)
@@ -456,7 +456,7 @@ export async function buildAnimeDirectory(
         }
         detail(
           'success',
-          `   ✓ chapters: восстановлено через detectIntros для ${recoveredMap.size}/${epsWithMissingChapters.length} эпизодов`,
+          `   ✓ chapters: восстановлено через detectIntros для ${recoveredMap.size}/${epsWithMissingChapters.length} эпизодов`
         )
       } else {
         detail('warn', `   ⚠ chapters: только ${probedAudio.length} живых аудиодорожек, нужно ≥2 — пропускаем`)
@@ -767,8 +767,8 @@ export async function buildAnimeDirectory(
       }
 
       // screenshots/ — полноразмерные скриншоты из манифеста или БД
-      const screenshotCids = parsedManifest.screenshotCids
-        ?? (ep.screenshotCids ? (JSON.parse(ep.screenshotCids) as string[]) : [])
+      const screenshotCids =
+        parsedManifest.screenshotCids ?? (ep.screenshotCids ? (JSON.parse(ep.screenshotCids) as string[]) : [])
       if (screenshotCids.length > 0) {
         const screenshotEntries: DirEntry[] = screenshotCids.map((cid: string, i: number) => ({
           name: `${String(i + 1).padStart(2, '0')}.webp`,
@@ -792,9 +792,8 @@ export async function buildAnimeDirectory(
           // Probe thumbnail CID и video CID параллельно — экономим 5s на эпизод при dead thumbnails
           const aliveCids: string[] = []
           let anyDead = false
-          const videoProbePromise = ep.transcodedCid && ep.durationMs
-            ? probeCidAvailable(ep.transcodedCid, 5000)
-            : Promise.resolve(false)
+          const videoProbePromise =
+            ep.transcodedCid && ep.durationMs ? probeCidAvailable(ep.transcodedCid, 5000) : Promise.resolve(false)
           await Promise.all(
             thumbnailCids.map(async (cid) => {
               const alive = await probeCidAvailable(cid, 5000)
@@ -803,7 +802,7 @@ export async function buildAnimeDirectory(
               } else {
                 anyDead = true
               }
-            }),
+            })
           )
 
           let finalCids = aliveCids
@@ -812,7 +811,7 @@ export async function buildAnimeDirectory(
             const deadCount = thumbnailCids.length - aliveCids.length
             detail(
               'info',
-              `   ↻ эп.${ep.number}: ${deadCount}/${thumbnailCids.length} thumbnails-img мёртвы, regen из video…`,
+              `   ↻ эп.${ep.number}: ${deadCount}/${thumbnailCids.length} thumbnails-img мёртвы, regen из video…`
             )
             const videoAlive = await videoProbePromise
             if (videoAlive) {
@@ -983,10 +982,11 @@ export async function buildAnimeDirectory(
           break
         } catch (pinErr) {
           const errStr = String(pinErr)
-          const isTimeout = errStr.includes('TimeoutError')
-            || errStr.includes('timed out')
-            || errStr.includes('AbortError')
-            || errStr.toLowerCase().includes('timeout')
+          const isTimeout =
+            errStr.includes('TimeoutError') ||
+            errStr.includes('timed out') ||
+            errStr.includes('AbortError') ||
+            errStr.toLowerCase().includes('timeout')
           const isFetchFailed = errStr.includes('fetch failed') || (errStr.includes('TypeError') && !isTimeout)
           if (isTimeout) {
             log.warn('pin.add таймаут (90с) — директория не защищена от GC', { directoryCid, attempt })
@@ -1138,7 +1138,7 @@ type ProbeOrRecoverFn = (
     detail?: string
     recover?: () => Promise<string | null>
     recoverVia?: RecoveredCidEntry['via']
-  },
+  }
 ) => Promise<string | null>
 
 /**
@@ -1153,7 +1153,7 @@ type ProbeOrRecoverFn = (
  */
 async function buildImagesEntriesWithRecovery(
   info: AnimeInfo,
-  probeOrRecover: ProbeOrRecoverFn,
+  probeOrRecover: ProbeOrRecoverFn
 ): Promise<DirEntry | null> {
   const cidToPath = new Map<string, string>()
   const usedNames = new Map<string, Set<string>>() // category → set of used filenames
@@ -1181,7 +1181,7 @@ async function buildImagesEntriesWithRecovery(
   async function probeEntity(
     category: 'studios' | 'persons' | 'characters',
     kind: MissingCidEntry['kind'],
-    entity: AnimeManifestStudio | AnimeManifestPerson | AnimeManifestCharacter,
+    entity: AnimeManifestStudio | AnimeManifestPerson | AnimeManifestCharacter
   ): Promise<{ category: 'studios' | 'persons' | 'characters'; entity: typeof entity; finalCid: string | null }> {
     const oldCid = entity.imageCid ?? null
     let finalCid: string | null = null
@@ -1204,10 +1204,10 @@ async function buildImagesEntriesWithRecovery(
       // imageCid есть — probe + recovery при смерти
       const recover = entity.imageUrl
         ? () =>
-          recoverShikimoriImage({
-            imageUrl: entity.imageUrl as string,
-            entityKey: `${category}-${entity.id ?? slugify(entity.name)}`,
-          })
+            recoverShikimoriImage({
+              imageUrl: entity.imageUrl as string,
+              entityKey: `${category}-${entity.id ?? slugify(entity.name)}`,
+            })
         : undefined
       finalCid = await probeOrRecover(oldCid, {
         kind,

@@ -5,7 +5,10 @@
  * API: GET https://shikimori.one/api/animes/{id}
  */
 
+import { net } from 'electron'
+
 import { createModuleLogger } from '../../utils/logger'
+import { describeNetErrorWithDiagnostics } from '../../utils/net-error'
 import { acquireShikimoriSlot } from './throttle'
 import type {
   ShikimoriAnimeRestResponse,
@@ -56,7 +59,7 @@ export async function getAnimeRestData(shikimoriId: number): Promise<ShikimoriAn
   log.info('Fetching anime REST data', { url })
 
   try {
-    const response = await fetch(url, {
+    const response = await net.fetch(url, {
       method: 'GET',
       headers: {
         'User-Agent': USER_AGENT,
@@ -95,7 +98,7 @@ export async function getAnimeRestData(shikimoriId: number): Promise<ShikimoriAn
     return data
   } catch (error) {
     log.error('Error fetching anime REST data', { shikimoriId, error })
-    throw error
+    throw new Error(await describeNetErrorWithDiagnostics(error, url))
   }
 }
 
@@ -142,7 +145,7 @@ export async function getAnimeRoles(shikimoriId: number): Promise<ShikimoriAnime
 
   let rawRoles: ShikimoriRestRole[]
   try {
-    const response = await fetch(url, {
+    const response = await net.fetch(url, {
       method: 'GET',
       headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
       signal: controller.signal,

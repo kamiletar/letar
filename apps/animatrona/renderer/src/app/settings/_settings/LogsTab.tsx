@@ -110,9 +110,7 @@ export function LogsTab() {
   }, [lines, autoScroll])
 
   // Фильтрация
-  const filtered = filter.trim()
-    ? lines.filter((l) => l.raw.toLowerCase().includes(filter.toLowerCase()))
-    : lines
+  const filtered = filter.trim() ? lines.filter((l) => l.raw.toLowerCase().includes(filter.toLowerCase())) : lines
 
   return (
     <VStack gap={3} align="stretch" maxW="100%">
@@ -142,10 +140,7 @@ export function LogsTab() {
           maxW="280px"
         />
         <NativeSelectRoot size="sm" maxW="140px">
-          <NativeSelectField
-            value={tailLines}
-            onChange={(e) => setTailLines(Number(e.target.value))}
-          >
+          <NativeSelectField value={tailLines} onChange={(e) => setTailLines(Number(e.target.value))}>
             <option value={200}>Последние 200</option>
             <option value={500}>Последние 500</option>
             <option value={1000}>Последние 1000</option>
@@ -161,11 +156,7 @@ export function LogsTab() {
           Очистить
         </Button>
         <HStack gap={2}>
-          <Switch.Root
-            checked={autoScroll}
-            onCheckedChange={(e) => setAutoScroll(e.checked)}
-            size="sm"
-          >
+          <Switch.Root checked={autoScroll} onCheckedChange={(e) => setAutoScroll(e.checked)} size="sm">
             <Switch.HiddenInput />
             <Switch.Control>
               <Switch.Thumb />

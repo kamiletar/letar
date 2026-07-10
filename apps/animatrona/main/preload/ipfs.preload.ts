@@ -99,7 +99,7 @@ export const ipfsPreload = {
   /** Добавить директорию в IPFS */
   addDirectory: (
     dirPath: string,
-    recursive = true,
+    recursive = true
   ): Promise<{ success: boolean; data?: { files: IpfsAddResult[]; rootCid: string }; error?: string }> =>
     ipcRenderer.invoke('ipfs:addDirectory', dirPath, recursive),
 
@@ -174,7 +174,7 @@ export const ipfsPreload = {
   }> => ipcRenderer.invoke('ipfs:findOrphanedPins'),
 
   /** Подписка на прогресс аудита */
-  onAuditProgress: (callback: (data: { current: number; total: number; name: string }) => void): () => void => {
+  onAuditProgress: (callback: (data: { current: number; total: number; name: string }) => void): (() => void) => {
     const handler = (_event: Electron.IpcRendererEvent, data: { current: number; total: number; name: string }) =>
       callback(data)
     ipcRenderer.on('ipfs:auditProgress', handler)
@@ -182,7 +182,7 @@ export const ipfsPreload = {
   },
 
   /** Подписка на шаги аудита (текстовое описание текущего шага) */
-  onAuditStep: (callback: (data: { step: string }) => void): () => void => {
+  onAuditStep: (callback: (data: { step: string }) => void): (() => void) => {
     const handler = (_event: Electron.IpcRendererEvent, data: { step: string }) => callback(data)
     ipcRenderer.on('ipfs:auditStep', handler)
     return () => ipcRenderer.removeListener('ipfs:auditStep', handler)
@@ -190,7 +190,7 @@ export const ipfsPreload = {
 
   /** Массовое удаление recursive pin'ов (параллельно, со стрим-прогрессом) */
   bulkUnpin: (
-    cids: string[],
+    cids: string[]
   ): Promise<{
     success: boolean
     data?: { unpinned: number; failed: number; total: number }
@@ -198,7 +198,7 @@ export const ipfsPreload = {
   }> => ipcRenderer.invoke('ipfs:bulkUnpin', cids),
 
   /** Подписка на прогресс массового удаления */
-  onBulkUnpinProgress: (callback: (data: { current: number; total: number }) => void): () => void => {
+  onBulkUnpinProgress: (callback: (data: { current: number; total: number }) => void): (() => void) => {
     const handler = (_event: Electron.IpcRendererEvent, data: { current: number; total: number }) => callback(data)
     ipcRenderer.on('ipfs:bulkUnpinProgress', handler)
     return () => ipcRenderer.removeListener('ipfs:bulkUnpinProgress', handler)
@@ -218,7 +218,7 @@ export const ipfsPreload = {
   }> => ipcRenderer.invoke('ipfs:normalizePins'),
 
   /** Подписка на шаги нормализации pins */
-  onNormalizeStep: (callback: (data: { step: string; current?: number; total?: number }) => void): () => void => {
+  onNormalizeStep: (callback: (data: { step: string; current?: number; total?: number }) => void): (() => void) => {
     const handler = (_event: Electron.IpcRendererEvent, data: { step: string; current?: number; total?: number }) =>
       callback(data)
     ipcRenderer.on('ipfs:normalizeStep', handler)
@@ -269,7 +269,7 @@ export const ipfsPreload = {
 
   /** Закрепить missing pins (referenced в БД, но не в Kubo) */
   pinMissing: (
-    cids: string[],
+    cids: string[]
   ): Promise<{
     success: boolean
     data?: { pinned: number; failed: number }
@@ -287,7 +287,7 @@ export const ipfsPreload = {
   /** Опубликовать CID под IPNS именем текущей ноды */
   ipnsPublish: (
     cid: string,
-    lifetime?: string,
+    lifetime?: string
   ): Promise<{ success: boolean; data?: IpnsPublishResult; error?: string }> =>
     ipcRenderer.invoke('ipns:publish', cid, lifetime),
 
@@ -329,7 +329,7 @@ export const ipfsPreload = {
   /** Обновить настройки подписки */
   subscriptionUpdate: (
     id: string,
-    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>,
+    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>
   ): Promise<{ success: boolean; data?: Subscription | null; error?: string }> =>
     ipcRenderer.invoke('subscription:update', id, data),
 
@@ -343,7 +343,7 @@ export const ipfsPreload = {
 
   /** Загрузить библиотеку подписки из IPFS по lastKnownCid */
   subscriptionFetchLibrary: (
-    id: string,
+    id: string
   ): Promise<{ success: boolean; data?: PublishedLibrary | null; error?: string }> =>
     ipcRenderer.invoke('subscription:fetchLibrary', id),
 
@@ -370,7 +370,7 @@ export const ipfsPreload = {
 
   /** Обновить конфигурацию публикации */
   publisherUpdateConfig: (
-    updates: Partial<PublisherConfig>,
+    updates: Partial<PublisherConfig>
   ): Promise<{ success: boolean; data?: PublisherConfig; error?: string }> =>
     ipcRenderer.invoke('publisher:updateConfig', updates),
 
@@ -417,9 +417,8 @@ export const ipfsPreload = {
   }> => ipcRenderer.invoke('publisher:migrateToIpfs'),
 
   /** Подписка на прогресс миграции */
-  onPublisherMigrationProgress: on<[{ current: number; total: number; animeName: string; episodeNumber: number }]>(
-    'publisher:migrationProgress',
-  ),
+  onPublisherMigrationProgress:
+    on<[{ current: number; total: number; animeName: string; episodeNumber: number }]>('publisher:migrationProgress'),
 
   /** Регенерировать все EpisodeManifest (заменить локальные пути на CID'ы из БД) */
   publisherRegenerateManifests: (): Promise<{
@@ -437,7 +436,7 @@ export const ipfsPreload = {
 
   /** Точечная регенерация EpisodeManifest + AnimeManifest + directoryCid для одного аниме */
   regenerateForAnime: (
-    animeId: string,
+    animeId: string
   ): Promise<{
     success: boolean
     data?: { updated: number; failed: number }
@@ -445,13 +444,12 @@ export const ipfsPreload = {
   }> => ipcRenderer.invoke('publisher:regenerateForAnime', animeId),
 
   /** Подписка на прогресс регенерации манифестов */
-  onPublisherRegenerateProgress: on<[{ current: number; total: number; animeName: string; episodeNumber: number }]>(
-    'publisher:regenerateProgress',
-  ),
+  onPublisherRegenerateProgress:
+    on<[{ current: number; total: number; animeName: string; episodeNumber: number }]>('publisher:regenerateProgress'),
 
   /** Удалить контент конкретного аниме из IPFS (вызывать ПЕРЕД удалением из БД) */
   publisherDeleteAnimeContent: (
-    animeId: string,
+    animeId: string
   ): Promise<{ success: boolean; data?: { deletedCids: number; cids: string[] }; error?: string }> =>
     ipcRenderer.invoke('publisher:deleteAnimeContent', animeId),
 
@@ -491,7 +489,7 @@ export const ipfsPreload = {
 
   /** Опубликовать аниме на tracker по directoryCid */
   trackerPublish: (
-    directoryCid: string,
+    directoryCid: string
   ): Promise<{
     success: boolean
     data?: {
@@ -522,7 +520,7 @@ export const ipfsPreload = {
 
   /** Пакетная публикация аниме на tracker */
   trackerBatchPublish: (
-    items: Array<{ directoryCid: string; animeName: string }>,
+    items: Array<{ directoryCid: string; animeName: string }>
   ): Promise<{
     success: boolean
     data?: {
@@ -583,7 +581,7 @@ export const ipfsPreload = {
 
   /** Обновить конфигурацию планировщика */
   schedulerUpdateConfig: (
-    updates: Partial<SchedulerConfig>,
+    updates: Partial<SchedulerConfig>
   ): Promise<{ success: boolean; data?: SchedulerConfig; error?: string }> =>
     ipcRenderer.invoke('scheduler:updateConfig', updates),
 
@@ -614,13 +612,13 @@ export const ipfsPreload = {
 
   /** Обновить конфигурацию remote pinning */
   remotePinUpdateConfig: (
-    updates: Partial<RemotePinConfig>,
+    updates: Partial<RemotePinConfig>
   ): Promise<{ success: boolean; data?: RemotePinConfig; error?: string }> =>
     ipcRenderer.invoke('remotePin:updateConfig', updates),
 
   /** Обновить конфигурацию Pinata */
   remotePinUpdatePinataConfig: (
-    updates: Partial<PinataConfig>,
+    updates: Partial<PinataConfig>
   ): Promise<{ success: boolean; data?: RemotePinConfig; error?: string }> =>
     ipcRenderer.invoke('remotePin:updatePinataConfig', updates),
 
@@ -631,7 +629,7 @@ export const ipfsPreload = {
   /** Закрепить CID на Pinata */
   remotePinPin: (
     cid: string,
-    options?: RemotePinOptions,
+    options?: RemotePinOptions
   ): Promise<{ success: boolean; data?: PinataPinJob; error?: string }> =>
     ipcRenderer.invoke('remotePin:pin', cid, options),
 
@@ -659,7 +657,7 @@ export const ipfsPreload = {
   remotePinUpdateMetadata: (
     cid: string,
     name: string,
-    keyvalues?: Record<string, string>,
+    keyvalues?: Record<string, string>
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('remotePin:updateMetadata', cid, name, keyvalues),
 

@@ -145,8 +145,8 @@ export const useUpdateStore = create<UpdateStore>()(
         scheduledInstall: state.scheduledInstall,
         preferences: state.preferences,
       }),
-    },
-  ),
+    }
+  )
 )
 
 // Экспортируем store в глобальный объект для E2E тестов

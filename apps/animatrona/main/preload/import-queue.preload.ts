@@ -72,9 +72,8 @@ export const importQueuePreload = {
     ipcRenderer.invoke('import-queue:get-item', itemId),
 
   /** Очистить завершённые items (опционально только успешные — error/cancelled не трогаем) */
-  clearCompleted: (
-    options?: { onlySuccess?: boolean },
-  ): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('import-queue:clear-completed', options),
+  clearCompleted: (options?: { onlySuccess?: boolean }): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('import-queue:clear-completed', options),
 
   /** Установить автозапуск */
   setAutoStart: (enabled: boolean): Promise<{ success: boolean; error?: string }> =>
@@ -95,7 +94,7 @@ export const importQueuePreload = {
   /** Переделать недостающие эпизоды (retranscode mode, опционально с pre-encode) */
   retryMissing: (
     itemId: string,
-    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string },
+    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string }
   ): Promise<{ success: boolean; data?: { newItemId?: string }; error?: string }> =>
     ipcRenderer.invoke('import-queue:retry-missing', itemId, preEncodeOptions),
 
@@ -105,7 +104,7 @@ export const importQueuePreload = {
   updateStatus: (
     itemId: string,
     status: ImportQueueStatus,
-    error?: string,
+    error?: string
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('import-queue:update-status', itemId, status, error),
 
@@ -115,14 +114,14 @@ export const importQueuePreload = {
     progress: number,
     currentFileName?: string,
     currentStage?: string,
-    detailProgress?: ImportQueueDetailProgress,
+    detailProgress?: ImportQueueDetailProgress
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('import-queue:update-progress', itemId, progress, currentFileName, currentStage, detailProgress),
 
   /** Обновить VMAF прогресс */
   updateVmafProgress: (
     itemId: string,
-    vmafProgress: ImportQueueVmafProgress,
+    vmafProgress: ImportQueueVmafProgress
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('import-queue:update-vmaf-progress', itemId, vmafProgress),
 
@@ -177,7 +176,7 @@ export const templatesPreload = {
   /** Обновить шаблон */
   update: (
     id: string,
-    data: ImportTemplateUpdateData,
+    data: ImportTemplateUpdateData
   ): Promise<{ success: boolean; data?: ImportTemplate; error?: string }> =>
     ipcRenderer.invoke('templates:update', id, data),
 

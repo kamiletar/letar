@@ -14,8 +14,8 @@ export {
   type SortOption,
 } from './AnimeFilters'
 export { AnimeGrid } from './AnimeGrid'
-export { BatchActionsBar } from './BatchActionsBar'
 export { AnimeMetadataSection } from './AnimeMetadataSection'
+export { BatchActionsBar } from './BatchActionsBar'
 export { DeleteAnimeDialog } from './DeleteAnimeDialog'
 export { DropZone } from './DropZone'
 export { EditAnimeDialog } from './EditAnimeDialog'

@@ -70,10 +70,7 @@ export interface TrackerConnectionResult {
  * @param directoryCid - CID корневой IPFS-директории аниме
  * @returns Результат публикации
  */
-export async function publishToTracker(
-  config: TrackerConfig,
-  directoryCid: string,
-): Promise<TrackerPublishResult> {
+export async function publishToTracker(config: TrackerConfig, directoryCid: string): Promise<TrackerPublishResult> {
   log.info('Публикация на tracker', {
     baseUrl: config.baseUrl,
     directoryCid,
@@ -212,7 +209,7 @@ export async function testTrackerConnection(config: TrackerConfig): Promise<Trac
  */
 export async function registerDistribution(
   config: TrackerConfig,
-  params: { cid: string; peerId: string; animeId?: string; size?: number },
+  params: { cid: string; peerId: string; animeId?: string; size?: number }
 ): Promise<TrackerDistributionResult> {
   try {
     const response = await fetch(`${config.baseUrl}/api/distributions`, {
@@ -246,7 +243,7 @@ export async function registerDistribution(
 export async function updateDistribution(
   config: TrackerConfig,
   distributionId: string,
-  params: { status?: 'ACTIVE' | 'PAUSED' | 'OFFLINE' },
+  params: { status?: 'ACTIVE' | 'PAUSED' | 'OFFLINE' }
 ): Promise<TrackerDistributionResult> {
   try {
     const response = await fetch(`${config.baseUrl}/api/distributions/${distributionId}`, {
@@ -280,7 +277,7 @@ export async function updateDistribution(
 export async function reportStats(
   config: TrackerConfig,
   peerId: string,
-  delta: StatsReportDelta,
+  delta: StatsReportDelta
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(`${config.baseUrl}/api/distributions/stats`, {
@@ -314,7 +311,7 @@ export async function reportStats(
  */
 export async function fetchTrackerCatalog(
   config: TrackerConfig,
-  params?: { page?: number; limit?: number; q?: string },
+  params?: { page?: number; limit?: number; q?: string }
 ): Promise<TrackerCatalogResult> {
   try {
     const url = new URL(`${config.baseUrl}/api/anime`)
@@ -361,7 +358,7 @@ export async function fetchTrackerCatalog(
  */
 export async function fetchTrackerAnimeDetail(
   config: TrackerConfig,
-  animeId: string,
+  animeId: string
 ): Promise<TrackerAnimeDetailResult> {
   try {
     // Детали аниме — публичный endpoint, Auth опционален
@@ -390,7 +387,7 @@ export async function fetchTrackerAnimeDetail(
  * Получить библиотеку пользователя с трекера (GET /api/user/library)
  */
 export async function fetchLibraryFromTracker(
-  config: TrackerConfig,
+  config: TrackerConfig
 ): Promise<{ success: boolean; data?: TrackerLibraryItem[]; error?: string }> {
   try {
     const response = await fetch(`${config.baseUrl}/api/user/library`, {
@@ -420,7 +417,7 @@ export async function fetchLibraryFromTracker(
 export async function syncLibraryToTracker(
   config: TrackerConfig,
   items: TrackerSyncItem[],
-  syncedSince?: string,
+  syncedSince?: string
 ): Promise<TrackerSyncResult> {
   try {
     const response = await fetch(`${config.baseUrl}/api/user/library/sync`, {
@@ -461,7 +458,7 @@ export async function pushWatchProgress(
     duration: number
     completed?: boolean
     updatedAt?: string
-  },
+  }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(`${config.baseUrl}/api/watch-progress`, {
@@ -491,7 +488,7 @@ export async function pushWatchProgress(
  */
 export async function fetchWatchProgressSince(
   config: TrackerConfig,
-  since?: string,
+  since?: string
 ): Promise<{ success: boolean; items?: TrackerWatchProgressItem[]; error?: string }> {
   try {
     const url = new URL(`${config.baseUrl}/api/user/watch-progress`)
@@ -525,7 +522,7 @@ export async function fetchWatchProgressSince(
  * Получить профиль пользователя с трекера (GET /api/profile/settings)
  */
 export async function fetchProfile(
-  config: TrackerConfig,
+  config: TrackerConfig
 ): Promise<{ success: boolean; data?: TrackerUserProfile; error?: string }> {
   try {
     const response = await fetch(`${config.baseUrl}/api/profile/settings`, {
@@ -551,7 +548,7 @@ export async function fetchProfile(
  */
 export async function updateProfile(
   config: TrackerConfig,
-  updates: Partial<TrackerUserProfile>,
+  updates: Partial<TrackerUserProfile>
 ): Promise<{ success: boolean; data?: TrackerUserProfile; error?: string }> {
   try {
     const response = await fetch(`${config.baseUrl}/api/profile/settings`, {
@@ -582,7 +579,7 @@ export async function updateProfile(
  */
 export async function addToLibraryViaTracker(
   config: TrackerConfig,
-  animeId: string,
+  animeId: string
 ): Promise<TrackerAddToLibraryResult> {
   try {
     const response = await fetch(`${config.baseUrl}/api/user/library/add`, {

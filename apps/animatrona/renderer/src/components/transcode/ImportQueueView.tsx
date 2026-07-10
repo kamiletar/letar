@@ -122,8 +122,8 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
           return false
         }
         if (
-          statusFilter === 'processing'
-          && !['vmaf', 'preparing', 'transcoding', 'postprocess'].includes(item.status)
+          statusFilter === 'processing' &&
+          !['vmaf', 'preparing', 'transcoding', 'postprocess'].includes(item.status)
         ) {
           return false
         }
@@ -151,7 +151,7 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
   // Drag & drop сенсоры
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   // Обработчик drag end
@@ -162,18 +162,18 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
         reorderItems(active.id as string, over.id as string)
       }
     },
-    [reorderItems],
+    [reorderItems]
   )
 
   // Вычисляемые значения через useMemo (используем filteredItems для поиска/фильтра)
   const pendingItems = useMemo(
     () => filteredItems.filter((i) => i.status === 'pending').sort((a, b) => a.priority - b.priority),
-    [filteredItems],
+    [filteredItems]
   )
 
   const completedItems = useMemo(
     () => filteredItems.filter((i) => ['completed', 'error', 'cancelled'].includes(i.status)),
-    [filteredItems],
+    [filteredItems]
   )
 
   // Все элементы для навигации (pending + completed, без текущего)
@@ -215,11 +215,11 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
           if (focusedItemId) {
             const item = allNavigableItems.find((i) => i.id === focusedItemId)
             if (
-              item
-              && (item.status === 'pending'
-                || item.status === 'completed'
-                || item.status === 'error'
-                || item.status === 'cancelled')
+              item &&
+              (item.status === 'pending' ||
+                item.status === 'completed' ||
+                item.status === 'error' ||
+                item.status === 'cancelled')
             ) {
               event.preventDefault()
               removeItem(focusedItemId)
@@ -440,12 +440,7 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
 
               {/* Очистить завершённые */}
               {completedItems.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => clearCompleted()}
-                  aria-label="Очистить завершённые"
-                >
+                <Button size="sm" variant="ghost" onClick={() => clearCompleted()} aria-label="Очистить завершённые">
                   <LuTrash2 />
                   Очистить
                 </Button>
@@ -558,45 +553,43 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
             <Icon as={LuClock} boxSize={4} />
             <Text fontWeight="medium">Ожидают ({pendingItems.length})</Text>
           </HStack>
-          {isCompactView
-            ? (
-              // Компактный вид — без drag & drop
-              <VStack gap={1} align="stretch" role="list" aria-label="Очередь импорта">
-                {pendingItems.map((item) => (
-                  <CompactQueueItem
-                    key={item.id}
-                    item={item}
-                    onRemove={() => removeItem(item.id)}
-                    isFocused={focusedItemId === item.id}
-                    onFocus={() => setFocusedItemId(item.id)}
-                  />
-                ))}
-              </VStack>
-            )
-            : (
-              // Развёрнутый вид — с drag & drop
-              <VStack gap={2} align="stretch" pl={8} role="list" aria-label="Очередь импорта">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  modifiers={[restrictToVerticalAxis]}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext items={pendingItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                    {pendingItems.map((item) => (
-                      <SortableQueueItem
-                        key={item.id}
-                        item={item}
-                        onRemove={() => removeItem(item.id)}
-                        onUpdate={updateItem}
-                        isFocused={focusedItemId === item.id}
-                        onFocus={() => setFocusedItemId(item.id)}
-                      />
-                    ))}
-                  </SortableContext>
-                </DndContext>
-              </VStack>
-            )}
+          {isCompactView ? (
+            // Компактный вид — без drag & drop
+            <VStack gap={1} align="stretch" role="list" aria-label="Очередь импорта">
+              {pendingItems.map((item) => (
+                <CompactQueueItem
+                  key={item.id}
+                  item={item}
+                  onRemove={() => removeItem(item.id)}
+                  isFocused={focusedItemId === item.id}
+                  onFocus={() => setFocusedItemId(item.id)}
+                />
+              ))}
+            </VStack>
+          ) : (
+            // Развёрнутый вид — с drag & drop
+            <VStack gap={2} align="stretch" pl={8} role="list" aria-label="Очередь импорта">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={pendingItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                  {pendingItems.map((item) => (
+                    <SortableQueueItem
+                      key={item.id}
+                      item={item}
+                      onRemove={() => removeItem(item.id)}
+                      onUpdate={updateItem}
+                      isFocused={focusedItemId === item.id}
+                      onFocus={() => setFocusedItemId(item.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </VStack>
+          )}
         </Box>
       )}
 
@@ -643,40 +636,38 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
               </Button>
             </HStack>
           </HStack>
-          {isCompactView
-            ? (
-              // Компактный вид
-              <VStack gap={1} align="stretch" opacity={0.85} role="list" aria-label="Завершённые импорты">
-                {completedItems.map((item) => (
-                  <CompactQueueItem
-                    key={item.id}
-                    item={item}
-                    onRemove={() => removeItem(item.id)}
-                    onRetry={(id, opts) => retryItem(id, opts)}
-                    isFocused={focusedItemId === item.id}
-                    onFocus={() => setFocusedItemId(item.id)}
-                  />
-                ))}
-              </VStack>
-            )
-            : (
-              // Развёрнутый вид
-              <VStack gap={2} align="stretch" opacity={0.85} role="list" aria-label="Завершённые импорты">
-                {completedItems.map((item) => (
-                  <ImportQueueItem
-                    key={item.id}
-                    item={item}
-                    isFocused={focusedItemId === item.id}
-                    onFocus={() => setFocusedItemId(item.id)}
-                    isCurrent={false}
-                    onRemove={() => removeItem(item.id)}
-                    onRetry={(id, opts) => retryItem(id, opts)}
-                    onMarkFailed={(id) => markItemFailed(id)}
-                    onRetryMissing={(id, preEncodeOptions) => retryMissing(id, preEncodeOptions)}
-                  />
-                ))}
-              </VStack>
-            )}
+          {isCompactView ? (
+            // Компактный вид
+            <VStack gap={1} align="stretch" opacity={0.85} role="list" aria-label="Завершённые импорты">
+              {completedItems.map((item) => (
+                <CompactQueueItem
+                  key={item.id}
+                  item={item}
+                  onRemove={() => removeItem(item.id)}
+                  onRetry={(id, opts) => retryItem(id, opts)}
+                  isFocused={focusedItemId === item.id}
+                  onFocus={() => setFocusedItemId(item.id)}
+                />
+              ))}
+            </VStack>
+          ) : (
+            // Развёрнутый вид
+            <VStack gap={2} align="stretch" opacity={0.85} role="list" aria-label="Завершённые импорты">
+              {completedItems.map((item) => (
+                <ImportQueueItem
+                  key={item.id}
+                  item={item}
+                  isFocused={focusedItemId === item.id}
+                  onFocus={() => setFocusedItemId(item.id)}
+                  isCurrent={false}
+                  onRemove={() => removeItem(item.id)}
+                  onRetry={(id, opts) => retryItem(id, opts)}
+                  onMarkFailed={(id) => markItemFailed(id)}
+                  onRetryMissing={(id, preEncodeOptions) => retryMissing(id, preEncodeOptions)}
+                />
+              ))}
+            </VStack>
+          )}
         </Box>
       )}
     </VStack>

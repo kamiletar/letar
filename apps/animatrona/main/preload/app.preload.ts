@@ -35,7 +35,7 @@ export const appPreload = {
 
   /** Получить информацию о диске */
   getDiskInfo: async (
-    targetPath?: string,
+    targetPath?: string
   ): Promise<{ total: number; free: number; used: number; usedPercent: number } | null> => {
     const result = await ipcRenderer.invoke('app:getDiskInfo', targetPath)
     return result.success ? result.data : null
@@ -112,9 +112,8 @@ export const appPreload = {
   },
 
   /** Подписка на прогресс миграции библиотеки */
-  onMigrationProgress: on<[import('../services/library/library-migration').MigrationProgress]>(
-    'app:migration-progress',
-  ),
+  onMigrationProgress:
+    on<[import('../services/library/library-migration').MigrationProgress]>('app:migration-progress'),
 }
 
 /** Управление окном (frameless title bar) */
@@ -165,7 +164,6 @@ export const trayPreload = {
   }): Promise<void> => ipcRenderer.invoke('tray:updateSettings', settings),
 
   /** Подписка на изменение настроек трея из main process (например, из контекстного меню) */
-  onSettingsChanged: on<[{ minimizeToTray: boolean; closeToTray: boolean; showTrayNotification: boolean }]>(
-    'tray:settingsChanged',
-  ),
+  onSettingsChanged:
+    on<[{ minimizeToTray: boolean; closeToTray: boolean; showTrayNotification: boolean }]>('tray:settingsChanged'),
 }

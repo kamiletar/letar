@@ -26,11 +26,7 @@ const DEFAULT_TIMEOUT = 10_000
  * @param path Путь endpoint'а (начинается с /)
  * @param opts Опции
  */
-async function kuboRequest(
-  apiUrl: string,
-  path: string,
-  opts: RequestOptions = {},
-): Promise<Response> {
+async function kuboRequest(apiUrl: string, path: string, opts: RequestOptions = {}): Promise<Response> {
   const url = `${apiUrl.replace(/\/+$/, '')}${path}`
   const response = await fetch(url, {
     method: 'POST',
@@ -68,10 +64,7 @@ export async function configGet(apiUrl: string, key: string): Promise<unknown> {
  */
 export async function configSet(apiUrl: string, key: string, value: unknown): Promise<void> {
   const json = encodeURIComponent(JSON.stringify(value))
-  await kuboRequest(
-    apiUrl,
-    `/api/v0/config?arg=${encodeURIComponent(key)}&arg=${json}&json=true`,
-  )
+  await kuboRequest(apiUrl, `/api/v0/config?arg=${encodeURIComponent(key)}&arg=${json}&json=true`)
   log.debug('configSet', { key })
 }
 

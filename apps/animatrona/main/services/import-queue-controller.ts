@@ -128,10 +128,10 @@ export class ImportQueueController extends EventEmitter {
       if (!entry.isRetranscode) {
         const existingByPath = [...this.queue.values()].find(
           (i) =>
-            i.folderPath === entry.folderPath
-            && i.selectedAnime.id === entry.selectedAnime.id
-            && i.status !== 'completed'
-            && i.status !== 'error',
+            i.folderPath === entry.folderPath &&
+            i.selectedAnime.id === entry.selectedAnime.id &&
+            i.status !== 'completed' &&
+            i.status !== 'error'
         )
         if (existingByPath) {
           log.warn('Item already in queue, skipping', { path: entry.folderPath })
@@ -405,7 +405,7 @@ export class ImportQueueController extends EventEmitter {
   private reauditOriginalItem(animeId: string): void {
     // Найти оригинальный completed item по createdAnimeId
     const original = [...this.queue.values()].find(
-      (i) => i.status === 'completed' && i.createdAnimeId === animeId && !i.isRetranscode,
+      (i) => i.status === 'completed' && i.createdAnimeId === animeId && !i.isRetranscode
     )
     if (!original) return
 
@@ -471,7 +471,7 @@ export class ImportQueueController extends EventEmitter {
    */
   async retryMissingEpisodes(
     itemId: string,
-    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string },
+    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string }
   ): Promise<{ newItemId?: string }> {
     const item = this.queue.get(itemId)
     if (!item) {
@@ -489,9 +489,9 @@ export class ImportQueueController extends EventEmitter {
     // Защита от дубликата — уже есть pending/active retranscode для этого аниме
     const existingRetranscode = [...this.queue.values()].find(
       (i) =>
-        i.isRetranscode
-        && i.existingAnimeId === item.createdAnimeId
-        && !['completed', 'error', 'cancelled'].includes(i.status),
+        i.isRetranscode &&
+        i.existingAnimeId === item.createdAnimeId &&
+        !['completed', 'error', 'cancelled'].includes(i.status)
     )
     if (existingRetranscode) {
       throw new Error('Retranscode уже в очереди')
@@ -519,11 +519,12 @@ export class ImportQueueController extends EventEmitter {
     // Определить неполные эпизоды
     const incompleteNumbers: number[] = []
     for (const ep of episodes) {
-      const hasIssue = !ep.transcodedCid
-        || !ep.manifestCid
-        || ep.audioTracks.some((at) => !at.transcodedCid)
-        || ep.subtitleTracks.some((st) => !st.fileCid)
-        || ep.subtitleTracks.some((st) => st.fonts.some((f) => !f.fileCid))
+      const hasIssue =
+        !ep.transcodedCid ||
+        !ep.manifestCid ||
+        ep.audioTracks.some((at) => !at.transcodedCid) ||
+        ep.subtitleTracks.some((st) => !st.fileCid) ||
+        ep.subtitleTracks.some((st) => st.fonts.some((f) => !f.fileCid))
 
       if (hasIssue) {
         incompleteNumbers.push(ep.number)
@@ -536,12 +537,12 @@ export class ImportQueueController extends EventEmitter {
 
     // Сматчить с files по episodeNumber (только выбранные — иначе попадут NCOP/NCED)
     const missingFiles = item.files.filter(
-      (f) => f.selected && f.episodeNumber !== null && incompleteNumbers.includes(f.episodeNumber),
+      (f) => f.selected && f.episodeNumber !== null && incompleteNumbers.includes(f.episodeNumber)
     )
 
     if (missingFiles.length === 0) {
       throw new Error(
-        `Неполные эпизоды: ${incompleteNumbers.map((n) => `#${n}`).join(', ')}, но исходные файлы не найдены в очереди`,
+        `Неполные эпизоды: ${incompleteNumbers.map((n) => `#${n}`).join(', ')}, но исходные файлы не найдены в очереди`
       )
     }
 
@@ -588,7 +589,7 @@ export class ImportQueueController extends EventEmitter {
 
     // Найти добавленный entry (последний в очереди)
     const added = [...this.queue.values()].find(
-      (i) => i.isRetranscode && i.existingAnimeId === item.createdAnimeId && i.status === 'pending',
+      (i) => i.isRetranscode && i.existingAnimeId === item.createdAnimeId && i.status === 'pending'
     )
 
     const animeName = item.selectedAnime.russian || item.selectedAnime.name
@@ -660,10 +661,10 @@ export class ImportQueueController extends EventEmitter {
     // Отменяем все pending и processing items
     for (const [id, item] of this.queue) {
       if (
-        item.status === 'pending'
-        || item.status === 'vmaf'
-        || item.status === 'preparing'
-        || item.status === 'transcoding'
+        item.status === 'pending' ||
+        item.status === 'vmaf' ||
+        item.status === 'preparing' ||
+        item.status === 'transcoding'
       ) {
         item.status = 'cancelled'
         item.completedAt = new Date().toISOString()
@@ -787,7 +788,7 @@ export class ImportQueueController extends EventEmitter {
     progress: number,
     currentFileName?: string,
     currentStage?: string,
-    detailProgress?: ImportQueueDetailProgress,
+    detailProgress?: ImportQueueDetailProgress
   ): void {
     const item = this.queue.get(itemId)
     if (!item) {
@@ -824,8 +825,8 @@ export class ImportQueueController extends EventEmitter {
 
     // Вычисляем сумму прогресса воркеров для отслеживания изменений в detailProgress
     const workersProgressSum = item.detailProgress
-      ? (item.detailProgress.videoWorkers?.reduce((sum, w) => sum + w.progress, 0) ?? 0)
-        + (item.detailProgress.audioWorkers?.reduce((sum, w) => sum + w.progress, 0) ?? 0)
+      ? (item.detailProgress.videoWorkers?.reduce((sum, w) => sum + w.progress, 0) ?? 0) +
+        (item.detailProgress.audioWorkers?.reduce((sum, w) => sum + w.progress, 0) ?? 0)
       : 0
     const lastWorkersSum = this.lastWorkersProgressSum.get(itemId) ?? 0
 
@@ -840,11 +841,11 @@ export class ImportQueueController extends EventEmitter {
     const fileNameChanged = currentFileName !== undefined && currentFileName !== oldFileName
 
     if (
-      now - lastEmit >= this.ITEM_PROGRESS_INTERVAL
-      || significantChange
-      || stageChanged
-      || workersChanged
-      || fileNameChanged
+      now - lastEmit >= this.ITEM_PROGRESS_INTERVAL ||
+      significantChange ||
+      stageChanged ||
+      workersChanged ||
+      fileNameChanged
     ) {
       this.lastItemProgressEmit.set(itemId, now)
       this.lastWorkersProgressSum.set(itemId, workersProgressSum)
@@ -860,7 +861,7 @@ export class ImportQueueController extends EventEmitter {
     itemId: string,
     progress: number,
     currentStage?: string,
-    detailProgress?: ImportQueueDetailProgress,
+    detailProgress?: ImportQueueDetailProgress
   ): void {
     const item = this.queue.get(itemId)
     if (!item) {
@@ -889,7 +890,7 @@ export class ImportQueueController extends EventEmitter {
     progress: number,
     currentFileName?: string,
     currentStage?: string,
-    detailProgress?: ImportQueueDetailProgress,
+    detailProgress?: ImportQueueDetailProgress
   ): void {
     this.emitItemProgress(itemId, progress, currentFileName, currentStage, detailProgress)
   }
@@ -1132,7 +1133,7 @@ export class ImportQueueController extends EventEmitter {
     status: 'completed' | 'error' | 'cancelled',
     startedAt: string,
     errorMessage?: string,
-    animeId?: string,
+    animeId?: string
   ): void {
     try {
       const completedAt = new Date().toISOString()
@@ -1143,9 +1144,10 @@ export class ImportQueueController extends EventEmitter {
         animeName: entry.selectedAnime.name,
         animeNameRu: entry.selectedAnime.russian ?? undefined,
         animeId: animeId ?? entry.selectedAnime.id,
-        shikimoriId: typeof entry.selectedAnime.id === 'string' && entry.selectedAnime.id.match(/^\d+$/)
-          ? parseInt(entry.selectedAnime.id)
-          : undefined,
+        shikimoriId:
+          typeof entry.selectedAnime.id === 'string' && entry.selectedAnime.id.match(/^\d+$/)
+            ? parseInt(entry.selectedAnime.id)
+            : undefined,
         posterUrl: entry.selectedAnime.posterUrl ?? undefined,
         episodesCount: entry.files.filter((f) => f.selected).length,
         seasonNumber: entry.parsedInfo.seasonNumber ?? undefined,
@@ -1222,14 +1224,12 @@ export class ImportQueueController extends EventEmitter {
   /**
    * Получить глобальные настройки приложения
    */
-  private async getGlobalSettings(): Promise<
-    {
-      useGpu: boolean
-      audioBitrate: number
-      libraryPath: string | null
-      outputPath: string | null
-    } | null
-  > {
+  private async getGlobalSettings(): Promise<{
+    useGpu: boolean
+    audioBitrate: number
+    libraryPath: string | null
+    outputPath: string | null
+  } | null> {
     try {
       const settings = await prisma.settings.findFirst()
       log.info('Global settings loaded', {
@@ -1240,11 +1240,11 @@ export class ImportQueueController extends EventEmitter {
       })
       return settings
         ? {
-          useGpu: settings.useGpu,
-          audioBitrate: settings.audioBitrate,
-          libraryPath: settings.libraryPath,
-          outputPath: settings.outputPath,
-        }
+            useGpu: settings.useGpu,
+            audioBitrate: settings.audioBitrate,
+            libraryPath: settings.libraryPath,
+            outputPath: settings.outputPath,
+          }
         : null
     } catch (err) {
       log.warn('Failed to get global settings', { error: String(err) })
@@ -1296,10 +1296,10 @@ export class ImportQueueController extends EventEmitter {
       reason: profile.preferCpu
         ? 'preferCpu'
         : !profile.useGpu
-        ? 'profile.useGpu=false'
-        : globalSettings?.useGpu === false
-        ? 'settings.useGpu=false'
-        : 'GPU enabled',
+          ? 'profile.useGpu=false'
+          : globalSettings?.useGpu === false
+            ? 'settings.useGpu=false'
+            : 'GPU enabled',
     })
 
     // Формируем videoOptions из профиля
@@ -1352,7 +1352,7 @@ export class ImportQueueController extends EventEmitter {
         }
         this.updateVmafProgress(itemId, vmafProgress)
       },
-      shouldUseCpu,
+      shouldUseCpu
     )
 
     log.info('VMAF completed', {
@@ -1427,7 +1427,7 @@ export class ImportQueueController extends EventEmitter {
     currentFileName?: string,
     currentStage?: string,
     detailProgress?: ImportQueueDetailProgress,
-    vmafProgress?: ImportQueueVmafProgress,
+    vmafProgress?: ImportQueueVmafProgress
   ): void {
     this.emit2Windows('import-queue:item-progress', {
       itemId,
@@ -1576,7 +1576,7 @@ export class ImportQueueController extends EventEmitter {
    * Маппинг статуса в enum БД
    */
   private mapStatusToDb(
-    status: ImportQueueStatus,
+    status: ImportQueueStatus
   ): 'PENDING' | 'VMAF' | 'PREPARING' | 'TRANSCODING' | 'POSTPROCESS' | 'COMPLETED' | 'ERROR' | 'CANCELLED' {
     const map: Record<
       ImportQueueStatus,

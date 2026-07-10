@@ -116,7 +116,7 @@ export function registerIpfsHandlers(): void {
       },
       (step) => {
         broadcastToWindows('ipfs:auditStep', { step })
-      },
+      }
     )
   })
 

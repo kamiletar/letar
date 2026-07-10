@@ -69,7 +69,7 @@ export function BundleAnimesPanel({
               id: Number(a.id),
               name: a.name,
               russian: a.russian,
-            })),
+            }))
           )
         }
       } finally {
@@ -87,14 +87,14 @@ export function BundleAnimesPanel({
       setSearchQuery('')
       setSearchResults([])
     },
-    [animes, onChange],
+    [animes, onChange]
   )
 
   const handleRemove = useCallback(
     (shikimoriId: number) => {
       onChange(animes.filter((a) => a.shikimoriId !== shikimoriId))
     },
-    [animes, onChange],
+    [animes, onChange]
   )
 
   const handleMove = useCallback(
@@ -107,7 +107,7 @@ export function BundleAnimesPanel({
       ;[next[idx], next[target]] = [next[target], next[idx]]
       onChange(next)
     },
-    [animes, onChange],
+    [animes, onChange]
   )
 
   const handleLoadRelated = useCallback(async () => {
@@ -133,7 +133,7 @@ export function BundleAnimesPanel({
       const related = (res.data.related ?? [])
         .filter(
           (r: { anime: { id: string; name: string; russian: string | null } | null; relationKind: string }) =>
-            r.anime && BUNDLE_RELATION_KINDS.has(r.relationKind),
+            r.anime && BUNDLE_RELATION_KINDS.has(r.relationKind)
         )
         .map((r: { anime: { id: string; name: string; russian: string | null }; relationKind: string }) => ({
           shikimoriId: Number(r.anime.id),
@@ -254,17 +254,15 @@ export function BundleAnimesPanel({
                 <Badge size="sm" variant="subtle">
                   #{r.id}
                 </Badge>
-                {alreadyAdded(r.id)
-                  ? (
-                    <Icon color="green.400" fontSize="xs">
-                      <LuCheck />
-                    </Icon>
-                  )
-                  : (
-                    <Icon color="blue.400" fontSize="xs">
-                      <LuPlus />
-                    </Icon>
-                  )}
+                {alreadyAdded(r.id) ? (
+                  <Icon color="green.400" fontSize="xs">
+                    <LuCheck />
+                  </Icon>
+                ) : (
+                  <Icon color="blue.400" fontSize="xs">
+                    <LuPlus />
+                  </Icon>
+                )}
               </HStack>
             ))}
           </VStack>

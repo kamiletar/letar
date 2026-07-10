@@ -52,9 +52,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
   // Итоги по экономии (для сводной строки)
   const totalSourceSize = completedVideoFiles.reduce((s, f) => s + (f.sourceSize ?? 0), 0)
   const totalTranscodedSize = completedVideoFiles.reduce((s, f) => s + (f.transcodedSize ?? 0), 0)
-  const totalSavingPercent = totalSourceSize > 0
-    ? Math.round((1 - totalTranscodedSize / totalSourceSize) * 100)
-    : 0
+  const totalSavingPercent = totalSourceSize > 0 ? Math.round((1 - totalTranscodedSize / totalSourceSize) * 100) : 0
 
   // Если нет ни активных воркеров, ни завершённых файлов — не показываем панель
   if (activeVideoWorkers.length === 0 && activeAudioWorkers.length === 0 && completedVideoFiles.length === 0) {
@@ -104,11 +102,12 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
                 templateColumns={{
                   base: '1fr',
                   sm: activeVideoWorkers.length > 1 ? 'repeat(2, 1fr)' : '1fr',
-                  lg: activeVideoWorkers.length > 2
-                    ? 'repeat(3, 1fr)'
-                    : activeVideoWorkers.length > 1
-                    ? 'repeat(2, 1fr)'
-                    : '1fr',
+                  lg:
+                    activeVideoWorkers.length > 2
+                      ? 'repeat(3, 1fr)'
+                      : activeVideoWorkers.length > 1
+                        ? 'repeat(2, 1fr)'
+                        : '1fr',
                 }}
                 gap={2}
               >
@@ -133,9 +132,13 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
               </HStack>
               <Wrap gap={2} role="list">
                 {/* Активные */}
-                {activeAudioWorkers.map((worker) => <CpuWorkerCard key={worker.workerId} worker={worker} />)}
+                {activeAudioWorkers.map((worker) => (
+                  <CpuWorkerCard key={worker.workerId} worker={worker} />
+                ))}
                 {/* Последние завершённые (для контекста) */}
-                {completedAudioWorkers.map((worker) => <CpuWorkerCard key={worker.workerId} worker={worker} />)}
+                {completedAudioWorkers.map((worker) => (
+                  <CpuWorkerCard key={worker.workerId} worker={worker} />
+                ))}
               </Wrap>
             </Box>
           )}
@@ -161,9 +164,8 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
               </HStack>
               <VStack gap={1} align="stretch" role="list">
                 {completedVideoFiles.map((file) => {
-                  const hasSizes = file.sourceSize !== undefined
-                    && file.transcodedSize !== undefined
-                    && file.sourceSize > 0
+                  const hasSizes =
+                    file.sourceSize !== undefined && file.transcodedSize !== undefined && file.sourceSize > 0
                   const savingPercent = hasSizes
                     ? Math.round((1 - (file.transcodedSize as number) / (file.sourceSize as number)) * 100)
                     : 0
@@ -187,23 +189,23 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
                           CQ {file.cq}
                         </Badge>
                       )}
-                      {hasSizes
-                        ? (
-                          <HStack gap={1} fontSize="xs">
-                            <Text color="fg.muted">{formatSize(file.sourceSize as number)}</Text>
-                            <Text color="fg.muted">→</Text>
-                            <Text color="fg" fontWeight="medium">{formatSize(file.transcodedSize as number)}</Text>
-                            <Badge size="xs" variant="subtle" colorPalette={savingPercent > 0 ? 'green' : 'red'}>
-                              {savingPercent > 0 ? '−' : '+'}
-                              {Math.abs(savingPercent)}%
-                            </Badge>
-                          </HStack>
-                        )
-                        : (
-                          <Text fontSize="xs" color="fg.muted">
-                            размер недоступен
+                      {hasSizes ? (
+                        <HStack gap={1} fontSize="xs">
+                          <Text color="fg.muted">{formatSize(file.sourceSize as number)}</Text>
+                          <Text color="fg.muted">→</Text>
+                          <Text color="fg" fontWeight="medium">
+                            {formatSize(file.transcodedSize as number)}
                           </Text>
-                        )}
+                          <Badge size="xs" variant="subtle" colorPalette={savingPercent > 0 ? 'green' : 'red'}>
+                            {savingPercent > 0 ? '−' : '+'}
+                            {Math.abs(savingPercent)}%
+                          </Badge>
+                        </HStack>
+                      ) : (
+                        <Text fontSize="xs" color="fg.muted">
+                          размер недоступен
+                        </Text>
+                      )}
                     </HStack>
                   )
                 })}

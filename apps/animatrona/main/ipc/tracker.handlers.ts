@@ -286,7 +286,7 @@ export function registerTrackerHandlers(): void {
     async (params?: { page?: number; limit?: number; q?: string }): Promise<TrackerCatalogResult> => {
       const config = await loadTrackerConfig()
       return fetchTrackerCatalog(config, params)
-    },
+    }
   )
 
   // Получить детали аниме с трекера (публичный endpoint — не требует API ключ)
@@ -397,7 +397,7 @@ export function registerTrackerHandlers(): void {
       // Используем sync service для debounced push + offline queue
       // Он сам сделает lookup trackerAnimeId если нужно
       getTrackerSyncService().pushWatchProgressImmediate(params)
-    },
+    }
   )
 
   // Немедленный push watchStatus одного аниме на трекер
@@ -424,7 +424,7 @@ export function registerTrackerHandlers(): void {
         return { success: false, error: 'API ключ не настроен' }
       }
       return fetchLibraryFromTracker(config)
-    },
+    }
   )
 
   // Добавить аниме из трекера в библиотеку
@@ -444,21 +444,18 @@ export function registerTrackerHandlers(): void {
   })
 
   // Пакетное изменение статуса просмотра
-  createHandler(
-    'library:batchUpdateWatchStatus',
-    async (input: { animeIds: string[]; watchStatus: string }) => {
-      log.info('Пакетное обновление watchStatus', { count: input.animeIds.length, watchStatus: input.watchStatus })
-      const updated = await prisma.anime.updateMany({
-        where: { id: { in: input.animeIds } },
-        data: { watchStatus: input.watchStatus as never },
-      })
-      // Push на трекер для каждого аниме (без ожидания — fire-and-forget)
-      for (const animeId of input.animeIds) {
-        getTrackerSyncService().pushLibraryItemImmediate(animeId)
-      }
-      return { success: true, count: updated.count }
-    },
-  )
+  createHandler('library:batchUpdateWatchStatus', async (input: { animeIds: string[]; watchStatus: string }) => {
+    log.info('Пакетное обновление watchStatus', { count: input.animeIds.length, watchStatus: input.watchStatus })
+    const updated = await prisma.anime.updateMany({
+      where: { id: { in: input.animeIds } },
+      data: { watchStatus: input.watchStatus as never },
+    })
+    // Push на трекер для каждого аниме (без ожидания — fire-and-forget)
+    for (const animeId of input.animeIds) {
+      getTrackerSyncService().pushLibraryItemImmediate(animeId)
+    }
+    return { success: true, count: updated.count }
+  })
 
   // Пакетный аспин аниме (последовательно, с прогрессом)
   createHandler('library:batchUnpinAnime', async (animeIds: string[]) => {

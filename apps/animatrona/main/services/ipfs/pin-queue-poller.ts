@@ -66,10 +66,7 @@ export async function queueRemotePin(cid: string, name?: string): Promise<void> 
  * Поставить несколько CID в очередь пинирования.
  * Продолжает при ошибках отдельных CID.
  */
-export async function queueRemotePins(
-  cids: string[],
-  name?: string,
-): Promise<{ queued: number; failed: number }> {
+export async function queueRemotePins(cids: string[], name?: string): Promise<{ queued: number; failed: number }> {
   let queued = 0
   let failed = 0
 

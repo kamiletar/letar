@@ -275,7 +275,7 @@ export function matchFromMalLink(torrent: RutrackerTorrentInfo): MatchResult | n
  */
 export function validateMatchMetadata(
   anime: { airedOn?: { year?: number | null } | null; episodes?: number },
-  torrent: RutrackerTorrentInfo,
+  torrent: RutrackerTorrentInfo
 ): boolean {
   // Проверка года — основной индикатор правильного сезона
   if (torrent.year && anime.airedOn?.year) {
@@ -301,11 +301,9 @@ export function matchFromMalRelated(shikimoriId: number, score: CandidateScore):
     shikimoriId,
     confidence: Math.min(score.score, 0.85), // Не выше 0.85 — нужно подтверждение
     method: 'mal-link' as const,
-    details: `Через related: скор ${score.score.toFixed(3)} (title: ${score.breakdown.titleScore.toFixed(2)}, year: ${
-      score.breakdown.yearScore.toFixed(
-        2,
-      )
-    }, type: ${score.breakdown.typeScore.toFixed(2)}, ep: ${score.breakdown.episodeScore.toFixed(2)})`,
+    details: `Через related: скор ${score.score.toFixed(3)} (title: ${score.breakdown.titleScore.toFixed(2)}, year: ${score.breakdown.yearScore.toFixed(
+      2
+    )}, type: ${score.breakdown.typeScore.toFixed(2)}, ep: ${score.breakdown.episodeScore.toFixed(2)})`,
   }
 }
 
@@ -322,14 +320,10 @@ export function matchFromSearch(scores: CandidateScore[]): MatchResult | null {
     shikimoriId: best.shikimoriId,
     confidence: best.score,
     method: 'search-title',
-    details: `Поиск по названию, скор: ${best.score.toFixed(3)} (title: ${
-      best.breakdown.titleScore.toFixed(
-        2,
-      )
-    }, year: ${best.breakdown.yearScore.toFixed(2)}, type: ${best.breakdown.typeScore.toFixed(2)}, ep: ${
-      best.breakdown.episodeScore.toFixed(
-        2,
-      )
-    })`,
+    details: `Поиск по названию, скор: ${best.score.toFixed(3)} (title: ${best.breakdown.titleScore.toFixed(
+      2
+    )}, year: ${best.breakdown.yearScore.toFixed(2)}, type: ${best.breakdown.typeScore.toFixed(2)}, ep: ${best.breakdown.episodeScore.toFixed(
+      2
+    )})`,
   }
 }

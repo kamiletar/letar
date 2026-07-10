@@ -146,7 +146,7 @@ export async function getPinStatusStats(): Promise<Record<RemotePinStatus, numbe
  * CID которые уже есть в PinStatus — не трогаются.
  */
 export async function scanAndRegisterLocalCids(
-  onProgress?: (processed: number, total: number) => void,
+  onProgress?: (processed: number, total: number) => void
 ): Promise<{ registered: number; skipped: number }> {
   log.info('Сканирование CID в БД для регистрации в PinStatus...')
 
@@ -194,12 +194,16 @@ export async function scanAndRegisterLocalCids(
     if (ep.thumbnailCids) {
       try {
         for (const cid of JSON.parse(ep.thumbnailCids) as string[]) allCids.add(cid)
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     if (ep.screenshotCids) {
       try {
         for (const cid of JSON.parse(ep.screenshotCids) as string[]) allCids.add(cid)
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     for (const t of ep.audioTracks) {
       if (t.transcodedCid) allCids.add(t.transcodedCid)

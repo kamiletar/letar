@@ -314,7 +314,7 @@ export class QBittorrentService extends EventEmitter {
       rutrackerUrl?: string
       isBundle?: boolean
       bundleAnimesJson?: string
-    },
+    }
   ): void {
     const meta = this.meta.get(infoHash)
     if (!meta) {
@@ -344,12 +344,13 @@ export class QBittorrentService extends EventEmitter {
   }
 
   /** Получить метаданные торрента (для оркестратора) */
-  getShikimoriMeta(
-    infoHash: string,
-  ):
-    | { shikimoriId?: number; animeName?: string; rutrackerUrl?: string; isBundle?: boolean; bundleAnimesJson?: string }
-    | null
-  {
+  getShikimoriMeta(infoHash: string): {
+    shikimoriId?: number
+    animeName?: string
+    rutrackerUrl?: string
+    isBundle?: boolean
+    bundleAnimesJson?: string
+  } | null {
     const meta = this.meta.get(infoHash)
     if (!meta) {
       return null
@@ -512,16 +513,13 @@ export class QBittorrentService extends EventEmitter {
           this.completedFiles.add(key)
           const filePath = `${savePath.replace(/[\\/]+$/, '')}/${file.name}`
           log.info('Файл торрента завершён', { hash, fileIndex: file.index, name: file.name })
-          this.emit(
-            'file:complete',
-            {
-              hash,
-              fileIndex: file.index,
-              fileName: file.name,
-              filePath,
-              fileSize: file.size,
-            } satisfies FileCompleteEvent,
-          )
+          this.emit('file:complete', {
+            hash,
+            fileIndex: file.index,
+            fileName: file.name,
+            filePath,
+            fileSize: file.size,
+          } satisfies FileCompleteEvent)
         }
       }
     } catch (err) {

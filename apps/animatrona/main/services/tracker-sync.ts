@@ -410,17 +410,17 @@ class TrackerSyncService {
         // Каскадный поиск: directoryCid → manifestCid → shikimoriId (fallback при смене CID)
         let localAnime = item.directoryCid
           ? await prisma.anime.findFirst({
-            where: { directoryCid: item.directoryCid },
-            select: {
-              id: true,
-              updatedAt: true,
-              shikimoriId: true,
-              name: true,
-              posterCid: true,
-              directoryCid: true,
-              pinnedLocally: true,
-            },
-          })
+              where: { directoryCid: item.directoryCid },
+              select: {
+                id: true,
+                updatedAt: true,
+                shikimoriId: true,
+                name: true,
+                posterCid: true,
+                directoryCid: true,
+                pinnedLocally: true,
+              },
+            })
           : null
         // TODO: удалить fallback по manifestCid после миграции всех клиентов на directoryCid
         if (!localAnime) {

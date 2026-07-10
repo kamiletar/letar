@@ -97,7 +97,7 @@ export function QBittorrentSettingsCard() {
             description: error instanceof Error ? error.message : String(error),
           })
         },
-      },
+      }
     )
   }, [url, username, password, upsertSettings])
 
@@ -109,11 +109,7 @@ export function QBittorrentSettingsCard() {
       const torrentApi = (
         window.electronAPI as unknown as {
           torrent?: {
-            testQBittorrentConnection?: (cfg: {
-              url: string
-              username: string
-              password: string
-            }) => Promise<{
+            testQBittorrentConnection?: (cfg: { url: string; username: string; password: string }) => Promise<{
               success: boolean
               data?: { success: boolean; version?: string; error?: string }
               error?: string
@@ -167,14 +163,8 @@ export function QBittorrentSettingsCard() {
 
           <Field.Root>
             <Field.Label>URL Web UI</Field.Label>
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.currentTarget.value)}
-              placeholder={DEFAULT_QB_URL}
-            />
-            <Field.HelperText>
-              Адрес Web UI qBittorrent (Tools → Options → Web UI → IP address + Port)
-            </Field.HelperText>
+            <Input value={url} onChange={(e) => setUrl(e.currentTarget.value)} placeholder={DEFAULT_QB_URL} />
+            <Field.HelperText>Адрес Web UI qBittorrent (Tools → Options → Web UI → IP address + Port)</Field.HelperText>
           </Field.Root>
 
           <Field.Root>
@@ -233,10 +223,7 @@ export function QBittorrentSettingsCard() {
           )}
 
           {/* Инструкция */}
-          <Collapsible.Root
-            open={showInstructions}
-            onOpenChange={(e) => setShowInstructions(e.open)}
-          >
+          <Collapsible.Root open={showInstructions} onOpenChange={(e) => setShowInstructions(e.open)}>
             <Collapsible.Trigger asChild>
               <Button size="sm" variant="ghost" justifyContent="flex-start">
                 <Icon as={LuInfo} mr={2} />

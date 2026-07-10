@@ -226,7 +226,7 @@ export async function findOptimalCQ(
   videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
   options: Partial<CqSearchOptions> = {},
   onProgress?: (progress: CqSearchProgress) => void,
-  preferCpu = false,
+  preferCpu = false
 ): Promise<CqSearchResult> {
   const startTime = Date.now()
   const codec = videoOptions.codec ?? 'av1'
@@ -294,7 +294,7 @@ export async function findOptimalCQ(
         samples,
         path.join(encodedDir, `cq_${testCq}`),
         { ...videoOptions, cq: testCq },
-        preferCpu,
+        preferCpu
       )
       const encodedSamples = encodeResult.samples
 
@@ -422,9 +422,9 @@ export async function findOptimalCQ(
     // anime4kFilter: упскейл всегда больше оригинала — пропускаем проверку
     if (estimatedSavings <= 0 && originalSize > 0 && !options.skipCompressionCheck && !options.anime4kFilter) {
       throw new Error(
-        `Сжатие неэффективно: оценочный размер ${Math.round(estimatedSize / 1024 / 1024)}MB `
-          + `>= исходник ${Math.round(originalSize / 1024 / 1024)}MB (CQ=${bestCq}). `
-          + `Исходник уже достаточно сжат, перекодирование увеличит размер файла.`,
+        `Сжатие неэффективно: оценочный размер ${Math.round(estimatedSize / 1024 / 1024)}MB ` +
+          `>= исходник ${Math.round(originalSize / 1024 / 1024)}MB (CQ=${bestCq}). ` +
+          `Исходник уже достаточно сжат, перекодирование увеличит размер файла.`
       )
     }
 

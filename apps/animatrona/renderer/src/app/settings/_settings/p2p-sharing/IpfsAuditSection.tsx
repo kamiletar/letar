@@ -158,9 +158,9 @@ export function IpfsAuditSection() {
               variant="outline"
               onClick={handleCleanAndGc}
               loading={isCleaning}
-              loadingText={cleanProgress
-                ? `Удаление: ${cleanProgress.current}/${cleanProgress.total}...`
-                : 'Удаление...'}
+              loadingText={
+                cleanProgress ? `Удаление: ${cleanProgress.current}/${cleanProgress.total}...` : 'Удаление...'
+              }
             >
               <LuTrash2 />
               Удалить {result.orphanedPins.length} осиротевших pins ({formatBytes(orphanedSize)})

@@ -57,7 +57,7 @@ export async function preEncodeFile(
   sourcePath: string,
   options?: PreEncodeOptions,
   onProgress?: (percent: number) => void,
-  signal?: { cancelled: boolean },
+  signal?: { cancelled: boolean }
 ): Promise<PreEncodeResult> {
   if (!existsSync(sourcePath)) {
     throw new Error(`Pre-encode: исходный файл не найден: ${sourcePath}`)

@@ -239,12 +239,7 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
             <Button variant="outline" onClick={handleClose} disabled={isMigrating}>
               Отмена
             </Button>
-            <Button
-              colorPalette="purple"
-              onClick={handleStart}
-              disabled={!toPath || isMigrating}
-              loading={isMigrating}
-            >
+            <Button colorPalette="purple" onClick={handleStart} disabled={!toPath || isMigrating} loading={isMigrating}>
               Начать перенос
             </Button>
           </Dialog.Footer>

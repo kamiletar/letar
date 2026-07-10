@@ -138,9 +138,8 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
               {/* Легенда */}
               <Box p={3} bg="bg.subtle" borderRadius="md">
                 <Text fontSize="xs" color="fg.subtle">
-                  💡 <strong>Пропустить</strong> — дорожка уже в оптимальном формате. <strong>Транскодировать</strong>
-                  {' '}
-                  — будет перекодировано в AAC 256 kbps для уменьшения размера.
+                  💡 <strong>Пропустить</strong> — дорожка уже в оптимальном формате. <strong>Транскодировать</strong> —
+                  будет перекодировано в AAC 256 kbps для уменьшения размера.
                 </Text>
               </Box>
             </VStack>

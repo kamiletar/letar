@@ -133,7 +133,7 @@ export function AnimeFilters({
       createListCollection({
         items: [{ value: '', label: 'Все жанры' }, ...genres.map((g) => ({ value: g.id, label: g.name }))],
       }),
-    [genres],
+    [genres]
   )
 
   const studioCollection = useMemo(
@@ -141,7 +141,7 @@ export function AnimeFilters({
       createListCollection({
         items: [{ value: '', label: 'Все студии' }, ...studios.map((s) => ({ value: s.id, label: s.name }))],
       }),
-    [studios],
+    [studios]
   )
 
   const fandubberCollection = useMemo(
@@ -149,7 +149,7 @@ export function AnimeFilters({
       createListCollection({
         items: [{ value: '', label: 'Любая озвучка' }, ...fandubbers.map((f) => ({ value: f.id, label: f.name }))],
       }),
-    [fandubbers],
+    [fandubbers]
   )
 
   const directorCollection = useMemo(
@@ -157,7 +157,7 @@ export function AnimeFilters({
       createListCollection({
         items: [{ value: '', label: 'Любой режиссёр' }, ...directors.map((d) => ({ value: d.id, label: d.name }))],
       }),
-    [directors],
+    [directors]
   )
 
   // Собираем активные фильтры для ActiveFilters компонента
@@ -193,8 +193,9 @@ export function AnimeFilters({
         category: 'Год',
         label,
         // v0.19.0 fix: используем onYearRangeClear для атомарного сброса обоих полей
-        onClear: onYearRangeClear
-          ?? (() => {
+        onClear:
+          onYearRangeClear ??
+          (() => {
             onYearMinChange('')
             onYearMaxChange('')
           }),
@@ -286,18 +287,20 @@ export function AnimeFilters({
     }
 
     if (episodesMin || episodesMax) {
-      const label = episodesMin && episodesMax
-        ? `${episodesMin}–${episodesMax}`
-        : episodesMin
-        ? `от ${episodesMin}`
-        : `до ${episodesMax}`
+      const label =
+        episodesMin && episodesMax
+          ? `${episodesMin}–${episodesMax}`
+          : episodesMin
+            ? `от ${episodesMin}`
+            : `до ${episodesMax}`
       filters.push({
         key: 'episodes',
         category: 'Эпизоды',
         label,
         // v0.19.0 fix: используем onEpisodesRangeClear для атомарного сброса
-        onClear: onEpisodesRangeClear
-          ?? (() => {
+        onClear:
+          onEpisodesRangeClear ??
+          (() => {
             onEpisodesMinChange('')
             onEpisodesMaxChange('')
           }),
@@ -731,11 +734,11 @@ export function AnimeFilters({
 }
 
 // Re-exports
-export { type ActiveFilter, ActiveFilters } from './ActiveFilters'
+export { ActiveFilters, type ActiveFilter } from './ActiveFilters'
 export { FilterChip } from './FilterChip'
 export { FiltersSkeleton } from './FiltersSkeleton'
 export { useDebounce } from './hooks/useDebounce'
-export { type FilterParams, useFilterParams } from './hooks/useFilterParams'
+export { useFilterParams, type FilterParams } from './hooks/useFilterParams'
 export { MobileFilterDrawer } from './MobileFilterDrawer'
 export { QualityFilterGroup } from './QualityFilterGroup'
 export { SearchableSelect, type SearchableSelectItem, type SearchableSelectProps } from './SearchableSelect'

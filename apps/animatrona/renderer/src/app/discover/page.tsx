@@ -185,9 +185,10 @@ export default function DiscoverPage() {
               gap={4}
             >
               {animeList.map((anime) => {
-                const localId = (anime.directoryCid && localAnimeMap.get(`dir:${anime.directoryCid}`))
-                  || (anime.shikimoriId && localAnimeMap.get(`shiki:${anime.shikimoriId}`))
-                  || null
+                const localId =
+                  (anime.directoryCid && localAnimeMap.get(`dir:${anime.directoryCid}`)) ||
+                  (anime.shikimoriId && localAnimeMap.get(`shiki:${anime.shikimoriId}`)) ||
+                  null
                 const isLocal = !!localId
 
                 return (
@@ -204,25 +205,23 @@ export default function DiscoverPage() {
                     {/* Постер */}
                     <Box position="relative">
                       <Box w="100%" aspectRatio="2/3" bg="bg.subtle" position="relative">
-                        {getCoverUrl(anime.coverUrl)
-                          ? (
-                            <Image
-                              src={getCoverUrl(anime.coverUrl)}
-                              alt={anime.title}
-                              w="100%"
-                              h="100%"
-                              objectFit="cover"
-                              loading="lazy"
-                              referrerPolicy="no-referrer"
-                              position="absolute"
-                              inset={0}
-                            />
-                          )
-                          : (
-                            <Box w="100%" h="100%" display="flex" alignItems="center" justifyContent="center">
-                              <Text color="fg.muted">Нет постера</Text>
-                            </Box>
-                          )}
+                        {getCoverUrl(anime.coverUrl) ? (
+                          <Image
+                            src={getCoverUrl(anime.coverUrl)}
+                            alt={anime.title}
+                            w="100%"
+                            h="100%"
+                            objectFit="cover"
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                            position="absolute"
+                            inset={0}
+                          />
+                        ) : (
+                          <Box w="100%" h="100%" display="flex" alignItems="center" justifyContent="center">
+                            <Text color="fg.muted">Нет постера</Text>
+                          </Box>
+                        )}
                       </Box>
                       {/* Бейдж статуса */}
                       <Badge position="absolute" top={2} right={2} colorPalette={isLocal ? 'green' : 'blue'} size="sm">
@@ -256,68 +255,66 @@ export default function DiscoverPage() {
                       </HStack>
 
                       {/* Кнопки */}
-                      {isLocal
-                        ? (
+                      {isLocal ? (
+                        <Button
+                          size="xs"
+                          colorPalette="green"
+                          variant="outline"
+                          flex={1}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/library/${localId}`)
+                          }}
+                        >
+                          <Icon as={LuLibrary} mr={1} />
+                          Открыть в библиотеке
+                        </Button>
+                      ) : (
+                        <HStack gap={2}>
                           <Button
                             size="xs"
-                            colorPalette="green"
-                            variant="outline"
+                            colorPalette="blue"
                             flex={1}
                             onClick={(e) => {
                               e.stopPropagation()
-                              router.push(`/library/${localId}`)
+                              handleAddToLibrary(anime.id)
                             }}
+                            loading={addingId === anime.id}
                           >
-                            <Icon as={LuLibrary} mr={1} />
-                            Открыть в библиотеке
+                            <Icon as={LuPlus} mr={1} />В библиотеку
                           </Button>
-                        )
-                        : (
-                          <HStack gap={2}>
-                            <Button
-                              size="xs"
-                              colorPalette="blue"
-                              flex={1}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleAddToLibrary(anime.id)
-                              }}
-                              loading={addingId === anime.id}
-                            >
-                              <Icon as={LuPlus} mr={1} />В библиотеку
-                            </Button>
-                            {anime.directoryCid && (
-                              <>
-                                <Button
-                                  size="xs"
-                                  colorPalette="green"
-                                  variant="outline"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleImport(anime, true)
-                                  }}
-                                  loading={importingId === anime.id}
-                                  title="Импортировать и закрепить локально"
-                                >
-                                  <Icon as={LuDownload} />
-                                </Button>
-                                <Button
-                                  size="xs"
-                                  colorPalette="blue"
-                                  variant="outline"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleImport(anime, false)
-                                  }}
-                                  loading={importingId === anime.id}
-                                  title="Добавить в облако (без скачивания)"
-                                >
-                                  <Icon as={LuCloud} />
-                                </Button>
-                              </>
-                            )}
-                          </HStack>
-                        )}
+                          {anime.directoryCid && (
+                            <>
+                              <Button
+                                size="xs"
+                                colorPalette="green"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleImport(anime, true)
+                                }}
+                                loading={importingId === anime.id}
+                                title="Импортировать и закрепить локально"
+                              >
+                                <Icon as={LuDownload} />
+                              </Button>
+                              <Button
+                                size="xs"
+                                colorPalette="blue"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleImport(anime, false)
+                                }}
+                                loading={importingId === anime.id}
+                                title="Добавить в облако (без скачивания)"
+                              >
+                                <Icon as={LuCloud} />
+                              </Button>
+                            </>
+                          )}
+                        </HStack>
+                      )}
                     </VStack>
                   </Box>
                 )

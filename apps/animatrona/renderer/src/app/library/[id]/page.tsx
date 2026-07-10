@@ -406,7 +406,10 @@ export default function AnimePage({ params }: AnimePageProps) {
         toaster.error({ title: 'Ошибка откреплениe', description: result.error })
       }
     } catch (error) {
-      toaster.error({ title: 'Ошибка откреплениe', description: error instanceof Error ? error.message : 'Неизвестная ошибка' })
+      toaster.error({
+        title: 'Ошибка откреплениe',
+        description: error instanceof Error ? error.message : 'Неизвестная ошибка',
+      })
     } finally {
       setIsUnpinning(false)
     }
@@ -425,7 +428,10 @@ export default function AnimePage({ params }: AnimePageProps) {
         toaster.error({ title: 'Ошибка закреплениe', description: result.error })
       }
     } catch (error) {
-      toaster.error({ title: 'Ошибка закреплениe', description: error instanceof Error ? error.message : 'Неизвестная ошибка' })
+      toaster.error({
+        title: 'Ошибка закреплениe',
+        description: error instanceof Error ? error.message : 'Неизвестная ошибка',
+      })
     } finally {
       setIsRepinning(false)
     }
@@ -452,7 +458,10 @@ export default function AnimePage({ params }: AnimePageProps) {
         toaster.error({ title: 'Ошибка синхронизации', description: result.error })
       }
     } catch (error) {
-      toaster.error({ title: 'Ошибка синхронизации', description: error instanceof Error ? error.message : 'Неизвестная ошибка' })
+      toaster.error({
+        title: 'Ошибка синхронизации',
+        description: error instanceof Error ? error.message : 'Неизвестная ошибка',
+      })
     } finally {
       setIsSyncingEpisodes(false)
     }

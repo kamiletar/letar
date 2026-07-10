@@ -67,7 +67,7 @@ interface UseImportQueueResult extends UseImportQueueState {
   /** Переделать недостающие эпизоды (опционально с pre-encode) */
   retryMissing: (
     itemId: string,
-    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string },
+    preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string }
   ) => Promise<void>
   /** Отменить всю очередь */
   cancelAll: () => Promise<void>
@@ -90,7 +90,7 @@ interface UseImportQueueResult extends UseImportQueueState {
     progress: number,
     currentFileName?: string,
     currentStage?: string,
-    detailProgress?: ImportQueueDetailProgress,
+    detailProgress?: ImportQueueDetailProgress
   ) => Promise<void>
   /** Обновить VMAF прогресс */
   updateVmafProgress: (itemId: string, vmafProgress: ImportQueueVmafProgress) => Promise<void>
@@ -222,9 +222,11 @@ export function useImportQueue(): UseImportQueueResult {
       ({ itemId, status, error }: { itemId: string; status: ImportQueueStatus; error?: string }) => {
         setState((prev) => ({
           ...prev,
-          items: prev.items.map((item) => item.id === itemId ? { ...item, status, error: error || item.error } : item),
+          items: prev.items.map((item) =>
+            item.id === itemId ? { ...item, status, error: error || item.error } : item
+          ),
         }))
-      },
+      }
     )
 
     // === Batch updates для onItemProgress ===
@@ -290,7 +292,7 @@ export function useImportQueue(): UseImportQueueResult {
 
         // Планируем flush если ещё не запланирован
         scheduleFlush()
-      },
+      }
     )
 
     // Cleanup при unmount
@@ -421,7 +423,7 @@ export function useImportQueue(): UseImportQueueResult {
         alert(`Ошибка: ${result.error ?? 'Неизвестная ошибка'}`)
       }
     },
-    [],
+    []
   )
 
   const cancelAll = useCallback(async () => {
@@ -504,7 +506,7 @@ export function useImportQueue(): UseImportQueueResult {
       progress: number,
       currentFileName?: string,
       currentStage?: string,
-      detailProgress?: ImportQueueDetailProgress,
+      detailProgress?: ImportQueueDetailProgress
     ) => {
       const api = window.electronAPI
       if (!api?.importQueue) {
@@ -516,13 +518,13 @@ export function useImportQueue(): UseImportQueueResult {
         progress,
         currentFileName,
         currentStage,
-        detailProgress,
+        detailProgress
       )
       if (!result.success) {
         console.error('[useImportQueue] updateProgress error:', result.error)
       }
     },
-    [],
+    []
   )
 
   const updateVmafProgress = useCallback(async (itemId: string, vmafProgress: ImportQueueVmafProgress) => {
@@ -565,7 +567,7 @@ export function useImportQueue(): UseImportQueueResult {
 
   const currentItem = useMemo(
     () => state.items.find((item) => item.id === state.currentId) || null,
-    [state.items, state.currentId],
+    [state.items, state.currentId]
   )
 
   const pendingCount = useMemo(() => state.items.filter((item) => item.status === 'pending').length, [state.items])
@@ -573,9 +575,9 @@ export function useImportQueue(): UseImportQueueResult {
   const completedCount = useMemo(
     () =>
       state.items.filter(
-        (item) => item.status === 'completed' || item.status === 'error' || item.status === 'cancelled',
+        (item) => item.status === 'completed' || item.status === 'error' || item.status === 'cancelled'
       ).length,
-    [state.items],
+    [state.items]
   )
 
   const hasItems = useMemo(() => state.items.length > 0, [state.items])

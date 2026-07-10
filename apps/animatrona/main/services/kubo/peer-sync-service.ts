@@ -105,10 +105,8 @@ class PeerSyncService {
       }
       // Эскалация: если успех был давно (или его не было вовсе) И провалы идут больше часа —
       // пишем error, чтобы это попало в трейс/логи, а не утонуло в warn-шуме.
-      const sinceLastSuccess = this.lastSuccessfulSyncAt === null
-        ? Infinity
-        : now - this.lastSuccessfulSyncAt
-      const escalate = sinceLastSuccess > 60 * 60_000 && (now - this.firstFailureAt) > 60 * 60_000
+      const sinceLastSuccess = this.lastSuccessfulSyncAt === null ? Infinity : now - this.lastSuccessfulSyncAt
+      const escalate = sinceLastSuccess > 60 * 60_000 && now - this.firstFailureAt > 60 * 60_000
       const payload = {
         error: message,
         lastSuccessfulSyncAt: this.lastSuccessfulSyncAt,
@@ -201,21 +199,16 @@ class PeerSyncService {
   /**
    * Применить peers к Kubo config через HTTP API.
    */
-  private async applyToKubo(
-    apiUrl: string,
-    response: PinServerResponse,
-  ): Promise<{ added: number; removed: number }> {
+  private async applyToKubo(apiUrl: string, response: PinServerResponse): Promise<{ added: number; removed: number }> {
     let added = 0
     let removed = 0
 
     // Relay исключаем из Peering (управляется через StaticRelays, см. kubo-config.ts:184-188)
     const apiPeerIdsToKeepInPeering = new Set<string>(
-      response.servers
-        .filter((s) => this.isPeering(s) && s.role !== 'relay')
-        .map((s) => s.peerId),
+      response.servers.filter((s) => this.isPeering(s) && s.role !== 'relay').map((s) => s.peerId)
     )
     const apiPeerIdsToKeepInBootstrap = new Set<string>(
-      response.servers.filter((s) => this.isBootstrap(s)).map((s) => s.peerId),
+      response.servers.filter((s) => this.isBootstrap(s)).map((s) => s.peerId)
     )
 
     // ========================
@@ -271,9 +264,9 @@ class PeerSyncService {
     // ========================
     let currentPeers: Array<{ ID: string; Addrs: string[] }> = []
     try {
-      const peeringRaw = (await kuboApi.configGet(apiUrl, 'Peering')) as
-        | { Peers?: Array<{ ID: string; Addrs: string[] }> }
-        | null
+      const peeringRaw = (await kuboApi.configGet(apiUrl, 'Peering')) as {
+        Peers?: Array<{ ID: string; Addrs: string[] }>
+      } | null
       currentPeers = peeringRaw?.Peers ?? []
     } catch (error) {
       log.warn('configGet Peering failed', { error: String(error) })
@@ -446,9 +439,7 @@ class PeerSyncService {
         name: 'Pinner 1 (mail, hardcoded)',
         role: 'pinner',
         peerId: PINNER_PEER_ID,
-        multiaddrs: Array.from(pinner1Peering.Addrs).map(
-          (addr) => `${addr}/p2p/${PINNER_PEER_ID}`,
-        ),
+        multiaddrs: Array.from(pinner1Peering.Addrs).map((addr) => `${addr}/p2p/${PINNER_PEER_ID}`),
         peeringRole: 'both',
       })
     }
@@ -460,9 +451,7 @@ class PeerSyncService {
         name: 'Pinner 3 (hardcoded)',
         role: 'pinner',
         peerId: PINNER3_PEER_ID,
-        multiaddrs: Array.from(pinner3Peering.Addrs).map(
-          (addr) => `${addr}/p2p/${PINNER3_PEER_ID}`,
-        ),
+        multiaddrs: Array.from(pinner3Peering.Addrs).map((addr) => `${addr}/p2p/${PINNER3_PEER_ID}`),
         peeringRole: 'both',
       })
     }
@@ -474,9 +463,7 @@ class PeerSyncService {
         name: 'Pinner 4 / Gateway (s3, hardcoded)',
         role: 'pinner',
         peerId: PINNER4_PEER_ID,
-        multiaddrs: Array.from(pinner4Peering.Addrs).map(
-          (addr) => `${addr}/p2p/${PINNER4_PEER_ID}`,
-        ),
+        multiaddrs: Array.from(pinner4Peering.Addrs).map((addr) => `${addr}/p2p/${PINNER4_PEER_ID}`),
         peeringRole: 'both',
       })
     }
@@ -488,9 +475,7 @@ class PeerSyncService {
         name: 'Gateway (s2, hardcoded)',
         role: 'gateway',
         peerId: GATEWAY_PEER_ID,
-        multiaddrs: Array.from(gatewayPeering.Addrs).map(
-          (addr) => `${addr}/p2p/${GATEWAY_PEER_ID}`,
-        ),
+        multiaddrs: Array.from(gatewayPeering.Addrs).map((addr) => `${addr}/p2p/${GATEWAY_PEER_ID}`),
         peeringRole: 'peering',
       })
     }

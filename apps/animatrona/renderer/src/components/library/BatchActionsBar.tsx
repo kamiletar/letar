@@ -82,11 +82,7 @@ export function BatchActionsBar({
                     {STATUS_ORDER.map((status) => {
                       const cfg = WATCH_STATUS_CONFIG[status]
                       return (
-                        <Menu.Item
-                          key={status}
-                          value={status}
-                          onClick={() => onBatchWatchStatus(status)}
-                        >
+                        <Menu.Item key={status} value={status} onClick={() => onBatchWatchStatus(status)}>
                           <Icon as={cfg.icon} color={cfg.color} />
                           {cfg.label}
                         </Menu.Item>
@@ -98,13 +94,7 @@ export function BatchActionsBar({
             </Menu.Root>
 
             {/* Распин */}
-            <Button
-              size="sm"
-              variant="outline"
-              colorPalette="orange"
-              onClick={onBatchUnpin}
-              disabled={isBatchUpdating}
-            >
+            <Button size="sm" variant="outline" colorPalette="orange" onClick={onBatchUnpin} disabled={isBatchUpdating}>
               {isBatchUpdating ? <Spinner size="xs" /> : <Icon as={LuPin} />}
               Открепить
             </Button>

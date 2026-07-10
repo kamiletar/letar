@@ -10,6 +10,7 @@ import { confirmShikimoriMatch, processRutrackerImport } from '../services/rutra
 import { parseRutrackerPage } from '../services/rutracker/rutracker-parser'
 import { createHandler } from '../utils/ipc-handler-factory'
 import { createModuleLogger } from '../utils/logger'
+import { describeNetErrorWithDiagnostics } from '../utils/net-error'
 
 const log = createModuleLogger('RutrackerIPC')
 
@@ -46,7 +47,7 @@ async function fetchRutrackerPage(url: string): Promise<string> {
   } catch (err) {
     const elapsed = Date.now() - startMs
     log.error('Ошибка загрузки страницы', { url, error: String(err), elapsed })
-    throw err
+    throw new Error(await describeNetErrorWithDiagnostics(err, url))
   }
 }
 

@@ -315,7 +315,7 @@ export async function recoverChapters(opts: {
             })
             detail('warn', `     ✗ ep.${ep.number}: ошибка — ${err instanceof Error ? err.message : String(err)}`)
           }
-        }),
+        })
       )
     }
 

@@ -160,7 +160,7 @@ export class ParallelTranscodeManager extends EventEmitter {
   startNewBatch(
     items: BatchImportItem[],
     batchId?: string,
-    concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number },
+    concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number }
   ): void {
     // Защита от двойного вызова (React StrictMode / race condition)
     // Если pool уже имеет задачи — это повторный вызов, игнорируем
@@ -453,9 +453,10 @@ export class ParallelTranscodeManager extends EventEmitter {
 
     // Прогресс видео: завершённые + частичный прогресс активных
     const videoTotal = videoStatus.tasks.length
-    const videoProgress = videoTotal > 0
-      ? ((videoCompleted + (runningVideoTasks.length > 0 ? currentVideoPercent / 100 : 0)) / videoTotal) * 100
-      : 100
+    const videoProgress =
+      videoTotal > 0
+        ? ((videoCompleted + (runningVideoTasks.length > 0 ? currentVideoPercent / 100 : 0)) / videoTotal) * 100
+        : 100
 
     // Прогресс аудио: только завершённые (аудио быстро кодируется)
     const audioTotal = audioStatus.tasks.length
@@ -686,7 +687,7 @@ export class ParallelTranscodeManager extends EventEmitter {
       task.outputPath,
       task.episodeId,
       task.passthrough,
-      task.originalCodec,
+      task.originalCodec
     )
 
     // Загружаем аудио в IPFS и обновляем transcodedCid + ipfsSize в БД
@@ -759,14 +760,15 @@ export class ParallelTranscodeManager extends EventEmitter {
   /** Проверка полного завершения элемента */
   private checkItemCompletion(item: ImportQueueItem): void {
     // Проверяем видео (завершено = completed, error или cancelled)
-    const videoFinished = item.videoTask.status === 'completed'
-      || item.videoTask.status === 'error'
-      || item.videoTask.status === 'cancelled'
+    const videoFinished =
+      item.videoTask.status === 'completed' ||
+      item.videoTask.status === 'error' ||
+      item.videoTask.status === 'cancelled'
     const videoSuccessful = item.videoTask.status === 'completed'
 
     // Проверяем все аудио
     const allAudioFinished = item.audioTasks.every(
-      (t) => t.status === 'completed' || t.status === 'error' || t.status === 'cancelled',
+      (t) => t.status === 'completed' || t.status === 'error' || t.status === 'cancelled'
     )
     const allAudioSuccessful = item.audioTasks.every((t) => t.status === 'completed')
 

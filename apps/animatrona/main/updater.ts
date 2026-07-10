@@ -262,7 +262,14 @@ export function initAutoUpdater(mainWindow: BrowserWindow): void {
         log.info('Найдена более новая версия, отменяем старую', { from: currentVersion, to: info.version })
         if (updateStatus.status === 'downloaded') {
           // Уже скачали старую — сразу начинаем скачивать новую
-          updateStatus = { ...updateStatus, status: 'downloading', updateInfo: info, downloadProgress: 0, downloadSpeed: 0, downloadEta: 0 }
+          updateStatus = {
+            ...updateStatus,
+            status: 'downloading',
+            updateInfo: info,
+            downloadProgress: 0,
+            downloadSpeed: 0,
+            downloadEta: 0,
+          }
           notifyRenderer()
           autoUpdater.downloadUpdate().catch((err: unknown) => log.error('Ошибка скачивания новой версии', { err }))
         } else {

@@ -266,9 +266,7 @@ export const ImportQueueItem = memo(
                 </Dialog.Header>
                 <Dialog.Body>
                   <VStack gap={4} align="stretch">
-                    <Text>
-                      Будут переделаны неполные эпизоды "{animeName}".
-                    </Text>
+                    <Text>Будут переделаны неполные эпизоды "{animeName}".</Text>
                     <Box
                       p={3}
                       borderRadius="md"
@@ -283,10 +281,7 @@ export const ImportQueueItem = memo(
                             Пережать в H264 перед импортом (для битых потоков)
                           </Text>
                         </VStack>
-                        <Switch.Root
-                          checked={preEncodeEnabled}
-                          onCheckedChange={(e) => setPreEncodeEnabled(e.checked)}
-                        >
+                        <Switch.Root checked={preEncodeEnabled} onCheckedChange={(e) => setPreEncodeEnabled(e.checked)}>
                           <Switch.HiddenInput />
                           <Switch.Control>
                             <Switch.Thumb />
@@ -295,7 +290,9 @@ export const ImportQueueItem = memo(
                       </HStack>
                       {preEncodeEnabled && (
                         <HStack gap={3}>
-                          <Text fontSize="sm" whiteSpace="nowrap">CRF:</Text>
+                          <Text fontSize="sm" whiteSpace="nowrap">
+                            CRF:
+                          </Text>
                           <Input
                             type="number"
                             size="sm"
@@ -323,9 +320,7 @@ export const ImportQueueItem = memo(
                       setShowRetryDialog(false)
                       onRetryMissing?.(
                         item.id,
-                        preEncodeEnabled
-                          ? { enabled: true, crf: preEncodeCrf, preset: 'medium' }
-                          : undefined,
+                        preEncodeEnabled ? { enabled: true, crf: preEncodeCrf, preset: 'medium' } : undefined
                       )
                     }}
                   >
@@ -461,90 +456,90 @@ export const ImportQueueItem = memo(
                 )}
 
                 {/* Прогресс (для активных статусов) */}
-                {!isFinished
-                  && item.status !== 'vmaf'
-                  && item.progress !== undefined
-                  && (item.progress > 0 || item.currentStage) && (
-                  <Box w="full" mt={1}>
-                    {item.progress > 0 && (
-                      <Progress.Root value={item.progress} size="sm" colorPalette="purple">
-                        <Progress.Track>
-                          <Progress.Range />
-                        </Progress.Track>
-                      </Progress.Root>
-                    )}
-                    <HStack justify="space-between" mt={1}>
-                      <Text fontSize="xs" color="fg.muted">
-                        {item.detailProgress?.videoTotal
-                          ? `${item.detailProgress.videoCompleted}/${item.detailProgress.videoTotal} видео`
-                            + (item.currentFileName ? ` • ${item.currentFileName}` : '')
-                          : (item.currentStage && stageLabels[item.currentStage]) || item.currentFileName || ''}
-                      </Text>
+                {!isFinished &&
+                  item.status !== 'vmaf' &&
+                  item.progress !== undefined &&
+                  (item.progress > 0 || item.currentStage) && (
+                    <Box w="full" mt={1}>
                       {item.progress > 0 && (
-                        <Text fontSize="xs" color="fg.muted">
-                          {item.progress.toFixed(0)}%
-                        </Text>
+                        <Progress.Root value={item.progress} size="sm" colorPalette="purple">
+                          <Progress.Track>
+                            <Progress.Range />
+                          </Progress.Track>
+                        </Progress.Root>
                       )}
-                    </HStack>
-
-                    {/* Детальный прогресс */}
-                    {item.detailProgress && (
-                      <VStack gap={2} mt={2} align="stretch">
-                        {/* FPS, скорость, размер */}
-                        <HStack gap={4} fontSize="xs" color="fg.muted" flexWrap="wrap">
-                          {item.detailProgress.fps !== undefined && item.detailProgress.fps > 0 && (
-                            <HStack gap={1}>
-                              <Text fontWeight="medium" color="green.400">
-                                {item.detailProgress.fps.toFixed(0)}
-                              </Text>
-                              <Text>fps</Text>
-                            </HStack>
-                          )}
-                          {item.detailProgress.speed !== undefined && item.detailProgress.speed > 0 && (
-                            <HStack gap={1}>
-                              <Icon as={LuZap} color="yellow.400" boxSize={3} />
-                              <Text fontWeight="medium" color="yellow.400">
-                                {formatSpeed(item.detailProgress.speed)}
-                              </Text>
-                            </HStack>
-                          )}
-                          {item.detailProgress.outputSize !== undefined && item.detailProgress.outputSize > 0 && (
-                            <Text>{formatBytes(item.detailProgress.outputSize)}</Text>
-                          )}
-                        </HStack>
-
-                        {/* Аудио-дорожки (компактно) */}
-                        {item.detailProgress.audioTracks && item.detailProgress.audioTracks.length > 0 && (
-                          <HStack gap={2} flexWrap="wrap">
-                            {item.detailProgress.audioTracks.map((track) => (
-                              <HStack
-                                key={track.index}
-                                gap={1}
-                                px={2}
-                                py={0.5}
-                                bg={track.progress >= 100 ? 'green.900/30' : 'purple.900/30'}
-                                borderRadius="sm"
-                                fontSize="xs"
-                              >
-                                <Icon
-                                  as={track.progress >= 100 ? LuCheck : LuMusic}
-                                  color={track.progress >= 100 ? 'green.400' : 'purple.400'}
-                                  boxSize={3}
-                                />
-                                <Text color={track.progress >= 100 ? 'green.400' : 'purple.400'}>{track.name}</Text>
-                                {track.progress < 100 && (
-                                  <Text color="purple.400" fontWeight="medium">
-                                    {track.progress}%
-                                  </Text>
-                                )}
-                              </HStack>
-                            ))}
-                          </HStack>
+                      <HStack justify="space-between" mt={1}>
+                        <Text fontSize="xs" color="fg.muted">
+                          {item.detailProgress?.videoTotal
+                            ? `${item.detailProgress.videoCompleted}/${item.detailProgress.videoTotal} видео` +
+                              (item.currentFileName ? ` • ${item.currentFileName}` : '')
+                            : (item.currentStage && stageLabels[item.currentStage]) || item.currentFileName || ''}
+                        </Text>
+                        {item.progress > 0 && (
+                          <Text fontSize="xs" color="fg.muted">
+                            {item.progress.toFixed(0)}%
+                          </Text>
                         )}
-                      </VStack>
-                    )}
-                  </Box>
-                )}
+                      </HStack>
+
+                      {/* Детальный прогресс */}
+                      {item.detailProgress && (
+                        <VStack gap={2} mt={2} align="stretch">
+                          {/* FPS, скорость, размер */}
+                          <HStack gap={4} fontSize="xs" color="fg.muted" flexWrap="wrap">
+                            {item.detailProgress.fps !== undefined && item.detailProgress.fps > 0 && (
+                              <HStack gap={1}>
+                                <Text fontWeight="medium" color="green.400">
+                                  {item.detailProgress.fps.toFixed(0)}
+                                </Text>
+                                <Text>fps</Text>
+                              </HStack>
+                            )}
+                            {item.detailProgress.speed !== undefined && item.detailProgress.speed > 0 && (
+                              <HStack gap={1}>
+                                <Icon as={LuZap} color="yellow.400" boxSize={3} />
+                                <Text fontWeight="medium" color="yellow.400">
+                                  {formatSpeed(item.detailProgress.speed)}
+                                </Text>
+                              </HStack>
+                            )}
+                            {item.detailProgress.outputSize !== undefined && item.detailProgress.outputSize > 0 && (
+                              <Text>{formatBytes(item.detailProgress.outputSize)}</Text>
+                            )}
+                          </HStack>
+
+                          {/* Аудио-дорожки (компактно) */}
+                          {item.detailProgress.audioTracks && item.detailProgress.audioTracks.length > 0 && (
+                            <HStack gap={2} flexWrap="wrap">
+                              {item.detailProgress.audioTracks.map((track) => (
+                                <HStack
+                                  key={track.index}
+                                  gap={1}
+                                  px={2}
+                                  py={0.5}
+                                  bg={track.progress >= 100 ? 'green.900/30' : 'purple.900/30'}
+                                  borderRadius="sm"
+                                  fontSize="xs"
+                                >
+                                  <Icon
+                                    as={track.progress >= 100 ? LuCheck : LuMusic}
+                                    color={track.progress >= 100 ? 'green.400' : 'purple.400'}
+                                    boxSize={3}
+                                  />
+                                  <Text color={track.progress >= 100 ? 'green.400' : 'purple.400'}>{track.name}</Text>
+                                  {track.progress < 100 && (
+                                    <Text color="purple.400" fontWeight="medium">
+                                      {track.progress}%
+                                    </Text>
+                                  )}
+                                </HStack>
+                              ))}
+                            </HStack>
+                          )}
+                        </VStack>
+                      )}
+                    </Box>
+                  )}
 
                 {/* Warning для completed с неполными эпизодами */}
                 {item.status === 'completed' && item.error && <WarningDetails error={item.error} />}
@@ -716,5 +711,5 @@ export const ImportQueueItem = memo(
 
     // Если дошли сюда — props равны, пропускаем render
     return true
-  },
+  }
 )

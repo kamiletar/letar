@@ -6,7 +6,10 @@
  * Возвращает полный граф связей франшизы (nodes + links)
  */
 
+import { net } from 'electron'
+
 import { createModuleLogger } from '../../utils/logger'
+import { describeNetErrorWithDiagnostics } from '../../utils/net-error'
 import { acquireShikimoriSlot } from './throttle'
 import type { ShikimoriFranchiseGraph } from './types'
 
@@ -48,7 +51,7 @@ export async function getFranchiseGraph(shikimoriId: number): Promise<ShikimoriF
   log.info('Fetching franchise graph', { url })
 
   try {
-    const response = await fetch(url, {
+    const response = await net.fetch(url, {
       method: 'GET',
       headers: {
         'User-Agent': USER_AGENT,
@@ -100,7 +103,7 @@ export async function getFranchiseGraph(shikimoriId: number): Promise<ShikimoriF
     return data
   } catch (error) {
     log.error('Error fetching franchise graph', { shikimoriId, error })
-    throw error
+    throw new Error(await describeNetErrorWithDiagnostics(error, url))
   }
 }
 

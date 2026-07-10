@@ -494,13 +494,11 @@ export class ExportManager extends EventEmitter {
         chapters = manifest.chapters
       }
 
-      return chapters.map(
-        (ch): MergeChapter => ({
-          startMs: ch.startMs,
-          endMs: ch.endMs,
-          title: ch.title || this.getChapterTitle(ch.type),
-        })
-      )
+      return chapters.map((ch): MergeChapter => ({
+        startMs: ch.startMs,
+        endMs: ch.endMs,
+        title: ch.title || this.getChapterTitle(ch.type),
+      }))
     } catch (error) {
       console.error('[ExportManager] Ошибка загрузки глав из IPFS:', error)
       return []

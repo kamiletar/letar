@@ -158,9 +158,9 @@ export function usePublisher(): UsePublisherReturn {
         ...prev,
         config: configResult.success ? configResult.data || null : prev.config,
         published: publishedResult.success ? publishedResult.data || null : prev.published,
-        animeCount: animeCountResult.success ? animeCountResult.data?.animeCount ?? prev.animeCount : prev.animeCount,
+        animeCount: animeCountResult.success ? (animeCountResult.data?.animeCount ?? prev.animeCount) : prev.animeCount,
         episodeCount: animeCountResult.success
-          ? animeCountResult.data?.episodeCount ?? prev.episodeCount
+          ? (animeCountResult.data?.episodeCount ?? prev.episodeCount)
           : prev.episodeCount,
       }))
     } catch {

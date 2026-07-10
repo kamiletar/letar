@@ -248,7 +248,7 @@ export async function findOrphanedPins(
   pinnedList?: PinInfo[],
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- сигнатура сохраняется для обратной совместимости IPC
   _onProgress?: (current: number, total: number, name: string) => void,
-  onStep?: (step: string) => void,
+  onStep?: (step: string) => void
 ): Promise<OrphanAuditResult> {
   log.info('=== Аудит хранилища: старт ===')
 

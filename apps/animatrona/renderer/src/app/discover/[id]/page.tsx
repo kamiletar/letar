@@ -37,8 +37,7 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
       : { where: { id: '__never__' }, select: { id: true }, take: 0 }
   )
   const localAnime = localMatch?.[0] as
-    | { id: string; directoryCid?: string | null; trackerPublishedCid?: string | null }
-    | undefined
+    { id: string; directoryCid?: string | null; trackerPublishedCid?: string | null } | undefined
   const localId = localAnime?.id
 
   // Определяем статус синхронизации CID

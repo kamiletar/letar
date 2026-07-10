@@ -62,13 +62,7 @@ export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum'
  * Тип условия достижения
  */
 export type AchievementConditionType =
-  | 'upload_bytes'
-  | 'seeding_time'
-  | 'peers_helped'
-  | 'ratio'
-  | 'unique_content'
-  | 'rank'
-  | 'first_seed'
+  'upload_bytes' | 'seeding_time' | 'peers_helped' | 'ratio' | 'unique_content' | 'rank' | 'first_seed'
 
 /**
  * Условие достижения

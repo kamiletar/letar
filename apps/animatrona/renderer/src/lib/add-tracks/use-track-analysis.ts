@@ -102,7 +102,7 @@ export function useTrackAnalysis(options: UseTrackAnalysisOptions) {
         setError(`Ошибка сканирования: ${error}`)
       }
     },
-    [episodes, contentTypeFilter, setState, setError],
+    [episodes, contentTypeFilter, setState, setError]
   )
 
   /**
@@ -198,13 +198,8 @@ export function useTrackAnalysis(options: UseTrackAnalysisOptions) {
               'dvdsub',
               'dvb_subtitle',
             ])
-            const format = codec === 'subrip'
-              ? 'srt'
-              : codec === 'ssa'
-              ? 'ass'
-              : IMAGE_BASED_CODECS.has(codec)
-              ? 'pgs'
-              : codec
+            const format =
+              codec === 'subrip' ? 'srt' : codec === 'ssa' ? 'ass' : IMAGE_BASED_CODECS.has(codec) ? 'pgs' : codec
             subtitleTracks.push({
               id: `${filePath}:subtitle:${i}`,
               streamIndex: i, // Относительный индекс субтитров для совместимости с demux
@@ -260,7 +255,7 @@ export async function scanExternalTracks(
   donorPath: string,
   matchedFiles: EpisodeMatch[],
   probeResults: Map<string, DonorProbeResult>,
-  contentTypeFilter?: 'series' | 'special',
+  contentTypeFilter?: 'series' | 'special'
 ): Promise<void> {
   // Сканируем внешние субтитры
   try {

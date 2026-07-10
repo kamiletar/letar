@@ -66,15 +66,7 @@ export function SetupWizardOverlay() {
   }
 
   return (
-    <Box
-      position="fixed"
-      inset={0}
-      zIndex={9999}
-      bg="bg"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-    >
+    <Box position="fixed" inset={0} zIndex={9999} bg="bg" display="flex" alignItems="center" justifyContent="center">
       <VStack gap={8} maxW="520px" w="full" px={6}>
         {/* Логотип / иконка */}
         <VStack gap={3}>
@@ -124,13 +116,7 @@ export function SetupWizardOverlay() {
               </Box>
             </Text>
 
-            <Button
-              colorPalette="purple"
-              size="lg"
-              w="full"
-              disabled={!libraryPath}
-              onClick={() => setStep(2)}
-            >
+            <Button colorPalette="purple" size="lg" w="full" disabled={!libraryPath} onClick={() => setStep(2)}>
               Далее
             </Button>
           </VStack>

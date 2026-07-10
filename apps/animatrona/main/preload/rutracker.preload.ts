@@ -15,7 +15,7 @@ import { on } from './ipc-helper'
 export const rutrackerPreload = {
   /** Загружает HTML страницы раздачи по URL */
   fetchPage: (
-    url: string,
+    url: string
   ): Promise<{
     success: boolean
     data?: string
@@ -25,7 +25,7 @@ export const rutrackerPreload = {
   /** Парсит HTML страницы раздачи */
   parse: (
     html: string,
-    url: string,
+    url: string
   ): Promise<{
     success: boolean
     data?: RutrackerTorrentInfo
@@ -35,7 +35,7 @@ export const rutrackerPreload = {
   /** Полный пайплайн: парсинг + матчинг с Shikimori */
   import: (
     html: string,
-    url: string,
+    url: string
   ): Promise<{
     success: boolean
     data?: RutrackerImportResult
@@ -44,7 +44,7 @@ export const rutrackerPreload = {
 
   /** Подтвердить выбранное аниме на Shikimori */
   confirmMatch: (
-    shikimoriId: number,
+    shikimoriId: number
   ): Promise<{
     success: boolean
     data?: ShikimoriAnimeExtended
@@ -53,7 +53,7 @@ export const rutrackerPreload = {
 
   /** Запустить скачивание торрента → автоматический импорт по завершении */
   startDownload: (
-    params: StartDownloadParams,
+    params: StartDownloadParams
   ): Promise<{
     success: boolean
     data?: StartDownloadResult
@@ -62,7 +62,7 @@ export const rutrackerPreload = {
 
   /** Метаданные загрузки для кнопки «В очередь» */
   getDownloadMeta: (
-    infoHash: string,
+    infoHash: string
   ): Promise<{
     success: boolean
     data?: { shikimoriId: number; animeName: string; folderPath: string } | null
@@ -79,7 +79,7 @@ export const rutrackerPreload = {
   /** Отменить загрузку */
   cancelDownload: (
     infoHash: string,
-    deleteFiles?: boolean,
+    deleteFiles?: boolean
   ): Promise<{
     success: boolean
     data?: boolean

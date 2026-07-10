@@ -80,7 +80,7 @@ export async function registerWithRelay(peerId: string | null): Promise<void> {
             reject(new Error(`Relay вернул ${res.statusCode}: ${data}`))
           }
         })
-      },
+      }
     )
     req.on('error', (err) => reject(err))
     req.on('timeout', () => {
@@ -126,9 +126,12 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
     }
   }
 
-  const interval = setInterval(() => {
-    doHeartbeat().catch(() => {})
-  }, 30 * 60 * 1000) as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
+  const interval = setInterval(
+    () => {
+      doHeartbeat().catch(() => {})
+    },
+    30 * 60 * 1000
+  ) as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
 
   // Прикрепляем cleanup функцию для clearTimeout retryTimeout при shutdown
   interval.__stopHeartbeat = () => {
@@ -186,7 +189,7 @@ export interface RelayMonitorOptions {
  */
 export function createRelayMonitor(
   getApiUrl: () => string | null,
-  options?: RelayMonitorOptions,
+  options?: RelayMonitorOptions
 ): ReturnType<typeof setInterval> {
   const { onRestartNeeded } = options ?? {}
 
@@ -233,22 +236,15 @@ export function createRelayMonitor(
       await forceSwarmConnect(apiUrl, PRIVATE_RELAY)
 
       // Проверяем порог рестарта — swarm connect не сбрасывает autorelay backoff
-      if (
-        consecutiveMisses >= RESTART_THRESHOLD
-        && onRestartNeeded
-        && !isRestarting
-      ) {
+      if (consecutiveMisses >= RESTART_THRESHOLD && onRestartNeeded && !isRestarting) {
         const now = Date.now()
         const timeSinceLastRestart = now - lastRestartAt
 
         if (timeSinceLastRestart >= RESTART_COOLDOWN_MS) {
-          log.warn(
-            'Relay reservation не восстанавливается — рестарт Kubo для сброса autorelay backoff',
-            {
-              consecutiveMisses,
-              minutesSinceLastRestart: Math.round(timeSinceLastRestart / 60000),
-            },
-          )
+          log.warn('Relay reservation не восстанавливается — рестарт Kubo для сброса autorelay backoff', {
+            consecutiveMisses,
+            minutesSinceLastRestart: Math.round(timeSinceLastRestart / 60000),
+          })
           isRestarting = true
           lastRestartAt = now
           consecutiveMisses = 0

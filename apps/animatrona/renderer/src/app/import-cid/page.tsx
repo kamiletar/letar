@@ -132,7 +132,7 @@ export function ImportCidContentEmbedded() {
         setIsLoading(false)
       }
     },
-    [cidInput],
+    [cidInput]
   )
 
   // Загрузить эпизоды из IPFS после загрузки манифеста
@@ -148,7 +148,7 @@ export function ImportCidContentEmbedded() {
         const res = await fetch(url)
         const data = (await res.json()) as EpisodesDocument
         const sorted = (data.episodes || []).sort(
-          (a: AnimeManifestEpisode, b: AnimeManifestEpisode) => a.number - b.number,
+          (a: AnimeManifestEpisode, b: AnimeManifestEpisode) => a.number - b.number
         )
         setEpisodes(sorted)
       } catch {
@@ -165,43 +165,46 @@ export function ImportCidContentEmbedded() {
   /**
    * Импортировать аниме в библиотеку (опционально)
    */
-  const handleImport = useCallback(async (pin = false) => {
-    const cid = cidInput.trim()
-    if (!cid || !manifest) {
-      return
-    }
-
-    setIsImporting(true)
-
-    try {
-      if (!window.electronAPI) {
-        toaster.error({ title: 'Electron API недоступен' })
+  const handleImport = useCallback(
+    async (pin = false) => {
+      const cid = cidInput.trim()
+      if (!cid || !manifest) {
         return
       }
-      const result = await window.electronAPI.animeManifest.import(cid, pin)
-      if (!result.success || !result.data) {
+
+      setIsImporting(true)
+
+      try {
+        if (!window.electronAPI) {
+          toaster.error({ title: 'Electron API недоступен' })
+          return
+        }
+        const result = await window.electronAPI.animeManifest.import(cid, pin)
+        if (!result.success || !result.data) {
+          toaster.error({
+            title: 'Ошибка импорта',
+            description: result.error || 'Не удалось импортировать аниме',
+          })
+          return
+        }
+
+        toaster.success({
+          title: pin ? 'Импорт и пиннинг запущены' : 'Импорт завершён',
+          description: `${result.data.animeName} (${result.data.episodeCount} эпизодов)`,
+        })
+
+        router.push(`/library/${result.data.animeId}`)
+      } catch (err) {
         toaster.error({
           title: 'Ошибка импорта',
-          description: result.error || 'Не удалось импортировать аниме',
+          description: err instanceof Error ? err.message : 'Неизвестная ошибка',
         })
-        return
+      } finally {
+        setIsImporting(false)
       }
-
-      toaster.success({
-        title: pin ? 'Импорт и пиннинг запущены' : 'Импорт завершён',
-        description: `${result.data.animeName} (${result.data.episodeCount} эпизодов)`,
-      })
-
-      router.push(`/library/${result.data.animeId}`)
-    } catch (err) {
-      toaster.error({
-        title: 'Ошибка импорта',
-        description: err instanceof Error ? err.message : 'Неизвестная ошибка',
-      })
-    } finally {
-      setIsImporting(false)
-    }
-  }, [cidInput, manifest, router])
+    },
+    [cidInput, manifest, router]
+  )
 
   // Автозагрузка CID из search params (deep link: animatrona://import/<cid>)
   useEffect(() => {
@@ -222,7 +225,7 @@ export function ImportCidContentEmbedded() {
         handlePreview()
       }
     },
-    [handlePreview, isLoading],
+    [handlePreview, isLoading]
   )
 
   /**
@@ -507,26 +510,24 @@ export function ImportCidContentEmbedded() {
                               {formatSize(ep.size)}
                             </Text>
                           )}
-                          {canPlay
-                            ? (
-                              <IconButton
-                                aria-label={`Смотреть эпизод ${ep.number}`}
-                                size="xs"
-                                variant={isActive ? 'solid' : 'ghost'}
-                                colorPalette="purple"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handlePlay(ep)
-                                }}
-                              >
-                                <LuPlay />
-                              </IconButton>
-                            )
-                            : (
-                              <Text fontSize="xs" color="fg.subtle">
-                                нет видео
-                              </Text>
-                            )}
+                          {canPlay ? (
+                            <IconButton
+                              aria-label={`Смотреть эпизод ${ep.number}`}
+                              size="xs"
+                              variant={isActive ? 'solid' : 'ghost'}
+                              colorPalette="purple"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handlePlay(ep)
+                              }}
+                            >
+                              <LuPlay />
+                            </IconButton>
+                          ) : (
+                            <Text fontSize="xs" color="fg.subtle">
+                              нет видео
+                            </Text>
+                          )}
                         </HStack>
                       </HStack>
                     )

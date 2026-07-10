@@ -186,91 +186,90 @@ export function BundleGroupingDialog({ open, onOpenChange, torrent, onDone }: Bu
               </Dialog.Header>
 
               <Dialog.Body>
-                {loading
-                  ? (
-                    <VStack gap={4} py={8}>
-                      <Spinner />
-                      <Text color="fg.muted">Загрузка файлов торрента...</Text>
-                    </VStack>
-                  )
-                  : (
-                    <VStack gap={4} align="stretch">
-                      {/* Пояснение */}
-                      <Text fontSize="sm" color="fg.muted">
-                        Порядок аниме должен совпадать с порядком файлов. Каждый файл будет импортирован отдельно — сабы
-                        сканер найдёт автоматически по имени файла.
-                      </Text>
+                {loading ? (
+                  <VStack gap={4} py={8}>
+                    <Spinner />
+                    <Text color="fg.muted">Загрузка файлов торрента...</Text>
+                  </VStack>
+                ) : (
+                  <VStack gap={4} align="stretch">
+                    {/* Пояснение */}
+                    <Text fontSize="sm" color="fg.muted">
+                      Порядок аниме должен совпадать с порядком файлов. Каждый файл будет импортирован отдельно — сабы
+                      сканер найдёт автоматически по имени файла.
+                    </Text>
 
-                      {mismatch && animes.length > 0 && (
-                        <Box p={3} borderRadius="md" bg="orange.subtle" borderWidth="1px" borderColor="orange.200">
-                          <Text fontSize="sm" color="orange.600">
-                            Файлов: {videoFiles.length}, аниме: {animes.length}. {videoFiles.length > animes.length
-                              ? `Последние ${videoFiles.length - animes.length} файлов будут пропущены.`
-                              : `Последние ${animes.length - videoFiles.length} аниме не получат файлов.`}
+                    {mismatch && animes.length > 0 && (
+                      <Box p={3} borderRadius="md" bg="orange.subtle" borderWidth="1px" borderColor="orange.200">
+                        <Text fontSize="sm" color="orange.600">
+                          Файлов: {videoFiles.length}, аниме: {animes.length}.{' '}
+                          {videoFiles.length > animes.length
+                            ? `Последние ${videoFiles.length - animes.length} файлов будут пропущены.`
+                            : `Последние ${animes.length - videoFiles.length} аниме не получат файлов.`}
+                        </Text>
+                      </Box>
+                    )}
+
+                    {/* Две колонки */}
+                    <HStack gap={4} align="start">
+                      {/* Файлы */}
+                      <VStack align="stretch" flex={1} gap={2}>
+                        <Heading size="sm">
+                          <HStack gap={1}>
+                            <Icon>
+                              <LuFilm />
+                            </Icon>
+                            <Text>Видеофайлы ({videoFiles.length})</Text>
+                          </HStack>
+                        </Heading>
+                        {videoFiles.length === 0 && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Файлы не найдены
                           </Text>
-                        </Box>
-                      )}
-
-                      {/* Две колонки */}
-                      <HStack gap={4} align="start">
-                        {/* Файлы */}
-                        <VStack align="stretch" flex={1} gap={2}>
-                          <Heading size="sm">
-                            <HStack gap={1}>
-                              <Icon>
-                                <LuFilm />
-                              </Icon>
-                              <Text>Видеофайлы ({videoFiles.length})</Text>
+                        )}
+                        {videoFiles.map((f, i) => (
+                          <Box
+                            key={f.absolutePath}
+                            p={2}
+                            borderRadius="md"
+                            bg={i < animes.length ? 'bg.subtle' : 'bg.error'}
+                            borderWidth="1px"
+                            borderColor={i < animes.length ? 'border.subtle' : 'red.200'}
+                          >
+                            <HStack gap={2}>
+                              <Box
+                                px={2}
+                                py={0.5}
+                                borderRadius="sm"
+                                bg="bg.muted"
+                                fontSize="xs"
+                                fontWeight="bold"
+                                minW="24px"
+                                textAlign="center"
+                              >
+                                {i + 1}
+                              </Box>
+                              <Text fontSize="xs" flex={1} truncate title={f.name}>
+                                {f.name}
+                              </Text>
                             </HStack>
-                          </Heading>
-                          {videoFiles.length === 0 && (
-                            <Text fontSize="sm" color="fg.muted">
-                              Файлы не найдены
-                            </Text>
-                          )}
-                          {videoFiles.map((f, i) => (
-                            <Box
-                              key={f.absolutePath}
-                              p={2}
-                              borderRadius="md"
-                              bg={i < animes.length ? 'bg.subtle' : 'bg.error'}
-                              borderWidth="1px"
-                              borderColor={i < animes.length ? 'border.subtle' : 'red.200'}
-                            >
-                              <HStack gap={2}>
-                                <Box
-                                  px={2}
-                                  py={0.5}
-                                  borderRadius="sm"
-                                  bg="bg.muted"
-                                  fontSize="xs"
-                                  fontWeight="bold"
-                                  minW="24px"
-                                  textAlign="center"
-                                >
-                                  {i + 1}
-                                </Box>
-                                <Text fontSize="xs" flex={1} truncate title={f.name}>
-                                  {f.name}
-                                </Text>
-                              </HStack>
-                            </Box>
-                          ))}
-                        </VStack>
+                          </Box>
+                        ))}
+                      </VStack>
 
-                        {/* Аниме — переиспользуем BundleAnimesPanel с поиском */}
-                        <Box flex={1}>
-                          <BundleAnimesPanel
-                            animes={animes}
-                            onChange={setAnimes}
-                            seedShikimoriId={torrent.shikimoriId}
-                            flat
-                            reorderable
-                          />
-                        </Box>
-                      </HStack>
-                    </VStack>
-                  )}
+                      {/* Аниме — переиспользуем BundleAnimesPanel с поиском */}
+                      <Box flex={1}>
+                        <BundleAnimesPanel
+                          animes={animes}
+                          onChange={setAnimes}
+                          seedShikimoriId={torrent.shikimoriId}
+                          flat
+                          reorderable
+                        />
+                      </Box>
+                    </HStack>
+                  </VStack>
+                )}
               </Dialog.Body>
 
               <Dialog.Footer>

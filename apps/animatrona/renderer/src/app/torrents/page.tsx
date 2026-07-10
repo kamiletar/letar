@@ -150,10 +150,10 @@ export function TorrentsContent() {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [importInitialData, setImportInitialData] = useState<
     | {
-      folderPath: string
-      videoFiles: string[]
-      skipFolderSelect?: boolean
-    }
+        folderPath: string
+        videoFiles: string[]
+        skipFolderSelect?: boolean
+      }
     | undefined
   >()
   const [importShikimoriId, setImportShikimoriId] = useState<number | undefined>()
@@ -200,7 +200,7 @@ export function TorrentsContent() {
         } catch {
           return { id, exists: false, animeId: undefined }
         }
-      }),
+      })
     )
     for (const { id, exists, animeId } of checks) {
       libraryMap.set(id, { exists, animeId })
@@ -281,11 +281,11 @@ export function TorrentsContent() {
           const existing = prev[idx]
           // Мержим только изменившиеся поля, не пересоздаём files[]
           if (
-            existing.progress === p.progress
-            && existing.downloadSpeed === p.downloadSpeed
-            && existing.uploadSpeed === p.uploadSpeed
-            && existing.numPeers === p.numPeers
-            && existing.status === p.status
+            existing.progress === p.progress &&
+            existing.downloadSpeed === p.downloadSpeed &&
+            existing.uploadSpeed === p.uploadSpeed &&
+            existing.numPeers === p.numPeers &&
+            existing.status === p.status
           ) {
             return prev // Ничего не изменилось — не обновляем стейт
           }
@@ -335,7 +335,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleResume = useCallback(
@@ -355,7 +355,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleRemove = useCallback(
@@ -370,7 +370,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleRemoveWithFiles = useCallback(
@@ -385,7 +385,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   /** Пересчитать хеш торрента (полная верификация, fire-and-forget) */
@@ -441,7 +441,7 @@ export function TorrentsContent() {
       setBundleTorrent({ ...torrent, isBundle: true })
       setBundleDialogOpen(true)
     },
-    [torrents],
+    [torrents]
   )
 
   /** Открыть ImportWizard для файлов торрента */
@@ -525,61 +525,59 @@ export function TorrentsContent() {
         toaster.error({ title: 'Ошибка открытия импорта', description: String(err) })
       }
     },
-    [torrents],
+    [torrents]
   )
 
   return (
     <Box p={4} maxW="900px" mx="auto">
-      {loading
-        ? (
-          <VStack gap={3} align="stretch">
-            <Skeleton height="140px" borderRadius="md" />
-            <Skeleton height="140px" borderRadius="md" />
-          </VStack>
-        )
-        : torrents.length === 0
-        ? (
-          <Card.Root>
-            <Card.Body>
-              <VStack gap={3} py={8}>
-                <Icon fontSize="3xl" color="fg.muted">
-                  <LuDownload />
-                </Icon>
-                <Heading size="md" color="fg.muted">
-                  Нет активных торрентов
-                </Heading>
-                <Text color="fg.muted" fontSize="sm">
-                  Торренты появятся здесь после начала скачивания из Rutracker
-                </Text>
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-        )
-        : (
-          <VStack gap={3} align="stretch">
-            <HStack position="relative">
-              <Icon position="absolute" left={3} color="fg.muted" zIndex={1} pointerEvents="none">
-                <LuSearch />
+      {loading ? (
+        <VStack gap={3} align="stretch">
+          <Skeleton height="140px" borderRadius="md" />
+          <Skeleton height="140px" borderRadius="md" />
+        </VStack>
+      ) : torrents.length === 0 ? (
+        <Card.Root>
+          <Card.Body>
+            <VStack gap={3} py={8}>
+              <Icon fontSize="3xl" color="fg.muted">
+                <LuDownload />
               </Icon>
-              <Input
-                pl={9}
-                placeholder="Поиск по названию..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="sm"
-              />
-            </HStack>
-            <HStack justify="space-between">
+              <Heading size="md" color="fg.muted">
+                Нет активных торрентов
+              </Heading>
               <Text color="fg.muted" fontSize="sm">
-                {torrents.length} {pluralize(torrents.length, ['торрент', 'торрента', 'торрентов'])}
+                Торренты появятся здесь после начала скачивания из Rutracker
               </Text>
-              <TotalStats torrents={torrents} />
-            </HStack>
-            {torrents.filter((t) => {
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+      ) : (
+        <VStack gap={3} align="stretch">
+          <HStack position="relative">
+            <Icon position="absolute" left={3} color="fg.muted" zIndex={1} pointerEvents="none">
+              <LuSearch />
+            </Icon>
+            <Input
+              pl={9}
+              placeholder="Поиск по названию..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="sm"
+            />
+          </HStack>
+          <HStack justify="space-between">
+            <Text color="fg.muted" fontSize="sm">
+              {torrents.length} {pluralize(torrents.length, ['торрент', 'торрента', 'торрентов'])}
+            </Text>
+            <TotalStats torrents={torrents} />
+          </HStack>
+          {torrents
+            .filter((t) => {
               if (!searchQuery) return true
               const q = searchQuery.toLowerCase()
               return t.name.toLowerCase().includes(q) || (t.animeName?.toLowerCase().includes(q) ?? false)
-            }).map((torrent) => (
+            })
+            .map((torrent) => (
               <TorrentCard
                 key={torrent.infoHash}
                 torrent={torrent}
@@ -594,8 +592,8 @@ export function TorrentsContent() {
                 onRecheck={handleRecheck}
               />
             ))}
-          </VStack>
-        )}
+        </VStack>
+      )}
 
       {/* Визард импорта для кнопки «В очередь» */}
       <ImportWizardDialog
@@ -768,9 +766,10 @@ function TorrentCard({
   const isPaused = torrent.status === 'paused'
   const isDownloading = torrent.status === 'downloading'
   const isFullyDownloaded = (torrent.progress ?? 0) >= 1
-  const canImport = (isSeeding || isDone || isPaused || isFullyDownloaded)
-    && torrent.importStatus !== 'queued'
-    && torrent.importStatus !== 'imported'
+  const canImport =
+    (isSeeding || isDone || isPaused || isFullyDownloaded) &&
+    torrent.importStatus !== 'queued' &&
+    torrent.importStatus !== 'imported'
 
   // Постер из Shikimori (если есть shikimoriId)
   const posterUrl = torrent.shikimoriId
@@ -978,12 +977,7 @@ function TorrentCard({
               </Button>
             )}
             {(isDownloading || isSeeding) && (
-              <Button
-                size="xs"
-                variant="outline"
-                disabled={busy}
-                onClick={() => onPause(torrent.infoHash)}
-              >
+              <Button size="xs" variant="outline" disabled={busy} onClick={() => onPause(torrent.infoHash)}>
                 <Icon>
                   <LuPause />
                 </Icon>

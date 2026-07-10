@@ -306,7 +306,7 @@ export function useLibraryPage() {
   // Множество всех загруженных shikimoriId для передачи в groupAnimeByFranchise
   const allLoadedShikimoriIds = useMemo(
     () => new Set((allAnimeShikimoriIds || []).map((a) => a.shikimoriId).filter((id): id is number => id != null)),
-    [allAnimeShikimoriIds],
+    [allAnimeShikimoriIds]
   )
 
   // Преобразуем _count.episodes в episodeCount и считаем суммарный размер для AnimeGrid
@@ -348,7 +348,7 @@ export function useLibraryPage() {
           totalIpfsSize: videoSize + audioSize + subtitleSize + fontsSize,
         }
       }),
-    [animesData],
+    [animesData]
   )
 
   const genres = genresData || []
@@ -356,7 +356,7 @@ export function useLibraryPage() {
   // Группировка аниме по франшизам
   const { franchiseGroups, standAloneAnimes } = useMemo(
     () => groupAnimeByFranchise(animes, allLoadedShikimoriIds),
-    [animes, allLoadedShikimoriIds],
+    [animes, allLoadedShikimoriIds]
   )
 
   // ===== Handlers =====
@@ -369,14 +369,14 @@ export function useLibraryPage() {
     (id: string) => {
       router.push(`/library/${id}`)
     },
-    [router],
+    [router]
   )
 
   const handleCardExport = useCallback(
     (id: string) => {
       router.push(`/library/${id}?openExport=true`)
     },
-    [router],
+    [router]
   )
 
   const handleCardRefreshMetadata = useCallback(
@@ -384,7 +384,7 @@ export function useLibraryPage() {
       router.push(`/library/${id}`)
       toaster.info({ title: 'Откройте меню аниме и нажмите "Обновить метаданные"' })
     },
-    [router],
+    [router]
   )
 
   const handleCardDelete = useCallback((id: string) => {
@@ -420,7 +420,7 @@ export function useLibraryPage() {
         })
       }
     },
-    [updateAnimeMutation, queryClient],
+    [updateAnimeMutation, queryClient]
   )
 
   // ===== Batch selection =====
@@ -438,12 +438,9 @@ export function useLibraryPage() {
     })
   }, [])
 
-  const toggleSelectAll = useCallback(
-    (allIds: string[]) => {
-      setSelectedIds((prev) => (prev.size === allIds.length ? new Set() : new Set(allIds)))
-    },
-    [],
-  )
+  const toggleSelectAll = useCallback((allIds: string[]) => {
+    setSelectedIds((prev) => (prev.size === allIds.length ? new Set() : new Set(allIds)))
+  }, [])
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set())
@@ -473,7 +470,7 @@ export function useLibraryPage() {
         setIsBatchUpdating(false)
       }
     },
-    [selectedIds, queryClient, clearSelection],
+    [selectedIds, queryClient, clearSelection]
   )
 
   const handleBatchUnpin = useCallback(async () => {
@@ -504,17 +501,18 @@ export function useLibraryPage() {
   const selectedAnime = selectedAnimeId ? animes.find((a) => a.id === selectedAnimeId) : null
 
   // Проверка: пустая библиотека без фильтров?
-  const isEmptyWithoutFilters = !isLoading
-    && animes.length === 0
-    && !searchInput
-    && !status
-    && !yearMin
-    && !yearMax
-    && !genre
-    && !studio
-    && !fandubber
-    && !director
-    && !watchStatusFilter
+  const isEmptyWithoutFilters =
+    !isLoading &&
+    animes.length === 0 &&
+    !searchInput &&
+    !status &&
+    !yearMin &&
+    !yearMax &&
+    !genre &&
+    !studio &&
+    !fandubber &&
+    !director &&
+    !watchStatusFilter
 
   return {
     // State

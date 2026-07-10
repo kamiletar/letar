@@ -71,12 +71,12 @@ const IMAGE_MIME_TYPES: Record<string, string> = {
 function getMimeType(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase()
   return (
-    VIDEO_MIME_TYPES[ext]
-    || AUDIO_MIME_TYPES[ext]
-    || SUBTITLE_MIME_TYPES[ext]
-    || FONT_MIME_TYPES[ext]
-    || IMAGE_MIME_TYPES[ext]
-    || 'application/octet-stream'
+    VIDEO_MIME_TYPES[ext] ||
+    AUDIO_MIME_TYPES[ext] ||
+    SUBTITLE_MIME_TYPES[ext] ||
+    FONT_MIME_TYPES[ext] ||
+    IMAGE_MIME_TYPES[ext] ||
+    'application/octet-stream'
   )
 }
 

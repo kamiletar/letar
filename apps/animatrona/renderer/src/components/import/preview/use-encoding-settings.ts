@@ -78,7 +78,7 @@ export function useEncodingSettings(options: UseEncodingSettingsOptions) {
   // Получаем выбранный профиль (должен быть перед useEffect который его использует)
   const selectedProfile = useMemo(
     () => profiles.find((p) => p.id === selectedProfileId) || null,
-    [profiles, selectedProfileId],
+    [profiles, selectedProfileId]
   )
 
   // Уведомляем родителя об изменении настроек
@@ -121,7 +121,7 @@ export function useEncodingSettings(options: UseEncodingSettingsOptions) {
         setTargetVmaf(92)
       }
     },
-    [setAnime4kEnabled, setDenoiseEnabled, setTargetVmaf],
+    [setAnime4kEnabled, setDenoiseEnabled, setTargetVmaf]
   )
 
   return {

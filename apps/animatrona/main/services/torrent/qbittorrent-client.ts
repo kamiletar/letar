@@ -30,7 +30,7 @@ export class QBittorrentAuthError extends Error {
 export class QBittorrentRequestError extends Error {
   constructor(
     message: string,
-    public readonly status: number,
+    public readonly status: number
   ) {
     super(message)
     this.name = 'QBittorrentRequestError'
@@ -87,9 +87,7 @@ export class QBittorrentClient {
     }
 
     if (!response.ok) {
-      throw new QBittorrentAuthError(
-        `Login failed: HTTP ${response.status} ${response.statusText}`,
-      )
+      throw new QBittorrentAuthError(`Login failed: HTTP ${response.status} ${response.statusText}`)
     }
 
     const text = await response.text()
@@ -170,7 +168,21 @@ export class QBittorrentClient {
 
     const response = await this.request('POST', '/api/v2/torrents/add', body)
     const text = await response.text()
-    if (text.trim() !== 'Ok.') {
+    const trimmed = text.trim()
+
+    // Старые версии qBittorrent возвращают "Ok." (plain text).
+    // Начиная с qBittorrent 5.1 /api/v2/torrents/add возвращает JSON
+    // { added_torrent_ids, failure_count, pending_count, success_count }.
+    if (trimmed !== 'Ok.') {
+      try {
+        const json = JSON.parse(trimmed) as { failure_count?: number; success_count?: number }
+        if (typeof json.failure_count === 'number' && json.failure_count === 0) {
+          log.info('Магнет добавлен (JSON-ответ)', { hash, savepath: params.savepath })
+          return hash.toLowerCase()
+        }
+      } catch {
+        // Не JSON — падаем в исходную ошибку ниже
+      }
       throw new Error(`Не удалось добавить торрент: ${text}`)
     }
 
@@ -278,11 +290,7 @@ export class QBittorrentClient {
    * @param ratioLimit Целевой ratio (-2 = default, -1 = infinity, >0 = конкретное)
    * @param seedingTimeLimit Лимит времени в минутах (-2/-1 аналогично)
    */
-  async setShareLimits(
-    hashes: string[],
-    ratioLimit: number,
-    seedingTimeLimit = -1,
-  ): Promise<void> {
+  async setShareLimits(hashes: string[], ratioLimit: number, seedingTimeLimit = -1): Promise<void> {
     const body = new URLSearchParams({
       hashes: hashes.join('|'),
       ratioLimit: String(ratioLimit),
@@ -326,11 +334,7 @@ export class QBittorrentClient {
    *
    * При 403 пытается перелогиниться один раз, потом пробрасывает ошибку.
    */
-  private async request(
-    method: 'GET' | 'POST',
-    path: string,
-    body?: URLSearchParams,
-  ): Promise<Response> {
+  private async request(method: 'GET' | 'POST', path: string, body?: URLSearchParams): Promise<Response> {
     if (!this.isConnected()) {
       throw new QBittorrentAuthError('Клиент не авторизован (вызовите login())')
     }
@@ -371,7 +375,7 @@ export class QBittorrentClient {
     if (!response.ok) {
       throw new QBittorrentRequestError(
         `${method} ${path} failed: HTTP ${response.status} ${response.statusText}`,
-        response.status,
+        response.status
       )
     }
 

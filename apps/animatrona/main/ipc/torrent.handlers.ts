@@ -66,7 +66,7 @@ export function registerTorrentHandlers(): void {
     (infoHash: string, update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string }) => {
       getTorrentService().updateMeta(infoHash, update)
       return true
-    },
+    }
   )
 
   // Остановить клиент
@@ -82,21 +82,20 @@ export function registerTorrentHandlers(): void {
   })
 
   // Обновить статус импорта торрента
-  createHandler(
-    'torrent:setImportStatus',
-    (infoHash: string, importStatus: 'none' | 'queued' | 'imported') => {
-      getTorrentService().updateMeta(infoHash, { importStatus })
-      return true
-    },
-  )
+  createHandler('torrent:setImportStatus', (infoHash: string, importStatus: 'none' | 'queued' | 'imported') => {
+    getTorrentService().updateMeta(infoHash, { importStatus })
+    return true
+  })
 
   // Проверить подключение к qBittorrent (без побочных эффектов)
   // Используется в Settings UI для кнопки «Проверить подключение».
   createHandler(
     'qbittorrent:testConnection',
-    async (
-      config: { url: string; username: string; password: string },
-    ): Promise<{ success: boolean; version?: string; error?: string }> => {
+    async (config: {
+      url: string
+      username: string
+      password: string
+    }): Promise<{ success: boolean; version?: string; error?: string }> => {
       const client = new QBittorrentClient()
       try {
         await client.login(config)
@@ -108,6 +107,6 @@ export function registerTorrentHandlers(): void {
         log.warn('qbittorrent:testConnection failed', { error: message })
         return { success: false, error: message }
       }
-    },
+    }
   )
 }

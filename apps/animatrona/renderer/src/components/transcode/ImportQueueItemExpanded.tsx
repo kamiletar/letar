@@ -142,7 +142,7 @@ export const ImportQueueItemExpanded = memo(
           : undefined,
         animation: isActive && !prefersReducedMotion ? `${pulseAnimation} 3s ease-in-out infinite` : undefined,
       }),
-      [isActive, prefersReducedMotion],
+      [isActive, prefersReducedMotion]
     )
 
     const handleCancel = () => {
@@ -261,10 +261,10 @@ export const ImportQueueItemExpanded = memo(
                   <HStack justify="space-between" mb={2}>
                     <Text fontSize="sm" color="fg.muted">
                       {/* currentFileName имеет приоритет — содержит детали текущего шага */}
-                      {item.currentFileName
-                        || (item.currentStage && stageLabels[item.currentStage])
-                        || (item.progress >= 100 ? 'Завершение...' : null)
-                        || 'Обработка...'}
+                      {item.currentFileName ||
+                        (item.currentStage && stageLabels[item.currentStage]) ||
+                        (item.progress >= 100 ? 'Завершение...' : null) ||
+                        'Обработка...'}
                     </Text>
                   </HStack>
                   <Progress.Root value={item.progress} size="lg" colorPalette="purple">
@@ -346,20 +346,14 @@ export const ImportQueueItemExpanded = memo(
                         size="xs"
                         variant="ghost"
                         colorPalette="red"
-                        onClick={() =>
-                          navigator.clipboard.writeText(item.error ?? '')}
+                        onClick={() => navigator.clipboard.writeText(item.error ?? '')}
                         aria-label="Копировать ошибку"
                       >
                         <Icon as={LuCopy} boxSize={3} />
                         Копировать
                       </Button>
                       {onRetry && (
-                        <Button
-                          size="xs"
-                          colorPalette="red"
-                          onClick={() => onRetry(item.id)}
-                          aria-label="Повторить"
-                        >
+                        <Button size="xs" colorPalette="red" onClick={() => onRetry(item.id)} aria-label="Повторить">
                           <Icon as={LuRefreshCw} boxSize={3} />
                           Повторить
                         </Button>
@@ -415,5 +409,5 @@ export const ImportQueueItemExpanded = memo(
     }
 
     return true
-  },
+  }
 )

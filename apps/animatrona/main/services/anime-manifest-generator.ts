@@ -109,7 +109,7 @@ function generateSlug(name: string): string {
  */
 async function saveShikimoriGenresToDb(
   animeId: string,
-  shikimoriGenres: Array<{ id: string; name: string; russian: string; kind: string }>,
+  shikimoriGenres: Array<{ id: string; name: string; russian: string; kind: string }>
 ): Promise<void> {
   for (const genreData of shikimoriGenres) {
     const shikimoriId = parseInt(genreData.id, 10)
@@ -521,16 +521,17 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
       manifest.createdAt = oldManifest.createdAt
 
       // Сравниваем контентные поля (без временных меток и directory stats)
-      const contentEqual = manifest.animeInfoCid === oldManifest.animeInfoCid
-        && manifest.name === oldManifest.name
-        && manifest.episodesCid === oldManifest.episodesCid
-        && manifest.posterCid === oldManifest.posterCid
-        && manifest.franchiseGraphCid === oldManifest.franchiseGraphCid
-        && manifest.relationsCid === oldManifest.relationsCid
-        && manifest.episodePreviewsCid === oldManifest.episodePreviewsCid
-        && manifest.isBdRemux === oldManifest.isBdRemux
-        && manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl
-        && manifest.creatorPeerId === oldManifest.creatorPeerId
+      const contentEqual =
+        manifest.animeInfoCid === oldManifest.animeInfoCid &&
+        manifest.name === oldManifest.name &&
+        manifest.episodesCid === oldManifest.episodesCid &&
+        manifest.posterCid === oldManifest.posterCid &&
+        manifest.franchiseGraphCid === oldManifest.franchiseGraphCid &&
+        manifest.relationsCid === oldManifest.relationsCid &&
+        manifest.episodePreviewsCid === oldManifest.episodePreviewsCid &&
+        manifest.isBdRemux === oldManifest.isBdRemux &&
+        manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl &&
+        manifest.creatorPeerId === oldManifest.creatorPeerId
 
       if (contentEqual && !forceUpdatedAt) {
         // Ничего не изменилось — возвращаем сигнал без нового CID
@@ -600,7 +601,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
  */
 export async function updateAnimeManifest(
   animeId: string,
-  options?: { skipShikimoriRefresh?: boolean },
+  options?: { skipShikimoriRefresh?: boolean }
 ): Promise<
   GenerateAnimeManifestResult & {
     directoryError?: string
@@ -681,8 +682,8 @@ export async function updateAnimeManifest(
     const contentHealth2: 'complete' | 'degraded' | 'broken' = hasCriticalLoss2
       ? 'broken'
       : hasAnyLoss2
-      ? 'degraded'
-      : 'complete'
+        ? 'degraded'
+        : 'complete'
 
     // Сохраняем новый directoryCid — теперь контент защищён через новый пин
     await prisma.anime.update({
@@ -766,8 +767,8 @@ export async function updateAnimeManifest(
         const contentHealth: 'complete' | 'degraded' | 'broken' = hasCriticalLoss
           ? 'broken'
           : hasAnyLoss
-          ? 'degraded'
-          : 'complete'
+            ? 'degraded'
+            : 'complete'
 
         buildContentHealth = contentHealth
         buildMissingCidsCount = missingCids.length

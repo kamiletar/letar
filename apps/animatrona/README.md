@@ -161,11 +161,11 @@ nx build:win animatrona
 
 ### Пути данных
 
-| Данные     | Windows                                    | macOS                                                          |
-| ---------- | ------------------------------------------ | -------------------------------------------------------------- |
+| Данные     | Windows                                     | macOS                                                           |
+| ---------- | ------------------------------------------- | --------------------------------------------------------------- |
 | БД         | `%APPDATA%/@letar/animatrona/data/app.db`   | `~/Library/Application Support/@letar/animatrona/data/app.db`   |
 | Логи       | `%APPDATA%/@letar/animatrona/logs/main.log` | `~/Library/Application Support/@letar/animatrona/logs/main.log` |
-| Библиотека | `~/Videos/Animatrona/` (настраивается)     | `~/Movies/Animatrona/` (настраивается)                         |
+| Библиотека | `~/Videos/Animatrona/` (настраивается)      | `~/Movies/Animatrona/` (настраивается)                          |
 
 **Логи:** уровень info+ записывается в файл без ANSI-цветов. Ротация: 3 файла по 5MB (`main.log` → `main.1.log` → `main.2.log`).
 

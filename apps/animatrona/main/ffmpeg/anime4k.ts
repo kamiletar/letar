@@ -41,11 +41,7 @@ export function getAnime4KShaderPath(): string {
   }
 
   // Dev: ищем в resources рядом с приложением
-  const possibleRoots = [
-    app.getAppPath(),
-    path.join(app.getAppPath(), '..'),
-    path.resolve(__dirname, '..', '..', '..'),
-  ]
+  const possibleRoots = [app.getAppPath(), path.join(app.getAppPath(), '..'), path.resolve(__dirname, '..', '..', '..')]
 
   for (const root of possibleRoots) {
     const candidate = path.join(root, 'resources', 'anime4k', SHADER_FILENAME)
@@ -128,7 +124,7 @@ async function probeDisplayInfo(inputPath: string): Promise<DisplayInfo> {
 export async function buildAnime4KFilter(
   inputPath: string,
   shaderPath: string,
-  denoiseEnabled = false,
+  denoiseEnabled = false
 ): Promise<string> {
   const info = await probeDisplayInfo(inputPath)
 
@@ -162,7 +158,7 @@ export async function buildAnime4KFilter(
     `setsar=1`,
     `scale=${displayWidth}:${height}:flags=lanczos`,
     `libplacebo=custom_shader_path='${shaderEsc}':w=${targetW}:h=${targetH}:upscaler=none`,
-    `setsar=1`,
+    `setsar=1`
   )
 
   return parts.join(',')

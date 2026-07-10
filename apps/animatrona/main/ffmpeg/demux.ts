@@ -114,7 +114,7 @@ export async function extractStream(
   inputPath: string,
   outputPath: string,
   streamSpec: string,
-  options?: { totalDuration?: number; onProgress?: (fraction: number) => void },
+  options?: { totalDuration?: number; onProgress?: (fraction: number) => void }
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const ff = spawnFFmpeg(['-y', '-i', inputPath, '-map', streamSpec, '-c', 'copy', outputPath])
@@ -170,16 +170,17 @@ const FONT_EXTENSIONS = ['.ttf', '.otf', '.ttc', '.woff', '.woff2']
 export async function extractAttachments(
   inputPath: string,
   outputDir: string,
-  streams: FFProbeOutput['streams'],
+  streams: FFProbeOutput['streams']
 ): Promise<string | null> {
   // Находим attachment streams (шрифты)
-  const attachmentStreams = streams?.filter((s) => {
-    if (s.codec_type !== 'attachment') {
-      return false
-    }
-    const filename = s.tags?.filename?.toLowerCase() || ''
-    return FONT_EXTENSIONS.some((ext) => filename.endsWith(ext))
-  }) || []
+  const attachmentStreams =
+    streams?.filter((s) => {
+      if (s.codec_type !== 'attachment') {
+        return false
+      }
+      const filename = s.tags?.filename?.toLowerCase() || ''
+      return FONT_EXTENSIONS.some((ext) => filename.endsWith(ext))
+    }) || []
 
   if (attachmentStreams.length === 0) {
     return null
@@ -276,7 +277,7 @@ export async function extractFontsFromFile(inputPath: string, outputDir: string)
 export async function demuxFile(
   inputPath: string,
   outputDir: string,
-  options: DemuxOptions = {},
+  options: DemuxOptions = {}
 ): Promise<DemuxResult> {
   const {
     extractSubs = true,

@@ -234,7 +234,7 @@ export class KuboService extends EventEmitter {
     // AutoRelay пытается reservation сразу при старте — ACL должен быть готов
     try {
       const repoConfig = JSON.parse(
-        await import('fs').then((fs) => fs.promises.readFile(`${repoPath}/config`, 'utf-8')),
+        await import('fs').then((fs) => fs.promises.readFile(`${repoPath}/config`, 'utf-8'))
       )
       const configPeerId = repoConfig?.Identity?.PeerID
       if (configPeerId) {

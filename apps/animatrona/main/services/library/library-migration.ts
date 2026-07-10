@@ -9,7 +9,6 @@ import path from 'path'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
-import { getKuboRepoPath } from '../kubo/kubo-daemon'
 import { getDefaultLibraryPath } from '../output-path-resolver'
 
 const log = createModuleLogger('LibraryMigration')
@@ -74,7 +73,7 @@ async function removeEmptyDirs(dir: string): Promise<void> {
 export async function runLibraryMigration(
   toPath: string,
   mode: 'copy' | 'move',
-  onProgress: (p: MigrationProgress) => void,
+  onProgress: (p: MigrationProgress) => void
 ): Promise<void> {
   log.info('Начинаю миграцию библиотеки', { toPath, mode })
 

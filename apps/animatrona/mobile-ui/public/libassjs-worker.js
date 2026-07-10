@@ -577,7 +577,7 @@ function BrotliDecodeClosure() {
     const table = new Int32Array(tableSize + 1)
     const tableIdx = table.length - 1
     readHuffmanCode(alphabetSize, alphabetSize, table, tableIdx, s)
-    for (let i = 0; i < contextMapSize; ) {
+    for (let i = 0; i < contextMapSize;) {
       if (s.halfOffset > 2030) {
         doReadMoreInput(s)
       }
@@ -770,7 +770,7 @@ function BrotliDecodeClosure() {
     s.numDirectDistanceCodes = readFewBits(s, 4) << s.distancePostfixBits
     s.distancePostfixMask = (1 << s.distancePostfixBits) - 1
     s.contextModes = new Int8Array(s.numLiteralBlockTypes)
-    for (let i = 0; i < s.numLiteralBlockTypes; ) {
+    for (let i = 0; i < s.numLiteralBlockTypes;) {
       const limit = min(i + 96, s.numLiteralBlockTypes)
       for (; i < limit; ++i) {
         if (s.bitOffset >= 16) {
@@ -1080,7 +1080,7 @@ function BrotliDecodeClosure() {
             s.metaBlockLength -= copyLength
             s.pos += copyLength
           } else {
-            for (; s.j < s.copyLength; ) {
+            for (; s.j < s.copyLength;) {
               ringBuffer[s.pos] = ringBuffer[(s.pos - s.distance) & ringBufferMask]
               s.metaBlockLength--
               s.pos++

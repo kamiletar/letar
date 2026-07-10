@@ -45,10 +45,7 @@ import {
 } from 'react-icons/lu'
 
 import { AlreadyInLibraryBadge } from '@/components/import/AlreadyInLibraryBadge'
-import {
-  type BundleAnimeEntry as SharedBundleEntry,
-  BundleAnimesPanel as SharedBundleAnimesPanel,
-} from '@/components/import/BundleAnimesPanel'
+import { BundleAnimesPanel as SharedBundleAnimesPanel } from '@/components/import/BundleAnimesPanel'
 import { Header } from '@/components/layout'
 import { toaster } from '@/components/ui/toaster'
 
@@ -226,16 +223,11 @@ export function ImportRutrackerContent() {
       console.log('[Import] Парсинг + Shikimori матчинг...')
       const response = await api.rutracker.import(html, effectiveUrl)
       if (!response.success || !response.data) {
-        const err = response.error || 'Ошибка парсинга'
-        // Добавляем подсказку для сетевых ошибок
-        const hint = err.includes('fetch failed') || err.includes('ECONNRESET') || err.includes('ETIMEDOUT')
-          ? '\n\nВозможно, Shikimori заблокирован DPI. Проверьте VPN/прокси.'
-          : ''
-        throw new Error(`${err}${hint}`)
+        throw new Error(response.error || 'Ошибка парсинга')
       }
       console.log(
         '[Import] Результат:',
-        response.data.match ? `матч ID=${response.data.match.shikimoriId}` : 'матч не найден',
+        response.data.match ? `матч ID=${response.data.match.shikimoriId}` : 'матч не найден'
       )
 
       setResult(response.data as ImportResult)
@@ -433,24 +425,24 @@ export function ImportRutrackerContent() {
             setResult((prev) =>
               prev
                 ? {
-                  ...prev,
-                  match: {
-                    shikimoriId: newId,
-                    confidence: 1,
-                    method: 'search-title',
-                    details: 'Выбрано вручную',
-                  },
-                  shikimoriData: {
-                    id: String(newId),
-                    name: newName,
-                    russian: russian,
-                    poster: prev.shikimoriData?.poster ?? null,
-                    score: null,
-                    episodes: 0,
-                    kind: null,
-                    status: 'released',
-                  },
-                }
+                    ...prev,
+                    match: {
+                      shikimoriId: newId,
+                      confidence: 1,
+                      method: 'search-title',
+                      details: 'Выбрано вручную',
+                    },
+                    shikimoriData: {
+                      id: String(newId),
+                      name: newName,
+                      russian: russian,
+                      poster: prev.shikimoriData?.poster ?? null,
+                      score: null,
+                      episodes: 0,
+                      kind: null,
+                      status: 'released',
+                    },
+                  }
                 : prev
             )
           }}
@@ -626,11 +618,7 @@ function PreviewStep({
                 Например, Ghost in the Shell ARISE — 4 ОВА с разными ID на Shikimori
               </Text>
             </VStack>
-            <Switch.Root
-              checked={isBundle}
-              onCheckedChange={(e) => onBundleChange(e.checked)}
-              colorPalette="blue"
-            >
+            <Switch.Root checked={isBundle} onCheckedChange={(e) => onBundleChange(e.checked)} colorPalette="blue">
               <Switch.HiddenInput />
               <Switch.Control>
                 <Switch.Thumb />
@@ -729,7 +717,7 @@ function ShikimoriMatchCard({
               id: Number(a.id),
               name: a.name,
               russian: a.russian,
-            })),
+            }))
           )
         }
       } finally {
@@ -745,7 +733,7 @@ function ShikimoriMatchCard({
       setSearchQuery('')
       setSearchResults([])
     },
-    [onMatchChange],
+    [onMatchChange]
   )
 
   const renderSearchPanel = () => (
@@ -754,18 +742,12 @@ function ShikimoriMatchCard({
         <Input
           placeholder="Поиск аниме на Shikimori (например: Psycho-Pass)"
           value={searchQuery}
-          onChange={(e) =>
-            handleSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           size="sm"
           autoFocus
         />
         {searching && <Spinner size="sm" />}
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() =>
-            setSearchOpen(false)}
-        >
+        <Button size="sm" variant="ghost" onClick={() => setSearchOpen(false)}>
           <Icon>
             <LuX />
           </Icon>
@@ -818,12 +800,7 @@ function ShikimoriMatchCard({
               <Text>Аниме не найдено на Shikimori. Найдите вручную:</Text>
             </HStack>
             {!searchOpen && (
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="orange"
-                onClick={() => setSearchOpen(true)}
-              >
+              <Button size="sm" variant="outline" colorPalette="orange" onClick={() => setSearchOpen(true)}>
                 <Icon>
                   <LuSearch />
                 </Icon>
@@ -854,7 +831,8 @@ function ShikimoriMatchCard({
                 cursor="pointer"
                 _hover={{ textDecoration: 'underline' }}
                 onClick={() =>
-                  window.electronAPI?.app?.openExternal(`https://shikimori.one/animes/${match.shikimoriId}`)}
+                  window.electronAPI?.app?.openExternal(`https://shikimori.one/animes/${match.shikimoriId}`)
+                }
               >
                 Shikimori #{match.shikimoriId}
               </Text>
@@ -868,9 +846,8 @@ function ShikimoriMatchCard({
                   cursor="pointer"
                   _hover={{ textDecoration: 'underline' }}
                   onClick={() =>
-                    window.electronAPI?.app?.openExternal(
-                      `https://myanimelist.net/anime/${torrentExternalLinks.malId}`,
-                    )}
+                    window.electronAPI?.app?.openExternal(`https://myanimelist.net/anime/${torrentExternalLinks.malId}`)
+                  }
                 >
                   mal-link
                 </Text>
@@ -891,9 +868,11 @@ function ShikimoriMatchCard({
             {shikimoriData?.poster?.mainUrl && (
               <Box
                 as="img"
-                src={shikimoriData.poster.mainUrl.startsWith('http')
-                  ? shikimoriData.poster.mainUrl
-                  : `https://shikimori.one${shikimoriData.poster.mainUrl}`}
+                src={
+                  shikimoriData.poster.mainUrl.startsWith('http')
+                    ? shikimoriData.poster.mainUrl
+                    : `https://shikimori.one${shikimoriData.poster.mainUrl}`
+                }
                 alt="Shikimori poster"
                 maxH="80px"
                 borderRadius="md"
@@ -1143,8 +1122,8 @@ function DoneStep({ animeName, onReset }: { animeName: string; onReset: () => vo
             <Heading size="md">Скачивание завершено</Heading>
           </HStack>
           <Text>
-            <strong>{animeName}</strong> скачан и добавлен в очередь импорта. Перейдите в <strong>Очередь</strong>{' '}
-            для настройки транскодирования.
+            <strong>{animeName}</strong> скачан и добавлен в очередь импорта. Перейдите в <strong>Очередь</strong> для
+            настройки транскодирования.
           </Text>
           <Button colorPalette="blue" onClick={onReset}>
             Импортировать ещё
@@ -1169,7 +1148,9 @@ function ErrorStep({ error, onRetry }: { error: string | null; onRetry: () => vo
               Ошибка
             </Text>
           </HStack>
-          <Text>{error || 'Неизвестная ошибка'}</Text>
+          <Text whiteSpace="pre-line" textAlign="center">
+            {error || 'Неизвестная ошибка'}
+          </Text>
           <Button onClick={onRetry} variant="outline">
             Попробовать снова
           </Button>

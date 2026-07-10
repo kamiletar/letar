@@ -46,7 +46,7 @@ export async function getDiskFreeGb(path: string): Promise<number> {
  */
 export async function hasSufficientDiskSpace(
   path: string = os.homedir(),
-  minGb: number = LOW_DISK_THRESHOLD_GB,
+  minGb: number = LOW_DISK_THRESHOLD_GB
 ): Promise<boolean> {
   const freeGb = await getDiskFreeGb(path)
   const ok = freeGb >= minGb

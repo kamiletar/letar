@@ -61,9 +61,11 @@ export interface TorrentServiceInterface extends EventEmitter {
   updateMeta(infoHash: string, update: TorrentMetaUpdate): void
 
   /** Получить метаданные торрента (для оркестратора) */
-  getShikimoriMeta(
-    infoHash: string,
-  ):
-    | { shikimoriId?: number; animeName?: string; rutrackerUrl?: string; isBundle?: boolean; bundleAnimesJson?: string }
-    | null
+  getShikimoriMeta(infoHash: string): {
+    shikimoriId?: number
+    animeName?: string
+    rutrackerUrl?: string
+    isBundle?: boolean
+    bundleAnimesJson?: string
+  } | null
 }

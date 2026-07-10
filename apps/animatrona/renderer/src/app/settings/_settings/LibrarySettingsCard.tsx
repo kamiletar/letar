@@ -96,7 +96,9 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
             </Text>
             <HStack>
               <Box flex={1} p={3} bg="bg.subtle" borderRadius="md">
-                {settings?.libraryPath ? <Text color="fg">{settings.libraryPath}</Text> : (
+                {settings?.libraryPath ? (
+                  <Text color="fg">{settings.libraryPath}</Text>
+                ) : (
                   <VStack align="start" gap={0}>
                     <Text color="fg.muted" fontSize="sm">
                       {defaultPaths?.libraryPath || 'Загрузка...'}
@@ -120,7 +122,9 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
             </Text>
             <HStack>
               <Box flex={1} p={3} bg="bg.subtle" borderRadius="md">
-                {settings?.outputPath ? <Text color="fg">{settings.outputPath}</Text> : (
+                {settings?.outputPath ? (
+                  <Text color="fg">{settings.outputPath}</Text>
+                ) : (
                   <VStack align="start" gap={0}>
                     <Text color="fg.muted" fontSize="sm">
                       {defaultPaths?.outputPath || 'Загрузка...'}
@@ -194,12 +198,7 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
                 </Text>
               </Box>
 
-              <Button
-                variant="outline"
-                size="sm"
-                alignSelf="start"
-                onClick={() => setMigrationOpen(true)}
-              >
+              <Button variant="outline" size="sm" alignSelf="start" onClick={() => setMigrationOpen(true)}>
                 <Icon as={LuTruck} />
                 Перенести библиотеку...
               </Button>

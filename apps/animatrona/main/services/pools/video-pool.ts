@@ -37,7 +37,7 @@ function parseFFmpegProgress(
   str: string,
   duration: number,
   startTime: number,
-  sourceFps: number,
+  sourceFps: number
 ): Partial<TranscodeProgressExtended> | null {
   // Парсим frame — более надёжный индикатор прогресса чем time (особенно с multipass)
   const frameMatch = str.match(/frame=\s*(\d+)/)
@@ -172,18 +172,18 @@ class CircularLogBuffer {
 function parseLogLevel(line: string): 'info' | 'warning' | 'error' {
   const lowerLine = line.toLowerCase()
   if (
-    lowerLine.includes('[error]')
-    || lowerLine.includes('error:')
-    || lowerLine.includes('failed')
-    || lowerLine.includes('invalid')
+    lowerLine.includes('[error]') ||
+    lowerLine.includes('error:') ||
+    lowerLine.includes('failed') ||
+    lowerLine.includes('invalid')
   ) {
     return 'error'
   }
   if (
-    lowerLine.includes('[warning]')
-    || lowerLine.includes('warning:')
-    || lowerLine.includes('discarding')
-    || lowerLine.includes('discarded')
+    lowerLine.includes('[warning]') ||
+    lowerLine.includes('warning:') ||
+    lowerLine.includes('discarding') ||
+    lowerLine.includes('discarded')
   ) {
     return 'warning'
   }
@@ -349,9 +349,10 @@ export class VideoPool extends BasePool<VideoPoolTask> {
       }
 
       const estimatedCurrentTime = estimatedFrame / sourceFps
-      const eta = task.progress.speed && task.progress.speed > 0
-        ? Math.max(0, (task.progress.totalDuration - estimatedCurrentTime) / task.progress.speed)
-        : (task.progress.eta ?? 0)
+      const eta =
+        task.progress.speed && task.progress.speed > 0
+          ? Math.max(0, (task.progress.totalDuration - estimatedCurrentTime) / task.progress.speed)
+          : (task.progress.eta ?? 0)
 
       this.emit('taskProgress', taskId, {
         ...task.progress,
@@ -573,10 +574,10 @@ export class VideoPool extends BasePool<VideoPoolTask> {
    */
   private checkAutoResetCpuFallback(): void {
     if (
-      this.globalCpuFallback
-      && this.cpuFallbackReason === 'crash'
-      && this.runningTasks.size === 0
-      && this.queue.length === 0
+      this.globalCpuFallback &&
+      this.cpuFallbackReason === 'crash' &&
+      this.runningTasks.size === 0 &&
+      this.queue.length === 0
     ) {
       log.info('Авто-сброс CPU fallback после crash — батч завершён')
       this.resetGlobalCpuFallback()
@@ -691,7 +692,7 @@ export class VideoPool extends BasePool<VideoPoolTask> {
         task.anime4kFilter = await buildAnime4KFilter(
           task.inputPath,
           task.options.anime4kShaderPath,
-          task.options.denoiseEnabled,
+          task.options.denoiseEnabled
         )
         log.info('Anime4K filter built', { taskId: task.id, filter: task.anime4kFilter })
       }

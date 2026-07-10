@@ -8,13 +8,13 @@ import {
   Badge,
   Box,
   Button,
+  Switch as ChakraSwitch,
   Flex,
   Heading,
   HStack,
   Icon,
   Input,
   Progress,
-  Switch as ChakraSwitch,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -57,17 +57,18 @@ export function PublishingSection({
   const regenLogRef = useRef<ProgressLogEntry[]>([])
   /** Текущий шаг: «[N/249] Аниме» — показывается над детальным логом */
   const [currentStep, setCurrentStep] = useState<string | null>(null)
-  const [healthSummary, setHealthSummary] = useState<
-    { complete: number; degraded: number; broken: number; unknown: number } | null
-  >(null)
+  const [healthSummary, setHealthSummary] = useState<{
+    complete: number
+    degraded: number
+    broken: number
+    unknown: number
+  } | null>(null)
   const [showDegradedDialog, setShowDegradedDialog] = useState(false)
-  const [regenCheckpoint, setRegenCheckpoint] = useState<
-    {
-      startedAt: string
-      total: number
-      pending: number
-    } | null
-  >(null)
+  const [regenCheckpoint, setRegenCheckpoint] = useState<{
+    startedAt: string
+    total: number
+    pending: number
+  } | null>(null)
   const [degradedList, setDegradedList] = useState<
     Array<{
       id: string
@@ -345,194 +346,174 @@ export function PublishingSection({
         )}
       </HStack>
 
-      {!ipfsRunning
-        ? <Text color="fg.subtle">Запустите IPFS ноду для публикации</Text>
-        : publisher.isLoading
-        ? <Text color="fg.subtle">Загрузка...</Text>
-        : publisher.animeCount === 0
-        ? (
-          <Box p={3} bg="orange.subtle" borderRadius="md">
-            <Text fontSize="sm" color="orange.fg">
-              Нет аниме для публикации. Импортируйте контент через очередь кодирования.
+      {!ipfsRunning ? (
+        <Text color="fg.subtle">Запустите IPFS ноду для публикации</Text>
+      ) : publisher.isLoading ? (
+        <Text color="fg.subtle">Загрузка...</Text>
+      ) : publisher.animeCount === 0 ? (
+        <Box p={3} bg="orange.subtle" borderRadius="md">
+          <Text fontSize="sm" color="orange.fg">
+            Нет аниме для публикации. Импортируйте контент через очередь кодирования.
+          </Text>
+        </Box>
+      ) : (
+        <VStack align="stretch" gap={4}>
+          {/* Название библиотеки */}
+          <Box>
+            <Text fontSize="sm" color="fg.subtle" mb={2}>
+              Название библиотеки
             </Text>
+            <HStack>
+              <Input
+                size="sm"
+                value={libraryName}
+                onChange={(e) => setLibraryName(e.target.value)}
+                placeholder="Моя библиотека"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSaveName}
+                disabled={!libraryName.trim() || libraryName === publisher.config?.libraryName}
+              >
+                Сохранить
+              </Button>
+            </HStack>
           </Box>
-        )
-        : (
-          <VStack align="stretch" gap={4}>
-            {/* Название библиотеки */}
-            <Box>
-              <Text fontSize="sm" color="fg.subtle" mb={2}>
-                Название библиотеки
+
+          {/* Переключатели */}
+          <Flex justify="space-between" align="center">
+            <VStack align="start" gap={0}>
+              <Text fontSize="sm">Включить публикацию</Text>
+              <Text fontSize="xs" color="fg.subtle">
+                Ваша библиотека будет доступна другим пользователям
               </Text>
-              <HStack>
-                <Input
-                  size="sm"
-                  value={libraryName}
-                  onChange={(e) => setLibraryName(e.target.value)}
-                  placeholder="Моя библиотека"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleSaveName}
-                  disabled={!libraryName.trim() || libraryName === publisher.config?.libraryName}
-                >
-                  Сохранить
-                </Button>
-              </HStack>
-            </Box>
+            </VStack>
+            <ChakraSwitch.Root
+              checked={publisher.config?.enabled ?? false}
+              onCheckedChange={(e) => void onUpdateConfig({ enabled: e.checked })}
+            >
+              <ChakraSwitch.HiddenInput />
+              <ChakraSwitch.Control />
+            </ChakraSwitch.Root>
+          </Flex>
 
-            {/* Переключатели */}
-            <Flex justify="space-between" align="center">
-              <VStack align="start" gap={0}>
-                <Text fontSize="sm">Включить публикацию</Text>
-                <Text fontSize="xs" color="fg.subtle">
-                  Ваша библиотека будет доступна другим пользователям
-                </Text>
-              </VStack>
-              <ChakraSwitch.Root
-                checked={publisher.config?.enabled ?? false}
-                onCheckedChange={(e) => void onUpdateConfig({ enabled: e.checked })}
-              >
-                <ChakraSwitch.HiddenInput />
-                <ChakraSwitch.Control />
-              </ChakraSwitch.Root>
-            </Flex>
-
-            <Flex justify="space-between" align="center">
-              <VStack align="start" gap={0}>
-                <Text fontSize="sm">Автопубликация</Text>
-                <Text fontSize="xs" color="fg.subtle">
-                  Автоматически публиковать при добавлении нового контента
-                </Text>
-              </VStack>
-              <ChakraSwitch.Root
-                checked={publisher.config?.autoPublish ?? false}
-                onCheckedChange={(e) => void onUpdateConfig({ autoPublish: e.checked })}
-                disabled={!publisher.config?.enabled}
-              >
-                <ChakraSwitch.HiddenInput />
-                <ChakraSwitch.Control />
-              </ChakraSwitch.Root>
-            </Flex>
-
-            {/* Прогресс публикации */}
-            {publisher.isPublishing && publisher.progress && (
-              <Box p={3} bg="bg.subtle" borderRadius="md">
-                <Text fontSize="sm" mb={2}>
-                  {publisher.progress.stage === 'loading' && 'Загрузка данных из БД...'}
-                  {publisher.progress.stage === 'generating' && 'Генерация манифеста...'}
-                  {publisher.progress.stage === 'publishing' && 'Публикация IPNS...'}
-                </Text>
-                <Progress.Root value={(publisher.progress.current / publisher.progress.total) * 100} size="sm">
-                  <Progress.Track>
-                    <Progress.Range />
-                  </Progress.Track>
-                </Progress.Root>
-                <Text fontSize="xs" color="fg.subtle" mt={1}>
-                  {publisher.progress.current} / {publisher.progress.total}
-                </Text>
-              </Box>
-            )}
-
-            {/* Информация о публикации */}
-            {publisher.config?.lastPublishedCid && (
-              <Box p={3} bg="bg.subtle" borderRadius="md">
-                <Text fontSize="xs" color="fg.subtle" mb={1}>
-                  Последняя публикация
-                </Text>
-                <Text fontFamily="mono" fontSize="xs" color="fg.muted" wordBreak="break-all">
-                  {publisher.config.lastPublishedCid}
-                </Text>
-                <Text fontSize="xs" color="fg.subtle" mt={1}>
-                  {formatDate(publisher.config.lastPublishedAt)}
-                </Text>
-              </Box>
-            )}
-
-            {/* Кнопка публикации */}
-            <Button
-              size="sm"
-              colorPalette="blue"
-              onClick={onPublish}
-              loading={publisher.isPublishing}
+          <Flex justify="space-between" align="center">
+            <VStack align="start" gap={0}>
+              <Text fontSize="sm">Автопубликация</Text>
+              <Text fontSize="xs" color="fg.subtle">
+                Автоматически публиковать при добавлении нового контента
+              </Text>
+            </VStack>
+            <ChakraSwitch.Root
+              checked={publisher.config?.autoPublish ?? false}
+              onCheckedChange={(e) => void onUpdateConfig({ autoPublish: e.checked })}
               disabled={!publisher.config?.enabled}
             >
-              <Icon as={LuCloudUpload} mr={2} />
-              Опубликовать сейчас
-            </Button>
-          </VStack>
-        )}
+              <ChakraSwitch.HiddenInput />
+              <ChakraSwitch.Control />
+            </ChakraSwitch.Root>
+          </Flex>
+
+          {/* Прогресс публикации */}
+          {publisher.isPublishing && publisher.progress && (
+            <Box p={3} bg="bg.subtle" borderRadius="md">
+              <Text fontSize="sm" mb={2}>
+                {publisher.progress.stage === 'loading' && 'Загрузка данных из БД...'}
+                {publisher.progress.stage === 'generating' && 'Генерация манифеста...'}
+                {publisher.progress.stage === 'publishing' && 'Публикация IPNS...'}
+              </Text>
+              <Progress.Root value={(publisher.progress.current / publisher.progress.total) * 100} size="sm">
+                <Progress.Track>
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+              <Text fontSize="xs" color="fg.subtle" mt={1}>
+                {publisher.progress.current} / {publisher.progress.total}
+              </Text>
+            </Box>
+          )}
+
+          {/* Информация о публикации */}
+          {publisher.config?.lastPublishedCid && (
+            <Box p={3} bg="bg.subtle" borderRadius="md">
+              <Text fontSize="xs" color="fg.subtle" mb={1}>
+                Последняя публикация
+              </Text>
+              <Text fontFamily="mono" fontSize="xs" color="fg.muted" wordBreak="break-all">
+                {publisher.config.lastPublishedCid}
+              </Text>
+              <Text fontSize="xs" color="fg.subtle" mt={1}>
+                {formatDate(publisher.config.lastPublishedAt)}
+              </Text>
+            </Box>
+          )}
+
+          {/* Кнопка публикации */}
+          <Button
+            size="sm"
+            colorPalette="blue"
+            onClick={onPublish}
+            loading={publisher.isPublishing}
+            disabled={!publisher.config?.enabled}
+          >
+            <Icon as={LuCloudUpload} mr={2} />
+            Опубликовать сейчас
+          </Button>
+        </VStack>
+      )}
 
       {/* Регенерация манифестов — показывается всегда когда IPFS запущен, не зависит от загрузки конфига */}
       {ipfsRunning && (
         <VStack align="stretch" gap={4} mt={publisher.isLoading || publisher.animeCount === 0 ? 4 : 4}>
           <Box>
-            {regenCheckpoint && !isRegenerating
-              ? (
-                /* Чекпоинт — регенерация была прервана */
-                <VStack align="start" gap={2}>
-                  <Text fontSize="xs" color="orange.400" fontWeight="medium">
-                    ⚠ Регенерация прервана: осталось {regenCheckpoint.pending} из {regenCheckpoint.total} аниме
-                  </Text>
-                  <HStack gap={2}>
-                    <Button
-                      size="sm"
-                      colorPalette="orange"
-                      onClick={handleResume}
-                      loading={isRegenerating}
-                      loadingText="Регенерация..."
-                    >
-                      <Icon as={LuRefreshCw} mr={2} />
-                      Продолжить ({regenCheckpoint.pending} осталось)
-                    </Button>
-                    {isRegenerating
-                      ? (
-                        <Button
-                          size="sm"
-                          colorPalette="red"
-                          variant="subtle"
-                          onClick={handleStop}
-                        >
-                          Остановить
-                        </Button>
-                      )
-                      : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleRegenerateAll}
-                        >
-                          Начать заново
-                        </Button>
-                      )}
-                  </HStack>
-                </VStack>
-              )
-              : (
+            {regenCheckpoint && !isRegenerating ? (
+              /* Чекпоинт — регенерация была прервана */
+              <VStack align="start" gap={2}>
+                <Text fontSize="xs" color="orange.400" fontWeight="medium">
+                  ⚠ Регенерация прервана: осталось {regenCheckpoint.pending} из {regenCheckpoint.total} аниме
+                </Text>
                 <HStack gap={2}>
                   <Button
                     size="sm"
-                    variant="outline"
-                    onClick={handleRegenerateAll}
+                    colorPalette="orange"
+                    onClick={handleResume}
                     loading={isRegenerating}
                     loadingText="Регенерация..."
                   >
                     <Icon as={LuRefreshCw} mr={2} />
-                    Регенерировать манифесты
+                    Продолжить ({regenCheckpoint.pending} осталось)
                   </Button>
-                  {isRegenerating && (
-                    <Button
-                      size="sm"
-                      colorPalette="red"
-                      variant="subtle"
-                      onClick={handleStop}
-                    >
+                  {isRegenerating ? (
+                    <Button size="sm" colorPalette="red" variant="subtle" onClick={handleStop}>
                       Остановить
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={handleRegenerateAll}>
+                      Начать заново
                     </Button>
                   )}
                 </HStack>
-              )}
+              </VStack>
+            ) : (
+              <HStack gap={2}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleRegenerateAll}
+                  loading={isRegenerating}
+                  loadingText="Регенерация..."
+                >
+                  <Icon as={LuRefreshCw} mr={2} />
+                  Регенерировать манифесты
+                </Button>
+                {isRegenerating && (
+                  <Button size="sm" colorPalette="red" variant="subtle" onClick={handleStop}>
+                    Остановить
+                  </Button>
+                )}
+              </HStack>
+            )}
             <Text fontSize="xs" color="fg.subtle" mt={1}>
               Перестроить дорожки и метаданные для всех эпизодов
             </Text>
@@ -586,20 +567,16 @@ export function PublishingSection({
               <Box maxH="380px" overflowY="auto">
                 <VStack gap={0.5} align="stretch">
                   {detailedLog.slice(-500).map((entry) => {
-                    const color = entry.level === 'error'
-                      ? 'red.400'
-                      : entry.level === 'warn'
-                      ? 'orange.400'
-                      : entry.level === 'success'
-                      ? 'green.400'
-                      : 'fg.muted'
+                    const color =
+                      entry.level === 'error'
+                        ? 'red.400'
+                        : entry.level === 'warn'
+                          ? 'orange.400'
+                          : entry.level === 'success'
+                            ? 'green.400'
+                            : 'fg.muted'
                     return (
-                      <Text
-                        key={entry.id}
-                        color={color}
-                        whiteSpace="pre-wrap"
-                        wordBreak="break-word"
-                      >
+                      <Text key={entry.id} color={color} whiteSpace="pre-wrap" wordBreak="break-word">
                         {entry.message}
                       </Text>
                     )
@@ -632,13 +609,7 @@ export function PublishingSection({
 
           {/* Сводка по целостности контента */}
           {healthSummary && !isRegenerating && (
-            <Box
-              p={3}
-              bg="bg.subtle"
-              borderRadius="md"
-              borderWidth="1px"
-              borderColor="border.subtle"
-            >
+            <Box p={3} bg="bg.subtle" borderRadius="md" borderWidth="1px" borderColor="border.subtle">
               <Text fontSize="xs" color="fg.muted" mb={2}>
                 Целостность контента после регенерации
               </Text>
@@ -696,9 +667,11 @@ export function PublishingSection({
               <VStack gap={1} align="stretch">
                 {degradedList.map((a) => {
                   const missingCids = a.missingCidsJson
-                    ? (JSON.parse(a.missingCidsJson) as Array<
-                      { kind: string; episodeNumber?: number; detail?: string }
-                    >)
+                    ? (JSON.parse(a.missingCidsJson) as Array<{
+                        kind: string
+                        episodeNumber?: number
+                        detail?: string
+                      }>)
                     : []
                   const missingFonts = a.missingFontsJson
                     ? (JSON.parse(a.missingFontsJson) as Array<{ episodeNumber: number; fileExt: string }>)
@@ -719,15 +692,15 @@ export function PublishingSection({
                       {missingCids.length > 0 && (
                         <Text fontSize="xs" color="fg.muted" mt={1}>
                           Потеряно CID:{' '}
-                          {missingCids.map((m) => `${m.kind}${m.episodeNumber ? ` (эп.${m.episodeNumber})` : ''}`)
+                          {missingCids
+                            .map((m) => `${m.kind}${m.episodeNumber ? ` (эп.${m.episodeNumber})` : ''}`)
                             .join(', ')}
                         </Text>
                       )}
                       {missingFonts.length > 0 && (
                         <Text fontSize="xs" color="fg.muted" mt={1}>
-                          Потеряно шрифтов: {missingFonts.length} (эп. {[
-                            ...new Set(missingFonts.map((f) => f.episodeNumber)),
-                          ].join(', ')})
+                          Потеряно шрифтов: {missingFonts.length} (эп.{' '}
+                          {[...new Set(missingFonts.map((f) => f.episodeNumber))].join(', ')})
                         </Text>
                       )}
                     </Box>

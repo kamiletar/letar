@@ -81,7 +81,7 @@ export async function regenerateAnimeEpisodeManifests(
     /** Пропустить пересборку AnimeManifest + directoryCid в конце.
      *  Используется когда caller сам управляет этим шагом (напр. делает Shikimori refresh перед сборкой). */
     skipDirectoryBuild?: boolean
-  },
+  }
 ): Promise<{
   updated: number
   failed: number

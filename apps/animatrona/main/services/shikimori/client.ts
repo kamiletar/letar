@@ -5,8 +5,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
-import { app, nativeImage } from 'electron'
+import { app, nativeImage, net } from 'electron'
 import { createModuleLogger } from '../../utils/logger'
+import { describeNetErrorWithDiagnostics } from '../../utils/net-error'
 
 import {
   GET_ANIME_DETAILS_QUERY,
@@ -30,11 +31,15 @@ import type {
 
 const log = createModuleLogger('ShikimoriClient')
 
-/** Список эндпоинтов GraphQL — фоллбэк при блокировке DPI */
-const GRAPHQL_ENDPOINTS = [
-  'https://shikimori.one/api/graphql',
-  'https://shikimori.io/api/graphql',
-]
+/**
+ * Список эндпоинтов GraphQL. Только .io — .one теперь всегда 301-редиректит POST /api/graphql
+ * на .io (домен мигрировал), а фолбэк на .one бесполезен: fetch() при 301 на POST молча
+ * превращает его в GET без тела (спецификация), Shikimori отвечает 404 (роут только под POST).
+ * redirect: 'manual' для ручной обработки в Electron net.fetch не работает (бросает
+ * "Redirect was cancelled" вместо ответа) — поэтому редирект не обрабатываем, а просто не
+ * ходим туда, откуда он неизбежен.
+ */
+const GRAPHQL_ENDPOINTS = ['https://shikimori.io/api/graphql']
 let activeEndpointIdx = 0
 const USER_AGENT = 'Animatrona/1.0 (Desktop App)'
 
@@ -142,7 +147,9 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
   // Извлекаем название операции из query для логирования
   const opMatch = query.match(/(?:query|mutation)\s+(\w+)/)
   const opName = opMatch?.[1] ?? 'unknown'
-  const varsStr = Object.entries(variables).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(', ')
+  const varsStr = Object.entries(variables)
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    .join(', ')
 
   // Пробуем все endpoint'ы начиная с последнего рабочего
   const endpointsToTry = [
@@ -151,6 +158,8 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
   ]
 
   const MAX_ATTEMPTS = 2
+  /** Ошибки по каждому эндпоинту за все попытки — чтобы не терять первую при фоллбэке на следующий */
+  const endpointErrors: { endpoint: string; message: string }[] = []
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     let lastError: Error | null = null
@@ -163,11 +172,14 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
 
       try {
         // AbortSignal.timeout не работает надёжно в Electron — используем явный AbortController
+        // 30с (не 15с): за прокси/DPI-обходом (например Clash в TUN-режиме) антибот-защита
+        // сайта (DDoS-Guard) может держать соединение по 15-20+ секунд перед тем как пропустить —
+        // в браузере это выглядит как "долгая загрузка", а не блокировка
         const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), 15_000)
+        const timer = setTimeout(() => controller.abort(), 30_000)
         let response: Response
         try {
-          response = await fetch(endpoint, {
+          response = await net.fetch(endpoint, {
             method: 'POST',
             headers: DEFAULT_HEADERS,
             body: JSON.stringify({ query, variables }),
@@ -180,8 +192,13 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
         const elapsed = Date.now() - startMs
 
         if (!response.ok) {
-          await response.body?.cancel().catch(() => {})
-          log.warn(`GraphQL ← ${opName} FAILED`, { endpoint, status: response.status, elapsed })
+          // Читаем тело ответа (не отбрасываем) — на 404/403 от прокси или DDoS-Guard
+          // там обычно осмысленная HTML/JSON страница с причиной, а не пустой ответ
+          const bodyText = await response.text().catch(() => '')
+          const bodySnippet = bodyText.slice(0, 300)
+          log.warn(`GraphQL ← ${opName} FAILED`, { endpoint, status: response.status, elapsed, bodySnippet })
+          const message = `${response.status} ${response.statusText} — ${bodySnippet || '(пусто)'}`
+          endpointErrors.push({ endpoint, message })
           // 404/502/503 от GraphQL — скорее всего DPI или временный сбой, пробуем следующий endpoint
           lastError = new Error(`Shikimori API error: ${response.status} ${response.statusText}`)
           continue
@@ -218,18 +235,24 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
         }
 
         // Сетевая ошибка или таймаут — пробуем следующий endpoint
-        const isNetworkError = errMsg.includes('fetch failed')
-          || errMsg.includes('ECONNRESET')
-          || errMsg.includes('ETIMEDOUT')
-          || errMsg.includes('ERR_NAME_NOT_RESOLVED')
-          || errMsg.includes('abort')
-          || errMsg.includes('TimeoutError')
-          || error instanceof DOMException
+        // net.fetch (Electron/Chromium) кидает ошибки вида "net::ERR_FAILED",
+        // "net::ERR_NAME_NOT_RESOLVED", "net::ERR_CONNECTION_RESET" и т.д. —
+        // отличается от Node fetch ("fetch failed", "ECONNRESET")
+        const isNetworkError =
+          errMsg.includes('fetch failed') ||
+          errMsg.includes('ECONNRESET') ||
+          errMsg.includes('ETIMEDOUT') ||
+          errMsg.includes('ERR_NAME_NOT_RESOLVED') ||
+          errMsg.includes('net::') ||
+          errMsg.includes('abort') ||
+          errMsg.includes('TimeoutError') ||
+          error instanceof DOMException
         if (isNetworkError) {
           log.warn(`GraphQL ← ${opName} NETWORK ERROR на ${new URL(endpoint).hostname}, пробуем следующий`, {
             error: errMsg,
             elapsed,
           })
+          endpointErrors.push({ endpoint, message: errMsg })
           lastError = error instanceof Error ? error : new Error(errMsg)
           continue
         }
@@ -247,8 +270,18 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
       continue
     }
 
-    // Исчерпали все попытки
-    throw lastError ?? new Error("Все Shikimori API endpoint'ы недоступны")
+    // Исчерпали все попытки — показываем историю по каждому эндпоинту, а не только последнюю ошибку
+    if (lastError) {
+      const history = endpointErrors.map((e) => `— ${e.endpoint}: ${e.message}`).join('\n')
+      const lastEndpoint = endpointErrors[endpointErrors.length - 1]?.endpoint ?? endpointsToTry[0]
+      const diagnostics = await describeNetErrorWithDiagnostics(lastError, lastEndpoint, {
+        method: 'POST',
+        headers: DEFAULT_HEADERS,
+        body: JSON.stringify({ query, variables }),
+      })
+      throw new Error(`${diagnostics}\n\nПопытки по эндпоинтам:\n${history}`)
+    }
+    throw new Error("Все Shikimori API endpoint'ы недоступны")
   }
 
   throw new Error("Все Shikimori API endpoint'ы недоступны")
@@ -396,7 +429,7 @@ function getMimeType(ext: string): string {
 export async function downloadPoster(
   posterUrl: string,
   animeId: string,
-  options?: { fileName?: string; savePath?: string },
+  options?: { fileName?: string; savePath?: string }
 ): Promise<PosterDownloadResult> {
   log.debug('Скачивание постера', { posterUrl, animeId })
 
@@ -423,7 +456,7 @@ export async function downloadPoster(
     const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT)
 
     try {
-      const response = await fetch(posterUrl, {
+      const response = await net.fetch(posterUrl, {
         signal: controller.signal,
         headers: SHIKIMORI_BROWSER_HEADERS,
       })
@@ -479,7 +512,7 @@ export async function downloadPoster(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error),
+      error: await describeNetErrorWithDiagnostics(error, posterUrl),
     }
   }
 }

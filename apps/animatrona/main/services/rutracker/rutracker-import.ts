@@ -9,14 +9,6 @@ import { broadcastToWindows } from '../../utils/ipc-handler-factory'
 import { createModuleLogger } from '../../utils/logger'
 import type { ShikimoriAnimeExtended, ShikimoriAnimePreview } from '../shikimori'
 import { getAnimeExtended, getAnimeWithRelated, searchAnime } from '../shikimori'
-
-const log = createModuleLogger('RutrackerImport')
-
-/** Отправить текущий этап импорта в renderer */
-function sendStep(step: string): void {
-  log.info(step)
-  broadcastToWindows('rutracker:importStep', step)
-}
 import {
   type CandidateScore,
   isAutoMatchConfident,
@@ -30,6 +22,14 @@ import {
 } from './rutracker-matcher'
 import { parseRutrackerPage } from './rutracker-parser'
 import type { RutrackerTorrentInfo } from './types'
+
+const log = createModuleLogger('RutrackerImport')
+
+/** Отправить текущий этап импорта в renderer */
+function sendStep(step: string): void {
+  log.info(step)
+  broadcastToWindows('rutracker:importStep', step)
+}
 
 /** Результат полного импорта (Фаза 1-2) */
 export interface RutrackerImportResult {
@@ -51,7 +51,7 @@ export interface RutrackerImportResult {
  */
 async function findCorrectSeasonViaRelated(
   malShikimoriId: number,
-  torrent: RutrackerTorrentInfo,
+  torrent: RutrackerTorrentInfo
 ): Promise<RutrackerImportResult | null> {
   const withRelated = await getAnimeWithRelated(malShikimoriId)
   if (!withRelated?.related?.length) return null
