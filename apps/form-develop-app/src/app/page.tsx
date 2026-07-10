@@ -6,9 +6,7 @@ export default function HomePage() {
     <Container maxW="4xl" py="8">
       <VStack gap={6} align="stretch">
         <Heading size="2xl">Form Develop App</Heading>
-        <Text color="gray.500">
-          Песочница для разработки @letar/forms. Полноценный CRUDL пример с рецептами.
-        </Text>
+        <Text color="gray.500">Песочница для разработки @letar/forms. Полноценный CRUDL пример с рецептами.</Text>
         <Button asChild colorPalette="blue" size="lg" width="fit-content">
           <Link href="/recipes">Перейти к рецептам</Link>
         </Button>

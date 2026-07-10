@@ -35,7 +35,9 @@ export default function AsyncValidationDemoPage() {
     >
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>Регистрация с проверкой уникальности</Heading>
+          <Heading size="md" mb={3}>
+            Регистрация с проверкой уникальности
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Email проверяется на blur (занятые: admin@test.com, user@test.com, test@test.com). Username проверяется
             onChange с debounce 300мс (занятые: admin, root, test, user).
@@ -61,20 +63,17 @@ export default function AsyncValidationDemoPage() {
               asyncDebounce={500}
               asyncTrigger="onBlur"
             />
-            <Form.Field.Password
-              name="password"
-              label="Пароль"
-            />
+            <Form.Field.Password name="password" label="Пароль" />
             <Form.Button.Submit>Зарегистрироваться</Form.Button.Submit>
           </Form>
         </Box>
 
         {submittedData && (
           <Box p={4} bg="bg.subtle" borderRadius="md">
-            <Heading size="sm" mb={2}>Отправленные данные:</Heading>
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+            <Heading size="sm" mb={2}>
+              Отправленные данные:
+            </Heading>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(submittedData, null, 2)}</pre>
           </Box>
         )}
       </VStack>

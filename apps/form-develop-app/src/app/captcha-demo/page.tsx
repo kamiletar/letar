@@ -5,13 +5,12 @@ import { DemoPageLayout } from '../_components'
 
 export default function CaptchaDemoPage() {
   return (
-    <DemoPageLayout
-      title="Form.Captcha"
-      description="CAPTCHA виджет — Turnstile, reCAPTCHA, hCaptcha"
-    >
+    <DemoPageLayout title="Form.Captcha" description="CAPTCHA виджет — Turnstile, reCAPTCHA, hCaptcha">
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>Использование</Heading>
+          <Heading size="md" mb={3}>
+            Использование
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             CAPTCHA требует настоящий siteKey от провайдера. Ниже — API и примеры конфигурации.
           </Text>
@@ -43,7 +42,9 @@ const result = await verifyCaptcha(token, {
         </Box>
 
         <Box>
-          <Heading size="md" mb={3}>Провайдеры</Heading>
+          <Heading size="md" mb={3}>
+            Провайдеры
+          </Heading>
           <VStack align="start" gap={2} fontSize="sm">
             <Text>
               <strong>turnstile</strong> — Cloudflare Turnstile (рекомендуемый, бесплатный)

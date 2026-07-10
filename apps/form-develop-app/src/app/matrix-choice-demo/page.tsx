@@ -16,7 +16,9 @@ export default function MatrixChoiceDemoPage() {
       <VStack gap={8} align="stretch">
         {/* Пример 1: NPS-опросник (radio) */}
         <Box>
-          <Heading size="md" mb={3}>NPS-опросник (radio)</Heading>
+          <Heading size="md" mb={3}>
+            NPS-опросник (radio)
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Один ответ на строку. Как в Google Forms.
           </Text>
@@ -49,7 +51,9 @@ export default function MatrixChoiceDemoPage() {
 
         {/* Пример 2: Checkbox (множественный) */}
         <Box>
-          <Heading size="md" mb={3}>Навыки (checkbox)</Heading>
+          <Heading size="md" mb={3}>
+            Навыки (checkbox)
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Несколько ответов на строку.
           </Text>
@@ -80,7 +84,9 @@ export default function MatrixChoiceDemoPage() {
 
         {/* Пример 3: Rating (звёзды) */}
         <Box>
-          <Heading size="md" mb={3}>Рейтинг (звёзды)</Heading>
+          <Heading size="md" mb={3}>
+            Рейтинг (звёзды)
+          </Heading>
           <Form
             debug
             initialValue={{ rating: {} }}
@@ -109,10 +115,10 @@ export default function MatrixChoiceDemoPage() {
 
         {submittedData && (
           <Box p={4} bg="bg.subtle" borderRadius="md">
-            <Heading size="sm" mb={2}>Отправленные данные:</Heading>
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+            <Heading size="sm" mb={2}>
+              Отправленные данные:
+            </Heading>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(submittedData, null, 2)}</pre>
           </Box>
         )}
       </VStack>

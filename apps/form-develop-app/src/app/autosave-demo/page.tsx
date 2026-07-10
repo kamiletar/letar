@@ -33,11 +33,7 @@ function AutosaveFormInner() {
       <Form.Field.String name="title" label="Заголовок" />
       <Form.Field.Textarea name="description" label="Описание" />
       <Form.Field.String name="category" label="Категория" />
-      <AutosaveIndicator
-        status={autosave.status}
-        lastSavedAt={autosave.lastSavedAt}
-        error={autosave.error}
-      />
+      <AutosaveIndicator status={autosave.status} lastSavedAt={autosave.lastSavedAt} error={autosave.error} />
       <Form.Button.Submit>Отправить</Form.Button.Submit>
     </VStack>
   )
@@ -51,7 +47,9 @@ export default function AutosaveDemoPage() {
     >
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>Автосохранение каждые 3 секунды</Heading>
+          <Heading size="md" mb={3}>
+            Автосохранение каждые 3 секунды
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Данные отправляются на сервер через POST. При отсутствии сети — сохраняются в localStorage. Индикатор
             показывает статус: &quot;Сохраняю...&quot; → &quot;Сохранено (время)&quot;.
@@ -60,7 +58,9 @@ export default function AutosaveDemoPage() {
         </Box>
 
         <Box p={4} bg="bg.subtle" borderRadius="md">
-          <Heading size="sm" mb={2}>API:</Heading>
+          <Heading size="sm" mb={2}>
+            API:
+          </Heading>
           <Code display="block" whiteSpace="pre" fontSize="xs" p={3}>
             {`const autosave = useFormAutosave(form, {
   endpoint: '/api/drafts',

@@ -42,14 +42,13 @@ export default function ServerErrorsDemoPage() {
   })
 
   return (
-    <DemoPageLayout
-      title="mapServerErrors()"
-      description="Автоматический маппинг серверных ошибок на поля формы"
-    >
+    <DemoPageLayout title="mapServerErrors()" description="Автоматический маппинг серверных ошибок на поля формы">
       <VStack gap={8} align="stretch">
         {/* Выбор типа ошибки */}
         <Box>
-          <Heading size="md" mb={3}>Тип серверной ошибки</Heading>
+          <Heading size="md" mb={3}>
+            Тип серверной ошибки
+          </Heading>
           <HStack gap={2} flexWrap="wrap">
             {Object.keys(ERROR_EXAMPLES).map((key) => (
               <Box
@@ -73,7 +72,9 @@ export default function ServerErrorsDemoPage() {
 
         {/* Входная ошибка */}
         <Box>
-          <Heading size="sm" mb={2} color="red.400">Входные данные (error)</Heading>
+          <Heading size="sm" mb={2} color="red.400">
+            Входные данные (error)
+          </Heading>
           <Code display="block" whiteSpace="pre-wrap" fontSize="xs" p={4} borderRadius="md">
             {JSON.stringify(error, null, 2)}
           </Code>
@@ -81,7 +82,9 @@ export default function ServerErrorsDemoPage() {
 
         {/* Результат маппинга */}
         <Box>
-          <Heading size="sm" mb={2} color="green.400">Результат mapServerErrors()</Heading>
+          <Heading size="sm" mb={2} color="green.400">
+            Результат mapServerErrors()
+          </Heading>
           <Code display="block" whiteSpace="pre-wrap" fontSize="xs" p={4} borderRadius="md">
             {JSON.stringify(mapped, null, 2)}
           </Code>
@@ -89,7 +92,9 @@ export default function ServerErrorsDemoPage() {
 
         {/* Fieldmap конфиг */}
         <Box>
-          <Heading size="sm" mb={2} color="blue.400">Конфигурация fieldMap</Heading>
+          <Heading size="sm" mb={2} color="blue.400">
+            Конфигурация fieldMap
+          </Heading>
           <Code display="block" whiteSpace="pre-wrap" fontSize="xs" p={4} borderRadius="md">
             {`fieldMap: {
   email: { field: 'email', message: 'Этот email уже зарегистрирован' },
@@ -100,7 +105,9 @@ export default function ServerErrorsDemoPage() {
 
         {/* Пример использования */}
         <Box>
-          <Heading size="md" mb={3}>Пример использования в onSubmit</Heading>
+          <Heading size="md" mb={3}>
+            Пример использования в onSubmit
+          </Heading>
           <Code display="block" whiteSpace="pre" fontSize="xs" p={4} borderRadius="md">
             {`import { mapServerErrors, applyServerErrors } from '@letar/forms'
 
@@ -132,7 +139,9 @@ export default function ServerErrorsDemoPage() {
 
         {/* Поддерживаемые форматы */}
         <Box>
-          <Heading size="md" mb={3}>Поддерживаемые форматы</Heading>
+          <Heading size="md" mb={3}>
+            Поддерживаемые форматы
+          </Heading>
           <VStack align="start" gap={2} fontSize="sm">
             <Text>
               <strong>Prisma P2002</strong> — unique constraint → маппинг meta.target на поле

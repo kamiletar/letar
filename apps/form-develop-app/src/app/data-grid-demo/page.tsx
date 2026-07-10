@@ -26,7 +26,9 @@ export default function DataGridDemoPage() {
     >
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>100 сотрудников</Heading>
+          <Heading size="md" mb={3}>
+            100 сотрудников
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Клик по ячейке → редактирование. Заголовок → сортировка. Фильтры сверху. Пагинация по 10 записей.
           </Text>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Heading, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { DemoPageLayout } from '../_components'
@@ -9,14 +9,13 @@ export default function SurveyFieldsDemoPage() {
   const [submittedData, setSubmittedData] = useState<Record<string, unknown> | null>(null)
 
   return (
-    <DemoPageLayout
-      title="Survey Fields"
-      description="ImageChoice, Likert, YesNo — поля для опросников и анкет"
-    >
+    <DemoPageLayout title="Survey Fields" description="ImageChoice, Likert, YesNo — поля для опросников и анкет">
       <VStack gap={8} align="stretch">
         {/* ImageChoice */}
         <Box>
-          <Heading size="md" mb={3}>ImageChoice — выбор из картинок</Heading>
+          <Heading size="md" mb={3}>
+            ImageChoice — выбор из картинок
+          </Heading>
           <Form
             debug
             initialValue={{ style: '' }}
@@ -53,7 +52,9 @@ export default function SurveyFieldsDemoPage() {
 
         {/* Likert */}
         <Box>
-          <Heading size="md" mb={3}>Likert — шкала согласия</Heading>
+          <Heading size="md" mb={3}>
+            Likert — шкала согласия
+          </Heading>
           <Form
             debug
             initialValue={{ experience: undefined }}
@@ -71,7 +72,9 @@ export default function SurveyFieldsDemoPage() {
 
         {/* YesNo — buttons */}
         <Box>
-          <Heading size="md" mb={3}>YesNo — бинарный выбор</Heading>
+          <Heading size="md" mb={3}>
+            YesNo — бинарный выбор
+          </Heading>
           <Form
             debug
             initialValue={{ agree: undefined, recommend: undefined, subscribe: undefined }}
@@ -84,26 +87,18 @@ export default function SurveyFieldsDemoPage() {
               noLabel="Нет, отказываюсь"
               variant="buttons"
             />
-            <Form.Field.YesNo
-              name="recommend"
-              label="Порекомендуете нас друзьям?"
-              variant="thumbs"
-            />
-            <Form.Field.YesNo
-              name="subscribe"
-              label="Подписаться на рассылку?"
-              variant="emoji"
-            />
+            <Form.Field.YesNo name="recommend" label="Порекомендуете нас друзьям?" variant="thumbs" />
+            <Form.Field.YesNo name="subscribe" label="Подписаться на рассылку?" variant="emoji" />
             <Form.Button.Submit>Отправить</Form.Button.Submit>
           </Form>
         </Box>
 
         {submittedData && (
           <Box p={4} bg="bg.subtle" borderRadius="md">
-            <Heading size="sm" mb={2}>Отправленные данные:</Heading>
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+            <Heading size="sm" mb={2}>
+              Отправленные данные:
+            </Heading>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(submittedData, null, 2)}</pre>
           </Box>
         )}
       </VStack>

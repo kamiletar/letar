@@ -15,7 +15,9 @@ export default function CreditCardDemoPage() {
     >
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>Inline layout</Heading>
+          <Heading size="md" mb={3}>
+            Inline layout
+          </Heading>
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Номер карты, срок действия и CVC в одну строку. Иконка бренда определяется автоматически.
           </Text>
@@ -30,7 +32,9 @@ export default function CreditCardDemoPage() {
         </Box>
 
         <Box>
-          <Heading size="md" mb={3}>Stacked layout</Heading>
+          <Heading size="md" mb={3}>
+            Stacked layout
+          </Heading>
           <Form
             debug
             initialValue={{ payment: { number: '', expiry: '', cvc: '' } }}
@@ -43,10 +47,10 @@ export default function CreditCardDemoPage() {
 
         {submittedData && (
           <Box p={4} bg="bg.subtle" borderRadius="md">
-            <Heading size="sm" mb={2}>Отправленные данные:</Heading>
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+            <Heading size="sm" mb={2}>
+              Отправленные данные:
+            </Heading>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(submittedData, null, 2)}</pre>
           </Box>
         )}
       </VStack>

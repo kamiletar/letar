@@ -8,9 +8,7 @@ import { z } from 'zod/v4'
 
 const FiltersSchema = z.object({
   search: z.string().meta({ ui: { title: 'Поиск', placeholder: 'Введите название...' } }),
-  category: z
-    .enum(['all', 'frontend', 'backend', 'devops'])
-    .meta({ ui: { title: 'Категория' } }),
+  category: z.enum(['all', 'frontend', 'backend', 'devops']).meta({ ui: { title: 'Категория' } }),
   minRating: z
     .number()
     .min(0)
@@ -57,10 +55,7 @@ function FilteredResults() {
           if (filters.category !== 'all' && item.category !== filters.category) return false
           if (item.rating < filters.minRating) return false
           if (filters.onlyFavorites && !item.favorite) return false
-          if (
-            filters.tags.length > 0
-            && !filters.tags.some((tag) => item.tags.includes(tag))
-          ) {
+          if (filters.tags.length > 0 && !filters.tags.some((tag) => item.tags.includes(tag))) {
             return false
           }
           return true
@@ -70,42 +65,49 @@ function FilteredResults() {
           <Box>
             <HStack justify="space-between" mb={4}>
               <Heading size="md">Результаты</Heading>
-              <Badge colorPalette={results.length > 0 ? 'green' : 'gray'}>{results.length} из {allItems.length}</Badge>
+              <Badge colorPalette={results.length > 0 ? 'green' : 'gray'}>
+                {results.length} из {allItems.length}
+              </Badge>
             </HStack>
 
-            {results.length === 0
-              ? (
-                <Box py={8} textAlign="center" color="gray.500">
-                  Ничего не найдено. Измените фильтры.
-                </Box>
-              )
-              : (
-                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
-                  {results.map((item) => (
-                    <Card.Root key={item.id} variant="outline" size="sm">
-                      <Card.Body>
-                        <HStack justify="space-between">
-                          <Text fontWeight="medium">{item.title}</Text>
-                          {item.favorite && <Text color="yellow.500">★</Text>}
-                        </HStack>
-                        <HStack gap={1} mt={2} wrap="wrap">
-                          <Badge colorPalette="blue" size="sm">{item.category}</Badge>
-                          {'★'.repeat(item.rating).split('').map((s, i) => (
-                            <Text key={i} color="yellow.400" fontSize="xs">{s}</Text>
+            {results.length === 0 ? (
+              <Box py={8} textAlign="center" color="gray.500">
+                Ничего не найдено. Измените фильтры.
+              </Box>
+            ) : (
+              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
+                {results.map((item) => (
+                  <Card.Root key={item.id} variant="outline" size="sm">
+                    <Card.Body>
+                      <HStack justify="space-between">
+                        <Text fontWeight="medium">{item.title}</Text>
+                        {item.favorite && <Text color="yellow.500">★</Text>}
+                      </HStack>
+                      <HStack gap={1} mt={2} wrap="wrap">
+                        <Badge colorPalette="blue" size="sm">
+                          {item.category}
+                        </Badge>
+                        {'★'
+                          .repeat(item.rating)
+                          .split('')
+                          .map((s, i) => (
+                            <Text key={i} color="yellow.400" fontSize="xs">
+                              {s}
+                            </Text>
                           ))}
-                        </HStack>
-                        <HStack gap={1} mt={1} wrap="wrap">
-                          {item.tags.map((tag) => (
-                            <Tag.Root key={tag} size="sm" variant="subtle">
-                              <Tag.Label>{tag}</Tag.Label>
-                            </Tag.Root>
-                          ))}
-                        </HStack>
-                      </Card.Body>
-                    </Card.Root>
-                  ))}
-                </SimpleGrid>
-              )}
+                      </HStack>
+                      <HStack gap={1} mt={1} wrap="wrap">
+                        {item.tags.map((tag) => (
+                          <Tag.Root key={tag} size="sm" variant="subtle">
+                            <Tag.Label>{tag}</Tag.Label>
+                          </Tag.Root>
+                        ))}
+                      </HStack>
+                    </Card.Body>
+                  </Card.Root>
+                ))}
+              </SimpleGrid>
+            )}
           </Box>
         )
       }}
@@ -192,11 +194,7 @@ export default function FiltersStateDemoPage() {
           </Text>
         </Box>
 
-        <Form
-          initialValue={initialValue}
-          schema={FiltersSchema}
-          formRef={formRef}
-        >
+        <Form initialValue={initialValue} schema={FiltersSchema} formRef={formRef}>
           {/* Form.UrlSync: записывает фильтры в URL с дебаунсом */}
           <Form.UrlSync
             fields={['search', 'category', 'minRating', 'onlyFavorites']}

@@ -11,7 +11,9 @@ export default function AnalyticsDemoPage() {
     >
       <VStack gap={8} align="stretch">
         <Box>
-          <Heading size="md" mb={3}>Использование</Heading>
+          <Heading size="md" mb={3}>
+            Использование
+          </Heading>
           <Code display="block" whiteSpace="pre" fontSize="xs" p={4} borderRadius="md">
             {`import { AnalyticsPanel, createUmamiAdapter, useFormAnalytics } from '@letar/forms'
 
@@ -35,7 +37,9 @@ const analytics = useFormAnalytics({
         </Box>
 
         <Box>
-          <Heading size="md" mb={3}>Адаптеры</Heading>
+          <Heading size="md" mb={3}>
+            Адаптеры
+          </Heading>
           <Code display="block" whiteSpace="pre" fontSize="xs" p={4} borderRadius="md">
             {`// Umami (наш стек)
 createUmamiAdapter()
@@ -55,19 +59,35 @@ const myAdapter = { name: 'custom', track: (event, formId) => fetch('/api/analyt
         </Box>
 
         <Box>
-          <Heading size="md" mb={3}>Что трекается</Heading>
+          <Heading size="md" mb={3}>
+            Что трекается
+          </Heading>
           <VStack align="start" gap={2} fontSize="sm">
-            <Text><strong>field_focus</strong> — количество фокусов на каждом поле</Text>
-            <Text><strong>field_blur</strong> — время проведённое на поле (мс)</Text>
-            <Text><strong>field_error</strong> — ошибки валидации по полям</Text>
-            <Text><strong>field_correction</strong> — возврат к полю после blur (исправления)</Text>
-            <Text><strong>form_abandon</strong> — последнее поле, заполненных полей, общее время</Text>
-            <Text><strong>form_complete</strong> — общее время, время по каждому полю</Text>
+            <Text>
+              <strong>field_focus</strong> — количество фокусов на каждом поле
+            </Text>
+            <Text>
+              <strong>field_blur</strong> — время проведённое на поле (мс)
+            </Text>
+            <Text>
+              <strong>field_error</strong> — ошибки валидации по полям
+            </Text>
+            <Text>
+              <strong>field_correction</strong> — возврат к полю после blur (исправления)
+            </Text>
+            <Text>
+              <strong>form_abandon</strong> — последнее поле, заполненных полей, общее время
+            </Text>
+            <Text>
+              <strong>form_complete</strong> — общее время, время по каждому полю
+            </Text>
           </VStack>
         </Box>
 
         <Box>
-          <Heading size="md" mb={3}>Статистика</Heading>
+          <Heading size="md" mb={3}>
+            Статистика
+          </Heading>
           <VStack align="start" gap={2} fontSize="sm">
             <Text>67% форм бросают незавершёнными (Zuko, 2025)</Text>
             <Text>Поле пароля — рекордсмен drop-off (10.5%)</Text>

@@ -9,10 +9,7 @@ export default function ConversationalDemoPage() {
   const [submittedData, setSubmittedData] = useState<Record<string, unknown> | null>(null)
 
   return (
-    <DemoPageLayout
-      title="Conversational Mode"
-      description="Typeform-стиль: одно поле за раз с анимацией и навигацией"
-    >
+    <DemoPageLayout title="Conversational Mode" description="Typeform-стиль: одно поле за раз с анимацией и навигацией">
       <VStack gap={8} align="stretch">
         <Box maxW="lg" mx="auto" w="full">
           <Form
@@ -58,10 +55,10 @@ export default function ConversationalDemoPage() {
 
         {submittedData && (
           <Box p={4} bg="bg.subtle" borderRadius="md">
-            <Heading size="sm" mb={2}>Отправленные данные:</Heading>
-            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+            <Heading size="sm" mb={2}>
+              Отправленные данные:
+            </Heading>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>{JSON.stringify(submittedData, null, 2)}</pre>
           </Box>
         )}
       </VStack>
