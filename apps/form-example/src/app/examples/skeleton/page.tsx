@@ -17,17 +17,23 @@ export default function SkeletonExamplePage() {
     <VStack gap={8} align="stretch" maxW="800px" mx="auto" py={8}>
       <Box>
         <Heading size="lg">Form Skeleton</Heading>
-        <Text color="fg.muted" mt={2}>Loading state пока загружаются данные формы.</Text>
+        <Text color="fg.muted" mt={2}>
+          Loading state пока загружаются данные формы.
+        </Text>
       </Box>
 
       <HStack gap={8} align="start">
         <Box flex={1} p={6} borderWidth="1px" borderRadius="lg">
-          <Heading size="sm" mb={4}>Из Zod-схемы (5 полей)</Heading>
+          <Heading size="sm" mb={4}>
+            Из Zod-схемы (5 полей)
+          </Heading>
           <FormSkeleton fields={ProductSchema} />
         </Box>
 
         <Box flex={1} p={6} borderWidth="1px" borderRadius="lg">
-          <Heading size="sm" mb={4}>Число полей: 3</Heading>
+          <Heading size="sm" mb={4}>
+            Число полей: 3
+          </Heading>
           <FormSkeleton fields={3} showSubmit />
         </Box>
       </HStack>

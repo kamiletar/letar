@@ -108,7 +108,9 @@ export function Nav() {
         APP
       </Text>
       <Stack gap={1} mb={4}>
-        {appPages.map((p) => <NavLink key={p.href} {...p} />)}
+        {appPages.map((p) => (
+          <NavLink key={p.href} {...p} />
+        ))}
       </Stack>
 
       <Separator mb={4} />
@@ -117,7 +119,9 @@ export function Nav() {
         EXAMPLES
       </Text>
       <Stack gap={0.5}>
-        {examples.map((ex) => <NavLink key={ex.href} {...ex} />)}
+        {examples.map((ex) => (
+          <NavLink key={ex.href} {...ex} />
+        ))}
       </Stack>
 
       <Separator my={4} />

@@ -23,10 +23,7 @@ export default function DataGridExamplePage() {
         </Text>
       </Stack>
 
-      <Form
-        initialValue={{ products: sampleData }}
-        onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}
-      >
+      <Form initialValue={{ products: sampleData }} onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}>
         <Form.Field.DataGrid
           name="products"
           label="Products"

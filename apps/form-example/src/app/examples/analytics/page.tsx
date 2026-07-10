@@ -5,10 +5,22 @@ import { AnalyticsPanel, Form, useFormAnalytics } from '@letar/forms'
 import { z } from 'zod/v4'
 
 const RegistrationSchema = z.object({
-  name: z.string().min(2).meta({ ui: { title: 'Имя', placeholder: 'Как вас зовут?' } }),
-  email: z.string().email().meta({ ui: { title: 'Email' } }),
-  password: z.string().min(8).meta({ ui: { title: 'Пароль', fieldType: 'password' } }),
-  phone: z.string().optional().meta({ ui: { title: 'Телефон', fieldType: 'phone' } }),
+  name: z
+    .string()
+    .min(2)
+    .meta({ ui: { title: 'Имя', placeholder: 'Как вас зовут?' } }),
+  email: z
+    .string()
+    .email()
+    .meta({ ui: { title: 'Email' } }),
+  password: z
+    .string()
+    .min(8)
+    .meta({ ui: { title: 'Пароль', fieldType: 'password' } }),
+  phone: z
+    .string()
+    .optional()
+    .meta({ ui: { title: 'Телефон', fieldType: 'phone' } }),
   agree: z.boolean().meta({ ui: { title: 'Согласен с условиями' } }),
 })
 
@@ -41,7 +53,9 @@ export default function AnalyticsExamplePage() {
         </Form>
 
         <Box p={4} bg="bg.muted" borderRadius="md">
-          <Text fontSize="sm" fontWeight="bold" mb={2}>Live-метрики:</Text>
+          <Text fontSize="sm" fontWeight="bold" mb={2}>
+            Live-метрики:
+          </Text>
           <Text fontSize="sm">Completion: {analytics.completionRate}%</Text>
           <Text fontSize="sm">Errors: {analytics.totalErrors}</Text>
           <Text fontSize="sm">Fields: {analytics.fieldAnalytics.size}</Text>

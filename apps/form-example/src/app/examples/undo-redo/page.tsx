@@ -5,9 +5,15 @@ import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
 const ArticleSchema = z.object({
-  title: z.string().min(2).meta({ ui: { title: 'Заголовок' } }),
+  title: z
+    .string()
+    .min(2)
+    .meta({ ui: { title: 'Заголовок' } }),
   slug: z.string().meta({ ui: { title: 'Slug' } }),
-  content: z.string().max(5000).meta({ ui: { title: 'Содержание' } }),
+  content: z
+    .string()
+    .max(5000)
+    .meta({ ui: { title: 'Содержание' } }),
   published: z.boolean().meta({ ui: { title: 'Опубликовать' } }),
 })
 
@@ -35,7 +41,9 @@ export default function UndoRedoExamplePage() {
       </Form>
 
       <Box p={4} bg="bg.muted" borderRadius="md" fontSize="sm">
-        <Text fontWeight="bold" mb={2}>Как подключить:</Text>
+        <Text fontWeight="bold" mb={2}>
+          Как подключить:
+        </Text>
         <Text>1. const history = useFormHistory(form)</Text>
         <Text>2. {'<HistoryControls history={history} />'}</Text>
         <Text>3. Keyboard shortcuts работают автоматически</Text>

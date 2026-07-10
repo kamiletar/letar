@@ -23,10 +23,7 @@ export default function AsyncValidationExamplePage() {
         </Text>
       </Stack>
 
-      <Form
-        initialValue={{ email: '', name: '' }}
-        onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}
-      >
+      <Form initialValue={{ email: '', name: '' }} onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}>
         <Form.Field.String name="name" label="Name" />
         <Form.Field.String
           name="email"

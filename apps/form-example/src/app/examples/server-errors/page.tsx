@@ -46,14 +46,18 @@ export default function ServerErrorsExamplePage() {
       </HStack>
 
       <Box>
-        <Text fontSize="xs" fontWeight="bold" color="red.500" mb={1}>Вход:</Text>
+        <Text fontSize="xs" fontWeight="bold" color="red.500" mb={1}>
+          Вход:
+        </Text>
         <Code display="block" whiteSpace="pre-wrap" fontSize="xs" p={3} borderRadius="md">
           {JSON.stringify(error, null, 2)}
         </Code>
       </Box>
 
       <Box>
-        <Text fontSize="xs" fontWeight="bold" color="green.500" mb={1}>Результат:</Text>
+        <Text fontSize="xs" fontWeight="bold" color="green.500" mb={1}>
+          Результат:
+        </Text>
         <Code display="block" whiteSpace="pre-wrap" fontSize="xs" p={3} borderRadius="md">
           {JSON.stringify(mapped, null, 2)}
         </Code>

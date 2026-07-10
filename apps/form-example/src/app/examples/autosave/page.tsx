@@ -7,9 +7,7 @@ export default function AutosaveExamplePage() {
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
         <Heading size="xl">Autosave to Server</Heading>
-        <Text color="fg.muted">
-          Automatic server-side saving with debounce, offline fallback, and draft recovery.
-        </Text>
+        <Text color="fg.muted">Automatic server-side saving with debounce, offline fallback, and draft recovery.</Text>
       </Stack>
 
       <Code display="block" whiteSpace="pre" fontSize="xs" p={4} borderRadius="md">

@@ -25,16 +25,22 @@ export default function ReadOnlyExamplePage() {
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
         <Heading size="lg">Read-Only View</Heading>
-        <Text color="fg.muted" mt={2}>FormReadOnlyView отображает данные как текст. Labels из Zod .meta().</Text>
+        <Text color="fg.muted" mt={2}>
+          FormReadOnlyView отображает данные как текст. Labels из Zod .meta().
+        </Text>
       </Box>
 
       <Box p={6} borderWidth="1px" borderRadius="lg">
-        <Heading size="md" mb={4}>Профиль пользователя</Heading>
+        <Heading size="md" mb={4}>
+          Профиль пользователя
+        </Heading>
         <FormReadOnlyView data={sampleData} schema={UserSchema} />
       </Box>
 
       <Box p={6} borderWidth="1px" borderRadius="lg">
-        <Heading size="md" mb={4}>Компактный режим</Heading>
+        <Heading size="md" mb={4}>
+          Компактный режим
+        </Heading>
         <FormReadOnlyView data={sampleData} schema={UserSchema} compact />
       </Box>
     </VStack>

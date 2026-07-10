@@ -17,10 +17,7 @@ export default function MatrixChoiceExamplePage() {
         </Text>
       </Stack>
 
-      <Form
-        initialValue={{ satisfaction: {} }}
-        onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}
-      >
+      <Form initialValue={{ satisfaction: {} }} onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}>
         <Form.Field.MatrixChoice
           name="satisfaction"
           label="How satisfied are you?"
