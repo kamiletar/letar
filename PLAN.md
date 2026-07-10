@@ -6,6 +6,19 @@
 > aprel8008). Полный план, приоритизация и чек-лист по файлам →
 > [`PLAN_STICKY_CTA.md`](./PLAN_STICKY_CTA.md). Реализация не начата.
 
+> 📌 **Отдельная инфраструктурная задача (вне темы этого файла): TypeScript 7 GA — тираж на остальные
+> проекты.** Пилот на `time` подтвердил паритет (см. сессию №51 ниже). Полный план тиража, найденная
+> ловушка с коллизией bin `tsc` и порядок действий → **§19** (конец файла).
+
+> **Сессия №51 (2026-07-10, TS7 GA — пилот на `time`):** ✅ вышел стабильный `typescript@7.0.2` (Go-порт,
+> GA 2026-07-08). Добавлен таргет `typecheck:ts7` в `apps/time/project.json` — `bunx --bun typescript@7.0.2
+> --noEmit`, **изолированно** от workspace `tsc`/`tsgo` (обычный `bun install` пакета в корневой
+> `package.json` тут же подменяет общий `node_modules/.bin/tsc` версией 7.0.2 **для всех** проектов молча,
+> несмотря на алиас-имя — поймано и отменено до коммита). Результат на `time`: **байт-в-байт идентичный**
+> вывод с `tsc` 6.0.3 и `tsgo` dev-preview (одни и те же 4 pre-existing ошибки — не хватает сгенерённых
+> Prisma-файлов, не про компилятор); скорость 0.62s — паритет с `tsgo`, ~4.4x быстрее `tsc` 6.0.3 (2.71s).
+> Полный план тиража → §19. commit `<будет добавлен>`.
+
 > **Сессия №42 (2026-06-21, Этап 6.11 — Pressable-компоненты):** ✅ **`@letar/ui` 0.5.0** —
 > `Pressable`, `PressableButton`, `ExternalLink`, `pressableConfig` (ripple + spring + iOS-фикс).
 > ✅ **kami** полностью переведён: `nav-links`→`AppLink`, `sign-in-button`→`Button`, `mobile-menu`→`AppLink`+`Pressable`,
@@ -2399,3 +2412,86 @@ Hard gate; уход от bash-ядра — **выбор между** (а) `libs/
 - [x] Сессия C: BlackCove задеплоил `time` через `deploy_app` (не SSH), exitCode 0 ✅. **Порт 3100 ещё НЕ закрыт снаружи** — отдельный заход (s3-инстанс + ufw)
 - [ ] Сессия D: полный цикл на grandslamcup — staging → e2e (json записан) → prod с зелёным gate; warn при испорченном json
 - [ ] Неделя warn-only без ложных срабатываний → решение о hard gate (Фаза 3)
+
+---
+
+## §19 — TypeScript 7 GA: план тиража на остальные проекты 🆕
+
+> Не связано с темой auth этого файла — инфраструктурный/тулинговый трек, добавлен здесь по аналогии с §15/§17/§18.
+> Контекст: 8 июля 2026 Microsoft выпустил стабильный **TypeScript 7.0** — Go-порт компилятора (ранее известный
+> как preview-проект «Corsa»/`tsgo`), заявлено 8–12x ускорение полных сборок. Официальный анонс:
+> https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/
+
+### Текущее состояние монорепо (проверено 2026-07-10)
+
+- `package.json` держит **два** компилятора отдельными зависимостями: `"typescript": "6.0.3"` (обычный `tsc`,
+  используется в таргете `typecheck` всех apps/libs) и `"@typescript/native-preview": "^7.0.0-dev.20260706.1"`
+  (dev-nightly сборка того же движка, что и вышедший TS7 GA; бинарник `tsgo`, таргет `typecheck:tsgo`,
+  «в 9-38x быстрее tsc» — уже задокументировано в `CLAUDE.md`/`environment.md`).
+- **Пилот выполнен на `time`** (сессия №51): таргет `typecheck:ts7` → `bunx --bun typescript@7.0.2 --noEmit`,
+  результат идентичен `tsc` 6.0.3 и `tsgo` dev-preview (те же 4 pre-existing ошибки, не про компилятор).
+  Скорость (`time`, чистый прогон): `tsc` 2.71s / `tsgo` 0.60s / **TS7 GA 0.62s** — паритет с уже используемым
+  `tsgo`, ускорение подтверждается на реальном коде, а не только на бенчмарках Microsoft.
+
+### ⚠️ Найденная ловушка — коллизия имени bin `tsc`
+
+При обычном `bun install` пакета `typescript@7.0.2` (даже под кастомным алиасом в `devDependencies`) bun
+переписывает **общий** `node_modules/.bin/tsc` версией 7.0.2 **для всего workspace**, несмотря на то что
+`package.json` продолжает показывать `"typescript": "6.0.3"` — потому что имя бинарника берётся из `bin`-поля
+самого пакета `typescript` (`"tsc": "bin/tsc"`), а не из ключа-алиаса в `devDependencies`. Т.е. **любой** bump
+версии в общем `package.json` немедленно и молча переключает `tsc` у всех 60+ проектов на новый компилятор —
+пилотировать «на одном приложении» через обычный `bun add` **невозможно** без риска для всего монорепо.
+
+Официальная рекомендация Microsoft для сосуществования 6.0/7.0 (нужна, т.к. TS7.0 **не имеет программного API**,
+обещан только в 7.1 — инструментам вроде typescript-eslint нужен API 6.0):
+
+```json
+{
+  "devDependencies": {
+    "typescript": "npm:@typescript/typescript6@^6.0.2", // bin: tsc6, реэкспорт API 6.0 для тулинга
+    "@typescript/native": "npm:typescript@^7.0.2" // bin: tsc, сам компилятор 7.0
+  }
+}
+```
+
+Проверено (`npm view`, 2026-07-10): `typescript` dist-tag `latest` = `7.0.2` (GA), `next` = `7.1.0-dev...`;
+`@typescript/typescript6` = `6.0.2`, bin `tsc6`; `@typescript/native-preview` (текущий пакет монорепо) ещё
+жив на `latest: 7.0.0-dev.20260707.2`, но по анонсу будет свёрнут в пользу `typescript@next`.
+
+### План тиража (не начат, только пилот)
+
+1. **Проверить lint-тулинг на зависимость от API `typescript`** — есть ли в летар ESLint-конфиге
+   typescript-eslint (`.oxlintrc.json`/`eslint.config.mjs`), который импортирует `require('typescript')`
+   программно, а не только зовёт бинарник. Если да — обязателен алиас-трюк выше, иначе сломается lint.
+2. **Заменить `@typescript/native-preview`** на схему `typescript` + `@typescript/native` (алиасы выше) —
+   одним PR в корневом `package.json`, с полным `nx run-many -t typecheck:tsgo` (или новый `typecheck:ts7`)
+   по всем проектам на регрессии, прежде чем удалять старые таргеты.
+3. **Переименовать таргеты** `typecheck:tsgo` → возможно оставить как есть (bin `tsgo` из
+   `@typescript/native-preview` продолжит работать, пока пакет не убран) либо завести `typecheck:ts7` во всех
+   `project.json` по аналогии с пилотом на `time`, и только потом решать судьбу `tsgo`.
+4. **Аудит tsconfig на тихие breaking changes TS7** (дефолты `strict: true`, `module: esnext`,
+   `noUncheckedSideEffectImports: true`, `rootDir: "./"`, `types: []`) — в `tsconfig.base.json` letar они уже
+   явные, риск низкий, но нужно свериться по каждому app-level `tsconfig.json`, если там есть переопределения.
+5. **Учесть ограничение embedded-языков** — Vue/MDX/Astro/Svelte/Angular-темплейты пока не работают с TS7
+   language server (нет стабильного API). Проверить, есть ли такие стеки в летар (MDX встречается в
+   `dsperevod` — `useMDXComponents`, см. `.claude/rules/git.md`) — для них редакторская поддержка TS7 пока
+   недоступна, но CLI-тайпчек (`tsc`/`tsgo`) не затронут.
+6. **Тиражировать по приложениям** — по одному, тем же способом, что и пилот (bunx-изоляция сначала,
+   переход на настоящую замену зависимости только после проверки lint-тулинга, п.1).
+
+### ✓ DoD §19
+
+- [x] Пилот на `time`: таргет `typecheck:ts7` добавлен, результат идентичен tsc/tsgo, задокументирован
+- [ ] Проверено, зависит ли ESLint/typescript-eslint от API `typescript` программно
+- [ ] Корневой `package.json` переведён на схему `typescript6`/`native` алиасов (или обосновано, почему нет)
+- [ ] `nx run-many -t typecheck:tsgo` (или `ts7`) зелёный по всем apps/libs на новом компиляторе
+- [ ] Решение по судьбе `typecheck:tsgo`/`@typescript/native-preview` (оставить, свернуть, переименовать)
+- [ ] Тираж завершён на всех проектах, доки (`CLAUDE.md`, `environment.md`) обновлены под новую версию/цифры скорости
+
+### Риски
+
+- Коллизия bin `tsc` (см. выше) — обязательно использовать alias-схему, не голый bump версии.
+- typescript-eslint/другие плагины ESLint могут требовать API 6.0 — без алиаса `@typescript/typescript6`
+  тираж сломает `nx lint` по всему монорепо разом.
+- TS7 language server пока не поддерживает Vue/MDX/Astro/Svelte/Angular embedding — не блокер для CLI-тайпчека,
+  но может повлиять на редакторский опыт там, где такие стеки используются.

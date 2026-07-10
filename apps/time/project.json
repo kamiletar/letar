@@ -31,6 +31,19 @@
         "technologies": ["typescript", "tsgo"]
       }
     },
+    "typecheck:ts7": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx --bun typescript@7.0.2 --noEmit",
+        "cwd": "apps/time"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "metadata": {
+        "description": "🆕 Пилот TS7 GA (typescript@7.0.2 через bunx, изолированно от workspace tsc/tsgo)",
+        "technologies": ["typescript"]
+      }
+    },
     "oxlint": {
       "executor": "nx:run-commands",
       "options": {
