@@ -31,11 +31,7 @@ function ContactForm() {
   })
 
   return (
-    <Form
-      schema={ContactSchema}
-      initialValue={{ name: '', email: '', phone: '', ...prefilled }}
-      onSubmit={save}
-    >
+    <Form schema={ContactSchema} initialValue={{ name: '', email: '', phone: '', ...prefilled }} onSubmit={save}>
       <Form.Field.String name="name" />
       <Form.Field.String name="email" />
       <Form.Field.Phone name="phone" />
@@ -83,12 +79,12 @@ const url = generatePrefillUrl('/contact', {
 
 ## Пропсы
 
-| Проп           | Тип                      | По умолч. | Описание                                |
-| -------------- | ------------------------ | --------- | --------------------------------------- |
-| `fields`       | `string[]`               | обязат.   | Whitelist разрешённых полей              |
-| `mapping`      | `Record<string, string>` | —         | URL-параметр → имя поля                 |
-| `cleanUrl`     | `boolean`                | `false`   | Удалить параметры из URL после извлечения |
-| `schema`       | `ZodSchema`              | —         | Валидация извлечённых значений          |
+| Проп           | Тип                      | По умолч. | Описание                                       |
+| -------------- | ------------------------ | --------- | ---------------------------------------------- |
+| `fields`       | `string[]`               | обязат.   | Whitelist разрешённых полей                    |
+| `mapping`      | `Record<string, string>` | —         | URL-параметр → имя поля                        |
+| `cleanUrl`     | `boolean`                | `false`   | Удалить параметры из URL после извлечения      |
+| `schema`       | `ZodSchema`              | —         | Валидация извлечённых значений                 |
 | `searchParams` | `URLSearchParams`        | авто      | Кастомный источник (по умолч. window.location) |
 
 ---

@@ -76,23 +76,23 @@ description: Matrix choice field for surveys, NPS forms, and questionnaires
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `name` | `string` | required | Field name |
-| `label` | `string` | — | Label above matrix |
-| `rows` | `MatrixRow[]` | required | Questions (row labels) |
-| `columns` | `MatrixColumn[]` | required | Answer options (column headers) |
-| `variant` | `'radio' \| 'checkbox' \| 'rating'` | `'radio'` | Selection mode |
-| `disabled` | `boolean` | `false` | Disable all inputs |
-| `readOnly` | `boolean` | `false` | Read-only mode |
+| Prop       | Type                                | Default   | Description                     |
+| ---------- | ----------------------------------- | --------- | ------------------------------- |
+| `name`     | `string`                            | required  | Field name                      |
+| `label`    | `string`                            | —         | Label above matrix              |
+| `rows`     | `MatrixRow[]`                       | required  | Questions (row labels)          |
+| `columns`  | `MatrixColumn[]`                    | required  | Answer options (column headers) |
+| `variant`  | `'radio' \| 'checkbox' \| 'rating'` | `'radio'` | Selection mode                  |
+| `disabled` | `boolean`                           | `false`   | Disable all inputs              |
+| `readOnly` | `boolean`                           | `false`   | Read-only mode                  |
 
 ## Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
+| Key              | Action               |
+| ---------------- | -------------------- |
 | Arrow Right/Left | Move between columns |
-| Arrow Up/Down | Move between rows |
-| Enter / Space | Select current cell |
+| Arrow Up/Down    | Move between rows    |
+| Enter / Space    | Select current cell  |
 
 ## Required Validation
 
@@ -101,7 +101,6 @@ When `required={true}`, unfilled rows are highlighted in red after form validati
 ## Responsive Behavior
 
 On mobile (`< md` breakpoint), the table automatically switches to a card-based layout where each question is a separate card with vertically stacked options.
-
 
 ---
 

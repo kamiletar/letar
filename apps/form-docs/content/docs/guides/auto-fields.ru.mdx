@@ -11,12 +11,12 @@ import { DemoContainer } from '@/components/demo-container'
 
 Библиотека предлагает четыре уровня генерации форм — каждый следующий даёт больше контроля:
 
-| Уровень | Компонент | JSX | Когда использовать |
-|---------|-----------|-----|-------------------|
-| 1 | `Form.FromSchema` | Нет | CRUD, прототипы, админки |
-| 2 | `Form.AutoFields` | Только layout | Кастомная раскладка с автополями |
-| 3 | `Form.Field.*` | Поля + layout | Полный контроль над каждым полем |
-| 4 | `useAppForm` | Всё | Императивная логика, кастомные хуки |
+| Уровень | Компонент         | JSX           | Когда использовать                  |
+| ------- | ----------------- | ------------- | ----------------------------------- |
+| 1       | `Form.FromSchema` | Нет           | CRUD, прототипы, админки            |
+| 2       | `Form.AutoFields` | Только layout | Кастомная раскладка с автополями    |
+| 3       | `Form.Field.*`    | Поля + layout | Полный контроль над каждым полем    |
+| 4       | `useAppForm`      | Всё           | Императивная логика, кастомные хуки |
 
 Уровни совместимы — можно свободно комбинировать их в одной форме.
 
@@ -47,25 +47,25 @@ const UserSchema = z.object({
 
 ### Пропсы FromSchema
 
-| Проп | Тип | По умолчанию | Описание |
-|------|-----|--------------|----------|
-| `schema` | Zod schema | обязательный | Схема для валидации и генерации полей |
-| `initialValue` | `TData` | обязательный | Начальные значения формы |
-| `onSubmit` | `(data: TData) => void` | обязательный | Обработчик отправки |
-| `submitLabel` | `ReactNode` | `'Save'` | Текст кнопки отправки |
-| `showReset` | `boolean` | `false` | Показать кнопку сброса |
-| `resetLabel` | `ReactNode` | `'Reset'` | Текст кнопки сброса |
-| `exclude` | `string[]` | — | Поля для исключения |
-| `validateOn` | `ValidateOn` | — | Режим валидации |
-| `middleware` | `FormMiddleware` | — | Middleware для событий формы |
-| `disabled` | `boolean` | — | Заблокировать все поля |
-| `readOnly` | `boolean` | — | Режим только чтение |
-| `persistence` | `FormPersistenceConfig` | — | Конфигурация localStorage |
-| `offline` | `FormOfflineConfig` | — | Конфигурация оффлайн-режима |
-| `debug` | `boolean \| 'force'` | — | JSON-инспектор значений |
-| `gap` | `number` | `4` | Отступ между полями |
-| `beforeButtons` | `ReactNode` | — | Контент перед кнопками |
-| `afterButtons` | `ReactNode` | — | Контент после кнопок |
+| Проп            | Тип                     | По умолчанию | Описание                              |
+| --------------- | ----------------------- | ------------ | ------------------------------------- |
+| `schema`        | Zod schema              | обязательный | Схема для валидации и генерации полей |
+| `initialValue`  | `TData`                 | обязательный | Начальные значения формы              |
+| `onSubmit`      | `(data: TData) => void` | обязательный | Обработчик отправки                   |
+| `submitLabel`   | `ReactNode`             | `'Save'`     | Текст кнопки отправки                 |
+| `showReset`     | `boolean`               | `false`      | Показать кнопку сброса                |
+| `resetLabel`    | `ReactNode`             | `'Reset'`    | Текст кнопки сброса                   |
+| `exclude`       | `string[]`              | —            | Поля для исключения                   |
+| `validateOn`    | `ValidateOn`            | —            | Режим валидации                       |
+| `middleware`    | `FormMiddleware`        | —            | Middleware для событий формы          |
+| `disabled`      | `boolean`               | —            | Заблокировать все поля                |
+| `readOnly`      | `boolean`               | —            | Режим только чтение                   |
+| `persistence`   | `FormPersistenceConfig` | —            | Конфигурация localStorage             |
+| `offline`       | `FormOfflineConfig`     | —            | Конфигурация оффлайн-режима           |
+| `debug`         | `boolean \| 'force'`    | —            | JSON-инспектор значений               |
+| `gap`           | `number`                | `4`          | Отступ между полями                   |
+| `beforeButtons` | `ReactNode`             | —            | Контент перед кнопками                |
+| `afterButtons`  | `ReactNode`             | —            | Контент после кнопок                  |
 
 ### Исключение полей
 
@@ -97,12 +97,12 @@ const UserSchema = z.object({
 
 ### Пропсы AutoFields
 
-| Проп | Тип | По умолчанию | Описание |
-|------|-----|--------------|----------|
-| `include` | `string[]` | — | Рендерить только эти поля |
-| `exclude` | `string[]` | — | Исключить эти поля |
-| `recursive` | `boolean` | `true` | Раскрывать вложенные объекты |
-| `fieldWrapper` | `(props) => ReactElement` | — | Кастомная обёртка для каждого поля |
+| Проп           | Тип                       | По умолчанию | Описание                           |
+| -------------- | ------------------------- | ------------ | ---------------------------------- |
+| `include`      | `string[]`                | —            | Рендерить только эти поля          |
+| `exclude`      | `string[]`                | —            | Исключить эти поля                 |
+| `recursive`    | `boolean`                 | `true`       | Раскрывать вложенные объекты       |
+| `fieldWrapper` | `(props) => ReactElement` | —            | Кастомная обёртка для каждого поля |
 
 ### Кастомная обёртка полей
 
@@ -145,17 +145,17 @@ const UserSchema = z.object({
 
 ### Маппинг по умолчанию (Zod → Компонент)
 
-| Zod тип | Компонент | Условие |
-|---------|-----------|---------|
-| `z.string()` | `Form.Field.String` | По умолчанию |
-| `z.string()` | `Form.Field.Textarea` | Если `maxLength > 200` |
-| `z.string().email()` | `Form.Field.String` | С `type="email"` |
-| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number` | |
-| `z.boolean()` | `Form.Field.Checkbox` | |
-| `z.date()` | `Form.Field.Date` | |
-| `z.enum()` / `z.literal()` | `Form.Field.NativeSelect` | |
-| `z.array(z.string())` | `Form.Field.Tags` | Массив строк |
-| `z.array(z.object())` | `Form.Group.List` | Массив объектов |
+| Zod тип                                | Компонент                 | Условие                |
+| -------------------------------------- | ------------------------- | ---------------------- |
+| `z.string()`                           | `Form.Field.String`       | По умолчанию           |
+| `z.string()`                           | `Form.Field.Textarea`     | Если `maxLength > 200` |
+| `z.string().email()`                   | `Form.Field.String`       | С `type="email"`       |
+| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number`       |                        |
+| `z.boolean()`                          | `Form.Field.Checkbox`     |                        |
+| `z.date()`                             | `Form.Field.Date`         |                        |
+| `z.enum()` / `z.literal()`             | `Form.Field.NativeSelect` |                        |
+| `z.array(z.string())`                  | `Form.Field.Tags`         | Массив строк           |
+| `z.array(z.object())`                  | `Form.Group.List`         | Массив объектов        |
 
 ### Переопределение через `fieldType`
 
@@ -167,7 +167,11 @@ const Schema = z.object({
   description: z.string().meta({ ui: { title: 'Описание', fieldType: 'textarea' } }),
 
   // Слайдер вместо числового поля
-  rating: z.number().min(0).max(10).meta({ ui: { title: 'Рейтинг', fieldType: 'slider' } }),
+  rating: z
+    .number()
+    .min(0)
+    .max(10)
+    .meta({ ui: { title: 'Рейтинг', fieldType: 'slider' } }),
 
   // Rich text редактор
   content: z.string().meta({ ui: { title: 'Контент', fieldType: 'richText' } }),
@@ -212,27 +216,30 @@ const Schema = z.object({
 
 ```tsx
 const Schema = z.object({
-  email: z.string().email().meta({
-    ui: {
-      title: 'Email-адрес',               // Лейбл
-      placeholder: 'user@example.com',     // Плейсхолдер
-      description: 'Мы никому не передаём', // Подсказка под полем
-      fieldType: 'string',                // Переопределение компонента
-      fieldProps: { type: 'email' },       // Пропсы для компонента
-    },
-  }),
+  email: z
+    .string()
+    .email()
+    .meta({
+      ui: {
+        title: 'Email-адрес', // Лейбл
+        placeholder: 'user@example.com', // Плейсхолдер
+        description: 'Мы никому не передаём', // Подсказка под полем
+        fieldType: 'string', // Переопределение компонента
+        fieldProps: { type: 'email' }, // Пропсы для компонента
+      },
+    }),
 })
 ```
 
-| Свойство meta | Тип | Описание |
-|---------------|-----|----------|
-| `title` | `string` | Лейбл поля |
-| `placeholder` | `string` | Текст-заполнитель |
-| `description` | `string` | Подсказка под полем |
-| `fieldType` | `FieldComponentType` | Переопределение компонента |
-| `fieldProps` | `Record<string, unknown>` | Дополнительные пропсы компонента |
-| `options` | `BaseOption[]` | Опции для select-полей |
-| `autocomplete` | `string` | HTML атрибут autocomplete |
+| Свойство meta  | Тип                       | Описание                         |
+| -------------- | ------------------------- | -------------------------------- |
+| `title`        | `string`                  | Лейбл поля                       |
+| `placeholder`  | `string`                  | Текст-заполнитель                |
+| `description`  | `string`                  | Подсказка под полем              |
+| `fieldType`    | `FieldComponentType`      | Переопределение компонента       |
+| `fieldProps`   | `Record<string, unknown>` | Дополнительные пропсы компонента |
+| `options`      | `BaseOption[]`            | Опции для select-полей           |
+| `autocomplete` | `string`                  | HTML атрибут autocomplete        |
 
 Если `title` не указан, имя поля конвертируется из camelCase в читаемый формат (`firstName` → `First Name`).
 
@@ -291,25 +298,25 @@ const Schema = z.object({
 Ограничения из Zod автоматически передаются как пропсы компонентов:
 
 ```tsx
-z.string().min(2).max(100)    // → minLength={2} maxLength={100}
-z.number().min(1).max(10)     // → min={1} max={10}
-z.string().email()            // → type="email"
-z.date().min(new Date())      // → min={now}
+z.string().min(2).max(100) // → minLength={2} maxLength={100}
+z.number().min(1).max(10) // → min={1} max={10}
+z.string().email() // → type="email"
+z.date().min(new Date()) // → min={now}
 ```
 
 Не нужно дублировать ограничения в JSX — схема является единым источником истины.
 
 ## Когда какой уровень использовать
 
-| Сценарий | Рекомендуемый уровень |
-|----------|----------------------|
-| Админские CRUD-формы | `Form.FromSchema` |
-| Быстрое прототипирование | `Form.FromSchema` |
-| Простые формы с кастомным layout | `Form.AutoFields` |
-| Сложные многоколоночные layouts | `Form.Field.*` (Compound Components) |
-| Мультистеп формы | `Form.Field.*` + `Form.Steps` |
-| Условный рендеринг | `Form.Field.*` + `Form.When` |
-| Кастомный UX (анимации, inline-editing) | `useAppForm` |
+| Сценарий                                | Рекомендуемый уровень                |
+| --------------------------------------- | ------------------------------------ |
+| Админские CRUD-формы                    | `Form.FromSchema`                    |
+| Быстрое прототипирование                | `Form.FromSchema`                    |
+| Простые формы с кастомным layout        | `Form.AutoFields`                    |
+| Сложные многоколоночные layouts         | `Form.Field.*` (Compound Components) |
+| Мультистеп формы                        | `Form.Field.*` + `Form.Steps`        |
+| Условный рендеринг                      | `Form.Field.*` + `Form.When`         |
+| Кастомный UX (анимации, inline-editing) | `useAppForm`                         |
 
 **Правило:** Если форма — линейный вертикальный поток, `FromSchema` или `AutoFields` отлично подходят. Для сложных layouts используйте Compound Components.
 

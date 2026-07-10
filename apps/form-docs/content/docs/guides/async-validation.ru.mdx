@@ -42,11 +42,11 @@ const Schema = z.object({
 
 Все поля, созданные через `createField`, поддерживают эти пропсы:
 
-| Пропс | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | — | Функция валидации |
-| `asyncDebounce` | `number` | `500` | Задержка debounce (мс) |
-| `asyncTrigger` | `'onBlur' \| 'onChange'` | `'onBlur'` | Когда запускать |
+| Пропс           | Тип                                                | По умолчанию | Описание               |
+| --------------- | -------------------------------------------------- | ------------ | ---------------------- |
+| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | —            | Функция валидации      |
+| `asyncDebounce` | `number`                                           | `500`        | Задержка debounce (мс) |
+| `asyncTrigger`  | `'onBlur' \| 'onChange'`                           | `'onBlur'`   | Когда запускать        |
 
 ## Возможности
 
@@ -63,13 +63,11 @@ const Schema = z.object({
 ```tsx
 import { useAsyncFieldValidation } from '@letar/forms'
 
-const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(
-  schema,
-  'email',
-  { asyncValidate: myFn, asyncDebounce: 300 }
-)
+const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(schema, 'email', {
+  asyncValidate: myFn,
+  asyncDebounce: 300,
+})
 ```
-
 
 ---
 

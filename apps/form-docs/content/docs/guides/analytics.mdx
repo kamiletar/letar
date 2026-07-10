@@ -24,9 +24,7 @@ function ContactForm() {
       <Form.Button.Submit>Send</Form.Button.Submit>
 
       {/* Dev-only panel */}
-      {process.env.NODE_ENV === 'development' && (
-        <AnalyticsPanel analytics={analytics} />
-      )}
+      {process.env.NODE_ENV === 'development' && <AnalyticsPanel analytics={analytics} />}
     </Form>
   )
 }
@@ -34,15 +32,15 @@ function ContactForm() {
 
 ## What's Tracked
 
-| Metric | Description |
-|--------|-------------|
-| **Focus count** | How many times each field received focus |
-| **Time per field** | Total milliseconds spent on each field |
-| **Error count** | Validation errors per field |
-| **Corrections** | How many times user returned to fix a field |
-| **Completion rate** | Percentage of fields filled (0-100%) |
-| **Abandon** | Last field, filled count, total time on `beforeunload` |
-| **Complete** | Total time and per-field breakdown on submit |
+| Metric              | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| **Focus count**     | How many times each field received focus               |
+| **Time per field**  | Total milliseconds spent on each field                 |
+| **Error count**     | Validation errors per field                            |
+| **Corrections**     | How many times user returned to fix a field            |
+| **Completion rate** | Percentage of fields filled (0-100%)                   |
+| **Abandon**         | Last field, filled count, total time on `beforeunload` |
+| **Complete**        | Total time and per-field breakdown on submit           |
 
 ## Adapters
 
@@ -108,16 +106,16 @@ const analytics = useFormAnalytics({
 
 **Returns:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `fieldAnalytics` | `Map<string, FieldAnalytics>` | Per-field metrics |
-| `completionRate` | `number` | 0-100% |
-| `lastFocusedField` | `string \| null` | Last focused field |
-| `totalTimeMs` | `number` | Time since form mount |
-| `totalErrors` | `number` | Total error count |
-| `trackAbandon()` | `() => void` | Force abandon event |
-| `trackComplete()` | `() => void` | Force complete event |
-| `reset()` | `() => void` | Reset all metrics |
+| Field              | Type                          | Description           |
+| ------------------ | ----------------------------- | --------------------- |
+| `fieldAnalytics`   | `Map<string, FieldAnalytics>` | Per-field metrics     |
+| `completionRate`   | `number`                      | 0-100%                |
+| `lastFocusedField` | `string \| null`              | Last focused field    |
+| `totalTimeMs`      | `number`                      | Time since form mount |
+| `totalErrors`      | `number`                      | Total error count     |
+| `trackAbandon()`   | `() => void`                  | Force abandon event   |
+| `trackComplete()`  | `() => void`                  | Force complete event  |
+| `reset()`          | `() => void`                  | Reset all metrics     |
 
 ## AnalyticsPanel
 

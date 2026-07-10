@@ -30,12 +30,16 @@ export default function ReadOnlyDemoPage() {
         </Box>
 
         <Box p={6} borderWidth="1px" borderRadius="lg">
-          <Heading size="md" mb={4}>Default</Heading>
+          <Heading size="md" mb={4}>
+            Default
+          </Heading>
           <FormReadOnlyView data={sampleData} schema={UserSchema} />
         </Box>
 
         <Box p={6} borderWidth="1px" borderRadius="lg">
-          <Heading size="md" mb={4}>Compact</Heading>
+          <Heading size="md" mb={4}>
+            Compact
+          </Heading>
           <FormReadOnlyView data={sampleData} schema={UserSchema} compact />
         </Box>
       </VStack>

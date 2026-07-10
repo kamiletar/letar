@@ -9,10 +9,10 @@ description: Editable data grid with sorting, filtering, pagination, and inline 
 
 ## When to Use
 
-| Scenario | Component |
-|----------|-----------|
+| Scenario                          | Component                |
+| --------------------------------- | ------------------------ |
 | Enter 5-50 new rows (order items) | `Form.Field.TableEditor` |
-| Edit/browse 100+ existing rows | `Form.Field.DataGrid` |
+| Edit/browse 100+ existing rows    | `Form.Field.DataGrid`    |
 
 ## Basic Usage
 
@@ -34,17 +34,17 @@ description: Editable data grid with sorting, filtering, pagination, and inline 
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `name` | `string` | required | Array field name |
-| `columns` | `DataGridColumnDef[]` | required | Column definitions |
-| `pageSize` | `number` | `20` | Rows per page |
-| `rowSelection` | `boolean` | `false` | Enable checkbox selection |
-| `onRowSave` | `(row, index) => Promise<void>` | — | Row-level save callback |
-| `virtualized` | `boolean` | `false` | Virtual scrolling for 1000+ rows |
-| `virtualHeight` | `string` | `'500px'` | Container height for virtualized mode |
-| `columnResizing` | `boolean` | `false` | Enable column resize by dragging |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'sm'` | Table size |
+| Prop             | Type                            | Default   | Description                           |
+| ---------------- | ------------------------------- | --------- | ------------------------------------- |
+| `name`           | `string`                        | required  | Array field name                      |
+| `columns`        | `DataGridColumnDef[]`           | required  | Column definitions                    |
+| `pageSize`       | `number`                        | `20`      | Rows per page                         |
+| `rowSelection`   | `boolean`                       | `false`   | Enable checkbox selection             |
+| `onRowSave`      | `(row, index) => Promise<void>` | —         | Row-level save callback               |
+| `virtualized`    | `boolean`                       | `false`   | Virtual scrolling for 1000+ rows      |
+| `virtualHeight`  | `string`                        | `'500px'` | Container height for virtualized mode |
+| `columnResizing` | `boolean`                       | `false`   | Enable column resize by dragging      |
+| `size`           | `'sm' \| 'md' \| 'lg'`          | `'sm'`    | Table size                            |
 
 ## Column Definition
 
@@ -52,7 +52,7 @@ description: Editable data grid with sorting, filtering, pagination, and inline 
 interface DataGridColumnDef {
   name: string
   label?: string
-  editable?: boolean   // default: true
+  editable?: boolean // default: true
   filter?: 'text' | 'range' | 'select' | 'date'
   align?: 'left' | 'center' | 'right'
   width?: string
@@ -72,7 +72,6 @@ interface DataGridColumnDef {
 - **Row selection** — checkbox per row, select all, bulk delete
 - **Row-level save** — `onRowSave` fires when a cell is edited
 - **CSV export** — download all data as CSV file
-
 
 ---
 

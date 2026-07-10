@@ -53,24 +53,24 @@ await fillField('agree', true)
 ## Assertion Helpers
 
 ```tsx
-expectFieldError('email', 'Invalid email')  // Field shows this error
-expectNoFieldError('email')                 // Field has no errors
-expectFieldValue('name', 'Ivan')            // Field has this value
+expectFieldError('email', 'Invalid email') // Field shows this error
+expectNoFieldError('email') // Field has no errors
+expectFieldValue('name', 'Ivan') // Field has this value
 ```
 
 ## Multi-step Helpers
 
 ```tsx
-await goToStep(2)         // Click "Next" to reach step 2
-expectActiveStep(2)       // Assert current step
+await goToStep(2) // Click "Next" to reach step 2
+expectActiveStep(2) // Assert current step
 ```
 
 ## Array Helpers
 
 ```tsx
-await addItem('phones')                // Click "Add" in list
-await removeItem(0, 'phones')         // Remove first item
-expectItemCount('phones', 3)          // Assert item count
+await addItem('phones') // Click "Add" in list
+await removeItem(0, 'phones') // Remove first item
+expectItemCount('phones', 3) // Assert item count
 ```
 
 ## TestWrapper
@@ -80,7 +80,11 @@ Standalone `ChakraProvider` wrapper for custom test setups:
 ```tsx
 import { TestWrapper } from '@letar/forms/testing'
 
-render(<TestWrapper><MyComponent /></TestWrapper>)
+render(
+  <TestWrapper>
+    <MyComponent />
+  </TestWrapper>
+)
 ```
 
 ---

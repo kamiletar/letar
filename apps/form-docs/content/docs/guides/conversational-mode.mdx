@@ -23,24 +23,24 @@ Each child element becomes one step. The user sees one field at a time and navig
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `showProgress` | `boolean` | `true` | Show progress bar |
-| `showQuestionNumber` | `boolean` | `true` | Show "Question 3 of 7" |
-| `nextLabel` | `string` | `'Далее'` | Next button text |
-| `prevLabel` | `string` | `'Назад'` | Previous button text |
-| `submitLabel` | `string` | `'Отправить'` | Submit button text (last step) |
-| `welcomeScreen` | `ReactNode` | — | Content before first question |
-| `completedScreen` | `ReactNode` | — | Content after last question |
-| `onComplete` | `() => void` | — | Called when all questions answered |
+| Prop                 | Type         | Default       | Description                        |
+| -------------------- | ------------ | ------------- | ---------------------------------- |
+| `showProgress`       | `boolean`    | `true`        | Show progress bar                  |
+| `showQuestionNumber` | `boolean`    | `true`        | Show "Question 3 of 7"             |
+| `nextLabel`          | `string`     | `'Далее'`     | Next button text                   |
+| `prevLabel`          | `string`     | `'Назад'`     | Previous button text               |
+| `submitLabel`        | `string`     | `'Отправить'` | Submit button text (last step)     |
+| `welcomeScreen`      | `ReactNode`  | —             | Content before first question      |
+| `completedScreen`    | `ReactNode`  | —             | Content after last question        |
+| `onComplete`         | `() => void` | —             | Called when all questions answered |
 
 ## Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
-| Enter | Next question |
-| Alt + Arrow Down | Next question |
-| Alt + Arrow Up | Previous question |
+| Key              | Action            |
+| ---------------- | ----------------- |
+| Enter            | Next question     |
+| Alt + Arrow Down | Next question     |
+| Alt + Arrow Up   | Previous question |
 
 ## Custom Hook
 
@@ -50,13 +50,12 @@ For building your own conversational UI:
 import { useConversationalState } from '@letar/forms'
 
 const state = useConversationalState(5) // 5 fields
-state.currentIndex  // 0
-state.progress      // 0.2
-state.next()        // go to next
-state.prev()        // go to previous
-state.isCompleted   // false
+state.currentIndex // 0
+state.progress // 0.2
+state.next() // go to next
+state.prev() // go to previous
+state.isCompleted // false
 ```
-
 
 ---
 

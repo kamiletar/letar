@@ -32,15 +32,15 @@ description: Card number input with brand detection, expiry, and CVC
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `name` | `string` | — | Field group name |
-| `label` | `string` | — | Label |
-| `brands` | `CardBrand[]` | all | Restrict accepted brands |
-| `showBrandIcon` | `boolean` | `true` | Show detected brand icon |
-| `layout` | `'inline' \| 'stacked'` | `'inline'` | Field layout |
-| `disabled` | `boolean` | `false` | Disable input |
-| `readOnly` | `boolean` | `false` | Read-only mode |
+| Prop            | Type                    | Default    | Description              |
+| --------------- | ----------------------- | ---------- | ------------------------ |
+| `name`          | `string`                | —          | Field group name         |
+| `label`         | `string`                | —          | Label                    |
+| `brands`        | `CardBrand[]`           | all        | Restrict accepted brands |
+| `showBrandIcon` | `boolean`               | `true`     | Show detected brand icon |
+| `layout`        | `'inline' \| 'stacked'` | `'inline'` | Field layout             |
+| `disabled`      | `boolean`               | `false`    | Disable input            |
+| `readOnly`      | `boolean`               | `false`    | Read-only mode           |
 
 ## Value
 
@@ -63,7 +63,6 @@ const schema = z.object({
   card: creditCardSchema,
 })
 ```
-
 
 ---
 

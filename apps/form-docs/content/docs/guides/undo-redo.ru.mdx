@@ -38,32 +38,32 @@ function ProductEditor() {
 
 ```typescript
 const history = useFormHistory(form, {
-  maxHistory: 50,        // Макс. снимков (по умолчанию: 50)
-  debounceMs: 500,       // Задержка перед записью (по умолчанию: 500мс)
-  keyboard: true,        // Горячие клавиши Ctrl+Z/Y (по умолчанию: true)
-  persist: false,        // sessionStorage (по умолчанию: false)
+  maxHistory: 50, // Макс. снимков (по умолчанию: 50)
+  debounceMs: 500, // Задержка перед записью (по умолчанию: 500мс)
+  keyboard: true, // Горячие клавиши Ctrl+Z/Y (по умолчанию: true)
+  persist: false, // sessionStorage (по умолчанию: false)
   persistKey: 'form-history',
 })
 ```
 
 **Возвращает:**
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `undo` | `() => void` | Отменить последнее изменение |
-| `redo` | `() => void` | Повторить отменённое |
-| `canUndo` | `boolean` | Есть история отмен |
-| `canRedo` | `boolean` | Есть история повторов |
-| `currentIndex` | `number` | Позиция в стеке |
-| `historyLength` | `number` | Всего снимков |
-| `clear` | `() => void` | Очистить историю |
+| Поле            | Тип          | Описание                     |
+| --------------- | ------------ | ---------------------------- |
+| `undo`          | `() => void` | Отменить последнее изменение |
+| `redo`          | `() => void` | Повторить отменённое         |
+| `canUndo`       | `boolean`    | Есть история отмен           |
+| `canRedo`       | `boolean`    | Есть история повторов        |
+| `currentIndex`  | `number`     | Позиция в стеке              |
+| `historyLength` | `number`     | Всего снимков                |
+| `clear`         | `() => void` | Очистить историю             |
 
 ## Горячие клавиши
 
-| Клавиши | Действие |
-|---------|----------|
-| `Ctrl+Z` / `Cmd+Z` | Отмена |
-| `Ctrl+Shift+Z` / `Ctrl+Y` | Повтор |
+| Клавиши                   | Действие |
+| ------------------------- | -------- |
+| `Ctrl+Z` / `Cmd+Z`        | Отмена   |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Повтор   |
 
 Отключить: `keyboard: false`.
 
@@ -72,8 +72,8 @@ const history = useFormHistory(form, {
 ```tsx
 <HistoryControls
   history={historyApi}
-  showCounter    // Показывать счётчик "3/7"
-  size="sm"      // xs | sm | md
+  showCounter // Показывать счётчик "3/7"
+  size="sm" // xs | sm | md
 />
 ```
 

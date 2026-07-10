@@ -55,25 +55,24 @@ export async function submitAction(data: FormData) {
 
 ## Providers
 
-| Provider | Free | Invisible | Notes |
-|----------|------|-----------|-------|
-| Turnstile | Yes | Yes | Recommended, privacy-friendly |
-| reCAPTCHA | Partial | v3 only | Google, most popular |
-| hCaptcha | Partial | Yes | Privacy alternative to reCAPTCHA |
+| Provider  | Free    | Invisible | Notes                            |
+| --------- | ------- | --------- | -------------------------------- |
+| Turnstile | Yes     | Yes       | Recommended, privacy-friendly    |
+| reCAPTCHA | Partial | v3 only   | Google, most popular             |
+| hCaptcha  | Partial | Yes       | Privacy alternative to reCAPTCHA |
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `provider` | `'turnstile' \| 'recaptcha' \| 'hcaptcha'` | from createForm | Override provider |
-| `siteKey` | `string` | from createForm | Override siteKey |
-| `theme` | `'auto' \| 'light' \| 'dark'` | `'auto'` | Widget theme |
-| `size` | `'normal' \| 'compact' \| 'invisible'` | `'normal'` | Widget size |
-| `language` | `string` | — | Language code (ISO 639-1) |
-| `onSuccess` | `(token: string) => void` | — | Success callback |
-| `onError` | `(error) => void` | — | Error callback |
-| `onExpire` | `() => void` | — | Token expiry callback |
-
+| Prop        | Type                                       | Default         | Description               |
+| ----------- | ------------------------------------------ | --------------- | ------------------------- |
+| `provider`  | `'turnstile' \| 'recaptcha' \| 'hcaptcha'` | from createForm | Override provider         |
+| `siteKey`   | `string`                                   | from createForm | Override siteKey          |
+| `theme`     | `'auto' \| 'light' \| 'dark'`              | `'auto'`        | Widget theme              |
+| `size`      | `'normal' \| 'compact' \| 'invisible'`     | `'normal'`      | Widget size               |
+| `language`  | `string`                                   | —               | Language code (ISO 639-1) |
+| `onSuccess` | `(token: string) => void`                  | —               | Success callback          |
+| `onError`   | `(error) => void`                          | —               | Error callback            |
+| `onExpire`  | `() => void`                               | —               | Token expiry callback     |
 
 ---
 

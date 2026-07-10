@@ -52,7 +52,9 @@ export default function MatrixChoiceDemoPage() {
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">
-              <Text fontWeight="bold" mb={2}>Submitted:</Text>
+              <Text fontWeight="bold" mb={2}>
+                Submitted:
+              </Text>
               <Code whiteSpace="pre-wrap">{JSON.stringify(result, null, 2)}</Code>
             </Box>
           )}

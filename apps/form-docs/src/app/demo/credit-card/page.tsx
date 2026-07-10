@@ -7,7 +7,10 @@ import { z } from 'zod/v4'
 
 const Schema = z
   .object({
-    cardholderName: z.string().min(1).meta({ ui: { title: 'Cardholder Name' } }),
+    cardholderName: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Cardholder Name' } }),
     card: z.object({
       number: z.string(),
       expiry: z.string(),
@@ -39,7 +42,9 @@ export default function CreditCardDemoPage() {
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">
-              <Text fontWeight="bold" mb={2}>Submitted:</Text>
+              <Text fontWeight="bold" mb={2}>
+                Submitted:
+              </Text>
               <Code whiteSpace="pre-wrap">{JSON.stringify(result, null, 2)}</Code>
             </Box>
           )}

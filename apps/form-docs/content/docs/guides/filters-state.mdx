@@ -9,25 +9,27 @@ A form doesn't have to end with a submit button. `Form` is a subscription-based 
 
 When to prefer `Form` over `useState`:
 
-| Need | Use |
-|---|---|
-| 1–2 independent controls | `useState` — simpler |
-| 3+ related controls | `Form` — single state, free reset |
-| Controls + URL sync | `Form` + `useUrlPrefill` |
-| Settings with Apply/Cancel | `Form` — `isDirty` + `reset()` built in |
-| Dashboard controls | `Form` — validation + URL + single source |
+| Need                       | Use                                       |
+| -------------------------- | ----------------------------------------- |
+| 1–2 independent controls   | `useState` — simpler                      |
+| 3+ related controls        | `Form` — single state, free reset         |
+| Controls + URL sync        | `Form` + `useUrlPrefill`                  |
+| Settings with Apply/Cancel | `Form` — `isDirty` + `reset()` built in   |
+| Dashboard controls         | `Form` — validation + URL + single source |
 
 ## Filter Form (No Submit)
 
 ```tsx
 import { z } from 'zod/v4'
 
-const FilterSchema = z.object({
-  search: z.string(),
-  category: z.string(),
-  minPrice: z.number(),
-  status: z.array(z.string()),
-}).strip()
+const FilterSchema = z
+  .object({
+    search: z.string(),
+    category: z.string(),
+    minPrice: z.number(),
+    status: z.array(z.string()),
+  })
+  .strip()
 
 const defaults = { search: '', category: 'all', minPrice: 0, status: [] }
 
@@ -42,9 +44,7 @@ function CatalogPage() {
         <Form.Button.Reset>Reset</Form.Button.Reset>
       </HStack>
 
-      <Form.Subscribe>
-        {(filters) => <ProductList filters={filters} />}
-      </Form.Subscribe>
+      <Form.Subscribe>{(filters) => <ProductList filters={filters} />}</Form.Subscribe>
     </Form>
   )
 }
@@ -57,9 +57,7 @@ function CatalogPage() {
 Render prop that re-renders whenever any form value changes:
 
 ```tsx
-<Form.Subscribe>
-  {(values) => <ResultCount filters={values} />}
-</Form.Subscribe>
+<Form.Subscribe>{(values) => <ResultCount filters={values} />}</Form.Subscribe>
 ```
 
 For subscribing to **specific fields** only — use `useTypedFormSubscribe`. The component re-renders only when those fields change:
@@ -68,11 +66,9 @@ For subscribing to **specific fields** only — use `useTypedFormSubscribe`. The
 function ActiveFiltersBar() {
   const { value } = useTypedFormSubscribe(['search', 'category', 'status'])
 
-  const count = [
-    value.search !== '',
-    value.category !== 'all',
-    (value.status as string[]).length > 0,
-  ].filter(Boolean).length
+  const count = [value.search !== '', value.category !== 'all', (value.status as string[]).length > 0].filter(
+    Boolean
+  ).length
 
   if (count === 0) return null
   return <Badge>Active filters: {count}</Badge>
@@ -101,11 +97,7 @@ function CatalogPage() {
         }}
       />
 
-      <Form.Subscribe>
-        {(filters) => (
-          <ProductList filters={{ ...filters, search: debouncedSearch }} />
-        )}
-      </Form.Subscribe>
+      <Form.Subscribe>{(filters) => <ProductList filters={{ ...filters, search: debouncedSearch }} />}</Form.Subscribe>
     </Form>
   )
 }
@@ -127,11 +119,7 @@ function CatalogPage() {
   })
 
   return (
-    <Form
-      schema={FilterSchema}
-      initialValue={{ ...defaults, ...prefilled }}
-      onSubmit={async () => {}}
-    >
+    <Form schema={FilterSchema} initialValue={{ ...defaults, ...prefilled }} onSubmit={async () => {}}>
       {/* ... */}
     </Form>
   )
@@ -154,7 +142,7 @@ function FilterUrlSync() {
           if (values.search) params.set('search', String(values.search))
           if (values.category !== 'all') params.set('category', String(values.category))
           if (values.minPrice !== 0) params.set('minPrice', String(values.minPrice))
-          ;(values.status as string[]).forEach(s => params.append('status', s))
+          ;(values.status as string[]).forEach((s) => params.append('status', s))
           router.replace(`?${params}`, { scroll: false })
         })
         return null
@@ -164,7 +152,7 @@ function FilterUrlSync() {
 }
 
 // Place inside <Form>:
-<FilterUrlSync />
+;<FilterUrlSync />
 ```
 
 ## Settings Panel with Apply / Cancel
@@ -203,11 +191,13 @@ function SettingsPanel({ settings, onSave }) {
 ## Dashboard Controls
 
 ```tsx
-const DashboardControls = z.object({
-  period: z.enum(['day', 'week', 'month', 'quarter', 'year']),
-  groupBy: z.enum(['day', 'week', 'month']),
-  metrics: z.array(z.enum(['revenue', 'orders', 'users', 'conversion'])),
-}).strip()
+const DashboardControls = z
+  .object({
+    period: z.enum(['day', 'week', 'month', 'quarter', 'year']),
+    groupBy: z.enum(['day', 'week', 'month']),
+    metrics: z.array(z.enum(['revenue', 'orders', 'users', 'conversion'])),
+  })
+  .strip()
 
 function DashboardPage() {
   const prefilled = useUrlPrefill({
@@ -227,9 +217,7 @@ function DashboardPage() {
         <Form.Field.CheckboxGroup name="metrics" options={metricOptions} />
       </HStack>
 
-      <Form.Subscribe>
-        {(controls) => <DashboardCharts controls={controls} />}
-      </Form.Subscribe>
+      <Form.Subscribe>{(controls) => <DashboardCharts controls={controls} />}</Form.Subscribe>
     </Form>
   )
 }
@@ -239,13 +227,13 @@ function DashboardPage() {
 
 These patterns currently require manual code. Planned for upcoming releases:
 
-| Feature | Description |
-|---|---|
-| `useFormUrlSync` | Bidirectional URL ↔ form state with debounce |
+| Feature                   | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| `useFormUrlSync`          | Bidirectional URL ↔ form state with debounce         |
 | `Form.Subscribe debounce` | Built-in debounce: `<Form.Subscribe debounce={300}>` |
-| Optional `onSubmit` | No-submit forms without `onSubmit={async () => {}}` |
-| `useFormRef` | Access form instance outside the `<Form>` tree |
-| `useActiveFiltersCount` | Count fields differing from defaults |
+| Optional `onSubmit`       | No-submit forms without `onSubmit={async () => {}}`  |
+| `useFormRef`              | Access form instance outside the `<Form>` tree       |
+| `useActiveFiltersCount`   | Count fields differing from defaults                 |
 
 ## Related
 

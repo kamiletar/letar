@@ -25,12 +25,16 @@ export default function SkeletonDemoPage() {
 
         <HStack gap={8} align="start">
           <Box flex={1} p={6} borderWidth="1px" borderRadius="lg">
-            <Heading size="sm" mb={4}>From Zod Schema (5 fields)</Heading>
+            <Heading size="sm" mb={4}>
+              From Zod Schema (5 fields)
+            </Heading>
             <FormSkeleton fields={ProductSchema} />
           </Box>
 
           <Box flex={1} p={6} borderWidth="1px" borderRadius="lg">
-            <Heading size="sm" mb={4}>Field Count: 3</Heading>
+            <Heading size="sm" mb={4}>
+              Field Count: 3
+            </Heading>
             <FormSkeleton fields={3} showSubmit />
           </Box>
         </HStack>

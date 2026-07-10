@@ -7,8 +7,14 @@ import { z } from 'zod/v4'
 
 const Schema = z
   .object({
-    email: z.string().email().meta({ ui: { title: 'Email' } }),
-    message: z.string().min(10).meta({ ui: { title: 'Message' } }),
+    email: z
+      .string()
+      .email()
+      .meta({ ui: { title: 'Email' } }),
+    message: z
+      .string()
+      .min(10)
+      .meta({ ui: { title: 'Message' } }),
   })
   .strip()
 
@@ -41,7 +47,9 @@ export default function CaptchaDemoPage() {
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">
-              <Text fontWeight="bold" mb={2}>Submitted:</Text>
+              <Text fontWeight="bold" mb={2}>
+                Submitted:
+              </Text>
               <Code whiteSpace="pre-wrap">{JSON.stringify(result, null, 2)}</Code>
             </Box>
           )}

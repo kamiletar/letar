@@ -53,24 +53,24 @@ await fillField('agree', true)
 ## Ассерт-хелперы
 
 ```tsx
-expectFieldError('email', 'Некорректный email')  // Поле показывает ошибку
-expectNoFieldError('email')                       // Поле без ошибок
-expectFieldValue('name', 'Иван')                  // Поле содержит значение
+expectFieldError('email', 'Некорректный email') // Поле показывает ошибку
+expectNoFieldError('email') // Поле без ошибок
+expectFieldValue('name', 'Иван') // Поле содержит значение
 ```
 
 ## Мультистеп хелперы
 
 ```tsx
-await goToStep(2)         // Кликнуть "Далее" до шага 2
-expectActiveStep(2)       // Проверить текущий шаг
+await goToStep(2) // Кликнуть "Далее" до шага 2
+expectActiveStep(2) // Проверить текущий шаг
 ```
 
 ## Хелперы для массивов
 
 ```tsx
-await addItem('phones')                // Клик "Добавить" в списке
-await removeItem(0, 'phones')         // Удалить первый элемент
-expectItemCount('phones', 3)          // Проверить количество
+await addItem('phones') // Клик "Добавить" в списке
+await removeItem(0, 'phones') // Удалить первый элемент
+expectItemCount('phones', 3) // Проверить количество
 ```
 
 ## TestWrapper
@@ -80,7 +80,11 @@ expectItemCount('phones', 3)          // Проверить количество
 ```tsx
 import { TestWrapper } from '@letar/forms/testing'
 
-render(<TestWrapper><MyComponent /></TestWrapper>)
+render(
+  <TestWrapper>
+    <MyComponent />
+  </TestWrapper>
+)
 ```
 
 ---

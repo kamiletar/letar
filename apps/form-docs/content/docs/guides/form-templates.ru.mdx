@@ -12,27 +12,23 @@ description: 10 готовых шаблонов форм для быстрой �
 ```tsx
 import { templates } from '@letar/forms'
 
-<Form.FromTemplate
-  template={templates.contactForm}
-  onSubmit={handleSubmit}
-  submitLabel="Отправить сообщение"
-/>
+;<Form.FromTemplate template={templates.contactForm} onSubmit={handleSubmit} submitLabel="Отправить сообщение" />
 ```
 
 ## Доступные шаблоны
 
-| Шаблон | Поля | Категория |
-|--------|------|-----------|
-| `loginForm` | email, password | Авторизация |
-| `registerForm` | name, email, password, confirmPassword | Авторизация |
-| `forgotPasswordForm` | email | Авторизация |
-| `contactForm` | name, email, phone, message | Обратная связь |
-| `feedbackForm` | rating, category, message, email | Обратная связь |
-| `npsForm` | score (0-10), reason, email | Опрос |
-| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account | Бизнес |
-| `orderForm` | items[], customer, address, email | Электронная коммерция |
-| `profileForm` | firstName, lastName, email, phone | Профиль |
-| `addressForm` | country, city, street, building, apartment, zip | Адрес |
+| Шаблон                | Поля                                            | Категория             |
+| --------------------- | ----------------------------------------------- | --------------------- |
+| `loginForm`           | email, password                                 | Авторизация           |
+| `registerForm`        | name, email, password, confirmPassword          | Авторизация           |
+| `forgotPasswordForm`  | email                                           | Авторизация           |
+| `contactForm`         | name, email, phone, message                     | Обратная связь        |
+| `feedbackForm`        | rating, category, message, email                | Обратная связь        |
+| `npsForm`             | score (0-10), reason, email                     | Опрос                 |
+| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account     | Бизнес                |
+| `orderForm`           | items[], customer, address, email               | Электронная коммерция |
+| `profileForm`         | firstName, lastName, email, phone               | Профиль               |
+| `addressForm`         | country, city, street, building, apartment, zip | Адрес                 |
 
 ## Кастомизация
 
@@ -78,7 +74,6 @@ export const myTemplate: FormTemplate = {
   renderFields: () => null,
 }
 ```
-
 
 ---
 

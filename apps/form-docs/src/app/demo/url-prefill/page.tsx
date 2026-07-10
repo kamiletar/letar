@@ -48,8 +48,8 @@ export default function UrlPrefillDemoPage() {
         <Box>
           <Heading size="lg">URL Prefill</Heading>
           <Text color="fg.muted" mt={2}>
-            Auto-fill form fields from URL query parameters. Try adding <Code>?name=Ivan&email=ivan@test.com</Code>{' '}
-            to the URL.
+            Auto-fill form fields from URL query parameters. Try adding <Code>?name=Ivan&email=ivan@test.com</Code> to
+            the URL.
           </Text>
         </Box>
 

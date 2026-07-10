@@ -68,17 +68,17 @@ description: Поле цифровой подписи с рисованием н
 
 ## Свойства
 
-| Свойство          | Тип       | По умолчанию    | Описание                              |
-| ----------------- | --------- | --------------- | ------------------------------------- |
-| `width`           | `number`  | `400`           | Ширина canvas в пикселях              |
-| `height`          | `number`  | `150`           | Высота canvas в пикселях              |
-| `strokeColor`     | `string`  | `'black'`       | Цвет пера/штриха                      |
-| `strokeWidth`     | `number`  | `2`             | Толщина пера/штриха                   |
-| `backgroundColor` | `string`  | `'white'`       | Фон canvas                            |
-| `clearLabel`      | `string`  | `'Clear'`       | Текст кнопки очистки                  |
-| `placeholder`     | `string`  | `'Sign here'`   | Подсказка над пустым canvas           |
-| `allowTyped`      | `boolean` | `true`          | Показывать режим текстовой подписи    |
-| `typedFont`       | `string`  | `cursive`       | Шрифт для текстового режима           |
+| Свойство          | Тип       | По умолчанию  | Описание                           |
+| ----------------- | --------- | ------------- | ---------------------------------- |
+| `width`           | `number`  | `400`         | Ширина canvas в пикселях           |
+| `height`          | `number`  | `150`         | Высота canvas в пикселях           |
+| `strokeColor`     | `string`  | `'black'`     | Цвет пера/штриха                   |
+| `strokeWidth`     | `number`  | `2`           | Толщина пера/штриха                |
+| `backgroundColor` | `string`  | `'white'`     | Фон canvas                         |
+| `clearLabel`      | `string`  | `'Clear'`     | Текст кнопки очистки               |
+| `placeholder`     | `string`  | `'Sign here'` | Подсказка над пустым canvas        |
+| `allowTyped`      | `boolean` | `true`        | Показывать режим текстовой подписи |
+| `typedFont`       | `string`  | `cursive`     | Шрифт для текстового режима        |
 
 ## Доступность
 
@@ -105,7 +105,6 @@ const Schema = z.object({
 ```
 
 Значение поля — пустая строка `''` при пустом canvas и data URI при рисовании/вводе.
-
 
 ---
 

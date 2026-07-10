@@ -7,14 +7,38 @@ import { z } from 'zod/v4'
 
 const Schema = z
   .object({
-    firstName: z.string().min(1).meta({ ui: { title: 'First Name' } }),
-    lastName: z.string().min(1).meta({ ui: { title: 'Last Name' } }),
-    email: z.string().email().meta({ ui: { title: 'Email' } }),
-    phone: z.string().min(1).meta({ ui: { title: 'Phone' } }),
-    streetAddress: z.string().min(1).meta({ ui: { title: 'Street Address' } }),
-    city: z.string().min(1).meta({ ui: { title: 'City' } }),
-    postalCode: z.string().min(1).meta({ ui: { title: 'Postal Code' } }),
-    country: z.string().min(1).meta({ ui: { title: 'Country' } }),
+    firstName: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'First Name' } }),
+    lastName: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Last Name' } }),
+    email: z
+      .string()
+      .email()
+      .meta({ ui: { title: 'Email' } }),
+    phone: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Phone' } }),
+    streetAddress: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Street Address' } }),
+    city: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'City' } }),
+    postalCode: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Postal Code' } }),
+    country: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Country' } }),
   })
   .strip()
 
@@ -27,8 +51,8 @@ export default function SmartAutofillDemoPage() {
         <Stack gap={6}>
           <Heading size="xl">Smart Autofill Demo</Heading>
           <Text color="fg.muted">
-            Fields automatically get correct <Code>autocomplete</Code>{' '}
-            attributes based on their names. Try browser autofill (Ctrl+Shift+A).
+            Fields automatically get correct <Code>autocomplete</Code> attributes based on their names. Try browser
+            autofill (Ctrl+Shift+A).
           </Text>
 
           <Form
@@ -58,7 +82,9 @@ export default function SmartAutofillDemoPage() {
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">
-              <Text fontWeight="bold" mb={2}>Submitted:</Text>
+              <Text fontWeight="bold" mb={2}>
+                Submitted:
+              </Text>
               <Code whiteSpace="pre-wrap">{JSON.stringify(result, null, 2)}</Code>
             </Box>
           )}

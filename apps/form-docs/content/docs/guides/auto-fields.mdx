@@ -11,12 +11,12 @@ import { DemoContainer } from '@/components/demo-container'
 
 The library offers four levels of form generation, each giving you more control:
 
-| Level | Component | JSX needed | Use case |
-|-------|-----------|-----------|----------|
-| 1 | `Form.FromSchema` | None | CRUD, prototyping, admin panels |
-| 2 | `Form.AutoFields` | Layout only | Custom layout with auto fields |
-| 3 | `Form.Field.*` | Fields + layout | Full control over each field |
-| 4 | `useAppForm` | Everything | Imperative logic, custom hooks |
+| Level | Component         | JSX needed      | Use case                        |
+| ----- | ----------------- | --------------- | ------------------------------- |
+| 1     | `Form.FromSchema` | None            | CRUD, prototyping, admin panels |
+| 2     | `Form.AutoFields` | Layout only     | Custom layout with auto fields  |
+| 3     | `Form.Field.*`    | Fields + layout | Full control over each field    |
+| 4     | `useAppForm`      | Everything      | Imperative logic, custom hooks  |
 
 Each level is backward-compatible — you can mix them freely within one form.
 
@@ -47,25 +47,25 @@ This renders all four fields with labels, validation, and a submit button — no
 
 ### FromSchema Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `schema` | Zod schema | required | Schema for validation and field generation |
-| `initialValue` | `TData` | required | Initial form values |
-| `onSubmit` | `(data: TData) => void` | required | Submit handler |
-| `submitLabel` | `ReactNode` | `'Save'` | Submit button text |
-| `showReset` | `boolean` | `false` | Show reset button |
-| `resetLabel` | `ReactNode` | `'Reset'` | Reset button text |
-| `exclude` | `string[]` | — | Fields to exclude |
-| `validateOn` | `ValidateOn` | — | Validation trigger mode |
-| `middleware` | `FormMiddleware` | — | Form event middleware |
-| `disabled` | `boolean` | — | Disable all fields |
-| `readOnly` | `boolean` | — | Read-only mode |
-| `persistence` | `FormPersistenceConfig` | — | localStorage config |
-| `offline` | `FormOfflineConfig` | — | Offline mode config |
-| `debug` | `boolean \| 'force'` | — | JSON value inspector |
-| `gap` | `number` | `4` | Gap between fields |
-| `beforeButtons` | `ReactNode` | — | Content before buttons |
-| `afterButtons` | `ReactNode` | — | Content after buttons |
+| Prop            | Type                    | Default   | Description                                |
+| --------------- | ----------------------- | --------- | ------------------------------------------ |
+| `schema`        | Zod schema              | required  | Schema for validation and field generation |
+| `initialValue`  | `TData`                 | required  | Initial form values                        |
+| `onSubmit`      | `(data: TData) => void` | required  | Submit handler                             |
+| `submitLabel`   | `ReactNode`             | `'Save'`  | Submit button text                         |
+| `showReset`     | `boolean`               | `false`   | Show reset button                          |
+| `resetLabel`    | `ReactNode`             | `'Reset'` | Reset button text                          |
+| `exclude`       | `string[]`              | —         | Fields to exclude                          |
+| `validateOn`    | `ValidateOn`            | —         | Validation trigger mode                    |
+| `middleware`    | `FormMiddleware`        | —         | Form event middleware                      |
+| `disabled`      | `boolean`               | —         | Disable all fields                         |
+| `readOnly`      | `boolean`               | —         | Read-only mode                             |
+| `persistence`   | `FormPersistenceConfig` | —         | localStorage config                        |
+| `offline`       | `FormOfflineConfig`     | —         | Offline mode config                        |
+| `debug`         | `boolean \| 'force'`    | —         | JSON value inspector                       |
+| `gap`           | `number`                | `4`       | Gap between fields                         |
+| `beforeButtons` | `ReactNode`             | —         | Content before buttons                     |
+| `afterButtons`  | `ReactNode`             | —         | Content after buttons                      |
 
 ### Excluding Fields
 
@@ -97,12 +97,12 @@ When you need control over layout but don't want to write every field manually:
 
 ### AutoFields Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `include` | `string[]` | — | Only render these fields |
-| `exclude` | `string[]` | — | Exclude these fields |
-| `recursive` | `boolean` | `true` | Auto-expand nested objects |
-| `fieldWrapper` | `(props) => ReactElement` | — | Custom wrapper per field |
+| Prop           | Type                      | Default | Description                |
+| -------------- | ------------------------- | ------- | -------------------------- |
+| `include`      | `string[]`                | —       | Only render these fields   |
+| `exclude`      | `string[]`                | —       | Exclude these fields       |
+| `recursive`    | `boolean`                 | `true`  | Auto-expand nested objects |
+| `fieldWrapper` | `(props) => ReactElement` | —       | Custom wrapper per field   |
 
 ### Custom Field Wrapper
 
@@ -145,17 +145,17 @@ The library maps Zod types to field components automatically:
 
 ### Default Mapping (Zod → Component)
 
-| Zod Type | Component | Condition |
-|----------|-----------|-----------|
-| `z.string()` | `Form.Field.String` | Default |
-| `z.string()` | `Form.Field.Textarea` | When `maxLength > 200` |
-| `z.string().email()` | `Form.Field.String` | With `type="email"` |
-| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number` | |
-| `z.boolean()` | `Form.Field.Checkbox` | |
-| `z.date()` | `Form.Field.Date` | |
-| `z.enum()` / `z.literal()` | `Form.Field.NativeSelect` | |
-| `z.array(z.string())` | `Form.Field.Tags` | String arrays |
-| `z.array(z.object())` | `Form.Group.List` | Object arrays |
+| Zod Type                               | Component                 | Condition              |
+| -------------------------------------- | ------------------------- | ---------------------- |
+| `z.string()`                           | `Form.Field.String`       | Default                |
+| `z.string()`                           | `Form.Field.Textarea`     | When `maxLength > 200` |
+| `z.string().email()`                   | `Form.Field.String`       | With `type="email"`    |
+| `z.number()` / `z.int()` / `z.float()` | `Form.Field.Number`       |                        |
+| `z.boolean()`                          | `Form.Field.Checkbox`     |                        |
+| `z.date()`                             | `Form.Field.Date`         |                        |
+| `z.enum()` / `z.literal()`             | `Form.Field.NativeSelect` |                        |
+| `z.array(z.string())`                  | `Form.Field.Tags`         | String arrays          |
+| `z.array(z.object())`                  | `Form.Group.List`         | Object arrays          |
 
 ### Override with `fieldType`
 
@@ -167,7 +167,11 @@ const Schema = z.object({
   description: z.string().meta({ ui: { title: 'Description', fieldType: 'textarea' } }),
 
   // Use slider instead of number input
-  rating: z.number().min(0).max(10).meta({ ui: { title: 'Rating', fieldType: 'slider' } }),
+  rating: z
+    .number()
+    .min(0)
+    .max(10)
+    .meta({ ui: { title: 'Rating', fieldType: 'slider' } }),
 
   // Use rich text editor
   content: z.string().meta({ ui: { title: 'Content', fieldType: 'richText' } }),
@@ -212,27 +216,30 @@ Control field appearance through `.meta({ ui: {...} })`:
 
 ```tsx
 const Schema = z.object({
-  email: z.string().email().meta({
-    ui: {
-      title: 'Email Address',         // Label
-      placeholder: 'user@example.com', // Placeholder
-      description: 'We never share it', // Helper text
-      fieldType: 'string',            // Component override
-      fieldProps: { type: 'email' },   // Props passed to component
-    },
-  }),
+  email: z
+    .string()
+    .email()
+    .meta({
+      ui: {
+        title: 'Email Address', // Label
+        placeholder: 'user@example.com', // Placeholder
+        description: 'We never share it', // Helper text
+        fieldType: 'string', // Component override
+        fieldProps: { type: 'email' }, // Props passed to component
+      },
+    }),
 })
 ```
 
-| Meta Property | Type | Description |
-|---------------|------|-------------|
-| `title` | `string` | Field label |
-| `placeholder` | `string` | Placeholder text |
-| `description` | `string` | Helper text below field |
-| `fieldType` | `FieldComponentType` | Override component type |
-| `fieldProps` | `Record<string, unknown>` | Additional component props |
-| `options` | `BaseOption[]` | Options for select fields |
-| `autocomplete` | `string` | HTML autocomplete attribute |
+| Meta Property  | Type                      | Description                 |
+| -------------- | ------------------------- | --------------------------- |
+| `title`        | `string`                  | Field label                 |
+| `placeholder`  | `string`                  | Placeholder text            |
+| `description`  | `string`                  | Helper text below field     |
+| `fieldType`    | `FieldComponentType`      | Override component type     |
+| `fieldProps`   | `Record<string, unknown>` | Additional component props  |
+| `options`      | `BaseOption[]`            | Options for select fields   |
+| `autocomplete` | `string`                  | HTML autocomplete attribute |
 
 If `title` is not provided, the field name is converted from camelCase to a readable label (e.g., `firstName` → `First Name`).
 
@@ -291,25 +298,25 @@ const Schema = z.object({
 Zod constraints are passed as component props automatically:
 
 ```tsx
-z.string().min(2).max(100)    // → minLength={2} maxLength={100}
-z.number().min(1).max(10)     // → min={1} max={10}
-z.string().email()            // → type="email"
-z.date().min(new Date())      // → min={now}
+z.string().min(2).max(100) // → minLength={2} maxLength={100}
+z.number().min(1).max(10) // → min={1} max={10}
+z.string().email() // → type="email"
+z.date().min(new Date()) // → min={now}
 ```
 
 No need to duplicate constraints in JSX — the schema is the single source of truth.
 
 ## When to Use Each Level
 
-| Scenario | Recommended Level |
-|----------|------------------|
-| Admin CRUD forms | `Form.FromSchema` |
-| Rapid prototyping | `Form.FromSchema` |
-| Simple forms with custom layout | `Form.AutoFields` |
-| Complex multi-column layouts | `Form.Field.*` (Compound Components) |
-| Multi-step forms | `Form.Field.*` + `Form.Steps` |
-| Conditional rendering | `Form.Field.*` + `Form.When` |
-| Custom UX (animations, inline editing) | `useAppForm` |
+| Scenario                               | Recommended Level                    |
+| -------------------------------------- | ------------------------------------ |
+| Admin CRUD forms                       | `Form.FromSchema`                    |
+| Rapid prototyping                      | `Form.FromSchema`                    |
+| Simple forms with custom layout        | `Form.AutoFields`                    |
+| Complex multi-column layouts           | `Form.Field.*` (Compound Components) |
+| Multi-step forms                       | `Form.Field.*` + `Form.Steps`        |
+| Conditional rendering                  | `Form.Field.*` + `Form.When`         |
+| Custom UX (animations, inline editing) | `useAppForm`                         |
 
 **Rule of thumb:** If the form is a linear vertical flow, `FromSchema` or `AutoFields` work great. For complex layouts, use Compound Components.
 

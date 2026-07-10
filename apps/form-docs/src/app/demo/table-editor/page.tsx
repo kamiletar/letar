@@ -6,14 +6,26 @@ import { useState } from 'react'
 import { z } from 'zod/v4'
 
 const ItemSchema = z.object({
-  product: z.string().min(1).meta({ ui: { title: 'Product' } }),
-  qty: z.number().min(1).meta({ ui: { title: 'Qty' } }),
-  price: z.number().min(0).meta({ ui: { title: 'Price' } }),
+  product: z
+    .string()
+    .min(1)
+    .meta({ ui: { title: 'Product' } }),
+  qty: z
+    .number()
+    .min(1)
+    .meta({ ui: { title: 'Qty' } }),
+  price: z
+    .number()
+    .min(0)
+    .meta({ ui: { title: 'Price' } }),
 })
 
 const OrderSchema = z
   .object({
-    customer: z.string().min(1).meta({ ui: { title: 'Customer' } }),
+    customer: z
+      .string()
+      .min(1)
+      .meta({ ui: { title: 'Customer' } }),
     items: z.array(ItemSchema).min(1),
   })
   .strip()
@@ -63,7 +75,9 @@ export default function TableEditorDemoPage() {
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">
-              <Text fontWeight="bold" mb={2}>Submitted:</Text>
+              <Text fontWeight="bold" mb={2}>
+                Submitted:
+              </Text>
               <Code whiteSpace="pre-wrap">{JSON.stringify(result, null, 2)}</Code>
             </Box>
           )}

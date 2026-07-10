@@ -38,32 +38,32 @@ function ProductEditor() {
 
 ```typescript
 const history = useFormHistory(form, {
-  maxHistory: 50,        // Max snapshots (default: 50)
-  debounceMs: 500,       // Delay before recording (default: 500ms)
-  keyboard: true,        // Ctrl+Z/Y shortcuts (default: true)
-  persist: false,        // sessionStorage (default: false)
+  maxHistory: 50, // Max snapshots (default: 50)
+  debounceMs: 500, // Delay before recording (default: 500ms)
+  keyboard: true, // Ctrl+Z/Y shortcuts (default: true)
+  persist: false, // sessionStorage (default: false)
   persistKey: 'form-history',
 })
 ```
 
 **Returns:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `undo` | `() => void` | Undo last change |
-| `redo` | `() => void` | Redo undone change |
-| `canUndo` | `boolean` | Has undo history |
-| `canRedo` | `boolean` | Has redo history |
-| `currentIndex` | `number` | Position in stack |
-| `historyLength` | `number` | Total snapshots |
-| `clear` | `() => void` | Reset history |
+| Field           | Type         | Description        |
+| --------------- | ------------ | ------------------ |
+| `undo`          | `() => void` | Undo last change   |
+| `redo`          | `() => void` | Redo undone change |
+| `canUndo`       | `boolean`    | Has undo history   |
+| `canRedo`       | `boolean`    | Has redo history   |
+| `currentIndex`  | `number`     | Position in stack  |
+| `historyLength` | `number`     | Total snapshots    |
+| `clear`         | `() => void` | Reset history      |
 
 ## Keyboard Shortcuts
 
-| Keys | Action |
-|------|--------|
-| `Ctrl+Z` / `Cmd+Z` | Undo |
-| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo |
+| Keys                      | Action |
+| ------------------------- | ------ |
+| `Ctrl+Z` / `Cmd+Z`        | Undo   |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo   |
 
 Disable: `keyboard: false`.
 
@@ -72,8 +72,8 @@ Disable: `keyboard: false`.
 ```tsx
 <HistoryControls
   history={historyApi}
-  showCounter    // Show "3/7" counter
-  size="sm"      // xs | sm | md
+  showCounter // Show "3/7" counter
+  size="sm" // xs | sm | md
 />
 ```
 

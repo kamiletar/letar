@@ -42,11 +42,11 @@ const Schema = z.object({
 
 All fields that use `createField` support these props:
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | — | Validation function |
-| `asyncDebounce` | `number` | `500` | Debounce delay (ms) |
-| `asyncTrigger` | `'onBlur' \| 'onChange'` | `'onBlur'` | When to trigger |
+| Prop            | Type                                               | Default    | Description         |
+| --------------- | -------------------------------------------------- | ---------- | ------------------- |
+| `asyncValidate` | `(value: unknown) => Promise<string \| undefined>` | —          | Validation function |
+| `asyncDebounce` | `number`                                           | `500`      | Debounce delay (ms) |
+| `asyncTrigger`  | `'onBlur' \| 'onChange'`                           | `'onBlur'` | When to trigger     |
 
 ## Features
 
@@ -63,13 +63,11 @@ For custom field components:
 ```tsx
 import { useAsyncFieldValidation } from '@letar/forms'
 
-const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(
-  schema,
-  'email',
-  { asyncValidate: myFn, asyncDebounce: 300 }
-)
+const { validators, asyncDebounceMs, hasAsyncValidation } = useAsyncFieldValidation(schema, 'email', {
+  asyncValidate: myFn,
+  asyncDebounce: 300,
+})
 ```
-
 
 ---
 

@@ -22,11 +22,11 @@ Visual selection from image cards. Ideal for choosing styles, products, or categ
 
 **Value:** `string` (single) or `string[]` (when `multiple={true}`)
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `options` | `ImageChoiceOption[]` | required | Options with images |
-| `columns` | `number` | `3` | Grid columns (responsive: 1→2→N) |
-| `multiple` | `boolean` | `false` | Multi-select mode |
+| Prop       | Type                  | Default  | Description                      |
+| ---------- | --------------------- | -------- | -------------------------------- |
+| `options`  | `ImageChoiceOption[]` | required | Options with images              |
+| `columns`  | `number`              | `3`      | Grid columns (responsive: 1→2→N) |
+| `multiple` | `boolean`             | `false`  | Multi-select mode                |
 
 ## Likert
 
@@ -43,10 +43,10 @@ Agreement/satisfaction scale with labeled points. Standard for NPS and survey fo
 
 **Value:** `number` (1-based index of selected point)
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `anchors` | `string[]` | required | Labels for each point |
-| `showNumbers` | `boolean` | `false` | Show point numbers |
+| Prop          | Type       | Default  | Description           |
+| ------------- | ---------- | -------- | --------------------- |
+| `anchors`     | `string[]` | required | Labels for each point |
+| `showNumbers` | `boolean`  | `false`  | Show point numbers    |
 
 On mobile, the horizontal scale switches to a vertical list.
 
@@ -66,14 +66,13 @@ Binary choice with large clickable blocks. Good for consents, confirmations, and
 
 **Value:** `boolean`
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `yesLabel` | `string` | `'Да'` | Yes button text |
-| `noLabel` | `string` | `'Нет'` | No button text |
-| `variant` | `'buttons' \| 'thumbs' \| 'emoji'` | `'buttons'` | Visual style |
+| Prop       | Type                               | Default     | Description     |
+| ---------- | ---------------------------------- | ----------- | --------------- |
+| `yesLabel` | `string`                           | `'Да'`      | Yes button text |
+| `noLabel`  | `string`                           | `'Нет'`     | No button text  |
+| `variant`  | `'buttons' \| 'thumbs' \| 'emoji'` | `'buttons'` | Visual style    |
 
 Variants: `buttons` (text only), `thumbs` (with thumbs up/down), `emoji` (with happy/sad face).
-
 
 ---
 

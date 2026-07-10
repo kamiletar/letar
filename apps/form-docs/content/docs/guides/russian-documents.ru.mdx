@@ -47,16 +47,16 @@ zRu.inn.individual() // только физическое лицо (12 цифр)
 
 ## Доступные поля
 
-| Компонент                   | Формат          | Контрольная сумма             |
-| --------------------------- | --------------- | ----------------------------- |
-| `Form.Document.INN`         | 10 или 12 цифр  | Взвешенная сумма mod 11       |
-| `Form.Document.KPP`         | 9 символов      | Проверка формата (NNNNPPXXX)  |
-| `Form.Document.OGRN`        | 13 цифр         | Первые 12 mod 11              |
-| `Form.Document.BIK`         | 9 цифр          | Начинается с "04"             |
-| `Form.Document.BankAccount` | 20 цифр         | Контрольный ключ (с БИК)      |
-| `Form.Document.CorrAccount` | 20 цифр         | Начинается с "301"            |
-| `Form.Document.SNILS`       | XXX-XXX-XXX YY  | Модуль 101                    |
-| `Form.Document.Passport`    | XX XX XXXXXX    | Проверка формата              |
+| Компонент                   | Формат         | Контрольная сумма            |
+| --------------------------- | -------------- | ---------------------------- |
+| `Form.Document.INN`         | 10 или 12 цифр | Взвешенная сумма mod 11      |
+| `Form.Document.KPP`         | 9 символов     | Проверка формата (NNNNPPXXX) |
+| `Form.Document.OGRN`        | 13 цифр        | Первые 12 mod 11             |
+| `Form.Document.BIK`         | 9 цифр         | Начинается с "04"            |
+| `Form.Document.BankAccount` | 20 цифр        | Контрольный ключ (с БИК)     |
+| `Form.Document.CorrAccount` | 20 цифр        | Начинается с "301"           |
+| `Form.Document.SNILS`       | XXX-XXX-XXX YY | Модуль 101                   |
+| `Form.Document.Passport`    | XX XX XXXXXX   | Проверка формата             |
 
 ## Кастомные документные поля
 
@@ -77,7 +77,6 @@ const FieldCustomDoc = createDocumentField({
   },
 })
 ```
-
 
 ---
 

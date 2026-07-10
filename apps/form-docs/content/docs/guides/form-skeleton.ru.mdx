@@ -10,11 +10,15 @@ description: Автоматическая генерация загрузочн�
 ```tsx
 import { Form } from '@letar/forms'
 
-{/* Пока данные загружаются */}
-<Form.Skeleton schema={UserSchema} showSubmit />
+{
+  /* Пока данные загружаются */
+}
+;<Form.Skeleton schema={UserSchema} showSubmit />
 
-{/* Или inline: форма сама показывает скелетон при загрузке */}
-<Form schema={UserSchema} loading={isLoading} initialValue={data} onSubmit={save}>
+{
+  /* Или inline: форма сама показывает скелетон при загрузке */
+}
+;<Form schema={UserSchema} loading={isLoading} initialValue={data} onSubmit={save}>
   <Form.Field.String name="name" />
   <Form.Field.String name="email" />
   <Form.Button.Submit>Сохранить</Form.Button.Submit>
@@ -23,11 +27,11 @@ import { Form } from '@letar/forms'
 
 ## Пропсы
 
-| Проп         | Тип         | По умолчанию | Описание                              |
-| ------------ | ----------- | ------------ | ------------------------------------- |
-| `schema`     | `ZodObject` | обязателен   | Схема для генерации скелетона         |
-| `showSubmit` | `boolean`   | `false`      | Показать скелетон кнопки внизу        |
-| `fields`     | `number`    | авто         | Переопределить количество полей       |
+| Проп         | Тип         | По умолчанию | Описание                        |
+| ------------ | ----------- | ------------ | ------------------------------- |
+| `schema`     | `ZodObject` | обязателен   | Схема для генерации скелетона   |
+| `showSubmit` | `boolean`   | `false`      | Показать скелетон кнопки внизу  |
+| `fields`     | `number`    | авто         | Переопределить количество полей |
 
 ## Standalone и Inline
 
@@ -59,7 +63,6 @@ import { Form } from '@letar/forms'
 ## Как это работает
 
 Схема анализируется для подсчёта полей и определения их типов. Каждый тип поля соответствует скелетон-бару подходящей высоты (текстовые поля → одна строка, textarea → несколько строк и т.д.).
-
 
 ---
 

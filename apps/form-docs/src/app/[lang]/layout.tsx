@@ -1,5 +1,5 @@
-import { i18nUI } from '@/lib/layout.shared'
 import { Providers } from '@/components/providers'
+import { i18nUI } from '@/lib/layout.shared'
 import type { ReactNode } from 'react'
 
 export default async function LangLayout({

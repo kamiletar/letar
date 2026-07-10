@@ -23,11 +23,7 @@ function MyForm() {
   return (
     <>
       <Form.Field.String name="title" />
-      <AutosaveIndicator
-        status={autosave.status}
-        lastSavedAt={autosave.lastSavedAt}
-        error={autosave.error}
-      />
+      <AutosaveIndicator status={autosave.status} lastSavedAt={autosave.lastSavedAt} error={autosave.error} />
     </>
   )
 }
@@ -35,33 +31,32 @@ function MyForm() {
 
 ## Конфигурация
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `endpoint` | `string` | обязательно | URL сервера для POST/PUT |
-| `interval` | `number` | `5000` | Интервал сохранения (мс) |
-| `debounce` | `number` | `1000` | Мин. задержка между сохранениями (мс) |
-| `draftId` | `string` | — | Идентификатор черновика для восстановления |
-| `method` | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'` | HTTP-метод |
-| `headers` | `Record<string, string>` | — | Дополнительные заголовки |
-| `onSave` | `(response) => void` | — | Колбэк при успешном сохранении |
-| `onError` | `(error) => void` | — | Колбэк при ошибке |
+| Опция      | Тип                          | По умолчанию | Описание                                   |
+| ---------- | ---------------------------- | ------------ | ------------------------------------------ |
+| `endpoint` | `string`                     | обязательно  | URL сервера для POST/PUT                   |
+| `interval` | `number`                     | `5000`       | Интервал сохранения (мс)                   |
+| `debounce` | `number`                     | `1000`       | Мин. задержка между сохранениями (мс)      |
+| `draftId`  | `string`                     | —            | Идентификатор черновика для восстановления |
+| `method`   | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'`     | HTTP-метод                                 |
+| `headers`  | `Record<string, string>`     | —            | Дополнительные заголовки                   |
+| `onSave`   | `(response) => void`         | —            | Колбэк при успешном сохранении             |
+| `onError`  | `(error) => void`            | —            | Колбэк при ошибке                          |
 
 ## Результат
 
-| Свойство | Тип | Описание |
-|----------|-----|----------|
-| `status` | `'idle' \| 'saving' \| 'saved' \| 'error'` | Текущий статус |
-| `lastSavedAt` | `Date \| null` | Время последнего успешного сохранения |
-| `error` | `string \| null` | Сообщение об ошибке |
-| `saveNow()` | `() => Promise<void>` | Принудительное сохранение |
-| `loadDraft()` | `() => Promise<object \| null>` | Загрузка черновика с сервера |
+| Свойство      | Тип                                        | Описание                              |
+| ------------- | ------------------------------------------ | ------------------------------------- |
+| `status`      | `'idle' \| 'saving' \| 'saved' \| 'error'` | Текущий статус                        |
+| `lastSavedAt` | `Date \| null`                             | Время последнего успешного сохранения |
+| `error`       | `string \| null`                           | Сообщение об ошибке                   |
+| `saveNow()`   | `() => Promise<void>`                      | Принудительное сохранение             |
+| `loadDraft()` | `() => Promise<object \| null>`            | Загрузка черновика с сервера          |
 
 ## Возможности
 
 - **Дедупликация** — пропускает сохранение, если данные не изменились
 - **Офлайн-фолбэк** — сохраняет в localStorage при отсутствии сети, очищает после успешного сохранения на сервер
 - **Восстановление черновика** — `loadDraft()` сначала обращается к серверу, затем к localStorage
-
 
 ---
 

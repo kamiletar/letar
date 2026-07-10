@@ -12,27 +12,23 @@ Form Templates provide pre-built form schemas with default values for common use
 ```tsx
 import { templates } from '@letar/forms'
 
-<Form.FromTemplate
-  template={templates.contactForm}
-  onSubmit={handleSubmit}
-  submitLabel="Send Message"
-/>
+;<Form.FromTemplate template={templates.contactForm} onSubmit={handleSubmit} submitLabel="Send Message" />
 ```
 
 ## Available Templates
 
-| Template | Fields | Category |
-|----------|--------|----------|
-| `loginForm` | email, password | Auth |
-| `registerForm` | name, email, password, confirmPassword | Auth |
-| `forgotPasswordForm` | email | Auth |
-| `contactForm` | name, email, phone, message | Feedback |
-| `feedbackForm` | rating, category, message, email | Feedback |
-| `npsForm` | score (0-10), reason, email | Survey |
-| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account | Business |
-| `orderForm` | items[], customer, address, email | E-commerce |
-| `profileForm` | firstName, lastName, email, phone | Profile |
-| `addressForm` | country, city, street, building, apartment, zip | Address |
+| Template              | Fields                                          | Category   |
+| --------------------- | ----------------------------------------------- | ---------- |
+| `loginForm`           | email, password                                 | Auth       |
+| `registerForm`        | name, email, password, confirmPassword          | Auth       |
+| `forgotPasswordForm`  | email                                           | Auth       |
+| `contactForm`         | name, email, phone, message                     | Feedback   |
+| `feedbackForm`        | rating, category, message, email                | Feedback   |
+| `npsForm`             | score (0-10), reason, email                     | Survey     |
+| `companyRegistration` | inn, kpp, ogrn, name, address, bik, account     | Business   |
+| `orderForm`           | items[], customer, address, email               | E-commerce |
+| `profileForm`         | firstName, lastName, email, phone               | Profile    |
+| `addressForm`         | country, city, street, building, apartment, zip | Address    |
 
 ## Customization
 
@@ -78,7 +74,6 @@ export const myTemplate: FormTemplate = {
   renderFields: () => null,
 }
 ```
-
 
 ---
 

@@ -23,23 +23,23 @@ description: Форма в стиле Typeform — один вопрос за р
 
 ## Пропсы
 
-| Пропс | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `showProgress` | `boolean` | `true` | Показывать прогресс-бар |
-| `showQuestionNumber` | `boolean` | `true` | Показывать «Вопрос 3 из 7» |
-| `nextLabel` | `string` | `'Далее'` | Текст кнопки «Далее» |
-| `prevLabel` | `string` | `'Назад'` | Текст кнопки «Назад» |
-| `submitLabel` | `string` | `'Отправить'` | Текст кнопки отправки (последний шаг) |
-| `welcomeScreen` | `ReactNode` | — | Контент перед первым вопросом |
-| `completedScreen` | `ReactNode` | — | Контент после последнего вопроса |
-| `onComplete` | `() => void` | — | Вызывается при ответе на все вопросы |
+| Пропс                | Тип          | По умолчанию  | Описание                              |
+| -------------------- | ------------ | ------------- | ------------------------------------- |
+| `showProgress`       | `boolean`    | `true`        | Показывать прогресс-бар               |
+| `showQuestionNumber` | `boolean`    | `true`        | Показывать «Вопрос 3 из 7»            |
+| `nextLabel`          | `string`     | `'Далее'`     | Текст кнопки «Далее»                  |
+| `prevLabel`          | `string`     | `'Назад'`     | Текст кнопки «Назад»                  |
+| `submitLabel`        | `string`     | `'Отправить'` | Текст кнопки отправки (последний шаг) |
+| `welcomeScreen`      | `ReactNode`  | —             | Контент перед первым вопросом         |
+| `completedScreen`    | `ReactNode`  | —             | Контент после последнего вопроса      |
+| `onComplete`         | `() => void` | —             | Вызывается при ответе на все вопросы  |
 
 ## Навигация с клавиатуры
 
-| Клавиша | Действие |
-|---------|----------|
-| Enter | Следующий вопрос |
-| Alt + Стрелка вниз | Следующий вопрос |
+| Клавиша             | Действие          |
+| ------------------- | ----------------- |
+| Enter               | Следующий вопрос  |
+| Alt + Стрелка вниз  | Следующий вопрос  |
 | Alt + Стрелка вверх | Предыдущий вопрос |
 
 ## Кастомный хук
@@ -50,13 +50,12 @@ description: Форма в стиле Typeform — один вопрос за р
 import { useConversationalState } from '@letar/forms'
 
 const state = useConversationalState(5) // 5 полей
-state.currentIndex  // 0
-state.progress      // 0.2
-state.next()        // перейти к следующему
-state.prev()        // вернуться к предыдущему
-state.isCompleted   // false
+state.currentIndex // 0
+state.progress // 0.2
+state.next() // перейти к следующему
+state.prev() // вернуться к предыдущему
+state.isCompleted // false
 ```
-
 
 ---
 

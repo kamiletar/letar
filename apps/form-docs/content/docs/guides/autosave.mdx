@@ -23,11 +23,7 @@ function MyForm() {
   return (
     <>
       <Form.Field.String name="title" />
-      <AutosaveIndicator
-        status={autosave.status}
-        lastSavedAt={autosave.lastSavedAt}
-        error={autosave.error}
-      />
+      <AutosaveIndicator status={autosave.status} lastSavedAt={autosave.lastSavedAt} error={autosave.error} />
     </>
   )
 }
@@ -35,33 +31,32 @@ function MyForm() {
 
 ## Config
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `endpoint` | `string` | required | Server URL for POST/PUT |
-| `interval` | `number` | `5000` | Save interval (ms) |
-| `debounce` | `number` | `1000` | Min delay between saves (ms) |
-| `draftId` | `string` | — | Draft identifier for recovery |
-| `method` | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'` | HTTP method |
-| `headers` | `Record<string, string>` | — | Extra headers |
-| `onSave` | `(response) => void` | — | Success callback |
-| `onError` | `(error) => void` | — | Error callback |
+| Option     | Type                         | Default  | Description                   |
+| ---------- | ---------------------------- | -------- | ----------------------------- |
+| `endpoint` | `string`                     | required | Server URL for POST/PUT       |
+| `interval` | `number`                     | `5000`   | Save interval (ms)            |
+| `debounce` | `number`                     | `1000`   | Min delay between saves (ms)  |
+| `draftId`  | `string`                     | —        | Draft identifier for recovery |
+| `method`   | `'POST' \| 'PUT' \| 'PATCH'` | `'POST'` | HTTP method                   |
+| `headers`  | `Record<string, string>`     | —        | Extra headers                 |
+| `onSave`   | `(response) => void`         | —        | Success callback              |
+| `onError`  | `(error) => void`            | —        | Error callback                |
 
 ## Result
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `status` | `'idle' \| 'saving' \| 'saved' \| 'error'` | Current status |
-| `lastSavedAt` | `Date \| null` | Last successful save time |
-| `error` | `string \| null` | Error message |
-| `saveNow()` | `() => Promise<void>` | Force save immediately |
-| `loadDraft()` | `() => Promise<object \| null>` | Load draft from server |
+| Property      | Type                                       | Description               |
+| ------------- | ------------------------------------------ | ------------------------- |
+| `status`      | `'idle' \| 'saving' \| 'saved' \| 'error'` | Current status            |
+| `lastSavedAt` | `Date \| null`                             | Last successful save time |
+| `error`       | `string \| null`                           | Error message             |
+| `saveNow()`   | `() => Promise<void>`                      | Force save immediately    |
+| `loadDraft()` | `() => Promise<object \| null>`            | Load draft from server    |
 
 ## Features
 
 - **Deduplication** — skips save if data has not changed
 - **Offline fallback** — saves to localStorage when offline, clears on successful server save
 - **Draft recovery** — `loadDraft()` tries server first, then localStorage
-
 
 ---
 

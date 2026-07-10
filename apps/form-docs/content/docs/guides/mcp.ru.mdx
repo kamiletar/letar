@@ -101,19 +101,19 @@ get_form_pattern({ pattern: "crud-create" })
 
 **Паттерны:**
 
-| Паттерн | Описание |
-|---------|----------|
-| `crud-create` | Создание записи с валидацией |
-| `crud-edit` | Редактирование с начальными данными |
-| `multi-step` | Пошаговая форма с валидацией на каждом шаге |
-| `offline` | Форма с оффлайн-режимом |
-| `i18n` | Мультиязычная форма |
-| `from-schema` | Автогенерация из Zod-схемы |
-| `declarative` | Полный декларативный API |
-| `server-action` | Интеграция с Server Actions |
-| `analytics` | Форма с аналитикой по полям |
-| `server-errors` | Маппинг серверных ошибок на поля |
-| `undo-redo` | История формы с Ctrl+Z |
+| Паттерн         | Описание                                    |
+| --------------- | ------------------------------------------- |
+| `crud-create`   | Создание записи с валидацией                |
+| `crud-edit`     | Редактирование с начальными данными         |
+| `multi-step`    | Пошаговая форма с валидацией на каждом шаге |
+| `offline`       | Форма с оффлайн-режимом                     |
+| `i18n`          | Мультиязычная форма                         |
+| `from-schema`   | Автогенерация из Zod-схемы                  |
+| `declarative`   | Полный декларативный API                    |
+| `server-action` | Интеграция с Server Actions                 |
+| `analytics`     | Форма с аналитикой по полям                 |
+| `server-errors` | Маппинг серверных ошибок на поля            |
+| `undo-redo`     | История формы с Ctrl+Z                      |
 
 ### get_directives
 
@@ -148,15 +148,15 @@ generate_form({
 
 Сервер предоставляет 7 ресурсов через `form-docs://` URI:
 
-| Ресурс | Содержимое |
-|--------|-----------|
-| `form-docs://fields` | Справочник 50+ компонентов полей |
-| `form-docs://form-level` | Form.Steps, Form.When, Form.Errors |
-| `form-docs://schema-generation` | FromSchema, AutoFields, Builder |
-| `form-docs://offline` | useOfflineForm, очередь синхронизации |
-| `form-docs://i18n` | FormI18nProvider, локализация ошибок |
-| `form-docs://zenstack` | @form.* директивы, schema.zmodel |
-| `form-docs://api-reference` | Хуки, контексты, типы |
+| Ресурс                          | Содержимое                            |
+| ------------------------------- | ------------------------------------- |
+| `form-docs://fields`            | Справочник 50+ компонентов полей      |
+| `form-docs://form-level`        | Form.Steps, Form.When, Form.Errors    |
+| `form-docs://schema-generation` | FromSchema, AutoFields, Builder       |
+| `form-docs://offline`           | useOfflineForm, очередь синхронизации |
+| `form-docs://i18n`              | FormI18nProvider, локализация ошибок  |
+| `form-docs://zenstack`          | @form.\* директивы, schema.zmodel     |
+| `form-docs://api-reference`     | Хуки, контексты, типы                 |
 
 ## Промпты
 
