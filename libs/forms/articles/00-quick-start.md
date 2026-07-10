@@ -102,20 +102,20 @@ function ContactForm() {
 import { FormSkeleton } from '@letar/forms'
 
 // Скелетон автоматически повторяет структуру формы
-<FormSkeleton fields={ContactSchema} showSubmit />
+;<FormSkeleton fields={ContactSchema} showSubmit />
 ```
 
 `FormSkeleton` читает Zod-схему и создаёт скелетон с нужным количеством полей и кнопкой отправки. Когда данные загрузились — просто рендерите `<Form>` вместо скелетона:
 
 ```tsx
 {
-  isLoading
-    ? <FormSkeleton fields={ContactSchema} showSubmit />
-    : (
-      <Form schema={ContactSchema} initialValue={data} onSubmit={save}>
-        ...
-      </Form>
-    )
+  isLoading ? (
+    <FormSkeleton fields={ContactSchema} showSubmit />
+  ) : (
+    <Form schema={ContactSchema} initialValue={data} onSubmit={save}>
+      ...
+    </Form>
+  )
 }
 ```
 

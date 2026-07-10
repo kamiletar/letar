@@ -17,7 +17,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" label="Биография" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Биография')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" placeholder="Расскажите о себе..." />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByPlaceholderText('Расскажите о себе...')).toBeInTheDocument()
@@ -40,7 +40,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('data-field-name', 'bio')
@@ -51,7 +51,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: 'Привет мир' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('textbox')).toHaveValue('Привет мир')
@@ -65,7 +65,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       await user.type(screen.getByRole('textbox'), 'Новый текст')
@@ -79,7 +79,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()
@@ -90,7 +90,7 @@ describe('FieldTextarea', () => {
         <Form initialValue={{ bio: '' }} onSubmit={vi.fn()}>
           <Form.Field.Textarea name="bio" helperText="Максимум 500 символов" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Максимум 500 символов')).toBeInTheDocument()

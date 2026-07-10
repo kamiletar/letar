@@ -5,10 +5,7 @@ import { useFormContext } from '../context'
 
 export interface FormSubscribeProps {
   /** Render function receiving current form values and state */
-  children: (
-    values: Record<string, unknown>,
-    state: { isDirty: boolean; isSubmitting: boolean },
-  ) => ReactNode
+  children: (values: Record<string, unknown>, state: { isDirty: boolean; isSubmitting: boolean }) => ReactNode
   /**
    * Debounce delay in milliseconds.
    * When set, children re-renders only after the specified delay
@@ -68,7 +65,8 @@ export function FormSubscribe({ children, debounce: delay }: FormSubscribeProps)
       >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {({ values, isDirty, isSubmitting }: any) =>
-          children(values as Record<string, unknown>, { isDirty, isSubmitting })}
+          children(values as Record<string, unknown>, { isDirty, isSubmitting })
+        }
       </form.Subscribe>
     )
   }

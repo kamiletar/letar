@@ -16,10 +16,7 @@ function useAddressProvider(propProvider?: AddressProvider, token?: string): Add
 
   // Мемоизируем — иначе createDaDataProvider создаёт новый объект при каждом рендере,
   // что вызывает re-render loop через fetchSuggestions → useEffect → запросы к DaData
-  const tokenProvider = useMemo(
-    () => (token ? createDaDataProvider({ token }) : null),
-    [token],
-  )
+  const tokenProvider = useMemo(() => (token ? createDaDataProvider({ token }) : null), [token])
 
   if (propProvider) return propProvider
   if (formContext?.addressProvider) return formContext.addressProvider
@@ -129,7 +126,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
           }
         }
       },
-      [provider, minChars, locations],
+      [provider, minChars, locations]
     )
 
     // Загрузка при изменении debounced запроса

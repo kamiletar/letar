@@ -17,7 +17,7 @@ describe('FieldTags', () => {
           <Form initialValue={{ tags: [] }} onSubmit={vi.fn()}>
             <Form.Field.Tags name="tags" />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       // TagsInput рендерит input для ввода тегов
@@ -30,7 +30,7 @@ describe('FieldTags', () => {
           <Form initialValue={{ tags: [] }} onSubmit={vi.fn()}>
             <Form.Field.Tags name="tags" label="Теги" />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       expect(screen.getByText('Теги')).toBeInTheDocument()
@@ -42,7 +42,7 @@ describe('FieldTags', () => {
           <Form initialValue={{ tags: ['React', 'TypeScript'] }} onSubmit={vi.fn()}>
             <Form.Field.Tags name="tags" />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       expect(screen.getByText('React')).toBeInTheDocument()
@@ -57,7 +57,7 @@ describe('FieldTags', () => {
           <Form initialValue={{ tags: [] }} onSubmit={vi.fn()}>
             <Form.Field.Tags name="tags" disabled />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()

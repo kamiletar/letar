@@ -132,14 +132,14 @@ function FileList({ showSize, clearable }: { showSize?: boolean; clearable?: boo
             </Icon>
           </FileUpload.ItemPreview>
 
-          {showSize
-            ? (
-              <FileUpload.ItemContent>
-                <FileUpload.ItemName />
-                <FileUpload.ItemSizeText />
-              </FileUpload.ItemContent>
-            )
-            : <FileUpload.ItemName flex="1" />}
+          {showSize ? (
+            <FileUpload.ItemContent>
+              <FileUpload.ItemName />
+              <FileUpload.ItemSizeText />
+            </FileUpload.ItemContent>
+          ) : (
+            <FileUpload.ItemName flex="1" />
+          )}
 
           {clearable && (
             <FileUpload.ItemDeleteTrigger asChild>
@@ -284,9 +284,11 @@ export const FieldFileUpload = createField<FileUploadFieldProps, File[], FileUpl
                   {buttonText}
                 </Button>
               </FileUpload.Trigger>
-              {isImageUpload
-                ? <FileImageList clearable={clearable} />
-                : <FileList showSize={showSize} clearable={clearable} />}
+              {isImageUpload ? (
+                <FileImageList clearable={clearable} />
+              ) : (
+                <FileList showSize={showSize} clearable={clearable} />
+              )}
             </>
           )}
 
@@ -301,9 +303,11 @@ export const FieldFileUpload = createField<FileUploadFieldProps, File[], FileUpl
                   {dropzoneDescription && <Text color="fg.muted">{dropzoneDescription}</Text>}
                 </FileUpload.DropzoneContent>
               </FileUpload.Dropzone>
-              {isImageUpload
-                ? <FileImageList clearable={clearable} />
-                : <FileList showSize={showSize} clearable={clearable} />}
+              {isImageUpload ? (
+                <FileImageList clearable={clearable} />
+              ) : (
+                <FileList showSize={showSize} clearable={clearable} />
+              )}
             </>
           )}
 

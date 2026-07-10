@@ -27,7 +27,7 @@ describe('FieldSchedule', () => {
           <Form initialValue={{ schedule: defaultSchedule }} onSubmit={vi.fn()}>
             <Form.Field.Schedule name="schedule" />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       // Каждый день недели должен быть виден — используем getAllByText т.к. день встречается в нескольких элементах
@@ -44,7 +44,7 @@ describe('FieldSchedule', () => {
           <Form initialValue={{ schedule: defaultSchedule }} onSubmit={vi.fn()}>
             <Form.Field.Schedule name="schedule" label="Расписание работы" />
           </Form>
-        </TestWrapper>,
+        </TestWrapper>
       )
 
       expect(screen.getByText('Расписание работы')).toBeInTheDocument()

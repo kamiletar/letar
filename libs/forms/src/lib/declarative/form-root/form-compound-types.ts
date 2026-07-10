@@ -328,10 +328,7 @@ export interface FormComponent {
    * ```
    */
   Subscribe: (props: {
-    children: (
-      values: Record<string, unknown>,
-      state: { isDirty: boolean; isSubmitting: boolean },
-    ) => ReactNode
+    children: (values: Record<string, unknown>, state: { isDirty: boolean; isSubmitting: boolean }) => ReactNode
     debounce?: number
   }) => ReactNode
 

@@ -27,7 +27,7 @@ describe('FieldMatrixChoice', () => {
         <Form initialValue={{ matrix: {} }} onSubmit={vi.fn()}>
           <Form.Field.MatrixChoice name="matrix" label="Оценка" rows={rows} columns={columns} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Оценка')).toBeInTheDocument()
@@ -38,7 +38,7 @@ describe('FieldMatrixChoice', () => {
         <Form initialValue={{ matrix: {} }} onSubmit={vi.fn()}>
           <Form.Field.MatrixChoice name="matrix" rows={rows} columns={columns} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       // Матрица использует Table.Root
@@ -57,7 +57,7 @@ describe('FieldMatrixChoice', () => {
             helperText="Выберите оценку для каждого критерия"
           />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Выберите оценку для каждого критерия')).toBeInTheDocument()

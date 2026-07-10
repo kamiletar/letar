@@ -16,11 +16,7 @@ describe('readUrlValues', () => {
   })
 
   it('reads string fields', () => {
-    const result = readUrlValues(
-      ['search', 'category'],
-      defaults,
-      new URLSearchParams('search=hello&category=books'),
-    )
+    const result = readUrlValues(['search', 'category'], defaults, new URLSearchParams('search=hello&category=books'))
     expect(result.search).toBe('hello')
     expect(result.category).toBe('books')
   })

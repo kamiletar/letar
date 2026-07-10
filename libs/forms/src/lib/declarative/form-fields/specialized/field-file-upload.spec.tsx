@@ -16,7 +16,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" label="Файл" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Файл')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" label="Загрузка документа" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Загрузка документа')).toBeInTheDocument()
@@ -38,7 +38,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const fieldElement = container.querySelector('[data-field-name="file"]')
@@ -52,7 +52,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" variant="button" buttonText="Выбрать файл" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Выбрать файл')).toBeInTheDocument()
@@ -68,7 +68,7 @@ describe('FieldFileUpload', () => {
             dropzoneDescription="или нажмите для выбора"
           />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Перетащите файл сюда')).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" accept="image/*" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="file"]')
@@ -94,7 +94,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" accept={['image/jpeg', 'image/png']} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="file"]')
@@ -106,7 +106,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ files: [] }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="files" maxFiles={5} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="file"]')
@@ -121,7 +121,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="file"]')
@@ -133,7 +133,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()} disabled>
           <Form.Field.FileUpload name="file" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="file"]')
@@ -147,7 +147,7 @@ describe('FieldFileUpload', () => {
         <Form initialValue={{ file: null }} onSubmit={vi.fn()}>
           <Form.Field.FileUpload name="file" helperText="Максимум 10 МБ" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Максимум 10 МБ')).toBeInTheDocument()
@@ -170,7 +170,7 @@ describe('FieldFileUpload', () => {
               }}
             />
           </Form>,
-          { wrapper: TestWrapper },
+          { wrapper: TestWrapper }
         )
       }).not.toThrow()
     })

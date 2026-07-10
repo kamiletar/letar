@@ -16,7 +16,7 @@ describe('FieldPercentage', () => {
         <Form initialValue={{ discount: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Percentage name="discount" label="Скидка" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Скидка')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldPercentage', () => {
         <Form initialValue={{ discount: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Percentage name="discount" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('[data-field-name="discount"]')
@@ -43,7 +43,7 @@ describe('FieldPercentage', () => {
         <Form initialValue={{ discount: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Percentage name="discount" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('spinbutton')
@@ -55,7 +55,7 @@ describe('FieldPercentage', () => {
         <Form initialValue={{ discount: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Percentage name="discount" helperText="От 0 до 100" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('От 0 до 100')).toBeInTheDocument()

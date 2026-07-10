@@ -16,9 +16,9 @@ export interface RenderFormOptions<TData extends Record<string, unknown> = Recor
 /**
  * Результат renderForm — стандартный RenderResult + хелперы
  */
-export interface RenderFormResult<TData extends Record<string, unknown> = Record<string, unknown>>
-  extends RenderResult
-{
+export interface RenderFormResult<
+  TData extends Record<string, unknown> = Record<string, unknown>,
+> extends RenderResult {
   /** Мок-функция onSubmit */
   onSubmit: (...args: unknown[]) => void
   /** Заполнить поле по имени */

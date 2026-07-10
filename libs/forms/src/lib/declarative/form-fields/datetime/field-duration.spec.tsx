@@ -16,7 +16,7 @@ describe('FieldDuration', () => {
         <Form initialValue={{ duration: '' }} onSubmit={vi.fn()}>
           <Form.Field.Duration name="duration" label="Длительность" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Длительность')).toBeInTheDocument()
@@ -30,7 +30,7 @@ describe('FieldDuration', () => {
         <Form initialValue={{ duration: '' }} onSubmit={vi.fn()}>
           <Form.Field.Duration name="duration" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText(':')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('FieldDuration', () => {
         <Form initialValue={{ duration: '' }} onSubmit={vi.fn()}>
           <Form.Field.Duration name="duration" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const spinbuttons = screen.getAllByRole('spinbutton')
@@ -57,7 +57,7 @@ describe('FieldDuration', () => {
         <Form initialValue={{ duration: '' }} onSubmit={vi.fn()}>
           <Form.Field.Duration name="duration" helperText="Формат: HH:MM" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Формат: HH:MM')).toBeInTheDocument()

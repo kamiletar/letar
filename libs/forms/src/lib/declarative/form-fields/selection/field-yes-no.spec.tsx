@@ -17,7 +17,7 @@ describe('FieldYesNo', () => {
         <Form initialValue={{ agree: null }} onSubmit={vi.fn()}>
           <Form.Field.YesNo name="agree" label="Согласны?" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Согласны?')).toBeInTheDocument()
@@ -30,7 +30,7 @@ describe('FieldYesNo', () => {
         <Form initialValue={{ agree: null }} onSubmit={vi.fn()}>
           <Form.Field.YesNo name="agree" yesLabel="Конечно" noLabel="Нет, спасибо" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Конечно')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('FieldYesNo', () => {
         <Form initialValue={{ agree: null }} onSubmit={vi.fn()}>
           <Form.Field.YesNo name="agree" yesLabel="Да" noLabel="Нет" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const yesRadio = screen.getAllByRole('radio')[0]
@@ -60,7 +60,7 @@ describe('FieldYesNo', () => {
         <Form initialValue={{ agree: null }} onSubmit={vi.fn()}>
           <Form.Field.YesNo name="agree" helperText="Обязательное поле" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Обязательное поле')).toBeInTheDocument()

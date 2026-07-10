@@ -22,7 +22,7 @@ describe('FieldCombobox', () => {
         <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
           <Form.Field.Combobox name="framework" label="Фреймворк" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Фреймворк')).toBeInTheDocument()
@@ -34,7 +34,7 @@ describe('FieldCombobox', () => {
         <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
           <Form.Field.Combobox name="framework" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('[data-field-name="framework"]')
@@ -46,7 +46,7 @@ describe('FieldCombobox', () => {
         <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
           <Form.Field.Combobox name="framework" options={options} placeholder="Выберите фреймворк" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByPlaceholderText('Выберите фреймворк')).toBeInTheDocument()
@@ -59,7 +59,7 @@ describe('FieldCombobox', () => {
         <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
           <Form.Field.Combobox name="framework" options={options} disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('combobox')
@@ -71,7 +71,7 @@ describe('FieldCombobox', () => {
         <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
           <Form.Field.Combobox name="framework" options={options} helperText="Начните вводить" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Начните вводить')).toBeInTheDocument()

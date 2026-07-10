@@ -67,9 +67,7 @@ export interface FormUrlSyncOptions<TData extends object> {
  * }
  * ```
  */
-export function useFormUrlSync<TData extends object>(
-  options: FormUrlSyncOptions<TData>,
-): { initialValue: TData } {
+export function useFormUrlSync<TData extends object>(options: FormUrlSyncOptions<TData>): { initialValue: TData } {
   const { fields, defaults } = options
   // Однократное чтение при маунте — без useMemo чтобы оставаться тестируемым
   const initialValue = readUrlValues(fields, defaults)
@@ -83,7 +81,7 @@ export function useFormUrlSync<TData extends object>(
 export function readUrlValues<TData extends object>(
   fields: (keyof TData & string)[],
   defaults: TData,
-  searchParams?: URLSearchParams,
+  searchParams?: URLSearchParams
 ): TData {
   if (typeof window === 'undefined' && !searchParams) return defaults
 

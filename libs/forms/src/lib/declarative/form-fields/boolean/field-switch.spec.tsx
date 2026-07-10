@@ -17,7 +17,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" label="Активен" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Активен')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: true }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('checkbox')).toBeChecked()
@@ -40,7 +40,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('checkbox')).not.toBeChecked()
@@ -54,7 +54,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const toggle = screen.getByRole('checkbox')
@@ -71,7 +71,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('checkbox')).toBeDisabled()
@@ -82,7 +82,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()} disabled>
           <Form.Field.Switch name="active" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('checkbox')).toBeDisabled()
@@ -93,7 +93,7 @@ describe('FieldSwitch', () => {
         <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
           <Form.Field.Switch name="active" helperText="Включить уведомления" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Включить уведомления')).toBeInTheDocument()

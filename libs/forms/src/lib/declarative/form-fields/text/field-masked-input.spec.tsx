@@ -16,7 +16,7 @@ describe('FieldMaskedInput', () => {
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
           <Form.Field.MaskedInput name="code" label="Код" mask="999-999" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Код')).toBeInTheDocument()
@@ -28,7 +28,7 @@ describe('FieldMaskedInput', () => {
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
           <Form.Field.MaskedInput name="code" mask="999-999" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('data-field-name', 'code')
@@ -39,7 +39,7 @@ describe('FieldMaskedInput', () => {
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
           <Form.Field.MaskedInput name="code" mask="999-999" placeholder="___-___" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByPlaceholderText('___-___')).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('FieldMaskedInput', () => {
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
           <Form.Field.MaskedInput name="code" mask="999-999" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()
@@ -63,7 +63,7 @@ describe('FieldMaskedInput', () => {
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
           <Form.Field.MaskedInput name="code" mask="999-999" helperText="Формат: XXX-XXX" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Формат: XXX-XXX')).toBeInTheDocument()

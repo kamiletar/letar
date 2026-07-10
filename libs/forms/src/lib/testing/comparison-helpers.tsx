@@ -27,19 +27,13 @@ import { TestWrapper } from './test-wrapper'
 export function renderComparison(
   original: Record<string, unknown>,
   current: Record<string, unknown>,
-  options?: Record<string, unknown>,
+  options?: Record<string, unknown>
 ): RenderResult {
   // Ленивый импорт — FormComparison из основного пакета
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { FormComparison } = require('../../index') as { FormComparison: React.ComponentType<Record<string, unknown>> }
 
-  return render(
-    createElement(
-      TestWrapper,
-      null,
-      createElement(FormComparison, { original, current, ...options }),
-    ),
-  )
+  return render(createElement(TestWrapper, null, createElement(FormComparison, { original, current, ...options })))
 }
 
 /**
@@ -60,20 +54,11 @@ export function renderComparison(
  * expect(getByText('Иван')).toBeInTheDocument()
  * ```
  */
-export function renderReadOnlyView(
-  data: Record<string, unknown>,
-  options?: Record<string, unknown>,
-): RenderResult {
+export function renderReadOnlyView(data: Record<string, unknown>, options?: Record<string, unknown>): RenderResult {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { FormReadOnlyView } = require('../../index') as {
     FormReadOnlyView: React.ComponentType<Record<string, unknown>>
   }
 
-  return render(
-    createElement(
-      TestWrapper,
-      null,
-      createElement(FormReadOnlyView, { data, ...options }),
-    ),
-  )
+  return render(createElement(TestWrapper, null, createElement(FormReadOnlyView, { data, ...options })))
 }

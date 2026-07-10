@@ -303,7 +303,7 @@ const { isBlocked, remaining, secondsLeft } = useRateLimit({
 ```tsx
 import { FormComparison } from '@letar/forms'
 
-<FormComparison
+;<FormComparison
   original={{ name: 'Иванов И.И.', email: 'old@test.com', role: 'user' }}
   current={{ name: 'Иванов И.И.', email: 'new@test.com', role: 'admin' }}
   onlyChanged
@@ -317,7 +317,7 @@ import { FormComparison } from '@letar/forms'
 ```tsx
 import { FormReadOnlyView } from '@letar/forms'
 
-<FormReadOnlyView
+;<FormReadOnlyView
   data={{ name: 'Иванов', email: 'ivan@test.com', role: 'Администратор' }}
   schema={UserSchema}
   compact

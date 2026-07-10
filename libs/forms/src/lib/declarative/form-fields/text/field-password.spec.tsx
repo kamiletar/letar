@@ -17,7 +17,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" label="Пароль" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Пароль')).toBeInTheDocument()
@@ -28,7 +28,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input[type="password"]')
@@ -40,7 +40,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" placeholder="Введите пароль" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByPlaceholderText('Введите пароль')).toBeInTheDocument()
@@ -53,7 +53,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const toggleBtn = screen.getByLabelText(/toggle password/i)
@@ -66,7 +66,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       // Изначально password
@@ -86,7 +86,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = container.querySelector('input')
@@ -98,7 +98,7 @@ describe('FieldPassword', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.Password name="password" helperText="Минимум 8 символов" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Минимум 8 символов')).toBeInTheDocument()

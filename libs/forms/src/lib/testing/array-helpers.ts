@@ -19,9 +19,7 @@ export async function addItem(listName?: string): Promise<void> {
   const addButton = findAddButton(listName)
 
   if (!addButton) {
-    throw new Error(
-      `addItem: кнопка добавления не найдена${listName ? ` для списка "${listName}"` : ''}`,
-    )
+    throw new Error(`addItem: кнопка добавления не найдена${listName ? ` для списка "${listName}"` : ''}`)
   }
 
   await user.click(addButton)
@@ -45,18 +43,14 @@ export async function removeItem(index: number, listName?: string): Promise<void
   const container = findListContainer(listName)
 
   if (!container) {
-    throw new Error(
-      `removeItem: контейнер списка не найден${listName ? ` ("${listName}")` : ''}`,
-    )
+    throw new Error(`removeItem: контейнер списка не найден${listName ? ` ("${listName}")` : ''}`)
   }
 
   // Ищем все кнопки удаления внутри контейнера
   const removeButtons = within(container).queryAllByRole('button', { name: /удалить|remove|delete|×|✕/i })
 
   if (index >= removeButtons.length) {
-    throw new Error(
-      `removeItem: индекс ${index} вне диапазона (найдено ${removeButtons.length} элементов)`,
-    )
+    throw new Error(`removeItem: индекс ${index} вне диапазона (найдено ${removeButtons.length} элементов)`)
   }
 
   await user.click(removeButtons[index])
@@ -89,9 +83,7 @@ export function expectItemCount(listName: string, count: number): void {
   const actual = items.length > 0 ? items.length : removeButtons.length
 
   if (actual !== count) {
-    throw new Error(
-      `expectItemCount: в списке "${listName}" ${actual} элементов, ожидалось ${count}`,
-    )
+    throw new Error(`expectItemCount: в списке "${listName}" ${actual} элементов, ожидалось ${count}`)
   }
 }
 

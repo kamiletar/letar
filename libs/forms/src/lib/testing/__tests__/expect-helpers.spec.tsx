@@ -14,11 +14,7 @@ const TestSchema = z.object({
 
 function TestForm() {
   return (
-    <Form
-      schema={TestSchema}
-      initialValue={{ name: 'Иван' }}
-      onSubmit={() => {}}
-    >
+    <Form schema={TestSchema} initialValue={{ name: 'Иван' }} onSubmit={() => {}}>
       <Form.Field.String name="name" />
       <Form.Button.Submit>OK</Form.Button.Submit>
     </Form>

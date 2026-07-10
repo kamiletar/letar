@@ -16,7 +16,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" label="Телефон" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('textbox')
@@ -29,7 +29,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" label="Номер телефона" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Номер телефона')).toBeInTheDocument()
@@ -40,7 +40,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" placeholder="+7 (___) ___-__-__" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByPlaceholderText('+7 (___) ___-__-__')).toBeInTheDocument()
@@ -51,7 +51,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('textbox')
@@ -65,7 +65,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       // По умолчанию RU — маска +7
@@ -78,7 +78,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" country="RU" showFlag />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       // Флаг 🇷🇺 должен быть видимым
@@ -92,7 +92,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" disabled />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('textbox')
@@ -104,7 +104,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '+79001234567' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('textbox')
@@ -117,7 +117,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()} disabled>
           <Form.Field.Phone name="phone" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const input = screen.getByRole('textbox')
@@ -131,7 +131,7 @@ describe('FieldPhone', () => {
         <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
           <Form.Field.Phone name="phone" helperText="Формат: +7 (XXX) XXX-XX-XX" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Формат: +7 (XXX) XXX-XX-XX')).toBeInTheDocument()

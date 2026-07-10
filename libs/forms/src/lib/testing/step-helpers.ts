@@ -16,10 +16,7 @@ import userEvent from '@testing-library/user-event'
  * await goToStep(1, { prevLabel: 'Back' })
  * ```
  */
-export async function goToStep(
-  step: number,
-  options?: { nextLabel?: string; prevLabel?: string },
-): Promise<void> {
+export async function goToStep(step: number, options?: { nextLabel?: string; prevLabel?: string }): Promise<void> {
   const user = userEvent.setup()
   const nextLabel = options?.nextLabel ?? /далее|next|продолжить/i
   const prevLabel = options?.prevLabel ?? /назад|back|prev/i

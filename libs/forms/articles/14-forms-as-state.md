@@ -94,9 +94,7 @@ function CatalogPage() {
       </HStack>
 
       {/* ProductList получает актуальные фильтры при каждом изменении */}
-      <Form.Subscribe>
-        {(filters) => <ProductList filters={filters} />}
-      </Form.Subscribe>
+      <Form.Subscribe>{(filters) => <ProductList filters={filters} />}</Form.Subscribe>
     </Form>
   )
 }
@@ -126,19 +124,11 @@ function CatalogPage() {
 function ActiveFiltersBar() {
   const { value } = useTypedFormSubscribe(['search', 'category', 'status'])
 
-  const activeCount = [
-    value.search !== '',
-    value.category !== 'all',
-    value.status.length > 0,
-  ].filter(Boolean).length
+  const activeCount = [value.search !== '', value.category !== 'all', value.status.length > 0].filter(Boolean).length
 
   if (activeCount === 0) return null
 
-  return (
-    <Badge colorScheme="blue">
-      Фильтры активны: {activeCount}
-    </Badge>
-  )
+  return <Badge colorScheme="blue">Фильтры активны: {activeCount}</Badge>
 }
 ```
 
@@ -169,9 +159,7 @@ function CatalogPage() {
         }}
       />
 
-      <Form.Subscribe>
-        {(filters) => <ProductList filters={{ ...filters, search: debouncedSearch }} />}
-      </Form.Subscribe>
+      <Form.Subscribe>{(filters) => <ProductList filters={{ ...filters, search: debouncedSearch }} />}</Form.Subscribe>
     </Form>
   )
 }
@@ -199,11 +187,7 @@ function CatalogPage() {
   })
 
   return (
-    <Form
-      schema={FilterSchema}
-      initialValue={{ ...defaultFilters, ...prefilled }}
-      onSubmit={async () => {}}
-    >
+    <Form schema={FilterSchema} initialValue={{ ...defaultFilters, ...prefilled }} onSubmit={async () => {}}>
       {/* ... */}
     </Form>
   )
@@ -244,7 +228,7 @@ function FilterUrlSync() {
 }
 
 // Использование:
-<Form schema={FilterSchema} initialValue={{ ...defaultFilters, ...prefilled }} onSubmit={async () => {}}>
+;<Form schema={FilterSchema} initialValue={{ ...defaultFilters, ...prefilled }} onSubmit={async () => {}}>
   <FilterUrlSync />
   {/* поля */}
 </Form>
@@ -266,10 +250,7 @@ interface AppSettings {
   itemsPerPage: number
 }
 
-function SettingsPanel({ settings, onSave }: {
-  settings: AppSettings
-  onSave: (s: AppSettings) => void
-}) {
+function SettingsPanel({ settings, onSave }: { settings: AppSettings; onSave: (s: AppSettings) => void }) {
   return (
     <Form
       schema={SettingsSchema}
@@ -292,7 +273,10 @@ function SettingsPanel({ settings, onSave }: {
       <Form.Field.NativeSelect
         name="language"
         label="Язык"
-        options={[{ value: 'ru', label: 'Русский' }, { value: 'en', label: 'English' }]}
+        options={[
+          { value: 'ru', label: 'Русский' },
+          { value: 'en', label: 'English' },
+        ]}
       />
       <Form.Field.Switch name="notifications" label="Уведомления" />
       <Form.Field.Number name="itemsPerPage" label="Элементов на странице" min={10} max={100} step={10} />
@@ -301,12 +285,8 @@ function SettingsPanel({ settings, onSave }: {
       <Form.Subscribe>
         {(_, formState) => (
           <HStack mt={4}>
-            <Form.Button.Submit isDisabled={!formState.isDirty}>
-              Применить
-            </Form.Button.Submit>
-            <Form.Button.Reset isDisabled={!formState.isDirty}>
-              Отмена
-            </Form.Button.Reset>
+            <Form.Button.Submit isDisabled={!formState.isDirty}>Применить</Form.Button.Submit>
+            <Form.Button.Reset isDisabled={!formState.isDirty}>Отмена</Form.Button.Reset>
           </HStack>
         )}
       </Form.Subscribe>
@@ -344,18 +324,13 @@ function DashboardPage() {
       onSubmit={async () => {}}
     >
       <HStack wrap="wrap" mb={6}>
-        <Form.Field.SegmentedControl
-          name="period"
-          options={periodOptions}
-        />
+        <Form.Field.SegmentedControl name="period" options={periodOptions} />
         <Form.Field.NativeSelect name="groupBy" label="Группировать по" options={groupByOptions} />
         <Form.Field.CheckboxGroup name="metrics" options={metricOptions} />
         <Form.Field.NativeSelect name="compareWith" label="Сравнить с" options={compareOptions} />
       </HStack>
 
-      <Form.Subscribe>
-        {(controls) => <DashboardCharts controls={controls} />}
-      </Form.Subscribe>
+      <Form.Subscribe>{(controls) => <DashboardCharts controls={controls} />}</Form.Subscribe>
     </Form>
   )
 }

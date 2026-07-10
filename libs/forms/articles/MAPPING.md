@@ -4,23 +4,23 @@
 
 ## Статья → Docs → Examples
 
-| #  | Статья                          | Docs pages                                                                              | Example pages                                             |
-| -- | ------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 00 | Quick Start                     | `quick-start.mdx`                                                                       | `/examples/basic`                                         |
-| 01 | Формы в React — почему больно   | `index.mdx` (overview)                                                                  | — (общие ссылки)                                          |
-| 02 | Zod .meta() — единый источник   | `guides/validation.mdx`                                                                 | `/examples/validation`, `/examples/constraints`           |
-| 03 | Compound Components             | `guides/create-form.mdx`, `api/form-component.mdx`                                      | `/examples/basic`, `/examples/all-fields`                 |
-| 04 | 50+ полей                       | `fields/*.mdx` (6 страниц)                                                              | `/examples/all-fields`, `/examples/advanced-fields`       |
-| 05 | Мультистеп и условный рендеринг | `guides/multi-step.mdx`, `guides/conditional-fields.mdx`                                | `/examples/multi-step`, `/examples/conditional`           |
-| 06 | Массивы и группы                | `guides/groups-arrays.mdx`                                                              | `/examples/groups`                                        |
-| 07 | FromSchema                      | **НЕТ отдельной страницы**                                                              | `/examples/auto-fields`, `/examples/auto-fields-advanced` |
-| 08 | ZenStack pipeline               | `guides/zenstack-plugin.mdx`, `guides/relation-fields.mdx`, `guides/tanstack-query.mdx` | `/examples/zenstack`, `/products`                         |
-| 09 | Offline-first                   | `guides/offline.mdx`, `guides/persistence.mdx`                                          | `/examples/offline`, `/examples/persistence`              |
-| 10 | i18n                            | `guides/i18n.mdx`                                                                       | `/examples/i18n`                                          |
-| 11 | MCP                             | **НЕТ страницы**                                                                        | — (npm link)                                              |
-| 12 | Релиз                           | `installation.mdx`                                                                      | `/examples/recipes`                                       |
-| 13 | Analytics                       | `guides/analytics.mdx`                                                                  | `/examples/analytics`                                     |
-| 14 | Формы как state manager         | `guides/filters-state.mdx`                                                              | —                                                         |
+| #   | Статья                          | Docs pages                                                                              | Example pages                                             |
+| --- | ------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 00  | Quick Start                     | `quick-start.mdx`                                                                       | `/examples/basic`                                         |
+| 01  | Формы в React — почему больно   | `index.mdx` (overview)                                                                  | — (общие ссылки)                                          |
+| 02  | Zod .meta() — единый источник   | `guides/validation.mdx`                                                                 | `/examples/validation`, `/examples/constraints`           |
+| 03  | Compound Components             | `guides/create-form.mdx`, `api/form-component.mdx`                                      | `/examples/basic`, `/examples/all-fields`                 |
+| 04  | 50+ полей                       | `fields/*.mdx` (6 страниц)                                                              | `/examples/all-fields`, `/examples/advanced-fields`       |
+| 05  | Мультистеп и условный рендеринг | `guides/multi-step.mdx`, `guides/conditional-fields.mdx`                                | `/examples/multi-step`, `/examples/conditional`           |
+| 06  | Массивы и группы                | `guides/groups-arrays.mdx`                                                              | `/examples/groups`                                        |
+| 07  | FromSchema                      | **НЕТ отдельной страницы**                                                              | `/examples/auto-fields`, `/examples/auto-fields-advanced` |
+| 08  | ZenStack pipeline               | `guides/zenstack-plugin.mdx`, `guides/relation-fields.mdx`, `guides/tanstack-query.mdx` | `/examples/zenstack`, `/products`                         |
+| 09  | Offline-first                   | `guides/offline.mdx`, `guides/persistence.mdx`                                          | `/examples/offline`, `/examples/persistence`              |
+| 10  | i18n                            | `guides/i18n.mdx`                                                                       | `/examples/i18n`                                          |
+| 11  | MCP                             | **НЕТ страницы**                                                                        | — (npm link)                                              |
+| 12  | Релиз                           | `installation.mdx`                                                                      | `/examples/recipes`                                       |
+| 13  | Analytics                       | `guides/analytics.mdx`                                                                  | `/examples/analytics`                                     |
+| 14  | Формы как state manager         | `guides/filters-state.mdx`                                                              | —                                                         |
 
 ## Отсутствующие страницы docs
 

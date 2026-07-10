@@ -23,7 +23,7 @@ describe('FieldRadioGroup', () => {
         <Form initialValue={{ gender: 'male' }} onSubmit={vi.fn()}>
           <Form.Field.RadioGroup name="gender" label="Пол" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Пол')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('FieldRadioGroup', () => {
         <Form initialValue={{ gender: 'male' }} onSubmit={vi.fn()}>
           <Form.Field.RadioGroup name="gender" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Мужской')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('FieldRadioGroup', () => {
         <Form initialValue={{ gender: 'female' }} onSubmit={vi.fn()}>
           <Form.Field.RadioGroup name="gender" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       const radios = screen.getAllByRole('radio')
@@ -64,7 +64,7 @@ describe('FieldRadioGroup', () => {
         <Form initialValue={{ gender: 'male' }} onSubmit={vi.fn()}>
           <Form.Field.RadioGroup name="gender" options={options} />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       await user.click(screen.getByText('Женский'))
@@ -80,7 +80,7 @@ describe('FieldRadioGroup', () => {
         <Form initialValue={{ gender: 'male' }} onSubmit={vi.fn()}>
           <Form.Field.RadioGroup name="gender" options={options} helperText="Выберите пол" />
         </Form>,
-        { wrapper: TestWrapper },
+        { wrapper: TestWrapper }
       )
 
       expect(screen.getByText('Выберите пол')).toBeInTheDocument()
