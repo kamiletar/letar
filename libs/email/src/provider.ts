@@ -94,7 +94,7 @@ function getTransporter(config?: EmailConfig): Transporter {
     // Maddy SMTP для продакшена
     if (!cfg.user || !cfg.password) {
       throw new Error(
-        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.',
+        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.'
       )
     }
 
