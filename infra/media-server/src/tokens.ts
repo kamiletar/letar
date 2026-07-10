@@ -15,7 +15,7 @@ export async function createUploadToken(appId: string, videoId: string, webhookU
 
 /** Проверяет токен и возвращает payload (одноразово — удаляет после чтения) */
 export async function consumeUploadToken(
-  token: string,
+  token: string
 ): Promise<{ appId: string; videoId: string; webhookUrl: string } | null> {
   const key = `upload_token:${token}`
   const raw = await redis.get(key)

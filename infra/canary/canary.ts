@@ -75,10 +75,7 @@ async function waitForDelivery(marker: string, deadline: number): Promise<number
 
     while (Date.now() < deadline) {
       // Ищем письмо с нашим маркером
-      const messages = client.fetch(
-        { since: new Date(Date.now() - 5 * 60 * 1000) },
-        { envelope: true },
-      )
+      const messages = client.fetch({ since: new Date(Date.now() - 5 * 60 * 1000) }, { envelope: true })
 
       for await (const msg of messages) {
         if (msg.envelope.subject?.includes(marker)) {
@@ -129,7 +126,7 @@ async function main() {
     console.error(`[canary] ❌ FAIL: ${message}`)
 
     await sendTelegramAlert(
-      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`,
+      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`
     )
     process.exit(1)
   }

@@ -40,10 +40,7 @@ async function main() {
 
   const newUser = await prisma.user.findUnique({ where: { email: NEW_EMAIL } })
   if (!newUser) {
-    console.error(
-      `❌ Пользователь ${NEW_EMAIL} не найден!\n`
-        + `   Войди в kami.letar.best через Ключницу и повтори.`,
-    )
+    console.error(`❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в kami.letar.best через Ключницу и повтори.`)
     process.exit(1)
   }
   console.log(`Новый: ${newUser.id} (${newUser.email}) roles=${newUser.roles}`)
@@ -66,7 +63,7 @@ async function main() {
   for (const u of oldUsers) {
     console.log(`\nСтарый: ${u.id} (${u.email}) roles=${u.roles}`)
     console.log(
-      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`,
+      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`
     )
     u.uploadedAudio.forEach((a) => console.log(`    🎵 ${a.title}`))
   }

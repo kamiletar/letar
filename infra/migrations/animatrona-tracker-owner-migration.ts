@@ -32,13 +32,12 @@ async function main() {
   try {
     const { rows: newUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = $1',
-      [NEW_EMAIL],
+      [NEW_EMAIL]
     )
     const newUser = newUsers[0]
     if (!newUser) {
       console.error(
-        `❌ Пользователь ${NEW_EMAIL} не найден!\n`
-          + `   Войди в animatrona.letar.best через Ключницу и повтори.`,
+        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в animatrona.letar.best через Ключницу и повтори.`
       )
       process.exit(1)
     }
@@ -64,7 +63,7 @@ async function main() {
               (SELECT COUNT(*) FROM "ApiKey" k WHERE k."userId" = u.id)::int as apikey_count
        FROM "User" u
        WHERE u.email = ANY($1)`,
-      [OLD_EMAILS],
+      [OLD_EMAILS]
     )
 
     if (oldUsers.length === 0 && newUser.role === 'ADMIN') {
@@ -74,10 +73,10 @@ async function main() {
 
     for (const u of oldUsers) {
       console.log(
-        `Старый: ${u.id} (${u.email}) role=${u.role}\n`
-          + `  Anime: ${u.anime_count}, Library: ${u.library_count}, `
-          + `Distribution: ${u.distribution_count}, PinJob: ${u.pinjob_count}, `
-          + `Content: ${u.content_count}, ApiKey: ${u.apikey_count}`,
+        `Старый: ${u.id} (${u.email}) role=${u.role}\n` +
+          `  Anime: ${u.anime_count}, Library: ${u.library_count}, ` +
+          `Distribution: ${u.distribution_count}, PinJob: ${u.pinjob_count}, ` +
+          `Content: ${u.content_count}, ApiKey: ${u.apikey_count}`
       )
     }
 
@@ -93,10 +92,10 @@ async function main() {
     for (const oldUser of oldUsers) {
       // Anime (uploadedById — RESTRICT: сначала переносим, потом удаляем user)
       if (oldUser.anime_count > 0) {
-        const { rowCount } = await client.query(
-          'UPDATE "Anime" SET "uploadedById" = $1 WHERE "uploadedById" = $2',
-          [newUser.id, oldUser.id],
-        )
+        const { rowCount } = await client.query('UPDATE "Anime" SET "uploadedById" = $1 WHERE "uploadedById" = $2', [
+          newUser.id,
+          oldUser.id,
+        ])
         console.log(`  ✅ Anime перенесено: ${rowCount}`)
       }
 
@@ -105,22 +104,19 @@ async function main() {
         // Перенос с учётом дублей по animeId
         const { rows: libraryItems } = await client.query<{ id: string; anime_id: string }>(
           'SELECT id, "animeId" as anime_id FROM "UserLibraryItem" WHERE "userId" = $1',
-          [oldUser.id],
+          [oldUser.id]
         )
         for (const item of libraryItems) {
           const { rows: exists } = await client.query(
             'SELECT id FROM "UserLibraryItem" WHERE "userId" = $1 AND "animeId" = $2',
-            [newUser.id, item.anime_id],
+            [newUser.id, item.anime_id]
           )
           if (exists.length > 0) {
             // Дубль — удаляем старый (UserWatchProgress каскадом)
             await client.query('DELETE FROM "UserLibraryItem" WHERE id = $1', [item.id])
             console.log(`  ⚠️  UserLibraryItem animeId=${item.anime_id}: дубль — удалён старый`)
           } else {
-            await client.query(
-              'UPDATE "UserLibraryItem" SET "userId" = $1 WHERE id = $2',
-              [newUser.id, item.id],
-            )
+            await client.query('UPDATE "UserLibraryItem" SET "userId" = $1 WHERE id = $2', [newUser.id, item.id])
           }
         }
         console.log(`  ✅ UserLibraryItem обработано: ${libraryItems.length}`)
@@ -128,44 +124,41 @@ async function main() {
 
       // Distribution (userId — RESTRICT)
       if (oldUser.distribution_count > 0) {
-        const { rowCount } = await client.query(
-          'UPDATE "Distribution" SET "userId" = $1 WHERE "userId" = $2',
-          [newUser.id, oldUser.id],
-        )
+        const { rowCount } = await client.query('UPDATE "Distribution" SET "userId" = $1 WHERE "userId" = $2', [
+          newUser.id,
+          oldUser.id,
+        ])
         console.log(`  ✅ Distribution перенесено: ${rowCount}`)
       }
 
       // PinJob (createdById — RESTRICT)
       if (oldUser.pinjob_count > 0) {
-        const { rowCount } = await client.query(
-          'UPDATE "PinJob" SET "createdById" = $1 WHERE "createdById" = $2',
-          [newUser.id, oldUser.id],
-        )
+        const { rowCount } = await client.query('UPDATE "PinJob" SET "createdById" = $1 WHERE "createdById" = $2', [
+          newUser.id,
+          oldUser.id,
+        ])
         console.log(`  ✅ PinJob перенесено: ${rowCount}`)
       }
 
       // Content (userId — SET NULL при delete, но переносим)
       if (oldUser.content_count > 0) {
-        const { rowCount } = await client.query(
-          'UPDATE "Content" SET "userId" = $1 WHERE "userId" = $2',
-          [newUser.id, oldUser.id],
-        )
+        const { rowCount } = await client.query('UPDATE "Content" SET "userId" = $1 WHERE "userId" = $2', [
+          newUser.id,
+          oldUser.id,
+        ])
         console.log(`  ✅ Content перенесено: ${rowCount}`)
       }
 
       // ApiKey (userId — CASCADE delete) — удалим: персональные ключи старого аккаунта не нужны
       if (oldUser.apikey_count > 0) {
-        const { rowCount } = await client.query(
-          'DELETE FROM "ApiKey" WHERE "userId" = $1',
-          [oldUser.id],
-        )
+        const { rowCount } = await client.query('DELETE FROM "ApiKey" WHERE "userId" = $1', [oldUser.id])
         console.log(`  ⚠️  ApiKey удалено (персональные): ${rowCount}`)
       }
 
       // ModerationLog (moderatorId — RESTRICT: нужно переносить перед удалением User)
       const { rowCount: modLogCount } = await client.query(
         'UPDATE "ModerationLog" SET "moderatorId" = $1 WHERE "moderatorId" = $2',
-        [newUser.id, oldUser.id],
+        [newUser.id, oldUser.id]
       )
       if (modLogCount) console.log(`  ✅ ModerationLog перенесено: ${modLogCount}`)
 
