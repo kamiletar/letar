@@ -20,8 +20,8 @@ import { describe, expect, it } from 'vitest'
 // только тестовой среде через относительный путь; в Docker-артефакт spec не попадает.
 // eslint-disable-next-line @nx/enforce-module-boundaries -- см. комментарий выше
 import {
-  getServerForApp as canonGetServerForApp,
   SERVER_APPS as CANON_SERVER_APPS,
+  getServerForApp as canonGetServerForApp,
 } from '../../../../libs/infra-config/src/index'
 import { getServerForApp, SERVER_APPS } from './server-config'
 

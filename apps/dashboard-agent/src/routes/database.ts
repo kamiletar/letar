@@ -62,7 +62,7 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -72,7 +72,9 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.post<{ Querystring: { db?: string } }>(
     '/api/database/backup',
-    async (request): Promise<
+    async (
+      request
+    ): Promise<
       ApiResponse<{ results: BackupResult[]; summary: { total: number; success: number; failed: number } }>
     > => {
       try {
@@ -114,7 +116,7 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -141,6 +143,6 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 }

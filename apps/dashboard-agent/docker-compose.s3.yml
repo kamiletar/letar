@@ -34,7 +34,11 @@ services:
     pid: host
     privileged: true
     ports:
-      - '3100:3100'
+      # host:3100 занят media-api → публикуем на 13103, и только на loopback:
+      # SSH-туннель deploy-mcp достаёт (localhost:13103 на хосте), снаружи недоступен
+      # (закрытие порта от интернета получаем даром, ufw не нужен). hostPort=13103
+      # синхронизирован с libs/infra-config (SERVERS.s3.hostPort).
+      - '127.0.0.1:13103:3100'
     env_file:
       - .env.docker
     environment:
