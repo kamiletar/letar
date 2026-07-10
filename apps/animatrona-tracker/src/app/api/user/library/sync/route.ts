@@ -84,16 +84,16 @@ export async function POST(request: NextRequest) {
   const [animeByDirCid, animeByShikimori, existingLibraryItems] = await Promise.all([
     directoryCids.length > 0
       ? prisma.anime.findMany({
-        where: { directoryCid: { in: directoryCids } },
-        select: { id: true, directoryCid: true },
-      })
+          where: { directoryCid: { in: directoryCids } },
+          select: { id: true, directoryCid: true },
+        })
       : [],
     // Fallback по shikimoriId — нужен при смене directoryCid (обновление раздачи)
     shikimoriIds.length > 0
       ? prisma.anime.findMany({
-        where: { shikimoriId: { in: shikimoriIds }, status: 'PUBLISHED' },
-        select: { id: true, shikimoriId: true },
-      })
+          where: { shikimoriId: { in: shikimoriIds }, status: 'PUBLISHED' },
+          select: { id: true, shikimoriId: true },
+        })
       : [],
     prisma.userLibraryItem.findMany({
       where: { userId: user.id },
@@ -113,8 +113,9 @@ export async function POST(request: NextRequest) {
     }
 
     // O(1) lookup: directoryCid → shikimoriId (fallback при смене CID)
-    const animeId = (item.directoryCid ? dirCidToAnimeId.get(item.directoryCid) : undefined)
-      ?? (item.shikimoriId ? shikimoriToAnimeId.get(item.shikimoriId) : undefined)
+    const animeId =
+      (item.directoryCid ? dirCidToAnimeId.get(item.directoryCid) : undefined) ??
+      (item.shikimoriId ? shikimoriToAnimeId.get(item.shikimoriId) : undefined)
 
     if (!animeId) {
       skipped++
@@ -136,25 +137,25 @@ export async function POST(request: NextRequest) {
 
     const libraryItem = shouldUpdateLibrary
       ? await prisma.userLibraryItem.upsert({
-        where: {
-          userId_animeId: {
+          where: {
+            userId_animeId: {
+              userId: user.id,
+              animeId,
+            },
+          },
+          create: {
             userId: user.id,
             animeId,
+            watchStatus,
+            userRating: item.userRating ?? null,
+            pinnedLocally: item.pinnedLocally ?? false,
           },
-        },
-        create: {
-          userId: user.id,
-          animeId,
-          watchStatus,
-          userRating: item.userRating ?? null,
-          pinnedLocally: item.pinnedLocally ?? false,
-        },
-        update: {
-          watchStatus,
-          userRating: item.userRating ?? null,
-          pinnedLocally: item.pinnedLocally ?? false,
-        },
-      })
+          update: {
+            watchStatus,
+            userRating: item.userRating ?? null,
+            pinnedLocally: item.pinnedLocally ?? false,
+          },
+        })
       : existing!
 
     // Синхронизация прогресса просмотра с conflict resolution

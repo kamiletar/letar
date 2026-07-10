@@ -33,13 +33,13 @@ export const auth = betterAuth({
   // OAuth провайдеры
   socialProviders: {
     // Google OAuth
-    ...(process.env.AUTH_GOOGLE_ID
-      && process.env.AUTH_GOOGLE_SECRET && {
-      google: {
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      },
-    }),
+    ...(process.env.AUTH_GOOGLE_ID &&
+      process.env.AUTH_GOOGLE_SECRET && {
+        google: {
+          clientId: process.env.AUTH_GOOGLE_ID,
+          clientSecret: process.env.AUTH_GOOGLE_SECRET,
+        },
+      }),
   },
 
   // Плагины
@@ -51,102 +51,102 @@ export const auth = betterAuth({
         // Ключница (auth.letar.best) — единый вход через OIDC
         ...(process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
           ? [
-            {
-              providerId: 'letar-auth',
-              discoveryUrl: process.env.OIDC_DISCOVERY_URL
-                || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
-              clientId: process.env.OIDC_CLIENT_ID,
-              clientSecret: process.env.OIDC_CLIENT_SECRET,
-              scopes: ['openid', 'profile', 'email'],
-              pkce: true,
-            },
-          ]
+              {
+                providerId: 'letar-auth',
+                discoveryUrl:
+                  process.env.OIDC_DISCOVERY_URL || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
+                clientId: process.env.OIDC_CLIENT_ID,
+                clientSecret: process.env.OIDC_CLIENT_SECRET,
+                scopes: ['openid', 'profile', 'email'],
+                pkce: true,
+              },
+            ]
           : []),
         // Yandex OAuth
         ...(process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
           ? [
-            {
-              providerId: 'yandex',
-              clientId: process.env.AUTH_YANDEX_ID,
-              clientSecret: process.env.AUTH_YANDEX_SECRET,
-              authorizationUrl: 'https://oauth.yandex.ru/authorize',
-              tokenUrl: 'https://oauth.yandex.ru/token',
-              scopes: ['login:email', 'login:info', 'login:avatar'],
-              getUserInfo: async (tokens: { accessToken?: string }) => {
-                const response = await fetch('https://login.yandex.ru/info?format=json', {
-                  headers: {
-                    Authorization: `OAuth ${tokens.accessToken}`,
-                  },
-                })
-                const data = await response.json()
-                return {
-                  id: data.id,
-                  name: data.display_name || data.real_name || data.login,
-                  email: data.default_email,
-                  image: data.default_avatar_id
-                    ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
-                    : undefined,
-                  emailVerified: true,
-                }
+              {
+                providerId: 'yandex',
+                clientId: process.env.AUTH_YANDEX_ID,
+                clientSecret: process.env.AUTH_YANDEX_SECRET,
+                authorizationUrl: 'https://oauth.yandex.ru/authorize',
+                tokenUrl: 'https://oauth.yandex.ru/token',
+                scopes: ['login:email', 'login:info', 'login:avatar'],
+                getUserInfo: async (tokens: { accessToken?: string }) => {
+                  const response = await fetch('https://login.yandex.ru/info?format=json', {
+                    headers: {
+                      Authorization: `OAuth ${tokens.accessToken}`,
+                    },
+                  })
+                  const data = await response.json()
+                  return {
+                    id: data.id,
+                    name: data.display_name || data.real_name || data.login,
+                    email: data.default_email,
+                    image: data.default_avatar_id
+                      ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
+                      : undefined,
+                    emailVerified: true,
+                  }
+                },
               },
-            },
-          ]
+            ]
           : []),
         // Shikimori OAuth
         ...(process.env.AUTH_SHIKIMORI_ID && process.env.AUTH_SHIKIMORI_SECRET
           ? [
-            {
-              providerId: 'shikimori',
-              clientId: process.env.AUTH_SHIKIMORI_ID,
-              clientSecret: process.env.AUTH_SHIKIMORI_SECRET,
-              authorizationUrl: 'https://shikimori.one/oauth/authorize',
-              tokenUrl: 'https://shikimori.one/oauth/token',
-              scopes: ['user_rates'],
-              getUserInfo: async (tokens: { accessToken?: string }) => {
-                const response = await fetch('https://shikimori.one/api/users/whoami', {
-                  headers: {
-                    'User-Agent': 'AnimatronaTracker',
-                    Authorization: `Bearer ${tokens.accessToken}`,
-                  },
-                })
-                const data = await response.json()
-                return {
-                  id: String(data.id),
-                  name: data.nickname,
-                  email: undefined, // Shikimori не отдаёт email
-                  image: data.image?.x160 || data.avatar,
-                  emailVerified: false,
-                }
+              {
+                providerId: 'shikimori',
+                clientId: process.env.AUTH_SHIKIMORI_ID,
+                clientSecret: process.env.AUTH_SHIKIMORI_SECRET,
+                authorizationUrl: 'https://shikimori.one/oauth/authorize',
+                tokenUrl: 'https://shikimori.one/oauth/token',
+                scopes: ['user_rates'],
+                getUserInfo: async (tokens: { accessToken?: string }) => {
+                  const response = await fetch('https://shikimori.one/api/users/whoami', {
+                    headers: {
+                      'User-Agent': 'AnimatronaTracker',
+                      Authorization: `Bearer ${tokens.accessToken}`,
+                    },
+                  })
+                  const data = await response.json()
+                  return {
+                    id: String(data.id),
+                    name: data.nickname,
+                    email: undefined, // Shikimori не отдаёт email
+                    image: data.image?.x160 || data.avatar,
+                    emailVerified: false,
+                  }
+                },
               },
-            },
-          ]
+            ]
           : []),
         // VK OAuth
         ...(process.env.AUTH_VK_ID && process.env.AUTH_VK_SECRET
           ? [
-            {
-              providerId: 'vk',
-              clientId: process.env.AUTH_VK_ID,
-              clientSecret: process.env.AUTH_VK_SECRET,
-              authorizationUrl: 'https://oauth.vk.com/authorize',
-              tokenUrl: 'https://oauth.vk.com/access_token',
-              scopes: ['email'],
-              getUserInfo: async (tokens: { accessToken?: string; email?: string }) => {
-                const response = await fetch(
-                  `https://api.vk.com/method/users.get?access_token=${tokens.accessToken}&fields=photo_200,email&v=5.131`,
-                )
-                const data = await response.json()
-                const user = data.response?.[0]
-                return {
-                  id: String(user?.id),
-                  name: `${user?.first_name} ${user?.last_name}`.trim(),
-                  email: tokens.email,
-                  image: user?.photo_200,
-                  emailVerified: true,
-                }
+              {
+                providerId: 'vk',
+                clientId: process.env.AUTH_VK_ID,
+                clientSecret: process.env.AUTH_VK_SECRET,
+                authorizationUrl: 'https://oauth.vk.com/authorize',
+                tokenUrl: 'https://oauth.vk.com/access_token',
+                scopes: ['email'],
+                getUserInfo: async (tokens: { accessToken?: string; email?: string }) => {
+                  const response = await fetch(
+                    `https://api.vk.com/method/users.get?access_token=${tokens.accessToken}&fields=photo_200,email&v=5.131`
+                  )
+                  const data = await response.json()
+                  const user = data.response?.[0]
+                  return {
+                    id: String(user?.id),
+                    name: `${user?.first_name} ${user?.last_name}`.trim(),
+                    email: tokens.email,
+                    image: user?.photo_200,
+                    emailVerified: true,
+                  }
+                },
               },
-            },
-          ]
+            ]
           : []),
       ],
     }),

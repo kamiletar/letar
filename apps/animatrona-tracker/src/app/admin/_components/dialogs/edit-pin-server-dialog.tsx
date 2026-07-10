@@ -18,7 +18,7 @@ export function EditPinServerDialog({ server, open, onOpenChange }: EditPinServe
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState(server.name)
   const [capacityGb, setCapacityGb] = useState(
-    server.capacityBytes > 0 ? String(Math.round(server.capacityBytes / 1024 / 1024 / 1024)) : '',
+    server.capacityBytes > 0 ? String(Math.round(server.capacityBytes / 1024 / 1024 / 1024)) : ''
   )
 
   const handleSave = async () => {

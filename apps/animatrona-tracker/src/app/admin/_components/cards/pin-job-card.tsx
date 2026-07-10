@@ -125,9 +125,9 @@ export function PinJobCard({ job, onMutate }: PinJobCardProps) {
       </HStack>
 
       {/* Прогресс пиннинга */}
-      {job.status === 'PINNING'
-        && job.progressBlocks > 0
-        && (() => {
+      {job.status === 'PINNING' &&
+        job.progressBlocks > 0 &&
+        (() => {
           const hasDetails = job.anime?.directoryBlocks && job.anime?.directorySize
           const percent = hasDetails
             ? Math.min(100, Math.round((job.progressBlocks / job.anime!.directoryBlocks!) * 100))
@@ -136,9 +136,10 @@ export function PinJobCard({ job, onMutate }: PinJobCardProps) {
           // Пропорциональный расчёт скачанного, ограниченный общим размером
           // (pin-queue может считать больше блоков, чем desktop записал в directoryBlocks)
           const ratio = hasDetails ? Math.min(job.progressBlocks / job.anime!.directoryBlocks!, 1) : null
-          const downloadedMB = ratio !== null
-            ? Math.round(ratio * (job.anime!.directorySize! / (1024 * 1024)))
-            : Math.round((job.progressBlocks * 256) / 1024)
+          const downloadedMB =
+            ratio !== null
+              ? Math.round(ratio * (job.anime!.directorySize! / (1024 * 1024)))
+              : Math.round((job.progressBlocks * 256) / 1024)
           const totalMB = hasDetails ? Math.round(job.anime!.directorySize! / (1024 * 1024)) : null
 
           return (

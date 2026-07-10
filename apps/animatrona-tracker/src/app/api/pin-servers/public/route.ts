@@ -41,9 +41,10 @@ export async function GET() {
 
   const payload = {
     version: 1,
-    updatedAt: servers.length > 0
-      ? servers.reduce((max, s) => (s.updatedAt > max ? s.updatedAt : max), servers[0].updatedAt).toISOString()
-      : new Date().toISOString(),
+    updatedAt:
+      servers.length > 0
+        ? servers.reduce((max, s) => (s.updatedAt > max ? s.updatedAt : max), servers[0].updatedAt).toISOString()
+        : new Date().toISOString(),
     servers: servers
       .filter((s) => s.peerId && s.swarmAddrs.length > 0)
       .map((s) => ({

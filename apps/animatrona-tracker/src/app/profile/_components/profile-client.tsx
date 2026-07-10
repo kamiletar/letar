@@ -280,90 +280,88 @@ export function ProfileClient({
                     </HStack>
                   )}
 
-                  {animeList.length === 0
-                    ? (
-                      <Box textAlign="center" py={16} bg="bg.panel" borderRadius="xl">
-                        <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
-                        <Heading size="lg" mb={2}>
-                          {initialQuery ? 'Ничего не найдено' : 'У вас пока нет аниме на трекере'}
-                        </Heading>
-                        <Text color="fg.muted">
-                          {initialQuery ? 'Попробуйте изменить поиск' : 'Опубликуйте аниме через Animatrona Desktop'}
-                        </Text>
-                      </Box>
-                    )
-                    : (
-                      <>
-                        <Grid
-                          templateColumns={{
-                            base: '1fr',
-                            sm: 'repeat(2, 1fr)',
-                            md: 'repeat(3, 1fr)',
-                            xl: 'repeat(4, 1fr)',
-                          }}
-                          gap={6}
-                        >
-                          {animeList.map((anime) => (
-                            <Box key={anime.id} position="relative">
-                              <AnimeCard anime={anime} />
-                              {/* Бейдж статуса для PENDING */}
-                              {(anime as AnimeCardItem & { status?: string }).status === 'PENDING' && (
-                                <Badge position="absolute" top={2} left={2} colorPalette="yellow" zIndex={1}>
-                                  На модерации
-                                </Badge>
-                              )}
-                            </Box>
-                          ))}
-                        </Grid>
+                  {animeList.length === 0 ? (
+                    <Box textAlign="center" py={16} bg="bg.panel" borderRadius="xl">
+                      <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
+                      <Heading size="lg" mb={2}>
+                        {initialQuery ? 'Ничего не найдено' : 'У вас пока нет аниме на трекере'}
+                      </Heading>
+                      <Text color="fg.muted">
+                        {initialQuery ? 'Попробуйте изменить поиск' : 'Опубликуйте аниме через Animatrona Desktop'}
+                      </Text>
+                    </Box>
+                  ) : (
+                    <>
+                      <Grid
+                        templateColumns={{
+                          base: '1fr',
+                          sm: 'repeat(2, 1fr)',
+                          md: 'repeat(3, 1fr)',
+                          xl: 'repeat(4, 1fr)',
+                        }}
+                        gap={6}
+                      >
+                        {animeList.map((anime) => (
+                          <Box key={anime.id} position="relative">
+                            <AnimeCard anime={anime} />
+                            {/* Бейдж статуса для PENDING */}
+                            {(anime as AnimeCardItem & { status?: string }).status === 'PENDING' && (
+                              <Badge position="absolute" top={2} left={2} colorPalette="yellow" zIndex={1}>
+                                На модерации
+                              </Badge>
+                            )}
+                          </Box>
+                        ))}
+                      </Grid>
 
-                        {/* Пагинация */}
-                        {totalPages > 1 && (
-                          <Flex justify="center" gap={2} mt={4}>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={page <= 1}
-                              onClick={() => updateParams({ page: String(page - 1), tab: initialTab })}
-                            >
-                              <Icon as={LuChevronLeft} />
-                            </Button>
-                            <HStack gap={1}>
-                              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let pageNum: number
-                                if (totalPages <= 5) {
-                                  pageNum = i + 1
-                                } else if (page <= 3) {
-                                  pageNum = i + 1
-                                } else if (page >= totalPages - 2) {
-                                  pageNum = totalPages - 4 + i
-                                } else {
-                                  pageNum = page - 2 + i
-                                }
-                                return (
-                                  <Button
-                                    key={pageNum}
-                                    size="sm"
-                                    variant={page === pageNum ? 'solid' : 'outline'}
-                                    colorPalette={page === pageNum ? 'brand' : 'gray'}
-                                    onClick={() => updateParams({ page: String(pageNum), tab: initialTab })}
-                                  >
-                                    {pageNum}
-                                  </Button>
-                                )
-                              })}
-                            </HStack>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={page >= totalPages}
-                              onClick={() => updateParams({ page: String(page + 1), tab: initialTab })}
-                            >
-                              <Icon as={LuChevronRight} />
-                            </Button>
-                          </Flex>
-                        )}
-                      </>
-                    )}
+                      {/* Пагинация */}
+                      {totalPages > 1 && (
+                        <Flex justify="center" gap={2} mt={4}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={page <= 1}
+                            onClick={() => updateParams({ page: String(page - 1), tab: initialTab })}
+                          >
+                            <Icon as={LuChevronLeft} />
+                          </Button>
+                          <HStack gap={1}>
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              let pageNum: number
+                              if (totalPages <= 5) {
+                                pageNum = i + 1
+                              } else if (page <= 3) {
+                                pageNum = i + 1
+                              } else if (page >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i
+                              } else {
+                                pageNum = page - 2 + i
+                              }
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  size="sm"
+                                  variant={page === pageNum ? 'solid' : 'outline'}
+                                  colorPalette={page === pageNum ? 'brand' : 'gray'}
+                                  onClick={() => updateParams({ page: String(pageNum), tab: initialTab })}
+                                >
+                                  {pageNum}
+                                </Button>
+                              )
+                            })}
+                          </HStack>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={page >= totalPages}
+                            onClick={() => updateParams({ page: String(page + 1), tab: initialTab })}
+                          >
+                            <Icon as={LuChevronRight} />
+                          </Button>
+                        </Flex>
+                      )}
+                    </>
+                  )}
                 </VStack>
               </Tabs.Content>
 
@@ -578,36 +576,34 @@ function LinkedAccountsSection({ linkedAccounts }: { linkedAccounts: LinkedAccou
             <Icon as={LuBookOpen} color="green.500" />
             <Text fontWeight="medium">Shikimori</Text>
           </HStack>
-          {hasShikimori
-            ? (
-              <Badge colorPalette="green" display="flex" alignItems="center" gap={1}>
-                <Icon as={LuCheck} boxSize={3} />
-                Привязан
-              </Badge>
-            )
-            : <Badge colorPalette="gray">Не привязан</Badge>}
+          {hasShikimori ? (
+            <Badge colorPalette="green" display="flex" alignItems="center" gap={1}>
+              <Icon as={LuCheck} boxSize={3} />
+              Привязан
+            </Badge>
+          ) : (
+            <Badge colorPalette="gray">Не привязан</Badge>
+          )}
         </HStack>
 
-        {hasShikimori
-          ? (
-            <VStack align="stretch" gap={2}>
-              <Button size="sm" variant="outline" onClick={handleSync} loading={syncing}>
-                <Icon as={LuRefreshCw} mr={2} />
-                Синхронизировать список
-              </Button>
-              {syncResult && (
-                <Text fontSize="xs" color="fg.muted">
-                  Импортировано: {syncResult.imported}, не найдено на трекере: {syncResult.notFound}
-                </Text>
-              )}
-            </VStack>
-          )
-          : (
-            <Button size="sm" variant="outline" onClick={handleLinkShikimori}>
-              <Icon as={LuLink} mr={2} />
-              Привязать Shikimori
+        {hasShikimori ? (
+          <VStack align="stretch" gap={2}>
+            <Button size="sm" variant="outline" onClick={handleSync} loading={syncing}>
+              <Icon as={LuRefreshCw} mr={2} />
+              Синхронизировать список
             </Button>
-          )}
+            {syncResult && (
+              <Text fontSize="xs" color="fg.muted">
+                Импортировано: {syncResult.imported}, не найдено на трекере: {syncResult.notFound}
+              </Text>
+            )}
+          </VStack>
+        ) : (
+          <Button size="sm" variant="outline" onClick={handleLinkShikimori}>
+            <Icon as={LuLink} mr={2} />
+            Привязать Shikimori
+          </Button>
+        )}
       </Box>
     </Box>
   )

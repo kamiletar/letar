@@ -74,12 +74,7 @@ export function PinServerCard({ server }: { server: PinServer }) {
                 {isMaintenance ? 'Включить' : 'На паузу'}
               </Button>
             )}
-            <IconButton
-              aria-label="Редактировать сервер"
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditOpen(true)}
-            >
+            <IconButton aria-label="Редактировать сервер" size="sm" variant="ghost" onClick={() => setEditOpen(true)}>
               <LuPencil />
             </IconButton>
             <IconButton

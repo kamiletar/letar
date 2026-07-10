@@ -158,14 +158,14 @@ export default async function AnimePage({ searchParams }: AnimePageProps) {
   // Поиск по названию, оригинальному названию, описанию, студии, режиссёру
   const titleFilter = params.q
     ? {
-      OR: [
-        { title: { contains: params.q, mode: 'insensitive' as const } },
-        { titleOriginal: { contains: params.q, mode: 'insensitive' as const } },
-        { description: { contains: params.q, mode: 'insensitive' as const } },
-        { studio: { contains: params.q, mode: 'insensitive' as const } },
-        { director: { contains: params.q, mode: 'insensitive' as const } },
-      ],
-    }
+        OR: [
+          { title: { contains: params.q, mode: 'insensitive' as const } },
+          { titleOriginal: { contains: params.q, mode: 'insensitive' as const } },
+          { description: { contains: params.q, mode: 'insensitive' as const } },
+          { studio: { contains: params.q, mode: 'insensitive' as const } },
+          { director: { contains: params.q, mode: 'insensitive' as const } },
+        ],
+      }
     : {}
 
   const genreFilter = params.genre ? { genres: { has: params.genre } } : {}
@@ -263,13 +263,14 @@ export default async function AnimePage({ searchParams }: AnimePageProps) {
   }
 
   // Сортировка
-  const orderBy = params.sort === 'popular'
-    ? { viewCount: 'desc' as const }
-    : params.sort === 'rating'
-    ? { avgRating: 'desc' as const }
-    : params.sort === 'title'
-    ? { title: 'asc' as const }
-    : { createdAt: 'desc' as const }
+  const orderBy =
+    params.sort === 'popular'
+      ? { viewCount: 'desc' as const }
+      : params.sort === 'rating'
+        ? { avgRating: 'desc' as const }
+        : params.sort === 'title'
+          ? { title: 'asc' as const }
+          : { createdAt: 'desc' as const }
 
   // Счётчики WatchStatus для авторизованных пользователей
   let watchStatusCounts: WatchStatusCount[] = []
@@ -284,7 +285,7 @@ export default async function AnimePage({ searchParams }: AnimePageProps) {
         WHERE "userId" = ${session.user.id}
         GROUP BY "watchStatus"
         ORDER BY count DESC
-      `,
+      `
     )
   }
 

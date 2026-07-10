@@ -6,13 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
 /** Error boundary каталога аниме — показывается при ошибке в /anime */
-export default function AnimeCatalogError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string }
-  reset: () => void
-}) {
+export default function AnimeCatalogError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
 

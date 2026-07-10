@@ -243,11 +243,7 @@ export function AnimePageClient({
               />
             ),
             admin: adminData ? (
-              <AdminSection
-                pinnedOn={adminData.pinnedOn}
-                viewers={adminData.viewers}
-                viewCount={anime.viewCount}
-              />
+              <AdminSection pinnedOn={adminData.pinnedOn} viewers={adminData.viewers} viewCount={anime.viewCount} />
             ) : undefined,
           }}
         />

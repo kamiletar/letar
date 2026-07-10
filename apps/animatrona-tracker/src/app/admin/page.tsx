@@ -131,9 +131,9 @@ export default async function AdminPage() {
       directorySize: a.directorySize ? Number(a.directorySize) : null,
       replacesAnime: a.replacesAnime
         ? {
-          ...a.replacesAnime,
-          directorySize: a.replacesAnime.directorySize ? Number(a.replacesAnime.directorySize) : null,
-        }
+            ...a.replacesAnime,
+            directorySize: a.replacesAnime.directorySize ? Number(a.replacesAnime.directorySize) : null,
+          }
         : null,
       competingCount: competingAnimeIds?.length ?? 0,
       competingAnimeIds,

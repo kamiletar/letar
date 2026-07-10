@@ -20,8 +20,8 @@ export const { useSession, signIn, signUp, signOut } = authClient
  * откуда кликнул «Войти». Передача явного значения перекрывает этот дефолт.
  */
 export async function signInWithLetarAuth(callbackURL?: string) {
-  const target = callbackURL
-    ?? (typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/')
+  const target =
+    callbackURL ?? (typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/')
   return authClient.signIn.oauth2({
     providerId: 'letar-auth',
     callbackURL: target,

@@ -52,7 +52,7 @@ async function pinQueueAdd(
   pinQueueUrl: string,
   cid: string,
   jobId: string,
-  secret?: string | null,
+  secret?: string | null
 ): Promise<PinResult> {
   try {
     const response = await fetch(`${pinQueueUrl}/api/pin`, {
@@ -96,7 +96,7 @@ async function pinQueueRemove(pinQueueUrl: string, cid: string, secret?: string 
 /** Получить статус всех заданий из pin-queue */
 async function pinQueueStatus(
   pinQueueUrl: string,
-  secret?: string | null,
+  secret?: string | null
 ): Promise<{ entries: PinQueueEntry[]; error?: string }> {
   try {
     const response = await fetch(`${pinQueueUrl}/api/status`, {
@@ -171,7 +171,7 @@ export async function kuboPinAdd(
   kuboApiUrl: string,
   cid: string,
   authSecret?: string | null,
-  timeout = 60000,
+  timeout = 60000
 ): Promise<PinResult> {
   try {
     const controller = new AbortController()
@@ -209,7 +209,7 @@ export async function kuboPinRm(
   kuboApiUrl: string,
   cid: string,
   authSecret?: string | null,
-  timeout = 30000,
+  timeout = 30000
 ): Promise<PinResult> {
   try {
     const controller = new AbortController()
@@ -245,7 +245,7 @@ export async function kuboPinLs(
   kuboApiUrl: string,
   cid?: string,
   authSecret?: string | null,
-  timeout = 10000,
+  timeout = 10000
 ): Promise<{ pinned: boolean; type?: string; error?: string }> {
   try {
     const controller = new AbortController()
@@ -299,7 +299,7 @@ export async function createPinJob(
   cid: string,
   serverId: string,
   createdById: string,
-  animeId?: string,
+  animeId?: string
 ): Promise<{ jobId: string; success: boolean; error?: string }> {
   const server = await prisma.pinServer.findUnique({ where: { id: serverId } })
   if (!server) {
@@ -320,18 +320,18 @@ export async function createPinJob(
 
   const job = existingJob
     ? await prisma.pinJob.update({
-      where: { id: existingJob.id },
-      data: { status: 'PINNING', error: null, progressBlocks: 0 },
-    })
+        where: { id: existingJob.id },
+        data: { status: 'PINNING', error: null, progressBlocks: 0 },
+      })
     : await prisma.pinJob.create({
-      data: {
-        cid,
-        serverId,
-        createdById,
-        animeId,
-        status: 'PINNING',
-      },
-    })
+        data: {
+          cid,
+          serverId,
+          createdById,
+          animeId,
+          status: 'PINNING',
+        },
+      })
 
   // Выбираем способ пиннинга: pin-queue или Kubo напрямую
   const result = server.pinQueueUrl
@@ -675,7 +675,7 @@ export async function unpinJob(jobId: string): Promise<{ success: boolean; error
 export async function pinAnime(
   animeId: string,
   serverId: string,
-  createdById: string,
+  createdById: string
 ): Promise<{ results: Array<{ cid: string; success: boolean; error?: string }> }> {
   const anime = await prisma.anime.findUnique({
     where: { id: animeId },
@@ -697,7 +697,7 @@ export async function pinAnime(
 /** Распинить все CID аниме с конкретного сервера */
 export async function unpinAnime(
   animeId: string,
-  serverId: string,
+  serverId: string
 ): Promise<{ results: Array<{ cid: string; success: boolean; error?: string }> }> {
   const jobs = await prisma.pinJob.findMany({
     where: {
@@ -721,7 +721,7 @@ export async function unpinAnime(
 export async function kuboRepoGc(
   kuboApiUrl: string,
   authSecret?: string | null,
-  timeout = 300_000,
+  timeout = 300_000
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(`${kuboApiUrl}/api/v0/repo/gc`, {
@@ -746,7 +746,7 @@ export async function kuboRepoGc(
 export async function kuboRepoStat(
   kuboApiUrl: string,
   authSecret?: string | null,
-  timeout = 10000,
+  timeout = 10000
 ): Promise<{ repoSize?: number; error?: string }> {
   try {
     const controller = new AbortController()
@@ -775,7 +775,7 @@ export async function kuboRepoStat(
 export async function kuboHealthCheck(
   kuboApiUrl: string,
   authSecret?: string | null,
-  timeout = 15000,
+  timeout = 15000
 ): Promise<{ online: boolean; peerId?: string; error?: string }> {
   try {
     const controller = new AbortController()
@@ -811,12 +811,12 @@ export async function kuboHealthCheck(
  */
 export async function autoPinAnime(
   animeId: string,
-  createdById: string,
+  createdById: string
 ): Promise<
   | { servers: Array<{ serverId: string; results: Array<{ cid: string; success: boolean; error?: string }> }> }
   | {
-    error: string
-  }
+      error: string
+    }
 > {
   // Шардирование: каждое аниме пинится на ОДНОМ сервере
   const anime = await prisma.anime.findUnique({
@@ -847,9 +847,7 @@ export async function autoPinAnime(
     })
 
     // Исключаем серверы где capacityBytes задан и usedBytes >= capacityBytes
-    const server = candidates.find(
-      (s) => s.capacityBytes === 0n || s.usedBytes < s.capacityBytes,
-    )
+    const server = candidates.find((s) => s.capacityBytes === 0n || s.usedBytes < s.capacityBytes)
 
     if (!server) {
       return { error: 'Нет доступных пин-серверов (все заполнены или недоступны)' }

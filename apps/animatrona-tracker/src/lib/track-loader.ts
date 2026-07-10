@@ -26,9 +26,7 @@ export interface TracksSummary {
  *
  * @returns Полный EpisodeManifest первого эпизода или null при ошибке
  */
-export async function loadFirstEpisodeManifest(
-  directoryCid: string,
-): Promise<EpisodeManifest | null> {
+export async function loadFirstEpisodeManifest(directoryCid: string): Promise<EpisodeManifest | null> {
   try {
     const gateway = getGateway()
 
@@ -68,9 +66,7 @@ export async function loadFirstEpisodeManifest(
  *
  * @returns TracksSummary или null при ошибке
  */
-export async function loadTracksSummary(
-  directoryCid: string,
-): Promise<TracksSummary | null> {
+export async function loadTracksSummary(directoryCid: string): Promise<TracksSummary | null> {
   try {
     const gateway = getGateway()
 

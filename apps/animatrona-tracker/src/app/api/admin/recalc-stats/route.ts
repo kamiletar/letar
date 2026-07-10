@@ -116,8 +116,7 @@ export async function POST() {
   for (const uploader of uploaders) {
     const userId = uploader.uploadedById
     const animeAgg = uploaderAnimeMap.get(userId) as
-      | { totalViewers: number; totalLibraryAdds: number; ratings: number[] }
-      | undefined
+      { totalViewers: number; totalLibraryAdds: number; ratings: number[] } | undefined
     const distStats = distStatsMap.get(userId)
 
     const avgUserRating =

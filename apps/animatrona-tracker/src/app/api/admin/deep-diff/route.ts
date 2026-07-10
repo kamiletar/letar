@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       { manifest: { episodeCount: 0 }, episodes: [] },
       {
         headers: { 'Cache-Control': 'no-store' },
-      },
+      }
     )
   }
 

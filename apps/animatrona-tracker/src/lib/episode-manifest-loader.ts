@@ -33,9 +33,7 @@ const CONCURRENCY = 5
  *
  * @returns DeepDiffResponse или null при ошибке загрузки корневого манифеста
  */
-export async function loadDeepDiffData(
-  directoryCid: string,
-): Promise<DeepDiffResponse | null> {
+export async function loadDeepDiffData(directoryCid: string): Promise<DeepDiffResponse | null> {
   try {
     const gateway = getGateway()
 
@@ -101,7 +99,7 @@ export async function loadDeepDiffData(
  */
 async function loadSingleEpisode(
   ep: AnimeManifestEpisode,
-  directoryBaseUrl: string | null,
+  directoryBaseUrl: string | null
 ): Promise<EpisodeFullSummary> {
   // Базовая сводка без глубоких данных (если EpisodeManifest недоступен)
   const base: EpisodeFullSummary = {
@@ -155,13 +153,13 @@ async function loadSingleEpisode(
     manifestLoaded: true,
     video: epManifest.video
       ? {
-        width: epManifest.video.width,
-        height: epManifest.video.height,
-        codec: epManifest.video.codec,
-        bitrate: epManifest.video.bitrate,
-        size: epManifest.video.size,
-        durationMs: epManifest.video.durationMs,
-      }
+          width: epManifest.video.width,
+          height: epManifest.video.height,
+          codec: epManifest.video.codec,
+          bitrate: epManifest.video.bitrate,
+          size: epManifest.video.size,
+          durationMs: epManifest.video.durationMs,
+        }
       : null,
     audioTracks: (epManifest.audioTracks ?? []).map((t) => ({
       language: t.language,
@@ -178,13 +176,13 @@ async function loadSingleEpisode(
     })),
     encoding: epManifest.encoding
       ? {
-        profileName: epManifest.encoding.profileName,
-        codec: epManifest.encoding.codec,
-        cq: epManifest.encoding.cq,
-        preset: epManifest.encoding.preset,
-        vmafScore: epManifest.encoding.vmafScore,
-        encoderType: epManifest.encoding.encoderType,
-      }
+          profileName: epManifest.encoding.profileName,
+          codec: epManifest.encoding.codec,
+          cq: epManifest.encoding.cq,
+          preset: epManifest.encoding.preset,
+          vmafScore: epManifest.encoding.vmafScore,
+          encoderType: epManifest.encoding.encoderType,
+        }
       : null,
     hasChapters,
     chaptersCount,

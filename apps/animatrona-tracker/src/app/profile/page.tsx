@@ -33,11 +33,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   // Фильтр поиска по названию
   const searchFilter = params.q
     ? {
-      OR: [
-        { title: { contains: params.q, mode: 'insensitive' as const } },
-        { titleOriginal: { contains: params.q, mode: 'insensitive' as const } },
-      ],
-    }
+        OR: [
+          { title: { contains: params.q, mode: 'insensitive' as const } },
+          { titleOriginal: { contains: params.q, mode: 'insensitive' as const } },
+        ],
+      }
     : {}
 
   const animeWhere = {
@@ -108,13 +108,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
   const distributionStats = distStats
     ? {
-      totalBytesUploaded: Number(distStats.totalBytesUploaded),
-      totalBytesDownloaded: Number(distStats.totalBytesDownloaded),
-      totalSeedingTimeMs: Number(distStats.totalSeedingTimeMs),
-      totalPeersHelped: distStats.totalPeersHelped,
-      totalUptimeMs: Number(distStats.totalUptimeMs),
-      activeDistributions: distStats.activeDistributions,
-    }
+        totalBytesUploaded: Number(distStats.totalBytesUploaded),
+        totalBytesDownloaded: Number(distStats.totalBytesDownloaded),
+        totalSeedingTimeMs: Number(distStats.totalSeedingTimeMs),
+        totalPeersHelped: distStats.totalPeersHelped,
+        totalUptimeMs: Number(distStats.totalUptimeMs),
+        activeDistributions: distStats.activeDistributions,
+      }
     : null
 
   const activityStats = {

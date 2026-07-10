@@ -284,9 +284,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
 
   // Приоритет trackMode: per-anime override > глобальный из профиля > null (клиент решит)
   const initialTrackMode = (watchData?.trackMode ?? userPreferredTrackMode ?? null) as
-    | 'RUSSIAN_DUB'
-    | 'ORIGINAL_SUB'
-    | null
+    'RUSSIAN_DUB' | 'ORIGINAL_SUB' | null
 
   return (
     <TrackerVideoPlayer

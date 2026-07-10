@@ -147,7 +147,7 @@ export function AnimeCatalogClient({
 
   const [query, setQuery] = useState(initialQuery)
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(
-    !!(initialStudio || initialDirector || initialEpFrom || initialEpTo),
+    !!(initialStudio || initialDirector || initialEpFrom || initialEpTo)
   )
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [progressMap, setProgressMap] = useState<Record<string, WatchProgressSummaryItem>>({})
@@ -217,7 +217,7 @@ export function AnimeCatalogClient({
   // Выбранные коды voiceActing в виде массива (для toggle в UI)
   const selectedVoiceCodes = useMemo(
     () => (initialVoice ? initialVoice.split(',').filter(Boolean) : []),
-    [initialVoice],
+    [initialVoice]
   )
 
   // Доступные рейтинги для фильтра (с учётом ограничений по возрасту)
@@ -384,7 +384,8 @@ export function AnimeCatalogClient({
               w="80px"
               value={initialYearTo}
               onChange={(e) =>
-                updateFilters({ yearTo: e.target.value, yearFrom: initialYearFrom || initialYear, year: '' })}
+                updateFilters({ yearTo: e.target.value, yearFrom: initialYearFrom || initialYear, year: '' })
+              }
             />
           </HStack>
         </Box>
@@ -458,12 +459,7 @@ export function AnimeCatalogClient({
             )
           })}
           {selectedVoiceCodes.length > 0 && (
-            <Button
-              size="xs"
-              variant="ghost"
-              colorPalette="gray"
-              onClick={() => updateFilters({ voice: '' })}
-            >
+            <Button size="xs" variant="ghost" colorPalette="gray" onClick={() => updateFilters({ voice: '' })}>
               <Icon as={LuX} />
               Сбросить
             </Button>
@@ -678,95 +674,93 @@ export function AnimeCatalogClient({
         </Box>
 
         {/* Контент */}
-        {animeList.length === 0
-          ? (
-            <Box textAlign="center" py={16}>
-              <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
-              <Heading size="lg" mb={2}>
-                Ничего не найдено
-              </Heading>
-              <Text color="fg.muted" mb={4}>
-                Попробуйте изменить параметры поиска
-              </Text>
-              {activeFilterCount > 0 && (
-                <Button variant="outline" onClick={resetFilters}>
-                  Сбросить фильтры
+        {animeList.length === 0 ? (
+          <Box textAlign="center" py={16}>
+            <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
+            <Heading size="lg" mb={2}>
+              Ничего не найдено
+            </Heading>
+            <Text color="fg.muted" mb={4}>
+              Попробуйте изменить параметры поиска
+            </Text>
+            {activeFilterCount > 0 && (
+              <Button variant="outline" onClick={resetFilters}>
+                Сбросить фильтры
+              </Button>
+            )}
+          </Box>
+        ) : (
+          <>
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)',
+                xl: 'repeat(5, 1fr)',
+              }}
+              gap={6}
+            >
+              {animeList.map((anime) => (
+                <AnimeCard
+                  key={anime.id}
+                  anime={anime}
+                  progress={progressMap[anime.id]}
+                  franchiseCount={franchiseCounts[anime.id]}
+                />
+              ))}
+            </Grid>
+
+            {/* Пагинация */}
+            {totalPages > 1 && (
+              <Flex justify="center" gap={2} mt={8}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => updateFilters({ page: String(page - 1) })}
+                >
+                  <Icon as={LuChevronLeft} />
                 </Button>
-              )}
-            </Box>
-          )
-          : (
-            <>
-              <Grid
-                templateColumns={{
-                  base: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                  lg: 'repeat(4, 1fr)',
-                  xl: 'repeat(5, 1fr)',
-                }}
-                gap={6}
-              >
-                {animeList.map((anime) => (
-                  <AnimeCard
-                    key={anime.id}
-                    anime={anime}
-                    progress={progressMap[anime.id]}
-                    franchiseCount={franchiseCounts[anime.id]}
-                  />
-                ))}
-              </Grid>
 
-              {/* Пагинация */}
-              {totalPages > 1 && (
-                <Flex justify="center" gap={2} mt={8}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={page <= 1}
-                    onClick={() => updateFilters({ page: String(page - 1) })}
-                  >
-                    <Icon as={LuChevronLeft} />
-                  </Button>
+                <HStack gap={1}>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum: number
+                    if (totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (page <= 3) {
+                      pageNum = i + 1
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i
+                    } else {
+                      pageNum = page - 2 + i
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        size="sm"
+                        variant={page === pageNum ? 'solid' : 'outline'}
+                        colorPalette={page === pageNum ? 'brand' : 'gray'}
+                        onClick={() => updateFilters({ page: String(pageNum) })}
+                      >
+                        {pageNum}
+                      </Button>
+                    )
+                  })}
+                </HStack>
 
-                  <HStack gap={1}>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number
-                      if (totalPages <= 5) {
-                        pageNum = i + 1
-                      } else if (page <= 3) {
-                        pageNum = i + 1
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i
-                      } else {
-                        pageNum = page - 2 + i
-                      }
-                      return (
-                        <Button
-                          key={pageNum}
-                          size="sm"
-                          variant={page === pageNum ? 'solid' : 'outline'}
-                          colorPalette={page === pageNum ? 'brand' : 'gray'}
-                          onClick={() => updateFilters({ page: String(pageNum) })}
-                        >
-                          {pageNum}
-                        </Button>
-                      )
-                    })}
-                  </HStack>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={page >= totalPages}
-                    onClick={() => updateFilters({ page: String(page + 1) })}
-                  >
-                    <Icon as={LuChevronRight} />
-                  </Button>
-                </Flex>
-              )}
-            </>
-          )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= totalPages}
+                  onClick={() => updateFilters({ page: String(page + 1) })}
+                >
+                  <Icon as={LuChevronRight} />
+                </Button>
+              </Flex>
+            )}
+          </>
+        )}
       </Container>
     </Box>
   )
