@@ -50,12 +50,16 @@ export function createEncryptedOauthApplicationClient<
   },
 >(client: T, key: Key): T {
   function decryptResult<R extends { clientSecret?: string | null } | null>(result: R): R {
-    if (!result || result.clientSecret === null || result.clientSecret === undefined) {return result}
+    if (!result || result.clientSecret === null || result.clientSecret === undefined) {
+      return result
+    }
     return { ...result, clientSecret: decS(result.clientSecret, key) } as R
   }
 
   function encryptData(data: Record<string, unknown>) {
-    if (!data || typeof data !== 'object') {return data}
+    if (!data || typeof data !== 'object') {
+      return data
+    }
     const out = { ...data }
     if (typeof out.clientSecret === 'string') {
       out.clientSecret = encS(out.clientSecret, key)
@@ -66,13 +70,15 @@ export function createEncryptedOauthApplicationClient<
   return new Proxy(client, {
     get(target, prop) {
       const original = (target as Record<string, unknown>)[prop as string]
-      if (typeof original !== 'function') {return original}
+      if (typeof original !== 'function') {
+        return original
+      }
 
       switch (prop) {
         case 'findMany':
           return async (args?: object) => {
             const results = await (target.findMany as (a?: object) => Promise<Array<{ clientSecret?: string | null }>>)(
-              args,
+              args
             )
             return results.map(decryptResult)
           }
@@ -81,7 +87,7 @@ export function createEncryptedOauthApplicationClient<
           return async (args?: object) => {
             const result = await (
               target[prop as 'findUnique' | 'findFirst'] as (
-                a?: object,
+                a?: object
               ) => Promise<{ clientSecret?: string | null } | null>
             )(args)
             return decryptResult(result)
@@ -129,13 +135,13 @@ export function createEncryptedOauthApplicationClient<
 export function createEncryptedOauthAccessTokenClient<
   T extends {
     findMany(
-      args?: object,
+      args?: object
     ): Promise<Array<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>>
     findUnique(
-      args: object,
+      args: object
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     findFirst(
-      args?: object,
+      args?: object
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     create(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
     update(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
@@ -145,7 +151,9 @@ export function createEncryptedOauthAccessTokenClient<
   type TokenRow = { accessToken?: string | null; refreshToken?: string | null }
 
   function decryptResult<R extends TokenRow | null>(result: R): R {
-    if (!result) {return result}
+    if (!result) {
+      return result
+    }
     return {
       ...result,
       accessToken: decT(result.accessToken, key, 'oauthAccessToken.accessToken'),
@@ -179,7 +187,9 @@ export function createEncryptedOauthAccessTokenClient<
   return new Proxy(client, {
     get(target, prop) {
       const original = (target as Record<string, unknown>)[prop as string]
-      if (typeof original !== 'function') {return original}
+      if (typeof original !== 'function') {
+        return original
+      }
 
       switch (prop) {
         case 'findMany':
@@ -233,13 +243,13 @@ export function createEncryptedOauthAccessTokenClient<
 export function createEncryptedAccountClient<
   T extends {
     findMany(
-      args?: object,
+      args?: object
     ): Promise<Array<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>>
     findFirst(
-      args?: object,
+      args?: object
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     findUnique(
-      args: object,
+      args: object
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     create(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
     update(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
@@ -249,7 +259,9 @@ export function createEncryptedAccountClient<
   type AccountRow = { accessToken?: string | null; refreshToken?: string | null }
 
   function decryptResult<R extends AccountRow | null>(result: R): R {
-    if (!result) {return result}
+    if (!result) {
+      return result
+    }
     return {
       ...result,
       accessToken: decS(result.accessToken, key),
@@ -271,7 +283,9 @@ export function createEncryptedAccountClient<
   return new Proxy(client, {
     get(target, prop) {
       const original = (target as Record<string, unknown>)[prop as string]
-      if (typeof original !== 'function') {return original}
+      if (typeof original !== 'function') {
+        return original
+      }
 
       switch (prop) {
         case 'findMany':

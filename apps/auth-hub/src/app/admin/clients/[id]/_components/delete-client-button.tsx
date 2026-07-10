@@ -8,7 +8,9 @@ export function DeleteClientButton({ clientId }: { clientId: string }) {
   const [isPending, startTransition] = useTransition()
 
   function handleDelete() {
-    if (!confirm(`Удалить клиент "${clientId}"? Это действие необратимо.`)) {return}
+    if (!confirm(`Удалить клиент "${clientId}"? Это действие необратимо.`)) {
+      return
+    }
     startTransition(() => deleteClientAction(clientId))
   }
 

@@ -96,7 +96,7 @@ export function TelegramSignInButton() {
         }
       }, POLL_INTERVAL_MS)
     },
-    [callbackUrl, router, stopPolling],
+    [callbackUrl, router, stopPolling]
   )
 
   const handleStart = useCallback(async () => {

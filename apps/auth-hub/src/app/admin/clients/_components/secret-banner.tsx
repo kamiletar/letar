@@ -21,7 +21,9 @@ export function SecretBanner({ secret, clientId }: SecretBannerProps) {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!visible) {return null}
+  if (!visible) {
+    return null
+  }
 
   async function handleCopy() {
     await navigator.clipboard.writeText(secret)

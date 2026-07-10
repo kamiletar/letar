@@ -130,8 +130,8 @@ export function telegramPlugin(): BetterAuthPlugin {
 
         const tgFrom = message.from
         const telegramId = String(tgFrom.id)
-        const name = [tgFrom.first_name, tgFrom.last_name].filter(Boolean).join(' ') || tgFrom.username
-          || `Telegram ${telegramId}`
+        const name =
+          [tgFrom.first_name, tgFrom.last_name].filter(Boolean).join(' ') || tgFrom.username || `Telegram ${telegramId}`
 
         // Ищем токен в БД
         const records = (await ctx.context.adapter.findMany({
@@ -264,17 +264,15 @@ export function telegramPlugin(): BetterAuthPlugin {
           // Ставим session cookie (паттерн из passkey-плагина)
           await setSessionCookie(ctx, { session: newSession, user: userRecord })
 
-          return ctx.json(
-            {
-              status: 'success',
-              user: {
-                id: userRecord.id,
-                email: userRecord.email,
-                name: userRecord.name,
-              },
-            } as const,
-          )
-        },
+          return ctx.json({
+            status: 'success',
+            user: {
+              id: userRecord.id,
+              email: userRecord.email,
+              name: userRecord.name,
+            },
+          } as const)
+        }
       ),
 
       // ─── /telegram/unlink ────────────────────────────────────────────────────

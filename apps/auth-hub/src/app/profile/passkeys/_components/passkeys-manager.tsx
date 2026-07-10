@@ -87,54 +87,53 @@ export function PasskeysManager({ passkeys: initialPasskeys }: PasskeysManagerPr
 
   return (
     <Stack gap={4}>
-      {initialPasskeys.length === 0
-        ? (
-          <Text color="fg.muted" fontSize="sm">
-            У вас нет зарегистрированных ключей доступа
-          </Text>
-        )
-        : (
-          <Stack gap={2}>
-            {initialPasskeys.map((pk) => (
-              <HStack
-                key={pk.id}
-                justify="space-between"
-                p={3}
-                borderWidth="1px"
-                borderRadius="md"
-                borderColor="border.subtle"
-              >
-                <Stack gap={0.5}>
-                  <HStack gap={2}>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {pk.name ?? (pk.deviceType === 'platform' ? 'Ключ устройства' : 'Переносной ключ')}
-                    </Text>
-                    <Badge size="sm" variant="outline">
-                      {pk.deviceType === 'platform' ? 'платформа' : 'внешний'}
-                    </Badge>
-                  </HStack>
-                  <Text fontSize="xs" color="fg.muted">
-                    Добавлен {new Date(pk.createdAt).toLocaleDateString('ru-RU', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+      {initialPasskeys.length === 0 ? (
+        <Text color="fg.muted" fontSize="sm">
+          У вас нет зарегистрированных ключей доступа
+        </Text>
+      ) : (
+        <Stack gap={2}>
+          {initialPasskeys.map((pk) => (
+            <HStack
+              key={pk.id}
+              justify="space-between"
+              p={3}
+              borderWidth="1px"
+              borderRadius="md"
+              borderColor="border.subtle"
+            >
+              <Stack gap={0.5}>
+                <HStack gap={2}>
+                  <Text fontSize="sm" fontWeight="medium">
+                    {pk.name ?? (pk.deviceType === 'platform' ? 'Ключ устройства' : 'Переносной ключ')}
                   </Text>
-                </Stack>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  colorPalette="red"
-                  loading={deletingId === pk.id}
-                  onClick={() => handleDelete(pk.id)}
-                  aria-label="Удалить ключ"
-                >
-                  <LuTrash2 />
-                </Button>
-              </HStack>
-            ))}
-          </Stack>
-        )}
+                  <Badge size="sm" variant="outline">
+                    {pk.deviceType === 'platform' ? 'платформа' : 'внешний'}
+                  </Badge>
+                </HStack>
+                <Text fontSize="xs" color="fg.muted">
+                  Добавлен{' '}
+                  {new Date(pk.createdAt).toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </Text>
+              </Stack>
+              <Button
+                size="sm"
+                variant="ghost"
+                colorPalette="red"
+                loading={deletingId === pk.id}
+                onClick={() => handleDelete(pk.id)}
+                aria-label="Удалить ключ"
+              >
+                <LuTrash2 />
+              </Button>
+            </HStack>
+          ))}
+        </Stack>
+      )}
 
       {error && (
         <Text color="fg.error" fontSize="sm">

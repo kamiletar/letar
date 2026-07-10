@@ -38,8 +38,12 @@ export function ClientForm({ mode, defaultValues, lockedClientId, onSubmit, succ
     const formData = new FormData(e.currentTarget)
 
     // Checkbox не попадает в FormData если не отмечен — явно выставляем false
-    if (!formData.has('skipConsent')) {formData.set('skipConsent', 'false')}
-    if (mode === 'edit' && !formData.has('disabled')) {formData.set('disabled', 'false')}
+    if (!formData.has('skipConsent')) {
+      formData.set('skipConsent', 'false')
+    }
+    if (mode === 'edit' && !formData.has('disabled')) {
+      formData.set('disabled', 'false')
+    }
 
     startTransition(async () => {
       const result = await onSubmit(formData)

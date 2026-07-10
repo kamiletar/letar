@@ -21,7 +21,9 @@ export default async function EditClientPage({ params }: Props) {
     where: { clientId: id },
   })
 
-  if (!client) {notFound()}
+  if (!client) {
+    notFound()
+  }
 
   async function handleUpdate(formData: FormData) {
     'use server'

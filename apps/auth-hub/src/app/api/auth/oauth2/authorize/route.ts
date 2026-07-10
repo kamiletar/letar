@@ -37,7 +37,9 @@ export async function GET(request: NextRequest) {
   const oidcParams: Record<string, string> = {}
   for (const key of OIDC_PARAMS) {
     const val = searchParams.get(key)
-    if (val) {oidcParams[key] = val}
+    if (val) {
+      oidcParams[key] = val
+    }
   }
 
   const baResponse = await baGET(request)

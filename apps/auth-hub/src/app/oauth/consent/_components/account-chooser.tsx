@@ -55,7 +55,7 @@ export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
         window.location.href = res.url
       }
     },
-    [consentCode, clientId, scope],
+    [consentCode, clientId, scope]
   )
 
   const handleContinue = useCallback(async () => {
@@ -92,10 +92,16 @@ export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
             }
             // Fallback: consent page params только
             const qs = new URLSearchParams()
-            if (clientId) {qs.set('client_id', clientId)}
-            if (scope) {qs.set('scope', scope)}
+            if (clientId) {
+              qs.set('client_id', clientId)
+            }
+            if (scope) {
+              qs.set('scope', scope)
+            }
             for (const [k, v] of searchParams.entries()) {
-              if (!qs.has(k)) {qs.set(k, v)}
+              if (!qs.has(k)) {
+                qs.set(k, v)
+              }
             }
             router.push(`/sign-in?${qs.toString()}`)
           },

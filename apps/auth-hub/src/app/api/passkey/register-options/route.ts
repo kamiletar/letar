@@ -13,7 +13,7 @@ export async function POST() {
     const options = await generatePasskeyRegistrationOptions(
       session.user.id,
       session.user.name ?? '',
-      session.user.email,
+      session.user.email
     )
     return NextResponse.json(options)
   } catch (error) {

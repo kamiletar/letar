@@ -25,7 +25,9 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
     where: { clientId: id },
   })
 
-  if (!client) {notFound()}
+  if (!client) {
+    notFound()
+  }
 
   const redirectList = client.redirectUrls
     .split(',')

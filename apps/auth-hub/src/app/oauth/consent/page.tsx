@@ -53,9 +53,7 @@ export default async function ConsentPage({ searchParams }: ConsentPageProps) {
   let oidcParams: Record<string, string> | null = null
   if (pendingCookie?.value) {
     try {
-      const parsed = JSON.parse(
-        Buffer.from(pendingCookie.value, 'base64').toString('utf-8'),
-      ) as Record<string, string>
+      const parsed = JSON.parse(Buffer.from(pendingCookie.value, 'base64').toString('utf-8')) as Record<string, string>
       if (parsed.client_id === clientId) {
         oidcParams = parsed
       }

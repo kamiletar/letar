@@ -10,7 +10,9 @@ export function RotateSecretButton({ clientId }: { clientId: string }) {
   const [isPending, startTransition] = useTransition()
 
   function handleRotate() {
-    if (!confirm('Ротировать секрет? Текущий секрет станет недействительным.')) {return}
+    if (!confirm('Ротировать секрет? Текущий секрет станет недействительным.')) {
+      return
+    }
 
     startTransition(async () => {
       const result = await rotateSecretAction(clientId)

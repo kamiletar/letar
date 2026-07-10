@@ -35,7 +35,9 @@ function getKey(): Buffer {
 
 async function run() {
   const databaseUrl = process.env.DATABASE_URL
-  if (!databaseUrl) {throw new Error('[encrypt-client-secrets] DATABASE_URL не задан')}
+  if (!databaseUrl) {
+    throw new Error('[encrypt-client-secrets] DATABASE_URL не задан')
+  }
 
   const key = getKey()
 
@@ -47,7 +49,7 @@ async function run() {
   console.log(
     `[encrypt-client-secrets] ${
       IS_DRY_RUN ? '--- DRY RUN (передай --execute для реального запуска) ---' : '--- EXECUTE ---'
-    }`,
+    }`
   )
 
   const clients = await orm.oauthApplication.findMany({})
@@ -85,7 +87,7 @@ async function run() {
   console.log(
     `\n[encrypt-client-secrets] Итого: ${alreadyEncrypted} уже зашифровано, ${toEncrypt} ${
       IS_DRY_RUN ? 'ожидают' : 'зашифровано'
-    }`,
+    }`
   )
 
   if (IS_DRY_RUN && toEncrypt > 0) {

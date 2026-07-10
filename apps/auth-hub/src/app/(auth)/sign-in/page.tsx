@@ -37,9 +37,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
 
   const countryCode = await getCountryCode()
   const isRussianIp = countryCode === 'RU'
-  const allowedProviders = ALL_OAUTH_PROVIDERS.filter(
-    (p): p is OAuthProvider => !isRussianIp || !BLOCKED_FOR_RU.has(p),
-  )
+  const allowedProviders = ALL_OAUTH_PROVIDERS.filter((p): p is OAuthProvider => !isRussianIp || !BLOCKED_FOR_RU.has(p))
 
   return (
     <Card.Root maxW="4xl" w="full" mx={4}>
