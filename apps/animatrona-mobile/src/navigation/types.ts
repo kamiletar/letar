@@ -9,9 +9,9 @@ export type RootStackParamList = {
   /** Экран подключения */
   Connect:
     | {
-      /** Режим: initial (первый запуск) или add (добавление сервера) */
-      mode?: 'initial' | 'add'
-    }
+        /** Режим: initial (первый запуск) или add (добавление сервера) */
+        mode?: 'initial' | 'add'
+      }
     | undefined
 
   /** Библиотека аниме */

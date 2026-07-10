@@ -11,13 +11,7 @@ import { type DownloadStatus, useDownloadsStore } from '@/store/downloads'
 import type { Episode } from '@letar/animatrona-shared'
 
 export type DownloadButtonState =
-  | 'available'
-  | 'queued'
-  | 'downloading'
-  | 'paused'
-  | 'completed'
-  | 'error'
-  | 'unavailable'
+  'available' | 'queued' | 'downloading' | 'paused' | 'completed' | 'error' | 'unavailable'
 
 interface UseDownloadEpisodeResult {
   /** Состояние кнопки скачивания */

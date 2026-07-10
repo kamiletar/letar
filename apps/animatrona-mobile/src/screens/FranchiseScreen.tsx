@@ -32,18 +32,14 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
       Haptics.light()
       navigation.navigate('Anime', { animeId })
     },
-    [navigation],
+    [navigation]
   )
 
-  const progressPercent = group.totalEpisodes > 0
-    ? Math.round((group.totalWatched / group.totalEpisodes) * 100)
-    : 0
+  const progressPercent = group.totalEpisodes > 0 ? Math.round((group.totalWatched / group.totalEpisodes) * 100) : 0
 
   const renderAnimeItem = useCallback(
     ({ item }: { item: AnimeListItem }) => {
-      const itemProgress = item.episodeCount > 0
-        ? Math.round((item.watchedEpisodes / item.episodeCount) * 100)
-        : 0
+      const itemProgress = item.episodeCount > 0 ? Math.round((item.watchedEpisodes / item.episodeCount) * 100) : 0
 
       return (
         <TouchableOpacity
@@ -51,10 +47,7 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
           onPress={() => handleAnimePress(item.id)}
           activeOpacity={0.7}
         >
-          <Image
-            source={{ uri: getPosterUrlCached(item.id, posterMap) }}
-            style={styles.poster}
-          />
+          <Image source={{ uri: getPosterUrlCached(item.id, posterMap) }} style={styles.poster} />
 
           {/* Прогресс-бар */}
           {itemProgress > 0 && itemProgress < 100 && (
@@ -67,7 +60,9 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
           {item.watchStatus === 'COMPLETED' && <View style={styles.completedBadge} />}
 
           <View style={styles.cardInfo}>
-            <Text style={styles.cardName} numberOfLines={2}>{item.name}</Text>
+            <Text style={styles.cardName} numberOfLines={2}>
+              {item.name}
+            </Text>
             <View style={styles.cardMetaRow}>
               <Text style={styles.cardMeta}>{item.year || '—'}</Text>
               <Text style={styles.cardMeta}>
@@ -78,7 +73,7 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
         </TouchableOpacity>
       )
     },
-    [handleAnimePress, layout.cardWidth, posterMap],
+    [handleAnimePress, layout.cardWidth, posterMap]
   )
 
   return (
@@ -90,7 +85,9 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
         </TouchableOpacity>
 
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={1}>{group.name}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {group.name}
+          </Text>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>
               {group.items.length} тайтл{group.items.length > 4 ? 'ов' : group.items.length > 1 ? 'а' : ''}

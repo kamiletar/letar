@@ -96,12 +96,10 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
 
   // Последний просмотренный незавершённый эпизод для кнопки "Продолжить"
   // Используем локальный AsyncStorage, т.к. API может не иметь актуального прогресса
-  const [lastWatchedEpisode, setLastWatchedEpisode] = useState<
-    {
-      episode: Episode
-      progress: WatchProgressData
-    } | null
-  >(null)
+  const [lastWatchedEpisode, setLastWatchedEpisode] = useState<{
+    episode: Episode
+    progress: WatchProgressData
+  } | null>(null)
 
   // Прогресс просмотра для всех эпизодов (из AsyncStorage)
   const [episodeProgress, setEpisodeProgress] = useState<Map<string, WatchProgressData>>(new Map())
@@ -146,7 +144,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         .catch(() => undefined) // Тихо — оффлайн покажет кэш
       // Обновляем прогресс из AsyncStorage (прогресс-бары эпизодов)
       loadAllProgress()
-    }, [animeId, loadAllProgress]),
+    }, [animeId, loadAllProgress])
   )
 
   const handleEpisodePress = useCallback(
@@ -161,7 +159,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         startTime: episode.progress?.currentTime,
       })
     },
-    [navigation, animeId],
+    [navigation, animeId]
   )
 
   const handleBack = useCallback(() => {
@@ -189,7 +187,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
       Haptics.light()
       enqueueEpisodeDownload(animeId, anime.name, episode)
     },
-    [anime, animeId],
+    [anime, animeId]
   )
 
   const handleDownloadSeason = useCallback(
@@ -198,7 +196,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         return
       }
       const episodesToDownload = section.data.filter(
-        (ep) => ep.videoCid && !(ep.id in downloaded) && !downloadQueue.find((t) => t.episodeId === ep.id),
+        (ep) => ep.videoCid && !(ep.id in downloaded) && !downloadQueue.find((t) => t.episodeId === ep.id)
       )
       if (episodesToDownload.length === 0) {
         return
@@ -208,7 +206,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         enqueueEpisodeDownload(animeId, anime.name, ep)
       }
     },
-    [anime, animeId, downloaded, downloadQueue],
+    [anime, animeId, downloaded, downloadQueue]
   )
 
   if (loading) {
@@ -250,8 +248,8 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
     const progressPercent = localProgress
       ? Math.round((localProgress.position / localProgress.duration) * 100)
       : episode.progress && episode.durationMs
-      ? Math.round((episode.progress.currentTime / (episode.durationMs / 1000)) * 100)
-      : 0
+        ? Math.round((episode.progress.currentTime / (episode.durationMs / 1000)) * 100)
+        : 0
     // Считаем просмотренным если прогресс > 90%
     const isCompleted = progressPercent >= 90 || episode.progress?.completed
 
@@ -285,31 +283,25 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         {isCompleted && <View style={styles.completedIndicator} />}
 
         {/* Кнопка скачивания */}
-        {isDownloaded
-          ? (
-            <View style={styles.downloadedBadge}>
-              <Check size={14} color="#FFFFFF" />
-            </View>
-          )
-          : task
-          ? (
-            <View style={styles.downloadingBadge}>
-              <Text style={styles.downloadingBadgeText}>
-                {task.status === 'downloading' ? `${Math.round(task.progress * 100)}%` : '…'}
-              </Text>
-            </View>
-          )
-          : episode.videoCid && !isOffline
-          ? (
-            <TouchableOpacity
-              style={styles.downloadButton}
-              onPress={() => handleDownloadEpisode(episode)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Download size={14} color="#805AD5" />
-            </TouchableOpacity>
-          )
-          : null}
+        {isDownloaded ? (
+          <View style={styles.downloadedBadge}>
+            <Check size={14} color="#FFFFFF" />
+          </View>
+        ) : task ? (
+          <View style={styles.downloadingBadge}>
+            <Text style={styles.downloadingBadgeText}>
+              {task.status === 'downloading' ? `${Math.round(task.progress * 100)}%` : '…'}
+            </Text>
+          </View>
+        ) : episode.videoCid && !isOffline ? (
+          <TouchableOpacity
+            style={styles.downloadButton}
+            onPress={() => handleDownloadEpisode(episode)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Download size={14} color="#805AD5" />
+          </TouchableOpacity>
+        ) : null}
       </TouchableOpacity>
     )
   }
@@ -317,7 +309,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
   const renderSectionHeader = ({ section }: { section: SeasonSection }) => {
     // Считаем, сколько эпизодов можно скачать
     const downloadableCount = section.data.filter(
-      (ep) => ep.videoCid && !(ep.id in downloaded) && !downloadQueue.find((t) => t.episodeId === ep.id),
+      (ep) => ep.videoCid && !(ep.id in downloaded) && !downloadQueue.find((t) => t.episodeId === ep.id)
     ).length
 
     return (
@@ -327,10 +319,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
           <Text style={styles.sectionCount}>{section.data.length} эп.</Text>
         </View>
         {downloadableCount > 0 && !isOffline && (
-          <TouchableOpacity
-            style={styles.downloadSeasonButton}
-            onPress={() => handleDownloadSeason(section)}
-          >
+          <TouchableOpacity style={styles.downloadSeasonButton} onPress={() => handleDownloadSeason(section)}>
             <Download size={12} color="#805AD5" />
             <Text style={styles.downloadSeasonText}>Скачать все</Text>
           </TouchableOpacity>

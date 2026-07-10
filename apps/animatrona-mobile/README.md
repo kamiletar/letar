@@ -32,7 +32,7 @@ React Native приложение для просмотра аниме из би
 | Video         | react-native-video           | 6.9+      |
 | Gestures      | Gesture Handler + Reanimated | 2.21/3.16 |
 | State         | Zustand                      | 5.x       |
-| ASS Subtitles | @letar/exoplayer-ass          | 0.1.0     |
+| ASS Subtitles | @letar/exoplayer-ass         | 0.1.0     |
 
 **Min SDK:** Android 7.0 (API 24)
 

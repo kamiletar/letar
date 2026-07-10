@@ -11,7 +11,6 @@
 import type {
   AnimeDetails,
   AnimeListItem,
-  AnimeRelationInfo,
   ChapterType,
   Episode,
   LastWatched,
@@ -272,12 +271,12 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
             const type: ChapterType = titleUpper.includes('OP')
               ? 'OP'
               : titleUpper.includes('ED')
-              ? 'ED'
-              : titleUpper.includes('RECAP')
-              ? 'RECAP'
-              : titleUpper.includes('PREVIEW')
-              ? 'PREVIEW'
-              : 'CHAPTER'
+                ? 'ED'
+                : titleUpper.includes('RECAP')
+                  ? 'RECAP'
+                  : titleUpper.includes('PREVIEW')
+                    ? 'PREVIEW'
+                    : 'CHAPTER'
             return {
               id: `ch-${i}`,
               title: ch.title,
@@ -358,7 +357,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
             const mapped = mapAnimeItem(item)
             mapped.posterPath = resolveIpfsUrl(mapped.posterPath)
             return mapped
-          }),
+          })
         )
 
         if (page >= response.pagination.totalPages) break
@@ -410,7 +409,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
       if (server.apiKey) {
         try {
           const progressResponse = await fetchApi<{ episodes: TrackerWatchProgress[] }>(
-            `/watch-progress?animeId=${animeId}`,
+            `/watch-progress?animeId=${animeId}`
           )
           const progressMap = new Map(progressResponse.episodes.map((p) => [p.episodeNumber, p]))
 
@@ -471,7 +470,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
 
       try {
         const response = await fetchApi<{ episodes: TrackerWatchProgress[] }>(
-          `/watch-progress?animeId=${cached.animeId}`,
+          `/watch-progress?animeId=${cached.animeId}`
         )
         const progress = response.episodes.find((p) => p.episodeNumber === cached.episodeNumber)
         if (!progress) return null
