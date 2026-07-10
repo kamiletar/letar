@@ -24,7 +24,10 @@ services:
     container_name: grandslamcup-staging-app
     restart: unless-stopped
     ports:
-      - '${PORT:-3018}:3016'
+      # Хостовый порт захардкожен (не из PORT env — PORT в .env.staging это ВНУТРЕННИЙ порт
+      # контейнера и раньше случайно перекрывал этот маппинг: env_file передавал ту же
+      # переменную внутрь контейнера, из-за чего Next.js слушал 3018, а маппинг бил в 3016).
+      - '3018:3016'
     env_file:
       - .env.staging
     environment:
@@ -35,7 +38,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:${PORT:-3016}/ || exit 1']
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3016/ || exit 1']
       interval: 5s
       timeout: 3s
       retries: 30

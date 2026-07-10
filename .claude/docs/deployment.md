@@ -59,7 +59,7 @@ cd /home/deploy/letar
 deploy_app({ app, target: "staging" })                                  → s3: образ <app>:staging,
                                                                             контейнер на своём хостовом
                                                                             порту (docker-compose.staging.yml)
-run_e2e({ app, baseUrl: "https://<app>.stage.s3.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
+run_e2e({ app, baseUrl: "https://<app>-stage.s3.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
                                                                             (BASE_URL — конвенция всех
                                                                             playwright.config.ts)
                                                                             → пишет .last-e2e-status/<app>.json
@@ -72,14 +72,19 @@ deploy_app({ app })                                                      → tar
 ```
 
 `baseUrl` передаётся явно в `run_e2e` — намеренно, максимально близко к прод-окружению: **реальный
-HTTPS-домен** `<app>.stage.s3.letar.best`, не `localhost`. Cookie/CORS/OIDC-редиректы на `localhost`
+HTTPS-домен** `<app>-stage.s3.letar.best`, не `localhost`. Cookie/CORS/OIDC-редиректы на `localhost`
 живут в другом security-контексте браузера (нет `Secure`-cookie, нет настоящего cross-origin между
 staging-приложением и `auth.letar.best`) — тестирование против `localhost` не проверяет именно то,
-что чаще всего ломается при релизе. Требует: wildcard DNS `*.stage.s3.letar.best` → s3, NPM proxy
-host на TLS-терминацию (wildcard-сертификат Let's Encrypt, DNS-01 challenge) → форвард на хостовый
-порт staging-контейнера (`docker-compose.staging.yml` приложения, например `3018` у grandslamcup).
-Это инфраструктурная задача (DNS/NPM/сертификат), выполняется через BlackCove/владельца — deploy-mcp
-и dashboard-agent её не автоматизируют.
+что чаще всего ломается при релизе. Домен — **один лейбл** (`<app>-stage`, дефис, не точка) —
+попадает под уже существующий DNS wildcard `*.s3 CNAME s3.letar.best` (`server-provision.md`),
+новая DNS-запись не нужна (`<app>.stage.s3.letar.best`, с точкой, НЕ подходит — DNS-wildcard
+матчит только один лейбл перед `.s3.letar.best`). NPM на s3 (уже поднят, порты 80/81/443
+публичны) → Proxy Host на этот домен, TLS через стандартный Let's Encrypt HTTP-01 (не wildcard,
+не DNS-01 — обычный флоу NPM, т.к. каждый staging-домен создаётся отдельным Proxy Host с
+собственным сертификатом) → форвард на хостовый порт staging-контейнера через docker-хост-гейтвей
+(`172.17.0.1:<port>` по умолчанию, а не имя контейнера — NPM и staging-compose в разных Docker
+сетях, `docker network connect` ломает `compose down` staging-сети). Настройка Proxy Host'а —
+задача BlackCove/владельца, deploy-mcp и dashboard-agent её не автоматизируют.
 
 ### Staging-данные: анонимизированный снепшот прод, не seed-фикстуры
 

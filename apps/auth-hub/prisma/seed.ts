@@ -69,9 +69,11 @@ const clients = [
       'https://grandslamcup.letar.best/api/auth/oauth2/callback/letar-auth',
       'https://grandslamcup.letar.best/sign-in',
       'http://localhost:3016/sign-in',
-      // Staging на s3 (PLAN.md §18 Сессия D) — реальный HTTPS-домен, максимально близко к проду
-      'https://grandslamcup.stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
-      'https://grandslamcup.stage.s3.letar.best/sign-in',
+      // Staging на s3 (PLAN.md §18 Сессия D) — реальный HTTPS-домен, максимально близко к проду.
+      // Один лейбл (grandslamcup-stage), не два (grandslamcup.stage) — попадает под существующий
+      // DNS-wildcard `*.s3 CNAME s3.letar.best`, новая DNS-запись не нужна.
+      'https://grandslamcup-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://grandslamcup-stage.s3.letar.best/sign-in',
     ].join(','),
   },
   {

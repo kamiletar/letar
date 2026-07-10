@@ -37,14 +37,15 @@ Hard gate — отдельное решение Фазы 3 (PLAN.md §18.6) по
 
 ```
 deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s3
-run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup.stage.s3.letar.best" }) // → nx e2e против staging
+run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup-stage.s3.letar.best" }) // → nx e2e против staging
 e2e_status({ app: "grandslamcup", sinceLine: 0 })                                    // поллинг + финальный lastStatus
 deploy_app({ app: "grandslamcup" })                                                  // production — покажет gate-warnings
 ```
 
 `baseUrl` — явный параметр (не выводится автоматически): единая конвенция
-`https://<app>.stage.s3.letar.best` требует wildcard DNS + NPM proxy host (TLS-терминация,
-wildcard-сертификат) → форвард на хостовый порт staging-контейнера — инфраструктурная задача,
+`https://<app>-stage.s3.letar.best` (один лейбл — попадает под существующий DNS wildcard
+`*.s3 CNAME s3.letar.best`) → NPM proxy host на s3 (TLS через обычный Let's Encrypt HTTP-01) →
+форвард на хостовый порт staging-контейнера через docker-хост-гейтвей — инфраструктурная задача,
 выполняется через BlackCove/владельца. Данные staging-БД — анонимизированный снепшот прод
 (`apps/<app>/scripts/anonymize-staging-db.ts`), не пустая/seed-БД — подробности в `deployment.md`.
 
