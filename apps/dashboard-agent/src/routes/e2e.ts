@@ -112,7 +112,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
     async (
-      request
+      request,
     ): Promise<
       ApiResponse<{
         run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
@@ -138,7 +138,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 
   /**
@@ -163,6 +163,11 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       }
       if (!baseUrl) {
         return { success: false, error: 'baseUrl is required', timestamp: new Date().toISOString() }
+      }
+      // project интерполируется в shell-строку для nsenter (см. ниже) — обязательная валидация,
+      // иначе это command injection в root-контекст хоста (nsenter -t 1 выходит из контейнера).
+      if (project !== undefined && !/^[a-z0-9-]+$/.test(project)) {
+        return { success: false, error: 'Invalid project format', timestamp: new Date().toISOString() }
       }
 
       // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
@@ -189,33 +194,39 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         // не блокируем прогон из-за невозможности определить sha
       }
 
-      const args = ['e2e', `${app}-e2e`]
-      if (project) {
-        args.push('--', `--project=${project}`)
-      }
-      appendOutput(run, `📋 Command: nx ${args.join(' ')}`)
+      // nsenter выполняет команду на хосте (pid: host + privileged) — как в deploy.ts.
+      // Внутри контейнера dashboard-agent нет ни `nx`, ни воркспейса; сам монорепо и bun/nx
+      // существуют только на хосте s3.
+      const nxCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${project ? ` -- --project=${project}` : ''}`
+      const args = ['-t', '1', '-m', '-u', '-n', '-i', '--', 'bash', '-c', nxCommand]
+      appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
       // BASE_URL — единая конвенция всех playwright.config.ts в монорепо (apps/*-e2e).
       // webServer.reuseExistingServer:true в конфигах означает: раз baseUrl уже отвечает
       // (staging-контейнер поднят), Playwright НЕ запускает `nx dev <app>` — бьёт напрямую.
+      // nsenter наследует env спавна (тот же приём, что SOPS_AGE_KEY_FILE в deploy.ts).
       const env = { ...process.env, BASE_URL: baseUrl }
 
-      currentProcess = spawn('nx', args, { cwd: REPO_PATH, stdio: ['ignore', 'pipe', 'pipe'], env })
+      currentProcess = spawn('nsenter', args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
       currentProcess.stdout?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, line)
         }
       })
 
       currentProcess.stderr?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, `⚠️ ${line}`)
         }
       })
@@ -249,6 +260,6 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { runId: run.runId, app, started: true },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 }
