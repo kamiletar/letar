@@ -204,8 +204,12 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // прогон создаёт root-owned .nx/workspace-data и apps/<app>-e2e/test-output,
       // которые потом ломают следующий deploy_app/run_e2e (EACCES). Тот же приём,
       // что и DEPLOY_AS_ROOT-гвард в deploy-affected.sh:11-19.
+      // ⚠️ `sudo -u deploy -H` по умолчанию СБРАСЫВАЕТ окружение (та же ловушка, что уже была
+      // с SOPS_AGE_KEY_FILE в deploy-affected.sh) — без --preserve-env BASE_URL/DEV_SESSION_TOKEN
+      // не долетают до `bunx nx e2e`, Playwright не видит staging baseUrl и поднимает свой
+      // `nx dev` против dev-БД (регрессия, найдена BlackCove на живом прогоне 2026-07-11).
       const nxCommand =
-        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
+        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 

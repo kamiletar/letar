@@ -1,5 +1,22 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №62 (2026-07-11, §18 — регрессия dashboard-agent: `sudo -u deploy` сбросил env):**
+> BlackCove задеплоил фикс root-owned `.nx` (0.7.3) — сработал, root-owned файлов больше нет. Но
+> `sudo -u deploy -H` по умолчанию **сбрасывает окружение процесса** (та же ловушка, что уже была
+> задокументирована для `SOPS_AGE_KEY_FILE` в `deploy-affected.sh`) — `BASE_URL`/`DEV_SESSION_TOKEN`
+> не долетали до `bunx nx e2e` после `exec sudo`. Playwright не увидел уже поднятый staging (не
+> нашёл `baseUrl` живым), поднял свой `nx dev grandslamcup` (`webServer.command` в
+> `playwright.config.ts`), который подключился к **dev-БД** (порт 5453 из закоммиченного `.env`,
+> не staging) → `ECONNREFUSED` каскадом на все 28 тестов ещё на этапе поднятия webServer, до
+> реальных тестов.
+>
+> **Fix (`dashboard-agent` 0.7.3→0.7.4):** `sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN`
+> вместо голого `sudo -u deploy -H`.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить dashboard-agent (0.7.4) + grandslamcup (0.8.2,
+> из сессии №60, если ещё не подтянут), повторить `run_e2e`. Инфраструктура (staging-снепшот,
+> admin-фикстура) стабильна, дело за самим прогоном.
+
 > **Сессия №61 (2026-07-11, §18 — итог + зафиксирован технический долг `createDevSessionRoute`):**
 > Wrap-up сессий №58–60. Обновлены `apps/grandslamcup/PLAN.md`/`PLAN_COMPLETED.md`,
 > `apps/dashboard-agent/PLAN_COMPLETED.md` итогами трёх фиксов. Agent-mail сессия завершена
