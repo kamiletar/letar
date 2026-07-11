@@ -1,5 +1,68 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №55 (2026-07-11, §18 Сессия D — живой пилот доведён до конца, BlackCove):**
+> Выполнен полный чек-лист из `grandslamcup-staging-pilot` (расширенный коммитом `8564663` —
+> реальный HTTPS-домен + анонимизированный прод-снепшот вместо localhost/пустой БД).
+>
+> **Домен переименован** `grandslamcup.stage.s3` → **`grandslamcup-stage.s3.letar.best`**
+> (дефис вместо точки) — двухлейбловый вариант не матчит существующий DNS wildcard
+> `*.s3 CNAME s3.letar.best` (wildcard матчит только один лейбл). Правки в
+> `apps/auth-hub/prisma/seed.ts`, `.env.staging.example`, `deployment.md` — коммит `adcdb4b`.
+> Заодно найден и исправлен PORT-баг в `docker-compose.staging.yml`: `${PORT:-3018}`
+> интерполировался и в маппинг портов, и (через `env_file`) внутрь контейнера — хостовый порт
+> захардкожен, `PORT` теперь однозначно внутренний.
+>
+> **Инфраструктурные баги, найденные и починенные по пути (все не специфичны для grandslamcup —
+> блокировали бы любое приложение на s3):**
+>
+> 1. Untracked-файлы (`next-env.d.ts`, Playwright auth-фикстуры, `test-output/`) в submodule
+>    `driving-school`/`driving-school-e2e` валили **весь** `git pull --recurse-submodules` на s3 →
+>    падал любой деплой, не только grandslamcup. Вычищено.
+> 2. `libs/zenstack-form-plugin/dist` (gitignored) не был собран на свежем s3 — `zenstack:generate`
+>    падал с «Cannot find plugin module». Собран вручную (`nx run @letar/zenstack-form-plugin:build`).
+> 3. `apps/dashboard-agent/src/routes/e2e.ts` спавнил `nx` напрямую внутри контейнера, где nx
+>    физически нет (`spawn nx ENOENT`) — первый живой e2e-прогон падал сразу. Переделано на
+>    `nsenter -t 1 -m -u -n -i` в host-namespace (как в `deploy.ts`). Заодно найдена и закрыта
+>    **command injection**: параметр `project` из POST-body шёл в shell-строку без валидации —
+>    добавлена та же regex-проверка, что у `app`. Коммит `2124454`, dashboard-agent `0.7.0→0.7.1`.
+>
+> **Прод-снепшот и анонимизация:** `pg_dump` на s2 (исключены `Account`/`Session`/`Verification`/
+> `consentLog`/`PushSubscription` флагами `-T`) → TRUNCATE + `pg_restore --data-only` на s3 →
+> `anonymize-staging-db.ts`. Найден и исправлен баг скрипта: `DATABASE_URL` с base64-паролем без
+> URL-энкодинга падал на парсинге (пароль содержал `+`/`/`/`=`) — исправлено `encodeURIComponent`.
+> Проверено: email вида `user-*@staging.invalid`, `Account`/`Session` — 0 строк, `Player` 849 /
+> `Match` 316 на месте.
+>
+> **Публичный домен:** NPM на s3 уже был поднят (не задокументирован в
+> `infra/nginx-proxy-manager/README.md` — TODO на будущее). DNS не трогали — wildcard уже
+> покрывал новый домен (подтверждено внешним DoH-резолвером с самого s3, локальный DNS в
+> sandboxed-окружении не соответствует реальности). NPM-креды нашлись в памяти
+> (`reference_npm_s3.md`) — дефолт `admin@example.com/changeme` не подошёл. Proxy Host создан
+> через NPM API: форвард на `172.17.0.1:3018` (хост-гейтвей docker0, не `docker network connect` —
+> NPM и staging-compose в разных Docker-сетях). Let's Encrypt HTTP-01 сертификат выпущен с первого
+> раза (истекает 2026-10-09). `https://grandslamcup-stage.s3.letar.best` → 200, валидный TLS.
+>
+> **E2E — инфраструктурно успешен, содержательно 3/28 passed.** Пайплайн `deploy_app(staging)` →
+> `run_e2e` → `e2e_status` отработал end-to-end первый раз в истории. Но большинство тестов
+> ожидают контент активного текущего сезона на `/` (ближайшие матчи/таблица/результаты) —
+> анонимизированный снепшот, похоже, не содержит такого сезона (исторические данные). Один
+> найденный баг похож на настоящий: `getByAltText('Grand Slam Cup')` матчит 2 элемента
+> (дублирующийся `alt` на логотипе в шапке) — не чинил, вне скоупа деплой-агента.
+>
+> **Gate:** production НЕ деплоился — e2e не прошёл, содержательного повода не было.
+> `checkE2eGate` на реальном прод-деплое покажет warn «e2e упал», не заблокирует.
+>
+> **Не блокирует, но замечено:** на s2 остался leftover `grandslamcup-staging-app/-db`
+> (докер>3ч) — вероятно, остаток раннего локального теста FrostySnow до пивота на домен, не
+> тронут, стоит почистить отдельно.
+>
+> **➡️ Следующий старт:** (1) владельцу фичи grandslamcup — разобраться с E2E-провалами
+> (недостающий активный сезон в снепшоте / дублирующийся alt на логотипе); (2) почистить leftover
+> staging на s2; (3) документировать NPM на s3 в `infra/nginx-proxy-manager/README.md`
+> (сейчас там только s1/s2); (4) решить, стоит ли добавить сборку `zenstack-form-plugin` в
+> `deploy-affected.sh` явно, чтобы не полагаться на ручной прогрев нового сервера; (5) после
+> недели наблюдения warn-only gate — решение по hard gate (§18.6, Фаза 3).
+
 > **Сессия №53 (2026-07-10, §18 Сессия D — код готов, ждём s3):** Продолжение с того места, где
 > остановилась сессия №52. **Отправлен формальный `deploy-request` BlackCove** (тред
 > `provision-s3-dashboard-agent`) на подъём dashboard-agent на s3 — конфиг-часть (`AGENT_TOKEN_S3`,
@@ -1286,7 +1349,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-;<UserMenu
+<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}
