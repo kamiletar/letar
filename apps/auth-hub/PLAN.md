@@ -273,14 +273,14 @@ Better Auth oidcProvider вероятно реализует `end_session_endpoi
 
 В `apps/auth-hub/src/lib/auth.ts` → секция `trustedClients` — добавить поле `postLogoutRedirectUris` для каждого клиента:
 
-| Клиент                  | `post_logout_redirect_uri`                                                       |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| archetest-prod          | `https://archetest.letar.best/sign-in`                                           |
-| time-prod               | `https://time.letar.best/`                                                       |
-| grandslamcup-prod       | `https://grandslamcup.letar.best/sign-in`, `https://gsc-test.letar.best/sign-in` |
-| kami-prod               | `https://kami.letar.best/sign-in`                                                |
-| animatrona-tracker-prod | `https://animatrona-tracker.letar.best/sign-in`                                  |
-| dashboard-prod          | `https://dash.letar.best/auth/signin`                                            |
+| Клиент                  | `post_logout_redirect_uri`                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| archetest-prod          | `https://archetest.letar.best/sign-in`                                                        |
+| time-prod               | `https://time.letar.best/`                                                                    |
+| grandslamcup-prod       | `https://grandslamcup.letar.best/sign-in`, `https://grandslamcup-stage.s3.letar.best/sign-in` |
+| kami-prod               | `https://kami.letar.best/sign-in`                                                             |
+| animatrona-tracker-prod | `https://animatrona-tracker.letar.best/sign-in`                                               |
+| dashboard-prod          | `https://dash.letar.best/auth/signin`                                                         |
 
 Также добавить localhost-варианты для разработки.
 
@@ -391,7 +391,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 
