@@ -18,6 +18,7 @@ import type { FastifyInstance } from 'fastify'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import { getCurrentCommit } from '../lib/git'
+import { hostShellArgs } from '../lib/host-exec'
 import { getCurrentServer } from '../lib/server-config'
 import type { ApiResponse } from '../types'
 
@@ -196,9 +197,10 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
       // nsenter выполняет команду на хосте (pid: host + privileged) — как в deploy.ts.
       // Внутри контейнера dashboard-agent нет ни `nx`, ни воркспейса; сам монорепо и bun/nx
-      // существуют только на хосте s3.
+      // существуют только на хосте s3. `project` уже провалидирован выше (regex) — обязательно
+      // до интерполяции в shell-строку, см. hostShellArgs().
       const nxCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${project ? ` -- --project=${project}` : ''}`
-      const args = ['-t', '1', '-m', '-u', '-n', '-i', '--', 'bash', '-c', nxCommand]
+      const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
       // BASE_URL — единая конвенция всех playwright.config.ts в монорепо (apps/*-e2e).
