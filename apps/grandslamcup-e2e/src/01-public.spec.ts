@@ -12,7 +12,10 @@ test.describe('Главная страница', () => {
 
   test('логотип виден в хедере', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByAltText('Grand Slam Cup')).toBeVisible()
+    // Логотип с одинаковым alt повторяется в header/footer/hero/mobile-drawer (одно и то же
+    // изображение — это корректно для доступности) — тест именно про хедер, скоупим локатор,
+    // иначе strict-mode violation (несколько совпадений на странице).
+    await expect(page.locator('header').getByAltText('Grand Slam Cup')).toBeVisible()
   })
 
   test('секция "Ближайшие матчи" отображается', async ({ page }) => {
