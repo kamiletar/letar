@@ -1,5 +1,25 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №63 (2026-07-11, §18 — ✅ ЗАКРЫТО: живой staging-пайплайн grandslamcup, 24/28 passed):**
+> BlackCove передеплоил `dashboard-agent` 0.7.4 (подтверждён рабочим — `--preserve-env` доставляет
+> `BASE_URL`/`DEV_SESSION_TOKEN` корректно, root-owned `.nx` не возникает). Прогон `run_e2e` упал на
+> последней мелочи: `apps/grandslamcup-e2e/src/global-setup.ts` искал cookie
+> `better-auth.session_token` точным именем, не учитывая `__Secure-` префикс из `useSecureCookies`
+> (0.8.2, сессия №60) — `dev-session` ставил cookie корректно (`__Secure-better-auth.session_token`),
+> но global-setup её не находил и падал ещё до тестов. С разрешения Ками BlackCove поправил файл
+> напрямую (не свой контур, но простой однострочный фикс) — заменил точное сравнение на поиск по
+> суффиксу (`cookie.name.endsWith(...)`), коммит `50d72bc`.
+>
+> **Итог: 24/28 passed.** `03-admin.spec.ts` зелёный (было 0/7 из-за трёх auth-багов сессий
+> №58–60). Оставшиеся 4 — все тестовые, не инфраструктура: 2 locator strict-mode violations
+> (несколько совпадающих элементов на странице), 1 — «Ближайшие матчи» не рендерится (вероятно нет
+> будущих дат в анонимизированном снепшоте), фикс редиректа/cookie эти три не блокирует.
+>
+> **§18 Сессия D (живой staging-пайплайн grandslamcup) закрыта.** Паттерн `createDevSessionRoute`
+>
+> - `useSecureCookies` + suffix-based cookie lookup в `global-setup.ts` — эталон для тиража на
+>   будущие staging-e2e приложения (§18.6), задокументирован в `.claude/docs/e2e-testing.md`.
+
 > **Сессия №62 (2026-07-11, §18 — регрессия dashboard-agent: `sudo -u deploy` сбросил env):**
 > BlackCove задеплоил фикс root-owned `.nx` (0.7.3) — сработал, root-owned файлов больше нет. Но
 > `sudo -u deploy -H` по умолчанию **сбрасывает окружение процесса** (та же ловушка, что уже была
