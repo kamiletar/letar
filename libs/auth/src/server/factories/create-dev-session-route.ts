@@ -26,8 +26,19 @@ export interface CreateDevSessionRouteOptions {
   defaultEmail: string
   /** Путь редиректа по умолчанию */
   defaultRedirect?: string
-  /** Название cookie сессии Better Auth (по умолчанию `better-auth.session_token`) */
+  /** Базовое имя cookie сессии Better Auth без `__Secure-` префикса (по умолчанию `better-auth.session_token`) */
   cookieName?: string
+  /**
+   * Использовать ли `__Secure-` префикс и флаг `Secure` в имени/атрибутах cookie — должно
+   * повторять то, что вычисляет сам Better Auth (`createCookieGetter` в `better-auth/dist/
+   * cookies/index.mjs`): `true`, если `options.baseURL`, переданный в `betterAuth()`, начинается
+   * с `https://` (если явно не переопределён `advanced.useSecureCookies`). По умолчанию
+   * определяется по `process.env.BETTER_AUTH_URL?.startsWith('https://')` — тому же источнику,
+   * который обычно передают как `baseURL`. **Несовпадение с реальной конфигурацией Better Auth
+   * ломает распознавание cookie** — сессия создаётся и cookie ставится, но `getSession()` не
+   * находит её под ожидаемым именем, и защищённые страницы редиректят на `/sign-in`.
+   */
+  useSecureCookies?: boolean
   /** Кастомизация полей нового User при первом создании фикстуры */
   buildUserData?: (email: string) => Record<string, unknown>
 }
@@ -90,7 +101,15 @@ function timingSafeEqualStr(a: string, b: string): boolean {
  * ```
  */
 export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
-  const { prisma, authSecret, defaultEmail, defaultRedirect = '/', cookieName = 'better-auth.session_token' } = options
+  const {
+    prisma,
+    authSecret,
+    defaultEmail,
+    defaultRedirect = '/',
+    cookieName = 'better-auth.session_token',
+    useSecureCookies = process.env.BETTER_AUTH_URL?.startsWith('https://') ?? false,
+  } = options
+  const finalCookieName = useSecureCookies ? `__Secure-${cookieName}` : cookieName
 
   return async function GET(request: Request): Promise<Response> {
     if (process.env.ALLOW_DEV_SESSION !== 'true') {
@@ -139,8 +158,8 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
       },
     })
 
-    // Формат подписи cookie идентичен тому, что использует Better Auth внутри (Hono signed cookie):
-    // value = `${token}.${btoa(hmac(token, secret))}`
+    // Формат подписи cookie идентичен signCookieValue() из better-call (роутер Better Auth,
+    // better-call/dist/crypto.mjs): value = `${token}.${btoa(hmac(token, secret))}`
     const encoder = new TextEncoder()
     const key = await crypto.subtle.importKey(
       'raw',
@@ -156,9 +175,12 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
     const cookieValue = encodeURIComponent(signedValue)
     const maxAge = 7 * 24 * 60 * 60
     const response = NextResponse.redirect(new URL(redirect, resolveBaseUrl(request)))
+    // __Secure- cookie-префикс требует атрибут Secure по спецификации — без него браузер
+    // молча отбросит Set-Cookie целиком (RFC 6265bis, __Secure- prefix requirement).
+    const secureAttr = useSecureCookies ? '; Secure' : ''
     response.headers.append(
       'Set-Cookie',
-      `${cookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax`,
+      `${finalCookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secureAttr}`,
     )
 
     return response

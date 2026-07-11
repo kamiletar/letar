@@ -1,5 +1,27 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №60 (2026-07-11, §18 — третий баг dev-session: `__Secure-` cookie-префикс):**
+> BlackCove задеплоил фикс редиректа (0.8.1), подтвердил `location` теперь верный, но
+> `03-admin.spec.ts` всё ещё падал — `/admin` со свежепоставленной cookie редиректило на
+> `/sign-in`. Проверка БД показала: сессия реальна и валидна (`userId`/`token`/`expiresAt` в
+> порядке), значит проблема не в данных, а в том, как Better Auth читает cookie.
+>
+> Разобрал исходники `better-auth`/`better-call` (не документировано публично): Better Auth сам
+> вычисляет имя cookie через `createCookieGetter` — если `baseURL` (обычно `BETTER_AUTH_URL`)
+> начинается с `https://` (staging/prod), реальное имя `__Secure-better-auth.session_token`,
+> а не голое `better-auth.session_token`; без атрибута `Secure` браузер вообще не примет такую
+> cookie (`__Secure-` prefix requirement, RFC 6265bis). `createDevSessionRoute` ставил cookie под
+> именем без префикса — cookie физически создавалась и была валидна в БД, но `getSession()` искал
+> её под другим именем и не находил → защищённые страницы решали, что сессии нет.
+>
+> **Fix (`@letar/auth` 0.8.1→0.8.2):** новая опция `useSecureCookies` (по умолчанию —
+> `BETTER_AUTH_URL?.startsWith('https://')`, тот же источник, что передают как `baseURL`)
+> добавляет `__Secure-` префикс и `Secure`-атрибут, повторяя логику самого Better Auth.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить staging (подтянет 0.8.2), повторить `run_e2e`.
+> Три инфраструктурных бага dev-session (NODE_ENV, редирект 0.0.0.0, cookie-префикс) должны быть
+> закрыты — ожидаем зелёный `03-admin.spec.ts`.
+
 > **Сессия №59 (2026-07-11, §18 — второй баг dev-session: редирект на `0.0.0.0`):** BlackCove
 > прогнал сессию №58 на живом s3 и нашёл ещё один реальный баг (не инфра) — потратил время на
 > ложные следы (root-owned `.nx`/Nx daemon от чужого пользователя, Chromium sandbox), но настоящая

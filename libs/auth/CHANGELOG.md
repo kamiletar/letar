@@ -7,6 +7,26 @@
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-07-11
+
+### Fixed
+
+- `createDevSessionRoute` ставил cookie сессии под именем `better-auth.session_token` без
+  `__Secure-` префикса и без атрибута `Secure`. Better Auth сам вычисляет имя cookie через
+  `createCookieGetter` (`better-auth/dist/cookies/index.mjs`): если `baseURL`, переданный в
+  `betterAuth()`, начинается с `https://` (обычный случай для staging/prod), реальное имя cookie —
+  `__Secure-better-auth.session_token`, а без `Secure`-атрибута браузер по спецификации
+  (`__Secure-` prefix requirement, RFC 6265bis) вообще не примет такую cookie. Session-lookup
+  (`getSession()`) искал cookie под правильным именем и не находил её под нашим — сессия
+  создавалась и валидна в БД, но `/admin` редиректил на `/sign-in`. Найдено BlackCove на живом
+  staging-прогоне grandslamcup (после фикса 0.8.1 редирект на `0.0.0.0` был устранён, но
+  `03-admin.spec.ts` всё ещё падал по этой второй причине).
+
+  Добавлена новая опция `useSecureCookies?: boolean` (по умолчанию —
+  `process.env.BETTER_AUTH_URL?.startsWith('https://')`, тот же источник, что обычно передают
+  как `baseURL` в `betterAuth()`), которая повторяет логику Better Auth: добавляет `__Secure-`
+  префикс к имени cookie и атрибут `Secure` к `Set-Cookie`.
+
 ## [0.8.1] - 2026-07-11
 
 ### Fixed
