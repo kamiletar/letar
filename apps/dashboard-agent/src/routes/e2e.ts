@@ -198,8 +198,14 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // nsenter выполняет команду на хосте (pid: host + privileged) — как в deploy.ts.
       // Внутри контейнера dashboard-agent нет ни `nx`, ни воркспейса; сам монорепо и bun/nx
       // существуют только на хосте s3. `project` уже провалидирован выше (regex) — обязательно
-      // до интерполяции в shell-строку, см. hostShellArgs().
-      const nxCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${project ? ` -- --project=${project}` : ''}`
+      // до интерполяции в шелл-строку, см. hostShellArgs().
+      const e2eCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${project ? ` -- --project=${project}` : ''}`
+      // nsenter -t 1 наследует root (privileged-контейнер) — без переключения на deploy
+      // прогон создаёт root-owned .nx/workspace-data и apps/<app>-e2e/test-output,
+      // которые потом ломают следующий deploy_app/run_e2e (EACCES). Тот же приём,
+      // что и DEPLOY_AS_ROOT-гвард в deploy-affected.sh:11-19.
+      const nxCommand =
+        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
