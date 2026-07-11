@@ -1,5 +1,22 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №64 (2026-07-11, §18.6 — Фаза 3 решена и спроектирована: `libs/deploy-engine`):**
+> Подтверждён итог сессии №63 через deploy-mcp и тред `grandslamcup-staging-pilot` (24/28,
+> auth-цепочка зелёная). Владелец принял решения по Фазе 3: **(а) `libs/deploy-engine`**
+> (TS + docker-rollout-паттерн), не Kamal; **hard gate без обхода** (fail-closed, без
+> force-флага); тираж staging-e2e пока только grandslamcup; **пилот rollout — `time`**;
+> каркас (сессия E) можно начинать сразу, gate (F) — после недели warn-only (2026-07-18).
+> Архитектура проработана (исследование кода + ресёрч docker-rollout/agentic-практик) и
+> записана в §18.6: network alias `<app>-app` (NPM Forward Host не меняется), strangler
+> через opt-in compose-label, `E2E_GATED_APPS` в infra-config, rollback с deploy-manifest
+> и `migrationWarning`, doctor как enforcement healthcheck-стандарта (сейчас 5/23). План
+> сессий E–J с DoD — таблицей в §18.6. Коммит `e11527a`. Задача на 4 оставшихся e2e-теста —
+> `apps/grandslamcup/PLAN.md` п.37 (закоммичено в `7e34567` вместе с итогами №63).
+>
+> **➡️ Следующий старт:** сессия E — каркас `libs/deploy-engine` (`doctor`+`status`, executor-
+> инъекция, схема манифеста, юнит-тесты); можно сразу, деплой не трогает. Параллельно: неделя
+> warn-only до 2026-07-18 (нужен ≥1 живой warn-деплой grandslamcup для сессии F).
+
 > **Сессия №63 (2026-07-11, §18 — ✅ ЗАКРЫТО: живой staging-пайплайн grandslamcup, 24/28 passed):**
 > BlackCove передеплоил `dashboard-agent` 0.7.4 (подтверждён рабочим — `--preserve-env` доставляет
 > `BASE_URL`/`DEV_SESSION_TOKEN` корректно, root-owned `.nx` не возникает). Прогон `run_e2e` упал на
