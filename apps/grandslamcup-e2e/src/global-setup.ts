@@ -14,14 +14,16 @@ import { resolve } from 'node:path'
 
 export const ADMIN_STORAGE_STATE = resolve(__dirname, '../playwright/.auth/admin.json')
 
-const SESSION_COOKIE_NAME = 'better-auth.session_token'
+// Суффикс, а не точное имя — Better Auth добавляет префикс `__Secure-` при
+// useSecureCookies (когда BETTER_AUTH_URL начинается с https://, см. createDevSessionRoute).
+const SESSION_COOKIE_SUFFIX = 'better-auth.session_token'
 
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0]?.use?.baseURL || 'http://localhost:3016'
   const devSessionToken = process.env.DEV_SESSION_TOKEN
   if (!devSessionToken) {
     throw new Error(
-      '[Global Setup] DEV_SESSION_TOKEN не задан в окружении e2e-раннера — без него dev-session вернёт 403'
+      '[Global Setup] DEV_SESSION_TOKEN не задан в окружении e2e-раннера — без него dev-session вернёт 403',
     )
   }
 
@@ -45,11 +47,11 @@ export default async function globalSetup(config: FullConfig) {
     await page.goto(`${baseURL}/api/auth/dev-session?${params.toString()}`)
 
     const cookies = await context.cookies()
-    const sessionCookie = cookies.find((cookie) => cookie.name === SESSION_COOKIE_NAME)
+    const sessionCookie = cookies.find((cookie) => cookie.name.endsWith(SESSION_COOKIE_SUFFIX))
     if (!sessionCookie) {
       throw new Error(
-        `[Global Setup] dev-session не установил cookie '${SESSION_COOKIE_NAME}' — вероятно 403 ` +
-          '(ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере) или ошибка авторизации'
+        `[Global Setup] dev-session не установил cookie '*${SESSION_COOKIE_SUFFIX}' — вероятно 403 `
+          + '(ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере) или ошибка авторизации',
       )
     }
 
