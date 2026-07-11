@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-11
+
+### Fixed
+
+- `createDevSessionRoute` строил редирект от `request.url` — за Docker port-forward и NPM
+  reverse-proxy это резолвится во внутренний bind-адрес контейнера (`http://0.0.0.0:<port>/...`,
+  Next.js standalone слушает `0.0.0.0`), а не в клиентский host:port. Cookie сессии устанавливалась
+  корректно, но браузер получал 307 на несуществующий `0.0.0.0` → `ERR_CONNECTION_REFUSED`. Найдено
+  BlackCove на живом staging-прогоне grandslamcup. Теперь base URL резолвится из заголовков
+  `x-forwarded-host`/`host` (`x-forwarded-proto` для схемы), с фолбэком на `request.url`, если
+  заголовки отсутствуют.
+
 ## [0.8.0] - 2026-07-11
 
 ### `createDevSessionRoute` — переиспользуемый dev-only логин без OIDC для staging-e2e

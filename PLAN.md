@@ -1,5 +1,29 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №59 (2026-07-11, §18 — второй баг dev-session: редирект на `0.0.0.0`):** BlackCove
+> прогнал сессию №58 на живом s3 и нашёл ещё один реальный баг (не инфра) — потратил время на
+> ложные следы (root-owned `.nx`/Nx daemon от чужого пользователя, Chromium sandbox), но настоящая
+> причина падений `03-admin.spec.ts` после фикса NODE_ENV: `createDevSessionRoute` строил редирект
+> через `new URL(redirect, request.url)`, а `request.url` за Docker port-forward/NPM reverse-proxy
+> резолвится во **внутренний bind-адрес контейнера** (`http://0.0.0.0:<port>/...` — Next.js
+> standalone слушает `0.0.0.0`), не в клиентский host:port. Cookie сессии ставилась корректно
+> (`curl -v` подтвердил `Set-Cookie`), но браузер получал `307 → http://0.0.0.0:3016/admin` →
+> `ERR_CONNECTION_REFUSED`.
+>
+> **Fix (`@letar/auth` 0.8.0→0.8.1):** base URL для редиректа резолвится из заголовков
+> `x-forwarded-host`/`host` (+ `x-forwarded-proto` для схемы) вместо `request.url`, с фолбэком на
+> `request.url` если заголовков нет (локальный `nx dev` без прокси).
+>
+> Побочные находки BlackCove для будущих staging-e2e (§18.6, не блокируют, отдельная задача): Nx
+> daemon на s3 может залипнуть от случайного непривилегированного запуска и потом обслуживать все
+> вызовы через IPC независимо от того, кто их делает (`bunx nx daemon --stop` перед важными
+> прогонами); headless Chromium sandbox требует root/CAP_SYS_ADMIN — работает только через
+> dashboard-agent; `.nx`/`test-output` на s3 становятся root-owned при root-стартующих прогонах —
+> нужно поправить сам механизм переключения на `deploy` в deploy-скриптах.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить staging (подтянет `@letar/auth` 0.8.1),
+> повторить `run_e2e`. Ожидается закрытие всех 7 `03-admin.spec.ts`.
+
 > **Сессия №58 (2026-07-11, §18 — системное решение по dev-session/NODE_ENV):** Закрыт
 > архитектурный блокер из сессии №57 (7 падений `03-admin.spec.ts`) — **системно, не точечным
 > фиксом в grandslamcup**, потому что §18.6 планирует тиражировать staging-e2e пайплайн на другие
@@ -1462,7 +1486,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-;<UserMenu
+<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}

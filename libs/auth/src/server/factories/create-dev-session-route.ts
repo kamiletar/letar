@@ -32,6 +32,24 @@ export interface CreateDevSessionRouteOptions {
   buildUserData?: (email: string) => Record<string, unknown>
 }
 
+/**
+ * Определяет base URL для построения редиректа/cookie-домена по внешним заголовкам, а не по
+ * `request.url` — за Docker port-forward и reverse-proxy (NPM) `request.url` резолвится во
+ * внутренний bind-адрес контейнера (`http://0.0.0.0:<port>/...`, Next.js standalone слушает
+ * `0.0.0.0`), не в клиентский host:port. Редирект на `0.0.0.0` браузер закономерно не может
+ * открыть (`ERR_CONNECTION_REFUSED`), хотя cookie сессии к этому моменту уже установлена.
+ */
+function resolveBaseUrl(request: Request): string {
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  const host = forwardedHost ?? request.headers.get('host')
+  if (!host) {
+    return request.url
+  }
+  const forwardedProto = request.headers.get('x-forwarded-proto')
+  const proto = forwardedProto ?? new URL(request.url).protocol.replace(':', '')
+  return `${proto}://${host}`
+}
+
 function timingSafeEqualStr(a: string, b: string): boolean {
   const bufA = Buffer.from(a)
   const bufB = Buffer.from(b)
@@ -129,7 +147,7 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
       encoder.encode(authSecret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign']
+      ['sign'],
     )
     const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(sessionToken))
     const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)))
@@ -137,10 +155,10 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
 
     const cookieValue = encodeURIComponent(signedValue)
     const maxAge = 7 * 24 * 60 * 60
-    const response = NextResponse.redirect(new URL(redirect, request.url))
+    const response = NextResponse.redirect(new URL(redirect, resolveBaseUrl(request)))
     response.headers.append(
       'Set-Cookie',
-      `${cookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax`
+      `${cookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax`,
     )
 
     return response
