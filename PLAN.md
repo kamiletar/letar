@@ -2791,29 +2791,129 @@ Gate живёт в deploy-mcp (единственный видит оба сер
 
 ### Сессии
 
-| #     | Содержимое                                                                                                                                                                                                                                                                                                                        | Статус                                                                                                                                                                                                                                                                                                                                                                              |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | Харденинг `deploy-affected.sh`: миграции fail=abort (различать «нет миграций» от ошибки), pg_dump перед миграцией (`/home/deploy/pre-migrate-dumps/`, ротация 3), sha-теги образов (ретеншн 3). `--dry-run` + shellcheck; боевой прогон на низкорисковом app. Доки: deployment.md, backup-architecture.md                         | ✅ задеплоено на `time`, подтверждено BlackCove; + self-re-exec фикс `63bcada`                                                                                                                                                                                                                                                                                                      |
-| **B** | `libs/infra-config`; dashboard-agent: серверный guard, `docker-compose.s3.yml`, консолидация production.yml/s2.yml (уточнить у BlackCove какой живой); коммит правок сессии №49 (deploy.ts, server-config.ts, cron.ts). Доки: README/CHANGELOG dashboard-agent, repo-structure.md, deployment.md (таблица серверов)               | ✅ коммиты `8498c06`, `a1772cf`; guard-тест вместо прямого импорта (Docker-изоляция); s2.yml удалён                                                                                                                                                                                                                                                                                 |
-| **C** | `libs/deploy-mcp` + `.mcp.json`; деплой dashboard-agent на s3 + закрытие порта 3100 — через BlackCove. Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md (строка MCP)                                                                                                                   | ✅ BlackCove задеплоил `time` через `deploy_app` (exitCode 0): deployId + sinceLine + self-re-exec + SOPS — все подтверждены вживую. Попутно 2 бага `/api/deploy/app` (SOPS-проброс `4d970e7` + sudo env-reset `1160e9e`). **s3-инстанс поднят и healthy** (loopback `127.0.0.1:13103`, HEAD `f21334bf`) — порт 3100 на s3 закрыт даром, s2 всё ещё торчит наружу (отдельный заход) |
-| **D** | Роут `e2e.ts` (run/status + `.last-e2e-status`), tools `run_e2e`/`e2e_status`, warn-gate; пилот grandslamcup: `.env.staging` s1→s3, домен, Playwright `E2E_BASE_URL` (webServer скипается), redirect URI auth-hub. Доки: deployment.md (воркфлоу), e2e-testing.md (конвенция + чек-лист подключения app), §15.3.1 отметить Этап A | 🟡 код готов и закоммичен (`apps/dashboard-agent/src/routes/e2e.ts`, `run_e2e`/`e2e_status`/`checkE2eGate` в `libs/deploy-mcp`, доки deployment.md/README deploy-mcp) — lint+typecheck зелёные. **s3 теперь живой** (см. Сессию C) — блокер снят, живой пилот на grandslamcup ещё не начат                                                                                          |
+| #     | Содержимое                                                                                                                                                                                                                                                                                                                        | Статус                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | Харденинг `deploy-affected.sh`: миграции fail=abort (различать «нет миграций» от ошибки), pg_dump перед миграцией (`/home/deploy/pre-migrate-dumps/`, ротация 3), sha-теги образов (ретеншн 3). `--dry-run` + shellcheck; боевой прогон на низкорисковом app. Доки: deployment.md, backup-architecture.md                         | ✅ задеплоено на `time`, подтверждено BlackCove; + self-re-exec фикс `63bcada`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **B** | `libs/infra-config`; dashboard-agent: серверный guard, `docker-compose.s3.yml`, консолидация production.yml/s2.yml (уточнить у BlackCove какой живой); коммит правок сессии №49 (deploy.ts, server-config.ts, cron.ts). Доки: README/CHANGELOG dashboard-agent, repo-structure.md, deployment.md (таблица серверов)               | ✅ коммиты `8498c06`, `a1772cf`; guard-тест вместо прямого импорта (Docker-изоляция); s2.yml удалён                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **C** | `libs/deploy-mcp` + `.mcp.json`; деплой dashboard-agent на s3 + закрытие порта 3100 — через BlackCove. Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md (строка MCP)                                                                                                                   | ✅ BlackCove задеплоил `time` через `deploy_app` (exitCode 0): deployId + sinceLine + self-re-exec + SOPS — все подтверждены вживую. Попутно 2 бага `/api/deploy/app` (SOPS-проброс `4d970e7` + sudo env-reset `1160e9e`). **s3-инстанс поднят и healthy** (loopback `127.0.0.1:13103`, HEAD `f21334bf`) — порт 3100 на s3 закрыт даром, s2 всё ещё торчит наружу (отдельный заход)                                                                                                                                         |
+| **D** | Роут `e2e.ts` (run/status + `.last-e2e-status`), tools `run_e2e`/`e2e_status`, warn-gate; пилот grandslamcup: `.env.staging` s1→s3, домен, Playwright `E2E_BASE_URL` (webServer скипается), redirect URI auth-hub. Доки: deployment.md (воркфлоу), e2e-testing.md (конвенция + чек-лист подключения app), §15.3.1 отметить Этап A | ✅ **живой пилот завершён 2026-07-11** (сессии №55–61): `deploy_app(staging)` → `run_e2e` → `e2e_status` прогнан end-to-end, **24/28 passed**, `03-admin.spec.ts` (auth-цепочка) зелёный. По пути найдены и закрыты 5 багов — 3 в `@letar/auth` (dev-session по `NODE_ENV`, редирект на `0.0.0.0`, `__Secure-` cookie), 1 в `dashboard-agent` (privilege-drop терял env), 1 в `global-setup.ts` самого e2e-раннера. Оставшиеся 4/28 — тестовые locator/данные, не блокируют пайплайн (см. `apps/grandslamcup/PLAN.md` п.37) |
 
-### §18.6 Фаза 3 (roadmap, отдельное решение после недели warn-only)
+### §18.6 Фаза 3 — hard gate + `libs/deploy-engine` ✅ РЕШЕНО (2026-07-11)
 
-Hard gate; уход от bash-ядра — **выбор между** (а) `libs/deploy-engine` TS + docker-rollout
-(поэтапная миграция логики в dashboard-agent, zero-downtime поверх compose) и (б) **Kamal (§17)**
-(готовый rolling+rollback, но registry + вопрос NPM vs kamal-proxy). Оценка 2026-07-09: для монорепо
-с Nx-affected и уже построенной экосистемой dashboard-agent вариант (а) выглядит органичнее, но §17
-содержит рабочие обходы возражений (`proxy: false`, `--skip-build`) — решать на старте Фазы 3 по
-результатам эксплуатации Фаз 1–2. Автоматический rollback-эндпоинт поверх sha-тегов — в любом варианте.
+> **Решение (владелец):** вариант **(а) `libs/deploy-engine`** (TS + docker-rollout), не Kamal.
+> Причина: NPM/registry-трение Kamal постоянное (не разовая настройка — вечный обход дефолтного
+> поведения: свой `kamal-proxy` вместо уже работающего NPM, нужен registry или `--skip-build`-обход),
+> а zero-downtime rollout поверх текущего compose — ограниченная по объёму задача (health-check +
+> переключение порта + rollback по sha-тегу), которую сессия A уже частично закрыла (sha-теги
+> образов, pre-migrate dump, fail=abort). Kamal экономит время ровно на той части, которая у нас и
+> так почти готова, а платит монорепо за это постоянным трением с NPM/registry. §17 (Kamal) остаётся
+> в файле как справочный анализ, реализация не ведётся.
+>
+> **Hard gate — семантика (решено):** жёсткий блок без обхода. `deploy_app(production)` **отказывает**,
+> если `.last-e2e-status/<app>.json` для текущего коммита не `passed` (включая случай «файла нет» —
+> fail-closed, не fail-open). Никакого force-флага/override на старте — если понадобится обход для
+> экстренных случаев (сама e2e-инфраструктура легла, а прод чинить надо прямо сейчас), обсуждать
+> отдельно как следующий инцидент, не проектировать заранее.
+>
+> **Тираж (решено):** пока **только `grandslamcup`** — паттерн закрепляется на нём, следующее
+> приложение под staging-e2e не подключаем, пока пайплайн не отработает без ложных срабатываний.
+> Hard gate в Фазе 3 применяется только к приложениям с настроенным staging-e2e (сейчас — только
+> grandslamcup); остальные деплоятся как прежде, без gate, пока не подключены к пайплайну.
+>
+> **Пилот rollout (решено 2026-07-11):** zero-downtime rollout пилотируется на **`time`**
+> (низкорисковое, уже было пилотом сессий A и C), grandslamcup подключается вторым — когда
+> механизм проверен. Первый живой прогон непроверенного механизма замены контейнера не должен
+> идти на приложении с реальными пользователями.
+>
+> **Старт работ (решено 2026-07-11):** каркас движка (сессия E) — сразу, он не меняет поведение
+> деплоя; hard gate (сессия F) — только после чистой недели warn-only (после 2026-07-18) и
+> минимум одного живого warn-деплоя grandslamcup.
+
+#### Архитектура deploy-engine (проработана 2026-07-11, ресёрч: docker-rollout-паттерн + agentic/MCP-практики)
+
+**Форма — lib + CLI на хосте.** `@letar/deploy-engine` — Nx-библиотека с bin-входом, исполняется
+на хосте `bun run` из `/home/deploy/letar`. dashboard-agent вызывает её тем же паттерном, что
+сейчас bash — `spawn('nsenter', hostExecArgs([...]))` (`deploy.ts:414-428`). Встраивание в
+dashboard-agent отвергнуто: его Dockerfile изолирован от `libs/` (прецедент — локальная копия
+`server-config.ts`), а движку нужны docker/compose/git/SOPS хоста. Подкоманды: `doctor`,
+`rollout`, `rollback`, `status`. Docker/compose/git-вызовы — через инжектируемый executor
+(тестируемость без живого Docker).
+
+**Zero-downtime — docker-rollout-паттерн с network alias.** Scale=2 compose-сервиса `app` +
+**network alias `<app>-app`** на `premium-network`: сервис у всех приложений называется `app`,
+голый service-name DNS коллидировал бы между проектами, а alias сохраняет текущий NPM Forward
+Host (`<app>-app`) без изменений. Изменения compose (production, только у подключаемых
+приложений): убрать `container_name` и `ports` у app, добавить alias + healthcheck +
+`image: <app>:${DEPLOY_TAG:-latest}` + `stop_grace_period`. Последовательность:
+`up -d --no-recreate --scale app=2` → wait healthy нового контейнера → `nginx -s reload`
+(nginx резолвит оба IP, `proxy_next_upstream` прикрывает окно) → graceful stop + rm старого →
+повторный reload. Риски: multi-IP поведение NPM (проверяется пилотом непрерывным curl), двойная
+RAM на время rollout, SSE/WebSocket рвутся при остановке старого (принять). **Fallback:**
+blue-green с переключением Forward Host через NPM REST API (уже автоматизирован для s3) —
+документируется, включается только если DNS-путь провалится на пилоте. Staging s3 остаётся на
+force-recreate (маршрутизация через `172.17.0.1:host-port`, простой некритичен).
+
+**Strangler-миграция из bash.** Первым в TS уходит только блок `deploy-affected.sh:977`
+(`docker compose up -d --force-recreate` — единственный шов простоя, окно 5–10 мин). Механизм
+opt-in: label `letar.rollout: 'true'` в compose приложения → bash ветвится на
+`bun run ... rollout --app X` либо идёт старым путём; откат = убрать label. В bash остаются
+надолго (работают, перенос не даёт ценности): sudo re-exec, SOPS, git pull + self-re-exec,
+bun install, affected-детекция, pre-migrate dump, migrate deploy, nx build, docker build +
+sha-теги. `dashboard`/`dashboard-agent` исключены из rollout (спецпути: systemd-run
+self-deploy / собственный контейнер).
+
+**Hard gate — в deploy-mcp, fail-closed.** Gate остаётся в deploy-mcp (единственный компонент,
+видящий оба сервера; s2-агент физически не может прочитать `.last-e2e-status` на s3). Новый
+экспорт **`E2E_GATED_APPS`** в `libs/infra-config` (канон рядом с `SERVER_APPS`, сейчас
+`['grandslamcup']`). Для gated-приложений `checkE2eGate` (`libs/deploy-mcp/src/server.ts:46-91`)
+блокирует по **любой** ветке: файла нет / `passed=false` / `commitSha ≠ HEAD` / age > 24h /
+s3 недоступен / ошибка запроса. Ответ при блоке — диагностичный (agentic-паттерн «эскалация с
+готовой диагностикой»): причина + фактический статус (sha/время/результат) + шаги устранения
+(`deploy_app(staging)` → `run_e2e` → повторить). Не-gated приложения — warn-only как сейчас.
+Без force-флага; аварийный канал — ручной SSH (документирован как incident-путь).
+
+**Rollback — команда + эндпоинт + MCP-tool.** `rollback --app X [--to-sha Y]` = тот же
+rollout-механизм с `DEPLOY_TAG=<sha>` без пересборки, тоже zero-downtime. Поверх:
+`POST /api/deploy/rollback` в dashboard-agent (async deployId-паттерн) + tool `deploy_rollback`
+в deploy-mcp. Движок ведёт **deploy-manifest** `.deploy-manifest/<app>.json` — история
+`{sha, imageTag, migrationsApplied[], timestamp, deployId}`: audit trail + источник
+«предыдущего sha». Миграции БД **не откатываются автоматически**: rollback выполняется, но
+возвращает `migrationWarning` (список миграций + путь к pre-migrate дампу). Агент может дёргать
+rollback автономно (обратимая операция — agentic-практика); восстановление дампа — только
+человек (уничтожает данные после миграции).
+
+**Healthcheck-стандартизация через doctor.** Факт: app-healthcheck есть только у 5/23 приложений
+(dashboard, dashboard-agent, grandslamcup, svoichuzhie, umami). Стандарт — профиль grandslamcup
+(`wget --spider`, interval 5s, retries 30, start_period 15s; при подключении желателен выделенный
+`/api/health`, чтобы не зависеть от тяжёлой главной). `deploy-engine doctor --app X` валидирует
+compose (healthcheck, alias, нет container_name/ports, DEPLOY_TAG, label); **rollout отказывается
+работать без пройденного doctor**. Healthcheck добавляется per-app в той же пачке, что и
+включение rollout — не big-bang.
+
+**Ключевые файлы будущей реализации:** `deploy-affected.sh:930-1040` (шов интеграции rollout),
+`libs/infra-config/src/index.ts` (`E2E_GATED_APPS`), `libs/deploy-mcp/src/server.ts:46-91`
+(`checkE2eGate` → hard gate), `apps/dashboard-agent/src/routes/deploy.ts` (паттерн
+nsenter-spawn/deployId для rollback-эндпоинта), `apps/grandslamcup/docker-compose.production.yml`
+(эталон compose-миграции).
+
+#### Сессии Фазы 3 (продолжение нумерации A–D)
+
+| #     | Условие старта                           | Содержимое                                                                                                                                                                 | DoD                                                                                                                                                                     |
+| ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **E** | можно сразу                              | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | lint/typecheck/test зелёные; `doctor --app grandslamcup` на s2 (вручную по SSH) выдаёт корректный отчёт готовности/неготовности                                         |
+| **F** | после 2026-07-18 + ≥1 живого warn-деплоя | Hard gate: `E2E_GATED_APPS` в infra-config, блок fail-closed в deploy-mcp, диагностичный ответ при блоке, тесты всех 6 веток                                               | Живой блок прод-деплоя grandslamcup без свежего e2e (с полной диагностикой); цепочка staging→e2e→prod проходит; `time` (не gated) деплоится как раньше                  |
+| **G** | после E                                  | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | Живой прод-деплой time через rollout при непрерывном curl-мониторинге — 0 отказов; multi-IP поведение NPM подтверждено; возврат label = старый путь работает (fallback) |
+| **H** | после G                                  | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                |
+| **I** | после F+H                                | grandslamcup на полный стек (gate+rollout+rollback) + доки (deployment.md — rollout/rollback, e2e-testing.md), отметка DoD §18 Фаза 3 с датой включения hard gate          | Живой gated-деплой grandslamcup через rollout; блок при несвежем e2e воспроизведён                                                                                      |
+| **J** | после I, растяжимая                      | Тираж на остальные приложения пачками 3–5 через doctor-чек-лист; проверка, что host-порты нигде больше не используются (мониторинг!); blue-green fallback задокументирован | Все SERVER_APPS кроме dashboard/dashboard-agent на rollout; старый путь сохранён как fallback                                                                           |
 
 ### DoD §18 (Фазы 1–2)
 
 - [x] Сессия A: sha-теги на образах ✅ (`time:63bcadacd`/`time:1160e9e46`); pre-migrate дамп/abort — код есть, на `time` миграций не было (нужен app с миграцией для полной проверки)
 - [x] Сессия B: `nx lint/typecheck` зелёные ✅; guard staging/production в deploy.ts ✅
 - [x] Сессия C: BlackCove задеплоил `time` через `deploy_app` (не SSH), exitCode 0 ✅. s3-инстанс поднят и healthy (loopback `13103`, порт закрыт от интернета даром) — **s2 порт 3100 всё ещё торчит наружу** (отдельный заход)
-- [ ] Сессия D: код готов (роут + tools + warn-gate, lint/typecheck зелёные), s3 теперь живой (блокер снят). Осталось: живой прогон полного цикла на grandslamcup — staging → e2e (json записан) → prod с зелёным gate; warn при испорченном json
-- [ ] Неделя warn-only без ложных срабатываний → решение о hard gate (Фаза 3)
+- [x] Сессия D: живой прогон полного цикла на grandslamcup завершён 2026-07-11 — `deploy_app(staging)` → `run_e2e` → `e2e_status`, 24/28 passed, `03-admin.spec.ts` (auth-цепочка через warn-gate) зелёный
+- [ ] Неделя warn-only без ложных срабатываний → решение о hard gate (Фаза 3) — отсчёт начинается с 2026-07-11
 
 ---
 
