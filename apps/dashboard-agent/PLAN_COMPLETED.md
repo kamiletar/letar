@@ -2,6 +2,21 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.3 — run_e2e не переключался на deploy-пользователя, root-owned `.nx` ломал деплои (§18 Сессия №60, 2026-07-11)
+
+Найдено BlackCove на живом staging-прогоне grandslamcup: в отличие от `deploy-affected.sh`
+(гвард `DEPLOY_AS_ROOT` в самом начале, до любого касания `.nx`), `nxCommand` в `routes/e2e.ts`
+запускался через `nsenter` без переключения с root на `deploy` — контейнер dashboard-agent
+privileged, `nsenter -t 1` наследует root. Каждый `run_e2e` на s3 создавал root-owned
+`.nx/workspace-data` и `apps/<app>-e2e/test-output`, которые потом ломали следующий
+`deploy_app`/`run_e2e` (`EACCES` при сборке `zenstack-form-plugin`) — приходилось вручную
+`chown -R deploy:deploy` после каждого прогона.
+
+**Фикс:** та же guard-логика, что в `deploy-affected.sh`, встроена прямо в собираемую
+shell-строку: `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H
+-- bash -c '<nx-команда>'; fi; <nx-команда>` — с фолбэком на прямой запуск, если пользователя
+`deploy` нет (например, локальная отладка не от root). `0.7.2 → 0.7.3`.
+
 ## Версия 0.7.1 — e2e-раннер: nsenter вместо прямого spawn, закрыта command injection (§18 Сессия D, 2026-07-11)
 
 Первый живой staging-пилот (grandslamcup, домен `grandslamcup-stage.s3.letar.best`) сразу вскрыл баг в `routes/e2e.ts` (реализован в предыдущей сессии, но ни разу не запускался вживую).
