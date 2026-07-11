@@ -34,7 +34,13 @@ export { AuthError, createAuthGuards, type GuardOptions } from './guards'
 export { createSessionHelpers, type AuthInstance } from './session'
 
 // Factories
-export { createLogoutAction, type LogoutActionOptions } from './factories'
+export {
+  createDevSessionRoute,
+  createLogoutAction,
+  type CreateDevSessionRouteOptions,
+  type DevSessionPrismaClient,
+  type LogoutActionOptions,
+} from './factories'
 
 // Auth factory (Этап 1.5 + Этап 8)
 export { createAuth, createAuthAsync } from './create-auth'

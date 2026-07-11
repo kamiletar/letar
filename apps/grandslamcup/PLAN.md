@@ -3020,15 +3020,24 @@ apps/grandslamcup/
       перегенерирован через `openssl rand -hex 32` (без спецсимволов; для чего угодно, что
       интерполируется в connection string — `-hex`, не `-base64`).
     - ⚠️ **Осталось 10/28, разбито по категориям:**
-      - **7 — все `03-admin.spec.ts`.** `/api/auth/dev-session` жёстко проверяет
-        `NODE_ENV === 'production'`, но Next.js standalone-сборка (`next build`) **всегда**
-        выставляет `NODE_ENV=production` — dev-session структурно не может работать на собранном
-        staging-образе. Плюс `global-setup.ts` `waitForURL('**/admin**')` ложно совпадает с самим
-        URL dev-session (`redirect=/admin` в query) — все прошлые прогоны рапортовали «Admin
-        авторизован» даже получив 403, маскируя проблему. **➡️ Следующая задача (архитектурное
-        решение, не тривиальный фикс):** заменить проверку `NODE_ENV` на отдельный флаг
-        (`ALLOW_DEV_SESSION=true` или аналог) — нужно решить, как не открыть дверь на реальном
-        проде при этом.
+      - **7 — все `03-admin.spec.ts`.** ✅ **Архитектурная причина закрыта системно (не только в
+        grandslamcup).** `/api/auth/dev-session` проверял `NODE_ENV === 'production'`, но Next.js
+        production-билд (`next build`/`next start`, которым собирается и staging-образ) **всегда**
+        выставляет `NODE_ENV=production` — проверка была структурно сломана на любом staging.
+        Дополнительно `global-setup.ts` `waitForURL('**/admin**')` ложно совпадал с самим URL
+        dev-session (`redirect=/admin` в query) — все прошлые прогоны рапортовали «Admin
+        авторизован» даже получив 403, маскируя проблему.
+        **Решение:** роут вынесен в переиспользуемую фабрику `createDevSessionRoute` в
+        `@letar/auth/server` (0.8.0) — двойная защита `ALLOW_DEV_SESSION=true` (флаг) +
+        `DEV_SESSION_TOKEN` (секретный токен, constant-time сравнение); обе переменные живут
+        только в `.env.staging`, никогда в `.env.docker` (см. `.claude/rules/env-files.md`). Даже
+        если флаг случайно просочится в прод-конфиг, без отдельно сгенерированного токена роут не
+        откроется. `global-setup.ts` больше не доверяет URL-паттерну — проверяет, что cookie
+        `better-auth.session_token` реально установлена. Паттерн задокументирован в
+        `.claude/docs/e2e-testing.md` для тиража на будущие staging-e2e приложения (§18.6).
+        Осталось: сгенерировать `DEV_SESSION_TOKEN` на s3 (`openssl rand -base64 32`), прописать
+        `ALLOW_DEV_SESSION=true` + `DEV_SESSION_TOKEN` в `.env.staging` на s3, пересобрать
+        staging-образ, повторить `run_e2e` — вне доступа этой сессии (нужен BlackCove).
       - **2 — locator strict-mode violations** («переход на Расписание», «переход на Команды») —
         не продакшн-баги, нужно уточнить селекторы теста.
       - **1 — «Ближайшие матчи» не рендерится** на `/spb` — вероятно, в анонимизированном
@@ -3717,26 +3726,28 @@ PlayerRating      — личный зачёт поэта
 
 ## Preview-авторизация для аудита и e2e
 
-Dev-only endpoint `/api/auth/dev-session` создаёт сессию без OIDC (заблокирован в production).
+Dev-only endpoint `/api/auth/dev-session` создаёт сессию без OIDC — через переиспользуемую фабрику
+`createDevSessionRoute` из `@letar/auth/server` (0.8.0+, см. корневой `PLAN.md` §18). Защищён
+явным флагом `ALLOW_DEV_SESSION=true` + секретным `DEV_SESSION_TOKEN` (**не** `NODE_ENV` — в
+production-билде Next.js `NODE_ENV` всегда `'production'`, включая staging-образ). Обе переменные
+заданы в `.env.local` (dev) и должны быть в `.env.staging` на s3 — **никогда** в `.env.docker`.
 
 **Админ в БД:** `admin@grandslamcup.ru`, roles: {ADMIN, USER}
 
 **Использование в preview:**
 
 ```javascript
-// После preview_start — навигируем на dev-session endpoint:
-window.location.href = '/api/auth/dev-session?email=admin@grandslamcup.ru&redirect=/admin'
+// После preview_start — навигируем на dev-session endpoint (token — из DEV_SESSION_TOKEN окружения):
+window.location.href = '/api/auth/dev-session?email=admin@grandslamcup.ru&redirect=/admin&token=<DEV_SESSION_TOKEN>'
 // → Создаёт Session в БД, подписывает cookie (Hono HMAC-SHA256), редиректит
 ```
 
-**Для e2e тестов (Playwright):**
+**Для e2e тестов (Playwright)** — см. `apps/grandslamcup-e2e/src/global-setup.ts`: токен передаётся
+через query, успех проверяется по факту установки cookie `better-auth.session_token`, а не по
+`waitForURL` (ложно совпадает с самим URL dev-session).
 
-```typescript
-await page.goto('/api/auth/dev-session?email=admin@grandslamcup.ru&redirect=/admin')
-await page.waitForURL('/admin')
-```
-
-**Файл:** `src/app/api/auth/dev-session/route.ts`
+**Файлы:** `src/app/api/auth/dev-session/route.ts` (тонкая обёртка), `libs/auth/src/server/
+factories/create-dev-session-route.ts` (общая логика).
 
 ---
 

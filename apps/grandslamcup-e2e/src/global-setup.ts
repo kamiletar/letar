@@ -1,6 +1,10 @@
 /**
  * Глобальная настройка: авторизация admin через dev-session endpoint.
  * Сохраняет storageState для тестов, требующих авторизации.
+ *
+ * ⚠️ НЕ проверяет успех по `waitForURL` — dev-session редиректит на `?redirect=/admin` даже
+ * в query-строке своего собственного 403-ответа, так что URL-паттерн ложно совпадает и с
+ * провалом, и с успехом. Проверяем реальный результат: cookie сессии либо установлена, либо нет.
  */
 
 import type { FullConfig } from '@playwright/test'
@@ -10,8 +14,16 @@ import { resolve } from 'node:path'
 
 export const ADMIN_STORAGE_STATE = resolve(__dirname, '../playwright/.auth/admin.json')
 
+const SESSION_COOKIE_NAME = 'better-auth.session_token'
+
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0]?.use?.baseURL || 'http://localhost:3016'
+  const devSessionToken = process.env.DEV_SESSION_TOKEN
+  if (!devSessionToken) {
+    throw new Error(
+      '[Global Setup] DEV_SESSION_TOKEN не задан в окружении e2e-раннера — без него dev-session вернёт 403'
+    )
+  }
 
   // Создаём директорию для auth state
   const authDir = resolve(__dirname, '../playwright/.auth')
@@ -25,8 +37,21 @@ export default async function globalSetup(config: FullConfig) {
   const page = await context.newPage()
 
   try {
-    await page.goto(`${baseURL}/api/auth/dev-session?email=admin@grandslamcup.ru&redirect=/admin`)
-    await page.waitForURL('**/admin**', { timeout: 30_000 })
+    const params = new URLSearchParams({
+      email: 'admin@grandslamcup.ru',
+      redirect: '/admin',
+      token: devSessionToken,
+    })
+    await page.goto(`${baseURL}/api/auth/dev-session?${params.toString()}`)
+
+    const cookies = await context.cookies()
+    const sessionCookie = cookies.find((cookie) => cookie.name === SESSION_COOKIE_NAME)
+    if (!sessionCookie) {
+      throw new Error(
+        `[Global Setup] dev-session не установил cookie '${SESSION_COOKIE_NAME}' — вероятно 403 ` +
+          '(ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере) или ошибка авторизации'
+      )
+    }
 
     // Сохраняем cookies в storageState
     await context.storageState({ path: ADMIN_STORAGE_STATE })

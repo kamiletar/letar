@@ -44,3 +44,13 @@ alwaysApply: true
 **Симптом пропущенного шага 2:** значение есть в `.env.docker` (расшифровано, `docker exec ... env` его не показывает), но контейнер падает/отдаёт 500 как будто переменной нет. Внутри контейнера: `docker exec <app>-app sh -c 'env | grep MY_VAR'` → пусто.
 
 > Прецедент: Этап 8 auth-hub добавил `AUTH_ENCRYPTION_KEY` в `.env.docker.enc`, но не в `environment:` compose → `db.ts` бросал throw в production → 500 на всех страницах SSO (commit `225fb4f`).
+
+## ⛔ `ALLOW_DEV_SESSION` / `DEV_SESSION_TOKEN` — ТОЛЬКО в `.env.staging`
+
+Приложения со staging-e2e через `@letar/auth/server` `createDevSessionRoute` (см. grandslamcup) держат в `.env.staging` пару переменных, открывающую бэкдор-эндпоинт `/api/auth/dev-session` — создание сессии для **любого** email без пароля/OIDC.
+
+**Причина отдельного правила:** проверка `NODE_ENV === 'production'` НЕ годится как защита — `next build`/`next start` (production-билд, которым собирается и staging-образ) всегда выставляет `NODE_ENV=production` независимо от реального окружения. Единственная защита — явный флаг + секретный токен, оба задаются вручную per-окружение.
+
+- **`ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` НИКОГДА не попадают в `.env.docker`/`.env.docker.enc`** — даже случайно, даже временно. Если они окажутся в прод-конфиге вместе — эндпоинт открыт на реальном проде.
+- Генерировать `DEV_SESSION_TOKEN` только через `openssl rand -base64 32` (см. [security.md](/.claude/rules/security.md)), не переиспользовать между приложениями/окружениями.
+- При копировании `.env.staging` как шаблона для нового окружения (staging → prod бэкапа/восстановления) — вручную вычищать эту пару переменных перед сохранением как `.env.docker`.

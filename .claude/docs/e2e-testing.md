@@ -336,6 +336,59 @@ await expect(page.getByRole('combobox')).toBeVisible() // Для select
 await expect(page.getByText('Ожидают:').first()).toBeVisible() // Для бейджа
 ```
 
+## E2E-логин без OIDC на staging: `NODE_ENV` не годится как индикатор окружения
+
+### Проблема
+
+`next build`/`next start` (production-билд, которым собирается и staging-, и прод-образ) **всегда**
+выставляет `NODE_ENV=production` независимо от реального окружения. Роут вида
+`/api/auth/dev-session`, охраняемый условием `if (process.env.NODE_ENV === 'production') return 403`,
+работает в `nx dev` (dev-сервер), но **структурно не может сработать на любом собранном образе** —
+включая staging, где он нужнее всего для e2e-логина без OIDC-провайдера.
+
+### Решение — `createDevSessionRoute` из `@letar/auth/server`
+
+Не пишите dev-session роут заново на каждое приложение — используйте общую фабрику с двойной
+защитой (явный флаг `ALLOW_DEV_SESSION=true` + секретный `DEV_SESSION_TOKEN`, сравниваемый
+constant-time):
+
+```typescript
+// apps/my-app/src/app/api/auth/dev-session/route.ts
+import { prisma } from '@/lib/db'
+import { createDevSessionRoute } from '@letar/auth/server'
+
+export const GET = createDevSessionRoute({
+  prisma,
+  authSecret: process.env.BETTER_AUTH_SECRET || '',
+  defaultEmail: 'admin@my-app.ru',
+  defaultRedirect: '/admin',
+})
+```
+
+Обе переменные (`ALLOW_DEV_SESSION`, `DEV_SESSION_TOKEN`) живут **только** в `.env.staging`,
+никогда в `.env.docker` — см. [env-files.md](/.claude/rules/env-files.md).
+
+### Ловушка в `global-setup.ts`: `waitForURL` даёт ложный успех
+
+Не проверяйте успех логина через `page.waitForURL('**/admin**')`, если сам dev-session роут
+принимает `redirect=/admin` в query-строке — этот паттерн совпадёт **и** с успешным редиректом,
+**и** с URL самого неудачного (403) запроса, если он попал в query до ответа. Прецедент:
+grandslamcup несколько прогонов подряд рапортовал «Admin авторизован» при фактическом 403 —
+маскировало настоящую причину провала 7 admin-тестов.
+
+```typescript
+// ❌ Ложный успех — URL-паттерн совпадает независимо от реального результата
+await page.goto(`${baseURL}/api/auth/dev-session?email=...&redirect=/admin`)
+await page.waitForURL('**/admin**', { timeout: 30_000 })
+
+// ✅ Проверяем факт — cookie сессии реально установлена
+await page.goto(`${baseURL}/api/auth/dev-session?email=...&redirect=/admin&token=${devSessionToken}`)
+const cookies = await context.cookies()
+if (!cookies.find((c) => c.name === 'better-auth.session_token')) {
+  throw new Error('dev-session не установил cookie — вероятно 403')
+}
+```
+
 ## Чеклист перед написанием E2E тестов
 
 - [ ] Click перед fill для всех input полей

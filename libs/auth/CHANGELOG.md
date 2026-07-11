@@ -7,6 +7,24 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-11
+
+### `createDevSessionRoute` — переиспользуемый dev-only логин без OIDC для staging-e2e
+
+**Added:**
+
+- `createDevSessionRoute(options)` — фабрика Next.js route handler'а, создающего Better Auth
+  сессию без пароля/OIDC для e2e-тестов и preview-аудита. Извлечено из grandslamcup (первого
+  приложения со staging-e2e пайплайном, §18 PLAN.md) в общую библиотеку, чтобы следующие
+  приложения не копипастили и не переизобретали защиту.
+- Двойная защита от случайного открытия на реальном проде: явный флаг
+  `process.env.ALLOW_DEV_SESSION === 'true'` + секретный `DEV_SESSION_TOKEN` (constant-time
+  сравнение). `NODE_ENV === 'production'` НЕ используется как индикатор — production-билд
+  Next.js (`next build`/`next start`, которым собирается и staging-образ) всегда выставляет
+  `NODE_ENV=production` независимо от реального окружения, поэтому старая проверка была
+  структурно сломана на staging.
+- `DevSessionPrismaClient`, `CreateDevSessionRouteOptions` — публичные типы.
+
 ## [0.3.0] - 2026-05-30
 
 ### ResendVerificationButton + UX при SMTP-ошибке (Этап 1.4 auth-унификации)

@@ -1,5 +1,35 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №58 (2026-07-11, §18 — системное решение по dev-session/NODE_ENV):** Закрыт
+> архитектурный блокер из сессии №57 (7 падений `03-admin.spec.ts`) — **системно, не точечным
+> фиксом в grandslamcup**, потому что §18.6 планирует тиражировать staging-e2e пайплайн на другие
+> приложения и следующий кандидат наступил бы на те же грабли.
+>
+> Роут `/api/auth/dev-session` вынесен в переиспользуемую фабрику **`createDevSessionRoute`** в
+> `@letar/auth/server` (0.7.0→0.8.0, `libs/auth/src/server/factories/create-dev-session-route.ts`).
+> Решение по защите (выбрано пользователем из 3 вариантов): **флаг + секретный токен**.
+> `ALLOW_DEV_SESSION === 'true'` включает роут, `DEV_SESSION_TOKEN` сравнивается constant-time
+> (`node:crypto timingSafeEqual`) с параметром `token`/заголовком `x-dev-session-token`. Fail-closed:
+> если флаг включён, но токен не задан — 403, а не открытый доступ. Даже случайная утечка флага в
+> прод-конфиг не открывает бэкдор без отдельно сгенерированного токена.
+>
+> **Новое правило в `env-files.md`:** `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` — только
+> `.env.staging`/`.env.local`, никогда `.env.docker`/`.env.docker.enc`.
+>
+> Заодно починена ложноположительная проверка в `apps/grandslamcup-e2e/src/global-setup.ts` —
+> `waitForURL('**/admin**')` совпадал с URL и успешного, и провального (403) запроса из-за
+> `redirect=/admin` в query dev-session; теперь проверяется факт установки cookie
+> `better-auth.session_token`.
+>
+> Паттерн (проблема + решение + анти-паттерн `waitForURL`) задокументирован в
+> `.claude/docs/e2e-testing.md` — новый раздел «E2E-логин без OIDC на staging». `apps/grandslamcup/
+PLAN.md` (пункт про `03-admin.spec.ts`) и `.env.staging.example`/`.env.local` обновлены.
+>
+> **➡️ Следующий старт:** BlackCove — сгенерировать `DEV_SESSION_TOKEN` (`openssl rand -base64 32`)
+> и прописать `ALLOW_DEV_SESSION=true`+`DEV_SESSION_TOKEN` в `.env.staging` на s3, пересобрать
+> staging-образ (подтянет `@letar/auth` 0.8.0), повторить `run_e2e` — ожидается закрытие всех 7
+> `03-admin.spec.ts`. Локаторные (2) и данные-related (1) провалы — отдельная небольшая задача.
+
 > **Сессия №57 (2026-07-11, §18 — снепшот пересобран, 3/28→18/28, найден архитектурный блокер):**
 > BlackCove пересоздал staging-снепшот с фиксом анонимизации. По пути найдено ещё 2 бага:
 > (1) в `.env.staging` не было `DATABASE_URL` — скрипты подхватывали закоммиченный dev `.env`
