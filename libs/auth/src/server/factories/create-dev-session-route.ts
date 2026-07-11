@@ -85,6 +85,16 @@ function timingSafeEqualStr(a: string, b: string): boolean {
  *    просочится в прод-конфиг (копипаста, утечка `.env.staging`), роут всё равно не откроется без
  *    знания токена — токен генерируется отдельно и не путешествует вместе с флагом.
  *
+ * ⚠️ **TODO (архитектурный компромисс):** cookie подписывается вручную по формату `better-call`
+ * (см. `signCookieValue`/`getSignedCookie` в `better-call/dist/crypto.mjs`+`context.mjs` — не
+ * публичный API, найдено чтением исходников при разборе бага №3 из §18 корневого `PLAN.md`), а не
+ * через `auth.api.signInEmail`/аналог. Если Better Auth в будущей мажорной/минорной версии сменит
+ * формат подписи или имя cookie — эта фабрика молча разойдётся с ним: `getSession()` перестанет
+ * находить сессию, а cookie при этом продолжит выглядеть валидной снаружи (тот же класс бага, что
+ * уже трижды ловили здесь). Стоит завести unit/integration-тест, который создаёт сессию через
+ * `createDevSessionRoute` и проверяет, что реальный `auth.api.getSession()` конкретного приложения
+ * (или тестовый `betterAuth()`-инстанс) её распознаёт — сейчас такого теста нет.
+ *
  * @example
  * ```typescript
  * // apps/my-app/src/app/api/auth/dev-session/route.ts
