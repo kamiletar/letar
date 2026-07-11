@@ -4,12 +4,21 @@
 
 ## Серверная архитектура
 
+⚠️ **Таблица ниже устарела** (s1 выведен из эксплуатации, актуальный список приложений по
+серверам — [deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов)).
+Оставлена как есть до отдельного аудита всех proxy hosts; секция **NPM на s3** ниже — актуальна
+(добавлена 2026-07-11).
+
 | Сервер            | Приложения                                       | NPM               | Примечания        |
 | ----------------- | ------------------------------------------------ | ----------------- | ----------------- |
 | **s1.letar.best** | mandala, kami, pravda, animatrona-landing, umami | npm.s1.letar.best | + dashboard-agent |
 | **s2.letar.best** | driving-school, dashboard                        | npm.s2.letar.best | Dashboard здесь   |
+| **s3.letar.best** | staging-домены приложений + e2e-раннер           | (без поддомена)   | См. раздел ниже   |
 
-**Docker сеть:** `premium-network` (одинаковая на обоих серверах)
+**Docker сеть:** `premium-network` (s1/s2). На s3 у NPM собственная сеть `npm_default` —
+staging-приложения форвардятся через **хост-гейтвей** (`172.17.0.1:<хостовый-порт>`), не через
+`docker network connect` (NPM и staging-compose живут в разных Docker-сетях, разные жизненные
+циклы — `docker network connect` пережил бы `compose down` staging-приложения расхождением).
 
 ## Быстрый старт
 
@@ -52,6 +61,28 @@ docker compose up -d
 | svoichuzhie.letar.best        | svoichuzhie-app        | 3021 | LE  | Staging (noindex)    |
 | gateway.letar.best            | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache |
 | npm.s2.letar.best             | localhost              | 81   | LE  | Админка NPM s2       |
+
+### NPM на s3 (обнаружен и задокументирован 2026-07-11 — БД `admin@letar.best`, см. `reference_npm_s3.md` в памяти агента)
+
+Поднят кем-то ранее без записи в этот файл — обнаружен по факту (`docker ps`) при первом живом
+staging-пилоте (§18 Сессия D). Публичные порты 80/81/443, отдельная Docker-сеть `npm_default` (не
+`premium-network` — s3 её вообще не использует).
+
+| Домен                            | Forward Host | Port | SSL | Примечания                                                                  |
+| -------------------------------- | ------------ | ---- | --- | --------------------------------------------------------------------------- |
+| grandslamcup-stage.s3.letar.best | `172.17.0.1` | 3018 | LE  | Staging grandslamcup, хост-гейтвей (не имя контейнера — другая Docker-сеть) |
+
+**Домены на s3 — один лейбл, не два** (`app-stage.s3.letar.best`, не `app.stage.s3.letar.best`):
+DNS покрыт существующим wildcard `*.s3 CNAME s3.letar.best`, который матчит только один лейбл
+перед `.s3.letar.best`. Двухлейбловый вариант потребовал бы отдельной DNS-записи.
+
+**SSL:** обычный Let's Encrypt HTTP-01 (не wildcard/DNS-01) — каждый staging-домен получает
+собственный сертификат через API `certificate_id: "new"`. Порт 80 на s3 уже публичен, DNS-01 не
+нужен и не настраивался.
+
+⚠️ После создания Proxy Host через API `ssl_forced` возвращается `false`, даже если запросить
+`true` — сертификат ещё не готов в момент создания хоста. Нужен отдельный `PUT` после того, как
+`certificate_id` в ответе перестал быть `null`.
 
 ## Специальные конфигурации
 

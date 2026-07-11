@@ -404,6 +404,19 @@ fi
 echo -e "${GREEN}✅ Dependencies installed${NC}"
 echo ""
 
+# Step 2.4: Build zenstack-form-plugin — gitignored dist/, не входит в bun install.
+# На свежем сервере (первый деплой ZenStack-приложения) zenstack:generate падает с
+# "Cannot find plugin module ../../libs/zenstack-form-plugin/dist/index.js" (обнаружено §18
+# Сессия D — s3, первый живой staging-деплой). nx build кэшируется, поэтому повторный вызов
+# на уже собранном дереве — почти мгновенный no-op, безопасно вызывать при каждом деплое.
+echo -e "${YELLOW}🔧 Ensuring @letar/zenstack-form-plugin is built...${NC}"
+if ! nx run @letar/zenstack-form-plugin:build; then
+  echo -e "${RED}❌ Failed to build @letar/zenstack-form-plugin (нужен для zenstack:generate)${NC}"
+  exit 1
+fi
+echo -e "${GREEN}✅ zenstack-form-plugin ready${NC}"
+echo ""
+
 # Step 2.5: Create cron-jobs.json if not exists (for Dashboard)
 if [ ! -f "cron-jobs.json" ] && [ -f "cron-jobs.example.json" ]; then
   cp cron-jobs.example.json cron-jobs.json
