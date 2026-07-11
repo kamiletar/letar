@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.4.0
+## Текущая версия: 0.7.1
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -30,9 +30,9 @@
 - [x] `@letar/infra-config` как канон + guard-тест сверки (НЕ прямой импорт — Dockerfile изолирован; локальная копия `server-config.ts` + `server-config.guard.spec.ts` ловит дрейф) — **закоммичено `8498c06`**
 - [x] `docker-compose.s3.yml`: SERVER_NAME s3, без прод-секретов `/secrets/*.env`, без `~/.ssh`, отдельный AGENT_TOKEN (раскладка через BlackCove при provision) — **сделано**
 - [x] Консолидация compose: `docker-compose.s2.yml` удалён как устаревший (живой — `production.yml`, подтвердил BlackCove через `docker inspect`; `driving-school-network` в s2.yml вестигиальный — `driving-school-db` на `premium-network`) — **сделано**
-- [ ] Роут `routes/e2e.ts`: `POST /api/e2e/run` (nx e2e с E2E_BASE_URL против staging), `GET /api/e2e/status`, запись `.last-e2e-status/<app>.json` (сессия D)
+- [x] Роут `routes/e2e.ts`: `POST /api/e2e/run`, `GET /api/e2e/status`, запись `.last-e2e-status/<app>.json` (сессия D) — реализован ранее, но первый живой прогон (2026-07-11, §18 Сессия D) сразу упал: `spawn nx ENOENT` (спавнил `nx` напрямую внутри контейнера, где nx физически нет). Исправлено на `nsenter -t 1 -m -u -n -i` в host-namespace, как в `deploy.ts` — заодно найдена и закрыта command injection (`project` из POST-body шёл в shell-строку без валидации). `0.7.0 → 0.7.1`.
 
-⚠️ На s2 крутится старая версия deploy API (без deployId, без guard) — передеплой dashboard-agent через BlackCove нужен до перевода BlackCove на deploy-mcp.
+✅ Передеплой s2 на новый deploy API выполнен (сессия C, см. корневой `PLAN.md` §18). s3-инстанс тоже поднят и живой (staging + e2e-раннер).
 
 | Задача                         | Статус  | Приоритет |
 | ------------------------------ | ------- | --------- |

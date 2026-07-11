@@ -2,6 +2,24 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.1 — e2e-раннер: nsenter вместо прямого spawn, закрыта command injection (§18 Сессия D, 2026-07-11)
+
+Первый живой staging-пилот (grandslamcup, домен `grandslamcup-stage.s3.letar.best`) сразу вскрыл баг в `routes/e2e.ts` (реализован в предыдущей сессии, но ни разу не запускался вживую).
+
+### `spawn nx ENOENT`
+
+`POST /api/e2e/run` спавнил `nx` напрямую в процессе dashboard-agent — но внутри контейнера нет ни воркспейса, ни бинарника `nx` (они существуют только на хосте s3). Симметрично багу, который уже чинили в `deploy.ts` (Сессия C) — деплой уже использовал `nsenter -t 1 -m -u -n -i` для выхода в host-namespace, e2e.ts этот приём не переиспользовал.
+
+**Фикс:** `spawn('nsenter', ['-t','1','-m','-u','-n','-i','--','bash','-c', 'cd <repo> && bunx nx e2e <app>-e2e ...'], { env })`. `env: { ...process.env, BASE_URL: baseUrl }` — nsenter наследует env спавна (тот же приём, что `SOPS_AGE_KEY_FILE` в deploy.ts).
+
+### Command injection, найденная по пути
+
+Переход на `bash -c` со строковой интерполяцией сделал параметр `project` из POST-body (ранее безобидный — шёл в `args` массивом для `spawn`) точкой command injection в **root-контекст хоста** (`nsenter -t 1` — полный выход из контейнера). Добавлена валидация `project` тем же regex, что у `app` (`^[a-z0-9-]+$`), до всякой интерполяции.
+
+### Результат первого живого прогона
+
+Инфраструктурно успешен (пайплайн `deploy_app(staging)` → `run_e2e` → `e2e_status` отработал end-to-end впервые). Содержательно 3/28 passed — не относится к dashboard-agent, см. `PLAN.md` §18 в корне репо и `apps/grandslamcup/PLAN.md`.
+
 ## Версия 0.6.0 — Deploy API для deploy-mcp (§18 Сессии B/C, 2026-07-10)
 
 Слой, над которым построен `libs/deploy-mcp` (MCP-деплой вместо сырого SSH). Работа велась в связке с BlackCove (deploy agent).
