@@ -41,6 +41,13 @@ services:
       - '127.0.0.1:13103:3100'
     env_file:
       - .env.docker
+      # Локальный, НЕ коммитится (.gitignore: .env.*), только на s3. Прокидывает
+      # DEV_SESSION_TOKEN/ALLOW_DEV_SESSION в spawn-окружение e2e-раннера (nsenter
+      # наследует env этого процесса, см. routes/e2e.ts) — сюда, а НЕ в .env.docker(.enc),
+      # по правилу из .claude/rules/env-files.md (эти две переменные никогда не должны
+      # попасть в прод-секреты). required:false — деплой не падает, если файла ещё нет.
+      - path: .env.s3-e2e.local
+        required: false
     environment:
       TZ: Europe/Moscow
       NODE_ENV: production
