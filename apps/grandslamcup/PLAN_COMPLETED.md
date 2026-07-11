@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич.
 
+## Три архитектурных бага `/api/auth/dev-session` на staging — закрыты системно через `@letar/auth` (§18 Сессии №58–60, 2026-07-11)
+
+Живой прогон staging-e2e (BlackCove) поочерёдно вскрыл три независимых бага в dev-session
+auth-бэкдоре, каждый маскировал следующий. Роут вынесен из grandslamcup в переиспользуемую
+фабрику `createDevSessionRoute` в `@letar/auth/server` (0.7.0 → 0.8.2), чтобы будущие
+staging-e2e приложения (§18.6 roadmap) не наступали на те же грабли.
+
+1. **`NODE_ENV === 'production'` не годится как индикатор окружения** — Next.js production-билд
+   (`next build`/`next start`, которым собирается и staging-образ) всегда выставляет
+   `NODE_ENV=production` независимо от реального окружения. Заменено на двойную защиту: явный
+   флаг `ALLOW_DEV_SESSION=true` + секретный `DEV_SESSION_TOKEN` (constant-time сравнение,
+   `node:crypto timingSafeEqual`), fail-closed если токен не настроен. Обе переменные — правило в
+   `.claude/rules/env-files.md`: только `.env.staging`/`.env.local`, никогда `.env.docker`.
+   Попутно починена ложноположительная проверка в `global-setup.ts` — `waitForURL('**/admin**')`
+   совпадал с URL и успешного, и 403-запроса (из-за `redirect=/admin` в query dev-session), маскируя
+   провал во всех прошлых прогонах; теперь проверяется факт установки cookie.
+2. **Редирект на bind-адрес `0.0.0.0`** — `new URL(redirect, request.url)` резолвился во
+   внутренний bind-адрес контейнера (Next.js standalone слушает `0.0.0.0`) за Docker port-forward
+   и NPM reverse-proxy, не в клиентский host:port. Cookie сессии ставилась корректно, но браузер
+   получал `307 → http://0.0.0.0:<port>/admin` → `ERR_CONNECTION_REFUSED`. Исправлено: base URL
+   резолвится из `x-forwarded-host`/`host` заголовков (+ `x-forwarded-proto`), фолбэк на
+   `request.url` если заголовков нет (локальный `nx dev`).
+3. **Cookie без `__Secure-` префикса** — Better Auth сам вычисляет имя cookie сессии через
+   `createCookieGetter` (better-auth internals): если `baseURL`/`BETTER_AUTH_URL` начинается с
+   `https://` (staging/prod), реальное имя — `__Secure-better-auth.session_token`, не голое
+   `better-auth.session_token`, и требует атрибут `Secure` (иначе браузер вообще не примет cookie
+   по спецификации `__Secure-` prefix, RFC 6265bis). Cookie физически создавалась и была валидна в
+   БД, но `getSession()` искал её под другим именем → `/admin` редиректил на `/sign-in`. Добавлена
+   опция `useSecureCookies` (по умолчанию — `BETTER_AUTH_URL?.startsWith('https://')`),
+   повторяющая логику самого Better Auth.
+
+Все три бага найдены и подтверждены на живом staging-прогоне (curl + прямые SQL-запросы к БД)
+агентом BlackCove; фиксы каждый раз коммитились и пушились в `origin/main` сразу после разбора.
+Побочно найден и починен связанный баг в `dashboard-agent`: `run_e2e` не переключался с root на
+`deploy` перед запуском nx (в отличие от `deploy-affected.sh`), оставляя root-owned `.nx`/
+`test-output` на s3 — фикс `apps/dashboard-agent/src/routes/e2e.ts` 0.7.2 → 0.7.3.
+
+Коммиты: `5a328c4` (NODE_ENV), `bf3fd3a` (редирект), `7d9d384` (cookie-префикс), `059a608`
+(dashboard-agent root-fix). Подробности — корневой `PLAN.md` §18 Сессии №58–60.
+
 ## Staging-пайплайн на s3 — реальный HTTPS-домен + анонимизированный прод-снепшот (§18 Сессия D, 2026-07-11)
 
 Первый живой прогон полного staging-gated пайплайна (deploy-mcp): `deploy_app(staging)` →
