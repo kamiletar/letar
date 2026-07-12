@@ -1,11 +1,10 @@
 services:
   # Rollout-профиль (§18.6, тираж после пилота time): нет container_name/ports (zero-downtime
   # требует scale=2), network alias вместо голого имени сети (сохраняет NPM Forward Host
-  # 'form-docs-app' без изменений, если он уже так настроен), healthcheck (стандарт grandslamcup/
-  # time), image через DEPLOY_TAG (rollback без пересборки). Label letar.rollout ПОКА
-  # закомментирован — раскомментировать только после обычного (не-rollout) деплоя, который
-  # подтвердит, что снятие публикации хост-порта 3020 не ломает NPM-роутинг для этого приложения
-  # (в отличие от time, у form-docs порт был реально опубликован, а не просто задан для памяти).
+  # 'form-docs-app' — подтверждено обычным деплоем 2026-07-12, снятие host-port publish не
+  # ломает роутинг), healthcheck (стандарт grandslamcup/time), image через DEPLOY_TAG. Label
+  # letar.rollout включён для supervised-пилота (сессия SwiftCastle, после подтверждающего
+  # обычного деплоя commit 4fbc414).
   app:
     image: form-docs:${DEPLOY_TAG:-latest}
     restart: always
@@ -24,8 +23,8 @@ services:
       retries: 30
       start_period: 15s
     stop_grace_period: 30s
-    # labels:
-    #   letar.rollout: 'true'
+    labels:
+      letar.rollout: 'true'
     networks:
       premium-network:
         aliases:
