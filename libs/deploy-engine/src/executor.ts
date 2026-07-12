@@ -22,7 +22,11 @@ export interface CommandResult {
 
 export interface DeployEngineExecutor {
   /** Запускает команду (docker/git/compose и т.п.) и возвращает результат без throw на ненулевой код. */
-  runCommand(command: string, args: string[], opts?: { cwd?: string }): Promise<CommandResult>
+  runCommand(
+    command: string,
+    args: string[],
+    opts?: { cwd?: string; env?: Record<string, string> },
+  ): Promise<CommandResult>
   /** Читает файл относительно корня репозитория; `null`, если файла нет. */
   readFile(path: string): Promise<string | null>
   /** Пишет файл относительно корня репозитория, создавая недостающие директории. */
@@ -45,7 +49,11 @@ export function createNodeExecutor(rootDir?: string): DeployEngineExecutor {
         execFile(
           command,
           args,
-          { cwd: opts?.cwd ?? root, maxBuffer: 10 * 1024 * 1024 },
+          {
+            cwd: opts?.cwd ? resolve(root, opts.cwd) : root,
+            env: opts?.env ? { ...process.env, ...opts.env } : process.env,
+            maxBuffer: 10 * 1024 * 1024,
+          },
           (error, stdout, stderr) => {
             const exitCode = error ? (typeof error.code === 'number' ? error.code : 1) : 0
             resolvePromise({ stdout: stdout.toString(), stderr: stderr.toString(), exitCode })

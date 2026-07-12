@@ -1,5 +1,43 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №66 (2026-07-12, §18.6 Сессия G — 🟡 `rollout` реализован, живой пилот НЕ проведён,
+> найден блокер миграции):** По разрешению владельца («деплой можешь сам дёргать без деплой
+> агента») продолжил без остановки на BlackCove. Реализовал `runRollout()` в `@letar/deploy-engine`
+> — полный docker-rollout-паттерн из §18.6 (doctor-гейт → `scale app=2` → poll healthy нового
+> контейнера `<project>-app-2` → `nginx -s reload` в `nginx-proxy-manager` (канонический
+> `container_name` подтверждён по `infra/nginx-proxy-manager/docker-compose.yml`) → stop+rm
+> старого `<project>-app-1` → повторный reload), каждый шаг короткозамкнут на первом провале.
+> 5 новых unit-тестов на мокнутом executor (полная последовательность, gate без doctor, провал на
+> каждом шаге, таймаут healthy) — 20/20 в либе. `deploy-affected.sh` (строка ~977) заветвлён по
+> label `letar.rollout: 'true'` в compose (grep по файлу) → вызывает `rollout` вместо
+> `--force-recreate`; ветка сейчас dead code — ни один compose ещё не выставляет label. Коммит
+> синтаксис проверен (`bash -n`).
+>
+> **🔴 Найден блокер (не в исходном плане §18.6):** `doctor`'ская проверка `no-container-name`
+> требует убрать `container_name` из compose (нужно для `--scale app=2`), но `apps/dashboard`
+> ищет контейнер приложения по **точному** имени (`DeployedApp.containerName` из
+> `prisma/seed.ts` + legacy `CONTAINER_NAME_MAP`, роуты `api/apps/[app]/{stats,status,logs}`) —
+> без `container_name` реальное имя становится `<project>-app-1` (дефолт compose), точное
+> совпадение ломается, Dashboard тихо теряет stats/logs/status для приложения. **Это ломается уже
+> на старом force-recreate пути**, не только при живом rollout — значит убирать `container_name`
+> небезопасно для ЛЮБОГО приложения, пока Dashboard не научится резолвить контейнер по network
+> alias/label вместо точного имени. Подготовил и локально проверил (`doctor --app time` — 6/7 ✅,
+> только label намеренно не выставлен) миграцию `apps/time/docker-compose.production.yml` под
+> rollout-профиль — **не закоммитил**, откатил (`git checkout --`), чтобы не сломать мониторинг
+> `time` в Dashboard следующим же обычным деплоем. Задокументировано в README `deploy-engine`.
+>
+> Код запушен (`libs/deploy-engine` + `deploy-affected.sh`), Dashboard/compose-миграция — нет.
+> Продакшен не трогал: и rollout, и branching в bash — код без побочных эффектов сегодня (label
+> нигде не установлен, `time` compose не менялся).
+>
+> **➡️ Следующий старт:** новая задача перед продолжением G — научить Dashboard резолвить
+> контейнер приложения по network alias (`<app>-app`) или Docker label вместо точного имени
+> (`apps/dashboard/src/app/api/apps/[app]/{stats,status,logs}/route.ts` + `CONTAINER_NAME_MAP` +
+> `DeployedApp.containerName`). Только после этого — миграция `time` (файл уже готов в этой
+> сессии, нужно будет пересоздать) → включение label → живой пилот rollout с непрерывным
+> curl-мониторингом (исходный DoD сессии G). Параллельно продолжается неделя warn-only e2e-gate
+> до 2026-07-18 (сессия F, независимая ветка).
+
 > **Сессия №65 (2026-07-11, §18.6 Сессия E — ✅ каркас `libs/deploy-engine`):** Реализован
 > Nx-lib `@letar/deploy-engine` (`libs/deploy-engine/`) по спецификации §18.6: интерфейс
 > `DeployEngineExecutor` (`runCommand`/`readFile`/`writeFile`/`fileExists`, продакшен-реализация

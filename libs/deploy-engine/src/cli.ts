@@ -11,7 +11,10 @@
 import { parseArgs } from 'node:util'
 import { type DoctorReport, runDoctor } from './doctor.js'
 import { createNodeExecutor } from './executor.js'
+import { type RolloutResult, runRollout } from './rollout.js'
 import { getStatus } from './status.js'
+
+const DEFAULT_NPM_CONTAINER = 'nginx-proxy-manager'
 
 function printDoctorReport(report: DoctorReport): void {
   console.log(`## doctor ${report.app} (${report.composePath})\n`)
@@ -20,6 +23,14 @@ function printDoctorReport(report: DoctorReport): void {
     console.log(`${icon} [${check.id}] ${check.description}${check.detail ? ` — ${check.detail}` : ''}`)
   }
   console.log(`\n${report.ready ? '✅ READY' : '❌ NOT READY'} — rollout ${report.ready ? 'разрешён' : 'заблокирован'}`)
+}
+
+function printRolloutResult(result: RolloutResult): void {
+  console.log(`## rollout ${result.app}\n`)
+  for (const step of result.steps) {
+    console.log(`${step.ok ? '✅' : '❌'} [${step.id}] ${step.description}${step.detail ? ` — ${step.detail}` : ''}`)
+  }
+  console.log(`\n${result.ok ? '✅ OK' : '❌ FAILED'}`)
 }
 
 function requireApp(rest: string[], usage: string): string {
@@ -49,8 +60,32 @@ async function main(): Promise<void> {
       console.log(JSON.stringify(status, null, 2))
       break
     }
+    case 'rollout': {
+      const usage =
+        'Использование: deploy-engine rollout --app <имя> [--deploy-tag <sha>] [--npm-container <имя>] [--project-name <имя>] [--env-file <файл>]'
+      const app = requireApp(rest, usage)
+      const { values } = parseArgs({
+        args: rest,
+        options: {
+          app: { type: 'string' },
+          'deploy-tag': { type: 'string' },
+          'npm-container': { type: 'string' },
+          'project-name': { type: 'string' },
+          'env-file': { type: 'string' },
+        },
+      })
+      const result = await runRollout(executor, app, {
+        deployTag: values['deploy-tag'],
+        npmContainerName: values['npm-container'] ?? DEFAULT_NPM_CONTAINER,
+        projectName: values['project-name'],
+        envFile: values['env-file'],
+      })
+      printRolloutResult(result)
+      process.exit(result.ok ? 0 : 1)
+      break
+    }
     default: {
-      console.error(`Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status`)
+      console.error(`Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout`)
       process.exit(2)
     }
   }

@@ -942,6 +942,7 @@ for app in $AFFECTED_APPS; do
   # Run docker-compose from app directory
   # Special handling for dashboard: when deploying itself, the container restart kills the deploy process
   # Solution: use systemd-run to start container in a separate transient unit
+  DEPLOY_SUCCEEDED=false
   if [ "$app" = "dashboard" ]; then
     echo -e "${YELLOW}⚠️  Dashboard self-deploy: using systemd transient unit for reliable restart${NC}"
 
@@ -971,11 +972,26 @@ RESTART_EOF
 
     echo -e "${GREEN}✅ Dashboard restart scheduled (nohup)${NC}"
     echo -e "${BLUE}ℹ️  Dashboard will restart in ~5 seconds${NC}"
-    DEPLOYED_APPS+=("$app")
-    save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
-    echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
+    DEPLOY_SUCCEEDED=true
+  elif grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?" "$COMPOSE_FILE" 2> /dev/null; then
+    # Strangler-переход на zero-downtime rollout (§18.6 Сессия G): opt-in через label
+    # letar.rollout: 'true' в docker-compose.production.yml сервиса app. Пока ни у одного
+    # приложения label не выставлен — эта ветка мертва до первого живого пилота (`time`).
+    # Откат = убрать label, старый force-recreate путь продолжает работать без изменений.
+    echo -e "${YELLOW}🔀 ${app}: label letar.rollout=true — zero-downtime rollout (libs/deploy-engine)${NC}"
+    GIT_SHORT_SHA_ROLLOUT=$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)
+    if (cd "$WORKSPACE_ROOT" && bun run libs/deploy-engine/src/cli.ts rollout --app "$app" --deploy-tag "$GIT_SHORT_SHA_ROLLOUT"); then
+      echo -e "${GREEN}✅ Rollout completed for ${app}!${NC}"
+      DEPLOY_SUCCEEDED=true
+    else
+      echo -e "${RED}❌ Rollout failed for ${app}${NC}"
+    fi
   elif docker compose -f $COMPOSE_FILE --env-file $ENV_FILE up -d --force-recreate app; then
     echo -e "${GREEN}✅ Deployment completed for ${app}!${NC}"
+    DEPLOY_SUCCEEDED=true
+  fi
+
+  if [ "$DEPLOY_SUCCEEDED" = true ]; then
     DEPLOYED_APPS+=("$app")
     save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
     echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
