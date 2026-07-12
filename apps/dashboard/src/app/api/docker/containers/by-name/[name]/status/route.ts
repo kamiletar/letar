@@ -6,6 +6,7 @@
  * - serverId: string (опционально) - ID сервера для запроса
  */
 
+import { findContainerByName } from '@/lib/server-client'
 import { getClientByServerId, updateServerLastSeen } from '@/lib/server-client/get-client-by-id'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -29,8 +30,9 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
       updateServerLastSeen(server.id)
     }
 
-    // Ищем контейнер по имени (Docker API: names=["/name"], agent: name="name")
-    const container = containers.find((c) => c.name === name || c.names?.some((n) => n === `/${name}` || n === name))
+    // Ищем контейнер по имени (Docker API: names=["/name"], agent: name="name") — точное
+    // совпадение или префикс <name>- (rollout-мигрированные приложения без container_name, §18.6)
+    const container = findContainerByName(containers, name)
 
     if (!container) {
       return NextResponse.json({ running: false, found: false })
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     console.error('Error in /api/docker/containers/by-name/[name]/status:', error)
     return NextResponse.json(
       { running: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

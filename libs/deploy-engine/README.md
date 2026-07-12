@@ -7,11 +7,14 @@ docker-rollout-паттерн поверх текущего production-compose �
 - rollback по sha-тегу — ограниченный объём работы).
 
 **Сессия E:** каркас — `doctor`, `status`, executor-инъекция, схема deploy-manifest.
-**Сессия G (текущая):** `rollout` — docker-rollout-паттерн, unit-тестирован против мокнутого
-executor'а; branching в `deploy-affected.sh` по opt-in label (пока dead code — ни один
-production-compose ещё не выставляет `letar.rollout: 'true'`, см. «Ограничения» ниже — миграция
-`time` заблокирована найденным конфликтом с dashboard). **Живой пилот не проводился.**
-`rollback` — сессия H, тем же принципом.
+**Сессия G:** `rollout` — docker-rollout-паттерн, unit-тестирован против мокнутого executor'а;
+branching в `deploy-affected.sh` по opt-in label (пока dead code — ни один production-compose ещё
+не выставляет `letar.rollout: 'true'`). Найденный конфликт с `apps/dashboard` (точное сравнение
+имени контейнера) — устранён (`findContainerByName`, см. «Ограничения» ниже),
+`apps/time/docker-compose.production.yml` мигрирован под rollout-профиль (`doctor --app time` —
+6/7 required ✅). **Живой пилот (включение label + прод-деплой с curl-мониторингом) не
+проводился** — следующий шаг, требует супервизии в реальном времени. `rollback` — сессия H, тем же
+принципом.
 
 ## Архитектура
 
@@ -84,17 +87,14 @@ const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-pro
   `rollback` — не реализован, сессия H (PLAN.md §18.6).
 - `doctor`/`rollout` работают только с production-compose. Staging остаётся на force-recreate
   (маршрутизация через `172.17.0.1:host-port`, простой некритичен) — вне скоупа.
-- **🔴 Найденный блокер миграции `time` (сессия G):** `doctor`'ская проверка `no-container-name`
-  требует убрать `container_name` из compose сервиса `app` (нужно для `--scale app=2` — Docker
-  Compose не даёт фиксированное имя контейнеру при scale>1). Но `apps/dashboard` хранит
-  `containerName` как **точное** имя контейнера в `DeployedApp` (реестр `prisma/seed.ts`) и ищет
-  контейнер по этому имени 1:1 (`apps/dashboard/src/app/api/apps/[app]/{stats,status,logs}/
-route.ts`, плюс legacy `CONTAINER_NAME_MAP`) — без `container_name` реальное имя контейнера
-  становится `<project>-app-1` (дефолтная нумерация compose), точное совпадение ломается, и
-  Dashboard тихо теряет docker stats/logs/status для этого приложения. Это ломается **уже на
-  старом force-recreate пути**, не только при живом rollout — поэтому убрать `container_name` из
-  compose небезопасно для ЛЮБОГО приложения, пока Dashboard не научится резолвить контейнер по
-  network alias (или label) вместо точного имени. Миграция `apps/time/docker-compose.production.yml`
-  подготовлена и проверена локально (`doctor --app time` — 6/7 required ✅, только label
-  отсутствует намеренно), но **не закоммичена** — блокер должен решаться отдельной задачей
-  (Dashboard: container discovery по alias/label) до подключения первого приложения к rollout.
+- **✅ Блокер миграции `time` устранён (сессия G, продолжение):** `doctor`'ская проверка
+  `no-container-name` требует убрать `container_name` из compose сервиса `app` (нужно для
+  `--scale app=2`), а `apps/dashboard` раньше искал контейнер приложения по **точному** имени
+  (`DeployedApp.containerName`, роуты `api/apps/[app]/{stats,status,logs}` + legacy
+  `CONTAINER_NAME_MAP`) — без `container_name` реальное имя контейнера становится `<project>-app-1`
+  (дефолтная нумерация compose), точное совпадение ломалось, и Dashboard тихо терял docker
+  stats/logs/status. Исправлено: `apps/dashboard/src/lib/server-client/find-container.ts` —
+  `findContainerByName()` принимает точное имя ИЛИ `<name>-N` с числовым суффиксом (не любой
+  префикс — не ловит несвязанные контейнеры вроде `<name>-worker`); подключено во всех 4 местах
+  точного сравнения. `apps/time/docker-compose.production.yml` мигрирован под rollout-профиль
+  (`doctor --app time` — 6/7 required ✅, label намеренно ещё закомментирован).

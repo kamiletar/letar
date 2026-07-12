@@ -1,5 +1,44 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №67 (2026-07-12, §18.6 Сессия G — 🟢 блокер снят, `time` мигрирован, живой пилот
+> ЕЩЁ НЕ проведён):** Закрыл блокер, найденный в сессии №66. Добавил
+> `apps/dashboard/src/lib/server-client/find-container.ts` — `findContainerByName()` резолвит
+> контейнер по точному имени (как раньше) ИЛИ по `<name>-N` с числовым суффиксом (дефолтная
+> нумерация docker compose без `container_name`), не любому префиксу — это исключает
+> ложные совпадения вроде `<name>-worker`. При нескольких живых репликах (окно rollout) берёт
+> `-1` детерминированно. Подключил в 4 местах, где раньше было точное сравнение имени:
+> `api/apps/[app]/{status,stats,logs}/route.ts`, `api/docker/containers/by-name/[name]/status/
+route.ts`, `api/servers/[id]/apps/[appId]/deploy/route.ts` (последний — локальный restart-путь,
+> тот же класс бага). Sanity-check вручную (6 кейсов: точное имя, одна реплика без
+> container_name, обе реплики во время rollout, отсутствие совпадения, не-ложное срабатывание на
+> `-worker`, экранирование спецсимволов в имени приложения для regex) — все ожидаемо.
+> `nx typecheck:tsgo`/`nx lint dashboard` зелёные. **Юнит-тестов на `findContainerByName` нет** —
+> у `dashboard` до сих пор не настроен vitest вообще (известный преэкзистентный пробел,
+> `.claude/docs/unit-testing.md`), заводить его целиком — отдельная задача не в скоупе этой сессии.
+>
+> ⚠️ Заодно поймал: `nx run dashboard:format` реформатировал 109 файлов сразу (§20 —
+> рассинхрон форматтера, уже задокументированная проблема) — не закоммитил, откатил всё кроме
+> 6 файлов, которые редактировал сам (`git checkout --` по списку, не bulk).
+>
+> Пересоздал миграцию `apps/time/docker-compose.production.yml` под rollout-профиль (тот же
+> контент, что готовил и откатывал в сессии №66) — теперь безопасна: `doctor --app time` даёт
+> 6/7 required ✅ (только `letar.rollout`-label намеренно не выставлен). Закоммичено и запушено —
+> **и dashboard-фикс, и time-compose** (в сессии №66 либо код без побочных эффектов, либо явно
+> не коммитился; здесь коммичу обе части).
+>
+> **Живой пилот rollout НЕ проведён** — сознательно. Первое включение label + реальный
+> `docker compose --scale app=2` + `nginx -s reload` на проде требует непрерывного curl-
+> мониторинга в реальном времени (собственный DoD сессии G) — риск (непроверенное мультиIP-
+> поведение NPM, см. §18.6) оправдывает супервизируемый заход, а не автономный fire-and-forget
+> в рамках одного хода.
+>
+> **➡️ Следующий старт:** включить `letar.rollout: 'true'` в `apps/time/docker-compose.
+production.yml` (раскомментировать) → супервизируемый живой прогон: закоммитить/запушить →
+> запросить продовый деплой `time` (через deploy-mcp или BlackCove) → параллельно curl-цикл на
+> `https://time.letar.best` → наблюдать `deploy_status`/логи rollout → подтвердить 0 отказов
+> перед закрытием сессии G (таблица DoD, PLAN.md §18.6). Параллельно продолжается неделя
+> warn-only e2e-gate до 2026-07-18 (сессия F, независимая ветка).
+
 > **Сессия №66 (2026-07-12, §18.6 Сессия G — 🟡 `rollout` реализован, живой пилот НЕ проведён,
 > найден блокер миграции):** По разрешению владельца («деплой можешь сам дёргать без деплой
 > агента») продолжил без остановки на BlackCove. Реализовал `runRollout()` в `@letar/deploy-engine`
@@ -48,10 +87,11 @@
 > `healthcheck`, image через `${DEPLOY_TAG:-latest}`, label `letar.rollout: 'true'`) + 1
 > info-проверку (`stop_grace_period`, не блокирует). Схема deploy-manifest (`zod`,
 > `.deploy-manifest/<app>.json`: `deployId`/`sha`/`imageTag`/`migrationsApplied[]`/`timestamp`)
-> + `readManifest`/`appendManifestEntry`/`latestEntry`/`entryBySha`. `getStatus()` — сводка
-> последнего деплоя. CLI (`src/cli.ts`, `bun run libs/deploy-engine/src/cli.ts doctor|status
+>
+> - `readManifest`/`appendManifestEntry`/`latestEntry`/`entryBySha`. `getStatus()` — сводка
+>   последнего деплоя. CLI (`src/cli.ts`, `bun run libs/deploy-engine/src/cli.ts doctor|status
 > --app <app>`) выходит с кодом 1 при not-ready — на этом позже завяжется `rollout`
-> («отказывается работать без пройденного doctor», сессия G).
+>   («отказывается работать без пройденного doctor», сессия G).
 >
 > **DoD подтверждён вживую:** `doctor --app grandslamcup` на текущем (немигрированном)
 > `apps/grandslamcup/docker-compose.production.yml` корректно репортует NOT READY с 5
@@ -2986,7 +3026,7 @@ nsenter-spawn/deployId для rollback-эндпоинта), `apps/grandslamcup/d
 
 | #     | Условие старта                           | Содержимое                                                                                                                                                                 | DoD                                                                                                                                                                     |
 | ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **E** | ✅ готово (сессия №65, 2026-07-11)        | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | ✅ lint/typecheck/test зелёные (15/15); `doctor --app grandslamcup` локально на реальном compose репо (эквивалент s2) выдаёт корректный NOT READY-отчёт с диагностикой   |
+| **E** | ✅ готово (сессия №65, 2026-07-11)       | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | ✅ lint/typecheck/test зелёные (15/15); `doctor --app grandslamcup` локально на реальном compose репо (эквивалент s2) выдаёт корректный NOT READY-отчёт с диагностикой  |
 | **F** | после 2026-07-18 + ≥1 живого warn-деплоя | Hard gate: `E2E_GATED_APPS` в infra-config, блок fail-closed в deploy-mcp, диагностичный ответ при блоке, тесты всех 6 веток                                               | Живой блок прод-деплоя grandslamcup без свежего e2e (с полной диагностикой); цепочка staging→e2e→prod проходит; `time` (не gated) деплоится как раньше                  |
 | **G** | после E                                  | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | Живой прод-деплой time через rollout при непрерывном curl-мониторинге — 0 отказов; multi-IP поведение NPM подтверждено; возврат label = старый путь работает (fallback) |
 | **H** | после G                                  | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                |

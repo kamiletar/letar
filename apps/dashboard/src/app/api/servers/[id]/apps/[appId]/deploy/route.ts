@@ -6,6 +6,7 @@
 
 import { getServerSession } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
+import { findContainerByName } from '@/lib/server-client'
 import { getClientByServerId } from '@/lib/server-client/get-client-by-id'
 import { NextResponse } from 'next/server'
 
@@ -88,12 +89,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
         return NextResponse.json({ error: 'Container name not specified for this app' }, { status: 400 })
       }
 
-      // Находим контейнер по имени
+      // Находим контейнер по имени (точное совпадение или префикс <name>- —
+      // rollout-мигрированные приложения без container_name, §18.6)
       const containers = await client.getContainers(true)
-      const container = containers.find((c) => {
-        const name = c.names?.[0]?.replace(/^\//, '') || c.name
-        return name === app.containerName
-      })
+      const container = findContainerByName(containers, app.containerName)
 
       if (!container) {
         return NextResponse.json({ error: `Container "${app.containerName}" not found on server` }, { status: 404 })

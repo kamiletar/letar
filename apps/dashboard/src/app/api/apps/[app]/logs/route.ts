@@ -1,4 +1,4 @@
-import { getLocalClient } from '@/lib/server-client'
+import { findContainerByName, getLocalClient } from '@/lib/server-client'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const client = getLocalClient()
     const containers = await client.getContainers(true)
-    const container = containers.find((c) => c.names?.some((n) => n === `/${containerName}` || n === containerName))
+    const container = findContainerByName(containers, containerName)
 
     if (!container) {
       return NextResponse.json({ error: 'Container not found' }, { status: 404 })

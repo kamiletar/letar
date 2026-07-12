@@ -7,6 +7,7 @@
 import { RemoteServerClient } from './remote'
 import type { ServerClient, ServerInfo } from './types'
 
+export { findContainerByName } from './find-container'
 export type {
   Container,
   ContainerPort,

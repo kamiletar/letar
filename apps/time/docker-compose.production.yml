@@ -19,12 +19,18 @@ services:
     networks:
       - premium-network
 
+  # Rollout-профиль (§18.6 Сессия G): нет container_name/ports (zero-downtime требует scale=2,
+  # который конфликтовал бы с обоими), network alias вместо голого имени сети (сохраняет NPM
+  # Forward Host "time-app" без изменений), healthcheck (стандарт grandslamcup), image через
+  # DEPLOY_TAG (rollback без пересборки). Dashboard теперь резолвит контейнер по <name>-N
+  # суффиксу (apps/dashboard/src/lib/server-client/find-container.ts), так что отсутствие
+  # container_name больше не ломает мониторинг. Label letar.rollout ПОКА закомментирован —
+  # структурно готово (`doctor --app time`), но живой пилот ещё не запускался (мультиIP-
+  # поведение NPM не проверено вживую) — раскомментировать только для супервизируемого
+  # пилот-деплоя с непрерывным curl-мониторингом.
   app:
-    image: time:latest
-    container_name: time-app
+    image: time:${DEPLOY_TAG:-latest}
     restart: unless-stopped
-    ports:
-      - '3013:3013'
     env_file:
       - .env.docker
     environment:
@@ -32,8 +38,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3013/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    stop_grace_period: 30s
+    # labels:
+    #   letar.rollout: 'true'
     networks:
-      - premium-network
+      premium-network:
+        aliases:
+          - time-app
 
 volumes:
   time-data:
