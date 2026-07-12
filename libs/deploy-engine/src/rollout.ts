@@ -53,6 +53,38 @@ function composeDir(app: string): string {
   return posix.dirname(composePathForApp(app))
 }
 
+/**
+ * Резолвит имя единственного существующего контейнера сервиса `app` ДО scale-up (пока их
+ * ровно один) — по compose-лейблам, не по конвенции имени. Нужно потому что легаси-контейнеры,
+ * созданные до перехода на rollout-профиль, могли иметь явный `container_name` (например
+ * `time-app` без `-1`), а не `<project>-app-1` — та же категория бага, что чинили в dashboard
+ * (`findContainerByName`, commit 8de3029).
+ */
+async function resolveOldContainer(
+  executor: DeployEngineExecutor,
+  projectName: string,
+): Promise<{ name?: string; error?: string }> {
+  const res = await executor.runCommand('docker', [
+    'ps',
+    '-a',
+    '--filter',
+    `label=com.docker.compose.project=${projectName}`,
+    '--filter',
+    'label=com.docker.compose.service=app',
+    '--format',
+    '{{.Names}}',
+  ])
+  const names = res.stdout.split('\n').map((s) => s.trim()).filter(Boolean)
+  if (names.length !== 1) {
+    return {
+      error: `ожидался ровно 1 существующий контейнер сервиса app, найдено ${names.length}${
+        names.length > 0 ? `: ${names.join(', ')}` : ''
+      }`,
+    }
+  }
+  return { name: names[0] }
+}
+
 async function waitHealthy(
   executor: DeployEngineExecutor,
   containerName: string,
@@ -93,7 +125,6 @@ export async function runRollout(
   const projectName = options.projectName ?? app
   const envFile = options.envFile ?? DEFAULT_ENV_FILE
   const dir = composeDir(app)
-  const oldContainer = `${projectName}-app-1`
   const newContainer = `${projectName}-app-2`
 
   const doctor = await runDoctor(executor, app)
@@ -107,6 +138,20 @@ export async function runRollout(
   if (!doctor.ready) {
     return { app, ok: false, steps }
   }
+
+  // Резолвится ДО scale-up, пока существует ровно один контейнер сервиса app — после scale-up
+  // их два, и различить старый от нового по лейблам уже нельзя.
+  const resolved = await resolveOldContainer(executor, projectName)
+  steps.push({
+    id: 'resolve-old-container',
+    description: 'найден единственный существующий контейнер сервиса app (кандидат на замену)',
+    ok: resolved.name !== undefined,
+    detail: resolved.error,
+  })
+  if (!resolved.name) {
+    return { app, ok: false, steps }
+  }
+  const oldContainer = resolved.name
 
   const scaleUpEnv = options.deployTag ? { DEPLOY_TAG: options.deployTag } : undefined
   const scaleUp = await executor.runCommand(

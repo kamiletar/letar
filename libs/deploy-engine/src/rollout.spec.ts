@@ -78,6 +78,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -92,6 +93,7 @@ describe('runRollout', () => {
     expect(result.ok).toBe(true)
     expect(result.steps.map((s) => s.id)).toEqual([
       'doctor',
+      'resolve-old-container',
       'scale-up',
       'wait-healthy',
       'nginx-reload-1',
@@ -131,6 +133,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
         { match: (a) => a.includes('--scale'), result: { stdout: '', stderr: 'boom', exitCode: 1 } },
       ],
     })
@@ -138,7 +141,7 @@ describe('runRollout', () => {
     const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
 
     expect(result.ok).toBe(false)
-    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'scale-up'])
+    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'resolve-old-container', 'scale-up'])
     // после провала scale-up не должно быть попыток healthcheck/reload/stop/rm
     expect(calls.filter((c) => c.args[0] === 'inspect' || c.args[0] === 'exec' || c.args[0] === 'stop')).toHaveLength(
       0,
@@ -151,6 +154,7 @@ describe('runRollout', () => {
     const { executor } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
         { match: (a) => a[0] === 'inspect', result: { stdout: 'starting\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -163,7 +167,7 @@ describe('runRollout', () => {
     )
 
     expect(result.ok).toBe(false)
-    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'scale-up', 'wait-healthy'])
+    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'resolve-old-container', 'scale-up', 'wait-healthy'])
     expect(result.steps.at(-1)?.detail).toContain('таймаут')
   })
 
@@ -171,6 +175,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
         { match: (a) => a[0] === 'exec', result: { stdout: '', stderr: 'reload failed', exitCode: 1 } },
       ],
@@ -179,7 +184,49 @@ describe('runRollout', () => {
     const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
 
     expect(result.ok).toBe(false)
-    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'scale-up', 'wait-healthy', 'nginx-reload-1'])
+    expect(result.steps.map((s) => s.id)).toEqual([
+      'doctor',
+      'resolve-old-container',
+      'scale-up',
+      'wait-healthy',
+      'nginx-reload-1',
+    ])
     expect(calls.some((c) => c.args[0] === 'stop')).toBe(false)
+  })
+
+  it('резолвит legacy-имя старого контейнера (без суффикса -N) по compose-лейблам', async () => {
+    // Контейнер создан ещё до перехода на rollout-профиль — явный container_name без суффикса.
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app\n', stderr: '', exitCode: 0 } },
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(true)
+    expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app')
+    expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app')
+    // новый контейнер (по конвенции scale) не путается со старым (legacy-имя)
+    expect(calls.find((c) => c.args[0] === 'inspect')?.args).toContain('time-app-2')
+  })
+
+  it('падает на resolve-old-container, если найдено 0 или >1 контейнеров сервиса app', async () => {
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\ntime-app-2\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(false)
+    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'resolve-old-container'])
+    expect(result.steps.at(-1)?.detail).toContain('найдено 2')
+    // scale-up не должен был выполниться — небезопасно катить, не зная какой контейнер старый
+    expect(calls.some((c) => c.args.includes('--scale'))).toBe(false)
   })
 })
