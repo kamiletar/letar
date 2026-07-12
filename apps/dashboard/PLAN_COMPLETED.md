@@ -2,7 +2,33 @@
 
 Детальное описание всех реализованных фич.
 
-## Версия 1.19.2
+## Версия 1.19.3
+
+### Fix: резолвинг контейнера по `<name>-N` суффиксу, не только точным именем
+
+Найдено при подготовке §18.6 Сессии G (`libs/deploy-engine`, `time` компоуз-миграция под
+zero-downtime rollout, см. корневой `PLAN.md` §18.6): `doctor`-проверка `no-container-name`
+требует убрать `container_name` из compose сервиса `app` (нужен для `docker compose --scale
+app=2`), но Dashboard искал контейнер приложения по **точному** имени
+(`DeployedApp.containerName`) — без `container_name` реальное имя контейнера становится
+`<project>-app-1` (дефолтная нумерация compose), точное совпадение ломается, и Dashboard тихо
+теряет docker stats/logs/status для приложения. Ломалось уже на обычном force-recreate пути, не
+только при живом rollout.
+
+**Fix:** `src/lib/server-client/find-container.ts` — `findContainerByName()` принимает точное имя
+ИЛИ `<name>-N` с числовым суффиксом (не любой префикс — не ловит несвязанные контейнеры вроде
+`<name>-worker`). При нескольких живых репликах (окно rollout) детерминированно берёт `-1`.
+Подключено во всех 4 местах, где раньше было точное сравнение имени: `api/apps/[app]/{status,
+stats,logs}/route.ts`, `api/docker/containers/by-name/[name]/status/route.ts`,
+`api/servers/[id]/apps/[appId]/deploy/route.ts` (локальный restart-путь, тот же класс бага).
+
+**Тестирование:** `dashboard` до сих пор без vitest вообще (преэкзистентный пробел, см.
+`.claude/docs/unit-testing.md`) — проверено вручную (6 сценариев: точное имя, одна реплика без
+`container_name`, обе реплики во время rollout, отсутствие совпадения, защита от ложного
+срабатывания на `-worker`-суффикс, regex-экранирование спецсимволов в имени приложения).
+`nx typecheck:tsgo`/`nx lint` — зелёные.
+
+commit `8de3029`
 
 ### Впервые задействован Telegram-алертинг (POST /api/alerts)
 

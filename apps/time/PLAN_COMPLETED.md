@@ -1,5 +1,22 @@
 # Time — Выполненные задачи
 
+## 2026-07-12 — Compose-миграция под zero-downtime rollout (инфра-пилот, вне тематики приложения)
+
+`time` выбран пилотом для `libs/deploy-engine` `rollout` (docker-rollout-паттерн, §18.6 Сессия G
+корневого `PLAN.md`) — низкорисковое приложение, уже было пилотом сессий A/C того же трека.
+
+- `docker-compose.production.yml`: убран `container_name`/`ports` у сервиса `app` (нужно для
+  `docker compose --scale app=2`), добавлен network alias `time-app` на `premium-network`
+  (сохраняет NPM Forward Host без изменений), `healthcheck` (профиль grandslamcup), `image` через
+  `${DEPLOY_TAG:-latest}` (rollback без пересборки)
+- По пути найден и устранён блокер: Dashboard резолвил контейнер приложения по точному имени —
+  без `container_name` ломался мониторинг stats/logs/status для `time`. Фикс — отдельная запись в
+  `apps/dashboard/PLAN_COMPLETED.md` (`findContainerByName`, версия 1.19.3)
+- `doctor --app time` (`bun run libs/deploy-engine/src/cli.ts doctor --app time`) подтверждает
+  6/7 required-проверок ✅ — не хватает только opt-in label `letar.rollout: 'true'`, оставлен
+  закомментированным намеренно до супервизируемого живого пилота
+- commit `8de3029`
+
 ## 2026-03-21
 
 - Создано приложение (Next.js 16 + Chakra UI v3, порт 3013)
