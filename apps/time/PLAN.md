@@ -54,8 +54,9 @@
 - [x] Перенести time на s2 (deploy-affected.sh, pull-env-docker.sh, dashboard seed)
 - [x] Compose-миграция под zero-downtime rollout-профиль (§18.6 Сессия G, healthcheck/alias/
       DEPLOY_TAG/без container_name-ports; `doctor --app time` → 6/7 required ✅)
-- [ ] Живой пилот rollout: включить `letar.rollout: 'true'` (сейчас закомментирован) →
-      супервизируемый прод-деплой с непрерывным curl-мониторингом — см. корневой `PLAN.md` §18.6
+- [x] Живой пилот rollout: `letar.rollout: 'true'` включён, супервизируемый прод-деплой с
+      непрерывным curl-мониторингом пройден чисто (2026-07-12, сессия №68) — см. корневой
+      `PLAN.md` §18.6 Сессия G
 - [ ] Исправить ошибку сборки: `number-to-words` не найден на сервере
 - [ ] Исправить POSTGRES_PASSWORD в docker-compose
 - [ ] Настроить crontab на s2

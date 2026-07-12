@@ -1,5 +1,21 @@
 # Time — Выполненные задачи
 
+## 2026-07-12 — Живой пилот zero-downtime rollout пройден (§18.6 Сессия G, инфра, вне тематики приложения)
+
+Продолжение записи ниже — супервизируемый прод-деплой через включённый `letar.rollout: 'true'`.
+
+- 3 попытки деплоя, 2 найденных и закрытых бага в `libs/deploy-engine`: `requireApp()` падал на
+  `--deploy-tag` из-за strict-режима `parseArgs` (commit `6618e3e`); `oldContainer` был
+  захардкожен как `<project>-app-1`, не находил легаси-контейнер `time-app` без суффикса —
+  добавлен `resolveOldContainer()` по compose-лейблам (commit `77d023b`)
+- Финальный чистый ретрай (`deployId 1b6fd716`) — все 8 шагов rollout без единого ❌: `doctor` →
+  `resolve-old-container` → `scale-up` → `wait-healthy` → `nginx-reload-1` → `stop-old` →
+  `rm-old` → `nginx-reload-2`
+- `time.letar.best` держал 200 OK весь пилот (независимо проверено двумя сторонами); multi-IP
+  nginx-балансировка (временное сосуществование двух контейнеров после `nginx-reload-1`)
+  подтверждена вживую без потери трафика
+- DoD §18.6 Сессии G выполнен — подробности корневой `PLAN.md` §18.6
+
 ## 2026-07-12 — Compose-миграция под zero-downtime rollout (инфра-пилот, вне тематики приложения)
 
 `time` выбран пилотом для `libs/deploy-engine` `rollout` (docker-rollout-паттерн, §18.6 Сессия G
