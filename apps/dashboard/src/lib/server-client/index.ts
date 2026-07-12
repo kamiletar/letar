@@ -8,6 +8,7 @@ import { RemoteServerClient } from './remote'
 import type { ServerClient, ServerInfo } from './types'
 
 export { findContainerByName } from './find-container'
+export { LEGACY_CONTAINER_NAME_MAP } from './legacy-container-map'
 export type {
   Container,
   ContainerPort,

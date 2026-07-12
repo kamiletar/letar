@@ -11,7 +11,8 @@
  * пройдёт healthcheck/alias-проверки (compose ещё не мигрирован на rollout-профиль).
  */
 
-import { runDoctor } from './doctor.js'
+import { posix } from 'node:path'
+import { composePathForApp, runDoctor } from './doctor.js'
 import type { DeployEngineExecutor } from './executor.js'
 
 export interface RolloutOptions {
@@ -47,8 +48,9 @@ const DEFAULT_HEALTH_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_POLL_INTERVAL_MS = 3000
 const DEFAULT_ENV_FILE = '.env.docker'
 
+/** Директория compose-файла — производная от `composePathForApp` (единый источник конвенции пути). */
 function composeDir(app: string): string {
-  return `apps/${app}`
+  return posix.dirname(composePathForApp(app))
 }
 
 async function waitHealthy(
