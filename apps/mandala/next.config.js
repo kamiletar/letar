@@ -15,9 +15,12 @@ const nextConfig = {
   output: 'standalone',
   // Корень монорепо — нужен для правильного трейсинга зависимостей
   outputFileTracingRoot: path.join(__dirname, '../../'),
-  // Включаем @swc/helpers в standalone (не попадает автоматически)
+  // Включаем @swc/helpers в standalone (не попадает автоматически).
+  // libvips-cpp.so тоже нужен явно: sharp грузит его через dlopen(), а не require(),
+  // трейсер такие динамические загрузки не видит (инцидент 2026-07-12, 500 на проде).
+  // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
   outputFileTracingIncludes: {
-    '/**/*': ['./node_modules/@swc/helpers/**/*'],
+    '/**/*': ['./node_modules/@swc/helpers/**/*', './node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
   nx: {
     svgr: false,

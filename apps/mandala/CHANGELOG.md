@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.39.8] - 2026-07-12
+
+### Fixed
+
+- **Устойчивый фикс `ERR_DLOPEN_FAILED: libvips-cpp.so`** — прод-инцидент 2026-07-12 (500 на
+  всех страницах, ~17 минут простоя, см. корневой `PLAN.md` Сессия №70/№71) закрыт временным
+  хотфиксом с захардкоженным путём к `.so`-файлу в `Dockerfile.production` (commit `8ba37d8f`).
+  Заменён на `outputFileTracingIncludes` в `next.config.js` — Next.js standalone tracer теперь
+  сам подхватывает `libvips-cpp.so` при `next build` через глоб
+  `./node_modules/.bun/@img+sharp-libvips-*/**/*.so*`, без привязки к версии `sharp-libvips`.
+  Явный `COPY` в `Dockerfile.production` убран как избыточный.
+
 ## [0.39.7] - 2026-01-10
 
 ### Fixed

@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.37.3] — 2026-07-12
+
+### Fixed
+
+- **Превентивный фикс `ERR_DLOPEN_FAILED: libvips-cpp.so`** — после прод-инцидента в `mandala`
+  (см. корневой `PLAN.md` Сессия №70/№71) добавлен `outputFileTracingIncludes` в
+  `next.config.mjs`: Next.js standalone tracer не подхватывает `.so`-файл, который `sharp`
+  грузит через `dlopen()`. Глоб `./node_modules/.bun/@img+sharp-libvips-*/**/*.so*` без
+  привязки к версии переживёт апдейт `sharp`/`bun.lock`.
+
 ## [3.37.2] — 2026-07-03
 
 ### Fixed — CookieBanner падал с ContextError вне ChakraProvider

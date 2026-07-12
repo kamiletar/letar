@@ -1,5 +1,33 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №71 (2026-07-12, нормализация sharp/libvips-фикса после инцидента mandala):**
+> Заменила хрупкий хотфикс (Сессия №70, commit `8ba37d8f`) на устойчивое решение —
+> `outputFileTracingIncludes` в `next.config.js` с глобом `./node_modules/.bun/@img+sharp-libvips-*/**/*.so*`
+> вместо хардкода версии `1.3.2` в `Dockerfile.production`. Next.js standalone tracer теперь
+> сам подхватывает `libvips-cpp.so` на этапе `next build` (в `.next/standalone`), явный `COPY`
+> в Dockerfile больше не нужен — убрала его из `apps/mandala/Dockerfile.production`.
+>
+> **Проверила через grep** (`from 'sharp'`/`require('sharp')` в `src/`, вне `scripts/` — те
+> билд-тайм, не в runtime-контейнере), баг не специфичен для `mandala`: тот же фикс применён
+> ко всем приложениям с runtime-использованием sharp — `mandala`, `driving-school` (submodule),
+> `aboi` (submodule), `kami`, `grandslamcup`. `pravda` использует sharp только в
+> `scripts/generate-icons.js`/`generate-og-images.ts` (build-time, не runtime) — фикс не нужен.
+>
+> **Изолированный тест механизма** (Docker `node:24-alpine` + bun workspace вне монорепо,
+> т.к. локальная машина — Windows и линуксовый `sharp-libvips-linuxmusl-x64` тут не ставится):
+> подтвердила, что (1) в bun workspace (несколько `package.json` в `workspaces`) действует
+> isolated-store layout `node_modules/.bun/@img+sharp-libvips-*@<version>/...` — тот же, что
+> в `bun.lock` монорепо; (2) `outputFileTracingIncludes` с глобом реально затягивает
+> `libvips-cpp.so` в `.next/standalone` при `next build` — воспроизвела на минимальном
+> Next.js 16.2.10 App Router проекте с `sharp` в зависимостях, до и после фикса. Полную сборку
+> `mandala` на Linux локально не гоняла (тяжело — весь монорепо-workspace) — просит проверки
+> BlackCove изолированной сборкой перед следующим деплоем `mandala`/`driving-school`/`aboi`/
+> `kami`/`grandslamcup`, как он уже делал для хотфикса (Сессия №70).
+>
+> **Не сделано:** общий Dockerfile-шаблон/скрипт (второе направление, предложенное BlackCove) —
+> не понадобился, `outputFileTracingIncludes` в `next.config.js` каждого приложения решает
+> задачу проще и без нового инструмента.
+
 > **Сессия №70 (2026-07-12, §18.6 Сессия J — тираж #3/#4, 🔴 прод-инцидент mandala закрыт):**
 > Смигрировала `form-example` (compose, commit `098eb75`, host-порт `3022` был реально
 > опубликован — та же схема, что form-docs: сначала обычный деплой перед rollout-label) и
@@ -50,7 +78,7 @@
 
 > **Сессия №69 (2026-07-12, §18.6 Сессия J — тираж, form-docs ✅ второй пилот закрыт):**
 > Первое приложение тиража после `time`. Смигрировала `apps/form-docs/docker-compose.
-> production.yml` под rollout-профиль (`147c5fe`) — в отличие от `time`, `form-docs` реально
+production.yml` под rollout-профиль (`147c5fe`) — в отличие от `time`, `form-docs` реально
 > публиковал host-порт `3020:3020`, поэтому сначала прогнала label выключенным через обычный
 > деплой, чтобы отдельно проверить гипотезу «снятие host-port publish не ломает NPM-роутинг»
 > без риска путать её с рисками самого rollout-механизма.
@@ -131,7 +159,7 @@
 > подтверждён живым прогоном на production, 2 найденных бага закрыты и покрыты тестами.
 > Механизм готов к обычной эксплуатации для `time` и, вероятно, для остальных приложений
 > после их миграции на rollout-профиль compose (по образцу `apps/time/docker-compose.
-> production.yml`).
+production.yml`).
 >
 > **➡️ Следующий старт:** тираж rollout-профиля на другие приложения (по одному, с тем же
 > паттерном doctor-гейта) — начать с определения приоритета (какое приложение следующим:
@@ -228,7 +256,7 @@ production.yml` (раскомментировать) → супервизиру�
 >
 > - `readManifest`/`appendManifestEntry`/`latestEntry`/`entryBySha`. `getStatus()` — сводка
 >   последнего деплоя. CLI (`src/cli.ts`, `bun run libs/deploy-engine/src/cli.ts doctor|status
-> --app <app>`) выходит с кодом 1 при not-ready — на этом позже завяжется `rollout`
+--app <app>`) выходит с кодом 1 при not-ready — на этом позже завяжется `rollout`
 >   («отказывается работать без пройденного doctor», сессия G).
 >
 > **DoD подтверждён вживую:** `doctor --app grandslamcup` на текущем (немигрированном)
@@ -1829,7 +1857,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-<UserMenu
+;<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}

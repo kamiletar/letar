@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-07-12
+
+### Fixed
+
+- **Превентивный фикс `ERR_DLOPEN_FAILED: libvips-cpp.so`** — после прод-инцидента в `mandala`
+  (см. корневой `PLAN.md` Сессия №70/№71) добавлен `outputFileTracingIncludes` в
+  `next.config.js`: Next.js standalone tracer не подхватывает `.so`-файл, который `sharp`
+  грузит через `dlopen()`. Глоб `./node_modules/.bun/@img+sharp-libvips-*/**/*.so*` без
+  привязки к версии переживёт апдейт `sharp`/`bun.lock`.
+
 ## [0.31.0] - 2026-06-06
 
 ### Added
