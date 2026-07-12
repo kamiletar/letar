@@ -973,11 +973,15 @@ RESTART_EOF
     echo -e "${GREEN}✅ Dashboard restart scheduled (nohup)${NC}"
     echo -e "${BLUE}ℹ️  Dashboard will restart in ~5 seconds${NC}"
     DEPLOY_SUCCEEDED=true
-  elif grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?" "$COMPOSE_FILE" 2> /dev/null; then
+  elif grep -vE '^[[:space:]]*#' "$COMPOSE_FILE" 2> /dev/null | grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?"; then
     # Strangler-переход на zero-downtime rollout (§18.6 Сессия G): opt-in через label
-    # letar.rollout: 'true' в docker-compose.production.yml сервиса app. Пока ни у одного
-    # приложения label не выставлен — эта ветка мертва до первого живого пилота (`time`).
-    # Откат = убрать label, старый force-recreate путь продолжает работать без изменений.
+    # letar.rollout: 'true' в docker-compose.production.yml сервиса app (пилот на `time`
+    # пройден чисто 2026-07-12, тираж на остальные приложения — в процессе). Детект
+    # закомментированных строк исключён (`grep -v '^\s*#'` перед проверкой label) — иначе
+    # `# labels:\n#   letar.rollout: 'true'` (temp-выключенный на приложениях в процессе
+    # миграции, напр. form-docs) ложно матчился и заворачивал на rollout-путь, который сразу
+    # падал в doctor (корректно, но зря) — найдено при тираже на form-docs 2026-07-12.
+    # Откат = убрать/закомментировать label, старый force-recreate путь работает без изменений.
     echo -e "${YELLOW}🔀 ${app}: label letar.rollout=true — zero-downtime rollout (libs/deploy-engine)${NC}"
     GIT_SHORT_SHA_ROLLOUT=$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)
     if (cd "$WORKSPACE_ROOT" && bun run libs/deploy-engine/src/cli.ts rollout --app "$app" --deploy-tag "$GIT_SHORT_SHA_ROLLOUT"); then
