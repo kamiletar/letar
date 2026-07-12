@@ -416,7 +416,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.5.2",
+      "version": "0.7.4",
       "dependencies": {
         "@fastify/cors": "^11.0.0",
         "cron-parser": "^5.0.0",
@@ -639,7 +639,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.7.0",
+      "version": "0.8.2",
       "peerDependencies": {
         "better-auth": ">=1.0.0",
         "next": ">=15.0.0",
@@ -683,9 +683,17 @@
       "name": "@letar/demo-protection",
       "version": "0.1.0",
     },
+    "libs/deploy-engine": {
+      "name": "@letar/deploy-engine",
+      "version": "0.1.0",
+      "dependencies": {
+        "yaml": "^2.9.0",
+        "zod": "^4.4.3",
+      },
+    },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.29.0",
@@ -1800,6 +1808,8 @@
     "@letar/dashboard": ["@letar/dashboard@workspace:apps/dashboard"],
 
     "@letar/demo-protection": ["@letar/demo-protection@workspace:libs/demo-protection"],
+
+    "@letar/deploy-engine": ["@letar/deploy-engine@workspace:libs/deploy-engine"],
 
     "@letar/deploy-mcp": ["@letar/deploy-mcp@workspace:libs/deploy-mcp"],
 

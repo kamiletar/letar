@@ -1,0 +1,92 @@
+{
+  "name": "@letar/deploy-engine",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/deploy-engine/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:tool", "owner:letar"],
+  "targets": {
+    "cli": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx tsx src/cli.ts",
+        "cwd": "libs/deploy-engine"
+      },
+      "metadata": {
+        "description": "Run deploy-engine CLI (doctor/status), например: nx run @letar/deploy-engine:cli -- doctor --app grandslamcup",
+        "technologies": ["cli"]
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/deploy-engine"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"],
+      "options": {
+        "lintFilePatterns": ["libs/deploy-engine/**/*.{ts,tsx}"]
+      },
+      "metadata": {
+        "description": "Run ESLint on deploy-engine library",
+        "technologies": ["eslint"]
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/deploy-engine"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/deploy-engine"
+      },
+      "dependsOn": ["^typecheck:tsgo"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library with tsgo (faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/deploy-engine/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests",
+        "technologies": ["vitest"]
+      }
+    }
+  }
+}

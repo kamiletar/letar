@@ -1,5 +1,36 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №65 (2026-07-11, §18.6 Сессия E — ✅ каркас `libs/deploy-engine`):** Реализован
+> Nx-lib `@letar/deploy-engine` (`libs/deploy-engine/`) по спецификации §18.6: интерфейс
+> `DeployEngineExecutor` (`runCommand`/`readFile`/`writeFile`/`fileExists`, продакшен-реализация
+> `createNodeExecutor()` через `execFile`, не shell `exec`) — вся docker/git/файловая логика
+> движка тестируется без живого Docker. `runDoctor(executor, app)` читает
+> `apps/<app>/docker-compose.production.yml` и проверяет 6 обязательных условий готовности к
+> rollout (нет `container_name`/`ports`, network alias `<app>-app` на `premium-network`,
+> `healthcheck`, image через `${DEPLOY_TAG:-latest}`, label `letar.rollout: 'true'`) + 1
+> info-проверку (`stop_grace_period`, не блокирует). Схема deploy-manifest (`zod`,
+> `.deploy-manifest/<app>.json`: `deployId`/`sha`/`imageTag`/`migrationsApplied[]`/`timestamp`)
+> + `readManifest`/`appendManifestEntry`/`latestEntry`/`entryBySha`. `getStatus()` — сводка
+> последнего деплоя. CLI (`src/cli.ts`, `bun run libs/deploy-engine/src/cli.ts doctor|status
+> --app <app>`) выходит с кодом 1 при not-ready — на этом позже завяжется `rollout`
+> («отказывается работать без пройденного doctor», сессия G).
+>
+> **DoD подтверждён вживую:** `doctor --app grandslamcup` на текущем (немигрированном)
+> `apps/grandslamcup/docker-compose.production.yml` корректно репортует NOT READY с 5
+> проваленными обязательными проверками (container_name/ports/alias/DEPLOY_TAG/label) и 1
+> прошедшей (healthcheck, есть с сессии №53) — ровно то поведение, которое ожидалось от ещё не
+> подключённого к rollout приложения. `status --app grandslamcup` корректно возвращает
+> `latest: null` (ещё ни одного деплоя через движок). 15/15 unit-тестов (`doctor`/`manifest`/
+> `executor`, in-memory executor в спеках — без реального Docker/ФС), `lint`
+> (0 ошибок, 4 некритичных `no-console` warning в CLI-выводе), `typecheck:tsgo` — все зелёные.
+> README задокументирован. Деплой не запускался и не менялся — движок пока не подключён ни к
+> `deploy-affected.sh`, ни к dashboard-agent (это strangler-шаг сессии G).
+>
+> **➡️ Следующий старт:** сессия G — команда `rollout` + пилот на `time` (compose-миграция
+> `time`: healthcheck, alias `time-app`, минус `container_name`/`ports`, `DEPLOY_TAG`, label;
+> ветвление в `deploy-affected.sh` по label). Параллельно продолжается неделя warn-only e2e-gate
+> до 2026-07-18 (нужен ≥1 живой warn-деплой grandslamcup для сессии F — независимая от E/G ветка).
+
 > **Сессия №64 (2026-07-11, §18.6 — Фаза 3 решена и спроектирована: `libs/deploy-engine`):**
 > Подтверждён итог сессии №63 через deploy-mcp и тред `grandslamcup-staging-pilot` (24/28,
 > auth-цепочка зелёная). Владелец принял решения по Фазе 3: **(а) `libs/deploy-engine`**
@@ -2917,7 +2948,7 @@ nsenter-spawn/deployId для rollback-эндпоинта), `apps/grandslamcup/d
 
 | #     | Условие старта                           | Содержимое                                                                                                                                                                 | DoD                                                                                                                                                                     |
 | ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **E** | можно сразу                              | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | lint/typecheck/test зелёные; `doctor --app grandslamcup` на s2 (вручную по SSH) выдаёт корректный отчёт готовности/неготовности                                         |
+| **E** | ✅ готово (сессия №65, 2026-07-11)        | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | ✅ lint/typecheck/test зелёные (15/15); `doctor --app grandslamcup` локально на реальном compose репо (эквивалент s2) выдаёт корректный NOT READY-отчёт с диагностикой   |
 | **F** | после 2026-07-18 + ≥1 живого warn-деплоя | Hard gate: `E2E_GATED_APPS` в infra-config, блок fail-closed в deploy-mcp, диагностичный ответ при блоке, тесты всех 6 веток                                               | Живой блок прод-деплоя grandslamcup без свежего e2e (с полной диагностикой); цепочка staging→e2e→prod проходит; `time` (не gated) деплоится как раньше                  |
 | **G** | после E                                  | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | Живой прод-деплой time через rollout при непрерывном curl-мониторинге — 0 отказов; multi-IP поведение NPM подтверждено; возврат label = старый путь работает (fallback) |
 | **H** | после G                                  | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                |
