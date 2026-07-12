@@ -1,5 +1,45 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №71 (2026-07-12, применение находок сессии №70 — аудит секретов + smoke-test):**
+> По итогам инцидента mandala предложила пользователю 3 системных находки, применила все.
+>
+> **1. Аудит хардкод-паролей в `docker-compose.production.yml`.** Расширенный grep
+> (`${VAR:-fallback}` с секретом в default-значении) нашёл паттерн в **8** приложениях:
+> `animatrona-tracker`, `aprel8008`, `auth-hub`, `driving-school`, `grandslamcup`, `kami`,
+> `mandala`, `studio`. Проверила через `sops --decrypt` каждый `.env.docker.enc` — в **7 из 8**
+> `DB_PASSWORD`/`POSTGRES_PASSWORD` уже реальный сгенерированный секрет, fallback никогда не
+> используется (мёртвый код). Убрала текст fallback без затрагивания сервера/секретов
+> (commits: `e51623f` — 5 приложений, `2752938` — driving-school submodule, `ee274d1` — studio
+> submodule, `5088891` — bump SHA обоих submodules).
+>
+> **🔴 `aprel8008` — реальная утечка:** `DB_PASSWORD` в `.env.docker.enc` буквально совпадал с
+> хардкод-fallback (`aprel8008_password`) — не мёртвый код, настоящий слабый пароль в открытом
+> виде в публичном репо. Сгенерирован новый (`openssl rand -hex 24`), обновлён в
+> `.env.docker.enc` (commit `5143dc0` в submodule + `3f752b6` bump SHA). Запрошена ротация у
+> BlackCove по образцу form-example (сессия №70): `ALTER USER` на живой БД **до** редеплоя —
+> **ответ ещё не пришёл** на момент записи, следующая сессия должна проверить статус.
+>
+> **2. Smoke-test в `libs/deploy-engine`.** Docker healthcheck (`wget --spider`) не всегда ловит
+> 5xx — это объясняет, почему mandala была "healthy" по Docker при реальных 500 (sharp/libvips).
+> Добавлен шаг `smoke-test` в `rollout.ts` между `wait-healthy` и `nginx-reload-1`: извлекает URL
+> из `healthcheck.test` (`serviceHealthcheckUrl` в `compose.ts`), дёргает его через `wget`
+> **без** `--spider` (реально скачивает тело, ненулевой exit code на 4xx/5xx). Не блокирует
+> rollout, если URL не извлекается (defense-in-depth, не новая точка отказа). 4 новых/изменённых
+> теста, 24/24 зелёные. Commit `855e11e`.
+> ⚠️ **Известное ограничение:** защищает только rollout-путь. Обычный `--force-recreate` путь
+> (`deploy-affected.sh`, bash) — которым был задеплоен сломанный `mandala` — остаётся без этой
+> защиты. Будет закрыто по мере тиража rollout-профиля на остальные приложения (§18.6 Сессия J).
+>
+> **3. `form-example /products` 500** — не тронула, уже была попытка фикса (откачена
+> `outputFileTracingIncludes`, не помогло) в фоновой задаче до этой сессии. Остаётся открытым,
+> см. флаг для отдельной сессии — причина глубже стандартной проблемы file-tracing, возможно
+> специфика Prisma 7 driver-adapter + Turbopack.
+>
+> **➡️ Следующий старт:** (1) проверить статус ротации `aprel8008` у BlackCove — если ответа всё
+> ещё нет, повторно запросить; (2) продолжить тираж §18.6 Сессии J (следующие кандидаты:
+> `pravda`, `kami-key-the-landing`, `letar-landing`, …); (3) когда будет время — `form-example
+> /products`, если кто-то захочет копнуть глубже Prisma 7 + Turbopack.
+
 > **Сессия №72 (2026-07-12, §18.6 Сессия J — `form-example` обычный деплой закрыт, найден
 > отдельный баг Prisma/`ECONNREFUSED` на `/products`):**
 > Закрыла зависший из Сессии №70 пункт — задеплоила `form-example` с двумя изменениями сразу
