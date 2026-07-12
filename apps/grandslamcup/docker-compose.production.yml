@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: grandslamcup
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - grandslamcup-data:/var/lib/postgresql/data
     ports:
@@ -28,7 +28,7 @@ services:
     env_file:
       - .env.docker
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@grandslamcup-db:5432/grandslamcup
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@grandslamcup-db:5432/grandslamcup
     volumes:
       - ./uploads:/app/apps/grandslamcup/uploads
     depends_on:

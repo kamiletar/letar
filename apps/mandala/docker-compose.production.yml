@@ -6,7 +6,7 @@ services:
     environment:
       TZ: Europe/Moscow
       POSTGRES_USER: lena_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-lena_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: mandala
     volumes:
       - mandala_postgres_data:/var/lib/postgresql/data
@@ -37,7 +37,7 @@ services:
       FORCE_COLOR: '1'
       NODE_ENV: production
       PORT: 3004
-      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD:-lena_password}@mandala-db:5432/mandala?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD}@mandala-db:5432/mandala?schema=public}
       NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3004}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3004}
 

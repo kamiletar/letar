@@ -6,7 +6,7 @@ services:
     environment:
       TZ: Europe/Moscow
       POSTGRES_USER: animatrona_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-animatrona_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: animatrona_tracker
     volumes:
       - animatrona_tracker_postgres_data:/var/lib/postgresql/data
@@ -45,7 +45,7 @@ services:
       # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
       FORCE_COLOR: '1'
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL:-postgresql://animatrona_user:${DB_PASSWORD:-animatrona_password}@animatrona-tracker-db:5432/animatrona_tracker?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://animatrona_user:${DB_PASSWORD}@animatrona-tracker-db:5432/animatrona_tracker?schema=public}
       REDIS_URL: redis://animatrona-tracker-redis:6379
 
       # Better Auth

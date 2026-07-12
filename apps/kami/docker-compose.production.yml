@@ -6,7 +6,7 @@ services:
     environment:
       TZ: Europe/Moscow
       POSTGRES_USER: lena_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-lena_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: lena_kami
     volumes:
       - kami_postgres_data:/var/lib/postgresql/data
@@ -31,7 +31,7 @@ services:
       # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
       FORCE_COLOR: '1'
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD:-lena_password}@kami-postgres:5432/lena_kami?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://lena_user:${DB_PASSWORD}@kami-postgres:5432/lena_kami?schema=public}
 
       # Better Auth
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}

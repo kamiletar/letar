@@ -6,7 +6,7 @@ services:
     environment:
       TZ: Europe/Moscow
       POSTGRES_USER: lena_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-lena_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: lena_auth
     volumes:
       - auth_hub_postgres_data:/var/lib/postgresql/data
