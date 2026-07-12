@@ -7,9 +7,11 @@ const config: NextConfig = {
   // в per-chunk alias-копию @prisma/client — без него prisma.*.findMany() падает с ECONNREFUSED
   // в рантайме, хотя build проходит без ошибок (инцидент 2026-07-12, form-example /products 500).
   outputFileTracingIncludes: {
+    // node_modules хоистится в корень монорепо (apps/form-example не имеет своего) —
+    // пути отсчитываются от директории приложения, поэтому нужно подняться на 2 уровня
     '/**': [
-      './node_modules/.prisma/client/**/*',
-      './node_modules/.bun/@prisma+client@*/node_modules/.prisma/client/**/*',
+      '../../node_modules/.prisma/client/**/*',
+      '../../node_modules/.bun/@prisma+client@*/node_modules/.prisma/client/**/*',
     ],
   },
   typescript: {
