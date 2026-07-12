@@ -20,15 +20,17 @@ services:
     networks:
       - premium-network
 
+  # Rollout-профиль (§18.6 Сессия J, тираж после time/form-docs/form-example): нет
+  # container_name/ports (zero-downtime требует scale=2), network alias вместо голого имени
+  # сети (Forward Host в NPM уже 'mandala-app' — infra/nginx-proxy-manager/README.md), healthcheck,
+  # image через DEPLOY_TAG. Label letar.rollout ПОКА закомментирован — mandala публиковала
+  # host-порт (${PORT:-3004}:3004), сначала обычный деплой подтверждает NPM-роутинг.
   app:
-    image: mandala:latest
-    container_name: mandala-app
+    image: mandala:${DEPLOY_TAG:-latest}
     restart: always
     # Ограничение памяти контейнера (защита от OOM хоста)
     mem_limit: 768m
     memswap_limit: 768m
-    ports:
-      - '${PORT:-3004}:3004' # Хост-порт конфигурируется через PORT env
     environment:
       TZ: Europe/Moscow
       # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
@@ -70,8 +72,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3004/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    stop_grace_period: 30s
+    # labels:
+    #   letar.rollout: 'true'
     networks:
-      - premium-network
+      premium-network:
+        aliases:
+          - mandala-app
     logging:
       driver: 'json-file'
       options:
