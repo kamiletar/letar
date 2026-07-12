@@ -34,8 +34,8 @@ function printRolloutResult(result: RolloutResult): void {
 }
 
 function requireApp(rest: string[], usage: string): string {
-  const { values } = parseArgs({ args: rest, options: { app: { type: 'string' } } })
-  if (!values.app) {
+  const { values } = parseArgs({ args: rest, options: { app: { type: 'string' } }, strict: false })
+  if (typeof values.app !== 'string' || !values.app) {
     console.error(usage)
     process.exit(2)
   }
