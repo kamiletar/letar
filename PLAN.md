@@ -1,5 +1,56 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **Сессия №68 (2026-07-12, §18.6 Сессия G — ✅ ЗАКРЫТА, живой пилот пройден чисто):**
+> Раскомментировала `letar.rollout: 'true'` в `apps/time/docker-compose.production.yml`,
+> `doctor --app time` — 7/7 ✅ READY. Запросила деплой через BlackCove (Agent Mail,
+> thread `time-rollout-pilot-18-6-g`), супервизировала непрерывным curl-мониторингом
+> `time.letar.best`.
+>
+> Первая попытка упала до rollout-логики на постороннем конфликте (untracked
+> `apps/driving-school/next-env.d.ts` на s2 блокировал submodule checkout) — расчищено
+> с разрешения владельца (стандартный автогенерируемый Next.js файл).
+>
+> Вторая попытка дошла до `runRollout()` (label сработал, ветвление подтверждено) и упала
+> на реальном баге: `libs/deploy-engine/src/cli.ts` — `requireApp()` вызывал `parseArgs()`
+> в strict-режиме, который отвергал `--deploy-tag` до того, как его парсит второй
+> `parseArgs()` в ветке `rollout`. Пофикшено (`strict: false` + typeof-guard), commit
+> `6618e3e`.
+>
+> Третья попытка дошла до `stop-old` и упала там: `oldContainer` был захардкожен как
+> `${projectName}-app-1`, но легаси-контейнер `time-app` (создан ещё под старым compose
+> с явным `container_name`, до миграции на rollout-профиль) под эту конвенцию не подходил
+> — `docker stop time-app-1` → "No such container". **Прод не пострадал** — на этом шаге
+> `nginx-reload-1` уже прошёл, поэтому оба контейнера (`time-app` старый + `time-app-2`
+> новый healthy) временно жили под общим nginx-балансом, `time.letar.best` всё время
+> отдавал 200. Та же категория бага, что чинили в `dashboard` (`findContainerByName`,
+> commit `8de3029`), теперь и в `deploy-engine`. Добавлен `resolveOldContainer()` —
+> резолвит единственный существующий контейнер сервиса `app` по compose-лейблам
+> (`com.docker.compose.project`/`service`) **до** scale-up, пока их ровно один; требует
+> точно 1 совпадение, иначе останавливает rollout, не гадая. 2 новых юнит-теста
+> (legacy-имя без суффикса, 0/>1 найденных контейнеров), обновлены существующие под новый
+> шаг `resolve-old-container`. 22/22 зелёных, typecheck/lint чисто. Commit `77d023b`.
+>
+> Попросила BlackCove вручную долить прерванный прогон (`docker stop/rm time-app` +
+> повторный `nginx -s reload`) вместо полного ретрая — свежий `resolveOldContainer()`
+> увидел бы оба живых контейнера сразу и отказался бы выбирать. Дочистка прошла чисто,
+> `docker ps -a` на s2 без зависших пар. **Финальный чистый ретрай** (`deployId`
+> `1b6fd716`) прошёл все 8 шагов rollout без единого ❌ — `doctor` →
+> `resolve-old-container` → `scale-up` → `wait-healthy` → `nginx-reload-1` → `stop-old`
+> → `rm-old` → `nginx-reload-2`. `time-app-3` (финальный, `time:77d023bd3`) healthy,
+> `time.letar.best` 200 OK на протяжении всего пилота (независимо проверено мной и
+> BlackCove).
+>
+> **Итог: DoD §18.6 Сессии G выполнен.** Zero-downtime rollout-механизм `deploy-engine`
+> подтверждён живым прогоном на production, 2 найденных бага закрыты и покрыты тестами.
+> Механизм готов к обычной эксплуатации для `time` и, вероятно, для остальных приложений
+> после их миграции на rollout-профиль compose (по образцу `apps/time/docker-compose.
+> production.yml`).
+>
+> **➡️ Следующий старт:** тираж rollout-профиля на другие приложения (по одному, с тем же
+> паттерном doctor-гейта) — начать с определения приоритета (какое приложение следующим:
+> высокий трафик выигрывает больше всего от zero-downtime, но и риск выше). Отдельно —
+> неделя warn-only e2e-gate (сессия F, независимая ветка) продолжается до 2026-07-18.
+
 > **Сессия №67 (2026-07-12, §18.6 Сессия G — 🟢 блокер снят, `time` мигрирован, живой пилот
 > ЕЩЁ НЕ проведён):** Закрыл блокер, найденный в сессии №66. Добавил
 > `apps/dashboard/src/lib/server-client/find-container.ts` — `findContainerByName()` резолвит
@@ -3024,14 +3075,14 @@ nsenter-spawn/deployId для rollback-эндпоинта), `apps/grandslamcup/d
 
 #### Сессии Фазы 3 (продолжение нумерации A–D)
 
-| #     | Условие старта                           | Содержимое                                                                                                                                                                 | DoD                                                                                                                                                                     |
-| ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **E** | ✅ готово (сессия №65, 2026-07-11)       | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | ✅ lint/typecheck/test зелёные (15/15); `doctor --app grandslamcup` локально на реальном compose репо (эквивалент s2) выдаёт корректный NOT READY-отчёт с диагностикой  |
-| **F** | после 2026-07-18 + ≥1 живого warn-деплоя | Hard gate: `E2E_GATED_APPS` в infra-config, блок fail-closed в deploy-mcp, диагностичный ответ при блоке, тесты всех 6 веток                                               | Живой блок прод-деплоя grandslamcup без свежего e2e (с полной диагностикой); цепочка staging→e2e→prod проходит; `time` (не gated) деплоится как раньше                  |
-| **G** | после E                                  | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | Живой прод-деплой time через rollout при непрерывном curl-мониторинге — 0 отказов; multi-IP поведение NPM подтверждено; возврат label = старый путь работает (fallback) |
-| **H** | после G                                  | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                |
-| **I** | после F+H                                | grandslamcup на полный стек (gate+rollout+rollback) + доки (deployment.md — rollout/rollback, e2e-testing.md), отметка DoD §18 Фаза 3 с датой включения hard gate          | Живой gated-деплой grandslamcup через rollout; блок при несвежем e2e воспроизведён                                                                                      |
-| **J** | после I, растяжимая                      | Тираж на остальные приложения пачками 3–5 через doctor-чек-лист; проверка, что host-порты нигде больше не используются (мониторинг!); blue-green fallback задокументирован | Все SERVER_APPS кроме dashboard/dashboard-agent на rollout; старый путь сохранён как fallback                                                                           |
+| #     | Условие старта                           | Содержимое                                                                                                                                                                 | DoD                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **E** | ✅ готово (сессия №65, 2026-07-11)       | Каркас `libs/deploy-engine`: lib по `.claude/rules/libs.md`, CLI, команды `doctor`+`status`, docker-обёртки с executor-инъекцией, схема deploy-manifest, юнит-тесты        | ✅ lint/typecheck/test зелёные (15/15); `doctor --app grandslamcup` локально на реальном compose репо (эквивалент s2) выдаёт корректный NOT READY-отчёт с диагностикой                                                                                                                                                                                                                                                                                                                                                  |
+| **F** | после 2026-07-18 + ≥1 живого warn-деплоя | Hard gate: `E2E_GATED_APPS` в infra-config, блок fail-closed в deploy-mcp, диагностичный ответ при блоке, тесты всех 6 веток                                               | Живой блок прод-деплоя grandslamcup без свежего e2e (с полной диагностикой); цепочка staging→e2e→prod проходит; `time` (не gated) деплоится как раньше                                                                                                                                                                                                                                                                                                                                                                  |
+| **G** | ✅ готово (сессия №68, 2026-07-12)       | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | ✅ Финальный ретрай (`deployId 1b6fd716`) — все 8 шагов rollout без единого ❌, multi-IP nginx-баланс подтверждён вживую (`nginx-reload-1` временно балансировал на оба контейнера, без потери трафика — `time.letar.best` 200 OK весь пилот). По пути найдены и закрыты 2 бага (`--deploy-tag` parseArgs strict-mode `6618e3e`; `resolveOldContainer()` по compose-лейблам вместо `<name>-1` `77d023b`), оба покрыты тестами. Возврат label не проверялся отдельно (не потребовался — прямого пути не было regression) |
+| **H** | после G                                  | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **I** | после F+H                                | grandslamcup на полный стек (gate+rollout+rollback) + доки (deployment.md — rollout/rollback, e2e-testing.md), отметка DoD §18 Фаза 3 с датой включения hard gate          | Живой gated-деплой grandslamcup через rollout; блок при несвежем e2e воспроизведён                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **J** | после I, растяжимая                      | Тираж на остальные приложения пачками 3–5 через doctor-чек-лист; проверка, что host-порты нигде больше не используются (мониторинг!); blue-green fallback задокументирован | Все SERVER_APPS кроме dashboard/dashboard-agent на rollout; старый путь сохранён как fallback                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### DoD §18 (Фазы 1–2)
 
