@@ -24,10 +24,9 @@ services:
   # Forward Host "time-app" без изменений), healthcheck (стандарт grandslamcup), image через
   # DEPLOY_TAG (rollback без пересборки). Dashboard теперь резолвит контейнер по <name>-N
   # суффиксу (apps/dashboard/src/lib/server-client/find-container.ts), так что отсутствие
-  # container_name больше не ломает мониторинг. Label letar.rollout ПОКА закомментирован —
-  # структурно готово (`doctor --app time`), но живой пилот ещё не запускался (мультиIP-
-  # поведение NPM не проверено вживую) — раскомментировать только для супервизируемого
-  # пилот-деплоя с непрерывным curl-мониторингом.
+  # container_name больше не ломает мониторинг. Label letar.rollout включён (сессия №68,
+  # супервизируемый живой пилот — непрерывный curl-мониторинг обязателен во время деплоя,
+  # мультиIP-поведение NPM ранее не проверялось вживую).
   app:
     image: time:${DEPLOY_TAG:-latest}
     restart: unless-stopped
@@ -45,8 +44,8 @@ services:
       retries: 30
       start_period: 15s
     stop_grace_period: 30s
-    # labels:
-    #   letar.rollout: 'true'
+    labels:
+      letar.rollout: 'true'
     networks:
       premium-network:
         aliases:
