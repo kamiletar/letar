@@ -56,3 +56,14 @@ export function serviceLabelValue(service: ComposeService, key: string): string 
   }
   return labels[key]
 }
+
+/** Достаёт http(s)-URL из строки healthcheck.test (конвенция репо — `wget --spider <url>`). */
+export function serviceHealthcheckUrl(service: ComposeService): string | undefined {
+  const hc = service.healthcheck
+  if (!hc || typeof hc !== 'object') {
+    return undefined
+  }
+  const test = (hc as { test?: unknown }).test
+  const testStr = Array.isArray(test) ? test.join(' ') : typeof test === 'string' ? test : ''
+  return testStr.match(/https?:\/\/\S+?(?=['"\s]|$)/)?.[0]
+}

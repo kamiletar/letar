@@ -1,7 +1,8 @@
 /**
  * `rollout` — docker-rollout-паттерн (§18.6 сессия G): scale=2 → wait healthy нового
- * контейнера → nginx reload (NPM резолвит оба IP alias'а `<app>-app`, `proxy_next_upstream`
- * прикрывает окно) → graceful stop+rm старого → повторный reload.
+ * контейнера → smoke-test реальным HTTP-запросом → nginx reload (NPM резолвит оба IP alias'а
+ * `<app>-app`, `proxy_next_upstream` прикрывает окно) → graceful stop+rm старого → повторный
+ * reload.
  *
  * Имена контейнеров опираются на детерминированную нумерацию `docker compose --scale`:
  * `<project>-app-1` — единственная существующая реплика (index всегда 1 при scale=1),
@@ -12,6 +13,7 @@
  */
 
 import { posix } from 'node:path'
+import { parseCompose, serviceHealthcheckUrl } from './compose.js'
 import { composePathForApp, runDoctor } from './doctor.js'
 import type { DeployEngineExecutor } from './executor.js'
 
@@ -83,6 +85,41 @@ async function resolveOldContainer(
     }
   }
   return { name: names[0] }
+}
+
+/**
+ * Реальный HTTP-запрос к новому контейнеру (не только TCP/`wget --spider`, который Docker
+ * healthcheck использует и который не всегда ловит 5xx — busybox wget в режиме `--spider`
+ * иногда засчитывает сам факт соединения, не статус ответа). Найдено при инциденте mandala
+ * (сессия №70, §18.6): контейнер был "healthy" по Docker, но каждая страница отдавала 500
+ * (sharp/libvips). `wget` без `--spider` возвращает ненулевой exit code на реальный 4xx/5xx.
+ *
+ * Если URL healthcheck не удаётся извлечь из compose — не блокирует rollout (defense-in-depth,
+ * не новая точка отказа): doctor уже требует healthcheck как обязательную проверку, отсутствие
+ * извлекаемого URL — редкий edge case формата, не повод останавливать уже работающий пайплайн.
+ */
+async function smokeTest(
+  executor: DeployEngineExecutor,
+  app: string,
+  newContainer: string,
+): Promise<{ ok: boolean; detail?: string }> {
+  const composePath = composePathForApp(app)
+  const raw = await executor.readFile(composePath)
+  const service = raw ? parseCompose(raw).services?.['app'] : undefined
+  const url = service ? serviceHealthcheckUrl(service) : undefined
+  if (!url) {
+    return { ok: true, detail: 'healthcheck URL не извлечён из compose — smoke-test пропущен' }
+  }
+  const res = await executor.runCommand('docker', ['exec', newContainer, 'wget', '-q', '-O', '/dev/null', url])
+  if (res.exitCode !== 0) {
+    return {
+      ok: false,
+      detail: `wget вернул ошибку на ${url} (вероятно не-2xx ответ): ${
+        res.stderr.trim() || res.stdout.trim() || `exit ${res.exitCode}`
+      }`,
+    }
+  }
+  return { ok: true }
 }
 
 async function waitHealthy(
@@ -195,6 +232,17 @@ export async function runRollout(
     detail: health.detail,
   })
   if (!health.ok) {
+    return { app, ok: false, steps }
+  }
+
+  const smoke = await smokeTest(executor, app, newContainer)
+  steps.push({
+    id: 'smoke-test',
+    description: `реальный HTTP-запрос к ${newContainer} возвращает не-5xx (не только TCP healthcheck)`,
+    ok: smoke.ok,
+    detail: smoke.detail,
+  })
+  if (!smoke.ok) {
     return { app, ok: false, steps }
   }
 

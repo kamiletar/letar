@@ -96,6 +96,7 @@ describe('runRollout', () => {
       'resolve-old-container',
       'scale-up',
       'wait-healthy',
+      'smoke-test',
       'nginx-reload-1',
       'stop-old',
       'rm-old',
@@ -117,12 +118,16 @@ describe('runRollout', () => {
     const inspectCall = calls.find((c) => c.args[0] === 'inspect')
     expect(inspectCall?.args).toContain('time-app-2')
 
+    // smoke-test дёргает URL из healthcheck.test у нового контейнера, не через docker inspect
+    const smokeCall = calls.find((c) => c.args[0] === 'exec' && c.args.includes('wget'))
+    expect(smokeCall?.args).toEqual(['exec', 'time-app-2', 'wget', '-q', '-O', '/dev/null', 'http://0.0.0.0:3013/'])
+
     // старый (index 1) останавливается и удаляется, не новый
     expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-1')
     expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app-1')
 
-    // nginx reload — дважды, в контейнер NPM
-    const reloads = calls.filter((c) => c.command === 'docker' && c.args[0] === 'exec')
+    // nginx reload — дважды, в контейнер NPM (отдельно от smoke-test exec)
+    const reloads = calls.filter((c) => c.command === 'docker' && c.args[0] === 'exec' && c.args.includes('nginx'))
     expect(reloads).toHaveLength(2)
     for (const call of reloads) {
       expect(call.args).toEqual(['exec', 'nginx-proxy-manager', 'nginx', '-s', 'reload'])
@@ -177,7 +182,10 @@ describe('runRollout', () => {
       commandResults: [
         { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
-        { match: (a) => a[0] === 'exec', result: { stdout: '', stderr: 'reload failed', exitCode: 1 } },
+        {
+          match: (a) => a[0] === 'exec' && a.includes('nginx'),
+          result: { stdout: '', stderr: 'reload failed', exitCode: 1 },
+        },
       ],
     })
 
@@ -189,9 +197,77 @@ describe('runRollout', () => {
       'resolve-old-container',
       'scale-up',
       'wait-healthy',
+      'smoke-test',
       'nginx-reload-1',
     ])
     expect(calls.some((c) => c.args[0] === 'stop')).toBe(false)
+  })
+
+  it('останавливается на smoke-test, если новый контейнер отдаёт реальный 5xx (healthy по Docker, но не по содержимому)', async () => {
+    // Инцидент mandala (сессия №70): контейнер "healthy" по TCP-healthcheck, но каждая страница 500.
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+        {
+          match: (a) => a[0] === 'exec' && a.includes('wget'),
+          result: { stdout: '', stderr: 'wget: server returned error: HTTP/1.1 500', exitCode: 8 },
+        },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(false)
+    expect(result.steps.map((s) => s.id)).toEqual([
+      'doctor',
+      'resolve-old-container',
+      'scale-up',
+      'wait-healthy',
+      'smoke-test',
+    ])
+    expect(result.steps.at(-1)?.detail).toContain('500')
+    // ни nginx reload, ни stop/rm старого — старый контейнер продолжает обслуживать весь трафик
+    expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('nginx'))).toBe(false)
+    expect(calls.some((c) => c.args[0] === 'stop')).toBe(false)
+  })
+
+  it('пропускает smoke-test без блокировки, если URL healthcheck не извлекается из compose', async () => {
+    const NO_URL_COMPOSE = `
+services:
+  app:
+    image: time:\${DEPLOY_TAG:-latest}
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'node', 'healthcheck.js']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    stop_grace_period: 30s
+    labels:
+      letar.rollout: 'true'
+    networks:
+      premium-network:
+        aliases:
+          - time-app
+`
+    const { executor, calls } = memoryExecutor({
+      composeText: NO_URL_COMPOSE,
+      commandResults: [
+        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(true)
+    const smokeStep = result.steps.find((s) => s.id === 'smoke-test')
+    expect(smokeStep?.ok).toBe(true)
+    expect(smokeStep?.detail).toContain('пропущен')
+    // без URL нечего дёргать через wget — не должно быть exec с wget в аргументах
+    expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('wget'))).toBe(false)
   })
 
   it('резолвит legacy-имя старого контейнера (без суффикса -N) по compose-лейблам', async () => {
