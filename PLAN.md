@@ -1,5 +1,23 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`auth-hub` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-13, RubyBear, commit `7c355d7`, thread
+> `deploy-auth-hub-rollout-J`, msg #418):** compose смигрирован на стандартный rollout-паттерн
+> (нет `container_name`/`ports` у `app`, alias `auth-hub-app`, healthcheck, `letar.rollout`,
+> `DEPLOY_TAG`). ⚠️ Повышенный риск, отличается от прошлых 11 кандидатов — auth-hub = Ключница,
+> SSO-хаб для ~10 hub-client приложений; при сбое ляжет вход везде одновременно, не в одном
+> приложении. Запрошен supervised-пилот + доп. проверка логина через OIDC (не только HTTP 200 на
+> самой Ключнице) — **ждёт выполнения BlackCove**.
+> **`driving-school` — 🟡 НЕ ТРОНУТ, идёт read-only сверка** (thread
+> `driving-school-websocket-rollout-check`, msg #419): помимо HTTP (`3003`) публикует Socket.IO
+> WebSocket-порт (`3004`) для чатов — паттерна для WebSocket в тираже ещё не было. Прежде чем
+> трогать compose — запрошена проверка NPM-конфига (sticky-балансировка или single-backend
+> routing для этого порта), чтобы решить, включать `3004` в rollout сразу или оставить на обычном
+> деплое. **Не мой скоуп деплоя, ждёт ответа перед любыми правками.**
+>
+> **➡️ Следующий старт:** (1) проверить статус auth-hub rollout-пилота у BlackCove; (2) по ответу
+> о WebSocket — смигрировать driving-school compose (полностью или частично); (3) после обоих —
+> все ~19 SERVER_APPS на rollout, можно просить BlackCove удалить старую `premium-network`.
+
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
 > smoke-test (реальный HTTP, не-5xx) прошёл, `Ready in 0ms`, миграций не было. **Живой пример
