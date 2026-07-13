@@ -1,22 +1,25 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **`auth-hub` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-13, RubyBear, commit `7c355d7`, thread
-> `deploy-auth-hub-rollout-J`, msg #418):** compose смигрирован на стандартный rollout-паттерн
-> (нет `container_name`/`ports` у `app`, alias `auth-hub-app`, healthcheck, `letar.rollout`,
-> `DEPLOY_TAG`). ⚠️ Повышенный риск, отличается от прошлых 11 кандидатов — auth-hub = Ключница,
-> SSO-хаб для ~10 hub-client приложений; при сбое ляжет вход везде одновременно, не в одном
-> приложении. Запрошен supervised-пилот + доп. проверка логина через OIDC (не только HTTP 200 на
-> самой Ключнице) — **ждёт выполнения BlackCove**.
-> **`driving-school` — 🟡 НЕ ТРОНУТ, идёт read-only сверка** (thread
-> `driving-school-websocket-rollout-check`, msg #419): помимо HTTP (`3003`) публикует Socket.IO
-> WebSocket-порт (`3004`) для чатов — паттерна для WebSocket в тираже ещё не было. Прежде чем
-> трогать compose — запрошена проверка NPM-конфига (sticky-балансировка или single-backend
-> routing для этого порта), чтобы решить, включать `3004` в rollout сразу или оставить на обычном
-> деплое. **Не мой скоуп деплоя, ждёт ответа перед любыми правками.**
+> **`auth-hub` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #420/#421, thread
+> `deploy-auth-hub-rollout-J`):** commit `7c355d7`→`20684fc`, сервер s2, zero-downtime rollout,
+> все 9 гейтов пройдены (doctor → resolve-old-container → scale-up → wait-healthy → smoke-test →
+> nginx-reload-1 → stop-old → rm-old → nginx-reload-2), даунтайма не было. Пост-проверка сверх
+> обычного HTTP 200: OIDC-редирект с hub-client (`kami`, «Войти» → корректный redirect на
+> `auth.letar.best` с рендером формы логина) подтверждён рабочим — блast radius (SSO для ~10
+> приложений) не сработал. **12/~19 SERVER_APPS на rollout.**
+> ⚠️ Находка BlackCove: для auth-hub ещё ни разу не гонялся staging e2e — завести перед
+> следующими rollout-изменениями Ключницы (не блокирует, задел на будущее).
 >
-> **➡️ Следующий старт:** (1) проверить статус auth-hub rollout-пилота у BlackCove; (2) по ответу
-> о WebSocket — смигрировать driving-school compose (полностью или частично); (3) после обоих —
-> все ~19 SERVER_APPS на rollout, можно просить BlackCove удалить старую `premium-network`.
+> **`driving-school` — 🟡 ждёт ответа BlackCove по WebSocket** (thread
+> `driving-school-websocket-rollout-check`, msg #419, ответа пока нет): помимо HTTP (`3003`)
+> публикует Socket.IO WebSocket-порт (`3004`) для чатов — паттерна для WebSocket в тираже ещё не
+> было. Запрошена проверка NPM-конфига (sticky-балансировка или single-backend routing для этого
+> порта) прежде чем трогать compose. **Не мой скоуп, жду ответа перед любыми правками.**
+>
+> **➡️ Следующий старт:** (1) проверить inbox по driving-school-websocket-rollout-check; (2) по
+> ответу — смигрировать driving-school compose (полностью, если WebSocket-риск снят, или частично
+> — только `3003`, оставив `3004` на обычном деплое); (3) после driving-school — все ~19
+> SERVER_APPS на rollout, можно просить BlackCove удалить старую `premium-network`.
 
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
