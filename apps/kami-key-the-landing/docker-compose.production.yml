@@ -1,10 +1,12 @@
 services:
+  # Rollout-профиль (§18.6 Сессия J): нет container_name/ports (zero-downtime требует scale=2,
+  # который конфликтовал бы с обоими), network alias вместо голого имени сети (сохраняет разрешение
+  # имени "kami-key-the-landing-app" для NPM — тот же сетевой сегмент nginx-proxy-manager_default,
+  # где живёт сам NPM), healthcheck (стандарт grandslamcup), image через DEPLOY_TAG (rollback без
+  # пересборки).
   app:
-    image: kami-key-the-landing:latest
-    container_name: kami-key-the-landing-app
-    restart: always
-    ports:
-      - '3011:3011'
+    image: kami-key-the-landing:${DEPLOY_TAG:-latest}
+    restart: unless-stopped
     environment:
       TZ: Europe/Moscow
       # Форсировать цветной вывод в логах (ANSI в Docker без TTY)
@@ -14,8 +16,19 @@ services:
       # Umami аналитика
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-}
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3011/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    stop_grace_period: 30s
+    labels:
+      letar.rollout: 'true'
     networks:
-      - nginx-proxy-manager_default
+      nginx-proxy-manager_default:
+        aliases:
+          - kami-key-the-landing-app
     logging:
       driver: 'json-file'
       options:
