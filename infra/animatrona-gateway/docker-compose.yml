@@ -16,7 +16,7 @@ services:
     environment:
       IPFS_PROFILE: lowpower
     networks:
-      - premium-network
+      - kami-network
     deploy:
       resources:
         limits:
@@ -35,5 +35,5 @@ volumes:
     name: animatrona-gateway-data
 
 networks:
-  premium-network:
+  kami-network:
     external: true

@@ -22,7 +22,7 @@
 корневого `PLAN.md`) — низкорисковое приложение, уже было пилотом сессий A/C того же трека.
 
 - `docker-compose.production.yml`: убран `container_name`/`ports` у сервиса `app` (нужно для
-  `docker compose --scale app=2`), добавлен network alias `time-app` на `premium-network`
+  `docker compose --scale app=2`), добавлен network alias `time-app` на `kami-network`
   (сохраняет NPM Forward Host без изменений), `healthcheck` (профиль grandslamcup), `image` через
   `${DEPLOY_TAG:-latest}` (rollback без пересборки)
 - По пути найден и устранён блокер: Dashboard резолвил контейнер приложения по точному имени —

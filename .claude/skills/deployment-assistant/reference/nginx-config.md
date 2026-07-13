@@ -86,12 +86,12 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
     networks:
-      - premium-network
+      - kami-network
       - imot-network
       - mandala-network
 
 networks:
-  premium-network:
+  kami-network:
     external: true
   imot-network:
     external: true
@@ -105,7 +105,7 @@ NPM должен быть подключён ко всем сетям прило
 
 ```bash
 # Подключить NPM к сетям
-docker network connect premium-network nginx-proxy-manager
+docker network connect kami-network nginx-proxy-manager
 docker network connect imot-network nginx-proxy-manager
 docker network connect mandala-network nginx-proxy-manager
 
@@ -126,7 +126,7 @@ docker inspect nginx-proxy-manager | grep -A 20 Networks
 2. Проверь что NPM в той же сети:
 
    ```bash
-   docker network inspect premium-network
+   docker network inspect kami-network
    ```
 
 3. Проверь Forward Hostname — должен быть **имя контейнера**, не IP

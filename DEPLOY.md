@@ -251,7 +251,7 @@ docker compose -f docker-compose.production.yml config
 
 | Приложение      | Порт App | Порт DB | Название БД  | Network         |
 | --------------- | -------- | ------- | ------------ | --------------- |
-| premium-rosstil | 3000     | 5432    | lena_premium | premium-network |
+| premium-rosstil | 3000     | 5432    | lena_premium | kami-network |
 | imot            | 3001     | 5433    | lena_imot    | imot-network    |
 
 ### Создание Docker Networks
@@ -259,7 +259,7 @@ docker compose -f docker-compose.production.yml config
 Перед первым деплоем создайте network для каждого приложения:
 
 ```bash
-docker network create premium-network
+docker network create kami-network
 ```
 
 ## См. также

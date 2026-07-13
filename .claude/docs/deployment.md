@@ -129,20 +129,16 @@ MCP-инструменты `run_e2e`/`e2e_status` — `libs/deploy-mcp/README.md
 
 Все веб-приложения используют Docker сети для коммуникации:
 
-- **premium-network** - общая для premium-rosstil, dashboard и Nginx Proxy Manager
-- **imot-network** - используется приложением imot
+- **kami-network** - общая сеть для большинства production-приложений на s2 (kami, dashboard,
+  driving-school, archetest и др.) и Nginx Proxy Manager. Переименована из `premium-network`
+  (название осталось от decommissioned `premium-rosstil`/`imot`, сняты с поддержки 2026-07-05).
+- **imot-network** - использовалась приложением imot (decommissioned)
 - **mandala-network** - используется приложением mandala (если есть)
 - **driving-school-network** - используется приложением driving-school (если есть)
-- **kami-network** - используется приложением kami (если есть)
 
-> 📌 **TODO (не сделано, задача на будущее):** переименовать `premium-network` → `kami-network`.
-> Название `premium-network` осталось от decommissioned `premium-rosstil`/`imot` (сняты с
-> поддержки 2026-07-05), хотя сеть общая и используется другими приложениями (dashboard, NPM).
-> ⚠️ Ловушка: сеть с именем `kami-network` уже упомянута строкой выше для приложения `kami` —
-> перед переименованием проверить, не создаст ли это коллизию/путаницу (возможно, эта запись
-> устарела/не создана — «если есть»). Переименование Docker-сети требует пересоздания сети и
-> передеплоя всех подключённых контейнеров — не тривиальная операция, планировать отдельным
-> заходом через BlackCove.
+> ⚠️ Фактическое переименование Docker-сети на сервере (пересоздание сети + переподключение
+> всех контейнеров) выполняется отдельным заходом через BlackCove — правки в коде (docker-compose,
+> deploy-engine) сами по себе сеть на сервере не переименовывают.
 
 ## Конфигурация Nginx Proxy Manager
 
@@ -776,8 +772,8 @@ docker compose -f docker-compose.production.yml exec app npx prisma migrate stat
 docker network ls
 
 # Создать сеть вручную
-docker network create premium-network
+docker network create kami-network
 
 # Подключить контейнер к сети
-docker network connect premium-network <container_name>
+docker network connect kami-network <container_name>
 ```

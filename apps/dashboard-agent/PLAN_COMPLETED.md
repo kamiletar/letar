@@ -63,7 +63,7 @@ shell-строку: `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then 
 
 ### docker-compose: консолидация + s3-инстанс
 
-- **`docker-compose.s2.yml` удалён** — устаревший дубль (живой всегда был `production.yml`, подтверждено `docker inspect`; `driving-school-network` в нём вестигиальный — `driving-school-db` на `premium-network`).
+- **`docker-compose.s2.yml` удалён** — устаревший дубль (живой всегда был `production.yml`, подтверждено `docker inspect`; `driving-school-network` в нём вестигиальный — `driving-school-db` на `kami-network`).
 - **`docker-compose.s3.yml`** — staging-инстанс: `SERVER_NAME=s3`, без прод-секретов `/secrets/*.env`, без `~/.ssh`. Токен — `AGENT_TOKEN: ${AGENT_TOKEN_S3:?…}` (отдельный s3-токен из общего `.env.docker.enc`, fail-safe против пустого). Публикация **`127.0.0.1:13103:3100`** (loopback) — host:3100 занят media-api, а loopback-bind разом чинит конфликт порта И закрывает агента от интернета.
 
 **Файлы:** `src/routes/deploy.ts`, `src/lib/server-config.ts` (+ `.guard.spec.ts`), `src/lib/cron.ts`, `src/types.ts`, `vitest.config.ts`, `tsconfig.spec.json`, `project.json`, `docker-compose.s3.yml`, удалён `docker-compose.s2.yml`.

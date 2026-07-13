@@ -24,7 +24,7 @@ branching в `deploy-affected.sh` по opt-in label (пока dead code — ни
   массивом, без shell-интерполяции). В тестах — in-memory реализация, без живого Docker/ФС.
 - **`doctor`** — читает `apps/<app>/docker-compose.production.yml`, проверяет готовность
   сервиса `app` к rollout: нет `container_name`/`ports`, есть network alias `<app>-app` на
-  `premium-network`, есть `healthcheck`, `image` использует `${DEPLOY_TAG:-latest}` (не
+  `kami-network`, есть `healthcheck`, `image` использует `${DEPLOY_TAG:-latest}` (не
   хардкод-тег), есть opt-in label `letar.rollout: 'true'`. `stop_grace_period` — info-проверка,
   не блокирует готовность. `rollout` откажется работать без пройденного `doctor`.
 - **`status`** — читает `.deploy-manifest/<app>.json` (история деплоев: `deployId`, `sha`,

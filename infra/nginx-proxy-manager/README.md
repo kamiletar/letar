@@ -15,7 +15,7 @@
 | **s2.letar.best** | driving-school, dashboard                        | npm.s2.letar.best | Dashboard здесь   |
 | **s3.letar.best** | staging-домены приложений + e2e-раннер           | (без поддомена)   | См. раздел ниже   |
 
-**Docker сеть:** `premium-network` (s1/s2). На s3 у NPM собственная сеть `npm_default` —
+**Docker сеть:** `kami-network` (s1/s2). На s3 у NPM собственная сеть `npm_default` —
 staging-приложения форвардятся через **хост-гейтвей** (`172.17.0.1:<хостовый-порт>`), не через
 `docker network connect` (NPM и staging-compose живут в разных Docker-сетях, разные жизненные
 циклы — `docker network connect` пережил бы `compose down` staging-приложения расхождением).
@@ -24,7 +24,7 @@ staging-приложения форвардятся через **хост-гей
 
 ```bash
 # Создать сети (если не существуют)
-docker network create premium-network
+docker network create kami-network
 
 # Запустить NPM
 cd infra/nginx-proxy-manager
@@ -66,7 +66,7 @@ docker compose up -d
 
 Поднят кем-то ранее без записи в этот файл — обнаружен по факту (`docker ps`) при первом живом
 staging-пилоте (§18 Сессия D). Публичные порты 80/81/443, отдельная Docker-сеть `npm_default` (не
-`premium-network` — s3 её вообще не использует).
+`kami-network` — s3 её вообще не использует).
 
 | Домен                            | Forward Host | Port | SSL | Примечания                                                                  |
 | -------------------------------- | ------------ | ---- | --- | --------------------------------------------------------------------------- |
@@ -235,7 +235,7 @@ git clone <repo-url> /home/deploy/letar
 cd /home/deploy/letar
 
 # Создать сети
-docker network create premium-network
+docker network create kami-network
 
 # Распаковать данные NPM
 cd infra/nginx-proxy-manager
@@ -264,7 +264,7 @@ NPM должен быть подключён к сетям всех прилож
 
 ```yaml
 networks:
-  - premium-network # dashboard
+  - kami-network # dashboard
   # Добавить по необходимости:
   # - mandala-network
   # - driving-school-network
@@ -308,7 +308,7 @@ netstat -tlnp | grep -E ':(80|81|443)'
 1. Проверить что сеть добавлена в NPM
 2. Проверить что контейнер приложения в нужной сети:
    ```bash
-   docker network inspect premium-network
+   docker network inspect kami-network
    ```
 3. Проверить что Forward Host совпадает с именем контейнера
 

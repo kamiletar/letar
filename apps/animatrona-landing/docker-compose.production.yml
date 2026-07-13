@@ -17,7 +17,7 @@ services:
       # Секрет для instant revalidation кэша через GitHub Actions
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
     networks:
-      - premium-network
+      - kami-network
     logging:
       driver: 'json-file'
       options:
@@ -25,5 +25,5 @@ services:
         max-file: '3'
 
 networks:
-  premium-network:
+  kami-network:
     external: true

@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - premium-network
+      - kami-network
 
   app:
     image: archetest:latest
@@ -33,11 +33,11 @@ services:
       db:
         condition: service_healthy
     networks:
-      - premium-network
+      - kami-network
 
 volumes:
   archetest-data:
 
 networks:
-  premium-network:
+  kami-network:
     external: true

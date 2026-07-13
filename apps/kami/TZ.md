@@ -696,7 +696,7 @@ Footer:
 Домен: kami.letar.best
 ├── SSL: Let's Encrypt (через Nginx Proxy Manager)
 ├── Порт приложения: 3005
-└── Docker network: premium-network
+└── Docker network: kami-network
 
 База данных:
 ├── Host: localhost (Docker: host.docker.internal)

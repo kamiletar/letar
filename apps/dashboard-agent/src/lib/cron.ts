@@ -60,7 +60,7 @@ const APP_PORTS: Record<string, number> = {
   'dashboard-agent': 3100,
 }
 
-// Карта хостов приложений (Docker container names внутри premium-network)
+// Карта хостов приложений (Docker container names внутри kami-network)
 // dashboard-agent обращается к себе через localhost, к другим через имя контейнера
 const APP_HOSTS: Record<string, string> = {
   'premium-rosstil': process.env.PREMIUM_ROSSTIL_HOST ?? 'premium-rosstil-app',

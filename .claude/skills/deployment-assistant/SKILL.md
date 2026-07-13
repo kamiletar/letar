@@ -293,7 +293,7 @@ services:
    - [ ] `apps/dashboard-agent/src/lib/database.ts` → `APP_CONFIG` — добавить запись с `secretsPath`, `containerName`, `defaults` (host, port, database, user)
    - [ ] `apps/dashboard-agent/src/lib/server-config.ts` → `SERVER_APPS` — маппинг `'<app>': 's1'` или `'s2'`
    - [ ] `apps/dashboard-agent/docker-compose.production.yml` — добавить volume mount секретов: `- ${WORKSPACE_PATH:-/home/deploy/letar}/apps/<app>/.env.docker:/secrets/<app>.env:ro`
-   - [ ] Если на s2 и приложение НЕ в `driving-school-network` — убедиться что `premium-network` подключён
+   - [ ] Если на s2 и приложение НЕ в `driving-school-network` — убедиться что `kami-network` подключён
    - [ ] `.claude/docs/backup-architecture.md` — добавить строку в таблицу БД
    - [ ] Задеплоить dashboard-agent на целевой сервер
    - [ ] Проверить бэкап: `curl -X POST http://localhost:3100/api/database/backup?db=<app>`

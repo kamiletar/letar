@@ -38,7 +38,7 @@ services:
     labels:
       letar.rollout: 'true'
     networks:
-      premium-network:
+      kami-network:
         aliases:
           - grandslamcup-app
 `
@@ -61,7 +61,7 @@ services:
       retries: 30
       start_period: 15s
     networks:
-      - premium-network
+      - kami-network
 `
 
 describe('runDoctor', () => {

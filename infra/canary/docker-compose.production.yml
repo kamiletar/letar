@@ -31,8 +31,8 @@ services:
       # Прокси для Telegram API (api.telegram.org заблокирован на s1/s2)
       TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}
     networks:
-      - premium-network
+      - kami-network
 
 networks:
-  premium-network:
+  kami-network:
     external: true

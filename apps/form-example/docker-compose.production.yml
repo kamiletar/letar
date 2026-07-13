@@ -10,7 +10,7 @@ services:
     volumes:
       - form-example-pgdata:/var/lib/postgresql/data
     networks:
-      - premium-network
+      - kami-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U forms -d forms_example']
       interval: 5s
@@ -51,7 +51,7 @@ services:
     # labels:
     #   letar.rollout: 'true'
     networks:
-      premium-network:
+      kami-network:
         aliases:
           - form-example-app
     logging:
@@ -64,5 +64,5 @@ volumes:
   form-example-pgdata:
 
 networks:
-  premium-network:
+  kami-network:
     external: true

@@ -81,7 +81,7 @@ docker stop <container_id>
 
 ```bash
 # Создать сеть
-docker network create premium-network
+docker network create kami-network
 
 # Проверить существующие
 docker network ls

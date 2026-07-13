@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - premium-network
+      - kami-network
 
   redis:
     image: redis:7-alpine
@@ -31,7 +31,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - premium-network
+      - kami-network
 
   app:
     image: animatrona-tracker:latest
@@ -78,7 +78,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - premium-network
+      - kami-network
     logging:
       driver: 'json-file'
       options:
@@ -90,5 +90,5 @@ volumes:
     driver: local
 
 networks:
-  premium-network:
+  kami-network:
     external: true

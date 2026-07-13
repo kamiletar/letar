@@ -18,7 +18,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - premium-network
+      - kami-network
     restart: unless-stopped
     logging:
       driver: json-file
@@ -40,7 +40,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - premium-network
+      - kami-network
     restart: unless-stopped
     logging:
       driver: json-file
@@ -53,7 +53,7 @@ services:
     container_name: media-redis
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     networks:
-      - premium-network
+      - kami-network
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
@@ -70,7 +70,7 @@ services:
       - /data/processed:/data/processed:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
-      - premium-network
+      - kami-network
     restart: unless-stopped
     logging:
       driver: json-file
@@ -79,5 +79,5 @@ services:
         max-file: '3'
 
 networks:
-  premium-network:
+  kami-network:
     external: true

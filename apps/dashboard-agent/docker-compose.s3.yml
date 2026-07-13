@@ -67,7 +67,7 @@ services:
       # Git репозиторий (deploy-affected.sh запускается на хосте через nsenter)
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
     networks:
-      - premium-network
+      - kami-network
     healthcheck:
       test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
       interval: 30s
@@ -81,5 +81,5 @@ services:
         max-file: '3'
 
 networks:
-  premium-network:
+  kami-network:
     external: true

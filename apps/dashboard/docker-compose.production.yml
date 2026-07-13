@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: dashboard
     networks:
-      - premium-network
+      - kami-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U dashboard_user -d dashboard']
       interval: 10s
@@ -129,7 +129,7 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
 
     networks:
-      - premium-network
+      - kami-network
     # Healthcheck вызывает auto-start endpoint — мониторинг запустится автоматически
     healthcheck:
       test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3002/api/monitoring/auto-start']
@@ -144,7 +144,7 @@ services:
         max-file: '3'
 
 networks:
-  premium-network:
+  kami-network:
     external: true
 
 volumes:

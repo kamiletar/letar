@@ -9,7 +9,7 @@ services:
     ports:
       - '6379:6379'
     networks:
-      - premium-network
+      - kami-network
     logging:
       driver: json-file
       options:
@@ -26,5 +26,5 @@ volumes:
     driver: local
 
 networks:
-  premium-network:
+  kami-network:
     external: true

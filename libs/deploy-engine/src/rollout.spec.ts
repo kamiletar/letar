@@ -17,7 +17,7 @@ services:
     labels:
       letar.rollout: 'true'
     networks:
-      premium-network:
+      kami-network:
         aliases:
           - time-app
 `
@@ -248,7 +248,7 @@ services:
     labels:
       letar.rollout: 'true'
     networks:
-      premium-network:
+      kami-network:
         aliases:
           - time-app
 `

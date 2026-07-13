@@ -51,7 +51,7 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
     networks:
-      - premium-network
+      - kami-network
     healthcheck:
       test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:3100/health']
       interval: 30s
@@ -65,5 +65,5 @@ services:
         max-file: '3'
 
 networks:
-  premium-network:
+  kami-network:
     external: true

@@ -39,7 +39,7 @@ services:
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
     networks:
       - ${APP_NAME}-network
-      - premium-network # Если нужен доступ к NPM
+      - kami-network # Если нужен доступ к NPM
 
 volumes:
   postgres_data:
@@ -47,7 +47,7 @@ volumes:
 networks:
   ${APP_NAME}-network:
     driver: bridge
-  premium-network:
+  kami-network:
     external: true
 ```
 
@@ -71,10 +71,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # Docker API
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/workspace:ro
     networks:
-      - premium-network
+      - kami-network
 
 networks:
-  premium-network:
+  kami-network:
     external: true
 ```
 
@@ -121,7 +121,7 @@ CMD ["npm", "start"]
 
 ```bash
 # Создание сетей
-docker network create premium-network
+docker network create kami-network
 docker network create imot-network
 docker network create mandala-network
 
@@ -129,10 +129,10 @@ docker network create mandala-network
 docker network ls
 
 # Просмотр контейнеров в сети
-docker network inspect premium-network
+docker network inspect kami-network
 
 # Подключение контейнера к сети
-docker network connect premium-network nginx-proxy-manager
+docker network connect kami-network nginx-proxy-manager
 ```
 
 ## Основные команды

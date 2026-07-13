@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - premium-network
+      - kami-network
 
   app:
     image: ghcr.io/umami-software/umami:postgresql-latest
@@ -41,7 +41,7 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - premium-network
+      - kami-network
     logging:
       driver: 'json-file'
       options:
@@ -53,5 +53,5 @@ volumes:
     driver: local
 
 networks:
-  premium-network:
+  kami-network:
     external: true

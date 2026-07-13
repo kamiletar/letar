@@ -62,7 +62,7 @@ function checkNetworkAlias(service: ComposeService, app: string): DoctorCheck {
   const passed = aliases.includes(expected)
   return {
     id: 'network-alias',
-    description: `network alias '${expected}' задан на premium-network`,
+    description: `network alias '${expected}' задан на kami-network`,
     passed,
     severity: 'required',
     detail: passed ? undefined : `найдены aliases: ${aliases.length > 0 ? aliases.join(', ') : 'нет'}`,
