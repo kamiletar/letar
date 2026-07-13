@@ -1,5 +1,12 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`archetest` + `grandslamcup` — compose смигрированы одним коммитом (`f6fb9ca`):** оба 8/8 READY
+> по `doctor`. archetest — повышенный риск (психоданные, фест 15.08.2026), у него же впервые
+> добавлен healthcheck (не было вообще). Запрос пилота отправлен BlackCove только для `archetest`
+> (thread `deploy-archetest-rollout-J`) — **ждёт выполнения**; `grandslamcup` пойдёт следующим
+> запросом после подтверждения archetest (по договорённости с пользователем — катим по одному
+> из-за повышенного риска, не параллельно).
+>
 > **`kami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #392, thread
 > `deploy-kami-rollout-J`):** zero-downtime rollout (label `letar.rollout`), commit `42720aa`
 > (fast-forward с `0fcd9f0`), сервер s2. Прошёл штатно: scale-up → wait-healthy → smoke-test →
@@ -20,11 +27,12 @@
 > ручной `docker pull` вендорского тега, обычный `rollback --to-sha` не работает (нет своих тегов
 > образа).
 >
-> **➡️ Следующий старт (следующая сессия):** (1) продолжить тираж §18.6 Сессии J по списку —
-> `archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними, риск выше — не
-> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (2) когда все ~20
-> приложений подтверждённо переехали на `kami-network` — попросить BlackCove удалить старую
-> `premium-network`.
+> **➡️ Следующий старт (следующая сессия):** (1) проверить `fetch_inbox`/thread
+> `deploy-archetest-rollout-J` — если пилот завершён, зафиксировать в PLAN.md и отправить запрос
+> для `grandslamcup` (compose уже готов, commit `f6fb9ca`); (2) затем `auth-hub`/`driving-school`
+> последними, риск выше — не мигрировать с ходу без дополнительного анализа, сверяться с
+> пользователем; (3) когда все ~20 приложений подтверждённо переехали на `kami-network` —
+> попросить BlackCove удалить старую `premium-network`.
 
 > **`dsperevod` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #383, thread
 > `deploy-dsperevod-rollout-J`):** zero-downtime (submodule `a8491ca` + `adf4e40` в letar, сервер
