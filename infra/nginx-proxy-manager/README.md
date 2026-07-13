@@ -260,21 +260,17 @@ docker compose up -d
 
 ## Docker сети
 
-NPM должен быть подключён к сетям всех приложений:
+Все production-приложения на s2 (s1 выведен из эксплуатации) с 2026-07-13 в единой сети
+`kami-network` (переименована из `premium-network` — Сессия №74). Отдельных сетей по приложениям
+больше нет:
 
 ```yaml
 networks:
-  - kami-network # dashboard
-  # Добавить по необходимости:
-  # - mandala-network
-  # - driving-school-network
-  # - kami-network
+  - kami-network
 ```
 
-При добавлении нового приложения:
-
-1. Добавить сеть в docker-compose.yml NPM
-2. `docker compose up -d` для перезапуска
+При добавлении нового приложения дополнительных действий с сетью NPM не требуется — новый
+контейнер просто подключается к уже существующей `kami-network`.
 
 ## Бэкапы
 
@@ -310,7 +306,11 @@ netstat -tlnp | grep -E ':(80|81|443)'
    ```bash
    docker network inspect kami-network
    ```
-3. Проверить что Forward Host совпадает с именем контейнера
+3. Проверить что Forward Host совпадает с именем контейнера — **или** с network alias, если
+   приложение на rollout-профиле (§18.6 Сессия J): такие app-сервисы больше не публикуют
+   `container_name`, вместо него `networks.kami-network.aliases` задан равным прежнему имени
+   контейнера (`docker network inspect kami-network` покажет alias у текущего активного контейнера
+   `<app>-app-1`/`<app>-app-2`)
 
 ### SSL сертификат не выдаётся
 
