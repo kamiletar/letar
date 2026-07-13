@@ -1,16 +1,23 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
 > **`aboi` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #387, thread
-> `deploy-aboi-rollout-J`):** zero-downtime, первый боевой e-commerce в тираже (submodule `bf9c54b`
+> `deploy-aboi-rollout-J`):** zero-downtime, первый боевой e-commerce в тираже (submodule `bf9c54b`,
+> `5c4e85e` в letar, сервер s2). BlackCove проверил не только HTTP 200, но и платёжные интеграции:
+> СДЭК-токен получен, вебхук `neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок; T-Bank
+> (ленивая инициализация) — ошибок нет; каталог реально отдаёт контент (106KB HTML, цены в ₽).
+> `depends_on: service_healthy` снова сработал корректно. **8/~19 SERVER_APPS на rollout.**
 >
-> - `5c4e85e` в letar, сервер s2). BlackCove проверил не только HTTP 200, но и платёжные интеграции:
->   СДЭК-токен получен, вебхук `neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок; T-Bank
->   (ленивая инициализация) — ошибок нет; каталог реально отдаёт контент (106KB HTML, цены в ₽).
->   `depends_on: service_healthy` снова сработал корректно. **8/~19 SERVER_APPS на rollout.**
->   **`umami` — compose смигрирован (commit `c119c66`):** ⚠️ единственный кандидат на вендорском
->   образе (`ghcr.io/umami-software/umami`, не собирается нами) — `DEPLOY_TAG` подставлен с дефолтом
->   на вендорский тег, `rollback --to-sha` для него не имеет смысла (нет наших тегов образа). `doctor`
->   8/8 READY. Запрос пилота отправлен BlackCove (thread `deploy-umami-rollout-J`) — **ждёт выполнения**.
+> **`umami` — compose смигрирован (commit `c119c66`):** ⚠️ единственный кандидат на вендорском
+> образе (`ghcr.io/umami-software/umami`, не собирается нами) — `DEPLOY_TAG` подставлен с дефолтом
+> на вендорский тег, `rollback --to-sha` для него не имеет смысла (нет наших тегов образа). `doctor`
+> 8/8 READY. Запрос пилота отправлен BlackCove (thread `deploy-umami-rollout-J`) — **на момент
+> закрытия сессии ответа нет, продолжение в следующей сессии.**
+>
+> **➡️ Следующий старт (следующая сессия):** (1) проверить `fetch_inbox`/thread
+> `deploy-umami-rollout-J` — если пилот завершён, зафиксировать результат в PLAN.md; (2) продолжить
+> тираж §18.6 Сессии J последним лёгким кандидатом — `kami` (публичное приложение в основном дереве,
+> не submodule); (3) дальше по списку (`archetest`/`grandslamcup`, затем `auth-hub`/`driving-school`
+> последними) риск выше — не мигрировать с ходу без дополнительного анализа, сверяться с пользователем.
 
 > **`dsperevod` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #383, thread
 > `deploy-dsperevod-rollout-J`):** zero-downtime (submodule `a8491ca` + `adf4e40` в letar, сервер
