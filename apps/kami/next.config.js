@@ -17,7 +17,7 @@ const nextConfig = {
   // include контейнер падает с ERR_DLOPEN_FAILED (инцидент mandala 2026-07-12).
   // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
   outputFileTracingIncludes: {
-    '/**/*': ['./node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
+    '/**/*': ['../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup

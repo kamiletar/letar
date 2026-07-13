@@ -16,7 +16,7 @@ const nextConfig = {
   // include контейнер падает с ERR_DLOPEN_FAILED (инцидент mandala 2026-07-12).
   // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
   outputFileTracingIncludes: {
-    '/**/*': ['./node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
+    '/**/*': ['../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   // Пустой turbopack — подавляет ошибку при наличии webpack config от Serwist
