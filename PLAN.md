@@ -1,5 +1,18 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
+> `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
+> smoke-test (реальный HTTP, не-5xx) прошёл, `Ready in 0ms`, миграций не было. **Живой пример
+> параллельного деплоя одного приложения двумя агентами** — почти одновременно с моим
+> compose-запросом другой агент (StormyBear, msg #412) отправил свой deploy-request с фиксом двух
+> багов telegram-напоминаний (`venue.lat/lng → latitude/longitude`, убрана несуществующая роль
+> `PLAYING_COACH`). BlackCove не деплоил дважды — оба коммита уже были на `origin/main` к моменту
+> старта, `deploy-affected.sh` подтянул HEAD и задеплоил всё одним прогоном.
+> ⚠️ **Не закрыто, требует внимания StormyBear:** e2e-gate предупредил — последний прогон e2e для
+> grandslamcup упал, на старом коммите `50d72bc` (>24ч, не совпадает с задеплоенным) — фикс
+> напоминаний тренерам автоматически не проверен. BlackCove рекомендует ручную проверку на проде.
+> **11/~19 SERVER_APPS на rollout.**
+>
 > **`archetest` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #409, thread
 > `deploy-archetest-rollout-J`, 4-я попытка):** commit `f61d654`, сервер s2, zero-downtime rollout
 > с реальным smoke-test (HTTP-запрос к `archetest-app-2`, не только TCP). Путь до успеха был
@@ -46,11 +59,12 @@
 > ручной `docker pull` вендорского тега, обычный `rollback --to-sha` не работает (нет своих тегов
 > образа).
 >
-> **➡️ Следующий старт (следующая сессия):** (1) проверить `fetch_inbox`/thread
-> `deploy-grandslamcup-rollout-J` — запрос пилота отправлен, ждём результат; если завершён,
-> зафиксировать в PLAN.md; (2) затем `auth-hub`/`driving-school` последними, риск выше — не
-> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (3) когда все ~20 приложений подтверждённо переехали на
-> `kami-network` — попросить BlackCove удалить старую `premium-network`.
+> **➡️ Следующий старт (следующая сессия):** (1) `archetest`+`grandslamcup` оба закрыты — следующие
+> кандидаты тиража §18.6 Сессии J: `auth-hub`/`driving-school` последними, риск выше — не
+> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (2) когда все ~20
+> приложений подтверждённо переехали на `kami-network` — попросить BlackCove удалить старую
+> `premium-network`; (3) StormyBear ещё не подтвердил ручную проверку telegram-напоминаний
+> grandslamcup (msg #415) — не мой скоуп, но если попадётся на глаза, можно спросить статус.
 
 > **`dsperevod` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #383, thread
 > `deploy-dsperevod-rollout-J`):** zero-downtime (submodule `a8491ca` + `adf4e40` в letar, сервер
