@@ -1310,7 +1310,8 @@ Tier — это **не отдельная ось**, а проекция выбо
 ### 3.3 Болевые точки
 
 - aboi `/sign-in` `EMAIL_NOT_VERIFIED` — только текст, нет resend.
-- premium-rosstil — параллельная кастомная верификация (дублирует Better Auth, ничего не гейтит).
+- ~~premium-rosstil — параллельная кастомная верификация (дублирует Better Auth, ничего не гейтит).~~
+  ➖ приложение выведено из эксплуатации (2026-07-05), пункт неактуален.
 - ✅ auth-hub — OIDC client secrets **ротированы** (сессия №8): литералы убраны из кода (сессия №2), новые значения
   сгенерированы и загружены в БД через seed. Старые значения из git-истории отозваны.
 - Три модели ролей, три способа DB-доступа в admin, auth-hub без i18n.
@@ -1355,7 +1356,8 @@ interface AuthProfile {
 ## 5. Карта auth монорепо
 
 - **Богатый флоу (эталон):** driving-school (pin-auth). **Тупик без resend:** aboi, kami, dsperevod, auth-hub.
-- **Кастомная верификация:** premium-rosstil (мигрируем — §9-D4). **PIN:** driving-school, mandala.
+- ~~**Кастомная верификация:** premium-rosstil (мигрируем — §9-D4).~~ ➖ premium-rosstil выведен из
+  эксплуатации (2026-07-05) — миграция (Этап 4) была выполнена до этого, но пункт больше не актуален. **PIN:** driving-school, mandala.
 - **OIDC-клиенты Ключницы:** kami (гибрид), dashboard (только Ключница), archetest/time/grandslamcup/animatrona-tracker.
 
 ---
@@ -1691,6 +1693,9 @@ interface AuthProfile {
 
 ### Этап 4 — premium-rosstil: миграция на Better Auth (§9-D4 = «мигрировать») ✅ ПОЛНОСТЬЮ (сессии №15–16)
 
+> ➖ **Приложение впоследствии выведено из эксплуатации (2026-07-05)** — этап сохранён как исторический
+> результат, дальнейшие действия по premium-rosstil не требуются.
+
 - ✅ **Шаг 1:** `register-form.tsx` → `authClient.signUp.email()`; удалён `/api/auth/register/route.ts`.
 - ✅ **Шаг 2:** `signin-form.tsx` resend → `authClient.sendVerificationEmail()`; удалён `/api/auth/resend-verification/route.ts`.
 - ✅ **Шаг 3:** `forgot-password-form.tsx` → `authClient.requestPasswordReset()` (BA 1.6.11: метод `requestPasswordReset`, не `forgetPassword`); `reset-password-form.tsx` → `authClient.resetPassword()`; удалены `/api/auth/request-reset`, `/api/auth/reset-password`.
@@ -1960,7 +1965,9 @@ import { UserMenu } from '@letar/ui'
 | Петы `*.letar.best`            | kami, grandslamcup, time, archetest, mandala, pravda, animatrona-landing, auth-hub | без согласования                               |
 | Лендинги letar                 | letar-landing, kami-key-the-landing                                                | решить: нужен ли self-credit на letar.best     |
 | Коммерческий (ИП владельца)    | driving-school (направа.рф)                                                        | оператор тот же — без внешнего согласования    |
-| Коммерческие (чужие владельцы) | aboi, premium-rosstil, imot, dsperevod, svoichuzhie                                | **согласовать с владельцами** + submodule-флоу |
+| Коммерческие (чужие владельцы) | aboi, dsperevod, svoichuzhie                                                       | **согласовать с владельцами** + submodule-флоу |
+
+> ➖ `premium-rosstil`, `imot` исключены из охвата — выведены из эксплуатации (2026-07-05).
 
 Полный список уточнить по `nx show projects` при реализации; приложения без публичного UI
 (dashboard-agent и т.п.) — N/A.
@@ -2090,7 +2097,8 @@ useEffect(() => {
 
 ## 8. Сквозные требования
 
-- **i18n:** `auth.verification.*` для `[locale]`-приложений (aboi, kami, dsperevod, premium-rosstil); auth-hub — ru-хардкод.
+- **i18n:** `auth.verification.*` для `[locale]`-приложений (aboi, kami, dsperevod); auth-hub — ru-хардкод.
+  (premium-rosstil исключён — выведен из эксплуатации 2026-07-05.)
 - **Rate-limit:** серверный (`/send-verification-email`, `/sign-up/email`). ⚠️ Дефолтный store Better Auth —
   **in-memory** (сброс при рестарте, не общий между инстансами Docker) → для production задать персистентный store
   (БД/secondary storage), иначе rate-limit иллюзорен. Ключ = `ip + email` (§13.3).
