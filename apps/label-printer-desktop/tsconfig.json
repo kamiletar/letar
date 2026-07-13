@@ -24,7 +24,8 @@
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/label-printer-core": ["../../libs/label-printer-core/src/index.ts"],
       "@letar/label-printer-core/*": ["../../libs/label-printer-core/src/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "renderer/**/*.ts",

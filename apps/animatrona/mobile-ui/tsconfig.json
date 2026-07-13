@@ -21,7 +21,9 @@
       "@letar/animatrona-shared": ["../../../libs/animatrona-shared/src/index.ts"],
       "@letar/video-player-react": ["../../../libs/video-player-react/src/index.ts"],
       "@letar/video-player-core": ["../../../libs/video-player-core/src/index.ts"]
-    }
+    },
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"],
   "references": [

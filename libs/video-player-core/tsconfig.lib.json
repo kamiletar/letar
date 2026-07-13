@@ -6,7 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]

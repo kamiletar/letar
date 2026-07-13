@@ -26,7 +26,8 @@
       "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "renderer/**/*.ts",

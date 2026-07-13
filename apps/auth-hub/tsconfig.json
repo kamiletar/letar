@@ -35,7 +35,8 @@
     "types": ["node"],
     "outDir": "dist",
     "rootDir": "../..",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",

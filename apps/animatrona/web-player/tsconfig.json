@@ -11,7 +11,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "declaration": false,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0",
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

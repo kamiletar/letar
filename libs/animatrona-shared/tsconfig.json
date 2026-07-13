@@ -13,7 +13,10 @@
     "types": [],
     "paths": {
       "@letar/animatrona-utils": ["../animatrona-utils/src/index.ts"]
-    }
+    },
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0",
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

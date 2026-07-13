@@ -32,7 +32,9 @@
       }
     ],
     "types": ["node"],
-    "target": "ES2022"
+    "target": "ES2022",
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "next-env.d.ts",

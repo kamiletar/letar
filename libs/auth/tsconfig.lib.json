@@ -13,7 +13,8 @@
     "jsx": "react-jsx",
     "forceConsistentCasingInFileNames": true,
     "lib": ["ESNext", "DOM"],
-    "types": ["node"]
+    "types": ["node"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "dist"],

@@ -27,7 +27,9 @@
       "@letar/query-provider": ["../../../libs/query-provider/src/index.ts"],
       "@letar/label-printer-core": ["../../../libs/label-printer-core/src/index.ts"],
       "@letar/label-printer-core/*": ["../../../libs/label-printer-core/src/*"]
-    }
+    },
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

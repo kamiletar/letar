@@ -9,7 +9,8 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "paths": {
       "@letar/format-utils": ["../format-utils/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "out-tsc",

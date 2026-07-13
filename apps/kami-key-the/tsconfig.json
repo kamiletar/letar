@@ -15,7 +15,10 @@
       "@/*": ["./src/*"]
     },
     "types": ["node"],
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0",
+    "rootDir": "."
   },
   "include": ["src/**/*.ts", "main/**/*.ts", "shared/**/*.ts"],
   "exclude": ["node_modules", "dist", "app", "renderer"]

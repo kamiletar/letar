@@ -31,7 +31,9 @@
     },
     "types": ["node"],
     "outDir": "dist",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "ignoreDeprecations": "6.0",
+    "rootDir": "src"
   },
   "include": [
     "../../apps/dashboard/.next/types/**/*.ts",

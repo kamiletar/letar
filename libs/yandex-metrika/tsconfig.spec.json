@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "jsx": "react-jsx",
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+    "rootDir": "."
   },
   "include": [
     "vitest.config.ts",

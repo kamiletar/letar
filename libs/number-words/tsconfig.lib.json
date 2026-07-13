@@ -4,7 +4,8 @@
     "outDir": "dist",
     "types": ["node"],
     "rootDir": "src",
-    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "out-tsc",

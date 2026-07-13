@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "types": []
+    "types": [],
+    "ignoreDeprecations": "6.0",
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"]
 }

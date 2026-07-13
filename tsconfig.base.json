@@ -16,6 +16,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@letar/source"]
+    "customConditions": ["@letar/source"],
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   }
 }

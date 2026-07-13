@@ -6,7 +6,9 @@
     "types": [],
     "paths": {
       "@letar/animatrona-types": ["../animatrona-types/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0",
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"],
   "references": [

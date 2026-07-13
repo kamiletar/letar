@@ -10,7 +10,8 @@
       "@pages/*": ["pages/*"],
       "@fixtures/*": ["fixtures/*"]
     },
-    "typeRoots": ["./types", "../../node_modules/@types"]
+    "typeRoots": ["./types", "../../node_modules/@types"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.ts", "playwright.config.ts", "types/**/*.d.ts"]
 }

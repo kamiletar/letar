@@ -7,7 +7,9 @@
     "jsx": "react-jsx",
     "paths": {
       "@letar/animatrona-utils": ["../animatrona-utils/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0",
+    "rootDir": "."
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [

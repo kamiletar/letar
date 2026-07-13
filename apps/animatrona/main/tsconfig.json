@@ -18,7 +18,9 @@
       "@/*": ["./src/*"],
       "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
       "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"]
-    }
+    },
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "preload/**/*.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules", "dist"],

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "composite": true
+    "composite": true,
+    "ignoreDeprecations": "6.0"
   },
   "extends": "../../tsconfig.base.json",
   "files": [],

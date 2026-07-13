@@ -9,7 +9,8 @@
       "@letar/exoplayer-sync": ["../../libs/exoplayer-sync/src"],
       "@letar/animatrona-shared": ["../../libs/animatrona-shared/src"]
     },
-    "types": ["react-native"]
+    "types": ["react-native"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*", "index.js", "App.tsx"],
   "exclude": ["node_modules", "android"]

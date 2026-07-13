@@ -14,7 +14,8 @@
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "**/*.ts",

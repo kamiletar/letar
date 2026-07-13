@@ -23,7 +23,9 @@
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"]
     },
-    "types": []
+    "types": [],
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"],

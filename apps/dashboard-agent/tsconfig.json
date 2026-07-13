@@ -17,7 +17,9 @@
       "@/*": ["./src/*"]
     },
     "types": ["node"],
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/*.spec.ts", "src/**/*.test.ts"],

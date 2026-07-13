@@ -189,5 +189,8 @@
     {
       "path": "./libs/cdek"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0"
+  }
 }
