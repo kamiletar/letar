@@ -1,23 +1,37 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`kami` — compose смигрирован (commit `7464c19`):** убраны `container_name`/`ports` у `app`,
+> добавлены network alias `kami-app`, healthcheck, `stop_grace_period`, `DEPLOY_TAG`-образ, label
+> `letar.rollout`. `doctor` 8/8 READY. Запрос пилота отправлен BlackCove (thread
+> `deploy-kami-rollout-J`) — **ждёт выполнения**.
+> ⚠️ Побочная находка (не блокирует, не трогала): дефолт `DATABASE_URL` в compose указывает на хост
+> `kami-postgres`, а реальный `container_name` БД — `kami-db`; явного `DATABASE_URL` в `.env.docker`
+> нет, значит дефолт реально в ходу. `kami.letar.best` при этом отдаёт HTTP 200 — резолвинг
+> как-то работает или путь не бьёт в БД; не разбиралась глубже, вне скоупа миграции. Флаг передан
+> BlackCove на случай ECONNREFUSED/ENOTFOUND во время rollout.
+>
+> **`umami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #389, thread
+> `deploy-umami-rollout-J`):** прошёл как infrastructure-деплой (вендорский образ
+> `ghcr.io/umami-software/umami`, `pull + recreate` напрямую, без zero-downtime scale=2 — ожидаемо
+> для этого кандидата), commit `c119c66`, сервер s2. Миграции не требовались («No pending
+> migrations»). `umami-app-1` и `umami-db` оба в `kami-network`. Домен `stats.letar.best` — 5/5 curl
+> HTTP 200, `/api/heartbeat` → `{"ok":true}`, ошибок в логах нет. На будущее: откат umami — только
+> ручной `docker pull` вендорского тега, обычный `rollback --to-sha` не работает (нет своих тегов
+> образа).
+>
 > **`aboi` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #387, thread
 > `deploy-aboi-rollout-J`):** zero-downtime, первый боевой e-commerce в тираже (submodule `bf9c54b`,
 > `5c4e85e` в letar, сервер s2). BlackCove проверил не только HTTP 200, но и платёжные интеграции:
 > СДЭК-токен получен, вебхук `neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок; T-Bank
 > (ленивая инициализация) — ошибок нет; каталог реально отдаёт контент (106KB HTML, цены в ₽).
-> `depends_on: service_healthy` снова сработал корректно. **8/~19 SERVER_APPS на rollout.**
->
-> **`umami` — compose смигрирован (commit `c119c66`):** ⚠️ единственный кандидат на вендорском
-> образе (`ghcr.io/umami-software/umami`, не собирается нами) — `DEPLOY_TAG` подставлен с дефолтом
-> на вендорский тег, `rollback --to-sha` для него не имеет смысла (нет наших тегов образа). `doctor`
-> 8/8 READY. Запрос пилота отправлен BlackCove (thread `deploy-umami-rollout-J`) — **на момент
-> закрытия сессии ответа нет, продолжение в следующей сессии.**
+> `depends_on: service_healthy` снова сработал корректно. **9/~19 SERVER_APPS на rollout.**
 >
 > **➡️ Следующий старт (следующая сессия):** (1) проверить `fetch_inbox`/thread
-> `deploy-umami-rollout-J` — если пилот завершён, зафиксировать результат в PLAN.md; (2) продолжить
-> тираж §18.6 Сессии J последним лёгким кандидатом — `kami` (публичное приложение в основном дереве,
-> не submodule); (3) дальше по списку (`archetest`/`grandslamcup`, затем `auth-hub`/`driving-school`
-> последними) риск выше — не мигрировать с ходу без дополнительного анализа, сверяться с пользователем.
+> `deploy-kami-rollout-J` — если пилот завершён, зафиксировать результат в PLAN.md; (2) дальше по
+> списку (`archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними) риск выше — не
+> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (3) когда все ~20
+> приложений подтверждённо переехали на `kami-network` — попросить BlackCove удалить старую
+> `premium-network`.
 
 > **`dsperevod` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #383, thread
 > `deploy-dsperevod-rollout-J`):** zero-downtime (submodule `a8491ca` + `adf4e40` в letar, сервер
