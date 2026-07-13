@@ -1,14 +1,15 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **`kami` — compose смигрирован (commit `7464c19`):** убраны `container_name`/`ports` у `app`,
-> добавлены network alias `kami-app`, healthcheck, `stop_grace_period`, `DEPLOY_TAG`-образ, label
-> `letar.rollout`. `doctor` 8/8 READY. Запрос пилота отправлен BlackCove (thread
-> `deploy-kami-rollout-J`) — **ждёт выполнения**.
-> ⚠️ Побочная находка (не блокирует, не трогала): дефолт `DATABASE_URL` в compose указывает на хост
-> `kami-postgres`, а реальный `container_name` БД — `kami-db`; явного `DATABASE_URL` в `.env.docker`
-> нет, значит дефолт реально в ходу. `kami.letar.best` при этом отдаёт HTTP 200 — резолвинг
-> как-то работает или путь не бьёт в БД; не разбиралась глубже, вне скоупа миграции. Флаг передан
-> BlackCove на случай ECONNREFUSED/ENOTFOUND во время rollout.
+> **`kami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #392, thread
+> `deploy-kami-rollout-J`):** zero-downtime rollout (label `letar.rollout`), commit `42720aa`
+> (fast-forward с `0fcd9f0`), сервер s2. Прошёл штатно: scale-up → wait-healthy → smoke-test →
+> nginx reload → stop/rm старого контейнера → повторный reload. Новый `kami-app-2` healthy,
+> `Ready in 0ms`. Миграций не требовалось.
+> ⚠️ Побочная находка про `kami-postgres` vs `kami-db` — **закрыта, ложная тревога**: в реальном
+> логе деплоя `DATABASE_URL: lena_user@kami-db:5432/lena_kami` резолвится корректно,
+> ECONNREFUSED/ENOTFOUND не наблюдалось. Похоже дефолт в локальном compose-файле где-то
+> переопределяется в рантайме — раз работает, BlackCove оставил как есть, вне скоупа деплоя.
+> **10/~19 SERVER_APPS на rollout.**
 >
 > **`umami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #389, thread
 > `deploy-umami-rollout-J`):** прошёл как infrastructure-деплой (вендорский образ
@@ -19,17 +20,9 @@
 > ручной `docker pull` вендорского тега, обычный `rollback --to-sha` не работает (нет своих тегов
 > образа).
 >
-> **`aboi` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #387, thread
-> `deploy-aboi-rollout-J`):** zero-downtime, первый боевой e-commerce в тираже (submodule `bf9c54b`,
-> `5c4e85e` в letar, сервер s2). BlackCove проверил не только HTTP 200, но и платёжные интеграции:
-> СДЭК-токен получен, вебхук `neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок; T-Bank
-> (ленивая инициализация) — ошибок нет; каталог реально отдаёт контент (106KB HTML, цены в ₽).
-> `depends_on: service_healthy` снова сработал корректно. **9/~19 SERVER_APPS на rollout.**
->
-> **➡️ Следующий старт (следующая сессия):** (1) проверить `fetch_inbox`/thread
-> `deploy-kami-rollout-J` — если пилот завершён, зафиксировать результат в PLAN.md; (2) дальше по
-> списку (`archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними) риск выше — не
-> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (3) когда все ~20
+> **➡️ Следующий старт (следующая сессия):** (1) продолжить тираж §18.6 Сессии J по списку —
+> `archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними, риск выше — не
+> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (2) когда все ~20
 > приложений подтверждённо переехали на `kami-network` — попросить BlackCove удалить старую
 > `premium-network`.
 
