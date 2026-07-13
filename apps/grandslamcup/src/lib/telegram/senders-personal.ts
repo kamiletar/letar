@@ -11,8 +11,8 @@ import { prisma } from '@/lib/db'
 
 import type { SendResult } from './bot'
 import { getTelegramBot } from './bot'
-import { matchUrl as buildMatchUrl, SITE_URL } from './helpers'
-import { getMatchCity, loadMatchData } from './match-data'
+import { SITE_URL } from './helpers'
+import { loadMatchData } from './match-data'
 
 /** Отправить напоминание тренеру: "Заявите состав на матч через 24 часа" */
 export async function sendCoachLineupReminder(matchId: string): Promise<SendResult[]> {
@@ -26,16 +26,12 @@ export async function sendCoachLineupReminder(matchId: string): Promise<SendResu
     return [{ success: false, error: 'Матч не найден' }]
   }
 
-  const city = getMatchCity(match)
-  const citySlug = city?.slug ?? ''
-  const url = buildMatchUrl(matchId, citySlug)
-
   // Находим тренеров обеих команд (через PlayerTeamSeason → Player → User)
   const teamIds = [match.homeTeamId, match.awayTeamId].filter(Boolean)
   const coaches = await prisma.playerTeamSeason.findMany({
     where: {
       teamSeasonId: { in: teamIds },
-      role: { in: ['COACH', 'PLAYING_COACH', 'ASSISTANT_COACH'] },
+      role: { in: ['COACH', 'ASSISTANT_COACH'] },
       leftAt: null,
     },
     include: {

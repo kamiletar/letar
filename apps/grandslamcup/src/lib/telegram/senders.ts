@@ -31,8 +31,8 @@ async function getMatchContext(matchId: string) {
   return {
     matchUrl: buildMatchUrl(matchId, citySlug),
     venueUrl:
-      match.venue?.lat && match.venue?.lng
-        ? `https://yandex.ru/maps/?pt=${match.venue.lng},${match.venue.lat}&z=17&l=map`
+      match.venue?.latitude && match.venue?.longitude
+        ? `https://yandex.ru/maps/?pt=${match.venue.longitude},${match.venue.latitude}&z=17&l=map`
         : null,
     citySlug,
   }
