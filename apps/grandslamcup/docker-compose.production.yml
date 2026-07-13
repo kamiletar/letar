@@ -19,12 +19,13 @@ services:
     networks:
       - kami-network
 
+  # Rollout-профиль (§18.6 Сессия J): нет container_name/ports (zero-downtime требует scale=2,
+  # который конфликтовал бы с обоими), network alias вместо голого имени сети (сохраняет NPM
+  # Forward Host "grandslamcup-app" без изменений), healthcheck уже был (стандарт grandslamcup —
+  # эталон), image через DEPLOY_TAG (rollback без пересборки).
   app:
-    image: grandslamcup:latest
-    container_name: grandslamcup-app
+    image: grandslamcup:${DEPLOY_TAG:-latest}
     restart: unless-stopped
-    ports:
-      - '3016:3016'
     env_file:
       - .env.docker
     environment:
@@ -40,8 +41,13 @@ services:
       timeout: 3s
       retries: 30
       start_period: 15s
+    stop_grace_period: 30s
+    labels:
+      letar.rollout: 'true'
     networks:
-      - kami-network
+      kami-network:
+        aliases:
+          - grandslamcup-app
 
 volumes:
   grandslamcup-data:
