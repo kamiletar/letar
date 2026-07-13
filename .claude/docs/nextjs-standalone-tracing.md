@@ -88,11 +88,64 @@ const config: NextConfig = {
 
 ## Известные случаи в монорепо
 
-| Приложение     | Пакет                    | Симптом                                   | Коммит                                                                                                                                   |
-| -------------- | ------------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `mandala`      | `sharp`/`libvips-cpp.so` | `ERR_DLOPEN_FAILED` на каждом SSR-запросе | нормализовано через `outputFileTracingIncludes` в `next.config.js` (было: хардкод-`COPY` в `Dockerfile.production`, инцидент 2026-07-12) |
-| `form-example` | `@prisma/adapter-pg`     | `ECONNREFUSED` в `prisma.*.findMany()`    | `apps/form-example/next.config.ts` (инцидент 2026-07-12)                                                                                 |
+| Приложение | Пакет                    | Симптом                                   | Коммит                                                                                                                                   |
+| ---------- | ------------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `mandala`  | `sharp`/`libvips-cpp.so` | `ERR_DLOPEN_FAILED` на каждом SSR-запросе | нормализовано через `outputFileTracingIncludes` в `next.config.js` (было: хардкод-`COPY` в `Dockerfile.production`, инцидент 2026-07-12) |
 
-Если ловишь третий случай — сначала проверь, не помогает ли уже применённый паттерн один в
+Если ловишь такой случай — сначала проверь, не помогает ли уже применённый паттерн один в
 один (те же приложения с `sharp` в рантайме: `driving-school`, `aboi`, `kami`, `grandslamcup`
 уже получили фикс превентивно, см. коммиты вокруг сессии №71 в корневом `PLAN.md`).
+
+## ⚠️ Не всякий рантайм-ECONNREFUSED — это баг трассировки
+
+Инцидент `form-example` (2026-07-12) изначально выглядел как классический случай этой статьи —
+`ECONNREFUSED` в `prisma.product.findMany()`, строка подключения проверена и рабочая. Была
+применена попытка фикса через `outputFileTracingIncludes` для `@prisma/adapter-pg`
+(коммиты `5df6e1e` → `d3423eb`) — **не помогло**, откачено в `16471b4`.
+
+Реальная причина оказалась другой и вообще не про трассировку файлов: в bun-хостинге
+монорепо параллельно установлено несколько версий `pg` (hoisting — 8.20.0/8.21.0/8.22.0
+одновременно в `node_modules/.bun/`). Код приложения создавал `new Pool({connectionString})`
+через одну резолвнутую версию `pg`, а `@prisma/adapter-pg` **внутри себя** резолвит свою,
+отдельную версию `pg` (свой изолированный dependency tree). `instanceof Pool`-проверка внутри
+адаптера между двумя разными классами (разные версии пакета = разные классы, даже
+структурно идентичные) не проходит → адаптер не распознаёт переданный `Pool` как валидный →
+тихо создаёт свой собственный `Pool` без `connectionString` → дефолтится на `localhost:5432`
+→ `ECONNREFUSED`. Реальная ошибка при этом маскируется внутри `performIO` (WASM query
+compiler) под generic `ECONNREFUSED`, не показывая, что дело в другом — это известный
+открытый баг Prisma, [prisma/prisma#28055](https://github.com/prisma/prisma/issues/28055).
+
+**Диагностика, которая отличает этот случай от бага трассировки:** воспроизвести падение
+внутри контейнера напрямую тем же кодом (см. п.3 «Диагностика» выше), но вызвать
+`adapter.queryRaw()` **в обход обёртки Prisma Client**, чтобы увидеть настоящее исключение —
+`handleRequestError`/`PrismaClientKnownRequestError` глотает реальную причину:
+
+```bash
+docker exec -w /app/apps/<app>/.next <container> node -e "
+(async()=>{
+  const { PrismaPg } = await import('@prisma/adapter-pg-<hash>')  // имя из логов
+  const { Pool } = await import('pg-<hash>')
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const adapter = await new PrismaPg(pool).connect()
+  try { await adapter.queryRaw({ sql: 'SELECT 1', args: [], argTypes: [] }) }
+  catch(e) { console.log(e) }  // реальная ошибка, не обёрнутая
+})()"
+```
+
+Если реальная ошибка указывает на `localhost`/`127.0.0.1`/`::1` вместо ожидаемого хоста —
+это конфликт версий `pg`, не проблема трассировки. **Фикс** — передавать `connectionString`
+(или `PoolConfig`) напрямую в конструктор адаптера вместо готового `Pool`-инстанса, чтобы
+адаптер сам создавал `Pool` через свою резолвнутую версию `pg`:
+
+```typescript
+// ❌ Может сломаться при нескольких версиях pg в hoisting
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const adapter = new PrismaPg(pool)
+
+// ✅ Адаптер создаёт Pool сам — конфликта версий классов нет
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+```
+
+Коммит фикса: `apps/form-example/src/lib/db.ts` (`bd498ed`). Если у приложения несколько
+версий `pg` в `bun.lock` (`grep -A1 '"pg"' bun.lock` или смотри `node_modules/.bun/pg@*`) и
+используется `@prisma/adapter-pg` — превентивно применяй тот же паттерн.
