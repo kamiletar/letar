@@ -1,0 +1,53 @@
+name: auth-hub-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: auth-hub-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lena_auth
+      POSTGRES_USER: lena_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - auth-hub-staging-data:/var/lib/postgresql/data
+    ports:
+      # Хостовый порт на s3 — не пересекается с grandslamcup-staging-db (5454) или e2e-postgres
+      # (5499), но не проверялся напрямую на сервере. Подтверди перед первым деплоем.
+      - '5455:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lena_user -d lena_auth']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: auth-hub:staging
+    container_name: auth-hub-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний порт 3010 — из Dockerfile.production (ENV PORT=3010), тот же образ что и
+      # прод. Хостовый 3019 подобран по аналогии с grandslamcup-staging (3018:3016) — свободен
+      # на момент написания, но не проверялся напрямую на s3. Подтверди перед первым деплоем.
+      - '3019:3010'
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@auth-hub-staging-db:5432/lena_auth
+      # На staging OAuth/passkeys/magic-link по-настоящему не заходят (тесты покрывают только
+      # рендер форм + dev-session admin-флоу) — BETTER_AUTH_URL/NEXT_PUBLIC_APP_URL указывают на
+      # сам staging-контейнер, не на auth.letar.best.
+      BETTER_AUTH_URL: http://localhost:3019
+      NEXT_PUBLIC_APP_URL: http://localhost:3019
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3010/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  auth-hub-staging-data:
