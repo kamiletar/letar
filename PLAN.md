@@ -84,12 +84,13 @@
 > rollout.** Оба последних высокорисковых кандидата §18.6 Сессии J (`auth-hub`, `driving-school`)
 > закрыты.
 >
-> **➡️ Следующий старт:** (1) продолжить тираж на оставшихся кандидатов — `animatrona-tracker`,
-> `form-example`, `aboi` (deploy-request уже отправлен ранее, статус не проверен в этой сессии),
-> `svoichuzhie`, `aprel8008`; `mandala` пока пропустить (нужен период стабильности после инцидента
-> Сессии №70); `dashboard`/`dashboard-agent` структурно исключены из rollout (спецпути деплоя);
-> (2) когда все активные SERVER_APPS на rollout — можно просить BlackCove удалить старую
-> `premium-network`.
+> **➡️ Следующий старт:** (1) `aboi` уже задеплоен (см. исправленную запись выше) — реально
+> оставшиеся кандидаты: `animatrona-tracker`, `svoichuzhie`, `aprel8008`; `form-example`/`mandala`
+> — обычный (non-rollout) деплой уже закрыт, `letar.rollout` пока намеренно выключен (mandala —
+> период стабильности после инцидента Сессии №70, form-example — не проверено в этой сессии,
+> нужно свериться со статусом); `dashboard`/`dashboard-agent` структурно исключены из rollout
+> (спецпути деплоя); (2) когда все активные SERVER_APPS на rollout — можно просить BlackCove
+> удалить старую `premium-network`.
 
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
@@ -162,10 +163,15 @@
 > s2). Первый rollout с БД со времён `time` — `depends_on: service_healthy` отработал корректно,
 > `dsperevod-app-2` дождался healthy `db`, ни одного ECONNREFUSED. Домен `dsperevod.ru` — 5/5 curl
 > HTTP 200. **7/~19 SERVER_APPS на rollout.**
-> **`aboi` — compose смигрирован (submodule `bf9c54b` + bump `5e4f3ef` в letar):** ⚠️ первый боевой
-> e-commerce в тираже (T-Bank эквайринг, СДЭК), выше риск, чем у предыдущих кандидатов. `doctor`
-> 8/8 READY. Запрос пилота отправлен BlackCove (thread `deploy-aboi-rollout-J`) с явным
-> предупреждением про повышенный риск — **ждёт выполнения**.
+> **`aboi` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #387, thread
+> `deploy-aboi-rollout-J`, инициатор VioletGrove):** commit `bf9c54b` (submodule) + `5e4f3ef`
+> (letar), сервер s2, zero-downtime — первый боевой e-commerce в тираже (T-Bank эквайринг, СДЭК).
+> BlackCove проверил не только HTTP 200, но и реальные интеграции: СДЭК-токен получен, webhook
+> `https://neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок в логах `aboi-app-2`; каталог
+> `/catalog/` реально отдаёт контент (106KB HTML, цены в ₽, не пустая страница). `depends_on:
+> service_healthy` снова сработал корректно (как в dsperevod). Ни одной ошибки. **Обнаружено
+> задним числом (2026-07-14, RubyBear) — PLAN.md не обновлялся после успеха, аналогично сессии
+> №73 с aprel8008: не доверять статусу «ждёт выполнения» в PLAN.md без проверки inbox.**
 
 > **`animatrona-landing` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #381, thread
 > `deploy-animatrona-landing-rollout-J`):** zero-downtime (commit `986d8da`, сервер s2).
