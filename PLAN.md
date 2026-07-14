@@ -1,5 +1,11 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`animatrona-tracker` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-14, RubyBear, commit `78b7db8`,
+> thread `deploy-animatrona-tracker-rollout-J`, msg #440):** compose смигрирован (нет
+> `container_name`/`ports` у `app`, alias `animatrona-tracker-app`, healthcheck `:3010`,
+> `letar.rollout`, `DEPLOY_TAG`; снят configurable host-порт `${PORT:-3010}`). Обычный риск — не
+> e-commerce, не SSO-хаб, hub-client Ключницы через OIDC. **Ждёт выполнения BlackCove.**
+
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
 > zero-downtime, все 9 гейтов пройдены. Сборка заняла дольше обычного (~4 мин, экспорт слоёв
