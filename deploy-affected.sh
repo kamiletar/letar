@@ -708,13 +708,31 @@ for app in $AFFECTED_APPS; do
     echo "Applying database migrations..."
     cd "$WORKSPACE_ROOT"
     cd "$APP_DIR"
-    # Передаём schema явно, DATABASE_URL берётся из environment
+    # ⚠️ Prisma 7 + prisma.config.ts (все приложения кроме label-printer-desktop, который не
+    # деплоится этим скриптом): CLI сам резолвит и schema, и migrations.path из конфига при
+    # запуске БЕЗ --schema (тот же вызов, что и в рабочих nx-таргетах db:migrate/db:migrate:deploy —
+    # `cwd: apps/<app>`, никакого --schema). Раньше здесь был хардкод `--schema
+    # src/generated/schema.prisma` — для driving-school (shared-lib паттерн, schema.prisma
+    # генерируется в libs/driving-school-db/, а migrations лежат в apps/driving-school/prisma/
+    # migrations/) путь не совпадал, скрипт молча писал "Schema not found" и пропускал ВЕСЬ шаг
+    # миграций без ошибки (в т.ч. на production — найдено при staging e2e §18.6 Сессия J).
+    # Передавать --schema на резолвленный из schema.zmodel путь тоже было бы неверно: Prisma
+    # тогда искал бы migrations рядом со schema.prisma (в libs/), а не в apps/.../prisma/migrations,
+    # где они реально лежат — конфиг в prisma.config.ts специально держит эти два пути вместе.
+    USE_PRISMA_CONFIG=0
     SCHEMA_PATH="src/generated/schema.prisma"
-    if [ -f "$SCHEMA_PATH" ]; then
+    if [ -f "prisma.config.ts" ]; then
+      USE_PRISMA_CONFIG=1
+    fi
+    if [ "$USE_PRISMA_CONFIG" = "1" ] || [ -f "$SCHEMA_PATH" ]; then
+      PRISMA_SCHEMA_FLAG=()
+      if [ "$USE_PRISMA_CONFIG" != "1" ]; then
+        PRISMA_SCHEMA_FLAG=(--schema "$SCHEMA_PATH")
+      fi
       # Различаем «нет миграций к применению» (status: exit 0) и реальную работу/ошибку.
       # Раньше падение migrate deploy давало warning и деплой продолжался поверх
       # недомигрированной БД — теперь ошибка миграции прерывает деплой приложения.
-      if DATABASE_URL="$DATABASE_URL" npx prisma migrate status --schema "$SCHEMA_PATH" > /dev/null 2>&1; then
+      if DATABASE_URL="$DATABASE_URL" npx prisma migrate status "${PRISMA_SCHEMA_FLAG[@]}" > /dev/null 2>&1; then
         echo -e "${BLUE}ℹ️  No pending migrations for ${app}${NC}"
       else
         # Перед миграцией — дамп прод-БД (защита данных; окно потери между ночными
@@ -745,7 +763,7 @@ for app in $AFFECTED_APPS; do
           echo -e "${YELLOW}⚠️  SKIP_PREMIGRATE_DUMP=1 — миграция без предварительного дампа${NC}"
         fi
 
-        if DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy --schema "$SCHEMA_PATH"; then
+        if DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy "${PRISMA_SCHEMA_FLAG[@]}"; then
           echo -e "${GREEN}✅ Migrations applied${NC}"
         else
           echo -e "${RED}❌ Migration failed for ${app} — деплой прерван, старый контейнер не тронут. Дамп до миграции: ${DUMP_DIR}${NC}"
@@ -756,7 +774,7 @@ for app in $AFFECTED_APPS; do
         fi
       fi
     else
-      echo -e "${YELLOW}⚠️  Schema not found at $SCHEMA_PATH${NC}"
+      echo -e "${YELLOW}⚠️  Schema not found at $SCHEMA_PATH (нет prisma.config.ts)${NC}"
     fi
   elif [ -n "$BUILD_ENV_FILE" ]; then
     echo -e "${BLUE}ℹ️  No database service defined, skipping DB setup${NC}"
