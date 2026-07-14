@@ -1,5 +1,12 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **`svoichuzhie` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-14, RubyBear, commit `1f73ab1`
+> submodule + `649167b` letar, thread `deploy-svoichuzhie-rollout-J`, msg #445):** compose
+> смигрирован (нет `container_name`/`ports` у `app`, alias `svoichuzhie-app`, healthcheck уже
+> был, `letar.rollout`, `DEPLOY_TAG`). ⚠️ Последний непроверенный кандидат тиража — боевой
+> e-commerce с СДЭК-доставкой, риск как у `aboi`. Запрошена проверка реальных интеграций (СДЭК
+> токен в логах, каталог отдаёт контент), не только HTTP 200. **Ждёт выполнения BlackCove.**
+
 > **`animatrona-tracker` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #442/#443, thread
 > `deploy-animatrona-tracker-rollout-J`):** commit `78b7db8`, сервер s2, zero-downtime, все 9
 > гейтов пройдены, curl-мониторинг `animatrona-tracker.letar.best` 200×5 без сбоев. **15/~19
