@@ -126,6 +126,21 @@
 > перед первым `deploy_app(staging)`. Нужен NPM proxy host для `driving-school-stage.s3.letar.best`
 > и, отдельно, для порта Socket.IO. `.env.staging` с реальными секретами создаётся на s3, не в git.
 >
+> **Провижининг сделан, первый staging-деплой упал (2026-07-14, BlackCove, msg #441):** порты
+> подтверждены свободными, `.env.staging` создан на s3 (секреты через `openssl rand`, общий
+> `DEV_SESSION_TOKEN` переиспользован), `docker-compose.staging.yml` парсится верно. NPM public
+> domain и `SOCKET_BASE_URL` осознанно не настроены — `run_e2e` бьёт по `BASE_URL` напрямую на том
+> же хосте s3, домен нужен только для будущего ручного QA; `SOCKET_BASE_URL` требует правки
+> allowlist `--preserve-env` в самом `dashboard-agent` (не провижининг конкретного приложения) —
+> тест и так грациозно `test.skip` без неё. Сам билд упал: `GoogleCalendarService` конструировался
+> на уровне модуля и бросал исключение при пустых `AUTH_GOOGLE_ID`/`SECRET` (staging их намеренно не
+> задаёт) — `next build` падал на статическом сборе `/api/calendar/feed/[token]`.
+>
+> **✅ Исправлено (2026-07-14, driving-school v0.236.1, commit `b320bb4`):** ленивый singleton
+> `getGoogleCalendarService()` вместо эагерного `export const`. Проверено локально: `nx build
+> driving-school` с намеренно пустыми `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — чисто. Попросил
+> BlackCove повторить staging-деплой.
+>
 > **➡️ Следующий старт:** (1) `aboi` уже задеплоен (см. исправленную запись выше) — реально
 > оставшиеся кандидаты: `animatrona-tracker`, `svoichuzhie`, `aprel8008`; `form-example`/`mandala`
 > — обычный (non-rollout) деплой уже закрыт, `letar.rollout` пока намеренно выключен (mandala —
