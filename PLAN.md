@@ -1,10 +1,16 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **`aprel8008` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-14, RubyBear, commit `8cbdfbe`
-> submodule + `a04d5cb` letar, thread `deploy-aprel8008-rollout-J`, msg #435):** compose
-> смигрирован на стандартный паттерн (нет `container_name`/`ports` у `app`, alias
-> `aprel8008-app`, healthcheck `:3023`, `letar.rollout`, `DEPLOY_TAG`). Простой кандидат — только
-> db+app, без WebSocket/Redis-специфики, обычный уровень риска. **Ждёт выполнения BlackCove.**
+> **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
+> `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
+> zero-downtime, все 9 гейтов пройдены. Сборка заняла дольше обычного (~4 мин, экспорт слоёв
+> 107с) — build cache на s2 разросся до 52GB, диск был под нагрузкой параллельно с driving-school
+> — на корректность деплоя не повлияло. **14/~19 SERVER_APPS на rollout.**
+>
+> **➡️ Следующий старт:** продолжить тираж — оставшиеся кандидаты `animatrona-tracker`,
+> `svoichuzhie` (оба без rollout-профиля пока), `form-example`/`mandala` (label намеренно
+> выключен — form-example статус не проверялся давно, mandala ждёт периода стабильности);
+> `dashboard`/`dashboard-agent` структурно исключены. Стоит присмотреться к 52GB build cache на
+> s2 — не блокирует, но растёт с каждым деплоем.
 
 > **`auth-hub` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #420/#421, thread
 > `deploy-auth-hub-rollout-J`):** commit `7c355d7`→`20684fc`, сервер s2, zero-downtime rollout,
