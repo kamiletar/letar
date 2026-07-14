@@ -1,10 +1,17 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **`animatrona-tracker` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-14, RubyBear, commit `78b7db8`,
-> thread `deploy-animatrona-tracker-rollout-J`, msg #440):** compose смигрирован (нет
-> `container_name`/`ports` у `app`, alias `animatrona-tracker-app`, healthcheck `:3010`,
-> `letar.rollout`, `DEPLOY_TAG`; снят configurable host-порт `${PORT:-3010}`). Обычный риск — не
-> e-commerce, не SSO-хаб, hub-client Ключницы через OIDC. **Ждёт выполнения BlackCove.**
+> **`animatrona-tracker` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #442/#443, thread
+> `deploy-animatrona-tracker-rollout-J`):** commit `78b7db8`, сервер s2, zero-downtime, все 9
+> гейтов пройдены, curl-мониторинг `animatrona-tracker.letar.best` 200×5 без сбоев. **15/~19
+> SERVER_APPS на rollout.**
+> ⚠️ Побочная находка (не блокирует): в логе `zenstack:generate` рассинхрон версий ZenStack —
+> `@zenstackhq/runtime@2.22.3` при остальных пакетах на `3.8.3`. Предсуществующий техдолг в
+> `package.json`, не трогали.
+>
+> **➡️ Следующий старт:** остался последний непроверенный кандидат тиража — `svoichuzhie`
+> (e-commerce с СДЭК, риск как у `aboi` — проверять не только HTTP 200, но и реальные интеграции
+> доставки в логах). После него — `form-example`/`mandala` (label намеренно выключен) и
+> `dashboard`/`dashboard-agent` (структурно исключены) остаются вне активного тиража.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
