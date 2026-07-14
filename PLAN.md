@@ -16,10 +16,22 @@
 > авторизации — email/password форма, magic-link, OAuth-кнопки), `02-admin` (dashboard/users/
 > clients с dev-session-сессией), `03-oidc-authorize` (смоук authorize-редиректа с произвольными
 > query — не привязан к конкретному seeded client_id, только «не 500»). Только `chromium` первым
-> заходом. `nx lint`/`nx typecheck:tsgo` чисто. **Инфраструктура на s3 ещё не готова** — отправлен
-> запрос BlackCove (thread `auth-hub-e2e-setup`, msg #426, low priority, не блокирует): создать
-> `e2e_auth_hub` БД, `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` в `.env.staging` (только там, не в
-> `.env.docker`), применить миграции, задеплоить на staging, первый `run_e2e`.
+> заходом. `nx lint`/`nx typecheck:tsgo` чисто.
+>
+> **✅ Первый прогон прошёл зелёным (2026-07-14, BlackCove, msg #428, 2м55с, chromium)** — но
+> вручную: BlackCove настроил `.env.local` + прогнал `nx e2e auth-hub-e2e` по SSH напрямую,
+> потому что `run_e2e`/`deploy_app(staging)` требуют `docker-compose.staging.yml`, которого у
+> auth-hub не было. Такой прогон не пишет `.last-e2e-status/auth-hub.json` и не участвует в
+> warn-gate перед production-деплоем — цель находки BlackCove (msg #420) не достигнута полностью.
+>
+> **✅ docker-compose.staging.yml добавлен (2026-07-14, RubyBear, commit `5ab4186`):** по образцу
+> `grandslamcup-staging` — `auth-hub-staging-db` (host `5455:5432`), `auth-hub-staging-app` (host
+> `3019:3010`, внутренний порт из `Dockerfile.production`). `playwright.config.ts` менять не
+> потребовалось — уже структурно совпадал с эталоном (`baseURL` из `BASE_URL`,
+> `webServer.reuseExistingServer: true`). ⚠️ Порты 5455/3019 подобраны по аналогии, не проверены
+> на реальную занятость на s3. Запрос отправлен BlackCove (thread `auth-hub-e2e-setup`, msg #429,
+> low priority): подтвердить порты → `deploy_app(staging)` → `run_e2e` → `.last-e2e-status`
+> появится, warn-gate заработает.
 >
 > **`driving-school` — 🔴 rollout ОТЛОЖЕН (2026-07-13, находка BlackCove, thread
 > `driving-school-websocket-rollout-check`, msg #422, решение пользователя):** живой NPM-конфиг
