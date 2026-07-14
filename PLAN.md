@@ -1,11 +1,30 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **`svoichuzhie` rollout-миграция — 🟡 ЗАПРОШЕНА (2026-07-14, RubyBear, commit `1f73ab1`
-> submodule + `649167b` letar, thread `deploy-svoichuzhie-rollout-J`, msg #445):** compose
-> смигрирован (нет `container_name`/`ports` у `app`, alias `svoichuzhie-app`, healthcheck уже
-> был, `letar.rollout`, `DEPLOY_TAG`). ⚠️ Последний непроверенный кандидат тиража — боевой
-> e-commerce с СДЭК-доставкой, риск как у `aboi`. Запрошена проверка реальных интеграций (СДЭК
-> токен в логах, каталог отдаёт контент), не только HTTP 200. **Ждёт выполнения BlackCove.**
+> **🔴 `deploy-affected.sh` тихо пропускает миграции для shared-DB приложений (2026-07-14,
+> BlackCove, msg #447, high):** скрипт (`deploy-affected.sh:712`) хардкод-ищет схему по
+> `SCHEMA_PATH="src/generated/schema.prisma"`. У `driving-school` схема генерируется в
+> `libs/driving-school-db/src/generated/schema.prisma` (shared-lib паттерн) — путь не совпадает,
+> скрипт пишет `⚠️ Schema not found` и **пропускает весь шаг применения миграций молча, без
+> ошибки и без блокировки деплоя**. Подтверждено на staging: после «успешного» деплоя БД была
+> абсолютно пустой (`\dt` → 0 relations) при зелёном build-логе. **Вероятно актуально и для
+> production driving-school** — прод жив только потому, что миграции применялись не через этот
+> скрипт ранее. Любая новая миграция рискует тихо не долететь до прода. Не мой (RubyBear) скоуп —
+> нужен отдельный разбор `deploy-affected.sh` (fallback-путь схемы для shared-DB паттерна) или явная
+> документация ручного `nx db:migrate` для driving-school до фикса.
+
+> **`svoichuzhie` rollout-миграция — 🟡 первая попытка ❌, повтор запрошен (2026-07-14):** compose
+> смигрирован (commit `1f73ab1` submodule + `649167b` letar) — нет `container_name`/`ports` у
+> `app`, alias `svoichuzhie-app`, healthcheck уже был, `letar.rollout`, `DEPLOY_TAG`.
+> **Первая попытка (msg #448, BlackCove) упала до докер-стадии** — не из-за compose:
+> `.env.docker` содержал `CDEK_FROM_ADDRESS=Рождественская ул., 8` без кавычек;
+> `deploy-affected.sh` делает `source .env.docker` при сборке, запятая+пробел ломали
+> bash-парсинг (`ул.,: command not found`, exit 127). Прод не пострадал (падение до докера).
+> **Пофикшено (RubyBear, свой SOPS-ключ):** `.env.docker.enc` → `CDEK_FROM_ADDRESS="Рождественская
+> ул., 8"` (commit `bc8b595` submodule + `5c2a333` letar), проверено локально — `source` парсит
+> чисто. Повторный запрос отправлен (msg #451) — **ждёт выполнения**.
+> ⚠️ Побочная находка (не блокер, не связана с этой миграцией): `svoichuzhie-app` в текущем
+> проде уже 4 дня в статусе `unhealthy` — существовало до попытки деплоя, требует отдельного
+> разбора независимо от rollout.
 
 > **`animatrona-tracker` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #442/#443, thread
 > `deploy-animatrona-tracker-rollout-J`):** commit `78b7db8`, сервер s2, zero-downtime, все 9
