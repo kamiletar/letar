@@ -78,9 +78,18 @@
 > `image: driving-school:${DEPLOY_TAG:-latest}`, `stop_grace_period: 30s`, `labels.letar.rollout: 'true'`.
 > `deploy-engine doctor --app driving-school` — 8/8 ✅ READY. Deploy-request отправлен BlackCove.
 >
-> **➡️ Следующий старт:** (1) BlackCove проводит живой rollout-пилот для driving-school (супервизия
-> обязательна — WS-чат в первый раз проходит через rollout); (2) после успеха — **13/~19 SERVER_APPS
-> на rollout**; (3) когда все ~19 на rollout — можно просить BlackCove удалить старую `premium-network`.
+> **✅✅ Rollout-пилот ЗАВЕРШЁН (2026-07-14, BlackCove, msg #434, инициатор RainyMarsh):**
+> zero-downtime, включая Redis-адаптер Socket.IO для WS-чата — первый WS-сервис в тираже. Curl-
+> мониторинг во время финального `nginx-reload`: 200×5 без сбоев. **13/~19 SERVER_APPS на
+> rollout.** Оба последних высокорисковых кандидата §18.6 Сессии J (`auth-hub`, `driving-school`)
+> закрыты.
+>
+> **➡️ Следующий старт:** (1) продолжить тираж на оставшихся кандидатов — `animatrona-tracker`,
+> `form-example`, `aboi` (deploy-request уже отправлен ранее, статус не проверен в этой сессии),
+> `svoichuzhie`, `aprel8008`; `mandala` пока пропустить (нужен период стабильности после инцидента
+> Сессии №70); `dashboard`/`dashboard-agent` структурно исключены из rollout (спецпути деплоя);
+> (2) когда все активные SERVER_APPS на rollout — можно просить BlackCove удалить старую
+> `premium-network`.
 
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
