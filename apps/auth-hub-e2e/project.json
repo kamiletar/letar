@@ -1,0 +1,15 @@
+{
+  "name": "auth-hub-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/auth-hub-e2e/src",
+  "tags": ["type:e2e", "scope:auth-hub", "owner:letar"],
+  "implicitDependencies": ["auth-hub"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/auth-hub-e2e/playwright.config.ts"
+      }
+    }
+  }
+}
