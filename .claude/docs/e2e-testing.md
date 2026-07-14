@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -572,6 +572,37 @@ nx db:migrate <app>
 - `ELECTRON_SKIP_BINARY_DOWNLOAD=1` — обязателен при `bun install` (Electron не нужен на сервере)
 - `bun` симлинкован через `/root/.bun/` — `/root` должен быть доступен для deploy (`chmod o+x /root`)
 - Playwright system deps установлены от root, браузер — от deploy пользователя
+
+### `DEV_SESSION_TOKEN` — общий секрет для ВСЕХ приложений, не per-app
+
+**Не генерируй свой `DEV_SESSION_TOKEN` для нового приложения** — `dashboard-agent` на s3
+передаёт в `nx e2e <app>-e2e` через `POST /api/e2e/run` **один и тот же** токен из **своего
+собственного окружения** (`--preserve-env=BASE_URL,DEV_SESSION_TOKEN`), а не читает
+`.env.staging`/`.env.local` конкретного приложения. Если сгенерировать уникальный токен per-app
+(естественная на вид идея — «свой секрет для своего приложения») — `global-setup.ts` получит от
+раннера чужой (общий) токен, `createDevSessionRoute` сравнит его со своим `DEV_SESSION_TOKEN` и
+отклонит с 403 — тест упадёт на `dev-session не установил cookie`.
+
+**Правильно:** взять уже существующее значение `DEV_SESSION_TOKEN` из окружения `dashboard-agent`
+на s3 (тот же токен, что и у всех остальных приложений с dev-session e2e — например
+`grandslamcup`) и прописать его в `.env.staging` нового приложения. Менять общий токен — только
+синхронно во всех `.env.staging` + в самом окружении `dashboard-agent`, никогда по отдельности.
+
+Прецедент: `auth-hub-e2e` (§18.6 Сессия J, 2026-07-14) — первый прогон падал именно из-за
+уникального токена, сгенерированного по аналогии с `AUTH_SECRET`/`DEV_SESSION_TOKEN` из раздела
+выше («Настройка нового приложения для E2E»). Тот раздел описывает **dev-server** паттерн
+(локальный `nx dev`, свои секреты нормальны); staging-docker паттерн (`docker-compose.staging.yml`
+
+- `run_e2e` через dashboard-agent) — это другой контур, где `DEV_SESSION_TOKEN` уже общий.
+
+### Комментарии в `docker-compose.staging.yml`/`.production.yml`: НЕ между `ports:` и портом
+
+`deploy-affected.sh` резолвит `DB_PORT` через `grep -A 1 "ports:"` — берёт буквально следующую
+строку после `ports:`. Комментарий, вставленный между `ports:` и первой записью (`- '5455:5432'`),
+перехватывает эту позицию — `DB_PORT` остаётся пустым, скрипт падает на дефолтный `5432`
+(`Can't reach database server at localhost:5432`, хотя контейнер реально слушает другой порт).
+Комментарии, поясняющие выбор порта, должны стоять НАД блоком `ports:`, не внутри него.
+
 - `nx zenstack:generate` не работает без предварительной сборки `libs/zenstack-form-plugin` — используй уже сгенерированные файлы из репо
 
 ### Обновление репозитория
