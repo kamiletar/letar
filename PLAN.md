@@ -10,6 +10,17 @@
 > ⚠️ Находка BlackCove: для auth-hub ещё ни разу не гонялся staging e2e — завести перед
 > следующими rollout-изменениями Ключницы (не блокирует, задел на будущее).
 >
+> **✅ Staging e2e для auth-hub заведён (2026-07-14, RubyBear, commit `3043014`):** новый
+> `apps/auth-hub-e2e` (Playwright, по образцу `grandslamcup-e2e`) + dev-session роут
+> (`createDevSessionRoute` из `@letar/auth/server`). 3 спека: `01-public` (sign-in/sign-up без
+> авторизации — email/password форма, magic-link, OAuth-кнопки), `02-admin` (dashboard/users/
+> clients с dev-session-сессией), `03-oidc-authorize` (смоук authorize-редиректа с произвольными
+> query — не привязан к конкретному seeded client_id, только «не 500»). Только `chromium` первым
+> заходом. `nx lint`/`nx typecheck:tsgo` чисто. **Инфраструктура на s3 ещё не готова** — отправлен
+> запрос BlackCove (thread `auth-hub-e2e-setup`, msg #426, low priority, не блокирует): создать
+> `e2e_auth_hub` БД, `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` в `.env.staging` (только там, не в
+> `.env.docker`), применить миграции, задеплоить на staging, первый `run_e2e`.
+>
 > **`driving-school` — 🔴 rollout ОТЛОЖЕН (2026-07-13, находка BlackCove, thread
 > `driving-school-websocket-rollout-check`, msg #422, решение пользователя):** живой NPM-конфиг
 > (`proxy_host/9.conf`) для WebSocket-порта `3004` резолвит `driving-school-app` в IP один раз при
