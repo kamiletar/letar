@@ -90,6 +90,23 @@
 > rollout.** Оба последних высокорисковых кандидата §18.6 Сессии J (`auth-hub`, `driving-school`)
 > закрыты.
 >
+> ⚠️ По пути найден и исправлен баг сборки, не связанный с rollout напрямую: коммит `b02bf2e`
+> (nx 23.1.0 migration) пин `rootDir: "."` в `tsconfig.json`, хотя `paths`/`references` указывают
+> на `libs/*` вне этой директории — `tsc` терпит (project references + noEmit), `next build` — нет.
+> Первый деплой после rollout-конфига упал на TS-чекере ещё до докер-стадии (старый контейнер не
+> тронут, даунтайма не было). Фикс: `rootDir: "../.."` (как у auth-hub/kami) — commit `b33cb9e`.
+>
+> **✅ Staging e2e — код готов (2026-07-14, driving-school v0.236.0, driving-school-e2e
+> `b747adf`), провижининг на s3 не запрошен.** BlackCove отметил отсутствие staging e2e как риск
+> первого rollout-пилота с Redis-адаптером (msg #433) — по аналогии с auth-hub добавлены:
+> `src/app/api/auth/dev-session/route.ts`, `docker-compose.staging.yml` (БД `:5456`, app
+> `:3020`/`:3021`, `REDIS_URL` на `e2e-redis` через `172.17.0.1:6380`), `.env.staging.example`,
+> новый Playwright-проект `staging-smoke` в `driving-school-e2e` (3 файла: публичные страницы,
+> dev-session дашборд, Socket.IO handshake через Redis-адаптер — последний пока `test.skip` без
+> `SOCKET_BASE_URL`). Порты `5456`/`3020`/`3021` не проверены на занятость на s3 — подтвердить
+> перед первым `deploy_app(staging)`. Нужен NPM proxy host для `driving-school-stage.s3.letar.best`
+> и, отдельно, для порта Socket.IO. `.env.staging` с реальными секретами создаётся на s3, не в git.
+>
 > **➡️ Следующий старт:** (1) `aboi` уже задеплоен (см. исправленную запись выше) — реально
 > оставшиеся кандидаты: `animatrona-tracker`, `svoichuzhie`, `aprel8008`; `form-example`/`mandala`
 > — обычный (non-rollout) деплой уже закрыт, `letar.rollout` пока намеренно выключен (mandala —
