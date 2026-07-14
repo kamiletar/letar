@@ -1,16 +1,24 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **🔴 `deploy-affected.sh` тихо пропускает миграции для shared-DB приложений (2026-07-14,
-> BlackCove, msg #447, high):** скрипт (`deploy-affected.sh:712`) хардкод-ищет схему по
-> `SCHEMA_PATH="src/generated/schema.prisma"`. У `driving-school` схема генерируется в
-> `libs/driving-school-db/src/generated/schema.prisma` (shared-lib паттерн) — путь не совпадает,
-> скрипт пишет `⚠️ Schema not found` и **пропускает весь шаг применения миграций молча, без
-> ошибки и без блокировки деплоя**. Подтверждено на staging: после «успешного» деплоя БД была
-> абсолютно пустой (`\dt` → 0 relations) при зелёном build-логе. **Вероятно актуально и для
-> production driving-school** — прод жив только потому, что миграции применялись не через этот
-> скрипт ранее. Любая новая миграция рискует тихо не долететь до прода. Не мой (RubyBear) скоуп —
-> нужен отдельный разбор `deploy-affected.sh` (fallback-путь схемы для shared-DB паттерна) или явная
-> документация ручного `nx db:migrate` для driving-school до фикса.
+> **✅ `deploy-affected.sh` — молчаливый пропуск миграций ПОФИКШЕН (2026-07-14, RubyBear, commit
+> `8e34f17`):** найдено BlackCove/RainyMarsh (msg #447/#450) при staging e2e для driving-school —
+> хардкод `SCHEMA_PATH="src/generated/schema.prisma"` не совпадал с shared-lib паттерном
+> driving-school (schema.prisma генерируется в `libs/driving-school-db/`, migrations лежат в
+> `apps/driving-school/prisma/migrations/`), скрипт молча писал `⚠️ Schema not found` и
+> пропускал весь шаг применения миграций без ошибки — подтверждено на staging (БД пустая при
+> зелёном build-логе), вероятно актуально и для production.
+> **Разбор перед фиксом:** первая идея (распарсить `output` из `schema.zmodel`) была бы неверна —
+> Prisma тогда искал бы `migrations/` рядом со сгенерированной `schema.prisma` (в `libs/`), а не
+> там, где они реально лежат (`apps/driving-school/prisma/migrations/`). Правильный источник —
+> `prisma.config.ts` (Prisma 7, есть у всех server-приложений кроме `label-printer-desktop`),
+> который держит `schema`+`migrations.path` согласованными. Рабочие nx-таргеты
+> `db:migrate`/`db:migrate:deploy` уже вызывают `prisma migrate deploy` БЕЗ `--schema`, полагаясь
+> на автообнаружение конфига — тот же паттерн применён и в `deploy-affected.sh`.
+> **Итог:** если у приложения есть `prisma.config.ts` — миграции запускаются без `--schema` флага
+> (как в nx-таргетах); иначе — старый хардкод-путь как fallback. Проверено на всех 18
+> приложениях с `schema.zmodel` — меняет поведение только для `driving-school`, остальные
+> получают эквивалентный вызов. Сообщено BlackCove — стоит последить за логом первого прогона
+> после этого коммита.
 
 > **`svoichuzhie` rollout-миграция — 🟡 первая попытка ❌, повтор запрошен (2026-07-14):** compose
 > смигрирован (commit `1f73ab1` submodule + `649167b` letar) — нет `container_name`/`ports` у
