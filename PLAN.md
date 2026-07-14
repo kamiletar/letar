@@ -37,16 +37,22 @@
 > **✅ Redis-адаптер добавлен в код (2026-07-14, driving-school v0.234.0, commit `b29ca4b`):**
 > `src/app/api/socket/route.ts` подключает `createAdapter` на `ioredis`, если задан `REDIS_URL`
 > (compose: `${REDIS_URL:-redis://letar-redis:6379}`, тот же общий Redis-инстанс, что у auth-hub/
-> kami). ⚠️ Половина блокера снята **в коде**, но rollout ещё не разрешён: (1) не проверено, жив ли
-> `letar-redis` на s2 и доступен ли он с driving-school-app по `kami-network`; (2) NPM-конфиг
-> `proxy_host/9.conf` для порта `3004` всё ещё резолвит IP один раз при старте воркера — без
-> `upstream`-блока или sticky-балансировки rollout всё равно рискован даже с общим room-state.
-> Перед переводом на rollout — запросить проверку у BlackCove.
+> kami).
 >
-> **➡️ Следующий старт:** (1) BlackCove проверяет `letar-redis` доступность + `proxy_host/9.conf`
-> для `3004`, при необходимости добавляет `upstream`/sticky; (2) после проверки — driving-school
-> можно переводить на rollout-профиль; (3) после этого — все ~19 SERVER_APPS на rollout, можно
-> просить BlackCove удалить старую `premium-network`.
+> **✅ BlackCove подтвердил инфру (2026-07-14, тред `424`):** `letar-redis` жив и доступен
+> с `driving-school-app` (nc -zv → open) — ничего донастраивать не нужно. По NPM `proxy_host/9.conf`
+> для `:3004` — upstream-блок НЕ нужен: с общим room-state в Redis не важно, на какую реплику физически
+> попадёт TCP-сокет при rollout, встроенный reconnect Socket.IO восстановит комнату из Redis без потери
+> сообщений (короткий реконнект-блип у активных чатов в момент `stop-old` — ожидаемо, не блокер).
+>
+> **✅ Rollout-профиль включён (2026-07-14, driving-school v0.235.0, commit `8189504`):** убраны
+> `container_name`/`ports` у `app`, добавлены network alias `driving-school-app`, `healthcheck`,
+> `image: driving-school:${DEPLOY_TAG:-latest}`, `stop_grace_period: 30s`, `labels.letar.rollout: 'true'`.
+> `deploy-engine doctor --app driving-school` — 8/8 ✅ READY. Deploy-request отправлен BlackCove.
+>
+> **➡️ Следующий старт:** (1) BlackCove проводит живой rollout-пилот для driving-school (супервизия
+> обязательна — WS-чат в первый раз проходит через rollout); (2) после успеха — **13/~19 SERVER_APPS
+> на rollout**; (3) когда все ~19 на rollout — можно просить BlackCove удалить старую `premium-network`.
 
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
