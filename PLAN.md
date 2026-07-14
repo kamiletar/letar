@@ -23,12 +23,19 @@
 > `@socket.io/redis-adapter` (общий room-state между репликами). Не в скоупе текущего тиража.
 > driving-school остаётся на обычном (non-rollout) деплое.
 >
-> **➡️ Следующий старт:** (1) §18.6 Сессия J по факту завершена без driving-school — **12/~19
-> SERVER_APPS на rollout**, оставшиеся (driving-school, ~6 не охваченных тиражом) требуют либо
-> Redis-адаптера (driving-school), либо отдельной оценки; (2) когда кто-то возьмётся за
-> Redis-адаптер для Socket.IO в driving-school — можно вернуться к его rollout-миграции (только
-> тогда, не раньше); (3) после этого — все ~19 SERVER_APPS на rollout, можно просить BlackCove
-> удалить старую `premium-network`.
+> **✅ Redis-адаптер добавлен в код (2026-07-14, driving-school v0.234.0, commit `b29ca4b`):**
+> `src/app/api/socket/route.ts` подключает `createAdapter` на `ioredis`, если задан `REDIS_URL`
+> (compose: `${REDIS_URL:-redis://letar-redis:6379}`, тот же общий Redis-инстанс, что у auth-hub/
+> kami). ⚠️ Половина блокера снята **в коде**, но rollout ещё не разрешён: (1) не проверено, жив ли
+> `letar-redis` на s2 и доступен ли он с driving-school-app по `kami-network`; (2) NPM-конфиг
+> `proxy_host/9.conf` для порта `3004` всё ещё резолвит IP один раз при старте воркера — без
+> `upstream`-блока или sticky-балансировки rollout всё равно рискован даже с общим room-state.
+> Перед переводом на rollout — запросить проверку у BlackCove.
+>
+> **➡️ Следующий старт:** (1) BlackCove проверяет `letar-redis` доступность + `proxy_host/9.conf`
+> для `3004`, при необходимости добавляет `upstream`/sticky; (2) после проверки — driving-school
+> можно переводить на rollout-профиль; (3) после этого — все ~19 SERVER_APPS на rollout, можно
+> просить BlackCove удалить старую `premium-network`.
 
 > **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
 > `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
