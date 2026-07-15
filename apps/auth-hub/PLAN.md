@@ -1,6 +1,18 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.6.1 — Фикс OIDC invalid_grant (Redis secondaryStorage) ✅
+## Текущий статус: v0.6.2 — Этап 8.5: self-service несколько email на аккаунт ✅
+
+### Выполнено (v0.6.2) — 2026-07-16
+
+- [x] `/profile/emails/` — добавление/подтверждение/удаление доп. email, назначение основным
+- [x] Модель `UserEmail`, свой токен подтверждения (не пересекается с core `Verification`)
+- [x] Форсированный `signOut` после смены основного email (инвалидация `cookieCache`)
+- [ ] Вход по любому linked-email — отдельная задача (перехват резолва sign-in)
+- [ ] Merge двух уже существующих разных аккаунтов — остаётся ручным скриптом владельца
+
+Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-062--2026-07-16-этап-85-self-service-несколько-email-на-аккаунт).
+
+## Текущий статус (ранее): v0.6.1 — Фикс OIDC invalid_grant (Redis secondaryStorage) ✅
 
 ### Выполнено (v0.6.0) — сессия №43, 2026-06-15
 
@@ -391,7 +403,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl: ;
+endSessionUrl:;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 
