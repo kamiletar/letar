@@ -505,6 +505,38 @@ UMAMI_API_PASSWORD=<пароль>
 
 ## Запланировано
 
+### 🔜 Рефакторинг: единый источник правды для реестра приложений
+
+**Найдено:** 2026-07-15, при чистке мёртвых ссылок на `premium-rosstil`/`imot` (см.
+`PLAN_COMPLETED.md` v1.19.4, commit `d7e8e49`). Карта `app → port` и связанные списки продублированы
+хардкодом минимум в 6 местах, независимо друг от друга:
+
+- `apps/dashboard-agent/src/lib/cron.ts` — `APP_PORTS`, `APP_HOSTS`
+- `apps/dashboard/src/lib/app-metrics.ts` — `APP_PORTS`
+- `apps/dashboard-agent/src/lib/server-config.ts` — `SERVER_APPS`
+- `apps/dashboard/src/lib/constants.ts` — `SUPPORTED_DATABASES`
+- `apps/dashboard/src/app/deploy/history/page.tsx` — `KNOWN_APPS`
+- `apps/dashboard-agent/src/lib/database.ts` — `APP_CONFIG` (бэкапы БД)
+
+Это прямо противоречит собственному правилу дашборда (`.claude/rules/dashboard.md`): _«Реестр
+приложений — `DeployedApp` таблица как единственный источник правды... Нет хардкоженных списков»_.
+На практике при удалении приложения из монорепо нужно вручную чистить 6+ файлов вместо одного — уже
+привело к мёртвым cron-задачам и мёртвым `docker-compose` volume-маунтам после удаления
+`premium-rosstil`/`imot` (2026-07-05, обнаружено только 2026-07-15).
+
+**Задача:**
+
+- [ ] Вынести карты `port`/`host`/`server`/`containerName` в единый источник — читать из
+      `DeployedApp` (dashboard-agent уже общается с dashboard по HTTP) либо, если БД недоступна из
+      dashboard-agent на раннем старте, держать один shared JSON/TS-модуль и импортировать его в
+      обоих приложениях вместо независимых копий.
+- [ ] `SUPPORTED_DATABASES`/`APP_CONFIG` (бэкапы) и `KNOWN_APPS`-подобные UI-списки — туда же или
+      генерировать из того же источника.
+- [ ] После рефакторинга: убедиться, что удаление приложения из монорепо требует правки только
+      одного места (плюс сам `DeployedApp` в БД).
+
+**Зависимости:** нет, чисто внутренний рефакторинг dashboard/dashboard-agent.
+
 ---
 
 ## Идеи на будущее
