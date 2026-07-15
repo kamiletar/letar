@@ -315,6 +315,29 @@ docker tag <app>:<sha> <app>:latest && docker compose -f docker-compose.producti
 
 ⚠️ Откат образа **не откатывает миграции БД** — если миграция уже применена, старый код должен быть с ней совместим (для этого миграции должны быть backward-compatible) либо восстанавливай БД из pre-migrate дампа (`/home/deploy/pre-migrate-dumps/`).
 
+### ⚠️ Healthcheck — никогда `localhost`, только `127.0.0.1` или `0.0.0.0`
+
+`/etc/hosts` внутри Docker-контейнера обычно резолвит `localhost` в `::1` (IPv6) **раньше**
+`127.0.0.1`. Next.js по умолчанию слушает только `0.0.0.0` (IPv4) — IPv6-listener'а нет. Если
+healthcheck-команда использует `wget http://localhost:<port>/...`, `busybox wget` (тот, что в
+Alpine-образах) **не делает fallback на IPv4** при неудаче по IPv6 — здоровый, полностью рабочий
+контейнер стабильно получает `connection refused` и уходит в `unhealthy`, при этом внешний трафик
+через nginx (отдельный сетевой путь, IPv4 к опубликованному порту) продолжает работать нормально.
+
+Прецедент: `svoichuzhie` был `unhealthy` в `docker ps` **4 дня подряд**, пока сайт реально работал
+для пользователей — маскировало настоящую диагностику (потрачено время на гипотезы про memory
+throttling/утечку event loop, прежде чем нашли одну строку). Правильная команда:
+
+```yaml
+# ❌ НЕ ТАК
+healthcheck:
+  test: ['CMD-SHELL', 'wget -qO- http://localhost:3021/api/health || exit 1']
+
+# ✅ ТАК — 127.0.0.1 или 0.0.0.0, никогда localhost
+healthcheck:
+  test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3021/api/health || exit 1']
+```
+
 ### Необходимые файлы для каждого приложения
 
 Каждое деплоируемое приложение требует:

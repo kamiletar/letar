@@ -443,6 +443,29 @@ try {
 3. Задеплой и примени: `nx db:migrate:deploy premium-rosstil`
 4. Миграции версионированы и безопасны для продакшна
 
+### ⚠️ `prisma.config.ts` — источник истины для schema/migrations, не хардкод-путь
+
+Каждое приложение с БД (Prisma 7) имеет `apps/<app>/prisma.config.ts` с полями `schema` и
+`migrations.path`. Рабочие nx-таргеты (`db:migrate`, `db:migrate:deploy`) вызывают `prisma
+migrate deploy` **вообще без `--schema`** — CLI сам находит и читает `prisma.config.ts` в текущей
+директории. Это не деталь реализации, а единственный надёжный способ резолвить оба пути
+согласованно.
+
+**Shared-lib паттерн** (эталон — `driving-school`): если schema.prisma генерируется ВНЕ
+`apps/<app>/` (например, в `libs/<app>-db/src/generated/schema.prisma` — когда библиотека с БД
+переиспользуется несколькими проектами, `@letar/driving-school-db` используется и приложением, и
+`driving-school-e2e`), `prisma.config.ts` держит `schema` (путь в `libs/`) и `migrations.path`
+(обычно всё ещё `apps/<app>/prisma/migrations/`) **согласованными между собой** — эти два пути не
+обязаны совпадать по директории, а `prisma.config.ts` — единственное место, которое это учитывает.
+
+**Не делай так:** не пытайся резолвить путь к `schema.prisma` вручную (например, парсингом
+`output` из `plugin prisma { ... }` в `schema.zmodel`) для инструментов вне nx-таргетов (CI-скрипты,
+`deploy-affected.sh` и т.п.) — велик риск получить путь к самой схеме, но не туда, где реально
+лежат `migrations/`, и Prisma будет искать миграции не там (тихий провал без ошибки). Всегда
+опирайся на `prisma.config.ts`, если он есть у приложения — читай `.env.local`/`.env`
+(`config({ path: ... })` в начале файла) так же, как это делает сам конфиг, и запускай без
+`--schema`.
+
 ## Мультитенантность (Organizations)
 
 Для мультитенантных приложений с Better Auth Organizations.
@@ -557,7 +580,7 @@ export const procedures = {
       type: string
       reason: string
       transferBalance: boolean
-    }
+    },
   ): Promise<TransferResult> => {
     // Бизнес-логика
     const connection = await client.studentInstructorConnection.findUnique({
