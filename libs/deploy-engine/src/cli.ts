@@ -9,8 +9,9 @@
  */
 
 import { parseArgs } from 'node:util'
-import { type DoctorReport, runDoctor } from './doctor.js'
+import { composePathForApp, type DoctorReport, runDoctor } from './doctor.js'
 import { createNodeExecutor } from './executor.js'
+import { migrateComposeToRollout } from './migrate-compose.js'
 import { type RolloutResult, runRollout } from './rollout.js'
 import { getStatus } from './status.js'
 
@@ -84,8 +85,37 @@ async function main(): Promise<void> {
       process.exit(result.ok ? 0 : 1)
       break
     }
+    case 'migrate-compose': {
+      const usage = 'Использование: deploy-engine migrate-compose --app <имя> [--write]'
+      const app = requireApp(rest, usage)
+      const { values } = parseArgs({ args: rest, options: { app: { type: 'string' }, write: { type: 'boolean' } } })
+      const composePath = composePathForApp(app)
+      const current = await executor.readFile(composePath)
+      if (current === null) {
+        console.error(`Файл не найден: ${composePath}`)
+        process.exit(1)
+        return
+      }
+      const result = migrateComposeToRollout(current, app)
+      if (!result.changed) {
+        console.log(`✅ ${composePath} уже соответствует rollout-профилю, изменений нет.`)
+      } else if (values.write) {
+        await executor.writeFile(composePath, result.yaml)
+        console.log(`✅ ${composePath} обновлён.`)
+      } else {
+        console.log(result.yaml)
+        console.log(`\n(предпросмотр — добавь --write, чтобы записать в ${composePath})`)
+      }
+      for (const warning of result.warnings) {
+        console.warn(`⚠️  ${warning}`)
+      }
+      process.exit(result.warnings.length > 0 ? 1 : 0)
+      break
+    }
     default: {
-      console.error(`Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout`)
+      console.error(
+        `Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout, migrate-compose`
+      )
       process.exit(2)
     }
   }
