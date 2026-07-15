@@ -124,9 +124,35 @@
 > (thread `deploy-form-example-mandala-rollout-J`) — **ждёт выполнения**. Известный некритичный
 > баг `/products ECONNREFUSED` не проверялся — деплой упал раньше, на миграциях.
 >
-> **➡️ Следующий старт:** дождаться повторного деплоя `form-example` → если зелёный, тираж §18.6
-> закрыт полностью (только `dashboard`/`dashboard-agent` вне активного тиража, структурно
-> исключены) — можно просить BlackCove удалить старую `premium-network`.
+> **`form-example` rollout-пилот 🟡 повторный root cause #2 (2026-07-15, BlackCove, msg #470):**
+> после фикса порта деплой дошёл до аутентификации и упал на `P1000` — `deploy-affected.sh`
+> строит `DATABASE_URL` для миграций из переменной `DB_PASSWORD` (не `POSTGRES_PASSWORD`),
+> а в `apps/form-example/.env.docker` её никогда не было (единственное такое приложение в
+> монорепо). **Пофикшено (commit `fd67766`):** добавлен `DB_PASSWORD` (то же значение, что
+> `POSTGRES_PASSWORD`) в `.env.docker`, пересобран `.env.docker.enc` через `sops --encrypt`.
+>
+> **`form-example` rollout-пилот 🟡 root cause #3, архитектурный пробел (2026-07-15, BlackCove,
+> msg #472):** пароль починился, деплой дошёл до реальной проверки миграций — упал на `P3005`
+> (`The database schema is not empty` / `No migration found`). `apps/form-example/prisma/
+> migrations/` **никогда не существовала в репозитории** — схема на проде была накатана через
+> `prisma db push`, а не `prisma migrate`; `deploy-affected.sh` безусловно вызывает `migrate
+> deploy`, который требует историю миграций против непустой БД (baseline). Не архитектурная
+> находка BlackCove (не его профиль трогать состояние прод-БД) — решение пользователя: baseline
+> вместо исключения из миграционного пути (риск молчаливого пропуска будущих реальных
+> schema-изменений, прецедент driving-school commit `8e34f17`).
+> **✅ Baseline-миграция сгенерирована и провалидирована (2026-07-15):** локальный dev reset
+> (временный Postgres-контейнер, не трогал `docker-compose.yml`) → `prisma migrate dev --name
+> init --create-only` из текущей `prisma/schema.prisma` → `prisma/migrations/
+> 20260715163011_init/migration.sql` (2 таблицы `Product`/`Contact`, 2 enum). Применена к чистой
+> тестовой БД через `migrate deploy` — прошла без ошибок, `migrate status` подтвердил «up to
+> date». Закоммичена в репо. **На проде миграцию НЕ применять DDL-ом** (схема там уже такая) —
+> нужен `prisma migrate resolve --applied 20260715163011_init` перед повторным `migrate deploy`,
+> это должен выполнить BlackCove (затрагивает состояние прод-БД, вне профиля этой сессии).
+>
+> **➡️ Следующий старт:** запросить у BlackCove `migrate resolve --applied` для baseline-миграции
+> form-example → повторить деплой. Если зелёный — тираж §18.6 закрыт полностью (только
+> `dashboard`/`dashboard-agent` вне активного тиража, структурно исключены) — можно просить
+> BlackCove удалить старую `premium-network`.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
@@ -471,8 +497,19 @@
 > `letar.rollout` остаётся выключенным (по плану BronzeForge/IvoryPrairie) — supervised-пилот
 > отдельным шагом позже.
 >
-> **Побочная находка — не блокирует, не регрессия сегодняшних изменений:** `/products`
-> (единственная страница `form-example` с реальным Prisma-запросом) стабильно падает с
+> **✅✅ ЗАКРЫТО (2026-07-12, commit `bd498ed`, не задокументировано вовремя — обнаружено задним
+> числом 2026-07-15):** ошибочная гипотеза про Turbopack/file-tracing (см. ниже) отменена в
+> `16471b4`. **Реальная причина:** конфликт версий пакета `pg` под bun-hoisting — `db.ts` создавал
+> `new Pool()` вручную через одну резолвнутую копию `pg`, а `@prisma/adapter-pg` внутри резолвит
+> свою собственную копию; `instanceof Pool`-проверка между разными экземплярами класса не
+> проходит, адаптер тихо не распознаёт переданный Pool и создаёт свой **без `connectionString`**
+> (дефолт `localhost:5432`) — отсюда обманчивый generic `ECONNREFUSED` (известный баг Prisma,
+> `github.com/prisma/prisma/issues/28055`). **Фикс:** передавать `connectionString` напрямую в
+> `PrismaPg` вместо готового `Pool`-инстанса. Проверено вживую на s2 — до фикса ECONNREFUSED на
+> `::1`/`127.0.0.1:5432`, после — успешный запрос к `form-example-db`.
+>
+> **Побочная находка (историческая, ошибочная гипотеза, оставлена для контекста):** `/products`
+> (единственная страница `form-example` с реальным Prisma-запросом) стабильно падала с
 > `ECONNREFUSED` в `prisma.product.findMany()`. Ручная диагностика (прямой `pg.Pool`,
 > `PrismaPg`-адаптер, полный `PrismaClient` — все через `docker exec` с теми же версиями/путями,
 > что использует рантайм) отработала **без единой ошибки** — расхождение с реальным упавшим
