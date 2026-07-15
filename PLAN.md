@@ -149,10 +149,18 @@
 > нужен `prisma migrate resolve --applied 20260715163011_init` перед повторным `migrate deploy`,
 > это должен выполнить BlackCove (затрагивает состояние прод-БД, вне профиля этой сессии).
 >
-> **➡️ Следующий старт:** запросить у BlackCove `migrate resolve --applied` для baseline-миграции
-> form-example → повторить деплой. Если зелёный — тираж §18.6 закрыт полностью (только
-> `dashboard`/`dashboard-agent` вне активного тиража, структурно исключены) — можно просить
-> BlackCove удалить старую `premium-network`.
+> **✅✅ `form-example` rollout-пилот ЗАВЕРШЁН — ТИРАЖ §18.6 ЗАКРЫТ ПОЛНОСТЬЮ (2026-07-15,
+> BlackCove, msg #474/#475, thread `deploy-form-example-mandala-rollout-J`):** `migrate resolve
+> --applied 20260715163011_init` выполнен на прод-БД (без DDL, только пометка в
+> `_prisma_migrations`), `migrate status` подтвердил «up to date». Четвёртая попытка деплоя
+> прошла целиком — все 9 гейтов зелёные, `form-example-app-2 healthy`, `nginx-reload` ×2,
+> `form-example-app-1` убран. **19/~19 SERVER_APPS на rollout** (`form-example` + `mandala` —
+> оба закрыты одним заходом, три независимых бага устранены: host-порт БД `d0c5cfc`,
+> `DB_PASSWORD` `fd67766`, baseline-миграция `b63b132`). Единственные приложения вне активного
+> тиража — `dashboard`/`dashboard-agent` (структурно исключены, спецпуть деплоя, не кандидаты).
+>
+> **➡️ Следующий старт:** тираж §18.6 Сессии J завершён — можно просить BlackCove удалить старую
+> `premium-network` (все активные SERVER_APPS подтверждённо на `kami-network`).
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
