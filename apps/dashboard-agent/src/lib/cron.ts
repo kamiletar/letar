@@ -50,8 +50,6 @@ export interface CronJobStatus {
 
 // Карта портов приложений
 const APP_PORTS: Record<string, number> = {
-  'premium-rosstil': 3000,
-  imot: 3001,
   dashboard: 3002,
   'driving-school': 3003,
   mandala: 3004,
@@ -63,8 +61,6 @@ const APP_PORTS: Record<string, number> = {
 // Карта хостов приложений (Docker container names внутри kami-network)
 // dashboard-agent обращается к себе через localhost, к другим через имя контейнера
 const APP_HOSTS: Record<string, string> = {
-  'premium-rosstil': process.env.PREMIUM_ROSSTIL_HOST ?? 'premium-rosstil-app',
-  imot: process.env.IMOT_HOST ?? 'imot-app',
   dashboard: process.env.DASHBOARD_HOST ?? 'dashboard-app',
   'driving-school': process.env.DRIVING_SCHOOL_HOST ?? 'driving-school-app',
   mandala: process.env.MANDALA_HOST ?? 'mandala-app',
@@ -119,26 +115,6 @@ const CONFIG_PATH = '/home/deploy/letar/cron-jobs.json'
  * Фильтруются по текущему серверу при загрузке
  */
 const DEFAULT_CRON_JOBS: CronJob[] = [
-  // === Задачи для S1 ===
-  {
-    id: 'imot-session-reminders',
-    name: 'Session Reminders',
-    app: 'imot',
-    endpoint: '/api/cron/session-reminders',
-    schedule: '0 9 * * *',
-    description: 'Отправка напоминаний о предстоящих сессиях',
-    enabled: true,
-  },
-  {
-    id: 'imot-practice-diary-reminders',
-    name: 'Practice Diary Reminders',
-    app: 'imot',
-    endpoint: '/api/cron/practice-diary-reminders',
-    schedule: '0 20 * * *',
-    description: 'Напоминания о заполнении дневника практик',
-    enabled: true,
-  },
-  // === Задачи для S2 ===
   {
     id: 'nginx-backup-s2',
     name: 'Nginx Backup S2',
@@ -196,13 +172,13 @@ function loadAllCronJobs(): CronJob[] {
       const updatedJobs = existingJobs.map((existing) => {
         const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
         if (
-          defaultJob &&
-          (defaultJob.app !== existing.app ||
-            defaultJob.endpoint !== existing.endpoint ||
-            defaultJob.server !== existing.server)
+          defaultJob
+          && (defaultJob.app !== existing.app
+            || defaultJob.endpoint !== existing.endpoint
+            || defaultJob.server !== existing.server)
         ) {
           console.warn(
-            `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`
+            `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
           )
           hasChanges = true
           return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }

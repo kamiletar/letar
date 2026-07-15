@@ -13,26 +13,6 @@ import { getCurrentServer, SERVER_APPS } from './server-config'
  * Аналогично dashboard/src/lib/secrets.ts
  */
 const APP_CONFIG = {
-  'premium-rosstil': {
-    secretsPath: '/secrets/premium-rosstil.env',
-    containerName: 'premium-rosstil-postgres',
-    defaults: {
-      host: 'premium-rosstil-postgres',
-      port: 5432,
-      database: 'lena_premium',
-      user: 'lena_user',
-    },
-  },
-  imot: {
-    secretsPath: '/secrets/imot.env',
-    containerName: 'imot-postgres',
-    defaults: {
-      host: 'imot-postgres',
-      port: 5432,
-      database: 'lena_imot',
-      user: 'lena_user',
-    },
-  },
   mandala: {
     secretsPath: '/secrets/mandala.env',
     containerName: 'mandala-db',
@@ -391,7 +371,7 @@ export async function getAllDatabaseStatuses(): Promise<DatabaseStatus[]> {
         port: config.port,
         database: config.database,
       }
-    })
+    }),
   )
 
   return statuses
@@ -621,7 +601,7 @@ export async function getAllDatabaseStats(filterDbName?: string): Promise<Databa
           error: error instanceof Error ? error.message : 'Unknown error',
         }
       }
-    })
+    }),
   )
 
   return stats

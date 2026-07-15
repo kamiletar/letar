@@ -223,22 +223,6 @@ async function main() {
       type: 'WEB' as const,
       domain: 'studio.letar.best',
     },
-    {
-      name: 'premium-rosstil',
-      displayName: 'Premium Rosstil',
-      containerName: 'premium-rosstil-app',
-      port: 3000,
-      type: 'WEB' as const,
-      domain: 'premium.rosstil.ru',
-    },
-    {
-      name: 'imot',
-      displayName: 'IMOT',
-      containerName: 'imot-app',
-      port: 3001,
-      type: 'WEB' as const,
-      domain: 'integrelle.com',
-    },
   ]
 
   for (const app of s2Apps) {
@@ -271,7 +255,7 @@ async function main() {
   console.log(`✅ Server: ${s1Server.displayName} (id: ${s1Server.id})`)
   console.log(`  🔑 Agent Token: ${s1Token}`)
 
-  // Приложений на s1 больше нет (premium-rosstil и imot переехали на s2)
+  // Приложений на s1 больше нет
   const s1Apps: Array<{
     name: string
     displayName: string

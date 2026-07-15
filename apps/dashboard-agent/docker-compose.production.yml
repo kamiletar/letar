@@ -35,8 +35,6 @@ services:
       # SSH ключи для git remote операций
       - ~/.ssh:/root/.ssh:ro
       # Secrets от всех приложений (для подключения к БД)
-      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/imot/.env.docker:/secrets/imot.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/archetest/.env.docker:/secrets/archetest.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro

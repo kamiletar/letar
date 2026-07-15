@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     // Only web apps have static files to track
-    const webApps = ['premium-rosstil', 'imot', 'dashboard']
+    const webApps = ['dashboard']
 
     if (!webApps.includes(app)) {
       return NextResponse.json({ error: 'Application does not have static files' }, { status: 404 })

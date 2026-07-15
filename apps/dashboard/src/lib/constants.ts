@@ -63,7 +63,7 @@ export const MAX_PROCESSES_FOR_GROUPING = 50
 // =============================================================================
 
 /** Поддерживаемые базы данных для бэкапов */
-export const SUPPORTED_DATABASES = ['premium-rosstil', 'imot', 'mandala', 'kami', 'driving-school'] as const
+export const SUPPORTED_DATABASES = ['mandala', 'kami', 'driving-school'] as const
 
 /** Все приложения (включая dashboard) */
 export const SUPPORTED_APPS = [...SUPPORTED_DATABASES, 'dashboard'] as const

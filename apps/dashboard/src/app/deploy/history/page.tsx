@@ -50,7 +50,7 @@ interface CommitsResponse {
   commits: Commit[]
 }
 
-const KNOWN_APPS = ['premium-rosstil', 'imot', 'dashboard', 'label-printer']
+const KNOWN_APPS = ['dashboard', 'label-printer']
 
 async function fetchDeployHistory(app?: string, status?: string) {
   const params = new URLSearchParams()
@@ -247,68 +247,70 @@ export default function DeployHistoryPage() {
             Deploy History
           </Heading>
 
-          {deployHistory?.entries && deployHistory.entries.length > 0 ? (
-            <VStack gap="3" align="stretch">
-              {deployHistory.entries.map((entry) => (
-                <Card.Root key={entry.id}>
-                  <Card.Body>
-                    <VStack align="start" gap="3">
-                      <HStack justify="space-between" w="full" flexWrap="wrap" gap="2">
-                        <HStack gap="2">
-                          <Badge colorPalette={getStatusColor(entry.status)} size="sm">
-                            {entry.status}
-                          </Badge>
-                          {entry.dryRun && (
-                            <Badge colorPalette="yellow" size="sm">
-                              Dry Run
+          {deployHistory?.entries && deployHistory.entries.length > 0
+            ? (
+              <VStack gap="3" align="stretch">
+                {deployHistory.entries.map((entry) => (
+                  <Card.Root key={entry.id}>
+                    <Card.Body>
+                      <VStack align="start" gap="3">
+                        <HStack justify="space-between" w="full" flexWrap="wrap" gap="2">
+                          <HStack gap="2">
+                            <Badge colorPalette={getStatusColor(entry.status)} size="sm">
+                              {entry.status}
                             </Badge>
-                          )}
-                          <Badge colorPalette="blue" size="sm" variant="outline">
-                            {entry.app || 'all'}
-                          </Badge>
+                            {entry.dryRun && (
+                              <Badge colorPalette="yellow" size="sm">
+                                Dry Run
+                              </Badge>
+                            )}
+                            <Badge colorPalette="blue" size="sm" variant="outline">
+                              {entry.app || 'all'}
+                            </Badge>
+                          </HStack>
+                          <Text fontSize="xs" color="fg.muted" fontFamily="mono">
+                            {entry.commitHash.substring(0, 7)}
+                          </Text>
                         </HStack>
-                        <Text fontSize="xs" color="fg.muted" fontFamily="mono">
-                          {entry.commitHash.substring(0, 7)}
+
+                        <Text fontWeight="medium" fontSize="sm">
+                          {entry.commitMessage}
                         </Text>
-                      </HStack>
 
-                      <Text fontWeight="medium" fontSize="sm">
-                        {entry.commitMessage}
-                      </Text>
+                        <HStack fontSize="xs" color="fg.muted" flexWrap="wrap" gap="3">
+                          <Text>Author: {entry.author}</Text>
+                          <Text>Started: {formatDateTime(entry.startTime)}</Text>
+                          <Text>Duration: {formatDuration(entry.startTime, entry.endTime)}</Text>
+                          {entry.pid && <Text>PID: {entry.pid}</Text>}
+                        </HStack>
 
-                      <HStack fontSize="xs" color="fg.muted" flexWrap="wrap" gap="3">
-                        <Text>Author: {entry.author}</Text>
-                        <Text>Started: {formatDateTime(entry.startTime)}</Text>
-                        <Text>Duration: {formatDuration(entry.startTime, entry.endTime)}</Text>
-                        {entry.pid && <Text>PID: {entry.pid}</Text>}
-                      </HStack>
-
-                      {/* View Logs Button */}
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        onClick={() => setSelectedDeploy(entry)}
-                        disabled={!entry.logFile}
-                      >
-                        <LuFileText />
-                        View Logs
-                      </Button>
-                    </VStack>
-                  </Card.Body>
-                </Card.Root>
-              ))}
-            </VStack>
-          ) : (
-            <Card.Root>
-              <Card.Body>
-                <Text color="fg.muted">
-                  {appFilter || statusFilter
-                    ? 'No deploys matching the filters'
-                    : 'No deploy history yet. Start a deploy to see history here.'}
-                </Text>
-              </Card.Body>
-            </Card.Root>
-          )}
+                        {/* View Logs Button */}
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          onClick={() => setSelectedDeploy(entry)}
+                          disabled={!entry.logFile}
+                        >
+                          <LuFileText />
+                          View Logs
+                        </Button>
+                      </VStack>
+                    </Card.Body>
+                  </Card.Root>
+                ))}
+              </VStack>
+            )
+            : (
+              <Card.Root>
+                <Card.Body>
+                  <Text color="fg.muted">
+                    {appFilter || statusFilter
+                      ? 'No deploys matching the filters'
+                      : 'No deploy history yet. Start a deploy to see history here.'}
+                  </Text>
+                </Card.Body>
+              </Card.Root>
+            )}
         </Box>
 
         {/* Last Legacy Deploy Info (backwards compat) */}

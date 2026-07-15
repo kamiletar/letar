@@ -35,8 +35,6 @@ export const SERVER_APPS: Record<string, CronServer> = {
   aprel8008: 's2',
   'kami-key-the-landing': 's2',
   'letar-landing': 's2',
-  'premium-rosstil': 's2',
-  imot: 's2',
 }
 
 /** Получить сервер для приложения */

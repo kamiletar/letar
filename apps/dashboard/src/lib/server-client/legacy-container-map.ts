@@ -5,8 +5,6 @@
  * DB-driven реестр `DeployedApp` (`api/servers/[id]/apps/[appId]/*`), не через эту карту.
  */
 export const LEGACY_CONTAINER_NAME_MAP: Record<string, string> = {
-  'premium-rosstil': 'premium-rosstil-app',
-  imot: 'imot-app',
   dashboard: 'dashboard-app',
   'driving-school': 'driving-school-app',
   mandala: 'mandala-app',

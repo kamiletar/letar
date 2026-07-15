@@ -122,8 +122,6 @@ services:
       # Backups directory (needs write access)
       - ${WORKSPACE_PATH:-/home/deploy/letar}/backups:/workspace/backups
       # App secrets (auto-read DB passwords from other apps)
-      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
-      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/imot/.env.docker:/secrets/imot.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/mandala/.env.docker:/secrets/mandala.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/kami/.env.docker:/secrets/kami.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
