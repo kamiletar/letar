@@ -60,5 +60,16 @@ export {
   type ConnectedAccountsListProps,
 } from './connected-accounts'
 
+// Auth Mode (Tier 1 / Tier 2 informed-consent, Этап 8 корневого PLAN.md)
+export {
+  AuthModeRequestForm,
+  AuthModeSettings,
+  type AuthModeRequestFormProps,
+  type AuthModeRequestResult,
+  type AuthModeRequestRow,
+  type AuthModeSettingsProps,
+  type AuthModeTierPoint,
+} from './auth-mode'
+
 // Icons
 export { FacebookIcon, GitHubIcon, GoogleIcon, TelegramIcon, VKIcon, YandexIcon } from './icons'

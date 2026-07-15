@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-16
+
+### Added
+
+- `AuthModeSettings`/`AuthModeRequestForm` (`@letar/auth/client`) — Tier 1/Tier 2 informed-consent
+  UI (§2.3/Этап 8 корневого PLAN.md). Извлечено из трёх дословно продублированных реализаций
+  (dsperevod → aboi → driving-school) в переиспользуемый компонент; data-fetching остаётся в
+  приложении, переиспользуется презентационная часть + чекбокс-форма запроса перехода.
+
 ## [0.8.2] - 2026-07-11
 
 ### Fixed

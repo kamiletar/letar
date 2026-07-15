@@ -143,6 +143,30 @@ Tier 1/Tier 2 с informed-consent) — `apps/dsperevod/src/app/(admin)/admin/soc
 > **устаревший паттерн, предшествующий фабрике `createAuth()`**. Для новых приложений используй
 > `libs/auth/README.md`, а не код из этого раздела.
 
+### Тираж Tier 2 UI на новое приложение — чеклист и известные исключения
+
+При переносе `/admin/social-providers/` + `/admin/settings/auth-mode/` на очередное приложение:
+
+1. **UI сравнения режимов (`/admin/settings/auth-mode/`)** — переиспользуй готовый
+   `AuthModeSettings`/`AuthModeRequestForm` из `@letar/auth/client` (см. `libs/auth/README.md`,
+   раздел «AuthModeSettings»). Приложение пишет только data-fetching (какая таблица аудита) +
+   server action `requestAuthModeMigration`, которая создаёт запись.
+2. **Нет своего `AuditLog`?** Не тащи полноценный audit-журнал ради одной фичи — заведи узкую
+   модель под конкретное событие (`AuthModeMigrationRequest { requestedById, createdAt }` с
+   `@@allow('create','read', auth().isAdmin)`), как сделано в `apps/aboi`. Полноценный `AuditLog`
+   имеет смысл только если приложение уже строит общий журнал действий (`OWNER_*`, `VIEW_*` и т.д.).
+3. **`createSocialProviderLoader` (DB-backed OAuth) НЕ переноси, если:**
+   - приложение использует plugin-specific `auth.api.*` методы поверх кастомных Better Auth
+     плагинов (например `signInAnonymous` от `anonymous`-плагина) — фабрика `createAuth()`
+     собирает `plugins` через spread и стирает tuple-тип массива, из-за чего TypeScript теряет
+     типизацию таких методов. В этом случае подключай `social.source:'db'` вручную поверх
+     `betterAuth({...})`, без перехода на фабрику целиком (см. `apps/aboi/src/lib/auth.ts`);
+   - хотя бы один соц-провайдер использует кастомный `getUserInfo`/`genericOAuth` (обогащение
+     профиля данными вроде дня рождения/пола/телефона, как VK/Yandex у driving-school) —
+     `createSocialProviderLoader` сериализует только `clientId`/`clientSecret`, перенос сломает
+     это обогащение. В этом случае переноси только `/admin/settings/auth-mode/`, соц-провайдеры
+     оставляй как есть (env-based).
+
 ---
 
 ## Интеграция Better Auth (per-app)

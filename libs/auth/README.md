@@ -182,10 +182,10 @@ export const auth = createAuth({
 
   // OAuth-провайдеры настраиваются ОДИН РАЗ для всех приложений монорепо
   socialProviders: {
-    ...(process.env.AUTH_GOOGLE_ID
-      && process.env.AUTH_GOOGLE_SECRET && {
-      google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
-    }),
+    ...(process.env.AUTH_GOOGLE_ID &&
+      process.env.AUTH_GOOGLE_SECRET && {
+        google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
+      }),
     // github, facebook, vk — аналогично
   },
 
@@ -387,9 +387,7 @@ export const auth = await createAuthAsync({
   mode: 'standalone',
   database: prismaAdapter(prisma as never, { provider: 'postgresql' }),
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3019',
-  email: {
-    /* ... */
-  },
+  email: {/* ... */},
   // Пусто на старте → соц-вход просто отсутствует до первой настройки владельцем,
   // не блокирует email/password.
   social: {
@@ -418,10 +416,10 @@ model SocialProvider {
 ```
 
 Полный вертикальный срез (модель + шифрование + admin UI со списком/созданием/редактированием +
-server actions) — [`apps/dsperevod/src/app/(admin)/admin/social-providers/`](../../apps/dsperevod/src/app/(admin)/admin/social-providers/).
+server actions) — [`apps/dsperevod/src/app/(admin)/admin/social-providers/`](<../../apps/dsperevod/src/app/(admin)/admin/social-providers/>).
 Компаньон — UI выбора Tier 1 (`hub-client`) / Tier 2 с показом рисков (§2.3) и informed-consent
 запросом в `AuditLog`, **не автоматизирующий сам переход** (смена режима = миграция identity, не
-рантайм-флаг): [`apps/dsperevod/.../admin/settings/auth-mode/`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/).
+рантайм-флаг): [`apps/dsperevod/.../admin/settings/auth-mode/`](<../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/>).
 
 > ⚠️ Ограничение: `social.source: 'db'` сериализует только `clientId`/`clientSecret` для нативных
 > `socialProviders` Better Auth. Провайдеры через `genericOAuth`-плагин с кастомным `getUserInfo`
@@ -497,7 +495,7 @@ const { getSession, getCurrentUser } = createSessionHelpers<Session>(auth)
 
 const { requireAuth, requireRole, requireAdmin } = createAuthGuards(
   getSession,
-  (session) => session.user as SessionUser,
+  (session) => session.user as SessionUser
 )
 
 const { isAuthenticated, hasRole, isAdmin } = createAuthChecks(getCurrentUser)
@@ -748,6 +746,81 @@ import { GitHubIcon, GoogleIcon, TelegramIcon, VKIcon, YandexIcon } from '@letar
 
 ---
 
+## AuthModeSettings — Tier 1/Tier 2 informed-consent (Этап 8 корневого PLAN.md)
+
+Готовая страница сравнения режимов авторизации для standalone-приложений (Tier 2 = свои ключи,
+Tier 1 = переход на Ключницу как hub-client). Компонент **только фиксирует запрос** — сам
+переход не автоматизирован (смена режима = миграция identity, требует правки `lib/auth.ts`,
+регистрации hub-клиента и переноса данных, не рантайм-флаг).
+
+Извлечён в libs после третьего дословного дубля (dsperevod → aboi → driving-school) — три
+приложения имели ~90% идентичный код страницы. Data-fetching (какая таблица аудита, ZenStack vs
+raw Prisma) остаётся в приложении; переиспользуется только презентационная часть + чекбокс-форма.
+
+```tsx
+// app/admin/settings/auth-mode/page.tsx
+import { AuthModeSettings } from '@letar/auth/client'
+
+import { requireAdmin } from '@/lib/auth-utils'
+import { getEnhancedPrisma } from '@/lib/db'
+import { requestAuthModeMigration } from '../../_actions/auth-mode.action'
+
+export default async function AuthModeSettingsPage() {
+  const user = await requireAdmin()
+  const db = getEnhancedPrisma(user)
+
+  const requests = await db.auditLog.findMany({
+    where: { action: 'REQUEST_AUTH_MODE_MIGRATION' },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    include: { user: { select: { name: true, email: true } } },
+  })
+
+  return (
+    <AuthModeSettings
+      currentModeLabel="Tier 2 — Standalone (свои ключи)"
+      tier2Points={['Свой домен и бренд входа', 'Соц-вход через собственные OAuth-приложения']}
+      tier1Points={[
+        { text: 'Вход делегируется Ключнице (auth.letar.best)' },
+        { text: 'user.id меняется на идентификатор Ключницы — требуется миграция данных', emphasized: true },
+      ]}
+      requests={requests.map((r) => ({ id: r.id, name: r.user.name, email: r.user.email, createdAt: r.createdAt }))}
+      onRequest={requestAuthModeMigration}
+    />
+  )
+}
+```
+
+```typescript
+// _actions/auth-mode.action.ts — остаётся в приложении, не выносится
+'use server'
+export async function requestAuthModeMigration(acknowledgedRisks: boolean) {
+  const user = await requireAdmin()
+  if (!acknowledgedRisks) return { error: 'Нужно подтвердить ознакомление с рисками перехода' }
+  await db.auditLog.create({ data: { action: 'REQUEST_AUTH_MODE_MIGRATION', userId: user.id, /* ... */ } })
+  revalidatePath('/admin/settings/auth-mode/')
+  return { data: null }
+}
+```
+
+#### Props AuthModeSettings
+
+| Prop              | Тип                                                             | Описание                                                       |
+| ------------------ | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| `currentModeLabel` | `string`                                                         | Ярлык текущего режима, например `"Tier 2 — Standalone (свои ключи)"` |
+| `tier2Points`      | `string[]`                                                       | Пункты карточки «Текущий выбор» (Tier 2)                        |
+| `tier1Points`      | `{ text: string; emphasized?: boolean }[]`                       | Пункты карточки «Альтернатива» (Tier 1); `emphasized` — выделить оранжевым |
+| `requests`         | `{ id, name: string \| null, email, createdAt: Date }[]`         | История запросов, уже отсортированная по убыванию даты          |
+| `onRequest`        | `(acknowledgedRisks: boolean) => Promise<{error?} \| {data:null}>` | Server action — фиксирует informed-consent запрос                |
+| `successMessage?`  | `string`                                                         | Текст алерта после успешной фиксации (переопределить для доп. рисков — например VK/Yandex у driving-school) |
+| `footer?`          | `ReactNode`                                                      | Доп. контент под таблицей (например ссылка на общий журнал аудита) |
+
+> Полные примеры: [`apps/dsperevod`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/page.tsx),
+> [`apps/aboi`](../../apps/aboi/src/app/[locale]/admin/settings/auth-mode/page.tsx),
+> [`apps/driving-school`](../../apps/driving-school/src/app/(owner)/owner/settings/auth-mode/page.tsx).
+
+---
+
 ## VK OAuth конфигурация
 
 VK OAuth требует HTTPS даже для локальной разработки. Используйте ngrok:
@@ -798,4 +871,4 @@ socialProviders: {
 
 ---
 
-**Последнее обновление:** 2026-06-11 | **@letar/auth** 0.7.0 | **Better Auth** 1.6.x
+**Последнее обновление:** 2026-07-16 | **@letar/auth** 0.9.0 | **Better Auth** 1.6.x
