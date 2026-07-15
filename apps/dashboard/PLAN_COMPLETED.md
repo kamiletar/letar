@@ -2,6 +2,24 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.19.4 — чистка мёртвых ссылок на `premium-rosstil`/`imot` (2026-07-15)
+
+Найдено при разборе техдолга вне глобального `PLAN.md` (сессия `/repo` статус-отчёта). Оба приложения
+удалены из монорепо 2026-07-05, но остались в 6 файлах кода: карты портов (`app-metrics.ts`,
+`legacy-container-map.ts`), список поддерживаемых БД (`constants.ts`), UI-ветки цвета/known-apps
+(`cron/page.tsx`, `deploy/history/page.tsx`), список web-приложений для storage-статистики
+(`api/apps/[app]/storage/route.ts`) и seed-данные `DeployedApp` (`prisma/seed.ts`).
+
+**Самое значимое:** `docker-compose.production.yml` монтировал `apps/premium-rosstil/.env.docker` и
+`apps/imot/.env.docker` — путей, которых больше нет в репозитории. При следующем поднятии контейнера
+Docker создал бы там пустые директории (реальный риск на будущем передеплое). Убрано.
+
+**Прод-данные:** фантомные строки `DeployedApp` (`premium-rosstil`, `imot`) на прод-БД `dashboard`
+существовали отдельно от кода — удалены BlackCove по запросу (agent-mail, тред
+`cleanup-deployedapp-premium-imot`, msg #480/#483 → #484), FK-зависимостей не найдено.
+
+`nx typecheck`/`lint` — чисто. commit `d7e8e49`.
+
 ## Версия 1.19.3
 
 ### Fix: резолвинг контейнера по `<name>-N` суффиксу, не только точным именем

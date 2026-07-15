@@ -11,6 +11,12 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.7.5] — 2026-07-15
+
+### Chore: удалены мёртвые ссылки на `premium-rosstil`/`imot`
+
+`APP_PORTS`/`APP_HOSTS` в `cron.ts`, `SERVER_APPS` в `server-config.ts` и `APP_CONFIG` в `database.ts` больше не содержат записи для приложений, удалённых из монорепо 2026-07-05. Удалены две мёртвые cron-задачи (`imot-session-reminders`, `imot-practice-diary-reminders`), которые пытались выполниться против несуществующего контейнера. `docker-compose.production.yml` больше не монтирует несуществующие `apps/premium-rosstil/.env.docker` / `apps/imot/.env.docker`.
+
 ## [0.7.0] — 2026-07-10
 
 ### Feat: e2e API-роут (PLAN.md §18 Сессия D)

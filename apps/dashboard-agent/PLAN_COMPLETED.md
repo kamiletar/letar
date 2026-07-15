@@ -2,6 +2,18 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.5 — чистка мёртвых ссылок на `premium-rosstil`/`imot` (2026-07-15)
+
+Оба приложения удалены из монорепо 2026-07-05. `cron.ts` продолжал держать их в `APP_PORTS`/
+`APP_HOSTS` и, что важнее, в `DEFAULT_CRON_JOBS` — 2 задачи (`imot-session-reminders`,
+`imot-practice-diary-reminders`, старый "S1"-блок) реально пытались выполниться по HTTP против
+несуществующего контейнера при каждом запуске планировщика. `server-config.ts` (`SERVER_APPS`) и
+`database.ts` (`APP_CONFIG` для бэкапов БД) также вычищены.
+
+`docker-compose.production.yml` монтировал несуществующие `apps/premium-rosstil/.env.docker` /
+`apps/imot/.env.docker` — убрано (см. связанную запись в `apps/dashboard/PLAN_COMPLETED.md`, тот же
+коммит `d7e8e49`).
+
 ## Версия 0.7.3 — run_e2e не переключался на deploy-пользователя, root-owned `.nx` ломал деплои (§18 Сессия №60, 2026-07-11)
 
 Найдено BlackCove на живом staging-прогоне grandslamcup: в отличие от `deploy-affected.sh`

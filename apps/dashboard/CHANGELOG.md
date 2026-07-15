@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.19.4] — 2026-07-15
+
+### Chore: удалены мёртвые ссылки на `premium-rosstil`/`imot`
+
+Оба приложения удалены из монорепо 2026-07-05, но остались в хардкоженных картах портов (`app-metrics.ts`, `legacy-container-map.ts`), списках БД/приложений (`constants.ts`), UI-ветках (`cron/page.tsx`, `deploy/history/page.tsx`, `storage/route.ts`) и seed-данных `DeployedApp` (`prisma/seed.ts`). Также убраны volume-маунты `apps/premium-rosstil/.env.docker` / `apps/imot/.env.docker` из `docker-compose.production.yml` — указывали на несуществующие пути. Фантомные строки `DeployedApp` на прод-БД удалены отдельно (BlackCove, тред `cleanup-deployedapp-premium-imot`).
+
 ## [1.19.2] — 2026-07-05
 
 ### Feat: `POST /api/alerts` — впервые задействован Telegram-алертинг
