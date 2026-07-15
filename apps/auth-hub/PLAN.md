@@ -8,7 +8,12 @@
 - [x] Модель `UserEmail`, свой токен подтверждения (не пересекается с core `Verification`)
 - [x] Форсированный `signOut` после смены основного email (инвалидация `cookieCache`)
 - [ ] Вход по любому linked-email — отдельная задача (перехват резолва sign-in)
-- [ ] Merge двух уже существующих разных аккаунтов — остаётся ручным скриптом владельца
+- [x] Merge двух уже существующих разных аккаунтов — `infra/migrations/auth-hub-merge-accounts.ts`
+      (параметризованный, `CANONICAL_EMAIL`/`DUPLICATE_EMAIL`/`DRY_RUN`, dry-run по умолчанию),
+      проверен на локальной БД (edge-cases: конфликт `Account` providerId, конфликт
+      `ProjectProfile` по `projectSlug`, конфликт `OauthConsent` по клиенту, идемпотентность
+      повторного запуска) — 2026-07-16. Прод-запуск не выполнялся (нет конкретной пары
+      аккаунтов для склейки), ждёт первого реального кейса.
 
 Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-062--2026-07-16-этап-85-self-service-несколько-email-на-аккаунт).
 
@@ -403,7 +408,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 

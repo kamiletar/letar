@@ -62,10 +62,29 @@
 > подтверждённо удалена BlackCove (2026-07-15, треды #477→#481) — не реликт для чистки, а
 > завершённая миграция.
 >
+> **✅ Этап 8.5 — merge двух аккаунтов, скрипт готов и проверен (2026-07-16):**
+> `infra/migrations/auth-hub-merge-accounts.ts` — параметризованный ручной инструмент
+> (`CANONICAL_EMAIL`/`DUPLICATE_EMAIL`/`DRY_RUN`, dry-run по умолчанию — инверсия дефолта
+> относительно owner-миграций, т.к. merge затрагивает потенциально живые сессии). Переносит
+> `Account`/`Passkey`/`OauthApplication`/`OauthAccessToken`/`OauthConsent`/`ProjectProfile`/
+> `TelegramToken`/`ConsentLog`/`UserEmail` с duplicate на canonical внутри одной транзакции,
+> email duplicate сохраняется как доп. подтверждённый `UserEmail` у canonical (по прецеденту
+> `setPrimaryEmail`), roles объединяются, обе `Session` принудительно инвалидируются
+> (cookieCache Better Auth иначе отдаст устаревший email/userId в OIDC `id_token` ~10
+> downstream-приложениям). Проверен вживую на локальной БД: dry-run, реальный merge с тремя
+> edge-cases (конфликт `Account` по `providerId`+разный `accountId` — не конфликт, оба Account
+> сохранены; конфликт `ProjectProfile` по `projectSlug` — roles объединены, metadata canonical
+> сохранена; конфликт `OauthConsent` по клиенту — дубль убран), повторный запуск — идемпотентен
+> (exit 0, без изменений). AuditLog-модель для auth-hub заведена не была — непропорционально
+> ради разового скрипта, вместо этого structured консоль-лог с инструкцией перенаправлять в
+> файл при реальном запуске. **Прод-запуск не выполнялся** — конкретной пары аккаунтов для
+> склейки пока нет, скрипт ждёт первого реального кейса.
+>
 > **➡️ Следующий старт:** тираж §2.3/Этап 8 на aboi и driving-school завершён, Этап 8.5
-> self-service email частично завершён, dsperevod seed.ts bcrypt/scrypt пофикшен (2026-07-16,
-> см. записи выше). Свободные концы: вход по любому linked-email и merge двух аккаунтов
-> (Этап 8.5), реальное исполнение Tier 1-перехода когда появится первый запрос (Этап 8).
+> self-service email + merge-скрипт завершены (2026-07-16, см. записи выше). Свободные концы:
+> вход по любому linked-email (Этап 8.5, требует перехвата резолва sign-in — риск для core
+> auth-flow ~10 downstream-приложений), реальное исполнение Tier 1-перехода когда появится
+> первый запрос (Этап 8).
 
 > **🔴 `svoichuzhie` — прод-баг, НЕ связанный с rollout (2026-07-14, BlackCove, msg #453):**
 > rollout-пилот безопасно откатился на гейте `wait-healthy` (без даунтайма, `nginx-reload-1` не
@@ -2733,6 +2752,18 @@ useEffect(() => {
   аудит. **Необратимо → бэкап БД обязателен.** Остаётся ручным скриптом владельца (см. ниже) — merge ДВУХ
   РАЗНЫХ уже существующих аккаунтов не покрыт self-service UI выше (это другая задача: там пользователь сам
   подтверждает владение обоими email последовательно, здесь — canonical выбирается вручную разработчиком).
+  ✅ **Скрипт готов и проверен (2026-07-16):** `infra/migrations/auth-hub-merge-accounts.ts` —
+  параметризованный (`CANONICAL_EMAIL`/`DUPLICATE_EMAIL`/`DRY_RUN`, dry-run по умолчанию), по прецеденту
+  `infra/migrations/kami-owner-migration.ts` (`ZenStackClient`+`$transaction`), но общего назначения, не
+  под конкретный email. Переносит все relations `User` (`Account` — по одной записи из-за составного
+  `@@unique([providerId, accountId])`, `Passkey`/`OauthApplication`/`OauthAccessToken`/`TelegramToken`/
+  `ConsentLog` — простой перенос, `OauthConsent`/`ProjectProfile` — с разрешением смысловых конфликтов),
+  email duplicate сохраняется как доп. `UserEmail` у canonical (по прецеденту `setPrimaryEmail`), roles —
+  union, обе `Session` инвалидируются принудительно (тот же риск `cookieCache`, что и у self-service).
+  Проверен вживую на локальной БД (dry-run + реальный merge с тремя edge-cases конфликтов + повторный
+  идемпотентный запуск), см. запись в шапке плана. Прод-запуск не выполнялся — ждёт первого реального
+  кейса. Своей `AuditLog` в auth-hub нет — лог только консольный (structured, с инструкцией
+  `tee` в файл), заводить модель ради разового скрипта признано непропорциональным.
 - **Разовая операция владельца:** склейка личных email в Ключнице — ✅ **ВЫПОЛНЕНА 2026-05-30** (§14.1):
   canonical `kami@letar.best`, 5 провайдеров (credential, github, google×2, yandex) на одном аккаунте.
   ✅ **Перенос данных в kami (2026-06-05):** `infra/migrations/kami-owner-migration.ts` — 4 AudioFile
