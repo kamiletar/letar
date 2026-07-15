@@ -106,11 +106,27 @@
 > `package.json`, не трогали.
 >
 > **➡️ Следующий старт:** `svoichuzhie` rollout-пилот ЗАВЕРШЁН (см. запись выше, msg #461,
-> **16/~19 SERVER_APPS на rollout**) — остаётся risk-check реальных интеграций СДЭК/каталога на
-> живом `svoichuzhie-app-2` (аналог проверки `aboi`), запрошено у BlackCove. После него —
-> `form-example`/`mandala` (label намеренно выключен) и `dashboard`/`dashboard-agent` (структурно
-> исключены) остаются вне активного тиража; когда все активные SERVER_APPS переедут на rollout —
-> попросить BlackCove удалить старую `premium-network`.
+> **16/~19 SERVER_APPS на rollout**), risk-check СДЭК/каталога закрыт с оговоркой (см. запись
+> выше). Продолжен тираж на `form-example`/`mandala` (2026-07-15, commit `3b4f732` — включён
+> `letar.rollout` в обоих compose).
+>
+> **`mandala` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-15, BlackCove, msg #467/#468, thread
+> `deploy-form-example-mandala-rollout-J`):** первый rollout для mandala, все 9 гейтов зелёные,
+> `mandala-app-2` healthy, `curl mandala.letar.best` → 200. **17/~19 SERVER_APPS на rollout.**
+>
+> **`form-example` rollout-пилот 🟡 ЗАБЛОКИРОВАН, root cause найден и пофикшен (2026-07-15,
+> BlackCove, msg #467):** деплой упал на шаге миграций (`P1001: Can't reach database server at
+> localhost:5432`) — `form-example-db`, единственная БД в монорепо без `ports:` в compose;
+> `deploy-affected.sh` мигрирует с хоста через `localhost:$DB_PORT`, слушать было нечего. Старый
+> контейнер не тронут, риска не было. **Пофикшено (commit `d0c5cfc`):** добавлен `ports:
+> '5443:5432'` (первый свободный порт, проверены все занятые 5434–5455) в
+> `apps/form-example/docker-compose.production.yml`. Повторный запрос деплоя отправлен BlackCove
+> (thread `deploy-form-example-mandala-rollout-J`) — **ждёт выполнения**. Известный некритичный
+> баг `/products ECONNREFUSED` не проверялся — деплой упал раньше, на миграциях.
+>
+> **➡️ Следующий старт:** дождаться повторного деплоя `form-example` → если зелёный, тираж §18.6
+> закрыт полностью (только `dashboard`/`dashboard-agent` вне активного тиража, структурно
+> исключены) — можно просить BlackCove удалить старую `premium-network`.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
