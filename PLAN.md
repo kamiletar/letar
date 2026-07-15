@@ -1,5 +1,25 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Этап 8 — Tier 2 self-service OAuth-админка: первый пилот (2026-07-15):** `dsperevod` —
+> `/admin/social-providers/`, `SocialProvider` модель, `createAuthAsync`+`createSocialProviderLoader`
+> из `@letar/auth` впервые реально подключены (раньше были только в докстрингах). Encrypt→store→
+> decrypt round-trip и auth-путь проверены вживую (curl+сессия). **Не сделано:** UI выбора
+> Tier 1/Tier 2 (только Tier 2), миграция driving-school на DB-backed соц-секреты (риск для
+> боевого VK/Yandex — сознательно не трогали). Побочно найден и вынесен в отдельную задачу баг
+> сид-скрипта dsperevod (bcrypt vs scrypt хеш пароля). Подробности — раздел «Этап 8» ниже.
+>
+> **✅✅ Этап 1.5 (`createAuth(profile)`) ПОЛНОСТЬЮ ЗАВЕРШЁН (2026-07-15):** DoD закрыт — README
+> `libs/auth` описывает все 3 режима, E2E dsperevod (behavior-parity standalone-миграции) прогнан
+> локально 2/2 зелёных, контракт §4 переписан под реальный API. Фабрика в проде на 6 приложениях
+> (dsperevod/time/kami/auth-hub/driving-school/archetest) во всех 3 режимах (`standalone`/
+> `hub-client`/`hub-provider`). Подробности — раздел «Этап 1.5» ниже. `premium-network` на s2
+> подтверждённо удалена BlackCove (2026-07-15, треды #477→#481) — не реликт для чистки, а
+> завершённая миграция.
+>
+> **➡️ Следующий старт:** Этап 8 продолжение — UI выбора Tier 1/Tier 2 в админке (Tier 1 = переход
+> на hub-client, ещё не начат); либо Этап 8.5 (несколько email на аккаунт); либо фикс
+> dsperevod seed.ts (bcrypt/scrypt, вынесено отдельной задачей).
+
 > **🔴 `svoichuzhie` — прод-баг, НЕ связанный с rollout (2026-07-14, BlackCove, msg #453):**
 > rollout-пилот безопасно откатился на гейте `wait-healthy` (без даунтайма, `nginx-reload-1` не
 > наступил) — но новый контейнер `svoichuzhie-app-2` воспроизвёл **ту же проблему**, что уже
@@ -159,8 +179,22 @@
 > `DB_PASSWORD` `fd67766`, baseline-миграция `b63b132`). Единственные приложения вне активного
 > тиража — `dashboard`/`dashboard-agent` (структурно исключены, спецпуть деплоя, не кандидаты).
 >
-> **➡️ Следующий старт:** тираж §18.6 Сессии J завершён — можно просить BlackCove удалить старую
-> `premium-network` (все активные SERVER_APPS подтверждённо на `kami-network`).
+> **✅✅ `premium-network` УДАЛЕНА ОКОНЧАТЕЛЬНО (2026-07-15, ~17:07, BlackCove, threads #477→#478,
+> #479→#481):** миграция доведена до конца. Все 27 контейнеров (все app/infra compose-файлы в
+> репо уже ссылались только на `kami-network` — dual-connect с сессии №74 был чисто избыточным
+> техдолгом) по одному отключены от старой сети, с проверкой healthcheck/connectivity после
+> каждого шага; `nginx-proxy-manager` — последним, с baseline-проверкой до/после. Сеть опустела
+> (`containers_left: 0`) → `docker network rm premium-network`. Смоук-тест по 5 приложениям после
+> удаления — все 200, ни одного сбоя связности за всю миграцию. Подтверждено повторной проверкой
+> `docker network ls` на s2 (2026-07-15, 17:32) — сети в списке нет. Ранее было расхождение (msg
+> #477/#478): CalmBasin утверждал, что сеть уже пуста и не используется, но `docker network
+> inspect` на тот момент показал обратное (~28 контейнеров, включая nginx-proxy-manager) — отсюда
+> двухэтапная (сначала диагностика, потом безопасная миграция) процедура удаления.
+
+> **➡️ Следующий старт:** тираж §18.6 Сессии J и удаление `premium-network` полностью завершены.
+> Кандидаты: (1) `driving-school` — `@socket.io/redis-adapter` для Socket.IO перед включением
+> rollout для этого сервиса (§10, отложено пользователем, не блокер); (2) Этап 1.5 `createAuth
+> (profile)` или Этап 8 (соц-секреты per-владелец) — следующий содержательный этап Фазы B/C.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
@@ -1807,22 +1841,64 @@ Tier — это **не отдельная ось**, а проекция выбо
 | Ключница (auth-hub)  | Единственный `hub-provider`; (Этап 8) управление соц-секретами; реестр hub-клиентов (`trustedClients`).       |
 | Приложение           | **Декларирует `AuthProfile`** + тонкая интеграция: страницы, server actions, адаптеры БД, i18n, rate-limit.   |
 
-**Контракт `createAuth(profile)` (проектируется в Этапе 1.5, здесь — целевой эскиз, не финальный API):**
+**Контракт `createAuth(profile)` ✅ ФИНАЛИЗИРОВАН (Этап 1.5, `libs/auth/src/server/create-auth/types.ts`,
+`@letar/auth` 0.7.0+). Дискриминированное объединение по `mode`, а не единый плоский интерфейс —
+финальный API разошёлся с исходным эскизом (не `emailVerification`/`hub`/`roleField`, а
+`email`/`oidc`/`user.additionalFields` — ближе к сырому `BetterAuthOptions`, чем предполагалось на
+старте). Уже используется в проде 6 приложениями (dsperevod, time, kami, auth-hub, driving-school,
+archetest) во всех трёх режимах.**
 
 ```ts
-interface AuthProfile {
-  mode: 'standalone' | 'hub-client' | 'hub-provider' // ось §2.2
-  database: BetterAuthAdapter // prismaAdapter / enhanced — параметр приложения
+// Общее для всех режимов
+interface AuthProfileBase {
   baseURL: string
-  emailVerification?: PinAuthConfig | BasicVerifyConfig // pin-auth (богатый) или базовый Better Auth
-  social?:
-    // только standalone:
-    | { source: 'env' } //   Tier 2 ключи из process.env (дефолт)
-    | { source: 'db'; load: () => Promise<SocialKeys> } //   Tier 2 ключи из БД проекта (чит. при старте/reload)
-  hub?: { issuerURL: string; clientId: string } // только hub-client: OIDC-discovery Ключницы
-  roleField?: 'role' | 'roles' // примиряет 3 модели ролей (§3.3)
+  trustedOrigins?: string[]
+  user?: BetterAuthOptions['user'] // additionalFields (role/roles и т.д.)
+  session?: Partial<BetterAuthOptions['session']>
+  plugins?: BetterAuthOptions['plugins']
+  pages?: { signIn?: string; signUp?: string; error?: string; resetPassword?: string }
+  secondaryStorage?: BetterAuthOptions['secondaryStorage'] // createRedisStorage(url)
 }
+
+// standalone — локальная авторизация (§2.2), коммерс со своим доменом
+interface StandaloneAuthProfile extends AuthProfileBase {
+  mode: 'standalone'
+  database: BetterAuthOptions['database'] // prismaAdapter(...)
+  email: {
+    // инжектируется приложением, не библиотекой
+    sendVerificationEmail: (p: { to; userName?; verificationUrl }) => Promise<{ success; error? }>
+    sendPasswordResetEmail?: (p: { to; userName?; resetUrl }) => Promise<{ success; error? }>
+    reportEmailFailure: (p: { type; to; error }) => void
+  }
+  rateLimit?: { customRules?: Record<string, { window: number; max: number }> }
+  social?: { source: 'env'; providers } | { source: 'db'; load: () => Promise<SocialKeys | null> } // Tier 2, Этап 8
+  databaseHooks?: BetterAuthOptions['databaseHooks']
+  password?: { hash; verify } // напр. bcrypt для legacy-хешей (driving-school)
+}
+
+// hub-client — OIDC-клиент Ключницы, петы *.letar.best
+interface HubClientAuthProfile extends AuthProfileBase {
+  mode: 'hub-client'
+  database?: BetterAuthOptions['database'] // опционально — time не имеет локальной БД
+  oidc: { clientId: string | undefined; clientSecret: string | undefined; discoveryUrl?: string }
+  rateLimit?: { storage?: 'memory' | 'database' | 'secondary-storage'; customRules? }
+  account?: { accountLinking?: { enabled?: boolean; trustedProviders?: string[] } }
+}
+
+// hub-provider — единственный экземпляр, сама Ключница (auth-hub)
+interface HubProviderAuthProfile extends AuthProfileBase {
+  mode: 'hub-provider'
+  database: BetterAuthOptions['database']
+  email: StandaloneAuthProfile['email']
+  socialProviders?: BetterAuthOptions['socialProviders'] // общие для всех hub-client приложений
+  oidcProvider?: { loginPage?; consentPage?; requirePKCE?; accessTokenExpiresIn?; refreshTokenExpiresIn?; scopes? }
+  account?: HubClientAuthProfile['account']
+}
+
+type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAuthProfile
 ```
+
+Полная документация с примерами по каждому режиму: [`libs/auth/README.md`](libs/auth/README.md).
 
 - `standalone` → собирает `socialProviders` из `social.source`; `hub-client` → `genericOAuth` на `hub.issuerURL`,
   локальных провайдеров нет; `hub-provider` → подключает `oidcProvider`-плагин (только auth-hub).
@@ -2105,7 +2181,7 @@ interface AuthProfile {
   - ✅ Добавлена тест-инфраструктура pin-auth (project.json/vitest/tsconfig.spec) + 11 тестов; bump 0.1.0→0.2.0 + CHANGELOG.
 - **Зависимости:** нет (публичные `libs/`). Стартовая сессия реализации.
 
-### Этап 1.5 — Серверная абстракция `createAuth(profile)` ⭐ ⏳ В РАБОТЕ (сессия №9, 2026-06-04)
+### Этап 1.5 — Серверная абстракция `createAuth(profile)` ⭐ ✅ ПОЛНОСТЬЮ (сессия №9, 2026-06-04; DoD закрыт 2026-07-15)
 
 > **Зачем:** сейчас каждое приложение собирает `betterAuth({...})` руками (auth-hub ~390 строк, копируются при
 > тираже). Цель — свести различие приложений к объекту `AuthProfile` (§2.2/§4), убрать дублирование, сделать смену
@@ -2118,8 +2194,14 @@ interface AuthProfile {
    приложения используют `as unknown as SessionUser`. Задокументировано в коде.
 2. ✅ **Эталон-миграция standalone** → **dsperevod**: `auth.ts` заменён декларацией профиля (90→35 строк).
 3. ✅ **Эталон-миграция hub-client** → **time**: `auth.ts` 84→20 строк, без DB-адаптера.
-4. ⏳ **Осталось по DoD:** `libs/auth/README.md` описывает 3 режима; E2E dsperevod проверить behavior-parity;
-   контракт §4 финализирован; под-вопросы п.4 (реестр hub-клиентов ✅ закрыт сессией №7).
+4. ✅ **DoD закрыт (2026-07-15):** `libs/auth/README.md` описывает все 3 режима с примерами по каждому
+   приложению-эталону (dsperevod/time/kami/auth-hub/driving-school), API Reference, актуально на
+   `@letar/auth` 0.7.0. E2E `dsperevod-e2e/src/email-verification.spec.ts` (behavior-parity после
+   миграции standalone на `createAuth()`) прогнан локально — 2/2 зелёных (регистрация →
+   `EMAIL_NOT_VERIFIED` → resend → cooldown; верификация по токену → автологин). Контракт §4
+   переписан под реальный API (`libs/auth/src/server/create-auth/types.ts` — дискриминированное
+   объединение по `mode`, разошёлся с исходным эскизом). Реестр hub-клиентов закрыт сессией №7.
+   **Этап 1.5 ПОЛНОСТЬЮ ЗАВЕРШЁН** — фабрика в проде на 6 приложениях во всех 3 режимах.
 
 - **✓ DoD:** `createAuth()` покрыт тестами; dsperevod (`standalone`) + archetest/time (`hub-client`) работают на
   фабрике, E2E зелёный; их `auth.ts` сократился до декларации профиля; `libs/auth/README.md` описывает 3 режима;
@@ -2544,14 +2626,36 @@ useEffect(() => {
 - **UI выбора режима в админке коммерческого проекта** (informed consent §2.3):
   - **Tier 1 → `hub-client`:** «перейти на авторизацию letar.best» с показом рисков (бренд, домен письма, риск бана,
     миграция identity, обработчик ПДн). Технически = регистрация проекта hub-клиентом Ключницы (реестр — см. Этап 1.5 п.4)
-    - миграция данных (§8.5).
+    - миграция данных (§8.5). ⏳ **Не начато** — нет UI выбора режима, только Tier 2 (ниже).
   - **Tier 2 → `standalone` + свои ключи:** владелец вводит свои OAuth clientId/secret; secret **шифруется at-rest**
     в БД его проекта; `createAuth({ social: { source: 'db' } })` читает их при старте/reload. **Без runtime-динамики
     провайдеров** (решение ревизии №3) — D8 не нужен.
+    ✅ **Реализовано и проверено вживую (2026-07-15)** — пилот на `dsperevod` (первый реальный
+    потребитель `createAuthAsync`/`createSocialProviderLoader`/`encryptSecret`/`decryptSecret` из
+    `@letar/auth`, до этого только докстринги без реальных вызовов): новая модель
+    `SocialProvider` (`@@allow('all', auth().role == 'ADMIN')`, AES-256-GCM secret), страница
+    `/admin/social-providers/` (список + create/edit/delete, `Alert` с рисками владения),
+    `lib/auth.ts` переведён на `createAuthAsync` с `social: { source: 'db', load:
+    createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелёные, dev-сервер стартует с
+    top-level `await createAuthAsync(...)` без ошибок, sign-up/sign-in через API работают,
+    `requireAdmin` → ZenStack-запрос → рендер страницы подтверждены curl'ом с реальной сессией,
+    encrypt→store→loader→decrypt round-trip проверен отдельным скриптом (значение в БД не
+    читается как plaintext, loader корректно расшифровывает). **Ограничение:** провайдеры
+    читаются один раз при старте процесса — правки в админке требуют рестарта (задокументировано
+    в UI и README). **Не покрыто:** OAuth-провайдеры через `genericOAuth`-плагин с кастомным
+    `getUserInfo` (Yandex у driving-school) — DB-loader сериализует только `clientId`/`clientSecret`
+    для нативных `socialProviders`, не сложные колбэки; миграция `driving-school` на DB-backed
+    Tier 2 сознательно не делалась в этой сессии — риск сломать боевой VK/Yandex-вход.
 - ✅ **Миграция auth-hub на `createAuth({ mode: 'hub-provider' })`** — выполнено (сессия №33). Вынести захардкоженные OIDC-секреты auth-hub в secret-store (Этап 0.4) — остаётся.
-- **✓ DoD:** коммерс может в админке выбрать Tier 1/Tier 2 с показом рисков; Tier 2-секреты шифруются at-rest и
-  подхватываются `createAuth()`; auth-hub работает на фабрике; нет строковых секретов в коде.
+- **✓ DoD:** коммерс может в админке выбрать Tier 1/Tier 2 с показом рисков (⏳ только Tier 2 UI
+  готов, выбора режима ещё нет); ✅ Tier 2-секреты шифруются at-rest и подхватываются `createAuth()`
+  (пилот dsperevod); ✅ auth-hub работает на фабрике; ✅ нет строковых секретов в коде нового пути.
 - **Зависимости:** после auth-унификации (этапы 1, **1.5**, 2–7). Самостоятельный крупный трек.
+- **Побочная находка (2026-07-15, не в скоупе, вынесена в отдельную задачу):** локальный
+  `apps/dsperevod/prisma/seed.ts` создаёт первого ADMIN с bcrypt-хешем пароля, но `lib/auth.ts`
+  не переопределяет `password.hash/verify` (в отличие от driving-school/aboi) → Better Auth
+  проверяет его своим дефолтным scrypt → `sign-in` под сид-админом падает с "Invalid password
+  hash". Предсуществующий баг, обнаружен при верификации этой фичи.
 
 ### Этап 8.5 — Несколько email на аккаунт (account linking / merge)
 
@@ -2622,10 +2726,11 @@ useEffect(() => {
 - **Соц-секреты Tier 1** — общий риск бана OAuth-приложения; владение/юридика (ToS); шифрование at-rest для БД.
 - ~~**Правовое (152-ФЗ) локализация**~~ ✅ **ЗАКРЫТ (2026-06-04):** Ключница хостится в РФ → ст. 18 152-ФЗ выполнена. Остаётся: оператор/обработчик, договор поручения для Tier 1, согласия per-домен (§2.6).
 - **Account-merge** — необратимо (перепривязка/удаление дублей) → бэкап БД + выбранный canonical до старта; боевые данные.
-- **🟠 `driving-school` Socket.IO без Redis-адаптера блокирует rollout (2026-07-13, §18.6 Сессия J):** in-memory
-  room-state per-process → при zero-downtime rollout (2 живые реплики) сообщения чата между собеседниками на разных
-  репликах молча теряются. Нужен `@socket.io/redis-adapter` прежде чем включать `letar.rollout` для этого сервиса.
-  Пользователь решил отложить, не в скоупе текущего тиража.
+- ~~**`driving-school` Socket.IO без Redis-адаптера блокирует rollout**~~ ✅ **ЗАКРЫТ (2026-07-14,
+  commit `b29ca4b`+`8189504`, см. запись выше §18.6 Сессия J):** `@socket.io/redis-adapter`
+  подключён (`route.ts` → `createAdapter` на `ioredis` при наличии `REDIS_URL`), `letar.rollout:
+  'true'` включён, rollout-пилот пройден zero-downtime (msg #434), **13/~19 SERVER_APPS на
+  rollout** на тот момент — driving-school больше не блокер, входит в состав финальных 19/19.
 - **🟠 Переход режима = миграция identity (ревизия №3)** — `standalone → hub-client` меняет источник `user.id`
   (Ключница вместо локального) → существующие пользователи коммерса требуют миграции/перепривязки данных (класс §8.5),
   а не флага. Однонаправленно по стоимости (откат Tier 1→Tier 2 — ещё одна миграция). Закладывать бэкап + план переноса.
