@@ -1,5 +1,19 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Этап 8 — тираж на aboi (2026-07-15):** `/admin/social-providers/` +
+> `/admin/settings/auth-mode/` перенесены с dsperevod (модели `SocialProvider` +
+> `AuthModeMigrationRequest` — у aboi не было своего `AuditLog`, минимальная модель вместо полного
+> журнала). **Отклонение от эталона:** соц-провайдеры грузятся вручную через
+> `createSocialProviderLoader` в raw `betterAuth()`, БЕЗ перехода на `createAuth()`/`createAuthAsync`
+> фабрику — фабрика собирает `plugins` через spread внутри своей функции и стирает tuple-тип
+> массива, из-за чего TypeScript терял типизацию `auth.api.signInAnonymous` (anonymous-плагин,
+> критичен для гостевой корзины aboi, живой e-commerce). Это системная находка — вероятно
+> ограничивает будущий тираж на другие приложения, использующие plugin-specific API поверх
+> `auth.api`, не только aboi. Проверено вживую: сид-логин, создание/редактирование/decrypt-round-trip
+> провайдера, informed-consent запрос, каталог/сессия/корзина после миграции — все зелёные.
+> `AUTH_ENCRYPTION_KEY` добавлен в `.env.local`+`.env.docker`+`docker-compose.production.yml`
+> (два места — deploy-request BlackCove ещё не отправлен, ждёт своей очереди).
+>
 > **✅ Этап 8 — Tier 1/Tier 2 UI + self-service OAuth-админка: пилот на dsperevod (2026-07-15):**
 > `/admin/social-providers/` (Tier 2 — свои OAuth-ключи, `SocialProvider` модель, secret
 > шифруется AES-256-GCM) + `/admin/settings/auth-mode/` (сравнение Tier 1/Tier 2 с рисками §2.3,
@@ -20,8 +34,9 @@
 > подтверждённо удалена BlackCove (2026-07-15, треды #477→#481) — не реликт для чистки, а
 > завершённая миграция.
 >
-> **➡️ Следующий старт:** Этап 8 продолжение — UI выбора Tier 1/Tier 2 в админке (Tier 1 = переход
-> на hub-client, ещё не начат); либо Этап 8.5 (несколько email на аккаунт); либо фикс
+> **➡️ Следующий старт:** Этап 8 тираж на `driving-school` (с оговоркой — Yandex/VK через
+> `genericOAuth` не покрываются DB-loader'ом, переносить только Google-часть + auth-mode UI, не
+> трогая боевой Yandex/VK вход); затем Этап 8.5 (несколько email на аккаунт); затем фикс
 > dsperevod seed.ts (bcrypt/scrypt, вынесено отдельной задачей).
 
 > **🔴 `svoichuzhie` — прод-баг, НЕ связанный с rollout (2026-07-14, BlackCove, msg #453):**
