@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: forms_example
     volumes:
       - form-example-pgdata:/var/lib/postgresql/data
+    ports:
+      - '5443:5432' # deploy-affected.sh мигрирует с хоста через localhost:$DB_PORT
     networks:
       - kami-network
     healthcheck:
