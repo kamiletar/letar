@@ -40,6 +40,28 @@
 > приложения уже используют `0.0.0.0`), баг был изолирован к svoichuzhie. Таймауты на внешние
 > `fetch()` (`83af83f`/`faf1a16`) остаются в коде как легитимное защитное улучшение, но не были
 > причиной. Запрошен повторный rollout-пилот у BlackCove (msg #457) — **ждёт выполнения**.
+>
+> **✅✅ ROLLOUT-ПИЛОТ ЗАВЕРШЁН (2026-07-15, BlackCove, msg #461, thread `deploy-svoichuzhie`):**
+> commit `fcb4689cd` (letar) / `f8c5bba` (submodule) — фикс healthcheck `localhost`→`127.0.0.1`
+> в проде. Подтверждено через `deploy_status` (deploy-mcp, exitCode 0): все 9 гейтов пройдены —
+> `doctor` → `resolve-old-container` → `scale-up` → `wait-healthy` (`svoichuzhie-app-2` healthy) →
+> `smoke-test` (реальный HTTP, не-5xx) → `nginx-reload-1` → `stop-old` → `rm-old` →
+> `nginx-reload-2`, `docker ps`: `svoichuzhie-app-2 — Up (healthy)`, даунтайма не было. IPv6/
+> `localhost` healthcheck-баг подтверждён закрытым. ⚠️ Повторный запрос (msg #460) оказался
+> дубликатом — исходный (#457) BlackCove обработал на ~5 минут раньше, ответ (#458) ушёл другому
+> агенту (RubyBear), не инициатору — источник путаницы «он ответил на другое имя агента».
+> **16/~19 SERVER_APPS на rollout.**
+>
+> **✅ Risk-check интеграций СДЭК/каталога — ЗАКРЫТ С ОГОВОРКОЙ (2026-07-15, BlackCove msg #463 +
+> проверка в браузере, thread `deploy-svoichuzhie`):** каталог/`delivery` — ✅ реальный HTML
+> (`/merch` 143955 байт, `/delivery` 164558 байт), общий health 5×curl `svoichuzhie.ru` → 200,
+> даунтайма нет. **СДЭК:** креды (`CDEK_CLIENT_ID`/`CDEK_CLIENT_SECRET`) внутри контейнера заданы
+> корректно (подтверждено `docker exec ... env`), но end-to-end расчёт доставки (Server Action
+> `shipping.action.ts`, недоступен для curl) проверить не удалось — **`/merch` на проде пуст**
+> («Скоро будет», товаров нет), страница оформления заказа физически недостижима, пока владелец
+> не опубликует товары. Не блокер rollout — интеграция задеплоена корректно, живой end-to-end тест
+> откладывается до наполнения каталога (появится естественным образом в логах при первом реальном
+> заказе).
 
 > **✅ `deploy-affected.sh` — молчаливый пропуск миграций ПОФИКШЕН (2026-07-14, RubyBear, commit
 > `8e34f17`):** найдено BlackCove/RainyMarsh (msg #447/#450) при staging e2e для driving-school —
@@ -83,10 +105,12 @@
 > `@zenstackhq/runtime@2.22.3` при остальных пакетах на `3.8.3`. Предсуществующий техдолг в
 > `package.json`, не трогали.
 >
-> **➡️ Следующий старт:** остался последний непроверенный кандидат тиража — `svoichuzhie`
-> (e-commerce с СДЭК, риск как у `aboi` — проверять не только HTTP 200, но и реальные интеграции
-> доставки в логах). После него — `form-example`/`mandala` (label намеренно выключен) и
-> `dashboard`/`dashboard-agent` (структурно исключены) остаются вне активного тиража.
+> **➡️ Следующий старт:** `svoichuzhie` rollout-пилот ЗАВЕРШЁН (см. запись выше, msg #461,
+> **16/~19 SERVER_APPS на rollout**) — остаётся risk-check реальных интеграций СДЭК/каталога на
+> живом `svoichuzhie-app-2` (аналог проверки `aboi`), запрошено у BlackCove. После него —
+> `form-example`/`mandala` (label намеренно выключен) и `dashboard`/`dashboard-agent` (структурно
+> исключены) остаются вне активного тиража; когда все активные SERVER_APPS переедут на rollout —
+> попросить BlackCove удалить старую `premium-network`.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
