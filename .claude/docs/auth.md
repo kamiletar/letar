@@ -166,6 +166,14 @@ Tier 1/Tier 2 с informed-consent) — `apps/dsperevod/src/app/(admin)/admin/soc
      `createSocialProviderLoader` сериализует только `clientId`/`clientSecret`, перенос сломает
      это обогащение. В этом случае переноси только `/admin/settings/auth-mode/`, соц-провайдеры
      оставляй как есть (env-based).
+4. **`/admin/social-providers/` (форма + server actions) пока НЕ вынесен в libs** — `social-provider-form.tsx`
+   и `social-provider.action.ts` в aboi и dsperevod почти дословно совпадают (форма отличается
+   только именем form-инстанса), но это только 2 места, и способ доступа к БД в actions
+   архитектурно разный (aboi — raw Prisma + ручной `requireAdmin()`, dsperevod — ZenStack
+   `getEnhancedPrisma` с access-policies). **Если третий тираж (следующий проект) снова копирует
+   этот код почти без изменений — вынеси `social-provider-form.tsx` в `@letar/auth/client`**
+   (проп для form-инстанса, по аналогии с `AuthModeSettings`); actions с data-access оставляй
+   per-app, там абстрагировать больше не стоит.
 
 ---
 
