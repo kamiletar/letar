@@ -127,6 +127,24 @@ ${baseURL}/api/auth/oauth2/callback/${providerId}
 
 ---
 
+## Tier 2 self-service соц-секреты владельца (`createAuth()` фабрика, Этап 8 PLAN.md)
+
+Для `standalone`-приложений владелец может сам вводить свои OAuth-ключи через собственную
+admin-панель, не трогая `.env.docker` — вместо `betterAuth({...})` руками приложение декларирует
+`AuthProfile` через `createAuth()`/`createAuthAsync()` из `@letar/auth/server` (см.
+[`libs/auth/README.md`](/libs/auth/README.md) — три режима `standalone`/`hub-client`/`hub-provider`,
+полный контракт и Tier 2 пример). Секрет шифруется AES-256-GCM (`encryptSecret`/`decryptSecret`),
+читается из БД один раз при старте процесса через `createSocialProviderLoader` (без runtime-
+динамики). Эталон полного среза (модель `SocialProvider` + admin UI + server actions + UI выбора
+Tier 1/Tier 2 с informed-consent) — `apps/dsperevod/src/app/(admin)/admin/social-providers/` и
+`.../admin/settings/auth-mode/`.
+
+> ⚠️ Примеры ниже в этом файле (`betterAuth({...})` напрямую, `verificationToken` вместо pin-auth) —
+> **устаревший паттерн, предшествующий фабрике `createAuth()`**. Для новых приложений используй
+> `libs/auth/README.md`, а не код из этого раздела.
+
+---
+
 ## Интеграция Better Auth (per-app)
 
 Приложение использует **Better Auth** с несколькими OAuth провайдерами и **ZenStack** для авторизации.
@@ -972,7 +990,7 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
       }
       setIsVerifying(false)
     },
-    [email]
+    [email],
   )
 
   // 4. Повторная отправка PIN
@@ -1051,15 +1069,17 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
 
       {/* Повторная отправка с countdown */}
       <Box textAlign="center">
-        {canResend ? (
-          <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
-            Отправить код повторно
-          </Button>
-        ) : (
-          <Text color="fg.muted" fontSize="sm">
-            Отправить повторно через {resendCountdown} сек
-          </Text>
-        )}
+        {canResend
+          ? (
+            <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
+              Отправить код повторно
+            </Button>
+          )
+          : (
+            <Text color="fg.muted" fontSize="sm">
+              Отправить повторно через {resendCountdown} сек
+            </Text>
+          )}
       </Box>
 
       <Text color="fg.muted" fontSize="xs" textAlign="center">
@@ -1277,7 +1297,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           clearInterval(interval)
           controller.close()
         },
-        5 * 60 * 1000
+        5 * 60 * 1000,
       )
     },
   })

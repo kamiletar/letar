@@ -182,10 +182,10 @@ export const auth = createAuth({
 
   // OAuth-провайдеры настраиваются ОДИН РАЗ для всех приложений монорепо
   socialProviders: {
-    ...(process.env.AUTH_GOOGLE_ID &&
-      process.env.AUTH_GOOGLE_SECRET && {
-        google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
-      }),
+    ...(process.env.AUTH_GOOGLE_ID
+      && process.env.AUTH_GOOGLE_SECRET && {
+      google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
+    }),
     // github, facebook, vk — аналогично
   },
 
@@ -368,6 +368,65 @@ interface AuthProfileBase {
 }
 ```
 
+### Tier 2 — self-service соц-секреты владельца (`social.source: 'db'`)
+
+Для `standalone`-режима владелец может сам вводить свои OAuth-ключи через админку своего
+приложения — вместо `process.env` секреты читаются из БД **один раз при старте процесса**
+(без runtime-динамики — решение ревизии №3 корневого PLAN.md, D8 не нужен). Требует
+`AUTH_ENCRYPTION_KEY` в окружении (32 байта hex, `openssl rand -hex 32`) и синхронный `createAuth`
+меняется на `createAuthAsync` + top-level `await`:
+
+```typescript
+// apps/dsperevod/src/lib/auth.ts (эталон Tier 2 self-service, PLAN.md Этап 8)
+import { createAuthAsync, createSocialProviderLoader, decryptSecret, getEncryptionKey } from '@letar/auth/server'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
+
+import { prisma } from './db'
+
+export const auth = await createAuthAsync({
+  mode: 'standalone',
+  database: prismaAdapter(prisma as never, { provider: 'postgresql' }),
+  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3019',
+  email: {
+    /* ... */
+  },
+  // Пусто на старте → соц-вход просто отсутствует до первой настройки владельцем,
+  // не блокирует email/password.
+  social: {
+    source: 'db',
+    load: createSocialProviderLoader(prisma as never, decryptSecret, getEncryptionKey()),
+  },
+})
+```
+
+`createSocialProviderLoader` ожидает модель `SocialProvider` в `schema.zmodel` приложения
+(только-ADMIN доступ, `clientSecret` шифруется `encryptSecret()` перед записью, никогда не
+отдаётся клиенту после сохранения — только маска последних 4 символов):
+
+```zmodel
+model SocialProvider {
+  id           String   @id @default(cuid())
+  providerId   String   @unique /// "google", "vk" — ключ Better Auth socialProviders
+  clientId     String
+  clientSecret String /// формат "gcm:<iv>:<cipher>:<tag>"
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@allow('all', auth().role == 'ADMIN')
+}
+```
+
+Полный вертикальный срез (модель + шифрование + admin UI со списком/созданием/редактированием +
+server actions) — [`apps/dsperevod/src/app/(admin)/admin/social-providers/`](../../apps/dsperevod/src/app/(admin)/admin/social-providers/).
+Компаньон — UI выбора Tier 1 (`hub-client`) / Tier 2 с показом рисков (§2.3) и informed-consent
+запросом в `AuditLog`, **не автоматизирующий сам переход** (смена режима = миграция identity, не
+рантайм-флаг): [`apps/dsperevod/.../admin/settings/auth-mode/`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/).
+
+> ⚠️ Ограничение: `social.source: 'db'` сериализует только `clientId`/`clientSecret` для нативных
+> `socialProviders` Better Auth. Провайдеры через `genericOAuth`-плагин с кастомным `getUserInfo`
+> (например Yandex у `driving-school`) этим механизмом не покрываются.
+
 ### Ограничение: additionalFields не выводятся автоматически
 
 Better Auth не выводит тип `additionalFields` через дженерик фабрики. Используйте явный cast:
@@ -438,7 +497,7 @@ const { getSession, getCurrentUser } = createSessionHelpers<Session>(auth)
 
 const { requireAuth, requireRole, requireAdmin } = createAuthGuards(
   getSession,
-  (session) => session.user as SessionUser
+  (session) => session.user as SessionUser,
 )
 
 const { isAuthenticated, hasRole, isAdmin } = createAuthChecks(getCurrentUser)
