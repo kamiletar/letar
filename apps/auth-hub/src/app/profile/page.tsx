@@ -3,7 +3,18 @@ import { prisma } from '@/lib/prisma'
 import { Avatar, Badge, Box, Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import NextLink from 'next/link'
-import { LuFingerprint, LuKey, LuKeyRound, LuLink, LuMail, LuPencil, LuShield, LuUser, LuUsers } from 'react-icons/lu'
+import {
+  LuFingerprint,
+  LuKey,
+  LuKeyRound,
+  LuLink,
+  LuMail,
+  LuMailPlus,
+  LuPencil,
+  LuShield,
+  LuUser,
+  LuUsers,
+} from 'react-icons/lu'
 import { PasskeyPromptBanner } from './_components/passkey-prompt-banner'
 import { SignOutButton } from './_components/sign-out-button'
 
@@ -19,13 +30,14 @@ export default async function ProfilePage() {
   const user = session.user
   const userIsAdmin = await isAdmin()
 
-  // Получаем связанные аккаунты и passkeys
-  const [accounts, passkeyCount] = await Promise.all([
+  // Получаем связанные аккаунты, passkeys и дополнительные email
+  const [accounts, passkeyCount, additionalEmailsCount] = await Promise.all([
     prisma.account.findMany({
       where: { userId: user.id },
       select: { providerId: true },
     }),
     prisma.passkey.count({ where: { userId: user.id } }),
+    prisma.userEmail.count({ where: { userId: user.id } }),
   ])
 
   return (
@@ -129,6 +141,22 @@ export default async function ProfilePage() {
                     <Text fontWeight="medium">Связанные аккаунты</Text>
                     <Text color="fg.muted" fontSize="sm">
                       {accounts.length} подключённых провайдеров
+                    </Text>
+                  </Box>
+                </HStack>
+              </Card.Body>
+            </NextLink>
+          </Card.Root>
+
+          <Card.Root asChild>
+            <NextLink href="/profile/emails">
+              <Card.Body py={3}>
+                <HStack gap={3}>
+                  <LuMailPlus size={20} />
+                  <Box>
+                    <Text fontWeight="medium">Email-адреса</Text>
+                    <Text color="fg.muted" fontSize="sm">
+                      {additionalEmailsCount > 0 ? `+${additionalEmailsCount} дополнительно` : 'Только основной'}
                     </Text>
                   </Box>
                 </HStack>

@@ -65,6 +65,9 @@ model User {
   // Журнал cookie-согласий
   consentLogs ConsentLog[]
 
+  // Дополнительные email (Этап 8.5)
+  additionalEmails UserEmail[]
+
   // Публичный доступ на чтение, создание/обновление — только себя
   @@allow('read', true)
   @@allow('create', true)
@@ -130,6 +133,27 @@ model Verification {
 
   @@deny('all', true)
   @@index([identifier])
+}
+
+// Дополнительные email на аккаунте (Этап 8.5 корневого PLAN.md) — self-service привязка/
+// подтверждение нескольких адресов к одному User (как GitHub). Каждый управляется через
+// server actions с requireAuth() + raw prisma (тот же паттерн, что Account/Session выше),
+// поэтому политики deny-all — access control на уровне action, не ZenStack.
+// НЕ покрывает: вход по любому linked-email (требует перехвата sign-in резолва, отдельная
+// задача) и merge двух УЖЕ СУЩЕСТВУЮЩИХ разных аккаунтов (остаётся ручным скриптом владельца,
+// необратимо, см. §8.5 «разовая операция»).
+model UserEmail {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email                 String    @unique
+  verified              Boolean   @default(false)
+  verificationToken     String?   @unique
+  verificationExpiresAt DateTime?
+  createdAt             DateTime  @default(now())
+
+  @@deny('all', true)
+  @@index([userId])
 }
 
 // Rate Limiting
