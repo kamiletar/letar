@@ -77,6 +77,9 @@
     },
     {
       "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/forms"
     }
   ]
 }
