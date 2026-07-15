@@ -86,6 +86,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "pravda"],
       "port": 3007
+    },
+    {
+      "name": "driving-school",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "driving-school"],
+      "port": 3003
     }
   ]
 }
