@@ -369,6 +369,30 @@ services:
       - DATABASE_URL=postgresql://lena_user:${DB_PASSWORD}@db:5432/${DB_NAME}
 ```
 
+#### ⚠️ Чеклист секции `db:` — обязательно для миграций
+
+`deploy-affected.sh` прогоняет `prisma migrate deploy` **с хоста** (не изнутри контейнера) перед
+пересборкой образа. Если секция `db:` не соответствует любому из пунктов ниже — деплой падает на
+шаге миграций, а не на билде (найдено на `form-example`, 2026-07-15, три независимых бага за один
+rollout — см. `apps/form-example/PLAN_COMPLETED.md`):
+
+- [ ] **`ports:` обязателен и публикует уникальный host-порт** (`'<port>:5432'`) — скрипт
+      парсит `ports:` секции регэкспом и коннектится на `localhost:$DB_PORT` для миграций.
+      Без `ports:` (только внутренняя сеть) — `P1001: Can't reach database server at localhost:5432`.
+      Не ставь комментарий МЕЖДУ `ports:` и первой строкой порта — парсер берёт следующую строку
+      буквально (`grep -A 1 "ports:"`), комментарии — только НАД блоком `ports:`.
+- [ ] **`.env.docker` содержит именно `DB_PASSWORD`**, не только `POSTGRES_PASSWORD` — скрипт
+      строит `DATABASE_URL` для миграций из переменной `DB_PASSWORD` (даже если compose использует
+      `POSTGRES_PASSWORD` для самого Postgres-сервиса). Разошедшиеся имена → пустой пароль в URL →
+      `P1000: Authentication failed`. Если оба нужны — держи одинаковое значение в обеих переменных.
+- [ ] **`prisma/migrations/` существует и не пуста** до первого `letar.rollout`/production-деплоя.
+      Если схема раньше накатывалась через `prisma db push` (без истории миграций) — `migrate
+      deploy` против непустой БД падает `P3005: database schema is not empty`. Нужен baseline:
+      сгенерировать первую миграцию локально (`nx db:migrate <app> -- --name init`, при
+      необходимости — `migrate dev --create-only` из текущей схемы), закоммитить, затем на
+      проде выполнить `prisma migrate resolve --applied <migration_name>` (только пометка в
+      `_prisma_migrations`, без реального DDL — схема там уже такая).
+
 Для приложений без БД (dashboard):
 
 ```yaml
