@@ -1,5 +1,27 @@
 # Выполненные задачи — form-example
 
+## Сессия 2026-07-15 — rollout-профиль включён, деплой закрыт
+
+- `letar.rollout: 'true'` раскомментирован в `docker-compose.production.yml` — приложение
+  структурно готово к rollout ещё с 2026-07-12 (commit `098eb75`), ждало подтверждения
+  NPM-роутинга обычным деплоем (условие выполнено).
+- Rollout-пилот прошёл с четвёртой попытки — вскрылись и устранены три независимых бага
+  инфраструктуры (все правки в compose/env, не в коде приложения):
+  1. `db:` секция никогда не публиковала host-порт — `deploy-affected.sh` мигрирует с хоста
+     через `localhost:$DB_PORT`, слушать было нечего (`P1001`). Фикс: `ports: '5443:5432'`
+     (commit `d0c5cfc`).
+  2. `.env.docker` содержал `POSTGRES_PASSWORD`, но не `DB_PASSWORD` — единственное такое
+     приложение в монорепо, скрипт строит `DATABASE_URL` для миграций именно из `DB_PASSWORD`
+     (`P1000` Authentication failed). Фикс: добавлена переменная, `.env.docker.enc` пересобран
+     через `sops` (commit `fd67766`).
+  3. `prisma/migrations/` никогда не существовала в репо — схема на проде была накатана через
+     `prisma db push`, а не `migrate`, что несовместимо с `migrate deploy` против непустой БД
+     (`P3005`). Фикс: сгенерирована и провалидирована baseline-миграция `20260715163011_init`
+     (commit `b63b132`), на проде помечена применённой через `prisma migrate resolve --applied`
+     (без DDL, схема совпадала).
+- Итог: `form-example-app-2` healthy, zero-downtime, старый контейнер убран. Деплой-агент —
+  BlackCove, координация через Agent Mail (thread `deploy-form-example-mandala-rollout-J`).
+
 ## Сессия 2026-07-12 — security-фикс + баг /products 500
 
 ### Ротация захардкоженного пароля Postgres

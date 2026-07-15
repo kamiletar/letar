@@ -599,4 +599,19 @@ export const authConfig = {
 
 ---
 
-**Последнее обновление:** 2025-12-14
+## Сессия 2026-07-15 — rollout-профиль включён, первый zero-downtime деплой
+
+- `letar.rollout: 'true'` раскомментирован в `docker-compose.production.yml` — приложение было
+  структурно готово к rollout, но ждало «периода стабильности» после прод-инцидента 2026-07-12
+  (500 на всех страницах, `sharp`/`libvips` `ERR_DLOPEN_FAILED`). Хотфикс той сессии
+  (явный `COPY` `.so`-файла) заменён устойчивым решением — `outputFileTracingIncludes` в
+  `next.config.js` — и подтверждён стабильным 3 дня без новых инцидентов.
+- Первый rollout-пилот прошёл с первой попытки, все 9 гейтов зелёные (`doctor` →
+  `scale-up` → `wait-healthy` → `smoke-test` → `nginx-reload-1` → `stop-old` → `rm-old` →
+  `nginx-reload-2`), `mandala-app-2 healthy`, `curl mandala.letar.best` → 200, простоя не было.
+- Деплой-агент — BlackCove, координация через Agent Mail (thread
+  `deploy-form-example-mandala-rollout-J`).
+
+---
+
+**Последнее обновление:** 2026-07-15
