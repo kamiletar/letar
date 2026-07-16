@@ -1,6 +1,25 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.6.3 — Этап 8.5: merge двух аккаунтов ✅ (скрипт готов, прод-запуск не выполнялся)
+## Текущий статус: v0.6.4 — Этап 8.5: вход по любому linked-email ✅ (Этап 8.5 закрыт целиком)
+
+### Выполнено (v0.6.4) — 2026-07-16
+
+- [x] `resolveLoginEmail()` (`src/lib/resolve-login-email.ts`) — резолв подтверждённого
+      `UserEmail` → основной `User.email` ДО вызова Better Auth; подключён в `loginUser` и
+      `sendMagicLinkAction`. Core-резолв sign-in НЕ перехватывался: выяснилось, что email+password
+      и magic-link входы идут только через собственные server actions Ключницы (downstream —
+      через OIDC-редирект на hub UI), так что spike свёлся к action-уровню без риска для core.
+- [x] Фикс дыры дубль-аккаунта: linked email + неверный пароль больше не уводит в auto-sign-up
+      (`resolved=true` → «Неверный пароль»); magic link резолвится до Better Auth (иначе
+      `disableSignUp: false` создавал бы дубль). Письмо magic link при вводе linked-адреса уходит
+      на основной адрес владельца (задокументировано в коде).
+- [x] Фикс гонки `verifyAddedEmail`: перепроверка занятости адреса таблицей `User` на момент
+      подтверждения (токен живёт 24ч; при конфликте привязка удаляется с ошибкой пользователю).
+- [x] Проверено вживую: вход по linked-адресу через UI → сессия primary-аккаунта; скрипт-матрица
+      резолва (verified/unverified/primary/unknown/UPPERCASE) на dev-БД; дубль не создаётся.
+- [ ] Деплой v0.6.4 через BlackCove (linked-email вход пока только локально)
+
+## Текущий статус (ранее): v0.6.3 — Этап 8.5: merge двух аккаунтов ✅ (скрипт готов, прод-запуск не выполнялся)
 
 ### Выполнено (v0.6.3) — 2026-07-16
 
@@ -10,8 +29,8 @@
       `ProjectProfile` по `projectSlug`, конфликт `OauthConsent` по клиенту, идемпотентность
       повторного запуска). Прод-запуск не выполнялся (нет конкретной пары аккаунтов для
       склейки), ждёт первого реального кейса.
-- [ ] Вход по любому linked-email — следующая задача (перехват резолва sign-in в Better Auth,
-      риск для core auth-flow ~10 downstream-приложений, нужен spike перед реализацией)
+- [x] Вход по любому linked-email — ✅ сделано в v0.6.4 (см. выше; перехват core-резолва не
+      понадобился — резолв на уровне server actions)
 
 Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-063--2026-07-16-этап-85-merge-двух-аккаунтов).
 
@@ -414,7 +433,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl: ;
+endSessionUrl:;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 

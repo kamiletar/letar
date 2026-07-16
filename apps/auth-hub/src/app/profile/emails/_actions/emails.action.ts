@@ -77,6 +77,15 @@ export async function verifyAddedEmail(token: string) {
     return { error: 'Срок действия ссылки истёк — запросите новую' }
   }
 
+  // Перепроверка на момент подтверждения: за 24ч жизни токена email мог стать
+  // чьим-то основным (обычная регистрация) — тогда подтверждать привязку нельзя,
+  // иначе резолв входа по linked-email конфликтовал бы с существующим аккаунтом.
+  const takenByUser = await prisma.user.findUnique({ where: { email: entry.email }, select: { id: true } })
+  if (takenByUser) {
+    await prisma.userEmail.delete({ where: { id: entry.id } })
+    return { error: 'Этот email уже используется другим аккаунтом' }
+  }
+
   await prisma.userEmail.update({
     where: { id: entry.id },
     data: { verified: true, verificationToken: null, verificationExpiresAt: null },

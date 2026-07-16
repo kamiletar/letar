@@ -1,6 +1,7 @@
 'use server'
 
 import { auth } from '@/lib/auth'
+import { resolveLoginEmail } from '@/lib/resolve-login-email'
 import { headers } from 'next/headers'
 
 interface LoginInput {
@@ -28,11 +29,17 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
   const reqHeaders = await headers()
   const redirectTo = data.callbackUrl || '/'
 
+  // Вход по любому подтверждённому linked-email (Этап 8.5): резолвим в основной
+  // адрес ДО Better Auth. resolved=true дополнительно защищает от дубль-регистрации
+  // ниже: без резолва «user not found» по linked-адресу уводил бы в trySignUp и
+  // молча создавал второй аккаунт с этим email.
+  const { email: loginEmail, resolved } = await resolveLoginEmail(data.email)
+
   try {
     // Попытка входа
     await auth.api.signInEmail({
       body: {
-        email: data.email,
+        email: loginEmail,
         password: data.password,
         callbackURL: redirectTo,
       },
@@ -74,6 +81,11 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
       lowerMessage.includes('user_not_found') ||
       lowerMessage.includes('invalid_credentials')
     ) {
+      // Email резолвился из linked-адреса → аккаунт точно существует, пароль неверный.
+      // trySignUp здесь создал бы дубль-аккаунт с linked-адресом в качестве основного.
+      if (resolved) {
+        return { success: false, error: 'Неверный пароль' }
+      }
       return await trySignUp(data, reqHeaders, redirectTo)
     }
 
