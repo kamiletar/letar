@@ -1019,7 +1019,13 @@ RESTART_EOF
     echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
     if [ "$RUN_SEED" = true ]; then
       echo -e "${YELLOW}🌱 Running db:seed for ${app}...${NC}"
-      if DATABASE_URL="$DATABASE_URL" nx run "${app}:db:seed"; then
+      # db:seed выполняется на хосте через `nx run` (НЕ docker exec — prod-образ standalone,
+      # без bun/prisma/seed.ts), поэтому нужен DATABASE_URL с localhost + маппинг порта, как на
+      # шаге build/migrate (строка ~680) — а не docker-internal hostname (${app}-db) из
+      # $DATABASE_URL выше: тот резолвится только изнутри docker-сети и с хоста даёт
+      # `getaddrinfo ESERVFAIL` (найдено 2026-07-16, деплой auth-hub --seed для aprel8008-prod).
+      SEED_DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${DB_PORT:-5432}/${DB_NAME}?schema=public"
+      if DATABASE_URL="$SEED_DATABASE_URL" nx run "${app}:db:seed"; then
         echo -e "${GREEN}✅ Seed completed for ${app}${NC}"
       else
         echo -e "${RED}⚠️  Seed failed for ${app} (deploy succeeded)${NC}"
