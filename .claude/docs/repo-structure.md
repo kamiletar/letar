@@ -70,6 +70,34 @@ git add .
 git commit -m "chore: bump all submodules"
 ```
 
+## infra/ — инфраструктурные каталоги и ручные скрипты
+
+Вне `apps/`/`libs/` — каталоги с деплой-конфигами и ручными скриптами, не входящими в Nx-граф.
+Каждый каталог с нетривиальной ручной операцией документирован собственным `README.md`:
+
+- [`infra/migrations/README.md`](/infra/migrations/README.md) — конвенции ручных скриптов
+  переноса данных (owner-миграции, merge аккаунтов): клиент БД, `DATABASE_URL`/`DRY_RUN`,
+  идемпотентность, транзакционность, аудит
+- [`infra/animatrona-relay/README.md`](/infra/animatrona-relay/README.md),
+  [`infra/animatrona-gateway/README.md`](/infra/animatrona-gateway/README.md),
+  [`infra/animatrona-pinner/README.md`](/infra/animatrona-pinner/README.md),
+  [`infra/animatrona-pinner3/README.md`](/infra/animatrona-pinner3/README.md),
+  [`infra/animatrona-pin-queue/README.md`](/infra/animatrona-pin-queue/README.md) — топология
+  приватной IPFS-сети (relay/gateway/пиннеры/pin-queue), деплой на конкретные серверы, PeerId
+- [`infra/agent-mail/README.md`](/infra/agent-mail/README.md) — установка сервера координации
+  агентов (MCP Agent Mail)
+- [`infra/canary/README.md`](/infra/canary/README.md) — периодический email-мониторинг
+  (Этап 0.7 корневого `PLAN.md`)
+- [`infra/staging/README.md`](/infra/staging/README.md) — синхронизация production БД на
+  staging (`sync-db-staging.sh`)
+- [`infra/redis/README.md`](/infra/redis/README.md) — общий Redis-инстанс для нескольких
+  приложений
+- [`infra/nginx-proxy-manager/README.md`](/infra/nginx-proxy-manager/README.md) — reverse-proxy
+  конфигурация
+
+`infra/media-server/` — полноценный сервис (не разовый скрипт), задокументирован отдельно в
+[media-server.md](/.claude/docs/media-server.md).
+
 ## Особенности
 
 ### .gitignore и Nx
