@@ -130,6 +130,20 @@ const clients = [
       'http://localhost:3020/sign-in',
     ].join(','),
   },
+  {
+    clientId: 'aprel8008-prod',
+    clientSecret: requireSecret('OIDC_APREL8008_SECRET'),
+    name: 'Aprel8008 (7 Сестёр) — админка',
+    type: 'web',
+    disabled: false,
+    skipConsent: false,
+    redirectUrls: [
+      'https://aprel8008.ru/api/auth/oauth2/callback/letar-auth',
+      'https://aprel8008.ru/sign-in',
+      'http://localhost:3023/api/auth/oauth2/callback/letar-auth',
+      'http://localhost:3023/sign-in',
+    ].join(','),
+  },
 ]
 
 async function seed() {

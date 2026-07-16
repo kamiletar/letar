@@ -110,9 +110,10 @@ ${baseURL}/api/auth/oauth2/callback/${providerId}
 
 ### Подключённые приложения
 
-| Приложение | clientId         | Домен                |
-| ---------- | ---------------- | -------------------- |
-| archetest  | `archetest-prod` | archetest.letar.best |
+| Приложение | clientId         | Домен                          |
+| ---------- | ---------------- | ------------------------------ |
+| archetest  | `archetest-prod` | archetest.letar.best           |
+| aprel8008  | `aprel8008-prod` | aprel8008.ru (только `/admin`) |
 
 ### Ключевые файлы
 
