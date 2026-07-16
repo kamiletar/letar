@@ -30,12 +30,18 @@ branching в `deploy-affected.sh` по opt-in label (пока dead code — ни
 - **`status`** — читает `.deploy-manifest/<app>.json` (история деплоев: `deployId`, `sha`,
   `imageTag`, `migrationsApplied[]`, `timestamp`), возвращает последнюю запись + возраст.
   Манифест — источник «предыдущего sha» для будущего `rollback` (сессия H).
-- **`rollout`** — docker-rollout-паттерн: `doctor` (гейт) → `docker compose up -d --no-recreate
-  --scale app=2` (новый контейнер детерминированно `<project>-app-2`, старый `<project>-app-1`
-  не трогается) → poll `docker inspect --format '{{.State.Health.Status}}'` нового контейнера до
-  `healthy` → `docker exec <npmContainerName> nginx -s reload` (резолвит alias на оба IP) →
-  `docker stop`+`docker rm` старого → повторный reload. Останавливается на первом неуспешном шаге
-  (`RolloutResult.steps[]`, каждый шаг — `{ id, ok, detail? }`). Пока НЕ пишет deploy-manifest
+- **`rollout`** — docker-rollout-паттерн: `doctor` (гейт) → резолв старого контейнера по
+  compose-лейблам (`docker ps --filter label=com.docker.compose...`, не по имени — до scale-up
+  существует ровно один) → `docker compose up -d --no-recreate --scale app=2` → повторный
+  такой же `docker ps`, из результата вычитается уже известное старое имя → это и есть новый
+  контейнер (**не** конвенция `<project>-app-2` — нумерация Compose не детерминирована: после
+  нескольких rollout-циклов старый контейнер может быть `-app-3`, тогда новый станет `-app-4`) →
+  poll `docker inspect --format '{{.State.Health.Status}}'` нового контейнера до `healthy` →
+  `docker exec <npmContainerName> nginx -s reload` (резолвит alias на оба IP) → `docker
+  stop`+`docker rm` старого → повторный reload. Останавливается на первом неуспешном шаге
+  (`RolloutResult.steps[]`, каждый шаг — `{ id, ok, detail? }`): `doctor` →
+  `resolve-old-container` → `scale-up` → `resolve-new-container` → `wait-healthy` → `smoke-test` →
+  `nginx-reload-1` → `stop-old` → `rm-old` → `nginx-reload-2`. Пока НЕ пишет deploy-manifest
   (свяжется в сессии H вместе с `rollback`).
 
 ## CLI

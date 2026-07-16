@@ -4,9 +4,12 @@
  * `<app>-app`, `proxy_next_upstream` прикрывает окно) → graceful stop+rm старого → повторный
  * reload.
  *
- * Имена контейнеров опираются на детерминированную нумерацию `docker compose --scale`:
- * `<project>-app-1` — единственная существующая реплика (index всегда 1 при scale=1),
- * `<project>-app-2` — новая, создаётся `--scale app=2 --no-recreate` (старая не трогается).
+ * Имена контейнеров НЕ опираются на нумерацию `docker compose --scale` (она не детерминирована:
+ * Compose выбирает следующий свободный индекс, а не всегда `-1`/`-2` — после нескольких
+ * rollout-циклов старый контейнер может быть `-app-3`, новый — `-app-4`). Вместо этого оба имени
+ * резолвятся через `docker ps --filter label=com.docker.compose...` — старое ДО scale-up (пока
+ * существует ровно один контейнер сервиса app), новое ПОСЛЕ scale-up (вычитанием уже известного
+ * старого имени из обновлённого списка).
  *
  * Отказывается работать без пройденного `doctor` — нет смысла катить контейнер, который не
  * пройдёт healthcheck/alias-проверки (compose ещё не мигрирован на rollout-профиль).
@@ -18,7 +21,8 @@ import { composePathForApp, runDoctor } from './doctor.js'
 import type { DeployEngineExecutor } from './executor.js'
 
 export interface RolloutOptions {
-  /** Имя compose-проекта (по умолчанию = app). Определяет имена контейнеров `<project>-app-N`. */
+  /** Имя compose-проекта (по умолчанию = app). Используется как лейбл-фильтр `docker ps` для
+   *  резолва реальных имён контейнеров (см. `resolveOldContainer`/`resolveNewContainer`). */
   projectName?: string
   /** Файл env для `docker compose --env-file` (по умолчанию `.env.docker`). */
   envFile?: string
@@ -56,16 +60,14 @@ function composeDir(app: string): string {
 }
 
 /**
- * Резолвит имя единственного существующего контейнера сервиса `app` ДО scale-up (пока их
- * ровно один) — по compose-лейблам, не по конвенции имени. Нужно потому что легаси-контейнеры,
- * созданные до перехода на rollout-профиль, могли иметь явный `container_name` (например
- * `time-app` без `-1`), а не `<project>-app-1` — та же категория бага, что чинили в dashboard
- * (`findContainerByName`, commit 8de3029).
+ * Список всех контейнеров сервиса `app` compose-проекта `projectName` — по compose-лейблам, не
+ * по конвенции имени (легаси-контейнеры, созданные до перехода на rollout-профиль, могли иметь
+ * явный `container_name` типа `time-app` без `-1` — та же категория бага, что чинили в dashboard,
+ * `findContainerByName`, commit 8de3029). Общий примитив для резолва и старого, и нового
+ * контейнера — разница только в том, до или после scale-up он вызывается и как парсится
+ * результат.
  */
-async function resolveOldContainer(
-  executor: DeployEngineExecutor,
-  projectName: string,
-): Promise<{ name?: string; error?: string }> {
+async function listAppContainers(executor: DeployEngineExecutor, projectName: string): Promise<string[]> {
   const res = await executor.runCommand('docker', [
     'ps',
     '-a',
@@ -76,7 +78,15 @@ async function resolveOldContainer(
     '--format',
     '{{.Names}}',
   ])
-  const names = res.stdout.split('\n').map((s) => s.trim()).filter(Boolean)
+  return res.stdout.split('\n').map((s) => s.trim()).filter(Boolean)
+}
+
+/** Резолвит имя единственного существующего контейнера сервиса `app` ДО scale-up (пока их ровно один). */
+async function resolveOldContainer(
+  executor: DeployEngineExecutor,
+  projectName: string,
+): Promise<{ name?: string; error?: string }> {
+  const names = await listAppContainers(executor, projectName)
   if (names.length !== 1) {
     return {
       error: `ожидался ровно 1 существующий контейнер сервиса app, найдено ${names.length}${
@@ -85,6 +95,29 @@ async function resolveOldContainer(
     }
   }
   return { name: names[0] }
+}
+
+/**
+ * Резолвит имя нового контейнера ПОСЛЕ scale-up — не по конвенции `<project>-app-2` (Compose
+ * выбирает следующий свободный индекс, не гарантированно 2 — после нескольких rollout-циклов
+ * старый контейнер мог остаться `-app-3`, тогда новый станет `-app-4`), а вычитанием уже
+ * известного `oldContainer` из обновлённого списка `docker ps`.
+ */
+async function resolveNewContainer(
+  executor: DeployEngineExecutor,
+  projectName: string,
+  oldContainer: string,
+): Promise<{ name?: string; error?: string }> {
+  const names = await listAppContainers(executor, projectName)
+  const candidates = names.filter((n) => n !== oldContainer)
+  if (candidates.length !== 1) {
+    return {
+      error: `ожидался ровно 1 новый контейнер сервиса app (кроме ${oldContainer}), найдено ${candidates.length}${
+        candidates.length > 0 ? `: ${candidates.join(', ')}` : ''
+      }`,
+    }
+  }
+  return { name: candidates[0] }
 }
 
 /**
@@ -162,7 +195,6 @@ export async function runRollout(
   const projectName = options.projectName ?? app
   const envFile = options.envFile ?? DEFAULT_ENV_FILE
   const dir = composeDir(app)
-  const newContainer = `${projectName}-app-2`
 
   const doctor = await runDoctor(executor, app)
   const failedRequired = doctor.checks.filter((c) => !c.passed && c.severity === 'required').map((c) => c.id)
@@ -176,8 +208,9 @@ export async function runRollout(
     return { app, ok: false, steps }
   }
 
-  // Резолвится ДО scale-up, пока существует ровно один контейнер сервиса app — после scale-up
-  // их два, и различить старый от нового по лейблам уже нельзя.
+  // Резолвится ДО scale-up, пока существует ровно один контейнер сервиса app — само по себе
+  // имя запоминается, чтобы после scale-up вычесть его из обновлённого списка и получить новый
+  // (см. resolveNewContainer ниже).
   const resolved = await resolveOldContainer(executor, projectName)
   steps.push({
     id: 'resolve-old-container',
@@ -210,13 +243,25 @@ export async function runRollout(
   )
   steps.push({
     id: 'scale-up',
-    description: `scale app=2 (новый контейнер ${newContainer})`,
+    description: 'scale app=2 (имя нового контейнера определит Docker Compose)',
     ok: scaleUp.exitCode === 0,
     detail: scaleUp.exitCode === 0 ? undefined : scaleUp.stderr.trim(),
   })
   if (scaleUp.exitCode !== 0) {
     return { app, ok: false, steps }
   }
+
+  const resolvedNew = await resolveNewContainer(executor, projectName, oldContainer)
+  steps.push({
+    id: 'resolve-new-container',
+    description: 'найден новый контейнер сервиса app, созданный scale-up',
+    ok: resolvedNew.name !== undefined,
+    detail: resolvedNew.error,
+  })
+  if (!resolvedNew.name) {
+    return { app, ok: false, steps }
+  }
+  const newContainer = resolvedNew.name
 
   const health = await waitHealthy(
     executor,

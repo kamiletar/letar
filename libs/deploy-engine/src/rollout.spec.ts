@@ -31,10 +31,14 @@ interface CommandCall {
 /**
  * In-memory executor с настраиваемыми ответами команд по префиксу argv (например
  * `['inspect', ...]` → healthy) и журналом вызовов для проверки последовательности шагов.
+ *
+ * `result` может быть статическим объектом или функцией `() => CommandResult` — функция нужна,
+ * когда одна и та же команда (например `docker ps` с теми же аргументами) вызывается дважды за
+ * прогон с разным реальным состоянием Docker (до и после scale-up) — см. `sequentialPsResults`.
  */
 function memoryExecutor(opts: {
   composeText?: string
-  commandResults?: Array<{ match: (args: string[]) => boolean; result: CommandResult }>
+  commandResults?: Array<{ match: (args: string[]) => boolean; result: CommandResult | (() => CommandResult) }>
 }): { executor: DeployEngineExecutor; calls: CommandCall[] } {
   const calls: CommandCall[] = []
   const files = new Map<string, string>()
@@ -45,7 +49,10 @@ function memoryExecutor(opts: {
     async runCommand(command, args, execOpts) {
       calls.push({ command, args, cwd: execOpts?.cwd })
       const found = opts.commandResults?.find((r) => r.match(args))
-      return found?.result ?? { stdout: '', stderr: '', exitCode: 0 }
+      if (!found) {
+        return { stdout: '', stderr: '', exitCode: 0 }
+      }
+      return typeof found.result === 'function' ? found.result() : found.result
     },
     async readFile(path) {
       return files.has(path) ? files.get(path)! : null
@@ -61,6 +68,24 @@ function memoryExecutor(opts: {
 }
 
 const noopSleep = () => Promise.resolve()
+
+/**
+ * Matcher для `docker ps`, возвращающий разные stdout на последовательные вызовы (первый — до
+ * scale-up, второй — после). Последний `output` повторяется, если вызовов больше, чем элементов.
+ */
+function sequentialPsResults(
+  ...outputs: string[]
+): { match: (args: string[]) => boolean; result: () => CommandResult } {
+  let call = 0
+  return {
+    match: (a) => a[0] === 'ps',
+    result: () => {
+      const stdout = outputs[Math.min(call, outputs.length - 1)]
+      call += 1
+      return { stdout, stderr: '', exitCode: 0 }
+    },
+  }
+}
 
 describe('runRollout', () => {
   it('отказывается работать без пройденного doctor', async () => {
@@ -78,7 +103,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -95,6 +120,7 @@ describe('runRollout', () => {
       'doctor',
       'resolve-old-container',
       'scale-up',
+      'resolve-new-container',
       'wait-healthy',
       'smoke-test',
       'nginx-reload-1',
@@ -159,7 +185,7 @@ describe('runRollout', () => {
     const { executor } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'starting\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -172,7 +198,13 @@ describe('runRollout', () => {
     )
 
     expect(result.ok).toBe(false)
-    expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'resolve-old-container', 'scale-up', 'wait-healthy'])
+    expect(result.steps.map((s) => s.id)).toEqual([
+      'doctor',
+      'resolve-old-container',
+      'scale-up',
+      'resolve-new-container',
+      'wait-healthy',
+    ])
     expect(result.steps.at(-1)?.detail).toContain('таймаут')
   })
 
@@ -180,7 +212,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
         {
           match: (a) => a[0] === 'exec' && a.includes('nginx'),
@@ -196,6 +228,7 @@ describe('runRollout', () => {
       'doctor',
       'resolve-old-container',
       'scale-up',
+      'resolve-new-container',
       'wait-healthy',
       'smoke-test',
       'nginx-reload-1',
@@ -208,7 +241,7 @@ describe('runRollout', () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
         {
           match: (a) => a[0] === 'exec' && a.includes('wget'),
@@ -224,6 +257,7 @@ describe('runRollout', () => {
       'doctor',
       'resolve-old-container',
       'scale-up',
+      'resolve-new-container',
       'wait-healthy',
       'smoke-test',
     ])
@@ -255,7 +289,7 @@ services:
     const { executor, calls } = memoryExecutor({
       composeText: NO_URL_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app-1\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -275,7 +309,7 @@ services:
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
       commandResults: [
-        { match: (a) => a[0] === 'ps', result: { stdout: 'time-app\n', stderr: '', exitCode: 0 } },
+        sequentialPsResults('time-app\n', 'time-app\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
       ],
     })
@@ -285,8 +319,59 @@ services:
     expect(result.ok).toBe(true)
     expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app')
     expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app')
-    // новый контейнер (по конвенции scale) не путается со старым (legacy-имя)
+    // новый контейнер резолвится вычитанием legacy-имени старого из списка, не по конвенции
     expect(calls.find((c) => c.args[0] === 'inspect')?.args).toContain('time-app-2')
+  })
+
+  it(
+    'резолвит новый контейнер по фактическому индексу Docker Compose, а не по хардкоду -app-2 '
+      + '(инцидент auth-hub: старый контейнер уже -app-3, scale-up создаёт -app-4)',
+    async () => {
+      const { executor, calls } = memoryExecutor({
+        composeText: READY_COMPOSE,
+        commandResults: [
+          sequentialPsResults('time-app-3\n', 'time-app-3\ntime-app-4\n'),
+          { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+        ],
+      })
+
+      const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+      expect(result.ok).toBe(true)
+      expect(result.steps.map((s) => s.id)).toContain('resolve-new-container')
+
+      // healthcheck и smoke-test бьют в реальный новый контейнер (-app-4), не в хардкод -app-2
+      expect(calls.find((c) => c.args[0] === 'inspect')?.args).toContain('time-app-4')
+      expect(calls.find((c) => c.args[0] === 'exec' && c.args.includes('wget'))?.args).toContain('time-app-4')
+
+      // старый (-app-3) останавливается и удаляется, не новый
+      expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-3')
+      expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app-3')
+    },
+  )
+
+  it('падает на resolve-new-container, если scale-up не создал новый контейнер', async () => {
+    // Post-scale ps возвращает только старый контейнер — scale-up формально ok, но реального
+    // нового контейнера нет (например, race condition или сбой Docker без ненулевого exit code).
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\n'),
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(false)
+    expect(result.steps.map((s) => s.id)).toEqual([
+      'doctor',
+      'resolve-old-container',
+      'scale-up',
+      'resolve-new-container',
+    ])
+    expect(result.steps.at(-1)?.detail).toContain('найдено 0')
+    // ни healthcheck, ни nginx reload, ни stop/rm — небезопасно продолжать, не зная новый контейнер
+    expect(calls.some((c) => c.args[0] === 'inspect' || c.args[0] === 'exec' || c.args[0] === 'stop')).toBe(false)
   })
 
   it('падает на resolve-old-container, если найдено 0 или >1 контейнеров сервиса app', async () => {
