@@ -25,10 +25,31 @@
       применена и на staging-БД), e2e прогнан через run_e2e — 10/10 зелёных (chromium),
       `lastStatus` обновлён. ⚠️ На staging нет `AUTH_GOOGLE_ID/SECRET` в `.env.staging` (заметка
       BlackCove) — текущий e2e Google OAuth не гоняет, донастроить при появлении таких тестов.
-- [ ] Кандидат в отдельную задачу: до hydration формы `/sign-in` сабмитятся нативным GET —
-      email+пароль утекают в URL (обнаружено при живой проверке; см. PLAN_COMPLETED v0.6.4)
+      Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-064--2026-07-16-этап-85-вход-по-любому-linked-email).
 
-Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-064--2026-07-16-этап-85-вход-по-любому-linked-email).
+## Бэклог — находки сессии v0.6.4 (2026-07-16, не в работе)
+
+- [ ] **🔴 Утечка пароля в URL до hydration** — `(auth)/sign-in/_components/login-form.tsx`:
+      форма без `method="post"`/`action` до гидрации React сабмитится нативным GET —
+      email+пароль попадают в URL (history, access-логи, Referer). Воспроизведено вживую.
+      Фикс: `method="post"` fallback на формах с паролем. ⚠️ **Кросс-приложенческое** — тот же
+      паттерн вероятен в aboi/dsperevod/driving-school; нужен аудит логин-форм монорепо +
+      правило в `.claude/docs/forms.md`.
+- [ ] **Хрупкий парсинг ошибок Better Auth** — `login.action.ts`: маршрутизация «вход vs
+      авторегистрация» держится на `message.includes('invalid')` и т.п. — смена текстов ошибок
+      в Better Auth молча уведёт пользователей в signup. Перейти на `error.status`/`body.code`.
+- [ ] **Hydration-нестабильность `/sign-in`** — консоль сыплет «Encountered a script tag while
+      rendering React component» (вероятно, Telegram-виджет), гидрация страницы флакает
+      (мешала и автоматизации при проверке). Разобраться; кандидат — грузить виджет через
+      `next/script`.
+- [ ] **Нет vitest-инфраструктуры** — известный пробел с Этапа 2 корневого PLAN;
+      `resolveLoginEmail` проверялся скриптом на живой dev-БД. Хелпер — идеальный первый
+      кандидат на unit-покрытие (см. `.claude/docs/unit-testing.md` — обязателен
+      tsconfig.spec.json).
+- [ ] **E2e не покрывает linked-email вход** — в auth-hub-e2e 10 smoke-тестов; нового сценария
+      нет. Нужен сид пользователя с подтверждённым `UserEmail` на staging-БД (порт 5455) +
+      спека «вход по linked-адресу → сессия primary». Также донастроить `AUTH_GOOGLE_ID/SECRET`
+      в `.env.staging`, если появятся OAuth-тесты.
 
 ## Текущий статус (ранее): v0.6.3 — Этап 8.5: merge двух аккаунтов ✅ (скрипт готов, прод-запуск не выполнялся)
 
