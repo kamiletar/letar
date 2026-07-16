@@ -68,7 +68,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form method="post" onSubmit={handleSubmit}>
       <Stack gap={4}>
         <Field.Root>
           <Field.Label>Email</Field.Label>

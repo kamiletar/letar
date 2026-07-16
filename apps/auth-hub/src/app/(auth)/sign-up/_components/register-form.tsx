@@ -55,7 +55,7 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form method="post" onSubmit={handleSubmit}>
       <Stack gap={4}>
         <Field.Root>
           <Field.Label>Имя</Field.Label>
