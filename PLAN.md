@@ -112,6 +112,27 @@
 > auth-hub ×3, aboi ×3, dsperevod ×3, svoichuzhie ×4); mandala/animatrona-tracker уже были на
 > `@letar/forms`, закрыты фиксом библиотеки. Typecheck зелёный, lint без новых ошибок. Детали
 > и коммиты — apps/auth-hub/PLAN.md «Бэклог».
+>
+> **✅✅ Тираж method=post задеплоен целиком, попутно найдено и закрыто ещё 3 бага
+> (2026-07-16):** (1) **`libs/deploy-engine/src/rollout.ts`** хардкодил имя нового контейнера
+> как `<project>-app-2`, вычисляя его ДО scale-up без проверки против реального состояния
+> Docker — Compose выбирает следующий свободный индекс, не гарантированно 2 (после нескольких
+> rollout-циклов старый контейнер был `-app-3`, новый стал `-app-4`); `wait-healthy` 5 минут
+> опрашивал несуществующее имя и падал по таймауту (инцидент на деплое auth-hub, BlackCove
+> вручную довёл rollout). Фикс — `resolveNewContainer()` резолвит новое имя ПОСЛЕ scale-up через
+> `docker ps`, вычитая уже известное старое (аналог `resolveOldContainer`); новый гейт
+> `resolve-new-container` (10 гейтов вместо 9). Regression-тест воспроизводит инцидент напрямую.
+> Подтверждено в бою на деплое svoichuzhie. Коммит `1e5e359`. (2) **`aboi`** — `next build`
+> ложно падал на TS-ошибке `rootDir` при импорте `@letar/forms` (internal TS-чекер Next.js не
+> полностью поддерживает project references) — фикс `typescript.ignoreBuildErrors: true`, тот
+> же паттерн, что уже в 7 других приложениях. Коммит `27af8d0`. (3) **`dsperevod`** —
+> `AUTH_ENCRYPTION_KEY` отсутствовал в проде целиком (ни в `.env.docker.enc`, ни в
+> `docker-compose.production.yml`) — сгенерирован через `openssl rand -hex 32`, добавлен в оба
+> обязательных места. Коммит `251b22c`. Отдельно — **`svoichuzhie`** зависание страницы у
+> пользователя оказалось клиентским Service Worker без таймаута сети (не сервером): подвисшее
+> TCP-соединение вешало fetch-event навечно, обычный хард-рефреш не спасал (SW продолжал
+> контролировать вкладку) — фикс `fetchWithTimeout()` (8с) с откатом на кэш. Коммит `a95e768`.
+> Все 4 приложения (auth-hub/aboi/dsperevod/svoichuzhie) в проде на актуальных коммитах.
 
 > **🔴 `svoichuzhie` — прод-баг, НЕ связанный с rollout (2026-07-14, BlackCove, msg #453):**
 > rollout-пилот безопасно откатился на гейте `wait-healthy` (без даунтайма, `nginx-reload-1` не
