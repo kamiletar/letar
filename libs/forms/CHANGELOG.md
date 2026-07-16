@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.2] - 2026-07-16
+
+### Fixed
+
+- **GET-утечка данных в URL до hydration:** `method="post"` на корневом `<form>` в `FormSimple` и
+  `FormWithApi` (`src/lib/declarative/form-root/`). Без гидрации React форма сабмитится нативным
+  GET — чувствительные поля (пароли и т.п.) попадают в URL/history/Referer/access-логи. Найдено
+  кросс-приложенческим аудитом логин-форм монорепо. Чисто аддитивный атрибут, без breaking changes.
+
 ## [1.4.0] - 2026-05-22 — Form as State Manager
 
 ### Added
