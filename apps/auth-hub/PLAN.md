@@ -17,7 +17,12 @@
       подтверждения (токен живёт 24ч; при конфликте привязка удаляется с ошибкой пользователю).
 - [x] Проверено вживую: вход по linked-адресу через UI → сессия primary-аккаунта; скрипт-матрица
       резолва (verified/unverified/primary/unknown/UPPERCASE) на dev-БД; дубль не создаётся.
-- [ ] Деплой v0.6.4 через BlackCove (linked-email вход пока только локально)
+- [x] Деплой v0.6.4 через BlackCove — ✅ выполнен (2026-07-16, msg #488, коммит `b7b8635`,
+      rollback-тег `auth-hub:b7b863568`, zero-downtime rollout на s2). Попутно применилась
+      миграция `20260715212241_add_user_email_multi_email` — т.е. v0.6.2 (self-service emails)
+      до этого деплоя на проде НЕ была, весь Этап 8.5 уехал одной пачкой. ⚠️ Предупреждение
+      гейта: e2e прогонялся на старом коммите (`6ee1751`) и старше 24ч — прогнать на актуальном
+      отдельно, если важно.
 
 ## Текущий статус (ранее): v0.6.3 — Этап 8.5: merge двух аккаунтов ✅ (скрипт готов, прод-запуск не выполнялся)
 
@@ -433,7 +438,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 
