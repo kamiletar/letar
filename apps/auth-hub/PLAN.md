@@ -29,12 +29,21 @@
 
 ## Бэклог — находки сессии v0.6.4 (2026-07-16, не в работе)
 
-- [ ] **🔴 Утечка пароля в URL до hydration** — `(auth)/sign-in/_components/login-form.tsx`:
+- [x] **🔴 Утечка пароля в URL до hydration — ЗАКРЫТ (2026-07-16)** — `(auth)/sign-in/_components/login-form.tsx`:
       форма без `method="post"`/`action` до гидрации React сабмитится нативным GET —
       email+пароль попадают в URL (history, access-логи, Referer). Воспроизведено вживую.
-      Фикс: `method="post"` fallback на формах с паролем. ⚠️ **Кросс-приложенческое** — тот же
-      паттерн вероятен в aboi/dsperevod/driving-school; нужен аудит логин-форм монорепо +
-      правило в `.claude/docs/forms.md`.
+      **Аудит монорепо подтвердил находку и расширил скоуп:** проблема оказалась не только
+      кросс-приложенческой, но и системной — оба корневых `<form>` в `@letar/forms`
+      (`FormSimple`, `FormWithApi`) тоже были без `method="post"`, т.е. риску подвержены
+      **все** приложения на библиотеке (включая driving-school), не только точечные raw-формы.
+      **Пофикшено `method="post"` в 15 местах:** `libs/forms` (2 корневых компонента — закрывает
+      driving-school и будущих потребителей), auth-hub (sign-in/sign-up/change-password),
+      aboi (sign-in/sign-up/reset-password), dsperevod (sign-in/sign-up/reset-password),
+      svoichuzhie (login/fanclub-join/2FA-подтверждение паролем ×2). mandala/animatrona-tracker
+      уже были на `@letar/forms` (закрыты фиксом библиотеки). Typecheck зелёный на всех
+      затронутых проектах; lint-ошибки в диффе — только pre-existing долг несвязанных файлов.
+      Коммиты: `8ea8b30` (forms), `29aaabd` (auth-hub), submodule-коммиты aboi `e475d5f`,
+      dsperevod `14d2c0b`, svoichuzhie `3a8703a`, bump SHA `b9eaa2a`.
 - [ ] **Хрупкий парсинг ошибок Better Auth** — `login.action.ts`: маршрутизация «вход vs
       авторегистрация» держится на `message.includes('invalid')` и т.п. — смена текстов ошибок
       в Better Auth молча уведёт пользователей в signup. Перейти на `error.status`/`body.code`.
