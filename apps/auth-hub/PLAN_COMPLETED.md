@@ -2,6 +2,60 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Версия 0.6.3 — 2026-07-16 (Этап 8.5: merge двух аккаунтов)
+
+### Скрипт: `infra/migrations/auth-hub-merge-accounts.ts`
+
+Продолжение §8.5 — self-service флоу нескольких email (v0.6.2) не покрывает случай, когда
+человек уже завёл два разных `User` (например, один раз через email/password, другой раз через
+Google OAuth с другим email). Реализован параметризованный ручной скрипт-инструмент (не UI, не
+server action) по прецеденту `infra/migrations/kami-owner-migration.ts`, но общего назначения:
+
+- **Параметры (env):** `CANONICAL_EMAIL` (остаётся), `DUPLICATE_EMAIL` (будет удалён),
+  `DRY_RUN` — **инверсия дефолта** относительно owner-миграций: без явного `DRY_RUN=0` ничего
+  не применяется. Merge необратим и затрагивает потенциально живые сессии, цена ошибки выше,
+  чем у owner-скриптов с предсказуемыми пустыми дублями.
+- **Клиент БД:** собственный `ZenStackClient` внутри скрипта (импорт схемы через относительный
+  путь), НЕ `apps/auth-hub/src/lib/db.ts` — `getEnhancedPrisma` заблокировал бы почти все
+  операции (`@@deny('all', true)` на нужных моделях), а `rawOrm`/`prisma` используют алиас
+  `@/generated/schema`, ненадёжно резолвящийся при запуске `bun run` вне tsconfig приложения.
+- **Перенос relations** (внутри одной `$transaction`): `Account` — по одной записи из-за
+  составного `@@unique([providerId, accountId])` (совпадение только `providerId` — не
+  конфликт, разные внешние аккаунты одного провайдера сосуществуют; полное совпадение
+  `providerId+accountId` физически невозможно на уровне БД, обработано как defensive dead-code);
+  `Passkey`/`OauthApplication`/`OauthAccessToken`/`TelegramToken`/`ConsentLog` — простой перенос
+  `userId`; `OauthConsent` — при смысловом дубле (оба давали consent одному клиенту) запись
+  duplicate удаляется; `ProjectProfile` (`@@unique([userId, projectSlug])`) — при конфликте
+  roles объединяются (union), metadata canonical имеет приоритет (потеря metadata duplicate —
+  warning в лог); `UserEmail` — простой перенос, email глобально уникален.
+- **Email самого duplicate** сохраняется как доп. подтверждённый `UserEmail` у canonical, по
+  прецеденту `setPrimaryEmail` в `emails.action.ts`.
+- **Roles** — union `canonical.roles` и `duplicate.roles`.
+- **Session НЕ переносятся** — `deleteMany` на обеих сторонах (canonical + duplicate),
+  принудительный re-login. Причина та же, что у `setPrimaryEmail`: `cookieCache` Better Auth
+  (5 мин TTL) может отдать устаревший email/userId в OIDC `id_token` ~10 downstream-приложениям.
+- **Аудит:** своей `AuditLog`-модели в auth-hub нет (в отличие от dsperevod/aboi) — заводить её
+  ради разового ручного скрипта признано непропорциональным. Вместо этого — structured
+  консоль-лог (`✅/⚠️/❌`) с инструкцией в докстринге перенаправлять stdout в файл (`tee`) при
+  реальном запуске.
+- **Бэкап** не встроен в скрипт (`pg_dump` — ответственность оператора) — явный текстовый
+  warning в консоли перед транзакцией плюс требование в докстринге.
+
+**Проверено вживую на локальной БД** (тестовые `User`/`Account`/`ProjectProfile`/`OauthConsent`
+и т.д. созданы напрямую SQL, вычищены после): dry-run корректно показал сводку без изменений;
+реальный merge прогнан с тремя edge-case сценариями — (1) `Account` с одинаковым `providerId`,
+разным `accountId` → оба сохранены без конфликта; (2) `ProjectProfile` с одинаковым
+`projectSlug` у обеих сторон → roles объединены `[reader, writer]`, metadata canonical
+сохранена; (3) `OauthConsent` дубль по одному клиенту → лишняя запись удалена; повторный запуск
+скрипта после успешного merge — идемпотентен (`Duplicate не найден`, exit 0, без изменений).
+
+**Прод-запуск не выполнялся** — нет конкретной пары существующих аккаунтов для склейки, скрипт
+ждёт первого реального кейса.
+
+**Коммиты:** `a0eb74a` (скрипт + PLAN.md), `47c5b2d` (docs, глобальный PLAN.md).
+
+---
+
 ## Версия 0.6.2 — 2026-07-16 (Этап 8.5: self-service несколько email на аккаунт)
 
 ### Фича: `/profile/emails/`
