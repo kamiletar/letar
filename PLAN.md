@@ -1,5 +1,19 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ SocialProvidersSettings извлечён в `@letar/auth` (2026-07-17, `libs/auth` v0.11.0):**
+> UI self-service Tier2 OAuth-ключей (список + форма + server actions CRUD) продублировался в
+> третий раз (dsperevod → aboi → driving-school, см. запись ниже) — извлечён в
+> `SocialProvidersList`/`SocialProviderForm` (`@letar/auth/client`, чистый React без
+> `@letar/forms` — тот же компромисс, что и у `AuthModeSettings`) + `createSocialProviderActions`
+> (`@letar/auth/server`, структурная типизация — не завязано на конкретный Prisma-клиент raw/
+> ZenStack-enhanced или сигнатуру auth-guard `requireAdmin`/`requireOwner`). Добавлен
+> `tryGetEncryptionKey()` — не бросает, возвращает `null` — обобщение graceful-degradation
+> паттерна driving-school для будущих Tier2-приложений. Все три приложения (dsperevod v0.6.3, aboi
+> v0.25.2, driving-school v0.238.1) переведены на общий компонент, поведение не изменилось.
+> Проверено скриптами напрямую на dev-БД каждого приложения (encrypt→store→decrypt round-trip,
+> access-policy non-admin/non-owner, CRUD) — без похода в браузер (dev-session роут driving-school
+> сломан, чинится отдельной параллельной сессией), typecheck/lint всех 4 проектов зелёные.
+>
 > **✅ Этап 8 — social-providers UI перенесён на driving-school (2026-07-17, v0.238.0):**
 > `/owner/settings/social-providers/` — self-service редактирование `clientId`/`clientSecret`
 > Google/VK/Yandex (модель `SocialProvider`, `@@allow('all', auth().isOwner)`, AES-256-GCM at-rest),
