@@ -37,9 +37,11 @@ export { createSessionHelpers, type AuthInstance } from './session'
 export {
   createDevSessionRoute,
   createLogoutAction,
+  createRoleGuards,
   type CreateDevSessionRouteOptions,
   type DevSessionPrismaClient,
   type LogoutActionOptions,
+  type RoleGuardOptions,
 } from './factories'
 
 // Auth factory (Этап 1.5 + Этап 8)

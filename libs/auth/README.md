@@ -182,10 +182,10 @@ export const auth = createAuth({
 
   // OAuth-провайдеры настраиваются ОДИН РАЗ для всех приложений монорепо
   socialProviders: {
-    ...(process.env.AUTH_GOOGLE_ID &&
-      process.env.AUTH_GOOGLE_SECRET && {
-        google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
-      }),
+    ...(process.env.AUTH_GOOGLE_ID
+      && process.env.AUTH_GOOGLE_SECRET && {
+      google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
+    }),
     // github, facebook, vk — аналогично
   },
 
@@ -416,10 +416,10 @@ model SocialProvider {
 ```
 
 Полный вертикальный срез (модель + шифрование + admin UI со списком/созданием/редактированием +
-server actions) — [`apps/dsperevod/src/app/(admin)/admin/social-providers/`](<../../apps/dsperevod/src/app/(admin)/admin/social-providers/>).
+server actions) — [`apps/dsperevod/src/app/(admin)/admin/social-providers/`](../../apps/dsperevod/src/app/(admin)/admin/social-providers/).
 Компаньон — UI выбора Tier 1 (`hub-client`) / Tier 2 с показом рисков (§2.3) и informed-consent
 запросом в `AuditLog`, **не автоматизирующий сам переход** (смена режима = миграция identity, не
-рантайм-флаг): [`apps/dsperevod/.../admin/settings/auth-mode/`](<../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/>).
+рантайм-флаг): [`apps/dsperevod/.../admin/settings/auth-mode/`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/).
 
 > ⚠️ Ограничение: `social.source: 'db'` сериализует только `clientId`/`clientSecret` для нативных
 > `socialProviders` Better Auth. Провайдеры через `genericOAuth`-плагин с кастомным `getUserInfo`
@@ -495,7 +495,7 @@ const { getSession, getCurrentUser } = createSessionHelpers<Session>(auth)
 
 const { requireAuth, requireRole, requireAdmin } = createAuthGuards(
   getSession,
-  (session) => session.user as SessionUser
+  (session) => session.user as SessionUser,
 )
 
 const { isAuthenticated, hasRole, isAdmin } = createAuthChecks(getCurrentUser)
@@ -577,6 +577,69 @@ export function OnlyFor(props: Omit<OnlyForProps<UserRole>, 'session' | 'isPendi
 - `isAuthenticated()` — проверка авторизации
 - `hasRole(roles)` — проверка роли
 - `isAdmin()` — проверка роли ADMIN
+
+> ⚠️ **`createAuthGuards`/`createAuthChecks` типизированы под одиночное поле `user.role: string`.**
+> На практике ни одно hub-client приложение монорепо так роли не хранит — везде используется
+> `additionalFields: { roles: { type: 'string[]', ... } }` (массив). Для этого паттерна используй
+> **`createRoleGuards`** ниже, а не эти две функции.
+
+#### `createRoleGuards(getSession, getUserFromSession, options?)`
+
+Guard-функции для приложений с массивом ролей (`user.roles: TRole[]`) — реальный паттерн всех
+hub-client приложений (kami, auth-hub, aprel8008 и др.). Объединяет то, что раньше каждое
+приложение копировало вручную в `lib/auth.ts`: `hasRole`/`isAdmin`/`requireAuth`/`requireAdmin`
+с DB-фолбэком на случай, когда `additionalFields` не попали в cookieCache Better Auth.
+
+```typescript
+// lib/auth.ts
+import { createAuth, createRoleGuards, createSessionHelpers } from '@letar/auth/server'
+
+export const auth = createAuth({
+  mode: 'hub-client',
+  /* ... */
+  user: { additionalFields: { roles: { type: 'string[]', defaultValue: ['USER'], required: false } } },
+})
+
+export type Session = typeof auth.$Infer.Session
+export type SessionUser = Session['user'] & { roles: UserRole[] }
+export type SessionWithRoles = { session: Session['session']; user: SessionUser }
+
+const { getSession: _getSession } = createSessionHelpers<Session>(auth)
+
+export async function getSession(): Promise<SessionWithRoles | null> {
+  return (await _getSession()) as SessionWithRoles | null
+}
+
+export const { getCurrentUser, hasRole, isAdmin, requireAuth, requireRole, requireAdmin } = createRoleGuards<
+  SessionWithRoles,
+  SessionUser,
+  UserRole
+>(getSession, (session) => session.user, {
+  refetchRoles: async (userId) => {
+    const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { roles: true } })
+    return dbUser?.roles ?? []
+  },
+})
+```
+
+Возвращает:
+
+- `getCurrentUser()` — текущий пользователь или `null`
+- `hasRole(role | role[])` — проверка роли(ей) с DB-фолбэком через `refetchRoles`
+- `isAdmin()` — shortcut для `hasRole('ADMIN')`
+- `requireAuth()` — требует сессию, иначе редирект на `signInUrl`; возвращает `{ session, user }`
+- `requireRole(role | role[])` — требует роль(и), иначе редирект на `forbiddenUrl`
+- `requireAdmin()` — shortcut для `requireRole('ADMIN')`
+
+Опции (`RoleGuardOptions`):
+
+| Опция          | Тип                                    | По умолчанию | Описание                                                             |
+| -------------- | -------------------------------------- | ------------ | -------------------------------------------------------------------- |
+| `refetchRoles` | `(userId: string) => Promise<TRole[]>` | —            | DB-фолбэк, если `user.roles` пуст (cookieCache без additionalFields) |
+| `signInUrl`    | `string`                               | `/sign-in`   | Редирект для неавторизованных                                        |
+| `forbiddenUrl` | `string`                               | `/`          | Редирект для авторизованных без нужной роли                          |
+
+> Эталон полного среза: [`apps/aprel8008/src/lib/auth.ts`](../../apps/aprel8008/src/lib/auth.ts).
 
 #### `createLogoutAction(auth, options?)`
 
@@ -797,7 +860,9 @@ export default async function AuthModeSettingsPage() {
 export async function requestAuthModeMigration(acknowledgedRisks: boolean) {
   const user = await requireAdmin()
   if (!acknowledgedRisks) return { error: 'Нужно подтвердить ознакомление с рисками перехода' }
-  await db.auditLog.create({ data: { action: 'REQUEST_AUTH_MODE_MIGRATION', userId: user.id, /* ... */ } })
+  await db.auditLog.create({
+    data: { action: 'REQUEST_AUTH_MODE_MIGRATION', userId: user.id /* ... */ },
+  })
   revalidatePath('/admin/settings/auth-mode/')
   return { data: null }
 }
@@ -805,15 +870,15 @@ export async function requestAuthModeMigration(acknowledgedRisks: boolean) {
 
 #### Props AuthModeSettings
 
-| Prop              | Тип                                                             | Описание                                                       |
-| ------------------ | --------------------------------------------------------------- | --------------------------------------------------------------- |
-| `currentModeLabel` | `string`                                                         | Ярлык текущего режима, например `"Tier 2 — Standalone (свои ключи)"` |
-| `tier2Points`      | `string[]`                                                       | Пункты карточки «Текущий выбор» (Tier 2)                        |
-| `tier1Points`      | `{ text: string; emphasized?: boolean }[]`                       | Пункты карточки «Альтернатива» (Tier 1); `emphasized` — выделить оранжевым |
-| `requests`         | `{ id, name: string \| null, email, createdAt: Date }[]`         | История запросов, уже отсортированная по убыванию даты          |
-| `onRequest`        | `(acknowledgedRisks: boolean) => Promise<{error?} \| {data:null}>` | Server action — фиксирует informed-consent запрос                |
-| `successMessage?`  | `string`                                                         | Текст алерта после успешной фиксации (переопределить для доп. рисков — например VK/Yandex у driving-school) |
-| `footer?`          | `ReactNode`                                                      | Доп. контент под таблицей (например ссылка на общий журнал аудита) |
+| Prop               | Тип                                                                | Описание                                                                                                    |
+| ------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `currentModeLabel` | `string`                                                           | Ярлык текущего режима, например `"Tier 2 — Standalone (свои ключи)"`                                        |
+| `tier2Points`      | `string[]`                                                         | Пункты карточки «Текущий выбор» (Tier 2)                                                                    |
+| `tier1Points`      | `{ text: string; emphasized?: boolean }[]`                         | Пункты карточки «Альтернатива» (Tier 1); `emphasized` — выделить оранжевым                                  |
+| `requests`         | `{ id, name: string \| null, email, createdAt: Date }[]`           | История запросов, уже отсортированная по убыванию даты                                                      |
+| `onRequest`        | `(acknowledgedRisks: boolean) => Promise<{error?} \| {data:null}>` | Server action — фиксирует informed-consent запрос                                                           |
+| `successMessage?`  | `string`                                                           | Текст алерта после успешной фиксации (переопределить для доп. рисков — например VK/Yandex у driving-school) |
+| `footer?`          | `ReactNode`                                                        | Доп. контент под таблицей (например ссылка на общий журнал аудита)                                          |
 
 > Полные примеры: [`apps/dsperevod`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/page.tsx),
 > [`apps/aboi`](../../apps/aboi/src/app/[locale]/admin/settings/auth-mode/page.tsx),
@@ -871,4 +936,4 @@ socialProviders: {
 
 ---
 
-**Последнее обновление:** 2026-07-16 | **@letar/auth** 0.9.0 | **Better Auth** 1.6.x
+**Последнее обновление:** 2026-07-17 | **@letar/auth** 0.10.0 | **Better Auth** 1.6.x
