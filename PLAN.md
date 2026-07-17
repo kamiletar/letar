@@ -1,5 +1,26 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Этап 8 — social-providers UI перенесён на driving-school (2026-07-17, v0.238.0):**
+> `/owner/settings/social-providers/` — self-service редактирование `clientId`/`clientSecret`
+> Google/VK/Yandex (модель `SocialProvider`, `@@allow('all', auth().isOwner)`, AES-256-GCM at-rest),
+> ранее сознательно пропущено (запись 2026-07-16 ниже) из-за риска сломать боевой VK/Yandex-вход.
+> Решение: `lib/auth.ts` мержит DB-провайдеров (приоритет) с существующими env-переменными
+> (fallback) через `resolveCreds()` — кастомные `getUserInfo`-колбэки (день рождения/пол/телефон) и
+> `databaseHooks.account.create.after` остаются захардкожены без изменений, DB-loader покрывает
+> только сами ключи, не колбэки. **Graceful degradation** (архитектурное отличие от aboi/dsperevod):
+> `AUTH_ENCRYPTION_KEY` не required fail-fast — если не задан или чтение БД падает, приложение тихо
+> откатывается на env-провайдеров вместо падения (проверено живым рестартом dev-сервера без ключа).
+> Строгий fail-fast здесь недопустим — driving-school уже в проде работает на env-провайдерах,
+> случайный обрыв ключа не должен ронять боевой соц-вход мультитенантной платформы. Проверено
+> скриптом напрямую на dev-БД (не через dev-session — см. находку ниже): encrypt→store→decrypt
+> round-trip не хранит plaintext, access-policy блокирует non-owner чтение, CRUD корректен.
+> `AUTH_ENCRYPTION_KEY` сгенерирован (`openssl rand -hex 32`, отдельный для dev/prod) и добавлен в
+> `.env.local`+`.env.docker`(`.env.docker.enc` пересобран)+`docker-compose.production.yml` — деплой
+> через BlackCove ещё не запрошен. **Побочно найден баг (вынесен отдельной задачей, не в скоупе):**
+> `/api/auth/dev-session` у driving-school падает с 500 (`TypeError: Cannot set property message of
+> which has only a getter`) — предсуществующий, не связан с этим изменением, блокирует будущие
+> e2e/preview через dev-session механизм.
+>
 > **✅ Тираж hub-client на aprel8008 (2026-07-16):** админка для владелицы (управление фото баз) +
 > вход через Ключницу, `createAuth({ mode: 'hub-client' })`. Роль ADMIN — простой whitelist по
 > email через `databaseHooks.user.create.after` (не `createAuthGuards`/`requireRole` из
@@ -177,8 +198,8 @@
 > 4 дня нет вообще. **Реальная причина:** `/etc/hosts` внутри контейнера резолвит `localhost` в
 > `::1` (IPv6) РАНЬШЕ `127.0.0.1` — а Next.js слушает только `0.0.0.0` (IPv4), IPv6-listener'а
 > нет. `busybox wget` (healthcheck-команда) не делает fallback на IPv4 → `wget
-> http://localhost:3021/...` стабильно получал `connection refused`, хотя `wget
-> http://127.0.0.1:3021/...` отвечал мгновенно. Внешний трафик через nginx идёт по отдельному
+http://localhost:3021/...` стабильно получал `connection refused`, хотя `wget
+http://127.0.0.1:3021/...` отвечал мгновенно. Внешний трафик через nginx идёт по отдельному
 > сетевому пути (IPv4 к опубликованному порту контейнера), не завязанному на `/etc/hosts` —
 > отсюда парадокс «unhealthy 4 дня, но сайт реально работает у пользователей» (подтверждено
 > Ками вживую в браузере). **Фикс (commit `0b1a017` submodule + `8466afc` letar):** healthcheck
@@ -238,7 +259,7 @@
 > `deploy-affected.sh` делает `source .env.docker` при сборке, запятая+пробел ломали
 > bash-парсинг (`ул.,: command not found`, exit 127). Прод не пострадал (падение до докера).
 > **Пофикшено (RubyBear, свой SOPS-ключ):** `.env.docker.enc` → `CDEK_FROM_ADDRESS="Рождественская
-> ул., 8"` (commit `bc8b595` submodule + `5c2a333` letar), проверено локально — `source` парсит
+ул., 8"` (commit `bc8b595` submodule + `5c2a333` letar), проверено локально — `source` парсит
 > чисто. Повторный запрос отправлен (msg #451) — **ждёт выполнения**.
 > ⚠️ Побочная находка (не блокер, не связана с этой миграцией): `svoichuzhie-app` в текущем
 > проде уже 4 дня в статусе `unhealthy` — существовало до попытки деплоя, требует отдельного
@@ -263,10 +284,10 @@
 >
 > **`form-example` rollout-пилот 🟡 ЗАБЛОКИРОВАН, root cause найден и пофикшен (2026-07-15,
 > BlackCove, msg #467):** деплой упал на шаге миграций (`P1001: Can't reach database server at
-> localhost:5432`) — `form-example-db`, единственная БД в монорепо без `ports:` в compose;
+localhost:5432`) — `form-example-db`, единственная БД в монорепо без `ports:` в compose;
 > `deploy-affected.sh` мигрирует с хоста через `localhost:$DB_PORT`, слушать было нечего. Старый
 > контейнер не тронут, риска не было. **Пофикшено (commit `d0c5cfc`):** добавлен `ports:
-> '5443:5432'` (первый свободный порт, проверены все занятые 5434–5455) в
+'5443:5432'` (первый свободный порт, проверены все занятые 5434–5455) в
 > `apps/form-example/docker-compose.production.yml`. Повторный запрос деплоя отправлен BlackCove
 > (thread `deploy-form-example-mandala-rollout-J`) — **ждёт выполнения**. Известный некритичный
 > баг `/products ECONNREFUSED` не проверялся — деплой упал раньше, на миграциях.
@@ -281,16 +302,16 @@
 > **`form-example` rollout-пилот 🟡 root cause #3, архитектурный пробел (2026-07-15, BlackCove,
 > msg #472):** пароль починился, деплой дошёл до реальной проверки миграций — упал на `P3005`
 > (`The database schema is not empty` / `No migration found`). `apps/form-example/prisma/
-> migrations/` **никогда не существовала в репозитории** — схема на проде была накатана через
+migrations/` **никогда не существовала в репозитории** — схема на проде была накатана через
 > `prisma db push`, а не `prisma migrate`; `deploy-affected.sh` безусловно вызывает `migrate
-> deploy`, который требует историю миграций против непустой БД (baseline). Не архитектурная
+deploy`, который требует историю миграций против непустой БД (baseline). Не архитектурная
 > находка BlackCove (не его профиль трогать состояние прод-БД) — решение пользователя: baseline
 > вместо исключения из миграционного пути (риск молчаливого пропуска будущих реальных
 > schema-изменений, прецедент driving-school commit `8e34f17`).
 > **✅ Baseline-миграция сгенерирована и провалидирована (2026-07-15):** локальный dev reset
 > (временный Postgres-контейнер, не трогал `docker-compose.yml`) → `prisma migrate dev --name
-> init --create-only` из текущей `prisma/schema.prisma` → `prisma/migrations/
-> 20260715163011_init/migration.sql` (2 таблицы `Product`/`Contact`, 2 enum). Применена к чистой
+init --create-only` из текущей `prisma/schema.prisma` → `prisma/migrations/
+20260715163011_init/migration.sql` (2 таблицы `Product`/`Contact`, 2 enum). Применена к чистой
 > тестовой БД через `migrate deploy` — прошла без ошибок, `migrate status` подтвердил «up to
 > date». Закоммичена в репо. **На проде миграцию НЕ применять DDL-ом** (схема там уже такая) —
 > нужен `prisma migrate resolve --applied 20260715163011_init` перед повторным `migrate deploy`,
@@ -298,7 +319,7 @@
 >
 > **✅✅ `form-example` rollout-пилот ЗАВЕРШЁН — ТИРАЖ §18.6 ЗАКРЫТ ПОЛНОСТЬЮ (2026-07-15,
 > BlackCove, msg #474/#475, thread `deploy-form-example-mandala-rollout-J`):** `migrate resolve
-> --applied 20260715163011_init` выполнен на прод-БД (без DDL, только пометка в
+--applied 20260715163011_init` выполнен на прод-БД (без DDL, только пометка в
 > `_prisma_migrations`), `migrate status` подтвердил «up to date». Четвёртая попытка деплоя
 > прошла целиком — все 9 гейтов зелёные, `form-example-app-2 healthy`, `nginx-reload` ×2,
 > `form-example-app-1` убран. **19/~19 SERVER_APPS на rollout** (`form-example` + `mandala` —
@@ -315,13 +336,13 @@
 > удаления — все 200, ни одного сбоя связности за всю миграцию. Подтверждено повторной проверкой
 > `docker network ls` на s2 (2026-07-15, 17:32) — сети в списке нет. Ранее было расхождение (msg
 > #477/#478): CalmBasin утверждал, что сеть уже пуста и не используется, но `docker network
-> inspect` на тот момент показал обратное (~28 контейнеров, включая nginx-proxy-manager) — отсюда
+inspect` на тот момент показал обратное (~28 контейнеров, включая nginx-proxy-manager) — отсюда
 > двухэтапная (сначала диагностика, потом безопасная миграция) процедура удаления.
 
 > **➡️ Следующий старт:** тираж §18.6 Сессии J и удаление `premium-network` полностью завершены.
 > Кандидаты: (1) `driving-school` — `@socket.io/redis-adapter` для Socket.IO перед включением
 > rollout для этого сервиса (§10, отложено пользователем, не блокер); (2) Этап 1.5 `createAuth
-> (profile)` или Этап 8 (соц-секреты per-владелец) — следующий содержательный этап Фазы B/C.
+(profile)` или Этап 8 (соц-секреты per-владелец) — следующий содержательный этап Фазы B/C.
 
 > **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
 > `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
@@ -388,7 +409,7 @@
 > `driving-school-websocket-rollout-check`, msg #422, решение пользователя):** живой NPM-конфиг
 > (`proxy_host/9.conf`) для WebSocket-порта `3004` резолвит `driving-school-app` в IP один раз при
 > старте воркера (нет sticky-балансировки, нет `upstream`-блока). Хуже — `apps/driving-school/
-> src/app/api/socket/route.ts` **не использует Redis-адаптер** (`@socket.io/redis-adapter`),
+src/app/api/socket/route.ts` **не использует Redis-адаптер** (`@socket.io/redis-adapter`),
 > Socket.IO держит комнаты in-memory per-process. Итог: в rollout-окне с 2 живыми репликами
 > сообщения чата между собеседниками на разных репликах **молча теряются**, без ошибки на
 > клиенте — не просто краткий обрыв, а тихая потеря данных. Один контейнер обслуживает и HTTP
@@ -448,7 +469,7 @@
 >
 > **✅ Исправлено (2026-07-14, driving-school v0.236.1, commit `b320bb4`):** ленивый singleton
 > `getGoogleCalendarService()` вместо эагерного `export const`. Проверено локально: `nx build
-> driving-school` с намеренно пустыми `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — чисто. Попросил
+driving-school` с намеренно пустыми `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — чисто. Попросил
 > BlackCove повторить staging-деплой.
 >
 > **➡️ Следующий старт:** (1) `aboi` уже задеплоен (см. исправленную запись выше) — реально
@@ -536,7 +557,7 @@
 > BlackCove проверил не только HTTP 200, но и реальные интеграции: СДЭК-токен получен, webhook
 > `https://neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок в логах `aboi-app-2`; каталог
 > `/catalog/` реально отдаёт контент (106KB HTML, цены в ₽, не пустая страница). `depends_on:
-> service_healthy` снова сработал корректно (как в dsperevod). Ни одной ошибки. **Обнаружено
+service_healthy` снова сработал корректно (как в dsperevod). Ни одной ошибки. **Обнаружено
 > задним числом (2026-07-14, RubyBear) — PLAN.md не обновлялся после успеха, аналогично сессии
 > №73 с aprel8008: не доверять статусу «ждёт выполнения» в PLAN.md без проверки inbox.**
 
@@ -567,7 +588,7 @@
 > deploy-request BlackCove (msg #377, thread `deploy-kami-network-rename`, ack required) на
 > фактическое пересоздание `kami-network` на s2 и передеплой всех затронутых приложений.
 > **Ответ получен (msg #378):** шаги 1–2 выполнены недеструктивно — `docker network create
-> kami-network`, все 44 контейнера с `premium-network` подключены и к `kami-network` (без
+kami-network`, все 44 контейнера с `premium-network` подключены и к `kami-network` (без
 > отключения от старой, zero-downtime — каждый контейнер временно в обеих сетях). Шаги 3–5
 > (передеплой ~20 приложений на алиас `kami-network` + удаление старой `premium-network` в конце)
 > BlackCove катит партиями с проверкой после каждой — см. записи `letar-landing`/
@@ -666,7 +687,7 @@
 > **➡️ Следующий старт:** (1) проверить статус ротации `aprel8008` у BlackCove — если ответа всё
 > ещё нет, повторно запросить; (2) продолжить тираж §18.6 Сессии J (следующие кандидаты:
 > `pravda`, `kami-key-the-landing`, `letar-landing`, …); (3) когда будет время — `form-example
-> /products`, если кто-то захочет копнуть глубже Prisma 7 + Turbopack.
+/products`, если кто-то захочет копнуть глубже Prisma 7 + Turbopack.
 
 > **Сессия №72 (2026-07-12, §18.6 Сессия J — `form-example` обычный деплой закрыт, найден
 > отдельный баг Prisma/`ECONNREFUSED` на `/products`):**
@@ -675,7 +696,7 @@
 > (`098eb75`, IvoryPrairie) + вынос захардкоженного `POSTGRES_PASSWORD` в `.env.docker.enc`
 > (`df5602179`, BronzeForge). Ротация пароля требовала ручного шага **до** пересборки: достала
 > новый `POSTGRES_PASSWORD` из расшифрованного `.env.docker.enc`, выполнила `ALTER USER forms
-> WITH PASSWORD ...` на уже работающем `form-example-db`, только потом обычный деплой (пересоздал
+WITH PASSWORD ...` на уже работающем `form-example-db`, только потом обычный деплой (пересоздал
 > `db`+`app` с новым паролем без потери доступа). Подтвердила подключение вручную через `psql`.
 > `letar.rollout` остаётся выключенным (по плану BronzeForge/IvoryPrairie) — supervised-пилот
 > отдельным шагом позже.
@@ -2771,7 +2792,7 @@ useEffect(() => {
     `SocialProvider` (`@@allow('all', auth().role == 'ADMIN')`, AES-256-GCM secret), страница
     `/admin/social-providers/` (список + create/edit/delete, `Alert` с рисками владения),
     `lib/auth.ts` переведён на `createAuthAsync` с `social: { source: 'db', load:
-    createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелёные, dev-сервер стартует с
+createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелёные, dev-сервер стартует с
     top-level `await createAuthAsync(...)` без ошибок, sign-up/sign-in через API работают,
     `requireAdmin` → ZenStack-запрос → рендер страницы подтверждены curl'ом с реальной сессией,
     encrypt→store→loader→decrypt round-trip проверен отдельным скриптом (значение в БД не
@@ -2782,14 +2803,24 @@ useEffect(() => {
     для нативных `socialProviders`, не сложные колбэки; миграция `driving-school` на DB-backed
     Tier 2 сознательно не делалась в этой сессии — риск сломать боевой VK/Yandex-вход.
 - ✅ **Миграция auth-hub на `createAuth({ mode: 'hub-provider' })`** — выполнено (сессия №33). Вынести захардкоженные OIDC-секреты auth-hub в secret-store (Этап 0.4) — остаётся.
+- ✅ **Тираж на aboi (2026-07-15)** — оба UI перенесены целиком (`/admin/social-providers/` +
+  `/admin/settings/auth-mode/`), см. запись в шапке плана.
+- ✅ **Тираж social-providers на driving-school (2026-07-17, v0.238.0)** — `/owner/settings/
+  social-providers/`, ранее сознательно пропущенный из-за Yandex/VK кастомных `getUserInfo`.
+  Решение: DB-провайдеры мержатся с env-fallback в `lib/auth.ts` через `resolveCreds()`, кастомные
+  колбэки/`databaseHooks` не тронуты — DB-loader покрывает только `clientId`/`clientSecret`, не
+  логику обогащения профиля. **Graceful degradation** — `AUTH_ENCRYPTION_KEY` не fail-fast (в
+  отличие от aboi/dsperevod): при отсутствии ключа или ошибке чтения БД приложение откатывается на
+  env-провайдеров вместо падения (боевая мультитенантная платформа, случайный обрыв ключа не должен
+  ронять соц-вход). Подробности — запись в шапке плана и `apps/driving-school/CHANGELOG.md`
+  (v0.238.0).
 - **✓ DoD:** ✅ коммерс может в админке увидеть Tier 1/Tier 2 с показом рисков и зафиксировать
-  informed-consent выбор (пилот dsperevod, `/admin/settings/auth-mode/`; сам переход на Tier 1 —
-  не самообслуживание, требует разработчика — см. запись выше); ✅ Tier 2-секреты шифруются at-rest
-  и подхватываются `createAuth()` (пилот dsperevod); ✅ auth-hub работает на фабрике; ✅ нет
-  строковых секретов в коде нового пути. **Остаётся:** тираж обоих UI (соц-провайдеры + выбор
-  режима) на другие Tier 2 приложения (aboi, driving-school — с оговоркой про Yandex/VK
-  кастомные колбэки); реальное исполнение Tier 1-перехода как отдельная задача класса §8.5, когда
-  появится первый реальный запрос.
+  informed-consent выбор (пилот dsperevod, тираж aboi/driving-school, `/admin(или /owner)/settings/
+  auth-mode/`; сам переход на Tier 1 — не самообслуживание, требует разработчика); ✅ Tier 2-секреты
+  шифруются at-rest и подхватываются `createAuth()`/вручную-мержатся (dsperevod/aboi/driving-school);
+  ✅ auth-hub работает на фабрике; ✅ нет строковых секретов в коде нового пути; ✅ оба UI перенесены
+  на все Tier 2 приложения монорепо (dsperevod эталон, aboi, driving-school). **Остаётся:** реальное
+  исполнение Tier 1-перехода как отдельная задача класса §8.5, когда появится первый реальный запрос.
 - **Зависимости:** после auth-унификации (этапы 1, **1.5**, 2–7). Самостоятельный крупный трек.
 - ✅ **Побочная находка ЗАКРЫТА (2026-07-15/16, коммит `ffd845b`):** локальный
   `apps/dsperevod/prisma/seed.ts` создавал первого ADMIN с bcrypt-хешем пароля, но `lib/auth.ts`
@@ -2894,7 +2925,7 @@ useEffect(() => {
 - ~~**`driving-school` Socket.IO без Redis-адаптера блокирует rollout**~~ ✅ **ЗАКРЫТ (2026-07-14,
   commit `b29ca4b`+`8189504`, см. запись выше §18.6 Сессия J):** `@socket.io/redis-adapter`
   подключён (`route.ts` → `createAdapter` на `ioredis` при наличии `REDIS_URL`), `letar.rollout:
-  'true'` включён, rollout-пилот пройден zero-downtime (msg #434), **13/~19 SERVER_APPS на
+'true'` включён, rollout-пилот пройден zero-downtime (msg #434), **13/~19 SERVER_APPS на
   rollout** на тот момент — driving-school больше не блокер, входит в состав финальных 19/19.
 - **🟠 Переход режима = миграция identity (ревизия №3)** — `standalone → hub-client` меняет источник `user.id`
   (Ключница вместо локального) → существующие пользователи коммерса требуют миграции/перепривязки данных (класс §8.5),
@@ -4054,6 +4085,56 @@ rollout-секцию `db:`+`app` по чеклисту из [deployment.md](/.cl
 (host-порт `db:`, `DB_PASSWORD`, healthcheck, alias, label) поверх существующего compose. Не
 блокирует ничего текущего — заводить, когда появится следующее приложение с БД на очереди на
 rollout, не раньше. Не начато.
+
+### §18.7 Тираж E2E-гейта на все приложения (добавлено 2026-07-17, владелец)
+
+> **Цель (сформулирована владельцем):** ни одно приложение не должно попадать на прод, не пройдя
+> e2e — цель шире, чем нынешний факт «только `grandslamcup` в `E2E_GATED_APPS`». Отдельно от
+> тиража rollout (§18.6 Сессия J, тот закрывает только «контейнер не поднялся», не логические
+> регрессии — см. разбор в диалоге). Это НЕ добавление новых сессий к hard gate (F) — тот остаётся
+> как есть (только grandslamcup, дата 2026-07-18); это отдельный трек по подключению остальных
+> приложений к staging-e2e (Сессия D паттерну), параллельно и независимо от F.
+
+**Инвентаризация (2026-07-17, `apps/*-e2e` × `S2_APPS` из `deploy-affected.sh`):**
+
+Приложения на s2 **с готовым e2e-сьютом**, ещё не подключённые к staging-гейту (13): `time`,
+`pravda`, `mandala`, `aira-web`, `kami`, `dsperevod`, `aboi`, `svoichuzhie`, `aprel8008`,
+`form-example`, `archetest`, `auth-hub`, `driving-school`.
+
+Приложения на s2 **без e2e-сьюта вообще** (9): `dashboard`, `dashboard-agent`, `form-docs`,
+`umami`, `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`,
+`studio`. `umami` — вендорский образ (не наш код, `rollback --to-sha` уже отмечен как
+неприменимый в J) — e2e тут смысла не имеет, кандидат на явное исключение, а не «долг». `dashboard`
+и `dashboard-agent` — спецпути self-deploy, уже исключены из rollout по той же причине
+(§18.6 Сессия J) — staging-e2e для них требует отдельного проектирования (self-deploy не вписывается
+в «деплой на s3 → тест → деплой на s2»), не просто «добавить сьют».
+
+**Тираж M — приложения с готовым e2e, подключение к staging-гейту.** По образцу Сессии D
+(grandslamcup): staging-домен `<app>-stage.s3.letar.best`, `.env.staging`, при наличии приватных
+данных в БД — анонимизированный снепшот (см. «Staging-данные» выше), `playwright.config.ts` на
+`BASE_URL`, добавление в `E2E_GATED_APPS`. Порядок — по возрастанию риска, вслед за уже принятой
+логикой J (низкорисковые вперёд, auth-критичные последними):
+
+| Батч | Приложения                                                                               | Условие старта                                                                                                                                                              |
+| ---- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1   | `aboi`, `svoichuzhie`, `aprel8008`, `dsperevod`, `mandala`, `pravda`, `aira-web`, `time` | ✅ можно начинать сразу — все уже прошли rollout-пилот, e2e-сьюты существуют                                                                                                |
+| M2   | `form-example`, `kami`                                                                   | после M1, без доп. условий                                                                                                                                                  |
+| M3   | `archetest`                                                                              | после M2 — своя специфика (психометрия, express-results), нужен отдельный анонимизирующий скрипт снепшота                                                                   |
+| M4   | `auth-hub`, `driving-school`                                                             | последними — auth-hub держит OIDC для всего монорепо, ошибка гейта здесь блокирует релизы всех downstream-приложений; driving-school — мультитенантность, самый сложный e2e |
+
+DoD батча: `deploy_app(staging)` → `run_e2e` → `e2e_status` зелёный для каждого приложения батча,
+`E2E_GATED_APPS` обновлён, warn-only минимум неделю на новом приложении перед тем, как рассчитывать
+на него как на реальную защиту (та же осторожность, что и с F).
+
+**Тираж N — приложения без e2e, сначала пишем сьюты.** Для `form-docs`, `animatrona-landing`,
+`animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio` — сначала e2e-сьют
+(`e2e-test-writer` агент / `/workflow:test-write`, покрытие критичных флоу — не 100% страниц), потом
+попадание в тираж M со следующим свободным батчем. `dashboard`/`dashboard-agent`/`umami` — отдельное
+решение по каждому (self-deploy-проектирование / вендорский образ), не автоматически «просто
+напиши e2e». Не начато — нет ещё сессии с датой/бюджетом, ждёт своей очереди после M1.
+
+**➡️ Следующий старт §18.7:** M1 — первое приложение-кандидат (`aboi` или `time`, оба уже
+проверенные пилоты rollout) через паттерн Сессии D.
 
 ### DoD §18 (Фазы 1–2)
 
