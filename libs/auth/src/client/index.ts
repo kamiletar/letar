@@ -71,5 +71,14 @@ export {
   type AuthModeTierPoint,
 } from './auth-mode'
 
+// Social Providers (Tier 2 self-service OAuth-ключи, извлечено после третьего дословного дубля
+// dsperevod → aboi → driving-school)
+export {
+  SocialProviderForm,
+  SocialProvidersList,
+  type SocialProviderFormProps,
+  type SocialProvidersListProps,
+} from './social-providers'
+
 // Icons
 export { FacebookIcon, GitHubIcon, GoogleIcon, TelegramIcon, VKIcon, YandexIcon } from './icons'

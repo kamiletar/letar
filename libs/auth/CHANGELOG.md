@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-07-17
+
+### Added
+
+- `SocialProvidersList`/`SocialProviderForm` (`@letar/auth/client`) + `createSocialProviderActions`
+  (`@letar/auth/server`) — self-service админка Tier 2 OAuth-провайдеров (§Этап 8 корневого
+  PLAN.md). Извлечено из трёх дословно продублированных реализаций (dsperevod → aboi →
+  driving-school), по тому же приёму, что и `AuthModeSettings`. Presentational-компоненты на
+  чистом React (без `@letar/forms`), server action-фабрика структурно типизирована (не завязана
+  на конкретный Prisma-клиент/auth-guard).
+- `tryGetEncryptionKey()` (`@letar/auth/server`) — как `getEncryptionKey()`, но возвращает `null`
+  вместо исключения при отсутствующем/невалидном `AUTH_ENCRYPTION_KEY`. Для приложений, где
+  строгий fail-fast недопустим (уже работающий в проде Tier2-соц-вход на env-переменных).
+
 ## [0.9.0] - 2026-07-16
 
 ### Added

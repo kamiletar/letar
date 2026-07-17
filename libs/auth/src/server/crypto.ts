@@ -13,6 +13,19 @@ export function getEncryptionKey(): Buffer {
 }
 
 /**
+ * Как getEncryptionKey(), но не бросает — возвращает null если ключ не задан/невалиден.
+ * Для приложений, где строгий fail-fast недопустим (уже работающий в проде Tier2-соц-вход на
+ * env-переменных, который не должен падать целиком из-за отсутствующего ключа шифрования).
+ */
+export function tryGetEncryptionKey(): Buffer | null {
+  try {
+    return getEncryptionKey()
+  } catch {
+    return null
+  }
+}
+
+/**
  * AES-256-GCM шифрование — для долгосрочных секретов (clientSecret).
  * Каждый вызов генерирует уникальный IV → не-детерминированный, максимально безопасный.
  * Формат: `gcm:<iv-hex>:<cipher-hex>:<tag-hex>`

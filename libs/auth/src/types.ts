@@ -101,3 +101,31 @@ export interface UnlinkAccountResult {
   /** Сообщение об ошибке (если success=false) */
   error?: string
 }
+
+/**
+ * Строка списка Tier2 self-service OAuth-провайдеров (SocialProvidersSettings)
+ */
+export interface SocialProviderRow {
+  id: string
+  /** ID провайдера ('google', 'vk', 'yandex' и т.д. — приложение решает какие показывать) */
+  providerId: string
+  clientId: string
+  enabled: boolean
+  createdAt: Date
+}
+
+/**
+ * Данные формы создания/редактирования Tier2 OAuth-провайдера
+ */
+export interface SocialProviderInput {
+  providerId: string
+  clientId: string
+  /** Пусто при редактировании = оставить текущий секрет без изменений */
+  clientSecret?: string
+  enabled?: boolean
+}
+
+/**
+ * Результат server action создания/обновления Tier2 OAuth-провайдера
+ */
+export type SocialProviderActionResult = { data: null } | { error: string }

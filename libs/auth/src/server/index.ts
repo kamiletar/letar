@@ -61,7 +61,15 @@ export type {
 export { createRedisStorage } from './redis-storage'
 
 // Шифрование at-rest (Этап 8 PLAN.md)
-export { decryptSecret, decryptToken, encryptSecret, encryptToken, getEncryptionKey, isEncrypted } from './crypto'
+export {
+  decryptSecret,
+  decryptToken,
+  encryptSecret,
+  encryptToken,
+  getEncryptionKey,
+  isEncrypted,
+  tryGetEncryptionKey,
+} from './crypto'
 export { createSocialProviderLoader } from './social-loader'
 
 // Connected Accounts
@@ -70,3 +78,12 @@ export {
   type CreateUnlinkActionOptions,
   type UnlinkAccountResult,
 } from './connected-accounts'
+
+// Social Providers (Tier 2 self-service OAuth-ключи — SocialProvidersSettings, извлечено после
+// третьего дословного дубля dsperevod → aboi → driving-school)
+export {
+  createSocialProviderActions,
+  type CreateSocialProviderActionsOptions,
+  type PrismaWithSocialProviderCrud,
+  type SocialProviderActions,
+} from './social-providers'
