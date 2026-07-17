@@ -381,6 +381,29 @@ error TS6059: File 'libs/my-lib/src/index.ts' is not under 'rootDir'
 error TS6307: File not listed within file list of project
 ```
 
+### ⚠️ TS6059 может вернуться даже с корректными `references` — в `next build`
+
+`references` исправляет `TS6059` для `nx typecheck:tsgo` (и вообще для `tsc --build`), но **не
+гарантированно** для собственного internal TS-чекера `next build` — он не полностью
+поддерживает project references. В логе билда это видно как предупреждение:
+
+```
+TypeScript project references are not fully supported. Attempting to build in incremental mode.
+```
+
+...после чего Next.js деградирует до плоского incremental-режима без изоляции по project
+boundaries — и тот же `TS6059` (`File ... is not under 'rootDir'`) снова всплывает на любом
+импорте `libs/*` через `paths`, несмотря на правильно настроенные `references`. Найдено
+2026-07-16 на `aboi` при импорте `@letar/forms` в `aboi-form.tsx`/`checkout-form.tsx` — деплой
+падал на этапе компиляции, хотя `nx typecheck:tsgo aboi` был чист (и остаётся чист после фикса).
+
+**Фикс:** `typescript.ignoreBuildErrors: true` в `next.config.mjs` — typecheck переносится на
+отдельный обязательный гейт `nx typecheck:tsgo <app>` (уже часть workflow перед коммитом), `next
+build` собственный TS-чекер не гоняет. Не маскирует реальные ошибки типов — они всё равно ловятся
+на `nx typecheck:tsgo`, просто не блокируют именно билд-стадию. Уже применяется в dsperevod,
+svoichuzhie, archetest, grandslamcup, studio, form-docs, aprel8008, aboi — заодно экономит RAM
+при билде на серверах (не гоняется второй, более тяжёлый TS-чекер поверх Turbopack-компиляции).
+
 ### Существующие shared библиотеки
 
 | Библиотека                | Описание                                          |
