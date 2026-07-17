@@ -184,21 +184,32 @@ async function waitHealthy(
   }
 }
 
-/** Прогоняет docker-rollout приложения. Останавливается на первом неуспешном шаге. */
+/** Прогоняет docker-rollout приложения. Останавливается на первом неуспешном шаге.
+ *
+ * `onStep` вызывается сразу после каждого шага, а не постфактум — без него весь прогресс
+ * (включая `wait-healthy`, который может занимать до `healthTimeoutMs`) виден вызывающей стороне
+ * только после того, как весь rollout уже завершится, что выглядит как зависание при live-опросе
+ * (см. инцидент auth-hub, §18.6 сессия K). */
 export async function runRollout(
   executor: DeployEngineExecutor,
   app: string,
   options: RolloutOptions,
   sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
+  onStep?: (step: RolloutStep) => void,
 ): Promise<RolloutResult> {
   const steps: RolloutStep[] = []
+  const push = (step: RolloutStep): RolloutStep => {
+    steps.push(step)
+    onStep?.(step)
+    return step
+  }
   const projectName = options.projectName ?? app
   const envFile = options.envFile ?? DEFAULT_ENV_FILE
   const dir = composeDir(app)
 
   const doctor = await runDoctor(executor, app)
   const failedRequired = doctor.checks.filter((c) => !c.passed && c.severity === 'required').map((c) => c.id)
-  steps.push({
+  push({
     id: 'doctor',
     description: 'doctor подтверждает готовность compose к rollout',
     ok: doctor.ready,
@@ -212,7 +223,7 @@ export async function runRollout(
   // имя запоминается, чтобы после scale-up вычесть его из обновлённого списка и получить новый
   // (см. resolveNewContainer ниже).
   const resolved = await resolveOldContainer(executor, projectName)
-  steps.push({
+  push({
     id: 'resolve-old-container',
     description: 'найден единственный существующий контейнер сервиса app (кандидат на замену)',
     ok: resolved.name !== undefined,
@@ -241,7 +252,7 @@ export async function runRollout(
     ],
     { cwd: dir, env: scaleUpEnv },
   )
-  steps.push({
+  push({
     id: 'scale-up',
     description: 'scale app=2 (имя нового контейнера определит Docker Compose)',
     ok: scaleUp.exitCode === 0,
@@ -252,7 +263,7 @@ export async function runRollout(
   }
 
   const resolvedNew = await resolveNewContainer(executor, projectName, oldContainer)
-  steps.push({
+  push({
     id: 'resolve-new-container',
     description: 'найден новый контейнер сервиса app, созданный scale-up',
     ok: resolvedNew.name !== undefined,
@@ -270,7 +281,7 @@ export async function runRollout(
     options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS,
     sleep,
   )
-  steps.push({
+  push({
     id: 'wait-healthy',
     description: `${newContainer} стал healthy`,
     ok: health.ok,
@@ -281,7 +292,7 @@ export async function runRollout(
   }
 
   const smoke = await smokeTest(executor, app, newContainer)
-  steps.push({
+  push({
     id: 'smoke-test',
     description: `реальный HTTP-запрос к ${newContainer} возвращает не-5xx (не только TCP healthcheck)`,
     ok: smoke.ok,
@@ -292,7 +303,7 @@ export async function runRollout(
   }
 
   const reload1 = await executor.runCommand('docker', ['exec', options.npmContainerName, 'nginx', '-s', 'reload'])
-  steps.push({
+  push({
     id: 'nginx-reload-1',
     description: 'nginx reload (резолвит alias на оба контейнера)',
     ok: reload1.exitCode === 0,
@@ -303,7 +314,7 @@ export async function runRollout(
   }
 
   const stopOld = await executor.runCommand('docker', ['stop', oldContainer])
-  steps.push({
+  push({
     id: 'stop-old',
     description: `остановлен старый контейнер ${oldContainer}`,
     ok: stopOld.exitCode === 0,
@@ -314,7 +325,7 @@ export async function runRollout(
   }
 
   const rmOld = await executor.runCommand('docker', ['rm', oldContainer])
-  steps.push({
+  push({
     id: 'rm-old',
     description: `удалён старый контейнер ${oldContainer}`,
     ok: rmOld.exitCode === 0,
@@ -325,7 +336,7 @@ export async function runRollout(
   }
 
   const reload2 = await executor.runCommand('docker', ['exec', options.npmContainerName, 'nginx', '-s', 'reload'])
-  steps.push({
+  push({
     id: 'nginx-reload-2',
     description: 'повторный nginx reload (убирает старый IP из upstream)',
     ok: reload2.exitCode === 0,

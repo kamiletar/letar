@@ -12,7 +12,7 @@ import { parseArgs } from 'node:util'
 import { composePathForApp, type DoctorReport, runDoctor } from './doctor.js'
 import { createNodeExecutor } from './executor.js'
 import { migrateComposeToRollout } from './migrate-compose.js'
-import { type RolloutResult, runRollout } from './rollout.js'
+import { type RolloutResult, type RolloutStep, runRollout } from './rollout.js'
 import { getStatus } from './status.js'
 
 const DEFAULT_NPM_CONTAINER = 'nginx-proxy-manager'
@@ -26,11 +26,11 @@ function printDoctorReport(report: DoctorReport): void {
   console.log(`\n${report.ready ? '✅ READY' : '❌ NOT READY'} — rollout ${report.ready ? 'разрешён' : 'заблокирован'}`)
 }
 
-function printRolloutResult(result: RolloutResult): void {
-  console.log(`## rollout ${result.app}\n`)
-  for (const step of result.steps) {
-    console.log(`${step.ok ? '✅' : '❌'} [${step.id}] ${step.description}${step.detail ? ` — ${step.detail}` : ''}`)
-  }
+function printRolloutStep(step: RolloutStep): void {
+  console.log(`${step.ok ? '✅' : '❌'} [${step.id}] ${step.description}${step.detail ? ` — ${step.detail}` : ''}`)
+}
+
+function printRolloutSummary(result: RolloutResult): void {
   console.log(`\n${result.ok ? '✅ OK' : '❌ FAILED'}`)
 }
 
@@ -75,13 +75,20 @@ async function main(): Promise<void> {
           'env-file': { type: 'string' },
         },
       })
-      const result = await runRollout(executor, app, {
-        deployTag: values['deploy-tag'],
-        npmContainerName: values['npm-container'] ?? DEFAULT_NPM_CONTAINER,
-        projectName: values['project-name'],
-        envFile: values['env-file'],
-      })
-      printRolloutResult(result)
+      console.log(`## rollout ${app}\n`)
+      const result = await runRollout(
+        executor,
+        app,
+        {
+          deployTag: values['deploy-tag'],
+          npmContainerName: values['npm-container'] ?? DEFAULT_NPM_CONTAINER,
+          projectName: values['project-name'],
+          envFile: values['env-file'],
+        },
+        undefined,
+        printRolloutStep,
+      )
+      printRolloutSummary(result)
       process.exit(result.ok ? 0 : 1)
       break
     }
@@ -114,7 +121,7 @@ async function main(): Promise<void> {
     }
     default: {
       console.error(
-        `Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout, migrate-compose`
+        `Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout, migrate-compose`,
       )
       process.exit(2)
     }

@@ -160,6 +160,32 @@ describe('runRollout', () => {
     }
   })
 
+  it('onStep вызывается сразу после каждого шага, а не постфактум по завершении rollout', async () => {
+    // Регрессия на инцидент auth-hub (§18.6 сессия K): без построчного onStep вызывающая сторона
+    // (CLI/deploy-mcp) не видит прогресс до самого конца rollout — долгий wait-healthy выглядит
+    // зависшим при live-опросе, хотя каждый шаг уже давно отработал.
+    const { executor } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const seenSteps: string[] = []
+    const result = await runRollout(
+      executor,
+      'time',
+      { npmContainerName: 'nginx-proxy-manager' },
+      noopSleep,
+      (step) => seenSteps.push(step.id),
+    )
+
+    // onStep видел ровно те же шаги, в том же порядке, что и итоговый result.steps —
+    // не накопленный постфактум список, а потоковая копия того же самого.
+    expect(seenSteps).toEqual(result.steps.map((s) => s.id))
+  })
+
   it('останавливается на scale-up при ошибке docker compose', async () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
