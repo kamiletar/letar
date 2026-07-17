@@ -1,5 +1,18 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Тираж hub-client на aprel8008 (2026-07-16):** админка для владелицы (управление фото баз) +
+> вход через Ключницу, `createAuth({ mode: 'hub-client' })`. Роль ADMIN — простой whitelist по
+> email через `databaseHooks.user.create.after` (не `createAuthGuards`/`requireRole` из
+> `@letar/auth` — та фабрика типизирована под единичное поле `role: string`, а во всех hub-client
+> приложениях монорепо реально используется `roles: string[]`; аpel8008 повторил тот же
+> ручной `hasRole`/`isAdmin`/`requireAuth`/`requireAdmin`-паттерн, что уже в kami и auth-hub —
+> см. находки в конце сессии). Клиент `aprel8008-prod` зарегистрирован в
+> `apps/auth-hub/prisma/seed.ts`. **Попутно найден и починен баг `deploy-affected.sh`:** шаг
+> `db:seed` (флаг `--seed`) резолвил `DATABASE_URL` с docker-internal хостнеймом вместо
+> `localhost:<port>` — падал с `getaddrinfo ESERVFAIL` на любом приложении, где сеялись клиенты
+> после первого деплоя auth-hub с этим флагом (commit `bcd3f01`). Проверено на проде: BlackCove
+> повторил только seed-шаг без полного редеплоя, все 8 OIDC-клиентов Ключницы пересозданы.
+>
 > **✅ Этап 8.5 — вход по любому linked-email СДЕЛАН (2026-07-16, auth-hub v0.6.4):** без
 > перехвата core-резолва Better Auth — оказалось, что email+password и magic-link входы в
 > Ключнице идут только через её собственные server actions (`loginUser`, `sendMagicLinkAction`),
