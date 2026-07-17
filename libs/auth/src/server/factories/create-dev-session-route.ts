@@ -133,6 +133,15 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
       return NextResponse.json({ error: 'Not configured' }, { status: 403 })
     }
 
+    if (!authSecret) {
+      // Пустой authSecret ломает crypto.subtle.importKey ниже (DOMException: Zero-length key is
+      // not supported) — Next.js в dev-режиме манглит эту ошибку в нечитаемый вторичный TypeError
+      // при попытке нормализовать DOMException для отображения. Явная проверка здесь даёт понятную
+      // причину вместо загадочного "Cannot set property message of ... which has only a getter".
+      console.error('[dev-session] authSecret пуст (BETTER_AUTH_SECRET не задан) — отказ')
+      return NextResponse.json({ error: 'Not configured' }, { status: 403 })
+    }
+
     const url = new URL(request.url)
     const providedToken = url.searchParams.get('token') ?? request.headers.get('x-dev-session-token') ?? ''
     if (!timingSafeEqualStr(providedToken, expectedToken)) {
@@ -176,7 +185,7 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
       encoder.encode(authSecret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign']
+      ['sign'],
     )
     const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(sessionToken))
     const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)))
@@ -190,7 +199,7 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
     const secureAttr = useSecureCookies ? '; Secure' : ''
     response.headers.append(
       'Set-Cookie',
-      `${finalCookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secureAttr}`
+      `${finalCookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secureAttr}`,
     )
 
     return response
