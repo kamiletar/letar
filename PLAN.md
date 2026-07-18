@@ -4341,8 +4341,15 @@ tsconfig, eslint, playwright.config.ts с портом из `apps/<app>/.env`, `
 ### Риски
 
 - Коллизия bin `tsc` (см. выше) — обязательно использовать alias-схему, не голый bump версии.
-- ~~typescript-eslint/другие плагины ESLint могут требовать API 6.0~~ ✅ **снят (2026-07-18)** —
-  type-aware linting нигде не включён, см. DoD выше.
+- typescript-eslint/другие плагины ESLint требуют API 6.0 — **риск ПОДТВЕРЖДЁН (2026-07-18,
+  перепроверка), не снят**: снятие в тот же день опиралось только на отсутствие type-aware linting,
+  но `typescript-estree` зовёт `require("typescript")`/`ts.createSourceFile` при каждом прогоне
+  ESLint (см. DoD п.1). Без алиаса `@typescript/typescript6` тираж ломает `nx lint` разом.
+- **Расхождение tsgo и tsc в выявлении ошибок наблюдалось на практике** — прецедент driving-school
+  v0.238.2 (2026-07-18, CHANGELOG): ошибку `Record<AuditAction, string>`, блокировавшую prod-билд,
+  «поймал только полный tsc, не typecheck:tsgo». До выяснения причины (nightly-баг tsgo? разный
+  скоуп прогона?) полный `tsc` остаётся эталонным пред-деплойным чеком; перед свёрткой TS 6.0
+  воспроизвести этот кейс на TS7 GA.
 - TS7 language server пока не поддерживает Vue/MDX/Astro/Svelte/Angular embedding — не блокер для CLI-тайпчека,
   но может повлиять на редакторский опыт там, где такие стеки используются.
 - `@typescript/native` (замена `@typescript/native-preview`) отдаёт bin `tsc`, не `tsgo` — таргет
