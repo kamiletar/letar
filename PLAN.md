@@ -1,11 +1,12 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **✅ §18.7 Тираж N — 5/6 приложений получили базовый e2e-сьют (2026-07-18):**
-> `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio`
-> (65 тестов суммарно, все зелёные локально) + фиксированные kebab-case имена agent-mail для всех
-> 30 проектных `/команд` (координация между сессиями одного приложения). Детали — §18.7 ниже.
-> **➡️ Следующий старт:** `form-docs` (последний из тиража N) либо старт тиража M (staging-e2e-гейт
-> на приложения с готовым сьютом, `aboi`/`time` первыми).
+> **✅ §18.7 Тираж N ЗАКРЫТ 6/6 — все приложения получили базовый e2e-сьют (2026-07-18):**
+> `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio`,
+> `form-docs` (67 тестов суммарно, все зелёные локально) + новый Nx-генератор
+> `@letar/generators:e2e-suite` (закрывает дублирование playwright.config.ts по ~20 приложениям) +
+> фиксированные kebab-case имена agent-mail для всех 30 проектных `/команд`. Детали — §18.7 ниже.
+> **➡️ Следующий старт:** тираж M — подключение к staging-e2e-гейту приложений с готовым сьютом,
+> `aboi`/`time` первыми.
 >
 > **✅ SocialProvidersSettings извлечён в `@letar/auth` (2026-07-17, `libs/auth` v0.11.0):**
 > UI self-service Tier2 OAuth-ключей (список + форма + server actions CRUD) продублировался в
@@ -36,8 +37,11 @@
 > скриптом напрямую на dev-БД (не через dev-session — см. находку ниже): encrypt→store→decrypt
 > round-trip не хранит plaintext, access-policy блокирует non-owner чтение, CRUD корректен.
 > `AUTH_ENCRYPTION_KEY` сгенерирован (`openssl rand -hex 32`, отдельный для dev/prod) и добавлен в
-> `.env.local`+`.env.docker`(`.env.docker.enc` пересобран)+`docker-compose.production.yml` — деплой
-> через BlackCove ещё не запрошен. **Побочно найден баг (вынесен отдельной задачей, не в скоупе):**
+> `.env.local`+`.env.docker`(`.env.docker.enc` пересобран)+`docker-compose.production.yml`.
+> **✅ Задеплоено на прод (2026-07-18, BlackCove, commit `53b6f1c`, zero-downtime)** — первая
+> попытка деплоя провалилась на предсуществующем баге (`AuditLog` labels/payload типы не ловились
+> `typecheck:tsgo`, только полным `next build`/`tsc`), пофикшено тем же коммитом, повтор прошёл
+> успешно. **Побочно найден баг (вынесен отдельной задачей, не в скоупе этой сессии):**
 > `/api/auth/dev-session` у driving-school падает с 500 (`TypeError: Cannot set property message of
 > which has only a getter`) — предсуществующий, не связан с этим изменением, блокирует будущие
 > e2e/preview через dev-session механизм.
@@ -2827,7 +2831,7 @@ createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелё�
 - ✅ **Тираж на aboi (2026-07-15)** — оба UI перенесены целиком (`/admin/social-providers/` +
   `/admin/settings/auth-mode/`), см. запись в шапке плана.
 - ✅ **Тираж social-providers на driving-school (2026-07-17, v0.238.0)** — `/owner/settings/
-  social-providers/`, ранее сознательно пропущенный из-за Yandex/VK кастомных `getUserInfo`.
+social-providers/`, ранее сознательно пропущенный из-за Yandex/VK кастомных `getUserInfo`.
   Решение: DB-провайдеры мержатся с env-fallback в `lib/auth.ts` через `resolveCreds()`, кастомные
   колбэки/`databaseHooks` не тронуты — DB-loader покрывает только `clientId`/`clientSecret`, не
   логику обогащения профиля. **Graceful degradation** — `AUTH_ENCRYPTION_KEY` не fail-fast (в
@@ -2837,7 +2841,7 @@ createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелё�
   (v0.238.0).
 - **✓ DoD:** ✅ коммерс может в админке увидеть Tier 1/Tier 2 с показом рисков и зафиксировать
   informed-consent выбор (пилот dsperevod, тираж aboi/driving-school, `/admin(или /owner)/settings/
-  auth-mode/`; сам переход на Tier 1 — не самообслуживание, требует разработчика); ✅ Tier 2-секреты
+auth-mode/`; сам переход на Tier 1 — не самообслуживание, требует разработчика); ✅ Tier 2-секреты
   шифруются at-rest и подхватываются `createAuth()`/вручную-мержатся (dsperevod/aboi/driving-school);
   ✅ auth-hub работает на фабрике; ✅ нет строковых секретов в коде нового пути; ✅ оба UI перенесены
   на все Tier 2 приложения монорепо (dsperevod эталон, aboi, driving-school). **Остаётся:** реальное
@@ -4147,22 +4151,32 @@ DoD батча: `deploy_app(staging)` → `run_e2e` → `e2e_status` зелён�
 `E2E_GATED_APPS` обновлён, warn-only минимум неделю на новом приложении перед тем, как рассчитывать
 на него как на реальную защиту (та же осторожность, что и с F).
 
-**Тираж N — приложения без e2e, сначала пишем сьюты.** ✅ **5/6 закрыто (2026-07-18):**
+**Тираж N — приложения без e2e, сначала пишем сьюты.** ✅ **6/6 закрыто (2026-07-18):**
 `animatrona-landing` (14 тестов), `animatrona-tracker` (15), `kami-key-the-landing` (9),
-`letar-landing` (11), `studio` (16, приватный submodule `letar-private-studio-e2e`) — сьюты
-написаны через `e2e-test-writer` агент, прогнаны локально до зелёного (`bunx playwright test`
+`letar-landing` (11), `studio` (16, приватный submodule `letar-private-studio-e2e`), `form-docs`
+(2, сгенерирован генератором ниже) — все прогнаны локально до зелёного (`bunx playwright test`
 напрямую против вручную поднятого dev-сервера — **`nx e2e <app>-e2e` зависает**: инферренный
 `dependsOn: [{project: <app>, target: 'dev'}]` в связке с `webServer`/`networkidle` в dev-режиме
-Next.js виснет намертво, HMR-вебсокет никогда не даёт `networkidle`; воркэраунд задокументирован
-находками сессии, отдельная doc-задача не заведена — см. коммит `6707993f`). По пути найден и
-починен реальный баг wiring `@letar/auth` в `studio` (paths/references/implicitDependencies
-отсутствовали — dev-session роут падал 500). `form-docs` остаётся — не начат.
+Next.js виснет намертво, HMR-вебсокет никогда не даёт `networkidle`; воркэраунд задокументирован в
+`.claude/docs/e2e-testing.md` § «nx e2e зависает намертво в dev-режиме Next.js»). По пути найдены и
+починены два реальных бага: wiring `@letar/auth` в `studio` (paths/references/implicitDependencies
+отсутствовали — dev-session роут падал 500) и отсутствующий `apps/form-docs/.env` (без него
+`next dev` слушал 3000 вместо документированного 3020 — нарушение конвенции `.env` = только PORT).
 `dashboard`/`dashboard-agent`/`umami` — отдельное решение по каждому (self-deploy-проектирование /
-вендорский образ), не автоматически «просто напиши e2e».
+вендорский образ), не автоматически «просто напиши e2e» — не в скоупе тиража N.
 
-**➡️ Следующий старт §18.7:** два параллельных фронта — (1) `form-docs` (последний из тиража N) и
-(2) тираж M — подключение к staging-e2e-гейту приложений, у которых сьют уже есть (13, включая
-5 свежих из N): `aboi`/`time` первыми (уже проверенные пилоты rollout) через паттерн Сессии D.
+**🆕 Генератор `@letar/generators:e2e-suite`** (`libs/generators`, 2026-07-18) — закрывает backlog
+дублирования `playwright.config.ts` по ~20 приложениям (был отдельный пункт в этом же разделе).
+`nx g @letar/generators:e2e-suite <app>` скаффолдит `apps/<app>-e2e` целиком (package.json,
+tsconfig, eslint, playwright.config.ts с портом из `apps/<app>/.env`, `.gitignore` для
+`playwright/.auth/`, стартовый smoke-тест). 8/8 юнит-тестов, живой прогон на `form-docs` подтверждён
+(typecheck+lint+playwright test все зелёные). Заодно нашёл и закрыл реальный пробел в корневом
+`eslint.config.mjs` — `**/out-tsc` (артефакт `tsc --build` для всех e2e-таргетов) нигде не
+игнорировался, любой e2e-проект падал на линте `.d.ts` после первого `nx typecheck`.
+
+**➡️ Следующий старт §18.7:** тираж M — подключение к staging-e2e-гейту приложений, у которых сьют
+уже есть (14, включая 6 свежих из N): `aboi`/`time` первыми (уже проверенные пилоты rollout) через
+паттерн Сессии D.
 
 ### DoD §18 (Фазы 1–2)
 
