@@ -63,6 +63,15 @@ nx lint <app-name>
 nx typecheck:tsgo <app-name>
 ```
 
+⚠️ **`typecheck:tsgo` не эквивалентен полному `tsc`**, который реально гоняет `next build` (прод-сборка
+на сервере при деплое). Расхождение подтверждено на практике (2026-07-18, driving-school): `tsgo` не
+поймал ошибку в exhaustive `Record<AuditAction, string>` (не все значения enum покрыты) и в
+ZenStack-типизации `payload` Json-поля — обе ошибки прошли `typecheck:tsgo` зелёным, но уронили
+`next build` при деплое (даунтайма не было — деплой упал до сборки Docker-образа, но потратил цикл
+BlackCove). **Перед деплой-запросом**, если менялся код рядом с exhaustive union-типами
+(`Record<SomeEnum, X>`) или Json-полями ZenStack-моделей — дополнительно прогони полный `nx typecheck
+<app-name>` (без `:tsgo`), не полагайся только на `tsgo`.
+
 ## Обработка варнингов
 
 Если варнинг линта нельзя исправить - подави его комментарием:
