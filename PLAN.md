@@ -1,29 +1,33 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **✅ §18.7 Тираж M1 — ответ BlackCove по `aboi`+`time`, оба бага починены (2026-07-18):**
-> Инфра сделана полностью (NPM proxy hosts + Let's Encrypt, `.env.staging` секреты, auth-hub
-> пересеян). **Побочно найдено и уже починено BlackCove:** мой коммит `133faafe` ссылался на
-> непроверенный SHA `driving-school` — блокировало `git pull --recurse-submodules` на s2 И s3
-> (любой деплой вообще); **вывод на будущее:** перед `git add <submodule>` проверять
-> `git log origin/main..HEAD` внутри submodule, не полагаться на локальный коммит.
-> **Баг 1 — `time` build failed** (`libs/analytics/src/index.ts is not under 'rootDir'`):
-> причина — в `next.config.js` `time` не было `typescript: { ignoreBuildErrors: true }` (уже есть
-> у 14 других приложений монорепо), из-за чего Next.js гонял свой тайпчекер поверх `next build` и
-> ложно валил rootDir на path-mapped импорте из `libs/` (Next не понимает TS project references
-> из `tsconfig.json` `references`). Типобезопасность в проекте и так идёт отдельным треком —
-> `nx typecheck:tsgo` (проходит чисто). **Пофикшено, локально `nx build time` зелёный.**
-> **Баг 2 — `aboi-e2e` 2 passed/9 failed** (пустой каталог товаров на свежей staging-БД + WebKit
-> не запускается на s3 из-за отсутствующих системных либ). Второе — разовая инфра-задача s3
-> (не только для aboi), первое — написан `apps/aboi/scripts/anonymize-staging-db.ts` по образцу
-> grandslamcup (анонимизирует User/UserProfile/Address/Order-снэпшот/ConsentLog, каталог
-> Product/Image не трогает — публичные данные). **Требует от BlackCove:** `pg_dump` прод aboi
-> (исключить `-T Account -T Session -T Verification -T ConsentLog`) → restore в
-> `aboi-staging-db` → прогнать скрипт → повторный `run_e2e`.
-> **➡️ Следующий старт:** ответ BlackCove по повтору `deploy_app(time, staging)` +
-> restore-снепшоту aboi + WebKit-депсам на s3; затем повторный `run_e2e` для обоих → зелёный →
-> добавление в `E2E_GATED_APPS`. Запрос по остальным 6 приложениям M1 (`svoichuzhie`,
-> `aprel8008`, `dsperevod`, `mandala`, `pravda`, `aira-web`) пока не отправлен — код готов
-> (ниже), ждём чтобы не перегружать очередь BlackCove.
+> **✅ §18.7 Тираж M1 — BlackCove закрыл инфра-часть `aboi`+`time`, e2e НЕ зелёный (app-баги) (2026-07-18):**
+> Полный прогон: `pg_dump` прод `aboi` (искл. `Account`/`Session`/`Verification`/`ConsentLog`) →
+> restore в `aboi-staging-db` (data-only) → `anonymize-staging-db.ts` — чисто. WebKit system-libs
+> на s3 установлены (`playwright install-deps webkit` от root) — разовая инфра-задача закрыта.
+> `deploy_app(aboi, staging)` и повторный `deploy_app(time, staging)` прошли, оба контейнера
+> healthy. Опубликован тестовый товар (`published: true`) — блокировал каталог/checkout пустым
+> списком, это и была исходная причина Бага 2.
+> **e2e ПОСЛЕ фикса — всё ещё не зелёный, но по app-причинам, не инфра:**
+> `aboi` 33/42 passed (было 2/42) — 9 падений: (1) CDEK test-credentials дают `401
+> invalid_client` на `api.edu.cdek.ru` → не рендерится `CDEK_POINT` radio, 6 тестов; (2)
+> `email-verification.spec.ts` — heading "Почти готово" не появляется после sign-up на всех
+> браузерах, похоже на реальный UI-баг, не флейк. `time` — e2e вообще не запускается:
+> `playwright.config.ts` пытается поднять свой webServer через `nx run @letar/time` (project not
+> found) вместо использования переданного `BASE_URL` — `time-e2e` пока только `example.spec.ts`-
+> плейсхолдер, конфиг не адаптирован под staging-прогон с внешним baseUrl.
+> **`E2E_GATED_APPS` пока НЕ пополнен** — оба прогона не зелёные, но не по вине инфраструктуры.
+> **Бонус:** deploy-mcp теперь поддерживает `deploy_app({ app, seed: true })` — `--seed` больше не
+> требует SSH-резерва (было закрыто через SSH для `auth-hub` в этой же сессии, затем зашито в
+> `apps/dashboard-agent/src/routes/deploy.ts` + `libs/deploy-mcp/src/server.ts`, коммит `64e558fc`,
+> см. `apps/dashboard-agent/PLAN_COMPLETED.md` v0.7.6). Само-деплой `dashboard-agent` на себя
+> споткнулся на известном chicken-and-egg (контейнер создан, не стартовал сам) — поднят вручную.
+> **Побочно найдено и починено BlackCove ранее:** коммит `133faafe` ссылался на непроверенный SHA
+> `driving-school` — блокировало `git pull --recurse-submodules` на s2 и s3; **вывод на будущее:**
+> перед `git add <submodule>` проверять `git log origin/main..HEAD` внутри submodule.
+> **➡️ Следующий старт:** app-владельцам (CobaltReef/RoseSparrow) — починить CDEK test-auth,
+> email-verification UI, `time-e2e` playwright.config, затем повторный `run_e2e` для обоих →
+> зелёный → `E2E_GATED_APPS`. Запрос по остальным 6 приложениям M1 (`svoichuzhie`, `aprel8008`,
+> `dsperevod`, `mandala`, `pravda`, `aira-web`) пока не отправлен — код готов (ниже).
 >
 > **⏳ §18.7 Тираж M — код-подготовка `aboi`+`time` (2026-07-18):** `docker-compose.staging.yml` +
 > `.env.staging.example` для обоих приложений (порты: aboi db 5457/app 3022→3018, time db

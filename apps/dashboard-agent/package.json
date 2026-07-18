@@ -1,6 +1,6 @@
 {
   "name": "dashboard-agent",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "private": true,
   "description": "Lightweight monitoring agent for remote servers",
   "type": "module",
