@@ -8,12 +8,27 @@
 > staging-инстанса Ключницы нет). `aboi` — standalone, OAuth/OIDC не участвует, но `AUTH_ENCRYPTION_KEY`
 > обязателен (fail-fast `getEncryptionKey()` в `src/lib/auth.ts`, не graceful). `playwright.config.ts`
 > обоих приложений уже поддерживают `BASE_URL` env — правок не потребовалось.
-> **Не в скоупе этой сессии (нужен BlackCove):** DNS/NPM proxy host для обоих доменов, создание
-> `.env.staging` с реальными секретами на s3, `db:seed` auth-hub с новым redirect URI, живой
-> `deploy_app(staging)` → `run_e2e` → добавление в `E2E_GATED_APPS`. Запрос отправлен через
-> agent-mail. **➡️ Следующий старт:** дождаться ответа BlackCove; после зелёного прогона —
-> следующие приложения батча M1 (`svoichuzhie`, `aprel8008`, `dsperevod`, `mandala`, `pravda`,
-> `aira-web`) тем же паттерном.
+> **Не в скоупе этой сессии (нужен BlackCove):** DNS/NPM proxy host для доменов, создание
+> `.env.staging` с реальными секретами на s3, `db:seed` auth-hub с новыми redirect URI, живой
+> `deploy_app(staging)` → `run_e2e` → добавление в `E2E_GATED_APPS`. Запрос по `aboi`+`time`
+> отправлен через agent-mail (thread `staging-e2e-gate-m1-aboi-time`).
+>
+> **⏳ §18.7 Тираж M1 — код-подготовка остальных 6 приложений батча (2026-07-18):**
+> `svoichuzhie`, `aprel8008`, `dsperevod`, `mandala`, `pravda`, `aira-web` — `docker-compose.staging.yml`
+> для всех + `.env.staging.example` для приложений с секретами (`pravda`/`aira-web` — статика/
+> без БД и auth, файл не нужен). Порты (продолжение последовательности aboi=5457/3022,
+> time=5458/3023): `mandala` db 5459/app 3024→3004, `svoichuzhie` db 5460/app 3025→3021,
+> `aprel8008` db 5461/app 3026→3023, `dsperevod` db 5462/app 3027→3019, `pravda` без БД/app
+> 3028→3007 (nginx-статика), `aira-web` без БД/app 3029→3017 (standalone Next.js, без auth).
+> `aprel8008` (hub-client) — добавлен staging redirect URI `aprel8008-stage.s3.letar.best` в
+> auth-hub seed.ts (clientId `aprel8008-prod`). `dsperevod` — как и `aboi`, требует
+> `AUTH_ENCRYPTION_KEY` (fail-fast). `mandala` — raw `betterAuth` (не фабрика `createAuth`),
+> Google/Yandex OAuth опционален (блок подключается только если оба ID/SECRET заданы) — на
+> staging не заполняется. `svoichuzhie` — 2FA/СДЭК/платежи не проверяются по-настоящему,
+> `REDIS_URL` для rate-limit опционален. Инфра-часть для всех 6 — тот же список, что и у
+> aboi/time, у BlackCove (запрос ещё не отправлен, ждём ответа по первой паре, чтобы не
+> перегружать очередь). **➡️ Следующий старт:** после ответа BlackCove по `aboi`/`time` —
+> запрос на оставшиеся 6 приложений M1 тем же образом; затем батч M2 (`form-example`, `kami`).
 >
 > **✅ §18.7 Тираж N ЗАКРЫТ 6/6 — все приложения получили базовый e2e-сьют (2026-07-18):**
 > `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio`,

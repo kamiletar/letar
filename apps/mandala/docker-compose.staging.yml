@@ -1,0 +1,56 @@
+name: mandala-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: mandala-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mandala_staging
+      POSTGRES_USER: lena_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - mandala-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s3 — следующий свободный после grandslamcup(5454)/auth-hub(5455)/
+    # driving-school(5456)/aboi(5457)/time(5458)/e2e-postgres(5499). Не проверялся напрямую на
+    # s3 — подтвердить перед первым деплоем.
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5459:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lena_user -d mandala_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: mandala:staging
+    container_name: mandala-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3004 — из Dockerfile.production (ENV PORT=3004), тот же образ что и прод.
+      # Хостовый 3024 — следующий свободный после aboi(3022)/time(3023). Подтвердить перед
+      # первым деплоем.
+      - '3024:3004'
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@mandala-staging-db:5432/mandala_staging
+      # Google/Yandex OAuth на staging сознательно не настраивается — mandala/auth.ts включает
+      # соц-провайдер в конфиг только если оба AUTH_*_ID/AUTH_*_SECRET заданы (без них блок
+      # просто отсутствует, email/password работает нормально).
+      BETTER_AUTH_URL: http://localhost:3024
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3004/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  mandala-staging-data:

@@ -1,0 +1,23 @@
+name: aira-web-staging
+
+services:
+  app:
+    image: aira-web:staging
+    container_name: aira-web-staging-app
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+      NODE_ENV: production
+      # Внутренний PORT=3017 — из Dockerfile.production, тот же образ что и прод. Без БД и без
+      # auth (см. apps/aira-web/src/lib — только github.ts/seo.ts, никакого lib/auth.ts).
+      PORT: '3017'
+    ports:
+      # Хостовый 3029 — следующий свободный после mandala(3024)/svoichuzhie(3025)/
+      # aprel8008(3026)/dsperevod(3027)/pravda(3028). Подтвердить перед первым деплоем.
+      - '3029:3017'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3017/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s

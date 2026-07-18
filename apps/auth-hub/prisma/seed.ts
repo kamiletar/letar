@@ -147,6 +147,11 @@ const clients = [
       'https://aprel8008.ru/sign-in',
       'http://localhost:3023/api/auth/oauth2/callback/letar-auth',
       'http://localhost:3023/sign-in',
+      // Staging (PLAN.md §18.7 Тираж M1) — тот же клиент, отдельного staging-инстанса Ключницы
+      // нет, только дополнительный redirect URI. Один лейбл (aprel8008-stage), под wildcard
+      // `*.s3 CNAME s3.letar.best`.
+      'https://aprel8008-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://aprel8008-stage.s3.letar.best/sign-in',
     ].join(','),
   },
 ]

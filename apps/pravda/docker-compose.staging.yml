@@ -1,0 +1,20 @@
+name: pravda-staging
+
+services:
+  app:
+    image: pravda:staging
+    container_name: pravda-staging-app
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+    ports:
+      # Внутренний 3007 — nginx отдаёт статический экспорт (см. Dockerfile.production, без
+      # Next.js/БД/auth). Хостовый 3028 — следующий свободный после mandala(3024)/
+      # svoichuzhie(3025)/aprel8008(3026)/dsperevod(3027). Подтвердить перед первым деплоем.
+      - '3028:3007'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3007/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
