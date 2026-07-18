@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
 )
 ```
 
@@ -195,6 +195,68 @@ await page.waitForURL((url) => !url.pathname.startsWith(`${LOCALE_PREFIX}/auth/`
   waitUntil: 'domcontentloaded',
 })
 ```
+
+### ⚠️ `networkidle` не работает в dev-режиме Next.js
+
+`page.waitForLoadState('networkidle')` **виснет на весь таймаут** (30с по умолчанию) на `next dev` —
+HMR держит открытым WebSocket, поэтому «нет сетевой активности 500мс» никогда не наступает. Это не
+флейк, а гарантированное зависание на каждом прогоне. Не используй `networkidle` ни для чего в
+dev-режиме — только `domcontentloaded` или явное ожидание конкретного элемента/состояния.
+
+### Гонка гидратации (SSR → hydrate race) при клике сразу после `page.goto()`
+
+Клик по интерактивному элементу сразу после `page.goto('/')` может попасть в окно между тем, как
+React-компонент отрендерился на сервере (DOM уже есть, элемент видим и проходит `toBeVisible()`), и
+тем, как клиентский JS навесил обработчики (`onClick` ещё не подключён — клик проваливается в
+никуда). Особенно заметно на первом посещении маршрута в dev-режиме (Turbopack ещё компилирует).
+Симптом: `expect(dialog).toBeVisible()` падает по таймауту, хотя дальше по коду тот же элемент
+прекрасно кликается вручную.
+
+Фиксированная задержка (`page.waitForTimeout(500)`) — не решение: либо мало на медленной машине,
+либо тратит время зря на быстрой. Рабочий паттерн — повторный клик внутри `expect(...).toPass()`,
+идемпотентный (клик только если ожидаемое состояние ещё не достигнуто — иначе повторный клик по
+toggle-элементу его же и закроет):
+
+```typescript
+const trigger = page.getByRole('button', { name: 'Открыть меню' })
+const dialog = page.getByRole('dialog')
+
+await expect(async () => {
+  if (!(await dialog.isVisible())) {
+    await trigger.click()
+  }
+  await expect(dialog).toBeVisible({ timeout: 1000 })
+}).toPass({ timeout: 15000 })
+```
+
+### ⛔ `nx e2e <app>-e2e` зависает намертво в dev-режиме Next.js
+
+Если `playwright.config.ts` указывает `webServer.command: 'bun nx run <app>:dev'`, плагин
+`@nx/playwright` **автоматически** добавляет инферренную зависимость таска
+`dependsOn: [{project: '<app>', target: 'dev'}]`. `next dev` — процесс, который никогда не
+завершается сам по себе, поэтому вызов `nx e2e <app>-e2e` может застрять на этой «зависимости» на
+неопределённое время (в бою ловили зависания по 30-60 минут) — сама команда `playwright test`
+внутри при этом может вообще не успевать запуститься.
+
+**Обходной путь для локального прогона:** не через `nx e2e`, а напрямую — поднять dev-сервер
+вручную в фоне и вызвать Playwright из директории сьюта:
+
+```bash
+# 1. Поднять dev-сервер приложения в фоне (не nx e2e!)
+nx run <app>:dev &
+
+# 2. Дождаться "Ready in" в логе, затем прогнать playwright напрямую
+cd apps/<app>-e2e
+BASE_URL=http://localhost:<port> bunx playwright test --project=chromium
+
+# 3. Остановить dev-сервер после прогона
+kill %1
+```
+
+Не путать с CI/staging-пайплайном (`deploy_app(staging)` → `run_e2e`, см. раздел «E2E-ранер на
+s3» ниже) — там `nx e2e` гоняется против **production-сборки** (`next start`, процесс тоже не
+завершается сам, но там нет `dependsOn: dev`-таска вообще, staging собирается и запускается
+отдельно от прогона тестов), проблема специфична именно для локального `next dev`.
 
 ## Отладка тестов
 
@@ -391,6 +453,11 @@ if (!cookies.find((c) => c.name === 'better-auth.session_token')) {
 
 ## Чеклист перед написанием E2E тестов
 
+- [ ] **Скаффолд нового сьюта — через генератор**, не копипастой:
+      `nx g @letar/generators:e2e-suite <app>` (порт берётся из `apps/<app>/.env`, либо передай
+      `--port=<число>` явно). Создаёт `apps/<app>-e2e` со всей конвенцией (package.json, tsconfig,
+      eslint, playwright.config.ts, `.gitignore` для `playwright/.auth/`, стартовый smoke-тест).
+      См. `libs/generators/README.md`.
 - [ ] Click перед fill для всех input полей
 - [ ] Глобальные селекторы для Portal компонентов
 - [ ] Placeholder/test-id для полей форм

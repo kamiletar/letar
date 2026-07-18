@@ -43,16 +43,17 @@ libs/my-lib/
 
 ## Существующие библиотеки
 
-| Библиотека              | Описание                                   |
-| ----------------------- | ------------------------------------------ |
-| @letar/forms            | Формы (TanStack Form)                      |
-| @letar/chakra-provider  | Chakra UI провайдер                        |
-| @letar/yandex-metrika   | Яндекс Метрика                             |
-| @letar/format-utils     | Форматирование дат, телефонов              |
-| @letar/ui               | Shared UI компоненты                       |
-| @letar/validation-utils | Zod схемы валидации                        |
-| @letar/email            | Email отправка через Maddy                 |
-| @letar/form-mcp         | MCP сервер для форм (npm: @letar/form-mcp) |
+| Библиотека              | Описание                                                           |
+| ----------------------- | ------------------------------------------------------------------ |
+| @letar/forms            | Формы (TanStack Form)                                              |
+| @letar/chakra-provider  | Chakra UI провайдер                                                |
+| @letar/yandex-metrika   | Яндекс Метрика                                                     |
+| @letar/format-utils     | Форматирование дат, телефонов                                      |
+| @letar/ui               | Shared UI компоненты                                               |
+| @letar/validation-utils | Zod схемы валидации                                                |
+| @letar/email            | Email отправка через Maddy                                         |
+| @letar/form-mcp         | MCP сервер для форм (npm: @letar/form-mcp)                         |
+| @letar/generators       | Локальные Nx-генераторы (`nx g @letar/generators:e2e-suite <app>`) |
 
 ## Правила
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "E2eSuite",
+  "title": "E2E Suite Generator",
+  "type": "object",
+  "properties": {
+    "app": {
+      "type": "string",
+      "description": "Имя приложения в apps/ (без -e2e), для которого создаётся сьют",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Для какого приложения (apps/<app>) создать e2e-сьют?"
+    },
+    "port": {
+      "type": "number",
+      "description": "Dev-порт приложения (baseURL). Если не указан — берётся из apps/<app>/.env (PORT=)"
+    }
+  },
+  "required": ["app"]
+}

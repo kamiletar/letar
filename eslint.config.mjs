@@ -9,6 +9,7 @@ export default [
       '**/dist',
       '**/build',
       '**/.next',
+      '**/out-tsc',
       '**/prisma/generated',
       '**/zod',
       '**/test-output',

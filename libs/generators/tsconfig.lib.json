@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"],
+    "rootDir": "src",
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "ignoreDeprecations": "6.0",
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/generators/**/files/**",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "include": ["src/**/*.ts"]
+}

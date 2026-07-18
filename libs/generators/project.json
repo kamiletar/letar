@@ -1,0 +1,58 @@
+{
+  "name": "@letar/generators",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/generators/src",
+  "projectType": "library",
+  "tags": ["scope:tooling", "type:util", "owner:letar"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/generators"
+      },
+      "dependsOn": ["^typecheck"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations",
+        "technologies": ["typescript"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/generators/vitest.config.ts"
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/generators"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"]
+    }
+  }
+}
