@@ -1,5 +1,20 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **⏳ §18.7 Тираж M — код-подготовка `aboi`+`time` (2026-07-18):** `docker-compose.staging.yml` +
+> `.env.staging.example` для обоих приложений (порты: aboi db 5457/app 3022→3018, time db
+> 5458/app 3023→3013 — следующие свободные после grandslamcup/auth-hub/driving-school). `time`
+> (hub-client) — добавлен staging redirect URI `time-stage.s3.letar.best` в
+> `apps/auth-hub/prisma/seed.ts` (clientId `time-prod`, тот же клиент/секрет, отдельного
+> staging-инстанса Ключницы нет). `aboi` — standalone, OAuth/OIDC не участвует, но `AUTH_ENCRYPTION_KEY`
+> обязателен (fail-fast `getEncryptionKey()` в `src/lib/auth.ts`, не graceful). `playwright.config.ts`
+> обоих приложений уже поддерживают `BASE_URL` env — правок не потребовалось.
+> **Не в скоупе этой сессии (нужен BlackCove):** DNS/NPM proxy host для обоих доменов, создание
+> `.env.staging` с реальными секретами на s3, `db:seed` auth-hub с новым redirect URI, живой
+> `deploy_app(staging)` → `run_e2e` → добавление в `E2E_GATED_APPS`. Запрос отправлен через
+> agent-mail. **➡️ Следующий старт:** дождаться ответа BlackCove; после зелёного прогона —
+> следующие приложения батча M1 (`svoichuzhie`, `aprel8008`, `dsperevod`, `mandala`, `pravda`,
+> `aira-web`) тем же паттерном.
+>
 > **✅ §18.7 Тираж N ЗАКРЫТ 6/6 — все приложения получили базовый e2e-сьют (2026-07-18):**
 > `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio`,
 > `form-docs` (67 тестов суммарно, все зелёные локально) + новый Nx-генератор

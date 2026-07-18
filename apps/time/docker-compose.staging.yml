@@ -1,0 +1,59 @@
+name: time-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: time-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: time_staging
+      POSTGRES_USER: time
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - time-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s3 — следующий свободный после grandslamcup-staging-db (5454),
+    # auth-hub-staging-db (5455), driving-school-staging-db (5456), aboi-staging-db (5457),
+    # e2e-postgres (5499). Подобран по аналогии, не проверялся напрямую на s3 — подтвердить
+    # перед первым деплоем.
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5458:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U time -d time_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: time:staging
+    container_name: time-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3013 — из Dockerfile.production (ENV PORT=3013), тот же образ что и прод.
+      # Хостовый 3023 — следующий свободный после grandslamcup(3018), auth-hub(3019),
+      # driving-school(3020/3021), aboi(3022). Подтвердить перед первым деплоем.
+      - '3023:3013'
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://time:${DB_PASSWORD:-postgres}@time-staging-db:5432/time_staging
+      # time — hub-client (OIDC через Ключницу, clientId time-prod). На staging OAuth-редирект
+      # реально заходит — auth-hub принимает redirect URI time-stage.s3.letar.best (см.
+      # apps/auth-hub/prisma/seed.ts). BETTER_AUTH_URL/NEXT_PUBLIC_APP_URL указывают на
+      # публичный staging-домен (не localhost) — иначе OIDC callback не совпадёт с redirect URI.
+      BETTER_AUTH_URL: https://time-stage.s3.letar.best
+      NEXT_PUBLIC_APP_URL: https://time-stage.s3.letar.best
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3013/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  time-staging-data:

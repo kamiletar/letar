@@ -56,6 +56,11 @@ const clients = [
       'https://time.letar.best/api/auth/oauth2/callback/letar-auth',
       'https://time.letar.best/',
       'http://localhost:3013/',
+      // Staging (PLAN.md §18.7 Тираж M) — тот же клиент, отдельного staging-инстанса Ключницы
+      // нет, только дополнительный redirect URI. Один лейбл (time-stage), под wildcard
+      // `*.s3 CNAME s3.letar.best`.
+      'https://time-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://time-stage.s3.letar.best/',
     ].join(','),
   },
   {
