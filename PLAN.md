@@ -38,11 +38,13 @@
 >   pre-existing флейк в геолокационном тесте (гонка с реальным Nominatim API, не связан с этой
 >   правкой). Коммиты: `f049f87` (aboi submodule), `16545c2` (aboi-e2e submodule), `884ed211`
 >   (time-e2e, letar root).
->   **➡️ Следующий старт:** запросить у BlackCove повторный `deploy_app(staging)` для `time` +
->   повторный `run_e2e` для обоих `aboi`/`time` (staging ещё не видел эти фиксы) → зелёный →
->   `E2E_GATED_APPS`. Отдельно стоит выяснить, не столкнётся ли staging-прогон с тем же
->   `/sign-up` rate-limit (5/час), если `run_e2e` гоняется многократно за сессию отладки — может
->   потребоваться сброс между попытками или временное увеличение лимита для staging.
+>   **➡️ Следующий старт:** ⏳ запрос BlackCove **отправлен и дополнен** — msg #570 (RoseSparrow,
+>   2026-07-18, тред `staging-e2e-gate-m1-aboi-time`) + msg #571 (root-weaver, 2026-07-19,
+>   дополнение: редеплой staging нужен и для **aboi**, не только time — `f049f87` меняет app-код
+>   `cdek.ts`/`instrumentation.ts`, staging-образ собран до фикса; плюс проверить фактический
+>   `CDEK_MOCK_MODE=true` в `.env.staging` на s3). Ждём BlackCove: `deploy_app(aboi+time, staging)`
+>   → `run_e2e` оба → зелёный → `E2E_GATED_APPS`. Предупреждение про `/sign-up` rate-limit (5/час
+>   при повторных прогонах) передано в обоих сообщениях.
 >
 > **✅ §18.7 Тираж M1 — BlackCove закрыл инфра-часть `aboi`+`time`, e2e НЕ зелёный (app-баги) (2026-07-18, архив):**
 > Полный прогон: `pg_dump` прод `aboi` (искл. `Account`/`Session`/`Verification`/`ConsentLog`) →
