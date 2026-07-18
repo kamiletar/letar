@@ -82,7 +82,7 @@ export async function getCdekToken(): Promise<string | null> {
 export async function calculateTariffs(
   to: CdekLocation,
   pkg: CdekPackageDims,
-  from?: CdekLocation
+  from?: CdekLocation,
 ): Promise<CdekShippingCosts> {
   if (process.env.CDEK_MOCK_MODE === 'true') {
     await new Promise((r) => setTimeout(r, 400))
@@ -587,6 +587,13 @@ export async function searchCdekCities(query: string): Promise<CdekCityItem[]> {
 
 /** Ищет CDEK city_code по почтовому индексу. */
 export async function getCityCodeByPostalCode(postalCode: string): Promise<number | null> {
+  if (process.env.CDEK_MOCK_MODE === 'true') {
+    await new Promise((r) => setTimeout(r, 150))
+    // MOCK_PVZ — только Москва, поэтому мок-код города всегда Москвы (44) независимо от индекса,
+    // getDeliveryPoints() в мок-режиме тоже игнорирует cityCode и отдаёт тот же список.
+    return MOCK_CITIES.find((c) => c.postal_codes.some((code) => code.startsWith(postalCode.slice(0, 3))))?.code ?? 44
+  }
+
   const token = await getCdekToken()
   if (!token) {
     return null
@@ -629,7 +636,7 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
       {
         headers: { Authorization: `Bearer ${token}` },
         signal: AbortSignal.timeout(8_000),
-      }
+      },
     )
     if (!resp.ok) {
       return []
@@ -642,7 +649,7 @@ export async function getDeliveryPoints(cityCode: number): Promise<CdekDeliveryP
 
 /** Создаёт заказ СДЭК. Возвращает uuid и трек-номер или объект с ошибкой. */
 export async function createCdekOrder(
-  request: CdekOrderRequest
+  request: CdekOrderRequest,
 ): Promise<{ uuid: string; trackNumber?: string } | { error: string }> {
   const token = await getCdekToken()
   if (!token) {
@@ -671,13 +678,12 @@ export async function createCdekOrder(
 
   if (!data.entity?.uuid) {
     const errors = data.requests?.[0]?.errors
-    const msg =
-      Array.isArray(errors) && errors.length > 0
-        ? errors
-            .map((e) => e.message)
-            .filter(Boolean)
-            .join('; ')
-        : `HTTP ${resp.status}, нет entity.uuid`
+    const msg = Array.isArray(errors) && errors.length > 0
+      ? errors
+        .map((e) => e.message)
+        .filter(Boolean)
+        .join('; ')
+      : `HTTP ${resp.status}, нет entity.uuid`
     console.warn('[cdek] createOrder error', JSON.stringify(data))
     return { error: `СДЭК API: ${msg}` }
   }

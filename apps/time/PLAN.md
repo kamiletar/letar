@@ -57,13 +57,14 @@
 - [x] Живой пилот rollout: `letar.rollout: 'true'` включён, супервизируемый прод-деплой с
       непрерывным curl-мониторингом пройден чисто (2026-07-12, сессия №68) — см. корневой
       `PLAN.md` §18.6 Сессия G
-- [ ] Исправить ошибку сборки: `number-to-words` не найден на сервере
-- [ ] Исправить POSTGRES_PASSWORD в docker-compose
-- [ ] Настроить crontab на s2
-- [ ] Создать Umami website ID
+- [x] Исправить ошибку сборки: `number-to-words` не найден на сервере
+- [x] Исправить POSTGRES_PASSWORD в docker-compose (`.env.docker` содержит `POSTGRES_PASSWORD`)
+- [x] Настроить NPM для time.letar.best на s2 (live, `DOMAIN=time.letar.best`)
+- [x] Создать Umami website ID (`NEXT_PUBLIC_UMAMI_WEBSITE_ID` в `.env.docker` заполнен)
+- [x] Деплой на s2 (в `S2_APPS` в `deploy-affected.sh`, rollout-пилот пройден — см. запись выше)
+- [ ] Настроить crontab на s2 — актуальный статус не подтверждён (проверить `CRON_SECRET` в
+      `.env.docker` присутствует, но сам crontab-job на сервере не верифицирован в этой сессии)
 - [ ] Добавить List-Unsubscribe заголовок в email
-- [ ] Настроить NPM для time.letar.best на s2
-- [ ] Деплой на s2
 
 ---
 
@@ -277,12 +278,8 @@ libs/number-words/
 
 ### Фаза 6: Деплой
 
-- [ ] Исправить ошибку сборки number-to-words на s2
-- [ ] Исправить POSTGRES_PASSWORD в docker-compose
-- [ ] Собрать и задеплоить time на s2
-- [ ] Настроить NPM time.letar.best
-- [ ] Создать Umami website ID
-- [ ] Настроить crontab
+✅ Задеплоено на s2 (`time.letar.best`, live) — детальный чеклист см. раздел «Инфраструктура»
+выше (2026-07-18: сверено с `.env.docker`, дублирующий устаревший список здесь удалён).
 
 ### Подключение к staging e2e-гейту (2026-07-18, кросс-приложенческий контекст — корневой `PLAN.md` §18.7)
 
