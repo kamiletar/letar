@@ -2,6 +2,15 @@
 
 Детальное описание реализованных функций.
 
+## Тесты (2026-07-18)
+
+### Базовый E2E-сьют
+
+- Создан `apps/animatrona-landing-e2e` (Playwright, конвенция `time-e2e`/`pravda-e2e`)
+- `playwright.config.ts` использует env-переменную `BASE_URL` (дефолт `http://localhost:3008`) — готовность к staging-гейту
+- 14 тестов в 3 файлах: `homepage.spec.ts` (рендер главной, Navbar/Footer, ключевые секции, skip-link), `navigation.spec.ts` (якорная навигация, документация, редирект `/docs`, сайдбар доков), `mobile.spec.ts` (отсутствие horizontal overflow, мобильный Drawer-меню)
+- Первый шаг перед подключением приложения к `E2E_GATED_APPS` (letar `PLAN.md` §18.7)
+
 ## Версия 0.2.0 (2026-01-09)
 
 ### Mobile Menu

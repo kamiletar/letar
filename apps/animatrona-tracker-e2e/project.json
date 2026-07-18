@@ -1,0 +1,15 @@
+{
+  "name": "animatrona-tracker-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/animatrona-tracker-e2e/src",
+  "tags": ["type:e2e", "scope:animatrona-tracker", "owner:letar"],
+  "implicitDependencies": ["animatrona-tracker"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/animatrona-tracker-e2e/playwright.config.ts"
+      }
+    }
+  }
+}

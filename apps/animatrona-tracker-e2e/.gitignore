@@ -1,0 +1,7 @@
+# storageState с реальными (пусть и dev-session) cookie сессии — не коммитим
+playwright/.auth/
+
+# артефакты прогонов
+test-output/
+playwright-report/
+blob-report/

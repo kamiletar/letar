@@ -25,3 +25,6 @@
 [submodule "apps/aprel8008"]
 	path = apps/aprel8008
 	url = git@github.com:kamiletar/letar-private-aprel8008.git
+[submodule "apps/studio-e2e"]
+	path = apps/studio-e2e
+	url = git@github.com:kamiletar/letar-private-studio-e2e.git

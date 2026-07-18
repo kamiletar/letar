@@ -1,0 +1,10 @@
+{
+  "name": "kami-key-the-landing-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "kami-key-the-landing"
+    ]
+  }
+}

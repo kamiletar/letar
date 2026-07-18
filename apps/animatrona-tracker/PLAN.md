@@ -418,7 +418,7 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
 - [x] Кэширование списков (Redis) — лидерборд 15м, профиль 5м, жанры 5м, invalidate при мутациях
 - [x] Redis для онлайн-статуса раздач — heartbeat в Redis с TTL 1ч, счётчик сидов на странице аниме, обновлённый admin UI
 - [ ] Мониторинг (Sentry)
-- [ ] E2E тесты
+- [x] **Базовый E2E-сьют** — `apps/animatrona-tracker-e2e`, 10 тестов Playwright (публичный каталог/поиск/RSS, sign-in/sign-up формы, dev-session логин по конвенции `createDevSessionRoute` из `@letar/auth/server`, доступ к `/admin` — редирект неавторизованных + дашборд/пользователи/вкладки для ADMIN). Новый роут `src/app/api/auth/dev-session/route.ts`
 - [ ] **Filecoin Cold Storage** — бесплатное холодное хранилище для каталога, автовосстановление, донаты в FIL. [ТЗ](docs/FILECOIN_COLD_STORAGE.md)
 
 ---
