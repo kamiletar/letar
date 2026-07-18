@@ -62,17 +62,19 @@ async function checkE2eGate(app: string): Promise<string[]> {
     }
     if (!last.passed) {
       warnings.push(
-        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`
+        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`,
       )
     }
     try {
       const head = localHeadSha()
       if (last.commitSha !== head) {
         warnings.push(
-          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(
-            0,
-            7
-          )} — не тот же коммит.`
+          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${
+            head.slice(
+              0,
+              7,
+            )
+          } — не тот же коммит.`,
         )
       }
     } catch {
@@ -84,7 +86,7 @@ async function checkE2eGate(app: string): Promise<string[]> {
     }
   } catch (err) {
     warnings.push(
-      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`
+      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`,
     )
   }
   return warnings
@@ -108,9 +110,9 @@ export function createDeployMcpServer(): McpServer {
           pretty(SERVER_APPS),
           '',
           '_staging любого приложения резолвится на s3 (target: "staging")._',
-        ].join('\n')
+        ].join('\n'),
       )
-    }
+    },
   )
 
   // ─── agent_health ──────────────────────────────────────────────────────────────
@@ -125,7 +127,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ Агент на **${server}** недоступен: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── git_status ────────────────────────────────────────────────────────────────
@@ -143,7 +145,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ git_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_status ───────────────────────────────────────────────────────────
@@ -179,7 +181,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_cancel ───────────────────────────────────────────────────────────
@@ -197,7 +199,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_cancel на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_app ────────────────────────────────────────────────────────────────
@@ -206,6 +208,7 @@ export function createDeployMcpServer(): McpServer {
     [
       'Запускает деплой приложения (POST /api/deploy/app) — замена сырого SSH + deploy-affected.sh.',
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s3, образ <app>:staging).',
+      'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
     ].join('\n'),
@@ -218,8 +221,9 @@ export function createDeployMcpServer(): McpServer {
         .enum(['production', 'staging'])
         .optional()
         .describe('production (по умолчанию, сервер приложения) или staging (s3)'),
+      seed: z.boolean().optional().describe('Запустить nx run <app>:db:seed после успешного деплоя (--seed)'),
     },
-    async ({ app, target = 'production' }) => {
+    async ({ app, target = 'production', seed = false }) => {
       const server = resolveDeployServer(app, target as DeployTarget)
       const staging = target === 'staging'
       // Warn-only e2e-gate: только для production, только предупреждает, никогда не блокирует
@@ -229,11 +233,11 @@ export function createDeployMcpServer(): McpServer {
         const res = await agentRequest(server, {
           method: 'POST',
           path: '/api/deploy/app',
-          body: { appName: app, staging },
+          body: { appName: app, staging, seed },
         })
         if (!res.success) {
           return errorText(
-            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n')
+            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
           )
         }
         const data = res.data as { deployId?: string } | undefined
@@ -247,17 +251,17 @@ export function createDeployMcpServer(): McpServer {
             }", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n')
+          ].join('\n'),
         )
       } catch (err) {
         return errorText(
           [
             ...gatePrefix,
             `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
-          ].join('\n')
+          ].join('\n'),
         )
       }
-    }
+    },
   )
 
   // ─── run_e2e ─────────────────────────────────────────────────────────────────
@@ -292,12 +296,12 @@ export function createDeployMcpServer(): McpServer {
             `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n')
+          ].join('\n'),
         )
       } catch (err) {
         return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── e2e_status ──────────────────────────────────────────────────────────────
@@ -334,7 +338,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   return server

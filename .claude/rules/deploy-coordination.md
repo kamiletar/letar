@@ -65,6 +65,7 @@ deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг (since
 ```
 
 - `target: "staging"` резолвится на s3 (образ `<app>:staging`).
+- `seed: true` → добавляет `--seed` (`nx run <app>:db:seed` после успешного деплоя) — теперь не требует SSH-резерва.
 - `agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
 - Подробности: [mcp-servers.md § Deploy MCP](/.claude/docs/mcp-servers.md#deploy-mcp-letardeploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 

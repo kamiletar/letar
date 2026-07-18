@@ -337,21 +337,24 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * POST /api/deploy/app — полный деплой приложения через deploy-affected.sh
-   * Body: { appName: string; staging?: boolean }
+   * Body: { appName: string; staging?: boolean; seed?: boolean }
    * staging: true → deploy-affected.sh --staging (образ <app>:staging, для s3)
+   * seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя)
    *
    * Асинхронный: сразу возвращает deployId, клиент опрашивает /api/deploy/status.
    * Аргументы передаются spawn'у массивом — без промежуточного bash -c,
    * инъекция через body структурно невозможна.
    */
-  fastify.post<{ Body: { appName: string; staging?: boolean } }>(
+  fastify.post<{ Body: { appName: string; staging?: boolean; seed?: boolean } }>(
     '/api/deploy/app',
     async (
       request,
-    ): Promise<ApiResponse<{ deployId: string; appName: string; staging: boolean; started: boolean }>> => {
+    ): Promise<
+      ApiResponse<{ deployId: string; appName: string; staging: boolean; seed: boolean; started: boolean }>
+    > => {
       const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
 
-      const { appName, staging = false } = request.body
+      const { appName, staging = false, seed = false } = request.body
 
       if (!appName) {
         return {
@@ -407,12 +410,18 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         startTime: new Date().toISOString(),
       })
 
-      appendOutput(deploy, `🚀 Deploying app: ${appName}${staging ? ' (staging)' : ''}`)
+      appendOutput(deploy, `🚀 Deploying app: ${appName}${staging ? ' (staging)' : ''}${seed ? ' [+seed]' : ''}`)
 
       // nsenter выполняет скрипт на хосте (pid: host + privileged), скрипт сам делает cd
       // в свою директорию (SCRIPT_DIR в deploy-affected.sh) — аргументы массивом, без shell.
       const scriptPath = `${REPO_PATH}/deploy-affected.sh`
-      const command = [scriptPath, '--app', appName, ...(staging ? ['--staging'] : [])]
+      const command = [
+        scriptPath,
+        '--app',
+        appName,
+        ...(staging ? ['--staging'] : []),
+        ...(seed ? ['--seed'] : []),
+      ]
       const args = hostExecArgs(command)
       appendOutput(deploy, `📋 Command: nsenter ${args.join(' ')}`)
 
@@ -479,6 +488,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           deployId: deploy.deployId,
           appName,
           staging,
+          seed,
           started: true,
         },
         timestamp: new Date().toISOString(),

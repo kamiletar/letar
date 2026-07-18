@@ -9,16 +9,16 @@ MCP-сервер: структурированный слой над REST API da
 
 ## Инструменты
 
-| Инструмент                                         | Действие                                                                   | Эндпоинт агента           |
-| -------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------- |
-| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`) | —                         |
-| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)            | `GET /health`             |
-| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем             | `GET /api/git/status`     |
-| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                | `GET /api/deploy/status`  |
-| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                           | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target })`                      | Запуск деплоя (`target`: `production`\|`staging`) + warn-only e2e-gate     | `POST /api/deploy/app`    |
-| `run_e2e({ app, baseUrl, project? })`              | Запуск Playwright e2e на s3 против `baseUrl`                               | `POST /api/e2e/run`       |
-| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)          | `GET /api/e2e/status`     |
+| Инструмент                                         | Действие                                                                                 | Эндпоинт агента           |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------- |
+| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)               | —                         |
+| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                          | `GET /health`             |
+| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                           | `GET /api/git/status`     |
+| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                              | `GET /api/deploy/status`  |
+| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                         | `POST /api/deploy/cancel` |
+| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + warn-only e2e-gate | `POST /api/deploy/app`    |
+| `run_e2e({ app, baseUrl, project? })`              | Запуск Playwright e2e на s3 против `baseUrl`                                             | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                        | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
 автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
