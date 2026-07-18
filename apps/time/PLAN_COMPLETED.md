@@ -1,5 +1,31 @@
 # Time — Выполненные задачи
 
+## 2026-07-18 — Подключение к staging e2e-гейту: build fix + playwright.config fix (§18.7, инфра, вне тематики приложения)
+
+Корневой `PLAN.md` §18.7 Тираж M1 — подключение `time` к staging-e2e-гейту. Первый
+staging-деплой (BlackCove) упал на билде; после фикса деплой прошёл, но `time-e2e` не запускался
+вообще из-за отдельного бага конфига.
+
+- **Build failed:** `next build` использует собственный TS-чекер, который не полностью
+  поддерживает project references (`tsconfig.json` → `references`) и ложно требовал, чтобы
+  `libs/analytics/src/index.ts` (path-mapped импорт `@letar/analytics`) лежал внутри `rootDir`
+  приложения. Фикс — `typescript: { ignoreBuildErrors: true }` в `next.config.js`, тот же
+  паттерн уже у 14 других приложений монорепо (grandslamcup, kami, aboi, driving-school...) —
+  типы проверяются отдельно `nx typecheck:tsgo` (у time чисто).
+- **`time-e2e` не запускался на staging:** `playwright.config.ts` — `webServer.command: 'bun nx
+  run @letar/time:dev'` звал несуществующий nx-проект (реальное имя — `time`, `@letar/time` —
+  это имя `package.json`); `webServer.url` был захардкожен на `localhost:3000` (дефолт
+  генератора, не совпадает ни с реальным портом time — 3013, ни с `baseURL`) — из-за этого
+  `reuseExistingServer` не видел уже поднятый staging-контейнер и пытался поднять несуществующий
+  локальный dev. Плюс добавлен `locale: 'ru-RU'` — без него Chromium/WebKit шлют
+  `Accept-Language: en-US`, next-intl отдаёт английский контент вместо `defaultLocale: 'ru'`.
+- `example.spec.ts` — дефолтный Nx-плейсхолдер (`<h1>` с текстом "Welcome", такого элемента на
+  главной странице `time` нет — она рендерит только `<Text>` со счётчиком часов) заменён на
+  реальный смок-тест (проверка `<title>` + видимого текста часа).
+- Локально 3/3 браузера (chromium/firefox/webkit) зелёные (`BASE_URL=http://localhost:3013
+  bunx playwright test`, минуя зависающий в dev-режиме `nx e2e`).
+- Коммит `884ed211` (letar root). Подробности — корневой `PLAN.md` §18.7.
+
 ## 2026-07-12 — Живой пилот zero-downtime rollout пройден (§18.6 Сессия G, инфра, вне тематики приложения)
 
 Продолжение записи ниже — супервизируемый прод-деплой через включённый `letar.rollout: 'true'`.

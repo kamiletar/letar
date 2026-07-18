@@ -283,3 +283,18 @@ libs/number-words/
 - [ ] Настроить NPM time.letar.best
 - [ ] Создать Umami website ID
 - [ ] Настроить crontab
+
+### Подключение к staging e2e-гейту (2026-07-18, кросс-приложенческий контекст — корневой `PLAN.md` §18.7)
+
+- [x] `docker-compose.staging.yml` + `.env.staging.example` — staging-окружение на s3
+- [x] `next.config.js` — `typescript.ignoreBuildErrors: true` (Next.js не понимает TS project
+      references из `tsconfig.json`, ложно валил rootDir на импорте `@letar/analytics`; тот же
+      паттерн уже у 14 других приложений монорепо, типы проверяются отдельно `nx typecheck:tsgo`)
+- [x] `apps/time-e2e/playwright.config.ts` — `webServer.command` звал несуществующий nx-проект
+      `@letar/time` (реальное имя — `time`), `webServer.url` был захардкожен на
+      `localhost:3000` вместо `baseURL`; добавлен `locale: 'ru-RU'` (иначе Chromium/WebKit шлют
+      `Accept-Language: en-US`, next-intl отдаёт английский вместо `defaultLocale: 'ru'`)
+- [x] `apps/time-e2e/src/example.spec.ts` — дефолтный Nx-плейсхолдер (`<h1>` с "Welcome", такого
+      элемента на странице нет вообще) заменён на реальный смок-тест главной страницы
+- [ ] Дождаться повторного `deploy_app(time, staging)` + `run_e2e` от BlackCove → зелёный →
+      добавление в `E2E_GATED_APPS`
