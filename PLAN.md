@@ -4260,6 +4260,19 @@ tsconfig, eslint, playwright.config.ts с портом из `apps/<app>/.env`, `
   результат идентичен `tsc` 6.0.3 и `tsgo` dev-preview (те же 4 pre-existing ошибки, не про компилятор).
   Скорость (`time`, чистый прогон): `tsc` 2.71s / `tsgo` 0.60s / **TS7 GA 0.62s** — паритет с уже используемым
   `tsgo`, ускорение подтверждается на реальном коде, а не только на бенчмарках Microsoft.
+- **Память — второй мотиватор тиража (замер 2026-07-18, driving-school, `--extendedDiagnostics`):**
+  `tsc` 6.0.3 — 2.3 GB / 18.4s, `tsgo` — 1.9 GB / 3.3s. Экономия по пику ~20%, но пик живёт 3 секунды
+  вместо 19 — при `nx run-many -t typecheck` (`parallel: 3`) это разница между «3×2.3 GB висят минуту»
+  и «всплеск на секунды». У `driving-school:typecheck` уже стоял костыль `--max-old-space-size=4096`
+  (tsc не влезал в дефолтный heap) — с tsgo он не нужен. Таргет `typecheck:tsgo` добавлен в
+  driving-school (2026-07-18), теперь он есть у 41 проекта.
+- **Редакторская память (tsserver) — не покрывается CLI-тиражом:** solution-tsconfig на ~60 references +
+  `paths` на исходники libs → tsserver в VS Code строит отдельную program на каждое открытое приложение и
+  выедает гигабайты V8-heap. Лечится переходом редактора на нативный LSP: расширение «TypeScript (Native
+  Preview)» + `"typescript.experimental.useTsgo": true` в настройках VS Code. Ограничения те же, что у
+  embedded-языков ниже: tsserver-плагины (в т.ч. `next` из tsconfig) в нативном LSP не работают —
+  редакторские подсказки typed routes пропадут, CLI-тайпчек не затронут. Пробовать индивидуально,
+  в `.vscode/settings.json` репо не коммитить, пока не проверено на Next-приложениях.
 
 ### ⚠️ Найденная ловушка — коллизия имени bin `tsc`
 
@@ -4310,12 +4323,16 @@ tsconfig, eslint, playwright.config.ts с портом из `apps/<app>/.env`, `
 ### ✓ DoD §19
 
 - [x] Пилот на `time`: таргет `typecheck:ts7` добавлен, результат идентичен tsc/tsgo, задокументирован
-- [x] **Проверено (2026-07-18), зависит ли ESLint/typescript-eslint от API `typescript` программно —
-      НЕТ.** Ни в одном `eslint.config.mjs` монорепо нет `parserOptions.project`/`projectService`
-      (type-aware linting не включён нигде) — `@typescript-eslint/*` правила работают в
-      синтаксическом режиме, не создают TS `Program`, не трогают API компилятора в рантайме.
-      Снижает риск шага 2 (алиасы) — можно бампать `typescript` в root `package.json`, не боясь
-      сломать `nx lint` по всему монорепо.
+- [x] **Проверено (2026-07-18, перепроверено в тот же день), зависит ли ESLint/typescript-eslint от API
+      `typescript` программно — ДА, зависит всегда, alias-схема обязательна.** Первая проверка была права
+      в том, что type-aware linting нигде не включён (`parserOptions.project`/`projectService`
+      отсутствуют), но вывод «API не трогается» неверен: `@typescript-eslint/typescript-estree@8.57.2`
+      делает `require("typescript")` в самом парсере (`convert.js`, `check-syntax-errors.js`,
+      `create-program/*`) и зовёт `ts.createSourceFile` при **каждом** прогоне ESLint, безотносительно
+      type-aware. Peer-резолюция проверена вживую: estree резолвит `typescript@6.0.3` из bun-изоляции
+      (`node_modules/.bun/@typescript-eslint+typescript-estree@8.57.2+…/node_modules/typescript`).
+      Голый бамп root `typescript` → 7.0.2 (пакет без JS API) переключит этот peer-линк и уронит
+      `nx lint` по всему монорепо → шаг 2 (алиас `typescript: npm:@typescript/typescript6`) — обязателен.
 - [ ] Корневой `package.json` переведён на схему `typescript6`/`native` алиасов (или обосновано, почему нет)
 - [ ] `nx run-many -t typecheck:tsgo` (или `ts7`) зелёный по всем apps/libs на новом компиляторе
 - [ ] Решение по судьбе `typecheck:tsgo`/`@typescript/native-preview` (оставить, свернуть, переименовать)
