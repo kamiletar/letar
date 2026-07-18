@@ -1,5 +1,23 @@
 # synth — Воркфлоу разработки (архитектор + музыкальный ментор)
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `synth-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "synth-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка synth: <что делаешь>",
+  file_reservation_paths: ["apps/synth/**"],
+  file_reservation_reason: "synth development"
+)
+```
+
 ## Читать первым
 
 1. `apps/synth/claude.md` — роль, профиль владельца, закрытые решения, «не делать»

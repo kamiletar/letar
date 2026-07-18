@@ -5,6 +5,24 @@
 1. Прочитай `apps/animatrona-mobile/README.md` для обзора приложения
 2. Прочитай `apps/animatrona-mobile/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `animatrona-mobile-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "animatrona-mobile-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка animatrona-mobile: <что делаешь>",
+  file_reservation_paths: ["apps/animatrona-mobile/**"],
+  file_reservation_reason: "animatrona-mobile development"
+)
+```
+
 ## Действия
 
 После изучения документации:

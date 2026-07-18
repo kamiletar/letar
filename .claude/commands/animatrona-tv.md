@@ -5,6 +5,24 @@
 1. Прочитай `apps/animatrona-tv/README.md` для обзора приложения
 2. Прочитай `apps/animatrona-tv/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `animatrona-tv-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "animatrona-tv-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка animatrona-tv: <что делаешь>",
+  file_reservation_paths: ["apps/animatrona-tv/**"],
+  file_reservation_reason: "animatrona-tv development"
+)
+```
+
 ## Действия
 
 После изучения документации:

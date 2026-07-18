@@ -5,6 +5,24 @@
 1. Прочитай `.claude/rules/driving-school.md` для специфичных правил
 2. Прочитай `apps/driving-school/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `driving-school-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "driving-school-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка driving-school: <что делаешь>",
+  file_reservation_paths: ["apps/driving-school/**"],
+  file_reservation_reason: "driving-school development"
+)
+```
+
 ## Действия
 
 После изучения документации:

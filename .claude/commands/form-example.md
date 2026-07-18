@@ -5,12 +5,30 @@
 1. Прочитай `apps/form-example/PLAN.md` для текущего состояния задач (если есть)
 2. Прочитай `libs/forms/README.md` для контекста библиотеки
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `form-example-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "form-example-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка form-example: <что делаешь>",
+  file_reservation_paths: ["apps/form-example/**"],
+  file_reservation_reason: "form-example development"
+)
+```
+
 ## Координация (Forms Coordinator)
 
 **Проверяй inbox** на задачи от координатора (topic: `forms-task`):
 
 ```
-fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
+fetch_inbox(project_key: "c-web-letar", agent_name: "form-example-dev", registration_token: "<токен из agent_fixed_names_tokens.md>", topic: "forms-task", include_bodies: true)
 ```
 
 После завершения — **отвечай через reply_message**.

@@ -6,7 +6,20 @@
 
 ## Инициализация
 
-1. Зарегистрируйся в координации агентов — `macro_start_session` (см. `.claude/rules/agent-mail.md`).
+1. Зарегистрируйся в координации агентов под фиксированным именем `letar-dev`
+   (токен — в памяти `agent_fixed_names_tokens.md`, таблица «Приложение → agent_name → registration_token»):
+
+   ```
+   macro_start_session(
+     human_key: "C:/web/letar",
+     program: "claude-code",
+     model: "claude-sonnet-4-6",
+     agent_name: "letar-dev",
+     registration_token: "<токен из agent_fixed_names_tokens.md>",
+     task_description: "Монорепо-задача: <что делаешь>"
+   )
+   ```
+
 2. Прочитай `CLAUDE.md` в корне — главные инструкции и стек.
 3. Вызови MCP `nx_workspace` — получи актуальную карту проектов, портов и графа зависимостей.
 4. При необходимости загляни в `.claude/docs/repo-structure.md` ⭐ (публичный репо + приватные submodules).

@@ -4,6 +4,24 @@
 
 1. Прочитай `apps/aprel8008/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `aprel8008-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "aprel8008-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка aprel8008: <что делаешь>",
+  file_reservation_paths: ["apps/aprel8008/**"],
+  file_reservation_reason: "aprel8008 development"
+)
+```
+
 ## Действия
 
 После изучения документации:

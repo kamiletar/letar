@@ -17,11 +17,16 @@
 
 ОБЯЗАТЕЛЬНО при старте сессии вызови `macro_start_session` (см. `.claude/rules/agent-mail.md`):
 
+Фиксированное имя `aboi-dev`, токен — в памяти `agent_fixed_names_tokens.md`
+(таблица «Приложение → agent_name → registration_token»).
+
 ```
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.7",
+  agent_name: "aboi-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
   task_description: "Разработка aboi: <что делаешь>",
   file_reservation_paths: ["apps/aboi/**"],
   file_reservation_reason: "aboi development"

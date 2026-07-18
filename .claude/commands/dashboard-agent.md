@@ -2,13 +2,16 @@
 
 ## Инициализация
 
-1. Зарегистрируйся в Agent Mail:
+1. Зарегистрируйся в Agent Mail под фиксированным именем `dashboard-agent-dev`
+   (токен — в памяти `agent_fixed_names_tokens.md`, таблица «Приложение → agent_name → registration_token»):
 
 ```
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
   model: "claude-sonnet-4-6",
+  agent_name: "dashboard-agent-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
   task_description: "Dashboard Agent — разработка apps/dashboard-agent",
   file_reservation_paths: ["apps/dashboard-agent/**"],
   file_reservation_reason: "dashboard-agent development"
@@ -22,7 +25,8 @@ macro_start_session(
 ```
 fetch_inbox(
   project_key: "c-web-letar",
-  agent_name: "<твоё-имя>",
+  agent_name: "dashboard-agent-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
   include_bodies: true
 )
 ```

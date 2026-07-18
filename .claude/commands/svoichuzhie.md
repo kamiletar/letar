@@ -5,6 +5,24 @@
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
 2. Прочитай `apps/svoichuzhie/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `svoichuzhie-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "svoichuzhie-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка svoichuzhie: <что делаешь>",
+  file_reservation_paths: ["apps/svoichuzhie/**"],
+  file_reservation_reason: "svoichuzhie development"
+)
+```
+
 ## Действия
 
 После изучения документации:

@@ -5,6 +5,24 @@
 1. Прочитай `apps/label-printer-desktop/PLAN.md` для текущего состояния задач
 2. Прочитай `libs/label-printer-core/README.md` для API shared библиотеки
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `label-printer-desktop-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "label-printer-desktop-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка label-printer-desktop: <что делаешь>",
+  file_reservation_paths: ["apps/label-printer-desktop/**"],
+  file_reservation_reason: "label-printer-desktop development"
+)
+```
+
 ## Действия
 
 После изучения документации:

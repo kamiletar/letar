@@ -4,12 +4,16 @@
 
 1. Прочитай `.claude/rules/forms.md` для правил работы с формами
 2. Прочитай `libs/forms/README.md` для API библиотеки
-3. Зарегистрируйся в agent-mail:
+3. Зарегистрируйся в agent-mail под фиксированным именем `forms-dev`
+   (токен — в памяти `agent_fixed_names_tokens.md`, таблица «Приложение → agent_name → registration_token»):
+
    ```
    macro_start_session(
      human_key: "C:/web/letar",
      program: "claude-code",
      model: "opus-4.6",
+     agent_name: "forms-dev",
+     registration_token: "<токен из agent_fixed_names_tokens.md>",
      task_description: "Разработка @letar/forms",
      file_reservation_paths: [
        "libs/forms/**",
@@ -25,6 +29,7 @@
 
    ⚠️ **Фаза 7 разбивает библиотеку на несколько пакетов** — резервируй владение ими заранее (даже если
    папки ещё не созданы), чтобы параллельные сессии не разъехались по core/скинам.
+
 4. **Проверь входящие запросы:**
    ```
    fetch_inbox(topic: "form-feature-request", include_bodies: true)

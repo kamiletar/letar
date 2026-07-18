@@ -5,6 +5,24 @@
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
 2. Прочитай `apps/studio/PLAN.md` для текущего состояния задач
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `studio-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "studio-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка studio: <что делаешь>",
+  file_reservation_paths: ["apps/studio/**"],
+  file_reservation_reason: "studio development"
+)
+```
+
 ## Действия
 
 После изучения документации:

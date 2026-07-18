@@ -7,6 +7,24 @@
 3. Прочитай `.claude/rules/animatrona.md` для архитектуры десктопа и IPFS
 4. Прочитай `.claude/rules/animatrona-db.md` для моделей данных
 
+## Регистрация в Agent Mail
+
+ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `animatrona-tracker-dev`.
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-4-6",
+  agent_name: "animatrona-tracker-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
+  task_description: "Разработка animatrona-tracker: <что делаешь>",
+  file_reservation_paths: ["apps/animatrona-tracker/**"],
+  file_reservation_reason: "animatrona-tracker development"
+)
+```
+
 ## Действия
 
 После изучения документации:
