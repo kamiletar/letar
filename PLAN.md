@@ -1,5 +1,30 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 Тираж M1 — ответ BlackCove по `aboi`+`time`, оба бага починены (2026-07-18):**
+> Инфра сделана полностью (NPM proxy hosts + Let's Encrypt, `.env.staging` секреты, auth-hub
+> пересеян). **Побочно найдено и уже починено BlackCove:** мой коммит `133faafe` ссылался на
+> непроверенный SHA `driving-school` — блокировало `git pull --recurse-submodules` на s2 И s3
+> (любой деплой вообще); **вывод на будущее:** перед `git add <submodule>` проверять
+> `git log origin/main..HEAD` внутри submodule, не полагаться на локальный коммит.
+> **Баг 1 — `time` build failed** (`libs/analytics/src/index.ts is not under 'rootDir'`):
+> причина — в `next.config.js` `time` не было `typescript: { ignoreBuildErrors: true }` (уже есть
+> у 14 других приложений монорепо), из-за чего Next.js гонял свой тайпчекер поверх `next build` и
+> ложно валил rootDir на path-mapped импорте из `libs/` (Next не понимает TS project references
+> из `tsconfig.json` `references`). Типобезопасность в проекте и так идёт отдельным треком —
+> `nx typecheck:tsgo` (проходит чисто). **Пофикшено, локально `nx build time` зелёный.**
+> **Баг 2 — `aboi-e2e` 2 passed/9 failed** (пустой каталог товаров на свежей staging-БД + WebKit
+> не запускается на s3 из-за отсутствующих системных либ). Второе — разовая инфра-задача s3
+> (не только для aboi), первое — написан `apps/aboi/scripts/anonymize-staging-db.ts` по образцу
+> grandslamcup (анонимизирует User/UserProfile/Address/Order-снэпшот/ConsentLog, каталог
+> Product/Image не трогает — публичные данные). **Требует от BlackCove:** `pg_dump` прод aboi
+> (исключить `-T Account -T Session -T Verification -T ConsentLog`) → restore в
+> `aboi-staging-db` → прогнать скрипт → повторный `run_e2e`.
+> **➡️ Следующий старт:** ответ BlackCove по повтору `deploy_app(time, staging)` +
+> restore-снепшоту aboi + WebKit-депсам на s3; затем повторный `run_e2e` для обоих → зелёный →
+> добавление в `E2E_GATED_APPS`. Запрос по остальным 6 приложениям M1 (`svoichuzhie`,
+> `aprel8008`, `dsperevod`, `mandala`, `pravda`, `aira-web`) пока не отправлен — код готов
+> (ниже), ждём чтобы не перегружать очередь BlackCove.
+>
 > **⏳ §18.7 Тираж M — код-подготовка `aboi`+`time` (2026-07-18):** `docker-compose.staging.yml` +
 > `.env.staging.example` для обоих приложений (порты: aboi db 5457/app 3022→3018, time db
 > 5458/app 3023→3013 — следующие свободные после grandslamcup/auth-hub/driving-school). `time`
