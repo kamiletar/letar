@@ -410,6 +410,34 @@ ack_required: true
 
 - Обязательно bind mount `./uploads:/app/apps/<name>/uploads` в docker-compose (не anonymous volume!)
 
+### 18. Подключение к staging e2e-гейту (опционально, когда появится e2e-сьют)
+
+`deploy_app(production)` может блокироваться, если коммит не прошёл e2e на стейдже — но только
+для приложений из `E2E_GATED_APPS` (`libs/infra-config`). Подключение — не обязательный шаг при
+создании приложения, а отдельный, более поздний тираж (см. PLAN.md §18.7 «Тираж M/N» — актуальный
+статус там: какие приложения уже gated, какие ждут очереди). Когда у приложения появится
+Playwright-сьют (`apps/<name>-e2e`) и придёт время подключать его к гейту:
+
+1. **`apps/<name>/docker-compose.staging.yml`** — по образцу `apps/grandslamcup/docker-compose.staging.yml`
+   (или свежих примеров из §18.7 M1 — `apps/aboi`, `apps/time`, `apps/mandala` и т.д.). Хостовые порты
+   (app/db) — следующие свободные в последовательности, см. актуальный список в PLAN.md §18.7 (там же
+   комментарий-конвенция про порядок `ports:` для `deploy-affected.sh`-парсинга `DB_PORT`).
+2. **`apps/<name>/.env.staging.example`** — шаблон секретов (не хранит реальные значения, они только
+   в `.env.staging` на s3). Если приложение — `hub-client` (OIDC через Ключницу), добавь
+   `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET`/`OIDC_DISCOVERY_URL` и **staging redirect URI**
+   (`https://<name>-stage.s3.letar.best/...`) в `apps/auth-hub/prisma/seed.ts` к существующему клиенту
+   (не заводи новый — тот же клиент/секрет, что и у прод).
+3. `playwright.config.ts` приложения-e2e обычно уже совместим (читает `BASE_URL` из env,
+   `webServer.reuseExistingServer: true`) — правок, как правило, не требует.
+4. **NPM proxy host + DNS** (`<name>-stage.s3.letar.best`, wildcard `*.s3 CNAME s3.letar.best` уже есть) и
+   создание `.env.staging` на s3 с реальными секретами — задача BlackCove, не твоя (см.
+   `.claude/rules/deploy-coordination.md`), отправь `deploy-request` через agent-mail.
+5. Добавление в `E2E_GATED_APPS` — только после зелёного `deploy_app(staging)` → `run_e2e` → `e2e_status`,
+   не раньше.
+
+Подробности пайплайна и текущий список подключённых/ожидающих приложений — `.claude/docs/deployment.md`
+и `PLAN.md` §18.7.
+
 ## После создания
 
 1. Запусти `nx dev <name>` — проверь что работает
