@@ -1,0 +1,8 @@
+# PLAN_TESTING — <%= displayName %>
+
+## Ручная проверка
+
+- [ ] `nx dev <%= name %>` — окно открывается, интерфейс реагирует на клики
+- [ ] `nx build:win <%= name %>` — `dist/*.exe` собирается без ошибок
+- [ ] Установленный `.exe` реально запускается и работает (GUI Electron не проверяется
+      в сендбоксе Claude Code — см. `.claude/rules/electron.md` § «Грабли»)

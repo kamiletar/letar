@@ -1,0 +1,26 @@
+/** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production'
+
+module.exports = {
+  // Статический экспорт — нет сервера, нет API routes, вся логика через Electron IPC
+  output: 'export',
+  distDir: '.next',
+  trailingSlash: true,
+  // В упакованном приложении страница грузится через file:// — абсолютные пути ("/_next/...")
+  // резолвятся от корня диска и ломают загрузку чанков. Относительный префикс чинит это
+  // (страница ровно одна, на глубине 0 — out/index.html рядом с out/_next/). Если добавляешь
+  // вложенные роуты — читай .claude/rules/electron.md § «Грабли».
+  assetPrefix: isProd ? './' : undefined,
+  images: {
+    unoptimized: true,
+  },
+  turbopack: {},
+  transpilePackages: ['@letar/chakra-provider'],
+  webpack: (config, { isServer }) => {
+    // В dev режиме для renderer используем electron-renderer
+    if (!isServer && !isProd) {
+      config.target = 'electron-renderer'
+    }
+    return config
+  },
+}

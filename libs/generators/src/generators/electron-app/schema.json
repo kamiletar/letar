@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "ElectronApp",
+  "title": "Electron App Generator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Имя приложения (папка apps/<name>), kebab-case",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Имя нового Electron-приложения (apps/<name>)?"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Человекочитаемое имя (заголовок окна, productName). По умолчанию — Title Case от name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание приложения (package.json, README, метаданные окна)"
+    },
+    "private": {
+      "type": "boolean",
+      "description": "Приложение приватное (будет отдельным git submodule) — влияет только на подсказки после генерации",
+      "default": false
+    }
+  },
+  "required": ["name"]
+}

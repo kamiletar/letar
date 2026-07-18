@@ -1,0 +1,49 @@
+appId: com.letar.<%= name %>
+productName: <%= displayName %>
+copyright: Copyright © <%= year %>
+electronVersion: <%= electronVersion %>
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+      - node_modules
+
+extraMetadata:
+  main: app/background.js
+
+# Нативные (.node) модули нельзя паковать в asar — добавляй сюда паттерны по мере
+# появления зависимостей вроде sharp/canvas (см. .claude/rules/electron.md § «Грабли»)
+asarUnpack:
+  - '**/*.node'
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: <%= displayName %>
+
+# Без автообновления по умолчанию — если нужно, настрой provider: github и убери publish: null
+publish: null
+
+extraResources:
+  # Статический экспорт Next.js (без сервера — вся логика через Electron IPC)
+  - from: renderer/out
+    to: renderer/out
+    filter:
+      - '**/*'

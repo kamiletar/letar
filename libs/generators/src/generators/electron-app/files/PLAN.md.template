@@ -1,0 +1,9 @@
+# PLAN — <%= displayName %>
+
+## Фаза 1 — MVP
+
+- [ ] Заменить placeholder-иконку и заголовок
+- [ ] Бизнес-логика в `main/services/`
+- [ ] IPC-хендлеры в `main/ipc/`
+- [ ] UI в `renderer/app/page.tsx`
+- [ ] Проверка dev-режима и упакованной сборки (`nx build:win <%= name %>`)

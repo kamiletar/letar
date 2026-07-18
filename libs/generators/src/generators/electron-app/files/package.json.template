@@ -1,0 +1,15 @@
+{
+  "name": "@letar/<%= name %>",
+  "version": "0.1.0",
+  "private": true,
+  "description": "<%= description %>",
+  "author": "Kami Letar",
+  "main": "app/background.js",
+  "nx": {
+    "name": "<%= name %>"
+  },
+  "devDependencies": {
+    "electron": "<%= electronVersion %>",
+    "electron-builder": "<%= electronBuilderVersion %>"
+  }
+}

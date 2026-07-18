@@ -1,0 +1,39 @@
+{
+  "name": "<%= name %>",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/<%= name %>",
+  "projectType": "application",
+  "tags": ["type:app", "scope:<%= name %>", "owner:letar", "platform:electron"],
+  "targets": {
+    "dev": {
+      "command": "node scripts/dev.js",
+      "options": {
+        "cwd": "apps/<%= name %>"
+      }
+    },
+    "build:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js",
+          "npx electron-builder --win"
+        ],
+        "cwd": "apps/<%= name %>",
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/<%= name %>/main/**/*.{ts,tsx}", "apps/<%= name %>/renderer/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --project apps/<%= name %>/tsconfig.json --noEmit"
+    },
+    "format": {
+      "command": "dprint fmt apps/<%= name %>/**/*.{ts,tsx,json}"
+    }
+  }
+}

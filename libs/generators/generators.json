@@ -6,6 +6,11 @@
       "factory": "./src/generators/e2e-suite/generator",
       "schema": "./src/generators/e2e-suite/schema.json",
       "description": "Скаффолдит новый Playwright e2e-сьют apps/<app>-e2e по конвенции монорепо (см. .claude/docs/e2e-testing.md)"
+    },
+    "electron-app": {
+      "factory": "./src/generators/electron-app/generator",
+      "schema": "./src/generators/electron-app/schema.json",
+      "description": "Скаффолдит новое минимальное Electron/Nextron-приложение apps/<name> (см. .claude/rules/electron.md)"
     }
   }
 }

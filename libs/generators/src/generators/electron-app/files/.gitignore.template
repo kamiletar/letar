@@ -1,0 +1,14 @@
+tsconfig.tsbuildinfo
+node_modules/
+next-env.d.ts
+
+# Build output
+/app/
+/dist/
+/main/**/*.js
+!/main/webpack.config.js
+/main/**/*.js.map
+/.next/
+/renderer/.next/
+/renderer/out/
+/output/

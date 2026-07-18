@@ -1,0 +1,26 @@
+'use client'
+
+import { Box, Button, Container, Heading, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+
+export default function HomePage() {
+  const [version, setVersion] = useState<string | null>(null)
+
+  useEffect(() => {
+    window.electronAPI.getVersion().then(setVersion)
+  }, [])
+
+  return (
+    <Container maxW="container.sm" py={16}>
+      <VStack gap={4} align="center">
+        <Heading size="xl"><%= displayName %></Heading>
+        <Text color="fg.muted">
+          {version ? `Electron-приложение, версия ${version}` : 'Загрузка...'}
+        </Text>
+        <Box>
+          <Button onClick={() => window.electronAPI.getVersion().then(setVersion)}>Обновить версию</Button>
+        </Box>
+      </VStack>
+    </Container>
+  )
+}

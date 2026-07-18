@@ -1,0 +1,43 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./renderer/*"],
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"]
+    },
+    "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "main/**/*.ts",
+    "renderer/**/*.ts",
+    "renderer/**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "../../libs/chakra-provider/src/**/*.ts",
+    "../../libs/chakra-provider/src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "app",
+    ".next",
+    "renderer/.next",
+    "renderer/out",
+    "../../libs/**/*.spec.ts",
+    "../../libs/**/*.spec.tsx"
+  ]
+}

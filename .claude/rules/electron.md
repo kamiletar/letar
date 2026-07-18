@@ -23,12 +23,25 @@ Prisma/сервера — renderer собран как статический э
 standalone-сервера внутри приложения; вся логика идёт через IPC. Смотри туда, когда новому
 приложению не нужна БД/сложный бэкенд — там же примеры фиксов из раздела «Грабли» ниже.
 
-## Готового генератора для новых Electron-приложений нет
+## Новое приложение — через генератор
 
-Нового Electron/Nextron-приложения через `nx generate` не создать — копируй структуру существующего
-(`main/`, `renderer/`, `nextron.config.js`, `project.json`, `electron-builder.yml`,
-`main/webpack.config.js`, `scripts/dev.js`) и упрощай под задачу. `label-printer-desktop` — эталон
-с БД/сканером/автообновлением, `poster-microtext-desktop` — минимальный вариант.
+```bash
+nx g @letar/generators:electron-app <name>
+# с явным displayName/description/private:
+nx g @letar/generators:electron-app <name> --displayName="Моё приложение" --private
+```
+
+Скаффолдит минимальный рабочий Nextron-каркас (`main/`, `renderer/` со статическим экспортом,
+`nextron.config.js`, `project.json`, `electron-builder.yml`, `main/webpack.config.js`,
+`scripts/dev.js`+`generate-icons.mjs`) с уже впаянными фиксами всех граблей ниже — точная версия
+electron, `assetPrefix` под `file://`, `publish: null`. Версия electron/electron-builder берётся
+из корневого `package.json` монорепо. Подробности и что делать дальше — в
+`libs/generators/README.md` и в сгенерированном `README.md` приложения.
+
+Генератор создаёт **минимальный** каркас без БД/сканера/автообновления — для сложного приложения
+смотри `label-printer-desktop` как эталон и дописывай руками. `poster-microtext-desktop` —
+пример минимального каркаса с добавленной бизнес-логикой (наглядно показывает, что и куда
+дописывать после генерации).
 
 ## Main Process
 
