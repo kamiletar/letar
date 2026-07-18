@@ -28,3 +28,6 @@
 [submodule "apps/studio-e2e"]
 	path = apps/studio-e2e
 	url = git@github.com:kamiletar/letar-private-studio-e2e.git
+[submodule "apps/poster-microtext-desktop"]
+	path = apps/poster-microtext-desktop
+	url = git@github.com:kamiletar/letar-private-poster-microtext-desktop.git
