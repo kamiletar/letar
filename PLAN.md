@@ -1,5 +1,40 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 Тираж M1 — второй круг находок BlackCove (msg #573) починен (2026-07-19):**
+> После редеплоя `f049f87`/`bee64c6d` BlackCove прогнал e2e 4 раза (localhost+staging × 2) —
+> CDEK-фикс подтверждён (0×401 во всех прогонах), но всплыло 5 новых проблем, все закрыты:
+>
+> - **`time-e2e` игнорировал staging BASE_URL целиком** — root cause НЕ в синтаксисе
+>   `webServer.command` (обе формы, `nx run x:y` и короткая `nx x y`, матчатся одним и тем же
+>   regex'ом в `@nx/playwright/plugin`), а в **отсутствии `project.json`**: без него таргет `e2e`
+>   собирается через inferred `createNodes`, который добавляет `dependsOn` на `dev`-таск — Nx
+>   поднимал локальный `next dev` ДО проверки `reuseExistingServer`/`url`, зелёный результат не
+>   отражал реальный контейнер. Фикс — explicit `project.json` с executor
+>   `@nx/playwright:playwright` (паттерн `aboi-e2e`/`grandslamcup-e2e`), обходит инференс целиком.
+>   Тот же баг унаследован всеми 6 приложениями из Тиража N генератора `@letar/generators:e2e-suite`
+>   (`animatrona-landing-e2e` и др.) — генератор теперь скаффолдит `project.json` по умолчанию,
+>   старые 6 не ретрофичены (не в скоупе, задокументировано как чеклист перед их гейтом).
+> - **`checkout.spec.ts`** — URL успеха матчился на устаревший `ORD-YYYYMMDD-XXXXX`, а реальный
+>   редирект — `accessToken` (cuid, `checkout.ts:352`); `orderNumber` используется только в
+>   `failUrl`/email/админке.
+> - **`pvz-picker.spec.ts`** — автокомплит города вызывает `searchDadataCitiesAction` (DaData), не
+>   `searchCdekCities` как думал старый комментарий теста; DaData — платный сервис без песочницы,
+>   `NEXT_PUBLIC_DADATA_TOKEN` на staging пуст → добавлен `DADATA_MOCK_MODE` (по образцу
+>   `CDEK_MOCK_MODE`) в `shipping.action.ts` + `.env.staging.example`.
+> - **WebKit «добавлено в корзину»** — таймаут 5с→10с (смена текста — чистый React state, не
+>   завязана на `router.refresh()` вопреки старому комментарию; задержка сетевая, под нагрузкой).
+> - **`email-verification.spec.ts`** — подтверждён тот же rate-limit `/sign-up` (5/час/IP), что и
+>   раньше диагностировала RoseSparrow, просто исчерпан повторными прогонами BlackCove; тест
+>   теперь детектирует HTTP 429 и делает `test.skip` с понятным сообщением вместо ложного failure.
+> - Побочно: `aboi-e2e/tsconfig.json` не тайпчекался (`window` в `addInitScript()`-колбэках без
+>   `lib: dom`) — вскрылось только после полной очистки Nx-кэша, вероятно маскировалось стейл-кэшем
+>   в прошлых сессиях.
+>
+> Коммиты: `ccd12ec` (aboi), `6907190` (aboi-e2e), `c034560e`+`bbbcc396` (letar root, включая фикс
+> генератора). **➡️ Следующий шаг:** запрошен у BlackCove повторный `deploy_app`+`run_e2e` для
+> `aboi`+`time` (msg отправлено в тред `staging-e2e-gate-m1-aboi-time`) — при зелёном добавить
+> оба в `E2E_GATED_APPS`.
+>
 > **✅ §18.7 Тираж M1 — все app-баги `aboi`/`time` из ответа BlackCove починены (2026-07-18):**
 > **`time-e2e`** — `playwright.config.ts` звал несуществующий nx-проект `@letar/time` (реальное
 > имя — `time`, `@letar/time` это имя `package.json`) и `webServer.url` был захардкожен на
