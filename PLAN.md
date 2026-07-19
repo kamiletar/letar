@@ -1,5 +1,47 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Системный фикс: staging trustedOrigins/localhost-баг тиражирован на 5 приложений
+> (2026-07-19, root-weaver):**
+> После находки root cause `/cart`-редиректов в `aboi` (см. запись ниже) — проверены все
+> `docker-compose.staging.yml` монорепо на тот же паттерн (`BETTER_AUTH_URL`/
+> `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_APP_URL` = `localhost:<port>` вместо реального публичного
+> staging-домена). Найден в **5 приложениях**: `driving-school`, `dsperevod`, `mandala`,
+> `svoichuzhie` — почтены, `auth-hub` — **пропущен**.
+>
+> Механизм неодинаков — три разных случая:
+>
+> - **`mandala`**: `auth.ts` не задаёт `trustedOrigins` явно → Better Auth дефолтится на
+>   `baseURL`. Фикс — только env-переменная в `docker-compose.staging.yml`.
+> - **`dsperevod`/`svoichuzhie`**: `baseURL` уже env-driven (`BETTER_AUTH_URL`), но
+>   `trustedOrigins` — захардкоженный массив, не читает эту переменную вообще. Добавлена
+>   аддитивная запись `...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : [])`
+>   поверх существующего прод-списка (не убирает/меняет старые записи) + фикс env-переменной.
+> - **`driving-school`**: сложнее всех — `baseURL` **жёстко захардкожен** на punycode прод-домена
+>   (`https://xn--80aaah6cnh.xn--p1ai`) независимо от `NODE_ENV`, из-за точного совпадения
+>   Google OAuth `redirect_uri`. **`baseURL` НЕ трогается** (риск сломать прод OAuth) —
+>   исправлен только `trustedOrigins` (аддитивно) + env-переменные `BETTER_AUTH_URL`/
+>   `NEXT_PUBLIC_APP_URL`, которые отдельно используются `getAppUrl()` (`lib/app-url.ts`) для
+>   абсолютных ссылок в email (magic-link, PIN, verification) — это чинится полностью, но
+>   Better Auth CSRF-валидация для driving-school остаётся частично untested без явного
+>   staging-прогона (driving-school и так в M4, последний батч §18.7, по причине сложности).
+>
+> **`auth-hub` НЕ тронут** — его staging-домен не подтверждён нигде в дереве (нет
+> `.env.staging.example`, нет упоминаний в `PLAN.md`), в отличие от остальных 4 (все имели
+> явную `DOMAIN=<app>-stage.s3.letar.best` строку). Гадать со значением для критичного
+> инфраструктурного приложения (держит OIDC для всего монорепо, `auth-hub` — намеренно
+> последний в M4 по этой же причине) признано слишком рискованным. Нужно подтверждение
+> реального домена (или отсутствия staging-домена вообще — возможно, вариант B из
+> `auth-hub-e2e-setup` thread — `docker-staging + warn-gate` — не предполагал публичный домен)
+> прежде чем чинить.
+>
+> **Ни один из 4 фиксов не подтверждён живым staging-прогоном** — только у `aboi` фикс того же
+> класса проверен BlackCove вживую. Остальные 4 — по аналогии, теоретически корректны (код
+> проверен typecheck/lint), но нуждаются в собственном staging-деплое + `run_e2e`, когда каждое
+> из них дойдёт до своего батча §18.7 Тиража M.
+>
+> Коммиты: `dbe3995`(driving-school), `cf9834d`(dsperevod), `9bcd851`(svoichuzhie),
+> `3f76ff98`(letar root, mandala + submodule bumps).
+>
 > **✅ §18.7 Тираж M1 — regex-баг из пятого прогона починен (2026-07-19, root-weaver):**
 > `checkout.spec.ts:194`+`:336` (оба вхождения одного паттерна) — `toHaveURL` матчит полный URL,
 > не `pathname` (в отличие от `waitForURL` выше в том же тесте), `$`-якорь без учёта query
