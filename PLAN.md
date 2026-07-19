@@ -1,5 +1,24 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 Тираж M1 — пятый прогон: `trustedOrigins`-фикс подтверждён живьём, найден
+> предсуществующий баг regex в тесте (2026-07-19):**
+> BlackCove пересобрал `aboi` на `372bf80`/`0b69ee64` и прогнал `run_e2e` через
+> `https://aboi-stage.s3.letar.best`. **`trustedOrigins`-гипотеза root-weaver подтверждена** —
+> `/cart`-редирект для `checkout.spec.ts:140` исчез, чекаут реально доходит до
+> `/checkout/success/<accessToken>` (пруф в логе: `.../checkout/success/cmrrphmre...?accountCreated=1`).
+>
+> Вскрылся **предсуществующий баг самого теста** (`checkout.spec.ts:194`): паттерн
+> `/\/checkout\/success\/[a-z0-9]{20,32}\/?$/` требует конца строки сразу после `accessToken`, но
+> реальный URL содержит `?accountCreated=1` — раньше не всплывало, потому что тест падал раньше
+> (на `/cart`-редиректе), фикс `trustedOrigins` расчистил путь и обнажил баг ассерта. Падает на
+> 3/3 браузера. Фикс тривиальный (убрать `$`-якорь или явно допустить query-string) — не в скоупе
+> BlackCove, ждёт app-владельца.
+>
+> Итог пятого прогона: 20 passed, 6 failed (все три категории — regex-баг выше + два уже принятых
+> известных шума: email-verification CPU-конкуренция, геолокация Firefox), 15 did not run
+> (каскад `test.skip`). **➡️ Следующий шаг:** app-владельцу починить regex в `checkout.spec.ts:194`
+> → шестой прогон BlackCove → при зелёном `aboi` кандидат на `E2E_GATED_APPS`.
+>
 > **✅ §18.7 Тираж M1 — `time` в `E2E_GATED_APPS`; `aboi` — найден вероятный корень
 > `/cart`-редиректов, четвёртый прогон 32/42 (2026-07-19):**
 > `time` добавлен BlackCove в `E2E_GATED_APPS` (`libs/infra-config/src/index.ts`, коммит
