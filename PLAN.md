@@ -1,5 +1,28 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 M1 `aboi` — закрыт незакрытый `checkout.spec.ts:140` (webkit) `/cart`-редирект +
+> найден и починен попутный баг (2026-07-19, aboi-dev, commit `<см. CHANGELOG аboi 0.25.4>`):**
+> Диагностика началась с ложной тревоги — шестой/седьмой прогоны BlackCove (`msg #582/#584`) на
+> самом деле били в `localhost:3018` dev-режим (playwright.config.ts webServer fallback), а не в
+> staging: `BASE_URL` не был передан в вызов `run_e2e` после рестарта Deploy Agent. После
+> перезапуска с явным `BASE_URL=https://aboi-stage.s3.letar.best` (msg #586) вскрылся один
+> реальный, стабильно воспроизводимый (2/2) отказ: `checkout.spec.ts:140` webkit,
+> `page.waitForURL` лог — `navigated to /checkout → /cart → /cart` вместо success. Причина:
+> `checkout-form.tsx` вызывал `authClient.signUp.email()` (авто-регистрация гостя) ДО перехода на
+> success-страницу — смена cookie сессии текущей вкладки происходила, пока клиент ещё технически
+> был на `/checkout`. Точный браузерный механизм гонки не подтверждён живой WebKit-отладкой
+> (недоступна из этой сессии), но фикс убирает саму экспозицию, а не гадает с таймаутом:
+> авто-регистрация переехала на `/checkout/success/[accessToken]` (новый клиентский компонент
+> `GuestAutoSignup`, данные — через `sessionStorage`, не query string) — там редиректов по
+> состоянию корзины/сессии не существует в принципе. Попутно найден и починен реальный, не
+> связанный с флейком баг: `mergeAnonymousAccount` не переносил `Order.userId` при линковке
+> anonymous→real (заказ терял владельца, т.к. `Order.user` — `onDelete: SetNull`, Better Auth
+> удаляет anonymous-юзера сразу после линковки). Также отправлен `deploy-mcp` техдолг BlackCove
+> (msg #586): параметр `baseUrl` не транслируется в `BASE_URL` для playwright — не в скоупе этой
+> сессии (libs/deploy-mcp, не aboi). **➡️ Следующий шаг:** запросить у BlackCove седьмой прогон
+> `aboi` на новом коммите для живого подтверждения фикса; если зелёный — кандидат в
+> `E2E_GATED_APPS`.
+>
 > **✅ Системный фикс: staging trustedOrigins/localhost-баг тиражирован на 5 приложений
 > (2026-07-19, root-weaver):**
 > После находки root cause `/cart`-редиректов в `aboi` (см. запись ниже) — проверены все
