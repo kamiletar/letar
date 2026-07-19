@@ -28,15 +28,18 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    // Nx-проект называется "time" (см. apps/time/project.json), не "@letar/time" (это имя
-    // package.json) — старый вызов падал на s3 с "project not found" при staging-прогоне.
+    // Реальный фикс от игнорирования BASE_URL — apps/time-e2e/project.json с explicit
+    // executor '@nx/playwright:playwright' (см. файл рядом, как у aboi-e2e/grandslamcup-e2e).
+    // Без project.json таргет e2e собирается through inferred createNodes @nx/playwright/plugin,
+    // который регексом разбирает command ЛЮБОЙ формы ("nx run x:y" и короткую "nx x y" тоже) и
+    // добавляет dependsOn на dev-таск — Nx поднимает его ДО проверки reuseExistingServer/url.
+    // Explicit executor в project.json полностью обходит эту инференс-ветку (найдено 2026-07-19
+    // по репорту BlackCove, PLAN.md §18.7).
     command: 'bun nx run time:dev',
-    // url ДОЛЖЕН совпадать с baseURL — иначе reuseExistingServer не видит уже поднятый
-    // staging-контейнер (BASE_URL=https://time-stage.s3...) и пытается поднять локальный dev,
-    // который не существует на e2e-раннере (см. PLAN.md §18.7, находка BlackCove).
     url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
+    timeout: 120_000,
   },
   projects: [
     {
