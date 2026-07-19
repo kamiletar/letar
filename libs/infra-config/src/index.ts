@@ -103,6 +103,17 @@ export function getServerForApp(app: string): InfraServer {
 }
 
 /**
+ * Приложения, подключённые к staging e2e-гейту (PLAN.md §18.7 Тираж M).
+ *
+ * Для каждого: `deploy_app(staging)` → `run_e2e` → зелёный прогон против реального
+ * staging-контейнера (не placeholder/локальный dev-сервер). Сейчас используется только
+ * как реестр для warn-only `checkE2eGate` в `libs/deploy-mcp` (проверяет любое приложение,
+ * список ниже не читает). Hard gate (fail-closed по этому списку) — отдельная будущая
+ * фаза (§18.6 Фаза 3), после недели эксплуатации warn-only.
+ */
+export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time']
+
+/**
  * Определяет текущий сервер по env `SERVER_NAME` или hostname. Fallback — s2.
  * (Раньше fallback был s1 — сервер выведен из эксплуатации.)
  */
