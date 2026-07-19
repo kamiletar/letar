@@ -1076,8 +1076,17 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
   done
 
   echo -e "${YELLOW}🔄 Reloading Nginx Proxy Manager to pick up new container IPs...${NC}"
-  if docker exec nginx-proxy-manager nginx -s reload 2>/dev/null; then
-    echo -e "${GREEN}✅ Nginx reloaded successfully${NC}"
+  # Имя контейнера NPM различается по серверам: "nginx-proxy-manager" на s2 (прод),
+  # "npm" на s3 (staging, поднят отдельно от canonical infra/nginx-proxy-manager/docker-compose.yml).
+  NPM_CONTAINER=""
+  for candidate in nginx-proxy-manager npm; do
+    if docker exec "$candidate" nginx -s reload 2>/dev/null; then
+      NPM_CONTAINER="$candidate"
+      break
+    fi
+  done
+  if [ -n "$NPM_CONTAINER" ]; then
+    echo -e "${GREEN}✅ Nginx reloaded successfully (container: ${NPM_CONTAINER})${NC}"
   else
     echo -e "${YELLOW}⚠️  Could not reload Nginx (container may not exist on this server)${NC}"
   fi
