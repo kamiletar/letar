@@ -43,11 +43,20 @@ describe('e2e-suite generator', () => {
     await e2eSuiteGenerator(tree, { app: 'my-app' })
 
     expect(tree.exists('apps/my-app-e2e/package.json')).toBe(true)
+    expect(tree.exists('apps/my-app-e2e/project.json')).toBe(true)
     expect(tree.exists('apps/my-app-e2e/tsconfig.json')).toBe(true)
     expect(tree.exists('apps/my-app-e2e/eslint.config.mjs')).toBe(true)
     expect(tree.exists('apps/my-app-e2e/playwright.config.ts')).toBe(true)
     expect(tree.exists('apps/my-app-e2e/.gitignore')).toBe(true)
     expect(tree.exists('apps/my-app-e2e/src/homepage.spec.ts')).toBe(true)
+  })
+
+  it('project.json — явный executor @nx/playwright:playwright (не inferred createNodes) — иначе staging BASE_URL игнорируется, см. .claude/docs/e2e-testing.md', async () => {
+    await e2eSuiteGenerator(tree, { app: 'my-app' })
+
+    const project = JSON.parse(tree.read('apps/my-app-e2e/project.json', 'utf-8') ?? '{}')
+    expect(project.targets.e2e.executor).toBe('@nx/playwright:playwright')
+    expect(project.implicitDependencies).toEqual(['my-app'])
   })
 
   it('package.json содержит правильное имя пакета и implicitDependencies', async () => {

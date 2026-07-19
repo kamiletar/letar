@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -229,14 +229,30 @@ await expect(async () => {
 }).toPass({ timeout: 15000 })
 ```
 
-### ⛔ `nx e2e <app>-e2e` зависает намертво в dev-режиме Next.js
+### ⛔ `nx e2e <app>-e2e` зависает намертво в dev-режиме Next.js / игнорирует staging BASE_URL
 
-Если `playwright.config.ts` указывает `webServer.command: 'bun nx run <app>:dev'`, плагин
-`@nx/playwright` **автоматически** добавляет инферренную зависимость таска
-`dependsOn: [{project: '<app>', target: 'dev'}]`. `next dev` — процесс, который никогда не
-завершается сам по себе, поэтому вызов `nx e2e <app>-e2e` может застрять на этой «зависимости» на
-неопределённое время (в бою ловили зависания по 30-60 минут) — сама команда `playwright test`
-внутри при этом может вообще не успевать запуститься.
+Если у `apps/<app>-e2e` **нет собственного `project.json`**, таргет `e2e` собирается через
+inferred `createNodes` плагина `@nx/playwright` (`nx.json` → `plugins: [{plugin:
+"@nx/playwright/plugin"}]`). Этот инференс разбирает `playwright.config.ts`'s `webServer.command`
+регексом (`node_modules/@nx/playwright/.../plugins/plugin.js`, `parseTaskFromCommand`) и матчит
+**обе** формы вызова — `nx run <app>:dev` **и** короткую `nx <app> dev`/`nx dev <app>` — после
+чего добавляет `dependsOn: [{project: '<app>', target: 'dev'}]`. Смена синтаксиса команды НЕ
+помогает, только явный `project.json`.
+
+Практические следствия:
+
+1. **Локально:** `next dev` — процесс, который никогда не завершается сам по себе, поэтому вызов
+   `nx e2e <app>-e2e` может застрять на этой «зависимости» на неопределённое время (в бою ловили
+   зависания по 30-60 минут) — сама команда `playwright test` внутри при этом может вообще не
+   успевать запуститься.
+2. **На staging (`deploy_app(staging)` → `run_e2e`):** несмотря на переданный `BASE_URL` внешнего
+   контейнера, Nx всё равно поднимает `dev`-зависимость ДО того, как Playwright's
+   `reuseExistingServer`/`url`-проверка вообще успевает отработать — прогон тестирует **локальный
+   dev-сервер раннера**, а не задеплоенный staging-контейнер, зелёный результат ничего не
+   доказывает про реальный деплой (найдено 2026-07-19 на `time-e2e`, PLAN.md §18.7, msg #573).
+   Раньше здесь было написано, что staging-пайплайн иммунен к этой проблеме («там нет `dependsOn:
+   dev`-таска вообще») — это верно **только** для приложений с explicit `project.json` (см. ниже),
+   не для всех.
 
 **Обходной путь для локального прогона:** не через `nx e2e`, а напрямую — поднять dev-сервер
 вручную в фоне и вызвать Playwright из директории сьюта:
@@ -253,10 +269,41 @@ BASE_URL=http://localhost:<port> bunx playwright test --project=chromium
 kill %1
 ```
 
-Не путать с CI/staging-пайплайном (`deploy_app(staging)` → `run_e2e`, см. раздел «E2E-ранер на
-s3» ниже) — там `nx e2e` гоняется против **production-сборки** (`next start`, процесс тоже не
-завершается сам, но там нет `dependsOn: dev`-таска вообще, staging собирается и запускается
-отдельно от прогона тестов), проблема специфична именно для локального `next dev`.
+**Настоящий фикс для staging-гейта:** явный `apps/<app>-e2e/project.json` с executor
+`@nx/playwright:playwright` (обходит inferred createNodes целиком, никакого регекс-парсинга
+`webServer.command`) — паттерн уже используют `aboi-e2e`/`grandslamcup-e2e` (единственный реально
+гейтованный staging-app на момент написания):
+
+```json
+{
+  "name": "<app>-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/<app>-e2e/src",
+  "tags": ["type:e2e", "scope:<app>", "owner:letar"],
+  "implicitDependencies": ["<app>"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": { "config": "apps/<app>-e2e/playwright.config.ts" }
+    }
+  }
+}
+```
+
+**Диагностика:** `nx show project <app>-e2e --json | jq '.targets.e2e'` — если `executor` не
+`@nx/playwright:playwright` (например `nx:run-commands` + `options.command: "playwright test"`) и
+`dependsOn` содержит `{target: "dev"}` — приложение уязвимо к этой проблеме на staging. Кэш Nx
+может маскировать смену конфигурации — при подозрении сначала `nx daemon --stop && rm -rf
+.nx/workspace-data .nx/cache`, иначе `nx show project` может отдавать стейл-результат даже после
+`nx reset`.
+
+⚠️ Генератор `@letar/generators:e2e-suite` (§18.7 Тираж N) скаффолдит `apps/<app>-e2e` — если его
+шаблон не создаёт `project.json`, все его выходы (`animatrona-landing-e2e`, `animatrona-tracker-e2e`,
+`kami-key-the-landing-e2e`, `letar-landing-e2e`, `studio-e2e`, `form-docs-e2e`) унаследуют эту же
+уязвимость при подключении к staging-гейту (Тираж M) — проверить перед тем как гейтовать любой из
+них.
 
 ## Отладка тестов
 

@@ -1,0 +1,17 @@
+{
+  "name": "<%= app %>-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/<%= app %>-e2e/src",
+  "tags": ["type:e2e", "scope:<%= app %>", "owner:letar"],
+  "implicitDependencies": ["<%= app %>"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/<%= app %>-e2e/playwright.config.ts"
+      }
+    }
+  }
+}
