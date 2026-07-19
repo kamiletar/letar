@@ -1,5 +1,40 @@
 # Time — Выполненные задачи
 
+## 2026-07-19 — Настоящий root cause staging-гейта: отсутствие `project.json`, подтверждён живым прогоном, добавлен в `E2E_GATED_APPS` (§18.7, инфра)
+
+Продолжение сессии 2026-07-18. BlackCove сообщил, что даже с фиксом `webServer` из вчерашней
+сессии staging-прогон всё ещё тестировал локальный dev-сервер раннера, не задеплоенный
+staging-контейнер — `> nx run time:dev` появлялся в логе `run_e2e` независимо от переданного
+`BASE_URL`.
+
+- **Настоящая причина — не синтаксис `webServer.command`.** У `apps/time-e2e` не было
+  собственного `project.json` — таргет `e2e` собирался через inferred `createNodes`
+  `@nx/playwright/plugin`, который разбирает `webServer.command` regex'ом
+  (`node_modules/@nx/playwright/.../plugin.js`, `parseTaskFromCommand`) и матчит ОБЕ формы
+  вызова — `nx run <app>:dev` и короткую `nx <app> dev`/`nx dev <app>` одним и тем же паттерном —
+  после чего добавляет `dependsOn: [{project, target: 'dev'}]`. Смена синтаксиса команды не
+  помогала, только явный `project.json`.
+- **Фикс:** добавлен `apps/time-e2e/project.json` с `executor: '@nx/playwright:playwright'` —
+  паттерн уже используют `aboi-e2e`/`grandslamcup-e2e` (единственный на тот момент реально
+  гейтованный staging-app), полностью обходит inferred-инференс. Проверено через
+  `nx show project time-e2e --json` (после полного сброса кэша Nx, включая daemon-stop — иначе
+  граф отдаёт устаревший результат): `dependsOn` исчез, `executor` правильный.
+- **Подтверждено живым прогоном BlackCove:** 3/3 passed за 8.2с, в логе `nx run time-e2e:e2e`
+  напрямую, без прежней строки `nx run time:dev`.
+- **Добавлен в `E2E_GATED_APPS`** — список не существовал в репозитории заранее (первая
+  реализация), BlackCove создал его в `libs/infra-config/src/index.ts` рядом с `SERVER_APPS`
+  (коммит `6af28c70`, с разрешения владельца).
+- **Побочный фикс монорепо-уровня:** генератор `@letar/generators:e2e-suite` (используется для
+  скаффолда новых e2e-сьютов) тоже не создавал `project.json` — все 6 его прошлых выходов
+  (`animatrona-landing-e2e` и др.) унаследовали ту же уязвимость. Генератор теперь скаффолдит
+  `project.json` по умолчанию; старые 6 не ретрофичены (не в скоупе, задокументировано в
+  `.claude/docs/e2e-testing.md` как чеклист перед их будущим staging-гейтом).
+
+Коммиты: `c034560e` (time-e2e project.json, letar root), `bbbcc396` (генератор + docs).
+Тред agent-mail: `staging-e2e-gate-m1-aboi-time` (msg #573–#579).
+
+---
+
 ## 2026-07-18 — Подключение к staging e2e-гейту: build fix + playwright.config fix (§18.7, инфра, вне тематики приложения)
 
 Корневой `PLAN.md` §18.7 Тираж M1 — подключение `time` к staging-e2e-гейту. Первый

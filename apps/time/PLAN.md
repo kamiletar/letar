@@ -293,5 +293,16 @@ libs/number-words/
       `Accept-Language: en-US`, next-intl отдаёт английский вместо `defaultLocale: 'ru'`)
 - [x] `apps/time-e2e/src/example.spec.ts` — дефолтный Nx-плейсхолдер (`<h1>` с "Welcome", такого
       элемента на странице нет вообще) заменён на реальный смок-тест главной страницы
-- [ ] Дождаться повторного `deploy_app(time, staging)` + `run_e2e` от BlackCove → зелёный →
-      добавление в `E2E_GATED_APPS`
+- [x] **Настоящий root cause найден и починен (2026-07-19):** не в синтаксисе
+      `webServer.command`, а в отсутствии `apps/time-e2e/project.json` — таргет `e2e` собирался
+      через inferred `createNodes` `@nx/playwright/plugin`, который добавлял `dependsOn` на
+      `time:dev` независимо от формы команды (`nx run x:y` и короткая `nx x y` матчатся одним
+      regex'ом). Nx поднимал локальный dev-сервер ДО проверки `reuseExistingServer`/staging
+      `BASE_URL` — зелёный результат раньше не отражал реальный контейнер. Добавлен explicit
+      `project.json` с `executor: '@nx/playwright:playwright'` (паттерн `grandslamcup-e2e` —
+      единственный на тот момент реально гейтованный staging-app), обходит инференс целиком.
+      Детали — корневой `PLAN.md` §18.7.
+- [x] **Подтверждено живым прогоном BlackCove (2026-07-19):** 3/3 passed, в логе
+      `nx run time-e2e:e2e` напрямую, без `nx run time:dev` — фикс реально работает.
+- [x] **Добавлен в `E2E_GATED_APPS`** (`libs/infra-config/src/index.ts`, коммит `6af28c70`,
+      BlackCove, с разрешения владельца).
