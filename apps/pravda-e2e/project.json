@@ -1,0 +1,15 @@
+{
+  "name": "pravda-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/pravda-e2e/src",
+  "tags": ["type:e2e", "scope:pravda", "owner:letar"],
+  "implicitDependencies": ["pravda"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/pravda-e2e/playwright.config.ts"
+      }
+    }
+  }
+}

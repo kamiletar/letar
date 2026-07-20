@@ -1,0 +1,15 @@
+{
+  "name": "aprel8008-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/aprel8008-e2e/src",
+  "tags": ["type:e2e", "scope:aprel8008", "owner:letar"],
+  "implicitDependencies": ["aprel8008"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/aprel8008-e2e/playwright.config.mts"
+      }
+    }
+  }
+}

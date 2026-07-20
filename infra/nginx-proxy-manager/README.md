@@ -68,9 +68,24 @@ docker compose up -d
 staging-пилоте (§18 Сессия D). Публичные порты 80/81/443, отдельная Docker-сеть `npm_default` (не
 `kami-network` — s3 её вообще не использует).
 
-| Домен                            | Forward Host | Port | SSL | Примечания                                                                  |
-| -------------------------------- | ------------ | ---- | --- | --------------------------------------------------------------------------- |
-| grandslamcup-stage.s3.letar.best | `172.17.0.1` | 3018 | LE  | Staging grandslamcup, хост-гейтвей (не имя контейнера — другая Docker-сеть) |
+| Домен                            | Forward Host | Port | SSL | Примечания                                                                   |
+| -------------------------------- | ------------ | ---- | --- | ---------------------------------------------------------------------------- |
+| grandslamcup-stage.s3.letar.best | `172.17.0.1` | 3018 | LE  | Staging grandslamcup, хост-гейтвей (не имя контейнера — другая Docker-сеть)  |
+| aboi-stage.s3.letar.best         | `172.17.0.1` | 3022 | LE  | Staging aboi (PLAN.md §18.7 Тираж M1)                                        |
+| time-stage.s3.letar.best         | `172.17.0.1` | 3023 | LE  | Staging time (PLAN.md §18.7 Тираж M1), OIDC redirect для клиента time-prod   |
+| mandala-stage.s3.letar.best      | `172.17.0.1` | 3024 | LE  | Staging mandala (PLAN.md §18.7 Тираж M1)                                     |
+| svoichuzhie-stage.s3.letar.best  | `172.17.0.1` | 3025 | LE  | Staging svoichuzhie (PLAN.md §18.7 Тираж M1)                                 |
+| aprel8008-stage.s3.letar.best    | `172.17.0.1` | 3026 | LE  | Staging aprel8008 (PLAN.md §18.7 Тираж M1), OIDC redirect для aprel8008-prod |
+| dsperevod-stage.s3.letar.best    | `172.17.0.1` | 3027 | LE  | Staging dsperevod (PLAN.md §18.7 Тираж M1)                                   |
+| pravda-stage.s3.letar.best       | `172.17.0.1` | 3028 | LE  | Staging pravda (PLAN.md §18.7 Тираж M1), без БД/auth                         |
+| aira-web-stage.s3.letar.best     | `172.17.0.1` | 3029 | LE  | Staging aira-web (PLAN.md §18.7 Тираж M1), без БД/auth                       |
+
+⚠️ **NPM на s3 обновлён до 2.15.1** (README ниже ещё указывает устаревшую 2.13.6 — актуальную
+версию видно через `GET /api/` без авторизации). API создания сертификата в 2.15 изменился:
+поле `meta` в `POST /api/nginx/certificates` теперь принимает **пустой объект** `{}` —
+`letsencrypt_email`/`letsencrypt_agree`/`dns_challenge` в payload вызывают
+`data/meta must NOT have additional properties`. Email/agree теперь настраиваются на уровне
+сервера, не за запрос.
 
 **Домены на s3 — один лейбл, не два** (`app-stage.s3.letar.best`, не `app.stage.s3.letar.best`):
 DNS покрыт существующим wildcard `*.s3 CNAME s3.letar.best`, который матчит только один лейбл
