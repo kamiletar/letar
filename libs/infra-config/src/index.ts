@@ -111,7 +111,7 @@ export function getServerForApp(app: string): InfraServer {
  * список ниже не читает). Hard gate (fail-closed по этому списку) — отдельная будущая
  * фаза (§18.6 Фаза 3), после недели эксплуатации warn-only.
  */
-export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time']
+export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time', 'aboi']
 
 /**
  * Определяет текущий сервер по env `SERVER_NAME` или hostname. Fallback — s2.
