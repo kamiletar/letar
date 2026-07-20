@@ -7,9 +7,12 @@
  * `.last-e2e-status/<app>.json` перед production-деплоем (warn-only gate).
  *
  * baseUrl передаётся явно из POST body (не хардкодится) — все playwright.config.ts
- * в монорепо читают `process.env.BASE_URL` (единая конвенция, см. любой apps/*-e2e),
- * без единого стандарта публичного staging-домена на s3 пока нет: e2e чаще всего
- * бьёт напрямую по `http://localhost:<staging-host-port>` того же хоста s3.
+ * в монорепо читают `process.env.BASE_URL` (единая конвенция, см. любой apps/*-e2e).
+ * baseUrl ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
+ * НЕ `http://localhost:<port>` — иначе Playwright молча поднимает свой dev-сервер
+ * (webServer.reuseExistingServer в playwright.config.ts) и прогон становится ложным
+ * (PLAN.md §18.7, aboi 2026-07-19 — ложный localhost-прогон дал совсем другой набор
+ * отказов, чем реальный staging).
  */
 
 import { type ChildProcess, spawn } from 'child_process'
@@ -113,7 +116,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
     async (
-      request,
+      request
     ): Promise<
       ApiResponse<{
         run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
@@ -139,13 +142,17 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
    * POST /api/e2e/run — запускает `nx e2e <app>-e2e` против staging-контейнера
    * Body: { app: string; baseUrl: string; project?: string }
-   * baseUrl — куда бить (обычно `http://localhost:<staging-host-port>` на этом же s3).
+   * baseUrl — куда бить: ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
+   * НЕ `http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов,
+   * а если он окажется недостижим, Playwright молча поднимет свой dev-сервер и результат прогона
+   * будет ложным (PLAN.md §18.7, aboi 2026-07-19). Клиент (libs/deploy-mcp) уже блокирует
+   * localhost/127.0.0.1 на уровне схемы — сюда localhost не должен долетать в принципе.
    * project — конкретный Playwright project (chromium/firefox/webkit/shard-*); без него — все.
    *
    * Асинхронный: возвращает runId сразу, клиент опрашивает /api/e2e/status.
@@ -208,8 +215,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // с SOPS_AGE_KEY_FILE в deploy-affected.sh) — без --preserve-env BASE_URL/DEV_SESSION_TOKEN
       // не долетают до `bunx nx e2e`, Playwright не видит staging baseUrl и поднимает свой
       // `nx dev` против dev-БД (регрессия, найдена BlackCove на живом прогоне 2026-07-11).
-      const nxCommand =
-        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
+      const nxCommand = `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
@@ -222,23 +228,19 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       currentProcess = spawn('nsenter', args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
       currentProcess.stdout?.on('data', (data: Buffer) => {
-        for (
-          const line of data
-            .toString()
-            .split('\n')
-            .filter((l) => l.trim())
-        ) {
+        for (const line of data
+          .toString()
+          .split('\n')
+          .filter((l) => l.trim())) {
           appendOutput(run, line)
         }
       })
 
       currentProcess.stderr?.on('data', (data: Buffer) => {
-        for (
-          const line of data
-            .toString()
-            .split('\n')
-            .filter((l) => l.trim())
-        ) {
+        for (const line of data
+          .toString()
+          .split('\n')
+          .filter((l) => l.trim())) {
           appendOutput(run, `⚠️ ${line}`)
         }
       })
@@ -272,6 +274,6 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { runId: run.runId, app, started: true },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 }

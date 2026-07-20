@@ -62,19 +62,17 @@ async function checkE2eGate(app: string): Promise<string[]> {
     }
     if (!last.passed) {
       warnings.push(
-        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`,
+        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`
       )
     }
     try {
       const head = localHeadSha()
       if (last.commitSha !== head) {
         warnings.push(
-          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${
-            head.slice(
-              0,
-              7,
-            )
-          } — не тот же коммит.`,
+          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(
+            0,
+            7
+          )} — не тот же коммит.`
         )
       }
     } catch {
@@ -86,7 +84,7 @@ async function checkE2eGate(app: string): Promise<string[]> {
     }
   } catch (err) {
     warnings.push(
-      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`,
+      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`
     )
   }
   return warnings
@@ -110,9 +108,9 @@ export function createDeployMcpServer(): McpServer {
           pretty(SERVER_APPS),
           '',
           '_staging любого приложения резолвится на s3 (target: "staging")._',
-        ].join('\n'),
+        ].join('\n')
       )
-    },
+    }
   )
 
   // ─── agent_health ──────────────────────────────────────────────────────────────
@@ -127,7 +125,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ Агент на **${server}** недоступен: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── git_status ────────────────────────────────────────────────────────────────
@@ -145,7 +143,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ git_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── deploy_status ───────────────────────────────────────────────────────────
@@ -181,7 +179,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── deploy_cancel ───────────────────────────────────────────────────────────
@@ -199,7 +197,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_cancel на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── deploy_app ────────────────────────────────────────────────────────────────
@@ -237,7 +235,7 @@ export function createDeployMcpServer(): McpServer {
         })
         if (!res.success) {
           return errorText(
-            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
+            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n')
           )
         }
         const data = res.data as { deployId?: string } | undefined
@@ -251,17 +249,17 @@ export function createDeployMcpServer(): McpServer {
             }", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n'),
+          ].join('\n')
         )
       } catch (err) {
         return errorText(
           [
             ...gatePrefix,
             `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
-          ].join('\n'),
+          ].join('\n')
         )
       }
-    },
+    }
   )
 
   // ─── run_e2e ─────────────────────────────────────────────────────────────────
@@ -270,7 +268,11 @@ export function createDeployMcpServer(): McpServer {
     [
       'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
       'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging"). baseUrl — куда бить',
-      '(обычно http://localhost:<staging-host-port> того же s3, см. docker-compose.staging.yml приложения).',
+      '⚠️ ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`, НИКОГДА',
+      '`http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов, а',
+      'если baseUrl случайно окажется недостижим/не тем, Playwright молча поднимет свой локальный',
+      'dev-сервер (webServer.reuseExistingServer в playwright.config.ts) и результат прогона будет',
+      'ложным — проверял не staging-контейнер, а cold dev-режим (PLAN.md §18.7, aboi 2026-07-19).',
       "Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом в deploy_app(production).",
       'Возвращает runId — опрашивай через e2e_status.',
     ].join('\n'),
@@ -279,7 +281,15 @@ export function createDeployMcpServer(): McpServer {
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
         .describe('Имя приложения'),
-      baseUrl: z.string().url().describe('URL staging-контейнера на s3, например http://localhost:3018'),
+      baseUrl: z
+        .string()
+        .url()
+        .refine((v) => !/^https?:\/\/localhost(:|\/|$)/.test(v) && !/^https?:\/\/127\.0\.0\.1(:|\/|$)/.test(v), {
+          message:
+            'baseUrl не должен быть localhost/127.0.0.1 — используй реальный публичный домен ' +
+            'https://<app>-stage.s3.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
+        })
+        .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s3.letar.best (НЕ localhost)'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
     },
     async ({ app, baseUrl, project }) => {
@@ -296,12 +306,12 @@ export function createDeployMcpServer(): McpServer {
             `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n'),
+          ].join('\n')
         )
       } catch (err) {
         return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── e2e_status ──────────────────────────────────────────────────────────────
@@ -338,7 +348,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   return server

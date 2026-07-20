@@ -104,7 +104,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { deployId?: string; sinceLine?: string } }>(
     '/api/deploy/status',
     async (
-      request,
+      request
     ): Promise<
       ApiResponse<Omit<DeployStatus, 'output'> & { output: string[]; totalLines: number; fromLine: number }>
     > => {
@@ -132,7 +132,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         data: { ...deploy, output, totalLines, fromLine },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
@@ -146,7 +146,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         data: deployHistory.map(({ output: _output, truncatedLines: _t, ...rest }) => rest).reverse(),
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
@@ -199,7 +199,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -230,7 +230,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       try {
         // Получаем информацию о контейнере
         const { stdout: inspectOutput } = await runDockerCommand(
-          `docker inspect ${containerId} --format '{{.Config.Image}}'`,
+          `docker inspect ${containerId} --format '{{.Config.Image}}'`
         )
         const imageName = inspectOutput.trim()
         output.push(`Container image: ${imageName}`)
@@ -277,7 +277,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -332,7 +332,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    },
+    }
   )
 
   /**
@@ -348,7 +348,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: { appName: string; staging?: boolean; seed?: boolean } }>(
     '/api/deploy/app',
     async (
-      request,
+      request
     ): Promise<
       ApiResponse<{ deployId: string; appName: string; staging: boolean; seed: boolean; started: boolean }>
     > => {
@@ -415,13 +415,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       // nsenter выполняет скрипт на хосте (pid: host + privileged), скрипт сам делает cd
       // в свою директорию (SCRIPT_DIR в deploy-affected.sh) — аргументы массивом, без shell.
       const scriptPath = `${REPO_PATH}/deploy-affected.sh`
-      const command = [
-        scriptPath,
-        '--app',
-        appName,
-        ...(staging ? ['--staging'] : []),
-        ...(seed ? ['--seed'] : []),
-      ]
+      const command = [scriptPath, '--app', appName, ...(staging ? ['--staging'] : []), ...(seed ? ['--seed'] : [])]
       const args = hostExecArgs(command)
       appendOutput(deploy, `📋 Command: nsenter ${args.join(' ')}`)
 
@@ -493,7 +487,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         },
         timestamp: new Date().toISOString(),
       }
-    },
+    }
   )
 
   /**
