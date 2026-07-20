@@ -26,7 +26,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'bun nx run pravda:dev',
-    url: 'http://localhost:3007',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },

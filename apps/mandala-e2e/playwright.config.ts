@@ -53,7 +53,7 @@ export default defineConfig({
   // Запуск dev сервера перед тестами
   webServer: {
     command: 'bun nx run mandala:dev',
-    url: 'http://localhost:3004',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },

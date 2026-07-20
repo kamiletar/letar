@@ -32,7 +32,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'bun nx run aprel8008:dev',
-    url: 'http://localhost:3023',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },

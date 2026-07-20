@@ -27,7 +27,7 @@ export default defineConfig({
   webServer: {
     command: 'bun nx run dsperevod:dev',
     // /sign-up — client-только страница без SSR-запросов к БД, гарантированно 200
-    url: 'http://localhost:3019/sign-up',
+    url: `${baseURL}/sign-up`,
     reuseExistingServer: true,
     cwd: workspaceRoot,
     timeout: 120_000,
@@ -47,7 +47,6 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
     // Uncomment for mobile browsers support
     /* {
       name: 'Mobile Chrome',

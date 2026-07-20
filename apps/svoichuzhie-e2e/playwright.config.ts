@@ -34,7 +34,7 @@ export default defineConfig({
   /* Dev-сервер с CDEK_MOCK_MODE=true — детерминированные тесты без сети */
   webServer: {
     command: 'bun nx run svoichuzhie:dev',
-    url: 'http://localhost:3021',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
     env: { CDEK_MOCK_MODE: 'true' },

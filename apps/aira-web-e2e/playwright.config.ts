@@ -25,7 +25,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'bun nx run aira-web:dev',
-    url: 'http://localhost:3017',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },
