@@ -1,0 +1,15 @@
+{
+  "name": "mandala-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/mandala-e2e/src",
+  "tags": ["type:e2e", "scope:mandala", "owner:letar"],
+  "implicitDependencies": ["mandala"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/mandala-e2e/playwright.config.ts"
+      }
+    }
+  }
+}

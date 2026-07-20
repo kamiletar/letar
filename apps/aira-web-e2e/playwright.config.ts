@@ -3,7 +3,7 @@ import { nxE2EPreset } from '@nx/playwright/preset'
 import { defineConfig, devices } from '@playwright/test'
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:3000'
+const baseURL = process.env['BASE_URL'] || 'http://localhost:3017'
 
 /**
  * Read environment variables from file.
@@ -24,8 +24,8 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'bun nx run @letar/aira-web:dev',
-    url: 'http://localhost:3000',
+    command: 'bun nx run aira-web:dev',
+    url: 'http://localhost:3017',
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },
@@ -44,7 +44,6 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
     // Uncomment for mobile browsers support
     /* {
       name: 'Mobile Chrome',

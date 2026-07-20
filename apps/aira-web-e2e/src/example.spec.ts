@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-test('has title', async ({ page }) => {
+test('главная страница отображает hero-заголовок', async ({ page }) => {
   await page.goto('/')
 
-  // Expect h1 to contain a substring.
-  expect(await page.locator('h1').innerText()).toContain('Welcome')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Speak freely')
 })

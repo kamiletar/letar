@@ -195,7 +195,7 @@ test.describe('Просмотрщик мандал', () => {
       const timerText = page.locator('text=/^\\d{2}:\\d{2}$/').first()
 
       // Запоминаем начальное время
-      const initialTime = await timerText.textContent()
+      const initialTime = (await timerText.textContent()) ?? ''
 
       // Ждём 3 секунды
       await page.waitForTimeout(3000)
@@ -274,7 +274,7 @@ test.describe('Просмотрщик мандал', () => {
         await page.waitForTimeout(500)
 
         // Запоминаем время
-        const timeOnPause = await timerText.textContent()
+        const timeOnPause = (await timerText.textContent()) ?? ''
 
         // Ждём 2 секунды
         await page.waitForTimeout(2000)
