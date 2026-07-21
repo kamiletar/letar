@@ -1,13 +1,15 @@
-import type { ImageCategory } from '@/generated/prisma'
-import { PrismaClient } from '@/generated/prisma'
 import { scryptAsync } from '@noble/hashes/scrypt.js'
 import { bytesToHex, randomBytes } from '@noble/hashes/utils.js'
+import { PrismaPg } from '@prisma/adapter-pg'
 import * as fs from 'fs'
 import * as path from 'path'
 import sharp from 'sharp'
 import mandalasData from '../data/mandalas.json'
+import type { ImageCategory } from '../src/generated/prisma'
+import { PrismaClient } from '../src/generated/prisma/client'
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL']! })
+const prisma = new PrismaClient({ adapter })
 
 /**
  * Тестовые данные для E2E тестов

@@ -1,5 +1,55 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 Тираж M1, батч 2 — `mandala` инфра-блокер снят, dashboard-agent на s3 передеплоен
+> (2026-07-21, BlackCove, msg #667):** Простой `dashboard-agent` на s3 (9.9 дней, см. запись ниже)
+> оказался не просто «забыли передеплоить» — коммит переименования `premium-network →
+kami-network` (`7fd18c8c`, 2026-07-13) прошёл по всему репо, но не докатился до самого s3:
+> `docker-compose.s3.yml` требовал внешнюю сеть `kami-network`, которой на сервере не было (осталась
+> `premium-network`), редеплой падал на `network ... declared as external, but could not be found`
+> с ~07-11/12 (ещё до самого коммита). **Смигрировано без даунтайма:** 4 живых media-контейнера
+> (`media-api`/`worker`/`nginx`/`redis`) dual-homed на `kami-network`, health проверен на новой сети
+> до отключения от старой, пустая `premium-network` удалена. Побочно найден техдолг: `deploy-affected.sh`
+> не знает про хост `s3` вообще (case-select только s1/s2) — обойдено прямым `docker compose` на
+> сервере, сам скрипт не тронут (общий критичный файл для всех продов, чинить — отдельным PR).
+> **Итог:** `deploy_app(mandala, seed:true)` теперь реально передаёт `--seed`; `nx run
+mandala:db:seed` запускается и падает уже на **нашей** известной проблеме
+> (`Cannot find module '@/generated/prisma'`, tsx/tsconfig-paths не резолвит path-alias при вызове
+> через `prisma db seed`) — инфра-блокер снят, дальше чинить app-владельцу.
+>
+> **✅ `mandala/prisma/seed.ts` — path-alias баг починен, вскрыл и обнажил ещё 2 связанных бага
+> (2026-07-21, root-weaver, v0.39.9):** Путь `@/generated/prisma` заменён на относительный
+> `../src/generated/prisma` (паттерн всех остальных приложений — `mandala` была единственной,
+> использовавшей алиас в `prisma/seed.ts`, куда `tsx` не прокидывает `tsconfig.json` paths при
+> вызове через `prisma db seed`). **После фикса вскрылись два новых бага, оба воспроизведены
+> локально в точности как на сервере (`nx zenstack:generate` → `nx db:seed`):**
+>
+> - **`PrismaClient` is not a constructor** — `zenstack:generate` у `mandala` (как и у
+>   `grandslamcup`/`dsperevod`/`auth-hub`/`time`/`archetest`/`aprel8008`/`svoichuzhie`/`kami`/
+>   `studio` — репо-wide паттерн) **намеренно** перезаписывает `src/generated/prisma/index.ts` на
+>   `export * from './browser'` третьей командой в `project.json` — защита от протечки
+>   Node-only `PrismaClient` в клиентские бандлы. Но `browser.ts` экспортирует только типы, не
+>   класс. Само приложение это не задевает (`lib/db.ts` использует `ZenStackClient`, не сырой
+>   `PrismaClient`), но `prisma/seed.ts` — единственное место в `mandala`, которому нужен
+>   настоящий класс. Фикс — импорт `PrismaClient` из явного `../src/generated/prisma/client`
+>   (реальный серверный entry-point, `index.ts`/`browser.ts` — сознательно урезанный дефолт).
+> - **`PrismaClientInitializationError`: нужен non-empty `PrismaClientOptions`** — Prisma 7
+>   (`prisma-client` TS-генератор) больше не собирает `new PrismaClient()` без параметров,
+>   требует явный driver adapter. Фикс по образцу `animatrona-tracker/prisma/seed.ts` —
+>   `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })`
+>   (`@prisma/adapter-pg` уже в зависимостях корня).
+>
+> **Проверено локально end-to-end:** `nx run mandala:db:seed --skip-nx-cache` — admin
+> (`admin@elfafeya.art`, credential-аккаунт) создан, 31 мандала/37 изображений/10 short URL
+> засеяны (предупреждения "File not found" — ожидаемо, `uploads/` не в git, на staging файлы
+> есть). `nx lint mandala` и `nx typecheck:tsgo mandala` чисто.
+>
+> **Не в скоупе этой сессии (не проверено):** тот же паттерн `browser`-override в
+> `zenstack:generate` потенциально бьёт `prisma/seed.ts` и других приложений батча
+> (`grandslamcup`, `dsperevod`, `auth-hub`, `time`, `archetest`, `aprel8008`, `svoichuzhie`,
+> `kami`, `studio`), если их сид-скрипты так же напрямую импортируют `PrismaClient` из
+> `generated/prisma` без явного `/client` и без driver adapter — не проверялось, чинить по факту
+> обнаружения.
+>
 > **✅ §18.7 Тираж M1, батч 2 — диагностика и фиксы 4 находок BlackCove (2026-07-21,
 > root-weaver):** По следам свода BlackCove (запись ниже) — разобраны и закрыты кодом 4 из 5
 > проблем батча (`mandala` не тронута, блокирована на стороне BlackCove — dashboard-agent
@@ -39,24 +89,35 @@
 >   `credential`, вообще никакой. `createDevSessionRoute` создаёт голого `User`+`Session`, минуя
 >   таблицу `Account`. Реальный `/sign-in/email` ищет `providerId='credential'`, не находит →
 >   `INVALID_EMAIL_OR_PASSWORD` (лог `"Credential account not found"`, `better-auth/dist/api/
-> routes/sign-in.mjs:211-214`). Объясняет заодно, почему `:30`/`:40` "проходили" — им нужен только
->   общий текст ошибки, неважно по какой причине. **Фикс (не проверен живьём, ждёт BlackCove):**
+routes/sign-in.mjs:211-214`). Объясняет заодно, почему `:30`/`:40` "проходили" — им нужен только
+>   общий текст ошибки, неважно по какой причине. **Фикс:**
 >   `createDevSessionRoute` (`@letar/auth/server` v0.11.1) — новый опциональный query-параметр
 >   `password`, создающий (idempotent) `Account` с `providerId='credential'` через
 >   `hashPassword` из `@better-auth/utils/password`; `devSessionLogin` (`@letar/e2e-testing`
 >   v0.1.1) прокидывает параметр; `svoichuzhie-e2e/global-setup.ts` передаёт
 >   `password: testFan.password`. Обратная совместимость: без `password` — поведение не меняется,
 >   безопасно для остальных 5 приложений на этой фабрике (aboi, driving-school, grandslamcup,
->   auth-hub, animatrona-tracker, studio). Коммит `c95bd1c7`.
+>   auth-hub, animatrona-tracker, studio). **✅ Подтверждено BlackCove живым прогоном (msg #664,
+>   2026-07-21 16:44):** `svoichuzhie` полный e2e (64 теста) — 54 passed/4 failed/6 skipped (было
+>   48/12/4). `10-auth.spec.ts:48` прошёл; косвенно подтверждён и весь `fan-chromium`-проект
+>   (`12-fanclub-member.fan.spec.ts`), зависящий от валидной fan-сессии. Коммит `c95bd1c7`.
 >
-> **Не в скоупе этой сессии:** `mandala` (54 admin-теста, блокирована на dashboard-agent redeploy
+> **Новые находки из подтверждающего прогона (не диагностировались, отдельный баг форм, не
+> dev-session):** `03-subscription.spec.ts:4` — email-инпут в footer остаётся visible после
+> сабмита формы подписки; `11-fanclub-register.spec.ts:10` — форма вступления в фан-клуб не выше
+> секции тиров (layout order); `11-fanclub-register.spec.ts:37`/`:65` — кнопка submit остаётся
+> disabled при регистрации в фан-клуб/anti-enumeration. Все 4 — вне скоупа этой сессии, ждут
+> app-владельца.
 >
-> - `tsx`/`@/generated/prisma` path-alias баг в seed-таргете — обе проблемы деплой-инфраструктуры,
->   не app-код); `svoichuzhie` `03-subscription`/`11-fanclub-register` (4 несвязанных фейла, не
->   трогались); `dsperevod` `callback-drawer.spec.ts` (webkit, ввод телефона — не диагностировано).
->   Временное диагностическое логирование в `svoichuzhie/fanclub/profile/page.tsx` **оставлено**
->   (gated за `ALLOW_DEV_SESSION`, безобидно) — убрать отдельным коммитом после финального
->   подтверждения фикса.
+> **Не в скоупе этой сессии:** `mandala` (54 admin-теста, блокирована на стороне BlackCove — две
+> раздельные проблемы, обе диагностированы BlackCove, msg #635: (1) `deploy_app(seed:true)` не
+> запускает seed — `dashboard-agent` на s3 не передеплоен 9 дней, текущий образ старше поддержки
+> `seed` в `apps/dashboard-agent/src/routes/deploy.ts:418`; (2) ручной `nx run mandala:db:seed`
+> падает отдельно — `Cannot find module '@/generated/prisma'`, `tsx`/`tsconfig-paths` не резолвит
+> path-alias при вызове через `prisma db seed`); `dsperevod` `callback-drawer.spec.ts` (webkit,
+> ввод телефона — не диагностировано). Временное диагностическое логирование в
+> `svoichuzhie/fanclub/profile/page.tsx` **оставлено** (gated за `ALLOW_DEV_SESSION`, безобидно) —
+> убрать отдельным коммитом после уборки диагностических находок.
 
 > **⚠️ §18.7 Тираж M1, батч 2 — полный редеплой+e2e остальных 5 приложений батча
 > (2026-07-21, BlackCove):** По плану root-weaver (#610) — для `mandala`, `dsperevod`, `pravda`,
