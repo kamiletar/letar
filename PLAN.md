@@ -1,5 +1,26 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ §18.7 Тираж M1, батч 2 — `DEV_SESSION_TOKEN` глобальный vs per-app, `svoichuzhie`
+> 48/64 passed (2026-07-20/21, BlackCove):** После фикса `webServer.url` (root-weaver, коммит
+> `88fed18f`) и фикса auth на staging через `stagingGlobalSetup()`/dev-session (root-weaver,
+> `4a75b32f`) — `svoichuzhie` всё ещё давал 403 на dev-session. **Root cause:**
+> `dashboard-agent` запускает `run_e2e` через `sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN`
+> — этот флаг сохраняет **ОДНО значение из окружения самого процесса dashboard-agent**
+> (`5cbe8e87...`, единое на весь сервис), а НЕ читает `DEV_SESSION_TOKEN` индивидуально из
+> `.env.staging` каждого приложения. BlackCove при настройке `.env.staging` для
+> `mandala`/`svoichuzhie`/`aprel8008`/`dsperevod` сгенерировал разные токены на каждое — отсюда
+> 403. **Фикс:** токен во всех четырёх `.env.staging` на s3 выровнен под глобальное значение
+> dashboard-agent. **Итог `svoichuzhie` после фикса: 48 passed / 12 failed / 4 skipped** —
+> auth-часть теперь честно проходит; остаток — (а) strict-mode конфликт двух кнопок «Войти» на
+> `/login` (шапка + форма, 7 из 12 отказов), (б) `db.helpers.ts:106` (`ensureTestProduct` для
+> merch-checkout) всё ещё бьёт `127.0.0.1:5432` напрямую — тот же класс проблемы, что чинили для
+> auth, но в другой helper-функции, не мигрирован на dev-session (2 отказа), (в)
+> `11-fanclub-register.spec.ts` — форма/таймауты, не диагностировано глубоко (2 отказа).
+> **Не проверено повторно:** `mandala`'s ранее репортнутый `auth.setup.ts` отказ мог быть тем же
+> классом бага (токен не совпадал) — токен выровнен, но mandala не переprogнан. `E2E_GATED_APPS`
+> BlackCove сам не трогает — ждёт решения root-weaver по итогам смешанных результатов батча
+> (тред `staging-e2e-gate-m1-batch2`, msg #619).
+>
 > **✅ §18.7 M1 `aboi` — `checkout.spec.ts:140` (webkit) `/cart`-редирект: первая гипотеза
 > опровергнута живым прогоном, вторая — подтверждена (2026-07-19, aboi-dev, commit
 > `<см. CHANGELOG аboi 0.25.5>`):** Диагностика началась с ложной тревоги — шестой/седьмой прогоны
@@ -151,7 +172,7 @@
 > - **DaData-подсказка адреса не появлялась** несмотря на `DADATA_MOCK_MODE=true` — оказалось,
 >   это ДРУГОЕ поле (`checkout-form.tsx` клиентский `AboiForm.Field.Address`, не серверный
 >   `searchDadataCitiesAction`): `libs/forms` `field-address.tsx` — пустой `token` → `provider =
->   null` → fetch вообще не вызывается, `page.route()` перехватывать нечего. Добавлен
+null` → fetch вообще не вызывается, `page.route()` перехватывать нечего. Добавлен
 >   `NEXT_PUBLIC_DADATA_TOKEN=<плейсхолдер>` в `.env.staging.example` — не настоящий токен,
 >   `page.route()` перехватывает запрос раньше, чем он доходит до `suggestions.dadata.ru`,
 >   нужна только непустая строка.
@@ -265,7 +286,7 @@
 > списком, это и была исходная причина Бага 2.
 > **e2e ПОСЛЕ фикса — всё ещё не зелёный, но по app-причинам, не инфра:**
 > `aboi` 33/42 passed (было 2/42) — 9 падений: (1) CDEK test-credentials дают `401
-> invalid_client` на `api.edu.cdek.ru` → не рендерится `CDEK_POINT` radio, 6 тестов; (2)
+invalid_client` на `api.edu.cdek.ru` → не рендерится `CDEK_POINT` radio, 6 тестов; (2)
 > `email-verification.spec.ts` — heading "Почти готово" не появляется после sign-up на всех
 > браузерах, похоже на реальный UI-баг, не флейк. `time` — e2e вообще не запускается:
 > `playwright.config.ts` пытается поднять свой webServer через `nx run @letar/time` (project not
@@ -358,7 +379,7 @@
 > `typecheck:tsgo`, только полным `next build`/`tsc`), пофикшено тем же коммитом, повтор прошёл
 > успешно. **Побочно найден баг (вынесен отдельной задачей, не в скоупе этой сессии):**
 > `/api/auth/dev-session` у driving-school падает с 500 (`TypeError: Cannot set property message of
-> which has only a getter`) — предсуществующий, не связан с этим изменением, блокирует будущие
+which has only a getter`) — предсуществующий, не связан с этим изменением, блокирует будущие
 > e2e/preview через dev-session механизм.
 >
 > **✅ Тираж hub-client на aprel8008 (2026-07-16):** админка для владелицы (управление фото баз) +
