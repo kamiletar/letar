@@ -1,10 +1,890 @@
-# PLAN.md — Архив выполненных сессий (до 2026-06-21)
+# PLAN.md — Архив выполненных сессий (до 2026-07-13)
 
-> Архив рабочего журнала (шапки) корневого `PLAN.md` — записи сессий старше ~1 месяца,
-> перенесены при архивации 2026-07-21 (`/workflow:archive-completed`, §21).
+> Архив рабочего журнала (шапки) корневого `PLAN.md` — записи сессий старше ~1 недели.
+> Первый проход (сессии №1-41, до 2026-06-21) — 2026-07-21 (`/workflow:archive-completed`, §21).
+> Второй проход (сессии №42-74, до 2026-07-13) — 2026-07-21 (`/workflow:archive-completed`, повторный запуск).
 > Активный журнал — см. верх `PLAN.md`.
 
 ---
+
+> **Сессия №74 (2026-07-13, переименование Docker-сети `premium-network` → `kami-network`):**
+> Закрыт долгоживущий TODO из `.claude/docs/deployment.md` (см. Сессию №73 и раньше — имя сети
+> осталось от decommissioned `premium-rosstil`/`imot`, хотя используется ~20+ текущими
+> приложениями). Переименовал во всех `docker-compose.production.yml`, `libs/deploy-engine`
+> (`doctor.ts`, `rollout.spec.ts`), документации и правилах деплоя — commit `7fd18c8` в letar.
+> Submodule-приложения (aboi, driving-school, dsperevod, studio, aprel8008, svoichuzhie) обновлены
+> отдельными коммитами в своих репо, SHA зафиксированы в letar. Проверил ловушку из TODO
+> (коллизия с «сетью kami-network приложения kami») — коллизии нет, отдельной сети не существовало,
+> `kami` сам сидел в `premium-network`.
+> ⚠️ Сеть `external: true` — переименование в коде не переименовывает её на сервере. Отправлен
+> deploy-request BlackCove (msg #377, thread `deploy-kami-network-rename`, ack required) на
+> фактическое пересоздание `kami-network` на s2 и передеплой всех затронутых приложений.
+> **Ответ получен (msg #378):** шаги 1–2 выполнены недеструктивно — `docker network create
+kami-network`, все 44 контейнера с `premium-network` подключены и к `kami-network` (без
+> отключения от старой, zero-downtime — каждый контейнер временно в обеих сетях). Шаги 3–5
+> (передеплой ~20 приложений на алиас `kami-network` + удаление старой `premium-network` в конце)
+> BlackCove катит партиями с проверкой после каждой — см. записи `letar-landing`/
+> `animatrona-landing` rollout-пилотов выше в шапке файла, где это уже происходит вживую.
+>
+> **🟡 ИСПРАВЛЕНИЕ (2026-07-15, BlackCove, msg #478, thread `477`):** предыдущая формулировка
+> «все SERVER_APPS подтверждённо переехали на `kami-network`» (см. записи rollout-пилотов ниже)
+> была **неточна** — тираж §18.6 пересоздаёт только **app-контейнеры** (новый `app-2` физически
+> создаётся только на `kami-network`), но **БД-контейнеры и инфра** (`nginx-proxy-manager`,
+> `dashboard-app`, `studio`, `media-*` — всего **28 контейнеров**) остались с dual-connect шага 2
+> и никогда не были явно отключены от `premium-network`. Обнаружено при попытке удаления сети
+> (msg #477) — BlackCove корректно отказался выполнить `docker network rm` с живыми критичными
+> контейнерами (включая `nginx-proxy-manager`, точку входа всего прод-трафика), проверил
+> `docker network inspect` перед действием вместо доверия статусу в PLAN.md. **План завершения
+> (msg #479):** по каждому контейнеру — сверить, что compose в репо уже не ссылается на
+> `premium-network`, отключить (`docker network disconnect`) по одному с проверкой связности,
+> `nginx-proxy-manager` — отдельно и последним (максимальный risk), удалить сеть только когда
+> `docker network inspect` покажет пустой список. Low-priority, не блокер — в работе у BlackCove.
+>
+> **➡️ Следующий старт:** (1) продолжить тираж §18.6 Сессии J (кандидаты: `pravda` ✅,
+> `kami-key-the-landing` ✅, `letar-landing` ✅, `animatrona-landing` ✅, `dsperevod`, `aboi`,
+> `umami`, `kami`); (2) когда все ~20 приложений подтверждённо переехали на `kami-network` —
+> попросить BlackCove удалить старую `premium-network`; (3) проверить статус ротации
+> `aprel8008`/`form-example`, если не закрыто предыдущей сессией.
+
+> **Сессия №73 (2026-07-13, ротация `aprel8008` + фикс `form-example /products` — закрыто BlackCove):**
+> Запрос на ротацию `DB_PASSWORD` для `aprel8008` (реальная утечка, см. Сессию №71 ниже) на момент
+> проверки не находился через `search_messages`/`fetch_inbox`/`fetch_summary` (0 результатов) —
+> отправлен повторно (msg id 367, thread `deploy-aprel8008-db-password-rotation`).
+> **Результат по отчёту BlackCove (очередь разобрана, скриншот пользователю):** `aprel8008` — пароль
+> Postgres ротирован, задеплоено, HTTP 200; `form-example` — пароль ротирован **и** зафиксирован
+> фикс `/products` (`ECONNREFUSED`, открытый с Сессии №72), задеплоено, HTTP 200.
+> **Уточнение (BlackCove, msg #372, thread `deploy-aprel8008-db-password-rotation`):** запрос на
+> ротацию `aprel8008` на самом деле **уже был отправлен и выполнен раньше** — другим агентом
+> (CloudyOtter, msg #357/#360, ~16:19), тем же коммитом `5143dc0`/`3f752b6`, тем же паролем.
+> Повторная отправка была не нужна (хотя и безвредна — идемпотентно, тот же пароль). Корень —
+> не «запрос не отправляли», а **PLAN.md не обновился после первого запроса** + `search_messages`
+> почему-то не нашёл существовавшие messages #357/#360 при проверке (~17:18, уже после их отправки) —
+> причина расхождения не выяснена (возможно, задержка индексации FTS или разница в scope/project_key
+> у отправителя); при следующем похожем случае перепроверять через `fetch_summary` с более широким
+> `since_hours` и не считать 0 результатов `search_messages` окончательным доказательством отсутствия.
+>
+> **➡️ Следующий старт:** (1) продолжить тираж §18.6 Сессии J (кандидаты: `pravda`,
+> `kami-key-the-landing`, `letar-landing`, `animatrona-landing`, `dsperevod`, `aboi`, `umami`, `kami`).
+
+> **`pravda` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #373, thread
+> `deploy-pravda-rollout-J`):** zero-downtime через `libs/deploy-engine` без ручного вмешательства
+> (commit `bf79514`, сервер s2) — doctor → scale-up `pravda-app-2` → healthy → smoke-test →
+> nginx-reload ×2 → stop-old. 5 внешних curl на `pravda.letar.best` после деплоя — все HTTP 200,
+> даунтайма не было.
+
+> **`kami-key-the-landing` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #375, thread
+> `deploy-kami-key-the-landing-rollout-J`):** zero-downtime (commit `fa50fa9`, сервер s2). BlackCove
+> проверил живой конфиг NPM перед деплоем (`/data/nginx/proxy_host/26.conf`) — Forward Host уже
+> резолвил по имени контейнера, alias совместим без правок NPM; сеть `nginx-proxy-manager_default`
+> на механизм rollout не повлияла. 5 внешних curl на `kamikeythe.letar.best` — все HTTP 200.
+> **4/~19 SERVER_APPS на rollout** (`time`, `form-docs`, `pravda`, `kami-key-the-landing`).
+> **`letar-landing`** — compose смигрирован (commit `05f3628`), `doctor` 8/8 READY, запрос пилота
+> отправлен BlackCove (thread `deploy-letar-landing-rollout-J`) — **ждёт выполнения**.
+
+> **Сессия №71 (2026-07-12, применение находок сессии №70 — аудит секретов + smoke-test):**
+> По итогам инцидента mandala предложила пользователю 3 системных находки, применила все.
+>
+> **1. Аудит хардкод-паролей в `docker-compose.production.yml`.** Расширенный grep
+> (`${VAR:-fallback}` с секретом в default-значении) нашёл паттерн в **8** приложениях:
+> `animatrona-tracker`, `aprel8008`, `auth-hub`, `driving-school`, `grandslamcup`, `kami`,
+> `mandala`, `studio`. Проверила через `sops --decrypt` каждый `.env.docker.enc` — в **7 из 8**
+> `DB_PASSWORD`/`POSTGRES_PASSWORD` уже реальный сгенерированный секрет, fallback никогда не
+> используется (мёртвый код). Убрала текст fallback без затрагивания сервера/секретов
+> (commits: `e51623f` — 5 приложений, `2752938` — driving-school submodule, `ee274d1` — studio
+> submodule, `5088891` — bump SHA обоих submodules).
+>
+> **🔴 `aprel8008` — реальная утечка:** `DB_PASSWORD` в `.env.docker.enc` буквально совпадал с
+> хардкод-fallback (`aprel8008_password`) — не мёртвый код, настоящий слабый пароль в открытом
+> виде в публичном репо. Сгенерирован новый (`openssl rand -hex 24`), обновлён в
+> `.env.docker.enc` (commit `5143dc0` в submodule + `3f752b6` bump SHA). Запрошена ротация у
+> BlackCove по образцу form-example (сессия №70): `ALTER USER` на живой БД **до** редеплоя —
+> **ответ ещё не пришёл** на момент записи, следующая сессия должна проверить статус.
+>
+> **2. Smoke-test в `libs/deploy-engine`.** Docker healthcheck (`wget --spider`) не всегда ловит
+> 5xx — это объясняет, почему mandala была "healthy" по Docker при реальных 500 (sharp/libvips).
+> Добавлен шаг `smoke-test` в `rollout.ts` между `wait-healthy` и `nginx-reload-1`: извлекает URL
+> из `healthcheck.test` (`serviceHealthcheckUrl` в `compose.ts`), дёргает его через `wget`
+> **без** `--spider` (реально скачивает тело, ненулевой exit code на 4xx/5xx). Не блокирует
+> rollout, если URL не извлекается (defense-in-depth, не новая точка отказа). 4 новых/изменённых
+> теста, 24/24 зелёные. Commit `855e11e`.
+> ⚠️ **Известное ограничение:** защищает только rollout-путь. Обычный `--force-recreate` путь
+> (`deploy-affected.sh`, bash) — которым был задеплоен сломанный `mandala` — остаётся без этой
+> защиты. Будет закрыто по мере тиража rollout-профиля на остальные приложения (§18.6 Сессия J).
+>
+> **3. `form-example /products` 500** — не тронула, уже была попытка фикса (откачена
+> `outputFileTracingIncludes`, не помогло) в фоновой задаче до этой сессии. Остаётся открытым,
+> см. флаг для отдельной сессии — причина глубже стандартной проблемы file-tracing, возможно
+> специфика Prisma 7 driver-adapter + Turbopack.
+>
+> **➡️ Следующий старт:** (1) проверить статус ротации `aprel8008` у BlackCove — если ответа всё
+> ещё нет, повторно запросить; (2) продолжить тираж §18.6 Сессии J (следующие кандидаты:
+> `pravda`, `kami-key-the-landing`, `letar-landing`, …); (3) когда будет время — `form-example
+/products`, если кто-то захочет копнуть глубже Prisma 7 + Turbopack.
+
+> **Сессия №72 (2026-07-12, §18.6 Сессия J — `form-example` обычный деплой закрыт, найден
+> отдельный баг Prisma/`ECONNREFUSED` на `/products`):**
+> Закрыла зависший из Сессии №70 пункт — задеплоила `form-example` с двумя изменениями сразу
+> (коммиты линейны, конфликта резервации не было): compose-миграция под rollout-профиль
+> (`098eb75`, IvoryPrairie) + вынос захардкоженного `POSTGRES_PASSWORD` в `.env.docker.enc`
+> (`df5602179`, BronzeForge). Ротация пароля требовала ручного шага **до** пересборки: достала
+> новый `POSTGRES_PASSWORD` из расшифрованного `.env.docker.enc`, выполнила `ALTER USER forms
+WITH PASSWORD ...` на уже работающем `form-example-db`, только потом обычный деплой (пересоздал
+> `db`+`app` с новым паролем без потери доступа). Подтвердила подключение вручную через `psql`.
+> `letar.rollout` остаётся выключенным (по плану BronzeForge/IvoryPrairie) — supervised-пилот
+> отдельным шагом позже.
+>
+> **✅✅ ЗАКРЫТО (2026-07-12, commit `bd498ed`, не задокументировано вовремя — обнаружено задним
+> числом 2026-07-15):** ошибочная гипотеза про Turbopack/file-tracing (см. ниже) отменена в
+> `16471b4`. **Реальная причина:** конфликт версий пакета `pg` под bun-hoisting — `db.ts` создавал
+> `new Pool()` вручную через одну резолвнутую копию `pg`, а `@prisma/adapter-pg` внутри резолвит
+> свою собственную копию; `instanceof Pool`-проверка между разными экземплярами класса не
+> проходит, адаптер тихо не распознаёт переданный Pool и создаёт свой **без `connectionString`**
+> (дефолт `localhost:5432`) — отсюда обманчивый generic `ECONNREFUSED` (известный баг Prisma,
+> `github.com/prisma/prisma/issues/28055`). **Фикс:** передавать `connectionString` напрямую в
+> `PrismaPg` вместо готового `Pool`-инстанса. Проверено вживую на s2 — до фикса ECONNREFUSED на
+> `::1`/`127.0.0.1:5432`, после — успешный запрос к `form-example-db`.
+>
+> **Побочная находка (историческая, ошибочная гипотеза, оставлена для контекста):** `/products`
+> (единственная страница `form-example` с реальным Prisma-запросом) стабильно падала с
+> `ECONNREFUSED` в `prisma.product.findMany()`. Ручная диагностика (прямой `pg.Pool`,
+> `PrismaPg`-адаптер, полный `PrismaClient` — все через `docker exec` с теми же версиями/путями,
+> что использует рантайм) отработала **без единой ошибки** — расхождение с реальным упавшим
+> запросом от скомпилированного Turbopack-чанка не нашла. По аналогии с sharp/mandala
+> (Сессия №70) заподозрила недокопированный `.prisma/client` (WASM query-compiler) в per-chunk
+> alias-копии `@prisma/client-0443beb3620eded9` — добавила `outputFileTracingIncludes`, файлы
+> в образе стали полными (подтвердила `find` внутри контейнера), но ошибка не исчезла. Не
+> нашла корень за разумное время (это demo/showcase-приложение библиотеки форм, не критичный
+> сервис) — **откатила фикс** (`outputFileTracingIncludes` раздул билд с 17с до 2.6мин без
+> результата, плохой размен). Передала находку BronzeForge/IvoryPrairie как отдельный
+> незаблокированный баг, не гнала дальше самостоятельно.
+>
+> **➡️ Следующий старт:** (1) кто-то (не обязательно BlackCove) разбирается с `/products`
+> `ECONNREFUSED` в `form-example` — вероятно специфика Prisma 7 driver-adapter + Turbopack
+> per-chunk алиасинга, не тривиальная трассировка файлов, как было со sharp; (2) продолжить
+> тираж §18.6 Сессии J — `mandala` пропущена в этой волне (инцидент Сессии №70, нужен период
+> стабильности), следующие кандидаты: `pravda`, `kami-key-the-landing`, `letar-landing`,
+> `animatrona-landing`, `dsperevod`, `aboi`, `umami`, `kami`.
+
+> **Сессия №71 (2026-07-12, нормализация sharp/libvips-фикса после инцидента mandala):**
+> Заменила хрупкий хотфикс (Сессия №70, commit `8ba37d8f`) на устойчивое решение —
+> `outputFileTracingIncludes` в `next.config.js` с глобом `./node_modules/.bun/@img+sharp-libvips-*/**/*.so*`
+> вместо хардкода версии `1.3.2` в `Dockerfile.production`. Next.js standalone tracer теперь
+> сам подхватывает `libvips-cpp.so` на этапе `next build` (в `.next/standalone`), явный `COPY`
+> в Dockerfile больше не нужен — убрала его из `apps/mandala/Dockerfile.production`.
+>
+> **Проверила через grep** (`from 'sharp'`/`require('sharp')` в `src/`, вне `scripts/` — те
+> билд-тайм, не в runtime-контейнере), баг не специфичен для `mandala`: тот же фикс применён
+> ко всем приложениям с runtime-использованием sharp — `mandala`, `driving-school` (submodule),
+> `aboi` (submodule), `kami`, `grandslamcup`. `pravda` использует sharp только в
+> `scripts/generate-icons.js`/`generate-og-images.ts` (build-time, не runtime) — фикс не нужен.
+>
+> **Изолированный тест механизма** (Docker `node:24-alpine` + bun workspace вне монорепо,
+> т.к. локальная машина — Windows и линуксовый `sharp-libvips-linuxmusl-x64` тут не ставится):
+> подтвердила, что (1) в bun workspace (несколько `package.json` в `workspaces`) действует
+> isolated-store layout `node_modules/.bun/@img+sharp-libvips-*@<version>/...` — тот же, что
+> в `bun.lock` монорепо; (2) `outputFileTracingIncludes` с глобом реально затягивает
+> `libvips-cpp.so` в `.next/standalone` при `next build` — воспроизвела на минимальном
+> Next.js 16.2.10 App Router проекте с `sharp` в зависимостях, до и после фикса. Полную сборку
+> `mandala` на Linux локально не гоняла (тяжело — весь монорепо-workspace) — просит проверки
+> BlackCove изолированной сборкой перед следующим деплоем `mandala`/`driving-school`/`aboi`/
+> `kami`/`grandslamcup`, как он уже делал для хотфикса (Сессия №70).
+>
+> **Не сделано:** общий Dockerfile-шаблон/скрипт (второе направление, предложенное BlackCove) —
+> не понадобился, `outputFileTracingIncludes` в `next.config.js` каждого приложения решает
+> задачу проще и без нового инструмента.
+
+> **Сессия №70 (2026-07-12, §18.6 Сессия J — тираж #3/#4, 🔴 прод-инцидент mandala закрыт):**
+> Смигрировала `form-example` (compose, commit `098eb75`, host-порт `3022` был реально
+> опубликован — та же схема, что form-docs: сначала обычный деплой перед rollout-label) и
+> `mandala` (compose, commit `6aa10fd`, host-порт `${PORT:-3004}` тоже реально опубликован,
+> Forward Host в NPM уже задокументирован как `mandala-app` — совпал с новым alias).
+>
+> Заодно фоновая задача пользователя (спавнена мной ранее при обнаружении секрета) вынесла
+> захардкоженный `POSTGRES_PASSWORD` из `apps/form-example/docker-compose.production.yml` в
+> `${POSTGRES_PASSWORD}`/`.env.docker.enc` (commit `df5602179` поверх моей миграции) — не
+> моя работа в этой сессии, но повлияла на деплой ниже.
+>
+> **🔴 Прод-инцидент:** обычный (не-rollout) деплой `mandala` формально завершился успешно
+> (`exitCode 0`), но `mandala.letar.best` отдавал **500 на каждой странице** — нативный модуль
+> `sharp` падал (`ERR_DLOPEN_FAILED: libvips-cpp.so.8.18.3`). Дала команду на откат к
+> `84dc5080` (последний коммит без изменений в `apps/mandala/`) как самое быстрое надёжное
+> восстановление под давлением — не хотела гадать про Dockerfile/toolchain в моменте.
+>
+> **BlackCove проявил инициативу и остановил откат до применения**, протестировав `84dc5080`
+> в изолированном worktree — краш воспроизводился **и там**, значит откат не решил бы проблему
+> (не регрессия от моих правок; `bun.lock` для `sharp` идентичен в обоих коммитах). Нашёл
+> настоящую причину: Next.js standalone output tracer не копирует `libvips-cpp.so.8.18.3` в
+> `.next/standalone` (баг трассировки `dlopen()`-зависимостей — sharp грузит `.so` динамически,
+> не через `require()`). Латентный баг, ждал первой полноценной пересборки образа (которую
+> спровоцировал мой compose-деплой) — раньше просто не всплывал, потому что образ `mandala`
+> давно не пересобирался с нуля. Применил хотфикс — явный `COPY` недостающего `.so`-файла в
+> `Dockerfile.production` (commit `8ba37d8f`), протестировал изолированно перед деплоем на
+> прод. **Простой ~17 минут (13:13–13:32 MSK).** Прод восстановлен, независимо подтверждено
+> (200 OK).
+>
+> ⚠️ **Хотфикс хрупкий** — путь `@img+sharp-libvips-linuxmusl-x64@1.3.2` захардкожен, версия
+> может съехать при следующем апдейте `sharp`/`bun.lock`, баг вернётся. BlackCove предложил
+> два направления для устойчивого решения: `outputFileTracingIncludes` в `next.config.js`
+> (глоб вместо хардкода версии) ИЛИ вынести фикс в общий Dockerfile-шаблон — баг не специфичен
+> для `mandala`, могут словить любые приложения с `sharp` при следующей полной пересборке.
+> **Не сделано в этой сессии** — экстренный хотфикс закрыл инцидент, нормализация отдельной
+> задачей.
+>
+> **`mandala.letar.best` пока НЕ на rollout-профиле** — `letar.rollout` в compose остаётся
+> закомментированным. После сегодняшнего инцидента приложению нужен период стабильности перед
+> следующим риском (supervised rollout-пилот), не гнать сразу следом.
+>
+> **➡️ Следующий старт:** (1) нормализовать хрупкий sharp/libvips фикс (`outputFileTracingIncludes`
+> или общий Dockerfile-паттерн) — самостоятельная задача, затрагивает потенциально все
+> приложения с `sharp`, не только `mandala`; (2) проверить статус обычного деплоя `form-example`
+> (запрошен, ответ от BlackCove ещё не пришёл на момент конца сессии); (3) продолжить тираж
+> §18.6 Сессии J дальше по списку (`pravda`, `kami-key-the-landing`, `letar-landing`, …) —
+> `mandala` пока пропустить, вернуться к её rollout-пилоту отдельно, не в этой волне.
+
+> **Сессия №69 (2026-07-12, §18.6 Сессия J — тираж, form-docs ✅ второй пилот закрыт):**
+> Первое приложение тиража после `time`. Смигрировала `apps/form-docs/docker-compose.
+production.yml` под rollout-профиль (`147c5fe`) — в отличие от `time`, `form-docs` реально
+> публиковал host-порт `3020:3020`, поэтому сначала прогнала label выключенным через обычный
+> деплой, чтобы отдельно проверить гипотезу «снятие host-port publish не ломает NPM-роутинг»
+> без риска путать её с рисками самого rollout-механизма.
+>
+> Обычный деплой (`deployId a91b3e2c`) неожиданно упал — но не по моей гипотезе: нашла баг в
+> `deploy-affected.sh` — наивный `grep -qE "letar\.rollout..."` матчил закомментированную
+> строку `#   letar.rollout: 'true'` тоже, ложно заворачивал на rollout-путь, где `doctor`
+> корректно, но зря блокировал (label реально не установлен). Прод не пострадал. Пофикшено
+> (`grep -v '^\s*#'` фильтрует строки-комментарии до проверки label), commit `4fbc414`.
+> Попутно BlackCove подтвердил в NPM: `forms.letar.best` → Forward Host уже `form-docs-app`
+> (проверено по `proxy_host/15.conf` на сервере) — гипотеза про alias подтверждена независимо.
+>
+> Ретрай обычного деплоя (`deployId 78b31444`) прошёл чисто — `forms.letar.best` 307 (i18n
+> редирект), 41ms, без прерываний. Гипотеза про host-port publish подтверждена полностью.
+>
+> Включила `letar.rollout: 'true'` (`9cec89f`), `doctor --app form-docs` — 8/8 ✅ READY.
+> Supervised rollout-пилот (`deployId c80afa44`) прошёл **чисто с первой попытки** — все 8
+> шагов ✅, без единого бага: `resolveOldContainer()` сразу нашёл `form-docs-app-1` без
+> легаси-путаницы (в отличие от `time`, все контейнеры уже были в правильной схеме имён с
+> самого начала). `forms.letar.best` 307, 42ms — без прерываний трафика.
+>
+> **Итог:** rollout-механизм подтверждён на двух разных типах приложений — stateful `time`
+> (с БД, легаси-контейнер) и stateless `form-docs` (без БД, host-port publish). Оба фикса из
+> пилота `time` (`resolveOldContainer`, `parseArgs strict:false`) сработали штатно без
+> повторных багов. Найден и закрыт третий баг (детект label в `deploy-affected.sh`) — не
+> специфичен для конкретного приложения, поэтому важен для всего тиража.
+>
+> **➡️ Следующий старт:** продолжить тираж §18.6 Сессии J пачками 3–5 приложений (см. таблицу
+> DoD, PLAN.md строка J). Кандидаты по возрастанию риска: `form-example`, `mandala`, `pravda`,
+> `kami-key-the-landing`, `letar-landing`, `animatrona-landing`, `dsperevod`, `aboi`, `umami`,
+> `kami` — затем `archetest`/`grandslamcup` (активная разработка, выше риск конфликта с текущими
+> сессиями), затем `auth-hub`/`driving-school` (критичные, самый высокий риск — последними).
+> Для каждого: проверить наличие/отсутствие `ports:` в текущем compose (как с form-docs — если
+> порт реально опубликован, сначала обычный деплой с выключенным label, потом supervised-пилот;
+> если порта уже нет — можно сразу пилотировать, как было готово у `time`).
+
+> **Сессия №68 (2026-07-12, §18.6 Сессия G — ✅ ЗАКРЫТА, живой пилот пройден чисто):**
+> Раскомментировала `letar.rollout: 'true'` в `apps/time/docker-compose.production.yml`,
+> `doctor --app time` — 7/7 ✅ READY. Запросила деплой через BlackCove (Agent Mail,
+> thread `time-rollout-pilot-18-6-g`), супервизировала непрерывным curl-мониторингом
+> `time.letar.best`.
+>
+> Первая попытка упала до rollout-логики на постороннем конфликте (untracked
+> `apps/driving-school/next-env.d.ts` на s2 блокировал submodule checkout) — расчищено
+> с разрешения владельца (стандартный автогенерируемый Next.js файл).
+>
+> Вторая попытка дошла до `runRollout()` (label сработал, ветвление подтверждено) и упала
+> на реальном баге: `libs/deploy-engine/src/cli.ts` — `requireApp()` вызывал `parseArgs()`
+> в strict-режиме, который отвергал `--deploy-tag` до того, как его парсит второй
+> `parseArgs()` в ветке `rollout`. Пофикшено (`strict: false` + typeof-guard), commit
+> `6618e3e`.
+>
+> Третья попытка дошла до `stop-old` и упала там: `oldContainer` был захардкожен как
+> `${projectName}-app-1`, но легаси-контейнер `time-app` (создан ещё под старым compose
+> с явным `container_name`, до миграции на rollout-профиль) под эту конвенцию не подходил
+> — `docker stop time-app-1` → "No such container". **Прод не пострадал** — на этом шаге
+> `nginx-reload-1` уже прошёл, поэтому оба контейнера (`time-app` старый + `time-app-2`
+> новый healthy) временно жили под общим nginx-балансом, `time.letar.best` всё время
+> отдавал 200. Та же категория бага, что чинили в `dashboard` (`findContainerByName`,
+> commit `8de3029`), теперь и в `deploy-engine`. Добавлен `resolveOldContainer()` —
+> резолвит единственный существующий контейнер сервиса `app` по compose-лейблам
+> (`com.docker.compose.project`/`service`) **до** scale-up, пока их ровно один; требует
+> точно 1 совпадение, иначе останавливает rollout, не гадая. 2 новых юнит-теста
+> (legacy-имя без суффикса, 0/>1 найденных контейнеров), обновлены существующие под новый
+> шаг `resolve-old-container`. 22/22 зелёных, typecheck/lint чисто. Commit `77d023b`.
+>
+> Попросила BlackCove вручную долить прерванный прогон (`docker stop/rm time-app` +
+> повторный `nginx -s reload`) вместо полного ретрая — свежий `resolveOldContainer()`
+> увидел бы оба живых контейнера сразу и отказался бы выбирать. Дочистка прошла чисто,
+> `docker ps -a` на s2 без зависших пар. **Финальный чистый ретрай** (`deployId`
+> `1b6fd716`) прошёл все 8 шагов rollout без единого ❌ — `doctor` →
+> `resolve-old-container` → `scale-up` → `wait-healthy` → `nginx-reload-1` → `stop-old`
+> → `rm-old` → `nginx-reload-2`. `time-app-3` (финальный, `time:77d023bd3`) healthy,
+> `time.letar.best` 200 OK на протяжении всего пилота (независимо проверено мной и
+> BlackCove).
+>
+> **Итог: DoD §18.6 Сессии G выполнен.** Zero-downtime rollout-механизм `deploy-engine`
+> подтверждён живым прогоном на production, 2 найденных бага закрыты и покрыты тестами.
+> Механизм готов к обычной эксплуатации для `time` и, вероятно, для остальных приложений
+> после их миграции на rollout-профиль compose (по образцу `apps/time/docker-compose.
+production.yml`).
+>
+> **➡️ Следующий старт:** тираж rollout-профиля на другие приложения (по одному, с тем же
+> паттерном doctor-гейта) — начать с определения приоритета (какое приложение следующим:
+> высокий трафик выигрывает больше всего от zero-downtime, но и риск выше). Отдельно —
+> неделя warn-only e2e-gate (сессия F, независимая ветка) продолжается до 2026-07-18.
+
+> **Сессия №67 (2026-07-12, §18.6 Сессия G — 🟢 блокер снят, `time` мигрирован, живой пилот
+> ЕЩЁ НЕ проведён):** Закрыл блокер, найденный в сессии №66. Добавил
+> `apps/dashboard/src/lib/server-client/find-container.ts` — `findContainerByName()` резолвит
+> контейнер по точному имени (как раньше) ИЛИ по `<name>-N` с числовым суффиксом (дефолтная
+> нумерация docker compose без `container_name`), не любому префиксу — это исключает
+> ложные совпадения вроде `<name>-worker`. При нескольких живых репликах (окно rollout) берёт
+> `-1` детерминированно. Подключил в 4 местах, где раньше было точное сравнение имени:
+> `api/apps/[app]/{status,stats,logs}/route.ts`, `api/docker/containers/by-name/[name]/status/
+route.ts`, `api/servers/[id]/apps/[appId]/deploy/route.ts` (последний — локальный restart-путь,
+> тот же класс бага). Sanity-check вручную (6 кейсов: точное имя, одна реплика без
+> container_name, обе реплики во время rollout, отсутствие совпадения, не-ложное срабатывание на
+> `-worker`, экранирование спецсимволов в имени приложения для regex) — все ожидаемо.
+> `nx typecheck:tsgo`/`nx lint dashboard` зелёные. **Юнит-тестов на `findContainerByName` нет** —
+> у `dashboard` до сих пор не настроен vitest вообще (известный преэкзистентный пробел,
+> `.claude/docs/unit-testing.md`), заводить его целиком — отдельная задача не в скоупе этой сессии.
+>
+> ⚠️ Заодно поймал: `nx run dashboard:format` реформатировал 109 файлов сразу (§20 —
+> рассинхрон форматтера, уже задокументированная проблема) — не закоммитил, откатил всё кроме
+> 6 файлов, которые редактировал сам (`git checkout --` по списку, не bulk).
+>
+> Пересоздал миграцию `apps/time/docker-compose.production.yml` под rollout-профиль (тот же
+> контент, что готовил и откатывал в сессии №66) — теперь безопасна: `doctor --app time` даёт
+> 6/7 required ✅ (только `letar.rollout`-label намеренно не выставлен). Закоммичено и запушено —
+> **и dashboard-фикс, и time-compose** (в сессии №66 либо код без побочных эффектов, либо явно
+> не коммитился; здесь коммичу обе части).
+>
+> **Живой пилот rollout НЕ проведён** — сознательно. Первое включение label + реальный
+> `docker compose --scale app=2` + `nginx -s reload` на проде требует непрерывного curl-
+> мониторинга в реальном времени (собственный DoD сессии G) — риск (непроверенное мультиIP-
+> поведение NPM, см. §18.6) оправдывает супервизируемый заход, а не автономный fire-and-forget
+> в рамках одного хода.
+>
+> **➡️ Следующий старт:** включить `letar.rollout: 'true'` в `apps/time/docker-compose.
+production.yml` (раскомментировать) → супервизируемый живой прогон: закоммитить/запушить →
+> запросить продовый деплой `time` (через deploy-mcp или BlackCove) → параллельно curl-цикл на
+> `https://time.letar.best` → наблюдать `deploy_status`/логи rollout → подтвердить 0 отказов
+> перед закрытием сессии G (таблица DoD, PLAN.md §18.6). Параллельно продолжается неделя
+> warn-only e2e-gate до 2026-07-18 (сессия F, независимая ветка).
+
+> **Сессия №66 (2026-07-12, §18.6 Сессия G — 🟡 `rollout` реализован, живой пилот НЕ проведён,
+> найден блокер миграции):** По разрешению владельца («деплой можешь сам дёргать без деплой
+> агента») продолжил без остановки на BlackCove. Реализовал `runRollout()` в `@letar/deploy-engine`
+> — полный docker-rollout-паттерн из §18.6 (doctor-гейт → `scale app=2` → poll healthy нового
+> контейнера `<project>-app-2` → `nginx -s reload` в `nginx-proxy-manager` (канонический
+> `container_name` подтверждён по `infra/nginx-proxy-manager/docker-compose.yml`) → stop+rm
+> старого `<project>-app-1` → повторный reload), каждый шаг короткозамкнут на первом провале.
+> 5 новых unit-тестов на мокнутом executor (полная последовательность, gate без doctor, провал на
+> каждом шаге, таймаут healthy) — 20/20 в либе. `deploy-affected.sh` (строка ~977) заветвлён по
+> label `letar.rollout: 'true'` в compose (grep по файлу) → вызывает `rollout` вместо
+> `--force-recreate`; ветка сейчас dead code — ни один compose ещё не выставляет label. Коммит
+> синтаксис проверен (`bash -n`).
+>
+> **🔴 Найден блокер (не в исходном плане §18.6):** `doctor`'ская проверка `no-container-name`
+> требует убрать `container_name` из compose (нужно для `--scale app=2`), но `apps/dashboard`
+> ищет контейнер приложения по **точному** имени (`DeployedApp.containerName` из
+> `prisma/seed.ts` + legacy `CONTAINER_NAME_MAP`, роуты `api/apps/[app]/{stats,status,logs}`) —
+> без `container_name` реальное имя становится `<project>-app-1` (дефолт compose), точное
+> совпадение ломается, Dashboard тихо теряет stats/logs/status для приложения. **Это ломается уже
+> на старом force-recreate пути**, не только при живом rollout — значит убирать `container_name`
+> небезопасно для ЛЮБОГО приложения, пока Dashboard не научится резолвить контейнер по network
+> alias/label вместо точного имени. Подготовил и локально проверил (`doctor --app time` — 6/7 ✅,
+> только label намеренно не выставлен) миграцию `apps/time/docker-compose.production.yml` под
+> rollout-профиль — **не закоммитил**, откатил (`git checkout --`), чтобы не сломать мониторинг
+> `time` в Dashboard следующим же обычным деплоем. Задокументировано в README `deploy-engine`.
+>
+> Код запушен (`libs/deploy-engine` + `deploy-affected.sh`), Dashboard/compose-миграция — нет.
+> Продакшен не трогал: и rollout, и branching в bash — код без побочных эффектов сегодня (label
+> нигде не установлен, `time` compose не менялся).
+>
+> **➡️ Следующий старт:** новая задача перед продолжением G — научить Dashboard резолвить
+> контейнер приложения по network alias (`<app>-app`) или Docker label вместо точного имени
+> (`apps/dashboard/src/app/api/apps/[app]/{stats,status,logs}/route.ts` + `CONTAINER_NAME_MAP` +
+> `DeployedApp.containerName`). Только после этого — миграция `time` (файл уже готов в этой
+> сессии, нужно будет пересоздать) → включение label → живой пилот rollout с непрерывным
+> curl-мониторингом (исходный DoD сессии G). Параллельно продолжается неделя warn-only e2e-gate
+> до 2026-07-18 (сессия F, независимая ветка).
+
+> **Сессия №65 (2026-07-11, §18.6 Сессия E — ✅ каркас `libs/deploy-engine`):** Реализован
+> Nx-lib `@letar/deploy-engine` (`libs/deploy-engine/`) по спецификации §18.6: интерфейс
+> `DeployEngineExecutor` (`runCommand`/`readFile`/`writeFile`/`fileExists`, продакшен-реализация
+> `createNodeExecutor()` через `execFile`, не shell `exec`) — вся docker/git/файловая логика
+> движка тестируется без живого Docker. `runDoctor(executor, app)` читает
+> `apps/<app>/docker-compose.production.yml` и проверяет 6 обязательных условий готовности к
+> rollout (нет `container_name`/`ports`, network alias `<app>-app` на `kami-network`,
+> `healthcheck`, image через `${DEPLOY_TAG:-latest}`, label `letar.rollout: 'true'`) + 1
+> info-проверку (`stop_grace_period`, не блокирует). Схема deploy-manifest (`zod`,
+> `.deploy-manifest/<app>.json`: `deployId`/`sha`/`imageTag`/`migrationsApplied[]`/`timestamp`)
+>
+> - `readManifest`/`appendManifestEntry`/`latestEntry`/`entryBySha`. `getStatus()` — сводка
+>   последнего деплоя. CLI (`src/cli.ts`, `bun run libs/deploy-engine/src/cli.ts doctor|status
+--app <app>`) выходит с кодом 1 при not-ready — на этом позже завяжется `rollout`
+>   («отказывается работать без пройденного doctor», сессия G).
+>
+> **DoD подтверждён вживую:** `doctor --app grandslamcup` на текущем (немигрированном)
+> `apps/grandslamcup/docker-compose.production.yml` корректно репортует NOT READY с 5
+> проваленными обязательными проверками (container_name/ports/alias/DEPLOY_TAG/label) и 1
+> прошедшей (healthcheck, есть с сессии №53) — ровно то поведение, которое ожидалось от ещё не
+> подключённого к rollout приложения. `status --app grandslamcup` корректно возвращает
+> `latest: null` (ещё ни одного деплоя через движок). 15/15 unit-тестов (`doctor`/`manifest`/
+> `executor`, in-memory executor в спеках — без реального Docker/ФС), `lint`
+> (0 ошибок, 4 некритичных `no-console` warning в CLI-выводе), `typecheck:tsgo` — все зелёные.
+> README задокументирован. Деплой не запускался и не менялся — движок пока не подключён ни к
+> `deploy-affected.sh`, ни к dashboard-agent (это strangler-шаг сессии G).
+>
+> **➡️ Следующий старт:** сессия G — команда `rollout` + пилот на `time` (compose-миграция
+> `time`: healthcheck, alias `time-app`, минус `container_name`/`ports`, `DEPLOY_TAG`, label;
+> ветвление в `deploy-affected.sh` по label). Параллельно продолжается неделя warn-only e2e-gate
+> до 2026-07-18 (нужен ≥1 живой warn-деплой grandslamcup для сессии F — независимая от E/G ветка).
+
+> **Сессия №64 (2026-07-11, §18.6 — Фаза 3 решена и спроектирована: `libs/deploy-engine`):**
+> Подтверждён итог сессии №63 через deploy-mcp и тред `grandslamcup-staging-pilot` (24/28,
+> auth-цепочка зелёная). Владелец принял решения по Фазе 3: **(а) `libs/deploy-engine`**
+> (TS + docker-rollout-паттерн), не Kamal; **hard gate без обхода** (fail-closed, без
+> force-флага); тираж staging-e2e пока только grandslamcup; **пилот rollout — `time`**;
+> каркас (сессия E) можно начинать сразу, gate (F) — после недели warn-only (2026-07-18).
+> Архитектура проработана (исследование кода + ресёрч docker-rollout/agentic-практик) и
+> записана в §18.6: network alias `<app>-app` (NPM Forward Host не меняется), strangler
+> через opt-in compose-label, `E2E_GATED_APPS` в infra-config, rollback с deploy-manifest
+> и `migrationWarning`, doctor как enforcement healthcheck-стандарта (сейчас 5/23). План
+> сессий E–J с DoD — таблицей в §18.6. Коммит `e11527a`. Задача на 4 оставшихся e2e-теста —
+> `apps/grandslamcup/PLAN.md` п.37 (закоммичено в `7e34567` вместе с итогами №63).
+>
+> **➡️ Следующий старт:** сессия E — каркас `libs/deploy-engine` (`doctor`+`status`, executor-
+> инъекция, схема манифеста, юнит-тесты); можно сразу, деплой не трогает. Параллельно: неделя
+> warn-only до 2026-07-18 (нужен ≥1 живой warn-деплой grandslamcup для сессии F).
+
+> **Сессия №63 (2026-07-11, §18 — ✅ ЗАКРЫТО: живой staging-пайплайн grandslamcup, 24/28 passed):**
+> BlackCove передеплоил `dashboard-agent` 0.7.4 (подтверждён рабочим — `--preserve-env` доставляет
+> `BASE_URL`/`DEV_SESSION_TOKEN` корректно, root-owned `.nx` не возникает). Прогон `run_e2e` упал на
+> последней мелочи: `apps/grandslamcup-e2e/src/global-setup.ts` искал cookie
+> `better-auth.session_token` точным именем, не учитывая `__Secure-` префикс из `useSecureCookies`
+> (0.8.2, сессия №60) — `dev-session` ставил cookie корректно (`__Secure-better-auth.session_token`),
+> но global-setup её не находил и падал ещё до тестов. С разрешения Ками BlackCove поправил файл
+> напрямую (не свой контур, но простой однострочный фикс) — заменил точное сравнение на поиск по
+> суффиксу (`cookie.name.endsWith(...)`), коммит `50d72bc`.
+>
+> **Итог: 24/28 passed.** `03-admin.spec.ts` зелёный (было 0/7 из-за трёх auth-багов сессий
+> №58–60). Оставшиеся 4 — все тестовые, не инфраструктура: 2 locator strict-mode violations
+> (несколько совпадающих элементов на странице), 1 — «Ближайшие матчи» не рендерится (вероятно нет
+> будущих дат в анонимизированном снепшоте), фикс редиректа/cookie эти три не блокирует.
+>
+> **§18 Сессия D (живой staging-пайплайн grandslamcup) закрыта.** Паттерн `createDevSessionRoute`
+>
+> - `useSecureCookies` + suffix-based cookie lookup в `global-setup.ts` — эталон для тиража на
+>   будущие staging-e2e приложения (§18.6), задокументирован в `.claude/docs/e2e-testing.md`.
+
+> **Сессия №62 (2026-07-11, §18 — регрессия dashboard-agent: `sudo -u deploy` сбросил env):**
+> BlackCove задеплоил фикс root-owned `.nx` (0.7.3) — сработал, root-owned файлов больше нет. Но
+> `sudo -u deploy -H` по умолчанию **сбрасывает окружение процесса** (та же ловушка, что уже была
+> задокументирована для `SOPS_AGE_KEY_FILE` в `deploy-affected.sh`) — `BASE_URL`/`DEV_SESSION_TOKEN`
+> не долетали до `bunx nx e2e` после `exec sudo`. Playwright не увидел уже поднятый staging (не
+> нашёл `baseUrl` живым), поднял свой `nx dev grandslamcup` (`webServer.command` в
+> `playwright.config.ts`), который подключился к **dev-БД** (порт 5453 из закоммиченного `.env`,
+> не staging) → `ECONNREFUSED` каскадом на все 28 тестов ещё на этапе поднятия webServer, до
+> реальных тестов.
+>
+> **Fix (`dashboard-agent` 0.7.3→0.7.4):** `sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN`
+> вместо голого `sudo -u deploy -H`.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить dashboard-agent (0.7.4) + grandslamcup (0.8.2,
+> из сессии №60, если ещё не подтянут), повторить `run_e2e`. Инфраструктура (staging-снепшот,
+> admin-фикстура) стабильна, дело за самим прогоном.
+
+> **Сессия №61 (2026-07-11, §18 — итог + зафиксирован технический долг `createDevSessionRoute`):**
+> Wrap-up сессий №58–60. Обновлены `apps/grandslamcup/PLAN.md`/`PLAN_COMPLETED.md`,
+> `apps/dashboard-agent/PLAN_COMPLETED.md` итогами трёх фиксов. Agent-mail сессия завершена
+> (`retire_agent`). По пути дважды поймал и откатил постороннее переформатирование от
+> `.claude/hooks/auto-format.js` (см. §20) — коммит `74c1082`.
+>
+> **🟡 Технический долг записан как TODO в коде (`createDevSessionRoute`):** фабрика вручную
+> реплицирует внутренний формат подписи cookie `better-call` (не публичный API Better Auth,
+> найдено чтением исходников при разборе бага №3) вместо вызова `auth.api.signInEmail`/аналога.
+> Архитектурный компромисс ради простоты — если Better Auth сменит формат подписи или имя cookie в
+> будущей версии, фабрика молча разойдётся с ним: тот же класс бага, что уже трижды ловили здесь
+> (баг выглядит снаружи валидным — cookie есть, — но `getSession()` её не находит). **Нет теста**,
+> который бы это ловил заранее. Предложение (не реализовано, вне скоупа сессии): unit/integration-
+> тест, создающий сессию через `createDevSessionRoute` и проверяющий, что реальный
+> `auth.api.getSession()` (или тестовый `betterAuth()`-инстанс) её распознаёт.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить staging (после коммита №60 версия 0.8.2),
+> повторить `run_e2e`. Отдельно, не срочно: завести тест на распознавание dev-session cookie
+> настоящим Better Auth (см. TODO выше) — предохранит от тихой поломки при апгрейде `better-auth`.
+
+> **Сессия №60 (2026-07-11, §18 — третий баг dev-session: `__Secure-` cookie-префикс):**
+> BlackCove задеплоил фикс редиректа (0.8.1), подтвердил `location` теперь верный, но
+> `03-admin.spec.ts` всё ещё падал — `/admin` со свежепоставленной cookie редиректило на
+> `/sign-in`. Проверка БД показала: сессия реальна и валидна (`userId`/`token`/`expiresAt` в
+> порядке), значит проблема не в данных, а в том, как Better Auth читает cookie.
+>
+> Разобрал исходники `better-auth`/`better-call` (не документировано публично): Better Auth сам
+> вычисляет имя cookie через `createCookieGetter` — если `baseURL` (обычно `BETTER_AUTH_URL`)
+> начинается с `https://` (staging/prod), реальное имя `__Secure-better-auth.session_token`,
+> а не голое `better-auth.session_token`; без атрибута `Secure` браузер вообще не примет такую
+> cookie (`__Secure-` prefix requirement, RFC 6265bis). `createDevSessionRoute` ставил cookie под
+> именем без префикса — cookie физически создавалась и была валидна в БД, но `getSession()` искал
+> её под другим именем и не находил → защищённые страницы решали, что сессии нет.
+>
+> **Fix (`@letar/auth` 0.8.1→0.8.2):** новая опция `useSecureCookies` (по умолчанию —
+> `BETTER_AUTH_URL?.startsWith('https://')`, тот же источник, что передают как `baseURL`)
+> добавляет `__Secure-` префикс и `Secure`-атрибут, повторяя логику самого Better Auth.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить staging (подтянет 0.8.2), повторить `run_e2e`.
+> Три инфраструктурных бага dev-session (NODE_ENV, редирект 0.0.0.0, cookie-префикс) должны быть
+> закрыты — ожидаем зелёный `03-admin.spec.ts`.
+
+> **Сессия №59 (2026-07-11, §18 — второй баг dev-session: редирект на `0.0.0.0`):** BlackCove
+> прогнал сессию №58 на живом s3 и нашёл ещё один реальный баг (не инфра) — потратил время на
+> ложные следы (root-owned `.nx`/Nx daemon от чужого пользователя, Chromium sandbox), но настоящая
+> причина падений `03-admin.spec.ts` после фикса NODE_ENV: `createDevSessionRoute` строил редирект
+> через `new URL(redirect, request.url)`, а `request.url` за Docker port-forward/NPM reverse-proxy
+> резолвится во **внутренний bind-адрес контейнера** (`http://0.0.0.0:<port>/...` — Next.js
+> standalone слушает `0.0.0.0`), не в клиентский host:port. Cookie сессии ставилась корректно
+> (`curl -v` подтвердил `Set-Cookie`), но браузер получал `307 → http://0.0.0.0:3016/admin` →
+> `ERR_CONNECTION_REFUSED`.
+>
+> **Fix (`@letar/auth` 0.8.0→0.8.1):** base URL для редиректа резолвится из заголовков
+> `x-forwarded-host`/`host` (+ `x-forwarded-proto` для схемы) вместо `request.url`, с фолбэком на
+> `request.url` если заголовков нет (локальный `nx dev` без прокси).
+>
+> Побочные находки BlackCove для будущих staging-e2e (§18.6, не блокируют, отдельная задача): Nx
+> daemon на s3 может залипнуть от случайного непривилегированного запуска и потом обслуживать все
+> вызовы через IPC независимо от того, кто их делает (`bunx nx daemon --stop` перед важными
+> прогонами); headless Chromium sandbox требует root/CAP_SYS_ADMIN — работает только через
+> dashboard-agent; `.nx`/`test-output` на s3 становятся root-owned при root-стартующих прогонах —
+> нужно поправить сам механизм переключения на `deploy` в deploy-скриптах.
+>
+> **➡️ Следующий старт:** BlackCove — передеплоить staging (подтянет `@letar/auth` 0.8.1),
+> повторить `run_e2e`. Ожидается закрытие всех 7 `03-admin.spec.ts`.
+
+> **Сессия №58 (2026-07-11, §18 — системное решение по dev-session/NODE_ENV):** Закрыт
+> архитектурный блокер из сессии №57 (7 падений `03-admin.spec.ts`) — **системно, не точечным
+> фиксом в grandslamcup**, потому что §18.6 планирует тиражировать staging-e2e пайплайн на другие
+> приложения и следующий кандидат наступил бы на те же грабли.
+>
+> Роут `/api/auth/dev-session` вынесен в переиспользуемую фабрику **`createDevSessionRoute`** в
+> `@letar/auth/server` (0.7.0→0.8.0, `libs/auth/src/server/factories/create-dev-session-route.ts`).
+> Решение по защите (выбрано пользователем из 3 вариантов): **флаг + секретный токен**.
+> `ALLOW_DEV_SESSION === 'true'` включает роут, `DEV_SESSION_TOKEN` сравнивается constant-time
+> (`node:crypto timingSafeEqual`) с параметром `token`/заголовком `x-dev-session-token`. Fail-closed:
+> если флаг включён, но токен не задан — 403, а не открытый доступ. Даже случайная утечка флага в
+> прод-конфиг не открывает бэкдор без отдельно сгенерированного токена.
+>
+> **Новое правило в `env-files.md`:** `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` — только
+> `.env.staging`/`.env.local`, никогда `.env.docker`/`.env.docker.enc`.
+>
+> Заодно починена ложноположительная проверка в `apps/grandslamcup-e2e/src/global-setup.ts` —
+> `waitForURL('**/admin**')` совпадал с URL и успешного, и провального (403) запроса из-за
+> `redirect=/admin` в query dev-session; теперь проверяется факт установки cookie
+> `better-auth.session_token`.
+>
+> Паттерн (проблема + решение + анти-паттерн `waitForURL`) задокументирован в
+> `.claude/docs/e2e-testing.md` — новый раздел «E2E-логин без OIDC на staging». `apps/grandslamcup/
+PLAN.md` (пункт про `03-admin.spec.ts`) и `.env.staging.example`/`.env.local` обновлены.
+>
+> **➡️ Следующий старт:** BlackCove — сгенерировать `DEV_SESSION_TOKEN` (`openssl rand -base64 32`)
+> и прописать `ALLOW_DEV_SESSION=true`+`DEV_SESSION_TOKEN` в `.env.staging` на s3, пересобрать
+> staging-образ (подтянет `@letar/auth` 0.8.0), повторить `run_e2e` — ожидается закрытие всех 7
+> `03-admin.spec.ts`. Локаторные (2) и данные-related (1) провалы — отдельная небольшая задача.
+
+> **Сессия №57 (2026-07-11, §18 — снепшот пересобран, 3/28→18/28, найден архитектурный блокер):**
+> BlackCove пересоздал staging-снепшот с фиксом анонимизации. По пути найдено ещё 2 бага:
+> (1) в `.env.staging` не было `DATABASE_URL` — скрипты подхватывали закоммиченный dev `.env`
+> (прод-порт 5453) → `ECONNREFUSED`; (2) **🔴 критично** — `POSTGRES_PASSWORD` через
+> `openssl rand -base64 32` содержал `+`/`/`/`=`, ломавшие парсинг `DATABASE_URL` при
+> интерполяции в `docker-compose.staging.yml` → **все страницы staging отдавали 500** с самого
+> первого деплоя (прогон 3/28 шёл на неработающем приложении, а не на «недостающих данных»).
+> Перегенерирован через `openssl rand -hex 32`. **Урок на будущее для любого staging-провижена:**
+> значения, интерполируемые в connection string/URL — генерировать через `-hex`, не `-base64`
+> (спецсимволы `+`/`/`/`=` не экранируются автоматически).
+>
+> Также найден `admin@grandslamcup.ru` — оказался НЕ seed-данными, а ручным staging-fixture из
+> старой БД (создан кем-то вручную, ни один скрипт его не воспроизводит); BlackCove пересоздал
+> вручную (роль ADMIN + `CityOrganizer` на оба города).
+>
+> **Результат: 18/28 passed** (было 3/28). Осталось 10, разбито на 3 категории:
+>
+> - **7 — `03-admin.spec.ts` (архитектурный блокер, НЕ тривиальный фикс):** `/api/auth/dev-session`
+>   проверяет `NODE_ENV === 'production'`, но Next.js standalone-сборка **всегда** выставляет
+>   `NODE_ENV=production` вне зависимости от env — dev-session структурно не может работать на
+>   собранном staging-образе. Плюс `global-setup.ts` `waitForURL('**/admin**')` ложно совпадает с
+>   самим URL dev-session (`redirect=/admin` в query) — все прошлые прогоны показывали «Admin
+>   авторизован» даже получив 403, маскируя проблему всё время.
+> - 2 — locator strict-mode violations («Расписание», «Команды») — не продакшн-баги.
+> - 1 — «Ближайшие матчи» не рендерится на `/spb` — вероятно, нет матчей с датой в будущем
+>   относительно текущего времени сервера в снепшоте.
+>
+> **➡️ Следующая задача (по решению владельца):** архитектурное решение по dev-session/NODE_ENV —
+> заменить проверку `NODE_ENV === 'production'` на отдельный явный флаг (например
+> `ALLOW_DEV_SESSION=true` в `.env.staging`, отсутствует в прод-конфиге по умолчанию) — нужно
+> тщательно спроектировать, чтобы не открыть дверь для обхода авторизации на реальном проде.
+> Заодно почистить `global-setup.ts`: `waitForURL('**/admin**')` даёт ложноположительный результат
+> из-за совпадения с query-строкой самого dev-session URL — заменить на более строгую проверку
+> (например `page.waitForURL(url => url.pathname === '/admin')` вместо wildcard-паттерна).
+> Подробности — `apps/grandslamcup/PLAN.md` пункт 37, `PLAN_COMPLETED.md`, тред agent-mail
+> `grandslamcup-staging-pilot`.
+
+> **Сессия №56 (2026-07-11, §18 — разбор e2e-провалов, настоящая причина найдена):** Гипотеза про
+> отсутствие активного сезона (сессия №55) **не подтвердилась**. Реальная причина: скрипт
+> `anonymize-staging-db.ts` анонимизировал **все** email в `User`, включая служебный
+> e2e/dev-session fixture `admin@grandslamcup.ru` (`global-setup.ts` логинится через
+> `/api/auth/dev-session?email=admin@grandslamcup.ru`, без OIDC). Без существующего юзера
+> `dev-session` создаёт **новый несвязанный** аккаунт (без `CityOrganizer`/`Player`-связей) →
+> `getByText('Claude Admin')` не находит имя → каскад по всем admin-зависимым тестам (сезоны/
+> команды не видны новому несвязанному admin'у, не из-за отсутствия данных). **Fix:**
+> `admin@grandslamcup.ru` исключён из анонимизации (`WHERE email != ...`). Коммит `ace1f8d`.
+>
+> **Alt-баг подтверждён по логу и починен:** `getByAltText('Grand Slam Cup')` резолвился ровно в
+> 2 элемента (`header` + hero на `/`) — оба легитимны для доступности (одно и то же изображение).
+> Тест `01-public.spec.ts` теперь скоупит через `page.locator('header')`.
+>
+> **Найдено, но не починено (нужна проверка BlackCove):** `/teams` (глобальный, без city-фильтра)
+> показывает 0 команд на staging — `Team` не анонимизируется и не исключён из `pg_dump`, должен
+> был восстановиться как `Player` (849 строк). Либо частичный `pg_restore`, либо реально 0 строк
+> в проде (маловероятно) — просьба отправлена BlackCove, тред `grandslamcup-staging-pilot`.
+>
+> **✅ Закрыто:** `01-public.spec.ts` обновлён под мультигород (коммит `8817da8`). `/` — city-
+> selector без меню (`buildNavItems` возвращает `[]` на root, nav-config.ts), секции «Ближайшие
+> матчи»/«Таблица»/«Последние результаты» и меню навигации живут только на `/[citySlug]` —
+> тесты теперь делают `goto('/spb')` перед проверкой (вынесено в отдельный describe «Дашборд
+> города»). Команды/Поэты/Стадионы (`/teams`, `/players`, `/venues`) не тронуты — это намеренно
+> глобальные страницы без city-фильтра, их провал — отдельный вопрос данных (см. ниже).
+>
+> **➡️ Следующий старт:** дождаться пересозданного BlackCove staging-снепшота (с фиксом
+> анонимизации) → повторный `run_e2e` → должны остаться зелёными все тесты кроме тех, что упираются
+> в `/teams`-пустоту (отдельная находка выше, ждёт проверки BlackCove).
+
+> **Пост-пилот (2026-07-11, BlackCove):** Три пункта из «следующего старта» сессии №55 закрыты.
+> (1) NPM на s3 задокументирован в `infra/nginx-proxy-manager/README.md`. (2) `deploy-affected.sh`
+> теперь всегда собирает `libs/zenstack-form-plugin` перед `zenstack:generate` (nx-кэш делает
+> повторные вызовы бесплатными) — закрывает баг, найденный при первом деплое на свежий s3.
+> Коммит `fc832df`. (3) **Найдена и закрыта PII-утечка:** leftover `grandslamcup-staging-app/-db`
+> на s2 (создан ещё 18.04.2026, я ошибочно предположил в предыдущей записи, что это свежий тест
+> FrostySnow — нет, гораздо старше) оказался **необезличенной копией прод-БД** (16 пользователей,
+> 0 анонимизированы), публично открытой на `0.0.0.0:5454`/`0.0.0.0:3018` несколько месяцев. Не
+> просто «прибрался» — переспросил Kami явно, получил подтверждение, `docker compose down -v` +
+> удалён osиротевший том другого compose-проекта (`grandslamcup_grandslamcup-staging-data`, тоже
+> с данными, без привязанного контейнера). Оба тома с данными удалены безвозвратно.
+>
+> **Осталось из следующего старта:** (1) владельцу фичи grandslamcup — E2E-провалы (25/28,
+> вероятно отсутствие активного сезона в анонимизированном снепшоте + дублирующийся `alt` на
+> логотипе); (2) hard gate §18.6 Фаза 3 — после недели наблюдения warn-only.
+
+> **Сессия №55 (2026-07-11, §18 Сессия D — живой пилот доведён до конца, BlackCove):**
+> Выполнен полный чек-лист из `grandslamcup-staging-pilot` (расширенный коммитом `8564663` —
+> реальный HTTPS-домен + анонимизированный прод-снепшот вместо localhost/пустой БД).
+>
+> **Домен переименован** `grandslamcup.stage.s3` → **`grandslamcup-stage.s3.letar.best`**
+> (дефис вместо точки) — двухлейбловый вариант не матчит существующий DNS wildcard
+> `*.s3 CNAME s3.letar.best` (wildcard матчит только один лейбл). Правки в
+> `apps/auth-hub/prisma/seed.ts`, `.env.staging.example`, `deployment.md` — коммит `adcdb4b`.
+> Заодно найден и исправлен PORT-баг в `docker-compose.staging.yml`: `${PORT:-3018}`
+> интерполировался и в маппинг портов, и (через `env_file`) внутрь контейнера — хостовый порт
+> захардкожен, `PORT` теперь однозначно внутренний.
+>
+> **Инфраструктурные баги, найденные и починенные по пути (все не специфичны для grandslamcup —
+> блокировали бы любое приложение на s3):**
+>
+> 1. Untracked-файлы (`next-env.d.ts`, Playwright auth-фикстуры, `test-output/`) в submodule
+>    `driving-school`/`driving-school-e2e` валили **весь** `git pull --recurse-submodules` на s3 →
+>    падал любой деплой, не только grandslamcup. Вычищено.
+> 2. `libs/zenstack-form-plugin/dist` (gitignored) не был собран на свежем s3 — `zenstack:generate`
+>    падал с «Cannot find plugin module». Собран вручную (`nx run @letar/zenstack-form-plugin:build`).
+> 3. `apps/dashboard-agent/src/routes/e2e.ts` спавнил `nx` напрямую внутри контейнера, где nx
+>    физически нет (`spawn nx ENOENT`) — первый живой e2e-прогон падал сразу. Переделано на
+>    `nsenter -t 1 -m -u -n -i` в host-namespace (как в `deploy.ts`). Заодно найдена и закрыта
+>    **command injection**: параметр `project` из POST-body шёл в shell-строку без валидации —
+>    добавлена та же regex-проверка, что у `app`. Коммит `2124454`, dashboard-agent `0.7.0→0.7.1`.
+>
+> **Прод-снепшот и анонимизация:** `pg_dump` на s2 (исключены `Account`/`Session`/`Verification`/
+> `consentLog`/`PushSubscription` флагами `-T`) → TRUNCATE + `pg_restore --data-only` на s3 →
+> `anonymize-staging-db.ts`. Найден и исправлен баг скрипта: `DATABASE_URL` с base64-паролем без
+> URL-энкодинга падал на парсинге (пароль содержал `+`/`/`/`=`) — исправлено `encodeURIComponent`.
+> Проверено: email вида `user-*@staging.invalid`, `Account`/`Session` — 0 строк, `Player` 849 /
+> `Match` 316 на месте.
+>
+> **Публичный домен:** NPM на s3 уже был поднят (не задокументирован в
+> `infra/nginx-proxy-manager/README.md` — TODO на будущее). DNS не трогали — wildcard уже
+> покрывал новый домен (подтверждено внешним DoH-резолвером с самого s3, локальный DNS в
+> sandboxed-окружении не соответствует реальности). NPM-креды нашлись в памяти
+> (`reference_npm_s3.md`) — дефолт `admin@example.com/changeme` не подошёл. Proxy Host создан
+> через NPM API: форвард на `172.17.0.1:3018` (хост-гейтвей docker0, не `docker network connect` —
+> NPM и staging-compose в разных Docker-сетях). Let's Encrypt HTTP-01 сертификат выпущен с первого
+> раза (истекает 2026-10-09). `https://grandslamcup-stage.s3.letar.best` → 200, валидный TLS.
+>
+> **E2E — инфраструктурно успешен, содержательно 3/28 passed.** Пайплайн `deploy_app(staging)` →
+> `run_e2e` → `e2e_status` отработал end-to-end первый раз в истории. Но большинство тестов
+> ожидают контент активного текущего сезона на `/` (ближайшие матчи/таблица/результаты) —
+> анонимизированный снепшот, похоже, не содержит такого сезона (исторические данные). Один
+> найденный баг похож на настоящий: `getByAltText('Grand Slam Cup')` матчит 2 элемента
+> (дублирующийся `alt` на логотипе в шапке) — не чинил, вне скоупа деплой-агента.
+>
+> **Gate:** production НЕ деплоился — e2e не прошёл, содержательного повода не было.
+> `checkE2eGate` на реальном прод-деплое покажет warn «e2e упал», не заблокирует.
+>
+> **Не блокирует, но замечено:** на s2 остался leftover `grandslamcup-staging-app/-db`
+> (докер>3ч) — вероятно, остаток раннего локального теста FrostySnow до пивота на домен, не
+> тронут, стоит почистить отдельно.
+>
+> **➡️ Следующий старт:** (1) владельцу фичи grandslamcup — разобраться с E2E-провалами
+> (недостающий активный сезон в снепшоте / дублирующийся alt на логотипе); (2) почистить leftover
+> staging на s2; (3) документировать NPM на s3 в `infra/nginx-proxy-manager/README.md`
+> (сейчас там только s1/s2); (4) решить, стоит ли добавить сборку `zenstack-form-plugin` в
+> `deploy-affected.sh` явно, чтобы не полагаться на ручной прогрев нового сервера; (5) после
+> недели наблюдения warn-only gate — решение по hard gate (§18.6, Фаза 3).
+
+> **Сессия №53 (2026-07-10, §18 Сессия D — код готов, ждём s3):** Продолжение с того места, где
+> остановилась сессия №52. **Отправлен формальный `deploy-request` BlackCove** (тред
+> `provision-s3-dashboard-agent`) на подъём dashboard-agent на s3 — конфиг-часть (`AGENT_TOKEN_S3`,
+> `docker-compose.s3.yml`) была готова с сессии №52, но физически контейнер ещё не поднят
+> (`agent_health({server:"s3"})` → `fetch failed` через SSH-туннель, подтверждено). Предыдущие
+> переговоры BrownRaven↔BlackCove зависли на взаимном «жду отдельного захода» без явного ack —
+> сформулирован явный чеклист из 3 шагов, ack_required.
+>
+> **Пока ждём s3, сделана кодовая часть Сессии D (не требует живого s3 для написания):**
+> ✅ `apps/dashboard-agent/src/routes/e2e.ts` — `POST /api/e2e/run` (async, ring-buffer как в
+> deploy.ts, guard «только на s3», пишет `.last-e2e-status/<app>.json` по завершении) +
+> `GET /api/e2e/status` (курсор `sinceLine` + персистентный `lastStatus`). Зарегистрирован в
+> `index.ts`. ✅ `libs/deploy-mcp`: tools `run_e2e`/`e2e_status` + `checkE2eGate()` — warn-only
+> e2e-gate внутри `deploy_app(production)` (проверяет наличие/успех/коммит/свежесть e2e-статуса на
+> s3, **предупреждает, не блокирует**). `nx lint`+`nx typecheck` на dashboard-agent и deploy-mcp
+> зелёные. Версии: dashboard-agent `0.6.0→0.7.0`, `@letar/deploy-mcp` `0.1.0→0.2.0`. Доки:
+> README deploy-mcp (таблица инструментов + workflow-пример), CHANGELOG dashboard-agent,
+> deployment.md (раздел «E2E-ранер и деплой» переписан под staging-gated пайплайн).
+>
+> **s3 поднят ✅ (BlackCove, тред `provision-s3-dashboard-agent`, 2026-07-10):** конфликт порта 3100
+> (занят `media-api` на s3) решён loopback-биндингом `127.0.0.1:13103:3100` в `docker-compose.s3.yml`
+> (`infra-config` разделил `agentPort`(3100)/`hostPort`(туннель, s3:13103), HEAD `16420ef`). BlackCove
+> подтвердил вживую на HEAD `f21334bf`: `docker compose -f docker-compose.s3.yml --env-file .env.docker
+up -d --build` → Started, healthy; `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. ⚠️ Попутно
+> найдено: `git pull` на s3 не смог обновить submodule `driving-school`/`driving-school-e2e` (untracked
+> dev-артефакты конфликтуют с checkout) — не блокирует dashboard-agent, submodule на s3 сейчас отстаёт,
+> не разобрано. Диагностика и исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout).
+>
+> **Сессия №54 (2026-07-10, §18 Сессия D — живой пилот запущен, найдены и починены 2 бага):**
+> `agent_health({server:"s3"})` подтверждён из MCP. При подготовке пилота на grandslamcup найдено:
+> (1) `e2e.ts` слал `E2E_BASE_URL`, а **все** `playwright.config.ts` в монорепо читают `BASE_URL` —
+> e2e бил бы по `localhost` вместо staging, никогда не долетев до реального контейнера; `run_e2e`
+> теперь принимает `baseUrl` явным параметром, хардкод-домен `<app>.s3.letar.best` убран (публичного
+> домена/NPM proxy host для staging пока не существует — нужна отдельная инфра-задача); (2)
+> `docker-compose.staging.yml` grandslamcup ссылался на внешнюю сеть `kami-network` (только на
+> s2) — на s3 `docker compose up` упал бы; убран `external: true`. Также поправлены
+> `.env.staging.example` (мёртвый домен `gsc-test.letar.best` s1 → `http://localhost:3018`) и
+> `apps/auth-hub/prisma/seed.ts` (redirect URI для `grandslamcup-prod`). Коммит `7027d0a`.
+>
+> Отправлен deploy-request BlackCove (тред `grandslamcup-staging-pilot`, ack_required) — первая
+> версия на `localhost`.
+>
+> **Пивот в этой же сессии (по требованию владельца):** localhost недостаточен для уверенности,
+> что релиз не сломает прод — другой security-контекст браузера, не проверяет cross-origin
+> cookie/OIDC-поведение между приложением и `auth.letar.best`. Решено: staging должен быть
+> максимально близко к прод-окружению.
+>
+> - **Домен:** `https://grandslamcup.stage.s3.letar.best` (реальный HTTPS, не localhost) — требует
+>   wildcard DNS + NPM proxy host + TLS-сертификат (инфра-задача, делегирована BlackCove/владельцу).
+>   `redirectUrls` в `apps/auth-hub/prisma/seed.ts` и `BETTER_AUTH_URL` в `.env.staging.example`
+>   обновлены под новый домен.
+> - **Данные:** по выбору владельца — **анонимизированный снепшот прод**, не пустая БД и не seed-
+>   фикстуры. Написан `apps/grandslamcup/scripts/anonymize-staging-db.ts`: секретные таблицы
+>   (`Account`/`Session`/`Verification`/`consentLog`/`PushSubscription` — OAuth-токены,
+>   session-токены, 152-ФЗ-аудит согласий) исключаются из `pg_dump` флагами `-T`, не
+>   анонимизируются (нет смысла анонимизировать то, что не должно копироваться вообще);
+>   `User.email/name/image/telegramChatId` псевдонимизируются детерминированно;
+>   `RosterApplication` (неподтверждённые заявки) — контактные поля очищены. Публичные турнирные
+>   модели (`Player`/`Team`/`Match`/`Standings`/`Poem`, везде `@@allow('read', true)`) копируются
+>   как есть — это ровно то, что e2e/QA должны увидеть. Скрипт отказывается работать, если
+>   `DATABASE_URL` не похож на staging-хост (защита от случайного прогона на проде). Коммит `8564663`.
+>
+> Обновлённый чеклист отправлен BlackCove тем же тредом (7 шагов: редеплой dashboard-agent →
+> DNS/NPM/TLS → `.env.staging` с секретами (OIDC-секрет **тот же**, что у прод-клиента) →
+> `db:seed` auth-hub → `pg_dump`(-T секретные)+`pg_restore`+анонимизация → `deploy_app(staging)` →
+> `run_e2e`). Явно предупредил: шаг DNS/сертификат может быть не в доступе BlackCove — тогда
+> эскалация к владельцу напрямую. Ждём ответа.
+>
+> **➡️ Следующий старт:** проверить инбокс треда `grandslamcup-staging-pilot`; если DNS/NPM —
+> не в доступе BlackCove, спросить владельца напрямую (кто держит DNS-провайдера для
+> `letar.best`); когда чеклист выполнен — `e2e_status`, затем прочитать поведение `checkE2eGate`
+> (не обязательно реально деплоить в прод ради теста); после успешного пилота — разобраться с
+> отставшим submodule driving-school/driving-school-e2e на s3 (untracked-конфликт при checkout,
+> отдельная задача, не блокирует grandslamcup).
+
+> 📌 **Отдельная кросс-приложенческая UI-задача (вне темы этого файла, для следующей сессии):**
+> «Липкая CTA» — тираж `StickyActionBar`/`useScrollGate` (`@letar/ui@0.7.0`) на длинные интро/формы
+> aboi, mandala, svoichuzhie, dsperevod, kami (+ разбор лендингов animatrona-landing, kami-key-the-landing,
+> aprel8008). Полный план, приоритизация и чек-лист по файлам →
+> [`PLAN_STICKY_CTA.md`](./PLAN_STICKY_CTA.md). Реализация не начата.
+
+> 📌 **Отдельная инфраструктурная задача (вне темы этого файла): TypeScript 7 GA — тираж на остальные
+> проекты.** Пилот на `time` подтвердил паритет (см. сессию №51 ниже). Полный план тиража, найденная
+> ловушка с коллизией bin `tsc` и порядок действий → **§19** (конец файла).
+
+> **Сессия №51 (2026-07-10, TS7 GA — пилот на `time`):** ✅ вышел стабильный `typescript@7.0.2` (Go-порт,
+> GA 2026-07-08). Добавлен таргет `typecheck:ts7` в `apps/time/project.json` — `bunx --bun typescript@7.0.2
+--noEmit`, **изолированно** от workspace `tsc`/`tsgo` (обычный `bun install` пакета в корневой
+> `package.json` тут же подменяет общий `node_modules/.bin/tsc` версией 7.0.2 **для всех** проектов молча,
+> несмотря на алиас-имя — поймано и отменено до коммита). Результат на `time`: **байт-в-байт идентичный**
+> вывод с `tsc` 6.0.3 и `tsgo` dev-preview (одни и те же 4 pre-existing ошибки — не хватает сгенерённых
+> Prisma-файлов, не про компилятор); скорость 0.62s — паритет с `tsgo`, ~4.4x быстрее `tsc` 6.0.3 (2.71s).
+> Полный план тиража → §19. commit `4698c97`.
+
+> **Сессия №52 (2026-07-10, §18 Deploy MCP — Сессии A/B/C реализованы):** ✅ **Сессии A, B, C плана §18
+> сделаны и подтверждены на реальных прогонах.** Работал агент **BrownRaven** в связке с **BlackCove** (deploy).
+>
+> **Сессия A** (харденинг `deploy-affected.sh`): sha-теги образов (rollback без пересборки), pre-migrate pg_dump
+>
+> - fail=abort при падении миграции. Задеплоено на `time`. Попутно найден и починен **self-modifying-скрипт баг**
+>   (BlackCove): git pull внутри скрипта обновлял его же, bash доигрывал по старому буферу → фикс **self-re-exec**
+>   (`63bcada`, хеш до/после pull → `exec` себя; sentinel против цикла). Подтверждён вживую на деплое `time`.
+>
+> **Сессия B** (`8498c06`, `a1772cf`): новый `libs/infra-config` (`@letar/infra-config`) — канон SERVER_APPS +
+> `SERVERS` (host/agentPort/**hostPort**/role) + резолверы. dashboard-agent: deploy API (deployId + ring-buffer +
+> курсор `sinceLine` + `/api/deploy/history` + серверный guard staging/production + spawn без shell), `server-config.ts`
+> = локальная копия канона (Dockerfile изолирован → **guard-тест** `server-config.guard.spec.ts` сверяет с каноном,
+> не прямой импорт), `docker-compose.s3.yml` создан, устаревший `docker-compose.s2.yml` удалён (живой — production.yml).
+>
+> **Сессия C** (`2f4805c` + фиксы): `libs/deploy-mcp` (`@letar/deploy-mcp`) — MCP-слой над REST API dashboard-agent
+> через **SSH-туннель**. 6 tools: `list_servers`, `agent_health`, `git_status`, `deploy_status` (deployId+sinceLine),
+> `deploy_cancel`, `deploy_app` (target production|staging). Токен из `.env.docker`(SOPS), не из `.mcp.json`.
+> ⚠️ **zod запинен 4.3.6** (не `^`, иначе 4.4.3 несовместима с zod-compat SDK). Зарегистрирован в `.mcp.json`
+> (файл gitignored — локально). Доки: README deploy-mcp, mcp-servers.md, deploy-coordination.md, deploy-agent.md, CLAUDE.md.
+> **BlackCove задеплоил `time` через `deploy_app` (exitCode 0)** — deployId+sinceLine+self-re-exec+SOPS подтверждены.
+> Попутно вскрыто и починено **2 бага `/api/deploy/app`** (никогда не работал для зашифрованных app): проброс
+> `SOPS_AGE_KEY_FILE` в spawn (`4d970e7`) + дефолт в скрипте после sudo env-reset (`1160e9e`, диагноз BlackCove:
+> `nsenter`→root→`sudo -u deploy` сбрасывает env). Полное описание gotcha и правило на будущее →
+> [deployment.md § Env-переменные пропадают при self-deploy](/.claude/docs/deployment.md#env-переменные-пропадают-при-self-deploy-через-dashboard-agent-nsenter--sudo-сбрасывает-env).
+>
+> **s3-инстанс ✅ поднят** (BlackCove, thread `provision-s3-dashboard-agent`): сгенерил
+> `AGENT_TOKEN_S3`, добавил в `.env.docker.enc` (`1dbb131`). Подъём упёрся в **конфликт порта 3100** (занят
+> `media-api` на s3) → решено loopback-биндингом: `docker-compose.s3.yml` = `127.0.0.1:13103:3100` (чинит конфликт
+> И закрывает порт от интернета даром). В infra-config разделены `agentPort`(3100) и **`hostPort`** (туннель; s2:3100,
+> s3:**13103**), deploy-mcp тоннелит в hostPort (фикс в репо-вайд dprint-коммитах, HEAD `16420ef`). Подтверждено
+> вживую (HEAD `f21334bf`): `curl http://127.0.0.1:13103/health` → `{"status":"ok"}`. Подробности и продолжение — см.
+> сессию №53 ниже.
+>
+> **➡️ Следующий старт (устарело, см. актуальный список в сессии №53 выше):**
+>
+> ~~1. Проверить инбокс — поднял ли BlackCove dashboard-agent на s3~~ ✅ сделано. 2. **Обновить локальный `apps/dashboard-agent/.env.docker`** (перекачать `.env.docker.enc` из origin +
+> расшифровать sops, там теперь `AGENT_TOKEN_S3`) → проверить `mcp__deploy-mcp__agent_health({server:"s3"})` через туннель. 3. **s2: закрытие порта 3100** — отдельная задача (тем же приёмом `127.0.0.1:3100:3100` при следующем передеплое, без ufw).
+> 3b. **submodule driving-school/driving-school-e2e на s3 отстают** — untracked-конфликт при checkout,
+> исправление → [deployment.md § Submodule на сервере отстаёт](/.claude/docs/deployment.md#submodule-на-сервере-отстаёт--untracked-файлы-блокируют-checkout). 4. Затем — **Сессия D** (§18): роут `apps/dashboard-agent/src/routes/e2e.ts` (`POST /api/e2e/run` nx e2e с
+> `E2E_BASE_URL` против staging + `GET /api/e2e/status` + запись `.last-e2e-status/<app>.json`), tools `run_e2e`/`e2e_status`
+> в deploy-mcp, warn-gate в `deploy_app(production)`, пилот **grandslamcup** (staging-комплект уже есть; `.env.staging`
+> домен s1→s3 на `grandslamcup.s3.letar.best`, Playwright `E2E_BASE_URL` скипает webServer, redirect URI в auth-hub).
+> Требует живого s3 (шаг 1-2). Детали — §18 таблица «Сессии» строка D + §18.5.
+>
+> **Agent Mail:** новая сессия регистрируется через `macro_start_session` (human_key `C:/web/letar`,
+> project_key `c-web-letar`) — см. `.claude/rules/agent-mail.md`. Тред координации s3: `provision-s3-dashboard-agent`.
+
+> **Сессия №42 (2026-06-21, Этап 6.11 — Pressable-компоненты):** ✅ **`@letar/ui` 0.5.0** —
+> `Pressable`, `PressableButton`, `ExternalLink`, `pressableConfig` (ripple + spring + iOS-фикс).
+> ✅ **kami** полностью переведён: `nav-links`→`AppLink`, `sign-in-button`→`Button`, `mobile-menu`→`AppLink`+`Pressable`,
+> `social-links`→`ExternalLink`, `projects/page`→`Pressable`, `pressable.tsx`→re-export, `theme-provider`→`pressableConfig`.
+> ✅ **aprel8008** (сабмодуль): `BrandButton`→`PressableButton`+asChild-режим, `providers.tsx` iOS-фикс,
+> `tsconfig.json` project references для `@letar/ui`. Lint и typecheck чистые. Коммиты `d88d362`, `5928798`.
+> **➡️ Осталось:** тираж ещё на 1+ приложение (driving-school, grandslamcup и др.).
 
 > **Сессия №41 (2026-06-14, инфра-планирование — сервер s3):** Добавлен **§15 «Сервер s3 — медиа, e2e, IPFS, бэкап»**.
 > Выбран конфиг **HDD S16** (12 ядер, 16 ГБ) — обоснован замером: пик `nx affected --target=e2e --parallel=3`
