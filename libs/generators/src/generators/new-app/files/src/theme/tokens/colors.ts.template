@@ -1,0 +1,110 @@
+import { defineTokens } from '@chakra-ui/react'
+
+/**
+ * Color tokens для <%= displayName %> — placeholder-палитра, замени под фирменный стиль приложения
+ *
+ * Палитры:
+ * - brand: Синий (#3182CE) — placeholder
+ * - accent: Фиолетовый (#805AD5) — placeholder
+ * - gray: Нейтральные цвета
+ * - success, warning, error, info: Семантические цвета
+ */
+export const colors = defineTokens.colors({
+  brand: {
+    50: { value: '#EBF8FF' },
+    100: { value: '#BEE3F8' },
+    200: { value: '#90CDF4' },
+    300: { value: '#63B3ED' },
+    400: { value: '#4299E1' },
+    500: { value: '#3182CE' },
+    600: { value: '#2B6CB0' },
+    700: { value: '#2C5282' },
+    800: { value: '#2A4365' },
+    900: { value: '#1A365D' },
+    950: { value: '#0F2138' },
+  },
+
+  accent: {
+    50: { value: '#FAF5FF' },
+    100: { value: '#E9D8FD' },
+    200: { value: '#D6BCFA' },
+    300: { value: '#B794F4' },
+    400: { value: '#9F7AEA' },
+    500: { value: '#805AD5' },
+    600: { value: '#6B46C1' },
+    700: { value: '#553C9A' },
+    800: { value: '#44337A' },
+    900: { value: '#322659' },
+    950: { value: '#1A1145' },
+  },
+
+  gray: {
+    50: { value: '#F7FAFC' },
+    100: { value: '#EDF2F7' },
+    200: { value: '#E2E8F0' },
+    300: { value: '#CBD5E0' },
+    400: { value: '#A0AEC0' },
+    500: { value: '#718096' },
+    600: { value: '#4A5568' },
+    700: { value: '#2D3748' },
+    800: { value: '#1A202C' },
+    900: { value: '#171923' },
+    950: { value: '#0D1117' },
+  },
+
+  success: {
+    50: { value: '#F0FFF4' },
+    100: { value: '#C6F6D5' },
+    200: { value: '#9AE6B4' },
+    300: { value: '#68D391' },
+    400: { value: '#48BB78' },
+    500: { value: '#38A169' },
+    600: { value: '#2F855A' },
+    700: { value: '#276749' },
+    800: { value: '#22543D' },
+    900: { value: '#1C4532' },
+    950: { value: '#0F2A1D' },
+  },
+
+  warning: {
+    50: { value: '#FFFFF0' },
+    100: { value: '#FEFCBF' },
+    200: { value: '#FAF089' },
+    300: { value: '#F6E05E' },
+    400: { value: '#ECC94B' },
+    500: { value: '#D69E2E' },
+    600: { value: '#B7791F' },
+    700: { value: '#975A16' },
+    800: { value: '#744210' },
+    900: { value: '#5F370E' },
+    950: { value: '#3D2409' },
+  },
+
+  error: {
+    50: { value: '#FFF5F5' },
+    100: { value: '#FED7D7' },
+    200: { value: '#FEB2B2' },
+    300: { value: '#FC8181' },
+    400: { value: '#F56565' },
+    500: { value: '#E53E3E' },
+    600: { value: '#C53030' },
+    700: { value: '#9B2C2C' },
+    800: { value: '#822727' },
+    900: { value: '#63171B' },
+    950: { value: '#3B0D0D' },
+  },
+
+  info: {
+    50: { value: '#E6FFFA' },
+    100: { value: '#B2F5EA' },
+    200: { value: '#81E6D9' },
+    300: { value: '#4FD1C5' },
+    400: { value: '#38B2AC' },
+    500: { value: '#319795' },
+    600: { value: '#2C7A7B' },
+    700: { value: '#285E61' },
+    800: { value: '#234E52' },
+    900: { value: '#1D4044' },
+    950: { value: '#0F2628' },
+  },
+})

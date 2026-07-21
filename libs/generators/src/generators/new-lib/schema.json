@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NewLib",
+  "title": "New Lib Generator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Имя библиотеки (папка libs/<name>), kebab-case, без префикса @letar/",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Имя новой библиотеки (libs/<name>)?"
+    },
+    "description": {
+      "type": "string",
+      "description": "Короткое описание для README.md. По умолчанию — заглушка"
+    }
+  },
+  "required": ["name"]
+}

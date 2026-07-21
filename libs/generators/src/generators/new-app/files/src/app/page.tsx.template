@@ -1,0 +1,12 @@
+import { Container, Heading, Text } from '@chakra-ui/react'
+
+export default function HomePage() {
+  return (
+    <Container maxW="3xl" py={16}>
+      <Heading as="h1" size="2xl" mb={4}>
+        <%= displayName %>
+      </Heading>
+      <Text color="fg.muted">Приложение создано. Начни разработку в src/app/page.tsx.</Text>
+    </Container>
+  )
+}

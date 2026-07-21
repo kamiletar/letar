@@ -57,6 +57,56 @@ nx g @letar/generators:electron-app <name> --displayName="Моё приложе�
 сгенерированном `README.md`. Nextron не поддерживает `nx generate` из коробки — второй референс для
 более сложного приложения (БД, автообновление, сканер) — `apps/label-printer-desktop`.
 
+### `new-lib`
+
+Скаффолдит новую shared-библиотеку `libs/<name>` (`@letar/<name>`) по актуальной конвенции монорепо
+(сверено с `libs/format-utils`/`libs/validation-utils`, а не только со старым `new-lib.md`):
+`package.json`, `project.json` (`typecheck`/`typecheck:tsgo`/`oxlint`/`lint`/`test`), `tsconfig.json` +
+`tsconfig.lib.json` + `tsconfig.spec.json` (композитная схема с раздельным spec-конфигом — обязательна
+для vitest 4 + vite 8 oxc, см. `.claude/docs/unit-testing.md`), `vitest.config.ts`, `eslint.config.mjs`,
+`README.md`, стартовые `src/index.ts` / `src/lib/feature.ts` / `src/lib/feature.spec.ts`.
+
+```bash
+nx g @letar/generators:new-lib <name>
+# с описанием для README:
+nx g @letar/generators:new-lib <name> --description="Утилиты для X"
+```
+
+**Генератор не перезаписывает существующие библиотеки** — если `libs/<name>` уже есть, падает с понятной
+ошибкой.
+
+⚠️ **После генерации:** подключение к приложению — три обязательных места (`.claude/rules/libs.md`):
+`paths` и `references` в `tsconfig.json` приложения, `implicitDependencies` в его `package.json`, затем
+`nx sync`.
+
+### `new-app`
+
+Скаффолдит новое минимальное Next.js приложение `apps/<name>` — чистый каркас Chakra UI v3 + MDX без
+типового boilerplate, который иначе приходится вычищать руками после `nx g @nx/next:application`
+(`global.css`, `.swcrc`, `next.config.js`, `api/hello`) — см. полный ручной процесс в
+[`.claude/commands/create/new-app.md`](/.claude/commands/create/new-app.md), который этот генератор
+заменяет для шагов 1–13 (структура, тема, provider'ы, MDX, vitest).
+
+```bash
+nx g @letar/generators:new-app <name>
+# с явным портом/именем/описанием/приватностью:
+nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё приложение" --private
+```
+
+Порт по умолчанию — следующий свободный `3xxx`, вычисляется сканированием `apps/*/.env`.
+
+Сгенерированное приложение **осознанно минимально** — без БД, форм, аутентификации, PWA. Это
+отправная точка, а не копия `grandslamcup`/`driving-school` — те эталоны несут специфику (Serwist,
+Better Auth, cookie-баннер и т.д.), которую не всем новым приложениям нужно тащить с первого дня.
+
+**Генератор не перезаписывает существующие приложения** — если `apps/<name>` уже есть, падает с понятной
+ошибкой.
+
+⚠️ **После генерации остаются ручные шаги** (намеренно не автоматизированы, см. `.claude/commands/create/new-app.md`
+§14+): приватный submodule, регистрация в Dashboard/`deploy-affected.sh`, бэкапы, `docker-compose.production.yml` +
+`output: 'standalone'`, e2e-gate, MCP postgres, ПДн-чеклист (если приложение собирает персональные
+данные — см. `.claude/docs/personal-data.md`).
+
 ## Разработка нового генератора
 
 1. `mkdir src/generators/<name>`, добавь `generator.ts` + `schema.json`/`schema.d.ts` + `files/`

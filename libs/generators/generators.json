@@ -11,6 +11,16 @@
       "factory": "./src/generators/electron-app/generator",
       "schema": "./src/generators/electron-app/schema.json",
       "description": "Скаффолдит новое минимальное Electron/Nextron-приложение apps/<name> (см. .claude/rules/electron.md)"
+    },
+    "new-lib": {
+      "factory": "./src/generators/new-lib/generator",
+      "schema": "./src/generators/new-lib/schema.json",
+      "description": "Скаффолдит новую shared-библиотеку libs/<name> (@letar/<name>) по конвенции монорепо (см. .claude/rules/libs.md)"
+    },
+    "new-app": {
+      "factory": "./src/generators/new-app/generator",
+      "schema": "./src/generators/new-app/schema.json",
+      "description": "Скаффолдит новое минимальное Next.js приложение apps/<name> — чистый шаблон Chakra UI v3 + MDX (см. .claude/commands/create/new-app.md)"
     }
   }
 }

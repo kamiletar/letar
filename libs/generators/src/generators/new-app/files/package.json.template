@@ -1,0 +1,9 @@
+{
+  "name": "@letar/<%= name %>",
+  "version": "0.1.0",
+  "private": true,
+  "nx": {
+    "name": "<%= name %>",
+    "implicitDependencies": ["chakra-provider", "ui", "analytics"]
+  }
+}

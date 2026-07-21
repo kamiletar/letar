@@ -1,0 +1,30 @@
+import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+import { pressableConfig } from '@letar/ui'
+
+import { semanticColors } from './semanticTokens'
+import { colors } from './tokens'
+
+/**
+ * Конфигурация темы для <%= displayName %>
+ */
+const <%= camelCaseName %>Config = defineConfig({
+  theme: {
+    tokens: {
+      colors,
+    },
+    semanticTokens: {
+      colors: semanticColors,
+    },
+    keyframes: {
+      ...pressableConfig.keyframes,
+    },
+  },
+  globalCss: {
+    ...pressableConfig.globalCss,
+  },
+})
+
+/**
+ * Система стилей Chakra UI для <%= displayName %>
+ */
+export const system = createSystem(defaultConfig, <%= camelCaseName %>Config)

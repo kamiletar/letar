@@ -1,0 +1,42 @@
+# @letar/<%= name %>
+
+<%= description %>
+
+## Установка
+
+Библиотека уже включена в монорепозиторий.
+
+```typescript
+import { feature } from '@letar/<%= name %>'
+```
+
+## API
+
+### `feature()`
+
+<!-- Опиши публичный API здесь -->
+
+## Команды
+
+```bash
+nx test <%= name %>
+nx lint <%= name %>
+nx typecheck:tsgo <%= name %>
+```
+
+## Подключение к приложению
+
+В `tsconfig.json` приложения:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@letar/<%= name %>": ["../../libs/<%= name %>/src/index.ts"]
+    }
+  },
+  "references": [{ "path": "../../libs/<%= name %>" }]
+}
+```
+
+Затем `nx sync` и добавь `<%= name %>` в `implicitDependencies` `package.json` приложения.

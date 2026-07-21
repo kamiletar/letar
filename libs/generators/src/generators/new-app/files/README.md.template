@@ -1,0 +1,30 @@
+# <%= displayName %>
+
+<%= description %>
+
+## Версия и стек
+
+| Параметр    | Значение           |
+| ----------- | ------------------ |
+| **Версия**  | 0.1.0               |
+| **Порт**    | <%= port %>              |
+| **Next.js** | 16                  |
+| **React**   | 19                  |
+| **UI**      | Chakra UI v3        |
+| **Формы**   | @letar/forms + Zod  |
+
+## Быстрый старт
+
+```bash
+nx dev <%= name %>              # Разработка
+nx format <%= name %>           # Форматирование
+nx lint <%= name %>             # oxlint → ESLint
+nx typecheck:tsgo <%= name %>   # Проверка типов
+nx test <%= name %>             # Тесты
+```
+
+## Что дальше
+
+Каркас минимален — нет БД, форм, аутентификации. Смотри `PLAN.md` для текущих задач и
+`.claude/commands/create/new-app.md` за оставшимися шагами (регистрация в Dashboard, бэкапы,
+docker-compose, e2e-gate — не автоматизированы генератором намеренно).

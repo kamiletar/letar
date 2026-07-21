@@ -8,103 +8,30 @@
 - Нужна изоляция логики от UI
 - Создание утилит, хуков, компонентов
 
-## Структура
-
-```
-libs/<lib-name>/
-├── src/
-│   ├── index.ts          # Публичный API
-│   └── lib/
-│       ├── feature.ts
-│       └── feature.spec.ts
-├── package.json          # @letar/<lib-name>
-├── project.json          # Nx конфигурация
-├── tsconfig.json         # composite: true
-├── tsconfig.lib.json
-└── README.md             # Документация API
-```
-
-## Шаги
-
-### 1. Создать структуру
+## Создание
 
 ```bash
-mkdir -p libs/<lib-name>/src/lib
+nx g @letar/generators:new-lib <lib-name>
+# с описанием для README:
+nx g @letar/generators:new-lib <lib-name> --description="Утилиты для X"
 ```
 
-### 2. package.json
+Генератор раскладывает полную структуру (`package.json`, `project.json` с
+`typecheck`/`typecheck:tsgo`/`oxlint`/`lint`/`test`, `tsconfig.json` + `tsconfig.lib.json` +
+`tsconfig.spec.json`, `vitest.config.ts`, `eslint.config.mjs`, `README.md`, стартовые
+`src/index.ts`/`src/lib/feature.ts`/`src/lib/feature.spec.ts`) — сверено с актуальными
+`libs/format-utils`/`libs/validation-utils`. Подробности и что генератор делает под капотом:
+[libs/generators/README.md](/libs/generators/README.md#new-lib).
 
-```json
-{
-  "name": "@letar/<lib-name>",
-  "version": "0.1.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
-}
-```
+**Не перезаписывает существующие библиотеки** — если `libs/<name>` уже есть, падает с понятной ошибкой.
 
-### 3. tsconfig.json
+## После генерации
 
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "./dist"
-  },
-  "include": ["src/**/*"],
-  "references": []
-}
-```
+### 1. Реализовать логику
 
-### 4. project.json
+Замени заглушку `src/lib/feature.ts` реальным кодом, экспортируй через `src/index.ts`.
 
-```json
-{
-  "name": "<lib-name>",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/<lib-name>/src",
-  "projectType": "library",
-  "tags": []
-}
-```
-
-### 5. src/index.ts
-
-```typescript
-// Публичный API библиотеки
-export * from './lib/feature'
-```
-
-### 6. README.md
-
-```markdown
-# @letar/<lib-name>
-
-<Описание библиотеки>
-
-## Установка
-
-Библиотека включена в монорепозиторий.
-
-\`\`\`typescript
-import { ... } from '@letar/<lib-name>'
-\`\`\`
-
-## API
-
-### Функция/Компонент
-
-\`\`\`typescript
-// Пример использования
-\`\`\`
-
----
-
-**Версия:** 0.1.0
-```
-
-## Подключение к приложению
+### 2. Подключить к приложению
 
 В `tsconfig.json` приложения:
 
@@ -119,21 +46,24 @@ import { ... } from '@letar/<lib-name>'
 }
 ```
 
-## Синхронизация
+Добавь `<lib-name>` в `implicitDependencies` `package.json` приложения, затем `nx sync`.
+
+### 3. Проверить
 
 ```bash
-nx sync
+nx typecheck:tsgo <lib-name>
+nx lint <lib-name>
+nx test <lib-name>
 ```
 
 ## Чеклист
 
-- [ ] Структура создана
-- [ ] package.json с @letar/ prefix
-- [ ] tsconfig.json с composite: true
-- [ ] Экспорт через src/index.ts
-- [ ] README.md с API документацией
-- [ ] Подключено к нужным приложениям
+- [ ] `nx g @letar/generators:new-lib <lib-name>` выполнен
+- [ ] Реализация в `src/lib/`, экспорт через `src/index.ts`
+- [ ] README.md дополнен реальным API (генератор создаёт только заглушку)
+- [ ] Подключено к нужным приложениям (paths + references + implicitDependencies)
 - [ ] `nx sync` выполнен
+- [ ] typecheck/lint/test зелёные
 
 ## Документация
 
