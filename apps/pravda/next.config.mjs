@@ -1,5 +1,6 @@
 import createMDX from '@next/mdx'
 import { composePlugins, withNx } from '@nx/next'
+import { fileURLToPath } from 'node:url'
 
 // Serwist отключён — не поддерживает Turbopack (Next.js 16+)
 // Используем простой sw.js из public/
@@ -12,6 +13,9 @@ const isProduction = process.env.NODE_ENV === 'production'
 const nextConfig = {
   // Статический экспорт только для production build (не для dev)
   output: isProduction ? 'export' : undefined,
+  // Воркараунд https://github.com/vercel/next.js/issues/85374 (см. build/adapter.js) —
+  // без него клиентская RSC-навигация между статьями ломается на статическом экспорте.
+  ...(isProduction && { adapterPath: fileURLToPath(new URL('./build/adapter.js', import.meta.url)) }),
   // Trailing slash для корректных путей в статике
   trailingSlash: true,
   // Отключаем оптимизацию изображений для статического экспорта

@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-07-21
+
+### Fixed
+
+- **Клиентская RSC-навигация между статьями не работала на статическом экспорте**
+  (`navigation.spec.ts` «Клиентская навигация (RSC)», PLAN.md §18.7 батч M1) — известный баг
+  Next.js 16 ([vercel/next.js#85374](https://github.com/vercel/next.js/issues/85374)): RSC-сегменты
+  (Cache Components, включены всегда с Next.js 16, не только при явном использовании фичи)
+  пишутся на диск вложенными директориями (`__next/section/__PAGE__.txt`), а клиентский роутер
+  запрашивает их плоским dot-separated именем (`__next.section.__PAGE__.txt`) — путь расходится,
+  prefetch получает 404, дальнейшая клиентская навигация ломается. Апстрим-фикс не смёржен
+  (PR #86948 открыт) — добавлен build adapter (`build/adapter.js`, `adapterPath` в
+  `next.config.mjs`), переименовывающий файлы в плоский путь после сборки (см.
+  [разбор Axiorema](https://blog.axiorema.com/engineering/uncurious-case-broken-static-exports-404s-nextjs-16/)).
+  Проверено локальным `next build`: адаптер отрабатывает (`Running onBuildComplete from
+  fix-issue-85374`), плоские файлы появляются на месте вложенных, старые пути пусты.
+
 ## [1.8.1] - 2026-07-21
 
 ### Fixed
