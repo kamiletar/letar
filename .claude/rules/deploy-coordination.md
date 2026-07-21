@@ -32,7 +32,15 @@ send_message(
 1. **Закоммить** все изменения: `git add apps/<app>/ && git commit`
 2. **Запушить**: `git push`
 3. **Проверь качество**: `nx lint <app> && nx typecheck:tsgo <app>`
-4. Только потом отправляй запрос
+4. **Если добавил/поменял импорт из `libs/*`** (особенно новую для этого приложения библиотеку) —
+   дополнительно прогони `nx build <app>`. `typecheck:tsgo` резолвит `libs/*` через TS project
+   references и может быть зелёным, даже если прод-билд (`next build`/Turbopack) не может
+   разрешить транзитивный импорт — например когда библиотека реэкспортирует другую `@letar/*`-либу,
+   не подключённую в `tsconfig.json`/`next.config.mjs` (`transpilePackages`) текущего приложения.
+   Прецедент: `SortablePhotoGrid` (`@letar/admin-ui`) реэкспортировал `@letar/format-utils`, которая
+   была подключена только в `mandala` — typecheck прошёл, а прод-билд в `aboi`/`aprel8008` упал на
+   `Module not found` (2026-07-21).
+5. Только потом отправляй запрос
 
 ## Ожидание результата
 
