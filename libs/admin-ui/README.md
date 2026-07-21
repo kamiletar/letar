@@ -51,6 +51,27 @@ bun add @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities
 | `StatusBadge`        | Цветные бейджи статусов       |
 | `DeleteConfirmation` | Диалог подтверждения удаления |
 
+### Photo
+
+| Компонент           | Описание                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `SortablePhotoGrid` | Сетка фото с drag&drop-сортировкой (мышь/тач/клавиатура) и кнопкой «Сделать главной» |
+
+```tsx
+import { SortablePhotoGrid } from '@letar/admin-ui'
+;<SortablePhotoGrid
+  items={photos.map((p) => ({ id: p.id, imageUrl: `/api/files/${p.path}` }))}
+  onReorder={(orderedIds) => reorderPhotosAction(estateSlug, orderedIds)}
+  onSetCover={(id) => setCoverPhotoAction(id)}
+  onDelete={(id) => deletePhotoAction(id)}
+  onChanged={() => router.refresh()}
+/>
+```
+
+Загрузку файлов держит вызывающий компонент — сетка только сортирует/удаляет/помечает главное
+(первый элемент в порядке) через переданные server actions. `onReorder`/`onSetCover`/`onDelete`
+должны вернуть `{ error?: string }` — при ошибке UI откатывает оптимистичное обновление.
+
 ### Form Fields
 
 | Компонент   | Описание                                |

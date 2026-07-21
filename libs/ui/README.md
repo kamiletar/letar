@@ -133,10 +133,53 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 ```tsx
 import { AdminEditOverlay } from '@letar/ui'
 
-<Box position="relative">
+;<Box position="relative">
   {isAdmin && <AdminEditOverlay href={`/admin/${slug}`} colorPalette="brand" />}
-  <Link asChild><NextLink href={`/item/${slug}`}>...карточка...</NextLink></Link>
+  <Link asChild>
+    <NextLink href={`/item/${slug}`}>...карточка...</NextLink>
+  </Link>
 </Box>
+```
+
+### PhotoGallery
+
+Сетка превью с лайтбоксом (yet-another-react-lightbox + Zoom + Fullscreen). Превью грузятся через
+`next/image` с дефолтным `quality`, а полноразмерное фото в лайтбоксе — через `/_next/image` с
+`lightboxQuality` (по умолчанию **85**).
+
+⚠️ **Next.js 16 по умолчанию разрешает только `quality: 75`.** Если твой `next.config` не
+переопределяет `images.qualities`, `/_next/image` вернёт **400** при открытии лайтбокса (превью на
+дефолтных 75 при этом продолжат грузиться нормально — баг незаметен в сетке, только при клике на
+фото). Обязательно добавь в `next.config.mjs` потребителя:
+
+```js
+const nextConfig = {
+  images: { qualities: [75, 85] }, // 75 — дефолт превью, 85 — lightboxQuality
+}
+```
+
+(наступили на этот баг в `aprel8008` — см. `apps/aprel8008/CHANGELOG.md` 2026-07-21).
+
+```tsx
+import { PhotoGallery } from '@letar/ui'
+;<PhotoGallery photos={photos.map((p) => ({ src: `/api/files/${p.path}`, alt: p.alt }))} />
+```
+
+### SortablePhotoGrid (`@letar/admin-ui`)
+
+Сетка фото с drag&drop-сортировкой (`@dnd-kit`, мышь/тач/клавиатура) и опциональной кнопкой
+«Сделать главной» — первое фото в порядке считается cover. Загрузку файлов держит вызывающий
+компонент, эта сетка только сортирует/удаляет/помечает главное через переданные server actions.
+
+```tsx
+import { SortablePhotoGrid } from '@letar/admin-ui'
+;<SortablePhotoGrid
+  items={photos.map((p) => ({ id: p.id, imageUrl: `/api/files/${p.path}` }))}
+  onReorder={(orderedIds) => reorderPhotosAction(estateSlug, orderedIds)}
+  onSetCover={(id) => setCoverPhotoAction(id)}
+  onDelete={(id) => deletePhotoAction(id)}
+  onChanged={() => router.refresh()}
+/>
 ```
 
 ## Хуки

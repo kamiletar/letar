@@ -21,7 +21,13 @@ interface PhotoGalleryProps {
   aspectRatio?: number
   /** Максимальная ширина для /_next/image в лайтбоксе (default: 1920) */
   lightboxMaxWidth?: number
-  /** Качество в лайтбоксе (default: 85) */
+  /**
+   * Качество в лайтбоксе (default: 85).
+   *
+   * ⚠️ Next.js 16 по умолчанию разрешает через `/_next/image` только `quality: 75` — без
+   * `images.qualities: [75, 85]` в `next.config` потребителя лайтбокс будет получать 400 при
+   * открытии фото (превью на дефолтных 75 при этом продолжат грузиться нормально).
+   */
   lightboxQuality?: number
   /** Скелетоны при loading=true */
   skeletonCount?: number

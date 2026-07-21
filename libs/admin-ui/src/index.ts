@@ -27,6 +27,9 @@ export { Pagination, SearchFilter, StatusFilter } from './filters'
 // Feedback components
 export { DeleteConfirmation, EmptyState, StatusBadge, createStatusBadge } from './feedback'
 
+// Photo components
+export { SortablePhotoGrid, type SortablePhotoGridProps, type SortablePhotoItem } from './photo'
+
 // Form fields
 export { SeoField, SlugField } from './form-fields'
 
