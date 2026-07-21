@@ -5,10 +5,11 @@
 > (раз в 15 минут, s2). SMTP-отправка через выделенный ящик `canary@letar.best` + IMAP-проверка
 > двух ног (internal — тот же ящик Maddy; external — BCC на реальный внешний почтовик, ловит
 > класс инцидента «форвард режется gmail»). Алерт в dashboard при 3 подряд неудачах одной ноги
-> (переиспользован `AlertType.CRON_FAILED`, без новой миграции схемы). **Обе ноги выключены до
-> ручного провижининга** (создание ящика `canary@letar.best` на Maddy + секреты в `.env.docker`) —
-> это за рамками кодовой сессии, задача владельца/BlackCove. Подробности — §0.7 ниже и
-> `apps/dashboard-agent/PLAN.md`.
+> (переиспользован `AlertType.CRON_FAILED`, без новой миграции схемы). **Internal-нога
+> провижинирована и подтверждена** (ящик `canary@letar.best` на Maddy, SMTP+IMAP auth проверены
+> вживую, секреты залиты и синхронизированы, деплой запрошен у BlackCove). **External-нога ждёт
+> владельца** — нужен внешний ящик (Gmail) с IMAP app-password, создание стороннего аккаунта агент
+> выполнить не может. Подробности — §0.7 ниже и `apps/dashboard-agent/PLAN.md`.
 
 > **✅ §18.7 Тираж M1, батч 2 — `mandala` инфра-блокер снят, dashboard-agent на s3 передеплоен
 > (2026-07-21, BlackCove, msg #667):** Простой `dashboard-agent` на s3 (9.9 дней, см. запись ниже)
@@ -1553,12 +1554,13 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 > этой задачи — можно завести `EMAIL_DELIVERY_FAILED` отдельно, если понадобится фильтрация в UI).
 > Umami-канал алертинга не заведён — текущий `sendNotification` в dashboard поддерживает только
 > Telegram, отдельный Umami-event ради одной задачи признан непропорциональным.
-> **⏳ Остаётся ручной провижининг (вне скоупа кода, задача владельца/BlackCove):** создать ящик
-> `canary@letar.best` на Maddy (`maddy creds create`, пароль — `openssl rand -base64 32`),
-> заполнить `EMAIL_CANARY_SMTP_*`/`EMAIL_CANARY_INTERNAL_IMAP_*` в `.env.docker` → sync → редеплой;
-> для external-ноги — внешний почтовый ящик (Gmail) с IMAP app-password в `EMAIL_CANARY_EXTERNAL_*`.
-> До заполнения секретов задача не падает и не алертит — обе ноги `configured: false`. Детали —
-> `apps/dashboard-agent/PLAN.md` и `CHANGELOG.md` (v0.8.0).
+> **✅ Internal-нога провижинирована и подтверждена (2026-07-22):** ящик `canary@letar.best`
+> создан на Maddy, SMTP+IMAP auth проверены вживую (оба OK), секреты залиты в `.env.docker.enc`
+> (коммит `2a5aaa0d`), синхронизированы на s1/s2, деплой запрошен у BlackCove. **⏳ External-нога
+> ждёт владельца:** нужен внешний почтовый ящик (Gmail и т.п.) с IMAP app-password в
+> `EMAIL_CANARY_EXTERNAL_*` — создание стороннего аккаунта агент выполнить не может. До заполнения
+> — `external.configured: false`, не алертит. Детали — `apps/dashboard-agent/PLAN.md` и
+> `CHANGELOG.md` (v0.8.0).
 
 - **Цель:** ловить инциденты доставки (как сегодняшний — форвард режется gmail, неверный `SMTP_FROM`, брутфорс)
   **автоматически**, а не по жалобам. Проверять, что письмо реально **доходит** (round-trip), а не только «SMTP принял».
