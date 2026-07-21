@@ -47,9 +47,13 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     await passwordInput.click()
     await passwordInput.fill('TestPass123!')
 
-    // Обязательный чекбокс согласия на ПДн
+    // Обязательный чекбокс согласия на ПДн — .check()/.click() ненадёжно переключают этот
+    // конкретный чекбокс (тот же класс проблемы, что задокументирован для aboi, см. PLAN.md
+    // §18.7): focus() + Space работает стабильно.
     const consentCheckbox = page.locator('input[type="checkbox"]').first()
-    await consentCheckbox.check()
+    await consentCheckbox.focus()
+    await page.keyboard.press('Space')
+    await expect(consentCheckbox).toBeChecked()
 
     await page.locator('form:has(#join-email) button[type="submit"]').click()
 
@@ -72,7 +76,9 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     await passwordInput.fill('AnyPass123!')
 
     const consentCheckbox = page.locator('input[type="checkbox"]').first()
-    await consentCheckbox.check()
+    await consentCheckbox.focus()
+    await page.keyboard.press('Space')
+    await expect(consentCheckbox).toBeChecked()
 
     await page.locator('form:has(#join-email) button[type="submit"]').click()
 
