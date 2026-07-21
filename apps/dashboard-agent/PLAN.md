@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.7.6
+## Текущая версия: 0.8.0
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -37,6 +37,17 @@
 - [x] `routes/deploy.ts`: `POST /api/deploy/app` принимает `seed?: boolean` → добавляет `--seed` к `deploy-affected.sh` (`nx run <app>:db:seed` после успешного деплоя). Раньше seed после деплоя требовал сырого SSH-резерва (см. `.claude/rules/deploy-coordination.md`) — теперь доступен через `deploy_app({ app, seed: true })` в `libs/deploy-mcp`. `0.7.5 → 0.7.6`, коммит `64e558fc` (2026-07-18, BlackCove).
 
 ✅ Передеплой s2 на новый deploy API выполнен (сессия C, см. корневой `PLAN.md` §18). s3-инстанс тоже поднят и живой (staging + e2e-раннер).
+
+### Канареечный мониторинг доставки email (корневой PLAN.md Этап 0.7, 2026-07-22, root-weaver)
+
+- [x] `lib/email-canary.ts` + `routes/email-canary.ts` — `POST /api/cron/email-canary-check` (запускается планировщиком раз в 15 минут) и `GET /api/cron/email-canary-check/status` (последнее состояние без нового прогона). Код готов, `0.7.6 → 0.8.0`. Детали — `CHANGELOG.md`.
+- [ ] **Провижининг (вне скоупа этой сессии, ручной шаг владельца/BlackCove):**
+  - Создать ящик `canary@letar.best` на Maddy: `ssh root@31.56.180.161 "docker exec -it maddy maddy creds create canary@letar.best"` (пароль генерировать только `openssl rand -base64 32`, см. `.claude/rules/security.md`).
+  - Заполнить `EMAIL_CANARY_SMTP_USER`/`EMAIL_CANARY_SMTP_PASSWORD`/`EMAIL_CANARY_INTERNAL_IMAP_*` в `apps/dashboard-agent/.env.docker` этим паролем → `./scripts/sync-env-docker.sh` → передеплой через BlackCove.
+  - Для external-ноги (реальная доставка во внешний почтовик, ловит класс «форвард режется gmail») — завести/использовать внешний ящик (Gmail и т.п.) с IMAP-доступом (app password), заполнить `EMAIL_CANARY_EXTERNAL_*`. Опционально — без них внешняя нога просто не проверяется.
+  - До заполнения секретов cron-задача `email-canary-check` будет молча возвращать `configured: false` по обеим ногам (не алертит, не считается провалом).
+- **Примечание по алертингу:** переиспользован существующий `AlertType.CRON_FAILED` (`POST /api/alerts` в dashboard) вместо нового enum-значения — избежали Prisma-миграции на боевой БД ради этой задачи. Если понадобится отдельная фильтрация в UI dashboard/alerts — заводить `EMAIL_DELIVERY_FAILED` отдельной сессией.
+- **Не покрыто (сознательно, вне MVP):** Umami-событие (§ Этап 0 упоминает Telegram+Umami как алертинг) — текущий alert-pipeline dashboard поддерживает только Telegram (`sendNotification` в `apps/dashboard/src/lib/notifications.ts`), заводить Umami-канал ради одной этой задачи не стали.
 
 | Задача                         | Статус  | Приоритет |
 | ------------------------------ | ------- | --------- |

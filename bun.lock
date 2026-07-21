@@ -435,10 +435,15 @@
         "cron-parser": "^5.0.0",
         "dockerode": "^4.0.6",
         "fastify": "^5.2.3",
+        "imapflow": "^1.4.7",
         "node-cron": "^3.0.3",
+        "nodemailer": "^9.0.3",
         "pg": "^8.14.0",
         "pino-pretty": "^13.1.3",
         "systeminformation": "^5.25.11",
+      },
+      "devDependencies": {
+        "@types/nodemailer": "8.0.1",
       },
     },
     "apps/driving-school": {
@@ -492,7 +497,7 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.37.3",
+      "version": "3.37.4",
     },
     "apps/grandslamcup-e2e": {
       "name": "@letar/grandslamcup-e2e",
@@ -545,7 +550,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.39.8",
+      "version": "0.39.9",
     },
     "apps/mandala-e2e": {
       "name": "mandala-e2e",
@@ -682,7 +687,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.11.1",
+      "version": "0.11.2",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
       },

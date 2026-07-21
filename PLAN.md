@@ -1,5 +1,15 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **✅ Этап 0.7 — канареечный мониторинг доставки email, код готов (2026-07-22, root-weaver):**
+> `dashboard-agent` 0.7.6 → 0.8.0 — `lib/email-canary.ts` + новая cron-задача `email-canary-check`
+> (раз в 15 минут, s2). SMTP-отправка через выделенный ящик `canary@letar.best` + IMAP-проверка
+> двух ног (internal — тот же ящик Maddy; external — BCC на реальный внешний почтовик, ловит
+> класс инцидента «форвард режется gmail»). Алерт в dashboard при 3 подряд неудачах одной ноги
+> (переиспользован `AlertType.CRON_FAILED`, без новой миграции схемы). **Обе ноги выключены до
+> ручного провижининга** (создание ящика `canary@letar.best` на Maddy + секреты в `.env.docker`) —
+> это за рамками кодовой сессии, задача владельца/BlackCove. Подробности — §0.7 ниже и
+> `apps/dashboard-agent/PLAN.md`.
+
 > **✅ §18.7 Тираж M1, батч 2 — `mandala` инфра-блокер снят, dashboard-agent на s3 передеплоен
 > (2026-07-21, BlackCove, msg #667):** Простой `dashboard-agent` на s3 (9.9 дней, см. запись ниже)
 > оказался не просто «забыли передеплоить» — коммит переименования `premium-network →
@@ -1530,6 +1540,25 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 - **Зависимости:** нет. Делается до начала тиражирования библиотек.
 
 ### Этап 0.7 — Периодический canary-мониторинг доставки email
+
+> **✅ Код готов (2026-07-22, root-weaver, dashboard-agent 0.7.6 → 0.8.0):** `lib/email-canary.ts` +
+> `routes/email-canary.ts` в `dashboard-agent` — `POST /api/cron/email-canary-check`, cron-задача
+> `email-canary-check` (раз в 15 минут, s2). SMTP-отправка (`canary@letar.best`) + IMAP-проверка
+> двух независимых ног: **internal** (тот же ящик Maddy — жив ли сам SMTP/IMAP) и **external**
+> (BCC на реальный внешний почтовик, напр. Gmail — ловит класс инцидента «форвард режется gmail»,
+> а не только «SMTP принял»). Обе ноги опциональны по конфигу — отсутствие env-переменных не
+> считается провалом, нога просто не проверяется. Состояние + latency последних 30 прогонов —
+> `/home/deploy/letar/email-canary-state.json`; при 3 подряд неудачах одной ноги — алерт в
+> dashboard (переиспользован `AlertType.CRON_FAILED`, не заводили отдельный enum/миграцию ради
+> этой задачи — можно завести `EMAIL_DELIVERY_FAILED` отдельно, если понадобится фильтрация в UI).
+> Umami-канал алертинга не заведён — текущий `sendNotification` в dashboard поддерживает только
+> Telegram, отдельный Umami-event ради одной задачи признан непропорциональным.
+> **⏳ Остаётся ручной провижининг (вне скоупа кода, задача владельца/BlackCove):** создать ящик
+> `canary@letar.best` на Maddy (`maddy creds create`, пароль — `openssl rand -base64 32`),
+> заполнить `EMAIL_CANARY_SMTP_*`/`EMAIL_CANARY_INTERNAL_IMAP_*` в `.env.docker` → sync → редеплой;
+> для external-ноги — внешний почтовый ящик (Gmail) с IMAP app-password в `EMAIL_CANARY_EXTERNAL_*`.
+> До заполнения секретов задача не падает и не алертит — обе ноги `configured: false`. Детали —
+> `apps/dashboard-agent/PLAN.md` и `CHANGELOG.md` (v0.8.0).
 
 - **Цель:** ловить инциденты доставки (как сегодняшний — форвард режется gmail, неверный `SMTP_FROM`, брутфорс)
   **автоматически**, а не по жалобам. Проверять, что письмо реально **доходит** (round-trip), а не только «SMTP принял».

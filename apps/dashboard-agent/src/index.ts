@@ -23,6 +23,7 @@ import { databaseRoutes } from './routes/database'
 import { deployRoutes } from './routes/deploy'
 import { dockerRoutes } from './routes/docker'
 import { e2eRoutes } from './routes/e2e'
+import { emailCanaryRoutes } from './routes/email-canary'
 import { envRoutes } from './routes/env'
 import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
@@ -36,17 +37,16 @@ async function main(): Promise<void> {
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
-      transport:
-        process.env.NODE_ENV !== 'production'
-          ? {
-              target: 'pino-pretty',
-              options: {
-                colorize: true,
-                translateTime: 'HH:MM:ss',
-                ignore: 'pid,hostname',
-              },
-            }
-          : undefined,
+      transport: process.env.NODE_ENV !== 'production'
+        ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'HH:MM:ss',
+            ignore: 'pid,hostname',
+          },
+        }
+        : undefined,
     },
   })
 
@@ -81,6 +81,7 @@ async function main(): Promise<void> {
   await fastify.register(cronRoutes)
   await fastify.register(gitRoutes)
   await fastify.register(envRoutes)
+  await fastify.register(emailCanaryRoutes)
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
