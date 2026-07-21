@@ -7,6 +7,21 @@
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-07-21
+
+### Fixed
+
+- **`createAuthClient`/`createAuthClientWithOAuth` — тот же класс бага build-time `NEXT_PUBLIC_*`,
+  что чинили в `dsperevod`/`svoichuzhie` (см. 0.11.1 выше и `authClient` в этих приложениях)**,
+  но в самой общей фабрике: дефолт был `baseURL ?? process.env.NEXT_PUBLIC_APP_URL` — если
+  `NEXT_PUBLIC_APP_URL` не передан как build ARG в `Dockerfile.production` (обычная практика в
+  этом монорепо), в бандле навсегда остаётся `undefined`. Затрагивало 9 приложений, вызывающих
+  фабрику без явного `baseURL` (`animatrona-tracker`, `aprel8008`, `archetest`, `auth-hub`,
+  `dashboard`, `grandslamcup`, `mandala`, `studio`, `time`) — не проверялось живьём на всех,
+  теоретический риск, не подтверждённый инцидент. Новый `resolveClientBaseURL()`:
+  явный параметр → `NEXT_PUBLIC_APP_URL` → `window.location.origin` (runtime, не зависит от
+  build-time переменных вообще). Обратная совместимость полная — сигнатуры функций не изменились.
+
 ## [0.11.1] - 2026-07-21
 
 ### Added
