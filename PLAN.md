@@ -43,12 +43,16 @@ mandala:db:seed` запускается и падает уже на **нашей
 > засеяны (предупреждения "File not found" — ожидаемо, `uploads/` не в git, на staging файлы
 > есть). `nx lint mandala` и `nx typecheck:tsgo mandala` чисто.
 >
-> **Не в скоупе этой сессии (не проверено):** тот же паттерн `browser`-override в
-> `zenstack:generate` потенциально бьёт `prisma/seed.ts` и других приложений батча
-> (`grandslamcup`, `dsperevod`, `auth-hub`, `time`, `archetest`, `aprel8008`, `svoichuzhie`,
-> `kami`, `studio`), если их сид-скрипты так же напрямую импортируют `PrismaClient` из
-> `generated/prisma` без явного `/client` и без driver adapter — не проверялось, чинить по факту
-> обнаружения.
+> **✅ Аудит остальных 9 приложений батча ЗАВЕРШЁН (2026-07-21, фоновая сессия):** реальный баг того
+> же класса нашёлся только в **`grandslamcup`** — тот же bare-index импорт (`'../src/generated/
+> prisma'` → `browser`-экспорт без класса) + `new PrismaClient()` без driver adapter. Починен тем
+> же паттерном (явный `../src/generated/prisma/client` + `PrismaPg` adapter), коммит `6efa4e59`,
+> версия `3.37.3 → 3.37.4`. Проверено локально (временный `postgres:17-alpine` на порту 5453,
+> `nx db:push` + `nx db:seed` — дошёл до реального запроса к БД, контейнер после проверки удалён).
+> **Остальные 8 приложений не затронуты — баг там не воспроизводится:**
+> `dsperevod`/`auth-hub`/`studio`/`archetest`/`kami` используют `ZenStackClient` напрямую (не сырой
+> `PrismaClient`, как и `mandala`), а `time`/`aprel8008`/`svoichuzhie` вообще не имеют
+> `prisma/seed.ts`. Правок в них не вносилось — паттерн бага не воспроизводится, трогать не нужно.
 >
 > **✅ §18.7 Тираж M1, батч 2 — диагностика и фиксы 4 находок BlackCove (2026-07-21,
 > root-weaver):** По следам свода BlackCove (запись ниже) — разобраны и закрыты кодом 4 из 5
