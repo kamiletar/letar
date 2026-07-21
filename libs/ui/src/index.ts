@@ -1,3 +1,4 @@
+export { AdminEditOverlay, type AdminEditOverlayProps } from './lib/admin-edit-overlay'
 export { BuildVersion, type BuildVersionProps } from './lib/build-version'
 export {
   ConfirmDialog,

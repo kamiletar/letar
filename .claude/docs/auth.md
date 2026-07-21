@@ -664,6 +664,57 @@ export function OnlyFor({ role, children, fallback = null }: OnlyForProps) {
 </OnlyFor>
 ```
 
+### Inline admin-controls на публичных страницах (server-side)
+
+Вместо отдельной кнопки «Войти» без обратной связи или полностью скрытой админки — паттерн,
+когда элементы редактирования показываются **прямо в публичном интерфейсе**, но только
+администраторам. Проверка `isAdmin()` идёт на сервере в самом page-компоненте, без клиентского
+JS для обычных посетителей (в отличие от `OnlyFor` выше, который клиентский и требует `useSession`).
+
+**Эталон:** `apps/aprel8008/src/app/page.tsx` (карточки баз) и `src/app/baza/[slug]/page.tsx` (hero).
+
+```tsx
+// Server Component — page.tsx
+import { isAdmin } from '@/lib/auth'
+import { AdminEditOverlay } from '@letar/ui'
+
+export default async function HomePage() {
+  const admin = await isAdmin()
+  // ...
+  return (
+    <Box position="relative">
+      {admin && <AdminEditOverlay href={`/admin/${item.slug}`} colorPalette="brand" />}
+      <Link asChild>
+        <NextLink href={`/item/${item.slug}`}>...карточка...</NextLink>
+      </Link>
+    </Box>
+  )
+}
+```
+
+`isAdmin()` — из `createRoleGuards()` (`@letar/auth/server`), тот же хелпер, что используют
+Server Actions и `proxy.ts` для защиты `/admin/*`. Здесь он вызывается ещё раз в публичном
+роуте — это ожидаемо: `proxy.ts` защищает только сам `/admin/*`, для условного рендера в
+остальных роутах проверку делает каждая страница сама.
+
+**Важный HTML-нюанс:** если вся карточка уже обёрнута в `<Link asChild><NextLink>...</NextLink></Link>`,
+кнопку редактирования нельзя класть внутрь — вложенные `<a>` невалидны. Оборачивай карточку и
+кнопку в общий `Box position="relative"`, кнопку делай sibling с `position="absolute"`
+(готовый компонент — `AdminEditOverlay` из `@letar/ui`, см. ниже).
+
+**`AdminEditOverlay` (`@letar/ui`)** — переиспользуемая иконка-карандаш для карточек:
+
+```tsx
+import { AdminEditOverlay } from '@letar/ui'
+
+<AdminEditOverlay href={`/admin/${slug}`} aria-label="Редактировать" colorPalette="brand" />
+```
+
+Для инлайн-кнопки с текстом (не оверлей, а рядом с заголовком) shared-компонента пока нет —
+в aprel8008 используется app-specific `BrandButton asChild` с `NextLink`, т.к. у кнопки должен
+быть бренд-стиль приложения. Если паттерн повторится в 3+ приложениях — выносить как
+`AdminEditButton` в `@letar/ui` по аналогии с `AdminEditOverlay`.
+
 ## Типовые паттерны
 
 ### Проверка аутентификации
@@ -1023,7 +1074,7 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
       }
       setIsVerifying(false)
     },
-    [email],
+    [email]
   )
 
   // 4. Повторная отправка PIN
@@ -1102,17 +1153,15 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
 
       {/* Повторная отправка с countdown */}
       <Box textAlign="center">
-        {canResend
-          ? (
-            <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
-              Отправить код повторно
-            </Button>
-          )
-          : (
-            <Text color="fg.muted" fontSize="sm">
-              Отправить повторно через {resendCountdown} сек
-            </Text>
-          )}
+        {canResend ? (
+          <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
+            Отправить код повторно
+          </Button>
+        ) : (
+          <Text color="fg.muted" fontSize="sm">
+            Отправить повторно через {resendCountdown} сек
+          </Text>
+        )}
       </Box>
 
       <Text color="fg.muted" fontSize="xs" textAlign="center">
@@ -1330,7 +1379,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           clearInterval(interval)
           controller.close()
         },
-        5 * 60 * 1000,
+        5 * 60 * 1000
       )
     },
   })

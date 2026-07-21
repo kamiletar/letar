@@ -18,7 +18,7 @@ import { ConfirmDialog, RatingStars, TopLoader } from '@letar/ui'
 
 ```tsx
 import { TopLoader } from '@letar/ui'
-<TopLoader />
+;<TopLoader />
 ```
 
 ### ConfirmDialog
@@ -27,7 +27,7 @@ import { TopLoader } from '@letar/ui'
 
 ```tsx
 import { ConfirmDialog } from '@letar/ui'
-<ConfirmDialog
+;<ConfirmDialog
   open={isOpen}
   onOpenChange={setIsOpen}
   title="Удалить запись?"
@@ -56,7 +56,7 @@ import { RatingDisplay, RatingStars } from '@letar/ui'
 
 ```tsx
 import { FilterField, FilterPanel, FilterRow } from '@letar/ui'
-<FilterPanel>
+;<FilterPanel>
   <FilterRow>
     <FilterField name="status" label="Статус">
       <Select options={statusOptions} />
@@ -82,7 +82,7 @@ import { RoleStat, StatCard } from '@letar/ui'
 
 ```tsx
 import { OptimizedAvatar } from '@letar/ui'
-<OptimizedAvatar src="/avatar.jpg" name="Иван" />
+;<OptimizedAvatar src="/avatar.jpg" name="Иван" />
 ```
 
 ### ReviewCard
@@ -91,7 +91,7 @@ import { OptimizedAvatar } from '@letar/ui'
 
 ```tsx
 import { ReviewCard } from '@letar/ui'
-<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
+;<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
 ```
 
 ### StickyActionBar
@@ -119,6 +119,24 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
     <Button disabled={!reachedEnd} onClick={onStart}>Начать</Button>
   </StickyActionBar>
 </>
+```
+
+### AdminEditOverlay
+
+Иконка-карандаш поверх карточки, ведущая в раздел редактирования (например `/admin/[slug]`).
+Для inline admin-controls на публичных страницах — рендерится только если `isAdmin()` вернул
+`true` на сервере (см. [auth.md](/.claude/docs/auth.md#inline-admin-controls-на-публичных-страницах-server-side)).
+
+⚠️ Если карточка уже обёрнута в `Link`/`NextLink` — клади `AdminEditOverlay` как sibling
+внутри `Box position="relative"`, не внутрь анкора (вложенные `<a>` невалидны).
+
+```tsx
+import { AdminEditOverlay } from '@letar/ui'
+
+<Box position="relative">
+  {isAdmin && <AdminEditOverlay href={`/admin/${slug}`} colorPalette="brand" />}
+  <Link asChild><NextLink href={`/item/${slug}`}>...карточка...</NextLink></Link>
+</Box>
 ```
 
 ## Хуки
