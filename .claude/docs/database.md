@@ -105,6 +105,13 @@ import { GenderSchema } from '@/generated/zod/enums/Gender.schema' // Устар
 // import { enhance } from '@/generated/zenstack/enhance' // Устарело в v3!
 ```
 
+> ⚠️ **Исключение:** `import { PrismaClient } from '@/generated/prisma'` в примере выше годится
+> только для **типов** (`Gender` и т.п.) — как **класс для `new PrismaClient()`** он работает
+> лишь в приложении, где само приложение реально его инстанцирует (не через `ZenStackClient`,
+> см. `getEnhancedPrisma()` — большинство приложений так и делает, поэтому проблема почти нигде
+> не всплывает). В **server-only скриптах** (`prisma/seed.ts`, `infra/migrations/*.ts`) — см.
+> отдельный раздел [«`PrismaClient` в server-only скриптах»](#критично---prismaclient-в-server-only-скриптах-seed-миграции) ниже, там этот же импорт ломается.
+
 ### Структура директории generated
 
 ```
@@ -352,6 +359,56 @@ nx db:reset premium-rosstil
 # Генерация только Prisma Client (редко нужно)
 nx db:generate premium-rosstil
 ```
+
+## ⚠️ КРИТИЧНО - `PrismaClient` в server-only скриптах (seed, миграции)
+
+**Симптом:** `TypeError: PrismaClient is not a constructor` или `PrismaClientInitializationError:
+PrismaClient needs to be constructed with a non-empty, valid PrismaClientOptions` при запуске
+`nx run <app>:db:seed` или ручного скрипта в `infra/migrations/`.
+
+**Причина 1 — `browser`-экспорт по умолчанию.** У большинства приложений (`mandala`,
+`grandslamcup`, `dsperevod`, `auth-hub`, `time`, `archetest`, `aprel8008`, `svoichuzhie`, `kami`,
+`studio`) таргет `zenstack:generate` в `project.json` намеренно **перезаписывает**
+`src/generated/prisma/index.ts` третьей командой:
+
+```json
+"node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./browser\\'\\n')\""
+```
+
+Это защита от протечки Node-only `PrismaClient` в клиентские бандлы — `browser.ts` экспортирует
+только модельные типы и enum'ы, **не класс**. Большинство приложений это не задевает: сам код
+приложения обычно работает через `ZenStackClient`/`getEnhancedPrisma()` (`lib/db.ts`), а не через
+сырой `PrismaClient`. Но **server-only скрипт**, которому нужен настоящий класс (`prisma/seed.ts`,
+скрипты в `infra/migrations/`), обязан импортировать его из явного `client.ts`, а не из bare
+`generated/prisma`:
+
+```typescript
+// ❌ НЕПРАВИЛЬНО в prisma/seed.ts — резолвится в browser-экспорт без класса
+import { PrismaClient } from '../src/generated/prisma'
+
+// ✅ ПРАВИЛЬНО — явный серверный entry-point
+import { PrismaClient } from '../src/generated/prisma/client'
+```
+
+**Причина 2 — Prisma 7 требует driver adapter.** `new PrismaClient()` без параметров больше не
+собирается (`prisma-client` TS-генератор, Prisma 7) — нужен явный адаптер:
+
+```typescript
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../src/generated/prisma/client'
+
+const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL']! })
+const prisma = new PrismaClient({ adapter })
+```
+
+`@prisma/adapter-pg` уже в зависимостях корня монорепо. Эталонный пример —
+`apps/animatrona-tracker/prisma/seed.ts`.
+
+**Проверять локально:** `nx run <app>:db:seed --skip-nx-cache` — `--skip-nx-cache` обязателен,
+иначе Nx может отдать закэшированный успех прошлого (не текущего) состояния файла. Прецедент —
+`mandala` и `grandslamcup` (2026-07-21, батч §18.7 M1/2, оба фикса подтверждены живым прогоном
+сида на dev-БД); остальные приложения того же списка не задеты — используют `ZenStackClient`
+напрямую либо не имеют `prisma/seed.ts` вовсе.
 
 ## Типовые паттерны
 
