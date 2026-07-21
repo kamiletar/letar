@@ -648,4 +648,19 @@ UPDATE "Player" SET "userId" = 'xvBwgGJVLDk8E0eielKJB9H1BBnPqtG2' WHERE id = 'cm
 
 ---
 
-**Последнее обновление:** 2026-07-03 (инцидент с ролью после консолидации Ключницы; код — v2.7.0)
+## `prisma/seed.ts` — PrismaClient без driver adapter (2026-07-21, v3.37.4)
+
+Тот же класс бага, что нашёлся и был первым продиагностирован в `mandala` (см. её
+`PLAN_COMPLETED.md`, батч §18.7 M1/2): `import { PrismaClient } from '../src/generated/prisma'`
+(bare index) резолвился в `zenstack:generate`-перезаписанный `export * from './browser'` —
+там нет класса `PrismaClient`, только типы; плюс Prisma 7 требует явный driver adapter, `new
+PrismaClient()` без параметров больше не собирается.
+
+Фикс — импорт переведён на явный `../src/generated/prisma/client` + добавлен `PrismaPg`
+adapter по образцу `animatrona-tracker/prisma/seed.ts`. Проверено локально (временный
+`postgres:17-alpine` контейнер, `nx db:push` + `nx db:seed` — дошёл до реального запроса к БД,
+контейнер удалён после проверки). Коммит `6efa4e59`.
+
+---
+
+**Последнее обновление:** 2026-07-21 (фикс `prisma/seed.ts`; код — v3.37.4)
