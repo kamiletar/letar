@@ -44,6 +44,14 @@ export interface DevSessionLoginOptions {
    * (создание связанной записи по query-параметру), который не делает сам dev-session роут.
    */
   postLoginPath?: string
+  /**
+   * Опционально — если фикстуре помимо dev-session cookie нужен ещё и рабочий реальный вход по
+   * email+паролю (например, тесты успешного /sign-in/email), см. `createDevSessionRoute`
+   * (`@letar/auth/server`) — без этого параметра dev-session создаёт User+Session без единой
+   * записи Account, и `/sign-in/email` для такого юзера всегда падает
+   * ("Credential account not found").
+   */
+  password?: string
   /** Суффикс имени cookie сессии Better Auth. По умолчанию `better-auth.session_token`. */
   cookieSuffix?: string
 }
@@ -71,14 +79,23 @@ export interface DevSessionLoginOptions {
  * ```
  */
 export async function devSessionLogin(options: DevSessionLoginOptions): Promise<void> {
-  const { baseURL, email, redirect, token, paths, postLoginPath, cookieSuffix = 'better-auth.session_token' } = options
+  const {
+    baseURL,
+    email,
+    redirect,
+    token,
+    paths,
+    postLoginPath,
+    password,
+    cookieSuffix = 'better-auth.session_token',
+  } = options
 
   const browser = await chromium.launch()
   const context = await browser.newContext()
   const page = await context.newPage()
 
   try {
-    const params = new URLSearchParams({ email, redirect, token })
+    const params = new URLSearchParams({ email, redirect, token, ...(password && { password }) })
     await page.goto(`${baseURL}/api/auth/dev-session?${params.toString()}`)
 
     const cookies = await context.cookies()

@@ -27,6 +27,9 @@ async function stagingGlobalSetup(): Promise<void> {
   await devSessionLogin({ baseURL: BASE_URL, email: testAdmin.email, redirect: '/admin', token, paths: ADMIN_PATHS })
   // postLoginPath — приложение само создаёт FanMember по сохранённому в dev-session
   // consentPersonal: true (см. app/fanclub/page.tsx), отдельного шага в БД не нужно.
+  // password — 10-auth.spec.ts проверяет РЕАЛЬНЫЙ вход по email+паролю (не dev-session cookie),
+  // без него dev-session заводит User без единой записи Account, и /sign-in/email для testFan
+  // всегда падает ("Credential account not found", PLAN.md §18.7 batch2).
   await devSessionLogin({
     baseURL: BASE_URL,
     email: testFan.email,
@@ -34,6 +37,7 @@ async function stagingGlobalSetup(): Promise<void> {
     token,
     paths: FAN_PATHS,
     postLoginPath: '/fanclub?verified=true',
+    password: testFan.password,
   })
   console.log('[E2E Setup:staging] Готово ✓\n')
 }

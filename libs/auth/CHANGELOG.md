@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-07-21
+
+### Added
+
+- **`createDevSessionRoute` — опциональный query-параметр `password`** (PLAN.md §18.7 batch2,
+  найдено на `svoichuzhie` `10-auth.spec.ts:48`). Dev-session bypass создавал только `User`+
+  `Session`, без единой записи `Account` — фикстуры, заведённые этим путём, физически не могли
+  пройти реальный `/sign-in/email` (Better Auth ищет `providerId='credential'` и не находит ни
+  одной `Account`, лог `"Credential account not found"`). Теперь при передаче `password` роут
+  дополнительно создаёт (idempotent, не трогает уже существующую запись) `Account` с
+  `providerId: 'credential'` и хешем через `hashPassword` из `@better-auth/utils/password` (тот же
+  формат, что и дефолтный scrypt Better Auth). Обратная совместимость: без `password` в query —
+  поведение не меняется, `account` в `DevSessionPrismaClient` опционален.
+
 ## [0.11.0] - 2026-07-17
 
 ### Added

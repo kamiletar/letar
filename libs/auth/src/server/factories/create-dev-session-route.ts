@@ -1,3 +1,4 @@
+import { hashPassword } from '@better-auth/utils/password'
 import { NextResponse } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
 
@@ -13,6 +14,17 @@ export interface DevSessionPrismaClient {
     create(args: { data: Record<string, unknown> }): Promise<{ id: string }>
   }
   session: {
+    create(args: { data: Record<string, unknown> }): Promise<unknown>
+  }
+  /**
+   * Опционально — нужен только если роут вызывается с query-параметром `password` (см.
+   * PLAN.md §18.7 batch2, svoichuzhie 10-auth.spec.ts:48): dev-session создаёт голого
+   * User+Session без единой записи Account, поэтому e2e-фикстуры, которым нужен реальный
+   * вход по email+паролю (не только dev-session bypass), не могут пройти `/sign-in/email` —
+   * Better Auth ищет providerId='credential' и не находит ни одной записи Account.
+   */
+  account?: {
+    findFirst(args: { where: { userId: string; providerId: string } }): Promise<{ id: string } | null>
     create(args: { data: Record<string, unknown> }): Promise<unknown>
   }
 }
@@ -161,6 +173,27 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
           ...(options.buildUserData?.(email) ?? {}),
         },
       })
+    }
+
+    // Опционально — создаёт credential-аккаунт (Account, providerId='credential') для фикстур,
+    // которым помимо dev-session cookie нужен ещё и рабочий реальный вход по email+паролю
+    // (например, тест "успешный вход" в 10-auth.spec.ts). Idempotent — не трогает уже
+    // существующую запись повторными вызовами.
+    const password = url.searchParams.get('password')
+    if (password && prisma.account) {
+      const existingAccount = await prisma.account.findFirst({
+        where: { userId: user.id, providerId: 'credential' },
+      })
+      if (!existingAccount) {
+        await prisma.account.create({
+          data: {
+            userId: user.id,
+            providerId: 'credential',
+            accountId: email,
+            password: await hashPassword(password),
+          },
+        })
+      }
     }
 
     const sessionToken = crypto.randomUUID()
