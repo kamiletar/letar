@@ -12,9 +12,10 @@
  * (не роняем internal-проверку из-за отсутствия внешнего ящика).
  */
 
+import { createEmailProvider } from '@letar/email'
 import { ImapFlow } from 'imapflow'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import nodemailer from 'nodemailer'
+import { postDashboardAlert } from './dashboard-alert'
 
 export interface EmailCanaryLegResult {
   configured: boolean
@@ -104,29 +105,26 @@ async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: str
     return { ok: false, error: 'EMAIL_CANARY_SMTP_USER/EMAIL_CANARY_SMTP_PASSWORD не заданы' }
   }
 
-  try {
-    const transport = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      auth: { user, pass: password },
-      connectionTimeout: 10_000,
-      socketTimeout: 15_000,
-      greetingTimeout: 5_000,
-    })
+  const provider = createEmailProvider({
+    host,
+    port,
+    secure,
+    user,
+    password,
+    fromEmail: user,
+    fromName: 'Email Canary',
+  })
 
-    await transport.sendMail({
-      from: `"Email Canary" <${user}>`,
-      to: user,
-      ...(externalRecipient && { bcc: externalRecipient }),
-      subject: `[email-canary] ${token}`,
-      text: `Канареечная проверка доставки email. Токен: ${token}. Отправлено: ${new Date().toISOString()}`,
-    })
+  const result = await provider.sendEmail({
+    to: user,
+    ...(externalRecipient && { bcc: externalRecipient }),
+    subject: `[email-canary] ${token}`,
+    text: `Канареечная проверка доставки email. Токен: ${token}. Отправлено: ${new Date().toISOString()}`,
+    html: `<p>Канареечная проверка доставки email. Токен: ${token}. Отправлено: ${new Date().toISOString()}</p>`,
+    meta: { type: 'email-canary' },
+  })
 
-    return { ok: true, error: null }
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : 'Unknown SMTP error' }
-  }
+  return { ok: result.success, error: result.error ?? null }
 }
 
 type WaitResult = { ok: boolean; latencyMs: number | null; error: string | null }
@@ -285,32 +283,13 @@ async function notifyCanaryAlert(
   consecutiveFailures: number,
   detail: string,
 ): Promise<void> {
-  try {
-    const host = process.env.DASHBOARD_HOST ?? 'dashboard-app'
-    const url = `http://${host}:3002/api/alerts`
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10_000)
-
-    await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Cron-Secret': process.env.CRON_SECRET || 'default-cron-secret',
-      },
-      body: JSON.stringify({
-        type: 'CRON_FAILED',
-        severity: 'ERROR',
-        title: `Email canary: ${consecutiveFailures} подряд неудач (${leg})`,
-        message: detail,
-        metadata: { jobId: 'email-canary-check', leg, consecutiveFailures },
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeout)
-  } catch (error) {
-    console.error('[EmailCanary] Не удалось отправить alert в dashboard:', error)
-  }
+  await postDashboardAlert({
+    type: 'CRON_FAILED',
+    severity: 'ERROR',
+    title: `Email canary: ${consecutiveFailures} подряд неудач (${leg})`,
+    message: detail,
+    metadata: { jobId: 'email-canary-check', leg, consecutiveFailures },
+  })
 }
 
 /**

@@ -11,6 +11,34 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.8.2] — 2026-07-22
+
+### Fix: бесконечная рекурсия `loadAllCronJobs ↔ saveCronConfig` при отсутствующем конфиге
+
+Обнаружено случайно в локальном dev-окружении (43k+ строк лога за секунды) — `loadAllCronJobs()`
+при отсутствующем `cron-jobs.json` звала `saveCronConfig()`, которая сама звала `loadAllCronJobs()`
+для мержа с другими серверами → взаимная рекурсия до `RangeError: Maximum call stack size
+exceeded` (перехватывалась try/catch, не роняла процесс, но впустую жгла CPU и не давала файлу
+реально создаться). В проде не стреляло, т.к. `/home/deploy/letar/` смонтирован и файл обычно уже
+существует — но при сбое volume/прав это заблокировало бы даже `/health`. Фикс: разорвал рекурсию
+через общий низкоуровневый примитив `readCronJobsFile()`/`writeCronJobsFile()`, ни одна из функций
+больше не вызывает другую.
+
+### Refactor: устранено дублирование алертинга и SMTP-отправки
+
+- `lib/cron.ts`'s `notifyDashboardAlert` и `lib/email-canary.ts`'s `notifyCanaryAlert` дублировали
+  один и тот же POST `/api/alerts` в dashboard — вынесены в общий `lib/dashboard-alert.ts`
+  (`postDashboardAlert`). `APP_PORTS`/`APP_HOSTS`/`getAppUrl` вынесены в новый `lib/app-registry.ts`
+  (нужны обоим модулям, избегает циклической зависимости).
+- `email-canary.ts` дублировал часть SMTP-транспорта из `@letar/email` — переключён на
+  `createEmailProvider()`. Библиотека `@letar/email` получила поддержку `bcc` в `SendEmailParams`
+  (`0.2.0 → 0.3.0`, обратно совместимо) — понадобилось для canary's internal+external проверки
+  одним письмом. Первый non-Next.js consumer `libs/*` в приложении на `@nx/esbuild` — проверено
+  живым билдом и смоук-тестом, кросс-lib импорт резолвится корректно.
+
+Прямая зависимость `nodemailer`/`@types/nodemailer` убрана из `dashboard-agent` — используется
+только транзитивно через `@letar/email`.
+
 ## [0.8.1] — 2026-07-22
 
 ### Fix: краш процесса на зависшем IMAP-сокете email-canary (прод-инцидент, найден BlackCove)

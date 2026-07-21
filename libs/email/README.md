@@ -189,6 +189,7 @@ await provider.sendEmail({
   subject: 'Тема',
   html: '<p>HTML контент</p>',
   text: 'Текстовая версия',
+  bcc: 'monitor@example.com', // опционально — скрытая копия
 })
 ```
 

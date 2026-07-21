@@ -6,6 +6,8 @@
 import CronParser from 'cron-parser'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import * as cron from 'node-cron'
+import { getAppUrl } from './app-registry'
+import { postDashboardAlert } from './dashboard-alert'
 import { type CronServer, getCurrentServer, SERVER_APPS } from './server-config'
 
 export type { CronServer }
@@ -46,27 +48,6 @@ export interface CronJobStatus {
   lastDuration: number | null
   nextRun: Date | null
   isScheduled: boolean
-}
-
-// Карта портов приложений
-const APP_PORTS: Record<string, number> = {
-  dashboard: 3002,
-  'driving-school': 3003,
-  mandala: 3004,
-  kami: 3005,
-  dsperevod: 3019,
-  'dashboard-agent': 3100,
-}
-
-// Карта хостов приложений (Docker container names внутри kami-network)
-// dashboard-agent обращается к себе через localhost, к другим через имя контейнера
-const APP_HOSTS: Record<string, string> = {
-  dashboard: process.env.DASHBOARD_HOST ?? 'dashboard-app',
-  'driving-school': process.env.DRIVING_SCHOOL_HOST ?? 'driving-school-app',
-  mandala: process.env.MANDALA_HOST ?? 'mandala-app',
-  kami: process.env.KAMI_HOST ?? 'kami-app',
-  dsperevod: process.env.DSPEREVOD_HOST ?? 'dsperevod-app',
-  'dashboard-agent': 'localhost', // self-reference
 }
 
 /**
@@ -168,57 +149,82 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
 ]
 
 /**
+ * Читает файл конфигурации как есть, без бутстрапа дефолтов и без побочных эффектов.
+ * `null` — файла нет или он не читается/не парсится. Единственная точка чтения с диска —
+ * `loadAllCronJobs()` и `saveCronConfig()` шарят её вместо того, чтобы вызывать друг друга
+ * (раньше `loadAllCronJobs()` при отсутствующей директории конфига звала `saveCronConfig()`,
+ * которая снова звала `loadAllCronJobs()` — взаимная рекурсия до `RangeError: Maximum call stack
+ * size exceeded`, обнаружено локально при отсутствии смонтированного `/home/deploy/letar`).
+ */
+function readCronJobsFile(): CronJob[] | null {
+  try {
+    if (!existsSync(CONFIG_PATH)) {
+      return null
+    }
+    const content = readFileSync(CONFIG_PATH, 'utf-8')
+    const config = JSON.parse(content) as { jobs: CronJob[] }
+    return config.jobs
+  } catch (error) {
+    console.error('[Cron] Ошибка загрузки конфигурации:', error)
+    return null
+  }
+}
+
+/** Пишет список задач на диск как есть — низкоуровневый примитив без чтения/мержа. */
+function writeCronJobsFile(jobs: CronJob[]): void {
+  try {
+    writeFileSync(CONFIG_PATH, JSON.stringify({ jobs }, null, 2), 'utf-8')
+  } catch (error) {
+    console.error('[Cron] Ошибка сохранения конфигурации:', error)
+  }
+}
+
+/**
  * Загружает ВСЕ задачи из конфигурации (без фильтрации).
  * Новые дефолтные задачи автоматически добавляются в существующий конфиг.
  */
 function loadAllCronJobs(): CronJob[] {
-  try {
-    if (existsSync(CONFIG_PATH)) {
-      const content = readFileSync(CONFIG_PATH, 'utf-8')
-      const config = JSON.parse(content) as { jobs: CronJob[] }
-      const existingJobs = config.jobs
+  const existingJobs = readCronJobsFile()
 
-      // Обновляем существующие задачи если их app/endpoint/server изменились в дефолтах
-      let hasChanges = false
-      const updatedJobs = existingJobs.map((existing) => {
-        const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
-        if (
-          defaultJob
-          && (defaultJob.app !== existing.app
-            || defaultJob.endpoint !== existing.endpoint
-            || defaultJob.server !== existing.server)
-        ) {
-          console.warn(
-            `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
-          )
-          hasChanges = true
-          return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }
-        }
-        return existing
-      })
-
-      // Добавляем дефолтные задачи которых ещё нет в конфиге
-      const existingIds = new Set(updatedJobs.map((j) => j.id))
-      const newDefaults = DEFAULT_CRON_JOBS.filter((j) => !existingIds.has(j.id))
-
-      if (newDefaults.length > 0 || hasChanges) {
-        const merged = [...updatedJobs, ...newDefaults]
-        writeFileSync(CONFIG_PATH, JSON.stringify({ jobs: merged }, null, 2), 'utf-8')
-        if (newDefaults.length > 0) {
-          console.warn(`[Cron] Добавлено ${newDefaults.length} новых задач: ${newDefaults.map((j) => j.id).join(', ')}`)
-        }
-        return merged
-      }
-
-      return updatedJobs
-    }
-  } catch (error) {
-    console.error('[Cron] Ошибка загрузки конфигурации:', error)
+  if (existingJobs === null) {
+    // Файла нет вообще (первый запуск) — создаём дефолтный конфиг напрямую, без saveCronConfig()
+    writeCronJobsFile(DEFAULT_CRON_JOBS)
+    return DEFAULT_CRON_JOBS
   }
 
-  // Создаём дефолтный конфиг
-  saveCronConfig(DEFAULT_CRON_JOBS)
-  return DEFAULT_CRON_JOBS
+  // Обновляем существующие задачи если их app/endpoint/server изменились в дефолтах
+  let hasChanges = false
+  const updatedJobs = existingJobs.map((existing) => {
+    const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
+    if (
+      defaultJob
+      && (defaultJob.app !== existing.app
+        || defaultJob.endpoint !== existing.endpoint
+        || defaultJob.server !== existing.server)
+    ) {
+      console.warn(
+        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
+      )
+      hasChanges = true
+      return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }
+    }
+    return existing
+  })
+
+  // Добавляем дефолтные задачи которых ещё нет в конфиге
+  const existingIds = new Set(updatedJobs.map((j) => j.id))
+  const newDefaults = DEFAULT_CRON_JOBS.filter((j) => !existingIds.has(j.id))
+
+  if (newDefaults.length > 0 || hasChanges) {
+    const merged = [...updatedJobs, ...newDefaults]
+    writeCronJobsFile(merged)
+    if (newDefaults.length > 0) {
+      console.warn(`[Cron] Добавлено ${newDefaults.length} новых задач: ${newDefaults.map((j) => j.id).join(', ')}`)
+    }
+    return merged
+  }
+
+  return updatedJobs
 }
 
 /**
@@ -238,28 +244,26 @@ export function loadCronConfig(): CronJob[] {
  * Сохранение конфигурации (мержит с задачами других серверов)
  */
 export function saveCronConfig(updatedJobs: CronJob[]): void {
-  try {
-    const currentServer = getCurrentServer()
+  const currentServer = getCurrentServer()
 
-    // Загружаем все задачи
-    const allJobs = loadAllCronJobs()
+  // Читаем файл напрямую (не через loadAllCronJobs() — та при бутстрапе сама пишет
+  // DEFAULT_CRON_JOBS, вызывать её отсюда не нужно и опасно рекурсией). Нет файла — нет и чужих
+  // задач других серверов для сохранения, начинаем с пустого списка.
+  const allJobs = readCronJobsFile() ?? []
 
-    // Отделяем задачи других серверов
-    const otherServerJobs = allJobs.filter((job) => {
-      if (job.server) {
-        return job.server !== currentServer
-      }
-      const appServer = SERVER_APPS[job.app]
-      return appServer !== currentServer
-    })
+  // Отделяем задачи других серверов
+  const otherServerJobs = allJobs.filter((job) => {
+    if (job.server) {
+      return job.server !== currentServer
+    }
+    const appServer = SERVER_APPS[job.app]
+    return appServer !== currentServer
+  })
 
-    // Объединяем
-    const mergedJobs = [...otherServerJobs, ...updatedJobs]
+  // Объединяем
+  const mergedJobs = [...otherServerJobs, ...updatedJobs]
 
-    writeFileSync(CONFIG_PATH, JSON.stringify({ jobs: mergedJobs }, null, 2), 'utf-8')
-  } catch (error) {
-    console.error('[Cron] Ошибка сохранения конфигурации:', error)
-  }
+  writeCronJobsFile(mergedJobs)
 }
 
 // =============================================================================
@@ -341,49 +345,19 @@ export function getScheduledCount(): number {
 // =============================================================================
 
 /**
- * Получение URL приложения
- * Использует APP_HOSTS для Docker container names вместо localhost
- */
-function getAppUrl(app: string, endpoint: string): string {
-  const port = APP_PORTS[app]
-  const host = APP_HOSTS[app] ?? 'localhost'
-  if (!port) {
-    throw new Error(`Неизвестное приложение: ${app}`)
-  }
-  return `http://${host}:${port}${endpoint}`
-}
-
-/**
  * Уведомляет dashboard о провале cron-задачи (создаёт Alert type=CRON_FAILED,
  * dashboard сам решает — слать ли в Telegram по своим AlertSettings).
- * Ошибки самого уведомления не должны ронять выполнение задачи — только логируются.
+ * Ошибки самого уведомления не должны ронять выполнение задачи — за это отвечает
+ * postDashboardAlert(), она сама не бросает исключений.
  */
 async function notifyDashboardAlert(job: CronJob, errorMessage: string, statusCode: number | null): Promise<void> {
-  try {
-    const url = getAppUrl('dashboard', '/api/alerts')
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10000)
-
-    await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Cron-Secret': process.env.CRON_SECRET || 'default-cron-secret',
-      },
-      body: JSON.stringify({
-        type: 'CRON_FAILED',
-        severity: 'ERROR',
-        title: `Cron задача провалилась: ${job.name}`,
-        message: errorMessage,
-        metadata: { jobId: job.id, app: job.app, endpoint: job.endpoint, statusCode },
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeout)
-  } catch (notifyError) {
-    console.error(`[Cron] Не удалось отправить alert в dashboard для задачи "${job.id}":`, notifyError)
-  }
+  await postDashboardAlert({
+    type: 'CRON_FAILED',
+    severity: 'ERROR',
+    title: `Cron задача провалилась: ${job.name}`,
+    message: errorMessage,
+    metadata: { jobId: job.id, app: job.app, endpoint: job.endpoint, statusCode },
+  })
 }
 
 /**

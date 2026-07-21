@@ -9,6 +9,8 @@ export interface SendEmailParams {
   subject: string
   html: string
   text: string
+  /** Скрытая копия (например для мониторинга/канареечных проверок) */
+  bcc?: string
   /** Метаданные для централизованного лога/алертинга провалов (§ Этап 0) */
   meta?: {
     /** Тип письма для структурного лога: 'verification' | 'password-reset' | … */

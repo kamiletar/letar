@@ -4,6 +4,7 @@
   "sourceRoot": "apps/dashboard-agent/src",
   "projectType": "application",
   "tags": ["type:app", "scope:infra", "owner:letar"],
+  "implicitDependencies": ["@letar/email"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",

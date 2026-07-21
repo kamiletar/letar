@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.8.1
+## Текущая версия: 0.8.2
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -46,6 +46,7 @@
 - [x] **Прод-инцидент найден и починен (2026-07-22, BlackCove + root-weaver, коммит `305c0ec7`, `0.8.0 → 0.8.1`):** первый деплой уронил весь процесс `dashboard-agent` на s2 — необработанный `'error'` на `ImapFlow` (`Socket timeout`) трактуется Node как фатальный, попутно оборвав деплой `aprel8008`, который в этот момент вёл BlackCove. Два слоя фикса: (1) слушатель `client.on('error', ...)` — устраняет краш, но если ошибка приходит вместо reject-а уже начатого `await`, тот `await` виснет навсегда; (2) `waitForCanaryMessage()` обёрнут внешним `Promise.race` с жёстким дедлайном (`POLL_TIMEOUT_MS + 15s`) + `client.close()` по истечении — гарантирует ответ за конечное время независимо от поведения ImapFlow изнутри, плюс `acquireTimeout` на `getMailboxLock()`. Живым прогоном воспроизведён реальный зависший IMAP-сокет (внешняя сетевая проблема до порта 993, не баг Maddy) и подтверждено: вместо зависания — `ok:false` с причиной за ~105с, процесс жив.
 - **Примечание по алертингу:** переиспользован существующий `AlertType.CRON_FAILED` (`POST /api/alerts` в dashboard) вместо нового enum-значения — избежали Prisma-миграции на боевой БД ради этой задачи. Если понадобится отдельная фильтрация в UI dashboard/alerts — заводить `EMAIL_DELIVERY_FAILED` отдельной сессией.
 - **Не покрыто (сознательно, вне MVP):** Umami-событие (§ Этап 0 упоминает Telegram+Umami как алертинг) — текущий alert-pipeline dashboard поддерживает только Telegram (`sendNotification` в `apps/dashboard/src/lib/notifications.ts`), заводить Umami-канал ради одной этой задачи не стали.
+- [x] **Системные находки применены (2026-07-22, `0.8.1 → 0.8.2`):** (1) починена латентная бесконечная рекурсия `loadAllCronJobs ↔ saveCronConfig` в `lib/cron.ts` (обнаружена случайно в dev, не стреляла в проде); (2) `notifyDashboardAlert`/`notifyCanaryAlert` дедуплицированы в общий `lib/dashboard-alert.ts` (+ `lib/app-registry.ts` для `APP_PORTS`/`APP_HOSTS`/`getAppUrl`); (3) `email-canary.ts` переключён на `@letar/email` (`createEmailProvider`) вместо дублирования nodemailer-транспорта — потребовало добавить `bcc?` в `SendEmailParams` (`@letar/email` 0.2.0 → 0.3.0). Первый non-Next.js consumer `libs/*` в приложении на `@nx/esbuild` — проверено живым билдом + смоук-тестом. Детали — `CHANGELOG.md`.
 
 | Задача                         | Статус  | Приоритет |
 | ------------------------------ | ------- | --------- |

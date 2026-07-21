@@ -14,7 +14,8 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@letar/email": ["../../libs/email/src/index.ts"]
     },
     "types": ["node"],
     "lib": ["ES2022"],
@@ -23,5 +24,5 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "references": [{ "path": "./tsconfig.spec.json" }]
+  "references": [{ "path": "./tsconfig.spec.json" }, { "path": "../../libs/email" }]
 }

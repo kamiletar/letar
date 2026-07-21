@@ -94,7 +94,7 @@ function getTransporter(config?: EmailConfig): Transporter {
     // Maddy SMTP для продакшена
     if (!cfg.user || !cfg.password) {
       throw new Error(
-        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.'
+        '[Email] SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD, or enable EMAIL_USE_MAILHOG=true for development.',
       )
     }
 
@@ -163,10 +163,13 @@ export function createEmailProvider(config?: EmailConfig): EmailProvider {
           subject: params.subject,
           html: params.html,
           text: params.text,
+          ...(params.bcc && { bcc: params.bcc }),
           ...(useExplicitEnvelope && {
             envelope: {
               from: fromEmail,
-              to: params.to,
+              // Явный envelope замещает RCPT TO целиком — bcc нужно продублировать сюда,
+              // иначе получатель скрытой копии молча не получит письмо.
+              to: params.bcc ? [params.to, params.bcc] : [params.to],
             },
           }),
         })
