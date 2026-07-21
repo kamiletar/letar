@@ -17,6 +17,10 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:3007'
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
+  // Временно 1 (было не задано → 0) — диагностика PLAN.md §18.7 batch2 navigation.spec.ts:
+  // trace: 'on-first-retry' без retries никогда не собирал trace.zip. Вернуть на дефолт nx
+  // после того, как разберёмся с расхождением голый Playwright API vs @playwright/test fixtures.
+  retries: 1,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
