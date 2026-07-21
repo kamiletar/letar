@@ -66,9 +66,12 @@ test.describe('08 — Мобильная навигация', () => {
     await page.locator('button[aria-label="Открыть меню"]').click()
     await expect(page.getByText('Навигация', { exact: true })).toBeVisible({ timeout: 5000 })
 
-    const loginLink = page.getByRole('link', { name: 'Войти', exact: true })
-    await expect(loginLink).toBeVisible()
-    await expect(loginLink).toHaveAttribute('href', /\/login/)
+    // MobileAuthSection (@letar/ui) рендерит <Button onClick={onSignIn}>, не ссылку —
+    // навигация на /login через router.push, не href.
+    const loginButton = page.getByRole('button', { name: 'Войти', exact: true })
+    await expect(loginButton).toBeVisible()
+    await loginButton.click()
+    await page.waitForURL(/\/login/, { timeout: 15_000 })
   })
 
   test('aria-expanded меняется при открытии/закрытии', async ({ page }) => {

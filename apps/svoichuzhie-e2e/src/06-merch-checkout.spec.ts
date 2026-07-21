@@ -63,6 +63,10 @@ test.describe('06 — Merch + CDEK checkout (mock)', () => {
 })
 
 test.describe('06b — Доставка оплачивается СДЭКу при получении (не онлайн)', () => {
+  // ensureTestProduct/createTestOrderWithDelivery пишут в БД напрямую — staging-раннер туда
+  // доступа не имеет (та же причина, что и у global-setup.ts, см. DEV_SESSION_TOKEN-ветку).
+  test.skip(!!process.env.DEV_SESSION_TOKEN, 'Требует прямого доступа к БД — недоступно в staging-режиме')
+
   let product: TestProduct
 
   test.beforeAll(async () => {
@@ -91,10 +95,10 @@ test.describe('06b — Доставка оплачивается СДЭКу пр
               ],
             },
             version: 1,
-          })
+          }),
         )
       },
-      { p: product }
+      { p: product },
     )
 
     await page.goto('/merch/checkout')
