@@ -129,9 +129,20 @@ async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: str
   }
 }
 
+type WaitResult = { ok: boolean; latencyMs: number | null; error: string | null }
+
 /**
  * Ждёт появления письма с токеном в теме во входящих указанного IMAP-ящика.
  * По найденному письму — помечает `\Seen`, чтобы не находить его повторно в следующих прогонах.
+ *
+ * КРИТИЧНО (инцидент 2026-07-21, см. PLAN.md): ImapFlow на socket-таймауте/обрыве соединения
+ * эмитит `'error'` асинхронно — не обязательно как reject уже начатого вызова, а иногда вместо
+ * него. Если `'error'` не имеет слушателя, необработанный event на EventEmitter роняет ВЕСЬ
+ * процесс dashboard-agent. Но одного слушателя недостаточно: если ошибка происходит ВМЕСТО
+ * reject-а уже начатого `await` (например `connect()`/`fetch()`), тот `await` может повиснуть
+ * навсегда — слушатель её перехватит, но текущая операция никогда не завершится сама. Поэтому
+ * вся функция обёрнута внешним дедлайном (`Promise.race`) — независимо от того, что происходит
+ * внутри ImapFlow, вызывающий код гарантированно получает ответ за конечное время.
  */
 async function waitForCanaryMessage(opts: {
   host: string
@@ -140,8 +151,7 @@ async function waitForCanaryMessage(opts: {
   user: string
   password: string
   token: string
-}): Promise<{ ok: boolean; latencyMs: number | null; error: string | null }> {
-  const startedAt = Date.now()
+}): Promise<WaitResult> {
   const client = new ImapFlow({
     host: opts.host,
     port: opts.port,
@@ -150,26 +160,71 @@ async function waitForCanaryMessage(opts: {
     logger: false,
   })
 
+  let clientError: Error | null = null
+  client.on('error', (error: unknown) => {
+    clientError = error instanceof Error ? error : new Error(String(error))
+  })
+
+  const hardDeadlineMs = POLL_TIMEOUT_MS + 15_000
+
+  const result = await Promise.race([
+    waitForCanaryMessageInner(client, opts.token, () => clientError),
+    new Promise<WaitResult>((resolve) => {
+      setTimeout(() => {
+        resolve({
+          ok: false,
+          latencyMs: null,
+          error: (clientError as Error | null)?.message
+            ?? `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
+        })
+      }, hardDeadlineMs)
+    }),
+  ])
+
+  // Гасим соединение жёстко (без LOGOUT) — если гонка выиграна таймаутом, штатный logout() в
+  // waitForCanaryMessageInner мог не выполниться (или тоже зависнуть на мёртвом сокете).
+  client.close()
+
+  return result
+}
+
+async function waitForCanaryMessageInner(
+  client: ImapFlow,
+  token: string,
+  getClientError: () => Error | null,
+): Promise<WaitResult> {
+  const startedAt = Date.now()
+
   try {
     await client.connect()
-    const lock = await client.getMailboxLock('INBOX')
+    const lock = await client.getMailboxLock('INBOX', { acquireTimeout: POLL_TIMEOUT_MS })
 
     try {
       while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
+        const clientError = getClientError()
+        if (clientError) {
+          return { ok: false, latencyMs: null, error: clientError.message }
+        }
         for await (const message of client.fetch({ seen: false }, { envelope: true, uid: true })) {
-          if (message.envelope?.subject?.includes(opts.token)) {
+          if (message.envelope?.subject?.includes(token)) {
             await client.messageFlagsAdd(message.uid, ['\\Seen'], { uid: true })
             return { ok: true, latencyMs: Date.now() - startedAt, error: null }
           }
         }
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
       }
-      return { ok: false, latencyMs: null, error: `Письмо с токеном не пришло за ${POLL_TIMEOUT_MS}мс` }
+      const clientError = getClientError()
+      return clientError
+        ? { ok: false, latencyMs: null, error: clientError.message }
+        : { ok: false, latencyMs: null, error: `Письмо с токеном не пришло за ${POLL_TIMEOUT_MS}мс` }
     } finally {
-      lock.release()
+      await Promise.resolve(lock.release()).catch(() => {
+        // соединение уже могло быть разорвано ошибкой выше — не мешаем вернуть результат
+      })
     }
   } catch (error) {
-    return { ok: false, latencyMs: null, error: error instanceof Error ? error.message : 'Unknown IMAP error' }
+    const reported = getClientError() ?? error
+    return { ok: false, latencyMs: null, error: reported instanceof Error ? reported.message : 'Unknown IMAP error' }
   } finally {
     await client.logout().catch(() => {
       // соединение уже могло быть разорвано ошибкой выше — не мешаем вернуть результат
