@@ -6,9 +6,11 @@
  * Идемпотентен — при повторном запуске не дублирует данные.
  */
 
-import { PrismaClient } from '../src/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../src/generated/prisma/client'
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL']! })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   // Находим первого ADMIN-пользователя как автора новости
