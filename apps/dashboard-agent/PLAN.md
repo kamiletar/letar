@@ -42,7 +42,7 @@
 
 - [x] `lib/email-canary.ts` + `routes/email-canary.ts` — `POST /api/cron/email-canary-check` (запускается планировщиком раз в 15 минут) и `GET /api/cron/email-canary-check/status` (последнее состояние без нового прогона). Код готов, `0.7.6 → 0.8.0`. Детали — `CHANGELOG.md`.
 - [x] **Internal-нога провижинирована (2026-07-22, root-weaver):** ящик `canary@letar.best` создан на Maddy (`maddy creds create`, пароль — `openssl rand -base64 32`), SMTP+IMAP auth проверены вживую (`nodemailer.verify()` + `ImapFlow.connect()`, оба OK). `EMAIL_CANARY_SMTP_USER`/`EMAIL_CANARY_SMTP_PASSWORD`/`EMAIL_CANARY_INTERNAL_IMAP_*` заполнены в `.env.docker`/`.env.docker.enc` (коммит `2a5aaa0d`), синхронизированы на s1/s2 через `scripts/sync-env-docker.sh dashboard-agent`. Деплой запрошен у BlackCove (thread `deploy-dashboard-agent-email-canary`).
-- [ ] **External-нога — ждёт владельца:** для реальной доставки во внешний почтовик (ловит класс «форвард режется gmail») нужен внешний ящик (Gmail и т.п.) с IMAP app-password — это создание стороннего аккаунта, агент сделать не может. Заполнить `EMAIL_CANARY_EXTERNAL_RECIPIENT`/`EMAIL_CANARY_EXTERNAL_IMAP_*` в `.env.docker` → `sync-env-docker.sh` → редеплой. До заполнения — `external.configured: false`, не алертит, не считается провалом.
+- [x] **External-нога провижинирована (2026-07-22):** получатель `letarkami@gmail.com` (личный ящик владельца), IMAP app-password сгенерирован владельцем (потребовалось сперва включить 2FA — без неё Google скрывает страницу app-passwords). IMAP auth проверен вживую (`ImapFlow.connect()` к `imap.gmail.com:993`, OK). `EMAIL_CANARY_EXTERNAL_*` заполнены в `.env.docker`/`.env.docker.enc`, синхронизированы на s1/s2. Обе ноги теперь `configured: true`.
 - **Примечание по алертингу:** переиспользован существующий `AlertType.CRON_FAILED` (`POST /api/alerts` в dashboard) вместо нового enum-значения — избежали Prisma-миграции на боевой БД ради этой задачи. Если понадобится отдельная фильтрация в UI dashboard/alerts — заводить `EMAIL_DELIVERY_FAILED` отдельной сессией.
 - **Не покрыто (сознательно, вне MVP):** Umami-событие (§ Этап 0 упоминает Telegram+Umami как алертинг) — текущий alert-pipeline dashboard поддерживает только Telegram (`sendNotification` в `apps/dashboard/src/lib/notifications.ts`), заводить Umami-канал ради одной этой задачи не стали.
 
@@ -55,6 +55,16 @@
 ---
 
 ## Backlog 📋
+
+### Надёжность deploy-истории (найдено BlackCove, 2026-07-22)
+
+`routes/deploy.ts` хранит `deployHistory` (ring-buffer, `MAX_DEPLOY_HISTORY` записей) и стрим логов текущего деплоя **только в памяти процесса** (`const deployHistory: DeployStatus[] = []`). При падении/рестарте контейнера `dashboard-agent` вся история и лог активного деплоя теряются безвозвратно — `deploy_status`/`GET /api/deploy/history` отвечают «not found»/«No deploys yet», хотя сам `deploy-affected.sh` мог быть ещё жив на хосте (через `nsenter`) и продолжать деплой вслепую, без возможности его отследить через deploy-mcp.
+
+**Инцидент-триггер:** 2026-07-22, email-canary (`lib/email-canary.ts`) уронил весь процесс dashboard-agent необработанным `error`-событием `ImapFlow` (`Socket timeout`) прямо во время деплоя aprel8008 — деплой пришлось доливать вручную через SSH-резерв, а прогресс из deploy-mcp пропал.
+
+- [ ] Вынести `deployHistory` (и активный лог-стрим по `deployId`) во внешнее хранилище, переживающее рестарт контейнера — Redis (TTL на записи, cap как сейчас) или файл/SQLite на volume `dashboard-agent`. Redis предпочтительнее, если он всё равно появится для чего-то ещё в инфре (сейчас нигде в letar не используется как shared-стор — проверить перед добавлением новой зависимости).
+- [ ] После рестарта — при старте процесса проверять, не был ли прерван `deploy-affected.sh` для какого-то приложения (маркер/pid-файл на хосте), и помечать соответствующую запись `interrupted`, а не молча терять.
+- [ ] Заодно рассмотреть: `dashboard-agent` крашится → должен ли `deploy-affected.sh`, запущенный через `nsenter` от его имени, быть устойчивым к обрыву exec-сессии (сейчас неясно, продолжает ли он работать после потери родителя, или тоже гибнет) — прояснить и задокументировать поведение.
 
 ### Улучшения сбора метрик
 
