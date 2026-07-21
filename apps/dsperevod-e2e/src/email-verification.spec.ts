@@ -65,7 +65,23 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     await page.getByPlaceholder('Иван Иванов').fill('E2E Тестов')
     await page.getByPlaceholder('ivan@dsperevod.ru').fill(email)
     await page.getByPlaceholder('Минимум 8 символов').fill(password)
+
+    // customRules['/sign-up/email'] = { window: 300, max: 3 } (дефолт createAuth() factory,
+    // libs/auth/src/server/create-auth/index.ts) — общий IP-лимит на реальный сервис, не
+    // тестовый артефакт. Повторные прогоны сьюта за короткое время (отладка, staging redeploy +
+    // run_e2e несколько раз подряд) могут исчерпать лимит ДО этого теста — тогда sign-up
+    // отвечает 429, и экран «Проверьте почту» не появляется, хотя это лимит, а не баг UI.
+    // Различаем явно, чтобы не гонять E2E_GATED_APPS по ложному сигналу (тот же паттерн, что уже
+    // в apps/aboi-e2e/src/email-verification.spec.ts).
+    const signUpResponse = page.waitForResponse((r) => r.url().includes('/api/auth/sign-up/email'), {
+      timeout: 30000,
+    })
     await page.getByRole('button', { name: 'Зарегистрироваться' }).click()
+    const response = await signUpResponse
+    test.skip(
+      response.status() === 429,
+      'sign-up rate-limited (customRules /sign-up/email: 3/5мин на IP) — не баг, повторить прогон позже',
+    )
 
     // Экран «Проверьте почту» — письмо отправлено (sendOnSignUp), сессии нет
     // (requireEmailVerification: true).
@@ -89,7 +105,7 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     await expect(
       page
         .getByRole('button', { name: /Отправить повторно через \d+ с/ })
-        .or(page.getByText('Не удалось отправить письмо. Попробуйте ещё раз.'))
+        .or(page.getByText('Не удалось отправить письмо. Попробуйте ещё раз.')),
     ).toBeVisible({ timeout: 10000 })
   })
 
