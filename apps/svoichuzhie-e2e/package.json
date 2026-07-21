@@ -4,7 +4,8 @@
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "svoichuzhie"
+      "svoichuzhie",
+      "@letar/e2e-testing"
     ],
     "tags": [
       "type:e2e",

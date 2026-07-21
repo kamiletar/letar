@@ -5,7 +5,10 @@
     "outDir": "out-tsc/playwright",
     "sourceMap": false,
     "ignoreDeprecations": "6.0",
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "@letar/e2e-testing": ["../../libs/e2e-testing/src/index.ts"]
+    }
   },
   "include": [
     "**/*.ts",
@@ -18,5 +21,9 @@
     "src/**/*.d.ts"
   ],
   "exclude": ["out-tsc", "test-output", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs"],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/e2e-testing"
+    }
+  ]
 }

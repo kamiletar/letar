@@ -4,21 +4,21 @@
  * Создаёт тестовых пользователей напрямую в БД через Prisma CJS wrapper.
  */
 import { config } from 'dotenv'
-import { randomBytes, scrypt } from 'node:crypto'
-import { promisify } from 'node:util'
+import { randomBytes, scryptSync } from 'node:crypto'
 import { resolve } from 'path'
 
-const scryptAsync = promisify(scrypt)
-
 // Better Auth scrypt format: `${salt_hex}:${key_hex}` (N=16384, r=16, p=1, dkLen=64)
+// scryptSync вместо promisify(scrypt) — util.promisify теряет перегрузку с options-объектом
+// (4 аргумента), типизация резолвится в 3-арг сигнатуру (TS2554). Тестовый setup-код —
+// синхронность не критична.
 async function hashPasswordBetterAuth(password: string): Promise<string> {
   const salt = randomBytes(16).toString('hex')
-  const key = (await scryptAsync(Buffer.from(password.normalize('NFKC')), salt, 64, {
+  const key = scryptSync(Buffer.from(password.normalize('NFKC')), salt, 64, {
     N: 16384,
     r: 16,
     p: 1,
     maxmem: 128 * 16384 * 16 * 2,
-  })) as Buffer
+  })
   return `${salt}:${key.toString('hex')}`
 }
 
@@ -136,7 +136,7 @@ export async function ensureTestProduct(): Promise<TestProduct> {
 /** Создаёт оплаченный заказ с ненулевой deliveryCost для проверки страницы /merch/orders/[token]. */
 export async function createTestOrderWithDelivery(
   product: TestProduct,
-  deliveryCost: number
+  deliveryCost: number,
 ): Promise<{ accessToken: string }> {
   const db = (await getPrisma()) as any
 
