@@ -614,4 +614,29 @@ export const authConfig = {
 
 ---
 
-**Последнее обновление:** 2026-07-15
+## Сессия 2026-07-21 — `prisma/seed.ts`: тройной баг PrismaClient (v0.39.9)
+
+Блокировал `nx run mandala:db:seed` на staging (батч §18.7 M1/2, 54 admin-теста e2e зависели от
+сида `admin@elfafeya.art`). Все три звена в одном файле, обнаружены и исправлены последовательно:
+
+1. **Path-alias `@/generated/prisma`** — `tsx` не резолвит `tsconfig.json` paths при вызове через
+   `prisma db seed` (`Cannot find module`). Заменён на относительный `../src/generated/prisma`
+   (паттерн всех остальных приложений — mandala была единственной с алиасом в `seed.ts`).
+2. **`PrismaClient` is not a constructor** — `zenstack:generate` намеренно перезаписывает
+   `src/generated/prisma/index.ts` на `export * from './browser'` (защита от протечки Node-only
+   клиента в браузерные бандлы; само приложение это не задевает — `lib/db.ts` использует
+   `ZenStackClient`, не сырой `PrismaClient`). Импорт в `seed.ts` переведён на явный
+   `../src/generated/prisma/client` — реальный серверный entry-point.
+3. **`PrismaClientInitializationError`** — Prisma 7 (`prisma-client` TS-генератор) требует явный
+   driver adapter, `new PrismaClient()` без параметров больше не собирается. Добавлен `PrismaPg`
+   по образцу `animatrona-tracker/prisma/seed.ts`.
+
+Проверено локально end-to-end (`nx run mandala:db:seed --skip-nx-cache`) — admin создан, 31
+мандала/37 изображений/10 short URL засеяны. `nx lint`/`nx typecheck:tsgo` чисто. Коммит
+`855d2e06`. Тот же класс бага проверен на 9 приложениях батча — нашёлся ещё в `grandslamcup`
+(починен отдельно, не в этом приложении), остальные 8 не задеты (используют `ZenStackClient`
+напрямую либо не имеют `prisma/seed.ts`). Детали координации с деплоем — корневой `PLAN.md` §18.7.
+
+---
+
+**Последнее обновление:** 2026-07-21
