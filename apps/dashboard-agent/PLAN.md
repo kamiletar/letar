@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.8.0
+## Текущая версия: 0.8.1
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -43,6 +43,7 @@
 - [x] `lib/email-canary.ts` + `routes/email-canary.ts` — `POST /api/cron/email-canary-check` (запускается планировщиком раз в 15 минут) и `GET /api/cron/email-canary-check/status` (последнее состояние без нового прогона). Код готов, `0.7.6 → 0.8.0`. Детали — `CHANGELOG.md`.
 - [x] **Internal-нога провижинирована (2026-07-22, root-weaver):** ящик `canary@letar.best` создан на Maddy (`maddy creds create`, пароль — `openssl rand -base64 32`), SMTP+IMAP auth проверены вживую (`nodemailer.verify()` + `ImapFlow.connect()`, оба OK). `EMAIL_CANARY_SMTP_USER`/`EMAIL_CANARY_SMTP_PASSWORD`/`EMAIL_CANARY_INTERNAL_IMAP_*` заполнены в `.env.docker`/`.env.docker.enc` (коммит `2a5aaa0d`), синхронизированы на s1/s2 через `scripts/sync-env-docker.sh dashboard-agent`. Деплой запрошен у BlackCove (thread `deploy-dashboard-agent-email-canary`).
 - [x] **External-нога провижинирована (2026-07-22):** получатель `letarkami@gmail.com` (личный ящик владельца), IMAP app-password сгенерирован владельцем (потребовалось сперва включить 2FA — без неё Google скрывает страницу app-passwords). IMAP auth проверен вживую (`ImapFlow.connect()` к `imap.gmail.com:993`, OK). `EMAIL_CANARY_EXTERNAL_*` заполнены в `.env.docker`/`.env.docker.enc`, синхронизированы на s1/s2. Обе ноги теперь `configured: true`.
+- [x] **Прод-инцидент найден и починен (2026-07-22, BlackCove + root-weaver, коммит `305c0ec7`, `0.8.0 → 0.8.1`):** первый деплой уронил весь процесс `dashboard-agent` на s2 — необработанный `'error'` на `ImapFlow` (`Socket timeout`) трактуется Node как фатальный, попутно оборвав деплой `aprel8008`, который в этот момент вёл BlackCove. Два слоя фикса: (1) слушатель `client.on('error', ...)` — устраняет краш, но если ошибка приходит вместо reject-а уже начатого `await`, тот `await` виснет навсегда; (2) `waitForCanaryMessage()` обёрнут внешним `Promise.race` с жёстким дедлайном (`POLL_TIMEOUT_MS + 15s`) + `client.close()` по истечении — гарантирует ответ за конечное время независимо от поведения ImapFlow изнутри, плюс `acquireTimeout` на `getMailboxLock()`. Живым прогоном воспроизведён реальный зависший IMAP-сокет (внешняя сетевая проблема до порта 993, не баг Maddy) и подтверждено: вместо зависания — `ok:false` с причиной за ~105с, процесс жив.
 - **Примечание по алертингу:** переиспользован существующий `AlertType.CRON_FAILED` (`POST /api/alerts` в dashboard) вместо нового enum-значения — избежали Prisma-миграции на боевой БД ради этой задачи. Если понадобится отдельная фильтрация в UI dashboard/alerts — заводить `EMAIL_DELIVERY_FAILED` отдельной сессией.
 - **Не покрыто (сознательно, вне MVP):** Umami-событие (§ Этап 0 упоминает Telegram+Umami как алертинг) — текущий alert-pipeline dashboard поддерживает только Telegram (`sendNotification` в `apps/dashboard/src/lib/notifications.ts`), заводить Umami-канал ради одной этой задачи не стали.
 
