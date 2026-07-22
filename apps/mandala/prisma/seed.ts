@@ -284,6 +284,10 @@ async function main() {
   // Создать тестовые товары для магазина
   console.log('\n⏳ Creating products...')
 
+  // mandalaImageUrl переиспользует уже загруженные картинки мандал (гарантированно
+  // доступны везде, где отрабатывает сидинг мандал выше) — своих фото товаров нет,
+  // а без изображения витрина/корзина/страница товара не рендерят <img> вовсе
+  // (см. apps/mandala/PLAN.md → «Второй прогон на staging»)
   const productsData = [
     {
       slug: 'magnit-mandala-om',
@@ -291,6 +295,7 @@ async function main() {
       description: 'Керамический магнит с изображением мандалы Ом ручной работы.',
       price: 350,
       stock: 15,
+      mandalaImageUrl: mandalasData[0]?.imageUrl,
     },
     {
       slug: 'otkrytka-czvetok-zhizni',
@@ -298,6 +303,7 @@ async function main() {
       description: 'Авторская открытка с мандалой "Цветок жизни", подходит для подарка.',
       price: 150,
       stock: 30,
+      mandalaImageUrl: mandalasData[1]?.imageUrl,
     },
     {
       slug: 'poster-anahata',
@@ -305,11 +311,12 @@ async function main() {
       description: 'Печатный постер мандалы Анахата формата А3.',
       price: 900,
       stock: 8,
+      mandalaImageUrl: mandalasData[2]?.imageUrl,
     },
   ]
 
   for (const [index, product] of productsData.entries()) {
-    await prisma.product.upsert({
+    const dbProduct = await prisma.product.upsert({
       where: { slug: product.slug },
       update: {
         name: product.name,
@@ -327,6 +334,16 @@ async function main() {
         order: index,
       },
     })
+
+    const hasImage = (await prisma.productImage.count({ where: { productId: dbProduct.id } })) > 0
+    if (!hasImage && product.mandalaImageUrl) {
+      const imageId = await upsertImage(extractPathFromUrl(product.mandalaImageUrl), 'PRODUCT')
+      if (imageId) {
+        await prisma.productImage.create({
+          data: { productId: dbProduct.id, imageId, order: 0 },
+        })
+      }
+    }
   }
 
   console.log(`✓ Created ${productsData.length} products`)
