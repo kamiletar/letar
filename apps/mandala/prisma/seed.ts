@@ -331,12 +331,42 @@ async function main() {
 
   console.log(`✓ Created ${productsData.length} products`)
 
+  // Создать тестовый заказ для E2E (09-admin-order-status не должен зависеть
+  // от того, успеет ли 05-full-checkout создать заказ первым)
+  console.log('\n⏳ Creating test order...')
+
+  const seedProduct = await prisma.product.findUnique({ where: { slug: productsData[0].slug } })
+
+  if (seedProduct) {
+    const existingOrder = await prisma.order.findFirst({ where: { name: 'E2E Seed Заказчик' } })
+
+    if (!existingOrder) {
+      await prisma.order.create({
+        data: {
+          name: 'E2E Seed Заказчик',
+          phone: '+79001112233',
+          email: 'seed-order@elfafeya.art',
+          address: 'г. Москва, ул. Сидовая, д. 1',
+          status: 'PENDING',
+          total: seedProduct.price,
+          items: {
+            create: [{ productId: seedProduct.id, quantity: 1, price: seedProduct.price }],
+          },
+        },
+      })
+      console.log('✓ Created 1 test order')
+    } else {
+      console.log('✓ Test order already exists, skip')
+    }
+  }
+
   // Итоговая статистика
   const stats = {
     images: await prisma.image.count(),
     mandalas: await prisma.mandala.count(),
     shortUrls: await prisma.shortUrl.count(),
     products: await prisma.product.count(),
+    orders: await prisma.order.count(),
   }
 
   // Проверяем что blurDataURL заполнен
@@ -349,6 +379,7 @@ async function main() {
   console.log(`  Mandalas: ${stats.mandalas}`)
   console.log(`  Short URLs: ${stats.shortUrls}`)
   console.log(`  Products: ${stats.products}`)
+  console.log(`  Orders: ${stats.orders}`)
 }
 
 main()

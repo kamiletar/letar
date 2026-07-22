@@ -60,7 +60,9 @@ test.describe('Админ: Полный CRUD товара', () => {
       // Проверка редиректа на страницу товара (может быть /edit или просто /:id)
       await expect(adminPage).toHaveURL(/\/admin\/products\/[^/]+/, { timeout: 15000 })
       // Убедимся что это не страница /new
-      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 5000 })
+      // 15s — под параллельной e2e-нагрузкой на общий staging-контейнер редирект после
+      // Server Action может занимать больше 5с (см. nextjs-server-action-redirect-race.md)
+      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 15000 })
 
       // Сохраняем ID товара из URL (с или без /edit)
       const url = adminPage.url()

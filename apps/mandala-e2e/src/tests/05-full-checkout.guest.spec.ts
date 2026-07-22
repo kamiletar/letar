@@ -44,7 +44,8 @@ test.describe('Полный Checkout Flow', () => {
     await addToCartButton.click()
 
     // 5. Проверка toast "Добавлено в корзину" или изменения кнопки
-    const addedConfirmation = page.getByText(/добавлено в корзину|в корзине/i)
+    // .first() — toast и disabled-кнопка "В корзине" совпадают под один regex одновременно
+    const addedConfirmation = page.getByText(/добавлено в корзину|в корзине/i).first()
     await expect(addedConfirmation).toBeVisible({ timeout: 5000 })
 
     // 6. Переход в корзину
@@ -105,7 +106,7 @@ test.describe('Полный Checkout Flow', () => {
     await addToCartButton.click()
 
     // Ждём подтверждения добавления в корзину
-    await expect(page.getByText(/добавлено в корзину|в корзине/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/добавлено в корзину|в корзине/i).first()).toBeVisible({ timeout: 5000 })
 
     // Переходим в checkout
     await page.goto('/checkout')

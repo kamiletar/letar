@@ -123,6 +123,60 @@ BlackCove, thread `staging-e2e-gate-m1-batch2`).
 
 ---
 
+## 🟡 Второй прогон на staging после фиксов выше (2026-07-23, коммит `2618f341`)
+
+BlackCove задеплоил и прогнал e2e: **107 passed / 8 failed**. Подтвердилось частично:
+
+- `10` — закрыт, в списке фейлов больше нет.
+- `01` (переход к товару) и `09` (обе части) — как и предполагалось выше, реальные проблемы на
+  staging, не флаки локального окружения.
+- `05` и `08` всё ещё падали, но **по другой причине**, не связанной с `noValidate` — новые находки
+  ниже.
+- Новый, ранее не входивший в список фейл: `04-checkout.guest.spec.ts` (`/checkout/success`).
+
+**Диагностировано и исправлено (2026-07-23, второй раунд):**
+
+- [x] `05-full-checkout` (оба теста, новая причина): `getByText(/добавлено в корзину|в корзине/i)`
+      matчил ОДНОВРЕМЕННО toast «Добавлено в корзину» и disabled-кнопку «В корзине» — strict-mode
+      violation в самом тесте (Chakra `AddToCartButton` рендерит toast И реактивно меняет текст кнопки
+      на «В корзине», оба варианта валидны в UI одновременно). Фикс — `.first()` на локаторе в
+      [`05-full-checkout.guest.spec.ts`](../mandala-e2e/src/tests/05-full-checkout.guest.spec.ts) (2 места).
+- [x] `07`/`08` (`waitForURL` таймаут 5000ms на `/new` после создания): оба `create*Action`
+      (`create-product.action.ts`, `create-mandala.action.ts` через `createCreateAction`) уже вызывают
+      `redirect()` внутри Server Action — паттерн корректный, гонки redirect'ов
+      (см. [nextjs-server-action-redirect-race.md](../../.claude/docs/nextjs-server-action-redirect-race.md))
+      нет. Причина — сам 5-секундный таймаут слишком тесен под параллельной e2e-нагрузкой на общий
+      staging-контейнер (задокументированное поведение для этого класса гонок). Фикс — увеличен до
+      15000ms в [`07-full-mandala-crud.admin.spec.ts`](../mandala-e2e/src/tests/07-full-mandala-crud.admin.spec.ts)
+      и [`08-full-product-crud.admin.spec.ts`](../mandala-e2e/src/tests/08-full-product-crud.admin.spec.ts).
+- [x] `09-admin-order-status` (обе части): та же категория бага, что чинилась раньше для
+      `/admin/products` — `prisma/seed.ts` не создавал ни одного `Order`, поэтому таблица заказов
+      пуста → рендерится `EmptyState` вместо `<table>` (см. `apps/mandala/src/app/(admin)/admin/orders/page.tsx:120`)
+      → падение `getByRole('table')`. Тест `09` полагался на то, что `05-full-checkout` успеет создать
+      заказ первым — хрупкая межтестовая зависимость под параллельными воркерами. Фикс — добавлен
+      сидинг одного тестового заказа в [`prisma/seed.ts`](../mandala/prisma/seed.ts), `09` больше не
+      зависит от результата `05`.
+- [ ] `04-checkout.guest.spec.ts` (`/checkout/success` без `orderId`): НЕ воспроизведено локально —
+      и SSR HTML (`curl`), и рендер в браузере показывают текст «Заказ оформлен!» сразу, без гонки
+      гидратации (страница не зависит от `orderId` для показа заголовка/сообщения, только блок номера
+      заказа условный). Похоже на транзиентный флак под staging-нагрузкой конкретно в этом прогоне —
+      требует подтверждения на следующем e2e.
+- [ ] `01-public-pages` («можно перейти к товару») и `09` (обе части, помимо самой причины
+      «нет заказов» выше) — таблица теперь должна появиться благодаря сидингу, но переход к товару
+      (`01`) всё ещё не воспроизведён локально; требует подтверждения на staging.
+
+**Изменённые файлы (второй раунд):**
+[`prisma/seed.ts`](../mandala/prisma/seed.ts),
+[`05-full-checkout.guest.spec.ts`](../mandala-e2e/src/tests/05-full-checkout.guest.spec.ts),
+[`07-full-mandala-crud.admin.spec.ts`](../mandala-e2e/src/tests/07-full-mandala-crud.admin.spec.ts),
+[`08-full-product-crud.admin.spec.ts`](../mandala-e2e/src/tests/08-full-product-crud.admin.spec.ts).
+
+`nx lint mandala` и `nx lint mandala-e2e` — чисто.
+
+Требуется повторный деплой + e2e для подтверждения (запрос отправлен BlackCove, тот же thread).
+
+---
+
 ## ⚠️ Ложная «регрессия» admin-раздела на staging — стейл-коммит, не новый баг (2026-07-22)
 
 После записи выше пришёл повторный прогон с явным регрессом: **95 passed / 13 failed / 4 skipped /
