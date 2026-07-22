@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto'
 import type { FastifyInstance } from 'fastify'
 import { promisify } from 'util'
 import { hostExecArgs } from '../lib/host-exec'
+import { getRedis } from '../lib/redis'
 import { getCurrentServer } from '../lib/server-config'
 import type { ApiResponse } from '../types'
 
@@ -38,13 +39,137 @@ interface DeployStatus {
   /** Сколько строк было вытеснено из начала output из-за переполнения */
   truncatedLines: number
   error?: string
+  /** true если запись восстановлена из Redis после рестарта агента во время running=true — реальный
+   * исход деплоя после этого момента неизвестен dashboard-agent'у (см. lib/redis.ts) */
+  interrupted?: boolean
 }
 
-// Ring-buffer истории деплоев: новые в конец, старые вытесняются
+// Ring-buffer истории деплоев: новые в конец, старые вытесняются. Персистится в Redis
+// (best-effort, см. persistDeploy/persistIndex ниже) — переживает рестарт контейнера.
 const deployHistory: DeployStatus[] = []
 
 // Текущий процесс деплоя (для возможности отмены)
 let currentProcess: ChildProcess | null = null
+
+// =============================================================================
+// Redis-персистентность (best-effort, graceful degradation без Redis — см. lib/redis.ts)
+// =============================================================================
+
+const REDIS_KEY_PREFIX = 'dashboard-agent:deploy:'
+const REDIS_INDEX_KEY = `${REDIS_KEY_PREFIX}index`
+// TTL с запасом сверх разумного времени жизни записи — подстраховка от рассинхрона
+// индекса и элементов, а не основной механизм ограничения размера (для этого MAX_DEPLOY_HISTORY)
+const REDIS_ITEM_TTL_SEC = 7 * 24 * 60 * 60
+
+function redisItemKey(deployId: string): string {
+  return `${REDIS_KEY_PREFIX}item:${deployId}`
+}
+
+/** Немедленный best-effort персист снапшота одного деплоя */
+async function persistDeploy(deploy: DeployStatus): Promise<void> {
+  const r = getRedis()
+  if (!r) {
+    return
+  }
+  try {
+    await r.set(redisItemKey(deploy.deployId), JSON.stringify(deploy), 'EX', REDIS_ITEM_TTL_SEC)
+  } catch {
+    // Не критично — следующий персист (debounce/flush) попробует снова
+  }
+}
+
+/** Перезаписывает индекс порядка deployId целиком (список короткий — до MAX_DEPLOY_HISTORY) */
+async function persistIndex(): Promise<void> {
+  const r = getRedis()
+  if (!r) {
+    return
+  }
+  try {
+    const ids = deployHistory.map((d) => d.deployId)
+    const pipeline = r.pipeline()
+    pipeline.del(REDIS_INDEX_KEY)
+    if (ids.length > 0) {
+      pipeline.rpush(REDIS_INDEX_KEY, ...ids)
+      pipeline.expire(REDIS_INDEX_KEY, REDIS_ITEM_TTL_SEC)
+    }
+    await pipeline.exec()
+  } catch {
+    // Не критично
+  }
+}
+
+// Debounce персиста лога: appendOutput может вызываться построчно на каждый chunk
+// stdout/stderr — пишем в Redis не чаще раза в секунду на деплой, а не на каждую строку
+const PERSIST_DEBOUNCE_MS = 1000
+const pendingPersists = new Map<string, ReturnType<typeof setTimeout>>()
+
+function schedulePersist(deploy: DeployStatus): void {
+  const existing = pendingPersists.get(deploy.deployId)
+  if (existing) {
+    clearTimeout(existing)
+  }
+  pendingPersists.set(
+    deploy.deployId,
+    setTimeout(() => {
+      pendingPersists.delete(deploy.deployId)
+      void persistDeploy(deploy)
+    }, PERSIST_DEBOUNCE_MS)
+  )
+}
+
+/** Немедленный персист в обход debounce — вызывать при завершении/значимых переходах статуса */
+function flushPersist(deploy: DeployStatus): void {
+  const existing = pendingPersists.get(deploy.deployId)
+  if (existing) {
+    clearTimeout(existing)
+    pendingPersists.delete(deploy.deployId)
+  }
+  void persistDeploy(deploy)
+}
+
+/**
+ * Восстанавливает deployHistory из Redis при старте процесса. Записи, застигнутые
+ * в состоянии running=true (агент перезапустился, пока деплой шёл) помечаются
+ * interrupted — реальный исход неизвестен: nsenter-процесс на хосте физически может
+ * быть жив (см. host-exec.ts), но dashboard-agent потерял currentProcess и больше не
+ * получает от него stdout/exit code напрямую.
+ */
+async function rehydrateFromRedis(): Promise<void> {
+  const r = getRedis()
+  if (!r) {
+    return
+  }
+  try {
+    const ids = await r.lrange(REDIS_INDEX_KEY, 0, -1)
+    if (ids.length === 0) {
+      return
+    }
+    const items = await r.mget(...ids.map(redisItemKey))
+    for (const raw of items) {
+      if (!raw) {
+        continue
+      }
+      try {
+        const deploy = JSON.parse(raw) as DeployStatus
+        if (deploy.running) {
+          deploy.running = false
+          deploy.interrupted = true
+          deploy.error =
+            deploy.error ?? 'Dashboard-agent перезапустился во время этого деплоя — итоговый статус неизвестен'
+          deploy.endTime = deploy.endTime ?? new Date().toISOString()
+        }
+        deployHistory.push(deploy)
+      } catch {
+        // Битая запись в Redis — пропускаем
+      }
+    }
+    if (deployHistory.length > 0) {
+      console.warn(`[deploy] Восстановлено ${deployHistory.length} записей истории деплоя из Redis`)
+    }
+  } catch (err) {
+    console.error('[deploy] Не удалось восстановить историю деплоя из Redis:', err)
+  }
+}
 
 /** Создаёт новую запись деплоя и кладёт в историю */
 function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines'>): DeployStatus {
@@ -58,6 +183,8 @@ function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'trunc
   if (deployHistory.length > MAX_DEPLOY_HISTORY) {
     deployHistory.shift()
   }
+  void persistDeploy(deploy)
+  void persistIndex()
   return deploy
 }
 
@@ -68,6 +195,7 @@ function appendOutput(deploy: DeployStatus, line: string): void {
     deploy.output.shift()
     deploy.truncatedLines++
   }
+  schedulePersist(deploy)
 }
 
 /** Текущий активный или последний завершённый деплой */
@@ -94,6 +222,8 @@ async function runDockerCommand(command: string): Promise<{ stdout: string; stde
 }
 
 export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
+  await rehydrateFromRedis()
+
   /**
    * GET /api/deploy/status — статус деплоя
    * Query:
@@ -178,6 +308,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         appendOutput(deploy, stdout || stderr || 'Pull completed')
         deploy.running = false
         deploy.endTime = new Date().toISOString()
+        flushPersist(deploy)
 
         return {
           success: true,
@@ -192,6 +323,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.running = false
         deploy.endTime = new Date().toISOString()
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
+        flushPersist(deploy)
 
         return {
           success: false,
@@ -256,6 +388,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
 
         deploy.running = false
         deploy.endTime = new Date().toISOString()
+        flushPersist(deploy)
 
         return {
           success: true,
@@ -270,6 +403,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.running = false
         deploy.endTime = new Date().toISOString()
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
+        flushPersist(deploy)
 
         return {
           success: false,
@@ -315,6 +449,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         appendOutput(deploy, output)
         deploy.running = false
         deploy.endTime = new Date().toISOString()
+        flushPersist(deploy)
 
         return {
           success: true,
@@ -325,6 +460,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.running = false
         deploy.endTime = new Date().toISOString()
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
+        flushPersist(deploy)
 
         return {
           success: false,
@@ -464,6 +600,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.running = false
         deploy.endTime = new Date().toISOString()
         currentProcess = null
+        flushPersist(deploy)
       })
 
       // Обрабатываем ошибки
@@ -473,6 +610,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.running = false
         deploy.endTime = new Date().toISOString()
         currentProcess = null
+        flushPersist(deploy)
       })
 
       // Возвращаем сразу — клиент будет опрашивать статус через /api/deploy/status
@@ -511,6 +649,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       running.running = false
       running.endTime = new Date().toISOString()
       currentProcess = null
+      flushPersist(running)
 
       return {
         success: true,

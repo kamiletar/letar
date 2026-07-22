@@ -241,7 +241,7 @@ shell-строку: `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then 
 2. **`Dockerfile.production` builder-стейдж** — вместо изолированного `bun install` только по
    `apps/dashboard-agent/package.json` собирает синтетический мини-workspace (копирует
    `libs/email` + генерирует root `package.json` с `workspaces: ["apps/dashboard-agent",
-   "libs/email"]`) — резолвит `@letar/email` из монорепо, не с npm registry.
+"libs/email"]`) — резолвит `@letar/email` из монорепо, не с npm registry.
 3. **`libs/email/package.json`** — добавлен `punycode` как explicit dependency. `provider.ts`
    импортирует `punycode/`, но пакет не был объявлен — маскировалось случайным хостингом в общем
    монорепо-`node_modules`, в изолированной Docker-сборке падало отдельной ошибкой.

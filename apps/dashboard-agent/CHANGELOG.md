@@ -11,6 +11,47 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.8.3] — 2026-07-22
+
+### Feat: персистентность deploy-истории в Redis
+
+`routes/deploy.ts` хранил `deployHistory` (ring-buffer до 20 деплоев + активный лог) только в
+памяти процесса — рестарт/пересоздание контейнера `dashboard-agent` безвозвратно терял историю и
+лог активного деплоя (найдено BlackCove 2026-07-22 на инциденте с email-canary, PLAN.md backlog).
+
+- Новый `lib/redis.ts` — клиент `ioredis` с graceful degradation (тот же паттерн, что и
+  `apps/animatrona-tracker/src/lib/redis.ts`): без `REDIS_URL` или при недоступности Redis
+  деплой продолжает работать чисто в памяти, как раньше, без ошибок.
+- `deploy.ts`: каждый деплой персистится в Redis (`dashboard-agent:deploy:item:<id>`, TTL 7 дней) +
+  индекс порядка (`dashboard-agent:deploy:index`, список deployId). Лог пишется дебаунсом (не чаще
+  раза в секунду на деплой — `appendOutput` может звать построчно на каждый chunk stdout/stderr),
+  финальный статус — немедленно (`flushPersist`) на каждом пути завершения (`pull`, `restart`,
+  `compose-up`, `deploy-app` close/error, `cancel`).
+- При старте процесса `rehydrateFromRedis()` восстанавливает `deployHistory`. Записи, застигнутые
+  в `running: true` (агент перезапустился посреди деплоя), помечаются `interrupted: true` —
+  реальный исход после рестарта dashboard-agent не отслеживается.
+- Redis (`letar-redis`, `infra/redis`) уже развёрнут на s2 и используется другими приложениями
+  (`animatrona-tracker`, `auth-hub`, `kami`, `driving-school`, `svoichuzhie`) — переиспользован тот
+  же инстанс на `kami-network`, новая инфраструктура не поднималась.
+  `docker-compose.production.yml`: `REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}`. На s3
+  (staging) Redis не развёрнут — `REDIS_URL` там намеренно не задан, агент работает в чистом
+  in-memory режиме без лишних error-логов о недоступном Redis.
+
+### Docs: устойчивость nsenter-процесса к рестарту контейнера — прояснено
+
+Backlog PLAN.md ставил вопрос: переживает ли `deploy-affected.sh`, запущенный через `nsenter`
+(`lib/host-exec.ts`), обрыв родительского процесса dashboard-agent. Разбор флагов: `nsenter -t 1 -m
+-u -n -i` НЕ включает `-p` (pid namespace) — не нужен, т.к. контейнер уже поднят с `pid: host` в
+compose, поэтому спавненный процесс и так живёт в host PID namespace. Но **cgroup при этом не
+меняется** — процесс остаётся в cgroup контейнера `dashboard-agent`, если явно не выполнен cgroup
+escape (не делается). При `docker compose up -d` recreate Docker останавливает контейнер через
+kill всей его cgroup — уносит с собой и nsenter-порождённый `deploy-affected.sh`, если тот ещё жив.
+Это тот же механизм, что и в другом backlog-пункте («self-deploy обрывает сам себя на
+recreate-шаге») — оба вытекают из общего factа: nsenter здесь даёт только namespace-изоляцию
+(mount/uts/net/ipc), не cgroup-независимость. Полноценный fix (cgroup escape, например через
+`systemd-run --scope` на хосте) не сделан в этой сессии — рискованное изменение общего
+`deploy-affected.sh`, отдельная задача.
+
 ## [0.8.2] — 2026-07-22
 
 ### Fix: бесконечная рекурсия `loadAllCronJobs ↔ saveCronConfig` при отсутствующем конфиге

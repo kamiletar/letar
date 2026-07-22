@@ -27,6 +27,10 @@ services:
       HOST: 0.0.0.0
       SERVER_NAME: s2.letar.best
       WORKSPACE_PATH: /home/deploy/letar
+      # Персистентность deploy-истории между рестартами контейнера (см. lib/redis.ts,
+      # routes/deploy.ts). Опционально — без Redis деплой продолжает работать в
+      # чистом in-memory режиме (graceful degradation).
+      REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}
       # Этап 0.7 — канареечный мониторинг доставки email (см. lib/email-canary.ts)
       EMAIL_CANARY_SMTP_HOST: ${EMAIL_CANARY_SMTP_HOST}
       EMAIL_CANARY_SMTP_PORT: ${EMAIL_CANARY_SMTP_PORT}
