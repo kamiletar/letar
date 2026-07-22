@@ -284,10 +284,11 @@ async function main() {
   // Создать тестовые товары для магазина
   console.log('\n⏳ Creating products...')
 
-  // mandalaImageUrl переиспользует уже загруженные картинки мандал (гарантированно
-  // доступны везде, где отрабатывает сидинг мандал выше) — своих фото товаров нет,
-  // а без изображения витрина/корзина/страница товара не рендерят <img> вовсе
-  // (см. apps/mandala/PLAN.md → «Второй прогон на staging»)
+  // imagePath переиспользует уже загруженные картинки мандал (uploads/mandalas/ —
+  // подтверждено присутствует и на проде, и на staging (36 файлов), в отличие от
+  // uploads/product/ — этой папки на staging вообще нет). Без изображения витрина/
+  // корзина/страница товара не рендерят <img> вовсе (см. apps/mandala/PLAN.md →
+  // «Второй/третий раунд на staging»)
   const productsData = [
     {
       slug: 'magnit-mandala-om',
@@ -295,7 +296,7 @@ async function main() {
       description: 'Керамический магнит с изображением мандалы Ом ручной работы.',
       price: 350,
       stock: 15,
-      mandalaImageUrl: mandalasData[0]?.imageUrl,
+      imagePath: extractPathFromUrl(mandalasData[0]?.imageUrl ?? ''),
     },
     {
       slug: 'otkrytka-czvetok-zhizni',
@@ -303,7 +304,7 @@ async function main() {
       description: 'Авторская открытка с мандалой "Цветок жизни", подходит для подарка.',
       price: 150,
       stock: 30,
-      mandalaImageUrl: mandalasData[1]?.imageUrl,
+      imagePath: extractPathFromUrl(mandalasData[1]?.imageUrl ?? ''),
     },
     {
       slug: 'poster-anahata',
@@ -311,7 +312,7 @@ async function main() {
       description: 'Печатный постер мандалы Анахата формата А3.',
       price: 900,
       stock: 8,
-      mandalaImageUrl: mandalasData[2]?.imageUrl,
+      imagePath: extractPathFromUrl(mandalasData[2]?.imageUrl ?? ''),
     },
   ]
 
@@ -336,8 +337,8 @@ async function main() {
     })
 
     const hasImage = (await prisma.productImage.count({ where: { productId: dbProduct.id } })) > 0
-    if (!hasImage && product.mandalaImageUrl) {
-      const imageId = await upsertImage(extractPathFromUrl(product.mandalaImageUrl), 'PRODUCT')
+    if (!hasImage && product.imagePath) {
+      const imageId = await upsertImage(product.imagePath, 'PRODUCT')
       if (imageId) {
         await prisma.productImage.create({
           data: { productId: dbProduct.id, imageId, order: 0 },
