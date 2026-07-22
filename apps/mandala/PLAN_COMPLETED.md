@@ -639,4 +639,24 @@ export const authConfig = {
 
 ---
 
-**Последнее обновление:** 2026-07-21
+## §18.7 Тираж M1 batch2 — staging uploads volume-mount (2026-07-22, root-weaver)
+
+**Root cause найден и починен:** после того как BlackCove синхронизировал реальные файлы
+`uploads/mandalas/` (+ `content/`/`watermarks/`) прод(s2)→staging(s3) и seed реально создал
+31/31 mandala-записей (было 0/31 — `upsertImage()` пропускал запись целиком без файла картинки,
+`apps/mandala/prisma/seed.ts:200-204`, это не баг seed, а сознательное поведение), обнаружился
+второй, независимый баг: `apps/mandala/docker-compose.staging.yml` не монтировал `uploads/` в
+контейнер (в отличие от `docker-compose.production.yml`) — seed отрабатывал корректно, потому что
+выполняется на хосте (`cwd: apps/mandala`, вне контейнера), но сам `mandala-staging-app` не видел
+файлов.
+
+**Фикс:** добавлен `volumes: - ./uploads:/app/apps/mandala/uploads` в `docker-compose.staging.yml`
+по образцу production. Коммит `b06b8929`. Подтверждено BlackCove передеплоем + прогоном.
+
+**Полный e2e после фикса:** 96 passed / 12 failed / 4 skipped / 11 did not run. Все 12 отказов —
+реальные баги приложения, не связаны с картинками/volume (см. `PLAN.md` → «🔴 Приоритетная задача
+— /admin/products сломан»), перенесены туда для отдельного агента.
+
+---
+
+**Последнее обновление:** 2026-07-22

@@ -230,4 +230,41 @@ shell-строку: `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then 
 
 ---
 
-**Последнее обновление:** 2026-02-02
+## §18.7 Тираж M1 batch2 — фикс Docker-сборки после email-canary (2026-07-22, root-weaver)
+
+**Проблема:** деплой падал на `bun install` — `@letar/email@^0.3.0` не резолвился (404), пакет
+`private: true` и никогда не публиковался на npm (внутренняя SMTP-обвязка для Maddy, не должен
+публиковаться). Найдены и починены 4 связанных бага, коммит `ac8d5fbf`:
+
+1. **`package.json`** — `@letar/email` переведён с semver-диапазона (`^0.3.0`) на `workspace:*`
+   — правильный протокол для внутренней монорепо-зависимости.
+2. **`Dockerfile.production` builder-стейдж** — вместо изолированного `bun install` только по
+   `apps/dashboard-agent/package.json` собирает синтетический мини-workspace (копирует
+   `libs/email` + генерирует root `package.json` с `workspaces: ["apps/dashboard-agent",
+   "libs/email"]`) — резолвит `@letar/email` из монорепо, не с npm registry.
+3. **`libs/email/package.json`** — добавлен `punycode` как explicit dependency. `provider.ts`
+   импортирует `punycode/`, но пакет не был объявлен — маскировалось случайным хостингом в общем
+   монорепо-`node_modules`, в изолированной Docker-сборке падало отдельной ошибкой.
+4. **`bun build --external cpu-features`** — `ssh2` (транзитивно через `dockerode`→
+   `docker-modem`) имеет опциональную нативную зависимость `cpu-features`, которую Alpine-билдер
+   без `python3/make/g++` не может собрать; `bun build` пытался статически её заинлайнить. `ssh2`
+   оборачивает `require('cpu-features')` в `try/catch` (см. `lib/protocol/constants.js`) —
+   безопасно исключить из бандла.
+5. **Копирование `dist`/`node_modules` в прод-стейдж** — bun-воркспейс кладёт относительные
+   symlink'и прямых зависимостей (`../../../node_modules/…`) во вложенный
+   `apps/dashboard-agent/node_modules`, рассчитанные под исходную глубину вложенности. Плоское
+   копирование в один уровень их ломало (падало на рантайм-загрузке `pino-pretty` — динамический
+   transport-worker pino, не инлайнится бандлом). Исправлено сохранением исходной вложенности
+   (`outdir` → `apps/dashboard-agent/dist`, копирование обеих директорий как есть).
+
+**Проверено полностью локально** — `docker build` + `docker run` + `curl /health` → `200
+{"status":"ok",...}`. Подтверждено BlackCove живым деплоем на s2 (msg #691) — health-check
+прошёл, cron поднялся.
+
+**Побочная находка (в Backlog):** self-deploy dashboard-agent на себя рискует зависнуть на
+recreate-шаге (deploy-mcp туннель живёт в том же контейнере, что деплоится) — не починено в этой
+сессии, требует правки общего `deploy-affected.sh`.
+
+---
+
+**Последнее обновление:** 2026-07-22

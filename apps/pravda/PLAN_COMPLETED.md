@@ -98,4 +98,21 @@
 
 ---
 
-**Последнее обновление:** 2025-12-28
+## §18.7 Тираж M1 batch2 — staging e2e-гейт (2026-07-22, root-weaver)
+
+**Фикс `toc.spec.ts` (`apps/pravda-e2e/src/toc.spec.ts`):** в трёх тестах (клик по пункту TOC,
+автоскролл к активному, подсветка активного пункта при скролле) переменной
+`href`/`firstHref`/`lastHref` присваивался сам Playwright `Locator` вместо строки атрибута —
+`await locator.getAttribute('href')` возвращал не вызывался, затем на `Locator` вызывался
+`.slice(1)` → `TypeError: href.slice is not a function`. Исправлено на `await
+locator.getAttribute('href')` перед `.slice()`. Коммит `6d4833aa`.
+
+**Подтверждено BlackCove живым прогоном на staging:** три `href.slice`-фейла ушли. Но `toc.spec.ts`
+остался частично красным на других ассертах (TOC не находит пункты, подсветка не работает) —
+это реальные баги приложения, не тестовые. Плюс получен `trace.zip` для `navigation.spec.ts`
+(RSC-навигация не меняет URL в Firefox/WebKit) благодаря ранее добавленному `retries: 1`. Все
+новые находки перенесены в `PLAN.md` → Backlog → «🔴 Приоритетные баги — staging e2e».
+
+---
+
+**Последнее обновление:** 2026-07-22
