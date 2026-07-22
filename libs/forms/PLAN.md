@@ -501,6 +501,13 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
 
 ### Запросы от агентов
 
+#### [2026-07-22] `Form.Field.Phone` — не проходит ввод в WebKit e2e (от dsperevod)
+
+- **Запросил:** root-weaver
+- **Приоритет:** high
+- **Описание:** `apps/dsperevod-e2e/src/callback-drawer.spec.ts` — все 4 теста (маска телефона + 3 сценария отправки) падают **только в WebKit**, все — на шаге ввода телефона (`phoneInput.pressSequentially('9185568172', { delay: 20 })` не приводит к ожидаемому значению маски). Chromium/Firefox проходят. Обнаружено §18.7 Тираж M1 batch2 (staging-e2e-гейт), не диагностировано глубоко — не в скоупе root-weaver (компонент `FieldPhone`, `libs/forms/src/lib/declarative/form-fields/specialized/field-phone.tsx`, использует `use-mask-input`/`withMask`, юнит-тестов на реальный ввод клавиш нет, только рендер/начальное значение — `field-phone.spec.tsx`). Подозрение: `withMask`/событийная модель WebKit (Safari) не синхронизируется с `pressSequentially` так же, как Chromium/Firefox — известный класс проблем у masked-input библиотек в WebKit.
+- **Статус:** ожидание
+
 #### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie)
 
 - **Запросил:** MagentaRaven

@@ -1001,6 +1001,34 @@ rollout, не раньше. Не начато.
 > как есть (только grandslamcup, дата 2026-07-18); это отдельный трек по подключению остальных
 > приложений к staging-e2e (Сессия D паттерну), параллельно и независимо от F.
 
+> **Тираж M1 batch2 — продолжение сессии (2026-07-22, root-weaver):** разобрал накопившийся
+> инбокс BlackCove по треду `staging-e2e-gate-m1-batch2` и продвинул 3 из 4 незакрытых находок:
+>
+> - **`pravda` `toc.spec.ts`** — реальный баг теста (не app-код): в трёх тестах (клик по пункту
+>   TOC, автоскролл к активному, подсветка активного) переменной `href`/`firstHref`/`lastHref`
+>   присваивался сам Playwright `Locator` вместо `await locator.getAttribute('href')`, затем на
+>   нём вызывался `.slice(1)` → `TypeError: href.slice is not a function`. Часть 54 фейлов из
+>   msg #640. Исправлено и запушено (коммит `6d4833aa`), запрошен у BlackCove передеплой+полный
+>   e2e (msg #682) — заодно должен собраться `trace.zip` для `navigation.spec.ts` firefox/webkit
+>   благодаря ранее добавленному `retries: 1` (коммит `b1ed1c12`, ещё не проверен живым прогоном).
+> - **`dsperevod` `callback-drawer.spec.ts`** — все 4 теста падают только в WebKit на вводе
+>   телефона (`Form.Field.Phone`, маска `use-mask-input`/`withMask`). Это баг общей библиотеки
+>   `@letar/forms`, не app-кода dsperevod — по `form-delegation.md` делегировано, не патчилось на
+>   месте. Записано в `libs/forms/PLAN.md` Backlog. Отправить `send_message` координатору не
+>   удалось — `FormsCoord` не зарегистрирован в проекте, `forms-dev` retired (не принимает
+>   сообщения) — делегация зафиксирована только в PLAN.md, ждёт владельца или переоживления агента.
+> - **`mandala` — 0/31 mandala при seed на staging** — не баг `seed.ts` (владелец решил не
+>   чинить graceful-фолбэк): `upsertImage()` возвращает `null`, если файла нет на диске →
+>   `apps/mandala/prisma/seed.ts:200-204` пропускает создание всей записи `Mandala` целиком
+>   (imageId обязателен по схеме). Файлы `uploads/mandalas/*.png` физически есть только на проде
+>   (s2), никогда не были синхронизированы на staging (s3), `uploads/` не в git по конвенции.
+>   Ками подтвердил: синхронизировать реальные файлы (не генерировать плейсхолдеры). Запрошено у
+>   BlackCove (msg #683) — прод(s2)→staging(s3) rsync/scp `uploads/mandalas/` (+ вероятно
+>   `content/`/`watermarks/`) → повторный `deploy_app(mandala, staging, seed:true)`.
+>
+> **Не тронуто в этой сессии:** `pravda` `bookmarks.spec.ts`/`cross-refs.spec.ts` (localStorage/
+> переходы между статьями, msg #640) — отдельная сессия.
+
 **Инвентаризация (2026-07-17, `apps/*-e2e` × `S2_APPS` из `deploy-affected.sh`):**
 
 Приложения на s2 **с готовым e2e-сьютом**, ещё не подключённые к staging-гейту (13): `time`,
@@ -1084,7 +1112,7 @@ ARG в `Dockerfile.production` (`dsperevod`/`svoichuzhie` — заменено �
    **Нужно:** передеплоить `dashboard-agent` на s3 (и проверить s2 на ту же старость).
 2. **`run_e2e` (routes/e2e.ts) не выставляет `CI=1`** при спавне `bunx nx e2e` на staging — у
    `nxE2EPreset()` (`node_modules/@nx/playwright/dist/src/utils/preset.js:82`) `retries: process.env.CI
-   ? 2 : 0`, значит `trace: 'on-first-retry'` в `apps/*-e2e/playwright.config.ts` **никогда** не
+? 2 : 0`, значит `trace: 'on-first-retry'` в `apps/*-e2e/playwright.config.ts` **никогда** не
    собирает `trace.zip` на staging-прогонах (retries=0) — только на locally-запущенных с `CI=1`.
    Не чинить хардкодом `retries` в конфигах приложений (сломает быстрый локальный dev-цикл) — нужно
    добавить `CI=1` в spawn-окружение `routes/e2e.ts`, тем же приёмом, что уже применён для
@@ -1092,7 +1120,7 @@ ARG в `Dockerfile.production` (`dsperevod`/`svoichuzhie` — заменено �
    разборе `pravda navigation.spec.ts` — root-weaver обошёл точечным `retries:1` в самом `pravda-e2e`
    (временный коммит), но проблема системная для всех gated-приложений.
 3. **`nx run <app>:db:seed` не резолвит `@/generated/prisma`-алиас** при ручном запуске (`npx tsx
-   prisma/seed.ts` за кулисами `prisma db seed`) вне полного `deploy-affected.sh` пайплайна —
+prisma/seed.ts` за кулисами `prisma db seed`) вне полного `deploy-affected.sh` пайплайна —
    воспроизведено на `mandala` (`Error: Cannot find module '@/generated/prisma'`, хотя файлы реально
    сгенерированы и alias `@/*` → `./src/*` в tsconfig на месте). Раз находка №1 выше чинится —
    возможно, тот же баг проявится и через официальный `deploy_app({ seed: true })` путь, раз он
