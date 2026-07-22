@@ -100,11 +100,15 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       (эндпоинты 404'ят с 2026-07-05), чистить через `dashboard-agent` cron API (`lib/cron.ts` →
       `saveCronConfig`), не прямым SSH-эдитом.
       `deploy-affected.sh` — только `--help`-текст, не трогали (не в `S2_APPS`, уже чисто).
-- [ ] **Docker-compose secret-mounts других живых приложений** (`apps/dashboard/docker-compose.production.yml`,
-      `apps/kami/docker-compose.production.yml`, `apps/mandala/docker-compose.production.yml`,
-      `infra/nginx-proxy-manager/docker-compose.yml`) — вероятно монтируют
-      `apps/premium-rosstil/.env.docker`/`apps/imot/.env.docker`, которых больше нет; требует проверки
-      на сервере, не просто грепа локально (случайно снести рабочий mount).
+- [x] **Docker-compose проверены (dashboard-agent-dev, 2026-07-22) — предположение backlog не
+      подтвердилось, править нечего:** `apps/dashboard`/`apps/kami`/`apps/mandala`
+      `docker-compose.production.yml` вообще не монтируют `.env.docker` удалённых приложений —
+      упоминания `imot`/`premium` там только в port-комментариях-легендах (`# 5432=premium,
+      5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
+      docker-compose.yml` — единственное реальное упоминание, и это **живая инфраструктура, не
+      тех-долг**: сам файл содержит явное предупреждение — `imot-network` намеренно не убрана,
+      потому что NPM на s1 всё ещё физически проксирует через неё живой сайт клиента; удаление
+      уронит прокси клиента молча. Не трогали.
 - [ ] **`apps/dashboard`** (реестр `DeployedApp`) — `prisma/seed.ts`, `src/lib/audit-log.ts`,
       `src/app/api/servers/[id]/apps/discover/route.ts`, `src/app/servers/_components/AppForm.tsx`,
       `src/generated/prisma/**` (НЕ трогать руками — генерируется, чистить через `schema.zmodel` +
