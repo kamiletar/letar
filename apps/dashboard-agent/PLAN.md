@@ -86,9 +86,12 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
 
 **Обнаруженные категории (`grep -rln "imot\|premium-rosstil"`, вне `apps/imot`/`apps/premium-rosstil`):**
 
-- [ ] **Функциональные, стоит почистить:** `libs/infra-config/src/index.ts` (`SERVER_APPS` — причина
-      падения теста), `scripts/sync-env-docker.sh` (`APPS` массив), `cron-jobs.json`/`cron-jobs.example.json`,
-      `deploy-affected.sh` (только в `--help` тексте как пример, не в `S2_APPS` — уже чисто).
+- [x] `libs/infra-config/src/index.ts` (`SERVER_APPS` содержал `premium-rosstil`/`imot` — причина
+      расхождения с локальной копией `server-config.ts` в dashboard-agent) — убраны, guard-тест и
+      typecheck зелёные (dashboard-agent-dev, 2026-07-22, коммит `319381b5`).
+- [ ] **Функциональные, ещё не почищены:** `scripts/sync-env-docker.sh` (`APPS` массив),
+      `cron-jobs.json`/`cron-jobs.example.json`, `deploy-affected.sh` (только в `--help` тексте как
+      пример, не в `S2_APPS` — уже чисто).
 - [ ] **Docker-compose secret-mounts других живых приложений** (`apps/dashboard/docker-compose.production.yml`,
       `apps/kami/docker-compose.production.yml`, `apps/mandala/docker-compose.production.yml`,
       `infra/nginx-proxy-manager/docker-compose.yml`) — вероятно монтируют
