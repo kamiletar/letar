@@ -45,7 +45,7 @@ export function AppForm({ form, isEditing, isSaving, onFormChange, onSave, onCan
                 size="sm"
                 value={form.name}
                 onChange={(e) => onFormChange({ ...form, name: e.target.value })}
-                placeholder="premium-rosstil"
+                placeholder="driving-school"
               />
             </Box>
             <Box flex="1" minW="150px">
@@ -56,7 +56,7 @@ export function AppForm({ form, isEditing, isSaving, onFormChange, onSave, onCan
                 size="sm"
                 value={form.displayName}
                 onChange={(e) => onFormChange({ ...form, displayName: e.target.value })}
-                placeholder="Premium Rosstil"
+                placeholder="Driving School"
               />
             </Box>
           </HStack>
@@ -70,7 +70,7 @@ export function AppForm({ form, isEditing, isSaving, onFormChange, onSave, onCan
                 size="sm"
                 value={form.containerName}
                 onChange={(e) => onFormChange({ ...form, containerName: e.target.value })}
-                placeholder="premium-rosstil"
+                placeholder="driving-school"
               />
             </Box>
             <Box flex="1" minW="80px">
@@ -117,7 +117,7 @@ export function AppForm({ form, isEditing, isSaving, onFormChange, onSave, onCan
               size="sm"
               value={form.imageName}
               onChange={(e) => onFormChange({ ...form, imageName: e.target.value })}
-              placeholder="lena/premium-rosstil:latest"
+              placeholder="lena/driving-school:latest"
             />
           </Box>
 

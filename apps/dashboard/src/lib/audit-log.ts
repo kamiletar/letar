@@ -110,7 +110,7 @@ function dbLogToApiEntry(log: AuditLogDB): AuditLogEntry {
  *   username: session.user.username,
  *   role: session.user.role,
  *   action: 'CONTAINER_START',
- *   resource: 'premium-rosstil-app',
+ *   resource: 'driving-school-app',
  *   success: true,
  * });
  * ```
@@ -141,7 +141,7 @@ export async function logSuccess(
   role: string,
   action: AuditAction,
   resource?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ): Promise<void> {
   await logAuditEvent({
     username,
@@ -162,7 +162,7 @@ export async function logFailure(
   action: AuditAction,
   error: string,
   resource?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ): Promise<void> {
   await logAuditEvent({
     username,

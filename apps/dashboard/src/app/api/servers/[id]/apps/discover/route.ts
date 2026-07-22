@@ -34,8 +34,8 @@ interface DiscoveredApp {
 
 /**
  * Извлечь имя из Docker контейнера
- * premium-rosstil -> Premium Rosstil
- * lena-imot-1 -> Imot
+ * driving-school -> Driving School
+ * lena-mandala-1 -> Mandala
  */
 function formatDisplayName(containerName: string): string {
   // Убираем lena- префикс и -1/-2 суффиксы
