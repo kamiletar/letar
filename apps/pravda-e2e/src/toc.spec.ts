@@ -47,8 +47,8 @@ test.describe('Table of Contents (TOC)', () => {
 
     // Находим первую ссылку в TOC
     const firstTocLink = toc.locator('a[href^="#"]').first()
-    const firstHref = firstTocLink
-    await expect(firstHref).toHaveAttribute('href')
+    await expect(firstTocLink).toHaveAttribute('href')
+    const firstHref = await firstTocLink.getAttribute('href')
 
     const firstId = firstHref!.slice(1) // убираем #
 
@@ -102,8 +102,8 @@ test.describe('Table of Contents (TOC)', () => {
     const middleIndex = Math.floor(count / 2)
     const middleLink = tocLinks.nth(middleIndex)
 
-    const href = middleLink
-    await expect(href).toHaveAttribute('href')
+    await expect(middleLink).toHaveAttribute('href')
+    const href = await middleLink.getAttribute('href')
     const targetId = href!.slice(1)
 
     // Кликаем на пункт TOC
@@ -144,8 +144,8 @@ test.describe('Table of Contents (TOC)', () => {
     }
 
     const lastLink = tocLinks.nth(count - 1)
-    const lastHref = lastLink
-    await expect(lastHref).toHaveAttribute('href')
+    await expect(lastLink).toHaveAttribute('href')
+    const lastHref = await lastLink.getAttribute('href')
     const lastId = lastHref!.slice(1)
 
     // Скроллим страницу к последнему разделу
