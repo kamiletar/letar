@@ -81,7 +81,7 @@ export function useFormUrlSync<TData extends object>(options: FormUrlSyncOptions
 export function readUrlValues<TData extends object>(
   fields: (keyof TData & string)[],
   defaults: TData,
-  searchParams?: URLSearchParams
+  searchParams?: URLSearchParams,
 ): TData {
   if (typeof window === 'undefined' && !searchParams) return defaults
 
@@ -138,8 +138,7 @@ export function FormUrlSync<TData extends object>({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unsubscribe = (form.store as any).subscribe(() => {
+    const unsubscribe = form.store.subscribe(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values = (form.state as any).values as Record<string, unknown>
 
@@ -187,10 +186,18 @@ export function FormUrlSync<TData extends object>({
           window.history.pushState(window.history.state, '', newUrl)
         }
       }, delay)
-    })
+      // Форсируем union-тип: инсталлированная в этом lib-контексте версия @tanstack/store
+      // типизирует subscribe() как чистую функцию, но у consuming apps (например mandala)
+      // может быть резолвлена версия ^0.11+, где subscribe() возвращает { unsubscribe }
+    }) as (() => void) | { unsubscribe: () => void }
 
     return () => {
-      unsubscribe()
+      // TanStack Store v0.9+ возвращает объект { unsubscribe }, а не функцию
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      } else {
+        unsubscribe.unsubscribe()
+      }
       if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [form, fields, defaults, delay, replace, router])

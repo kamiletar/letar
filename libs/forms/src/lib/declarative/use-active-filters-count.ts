@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useFormContext } from '../context'
+import { useFormStoreSubscribe } from '../utils'
 
 /**
  * Returns the number of form fields that differ from their default values.
@@ -34,14 +35,14 @@ export function useActiveFiltersCount<TData extends object>(defaults: TData): nu
     countDiff((form.state as any).values as TData, defaults)
   )
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unsubscribe = (form.store as any).subscribe(() => {
+  useFormStoreSubscribe(
+    form,
+    () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setCount(countDiff((form.state as any).values as TData, defaults))
-    })
-    return unsubscribe
-  }, [form, defaults])
+    },
+    [form, defaults],
+  )
 
   return count
 }

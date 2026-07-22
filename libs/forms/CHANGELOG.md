@@ -4,6 +4,28 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.3] - 2026-07-22
+
+### Fixed
+
+- **Утечка подписки `form.store` при рассинхроне версий `@tanstack/store`.** В установленной у части
+  приложений версии (`@tanstack/store@^0.11.0`, тянется транзитивно через `@tanstack/form-core@1.33.x`)
+  `subscribe()` возвращает объект `{ unsubscribe }`, а не bare-функцию (как в `0.7.x`/`0.9.x`). Три
+  места в `libs/declarative/` (`form-subscribe.tsx`, `use-active-filters-count.ts`,
+  `use-form-url-sync.ts`) и одно в `libs/history/use-form-history.ts` вызывали/возвращали результат
+  `subscribe()` так, будто это всегда функция — `as any`-каст скрывал ошибку типов, но в рантайме
+  cleanup либо не вызывался (подписка утекала на каждый mount/unmount), либо кидал
+  `TypeError: ... is not a function`. `form-steps-step.tsx` был асимметричен в обратную сторону —
+  предполагал только объектную форму. Найдено при разборе краша вкладки браузера в `apps/mandala`
+  (см. `apps/mandala/PLAN_COMPLETED.md`), где точно такой же баг сидел в двух компонентах
+  `@letar/admin-ui` (`SlugField`/`SeoField`, коммит `a5893e7c`). Все 6 мест приведены к одному
+  безопасному паттерну (проверка `typeof subscription === 'function'`).
+- **Новый `useFormStoreSubscribe(form, callback, deps)`** (`libs/forms/src/lib/utils/`, экспортирован
+  из корневого `index.ts`) — общий хелпер для подписки на `form.store` внутри `useEffect`, инкапсулирует
+  проверку формы возврата `subscribe()`. Один источник правды вместо копипасты этой проверки по коду;
+  используется в `use-active-filters-count.ts`. Остальные затронутые файлы оставлены с инлайн-фиксом —
+  у них есть дополнительная логика в cleanup (debounce-таймеры), не покрываемая общим хелпером.
+
 ## [1.4.2] - 2026-07-16
 
 ### Fixed

@@ -21,11 +21,12 @@ import type { FormHistoryConfig, HistoryEntry, UseFormHistoryResult } from './ty
 export function useFormHistory<T>(
   form: {
     state: { values: T }
-    store: { subscribe: (cb: () => void) => () => void }
+    // TanStack Store v0.7.x/v0.9.x возвращает bare unsubscribe-функцию, v0.11+ — объект { unsubscribe }
+    store: { subscribe: (cb: () => void) => (() => void) | { unsubscribe: () => void } }
     setFieldValue: (field: string, value: unknown) => void
     reset: () => void
   },
-  config?: FormHistoryConfig
+  config?: FormHistoryConfig,
 ): UseFormHistoryResult<T> {
   const {
     maxHistory = 50,
@@ -80,7 +81,7 @@ export function useFormHistory<T>(
         return newIndex
       })
     },
-    [currentIndex, maxHistory]
+    [currentIndex, maxHistory],
   )
 
   // Подписка на изменения формы с debounce
@@ -95,7 +96,12 @@ export function useFormHistory<T>(
     })
 
     return () => {
-      unsub()
+      // TanStack Store v0.9+ возвращает объект { unsubscribe }, а не функцию
+      if (typeof unsub === 'function') {
+        unsub()
+      } else {
+        unsub.unsubscribe()
+      }
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [form.store, form.state.values, debounceMs, pushSnapshot])
@@ -124,7 +130,7 @@ export function useFormHistory<T>(
         isUndoRedoRef.current = false
       }, 0)
     },
-    [form]
+    [form],
   )
 
   const undo = useCallback(() => {

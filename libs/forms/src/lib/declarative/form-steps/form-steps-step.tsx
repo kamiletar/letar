@@ -214,7 +214,10 @@ export function FormStepsStep({
       }
     })
 
-    // TanStack Store v0.9+ returns an object { unsubscribe }, not a function
+    // Совместимость: @tanstack/store 0.9+ returns Subscription, ранние — () => void
+    if (typeof subscription === 'function') {
+      return subscription
+    }
     return () => subscription.unsubscribe()
   }, [form, when])
 
@@ -290,13 +293,12 @@ export function FormStepsStep({
     // Use segment path as proxy to determine when structure may change
     // children NOT included — they change every render
 
-    [fieldExtractionPath]
+    [fieldExtractionPath],
   )
 
   // Update ref only if fieldNames actually changed
-  const fieldNamesChanged =
-    currentFieldNames.length !== fieldNamesRef.current.length ||
-    currentFieldNames.some((name, i) => name !== fieldNamesRef.current[i])
+  const fieldNamesChanged = currentFieldNames.length !== fieldNamesRef.current.length
+    || currentFieldNames.some((name, i) => name !== fieldNamesRef.current[i])
   if (fieldNamesChanged) {
     fieldNamesRef.current = currentFieldNames
   }
@@ -343,7 +345,7 @@ export function FormStepsStep({
         x: direction === 'forward' ? -SLIDE_OFFSET : SLIDE_OFFSET,
       },
     }),
-    [direction]
+    [direction],
   )
 
   // Step hidden via when condition — don't render

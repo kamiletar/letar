@@ -65,8 +65,7 @@ export function FormSubscribe({ children, debounce: delay }: FormSubscribeProps)
       >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {({ values, isDirty, isSubmitting }: any) =>
-          children(values as Record<string, unknown>, { isDirty, isSubmitting })
-        }
+          children(values as Record<string, unknown>, { isDirty, isSubmitting })}
       </form.Subscribe>
     )
   }
@@ -100,8 +99,10 @@ function FormSubscribeDebounced({ delay, children }: DebouncedProps): ReactNode 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unsubscribe = (form.store as any).subscribe(() => {
+    // Форсируем union-тип: инсталлированная в этом lib-контексте версия @tanstack/store
+    // типизирует subscribe() как чистую функцию, но у consuming apps (например mandala)
+    // может быть резолвлена версия ^0.11+, где subscribe() возвращает { unsubscribe }
+    const unsubscribe = form.store.subscribe(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state = form.state as any
       const next = {
@@ -112,10 +113,15 @@ function FormSubscribeDebounced({ delay, children }: DebouncedProps): ReactNode 
 
       if (timerRef.current) clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => setSnapshot(next), delay)
-    })
+    }) as (() => void) | { unsubscribe: () => void }
 
     return () => {
-      unsubscribe()
+      // TanStack Store v0.9+ возвращает объект { unsubscribe }, а не функцию
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      } else {
+        unsubscribe.unsubscribe()
+      }
       if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [form, delay])
