@@ -58,6 +58,41 @@
 
 ## Backlog 📋
 
+### Хвосты imot/premium-rosstil в функциональном коде (найдено root-weaver, 2026-07-22)
+
+Оба приложения удалены из монорепо 2026-07-05 (см. `project_premium_rosstil_imot_removed` в
+памяти), но упоминания остались в **25+ файлах**. Один из них — `libs/infra-config/src/index.ts`
+(`SERVER_APPS` всё ещё содержит `'premium-rosstil': 's2'` и `imot: 's2'`) — реально ломает
+`server-config.guard.spec.ts` в `dashboard-agent` (канон ≠ локальная копия `SERVER_APPS`, которая
+их уже не содержит с версии 0.7.5). Остальное — тихий тех-долг, не роняет ничего активно.
+
+**Обнаруженные категории (`grep -rln "imot\|premium-rosstil"`, вне `apps/imot`/`apps/premium-rosstil`):**
+
+- [ ] **Функциональные, стоит почистить:** `libs/infra-config/src/index.ts` (`SERVER_APPS` — причина
+      падения теста), `scripts/sync-env-docker.sh` (`APPS` массив), `cron-jobs.json`/`cron-jobs.example.json`,
+      `deploy-affected.sh` (только в `--help` тексте как пример, не в `S2_APPS` — уже чисто).
+- [ ] **Docker-compose secret-mounts других живых приложений** (`apps/dashboard/docker-compose.production.yml`,
+      `apps/kami/docker-compose.production.yml`, `apps/mandala/docker-compose.production.yml`,
+      `infra/nginx-proxy-manager/docker-compose.yml`) — вероятно монтируют
+      `apps/premium-rosstil/.env.docker`/`apps/imot/.env.docker`, которых больше нет; требует проверки
+      на сервере, не просто грепа локально (случайно снести рабочий mount).
+- [ ] **`apps/dashboard`** (реестр `DeployedApp`) — `prisma/seed.ts`, `src/lib/audit-log.ts`,
+      `src/app/api/servers/[id]/apps/discover/route.ts`, `src/app/servers/_components/AppForm.tsx`,
+      `src/generated/prisma/**` (НЕ трогать руками — генерируется, чистить через `schema.zmodel` +
+      `zenstack:generate`, если там реально enum/константа).
+- [ ] **Backup-скрипты:** `scripts/backup/db-backup.sh`, `db-restore.sh`, `list-backups.sh`,
+      `scripts/pull-env-docker.sh`, `scripts/umami-setup.sh`.
+- [ ] **Прочее:** `apps/driving-school/.../pin-auth-adapters.ts`, `libs/letar-consultant/src/prompt.ts`,
+      `.socraticodecontextartifacts.json`, `tsconfig.json` (path-алиасы?).
+- [ ] **Только doc-комментарии, косметика:** `libs/validation-utils/src/lib/{money,password,phone}.ts`
+      (`* Используется в: premium-rosstil, imot` — списки использования в JSDoc, не код).
+
+**Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` — отдельный git worktree (заброшенный?),
+не часть основного дерева, требует отдельного решения (удалить worktree или разобраться, что это).
+
+**Зависимости:** независимая сессия — большая часть требует проверки на сервере (docker-compose
+secret-mounts), не чисто локальный grep-and-replace.
+
 ### Надёжность deploy-истории (найдено BlackCove, 2026-07-22)
 
 `routes/deploy.ts` хранит `deployHistory` (ring-buffer, `MAX_DEPLOY_HISTORY` записей) и стрим логов текущего деплоя **только в памяти процесса** (`const deployHistory: DeployStatus[] = []`). При падении/рестарте контейнера `dashboard-agent` вся история и лог активного деплоя теряются безвозвратно — `deploy_status`/`GET /api/deploy/history` отвечают «not found»/«No deploys yet», хотя сам `deploy-affected.sh` мог быть ещё жив на хосте (через `nsenter`) и продолжать деплой вслепую, без возможности его отследить через deploy-mcp.
