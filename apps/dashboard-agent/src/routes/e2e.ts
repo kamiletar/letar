@@ -37,6 +37,7 @@ interface E2eRun {
   running: boolean
   app: string
   project?: string
+  grep?: string
   startTime?: string
   endTime?: string
   exitCode?: number | null
@@ -147,21 +148,24 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * POST /api/e2e/run — запускает `nx e2e <app>-e2e` против staging-контейнера
-   * Body: { app: string; baseUrl: string; project?: string }
+   * Body: { app: string; baseUrl: string; project?: string; grep?: string }
    * baseUrl — куда бить: ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
    * НЕ `http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов,
    * а если он окажется недостижим, Playwright молча поднимет свой dev-сервер и результат прогона
    * будет ложным (PLAN.md §18.7, aboi 2026-07-19). Клиент (libs/deploy-mcp) уже блокирует
    * localhost/127.0.0.1 на уровне схемы — сюда localhost не должен долетать в принципе.
    * project — конкретный Playwright project (chromium/firefox/webkit/shard-*); без него — все.
+   * grep — передаётся в `playwright test --grep` (имя файла/спека/название теста, подстрока
+   * или regex) для точечного прогона вместо всего набора — экономит время (2026-07-22:
+   * запрос точечной проверки /admin/products гонял все 123 теста за отсутствием фильтра).
    *
    * Асинхронный: возвращает runId сразу, клиент опрашивает /api/e2e/status.
    * По завершении пишет `.last-e2e-status/<app>.json` — читается warn-gate'ом deploy_app(production).
    */
-  fastify.post<{ Body: { app: string; baseUrl: string; project?: string } }>(
+  fastify.post<{ Body: { app: string; baseUrl: string; project?: string; grep?: string } }>(
     '/api/e2e/run',
     async (request): Promise<ApiResponse<{ runId: string; app: string; started: boolean }>> => {
-      const { app, baseUrl, project } = request.body
+      const { app, baseUrl, project, grep } = request.body
 
       if (!app) {
         return { success: false, error: 'App name is required', timestamp: new Date().toISOString() }
@@ -177,6 +181,16 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       if (project !== undefined && !/^[a-z0-9-]+$/.test(project)) {
         return { success: false, error: 'Invalid project format', timestamp: new Date().toISOString() }
       }
+      // grep тоже интерполируется в shell-строку (внутри одинарных кавычек) — запрещаем символы,
+      // которыми можно вырваться из кавычек или инжектировать команду. Кириллица/пробелы/пунктуация
+      // (для поиска по названию теста) разрешены, поэтому это deny-, а не allow-лист.
+      if (grep !== undefined && (grep.length > 200 || /['"`$;|&<>\\\r\n]/.test(grep))) {
+        return {
+          success: false,
+          error: 'Invalid grep pattern (запрещены кавычки/`$;|&<>\\` и переносы строк, макс. 200 символов)',
+          timestamp: new Date().toISOString(),
+        }
+      }
 
       // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
       if (getCurrentServer() !== 's3') {
@@ -191,8 +205,13 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         return { success: false, error: 'Другой e2e-прогон уже выполняется', timestamp: new Date().toISOString() }
       }
 
-      const run = createRun({ running: true, app, project, startTime: new Date().toISOString() })
-      appendOutput(run, `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''} against ${baseUrl}`)
+      const run = createRun({ running: true, app, project, grep, startTime: new Date().toISOString() })
+      appendOutput(
+        run,
+        `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${
+          grep ? ` (grep=${grep})` : ''
+        } against ${baseUrl}`
+      )
 
       // Коммит фиксируем ДО прогона — это то, что реально протестировано (не что задеплоено).
       let commitSha = 'unknown'
@@ -204,9 +223,16 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
       // nsenter выполняет команду на хосте (pid: host + privileged) — как в deploy.ts.
       // Внутри контейнера dashboard-agent нет ни `nx`, ни воркспейса; сам монорепо и bun/nx
-      // существуют только на хосте s3. `project` уже провалидирован выше (regex) — обязательно
-      // до интерполяции в шелл-строку, см. hostShellArgs().
-      const e2eCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${project ? ` -- --project=${project}` : ''}`
+      // существуют только на хосте s3. `project`/`grep` уже провалидированы выше (regex/deny-лист) —
+      // обязательно до интерполяции в шелл-строку, см. hostShellArgs().
+      // ⚠️ grep оборачиваем ДВОЙНЫМИ кавычками, не одинарными: e2eCommand целиком попадает внутрь
+      // одинарных кавычек в nxCommand ниже (`bash -c '${e2eCommand}'`) — одинарная кавычка здесь
+      // преждевременно закрыла бы ту внешнюю обёртку. Deny-лист выше уже исключает `"` из grep,
+      // так что вложенные двойные кавычки безопасны.
+      const extraArgs = [project ? `--project=${project}` : '', grep ? `--grep "${grep}"` : '']
+        .filter(Boolean)
+        .join(' ')
+      const e2eCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${extraArgs ? ` -- ${extraArgs}` : ''}`
       // nsenter -t 1 наследует root (privileged-контейнер) — без переключения на deploy
       // прогон создаёт root-owned .nx/workspace-data и apps/<app>-e2e/test-output,
       // которые потом ломают следующий deploy_app/run_e2e (EACCES). Тот же приём,

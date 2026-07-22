@@ -275,6 +275,10 @@ export function createDeployMcpServer(): McpServer {
       'ложным — проверял не staging-контейнер, а cold dev-режим (PLAN.md §18.7, aboi 2026-07-19).',
       "Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом в deploy_app(production).",
       'Возвращает runId — опрашивай через e2e_status.',
+      '',
+      'grep — точечный прогон вместо всего набора (playwright test --grep): имя файла-спека, название',
+      'теста/describe-блока (подстрока) или regex. Экономит время, когда нужно подтвердить фикс в паре',
+      'тестов, а не гонять все ~100+ (типовой кейс: точечная проверка после фикса конкретной страницы).',
     ].join('\n'),
     {
       app: z
@@ -291,10 +295,25 @@ export function createDeployMcpServer(): McpServer {
         })
         .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s3.letar.best (НЕ localhost)'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
+      grep: z
+        .string()
+        .max(200, 'grep слишком длинный (макс. 200 символов)')
+        .refine((v) => !/['"`$;|&<>\\\r\n]/.test(v), {
+          message: 'grep не должен содержать кавычки/`$;|&<>\\` и переносы строк (интерполируется в shell на s3)',
+        })
+        .optional()
+        .describe(
+          'Точечный прогон вместо всего набора: имя файла-спека (например "03-admin-products.admin.spec.ts") ' +
+            'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор.'
+        ),
     },
-    async ({ app, baseUrl, project }) => {
+    async ({ app, baseUrl, project, grep }) => {
       try {
-        const res = await agentRequest('s3', { method: 'POST', path: '/api/e2e/run', body: { app, baseUrl, project } })
+        const res = await agentRequest('s3', {
+          method: 'POST',
+          path: '/api/e2e/run',
+          body: { app, baseUrl, project, grep },
+        })
         if (!res.success) {
           return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
         }
