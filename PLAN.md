@@ -1,5 +1,29 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
+> **⚠️ §18.7 Тираж M1, батч 2 — ложный «регресс» `mandala` admin-раздела на staging: стейл-коммит,
+> не новый баг (2026-07-22, SageBeacon):** повторный e2e-прогон дал регресс (95 passed / 13 failed,
+> весь admin-UI снова не рендерился) на коммите `5698f885` — который закоммичен на **5 минут раньше**
+> фикса `a5893e7c` (запись ниже). Подтверждено напрямую (`git show 5698f885:...`): в этом коммите ещё
+> старый `return unsubscribe` в `SlugField`/`SeoField` и пустой Product-сид — код тестировался **до**
+> фикса. Регрессии в коде нет, фикс `a5893e7c` уже подтверждён прогоном 103/9 (запись ниже). Запрос
+> BlackCove — подтвердить коммит `mandala-stage.s3.letar.best` и передеплоить на актуальный HEAD.
+> Детали — `apps/mandala/PLAN.md` → «Ложная регрессия admin-раздела».
+
+> **✅ §18.7 Тираж M1, батч 2 — `mandala` `/admin/products` сломан целиком, два независимых бага
+> в т.ч. в `libs/admin-ui` (2026-07-22, mandala-dev, коммит `a5893e7c`, v0.39.10):**
+> (1) `prisma/seed.ts` никогда не создавал `Product` — таблица товаров была пуста на любом
+> окружении; (2) `SlugField`/`SeoField` (`libs/admin-ui/src/form-fields/`) возвращали из `useEffect`
+> результат `form.store.subscribe()` напрямую — в установленном `@tanstack/store@^0.11.0`
+> `subscribe()` возвращает `{ unsubscribe }`, а не функцию, cleanup не вызывался, подписка утекала
+> на каждый mount/unmount и крашила вкладку браузера при клиентской навигации с любого admin-списка
+> на `/new` (`Target page, context or browser has been closed` в Playwright). Тот же паттерн уже был
+> починен в 10 местах `libs/forms/src/` ранее — только 2 файла `libs/admin-ui` остались со старым
+> кодом. Фикс сделан напрямую в `libs/admin-ui` (единственный consumer — `mandala`), без делегирования
+> через `form-delegation.md` (не `libs/forms`/form-mcp экосистема). **Верифицировано на staging через
+> BlackCove:** 96→99→**103 passed** (было 12 failed → 9 failed, все по теме `/admin/products` ушли).
+> Остаточные 9 фейлов (чекаут/заказы/CRUD-флоу) — отдельная задача, в `apps/mandala/PLAN.md` →
+> «🟡 Остаточные e2e-фейлы». Детали — `apps/mandala/PLAN_COMPLETED.md`.
+
 > **🔴→✅ Этап 0.7 — инцидент прод-краша от email-canary, найден BlackCove и починен
 > (2026-07-21/22, thread `deploy-dashboard-agent-email-canary`, коммит `305c0ec7`):** после первого
 > деплоя `email-canary-check` необработанный `'error'` на `ImapFlow` (`Socket timeout`) уронил весь
