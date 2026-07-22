@@ -118,15 +118,11 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       `server-config.ts`/`deploy-affected.sh` это уже отражают); `dashboard-agent`/`aboi` числились
       на s1, хотя реально на s2 — перенесены в `S2_APPS`. `scripts/umami-setup.sh` — убраны сайты
       `premium-rosstil`/`imot` из `SITES`, заголовок поправлен с s1 на s2. Коммит `975f6b65`.
-- [ ] **`scripts/backup/{db-backup,db-restore,list-backups}.sh` + `.env.example` + `INTEGRATION.md`/
-      `QUICKSTART.md`/`README.md` — не тронуто, требует решения владельца.** Это не переиспользуемый
-      скрипт с параметром приложения, а целая подсистема, изначально написанная **конкретно под
-      premium-rosstil** (хардкод `/opt/premium-rosstil/...`, `premium-rosstil-postgres`, домен).
-      `.claude/docs/backup-architecture.md` описывает другой, актуальный канон бэкапов —
-      `dashboard`/`dashboard-agent` API (`docker exec pg_dump` через dockerode, `/home/deploy/letar/
-      backups/`) — эта папка нигде не упомянута как часть текущей архитектуры. Похоже на полностью
-      осиротевшую legacy-подсистему, но решение «удалить целиком» — не грeп-фикс, требует
-      подтверждения владельца.
+- [x] **`scripts/backup/` удалена целиком** (владелец подтвердил, 2026-07-22) — вся подсистема
+      (`db-backup.sh`, `db-restore.sh`, `list-backups.sh`, `.env.example`, `INTEGRATION.md`,
+      `QUICKSTART.md`, `README.md`) была написана конкретно под premium-rosstil и осиротела вместе
+      с приложением; актуальный канон бэкапов — `dashboard`/`dashboard-agent` API
+      (`.claude/docs/backup-architecture.md`), эта папка там не упоминалась.
 - [x] `tsconfig.json` — реально мёртвые project references на несуществующие `apps/imot`,
       `apps/imot-e2e`, `apps/premium-rosstil-e2e`; `.socraticodecontextartifacts.json` — индексировал
       `schema.zmodel` обоих удалённых приложений; `libs/letar-consultant/src/prompt.ts` — список apps/
