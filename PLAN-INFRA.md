@@ -1358,4 +1358,24 @@ prisma/seed.ts` за кулисами `prisma db seed`) вне полного `d
   диффы в соседние файлы, увеличивая риск, что кто-то однажды закоммитит их не глядя (конфликты
   с другими агентами, шумные code review).
 
+### Новая находка — `nx format:write --projects=<неверное-имя>` форматирует ВЕСЬ репозиторий (2026-07-22, dashboard-agent-dev)
+
+Другой механизм, тот же класс симптома. При выносе `libs/redis-client` вызвал
+`nx format:write --projects=redis-client,dashboard-agent,animatrona-tracker,svoichuzhie` —
+`redis-client` оказалось неверным именем проекта (канон — `@letar/redis-client`, из
+`project.json`). Nx упал с `Cannot read properties of undefined (reading 'data')`, написал
+`Defaulting to all files pattern: "."` и прогнал dprint по **всему репозиторию**. Затронул 8
+файлов вне скоупа задачи (`PLAN.md`, `libs/email/src/provider.ts`, `apps/mandala/next.config.js` и
+др.) — все правки чисто косметические (см. §20 выше), но заметил только потому что специально
+сверил `git status` перед коммитом. Откатил `git restore <file>` поштучно (не `git checkout -- .`
+— заблокировано хуком).
+
+**Практический вывод:** перед `--projects=X,Y,Z` сверяй имя с полем `"name"` в `project.json`
+целевого проекта — для npm-scoped библиотек (`@letar/*`) короткое имя каталога **не работает**,
+а nx проглатывает ошибку резолва и молча откатывается к форматированию всего дерева, ничем не
+предупреждая, что скоуп изменился. Не добавлено в DoD ниже как отдельный пункт — тот же паттерн
+проверки («git status перед коммитом»), что и вариант решения 4 выше, но стоит учесть при выборе
+финального решения §20: если чинить сузение `auto-format.js`/PostToolUse-хука, вероятно стоит
+заодно защититься и от этого падения `--projects` в `nx format:write`/`format:check`.
+
 ---

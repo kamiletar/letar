@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.8.4] — 2026-07-22
+
+### Refactor: Redis-клиент вынесен в @letar/redis-client
+
+`lib/redis.ts` дублировал один и тот же паттерн graceful-degradation, что и
+`animatrona-tracker`/`svoichuzhie`. Вынесено в общую библиотеку `libs/redis-client`
+(`@letar/redis-client`) — `lib/redis.ts` теперь тонкая обёртка (`createRedisClient()`).
+Поведение не изменилось. Проверено изолированной Docker-сборкой (та же схема, что ловит
+"Module not found" на транзитивных `@letar/*`-импортах).
+
 ## [0.8.3] — 2026-07-22
 
 ### Feat: персистентность deploy-истории в Redis

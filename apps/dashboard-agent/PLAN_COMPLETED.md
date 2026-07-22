@@ -2,6 +2,36 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.8.3 → 0.8.4 — Redis-клиент вынесен в @letar/redis-client (2026-07-22, dashboard-agent-dev)
+
+После добавления `lib/redis.ts` в прошлой задаче заметили: точно такой же код (Redis-клиент с
+graceful degradation) уже был отдельно в `animatrona-tracker` и `svoichuzhie` — три копии одного
+паттерна. Вынесли в новую библиотеку `libs/redis-client` (`@letar/redis-client`).
+
+- `createRedisClient(options)` — фабрика, каждый вызов создаёт независимый singleton-геттер
+  `() => Redis | null`. Опции: `envVar`, `fallbackUrl`, `silent`, `redisOptions`, `logPrefix`.
+- `dashboard-agent/src/lib/redis.ts` теперь — тонкая обёртка в 3 строки.
+- Приложения оставляют свои хелперы (`cached`, `rateLimit`, `checkRateLimit`, персист
+  deploy-истории) поверх общего клиента — они у каждого свои, не тянут на общую абстракцию.
+- Подключение: `paths`/`references` в `tsconfig.json`, `implicitDependencies` в `project.json`,
+  `Dockerfile.production` — добавлен `libs/redis-client` в синтетический мини-workspace (по
+  аналогии с `libs/email`).
+
+**Проверка:** typecheck/lint/test — зелёные для всех трёх приложений и новой библиотеки. Реальный
+`next build` прошёл для `animatrona-tracker`/`svoichuzhie`. Для `dashboard-agent` отдельно прогнали
+изолированную Docker-сборку (builder-стейдж) — именно то место, где раньше ловили `Module not
+found` на транзитивных `@letar/*`-импортах (прецедент с `SortablePhotoGrid`, см. `.claude/rules/
+deploy-coordination.md`).
+
+**Инцидент по пути (исправлен):** `nx format:write` со старым именем проекта (`redis-client`
+вместо канонического `@letar/redis-client`) упал с ошибкой и молча переформатировал **весь
+репозиторий** — задело 8 чужих файлов вне скоупа задачи. Замечено по diff, откачено
+`git restore` до состояния коммита — в итоговый коммит попали только свои файлы.
+
+**Коммиты:** `3f3d15d3` (dashboard-agent + animatrona-tracker + новая либа, основной репо),
+`63bb0ff` (svoichuzhie, отдельный коммит в приватном submodule), `db599fe4` (bump submodule SHA).
+Деплой запрошен у BlackCove (thread #708) для всех трёх приложений разом.
+
 ## Версия 0.8.2 → 0.8.3 — Персистентность deploy-истории в Redis (2026-07-22, dashboard-agent-dev)
 
 Закрытие backlog-пункта «Надёжность deploy-истории», найденного BlackCove в тот же день на
