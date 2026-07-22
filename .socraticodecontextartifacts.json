@@ -3,7 +3,7 @@
     {
       "name": "architecture-docs",
       "path": "./.claude/docs",
-      "description": "Архитектурная документация монорепо letar: архитектура всех приложений (premium-rosstil, imot, driving-school, kami, mandala, auth-hub, archetest, time, animatrona), БД (ZenStack v3 + Prisma 7.6 + PostgreSQL), формы (@letar/forms v0.79), аутентификация (Better Auth + OIDC + Organizations), деплой (Docker + deploy-affected.sh), стиль кода, MCP серверы, e2e тестирование (Playwright/Cypress), PWA offline (Serwist + IndexedDB), email (Maddy), personal-data (152-ФЗ, cookie-согласия), images (WebP, thumbnails), data-fetching (TanStack Query + Server Actions)."
+      "description": "Архитектурная документация монорепо letar: архитектура всех приложений (driving-school, kami, mandala, auth-hub, archetest, time, animatrona), БД (ZenStack v3 + Prisma 7.6 + PostgreSQL), формы (@letar/forms v0.79), аутентификация (Better Auth + OIDC + Organizations), деплой (Docker + deploy-affected.sh), стиль кода, MCP серверы, e2e тестирование (Playwright/Cypress), PWA offline (Serwist + IndexedDB), email (Maddy), personal-data (152-ФЗ, cookie-согласия), images (WebP, thumbnails), data-fetching (TanStack Query + Server Actions)."
     },
     {
       "name": "skill-patterns",
@@ -26,11 +26,6 @@
       "description": "Полное API @letar/forms: декларативный Form API (createForm, <Form initialValue schema onSubmit>, Form.Field.String/Number/Textarea/Date/Password/Select/Combobox/Checkbox/Switch/RadioGroup/ColorPicker/Schedule/Editable, Form.Group/Form.Group.List, Form.Button.Submit, Form.Errors), imperative API (useAppForm, TanStackFormField, ChakraFormField, FormGroup, FormGroupList), offline (useOfflineForm, FormOfflineIndicator), persistence (localStorage, useFormPersistence), i18n (FormI18nProvider, useLocalizedOptions), mapServerErrors, applyServerErrors, withUIMeta, withUIMetaDeep, enumMeta, relationMeta."
     },
     {
-      "name": "db-schema-premium-rosstil",
-      "path": "./apps/premium-rosstil/schema.zmodel",
-      "description": "ZenStack схема БД для premium-rosstil (e-commerce интернет-магазин одежды): модели User (role: USER/ADMIN), Product, ProductVariant, ProductItem, ProductSize (международные размеры: ru/de/it/fr/uk/us, мерки bust/waist/hips), Cart+CartItem, Order+OrderItem (снэпшоты данных, статусы NEW/CONFIRMED/PROCESSING/SHIPPED/DELIVERED/CANCELLED), Address (DaData интеграция), Wishlist, NotificationPreferences. ZenStack v3 policies: @@allow('all', auth().role == ADMIN), @@allow('read', auth() == this)."
-    },
-    {
       "name": "db-schema-driving-school",
       "path": "./apps/driving-school/schema.zmodel",
       "description": "Эталонная ZenStack схема с мультитенантностью: Better Auth Organizations (School → Member → роли OWNER/SCHOOL_ADMIN/INSTRUCTOR/STUDENT через массив UserRole[]), has(auth().roles, ROLE), field-level @allow/@deny (email, phone только owner/OWNER), Custom Procedures (initiateTransfer, processPayment), ZenStack v3 ORM. Ключевые модели: School (организация), Member, InstructorProfile, StudentProfile, Lesson, Schedule, Payment. Эталон Organizations + multi-role patterns."
@@ -39,11 +34,6 @@
       "name": "db-schema-auth-hub",
       "path": "./apps/auth-hub/schema.zmodel",
       "description": "ZenStack схема для auth.letar.best (централизованный сервис авторизации): модели User, Account (OAuth), Session, OauthApplication (OIDC клиенты), VerificationToken (PIN верификация: 6-значный код, pinExpires, pinAttempts max 5). OIDC Provider plugin, trustedClients (skipConsent для своих приложений), подключённые клиенты: archetest-prod."
-    },
-    {
-      "name": "db-schema-imot",
-      "path": "./apps/imot/schema.zmodel",
-      "description": "ZenStack схема для IMOT (психотерапевтическая платформа): мультиролевая система (CLIENT, SPECIALIST, ADMIN). Модели: User, DiagnosticSession, TherapyPlan, Practice, ProgressRecord, Analytics. ZenStack v3 policies по ролям."
     },
     {
       "name": "external-tool-docs",

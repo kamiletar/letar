@@ -5,7 +5,7 @@ import { z } from 'zod/v4'
  * Принимает строку или число, возвращает number
  * Пустая строка трансформируется в NaN и будет отклонена валидатором
  *
- * Используется в: driving-school (lesson-type-form), premium-rosstil (products)
+ * Используется в: driving-school (lesson-type-form)
  *
  * @example
  * priceSchema.parse(1500) // 1500
@@ -24,7 +24,7 @@ export const priceSchema = z
     z
       .number({ message: 'Введите корректную сумму' })
       .min(0, { message: 'Сумма не может быть отрицательной' })
-      .max(100000000, { message: 'Сумма слишком большая' })
+      .max(100000000, { message: 'Сумма слишком большая' }),
   )
 
 /**
@@ -58,7 +58,7 @@ export function createPriceSchema(options?: { min?: number; max?: number; minMes
       z
         .number({ message: 'Введите корректную сумму' })
         .min(min, { message: minMessage ?? `Минимальная сумма — ${min} ₽` })
-        .max(max, { message: maxMessage ?? `Максимальная сумма — ${max} ₽` })
+        .max(max, { message: maxMessage ?? `Максимальная сумма — ${max} ₽` }),
     )
 }
 
@@ -85,5 +85,5 @@ export const optionalPriceSchema = z
       .number()
       .min(0, { message: 'Сумма не может быть отрицательной' })
       .max(100000000, { message: 'Сумма слишком большая' })
-      .optional()
+      .optional(),
   )

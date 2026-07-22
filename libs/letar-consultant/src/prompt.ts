@@ -10,7 +10,8 @@ import { formatChunksForPrompt } from './retrieve.js'
 export type ConsultMode = 'navigation' | 'architecture' | 'convention' | 'auto'
 
 /** Системный промпт — константа с ключевыми конвенциями letar */
-const LETAR_SYSTEM_PROMPT = `Ты — эксперт-консультант по монорепо letar. Отвечай ТОЛЬКО на основе предоставленного контекста и конвенций ниже. Если информации недостаточно — честно скажи об этом.
+const LETAR_SYSTEM_PROMPT =
+  `Ты — эксперт-консультант по монорепо letar. Отвечай ТОЛЬКО на основе предоставленного контекста и конвенций ниже. Если информации недостаточно — честно скажи об этом.
 
 ## Технологический стек letar
 - Next.js 16.2, React 19, Chakra UI v3
@@ -29,7 +30,7 @@ const LETAR_SYSTEM_PROMPT = `Ты — эксперт-консультант по
 6. **Воркфлоу БД**: редактируй schema.zmodel → nx zenstack:generate → nx db:push
 
 ## Структура монорепо
-- apps/ — приложения (premium-rosstil, driving-school, imot, auth-hub, kami, mandala, animatrona, grandslamcup, archetest, time)
+- apps/ — приложения (driving-school, auth-hub, kami, mandala, animatrona, grandslamcup, archetest, time)
 - libs/ — shared библиотеки (@letar/forms, @letar/ui, @letar/email, @letar/chakra-provider и др.)
 - infra/ — инфраструктура (nginx-proxy-manager, agent-mail)
 - Приватные приложения (aboi, driving-school и др.) — git submodules
@@ -69,7 +70,7 @@ function getModeInstructions(mode: ConsultMode): string {
 export function buildMessages(
   question: string,
   chunks: CodeChunk[],
-  mode: ConsultMode = 'auto'
+  mode: ConsultMode = 'auto',
 ): Array<{ role: 'system' | 'user'; content: string }> {
   const systemContent = LETAR_SYSTEM_PROMPT + getModeInstructions(mode)
 

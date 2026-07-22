@@ -16,9 +16,6 @@
       "path": "./libs/chakra-provider"
     },
     {
-      "path": "./apps/premium-rosstil-e2e"
-    },
-    {
       "path": "./libs/format-utils"
     },
     {
@@ -131,12 +128,6 @@
     },
     {
       "path": "./libs/number-words"
-    },
-    {
-      "path": "./apps/imot"
-    },
-    {
-      "path": "./apps/imot-e2e"
     },
     {
       "path": "./apps/form-docs"
