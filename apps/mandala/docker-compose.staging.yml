@@ -46,6 +46,8 @@ services:
       # совпадал с Origin реального e2e-браузера (найдено 2026-07-19 на aboi, тот же класс бага,
       # PLAN.md §18.7).
       BETTER_AUTH_URL: https://mandala-stage.s3.letar.best
+    volumes:
+      - ./uploads:/app/apps/mandala/uploads
     depends_on:
       db:
         condition: service_healthy
