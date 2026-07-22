@@ -3,7 +3,7 @@
 # Использование: ./scripts/sync-env-docker.sh [app-name]
 # Примеры:
 #   ./scripts/sync-env-docker.sh              # Синхронизировать все на оба сервера
-#   ./scripts/sync-env-docker.sh premium-rosstil  # Только premium-rosstil
+#   ./scripts/sync-env-docker.sh dashboard-agent  # Только dashboard-agent
 
 set -e
 
@@ -36,8 +36,6 @@ fi
 
 # Список приложений с .env.docker
 APPS=(
-  "premium-rosstil"
-  "imot"
   "mandala"
   "dashboard"
   "driving-school"

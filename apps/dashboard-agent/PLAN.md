@@ -89,9 +89,17 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
 - [x] `libs/infra-config/src/index.ts` (`SERVER_APPS` содержал `premium-rosstil`/`imot` — причина
       расхождения с локальной копией `server-config.ts` в dashboard-agent) — убраны, guard-тест и
       typecheck зелёные (dashboard-agent-dev, 2026-07-22, коммит `319381b5`).
-- [ ] **Функциональные, ещё не почищены:** `scripts/sync-env-docker.sh` (`APPS` массив),
-      `cron-jobs.json`/`cron-jobs.example.json`, `deploy-affected.sh` (только в `--help` тексте как
-      пример, не в `S2_APPS` — уже чисто).
+- [x] `scripts/sync-env-docker.sh` (`APPS` массив + пример в шапке) и `cron-jobs.example.json`
+      (два `imot-*` cron-задания) — убраны (dashboard-agent-dev, 2026-07-22).
+      **Важно:** локальный `cron-jobs.json` в корне репо — `/cron-jobs.json` в `.gitignore` (не
+      трекается git, `git ls-files` его не показывает) — это личный черновой файл, не часть
+      репозитория, коммитить/чистить в нём нечего. Реальный конфиг на сервере — `/home/deploy/letar/
+      cron-jobs.json` (`deploy-affected.sh:421` копирует туда `cron-jobs.example.json` только если
+      файла там ещё нет — на s2 он уже существует с 2026-07, этот коммит его не трогает). Если
+      `imot-session-reminders`/`imot-practice-diary-reminders` всё ещё в живом конфиге на s2
+      (эндпоинты 404'ят с 2026-07-05), чистить через `dashboard-agent` cron API (`lib/cron.ts` →
+      `saveCronConfig`), не прямым SSH-эдитом.
+      `deploy-affected.sh` — только `--help`-текст, не трогали (не в `S2_APPS`, уже чисто).
 - [ ] **Docker-compose secret-mounts других живых приложений** (`apps/dashboard/docker-compose.production.yml`,
       `apps/kami/docker-compose.production.yml`, `apps/mandala/docker-compose.production.yml`,
       `infra/nginx-proxy-manager/docker-compose.yml`) — вероятно монтируют
