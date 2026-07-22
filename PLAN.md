@@ -1540,6 +1540,13 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 - **✓ DoD:** по каждому идентификатору зафиксировано решение; где мигрируем — выполнено с бэкапом; `grep -i lena`
   чист либо остаток обоснован в этом этапе.
 - **Зависимости:** БД-ренейм пересекается с бэкапами (0.3) и миграциями (§8 сквозные).
+- ⏳ **Хвосты decommission `imot`/`premium-rosstil` (найдено root-weaver, 2026-07-22, тот же класс
+  проблемы, что и хвосты `lena`):** приложения выведены из эксплуатации 2026-07-05, но 25+ файлов вне
+  их собственных папок всё ещё их упоминают. Один реально ломает тест — `libs/infra-config/src/index.ts`
+  (`SERVER_APPS`) расходится с локальной копией в `dashboard-agent` (там уже почищено с v0.7.5), из-за
+  чего падает `server-config.guard.spec.ts`. Полный список по категориям риска (docker-compose
+  secret-mounts других приложений, backup-скрипты, generated Prisma, doc-комментарии) — Backlog в
+  `apps/dashboard-agent/PLAN.md`.
 
 ### Этап 0.5 — Nx module-boundary теги (§13.10)
 
