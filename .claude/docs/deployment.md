@@ -714,6 +714,25 @@ export SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-/home/deploy/.age/letar-key.txt}"
 
 ---
 
+### Self-деплой dashboard-agent обрывается на recreate-шаге
+
+**Ключевой факт:** `deploy-mcp`/`deploy_app` работает через SSH-туннель (`:13100`) **в тот же самый контейнер dashboard-agent**, который выполняет и оркеструет деплой. Это не отдельная инфраструктура — деплой-агент деплоит сам себя.
+
+**Симптом:** при `deploy_app(dashboard-agent, production)` скрипт доходит до `docker compose up -d` → останавливает старый контейнер `dashboard-agent` → в этот момент обрывается сам процесс `deploy-affected.sh` (он жил внутри старого контейнера) → новый контейнер остаётся в статусе `Created`, но не стартует. `deploy_status` после этого падает с `Не удалось достучаться до агента на s2 (туннель :13100): fetch failed` — потому что обслуживающий туннель контейнер только что убит.
+
+**Починка (ручная, до системного фикса):**
+
+```bash
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+  "cd /home/deploy/letar/apps/dashboard-agent && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && docker compose -f docker-compose.production.yml --env-file .env.docker up -d"
+```
+
+Проверить `docker ps -a --filter name=dashboard-agent` — если новый контейнер `Created`, а старый `Exited`, это тот самый обрыв, а не ошибка сборки.
+
+**Правило на будущее:** деплой dashboard-agent на прод **всегда** рискует зависнуть на этом шаге — закладывать это как ожидаемый риск, не как аномалию. Системный фикс не применён (возможные варианты: `docker compose up -d --wait`, health-check-retry с большим таймаутом в `deploy-affected.sh`, либо запуск оркестрации через отдельный процесс/watchdog, не убиваемый вместе с самим контейнером).
+
+---
+
 ### Submodule на сервере отстаёт — untracked-файлы блокируют checkout
 
 **Симптом:** `git pull --recurse-submodules` обновляет основной репо, но для отдельных submodule падает:
