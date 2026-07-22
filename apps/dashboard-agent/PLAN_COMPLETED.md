@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.8.2 → 0.8.3 — Персистентность deploy-истории в Redis (2026-07-22, dashboard-agent-dev)
+
+Закрытие backlog-пункта «Надёжность deploy-истории», найденного BlackCove в тот же день на
+инциденте с email-canary (краш процесса необработанным `error` от `ImapFlow` посреди деплоя
+`aprel8008` — прогресс из deploy-mcp пропал, деплой пришлось доливать вручную через SSH).
+
+**Код:** новый `lib/redis.ts` — клиент `ioredis` с graceful degradation (без `REDIS_URL` или при
+недоступном Redis все вызывающие продолжают работать чисто в памяти, без ошибок — тот же паттерн,
+что и `apps/animatrona-tracker/src/lib/redis.ts`). `routes/deploy.ts`:
+
+- каждый снапшот `DeployStatus` персистится в Redis (`dashboard-agent:deploy:item:<id>`, TTL 7
+  дней) + индекс порядка (`dashboard-agent:deploy:index`);
+- лог (`appendOutput`, вызывается построчно на каждый chunk stdout/stderr) — дебаунс не чаще раза
+  в секунду на деплой; финальный статус на каждом пути завершения (`pull`/`restart`/`compose-up`/
+  `deploy-app` close·error/`cancel`) — немедленный `flushPersist`;
+- `rehydrateFromRedis()` при старте процесса восстанавливает `deployHistory`; записи, застигнутые
+  в `running: true` (агент перезапустился посреди деплоя), помечаются `interrupted: true`.
+
+**Инфраструктура:** переиспользован уже существующий shared Redis (`letar-redis`, `infra/redis`,
+живёт на s2) — используется `animatrona-tracker`/`auth-hub`/`kami`/`driving-school`/`svoichuzhie`.
+Заметка в этом же `PLAN.md` от 2026-07-06 («Redis нигде не используется как shared-стор») оказалась
+устаревшей на момент проверки — новая инфраструктура не поднималась, только
+`REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}` в `docker-compose.production.yml`. На s3
+(staging) Redis не развёрнут — `REDIS_URL` там намеренно не задан (graceful degradation, без
+лишних error-логов о недоступном инстансе).
+
+**Побочная находка (задокументирована, не исправлена):** прояснена причина, почему
+`deploy-affected.sh`, запущенный через `nsenter` (`lib/host-exec.ts`), не переживает рестарт
+контейнера `dashboard-agent`. `nsenter -t 1 -m -u -n -i` не включает `-p` (pid namespace) — не
+нужен, контейнер и так поднят с `pid: host`. Но **cgroup при этом не меняется**: процесс остаётся в
+cgroup контейнера, и `docker compose up -d` recreate убивает его вместе с контейнером. Тот же
+корень, что и в соседнем backlog-пункте «self-deploy обрывает сам себя на recreate-шаге» — оба
+вытекают из того, что nsenter здесь даёт только namespace-изоляцию, не cgroup-независимость.
+Полноценный fix (cgroup escape, например `systemd-run --scope` на хосте) не входил в эту сессию —
+требует изменений в общем `deploy-affected.sh`, отдельная задача.
+
+**Деплой:** запрошен и выполнен BlackCove тем же вечером (commit `5698f885`, s2) — self-деплой
+снова обрывался на recreate-шаге (та самая непочиненная проблема выше), добит вручную через
+`docker compose up -d`. Health-check зелёный.
+
 ## Версия 0.8.0 → 0.8.1 — Канареечный мониторинг доставки email + прод-инцидент (2026-07-22)
 
 Реализация корневого `PLAN.md` Этапа 0.7 — автоматическая проверка, что письма реально **доходят**
