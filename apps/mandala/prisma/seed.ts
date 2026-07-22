@@ -281,11 +281,62 @@ async function main() {
 
   console.log(`✓ Created ${firstMandalas.length} short URLs`)
 
+  // Создать тестовые товары для магазина
+  console.log('\n⏳ Creating products...')
+
+  const productsData = [
+    {
+      slug: 'magnit-mandala-om',
+      name: 'Магнит "Мандала Ом"',
+      description: 'Керамический магнит с изображением мандалы Ом ручной работы.',
+      price: 350,
+      stock: 15,
+    },
+    {
+      slug: 'otkrytka-czvetok-zhizni',
+      name: 'Открытка "Цветок жизни"',
+      description: 'Авторская открытка с мандалой "Цветок жизни", подходит для подарка.',
+      price: 150,
+      stock: 30,
+    },
+    {
+      slug: 'poster-anahata',
+      name: 'Постер "Анахата"',
+      description: 'Печатный постер мандалы Анахата формата А3.',
+      price: 900,
+      stock: 8,
+    },
+  ]
+
+  for (const [index, product] of productsData.entries()) {
+    await prisma.product.upsert({
+      where: { slug: product.slug },
+      update: {
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        order: index,
+      },
+      create: {
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        order: index,
+      },
+    })
+  }
+
+  console.log(`✓ Created ${productsData.length} products`)
+
   // Итоговая статистика
   const stats = {
     images: await prisma.image.count(),
     mandalas: await prisma.mandala.count(),
     shortUrls: await prisma.shortUrl.count(),
+    products: await prisma.product.count(),
   }
 
   // Проверяем что blurDataURL заполнен
@@ -297,6 +348,7 @@ async function main() {
   console.log(`  Images: ${stats.images} (with blur: ${imagesWithBlur})`)
   console.log(`  Mandalas: ${stats.mandalas}`)
   console.log(`  Short URLs: ${stats.shortUrls}`)
+  console.log(`  Products: ${stats.products}`)
 }
 
 main()

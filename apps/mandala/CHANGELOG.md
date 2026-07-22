@@ -4,6 +4,25 @@
 
 ## [Unreleased]
 
+## [0.39.10] - 2026-07-22
+
+### Fixed
+
+- **`/admin/products` сломан целиком** (найдено BlackCove, staging e2e §18.7 batch2) — два независимых бага:
+  - **`prisma/seed.ts` никогда не создавал записи `Product`** — список товаров в админке был пуст на любом
+    окружении (не только staging), из-за чего 3 e2e-теста падали на `getByRole('table')`. Добавлен блок
+    сидинга 3 тестовых товаров (аналогично мандалам).
+  - **Клиентская навигация с любой admin-таблицы на `/new` крашила вкладку** (`SlugField`/`SeoField` из
+    `@letar/admin-ui` подписывались на `form.store.subscribe()` и возвращали результат подписки прямо из
+    `useEffect`). В установленной версии `@tanstack/form-core@1.33.x` → `@tanstack/store@^0.11.0`
+    `subscribe()` возвращает объект `{ unsubscribe }`, а не функцию — React ругался
+    `useEffect must not return anything besides a function` и **cleanup никогда не вызывался**, подписка
+    утекала на каждый mount/unmount. При навигации это провоцировало крах вкладки браузера
+    (`Target page, context or browser has been closed` в Playwright). Баг задевал не только товары, но и
+    мандалы/контент-страницы — везде, где используются `SlugField`/`SeoField`. Остальные 10 мест в
+    `libs/forms/src` уже были исправлены на `.unsubscribe()` ранее; `slug-field.tsx`/`seo-field.tsx`
+    остались со старым паттерном. Исправлено по тому же паттерну.
+
 ## [0.39.8] - 2026-07-12
 
 ### Fixed

@@ -62,7 +62,7 @@ export function SlugField<T extends Record<string, unknown>>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(form.setFieldValue as any)(name, value)
     },
-    [form]
+    [form],
   )
 
   const getValues = useCallback(() => form.state.values as unknown as T, [form])
@@ -103,7 +103,7 @@ export function SlugField<T extends Record<string, unknown>>({
         setFieldValue(slugName, newSlug as T[typeof slugName])
       }
     },
-    [titleName, slugName, isLinked, setFieldValue]
+    [titleName, slugName, isLinked, setFieldValue],
   )
 
   // Синхронизация с формой при изменении slug
@@ -117,7 +117,7 @@ export function SlugField<T extends Record<string, unknown>>({
       setSlugValue(value)
       setFieldValue(slugName, value as T[typeof slugName])
     },
-    [slugName, isLinked, setFieldValue]
+    [slugName, isLinked, setFieldValue],
   )
 
   // Переключение связи
@@ -158,7 +158,8 @@ export function SlugField<T extends Record<string, unknown>>({
       }
     })
 
-    return unsubscribe
+    // TanStack Store v0.9+ возвращает объект { unsubscribe }, а не функцию
+    return () => unsubscribe.unsubscribe()
   }, [form, titleName, slugName, titleValue, slugValue])
 
   return (
