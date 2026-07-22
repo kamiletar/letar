@@ -4,7 +4,7 @@
   "sourceRoot": "apps/dashboard-agent/src",
   "projectType": "application",
   "tags": ["type:app", "scope:infra", "owner:letar"],
-  "implicitDependencies": ["@letar/email"],
+  "implicitDependencies": ["@letar/email", "@letar/redis-client"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",

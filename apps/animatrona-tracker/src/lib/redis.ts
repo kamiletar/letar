@@ -5,49 +5,10 @@
  * приложение продолжает работать напрямую через БД.
  */
 
-import Redis from 'ioredis'
+import { createRedisClient } from '@letar/redis-client'
 
-/** Singleton Redis клиент — ленивая инициализация */
-let redis: Redis | null = null
-let connectionFailed = false
-
-/**
- * Получить Redis клиент. Возвращает null если REDIS_URL не задан
- * или подключение ранее провалилось.
- */
-export function getRedis(): Redis | null {
-  if (!process.env.REDIS_URL || connectionFailed) {
-    return null
-  }
-
-  if (!redis) {
-    redis = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      lazyConnect: true,
-      retryStrategy(times) {
-        // Переподключение: 1с, 2с, 4с... макс 30с
-        const delay = Math.min(times * 1000, 30000)
-        return delay
-      },
-    })
-
-    redis.on('error', (err) => {
-      console.error('[redis] Ошибка:', err.message)
-    })
-
-    redis.on('connect', () => {
-      connectionFailed = false
-    })
-
-    // Попытка подключения
-    redis.connect().catch(() => {
-      connectionFailed = true
-      console.warn('[redis] Не удалось подключиться, работаем без кэша')
-    })
-  }
-
-  return redis
-}
+/** Singleton-геттер Redis клиента — возвращает null если REDIS_URL не задан или подключение провалилось */
+export const getRedis = createRedisClient({ logPrefix: '[redis]' })
 
 /**
  * Cache-aside хелпер: проверяем Redis → если miss → вызываем fn → пишем в Redis.

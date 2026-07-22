@@ -33,7 +33,8 @@
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
       "@letar/animatrona-franchise-graph": ["../../libs/animatrona-franchise-graph/src/index.ts"],
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
-      "@letar/ui": ["../../libs/ui/src/index.ts"]
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/redis-client": ["../../libs/redis-client/src/index.ts"]
     },
     "types": ["node"],
     "outDir": "dist",
@@ -114,6 +115,9 @@
     },
     {
       "path": "../../libs/query-provider"
+    },
+    {
+      "path": "../../libs/redis-client"
     }
   ]
 }

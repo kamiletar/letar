@@ -15,7 +15,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@letar/email": ["../../libs/email/src/index.ts"]
+      "@letar/email": ["../../libs/email/src/index.ts"],
+      "@letar/redis-client": ["../../libs/redis-client/src/index.ts"]
     },
     "types": ["node"],
     "lib": ["ES2022"],
@@ -24,5 +25,9 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "references": [{ "path": "./tsconfig.spec.json" }, { "path": "../../libs/email" }]
+  "references": [
+    { "path": "./tsconfig.spec.json" },
+    { "path": "../../libs/email" },
+    { "path": "../../libs/redis-client" }
+  ]
 }

@@ -42,7 +42,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@chakra-ui/react', 'react-icons'],
   },
-  transpilePackages: ['@letar/chakra-provider', '@letar/analytics', '@letar/forms'],
+  transpilePackages: ['@letar/chakra-provider', '@letar/analytics', '@letar/forms', '@letar/redis-client'],
   // Security headers
   async headers() {
     return [
