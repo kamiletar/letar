@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",
-    "@letar/email": "^0.3.0",
+    "@letar/email": "workspace:*",
     "cron-parser": "^5.0.0",
     "dockerode": "^4.0.6",
     "fastify": "^5.2.3",

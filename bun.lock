@@ -429,7 +429,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "dependencies": {
         "@fastify/cors": "^11.0.0",
         "@letar/email": "^0.3.0",
@@ -761,6 +761,7 @@
       "version": "0.3.0",
       "dependencies": {
         "nodemailer": "^6.9.16",
+        "punycode": "^2.3.1",
       },
       "devDependencies": {
         "@types/nodemailer": "^6.4.17",

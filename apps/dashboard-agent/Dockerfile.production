@@ -18,18 +18,33 @@ FROM base AS builder
 # Устанавливаем bun
 RUN npm install -g bun
 
-# Копируем только package.json dashboard-agent
-COPY apps/dashboard-agent/package.json ./
+# Мини-workspace для резолва внутренних @letar/*-зависимостей. @letar/email — private:true,
+# никогда не публикуется в npm (внутренняя SMTP-обвязка для Maddy) — bun install в изоляции
+# (только package.json dashboard-agent) искал её на публичном registry и падал 404.
+COPY libs/email ./libs/email
+COPY apps/dashboard-agent/package.json ./apps/dashboard-agent/package.json
+RUN printf '{"name":"dashboard-agent-docker-build","private":true,"workspaces":["apps/dashboard-agent","libs/email"]}' > package.json
 
-# Устанавливаем зависимости только для dashboard-agent
+# Устанавливаем зависимости
 RUN bun install
 
 # Копируем исходный код
-COPY apps/dashboard-agent/src ./src
-COPY apps/dashboard-agent/tsconfig.json ./
+COPY apps/dashboard-agent/src ./apps/dashboard-agent/src
+COPY apps/dashboard-agent/tsconfig.json ./apps/dashboard-agent/tsconfig.json
 
-# Сборка
-RUN bun build ./src/index.ts --outdir=./dist --target=node
+# Сборка. cpu-features — опциональная нативная зависимость ssh2 (транзитивно через
+# dockerode → docker-modem), обёрнута в try/catch в самом ssh2 (см. lib/protocol/constants.js) —
+# dashboard-agent никогда не использует SSH-транспорт Docker, но Alpine-билдер без python3/make/g++
+# не может собрать нативный аддон, и bun build пытается статически его заинлайнить. --external
+# отключает статическое подключение, оставляя safe try/require на рантайм.
+#
+# outdir нарочно вложенный (apps/dashboard-agent/dist, не плоский ./dist) — pino динамически
+# грузит pino-pretty как отдельный worker-модуль по имени (не заинлайнен бандлом), а
+# bun-воркспейс кладёт символическую ссылку на него в apps/dashboard-agent/node_modules с
+# ОТНОСИТЕЛЬНЫМ путём (../../../node_modules/.bun/...), рассчитанным под эту глубину
+# вложенности. dist должен остаться на той же глубине, что и node_modules, иначе ссылка
+# в проде указывает мимо (см. следующий стейдж).
+RUN bun build ./apps/dashboard-agent/src/index.ts --outdir=./apps/dashboard-agent/dist --target=node --external cpu-features
 
 # =============================================================================
 # Production stage
@@ -45,11 +60,13 @@ RUN addgroup -g 1001 -S agent && \
 
 WORKDIR /app
 
-# Копируем собранные файлы
-COPY --from=builder /app/dist ./
-
-# Устанавливаем только production зависимости
+# Копируем собранные файлы + node_modules, сохраняя ИСХОДНУЮ вложенность builder-стейджа
+# (apps/dashboard-agent/{dist,node_modules} рядом с корневым node_modules) — так относительные
+# symlink'и bun-воркспейса (apps/dashboard-agent/node_modules/pino-pretty → ../../../node_modules/…)
+# остаются валидными. Плоское копирование в один уровень их ломает (см. комментарий у bun build).
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/dashboard-agent/node_modules ./apps/dashboard-agent/node_modules
+COPY --from=builder /app/apps/dashboard-agent/dist ./apps/dashboard-agent/dist
 
 # Переключаемся на пользователя agent
 USER agent
@@ -62,4 +79,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3100/health || exit 1
 
 # Запуск
-CMD ["node", "index.js"]
+CMD ["node", "apps/dashboard-agent/dist/index.js"]
