@@ -100,15 +100,14 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       (эндпоинты 404'ят с 2026-07-05), чистить через `dashboard-agent` cron API (`lib/cron.ts` →
       `saveCronConfig`), не прямым SSH-эдитом.
       `deploy-affected.sh` — только `--help`-текст, не трогали (не в `S2_APPS`, уже чисто).
-- [x] **Docker-compose проверены (dashboard-agent-dev, 2026-07-22) — предположение backlog не
-      подтвердилось, править нечего:** `apps/dashboard`/`apps/kami`/`apps/mandala`
-      `docker-compose.production.yml` вообще не монтируют `.env.docker` удалённых приложений —
-      упоминания `imot`/`premium` там только в port-комментариях-легендах (`# 5432=premium,
-      5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
-      docker-compose.yml` — единственное реальное упоминание, и это **живая инфраструктура, не
-      тех-долг**: сам файл содержит явное предупреждение — `imot-network` намеренно не убрана,
-      потому что NPM на s1 всё ещё физически проксирует через неё живой сайт клиента; удаление
-      уронит прокси клиента молча. Не трогали.
+- [x] **Docker-compose проверены (dashboard-agent-dev, 2026-07-22):** `apps/dashboard`/`apps/kami`/
+      `apps/mandala` `docker-compose.production.yml` вообще не монтируют `.env.docker` удалённых
+      приложений — упоминания `imot`/`premium` там только в port-комментариях-легендах (`# 5432=
+      premium, 5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
+      docker-compose.yml` держал `imot-network` с комментарием «NPM на s1 всё ещё проксирует живой
+      сайт клиента через эту сеть» — **устарело**: s1 больше не существует физически (не просто «вне
+      ротации»), клиентский сайт через эту сеть уже не обслуживается. `imot-network` убрана из
+      `services.app.networks` и из блока `networks:` (владелец подтвердил, 2026-07-22).
 - [x] **`apps/dashboard`** — `prisma/seed.ts` уже был чист (нет реальных записей `DeployedApp` для
       удалённых приложений — предположение backlog не подтвердилось). `src/lib/audit-log.ts`,
       `src/app/api/servers/[id]/apps/discover/route.ts`, `src/app/servers/_components/AppForm.tsx` —
@@ -136,9 +135,8 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       отсылка «как в premium-rosstil» из JSDoc. `checkout main` (уже был на нём) → commit `5bd04c4`
       → push в `letar-private-driving-school` → bump SHA в letar коммитом `b81af6c7`.
 
-**Итог (2026-07-22):** все пункты бэклога «Хвосты imot/premium-rosstil» закрыты. Единственное
-намеренно нетронутое упоминание — `imot-network` в `infra/nginx-proxy-manager/docker-compose.yml`
-(живая инфраструктура, проксирует сайт клиента через s1, не тех-долг).
+**Итог (2026-07-22):** все пункты бэклога «Хвосты imot/premium-rosstil» закрыты полностью, включая
+`imot-network` — s1 физически не существует, клиентский сайт через эту сеть больше не проксируется.
 
 **Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` — отдельный git worktree (заброшенный?),
 не часть основного дерева, требует отдельного решения (удалить worktree или разобраться, что это).
