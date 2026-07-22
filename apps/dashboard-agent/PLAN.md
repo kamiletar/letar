@@ -111,10 +111,17 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       `zenstack:generate`, если там реально enum/константа).
 - [ ] **Backup-скрипты:** `scripts/backup/db-backup.sh`, `db-restore.sh`, `list-backups.sh`,
       `scripts/pull-env-docker.sh`, `scripts/umami-setup.sh`.
-- [ ] **Прочее:** `apps/driving-school/.../pin-auth-adapters.ts`, `libs/letar-consultant/src/prompt.ts`,
-      `.socraticodecontextartifacts.json`, `tsconfig.json` (path-алиасы?).
-- [ ] **Только doc-комментарии, косметика:** `libs/validation-utils/src/lib/{money,password,phone}.ts`
-      (`* Используется в: premium-rosstil, imot` — списки использования в JSDoc, не код).
+- [x] `tsconfig.json` — реально мёртвые project references на несуществующие `apps/imot`,
+      `apps/imot-e2e`, `apps/premium-rosstil-e2e`; `.socraticodecontextartifacts.json` — индексировал
+      `schema.zmodel` обоих удалённых приложений; `libs/letar-consultant/src/prompt.ts` — список apps/
+      в системном промпте консультанта. Убраны (dashboard-agent-dev, 2026-07-22, коммит `1fd42dea`).
+- [x] **Doc-комментарии, косметика:** `libs/validation-utils/src/lib/{money,password,phone}.ts`
+      (`* Используется в: premium-rosstil, imot`) — обновлены на реальных потребителей (только
+      `driving-school`, других consumer'ов не нашлось — `grep` по `passwordSchema`/`moneySchema`/
+      `phoneSchema` в `apps/`). Коммит `1fd42dea`.
+- [ ] **Submodule, не тронуто:** `apps/driving-school/src/app/(auth)/_adapters/pin-auth-adapters.ts`
+      (JSDoc «как в premium-rosstil» — историческая отсылка в приватном submodule, требует отдельного
+      checkout main + commit + push + bump SHA в letar; отложено как самый низкий приоритет).
 
 **Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` — отдельный git worktree (заброшенный?),
 не часть основного дерева, требует отдельного решения (удалить worktree или разобраться, что это).
