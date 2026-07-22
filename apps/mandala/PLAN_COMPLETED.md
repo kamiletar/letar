@@ -659,4 +659,54 @@ export const authConfig = {
 
 ---
 
+## `/admin/products` сломан целиком — два независимых бага (2026-07-22, v0.39.10)
+
+**Задача из `PLAN.md`** (см. предыдущую сессию выше). Оба бага воспроизведены **локально в браузере**
+(реальные клики, не только чтение кода) через `mandala:dev` + вход тестовым админом `admin@elfafeya.art`.
+
+**Баг 1 — `prisma/seed.ts` никогда не создавал `Product`.** Проверено `grep`: в сид-скрипте не было
+ни единого `prisma.product.*`. Список товаров в админке был пуст **на любом окружении**, включая
+staging — не только там, где не хватало файлов картинок. `EmptyState` вместо `<table>` → падение
+`getByRole('table')` в 3 e2e-тестах. Фикс: добавлен блок сидинга 3 тестовых товаров (магнит,
+открытка, постер), аналогично мандалам — `where: { slug }` upsert, без изображений (поле опционально).
+
+**Баг 2 — краш вкладки браузера при клиентской навигации с любого admin-списка на `/new`.**
+Воспроизведено буквально: клик по ссылке «Создать товар» → title меняется на «Создать товар — Админ»,
+но `document.body.innerText` → `"This page couldn't load. Reload to try again, or go back."` (нативная
+error-страница Chrome, не React-оверлей) + сотни повторов `recursivelyTraversePassiveUnmountEffects` в
+network-логах `__nextjs_original-stack-frames` — реальный краш рендер-процесса, не просто React-варнинг.
+То же самое на `/admin/mandalas` → `/admin/mandalas/new` — баг общий, не products-специфичный.
+
+**Root cause:** `SlugField`/`SeoField` (`libs/admin-ui/src/form-fields/`) делали
+`const unsubscribe = form.store.subscribe(...); return unsubscribe` в `useEffect`. В `apps/mandala`
+установлен `@tanstack/react-form@1.33.x` → `@tanstack/form-core@1.33.x` → `@tanstack/store@^0.11.0`,
+где `subscribe()` возвращает объект `Subscription { unsubscribe: () => void }`, а не функцию (в
+`0.7.7`/`0.9.x` было наоборот — bare `() => void`). React ругался `useEffect must not return anything
+besides a function... You returned: [object Object]` и **cleanup никогда не вызывался** — подписка на
+`form.store` утекала на каждый mount/unmount. `grep` по всему репо нашёл те же 12 мест с
+`form.store.subscribe(`; 10 из них в `libs/forms/src/` уже были починены раньше (комментарий
+`// TanStack Store v0.9+ возвращает объект { unsubscribe }, а не функцию` + `.unsubscribe()`), только
+`libs/admin-ui/src/form-fields/slug-field.tsx` и `seo-field.tsx` остались со старым паттерном.
+**Fix (тот же паттерн, что уже проверен в 10 других местах):** `return () => unsubscribe.unsubscribe()`.
+
+Затронуты все admin-CRUD формы mandala (мандалы, товары, контент-страницы) — единственный consumer
+`SlugField`/`SeoField` в монорепо, поэтому фикс сделан напрямую в `libs/admin-ui`, без делегирования
+через `form-delegation.md` (это не `libs/forms`/form-mcp экосистема, а изолированный shared UI-компонент
+с одним потребителем).
+
+**Коммит:** `a5893e7c` (`apps/mandala/prisma/seed.ts`, `libs/admin-ui/src/form-fields/{slug,seo}-field.tsx`).
+
+**Верификация на staging (agent-mail, тред `staging-e2e-gate-m1-batch2`, через BlackCove):**
+
+| Прогон                           | Результат                                              | Комментарий                                                                                                                                                               |
+| -------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| до фикса                         | 96 passed / 12 failed / 4 skipped / 11 did not run     | исходная находка                                                                                                                                                          |
+| после деплоя фикса, без пересида | 99 passed / 9 failed / 4 skipped / 11 did not run      | `02-admin-mandalas` — все 5 фейлов ушли; `03-admin-products` — форма создания зелёная, но «просмотр»/«редактирование» ещё падают (0 товаров в БД — сид не перезапускался) |
+| после `seed:true` пересида       | **103 passed / 9 failed / 1 skipped / 10 did not run** | оба оставшихся фейла `03-admin-products` ушли — гипотеза с несвежим сидом подтвердилась                                                                                   |
+
+Остаточные 9 фейлов (чекаут, статусы заказов, полный CRUD-флоу, SEO-заголовок) — отдельный класс
+багов, не диагностировался в этой сессии, перенесён в `PLAN.md` → «🟡 Остаточные e2e-фейлы».
+
+---
+
 **Последнее обновление:** 2026-07-22
