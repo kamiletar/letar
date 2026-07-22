@@ -2,8 +2,16 @@ import { OrderCreateFormSchema } from '@/generated/form-schemas/Order.form'
 import { z } from 'zod/v4'
 
 // Схема для checkout: из Order убираем status/total, добавляем cartItems
-export const CheckoutFormSchema = OrderCreateFormSchema.omit({ status: true, total: true }).extend({
+// email переопределён — генерируемый z.string().email().optional() не пропускает
+// пустую строку (только undefined/null), а поле в форме необязательное и по
+// умолчанию содержит ''
+export const CheckoutFormSchema = OrderCreateFormSchema.omit({ status: true, total: true, email: true }).extend({
   cartItems: z.string(),
+  email: z
+    .union([z.email(), z.literal('')])
+    .nullable()
+    .optional()
+    .meta(OrderCreateFormSchema.shape.email.meta() ?? {}),
 })
 
 export type CheckoutFormInput = z.infer<typeof CheckoutFormSchema>

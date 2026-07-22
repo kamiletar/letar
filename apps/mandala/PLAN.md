@@ -59,15 +59,67 @@ SEO title-баг (`/Elfafeya Art/i` vs "Добро пожаловать в ми�
 ## 🟡 Остаточные e2e-фейлы staging batch2 (не по теме `/admin/products`, 2026-07-22)
 
 После фикса выше и пересида staging: **103 passed / 9 failed / 1 skipped / 10 did not run**.
-Оставшиеся 9 — отдельный класс багов (чекаут/заказы/полный CRUD-флоу), не диагностировались
-в этой сессии, требуют отдельного разбора:
+Оставшиеся 9 — отдельный класс багов (чекаут/заказы/полный CRUD-флоу).
 
-- [ ] `01-public-pages`: SEO-заголовок не совпадает + «можно перейти к товару» (guest) падает
-- [ ] `05-full-checkout` (2 теста): полный флоу оформления заказа и валидация пустых полей
-- [ ] `07-full-mandala-crud`: создание мандалы с изображением (полный flow)
-- [ ] `08-full-product-crud`: «созданный товар отображается в списке» после создания
-- [ ] `09-admin-order-status` (2 теста): кнопки смены статуса заказа / текущий статус не совпадает
-- [ ] `10-integration-full-flow`: падает на шаге 1 — timeout при переходе после создания товара
+**Диагностировано и исправлено локально (2026-07-23):**
+
+- [x] `01-public-pages` (SEO title): реальный баг, не устаревший тест. Главная страница
+      (`page.tsx`) — единственный лист-сегмент, совпадающий по глубине с `[locale]/layout.tsx`,
+      из-за чего `title.template` родителя не применяется к строковому `title` дочерней страницы.
+      Фикс: [`[locale]/page.tsx`](src/app/[locale]/page.tsx) формирует финальный `title` явно
+      (`${t('welcome')} - Elfafeya Art`), без опоры на template. Побочно найден и исправлен двойной
+      суффикс `"- Elfafeya Art - Elfafeya Art"` на 7 других страницах (about-elfafeya, about-mandalas,
+      sign-in, sign-up, shop, cart, checkout) — из `messages/ru.json` и `messages/en.json` убран
+      захардкоженный суффикс в значениях `metaTitle`, он и так добавляется через layout template.
+- [ ] `01-public-pages` («можно перейти к товару», guest): НЕ воспроизведено локально (реальный
+      клик и программный клик оба работают корректно) — требует подтверждения на staging, возможен
+      флак.
+- [x] `05-full-checkout` (оба теста): корневая причина — **silent submit failure**, общая для
+      ВСЕХ форм `@letar/forms`. Chakra `Field.Root required` прокидывает нативный HTML5 `required`
+      на дочерний `<input>`/`<textarea>` через контекст; при пустом обязательном поле браузер тихо
+      блокирует `submit` до вызова React `onSubmit`, поэтому собственная Zod-валидация библиотеки
+      (`Form.Errors`) никогда не получала возможности сработать и показать ошибки. Фикс (библиотечный,
+      затрагивает все приложения): добавлен `noValidate` на `<form>` в
+      [`form-simple.tsx`](../../libs/forms/src/lib/declarative/form-root/form-simple.tsx) и
+      [`form-with-api.tsx`](../../libs/forms/src/lib/declarative/form-root/form-with-api.tsx).
+      Второй, независимый баг в этом же флоу: необязательное поле `email` в чекауте падало с
+      «Некорректный email» на пустой строке — сгенерированная Zod-схема `z.string().email().optional()`
+      пропускает только `undefined`/`null`, а поле по умолчанию хранит `''`. Фикс:
+      [`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) —
+      `email` переопределён через `z.union([z.email(), z.literal('')])`. Оба фикса подтверждены
+      вместе: полный чекаут проходит end-to-end (заказ создаётся, редирект на success), а пустые
+      обязательные поля теперь показывают видимые ошибки вместо тихого блока.
+- [x] `07-full-mandala-crud` (создание мандалы с изображением): воспроизведено и подтверждено
+      работающим без дополнительных правок — баг `subscribe()` в `SlugField`/`SeoField` уже был
+      исправлен раньше (коммит `a5893e7c`), а `noValidate` выше устраняет остаточный silent-submit
+      риск на этой форме тоже.
+- [x] `08-full-product-crud` («созданный товар отображается в списке»): исправлено тем же
+      `noValidate`-фиксом, что и `05` — подтверждено end-to-end локально (товар создан, редирект
+      сработал, отображается в `/admin/products`).
+- [ ] `09-admin-order-status` (оба теста): НЕ воспроизведено локально — таблица заказов, переход
+      в детали, все кнопки смены статуса отработали корректно без правок. Требует подтверждения на
+      staging (возможен тот же класс «стейл-деплоя», что и в разделе выше, либо флак).
+- [x] `10-integration-full-flow` (timeout на шаге 1 после создания товара): тот же путь создания
+      товара, что и `08` — исправлено тем же `noValidate`-фиксом (не перепроверено отдельным полным
+      прогоном Playwright, только логически через общий код-путь).
+
+**Изменённые файлы:** [`page.tsx`](src/app/[locale]/page.tsx),
+[`messages/ru.json`](messages/ru.json), [`messages/en.json`](messages/en.json),
+[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts),
+[`form-simple.tsx`](../../libs/forms/src/lib/declarative/form-root/form-simple.tsx),
+[`form-with-api.tsx`](../../libs/forms/src/lib/declarative/form-root/form-with-api.tsx).
+
+Не подтверждённая находка (не признаётся багом): при тестировании через browser MCP tool
+(`form_input`) созданный товар несколько раз получил `price=0` в БД — вероятно, артефакт
+взаимодействия тестового инструмента с Chakra `NumberInput` (в отличие от реального Playwright
+`.fill()`), а не продуктовый баг. Требует отдельной проверки при следующем e2e прогоне.
+
+`nx lint mandala` — чисто. `nx typecheck:tsgo mandala` падает с `TS6305` на
+`libs/admin-ui/dist` — предсуществующая проблема (нет build target для `@letar/admin-ui`),
+не связана с этими правками; изменённый `page.tsx` отдельно проверен без ошибок typecheck.
+
+Требуется деплой на staging + повторный e2e-прогон для подтверждения (запрос отправлен
+BlackCove, thread `staging-e2e-gate-m1-batch2`).
 
 ---
 

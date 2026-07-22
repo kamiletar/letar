@@ -175,9 +175,9 @@ export function FormWithApi<TData extends object>({
   // Restore data from persistence
   useEffect(() => {
     if (
-      !features.isPersistenceEnabled ||
-      !features.persistenceResult.shouldRestore ||
-      !features.persistenceResult.savedData
+      !features.isPersistenceEnabled
+      || !features.persistenceResult.shouldRestore
+      || !features.persistenceResult.savedData
     ) {
       return
     }
@@ -222,6 +222,7 @@ export function FormWithApi<TData extends object>({
       {features.isPersistenceEnabled && <features.persistenceResult.RestoreDialog />}
       <form
         method="post"
+        noValidate
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()

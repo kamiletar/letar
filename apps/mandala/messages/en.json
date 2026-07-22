@@ -60,7 +60,7 @@
     "price": "Price",
     "page": {
       "title": "Shop",
-      "metaTitle": "Shop - Elfafeya Art",
+      "metaTitle": "Shop",
       "metaDescription": "Handcrafted goods from artist Elfafeya. Original paintings, prints, souvenirs."
     },
     "product": {
@@ -89,7 +89,7 @@
     "itemCount": "Items: {count}",
     "page": {
       "title": "Cart",
-      "metaTitle": "Cart - Elfafeya Art",
+      "metaTitle": "Cart",
       "metaDescription": "Your cart"
     },
     "emptyState": {
@@ -136,7 +136,7 @@
     },
     "page": {
       "title": "Checkout",
-      "metaTitle": "Checkout - Elfafeya Art",
+      "metaTitle": "Checkout",
       "metaDescription": "Complete your order"
     },
     "emptyState": {
@@ -275,14 +275,14 @@
     "continueWith": "Continue with {provider}",
     "signInPage": {
       "title": "Sign In",
-      "metaTitle": "Sign In - Elfafeya Art",
+      "metaTitle": "Sign In",
       "metaDescription": "Sign in to your account",
       "welcomeBack": "Welcome back!",
       "subtitle": "Sign in to your account"
     },
     "signUpPage": {
       "title": "Sign Up",
-      "metaTitle": "Sign Up - Elfafeya Art",
+      "metaTitle": "Sign Up",
       "metaDescription": "Create an account to place orders and track order history",
       "welcome": "Welcome!",
       "subtitle": "Create an account to place orders"
@@ -421,7 +421,7 @@
   },
   "aboutArtist": {
     "title": "Elfafeya",
-    "metaTitle": "Elfafeya - Elfafeya Art",
+    "metaTitle": "Elfafeya",
     "metaDescription": "Elfafeya is an artist, a guide to distant corners of the Metagalaxy through fractal portals of mandalas.",
     "photoAlt": "Photo of Elfafeya",
     "handsAlt": "Elfafeya's hands",
@@ -435,7 +435,7 @@
   },
   "aboutMandalas": {
     "title": "About Mandalas",
-    "metaTitle": "About Mandalas - Elfafeya Art",
+    "metaTitle": "About Mandalas",
     "metaDescription": "A word to Jung. He introduced modern psychology to the idea of the mandala. The mandala is a universal symbolic model of the universe, human consciousness, and various life processes.",
     "jungPhotoAlt": "Photo of Carl Gustav Jung",
     "jungTitle": "A Word to Jung",
