@@ -109,10 +109,11 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       тех-долг**: сам файл содержит явное предупреждение — `imot-network` намеренно не убрана,
       потому что NPM на s1 всё ещё физически проксирует через неё живой сайт клиента; удаление
       уронит прокси клиента молча. Не трогали.
-- [ ] **`apps/dashboard`** (реестр `DeployedApp`) — `prisma/seed.ts`, `src/lib/audit-log.ts`,
-      `src/app/api/servers/[id]/apps/discover/route.ts`, `src/app/servers/_components/AppForm.tsx`,
-      `src/generated/prisma/**` (НЕ трогать руками — генерируется, чистить через `schema.zmodel` +
-      `zenstack:generate`, если там реально enum/константа).
+- [x] **`apps/dashboard`** — `prisma/seed.ts` уже был чист (нет реальных записей `DeployedApp` для
+      удалённых приложений — предположение backlog не подтвердилось). `src/lib/audit-log.ts`,
+      `src/app/api/servers/[id]/apps/discover/route.ts`, `src/app/servers/_components/AppForm.tsx` —
+      только JSDoc-примеры и placeholder-подсказки формы, не реальные данные; заменены на
+      `driving-school`. Typecheck зелёный. Коммит `914d6f0c`.
 - [x] `scripts/pull-env-docker.sh` — держал целый **s1 как активный сервер** (`SERVER_MAP`,
       `S1_APPS`), хотя s1 выведен из ротации 2026-06-20 (`project_server_mapping` в памяти,
       `server-config.ts`/`deploy-affected.sh` это уже отражают); `dashboard-agent`/`aboi` числились
@@ -131,15 +132,16 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
       (`* Используется в: premium-rosstil, imot`) — обновлены на реальных потребителей (только
       `driving-school`, других consumer'ов не нашлось — `grep` по `passwordSchema`/`moneySchema`/
       `phoneSchema` в `apps/`). Коммит `1fd42dea`.
-- [ ] **Submodule, не тронуто:** `apps/driving-school/src/app/(auth)/_adapters/pin-auth-adapters.ts`
-      (JSDoc «как в premium-rosstil» — историческая отсылка в приватном submodule, требует отдельного
-      checkout main + commit + push + bump SHA в letar; отложено как самый низкий приоритет).
+- [x] **Submodule:** `apps/driving-school/src/app/(auth)/_adapters/pin-auth-adapters.ts` — убрана
+      отсылка «как в premium-rosstil» из JSDoc. `checkout main` (уже был на нём) → commit `5bd04c4`
+      → push в `letar-private-driving-school` → bump SHA в letar коммитом `b81af6c7`.
+
+**Итог (2026-07-22):** все пункты бэклога «Хвосты imot/premium-rosstil» закрыты. Единственное
+намеренно нетронутое упоминание — `imot-network` в `infra/nginx-proxy-manager/docker-compose.yml`
+(живая инфраструктура, проксирует сайт клиента через s1, не тех-долг).
 
 **Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` — отдельный git worktree (заброшенный?),
 не часть основного дерева, требует отдельного решения (удалить worktree или разобраться, что это).
-
-**Зависимости:** независимая сессия — большая часть требует проверки на сервере (docker-compose
-secret-mounts), не чисто локальный grep-and-replace.
 
 ### Надёжность deploy-истории (найдено BlackCove, 2026-07-22) — ✅ закрыто (dashboard-agent-dev, 2026-07-22)
 
