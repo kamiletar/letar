@@ -2,24 +2,21 @@
 # Обратная синхронизация: скачивание .env.docker с production серверов на локальную машину
 # Использование:
 #   ./scripts/pull-env-docker.sh                        # Показать diff для всех
-#   ./scripts/pull-env-docker.sh premium-rosstil        # Только одно приложение
+#   ./scripts/pull-env-docker.sh dashboard-agent        # Только одно приложение
 #   ./scripts/pull-env-docker.sh --apply                # Скачать и перезаписать все
-#   ./scripts/pull-env-docker.sh premium-rosstil --apply # Скачать конкретное
-#   ./scripts/pull-env-docker.sh --server s1             # Только с s1
+#   ./scripts/pull-env-docker.sh dashboard-agent --apply # Скачать конкретное
 
 set -e
 
-# Production серверы
+# Production серверы (s1 выведен из эксплуатации 2026-06-20, все приложения — на s2)
 declare -A SERVER_MAP=(
-  ["s1"]="root@s1.letar.best"
   ["s2"]="root@s2.letar.best"
 )
 REMOTE_PATH="/home/deploy/letar"
 LOCAL_PATH="apps"
 
 # Какие приложения на каком сервере
-S1_APPS="premium-rosstil imot dashboard-agent aboi"
-S2_APPS="dashboard driving-school animatrona-web animatrona-tracker auth-hub archetest time form-docs grandslamcup aira-web mandala kami pravda umami animatrona-landing kami-key-the-landing letar-landing dsperevod aprel8008"
+S2_APPS="dashboard dashboard-agent driving-school animatrona-web animatrona-tracker auth-hub archetest time form-docs grandslamcup aira-web mandala kami pravda umami animatrona-landing kami-key-the-landing letar-landing dsperevod aprel8008 aboi"
 
 # Windows OpenSSH
 SSH="/c/Windows/System32/OpenSSH/ssh.exe"
@@ -46,7 +43,7 @@ for arg in "$@"; do
   case "$arg" in
     --apply) APPLY=true ;;
     --server) shift; SERVER_FILTER="$1" ;;
-    s1|s2) SERVER_FILTER="$arg" ;;
+    s2) SERVER_FILTER="$arg" ;;
     *) APP_FILTER="$arg" ;;
   esac
 done
@@ -54,9 +51,7 @@ done
 # Определить сервер для приложения
 get_server_for_app() {
   local app="$1"
-  if echo "$S1_APPS" | grep -qw "$app"; then
-    echo "s1"
-  elif echo "$S2_APPS" | grep -qw "$app"; then
+  if echo "$S2_APPS" | grep -qw "$app"; then
     echo "s2"
   else
     echo ""
@@ -65,10 +60,10 @@ get_server_for_app() {
 
 # Список приложений
 ALL_APPS=(
-  "premium-rosstil" "imot" "dashboard-agent"
+  "dashboard-agent"
   "dashboard" "driving-school" "auth-hub" "archetest"
   "mandala" "kami" "pravda" "animatrona-landing" "animatrona-tracker"
-  "umami" "animatrona-web" "letar-landing" "aira-web"
+  "umami" "animatrona-web" "letar-landing" "aira-web" "aboi"
   "kami-key-the-landing" "grandslamcup" "time" "form-docs" "form-example"
   "dsperevod"
   "aprel8008"

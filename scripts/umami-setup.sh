@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Одноразовый скрипт переинициализации Umami
-# Запускается на s1.letar.best после пересоздания контейнеров
+# Запускается на s2.letar.best после пересоздания контейнеров
 #
 # Использование:
 #   1. Перегенерировать .env.docker (DB_PASSWORD, APP_SECRET)
@@ -79,8 +79,6 @@ log "Перелогинились с новым паролем"
 
 # --- Шаг 4: Создание сайтов ---
 SITES=(
-  "premium-rosstil|premium.rosstil.ru"
-  "imot|integrelle.com"
   "mandala|mandala.letar.best"
   "kami|kami.letar.best"
   "pravda|pravda.letar.best"
