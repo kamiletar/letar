@@ -19,6 +19,28 @@
 
 ---
 
+## 🔴 Приоритетная задача — `/admin/products` сломан (найдено BlackCove, staging e2e, 2026-07-22)
+
+**Контекст:** §18.7 Тираж M1 batch2 (staging-e2e-гейт монорепо, `PLAN-INFRA.md`) — после того как
+staging-инфра mandala была полностью починена (auth/seed/uploads-volume, см. историю в
+корневом `PLAN.md`/`PLAN-INFRA.md`), полный e2e-прогон на `mandala-stage.s3.letar.best` дал
+**96 passed / 12 failed / 4 skipped / 11 did not run** — все 12 отказов не связаны с
+инфраструктурой (картинки/сид/БД уже в порядке), это реальные баги приложения:
+
+- **`/admin/products` похоже сломан целиком:**
+  - `getByRole('table')` не находится на `/admin/products` (3 теста) — таблица товаров не рендерится
+  - `heading('Создать товар')` не появляется — форма создания не грузится
+  - `toHaveURL(/admin/products/new/)` — клик по ссылке создания не переходит на `/new`, остаётся на `/admin/products`
+  - Из-за этого падает и `10-integration-full-flow`, и order-status тесты (тоже на `getByRole('table')` — возможно общий баг рендера таблиц, не только products)
+- **"Полный flow создания X с изображением"** (и mandala, и product) — падают на `Target page, context or browser has been closed` посреди заполнения формы (таймаут 30s) — похоже на краш/неожиданный редирект страницы, не на 404 картинки
+- **SEO title не совпадает** — ожидали `/Elfafeya Art/i`, получили `"Добро пожаловать в мир мандал"`
+
+**Не диагностировано глубже** — передано владельцу приложения. Полные `error-context.md` — в
+`apps/mandala-e2e/test-output/playwright/output/*/` на s3 (BlackCove может прислать пути по
+запросу через agent-mail, тред `staging-e2e-gate-m1-batch2`).
+
+---
+
 ## Обзор миграции
 
 ### Что мигрируем
