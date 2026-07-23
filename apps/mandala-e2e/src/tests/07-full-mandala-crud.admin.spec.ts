@@ -38,8 +38,11 @@ test.describe('Админ: Полный CRUD мандалы', () => {
       const fileInput = adminPage.locator('input[type="file"]').first()
       await fileInput.setInputFiles(testImagePath)
 
-      // Ожидание превью изображения (после загрузки появляется img внутри dropzone)
-      await adminPage.waitForTimeout(2000) // Ждём upload
+      // Ждём реального завершения загрузки, а не фиксированную паузу — imageId
+      // обязательное поле формы (requiredImageIdSchema), submit заблокируется
+      // клиентской валидацией пока не появится превью с кнопкой "Удалить";
+      // под параллельной e2e-нагрузкой на staging загрузка может занять больше 2с
+      await expect(adminPage.getByRole('button', { name: /удалить/i })).toBeVisible({ timeout: 15000 })
 
       // Клик "Создать мандалу"
       await adminPage.getByRole('button', { name: /создать мандалу/i }).click()

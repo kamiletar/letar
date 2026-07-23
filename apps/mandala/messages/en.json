@@ -146,11 +146,10 @@
     },
     "successPage": {
       "title": "Order placed!",
-      "metaTitle": "Order placed - Elfafeya Art",
-      "description": "Thank you for your order. We will contact you shortly to confirm the order.",
+      "message": "Thank you for your order. We will contact you shortly to confirm the order.",
       "orderNumber": "Order number",
-      "backToShop": "Back to shop",
-      "viewOrders": "View orders"
+      "continueShopping": "Continue shopping",
+      "goHome": "Go home"
     }
   },
   "contacts": {

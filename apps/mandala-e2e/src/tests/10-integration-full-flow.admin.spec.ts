@@ -108,7 +108,11 @@ test.describe('Интеграционный flow: товар → заказ → 
     // Загрузка изображения
     const fileInput = adminPage.locator('input[type="file"]').first()
     await fileInput.setInputFiles(testImagePath)
-    await adminPage.waitForTimeout(2000) // Ждём upload
+
+    // Ждём реального завершения загрузки, а не фиксированную паузу — под
+    // параллельной e2e-нагрузкой на staging загрузка может занять больше 2с
+    // (см. тот же фикс в 07-full-mandala-crud.admin.spec.ts)
+    await expect(adminPage.getByRole('button', { name: /удалить/i }).first()).toBeVisible({ timeout: 15000 })
 
     // Создание товара
     await adminPage.getByRole('button', { name: /создать товар/i }).click()
