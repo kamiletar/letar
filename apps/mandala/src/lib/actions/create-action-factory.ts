@@ -65,16 +65,24 @@ export interface CreateActionConfig<TSchema extends z.ZodSchema> {
  * @returns Async функция создания
  */
 export function createCreateAction<TSchema extends z.ZodSchema>(
-  config: CreateActionConfig<TSchema>
+  config: CreateActionConfig<TSchema>,
 ): (data: z.infer<TSchema>) => Promise<MutationResult> {
   const { model, schema, redirectPath, entityName, uniqueField, uniqueErrorMessage, transformData } = config
 
   return async function create(data: z.infer<TSchema>): Promise<MutationResult> {
+    // TODO(temp-debug): диагностика 08/10 staging e2e — убрать после того как
+    // подтвердим, доходит ли запрос до action и не валится ли валидация
+    console.warn(`[DEBUG create-action-factory] model=${model} called, data:`, JSON.stringify(data))
+
     const { db } = await assertAdminAuth()
 
     const parsed = schema.safeParse(data)
 
     if (!parsed.success) {
+      console.warn(
+        `[DEBUG create-action-factory] model=${model} validation failed:`,
+        JSON.stringify(parsed.error.flatten()),
+      )
       return { success: false, error: 'Некорректные данные' }
     }
 
