@@ -60,7 +60,11 @@ export default async function ProductsListPage({ searchParams }: ProductsPagePro
   const [products, total] = await Promise.all([
     db.product.findMany({
       where,
-      orderBy: { order: 'asc' },
+      // Вторичный ключ сортировки обязателен: у всех новых записей order по
+      // умолчанию 0, без createdAt как тайбрейкера Postgres возвращает записи
+      // с одинаковым order в недетерминированном порядке — новый товар
+      // может не попасть на первую страницу списка
+      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
       include: { images: { orderBy: { order: 'asc' }, take: 1 } },
       skip: (currentPage - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
@@ -107,31 +111,35 @@ export default async function ProductsListPage({ searchParams }: ProductsPagePro
         </Suspense>
       </HStack>
 
-      {products.length === 0 ? (
-        hasFilters ? (
-          <Box py={8} textAlign="center">
-            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-          </Box>
-        ) : (
-          <EmptyState
-            icon={LuPackage}
-            title="Нет товаров"
-            description="Создайте первый товар для магазина"
-            action={{ label: 'Создать товар', href: '/admin/products/new' }}
-          />
+      {products.length === 0
+        ? (
+          hasFilters
+            ? (
+              <Box py={8} textAlign="center">
+                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+              </Box>
+            )
+            : (
+              <EmptyState
+                icon={LuPackage}
+                title="Нет товаров"
+                description="Создайте первый товар для магазина"
+                action={{ label: 'Создать товар', href: '/admin/products/new' }}
+              />
+            )
         )
-      ) : (
-        <>
-          <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
-            <ProductsTable products={products} />
-          </Suspense>
+        : (
+          <>
+            <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
+              <ProductsTable products={products} />
+            </Suspense>
 
-          {/* Пагинация */}
-          <Suspense fallback={<Box h="48px" />}>
-            <Pagination total={total} pageSize={PAGE_SIZE} />
-          </Suspense>
-        </>
-      )}
+            {/* Пагинация */}
+            <Suspense fallback={<Box h="48px" />}>
+              <Pagination total={total} pageSize={PAGE_SIZE} />
+            </Suspense>
+          </>
+        )}
     </Stack>
   )
 }
