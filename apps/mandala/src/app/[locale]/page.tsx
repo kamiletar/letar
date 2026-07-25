@@ -23,8 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'home' })
 
+  // Next.js не применяет title.template родительского layout к главной странице
+  // (единственный кейс, где leaf page.tsx совпадает с сегментом [locale]/layout.tsx) —
+  // поэтому суффикс добавляем явно, как и в скрытом H1 ниже
+  const title = `${t('welcome')} - Elfafeya Art`
+
   return {
-    title: t('welcome'),
+    title,
     description: t('subtitle'),
     alternates: {
       canonical: `/${locale}/`,
@@ -34,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: t('welcome'),
+      title,
       description: t('subtitle'),
       url: `${SITE_URL}/${locale}/`,
       images: [

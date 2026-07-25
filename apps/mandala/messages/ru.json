@@ -57,7 +57,7 @@
     "noImage": "Нет изображения",
     "page": {
       "title": "Магазин",
-      "metaTitle": "Магазин - Elfafeya Art",
+      "metaTitle": "Магазин",
       "metaDescription": "Уникальные изделия с мандалами и точечной росписью от художницы Эльфафеи",
       "heading": "Магазин",
       "subtitle": "Уникальные изделия ручной работы"
@@ -83,7 +83,7 @@
     "continueShopping": "Продолжить покупки",
     "page": {
       "title": "Корзина",
-      "metaTitle": "Корзина - Elfafeya Art",
+      "metaTitle": "Корзина",
       "metaDescription": "Ваша корзина покупок"
     },
     "emptyState": {
@@ -133,7 +133,7 @@
     },
     "page": {
       "title": "Оформление заказа",
-      "metaTitle": "Оформление заказа - Elfafeya Art",
+      "metaTitle": "Оформление заказа",
       "metaDescription": "Оформите ваш заказ"
     },
     "emptyState": {
@@ -272,7 +272,7 @@
     "continueWith": "Продолжить через {provider}",
     "signInPage": {
       "title": "Вход",
-      "metaTitle": "Вход - Elfafeya Art",
+      "metaTitle": "Вход",
       "metaDescription": "Войдите в свой аккаунт на Elfafeya Art",
       "heading": "Вход",
       "subtitle": "Войдите в свой аккаунт",
@@ -283,7 +283,7 @@
     },
     "signUpPage": {
       "title": "Регистрация",
-      "metaTitle": "Регистрация - Elfafeya Art",
+      "metaTitle": "Регистрация",
       "metaDescription": "Создайте аккаунт на Elfafeya Art",
       "heading": "Регистрация",
       "subtitle": "Создайте аккаунт, чтобы отслеживать заказы",
@@ -432,7 +432,7 @@
   },
   "aboutArtist": {
     "title": "Эльфа́фея",
-    "metaTitle": "Эльфа́фея - Elfafeya Art",
+    "metaTitle": "Эльфа́фея",
     "metaDescription": "Эльфафея — художница, проводник в отдалённые уголки Метагалактики через фрактальные порталы мандал.",
     "photoAlt": "Фотография Эльфафеи",
     "handsAlt": "Руки Эльфафеи",
@@ -446,7 +446,7 @@
   },
   "aboutMandalas": {
     "title": "О мандалах",
-    "metaTitle": "О мандалах - Elfafeya Art",
+    "metaTitle": "О мандалах",
     "metaDescription": "Слово Юнгу. Он кстати познакомил современную психологию с идеей мандалы. Мандала есть универсальная символическая модель мироздания, человеческого сознания и всевозможных жизненных процессов.",
     "jungPhotoAlt": "Фото Карла Густава Юнга",
     "jungTitle": "Слово Юнгу",

@@ -166,9 +166,9 @@ export function FormSimple<TData extends object>({
   // Restore data from persistence
   useEffect(() => {
     if (
-      !features.isPersistenceEnabled ||
-      !features.persistenceResult.shouldRestore ||
-      !features.persistenceResult.savedData
+      !features.isPersistenceEnabled
+      || !features.persistenceResult.shouldRestore
+      || !features.persistenceResult.savedData
     ) {
       return
     }
@@ -191,7 +191,7 @@ export function FormSimple<TData extends object>({
       readOnly,
       addressProvider,
     }),
-    [form, schema, features.offlineState, disabled, readOnly, addressProvider]
+    [form, schema, features.offlineState, disabled, readOnly, addressProvider],
   )
 
   return (
@@ -200,6 +200,7 @@ export function FormSimple<TData extends object>({
       {features.isPersistenceEnabled && <features.persistenceResult.RestoreDialog />}
       <form
         method="post"
+        noValidate
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()

@@ -284,6 +284,11 @@ async function main() {
   // Создать тестовые товары для магазина
   console.log('\n⏳ Creating products...')
 
+  // imagePath переиспользует уже загруженные картинки мандал (uploads/mandalas/ —
+  // подтверждено присутствует и на проде, и на staging (36 файлов), в отличие от
+  // uploads/product/ — этой папки на staging вообще нет). Без изображения витрина/
+  // корзина/страница товара не рендерят <img> вовсе (см. apps/mandala/PLAN.md →
+  // «Второй/третий раунд на staging»)
   const productsData = [
     {
       slug: 'magnit-mandala-om',
@@ -291,6 +296,7 @@ async function main() {
       description: 'Керамический магнит с изображением мандалы Ом ручной работы.',
       price: 350,
       stock: 15,
+      imagePath: extractPathFromUrl(mandalasData[0]?.imageUrl ?? ''),
     },
     {
       slug: 'otkrytka-czvetok-zhizni',
@@ -298,6 +304,7 @@ async function main() {
       description: 'Авторская открытка с мандалой "Цветок жизни", подходит для подарка.',
       price: 150,
       stock: 30,
+      imagePath: extractPathFromUrl(mandalasData[1]?.imageUrl ?? ''),
     },
     {
       slug: 'poster-anahata',
@@ -305,11 +312,12 @@ async function main() {
       description: 'Печатный постер мандалы Анахата формата А3.',
       price: 900,
       stock: 8,
+      imagePath: extractPathFromUrl(mandalasData[2]?.imageUrl ?? ''),
     },
   ]
 
   for (const [index, product] of productsData.entries()) {
-    await prisma.product.upsert({
+    const dbProduct = await prisma.product.upsert({
       where: { slug: product.slug },
       update: {
         name: product.name,
@@ -327,9 +335,48 @@ async function main() {
         order: index,
       },
     })
+
+    const hasImage = (await prisma.productImage.count({ where: { productId: dbProduct.id } })) > 0
+    if (!hasImage && product.imagePath) {
+      const imageId = await upsertImage(product.imagePath, 'PRODUCT')
+      if (imageId) {
+        await prisma.productImage.create({
+          data: { productId: dbProduct.id, imageId, order: 0 },
+        })
+      }
+    }
   }
 
   console.log(`✓ Created ${productsData.length} products`)
+
+  // Создать тестовый заказ для E2E (09-admin-order-status не должен зависеть
+  // от того, успеет ли 05-full-checkout создать заказ первым)
+  console.log('\n⏳ Creating test order...')
+
+  const seedProduct = await prisma.product.findUnique({ where: { slug: productsData[0].slug } })
+
+  if (seedProduct) {
+    const existingOrder = await prisma.order.findFirst({ where: { name: 'E2E Seed Заказчик' } })
+
+    if (!existingOrder) {
+      await prisma.order.create({
+        data: {
+          name: 'E2E Seed Заказчик',
+          phone: '+79001112233',
+          email: 'seed-order@elfafeya.art',
+          address: 'г. Москва, ул. Сидовая, д. 1',
+          status: 'PENDING',
+          total: seedProduct.price,
+          items: {
+            create: [{ productId: seedProduct.id, quantity: 1, price: seedProduct.price }],
+          },
+        },
+      })
+      console.log('✓ Created 1 test order')
+    } else {
+      console.log('✓ Test order already exists, skip')
+    }
+  }
 
   // Итоговая статистика
   const stats = {
@@ -337,6 +384,7 @@ async function main() {
     mandalas: await prisma.mandala.count(),
     shortUrls: await prisma.shortUrl.count(),
     products: await prisma.product.count(),
+    orders: await prisma.order.count(),
   }
 
   // Проверяем что blurDataURL заполнен
@@ -349,6 +397,7 @@ async function main() {
   console.log(`  Mandalas: ${stats.mandalas}`)
   console.log(`  Short URLs: ${stats.shortUrls}`)
   console.log(`  Products: ${stats.products}`)
+  console.log(`  Orders: ${stats.orders}`)
 }
 
 main()

@@ -44,7 +44,8 @@ test.describe('Полный Checkout Flow', () => {
     await addToCartButton.click()
 
     // 5. Проверка toast "Добавлено в корзину" или изменения кнопки
-    const addedConfirmation = page.getByText(/добавлено в корзину|в корзине/i)
+    // .first() — toast и disabled-кнопка "В корзине" совпадают под один regex одновременно
+    const addedConfirmation = page.getByText(/добавлено в корзину|в корзине/i).first()
     await expect(addedConfirmation).toBeVisible({ timeout: 5000 })
 
     // 6. Переход в корзину
@@ -61,16 +62,15 @@ test.describe('Полный Checkout Flow', () => {
     await expect(page).toHaveURL(/\/checkout/)
 
     // 9. Заполнение формы checkout
-    await page.locator('input[name="name"]').fill(testCustomer.name)
-    await page.locator('input[name="phone"]').fill(testCustomer.phone)
-    await page.locator('input[name="email"]').fill(testCustomer.email)
-
-    // Адрес может быть textarea
-    const addressField = page.locator('textarea[name="address"], input[name="address"]')
-    await addressField.fill(testCustomer.address)
+    // @letar/forms не проставляет нативный HTML name= на инпуты — только
+    // data-field-name (см. libs/forms/src/lib/declarative/form-fields/text/field-string.tsx)
+    await page.locator('[data-field-name="name"]').fill(testCustomer.name)
+    await page.locator('[data-field-name="phone"]').fill(testCustomer.phone)
+    await page.locator('[data-field-name="email"]').fill(testCustomer.email)
+    await page.locator('[data-field-name="address"]').fill(testCustomer.address)
 
     // Комментарий опционален
-    const commentField = page.locator('textarea[name="comment"], input[name="comment"]')
+    const commentField = page.locator('[data-field-name="comment"]')
     if (await commentField.isVisible().catch(() => false)) {
       await commentField.fill(testCustomer.comment)
     }
@@ -82,7 +82,8 @@ test.describe('Полный Checkout Flow', () => {
     await expect(page).toHaveURL(/\/checkout\/success/, { timeout: 15000 })
 
     // 12. Проверка сообщения "Заказ оформлен"
-    const successMessage = page.getByText(/заказ оформлен|спасибо|успешно/i)
+    // .first() — заголовок и текст успеха совпадают под один regex одновременно
+    const successMessage = page.getByText(/заказ оформлен|спасибо|успешно/i).first()
     await expect(successMessage).toBeVisible()
   })
 
@@ -105,7 +106,7 @@ test.describe('Полный Checkout Flow', () => {
     await addToCartButton.click()
 
     // Ждём подтверждения добавления в корзину
-    await expect(page.getByText(/добавлено в корзину|в корзине/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/добавлено в корзину|в корзине/i).first()).toBeVisible({ timeout: 5000 })
 
     // Переходим в checkout
     await page.goto('/checkout')

@@ -44,8 +44,11 @@ export default defineConfig({
   // Повторы при ошибках
   retries: process.env.CI ? 2 : 0,
 
-  // Количество воркеров
-  workers: 3,
+  // Количество воркеров — 1: staging бьётся в единственный контейнер
+  // mandala-staging-app (Next.js, single instance), несколько параллельных
+  // воркеров создают гонку за Server Actions одного процесса — таймауты
+  // навигации после redirect'а плавают от прогона к прогону на разных тестах
+  workers: 1,
 
   // Репортеры
   reporter: [['html', { open: 'never' }], ['list']],

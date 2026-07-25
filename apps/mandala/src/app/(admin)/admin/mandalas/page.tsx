@@ -54,7 +54,11 @@ export default async function MandalasListPage({ searchParams }: MandalasPagePro
   const [mandalas, total] = await Promise.all([
     db.mandala.findMany({
       where,
-      orderBy: { order: 'asc' },
+      // Вторичный ключ сортировки обязателен: у всех новых записей order по
+      // умолчанию 0, без createdAt как тайбрейкера Postgres возвращает записи
+      // с одинаковым order в недетерминированном порядке — новая мандала
+      // может не попасть на первую страницу списка
+      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
       skip: (currentPage - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -91,31 +95,35 @@ export default async function MandalasListPage({ searchParams }: MandalasPagePro
         </Suspense>
       </HStack>
 
-      {mandalas.length === 0 ? (
-        hasFilters ? (
-          <Box py={8} textAlign="center">
-            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-          </Box>
-        ) : (
-          <EmptyState
-            icon={LuImage}
-            title="Нет мандал"
-            description="Создайте первую мандалу для галереи"
-            action={{ label: 'Создать мандалу', href: '/admin/mandalas/new' }}
-          />
+      {mandalas.length === 0
+        ? (
+          hasFilters
+            ? (
+              <Box py={8} textAlign="center">
+                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+              </Box>
+            )
+            : (
+              <EmptyState
+                icon={LuImage}
+                title="Нет мандал"
+                description="Создайте первую мандалу для галереи"
+                action={{ label: 'Создать мандалу', href: '/admin/mandalas/new' }}
+              />
+            )
         )
-      ) : (
-        <>
-          <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
-            <MandalasTable mandalas={mandalas} />
-          </Suspense>
+        : (
+          <>
+            <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
+              <MandalasTable mandalas={mandalas} />
+            </Suspense>
 
-          {/* Пагинация */}
-          <Suspense fallback={<Box h="48px" />}>
-            <Pagination total={total} pageSize={PAGE_SIZE} />
-          </Suspense>
-        </>
-      )}
+            {/* Пагинация */}
+            <Suspense fallback={<Box h="48px" />}>
+              <Pagination total={total} pageSize={PAGE_SIZE} />
+            </Suspense>
+          </>
+        )}
     </Stack>
   )
 }
