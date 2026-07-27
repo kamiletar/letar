@@ -91,6 +91,34 @@ references** — иначе трансформация падает. В Next.js-
 "include": ["vitest.config.ts", "main/**/*.ts"]
 ```
 
+**⚠️ Обратный случай — исходники ПОКРЫТЫ корневым `tsconfig.json` (образец —
+`poster-microtext-desktop`, 2026-07-28):** если каталог с тестируемым кодом (`main/`,
+`shared/`) уже входит в `include` корневого tsconfig приложения, дублировать его в
+`include` у `tsconfig.spec.json` **нельзя**. Composite-проект объявляет себя владельцем
+этих файлов, и любой другой импортёр (например `renderer/app/page.tsx`, импортирующий
+`shared/`) падает на:
+
+```
+error TS6305: Output file '.../out-tsc/spec/shared/visibility-model.d.ts'
+has not been built from source file '.../shared/visibility-model.ts'.
+```
+
+Коварство в том, что TS6305 ломает резолюцию типов дальше по цепочке и тянет за собой
+пачку ложных `TS7006 implicit any` в файлах, которых правка вообще не касалась — легко
+принять за собственную ошибку в типах.
+
+**Правило:** в `tsconfig.spec.json` держать только то, чего нет в корневом `include` —
+`vitest.config.ts` и сами spec-файлы:
+
+```json
+"include": ["vitest.config.ts", "shared/**/*.spec.ts", "main/**/*.spec.ts"]
+```
+
+Плюс исключить spec-файлы из корневого `tsconfig.json` (`"exclude": ["shared/**/*.spec.ts"]`),
+иначе их увидят оба проекта. Широкий `include` из абзаца про Electron выше нужен только
+когда каталог исходников в `exclude` корневого tsconfig (`animatrona`,
+`label-printer-desktop`) — сначала посмотри, какой из двух случаев твой.
+
 **Проекты без vitest вообще (не в скоупе фикса)** — есть `vitest.config.ts`, но 0 тестовых
 файлов: `aira-web`, `dsperevod`, `grandslamcup`, `time`, `studio`, `svoichuzhie`, `synth`,
 `aprel8008`, `animatrona-tracker`, `libs/cdek`, `libs/image-upload`, `libs/query-provider`.
