@@ -2,6 +2,27 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.8.6 — регистрация `studio` в реестре приложений (2026-07-28)
+
+`studio` полностью отсутствовал в `lib/app-registry.ts` (`APP_PORTS`/`APP_HOSTS`) и
+`lib/server-config.ts` (`SERVER_APPS`) — из-за этого новые cron-задачи studio
+(`send-reminders`, `recurring-invoices`) не смогли бы выполниться (`executeJob` бросает
+"Неизвестное приложение: studio" при попытке резолвнуть URL). Добавлено: порт 3024,
+host `studio-app` (fallback, совпадает с реальным именем контейнера), сервер `s2`.
+
+При деплое BlackCove столкнулся с известным self-deploy багом (агент деплоит себя через
+собственный SSH-туннель и обрывается на шаге recreate, см. `.claude/docs/deployment.md`) —
+новый контейнер завис в `Created`, добит вручную `docker compose up -d`.
+
+**Ручная чистка `cron-jobs.json` на s2** (не в git, рантайм-файл): удалены 4 мёртвые задачи
+для удалённого приложения `imot` (session-reminders, practice-diary-reminders) и
+decommissioned-сервера `s1` (nginx-backup, database-backup) — были причиной алерта с
+перепутанным именем/jobId («Practice Diary Reminders» при `jobId: email-canary-check»,
+похоже на застрявшее in-memory состояние планировщика). Контейнер перезапущен
+(`--force-recreate`) для пересборки`scheduledTasks` с нуля из очищенного файла.
+
+commit `ac28fe5e`.
+
 ## Версия 0.8.4 → 0.8.5 — grep-фильтр в run_e2e для точечных прогонов (2026-07-22, BlackCove)
 
 По ходу деплой-сессии root-weaver попросил точечно подтвердить фикс `/admin/products` +

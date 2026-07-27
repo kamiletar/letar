@@ -2,6 +2,32 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.0 — Alert Heartbeat + фикс сломанного прод-билда (2026-07-28)
+
+**Heartbeat-уведомление:** `POST /api/cron/heartbeat` — если за последние 24 часа не было
+ни одного `Alert`, шлёт в Telegram «У всех всё хорошо» напрямую (`sendHeartbeatTelegram`,
+без создания записи в БД — эфемерное подтверждение живости канала, а не событие для истории).
+Отличает «всё правда хорошо» от «Telegram/канареечный путь сломан и молчит».
+
+**⚠️ Попутно найден и починен production-баг, блокировавший билд целиком:** `next build`
+падал на любом импорте из `@letar/auth/server` (`File libs/auth/src/server/index.ts is not
+under rootDir 'apps/dashboard/src'`) — `tsconfig.json` имел `rootDir: "src"` + `composite: false`,
+конфликтующие с `paths`-маппингом на сырые файлы `libs/auth/src/*` (библиотека без билд-шага,
+`package.json` → `exports` указывают прямо на `.ts`). `nx typecheck:tsgo` эту категорию ошибок
+не ловит (резолвит `libs/*` через TS project references иначе, чем `next build`/tsc — см. корневой
+`CLAUDE.md`). Исправлено по образцу `driving-school`/`auth-hub`: `rootDir: "../.."` (корень
+монорепо) + добавлен `@letar/auth` в `transpilePackages`.
+
+**Масштаб:** BlackCove подтвердил при деплое — прод-билд был сломан с коммита `78340e8a`
+(RP-Initiated Logout, v0.5.0), деплой dashboard не запускался с тех пор (последний живой образ —
+с коммита `d074e9b5`, задолго до breaking-изменения).
+
+**После деплоя** обнаружено в логах: `Error sending Telegram notification: [TypeError: fetch
+failed] ETIMEDOUT` (повторяется) — Telegram API недоступен из контейнера прямо сейчас,
+отдельная нерешённая проблема (сеть/DNS/файрвол), блокирует и heartbeat, и обычные алерты.
+
+commit `d4374694`.
+
 ## Версия 1.19.4 — чистка мёртвых ссылок на `premium-rosstil`/`imot` (2026-07-15)
 
 Найдено при разборе техдолга вне глобального `PLAN.md` (сессия `/repo` статус-отчёта). Оба приложения
