@@ -48,7 +48,7 @@ export interface ElectronAPI {
     getVersion(): Promise<string>
     getLayoutInfo(): Promise<LayoutInfo>
     isAutostartEnabled(): Promise<boolean>
-    setAutostart(on: boolean): Promise<void>
+    setAutostart(on: boolean): Promise<boolean>
     isHotkeyEnabled(): Promise<boolean>
     setHotkeyEnabled(on: boolean): Promise<void>
   }

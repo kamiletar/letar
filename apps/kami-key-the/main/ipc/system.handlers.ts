@@ -28,9 +28,11 @@ export function registerSystemHandlers(): void {
     return app.getLoginItemSettings().openAtLogin
   })
 
-  ipcMain.handle('system:setAutostart', (_event, on: boolean): void => {
+  ipcMain.handle('system:setAutostart', (_event, on: boolean): boolean => {
     app.setLoginItemSettings({ openAtLogin: on })
-    console.log(`Автозагрузка: ${on ? 'включена' : 'выключена'}`)
+    const actual = app.getLoginItemSettings().openAtLogin
+    console.log(`Автозагрузка: ${actual ? 'включена' : 'выключена'}`)
+    return actual
   })
 
   ipcMain.handle('system:isHotkeyEnabled', (): boolean => {

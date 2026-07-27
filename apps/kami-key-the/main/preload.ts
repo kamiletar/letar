@@ -30,7 +30,7 @@ const electronAPI: ElectronAPI = {
     getVersion: () => ipcRenderer.invoke('system:getVersion'),
     getLayoutInfo: () => ipcRenderer.invoke('system:getLayoutInfo'),
     isAutostartEnabled: () => ipcRenderer.invoke('system:isAutostartEnabled'),
-    setAutostart: (on: boolean) => ipcRenderer.invoke('system:setAutostart', on),
+    setAutostart: (on: boolean): Promise<boolean> => ipcRenderer.invoke('system:setAutostart', on),
     isHotkeyEnabled: () => ipcRenderer.invoke('system:isHotkeyEnabled'),
     setHotkeyEnabled: (on: boolean) => ipcRenderer.invoke('system:setHotkeyEnabled', on),
   },

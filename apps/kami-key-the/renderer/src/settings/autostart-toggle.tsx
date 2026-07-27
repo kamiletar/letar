@@ -4,6 +4,7 @@
 
 import { Box, Flex, Switch, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
+import { toaster } from '../lib/toaster'
 
 export function AutostartToggle() {
   const [enabled, setEnabled] = useState(false)
@@ -14,8 +15,23 @@ export function AutostartToggle() {
 
   const toggle = async () => {
     const newState = !enabled
-    await window.electronAPI.system.setAutostart(newState)
-    setEnabled(newState)
+    try {
+      const actual = await window.electronAPI.system.setAutostart(newState)
+      setEnabled(actual)
+      if (actual !== newState) {
+        toaster.create({
+          title: 'Не удалось изменить автозагрузку',
+          description: 'Windows отклонила изменение — проверь права или Диспетчер задач → Автозагрузка',
+          type: 'error',
+        })
+      }
+    } catch {
+      toaster.create({
+        title: 'Ошибка автозагрузки',
+        description: 'Не удалось обратиться к системным настройкам',
+        type: 'error',
+      })
+    }
   }
 
   return (

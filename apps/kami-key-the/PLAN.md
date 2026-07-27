@@ -56,7 +56,6 @@ src/
 ├── stats.ts          # Статистика использования символов
 ├── exclusions.ts     # Режим исключений + per-app профили
 ├── config.ts         # JSON-конфиг (%APPDATA%/KamiKeyThe/keymap.json)
-├── autostart.ts      # Автозагрузка (Windows реестр, legacy)
 ├── layout.ts         # Детекция раскладки клавиатуры
 └── types.ts          # Общие типы
 ```
