@@ -67,6 +67,7 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/grandslamcup/.env.docker:/secrets/grandslamcup.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/studio/.env.docker:/secrets/studio.env:ro
     networks:
       - kami-network
     healthcheck:

@@ -143,6 +143,16 @@ const APP_CONFIG = {
       user: 'svoichuzhie_user',
     },
   },
+  studio: {
+    secretsPath: '/secrets/studio.env',
+    containerName: 'studio-db',
+    defaults: {
+      host: 'studio-db',
+      port: 5432,
+      database: 'studio',
+      user: 'studio_user',
+    },
+  },
 } as const
 
 type AppName = keyof typeof APP_CONFIG
