@@ -7,8 +7,8 @@
  * опции — миграция существующих вызовов не меняет их поведение по умолчанию.
  */
 import { app } from 'electron'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export interface JsonStoreLogger {
@@ -30,6 +30,13 @@ export interface JsonStoreOptions {
   mergeDefaults?: boolean
   /** Логгер ошибок load/save; по умолчанию `console` */
   logger?: JsonStoreLogger
+  /**
+   * Атомарная запись: пишем во `${filename}.tmp`, затем переименовываем поверх целевого
+   * файла. Переименование на одной ФС атомарно — при сбое/креше во время записи старый
+   * файл остаётся целым (не бывает частично записанного JSON). По умолчанию выключено
+   * (прямая запись, поведение исходного `createConfigStore` из animatrona).
+   */
+  atomic?: boolean
 }
 
 export interface JsonStore<T> {
@@ -56,7 +63,7 @@ export interface JsonStore<T> {
  *   чтение/парсинг упали
  */
 export function createJsonStore<T>(filename: string, defaultValue: T, options: JsonStoreOptions = {}): JsonStore<T> {
-  const { dir, cacheTtlMs = 0, mergeDefaults = false, logger = console } = options
+  const { dir, cacheTtlMs = 0, mergeDefaults = false, logger = console, atomic = false } = options
 
   let cachedData: T | null = null
   let cacheExpiry = 0
@@ -154,7 +161,14 @@ export function createJsonStore<T>(filename: string, defaultValue: T, options: J
     ensureDir()
     const filePath = getPath()
     try {
-      writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+      const json = JSON.stringify(data, null, 2)
+      if (atomic) {
+        const tmpPath = `${filePath}.tmp`
+        writeFileSync(tmpPath, json, 'utf-8')
+        renameSync(tmpPath, filePath)
+      } else {
+        writeFileSync(filePath, json, 'utf-8')
+      }
       updateCache(data)
     } catch (error) {
       logger.error(`[JsonStore] Не удалось сохранить ${filePath}`, error)
@@ -166,7 +180,14 @@ export function createJsonStore<T>(filename: string, defaultValue: T, options: J
     ensureDir()
     const filePath = getPath()
     try {
-      await writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8')
+      const json = JSON.stringify(data, null, 2)
+      if (atomic) {
+        const tmpPath = `${filePath}.tmp`
+        await writeFile(tmpPath, json, 'utf-8')
+        await rename(tmpPath, filePath)
+      } else {
+        await writeFile(filePath, json, 'utf-8')
+      }
       updateCache(data)
     } catch (error) {
       logger.error(`[JsonStore] Не удалось сохранить ${filePath}`, error)

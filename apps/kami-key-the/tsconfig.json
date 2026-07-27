@@ -7,19 +7,16 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
     },
     "types": ["node"],
     "lib": ["ES2022"],
     "noUncheckedSideEffectImports": false,
-    "ignoreDeprecations": "6.0",
-    "rootDir": "."
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts", "main/**/*.ts", "shared/**/*.ts"],
-  "exclude": ["node_modules", "dist", "app", "renderer"]
+  "include": ["src/**/*.ts", "main/**/*.ts", "shared/**/*.ts", "../../libs/electron-storage/src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "app", "renderer", "../../libs/**/*.spec.ts"]
 }

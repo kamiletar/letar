@@ -21,8 +21,9 @@ await store.save({ widthCm: 50, font: 'Verdana' })
 await store.update({ widthCm: 60 }) // мёрджит поверх текущего значения
 ```
 
-Объединяет два паттерна, ранее продублированных по приложениям: кеш с TTL и sync/async
-API (`label-printer-desktop`), merge с дефолтами и `update()` (`animatrona`).
+Объединяет паттерны, ранее продублированные по приложениям: кеш с TTL и sync/async
+API (`label-printer-desktop`), merge с дефолтами и `update()` (`animatrona`), атомарная
+запись tmp+rename (`kami-key-the`).
 
 ## API
 
@@ -53,6 +54,7 @@ API (`label-printer-desktop`), merge с дефолтами и `update()` (`anima
 | `cacheTtlMs`    | `0` (без кеша)            | TTL кеша в мс — повторные load/loadSync в этот срок не трогают диск      |
 | `mergeDefaults` | `false`                   | `{ ...defaultValue, ...parsed }` вместо замены — для эволюции интерфейса |
 | `logger`        | `console`                 | Логгер ошибок (`{ error(...args) }`)                                     |
+| `atomic`        | `false`                   | Запись через `${filename}.tmp` + rename — без частично записанного JSON при сбое |
 
 ## Команды
 

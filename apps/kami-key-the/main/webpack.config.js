@@ -19,6 +19,9 @@ module.exports = {
     extensionAlias: {
       '.js': ['.ts', '.js'],
     },
+    alias: {
+      '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
+    },
   },
   module: {
     rules: [

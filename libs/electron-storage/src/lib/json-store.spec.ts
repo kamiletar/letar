@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -111,5 +111,19 @@ describe('createJsonStore', () => {
   it('getPath() указывает на filename внутри dir', () => {
     const store = createJsonStore('settings.json', DEFAULTS, { dir })
     expect(store.getPath()).toBe(join(dir, 'settings.json'))
+  })
+
+  it('atomic: true — saveSync не оставляет .tmp-файл, целевой файл содержит данные', () => {
+    const store = createJsonStore<Settings>('settings.json', DEFAULTS, { dir, atomic: true })
+    store.saveSync({ widthCm: 15, font: 'Consolas' })
+    expect(store.loadSync()).toEqual({ widthCm: 15, font: 'Consolas' })
+    expect(existsSync(join(dir, 'settings.json.tmp'))).toBe(false)
+  })
+
+  it('atomic: true — async save не оставляет .tmp-файл, целевой файл содержит данные', async () => {
+    const store = createJsonStore<Settings>('settings.json', DEFAULTS, { dir, atomic: true })
+    await store.save({ widthCm: 25, font: 'Georgia' })
+    await expect(store.load()).resolves.toEqual({ widthCm: 25, font: 'Georgia' })
+    expect(existsSync(join(dir, 'settings.json.tmp'))).toBe(false)
   })
 })

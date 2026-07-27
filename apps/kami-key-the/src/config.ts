@@ -1,22 +1,19 @@
 /**
- * JSON-конфиг в %APPDATA%/KamiKeyThe/keymap.json
+ * JSON-конфиг в userData/keymap.json (%APPDATA%/KamiKeyThe/keymap.json)
  *
  * Чтение/запись конфигурации с маппингами, раскладками и настройками.
- * При ошибке чтения или отсутствии файла — возвращает дефолтный конфиг.
- * Запись атомарная: tmp + renameSync.
+ * При ошибке чтения, отсутствии файла или невалидных данных — возвращает дефолтный конфиг.
+ * Запись атомарная: tmp + renameSync (см. `@letar/electron-storage`).
  */
 
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { createJsonStore } from '@letar/electron-storage'
 import type { KeymapConfig, LayoutProfile } from './types.js'
+
+const store = createJsonStore<KeymapConfig | null>('keymap.json', null, { atomic: true })
 
 /** Путь к файлу конфига */
 export function getConfigPath(): string {
-  const appData = process.env.APPDATA
-  if (!appData) {
-    throw new Error('Переменная окружения APPDATA не определена')
-  }
-  return join(appData, 'KamiKeyThe', 'keymap.json')
+  return store.getPath()
 }
 
 /** Дефолтный конфиг с 14 маппингами (литералы, без импорта из keymap.ts) */
@@ -63,49 +60,30 @@ export function getDefaultConfig(): KeymapConfig {
   }
 }
 
-/** Загрузить конфиг из файла. При ошибке — дефолтный конфиг. */
+/** Загрузить конфиг из файла. При ошибке, отсутствии или невалидных данных — дефолтный конфиг. */
 export function loadConfig(): KeymapConfig {
-  const configPath = getConfigPath()
+  if (!store.exists()) {
+    console.log(`Конфиг не найден: ${getConfigPath()}`)
+    console.log('Создаю дефолтный конфиг...')
+    const config = getDefaultConfig()
+    saveConfig(config)
+    return config
+  }
 
-  try {
-    if (!existsSync(configPath)) {
-      console.log(`Конфиг не найден: ${configPath}`)
-      console.log('Создаю дефолтный конфиг...')
-      const config = getDefaultConfig()
-      saveConfig(config)
-      return config
-    }
+  const parsed = store.loadSync()
 
-    const raw = readFileSync(configPath, 'utf-8')
-    const parsed = JSON.parse(raw) as KeymapConfig
-
-    // Минимальная валидация
-    if (!parsed.layouts || !Array.isArray(parsed.layouts) || parsed.layouts.length === 0) {
-      console.warn('Конфиг невалиден (нет раскладок), использую дефолт')
-      return getDefaultConfig()
-    }
-
-    return parsed
-  } catch (err) {
-    console.warn('Ошибка чтения конфига, использую дефолт:', err)
+  // Минимальная валидация
+  if (!parsed || !parsed.layouts || !Array.isArray(parsed.layouts) || parsed.layouts.length === 0) {
+    console.warn('Конфиг невалиден (нет раскладок), использую дефолт')
     return getDefaultConfig()
   }
+
+  return parsed
 }
 
 /** Атомарная запись конфига: tmp + renameSync */
 export function saveConfig(config: KeymapConfig): void {
-  const configPath = getConfigPath()
-  const dir = dirname(configPath)
-  const tmpPath = configPath + '.tmp'
-
-  // Создаём директорию если не существует
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true })
-  }
-
-  const json = JSON.stringify(config, null, 2)
-  writeFileSync(tmpPath, json, 'utf-8')
-  renameSync(tmpPath, configPath)
+  store.saveSync(config)
 }
 
 /** Получить активную раскладку (по имени или первую) */
