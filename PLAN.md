@@ -15,6 +15,15 @@
 > `apps/dashboard/PLAN_COMPLETED.md` (v1.20.0), `apps/dashboard-agent/PLAN_COMPLETED.md` (v0.8.6),
 > `apps/studio/PLAN_COMPLETED.md` (Фаза 10/5).
 
+> **📋 TODO: вынести проверку `X-Cron-Secret` в общий `libs/*` (найдено LavenderSpring,
+> 2026-07-28).** Идентичные 4 строки (`const cronSecret = process.env.CRON_SECRET; const
+> provided = request.headers.get('x-cron-secret'); if (!cronSecret || provided !== cronSecret)
+> return 401`) продублированы минимум в 5 местах: `studio/api/cron/send-reminders`,
+> `studio/api/cron/recurring-invoices`, `dashboard/api/alerts`, `dashboard/api/cron/heartbeat`,
+> `driving-school/api/cron/cleanup-api-logs`. Кандидат на `verifyCronSecret(request): boolean`
+> (или сразу с `NextResponse` на 401) в подходящей существующей `libs/*`, либо новая лёгкая
+> `libs/cron-auth`. Не реализовано, не приоритизировано.
+
 > **✅ §18.7 Тираж M1, батч 2 — `mandala` все 6 категорий закрыты, 41/41 локально
 > (2026-07-23, CoralCliff):** по SSH скопировал с прод-сервера (s2) недостающие исходные файлы
 > мандал/товаров, что разблокировало полноценный локальный сидинг и довёл диагностику до конца.
