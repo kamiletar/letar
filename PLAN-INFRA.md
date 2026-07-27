@@ -1575,3 +1575,327 @@ if (!rect) {
 - [ ] (опционально, не блокирует) `svoichuzhie` мигрирован на тот же компонент
 
 ---
+
+## §25 — Еженедельный контроль зависимостей 🆕
+
+> Спроектировано 2026-07-28 (сессия `/repo`, план целиком согласован с владельцем).
+> Реализации ещё нет — это ТЗ для исполняющего агента, писалось так, чтобы его можно было
+> выполнять буквально, по шагам. Полная копия плана также лежит в
+> `C:\Users\Kami\.claude\plans\dynamic-gliding-church.md`.
+
+### Что есть сейчас
+
+Обновление зависимостей — ручной ритуал. Человек вспоминает, что «давно не обновляли», и
+вызывает `/infra:deps-update` (`.claude/commands/infra/deps-update.md`) — markdown-инструкция
+без автоматизации: ни отметки о выполнении, ни данных о накопившемся, ни разбора breaking
+changes. В монорепо ~190 prod- и ~120 dev-зависимостей в корневом `package.json` и 25+
+приложений — пропущенный major в `next`/`prisma`/`chakra` стоит дорого.
+
+Цель — чтобы система сама напоминала и приносила готовый разбор: сколько устарело, что уязвимо,
+что именно сломается **у нас** при major-обновлении. Решение по каждому пакету принимает человек.
+
+### Принятые решения (НЕ пересматривать)
+
+1. **Сбор данных только локально.** На сервере в `/home/deploy/letar` нет `node_modules` —
+   сборка идёт внутри Docker. Скрипт гонит `bun outdated` + `bun audit` на машине разработчика
+   и делает POST в dashboard.
+2. **«Давно не обновляли» считается по git**: `git log -1 --format=%cI -- bun.lock`.
+   Отдельного файла-отметки нет — забыть отметиться невозможно.
+3. **Анализ changelog — только для major и CVE**, и его делает модель, а не скрипт.
+   Patch/minor не разбираются никогда.
+4. **Автообновление пакетов запрещено.** Ни кнопки «обновить», ни авто-PR, ни авто-коммита.
+   Система смотрит и докладывает; `bun update` запускает человек.
+5. **`CRON_SECRET`** берётся из локального `apps/dashboard/.env.docker` (см. ниже).
+
+### Проверенные факты (перепроверять не нужно)
+
+- `bun outdated` в bun 1.3.14 **не имеет `--json`**. При пайпе отдаёт чистую ASCII-таблицу без
+  ANSI: `| Package | Current | Update | Latest |`. Парсится надёжно, но это самое хрупкое место.
+- `bun audit --json` **есть**. Баннер `bun audit v1.3.14` идёт в **stderr** — читать только stdout.
+  Формат: `{ "<pkg>": [{ id, url, title, severity, vulnerable_versions, cwe, cvss: { score } }] }`.
+  Установленной версии пакета в выводе нет — join делаем сами.
+- `bun outdated` без флагов сканирует только корневой workspace. Все зависимости подняты
+  в корень — этого достаточно.
+- `createAlert` в `apps/dashboard/src/lib/alerts.ts` уже дедуплицирует по `type + status=ACTIVE`,
+  рядом есть `resolveAlertsByType`. Еженедельный скан ложится на это идеально.
+- `git log -1 -- bun.lock` сейчас показывает коммит «бамп submodule», а не реальное обновление
+  зависимостей — источник ложных отрицаний, см. Шаг 5.
+- В репо сейчас есть уязвимости уровня high — первый же скан поднимет алерт. Это ожидаемо.
+
+### Секрет `CRON_SECRET`
+
+Значение живёт в `apps/dashboard/.env.docker` (в `.gitignore`, не коммитится). Если файла нет
+или он устарел — синхронизировать с прода по SSH готовым скриптом:
+
+```bash
+./scripts/pull-env-docker.sh dashboard --apply
+```
+
+Скрипт ходит на `root@s2.letar.best`, тянет `/home/deploy/letar/apps/dashboard/.env.docker`.
+Без `--apply` показывает только diff.
+
+`scripts/deps-scan.ts` читает секрет в порядке: (1) `process.env.CRON_SECRET`; (2) парсит
+`apps/dashboard/.env.docker`, строка `CRON_SECRET=...`; (3) не нашёл — падает с понятным текстом
+и подсказкой запустить `pull-env-docker.sh`.
+
+⛔ Секрет **не печатать** в терминал, логи и чат. В `.env` корня не класть — по
+[env-files](/.claude/rules/env-files.md) там только `PORT`.
+
+### Этап 1 — MVP
+
+#### Шаг 1. Схема БД
+
+Файл `apps/dashboard/schema.zmodel`. Комментарии `///` по-русски обязательны — стиль файла.
+
+Новые enum'ы (в секцию `// ENUMS`):
+
+```
+enum DepUpdateKind      { MAJOR MINOR PATCH NONE }
+enum DepVulnSeverity    { LOW MODERATE HIGH CRITICAL }
+enum DepRiskLevel       { NONE LOW MEDIUM HIGH CRITICAL }
+enum DepAnalysisStatus  { NOT_REQUIRED PENDING DONE FAILED }
+```
+
+`DepVulnSeverity` — отдельный, не переиспользовать `AlertSeverity`: у npm шкала
+`low/moderate/high/critical`, у нас `INFO/WARNING/ERROR/CRITICAL`. Маппинг делается в коде.
+
+**`model DepScan`** — снапшот одного запуска:
+`id`, `createdAt`, `scannedAt` (время на машине разработчика), `source` (`local` /
+`local-fallback`), `gitCommit`, `gitBranch`, `lockfileUpdatedAt`, `lockfileCommit`, `bunVersion`,
+`scannerVersion`, `totalPackages`, `outdatedCount`, `majorCount`, `minorCount`, `patchCount`,
+`vulnCount`, `vulnCritical`, `vulnHigh`, `vulnModerate`, `vulnLow`, `pinnedOutdatedCount`,
+`riskScore`, `durationMs`, `analysisStatus`, `analysisSummary @db.Text`, `analysisAt`,
+`analysisModel`, `reviewedAt`, `reviewedBy`, `rawAudit Json?`, `packages DepPackage[]`.
+
+Почему так: агрегаты (`*Count`) денормализованы намеренно — карточки и порог алерта считаются
+без чтения детей. `bunVersion`/`scannerVersion` нужны, чтобы при поломке парсера было видно, где
+сменился формат. `rawAudit` позволяет переразобрать историю, не гоняя скан заново; сырой вывод
+`bun outdated` не храним — он полностью разложен в `DepPackage`.
+
+```
+@@allow('all', auth() != null)
+@@index([createdAt(sort: Desc)])
+@@index([analysisStatus])
+```
+
+**`model DepPackage`** — строка внутри скана:
+`id`, `createdAt`, `scan`/`scanId` (relation `onDelete: Cascade`), `name`,
+`currentVersion String?` (null у транзитивных, которые видит только audit), `wantedVersion`,
+`latestVersion`, `updateKind`, `depType` (`dependencies`/`devDependencies`/`transitive`),
+`isPinned Boolean` (пакет в `resolutions`/`overrides` — сейчас minimist, qs, picomatch,
+serialize-javascript), `vulnerable`, `maxSeverity DepVulnSeverity?`, `advisoryCount`,
+`advisories Json?`, `riskLevel`, `analysisNote @db.Text`, `analysisAt`,
+`analysisCarriedFrom String?`, `breakingChanges Boolean?`.
+
+```
+@@unique([scanId, name])
+@@index([scanId, riskLevel])
+@@index([name, createdAt])
+@@allow('all', auth() != null)
+```
+
+Модель делать **сразу полную**, включая поля анализа из Этапа 2 — одна миграция дешевле двух.
+
+**Правка `enum AlertType`**: добавить `DEPS_VULNERABLE`, `DEPS_STALE`.
+
+⚠️ Список `AlertType` продублирован строкой в `z.enum([...])` в
+`apps/dashboard/src/app/api/alerts/route.ts` (~строки 39–49) — **обязательно расширить и там**,
+иначе алерты новых типов будут падать с 400. Самое лёгкое место, чтобы забыть.
+
+Проверка: `nx run dashboard:zenstack:generate` → `nx run dashboard:db:migrate`.
+`prisma/seed.ts` не трогать.
+
+#### Шаг 2. Скрипт-сканер
+
+Файл `scripts/deps-scan.ts`, шебанг `#!/usr/bin/env bun`. Стиль копировать с
+`scripts/bump-version.ts` (chalk, `execFileSync`, русские JSDoc).
+Запуск: `bun scripts/deps-scan.ts`. Флаги: `--dry-run`, `--out <path>`, `--endpoint <url>`.
+
+1. Контекст репо: `git rev-parse --show-toplevel`, `git rev-parse HEAD`,
+   `git rev-parse --abbrev-ref HEAD`, `git log -1 --format=%cI%x09%H -- bun.lock`.
+2. Классификация: прочитать корневой `package.json` → `Map<name, dependencies|devDependencies>`
+   и `Set<pinned>` из объединения `resolutions` + `overrides`.
+3. `bun outdated` через `execFileSync('bun', ['outdated'], { cwd: root, encoding: 'utf-8',
+   timeout: 300_000, maxBuffer: 32*1024*1024, stdio: ['ignore','pipe','pipe'] })`.
+   Парсер: брать строки, начинающиеся с `|`; отбросить разделители и заголовок
+   (`cols[0] === 'Package'`); `split('|')` → срезать пустые края → `trim()` →
+   `[name, current, update, latest]`. Снять возможный суффикс `(dev)`/`(peer)` из имени и
+   запомнить как подсказку для `depType`. Страховка от ANSI: `replace(/\[[0-9;]*m/g, '')`.
+   Ненулевой exit считать ошибкой только при пустом stdout.
+4. Если парсер вернул 0 строк, а зависимостей > 0 — **бросить явную ошибку** «формат вывода
+   `bun outdated` изменился, парсер нужно чинить». Fallback через npm registry — Этап 3.
+5. `bun audit --json` со `stdio: ['ignore','pipe','ignore']` (баннер в stderr отбрасываем).
+   Ненулевой exit при наличии уязвимостей — норма; ошибка только если JSON не разбирается.
+6. Join по объединению имён (outdated ∪ audit). `updateKind` — сравнение `current`/`latest`
+   через `Bun.semver`. Пакеты только из audit → `depType: 'transitive'`, `currentVersion: null`.
+   `riskLevel`: `CRITICAL` — уязвимость critical/high; `HIGH` — уязвимость moderate **либо**
+   major у критичного пакета (`next, react, react-dom, @chakra-ui/react, prisma, @prisma/client,
+   @zenstackhq/*, typescript, nx, @tanstack/react-query, better-auth`); `MEDIUM` — любой другой
+   major; `LOW` — minor или уязвимость low; `NONE` — patch.
+7. `riskScore = min(100, 40*critical + 25*high + 8*moderate + 2*lowVuln + 3*majorКритичных +
+   0.5*majorПрочих)`, округлить. Формула живёт в одном месте и пишется в БД — иначе тренд
+   несопоставим между версиями скрипта.
+8. Записать `.claude/state/deps-last-scan.json`. Каталога `.claude/state/` нет — создать и
+   добавить в `.gitignore`. Прецедент структуры — `STATE_PATH` в
+   `apps/dashboard-agent/src/lib/email-canary.ts`.
+9. POST на `${endpoint}/api/deps/scan`, заголовок `X-Cron-Secret`. Таймаут 30 с, один ретрай.
+   Endpoint по умолчанию — из `DEPS_DASHBOARD_URL`, иначе прод-адрес dashboard.
+10. Печать сводки: топ-10 по риску + напоминание «обновление руками, автообновления нет».
+
+#### Шаг 3. API
+
+**`POST /api/deps/scan`** — приём скана. Авторизация по `X-Cron-Secret`, один в один как
+`apps/dashboard/src/app/api/alerts/route.ts` (проверка заголовка → zod `.strip()` → 401/400).
+
+Правка `apps/dashboard/src/proxy.ts`: **нельзя** добавлять `/api/deps` в `publicPaths` — там матч
+по `startsWith`, откроются и GET'ы. Повторить точечное исключение сразу под тем, что стоит для
+алертов (~строки 33–37):
+
+```ts
+if (pathname === '/api/deps/scan' && request.method === 'POST') return NextResponse.next()
+```
+
+**`GET /api/deps/latest`** — последний скан + пакеты + возраст lockfile, под сессией (proxy).
+
+Валидация — zod/v4 со `.strip()`: `packages` `.max(2000)`, `name` `.max(214)`, `advisories`
+`.max(50)` на пакет, строки версий `.max(64)`.
+
+Сервис `apps/dashboard/src/lib/deps.ts` на сыром `prisma` (как `lib/alerts.ts`):
+`ingestScan(payload)` — транзакция `depScan.create` + `depPackage.createMany`; ретеншн: оставить
+последние 52 скана (каскад унесёт `DepPackage`), по образцу `cleanOldAlerts`; вернуть
+`{ scanId, needsAnalysis }`. Плюс `getLatestScan()`.
+
+Алерты внутри `ingestScan` через существующий `createAlert`: `vulnCritical > 0` →
+`DEPS_VULNERABLE`/`CRITICAL`; иначе `vulnHigh > 0` → `ERROR`; уязвимостей нет →
+`resolveAlertsByType('DEPS_VULNERABLE')`.
+
+⚠️ Порог первой итерации — **`high+`, не `moderate`**: в репо есть вечные low/moderate
+в devDependencies. Telegram-уведомление из ingest в MVP не слать вообще.
+
+#### Шаг 4. Страница `/deps`
+
+`apps/dashboard/src/app/deps/page.tsx`, целиком `'use client'` + TanStack Query. Эталон
+структуры — `apps/dashboard/src/app/alerts/page.tsx`. `Header` **не импортировать** — это
+заглушка, возвращает `null`; навигация в `Sidebar`. Компоненты — в
+`apps/dashboard/src/app/_components/deps/`.
+
+Запрос `['deps','latest']` → `/api/deps/latest`, `refetchInterval: 60_000` (данные меняются раз
+в неделю, чаще незачем).
+
+1. `DepsStalenessBanner` — возраст `lockfileUpdatedAt` и последнего скана. ≤7 дней скрыт,
+   7–14 жёлтый, >14 красный. Кнопка «скопировать команду» (`bun scripts/deps-scan.ts`).
+2. `DepsSummaryCards` — risk score, устарело (major/minor/patch), уязвимости по severity, возраст
+   lockfile, последний скан. Форматирование — `formatRelativeTime`/`formatDateTime` из
+   `apps/dashboard/src/lib/format.ts`. Скелетоны — `MetricCardSkeleton`, `SkeletonGrid` из
+   `_components/ui/skeletons.tsx`.
+3. `DepsPackageTable` — главный элемент. Фильтр-чипы (все / уязвимые / major / minor / patch /
+   закреплённые), поиск по имени, сортировка `riskLevel desc, name asc`. Колонки: пакет ·
+   текущая · целевая · последняя · тип обновления · уязвимость (severity + CVSS) ·
+   dep/dev/transitive · 📌 pinned. Раскрытие строки → advisory со ссылками. Скелетон —
+   `TableRowSkeleton`.
+
+Навигация: `apps/dashboard/src/app/_components/layout/Sidebar.tsx`, массив `navLinks`
+(~строки 57–71), между `/cron` и `/alerts`:
+`{ href: '/deps', label: 'Зависимости', icon: LuPackage }` + импорт `LuPackage` из `react-icons/lu`.
+
+⛔ На странице **нет и не будет** кнопок `bun update` / «обновить всё» / «обновить пакет».
+Зафиксировать комментарием в коде страницы, чтобы позже не «доработали».
+
+#### Шаг 5. Правка `/repo`
+
+Файл `.claude/commands/repo.md`. Во frontmatter добавить
+`allowed-tools: Bash(git log:*), Bash(git rev-parse:*)` — иначе будет промпт на разрешение.
+Новая секция перед «Следующий шаг», в стиле файла (императив, нумерация, «Если X — предложи Y»):
+
+1. `git log -1 --format=%cI -- bun.lock` — дата последнего изменения lock-файла.
+2. `git log -5 --format='%cI %h %s' -- bun.lock` — определить, был ли последний коммит реальным
+   обновлением зависимостей или lock задело попутно (например, бампом submodule). Если попутно —
+   взять ближайший коммит, похожий на настоящее обновление, и отметить расхождение строкой.
+3. Возраст в днях → `Зависимости: последнее обновление N дней назад (<коммит>, <дата>)`.
+4. Условная логика: N ≤ 7 — «в норме», ничего не предлагать; 7 < N ≤ 14 — 🟡 «пора запланировать
+   проверку»; N > 14 — 🔴 баннер, предложить `bun scripts/deps-scan.ts`, затем
+   `/infra:deps-analyze`. **Спросить, запускать ли сканер. Не запускать без ответа.**
+5. Если `.claude/state/deps-last-scan.json` есть — добавить строку с датой скана и счётчиками;
+   если нет — «скан ни разу не запускался».
+
+### Этап 2 — анализ changelog
+
+**Перенос разборов при ingest** — ядро экономии. В `ingestScan`, до вставки: достать из
+предыдущих сканов пары `(name, major.minor от latestVersion) -> analysisNote` (последнюю
+непустую) и проставить в новые строки вместе с `analysisCarriedFrom = <id старого скана>`.
+Если на этой неделе 21 major и 19 из них те же — модель разбирает 2 новых, а не 21. Ключ по
+`major.minor`, а не по полной версии: иначе патч-бамп `17.0.4 → 17.0.5` сбросит валидную
+заметку. `analysisCarriedFrom` показывать в UI — человек должен видеть, что заметка не свежая.
+`analysisStatus` = `PENDING`, если есть пакет `riskLevel in (CRITICAL, HIGH)` без
+`analysisNote`; иначе `NOT_REQUIRED`.
+
+**Команда `/infra:deps-analyze`** (`.claude/commands/infra/deps-analyze.md`), запускается
+человеком, не автоматически:
+
+1. Прочитать `.claude/state/deps-last-scan.json`. Нет или старше 3 дней — предложить сперва скан.
+2. Взять `scanId` и `needsAnalysis` (сервер уже вычел перенесённые разборы).
+3. Отфильтровать: только `riskLevel ∈ {CRITICAL, HIGH}`, исключить `isPinned` (их регулирует
+   раздел «Зафиксированные версии» в `deps-update.md`), отсортировать по риску, **взять не более
+   12**. Остальные перечислить списком «не разбирали, лимит».
+4. По каждому: найти changelog (GitHub Releases → `CHANGELOG.md` → npm), прочитать только
+   диапазон между текущей и целевой версией.
+5. Грепнуть `libs/` и `apps/` на реальное использование ломающихся API — вывод должен быть
+   «что сломается **у нас**», а не пересказ релиз-нотов.
+6. По пакету 3–6 строк: что ломается · где у нас · объём работы (тривиально / полдня / отдельная
+   задача) · вердикт `breakingChanges`. Плюс общий `summary`.
+7. `POST /api/deps/scan/<scanId>/analysis` с `X-Cron-Secret`. **Секрет не печатать в чат.**
+   Роут с динамическим сегментом — точный матч в proxy не сработает, нужен regex
+   `^/api/deps/scan/[^/]+/analysis$` для метода POST.
+
+Дополнения страницы: `DepsAnalysisPanel` (summary, модель, возраст разбора, сколько заметок
+перенесено), `DepsScanHistory` (`GET /api/deps/scans?limit=30`, клик → Dialog по образцу
+`_components/shared/LogsDialog.tsx`), server actions в `_actions/deps-actions.ts`
+(`markScanReviewed`, `deleteScan`) по паттерну `cron-actions.ts` — `requireAdmin()` + audit-log.
+
+### Этап 3 — доработки
+
+- Fallback сканера через npm registry (`Accept: application/vnd.npm.install-v1+json`,
+  `dist-tags.latest`, `Bun.semver.satisfies` для wanted, конкурентность 8) с пометкой
+  `source: "local-fallback"` — чтобы деградация парсера не была тихой.
+- График тренда `riskScore` (в репо есть `@chakra-ui/charts`).
+- `DEPS_STALE` через `POST /api/cron/deps-staleness` — префикс `/api/cron` уже в `publicPaths`,
+  правок proxy не нужно.
+- Разрешение транзитивных уязвимостей до корневого пакета (`bun pm ls --all` или чтение `bun.lock`).
+
+### Деплой
+
+⛔ **Деплоить самостоятельно запрещено** ([deploy-coordination](/.claude/rules/deploy-coordination.md)).
+Страница `/deps` и роут появятся на проде только после деплоя dashboard, включая миграцию БД.
+Порядок: коммит → push → `nx lint` + `nx typecheck:tsgo` → deploy-request агенту **BlackCove**
+через Agent Mail (`topic: "deploy"`, `subject: "deploy-request: dashboard"`). Даже если
+пользователь напишет «деплой» — отправить запрос, а не деплоить. До деплоя всё проверяется
+локально: `nx dev dashboard` + локальная БД.
+
+### Риски
+
+1. **Парсер таблицы `bun outdated` — самое хрупкое место.** Формат не документирован как
+   контракт и может измениться в любом минорном релизе bun. Митигация: запись `bunVersion`
+   в скан, явная ошибка вместо тихого нуля, unit-тест парсера на зафиксированном примере вывода.
+2. **`git log -1 -- bun.lock` даёт ложные отрицания** — подтверждено на живых данных. Отсюда
+   шаг 2 в правке `/repo`. Полностью надёжного сигнала из git не выжать.
+3. **Транзитивные уязвимости** приходят без установленной версии и без пути зависимости —
+   непонятно, что обновлять. В MVP помечать «требует ручного разбора», решение — Этап 3.
+4. **Шум алертов.** Порог `high+` в первой итерации, Telegram из ingest не слать.
+5. **Размер payload ~300 КБ** — проверить `client_max_body_size` в Nginx Proxy Manager перед
+   первым прогоном на прод, иначе 413.
+6. **Перенос разборов может «залипнуть»** и показывать устаревший анализ как свежий. Отсюда
+   обязательные `analysisCarriedFrom` и явная пометка в UI.
+
+### ✓ DoD §25 (Этап 1 — MVP)
+
+- [ ] `DepScan` + `DepPackage` + 4 enum'а в `schema.zmodel`, миграция применена
+- [ ] `AlertType` расширен `DEPS_VULNERABLE`/`DEPS_STALE` **и в `z.enum` в `api/alerts/route.ts`**
+- [ ] `scripts/deps-scan.ts` работает, `--dry-run` даёт корректные счётчики
+- [ ] `POST /api/deps/scan` + исключение в `proxy.ts`; `GET /api/deps/latest` без сессии редиректит
+- [ ] Сквозной прогон: запись в БД, поднялся `Alert`, повторный прогон не дублирует алерт
+- [ ] Страница `/deps` (баннер + карточки + таблица) и пункт в `Sidebar`
+- [ ] Секция «Здоровье зависимостей» в `.claude/commands/repo.md`
+- [ ] `nx format` → `nx run dashboard:lint` → `nx run dashboard:typecheck:tsgo` зелёные,
+      версия `apps/dashboard/package.json` поднята, `CHANGELOG.md` дописан
+
+---
