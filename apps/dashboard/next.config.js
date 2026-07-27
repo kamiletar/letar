@@ -20,7 +20,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
   },
-  transpilePackages: ['@letar/ui', '@letar/forms', '@letar/analytics', '@letar/chakra-provider'],
+  transpilePackages: ['@letar/ui', '@letar/forms', '@letar/analytics', '@letar/chakra-provider', '@letar/auth'],
   // External packages that should not be bundled (native Node.js modules)
   serverExternalPackages: ['dockerode', 'docker-modem', 'ssh2', 'systeminformation', 'simple-git'],
 }

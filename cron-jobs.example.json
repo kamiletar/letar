@@ -28,6 +28,16 @@
       "description": "Автовыставление абонентских счетов (RecurringInvoice) по наступившим nextRunAt",
       "enabled": true,
       "server": "s2"
+    },
+    {
+      "id": "dashboard-heartbeat",
+      "name": "Alert Heartbeat",
+      "app": "dashboard",
+      "endpoint": "/api/cron/heartbeat",
+      "schedule": "0 21 * * *",
+      "description": "Если за сутки не было ни одного алерта — шлёт в Telegram «У всех всё хорошо» (проверка живости канала уведомлений)",
+      "enabled": true,
+      "server": "s2"
     }
   ]
 }

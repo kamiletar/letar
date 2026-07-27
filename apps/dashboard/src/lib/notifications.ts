@@ -98,11 +98,12 @@ function getSeverityEmoji(severity: AlertSeverity): string {
  */
 export async function testTelegramNotification(
   botToken: string,
-  chatId: string
+  chatId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const serverName = getServerName()
-    const message = `✅ <b>[${serverName}] Dashboard Alert Test</b>\n\nTelegram notifications are working correctly!\n\n<b>Server:</b> ${serverName}`
+    const message =
+      `✅ <b>[${serverName}] Dashboard Alert Test</b>\n\nTelegram notifications are working correctly!\n\n<b>Server:</b> ${serverName}`
 
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -134,13 +135,50 @@ export async function testTelegramNotification(
 }
 
 /**
+ * Heartbeat-уведомление: подтверждает, что канал доставки жив, когда за сутки
+ * не было ни одного алерта (иначе тишина неотличима от сломанного Telegram/канареечного пути).
+ */
+export async function sendHeartbeatTelegram(botToken: string, chatId: string): Promise<boolean> {
+  try {
+    const serverName = getServerName()
+    const timestamp = new Date().toLocaleString('ru-RU')
+    const message = `🟢 <b>[${serverName}] У всех всё хорошо</b>\n\n`
+      + `За последние 24 часа не было ни одного алерта.\n\n`
+      + `<b>Time:</b> ${timestamp}`
+
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'HTML',
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('Telegram API error (heartbeat):', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error sending Telegram heartbeat:', error)
+    return false
+  }
+}
+
+/**
  * Отправка уведомления (выбирает метод на основе настроек)
  */
 export async function sendNotification(
   alert: Alert,
   telegramEnabled: boolean,
   telegramBotToken?: string,
-  telegramChatId?: string
+  telegramChatId?: string,
 ): Promise<boolean> {
   if (telegramEnabled && telegramBotToken && telegramChatId) {
     return await sendTelegramNotification(telegramBotToken, telegramChatId, alert)
