@@ -24,6 +24,7 @@ export const SERVER_APPS: Record<string, CronServer> = {
   'form-docs': 's2',
   grandslamcup: 's2',
   dsperevod: 's2',
+  studio: 's2',
   mandala: 's2',
   kami: 's2',
   pravda: 's2',

@@ -8,6 +8,26 @@
       "schedule": "0 3 * * *",
       "description": "Удаление API логов старше 30 дней",
       "enabled": true
+    },
+    {
+      "id": "studio-send-reminders",
+      "name": "Payment Reminders (studio)",
+      "app": "studio",
+      "endpoint": "/api/cron/send-reminders",
+      "schedule": "0 9 * * *",
+      "description": "Напоминания об оплате: за 3 дня до срока + просроченные счета",
+      "enabled": true,
+      "server": "s2"
+    },
+    {
+      "id": "studio-recurring-invoices",
+      "name": "Recurring Invoices (studio)",
+      "app": "studio",
+      "endpoint": "/api/cron/recurring-invoices",
+      "schedule": "0 8 * * *",
+      "description": "Автовыставление абонентских счетов (RecurringInvoice) по наступившим nextRunAt",
+      "enabled": true,
+      "server": "s2"
     }
   ]
 }

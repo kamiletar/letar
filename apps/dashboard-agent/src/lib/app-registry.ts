@@ -11,6 +11,7 @@ export const APP_PORTS: Record<string, number> = {
   mandala: 3004,
   kami: 3005,
   dsperevod: 3019,
+  studio: 3024,
   'dashboard-agent': 3100,
 }
 
@@ -22,6 +23,7 @@ export const APP_HOSTS: Record<string, string> = {
   mandala: process.env.MANDALA_HOST ?? 'mandala-app',
   kami: process.env.KAMI_HOST ?? 'kami-app',
   dsperevod: process.env.DSPEREVOD_HOST ?? 'dsperevod-app',
+  studio: process.env.STUDIO_HOST ?? 'studio-app',
   'dashboard-agent': 'localhost', // self-reference
 }
 
