@@ -8,7 +8,8 @@
   "nx": {
     "name": "label-printer-desktop",
     "implicitDependencies": [
-      "@letar/query-provider"
+      "@letar/query-provider",
+      "@letar/electron-storage"
     ]
   },
   "dependencies": {

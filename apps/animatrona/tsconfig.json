@@ -25,7 +25,8 @@
       "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
       "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
-      "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"]
+      "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
+      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -51,7 +52,8 @@
     "../../libs/video-player-core/src/**/*.ts",
     "../../libs/animatrona-utils/src/**/*.ts",
     "../../libs/animatrona-ui/src/**/*.ts",
-    "../../libs/animatrona-ui/src/**/*.tsx"
+    "../../libs/animatrona-ui/src/**/*.tsx",
+    "../../libs/electron-storage/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -73,6 +75,9 @@
     },
     {
       "path": "../../libs/animatrona-types"
+    },
+    {
+      "path": "../../libs/electron-storage"
     }
   ]
 }

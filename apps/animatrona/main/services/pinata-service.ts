@@ -10,6 +10,7 @@
  * @see https://docs.pinata.cloud/api-reference
  */
 
+import { createJsonStore } from '@letar/electron-storage'
 import type {
   PinataConfig,
   PinataPinJob,
@@ -21,7 +22,6 @@ import type {
   RemotePinStatus,
 } from '../../shared/types/remote-pinning'
 import { DEFAULT_REMOTE_PIN_CONFIG } from '../../shared/types/remote-pinning'
-import { createConfigStore } from '../utils/config-store'
 import { createModuleLogger } from '../utils/logger'
 
 const PINATA_API_BASE = 'https://api.pinata.cloud'
@@ -29,7 +29,10 @@ const PINATA_API_BASE = 'https://api.pinata.cloud'
 const log = createModuleLogger('PinataService')
 
 /** Config store для remote pinning */
-const remotePinConfigStore = createConfigStore<RemotePinConfig>('remote-pinning.json', DEFAULT_REMOTE_PIN_CONFIG)
+const remotePinConfigStore = createJsonStore<RemotePinConfig>('remote-pinning.json', DEFAULT_REMOTE_PIN_CONFIG, {
+  mergeDefaults: true,
+  logger: log,
+})
 
 /** Загрузить конфигурацию */
 export async function loadRemotePinConfig(): Promise<RemotePinConfig> {

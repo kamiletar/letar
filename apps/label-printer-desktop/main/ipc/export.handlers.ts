@@ -1,16 +1,21 @@
 /**
  * IPC handlers для экспорта данных
  */
+import { createJsonStore } from '@letar/electron-storage'
 import { BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import * as fs from 'fs/promises'
 import * as XLSX from 'xlsx'
 import { STORAGE_FILES } from '../../shared/constants'
 import type { ExportHistoryParams, ExportResult, HistoryData, PrintJob } from '../../shared/types'
-import { JsonStorage } from '../utils/json-storage'
-import { logger } from '../utils/logger-helper'
+import { devDataDir } from '../utils/data-dir'
+import { jsonStoreLogger, logger } from '../utils/logger-helper'
 
 /** Хранилище истории (singleton) */
-const historyStorage = new JsonStorage<HistoryData>(STORAGE_FILES.history, { jobs: [] })
+const historyStorage = createJsonStore<HistoryData>(
+  STORAGE_FILES.history,
+  { jobs: [] },
+  { dir: devDataDir(), logger: jsonStoreLogger }
+)
 
 /**
  * Фильтрация по диапазону дат

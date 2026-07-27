@@ -16,6 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       '@letar/label-printer-core': path.resolve(__dirname, '../../../libs/label-printer-core/src'),
+      '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
     },
   },
   module: {

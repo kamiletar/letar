@@ -8,7 +8,8 @@
   "nx": {
     "name": "animatrona",
     "implicitDependencies": [
-      "@letar/query-provider"
+      "@letar/query-provider",
+      "@letar/electron-storage"
     ]
   },
   "scripts": {

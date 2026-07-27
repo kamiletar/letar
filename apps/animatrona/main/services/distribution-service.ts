@@ -5,8 +5,8 @@
  * отправляет периодический heartbeat, статистику и уведомляет трекер при shutdown.
  */
 
+import { createJsonStore } from '@letar/electron-storage'
 import type { TrackerConfig, TrackerDistribution } from '../../shared/types/tracker'
-import { createConfigStore } from '../utils/config-store'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
 import { getKuboService } from './kubo'
@@ -22,11 +22,15 @@ const HEARTBEAT_INTERVAL_MS = 30 * 60 * 1000
 const STATS_REPORT_INTERVAL_MS = 10 * 60 * 1000
 
 /** Config store для tracker (shared с tracker.handlers.ts) */
-const trackerConfigStore = createConfigStore<TrackerConfig>('tracker-config.json', {
-  baseUrl: 'https://animatrona-tracker.letar.best',
-  apiKey: '',
-  enabled: false,
-})
+const trackerConfigStore = createJsonStore<TrackerConfig>(
+  'tracker-config.json',
+  {
+    baseUrl: 'https://animatrona-tracker.letar.best',
+    apiKey: '',
+    enabled: false,
+  },
+  { mergeDefaults: true, logger: log }
+)
 
 /** Загрузить конфигурацию трекера, null если не настроен */
 async function loadTrackerConfig(): Promise<TrackerConfig | null> {

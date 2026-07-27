@@ -23,3 +23,17 @@ export const logger: Logger = new Proxy({} as Logger, {
     return getLogger()[prop]
   },
 })
+
+/**
+ * Адаптер `logger` под интерфейс `JsonStoreLogger` (`@letar/electron-storage`).
+ *
+ * `logger` выше типизирован как класс `Logger` (статический, без инстанс-методов) —
+ * в рантайме прокси корректно делегирует в `getLogger().error(...)`, но статически
+ * `logger.error` не существует на уровне типов. `getLogger()` возвращает реальный
+ * `winston.Logger` с типизированным `.error`, поэтому берём метод оттуда напрямую.
+ */
+export const jsonStoreLogger = {
+  error: (...args: unknown[]) => {
+    getLogger().error(String(args[0]), ...args.slice(1))
+  },
+}

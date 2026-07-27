@@ -5,7 +5,10 @@
  * При возобновлении — пропускаем аниме где lastHealthCheckAt >= startedAt.
  */
 
-import { createConfigStore } from '../utils/config-store'
+import { createJsonStore } from '@letar/electron-storage'
+import { createModuleLogger } from '../utils/logger'
+
+const log = createModuleLogger('RegenCheckpoint')
 
 export interface RegenCheckpointData {
   /** Время старта текущего запуска (ISO). null = нет активного чекпоинта */
@@ -14,7 +17,11 @@ export interface RegenCheckpointData {
   total: number
 }
 
-export const regenCheckpointStore = createConfigStore<RegenCheckpointData>('regen-checkpoint.json', {
-  startedAt: null,
-  total: 0,
-})
+export const regenCheckpointStore = createJsonStore<RegenCheckpointData>(
+  'regen-checkpoint.json',
+  {
+    startedAt: null,
+    total: 0,
+  },
+  { mergeDefaults: true, logger: log }
+)

@@ -23,7 +23,8 @@
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/label-printer-core": ["../../libs/label-printer-core/src/index.ts"],
-      "@letar/label-printer-core/*": ["../../libs/label-printer-core/src/*"]
+      "@letar/label-printer-core/*": ["../../libs/label-printer-core/src/*"],
+      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -41,7 +42,8 @@
     "../../libs/chakra-provider/src/**/*.tsx",
     "../../libs/query-provider/src/**/*.ts",
     "../../libs/query-provider/src/**/*.tsx",
-    "../../libs/label-printer-core/src/**/*.ts"
+    "../../libs/label-printer-core/src/**/*.ts",
+    "../../libs/electron-storage/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -69,6 +71,9 @@
     },
     {
       "path": "../../libs/label-printer-core"
+    },
+    {
+      "path": "../../libs/electron-storage"
     }
   ]
 }

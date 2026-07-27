@@ -27,6 +27,7 @@ module.exports = {
       // Монорепо shared-библиотеки
       '@letar/animatrona-utils': path.resolve(__dirname, '../../../libs/animatrona-utils/src/index.ts'),
       '@letar/animatrona-types': path.resolve(__dirname, '../../../libs/animatrona-types/src/index.ts'),
+      '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
     },
   },
   module: {

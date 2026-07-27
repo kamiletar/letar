@@ -1,15 +1,20 @@
 /**
  * IPC handlers для работы с базой данных (история, статистика)
  */
+import { createJsonStore } from '@letar/electron-storage'
 import type { IpcMainInvokeEvent } from 'electron'
 import { ipcMain } from 'electron'
 import { STORAGE_FILES } from '../../shared/constants'
 import type { HistoryData, PrintJob } from '../../shared/types'
-import { JsonStorage } from '../utils/json-storage'
-import { logger } from '../utils/logger-helper'
+import { devDataDir } from '../utils/data-dir'
+import { jsonStoreLogger, logger } from '../utils/logger-helper'
 
 /** Хранилище истории (singleton) */
-const historyStorage = new JsonStorage<HistoryData>(STORAGE_FILES.history, { jobs: [] })
+const historyStorage = createJsonStore<HistoryData>(
+  STORAGE_FILES.history,
+  { jobs: [] },
+  { dir: devDataDir(), logger: jsonStoreLogger }
+)
 
 /**
  * IPC handlers для работы с базой данных (история, статистика)

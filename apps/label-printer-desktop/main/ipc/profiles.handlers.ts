@@ -1,12 +1,13 @@
 /**
  * IPC handlers для профилей принтеров
  */
+import { createJsonStore } from '@letar/electron-storage'
 import type { IpcMainInvokeEvent } from 'electron'
 import { ipcMain } from 'electron'
 import { STORAGE_FILES } from '../../shared/constants'
 import type { PrinterProfile } from '../../shared/types'
-import { JsonStorage } from '../utils/json-storage'
-import { logger } from '../utils/logger-helper'
+import { devDataDir } from '../utils/data-dir'
+import { jsonStoreLogger, logger } from '../utils/logger-helper'
 
 /** Данные профилей */
 interface ProfilesData {
@@ -14,7 +15,11 @@ interface ProfilesData {
 }
 
 /** Хранилище профилей (singleton) */
-const profilesStorage = new JsonStorage<ProfilesData>(STORAGE_FILES.profiles, { profiles: [] })
+const profilesStorage = createJsonStore<ProfilesData>(
+  STORAGE_FILES.profiles,
+  { profiles: [] },
+  { dir: devDataDir(), logger: jsonStoreLogger }
+)
 
 /**
  * Генерация уникального ID

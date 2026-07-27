@@ -10,6 +10,7 @@
  * - tracker:cancelBatch — Отменить пакетную публикацию
  */
 
+import { createJsonStore } from '@letar/electron-storage'
 import { CID } from 'multiformats/cid'
 import type {
   TrackerAnimeDetailResult,
@@ -38,7 +39,6 @@ import {
   testTrackerConnection,
 } from '../services/tracker-client'
 import { getTrackerSyncService } from '../services/tracker-sync'
-import { createConfigStore } from '../utils/config-store'
 import { prisma } from '../utils/db'
 import { broadcastToWindows, createHandler } from '../utils/ipc-handler-factory'
 import { createModuleLogger } from '../utils/logger'
@@ -48,12 +48,16 @@ const log = createModuleLogger('TrackerHandlers')
 /** Флаг отмены пакетной публикации */
 let batchCancelled = false
 
-/** Config store для tracker */
-const trackerConfigStore = createConfigStore<TrackerConfig>('tracker-config.json', {
-  baseUrl: 'https://animatrona-tracker.letar.best',
-  apiKey: '',
-  enabled: false,
-})
+/** Config store для tracker (singleton на файл, shared с distribution-service.ts) */
+const trackerConfigStore = createJsonStore<TrackerConfig>(
+  'tracker-config.json',
+  {
+    baseUrl: 'https://animatrona-tracker.letar.best',
+    apiKey: '',
+    enabled: false,
+  },
+  { mergeDefaults: true, logger: log }
+)
 
 /** Загрузить конфигурацию tracker */
 async function loadTrackerConfig(): Promise<TrackerConfig> {
