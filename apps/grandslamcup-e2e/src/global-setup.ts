@@ -23,7 +23,7 @@ export default async function globalSetup(config: FullConfig) {
   const devSessionToken = process.env.DEV_SESSION_TOKEN
   if (!devSessionToken) {
     throw new Error(
-      '[Global Setup] DEV_SESSION_TOKEN не задан в окружении e2e-раннера — без него dev-session вернёт 403',
+      '[Global Setup] DEV_SESSION_TOKEN не задан в окружении e2e-раннера — без него dev-session вернёт 403'
     )
   }
 
@@ -50,8 +50,8 @@ export default async function globalSetup(config: FullConfig) {
     const sessionCookie = cookies.find((cookie) => cookie.name.endsWith(SESSION_COOKIE_SUFFIX))
     if (!sessionCookie) {
       throw new Error(
-        `[Global Setup] dev-session не установил cookie '*${SESSION_COOKIE_SUFFIX}' — вероятно 403 `
-          + '(ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере) или ошибка авторизации',
+        `[Global Setup] dev-session не установил cookie '*${SESSION_COOKIE_SUFFIX}' — вероятно 403 ` +
+          '(ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере) или ошибка авторизации'
       )
     }
 
