@@ -101,6 +101,7 @@ scripts/backup/.env
 # Generated Service Worker (created from sw.template.js at build time)
 apps/driving-school/public/sw.js
 apps/grandslamcup/public/sw.js
+apps/grandslamcup/public/swe-worker-*.js
 apps/archetest/public/sw.js
 apps/archetest/public/swe-worker-*.js
 # ZenStack v3 artifacts
