@@ -1,5 +1,20 @@
 # Выполненные задачи — Animatrona Tracker
 
+## 152-ФЗ: consent-инфраструктура с нуля (2026-07-28)
+
+Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
+собирает email (Better Auth, hub-client), но не имело ни одного элемента чек-листа 152-ФЗ. Добавлено:
+
+- `ConsentLog` в `schema.zmodel` + миграция (`prisma/migrations/20260728041010_add_consent_log`)
+- `POST /api/consent` — sha256-хэш IP, без email/точного IP
+- `CookieBanner`/`CookieSettingsButton` из `@letar/ui` в layout/header
+- Страница `/privacy`
+
+Локальная dev-БД (свежий пустой контейнер) имела рассинхрон с историей миграций (`prisma migrate
+deploy` падал `P3018` на уже существующих колонках) — устранён `prisma migrate reset --force` с
+явного разрешения владельца в чате (2026-07-28), затем применена вся история миграций + новая
+`add_consent_log`. `nx zenstack:generate`+lint+typecheck зелёные.
+
 ## Техдолг (2026-07-07)
 
 Аудит после планового `bun update` — сравнение typecheck/lint до/после обновления зависимостей
@@ -9,7 +24,7 @@
 - **TS6305 dist-цепочка** — `libs/animatrona-ui` не имел вообще никаких Nx-таргетов, из-за чего
   `dist/*.d.ts` никогда не мог быть сгенерирован → падал `typecheck:tsgo` у `animatrona-tracker`
   через всю цепочку `animatrona-ui → animatrona-franchise-graph → video-player-react →
-  video-player-core`. Добавлен `typecheck`-таргет (зеркально `animatrona-franchise-graph`) +
+video-player-core`. Добавлен `typecheck`-таргет (зеркально `animatrona-franchise-graph`) +
   `oxlint`/`lint`. Попутно всплыл смежный баг — `animatrona-franchise-graph` не собирался из-за
   отсутствия `declare module '*.css'` (добавлен `css.d.ts` по образцу `libs/ui`, `driving-school`).
 - **`EpisodeCardBase.tsx`** (libs/animatrona-ui) — `eqeqeq`, всплыло только после появления

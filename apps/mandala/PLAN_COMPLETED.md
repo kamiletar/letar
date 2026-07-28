@@ -709,4 +709,20 @@ besides a function... You returned: [object Object]` и **cleanup никогда
 
 ---
 
-**Последнее обновление:** 2026-07-22
+## v0.40.0 — 2026-07-28 (152-ФЗ: consent-инфраструктура с нуля)
+
+Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
+собирает email (Better Auth), но не имело ни одного элемента чек-листа 152-ФЗ. Добавлено:
+
+- `ConsentLog` в `schema.zmodel` + миграция (`prisma/migrations/20260728041113_add_consent_log`)
+- `POST /api/consent` — sha256-хэш IP, без email/точного IP
+- `CookieBanner`/`CookieSettingsButton` из `@letar/ui` в layout/footer
+- Страница `/privacy`
+
+Локальная dev-БД имела pre-existing дрейф (`better_auth`-миграция была изменена после применения) —
+устранён `prisma migrate reset --force` с явного разрешения владельца в чате (2026-07-28), затем создана
+и применена миграция `add_consent_log`. `nx zenstack:generate`+lint+typecheck зелёные.
+
+---
+
+**Последнее обновление:** 2026-07-28

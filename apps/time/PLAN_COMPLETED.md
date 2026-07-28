@@ -1,5 +1,21 @@
 # Time — Выполненные задачи
 
+## v0.5.0 — 2026-07-28 (152-ФЗ: consent-инфраструктура с нуля + первый baseline миграций)
+
+Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
+собирает email (Better Auth, hub-client), но не имело ни одного элемента чек-листа 152-ФЗ. Добавлено:
+
+- `ConsentLog` в `schema.zmodel`
+- `POST /api/consent` — sha256-хэш IP, без email/точного IP
+- `CookieBanner`/`CookieSettingsButton` из `@letar/ui` в layout/toolbar
+- Страница `/privacy`
+
+**Важная находка:** у приложения вообще не было папки `prisma/migrations` — три таблицы (`User`,
+`NotificationLog`, `NotificationSubscription`) существовали в dev-БД только через исторический
+`db:push`, без истории миграций. С явного разрешения владельца (2026-07-28) локальная dev-БД очищена
+(`DROP SCHEMA public CASCADE`) и создана первая миграция `init`, включающая существующие модели +
+`ConsentLog` — теперь `prisma migrate status` и деплой на прод пойдут через нормальный migration-флоу.
+
 ## 2026-07-19 — Настоящий root cause staging-гейта: отсутствие `project.json`, подтверждён живым прогоном, добавлен в `E2E_GATED_APPS` (§18.7, инфра)
 
 Продолжение сессии 2026-07-18. BlackCove сообщил, что даже с фиксом `webServer` из вчерашней
@@ -48,7 +64,7 @@ staging-деплой (BlackCove) упал на билде; после фикса
   паттерн уже у 14 других приложений монорепо (grandslamcup, kami, aboi, driving-school...) —
   типы проверяются отдельно `nx typecheck:tsgo` (у time чисто).
 - **`time-e2e` не запускался на staging:** `playwright.config.ts` — `webServer.command: 'bun nx
-  run @letar/time:dev'` звал несуществующий nx-проект (реальное имя — `time`, `@letar/time` —
+run @letar/time:dev'` звал несуществующий nx-проект (реальное имя — `time`, `@letar/time` —
   это имя `package.json`); `webServer.url` был захардкожен на `localhost:3000` (дефолт
   генератора, не совпадает ни с реальным портом time — 3013, ни с `baseURL`) — из-за этого
   `reuseExistingServer` не видел уже поднятый staging-контейнер и пытался поднять несуществующий
@@ -58,7 +74,7 @@ staging-деплой (BlackCove) упал на билде; после фикса
   главной странице `time` нет — она рендерит только `<Text>` со счётчиком часов) заменён на
   реальный смок-тест (проверка `<title>` + видимого текста часа).
 - Локально 3/3 браузера (chromium/firefox/webkit) зелёные (`BASE_URL=http://localhost:3013
-  bunx playwright test`, минуя зависающий в dev-режиме `nx e2e`).
+bunx playwright test`, минуя зависающий в dev-режиме `nx e2e`).
 - Коммит `884ed211` (letar root). Подробности — корневой `PLAN.md` §18.7.
 
 ## 2026-07-12 — Живой пилот zero-downtime rollout пройден (§18.6 Сессия G, инфра, вне тематики приложения)
