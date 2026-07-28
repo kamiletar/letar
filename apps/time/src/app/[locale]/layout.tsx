@@ -1,5 +1,6 @@
 import { ALL_LOCALES, routing, RTL_LOCALES } from '@/i18n/routing'
 import { UmamiScript } from '@letar/analytics'
+import { CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -69,6 +70,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           </NextIntlClientProvider>
         </ChakraProviders>
         <UmamiScript />
+        <CookieBanner appKey="time" />
       </body>
     </html>
   )

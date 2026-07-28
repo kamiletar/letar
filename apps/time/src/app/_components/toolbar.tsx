@@ -4,7 +4,7 @@ import { logoutAction } from '@/app/_actions/auth.actions'
 import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 import { HStack } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
-import { UserMenu } from '@letar/ui'
+import { CookieSettingsButton, UserMenu } from '@letar/ui'
 
 import { LocaleSwitcher } from './locale-switcher'
 
@@ -16,6 +16,7 @@ export function Toolbar() {
     <HStack pos="fixed" top={4} right={4} zIndex={10} gap={1} opacity={0.7} _hover={{ opacity: 1 }}>
       <LocaleSwitcher />
       <ColorModeButton />
+      <CookieSettingsButton appKey="time" />
       <UserMenu
         session={session?.user ?? null}
         onSignIn={() => signInWithLetarAuth()}

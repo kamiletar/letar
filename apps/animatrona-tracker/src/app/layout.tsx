@@ -1,4 +1,5 @@
 import { UmamiScript } from '@letar/analytics'
+import { CookieBanner } from '@letar/ui'
 import Script from 'next/script'
 
 import { Header } from '@/app/_components/header'
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Provider>
         <Script src="/subtitles-octopus.js" strategy="beforeInteractive" />
         <UmamiScript />
+        <CookieBanner appKey="animatrona-tracker" />
       </body>
     </html>
   )

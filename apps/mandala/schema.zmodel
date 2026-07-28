@@ -121,6 +121,33 @@ model Verification {
 }
 
 // ============================================================================
+// CONSENT LOG (152-ФЗ)
+// ============================================================================
+
+model ConsentLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  /// Хэш IP (sha256, без соли — для дедупликации, не для деанонимизации)
+  ipHash    String
+  userAgent String?
+
+  acceptedAnalytics  Boolean @default(false)
+  acceptedMarketing  Boolean @default(false)
+  acceptedFunctional Boolean @default(true)
+
+  /// Версия текста политики, на которую дано согласие
+  consentVersion String
+
+  consentedAt DateTime @default(now())
+
+  @@allow('create', true)
+  @@allow('read', auth().role == ADMIN)
+  @@index([userId])
+  @@index([consentedAt])
+}
+
+// ============================================================================
 // MANDALA MODELS
 // ============================================================================
 

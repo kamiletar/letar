@@ -25,6 +25,34 @@ plugin policy {
 }
 
 // ========================================
+// Журнал согласий на обработку cookie (152-ФЗ)
+// ========================================
+
+model ConsentLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  /// Хэш IP (sha256, без соли — для дедупликации, не для деанонимизации)
+  ipHash    String
+  userAgent String?
+
+  acceptedAnalytics  Boolean @default(false)
+  acceptedMarketing  Boolean @default(false)
+  acceptedFunctional Boolean @default(true)
+
+  /// Версия текста политики, на которую дано согласие
+  consentVersion String
+
+  consentedAt DateTime @default(now())
+
+  // В приложении нет роли ADMIN на User (hub-client через ключницу) —
+  // чтение журнала согласий закрыто для всех клиентов ORM (только через БД напрямую)
+  @@allow('create', true)
+  @@index([userId])
+  @@index([consentedAt])
+}
+
+// ========================================
 // Пользователь (синхронизируется с ключницей)
 // ========================================
 

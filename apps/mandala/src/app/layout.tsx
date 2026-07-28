@@ -10,7 +10,7 @@ import { Provider } from '@/app/_components/ui/provider'
 import { Toaster } from '@/app/_components/ui/toaster'
 import { YandexMetrika } from '@/app/_components/yandex-metrika'
 import { UmamiScript } from '@letar/analytics'
-import { TopLoader } from '@letar/ui'
+import { CookieBanner, TopLoader } from '@letar/ui'
 import type { Viewport } from 'next'
 import type { JSX } from 'react'
 
@@ -60,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                 <OfflineIndicator />
                 <YandexMetrika />
                 <UmamiScript />
+                <CookieBanner appKey="mandala" />
               </Provider>
             </CartProvider>
           </QueryProvider>

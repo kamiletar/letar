@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Container, Flex, Link, Text } from '@chakra-ui/react'
-import { BuildVersion, StudioCredit } from '@letar/ui'
+import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
 import packageJson from '../../../package.json'
 
 /**
@@ -33,6 +33,16 @@ export function Footer() {
           <Link href="mailto:elfafeya@gmail.com" color="brand.500" _hover={{ textDecoration: 'underline' }}>
             elfafeya@gmail.com
           </Link>
+          <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
+            |
+          </Text>
+          <Link href="/privacy" color="brand.500" _hover={{ textDecoration: 'underline' }}>
+            Политика ПДн
+          </Link>
+          <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
+            |
+          </Text>
+          <CookieSettingsButton appKey="mandala" />
           <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
             |
           </Text>

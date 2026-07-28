@@ -17,7 +17,7 @@ import {
   Separator,
   VStack,
 } from '@chakra-ui/react'
-import { MobileAuthSection, UserMenu } from '@letar/ui'
+import { CookieSettingsButton, MobileAuthSection, UserMenu } from '@letar/ui'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -78,6 +78,7 @@ export function Header() {
 
           {/* Десктоп — UserMenu */}
           <HStack gap={2} display={{ base: 'none', md: 'flex' }}>
+            <CookieSettingsButton appKey="animatrona-tracker" />
             <UserMenu
               session={session?.user ?? null}
               onSignIn={() => signInWithLetarAuth(pathname)}
@@ -148,9 +149,9 @@ export function Header() {
                         onSignOut={signOut}
                         onClose={() => setDrawerOpen(false)}
                         profileHref="/profile"
-                        extraItems={isAdmin
-                          ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }]
-                          : []}
+                        extraItems={
+                          isAdmin ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }] : []
+                        }
                       />
                     </VStack>
                   </Drawer.Body>
