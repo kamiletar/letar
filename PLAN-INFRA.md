@@ -1001,33 +1001,10 @@ rollout, не раньше. Не начато.
 > как есть (только grandslamcup, дата 2026-07-18); это отдельный трек по подключению остальных
 > приложений к staging-e2e (Сессия D паттерну), параллельно и независимо от F.
 
-> **Тираж M1 batch2 — продолжение сессии (2026-07-22, root-weaver):** разобрал накопившийся
-> инбокс BlackCove по треду `staging-e2e-gate-m1-batch2` и продвинул 3 из 4 незакрытых находок:
->
-> - **`pravda` `toc.spec.ts`** — реальный баг теста (не app-код): в трёх тестах (клик по пункту
->   TOC, автоскролл к активному, подсветка активного) переменной `href`/`firstHref`/`lastHref`
->   присваивался сам Playwright `Locator` вместо `await locator.getAttribute('href')`, затем на
->   нём вызывался `.slice(1)` → `TypeError: href.slice is not a function`. Часть 54 фейлов из
->   msg #640. Исправлено и запушено (коммит `6d4833aa`), запрошен у BlackCove передеплой+полный
->   e2e (msg #682) — заодно должен собраться `trace.zip` для `navigation.spec.ts` firefox/webkit
->   благодаря ранее добавленному `retries: 1` (коммит `b1ed1c12`, ещё не проверен живым прогоном).
-> - **`dsperevod` `callback-drawer.spec.ts`** — все 4 теста падают только в WebKit на вводе
->   телефона (`Form.Field.Phone`, маска `use-mask-input`/`withMask`). Это баг общей библиотеки
->   `@letar/forms`, не app-кода dsperevod — по `form-delegation.md` делегировано, не патчилось на
->   месте. Записано в `libs/forms/PLAN.md` Backlog. Отправить `send_message` координатору не
->   удалось — `FormsCoord` не зарегистрирован в проекте, `forms-dev` retired (не принимает
->   сообщения) — делегация зафиксирована только в PLAN.md, ждёт владельца или переоживления агента.
-> - **`mandala` — 0/31 mandala при seed на staging** — не баг `seed.ts` (владелец решил не
->   чинить graceful-фолбэк): `upsertImage()` возвращает `null`, если файла нет на диске →
->   `apps/mandala/prisma/seed.ts:200-204` пропускает создание всей записи `Mandala` целиком
->   (imageId обязателен по схеме). Файлы `uploads/mandalas/*.png` физически есть только на проде
->   (s2), никогда не были синхронизированы на staging (s3), `uploads/` не в git по конвенции.
->   Ками подтвердил: синхронизировать реальные файлы (не генерировать плейсхолдеры). Запрошено у
->   BlackCove (msg #683) — прод(s2)→staging(s3) rsync/scp `uploads/mandalas/` (+ вероятно
->   `content/`/`watermarks/`) → повторный `deploy_app(mandala, staging, seed:true)`.
->
-> **Не тронуто в этой сессии:** `pravda` `bookmarks.spec.ts`/`cross-refs.spec.ts` (localStorage/
-> переходы между статьями, msg #640) — отдельная сессия.
+> **📋 Плотный операционный нарратив тиража** (batch M1 находки, статус на 2026-07-21/22, находки
+> требующие отдельного трека) — вынесен в `.claude/private/PLAN-JOURNAL.md` §18.7 (2026-07-28,
+> §27 Часть 2 Шаг 2.5) — кросс-приложенческая запись с причинно-следственными связями между
+> приложениями, тот же класс контента, что журнал §18.6/§18.7 выше.
 
 **Инвентаризация (2026-07-17, `apps/*-e2e` × `S2_APPS` из `deploy-affected.sh`):**
 
@@ -1087,50 +1064,9 @@ tsconfig, eslint, playwright.config.ts с портом из `apps/<app>/.env`, `
 уже есть (14, включая 6 свежих из N): `aboi`/`time` первыми (уже проверенные пилоты rollout) через
 паттерн Сессии D.
 
-### Батч M1 — статус на 2026-07-21 (BlackCove + root-weaver, тираж `staging-e2e-gate-m1-batch2`)
-
-Итеративный цикл деплой→e2e→диагностика→фикс→повтор по `svoichuzhie`/`mandala`/`dsperevod`/`pravda`.
-Найдено и починено силами root-weaver в течение сессии: `port_in_redirect` в `pravda/nginx.conf`
-(редиректы уводили на внутренний container-порт), build-time `NEXT_PUBLIC_BETTER_AUTH_URL` без build
-ARG в `Dockerfile.production` (`dsperevod`/`svoichuzhie` — заменено на `window.location.origin`,
-паттерн aboi), Next.js 16 upstream-баг [vercel/next.js#85374](https://github.com/vercel/next.js/issues/85374)
-для `pravda` (build adapter, реально работает на сетевом уровне — не воспроизводится вне
-`@playwright/test`-обвязки, см. находку ниже). Незакрытые к концу сессии: `svoichuzhie:48` (успешный
-вход без `callbackUrl` не редиректит — root cause найден: `testFan` заведён через `createDevSessionRoute`
-без строки `Account`, реальный `/sign-in/email` не может найти credential-запись; чинить —
-отдельный сид с реальным credential-аккаунтом, не трогая dev-session механизм), `mandala` auth.setup
-(гипотеза не-засеянной staging-БД подтверждена, но сам сид не удаётся выполнить — см. находку ниже),
-`pravda navigation.spec.ts` (5/13 падают только внутри `@playwright/test` — ad-hoc воспроизведение
-голым `playwright` API проходит чисто, включён `retries:1` для сбора `trace.zip`, разбор не завершён).
-
-### 🔴 Находки этой сессии, требующие отдельного трека (не в скоупе тиража M1, не почищено)
-
-1. **`dashboard-agent` на s3 не передеплоен 9+ дней** — контейнер работает на коде, предшествующем
-   уже смёрженной поддержке `seed` (`apps/dashboard-agent/src/routes/deploy.ts:418`, коммит
-   `64e558fc`, см. `apps/dashboard-agent/PLAN.md` "В работе"). Из-за этого `deploy_app({ seed: true })`
-   молча не запускает сид ни для одного приложения через deploy-mcp — обнаружено на `mandala`.
-   **Нужно:** передеплоить `dashboard-agent` на s3 (и проверить s2 на ту же старость).
-2. **`run_e2e` (routes/e2e.ts) не выставляет `CI=1`** при спавне `bunx nx e2e` на staging — у
-   `nxE2EPreset()` (`node_modules/@nx/playwright/dist/src/utils/preset.js:82`) `retries: process.env.CI
-? 2 : 0`, значит `trace: 'on-first-retry'` в `apps/*-e2e/playwright.config.ts` **никогда** не
-   собирает `trace.zip` на staging-прогонах (retries=0) — только на locally-запущенных с `CI=1`.
-   Не чинить хардкодом `retries` в конфигах приложений (сломает быстрый локальный dev-цикл) — нужно
-   добавить `CI=1` в spawn-окружение `routes/e2e.ts`, тем же приёмом, что уже применён для
-   `BASE_URL`/`DEV_SESSION_TOKEN` (`--preserve-env`, см. запись 0.7.4 выше в этом файле). Найдено при
-   разборе `pravda navigation.spec.ts` — root-weaver обошёл точечным `retries:1` в самом `pravda-e2e`
-   (временный коммит), но проблема системная для всех gated-приложений.
-3. **`nx run <app>:db:seed` не резолвит `@/generated/prisma`-алиас** при ручном запуске (`npx tsx
-prisma/seed.ts` за кулисами `prisma db seed`) вне полного `deploy-affected.sh` пайплайна —
-   воспроизведено на `mandala` (`Error: Cannot find module '@/generated/prisma'`, хотя файлы реально
-   сгенерированы и alias `@/*` → `./src/*` в tsconfig на месте). Раз находка №1 выше чинится —
-   возможно, тот же баг проявится и через официальный `deploy_app({ seed: true })` путь, раз он
-   использует ту же команду — стоит проверить сразу после передеплоя `dashboard-agent`.
-4. **`libs/admin-ui` — сломанная транзитивная зависимость `@letar/format-utils`** (несуществующий
-   пакет), блокирует production-билд одновременно `aprel8008` и `aboi` — оба переведены на общий
-   `SortablePhotoGrid` (`libs/admin-ui/src/photo/sortable-photo-grid.tsx` → `utils/slugify.ts:2` →
-   `@letar/format-utils`). Владельцы (`aprel8008-dev`/`aboi-dev`) уже уведомлены через Agent Mail
-   (2026-07-21), деплой обоих приложений придержан до фикса. Если к следующей сессии не закрыто —
-   поднять снова здесь.
+> **Батч M1 (статус на 2026-07-21) и находки, требующие отдельного трека** (dashboard-agent
+> устарел на s3, `run_e2e` не выставляет `CI=1`, `db:seed` не резолвит алиас, `@letar/format-utils`
+> сломан) — детали в `.claude/private/PLAN-JOURNAL.md` §18.7 (см. пометку выше).
 
 ---
 
