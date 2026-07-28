@@ -13,6 +13,8 @@
 
 # Generated files
 **/src/generated
+apps/archetest/docs/question-bank-audit.md
+apps/archetest/docs/question-bank-audit.json
 
 # Dependencies
 /node_modules

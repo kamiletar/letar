@@ -17,7 +17,8 @@
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",
     "src/**/*.spec.tsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["out-tsc", "dist", "node_modules", ".next"]
 }

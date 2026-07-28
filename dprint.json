@@ -32,6 +32,8 @@
     "**/.nx/cache",
     "**/.nx/workspace-data",
     "**/src/generated",
+    "apps/archetest/docs/question-bank-audit.md",
+    "apps/archetest/docs/question-bank-audit.json",
     "**/*.log",
     ".vscode",
     ".idea",
