@@ -10,9 +10,7 @@ import { ProfessionalLeadSchema } from '../_schemas/professional-lead.schema'
  * и он бы упал на policy check для анонимного гостя (запись при этом всё равно
  * попала бы в БД) — тот же паттерн, что в auth-hub для ConsentLog.
  */
-export async function submitProfessionalLeadAction(
-  input: unknown,
-): Promise<{ ok: true } | { error: string }> {
+export async function submitProfessionalLeadAction(input: unknown): Promise<{ ok: true } | { error: string }> {
   const parsed = ProfessionalLeadSchema.safeParse(input)
   if (!parsed.success) {
     return { error: 'validation_failed' }

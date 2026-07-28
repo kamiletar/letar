@@ -33,10 +33,7 @@ export interface ArmorRadarIndex {
   attentionEn: string
 }
 
-const QUADRANTS: Record<
-  ArmorRadarQuadrant,
-  Omit<ArmorRadarIndex, 'physical' | 'affective' | 'quadrant'>
-> = {
+const QUADRANTS: Record<ArmorRadarQuadrant, Omit<ArmorRadarIndex, 'physical' | 'affective' | 'quadrant'>> = {
   'lightning-rod': {
     label: 'Громоотвод',
     labelEn: 'Lightning Rod',
@@ -80,10 +77,8 @@ const QUADRANTS: Record<
       'Броня и радар в среднем диапазоне: ни выраженного заглушения телесных сигналов, ни повышенной проницаемости к чужим состояниям.',
     descriptionEn:
       'Armor and radar in the mid range: neither pronounced muting of body signals nor heightened permeability to others’ states.',
-    attention:
-      'Выраженного кросс-паттерна нет — интерпретировать шкалы по отдельности.',
-    attentionEn:
-      'No pronounced cross-pattern — interpret the scales separately.',
+    attention: 'Выраженного кросс-паттерна нет — интерпретировать шкалы по отдельности.',
+    attentionEn: 'No pronounced cross-pattern — interpret the scales separately.',
   },
 }
 

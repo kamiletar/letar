@@ -43,7 +43,14 @@ describe('computeArmorRadar', () => {
       [10, 10],
     ]) {
       const idx = computeArmorRadar(p, a)
-      for (const field of [idx.label, idx.labelEn, idx.description, idx.descriptionEn, idx.attention, idx.attentionEn]) {
+      for (const field of [
+        idx.label,
+        idx.labelEn,
+        idx.description,
+        idx.descriptionEn,
+        idx.attention,
+        idx.attentionEn,
+      ]) {
         expect(field, `квадрант ${idx.quadrant}`).toBeTruthy()
       }
     }

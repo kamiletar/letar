@@ -101,7 +101,7 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
          VALUES (gen_random_uuid()::text, 'E2E Safety Net', $1, true, ARRAY['USER']::"UserRole"[], true, now())
          ON CONFLICT (email) DO UPDATE SET "disclaimerAccepted" = true, "updatedAt" = now()
          RETURNING id`,
-        [TEST_EMAIL],
+        [TEST_EMAIL]
       )
       userId = userResult.rows[0].id as string
 
@@ -111,7 +111,7 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
       await client.query(
         `INSERT INTO "Session" (id, "userId", token, "expiresAt", "updatedAt")
          VALUES (gen_random_uuid()::text, $1, $2, $3, now())`,
-        [userId, token, expiresAt],
+        [userId, token, expiresAt]
       )
       cookieValue = signSessionCookie(token, secret)
     } finally {
