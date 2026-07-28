@@ -1,5 +1,14 @@
 # Выполненные задачи — Kami
 
+## Версия 0.33.1 — чистка мёртвых demo-ссылок в портфолио (2026-07-28)
+
+Найдено при повторном аудите хвостов decommission `imot`/`premium-rosstil`
+(`apps/dashboard-agent/PLAN.md`, раунд 2): `prisma/seed.ts` отдавал `demoUrl` на decommissioned
+`https://premium.rosstil.ru/` и `https://imot.letar.best` — реальный битый UX на живом портфолио,
+не просто косметика. `demoUrl` убран у обеих карточек, описание/технологии оставлены как история
+портфолио. Seed idempotent (`deleteMany`+`createMany`), но re-seed прод-БД kami не выполнялся —
+если демо-ссылки уже в проде, нужен отдельный запуск сида с согласия владельца.
+
 ## Версия 0.33.0 — 152-ФЗ: CookieBanner+ConsentLog, consent-aware аналитика (2026-07-28)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Страница
