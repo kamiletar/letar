@@ -76,7 +76,7 @@ async function loginAndSave(
   page: Awaited<ReturnType<Awaited<ReturnType<typeof chromium.launch>>['newPage']>>,
   email: string,
   password: string,
-  paths: string[],
+  paths: string[]
 ): Promise<void> {
   await page.goto(`${BASE_URL}/login`, { timeout: 45_000 })
   await page.waitForSelector('input[type="email"]', { timeout: 25_000 })
