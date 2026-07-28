@@ -11,8 +11,9 @@
  * что и `rsync` с mail-сервера.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import { postDashboardAlert } from './dashboard-alert'
+import { loadJsonState, saveJsonState } from './json-state-file'
 
 const BACKUP_DIR = process.env.MADDY_BACKUP_DIR || '/home/deploy/letar/backups/maddy'
 const STATE_PATH = process.env.MADDY_BACKUP_STATE_PATH || '/home/deploy/letar/maddy-backup-freshness-state.json'
@@ -34,22 +35,11 @@ interface FreshnessState {
 }
 
 function loadState(): FreshnessState {
-  try {
-    if (existsSync(STATE_PATH)) {
-      return JSON.parse(readFileSync(STATE_PATH, 'utf-8')) as FreshnessState
-    }
-  } catch {
-    // повреждённый/нечитаемый файл состояния — начинаем с чистого листа
-  }
-  return { alerted: false }
+  return loadJsonState<FreshnessState>(STATE_PATH, { alerted: false })
 }
 
 function saveState(state: FreshnessState): void {
-  try {
-    writeFileSync(STATE_PATH, JSON.stringify(state, null, 2), 'utf-8')
-  } catch (error) {
-    console.error('[BackupFreshness] Не удалось сохранить состояние:', error)
-  }
+  saveJsonState(STATE_PATH, state, 'BackupFreshness')
 }
 
 function findNewestBackupFile(dir: string): { name: string; mtimeMs: number } | null {

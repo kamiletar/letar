@@ -89,19 +89,14 @@ self-deploy случая (`dashboard-agent` деплоит сам себя). Т�
 `SERVER_APPS` в один объект-реестр (по образцу `APP_CONFIG` в `database.ts`) — один источник
 истины вместо трёх параллельных Record'ов с одинаковым набором ключей-приложений.
 
-### `APP_CONFIG.defaults.host` дублирует `containerName` (найдено MagentaGlen, 2026-07-28)
+### ✅ `APP_CONFIG.defaults.host` дублировал `containerName` — закрыто (root-weaver, 2026-07-28)
 
-В `src/lib/database.ts` каждая из 15 записей `APP_CONFIG` хранит `containerName` и
-`defaults.host` как две отдельные строки с одинаковым значением (например
-`containerName: 'studio-db'`, `defaults.host: 'studio-db'`). Это та же категория риска, что
-вызвала инцидент studio 2026-07-04 (`docker-compose.production.yml`: `container_name:
-studio-postgres` разошёлся с хостом `studio-db`, который жёстко генерирует
-`deploy-affected.sh` по конвенции `${app}-db`) — только здесь рассинхрон возможен между двумя
-полями одного объекта при копипасте новой записи.
-
-**Предложение:** вывести `host` из `containerName` (`host: config.containerName`) вместо
-повторения строки — один источник истины, опечатка при добавлении нового приложения станет
-невозможна на уровне типа.
+В `src/lib/database.ts` каждая запись `APP_CONFIG` хранила `containerName` и `defaults.host`
+как две отдельные строки с одинаковым значением (найдено MagentaGlen 2026-07-28 — та же
+категория риска, что инцидент studio 2026-07-04). Поле `host` убрано из `defaults` всех 17
+записей; `getAppDbConfig()` теперь выводит `host: config.containerName` — один источник
+истины, опечатка при добавлении нового приложения больше не может рассинхронить два поля
+одного объекта. `dashboard-agent` 0.8.9.
 
 ### ✅ Устаревшее описание cron-задачи `s2-database-backup` — закрыто (root-weaver, 2026-07-28)
 

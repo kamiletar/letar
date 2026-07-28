@@ -31,6 +31,18 @@ Maddy не шли 26 дней незамеченно, потому что нич
 commit `bcbaf10c` (0.8.7), `c3d6c527` (0.8.8). Деплой запрошен у BlackCove (тред
 `deploy-dashboard-agent-backup-coverage`), не выполнялся на момент записи.
 
+**0.8.9 — рефакторинг по итогам самопроверки сессии:** два системных находки, всплывшие
+при работе с `database.ts`/`email-canary.ts`/`backup-freshness.ts`, применены сразу же:
+
+1. `APP_CONFIG.defaults.host` дублировал `containerName` строкой в каждой из 17 записей
+   (риск отмечен MagentaGlen 2026-07-28, до этой сессии не был применён) — убран, `host`
+   выводится из `containerName` в `getAppDbConfig()`.
+2. `email-canary.ts` и `backup-freshness.ts` дублировали паттерн «читать/писать JSON-файл
+   состояния с try/catch» — вынесено в `lib/json-state-file.ts`
+   (`loadJsonState`/`saveJsonState`). Сама бизнес-логика дебаунса (пороги, счётчики) не
+   унифицирована — у email-canary две ноги с `consecutiveFailures`, у backup-freshness
+   плоский `alerted`, разная семантика.
+
 ## Версия 0.8.6 — регистрация `studio` в реестре приложений (2026-07-28)
 
 `studio` полностью отсутствовал в `lib/app-registry.ts` (`APP_PORTS`/`APP_HOSTS`) и

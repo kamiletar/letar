@@ -11,6 +11,23 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.8.9] — 2026-07-28
+
+### Changed
+
+- **`APP_CONFIG` в `src/lib/database.ts` — убрано дублирование `host`/`containerName`**
+  (Backlog, найдено ранее MagentaGlen как категория риска после инцидента studio 2026-07-04):
+  `host` больше не отдельное поле в `defaults`, а всегда выводится из `containerName`
+  (`getAppDbConfig()` → `host: config.containerName`). Опечатка при добавлении нового
+  приложения (как у aboi/aprel8008 в 0.8.7) больше не может рассинхронить два поля одного
+  объекта.
+- **Общий `lib/json-state-file.ts`** — `loadJsonState`/`saveJsonState` вынесены из
+  задублированного паттерна «читать/писать небольшой JSON-файл состояния, try/catch на
+  каждую операцию», который был отдельно в `email-canary.ts` и новом `backup-freshness.ts`
+  (0.8.8). Сам дебаунс-паттерн (пороги, `consecutiveFailures` у двух ног email-canary
+  против плоского `alerted` у backup-freshness) не унифицирован — разная семантика, только
+  низкоуровневое чтение/запись файла было идентично.
+
 ## [0.8.8] — 2026-07-28
 
 ### Added

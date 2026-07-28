@@ -17,7 +17,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/mandala.env',
     containerName: 'mandala-db',
     defaults: {
-      host: 'mandala-db',
       port: 5432,
       database: 'mandala',
       user: 'lena_user',
@@ -27,7 +26,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/kami.env',
     containerName: 'kami-db',
     defaults: {
-      host: 'kami-db',
       port: 5432,
       database: 'lena_kami',
       user: 'lena_user',
@@ -37,7 +35,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/driving-school.env',
     containerName: 'driving-school-db',
     defaults: {
-      host: 'driving-school-db',
       port: 5432,
       database: 'lena_driving_school',
       user: 'lena_user',
@@ -47,7 +44,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/umami.env',
     containerName: 'umami-db',
     defaults: {
-      host: 'umami-db',
       port: 5432,
       database: 'umami',
       user: 'umami_user',
@@ -57,7 +53,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/animatrona-tracker.env',
     containerName: 'animatrona-tracker-db',
     defaults: {
-      host: 'animatrona-tracker-db',
       port: 5432,
       database: 'animatrona_tracker',
       user: 'animatrona_user',
@@ -67,7 +62,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/dashboard.env',
     containerName: 'dashboard-db',
     defaults: {
-      host: 'dashboard-db',
       port: 5432,
       database: 'dashboard',
       user: 'dashboard_user',
@@ -77,7 +71,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/archetest.env',
     containerName: 'archetest-db',
     defaults: {
-      host: 'archetest-db',
       port: 5432,
       database: 'archetest',
       user: 'archetest',
@@ -87,7 +80,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/auth-hub.env',
     containerName: 'auth-hub-db',
     defaults: {
-      host: 'auth-hub-db',
       port: 5432,
       database: 'lena_auth',
       user: 'lena_user',
@@ -97,7 +89,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/time.env',
     containerName: 'time-db',
     defaults: {
-      host: 'time-db',
       port: 5432,
       database: 'time',
       user: 'time',
@@ -107,7 +98,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/form-example.env',
     containerName: 'form-example-db',
     defaults: {
-      host: 'form-example-db',
       port: 5432,
       database: 'forms_example',
       user: 'forms',
@@ -117,7 +107,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/dsperevod.env',
     containerName: 'dsperevod-db',
     defaults: {
-      host: 'dsperevod-db',
       port: 5432,
       database: 'dsperevod',
       user: 'dsperevod',
@@ -127,7 +116,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/grandslamcup.env',
     containerName: 'grandslamcup-db',
     defaults: {
-      host: 'grandslamcup-db',
       port: 5432,
       database: 'grandslamcup',
       user: 'postgres',
@@ -137,7 +125,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/svoichuzhie.env',
     containerName: 'svoichuzhie-db',
     defaults: {
-      host: 'svoichuzhie-db',
       port: 5432,
       database: 'svoichuzhie',
       user: 'svoichuzhie_user',
@@ -147,7 +134,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/studio.env',
     containerName: 'studio-db',
     defaults: {
-      host: 'studio-db',
       port: 5432,
       database: 'studio',
       user: 'studio_user',
@@ -157,7 +143,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/aboi.env',
     containerName: 'aboi-db',
     defaults: {
-      host: 'aboi-db',
       port: 5432,
       database: 'neyroaboi_prod',
       user: 'aboi_user',
@@ -167,7 +152,6 @@ const APP_CONFIG = {
     secretsPath: '/secrets/aprel8008.env',
     containerName: 'aprel8008-db',
     defaults: {
-      host: 'aprel8008-db',
       port: 5432,
       database: 'aprel8008',
       user: 'aprel8008_user',
@@ -294,7 +278,10 @@ function getAppDbConfig(appName: AppName): DbConfig {
   return {
     name: appName,
     containerName: config.containerName,
-    host: config.defaults.host,
+    // host всегда совпадает с containerName (конвенция deploy-affected.sh: сервис БД
+    // публикуется под тем же именем, что и контейнер) — единый источник истины,
+    // не отдельное поле в defaults (было причиной риска рассинхрона, см. PLAN.md Backlog).
+    host: config.containerName,
     port: config.defaults.port,
     database: env['POSTGRES_DB'] || config.defaults.database,
     user: env['POSTGRES_USER'] || config.defaults.user,

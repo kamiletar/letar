@@ -14,8 +14,8 @@
 
 import { createEmailProvider } from '@letar/email'
 import { ImapFlow } from 'imapflow'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { postDashboardAlert } from './dashboard-alert'
+import { loadJsonState, saveJsonState } from './json-state-file'
 
 export interface EmailCanaryLegResult {
   configured: boolean
@@ -65,27 +65,16 @@ function defaultLegState(): CanaryLegState {
 }
 
 function loadState(): CanaryState {
-  try {
-    if (existsSync(STATE_PATH)) {
-      const parsed = JSON.parse(readFileSync(STATE_PATH, 'utf-8')) as Partial<CanaryState>
-      return {
-        internal: parsed.internal ?? defaultLegState(),
-        external: parsed.external ?? defaultLegState(),
-        history: parsed.history ?? [],
-      }
-    }
-  } catch (error) {
-    console.error('[EmailCanary] Не удалось прочитать состояние, начинаем с чистого листа:', error)
+  const parsed = loadJsonState<Partial<CanaryState>>(STATE_PATH, {})
+  return {
+    internal: parsed.internal ?? defaultLegState(),
+    external: parsed.external ?? defaultLegState(),
+    history: parsed.history ?? [],
   }
-  return { internal: defaultLegState(), external: defaultLegState(), history: [] }
 }
 
 function saveState(state: CanaryState): void {
-  try {
-    writeFileSync(STATE_PATH, JSON.stringify(state, null, 2), 'utf-8')
-  } catch (error) {
-    console.error('[EmailCanary] Не удалось сохранить состояние:', error)
-  }
+  saveJsonState(STATE_PATH, state, 'EmailCanary')
 }
 
 /**
