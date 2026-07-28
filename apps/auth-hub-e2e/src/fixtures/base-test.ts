@@ -4,7 +4,7 @@
  * Сейчас auth-hub не требует блокировки SSE/сетевых паттернов — просто re-export.
  */
 
-import { expect, test as base } from '@playwright/test'
+import { test as base, expect } from '@playwright/test'
 
 export const test = base.extend({})
 
