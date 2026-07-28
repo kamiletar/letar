@@ -5,6 +5,13 @@
   "projectType": "library",
   "tags": ["scope:shared", "type:tool", "owner:letar"],
   "targets": {
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/deploy-mcp/vitest.config.ts"
+      }
+    },
     "serve": {
       "executor": "nx:run-commands",
       "options": {

@@ -106,11 +106,24 @@ export function getServerForApp(app: string): InfraServer {
  *
  * Для каждого: `deploy_app(staging)` → `run_e2e` → зелёный прогон против реального
  * staging-контейнера (не placeholder/локальный dev-сервер). Сейчас используется только
- * как реестр для warn-only `checkE2eGate` в `libs/deploy-mcp` (проверяет любое приложение,
- * список ниже не читает). Hard gate (fail-closed по этому списку) — отдельная будущая
- * фаза (§18.6 Фаза 3), после недели эксплуатации warn-only.
+ * как реестр (не читается кодом гейта — тот проверяет любое приложение). Warn-only:
+ * приложения из этого списка не блокируются жёстче, чем не входящие в него — единственный
+ * fail-closed механизм сейчас — `HARD_GATED_APPS` ниже.
  */
 export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time', 'aboi', 'aira-web', 'aprel8008']
+
+/**
+ * Приложения с ЖЁСТКИМ (fail-closed) pre-deploy e2e-гейтом (PLAN-INFRA.md §18.7,
+ * инцидент archetest 2026-07-28, тред agent-mail `e2e-gate-hard-scope-5-commercial`).
+ *
+ * Отличие от `E2E_GATED_APPS` выше: это не тираж-реестр, а активный блокирующий список —
+ * `deploy_app(production)` в `libs/deploy-mcp` ОТКАЗЫВАЕТ в деплое любого приложения
+ * из этого списка, если e2e на staging не прошёл/не прогонялся/устарел/не на том коммите.
+ * Владелец решил применить сразу ко всем пяти активным коммерческим приложениям, без
+ * warn-only периода — реакция на прод-инцидент archetest v0.25.5 (сломанный рендер,
+ * не пойманный HTTP-проверками деплоя).
+ */
+export const HARD_GATED_APPS: string[] = ['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008']
 
 /**
  * Определяет текущий сервер по env `SERVER_NAME` или hostname. Fallback — s2.

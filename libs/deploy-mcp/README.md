@@ -9,16 +9,16 @@ MCP-сервер: структурированный слой над REST API da
 
 ## Инструменты
 
-| Инструмент                                         | Действие                                                                                   | Эндпоинт агента           |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------- |
-| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                 | —                         |
-| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                            | `GET /health`             |
-| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                             | `GET /api/git/status`     |
-| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                                | `GET /api/deploy/status`  |
-| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                           | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + warn-only e2e-gate   | `POST /api/deploy/app`    |
-| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора | `POST /api/e2e/run`       |
-| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                          | `GET /api/e2e/status`     |
+| Инструмент                                         | Действие                                                                                                               | Эндпоинт агента           |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                             | —                         |
+| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                        | `GET /health`             |
+| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                         | `GET /api/git/status`     |
+| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                                                            | `GET /api/deploy/status`  |
+| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                       | `POST /api/deploy/cancel` |
+| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`) | `POST /api/deploy/app`    |
+| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора                             | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                      | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
 автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
@@ -27,10 +27,21 @@ MCP-сервер: структурированный слой над REST API da
 ### e2e-gate в deploy_app(production)
 
 Перед запуском production-деплоя (`target` не `"staging"`) `deploy_app` читает
-`.last-e2e-status/<app>.json` на s3 (через `agent_health`-туннель) и **предупреждает**, если:
-данных нет; последний прогон упал; прогонялся на другом коммите, чем деплоится; или старше 24ч.
-**Это warn-only** — деплой не блокируется, предупреждения просто дописываются в начало ответа.
-Hard gate — отдельное решение Фазы 3 (PLAN.md §18.6) после недели эксплуатации warn-only.
+`.last-e2e-status/<app>.json` на s3 (через `agent_health`-туннель) и собирает причины, если:
+данных нет; последний прогон упал; прогонялся на другом коммите, чем деплоится; старше 24ч;
+или сам запрос статуса не удался (сеть/туннель).
+
+Два режима одновременно (`evaluateE2eGate()` в `server.ts`):
+
+- **Warn-only** (по умолчанию) — деплой не блокируется, причины просто дописываются в начало
+  ответа как предупреждения.
+- **Hard gate** (fail-closed) — для приложений из `HARD_GATED_APPS` (`@letar/infra-config`:
+  сейчас `archetest`, `dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`) любая причина **блокирует**
+  деплой: инструмент возвращает `isError` до вызова `/api/deploy/app`, ни `deploy_app`, ни
+  сам прод-деплой не выполняются. Обхода флагом нет (PLAN-INFRA.md §18.7, инцидент archetest
+  2026-07-28 — сломанный рендер, не пойманный HTTP-проверками деплоя). Для `grandslamcup` (§18.6
+  Фаза 3) hard gate — отдельное, ещё не принятое решение после недели warn-only; он в
+  `HARD_GATED_APPS` не входит.
 
 Типичный staging-пайплайн (реальный HTTPS-домен — максимально близко к прод-окружению, `localhost`
 не годится для проверки cookie/CORS/OIDC-редиректов):
@@ -91,8 +102,13 @@ deploy_status({ server: "s2", deployId, sinceLine: <totalLines из прошло
 - **Модель доверия процедурная.** `.mcp.json` общий для всех сессий, поэтому `deploy_app`
   технически вызываем из любой сессии — как и SSH-ключ сегодня. По конвенции деплоит только
   BlackCove ([deploy-coordination](/.claude/rules/deploy-coordination.md)).
-- **e2e-gate warn-only**, не блокирует деплой при отсутствии/провале e2e-данных (PLAN.md §18.6 —
-  hard gate решается отдельно после недели эксплуатации).
+- **e2e-gate warn-only для приложений вне `HARD_GATED_APPS`** — не блокирует деплой при
+  отсутствии/провале e2e-данных. Для `grandslamcup` (PLAN.md §18.6) hard gate — отдельное,
+  ещё не принятое решение после недели эксплуатации warn-only.
 - **`run_e2e`/`e2e_status` требуют живого dashboard-agent на s3** — до тех пор возвращают ошибку
-  туннеля/недоступности, `deploy_app(production)` при этом всё равно работает (gate просто warn'ит
-  про недоступность s3, не падает).
+  туннеля/недоступности; для warn-only приложений `deploy_app(production)` при этом всё равно
+  работает (gate просто warn'ит про недоступность s3, не падает), для `HARD_GATED_APPS` —
+  недоступность s3 тоже блокирует (fail-closed).
+- **`run_e2e` таймаут 15 мин** (`apps/dashboard-agent/src/routes/e2e.ts`) — зависший Playwright-
+  прогон останавливается (SIGTERM → SIGKILL) и явно пишется как `passed:false`, иначе гейт читал
+  бы устаревший «зелёный» статус, не зная о зависшем прогоне.

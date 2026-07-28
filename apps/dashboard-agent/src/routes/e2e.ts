@@ -32,6 +32,13 @@ const STATUS_DIR = path.join(REPO_PATH, '.last-e2e-status')
 const MAX_E2E_HISTORY = 20
 const MAX_OUTPUT_LINES = 2000
 
+// Таймаут прогона (PLAN-INFRA.md §18.7, hard e2e-gate): без него зависший процесс никогда не
+// пишет .last-e2e-status/<app>.json, и evaluateE2eGate в deploy-mcp продолжает читать СТАРЫЙ
+// (потенциально «зелёный») статус — зависание молча не блокирует прод-деплой. Таймаут явно
+// помечает прогон как failed, а не оставляет «прогона как будто не было».
+const E2E_RUN_TIMEOUT_MS = 15 * 60 * 1000
+const E2E_KILL_GRACE_MS = 10 * 1000
+
 interface E2eRun {
   runId: string
   running: boolean
@@ -117,7 +124,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
     async (
-      request
+      request,
     ): Promise<
       ApiResponse<{
         run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
@@ -143,7 +150,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 
   /**
@@ -210,7 +217,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         run,
         `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${
           grep ? ` (grep=${grep})` : ''
-        } against ${baseUrl}`
+        } against ${baseUrl}`,
       )
 
       // Коммит фиксируем ДО прогона — это то, что реально протестировано (не что задеплоено).
@@ -241,7 +248,8 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // с SOPS_AGE_KEY_FILE в deploy-affected.sh) — без --preserve-env BASE_URL/DEV_SESSION_TOKEN
       // не долетают до `bunx nx e2e`, Playwright не видит staging baseUrl и поднимает свой
       // `nx dev` против dev-БД (регрессия, найдена BlackCove на живом прогоне 2026-07-11).
-      const nxCommand = `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
+      const nxCommand =
+        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
@@ -253,32 +261,59 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
       currentProcess = spawn('nsenter', args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
+      // Таймаут: без него зависший прогон никогда не пишет lastStatus, и hard e2e-gate в
+      // deploy-mcp продолжает читать старый (возможно зелёный) статус — зависание молча НЕ
+      // блокирует прод-деплой. SIGTERM сначала (даёт Playwright шанс на graceful shutdown),
+      // SIGKILL через E2E_KILL_GRACE_MS если процесс не среагировал.
+      let timedOut = false
+      const timeoutTimer = setTimeout(() => {
+        timedOut = true
+        appendOutput(run, `⏱️ E2E не уложился в ${E2E_RUN_TIMEOUT_MS / 60000} мин — останавливаю (SIGTERM)`)
+        currentProcess?.kill('SIGTERM')
+        setTimeout(() => {
+          if (run.running) {
+            appendOutput(run, '⏱️ Процесс не завершился после SIGTERM — SIGKILL')
+            currentProcess?.kill('SIGKILL')
+          }
+        }, E2E_KILL_GRACE_MS)
+      }, E2E_RUN_TIMEOUT_MS)
+
       currentProcess.stdout?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, line)
         }
       })
 
       currentProcess.stderr?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, `⚠️ ${line}`)
         }
       })
 
       currentProcess.on('close', (code) => {
+        clearTimeout(timeoutTimer)
         run.exitCode = code
         run.running = false
         run.endTime = new Date().toISOString()
-        const passed = code === 0
-        appendOutput(run, passed ? '✅ E2E passed' : `❌ E2E failed with exit code ${code}`)
-        if (!passed) {
-          run.error = `Process exited with code ${code}`
+        const passed = !timedOut && code === 0
+        if (timedOut) {
+          appendOutput(run, '❌ E2E остановлен по таймауту')
+          run.error = `Timed out after ${E2E_RUN_TIMEOUT_MS / 60000} min`
+        } else {
+          appendOutput(run, passed ? '✅ E2E passed' : `❌ E2E failed with exit code ${code}`)
+          if (!passed) {
+            run.error = `Process exited with code ${code}`
+          }
         }
 
         const durationMs = run.startTime ? Date.now() - new Date(run.startTime).getTime() : 0
@@ -288,10 +323,16 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       })
 
       currentProcess.on('error', (error) => {
+        clearTimeout(timeoutTimer)
         appendOutput(run, `❌ Process error: ${error.message}`)
         run.error = error.message
         run.running = false
         run.endTime = new Date().toISOString()
+        // Инфраструктурный сбой самого прогона (не тест упал, а процесс не смог стартовать/
+        // выполниться) должен блокировать hard-gated приложения так же, как явный fail —
+        // без записи lastStatus гейт продолжил бы читать старый (возможно зелёный) статус.
+        const durationMs = run.startTime ? Date.now() - new Date(run.startTime).getTime() : 0
+        writeLastStatus(app, { commitSha, passed: false, timestamp: run.endTime, durationMs })
         currentProcess = null
       })
 
@@ -300,6 +341,6 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { runId: run.runId, app, started: true },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 }

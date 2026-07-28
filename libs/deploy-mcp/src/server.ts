@@ -9,14 +9,34 @@
  * Фаза 2 (Сессия D): run_e2e, e2e_status + e2e-gate в deploy_app(production).
  */
 
-import { type DeployTarget, type InfraServer, resolveDeployServer, SERVER_APPS, SERVERS } from '@letar/infra-config'
+import {
+  type DeployTarget,
+  HARD_GATED_APPS,
+  type InfraServer,
+  resolveDeployServer,
+  SERVER_APPS,
+  SERVERS,
+} from '@letar/infra-config'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { agentRequest } from './client.js'
+import { agentRequest, type AgentResponse } from './client.js'
 import { localHeadSha } from './config.js'
 
 const serverEnum = z.enum(['s2', 's3'])
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
+
+/** Форма ответа `/api/e2e/status` — то же поле, что читает и warn-, и hard-gate. */
+interface E2eStatusResponse {
+  lastStatus: { commitSha: string; passed: boolean; timestamp: string } | null
+}
+
+/** Результат оценки e2e-гейта: причины (человекочитаемые) + решение блокировать или нет. */
+interface E2eGateResult {
+  /** true только для hard-gated приложения с хотя бы одной причиной — деплой должен отказать. */
+  blocked: boolean
+  /** Причины без ведущего «⚠️»/форматирования — вызывающий код сам решает, как их показать. */
+  reasons: string[]
+}
 
 // Обе функции возвращают ОДНУ и ту же форму (с полем isError) без аннотации типа —
 // так вывод типов SDK-колбэка работает (аналогично form-mcp). Аннотация или union
@@ -38,56 +58,63 @@ function pretty(data: unknown): string {
 }
 
 /**
- * Warn-only e2e-gate перед production-деплоем (PLAN.md §18 Сессия D): читает
- * `.last-e2e-status/<app>.json` на s3 через dashboard-agent и предупреждает о
- * несвежих/проваленных/отсутствующих данных — но НИКОГДА не блокирует деплой
- * (hard gate — отдельное решение Фазы 3, §18.6, после недели эксплуатации warn-only).
+ * Оценивает e2e-гейт перед production-деплоем (PLAN.md §18 Сессия D, PLAN-INFRA.md §18.7):
+ * читает `.last-e2e-status/<app>.json` на s3 через dashboard-agent и собирает причины
+ * (несвежий/проваленный/отсутствующий прогон, коммит не совпадает, инфраструктурная ошибка).
+ *
+ * Для приложений из `HARD_GATED_APPS` (archetest, dsperevod, svoichuzhie, aboi, aprel8008 —
+ * PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28) любая причина блокирует деплой
+ * (`blocked: true`, fail-closed). Для остальных — те же причины остаются предупреждениями, деплой
+ * продолжается (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
+ *
+ * Зависимости (`fetchStatus`/`getHeadSha`) инжектируются — позволяет тестировать логику
+ * гейта без реального SSH-туннеля/git (см. `server.spec.ts`).
  */
-async function checkE2eGate(app: string): Promise<string[]> {
-  const warnings: string[] = []
+export async function evaluateE2eGate(
+  app: string,
+  hardGated: boolean,
+  fetchStatus: (app: string) => Promise<AgentResponse<E2eStatusResponse>> = (a) =>
+    agentRequest<E2eStatusResponse>('s3', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
+  getHeadSha: () => string = localHeadSha,
+): Promise<E2eGateResult> {
+  const reasons: string[] = []
   try {
-    const res = await agentRequest('s3', {
-      path: `/api/e2e/status?app=${encodeURIComponent(app)}`,
-      timeoutMs: 10000,
-    })
+    const res = await fetchStatus(app)
     if (!res.success) {
-      warnings.push(`⚠️ e2e-gate: не удалось получить статус на s3 (${res.error ?? 'нет данных'}) — деплою вслепую.`)
-      return warnings
+      reasons.push(`не удалось получить статус e2e на s3 (${res.error ?? 'нет данных'})`)
+      return { blocked: hardGated, reasons }
     }
-    const data = res.data as { lastStatus: { commitSha: string; passed: boolean; timestamp: string } | null } | null
-    const last = data?.lastStatus
+    const last = res.data?.lastStatus ?? null
     if (!last) {
-      warnings.push(`⚠️ e2e-gate: для ${app} ещё ни разу не прогонялся e2e на staging — нет данных для сверки.`)
-      return warnings
+      reasons.push(`для ${app} ещё ни разу не прогонялся e2e на staging — нет данных для сверки`)
+      return { blocked: hardGated, reasons }
     }
     if (!last.passed) {
-      warnings.push(
-        `⚠️ e2e-gate: последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ.`
-      )
+      reasons.push(`последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ`)
     }
     try {
-      const head = localHeadSha()
+      const head = getHeadSha()
       if (last.commitSha !== head) {
-        warnings.push(
-          `⚠️ e2e-gate: e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(
-            0,
-            7
-          )} — не тот же коммит.`
+        reasons.push(
+          `e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(0, 7)} — не тот же коммит`,
         )
       }
     } catch {
-      // не удалось определить локальный HEAD — пропускаем сверку коммита, остальные проверки не отменяем
+      // Не удалось определить локальный HEAD. Для warn-only приложений просто пропускаем сверку
+      // коммита. Для hard-gated это тоже повод отказать (fail-closed) — мы не можем подтвердить,
+      // что прошедший e2e относится к тому же коду, что сейчас деплоится.
+      if (hardGated) {
+        reasons.push('не удалось определить локальный HEAD для сверки коммита e2e-прогона')
+      }
     }
     const ageMs = Date.now() - new Date(last.timestamp).getTime()
     if (ageMs > E2E_GATE_MAX_AGE_MS) {
-      warnings.push(`⚠️ e2e-gate: последний прогон для ${app} старше 24ч (${last.timestamp}).`)
+      reasons.push(`последний прогон для ${app} старше 24ч (${last.timestamp})`)
     }
   } catch (err) {
-    warnings.push(
-      `⚠️ e2e-gate: ошибка проверки (${err instanceof Error ? err.message : String(err)}) — деплою вслепую.`
-    )
+    reasons.push(`ошибка проверки e2e-статуса (${err instanceof Error ? err.message : String(err)})`)
   }
-  return warnings
+  return { blocked: hardGated && reasons.length > 0, reasons }
 }
 
 export function createDeployMcpServer(): McpServer {
@@ -108,9 +135,9 @@ export function createDeployMcpServer(): McpServer {
           pretty(SERVER_APPS),
           '',
           '_staging любого приложения резолвится на s3 (target: "staging")._',
-        ].join('\n')
+        ].join('\n'),
       )
-    }
+    },
   )
 
   // ─── agent_health ──────────────────────────────────────────────────────────────
@@ -125,7 +152,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ Агент на **${server}** недоступен: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── git_status ────────────────────────────────────────────────────────────────
@@ -143,7 +170,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ git_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_status ───────────────────────────────────────────────────────────
@@ -179,7 +206,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_cancel ───────────────────────────────────────────────────────────
@@ -197,7 +224,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ deploy_cancel на ${server}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── deploy_app ────────────────────────────────────────────────────────────────
@@ -209,6 +236,8 @@ export function createDeployMcpServer(): McpServer {
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
+      '⛔ Для archetest/dsperevod/svoichuzhie/aboi/aprel8008 (HARD_GATED_APPS) production-деплой',
+      'ОТКАЗЫВАЕТ без свежего зелёного e2e на staging для текущего коммита — не обходится флагом.',
     ].join('\n'),
     {
       app: z
@@ -224,9 +253,22 @@ export function createDeployMcpServer(): McpServer {
     async ({ app, target = 'production', seed = false }) => {
       const server = resolveDeployServer(app, target as DeployTarget)
       const staging = target === 'staging'
-      // Warn-only e2e-gate: только для production, только предупреждает, никогда не блокирует
-      const gateWarnings = staging ? [] : await checkE2eGate(app)
-      const gatePrefix = gateWarnings.length > 0 ? [...gateWarnings, ''] : []
+      const hardGated = !staging && HARD_GATED_APPS.includes(app)
+      // e2e-gate: только для production. Для HARD_GATED_APPS — fail-closed (блокирует деплой),
+      // для остальных — старое warn-only поведение Фазы 2 (только предупреждает).
+      const gate = staging ? { blocked: false, reasons: [] } : await evaluateE2eGate(app, hardGated)
+      if (gate.blocked) {
+        return errorText(
+          [
+            `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
+            ...gate.reasons.map((r) => `- ${r}`),
+            '',
+            'Чтобы снять блок: deploy_app({ app, target: "staging" }) → run_e2e({ app, baseUrl: '
+            + `"https://${app}-stage.s3.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
+          ].join('\n'),
+        )
+      }
+      const gatePrefix = gate.reasons.length > 0 ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), ''] : []
       try {
         const res = await agentRequest(server, {
           method: 'POST',
@@ -235,7 +277,7 @@ export function createDeployMcpServer(): McpServer {
         })
         if (!res.success) {
           return errorText(
-            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n')
+            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
           )
         }
         const data = res.data as { deployId?: string } | undefined
@@ -249,17 +291,17 @@ export function createDeployMcpServer(): McpServer {
             }", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n')
+          ].join('\n'),
         )
       } catch (err) {
         return errorText(
           [
             ...gatePrefix,
             `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
-          ].join('\n')
+          ].join('\n'),
         )
       }
-    }
+    },
   )
 
   // ─── run_e2e ─────────────────────────────────────────────────────────────────
@@ -289,9 +331,8 @@ export function createDeployMcpServer(): McpServer {
         .string()
         .url()
         .refine((v) => !/^https?:\/\/localhost(:|\/|$)/.test(v) && !/^https?:\/\/127\.0\.0\.1(:|\/|$)/.test(v), {
-          message:
-            'baseUrl не должен быть localhost/127.0.0.1 — используй реальный публичный домен ' +
-            'https://<app>-stage.s3.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
+          message: 'baseUrl не должен быть localhost/127.0.0.1 — используй реальный публичный домен '
+            + 'https://<app>-stage.s3.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
         })
         .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s3.letar.best (НЕ localhost)'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
@@ -303,8 +344,8 @@ export function createDeployMcpServer(): McpServer {
         })
         .optional()
         .describe(
-          'Точечный прогон вместо всего набора: имя файла-спека (например "03-admin-products.admin.spec.ts") ' +
-            'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор.'
+          'Точечный прогон вместо всего набора: имя файла-спека (например "03-admin-products.admin.spec.ts") '
+            + 'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор.',
         ),
     },
     async ({ app, baseUrl, project, grep }) => {
@@ -325,12 +366,12 @@ export function createDeployMcpServer(): McpServer {
             `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
             '',
             pretty(res.data),
-          ].join('\n')
+          ].join('\n'),
         )
       } catch (err) {
         return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── e2e_status ──────────────────────────────────────────────────────────────
@@ -367,7 +408,7 @@ export function createDeployMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   return server

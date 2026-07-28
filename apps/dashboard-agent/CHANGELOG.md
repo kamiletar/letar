@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.0] — 2026-07-28
+
+### Added
+
+- **Таймаут на `POST /api/e2e/run`** (15 мин, SIGTERM → SIGKILL через 10с) — часть hard
+  e2e-gate для archetest/dsperevod/svoichuzhie/aboi/aprel8008 (PLAN-INFRA.md §18.7). Без
+  таймаута зависший Playwright-прогон никогда не писал `.last-e2e-status/<app>.json`, и
+  hard-gate в `deploy-mcp` продолжал бы читать старый (возможно зелёный) статус. По срабатыванию
+  таймаута, а также при ошибке самого процесса (`spawn`/`error`), статус явно пишется как
+  `passed:false` — раньше при ошибке процесса `lastStatus` не писался вообще.
+
 ## [0.8.9] — 2026-07-28
 
 ### Changed
