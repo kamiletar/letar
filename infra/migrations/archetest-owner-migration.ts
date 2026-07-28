@@ -45,12 +45,12 @@ async function main() {
   try {
     const { rows: newUsers } = await client.query<{ id: string; email: string; roles: string[] }>(
       'SELECT id, email, roles FROM "User" WHERE email = $1',
-      [NEW_EMAIL],
+      [NEW_EMAIL]
     )
     const newUser = newUsers[0]
     if (!newUser) {
       console.error(
-        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в archetest.letar.best через Ключницу и повтори.`,
+        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в archetest.letar.best через Ключницу и повтори.`
       )
       process.exit(1)
     }
@@ -72,7 +72,7 @@ async function main() {
        FROM "User" u
        LEFT JOIN "QuizLeaderboardEntry" l ON l."userId" = u.id
        WHERE u.email = ANY($1)`,
-      [OLD_EMAILS],
+      [OLD_EMAILS]
     )
 
     if (oldUsers.length === 0 && newUser.roles.includes('ADMIN')) {
@@ -82,9 +82,9 @@ async function main() {
 
     for (const u of oldUsers) {
       console.log(
-        `Старый: ${u.id} (${u.email}) roles=${JSON.stringify(u.roles)}\n`
-          + `  LeaderboardEntry: ${u.leaderboard_id ? `xp=${u.leaderboard_xp}` : 'нет'}, `
-          + `Sessions: ${u.session_count}, Achievements: ${u.achievement_count}`,
+        `Старый: ${u.id} (${u.email}) roles=${JSON.stringify(u.roles)}\n` +
+          `  LeaderboardEntry: ${u.leaderboard_id ? `xp=${u.leaderboard_xp}` : 'нет'}, ` +
+          `Sessions: ${u.session_count}, Achievements: ${u.achievement_count}`
       )
     }
 
@@ -101,19 +101,19 @@ async function main() {
       // Переносим QuizSession (QuizAnswer/QuizSkippedQuestion каскадом не нужно — там sessionId, не userId)
       const { rowCount: sessionsMoved } = await client.query(
         'UPDATE "QuizSession" SET "userId" = $1 WHERE "userId" = $2',
-        [newUser.id, oldUser.id],
+        [newUser.id, oldUser.id]
       )
       if (sessionsMoved) console.log(`  ✅ QuizSession перенесено: ${sessionsMoved}`)
 
       // Переносим UserQuizAchievement (проверяем дубли по achievementCode)
       const { rows: achievements } = await client.query<{ id: string; achievementCode: string }>(
         'SELECT id, "achievementCode" FROM "UserQuizAchievement" WHERE "userId" = $1',
-        [oldUser.id],
+        [oldUser.id]
       )
       for (const ach of achievements) {
         const { rows: exists } = await client.query(
           'SELECT id FROM "UserQuizAchievement" WHERE "userId" = $1 AND "achievementCode" = $2',
-          [newUser.id, ach.achievementCode],
+          [newUser.id, ach.achievementCode]
         )
         if (exists.length > 0) {
           await client.query('DELETE FROM "UserQuizAchievement" WHERE id = $1', [ach.id])
@@ -135,7 +135,7 @@ async function main() {
           rank_code: string
         }>(
           'SELECT id, "sessionsCount" as sessions_count, "achievementsCount" as achievements_count, "totalAnswers" as total_answers, xp, "rankCode" as rank_code FROM "QuizLeaderboardEntry" WHERE "userId" = $1',
-          [newUser.id],
+          [newUser.id]
         )
 
         if (newLb.length > 0) {
@@ -147,7 +147,7 @@ async function main() {
                  "totalAnswers" = "totalAnswers" + (SELECT "totalAnswers" FROM "QuizLeaderboardEntry" WHERE id = $1),
                  xp = xp + (SELECT xp FROM "QuizLeaderboardEntry" WHERE id = $1)
              WHERE "userId" = $2`,
-            [oldUser.leaderboard_id, newUser.id],
+            [oldUser.leaderboard_id, newUser.id]
           )
           await client.query('DELETE FROM "QuizLeaderboardEntry" WHERE id = $1', [oldUser.leaderboard_id])
           console.log(`  ✅ LeaderboardEntry объединён (stats суммированы)`)

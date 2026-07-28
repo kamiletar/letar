@@ -67,7 +67,7 @@ async function main() {
   for (const u of oldUsers) {
     console.log(`\nСтарый: ${u.id} (${u.email}) roles=${u.roles}`)
     console.log(
-      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`,
+      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`
     )
     u.uploadedAudio.forEach((a) => console.log(`    🎵 ${a.title}`))
   }

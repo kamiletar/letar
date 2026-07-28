@@ -38,12 +38,12 @@ async function main() {
   try {
     const { rows: newUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = $1',
-      [NEW_EMAIL],
+      [NEW_EMAIL]
     )
     const newUser = newUsers[0]
     if (!newUser) {
       console.error(
-        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в dashboard.letar.best через Ключницу и повтори.`,
+        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в dashboard.letar.best через Ключницу и повтори.`
       )
       process.exit(1)
     }
@@ -51,7 +51,7 @@ async function main() {
 
     const { rows: oldUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = ANY($1)',
-      [OLD_EMAILS],
+      [OLD_EMAILS]
     )
 
     if (oldUsers.length === 0 && newUser.role === 'ADMIN') {
