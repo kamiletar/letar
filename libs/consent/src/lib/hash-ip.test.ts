@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
-import { hashIp } from './hash-ip'
+import { hashIp, hashIpFromHeaders } from './hash-ip'
 
 function fakeRequest(headers: Record<string, string>): Request {
   return new Request('http://localhost/api/consent', { headers })
@@ -26,5 +26,18 @@ describe('hashIp', () => {
   it('использует "unknown" если оба заголовка отсутствуют', () => {
     const expected = createHash('sha256').update('unknown').digest('hex')
     expect(hashIp(fakeRequest({}))).toBe(expected)
+  })
+})
+
+describe('hashIpFromHeaders', () => {
+  it('работает с любым объектом, у которого есть .get(name) — например, next/headers()', () => {
+    const expected = createHash('sha256').update('203.0.113.42').digest('hex')
+    const headersLike = { get: (name: string) => (name === 'x-forwarded-for' ? '203.0.113.42' : null) }
+    expect(hashIpFromHeaders(headersLike)).toBe(expected)
+  })
+
+  it('hashIp(request) делегирует hashIpFromHeaders(request.headers) — одинаковый результат', () => {
+    const req = fakeRequest({ 'x-forwarded-for': '203.0.113.42' })
+    expect(hashIp(req)).toBe(hashIpFromHeaders(req.headers))
   })
 })

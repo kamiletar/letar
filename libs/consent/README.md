@@ -13,10 +13,15 @@
 
 ## API
 
-### `hashIp(request: Request): string`
+### `hashIp(request: Request): string` / `hashIpFromHeaders(headers: HeaderReader): string`
 
-Хэширует IP запроса SHA-256 (152-ФЗ: сырой IP не хранится). Берёт первый адрес из
-`x-forwarded-for` (прокси/CDN), иначе `x-real-ip`, иначе `'unknown'`.
+Хэширует IP SHA-256 (152-ФЗ: сырой IP не хранится). Берёт первый адрес из `x-forwarded-for`
+(прокси/CDN), иначе `x-real-ip`, иначе `'unknown'`. `hashIp` — для Route Handlers (принимает
+целиком `Request`); `hashIpFromHeaders` — для Server Actions, где под рукой только
+`next/headers()` (`HeaderReader` — любой объект с `.get(name)`, `hashIp` — тонкая обёртка над ним).
+Используй `hashIpFromHeaders` напрямую, если модель `ConsentLog` приложения не совпадает с
+контрактом `createConsentRoute` (пример: `dsperevod` — своя схема с `formType`/nested-связями,
+переиспользует только хэширование IP, не весь фасад).
 
 ### `CookieConsentSchema` / `CookieConsentInput`
 
