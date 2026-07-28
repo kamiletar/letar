@@ -123,7 +123,7 @@ const MEDIA_KEY = process.env.MEDIA_API_KEY!
 export async function uploadVideo(
   file: File,
   appId: string,
-  webhookUrl?: string,
+  webhookUrl?: string
 ): Promise<{ videoId: string; jobId: string }> {
   const form = new FormData()
   form.append('file', file)
@@ -141,7 +141,7 @@ export async function uploadVideo(
 
 export async function getVideoStatus(
   appId: string,
-  videoId: string,
+  videoId: string
 ): Promise<'queued' | 'processing' | 'ready' | 'error' | 'unknown'> {
   const res = await fetch(`${MEDIA_API}/api/v1/${appId}/video/${videoId}/status`, {
     headers: { 'X-Media-Key': MEDIA_KEY },

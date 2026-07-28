@@ -249,10 +249,10 @@ docker compose -f docker-compose.production.yml config
 
 ## Конфигурация приложений
 
-| Приложение      | Порт App | Порт DB | Название БД  | Network         |
-| --------------- | -------- | ------- | ------------ | --------------- |
+| Приложение      | Порт App | Порт DB | Название БД  | Network      |
+| --------------- | -------- | ------- | ------------ | ------------ |
 | premium-rosstil | 3000     | 5432    | lena_premium | kami-network |
-| imot            | 3001     | 5433    | lena_imot    | imot-network    |
+| imot            | 3001     | 5433    | lena_imot    | imot-network |
 
 ### Создание Docker Networks
 

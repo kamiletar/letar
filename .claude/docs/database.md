@@ -637,7 +637,7 @@ export const procedures = {
       type: string
       reason: string
       transferBalance: boolean
-    },
+    }
   ): Promise<TransferResult> => {
     // Бизнес-логика
     const connection = await client.studentInstructorConnection.findUnique({

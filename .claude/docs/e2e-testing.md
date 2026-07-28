@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
 )
 ```
 
@@ -251,7 +251,7 @@ inferred `createNodes` плагина `@nx/playwright` (`nx.json` → `plugins: 
    dev-сервер раннера**, а не задеплоенный staging-контейнер, зелёный результат ничего не
    доказывает про реальный деплой (найдено 2026-07-19 на `time-e2e`, PLAN.md §18.7, msg #573).
    Раньше здесь было написано, что staging-пайплайн иммунен к этой проблеме («там нет `dependsOn:
-   dev`-таска вообще») — это верно **только** для приложений с explicit `project.json` (см. ниже),
+dev`-таска вообще») — это верно **только** для приложений с explicit `project.json` (см. ниже),
    не для всех.
 
 **Обходной путь для локального прогона:** не через `nx e2e`, а напрямую — поднять dev-сервер
