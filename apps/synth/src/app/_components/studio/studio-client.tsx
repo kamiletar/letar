@@ -5,6 +5,7 @@ import { DrumEngine } from '@/lib/audio/drums'
 import { FmEngine } from '@/lib/audio/fm'
 import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
 import { MasterRecorder } from '@/lib/audio/recorder'
+import { renderPatchToWav } from '@/lib/audio/render'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
@@ -106,6 +107,8 @@ export function StudioClient() {
   const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
   const [isRecording, setIsRecording] = useState(false)
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
+  const [renderStatus, setRenderStatus] = useState<'idle' | 'rendering' | 'done' | 'error'>('idle')
+  const [renderUrl, setRenderUrl] = useState<string | null>(null)
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
@@ -308,6 +311,29 @@ export function StudioClient() {
       setRecordingUrl(null)
       setIsRecording(true)
     }
+  }, [])
+
+  // Детерминированный рендер текущего патча в WAV (OfflineAudioContext) — в отличие от живой
+  // записи не зависит от системного аудиостека и всегда даёт один и тот же файл
+  const handleRenderWav = useCallback(() => {
+    const current =
+      engineTypeRef.current === 'fm'
+        ? fmPatchRef.current
+        : engineTypeRef.current === 'drumkit'
+          ? drumPatchRef.current
+          : patchRef.current
+    setRenderStatus('rendering')
+    void renderPatchToWav(current)
+      .then((blob) => {
+        setRenderUrl((prev) => {
+          if (prev) {
+            URL.revokeObjectURL(prev)
+          }
+          return URL.createObjectURL(blob)
+        })
+        setRenderStatus('done')
+      })
+      .catch(() => setRenderStatus('error'))
   }, [])
 
   // Загрузка сохранённого патча — по типу текущего движка
@@ -541,6 +567,36 @@ export function StudioClient() {
                 >
                   ↓ скачать запись
                 </a>
+              )}
+              <button
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #5a3a10',
+                  background: 'transparent',
+                  color: '#D4AF37',
+                  cursor: renderStatus === 'rendering' ? 'wait' : 'pointer',
+                  letterSpacing: '0.04em',
+                }}
+                disabled={renderStatus === 'rendering'}
+                onClick={handleRenderWav}
+              >
+                {renderStatus === 'rendering' ? '… рендер' : '⇄ рендер WAV'}
+              </button>
+              {renderStatus === 'done' && renderUrl && (
+                <a
+                  href={renderUrl}
+                  download={`synth-render-${Date.now()}.wav`}
+                  style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
+                >
+                  ↓ скачать .wav
+                </a>
+              )}
+              {renderStatus === 'error' && (
+                <Text fontSize="9px" color="red.400">
+                  ✗ не удалось отрендерить
+                </Text>
               )}
             </Box>
           )}

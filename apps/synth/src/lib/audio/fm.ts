@@ -6,12 +6,12 @@ export class FmEngine {
   private readonly node: AudioWorkletNode
   private readonly gainNode: GainNode
 
-  static async create(ctx: AudioContext, destination: AudioNode): Promise<FmEngine> {
+  static async create(ctx: BaseAudioContext, destination: AudioNode): Promise<FmEngine> {
     await ctx.audioWorklet.addModule('/worklets/fm-processor.js')
     return new FmEngine(ctx, destination)
   }
 
-  private constructor(ctx: AudioContext, destination: AudioNode) {
+  private constructor(ctx: BaseAudioContext, destination: AudioNode) {
     // FM-полифония суммируется громко — нормализуем через gain
     this.gainNode = ctx.createGain()
     this.gainNode.gain.value = 0.4

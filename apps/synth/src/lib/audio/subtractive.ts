@@ -21,7 +21,7 @@ interface Voice {
 }
 
 function startVoice(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   dest: AudioNode,
   patch: SubtractiveEngineParams,
   midiNote: number,
@@ -109,7 +109,7 @@ function startVoice(
   return { osc1, osc2, gainOsc1, gainOsc2, filter, gainAmp, lfo, gainLfo, midiNote, startedAt: now, isReleasing: false }
 }
 
-function triggerRelease(ctx: AudioContext, voice: Voice, releaseTime: number): void {
+function triggerRelease(ctx: BaseAudioContext, voice: Voice, releaseTime: number): void {
   const now = ctx.currentTime
   const curGain = voice.gainAmp.gain.value
 
@@ -148,10 +148,10 @@ const MAX_VOICES = 8
 export class SubtractiveEngine {
   private voices = new Map<number, Voice>() // midiNote → Voice
   private ageQueue: number[] = [] // очередь для voice stealing (старший = первый)
-  private ctx: AudioContext
+  private ctx: BaseAudioContext
   private destination: AudioNode
 
-  constructor(ctx: AudioContext, destination: AudioNode) {
+  constructor(ctx: BaseAudioContext, destination: AudioNode) {
     this.ctx = ctx
     this.destination = destination
   }

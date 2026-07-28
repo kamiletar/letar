@@ -1,6 +1,6 @@
 // Генерирует синтетический импульсный отклик (IR) для ConvolverNode.
 // Метод: экспоненциально затухающий шум — классический «plate reverb» в браузере.
-export async function buildReverbIR(ctx: AudioContext, decay: number): Promise<AudioBuffer> {
+export async function buildReverbIR(ctx: BaseAudioContext, decay: number): Promise<AudioBuffer> {
   const sampleRate = ctx.sampleRate
   const clampedDecay = Math.max(0.1, Math.min(decay, 8))
   const length = Math.ceil(sampleRate * clampedDecay)

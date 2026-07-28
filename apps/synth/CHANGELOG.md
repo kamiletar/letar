@@ -4,6 +4,18 @@
 
 ---
 
+## [0.4.0] — 2026-07-28
+
+### Добавлено
+
+- Детерминированный рендер патча в WAV через `OfflineAudioContext` (`src/lib/audio/render.ts`) — кнопка «⇄ рендер WAV» в шапке студии, работает для всех трёх движков (SUB/FM/DRUM)
+
+### Исправлено
+
+- Типы движков (`SubtractiveEngine`, `DrumEngine`, `FmEngine`, `buildReverbIR`) ослаблены до `BaseAudioContext`, чтобы одинаково работать в живом `AudioContext` и офлайн-рендере
+
+---
+
 ## [0.3.0] — 2026-07-28
 
 ### Добавлено

@@ -11,7 +11,7 @@ function velocityScale(velocity: number): number {
   return 0.4 + 0.6 * Math.max(0, Math.min(1, velocity))
 }
 
-function createNoiseBuffer(ctx: AudioContext): AudioBuffer {
+function createNoiseBuffer(ctx: BaseAudioContext): AudioBuffer {
   const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate)
   const data = buffer.getChannelData(0)
   for (let i = 0; i < data.length; i++) {
@@ -22,7 +22,7 @@ function createNoiseBuffer(ctx: AudioContext): AudioBuffer {
 
 // Кик/том: синус с быстрым питч-свипом сверху вниз («удар молоточка») + амп-огибающая.
 // tone управляет силой свипа — больше tone = более щёлкающая, «клик»-атака (характерно для 808).
-function triggerKickOrTom(ctx: AudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
+function triggerKickOrTom(ctx: BaseAudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
   const now = ctx.currentTime
   const baseFreq = midiToFreq(synth.pitch)
   const sweepMult = 1 + synth.tone * 4
@@ -46,7 +46,7 @@ function triggerKickOrTom(ctx: AudioContext, dest: AudioNode, synth: DrumPadSynt
 // Малый барабан: тональное тело (2 расстроенных треугольника) + шумовой «треск» (band-pass шум).
 // tone смешивает тело и шум — 0 = глухой тональный удар, 1 = почти один треск.
 function triggerSnare(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   dest: AudioNode,
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
@@ -92,7 +92,7 @@ function triggerSnare(
 
 // Хай-хэт (закрытый/открытый — разница только в decay патча): 6 square-осцилляторов
 // в негармоничных соотношениях (классический 909-приём) → highpass → короткая/длинная огибающая.
-function triggerHat(ctx: AudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
+function triggerHat(ctx: BaseAudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
   const now = ctx.currentTime
   const baseFreq = midiToFreq(synth.pitch) * 0.5
   const stopAt = now + synth.decay + 0.1
@@ -124,7 +124,7 @@ function triggerHat(ctx: AudioContext, dest: AudioNode, synth: DrumPadSynth, vel
 // Хлопок: несколько близких шумовых всплесков («флэм») сливаются в один хлопок + хвост.
 // tone поднимает центр band-pass фильтра — ярче/резче хлопок.
 function triggerClap(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   dest: AudioNode,
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
@@ -164,11 +164,11 @@ function triggerClap(
 }
 
 export class DrumEngine {
-  private ctx: AudioContext
-  private destination: AudioNode
-  private noiseBuffer: AudioBuffer
+  private readonly ctx: BaseAudioContext
+  private readonly destination: AudioNode
+  private readonly noiseBuffer: AudioBuffer
 
-  constructor(ctx: AudioContext, destination: AudioNode) {
+  constructor(ctx: BaseAudioContext, destination: AudioNode) {
     this.ctx = ctx
     this.destination = destination
     this.noiseBuffer = createNoiseBuffer(ctx)
