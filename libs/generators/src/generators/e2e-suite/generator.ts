@@ -1,20 +1,10 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
 import { fileURLToPath } from 'node:url'
+import { resolveAppPort } from '../../utils/ports'
 import type { E2eSuiteGeneratorSchema } from './schema'
 
 // Генератор исполняется как ESM (нет __dirname) — восстанавливаем аналог через import.meta.url
 const currentDir = fileURLToPath(new URL('.', import.meta.url))
-
-/** Достаёт `PORT=<число>` из apps/<app>/.env (единственное, что там должно лежать — см. .claude/rules/env-files.md) */
-function resolvePort(tree: Tree, app: string): number | undefined {
-  const envPath = joinPathFragments('apps', app, '.env')
-  if (!tree.exists(envPath)) {
-    return undefined
-  }
-  const content = tree.read(envPath, 'utf-8') ?? ''
-  const match = content.match(/^PORT=(\d+)/m)
-  return match ? Number(match[1]) : undefined
-}
 
 export default async function e2eSuiteGenerator(tree: Tree, options: E2eSuiteGeneratorSchema): Promise<void> {
   const { app } = options
@@ -28,10 +18,11 @@ export default async function e2eSuiteGenerator(tree: Tree, options: E2eSuiteGen
     throw new Error(`apps/${app}-e2e уже существует — генератор не перезаписывает существующие сьюты`)
   }
 
-  const port = options.port ?? resolvePort(tree, app)
+  const port = options.port ?? resolveAppPort(tree, app)
   if (!port) {
     throw new Error(
-      `Не удалось определить dev-порт для apps/${app} (нет apps/${app}/.env с PORT=<число>). ` +
+      `Не удалось определить dev-порт для apps/${app} (нет ни PORT=<число> в apps/${app}/.env(.local), ` +
+        `ни \`-p <порт>\` в apps/${app}/project.json). ` +
         `Передай явно: nx g @letar/generators:e2e-suite ${app} --port=<число>`
     )
   }

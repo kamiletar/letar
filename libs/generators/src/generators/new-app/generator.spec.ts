@@ -15,14 +15,39 @@ describe('new-app generator', () => {
     await expect(newAppGenerator(tree, { name: 'my-app' })).rejects.toThrow('уже существует')
   })
 
-  it('берёт следующий свободный 3xxx порт, если явно не передан', async () => {
-    tree.write('apps/existing-a/.env', 'PORT=3000\n')
-    tree.write('apps/existing-b/.env', 'PORT=3001\n')
+  it('берёт следующий за максимальным занятым 3xxx порт, если явно не передан', async () => {
+    tree.write('apps/existing-a/.env', 'PORT=3003\n')
+    tree.write('apps/existing-b/.env', 'PORT=3024\n')
 
     await newAppGenerator(tree, { name: 'my-app' })
 
     const env = tree.read('apps/my-app/.env', 'utf-8')
-    expect(env).toContain('PORT=3002')
+    expect(env).toContain('PORT=3025')
+  })
+
+  it('не откатывается в дырку последовательности (в том числе на дефолтный 3000)', async () => {
+    // 3000–3009 свободны, но новое приложение продолжает ряд с конца
+    tree.write('apps/existing/.env', 'PORT=3010\n')
+
+    await newAppGenerator(tree, { name: 'my-app' })
+
+    const env = tree.read('apps/my-app/.env', 'utf-8')
+    expect(env).toContain('PORT=3011')
+    expect(env).not.toContain('PORT=3000')
+  })
+
+  it('учитывает приложения, объявляющие порт вне .env (project.json, .env.local)', async () => {
+    tree.write('apps/existing/.env', 'PORT=3005\n')
+    tree.write(
+      'apps/landing/project.json',
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } })
+    )
+    tree.write('apps/dashboard/.env.local', 'PORT=3016\n')
+
+    await newAppGenerator(tree, { name: 'my-app' })
+
+    const env = tree.read('apps/my-app/.env', 'utf-8')
+    expect(env).toContain('PORT=3017')
   })
 
   it('явный --port переопределяет автовычисление', async () => {
@@ -32,11 +57,11 @@ describe('new-app generator', () => {
     expect(env).toContain('PORT=3050')
   })
 
-  it('стартует с 3000, если apps/ ещё пуст', async () => {
+  it('стартует с 3001, если apps/ ещё пуст (3000 — дефолт Next.js, его не занимаем)', async () => {
     await newAppGenerator(tree, { name: 'first-app' })
 
     const env = tree.read('apps/first-app/.env', 'utf-8')
-    expect(env).toContain('PORT=3000')
+    expect(env).toContain('PORT=3001')
   })
 
   it('создаёт полный набор файлов приложения', async () => {

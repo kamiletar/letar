@@ -1,5 +1,6 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
 import { fileURLToPath } from 'node:url'
+import { resolveNextFreePort } from '../../utils/ports'
 import type { NewAppGeneratorSchema } from './schema'
 
 // Генератор исполняется как ESM (нет __dirname) — восстанавливаем аналог через import.meta.url
@@ -16,31 +17,6 @@ function toCamelCase(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase())
 }
 
-/** Следующий свободный 3xxx порт — сканирует apps/<app>/.env на PORT=<число> */
-function resolveNextPort(tree: Tree): number {
-  const usedPorts = new Set<number>()
-
-  if (tree.exists('apps')) {
-    for (const app of tree.children('apps')) {
-      const envPath = joinPathFragments('apps', app, '.env')
-      if (!tree.exists(envPath)) {
-        continue
-      }
-      const content = tree.read(envPath, 'utf-8') ?? ''
-      const match = content.match(/^PORT=(\d+)/m)
-      if (match) {
-        usedPorts.add(Number(match[1]))
-      }
-    }
-  }
-
-  let port = 3000
-  while (usedPorts.has(port)) {
-    port++
-  }
-  return port
-}
-
 export default async function newAppGenerator(tree: Tree, options: NewAppGeneratorSchema): Promise<void> {
   const { name } = options
   const appDir = joinPathFragments('apps', name)
@@ -49,7 +25,7 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     throw new Error(`apps/${name} уже существует — генератор не перезаписывает существующие приложения`)
   }
 
-  const port = options.port ?? resolveNextPort(tree)
+  const port = options.port ?? resolveNextFreePort(tree)
   const displayName = options.displayName ?? toDisplayName(name)
   const description = options.description ?? `${displayName} — Next.js приложение`
 
