@@ -153,8 +153,9 @@ export async function buildAnimeDirectory(
       episodes: {
         orderBy: { number: 'asc' },
         include: {
+          // Без where-фильтра по CID — дорожки без загруженного контента должны попасть
+          // в missingCids, а не молча исчезнуть из запроса ещё до того как builder их увидит.
           audioTracks: {
-            where: { transcodedCid: { not: null } },
             select: {
               language: true,
               dubGroup: true,
@@ -162,7 +163,6 @@ export async function buildAnimeDirectory(
             },
           },
           subtitleTracks: {
-            where: { fileCid: { not: null } },
             select: {
               language: true,
               dubGroup: true,
@@ -467,8 +467,16 @@ export async function buildAnimeDirectory(
   }
 
   for (const ep of anime.episodes) {
-    // Пропускаем эпизоды без видео в IPFS
+    // Эпизод без видео в IPFS — критическая потеря, репортим и пропускаем
+    // (раньше молча continue'ился без missingCids — contentHealth ложно оставался 'complete')
     if (!ep.transcodedCid) {
+      missingCids.push({
+        kind: 'video',
+        cid: 'unknown',
+        episodeNumber: ep.number,
+        detail: 'video.webm отсутствует в БД',
+      })
+      detail('warn', `   ⚠ эп.${ep.number}: video.webm отсутствует в БД — эпизод пропущен`)
       continue
     }
 
@@ -506,6 +514,18 @@ export async function buildAnimeDirectory(
     const audioNamesUsed = new Set<string>()
     for (const track of ep.audioTracks) {
       if (!track.transcodedCid) {
+        // Аудио транскодировалось, но не загрузилось в IPFS (transcodedCid = null) —
+        // раньше такие дорожки исключались уже на уровне SQL-запроса и не попадали в missingCids
+        missingCids.push({
+          kind: 'audio',
+          cid: 'unknown',
+          episodeNumber: ep.number,
+          detail: `аудио ${track.language}${track.dubGroup ? `/${track.dubGroup}` : ''} не загружено в IPFS`,
+        })
+        detail(
+          'warn',
+          `   ⚠ эп.${ep.number}: аудио ${track.language}${track.dubGroup ? `/${track.dubGroup}` : ''} без CID`
+        )
         continue
       }
       let fileName = buildTrackFileName(track.language, track.dubGroup, 'm4a')
@@ -542,6 +562,17 @@ export async function buildAnimeDirectory(
 
     for (const track of ep.subtitleTracks) {
       if (!track.fileCid) {
+        // Как и с аудио выше: раньше исключалось SQL-фильтром до того как builder успевал увидеть
+        missingCids.push({
+          kind: 'sub',
+          cid: 'unknown',
+          episodeNumber: ep.number,
+          detail: `субтитры ${track.language}${track.dubGroup ? `/${track.dubGroup}` : ''} не загружены в IPFS`,
+        })
+        detail(
+          'warn',
+          `   ⚠ эп.${ep.number}: субтитры ${track.language}${track.dubGroup ? `/${track.dubGroup}` : ''} без CID`
+        )
         continue
       }
       const ext = track.format || 'ass'

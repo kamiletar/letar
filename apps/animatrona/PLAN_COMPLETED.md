@@ -2,7 +2,42 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-07-21
+> **Архив обновлён:** 2026-07-28
+
+---
+
+## v0.52.2–0.52.4 — Перезаливка библиотеки на новый pinner-сервер (2026-07-28)
+
+**Контекст:** старый раздающий (pinner) сервер утрачен. Серия прошлых фиксов регенерации
+манифеста (гонки pin/unpin, мёртвые CID, зависшая `regenerateAll`) была латанием симптомов
+этой архитектуры. Решение: не чинить/аудировать старые CID, а перезалить всю библиотеку заново
+на новый сервер через реимпорт с Рутрекера.
+
+- **v0.52.2 — метка «Требует перезаливки»:** поле `Anime.needsReupload` (`schema.zmodel`),
+  миграция `20260728044106_add_needs_reupload_flag` backfill'ит `true` всей библиотеке на
+  момент перехода (новые импорты — `false`). UI: оранжевый бейдж на карточке
+  ([AnimeCard.tsx](main/../renderer/src/components/library/AnimeCard.tsx)) + фильтр
+  «Перезаливка» (Все / Требует / Перезалито) в каталоге.
+
+- **v0.52.3 — аудит `buildAnimeDirectory`:** найдено, что `audioTracks`/`subtitleTracks`
+  фильтровались по `transcodedCid`/`fileCid` not null на уровне SQL-запроса
+  ([anime-directory-builder.ts](main/services/ipfs/anime-directory-builder.ts)) — дорожки без
+  загруженного в IPFS контента никогда не попадали в `missingCids`, `contentHealth` ложно
+  показывал `'complete'`. То же с эпизодом без `transcodedCid`. Убран where-фильтр (fonts —
+  оставлен намеренно, некритичная потеря с ручным восстановлением), добавлены записи
+  `missingCids` (`kind: 'video' | 'audio' | 'sub'`) — теперь честно триггерят `'broken'`.
+
+- **v0.52.4 — реимпорт с Рутрекера сливается в существующее аниме:** финальное решение по
+  автоматизации — вставка ссылки на Рутрекер (существующий парсер уже подхватывает максимум из
+  описания раздачи), матчинг строго по тому же `shikimoriId`, слияние в существующую карточку
+  через `existingAnimeId`/`isRetranscode` (переиспользован механизм «Добавить эпизоды», см.
+  [ImportWizardDialog.tsx](renderer/src/components/import/ImportWizardDialog.tsx)) вместо
+  создания дубликата. При расхождении числа серий — `window.confirm` (может быть другой
+  релиз/качество). После чистого успеха `needsReupload` снимается автоматически в
+  [import-service.ts](main/services/import/import-service.ts) `process()`.
+  Изменено: [library.handlers.ts](main/ipc/library.handlers.ts) `checkAnimeExists` возвращает
+  `episodeCount`/`needsReupload`; [torrents/page.tsx](renderer/src/app/torrents/page.tsx)
+  `handleImport` — проверка + confirm + прокидка `existingAnimeId`.
 
 ---
 

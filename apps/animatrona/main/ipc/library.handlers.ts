@@ -29,17 +29,26 @@ export function registerLibraryHandlers(): void {
   createHandler('library:ensureEpisodeDirectory', (options: OutputPathOptions) => ensureEpisodeDirectory(options))
 
   // Создать папку для аниме
-  createHandler('library:ensureAnimeDirectory', (libraryPath: string, animeName: string) =>
-    ensureAnimeDirectory(libraryPath, animeName)
+  createHandler(
+    'library:ensureAnimeDirectory',
+    (libraryPath: string, animeName: string) => ensureAnimeDirectory(libraryPath, animeName),
   )
 
   // Проверить, есть ли аниме с таким shikimoriId в библиотеке
   createHandler('library:checkAnimeExists', async (shikimoriId: number) => {
     const anime = await prisma.anime.findUnique({
       where: { shikimoriId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, episodeCount: true, needsReupload: true },
     })
-    return anime ? { exists: true, animeId: anime.id, animeName: anime.name } : { exists: false }
+    return anime
+      ? {
+        exists: true,
+        animeId: anime.id,
+        animeName: anime.name,
+        episodeCount: anime.episodeCount,
+        needsReupload: anime.needsReupload,
+      }
+      : { exists: false }
   })
 
   // Синхронизировать эпизоды из IPFS (для онгоингов и retry)
