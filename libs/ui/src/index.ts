@@ -47,6 +47,7 @@ export {
 export { PhotoGallery, type PhotoItem } from './lib/photo-gallery'
 export { Pressable, RippleEl, pressableConfig, useRipple, type PressableProps } from './lib/pressable'
 export { PressableButton, type PressableButtonProps } from './lib/pressable-button'
+export { QuantityStepper, type QuantityStepperProps } from './lib/quantity-stepper'
 export { RatingDisplay, type RatingDisplayProps } from './lib/rating-display'
 export { RatingStars, type RatingStarsProps } from './lib/rating-stars'
 export { ReviewCard, type ReviewAuthor, type ReviewCardProps, type ReviewData } from './lib/review-card'

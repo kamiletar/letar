@@ -39,10 +39,34 @@ git push && ssh s2 'cd /home/deploy/letar && git pull && ./deploy-affected.sh --
 
 ```bash
 # Создать migration из diff
-npx prisma migrate diff --from-migrations prisma/migrations --to-schema-datamodel src/generated/schema.prisma --script > prisma/migrations/<timestamp>_<name>/migration.sql
-# Пометить как применённую
-npx prisma migrate resolve --applied <migration_name>
+bun x prisma migrate diff --from-migrations prisma/migrations --to-schema src/generated/schema.prisma --script > /tmp/mig.sql
+# Положить SQL в новую папку миграции и применить
+mkdir -p prisma/migrations/<timestamp>_<name> && cp /tmp/mig.sql prisma/migrations/<timestamp>_<name>/migration.sql
+bun x prisma migrate deploy
 ```
+
+### ⚠️ Prisma 7: флаги и shadow-БД изменились
+
+Проверено на `aboi` 2026-07-28 — старый рецепт больше не работает:
+
+- `--to-schema-datamodel` **удалён** → теперь `--to-schema`.
+- `--shadow-database-url` как флаг CLI **не существует** → shadow-БД задаётся только
+  в `prisma.config.ts`:
+  ```ts
+  datasource: {
+    url: env('DATABASE_URL'),
+    shadowDatabaseUrl: env('SHADOW_DATABASE_URL'),
+  }
+  ```
+  Без неё `migrate diff --from-migrations` падает с «You must set `datasource.shadowDatabaseUrl`».
+  Саму БД создать один раз: `docker exec <app>-postgres psql -U <user> -d postgres -c 'CREATE DATABASE <db>_shadow;'`
+- `prisma migrate dev` и `migrate reset` **интерактивны** и падают в агентской сессии
+  («environment is non-interactive»). Путь для агента: `migrate diff` → положить SQL →
+  `migrate deploy`.
+- `migrate reset --force` дополнительно требует переменную
+  `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` с текстом согласия пользователя — Prisma
+  намеренно блокирует уничтожение БД агентом без явного подтверждения в чате.
+  Флага `--skip-seed` больше нет.
 
 ## Структура schema.zmodel
 
