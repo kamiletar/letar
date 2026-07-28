@@ -1108,16 +1108,26 @@ svoichuzhie, aboi, aprel8008**. У всех пяти уже есть `<app>-e2e`
   было» — иначе зависший процесс никогда не обновил бы статус, и гейт продолжил бы читать старый
   зелёный). То же самое сделано для ошибки самого процесса (`spawn`/`error`-событие) — раньше
   `lastStatus` в этом случае не писался вообще.
-- **Не сделано:** живой прогон на реальном стенде. Требует: (1) BlackCove подтягивает этот
-  коммит там, откуда реально исполняется `deploy-mcp` (stdio-процесс из `libs/deploy-mcp/src/
-  cli.ts`, локальная копия репо — правки не долетают сами по себе, нужен `git pull` + рестарт
-  MCP-сессии); (2) redeploy `dashboard-agent` на s3 (таймаут живёт там); (3) для archetest —
-  живой цикл `deploy_app(staging)` → `run_e2e` → зелёный → `deploy_app(production)` (успех) и
-  отдельно живая проверка блока (например откатить/испортить `.last-e2e-status/archetest.json`
-  и убедиться, что `deploy_app` отказывает).
-- dsperevod/svoichuzhie/aprel8008 технически покрыты тем же кодом (список общий), но их
-  собственный живой прогон не приоритет этой сессии — картина по коду и тестам верна для всех
-  пяти сразу, только archetest проверен по приоритету пользователя.
+- **Живая проверка (BlackCove, сразу после push):** ✅ гейт подтверждён fail-closed —
+  `deploy_app(archetest, production)` реально отказал с причиной «ещё ни разу не прогонялся
+  e2e на staging». Заодно поймал и починил второй блокер: коммит `b87ce831` был только
+  локальным, не запушенным в `origin/main` — `git push` сделан, ветка синхронизирована.
+- **🔴 Третий блокер, найден тем же прогоном: у archetest не было `docker-compose.staging.yml`**
+  — `deploy_app(archetest, staging)` отвечал успехом, но ничего не разворачивал (`No
+  docker-compose.staging.yml found for archetest, skipping...`). Без staging-инстанса
+  `run_e2e` бить некуда — гейт был бы заблокирован навсегда. **Заведён** (root-weaver, по
+  образцу dsperevod/svoichuzhie): `apps/archetest/docker-compose.staging.yml` (БД-порт 5463,
+  app-порт 3030, домен `archetest-stage.s3.letar.best` — валиден по существующему DNS
+  wildcard, новая запись не нужна). Детали и что осталось (`.env.staging` на s3, NPM proxy
+  host) — `apps/archetest/PLAN.md`.
+- **Не сделано:** (1) redeploy `dashboard-agent` на s3 (таймаут `run_e2e` живёт там —
+  BlackCove упёрся в то, что dashboard-agent на s3 живёт по отдельному `docker-compose.s3.yml`,
+  обычный staging-путь его не видит, идёт через SSH напрямую как резервный канал); (2) первый
+  живой `deploy_app(archetest, staging)` → `run_e2e` → зелёный → `deploy_app(archetest,
+  production)` — теперь технически возможен (staging-конфиг есть), но ещё не пройден.
+- dsperevod/svoichuzhie/aprel8008 технически покрыты тем же кодом (список общий) и у них уже
+  ЕСТЬ `docker-compose.staging.yml` — блокер выше был специфичен для archetest. Их собственный
+  живой прогон не приоритет этой сессии.
 
 Не путать с М3 в таблице выше — там archetest ждала после M2 «специфика психометрии, снепшот»
 для ПОЛНОГО staging-гейта (анонимизация данных и т.п.); этот трек — только hard e2e-gate перед

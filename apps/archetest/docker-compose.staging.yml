@@ -1,0 +1,62 @@
+name: archetest-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: archetest-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: archetest_staging
+      POSTGRES_USER: archetest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - archetest-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s3 — следующий свободный после grandslamcup(5454)/auth-hub(5455)/
+    # driving-school(5456)/aboi(5457)/time(5458)/mandala(5459)/svoichuzhie(5460)/
+    # aprel8008(5461)/dsperevod(5462)/e2e-postgres(5499). Не проверялся напрямую на s3 —
+    # подтвердить перед первым деплоем.
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5463:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U archetest -d archetest_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: archetest:staging
+    container_name: archetest-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3012 — из Dockerfile.production (ENV PORT=3012), тот же образ что и прод.
+      # Хостовый 3030 — следующий свободный после aboi(3022)/auth-hub(3019)/driving-school(3020-3021)/
+      # time(3023)/mandala(3024)/svoichuzhie(3025)/aprel8008(3026)/dsperevod(3027)/pravda(3028)/
+      # aira-web(3029). Подтвердить перед первым деплоем.
+      - '3030:3012'
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://archetest:${POSTGRES_PASSWORD:-postgres}@archetest-staging-db:5432/archetest_staging
+      # hub-client: авторизация делегирована Ключнице (auth.letar.best), не своему Better Auth.
+      # Текущий e2e-сьют (express/kiosk/mood-check-in/safety-net) не проходит через OIDC-логин —
+      # тесты гостевые/квиз-флоу, поэтому staging-специфичный OIDC-клиент пока не заводился.
+      # Если e2e начнёт покрывать логин — заводить отдельный oauthApplication
+      # "archetest-staging" в auth-hub с redirect_uri на этот домен (не переиспользовать
+      # archetest-prod — редирект не совпадёт).
+      BETTER_AUTH_URL: https://archetest-stage.s3.letar.best
+      NEXT_PUBLIC_APP_URL: https://archetest-stage.s3.letar.best
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3012/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  archetest-staging-data:

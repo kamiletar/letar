@@ -65,8 +65,33 @@
 **Скоуп уточнён (2026-07-28):** не пилот на одном archetest — сразу на всех пяти активных
 коммерческих приложениях: **archetest, dsperevod, svoichuzhie, aboi, aprel8008**. У всех
 пяти уже есть `<app>-e2e` проекты, технической причины ограничиваться пилотом не было.
-Отправлено BlackCove (agent-mail, тред `e2e-gate-hard-scope-5-commercial`), ждём реализации —
-не блокирует текущую работу над archetest.
+Отправлено BlackCove (agent-mail, тред `e2e-gate-hard-scope-5-commercial`).
+
+**Код гейта реализован и запущен в бою (commit `b87ce831`, push подтверждён BlackCove).**
+Живой прогон подтвердил fail-closed: `deploy_app(archetest, production)` реально отказал
+с причиной «ещё ни разу не прогонялся e2e на staging».
+
+**🔴 Найден блокер той же сессией: у archetest не было `docker-compose.staging.yml`** —
+`deploy_app(archetest, staging)` формально отвечал успехом, но ничего не разворачивал
+(`No docker-compose.staging.yml found for archetest, skipping...`). Без staging-инстанса
+`run_e2e` бить некуда — гейт был бы заблокирован навсегда. **Заведён** (root-weaver,
+по образцу dsperevod/svoichuzhie): `apps/archetest/docker-compose.staging.yml`,
+БД-порт `5463`, app-порт `3030`, домен `archetest-stage.s3.letar.best` (валиден по
+существующему DNS wildcard `*.s3.letar.best`, новая запись не нужна).
+
+**Осталось (инфраструктурная часть, не код archetest):**
+
+1. `.env.staging` создать вручную на s3 (секреты, в репозиторий не попадает — как у всех
+   остальных staging-приложений). Текущий e2e-сьют (`express`/`kiosk`/`mood-check-in`/
+   `safety-net`) не проходит через OIDC-логин, поэтому staging-специфичный OIDC-клиент
+   в auth-hub заводить не пришлось — если e2e когда-нибудь начнёт покрывать вход,
+   понадобится отдельный `oauthApplication "archetest-staging"` с redirect_uri на
+   staging-домен (не переиспользовать `archetest-prod` — редирект не совпадёт).
+2. NPM proxy host на s3 для `archetest-stage.s3.letar.best` (TLS через Let's Encrypt
+   HTTP-01, форвард на хостовый порт `3030`) — задача BlackCove/владельца, как и у всех
+   остальных staging-доменов.
+3. Первый `deploy_app(archetest, staging)` → `run_e2e` → зелёный → `deploy_app(archetest,
+   production)` должен пройти без блока.
 
 ## ⭐ СЛЕДУЮЩАЯ ЗАДАЧА: часть B аудита банка (после ревью HON)
 
