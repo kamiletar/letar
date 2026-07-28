@@ -80,7 +80,7 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     const response = await signUpResponse
     test.skip(
       response.status() === 429,
-      'sign-up rate-limited (customRules /sign-up/email: 3/5мин на IP) — не баг, повторить прогон позже',
+      'sign-up rate-limited (customRules /sign-up/email: 3/5мин на IP) — не баг, повторить прогон позже'
     )
 
     // Экран «Проверьте почту» — письмо отправлено (sendOnSignUp), сессии нет
@@ -105,7 +105,7 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     await expect(
       page
         .getByRole('button', { name: /Отправить повторно через \d+ с/ })
-        .or(page.getByText('Не удалось отправить письмо. Попробуйте ещё раз.')),
+        .or(page.getByText('Не удалось отправить письмо. Попробуйте ещё раз.'))
     ).toBeVisible({ timeout: 10000 })
   })
 
