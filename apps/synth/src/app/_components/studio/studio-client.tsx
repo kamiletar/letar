@@ -13,7 +13,8 @@ import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
-import { Box, Button, Text } from '@chakra-ui/react'
+import { Box, Button, Link, Text } from '@chakra-ui/react'
+import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DrumPads } from './drum-pads'
 import { DrumPanel } from './drum-panel'
@@ -467,6 +468,9 @@ export function StudioClient() {
           <Text fontSize="xs" color="fg.muted" letterSpacing="0.15em" textTransform="uppercase">
             {engineType === 'fm' ? fmPatch.name : engineType === 'drumkit' ? drumPatch.name : patch.name}
           </Text>
+          <Link asChild fontSize="9px" color="fg.subtle" letterSpacing="0.08em" _hover={{ color: 'accent.DEFAULT' }}>
+            <NextLink href="/gallery">витрина ↗</NextLink>
+          </Link>
         </Box>
 
         <Box display="flex" alignItems="center" gap={2}>

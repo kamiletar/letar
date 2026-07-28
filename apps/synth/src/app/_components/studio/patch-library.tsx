@@ -1,5 +1,6 @@
 'use client'
 
+import { downloadPatchJson } from '@/lib/patch/publish'
 import type { Patch } from '@/lib/patch/schema'
 import { deletePatch, listPatches, savePatch, slugify } from '@/lib/storage/patches-db'
 import { Box, HStack, Text } from '@chakra-ui/react'
@@ -78,6 +79,11 @@ export function PatchLibrary({ type, currentPatch, onLoad }: PatchLibraryProps) 
     [refresh]
   )
 
+  const handlePublish = useCallback((patch: Patch, e: React.MouseEvent) => {
+    e.stopPropagation()
+    downloadPatchJson(patch)
+  }, [])
+
   return (
     <Box
       display="flex"
@@ -137,6 +143,13 @@ export function PatchLibrary({ type, currentPatch, onLoad }: PatchLibraryProps) 
               <Text fontSize="9px" color="fg.muted" fontFamily="mono">
                 {p.name}
               </Text>
+              <button
+                style={{ ...btnStyle(false), padding: '0 4px', fontSize: '9px', border: 'none' }}
+                onClick={(e) => handlePublish(p, e)}
+                title="Опубликовать (скачать JSON для patches/)"
+              >
+                ⇧
+              </button>
               <button
                 style={{ ...btnStyle(false), padding: '0 4px', fontSize: '9px', border: 'none' }}
                 onClick={(e) => handleDelete(p.id, e)}
