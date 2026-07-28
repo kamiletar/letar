@@ -1,5 +1,6 @@
+import { AnalyticsConsent } from '@/app/_components/analytics-consent'
 import { Provider } from '@/app/_components/ui/provider'
-import { UmamiScript } from '@letar/analytics'
+import { CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
@@ -61,7 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* JSON-LD для SEO — статические данные, XSS невозможен */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Provider>{children}</Provider>
-        <UmamiScript />
+        <AnalyticsConsent />
+        <CookieBanner appKey="letar-landing" consentApiUrl={null} />
       </body>
     </html>
   )

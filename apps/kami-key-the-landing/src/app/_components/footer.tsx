@@ -1,7 +1,8 @@
 'use client'
 
 import { Box, Container, Flex, HStack, Text } from '@chakra-ui/react'
-import { BuildVersion, StudioCredit } from '@letar/ui'
+import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
+import NextLink from 'next/link'
 import { FaGithub, FaKeyboard } from 'react-icons/fa6'
 import { LuExternalLink } from 'react-icons/lu'
 import packageJson from '../../../package.json'
@@ -62,6 +63,19 @@ export function Footer() {
                 <LuExternalLink size={12} />
               </a>
             </Box>
+            <Box
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
+              fontSize="xs"
+              color="gray.500"
+              className="font-mono"
+              transition="color 0.2s ease"
+              _hover={{ color: 'brand.400' }}
+              asChild
+            >
+              <NextLink href="/privacy">Конфиденциальность</NextLink>
+            </Box>
           </HStack>
         </Flex>
 
@@ -72,6 +86,7 @@ export function Footer() {
           </Text>
           <StudioCredit app="kami-key-the-landing" color="gray.600" />
           <BuildVersion version={packageJson.version} color="gray.600" />
+          <CookieSettingsButton appKey="kami-key-the-landing" />
         </HStack>
       </Container>
     </Box>

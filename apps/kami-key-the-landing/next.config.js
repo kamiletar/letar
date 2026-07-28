@@ -14,6 +14,8 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
   },
+  // @letar/ui — cookie-баннер согласий (CookieBanner, CookieSettingsButton)
+  transpilePackages: ['@letar/ui'],
 }
 
 module.exports = composePlugins(withNx)(nextConfig)

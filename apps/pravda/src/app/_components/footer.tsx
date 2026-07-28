@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { BuildVersion, StudioCredit } from '@letar/ui'
+import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
 import NextLink from 'next/link'
 import type { ReactNode } from 'react'
 import { LuFileText, LuGavel, LuScroll, LuShield } from 'react-icons/lu'
@@ -108,11 +108,21 @@ export function Footer() {
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>
+            <Link asChild color="brand.500" _hover={{ textDecoration: 'underline' }}>
+              <NextLink href="/privacy">Конфиденциальность</NextLink>
+            </Link>
+            <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
+              |
+            </Text>
             <StudioCredit app="pravda" />
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>
             <BuildVersion version={packageJson.version} />
+            <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
+              |
+            </Text>
+            <CookieSettingsButton appKey="pravda" />
           </Flex>
         </VStack>
       </Container>

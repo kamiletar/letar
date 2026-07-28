@@ -1,7 +1,8 @@
 'use client'
 
 import { Box, Container, HStack, Link, Text, VStack } from '@chakra-ui/react'
-import { BuildVersion, StudioCredit } from '@letar/ui'
+import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
+import NextLink from 'next/link'
 import packageJson from '../../../package.json'
 
 export function Footer() {
@@ -52,6 +53,9 @@ export function Footer() {
             >
               Лицензия MIT
             </Link>
+            <Link asChild color="gray.500" fontSize="sm" _hover={{ color: 'white' }}>
+              <NextLink href="/privacy">Конфиденциальность</NextLink>
+            </Link>
           </HStack>
 
           <HStack gap={3} flexWrap="wrap" justify="center">
@@ -60,6 +64,7 @@ export function Footer() {
             </Text>
             <StudioCredit app="animatrona-landing" color="gray.600" />
             <BuildVersion version={packageJson.version} color="gray.600" />
+            <CookieSettingsButton appKey="animatrona-landing" />
           </HStack>
         </VStack>
       </Container>

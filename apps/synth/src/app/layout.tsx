@@ -1,6 +1,7 @@
-import { UmamiScript } from '@letar/analytics'
+import { CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 
+import { AnalyticsConsent } from './_components/analytics-consent'
 import { Provider } from './_components/ui/provider'
 
 const BASE_URL = 'https://synth.letar.best'
@@ -47,7 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head />
       <body>
         <Provider>{children}</Provider>
-        <UmamiScript />
+        <AnalyticsConsent />
+        <CookieBanner appKey="synth" consentApiUrl={null} />
       </body>
     </html>
   )
