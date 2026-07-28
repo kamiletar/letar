@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.1 — X-Cron-Secret через @letar/api-server (2026-07-28)
+
+Закрыт хвост из корневого `PLAN.md` §0: проверка `CRON_SECRET` была продублирована идентичным кодом
+(`!cronSecret || provided !== cronSecret`) в 6 местах монорепо (dashboard×2, studio×2, driving-school,
+dsperevod). Вынес в `verifyCronSecret(request)` (`libs/api-server/src/lib/cron-secret.ts`, fail-closed —
+без `CRON_SECRET` в окружении всегда `false`, покрыт unit-тестами). `/api/cron/heartbeat` и `/api/alerts`
+переключены на него. Подключил `@letar/api-server` в `implicitDependencies`/`tsconfig.json` (paths +
+references) — раньше не был подключён.
+
+Попутно поправлен doc-пример в `schema.zmodel` (`imageName`/`domain` в `DeployedApp` ссылались на
+decommissioned `premium-rosstil` — заменено на `driving-school`, `src/generated` перегенерирован
+через `zenstack:generate`+`db:generate`, не трекается git).
+
 ## Версия 1.20.0 — Alert Heartbeat + фикс сломанного прод-билда (2026-07-28)
 
 **Heartbeat-уведомление:** `POST /api/cron/heartbeat` — если за последние 24 часа не было

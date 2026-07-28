@@ -142,7 +142,7 @@ export default function CronPage() {
       return state.map((item) =>
         item.job.id === jobId ? { ...item, job: { ...item.job, enabled }, isScheduled: enabled } : item
       )
-    },
+    }
   )
 
   // Мутация для запуска задачи
@@ -283,30 +283,28 @@ export default function CronPage() {
             <Badge colorPalette={isRunning ? 'green' : 'red'} size="lg">
               {isRunning ? `Активен (${scheduledCount})` : 'Остановлен'}
             </Badge>
-            {isRunning
-              ? (
-                <Button
-                  size="sm"
-                  colorPalette="red"
-                  variant="outline"
-                  onClick={() => schedulerMutation.mutate('stop')}
-                  loading={schedulerMutation.isPending}
-                >
-                  <LuPause />
-                  Остановить
-                </Button>
-              )
-              : (
-                <Button
-                  size="sm"
-                  colorPalette="green"
-                  onClick={() => schedulerMutation.mutate('start')}
-                  loading={schedulerMutation.isPending}
-                >
-                  <LuPlay />
-                  Запустить
-                </Button>
-              )}
+            {isRunning ? (
+              <Button
+                size="sm"
+                colorPalette="red"
+                variant="outline"
+                onClick={() => schedulerMutation.mutate('stop')}
+                loading={schedulerMutation.isPending}
+              >
+                <LuPause />
+                Остановить
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                colorPalette="green"
+                onClick={() => schedulerMutation.mutate('start')}
+                loading={schedulerMutation.isPending}
+              >
+                <LuPlay />
+                Запустить
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
@@ -450,7 +448,8 @@ export default function CronPage() {
                               id: item.job.id,
                               name: item.job.name,
                               schedule: item.job.schedule,
-                            })}
+                            })
+                          }
                         >
                           <LuPencil />
                         </IconButton>

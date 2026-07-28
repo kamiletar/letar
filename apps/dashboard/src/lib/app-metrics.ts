@@ -203,9 +203,8 @@ export async function getAppMetrics(app: string): Promise<AppMetrics> {
 
   // Рассчитываем метрики
   const responseTimes = successfulChecks.map((h) => h.responseTime)
-  const avgResponseTime = responseTimes.length > 0
-    ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
-    : 0
+  const avgResponseTime =
+    responseTimes.length > 0 ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) : 0
   const minResponseTime = responseTimes.length > 0 ? Math.min(...responseTimes) : 0
   const maxResponseTime = responseTimes.length > 0 ? Math.max(...responseTimes) : 0
 
@@ -250,7 +249,7 @@ export async function performAllHealthChecks(): Promise<Record<string, HealthChe
   await Promise.all(
     Object.keys(APP_PORTS).map(async (app) => {
       results[app] = await performHealthCheck(app)
-    }),
+    })
   )
 
   return results

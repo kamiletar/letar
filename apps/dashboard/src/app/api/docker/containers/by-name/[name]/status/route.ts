@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     console.error('Error in /api/docker/containers/by-name/[name]/status:', error)
     return NextResponse.json(
       { running: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

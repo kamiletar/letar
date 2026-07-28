@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.20.1] — 2026-07-28
+
+### Refactor: `X-Cron-Secret` через `@letar/api-server`
+
+`/api/cron/heartbeat` и `/api/alerts` переведены на общий `verifyCronSecret()` из `@letar/api-server` вместо дублированной инлайн-проверки `CRON_SECRET`. Попутно поправлен doc-пример поля `imageName`/`domain` в `schema.zmodel` (ссылался на decommissioned `premium-rosstil`, заменён на `driving-school`).
+
 ## [1.19.4] — 2026-07-15
 
 ### Chore: удалены мёртвые ссылки на `premium-rosstil`/`imot`
