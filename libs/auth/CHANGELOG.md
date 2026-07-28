@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-07-28
+
+### Changed
+
+- **`ResendVerificationButton` переиспользует `useResendCountdown` из `@letar/pin-auth/client`**
+  вместо заинлайненного дубликата cooldown-логики (хвост Этапа 1 из корневого `PLAN.md`, отложенный
+  ранее из-за отсутствия cross-lib резолва по имени пакета на уровне `libs/`). Резолв работает через
+  обычный `bun install` workspace-симлинк (`libs/auth/node_modules/@letar/pin-auth`) + `exports`
+  пакета — ручной `paths`-маппинг в tsconfig не потребовался, Nx сам подхватил зависимость в граф.
+  Поведение компонента не изменилось (тот же контракт `ResendVerificationButtonProps`).
+
 ## [0.11.2] - 2026-07-21
 
 ### Fixed

@@ -457,7 +457,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.5",
+      "version": "0.6.6",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -689,6 +689,7 @@
       "version": "0.11.2",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
+        "@letar/pin-auth": "workspace:*",
       },
       "peerDependencies": {
         "better-auth": ">=1.0.0",

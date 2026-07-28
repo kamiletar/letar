@@ -1,7 +1,8 @@
 'use client'
 
 import { Button, type ButtonProps } from '@chakra-ui/react'
-import { type JSX, useCallback, useEffect, useState } from 'react'
+import { useResendCountdown } from '@letar/pin-auth/client'
+import { type JSX, useCallback, useState } from 'react'
 
 /**
  * Минимальный структурный контракт auth-клиента для повторной отправки письма.
@@ -70,18 +71,8 @@ export function ResendVerificationButton({
   ...buttonProps
 }: ResendVerificationButtonProps): JSX.Element {
   // Стартуем с 0 → кнопка сразу доступна; cooldown заводим вручную при успехе
-  const [secondsLeft, setSecondsLeft] = useState(0)
+  const { secondsLeft, canResend, start } = useResendCountdown({ initialSeconds: 0 })
   const [isSending, setIsSending] = useState(false)
-  const canResend = secondsLeft <= 0
-
-  // Обратный отсчёт cooldown
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      return
-    }
-    const timer = setTimeout(() => setSecondsLeft((prev) => prev - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [secondsLeft])
 
   const handleClick = useCallback(async () => {
     setIsSending(true)
@@ -94,14 +85,14 @@ export function ResendVerificationButton({
         return
       }
 
-      setSecondsLeft(cooldownSeconds)
+      start(cooldownSeconds)
       onSent?.()
     } catch {
       onError?.(NEUTRAL_ERROR)
     } finally {
       setIsSending(false)
     }
-  }, [authClient, email, callbackURL, cooldownSeconds, onSent, onError])
+  }, [authClient, email, callbackURL, cooldownSeconds, start, onSent, onError])
 
   return (
     <Button type="button" onClick={handleClick} disabled={!canResend || isSending} loading={isSending} {...buttonProps}>

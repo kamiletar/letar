@@ -63,6 +63,7 @@
 | Реальный переход коммерса на Tier 1 (`hub-client`) ни разу не выполнялся                                                                                                                                                                                                                         | 8    | Ждёт первого запроса владельца                           |
 | Прод-запуск merge-скрипта дублей-аккаунтов ни разу не выполнялся                                                                                                                                                                                                                                 | 8.5  | Ждёт первого реального кейса                             |
 | 🔴 `svoichuzhie` (`svoichuzhie.ru`) не зарегистрирован в РКН — подтверждено на проде                                                                                                                                                                                                             | 0.8  | Юридическое решение владельца — отдельная подача или нет |
+| 🔴 `aprel8008` не зарегистрирован в РКН — вывод «не требует подачи» пересмотрен 2026-07-28 (см. `.claude/private/COMPLIANCE.md`)                                                                                                                                                                 | 0.8  | Реквизиты оператора от заказчика, затем подача           |
 
 ## Как читать документ
 
@@ -651,9 +652,14 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
      ConsentLog) полный — не хватает только самого уведомления в РКН + дозаполнения плейсхолдеров после
      подачи. Требует решения владельца svoichuzhie (аналогично aboi/dsperevod — отдельный оператор или тот
      же ИП, что и letar/driving-school).
-   - ✅ **aprel8008 — вероятно не требует отдельной подачи.** Домен свой (`aprel8008.ru`), но `mode: 'hub-client'`
-     — вход только через Ключницу (auth.letar.best), identity и ПД хранятся в БД auth-hub, уже покрытой
-     letar-регистрацией. Формально не проверялось юридически — зафиксировать явно при следующем аудите.
+   - ⚠️ **aprel8008 — юридически проверено (2026-07-28), вывод скорректирован: вероятно ТРЕБУЕТ отдельной
+     подачи**, предыдущее «вероятно не требует» было неполным. `mode: 'hub-client'` покрывает только канал
+     входа (identity через Ключницу) — но `createAuth({ mode: 'hub-client', database: prismaAdapter(...) })`
+     всё равно хранит **свою локальную копию** email/роли пользователя в БД самого aprel8008 (`auth.ts`),
+     не только в auth-hub. Плюс это **клиентский проект другого владельца** (заказчик/владелица, не ИП letar),
+     собственный домен `aprel8008.ru` — тот же класс, что aboi/dsperevod, а не пет-проект. `/privacy` уже
+     существует, но раздел с реквизитами оператора помечен «ждём от заказчика» (`apps/aprel8008/PLAN.md`) —
+     подачи в РКН нет. Реквизиты и решение — `.claude/private/COMPLIANCE.md`.
 2. **Проверка чекбоксов** — убедиться, что нигде нет `consentAccepted: true` как defaultValue (нарушение ФЗ).
 3. **Consent-aware аналитика** — убедиться, что Umami/Я.Метрика нигде не грузится до согласия.
 4. **Право на удаление** — `deleteAccountAction` во всех аккаунт-имеющих приложениях.
@@ -711,8 +717,11 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   переиспользуемы вне driving-school; брендинг шаблонов в конфиг. _(совместимость/брендинг — частично, по мере тиража)_
 - ✅ `@letar/auth/client`: `<ResendVerificationButton authClient email callbackURL/>` со встроенным cooldown;
   «лёгкий путь» — обёртка над `authClient.sendVerificationEmail`. bump 0.2.0→0.3.0 + CHANGELOG.
-  ⏳ Реэкспорт pin-auth хуков **отложен**: на уровне `libs/` нет cross-lib резолва по имени пакета
-  (нет `node_modules/@letar`, paths только в приложениях) — cooldown инлайнен в кнопке. Отдельная задача.
+  ✅ **Реэкспорт pin-auth хуков — закрыто (2026-07-28):** `ResendVerificationButton` переиспользует
+  `useResendCountdown` из `@letar/pin-auth/client`; резолв решился штатным `bun install`
+  workspace-симлинком (`libs/auth/node_modules/@letar/pin-auth`) + package.json `exports` — ручной
+  `paths`-маппинг в tsconfig не потребовался, Nx сам подхватил зависимость в граф (см. `libs/deploy-mcp`
+  → `@letar/infra-config` — тот же паттерн уже был в монорепо). `@letar/auth` 0.11.2→0.11.3.
 - **Security hardening (§13.1–13.2–13.8) — ✅ сделано:**
   - ✅ **SSE-токен вместо email в URL (§13.1):** `streamToken` генерируется в `token-manager`, передаётся в адаптер
     `createToken`, `useVerificationStream` принимает его. **Аддитивно** — email-путь сохранён; полное удаление
