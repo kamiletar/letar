@@ -112,7 +112,7 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     app: 'dashboard-agent',
     endpoint: '/api/database/backup',
     schedule: '0 2 * * *',
-    description: 'Автоматический бэкап всех БД на s2 (driving-school)',
+    description: 'Автоматический бэкап всех БД на s2 из APP_CONFIG (см. database.ts)',
     enabled: true,
     server: 's2',
   },

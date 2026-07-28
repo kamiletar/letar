@@ -2,6 +2,35 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.8.7 → 0.8.8 — аудит охвата бэкапов + canary свежести бэкапа Maddy (2026-07-28, root-weaver)
+
+Сессия «хвосты корневого `PLAN.md`»: сверка охвата ежедневного `pg_dump`-бэкапа БД
+(`APP_CONFIG` в `src/lib/database.ts`) с фактическим списком приложений с БД на s2.
+
+**0.8.7 — найден и закрыт реальный пробел:** `aboi` и `aprel8008` развёрнуты на s2
+(`SERVER_APPS`), у обоих Postgres-БД, но `APP_CONFIG` их не перечислял, а
+`docker-compose.production.yml` не монтировал их `.env.docker` в `/secrets/` — БД **никогда
+не бэкапились**. Добавлены оба (`aboi-db`/`neyroaboi_prod`/`aboi_user`,
+`aprel8008-db`/`aprel8008`/`aprel8008_user`) — и в `APP_CONFIG`, и в volume-маунты. aboi —
+флагман 152-ФЗ-комплаенса, гэп не был замечен ни разу с момента, когда реестр заведён.
+
+Заодно закрыт смежный дрейф: канон `@letar/infra-config` не знал про `studio` в
+`SERVER_APPS` (была только в локальной копии `server-config.ts`) — `server-config.guard.
+spec.ts` падал красным на `main` до этого коммита. И попутно поправлена устаревшая
+формулировка описания cron-задачи `s2-database-backup` (см. Backlog выше — «бэкап
+driving-school» → «бэкап всех приложений из APP_CONFIG»).
+
+**0.8.8 — canary свежести бэкапа Maddy:** новая cron-задача `maddy-backup-freshness-check`
+(`src/lib/backup-freshness.ts`, раз в 6 часов, `s2`) — читает `/home/deploy/letar/backups/
+maddy` (смонтирован 1-в-1 с хостом) и алертит `BACKUP_FAILED` (дебаунс — один алерт на
+эпизод, тот же паттерн, что `email-canary.ts`), если самый свежий `maddy_*.tar.gz` старше
+30 часов. Закрывает урок инцидента 2026-07-28 (см. корневой `PLAN.md` §Этап 0.3): бэкапы
+Maddy не шли 26 дней незамеченно, потому что ничего не проверяло сам факт их появления —
+`email-canary` проверяет доставку писем, не целостность бэкап-пайплайна.
+
+commit `bcbaf10c` (0.8.7), `c3d6c527` (0.8.8). Деплой запрошен у BlackCove (тред
+`deploy-dashboard-agent-backup-coverage`), не выполнялся на момент записи.
+
 ## Версия 0.8.6 — регистрация `studio` в реестре приложений (2026-07-28)
 
 `studio` полностью отсутствовал в `lib/app-registry.ts` (`APP_PORTS`/`APP_HOSTS`) и
