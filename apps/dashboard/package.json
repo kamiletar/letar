@@ -10,7 +10,8 @@
     ],
     "implicitDependencies": [
       "@letar/query-provider",
-      "@letar/analytics"
+      "@letar/analytics",
+      "@letar/api-server"
     ]
   },
   "dependencies": {

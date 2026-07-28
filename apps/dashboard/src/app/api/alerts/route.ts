@@ -1,5 +1,6 @@
 import { createAlert, getActiveAlerts, getAlerts, getAlertSettings } from '@/lib/alerts'
 import { sendNotification } from '@/lib/notifications'
+import { verifyCronSecret } from '@letar/api-server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod/v4'
 
@@ -63,10 +64,7 @@ const CreateAlertSchema = z
  * Авторизация: тот же X-Cron-Secret, что dashboard-agent использует для вызова cron-эндпоинтов.
  */
 export async function POST(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  const providedSecret = request.headers.get('x-cron-secret')
-
-  if (!cronSecret || providedSecret !== cronSecret) {
+  if (!verifyCronSecret(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

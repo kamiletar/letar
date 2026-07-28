@@ -1,6 +1,7 @@
 import { getAlertSettings } from '@/lib/alerts'
 import { prisma } from '@/lib/db'
 import { sendHeartbeatTelegram } from '@/lib/notifications'
+import { verifyCronSecret } from '@letar/api-server'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -17,9 +18,7 @@ const WINDOW_MS = 24 * 60 * 60 * 1000
  * curl -X POST -H "X-Cron-Secret: $CRON_SECRET" https://dash.letar.best/api/cron/heartbeat
  */
 export async function POST(request: Request): Promise<NextResponse> {
-  const cronSecret = process.env.CRON_SECRET
-  const providedSecret = request.headers.get('x-cron-secret')
-  if (!cronSecret || providedSecret !== cronSecret) {
+  if (!verifyCronSecret(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

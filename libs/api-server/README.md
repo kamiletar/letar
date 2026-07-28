@@ -6,6 +6,7 @@
 
 - **API Response** — стандартные ответы `apiSuccess`, `apiError`
 - **API Keys** — генерация и хеширование API-ключей
+- **Cron Secret** — проверка `X-Cron-Secret` в cron-эндпоинтах, вызываемых dashboard-agent
 - **Rate Limiting** — sliding window алгоритм с whitelist/blacklist
 - **Role Utils** — проверка ролей `hasRole`, `hasAnyRole`, `hasAllRoles`
 
@@ -57,6 +58,26 @@ const apiKey = await db.apiKey.findUnique({ where: { keyHash: hash } })
 const generateKey = createApiKeyGenerator('ds_live_')
 const { key } = generateKey()
 ```
+
+### Cron Secret
+
+```typescript
+import { verifyCronSecret } from '@letar/api-server'
+import { NextResponse } from 'next/server'
+
+// app/api/cron/my-job/route.ts
+export async function POST(request: Request) {
+  if (!verifyCronSecret(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // ... логика cron-задачи
+}
+```
+
+`verifyCronSecret` сравнивает заголовок `X-Cron-Secret` с `process.env.CRON_SECRET` (fail-closed —
+если `CRON_SECRET` не задан, всегда `false`). Вызывающая сторона — `executeJob` в `dashboard-agent`,
+который шлёт этот заголовок на все cron-эндпоинты по расписанию.
 
 ### Rate Limiting
 
