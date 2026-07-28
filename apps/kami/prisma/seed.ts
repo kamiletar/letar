@@ -426,7 +426,6 @@ async function main() {
         description:
           'Интернет-магазин премиальной одежды с кастомными заказами, корзиной и интеграцией платёжных систем.',
         descriptionEn: 'Premium clothing e-commerce store with custom orders, shopping cart and payment integration.',
-        demoUrl: 'https://premium.rosstil.ru/',
         technologies: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL', 'Chakra UI', 'ZenStack'],
         featured: true,
         order: 2,
@@ -451,7 +450,6 @@ async function main() {
         description:
           'Платформа для интегративной психотерапии: запись на консультации, профили терапевтов, онлайн-сессии.',
         descriptionEn: 'Integrative psychotherapy platform: appointment booking, therapist profiles, online sessions.',
-        demoUrl: 'https://imot.letar.best',
         technologies: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL', 'Better Auth'],
         featured: true,
         order: 4,

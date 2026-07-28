@@ -14,8 +14,6 @@ const { spawnSync } = require('child_process')
 // Маппинг проектов E2E на порты
 const PORT_MAP = {
   'driving-school': 3003,
-  'premium-rosstil': 3000,
-  imot: 3001,
   dashboard: 3002,
   mandala: 3004,
   kami: 3005,

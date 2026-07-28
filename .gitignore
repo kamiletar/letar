@@ -83,8 +83,6 @@ scripts/backup/.env
 # Deployment tracking
 .last-deploy-commit
 .last-deploy/
-/apps/premium-rosstil/logs/combined.log
-/apps/premium-rosstil/logs/error.log
 /dashboard-data/
 **/playwright-report/*
 /apps/dashboard/dashboard-data/

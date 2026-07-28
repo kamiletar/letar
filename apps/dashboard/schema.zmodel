@@ -368,9 +368,9 @@ model DeployedApp {
   port          Int?
   /// Тип приложения
   type          AppType   @default(WEB)
-  /// Docker образ (например, lena/premium-rosstil:latest)
+  /// Docker образ (например, letar/driving-school:latest)
   imageName     String?
-  /// Домен приложения (например, premium.rosstil.ru)
+  /// Домен приложения (например, driving-school.letar.best)
   domain        String?
   /// Время последнего деплоя
   lastDeployed  DateTime?
