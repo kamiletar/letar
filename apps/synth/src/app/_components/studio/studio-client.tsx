@@ -4,15 +4,12 @@ import { getAudioContext, resumeContext } from '@/lib/audio/context'
 import { DrumEngine } from '@/lib/audio/drums'
 import { FmEngine } from '@/lib/audio/fm'
 import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
-import { MasterRecorder } from '@/lib/audio/recorder'
-import { renderPatchToWav } from '@/lib/audio/render'
-import { buildReverbIR } from '@/lib/audio/reverb'
-import { createSpatialPanner, setPannerPosition } from '@/lib/audio/spatial'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
 import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
+import { applyCC, applyEncoderDelta } from '@/lib/patch/midi-mapping'
 import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
@@ -24,72 +21,14 @@ import { Keyboard } from './keyboard'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
+import { useMasterBus } from './use-master-bus'
+import { useRecording } from './use-recording'
+import { useWavRender } from './use-wav-render'
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
 
 // Дефолтный маппинг MIDI-пэдов на слоты нашего драм-кита (нота 36 = пэд 0, как в GM/большинстве контроллеров)
 const DRUM_MIDI_BASE = 36
-
-function clamp(v: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, v))
-}
-
-// CC-маппинг для 4 физических фейдеров SMK-37 PRO (реальные номера подтверждены на железе
-// 2026-07-08: CC 68-71, НЕ 70-77 как предполагалось раньше). Абсолютные значения 0-127.
-function applyCC(patch: SubtractivePatch, cc: number, raw: number): SubtractivePatch {
-  const norm = raw / 127
-  const e = patch.engine
-  switch (cc) {
-    case 68:
-      return { ...patch, engine: { ...e, filter: { ...e.filter, cutoff: norm } } }
-    case 69:
-      return { ...patch, engine: { ...e, filter: { ...e.filter, resonance: norm * 0.99 } } }
-    case 70:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, attack: norm * 2 } } } }
-    case 71:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, adsr: { ...e.amp.adsr, release: norm * 3 } } } }
-    default:
-      return patch
-  }
-}
-
-// Маппинг для 8 крутилок-энкодеров SMK-37 PRO (относительный шаг, см. MidiInputManager.onEncoder) —
-// каждый тик прибавляет/убавляет delta к своему параметру, а не задаёт абсолютное положение.
-function applyEncoderDelta(patch: SubtractivePatch, index: number, delta: number): SubtractivePatch {
-  const e = patch.engine
-  switch (index) {
-    case 0:
-      return { ...patch, engine: { ...e, osc1: { ...e.osc1, detune: clamp(e.osc1.detune + delta, -100, 100) } } }
-    case 1:
-      return {
-        ...patch,
-        engine: { ...e, filter: { ...e.filter, envAmount: clamp(e.filter.envAmount + delta * 0.01, -1, 1) } },
-      }
-    case 2:
-      return { ...patch, engine: { ...e, lfo: { ...e.lfo, rate: clamp(e.lfo.rate + delta * 0.05, 0.01, 20) } } }
-    case 3:
-      return { ...patch, engine: { ...e, lfo: { ...e.lfo, depth: clamp(e.lfo.depth + delta * 0.01, 0, 1) } } }
-    case 4:
-      return { ...patch, engine: { ...e, amp: { ...e.amp, gain: clamp(e.amp.gain + delta * 0.01, 0, 1) } } }
-    case 5:
-      return {
-        ...patch,
-        engine: { ...e, fx: { ...e.fx, reverb: { ...e.fx.reverb, wet: clamp(e.fx.reverb.wet + delta * 0.01, 0, 1) } } },
-      }
-    case 6:
-      return {
-        ...patch,
-        engine: {
-          ...e,
-          fx: { ...e.fx, reverb: { ...e.fx.reverb, decay: clamp(e.fx.reverb.decay + delta * 0.05, 0.1, 8) } },
-        },
-      }
-    case 7:
-      return { ...patch, engine: { ...e, osc2: { ...e.osc2, detune: clamp(e.osc2.detune + delta, -100, 100) } } }
-    default:
-      return patch
-  }
-}
 
 export function StudioClient() {
   const [started, setStarted] = useState(false)
@@ -107,10 +46,6 @@ export function StudioClient() {
   const [octaveShift, setOctaveShift] = useState(0)
   const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
-  const [renderStatus, setRenderStatus] = useState<'idle' | 'rendering' | 'done' | 'error'>('idle')
-  const [renderUrl, setRenderUrl] = useState<string | null>(null)
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
@@ -118,7 +53,6 @@ export function StudioClient() {
   const masterGainRef = useRef<GainNode | null>(null)
   const midiRef = useRef<MidiInputManager | null>(null)
   const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const recorderRef = useRef<MasterRecorder | null>(null)
 
   // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий
   const patchRef = useRef(patch)
@@ -130,11 +64,9 @@ export function StudioClient() {
   const engineTypeRef = useRef(engineType)
   engineTypeRef.current = engineType
 
-  // Reverb-шина: masterGain → panner → [dryGain → dest] + [convolver → reverbWet → dest]
-  const convolverRef = useRef<ConvolverNode | null>(null)
-  const reverbWetRef = useRef<GainNode | null>(null)
-  const pannerRef = useRef<PannerNode | null>(null)
-  const orbitRafRef = useRef<number | null>(null)
+  const masterBus = useMasterBus(patch, patchRef, started)
+  const recording = useRecording()
+  const wavRender = useWavRender()
 
   // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
   const handlePadHit = useCallback((index: number, velocity: number) => {
@@ -262,75 +194,16 @@ export function StudioClient() {
 
   const handleStart = useCallback(async () => {
     const ctx = await resumeContext()
+    const bus = masterBus.start(ctx)
+    masterGainRef.current = bus.masterGain
 
-    // Мастер-шина: сухой сигнал + reverb send
-    const masterGain = ctx.createGain()
-    masterGainRef.current = masterGain
-
-    const dryGain = ctx.createGain()
-    dryGain.gain.value = 1
-
-    const convolver = ctx.createConvolver()
-    convolverRef.current = convolver
-
-    const reverbWet = ctx.createGain()
-    reverbWetRef.current = reverbWet
-    reverbWet.gain.value = patchRef.current.engine.fx.reverb.wet
-
-    // Пространство: PannerNode (HRTF) между мастер-шиной и dry/reverb-раздачей — позиция
-    // одинаково окрашивает и сухой сигнал, и его reverb-хвост
-    const panner = createSpatialPanner(ctx)
-    pannerRef.current = panner
-    setPannerPosition(
-      panner,
-      ctx,
-      patchRef.current.engine.fx.space.azimuth * (Math.PI / 2),
-      patchRef.current.engine.fx.space.depth
-    )
-
-    masterGain.connect(panner)
-    panner.connect(dryGain)
-    dryGain.connect(ctx.destination)
-    panner.connect(convolver)
-    convolver.connect(reverbWet)
-    reverbWet.connect(ctx.destination)
-
-    // Строим IR асинхронно (не блокирует старт — сначала услышишь dry)
-    void buildReverbIR(ctx, patchRef.current.engine.fx.reverb.decay).then((buf) => {
-      convolver.buffer = buf
-    })
-
-    engineRef.current = new SubtractiveEngine(ctx, masterGain)
-    recorderRef.current = new MasterRecorder(ctx, masterGain)
+    engineRef.current = new SubtractiveEngine(ctx, bus.masterGain)
+    recording.attach(ctx, bus.masterGain)
     setStarted(true)
     void handleMidiConnect()
-  }, [handleMidiConnect])
+  }, [handleMidiConnect, masterBus, recording])
 
-  // Запись живого выступления с мастер-шины (см. PLAN.md Фаза 1 «Запись»)
-  const handleToggleRecord = useCallback(() => {
-    const recorder = recorderRef.current
-    if (!recorder) {
-      return
-    }
-    if (recorder.isRecording()) {
-      void recorder.stop().then((blob) => {
-        setRecordingUrl((prev) => {
-          if (prev) {
-            URL.revokeObjectURL(prev)
-          }
-          return URL.createObjectURL(blob)
-        })
-      })
-      setIsRecording(false)
-    } else {
-      recorder.start()
-      setRecordingUrl(null)
-      setIsRecording(true)
-    }
-  }, [])
-
-  // Детерминированный рендер текущего патча в WAV (OfflineAudioContext) — в отличие от живой
-  // записи не зависит от системного аудиостека и всегда даёт один и тот же файл
+  // Детерминированный рендер текущего патча в WAV — по типу активного движка
   const handleRenderWav = useCallback(() => {
     const current =
       engineTypeRef.current === 'fm'
@@ -338,19 +211,8 @@ export function StudioClient() {
         : engineTypeRef.current === 'drumkit'
           ? drumPatchRef.current
           : patchRef.current
-    setRenderStatus('rendering')
-    void renderPatchToWav(current)
-      .then((blob) => {
-        setRenderUrl((prev) => {
-          if (prev) {
-            URL.revokeObjectURL(prev)
-          }
-          return URL.createObjectURL(blob)
-        })
-        setRenderStatus('done')
-      })
-      .catch(() => setRenderStatus('error'))
-  }, [])
+    wavRender.render(current)
+  }, [wavRender])
 
   // Загрузка сохранённого патча — по типу текущего движка
   const handleLoadSubtractive = useCallback((p: SubtractivePatch) => {
@@ -429,73 +291,12 @@ export function StudioClient() {
     setTimeout(() => setSendStatus('idle'), 2000)
   }, [])
 
-  // Мгновенно обновляем wet gain при движении ручки
-  useEffect(() => {
-    if (!reverbWetRef.current) {
-      return
-    }
-    reverbWetRef.current.gain.value = patch.engine.fx.reverb.wet
-  }, [patch.engine.fx.reverb.wet])
-
-  // Пересоздаём IR при смене decay (не при старте — там уже строится в handleStart)
-  useEffect(() => {
-    if (!convolverRef.current) {
-      return
-    }
-    const ctx = getAudioContext()
-    void buildReverbIR(ctx, patch.engine.fx.reverb.decay).then((buf) => {
-      if (convolverRef.current) {
-        convolverRef.current.buffer = buf
-      }
-    })
-  }, [patch.engine.fx.reverb.decay])
-
-  // Ручная позиция (азимут/глубина) — применяется, пока не включена авто-орбита
-  useEffect(() => {
-    if (!pannerRef.current || patch.engine.fx.space.autoOrbit) {
-      return
-    }
-    const ctx = getAudioContext()
-    setPannerPosition(
-      pannerRef.current,
-      ctx,
-      patch.engine.fx.space.azimuth * (Math.PI / 2),
-      patch.engine.fx.space.depth
-    )
-  }, [patch.engine.fx.space.azimuth, patch.engine.fx.space.depth, patch.engine.fx.space.autoOrbit])
-
-  // Авто-орбита: звук непрерывно обходит слушателя по кругу, а не стоит на месте
-  useEffect(() => {
-    if (!started || !patch.engine.fx.space.autoOrbit || !pannerRef.current) {
-      return
-    }
-    const ctx = getAudioContext()
-    const panner = pannerRef.current
-    const startTime = ctx.currentTime
-
-    const tick = () => {
-      const { orbitRate, depth } = patchRef.current.engine.fx.space
-      const angle = (ctx.currentTime - startTime) * orbitRate * Math.PI * 2
-      setPannerPosition(panner, ctx, angle, depth)
-      orbitRafRef.current = requestAnimationFrame(tick)
-    }
-    orbitRafRef.current = requestAnimationFrame(tick)
-
-    return () => {
-      if (orbitRafRef.current) {
-        cancelAnimationFrame(orbitRafRef.current)
-        orbitRafRef.current = null
-      }
-    }
-  }, [started, patch.engine.fx.space.autoOrbit])
-
   useEffect(() => {
     return () => {
       engineRef.current?.dispose()
       fmEngineRef.current?.dispose()
       drumEngineRef.current?.dispose()
       midiRef.current?.dispose()
-      recorderRef.current?.dispose()
       if (readTimeoutRef.current) {
         clearTimeout(readTimeoutRef.current)
       }
@@ -607,19 +408,19 @@ export function StudioClient() {
                   padding: '2px 8px',
                   fontSize: '10px',
                   borderRadius: '4px',
-                  border: `1px solid ${isRecording ? '#e05555' : '#5a3a10'}`,
-                  background: isRecording ? '#3A0808' : 'transparent',
-                  color: isRecording ? '#ff8080' : '#D4AF37',
+                  border: `1px solid ${recording.isRecording ? '#e05555' : '#5a3a10'}`,
+                  background: recording.isRecording ? '#3A0808' : 'transparent',
+                  color: recording.isRecording ? '#ff8080' : '#D4AF37',
                   cursor: 'pointer',
                   letterSpacing: '0.04em',
                 }}
-                onClick={handleToggleRecord}
+                onClick={recording.toggle}
               >
-                {isRecording ? '● стоп' : '● запись'}
+                {recording.isRecording ? '● стоп' : '● запись'}
               </button>
-              {recordingUrl && !isRecording && (
+              {recording.recordingUrl && !recording.isRecording && (
                 <a
-                  href={recordingUrl}
+                  href={recording.recordingUrl}
                   download={`synth-take-${Date.now()}.webm`}
                   style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
                 >
@@ -634,24 +435,24 @@ export function StudioClient() {
                   border: '1px solid #5a3a10',
                   background: 'transparent',
                   color: '#D4AF37',
-                  cursor: renderStatus === 'rendering' ? 'wait' : 'pointer',
+                  cursor: wavRender.status === 'rendering' ? 'wait' : 'pointer',
                   letterSpacing: '0.04em',
                 }}
-                disabled={renderStatus === 'rendering'}
+                disabled={wavRender.status === 'rendering'}
                 onClick={handleRenderWav}
               >
-                {renderStatus === 'rendering' ? '… рендер' : '⇄ рендер WAV'}
+                {wavRender.status === 'rendering' ? '… рендер' : '⇄ рендер WAV'}
               </button>
-              {renderStatus === 'done' && renderUrl && (
+              {wavRender.status === 'done' && wavRender.url && (
                 <a
-                  href={renderUrl}
+                  href={wavRender.url}
                   download={`synth-render-${Date.now()}.wav`}
                   style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
                 >
                   ↓ скачать .wav
                 </a>
               )}
-              {renderStatus === 'error' && (
+              {wavRender.status === 'error' && (
                 <Text fontSize="9px" color="red.400">
                   ✗ не удалось отрендерить
                 </Text>
