@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth'
 import { getEnhancedPrisma, prisma } from '@/lib/db'
 import { z } from 'zod/v4'
 import type { ScaleCode } from '../_data/personality-types'
+import type { ScaleConfidence } from '../_lib/scoring-core'
 import { calculateScores } from './quiz.action'
 
 /** Проверить, что текущий пользователь — психолог */
@@ -90,8 +91,13 @@ export async function getClientDetailAction(clientId: string) {
     }
   }
 
-  // Кумулятивные баллы
+  // Кумулятивные баллы. Вместе с ними — relevantCounts и confidence: без числа
+  // отвеченных вопросов по шкале нельзя отличить «нет данных» от честного нуля
+  // (нужно индексу «Тёмное ядро»), а ipsative-ранжирование в ProfileDetails без
+  // relevantCounts вообще не срабатывает.
   let cumulativeScores: Record<ScaleCode, number> | null = null
+  let scoreRelevantCounts: Record<ScaleCode, number> | null = null
+  let scoreConfidence: Record<ScaleCode, ScaleConfidence> | null = null
   if (uniqueAnswered.size > 0) {
     const answersArray = Array.from(uniqueAnswered.entries()).map(([questionId, selectedOption]) => ({
       questionId,
@@ -99,6 +105,8 @@ export async function getClientDetailAction(clientId: string) {
     }))
     const scores = await calculateScores(answersArray, db)
     cumulativeScores = scores.normalized
+    scoreRelevantCounts = scores.relevantCounts
+    scoreConfidence = scores.confidence
   }
 
   // История сессий для графика динамики (questionBankVersion — чтобы график
@@ -134,6 +142,8 @@ export async function getClientDetailAction(clientId: string) {
       },
       client: link.client,
       cumulativeScores,
+      scoreRelevantCounts,
+      scoreConfidence,
       totalAnswered: uniqueAnswered.size,
       sessionsHistory,
       notes: link.notes.map((n) => ({

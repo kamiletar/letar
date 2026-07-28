@@ -1,10 +1,27 @@
 import { Link } from '@/i18n/navigation'
 import { Box, Link as ChakraLink, Container, Heading, Table, Text, VStack } from '@chakra-ui/react'
+import type { Metadata } from 'next'
 import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
-import { Suspense } from 'react'
+import { Fragment, Suspense } from 'react'
 import { ProfessionalLeadForm } from '../_components/professional-lead-form'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
+  const isRu = locale === 'ru'
+  const title = isRu ? 'Психологам: методология теста' : 'For Clinicians: Test Methodology'
+  const description = isRu
+    ? 'На чём основан Archetest: маппинг 22 шкал на валидированные инструменты (PID-5, Light Triad Scale, SD3, AQ, TAS-20), дименсиональные модели AMPD и МКБ-11, D-фактор и тёмное ядро, кабинет психолога с динамикой клиентов.'
+    : 'What Archetest is grounded in: 22 scales mapped onto validated instruments (PID-5, Light Triad Scale, SD3, AQ, TAS-20), the AMPD and ICD-11 dimensional models, the Dark Factor of Personality, and a clinician dashboard with client dynamics.'
+
+  return {
+    title,
+    description,
+    alternates: { canonical: isRu ? '/for-professionals' : '/en/for-professionals' },
+    openGraph: { title, description, type: 'article', locale: isRu ? 'ru_RU' : 'en_US' },
+  }
+}
 
 /**
  * Страница «Если вы психолог» — руководство для клинических специалистов.
@@ -50,7 +67,7 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         </Section>
 
         {/* Методология */}
-        <Section title={isRu ? 'Методология' : 'Methodology'}>
+        <Section title={isRu ? 'Методология' : 'Methodology'} id="methodology">
           <Text>
             {isRu
               ? 'Тест не изобретает шкалы с нуля. Большинство шкал опираются на валидированные инструменты — но на уровне конструкта, а не заимствования пунктов: все формулировки вопросов archetest авторские и ситуационные. Это сохраняет лицензионную чистоту (часть прототипов, например TAS-20, коммерческие, часть — research-only) и одновременно даёт связь с накопленной научной базой и нормами.'
@@ -67,85 +84,183 @@ function ForProfessionalsView({ locale }: { locale: string }) {
             <Table.Body>
               {(isRu
                 ? [
-                    ['Светлая триада (HUM/KAN/FAI)', 'Light Triad Scale (LTS), 12 пунктов', 'Kaufman et al., 2019'],
+                    [
+                      'Светлая триада (HUM/KAN/FAI)',
+                      'Light Triad Scale (LTS), 12 пунктов',
+                      'Kaufman et al., 2019',
+                      '10.3389/fpsyg.2019.00467',
+                    ],
                     [
                       'Тёмная триада (MAC/NAR/ANT)',
                       'Short Dark Triad (SD3) / Dirty Dozen',
                       'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
+                      '10.1177/1073191113514105',
+                    ],
+                    [
+                      'Тёмное ядро (MAC/NAR/ANT/SAD)',
+                      'D-фактор (Dark Factor of Personality), D70/D35/D16',
+                      'Moshagen, Hilbig & Zettler, 2018',
+                      '10.1037/rev0000111',
                     ],
                     [
                       'Садизм (SAD)',
-                      'Assessment of Sadistic Personality (ASP) / SSIS',
-                      "O'Meara et al., 2011; Paulhus, 2014",
+                      'Short Sadistic Impulse Scale (SSIS) / ASP',
+                      "O'Meara, Davies & Hammond, 2011",
+                      '10.1037/a0022400',
                     ],
                     [
                       '13 шкал РЛ (дименсионально)',
                       'PID-5 (Personality Inventory for DSM-5)',
                       'Krueger et al., 2012, APA',
+                      '10.1017/S0033291711002674',
                     ],
                     [
                       'Систематизация и спектр (ASD)',
                       'Autism-Spectrum Quotient (AQ / AQ-10)',
                       'Baron-Cohen et al., 2001',
+                      '10.1023/A:1005653411471',
                     ],
                     [
                       'Прямота коммуникации (DIR)',
                       'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
                       'Snyder, 1974 / Ashton & Lee, 2009',
+                      '10.1080/00223890902935878',
                     ],
-                    ['Алекситимия (ALX)', 'Toronto Alexithymia Scale (TAS-20)', 'Bagby, Parker & Taylor, 1994'],
-                    ['BAR-скрининг', 'MDQ / HCL-32', 'Hirschfeld, 2000 / Angst, 2005'],
-                    ['DPR-скрининг', 'PHQ-9 (конструкт, без пункта о суицидальном риске)', 'Kroenke et al., 2001'],
+                    [
+                      'Алекситимия (ALX)',
+                      'Toronto Alexithymia Scale (TAS-20)',
+                      'Bagby, Parker & Taylor, 1994',
+                      '10.1016/0022-3999(94)90005-1',
+                    ],
+                    ['BAR-скрининг', 'MDQ / HCL-32', 'Hirschfeld et al., 2000', '10.1176/appi.ajp.157.11.1873'],
+                    [
+                      'DPR-скрининг',
+                      'PHQ-9 (конструкт, без пункта о суицидальном риске)',
+                      'Kroenke, Spitzer & Williams, 2001',
+                      '10.1046/j.1525-1497.2001.016009606.x',
+                    ],
                   ]
                 : [
-                    ['Light Triad (HUM/KAN/FAI)', 'Light Triad Scale (LTS), 12 items', 'Kaufman et al., 2019'],
+                    [
+                      'Light Triad (HUM/KAN/FAI)',
+                      'Light Triad Scale (LTS), 12 items',
+                      'Kaufman et al., 2019',
+                      '10.3389/fpsyg.2019.00467',
+                    ],
                     [
                       'Dark Triad (MAC/NAR/ANT)',
                       'Short Dark Triad (SD3) / Dirty Dozen',
                       'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
+                      '10.1177/1073191113514105',
+                    ],
+                    [
+                      'Dark core (MAC/NAR/ANT/SAD)',
+                      'The Dark Factor of Personality (D), D70/D35/D16',
+                      'Moshagen, Hilbig & Zettler, 2018',
+                      '10.1037/rev0000111',
                     ],
                     [
                       'Sadism (SAD)',
-                      'Assessment of Sadistic Personality (ASP) / SSIS',
-                      "O'Meara et al., 2011; Paulhus, 2014",
+                      'Short Sadistic Impulse Scale (SSIS) / ASP',
+                      "O'Meara, Davies & Hammond, 2011",
+                      '10.1037/a0022400',
                     ],
                     [
                       '13 personality scales (dimensional)',
                       'PID-5 (Personality Inventory for DSM-5)',
                       'Krueger et al., 2012, APA',
+                      '10.1017/S0033291711002674',
                     ],
                     [
                       'Systemizing / spectrum (ASD)',
                       'Autism-Spectrum Quotient (AQ / AQ-10)',
                       'Baron-Cohen et al., 2001',
+                      '10.1023/A:1005653411471',
                     ],
                     [
                       'Communication directness (DIR)',
                       'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
                       'Snyder, 1974 / Ashton & Lee, 2009',
+                      '10.1080/00223890902935878',
                     ],
-                    ['Alexithymia (ALX)', 'Toronto Alexithymia Scale (TAS-20)', 'Bagby, Parker & Taylor, 1994'],
-                    ['BAR screening', 'MDQ / HCL-32', 'Hirschfeld, 2000 / Angst, 2005'],
-                    ['DPR screening', 'PHQ-9 (construct only, no suicide-risk item)', 'Kroenke et al., 2001'],
+                    [
+                      'Alexithymia (ALX)',
+                      'Toronto Alexithymia Scale (TAS-20)',
+                      'Bagby, Parker & Taylor, 1994',
+                      '10.1016/0022-3999(94)90005-1',
+                    ],
+                    ['BAR screening', 'MDQ / HCL-32', 'Hirschfeld et al., 2000', '10.1176/appi.ajp.157.11.1873'],
+                    [
+                      'DPR screening',
+                      'PHQ-9 (construct only, no suicide-risk item)',
+                      'Kroenke, Spitzer & Williams, 2001',
+                      '10.1046/j.1525-1497.2001.016009606.x',
+                    ],
                   ]
-              ).map(([scale, proto, src]) => (
+              ).map(([scale, proto, src, doi]) => (
                 <Table.Row key={scale}>
                   <Table.Cell fontWeight="bold">{scale}</Table.Cell>
                   <Table.Cell>{proto}</Table.Cell>
-                  <Table.Cell color="fg.muted">{src}</Table.Cell>
+                  <Table.Cell color="fg.muted">
+                    <ChakraLink
+                      href={`https://doi.org/${doi}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="fg.muted"
+                    >
+                      {src}
+                    </ChakraLink>
+                  </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
           </Table.Root>
           <Text>
             {isRu
-              ? 'Валидированное ядро — 21 из 22 текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: сейчас это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.'
-              : 'The validated core covers 21 of the 22 current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: currently only MAS ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.'}
+              ? 'Валидированное ядро — 21 из 22 текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: в ядре это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.'
+              : 'The validated core covers 21 of the 22 current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.'}
+          </Text>
+          <Text>
+            {isRu
+              ? 'Вне ядра из 22 шкал существуют ещё три экспериментальные шкалы, доступные только в кабинете психолога и никогда не показываемые клиенту: «Физическая броня» (RES_PHYS, авторский конструкт без валидированного прототипа), «Аффективный резонанс» (RES_AFF, прототипы — IRI Personal Distress и шкала высокой чувствительности HSP/SPS) и «Специальные интересы» (SPEC_INT). Из них строится кросс-индекс «Броня и Радар». Все три помечены «бета», в экспресс-тест и «ведущие черты» не входят и на скоринг ядра не влияют: их вопросы начисляют баллы исключительно экспериментальным шкалам.'
+              : 'Beyond the 22-scale core there are three further experimental scales, available only in the clinician’s dashboard and never shown to the client: “Physical Armor” (RES_PHYS, an original construct with no validated prototype), “Affective Resonance” (RES_AFF, prototypes — IRI Personal Distress and the Highly Sensitive Person scale, HSP/SPS) and “Special Interests” (SPEC_INT). The “Armor & Radar” cross-index is built from them. All three are marked “beta”, are excluded from the express test and from “leading traits”, and do not affect core scoring: their items award points to experimental scales only.'}
           </Text>
           <Text>
             {isRu
               ? 'Светлая и тёмная триады — не противоположные концы одной оси: по данным Kaufman et al. (2019) корреляция между ними умеренная (r ≈ −.48), а не абсолютная. Высокие баллы одновременно по обеим триадам — норма данных, а не парадокс или ошибка заполнения.'
               : 'The Light and Dark triads are not opposite ends of a single axis: per Kaufman et al. (2019), the correlation between them is moderate (r ≈ −.48), not absolute. Elevated scores on both triads simultaneously are a normal data pattern, not a paradox or a filling error.'}
+          </Text>
+
+          <Heading size="md" pt={2}>
+            {isRu ? 'Тёмное ядро: общий фактор и «вкусы»' : 'The dark core: a general factor and its “flavors”'}
+          </Heading>
+          <Text>
+            {isRu
+              ? 'Современная работа с тёмными чертами сместилась от перечисления триад к общему фактору. D-фактор (Dark Factor of Personality) определяется как общая тенденция максимизировать собственную выгоду, пренебрегая, принимая или злонамеренно провоцируя ущерб для других, вместе с убеждениями, которые это оправдывают. Отдельные тёмные черты в этой рамке — не самостоятельные сущности, а «проявления со вкусом»: общее ядро плюс уникальный, по сути НЕ-аверсивный компонент. У нарциссизма это стремление к восхищению, у психопатии — расторможенность, у макиавеллизма — расчётливость. В работе 2023 года триада как набор трёх различимых черт эмпирической проверки не прошла.'
+              : 'Contemporary work on dark traits has shifted from enumerating triads toward a general factor. The Dark Factor of Personality (D) is defined as the general tendency to maximize one’s individual utility — disregarding, accepting, or malevolently provoking disutility for others — accompanied by beliefs that serve as justifications. Within this frame, individual dark traits are not standalone entities but “flavored manifestations”: the common core plus a unique, essentially non-aversive component. For narcissism that is admiration seeking, for psychopathy disinhibition, for Machiavellianism planfulness. In a 2023 study, the triad as a set of three distinguishable traits failed empirical scrutiny.'}
+          </Text>
+          <Text>
+            {isRu
+              ? 'В кабинете психолога есть индекс «Тёмное ядро», собранный из четырёх шкал теста (MAC/NAR/ANT/SAD) — с явными ограничениями, которые мы предпочитаем назвать сами. Во-первых, это приближение, а не измерение D: сам D измеряется инструментами D70/D35/D16. Во-вторых, композит тетрады коррелирует с полным D на r ≈ .85 — это ниже медианы случайных комбинаций из четырёх аверсивных черт (r ≈ .90), и авторы прямо предостерегают считать тетраду главным представлением ядра; просадку даёт нарциссическое «восхищение», поэтому индекс показывает и оценку без нарциссизма. В-третьих, существует содержательная критика самого конструкта: латентные D и антагонизм (полюс Доброжелательности) коррелируют около −.90, а инкрементальной валидности D над антагонизмом показано не было — то есть возможно, что это два имени для одного и того же. Шкалы Доброжелательности в тесте нет, поэтому проверить это на наших данных невозможно в принципе. Индекс стоит читать как структурную подсказку — ровное ядро или ядро с выраженным «вкусом», — а не как балл, сопоставимый с популяцией: нормативных перцентилей у теста пока нет.'
+              : 'The clinician’s dashboard includes a “Dark core” index built from four scales of the test (MAC/NAR/ANT/SAD) — with explicit limitations we prefer to state ourselves. First, it is an approximation, not a measurement of D: D itself is measured with the D70/D35/D16 inventories. Second, the tetrad composite correlates with full D at r ≈ .85 — below the median of random four-trait combinations (r ≈ .90), and the authors explicitly warn against treating the tetrad as the prime representation of the core; the shortfall comes from narcissistic admiration, which is why the index also reports an estimate without narcissism. Third, there is substantive criticism of the construct itself: latent D and antagonism (the low pole of Agreeableness) correlate at about −.90, and no incremental validity of D over antagonism has been demonstrated — so these may be two names for one thing. The test has no Agreeableness scale, so this cannot be checked on our data even in principle. The index should be read as a structural hint — an even core versus a core with a pronounced “flavor” — not as a score comparable to a population: the test has no normative percentiles yet.'}
+          </Text>
+          <Text fontSize="sm" color="fg.muted">
+            {isRu ? 'Источники: ' : 'Sources: '}
+            {[
+              ['Moshagen, Hilbig & Zettler, 2018', '10.1037/rev0000111'],
+              ['Moshagen, Zettler & Hilbig, 2020', '10.1037/pas0000778'],
+              ['Bader et al., 2023', '10.1111/jopy.12785'],
+              ['Hilbig et al., 2023', '10.1038/s41598-023-42115-z'],
+              ['Vize, Miller & Lynam, 2021', '10.1111/jopy.12601'],
+              [`Hilbig et al., 2021 (${isRu ? 'ответ на критику' : 'reply'})`, '10.1016/j.jrp.2021.104074'],
+            ].map(([label, doi], i, arr) => (
+              <Fragment key={doi}>
+                <ChakraLink href={`https://doi.org/${doi}`} target="_blank" rel="noopener noreferrer" color="fg.muted">
+                  {label}
+                </ChakraLink>
+                {i < arr.length - 1 ? '; ' : '.'}
+              </Fragment>
+            ))}
           </Text>
           <Text>
             {isRu
@@ -427,10 +542,10 @@ function ForProfessionalsView({ locale }: { locale: string }) {
   )
 }
 
-/** Секция с заголовком */
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/** Секция с заголовком. `id` даёт якорь для ссылок из презентации и раздатки */
+function Section({ title, id, children }: { title: string; id?: string; children: React.ReactNode }) {
   return (
-    <Box w="100%">
+    <Box w="100%" id={id} scrollMarginTop="80px">
       <Heading size="lg" mb={3}>
         {title}
       </Heading>

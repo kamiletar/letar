@@ -8,6 +8,11 @@ import { computeArmorRadar } from '../../../_lib/armor-radar'
 interface ExperimentalScalesBlockProps {
   /** Кумулятивные баллы клиента (включают экспериментальные шкалы 5.5) */
   scores: Record<ScaleCode, number>
+  /**
+   * Число отвеченных релевантных вопросов по шкалам. Нужно, чтобы отличить
+   * «шкала не отвечена» от честного нуля: по баллу это неразличимо.
+   */
+  relevantCounts?: Record<ScaleCode, number>
 }
 
 /**
@@ -16,14 +21,20 @@ interface ExperimentalScalesBlockProps {
  * Вне ядра 22: пользователь эти шкалы не видит, поэтому здесь показываем
  * конструктные названия и прототипы открыто, но с обязательной пометкой «бета».
  */
-export function ExperimentalScalesBlock({ scores }: ExperimentalScalesBlockProps) {
+export function ExperimentalScalesBlock({ scores, relevantCounts }: ExperimentalScalesBlockProps) {
   const isRu = useLocale() === 'ru'
 
   const phys = scores.RES_PHYS ?? 0
   const aff = scores.RES_AFF ?? 0
 
-  // Индекс «Броня и Радар» — только когда обе оси измерены
-  const armorRadar = phys > 0 && aff > 0 ? computeArmorRadar(phys, aff) : null
+  // Индекс «Броня и Радар» — только когда обе оси измерены. Измеренность считаем
+  // по числу ответов, а не по «балл > 0»: честный ноль по броне тоже осмысленный
+  // результат и не должен молча прятать индекс. Без relevantCounts — старое
+  // поведение (вызовы без этого пропа остаются рабочими).
+  const measured = relevantCounts
+    ? (relevantCounts.RES_PHYS ?? 0) > 0 && (relevantCounts.RES_AFF ?? 0) > 0
+    : phys > 0 && aff > 0
+  const armorRadar = measured ? computeArmorRadar(phys, aff) : null
 
   return (
     <Card.Root w="100%" variant="outline" borderColor="purple.300">
@@ -71,7 +82,13 @@ export function ExperimentalScalesBlock({ scores }: ExperimentalScalesBlockProps
                   />
                 </Box>
                 <Text fontSize="xs" color="fg.muted">
-                  {value >= 50 ? (isRu ? scale.whenHigh : scale.whenHighEn) : isRu ? scale.description : scale.descriptionEn}
+                  {value >= 50
+                    ? isRu
+                      ? scale.whenHigh
+                      : scale.whenHighEn
+                    : isRu
+                      ? scale.description
+                      : scale.descriptionEn}
                 </Text>
                 <Text fontSize="2xs" color="fg.subtle" mt={1}>
                   {isRu ? 'Прототип: ' : 'Prototype: '}

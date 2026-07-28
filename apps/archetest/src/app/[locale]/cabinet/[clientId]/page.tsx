@@ -9,7 +9,15 @@ import { getClientDetailAction, updateDisplayNameAction } from '../../_actions/c
 import { HexagramChart } from '../../_components/hexagram-chart'
 import { PersonalityRadarChart } from '../../_components/personality-radar-chart'
 import { ProfileDetails } from '../../_components/profile-details'
-import { EXPERIMENTAL_SCALE_CODES, HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../../_data/personality-types'
+import {
+  EXPERIMENTAL_SCALE_CODES,
+  HEXAGRAM_SCALE_CODES,
+  PERSONALITY_TYPES,
+  STATE_CODES,
+} from '../../_data/personality-types'
+import { computeDarkCore } from '../../_lib/dark-core'
+import { computeIpsativeRanking } from '../../_lib/ipsative'
+import { DarkCoreBlock } from './_components/dark-core-block'
 import { ExperimentalScalesBlock } from './_components/experimental-scales-block'
 import { PsychologistNotes } from './_components/psychologist-notes'
 import { SessionDynamicsChart } from './_components/session-dynamics-chart'
@@ -76,6 +84,28 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
       }
     })
   }, [detail?.cumulativeScores, isRu])
+
+  // Ipsative-ранжирование профиля: нужно и «ведущим чертам», и контексту тёмного ядра
+  const ipsativeRanking = useMemo(() => {
+    if (!detail?.cumulativeScores || !detail.scoreRelevantCounts) {
+      return null
+    }
+    return computeIpsativeRanking(detail.cumulativeScores, detail.scoreRelevantCounts, { exclude: STATE_CODES })
+  }, [detail?.cumulativeScores, detail?.scoreRelevantCounts])
+
+  // Индекс «Тёмное ядро». Гейт показа — сам модуль (structure !== 'insufficient'),
+  // а не условие «балл > 0» в компоненте: оно не отличает «нет данных» от нуля
+  const darkCore = useMemo(() => {
+    if (!detail?.cumulativeScores || !detail.scoreRelevantCounts || !detail.scoreConfidence) {
+      return null
+    }
+    return computeDarkCore({
+      normalized: detail.cumulativeScores,
+      relevantCounts: detail.scoreRelevantCounts,
+      confidence: detail.scoreConfidence,
+      ranking: ipsativeRanking ?? undefined,
+    })
+  }, [detail?.cumulativeScores, detail?.scoreRelevantCounts, detail?.scoreConfidence, ipsativeRanking])
 
   if (loading) {
     return (
@@ -184,17 +214,30 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
           </Card.Root>
         )}
 
-        {/* Экспериментальные шкалы (этап 5.5) — только если клиент отвечал на их вопросы */}
+        {/* Экспериментальные шкалы (этап 5.5) — только если клиент отвечал на их вопросы.
+            Измеренность считаем по числу ответов: балл 0 бывает и при отсутствии данных */}
         {detail.cumulativeScores &&
-          EXPERIMENTAL_SCALE_CODES.some((code) => (detail.cumulativeScores![code] ?? 0) > 0) && (
-            <ExperimentalScalesBlock scores={detail.cumulativeScores} />
+          EXPERIMENTAL_SCALE_CODES.some((code) => (detail.scoreRelevantCounts?.[code] ?? 0) > 0) && (
+            <ExperimentalScalesBlock
+              scores={detail.cumulativeScores}
+              relevantCounts={detail.scoreRelevantCounts ?? undefined}
+            />
           )}
+
+        {/* Тёмное ядро (Фаза 3) — гейт вычислен модулем, не условием «балл > 0» */}
+        {darkCore && darkCore.structure !== 'insufficient' && <DarkCoreBlock index={darkCore} />}
 
         {/* Динамика по сессиям */}
         <SessionDynamicsChart sessions={detail.sessionsHistory} />
 
-        {/* Текстовые детали профиля */}
-        {detail.cumulativeScores && <ProfileDetails scores={detail.cumulativeScores} />}
+        {/* Текстовые детали профиля — с relevantCounts включается ipsative-ранжирование */}
+        {detail.cumulativeScores && (
+          <ProfileDetails
+            scores={detail.cumulativeScores}
+            confidence={detail.scoreConfidence ?? undefined}
+            relevantCounts={detail.scoreRelevantCounts ?? undefined}
+          />
+        )}
 
         {/* Заметки психолога */}
         <PsychologistNotes linkId={detail.link.id} notes={detail.notes} onUpdate={loadDetail} />
