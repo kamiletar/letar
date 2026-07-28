@@ -81,7 +81,7 @@ export function useFormUrlSync<TData extends object>(options: FormUrlSyncOptions
 export function readUrlValues<TData extends object>(
   fields: (keyof TData & string)[],
   defaults: TData,
-  searchParams?: URLSearchParams,
+  searchParams?: URLSearchParams
 ): TData {
   if (typeof window === 'undefined' && !searchParams) return defaults
 

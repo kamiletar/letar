@@ -35,14 +35,10 @@ export function useActiveFiltersCount<TData extends object>(defaults: TData): nu
     countDiff((form.state as any).values as TData, defaults)
   )
 
-  useFormStoreSubscribe(
-    form,
-    () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setCount(countDiff((form.state as any).values as TData, defaults))
-    },
-    [form, defaults],
-  )
+  useFormStoreSubscribe(form, () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setCount(countDiff((form.state as any).values as TData, defaults))
+  }, [form, defaults])
 
   return count
 }

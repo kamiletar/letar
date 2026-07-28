@@ -65,7 +65,8 @@ export function FormSubscribe({ children, debounce: delay }: FormSubscribeProps)
       >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {({ values, isDirty, isSubmitting }: any) =>
-          children(values as Record<string, unknown>, { isDirty, isSubmitting })}
+          children(values as Record<string, unknown>, { isDirty, isSubmitting })
+        }
       </form.Subscribe>
     )
   }
