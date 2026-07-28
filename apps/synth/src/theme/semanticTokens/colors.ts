@@ -15,6 +15,8 @@ export const semanticColors = defineSemanticTokens.colors({
     surface: { value: '{colors.forge.900}' },
     elevated: { value: '{colors.forge.800}' },
     overlay: { value: 'rgba(4, 3, 2, 0.85)' },
+    // Синоним surface — ожидается общими компонентами монорепо (напр. @letar/ui CookieBanner)
+    panel: { value: '{colors.forge.900}' },
   },
 
   /* Текст — тёплый белый, слоновая кость */
@@ -39,6 +41,18 @@ export const semanticColors = defineSemanticTokens.colors({
     muted: { value: '{colors.gold.800}' },
     emphasized: { value: '{colors.gold.300}' },
     fg: { value: '{colors.void.950}' },
+  },
+
+  // Алиас 'brand' на золото — ожидается общими компонентами монорепо (напр. @letar/ui
+  // CookieBanner использует colorPalette="brand" жёстко), в synth своей брендовой палитры нет
+  brand: {
+    solid: { value: '{colors.gold.500}' },
+    contrast: { value: '{colors.void.950}' },
+    fg: { value: '{colors.gold.300}' },
+    muted: { value: '{colors.gold.900}' },
+    subtle: { value: '{colors.gold.950}' },
+    emphasized: { value: '{colors.gold.700}' },
+    focusRing: { value: '{colors.gold.400}' },
   },
 
   /* colorPalette для совместимости с Chakra компонентами */

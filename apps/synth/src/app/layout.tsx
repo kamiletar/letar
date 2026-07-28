@@ -47,11 +47,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" suppressHydrationWarning>
       <head />
       <body>
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <CookieBanner appKey="synth" consentApiUrl={null} />
+        </Provider>
         <AnalyticsGate appKey="synth">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner appKey="synth" consentApiUrl={null} />
       </body>
     </html>
   )

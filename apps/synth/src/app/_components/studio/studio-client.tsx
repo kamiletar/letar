@@ -4,6 +4,7 @@ import { getAudioContext, resumeContext } from '@/lib/audio/context'
 import { DrumEngine } from '@/lib/audio/drums'
 import { FmEngine } from '@/lib/audio/fm'
 import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
+import { MasterRecorder } from '@/lib/audio/recorder'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
@@ -19,6 +20,7 @@ import { FmPanel } from './fm-panel'
 import { Keyboard } from './keyboard'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
+import { PatchLibrary } from './patch-library'
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
 
@@ -102,6 +104,8 @@ export function StudioClient() {
   const [octaveShift, setOctaveShift] = useState(0)
   const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
@@ -109,6 +113,7 @@ export function StudioClient() {
   const masterGainRef = useRef<GainNode | null>(null)
   const midiRef = useRef<MidiInputManager | null>(null)
   const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const recorderRef = useRef<MasterRecorder | null>(null)
 
   // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий
   const patchRef = useRef(patch)
@@ -277,9 +282,49 @@ export function StudioClient() {
     })
 
     engineRef.current = new SubtractiveEngine(ctx, masterGain)
+    recorderRef.current = new MasterRecorder(ctx, masterGain)
     setStarted(true)
     void handleMidiConnect()
   }, [handleMidiConnect])
+
+  // Запись живого выступления с мастер-шины (см. PLAN.md Фаза 1 «Запись»)
+  const handleToggleRecord = useCallback(() => {
+    const recorder = recorderRef.current
+    if (!recorder) {
+      return
+    }
+    if (recorder.isRecording()) {
+      void recorder.stop().then((blob) => {
+        setRecordingUrl((prev) => {
+          if (prev) {
+            URL.revokeObjectURL(prev)
+          }
+          return URL.createObjectURL(blob)
+        })
+      })
+      setIsRecording(false)
+    } else {
+      recorder.start()
+      setRecordingUrl(null)
+      setIsRecording(true)
+    }
+  }, [])
+
+  // Загрузка сохранённого патча — по типу текущего движка
+  const handleLoadSubtractive = useCallback((p: SubtractivePatch) => {
+    engineRef.current?.allNotesOff(0.05)
+    setActiveNotes(new Set())
+    setPatch(p)
+  }, [])
+
+  const handleLoadFm = useCallback((p: FmPatch) => {
+    setFmPatch(p)
+    fmEngineRef.current?.updatePatch(p.engine)
+  }, [])
+
+  const handleLoadDrumkit = useCallback((p: DrumkitPatch) => {
+    setDrumPatch(p)
+  }, [])
 
   // Переключение движка с ленивым созданием FmEngine/DrumEngine
   const handleSwitchEngine = useCallback(
@@ -369,6 +414,7 @@ export function StudioClient() {
       fmEngineRef.current?.dispose()
       drumEngineRef.current?.dispose()
       midiRef.current?.dispose()
+      recorderRef.current?.dispose()
       if (readTimeoutRef.current) {
         clearTimeout(readTimeoutRef.current)
       }
@@ -469,6 +515,35 @@ export function StudioClient() {
               ● активен · клавиши A–; · мышь · MIDI
             </Text>
           )}
+
+          {started && (
+            <Box display="flex" alignItems="center" gap={2}>
+              <button
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '10px',
+                  borderRadius: '4px',
+                  border: `1px solid ${isRecording ? '#e05555' : '#5a3a10'}`,
+                  background: isRecording ? '#3A0808' : 'transparent',
+                  color: isRecording ? '#ff8080' : '#D4AF37',
+                  cursor: 'pointer',
+                  letterSpacing: '0.04em',
+                }}
+                onClick={handleToggleRecord}
+              >
+                {isRecording ? '● стоп' : '● запись'}
+              </button>
+              {recordingUrl && !isRecording && (
+                <a
+                  href={recordingUrl}
+                  download={`synth-take-${Date.now()}.webm`}
+                  style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
+                >
+                  ↓ скачать запись
+                </a>
+              )}
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -476,12 +551,27 @@ export function StudioClient() {
       <Box flex={1} overflow="auto" p={4} display="flex" flexDir="column" gap={4}>
         {/* Панели параметров — переключаемые по движку */}
         {engineType === 'subtractive' ? (
-          <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+          <Box display="flex" flexDir="column" gap={2}>
+            <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+            <PatchLibrary
+              type="subtractive"
+              currentPatch={patch}
+              onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
+            />
+          </Box>
         ) : engineType === 'drumkit' ? (
-          <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
+          <Box display="flex" flexDir="column" gap={2}>
+            <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
+            <PatchLibrary
+              type="drumkit"
+              currentPatch={drumPatch}
+              onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
+            />
+          </Box>
         ) : (
           <Box display="flex" flexDir="column" gap={2}>
             <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+            <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
             {midiDevices.length > 0 && (
               <Box display="flex" alignItems="center" gap={2}>
                 <button
