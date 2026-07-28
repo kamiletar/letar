@@ -214,6 +214,28 @@ import { SortablePhotoGrid } from '@letar/admin-ui'
 />
 ```
 
+### FaqAccordion
+
+Список вопрос-ответ на базе Chakra `Accordion` — вынесен после того, как одна и та же
+разметка (`Accordion.Item`/`ItemTrigger`/`ItemIndicator`/`ItemContent`) независимо
+появилась в aboi, driving-school и animatrona-landing.
+
+```tsx
+import { FaqAccordion } from '@letar/ui'
+<FaqAccordion
+  items={[{ question: 'Как это работает?', answer: 'Вот так.' }]}
+  variant="enclosed" // любой проп Accordion.Root проходит насквозь
+  icon={<LuCircleHelp />} // опционально, одна иконка на все пункты
+  defaultOpenFirst // опционально, раскрыть первый вопрос сразу
+/>
+```
+
+Обёртку секции (заголовок, motion-анимация, `Dialog`) компонент не берёт на себя —
+это остаётся на стороне приложения. Если пункту нужна точечная стилизация (бордер,
+фон, `_open`-состояние) — прокинь `itemProps`. Для сильно кастомных случаев (glass-тема
+и hover в animatrona-landing, CSS-анимация появления по скроллу в kami) общий компонент
+не подошёл бы без раздувания пропсов — там оставлены собственные реализации.
+
 ## Хуки
 
 ### useServiceWorker
