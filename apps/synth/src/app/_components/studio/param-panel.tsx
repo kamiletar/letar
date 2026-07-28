@@ -85,6 +85,8 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
   const setLfo = (k: string, v: number | string) => onChange(patchEngine(engine, 'lfo', { ...engine.lfo, [k]: v }))
   const setFxReverb = (k: 'wet' | 'decay', v: number) =>
     onChange(patchEngine(engine, 'fx', { ...engine.fx, reverb: { ...engine.fx.reverb, [k]: v } }))
+  const setFxSpace = (k: 'azimuth' | 'depth' | 'autoOrbit' | 'orbitRate', v: number | boolean) =>
+    onChange(patchEngine(engine, 'fx', { ...engine.fx, space: { ...engine.fx.space, [k]: v } }))
 
   const cutoffHz = Math.round(cutoffNormToFreq(engine.filter.cutoff))
   const cutoffDisplay = cutoffHz < 1000 ? `${cutoffHz}Hz` : `${(cutoffHz / 1000).toFixed(1)}k`
@@ -248,6 +250,45 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
             hint={HINTS['fx.reverb.decay']}
           />
         </KnobRow>
+      </Section>
+
+      {/* FX — Пространство */}
+      <Section title="FX — Пространство">
+        <KnobRow>
+          <Knob
+            label="азимут"
+            value={(engine.fx.space.azimuth + 1) / 2}
+            onChange={(v) => setFxSpace('azimuth', Math.round((v * 2 - 1) * 100) / 100)}
+            displayValue={
+              engine.fx.space.azimuth === 0
+                ? 'центр'
+                : `${Math.abs(Math.round(engine.fx.space.azimuth * 90))}° ${engine.fx.space.azimuth < 0 ? 'Л' : 'П'}`
+            }
+            hint={HINTS['fx.space.azimuth']}
+          />
+          <Knob
+            label="глубина"
+            value={engine.fx.space.depth}
+            onChange={(v) => setFxSpace('depth', Math.round(v * 100) / 100)}
+            displayValue={`${Math.round(engine.fx.space.depth * 100)}%`}
+            hint={HINTS['fx.space.depth']}
+          />
+          <Knob
+            label="орбита"
+            value={engine.fx.space.orbitRate}
+            onChange={(v) => setFxSpace('orbitRate', Math.round(v * 100) / 100)}
+            displayValue={`${engine.fx.space.orbitRate.toFixed(2)}/с`}
+            hint={HINTS['fx.space.orbitRate']}
+          />
+        </KnobRow>
+        <Box mt={2}>
+          <button
+            style={btnStyle(engine.fx.space.autoOrbit)}
+            onClick={() => setFxSpace('autoOrbit', !engine.fx.space.autoOrbit)}
+          >
+            {engine.fx.space.autoOrbit ? '● авто-орбита вкл' : '○ авто-орбита выкл'}
+          </button>
+        </Box>
       </Section>
 
       {/* LFO */}

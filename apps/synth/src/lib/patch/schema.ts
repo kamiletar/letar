@@ -29,6 +29,12 @@ export const FxSchema = z.object({
     wet: z.number().min(0).max(1), // 0 = сухой, 1 = полное пространство
     decay: z.number().min(0.1).max(8), // время затухания, секунды
   }),
+  space: z.object({
+    azimuth: z.number().min(-1).max(1), // -1 = слева, 0 = по центру, 1 = справа (PannerNode HRTF)
+    depth: z.number().min(0).max(1), // 0 = вплотную, 1 = далеко (влияет на громкость через distance-модель)
+    autoOrbit: z.boolean(), // звук вращается по кругу вокруг слушателя, а не стоит статично
+    orbitRate: z.number().min(0.02).max(1), // оборотов в секунду при autoOrbit
+  }),
 })
 export type FxParams = z.infer<typeof FxSchema>
 

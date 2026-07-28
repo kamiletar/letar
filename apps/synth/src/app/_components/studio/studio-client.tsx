@@ -7,6 +7,7 @@ import { type MidiDevice, MidiInputManager } from '@/lib/audio/midi-input'
 import { MasterRecorder } from '@/lib/audio/recorder'
 import { renderPatchToWav } from '@/lib/audio/render'
 import { buildReverbIR } from '@/lib/audio/reverb'
+import { createSpatialPanner, setPannerPosition } from '@/lib/audio/spatial'
 import { SubtractiveEngine } from '@/lib/audio/subtractive'
 import { REESE_BASS } from '@/lib/patch/defaults'
 import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
@@ -129,9 +130,11 @@ export function StudioClient() {
   const engineTypeRef = useRef(engineType)
   engineTypeRef.current = engineType
 
-  // Reverb-шина: masterGain → [dryGain → dest] + [convolver → reverbWet → dest]
+  // Reverb-шина: masterGain → panner → [dryGain → dest] + [convolver → reverbWet → dest]
   const convolverRef = useRef<ConvolverNode | null>(null)
   const reverbWetRef = useRef<GainNode | null>(null)
+  const pannerRef = useRef<PannerNode | null>(null)
+  const orbitRafRef = useRef<number | null>(null)
 
   // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
   const handlePadHit = useCallback((index: number, velocity: number) => {
@@ -274,9 +277,21 @@ export function StudioClient() {
     reverbWetRef.current = reverbWet
     reverbWet.gain.value = patchRef.current.engine.fx.reverb.wet
 
-    masterGain.connect(dryGain)
+    // Пространство: PannerNode (HRTF) между мастер-шиной и dry/reverb-раздачей — позиция
+    // одинаково окрашивает и сухой сигнал, и его reverb-хвост
+    const panner = createSpatialPanner(ctx)
+    pannerRef.current = panner
+    setPannerPosition(
+      panner,
+      ctx,
+      patchRef.current.engine.fx.space.azimuth * (Math.PI / 2),
+      patchRef.current.engine.fx.space.depth
+    )
+
+    masterGain.connect(panner)
+    panner.connect(dryGain)
     dryGain.connect(ctx.destination)
-    masterGain.connect(convolver)
+    panner.connect(convolver)
     convolver.connect(reverbWet)
     reverbWet.connect(ctx.destination)
 
@@ -434,6 +449,45 @@ export function StudioClient() {
       }
     })
   }, [patch.engine.fx.reverb.decay])
+
+  // Ручная позиция (азимут/глубина) — применяется, пока не включена авто-орбита
+  useEffect(() => {
+    if (!pannerRef.current || patch.engine.fx.space.autoOrbit) {
+      return
+    }
+    const ctx = getAudioContext()
+    setPannerPosition(
+      pannerRef.current,
+      ctx,
+      patch.engine.fx.space.azimuth * (Math.PI / 2),
+      patch.engine.fx.space.depth
+    )
+  }, [patch.engine.fx.space.azimuth, patch.engine.fx.space.depth, patch.engine.fx.space.autoOrbit])
+
+  // Авто-орбита: звук непрерывно обходит слушателя по кругу, а не стоит на месте
+  useEffect(() => {
+    if (!started || !patch.engine.fx.space.autoOrbit || !pannerRef.current) {
+      return
+    }
+    const ctx = getAudioContext()
+    const panner = pannerRef.current
+    const startTime = ctx.currentTime
+
+    const tick = () => {
+      const { orbitRate, depth } = patchRef.current.engine.fx.space
+      const angle = (ctx.currentTime - startTime) * orbitRate * Math.PI * 2
+      setPannerPosition(panner, ctx, angle, depth)
+      orbitRafRef.current = requestAnimationFrame(tick)
+    }
+    orbitRafRef.current = requestAnimationFrame(tick)
+
+    return () => {
+      if (orbitRafRef.current) {
+        cancelAnimationFrame(orbitRafRef.current)
+        orbitRafRef.current = null
+      }
+    }
+  }, [started, patch.engine.fx.space.autoOrbit])
 
   useEffect(() => {
     return () => {

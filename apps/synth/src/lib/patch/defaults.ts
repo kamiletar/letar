@@ -35,6 +35,7 @@ export const REESE_BASS: SubtractivePatch = {
     },
     fx: {
       reverb: { wet: 0.18, decay: 2.2 },
+      space: { azimuth: 0, depth: 0.15, autoOrbit: false, orbitRate: 0.15 },
     },
   },
 }
