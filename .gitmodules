@@ -34,3 +34,6 @@
 [submodule ".claude/private"]
 	path = .claude/private
 	url = git@github.com:kamiletar/letar-private-docs.git
+[submodule "apps/domwellbes"]
+	path = apps/domwellbes
+	url = git@github.com:kamiletar/letar-private-domwellbes.git
