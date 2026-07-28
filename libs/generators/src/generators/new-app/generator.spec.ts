@@ -117,6 +117,23 @@ describe('new-app generator', () => {
     expect(pkg.nx.implicitDependencies).toEqual(['chakra-provider', 'ui', 'analytics'])
   })
 
+  it('--private кладёт .gitignore — корневой на submodule не действует', async () => {
+    await newAppGenerator(tree, { name: 'my-app', private: true })
+
+    const gitignore = tree.read('apps/my-app/.gitignore', 'utf-8') ?? ''
+    expect(gitignore).toContain('node_modules/')
+    expect(gitignore).toContain('dist/')
+    expect(gitignore).toContain('*.tsbuildinfo')
+    // .env с одним лишь PORT коммитится (см. .claude/rules/env-files.md) — игнорить его нельзя
+    expect(gitignore).not.toMatch(/^\.env$/m)
+  })
+
+  it('публичному приложению .gitignore не создаётся — его закрывает корневой репо', async () => {
+    await newAppGenerator(tree, { name: 'my-app' })
+
+    expect(tree.exists('apps/my-app/.gitignore')).toBe(false)
+  })
+
   it('displayName по умолчанию — Title Case от имени', async () => {
     await newAppGenerator(tree, { name: 'my-cool-app' })
 

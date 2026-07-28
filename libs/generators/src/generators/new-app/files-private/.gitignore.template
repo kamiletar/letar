@@ -1,0 +1,32 @@
+# Приложение — приватный git submodule, и корневой .gitignore монорепо на него НЕ действует:
+# вложенный репозиторий видит только этот файл. Без него первый же `git add .` унесёт в коммит
+# node_modules/, .next/ и dist/. Подробности: .claude/rules/git.md § «Каждому submodule нужен свой».
+
+# Зависимости
+node_modules/
+
+# Сборка
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Секреты окружения (.env с одним PORT — коммитится, см. .claude/rules/env-files.md)
+.env.local
+.env.docker
+.env.production
+.env.*.local
+!.env.docker.example
+!.env.staging.example
+
+# Тесты
+/coverage
+test-results/
+playwright-report/
+
+# Логи
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -79,6 +79,21 @@ git add .gitmodules apps/<name>
 git commit -m "chore: add <name> as private submodule"
 ```
 
+⚠️ **Проверь, что `.gitignore` на месте перед первым `git add .`** (шаг 2). Корневой `.gitignore`
+монорепо на вложенный репозиторий **не действует**, и без своего в initial commit уедут
+`node_modules/`, `.next/`, `dist/`, `*.tsbuildinfo`. Генератор кладёт его сам при `--private`, но
+если приложение генерировалось без флага — скопируй из любого существующего submodule
+(`apps/domwellbes/.gitignore`). Разбор — [git.md](/.claude/rules/git.md) § «Каждому submodule нужен
+СВОЙ `.gitignore`».
+
+⚠️ **Windows: `rm -rf apps/<name>` падает с `Device or resource busy`** (шаг 3) — папку держит
+Nx-демон или dev-сервер. `nx reset` помогает не всегда. Обход — удалить содержимое, потом саму
+папку:
+
+```bash
+rm -rf apps/<name>/* apps/<name>/.[!.]* && rmdir apps/<name>
+```
+
 ⚠️ **НЕ добавляй путь submodule в корневой `.gitignore`** — Nx сломается. Подробности: [repo-structure](/.claude/docs/repo-structure.md).
 
 ## Дальнейшие шаги (не автоматизированы генератором)

@@ -62,6 +62,14 @@ git commit -m "chore: bump driving-school submodule"
 git push                        # пуш в публичный letar
 ```
 
+### У каждого submodule свой `.gitignore`
+
+Корневой `.gitignore` монорепо на вложенный независимый репозиторий **не действует** — submodule
+видит только собственный. Заводишь новый — клади `.gitignore` до первого `git add .`, иначе в
+initial commit уедут `node_modules/`, `.next/`, `dist/`. Генератор `new-app --private` кладёт его
+сам. Подробности и образец — [git.md](/.claude/rules/git.md) § «Каждому submodule нужен СВОЙ
+`.gitignore`».
+
 ### Обновить все submodules до последних версий
 
 ```bash

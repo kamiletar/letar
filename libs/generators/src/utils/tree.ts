@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url'
  * Генераторы исполняются как ESM (нет `__dirname`), поэтому директорию восстанавливаем через
  * `import.meta.url` — его обязан передать сам генератор, иначе получим папку этого утиля.
  */
-export function templatesDirFor(importMetaUrl: string): string {
-  return joinPathFragments(fileURLToPath(new URL('.', importMetaUrl)), 'files')
+export function templatesDirFor(importMetaUrl: string, dir = 'files'): string {
+  return joinPathFragments(fileURLToPath(new URL('.', importMetaUrl)), dir)
 }
 
 /**

@@ -6,6 +6,15 @@ import type { NewAppGeneratorSchema } from './schema'
 
 const templatesDir = templatesDirFor(import.meta.url)
 
+/**
+ * Шаблоны только для приватных приложений (`--private`).
+ *
+ * Сейчас это `.gitignore`: приватное приложение живёт в отдельном submodule-репозитории, на
+ * который корневой `.gitignore` монорепо не действует. Публичным приложениям он не нужен —
+ * их закрывают правила корневого репо.
+ */
+const privateTemplatesDir = templatesDirFor(import.meta.url, 'files-private')
+
 export default async function newAppGenerator(tree: Tree, options: NewAppGeneratorSchema): Promise<void> {
   const { name } = options
   const appDir = joinPathFragments('apps', name)
@@ -15,6 +24,10 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
   const port = options.port ?? resolveNextFreePort(tree)
   const displayName = options.displayName ?? toDisplayName(name)
   const description = options.description ?? `${displayName} — Next.js приложение`
+
+  if (options.private) {
+    generateFiles(tree, privateTemplatesDir, appDir, { name })
+  }
 
   generateFiles(tree, templatesDir, appDir, {
     name,
@@ -46,7 +59,9 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     logger.info(
       'Приложение помечено как приватное — заведи submodule по инструкции в ' +
         '.claude/commands/create/new-app.md § «Приватные приложения» (gh repo create → git submodule add). ' +
-        'Сгенерированные файлы уже лежат в apps/<name> — просто перенеси их в новый submodule-репозиторий.'
+        'Сгенерированные файлы уже лежат в apps/<name> — просто перенеси их в новый submodule-репозиторий. ' +
+        '.gitignore для будущего submodule уже создан: не потеряй его при переносе, иначе первый же ' +
+        '`git add .` унесёт node_modules/ и dist/ в initial commit.'
     )
   }
   logger.info(

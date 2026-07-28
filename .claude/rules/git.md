@@ -107,6 +107,57 @@ git push                        # пуш в публичный letar
 - ❌ **НЕ добавляй пути submodule в корневой `.gitignore`** — Nx уважает gitignore при сканировании проектов и приватные проекты исчезнут из `nx show projects` / `nx affected`. Submodule в Git хранится как gitlink (SHA), физически working tree не закоммитится в родительский репо без `.gitignore` страховки.
 - ❌ **НЕ добавляй `src/generated/` в .gitignore submodule** если эта папка раньше была tracked (например, `libs/driving-school-db/src/generated/prisma/` — это типы Prisma, должны быть в репо).
 
+### ⚠️ Каждому submodule нужен СВОЙ `.gitignore`
+
+Корневой `.gitignore` монорепо **не действует** на вложенный независимый git-репозиторий.
+Submodule видит только собственный `.gitignore`, а его у свежесозданного нет — поэтому первый же
+`git add .` внутри него уносит в коммит `node_modules/`, `.next/`, `dist/`, `*.tsbuildinfo`.
+
+Прецедент: `domwellbes` при заведении submodule утащил `dist/tsconfig.tsbuildinfo` в initial commit.
+
+**Заводишь новый приватный submodule — клади `.gitignore` ДО первого `git add`.** Образец — любой
+существующий, например `apps/domwellbes/.gitignore`:
+
+```
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+.env.local
+.env.docker
+/coverage
+test-results/
+playwright-report/
+*.log
+```
+
+> Обычные (не submodule) приложения монорепо — `apps/archetest`, `apps/kami` и прочие — своего
+> `.gitignore` **не требуют**: они часть корневого репо и закрыты его правилами.
+
+### ⚠️ `git commit -- <путь>` после `git rm --cached` возвращает файл
+
+Коммит с pathspec берёт содержимое **рабочей копии**, а не то, что лежит в индексе. Поэтому
+последовательность «убрать из индекса → закоммитить по пути» отменяет саму себя:
+
+```bash
+git rm -r --cached dist        # удаление подготовлено в индексе
+git commit -- .gitignore dist  # ❌ dist добавляется обратно из рабочей копии
+```
+
+Правильно — коммитить удаление **без pathspec** (индекс уже содержит только нужное):
+
+```bash
+git rm -r --cached dist
+git add .gitignore
+git commit -m "chore: убрать артефакты сборки из индекса"
+```
+
+⚠️ Это единственное законное исключение из правила «коммить только свои пути» (см. ниже
+«Работа в монорепозитории»), и оно применимо **только внутри submodule**, где кроме тебя никто
+не работает. В корневом репо голый `git commit` заберёт чужие staged-файлы — там сначала
+проверь `git status`, а после коммита — `git show --stat`.
+
 ### Обновить все submodules до последних коммитов
 
 ```bash
