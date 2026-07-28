@@ -153,6 +153,26 @@ const APP_CONFIG = {
       user: 'studio_user',
     },
   },
+  aboi: {
+    secretsPath: '/secrets/aboi.env',
+    containerName: 'aboi-db',
+    defaults: {
+      host: 'aboi-db',
+      port: 5432,
+      database: 'neyroaboi_prod',
+      user: 'aboi_user',
+    },
+  },
+  aprel8008: {
+    secretsPath: '/secrets/aprel8008.env',
+    containerName: 'aprel8008-db',
+    defaults: {
+      host: 'aprel8008-db',
+      port: 5432,
+      database: 'aprel8008',
+      user: 'aprel8008_user',
+    },
+  },
 } as const
 
 type AppName = keyof typeof APP_CONFIG

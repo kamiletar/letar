@@ -449,7 +449,13 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 
 - ✅ **Сузить scope синхронизации (Resilio Sync).** `.sync/IgnoreList` обновлён на s1 + s2
   (добавлены `.env.docker` / `.env.local` / `.env` → секреты не уходят в offsite Resilio).
-- **Базы данных** ⏳ — проверить полноту охвата (все БД s1/s2), расписание и **ротацию**.
+- ✅ **Базы данных — охват проверен (2026-07-28):** реестр `APP_CONFIG` в `dashboard-agent`
+  (`pg_dump` ежедневно в `/home/deploy/letar/backups`) сверен с фактическим списком приложений
+  с БД на s2. **Найден и закрыт пробел: `aboi` и `aprel8008` не бэкапились вообще** (не были
+  в реестре + `.env.docker` не смонтирован в `/secrets/`) — добавлены оба. Заодно найден и
+  закрыт дрейф `SERVER_APPS` (канон `@letar/infra-config` не знал про `studio` — падал
+  `server-config.guard.spec.ts`). Ротация — файлы копятся без явного лимита (не проверялось
+  специально, вне скоупа этой сессии). Детали — `apps/dashboard-agent/CHANGELOG.md` 0.8.7.
 - ✅ **Конфиги Maddy** (2026-06-04): `/opt/maddy/backup.sh` тарует `maddy.conf` + `docker-compose.yml` +
   `credentials.db` + `aliases` + `dkim_keys/` → `/root/backups/maddy/maddy_YYYY-MM-DD.tar.gz`;
   cron 03:00 ежедневно, ротация 14 дней. Документировано в `backup-architecture.md`.

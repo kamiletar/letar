@@ -68,6 +68,8 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dsperevod/.env.docker:/secrets/dsperevod.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/studio/.env.docker:/secrets/studio.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/aboi/.env.docker:/secrets/aboi.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/aprel8008/.env.docker:/secrets/aprel8008.env:ro
     networks:
       - kami-network
     healthcheck:

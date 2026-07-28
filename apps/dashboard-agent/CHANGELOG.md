@@ -11,6 +11,22 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.8.7] — 2026-07-28
+
+### Fixed
+
+- **Аудит охвата бэкапов БД (корневой `PLAN.md`, Этап 0.3) нашёл пробел: `aboi` и `aprel8008`
+  вообще не бэкапились** — оба развёрнуты на s2 (`SERVER_APPS`), у обоих есть Postgres-БД,
+  но `APP_CONFIG` в `src/lib/database.ts` их не перечислял, а `docker-compose.production.yml`
+  не монтировал их `.env.docker` в `/secrets/`. Добавлены оба приложения (контейнеры `aboi-db`
+  /`aprel8008-db`, БД `neyroaboi_prod`/`aprel8008`) — не только в аудит, но и в реальный
+  ежедневный `pg_dump`-бэкап на `/home/deploy/letar/backups`.
+  ⚠️ aboi — флагман 152-ФЗ-комплаенса, его БД не бэкапилась ни разу с момента, когда
+  реестр `APP_CONFIG` был заведён — гэп не датирован точно, обнаружен только сейчас.
+- **Дрейф `SERVER_APPS`: канон `@letar/infra-config` не содержал `studio`** (был только
+  в локальной копии `src/lib/server-config.ts`) — `server-config.guard.spec.ts` падал
+  красным на `main` до этого коммита. Добавлен `studio` в канон, тест снова зелёный.
+
 ## [0.8.5] — 2026-07-22
 
 ### Added: grep-фильтр в `POST /api/e2e/run`
