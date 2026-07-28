@@ -1,5 +1,17 @@
 # Выполненные задачи — Kami
 
+## Версия 0.33.0 — 152-ФЗ: CookieBanner+ConsentLog, consent-aware аналитика (2026-07-28)
+
+Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Страница
+`/privacy` уже была, но не было ни cookie-баннера, ни `ConsentLog`, а Yandex Metrika/Umami грузились
+безусловно, до согласия. Добавлено:
+
+- `ConsentLog` в `schema.zmodel` + миграция (`prisma/migrations/20260728033244_add_consent_log`)
+- `POST /api/consent`
+- `CookieBanner`/`CookieSettingsButton` из `@letar/ui`
+- `umami-script-consent.tsx`/`yandex-metrika-consent.tsx` — аналитика инициализируется только после
+  `analytics: true` в согласии (слушают `kami:consent-change`, читают localStorage при монтировании)
+
 ## Версия 0.32.0 — Pressable-компоненты + тач-фидбек (2026-06-21)
 
 ### Что сделано

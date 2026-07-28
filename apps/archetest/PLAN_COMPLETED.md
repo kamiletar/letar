@@ -1,6 +1,6 @@
 # Выполненные задачи: Archetest
 
-> **Версия:** 0.24.0 | **Обновлено:** 2026-07-28
+> **Версия:** 0.25.0 | **Обновлено:** 2026-07-28
 >
 > **Основной план:** [PLAN.md](./PLAN.md)
 
@@ -1287,6 +1287,20 @@ Dev-превью `/dev/dark-core` — все пять веток; числа я�
   перепроверить при первых нормах.
 - **Динамики по сессиям нет**: `QuizSession.scores` хранит только `raw`, `relevantCounts`
   по сессии не персистится. Индекс кумулятивный; динамика потребовала бы миграции.
+
+---
+
+## Сессия 2026-07-28 (продолжение) — 152-ФЗ: CookieBanner+ConsentLog, consent-aware аналитика (v0.25.0) 🍪
+
+Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Страница
+`/privacy` уже была, но не было ни cookie-баннера, ни `ConsentLog`, а Umami грузился безусловно, до
+согласия. Добавлено:
+
+- `ConsentLog` в `schema.zmodel` + миграция (`prisma/migrations/20260728033356_add_consent_log`)
+- `POST /api/consent`
+- `CookieBanner`/`CookieSettingsButton` из `@letar/ui` — в архетесте не было футера (только `Header`),
+  кнопка настроек cookie размещена в `Header` рядом с `LanguageSwitcher`
+- `umami-script-consent.tsx` — Umami инициализируется только после `analytics: true` в согласии
 
 ---
 
