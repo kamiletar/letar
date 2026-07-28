@@ -46,14 +46,26 @@ export default function RootLayout({ children }) {
 <UmamiScript scriptUrl="https://stats.letar.best/script.js" websiteId="abc-123" />
 ```
 
+### 4. Согласие на аналитику (152-ФЗ)
+
+`hasConsent` работает как в `@letar/yandex-metrika`: `undefined` — грузить сразу (обратная
+совместимость), `false` — не грузить, `true` — грузить. В приложениях с `CookieBanner` из
+`@letar/ui` оборачивай `UmamiScript` в consent-aware компонент — образец:
+`apps/dsperevod/src/app/_components/yandex-metrika-consent.tsx`.
+
+```tsx
+<UmamiScript hasConsent={hasConsent} />
+```
+
 ## API
 
 ### UmamiScript
 
-| Prop        | Тип       | Описание                                                     |
-| ----------- | --------- | ------------------------------------------------------------ |
-| `scriptUrl` | `string?` | URL скрипта (по умолчанию из `NEXT_PUBLIC_UMAMI_SCRIPT_URL`) |
-| `websiteId` | `string?` | Website ID (по умолчанию из `NEXT_PUBLIC_UMAMI_WEBSITE_ID`)  |
+| Prop         | Тип        | Описание                                                                                   |
+| ------------ | ---------- | ------------------------------------------------------------------------------------------ |
+| `scriptUrl`  | `string?`  | URL скрипта (по умолчанию из `NEXT_PUBLIC_UMAMI_SCRIPT_URL`)                               |
+| `websiteId`  | `string?`  | Website ID (по умолчанию из `NEXT_PUBLIC_UMAMI_WEBSITE_ID`)                                |
+| `hasConsent` | `boolean?` | Согласие на аналитику. `undefined` — грузить сразу, `false` — не грузить, `true` — грузить |
 
 ## Получение Website ID
 

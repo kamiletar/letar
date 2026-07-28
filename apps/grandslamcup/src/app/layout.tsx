@@ -1,4 +1,3 @@
-import { UmamiScript } from '@letar/analytics'
 import { CookieBanner, TopLoader } from '@letar/ui'
 import type { Metadata } from 'next'
 
@@ -6,6 +5,7 @@ import { OfflineConsentBanner } from './_components/offline-consent-banner'
 import { Providers } from './_components/providers'
 import { ServiceWorkerRegistration } from './_components/service-worker-registration'
 import { AppToaster } from './_components/ui/toaster'
+import { UmamiScriptConsent } from './_components/umami-script-consent'
 
 const BASE_URL = 'https://grandslamcup.letar.best'
 
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ServiceWorkerRegistration />
           <OfflineConsentBanner />
         </Providers>
-        <UmamiScript />
+        <UmamiScriptConsent />
       </body>
     </html>
   )

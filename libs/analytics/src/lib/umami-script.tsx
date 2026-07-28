@@ -7,6 +7,13 @@ interface UmamiScriptProps {
   scriptUrl?: string
   /** Переопределить Website ID */
   websiteId?: string
+  /**
+   * Явное согласие пользователя на аналитические cookies (152-ФЗ).
+   * undefined — загрузить сразу без проверки (обратная совместимость).
+   * false — не загружать до получения согласия.
+   * true — загрузить.
+   */
+  hasConsent?: boolean
 }
 
 /**
@@ -24,11 +31,11 @@ interface UmamiScriptProps {
  *   websiteId="abc-123"
  * />
  */
-export function UmamiScript({ scriptUrl, websiteId }: UmamiScriptProps) {
+export function UmamiScript({ scriptUrl, websiteId, hasConsent }: UmamiScriptProps) {
   const url = scriptUrl ?? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL
   const id = websiteId ?? process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
 
-  if (!url || !id) {
+  if (!url || !id || hasConsent === false) {
     return null
   }
 
