@@ -4,12 +4,12 @@ import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Box, Card, Heading, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
 import { Fragment, useMemo } from 'react'
-import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { PERSONALITY_TYPES, replaceTypeCodes, STATE_CODES } from '../_data/personality-types'
 import { getInteraction, getMoodModifier } from '../_data/type-interactions'
 import type { IpsativeScale } from '../_lib/ipsative'
 import { computeIpsativeRanking } from '../_lib/ipsative'
+import type { ScaleConfidence } from '../_lib/scoring-core'
 import { DevelopmentalProfileCard } from './developmental-profile-card'
 
 interface ProfileDetailsProps {

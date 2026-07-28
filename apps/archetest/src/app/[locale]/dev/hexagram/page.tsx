@@ -1,7 +1,6 @@
 'use client'
 
 import { Box, Button, Container, Heading, HStack, VStack } from '@chakra-ui/react'
-import { notFound } from 'next/navigation'
 import { useState } from 'react'
 
 import { HexagramChart } from '../../_components/hexagram-chart'
@@ -22,10 +21,6 @@ const DEMO_PROFILES: Record<string, Partial<Record<PersonalityTypeCode, number>>
  * Переключение профилей проверяет и прогрессивную анимацию перестроения.
  */
 export default function HexagramDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   const [profileKey, setProfileKey] = useState<string>('Сбалансированный')
 
   return (

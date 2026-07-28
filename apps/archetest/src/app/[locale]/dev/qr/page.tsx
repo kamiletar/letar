@@ -2,9 +2,8 @@
 
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
-import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
+import { useEffect, useState } from 'react'
 
 /**
  * Print-friendly QR-коды для раздатки на фесте (этап 5.7): экспресс-тест и
@@ -12,10 +11,6 @@ import { QRCodeSVG } from 'qrcode.react'
  * перед мероприятием, в production роут не открывается.
  */
 export default function QrDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   const params = useParams<{ locale: string }>()
   const locale = params.locale ?? 'ru'
   const [origin, setOrigin] = useState('')

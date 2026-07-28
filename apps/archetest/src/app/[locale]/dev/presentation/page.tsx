@@ -1,9 +1,10 @@
 'use client'
 
 import { Badge, Box, Container, Heading, HStack, SimpleGrid, Table, Text, VStack } from '@chakra-ui/react'
-import { notFound } from 'next/navigation'
 import { HexagramChart } from '../../_components/hexagram-chart'
+import { CORE_SCALE_COUNT, TOTAL_QUESTIONS } from '../../_data/bank-stats'
 import type { PersonalityTypeCode } from '../../_data/personality-types'
+import { SCALE_PROTOTYPES } from '../../_data/scale-prototypes'
 
 /**
  * Презентация продукта для Инпсихофеста (этап 5.7) — RU-first, print-friendly.
@@ -15,10 +16,6 @@ import type { PersonalityTypeCode } from '../../_data/personality-types'
  * перед мероприятием, в production роут не открывается.
  */
 export default function PresentationDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   // Примерный профиль для живой гексаграммы: заметный свет + умеренная тень
   const sampleScores: Partial<Record<PersonalityTypeCode, number>> = {
     HUM: 78,
@@ -37,15 +34,18 @@ export default function PresentationDevPage() {
         {/* ── Слайд 1: Титул ─────────────────────────────────────────────── */}
         <Slide number="01 · Что это">
           <Heading size="3xl" lineHeight="shorter">
-            Архетест — карта личности из 22 шкал
+            Архетест — карта личности из {CORE_SCALE_COUNT} шкал
           </Heading>
           <Text fontSize="lg" color="fg.muted">
             Инструмент самопознания и развития: структурированная отправная точка для работы психолога с клиентом. Не
             диагностика, не медицинское изделие — и мы говорим это прямо на каждом экране.
           </Text>
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} w="100%" pt={2}>
-            <Stat value="2096" label="ситуационных вопросов — жизненные сцены, не само-ярлыки" />
-            <Stat value="22" label="шкалы: DSM-5 кластеры A/B/C, триады, деструктивные паттерны, спектр развития" />
+            <Stat value={String(TOTAL_QUESTIONS)} label="ситуационных вопросов — жизненные сцены, не само-ярлыки" />
+            <Stat
+              value={String(CORE_SCALE_COUNT)}
+              label="шкалы: DSM-5 кластеры A/B/C, триады, деструктивные паттерны, спектр развития"
+            />
             <Stat value="3–5 мин" label="экспресс-скан из 24 вопросов — работает офлайн прямо на стенде" />
           </SimpleGrid>
         </Slide>
@@ -53,25 +53,16 @@ export default function PresentationDevPage() {
         {/* ── Слайд 2: Научный фундамент ─────────────────────────────────── */}
         <Slide number="02 · Научный фундамент" title="Шкалы не изобретены с нуля">
           <Text>
-            21 из 22 шкал опираются на валидированные инструменты — <b>на уровне конструктов, не пунктов</b>: каждая
-            формулировка archetest авторская и ситуационная. Это лицензионная чистота плюс связь с накопленной научной
-            базой.
+            {CORE_SCALE_COUNT - 1} из {CORE_SCALE_COUNT} шкал опираются на валидированные инструменты —{' '}
+            <b>на уровне конструктов, не пунктов</b>: каждая формулировка archetest авторская и ситуационная. Это
+            лицензионная чистота плюс связь с накопленной научной базой.
           </Text>
           <Table.Root size="sm" w="100%">
             <Table.Body>
-              {[
-                ['Светлая триада (HUM/KAN/FAI)', 'Light Triad Scale — Kaufman et al., 2019'],
-                ['Тёмная триада (MAC/NAR/PSY)', 'Short Dark Triad — Jones & Paulhus, 2014'],
-                ['Садизм (SAD)', 'ASP / SSIS — Dark Tetrad, Paulhus, 2014'],
-                ['13 шкал РЛ (дименсионально)', 'PID-5 — Krueger et al., 2012 (APA)'],
-                ['Систематизация и спектр (ASD)', 'AQ-10 — Baron-Cohen et al., 2001'],
-                ['Прямота (DIR)', 'Self-Monitoring reversed / HEXACO Sincerity'],
-                ['Алекситимия (ALX)', 'TAS-20 — Bagby, Parker & Taylor, 1994'],
-                ['Скрининги BAR / DPR', 'MDQ, HCL-32 / PHQ-9 (конструкт)'],
-              ].map(([scale, proto]) => (
-                <Table.Row key={scale}>
-                  <Table.Cell fontWeight="bold">{scale}</Table.Cell>
-                  <Table.Cell color="fg.muted">{proto}</Table.Cell>
+              {SCALE_PROTOTYPES.map(({ group, shortLabel }) => (
+                <Table.Row key={group}>
+                  <Table.Cell fontWeight="bold">{group}</Table.Cell>
+                  <Table.Cell color="fg.muted">{shortLabel}</Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
@@ -179,10 +170,13 @@ export default function PresentationDevPage() {
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} w="100%">
             <Stat
               value="24 вопроса"
-              label="экспресс покрывает 8 шкал гексаграммы честно: по 3 вопроса на шкалу, не «22 шкалы за 2 минуты»"
+              label={`экспресс покрывает 8 шкал гексаграммы честно: по 3 вопроса на шкалу, не «${CORE_SCALE_COUNT} шкалы за 2 минуты»`}
             />
             <Stat value="Офлайн" label="PWA: выставочный Wi-Fi не мешает — страница и подсчёт работают без сети" />
-            <Stat value="QR" label="с экрана результатов: полный тест (22 шкалы) и страница для психологов" />
+            <Stat
+              value="QR"
+              label={`с экрана результатов: полный тест (${CORE_SCALE_COUNT} шкалы) и страница для психологов`}
+            />
           </SimpleGrid>
           <Bullet>
             Kiosk-режим на планшете: кнопка «Новый посетитель» с двойным подтверждением — сброс результата и согласия

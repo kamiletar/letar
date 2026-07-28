@@ -2,7 +2,6 @@
 
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
-import { notFound } from 'next/navigation'
 
 import { DarkReassuranceNote, SafetyNetBlock } from '../../_components/safety-net-block'
 
@@ -11,10 +10,6 @@ import { DarkReassuranceNote, SafetyNetBlock } from '../../_components/safety-ne
  * Показывает оба блока в текущей локали (кризисный + мягкая формулировка).
  */
 export default function SafetyNetDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   const locale = useLocale()
   const isRu = locale === 'ru'
 

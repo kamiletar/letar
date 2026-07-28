@@ -3,8 +3,9 @@
 import { getEnhancedPrisma } from '@/lib/db'
 import { isValidityQuestion } from '../_data/validity-checks'
 import { selectExpressQuestions } from '../_lib/express-select'
+import type { QuizOptionData } from '../_lib/scoring-core'
 import { fisherYatesShuffle } from '../_lib/stratified-shuffle'
-import type { QuizOptionData, QuizQuestionDTO } from './quiz.action'
+import type { QuizQuestionDTO } from './quiz.action'
 
 /**
  * Получить вопросы экспресс-теста (этап 5.3): ровно 3 вопроса на каждую из

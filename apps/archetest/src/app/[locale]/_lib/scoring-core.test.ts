@@ -3,11 +3,13 @@ import { ALL_SCALE_CODES, EXPERIMENTAL_SCALE_CODES } from '../_data/personality-
 import type { AnsweredQuestionInput, QuizOptionData, ScoringData } from './scoring-core'
 import {
   BANK_SCORING_DATA,
+  bankCoverage,
   buildTotalRelevantByScale,
   computeActualMax,
   computeScoresCore,
   confidenceFromCount,
   countRelevantAnswered,
+  getScaleBankCoverage,
   getScaleConfidence,
   getScaleLevel,
 } from './scoring-core'
@@ -45,18 +47,36 @@ describe('getScaleLevel', () => {
 })
 
 describe('confidenceFromCount', () => {
-  it('пороги ratio: 0.1/0.3/0.6', () => {
-    expect(confidenceFromCount(0, 10)).toBe('insufficient')
-    expect(confidenceFromCount(1, 10)).toBe('low') // ровно 0.1 → уже low
-    expect(confidenceFromCount(2, 10)).toBe('low')
-    expect(confidenceFromCount(3, 10)).toBe('moderate') // ровно 0.3 → moderate
-    expect(confidenceFromCount(5, 10)).toBe('moderate')
-    expect(confidenceFromCount(6, 10)).toBe('high') // ровно 0.6 → high
-    expect(confidenceFromCount(10, 10)).toBe('high')
+  it('абсолютные пороги: 5/15/30 отвеченных релевантных вопросов', () => {
+    expect(confidenceFromCount(0)).toBe('insufficient')
+    expect(confidenceFromCount(4)).toBe('insufficient')
+    expect(confidenceFromCount(5)).toBe('low') // ровно порог → уже low
+    expect(confidenceFromCount(14)).toBe('low')
+    expect(confidenceFromCount(15)).toBe('moderate')
+    expect(confidenceFromCount(29)).toBe('moderate')
+    expect(confidenceFromCount(30)).toBe('high')
+    expect(confidenceFromCount(700)).toBe('high')
   })
 
-  it('total=0 не делит на ноль', () => {
-    expect(confidenceFromCount(0, 0)).toBe('insufficient')
+  it('не зависит от размера банка — в этом и была суть починки', () => {
+    // Раньше 6 ответов по редкой шкале (банк 10) давали high,
+    // а 6 ответов по населённой (банк 1192) — insufficient.
+    // Точность оценки определяется абсолютным n, банк тут ни при чём.
+    expect(confidenceFromCount(6)).toBe('low')
+    expect(confidenceFromCount(40)).toBe('high')
+  })
+})
+
+describe('bankCoverage', () => {
+  it('доля пройденного банка — отдельная величина, не достоверность', () => {
+    expect(bankCoverage(6, 10)).toBeCloseTo(0.6)
+    expect(bankCoverage(6, 1192)).toBeCloseTo(0.005, 3)
+  })
+
+  it('банк 0 не делит на ноль; переполнение зажимается единицей', () => {
+    expect(bankCoverage(0, 0)).toBe(0)
+    expect(bankCoverage(5, 0)).toBe(0)
+    expect(bankCoverage(20, 10)).toBe(1)
   })
 })
 
@@ -76,9 +96,32 @@ describe('computeActualMax / countRelevantAnswered', () => {
     expect(counts.SAD).toBe(0)
   })
 
-  it('getScaleConfidence: полное покрытие банка → high, нулевое → insufficient', () => {
-    expect(getScaleConfidence('MAC', [0, 1], data)).toBe('high') // 2 из 2
-    expect(getScaleConfidence('HUM', [], data)).toBe('insufficient') // 0 из 2
+  it('getScaleConfidence: два ответа — insufficient, даже если это весь банк шкалы', () => {
+    // Именно здесь была инверсия: раньше «2 из 2» давало high.
+    // Оценка по двум вопросам не становится точной от того, что больше их нет.
+    expect(getScaleConfidence('MAC', [0, 1], data)).toBe('insufficient')
+    expect(getScaleConfidence('HUM', [], data)).toBe('insufficient')
+  })
+
+  it('getScaleBankCoverage: доля банка шкалы, шкала вне справочника — 0', () => {
+    expect(getScaleBankCoverage('MAC', [0, 1], data)).toBeCloseTo(1) // 2 из 2
+    expect(getScaleBankCoverage('HUM', [2], data)).toBeCloseTo(0.5) // 1 из 2
+    expect(getScaleBankCoverage('SAD', [0, 1, 2, 3], data)).toBe(0)
+  })
+
+  it('getScaleConfidence: high набирается абсолютным числом ответов', () => {
+    // 40 вопросов, все релевантны SAD
+    const wideMax: Record<string, Record<string, number>> = {}
+    for (let i = 1; i <= 40; i++) {
+      wideMax[String(i)] = { SAD: 2 }
+    }
+    const wide: ScoringData = { perQuestionMax: wideMax, totalRelevantByScale: buildTotalRelevantByScale(wideMax) }
+    const sortOrders = Array.from({ length: 40 }, (_, i) => i)
+
+    expect(getScaleConfidence('SAD', sortOrders.slice(0, 4), wide)).toBe('insufficient')
+    expect(getScaleConfidence('SAD', sortOrders.slice(0, 10), wide)).toBe('low')
+    expect(getScaleConfidence('SAD', sortOrders.slice(0, 20), wide)).toBe('moderate')
+    expect(getScaleConfidence('SAD', sortOrders, wide)).toBe('high')
   })
 })
 
@@ -200,8 +243,9 @@ describe('пересчёт гостевой сессии на сервере (5.
     // HUM: raw 1+2=3, actual_max 6 → 50 (significant)
     expect(scores.normalized.HUM).toBe(50)
     expect(scores.levels.HUM).toBe('significant')
-    // Достоверность и валидность считаются из тех же ответов
-    expect(scores.confidence.MAC).toBe('high')
+    // Достоверность считается из тех же ответов: два релевантных вопроса по MAC —
+    // это insufficient, сколько бы их ни было в банке
+    expect(scores.confidence.MAC).toBe('insufficient')
     expect(scores.answersWithSortOrder).toHaveLength(4)
   })
 })

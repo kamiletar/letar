@@ -1,7 +1,6 @@
 'use client'
 
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
-import { notFound } from 'next/navigation'
 
 import { DevelopmentalProfileCard } from '../../_components/developmental-profile-card'
 import { ProfileDetails } from '../../_components/profile-details'
@@ -10,14 +9,10 @@ import { ALL_SCALE_CODES, STATE_CODES } from '../../_data/personality-types'
 
 /**
  * Dev-страница визуальной проверки developmental-фрейма (этап 5.6.1) — только для разработки.
- * Показывает карточку «Суперсила → Ловушка → Практики» для всех 22 шкал (как юзер, без клиники),
+ * Показывает карточку «Суперсила → Ловушка → Практики» для всех шкал ядра (как юзер, без клиники),
  * блок «Состояния» с примерными баллами BAR/DPR и ipsative-ранжирование с интервалами (5.6).
  */
 export default function DevelopmentalDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   // Примерные баллы: состояния выражены, чтобы блок «Состояния» отрисовался
   const sampleScores = Object.fromEntries(
     ALL_SCALE_CODES.map((code) => [code, STATE_CODES.includes(code) ? 65 : 50])

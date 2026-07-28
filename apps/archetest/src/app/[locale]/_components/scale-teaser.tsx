@@ -5,7 +5,7 @@ import { Button, Card, Heading, HStack, Icon, SimpleGrid, Text, VStack } from '@
 import { useTranslations } from 'next-intl'
 import { LuLock } from 'react-icons/lu'
 
-import { getPersonalityType, type PersonalityTypeCode, TEASER_SCALE_CODES } from '../_data/personality-types'
+import { getScaleName, type PersonalityTypeCode, TEASER_SCALE_CODES } from '../_data/personality-types'
 
 interface ScaleTeaserProps {
   /** Русская локаль (иначе английская) */
@@ -14,8 +14,7 @@ interface ScaleTeaserProps {
 
 /** Название шкалы в тизере: юзерский label + архетип, без клинических ярлыков (политика 5.6.1) */
 function teaserName(code: PersonalityTypeCode, isRu: boolean): string {
-  const type = getPersonalityType(code)
-  return isRu ? `${type.label} ${type.archetype}` : `${type.labelEn} ${type.archetypeEn}`
+  return getScaleName(code, { audience: 'user' }, isRu)
 }
 
 /**

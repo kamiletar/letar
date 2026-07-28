@@ -1,10 +1,9 @@
 'use client'
 
 import { Container, Heading, Text, VStack } from '@chakra-ui/react'
-import { notFound } from 'next/navigation'
 
-import { ExperimentalScalesBlock } from '../../cabinet/[clientId]/_components/experimental-scales-block'
 import { type ScaleCode, SCORED_SCALE_CODES } from '../../_data/personality-types'
+import { ExperimentalScalesBlock } from '../../cabinet/[clientId]/_components/experimental-scales-block'
 
 /**
  * Dev-страница визуальной проверки блока экспериментальных шкал (этап 5.5) —
@@ -12,10 +11,6 @@ import { type ScaleCode, SCORED_SCALE_CODES } from '../../_data/personality-type
  * сценариев индекса «Броня и Радар» (Громоотвод / Крепость / Оголённый нерв).
  */
 export default function ExperimentalDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   const base = Object.fromEntries(SCORED_SCALE_CODES.map((code) => [code, 40])) as Record<ScaleCode, number>
 
   // Громоотвод: высокая броня + высокий радар

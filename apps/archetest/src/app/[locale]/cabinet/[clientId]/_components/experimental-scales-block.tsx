@@ -2,6 +2,8 @@
 
 import { Badge, Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
+import { ScoreBar } from '../../../_components/score-bar'
+import { CORE_SCALE_COUNT } from '../../../_data/bank-stats'
 import { EXPERIMENTAL_SCALES, type ScaleCode } from '../../../_data/personality-types'
 import { computeArmorRadar } from '../../../_lib/armor-radar'
 
@@ -47,8 +49,8 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
         </HStack>
         <Text fontSize="xs" color="fg.subtle" mb={4}>
           {isRu
-            ? 'Авторские / прототипные конструкты вне ядра из 22 шкал. Не показываются клиенту, не входят в экспресс и «ведущие черты». Интерпретировать осторожно — валидация не завершена.'
-            : 'Author / prototype constructs outside the 22-scale core. Not shown to the client, excluded from the express test and “leading traits”. Interpret cautiously — validation is not complete.'}
+            ? `Авторские / прототипные конструкты вне ядра из ${CORE_SCALE_COUNT} шкал. Не показываются клиенту, не входят в экспресс и «ведущие черты». Интерпретировать осторожно — валидация не завершена.`
+            : `Author / prototype constructs outside the ${CORE_SCALE_COUNT}-scale core. Not shown to the client, excluded from the express test and “leading traits”. Interpret cautiously — validation is not complete.`}
         </Text>
 
         <VStack gap={4} align="stretch">
@@ -70,17 +72,7 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
                   </Text>
                 </HStack>
                 {/* Полоса балла */}
-                <Box position="relative" h="6px" bg="bg.muted" borderRadius="full" overflow="hidden" mb={2}>
-                  <Box
-                    position="absolute"
-                    left={0}
-                    top={0}
-                    h="100%"
-                    w={`${Math.min(100, value)}%`}
-                    bg={scale.color}
-                    borderRadius="full"
-                  />
-                </Box>
+                <ScoreBar value={value} color={scale.color} mb={2} />
                 <Text fontSize="xs" color="fg.muted">
                   {value >= 50
                     ? isRu

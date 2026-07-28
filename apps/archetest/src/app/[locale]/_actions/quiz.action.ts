@@ -7,16 +7,18 @@ import type { PersonalityTypeCode } from '../_data/personality-types'
 import { ALL_SCALE_CODES } from '../_data/personality-types'
 import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
 import { isValidityQuestion, VALIDITY_CHECKS, VALIDITY_PER_SESSION } from '../_data/validity-checks'
-import type { AnsweredQuestionInput, QuizOptionData, QuizScores, ScaleConfidence } from '../_lib/scoring-core'
-import { computeActualMax, computeScoresCore, getScaleConfidence } from '../_lib/scoring-core'
+import type { AnsweredQuestionInput, QuizOptionData, QuizScores } from '../_lib/scoring-core'
+import { computeActualMax, computeScoresCore, getScaleBankCoverage } from '../_lib/scoring-core'
 import { fisherYatesShuffle, stratifiedSelect } from '../_lib/stratified-shuffle'
 import { computeValidityFlags } from '../_lib/validity'
 import { checkAndAwardAchievements } from './achievements.action'
 import { recalcLeaderboardEntry } from './leaderboard.action'
 
 // Ядро скоринга вынесено в _lib/scoring-core (этап 5.6, unit-тестируемо без next).
-// Типы реэкспортируются — внешние импорты из quiz.action продолжают работать.
-export type { QuizOptionData, QuizScores, ScaleConfidence, ScaleLevel } from '../_lib/scoring-core'
+// Типы отсюда НЕ реэкспортируются: единственный источник — '../_lib/scoring-core'.
+// Реэкспорт из 'use server'-модуля приглашал написать однажды value-импорт вместо
+// type-импорта и утащить серверный код в клиентский бандл
+// (см. .claude/docs/client-bundle-data-leaks.md).
 
 /** Вопрос квиза для клиента */
 export interface QuizQuestionDTO {
@@ -48,13 +50,18 @@ const SubmitQuizSchema = z
   .strip()
 
 /**
- * Достоверность всех шкал по кумулятивному набору отвеченных вопросов (этап 5.9.4,
- * ачивка «Полная карта»). Async-обёртка над ядром scoring-core для achievements.action.ts.
+ * Покрытие банка по всем шкалам ядра (0..1) для кумулятивного набора отвеченных
+ * вопросов (этап 5.9.4, ачивка «Полная карта»). Async-обёртка над ядром scoring-core.
+ *
+ * Именно покрытие, а не достоверность: «полная карта» — это «прошёл всё, что есть
+ * по каждой шкале», а достоверность отвечает на другой вопрос — «насколько точна
+ * оценка» (и по редким шкалам банка её высокий уровень недостижим в принципе,
+ * см. `confidenceFromCount`).
  */
-export async function getCumulativeConfidence(answeredSortOrders: number[]): Promise<Record<string, ScaleConfidence>> {
-  const result: Record<string, ScaleConfidence> = {}
+export async function getCumulativeBankCoverage(answeredSortOrders: number[]): Promise<Record<string, number>> {
+  const result: Record<string, number> = {}
   for (const code of ALL_SCALE_CODES) {
-    result[code] = getScaleConfidence(code, answeredSortOrders)
+    result[code] = getScaleBankCoverage(code, answeredSortOrders)
   }
   return result
 }

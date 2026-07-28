@@ -16,6 +16,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: isRu
       ? 'Как Archetest обрабатывает персональные данные (152-ФЗ)'
       : 'How Archetest processes personal data',
+    alternates: {
+      canonical: isRu ? '/privacy' : '/en/privacy',
+      languages: { ru: '/privacy', en: '/en/privacy' },
+    },
   }
 }
 

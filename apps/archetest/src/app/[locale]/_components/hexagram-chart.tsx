@@ -5,8 +5,8 @@ import { useLocale } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import {
-  DARK_TRIAD_DISPLAY,
   getPersonalityType,
+  getScaleName,
   HEXAGRAM_SCALE_CODES,
   type PersonalityTypeCode,
 } from '../_data/personality-types'
@@ -75,14 +75,14 @@ function useAnimatedScores(
   return animated
 }
 
-/** Подпись шкалы: в контексте триады тёмные показываются под display-ярлыками (PSY и др.) */
+/**
+ * Подпись шкалы: гексаграмма — единственное пользовательское место, где показываются
+ * конструктные названия («Гуманизм», «Психопатия»): без терминов триад визуализация
+ * теряет смысл. Аудитория `construct` разрешает это только для шкал белого списка
+ * (см. PUBLIC_CONSTRUCT_SCALES) — все восемь вершин в него входят.
+ */
 function scaleLabel(code: PersonalityTypeCode, isRu: boolean): string {
-  const display = DARK_TRIAD_DISPLAY[code]
-  if (display) {
-    return isRu ? display.ru : display.en
-  }
-  const type = getPersonalityType(code)
-  return isRu ? type.clinical : type.clinicalEn
+  return getScaleName(code, { audience: 'construct', triadAlias: true }, isRu)
 }
 
 /** Подпись вершины за пределами ауры, с anchor по стороне света */

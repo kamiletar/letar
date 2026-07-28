@@ -2,7 +2,8 @@
 
 import { Badge, Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
-import { DARK_TRIAD_DISPLAY, getPersonalityType } from '../../../_data/personality-types'
+import { ScoreBar } from '../../../_components/score-bar'
+import { getScaleName } from '../../../_data/personality-types'
 import type { DarkCoreCode, DarkCoreIndex } from '../../../_lib/dark-core'
 import type { ScaleConfidence } from '../../../_lib/scoring-core'
 
@@ -13,12 +14,7 @@ interface DarkCoreBlockProps {
 
 /** Конструктное название шкалы — психологу показываем открыто */
 function scaleName(code: DarkCoreCode, isRu: boolean): string {
-  const display = DARK_TRIAD_DISPLAY[code]
-  if (display) {
-    return isRu ? display.ru : display.en
-  }
-  const type = getPersonalityType(code)
-  return (isRu ? type?.clinical : type?.clinicalEn) ?? code
+  return getScaleName(code, { audience: 'clinician', triadAlias: true }, isRu)
 }
 
 /** Подпись достоверности. Это покрытие банка вопросов, а не надёжность измерения */
@@ -108,17 +104,11 @@ export function DarkCoreBlock({ index }: DarkCoreBlockProps) {
                   {flavor.score}%
                 </Text>
               </HStack>
-              <Box position="relative" h="6px" bg="bg.muted" borderRadius="full" overflow="hidden" mb={2}>
-                <Box
-                  position="absolute"
-                  left={0}
-                  top={0}
-                  h="100%"
-                  w={`${Math.min(100, flavor.score)}%`}
-                  bg={flavor.pronounced && flavor.deviation > 0 ? 'orange.400' : 'gray.400'}
-                  borderRadius="full"
-                />
-              </Box>
+              <ScoreBar
+                value={flavor.score}
+                color={flavor.pronounced && flavor.deviation > 0 ? 'orange.400' : 'gray.400'}
+                mb={2}
+              />
               <Text fontSize="xs" color="fg.muted">
                 {flavor.pronounced
                   ? isRu

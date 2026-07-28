@@ -5,20 +5,25 @@ import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { Fragment, Suspense } from 'react'
 import { ProfessionalLeadForm } from '../_components/professional-lead-form'
+import { CORE_SCALE_COUNT, TOTAL_QUESTIONS } from '../_data/bank-stats'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
+import { SCALE_PROTOTYPES } from '../_data/scale-prototypes'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const isRu = locale === 'ru'
   const title = isRu ? 'Психологам: методология теста' : 'For Clinicians: Test Methodology'
   const description = isRu
-    ? 'На чём основан Archetest: маппинг 22 шкал на валидированные инструменты (PID-5, Light Triad Scale, SD3, AQ, TAS-20), дименсиональные модели AMPD и МКБ-11, D-фактор и тёмное ядро, кабинет психолога с динамикой клиентов.'
-    : 'What Archetest is grounded in: 22 scales mapped onto validated instruments (PID-5, Light Triad Scale, SD3, AQ, TAS-20), the AMPD and ICD-11 dimensional models, the Dark Factor of Personality, and a clinician dashboard with client dynamics.'
+    ? `На чём основан Archetest: маппинг ${CORE_SCALE_COUNT} шкал на валидированные инструменты (PID-5, Light Triad Scale, SD3, AQ, TAS-20), дименсиональные модели AMPD и МКБ-11, D-фактор и тёмное ядро, кабинет психолога с динамикой клиентов.`
+    : `What Archetest is grounded in: ${CORE_SCALE_COUNT} scales mapped onto validated instruments (PID-5, Light Triad Scale, SD3, AQ, TAS-20), the AMPD and ICD-11 dimensional models, the Dark Factor of Personality, and a clinician dashboard with client dynamics.`
 
   return {
     title,
     description,
-    alternates: { canonical: isRu ? '/for-professionals' : '/en/for-professionals' },
+    alternates: {
+      canonical: isRu ? '/for-professionals' : '/en/for-professionals',
+      languages: { ru: '/for-professionals', en: '/en/for-professionals' },
+    },
     openGraph: { title, description, type: 'article', locale: isRu ? 'ru_RU' : 'en_US' },
   }
 }
@@ -56,8 +61,8 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         <Section title={isRu ? 'О тесте' : 'About the Test'}>
           <Text>
             {isRu
-              ? 'Многошкальный скрининговый опросник личностных черт и аффективных паттернов. 2096 вопросов, 22 шкалы, ситуативный формат (каждый вопрос — жизненная ситуация с четырьмя вариантами реагирования). Результат — нормализованный профиль выраженности черт от 0 до 100% по каждой шкале.'
-              : 'A multi-scale screening questionnaire for personality traits and affective patterns. 2096 items, 22 scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.'}
+              ? `Многошкальный скрининговый опросник личностных черт и аффективных паттернов. ${TOTAL_QUESTIONS} вопросов, ${CORE_SCALE_COUNT} шкалы, ситуативный формат (каждый вопрос — жизненная ситуация с четырьмя вариантами реагирования). Результат — нормализованный профиль выраженности черт от 0 до 100% по каждой шкале.`
+              : `A multi-scale screening questionnaire for personality traits and affective patterns. ${TOTAL_QUESTIONS} items, ${CORE_SCALE_COUNT} scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.`}
           </Text>
           <Text>
             {isRu
@@ -82,125 +87,10 @@ function ForProfessionalsView({ locale }: { locale: string }) {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {(isRu
-                ? [
-                    [
-                      'Светлая триада (HUM/KAN/FAI)',
-                      'Light Triad Scale (LTS), 12 пунктов',
-                      'Kaufman et al., 2019',
-                      '10.3389/fpsyg.2019.00467',
-                    ],
-                    [
-                      'Тёмная триада (MAC/NAR/ANT)',
-                      'Short Dark Triad (SD3) / Dirty Dozen',
-                      'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
-                      '10.1177/1073191113514105',
-                    ],
-                    [
-                      'Тёмное ядро (MAC/NAR/ANT/SAD)',
-                      'D-фактор (Dark Factor of Personality), D70/D35/D16',
-                      'Moshagen, Hilbig & Zettler, 2018',
-                      '10.1037/rev0000111',
-                    ],
-                    [
-                      'Садизм (SAD)',
-                      'Short Sadistic Impulse Scale (SSIS) / ASP',
-                      "O'Meara, Davies & Hammond, 2011",
-                      '10.1037/a0022400',
-                    ],
-                    [
-                      '13 шкал РЛ (дименсионально)',
-                      'PID-5 (Personality Inventory for DSM-5)',
-                      'Krueger et al., 2012, APA',
-                      '10.1017/S0033291711002674',
-                    ],
-                    [
-                      'Систематизация и спектр (ASD)',
-                      'Autism-Spectrum Quotient (AQ / AQ-10)',
-                      'Baron-Cohen et al., 2001',
-                      '10.1023/A:1005653411471',
-                    ],
-                    [
-                      'Прямота коммуникации (DIR)',
-                      'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
-                      'Snyder, 1974 / Ashton & Lee, 2009',
-                      '10.1080/00223890902935878',
-                    ],
-                    [
-                      'Алекситимия (ALX)',
-                      'Toronto Alexithymia Scale (TAS-20)',
-                      'Bagby, Parker & Taylor, 1994',
-                      '10.1016/0022-3999(94)90005-1',
-                    ],
-                    ['BAR-скрининг', 'MDQ / HCL-32', 'Hirschfeld et al., 2000', '10.1176/appi.ajp.157.11.1873'],
-                    [
-                      'DPR-скрининг',
-                      'PHQ-9 (конструкт, без пункта о суицидальном риске)',
-                      'Kroenke, Spitzer & Williams, 2001',
-                      '10.1046/j.1525-1497.2001.016009606.x',
-                    ],
-                  ]
-                : [
-                    [
-                      'Light Triad (HUM/KAN/FAI)',
-                      'Light Triad Scale (LTS), 12 items',
-                      'Kaufman et al., 2019',
-                      '10.3389/fpsyg.2019.00467',
-                    ],
-                    [
-                      'Dark Triad (MAC/NAR/ANT)',
-                      'Short Dark Triad (SD3) / Dirty Dozen',
-                      'Jones & Paulhus, 2014 / Jonason & Webster, 2010',
-                      '10.1177/1073191113514105',
-                    ],
-                    [
-                      'Dark core (MAC/NAR/ANT/SAD)',
-                      'The Dark Factor of Personality (D), D70/D35/D16',
-                      'Moshagen, Hilbig & Zettler, 2018',
-                      '10.1037/rev0000111',
-                    ],
-                    [
-                      'Sadism (SAD)',
-                      'Short Sadistic Impulse Scale (SSIS) / ASP',
-                      "O'Meara, Davies & Hammond, 2011",
-                      '10.1037/a0022400',
-                    ],
-                    [
-                      '13 personality scales (dimensional)',
-                      'PID-5 (Personality Inventory for DSM-5)',
-                      'Krueger et al., 2012, APA',
-                      '10.1017/S0033291711002674',
-                    ],
-                    [
-                      'Systemizing / spectrum (ASD)',
-                      'Autism-Spectrum Quotient (AQ / AQ-10)',
-                      'Baron-Cohen et al., 2001',
-                      '10.1023/A:1005653411471',
-                    ],
-                    [
-                      'Communication directness (DIR)',
-                      'Self-Monitoring Scale (reversed) / HEXACO Sincerity',
-                      'Snyder, 1974 / Ashton & Lee, 2009',
-                      '10.1080/00223890902935878',
-                    ],
-                    [
-                      'Alexithymia (ALX)',
-                      'Toronto Alexithymia Scale (TAS-20)',
-                      'Bagby, Parker & Taylor, 1994',
-                      '10.1016/0022-3999(94)90005-1',
-                    ],
-                    ['BAR screening', 'MDQ / HCL-32', 'Hirschfeld et al., 2000', '10.1176/appi.ajp.157.11.1873'],
-                    [
-                      'DPR screening',
-                      'PHQ-9 (construct only, no suicide-risk item)',
-                      'Kroenke, Spitzer & Williams, 2001',
-                      '10.1046/j.1525-1497.2001.016009606.x',
-                    ],
-                  ]
-              ).map(([scale, proto, src, doi]) => (
-                <Table.Row key={scale}>
-                  <Table.Cell fontWeight="bold">{scale}</Table.Cell>
-                  <Table.Cell>{proto}</Table.Cell>
+              {SCALE_PROTOTYPES.map(({ group, groupEn, prototype, prototypeEn, source, doi }) => (
+                <Table.Row key={group}>
+                  <Table.Cell fontWeight="bold">{isRu ? group : groupEn}</Table.Cell>
+                  <Table.Cell>{isRu ? prototype : prototypeEn}</Table.Cell>
                   <Table.Cell color="fg.muted">
                     <ChakraLink
                       href={`https://doi.org/${doi}`}
@@ -208,7 +98,7 @@ function ForProfessionalsView({ locale }: { locale: string }) {
                       rel="noopener noreferrer"
                       color="fg.muted"
                     >
-                      {src}
+                      {source}
                     </ChakraLink>
                   </Table.Cell>
                 </Table.Row>
@@ -217,13 +107,13 @@ function ForProfessionalsView({ locale }: { locale: string }) {
           </Table.Root>
           <Text>
             {isRu
-              ? 'Валидированное ядро — 21 из 22 текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: в ядре это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.'
-              : 'The validated core covers 21 of the 22 current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.'}
+              ? `Валидированное ядро — ${CORE_SCALE_COUNT - 1} из ${CORE_SCALE_COUNT} текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: в ядре это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.`
+              : `The validated core covers ${CORE_SCALE_COUNT - 1} of the ${CORE_SCALE_COUNT} current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.`}
           </Text>
           <Text>
             {isRu
-              ? 'Вне ядра из 22 шкал существуют ещё три экспериментальные шкалы, доступные только в кабинете психолога и никогда не показываемые клиенту: «Физическая броня» (RES_PHYS, авторский конструкт без валидированного прототипа), «Аффективный резонанс» (RES_AFF, прототипы — IRI Personal Distress и шкала высокой чувствительности HSP/SPS) и «Специальные интересы» (SPEC_INT). Из них строится кросс-индекс «Броня и Радар». Все три помечены «бета», в экспресс-тест и «ведущие черты» не входят и на скоринг ядра не влияют: их вопросы начисляют баллы исключительно экспериментальным шкалам.'
-              : 'Beyond the 22-scale core there are three further experimental scales, available only in the clinician’s dashboard and never shown to the client: “Physical Armor” (RES_PHYS, an original construct with no validated prototype), “Affective Resonance” (RES_AFF, prototypes — IRI Personal Distress and the Highly Sensitive Person scale, HSP/SPS) and “Special Interests” (SPEC_INT). The “Armor & Radar” cross-index is built from them. All three are marked “beta”, are excluded from the express test and from “leading traits”, and do not affect core scoring: their items award points to experimental scales only.'}
+              ? `Вне ядра из ${CORE_SCALE_COUNT} шкал существуют ещё три экспериментальные шкалы, доступные только в кабинете психолога и никогда не показываемые клиенту: «Физическая броня» (RES_PHYS, авторский конструкт без валидированного прототипа), «Аффективный резонанс» (RES_AFF, прототипы — IRI Personal Distress и шкала высокой чувствительности HSP/SPS) и «Специальные интересы» (SPEC_INT). Из них строится кросс-индекс «Броня и Радар». Все три помечены «бета», в экспресс-тест и «ведущие черты» не входят и на скоринг ядра не влияют: их вопросы начисляют баллы исключительно экспериментальным шкалам.`
+              : `Beyond the ${CORE_SCALE_COUNT}-scale core there are three further experimental scales, available only in the clinician’s dashboard and never shown to the client: “Physical Armor” (RES_PHYS, an original construct with no validated prototype), “Affective Resonance” (RES_AFF, prototypes — IRI Personal Distress and the Highly Sensitive Person scale, HSP/SPS) and “Special Interests” (SPEC_INT). The “Armor & Radar” cross-index is built from them. All three are marked “beta”, are excluded from the express test and from “leading traits”, and do not affect core scoring: their items award points to experimental scales only.`}
           </Text>
           <Text>
             {isRu
@@ -302,8 +192,8 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         <Section title={isRu ? 'Порционное прохождение и стратификация' : 'Portioned Completion and Stratification'}>
           <Text>
             {isRu
-              ? 'Тест проходится порциями по 50 вопросов. Каждая порция формируется методом стратифицированной выборки: вопросы распределяются пропорционально по всем 22 шкалам с гарантией минимум одного вопроса на каждую шкалу. Это обеспечивает равномерный рост достоверности профиля по всем осям после каждой порции.'
-              : 'The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all 22 scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.'}
+              ? `Тест проходится порциями по 50 вопросов. Каждая порция формируется методом стратифицированной выборки: вопросы распределяются пропорционально по всем ${CORE_SCALE_COUNT} шкалам с гарантией минимум одного вопроса на каждую шкалу. Это обеспечивает равномерный рост достоверности профиля по всем осям после каждой порции.`
+              : `The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all ${CORE_SCALE_COUNT} scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.`}
           </Text>
           <Text>
             {isRu

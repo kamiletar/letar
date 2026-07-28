@@ -1,7 +1,6 @@
 'use client'
 
 import { Container, Heading, Text, VStack } from '@chakra-ui/react'
-import { notFound } from 'next/navigation'
 
 import { ALL_SCALE_CODES, type PersonalityTypeCode, STATE_CODES } from '../../_data/personality-types'
 import { computeDarkCore } from '../../_lib/dark-core'
@@ -15,10 +14,6 @@ import { DarkCoreBlock } from '../../cabinet/[clientId]/_components/dark-core-bl
  * (в /dev/experimental четвёртый квадрант не покрыт — здесь эту недоработку не повторяем).
  */
 export default function DarkCoreDevPage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
-
   const base = Object.fromEntries(ALL_SCALE_CODES.map((code) => [code, 35])) as Record<PersonalityTypeCode, number>
   const counts = Object.fromEntries(ALL_SCALE_CODES.map((code) => [code, 40])) as Record<PersonalityTypeCode, number>
   const confidence = Object.fromEntries(ALL_SCALE_CODES.map((code) => [code, 'moderate' as ScaleConfidence])) as Record<

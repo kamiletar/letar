@@ -12,8 +12,8 @@ import { LuArrowRight, LuRotateCcw } from 'react-icons/lu'
 import { submitQuizAction } from '../_actions/quiz.action'
 import {
   DARK_TRIAD_CODES,
-  DARK_TRIAD_DISPLAY,
   getPersonalityType,
+  getScaleName,
   LIGHT_TRIAD_CODES,
   type PersonalityTypeCode,
 } from '../_data/personality-types'
@@ -41,14 +41,9 @@ interface ExpressResultsProps {
 /** Внешнее кольцо гексаграммы: деструктивные паттерны */
 const AURA_CODES: PersonalityTypeCode[] = ['SAD', 'MAS']
 
-/** Подпись шкалы: тёмные — под display-ярлыком (Психопатия и др.) */
+/** Подпись шкалы: юзерская лексика, тёмные — под display-ярлыком (Психопатия и др.) */
 function scaleName(code: PersonalityTypeCode, isRu: boolean): string {
-  const display = DARK_TRIAD_DISPLAY[code]
-  if (display) {
-    return isRu ? display.ru : display.en
-  }
-  const type = getPersonalityType(code)
-  return isRu ? `${type.label} ${type.archetype}` : `${type.labelEn} ${type.archetypeEn}`
+  return getScaleName(code, { audience: 'user', triadAlias: true }, isRu)
 }
 
 /** Строка одной шкалы: название, балл, короткое описание */
@@ -96,7 +91,9 @@ function ScaleGroup({
       <Text fontSize="xs" fontWeight="bold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
         {title}
       </Text>
-      {codes.map((code) => <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />)}
+      {codes.map((code) => (
+        <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />
+      ))}
     </VStack>
   )
 }

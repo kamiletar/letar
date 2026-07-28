@@ -4,6 +4,7 @@ import { Box, HStack, Text } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 import { getNextRank, RANKS_MAP } from '../_data/ranks'
+import { ScoreBar } from './score-bar'
 
 interface RankBadgeProps {
   rankCode: string
@@ -39,9 +40,7 @@ export function RankBadge({ rankCode, xp, showProgress = false }: RankBadgeProps
       </HStack>
       {showProgress && (
         <Box mt={2}>
-          <Box w="100%" h="6px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
-            <Box h="100%" w={`${progressPercent}%`} bg="blue.500" borderRadius="full" transition="width 0.5s ease" />
-          </Box>
+          <ScoreBar value={progressPercent} color="blue.500" trackColor="bg.emphasized" animated />
           <Text fontSize="xs" color="fg.muted" mt={1}>
             {nextRank ? t('xpProgress', { current: xp, next: nextRank.minXp }) : t('maxRank')}
           </Text>

@@ -602,7 +602,7 @@ export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES
  * раскрывает полный тест. BAR/DPR (STATE_CODES) исключены — упомянуты отдельно.
  */
 export const TEASER_SCALE_CODES: PersonalityTypeCode[] = ALL_SCALE_CODES.filter(
-  (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code),
+  (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code)
 )
 
 /**
@@ -723,6 +723,67 @@ export function getPersonalityType(code: PersonalityTypeCode): PersonalityType {
 /** Получить типы по кластеру */
 export function getTypesByCluster(cluster: PersonalityCluster): PersonalityType[] {
   return PERSONALITY_TYPES.filter((t) => t.cluster === cluster)
+}
+
+/**
+ * Кому адресована подпись шкалы.
+ *
+ * - `user` — юзерская лексика: «label + архетип», никакой клиники (политика 5.6.1).
+ * - `construct` — конструктное название (поле `clinical`), но **только для шкал
+ *   из белого списка** `PUBLIC_CONSTRUCT_SCALES`; для остальных молча падает
+ *   обратно на юзерское имя. Нужен там, где пользователю осознанно показывают
+ *   термины — гексаграмма Светлой и Тёмной триад без них теряет смысл.
+ * - `clinician` — конструктное/клиническое название без ограничений. Только
+ *   кабинет психолога.
+ */
+export type ScaleNameAudience = 'user' | 'construct' | 'clinician'
+
+/**
+ * Шкалы, чьё поле `clinical` продуктово одобрено к показу пользователю.
+ *
+ * Это ровно 8 шкал гексаграммы: их конструктные имена («Гуманизм», «Психопатия»,
+ * «Бытовой садизм») — узнаваемые термины триад, а не диагнозы из карточки.
+ *
+ * Смысл списка — сделать политику 5.6.1 механической, а не договорной. Раньше
+ * четыре компонента выбирали `clinical` или `label` на месте вызова, и новый
+ * компонент мог взять клиническое название для пользователя, ничего не нарушив
+ * формально. Теперь шкала вне списка не отдаст `clinical` в пользовательский
+ * контекст, даже если автор попросит.
+ */
+export const PUBLIC_CONSTRUCT_SCALES: PersonalityTypeCode[] = HEXAGRAM_SCALE_CODES
+
+/**
+ * Единая точка именования шкалы: аудитория + нужен ли триада-алиас.
+ *
+ * Заменяет четыре локальные функции (`scaleName` в express-results и
+ * dark-core-block, `scaleLabel` в hexagram-chart, `teaserName` в scale-teaser),
+ * которые решали одну задачу по-разному.
+ */
+export function getScaleName(
+  code: PersonalityTypeCode,
+  options: { audience: ScaleNameAudience; triadAlias?: boolean },
+  isRu: boolean
+): string {
+  if (options.triadAlias) {
+    const display = DARK_TRIAD_DISPLAY[code]
+    if (display) {
+      return isRu ? display.ru : display.en
+    }
+  }
+
+  const type = getPersonalityType(code)
+  if (!type) {
+    return code
+  }
+
+  const userName = isRu ? `${type.label} ${type.archetype}` : `${type.labelEn} ${type.archetypeEn}`
+  if (options.audience === 'user') {
+    return userName
+  }
+  if (options.audience === 'construct' && !PUBLIC_CONSTRUCT_SCALES.includes(code)) {
+    return userName
+  }
+  return (isRu ? type.clinical : type.clinicalEn) || userName
 }
 
 /** Regex всех кодов шкал (генерируется из ALL_SCALE_CODES — не забыть про новые шкалы невозможно) */

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import { ACHIEVEMENTS, ACHIEVEMENTS_MAP } from '../_data/achievements'
 import { ALL_SCALE_CODES } from '../_data/personality-types'
-import { getCumulativeConfidence } from './quiz.action'
+import { getCumulativeBankCoverage } from './quiz.action'
 
 /** Одна сессия для проверки достижений (моменты времени, mood, скоринг) */
 interface AchievementSession {
@@ -21,9 +21,21 @@ interface AchievementContext {
   allSessions: AchievementSession[]
   existingAchievements: string[]
   completedAt: Date
-  /** Достоверность по кумулятивному набору ВСЕХ отвеченных вопросов пользователя (5.9.4) */
-  cumulativeConfidence: Record<string, string>
+  /** Покрытие банка (0..1) по кумулятивному набору ВСЕХ отвеченных вопросов (5.9.4) */
+  cumulativeCoverage: Record<string, number>
 }
+
+/**
+ * Порог ачивки «Полная карта»: доля банка, пройденная по каждой шкале ядра.
+ *
+ * Раньше условием была достоверность `high`, которая тогда означала ровно «60%
+ * банка шкалы». После перевода достоверности на абсолютные пороги (см.
+ * `confidenceFromCount`) прежнее условие стало бы структурно недостижимым:
+ * по SAD в банке всего 21 вопрос, а `high` теперь требует 30 ответов.
+ * Ачивка про полноту прохождения, а не про точность оценки — поэтому она
+ * переехала на покрытие, а её достижимость осталась ровно прежней.
+ */
+const FULL_MAP_COVERAGE = 0.6
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -184,7 +196,7 @@ function checkAchievement(code: string, ctx: AchievementContext): boolean {
       return hasSpacingSeries(sessionsAsc, 4, 7)
     }
     case 'FULL_MAP':
-      return ALL_SCALE_CODES.every((code) => ctx.cumulativeConfidence[code] === 'high')
+      return ALL_SCALE_CODES.every((code) => (ctx.cumulativeCoverage[code] ?? 0) >= FULL_MAP_COVERAGE)
 
     default:
       return false
@@ -202,7 +214,7 @@ export async function checkAndAwardAchievements(
     answeredCount: number
     scores: Record<string, number>
     completedAt: Date
-  },
+  }
 ): Promise<string[]> {
   // Загружаем контекст
   const [allSessions, existingAchievements, uniqueAnsweredQuestions] = await Promise.all([
@@ -222,7 +234,7 @@ export async function checkAndAwardAchievements(
       where: { userId },
       select: { achievementCode: true },
     }),
-    // Уникальные отвеченные вопросы по ВСЕМ сессиям — для кумулятивной достоверности (FULL_MAP)
+    // Уникальные отвеченные вопросы по ВСЕМ сессиям — для кумулятивного покрытия (FULL_MAP)
     prisma.quizAnswer.findMany({
       where: { session: { userId } },
       select: { question: { select: { sortOrder: true } } },
@@ -235,7 +247,7 @@ export async function checkAndAwardAchievements(
   const answeredSortOrders = uniqueAnsweredQuestions
     .map((a) => a.question?.sortOrder)
     .filter((so): so is number => so !== undefined && so !== null)
-  const cumulativeConfidence = await getCumulativeConfidence(answeredSortOrders)
+  const cumulativeCoverage = await getCumulativeBankCoverage(answeredSortOrders)
 
   const ctx: AchievementContext = {
     sessionsCount: allSessions.length,
@@ -244,7 +256,7 @@ export async function checkAndAwardAchievements(
     allSessions,
     existingAchievements: [...existingCodes],
     completedAt: newSession.completedAt,
-    cumulativeConfidence,
+    cumulativeCoverage,
   }
 
   // Проверяем все ещё не разблокированные достижения
@@ -265,7 +277,7 @@ export async function checkAndAwardAchievements(
         prisma.userQuizAchievement.create({
           data: { userId, achievementCode: code },
         })
-      ),
+      )
     )
   }
 

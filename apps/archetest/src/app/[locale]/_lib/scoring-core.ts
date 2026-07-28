@@ -113,7 +113,7 @@ export function computeActualMax(scale: string, answeredSortOrders: number[], da
 /** Число отвеченных релевантных вопросов по каждой шкале */
 export function countRelevantAnswered(
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA,
+  data: ScoringData = BANK_SCORING_DATA
 ): Record<ScaleCode, number> {
   const counts: Record<string, number> = {}
   for (const code of SCORED_SCALE_CODES) {
@@ -134,26 +134,63 @@ export function countRelevantAnswered(
   return counts as Record<ScaleCode, number>
 }
 
-/** Достоверность шкалы по числу пройденных релевантных вопросов относительно банка */
-export function confidenceFromCount(relevant: number, totalInBank: number): ScaleConfidence {
-  const ratio = relevant / (totalInBank || 1)
-  if (ratio < 0.1) {
+/**
+ * Пороги достоверности — по АБСОЛЮТНОМУ числу отвеченных релевантных вопросов.
+ *
+ * Раньше считалась доля банка (`relevant / totalInBank`), и это давало
+ * противоположный смыслу результат: вопросов на шкалу в банке различается в 100+ раз
+ * (RES_PHYS — 10, SAD — 21, а AVD — 1192, OBC — 1175). «Высокая достоверность»
+ * достигалась за 6 ответов по редкой шкале и за 715 — по населённой, то есть
+ * чем больше вопросов по шкале, тем «недостовернее» она выглядела.
+ *
+ * Точность оценки зависит от абсолютного n (стандартная ошибка убывает как 1/√n),
+ * а не от доли банка. Границы выведены из полуширины 95%-интервала Уилсона
+ * при худшем случае p = 0.5 — том самом, что уже считается в `ipsative.ts`:
+ *
+ * | n   | полуширина интервала | уровень      |
+ * | --- | -------------------- | ------------ |
+ * | < 5 | > ±33 п.п.           | insufficient |
+ * | 5   | ±33 п.п.             | low          |
+ * | 15  | ±23 п.п.             | moderate     |
+ * | 30  | ±17 п.п.             | high         |
+ *
+ * Следствие, которое важно понимать: по редким шкалам ядра (SAD — 21 вопрос,
+ * ASD — 22, MAS — 23) уровень `high` недостижим даже при исчерпании банка.
+ * Это честно — оценка по двум десяткам вопросов действительно груба, — и это
+ * подсвечивает отдельный техдолг «выровнять банк по редким шкалам».
+ */
+export const CONFIDENCE_THRESHOLDS = { low: 5, moderate: 15, high: 30 } as const
+
+/** Достоверность шкалы по числу отвеченных релевантных вопросов */
+export function confidenceFromCount(relevant: number): ScaleConfidence {
+  if (relevant < CONFIDENCE_THRESHOLDS.low) {
     return 'insufficient'
   }
-  if (ratio < 0.3) {
+  if (relevant < CONFIDENCE_THRESHOLDS.moderate) {
     return 'low'
   }
-  if (ratio < 0.6) {
+  if (relevant < CONFIDENCE_THRESHOLDS.high) {
     return 'moderate'
   }
   return 'high'
+}
+
+/**
+ * Покрытие банка по шкале (0..1) — доля релевантных вопросов шкалы, на которые
+ * человек ответил. Это НЕ достоверность (см. `confidenceFromCount`), а другая
+ * величина: «сколько из доступного пройдено». Оставлено отдельным показателем
+ * на случай, если понадобится в UI — например, чтобы объяснить, почему по редкой
+ * шкале нельзя набрать высокую точность.
+ */
+export function bankCoverage(relevant: number, totalInBank: number): number {
+  return totalInBank > 0 ? Math.min(1, relevant / totalInBank) : 0
 }
 
 /** Определить достоверность шкалы по списку отвеченных sortOrder */
 export function getScaleConfidence(
   scale: string,
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA,
+  data: ScoringData = BANK_SCORING_DATA
 ): ScaleConfidence {
   let relevant = 0
   for (const so of answeredSortOrders) {
@@ -162,7 +199,23 @@ export function getScaleConfidence(
       relevant++
     }
   }
-  return confidenceFromCount(relevant, data.totalRelevantByScale[scale] || 1)
+  return confidenceFromCount(relevant)
+}
+
+/** Покрытие банка по шкале (0..1) для списка отвеченных sortOrder */
+export function getScaleBankCoverage(
+  scale: string,
+  answeredSortOrders: number[],
+  data: ScoringData = BANK_SCORING_DATA
+): number {
+  let relevant = 0
+  for (const so of answeredSortOrders) {
+    const qId = String(so + 1)
+    if (data.perQuestionMax[qId]?.[scale] && data.perQuestionMax[qId][scale] > 0) {
+      relevant++
+    }
+  }
+  return bankCoverage(relevant, data.totalRelevantByScale[scale] ?? 0)
 }
 
 /**
@@ -172,7 +225,7 @@ export function getScaleConfidence(
  */
 export function computeScoresCore(
   answered: AnsweredQuestionInput[],
-  data: ScoringData = BANK_SCORING_DATA,
+  data: ScoringData = BANK_SCORING_DATA
 ): QuizScores {
   const raw: Record<string, number> = {}
   for (const code of SCORED_SCALE_CODES) {
@@ -214,7 +267,7 @@ export function computeScoresCore(
       levels[code] = getScaleLevel(norm)
     }
 
-    confidence[code] = confidenceFromCount(relevantCounts[code], data.totalRelevantByScale[code] || 1)
+    confidence[code] = confidenceFromCount(relevantCounts[code])
   }
 
   return {

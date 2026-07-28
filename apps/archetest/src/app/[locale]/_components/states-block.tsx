@@ -4,9 +4,9 @@ import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
 import { LuActivity } from 'react-icons/lu'
-import type { ScaleConfidence } from '../_actions/quiz.action'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { STATE_CODES } from '../_data/personality-types'
+import type { ScaleConfidence } from '../_lib/scoring-core'
 import { DevelopmentalProfileCard } from './developmental-profile-card'
 
 interface StatesBlockProps {

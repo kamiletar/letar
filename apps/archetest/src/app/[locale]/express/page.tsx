@@ -13,9 +13,15 @@ type Props = { params: Promise<{ locale: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'express' })
+  const isRu = locale === 'ru'
   return {
     title: t('title'),
     description: t('description'),
+    alternates: {
+      canonical: isRu ? '/express' : '/en/express',
+      languages: { ru: '/express', en: '/en/express' },
+    },
+    openGraph: { title: t('title'), description: t('description'), type: 'website' },
   }
 }
 

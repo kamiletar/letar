@@ -10,6 +10,7 @@ import { AppToaster } from '@/app/_components/ui/toaster'
 import { routing } from '@/i18n/routing'
 import { CookieConsent } from './_components/cookie-consent'
 import { Header } from './_components/header'
+import { CORE_SCALE_COUNT, TOTAL_QUESTIONS } from './_data/bank-stats'
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -22,10 +23,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const siteName = isRu ? 'Архетест' : 'Archetest'
   const title = isRu ? 'Архетест — Тест типа личности' : 'Archetest — Personality Type Test'
   const description = isRu
-    ? 'Узнайте свой архетип личности. 2096 вопросов, 22 шкалы — по 50 за сессию, в удобном темпе.'
-    : 'Discover your personality archetype. 2096 questions, 22 scales — 50 per session, at your own pace.'
+    ? `Узнайте свой архетип личности. ${TOTAL_QUESTIONS} вопросов, ${CORE_SCALE_COUNT} шкалы — по 50 за сессию, в удобном темпе.`
+    : `Discover your personality archetype. ${TOTAL_QUESTIONS} questions, ${CORE_SCALE_COUNT} scales — 50 per session, at your own pace.`
+
+  // Без metadataBase Next.js строит OpenGraph-ссылки и canonical относительными,
+  // а соцсети и поисковики требуют абсолютных
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
 
   return {
+    ...(baseUrl ? { metadataBase: new URL(baseUrl) } : {}),
     title: {
       default: title,
       template: `%s | ${siteName}`,
