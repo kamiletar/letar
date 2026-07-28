@@ -116,4 +116,14 @@ Better Auth, cookie-баннер и т.д.), которую не всем нов
 1. `mkdir src/generators/<name>`, добавь `generator.ts` + `schema.json`/`schema.d.ts` + `files/`
    (шаблоны с суффиксом `__tmpl__`, dotfiles — `__dot__<name>__tmpl__`, EJS-синтаксис `<%= var %>`)
 2. Зарегистрируй в `generators.json`
-3. Покрой тестом на `createTreeWithEmptyWorkspace()` (см. `e2e-suite/generator.spec.ts`)
+3. Покрой тестом на `createTreeWithEmptyWorkspace()` (см. `e2e-suite/generator.spec.ts`).
+   ⚠️ Фикстура должна повторять **форму реальных данных**, а не удобную для проверки: баг
+   автоподбора порта прожил незамеченным именно потому, что тест писал конфигурацию портов,
+   которой в монорепо не бывает ([PLAN-INFRA.md §34](/PLAN-INFRA.md))
+4. Не пиши заново то, что уже лежит в `src/utils/` — оно общее для всех генераторов:
+
+| Утиль       | Что даёт                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `tree.ts`   | `templatesDirFor(import.meta.url)` — путь к `files/`; `assertTargetIsFree()` — проверка, что проект не затирается |
+| `naming.ts` | `toDisplayName()`, `toCamelCase()` — kebab-case имя проекта в то, что идёт в шаблоны                              |
+| `ports.ts`  | `resolveNextFreePort()` для нового приложения, `resolveAppPort()` для существующего                               |

@@ -1,35 +1,22 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
-import { fileURLToPath } from 'node:url'
+import { toCamelCase, toDisplayName } from '../../utils/naming'
 import { resolveNextFreePort } from '../../utils/ports'
+import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
 import type { NewAppGeneratorSchema } from './schema'
 
-// Генератор исполняется как ESM (нет __dirname) — восстанавливаем аналог через import.meta.url
-const currentDir = fileURLToPath(new URL('.', import.meta.url))
-
-function toDisplayName(name: string): string {
-  return name
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
-
-function toCamelCase(name: string): string {
-  return name.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase())
-}
+const templatesDir = templatesDirFor(import.meta.url)
 
 export default async function newAppGenerator(tree: Tree, options: NewAppGeneratorSchema): Promise<void> {
   const { name } = options
   const appDir = joinPathFragments('apps', name)
 
-  if (tree.exists(appDir)) {
-    throw new Error(`apps/${name} уже существует — генератор не перезаписывает существующие приложения`)
-  }
+  assertTargetIsFree(tree, appDir, 'приложения')
 
   const port = options.port ?? resolveNextFreePort(tree)
   const displayName = options.displayName ?? toDisplayName(name)
   const description = options.description ?? `${displayName} — Next.js приложение`
 
-  generateFiles(tree, joinPathFragments(currentDir, 'files'), appDir, {
+  generateFiles(tree, templatesDir, appDir, {
     name,
     camelCaseName: toCamelCase(name),
     port,

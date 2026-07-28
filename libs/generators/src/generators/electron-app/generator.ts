@@ -1,16 +1,9 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, readJson, type Tree } from '@nx/devkit'
-import { fileURLToPath } from 'node:url'
+import { toDisplayName } from '../../utils/naming'
+import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
 import type { ElectronAppGeneratorSchema } from './schema'
 
-// Генератор исполняется как ESM (нет __dirname) — восстанавливаем аналог через import.meta.url
-const currentDir = fileURLToPath(new URL('.', import.meta.url))
-
-function toDisplayName(name: string): string {
-  return name
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
+const templatesDir = templatesDirFor(import.meta.url)
 
 /** Убирает диапазонный префикс (^, ~) — electron-builder требует точную версию, иначе не может скачать бинарник */
 function pinVersion(range: string): string {
@@ -21,9 +14,7 @@ export default async function electronAppGenerator(tree: Tree, options: Electron
   const { name } = options
   const appDir = joinPathFragments('apps', name)
 
-  if (tree.exists(appDir)) {
-    throw new Error(`apps/${name} уже существует — генератор не перезаписывает существующие приложения`)
-  }
+  assertTargetIsFree(tree, appDir, 'приложения')
 
   const rootPkg = readJson(tree, 'package.json')
   const electronRange = rootPkg.dependencies?.electron ?? rootPkg.devDependencies?.electron
@@ -43,7 +34,7 @@ export default async function electronAppGenerator(tree: Tree, options: Electron
   const displayName = options.displayName ?? toDisplayName(name)
   const description = options.description ?? `${displayName} — Electron-приложение`
 
-  generateFiles(tree, joinPathFragments(currentDir, 'files'), appDir, {
+  generateFiles(tree, templatesDir, appDir, {
     name,
     displayName,
     description,

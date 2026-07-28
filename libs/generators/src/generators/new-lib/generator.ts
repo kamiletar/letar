@@ -1,21 +1,18 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
-import { fileURLToPath } from 'node:url'
+import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
 import type { NewLibGeneratorSchema } from './schema'
 
-// Генератор исполняется как ESM (нет __dirname) — восстанавливаем аналог через import.meta.url
-const currentDir = fileURLToPath(new URL('.', import.meta.url))
+const templatesDir = templatesDirFor(import.meta.url)
 
 export default async function newLibGenerator(tree: Tree, options: NewLibGeneratorSchema): Promise<void> {
   const { name } = options
   const libDir = joinPathFragments('libs', name)
 
-  if (tree.exists(libDir)) {
-    throw new Error(`libs/${name} уже существует — генератор не перезаписывает существующие библиотеки`)
-  }
+  assertTargetIsFree(tree, libDir, 'библиотеки')
 
   const description = options.description ?? `${name} — shared-библиотека монорепо letar`
 
-  generateFiles(tree, joinPathFragments(currentDir, 'files'), libDir, {
+  generateFiles(tree, templatesDir, libDir, {
     name,
     description,
   })
