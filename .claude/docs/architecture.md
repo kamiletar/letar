@@ -534,38 +534,13 @@ docker compose -f docker-compose.production.yml down
 docker compose -f docker-compose.production.yml up -d --build --force-recreate
 ```
 
-## Метаданные и SEO
-
-### Premium RosStil
-
-Из `apps/premium-rosstil/src/app/layout.tsx`:
-
-- Base URL: `https://premium.rosstil.ru`
-- Title: "Дизайнерская Одежда — Премиум РосСтиль"
-- Description: "Каталог премиальной дизайнерской одежды от Елены Аксяновой"
-- OpenGraph включён с русским описанием
-
-### IMOT
-
-Из `apps/imot/src/app/layout.tsx`:
-
-- Title: "Добро пожаловать в технику ИМОТ"
-- Description: "Интегративная Матрица Осознанной Трансформации"
-- Русскоязычный сайт (`lang="ru"`)
-
 ## Загрузка файлов
 
-### Premium RosStil
-
-- **Изображения товаров (только ADMIN):** `/api/upload` - Макс. 32MB, сохраняются в `uploads/products/`
-- **Аватары пользователей (авторизованные):** `/api/upload/avatar` - Макс. 2MB, сохраняются в `uploads/avatars/`
+- **Изображения (только ADMIN):** `/api/upload` — сохраняются в `uploads/<category>/`, лимит по типу.
+- **Аватары пользователей (авторизованные):** `/api/upload/avatar` — Макс. 2MB, сохраняются в `uploads/avatars/`
 - **Статическая отдача:** `/api/files/[...path]` - Отдаёт загруженные файлы
 - Файлы хранятся в структуре директорий приложения
 - Используй компонент Next.js Image для оптимизированной доставки
-
-### IMOT
-
-Реализация загрузки файлов следует аналогичным паттернам premium-rosstil.
 
 ## Типы компонентов
 

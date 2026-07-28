@@ -1,9 +1,8 @@
 /**
- * Этап 8.5 — Перенос данных владельца в kami
+ * Этап 8.5 — Перенос данных владельца в kami (выполнено 2026-06-05, скрипт оставлен как справка)
  *
- * Два старых аккаунта владельца → новый аккаунт Ключницы (kami@letar.best):
- *   - letarkami@gmail.com  → данные (4 AudioFile) + роли ADMIN
- *   - kaspergreen@gmail.com → данных нет, просто удаляем
+ * Два старых личных аккаунта владельца → новый аккаунт Ключницы (kami@letar.best).
+ * Конкретные адреса — в `.claude/private/COMPLIANCE.md`, здесь только через env (OLD_EMAILS).
  *
  * ПЕРЕД запуском:
  *   1. Войти в kami.letar.best через Ключницу → User(kami@letar.best) создан
@@ -12,10 +11,11 @@
  * Запуск на s2:
  *   cd /home/deploy/letar
  *   DATABASE_URL="postgresql://lena_user:<pass>@localhost:5437/lena_kami" \
+ *     OLD_EMAILS="old1@example.com,old2@example.com" \
  *     bun run infra/migrations/kami-owner-migration.ts
  *
  * Dry-run (без изменений):
- *   DRY_RUN=1 DATABASE_URL=... bun run infra/migrations/kami-owner-migration.ts
+ *   DRY_RUN=1 DATABASE_URL=... OLD_EMAILS=... bun run infra/migrations/kami-owner-migration.ts
  */
 
 import { ZenStackClient } from '@zenstackhq/orm'
@@ -23,7 +23,11 @@ import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 import { schema } from '../../apps/kami/src/generated/schema'
 
-const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
+if (!process.env.OLD_EMAILS) {
+  console.error('❌ Missing required env: OLD_EMAILS (comma-separated)')
+  process.exit(1)
+}
+const OLD_EMAILS = process.env.OLD_EMAILS.split(',').map((e) => e.trim())
 const NEW_EMAIL = 'kami@letar.best'
 const DRY_RUN = process.env.DRY_RUN === '1'
 
@@ -63,7 +67,7 @@ async function main() {
   for (const u of oldUsers) {
     console.log(`\nСтарый: ${u.id} (${u.email}) roles=${u.roles}`)
     console.log(
-      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`
+      `  AudioFile: ${u.uploadedAudio.length}, Image: ${u.uploadedImages.length}, BlogComment: ${u.blogComments.length}, Member: ${u.members.length}`,
     )
     u.uploadedAudio.forEach((a) => console.log(`    🎵 ${a.title}`))
   }

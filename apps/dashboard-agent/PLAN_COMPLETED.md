@@ -142,7 +142,7 @@ IMAP-проверка round-trip двумя независимыми ногам�
 
 **Провижининг (в этой же сессии, не отдельной задачей):** ящик `canary@letar.best` создан на Maddy
 (`maddy creds create`, пароль — `openssl rand -base64 32`), SMTP+IMAP auth проверены вживую.
-Внешняя нога — `letarkami@gmail.com` (личный ящик владельца), IMAP app-password (потребовало
+Внешняя нога — `<личный ящик владельца>`, IMAP app-password (потребовало
 включить 2FA на аккаунте — без неё Google скрывает страницу app-passwords). Оба секрета залиты в
 `.env.docker`/`.env.docker.enc`, синхронизированы на s1/s2 через `scripts/sync-env-docker.sh`.
 

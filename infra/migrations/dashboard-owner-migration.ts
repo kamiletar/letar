@@ -14,12 +14,18 @@
  *     bun run infra/migrations/dashboard-owner-migration.ts
  *
  * Dry-run:
- *   DRY_RUN=1 DATABASE_URL=... bun run infra/migrations/dashboard-owner-migration.ts
+ *   DRY_RUN=1 DATABASE_URL=... OLD_EMAILS=... bun run infra/migrations/dashboard-owner-migration.ts
+ *
+ * OLD_EMAILS — через запятую, конкретные адреса в `.claude/private/COMPLIANCE.md`.
  */
 
 import { Pool } from 'pg'
 
-const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
+if (!process.env.OLD_EMAILS) {
+  console.error('❌ Missing required env: OLD_EMAILS (comma-separated)')
+  process.exit(1)
+}
+const OLD_EMAILS = process.env.OLD_EMAILS.split(',').map((e) => e.trim())
 const NEW_EMAIL = 'kami@letar.best'
 const DRY_RUN = process.env.DRY_RUN === '1'
 
@@ -32,12 +38,12 @@ async function main() {
   try {
     const { rows: newUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = $1',
-      [NEW_EMAIL]
+      [NEW_EMAIL],
     )
     const newUser = newUsers[0]
     if (!newUser) {
       console.error(
-        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в dashboard.letar.best через Ключницу и повтори.`
+        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в dashboard.letar.best через Ключницу и повтори.`,
       )
       process.exit(1)
     }
@@ -45,7 +51,7 @@ async function main() {
 
     const { rows: oldUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = ANY($1)',
-      [OLD_EMAILS]
+      [OLD_EMAILS],
     )
 
     if (oldUsers.length === 0 && newUser.role === 'ADMIN') {

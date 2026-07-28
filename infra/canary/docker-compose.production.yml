@@ -17,10 +17,10 @@ services:
       SMTP_USER: ${SMTP_USER:-noreply@letar.best}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-canary@letar.best}
-      # IMAP — Яндекс (проверка доставки)
-      CANARY_TO: ${CANARY_TO:-kaspergreen@yandex.ru}
-      CANARY_IMAP_HOST: ${CANARY_IMAP_HOST:-imap.yandex.ru}
-      CANARY_IMAP_USER: ${CANARY_IMAP_USER:-kaspergreen@yandex.ru}
+      # IMAP — внешний провайдер (проверка доставки), без дефолтов: обязателен .env.docker
+      CANARY_TO: ${CANARY_TO}
+      CANARY_IMAP_HOST: ${CANARY_IMAP_HOST}
+      CANARY_IMAP_USER: ${CANARY_IMAP_USER}
       CANARY_IMAP_PASSWORD: ${CANARY_IMAP_PASSWORD}
       # Таймауты
       CANARY_TIMEOUT_MS: ${CANARY_TIMEOUT_MS:-90000}

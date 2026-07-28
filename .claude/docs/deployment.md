@@ -176,10 +176,10 @@ proxy_read_timeout 86400s;
 
 | Домен                         | Приложение               | Порт |
 | ----------------------------- | ------------------------ | ---- |
-| premium.rosstil.ru            | premium-rosstil-app      | 3000 |
-| integrelle.com                | imot-app                 | 3001 |
+| _(коммерческий домен)_        | premium-rosstil-app      | 3000 |
+| _(коммерческий домен)_        | imot-app                 | 3001 |
 | dash.letar.best               | dashboard-app            | 3002 |
-| направа.рф                    | driving-school-app       | 3003 |
+| _(коммерческий домен)_        | driving-school-app       | 3003 |
 | mandala.letar.best            | mandala-app              | 3004 |
 | kami.letar.best               | kami-app                 | 3005 |
 | pravda.letar.best             | pravda-app               | 3007 |

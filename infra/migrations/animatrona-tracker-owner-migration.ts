@@ -14,12 +14,18 @@
  *     bun run infra/migrations/animatrona-tracker-owner-migration.ts
  *
  * Dry-run:
- *   DRY_RUN=1 DATABASE_URL=... bun run infra/migrations/animatrona-tracker-owner-migration.ts
+ *   DRY_RUN=1 DATABASE_URL=... OLD_EMAILS=... bun run infra/migrations/animatrona-tracker-owner-migration.ts
+ *
+ * OLD_EMAILS — через запятую, конкретные адреса в `.claude/private/COMPLIANCE.md`.
  */
 
 import { Pool } from 'pg'
 
-const OLD_EMAILS = ['letarkami@gmail.com', 'kaspergreen@gmail.com']
+if (!process.env.OLD_EMAILS) {
+  console.error('❌ Missing required env: OLD_EMAILS (comma-separated)')
+  process.exit(1)
+}
+const OLD_EMAILS = process.env.OLD_EMAILS.split(',').map((e) => e.trim())
 const NEW_EMAIL = 'kami@letar.best'
 const DRY_RUN = process.env.DRY_RUN === '1'
 
@@ -32,12 +38,12 @@ async function main() {
   try {
     const { rows: newUsers } = await client.query<{ id: string; email: string; role: string }>(
       'SELECT id, email, role FROM "User" WHERE email = $1',
-      [NEW_EMAIL]
+      [NEW_EMAIL],
     )
     const newUser = newUsers[0]
     if (!newUser) {
       console.error(
-        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в animatrona.letar.best через Ключницу и повтори.`
+        `❌ Пользователь ${NEW_EMAIL} не найден!\n` + `   Войди в animatrona.letar.best через Ключницу и повтори.`,
       )
       process.exit(1)
     }
@@ -63,7 +69,7 @@ async function main() {
               (SELECT COUNT(*) FROM "ApiKey" k WHERE k."userId" = u.id)::int as apikey_count
        FROM "User" u
        WHERE u.email = ANY($1)`,
-      [OLD_EMAILS]
+      [OLD_EMAILS],
     )
 
     if (oldUsers.length === 0 && newUser.role === 'ADMIN') {
@@ -73,10 +79,10 @@ async function main() {
 
     for (const u of oldUsers) {
       console.log(
-        `Старый: ${u.id} (${u.email}) role=${u.role}\n` +
-          `  Anime: ${u.anime_count}, Library: ${u.library_count}, ` +
-          `Distribution: ${u.distribution_count}, PinJob: ${u.pinjob_count}, ` +
-          `Content: ${u.content_count}, ApiKey: ${u.apikey_count}`
+        `Старый: ${u.id} (${u.email}) role=${u.role}\n`
+          + `  Anime: ${u.anime_count}, Library: ${u.library_count}, `
+          + `Distribution: ${u.distribution_count}, PinJob: ${u.pinjob_count}, `
+          + `Content: ${u.content_count}, ApiKey: ${u.apikey_count}`,
       )
     }
 
@@ -104,12 +110,12 @@ async function main() {
         // Перенос с учётом дублей по animeId
         const { rows: libraryItems } = await client.query<{ id: string; anime_id: string }>(
           'SELECT id, "animeId" as anime_id FROM "UserLibraryItem" WHERE "userId" = $1',
-          [oldUser.id]
+          [oldUser.id],
         )
         for (const item of libraryItems) {
           const { rows: exists } = await client.query(
             'SELECT id FROM "UserLibraryItem" WHERE "userId" = $1 AND "animeId" = $2',
-            [newUser.id, item.anime_id]
+            [newUser.id, item.anime_id],
           )
           if (exists.length > 0) {
             // Дубль — удаляем старый (UserWatchProgress каскадом)
@@ -158,7 +164,7 @@ async function main() {
       // ModerationLog (moderatorId — RESTRICT: нужно переносить перед удалением User)
       const { rowCount: modLogCount } = await client.query(
         'UPDATE "ModerationLog" SET "moderatorId" = $1 WHERE "moderatorId" = $2',
-        [newUser.id, oldUser.id]
+        [newUser.id, oldUser.id],
       )
       if (modLogCount) console.log(`  ✅ ModerationLog перенесено: ${modLogCount}`)
 

@@ -8,9 +8,9 @@
  * Env:
  *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD — Maddy (стандартные)
  *   SMTP_FROM_EMAIL                                — от кого (canary@letar.best)
- *   CANARY_TO                                      — куда (kaspergreen@yandex.ru)
- *   CANARY_IMAP_HOST                               — imap.yandex.ru
- *   CANARY_IMAP_USER                               — kaspergreen@yandex.ru
+ *   CANARY_TO                                      — куда (личный внешний ящик владельца)
+ *   CANARY_IMAP_HOST                               — imap-хост внешнего провайдера (напр. imap.yandex.ru)
+ *   CANARY_IMAP_USER                               — тот же личный внешний ящик, что CANARY_TO
  *   CANARY_IMAP_PASSWORD                           — пароль приложения Яндекса
  *   CANARY_TIMEOUT_MS                              — таймаут ожидания (default: 60000)
  *   CANARY_POLL_INTERVAL_MS                        — интервал опроса (default: 5000)
@@ -23,7 +23,7 @@ import { createTransport } from 'nodemailer'
 
 const TIMEOUT_MS = Number(process.env.CANARY_TIMEOUT_MS ?? 60_000)
 const POLL_INTERVAL_MS = Number(process.env.CANARY_POLL_INTERVAL_MS ?? 5_000)
-const CANARY_TO = process.env.CANARY_TO ?? 'kaspergreen@yandex.ru'
+const CANARY_TO = requireEnv('CANARY_TO')
 const CANARY_FROM = process.env.SMTP_FROM_EMAIL ?? 'noreply@letar.best'
 
 function requireEnv(name: string): string {
@@ -126,7 +126,7 @@ async function main() {
     console.error(`[canary] ❌ FAIL: ${message}`)
 
     await sendTelegramAlert(
-      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`
+      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`,
     )
     process.exit(1)
   }

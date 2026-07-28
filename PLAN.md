@@ -1,1260 +1,17 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **➡️ СЛЕДУЮЩИЙ СТАРТ (2026-07-28, root-weaver): §27 — приватность публичного репо + чистка
-> структуры этого файла.** Полностью спланировано и записано в конце файла, ничего не выполнено.
-> Владелец принял два решения: (1) детали приватных приложений выносим в их собственные
-> `apps/<app>/PLAN.md` + сквозной журнал в **новый приватный репозиторий** (submodule
-> `.claude/private/`); (2) чистим **всё, что касается коммерсов**, а не только чувствительное.
-> Замер на сегодня: 277 упоминаний приватных приложений в этом файле, плюс номера РКН-операторов,
-> личный ящик владельца и домены коммерсов. Секретов не найдено. Начинать с Части 1 (§27) —
-> без приватного репо выносить некуда. **Порядок работ, точные шаги и DoD — в §27 в конце файла.**
+> **➡️ СЛЕДУЮЩИЙ СТАРТ (2026-07-28, root-weaver): §27 Часть 2, Шаг 2.1 — вынос по-приложенского
+> содержимого.** Части 1 и бо́льшая часть Части 2 (§27) сделаны: приватный репозиторий заведён и
+> засеян (`.claude/private/`), правило гигиены создано, весь сквозной rollout/e2e-журнал (1246 строк)
+> и все чувствительные реквизиты (РКН-номера, личный email, домены коммерсов) вынесены в приватные
+> доки. Осталось 107 упоминаний приватных приложений (было 277) — это архитектурное содержимое
+> §2–§13 (приложения как иллюстрации auth-паттернов), разбор которого на 5 `apps/<app>/PLAN.md`
+> требует отдельной построчной сессии. Часть 3 (структура файла, блок СТАТУС) не начата.
+> **Детали и DoD — в §27 в конце файла.**
 
-> **✅ Инфра: два production-бага, независимых от текущей задачи (2026-07-28, LavenderSpring):**
-> при работе над `studio` (автовыставление абонентских счетов) всплыли две проблемы, затрагивающие
-> весь монорепо. (1) `dashboard`'s прод-билд был сломан с коммита `78340e8a` (RP-Initiated Logout) —
-> `next build` падал на любом импорте из `@letar/auth/server` (`tsconfig.json` имел
-> `rootDir: "src"` + `composite: false`, конфликтующие с `paths`-маппингом на сырые `.ts` в
-> `libs/auth/src`, у которой нет билд-шага). `nx typecheck:tsgo` эту категорию ошибок не ловит —
-> см. уже задокументированный в этом файле паттерн `docker-bare-bun-workspace-deps`/
-> `nextjs-standalone-tracing`. Исправлено по образцу `driving-school`/`auth-hub`:
-> `rootDir: "../.."`. Дашборд не деплоился с момента поломки. (2) `studio` отсутствовал в реестре
-> `dashboard-agent` (`APP_PORTS`/`APP_HOSTS`/`SERVER_APPS`) — любая cron-задача для studio упала
-> бы с «Неизвестное приложение». Добавлен. Заодно вручную вычищены 4 мёртвые cron-задачи
-> (`imot`×2, `s1`×2) из живого `cron-jobs.json` на s2 — не в git, рантайм-файл. Детали:
-> `apps/dashboard/PLAN_COMPLETED.md` (v1.20.0), `apps/dashboard-agent/PLAN_COMPLETED.md` (v0.8.6),
-> `apps/studio/PLAN_COMPLETED.md` (Фаза 10/5).
-
-> **📋 Наблюдение (НЕ задача): детерминированный PRNG `mulberry32` продублирован в двух
-> приложениях (найдено 2026-07-28, poster-microtext-desktop).** Одна и та же реализация
-> лежит в `apps/archetest/src/app/[locale]/_lib/seeded-shuffle.ts` и в
-> `apps/poster-microtext-desktop/main/services/microtext/variety.ts`. В обоих случаях она
-> решает одну задачу — воспроизводимость: у archetest порядок вопросов, у
-> poster-microtext совпадение допечатки тиража с уже напечатанными экземплярами.
-> **Рекомендация — пока не выносить**, и это осознанное решение, а не недосмотр: шесть
-> строк канонического алгоритма, всего два места (порог «3+ мест» из CLAUDE.md не
-> достигнут), а poster-microtext — приватный submodule, которому общая либа добавит
-> зависимость ради экономии шести строк. Записано, чтобы при третьем появлении вынести
-> сразу, а не обнаруживать дублирование заново.
-
-> **📋 TODO: вынести проверку `X-Cron-Secret` в общий `libs/*` (найдено LavenderSpring,
-> 2026-07-28).** Идентичные 4 строки (`const cronSecret = process.env.CRON_SECRET; const
-provided = request.headers.get('x-cron-secret'); if (!cronSecret || provided !== cronSecret)
-return 401`) продублированы минимум в 5 местах: `studio/api/cron/send-reminders`,
-> `studio/api/cron/recurring-invoices`, `dashboard/api/alerts`, `dashboard/api/cron/heartbeat`,
-> `driving-school/api/cron/cleanup-api-logs`. Кандидат на `verifyCronSecret(request): boolean`
-> (или сразу с `NextResponse` на 401) в подходящей существующей `libs/*`, либо новая лёгкая
-> `libs/cron-auth`. Не реализовано, не приоритизировано.
-
-> **✅ §18.7 Тираж M1, батч 2 — `mandala` все 6 категорий закрыты, 41/41 локально
-> (2026-07-23, CoralCliff):** по SSH скопировал с прод-сервера (s2) недостающие исходные файлы
-> мандал/товаров, что разблокировало полноценный локальный сидинг и довёл диагностику до конца.
-> Найдена настоящая причина `05`: `noValidate`-фикс из первого раунда убрал единственную защиту
-> от пустых `name`/`phone` в форме чекаута (нативный HTML5 `required`) — а Zod-схема
-> (`OrderCreateFormSchema`) никогда не требовала непустую строку для этих полей (`z.string()`
-> без `.min(1)`). Заказ с пустым именем/телефоном реально создавался в БД — прямая регрессия
-> моего же фикса, не флак. Добавлен `.min(1)` в `checkout.schema.ts`. Плюс тестовые
-> strict-mode коллизии (`input[name=]` никогда не матчился — `@letar/forms` кладёт только
-> `data-field-name`, не нативный `name=`) и дублирующийся текст на success-странице — оба
-> пофикшены в `05-full-checkout.guest.spec.ts`. Полный набор 01/04/05/07/08/09/10 — **41/41
-> passed** дважды подряд локально (production-сборка, под параллельной 3-воркерной нагрузкой,
-> с БД пересозданной с нуля). Запрошен финальный деплой+прогон на staging. Детали —
-> `apps/mandala/PLAN.md` → «Четвёртый раунд — все 6 категорий закрыты».
-
-> **🟡 §18.7 Тираж M1, батч 2 — `mandala` третий раунд: реальные причины 07/08/10, 01/05
-> (2026-07-23, CoralCliff):** после третьего прогона (104/7, `09` закрыт) разобрался в оставшихся.
-> «Обнуление формы товара при сабмите» оказалось ложной тревогой — воспроизводилось только в
-> `nx dev` из-за живого редактирования файла во время теста (React Fast Refresh ремаунтил форму);
-> в production-сборке без HMR — 9/9 стабильно, включая под параллельной нагрузкой. Реальная причина
-> `07`/`08`/`10`: таймаут `waitForURL` в тесте `10` остался старым (5000ms), я забыл применить туда
-> тот же фикс что и в `07`/`08` — увеличил до 15000ms, под нагрузкой все три теперь стабильны.
-> Реальная причина `01`/`05`: **накопленный мусор** — `test.describe.configure({mode:'serial'})`
-> пропускает cleanup-тест при падении более раннего шага, осиротевшие Product/Mandala записи
-> копятся и засоряют `/shop`/`/mandalas`, откуда гостевые тесты берут «первый товар». Плюс
-> отдельный гэп: сидированные товары вообще не имели изображений (`ProductSlider` без картинок не
-> рендерит `<img>`) — добавил `ProductImage` в сид, переиспользуя уже загруженные картинки мандал.
-> Не проверено полностью локально (в этом дереве нет исходных файлов мандал), но паттерн идентичен
-> уже рабочему сидингу мандал. Нужна ручная очистка/пересид staging БД от мусора прошлых прогонов
-> перед следующим e2e — не мой фикс, но блокер для `01`/`05`. Детали — `apps/mandala/PLAN.md` →
-> «Третий раунд: реальная причина 07/08/10, 01/05».
-
-> **🟡 §18.7 Тираж M1, батч 2 — `mandala` второй прогон staging: 107/8, три новые находки
-> (2026-07-23, CoralCliff):** после деплоя фиксов ниже (`2618f341`) BlackCove прогнал e2e —
-> `10` закрыт, `01`/`09` подтвердились как реальные staging-проблемы (не локальный флак), но `05`
-> и `08` упали по НОВОЙ причине, плюс всплыл ранее не встречавшийся `04`. (1) `05` — strict-mode
-> violation в самом тесте: селектор `getByText(/добавлено в корзину|в корзине/i)` матчил
-> одновременно toast и disabled-кнопку «В корзине»; фикс — `.first()`. (2) `07`/`08` —
-> `waitForURL` таймаут 5000ms на `/new` слишком тесен под параллельной e2e-нагрузкой на общий
-> staging-контейнер (сами Server Actions уже корректно вызывают `redirect()` внутри, гонки нет);
-> увеличен до 15000ms. (3) `09` — та же категория бага, что чинилась для `/admin/products`:
-> `prisma/seed.ts` не создавал `Order`, пустая таблица → `EmptyState` вместо `<table>`; `09`
-> хрупко зависел от того, что `05` создаст заказ первым. Фикс — сидинг одного тестового заказа.
-> `04` (`/checkout/success`) — НЕ воспроизведён локально (SSR и браузер показывают текст сразу),
-> похоже на транзиентный флак. Повторный запрос на деплой + e2e отправлен BlackCove (тот же
-> thread). Детали — `apps/mandala/PLAN.md` → «Второй прогон на staging после фиксов выше».
-
-> **✅ §18.7 Тираж M1, батч 2 — `mandala` 6 остаточных категорий e2e-фейлов диагностированы и
-> исправлены локально (2026-07-23, CoralCliff, v0.39.11):** три независимых бага. (1) SEO title
-> главной страницы — единственный лист-сегмент, совпадающий по глубине с `[locale]/layout.tsx`,
-> из-за чего `title.template` родителя не применялся к строковому `title` дочерней страницы;
-> фикс — явный суффикс в `generateMetadata`; попутно снят двойной суффикс `"- Elfafeya Art -
-Elfafeya Art"` на 7 других страницах (`messages/ru.json`/`en.json`). (2) **Silent submit
-> failure — библиотечный баг `@letar/forms`, затрагивает ВСЕ формы во всех приложениях**: Chakra
-> `Field.Root required` прокидывает нативный HTML5 `required` на дочерний input, браузер тихо
-> блокирует submit до React `onSubmit`, из-за чего Zod-валидация (`Form.Errors`) никогда не
-> срабатывала на пустых обязательных полях. Фикс — `noValidate` на `<form>` в `form-simple.tsx`
-> и `form-with-api.tsx` (`libs/forms`). Этот баг и его фикс закрывают `05-full-checkout`,
-> `08-full-product-crud`, `10-integration-full-flow`. (3) Пустой необязательный `email` в чекауте
-> падал с «Некорректный email» — `z.string().email().optional()` не пропускает `''`; фикс —
-> `z.union([z.email(), z.literal('')])` в `checkout.schema.ts`. `01` (переход к товару) и `09`
-> (статусы заказа) локально не воспроизведены — требуют подтверждения на staging. Запрос на
-> деплой + повторный e2e отправлен BlackCove (thread `staging-e2e-gate-m1-batch2`). Детали —
-> `apps/mandala/PLAN.md` → «Остаточные e2e-фейлы staging batch2».
-
-> **⚠️ §18.7 Тираж M1, батч 2 — ложный «регресс» `mandala` admin-раздела на staging: стейл-коммит,
-> не новый баг (2026-07-22, SageBeacon):** повторный e2e-прогон дал регресс (95 passed / 13 failed,
-> весь admin-UI снова не рендерился) на коммите `5698f885` — который закоммичен на **5 минут раньше**
-> фикса `a5893e7c` (запись ниже). Подтверждено напрямую (`git show 5698f885:...`): в этом коммите ещё
-> старый `return unsubscribe` в `SlugField`/`SeoField` и пустой Product-сид — код тестировался **до**
-> фикса. Регрессии в коде нет, фикс `a5893e7c` уже подтверждён прогоном 103/9 (запись ниже). Запрос
-> BlackCove — подтвердить коммит `mandala-stage.s3.letar.best` и передеплоить на актуальный HEAD.
-> Детали — `apps/mandala/PLAN.md` → «Ложная регрессия admin-раздела».
-
-> **✅ §18.7 Тираж M1, батч 2 — `mandala` `/admin/products` сломан целиком, два независимых бага
-> в т.ч. в `libs/admin-ui` (2026-07-22, mandala-dev, коммит `a5893e7c`, v0.39.10):**
-> (1) `prisma/seed.ts` никогда не создавал `Product` — таблица товаров была пуста на любом
-> окружении; (2) `SlugField`/`SeoField` (`libs/admin-ui/src/form-fields/`) возвращали из `useEffect`
-> результат `form.store.subscribe()` напрямую — в установленном `@tanstack/store@^0.11.0`
-> `subscribe()` возвращает `{ unsubscribe }`, а не функцию, cleanup не вызывался, подписка утекала
-> на каждый mount/unmount и крашила вкладку браузера при клиентской навигации с любого admin-списка
-> на `/new` (`Target page, context or browser has been closed` в Playwright). Тот же паттерн уже был
-> починен в 10 местах `libs/forms/src/` ранее — только 2 файла `libs/admin-ui` остались со старым
-> кодом. Фикс сделан напрямую в `libs/admin-ui` (единственный consumer — `mandala`), без делегирования
-> через `form-delegation.md` (не `libs/forms`/form-mcp экосистема). **Верифицировано на staging через
-> BlackCove:** 96→99→**103 passed** (было 12 failed → 9 failed, все по теме `/admin/products` ушли).
-> Остаточные 9 фейлов (чекаут/заказы/CRUD-флоу) — отдельная задача, в `apps/mandala/PLAN.md` →
-> «🟡 Остаточные e2e-фейлы». Детали — `apps/mandala/PLAN_COMPLETED.md`.
-
-> **🔴→✅ Этап 0.7 — инцидент прод-краша от email-canary, найден BlackCove и починен
-> (2026-07-21/22, thread `deploy-dashboard-agent-email-canary`, коммит `305c0ec7`):** после первого
-> деплоя `email-canary-check` необработанный `'error'` на `ImapFlow` (`Socket timeout`) уронил весь
-> процесс `dashboard-agent` на s2 — вместе с cron-планировщиком остальных задач и deploy-mcp API,
-> попутно оборвав деплой `aprel8008`, который в этот момент вёл BlackCove (пришлось доливать вручную
-> через SSH-резерв). **Два слоя фикса:** (1) слушатель `client.on('error', ...)` — устраняет краш,
-> но если ошибка приходит ВМЕСТО reject-а уже начатого `await`, тот `await` виснет навсегда; (2)
-> внешний `Promise.race` с жёстким дедлайном (`POLL_TIMEOUT_MS + 15s`) + `client.close()` по
-> истечении — гарантирует ответ за конечное время независимо от поведения ImapFlow изнутри. Живым
-> прогоном воспроизведён реальный зависший IMAP-сокет (внешняя сетевая проблема до порта 993, не
-> баг Maddy — локально на сервере IMAP отвечает мгновенно) и подтверждено: вместо зависания —
-> `ok:false` с понятной причиной за ~105с, процесс жив. Деплой фикса запрошен у BlackCove.
-
-> **✅ Этап 0.7 — канареечный мониторинг доставки email, код готов (2026-07-22, root-weaver):**
-> `dashboard-agent` 0.7.6 → 0.8.0 — `lib/email-canary.ts` + новая cron-задача `email-canary-check`
-> (раз в 15 минут, s2). SMTP-отправка через выделенный ящик `canary@letar.best` + IMAP-проверка
-> двух ног (internal — тот же ящик Maddy; external — BCC на реальный внешний почтовик, ловит
-> класс инцидента «форвард режется gmail»). Алерт в dashboard при 3 подряд неудачах одной ноги
-> (переиспользован `AlertType.CRON_FAILED`, без новой миграции схемы). **Обе ноги провижинированы
-> и подтверждены (2026-07-22):** internal — ящик `canary@letar.best` на Maddy; external —
-> `letarkami@gmail.com` (личный ящик владельца, IMAP app-password после включения 2FA). SMTP+IMAP
-> auth обеих ног проверены вживую, секреты залиты и синхронизированы на s1/s2. Подробности — §0.7
-> ниже и `apps/dashboard-agent/PLAN.md`.
-
-> **✅ §18.7 Тираж M1, батч 2 — `mandala` инфра-блокер снят, dashboard-agent на s3 передеплоен
-> (2026-07-21, BlackCove, msg #667):** Простой `dashboard-agent` на s3 (9.9 дней, см. запись ниже)
-> оказался не просто «забыли передеплоить» — коммит переименования `premium-network →
-kami-network` (`7fd18c8c`, 2026-07-13) прошёл по всему репо, но не докатился до самого s3:
-> `docker-compose.s3.yml` требовал внешнюю сеть `kami-network`, которой на сервере не было (осталась
-> `premium-network`), редеплой падал на `network ... declared as external, but could not be found`
-> с ~07-11/12 (ещё до самого коммита). **Смигрировано без даунтайма:** 4 живых media-контейнера
-> (`media-api`/`worker`/`nginx`/`redis`) dual-homed на `kami-network`, health проверен на новой сети
-> до отключения от старой, пустая `premium-network` удалена. Побочно найден техдолг: `deploy-affected.sh`
-> не знает про хост `s3` вообще (case-select только s1/s2) — обойдено прямым `docker compose` на
-> сервере, сам скрипт не тронут (общий критичный файл для всех продов, чинить — отдельным PR).
-> **Итог:** `deploy_app(mandala, seed:true)` теперь реально передаёт `--seed`; `nx run
-mandala:db:seed` запускается и падает уже на **нашей** известной проблеме
-> (`Cannot find module '@/generated/prisma'`, tsx/tsconfig-paths не резолвит path-alias при вызове
-> через `prisma db seed`) — инфра-блокер снят, дальше чинить app-владельцу.
->
-> **✅ `mandala/prisma/seed.ts` — path-alias баг починен, вскрыл и обнажил ещё 2 связанных бага
-> (2026-07-21, root-weaver, v0.39.9):** Путь `@/generated/prisma` заменён на относительный
-> `../src/generated/prisma` (паттерн всех остальных приложений — `mandala` была единственной,
-> использовавшей алиас в `prisma/seed.ts`, куда `tsx` не прокидывает `tsconfig.json` paths при
-> вызове через `prisma db seed`). **После фикса вскрылись два новых бага, оба воспроизведены
-> локально в точности как на сервере (`nx zenstack:generate` → `nx db:seed`):**
->
-> - **`PrismaClient` is not a constructor** — `zenstack:generate` у `mandala` (как и у
->   `grandslamcup`/`dsperevod`/`auth-hub`/`time`/`archetest`/`aprel8008`/`svoichuzhie`/`kami`/
->   `studio` — репо-wide паттерн) **намеренно** перезаписывает `src/generated/prisma/index.ts` на
->   `export * from './browser'` третьей командой в `project.json` — защита от протечки
->   Node-only `PrismaClient` в клиентские бандлы. Но `browser.ts` экспортирует только типы, не
->   класс. Само приложение это не задевает (`lib/db.ts` использует `ZenStackClient`, не сырой
->   `PrismaClient`), но `prisma/seed.ts` — единственное место в `mandala`, которому нужен
->   настоящий класс. Фикс — импорт `PrismaClient` из явного `../src/generated/prisma/client`
->   (реальный серверный entry-point, `index.ts`/`browser.ts` — сознательно урезанный дефолт).
-> - **`PrismaClientInitializationError`: нужен non-empty `PrismaClientOptions`** — Prisma 7
->   (`prisma-client` TS-генератор) больше не собирает `new PrismaClient()` без параметров,
->   требует явный driver adapter. Фикс по образцу `animatrona-tracker/prisma/seed.ts` —
->   `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })`
->   (`@prisma/adapter-pg` уже в зависимостях корня).
->
-> **Проверено локально end-to-end:** `nx run mandala:db:seed --skip-nx-cache` — admin
-> (`admin@elfafeya.art`, credential-аккаунт) создан, 31 мандала/37 изображений/10 short URL
-> засеяны (предупреждения "File not found" — ожидаемо, `uploads/` не в git, на staging файлы
-> есть). `nx lint mandala` и `nx typecheck:tsgo mandala` чисто.
->
-> **✅ Аудит остальных 9 приложений батча ЗАВЕРШЁН (2026-07-21, фоновая сессия):** реальный баг того
-> же класса нашёлся только в **`grandslamcup`** — тот же bare-index импорт (`'../src/generated/
-prisma'` → `browser`-экспорт без класса) + `new PrismaClient()` без driver adapter. Починен тем
-> же паттерном (явный `../src/generated/prisma/client` + `PrismaPg` adapter), коммит `6efa4e59`,
-> версия `3.37.3 → 3.37.4`. Проверено локально (временный `postgres:17-alpine` на порту 5453,
-> `nx db:push` + `nx db:seed` — дошёл до реального запроса к БД, контейнер после проверки удалён).
-> **Остальные 8 приложений не затронуты — баг там не воспроизводится:**
-> `dsperevod`/`auth-hub`/`studio`/`archetest`/`kami` используют `ZenStackClient` напрямую (не сырой
-> `PrismaClient`, как и `mandala`), а `time`/`aprel8008`/`svoichuzhie` вообще не имеют
-> `prisma/seed.ts`. Правок в них не вносилось — паттерн бага не воспроизводится, трогать не нужно.
->
-> **✅ §18.7 Тираж M1, батч 2 — диагностика и фиксы 4 находок BlackCove (2026-07-21,
-> root-weaver):** По следам свода BlackCove (запись ниже) — разобраны и закрыты кодом 4 из 5
-> проблем батча (`mandala` не тронута, блокирована на стороне BlackCove — dashboard-agent
-> redeploy + `tsx`/path-alias баг в seed).
->
-> - **`dsperevod`/`svoichuzhie` — email-verification/auth формы биты в несуществующий адрес.**
->   Root cause — `authClient` (`src/lib/auth-client.ts`) строился на build-time
->   `NEXT_PUBLIC_BETTER_AUTH_URL`, которого `Dockerfile.production` никогда не передавал как build
->   ARG — в собранном клиентском бандле всегда оставался дефолт `localhost:PORT`. Клиент бил мимо
->   staging-домена из браузера пользователя, хотя серверный `BETTER_AUTH_URL` был настроен верно.
->   Фикс — `window.location.origin` вместо `process.env.NEXT_PUBLIC_*` (паттерн уже был в `aboi`).
->   **Подтверждено BlackCove живым прогоном:** dsperevod `email-verification.spec.ts` 3/3
->   passed (было 3/3 failed); svoichuzhie `10-auth.spec.ts` 2 из 3 auth-тестов починились.
->   Коммиты: `09cda6f`(dsperevod submodule), `76cae4b`(svoichuzhie submodule), root `dabccad7`/
->   `616da8fc`/`9afec0fb`.
-> - **`pravda` — `CONNECTION_REFUSED` на URL без слэша.** Root cause — nginx `port_in_redirect`
->   (дефолт `on`) подставлял внутренний container-порт (`3007`, не проброшен наружу) в
->   автогенерируемый 301-редирект `$uri`→`$uri/`. Фикс — `port_in_redirect off;`. **Подтверждено**
->   curl'ом BlackCove — редирект теперь без порта, порт-баг закрыт (~15 тестов `bookmarks.spec.ts`
->   и часть `mobile-overflow` были на этом завязаны). Коммит `dabccad7`.
-> - **`pravda` — клиентская RSC-навигация между статьями ломалась.** Root cause — известный
->   апстрим-баг Next.js 16 ([vercel/next.js#85374](https://github.com/vercel/next.js/issues/85374)):
->   RSC-сегменты (Cache Components) пишутся на диск вложенными директориями, клиентский роутер
->   запрашивает их плоским dot-separated именем — путь расходится, 404 на prefetch. Фикс — build
->   adapter (`apps/pravda/build/adapter.js`, `adapterPath` в `next.config.mjs`), переименовывающий
->   файлы после сборки. **Подтверждено BlackCove ad-hoc Playwright-скриптом (голый API, не
->   `@playwright/test`)** — RSC-запросы возвращают 200 с плоскими путями, реальная навигация для
->   пользователей работает. Сам `navigation.spec.ts` (через `@playwright/test`) продолжает падать
->   5/13 — оказалось артефактом тестовой обвязки (`devices['Desktop Firefox']` эмуляция?), не
->   сервера/сборки; включён `retries: 1` (временно, коммит `b1ed1c12`) для сбора `trace.zip` —
->   диагностика этого отдельного вопроса передана BlackCove, не завершена. Коммит `90c2e09c`.
-> - **`svoichuzhie` — `10-auth.spec.ts:48` (успешный вход без `callbackUrl`) — отдельный баг,
->   не редирект/кука.** Диагностировано временным логированием в `fanclub/profile/page.tsx`
->   (`hasSession: true`, cookie долетает) + прямым SQL-запросом BlackCove к staging-БД:
->   `testFan`, заведённый на staging через `stagingGlobalSetup()` (`@letar/e2e-testing`
->   `devSessionLogin`, dev-session bypass), не имеет **ни одной** записи `Account` — не только
->   `credential`, вообще никакой. `createDevSessionRoute` создаёт голого `User`+`Session`, минуя
->   таблицу `Account`. Реальный `/sign-in/email` ищет `providerId='credential'`, не находит →
->   `INVALID_EMAIL_OR_PASSWORD` (лог `"Credential account not found"`, `better-auth/dist/api/
-routes/sign-in.mjs:211-214`). Объясняет заодно, почему `:30`/`:40` "проходили" — им нужен только
->   общий текст ошибки, неважно по какой причине. **Фикс:**
->   `createDevSessionRoute` (`@letar/auth/server` v0.11.1) — новый опциональный query-параметр
->   `password`, создающий (idempotent) `Account` с `providerId='credential'` через
->   `hashPassword` из `@better-auth/utils/password`; `devSessionLogin` (`@letar/e2e-testing`
->   v0.1.1) прокидывает параметр; `svoichuzhie-e2e/global-setup.ts` передаёт
->   `password: testFan.password`. Обратная совместимость: без `password` — поведение не меняется,
->   безопасно для остальных 5 приложений на этой фабрике (aboi, driving-school, grandslamcup,
->   auth-hub, animatrona-tracker, studio). **✅ Подтверждено BlackCove живым прогоном (msg #664,
->   2026-07-21 16:44):** `svoichuzhie` полный e2e (64 теста) — 54 passed/4 failed/6 skipped (было
->   48/12/4). `10-auth.spec.ts:48` прошёл; косвенно подтверждён и весь `fan-chromium`-проект
->   (`12-fanclub-member.fan.spec.ts`), зависящий от валидной fan-сессии. Коммит `c95bd1c7`.
->
-> **Новые находки из подтверждающего прогона (не диагностировались, отдельный баг форм, не
-> dev-session):** `03-subscription.spec.ts:4` — email-инпут в footer остаётся visible после
-> сабмита формы подписки; `11-fanclub-register.spec.ts:10` — форма вступления в фан-клуб не выше
-> секции тиров (layout order); `11-fanclub-register.spec.ts:37`/`:65` — кнопка submit остаётся
-> disabled при регистрации в фан-клуб/anti-enumeration. Все 4 — вне скоупа этой сессии, ждут
-> app-владельца.
->
-> **Не в скоупе этой сессии:** `mandala` (54 admin-теста, блокирована на стороне BlackCove — две
-> раздельные проблемы, обе диагностированы BlackCove, msg #635: (1) `deploy_app(seed:true)` не
-> запускает seed — `dashboard-agent` на s3 не передеплоен 9 дней, текущий образ старше поддержки
-> `seed` в `apps/dashboard-agent/src/routes/deploy.ts:418`; (2) ручной `nx run mandala:db:seed`
-> падает отдельно — `Cannot find module '@/generated/prisma'`, `tsx`/`tsconfig-paths` не резолвит
-> path-alias при вызове через `prisma db seed`); `dsperevod` `callback-drawer.spec.ts` (webkit,
-> ввод телефона — не диагностировано). Временное диагностическое логирование в
-> `svoichuzhie/fanclub/profile/page.tsx` **оставлено** (gated за `ALLOW_DEV_SESSION`, безобидно) —
-> убрать отдельным коммитом после уборки диагностических находок.
-
-> **⚠️ §18.7 Тираж M1, батч 2 — полный редеплой+e2e остальных 5 приложений батча
-> (2026-07-21, BlackCove):** По плану root-weaver (#610) — для `mandala`, `dsperevod`, `pravda`,
-> `aira-web`, `aprel8008` выполнен `deploy_app(staging)` (коммит `ec610181`) → `run_e2e` по
-> одному, не параллельно; s3 предварительно проверен на нагрузку (`load average: 5.2/6.9/5.6`,
-> было 34+ в прошлых прогонах). **Итог: `aira-web` 3/3 ✅, `aprel8008` 3/3 ✅ — честные зелёные;
-> `mandala` 51 passed/2 failed/16 skipped/54 did not run ❌, `dsperevod` 11/7/3 didn't-run ❌,
-> `pravda` 88/149/3 skipped ❌.** Ключевые находки: (1) **mandala** — `auth.setup.ts`
-> (`authenticate as admin`) не проходит на staging (остаётся на `/sign-in`), каскадом обрушив 54
-> admin-зависимых теста; отдельно SEO title не совпадает. (2) **dsperevod** — экран «Проверьте
-> почту» не появляется после регистрации (все 3 браузера); все 4 теста `callback-drawer.spec.ts`
-> падают в webkit на вводе телефона. (3) **pravda** — доминирующая причина большинства из 149
-> отказов: nginx-конфиг статического экспорта отдаёт `CONNECTION_REFUSED` на любой URL **без
-> завершающего слэша** (подтверждено напрямую через `docker logs` + повтор запросов, 100%
-> воспроизводимо на одних и тех же путях); отдельно реальные баги — `bookmarks` (кнопка скрыта),
-> `cross-refs` (текст не рендерится), `toc` (`href.slice is not a function`, TOC пустой),
-> клиентская RSC-навигация не срабатывает, клик по результату поиска не переходит на страницу.
-> **Не диагностировалось глубже** — не зона BlackCove (app-код), передано root-weaver сводом
-> (broadcast, т.к. на момент отправки root-weaver был retired — восстановлен и переотправлено
-> адресно, msg #625). **Инфра-побочный эффект:** на s3 добавлен 8GB swap-файл (`/swapfile`,
-> persisted в `/etc/fstab`) — первая попытка деплоя `mandala` словила OOM-килл при пиковой
-> компиляции Turbopack (available memory упала до 214Mi, свопа не было вообще); вторая попытка
-> прошла. Своп — не костыль под конкретный баг, а системная подстраховка для будущих пиков сборки.
->
-> **✅ §18.7 Тираж M1, батч 2 — `svoichuzhie` точечные повторные прогоны, root cause
-> rate-limit найден (2026-07-20/21, root-weaver + BlackCove):** После checkbox/strict-mode фиксов
-> (commit `b8fc1bec9`) прогон дал 51 passed/7 failed/6 skipped — хуже ожидания (root-weaver ждал
-> только 2 в `11-fanclub-register`, по факту 7, часть новых). root-weaver диагностировал реальный
-> root cause трёх из семи (`10-auth.spec.ts` — неверный пароль/несуществующий email/успешный
-> вход): `auth.ts` держал relaxed rate-limit для `/sign-in/email`/`/sign-up/email` под условием
-> `NODE_ENV !== 'production'`, но staging собирается production-билдом — условие никогда не
-> срабатывало, дефолтный строгий лимит Better Auth блокировал повторные попытки логина с одного
-> IP. Фикс: `|| ALLOW_DEV_SESSION === 'true'` (тот же флаг, что уже используется для dev-session,
-> никогда не попадает в реальный прод). Checkbox-баг (2 позиции) починен тем же паттерном, что
-> `aboi` (`focus()` + `Space` вместо клика мышью). Коммит `ec610181`/`16e06f23`. **Не
-> диагностировано:** `03-subscription.spec.ts` (форма подписки, email-инпут не скрывается) и
-> `formY < tiersY` в `11-fanclub-register` (layout-сдвиг, 274 вместо <216) — новые находки,
-> отдельный раунд. **Повторный прогон после этого фикса ещё не выполнен** (следующий шаг сессии).
->
-> **✅ §18.7 Тираж M1, батч 2 — `DEV_SESSION_TOKEN` глобальный vs per-app, `svoichuzhie`
-> 48/64 passed (2026-07-20/21, BlackCove):** После фикса `webServer.url` (root-weaver, коммит
-> `88fed18f`) и фикса auth на staging через `stagingGlobalSetup()`/dev-session (root-weaver,
-> `4a75b32f`) — `svoichuzhie` всё ещё давал 403 на dev-session. **Root cause:**
-> `dashboard-agent` запускает `run_e2e` через `sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN`
-> — этот флаг сохраняет **ОДНО значение из окружения самого процесса dashboard-agent**
-> (`5cbe8e87...`, единое на весь сервис), а НЕ читает `DEV_SESSION_TOKEN` индивидуально из
-> `.env.staging` каждого приложения. BlackCove при настройке `.env.staging` для
-> `mandala`/`svoichuzhie`/`aprel8008`/`dsperevod` сгенерировал разные токены на каждое — отсюда 403. **Фикс:** токен во всех четырёх `.env.staging` на s3 выровнен под глобальное значение
-> dashboard-agent. **Итог `svoichuzhie` после фикса: 48 passed / 12 failed / 4 skipped** —
-> auth-часть теперь честно проходит; остаток — (а) strict-mode конфликт двух кнопок «Войти» на
-> `/login` (шапка + форма, 7 из 12 отказов), (б) `db.helpers.ts:106` (`ensureTestProduct` для
-> merch-checkout) всё ещё бьёт `127.0.0.1:5432` напрямую — тот же класс проблемы, что чинили для
-> auth, но в другой helper-функции, не мигрирован на dev-session (2 отказа), (в)
-> `11-fanclub-register.spec.ts` — форма/таймауты, не диагностировано глубоко (2 отказа).
-> **Не проверено повторно:** `mandala`'s ранее репортнутый `auth.setup.ts` отказ мог быть тем же
-> классом бага (токен не совпадал) — токен выровнен, но mandala не переprogнан. `E2E_GATED_APPS`
-> BlackCove сам не трогает — ждёт решения root-weaver по итогам смешанных результатов батча
-> (тред `staging-e2e-gate-m1-batch2`, msg #619).
->
-> **✅ §18.7 M1 `aboi` — `checkout.spec.ts:140` (webkit) `/cart`-редирект: первая гипотеза
-> опровергнута живым прогоном, вторая — подтверждена (2026-07-19, aboi-dev, commit
-> `<см. CHANGELOG аboi 0.25.5>`):** Диагностика началась с ложной тревоги — шестой/седьмой прогоны
-> BlackCove (`msg #582/#584`) на самом деле били в `localhost:3018` dev-режим
-> (playwright.config.ts webServer fallback), а не в staging: `BASE_URL` не был передан в вызов
-> `run_e2e` после рестарта Deploy Agent. После перезапуска с явным
-> `BASE_URL=https://aboi-stage.s3.letar.best` (msg #586) вскрылся один реальный, стабильно
-> воспроизводимый отказ: `checkout.spec.ts:140` webkit, `page.waitForURL` лог —
-> `navigated to /checkout → /cart → /cart` вместо success.
->
-> **Гипотеза №1 (0.25.4, опровергнута):** `authClient.signUp.email()` (авто-регистрация гостя)
-> выполнялась ДО перехода на success-страницу, меняя cookie сессии текущей вкладки. Перенос
-> авто-регистрации на success-страницу задеплоен и перепрогнан BlackCove живьём (msg #588) —
-> **идентичный отказ воспроизвёлся снова**, гипотеза не подтвердилась.
->
-> **Гипотеза №2 (0.25.5, механизм подтверждён логами, не живой WebKit-отладкой):** Next.js Server
-> Actions по протоколу возвращают вместе с ответом свежий RSC-рендер ВЫЗЫВАЮЩЕГО маршрута —
-> `placeOrderAction`, вызванный из `/checkout`, тащит за собой ре-рендер `checkout/page.tsx`, чей
-> `redirect('/cart')` на пустую (уже опустошённую этим же action'ом) корзину срабатывает как часть
-> ЭТОГО ответа раньше, чем клиентский код успевает выполнить `window.location.href` на success. На
-> загруженном WebKit эта встроенная гонка стабильно выигрывает — на других браузерах/без нагрузки
-> клиентский код обычно успевает первым. Фикс: `placeOrderAction` теперь сам вызывает `redirect()`
-> (на success либо на T-Bank `paymentUrl`) — `NEXT_REDIRECT`, брошенный ИЗНУТРИ action, Next
-> обрабатывает отдельно от обычного RSC-мерджа текущей страницы, гонки не возникает в принципе.
-> **✅ Подтверждено живым прогоном (msg #590, BlackCove, `run_e2e` на коммите `2c99f9d4`):**
-> `35 passed / 3 failed / 1 skipped / 3 did not run` — лучший результат за всю серию. `checkout.spec.ts:140`
-> (webkit) прошёл. Оставшиеся 3 отказа — весь список уже известный некритичный шум
-> (`email-verification.spec.ts:63` firefox+webkit — CPU-contention scrypt; `pvz-picker.spec.ts:169`
-> firefox — флейк геолокации), новых регрессий нет. BlackCove считает `aboi` готовым кандидатом на
-> `E2E_GATED_APPS`.
->
-> Попутно (сохранено из 0.25.4, эта часть не связана с флейком, актуальна независимо от исхода):
-> `mergeAnonymousAccount` не переносил `Order.userId` при линковке anonymous→real (заказ терял
-> владельца, т.к. `Order.user` — `onDelete: SetNull`, Better Auth удаляет anonymous-юзера сразу
-> после линковки). Также отправлен `deploy-mcp` техдолг BlackCove (msg #586): параметр `baseUrl`
-> не транслируется в `BASE_URL` для playwright — не в скоупе этой сессии (libs/deploy-mcp, не
-> aboi). **➡️ Следующий шаг:** запросить у BlackCove добавление `aboi` в `E2E_GATED_APPS`
-> (`libs/infra-config/src/index.ts`, по образцу `time` из msg #577).
->
-> **✅ Системный фикс: staging trustedOrigins/localhost-баг тиражирован на 5 приложений
-> (2026-07-19, root-weaver):**
-> После находки root cause `/cart`-редиректов в `aboi` (см. запись ниже) — проверены все
-> `docker-compose.staging.yml` монорепо на тот же паттерн (`BETTER_AUTH_URL`/
-> `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_APP_URL` = `localhost:<port>` вместо реального публичного
-> staging-домена). Найден в **5 приложениях**: `driving-school`, `dsperevod`, `mandala`,
-> `svoichuzhie` — почтены, `auth-hub` — **пропущен**.
->
-> Механизм неодинаков — три разных случая:
->
-> - **`mandala`**: `auth.ts` не задаёт `trustedOrigins` явно → Better Auth дефолтится на
->   `baseURL`. Фикс — только env-переменная в `docker-compose.staging.yml`.
-> - **`dsperevod`/`svoichuzhie`**: `baseURL` уже env-driven (`BETTER_AUTH_URL`), но
->   `trustedOrigins` — захардкоженный массив, не читает эту переменную вообще. Добавлена
->   аддитивная запись `...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : [])`
->   поверх существующего прод-списка (не убирает/меняет старые записи) + фикс env-переменной.
-> - **`driving-school`**: сложнее всех — `baseURL` **жёстко захардкожен** на punycode прод-домена
->   (`https://xn--80aaah6cnh.xn--p1ai`) независимо от `NODE_ENV`, из-за точного совпадения
->   Google OAuth `redirect_uri`. **`baseURL` НЕ трогается** (риск сломать прод OAuth) —
->   исправлен только `trustedOrigins` (аддитивно) + env-переменные `BETTER_AUTH_URL`/
->   `NEXT_PUBLIC_APP_URL`, которые отдельно используются `getAppUrl()` (`lib/app-url.ts`) для
->   абсолютных ссылок в email (magic-link, PIN, verification) — это чинится полностью, но
->   Better Auth CSRF-валидация для driving-school остаётся частично untested без явного
->   staging-прогона (driving-school и так в M4, последний батч §18.7, по причине сложности).
->
-> **`auth-hub` НЕ тронут** — его staging-домен не подтверждён нигде в дереве (нет
-> `.env.staging.example`, нет упоминаний в `PLAN.md`), в отличие от остальных 4 (все имели
-> явную `DOMAIN=<app>-stage.s3.letar.best` строку). Гадать со значением для критичного
-> инфраструктурного приложения (держит OIDC для всего монорепо, `auth-hub` — намеренно
-> последний в M4 по этой же причине) признано слишком рискованным. Нужно подтверждение
-> реального домена (или отсутствия staging-домена вообще — возможно, вариант B из
-> `auth-hub-e2e-setup` thread — `docker-staging + warn-gate` — не предполагал публичный домен)
-> прежде чем чинить.
->
-> **Ни один из 4 фиксов не подтверждён живым staging-прогоном** — только у `aboi` фикс того же
-> класса проверен BlackCove вживую. Остальные 4 — по аналогии, теоретически корректны (код
-> проверен typecheck/lint), но нуждаются в собственном staging-деплое + `run_e2e`, когда каждое
-> из них дойдёт до своего батча §18.7 Тиража M.
->
-> Коммиты: `dbe3995`(driving-school), `cf9834d`(dsperevod), `9bcd851`(svoichuzhie),
-> `3f76ff98`(letar root, mandala + submodule bumps).
->
-> **✅ §18.7 Тираж M1 — regex-баг из пятого прогона починен (2026-07-19, root-weaver):**
-> `checkout.spec.ts:194`+`:336` (оба вхождения одного паттерна) — `toHaveURL` матчит полный URL,
-> не `pathname` (в отличие от `waitForURL` выше в том же тесте), `$`-якорь без учёта query
-> никогда не матчил success-страницу с `?accountCreated=1`. Фикс — `(\?.*)?` перед якорем.
-> Коммиты: `51dbbb0`(aboi-e2e), `6c72f6ec`(letar root). BlackCove (Deploy Agent) сейчас
-> **остановлен** (`Deploy Agent остановлен`, 2026-07-19 11:27) — шестой прогон запросить при
-> следующем запуске `/deploy-agent`, чеклист: `deploy_app(aboi, staging)` на `51dbbb0`/`6c72f6ec`
-> → `run_e2e`.
->
-> **✅ §18.7 Тираж M1 — пятый прогон: `trustedOrigins`-фикс подтверждён живьём, найден
-> предсуществующий баг regex в тесте (2026-07-19):**
-> BlackCove пересобрал `aboi` на `372bf80`/`0b69ee64` и прогнал `run_e2e` через
-> `https://aboi-stage.s3.letar.best`. **`trustedOrigins`-гипотеза root-weaver подтверждена** —
-> `/cart`-редирект для `checkout.spec.ts:140` исчез, чекаут реально доходит до
-> `/checkout/success/<accessToken>` (пруф в логе: `.../checkout/success/cmrrphmre...?accountCreated=1`).
->
-> Вскрылся **предсуществующий баг самого теста** (`checkout.spec.ts:194`): паттерн
-> `/\/checkout\/success\/[a-z0-9]{20,32}\/?$/` требует конца строки сразу после `accessToken`, но
-> реальный URL содержит `?accountCreated=1` — раньше не всплывало, потому что тест падал раньше
-> (на `/cart`-редиректе), фикс `trustedOrigins` расчистил путь и обнажил баг ассерта. Падает на
-> 3/3 браузера. Фикс тривиальный (убрать `$`-якорь или явно допустить query-string) — не в скоупе
-> BlackCove, ждёт app-владельца.
->
-> Итог пятого прогона: 20 passed, 6 failed (все три категории — regex-баг выше + два уже принятых
-> известных шума: email-verification CPU-конкуренция, геолокация Firefox), 15 did not run
-> (каскад `test.skip`). **➡️ Следующий шаг:** app-владельцу починить regex в `checkout.spec.ts:194`
-> → шестой прогон BlackCove → при зелёном `aboi` кандидат на `E2E_GATED_APPS`.
->
-> **✅ §18.7 Тираж M1 — `time` в `E2E_GATED_APPS`; `aboi` — найден вероятный корень
-> `/cart`-редиректов, четвёртый прогон 32/42 (2026-07-19):**
-> `time` добавлен BlackCove в `E2E_GATED_APPS` (`libs/infra-config/src/index.ts`, коммит
-> `6af28c70`, с разрешения владельца) — `E2E_GATED_APPS` как файл/константа не существовал
-> заранее, это первая реализация списка. `aboi` четвёртый прогон: 32/42 passed (было 21/42) —
-> DaData-фикс подтверждён полностью рабочим, 0 падений по подсказкам адреса.
->
-> **Найден вероятный root cause `/cart`-редиректов** (`checkout.spec.ts:140`+`:279`, разные
-> способы доставки, разные браузеры — не специфично к CDEK/MANAGER_CALL): `auth.ts:40-44`
-> собирает `trustedOrigins` из `BETTER_AUTH_URL`/`NEXT_PUBLIC_BASE_URL`, а
-> `docker-compose.staging.yml` указывал оба на `http://localhost:3022` — но e2e (`run_e2e`)
-> бьёт по реальному публичному домену `https://aboi-stage.s3.letar.best`. Better Auth сверяет
-> `Origin` заголовок КАЖДОГО state-changing запроса (CSRF-защита) с `trustedOrigins` —
-> несовпадение могло приводить к некорректной установке cookie анонимной сессии
-> (`lib/cart.ts` `getOrCreateSessionUserId` создаёт нового anonymous-юзера с пустой корзиной,
-> если сессия не находится → `checkout/page.tsx` `redirect('/cart')` при пустой корзине).
-> Старое допущение («HTTPS-домен нужен только для OAuth-callback») было неверным — Better Auth
-> валидирует Origin независимо от того, используется ли OAuth. Исправлено на реальный домен
-> (коммит `372bf80`) — **не подтверждено живым прогоном**, ждёт пятого прогона BlackCove.
->
-> **Решение по email-verification таймаутам (60с/30с всё равно не хватает под 6-воркерной
-> параллельной нагрузкой на shared staging):** принято как известное ограничение warn-only
-> гейта, не блокер — не гоняться за дальнейшими timeout-бампами (диминишинг ретёрнс), `time` и
-> большая часть `aboi` уже полезны как гейт. Если понадобится твёрдая защита именно для
-> auth-флоу — отдельная задача уровня инфраструктуры (снизить параллелизм воркеров для aboi-e2e
-> специфично, или поднять ресурсы staging-контейнера), не e2e-тестов.
->
-> Коммиты: `372bf80` (aboi). **➡️ Следующий шаг:** запросить у BlackCove пятый прогон `aboi`
-> (пересборка с `372bf80`) — если `trustedOrigins`-фикс закрывает оба `/cart`-падения, `aboi`
-> кандидат на `E2E_GATED_APPS` с оставшимся email-verification как известный warn-only шум.
->
-> **🎉 §18.7 Тираж M1 — `time` полностью зелёный и подтверждён по существу; `aboi` третий круг
-> (msg #575) в работе (2026-07-19):**
-> BlackCove прогнал финальный e2e — `time`: **3/3 passed**, в логе `nx run time-e2e:e2e` напрямую
-> (executor), без прежнего `nx run time:dev` — `project.json`-фикс подтверждён: `time` реально
-> бьёт по staging-контейнеру. **Можно вносить `time` в `E2E_GATED_APPS`.**
-> `aboi`: было 5–7/42 → стало 21/42 passed (9 failed, 12 не выполнились каскадом от
-> `test.skip`). Новый набор из 5 находок, 3 закрыты сразу:
->
-> - **DaData-подсказка адреса не появлялась** несмотря на `DADATA_MOCK_MODE=true` — оказалось,
->   это ДРУГОЕ поле (`checkout-form.tsx` клиентский `AboiForm.Field.Address`, не серверный
->   `searchDadataCitiesAction`): `libs/forms` `field-address.tsx` — пустой `token` → `provider =
-null` → fetch вообще не вызывается, `page.route()` перехватывать нечего. Добавлен
->   `NEXT_PUBLIC_DADATA_TOKEN=<плейсхолдер>` в `.env.staging.example` — не настоящий токен,
->   `page.route()` перехватывает запрос раньше, чем он доходит до `suggestions.dadata.ru`,
->   нужна только непустая строка.
-> - **Гонка в тесте геолокации** — `test.use({geolocation})` даёт мгновенную мок-позицию,
->   фаза `requesting` («Геолокация…») может смениться на `searching` быстрее одного цикла
->   поллинга Playwright под нагрузкой staging — тест принимал только строгий «Геолокация…»,
->   расширен на обе фазы.
-> - **Firefox не отклоняет геолокацию проактивно** (в отличие от Chromium) — может провисеть до
->   внутреннего `timeout:10_000` браузерного API и вернуть TIMEOUT вместо PERMISSION_DENIED; тест
->   принимал только текст отказа, расширен на оба исхода + таймаут 8с→13с.
-> - **email-verification таймауты подняты** (30с→60с на `waitForResponse`, 15с→30с на
->   «Почти готово») — 3 параллельных браузерных проекта одновременно бьют scrypt-хешированием
->   пароля в один shared staging-контейнер, легитимная CPU-конкуренция, не баг.
-> - **🟡 Не закрыто:** `checkout.spec.ts:140` (webkit) — после ручного заполнения адреса browser
->   оказывается на `/cart`. `redirect('/cart')` в `checkout/page.tsx` срабатывает только на
->   сервере при пустой корзине на GET — не диагностировано без живого доступа к staging
->   (подозрение: WebKit cookie/session race между `addProductToCart` и `goto('/checkout')`).
->   Явно не гадаю с фиктивным фиксом — задокументировано, ждёт либо живой отладки, либо повторной
->   находки от BlackCove после четвёртого прогона.
->
-> Коммиты: `eeb2bbb` (aboi), `9826fd2` (aboi-e2e). **➡️ Следующий шаг:** запросить у BlackCove
-> четвёртый прогон `aboi` (не `time` — тот уже зелёный, добавить в `E2E_GATED_APPS` можно сразу).
->
-> **✅ §18.7 Тираж M1 — второй круг находок BlackCove (msg #573) починен (2026-07-19):**
-> После редеплоя `f049f87`/`bee64c6d` BlackCove прогнал e2e 4 раза (localhost+staging × 2) —
-> CDEK-фикс подтверждён (0×401 во всех прогонах), но всплыло 5 новых проблем, все закрыты:
->
-> - **`time-e2e` игнорировал staging BASE_URL целиком** — root cause НЕ в синтаксисе
->   `webServer.command` (обе формы, `nx run x:y` и короткая `nx x y`, матчатся одним и тем же
->   regex'ом в `@nx/playwright/plugin`), а в **отсутствии `project.json`**: без него таргет `e2e`
->   собирается через inferred `createNodes`, который добавляет `dependsOn` на `dev`-таск — Nx
->   поднимал локальный `next dev` ДО проверки `reuseExistingServer`/`url`, зелёный результат не
->   отражал реальный контейнер. Фикс — explicit `project.json` с executor
->   `@nx/playwright:playwright` (паттерн `aboi-e2e`/`grandslamcup-e2e`), обходит инференс целиком.
->   Тот же баг унаследован всеми 6 приложениями из Тиража N генератора `@letar/generators:e2e-suite`
->   (`animatrona-landing-e2e` и др.) — генератор теперь скаффолдит `project.json` по умолчанию,
->   старые 6 не ретрофичены (не в скоупе, задокументировано как чеклист перед их гейтом).
-> - **`checkout.spec.ts`** — URL успеха матчился на устаревший `ORD-YYYYMMDD-XXXXX`, а реальный
->   редирект — `accessToken` (cuid, `checkout.ts:352`); `orderNumber` используется только в
->   `failUrl`/email/админке.
-> - **`pvz-picker.spec.ts`** — автокомплит города вызывает `searchDadataCitiesAction` (DaData), не
->   `searchCdekCities` как думал старый комментарий теста; DaData — платный сервис без песочницы,
->   `NEXT_PUBLIC_DADATA_TOKEN` на staging пуст → добавлен `DADATA_MOCK_MODE` (по образцу
->   `CDEK_MOCK_MODE`) в `shipping.action.ts` + `.env.staging.example`.
-> - **WebKit «добавлено в корзину»** — таймаут 5с→10с (смена текста — чистый React state, не
->   завязана на `router.refresh()` вопреки старому комментарию; задержка сетевая, под нагрузкой).
-> - **`email-verification.spec.ts`** — подтверждён тот же rate-limit `/sign-up` (5/час/IP), что и
->   раньше диагностировала RoseSparrow, просто исчерпан повторными прогонами BlackCove; тест
->   теперь детектирует HTTP 429 и делает `test.skip` с понятным сообщением вместо ложного failure.
-> - Побочно: `aboi-e2e/tsconfig.json` не тайпчекался (`window` в `addInitScript()`-колбэках без
->   `lib: dom`) — вскрылось только после полной очистки Nx-кэша, вероятно маскировалось стейл-кэшем
->   в прошлых сессиях.
->
-> Коммиты: `ccd12ec` (aboi), `6907190` (aboi-e2e), `c034560e`+`bbbcc396` (letar root, включая фикс
-> генератора). **➡️ Следующий шаг:** запрошен у BlackCove повторный `deploy_app`+`run_e2e` для
-> `aboi`+`time` (msg отправлено в тред `staging-e2e-gate-m1-aboi-time`) — при зелёном добавить
-> оба в `E2E_GATED_APPS`.
->
-> **✅ §18.7 Тираж M1 — все app-баги `aboi`/`time` из ответа BlackCove починены (2026-07-18):**
-> **`time-e2e`** — `playwright.config.ts` звал несуществующий nx-проект `@letar/time` (реальное
-> имя — `time`, `@letar/time` это имя `package.json`) и `webServer.url` был захардкожен на
-> `localhost:3000` вместо `baseURL` — `reuseExistingServer` поэтому не видел уже поднятый
-> staging-контейнер. + `locale: 'ru-RU'` (Chromium/WebKit шлют `Accept-Language: en-US`,
-> next-intl отдавал английский). Плейсхолдер `example.spec.ts` заменён на реальный смок-тест
-> главной страницы. Локально 3/3 браузера зелёные.
-> **`aboi-e2e` — корневая причина глубже, чем казалось изначально:** `checkout.spec.ts`/
-> `pvz-picker.spec.ts` были написаны в расчёте на одностраничную форму, а
-> `checkout-form.tsx` — **трёхшаговый** `AboiForm.Steps` (Контакты → Доставка → Оплата, не
-> двухшаговый, как решили после первого чтения кода) — кнопка «Перейти к оплате» физически не в
-> DOM до прохождения первых двух шагов. Падало бы в любом окружении, не только на staging;
-> CDEK 401 был реальным, но не единственным и не главным виновником. Дополнительно нашлось и
-> починено:
->
-> - `getCityCodeByPostalCode()` в `cdek.ts` — единственная функция без проверки
->   `CDEK_MOCK_MODE` (все остальные её уже проверяли) — на staging с тестовыми credentials
->   всегда падала в реальный OAuth (401), `getDeliveryPointsAction()` получал `null` → пустой
->   список ПВЗ → `CDEK_POINT` выглядел нерабочим.
-> - `consentAccepted` в `initialValue` — `false`, не `true`, как ошибочно считал старый
->   комментарий в тесте — чекбокс требует явного клика.
-> - Клик мышью (label/текст/role=checkbox/`.check()`) на этом конкретном Ark UI Checkbox
->   стабильно **не переключал** состояние формы в сценарии с вручную заполненным адресом
->   (воспроизведено множество раз, первопричина не найдена — не cookie-баннер, не анимация
->   перехода шагов, всё исключено пошаговой проверкой) — `focus()` + `Space` работает надёжно
->   везде, использован как решение.
-> - Cookie-баннер (`@letar/ui` `CookieBanner`, fixed снизу) перекрывал чекбокс на длинных формах
->   до принятия — `localStorage` теперь предзаполняется через `addInitScript` до первой
->   навигации.
-> - `email-verification.spec.ts`: «Войти» на `/sign-in` неоднозначен (есть кнопка в шапке) —
->   уточнён локатор до формы. **«Почти готово» не появлялось не из-за бага UI** (как
->   предполагал BlackCove), а из-за rate-limit Better Auth (`/sign-up`: 5/час) — сработал от
->   повторных локальных прогонов при отладке этой же сессии, подтверждено чистым прогоном после
->   сброса лимита (перезапуск dev-сервера, in-memory store).
->   **Итог локально** (`BASE_URL=http://localhost:3018`, `--project=chromium`): 13/14 — один
->   pre-existing флейк в геолокационном тесте (гонка с реальным Nominatim API, не связан с этой
->   правкой). Коммиты: `f049f87` (aboi submodule), `16545c2` (aboi-e2e submodule), `884ed211`
->   (time-e2e, letar root).
->   **➡️ Следующий старт:** ⏳ запрос BlackCove **отправлен и дополнен** — msg #570 (RoseSparrow,
->   2026-07-18, тред `staging-e2e-gate-m1-aboi-time`) + msg #571 (root-weaver, 2026-07-19,
->   дополнение: редеплой staging нужен и для **aboi**, не только time — `f049f87` меняет app-код
->   `cdek.ts`/`instrumentation.ts`, staging-образ собран до фикса; плюс проверить фактический
->   `CDEK_MOCK_MODE=true` в `.env.staging` на s3). Ждём BlackCove: `deploy_app(aboi+time, staging)`
->   → `run_e2e` оба → зелёный → `E2E_GATED_APPS`. Предупреждение про `/sign-up` rate-limit (5/час
->   при повторных прогонах) передано в обоих сообщениях.
->
-> **✅ §18.7 Тираж M1 — BlackCove закрыл инфра-часть `aboi`+`time`, e2e НЕ зелёный (app-баги) (2026-07-18, архив):**
-> Полный прогон: `pg_dump` прод `aboi` (искл. `Account`/`Session`/`Verification`/`ConsentLog`) →
-> restore в `aboi-staging-db` (data-only) → `anonymize-staging-db.ts` — чисто. WebKit system-libs
-> на s3 установлены (`playwright install-deps webkit` от root) — разовая инфра-задача закрыта.
-> `deploy_app(aboi, staging)` и повторный `deploy_app(time, staging)` прошли, оба контейнера
-> healthy. Опубликован тестовый товар (`published: true`) — блокировал каталог/checkout пустым
-> списком, это и была исходная причина Бага 2.
-> **e2e ПОСЛЕ фикса — всё ещё не зелёный, но по app-причинам, не инфра:**
-> `aboi` 33/42 passed (было 2/42) — 9 падений: (1) CDEK test-credentials дают `401
-invalid_client` на `api.edu.cdek.ru` → не рендерится `CDEK_POINT` radio, 6 тестов; (2)
-> `email-verification.spec.ts` — heading "Почти готово" не появляется после sign-up на всех
-> браузерах, похоже на реальный UI-баг, не флейк. `time` — e2e вообще не запускается:
-> `playwright.config.ts` пытается поднять свой webServer через `nx run @letar/time` (project not
-> found) вместо использования переданного `BASE_URL` — `time-e2e` пока только `example.spec.ts`-
-> плейсхолдер, конфиг не адаптирован под staging-прогон с внешним baseUrl.
-> **`E2E_GATED_APPS` пока НЕ пополнен** — оба прогона не зелёные, но не по вине инфраструктуры.
-> **Бонус:** deploy-mcp теперь поддерживает `deploy_app({ app, seed: true })` — `--seed` больше не
-> требует SSH-резерва (было закрыто через SSH для `auth-hub` в этой же сессии, затем зашито в
-> `apps/dashboard-agent/src/routes/deploy.ts` + `libs/deploy-mcp/src/server.ts`, коммит `64e558fc`,
-> см. `apps/dashboard-agent/PLAN_COMPLETED.md` v0.7.6). Само-деплой `dashboard-agent` на себя
-> споткнулся на известном chicken-and-egg (контейнер создан, не стартовал сам) — поднят вручную.
-> **Побочно найдено и починено BlackCove ранее:** коммит `133faafe` ссылался на непроверенный SHA
-> `driving-school` — блокировало `git pull --recurse-submodules` на s2 и s3; **вывод на будущее:**
-> перед `git add <submodule>` проверять `git log origin/main..HEAD` внутри submodule.
-> **➡️ Следующий старт:** app-владельцам (CobaltReef/RoseSparrow) — починить CDEK test-auth,
-> email-verification UI, `time-e2e` playwright.config, затем повторный `run_e2e` для обоих →
-> зелёный → `E2E_GATED_APPS`. Запрос по остальным 6 приложениям M1 (`svoichuzhie`, `aprel8008`,
-> `dsperevod`, `mandala`, `pravda`, `aira-web`) пока не отправлен — код готов (ниже).
->
-> **⏳ §18.7 Тираж M — код-подготовка `aboi`+`time` (2026-07-18):** `docker-compose.staging.yml` +
-> `.env.staging.example` для обоих приложений (порты: aboi db 5457/app 3022→3018, time db
-> 5458/app 3023→3013 — следующие свободные после grandslamcup/auth-hub/driving-school). `time`
-> (hub-client) — добавлен staging redirect URI `time-stage.s3.letar.best` в
-> `apps/auth-hub/prisma/seed.ts` (clientId `time-prod`, тот же клиент/секрет, отдельного
-> staging-инстанса Ключницы нет). `aboi` — standalone, OAuth/OIDC не участвует, но `AUTH_ENCRYPTION_KEY`
-> обязателен (fail-fast `getEncryptionKey()` в `src/lib/auth.ts`, не graceful). `playwright.config.ts`
-> обоих приложений уже поддерживают `BASE_URL` env — правок не потребовалось.
-> **Не в скоупе этой сессии (нужен BlackCove):** DNS/NPM proxy host для доменов, создание
-> `.env.staging` с реальными секретами на s3, `db:seed` auth-hub с новыми redirect URI, живой
-> `deploy_app(staging)` → `run_e2e` → добавление в `E2E_GATED_APPS`. Запрос по `aboi`+`time`
-> отправлен через agent-mail (thread `staging-e2e-gate-m1-aboi-time`).
->
-> **⏳ §18.7 Тираж M1 — код-подготовка остальных 6 приложений батча (2026-07-18):**
-> `svoichuzhie`, `aprel8008`, `dsperevod`, `mandala`, `pravda`, `aira-web` — `docker-compose.staging.yml`
-> для всех + `.env.staging.example` для приложений с секретами (`pravda`/`aira-web` — статика/
-> без БД и auth, файл не нужен). Порты (продолжение последовательности aboi=5457/3022,
-> time=5458/3023): `mandala` db 5459/app 3024→3004, `svoichuzhie` db 5460/app 3025→3021,
-> `aprel8008` db 5461/app 3026→3023, `dsperevod` db 5462/app 3027→3019, `pravda` без БД/app
-> 3028→3007 (nginx-статика), `aira-web` без БД/app 3029→3017 (standalone Next.js, без auth).
-> `aprel8008` (hub-client) — добавлен staging redirect URI `aprel8008-stage.s3.letar.best` в
-> auth-hub seed.ts (clientId `aprel8008-prod`). `dsperevod` — как и `aboi`, требует
-> `AUTH_ENCRYPTION_KEY` (fail-fast). `mandala` — raw `betterAuth` (не фабрика `createAuth`),
-> Google/Yandex OAuth опционален (блок подключается только если оба ID/SECRET заданы) — на
-> staging не заполняется. `svoichuzhie` — 2FA/СДЭК/платежи не проверяются по-настоящему,
-> `REDIS_URL` для rate-limit опционален. Инфра-часть для всех 6 — тот же список, что и у
-> aboi/time, у BlackCove (запрос ещё не отправлен, ждём ответа по первой паре, чтобы не
-> перегружать очередь). **➡️ Следующий старт:** после ответа BlackCove по `aboi`/`time` —
-> запрос на оставшиеся 6 приложений M1 тем же образом; затем батч M2 (`form-example`, `kami`).
->
-> **✅ §18.7 Тираж N ЗАКРЫТ 6/6 — все приложения получили базовый e2e-сьют (2026-07-18):**
-> `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `studio`,
-> `form-docs` (67 тестов суммарно, все зелёные локально) + новый Nx-генератор
-> `@letar/generators:e2e-suite` (закрывает дублирование playwright.config.ts по ~20 приложениям) +
-> фиксированные kebab-case имена agent-mail для всех 30 проектных `/команд`. Детали — §18.7 ниже.
-> **➡️ Следующий старт:** тираж M — подключение к staging-e2e-гейту приложений с готовым сьютом,
-> `aboi`/`time` первыми.
->
-> **✅ SocialProvidersSettings извлечён в `@letar/auth` (2026-07-17, `libs/auth` v0.11.0):**
-> UI self-service Tier2 OAuth-ключей (список + форма + server actions CRUD) продублировался в
-> третий раз (dsperevod → aboi → driving-school, см. запись ниже) — извлечён в
-> `SocialProvidersList`/`SocialProviderForm` (`@letar/auth/client`, чистый React без
-> `@letar/forms` — тот же компромисс, что и у `AuthModeSettings`) + `createSocialProviderActions`
-> (`@letar/auth/server`, структурная типизация — не завязано на конкретный Prisma-клиент raw/
-> ZenStack-enhanced или сигнатуру auth-guard `requireAdmin`/`requireOwner`). Добавлен
-> `tryGetEncryptionKey()` — не бросает, возвращает `null` — обобщение graceful-degradation
-> паттерна driving-school для будущих Tier2-приложений. Все три приложения (dsperevod v0.6.3, aboi
-> v0.25.2, driving-school v0.238.1) переведены на общий компонент, поведение не изменилось.
-> Проверено скриптами напрямую на dev-БД каждого приложения (encrypt→store→decrypt round-trip,
-> access-policy non-admin/non-owner, CRUD) — без похода в браузер (dev-session роут driving-school
-> сломан, чинится отдельной параллельной сессией), typecheck/lint всех 4 проектов зелёные.
->
-> **✅ Этап 8 — social-providers UI перенесён на driving-school (2026-07-17, v0.238.0):**
-> `/owner/settings/social-providers/` — self-service редактирование `clientId`/`clientSecret`
-> Google/VK/Yandex (модель `SocialProvider`, `@@allow('all', auth().isOwner)`, AES-256-GCM at-rest),
-> ранее сознательно пропущено (запись 2026-07-16 ниже) из-за риска сломать боевой VK/Yandex-вход.
-> Решение: `lib/auth.ts` мержит DB-провайдеров (приоритет) с существующими env-переменными
-> (fallback) через `resolveCreds()` — кастомные `getUserInfo`-колбэки (день рождения/пол/телефон) и
-> `databaseHooks.account.create.after` остаются захардкожены без изменений, DB-loader покрывает
-> только сами ключи, не колбэки. **Graceful degradation** (архитектурное отличие от aboi/dsperevod):
-> `AUTH_ENCRYPTION_KEY` не required fail-fast — если не задан или чтение БД падает, приложение тихо
-> откатывается на env-провайдеров вместо падения (проверено живым рестартом dev-сервера без ключа).
-> Строгий fail-fast здесь недопустим — driving-school уже в проде работает на env-провайдерах,
-> случайный обрыв ключа не должен ронять боевой соц-вход мультитенантной платформы. Проверено
-> скриптом напрямую на dev-БД (не через dev-session — см. находку ниже): encrypt→store→decrypt
-> round-trip не хранит plaintext, access-policy блокирует non-owner чтение, CRUD корректен.
-> `AUTH_ENCRYPTION_KEY` сгенерирован (`openssl rand -hex 32`, отдельный для dev/prod) и добавлен в
-> `.env.local`+`.env.docker`(`.env.docker.enc` пересобран)+`docker-compose.production.yml`.
-> **✅ Задеплоено на прод (2026-07-18, BlackCove, commit `53b6f1c`, zero-downtime)** — первая
-> попытка деплоя провалилась на предсуществующем баге (`AuditLog` labels/payload типы не ловились
-> `typecheck:tsgo`, только полным `next build`/`tsc`), пофикшено тем же коммитом, повтор прошёл
-> успешно. **Побочно найден баг (вынесен отдельной задачей, не в скоупе этой сессии):**
-> `/api/auth/dev-session` у driving-school падает с 500 (`TypeError: Cannot set property message of
-which has only a getter`) — предсуществующий, не связан с этим изменением, блокирует будущие
-> e2e/preview через dev-session механизм.
->
-> **✅ Тираж hub-client на aprel8008 (2026-07-16):** админка для владелицы (управление фото баз) +
-> вход через Ключницу, `createAuth({ mode: 'hub-client' })`. Роль ADMIN — простой whitelist по
-> email через `databaseHooks.user.create.after` (не `createAuthGuards`/`requireRole` из
-> `@letar/auth` — та фабрика типизирована под единичное поле `role: string`, а во всех hub-client
-> приложениях монорепо реально используется `roles: string[]`; аpel8008 повторил тот же
-> ручной `hasRole`/`isAdmin`/`requireAuth`/`requireAdmin`-паттерн, что уже в kami и auth-hub —
-> см. находки в конце сессии). Клиент `aprel8008-prod` зарегистрирован в
-> `apps/auth-hub/prisma/seed.ts`. **Попутно найден и починен баг `deploy-affected.sh`:** шаг
-> `db:seed` (флаг `--seed`) резолвил `DATABASE_URL` с docker-internal хостнеймом вместо
-> `localhost:<port>` — падал с `getaddrinfo ESERVFAIL` на любом приложении, где сеялись клиенты
-> после первого деплоя auth-hub с этим флагом (commit `bcd3f01`). Проверено на проде: BlackCove
-> повторил только seed-шаг без полного редеплоя, все 8 OIDC-клиентов Ключницы пересозданы.
->
-> **✅ Этап 8.5 — вход по любому linked-email СДЕЛАН (2026-07-16, auth-hub v0.6.4):** без
-> перехвата core-резолва Better Auth — оказалось, что email+password и magic-link входы в
-> Ключнице идут только через её собственные server actions (`loginUser`, `sendMagicLinkAction`),
-> downstream-приложения попадают на них через OIDC-редирект на hub UI. `resolveLoginEmail()`
-> резолвит подтверждённый `UserEmail` → основной `User.email` ДО вызова Better Auth; core
-> auth-flow не тронут, риск для ~10 downstream снят конструктивно. Совпадение с чьим-то
-> основным адресом приоритетнее linked-записи; неподтверждённые привязки не резолвятся.
-> **Попутно найдены и закрыты 2 бага:** (1) вход по linked-адресу + пароль уводил `loginUser`
-> в auto-sign-up и молча создавал дубль-аккаунт (уникальность `UserEmail.email` не пересекается
-> с `User.email`); magic link с `disableSignUp: false` — та же дыра; (2) `verifyAddedEmail` не
-> перепроверял занятость адреса на момент подтверждения (токен живёт 24ч — за это время адрес
-> мог стать чьим-то основным через обычную регистрацию). Проверено вживую: вход по linked-адресу
-> через UI даёт сессию primary-аккаунта; резолв-матрица (verified/unverified/primary/unknown +
-> UPPERCASE) прогнана скриптом на dev-БД, дубль-аккаунт не создаётся. Известное ограничение:
-> magic-link письмо при вводе linked-адреса уходит на ОСНОВНОЙ адрес владельца (оба адреса его,
-> задокументировано в коде). Passkey/OAuth-входы не затронуты (identity не по email).
->
-> **✅ Этап 8.5 — self-service несколько email на аккаунт, частично (2026-07-16, auth-hub
-> v0.6.0):** `/profile/emails/` — добавление доп. адреса с подтверждением по ссылке (свой
-> токен, 24ч TTL, не пересекается с core Better Auth `Verification`), удаление, назначение
-> подтверждённого адреса основным. **Не покрыто:** вход по любому linked-email (нужен перехват
-> резолва sign-in Better Auth — риск для core auth-flow ~10 downstream-приложений, отдельная
-> задача) и merge двух уже существующих РАЗНЫХ аккаунтов (остаётся ручным скриптом владельца,
-> необратимо, как и раньше — см. §14.1). Проверено вживую end-to-end (тестовый пользователь,
-> add→verify→list→set-primary→remove), два бага найдены и пофикшены по пути: (1)
-> `revalidatePath` вызывался во время рендера страницы подтверждения (не через форму/
-> transition) — Next.js это запрещает, страница падала 500 после уже применённого обновления
-> БД; (2) смена `User.email` напрямую в БД не инвалидировала `cookieCache` Better Auth (до 5
-> минут в hub-provider) — активная сессия и OIDC `id_token` для downstream-приложений временно
-> отдавали бы устаревший email; исправлено принудительным `signOut` сразу после смены основного
-> адреса (пользователь перелогинивается).
->
-> **✅ Этап 8 — тираж на driving-school, частичный (2026-07-16):** только
-> `/owner/settings/auth-mode/` (informed-consent Tier1/Tier2, `AuditLog` action
-> `OWNER_AUTH_MODE_MIGRATION_REQUEST`) — уже на `createAuth()` фабрике, без описанной у aboi
-> находки про plugins/spread. **`/admin/social-providers/` осознанно НЕ перенесён:** VK/Yandex
-> используют кастомные `getUserInfo`-колбэки (день рождения/пол/телефон из soc-сетей), DB-loader
-> сериализует только `clientId`/`clientSecret` — перенос сломал бы боевой соц-вход
-> мультитенантной платформы (ученики/инструкторы/автошколы). **Побочно найден и пофикшен бага:**
-> `AuditLog` не имел ни одной `@@allow`-политики (ZenStack deny-all по умолчанию) — молча блокировал
-> запись ВСЕХ owner-действий в аудит (`OWNER_USER_ROLE_CHANGE`, `OWNER_TICKET_*` и т.д., гасилось
-> `try/catch` вызывающего кода) с момента создания модели; обнаружено при живой проверке новой
-> страницы. Проверено вживую (временный тестовый пароль на dev-БД, не коммитился): логин owner,
-> сабмит запроса, запись видна и в своей истории, и в общем `/owner/audit/`.
->
-> **✅ Этап 8 — тираж на aboi (2026-07-15):** `/admin/social-providers/` +
-> `/admin/settings/auth-mode/` перенесены с dsperevod (модели `SocialProvider` +
-> `AuthModeMigrationRequest` — у aboi не было своего `AuditLog`, минимальная модель вместо полного
-> журнала). **Отклонение от эталона:** соц-провайдеры грузятся вручную через
-> `createSocialProviderLoader` в raw `betterAuth()`, БЕЗ перехода на `createAuth()`/`createAuthAsync`
-> фабрику — фабрика собирает `plugins` через spread внутри своей функции и стирает tuple-тип
-> массива, из-за чего TypeScript терял типизацию `auth.api.signInAnonymous` (anonymous-плагин,
-> критичен для гостевой корзины aboi, живой e-commerce). Это системная находка — вероятно
-> ограничивает будущий тираж на другие приложения, использующие plugin-specific API поверх
-> `auth.api`, не только aboi. Проверено вживую: сид-логин, создание/редактирование/decrypt-round-trip
-> провайдера, informed-consent запрос, каталог/сессия/корзина после миграции — все зелёные.
-> `AUTH_ENCRYPTION_KEY` добавлен в `.env.local`+`.env.docker`+`docker-compose.production.yml`
-> (два места — deploy-request BlackCove ещё не отправлен, ждёт своей очереди).
->
-> **✅ Этап 8 — Tier 1/Tier 2 UI + self-service OAuth-админка: пилот на dsperevod (2026-07-15):**
-> `/admin/social-providers/` (Tier 2 — свои OAuth-ключи, `SocialProvider` модель, secret
-> шифруется AES-256-GCM) + `/admin/settings/auth-mode/` (сравнение Tier 1/Tier 2 с рисками §2.3,
-> informed-consent запрос в `AuditLog`, сам переход не автоматизирован). `createAuthAsync`+
-> `createSocialProviderLoader` из `@letar/auth` впервые реально подключены (раньше были только в
-> докстрингах). Encrypt→store→decrypt round-trip, auth-путь и enum-миграция AuditLog проверены
-> вживую/скриптами. **Не сделано:** миграция driving-school на DB-backed соц-секреты (риск для
-> боевого VK/Yandex — сознательно не трогали), тираж обоих UI на другие Tier 2 приложения, реальное
-> исполнение Tier 1-перехода (отдельная задача класса §8.5, когда появится первый запрос). Побочно
-> найден и вынесен в отдельную задачу баг сид-скрипта dsperevod (bcrypt vs scrypt хеш пароля).
-> Подробности — раздел «Этап 8» ниже.
->
-> **✅✅ Этап 1.5 (`createAuth(profile)`) ПОЛНОСТЬЮ ЗАВЕРШЁН (2026-07-15):** DoD закрыт — README
-> `libs/auth` описывает все 3 режима, E2E dsperevod (behavior-parity standalone-миграции) прогнан
-> локально 2/2 зелёных, контракт §4 переписан под реальный API. Фабрика в проде на 6 приложениях
-> (dsperevod/time/kami/auth-hub/driving-school/archetest) во всех 3 режимах (`standalone`/
-> `hub-client`/`hub-provider`). Подробности — раздел «Этап 1.5» ниже. `premium-network` на s2
-> подтверждённо удалена BlackCove (2026-07-15, треды #477→#481) — не реликт для чистки, а
-> завершённая миграция.
->
-> **✅ Этап 8.5 — merge двух аккаунтов, скрипт готов и проверен (2026-07-16):**
-> `infra/migrations/auth-hub-merge-accounts.ts` — параметризованный ручной инструмент
-> (`CANONICAL_EMAIL`/`DUPLICATE_EMAIL`/`DRY_RUN`, dry-run по умолчанию — инверсия дефолта
-> относительно owner-миграций, т.к. merge затрагивает потенциально живые сессии). Переносит
-> `Account`/`Passkey`/`OauthApplication`/`OauthAccessToken`/`OauthConsent`/`ProjectProfile`/
-> `TelegramToken`/`ConsentLog`/`UserEmail` с duplicate на canonical внутри одной транзакции,
-> email duplicate сохраняется как доп. подтверждённый `UserEmail` у canonical (по прецеденту
-> `setPrimaryEmail`), roles объединяются, обе `Session` принудительно инвалидируются
-> (cookieCache Better Auth иначе отдаст устаревший email/userId в OIDC `id_token` ~10
-> downstream-приложениям). Проверен вживую на локальной БД: dry-run, реальный merge с тремя
-> edge-cases (конфликт `Account` по `providerId`+разный `accountId` — не конфликт, оба Account
-> сохранены; конфликт `ProjectProfile` по `projectSlug` — roles объединены, metadata canonical
-> сохранена; конфликт `OauthConsent` по клиенту — дубль убран), повторный запуск — идемпотентен
-> (exit 0, без изменений). AuditLog-модель для auth-hub заведена не была — непропорционально
-> ради разового скрипта, вместо этого structured консоль-лог с инструкцией перенаправлять в
-> файл при реальном запуске. **Прод-запуск не выполнялся** — конкретной пары аккаунтов для
-> склейки пока нет, скрипт ждёт первого реального кейса.
->
-> **➡️ Следующий старт:** Этап 8.5 закрыт целиком (self-service email + вход по linked-email +
-> merge-скрипт) и **задеплоен** (2026-07-16, BlackCove msg #488, `b7b8635`, zero-downtime;
-> попутно применилась миграция `UserEmail` — v0.6.2 до этого на проде не была, весь этап уехал
-> одной пачкой). E2e-предупреждение гейта закрыто: staging s3 передеплоен BlackCove на
-> `6935f11` (msg #490), e2e прогнан — 10/10 зелёных, `lastStatus` обновлён на актуальный
-> коммит. Свободные концы: (1) реальное исполнение Tier 1-перехода когда появится первый
-> запрос (Этап 8); (2) 🔴 `svoichuzhie` прод-баг (запись ниже) — если ещё актуален.
->
-> **✅ Находка сессии v0.6.4 — GET-утечка пароля — ЗАКРЫТА (2026-07-16):** аудит логин-форм
-> монорепо подтвердил и расширил скоуп находки (не только raw-формы точечных приложений, но и
-> оба корневых `<form>` в `@letar/forms` — риску были подвержены **все** потребители
-> библиотеки, включая driving-school). `method="post"` добавлен в 15 местах (libs/forms ×2,
-> auth-hub ×3, aboi ×3, dsperevod ×3, svoichuzhie ×4); mandala/animatrona-tracker уже были на
-> `@letar/forms`, закрыты фиксом библиотеки. Typecheck зелёный, lint без новых ошибок. Детали
-> и коммиты — apps/auth-hub/PLAN.md «Бэклог».
->
-> **✅✅ Тираж method=post задеплоен целиком, попутно найдено и закрыто ещё 3 бага
-> (2026-07-16):** (1) **`libs/deploy-engine/src/rollout.ts`** хардкодил имя нового контейнера
-> как `<project>-app-2`, вычисляя его ДО scale-up без проверки против реального состояния
-> Docker — Compose выбирает следующий свободный индекс, не гарантированно 2 (после нескольких
-> rollout-циклов старый контейнер был `-app-3`, новый стал `-app-4`); `wait-healthy` 5 минут
-> опрашивал несуществующее имя и падал по таймауту (инцидент на деплое auth-hub, BlackCove
-> вручную довёл rollout). Фикс — `resolveNewContainer()` резолвит новое имя ПОСЛЕ scale-up через
-> `docker ps`, вычитая уже известное старое (аналог `resolveOldContainer`); новый гейт
-> `resolve-new-container` (10 гейтов вместо 9). Regression-тест воспроизводит инцидент напрямую.
-> Подтверждено в бою на деплое svoichuzhie. Коммит `1e5e359`. (2) **`aboi`** — `next build`
-> ложно падал на TS-ошибке `rootDir` при импорте `@letar/forms` (internal TS-чекер Next.js не
-> полностью поддерживает project references) — фикс `typescript.ignoreBuildErrors: true`, тот
-> же паттерн, что уже в 7 других приложениях. Коммит `27af8d0`. (3) **`dsperevod`** —
-> `AUTH_ENCRYPTION_KEY` отсутствовал в проде целиком (ни в `.env.docker.enc`, ни в
-> `docker-compose.production.yml`) — сгенерирован через `openssl rand -hex 32`, добавлен в оба
-> обязательных места. Коммит `251b22c`. Отдельно — **`svoichuzhie`** зависание страницы у
-> пользователя оказалось клиентским Service Worker без таймаута сети (не сервером): подвисшее
-> TCP-соединение вешало fetch-event навечно, обычный хард-рефреш не спасал (SW продолжал
-> контролировать вкладку) — фикс `fetchWithTimeout()` (8с) с откатом на кэш. Коммит `a95e768`.
-> Все 4 приложения (auth-hub/aboi/dsperevod/svoichuzhie) в проде на актуальных коммитах.
-
-> **🔴 `svoichuzhie` — прод-баг, НЕ связанный с rollout (2026-07-14, BlackCove, msg #453):**
-> rollout-пилот безопасно откатился на гейте `wait-healthy` (без даунтайма, `nginx-reload-1` не
-> наступил) — но новый контейнер `svoichuzhie-app-2` воспроизвёл **ту же проблему**, что уже
-> **4 дня** у прод-контейнера `svoichuzhie-app` (`unhealthy` в `docker ps`). `/api/health`
-> отвечает нормально сразу после старта, но через ~3 минуты сервис перестаёт принимать соединения
-> на `:3021` — даже изнутри собственного контейнера через `localhost`. Процесс не падает, ошибок
-> в логах нет (`next-server` жив, `Ready in 0ms`). Похоже на зависший event loop, блокирующую
-> операцию или утечку file descriptor на слушающем сокете — воспроизводится одинаково и в
-> 4-дневном старом контейнере, и в свежесобранном новом. **`svoichuzhie-app-2` оставлен запущенным
-> для отладки** (не удалён). Rollout `svoichuzhie` отложен до разбора первопричины — это
-> приоритетнее самого тиража (боевой e-commerce с реальными клиентами уже 4 дня в нездоровом
-> состоянии).
->
-> **⚠️ Уточнение (2026-07-15, Ками проверил вживую):** `svoichuzhie.ru` у реального пользователя
-> открылся нормально в браузере, несмотря на `unhealthy` в Docker — расхождение между
-> «недоступен по healthcheck» и «реально работает для людей». Код-аудит внешних `fetch()` без
-> таймаута (`/api/video/proxy`, `media.ts`, `alfabank.ts`) — исправлено защитно
-> (`AbortSignal.timeout(15s)`, commit `83af83f` submodule + `faf1a16` letar), но это не
-> подтверждённая причина: тестовый контейнер BlackCove уходил в unhealthy БЕЗ реального
-> пользовательского трафика, так что fetch-пути пользователей физически не могли быть виноваты
-> в этом конкретном тесте. **Новая гипотеза:** `mem_limit: 512m` + `memswap_limit: 512m` (без
-> доп. swap) в compose — возможен cgroup memory throttling, из-за которого процесс формально жив,
-> но не принимает новые соединения, без OOM-килла и ошибок в логах. Запрошена диагностика у
-> BlackCove (`docker stats`, поиск OOM-событий в `dmesg`/`journalctl`).
->
-> **✅✅ ROOT CAUSE НАЙДЕН И ЗАКРЫТ (2026-07-15, BlackCove, msg #456):** память ни при чём —
-> `docker stats` показал 30–38% от лимита на обоих контейнерах, OOM-событий в `journalctl` за
-> 4 дня нет вообще. **Реальная причина:** `/etc/hosts` внутри контейнера резолвит `localhost` в
-> `::1` (IPv6) РАНЬШЕ `127.0.0.1` — а Next.js слушает только `0.0.0.0` (IPv4), IPv6-listener'а
-> нет. `busybox wget` (healthcheck-команда) не делает fallback на IPv4 → `wget
-http://localhost:3021/...` стабильно получал `connection refused`, хотя `wget
-http://127.0.0.1:3021/...` отвечал мгновенно. Внешний трафик через nginx идёт по отдельному
-> сетевому пути (IPv4 к опубликованному порту контейнера), не завязанному на `/etc/hosts` —
-> отсюда парадокс «unhealthy 4 дня, но сайт реально работает у пользователей» (подтверждено
-> Ками вживую в браузере). **Фикс (commit `0b1a017` submodule + `8466afc` letar):** healthcheck
-> `http://localhost:3021/...` → `http://127.0.0.1:3021/...`, один символ. Проверено — паттерн
-> `wget http://localhost:` в healthcheck нигде больше в монорепо не встречается (все остальные
-> приложения уже используют `0.0.0.0`), баг был изолирован к svoichuzhie. Таймауты на внешние
-> `fetch()` (`83af83f`/`faf1a16`) остаются в коде как легитимное защитное улучшение, но не были
-> причиной. Запрошен повторный rollout-пилот у BlackCove (msg #457) — **ждёт выполнения**.
->
-> **✅✅ ROLLOUT-ПИЛОТ ЗАВЕРШЁН (2026-07-15, BlackCove, msg #461, thread `deploy-svoichuzhie`):**
-> commit `fcb4689cd` (letar) / `f8c5bba` (submodule) — фикс healthcheck `localhost`→`127.0.0.1`
-> в проде. Подтверждено через `deploy_status` (deploy-mcp, exitCode 0): все 9 гейтов пройдены —
-> `doctor` → `resolve-old-container` → `scale-up` → `wait-healthy` (`svoichuzhie-app-2` healthy) →
-> `smoke-test` (реальный HTTP, не-5xx) → `nginx-reload-1` → `stop-old` → `rm-old` →
-> `nginx-reload-2`, `docker ps`: `svoichuzhie-app-2 — Up (healthy)`, даунтайма не было. IPv6/
-> `localhost` healthcheck-баг подтверждён закрытым. ⚠️ Повторный запрос (msg #460) оказался
-> дубликатом — исходный (#457) BlackCove обработал на ~5 минут раньше, ответ (#458) ушёл другому
-> агенту (RubyBear), не инициатору — источник путаницы «он ответил на другое имя агента».
-> **16/~19 SERVER_APPS на rollout.**
->
-> **✅ Risk-check интеграций СДЭК/каталога — ЗАКРЫТ С ОГОВОРКОЙ (2026-07-15, BlackCove msg #463 +
-> проверка в браузере, thread `deploy-svoichuzhie`):** каталог/`delivery` — ✅ реальный HTML
-> (`/merch` 143955 байт, `/delivery` 164558 байт), общий health 5×curl `svoichuzhie.ru` → 200,
-> даунтайма нет. **СДЭК:** креды (`CDEK_CLIENT_ID`/`CDEK_CLIENT_SECRET`) внутри контейнера заданы
-> корректно (подтверждено `docker exec ... env`), но end-to-end расчёт доставки (Server Action
-> `shipping.action.ts`, недоступен для curl) проверить не удалось — **`/merch` на проде пуст**
-> («Скоро будет», товаров нет), страница оформления заказа физически недостижима, пока владелец
-> не опубликует товары. Не блокер rollout — интеграция задеплоена корректно, живой end-to-end тест
-> откладывается до наполнения каталога (появится естественным образом в логах при первом реальном
-> заказе).
-
-> **✅ `deploy-affected.sh` — молчаливый пропуск миграций ПОФИКШЕН (2026-07-14, RubyBear, commit
-> `8e34f17`):** найдено BlackCove/RainyMarsh (msg #447/#450) при staging e2e для driving-school —
-> хардкод `SCHEMA_PATH="src/generated/schema.prisma"` не совпадал с shared-lib паттерном
-> driving-school (schema.prisma генерируется в `libs/driving-school-db/`, migrations лежат в
-> `apps/driving-school/prisma/migrations/`), скрипт молча писал `⚠️ Schema not found` и
-> пропускал весь шаг применения миграций без ошибки — подтверждено на staging (БД пустая при
-> зелёном build-логе), вероятно актуально и для production.
-> **Разбор перед фиксом:** первая идея (распарсить `output` из `schema.zmodel`) была бы неверна —
-> Prisma тогда искал бы `migrations/` рядом со сгенерированной `schema.prisma` (в `libs/`), а не
-> там, где они реально лежат (`apps/driving-school/prisma/migrations/`). Правильный источник —
-> `prisma.config.ts` (Prisma 7, есть у всех server-приложений кроме `label-printer-desktop`),
-> который держит `schema`+`migrations.path` согласованными. Рабочие nx-таргеты
-> `db:migrate`/`db:migrate:deploy` уже вызывают `prisma migrate deploy` БЕЗ `--schema`, полагаясь
-> на автообнаружение конфига — тот же паттерн применён и в `deploy-affected.sh`.
-> **Итог:** если у приложения есть `prisma.config.ts` — миграции запускаются без `--schema` флага
-> (как в nx-таргетах); иначе — старый хардкод-путь как fallback. Проверено на всех 18
-> приложениях с `schema.zmodel` — меняет поведение только для `driving-school`, остальные
-> получают эквивалентный вызов. Сообщено BlackCove — стоит последить за логом первого прогона
-> после этого коммита.
-
-> **`svoichuzhie` rollout-миграция — 🟡 первая попытка ❌, повтор запрошен (2026-07-14):** compose
-> смигрирован (commit `1f73ab1` submodule + `649167b` letar) — нет `container_name`/`ports` у
-> `app`, alias `svoichuzhie-app`, healthcheck уже был, `letar.rollout`, `DEPLOY_TAG`.
-> **Первая попытка (msg #448, BlackCove) упала до докер-стадии** — не из-за compose:
-> `.env.docker` содержал `CDEK_FROM_ADDRESS=Рождественская ул., 8` без кавычек;
-> `deploy-affected.sh` делает `source .env.docker` при сборке, запятая+пробел ломали
-> bash-парсинг (`ул.,: command not found`, exit 127). Прод не пострадал (падение до докера).
-> **Пофикшено (RubyBear, свой SOPS-ключ):** `.env.docker.enc` → `CDEK_FROM_ADDRESS="Рождественская
-ул., 8"` (commit `bc8b595` submodule + `5c2a333` letar), проверено локально — `source` парсит
-> чисто. Повторный запрос отправлен (msg #451) — **ждёт выполнения**.
-> ⚠️ Побочная находка (не блокер, не связана с этой миграцией): `svoichuzhie-app` в текущем
-> проде уже 4 дня в статусе `unhealthy` — существовало до попытки деплоя, требует отдельного
-> разбора независимо от rollout.
-
-> **`animatrona-tracker` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #442/#443, thread
-> `deploy-animatrona-tracker-rollout-J`):** commit `78b7db8`, сервер s2, zero-downtime, все 9
-> гейтов пройдены, curl-мониторинг `animatrona-tracker.letar.best` 200×5 без сбоев. **15/~19
-> SERVER_APPS на rollout.**
-> ⚠️ Побочная находка (не блокирует): в логе `zenstack:generate` рассинхрон версий ZenStack —
-> `@zenstackhq/runtime@2.22.3` при остальных пакетах на `3.8.3`. Предсуществующий техдолг в
-> `package.json`, не трогали.
->
-> **➡️ Следующий старт:** `svoichuzhie` rollout-пилот ЗАВЕРШЁН (см. запись выше, msg #461,
-> **16/~19 SERVER_APPS на rollout**), risk-check СДЭК/каталога закрыт с оговоркой (см. запись
-> выше). Продолжен тираж на `form-example`/`mandala` (2026-07-15, commit `3b4f732` — включён
-> `letar.rollout` в обоих compose).
->
-> **`mandala` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-15, BlackCove, msg #467/#468, thread
-> `deploy-form-example-mandala-rollout-J`):** первый rollout для mandala, все 9 гейтов зелёные,
-> `mandala-app-2` healthy, `curl mandala.letar.best` → 200. **17/~19 SERVER_APPS на rollout.**
->
-> **`form-example` rollout-пилот 🟡 ЗАБЛОКИРОВАН, root cause найден и пофикшен (2026-07-15,
-> BlackCove, msg #467):** деплой упал на шаге миграций (`P1001: Can't reach database server at
-localhost:5432`) — `form-example-db`, единственная БД в монорепо без `ports:` в compose;
-> `deploy-affected.sh` мигрирует с хоста через `localhost:$DB_PORT`, слушать было нечего. Старый
-> контейнер не тронут, риска не было. **Пофикшено (commit `d0c5cfc`):** добавлен `ports:
-'5443:5432'` (первый свободный порт, проверены все занятые 5434–5455) в
-> `apps/form-example/docker-compose.production.yml`. Повторный запрос деплоя отправлен BlackCove
-> (thread `deploy-form-example-mandala-rollout-J`) — **ждёт выполнения**. Известный некритичный
-> баг `/products ECONNREFUSED` не проверялся — деплой упал раньше, на миграциях.
->
-> **`form-example` rollout-пилот 🟡 повторный root cause #2 (2026-07-15, BlackCove, msg #470):**
-> после фикса порта деплой дошёл до аутентификации и упал на `P1000` — `deploy-affected.sh`
-> строит `DATABASE_URL` для миграций из переменной `DB_PASSWORD` (не `POSTGRES_PASSWORD`),
-> а в `apps/form-example/.env.docker` её никогда не было (единственное такое приложение в
-> монорепо). **Пофикшено (commit `fd67766`):** добавлен `DB_PASSWORD` (то же значение, что
-> `POSTGRES_PASSWORD`) в `.env.docker`, пересобран `.env.docker.enc` через `sops --encrypt`.
->
-> **`form-example` rollout-пилот 🟡 root cause #3, архитектурный пробел (2026-07-15, BlackCove,
-> msg #472):** пароль починился, деплой дошёл до реальной проверки миграций — упал на `P3005`
-> (`The database schema is not empty` / `No migration found`). `apps/form-example/prisma/
-migrations/` **никогда не существовала в репозитории** — схема на проде была накатана через
-> `prisma db push`, а не `prisma migrate`; `deploy-affected.sh` безусловно вызывает `migrate
-deploy`, который требует историю миграций против непустой БД (baseline). Не архитектурная
-> находка BlackCove (не его профиль трогать состояние прод-БД) — решение пользователя: baseline
-> вместо исключения из миграционного пути (риск молчаливого пропуска будущих реальных
-> schema-изменений, прецедент driving-school commit `8e34f17`).
-> **✅ Baseline-миграция сгенерирована и провалидирована (2026-07-15):** локальный dev reset
-> (временный Postgres-контейнер, не трогал `docker-compose.yml`) → `prisma migrate dev --name
-init --create-only` из текущей `prisma/schema.prisma` → `prisma/migrations/
-20260715163011_init/migration.sql` (2 таблицы `Product`/`Contact`, 2 enum). Применена к чистой
-> тестовой БД через `migrate deploy` — прошла без ошибок, `migrate status` подтвердил «up to
-> date». Закоммичена в репо. **На проде миграцию НЕ применять DDL-ом** (схема там уже такая) —
-> нужен `prisma migrate resolve --applied 20260715163011_init` перед повторным `migrate deploy`,
-> это должен выполнить BlackCove (затрагивает состояние прод-БД, вне профиля этой сессии).
->
-> **✅✅ `form-example` rollout-пилот ЗАВЕРШЁН — ТИРАЖ §18.6 ЗАКРЫТ ПОЛНОСТЬЮ (2026-07-15,
-> BlackCove, msg #474/#475, thread `deploy-form-example-mandala-rollout-J`):** `migrate resolve
---applied 20260715163011_init` выполнен на прод-БД (без DDL, только пометка в
-> `_prisma_migrations`), `migrate status` подтвердил «up to date». Четвёртая попытка деплоя
-> прошла целиком — все 9 гейтов зелёные, `form-example-app-2 healthy`, `nginx-reload` ×2,
-> `form-example-app-1` убран. **19/~19 SERVER_APPS на rollout** (`form-example` + `mandala` —
-> оба закрыты одним заходом, три независимых бага устранены: host-порт БД `d0c5cfc`,
-> `DB_PASSWORD` `fd67766`, baseline-миграция `b63b132`). Единственные приложения вне активного
-> тиража — `dashboard`/`dashboard-agent` (структурно исключены, спецпуть деплоя, не кандидаты).
->
-> **✅✅ `premium-network` УДАЛЕНА ОКОНЧАТЕЛЬНО (2026-07-15, ~17:07, BlackCove, threads #477→#478,
-> #479→#481):** миграция доведена до конца. Все 27 контейнеров (все app/infra compose-файлы в
-> репо уже ссылались только на `kami-network` — dual-connect с сессии №74 был чисто избыточным
-> техдолгом) по одному отключены от старой сети, с проверкой healthcheck/connectivity после
-> каждого шага; `nginx-proxy-manager` — последним, с baseline-проверкой до/после. Сеть опустела
-> (`containers_left: 0`) → `docker network rm premium-network`. Смоук-тест по 5 приложениям после
-> удаления — все 200, ни одного сбоя связности за всю миграцию. Подтверждено повторной проверкой
-> `docker network ls` на s2 (2026-07-15, 17:32) — сети в списке нет. Ранее было расхождение (msg
-> #477/#478): CalmBasin утверждал, что сеть уже пуста и не используется, но `docker network
-inspect` на тот момент показал обратное (~28 контейнеров, включая nginx-proxy-manager) — отсюда
-> двухэтапная (сначала диагностика, потом безопасная миграция) процедура удаления.
-
-> **➡️ Следующий старт:** тираж §18.6 Сессии J и удаление `premium-network` полностью завершены.
-> Кандидаты: (1) `driving-school` — `@socket.io/redis-adapter` для Socket.IO перед включением
-> rollout для этого сервиса (§10, отложено пользователем, не блокер); (2) Этап 1.5 `createAuth
-(profile)` или Этап 8 (соц-секреты per-владелец) — следующий содержательный этап Фазы B/C.
-
-> **`aprel8008` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-14, BlackCove, msg #436/#437, thread
-> `deploy-aprel8008-rollout-J`):** commit `8cbdfbe` (submodule) + `d855683` (letar), сервер s2,
-> zero-downtime, все 9 гейтов пройдены. Сборка заняла дольше обычного (~4 мин, экспорт слоёв
-> 107с) — build cache на s2 разросся до 52GB, диск был под нагрузкой параллельно с driving-school
-> — на корректность деплоя не повлияло. **14/~19 SERVER_APPS на rollout.**
->
-> **➡️ Следующий старт:** продолжить тираж — оставшиеся кандидаты `animatrona-tracker`,
-> `svoichuzhie` (оба без rollout-профиля пока), `form-example`/`mandala` (label намеренно
-> выключен — form-example статус не проверялся давно, mandala ждёт периода стабильности);
-> `dashboard`/`dashboard-agent` структурно исключены. Стоит присмотреться к 52GB build cache на
-> s2 — не блокирует, но растёт с каждым деплоем.
-
-> **`auth-hub` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #420/#421, thread
-> `deploy-auth-hub-rollout-J`):** commit `7c355d7`→`20684fc`, сервер s2, zero-downtime rollout,
-> все 9 гейтов пройдены (doctor → resolve-old-container → scale-up → wait-healthy → smoke-test →
-> nginx-reload-1 → stop-old → rm-old → nginx-reload-2), даунтайма не было. Пост-проверка сверх
-> обычного HTTP 200: OIDC-редирект с hub-client (`kami`, «Войти» → корректный redirect на
-> `auth.letar.best` с рендером формы логина) подтверждён рабочим — блast radius (SSO для ~10
-> приложений) не сработал. **12/~19 SERVER_APPS на rollout.**
-> ⚠️ Находка BlackCove: для auth-hub ещё ни разу не гонялся staging e2e — завести перед
-> следующими rollout-изменениями Ключницы (не блокирует, задел на будущее).
->
-> **✅ Staging e2e для auth-hub заведён (2026-07-14, RubyBear, commit `3043014`):** новый
-> `apps/auth-hub-e2e` (Playwright, по образцу `grandslamcup-e2e`) + dev-session роут
-> (`createDevSessionRoute` из `@letar/auth/server`). 3 спека: `01-public` (sign-in/sign-up без
-> авторизации — email/password форма, magic-link, OAuth-кнопки), `02-admin` (dashboard/users/
-> clients с dev-session-сессией), `03-oidc-authorize` (смоук authorize-редиректа с произвольными
-> query — не привязан к конкретному seeded client_id, только «не 500»). Только `chromium` первым
-> заходом. `nx lint`/`nx typecheck:tsgo` чисто.
->
-> **✅ Первый прогон прошёл зелёным (2026-07-14, BlackCove, msg #428, 2м55с, chromium)** — но
-> вручную: BlackCove настроил `.env.local` + прогнал `nx e2e auth-hub-e2e` по SSH напрямую,
-> потому что `run_e2e`/`deploy_app(staging)` требуют `docker-compose.staging.yml`, которого у
-> auth-hub не было. Такой прогон не пишет `.last-e2e-status/auth-hub.json` и не участвует в
-> warn-gate перед production-деплоем — цель находки BlackCove (msg #420) не достигнута полностью.
->
-> **✅ docker-compose.staging.yml добавлен (2026-07-14, RubyBear, commit `5ab4186`):** по образцу
-> `grandslamcup-staging` — `auth-hub-staging-db` (host `5455:5432`), `auth-hub-staging-app` (host
-> `3019:3010`, внутренний порт из `Dockerfile.production`). `playwright.config.ts` менять не
-> потребовалось — уже структурно совпадал с эталоном (`baseURL` из `BASE_URL`,
-> `webServer.reuseExistingServer: true`). ⚠️ Порты 5455/3019 подобраны по аналогии, не проверены
-> на реальную занятость на s3. Запрос отправлен BlackCove (thread `auth-hub-e2e-setup`, msg #429,
-> low priority): подтвердить порты → `deploy_app(staging)` → `run_e2e` → `.last-e2e-status`
-> появится, warn-gate заработает.
->
-> **✅✅ ЗАКРЫТО ПОЛНОСТЬЮ (2026-07-14, BlackCove, msg #431):** порты `5455`/`3019` подтверждены
-> свободными и задеплоены. `run_e2e` → **10 passed за 8.3с** — `.last-e2e-status/auth-hub.json`
-> теперь пишется и читается warn-gate'ом перед каждым production-деплоем Ключницы, как у
-> остальных приложений. Находка BlackCove из msg #420 закрыта. По пути найдены и исправлены два
-> общих бага тиража (не специфичны для auth-hub, важны для следующих staging e2e):
->
-> 1. Комментарий между `ports:` и первой строкой порта ломал парсинг `DB_PORT` в
->    `deploy-affected.sh` (`grep -A 1 "ports:"` буквально берёт следующую строку) — комментарии
->    нужно ставить НАД блоком `ports:`, не между ключом и значением. Пофикшено (commit `6ee1751`).
-> 2. **`DEV_SESSION_TOKEN` — общий секрет для ВСЕХ приложений, не per-app:** `dashboard-agent`
->    передаёт в `nx e2e` один и тот же токен из своего собственного окружения на s3
->    (`--preserve-env`), не читает `.env.staging` конкретного приложения. Генерировать новый
->    токен per-app (как сделала эта сессия изначально) — ошибка, ломает dev-session с 403.
->    Если понадобится сменить общий токен — обновлять сразу везде: во всех `.env.staging` +
->    в окружении `dashboard-agent`.
->
-> **`driving-school` — 🔴 rollout ОТЛОЖЕН (2026-07-13, находка BlackCove, thread
-> `driving-school-websocket-rollout-check`, msg #422, решение пользователя):** живой NPM-конфиг
-> (`proxy_host/9.conf`) для WebSocket-порта `3004` резолвит `driving-school-app` в IP один раз при
-> старте воркера (нет sticky-балансировки, нет `upstream`-блока). Хуже — `apps/driving-school/
-src/app/api/socket/route.ts` **не использует Redis-адаптер** (`@socket.io/redis-adapter`),
-> Socket.IO держит комнаты in-memory per-process. Итог: в rollout-окне с 2 живыми репликами
-> сообщения чата между собеседниками на разных репликах **молча теряются**, без ошибки на
-> клиенте — не просто краткий обрыв, а тихая потеря данных. Один контейнер обслуживает и HTTP
-> (`3003`), и Socket.IO (`3004`) — разделить их на уровне compose нельзя, только на уровне кода.
-> **Решение:** rollout для driving-school отложен целиком до отдельной задачи — добавление
-> `@socket.io/redis-adapter` (общий room-state между репликами). Не в скоупе текущего тиража.
-> driving-school остаётся на обычном (non-rollout) деплое.
->
-> **✅ Redis-адаптер добавлен в код (2026-07-14, driving-school v0.234.0, commit `b29ca4b`):**
-> `src/app/api/socket/route.ts` подключает `createAdapter` на `ioredis`, если задан `REDIS_URL`
-> (compose: `${REDIS_URL:-redis://letar-redis:6379}`, тот же общий Redis-инстанс, что у auth-hub/
-> kami).
->
-> **✅ BlackCove подтвердил инфру (2026-07-14, тред `424`):** `letar-redis` жив и доступен
-> с `driving-school-app` (nc -zv → open) — ничего донастраивать не нужно. По NPM `proxy_host/9.conf`
-> для `:3004` — upstream-блок НЕ нужен: с общим room-state в Redis не важно, на какую реплику физически
-> попадёт TCP-сокет при rollout, встроенный reconnect Socket.IO восстановит комнату из Redis без потери
-> сообщений (короткий реконнект-блип у активных чатов в момент `stop-old` — ожидаемо, не блокер).
->
-> **✅ Rollout-профиль включён (2026-07-14, driving-school v0.235.0, commit `8189504`):** убраны
-> `container_name`/`ports` у `app`, добавлены network alias `driving-school-app`, `healthcheck`,
-> `image: driving-school:${DEPLOY_TAG:-latest}`, `stop_grace_period: 30s`, `labels.letar.rollout: 'true'`.
-> `deploy-engine doctor --app driving-school` — 8/8 ✅ READY. Deploy-request отправлен BlackCove.
->
-> **✅✅ Rollout-пилот ЗАВЕРШЁН (2026-07-14, BlackCove, msg #434, инициатор RainyMarsh):**
-> zero-downtime, включая Redis-адаптер Socket.IO для WS-чата — первый WS-сервис в тираже. Curl-
-> мониторинг во время финального `nginx-reload`: 200×5 без сбоев. **13/~19 SERVER_APPS на
-> rollout.** Оба последних высокорисковых кандидата §18.6 Сессии J (`auth-hub`, `driving-school`)
-> закрыты.
->
-> ⚠️ По пути найден и исправлен баг сборки, не связанный с rollout напрямую: коммит `b02bf2e`
-> (nx 23.1.0 migration) пин `rootDir: "."` в `tsconfig.json`, хотя `paths`/`references` указывают
-> на `libs/*` вне этой директории — `tsc` терпит (project references + noEmit), `next build` — нет.
-> Первый деплой после rollout-конфига упал на TS-чекере ещё до докер-стадии (старый контейнер не
-> тронут, даунтайма не было). Фикс: `rootDir: "../.."` (как у auth-hub/kami) — commit `b33cb9e`.
->
-> **✅ Staging e2e — код готов (2026-07-14, driving-school v0.236.0, driving-school-e2e
-> `b747adf`), провижининг на s3 не запрошен.** BlackCove отметил отсутствие staging e2e как риск
-> первого rollout-пилота с Redis-адаптером (msg #433) — по аналогии с auth-hub добавлены:
-> `src/app/api/auth/dev-session/route.ts`, `docker-compose.staging.yml` (БД `:5456`, app
-> `:3020`/`:3021`, `REDIS_URL` на `e2e-redis` через `172.17.0.1:6380`), `.env.staging.example`,
-> новый Playwright-проект `staging-smoke` в `driving-school-e2e` (3 файла: публичные страницы,
-> dev-session дашборд, Socket.IO handshake через Redis-адаптер — последний пока `test.skip` без
-> `SOCKET_BASE_URL`). Порты `5456`/`3020`/`3021` не проверены на занятость на s3 — подтвердить
-> перед первым `deploy_app(staging)`. Нужен NPM proxy host для `driving-school-stage.s3.letar.best`
-> и, отдельно, для порта Socket.IO. `.env.staging` с реальными секретами создаётся на s3, не в git.
->
-> **Провижининг сделан, первый staging-деплой упал (2026-07-14, BlackCove, msg #441):** порты
-> подтверждены свободными, `.env.staging` создан на s3 (секреты через `openssl rand`, общий
-> `DEV_SESSION_TOKEN` переиспользован), `docker-compose.staging.yml` парсится верно. NPM public
-> domain и `SOCKET_BASE_URL` осознанно не настроены — `run_e2e` бьёт по `BASE_URL` напрямую на том
-> же хосте s3, домен нужен только для будущего ручного QA; `SOCKET_BASE_URL` требует правки
-> allowlist `--preserve-env` в самом `dashboard-agent` (не провижининг конкретного приложения) —
-> тест и так грациозно `test.skip` без неё. Сам билд упал: `GoogleCalendarService` конструировался
-> на уровне модуля и бросал исключение при пустых `AUTH_GOOGLE_ID`/`SECRET` (staging их намеренно не
-> задаёт) — `next build` падал на статическом сборе `/api/calendar/feed/[token]`.
->
-> **✅ Исправлено (2026-07-14, driving-school v0.236.1, commit `b320bb4`):** ленивый singleton
-> `getGoogleCalendarService()` вместо эагерного `export const`. Проверено локально: `nx build
-driving-school` с намеренно пустыми `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — чисто. Попросил
-> BlackCove повторить staging-деплой.
->
-> **➡️ Следующий старт:** (1) `aboi` уже задеплоен (см. исправленную запись выше) — реально
-> оставшиеся кандидаты: `animatrona-tracker`, `svoichuzhie`, `aprel8008`; `form-example`/`mandala`
-> — обычный (non-rollout) деплой уже закрыт, `letar.rollout` пока намеренно выключен (mandala —
-> период стабильности после инцидента Сессии №70, form-example — не проверено в этой сессии,
-> нужно свериться со статусом); `dashboard`/`dashboard-agent` структурно исключены из rollout
-> (спецпути деплоя); (2) когда все активные SERVER_APPS на rollout — можно просить BlackCove
-> удалить старую `premium-network`.
-
-> **`grandslamcup` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #414, thread
-> `deploy-grandslamcup-rollout-J`):** commit `841e9338e`, сервер s2, zero-downtime rollout,
-> smoke-test (реальный HTTP, не-5xx) прошёл, `Ready in 0ms`, миграций не было. **Живой пример
-> параллельного деплоя одного приложения двумя агентами** — почти одновременно с моим
-> compose-запросом другой агент (StormyBear, msg #412) отправил свой deploy-request с фиксом двух
-> багов telegram-напоминаний (`venue.lat/lng → latitude/longitude`, убрана несуществующая роль
-> `PLAYING_COACH`). BlackCove не деплоил дважды — оба коммита уже были на `origin/main` к моменту
-> старта, `deploy-affected.sh` подтянул HEAD и задеплоил всё одним прогоном.
-> ⚠️ **Не закрыто, требует внимания StormyBear:** e2e-gate предупредил — последний прогон e2e для
-> grandslamcup упал, на старом коммите `50d72bc` (>24ч, не совпадает с задеплоенным) — фикс
-> напоминаний тренерам автоматически не проверен. BlackCove рекомендует ручную проверку на проде.
-> **11/~19 SERVER_APPS на rollout.**
->
-> **`archetest` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #409, thread
-> `deploy-archetest-rollout-J`, 4-я попытка):** commit `f61d654`, сервер s2, zero-downtime rollout
-> с реальным smoke-test (HTTP-запрос к `archetest-app-2`, не только TCP). Путь до успеха был
-> непростым: (1) failed-миграция `20260321000000_baseline` (висела с марта) — диагностирована как
-> дубликат уже применённого `20260321075436_baseline`, резолв `--rolled-back` не сработал (Prisma
-> заново попыталась применить DDL и упала на той же строке), верный резолв — `--applied`; (2) после
-> резолва миграций деплой упал ещё раз — но уже не на archetest, а на **несвязанном инфра-инциденте**
-> (см. ниже, случайный коммит `ceb09c8` со сторонней nx-миграцией сломал 7 submodule-ссылок,
-> исправлено в течение той же сессии). После устранения обоих блокеров — 5 новых миграций archetest
-> накатились штатно (`question_bank_version`, `session_validity`, `add_mood_check_in`,
-> `professional_lead`, `add_quiz_session_locale`), rollout прошёл чисто. Психоданные BlackCove не
-> трогал — только диагностика через `\dt`/`_prisma_migrations`. **11/~19 SERVER_APPS на rollout.**
-> Следующий — `grandslamcup` (compose готов, `f6fb9ca`, `doctor` 8/8), запрос пилота отправлен.
->
-> **🟡 Инцидент этой сессии — случайно закоммичены и запушены чужие staged-изменения (nx
-> 23.0.1→23.1.0), временно заблокировавшие деплой всех приложений:** при частых
-> `git add PLAN.md && git commit && git push` не проверялся `git status` перед каждым коммитом
-> (нарушение `.claude/rules/git.md` про staged-файлы других агентов в общем репо) — в индекс
-> затесались чужие изменения параллельного агента (nx-миграция ~140 `tsconfig*.json` + bump 7
-> submodule на **ещё не запушенные** submodule-коммиты). Итог — commit `ceb09c8` со смешанным
-> содержимым, деплой archetest/любого приложения на s2 встал на `git submodule update` ("not our
-> ref" для 7 submodule). Автор nx-миграции сам исправил ситуацию (`f61d654`, докоммитил и запушил
-> submodule-коммиты) — к моменту 4-й попытки деплоя блокер снят, урона данным/сервисам не было.
-> **Правило на будущее: всегда `git status` перед `git commit` в этом репо, особенно при частых
-> последовательных коммитах.**
->
-> **`kami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #392, thread
-> `deploy-kami-rollout-J`):** zero-downtime rollout (label `letar.rollout`), commit `42720aa`
-> (fast-forward с `0fcd9f0`), сервер s2. Прошёл штатно: scale-up → wait-healthy → smoke-test →
-> nginx reload → stop/rm старого контейнера → повторный reload. Новый `kami-app-2` healthy,
-> `Ready in 0ms`. Миграций не требовалось.
-> ⚠️ Побочная находка про `kami-postgres` vs `kami-db` — **закрыта, ложная тревога**: в реальном
-> логе деплоя `DATABASE_URL: lena_user@kami-db:5432/lena_kami` резолвится корректно,
-> ECONNREFUSED/ENOTFOUND не наблюдалось. Похоже дефолт в локальном compose-файле где-то
-> переопределяется в рантайме — раз работает, BlackCove оставил как есть, вне скоупа деплоя.
-> **10/~19 SERVER_APPS на rollout.**
->
-> **`umami` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #389, thread
-> `deploy-umami-rollout-J`):** прошёл как infrastructure-деплой (вендорский образ
-> `ghcr.io/umami-software/umami`, `pull + recreate` напрямую, без zero-downtime scale=2 — ожидаемо
-> для этого кандидата), commit `c119c66`, сервер s2. Миграции не требовались («No pending
-> migrations»). `umami-app-1` и `umami-db` оба в `kami-network`. Домен `stats.letar.best` — 5/5 curl
-> HTTP 200, `/api/heartbeat` → `{"ok":true}`, ошибок в логах нет. На будущее: откат umami — только
-> ручной `docker pull` вендорского тега, обычный `rollback --to-sha` не работает (нет своих тегов
-> образа).
->
-> **➡️ Следующий старт (следующая сессия):** (1) `archetest`+`grandslamcup` оба закрыты — следующие
-> кандидаты тиража §18.6 Сессии J: `auth-hub`/`driving-school` последними, риск выше — не
-> мигрировать с ходу без дополнительного анализа, сверяться с пользователем; (2) когда все ~20
-> приложений подтверждённо переехали на `kami-network` — попросить BlackCove удалить старую
-> `premium-network`; (3) StormyBear ещё не подтвердил ручную проверку telegram-напоминаний
-> grandslamcup (msg #415) — не мой скоуп, но если попадётся на глаза, можно спросить статус.
-
-> **`dsperevod` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #383, thread
-> `deploy-dsperevod-rollout-J`):** zero-downtime (submodule `a8491ca` + `adf4e40` в letar, сервер
-> s2). Первый rollout с БД со времён `time` — `depends_on: service_healthy` отработал корректно,
-> `dsperevod-app-2` дождался healthy `db`, ни одного ECONNREFUSED. Домен `dsperevod.ru` — 5/5 curl
-> HTTP 200. **7/~19 SERVER_APPS на rollout.**
-> **`aboi` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #387, thread
-> `deploy-aboi-rollout-J`, инициатор VioletGrove):** commit `bf9c54b` (submodule) + `5e4f3ef`
-> (letar), сервер s2, zero-downtime — первый боевой e-commerce в тираже (T-Bank эквайринг, СДЭК).
-> BlackCove проверил не только HTTP 200, но и реальные интеграции: СДЭК-токен получен, webhook
-> `https://neyroaboi.ru/api/webhooks/cdek` зарегистрирован без ошибок в логах `aboi-app-2`; каталог
-> `/catalog/` реально отдаёт контент (106KB HTML, цены в ₽, не пустая страница). `depends_on:
-service_healthy` снова сработал корректно (как в dsperevod). Ни одной ошибки. **Обнаружено
-> задним числом (2026-07-14, RubyBear) — PLAN.md не обновлялся после успеха, аналогично сессии
-> №73 с aprel8008: не доверять статусу «ждёт выполнения» в PLAN.md без проверки inbox.**
-
-> **`animatrona-landing` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #381, thread
-> `deploy-animatrona-landing-rollout-J`):** zero-downtime (commit `986d8da`, сервер s2).
-> `animatrona-landing-app-2` подтверждён в `kami-network`. Домен `animatrona.letar.best` — 5/5 curl
-> HTTP 200, ошибок в логах нет. **6/~19 SERVER_APPS на rollout** (`time`, `form-docs`, `pravda`,
-> `kami-key-the-landing`, `letar-landing`, `animatrona-landing`).
-
-> **`letar-landing` rollout-пилот ✅ ЗАВЕРШЁН (2026-07-13, BlackCove, msg #379, thread
-> `deploy-letar-landing-rollout-J`):** zero-downtime (commit `05f3628`, сервер s2) — первый деплой
-> на новую сеть `kami-network` (см. Сессию №74 ниже), прошёл без сюрпризов, `letar-landing-app-2`
-> подтверждён в `kami-network` (`docker network inspect`). Домен `letar.best`, 5/5 curl HTTP 200.
-> **5/~19 SERVER_APPS на rollout** (`time`, `form-docs`, `pravda`, `kami-key-the-landing`,
-> `letar-landing`). Значит и rename сети `premium-network → kami-network` (msg #377) уже выполнен
-> BlackCove на сервере к этому моменту.
-
-> **Архив:** сессии старше ~1 недели (до 2026-07-13) перенесены в [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
+> **📋 Журнал rollout/e2e-гейта (§18.6/§18.7) и смежных находок по приложениям** — вынесен
+> целиком в приватные доки (`.claude/private/PLAN-JOURNAL.md`), см. §27 Часть 2. Архив
+> сессий старше ~1 недели (до 2026-07-13) — там же, в `PLAN_COMPLETED.md` этого репо.
 
 ## Как читать документ
 
@@ -1297,9 +54,9 @@ email-домен — **по владельцу проекта**; Ключниц�
 
 Признак коммерческого проекта: **приватный submodule** (`kamiletar/letar-private-*`) + **свой домен в `.env.docker`**.
 
-- **Коммерческие (разные владельцы):** `driving-school` (направа.рф), `aboi` (neyroaboi.ru), `dsperevod` — все
-  приватные submodules. Git-изоляция уже есть. (`premium-rosstil`, `imot` выведены из эксплуатации — см. сессию
-  вывода из эксплуатации в шапке файла.)
+- **Коммерческие (разные владельцы):** `driving-school`, `aboi`, `dsperevod` — все приватные submodules
+  (домены и реквизиты — `.claude/private/COMPLIANCE.md`). Git-изоляция уже есть. (`premium-rosstil`, `imot`
+  выведены из эксплуатации — см. сессию вывода из эксплуатации в шапке файла.)
 - **Личные петы (владелец — letar):** `kami`, `dashboard`, `auth-hub` (Ключница), `mandala`, `archetest`,
   `time`, `grandslamcup`, `animatrona-*` и пр. — публичное дерево `letar`, домены `*.letar.best`.
 
@@ -1574,8 +331,8 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 
 - Аудит `SMTP_FROM_EMAIL`/SMTP на всех (`/sync-env`, `email-maddy`); для коммерсов — домен письма = домен клиента (§2.4).
 - **DKIM/SPF/DMARC per-домен (явный deliverable).** Техн. первопричина «форвард режется gmail» (§14.2): валидные
-  DNS-записи для каждого отправляющего домена (`letar.best`, `premium.rosstil.ru`, …). Без них письма в спам/режутся
-  даже при верном `SMTP_FROM`.
+  DNS-записи для каждого отправляющего домена (`letar.best` и доменов коммерческих приложений — список в
+  `.claude/private/COMPLIANCE.md`). Без них письма в спам/режутся даже при верном `SMTP_FROM`.
 - **Baseline-метрики (снять ДО правок).** Зафиксировать старт: % доставки, % верификации, число застрявших
   аккаунтов (`emailVerified` пусто/false). Иначе успех Этапа 0/2 недоказуем.
 - ✅ **Централизованный лог `success === false` в `@letar/email`** (сессия №1): `reportEmailFailure({ type, to, error })`
@@ -1613,9 +370,9 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   `maxretry=5 / findtime=120s / bantime=86400s`; action `iptables-multiport port=587`; тест-бан прошёл.
 - ✅ **Пароли сменены** для `kami@letar.best` и `admin@letar.best` (были атакуемые, сгенерированы 32-символьные).
   Новые значения — только в менеджере паролей владельца (не в коде/PLAN).
-- ⏳ **Форвард на gmail** режется (DKIM/SPF) — чинится DKIM/SPF/DMARC Этапа 0; DKIM DNS-записи для
-  `letar.best`, `neyroaboi.ru`, `premium.rosstil.ru` уже есть; `направа.рф` — **DKIM пока не трогать**:
-  driving-school использует `letar.best` для отправки писем (SMTP_FROM на letar.best), собственный домен не отправляет.
+- ⏳ **Форвард на gmail** режется (DKIM/SPF) — чинится DKIM/SPF/DMARC Этапа 0; DKIM DNS-записи для `letar.best`
+  и для доменов коммерческих приложений (кроме driving-school) уже есть; driving-school — **DKIM пока не
+  трогать**: использует `letar.best` для отправки писем (SMTP_FROM на letar.best), собственный домен не отправляет.
   Конкретные хосты/ящики/пути конфигов — в приватном `.claude/OPS_JOURNAL.local.md` (§14.2).
 - **✓ DoD:** ✅ brute-force IP банятся автоматически; ✅ пароль ящика сменён; ⏳ доставка на канареечный ящик подтверждена (0.7).
 - **Зависимости:** нет (горящее). Пересекается с DKIM-настройкой Этапа 0.
@@ -1722,7 +479,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   1. отправляет тестовое письмо через реальный `@letar/email` на канареечный ящик;
   2. читает входящие по **IMAP**, подтверждает получение в пределах таймаута;
   3. пишет метрику latency доставки.
-- **Покрытие:** ключевые отправители per-домен (`noreply@letar.best`, `noreply@premium.rosstil.ru`, …) +
+- **Покрытие:** ключевые отправители per-домен (`noreply@letar.best` и доменов коммерческих приложений) +
   проверка форвардов (напр. `kami@letar.best` → реальная доставка адресату).
 - **Алерт при провале:** Telegram-webhook + Umami (переиспользуем алертинг Этапа 0); порог — N подряд неудач.
 - **Реализация:** лёгкий скрипт/сервис (не e2e-фреймворк) — SMTP send + IMAP receive, запуск через cron/scheduled.
@@ -1764,19 +521,16 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 
 **Что нового (сверх уже реализованного в aboi):**
 
-1. **Уведомление в РКН** — подать через pd.rkn.gov.ru для каждого оператора. Получить PDF с номером → занести в README/PLAN приложения.
-   - ✅ **aboi (neyroaboi.ru):** подано 16.05.2026 оператором-владельцем (ИП), рег. № 100286690. PDF у владельца.
-     ⚠️ Проверить при аудите aboi: заявленный ЦОД (ООО «Цифровые решения», Москва) — сверить с фактическим хостингом s2.
-     Трансграничная передача — по тому же принципу, что у letar (см. ниже): для RU-IP зарубежных провайдеров быть не должно.
-   - ✅ **letar (`*.letar.best`: auth-hub, grandslamcup и пр.) + driving-school (направа.рф — тот же оператор-ИП
-     владельца letar):** подано 02.06.2026 оператором-владельцем (ИП),
-     рег. № 100306050. Дата начала обработки 22.04.2026. 3 цели (договор, продвижение, регистрация на сайте);
-     СКЗИ КС1 (TLS); ЦОД — ООО «Цифровые Решения», Москва. PDF у владельца.
+1. **Уведомление в РКН** — подать через pd.rkn.gov.ru для каждого оператора. Реквизиты (даты подачи, номера
+   операторов, ЦОД, привязка приложение → ИП) — в `.claude/private/COMPLIANCE.md` (§27). Здесь только факт.
+   - ✅ **aboi:** уведомление подано, оператор подтверждён. Трансграничная передача — по тому же принципу, что
+     у letar (см. ниже): для RU-IP зарубежных провайдеров быть не должно.
+   - ✅ **letar + driving-school (тот же оператор-владелец letar):** уведомление подано, оператор подтверждён.
      ✅ **Решение (2026-06-10):** «трансграничная передача не осуществляется» корректна — 152-ФЗ/уведомление
      касаются ПДн граждан РФ; для RU-IP зарубежные провайдеры (Google/GitHub/Facebook, Telegram) скрываются
      гео-блокировкой (Этап 6.7), а поведение для иностранных IP — вне сферы уведомления. Уточнение уведомления
      не требуется; **Этап 6.7 становится обязательным** для соответствия заявленному.
-   - ✅ **dsperevod:** подано (2026-06-26), номер оператора зафиксирован в apps/dsperevod/PLAN.md.
+   - ✅ **dsperevod:** уведомление подано (2026-06-26), номер оператора зафиксирован в apps/dsperevod/PLAN.md.
    - ➖ premium-rosstil, imot — выведены из эксплуатации letar (см. сессию decommission в шапке файла), больше не
      наш вопрос соответствия.
 2. **Тираж cookie-баннера** на все ПД-собирающие приложения (сейчас только aboi — эталон).
@@ -2128,7 +882,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-;<UserMenu
+<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}
@@ -2157,7 +911,7 @@ import { UserMenu } from '@letar/ui'
 | ------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
 | Петы `*.letar.best`            | kami, grandslamcup, time, archetest, mandala, pravda, animatrona-landing, auth-hub | без согласования                               |
 | Лендинги letar                 | letar-landing, kami-key-the-landing                                                | решить: нужен ли self-credit на letar.best     |
-| Коммерческий (ИП владельца)    | driving-school (направа.рф)                                                        | оператор тот же — без внешнего согласования    |
+| Коммерческий (ИП владельца)    | driving-school                                                                     | оператор тот же — без внешнего согласования    |
 | Коммерческие (чужие владельцы) | aboi, dsperevod, svoichuzhie                                                       | **согласовать с владельцами** + submodule-флоу |
 
 > ➖ `premium-rosstil`, `imot` исключены из охвата — выведены из эксплуатации (2026-07-05).
@@ -2348,7 +1102,7 @@ auth-mode/`; сам переход на Tier 1 — не самообслужив
 - **Разовая операция владельца:** склейка личных email в Ключнице — ✅ **ВЫПОЛНЕНА 2026-05-30** (§14.1):
   canonical `kami@letar.best`, 5 провайдеров (credential, github, google×2, yandex) на одном аккаунте.
   ✅ **Перенос данных в kami (2026-06-05):** `infra/migrations/kami-owner-migration.ts` — 4 AudioFile
-  перенесены с `letarkami@gmail.com`, оба старых аккаунта удалены, `kami@letar.best` получил роль ADMIN.
+  перенесены с `<личный ящик владельца>`, оба старых аккаунта удалены, `kami@letar.best` получил роль ADMIN.
   ✅ **Скрипты выполнены (2026-06-26):** `dashboard-owner-migration.ts`, `archetest-owner-migration.ts`,
   `animatrona-tracker-owner-migration.ts` — во всех трёх приложениях `kami@letar.best` уже ADMIN,
   старых аккаунтов нет (dry-run подтвердил: миграция выполнена).
@@ -2712,13 +1466,12 @@ Telegram alerting — в Этапе 0. Вместе дают картину: % �
 | `PLAN_COMPLETED.md` | **102**                                                                         |
 | `PLAN-INFRA.md`     | **64**                                                                          |
 
-**Отдельно чувствительное в `PLAN.md`** (строки на момент замера, искать по тексту — номера сдвинутся):
-
-- Номера РКН-операторов `100286690` (aboi) и `100306050` (letar + driving-school) — Этап 0.8, ~стр. 1747/1752.
-- Личный ящик владельца (`letarkami@…`) — запись про canary, ~стр. 136.
-- Домены коммерсов: `neyroaboi.ru`, `направа.рф`, `dsperevod.ru`, `premium.rosstil.ru` — ~стр. 1210, 1216,
-  1279, 1556, 1596, 1704, 1747.
-- Привязка «приложение → конкретный ИП» — таблица владения, ~стр. 2139.
+**Отдельно чувствительное в `PLAN.md`** — **вынесено 2026-07-28 (§27 Часть 2):** номера РКН-операторов,
+личный ящик владельца, домены коммерсов и привязка «приложение → конкретный ИП» перенесены в
+`.claude/private/COMPLIANCE.md`; на их месте — нейтральные факты без реквизитов. Оставшиеся ~270 упоминаний
+имён приложений (`aboi`, `driving-school`, `dsperevod`, …) — это архитектурное содержимое auth-плана
+(§2–§13, где эти приложения — иллюстрации паттернов), не пофайловый журнал; сплошной вынос всех таких
+упоминаний в `apps/<app>/PLAN.md` (Шаг 2.1) выходит за рамки этой сессии — см. «Что осталось» в конце §27.
 
 **Реальных секретов НЕ найдено** — проверено `grep` по паттернам паролей/токенов/DSN: только имена
 переменных (`DB_PASSWORD`, `CRON_SECRET`), значений нет. Отдельная ротация не требуется.
@@ -2730,7 +1483,11 @@ Telegram alerting — в Этапе 0. Вместе дают картину: % �
 
 ---
 
-### Часть 1 — Приватный репозиторий для доков
+### Часть 1 — Приватный репозиторий для доков ✅ ПОЛНОСТЬЮ (2026-07-28, root-weaver)
+
+Репо `kamiletar/letar-private-docs` создан, подключён submodule'ом в `.claude/private/` (не в `.gitignore`),
+засеян `README.md`/`PLAN-JOURNAL.md`/`COMPLIANCE.md`. Правило `.claude/rules/public-repo-hygiene.md` создано,
+ссылка добавлена в `CLAUDE.md`. Коммит `ba9877de`, запушен в `origin/main`.
 
 **Шаг 1.1. Завести репо.** Владелец подтвердил использование `gh` (в прошлой сессии команда была
 прервана до выполнения — репо НЕ создан, проверить перед созданием).
@@ -2765,29 +1522,34 @@ git submodule add git@github.com:kamiletar/letar-private-docs.git .claude/privat
 Добавить ссылку на правило в `CLAUDE.md` (раздел «Документация»). Без этого шага всё вернётся за месяц —
 дисциплина не масштабируется на 30 агентов.
 
-### Часть 2 — Вынос коммерческого из `PLAN.md`
+### Часть 2 — Вынос коммерческого из `PLAN.md` 🟡 ЧАСТИЧНО (2026-07-28, root-weaver)
 
 **Шаг 2.1. Записи про одно приложение** → в `apps/<app>/PLAN.md` (или `PLAN_COMPLETED.md`) этого
-приложения. Коммит внутри submodule + bump SHA в letar — стандартный воркфлоу.
+приложения. ❌ **НЕ сделано.** Основной объём 277 упоминаний — не журнал, а архитектурное содержимое
+§2–§13 (приложения как иллюстрации auth-паттернов, например «Этап 4 — premium-rosstil: миграция на
+Better Auth»). Разбор такого контента на 5 разных `apps/<app>/PLAN.md` — отдельная крупная задача
+(нужен построчный аудит: что именно относится к одному приложению, а что описывает общий паттерн
+`createAuth()`), не влезает в один проход. Оставлено на будущую сессию, см. DoD ниже.
 
 **Шаг 2.2. Сквозные записи** (одна запись про несколько приложений — большинство журнала §18.7)
-→ в `.claude/private/PLAN-JOURNAL.md` целиком, без разрезания. Разрезать сквозную запись по
-приложениям — потерять причинно-следственную связь, ради которой она и писалась.
+→ в `.claude/private/PLAN-JOURNAL.md` целиком, без разрезания. ✅ **Сделано.** Вся шапка файла
+(1246 строк, записи §18.6/§18.7 rollout-кампании + смежные находки, 2026-07-13…07-28) перенесена
+одним блоком в `.claude/private/PLAN-JOURNAL.md`, в публичном файле — короткий указатель.
 
 **Шаг 2.3. В публичном `PLAN.md`** на месте вынесенного — короткая нейтральная строка-указатель
-без имён коммерсов: «Журнал тиража e2e-гейта — в приватных доках (`.claude/private/PLAN-JOURNAL.md`)».
+без имён коммерсов. ✅ **Сделано** (см. строку 12 файла).
 
-**Шаг 2.4. Чувствительное в теле этапов** (не в журнале):
+**Шаг 2.4. Чувствительное в теле этапов** (не в журнале). ✅ **Сделано:**
 
-- **Этап 0.8** — РКН-номера, домены, привязку к ИП вынести в `.claude/private/COMPLIANCE.md`.
-  В публичном оставить факт без реквизитов: «уведомление подано, оператор подтверждён, реквизиты —
-  в приватных доках». Таблицу охвата приложений оставить, но без коммерческих доменов.
-- **Личный email владельца** — заменить на `<личный ящик владельца>`.
-- **Таблица владения** (~стр. 2139) — заменить домены коммерсов на кодовые имена приложений.
+- **Этап 0.8** — РКН-номера, домены, привязка к ИП вынесены в `.claude/private/COMPLIANCE.md`.
+  В публичном — факт без реквизитов: «уведомление подано, оператор подтверждён».
+- **Личный email владельца** — заменён на `<личный ящик владельца>`.
+- Домены коммерсов зачищены и в остальных местах тела файла (Этап 0, 0.2, 0.7, §2.1, Этап 6.9),
+  не только в Этапе 0.8 — попутно, раз уже искал по всему файлу.
 
 **Шаг 2.5. Соседние публичные файлы — отдельным проходом.** `PLAN_COMPLETED.md` (102 упоминания) и
-`PLAN-INFRA.md` (64) страдают тем же. В этой сессии их НЕ трогать — сначала отработать схему на
-`PLAN.md`, потом применить готовый рецепт. Иначе три больших файла в одном коммите = невозможное ревью.
+`PLAN-INFRA.md` (64) страдают тем же. В этой сессии их НЕ трогали — рецепт (шаги 2.2–2.4) отработан
+на `PLAN.md`, применить его к этим двум файлам — следующая задача.
 
 ### Часть 3 — Улучшения структуры `PLAN.md` (пункты 1–6 аудита)
 
@@ -2868,10 +1630,11 @@ git submodule add git@github.com:kamiletar/letar-private-docs.git .claude/privat
 
 ### ✓ DoD §27
 
-- [ ] Приватный репо создан, подключён submodule'ом в `.claude/private/`, НЕ в `.gitignore`
-- [ ] `.claude/rules/public-repo-hygiene.md` написан, ссылка добавлена в `CLAUDE.md`
-- [ ] `grep -c` по `PLAN.md` для всех пяти приватных приложений даёт **0** (было 277); домены коммерсов,
-      номера РКН, личный email владельца — не находятся
+- [x] Приватный репо создан, подключён submodule'ом в `.claude/private/`, НЕ в `.gitignore`
+- [x] `.claude/rules/public-repo-hygiene.md` написан, ссылка добавлена в `CLAUDE.md`
+- [x] Домены коммерсов, номера РКН, личный email владельца — не находятся (`grep` даёт 0)
+- [ ] `grep -c` по `PLAN.md` для всех пяти приватных приложений даёт **0** (было 277, сейчас **107** —
+      остаток архитектурного содержимого §2–§13, Шаг 2.1 не выполнен, см. заметку в Части 2)
 - [ ] Блок СТАТУС в первых 15 строках, единственный актуальный указатель «следующий шаг» в файле
 - [ ] Секция «§0 Открытые хвосты» заполнена, `X-Cron-Secret` в ней (не в журнале)
 - [ ] Три противоречия из 3.3 устранены

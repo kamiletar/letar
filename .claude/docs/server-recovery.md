@@ -392,11 +392,11 @@ curl -I https://mandala.ru
 
 ## Справочник: Приложения s1
 
-| Приложение          | Порт        | БД порт | Домен              |
-| ------------------- | ----------- | ------- | ------------------ |
-| nginx-proxy-manager | 80, 443, 81 | —       | (прокси для всех)  |
-| premium-rosstil     | 3000        | 5432    | premium.rosstil.ru |
-| imot                | 3001        | 5433    | integrelle.com     |
+| Приложение          | Порт        | БД порт | Домен                  |
+| ------------------- | ----------- | ------- | ---------------------- |
+| nginx-proxy-manager | 80, 443, 81 | —       | (прокси для всех)      |
+| premium-rosstil     | 3000        | 5432    | _(коммерческий домен)_ |
+| imot                | 3001        | 5433    | _(коммерческий домен)_ |
 
 > **s2.letar.best** (основной сервер): dashboard, driving-school, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, auth-hub, archetest, time, grandslamcup и др.
 
