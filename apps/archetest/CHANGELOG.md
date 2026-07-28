@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.25.5] - 2026-07-28
+
+### Fixed
+
+- **CRITICAL: сайт был сломан для всех посетителей — `CookieBanner` рендерился вне `ChakraProvider`.**
+  В `[locale]/layout.tsx` `<CookieConsent />` стоял сиблингом `<Providers>` (снаружи), а не
+  внутри — `CookieBanner` (`libs/ui`) использует `Box`/`Button`/`Checkbox` из `@chakra-ui/react`,
+  что бросало `ContextError: useContext returned undefined` на КАЖДОЙ странице сайта. Баг жил
+  с деплоя v0.25.0 (152-ФЗ CookieBanner, тем же днём) — не пойман раньше, потому что верификация
+  деплоев шла через HTTP `fetch` (статус-коды), а не через реальный рендер в браузере. Обнаружен
+  пользователем в реальном Brave, воспроизведён и починен в течение сессии. Перенос `<CookieConsent />`
+  внутрь `<Providers>` — единственное изменение.
+
 ## [0.25.4] - 2026-07-28
 
 ### Fixed

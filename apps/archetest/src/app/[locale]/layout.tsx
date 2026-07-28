@@ -79,8 +79,8 @@ export default async function LocaleLayout({
             <Header />
             {children}
             <AppToaster />
+            <CookieConsent />
           </Providers>
-          <CookieConsent />
         </NextIntlClientProvider>
         <AnalyticsGate appKey="archetest">
           <UmamiScript />
