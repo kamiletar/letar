@@ -5,6 +5,20 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.25.4] - 2026-07-28
+
+### Fixed
+
+- **Настоящий источник бага 0.25.3 — плагин `@serwist/next`, не наш компонент.**
+  Проверка деплоя 0.25.3 показала: `service-worker-registration.tsx` больше не единственная
+  точка регистрации. `@serwist/next` по умолчанию (`register: true`) сам инжектит клиентский
+  скрипт, который безусловно, на КАЖДОЙ странице, вызывает
+  `navigator.serviceWorker.register('/sw.js', { scope: '/' })` — в обход консент-гейта
+  `useOfflineConsent`. Именно этот авто-инжект, а не наш компонент, реально брал сайт
+  под контроль SW. Теперь `withSerwistInit({ ..., register: false })` в `next.config.mjs` —
+  единственная точка регистрации снова `service-worker-registration.tsx` (фикс 0.25.3
+  остаётся в силе как defense-in-depth, но сам по себе не закрывал проблему).
+
 ## [0.25.3] - 2026-07-28
 
 ### Fixed
