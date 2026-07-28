@@ -85,7 +85,7 @@ SEO title-баг (`/Elfafeya Art/i` vs "Добро пожаловать в ми�
       Второй, независимый баг в этом же флоу: необязательное поле `email` в чекауте падало с
       «Некорректный email» на пустой строке — сгенерированная Zod-схема `z.string().email().optional()`
       пропускает только `undefined`/`null`, а поле по умолчанию хранит `''`. Фикс:
-      [`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) —
+      [`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) —
       `email` переопределён через `z.union([z.email(), z.literal('')])`. Оба фикса подтверждены
       вместе: полный чекаут проходит end-to-end (заказ создаётся, редирект на success), а пустые
       обязательные поля теперь показывают видимые ошибки вместо тихого блока.
@@ -105,7 +105,7 @@ SEO title-баг (`/Elfafeya Art/i` vs "Добро пожаловать в ми�
 
 **Изменённые файлы:** [`page.tsx`](src/app/[locale]/page.tsx),
 [`messages/ru.json`](messages/ru.json), [`messages/en.json`](messages/en.json),
-[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts),
+[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>),
 [`form-simple.tsx`](../../libs/forms/src/lib/declarative/form-root/form-simple.tsx),
 [`form-with-api.tsx`](../../libs/forms/src/lib/declarative/form-root/form-with-api.tsx).
 
@@ -190,7 +190,7 @@ BlackCove прогнал третий раз: **104 passed / 7 failed**. `09` �
    изображением иногда отправляла ПОЛНОСТЬЮ пустые данные (`name`, `slug`, `price` — все blank/0),
    что и объясняло бы зависание на `/new` (create action падал на unique constraint по
    дублирующемуся пустому `slug`). Добавил временный `console.log` в
-   [`product-form.tsx`](src/app/(admin)/admin/products/_components/product-form.tsx) и
+   [`product-form.tsx`](<src/app/(admin)/admin/products/_components/product-form.tsx>) и
    воспроизвёл через реальный Playwright. **Опровергнуто**: баг проявлялся только в `nx dev`
    (Turbopack HMR) — я редактировал файл прямо во время прогона теста, и React Fast Refresh
    ремаунтил компонент формы, сбрасывая состояние ровно между заполнением и сабмитом. В
@@ -250,7 +250,7 @@ HTML5 `required`; после `noValidate` эта защита исчезла, а
 строку — заказ с пустым именем/телефоном стал реально проходить и создаваться в БД (проверено:
 редирект на `/checkout/success` с настоящим `orderId`). Это прямая регрессия от фикса первого
 раунда, не флак и не тестовый баг. Фикс — `name`/`phone` в
-[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) переопределены
+[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) переопределены
 с `.min(1, 'Обязательное поле')`, аналогично уже сделанному для `email`.
 
 Заодно поймал и исправил тестовые strict-mode коллизии в
@@ -271,7 +271,7 @@ staging) и с полностью пересозданной БД (`nx db:seed` 
 в сиде), после их устранения список пуст даже без ручной чистки БД.
 
 **Изменённые файлы (четвёртый раунд):**
-[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) (`.min(1)` для
+[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) (`.min(1)` для
 name/phone), [`05-full-checkout.guest.spec.ts`](../mandala-e2e/src/tests/05-full-checkout.guest.spec.ts)
 (`data-field-name` вместо `name=`, `.first()` на success-сообщении).
 

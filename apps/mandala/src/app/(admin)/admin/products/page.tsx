@@ -111,35 +111,31 @@ export default async function ProductsListPage({ searchParams }: ProductsPagePro
         </Suspense>
       </HStack>
 
-      {products.length === 0
-        ? (
-          hasFilters
-            ? (
-              <Box py={8} textAlign="center">
-                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-              </Box>
-            )
-            : (
-              <EmptyState
-                icon={LuPackage}
-                title="Нет товаров"
-                description="Создайте первый товар для магазина"
-                action={{ label: 'Создать товар', href: '/admin/products/new' }}
-              />
-            )
+      {products.length === 0 ? (
+        hasFilters ? (
+          <Box py={8} textAlign="center">
+            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+          </Box>
+        ) : (
+          <EmptyState
+            icon={LuPackage}
+            title="Нет товаров"
+            description="Создайте первый товар для магазина"
+            action={{ label: 'Создать товар', href: '/admin/products/new' }}
+          />
         )
-        : (
-          <>
-            <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
-              <ProductsTable products={products} />
-            </Suspense>
+      ) : (
+        <>
+          <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
+            <ProductsTable products={products} />
+          </Suspense>
 
-            {/* Пагинация */}
-            <Suspense fallback={<Box h="48px" />}>
-              <Pagination total={total} pageSize={PAGE_SIZE} />
-            </Suspense>
-          </>
-        )}
+          {/* Пагинация */}
+          <Suspense fallback={<Box h="48px" />}>
+            <Pagination total={total} pageSize={PAGE_SIZE} />
+          </Suspense>
+        </>
+      )}
     </Stack>
   )
 }

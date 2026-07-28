@@ -8,7 +8,7 @@
  * 4. Админ видит заказ и меняет статус
  * 5. Cleanup: удаление тестового товара
  */
-import { expect, test as base } from '@playwright/test'
+import { test as base, expect } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ADMIN_STORAGE_STATE } from '../fixtures/storage-state'

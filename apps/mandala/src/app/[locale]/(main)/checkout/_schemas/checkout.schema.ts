@@ -17,8 +17,14 @@ export const CheckoutFormSchema = OrderCreateFormSchema.omit({
   phone: true,
 }).extend({
   cartItems: z.string(),
-  name: z.string().min(1, 'Обязательное поле').meta(OrderCreateFormSchema.shape.name.meta() ?? {}),
-  phone: z.string().min(1, 'Обязательное поле').meta(OrderCreateFormSchema.shape.phone.meta() ?? {}),
+  name: z
+    .string()
+    .min(1, 'Обязательное поле')
+    .meta(OrderCreateFormSchema.shape.name.meta() ?? {}),
+  phone: z
+    .string()
+    .min(1, 'Обязательное поле')
+    .meta(OrderCreateFormSchema.shape.phone.meta() ?? {}),
   email: z
     .union([z.email(), z.literal('')])
     .nullable()

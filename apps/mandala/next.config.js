@@ -20,10 +20,7 @@ const nextConfig = {
   // трейсер такие динамические загрузки не видит (инцидент 2026-07-12, 500 на проде).
   // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
   outputFileTracingIncludes: {
-    '/**/*': [
-      '../../node_modules/@swc/helpers/**/*',
-      '../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*',
-    ],
+    '/**/*': ['../../node_modules/@swc/helpers/**/*', '../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
   nx: {
     svgr: false,
