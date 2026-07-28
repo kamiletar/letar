@@ -31,3 +31,6 @@
 [submodule "apps/poster-microtext-desktop"]
 	path = apps/poster-microtext-desktop
 	url = git@github.com:kamiletar/letar-private-poster-microtext-desktop.git
+[submodule ".claude/private"]
+	path = .claude/private
+	url = git@github.com:kamiletar/letar-private-docs.git
