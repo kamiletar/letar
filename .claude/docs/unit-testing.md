@@ -77,7 +77,9 @@ references** — иначе трансформация падает. В Next.js-
 Проекты с исправленным `tsconfig.spec.json` + reference: `archetest`, `kami`, `dashboard`,
 `mandala`, `driving-school` (submodule — коммит внутри submodule обязателен отдельно),
 `pravda`, `animatrona`, `aboi`, `label-printer-desktop`, `libs/label-printer-core`,
-`libs/auth`, `libs/email`, `libs/contract-generator`.
+`libs/auth`, `libs/email`, `libs/contract-generator`, `studio` (2026-07-28, первые тесты
+биллинга/интеграции Точка Банк — заодно потребовался alias `@letar/email` в `vitest.config.ts`,
+которого не хватало для резолва в тестах server actions).
 
 **Особый случай — Electron-приложения (main/ исключён из корневого tsconfig.json):**
 у `animatrona` и `label-printer-desktop` каталог `main/` явно в `exclude` корневого
@@ -120,7 +122,7 @@ has not been built from source file '.../shared/visibility-model.ts'.
 `label-printer-desktop`) — сначала посмотри, какой из двух случаев твой.
 
 **Проекты без vitest вообще (не в скоупе фикса)** — есть `vitest.config.ts`, но 0 тестовых
-файлов: `aira-web`, `dsperevod`, `grandslamcup`, `time`, `studio`, `svoichuzhie`, `synth`,
+файлов: `aira-web`, `dsperevod`, `grandslamcup`, `time`, `svoichuzhie`, `synth`,
 `aprel8008`, `animatrona-tracker`, `libs/cdek`, `libs/image-upload`, `libs/query-provider`.
 Не требуют tsconfig.spec.json пока не появятся первые тесты.
 
@@ -152,6 +154,35 @@ tsconfig, но требуют отдельного разбора): `pravda` (н
 `options.config: "<path>/vitest.config.ts"`). Для `form-mcp` и `letar-consultant` (нет
 тестовых файлов) target `test` целиком удалён — Nx сам не подхватывает пустой executor без
 смысла держать.
+
+## `jose` (SignJWT/RS256) в jsdom-окружении — кросс-реалмный `Uint8Array`
+
+**Симптом:** тест, подписывающий JWT через `new SignJWT(payload).sign(privateKey)` в файле с
+`environment: 'jsdom'` (глобальный или из `vitest.config.ts`), падает внутри `jose` с
+`TypeError: payload must be an instance of Uint8Array` — хотя точно такой же код в чистом
+Node/Bun-скрипте (без vitest) отрабатывает без ошибок.
+
+**Причина:** `vitest.setup.tsx` многих приложений переопределяет `global.TextEncoder`/`TextDecoder`
+Node-реализацией из `node:util` (полифил для jsdom, где их изначально нет). В jsdom-окружении
+`global.Uint8Array` — это конструктор из jsdom-реалма, а `TextEncoder.encode()` из `node:util`
+возвращает `Uint8Array` из **Node-реалма**. Это два разных объекта-конструктора, и `instanceof`
+между реалмами всегда `false`. `crypto.subtle.encrypt/decrypt` (AES-GCM в `tochka/auth.ts`)
+такой проверки не делает и работает нормально в обоих реалмах — но `jose`'s `FlattenedSign`
+делает явный `payload instanceof Uint8Array` и падает.
+
+**Фикс:** для spec-файла, который реально подписывает/проверяет JWT через `jose`, переключить
+окружение на `node` директивой в первой строке файла — `vitest.setup.tsx` там всё равно
+выполнится, но `global.Uint8Array` и результат `TextEncoder.encode()` будут из одного (Node)
+реалма:
+
+```ts
+// @vitest-environment node
+import { describe, expect, it } from 'vitest'
+```
+
+Не трогать глобальный `environment` в `vitest.config.ts` — он нужен jsdom большинству React-тестов
+приложения; переопределять по месту, только для файлов с реальной RS256/JWT-криптографией
+(образец: `apps/studio/src/lib/tochka/webhooks.test.ts`, 2026-07-28).
 
 ## Диагностика: nx прячет вывод vitest
 
