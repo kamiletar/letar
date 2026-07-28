@@ -65,66 +65,64 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
         <Heading as="h3" size="sm" mb={3} color="fg.muted" textTransform="uppercase" letterSpacing="wide" fontSize="xs">
           Пин-сервер
         </Heading>
-        {pinnedOn
-          ? (
-            <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px">
-              <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }} gap={4}>
-                <VStack align="start" gap={1}>
-                  <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuServer} />
-                    <Text>Сервер</Text>
-                  </HStack>
-                  <HStack>
-                    <Text fontWeight="semibold">{pinnedOn.name}</Text>
-                    <Badge colorPalette={PIN_STATUS_COLORS[pinnedOn.status] ?? 'gray'} size="sm">
-                      {pinnedOn.status}
-                    </Badge>
-                  </HStack>
-                  <Badge colorPalette="purple" variant="outline" size="sm">
-                    {pinnedOn.role}
+        {pinnedOn ? (
+          <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px">
+            <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }} gap={4}>
+              <VStack align="start" gap={1}>
+                <HStack color="fg.muted" fontSize="xs">
+                  <Icon as={LuServer} />
+                  <Text>Сервер</Text>
+                </HStack>
+                <HStack>
+                  <Text fontWeight="semibold">{pinnedOn.name}</Text>
+                  <Badge colorPalette={PIN_STATUS_COLORS[pinnedOn.status] ?? 'gray'} size="sm">
+                    {pinnedOn.status}
                   </Badge>
-                </VStack>
+                </HStack>
+                <Badge colorPalette="purple" variant="outline" size="sm">
+                  {pinnedOn.role}
+                </Badge>
+              </VStack>
 
-                <VStack align="start" gap={1}>
-                  <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuWifi} />
-                    <Text>API URL</Text>
-                  </HStack>
-                  <Text fontSize="sm" fontFamily="mono" wordBreak="break-all">
-                    {pinnedOn.apiUrl}
+              <VStack align="start" gap={1}>
+                <HStack color="fg.muted" fontSize="xs">
+                  <Icon as={LuWifi} />
+                  <Text>API URL</Text>
+                </HStack>
+                <Text fontSize="sm" fontFamily="mono" wordBreak="break-all">
+                  {pinnedOn.apiUrl}
+                </Text>
+                {pinnedOn.peerId && (
+                  <Text fontSize="xs" color="fg.muted" fontFamily="mono" truncate maxW="200px">
+                    {pinnedOn.peerId}
                   </Text>
-                  {pinnedOn.peerId && (
-                    <Text fontSize="xs" color="fg.muted" fontFamily="mono" truncate maxW="200px">
-                      {pinnedOn.peerId}
+                )}
+              </VStack>
+
+              <VStack align="start" gap={1}>
+                <HStack color="fg.muted" fontSize="xs">
+                  <Icon as={LuDatabase} />
+                  <Text>Хранилище</Text>
+                </HStack>
+                <Text fontSize="sm">
+                  {formatBytes(pinnedOn.usedBytes)}
+                  {pinnedOn.capacityBytes > 0 && (
+                    <Text as="span" color="fg.muted">
+                      {' '}
+                      / {formatBytes(pinnedOn.capacityBytes)}
                     </Text>
                   )}
-                </VStack>
-
-                <VStack align="start" gap={1}>
-                  <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuDatabase} />
-                    <Text>Хранилище</Text>
-                  </HStack>
-                  <Text fontSize="sm">
-                    {formatBytes(pinnedOn.usedBytes)}
-                    {pinnedOn.capacityBytes > 0 && (
-                      <Text as="span" color="fg.muted">
-                        {' '}
-                        / {formatBytes(pinnedOn.capacityBytes)}
-                      </Text>
-                    )}
-                  </Text>
-                </VStack>
-              </Grid>
-            </Box>
-          )
-          : (
-            <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderStyle="dashed">
-              <Text color="fg.muted" fontSize="sm">
-                Аниме не запинено ни на один сервер
-              </Text>
-            </Box>
-          )}
+                </Text>
+              </VStack>
+            </Grid>
+          </Box>
+        ) : (
+          <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderStyle="dashed">
+            <Text color="fg.muted" fontSize="sm">
+              Аниме не запинено ни на один сервер
+            </Text>
+          </Box>
+        )}
       </Box>
 
       {/* Зрители */}
@@ -138,68 +136,64 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
           </Badge>
         </HStack>
 
-        {viewers.length === 0
-          ? (
-            <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderStyle="dashed">
-              <Text color="fg.muted" fontSize="sm">
-                Никто не добавил в библиотеку
-              </Text>
-            </Box>
-          )
-          : (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-              <Table.Root size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Пользователь</Table.ColumnHeader>
-                    <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                    <Table.ColumnHeader>Оценка</Table.ColumnHeader>
-                    <Table.ColumnHeader>Локальный пин</Table.ColumnHeader>
-                    <Table.ColumnHeader>Добавлено</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {viewers.map((v) => {
-                    const ws = WATCH_STATUS_LABELS[v.watchStatus] ?? { label: v.watchStatus, color: 'gray' }
-                    return (
-                      <Table.Row key={v.userId}>
-                        <Table.Cell>
-                          <HStack gap={2}>
-                            <Icon as={LuUser} color="fg.muted" />
-                            <Text>{v.userName ?? 'Аноним'}</Text>
-                          </HStack>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={ws.color} size="sm">
-                            {ws.label}
+        {viewers.length === 0 ? (
+          <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderStyle="dashed">
+            <Text color="fg.muted" fontSize="sm">
+              Никто не добавил в библиотеку
+            </Text>
+          </Box>
+        ) : (
+          <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+            <Table.Root size="sm">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Пользователь</Table.ColumnHeader>
+                  <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                  <Table.ColumnHeader>Оценка</Table.ColumnHeader>
+                  <Table.ColumnHeader>Локальный пин</Table.ColumnHeader>
+                  <Table.ColumnHeader>Добавлено</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {viewers.map((v) => {
+                  const ws = WATCH_STATUS_LABELS[v.watchStatus] ?? { label: v.watchStatus, color: 'gray' }
+                  return (
+                    <Table.Row key={v.userId}>
+                      <Table.Cell>
+                        <HStack gap={2}>
+                          <Icon as={LuUser} color="fg.muted" />
+                          <Text>{v.userName ?? 'Аноним'}</Text>
+                        </HStack>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge colorPalette={ws.color} size="sm">
+                          {ws.label}
+                        </Badge>
+                      </Table.Cell>
+                      <Table.Cell color="fg.muted">
+                        {v.userRating !== null && v.userRating !== undefined ? `${v.userRating}/10` : '—'}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {v.pinnedLocally ? (
+                          <Badge colorPalette="green" size="sm" variant="subtle">
+                            Да
                           </Badge>
-                        </Table.Cell>
-                        <Table.Cell color="fg.muted">
-                          {v.userRating !== null && v.userRating !== undefined ? `${v.userRating}/10` : '—'}
-                        </Table.Cell>
-                        <Table.Cell>
-                          {v.pinnedLocally
-                            ? (
-                              <Badge colorPalette="green" size="sm" variant="subtle">
-                                Да
-                              </Badge>
-                            )
-                            : (
-                              <Text color="fg.muted" fontSize="sm">
-                                —
-                              </Text>
-                            )}
-                        </Table.Cell>
-                        <Table.Cell color="fg.muted" fontSize="xs">
-                          {new Date(v.addedAt).toLocaleDateString('ru-RU')}
-                        </Table.Cell>
-                      </Table.Row>
-                    )
-                  })}
-                </Table.Body>
-              </Table.Root>
-            </Box>
-          )}
+                        ) : (
+                          <Text color="fg.muted" fontSize="sm">
+                            —
+                          </Text>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell color="fg.muted" fontSize="xs">
+                        {new Date(v.addedAt).toLocaleDateString('ru-RU')}
+                      </Table.Cell>
+                    </Table.Row>
+                  )
+                })}
+              </Table.Body>
+            </Table.Root>
+          </Box>
+        )}
       </Box>
     </VStack>
   )
