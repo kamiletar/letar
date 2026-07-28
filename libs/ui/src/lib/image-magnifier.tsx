@@ -99,6 +99,7 @@ export function ImageMagnifier({
   ...boxProps
 }: ImageMagnifierProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
   const frameRef = useRef<number>(0)
 
   const [lens, setLens] = useState<{ x: number; y: number } | null>(null)
@@ -106,6 +107,14 @@ export function ImageMagnifier({
   const [loaded, setLoaded] = useState(false)
   const [touched, setTouched] = useState(false)
   const [demoDone, setDemoDone] = useState(false)
+
+  // Из кэша картинка успевает загрузиться до гидратации — событие load
+  // тогда уже не придёт, и без этой проверки лупа не включится никогда
+  useEffect(() => {
+    if (imageRef.current?.complete) {
+      setLoaded(true)
+    }
+  }, [])
 
   /** Перевод точки в долях изображения в CSS-координаты контейнера */
   const toLocal = useCallback((point: MagnifierPoint) => {
@@ -259,7 +268,10 @@ export function ImageMagnifier({
   // достаточно перевести координаты курсора в натуральные
   const rect = containerRef.current?.getBoundingClientRect()
   const scale = rect && rect.width > 0 ? naturalWidth / rect.width : 1
-  const half = lensSize / 2
+  // Весь эффект держится на контрасте «вокруг мелко — внутри крупно»: если лупа
+  // закрывает почти весь кадр, сравнивать не с чем. На узких экранах ужимаем её
+  const effectiveLensSize = rect ? Math.min(lensSize, rect.width * 0.5, rect.height * 0.6) : lensSize
+  const half = effectiveLensSize / 2
 
   return (
     <Box
@@ -292,6 +304,7 @@ export function ImageMagnifier({
       }
       <Box asChild opacity={loaded ? 1 : 0} transition="opacity 0.4s ease" userSelect="none">
         <Image
+          ref={imageRef}
           src={src}
           alt=""
           fill
@@ -308,8 +321,8 @@ export function ImageMagnifier({
           pointerEvents="none"
           left={`${lens.x - half}px`}
           top={`${lens.y - half}px`}
-          w={`${lensSize}px`}
-          h={`${lensSize}px`}
+          w={`${effectiveLensSize}px`}
+          h={`${effectiveLensSize}px`}
           borderRadius="full"
           borderWidth="3px"
           borderColor="whiteAlpha.800"

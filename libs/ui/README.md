@@ -18,7 +18,7 @@ import { ConfirmDialog, RatingStars, TopLoader } from '@letar/ui'
 
 ```tsx
 import { TopLoader } from '@letar/ui'
-;<TopLoader />
+<TopLoader />
 ```
 
 ### ConfirmDialog
@@ -27,7 +27,7 @@ import { TopLoader } from '@letar/ui'
 
 ```tsx
 import { ConfirmDialog } from '@letar/ui'
-;<ConfirmDialog
+<ConfirmDialog
   open={isOpen}
   onOpenChange={setIsOpen}
   title="Удалить запись?"
@@ -56,7 +56,7 @@ import { RatingDisplay, RatingStars } from '@letar/ui'
 
 ```tsx
 import { FilterField, FilterPanel, FilterRow } from '@letar/ui'
-;<FilterPanel>
+<FilterPanel>
   <FilterRow>
     <FilterField name="status" label="Статус">
       <Select options={statusOptions} />
@@ -82,7 +82,7 @@ import { RoleStat, StatCard } from '@letar/ui'
 
 ```tsx
 import { OptimizedAvatar } from '@letar/ui'
-;<OptimizedAvatar src="/avatar.jpg" name="Иван" />
+<OptimizedAvatar src="/avatar.jpg" name="Иван" />
 ```
 
 ### ReviewCard
@@ -91,7 +91,7 @@ import { OptimizedAvatar } from '@letar/ui'
 
 ```tsx
 import { ReviewCard } from '@letar/ui'
-;<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
+<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
 ```
 
 ### StickyActionBar
@@ -132,7 +132,7 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 
 ```tsx
 import { AdminEditOverlay } from '@letar/ui'
-;<Box position="relative">
+<Box position="relative">
   {isAdmin && <AdminEditOverlay href={`/admin/${slug}`} colorPalette="brand" />}
   <Link asChild>
     <NextLink href={`/item/${slug}`}>...карточка...</NextLink>
@@ -161,8 +161,41 @@ const nextConfig = {
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-;<PhotoGallery photos={photos.map((p) => ({ src: `/api/files/${p.path}`, alt: p.alt }))} />
+<PhotoGallery photos={photos.map((p) => ({ src: `/api/files/${p.path}`, alt: p.alt }))} />
 ```
+
+### ImageMagnifier
+
+Изображение с лупой: под курсором участок показывается в натуральном разрешении 1:1, вокруг — то же
+изображение, ужатое до контейнера. Нужен там, где мелкая деталь физически теряется при уменьшении и
+её надо показать, не обманывая зрителя монтажом — пиксели берутся из того же файла.
+
+Мышь ведёт лупу, клик закрепляет; тап ставит лупу в точку (скролл не блокируется); стрелки двигают,
+Enter/Space закрепляет. При появлении в зоне видимости лупа один раз проезжает сама (`autoDemo`),
+`prefers-reduced-motion` уважается.
+
+```tsx
+import { ImageMagnifier } from '@letar/ui'
+<ImageMagnifier
+  src="/demo/poster-fragment.webp"
+  placeholderSrc="/demo/poster-fragment-far.webp"
+  naturalWidth={3200}
+  naturalHeight={2200}
+  alt="Фрагмент постера: вблизи проступают слова"
+  hint="Наведите — как будто подошли ближе"
+/>
+```
+
+⚠️ **`src` грузится с `unoptimized`** — через `/_next/image` пришла бы масштабированная копия, и
+координаты лупы разъехались бы. Файл отдаётся как есть, поэтому класть в `public/` надо уже
+подготовленный кроп, а не исходник на десятки мегабайт.
+
+Полный файл грузится лениво, и до его загрузки лупа не работает — до этого момента виден только
+`placeholderSrc`. Ставить `priority` через `next/image` тут не стоит: файл тяжёлый, а секция обычно
+не первый экран.
+
+`lensSize` — верхняя граница: реальный диаметр ужимается до долей контейнера, иначе на узком экране
+лупа закрывает весь кадр и сравнивать «мелко/крупно» не с чем.
 
 ### SortablePhotoGrid (`@letar/admin-ui`)
 
@@ -172,7 +205,7 @@ import { PhotoGallery } from '@letar/ui'
 
 ```tsx
 import { SortablePhotoGrid } from '@letar/admin-ui'
-;<SortablePhotoGrid
+<SortablePhotoGrid
   items={photos.map((p) => ({ id: p.id, imageUrl: `/api/files/${p.path}` }))}
   onReorder={(orderedIds) => reorderPhotosAction(estateSlug, orderedIds)}
   onSetCover={(id) => setCoverPhotoAction(id)}
