@@ -102,8 +102,8 @@ export async function devSessionLogin(options: DevSessionLoginOptions): Promise<
     const sessionCookie = cookies.find((c) => c.name.endsWith(cookieSuffix))
     if (!sessionCookie) {
       throw new Error(
-        `[devSessionLogin] dev-session не установил cookie '*${cookieSuffix}' для ${email} — `
-          + 'вероятно 403 (ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере)',
+        `[devSessionLogin] dev-session не установил cookie '*${cookieSuffix}' для ${email} — ` +
+          'вероятно 403 (ALLOW_DEV_SESSION/DEV_SESSION_TOKEN не совпадают на сервере)'
       )
     }
 

@@ -35,7 +35,7 @@ export const strongPasswordSchema = z.preprocess(
     .regex(/[A-Z]/, 'Пароль должен содержать хотя бы одну заглавную букву')
     .regex(/[a-z]/, 'Пароль должен содержать хотя бы одну строчную букву')
     .regex(/[0-9]/, 'Пароль должен содержать хотя бы одну цифру')
-    .regex(/[^A-Za-z0-9]/, 'Пароль должен содержать хотя бы один спецсимвол'),
+    .regex(/[^A-Za-z0-9]/, 'Пароль должен содержать хотя бы один спецсимвол')
 )
 
 /**
@@ -62,7 +62,7 @@ export const strongPasswordSchema = z.preprocess(
 export function withPasswordConfirmation<T extends z.ZodType<Record<string, unknown>>>(
   schema: T,
   passwordField = 'password',
-  confirmPasswordField = 'confirmPassword',
+  confirmPasswordField = 'confirmPassword'
 ) {
   return schema.refine((data) => data[passwordField] === data[confirmPasswordField], {
     message: 'Пароли не совпадают',

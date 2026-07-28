@@ -58,10 +58,7 @@ export function SlugField<T extends Record<string, unknown>>({
 
   // Читаем текущее значение поля формы напрямую (без дублирующего локального
   // состояния) — form.state.values всегда актуален на момент вызова
-  const getCurrentTitle = useCallback(
-    () => String((form.state.values as T)[titleName] || ''),
-    [form, titleName],
-  )
+  const getCurrentTitle = useCallback(() => String((form.state.values as T)[titleName] || ''), [form, titleName])
   const getCurrentSlug = useCallback(() => String((form.state.values as T)[slugName] || ''), [form, slugName])
 
   const setFieldValue = useCallback(
@@ -69,7 +66,7 @@ export function SlugField<T extends Record<string, unknown>>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(form.setFieldValue as any)(name, value)
     },
-    [form],
+    [form]
   )
 
   // Связь активна: slug автоматически генерируется из названия
@@ -182,12 +179,7 @@ export function SlugField<T extends Record<string, unknown>>({
             {/* Кнопка регенерации */}
             <Tooltip.Root positioning={{ placement: 'top' }} openDelay={0} closeDelay={0}>
               <Tooltip.Trigger asChild>
-                <IconButton
-                  aria-label="Сгенерировать из названия"
-                  size="xs"
-                  variant="ghost"
-                  onClick={regenerateSlug}
-                >
+                <IconButton aria-label="Сгенерировать из названия" size="xs" variant="ghost" onClick={regenerateSlug}>
                   <LuRefreshCw size={14} />
                 </IconButton>
               </Tooltip.Trigger>

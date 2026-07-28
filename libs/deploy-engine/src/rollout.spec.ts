@@ -73,9 +73,10 @@ const noopSleep = () => Promise.resolve()
  * Matcher для `docker ps`, возвращающий разные stdout на последовательные вызовы (первый — до
  * scale-up, второй — после). Последний `output` повторяется, если вызовов больше, чем элементов.
  */
-function sequentialPsResults(
-  ...outputs: string[]
-): { match: (args: string[]) => boolean; result: () => CommandResult } {
+function sequentialPsResults(...outputs: string[]): {
+  match: (args: string[]) => boolean
+  result: () => CommandResult
+} {
   let call = 0
   return {
     match: (a) => a[0] === 'ps',
@@ -112,7 +113,7 @@ describe('runRollout', () => {
       executor,
       'time',
       { npmContainerName: 'nginx-proxy-manager', deployTag: 'abc1234' },
-      noopSleep,
+      noopSleep
     )
 
     expect(result.ok).toBe(true)
@@ -137,7 +138,7 @@ describe('runRollout', () => {
         command: 'docker',
         args: expect.arrayContaining(['compose', 'up', '-d', '--no-recreate', '--scale', 'app=2']),
         cwd: 'apps/time',
-      }),
+      })
     )
 
     // healthcheck опрашивает именно новый контейнер (index 2, старый остаётся нетронутым)
@@ -173,12 +174,8 @@ describe('runRollout', () => {
     })
 
     const seenSteps: string[] = []
-    const result = await runRollout(
-      executor,
-      'time',
-      { npmContainerName: 'nginx-proxy-manager' },
-      noopSleep,
-      (step) => seenSteps.push(step.id),
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep, (step) =>
+      seenSteps.push(step.id)
     )
 
     // onStep видел ровно те же шаги, в том же порядке, что и итоговый result.steps —
@@ -200,9 +197,7 @@ describe('runRollout', () => {
     expect(result.ok).toBe(false)
     expect(result.steps.map((s) => s.id)).toEqual(['doctor', 'resolve-old-container', 'scale-up'])
     // после провала scale-up не должно быть попыток healthcheck/reload/stop/rm
-    expect(calls.filter((c) => c.args[0] === 'inspect' || c.args[0] === 'exec' || c.args[0] === 'stop')).toHaveLength(
-      0,
-    )
+    expect(calls.filter((c) => c.args[0] === 'inspect' || c.args[0] === 'exec' || c.args[0] === 'stop')).toHaveLength(0)
   })
 
   it('таймаутит и останавливается, если новый контейнер не становится healthy', async () => {
@@ -220,7 +215,7 @@ describe('runRollout', () => {
       executor,
       'time',
       { npmContainerName: 'nginx-proxy-manager', healthTimeoutMs: 10, pollIntervalMs: 1 },
-      noopSleep,
+      noopSleep
     )
 
     expect(result.ok).toBe(false)
@@ -350,8 +345,8 @@ services:
   })
 
   it(
-    'резолвит новый контейнер по фактическому индексу Docker Compose, а не по хардкоду -app-2 '
-      + '(инцидент auth-hub: старый контейнер уже -app-3, scale-up создаёт -app-4)',
+    'резолвит новый контейнер по фактическому индексу Docker Compose, а не по хардкоду -app-2 ' +
+      '(инцидент auth-hub: старый контейнер уже -app-3, scale-up создаёт -app-4)',
     async () => {
       const { executor, calls } = memoryExecutor({
         composeText: READY_COMPOSE,
@@ -373,7 +368,7 @@ services:
       // старый (-app-3) останавливается и удаляется, не новый
       expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-3')
       expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app-3')
-    },
+    }
   )
 
   it('падает на resolve-new-container, если scale-up не создал новый контейнер', async () => {
@@ -381,9 +376,7 @@ services:
     // нового контейнера нет (например, race condition или сбой Docker без ненулевого exit code).
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,
-      commandResults: [
-        sequentialPsResults('time-app-1\n', 'time-app-1\n'),
-      ],
+      commandResults: [sequentialPsResults('time-app-1\n', 'time-app-1\n')],
     })
 
     const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)

@@ -10,8 +10,7 @@ import { formatChunksForPrompt } from './retrieve.js'
 export type ConsultMode = 'navigation' | 'architecture' | 'convention' | 'auto'
 
 /** Системный промпт — константа с ключевыми конвенциями letar */
-const LETAR_SYSTEM_PROMPT =
-  `Ты — эксперт-консультант по монорепо letar. Отвечай ТОЛЬКО на основе предоставленного контекста и конвенций ниже. Если информации недостаточно — честно скажи об этом.
+const LETAR_SYSTEM_PROMPT = `Ты — эксперт-консультант по монорепо letar. Отвечай ТОЛЬКО на основе предоставленного контекста и конвенций ниже. Если информации недостаточно — честно скажи об этом.
 
 ## Технологический стек letar
 - Next.js 16.2, React 19, Chakra UI v3
@@ -70,7 +69,7 @@ function getModeInstructions(mode: ConsultMode): string {
 export function buildMessages(
   question: string,
   chunks: CodeChunk[],
-  mode: ConsultMode = 'auto',
+  mode: ConsultMode = 'auto'
 ): Array<{ role: 'system' | 'user'; content: string }> {
   const systemContent = LETAR_SYSTEM_PROMPT + getModeInstructions(mode)
 

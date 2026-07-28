@@ -218,7 +218,7 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
       encoder.encode(authSecret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign'],
+      ['sign']
     )
     const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(sessionToken))
     const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)))
@@ -232,7 +232,7 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
     const secureAttr = useSecureCookies ? '; Secure' : ''
     response.headers.append(
       'Set-Cookie',
-      `${finalCookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secureAttr}`,
+      `${finalCookieName}=${cookieValue}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secureAttr}`
     )
 
     return response
