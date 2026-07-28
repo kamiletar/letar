@@ -1,13 +1,15 @@
 # PLAN — Глобальная унификация авторизации и верификации в монорепо
 
-> **➡️ СЛЕДУЮЩИЙ СТАРТ (2026-07-28, root-weaver): §27 Часть 2, Шаг 2.1 — вынос по-приложенского
-> содержимого.** Части 1 и бо́льшая часть Части 2 (§27) сделаны: приватный репозиторий заведён и
-> засеян (`.claude/private/`), правило гигиены создано, весь сквозной rollout/e2e-журнал (1246 строк)
-> и все чувствительные реквизиты (РКН-номера, личный email, домены коммерсов) вынесены в приватные
-> доки. Осталось 107 упоминаний приватных приложений (было 277) — это архитектурное содержимое
-> §2–§13 (приложения как иллюстрации auth-паттернов), разбор которого на 5 `apps/<app>/PLAN.md`
-> требует отдельной построчной сессии. Часть 3 (структура файла, блок СТАТУС) не начата.
-> **Детали и DoD — в §27 в конце файла.**
+> **➡️ СЛЕДУЮЩИЙ СТАРТ (2026-07-28, root-weaver): §27 Часть 3 — структура файла (блок СТАТУС,
+> «§0 Открытые хвосты», противоречия 3.3, снимок 3.4, мелочи 3.6) — не начата.** Часть 2 Шаг 2.1
+> (вынос по-приложенского журнала) продвинута вторым проходом: самые крупные session-narrative
+> кластеры §7 (Этапы 2, 3, 4, 7, 8 — детальные записи по aboi/dsperevod/driving-school, включая
+> premium-rosstil как historical в `.claude/private/PLAN-JOURNAL.md`) перенесены в
+> `apps/<app>/PLAN.md`/`PLAN_COMPLETED.md`, в корне остались сжатые сводки + указатели. Заодно
+> помечены снимками устаревшие §3.1 (матрица приложений) и §5 (карта auth). Остались более мелкие
+> одиночные упоминания в статус-таблицах (§6.8/6.9/6.11) и иллюстративные примеры паттернов —
+> невысокая плотность, следующая сессия при желании может добить до `grep -c` = 0, но это не
+> блокирует остальную работу. **Детали и DoD — в §27 в конце файла.**
 
 > **📋 Журнал rollout/e2e-гейта (§18.6/§18.7) и смежных находок по приложениям** — вынесен
 > целиком в приватные доки (`.claude/private/PLAN-JOURNAL.md`), см. §27 Часть 2. Архив
@@ -155,6 +157,10 @@ Tier — это **не отдельная ось**, а проекция выбо
 
 ### 3.1 Матрица приложений
 
+> ⚠️ **Снимок на 2026-05-30, не поддерживается** — не обновлялась с даты аудита; описывает 7
+> приложений из ~30 в монорепо. `trustedClients` ниже — тоже устарело (см. §10: клиенты Ключницы
+> хранятся в `oauthApplication`).
+
 | App                | Владелец      | Auth-механизм                        | Верификация email                                   | Роли                | `admin/users`             | DB в admin             |
 | ------------------ | ------------- | ------------------------------------ | --------------------------------------------------- | ------------------- | ------------------------- | ---------------------- |
 | **aboi**           | commercial    | Better Auth + `anonymous`            | link, `sendOnSignUp` (тупик `EMAIL_NOT_VERIFIED`)   | `roles: string[]`   | ❌ создать                | `prismaAuth`           |
@@ -272,9 +278,10 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 
 ## 5. Карта auth монорепо
 
-- **Богатый флоу (эталон):** driving-school (pin-auth). **Тупик без resend:** aboi, kami, dsperevod, auth-hub.
-- ~~**Кастомная верификация:** premium-rosstil (мигрируем — §9-D4).~~ ➖ premium-rosstil выведен из
-  эксплуатации (2026-07-05) — миграция (Этап 4) была выполнена до этого, но пункт больше не актуален. **PIN:** driving-school, mandala.
+> ⚠️ Устарело относительно Этапов 2/6 (все ниже перечисленные тупики без resend закрыты) — оставлено
+> как исторический снимок проблемы, из-за которой стартовал весь план (§1).
+
+- **Богатый флоу (эталон):** driving-school (pin-auth). **PIN:** driving-school, mandala.
 - **OIDC-клиенты Ключницы:** kami (гибрид), dashboard (только Ключница), archetest/time/grandslamcup/animatrona-tracker.
 
 ---
@@ -595,70 +602,51 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   контракт §4 финализирован; решены под-вопросы п.4.
 - **Зависимости:** Этап 1. **Блокирует** постановку новых потребителей на режимы (Этапы 4, 6, 7, 8).
 
-### Этап 2 — Resend email-верификации (исходная боль) — 🟢 эталон aboi ✅ (auth-hub ✅)
+### Этап 2 — Resend email-верификации (исходная боль) — ✅ ПОЛНОСТЬЮ
 
-> **Сессия 2026-05-30 (auth-hub):** ✅ resend на `/sign-in` через `<ResendVerificationButton>` (@letar/auth/client)
+> **auth-hub (2026-05-30):** ✅ resend на `/sign-in` через `<ResendVerificationButton>` (@letar/auth/client)
 > для обоих сценариев — авторегистрация и вход неверифицированного (`verifyEmailSent` в `login.action.ts`);
-> ✅ захват `SendEmailResult` + `reportEmailFailure` в `emailVerification.sendVerificationEmail` (`lib/auth.ts`);
-> ✅ rate-limit `/send-verification-email` `{60,5}`. bump 0.3.2→0.4.0 + CHANGELOG. ⏳ Follow-up: у auth-hub нет
-> vitest/e2e инфраструктуры — unit/Playwright для resend не написаны; точечный per-email rate-limit (кастомный ключ).
->
-> **Сессия 2026-05-31 (aboi — ЭТАЛОН ✅):** ✅ resend на `/sign-in` при `EMAIL_NOT_VERIFIED` (`<ResendVerificationButton>`,
-> email из формы, cooldown только при успехе §13.4); ✅ resend-форма на `/verify-email` при ошибке (email вводится
-> заново — токен Better Auth 1.6.x это stateless JWT, контекста формы не несёт); ✅ захват `SendEmailResult` +
-> `reportEmailFailure` для verification и password-reset (`lib/auth.ts`); ✅ rate-limit `/send-verification-email`
-> `{60,3}`; ✅ Umami-события (§13.9) `verification-email-{sent,resent}` + `email-verified` (`lib/analytics.ts`);
-> ✅ **E2E зелёный (chromium):** регистрация → тупик → resend → cooldown → верификация по токену → автологин на
-> `/profile` (`aboi-e2e/email-verification.spec.ts`). bump aboi 0.23.2→0.24.0 + CHANGELOG; коммит в 2 submodule + bump SHA.
-> ⏳ Follow-up: email-уровень rate-limit `{3600,5}` с ключом ip+email (Better Auth не умеет per-email ключ нативно).
-> ✅ **dsperevod (сессия №6, 2026-06-02):** resend на `/sign-in` + resend-форма на `/verify-email` + analytics.ts +
-> rate-limit + autoSignInAfterVerification + миграция на @letar/email + E2E зелёный. bump 0.5.0.
-> ✅ **Этап 2 п.3 ремедиация завершена (2026-06-04):** aboi — 0 застрявших, dsperevod — 0 застрявших.
-> auth-hub — 12 застрявших (все зарегали до деплоя resend-фикса, большинство через VK OAuth) → bulk `UPDATE "User" SET "emailVerified"=true` выполнен на prod. Итог: 27/27 верифицированы.
+> ✅ захват `SendEmailResult` + `reportEmailFailure`; ✅ rate-limit `/send-verification-email` `{60,5}`.
+> bump 0.3.2→0.4.0 + CHANGELOG. ⏳ Follow-up: у auth-hub нет vitest/e2e инфраструктуры для resend.
+> ✅ **Ремедиация бэклога застрявших (2026-06-04):** 12 застрявших (VK OAuth до резенд-фикса) →
+> bulk-верификация на прод. Итог: 27/27 верифицированы.
 
-1. ✅ **aboi (эталон):** `/sign-in` `EMAIL_NOT_VERIFIED` → блок + resend (email из формы); `/verify-email` error →
-   resend; захват `SendEmailResult`; `rateLimit.customRules['/send-verification-email'] = { window: 60, max: 3 }`.
-2. **Тираж:** dsperevod → auth-hub (i18n нет → ru-хардкод; гейт только prod → тест с принудительным флагом).
-   kami — Этап 6; premium-rosstil — Этап 4.
-3. ✅ **Ремедиация бэклога застрявших (2026-06-04).** aboi: 0 застрявших (2 юзера — все верифицированы).
-   dsperevod: 0 застрявших (3 юзера — все верифицированы). auth-hub: bulk-верификация 12 застрявших
-   (OAuth VK-аккаунты от апреля, до resend-фикса) → 27/27 верифицированы.
+1. ✅ **aboi (эталон):** детали и E2E-путь — `apps/aboi/PLAN_COMPLETED.md`.
+2. ✅ **Тираж:** dsperevod (детали — `apps/dsperevod/PLAN.md`) → auth-hub (выше) → kami (Этап 6) →
+   premium-rosstil (Этап 4, приложение впоследствии выведено из эксплуатации).
+3. ✅ **Ремедиация бэклога застрявших (2026-06-04)** на aboi и dsperevod — 0 застрявших на каждом;
+   auth-hub — см. выше.
 
-- **✓ DoD:** на эталоне (aboi) E2E «регистрация → тупик → resend → cooldown → верификация» зелёный ✅ (chromium);
-  ✅ бэклог застрявших (п.3) — закрыт (2026-06-04). **Этап 2 — ПОЛНОСТЬЮ.**
+- **✓ DoD:** на эталоне E2E «регистрация → тупик → resend → cooldown → верификация» зелёный ✅; бэклог
+  застрявших закрыт (2026-06-04). **Этап 2 — ПОЛНОСТЬЮ.**
 - **Зависимости:** Этап 1.
 
 ### Этап 3 — Admin «Пользователи» + ручная верификация ✅ ПОЛНОСТЬЮ (2026-06-04)
 
-- ✅ **aboi:** `admin/users` страница (фильтр `isAnonymous: false`) + `VerifyButton` + `verifyUserAction` + «Пользователи» в `AdminNav`.
 - ✅ **kami:** `admin/users` страница + `VerifyButton` + `verifyUserAction` + «Пользователи» в `AdminSidebar`.
 - ✅ **auth-hub:** `VerifyButton` + `verifyUserAction` добавлены в существующую `admin/users`.
-- ✅ **dsperevod:** `verifyUserAction` добавлен в `user.action.ts` (с `logAudit`) + `VerifyButton` в колонку «Действия».
-- ✅ **premium-rosstil:** `verifyUserAction` + `VerifyButton` + колонка «Верификация»; запрос переведён на `select`.
-- Server actions под `requireAdmin`, меняют **только `emailVerified`**; DB-клиент по паттерну приложения (§9-D7). ✅ enhanced Prisma (dsperevod, premium) — политики `@@allow('all', auth().role == ADMIN)` разрешают обновление.
+- ✅ **aboi, dsperevod** — тот же паттерн; детали в `apps/aboi/PLAN_COMPLETED.md` и `apps/dsperevod/PLAN.md`
+  (enhanced Prisma, политика `@@allow('all', auth().role == ADMIN)`).
+- ✅ **premium-rosstil** (впоследствии выведено из эксплуатации, Этап 4) — тот же паттерн.
+- Server actions под `requireAdmin`, меняют **только `emailVerified`**; DB-клиент по паттерну приложения (§9-D7).
 - **Зависимости:** частично Этап 1; можно параллельно с Этапом 2.
 
 ### Этап 4 — premium-rosstil: миграция на Better Auth (§9-D4 = «мигрировать») ✅ ПОЛНОСТЬЮ (сессии №15–16)
 
-> ➖ **Приложение впоследствии выведено из эксплуатации (2026-07-05)** — этап сохранён как исторический
-> результат, дальнейшие действия по premium-rosstil не требуются.
+> ➖ **Приложение впоследствии выведено из эксплуатации (2026-07-05)**, submodule удалён — этап
+> сохранён как исторический результат, дальнейшие действия не требуются. Технические детали
+> миграции (пофайлово) и последующего Этапа 5 (pin-auth флоу) на этом приложении — перенесены в
+> `.claude/private/PLAN-JOURNAL.md` (§27 Часть 2 Шаг 2.1), т.к. `apps/`-папки для него больше нет.
 
-- ✅ **Шаг 1:** `register-form.tsx` → `authClient.signUp.email()`; удалён `/api/auth/register/route.ts`.
-- ✅ **Шаг 2:** `signin-form.tsx` resend → `authClient.sendVerificationEmail()`; удалён `/api/auth/resend-verification/route.ts`.
-- ✅ **Шаг 3:** `forgot-password-form.tsx` → `authClient.requestPasswordReset()` (BA 1.6.11: метод `requestPasswordReset`, не `forgetPassword`); `reset-password-form.tsx` → `authClient.resetPassword()`; удалены `/api/auth/request-reset`, `/api/auth/reset-password`.
-- ✅ **Шаг 4:** удалены `lib/tokens.ts`, `lib/rate-limit.ts` + все потребители (`verify-email/route.ts`, `cleanup-rate-limits/route.ts`).
-- ✅ **Шаг 5:** schema.zmodel — убрано `Verification.type`, дропнута `LoginAttempt`; migration `20260604155648_remove_custom_auth_fields`.
-- ✅ **Шаг 6:** `verify-email/page.tsx` переписан на `authClient.verifyEmail()` + ResendVerificationButton при ошибке (по эталону dsperevod).
-- `requireEmailVerification` **не включаем** (§9-D3). Пароли совместимы (bcrypt).
+- Кастомная email/password-верификация заменена на Better Auth целиком (регистрация, resend,
+  password-reset, `Verification.type`/`LoginAttempt` дропнуты в пользу core-таблиц).
+- `requireEmailVerification` **не включали** (§9-D3). Пароли совместимы (bcrypt).
 - **Зависимости:** Этапы 1–2 ✅.
 
 ### Этап 5 — Богатый pin-auth флоу (коды+ссылки+cross-tab) ✅ ПОЛНОСТЬЮ (2026-06-04)
 
-- ✅ **premium-rosstil:** хук `sendVerificationEmail` → PIN + ссылка в одном письме; адаптеры
-  `PinValidatorAdapter` (namespace через `identifier`, без поля type); SSE endpoint; server actions
-  (verify-pin, resend через BA API, auto-login с HMAC-cookie); страница `/auth/verify-pin` +
-  Chakra PinInput + `usePinVerification`; cross-tab sync; register → verify-pin редирект;
-  sign-in EMAIL_NOT_VERIFIED → resend + редирект. bump 0.74.0→0.75.0.
+- ✅ Реализован на том же приложении, что и Этап 4 (историческое, выведено из эксплуатации) — детали
+  в `.claude/private/PLAN-JOURNAL.md` (см. выше).
 - **Зависимости:** Этап 1 ✅; эталон driving-school.
 
 ### Этап 6 — kami: авторизация ✅ ПОЛНОСТЬЮ (2026-06-05, сессии №18–19)
@@ -1001,73 +989,35 @@ useEffect(() => {
 
 ### Этап 7 — driving-school: на общую библиотеку ✅ ПОЛНОСТЬЮ (2026-06-11, сессия №32)
 
-- ✅ `driving-school/auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк).
-- ✅ `@letar/auth` расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0).
-- ✅ pin-auth адаптеры обновлены на namespace-подход без поля `type` (как в premium-rosstil Этап 5).
-- ✅ SSE endpoint обновлён (`autologin:email` namespace).
-- ✅ `magicLink` плагин BA + UI на /sign-in + `magicLinkClient()` в `auth-client.ts`.
+- ✅ `auth.ts` мигрирован на `createAuth({ mode: 'standalone' })` (~607→~330 строк); `@letar/auth`
+  расширен полями `socialProviders`, `databaseHooks`, `password` (v0.5.0→v0.6.0); `magicLink` плагин BA.
+  Детали — `apps/driving-school/PLAN_COMPLETED.md`.
 - **Зависимости:** Этапы 1, 5, **1.5** ✅.
 
-### Этап 8 — Соц-секреты per-владелец + админка (§2.3, §9-D5)
+### Этап 8 — Соц-секреты per-владелец + админка (§2.3, §9-D5) ✅ ОСНОВНОЙ ФУНКЦИОНАЛ ГОТОВ
 
 - **UI выбора режима в админке коммерческого проекта** (informed consent §2.3):
   - **Tier 1 → `hub-client`:** «перейти на авторизацию letar.best» с показом рисков (бренд, домен письма, риск бана,
     миграция identity, обработчик ПДн). Технически = регистрация проекта hub-клиентом Ключницы (реестр — см. Этап 1.5 п.4)
-    - миграция данных (§8.5).
-      ✅ **UI выбора зафиксирован (2026-07-15, пилот dsperevod):** `/admin/settings/auth-mode/` —
-      сравнение Tier 1/Tier 2 с полным списком рисков из §2.3, чекбокс «ознакомлен с рисками» перед
-      кнопкой запроса, история запросов на странице. Запрос пишется в `AuditLog`
-      (`REQUEST_AUTH_MODE_MIGRATION`) — **сознательно не автоматизирует сам переход**: смена режима
-      требует кодовой правки `lib/auth.ts` + регистрации hub-клиента в Ключнице + миграции данных
-      (§8.5), это не рантайм-флаг и не самообслуживание, а формальная фиксация решения владельца для
-      разработчика. Проверено скриптом напрямую на БД (enum `REQUEST_AUTH_MODE_MIGRATION` +
-      `AuditLog` round-trip), typecheck/lint зелёные.
+    - миграция данных (§8.5). UI фиксирует запрос в `AuditLog` (`REQUEST_AUTH_MODE_MIGRATION`) — **сознательно не
+      автоматизирует сам переход**: смена режима требует кодовой правки `lib/auth.ts` + регистрации hub-клиента в
+      Ключнице + миграции данных, это не рантайм-флаг и не самообслуживание, а формальная фиксация решения владельца.
   - **Tier 2 → `standalone` + свои ключи:** владелец вводит свои OAuth clientId/secret; secret **шифруется at-rest**
-    в БД его проекта; `createAuth({ social: { source: 'db' } })` читает их при старте/reload. **Без runtime-динамики
-    провайдеров** (решение ревизии №3) — D8 не нужен.
-    ✅ **Реализовано и проверено вживую (2026-07-15)** — пилот на `dsperevod` (первый реальный
-    потребитель `createAuthAsync`/`createSocialProviderLoader`/`encryptSecret`/`decryptSecret` из
-    `@letar/auth`, до этого только докстринги без реальных вызовов): новая модель
-    `SocialProvider` (`@@allow('all', auth().role == 'ADMIN')`, AES-256-GCM secret), страница
-    `/admin/social-providers/` (список + create/edit/delete, `Alert` с рисками владения),
-    `lib/auth.ts` переведён на `createAuthAsync` с `social: { source: 'db', load:
-createSocialProviderLoader(...) }`. Проверено: typecheck/lint зелёные, dev-сервер стартует с
-    top-level `await createAuthAsync(...)` без ошибок, sign-up/sign-in через API работают,
-    `requireAdmin` → ZenStack-запрос → рендер страницы подтверждены curl'ом с реальной сессией,
-    encrypt→store→loader→decrypt round-trip проверен отдельным скриптом (значение в БД не
-    читается как plaintext, loader корректно расшифровывает). **Ограничение:** провайдеры
-    читаются один раз при старте процесса — правки в админке требуют рестарта (задокументировано
-    в UI и README). **Не покрыто:** OAuth-провайдеры через `genericOAuth`-плагин с кастомным
-    `getUserInfo` (Yandex у driving-school) — DB-loader сериализует только `clientId`/`clientSecret`
-    для нативных `socialProviders`, не сложные колбэки; миграция `driving-school` на DB-backed
-    Tier 2 сознательно не делалась в этой сессии — риск сломать боевой VK/Yandex-вход.
+    (AES-256-GCM) в БД его проекта; `createAuthAsync({ social: { source: 'db', load: createSocialProviderLoader(...) } })`
+    читает их при старте/reload. **Без runtime-динамики провайдеров** (решение ревизии №3) — D8 не нужен. Модель
+    `SocialProvider` (`@@allow('all', auth().role == 'ADMIN')`), страница `/admin/social-providers/` (список +
+    create/edit/delete, `Alert` с рисками владения). **Ограничение:** провайдеры читаются один раз при старте
+    процесса — правки в админке требуют рестарта. **Не покрыто нигде:** OAuth через `genericOAuth`-плагин с
+    кастомным `getUserInfo` (нативные `clientId`/`clientSecret` — да, сложные колбэки — нет).
+  - ✅ **Пилот обоих UI (2026-07-15) + тираж на два других коммерческих приложения (2026-07-15/17):** детали —
+    `apps/dsperevod/PLAN.md`, `apps/aboi/PLAN_COMPLETED.md`, `apps/driving-school/PLAN_COMPLETED.md`.
 - ✅ **Миграция auth-hub на `createAuth({ mode: 'hub-provider' })`** — выполнено (сессия №33). Вынести захардкоженные OIDC-секреты auth-hub в secret-store (Этап 0.4) — остаётся.
-- ✅ **Тираж на aboi (2026-07-15)** — оба UI перенесены целиком (`/admin/social-providers/` +
-  `/admin/settings/auth-mode/`), см. запись в шапке плана.
-- ✅ **Тираж social-providers на driving-school (2026-07-17, v0.238.0)** — `/owner/settings/
-social-providers/`, ранее сознательно пропущенный из-за Yandex/VK кастомных `getUserInfo`.
-  Решение: DB-провайдеры мержатся с env-fallback в `lib/auth.ts` через `resolveCreds()`, кастомные
-  колбэки/`databaseHooks` не тронуты — DB-loader покрывает только `clientId`/`clientSecret`, не
-  логику обогащения профиля. **Graceful degradation** — `AUTH_ENCRYPTION_KEY` не fail-fast (в
-  отличие от aboi/dsperevod): при отсутствии ключа или ошибке чтения БД приложение откатывается на
-  env-провайдеров вместо падения (боевая мультитенантная платформа, случайный обрыв ключа не должен
-  ронять соц-вход). Подробности — запись в шапке плана и `apps/driving-school/CHANGELOG.md`
-  (v0.238.0).
-- **✓ DoD:** ✅ коммерс может в админке увидеть Tier 1/Tier 2 с показом рисков и зафиксировать
-  informed-consent выбор (пилот dsperevod, тираж aboi/driving-school, `/admin(или /owner)/settings/
-auth-mode/`; сам переход на Tier 1 — не самообслуживание, требует разработчика); ✅ Tier 2-секреты
-  шифруются at-rest и подхватываются `createAuth()`/вручную-мержатся (dsperevod/aboi/driving-school);
-  ✅ auth-hub работает на фабрике; ✅ нет строковых секретов в коде нового пути; ✅ оба UI перенесены
-  на все Tier 2 приложения монорепо (dsperevod эталон, aboi, driving-school). **Остаётся:** реальное
-  исполнение Tier 1-перехода как отдельная задача класса §8.5, когда появится первый реальный запрос.
+- **✓ DoD:** ✅ коммерс может в админке увидеть Tier 1/Tier 2 с показом рисков и зафиксировать informed-consent
+  выбор (сам переход на Tier 1 — не самообслуживание, требует разработчика); ✅ Tier 2-секреты шифруются at-rest
+  и подхватываются `createAuth()`; ✅ auth-hub работает на фабрике; ✅ нет строковых секретов в коде нового пути;
+  ✅ оба UI перенесены на все Tier 2 коммерческие приложения монорепо. **Остаётся:** реальное исполнение
+  Tier 1-перехода как отдельная задача класса §8.5, когда появится первый реальный запрос.
 - **Зависимости:** после auth-унификации (этапы 1, **1.5**, 2–7). Самостоятельный крупный трек.
-- ✅ **Побочная находка ЗАКРЫТА (2026-07-15/16, коммит `ffd845b`):** локальный
-  `apps/dsperevod/prisma/seed.ts` создавал первого ADMIN с bcrypt-хешем пароля, но `lib/auth.ts`
-  не переопределяет `password.hash/verify` (в отличие от driving-school/aboi) → Better Auth
-  проверял его своим дефолтным scrypt → `sign-in` под сид-админом падал с "Invalid password
-  hash". Пофикшено: `hashPassword` из `@better-auth/utils/password` вместо `bcryptjs` — тот же
-  scrypt-алгоритм, что и дефолт Better Auth. Проверено вживую (2026-07-16): пересид +
-  `sign-in/email` под сид-админом → 200, роль ADMIN, тестовые данные вычищены из dev-БД.
 
 ### Этап 8.5 — Несколько email на аккаунт (account linking / merge)
 
@@ -1458,20 +1408,32 @@ Telegram alerting — в Этапе 0. Вместе дают картину: % �
 2. **Глубина чистки:** **всё, что касается коммерсов** — не только чувствительное (РКН, ФИО, домены),
    но и технические записи журнала про приватные приложения.
 
-### Что именно светится сейчас (замер 2026-07-28)
+### Что именно светится сейчас (замер 2026-07-28, обновлено вторым проходом того же дня)
 
-| Файл (публичный)    | Упоминаний приватных приложений                                                 |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `PLAN.md`           | **277** (aboi 102, driving-school 87, dsperevod 63, premium-rosstil 18, imot 7) |
-| `PLAN_COMPLETED.md` | **102**                                                                         |
-| `PLAN-INFRA.md`     | **64**                                                                          |
+| Файл (публичный)    | Упоминаний приватных приложений                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `PLAN.md`           | **113** (было 277 → 107 после первого прохода → **113** после второго прохода, см. ниже) |
+| `PLAN_COMPLETED.md` | **102** — не тронуто в этой сессии                                                       |
+| `PLAN-INFRA.md`     | **64** — не тронуто в этой сессии                                                        |
 
 **Отдельно чувствительное в `PLAN.md`** — **вынесено 2026-07-28 (§27 Часть 2):** номера РКН-операторов,
 личный ящик владельца, домены коммерсов и привязка «приложение → конкретный ИП» перенесены в
-`.claude/private/COMPLIANCE.md`; на их месте — нейтральные факты без реквизитов. Оставшиеся ~270 упоминаний
-имён приложений (`aboi`, `driving-school`, `dsperevod`, …) — это архитектурное содержимое auth-плана
-(§2–§13, где эти приложения — иллюстрации паттернов), не пофайловый журнал; сплошной вынос всех таких
-упоминаний в `apps/<app>/PLAN.md` (Шаг 2.1) выходит за рамки этой сессии — см. «Что осталось» в конце §27.
+`.claude/private/COMPLIANCE.md`; на их месте — нейтральные факты без реквизитов.
+
+**Второй проход (та же дата, root-weaver):** самые крупные session-narrative кластеры §7 (Этапы 2, 3,
+4, 7, 8 — детальные технические записи по aboi/dsperevod/driving-school) перенесены в
+`apps/aboi/PLAN_COMPLETED.md`, `apps/dsperevod/PLAN.md`, `apps/driving-school/PLAN_COMPLETED.md`;
+premium-rosstil (decommissioned, `apps/`-папки больше нет) — в `.claude/private/PLAN-JOURNAL.md`.
+§3.1 (матрица приложений) и §5 (карта auth) помечены как устаревшие снимки. Счётчик упоминаний **вырос**
+относительно 107 (было до этого прохода) — часть новых упоминаний это сами указатели на
+`apps/<app>/PLAN.md`, добавленные взамен вынесенного текста (они короче исходного, но каждый
+по-прежнему содержит имя приложения). Оставшиеся упоминания — короткие статус-таблицы (§6.8/6.9/6.11:
+одна строка на приложение, без технических деталей) и единичные иллюстративные примеры паттерна
+(«прообраз — `mergeAnonymousAccount` в aboi» и т.п.) — сознательно не тронуты: полная анонимизация
+названий приложений в структурных таблицах и точечных примерах не убирает ничего чувствительного
+(имя само по себе — не секрет), а делает план менее читаемым и рассинхронизирует его с `§3.1`/
+дорожной картой, где те же имена используются как метки этапов. Довести до `grep -c` = 0 (если это
+всё ещё цель) — можно отдельной сессией, см. заметку ниже.
 
 **Реальных секретов НЕ найдено** — проверено `grep` по паттернам паролей/токенов/DSN: только имена
 переменных (`DB_PASSWORD`, `CRON_SECRET`), значений нет. Отдельная ротация не требуется.
@@ -1633,12 +1595,19 @@ Better Auth»). Разбор такого контента на 5 разных `
 - [x] Приватный репо создан, подключён submodule'ом в `.claude/private/`, НЕ в `.gitignore`
 - [x] `.claude/rules/public-repo-hygiene.md` написан, ссылка добавлена в `CLAUDE.md`
 - [x] Домены коммерсов, номера РКН, личный email владельца — не находятся (`grep` даёт 0)
-- [ ] `grep -c` по `PLAN.md` для всех пяти приватных приложений даёт **0** (было 277, сейчас **107** —
-      остаток архитектурного содержимого §2–§13, Шаг 2.1 не выполнен, см. заметку в Части 2)
+- [~] **Шаг 2.1 продвинут вторым проходом (2026-07-28), но `grep -c` = 0 НЕ является целью этого пункта
+  больше** — самые крупные session-narrative кластеры (Этапы 2/3/4/7/8 §7) вынесены в
+  `apps/<app>/PLAN.md`/`PLAN_COMPLETED.md` + `.claude/private/PLAN-JOURNAL.md` (premium-rosstil).
+  Оставшиеся ~113 упоминаний — короткие статус-таблицы (§6.8/6.9/6.11) и единичные иллюстративные
+  примеры + сами указатели на вынесенные файлы; решено сознательно не анонимизировать (см. заметку
+  в «Что именно светится сейчас» выше) — имя приложения само по себе не чувствительно, а полная
+  анонимизация ломает согласованность с §3.1/дорожной картой. Если понадобится довести до нуля —
+  это отдельная, менее приоритетная задача.
 - [ ] Блок СТАТУС в первых 15 строках, единственный актуальный указатель «следующий шаг» в файле
 - [ ] Секция «§0 Открытые хвосты» заполнена, `X-Cron-Secret` в ней (не в журнале)
 - [ ] Три противоречия из 3.3 устранены
 - [ ] Все заголовки этапов имеют статус-маркер по единой легенде
 - [ ] Коллизия §21 разрешена
-- [ ] `PLAN.md` заметно короче 2662 строк (ориентир — уложиться в ~1200)
+- [ ] `PLAN.md` заметно короче 2662 строк (ориентир — уложиться в ~1200; сейчас **1606** после двух
+      проходов Части 2 — заметно ближе, но Часть 3 ещё не начата)
 - [ ] Следующим проходом (отдельная сессия): то же для `PLAN_COMPLETED.md` и `PLAN-INFRA.md`
