@@ -45,6 +45,14 @@ const pinnedStatusCollection = createListCollection({
   ],
 })
 
+const reuploadStatusCollection = createListCollection({
+  items: [
+    { value: '', label: 'Все' },
+    { value: 'needs', label: 'Требует перезаливки' },
+    { value: 'done', label: 'Перезалито' },
+  ],
+})
+
 const ageRatingCollection = createListCollection({
   items: [
     { value: '', label: 'Все' },
@@ -117,6 +125,8 @@ export function AnimeFilters({
   onWatchStatusChange,
   pinnedStatus,
   onPinnedStatusChange,
+  reuploadStatus,
+  onReuploadStatusChange,
   ageRatingFilter,
   onAgeRatingFilterChange,
   onReset,
@@ -234,6 +244,18 @@ export function AnimeFilters({
           category: 'Хранение',
           label: item.label,
           onClear: () => onPinnedStatusChange(''),
+        })
+      }
+    }
+
+    if (reuploadStatus) {
+      const item = reuploadStatusCollection.items.find((i) => i.value === reuploadStatus)
+      if (item) {
+        filters.push({
+          key: 'reuploadStatus',
+          category: 'Перезаливка',
+          label: item.label,
+          onClear: () => onReuploadStatusChange(''),
         })
       }
     }
@@ -360,6 +382,8 @@ export function AnimeFilters({
     onBitDepthChange,
     pinnedStatus,
     onPinnedStatusChange,
+    reuploadStatus,
+    onReuploadStatusChange,
     ageRatingFilter,
     onAgeRatingFilterChange,
   ])
@@ -578,6 +602,21 @@ export function AnimeFilters({
                       variant={pinnedStatus === item.value ? 'solid' : 'outline'}
                       colorPalette={pinnedStatus === item.value ? 'blue' : 'gray'}
                       onClick={() => onPinnedStatusChange(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </HStack>
+
+                {/* Перезаливка */}
+                <HStack gap={1}>
+                  {reuploadStatusCollection.items.map((item) => (
+                    <Button
+                      key={item.value}
+                      size="xs"
+                      variant={reuploadStatus === item.value ? 'solid' : 'outline'}
+                      colorPalette={reuploadStatus === item.value ? 'orange' : 'gray'}
+                      onClick={() => onReuploadStatusChange(item.value)}
                     >
                       {item.label}
                     </Button>

@@ -388,6 +388,12 @@ model Anime {
   pinnedLocally   Boolean     @default(true)
 
   /// @form.exclude
+  /// Требует перезаливки — контент раздавался через утраченный pinner-сервер (миграция
+  /// backfill проставила true всей библиотеке на момент перехода на новую схему раздачи).
+  /// Снимается вручную после успешного реимпорта/republish.
+  needsReupload   Boolean     @default(false)
+
+  /// @form.exclude
   /// Дата публикации на трекер (null = никогда не публиковалось)
   trackerPublishedAt DateTime?
 

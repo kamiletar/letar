@@ -23,6 +23,8 @@ interface Anime {
   watchStatus?: WatchStatus
   /** Контент закреплён локально */
   pinnedLocally?: boolean
+  /** Требует перезаливки — раздавалось через утраченный pinner-сервер */
+  needsReupload?: boolean
   /** Суммарный размер IPFS контента (байты) */
   totalIpfsSize?: number
   /** Размер по категориям (байты) */
@@ -153,6 +155,7 @@ export const AnimeGrid = memo(function AnimeGrid({
               genres={anime.genres?.map((g) => g.genre.name)}
               watchStatus={anime.watchStatus}
               pinnedLocally={anime.pinnedLocally}
+              needsReupload={anime.needsReupload}
               totalIpfsSize={anime.totalIpfsSize}
               ipfsSizeBreakdown={anime.ipfsSizeBreakdown}
               onPlay={selectionMode ? undefined : onPlay}

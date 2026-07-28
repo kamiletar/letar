@@ -71,6 +71,10 @@ export interface AnimeFiltersProps {
   pinnedStatus: string
   onPinnedStatusChange: (value: string) => void
 
+  /** Статус перезаливки: '' = все, 'needs' = требует, 'done' = не требует */
+  reuploadStatus: string
+  onReuploadStatusChange: (value: string) => void
+
   /** Возрастной рейтинг: '' = все, 'kids' = до 13, 'teen' = 13+, 'adult' = 17+ */
   ageRatingFilter: string
   onAgeRatingFilterChange: (value: string) => void

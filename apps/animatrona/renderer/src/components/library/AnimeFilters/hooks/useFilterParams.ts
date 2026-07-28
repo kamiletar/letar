@@ -27,6 +27,7 @@ export interface FilterParams {
   sortBy: SortOption
   watchStatus: string
   pinnedStatus: string
+  reuploadStatus: string
   ageRatingFilter: string
 }
 
@@ -47,6 +48,7 @@ const PARAM_MAP: Record<keyof FilterParams, string> = {
   sortBy: 'sort',
   watchStatus: 'watch',
   pinnedStatus: 'pinned',
+  reuploadStatus: 'reupload',
   ageRatingFilter: 'age',
 }
 
@@ -95,6 +97,7 @@ export function useFilterParams() {
       sortBy: (searchParams.get('sort') as SortOption) || '-updatedAt',
       watchStatus: searchParams.get('watch') || '',
       pinnedStatus: searchParams.get('pinned') || '',
+      reuploadStatus: searchParams.get('reupload') || '',
       ageRatingFilter: searchParams.get('age') || '',
     }),
     [searchParams]

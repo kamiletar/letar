@@ -215,6 +215,7 @@ function LibraryPageContent() {
     sortBy,
     watchStatus: watchStatusFilter,
     pinnedStatus: pinnedStatusFilter,
+    reuploadStatus: reuploadStatusFilter,
     ageRatingFilter,
   } = urlParams
 
@@ -356,6 +357,8 @@ function LibraryPageContent() {
               onWatchStatusChange={(v) => setParam('watchStatus', v)}
               pinnedStatus={pinnedStatusFilter}
               onPinnedStatusChange={(v) => setParam('pinnedStatus', v)}
+              reuploadStatus={reuploadStatusFilter}
+              onReuploadStatusChange={(v) => setParam('reuploadStatus', v)}
               ageRatingFilter={ageRatingFilter}
               onAgeRatingFilterChange={(v) => setParam('ageRatingFilter', v)}
               onReset={handleReset}

@@ -138,6 +138,7 @@ export function useLibraryPage() {
     sortBy,
     watchStatus: watchStatusFilter,
     pinnedStatus: pinnedStatusFilter,
+    reuploadStatus: reuploadStatusFilter,
     ageRatingFilter,
   } = urlParams
 
@@ -218,6 +219,9 @@ export function useLibraryPage() {
       // Хранение
       ...(pinnedStatusFilter === 'local' && { pinnedLocally: true }),
       ...(pinnedStatusFilter === 'remote' && { pinnedLocally: false }),
+      // Требует перезаливки (утраченный pinner-сервер)
+      ...(reuploadStatusFilter === 'needs' && { needsReupload: true }),
+      ...(reuploadStatusFilter === 'done' && { needsReupload: false }),
       // Возрастной рейтинг
       ...(ageRatingFilter === 'kids' && { ageRating: { in: ['g', 'pg', 'pg_13'] } }),
       ...(ageRatingFilter === 'teen' && { ageRating: { in: ['r'] } }),
@@ -237,6 +241,7 @@ export function useLibraryPage() {
       folderPath: true,
       shikimoriId: true,
       pinnedLocally: true,
+      needsReupload: true,
       ageRating: true,
       poster: { select: { cid: true } },
       genres: {

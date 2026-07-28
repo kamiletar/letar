@@ -4,7 +4,16 @@ import { Badge, Box, Card, HStack, Icon, IconButton, Menu, Portal, Text, Tooltip
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import { memo, type MouseEvent, useCallback } from 'react'
-import { LuCloud, LuEllipsisVertical, LuPlay, LuRefreshCw, LuStar, LuTrash2, LuUpload } from 'react-icons/lu'
+import {
+  LuCloud,
+  LuEllipsisVertical,
+  LuPlay,
+  LuRefreshCw,
+  LuStar,
+  LuTrash2,
+  LuTriangleAlert,
+  LuUpload,
+} from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
 import { formatBytes } from '@/lib/format-utils'
@@ -27,6 +36,8 @@ interface AnimeCardProps {
   watchStatus?: WatchStatus
   /** Контент закреплён локально (false = только на удалённых пирах) */
   pinnedLocally?: boolean
+  /** Требует перезаливки — раздавалось через утраченный pinner-сервер */
+  needsReupload?: boolean
   /** Суммарный размер IPFS контента (байты) */
   totalIpfsSize?: number
   /** Размер по категориям (байты) */
@@ -86,6 +97,7 @@ export const AnimeCard = memo(function AnimeCard({
   genres = [],
   watchStatus,
   pinnedLocally = true,
+  needsReupload = false,
   totalIpfsSize,
   ipfsSizeBreakdown,
   onPlay,
@@ -246,6 +258,32 @@ export const AnimeCard = memo(function AnimeCard({
           <Badge position="absolute" top={2} left={2} colorPalette={statusInfo.color}>
             {statusInfo.label}
           </Badge>
+
+          {/* Бейдж требует перезаливки */}
+          {needsReupload && (
+            <Tooltip.Root openDelay={300}>
+              <Tooltip.Trigger asChild>
+                <Badge
+                  position="absolute"
+                  top={9}
+                  left={2}
+                  colorPalette="orange"
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  cursor="default"
+                >
+                  <Icon as={LuTriangleAlert} boxSize={3} />
+                  Перезалить
+                </Badge>
+              </Tooltip.Trigger>
+              <Portal>
+                <Tooltip.Positioner>
+                  <Tooltip.Content>Раздавалось через утраченный сервер, требует перезаливки</Tooltip.Content>
+                </Tooltip.Positioner>
+              </Portal>
+            </Tooltip.Root>
+          )}
 
           {/* Бейдж local/remote (Cloud Library) */}
           {!pinnedLocally && (

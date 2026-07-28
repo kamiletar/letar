@@ -35,6 +35,8 @@ export interface AnimeWithFranchise {
   watchStatus?: WatchStatus
   /** Контент закреплён локально (false = только на удалённых пирах, Cloud Library) */
   pinnedLocally?: boolean
+  /** Требует перезаливки — раздавалось через утраченный pinner-сервер */
+  needsReupload?: boolean
   /** CID манифеста в IPFS */
   manifestCid?: string | null
   /** CID корневой IPFS-директории аниме */
