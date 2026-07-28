@@ -960,7 +960,7 @@ nsenter-spawn/deployId для rollback-эндпоинта), `apps/grandslamcup/d
 | **G** | ✅ готово (сессия №68, 2026-07-12)                                                         | Команда `rollout` + пилот на `time`: compose time (healthcheck, alias `time-app`, минус container_name/ports, DEPLOY_TAG, label), ветвление в deploy-affected.sh по label  | ✅ Финальный ретрай (`deployId 1b6fd716`) — все 8 шагов rollout без единого ❌, multi-IP nginx-баланс подтверждён вживую (`nginx-reload-1` временно балансировал на оба контейнера, без потери трафика — `time.letar.best` 200 OK весь пилот). По пути найдены и закрыты 2 бага (`--deploy-tag` parseArgs strict-mode `6618e3e`; `resolveOldContainer()` по compose-лейблам вместо `<name>-1` `77d023b`), оба покрыты тестами. Возврат label не проверялся отдельно (не потребовался — прямого пути не было regression)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | **H** | после G                                                                                    | Rollback + манифест: rollout пишет манифест, `rollback` в engine, `POST /api/deploy/rollback` в dashboard-agent, tool `deploy_rollback` в deploy-mcp, `migrationWarning`   | Живой rollback time на предыдущий sha без пересборки и простоя; roll-forward обратно; манифест корректен                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | **I** | после F+H                                                                                  | grandslamcup на полный стек (gate+rollout+rollback) + доки (deployment.md — rollout/rollback, e2e-testing.md), отметка DoD §18 Фаза 3 с датой включения hard gate          | Живой gated-деплой grandslamcup через rollout; блок при несвежем e2e воспроизведён                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **J** | ⏳ начат досрочно (сессия №69, 2026-07-12, независимо от I — rollout не требует hard gate) | Тираж на остальные приложения пачками 3–5 через doctor-чек-лист; проверка, что host-порты нигде больше не используются (мониторинг!); blue-green fallback задокументирован | 8/~19 SERVER_APPS на rollout (`time`, `form-docs`, `pravda`, `kami-key-the-landing`, `letar-landing`, `animatrona-landing`, `dsperevod`, `aboi` — все ✅ чистые пилоты, подробности выше в шапке файла). Найден и закрыт баг детектора label в `deploy-affected.sh` (`4fbc414`), важен для всего тиража. `form-example` и `mandala` — обычный (не-rollout) деплой закрыт, `letar.rollout` пока выключен (mandala — период стабильности после прод-инцидента сессии №70; form-example — найден отдельный незаблокированный баг `/products` ECONNREFUSED, сессия №72, закрыт сессией №73). `umami` — compose смигрирован (commit `c119c66`, ⚠️ вендорский образ, rollback --to-sha не применим), `doctor` 8/8 READY, запрос пилота отправлен BlackCove (thread `deploy-umami-rollout-J`) — **ждёт выполнения**. Осталось пройти тиражом: `kami`, затем `archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними (риск по возрастанию)                                                                                                                                                          |
+| **J** | ⏳ начат досрочно (сессия №69, 2026-07-12, независимо от I — rollout не требует hard gate) | Тираж на остальные приложения пачками 3–5 через doctor-чек-лист; проверка, что host-порты нигде больше не используются (мониторинг!); blue-green fallback задокументирован | 8/~19 SERVER_APPS на rollout (`time`, `form-docs`, `pravda`, `kami-key-the-landing`, `letar-landing`, `animatrona-landing`, `dsperevod`, `aboi` — все ✅ чистые пилоты, подробности выше в шапке файла). Найден и закрыт баг детектора label в `deploy-affected.sh` (`4fbc414`), важен для всего тиража. `form-example` и `mandala` — обычный (не-rollout) деплой закрыт, `letar.rollout` пока выключен (mandala — период стабильности после прод-инцидента сессии №70; form-example — найден отдельный незаблокированный баг `/products` ECONNREFUSED, сессия №72, закрыт сессией №73). `umami` — compose смигрирован (commit `c119c66`, ⚠️ вендорский образ, rollback --to-sha не применим), `doctor` 8/8 READY, запрос пилота отправлен BlackCove (thread `deploy-umami-rollout-J`) — **ждёт выполнения**. Осталось пройти тиражом: `kami`, затем `archetest`/`grandslamcup`, затем `auth-hub`/`driving-school` последними (риск по возрастанию)                                                                                                                                                         |
 | **K** | ✅ найдено и закрыто (2026-07-16, BlackCove + CobaltReef)                                  | Прод-инцидент: rollout `auth-hub` завис на 5 минут и упал по таймауту `wait-healthy`                                                                                       | **Root cause:** `rollout.ts:165` хардкодил имя нового контейнера как `${projectName}-app-2`, но Docker Compose при `--scale app=2` берёт следующий по возрастанию индекс относительно уже существующих реплик (не переиспользует «-2») — после нескольких rollout-циклов старый контейнер уже был `-app-3`, новый создавался как `-app-4`, и `waitHealthy` пять минут опрашивал несуществующий `-app-2`. Баг воспроизводился бы на любом rollout-приложении с накопленной историей циклов. **Фикс (commit `1e5e359`, CobaltReef):** новая `resolveNewContainer()` (аналог `resolveOldContainer`) резолвит новый контейнер через `docker ps --filter label=...` после scale-up; новый гейт `resolve-new-container` между `scale-up` и `wait-healthy` (10 гейтов вместо 9) — при неоднозначном резолве падает явно, не висит в таймауте. Regression-тест в `rollout.spec.ts` воспроизводит инцидент напрямую. Подтверждено в бою на 4 последующих rollout-деплоях (svoichuzhie, aprel8008, aboi, dsperevod) — все чистые, `resolve-new-container` корректно нашёл `-app-3`/`-app-4` вместо хардкод-угадывания |
 | **L** | ✅ найдено и закрыто (2026-07-16, BlackCove)                                               | Побочная находка при расследовании K: `deploy_status` во время `wait-healthy` показывал пустой лог — выглядело как повторное зависание                                     | **Root cause:** не буферизация ОС/pipe, а архитектурный пробел — `runRollout()` не делал ни одного `console.log`, все 10 шагов копились в массив `steps` молча; `cli.ts` печатал их одним блоком (`printRolloutResult`) только после того, как `await runRollout(...)` полностью резолвился. Во время `wait-healthy` (до 5 минут поллинга) в лог не попадало вообще ничего. **Фикс:** `runRollout()` получил опциональный 5-й параметр `onStep?: (step) => void`, вызывается сразу после каждого `steps.push()` через локальный helper `push()`; `cli.ts` подключил его к `console.log` — шаг печатается сразу по готовности, не постфактум. Regression-тест в `rollout.spec.ts` проверяет, что `onStep` видит те же шаги в том же порядке, что и итоговый `result.steps`. Тесты/typecheck/lint зелёные                                                                                                                                                                                                                                                                                                     |
 
@@ -1709,7 +1709,7 @@ serialize-javascript), `vulnerable`, `maxSeverity DepVulnSeverity?`, `advisoryCo
 2. Классификация: прочитать корневой `package.json` → `Map<name, dependencies|devDependencies>`
    и `Set<pinned>` из объединения `resolutions` + `overrides`.
 3. `bun outdated` через `execFileSync('bun', ['outdated'], { cwd: root, encoding: 'utf-8',
-   timeout: 300_000, maxBuffer: 32*1024*1024, stdio: ['ignore','pipe','pipe'] })`.
+timeout: 300_000, maxBuffer: 32*1024*1024, stdio: ['ignore','pipe','pipe'] })`.
    Парсер: брать строки, начинающиеся с `|`; отбросить разделители и заголовок
    (`cols[0] === 'Package'`); `split('|')` → срезать пустые края → `trim()` →
    `[name, current, update, latest]`. Снять возможный суффикс `(dev)`/`(peer)` из имени и
@@ -1723,10 +1723,10 @@ serialize-javascript), `vulnerable`, `maxSeverity DepVulnSeverity?`, `advisoryCo
    через `Bun.semver`. Пакеты только из audit → `depType: 'transitive'`, `currentVersion: null`.
    `riskLevel`: `CRITICAL` — уязвимость critical/high; `HIGH` — уязвимость moderate **либо**
    major у критичного пакета (`next, react, react-dom, @chakra-ui/react, prisma, @prisma/client,
-   @zenstackhq/*, typescript, nx, @tanstack/react-query, better-auth`); `MEDIUM` — любой другой
+@zenstackhq/*, typescript, nx, @tanstack/react-query, better-auth`); `MEDIUM` — любой другой
    major; `LOW` — minor или уязвимость low; `NONE` — patch.
 7. `riskScore = min(100, 40*critical + 25*high + 8*moderate + 2*lowVuln + 3*majorКритичных +
-   0.5*majorПрочих)`, округлить. Формула живёт в одном месте и пишется в БД — иначе тренд
+0.5*majorПрочих)`, округлить. Формула живёт в одном месте и пишется в БД — иначе тренд
    несопоставим между версиями скрипта.
 8. Записать `.claude/state/deps-last-scan.json`. Каталога `.claude/state/` нет — создать и
    добавить в `.gitignore`. Прецедент структуры — `STATE_PATH` в
@@ -2035,5 +2035,61 @@ Prisma 7 поменяла и флаги, и интерактивность, и �
 - [ ] `deployment.md` не советует интерактивных команд Prisma для агентского пути
 - [ ] `zenstack-helper/SKILL.md` согласован с правилом
 - [ ] В примерах `docs/database.md` нет удалённых приложений
+
+---
+
+## §31 — Правка в `libs/*` не видна потребителю: typecheck читает устаревшие `.d.ts` 🆕
+
+> Найдено 2026-07-28 (aboi-dev) при добавлении пропа в компонент `libs/ui`. Потерянные
+> полчаса ушли на поиск ошибки в приложении, хотя ошибки там не было.
+
+### Что происходит
+
+`apps/*/tsconfig.json` содержит `references` на `libs/*`, а `libs/*/tsconfig.lib.json`
+эмитит декларации в `libs/*/dist`. При TS project references потребитель резолвит
+библиотеку **через собранные `.d.ts`, а не через исходник** — несмотря на то, что
+`paths` и `package.json` библиотеки указывают на `src/index.ts`.
+
+Практический эффект: правишь `libs/ui/src/lib/<компонент>.tsx`, добавляешь проп,
+используешь его в приложении — и получаешь
+
+```
+error TS2322: Property '<новый проп>' does not exist on type
+'IntrinsicAttributes & <Компонент>Props'
+```
+
+Ошибка **указывает на файл приложения**, подчёркивает строку с пропом и читается как
+«ты написал ерунду в приложении». В исходнике библиотеки проп при этом на месте — открыв
+его, видишь, что всё правильно, и начинаешь искать несуществующую проблему в другом месте.
+
+Лечится одной командой: `nx typecheck <lib>` (пересобирает `dist/**/*.d.ts`).
+
+### Почему это стоит починить, а не запомнить
+
+- **Ловушка молчаливая и повторяемая.** Она срабатывает у каждого, кто расширяет API
+  общей библиотеки, — то есть ровно при работе по правилу shared-first, которое монорепо
+  само же и требует.
+- **`nx lint` и dev-сервер её не ловят.** Turbopack резолвит по `paths` в исходник, поэтому
+  в браузере всё работает — расходится только typecheck. Это худший вид расхождения:
+  зелёный экран в браузере против красного в консоли.
+- **Диагноз не подсказывается ничем.** Ни текст ошибки, ни `--verbose` не упоминают `dist`.
+
+### Что предлагается (решение не принято)
+
+1. **Прописать `dependsOn` явно.** `apps/*:typecheck:tsgo` должен зависеть от
+   `^typecheck` — тогда Nx пересоберёт декларации библиотек сам, и ловушка исчезнет
+   без участия человека. Проверить, почему этого нет сейчас: у `libs/ui:typecheck`
+   `dependsOn: ["^typecheck"]` стоит, а у потребителя связи нет.
+2. **Либо убрать `references` на библиотеки** и резолвить только через `paths` в исходники —
+   но это меняет модель сборки всего репо и требует отдельного замера скорости.
+3. **Минимум, если ни то ни другое:** строка в `.claude/docs/environment.md` рядом с
+   разделом про shared-библиотеки — «поменял API в `libs/*` → `nx typecheck <lib>` перед
+   typecheck потребителя».
+
+### Проверка
+
+- [ ] Добавление пропа в компонент `libs/*` и его использование в приложении даёт зелёный
+      `nx typecheck:tsgo <app>` без ручного пересбора библиотеки
+- [ ] Либо: ловушка описана в доке, и текст ошибки в ней узнаваем дословно
 
 ---
