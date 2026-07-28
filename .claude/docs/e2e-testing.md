@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -538,6 +538,40 @@ nx e2e animatrona-e2e -- --project=electron
 ```
 
 ### Критичные особенности
+
+#### 0. `shikimori.mock.ts` (`page.route()`) НЕ мокает запросы из main-процесса
+
+`apps/animatrona-e2e/helpers/shikimori.mock.ts` перехватывает GraphQL-запросы к Shikimori через
+`page.route()` — это работает **только** для сетевого стека рендерера (Chromium page context).
+Часть Shikimori-вызовов (например, весь пайплайн импорта из Рутрекера —
+`main/services/rutracker/rutracker-import.ts` → `main/services/shikimori/client.ts`) идёт из
+**main-процесса** через `fetch`/`net.fetch`, а не из страницы — `page.route()` их не видит,
+запрос реально уходит в интернет.
+
+Для сценариев, где Shikimori-вызов гарантированно происходит из main-процесса:
+
+- **Мокать успешный ответ пока нельзя** без dedicated test-mode hook в main (переменная
+  окружения, которая подменяет клиент на фикстуру) — такого хука сейчас нет.
+- **Единственный доступный без правки прод-кода seam** — `session.webRequest.onBeforeRequest`
+  через `ctx.app.evaluate()`, но он умеет только `cancel`/`redirect`, не подмену тела ответа.
+  Годится только для детерминированного тестирования ветки ошибки (см.
+  `apps/animatrona-e2e/src/03-import/rutracker-import.electron.spec.ts`,
+  `blockShikimoriNetwork()`).
+- **Happy-path без реальной сети** для main-процессных вызовов Shikimori пока не покрыт нигде в
+  сьюте — тестируется либо через реальный сетевой запрос (см. следующий пункт), либо требует
+  добавления test-mode hook.
+
+Перед тем как писать тест на Shikimori-сценарий — проверь, из какого процесса (main или
+renderer) реально идёт вызов, прежде чем полагаться на `shikimori.mock.ts`.
+
+#### 0.1 Тесты с реальной сетью — TUN-VPN может ронять Electron-специфичный сетевой стек
+
+Если пишешь тест, который намеренно бьёт в реальный внешний API (например, для диагностики
+сетевого бага) — учти [electron-net-fetch-tun-vpn.md](electron-net-fetch-tun-vpn.md): под
+TUN-режимом VPN (Clash и т.п.) `net.fetch` (Chromium) и обычный `fetch`/сокет Node.js могут
+проходить по-разному для одного домена. Если main-процессный код использует `net.fetch` — тест
+может падать локально у одних разработчиков и проходить у других не из-за флейка, а из-за
+разных сетевых условий.
 
 #### 1. `app://` протокол НЕ работает для навигации
 

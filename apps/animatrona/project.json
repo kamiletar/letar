@@ -12,6 +12,16 @@
         "cwd": "apps/animatrona"
       }
     },
+    "db:template": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx scripts/db-template-safe.ts",
+        "cwd": "apps/animatrona"
+      },
+      "metadata": {
+        "description": "Обновляет resources/template.db через prisma db push (используется в build/release таргетами и e2e-тестами)"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {
