@@ -128,7 +128,7 @@ studio-postgres` разошёлся с хостом `studio-db`, который 
       **Важно:** локальный `cron-jobs.json` в корне репо — `/cron-jobs.json` в `.gitignore` (не
       трекается git, `git ls-files` его не показывает) — это личный черновой файл, не часть
       репозитория, коммитить/чистить в нём нечего. Реальный конфиг на сервере — `/home/deploy/letar/
-      cron-jobs.json` (`deploy-affected.sh:421` копирует туда `cron-jobs.example.json` только если
+  cron-jobs.json` (`deploy-affected.sh:421` копирует туда `cron-jobs.example.json` только если
       файла там ещё нет — на s2 он уже существует с 2026-07, этот коммит его не трогает). Если
       `imot-session-reminders`/`imot-practice-diary-reminders` всё ещё в живом конфиге на s2
       (эндпоинты 404'ят с 2026-07-05), чистить через `dashboard-agent` cron API (`lib/cron.ts` →
@@ -137,8 +137,8 @@ studio-postgres` разошёлся с хостом `studio-db`, который 
 - [x] **Docker-compose проверены (dashboard-agent-dev, 2026-07-22):** `apps/dashboard`/`apps/kami`/
       `apps/mandala` `docker-compose.production.yml` вообще не монтируют `.env.docker` удалённых
       приложений — упоминания `imot`/`premium` там только в port-комментариях-легендах (`# 5432=
-      premium, 5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
-      docker-compose.yml` держал `imot-network` с комментарием «NPM на s1 всё ещё проксирует живой
+  premium, 5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
+  docker-compose.yml` держал `imot-network` с комментарием «NPM на s1 всё ещё проксирует живой
       сайт клиента через эту сеть» — **устарело**: s1 больше не существует физически (не просто «вне
       ротации»), клиентский сайт через эту сеть уже не обслуживается. `imot-network` убрана из
       `services.app.networks` и из блока `networks:` (владелец подтвердил, 2026-07-22).
@@ -172,8 +172,31 @@ studio-postgres` разошёлся с хостом `studio-db`, который 
 **Итог (2026-07-22):** все пункты бэклога «Хвосты imot/premium-rosstil» закрыты полностью, включая
 `imot-network` — s1 физически не существует, клиентский сайт через эту сеть больше не проксируется.
 
-**Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` — отдельный git worktree (заброшенный?),
-не часть основного дерева, требует отдельного решения (удалить worktree или разобраться, что это).
+**Раунд 2 (2026-07-28, root-weaver):** повторный `grep -rln "imot\|premium-rosstil"` (вне `apps/imot`/
+`apps/premium-rosstil`, вне `.claude/worktrees`/`.claude/artifacts`) нашёл живые остатки, пропущенные
+раундом 1 — тот грепал конкретные категории (docker-compose, sync-env, tsconfig), не сплошным поиском
+по всему дереву:
+
+- 🔴 **`apps/kami/prisma/seed.ts`** — реальный битый UX, не косметика: портфолио kami отдавало
+  `demoUrl` на мёртвые `https://premium.rosstil.ru/` и `https://imot.letar.best`. `demoUrl` убран у
+  обеих карточек (описание/технологии оставлены как история портфолио). Seed idempotent
+  (`deleteMany`+`createMany`), но re-seed прод-БД kami не выполнялся — отдельное решение владельца.
+- `ecosystem.config.js` (мёртвый PM2-конфиг `start premium-rosstil`, не референсится нигде — вытеснен
+  Docker-деплоем) и `scripts/generate-pwa-icons.mjs`/`generate-pwa-screenshots.mjs` (одноразовые
+  скрипты, хардкоженные на `apps/premium-rosstil`, вытеснены локальными per-app версиями) — удалены.
+- `.gitignore` (мёртвые записи `/apps/premium-rosstil/logs/*.log`), `deploy-affected.sh` (примеры в
+  `--help`), `apps/dashboard/schema.zmodel` (doc-пример поля `imageName`/`domain`, regen через
+  `zenstack:generate`+`db:generate`), `.claude/hooks/kill-e2e-port.js` (`PORT_MAP` держал мёртвые
+  порты imot/premium-rosstil) — поправлены.
+
+Остаток после раунда 2 — десятки упоминаний в `.md` (PLAN/CHANGELOG/README историческая запись самого
+decommission'а — не трогать, это архив) и generic-примеры команд в `.claude/skills/*/reference/*.md`
+(`nx build premium-rosstil` как иллюстрация синтаксиса, не утверждение что приложение живо) — низкий
+приоритет, не функциональный код.
+
+**Не трогать:** `.claude/worktrees/heuristic-roentgen-7645de/` и `.claude/worktrees/jovial-bhabha-baae8b/`
+— отдельные git worktree (заброшенные?), не часть основного дерева, требуют отдельного решения (удалить
+worktree или разобраться, что это).
 
 ### Надёжность deploy-истории (найдено BlackCove, 2026-07-22) — ✅ закрыто (dashboard-agent-dev, 2026-07-22)
 
