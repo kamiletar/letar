@@ -1,10 +1,10 @@
-import { CookieBanner } from '@letar/ui'
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
 import { BASE_URL, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME } from '@/lib/seo'
 
-import { AnalyticsConsent } from './_components/analytics-consent'
 import { WebSiteJsonLd } from './_components/json-ld'
 import { Providers } from './_components/providers'
 import './globals.css'
@@ -83,7 +83,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <WebSiteJsonLd />
         <Providers>{children}</Providers>
-        <AnalyticsConsent />
+        <AnalyticsGate appKey="pravda">
+          <UmamiScript />
+        </AnalyticsGate>
         <CookieBanner appKey="pravda" consentApiUrl={null} />
       </body>
     </html>

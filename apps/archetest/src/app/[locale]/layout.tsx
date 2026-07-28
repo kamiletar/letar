@@ -1,3 +1,5 @@
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -8,7 +10,6 @@ import { AppToaster } from '@/app/_components/ui/toaster'
 import { routing } from '@/i18n/routing'
 import { CookieConsent } from './_components/cookie-consent'
 import { Header } from './_components/header'
-import { UmamiScriptConsent } from './_components/umami-script-consent'
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -75,7 +76,9 @@ export default async function LocaleLayout({
           </Providers>
           <CookieConsent />
         </NextIntlClientProvider>
-        <UmamiScriptConsent />
+        <AnalyticsGate appKey="archetest">
+          <UmamiScript />
+        </AnalyticsGate>
       </body>
     </html>
   )

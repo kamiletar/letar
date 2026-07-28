@@ -1,6 +1,6 @@
-import { AnalyticsConsent } from '@/app/_components/analytics-consent'
 import { Provider } from '@/app/_components/ui/provider'
-import { CookieBanner } from '@letar/ui'
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 import './globals.css'
@@ -102,7 +102,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* JSON-LD для SEO — статические данные (не пользовательский ввод), безопасно */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Provider>{children}</Provider>
-        <AnalyticsConsent />
+        <AnalyticsGate appKey="kami-key-the-landing">
+          <UmamiScript />
+        </AnalyticsGate>
         <CookieBanner appKey="kami-key-the-landing" consentApiUrl={null} />
       </body>
     </html>

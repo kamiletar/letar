@@ -1,11 +1,11 @@
-import { CookieBanner } from '@letar/ui'
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
-import { AnalyticsConsent } from '@/app/_components/analytics-consent'
 import { HomeJsonLd } from '@/app/_components/json-ld'
 import { Providers } from '@/app/_components/providers'
 import { SkipToContent } from '@/app/_components/skip-to-content'
@@ -122,7 +122,9 @@ export default async function LocaleLayout({ children, params }: Props) {
             {children}
           </NextIntlClientProvider>
         </Providers>
-        <AnalyticsConsent />
+        <AnalyticsGate appKey="aira-web">
+          <UmamiScript />
+        </AnalyticsGate>
         <CookieBanner
           appKey="aira-web"
           consentApiUrl={null}

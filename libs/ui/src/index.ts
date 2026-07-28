@@ -1,4 +1,5 @@
 export { AdminEditOverlay, type AdminEditOverlayProps } from './lib/admin-edit-overlay'
+export { AnalyticsGate, type AnalyticsGateProps } from './lib/analytics-gate'
 export { BuildVersion, type BuildVersionProps } from './lib/build-version'
 export {
   ConfirmDialog,
@@ -57,6 +58,7 @@ export { StickyActionBar, type StickyActionBarProps } from './lib/sticky-action-
 export { StudioCredit, type StudioCreditProps } from './lib/studio-credit'
 export { Tooltip, type TooltipProps } from './lib/tooltip'
 export { TopLoader, type TopLoaderProps } from './lib/top-loader'
+export { useAnalyticsConsent } from './lib/use-analytics-consent'
 export { useScrollGate, type UseScrollGateOptions, type UseScrollGateResult } from './lib/use-scroll-gate'
 export { useServiceWorker, type UseServiceWorkerOptions } from './lib/use-service-worker'
 export { UserMenu, type UserMenuItemConfig, type UserMenuProps, type UserMenuSession } from './lib/user-menu'

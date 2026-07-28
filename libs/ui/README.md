@@ -132,7 +132,6 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 
 ```tsx
 import { AdminEditOverlay } from '@letar/ui'
-
 ;<Box position="relative">
   {isAdmin && <AdminEditOverlay href={`/admin/${slug}`} colorPalette="brand" />}
   <Link asChild>
@@ -207,6 +206,30 @@ import { useScrollGate } from '@letar/ui'
 
 const { sentinelRef, reachedEnd } = useScrollGate({ enabled: true })
 ```
+
+### useAnalyticsConsent / AnalyticsGate
+
+Consent-aware гейтинг аналитики (152-ФЗ, `.claude/docs/personal-data.md §5`). Читает состояние
+согласия из localStorage (namespace общий с `CookieBanner`/`createConsentConfig`) и реактивно
+обновляется по событию `{appKey}:consent-change`. `AnalyticsGate` — Client Component-обёртка для
+использования прямо в Server Component layout, без отдельного `analytics-consent.tsx` на каждое
+приложение:
+
+```tsx
+// Server Component layout.tsx
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate, CookieBanner } from '@letar/ui'
+
+;<AnalyticsGate appKey="my-app">
+  <UmamiScript />
+</AnalyticsGate>
+<CookieBanner appKey="my-app" />
+```
+
+`AnalyticsGate` принимает несколько `children` — удобно для приложений с двумя счётчиками
+(например, Umami + Yandex Metrika), не требует по обёртке на каждый. Хук `useAnalyticsConsent`
+экспортируется отдельно для нестандартных случаев (напр. когда компонент аналитики сам принимает
+`hasConsent` пропом, как `@letar/yandex-metrika`).
 
 ### useUrlFilters
 

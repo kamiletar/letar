@@ -1,7 +1,7 @@
-import { AnalyticsConsent } from '@/app/_components/analytics-consent'
 import { SkipLink } from '@/app/_components/skip-link'
 import { Provider } from '@/app/_components/ui/provider'
-import { CookieBanner } from '@letar/ui'
+import { UmamiScript } from '@letar/analytics'
+import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
@@ -102,7 +102,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <SkipLink />
         <Provider>{children}</Provider>
-        <AnalyticsConsent />
+        <AnalyticsGate appKey="animatrona-landing">
+          <UmamiScript />
+        </AnalyticsGate>
         <CookieBanner appKey="animatrona-landing" consentApiUrl={null} />
       </body>
     </html>
