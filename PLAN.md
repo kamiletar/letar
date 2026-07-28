@@ -24,10 +24,22 @@
 > `apps/dashboard/PLAN_COMPLETED.md` (v1.20.0), `apps/dashboard-agent/PLAN_COMPLETED.md` (v0.8.6),
 > `apps/studio/PLAN_COMPLETED.md` (Фаза 10/5).
 
+> **📋 Наблюдение (НЕ задача): детерминированный PRNG `mulberry32` продублирован в двух
+> приложениях (найдено 2026-07-28, poster-microtext-desktop).** Одна и та же реализация
+> лежит в `apps/archetest/src/app/[locale]/_lib/seeded-shuffle.ts` и в
+> `apps/poster-microtext-desktop/main/services/microtext/variety.ts`. В обоих случаях она
+> решает одну задачу — воспроизводимость: у archetest порядок вопросов, у
+> poster-microtext совпадение допечатки тиража с уже напечатанными экземплярами.
+> **Рекомендация — пока не выносить**, и это осознанное решение, а не недосмотр: шесть
+> строк канонического алгоритма, всего два места (порог «3+ мест» из CLAUDE.md не
+> достигнут), а poster-microtext — приватный submodule, которому общая либа добавит
+> зависимость ради экономии шести строк. Записано, чтобы при третьем появлении вынести
+> сразу, а не обнаруживать дублирование заново.
+
 > **📋 TODO: вынести проверку `X-Cron-Secret` в общий `libs/*` (найдено LavenderSpring,
 > 2026-07-28).** Идентичные 4 строки (`const cronSecret = process.env.CRON_SECRET; const
-> provided = request.headers.get('x-cron-secret'); if (!cronSecret || provided !== cronSecret)
-> return 401`) продублированы минимум в 5 местах: `studio/api/cron/send-reminders`,
+provided = request.headers.get('x-cron-secret'); if (!cronSecret || provided !== cronSecret)
+return 401`) продублированы минимум в 5 местах: `studio/api/cron/send-reminders`,
 > `studio/api/cron/recurring-invoices`, `dashboard/api/alerts`, `dashboard/api/cron/heartbeat`,
 > `driving-school/api/cron/cleanup-api-logs`. Кандидат на `verifyCronSecret(request): boolean`
 > (или сразу с `NextResponse` на 401) в подходящей существующей `libs/*`, либо новая лёгкая
@@ -85,7 +97,7 @@
 > главной страницы — единственный лист-сегмент, совпадающий по глубине с `[locale]/layout.tsx`,
 > из-за чего `title.template` родителя не применялся к строковому `title` дочерней страницы;
 > фикс — явный суффикс в `generateMetadata`; попутно снят двойной суффикс `"- Elfafeya Art -
-> Elfafeya Art"` на 7 других страницах (`messages/ru.json`/`en.json`). (2) **Silent submit
+Elfafeya Art"` на 7 других страницах (`messages/ru.json`/`en.json`). (2) **Silent submit
 > failure — библиотечный баг `@letar/forms`, затрагивает ВСЕ формы во всех приложениях**: Chakra
 > `Field.Root required` прокидывает нативный HTML5 `required` на дочерний input, браузер тихо
 > блокирует submit до React `onSubmit`, из-за чего Zod-валидация (`Form.Errors`) никогда не
@@ -191,7 +203,7 @@ mandala:db:seed` запускается и падает уже на **нашей
 >
 > **✅ Аудит остальных 9 приложений батча ЗАВЕРШЁН (2026-07-21, фоновая сессия):** реальный баг того
 > же класса нашёлся только в **`grandslamcup`** — тот же bare-index импорт (`'../src/generated/
-> prisma'` → `browser`-экспорт без класса) + `new PrismaClient()` без driver adapter. Починен тем
+prisma'` → `browser`-экспорт без класса) + `new PrismaClient()` без driver adapter. Починен тем
 > же паттерном (явный `../src/generated/prisma/client` + `PrismaPg` adapter), коммит `6efa4e59`,
 > версия `3.37.3 → 3.37.4`. Проверено локально (временный `postgres:17-alpine` на порту 5453,
 > `nx db:push` + `nx db:seed` — дошёл до реального запроса к БД, контейнер после проверки удалён).
@@ -2116,7 +2128,7 @@ return ctx.json(options)
 
 ```tsx
 import { UserMenu } from '@letar/ui'
-<UserMenu
+;<UserMenu
   session={session?.user ?? null}
   onSignIn={() => signInWithLetarAuth(pathname)} // hub-client
   onSignOut={() => signOut()}
