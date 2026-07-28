@@ -70,12 +70,19 @@ export default defineConfig({
   ],
 
   // Dev сервер для UI тестов (dev-chromium project)
-  // Запускаем ТОЛЬКО Next.js renderer, не Electron
-  webServer: {
-    command: 'cd apps/animatrona/renderer && next dev -p 3007',
-    url: baseURL,
-    reuseExistingServer: true,
-    cwd: workspaceRoot,
-    timeout: 180000,
-  },
+  // Запускаем ТОЛЬКО Next.js renderer, не Electron.
+  // Пропускаем через SKIP_DEV_WEBSERVER=1 при прогоне только electron/smoke проектов —
+  // Playwright стартует webServer для ЛЮБОГО набора проектов независимо от --project
+  // фильтра, а dev-сервер сейчас падает на несвязанном баге (shaka-player SSR).
+  ...(process.env['SKIP_DEV_WEBSERVER']
+    ? {}
+    : {
+      webServer: {
+        command: 'cd apps/animatrona/renderer && next dev -p 3007',
+        url: baseURL,
+        reuseExistingServer: true,
+        cwd: workspaceRoot,
+        timeout: 180000,
+      },
+    }),
 })
