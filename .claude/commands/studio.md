@@ -108,7 +108,7 @@ commit: <hash>",
 ## Проект
 
 **Приложение:** studio
-**Порт:** 3020
+**Порт:** 3024
 **Домен:** studio.letar.best
 **Сервер:** s2 (185.28.85.195)
 **Auth:** Better Auth (email/password)

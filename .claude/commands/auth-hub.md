@@ -65,7 +65,7 @@ send_message(
 ## Проект
 
 **Приложение:** auth-hub
-**Порт:** 3010
+**Порт:** 3014
 **Домен:** auth.letar.best
 **Сервер:** s2 (185.28.85.195)
 **Auth:** Better Auth + OAuth (Google, Yandex, VK, Telegram)

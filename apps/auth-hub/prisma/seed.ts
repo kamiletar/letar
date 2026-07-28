@@ -131,8 +131,11 @@ const clients = [
     redirectUrls: [
       'https://studio.letar.best/api/auth/oauth2/callback/letar-auth',
       'https://studio.letar.best/sign-in',
-      'http://localhost:3020/api/auth/oauth2/callback/letar-auth',
-      'http://localhost:3020/sign-in',
+      // Локальный dev-порт студии — 3024 (3020 занял form-docs). Расхождение с этим
+      // значением ломает локальный вход: студия ходит в ПРОД-Ключницу, поэтому localhost-адрес
+      // должен лежать в боевой БД. Сверяется guard-тестом @letar/infra-config.
+      'http://localhost:3024/api/auth/oauth2/callback/letar-auth',
+      'http://localhost:3024/sign-in',
     ].join(','),
   },
   {
