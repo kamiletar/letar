@@ -9,7 +9,8 @@
       "@letar/analytics",
       "@letar/auth",
       "@letar/email",
-      "@letar/number-words"
+      "@letar/number-words",
+      "@letar/consent"
     ]
   }
 }

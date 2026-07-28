@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@letar/consent": ["../../libs/consent/src/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
@@ -60,6 +61,9 @@
     "eslint.config.mjs"
   ],
   "references": [
+    {
+      "path": "../../libs/consent"
+    },
     {
       "path": "../../libs/auth"
     },

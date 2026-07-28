@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [0.52.5] - 2026-07-28
+
+### Fixed
+
+- **Shikimori-запросы падали `net::ERR_FAILED` под TUN-VPN (Clash и т.п.)** — `net.fetch`
+  (сеть Electron/Chromium) режется TUN-клиентом по TLS-отпечатку, хотя тот же запрос через
+  обычный Node-сокет проходит успешно (`session.setProxy`/`proxyBypassRules` тут не помогают —
+  `resolveProxy()` в TUN-режиме честно возвращает `DIRECT`, блокировка происходит ниже уровня
+  прокси-настроек Chromium). `main/services/shikimori/{client,anime-api,franchise-api}.ts`
+  переведены с `net.fetch` на глобальный `fetch` (Node.js/undici).
+- **SSR-краш `shaka-player` блокировал любую сборку** (`self is not defined` при пререндере
+  `/discover` и `/_not-found`) — статический `import shaka from 'shaka-player'` в
+  `GlobalVideoProvider.tsx`/`useShakaPlayer.ts` заменён на динамический `import()` внутри
+  `useEffect`, выполняется только в браузере.
+
 ## [0.52.4] - 2026-07-28
 
 ### Added

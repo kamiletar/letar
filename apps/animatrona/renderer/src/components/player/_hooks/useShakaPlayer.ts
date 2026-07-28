@@ -14,9 +14,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import shaka from 'shaka-player'
 
 import type { MutableRefObject, RefObject } from 'react'
+import type Shaka from 'shaka-player'
 
 import { toPlayableUrl } from '@/lib/media-url'
 
@@ -45,7 +45,7 @@ export interface UseShakaPlayerReturn {
   /** Ref на video элемент */
   videoRef: MutableRefObject<HTMLVideoElement | null>
   /** Ref на Shaka Player */
-  playerRef: MutableRefObject<shaka.Player | null>
+  playerRef: MutableRefObject<Shaka.Player | null>
   /** Видео загружено и готово к воспроизведению */
   isVideoReady: boolean
   /** Идёт загрузка */
@@ -70,7 +70,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
 
   // Refs
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const playerRef = useRef<shaka.Player | null>(null)
+  const playerRef = useRef<Shaka.Player | null>(null)
 
   // Стабильные рефы для коллбэков — НЕ должны перезапускать плеер при изменении
   const onErrorRef = useRef(onError)
@@ -97,118 +97,133 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
 
     // Флаг для отмены обработки после unmount
     let isMounted = true
+    let cleanupPlayer: (() => void) | undefined
 
-    // Создаём video элемент программно
-    const video = document.createElement('video')
-    video.style.width = '100%'
-    video.style.height = '100%'
-    video.style.objectFit = 'contain'
-    video.crossOrigin = 'anonymous'
-    video.onclick = (e) => e.stopPropagation()
-
-    // В режиме раздельных дорожек video.muted = true
-    video.muted = usesSeparateAudioRef.current
-
-    // Добавляем в DOM и сохраняем ref
-    videoContainer.appendChild(video)
-    videoRef.current = video
-
-    // Устанавливаем полифиллы Shaka
-    shaka.polyfill.installAll()
-
-    // Проверяем поддержку браузера
-    if (!shaka.Player.isBrowserSupported()) {
-      console.error('[useShakaPlayer] Browser not supported')
-      onErrorRef.current?.(new Error('Browser not supported'))
-      return
-    }
-
-    // Создаём плеер
-    const player = new shaka.Player()
-    player.attach(video)
-    playerRef.current = player
-
-    // Обработка ошибок Shaka
-    player.addEventListener('error', (event) => {
+    // shaka-player при статическом импорте ссылается на `self` в топ-левел коде — падает при
+    // Next.js SSR/prerender (нет `self` в Node). Динамический import() выполняется только
+    // здесь, внутри useEffect — строго в браузере.
+    void (async () => {
+      const shaka = (await import('shaka-player')).default
       if (!isMounted) {
         return
       }
-      const error = (event as unknown as { detail: shaka.util.Error }).detail
-      console.error('[useShakaPlayer] Shaka error:', error)
-      onErrorRef.current?.(new Error(error.message || 'Playback error'))
-    })
 
-    // Загрузка источника
-    const loadSource = async () => {
-      try {
-        const mediaUrl = toPlayableUrl({ path: src })
-        if (!mediaUrl) {
-          throw new Error('Invalid video source')
-        }
-        await player.load(mediaUrl, startTime)
+      // Создаём video элемент программно
+      const video = document.createElement('video')
+      video.style.width = '100%'
+      video.style.height = '100%'
+      video.style.objectFit = 'contain'
+      video.crossOrigin = 'anonymous'
+      video.onclick = (e) => e.stopPropagation()
 
-        if (!isMounted) {
-          return
-        }
+      // В режиме раздельных дорожек video.muted = true
+      video.muted = usesSeparateAudioRef.current
 
-        // Обновляем duration
-        onDurationChangeRef.current?.(video.duration)
+      // Добавляем в DOM и сохраняем ref
+      videoContainer.appendChild(video)
+      videoRef.current = video
 
-        // Начальная синхронизация audio после загрузки видео
-        const audio = audioRef.current
-        if (usesSeparateAudioRef.current && audio) {
-          audio.volume = video.volume
-          audio.muted = false
-          audio.playbackRate = video.playbackRate
-          audio.currentTime = video.currentTime
-        }
+      // Устанавливаем полифиллы Shaka
+      shaka.polyfill.installAll()
 
-        // Сигнализируем о готовности
-        setIsVideoReady(true)
-        setIsLoading(false)
-        onVideoReadyRef.current?.()
-
-        if (autoPlay) {
-          video.play()
-        }
-      } catch (error) {
-        if (!isMounted) {
-          return
-        }
-
-        // Игнорируем LOAD_INTERRUPTED (code 7002)
-        const shakaError = error as { code?: number }
-        if (shakaError.code === 7002) {
-          return
-        }
-
-        console.error('[useShakaPlayer] Load error:', error)
-        setIsLoading(false)
-        onErrorRef.current?.(error instanceof Error ? error : new Error(String(error)))
+      // Проверяем поддержку браузера
+      if (!shaka.Player.isBrowserSupported()) {
+        console.error('[useShakaPlayer] Browser not supported')
+        onErrorRef.current?.(new Error('Browser not supported'))
+        return
       }
-    }
 
-    loadSource()
+      // Создаём плеер
+      const player = new shaka.Player()
+      player.attach(video)
+      playerRef.current = player
+
+      // Обработка ошибок Shaka
+      player.addEventListener('error', (event) => {
+        if (!isMounted) {
+          return
+        }
+        const error = (event as unknown as { detail: Shaka.util.Error }).detail
+        console.error('[useShakaPlayer] Shaka error:', error)
+        onErrorRef.current?.(new Error(error.message || 'Playback error'))
+      })
+
+      // Загрузка источника
+      const loadSource = async () => {
+        try {
+          const mediaUrl = toPlayableUrl({ path: src })
+          if (!mediaUrl) {
+            throw new Error('Invalid video source')
+          }
+          await player.load(mediaUrl, startTime)
+
+          if (!isMounted) {
+            return
+          }
+
+          // Обновляем duration
+          onDurationChangeRef.current?.(video.duration)
+
+          // Начальная синхронизация audio после загрузки видео
+          const audio = audioRef.current
+          if (usesSeparateAudioRef.current && audio) {
+            audio.volume = video.volume
+            audio.muted = false
+            audio.playbackRate = video.playbackRate
+            audio.currentTime = video.currentTime
+          }
+
+          // Сигнализируем о готовности
+          setIsVideoReady(true)
+          setIsLoading(false)
+          onVideoReadyRef.current?.()
+
+          if (autoPlay) {
+            video.play()
+          }
+        } catch (error) {
+          if (!isMounted) {
+            return
+          }
+
+          // Игнорируем LOAD_INTERRUPTED (code 7002)
+          const shakaError = error as { code?: number }
+          if (shakaError.code === 7002) {
+            return
+          }
+
+          console.error('[useShakaPlayer] Load error:', error)
+          setIsLoading(false)
+          onErrorRef.current?.(error instanceof Error ? error : new Error(String(error)))
+        }
+      }
+
+      loadSource()
+
+      cleanupPlayer = () => {
+        setIsVideoReady(false)
+
+        // Останавливаем воспроизведение
+        video.pause()
+        audioRef.current?.pause()
+
+        // Unload и destroy
+        player.unload()
+        player.destroy()
+
+        // Удаляем video element из DOM
+        video.remove()
+
+        // Очищаем refs
+        videoRef.current = null
+        playerRef.current = null
+      }
+    })()
 
     // Cleanup
     return () => {
       isMounted = false
-      setIsVideoReady(false)
-
-      // Останавливаем воспроизведение
-      video.pause()
-      audioRef.current?.pause()
-
-      // Unload и destroy
-      player.unload()
-      player.destroy()
-
-      // Удаляем video element из DOM
-      video.remove()
-
-      // Очищаем refs
-      videoRef.current = null
-      playerRef.current = null
+      cleanupPlayer?.()
     }
   }, [
     src,

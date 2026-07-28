@@ -11,7 +11,8 @@
       "@letar/ui",
       "@letar/analytics",
       "@letar/auth",
-      "@letar/hooks"
+      "@letar/hooks",
+      "@letar/consent"
     ]
   }
 }

@@ -6,7 +6,8 @@
     "implicitDependencies": [
       "@letar/chakra-provider",
       "@letar/yandex-metrika",
-      "@letar/analytics"
+      "@letar/analytics",
+      "@letar/consent"
     ]
   },
   "prisma": {

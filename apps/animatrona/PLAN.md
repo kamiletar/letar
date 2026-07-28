@@ -1,8 +1,21 @@
 # Animatrona — План развития
 
-## Текущая версия: 0.52.4
+## Текущая версия: 0.52.5
 
 ## Черновик (новые идеи)
+
+- [x] **E2E для импорта из Рутрекера + фикс Shikimori под TUN-VPN** (v0.52.5) — новый сьют
+      `apps/animatrona-e2e/src/03-import/rutracker-import.electron.spec.ts` (навигация,
+      disabled-состояние кнопки, детерминированная ошибка при недоступном Shikimori API,
+      happy-path на реальной сети с прямым матчем по shikimoriId). Первый же реальный прогон
+      поймал баг: `net.fetch` (Chromium) падал `net::ERR_FAILED` на POST к shikimori.io под
+      TUN-VPN (Clash), хотя обычный Node-сокет проходил 200 OK — TUN режет по TLS-отпечатку,
+      не по прокси-настройкам (`session.setProxy` тут бессилен, `resolveProxy()` возвращает
+      `DIRECT`). Пофикшено переводом `main/services/shikimori/{client,anime-api,
+      franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно почищен несвязанный
+      SSR-краш `shaka-player` (`self is not defined`), блокировавший вообще любую сборку
+      `nx build:win` с 3 июля — статический импорт заменён на динамический `import()` в
+      `GlobalVideoProvider.tsx`/`useShakaPlayer.ts`.
 
 - [x] **Реимпорт с Рутрекера сливается в существующее аниме** (v0.52.4) — решение по
       перезаливке библиотеки: не пытаться восстанавливать/аудировать старые CID, а просто

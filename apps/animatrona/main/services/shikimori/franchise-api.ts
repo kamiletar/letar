@@ -4,9 +4,11 @@
  *
  * API: GET https://shikimori.one/api/animes/{id}/franchise
  * Возвращает полный граф связей франшизы (nodes + links)
+ *
+ * ⚠️ Используем глобальный `fetch` (Node.js/undici), НЕ `net.fetch` (Electron/Chromium) —
+ * подробное объяснение см. в `client.ts` у `GRAPHQL_ENDPOINTS` (TUN-VPN режет Chromium-стек
+ * по TLS-отпечатку, обычный Node-сокет проходит).
  */
-
-import { net } from 'electron'
 
 import { createModuleLogger } from '../../utils/logger'
 import { describeNetErrorWithDiagnostics } from '../../utils/net-error'
@@ -51,7 +53,7 @@ export async function getFranchiseGraph(shikimoriId: number): Promise<ShikimoriF
   log.info('Fetching franchise graph', { url })
 
   try {
-    const response = await net.fetch(url, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'User-Agent': USER_AGENT,

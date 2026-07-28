@@ -5,7 +5,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
-import { app, nativeImage, net } from 'electron'
+import { app, nativeImage } from 'electron'
 import { createModuleLogger } from '../../utils/logger'
 import { describeNetErrorWithDiagnostics } from '../../utils/net-error'
 
@@ -43,7 +43,23 @@ const GRAPHQL_ENDPOINTS = ['https://shikimori.io/api/graphql']
 let activeEndpointIdx = 0
 const USER_AGENT = 'Animatrona/1.0 (Desktop App)'
 
-/** Браузерные заголовки для GraphQL — обход DPI (POST-запросы к /api/graphql блокируются иначе чем GET) */
+/**
+ * ⚠️ Используем глобальный `fetch` (Node.js/undici), НЕ `net.fetch` (Electron/Chromium).
+ *
+ * TUN-режим VPN/прокси (Clash, FlClash и т.п.) перехватывает пакеты на уровне сетевого
+ * адаптера ОС — `session.resolveProxy()` в таком случае честно возвращает `DIRECT` (с точки
+ * зрения Chromium прокси вообще нет), поэтому `session.setProxy()`/`proxyBypassRules` здесь
+ * бессильны в принципе — блокировка происходит НИЖЕ уровня прокси-настроек Chromium.
+ * Отличие оказалось в TLS-отпечатке: TUN-клиент различает Chromium-стек (`net.fetch`) и
+ * Node-стек (`fetch`/undici) по ClientHello и режет только первый — тот же самый запрос
+ * (метод/путь/заголовки/тело) через обычный Node-сокет проходит с 200 OK, через net.fetch
+ * падает net::ERR_FAILED. Диагностика — `describeNetErrorWithDiagnostics()` (`net-error.ts`),
+ * которая как раз повторяет упавший запрос через `node:https` для сравнения.
+ *
+ * Браузерные заголовки ниже (`DEFAULT_HEADERS`) изначально добавлялись «для обхода DPI», но
+ * при таком диагнозе они как раз ухудшают ситуацию с TUN-VPN (антибот-защита сайта тут ни при
+ * чём) — оставлены, т.к. не мешают обычным сетям без DPI/TUN-перехвата.
+ */
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
   'User-Agent':
@@ -179,7 +195,7 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
         const timer = setTimeout(() => controller.abort(), 30_000)
         let response: Response
         try {
-          response = await net.fetch(endpoint, {
+          response = await fetch(endpoint, {
             method: 'POST',
             headers: DEFAULT_HEADERS,
             body: JSON.stringify({ query, variables }),
@@ -238,15 +254,14 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
         // net.fetch (Electron/Chromium) кидает ошибки вида "net::ERR_FAILED",
         // "net::ERR_NAME_NOT_RESOLVED", "net::ERR_CONNECTION_RESET" и т.д. —
         // отличается от Node fetch ("fetch failed", "ECONNRESET")
-        const isNetworkError =
-          errMsg.includes('fetch failed') ||
-          errMsg.includes('ECONNRESET') ||
-          errMsg.includes('ETIMEDOUT') ||
-          errMsg.includes('ERR_NAME_NOT_RESOLVED') ||
-          errMsg.includes('net::') ||
-          errMsg.includes('abort') ||
-          errMsg.includes('TimeoutError') ||
-          error instanceof DOMException
+        const isNetworkError = errMsg.includes('fetch failed')
+          || errMsg.includes('ECONNRESET')
+          || errMsg.includes('ETIMEDOUT')
+          || errMsg.includes('ERR_NAME_NOT_RESOLVED')
+          || errMsg.includes('net::')
+          || errMsg.includes('abort')
+          || errMsg.includes('TimeoutError')
+          || error instanceof DOMException
         if (isNetworkError) {
           log.warn(`GraphQL ← ${opName} NETWORK ERROR на ${new URL(endpoint).hostname}, пробуем следующий`, {
             error: errMsg,
@@ -429,7 +444,7 @@ function getMimeType(ext: string): string {
 export async function downloadPoster(
   posterUrl: string,
   animeId: string,
-  options?: { fileName?: string; savePath?: string }
+  options?: { fileName?: string; savePath?: string },
 ): Promise<PosterDownloadResult> {
   log.debug('Скачивание постера', { posterUrl, animeId })
 
@@ -450,13 +465,15 @@ export async function downloadPoster(
     // Глобальный throttle — координация со всеми Shikimori-запросами
     await acquireShikimoriSlot()
 
-    // Скачать файл через fetch с браузерными заголовками (DDoS-Guard)
+    // Скачать файл через fetch с браузерными заголовками (DDoS-Guard).
+    // Node fetch, не net.fetch — см. комментарий у GRAPHQL_ENDPOINTS выше (TUN-VPN режет
+    // именно Chromium-стек по TLS-отпечатку, обычный Node-сокет проходит).
     const DOWNLOAD_TIMEOUT = 15_000
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT)
 
     try {
-      const response = await net.fetch(posterUrl, {
+      const response = await fetch(posterUrl, {
         signal: controller.signal,
         headers: SHIKIMORI_BROWSER_HEADERS,
       })

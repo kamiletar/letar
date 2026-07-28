@@ -8,7 +8,8 @@
       "@letar/chakra-provider",
       "@letar/ui",
       "@letar/analytics",
-      "@letar/auth"
+      "@letar/auth",
+      "@letar/consent"
     ]
   }
 }

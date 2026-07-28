@@ -1,7 +1,13 @@
 {
   "name": "animatrona-tracker",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": ["@letar/chakra-provider", "@letar/analytics", "animatrona-ui", "@letar/redis-client"],
+  "implicitDependencies": [
+    "@letar/chakra-provider",
+    "@letar/analytics",
+    "@letar/consent",
+    "animatrona-ui",
+    "@letar/redis-client"
+  ],
   "sourceRoot": "apps/animatrona-tracker/src",
   "projectType": "application",
   "tags": ["type:app", "scope:animatrona-tracker", "owner:letar"],

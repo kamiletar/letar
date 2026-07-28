@@ -6,6 +6,61 @@
 
 ---
 
+## v0.52.5 — E2E импорта из Рутрекера + Shikimori под TUN-VPN (2026-07-28)
+
+**Задача:** написать e2e-тест на процесс импорта аниме из Рутрекера
+(`ImportRutrackerContent`, `apps/animatrona/renderer/src/app/import-rutracker/page.tsx`).
+
+**Реализовано** (`apps/animatrona-e2e/src/03-import/rutracker-import.electron.spec.ts` +
+`apps/animatrona-e2e/pages/rutracker-import.page.ts`):
+
+- Навигация на вкладку "Rutracker" страницы "Импорт" через sidebar (`getByRole('button')`, не
+  `'link'` — пункты навигации в этом приложении рендерятся как кнопки).
+- Disabled-состояние кнопки "Парсить и найти на Shikimori" без ввода.
+- Детерминированный экран ошибки при обрыве сети к Shikimori:
+  `session.webRequest.onBeforeRequest` через `app.evaluate()` — единственный доступный seam,
+  т.к. `page.route()` (см. `shikimori.mock.ts`) перехватывает только рендерер, а Shikimori-запросы
+  идут из main-процесса.
+- Happy-path на РЕАЛЬНОЙ сети: прямой матч по `shikimoriId=9253` (Steins;Gate, ссылка в HTML
+  фикстуре) → шаг preview с корректным названием и активной кнопкой "Скачать и импортировать".
+
+**Найденный при первом прогоне баг:** `net.fetch` (Electron/Chromium network stack) падал
+`net::ERR_FAILED` на POST-запросе к `shikimori.io/api/graphql`, хотя `describeNetErrorWithDiagnostics`
+(`main/utils/net-error.ts`) повторил тот же запрос (метод/путь/заголовки/тело) через обычный
+Node `https`-сокет — и получил `200 OK`. Диагностика по шагам:
+
+1. Первая гипотеза (неверная) — системный прокси/VPN (Clash) перехватывает трафик к
+   `shikimori.io`, `session.setProxy({ mode: 'system', proxyBypassRules })` должен помочь.
+   Эмпирически подтверждено, что НЕ помогает — Chromium в `system`-режиме просто делегирует
+   `ProxyConfigService` ОС, полностью игнорируя `proxyBypassRules` (работает только для
+   `fixed_servers`/`pac_script`).
+2. Вторая попытка — читать реальный системный прокси через `session.resolveProxy()` и
+   пересобирать как `fixed_servers` + `proxyBypassRules`. Тоже не сработало —
+   `resolveProxy('https://rutracker.org')` вернул `DIRECT`: с точки зрения Chromium прокси
+   вообще не настроен (Clash работает в TUN-режиме — перехват на уровне сетевого адаптера ОС,
+   ниже уровня прокси-настроек приложения).
+3. **Настоящая причина:** TUN-клиент различает Chromium-сетевой-стек (`net.fetch`) и
+   Node-стек (`fetch`/undici) по TLS-отпечатку (ClientHello) и режет только первый. Это
+   означает, что `session.setProxy`/`proxyBypassRules` в принципе не могли помочь — блокировка
+   происходит не на уровне прокси-конфигурации.
+
+**Итоговый фикс:** `main/services/shikimori/client.ts`, `anime-api.ts`, `franchise-api.ts`
+переведены с `net.fetch` на глобальный `fetch` (Node.js/undici) — включая GraphQL-клиент,
+REST-клиент ролей/франшизы и скачивание постеров (`downloadPoster`). Неудачная первая попытка
+фикса (`session.setProxy`/`resolveProxy` в `main.ts`) удалена как бесполезный код.
+
+**Побочный фикс (блокировал верификацию):** `nx build:win animatrona` не собирался с 3 июля —
+`shaka-player` при статическом импорте (`import shaka from 'shaka-player'`) ссылается на `self`
+в топ-левел коде, что валит Next.js SSR-пререндер (`self is not defined` на `/discover` и
+`/_not-found`). Исправлено переводом `GlobalVideoProvider.tsx` и `useShakaPlayer.ts` на
+динамический `import('shaka-player')` внутри `useEffect` (типы — через `import type Shaka`).
+
+**Инфраструктурная находка:** таргет `db:template` отсутствует в `apps/animatrona/project.json`
+(остался только как мёртвая `dependsOn`-ссылка в 7 таргетах — `build`, `build:linux`,
+`release:linux`, `build:mac`, `release:mac`, `release:win-linux`). Скрипт
+`scripts/db-template-safe.ts` на месте и рабочий — просто отвязан от Nx-таргета. Обходной путь:
+`npx tsx scripts/db-template-safe.ts` напрямую. Требует восстановления таргета отдельной задачей.
+
 ## v0.52.2–0.52.4 — Перезаливка библиотеки на новый pinner-сервер (2026-07-28)
 
 **Контекст:** старый раздающий (pinner) сервер утрачен. Серия прошлых фиксов регенерации

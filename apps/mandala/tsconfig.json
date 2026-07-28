@@ -21,6 +21,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@letar/consent": ["../../libs/consent/src/index.ts"],
       "@letar/auth": ["../../libs/auth/src/index.ts"],
       "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
       "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
@@ -69,6 +70,9 @@
     "eslint.config.mjs"
   ],
   "references": [
+    {
+      "path": "../../libs/consent"
+    },
     {
       "path": "./tsconfig.spec.json"
     },

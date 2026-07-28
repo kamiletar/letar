@@ -26,9 +26,17 @@ nx e2e animatrona-e2e
       (`ImportRutrackerContent`): навигация на вкладку, disabled-состояние кнопки "Парсить",
       детерминированный экран ошибки при недоступном Shikimori API (сеть к shikimori.io/shikimori.one
       блокируется через `session.webRequest.onBeforeRequest` в main-процессе, т.к. `page.route()`
-      не перехватывает `net.fetch` из main). Happy-path (успешный Shikimori-матч → шаг preview)
-      НЕ покрыт — нужен dedicated test-mode hook для подмены ответа GraphQL/REST в main-процессе,
-      см. комментарий в конце spec-файла.
+      не перехватывает `net.fetch` из main), и happy-path с РЕАЛЬНОЙ сетью (прямой матч по
+      shikimoriId=9253 → шаг preview с корректным названием и активной кнопкой "Скачать и
+      импортировать"). Мокнутый happy-path (без реальной сети) всё ещё НЕ покрыт — `webRequest`
+      умеет только cancel/redirect, не подмену тела ответа; нужен dedicated test-mode hook для
+      этого в main-процессе, см. комментарий в конце spec-файла.
+      **Важная находка при первом реальном прогоне:** `net.fetch` (Electron/Chromium) падал
+      `net::ERR_FAILED` на POST к shikimori.io под TUN-VPN (Clash), хотя тот же запрос через
+      обычный Node-сокет проходил 200 OK — TUN-клиент режет по TLS-отпечатку Chromium-стека,
+      а не по прокси-настройкам (`session.setProxy`/`proxyBypassRules` тут бессильны, см.
+      `client.ts`). Пофикшено переводом `main/services/shikimori/{client,anime-api,
+      franchise-api}.ts` на глобальный `fetch` (Node/undici) вместо `net.fetch`.
 
 ---
 
