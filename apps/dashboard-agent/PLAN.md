@@ -128,7 +128,7 @@ studio-postgres` разошёлся с хостом `studio-db`, который 
       **Важно:** локальный `cron-jobs.json` в корне репо — `/cron-jobs.json` в `.gitignore` (не
       трекается git, `git ls-files` его не показывает) — это личный черновой файл, не часть
       репозитория, коммитить/чистить в нём нечего. Реальный конфиг на сервере — `/home/deploy/letar/
-  cron-jobs.json` (`deploy-affected.sh:421` копирует туда `cron-jobs.example.json` только если
+cron-jobs.json` (`deploy-affected.sh:421` копирует туда `cron-jobs.example.json` только если
       файла там ещё нет — на s2 он уже существует с 2026-07, этот коммит его не трогает). Если
       `imot-session-reminders`/`imot-practice-diary-reminders` всё ещё в живом конфиге на s2
       (эндпоинты 404'ят с 2026-07-05), чистить через `dashboard-agent` cron API (`lib/cron.ts` →
@@ -137,8 +137,8 @@ studio-postgres` разошёлся с хостом `studio-db`, который 
 - [x] **Docker-compose проверены (dashboard-agent-dev, 2026-07-22):** `apps/dashboard`/`apps/kami`/
       `apps/mandala` `docker-compose.production.yml` вообще не монтируют `.env.docker` удалённых
       приложений — упоминания `imot`/`premium` там только в port-комментариях-легендах (`# 5432=
-  premium, 5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
-  docker-compose.yml` держал `imot-network` с комментарием «NPM на s1 всё ещё проксирует живой
+premium, 5433=imot, 5434=mandala...`), справочных, ничего не мапят. `infra/nginx-proxy-manager/
+docker-compose.yml` держал `imot-network` с комментарием «NPM на s1 всё ещё проксирует живой
       сайт клиента через эту сеть» — **устарело**: s1 больше не существует физически (не просто «вне
       ротации»), клиентский сайт через эту сеть уже не обслуживается. `imot-network` убрана из
       `services.app.networks` и из блока `networks:` (владелец подтвердил, 2026-07-22).

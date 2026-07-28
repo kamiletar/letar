@@ -146,6 +146,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
     server: 's2',
   },
+  {
+    id: 'maddy-backup-freshness-check',
+    name: 'Maddy Backup Freshness Check',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/backup-freshness-check',
+    schedule: '0 */6 * * *',
+    description:
+      'Проверка свежести бэкапа Maddy (Этап 0.3): алерт BACKUP_FAILED, если самый новый maddy_*.tar.gz в /home/deploy/letar/backups/maddy старше 30ч — урок инцидента 2026-07-28 (26 дней простоя незамеченными)',
+    enabled: true,
+    server: 's2',
+  },
 ]
 
 /**

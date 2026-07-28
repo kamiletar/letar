@@ -18,6 +18,7 @@ import { authMiddleware } from './lib/auth'
 import { startScheduler } from './lib/cron'
 import { startHistoryCollection } from './lib/history'
 import { appsRoutes } from './routes/apps'
+import { backupFreshnessRoutes } from './routes/backup-freshness'
 import { cronRoutes } from './routes/cron'
 import { databaseRoutes } from './routes/database'
 import { deployRoutes } from './routes/deploy'
@@ -83,6 +84,7 @@ async function main(): Promise<void> {
   await fastify.register(gitRoutes)
   await fastify.register(envRoutes)
   await fastify.register(emailCanaryRoutes)
+  await fastify.register(backupFreshnessRoutes)
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
