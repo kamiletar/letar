@@ -88,7 +88,7 @@ if (process.env.DEBUG_LIBP2P === '1' && !process.env.DEBUG) {
   console.log('[libp2p] DEBUG логирование включено через DEBUG env')
 }
 
-import { app, BrowserWindow, crashReporter, dialog, Menu, powerMonitor, powerSaveBlocker } from 'electron'
+import { app, BrowserWindow, crashReporter, dialog, Menu, powerMonitor, powerSaveBlocker, session } from 'electron'
 import path from 'path'
 import { registerIpcHandlers } from './ipc'
 import { setMainWindowForMigration, setNeedsSetup } from './ipc/app.handlers'
@@ -171,6 +171,25 @@ app.whenReady().then(async () => {
     log.info('Secure DNS явно выключен — используется системный DNS')
   } catch (err) {
     log.warn('Не удалось настроить DNS resolver', { error: String(err) })
+  }
+
+  // Shikimori — обход системного прокси/TUN-VPN (Clash и т.п.).
+  // net.fetch (Chromium network stack) в отличие от обычного Node-сокета уважает системные
+  // настройки прокси — если Clash/FlClash перехватывает трафик к shikimori.io/.one по правилу
+  // (хотя в блокировке нуждается только rutracker.org), запрос может рваться на стороне
+  // прокси-нода (net::ERR_FAILED) даже когда DNS уже резолвится верно (secureDnsMode: 'off'
+  // выше чинит только DNS-часть, не сам факт перехвата трафика). Диагностика подтверждает:
+  // тот же запрос через обычный Node-сокет (в обход системного прокси) проходит с 200 OK.
+  // proxyBypassRules заставляет net.fetch идти напрямую для этих доменов независимо от
+  // системного прокси/VPN пользователя.
+  try {
+    await session.defaultSession.setProxy({
+      mode: 'system',
+      proxyBypassRules: 'shikimori.io,shikimori.one,*.shikimori.io,*.shikimori.one',
+    })
+    log.info('Прокси-исключение для Shikimori настроено (proxyBypassRules)')
+  } catch (err) {
+    log.warn('Не удалось настроить proxyBypassRules для Shikimori', { error: String(err) })
   }
 
   // Миграция данных из старого пути @letar/animatrona в новый Animatrona
@@ -277,7 +296,8 @@ app.whenReady().then(async () => {
         type: 'error',
         title: 'Ошибка запуска',
         message: 'Не удалось запустить сервер',
-        detail: `Animatrona не смогла найти свободный порт для запуска.\n\nВозможные решения:\n• Закройте другие приложения\n• Перезагрузите компьютер\n• Проверьте антивирус/фаервол\n\nОшибка: ${err}`,
+        detail:
+          `Animatrona не смогла найти свободный порт для запуска.\n\nВозможные решения:\n• Закройте другие приложения\n• Перезагрузите компьютер\n• Проверьте антивирус/фаервол\n\nОшибка: ${err}`,
         buttons: ['Повторить', 'Выход'],
         defaultId: 0,
       })
