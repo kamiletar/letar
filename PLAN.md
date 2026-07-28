@@ -49,7 +49,6 @@
 
 | Что                                                                                  | Этап | Чем блокирован                                               |
 | ------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| External-нога email-canary без внешнего почтового ящика с IMAP app-password          | 0.7  | Ждёт владельца — агент завести сторонний аккаунт не может    |
 | Пути бэкапов Resilio (`C:\BackupSync\lena`, `/home/backups/lena`) не переименованы   | 0.6  | Пересекается с Этапом 0.3, не назначено                      |
 | Root-пакет `@lena/source` (`package.json`+`bun.lock`) не переименован                | 0.6  | Требует регенерации lockfile, low-impact                     |
 | 25+ файлов вне `apps/imot`/`apps/premium-rosstil` всё ещё их упоминают               | 0.6  | Backlog по категориям риска — `apps/dashboard-agent/PLAN.md` |
@@ -509,7 +508,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   secret-mounts других приложений, backup-скрипты, generated Prisma, doc-комментарии) — Backlog в
   `apps/dashboard-agent/PLAN.md` (см. §0).
 
-### Этап 0.7 — Периодический canary-мониторинг доставки email 🟡 ЧАСТИЧНО
+### Этап 0.7 — Периодический canary-мониторинг доставки email ✅ ПОЛНОСТЬЮ (обе ноги, 2026-07-22)
 
 > **✅ Код готов (2026-07-22, root-weaver, dashboard-agent 0.7.6 → 0.8.0):** `lib/email-canary.ts` +
 > `routes/email-canary.ts` в `dashboard-agent` — `POST /api/cron/email-canary-check`, cron-задача
@@ -525,11 +524,13 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 > Telegram, отдельный Umami-event ради одной задачи признан непропорциональным.
 > **✅ Internal-нога провижинирована и подтверждена (2026-07-22):** ящик `canary@letar.best`
 > создан на Maddy, SMTP+IMAP auth проверены вживую (оба OK), секреты залиты в `.env.docker.enc`
-> (коммит `2a5aaa0d`), синхронизированы на s1/s2, деплой запрошен у BlackCove. **⏳ External-нога
-> ждёт владельца:** нужен внешний почтовый ящик (Gmail и т.п.) с IMAP app-password в
-> `EMAIL_CANARY_EXTERNAL_*` — создание стороннего аккаунта агент выполнить не может. До заполнения
-> — `external.configured: false`, не алертит. Детали — `apps/dashboard-agent/PLAN.md` и
-> `CHANGELOG.md` (v0.8.0).
+> (коммит `2a5aaa0d`), синхронизированы на s1/s2. **✅ External-нога провижинирована и
+> подтверждена (2026-07-22):** получатель — личный ящик владельца (Gmail), IMAP app-password
+> сгенерирован владельцем (потребовалось включить 2FA), `ImapFlow.connect()` к `imap.gmail.com:993`
+> проверен вживую — OK. `EMAIL_CANARY_EXTERNAL_*` залиты в `.env.docker.enc`, синхронизированы на
+> s1/s2. Обе ноги `configured: true`. Прод-инцидент 2026-07-22 (ImapFlow ронял процесс
+> `dashboard-agent` при зависшем сокете) пофикшен коммитом `305c0ec7` (0.8.0→0.8.1), доп. фиксы
+> — 0.8.2. Детали — `apps/dashboard-agent/PLAN.md` и `CHANGELOG.md`.
 
 - **Цель:** ловить инциденты доставки (как сегодняшний — форвард режется gmail, неверный `SMTP_FROM`, брутфорс)
   **автоматически**, а не по жалобам. Проверять, что письмо реально **доходит** (round-trip), а не только «SMTP принял».
@@ -628,7 +629,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
      не покрывает. `svoichuzhie.ru/privacy` (редакция от 14.06.2026) уже содержит все обязательные разделы
      (данные/цели/сроки/права субъекта), но раздел «1. Оператор персональных данных» — **незаполненный
      плейсхолдер, видимый любому посетителю**: `[юридическое лицо / ИП — заполнить после регистрации
-     оператора в РКН]`, контактный email тоже `[заполнить]`. Технический комплект (privacy/cookie-баннер/
+оператора в РКН]`, контактный email тоже `[заполнить]`. Технический комплект (privacy/cookie-баннер/
      ConsentLog) полный — не хватает только самого уведомления в РКН + дозаполнения плейсхолдеров после
      подачи. Требует решения владельца svoichuzhie (аналогично aboi/dsperevod — отдельный оператор или тот
      же ИП, что и letar/driving-school).
