@@ -1,0 +1,467 @@
+[
+  {
+    "_facet": "Искренность",
+    "scenario": "Сосед третий раз за месяц просит подвезти его до работы — вам не по пути, крюк минут двадцать.",
+    "scenarioEn": "For the third time this month a neighbour asks for a lift to work — it is out of your way, about a twenty-minute detour.",
+    "options": [
+      {
+        "text": "Говорю прямо, что мне неудобно, и предлагаю скинуться на такси",
+        "textEn": "I say straight out that it does not work for me and suggest splitting a taxi",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Соглашаюсь, но потом «случайно» выезжаю раньше, чтобы он не успел",
+        "textEn": "I agree, but then \"accidentally\" leave earlier so he misses me",
+        "scoring": {}
+      },
+      {
+        "text": "Ссылаюсь на несуществующие дела — так мягче",
+        "textEn": "I refer to plans I do not actually have — it lands more gently",
+        "scoring": {}
+      },
+      {
+        "text": "Подвожу и молчу, хотя раздражаюсь",
+        "textEn": "I give him the lift and say nothing, though it irritates me",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Искренность",
+    "_reverse": true,
+    "scenario": "Вы опоздали на встречу, потому что проспали. Вас спрашивают, что случилось.",
+    "scenarioEn": "You are late for a meet-up because you overslept. You are asked what happened.",
+    "options": [
+      {
+        "text": "Говорю как есть: проспал",
+        "textEn": "I say it as it is: I overslept",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "«Пробки» — звучит уважительнее и никого не задевает",
+        "textEn": "\"Traffic\" — it sounds more acceptable and hurts no one",
+        "scoring": {}
+      },
+      {
+        "text": "Ссылаюсь на затянувшийся звонок: формально почти правда",
+        "textEn": "I blame a call that ran long: technically almost true",
+        "scoring": {}
+      },
+      {
+        "text": "Извиняюсь, но причину не называю вовсе",
+        "textEn": "I apologize but do not name a reason at all",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Искренность",
+    "_reverse": true,
+    "scenario": "В компании увлечённо обсуждают сериал, которого вы не смотрели. К вам поворачиваются: «Ну а ты как считаешь?»",
+    "scenarioEn": "A group is eagerly discussing a show you have not watched. They turn to you: \"So what do you think?\"",
+    "options": [
+      {
+        "text": "Говорю, что не смотрел, и слушаю дальше",
+        "textEn": "I say I have not seen it and go on listening",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Отвечаю общо — по обрывкам разговора вполне можно поддержать",
+        "textEn": "I answer in general terms — the snippets of conversation are enough to keep up",
+        "scoring": {}
+      },
+      {
+        "text": "Пересказываю чужое мнение как своё, я его где-то слышал",
+        "textEn": "I repeat someone else's take as my own; I heard it somewhere",
+        "scoring": {}
+      },
+      {
+        "text": "Перевожу тему на то, в чём разбираюсь",
+        "textEn": "I steer the topic to something I do know",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Искренность",
+    "_reverse": true,
+    "scenario": "Вы заполняете анкету в приложении для знакомств. Поля про рост, доход, увлечения.",
+    "scenarioEn": "You are filling out a dating-app profile. Fields for height, income, interests.",
+    "options": [
+      {
+        "text": "Пишу как есть, включая скучные места",
+        "textEn": "I write it as it is, dull parts included",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Округляю в свою пользу — так делают все",
+        "textEn": "I round things in my favour — everyone does",
+        "scoring": {}
+      },
+      {
+        "text": "Добавляю увлечения, которые были давно и недолго",
+        "textEn": "I add hobbies I had briefly, long ago",
+        "scoring": {}
+      },
+      {
+        "text": "Оставляю неудобные поля пустыми",
+        "textEn": "I leave the awkward fields blank",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Справедливость",
+    "scenario": "Продаёте свой велосипед. Вы знаете, что через сезон придётся менять узел — по виду это не заметно.",
+    "scenarioEn": "You are selling your bicycle. You know one part will need replacing after a season — it is not visible from the outside.",
+    "options": [
+      {
+        "text": "Говорю про узел сам и ставлю цену с учётом этого",
+        "textEn": "I bring the part up myself and price the bike accordingly",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Скажу, если спросят прямо; сам тему не поднимаю",
+        "textEn": "I will mention it if asked directly; I do not raise it myself",
+        "scoring": {
+          "HON": 1
+        }
+      },
+      {
+        "text": "Продаю как есть: осматривать — задача покупателя",
+        "textEn": "I sell it as is: inspecting is the buyer's job",
+        "scoring": {}
+      },
+      {
+        "text": "Перед продажей вычищаю и полирую, чтобы выглядел свежее",
+        "textEn": "Before the sale I clean and polish it so it looks fresher",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Справедливость",
+    "_reverse": true,
+    "scenario": "В доме собирают деньги на замену домофона. Сбор добровольный, домофон поставят в любом случае.",
+    "scenarioEn": "Your building is collecting money to replace the entry system. Contributing is voluntary; it will be installed either way.",
+    "options": [
+      {
+        "text": "Сдаю свою долю — пользоваться буду наравне со всеми",
+        "textEn": "I pay my share — I will use it the same as everyone",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Не сдаю: раз добровольно, значит без меня обошлись",
+        "textEn": "I do not pay: if it is voluntary, they managed without me",
+        "scoring": {}
+      },
+      {
+        "text": "Сдаю меньше, чем просят, — у меня и старый работал",
+        "textEn": "I give less than asked — the old one worked fine for me",
+        "scoring": {}
+      },
+      {
+        "text": "Сдаю, но хочу, чтобы это было видно в общем чате",
+        "textEn": "I pay, but I want it visible in the building chat",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Справедливость",
+    "scenario": "У вас есть карта со скидкой, по правилам действующая только на ваши покупки. Знакомые просят покупать через вас.",
+    "scenarioEn": "You have a discount card that by the rules applies only to your own purchases. Acquaintances ask you to buy things through you.",
+    "options": [
+      {
+        "text": "Объясняю, что карта не для этого, и отказываюсь",
+        "textEn": "I explain the card is not for that and decline",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Изредка и только самым близким",
+        "textEn": "Occasionally, and only for the closest people",
+        "scoring": {
+          "HON": 1
+        }
+      },
+      {
+        "text": "Покупаю всем: правило формальное, никто не пострадает",
+        "textEn": "I buy for everyone: the rule is a formality, nobody is harmed",
+        "scoring": {}
+      },
+      {
+        "text": "Покупаю, но беру себе часть разницы за хлопоты",
+        "textEn": "I buy for them but keep part of the difference for the trouble",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Справедливость",
+    "scenario": "Вы вдвоём с двоюродным братом разбираете гараж покойного дяди. В хламе вам попадается вещь, которая заметно дороже, чем кажется.",
+    "scenarioEn": "You and your cousin are clearing out your late uncle's garage. Among the junk you come across an item worth noticeably more than it looks.",
+    "options": [
+      {
+        "text": "Сразу говорю брату, оцениваем и решаем вместе",
+        "textEn": "I tell my cousin right away; we get it valued and decide together",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Говорю, но напоминаю, что нашёл её всё-таки я",
+        "textEn": "I tell him, but point out that I was the one who found it",
+        "scoring": {
+          "HON": 1
+        }
+      },
+      {
+        "text": "Забираю себе: кто разбирал, тот и нашёл",
+        "textEn": "I keep it: whoever does the digging gets the find",
+        "scoring": {}
+      },
+      {
+        "text": "Предлагаю отдать тому, кому дядя был дороже",
+        "textEn": "I suggest giving it to whoever was closer to our uncle",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Нежадность",
+    "scenario": "Вам подняли зарплату на треть. Через полгода вы замечаете, что…",
+    "scenarioEn": "Your salary went up by a third. Six months later you notice that…",
+    "options": [
+      {
+        "text": "живу примерно как раньше, разница уходит в накопления",
+        "textEn": "I live roughly as before; the difference goes into savings",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "сразу подтянул уровень: машина, район, рестораны",
+        "textEn": "I upgraded right away: car, neighbourhood, restaurants",
+        "scoring": {}
+      },
+      {
+        "text": "стал чаще звать друзей за свой счёт",
+        "textEn": "I treat friends more often now",
+        "scoring": {}
+      },
+      {
+        "text": "трачу больше, но не могу вспомнить на что",
+        "textEn": "I spend more but cannot recall on what",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Нежадность",
+    "_reverse": true,
+    "scenario": "Вы выбираете жильё. Один вариант — престижный район на пределе бюджета, другой — проще, но с запасом денег каждый месяц.",
+    "scenarioEn": "You are choosing where to live. One option is a prestigious area at the edge of your budget, the other is plainer but leaves money to spare each month.",
+    "options": [
+      {
+        "text": "Беру то, что проще: запас важнее адреса",
+        "textEn": "I take the plainer one: the cushion matters more than the address",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Беру престижный: такие вложения себя оправдывают",
+        "textEn": "I take the prestigious one: that kind of investment pays off",
+        "scoring": {}
+      },
+      {
+        "text": "Беру престижный — вокруг будут люди другого уровня",
+        "textEn": "I take the prestigious one — the people around will be of a different calibre",
+        "scoring": {}
+      },
+      {
+        "text": "Смотрю только на дорогу до работы, остальное неважно",
+        "textEn": "I look only at the commute; the rest does not matter",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Нежадность",
+    "scenario": "Планируете поездку. За те же дни можно жить в обычном месте или в дорогом, о котором потом будете рассказывать.",
+    "scenarioEn": "You are planning a trip. For the same days you can stay somewhere ordinary or somewhere expensive that you will be telling people about afterwards.",
+    "options": [
+      {
+        "text": "Обычное: деньги лучше потратить на саму поездку",
+        "textEn": "The ordinary one: the money is better spent on the trip itself",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Дорогое: раз в год можно себе позволить лучшее",
+        "textEn": "The expensive one: once a year you can afford the best",
+        "scoring": {}
+      },
+      {
+        "text": "Дорогое: с него и фотографии другие",
+        "textEn": "The expensive one: the photos from there are different too",
+        "scoring": {}
+      },
+      {
+        "text": "Возьму обычное, но буду жалеть, что не дорогое",
+        "textEn": "I will take the ordinary one but regret not choosing the expensive one",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Нежадность",
+    "_reverse": true,
+    "scenario": "Вам предлагают дело, где доход заметно выше нынешнего, но свободного времени почти не останется.",
+    "scenarioEn": "You are offered work where the income is noticeably higher than now, but you will have almost no free time left.",
+    "options": [
+      {
+        "text": "Отказываюсь: мне хватает того, что есть",
+        "textEn": "I decline: what I have is enough for me",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Соглашаюсь: от таких денег не отказываются",
+        "textEn": "I accept: you do not turn down that kind of money",
+        "scoring": {}
+      },
+      {
+        "text": "Соглашаюсь на пару лет, а потом посмотрю",
+        "textEn": "I accept for a couple of years and see after that",
+        "scoring": {}
+      },
+      {
+        "text": "Торгуюсь, чтобы и доход был, и время осталось",
+        "textEn": "I negotiate for both the income and the time",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Скромность",
+    "_reverse": true,
+    "scenario": "Вы много лет занимаетесь своим делом. Новый знакомый, не зная этого, с жаром объясняет вам его основы.",
+    "scenarioEn": "You have been doing your craft for years. A new acquaintance, unaware of that, enthusiastically explains its basics to you.",
+    "options": [
+      {
+        "text": "Слушаю, не обозначая свой уровень",
+        "textEn": "I listen without flagging my level",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Мягко даю понять, что в теме, — иначе неловко нам обоим",
+        "textEn": "I gently make it clear that I know the field — otherwise it gets awkward for both of us",
+        "scoring": {
+          "HON": 1
+        }
+      },
+      {
+        "text": "Сразу говорю, сколько лет этим занимаюсь",
+        "textEn": "I say straight away how many years I have been at it",
+        "scoring": {}
+      },
+      {
+        "text": "Задаю вопрос, после которого станет ясно, кто здесь кто",
+        "textEn": "I ask a question that will make clear who is who here",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Скромность",
+    "scenario": "Детскую площадку во дворе делали втроём. Соседи благодарят при всех вас одного.",
+    "scenarioEn": "Three of you built the playground in the courtyard. In front of everyone the neighbours thank you alone.",
+    "options": [
+      {
+        "text": "Тут же называю остальных двоих",
+        "textEn": "I name the other two right there",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Говорю «делали вместе», без имён",
+        "textEn": "I say \"we did it together\", without names",
+        "scoring": {
+          "HON": 1
+        }
+      },
+      {
+        "text": "Принимаю благодарность: я и правда вложился больше всех",
+        "textEn": "I accept the thanks: I did put in the most",
+        "scoring": {}
+      },
+      {
+        "text": "Отшучиваюсь и перевожу тему",
+        "textEn": "I make a joke of it and change the subject",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Скромность",
+    "_reverse": true,
+    "scenario": "Близкому человеку предстоит отбор, где всё решает общий порядок. У вас есть знакомство, через которое «вопрос решается».",
+    "scenarioEn": "Someone close to you faces a selection decided by the standard procedure. You have a connection through which \"the matter can be handled\".",
+    "options": [
+      {
+        "text": "Не пользуюсь: пусть проходит общим путём",
+        "textEn": "I do not use it: let them go through the standard route",
+        "scoring": {
+          "HON": 3
+        }
+      },
+      {
+        "text": "Позвоню — на его месте так поступил бы любой",
+        "textEn": "I will make the call — anyone in my position would",
+        "scoring": {}
+      },
+      {
+        "text": "Не прошу решить, но упомяну, что это мой человек",
+        "textEn": "I will not ask for a fix, but I will mention that this is my person",
+        "scoring": {}
+      },
+      {
+        "text": "Спрошу у него самого, хочет ли он так",
+        "textEn": "I will ask them whether they want it that way",
+        "scoring": {
+          "HON": 1
+        }
+      }
+    ]
+  }
+]
