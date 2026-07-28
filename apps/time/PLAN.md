@@ -182,48 +182,48 @@ libs/number-words/
 
 **Полный список языков (40):**
 
-| #  | Код | Язык        | Нативное название | Носители | RTL | Группа          |
-| -- | --- | ----------- | ----------------- | -------- | --- | --------------- |
-| 1  | ru  | Russian     | Русский           | 250M     | -   | Славянские      |
-| 2  | en  | English     | English           | 1.5B     | -   | Германские      |
-| 3  | fr  | French      | Français          | 320M     | -   | Романские       |
-| 4  | de  | German      | Deutsch           | 130M     | -   | Германские      |
-| 5  | ja  | Japanese    | 日本語            | 125M     | -   | Японские        |
-| 6  | zh  | Chinese     | 中文              | 1.1B     | -   | Синитские       |
-| 7  | ar  | Arabic      | العربية           | 370M     | RTL | Семитские       |
-| 8  | ko  | Korean      | 한국어            | 80M      | -   | Корейские       |
-| 9  | es  | Spanish     | Español           | 550M     | -   | Романские       |
-| 10 | pt  | Portuguese  | Português         | 260M     | -   | Романские       |
-| 11 | hi  | Hindi       | हिन्दी             | 600M     | -   | Индоарийские    |
-| 12 | tr  | Turkish     | Türkçe            | 80M      | -   | Тюркские        |
-| 13 | pl  | Polish      | Polski            | 45M      | -   | Славянские      |
-| 14 | uk  | Ukrainian   | Українська        | 40M      | -   | Славянские      |
-| 15 | be  | Belarusian  | Беларуская        | 5M       | -   | Славянские      |
-| 16 | kk  | Kazakh      | Қазақша           | 13M      | -   | Тюркские        |
-| 17 | uz  | Uzbek       | Oʻzbekcha         | 35M      | -   | Тюркские        |
-| 18 | tg  | Tajik       | Тоҷикӣ            | 8M       | -   | Иранские        |
-| 19 | ky  | Kyrgyz      | Кыргызча          | 4M       | -   | Тюркские        |
-| 20 | tk  | Turkmen     | Türkmençe         | 7M       | -   | Тюркские        |
-| 21 | az  | Azerbaijani | Azərbaycanca      | 23M      | -   | Тюркские        |
-| 22 | hy  | Armenian    | Հայերեն           | 6M       | -   | Армянские       |
-| 23 | ka  | Georgian    | ქართული           | 4M       | -   | Картвельские    |
-| 24 | ro  | Romanian    | Română            | 24M      | -   | Романские       |
-| 25 | fa  | Persian     | فارسی             | 110M     | RTL | Иранские        |
-| 26 | bn  | Bengali     | বাংলা             | 270M     | -   | Индоарийские    |
-| 27 | id  | Indonesian  | Bahasa Indonesia  | 200M     | -   | Австронезийские |
-| 28 | ms  | Malay       | Bahasa Melayu     | 80M      | -   | Австронезийские |
-| 29 | vi  | Vietnamese  | Tiếng Việt        | 85M      | -   | Вьет-мыонг      |
-| 30 | th  | Thai        | ภาษาไทย           | 70M      | -   | Тай-кадайские   |
-| 31 | sw  | Swahili     | Kiswahili         | 100M     | -   | Банту           |
-| 32 | nl  | Dutch       | Nederlands        | 25M      | -   | Германские      |
-| 33 | sv  | Swedish     | Svenska           | 10M      | -   | Германские      |
-| 34 | it  | Italian     | Italiano          | 65M      | -   | Романские       |
-| 35 | el  | Greek       | Ελληνικά          | 13M      | -   | Греческие       |
-| 36 | he  | Hebrew      | עברית             | 9M       | RTL | Семитские       |
-| 37 | ur  | Urdu        | اردو              | 230M     | RTL | Индоарийские    |
-| 38 | mr  | Marathi     | मराठी             | 83M      | -   | Индоарийские    |
-| 39 | ta  | Tamil       | தமிழ்              | 75M      | -   | Дравидийские    |
-| 40 | te  | Telugu      | తెలుగు             | 82M      | -   | Дравидийские    |
+| #   | Код | Язык        | Нативное название | Носители | RTL | Группа          |
+| --- | --- | ----------- | ----------------- | -------- | --- | --------------- |
+| 1   | ru  | Russian     | Русский           | 250M     | -   | Славянские      |
+| 2   | en  | English     | English           | 1.5B     | -   | Германские      |
+| 3   | fr  | French      | Français          | 320M     | -   | Романские       |
+| 4   | de  | German      | Deutsch           | 130M     | -   | Германские      |
+| 5   | ja  | Japanese    | 日本語            | 125M     | -   | Японские        |
+| 6   | zh  | Chinese     | 中文              | 1.1B     | -   | Синитские       |
+| 7   | ar  | Arabic      | العربية           | 370M     | RTL | Семитские       |
+| 8   | ko  | Korean      | 한국어            | 80M      | -   | Корейские       |
+| 9   | es  | Spanish     | Español           | 550M     | -   | Романские       |
+| 10  | pt  | Portuguese  | Português         | 260M     | -   | Романские       |
+| 11  | hi  | Hindi       | हिन्दी            | 600M     | -   | Индоарийские    |
+| 12  | tr  | Turkish     | Türkçe            | 80M      | -   | Тюркские        |
+| 13  | pl  | Polish      | Polski            | 45M      | -   | Славянские      |
+| 14  | uk  | Ukrainian   | Українська        | 40M      | -   | Славянские      |
+| 15  | be  | Belarusian  | Беларуская        | 5M       | -   | Славянские      |
+| 16  | kk  | Kazakh      | Қазақша           | 13M      | -   | Тюркские        |
+| 17  | uz  | Uzbek       | Oʻzbekcha         | 35M      | -   | Тюркские        |
+| 18  | tg  | Tajik       | Тоҷикӣ            | 8M       | -   | Иранские        |
+| 19  | ky  | Kyrgyz      | Кыргызча          | 4M       | -   | Тюркские        |
+| 20  | tk  | Turkmen     | Türkmençe         | 7M       | -   | Тюркские        |
+| 21  | az  | Azerbaijani | Azərbaycanca      | 23M      | -   | Тюркские        |
+| 22  | hy  | Armenian    | Հայերեն           | 6M       | -   | Армянские       |
+| 23  | ka  | Georgian    | ქართული           | 4M       | -   | Картвельские    |
+| 24  | ro  | Romanian    | Română            | 24M      | -   | Романские       |
+| 25  | fa  | Persian     | فارسی             | 110M     | RTL | Иранские        |
+| 26  | bn  | Bengali     | বাংলা             | 270M     | -   | Индоарийские    |
+| 27  | id  | Indonesian  | Bahasa Indonesia  | 200M     | -   | Австронезийские |
+| 28  | ms  | Malay       | Bahasa Melayu     | 80M      | -   | Австронезийские |
+| 29  | vi  | Vietnamese  | Tiếng Việt        | 85M      | -   | Вьет-мыонг      |
+| 30  | th  | Thai        | ภาษาไทย           | 70M      | -   | Тай-кадайские   |
+| 31  | sw  | Swahili     | Kiswahili         | 100M     | -   | Банту           |
+| 32  | nl  | Dutch       | Nederlands        | 25M      | -   | Германские      |
+| 33  | sv  | Swedish     | Svenska           | 10M      | -   | Германские      |
+| 34  | it  | Italian     | Italiano          | 65M      | -   | Романские       |
+| 35  | el  | Greek       | Ελληνικά          | 13M      | -   | Греческие       |
+| 36  | he  | Hebrew      | עברית             | 9M       | RTL | Семитские       |
+| 37  | ur  | Urdu        | اردو              | 230M     | RTL | Индоарийские    |
+| 38  | mr  | Marathi     | मराठी             | 83M      | -   | Индоарийские    |
+| 39  | ta  | Tamil       | தமிழ்             | 75M      | -   | Дравидийские    |
+| 40  | te  | Telugu      | తెలుగు            | 82M      | -   | Дравидийские    |
 
 **Суммарный охват: ~6.5 млрд человек, 4 RTL языка (ar, fa, he, ur), 14 языковых семей, 18 письменностей**
 
