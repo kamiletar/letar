@@ -9,7 +9,7 @@ import { REESE_BASS } from '@/lib/patch/defaults'
 import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
-import { applyCC, applyEncoderDelta } from '@/lib/patch/midi-mapping'
+import { applyCC, applyEncoderValue } from '@/lib/patch/midi-mapping'
 import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
@@ -17,10 +17,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { DrumPads } from './drum-pads'
 import { DrumPanel } from './drum-panel'
 import { FmPanel } from './fm-panel'
+import { HardwarePanel } from './hardware-panel'
 import { Keyboard } from './keyboard'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
+import { useHardwareReadout } from './use-hardware-readout'
 import { useMasterBus } from './use-master-bus'
 import { useRecording } from './use-recording'
 import { useWavRender } from './use-wav-render'
@@ -67,6 +69,7 @@ export function StudioClient() {
   const masterBus = useMasterBus(patch, patchRef, started)
   const recording = useRecording()
   const wavRender = useWavRender()
+  const hardware = useHardwareReadout()
 
   // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
   const handlePadHit = useCallback((index: number, velocity: number) => {
@@ -127,15 +130,23 @@ export function StudioClient() {
     })
   }, [])
 
-  const handleCC = useCallback((cc: number, value: number) => {
-    setPatch((p) => applyCC(p, cc, value))
-  }, [])
+  const handleCC = useCallback(
+    (cc: number, value: number) => {
+      setPatch((p) => applyCC(p, cc, value))
+      hardware.recordCC(cc, value)
+    },
+    [hardware]
+  )
 
   // Энкодеры пока управляют только SUB-патчем (как и фейдеры) — FM/DRUM живой контроль ручками
   // за железом — открытый пункт Фазы 1.5
-  const handleEncoder = useCallback((index: number, delta: number) => {
-    setPatch((p) => applyEncoderDelta(p, index, delta))
-  }, [])
+  const handleEncoder = useCallback(
+    (index: number, value: number, bank: 1 | 2) => {
+      setPatch((p) => applyEncoderValue(p, index, value, bank))
+      hardware.recordEncoder(index, value, bank)
+    },
+    [hardware]
+  )
 
   // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
   const handleSysex = useCallback((bytes: Uint8Array) => {
@@ -464,6 +475,16 @@ export function StudioClient() {
 
       {/* Основное содержимое */}
       <Box flex={1} overflow="auto" p={4} display="flex" flexDir="column" gap={4}>
+        {/* Зеркало физической панели SMK-37 — только когда MIDI подключён */}
+        {midiDevices.length > 0 && (
+          <HardwarePanel
+            faderValues={hardware.faderValues}
+            faderBank={hardware.faderBank}
+            encoderValues={hardware.encoderValues}
+            encoderBank={hardware.encoderBank}
+          />
+        )}
+
         {/* Панели параметров — переключаемые по движку */}
         {engineType === 'subtractive' ? (
           <Box display="flex" flexDir="column" gap={2}>

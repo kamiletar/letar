@@ -126,12 +126,11 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
       <Portal>
         <Tooltip.Positioner>
           <Tooltip.Content
-            bg="bg.surface"
-            color="fg.DEFAULT"
+            bg="#1A1200"
+            color="#F5F0E8"
             fontSize="xs"
             maxW="220px"
-            border="1px solid"
-            borderColor="border.gold"
+            border="1px solid #D4AF37"
             px={3}
             py={2}
             borderRadius="md"

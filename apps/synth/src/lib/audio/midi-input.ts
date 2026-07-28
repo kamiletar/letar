@@ -13,12 +13,17 @@ export interface MidiCallbacks {
   /** Входящий SysEx (например, ответ на запрос дампа патча) — полный фрейм F0...F7 */
   onSysex?: (bytes: Uint8Array) => void
   /**
-   * Крутилка-энкодер повёрнута. index — номер энкодера (0-7, определяется по MIDI-каналу
-   * Pitch Bend сообщения). delta — относительный шаг вращения со знаком (+ = по часовой,
-   * - = против), НЕ абсолютное значение — на SMK-37 PRO энкодеры бесконечные и шлют не
-   * абсолютную позицию, а «на сколько повернули» при каждом тике.
+   * Крутилка-энкодер повёрнута. index — номер энкодера (0-7). value — АБСОЛЮТНАЯ позиция 0-127
+   * (несмотря на «бесконечное» вращение самого энкодера, устройство шлёт именно абсолютное
+   * значение, не относительный шаг — подтверждено на железе 2026-07-09: значения идут гладкой
+   * последовательностью 0..127 туда-обратно, а не «тиками»). bank — какой физический банк
+   * энкодеров сейчас активен (кнопка knob bank на устройстве), разные банки управляют разными
+   * наборами параметров — см. midi-mapping.ts:
+   * - банк 1 — Control Change на фиксированном канале, номер CC = 48+index (48-55)
+   * - банк 2 — Pitch Bend, номер канала = index
+   * (номер энкодера кодируется по-разному в двух банках — так шлёт железо, не наша прихоть)
    */
-  onEncoder?: (index: number, delta: number) => void
+  onEncoder?: (index: number, value: number, bank: 1 | 2) => void
 }
 
 // SMK-37 PRO touch-энкодеры при касании шлют Note On/Off как индикатор «палец на ручке»
@@ -26,6 +31,12 @@ export interface MidiCallbacks {
 // Без этого фильтра простое касание крутилки играет случайную высокую ноту в текущем движке.
 const ENCODER_TOUCH_NOTE_MIN = 104
 const ENCODER_TOUCH_NOTE_MAX = 111
+
+// Банк 1 энкодеров: фиксированный канал (5), но РАЗНЫЙ CC-номер на каждую из 8 крутилок (48-55) —
+// подтверждено на железе 2026-07-09. Первая попытка (номер CC фиксирован, канал = индекс
+// энкодера) была перепутана местами — оттого крутилась только одна ручка из восьми.
+const ENCODER_BANK1_CC_MIN = 0x30
+const ENCODER_BANK1_CC_MAX = 0x37
 
 export class MidiInputManager {
   private access: MIDIAccess | null = null
@@ -132,15 +143,19 @@ export class MidiInputManager {
       const note = Math.max(0, Math.min(127, d1 + this.octaveShift))
       this.callbacks.onNoteOff(note)
     } else if (type === 0xb0) {
-      // Control Change — физические фейдеры SMK-37 (CC 68-71, подтверждено на реальном железе)
-      this.callbacks.onCC(d1, d2)
+      if (d1 >= ENCODER_BANK1_CC_MIN && d1 <= ENCODER_BANK1_CC_MAX) {
+        // Энкодер, банк 1 — CC 48-55 на фиксированном канале, номер CC = номеру энкодера
+        const encoderIndex = d1 - ENCODER_BANK1_CC_MIN
+        this.callbacks.onEncoder?.(encoderIndex, d2, 1)
+      } else {
+        // Control Change — физические фейдеры SMK-37 (CC 64-71, два банка по 4, см. midi-mapping.ts)
+        this.callbacks.onCC(d1, d2)
+      }
     } else if (type === 0xe0) {
-      // Pitch Bend — на SMK-37 PRO каждый из 8 энкодеров шлёт его на СВОЁМ канале (не абсолютная
-      // позиция, а относительный шаг). d1 (LSB) всегда 0 на этом устройстве, значение — в d2 (MSB):
-      // 0-63 = поворот по часовой на d2 шагов, 64-127 = против часовой на (d2-128) шагов.
+      // Энкодер, банк 2 — Pitch Bend на канале = номеру энкодера.
+      // d1 (LSB) всегда 0 на этом устройстве, абсолютная позиция 0-127 — в d2 (MSB).
       const encoderIndex = status & 0x0f
-      const delta = d2 <= 63 ? d2 : d2 - 128
-      this.callbacks.onEncoder?.(encoderIndex, delta)
+      this.callbacks.onEncoder?.(encoderIndex, d2, 2)
     }
     // Aftertouch (0xD0) и т.д. — Фаза 1.5, если понадобится
   }
