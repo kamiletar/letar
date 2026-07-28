@@ -12,6 +12,7 @@ import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 
 import { useIsPsychologist } from '@/app/_hooks/use-psychologist'
 
+import { CookieSettingsButton } from './cookie-settings-button'
 import { HighContrastToggle } from './high-contrast-toggle'
 import { LanguageSwitcher } from './language-switcher'
 import { MobileDrawer } from './mobile-drawer'
@@ -48,6 +49,7 @@ export function Header() {
 
           {/* Десктоп: язык + авторизация */}
           <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
+            <CookieSettingsButton />
             <LanguageSwitcher />
             <HighContrastToggle />
             <ColorModeButton />

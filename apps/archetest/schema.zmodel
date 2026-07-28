@@ -72,6 +72,9 @@ model User {
   clientLinks       ClientPsychologistLink[] @relation("ClientLinks")
   psychologistLinks ClientPsychologistLink[] @relation("PsychologistLinks")
 
+  /// Логи согласий на обработку cookie/ПДн (152-ФЗ)
+  consentLogs       ConsentLog[]
+
   @@allow('read', auth() == this)
   @@allow('update', auth() == this)
   // Психолог видит базовые данные своих активных клиентов
@@ -347,4 +350,32 @@ model ProfessionalLead {
   // Гость (не аутентифицирован) может оставить заявку
   @@allow('create', true)
   @@allow('read,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ========================================
+// Согласия на обработку cookie/ПДн (152-ФЗ)
+// ========================================
+
+// Журнал согласий на обработку cookie (аналитика/маркетинг/функциональные)
+model ConsentLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  /// Хэш IP (sha256, без соли — для дедупликации, не для деанонимизации)
+  ipHash    String
+  userAgent String?
+
+  acceptedAnalytics  Boolean @default(false)
+  acceptedMarketing  Boolean @default(false)
+  acceptedFunctional Boolean @default(true)
+
+  /// Версия текста политики, на которую дано согласие
+  consentVersion String
+
+  consentedAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@allow('create', true)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
 }

@@ -1,19 +1,20 @@
 import { MainMatrix } from '@/app/[locale]/main-matrix'
 import { ChatWidgetLazy } from '@/app/_components/chat/chat-widget-lazy'
+import { CookieConsent } from '@/app/_components/cookie-consent'
 import { Footer } from '@/app/_components/footer/footer'
 import { Header } from '@/app/_components/header/header'
 import { JsonLd } from '@/app/_components/json-ld'
 import { SkipLink } from '@/app/_components/skip-link'
 import { ThemeProvider } from '@/app/_components/theme-provider'
 import { Toaster } from '@/app/_components/ui/toaster'
+import { UmamiScriptConsent } from '@/app/_components/umami-script-consent'
 import { type UserContextValue, UserProvider } from '@/app/_components/user-provider'
+import { YandexMetrikaConsent } from '@/app/_components/yandex-metrika-consent'
 import '@/app/global.css'
 import { routing } from '@/i18n/routing'
 import { getSession, isAdmin } from '@/lib/auth'
 import { Box, Flex } from '@chakra-ui/react'
-import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider } from '@letar/chakra-provider'
-import { YandexMetrika } from '@letar/yandex-metrika'
 import type { Metadata } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -152,8 +153,9 @@ export default async function LocaleLayout({ children, params }: Props) {
                 </Flex>
                 <Toaster />
                 {process.env.ANTHROPIC_API_KEY && <ChatWidgetLazy />}
-                <YandexMetrika YM_COUNTER_ID={Number(process.env.NEXT_PUBLIC_YM_COUNTER_ID) || 0} />
-                <UmamiScript />
+                <CookieConsent />
+                <YandexMetrikaConsent counterId={Number(process.env.NEXT_PUBLIC_YM_COUNTER_ID) || 0} />
+                <UmamiScriptConsent />
               </UserProvider>
             </NextIntlClientProvider>
           </ThemeProvider>

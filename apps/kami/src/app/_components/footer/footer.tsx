@@ -1,5 +1,6 @@
 'use client'
 
+import { CookieSettingsButton } from '@/app/_components/cookie-settings-button'
 import { Link } from '@/i18n/navigation'
 import { CONTACT } from '@/lib/utils/constants'
 import {
@@ -123,6 +124,7 @@ export function Footer() {
                 humans.txt
               </Text>
             </Link>
+            <CookieSettingsButton />
             <Text fontSize="sm" color="fg.muted">
               {t('madeWith')} ❤️ & Claude Code
             </Text>
