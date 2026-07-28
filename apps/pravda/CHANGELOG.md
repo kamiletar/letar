@@ -22,7 +22,7 @@
   `next.config.mjs`), переименовывающий файлы в плоский путь после сборки (см.
   [разбор Axiorema](https://blog.axiorema.com/engineering/uncurious-case-broken-static-exports-404s-nextjs-16/)).
   Проверено локальным `next build`: адаптер отрабатывает (`Running onBuildComplete from
-  fix-issue-85374`), плоские файлы появляются на месте вложенных, старые пути пусты.
+fix-issue-85374`), плоские файлы появляются на месте вложенных, старые пути пусты.
 
 ## [1.8.1] - 2026-07-21
 
