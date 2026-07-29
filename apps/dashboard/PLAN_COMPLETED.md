@@ -2,6 +2,87 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.6 — health-check ходил в localhost вместо соседа по kami-network (2026-07-30)
+
+Разбор задачи: почему `/metrics` всегда показывал красный статус/0% uptime для
+`driving-school`/`mandala`/`kami`/`animatrona-landing`, хотя сами приложения были живы.
+
+`apps/dashboard/docker-compose.production.yml` подключает `dashboard-app` к `kami-network` обычным
+bridge-режимом (`networks: [kami-network]`, БЕЗ `network_mode: host` — есть только `pid: host`,
+который шарит PID-namespace, а не сеть). В bridge-режиме `localhost` внутри контейнера — это сам
+контейнер, а не хост-машина и не соседи по сети. `performHealthCheck()` в `app-metrics.ts` делал
+`fetch('http://localhost:<port>/api/health')` для всех `MONITORED_APPS` — что для самого dashboard
+(тот же контейнер) работало, а для всех остальных было гарантированным `ECONNREFUSED`/`fetch
+failed`, тихо пишущимся в БД каждый цикл health-check.
+
+Подтверждено эмпирически на s2 (`docker exec dashboard-app`):
+
+```
+wget http://localhost:3003/api/health          → connection refused (EXIT:1)
+wget http://driving-school-app:3003/api/health → {"status":"ok",...} (EXIT:0)
+```
+
+`driving-school`/`mandala`/`kami`/`animatrona-landing` — rollout-профиль (§18.6 Сессия J): без
+`container_name`, доступны по network alias (`networks.kami-network.aliases`) из своих
+`docker-compose.production.yml`: `driving-school-app`, `mandala-app`, `kami-app`,
+`animatrona-landing-app` соответственно.
+
+**Исправление** — по образцу `APP_HOSTS` из `apps/dashboard-agent/src/lib/app-registry.ts` (тот же
+паттерн уже решал ту же проблему для межконтейнерных вызовов cron/алертов):
+
+- `libs/infra-config/src/index.ts` — новый `APP_HOSTS`/`getAppHost()`, канон «истинного» сетевого
+  имени контейнера каждого приложения (не self-reference — тот caller-specific, см. комментарий в
+  коде). `dashboard: 'dashboard-app'` — как его видят ДРУГИЕ, не как он видит сам себя.
+- `apps/dashboard/src/lib/app-metrics.ts` — `performHealthCheck()` собирает URL через
+  `getAppHost(app)`, с явным исключением `app === 'dashboard'` → `'localhost'` (self-check, тот же
+  контейнер).
+- `apps/dashboard-agent/src/lib/app-registry.guard.spec.ts` — расширен второй проверкой: локальная
+  копия `APP_HOSTS` в `app-registry.ts` не расходится с каноном (кроме `dashboard-agent` — тоже
+  self-reference на `localhost`, отличается от того, как канон называет этот контейнер для чужих
+  вызовов).
+
+Не тронуто: `MONITORED_APPS` (локальное решение «кого проверяем», не канон), `dsperevod`/`studio`
+добавлены в канон `APP_HOSTS` для полноты (уже были в `app-registry.ts` у dashboard-agent), но
+`app-metrics.ts` их не опрашивает — вне текущего `MONITORED_APPS`.
+
+Проверено: `nx test dashboard-agent`, `nx test @letar/infra-config`, `nx lint`/`typecheck:tsgo` на
+`dashboard`, `dashboard-agent`, `@letar/infra-config` — зелёные. Живая проверка на s2 через
+`docker exec` (см. выше) — до фикса.
+
+## Версия 1.20.5 — мёртвый allow-list SUPPORTED_DATABASES/DatabaseNameSchema (2026-07-30)
+
+Разбор задачи: `SUPPORTED_DATABASES` (`constants.ts`) — allow-list из 3 приложений
+(`mandala`, `kami`, `driving-school`) для UI восстановления бэкапов, тогда как
+`dashboard-agent/src/lib/database.ts` `APP_CONFIG` реально бэкапит 16 приложений. Гипотеза
+из PLAN.md § «Единый источник правды для карты портов»: недоступна кнопка восстановления
+для 13 приложений, чей бэкап реально идёт.
+
+Гипотеза не подтвердилась. Восстановление отключено целиком, для всех БД без исключения,
+задолго до вопроса allow-list:
+
+- `apps/dashboard/src/app/_actions/database-actions.ts` — `restoreBackup`, `removeBackup`,
+  `executeMigrations` помечены `@deprecated` и безусловно возвращают
+  `{ success: false, error: '... not available via agent API.' }`, не обращаясь к агенту
+- `apps/dashboard/src/app/api/database/[db]/restore/route.ts` — безусловный `501`, даже не
+  парсит `DatabaseNameSchema`
+- Причина — `dashboard-agent/src/routes/database.ts` вообще не реализует restore/delete/
+  migration-эндпоинты, только `status`/`stats`/`backup`/`backups`
+
+`grep` по `apps/dashboard/src` показал, что `DatabaseNameSchema`/`AppNameSchema` (и весь файл
+`apps/dashboard/src/app/api/_schemas/common.ts`, который их экспортировал —
+`DeployStartSchema`, `DatabaseRestoreSchema`, `ContainersQuerySchema`) не импортируются ни
+одним живым файлом. Список БД для кнопок бэкапа на `database/backups/page.tsx` уже берётся
+динамически через `GET /api/database/available` → `client.getDatabaseStatus()` (живой запрос к
+агенту), в обход `SUPPORTED_DATABASES`.
+
+**Удалено** (мёртвый код, не влиявший на поведение):
+
+- `apps/dashboard/src/app/api/_schemas/common.ts` — файл целиком
+- `apps/dashboard/src/lib/constants.ts` — `SUPPORTED_DATABASES`, `SUPPORTED_APPS`,
+  `DatabaseName`, `AppName`
+
+Проверено: `nx lint dashboard`, `nx typecheck:tsgo dashboard` — зелёные.
+
 ## Версия 1.20.3 — удалена мёртвая страница /deploy/history (2026-07-30)
 
 При разборе задачи «`KNOWN_APPS` содержит устаревший `label-printer`» (см. PLAN.md v1.20.2)

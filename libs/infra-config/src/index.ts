@@ -186,3 +186,37 @@ export const APP_PORTS: Record<string, number> = {
 export function getAppPort(app: string): number | undefined {
   return APP_PORTS[app]
 }
+
+/**
+ * Docker container name (network alias в `kami-network`) приложения — то, как ДРУГИЕ контейнеры
+ * сети видят это приложение. `localhost` внутри контейнера — это сам контейнер, а не хост и не
+ * сосед по bridge-сети: `apps/dashboard/docker-compose.production.yml` подключает `dashboard-app`
+ * к `kami-network` без `network_mode: host`, поэтому `fetch(http://localhost:<port>)` из
+ * `app-metrics.ts` для любого приложения кроме самого dashboard молча возвращал
+ * ECONNREFUSED/fetch failed (обнаружено 2026-07-30, проверено `docker exec dashboard-app`).
+ *
+ * Значения — либо фиксированный `container_name`, либо network alias из
+ * `networks.kami-network.aliases` (rollout-профиль без `container_name`, см.
+ * `.claude/docs/deployment.md`).
+ *
+ * ⚠️ Намеренно НЕТ записи для самоссылки (текущее приложение вызывает само себя): это
+ * caller-specific случай — `dashboard` видит себя как `localhost` (тот же контейнер),
+ * а `dashboard-agent` видит СЕБЯ тоже как `localhost`, но видит DASHBOARD как `dashboard-app`.
+ * Единственно верный host для приложения зависит от того, кто спрашивает, поэтому канон хранит
+ * только «истинное» сетевое имя контейнера; self-reference каждый вызывающий решает сам.
+ */
+export const APP_HOSTS: Record<string, string> = {
+  dashboard: 'dashboard-app',
+  'driving-school': 'driving-school-app',
+  mandala: 'mandala-app',
+  kami: 'kami-app',
+  'animatrona-landing': 'animatrona-landing-app',
+  dsperevod: 'dsperevod-app',
+  studio: 'studio-app',
+  'dashboard-agent': 'dashboard-agent',
+}
+
+/** Docker container name/alias приложения из канона. Fallback — `localhost` (dev-режим). */
+export function getAppHost(app: string): string {
+  return APP_HOSTS[app] ?? 'localhost'
+}

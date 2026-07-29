@@ -2,6 +2,30 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.20.6] — 2026-07-30
+
+### Fix: health-check бил в `localhost` вместо контейнера соседа по сети
+
+`performHealthCheck()` в `app-metrics.ts` ходил по `http://localhost:<port>/api/health` для
+`driving-school`, `mandala`, `kami`, `animatrona-landing` — но `dashboard-app` подключён к
+`kami-network` обычным bridge-режимом (`network_mode: host` не выставлен, есть только
+`pid: host`), поэтому `localhost` внутри контейнера — это сам dashboard-app, а не сосед по сети.
+Проверено `docker exec dashboard-app` на s2: `localhost:3003` — `connection refused`,
+`driving-school-app:3003` — `200 OK`. Для всех приложений кроме самого dashboard health-check
+молча писал в БД `status: 'down'` с `error: 'fetch failed'` каждый цикл.
+
+Добавлен канон `APP_HOSTS`/`getAppHost()` в `@letar/infra-config` (то же место, что и `APP_PORTS`)
+— имя контейнера/network alias приложения в `kami-network`. `app-metrics.ts` теперь ходит по
+`http://${getAppHost(app)}:${port}` с явным исключением для самого dashboard (`localhost`, тот же
+контейнер). Guard-тест `app-registry.guard.spec.ts` (dashboard-agent) расширен: проверяет, что
+локальная копия `APP_HOSTS` не разошлась с каноном (кроме self-reference `dashboard-agent`).
+
+## [1.20.5] — 2026-07-30
+
+### Removed: мёртвый allow-list `SUPPORTED_DATABASES`/`DatabaseNameSchema`
+
+Расследование расхождения между `SUPPORTED_DATABASES` (`constants.ts`, 3 приложения) и `APP_CONFIG` в `dashboard-agent/database.ts` (16 приложений с реальными pg_dump-бэкапами) показало, что это не баг UI восстановления бэкапов — восстановление отключено целиком, для всех БД без исключения. `_actions/database-actions.ts` (`restoreBackup`, `removeBackup`, `executeMigrations`) и `/api/database/[db]/restore/route.ts` безусловно возвращают ошибку/`501`, независимо от переданного имени БД: `dashboard-agent` не реализует restore/delete/migration-эндпоинты, только `status`/`stats`/`backup`/`backups`. Сам `SUPPORTED_DATABASES` и весь читавший его `api/_schemas/common.ts` (`AppNameSchema`, `DatabaseNameSchema`, `DeployStartSchema`, `DatabaseRestoreSchema`, `ContainersQuerySchema`) не импортировались ни одним живым роутом — список БД для кнопок бэкапа UI уже брался динамически из `/api/database/available`. Удалён `common.ts`, из `constants.ts` убраны `SUPPORTED_DATABASES`/`SUPPORTED_APPS`/`DatabaseName`/`AppName`.
+
 ## [1.20.3] — 2026-07-30
 
 ### Removed: мёртвая страница `/deploy/history`

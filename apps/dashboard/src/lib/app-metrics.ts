@@ -5,7 +5,7 @@
  */
 
 import type { HealthCheck as HealthCheckDB, HealthStatus } from '@/generated/models'
-import { getAppPort } from '@letar/infra-config'
+import { getAppHost, getAppPort } from '@letar/infra-config'
 
 import { prisma } from './db'
 
@@ -103,7 +103,9 @@ export async function performHealthCheck(app: string): Promise<HealthCheckResult
     }
   }
 
-  const url = `http://localhost:${port}/api/health`
+  // Самоссылка (dashboard проверяет сам себя) — тот же контейнер, а не сосед по kami-network
+  const host = app === 'dashboard' ? 'localhost' : getAppHost(app)
+  const url = `http://${host}:${port}/api/health`
   const startTime = performance.now()
 
   try {
