@@ -5,20 +5,14 @@
  */
 
 import { AspectRatio, Box, Grid, Icon, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
-import { useLayoutEffect, useRef, useState } from 'react'
 import { LuLayers } from 'react-icons/lu'
 
 import { AnimeCard, FranchiseCard } from '@/components/library'
 import type { WatchStatus } from '@/generated/prisma'
+import { useVirtualizedGrid } from '@/lib/hooks/use-virtualized-grid'
 import { toPlayableUrl } from '@/lib/media-url'
 
 import type { AnimeWithFranchise, FranchiseGroup } from './types'
-
-/** Минимальная ширина карточки — та же величина, что была в `minmax(200px, 1fr)` */
-const MIN_CARD_WIDTH = 200
-/** Зазор между карточками — Chakra токен `gap={4}` (1rem) */
-const GRID_GAP = 16
 
 /** Пропсы для FranchiseView */
 export interface FranchiseViewProps {
@@ -35,9 +29,7 @@ export interface FranchiseViewProps {
 }
 
 /** Элемент единой сетки — франшиза или одиночное аниме, порядок как в исходном рендере */
-type ViewItem =
-  | { kind: 'franchise'; group: FranchiseGroup }
-  | { kind: 'standalone'; anime: AnimeWithFranchise }
+type ViewItem = { kind: 'franchise'; group: FranchiseGroup } | { kind: 'standalone'; anime: AnimeWithFranchise }
 
 /**
  * Скелетон загрузки — плитки в формате сетки
@@ -85,49 +77,14 @@ export function FranchiseView({
   onDelete,
   onWatchStatusChange,
 }: FranchiseViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const scrollMarginRef = useRef(0)
-  const [containerWidth, setContainerWidth] = useState(0)
-
-  // Замеряем смещение контейнера от начала документа один раз при монтировании —
-  // используется как scrollMargin для useWindowVirtualizer (скроллится сама страница, не контейнер)
-  useLayoutEffect(() => {
-    scrollMarginRef.current = containerRef.current?.offsetTop ?? 0
-  }, [])
-
-  useLayoutEffect(() => {
-    const el = containerRef.current
-    if (!el) {
-      return
-    }
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width
-      if (width) {
-        setContainerWidth(width)
-      }
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
   const items: ViewItem[] = [
     ...franchiseGroups.map((group): ViewItem => ({ kind: 'franchise', group })),
     ...standAloneAnimes.map((anime): ViewItem => ({ kind: 'standalone', anime })),
   ]
 
-  // Повторяет поведение CSS `repeat(auto-fill, minmax(200px, 1fr))`
-  const columns = containerWidth > 0
-    ? Math.max(1, Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP)))
-    : 1
-  const cardWidth = columns > 0 ? (containerWidth - GRID_GAP * (columns - 1)) / columns : MIN_CARD_WIDTH
-  const rowCount = Math.ceil(items.length / columns)
-
-  const rowVirtualizer = useWindowVirtualizer({
-    count: rowCount,
+  const { containerRef, columns, rowVirtualizer } = useVirtualizedGrid(items.length, {
     // FranchiseCard может быть выше AnimeCard (стопка постеров) — оценка грубая, уточняется через measureElement
-    estimateSize: () => cardWidth * 1.5 + 190,
-    overscan: 3,
-    scrollMargin: scrollMarginRef.current,
+    estimateSize: (cardWidth) => cardWidth * 1.5 + 190,
   })
 
   if (isLoading) {

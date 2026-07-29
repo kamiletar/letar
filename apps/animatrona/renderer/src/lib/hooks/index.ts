@@ -30,3 +30,7 @@ export { useAnimeIpfsData } from './use-anime-ipfs-data'
 
 // URL обложки через локальный Kubo gateway
 export { useCoverUrl } from './use-cover-url'
+
+// Виртуализация сетки карточек с адаптивным числом колонок
+export { useVirtualizedGrid } from './use-virtualized-grid'
+export type { UseVirtualizedGridOptions } from './use-virtualized-grid'

@@ -4,6 +4,25 @@
 
 ## [Unreleased]
 
+## [0.55.8] - 2026-07-29
+
+### Changed
+
+- **Рефакторинг: общий хук `useVirtualizedGrid`** — `AnimeGrid.tsx` (режим «По отдельности») и
+  `FranchiseView.tsx` (режим «По франшизам») дублировали идентичную логику виртуализации сетки
+  (`containerRef` + `ResizeObserver`, замер `scrollMargin`, расчёт `columns`/`cardWidth` по ширине
+  контейнера, `useWindowVirtualizer`, разметка абсолютно позиционированной строки). Вынесено в
+  `renderer/src/lib/hooks/use-virtualized-grid.ts` — принимает `itemCount` и `estimateSize(cardWidth)`
+  (высота строки отличается между режимами: `+170` для `AnimeCard`, `+190` для `FranchiseCard` со
+  стопкой постеров), возвращает `containerRef`/`columns`/`cardWidth`/`rowVirtualizer`. Рендер строки
+  и конкретной карточки остался в компонентах без изменений.
+  ⚠️ Импортировать хук нужно точечно — `@/lib/hooks/use-virtualized-grid`, а не барабанный
+  `@/lib/hooks`: в `lib/` рядом с папкой `hooks/` есть файл `hooks.ts` (ZenStack CRUD-хуки), и при
+  `moduleResolution: "bundler"` TS резолвит `@/lib/hooks` в файл `hooks.ts`, а не в
+  `hooks/index.ts` — экспорт из барреля молча не виден. Не запускался в браузере — визуальная
+  проверка виртуализированной сетки в обоих режимах библиотеки на следующем запуске десктопного
+  приложения.
+
 ## [0.55.7] - 2026-07-29
 
 ### Added

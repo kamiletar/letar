@@ -494,6 +494,12 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         (`useWindowVirtualizer`) уточняет итоговую высоту после первых кадров через
         `measureElement` — однократный вызов сразу после монтирования промахивается.
         Подключено в `library/page.tsx`: `useScrollRestoration(!isLoading, viewMode)`.
+  - [x] **Рефакторинг: общий хук `useVirtualizedGrid`** (v0.55.8) — `AnimeGrid.tsx` и
+        `FranchiseView.tsx` дублировали идентичную логику виртуализации (`containerRef` +
+        `ResizeObserver`, `scrollMargin`, расчёт `columns`/`cardWidth`, `useWindowVirtualizer`,
+        разметка строки). Вынесено в `renderer/src/lib/hooks/use-virtualized-grid.ts`, компоненты
+        оставили только рендер карточки и `estimateSize(cardWidth)` под свою карточку. Подробности
+        — CHANGELOG.md [0.55.8].
 
   ⚠️ Визуально не проверено — `nx typecheck:tsgo`/`nx lint` чистые, но animatrona это Electron-
   desktop, не web-превью; ручная проверка (скролл по большой библиотеке, ресайз окна, смена
