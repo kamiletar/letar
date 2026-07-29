@@ -3,11 +3,11 @@ services:
     image: redis:7-alpine
     container_name: letar-redis
     restart: always
-    command: redis-server --save 60 1 --loglevel warning --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --save 60 1 --loglevel warning --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
-    ports:
-      - '6379:6379'
+    # ⚠️ Порт НЕ публикуется на хост намеренно (см. .claude/docs/redis-security.md).
+    # Потребители подключаются только через docker-сеть kami-network по имени контейнера.
     networks:
       - kami-network
     logging:
