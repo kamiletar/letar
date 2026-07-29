@@ -57,19 +57,3 @@ export const CACHE_TTL = {
 
 /** Максимальное количество процессов для группировки */
 export const MAX_PROCESSES_FOR_GROUPING = 50
-
-// =============================================================================
-// Приложения и базы данных
-// =============================================================================
-
-/** Поддерживаемые базы данных для бэкапов */
-export const SUPPORTED_DATABASES = ['mandala', 'kami', 'driving-school'] as const
-
-/** Все приложения (включая dashboard) */
-export const SUPPORTED_APPS = [...SUPPORTED_DATABASES, 'dashboard'] as const
-
-/** Тип для имени базы данных */
-export type DatabaseName = (typeof SUPPORTED_DATABASES)[number]
-
-/** Тип для имени приложения */
-export type AppName = (typeof SUPPORTED_APPS)[number]
