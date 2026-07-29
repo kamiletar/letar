@@ -1,8 +1,9 @@
 'use client'
 
+import type { PadMidiMap } from '@/lib/patch/pad-midi-map'
 import type { DrumPad } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 // Клавиши компьютера → индекс пэда (4×4, ряды снизу вверх — как раскладка MPC)
 const QWERTY_MAP: Record<string, number> = {
@@ -24,25 +25,46 @@ const QWERTY_MAP: Record<string, number> = {
   '4': 15,
 }
 
+interface DrumPadMidiLearnProps {
+  active: boolean
+  armedPad: number | null
+  map: PadMidiMap
+  onArm: (index: number) => void
+}
+
 interface DrumPadsProps {
   pads: DrumPad[]
   selectedIndex: number
   activePads: Set<number>
   onSelect: (index: number) => void
   onHit: (index: number, velocity: number) => void
+  midiLearn: DrumPadMidiLearnProps
 }
 
-export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit }: DrumPadsProps) {
+export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit, midiLearn }: DrumPadsProps) {
   const pressedKeys = useRef<Set<string>>(new Set())
+
+  // Обратная карта «индекс пэда → выученная MIDI-нота», только для подсказки в UI
+  const noteByPad = useMemo(() => {
+    const inverse = new Map<number, number>()
+    for (const [note, padIndex] of Object.entries(midiLearn.map)) {
+      inverse.set(padIndex, Number(note))
+    }
+    return inverse
+  }, [midiLearn.map])
 
   const handleHit = useCallback(
     (index: number) => {
+      if (midiLearn.active) {
+        midiLearn.onArm(index)
+        return
+      }
       onSelect(index)
       if (pads[index].synth) {
         onHit(index, 0.85)
       }
     },
-    [pads, onSelect, onHit]
+    [pads, onSelect, onHit, midiLearn]
   )
 
   useEffect(() => {
@@ -84,6 +106,8 @@ export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit }: D
             const active = activePads.has(index)
             const selected = selectedIndex === index
             const empty = !pad.synth
+            const armed = midiLearn.active && midiLearn.armedPad === index
+            const note = noteByPad.get(index)
             return (
               <Box
                 key={index}
@@ -95,13 +119,14 @@ export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit }: D
                 justifyContent="center"
                 borderRadius="md"
                 border="1px solid"
-                borderColor={selected ? 'accent.DEFAULT' : active ? '#D4AF37' : 'border.DEFAULT'}
-                bg={active ? '#3A2E08' : empty ? '#0A0806' : '#150F0A'}
-                cursor={empty ? 'default' : 'pointer'}
-                opacity={empty ? 0.4 : 1}
-                boxShadow={active ? '0 0 10px #D4AF3766' : 'none'}
+                borderColor={armed ? '#4FA8FF' : selected ? 'accent.DEFAULT' : active ? '#D4AF37' : 'border.DEFAULT'}
+                bg={armed ? '#0A1830' : active ? '#3A2E08' : empty ? '#0A0806' : '#150F0A'}
+                cursor="pointer"
+                opacity={!midiLearn.active && empty ? 0.4 : 1}
+                boxShadow={armed ? '0 0 10px #4FA8FF88' : active ? '0 0 10px #D4AF3766' : 'none'}
                 transition="background 0.05s, box-shadow 0.05s"
                 onPointerDown={() => handleHit(index)}
+                title={note !== undefined ? `MIDI-нота ${note}` : undefined}
               >
                 <Text fontSize="8px" color="fg.subtle" letterSpacing="0.04em">
                   {index + 1}

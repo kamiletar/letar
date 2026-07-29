@@ -86,7 +86,12 @@ export function describeAlgorithm(algorithm: number): string {
       cur = next
     }
     chain.forEach((op) => consumed.add(op))
-    chains.push(chain.map((op) => op + 1).reverse().join('→'))
+    chains.push(
+      chain
+        .map((op) => op + 1)
+        .reverse()
+        .join('→')
+    )
   }
 
   return chains.join(' + ')

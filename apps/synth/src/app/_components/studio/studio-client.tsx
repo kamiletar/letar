@@ -15,6 +15,7 @@ import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { filledToggleStyle, outlineButtonStyle } from './button-style'
 import { DrumPads } from './drum-pads'
 import { DrumPanel } from './drum-panel'
 import { FmHardwareControls } from './fm-hardware-controls'
@@ -22,19 +23,19 @@ import { FmPanel } from './fm-panel'
 import { HardwarePanel } from './hardware-panel'
 import { HardwareRecordingPanel } from './hardware-recording-panel'
 import { Keyboard } from './keyboard'
+import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
 import { useMasterBus } from './use-master-bus'
+import { useMidiMonitor } from './use-midi-monitor'
+import { usePadMidiLearn } from './use-pad-midi-learn'
 import { useRecording } from './use-recording'
 import { useWavRender } from './use-wav-render'
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
-
-// Дефолтный маппинг MIDI-пэдов на слоты нашего драм-кита (нота 36 = пэд 0, как в GM/большинстве контроллеров)
-const DRUM_MIDI_BASE = 36
 
 export function StudioClient() {
   const [started, setStarted] = useState(false)
@@ -53,6 +54,7 @@ export function StudioClient() {
   const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
   const [syxImportStatus, setSyxImportStatus] = useState<'idle' | 'imported' | 'bulk-partial' | 'error'>('idle')
+  const [midiMonitorOpen, setMidiMonitorOpen] = useState(false)
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
   const fmEngineRef = useRef<FmEngine | null>(null)
@@ -76,6 +78,8 @@ export function StudioClient() {
   const wavRender = useWavRender()
   const hardware = useHardwareReadout()
   const hardwareRecording = useHardwareRecording()
+  const midiMonitor = useMidiMonitor()
+  const padMidiLearn = usePadMidiLearn()
 
   // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
   const handlePadHit = useCallback((index: number, velocity: number) => {
@@ -104,8 +108,12 @@ export function StudioClient() {
   const handleNoteOn = useCallback(
     (midiNote: number, velocity: number) => {
       if (engineTypeRef.current === 'drumkit') {
-        const padIndex = midiNote - DRUM_MIDI_BASE
-        if (padIndex >= 0 && padIndex < 16) {
+        // Режим MIDI Learn «съедает» первый удар после клика по пэду — назначает ноту вместо звука
+        if (padMidiLearn.handleLearnNote(midiNote)) {
+          return
+        }
+        const padIndex = padMidiLearn.resolve(midiNote)
+        if (padIndex !== null) {
           handlePadHit(padIndex, velocity)
         }
         return
@@ -117,7 +125,7 @@ export function StudioClient() {
       }
       setActiveNotes((prev) => new Set([...prev, midiNote]))
     },
-    [handlePadHit]
+    [handlePadHit, padMidiLearn.handleLearnNote, padMidiLearn.resolve]
   )
 
   const handleNoteOff = useCallback((midiNote: number) => {
@@ -179,6 +187,7 @@ export function StudioClient() {
         onCC: handleCC,
         onSysex: handleSysex,
         onEncoder: handleEncoder,
+        onRawMessage: midiMonitor.record,
       })
     }
     try {
@@ -187,7 +196,7 @@ export function StudioClient() {
     } catch (err) {
       setMidiError(err instanceof Error ? err.message : 'Ошибка MIDI')
     }
-  }, [handleNoteOn, handleNoteOff, handleCC, handleSysex, handleEncoder])
+  }, [handleNoteOn, handleNoteOff, handleCC, handleSysex, handleEncoder, midiMonitor.record])
 
   // Запрашивает у железа дамп текущего голоса (voice edit buffer) по SysEx
   const handleRequestFromHardware = useCallback(() => {
@@ -521,6 +530,29 @@ export function StudioClient() {
           </Box>
         ) : engineType === 'drumkit' ? (
           <Box display="flex" flexDir="column" gap={2}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <button
+                style={filledToggleStyle(padMidiLearn.active, { padding: '3px 8px', letterSpacing: '0.04em' })}
+                onClick={padMidiLearn.toggleActive}
+              >
+                {padMidiLearn.active ? '● обучение пэдов включено' : 'MIDI Learn: пэды'}
+              </button>
+              {padMidiLearn.active && (
+                <button
+                  style={outlineButtonStyle('default', { padding: '3px 8px', letterSpacing: '0.04em' })}
+                  onClick={padMidiLearn.reset}
+                >
+                  сбросить к дефолту
+                </button>
+              )}
+              {padMidiLearn.active && (
+                <Text fontSize="9px" color="fg.subtle" letterSpacing="0.04em">
+                  {padMidiLearn.armedPad !== null
+                    ? `жду удар по железу для пэда ${padMidiLearn.armedPad + 1}…`
+                    : 'кликни по экранному пэду, потом ударь по нужному пэду на железе'}
+                </Text>
+              )}
+            </Box>
             <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
             <PatchLibrary
               type="drumkit"
@@ -554,6 +586,17 @@ export function StudioClient() {
           error={midiError}
         />
 
+        {/* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
+            SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */}
+        {midiDevices.length > 0 && (
+          <MidiMonitor
+            open={midiMonitorOpen}
+            entries={midiMonitor.entries}
+            onToggle={() => setMidiMonitorOpen((v) => !v)}
+            onClear={midiMonitor.clear}
+          />
+        )}
+
         {/* Запись реального аппаратного звука (SMK-37 как USB-audio interface) */}
         {started && (
           <HardwareRecordingPanel
@@ -584,6 +627,12 @@ export function StudioClient() {
               activePads={activePads}
               onSelect={setSelectedPad}
               onHit={handlePadHit}
+              midiLearn={{
+                active: padMidiLearn.active,
+                armedPad: padMidiLearn.armedPad,
+                map: padMidiLearn.map,
+                onArm: padMidiLearn.armPad,
+              }}
             />
           ) : (
             <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />

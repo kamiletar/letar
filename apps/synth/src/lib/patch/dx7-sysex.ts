@@ -132,7 +132,7 @@ export function encodeSingleVoiceSysex(engine: FmEngineParams, name: string, cha
     0, // LFO SYNC — дефолт «выключено»
     LFO_WAVE_TO_DX7[engine.lfo.wave],
     3, // PITCH MOD SENSITIVITY — дефолт
-    24, // TRANSPOSE — дефолт (24 = без транспонирования)
+    24 // TRANSPOSE — дефолт (24 = без транспонирования)
   )
 
   const paddedName = name.toUpperCase().padEnd(10, ' ').slice(0, 10)

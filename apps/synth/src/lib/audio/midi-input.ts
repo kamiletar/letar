@@ -24,6 +24,13 @@ export interface MidiCallbacks {
    * (номер энкодера кодируется по-разному в двух банках — так шлёт железо, не наша прихоть)
    */
   onEncoder?: (index: number, value: number, bank: 1 | 2) => void
+  /**
+   * Каждое входящее MIDI-сообщение целиком, до какой-либо интерпретации — для диагностики
+   * недокументированных кнопок устройства (ARP/SCALE/CHORD/GLOBE/BT/PATCH/PARA/FX/SEQ и т.п.):
+   * SysEx-карта SMK-37 PRO эти кнопки не описывает, неизвестно, шлют ли они вообще MIDI на хост
+   * или это чисто меню внутренней прошивки. См. MidiMonitor.
+   */
+  onRawMessage?: (bytes: Uint8Array) => void
 }
 
 // SMK-37 PRO touch-энкодеры при касании шлют Note On/Off как индикатор «палец на ручке»
@@ -115,6 +122,8 @@ export class MidiInputManager {
     if (!data || data.length < 2) {
       return
     }
+
+    this.callbacks.onRawMessage?.(new Uint8Array(data))
 
     const status = data[0]
 
