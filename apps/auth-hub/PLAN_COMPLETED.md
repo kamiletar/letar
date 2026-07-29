@@ -358,6 +358,13 @@ bun run scripts/encrypt-client-secrets.ts --execute
 - Панель администратора (каркас)
 - Профиль пользователя (каркас)
 
+### 2026-07-30 — Telegram API через tg-proxy (обход блокировки s1/s2)
+
+- `sendBotMessage()` (`src/lib/telegram/plugin.ts`) переведён на `TELEGRAM_API_ROOT` вместо
+  хардкода `api.telegram.org`, заблокированного провайдером ДЦ на s1/s2. Дефолт
+  `https://tg-proxy.letar.best` — компоновка через `docker-compose.production.yml`, без изменений
+  `.env.docker.enc`.
+
 ---
 
-**Последнее обновление:** 2026-04-10
+**Последнее обновление:** 2026-07-30

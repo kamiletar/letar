@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-07-30
+
+### Fixed
+
+- **Telegram API через tg-proxy (обход блокировки s1/s2):** `sendBotMessage()` в
+  `src/lib/telegram/plugin.ts` хардкодил `https://api.telegram.org`, заблокированный провайдером ДЦ
+  на s1/s2 — уведомления о привязке/отвязке Telegram-аккаунта зависали. Переведён на
+  `TELEGRAM_API_ROOT` с дефолтом `https://tg-proxy.letar.best`.
+
 ## [0.6.5] - 2026-07-16
 
 ### Fixed

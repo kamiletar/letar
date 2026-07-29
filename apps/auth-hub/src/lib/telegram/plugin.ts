@@ -312,8 +312,10 @@ async function sendBotMessage(chatId: number, text: string): Promise<void> {
   if (!botToken) {
     return
   }
+  // На s1/s2 api.telegram.org заблокирован провайдером ДЦ — обход через tg-proxy.letar.best
+  const telegramApiRoot = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
   try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    await fetch(`${telegramApiRoot}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text }),

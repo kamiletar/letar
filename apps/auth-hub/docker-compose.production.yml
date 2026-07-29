@@ -67,6 +67,10 @@ services:
       NEXT_PUBLIC_APP_URL: https://auth.letar.best
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL}
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+      # Telegram Bot (уведомления при привязке/отвязке аккаунта)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      # api.telegram.org заблокирован провайдером ДЦ на s1/s2 — прокси через mail сервер
+      TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}
     depends_on:
       db:
         condition: service_healthy
