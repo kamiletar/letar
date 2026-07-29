@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { Box, Link as ChakraLink, Checkbox, Text } from '@chakra-ui/react'
+import { Box, Checkbox, Link as ChakraLink, Text } from '@chakra-ui/react'
 import { DISCLAIMER_EN, DISCLAIMER_RU } from '../_data/disclaimer'
 
 interface DisclaimerConsentProps {
@@ -46,7 +46,7 @@ export function DisclaimerConsent({ accepted, onChange, isRu }: DisclaimerConsen
       </Text>
       <Checkbox.Root checked={accepted} onCheckedChange={(e) => onChange(!!e.checked)}>
         <Checkbox.HiddenInput />
-        <Checkbox.Control />
+        <Checkbox.Control data-testid="disclaimer-consent-checkbox" />
         <Checkbox.Label fontSize="sm">
           {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
           <ChakraLink asChild color="blue.500" textDecoration="underline">

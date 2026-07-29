@@ -30,7 +30,7 @@ test.describe('Kiosk-режим /express', () => {
     // (clickWithHydrationRetry из @letar/e2e-testing) — гонка гидратации в WebKit/Firefox
     // headless, не косметика (подробности гонки — в JSDoc самого хелпера).
     const startButton = page.getByRole('button', { name: 'Начать экспресс' })
-    const consentCheckbox = page.locator('[data-part="control"]').first()
+    const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
     await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
     const consentBefore = await page.evaluate(() => localStorage.getItem('quiz_disclaimer_accepted'))
     expect(consentBefore).toBeTruthy()

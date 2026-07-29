@@ -17,7 +17,7 @@ async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   // Согласие не предотмечено → кнопка старта заблокирована
   await expect(startButton).toBeDisabled()
   // Кликаем именно контрол чекбокса (в лейбле есть ссылка на /privacy — по ней не попадаем)
-  const consentCheckbox = page.locator('[data-part="control"]').first()
+  const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
   await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
   await startButton.click()
 }

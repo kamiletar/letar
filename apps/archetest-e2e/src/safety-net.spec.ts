@@ -42,6 +42,13 @@ import path from 'node:path'
  * «Начать тест». Локатор кнопки матчит оба варианта; на сам сценарий (mood
  * check-in + прохождение вопросов) это не влияет — 5.9.2 показывает mood check-in
  * перед КАЖДОЙ новой порцией вопросов, и при первом старте, и при «Продолжить».
+ *
+ * Чекбокс согласия ищется по `data-testid="disclaimer-consent-checkbox"`
+ * (`disclaimer-consent.tsx`), НЕ по голому `[data-part="control"]` — этот атрибут
+ * матчит любой Chakra `Checkbox.Control` на странице, включая вечно disabled
+ * «Необходимые» из `CookieBanner` (`libs/ui/cookie-banner.tsx`). Если cookie-banner
+ * рендерится раньше в DOM, `.first()` хватает его чекбокс — клик 120с висит на
+ * элементе, который в принципе не может стать enabled (найдено 2026-07-29).
  */
 
 const ARCHETEST_DIR = path.join(__dirname, '../../archetest')
@@ -106,7 +113,7 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     // называется «Продолжить тест», а не «Начать тест» (см. JSDoc выше)
     const startButton = page.getByRole('button', { name: /Начать тест|Продолжить тест/ })
     if (await startButton.isDisabled()) {
-      const consentCheckbox = page.locator('[data-part="control"]').first()
+      const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
       await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
     }
     await expect(startButton).toBeEnabled({ timeout: 15_000 })

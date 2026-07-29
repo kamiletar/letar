@@ -18,7 +18,7 @@ import { expect, test } from '@playwright/test'
 async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   const startButton = page.getByRole('button', { name: 'Начать тест' })
   await expect(startButton).toBeDisabled()
-  const consentCheckbox = page.locator('[data-part="control"]').first()
+  const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
   await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
   await startButton.click()
 }
