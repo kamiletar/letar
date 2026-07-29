@@ -5,8 +5,17 @@ import type { MentorEvent } from './schema'
 // POST /api/mentor/emit публикует. Единственный источник правды в рамках одного
 // запущенного процесса — студия одного пользователя, горизонтальное
 // масштабирование не нужно.
-const bus = new EventEmitter()
+//
+// globalThis, а не обычная module-scope переменная: в dev-режиме Turbopack каждый
+// route.ts компилируется как отдельная точка входа и может подключить свою копию
+// модуля — обычный `const bus = new EventEmitter()` тогда не гарантированно один и
+// тот же объект для /api/mentor/events и /api/mentor/emit (тот же паттерн, что и
+// кэширование Prisma-клиента через globalThis в apps/*/src/lib/db.ts).
+const globalForMentorBus = globalThis as unknown as { __synthMentorBus?: EventEmitter }
+
+const bus = globalForMentorBus.__synthMentorBus ?? new EventEmitter()
 bus.setMaxListeners(50)
+globalForMentorBus.__synthMentorBus = bus
 
 const EVENT = 'mentor-event'
 
