@@ -10,7 +10,7 @@ import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import { applyCC, applyEncoderValue } from '@/lib/patch/midi-mapping'
-import type { DrumkitPatch, DrumPad, FmPatch, Patch, SubtractivePatch } from '@/lib/patch/schema'
+import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
 import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
@@ -32,10 +32,10 @@ import { PatchLibrary } from './patch-library'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
 import { useMasterBus } from './use-master-bus'
-import { useMentorEvents, useMentorStateReport } from './use-mentor-events'
 import { useMidiMonitor } from './use-midi-monitor'
 import { usePadMidiLearn } from './use-pad-midi-learn'
 import { useRecording } from './use-recording'
+import { useStudioMentor } from './use-studio-mentor'
 import { useWavRender } from './use-wav-render'
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
@@ -338,50 +338,19 @@ export function StudioClient() {
     setTimeout(() => setSyxImportStatus('idle'), 3000)
   }, [])
 
-  // Загружает патч, пришедший от MCP-инструмента load_patch/play_demo — переключает движок при необходимости
-  const handleMentorLoadPatch = useCallback(
-    async (incoming: Patch) => {
-      if (incoming.type !== engineTypeRef.current) {
-        if (started) {
-          await handleSwitchEngine(incoming.type)
-        } else {
-          setEngineType(incoming.type)
-        }
-      }
-      if (incoming.type === 'fm') {
-        handleLoadFm(incoming)
-      } else if (incoming.type === 'drumkit') {
-        handleLoadDrumkit(incoming)
-      } else {
-        handleLoadSubtractive(incoming)
-      }
-    },
-    [started, handleSwitchEngine, handleLoadFm, handleLoadDrumkit, handleLoadSubtractive]
-  )
-
-  // Проигрывает последовательность нот от send_midi_sequence/play_demo — без запущенного звука нечего проигрывать
-  const handleMentorMidiSequence = useCallback(
-    (notes: { note: number; velocity: number; startMs: number; durationMs: number }[]) => {
-      if (!started) {
-        return
-      }
-      for (const n of notes) {
-        setTimeout(() => handleNoteOn(n.note, n.velocity), n.startMs)
-        setTimeout(() => handleNoteOff(n.note), n.startMs + n.durationMs)
-      }
-    },
-    [started, handleNoteOn, handleNoteOff]
-  )
-
-  const mentor = useMentorEvents({
-    onLoadPatch: (p) => void handleMentorLoadPatch(p),
-    onMidiSequence: handleMentorMidiSequence,
-  })
-
-  useMentorStateReport({
-    engineType,
-    patchName: engineType === 'fm' ? fmPatch.name : engineType === 'drumkit' ? drumPatch.name : patch.name,
+  const mentor = useStudioMentor({
     started,
+    engineType,
+    patch,
+    fmPatch,
+    drumPatch,
+    setEngineType,
+    handleSwitchEngine,
+    handleLoadSubtractive,
+    handleLoadFm,
+    handleLoadDrumkit,
+    handleNoteOn,
+    handleNoteOff,
   })
 
   useEffect(() => {
