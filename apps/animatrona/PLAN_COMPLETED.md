@@ -2,7 +2,66 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-07-28
+> **Архив обновлён:** 2026-07-29
+
+---
+
+## v0.53.0–0.54.0 — .torrent-источник + категория qBittorrent + Web Player в directoryCid (2026-07-29)
+
+**Задача:** сделать раздачу аниме по CID по-настоящему самодостаточной — источник (ссылка +
+сам `.torrent` файл) и плеер должны физически лежать внутри `directoryCid` и пиниться вместе с
+ним. Принцип сессии: если контент нужен для полноценного восстановления/просмотра — он либо в
+`directoryCid`, либо его при потере пиннера не восстановить даже с реплики. IPFS не дублирует
+блоки по CID, так что включить «всё» не стоит ничего лишнего.
+
+**Реализовано:**
+
+- **`source/` в directoryCid** — `QBittorrentService` экспортирует `.torrent` файл раздачи через
+  `/api/v2/torrents/export` (qBittorrent 4.5+, как только получены метаданные раздачи), заливает
+  байты в IPFS (`pin: false`) и сохраняет CID в `TorrentDownload.torrentFileCid` →
+  `Anime.sourceTorrentCid`. CID пробрасывается по всему пути импорта: `getDownloadMeta` →
+  `ImportWizardDialog` → `ImportQueueParsedInfo.sourceTorrentCid` → `Anime.sourceTorrentCid`.
+  `anime-directory-builder.ts` добавляет папку `source/` — `source.json`
+  (`{ source: { type, url }, torrentFileCid }`, поле `type` открытое под будущие источники —
+  nyaa, anidex, прямые ссылки — без изменения схемы) + сам `source.torrent` (родовое имя, не
+  `rutracker.torrent`). На qBittorrent <4.5 экспорт получает 404 — источник (ссылка) всё равно
+  сохраняется, в лог идёт явное предупреждение с просьбой обновить qBittorrent.
+- **Категория qBittorrent `animatrona`** — торренты, добавленные через приложение, помечаются
+  категорией (`ANIMATRONA_TORRENT_CATEGORY`, авто-создаётся при `init()`). Вкладка «Animatrona» /
+  «Остальное» в `torrents/page.tsx` отделяет их от добавленных вручную напрямую в qBittorrent (или
+  другим приложением) — раньше они смешивались в одном списке.
+- **`play/` — standalone Web Player встроен прямо в directoryCid** — новый
+  `main/services/ipfs/play-folder-builder.ts` переиспользует уже существующий Web Player
+  (`web-export/asset-bundler.ts` + `manifest-generator.ts`, режим `referenced` — src в манифесте
+  это голые CID, плеер резолвит их через gateway независимо от глубины папки в дереве). Строит
+  `QueueExportConfig` из уже загруженных Prisma-данных аниме, но включает ВСЕ эпизоды и ВСЕ
+  аудио/суб-дорожки — в отличие от ручного экспорта, где пользователь выбирает подмножество. Для
+  просмотра теперь достаточно `<gateway>/ipfs/<directoryCid>/play/` — без Animatrona, без
+  animatrona-web, без отдельного шага «Экспорт для Web Player».
+  - `anime-directory-builder.ts` строит `play/` **после** основного цикла по эпизодам —
+    переиспользует итоговый `chaptersByEp` (episodeId → живой/восстановленный chaptersCid из
+    pre-pass'а), чтобы главы (OP/ED) тоже попали в манифест плеера. `chapters.json` каждого
+    эпизода и так уже был частью `directoryCid` (`episodes/NN/meta/chapters.json`) — здесь только
+    читается его содержимое через `safeCat()`, никакой новый контент не пинится.
+  - Prisma-запрос в `buildAnimeDirectory()` расширен: `season.number`, `title`/`streamIndex`/
+    `isDefault` у audio/subtitle треков (раньше выбирались только `language`/`dubGroup` — этого
+    было достаточно для основного дерева, но не для полноценного `WebPlayerManifest`).
+- **Миграция БД** (`Anime.sourceTorrentCid`, `TorrentDownload.torrentFileCid`) применена вручную
+  через `prisma db execute` + `migrate resolve --applied` вместо `db:migrate` — обычный воркфлоу
+  упирался в рассинхронизацию чек-суммы более старой миграции
+  (`20260728044106_add_needs_reupload_flag`) в локальной БД, а `migrate reset` уничтожил бы
+  реальную библиотеку (это рабочий `app.db` десктоп-приложения, не тестовые данные).
+
+**Изменённые места:** `main/services/torrent/{qbittorrent-client,qbittorrent-service,types}.ts`,
+`main/services/ipfs/{anime-directory-builder,play-folder-builder}.ts`,
+`main/services/import/{import-service,import-db}.ts`,
+`main/services/rutracker/rutracker-download-orchestrator.ts`,
+`renderer/src/app/torrents/page.tsx`, `renderer/src/components/import/ImportWizardDialog.tsx`,
+`shared/types/import-queue.ts`, `schema.zmodel` + миграция `20260729010000_add_source_torrent_cid`.
+
+**Отложено:** авто-импорт по ссылке из комментария `.torrent` файла (для торрентов, добавленных
+не через Animatrona — у них в `/api/v2/torrents/properties` часто уже лежит прямая ссылка на
+раздачу) — см. открытую задачу в `PLAN.md`.
 
 ---
 
