@@ -76,7 +76,12 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
 
   return (
     <Box ref={containerRef} position="fixed" inset={0} zIndex={100} bg="void.950">
-      <SpinGraphCanvas analyser={activeAnalyser} activeNoteCount={activeNoteCount} patchRef={patchRef} pulseRef={pulseRef} />
+      <SpinGraphCanvas
+        analyser={activeAnalyser}
+        activeNoteCount={activeNoteCount}
+        patchRef={patchRef}
+        pulseRef={pulseRef}
+      />
 
       <Box position="absolute" top={4} right={4} display="flex" alignItems="center" gap={2}>
         {external.devices.length === 0 ? (

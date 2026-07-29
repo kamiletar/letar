@@ -170,7 +170,9 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef 
       for (let i = 0; i < nodeCount; i++) {
         const a = positions[i]
         const b = positions[(i + 2) % nodeCount]
-        if (!a || !b) {continue}
+        if (!a || !b) {
+          continue
+        }
         const grad = ctx2d.createLinearGradient(a.x, a.y, b.x, b.y)
         grad.addColorStop(0, `rgba(212, 175, 55, ${0.15 + smoothMid * 0.35 + cutoff * 0.15})`)
         grad.addColorStop(1, `rgba(245, 216, 90, ${0.05 + smoothMid * 0.2 + cutoff * 0.08})`)

@@ -27,13 +27,21 @@ export function createBandsReader(analyser: AnalyserNode) {
     analyser.getByteFrequencyData(data)
 
     let bassSum = 0
-    for (let i = 0; i < bassEnd; i++) {bassSum += data[i] ?? 0}
+    for (let i = 0; i < bassEnd; i++) {
+      bassSum += data[i] ?? 0
+    }
     let midSum = 0
-    for (let i = bassEnd; i < midEnd; i++) {midSum += data[i] ?? 0}
+    for (let i = bassEnd; i < midEnd; i++) {
+      midSum += data[i] ?? 0
+    }
     let trebleSum = 0
-    for (let i = midEnd; i < data.length; i++) {trebleSum += data[i] ?? 0}
+    for (let i = midEnd; i < data.length; i++) {
+      trebleSum += data[i] ?? 0
+    }
     let total = 0
-    for (let i = 0; i < data.length; i++) {total += data[i] ?? 0}
+    for (let i = 0; i < data.length; i++) {
+      total += data[i] ?? 0
+    }
 
     return {
       bass: bassSum / bassEnd / 255,
