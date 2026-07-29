@@ -2,6 +2,17 @@
 
 Детальное описание всех реализованных фич.
 
+## v3.38.1 — 2026-07-30 (eslint: игнор сгенерированного Serwist-бандла)
+
+Найдено в `studio` (Фаза 11 блока H): после `next build --webpack` Serwist генерирует
+`public/sw.js`/`public/swe-worker-*.js` — минифицированные бандлы, не исходный код. `eslint .`
+пытался их линтить и падал на минифицированном коде (`no-var`, `prefer-const` и т.п.). В studio и
+archetest ignore уже стоял в `eslint.config.mjs`; в grandslamcup — отсутствовал, хотя `project.json`
+использует тот же `next build --webpack` для Serwist. Добавлен `ignores: ['public/sw.js',
+'public/swe-worker-*.js']` рядом с существующим `.next/**/*`. Проверено: `nx build grandslamcup` →
+`nx lint grandslamcup` больше не упоминает `public/sw.js`/`swe-worker-*`. `driving-school` Serwist
+не использует — фикс не требуется.
+
 ## v3.38.0 — 2026-07-28 (152-ФЗ: страница /privacy)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). `CookieBanner`

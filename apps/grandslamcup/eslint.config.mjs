@@ -7,6 +7,7 @@ export default [
   ...nx.configs['flat/react-typescript'],
   ...baseConfig,
   {
-    ignores: ['.next/**/*', '**/out-tsc'],
+    // public/sw.js и swe-worker — сгенерированные Serwist бандлы (минифицированные)
+    ignores: ['.next/**/*', '**/out-tsc', 'public/sw.js', 'public/swe-worker-*.js'],
   },
 ]
