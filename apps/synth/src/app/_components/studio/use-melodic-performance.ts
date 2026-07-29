@@ -18,6 +18,9 @@ interface UseMelodicPerformanceOptions {
   soundNoteOn: (note: number, velocity: number) => void
   soundNoteOff: (note: number) => void
   clearActiveNotes: () => void
+  // Пробрасывается в оба пиано-ролла (SUB/FM) — VJ-графу нужен единый «пульс на бит» независимо
+  // от того, какой движок сейчас активен.
+  onBeat?: (stepIndex: number) => void
 }
 
 // Арпеджиатор + пиано-ролл для SUB/FM-движков: настройки живут в `patch.engine.arpeggiator`/
@@ -32,6 +35,7 @@ export function useMelodicPerformance({
   soundNoteOn,
   soundNoteOff,
   clearActiveNotes,
+  onBeat,
 }: UseMelodicPerformanceOptions) {
   const engineTypeRef = useRef(engineType)
   engineTypeRef.current = engineType
@@ -98,12 +102,14 @@ export function useMelodicPerformance({
     setSequence: setSubSequence,
     noteOn: soundNoteOn,
     noteOff: soundNoteOff,
+    onBeat,
   })
   const fmPianoRoll = usePianoRoll({
     sequence: fmPatch.engine.sequence,
     setSequence: setFmSequence,
     noteOn: soundNoteOn,
     noteOff: soundNoteOff,
+    onBeat,
   })
 
   return { currentArp, arpeggiator, arpEnabledRef, setArp, handleToggleArp, subPianoRoll, fmPianoRoll }

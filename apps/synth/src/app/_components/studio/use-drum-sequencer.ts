@@ -25,12 +25,21 @@ interface UseDrumSequencerOptions {
   // Визуальная подсветка пэда — переиспользует существующий activePads-механизм студии,
   // сам звук секвенсор триггерит сам (не через handlePadHit, чтобы не дублировать логику).
   onPadHit: (index: number) => void
+  // Дёргается на каждый четвертной удар (каждый 4-й 16-й шаг), независимо от того, набит ли
+  // на нём реальный удар — задаёт VJ-графу «пульс на бит» драм-кита как главного ритмического источника.
+  onBeat?: (stepIndex: number) => void
 }
 
 // Степ-секвенсор драм-кита: 16 пэдов × 16 шагов, планирование через StepSequencer (lookahead
 // по аудио-часам). Паттерн хранится прямо в `drumPatch.engine.sequence` — сохраняется/грузится
 // через обычный поток PatchLibrary (IndexedDB), отдельного стораджа для секвенсора не заводили.
-export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, onPadHit }: UseDrumSequencerOptions) {
+export function useDrumSequencer({
+  drumEngineRef,
+  drumPatchRef,
+  setDrumPatch,
+  onPadHit,
+  onBeat,
+}: UseDrumSequencerOptions) {
   const sequence = drumPatchRef.current.engine.sequence ?? emptySequence()
   const pattern = sequence.pattern
   const bpm = sequence.bpm
@@ -59,8 +68,11 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
         setTimeout(() => onPadHit(pad), visualDelayMs)
       }
       setTimeout(() => setCurrentStep(stepIndex), visualDelayMs)
+      if (stepIndex % 4 === 0) {
+        setTimeout(() => onBeat?.(stepIndex), visualDelayMs)
+      }
     },
-    [drumEngineRef, drumPatchRef, onPadHit]
+    [drumEngineRef, drumPatchRef, onPadHit, onBeat]
   )
 
   useEffect(() => {

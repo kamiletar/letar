@@ -14,6 +14,8 @@ interface VjOverlayProps {
   patchRef?: RefObject<SubtractivePatch>
   /** Счётчик ударов ноты/пэда — резкая вспышка-пульс графа синхронно с атакой */
   pulseRef?: RefObject<number>
+  /** Счётчик четвертных долей активного секвенсора — устойчивый «пульс на бит», синхронный с BPM */
+  beatRef?: RefObject<number>
   onClose: () => void
 }
 
@@ -37,7 +39,7 @@ const buttonStyle = {
  * микрофон/линейный вход — на вечеринке/фаершоу реагировать нужно на чужую музыку,
  * не свою (см. `use-external-audio-input.ts`).
  */
-export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef, onClose }: VjOverlayProps) {
+export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef, beatRef, onClose }: VjOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const external = useExternalAudioInput()
 
@@ -81,6 +83,7 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
         activeNoteCount={activeNoteCount}
         patchRef={patchRef}
         pulseRef={pulseRef}
+        beatRef={beatRef}
       />
 
       <Box position="absolute" top={4} right={4} display="flex" alignItems="center" gap={2}>

@@ -17,6 +17,13 @@ interface SpinGraphCanvasProps {
   patchRef?: RefObject<SubtractivePatch>
   /** Счётчик ударов (нота/пэд) — растёт на каждый triggerNote/pad-hit; даёт резкую вспышку-пульс */
   pulseRef?: RefObject<number>
+  /**
+   * Счётчик четвертных долей активного секвенсора (драм-кит/пиано-ролл) — растёт ровно раз на бит,
+   * даже если на этом шаге нет реальной ноты. В отличие от `pulseRef` (локальная вспышка узлов на
+   * каждый транзиент), даёт устойчивое расширяющееся кольцо в темп BPM — видимый метроном графа,
+   * который держит форму даже в разреженном паттерне или в тишине между нотами.
+   */
+  beatRef?: RefObject<number>
 }
 
 const GOLD_BRIGHT = '#F5D85A'
@@ -32,7 +39,7 @@ const VOID_BG = '#040302'
  * важнее цвета (владелец не видит цвет в звуке, но остро слышит объём) — весь визуал
  * монохромный золото/пустота, разница в яркости и радиальном размытии, не в оттенках.
  */
-export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef }: SpinGraphCanvasProps) {
+export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef, beatRef }: SpinGraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
   const activeNoteCountRef = useRef(activeNoteCount)
@@ -63,6 +70,11 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef 
     // Вспышка-пульс на удар ноты/пэда — растёт мгновенно, затухает экспоненциально по кадрам
     let pulseEnergy = 0
     let lastPulseSeen = pulseRef?.current ?? 0
+    // Расширяющееся кольцо-метроном на бит — в отличие от pulseEnergy не затухает по яркости,
+    // а «бежит» от ядра наружу и исчезает по достижении края; несколько колец могут сосуществовать
+    // на быстром темпе, поэтому храним список фаз (0 = только родилось, 1 = долетело до края).
+    let beatRings: number[] = []
+    let lastBeatSeen = beatRef?.current ?? 0
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1
@@ -125,6 +137,15 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef 
       }
       pulseEnergy *= 0.88
 
+      // Кольцо-метроном: новый бит — новое кольцо рождается у ядра; все существующие кольца
+      // продвигаются к краю канвы и удаляются по долёту (та же идея, что круги на воде от каждого удара).
+      const beatNow = beatRef?.current ?? 0
+      if (beatNow !== lastBeatSeen) {
+        beatRings.push(0)
+        lastBeatSeen = beatNow
+      }
+      beatRings = beatRings.map((phase) => phase + 0.02).filter((phase) => phase < 1)
+
       // Живые ручки SUB-патча — те же, что крутят звук (cutoff/резонанс/пространство)
       const azimuth = patchRef?.current?.engine.fx.space.azimuth ?? 0
       const depth = patchRef?.current?.engine.fx.space.depth ?? 0
@@ -139,6 +160,16 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef 
       glow.addColorStop(1, 'rgba(4, 3, 2, 0)')
       ctx2d.fillStyle = glow
       ctx2d.fillRect(0, 0, w, h)
+
+      // Кольца-метроном — расходятся от центра к краю, ярче в начале пути, гаснут к финалу
+      const maxRingRadius = Math.max(w, h) * 0.7
+      for (const phase of beatRings) {
+        ctx2d.strokeStyle = `rgba(245, 216, 90, ${0.35 * (1 - phase)})`
+        ctx2d.lineWidth = 1.5
+        ctx2d.beginPath()
+        ctx2d.arc(cx, cy, phase * maxRingRadius, 0, Math.PI * 2)
+        ctx2d.stroke()
+      }
 
       const baseRadius = Math.min(w, h) * 0.22
       const coreRadius = baseRadius * (1 + smoothBass * 0.35 + pulseEnergy * 0.15)

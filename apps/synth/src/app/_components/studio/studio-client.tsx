@@ -79,6 +79,13 @@ export function StudioClient() {
   // Счётчик ударов для VJ-режима: растёт на каждую живую ноту/пэд, читается прямо в rAF-цикле
   // спин-графа (SpinGraphCanvas) — без setState, чтобы не дёргать рендер студии на каждый удар
   const vjPulseRef = useRef(0)
+  // Счётчик четвертных долей — растёт только на каждый 4-й 16-й шаг активного секвенсора
+  // (драм-кит/пиано-ролл SUB/FM), независимо от того, звучит ли на нём реальная нота. Даёт
+  // VJ-графу устойчивый «пульс на бит», синхронный с BPM/транспортом, а не только с транзиентами.
+  const vjBeatRef = useRef(0)
+  const handleBeat = useCallback(() => {
+    vjBeatRef.current++
+  }, [])
 
   const masterBus = useMasterBus(patch, patchRef, started)
   const recording = useRecording()
@@ -113,7 +120,13 @@ export function StudioClient() {
     [flashPad]
   )
 
-  const sequencer = useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, onPadHit: flashPad })
+  const sequencer = useDrumSequencer({
+    drumEngineRef,
+    drumPatchRef,
+    setDrumPatch,
+    onPadHit: flashPad,
+    onBeat: handleBeat,
+  })
 
   const handlePadChange = useCallback((pad: DrumPad) => {
     setDrumPatch((p) => {
@@ -160,6 +173,7 @@ export function StudioClient() {
       soundNoteOn,
       soundNoteOff,
       clearActiveNotes,
+      onBeat: handleBeat,
     })
 
   // Точка входа для клавиатуры/MIDI/ментора: если арпеджиатор включён — нота становится частью
@@ -745,6 +759,7 @@ export function StudioClient() {
         activeNoteCount={activeNotes.size}
         patchRef={patchRef}
         pulseRef={vjPulseRef}
+        beatRef={vjBeatRef}
         onClose={() => setVjOpen(false)}
       />
 

@@ -17,12 +17,15 @@ interface UsePianoRollOptions {
   setSequence: (updater: (prev: MelodicSequence) => MelodicSequence) => void
   noteOn: (note: number, velocity: number) => void
   noteOff: (note: number) => void
+  // Дёргается на каждый четвертной удар (каждый 4-й 16-й шаг) во время воспроизведения — задаёт
+  // VJ-графу «пульс на бит», независимый от того, есть ли реально нота на этом шаге.
+  onBeat?: (stepIndex: number) => void
 }
 
 // Пиано-ролл для SUB/FM: ноты с высотой и длительностью (в отличие от булевой драм-сетки).
 // Паттерн хранится прямо в `patch.engine.sequence` — сохраняется/грузится через PatchLibrary
 // вместе с остальным патчем, как и у драм-секвенсора (use-drum-sequencer.ts).
-export function usePianoRoll({ sequence, setSequence, noteOn, noteOff }: UsePianoRollOptions) {
+export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }: UsePianoRollOptions) {
   const current = sequence ?? emptyMelodicSequence()
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
@@ -33,6 +36,8 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff }: UsePian
   noteOnRef.current = noteOn
   const noteOffRef = useRef(noteOff)
   noteOffRef.current = noteOff
+  const onBeatRef = useRef(onBeat)
+  onBeatRef.current = onBeat
   const schedulerRef = useRef<MelodicSequencer | null>(null)
 
   useEffect(() => {
@@ -54,7 +59,12 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff }: UsePian
         () => sequenceRef.current
       )
     }
-    schedulerRef.current.start((step) => setCurrentStep(step))
+    schedulerRef.current.start((step) => {
+      setCurrentStep(step)
+      if (step % 4 === 0) {
+        onBeatRef.current?.(step)
+      }
+    })
     setIsPlaying(true)
   }, [])
 
