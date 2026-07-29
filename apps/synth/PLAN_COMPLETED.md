@@ -1,5 +1,21 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 5) — рефакторинг studio-client.tsx
+
+### Что сделано
+
+- **`use-studio-mentor.ts`** — логика интеграции с MCP-ментором (`handleMentorLoadPatch`,
+  `handleMentorMidiSequence`, `useMentorEvents`/`useMentorStateReport`), добавленная в Фазе 2, вынесена
+  из `studio-client.tsx` (был 715 строк) в отдельный хук — по образцу соседних `use-hardware-recording.ts`
+  и т.п. Зависимости передаются явными пропсами (`started`, `engineType`, `handleSwitchEngine`,
+  `handleLoadFm/Drumkit/Subtractive`, `handleNoteOn/Off`), без общего context-объекта. Поведение не
+  менялось, `studio-client.tsx` остался единственным владельцем React state.
+- Блок логики движков/патчей (`handleLoadSubtractive`/`handleSwitchEngine`/`handleEngineChange` и
+  ref-зеркала `patchRef`/`engineTypeRef`) сознательно **не вынесен** — завязан на замыкания над
+  `audioContext`/движками через ref-зеркала, которые как раз и существуют, чтобы не создавать функции
+  под каждый рендер; выделение в отдельный хук потребовало бы либо тащить эти рефы наружу, либо
+  дублировать паттерн — риск не оправдан для чисто косметического рефакторинга.
+
 ## Сессия 2026-07-29 (продолжение 4) — Фаза 2: MCP-сервер (ментор + DAW)
 
 ### Что сделано
