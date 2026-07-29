@@ -622,7 +622,7 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
       конкретного аниме, `useFindUniqueAnime`, страница `library/[id]`). Если фоновый sync менял
       `watchStatus`/`userRating`, а пользователь в этот момент был на странице деталей — она не
       обновлялась до ручного перехода. Добавлена `queryClient.invalidateQueries({ queryKey:
-    ['anime'] })` по аналогии с `MobileProgressSync.tsx`.
+  ['anime'] })` по аналогии с `MobileProgressSync.tsx`.
 
 ---
 
