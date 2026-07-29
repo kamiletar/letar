@@ -45,10 +45,18 @@ export function CookieBanner({
 
   // Публикует свою высоту в CSS-переменную, пока видим — StickyActionBar (тот же bottom:0)
   // читает её, чтобы приподняться над баннером, а не спрятаться под ним по pointer-events.
-  // Синхронный getBoundingClientRect() + resize-листенер вместо ResizeObserver: колбэк
-  // ResizeObserver — часть рендер-пайплайна браузера и не срабатывает, пока вкладка не
-  // компоузит кадры (свёрнутая/неактивная), тогда как getBoundingClientRect форсирует layout
-  // синхронно и не зависит от этого состояния.
+  // Синхронный getBoundingClientRect() в useLayoutEffect даёт значение до первой отрисовки,
+  // но само по себе недостаточно: на реальной странице замер иногда попадает на момент ДО
+  // того, как осядут стили/шрифты/соседние баннеры (offline-consent и т.п.) — измеренная
+  // высота оказывается неверной и раньше замораживалась навсегда, потому что единственным
+  // триггером пересчёта был `window resize`, а на статичном вьюпорте (планшет на феста, без
+  // изменения размера окна) он никогда не происходит. Подтверждено вручную: после чистой
+  // загрузки `--letar-cookie-banner-height` показывал 1655px (в 12 раз больше реальных
+  // 142px) и не исправлялся сам — только после ручного resize.
+  // ResizeObserver — правильный инструмент для «пересчитывать при любом изменении размера
+  // элемента», не только для явного resize окна; используем его как основной механизм,
+  // getBoundingClientRect — только для немедленного значения при первом монтировании (быстрее
+  // первого колбэка ResizeObserver, который приходит асинхронно).
   useLayoutEffect(() => {
     const root = document.documentElement
     if (!shown || !rootRef.current) {
@@ -56,13 +64,17 @@ export function CookieBanner({
       return
     }
     const el = rootRef.current
-    function update() {
+    root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
+
+    // getBoundingClientRect() и в колбэке (не entry.contentRect) — тот считает только
+    // content-box (без border), а у баннера есть borderTopWidth, из-за чего высоты
+    // разошлись бы на 1px между первым и последующими замерами.
+    const observer = new ResizeObserver(() => {
       root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
-    }
-    update()
-    window.addEventListener('resize', update)
+    })
+    observer.observe(el)
     return () => {
-      window.removeEventListener('resize', update)
+      observer.disconnect()
       root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
     }
   }, [shown])

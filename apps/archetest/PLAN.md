@@ -93,43 +93,39 @@
 корректно в обе стороны (заблокировал прод и на красном e2e, и на рассинхроне коммитов) —
 сама инфраструктура гейта ЗАКРЫТА. Осталось почему упал сам сьют:
 
-### 🔧 В РАБОТЕ, не закончено — забирать со следующей сессии
+### ✅ Оба пункта закрыты 2026-07-29 — готово к повторному `run_e2e`
 
-**1. `safety-net.spec.ts` — DATABASE_URL/BETTER_AUTH_SECRET читались из локального `.env`
-файла**, которого нет на e2e-раннере (прогон идёт против реального `https://archetest-
-stage.s3.letar.best`, не dev-сервера с файловым доступом к секретам). Правильный паттерн
-уже есть в монорепо — `createDevSessionRoute` (`@letar/auth/server`) + `devSessionLogin`
-(`@letar/e2e-testing`), см. `libs/e2e-testing/src/lib/staging-auth.ts` (используется
-svoichuzhie/driving-school/grandslamcup/studio/auth-hub/animatrona-tracker).
+**1. ✅ `safety-net.spec.ts` переписан на dev-session.** Убраны `pg.Client`,
+`loadEnvVar`, `signSessionCookie` — тест логинится через `page.goto('/api/auth/dev-session
+?email=...&token=...&redirect=/ru')` (`createDevSessionRoute`, роут уже существовал с
+прошлой сессии), `DEV_SESSION_TOKEN` читается из `process.env` раннера. `buildBestOptionMap`
+и чтение `questions-dump.json` не тронуты — это статический файл в репо, не секрет.
+lint/typecheck `archetest-e2e` зелёные.
 
-Сделано в этой сессии (✅ закоммичено):
+**Инфраструктурная зависимость, не в этом репо** (не закрывается кодом archetest):
+`.env.staging` archetest на s3 нужно дополнить `ALLOW_DEV_SESSION=true` +
+`DEV_SESSION_TOKEN=<то же значение, что уже использует dashboard-agent для preserve-env
+в`run_e2e`>` — та же пара, что у svoichuzhie/driving-school. Без этого dev-session роут
+всегда отвечает 403. Просить BlackCove/владельца добавить по аналогии с остальными.
 
-- `apps/archetest/src/app/api/auth/dev-session/route.ts` — создан, `buildUserData` ставит
-  `disclaimerAccepted: true` (дефолт схемы `false` блокирует старт квиза на экране
-  дисклеймера, `quiz-intro.tsx`) + `roles: ['USER']`.
-- `apps/archetest-e2e/package.json` + `tsconfig.json` — подключён `@letar/e2e-testing`
-  (implicitDependencies + paths + references, по образцу `svoichuzhie-e2e`).
-- **НЕ сделано:** `safety-net.spec.ts` всё ещё в старом виде (raw `pg.Client` +
-  `loadEnvVar`/`signSessionCookie`) — сам файл ещё не переписан на
-  `page.goto('/api/auth/dev-session?email=...&token=...&redirect=/ru')` (проще, чем
-  `devSessionLogin` из либы — той нужен отдельный global-setup/storageState, тут хватит
-  прямого редиректа в одном тесте). Нужно убрать импорт `pg`, `loadEnvVar`, `signSessionCookie`,
-  оставить `buildBestOptionMap`/чтение `questions-dump.json` (это статический файл в репо,
-  не секрет — читается нормально и на раннере).
-- **Инфраструктурная зависимость, не в этом репо:** `.env.staging` archetest на s3 нужно
-  дополнить `ALLOW_DEV_SESSION=true` + `DEV_SESSION_TOKEN=<то же значение, что уже
-  использует dashboard-agent для preserve-env в`run_e2e`>` — та же пара, что у
-  svoichuzhie/driving-school и т.д. Без этого dev-session роут будет всегда отвечать 403.
-  Просить BlackCove/владельца добавить по аналогии с остальными.
+**2. ✅ Закрыто, с исправлением найденного в этой же сессии остаточного бага.**
+Cookie-consent баннер перехватывал клики по CTA — координация через CSS-переменную
+`--letar-cookie-banner-height` (см. `.claude/docs/ui-components.md`) в целом верна, но
+конкретная реализация из прошлого коммита (`getBoundingClientRect` в `useLayoutEffect` +
+только `window resize`-листенер) **не переизмеряла высоту после первой отрисовки** —
+живая проверка на `/express` показала `--letar-cookie-banner-height: 1655px` (реальная
+высота баннера 142px) сразу после чистой загрузки, без ручного `resize` окна значение
+так и оставалось неверным. На фестивальном планшете (статичный вьюпорт, `resize` никогда
+не происходит) это заморозило бы неверный отступ навсегда. Вернул `ResizeObserver` как
+основной механизм (он ловит любое изменение размера элемента — шрифты, соседние баннеры,
+вьюпорт — а не только явный `window resize`), `getBoundingClientRect` оставлен только для
+немедленного значения при монтировании. Живая проверка после фикса: `elementFromPoint` в
+координатах кнопки «Начать экспресс» возвращает саму кнопку, не ссылку баннера — CTA
+кликабельна без ручного resize.
 
-**2. ✅ Закрыто 2026-07-29** — cookie-consent баннер перехватывал клики по CTA. Фикс
-(CSS-переменная высоты баннера, `getBoundingClientRect` вместо `ResizeObserver`) готов,
-подтверждён вживую, задокументирован в `.claude/docs/ui-components.md`. Детали — в
-`PLAN_COMPLETED.md`, сессия «2026-07-29 (продолжение)».
-
-**Осталось из пункта 2026-07-28:** дописать `safety-net.spec.ts` (см. пункт 1 выше), затем
-`nx lint/typecheck:tsgo/test archetest archetest-e2e @letar/ui` → коммит → попросить
-BlackCove повторить `deploy_app(staging)` → `run_e2e` → `deploy_app(production)`.
+Обе части `nx lint`/`typecheck:tsgo` (`archetest`, `archetest-e2e`, `@letar/ui`) зелёные.
+Дальше: коммит → попросить BlackCove повторить `deploy_app(staging)` → `run_e2e` →
+`deploy_app(production)`.
 
 ## ⭐ СЛЕДУЮЩАЯ ЗАДАЧА: часть B аудита банка (после ревью HON)
 

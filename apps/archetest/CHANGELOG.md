@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.26.2] - 2026-07-29
+
+### Fixed
+
+- **`safety-net.spec.ts`** переписан на `/api/auth/dev-session` вместо прямого доступа к
+  БД через `pg` — старый подход падал на staging-раннере (`DATABASE_URL`/`.env` там нет).
+- **`CookieBanner`/`StickyActionBar` (`@letar/ui`)** — исправлен остаточный баг координации
+  bottom-anchored компонентов (закрыто ранее сегодня, commit `1d8ae644`): высота баннера,
+  публикуемая в CSS-переменную `--letar-cookie-banner-height`, замерялась один раз при
+  монтировании и не переизмерялась без явного `window resize` — на статичном вьюпорте
+  (фестивальный планшет) значение застревало неверным (замер `1655px` вместо реальных
+  `142px`). `ResizeObserver` возвращён как основной механизм пересчёта.
+
 ## [0.26.1] - 2026-07-28
 
 ### Added
