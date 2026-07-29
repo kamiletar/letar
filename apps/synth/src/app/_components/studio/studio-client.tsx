@@ -15,9 +15,8 @@ import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { filledToggleStyle, outlineButtonStyle } from './button-style'
 import { DrumPads } from './drum-pads'
-import { DrumPanel } from './drum-panel'
+import { DrumkitColumn } from './drumkit-column'
 import { FmHardwareControls } from './fm-hardware-controls'
 import { FmPanel } from './fm-panel'
 import { HardwarePanel } from './hardware-panel'
@@ -29,7 +28,6 @@ import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
-import { SequencerPanel } from './sequencer-panel'
 import { useDrumSequencer } from './use-drum-sequencer'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
@@ -562,48 +560,14 @@ export function StudioClient() {
               />
             </Box>
           ) : engineType === 'drumkit' ? (
-            <Box display="flex" flexDir="column" gap={2}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <button
-                  style={filledToggleStyle(padMidiLearn.active, { padding: '3px 8px', letterSpacing: '0.04em' })}
-                  onClick={padMidiLearn.toggleActive}
-                >
-                  {padMidiLearn.active ? '● обучение пэдов включено' : 'MIDI Learn: пэды'}
-                </button>
-                {padMidiLearn.active && (
-                  <button
-                    style={outlineButtonStyle('default', { padding: '3px 8px', letterSpacing: '0.04em' })}
-                    onClick={padMidiLearn.reset}
-                  >
-                    сбросить к дефолту
-                  </button>
-                )}
-                {padMidiLearn.active && (
-                  <Text fontSize="9px" color="fg.subtle" letterSpacing="0.04em">
-                    {padMidiLearn.armedPad !== null
-                      ? `жду удар по железу для пэда ${padMidiLearn.armedPad + 1}…`
-                      : 'кликни по экранному пэду, потом ударь по нужному пэду на железе'}
-                  </Text>
-                )}
-              </Box>
-              <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
-              <PatchLibrary
-                type="drumkit"
-                currentPatch={drumPatch}
-                onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
-              />
-              <SequencerPanel
-                pads={drumPatch.engine.pads}
-                pattern={sequencer.pattern}
-                currentStep={sequencer.currentStep}
-                isPlaying={sequencer.isPlaying}
-                bpm={sequencer.bpm}
-                onToggleStep={sequencer.toggleStep}
-                onToggle={sequencer.toggle}
-                onBpmChange={sequencer.setBpm}
-                onClear={sequencer.clear}
-              />
-            </Box>
+            <DrumkitColumn
+              drumPatch={drumPatch}
+              selectedPad={selectedPad}
+              onPadChange={handlePadChange}
+              onLoadDrumkit={handleLoadDrumkit}
+              padMidiLearn={padMidiLearn}
+              sequencer={sequencer}
+            />
           ) : (
             <Box display="flex" flexDir="column" gap={2}>
               <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
