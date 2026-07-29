@@ -11,6 +11,19 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.10] — 2026-07-30
+
+### Fixed
+
+- `deploy-affected.sh`: живой прогон 0.9.9 упал сразу — голый `systemd-run` без `sudo`
+  требует polkit-авторизацию (`Interactive authentication required`), непривилегированный
+  `deploy` не может стартовать unit в `system.slice` напрямую. Хуже того, вызов стоял в
+  `then`-блоке `if`, поэтому его ненулевой exit-код под `set -e` убивал весь
+  `deploy-affected.sh`, ни разу не дойдя до fallback (диагностировал BlackCove, message
+  #875, проверил вручную: `sudo -n systemd-run` работает на s2, голый — нет). Исправлено:
+  вызов перенесён в условие `if` (не убивает скрипт при падении) + добавлен `sudo -n`.
+  Не проверено живым деплоем.
+
 ## [0.9.9] — 2026-07-30
 
 ### Fixed

@@ -88,7 +88,7 @@ crash-loop) и доступность БД (контейнер жив, подк�
 
 ## Backlog 📋
 
-### 🚧 Self-deploy обрывает сам себя на recreate-шаге (dashboard-agent-dev, 2026-07-30, вторая попытка)
+### 🚧 Self-deploy обрывает сам себя на recreate-шаге (dashboard-agent-dev, 2026-07-30, третья попытка)
 
 Деплой `dashboard-agent` на прод (s2) был особым случаем: `docker compose up -d` останавливает
 старый контейнер `dashboard-agent`, который в этот момент сам обслуживает deploy-mcp туннель
@@ -111,7 +111,20 @@ systemd-юнит выполняется в `system.slice`, полностью о
 решает self-deploy). Заодно исправлен сопутствующий баг: цикл ожидания healthcheck перед
 reload nginx вычислял имя контейнера как `${app}-app`, но `dashboard-agent` в
 `docker-compose.production.yml` задаёт `container_name: dashboard-agent` без суффикса —
-добавлен явный кейс. Синтаксис проверен `bash -n`, живой прогон 0.9.9 ещё не выполнялся.
+добавлен явный кейс.
+
+**Вторая попытка (0.9.9, коммит `d689a8d6`) тоже не сработала:** живой прогон упал сразу
+после warning-строки, ни разу не дойдя до `✅ ... restart scheduled via systemd-run`.
+Диагноз (BlackCove, message #875, проверено вручную на s2): голый `systemd-run` без `sudo`
+требует polkit-авторизацию (`Interactive authentication required`) — непривилегированный
+`deploy` не может стартовать unit в `system.slice` без интерактивной сессии. Хуже того,
+вызов стоял в `then`-блоке `if`, поэтому его ненулевой exit-код под `set -e` (действует всю
+жизнь скрипта) убивал весь `deploy-affected.sh`, а не только уходил в fallback.
+
+**Решение (0.9.10):** вызов перенесён в условие `if` (падение внутри условия не триггерит
+`set -e`) + добавлен `sudo -n systemd-run` (`sudo -n systemd-run` подтверждён BlackCove
+рабочим на s2 — passwordless sudo у `deploy` есть). Синтаксис проверен `bash -n`, живой
+прогон 0.9.10 ещё не выполнялся.
 
 ### Регистрация нового приложения разбросана по 3 местам (найдено LavenderSpring, 2026-07-28)
 

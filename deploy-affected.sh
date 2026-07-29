@@ -1004,14 +1004,22 @@ RESTART_EOF
     chmod +x "$RESTART_SCRIPT"
 
     RESTART_UNIT="${app}-restart-$$"
-    if command -v systemd-run >/dev/null 2>&1; then
-      # --collect: юнит и его результат удаляются автоматически после завершения (не копится
-      # в `systemctl list-units --failed`). Без --scope — транзиентный service, а не scope:
-      # запускается в фоне, systemd-run возвращает управление сразу, не блокируя деплой.
-      systemd-run --unit="$RESTART_UNIT" --collect -- bash "$RESTART_SCRIPT" >/dev/null 2>&1
-      echo -e "${GREEN}✅ ${app} restart scheduled via systemd-run (unit: ${RESTART_UNIT})${NC}"
+    # ⚠️ Вызов systemd-run должен стоять именно в условии if (не в then-блоке) — при `set -e`
+    # (действует всю жизнь скрипта, см. строку 2) ненулевой exit-код внутри then-блока убивает
+    # ВЕСЬ deploy-affected.sh, а не только эту ветку. Так и произошло с первой версией фикса
+    # (0.9.9, попытка 1): голый `systemd-run --unit=...` без sudo падал с "Interactive
+    # authentication required" (polkit не даёт непривилегированному deploy стартовать unit в
+    # system.slice без интерактивной авторизации) — команда была в then-блоке, скрипт падал
+    # сразу после warning-строки, ни разу не добравшись до fallback (диагностировал BlackCove,
+    # message #875, проверил вручную на s2: `sudo -n systemd-run` работает, голый — нет).
+    # --collect: юнит и его результат удаляются автоматически после завершения (не копится
+    # в `systemctl list-units --failed`). Без --scope — транзиентный service, а не scope:
+    # запускается в фоне, systemd-run возвращает управление сразу, не блокируя деплой.
+    if command -v systemd-run >/dev/null 2>&1 \
+      && sudo -n systemd-run --unit="$RESTART_UNIT" --collect -- bash "$RESTART_SCRIPT" >/dev/null 2>&1; then
+      echo -e "${GREEN}✅ ${app} restart scheduled via sudo systemd-run (unit: ${RESTART_UNIT})${NC}"
     else
-      echo -e "${RED}❌ systemd-run недоступен на этом хосте — fallback на nohup+setsid, который НЕ переживает уничтожение cgroup контейнера (известно не работает для self-deploy, см. комментарий выше)${NC}"
+      echo -e "${RED}❌ sudo systemd-run недоступен на этом хосте (нет passwordless sudo или systemd-run) — fallback на nohup+setsid, который НЕ переживает уничтожение cgroup контейнера (известно не работает для self-deploy, см. комментарий выше)${NC}"
       nohup setsid bash "$RESTART_SCRIPT" > /dev/null 2>&1 &
     fi
 
