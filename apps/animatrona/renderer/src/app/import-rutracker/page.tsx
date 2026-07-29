@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck — rutracker/torrent IPC типы ещё не добавлены в electron.d.ts
 'use client'
 
 /**
@@ -18,6 +16,7 @@ import {
   Heading,
   HStack,
   Icon,
+  Image,
   Input,
   Progress,
   Spinner,
@@ -48,6 +47,7 @@ import { AlreadyInLibraryBadge } from '@/components/import/AlreadyInLibraryBadge
 import { BundleAnimesPanel as SharedBundleAnimesPanel } from '@/components/import/BundleAnimesPanel'
 import { Header } from '@/components/layout'
 import { toaster } from '@/components/ui/toaster'
+import type { RutrackerCandidateScore, RutrackerMatchResult, RutrackerTorrentInfo } from '@/types/electron'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,86 +65,27 @@ interface DownloadProgress {
   totalSize: number
 }
 
-/** Тип данных из IPC */
-interface TorrentInfo {
-  nameRu: string
-  nameOriginal: string
-  type?: string
-  episodeCount?: number
-  episodeInfo?: string
-  year?: number
-  genres: string[]
-  resolution?: string
-  sourceType?: string
-  country?: string
-  studio?: string
-  director?: string
-  description?: string
-  posterUrl?: string
-  magnetLink: string
-  sizeText?: string
-  dubGroups: Array<{
-    name: string
-    type: 'dub' | 'sub'
-    language: string
-    isExternal: boolean
-    details?: string
-  }>
-  mediaInfo?: {
-    videoCodec: string
-    width: number
-    height: number
-    bitDepth: number
-    fps: number
-    videoBitrate: number
-    audioTracks: Array<{
-      codec: string
-      channels: string
-      language: string
-      bitrate: number
-    }>
-  }
-  externalLinks: {
-    shikimoriUrl?: string
-    shikimoriId?: number
-    malUrl?: string
-    malId?: number
-  }
-}
+/** Данные раздачи Рутрекера (алиас канонического IPC-типа) */
+type TorrentInfo = RutrackerTorrentInfo
 
-interface MatchResult {
-  shikimoriId: number
-  confidence: number
-  method: 'direct-link' | 'mal-link' | 'search-title'
-  details: string
-}
-
-interface CandidateScore {
-  shikimoriId: number
-  score: number
-  breakdown: {
-    titleScore: number
-    yearScore: number
-    typeScore: number
-    episodeScore: number
-  }
+/** Данные Shikimori для превью — до `confirmMatch` доступен только этот усечённый набор полей */
+interface PreviewShikimoriData {
+  id: string
+  name: string
+  russian: string | null
+  poster: { mainUrl: string } | null
+  score: number | null
+  episodes: number
+  kind: string | null
+  status: string
 }
 
 interface ImportResult {
-  torrent: TorrentInfo
-  match: MatchResult | null
+  torrent: RutrackerTorrentInfo
+  match: RutrackerMatchResult | null
   needsConfirmation: boolean
-  candidates: CandidateScore[]
-  shikimoriData?: {
-    id: string
-    name: string
-    russian: string | null
-    poster: { mainUrl: string } | null
-    score: number | null
-    episodes: number
-    kind: string | null
-    status: string
-  }
+  candidates: RutrackerCandidateScore[]
+  shikimoriData?: PreviewShikimoriData
 }
 
 /** Аниме в наборе (bundle) */
@@ -282,15 +223,16 @@ export function ImportRutrackerContent() {
 
       // Подписываемся на прогресс
       unsubProgressRef.current = api.torrent.onProgress((info) => {
-        setDownloadProgress({
+        // TorrentProgress — компактный формат без totalSize, сохраняем его из предыдущего состояния
+        setDownloadProgress((prev) => ({
           infoHash: info.infoHash,
           progress: info.progress,
           downloadSpeed: info.downloadSpeed,
           uploadSpeed: info.uploadSpeed,
           numPeers: info.numPeers,
           downloaded: info.downloaded,
-          totalSize: info.totalSize,
-        })
+          totalSize: prev?.totalSize ?? 0,
+        }))
       })
 
       // Подписываемся на завершение
@@ -309,7 +251,8 @@ export function ImportRutrackerContent() {
 
       // Запускаем скачивание
       const downloadResponse = await api.rutracker.startDownload({
-        importResult: result,
+        // result.shikimoriData — усечённый превью-набор полей, для IPC нужны полные данные
+        importResult: { ...result, shikimoriData: confirmResponse.data },
         shikimoriData: confirmResponse.data,
         downloadPath: torrentSettings.downloadPath || undefined,
         isBundle,
@@ -582,14 +525,7 @@ function PreviewStep({
               </HStack>
             </VStack>
             {torrent.posterUrl && (
-              <Box
-                as="img"
-                src={torrent.posterUrl}
-                alt={torrent.nameRu}
-                maxH="120px"
-                borderRadius="md"
-                objectFit="cover"
-              />
+              <Image src={torrent.posterUrl} alt={torrent.nameRu} maxH="120px" borderRadius="md" objectFit="cover" />
             )}
           </HStack>
         </Card.Body>
@@ -686,7 +622,7 @@ function ShikimoriMatchCard({
   torrentExternalLinks,
   onMatchChange,
 }: {
-  match: MatchResult | null
+  match: RutrackerMatchResult | null
   shikimoriData?: ImportResult['shikimoriData']
   torrentExternalLinks?: TorrentInfo['externalLinks']
   onMatchChange: (newShikimoriId: number, newName: string, russian: string | null) => void
@@ -866,8 +802,7 @@ function ShikimoriMatchCard({
           </VStack>
           <VStack gap={2} align="end">
             {shikimoriData?.poster?.mainUrl && (
-              <Box
-                as="img"
+              <Image
                 src={
                   shikimoriData.poster.mainUrl.startsWith('http')
                     ? shikimoriData.poster.mainUrl

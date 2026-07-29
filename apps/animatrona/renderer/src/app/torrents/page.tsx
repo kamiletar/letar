@@ -1,4 +1,3 @@
-// @ts-nocheck — torrent IPC типы ещё не добавлены в electron.d.ts
 'use client'
 
 /**
@@ -17,6 +16,7 @@ import {
   Heading,
   HStack,
   Icon,
+  Image,
   Input,
   Portal,
   Progress,
@@ -24,7 +24,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   LuArrowDown,
   LuArrowUp,
@@ -47,36 +47,14 @@ import { BundleGroupingDialog } from '@/components/import/BundleGroupingDialog'
 import { ImportWizardDialog } from '@/components/import/ImportWizardDialog'
 import { Header } from '@/components/layout'
 import { toaster } from '@/components/ui/toaster'
+import type { TorrentInfo as CanonicalTorrentInfo, TorrentProgress } from '@/types/electron'
 
 export const dynamic = 'force-dynamic'
 
-/** Информация о торренте (дублируем для renderer) */
-interface TorrentInfo {
-  infoHash: string
-  name: string
-  totalSize: number
-  downloaded: number
-  uploaded: number
-  progress: number
-  downloadSpeed: number
-  uploadSpeed: number
-  numPeers: number
-  ratio?: number
-  status: 'adding' | 'downloading' | 'checking' | 'seeding' | 'paused' | 'error' | 'done'
-  path: string
-  addedAt?: number
-  importStatus?: 'none' | 'queued' | 'imported'
-  animeName?: string
-  shikimoriId?: number
-  error?: string
+/** Торрент с добавленным клиентским полем libraryAnimeId (заполняется enrichWithLibraryStatus) */
+interface TorrentInfo extends CanonicalTorrentInfo {
   /** ID аниме в библиотеке (заполняется enrichWithLibraryStatus) */
   libraryAnimeId?: string
-  /** Ссылка на страницу раздачи на Rutracker */
-  rutrackerUrl?: string
-  /** Набор из нескольких аниме */
-  isBundle?: boolean
-  /** JSON [{shikimoriId, animeName}] */
-  bundleAnimesJson?: string
 }
 
 /** Форматирование размера */
@@ -146,7 +124,6 @@ export function TorrentsContent() {
   const [torrentCategoryTab, setTorrentCategoryTab] = useState<'animatrona' | 'other'>('animatrona')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const unsubRef = useRef<(() => void) | null>(null)
 
   // Состояние ImportWizardDialog
   const [importDialogOpen, setImportDialogOpen] = useState(false)
@@ -268,18 +245,7 @@ export function TorrentsContent() {
       }
 
       // Обновление только прогресса (компактный формат, без files[] — снижает нагрузку на IPC)
-      const handleProgress = (data: unknown) => {
-        const p = data as {
-          infoHash: string
-          progress: number
-          downloadSpeed: number
-          uploadSpeed: number
-          numPeers: number
-          downloaded: number
-          uploaded: number
-          ratio: number
-          status: string
-        }
+      const handleProgress = (p: TorrentProgress) => {
         setTorrents((prev) => {
           const idx = prev.findIndex((t) => t.infoHash === p.infoHash)
           if (idx < 0) return prev
@@ -466,22 +432,23 @@ export function TorrentsContent() {
           toaster.error({ title: 'Ошибка поиска источника', description: res.error })
           return
         }
-        if (!res.data.found) {
+        const found = res.data
+        if (!found.found) {
           toaster.info({
             title: 'Ссылка не найдена',
             description: 'В комментарии раздачи нет ссылки на страницу Rutracker',
           })
           return
         }
-        if (res.data.linked) {
+        if (found.linked) {
           toaster.success({
-            title: `Источник найден: ${res.data.animeName ?? ''}`,
+            title: `Источник найден: ${found.animeName ?? ''}`,
             description: 'Торрент связан с раздачей Rutracker',
           })
           setTorrents((prev) =>
             prev.map((t) =>
               t.infoHash === infoHash
-                ? { ...t, rutrackerUrl: res.data.url, shikimoriId: res.data.shikimoriId, animeName: res.data.animeName }
+                ? { ...t, rutrackerUrl: found.url, shikimoriId: found.shikimoriId, animeName: found.animeName }
                 : t
             )
           )
@@ -490,7 +457,7 @@ export function TorrentsContent() {
             title: 'Ссылка найдена, но матч неуверенный',
             description: 'Откройте страницу и подтвердите аниме вручную во вкладке Rutracker',
           })
-          window.electronAPI?.app?.openExternal(res.data.url)
+          window.electronAPI?.app?.openExternal(found.url)
         }
       })
     },
@@ -556,8 +523,8 @@ export function TorrentsContent() {
           videoFiles = [`${torrent.path}/${torrent.name}`]
         } else if (api.fs) {
           const scanResult = await api.fs.scanFolder(folderPath, false)
-          if (scanResult.success && scanResult.data?.files) {
-            videoFiles = scanResult.data.files.map((f: { path: string }) => f.path)
+          if (scanResult.success && scanResult.files) {
+            videoFiles = scanResult.files.map((f) => f.path)
           }
         }
 
@@ -722,7 +689,7 @@ export function TorrentsContent() {
             setImportSourceUrl(undefined)
             setImportSourceTorrentCid(undefined)
             setImportExistingAnimeId(undefined)
-            setImportingInfoHash(null)
+            setImportingInfoHash(undefined)
           }
         }}
         initialData={importInitialData}
@@ -902,8 +869,7 @@ function TorrentCard({
           {/* Заголовок + постер + статус */}
           <HStack justify="space-between" align="start" gap={3}>
             {posterUrl && (
-              <Box
-                as="img"
+              <Image
                 src={posterUrl}
                 alt={torrent.animeName ?? torrent.name}
                 w="48px"

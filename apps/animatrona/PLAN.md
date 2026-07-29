@@ -10,27 +10,23 @@
       попало под recursive pin директории; полагаться на «где-то ещё есть» нельзя. IPFS не
       дублирует блоки по CID, так что это ничего не стоит. Теперь для просмотра аниме нужен
       только IPFS-гейтвей + `<gateway>/ipfs/<directoryCid>/play/` — без Animatrona, без
-      animatrona-web, без отдельной публикации.
-      - Новый `main/services/ipfs/play-folder-builder.ts` — переиспользует существующий
+      animatrona-web, без отдельной публикации. - Новый `main/services/ipfs/play-folder-builder.ts` — переиспользует существующий
       standalone-плеер из `web-export/asset-bundler.ts` (`buildDirectoryStructure`) и
       `web-export/manifest-generator.ts` (`generateManifest`, режим `referenced` — src в
       манифесте это голые CID, плеер резолвит их через gateway независимо от глубины папки).
       Строит `QueueExportConfig` из уже загруженных Prisma-данных аниме (включены ВСЕ эпизоды
       и ВСЕ аудио/суб-дорожки — в отличие от ручного экспорта, где пользователь выбирает
-      подмножество).
-      - `anime-directory-builder.ts` пробрасывает `play/` как ещё одну папку рядом с `meta/` и
+      подмножество). - `anime-directory-builder.ts` пробрасывает `play/` как ещё одну папку рядом с `meta/` и
       `source/`, строится **после** основного цикла по эпизодам. `play/episodes/NN/video.webm`
       и т.д. ссылаются на те же CID, что и основное дерево — IPFS не дублирует блоки, только
-      одна лишняя запись в directory listing.
-      - **Главы (OP/ED) — тоже в `play/`, не пропущены.** `chapters.json` каждого эпизода уже
+      одна лишняя запись в directory listing. - **Главы (OP/ED) — тоже в `play/`, не пропущены.** `chapters.json` каждого эпизода уже
       часть `directoryCid` (`episodes/NN/meta/chapters.json`, существовало и раньше) — сама
       по себе задача пин-безопасности тут была решена ещё до этой сессии. Не хватало только
       того, чтобы плеер в `play/` реально показывал метки: `buildPlayFolderEntries()` получает
       уже вычисленный `chaptersByEp` (episodeId → живой/восстановленный chaptersCid, из
       pre-pass'а `buildAnimeDirectory()`) и читает содержимое через `safeCat()` — никакого
       нового контента не пинится, только чтение уже пропинненного JSON для наполнения
-      `WebPlayerManifest.episodes[].chapters`.
-      - Prisma-запрос в `buildAnimeDirectory()` расширен: `season.number`, `title`/`streamIndex`/
+      `WebPlayerManifest.episodes[].chapters`. - Prisma-запрос в `buildAnimeDirectory()` расширен: `season.number`, `title`/`streamIndex`/
       `isDefault` у audio/subtitle треков (раньше выбирались только `language`/`dubGroup`).
 
 - [x] **Сохранение исходного .torrent файла в directoryCid + разделение торрентов по категории**
@@ -75,7 +71,7 @@
       TUN-VPN (Clash), хотя обычный Node-сокет проходил 200 OK — TUN режет по TLS-отпечатку,
       не по прокси-настройкам (`session.setProxy` тут бессилен, `resolveProxy()` возвращает
       `DIRECT`). Пофикшено переводом `main/services/shikimori/{client,anime-api,
-  franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно почищен несвязанный
+franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно почищен несвязанный
       SSR-краш `shaka-player` (`self is not defined`), блокировавший вообще любую сборку
       `nx build:win` с 3 июля — статический импорт заменён на динамический `import()` в
       `GlobalVideoProvider.tsx`/`useShakaPlayer.ts`.
@@ -145,18 +141,20 @@
 
 ## Открытые задачи
 
-### Дотипизировать rutracker/torrent IPC в electron.d.ts
-
-**Проблема:** `renderer/src/app/torrents/page.tsx` и `renderer/src/app/import-rutracker/page.tsx`
-живут под `// @ts-nocheck` — типы IPC-каналов `rutracker:*`/`torrent:*` объявлены только внутри
-preload-файлов (`main/preload/rutracker.preload.ts`, `main/preload/torrent.preload.ts`), но
-никогда не были добавлены в `renderer/src/types/electron.d.ts`. Каждый новый канал (последним —
-`rutracker:findSourceForTorrent`, добавлен 2026-07-29) просто наследует существующий пробел
-вместо ошибки типов, что делает `@ts-nocheck` самоподдерживающимся и растущим долгом.
-
-**Решение:** описать `rutracker`/`torrent` секции `window.electronAPI` в `electron.d.ts` (по
-образцу уже типизированных секций вроде `library`/`app`), убрать `@ts-nocheck` из обоих файлов
-и поправить всплывшие несоответствия типов.
+- [x] **Дотипизировать rutracker/torrent IPC в electron.d.ts** (v0.55.1) — описаны секции
+      `rutracker`/`torrent` в `ElectronAPI` + канонические типы (`RutrackerTorrentInfo`,
+      `RutrackerImportResult`, `TorrentInfo`, `TorrentProgress` и т.д.), `@ts-nocheck` убран из
+      `torrents/page.tsx` и `import-rutracker/page.tsx`. По пути найдены и починены реальные баги,
+      которые скрывал `@ts-nocheck`: прогресс скачивания терял `totalSize` на первом же tick
+      (перезаписывался `undefined`, т.к. `TorrentProgress` — компактный формат без этого поля);
+      `fs.scanFolder` в `handleImport` всегда возвращал 0 файлов при импорте из папки (код читал
+      несуществующее `scanResult.data.files` вместо `scanResult.files`); `handleFindSource`
+      терял TS-сужение по `res.data.found`/`res.data.linked` внутри вложенного `setTorrents`
+      колбэка (property-access narrowing не переживает границу closure — исправлено через
+      алиасинг в `const found = res.data`). Локальные дублирующиеся интерфейсы (`TorrentInfo`,
+      `MatchResult`, `CandidateScore` в обоих файлах) заменены на канонические импорты из
+      `@/types/electron`, устраняя источник будущего дрейфа типов. `Box as="img"` заменён на
+      Chakra `Image` (полиморфный `as="img"` не типизировал `src`).
 
 ### Миграция торрент-клиента: webtorrent → qBittorrent
 
@@ -492,7 +490,7 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
   - [x] Фаза 5: Упрощение renderer — удалён lib/import/ (~3000 строк мёртвого кода: ImportProcessor, use-import-flow, дубликаты audio/subtitle/chapter creators)
   - [x] Фаза 6: Очистка deprecated кода (export-manager deprecated полей, isPssuspendAvailable)
   - [x] Фаза 7: Фикс загрузки аудиодорожек в IPFS — handleAudioCompleted не загружал аудио после удаления renderer обработчика
-- [ ] **Восстановление аудиодорожек для аниме v0.44–v0.46.7** — аудио транскодировалось, но не загружалось в IPFS (transcodedCid = null). Temp файлы удалены, в IPFS аудио нет. Единственный вариант — переимпортировать аудио из исходников через "Добавить дорожки" или полный реимпорт. С v0.52.3 такие аниме честно попадают в `contentHealth: 'broken'` (раньше молчаливо считались `'complete'`); с v0.52.4 полный реимпорт через ссылку на Рутрекер сливается в ту же карточку автоматически — осталось выполнить сам реимпорт по списку затронутых аниме
+- [x] **Восстановление аудиодорожек для аниме v0.44–v0.46.7** — задача устарела: вместо точечного восстановления затронутая библиотека переимпортируется заново с Рутрекера целиком (см. «Реимпорт с Рутрекера сливается в существующее аниме», v0.52.4) — механизм для этого уже готов, остался только сам прогон по списку.
 - [x] **Автодетекция GPU и CPU профили кодирования** — определение поколения GPU (Blackwell/Ada/Ampere/Turing), условный seed профилей, CPU кодирование через SVT-AV1/libx265
 - [x] **Импорт из Рутрекера** — вставить ссылку → парсинг → скачивание → энкод (см. ТЗ ниже)
   - [x] Фаза 1: Парсер Рутрекера + тесты (cheerio, 100 тестов)
@@ -537,7 +535,26 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
   - `app/watch/_hooks/useGlobalVideo.ts` — initVideo/minimize/expand
   - `app/layout.tsx` — `<GlobalVideoProvider>` обёртка
 
-- [ ] **Синхронизация прогресса с трекером** — отправлять DiscoverWatchProgress на animatrona-tracker для кросс-устройственного просмотра
+- [ ] **Синхронизация прогресса с трекером — бесшовный переход между устройствами** —
+      отправлять `DiscoverWatchProgress` на animatrona-tracker, но сама задача шире точечной
+      синхронизации прогресса. Сценарий: начал смотреть на компьютере → ушёл с телефоном
+      (продолжить в дороге) → досмотрел на телевизоре → на кухне переключился на колонку/Алису
+      (аудио-часть или просто пауза до возврата к экрану). Переход между устройствами должен
+      быть максимально малошовным — минимум ручных действий («найди серию → перемотай на то же
+      место»).
+
+      **Нужно сначала исследовать:**
+          - Как часто обновлять прогресс (текущий троттлинг MiniPlayer — 5 сек, см. Фазу 7 выше) —
+            для кросс-девайсной синхронизации может понадобиться чаще или push вместо polling.
+          - Конфликты одновременного просмотра с двух устройств (какой прогресс побеждает).
+          - Что делает animatrona-tracker уже сейчас (`tracker-sync.ts`, `MobileProgressSync` в
+            мобильном клиенте) — как это распространяется на TV/десктоп/умные колонки.
+          - Нужен ли push (WebSocket/SSE) вместо периодического pull для «мгновенного» подхвата на
+            новом устройстве без ручного обновления страницы.
+          - Место Yandex Алисы/умных колонок в этом сценарии — скорее всего голосовое продолжение
+            аудиодорожки, не самостоятельный видеоклиент; отдельно оценить, насколько это отдельная
+            интеграция (Yandex Dialogs/умный дом) vs расширение существующих клиентов.
+
 - [x] **Мобильный клиент (React Native)** — реализован в `apps/animatrona-mobile/` (v0.3.1+)
 - [ ] **ActivityPub федерация** — серверная часть в animatrona-tracker
 - [ ] **Поддержка Intel QSV и AMD AMF** — hw encode для Intel Arc (av1_qsv) и AMD RX 7000+ (av1_amf). Детекция через `ffmpeg -encoders`, отдельные наборы профилей. По фидбеку от пользователей

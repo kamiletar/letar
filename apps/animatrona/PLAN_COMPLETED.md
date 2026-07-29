@@ -6,6 +6,46 @@
 
 ---
 
+## v0.55.1 — Дотипизация rutracker/torrent IPC в electron.d.ts (2026-07-29)
+
+**Задача:** `torrents/page.tsx` и `import-rutracker/page.tsx` жили под `// @ts-nocheck` — типы
+IPC-каналов `rutracker:*`/`torrent:*` были объявлены только в preload-файлах, но никогда не
+добавлялись в `renderer/src/types/electron.d.ts`. Каждый новый канал наследовал этот пробел
+вместо ошибки типов.
+
+**Реализация:**
+
+- В `electron.d.ts` описаны секции `rutracker`/`torrent` интерфейса `ElectronAPI` (по образцу
+  уже типизированных секций вроде `library`/`app`) + канонические типы, зеркалящие реальные
+  main-side типы: `RutrackerTorrentInfo`, `RutrackerDubGroup`, `RutrackerAudioTrack`,
+  `RutrackerMediaInfo`, `RutrackerExternalLinks`, `RutrackerMatchResult`,
+  `RutrackerCandidateScore`, `RutrackerImportResult`, `TorrentStatus`, `TorrentFileInfo`,
+  `TorrentInfo`, `TorrentProgress`, `AddTorrentOptions`, `StartDownloadParams`,
+  `StartDownloadResult`.
+- `@ts-nocheck` убран из обоих файлов. Локальные дублирующиеся интерфейсы (`TorrentInfo`,
+  `MatchResult`, `CandidateScore` в обоих файлах) заменены на канонические импорты из
+  `@/types/electron` — устраняет источник будущего дрейфа типов между preload и renderer.
+  `import-rutracker/page.tsx` сохранил узкий локальный тип `PreviewShikimoriData` для
+  превью-состояния (до `confirmMatch` доступен только усечённый набор полей Shikimori, а не
+  полный `ShikimoriAnimeExtended`) — при запуске скачивания подставляется полный объект из
+  `confirmMatch`.
+
+**Найденные и починенные баги (были скрыты `@ts-nocheck`):**
+
+- Прогресс скачивания терял `totalSize`: `TorrentProgress` — компактный формат IPC-события без
+  этого поля, а код перезаписывал состояние им напрямую, обнуляя `totalSize` на первом же tick.
+  Исправлено функциональным `setState`, сохраняющим `totalSize` из предыдущего состояния.
+- `handleImport` в `torrents/page.tsx` при импорте из папки (не одиночный файл) всегда находил
+  0 видеофайлов — код читал `scanResult.data.files`, но `fs.scanFolder` возвращает
+  `{success, files}` без обёртки `data`.
+- `handleFindSource` терял TS-сужение по дискриминанту `res.data.found`/`res.data.linked`
+  внутри вложенного колбэка `setTorrents((prev) => prev.map(...))` — property-access narrowing
+  не переживает границу closure. Исправлено алиасингом в `const found = res.data` перед
+  ветвлением (narrowing простого identifier'а сохраняется в замыканиях).
+- `Box as="img"` в обоих файлах не типизировал `src` (полиморфный `as` Chakra Box) — заменено
+  на компонент `Image` из `@chakra-ui/react`, уже используемый в остальной кодовой базе
+  (`ShikimoriAnimeCard.tsx`).
+
 ## v0.55.0 — Авто-импорт по ссылке из комментария .torrent файла (2026-07-29)
 
 **Задача:** торренты, добавленные вручную в qBittorrent (не через Animatrona, вкладка
