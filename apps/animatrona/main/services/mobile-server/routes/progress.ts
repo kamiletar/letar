@@ -10,6 +10,7 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import { withDbRetry } from '../../../utils/db-retry'
 import { createModuleLogger } from '../../../utils/logger'
 import { getDb } from '../../database'
+import { getTrackerSyncService } from '../../tracker-sync'
 import { mobileProgressEvents } from '../progress-events'
 import type { MobileWatchProgress } from '../types'
 
@@ -21,7 +22,7 @@ const log = createModuleLogger('MobileProgress')
 export async function handleProgressRequest(
   req: IncomingMessage,
   res: ServerResponse,
-  episodeId: string
+  episodeId: string,
 ): Promise<void> {
   const db = getDb()
 
@@ -90,7 +91,7 @@ async function handleSaveProgress(
   req: IncomingMessage,
   res: ServerResponse,
   db: ReturnType<typeof getDb>,
-  episodeId: string
+  episodeId: string,
 ): Promise<void> {
   // Парсим body
   const body = await parseBody(req)
@@ -111,7 +112,7 @@ async function handleSaveProgress(
   // Получаем эпизод с animeId
   const episode = await db.episode.findUnique({
     where: { id: episodeId },
-    select: { animeId: true, durationMs: true },
+    select: { animeId: true, durationMs: true, number: true },
   })
 
   if (!episode) {
@@ -151,7 +152,7 @@ async function handleSaveProgress(
           lastWatchedAt: new Date(),
         },
       }),
-    { context: 'mobile:saveProgress' }
+    { context: 'mobile:saveProgress' },
   )
 
   // Обновляем статус просмотра аниме если эпизод завершён
@@ -169,6 +170,17 @@ async function handleSaveProgress(
 
   // Уведомляем renderer через IPC об обновлении прогресса с мобильного
   mobileProgressEvents.emit('saved', { animeId: episode.animeId, episodeId })
+
+  // Пробрасываем прогресс на трекер (fire-and-forget) — без этого прогресс,
+  // сохранённый через мобильный/TV-клиент, улетает на трекер только с 5-минутным
+  // полным sync (или не улетает вовсе, если Desktop выключат раньше)
+  getTrackerSyncService().pushWatchProgressImmediate({
+    animeId: episode.animeId,
+    episodeNumber: episode.number,
+    currentTime,
+    duration: episode.durationMs ? episode.durationMs / 1000 : 0,
+    completed: isCompleted,
+  })
 
   const response: MobileWatchProgress = {
     currentTime: progress.currentTime,
@@ -348,7 +360,7 @@ export async function handleLastWatchedRequest(res: ServerResponse): Promise<voi
             completed: false,
             lastWatchedAt: new Date().toISOString(),
           },
-        })
+        }),
       )
       return
     }

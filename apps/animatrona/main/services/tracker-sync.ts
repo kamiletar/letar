@@ -81,7 +81,10 @@ class TrackerSyncService {
 
   private fullSyncTimer: ReturnType<typeof setInterval> | null = null
   private progressPollTimer: ReturnType<typeof setInterval> | null = null
-  private pushDebounceTimer: ReturnType<typeof setTimeout> | null = null
+  /** Debounce-таймеры push прогресса, ключ `${trackerAnimeId}:${episodeNumber}` —
+   * отдельный таймер на каждую пару аниме+серия, чтобы переключение эпизода не
+   * отменяло ещё не отправленный push предыдущего (было общее поле на весь сервис) */
+  private pushDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>()
   private running = false
   private syncInProgress = false
 
@@ -146,10 +149,10 @@ class TrackerSyncService {
       clearInterval(this.progressPollTimer)
       this.progressPollTimer = null
     }
-    if (this.pushDebounceTimer) {
-      clearTimeout(this.pushDebounceTimer)
-      this.pushDebounceTimer = null
+    for (const timer of this.pushDebounceTimers.values()) {
+      clearTimeout(timer)
     }
+    this.pushDebounceTimers.clear()
 
     log.info('Фоновая синхронизация остановлена')
   }
@@ -266,8 +269,10 @@ class TrackerSyncService {
       return
     }
 
-    if (this.pushDebounceTimer) {
-      clearTimeout(this.pushDebounceTimer)
+    const debounceKey = `${trackerAnimeId}:${params.episodeNumber}`
+    const existingTimer = this.pushDebounceTimers.get(debounceKey)
+    if (existingTimer) {
+      clearTimeout(existingTimer)
     }
 
     const normalizedPayload = {
@@ -279,8 +284,8 @@ class TrackerSyncService {
       updatedAt: new Date().toISOString(),
     }
 
-    this.pushDebounceTimer = setTimeout(() => {
-      this.pushDebounceTimer = null
+    const timer = setTimeout(() => {
+      this.pushDebounceTimers.delete(debounceKey)
       const config = loadTrackerConfig()
       if (!config.apiKey) {
         return
@@ -296,6 +301,7 @@ class TrackerSyncService {
           this.enqueueIfNeeded('watchProgress', normalizedPayload)
         })
     }, PUSH_DEBOUNCE)
+    this.pushDebounceTimers.set(debounceKey, timer)
   }
 
   /**
@@ -410,17 +416,17 @@ class TrackerSyncService {
         // Каскадный поиск: directoryCid → manifestCid → shikimoriId (fallback при смене CID)
         let localAnime = item.directoryCid
           ? await prisma.anime.findFirst({
-              where: { directoryCid: item.directoryCid },
-              select: {
-                id: true,
-                updatedAt: true,
-                shikimoriId: true,
-                name: true,
-                posterCid: true,
-                directoryCid: true,
-                pinnedLocally: true,
-              },
-            })
+            where: { directoryCid: item.directoryCid },
+            select: {
+              id: true,
+              updatedAt: true,
+              shikimoriId: true,
+              name: true,
+              posterCid: true,
+              directoryCid: true,
+              pinnedLocally: true,
+            },
+          })
           : null
         // TODO: удалить fallback по manifestCid после миграции всех клиентов на directoryCid
         if (!localAnime) {
