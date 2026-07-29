@@ -7,13 +7,14 @@
  */
 
 import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { usePolledData } from '@letar/hooks'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { usePathname, useRouter } from 'next/navigation'
-import { memo, useEffect, useState } from 'react'
+import { memo } from 'react'
 import { LuPlay } from 'react-icons/lu'
 
-import { findGlobalLastWatched, type GlobalLastWatchedData } from '@/app/_actions/watch-progress.action'
+import { findGlobalLastWatched } from '@/app/_actions/watch-progress.action'
 
 /** Форматирует время в минуты:секунды */
 function formatTime(seconds: number): string {
@@ -32,45 +33,16 @@ function formatTime(seconds: number): string {
 export const ContinueWatchingCard = memo(function ContinueWatchingCard() {
   const pathname = usePathname()
   const router = useRouter()
-  const [data, setData] = useState<GlobalLastWatchedData | null>(null)
-  const [loading, setLoading] = useState(true)
 
   // Скрываем на странице просмотра — во время просмотра карточка бессмысленна
   const isOnWatchPage = pathname?.startsWith('/watch')
 
   // Загружаем данные при монтировании, смене роута и при возвращении на страницу
-  useEffect(() => {
-    // Не загружаем на странице просмотра
-    if (isOnWatchPage) {
-      return
-    }
-
-    const load = async () => {
-      try {
-        const result = await findGlobalLastWatched()
-        setData(result)
-      } catch (error) {
-        console.error('[ContinueWatchingCard] Ошибка загрузки:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-
-    // Обновляем при фокусе на окно
-    const handleFocus = () => {
-      load()
-    }
-    window.addEventListener('focus', handleFocus)
-
-    // Обновляем каждые 30 секунд
-    const interval = setInterval(load, 30000)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [isOnWatchPage]) // Перезагружаем при смене роута
+  const { data, loading } = usePolledData(findGlobalLastWatched, {
+    intervalMs: 30000,
+    refetchOnFocus: true,
+    enabled: !isOnWatchPage,
+  })
 
   // Не показываем на странице просмотра или если нет данных
   if (isOnWatchPage || loading || !data) {

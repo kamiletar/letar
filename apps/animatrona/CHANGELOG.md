@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.11] - 2026-07-29
+
+### Changed
+
+- **Устранено дублирование poll-паттерна в `Sidebar`-карточках** — `ContinueWatchingCard` и
+  `WatchNextCard` почти дословно повторяли один и тот же каркас (`useState` данных + `useState`
+  загрузки, mount-fetch в `useEffect`, `setInterval` рефетч, `focus`-листенер, cleanup). Вынесено
+  в переиспользуемый хук `usePolledData<T>(fetchFn, { intervalMs, refetchOnFocus?, enabled? })` в
+  `@letar/hooks` (универсальный паттерн, полезный за пределами Sidebar). Оба компонента переведены
+  на хук с сохранением текущего поведения, включая `enabled: !isOnWatchPage` у
+  `ContinueWatchingCard`. Верифицировано `nx typecheck:tsgo`.
+
 ## [0.55.10] - 2026-07-29
 
 ### Changed

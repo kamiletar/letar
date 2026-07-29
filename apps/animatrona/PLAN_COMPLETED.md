@@ -6,6 +6,25 @@
 
 ---
 
+## v0.55.11 — Хук usePolledData: устранение дублирования в Sidebar-карточках (2026-07-29)
+
+**Задача:** `ContinueWatchingCard` и `WatchNextCard` почти дословно повторяли один и тот же каркас
+опроса данных — `useState<T | null>` + `useState<boolean>` загрузки, mount-fetch в `useEffect`,
+`setInterval` рефетч (30 сек / 60 сек), `focus`-листенер, cleanup через `clearInterval` +
+`removeEventListener`.
+
+**Реализовано:** общий паттерн вынесен в хук `usePolledData<T>(fetchFn, { intervalMs,
+refetchOnFocus?, enabled? })` → `{ data, loading, refetch }` в `libs/hooks/src/lib/query/
+use-polled-data.ts`, экспортирован из `@letar/hooks` (пакет уже существовал на момент задачи —
+хук универсален, не завязан на Sidebar, поэтому положен туда, а не локально в приложение). Оба
+компонента переведены на хук:
+
+- `ContinueWatchingCard`: `intervalMs: 30000, refetchOnFocus: true, enabled: !isOnWatchPage` —
+  условие скрытия на странице `/watch` транслировано в `enabled`.
+- `WatchNextCard`: `intervalMs: 60000, refetchOnFocus: true`.
+
+Поведение обоих компонентов не изменилось. Верифицировано `nx typecheck:tsgo animatrona`.
+
 ## v0.55.10 — Аудит производительности: React.memo для Sidebar-карточек (2026-07-29)
 
 **Задача:** продолжение ветки «Аудит производительности» из PLAN.md — конкретно пункт

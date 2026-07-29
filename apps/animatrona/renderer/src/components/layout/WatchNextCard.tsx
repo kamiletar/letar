@@ -8,7 +8,8 @@
  */
 
 import { Box, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
-import { memo, useEffect, useState } from 'react'
+import { usePolledData } from '@letar/hooks'
+import { memo } from 'react'
 import { LuArrowRight } from 'react-icons/lu'
 
 import { toMediaUrl } from '@/lib/media-url'
@@ -31,37 +32,12 @@ interface WatchNextData {
  */
 export const WatchNextCard = memo(function WatchNextCard() {
   const router = useRouter()
-  const [data, setData] = useState<WatchNextData | null>(null)
-  const [loading, setLoading] = useState(true)
 
-  // Загружаем рекомендацию при монтировании
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await getWatchNextSuggestion()
-        setData(result)
-      } catch (error) {
-        console.error('[WatchNextCard] Ошибка загрузки:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-
-    // Обновляем при фокусе на окно (после просмотра)
-    const handleFocus = () => {
-      load()
-    }
-    window.addEventListener('focus', handleFocus)
-
-    // Обновляем каждые 60 секунд
-    const interval = setInterval(load, 60000)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [])
+  // Загружаем рекомендацию при монтировании, обновляем при фокусе и каждые 60 секунд
+  const { data, loading } = usePolledData<WatchNextData | null>(getWatchNextSuggestion, {
+    intervalMs: 60000,
+    refetchOnFocus: true,
+  })
 
   // Не показываем если нет данных или загрузка
   if (loading || !data) {
