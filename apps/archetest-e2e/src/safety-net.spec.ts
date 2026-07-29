@@ -1,3 +1,4 @@
+import { clickWithHydrationRetry } from '@letar/e2e-testing'
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -27,6 +28,14 @@ import path from 'node:path'
  * баллом по DPR+BAR+BOR и выбирает именно его. Это гарантированно даёт 100%
  * (значит и ≥60%) по формуле нормализации TZ v2 (raw/actualMax по отвеченным
  * вопросам), см. calculateScores в quiz.action.ts.
+ *
+ * Согласие с дисклеймером (найдено 2026-07-29): staging-БД персистентна между
+ * прогонами, а `dev-session` переиспользует одного и того же пользователя по
+ * `TEST_EMAIL` — если согласие уже было принято в БД в прошлом прогоне,
+ * `DisclaimerConsent` не рендерится вовсе и кнопка сразу enabled; если нет —
+ * кнопка disabled, пока чекбокс не кликнут. Тест не может полагаться на то,
+ * в каком из двух состояний окажется свежий staging-раннер, поэтому кликает
+ * чекбокс только когда кнопка ещё disabled.
  */
 
 const ARCHETEST_DIR = path.join(__dirname, '../../archetest')
@@ -79,12 +88,18 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     const bestOptionByScenario = buildBestOptionMap()
 
     await page.goto(
-      `/api/auth/dev-session?email=${encodeURIComponent(TEST_EMAIL)}&token=${encodeURIComponent(
-        devSessionToken
-      )}&redirect=/ru`
+      `/api/auth/dev-session?email=${encodeURIComponent(TEST_EMAIL)}&token=${
+        encodeURIComponent(
+          devSessionToken,
+        )
+      }&redirect=/ru`,
     )
 
     const startButton = page.getByRole('button', { name: 'Начать тест' })
+    if (await startButton.isDisabled()) {
+      const consentCheckbox = page.locator('[data-part="control"]').first()
+      await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
+    }
     await expect(startButton).toBeEnabled({ timeout: 15_000 })
     await startButton.click()
 
