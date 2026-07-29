@@ -825,7 +825,11 @@ env:
   sinceLine), `deploy_cancel`, `git_status`, `list_servers`, `agent_health`. Фазы 2: `run_e2e`, `e2e_status`.
   Токен — из `apps/dashboard-agent/.env.docker` (SOPS), не из `.mcp.json`.
 - **`libs/infra-config`** — единый маппинг app→server (`SERVER_APPS`, `getCurrentServer()`) для
-  dashboard-agent и deploy-mcp вместо трёх копий.
+  dashboard-agent и deploy-mcp вместо трёх копий. 2026-07-30: тем же паттерном добавлен
+  `APP_PORTS`/`getAppPort()` — убрал дублирование карты HTTP-портов между
+  `dashboard/app-metrics.ts` (прямой импорт) и `dashboard-agent/app-registry.ts` (локальная
+  копия + `app-registry.guard.spec.ts`, Docker-изоляция агента). Список «кого мониторить/
+  вызывать» у каждого потребителя остался своим — канон описывает только номер порта.
 - **dashboard-agent**: deployId + ring-buffer истории (20) + cap логов (2000 строк) + sinceLine; `staging`
   в body; spawn аргументами без `bash -c`; **серверный guard** (s3 принимает только staging, s2 — только
   production); `docker-compose.s3.yml` (без прод-секретов, отдельный AGENT_TOKEN).
@@ -1114,7 +1118,7 @@ svoichuzhie, aboi, aprel8008**. У всех пяти уже есть `<app>-e2e`
   локальным, не запушенным в `origin/main` — `git push` сделан, ветка синхронизирована.
 - **🔴 Третий блокер, найден тем же прогоном: у archetest не было `docker-compose.staging.yml`**
   — `deploy_app(archetest, staging)` отвечал успехом, но ничего не разворачивал (`No
-  docker-compose.staging.yml found for archetest, skipping...`). Без staging-инстанса
+docker-compose.staging.yml found for archetest, skipping...`). Без staging-инстанса
   `run_e2e` бить некуда — гейт был бы заблокирован навсегда. **Заведён** (root-weaver, по
   образцу dsperevod/svoichuzhie): `apps/archetest/docker-compose.staging.yml` (БД-порт 5463,
   app-порт 3030, домен `archetest-stage.s3.letar.best` — валиден по существующему DNS
@@ -1124,7 +1128,7 @@ svoichuzhie, aboi, aprel8008**. У всех пяти уже есть `<app>-e2e`
   BlackCove упёрся в то, что dashboard-agent на s3 живёт по отдельному `docker-compose.s3.yml`,
   обычный staging-путь его не видит, идёт через SSH напрямую как резервный канал); (2) первый
   живой `deploy_app(archetest, staging)` → `run_e2e` → зелёный → `deploy_app(archetest,
-  production)` — теперь технически возможен (staging-конфиг есть), но ещё не пройден.
+production)` — теперь технически возможен (staging-конфиг есть), но ещё не пройден.
 - dsperevod/svoichuzhie/aprel8008 технически покрыты тем же кодом (список общий) и у них уже
   ЕСТЬ `docker-compose.staging.yml` — блокер выше был специфичен для archetest. Их собственный
   живой прогон не приоритет этой сессии.

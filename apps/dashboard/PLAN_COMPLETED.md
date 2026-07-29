@@ -2,6 +2,34 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.2 — единый канон APP_PORTS (2026-07-30, dashboard-dev)
+
+Закрыл первый пункт backlog «единый источник правды для реестра приложений» (найден 2026-07-15
+при чистке `premium-rosstil`/`imot`) — карту `app → port`. `SERVER_APPS` уже был вынесен в
+`@letar/infra-config` раньше; по тому же паттерну добавлен `APP_PORTS`/`getAppPort()`.
+
+`app-metrics.ts` теперь импортирует порт напрямую из `@letar/infra-config` (dashboard не
+Docker-изолирован — подключил лib в `tsconfig.json`/`package.json`/`next.config.ts`
+transpilePackages). `dashboard-agent/app-registry.ts` держит локальную копию значений (его
+`Dockerfile.production` не видит `libs/`), дрейф от канона теперь ловит новый
+`app-registry.guard.spec.ts` — тот же приём, что уже был у `server-config.guard.spec.ts`.
+
+Список «кого мониторим» (`MONITORED_APPS`) в обоих модулях остался явным локальным решением —
+канон отвечает только за «какой у кого порт», не за то, кого включать в опрос/вызовы. Это
+осознанно: слепое использование полного канона вместо текущего явного списка расширило бы
+набор health-check'аемых/вызываемых приложений тихо, без решения разработчика.
+
+**Сознательно не тронуто** (не тот же класс дублирования — самостоятельные curated-списки со
+своей бизнес-логикой, а не текстовое повторение одного факта): `SUPPORTED_DATABASES`
+(`constants.ts`, allow-list из 3 приложений для UI восстановления бэкапов — сильно уже, чем
+16 приложений в `dashboard-agent/database.ts` `APP_CONFIG`, возможно баг, но отдельная задача),
+`KNOWN_APPS` (`deploy/history/page.tsx`, ручной UI-фильтр из 2 значений), `APP_CONFIG` в
+`dashboard-agent/database.ts` (единственный владелец этих данных — `dashboard/lib/secrets.ts`
+с аналогичной картой уже удалён в Фазе 2 v1.18.0).
+
+Проверено: `typecheck:tsgo`/`typecheck`, `test`, `lint`, `build` — зелёные для `infra-config`,
+`dashboard`, `dashboard-agent`. Коммит `759110cb`.
+
 ## Версия 1.20.1 — X-Cron-Secret через @letar/api-server (2026-07-28)
 
 Закрыт хвост из корневого `PLAN.md` §0: проверка `CRON_SECRET` была продублирована идентичным кодом
