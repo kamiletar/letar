@@ -3,8 +3,8 @@
 import { getAudioContext } from '@/lib/audio/context'
 import type { DrumEngine } from '@/lib/audio/drums'
 import { StepSequencer } from '@/lib/audio/sequencer'
-import type { DrumkitPatch } from '@/lib/patch/schema'
-import type { RefObject } from 'react'
+import type { DrumkitPatch, SequencerPattern } from '@/lib/patch/schema'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export const SEQUENCER_PADS = 16
@@ -14,19 +14,27 @@ function emptyPattern(): boolean[][] {
   return Array.from({ length: SEQUENCER_PADS }, () => Array<boolean>(SEQUENCER_STEPS).fill(false))
 }
 
+function emptySequence(): SequencerPattern {
+  return { pattern: emptyPattern(), bpm: 120 }
+}
+
 interface UseDrumSequencerOptions {
   drumEngineRef: RefObject<DrumEngine | null>
   drumPatchRef: RefObject<DrumkitPatch>
+  setDrumPatch: Dispatch<SetStateAction<DrumkitPatch>>
   // Визуальная подсветка пэда — переиспользует существующий activePads-механизм студии,
   // сам звук секвенсор триггерит сам (не через handlePadHit, чтобы не дублировать логику).
   onPadHit: (index: number) => void
 }
 
 // Степ-секвенсор драм-кита: 16 пэдов × 16 шагов, планирование через StepSequencer (lookahead
-// по аудио-часам). Паттерн живёт только в памяти студии — сохранение вместе с патчем не сделано.
-export function useDrumSequencer({ drumEngineRef, drumPatchRef, onPadHit }: UseDrumSequencerOptions) {
-  const [pattern, setPattern] = useState<boolean[][]>(emptyPattern)
-  const [bpm, setBpm] = useState(120)
+// по аудио-часам). Паттерн хранится прямо в `drumPatch.engine.sequence` — сохраняется/грузится
+// через обычный поток PatchLibrary (IndexedDB), отдельного стораджа для секвенсора не заводили.
+export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, onPadHit }: UseDrumSequencerOptions) {
+  const sequence = drumPatchRef.current.engine.sequence ?? emptySequence()
+  const pattern = sequence.pattern
+  const bpm = sequence.bpm
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
 
@@ -87,18 +95,40 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, onPadHit }: UseD
     }
   }, [isPlaying, play, stop])
 
-  const toggleStep = useCallback((padIndex: number, stepIndex: number) => {
-    setPattern((prev) => {
-      const next = prev.map((row) => [...row])
-      next[padIndex] = [...next[padIndex]]
-      next[padIndex][stepIndex] = !next[padIndex][stepIndex]
-      return next
-    })
-  }, [])
+  // Пишет напрямую в drumPatch.engine.sequence — так паттерн живёт вместе с остальным
+  // патчем и сохраняется/грузится через PatchLibrary без отдельного кода.
+  const updateSequence = useCallback(
+    (updater: (prev: SequencerPattern) => SequencerPattern) => {
+      setDrumPatch((prev) => ({
+        ...prev,
+        engine: { ...prev.engine, sequence: updater(prev.engine.sequence ?? emptySequence()) },
+      }))
+    },
+    [setDrumPatch]
+  )
+
+  const setBpm = useCallback(
+    (next: number) => {
+      updateSequence((prev) => ({ ...prev, bpm: Math.max(40, Math.min(240, next)) }))
+    },
+    [updateSequence]
+  )
+
+  const toggleStep = useCallback(
+    (padIndex: number, stepIndex: number) => {
+      updateSequence((prev) => {
+        const next = prev.pattern.map((row) => [...row])
+        next[padIndex] = [...next[padIndex]]
+        next[padIndex][stepIndex] = !next[padIndex][stepIndex]
+        return { ...prev, pattern: next }
+      })
+    },
+    [updateSequence]
+  )
 
   const clear = useCallback(() => {
-    setPattern(emptyPattern())
-  }, [])
+    updateSequence((prev) => ({ ...prev, pattern: emptyPattern() }))
+  }, [updateSequence])
 
   return { pattern, bpm, setBpm, isPlaying, currentStep, toggle, toggleStep, clear }
 }

@@ -141,8 +141,17 @@ export const DrumPadSchema = z.object({
   synth: DrumPadSynthSchema.nullable(),
 })
 
+// Паттерн степ-секвенсора (16 пэдов × 16 шагов) — опционален: старые патчи и свежесозданные
+// киты его не имеют, тогда студия подставляет пустую сетку и BPM 120 (см. use-drum-sequencer.ts)
+export const SequencerPatternSchema = z.object({
+  pattern: z.array(z.array(z.boolean()).min(16).max(16)).min(16).max(16),
+  bpm: z.number().int().min(40).max(240),
+})
+export type SequencerPattern = z.infer<typeof SequencerPatternSchema>
+
 export const DrumkitEngineSchema = z.object({
   pads: z.array(DrumPadSchema).min(16).max(16),
+  sequence: SequencerPatternSchema.optional(),
 })
 export type DrumkitEngineParams = z.infer<typeof DrumkitEngineSchema>
 export type DrumPadSynth = z.infer<typeof DrumPadSynthSchema>

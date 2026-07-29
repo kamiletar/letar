@@ -105,16 +105,16 @@ export function StudioClient() {
       }
       flashPad(index)
     },
-    [flashPad]
+    [flashPad],
   )
 
-  const sequencer = useDrumSequencer({ drumEngineRef, drumPatchRef, onPadHit: flashPad })
+  const sequencer = useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, onPadHit: flashPad })
 
   const handlePadChange = useCallback((pad: DrumPad) => {
     setDrumPatch((p) => {
       const pads = [...p.engine.pads] as DrumkitPatch['engine']['pads']
       pads[pad.index] = pad
-      return { ...p, engine: { pads } }
+      return { ...p, engine: { ...p.engine, pads } }
     })
   }, [])
 
@@ -138,7 +138,7 @@ export function StudioClient() {
       }
       setActiveNotes((prev) => new Set([...prev, midiNote]))
     },
-    [handlePadHit, padMidiLearn.handleLearnNote, padMidiLearn.resolve]
+    [handlePadHit, padMidiLearn.handleLearnNote, padMidiLearn.resolve],
   )
 
   const handleNoteOff = useCallback((midiNote: number) => {
@@ -162,7 +162,7 @@ export function StudioClient() {
       setPatch((p) => applyCC(p, cc, value))
       hardware.recordCC(cc, value)
     },
-    [hardware]
+    [hardware],
   )
 
   // Энкодеры пока управляют только SUB-патчем (как и фейдеры) — FM/DRUM живой контроль ручками
@@ -172,7 +172,7 @@ export function StudioClient() {
       setPatch((p) => applyEncoderValue(p, index, value, bank))
       hardware.recordEncoder(index, value, bank)
     },
-    [hardware]
+    [hardware],
   )
 
   // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
@@ -244,12 +244,11 @@ export function StudioClient() {
 
   // Детерминированный рендер текущего патча в WAV — по типу активного движка
   const handleRenderWav = useCallback(() => {
-    const current =
-      engineTypeRef.current === 'fm'
-        ? fmPatchRef.current
-        : engineTypeRef.current === 'drumkit'
-          ? drumPatchRef.current
-          : patchRef.current
+    const current = engineTypeRef.current === 'fm'
+      ? fmPatchRef.current
+      : engineTypeRef.current === 'drumkit'
+      ? drumPatchRef.current
+      : patchRef.current
     wavRender.render(current)
   }, [wavRender])
 
@@ -298,7 +297,7 @@ export function StudioClient() {
         setEngineType(type)
       }
     },
-    [started]
+    [started],
   )
 
   const handleEngineChange = useCallback(
@@ -309,7 +308,7 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes]
+    [activeNotes],
   )
 
   // FM-патч обновляется синхронно в воркслет при изменении любого параметра
@@ -550,40 +549,44 @@ export function StudioClient() {
 
         {/* Панели параметров — переключаемые по движку */}
         <MentorFocusZone active={mentor.focusSection === 'engine'} p={1}>
-          {engineType === 'subtractive' ? (
-            <Box display="flex" flexDir="column" gap={2}>
-              <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-              <PatchLibrary
-                type="subtractive"
-                currentPatch={patch}
-                onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
+          {engineType === 'subtractive'
+            ? (
+              <Box display="flex" flexDir="column" gap={2}>
+                <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+                <PatchLibrary
+                  type="subtractive"
+                  currentPatch={patch}
+                  onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
+                />
+              </Box>
+            )
+            : engineType === 'drumkit'
+            ? (
+              <DrumkitColumn
+                drumPatch={drumPatch}
+                selectedPad={selectedPad}
+                onPadChange={handlePadChange}
+                onLoadDrumkit={handleLoadDrumkit}
+                padMidiLearn={padMidiLearn}
+                sequencer={sequencer}
               />
-            </Box>
-          ) : engineType === 'drumkit' ? (
-            <DrumkitColumn
-              drumPatch={drumPatch}
-              selectedPad={selectedPad}
-              onPadChange={handlePadChange}
-              onLoadDrumkit={handleLoadDrumkit}
-              padMidiLearn={padMidiLearn}
-              sequencer={sequencer}
-            />
-          ) : (
-            <Box display="flex" flexDir="column" gap={2}>
-              <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
-              <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
-              <FmHardwareControls
-                midiDevices={midiDevices}
-                syxImportStatus={syxImportStatus}
-                sendStatus={sendStatus}
-                readStatus={readStatus}
-                onDownloadSyx={handleDownloadSyx}
-                onImportSyxFile={(file) => void handleImportSyxFile(file)}
-                onSendToHardware={handleSendToHardware}
-                onRequestFromHardware={handleRequestFromHardware}
-              />
-            </Box>
-          )}
+            )
+            : (
+              <Box display="flex" flexDir="column" gap={2}>
+                <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+                <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
+                <FmHardwareControls
+                  midiDevices={midiDevices}
+                  syxImportStatus={syxImportStatus}
+                  sendStatus={sendStatus}
+                  readStatus={readStatus}
+                  onDownloadSyx={handleDownloadSyx}
+                  onImportSyxFile={(file) => void handleImportSyxFile(file)}
+                  onSendToHardware={handleSendToHardware}
+                  onRequestFromHardware={handleRequestFromHardware}
+                />
+              </Box>
+            )}
         </MentorFocusZone>
 
         <MentorFocusZone active={mentor.focusSection === 'midi'} p={1} display="flex" flexDir="column" gap={4}>
@@ -596,8 +599,10 @@ export function StudioClient() {
             error={midiError}
           />
 
-          {/* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
-              SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */}
+          {
+            /* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
+              SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */
+          }
           {midiDevices.length > 0 && (
             <MidiMonitor
               open={midiMonitorOpen}
@@ -638,23 +643,23 @@ export function StudioClient() {
           justifyContent="center"
           overflow="auto"
         >
-          {engineType === 'drumkit' ? (
-            <DrumPads
-              pads={drumPatch.engine.pads}
-              selectedIndex={selectedPad}
-              activePads={activePads}
-              onSelect={setSelectedPad}
-              onHit={handlePadHit}
-              midiLearn={{
-                active: padMidiLearn.active,
-                armedPad: padMidiLearn.armedPad,
-                map: padMidiLearn.map,
-                onArm: padMidiLearn.armPad,
-              }}
-            />
-          ) : (
-            <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
-          )}
+          {engineType === 'drumkit'
+            ? (
+              <DrumPads
+                pads={drumPatch.engine.pads}
+                selectedIndex={selectedPad}
+                activePads={activePads}
+                onSelect={setSelectedPad}
+                onHit={handlePadHit}
+                midiLearn={{
+                  active: padMidiLearn.active,
+                  armedPad: padMidiLearn.armedPad,
+                  map: padMidiLearn.map,
+                  onArm: padMidiLearn.armPad,
+                }}
+              />
+            )
+            : <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />}
         </MentorFocusZone>
       </Box>
 
