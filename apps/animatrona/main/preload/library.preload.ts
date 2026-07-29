@@ -33,13 +33,13 @@ export const libraryPreload = {
   /** Создать папку для аниме (для постера и других общих файлов) */
   ensureAnimeDirectory: (
     libraryPath: string,
-    animeName: string,
+    animeName: string
   ): Promise<{ success: boolean; data?: string; error?: string }> =>
     ipcRenderer.invoke('library:ensureAnimeDirectory', libraryPath, animeName),
 
   /** Проверить, есть ли аниме с таким shikimoriId в библиотеке */
   checkAnimeExists: (
-    shikimoriId: number,
+    shikimoriId: number
   ): Promise<{
     success: boolean
     data?: {
@@ -54,7 +54,7 @@ export const libraryPreload = {
 
   /** Синхронизировать эпизоды из IPFS (для онгоингов) */
   syncEpisodes: (
-    animeId: string,
+    animeId: string
   ): Promise<{ success: boolean; data?: { added: number; total: number }; error?: string }> =>
     ipcRenderer.invoke('library:syncEpisodes', animeId),
 }

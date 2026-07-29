@@ -254,14 +254,15 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
         // net.fetch (Electron/Chromium) кидает ошибки вида "net::ERR_FAILED",
         // "net::ERR_NAME_NOT_RESOLVED", "net::ERR_CONNECTION_RESET" и т.д. —
         // отличается от Node fetch ("fetch failed", "ECONNRESET")
-        const isNetworkError = errMsg.includes('fetch failed')
-          || errMsg.includes('ECONNRESET')
-          || errMsg.includes('ETIMEDOUT')
-          || errMsg.includes('ERR_NAME_NOT_RESOLVED')
-          || errMsg.includes('net::')
-          || errMsg.includes('abort')
-          || errMsg.includes('TimeoutError')
-          || error instanceof DOMException
+        const isNetworkError =
+          errMsg.includes('fetch failed') ||
+          errMsg.includes('ECONNRESET') ||
+          errMsg.includes('ETIMEDOUT') ||
+          errMsg.includes('ERR_NAME_NOT_RESOLVED') ||
+          errMsg.includes('net::') ||
+          errMsg.includes('abort') ||
+          errMsg.includes('TimeoutError') ||
+          error instanceof DOMException
         if (isNetworkError) {
           log.warn(`GraphQL ← ${opName} NETWORK ERROR на ${new URL(endpoint).hostname}, пробуем следующий`, {
             error: errMsg,
@@ -444,7 +445,7 @@ function getMimeType(ext: string): string {
 export async function downloadPoster(
   posterUrl: string,
   animeId: string,
-  options?: { fileName?: string; savePath?: string },
+  options?: { fileName?: string; savePath?: string }
 ): Promise<PosterDownloadResult> {
   log.debug('Скачивание постера', { posterUrl, animeId })
 

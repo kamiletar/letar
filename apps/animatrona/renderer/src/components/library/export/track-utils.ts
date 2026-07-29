@@ -4,14 +4,10 @@
  * Вспомогательные функции для работы с аудио и субтитрами
  */
 
+import { resolveTrackKey as getTrackKey } from '../../../../../shared/types/track-key'
 import type { EpisodeWithTracks, TrackInfo } from './export-types'
 
-/**
- * Генерирует ключ для группировки дорожек
- */
-export function getTrackKey(language: string, title: string | null): string {
-  return `${language}:${title || 'default'}`
-}
+export { getTrackKey }
 
 /**
  * Собирает уникальные аудиодорожки из всех эпизодов

@@ -10,6 +10,7 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 
 import type { QueueExportConfig } from '../../../shared/types/export-queue'
+import { resolveTrackKey } from '../../../shared/types/track-key'
 import type { WebExportProgress, WebPlayerManifest, WebPlayerResourceMode } from '../../../shared/types/web-player'
 import { getIpfsUrl } from '../../utils/ipfs-url'
 import { createModuleLogger } from '../../utils/logger'
@@ -229,7 +230,7 @@ export async function bundleAssets(
       await fs.mkdir(audioDir, { recursive: true })
 
       for (const track of ep.audioTracks) {
-        const key = `${track.language}:${track.title || 'default'}`
+        const key = resolveTrackKey(track.language, track.title)
         if (config.selectedAudioKeys.includes(key)) {
           await downloadFromIpfs(track.transcodedCid, path.join(audioDir, `${track.language}.m4a`))
         }
@@ -240,7 +241,7 @@ export async function bundleAssets(
       await fs.mkdir(subsDir, { recursive: true })
 
       for (const track of ep.subtitleTracks) {
-        const key = `${track.language}:${track.title || 'default'}`
+        const key = resolveTrackKey(track.language, track.title)
         if (config.selectedSubtitleKeys.includes(key)) {
           await downloadFromIpfs(track.fileCid, path.join(subsDir, `${track.language}.ass`))
 
@@ -339,7 +340,7 @@ export async function buildDirectoryStructure(
     // audio/
     const audioChildren: DirEntry[] = ep.audioTracks
       .filter((t) => {
-        const key = `${t.language}:${t.title || 'default'}`
+        const key = resolveTrackKey(t.language, t.title)
         return config.selectedAudioKeys.includes(key)
       })
       .map((t) => ({
@@ -361,7 +362,7 @@ export async function buildDirectoryStructure(
     const fontsMap = new Map<string, string>() // Дедупликация шрифтов
 
     for (const track of ep.subtitleTracks) {
-      const key = `${track.language}:${track.title || 'default'}`
+      const key = resolveTrackKey(track.language, track.title)
       if (!config.selectedSubtitleKeys.includes(key)) {
         continue
       }

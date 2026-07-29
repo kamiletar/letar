@@ -16,6 +16,7 @@
 import type { ChaptersDocument } from '@letar/animatrona-types'
 import type { NamingPattern } from '../../../shared/types/export'
 import type { QueueEpisodeExportData, QueueExportConfig } from '../../../shared/types/export-queue'
+import { resolveTrackKey } from '../../../shared/types/track-key'
 import { createModuleLogger } from '../../utils/logger'
 import { buildDirectoryStructure } from '../web-export/asset-bundler'
 import { generateManifest } from '../web-export/manifest-generator'
@@ -81,10 +82,6 @@ async function readChapters(chaptersCid: string): Promise<ChaptersDocument['chap
   }
 }
 
-function trackKey(language: string, title: string): string {
-  return `${language}:${title}`
-}
-
 /**
  * Строит DirEntry[] для папки `play/` (standalone-плеер) из уже загруженных данных аниме.
  *
@@ -92,7 +89,7 @@ function trackKey(language: string, title: string): string {
  */
 export async function buildPlayFolderEntries(
   anime: PlayFolderAnime,
-  chaptersByEp?: Map<string, string>,
+  chaptersByEp?: Map<string, string>
 ): Promise<DirEntry | null> {
   const episodesWithVideo = anime.episodes.filter((ep) => !!ep.transcodedCid)
   if (episodesWithVideo.length === 0) {
@@ -131,7 +128,7 @@ export async function buildPlayFolderEntries(
           })),
         chapters,
       } satisfies QueueEpisodeExportData
-    }),
+    })
   )
 
   // Все ключи дорожек по всем эпизодам — плеер сам решает, какие показать для конкретной серии
@@ -145,7 +142,7 @@ export async function buildPlayFolderEntries(
       if (!t.transcodedCid) {
         continue
       }
-      const key = trackKey(t.language, t.title ?? t.dubGroup ?? 'default')
+      const key = resolveTrackKey(t.language, t.title, t.dubGroup)
       audioKeys.add(key)
       if (t.isDefault && !defaultAudioKey) {
         defaultAudioKey = key
@@ -155,7 +152,7 @@ export async function buildPlayFolderEntries(
       if (!t.fileCid) {
         continue
       }
-      const key = trackKey(t.language, t.title ?? t.dubGroup ?? 'default')
+      const key = resolveTrackKey(t.language, t.title, t.dubGroup)
       subtitleKeys.add(key)
       if (t.isDefault && !defaultSubtitleKey) {
         defaultSubtitleKey = key

@@ -5,6 +5,7 @@
 import { app } from 'electron'
 
 import type { QueueExportConfig } from '../../../shared/types/export-queue'
+import { resolveTrackKey as getTrackKey } from '../../../shared/types/track-key'
 import type {
   WebPlayerAudioTrack,
   WebPlayerChapter,
@@ -21,13 +22,6 @@ interface ManifestOptions {
   selectedEpisodes: number[]
   defaultAudioKey?: string
   defaultSubtitleKey?: string
-}
-
-/**
- * Генерирует ключ дорожки из language и title
- */
-function getTrackKey(language: string, title: string | null): string {
-  return `${language}:${title || 'default'}`
 }
 
 /**

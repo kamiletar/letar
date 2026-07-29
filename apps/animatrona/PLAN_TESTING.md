@@ -36,7 +36,7 @@ nx e2e animatrona-e2e
       обычный Node-сокет проходил 200 OK — TUN-клиент режет по TLS-отпечатку Chromium-стека,
       а не по прокси-настройкам (`session.setProxy`/`proxyBypassRules` тут бессильны, см.
       `client.ts`). Пофикшено переводом `main/services/shikimori/{client,anime-api,
-      franchise-api}.ts` на глобальный `fetch` (Node/undici) вместо `net.fetch`.
+franchise-api}.ts` на глобальный `fetch` (Node/undici) вместо `net.fetch`.
 
 ---
 
