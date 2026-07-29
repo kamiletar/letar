@@ -458,10 +458,20 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         так что возврат в библиотеку читает кэш.
 
   **Рендер приложения:**
-  - [ ] Профилировать через React DevTools Profiler — найти компоненты с дорогим рендером
-  - [ ] Проверить лишние `useEffect` с тяжёлыми зависимостями
+  - [ ] Профилировать через React DevTools Profiler — найти компоненты с дорогим рендером (нужен
+        запущенный десктоп-клиент, не сделано; см. ниже находку по коду вместо профайлера)
+  - [x] **Проверить лишние `useEffect` с тяжёлыми зависимостями** (v0.55.10, частично) — точечный
+        аудит always-mounted `Sidebar` и его карточек (`ContinueWatchingCard`, `WatchNextCard`,
+        `EncodingStatusCard`). Сами эффекты в порядке (корректные deps, `setInterval` с cleanup),
+        но карточки не были обёрнуты в `React.memo` — два опроса в `Sidebar` (диск 30с, power-save
+        5с) перерисовывали всё поддерево каждый тик. Обёрнуты в `memo`, см. CHANGELOG [0.55.10].
+        Остальные 122 файла с `useEffect` (222 вызова) не проверены — точечный проход по
+        наиболее «горячим» always-mounted компонентам, не полный аудит.
   - [ ] Electron: убедиться что main process не блокирует renderer (тяжёлые операции через `worker_threads`)
-  - [ ] Проверить размер JS бандла Next.js (`nx build animatrona` → анализ webpack stats)
+  - [ ] Проверить размер JS бандла Next.js — `@next/bundle-analyzer` **не работает с Turbopack**
+        (дефолтный билдер этого приложения), нужен `next build --webpack` или
+        `next experimental-analyze`; попытка через `next build` напрямую в `renderer/` (в обход
+        `nx build animatrona`) не резолвит workspace-пакет `@letar/hooks` — см. CHANGELOG [0.55.10]
 
   **Метрики успеха:** открытие каталога <100ms, скролл 60fps без jank, переход между страницами <200ms
 

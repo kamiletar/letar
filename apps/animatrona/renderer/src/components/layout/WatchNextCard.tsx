@@ -8,7 +8,7 @@
  */
 
 import { Box, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { LuArrowRight } from 'react-icons/lu'
 
 import { toMediaUrl } from '@/lib/media-url'
@@ -24,8 +24,12 @@ interface WatchNextData {
 /**
  * Компонент карточки "Что смотреть дальше"
  * Показывает незначатый сиквел завершённого аниме
+ *
+ * Обёрнута в React.memo — компонент без пропсов, живёт в Sidebar рядом с
+ * блоками, которые ре-рендерятся раз в 5-30 сек (poll диска/power-save),
+ * без memo это тянуло бы за собой весь поддерево карточки на каждый тик.
  */
-export function WatchNextCard() {
+export const WatchNextCard = memo(function WatchNextCard() {
   const router = useRouter()
   const [data, setData] = useState<WatchNextData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -97,19 +101,19 @@ export function WatchNextCard() {
         {/* Контент */}
         <HStack gap={3}>
           {/* Мини-постер */}
-          {suggestion.posterPath ? (
-            <Image
-              src={toMediaUrl(suggestion.posterPath) ?? undefined}
-              alt={suggestion.name}
-              w="40px"
-              h="60px"
-              objectFit="cover"
-              borderRadius="sm"
-              flexShrink={0}
-            />
-          ) : (
-            <Box w="40px" h="60px" bg="whiteAlpha.200" borderRadius="sm" flexShrink={0} />
-          )}
+          {suggestion.posterPath
+            ? (
+              <Image
+                src={toMediaUrl(suggestion.posterPath) ?? undefined}
+                alt={suggestion.name}
+                w="40px"
+                h="60px"
+                objectFit="cover"
+                borderRadius="sm"
+                flexShrink={0}
+              />
+            )
+            : <Box w="40px" h="60px" bg="whiteAlpha.200" borderRadius="sm" flexShrink={0} />}
 
           {/* Информация */}
           <VStack align="start" gap={0.5} flex={1} minW={0}>
@@ -130,4 +134,4 @@ export function WatchNextCard() {
       </VStack>
     </Box>
   )
-}
+})

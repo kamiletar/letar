@@ -10,7 +10,7 @@ import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { LuPlay } from 'react-icons/lu'
 
 import { findGlobalLastWatched, type GlobalLastWatchedData } from '@/app/_actions/watch-progress.action'
@@ -25,8 +25,11 @@ function formatTime(seconds: number): string {
 /**
  * Компонент карточки "Продолжить смотреть"
  * Отображается в Sidebar когда есть незавершённый просмотр
+ * Обёрнута в React.memo — компонент без пропсов, живёт в Sidebar рядом с
+ * блоками, которые ре-рендерятся раз в 5-30 сек (poll диска/power-save),
+ * без memo это тянуло бы за собой весь поддерево карточки на каждый тик.
  */
-export function ContinueWatchingCard() {
+export const ContinueWatchingCard = memo(function ContinueWatchingCard() {
   const pathname = usePathname()
   const router = useRouter()
   const [data, setData] = useState<GlobalLastWatchedData | null>(null)
@@ -142,4 +145,4 @@ export function ContinueWatchingCard() {
       </VStack>
     </Box>
   )
-}
+})

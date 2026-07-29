@@ -7,6 +7,7 @@
 
 import { Badge, Box, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
+import { memo } from 'react'
 import { LuLoader, LuPause, LuZap } from 'react-icons/lu'
 
 import { useImportQueue } from '@/hooks/useImportQueue'
@@ -14,8 +15,12 @@ import { useImportQueue } from '@/hooks/useImportQueue'
 /**
  * Компонент карточки статуса кодирования
  * Отображается в Sidebar когда есть активный энкод или очередь
+ *
+ * Обёрнута в React.memo — компонент без пропсов, живёт в Sidebar рядом с
+ * блоками, которые ре-рендерятся раз в 5-30 сек (poll диска/power-save),
+ * без memo это тянуло бы за собой весь поддерево карточки на каждый тик.
  */
-export function EncodingStatusCard() {
+export const EncodingStatusCard = memo(function EncodingStatusCard() {
   const { items, currentItem, pendingCount, isPaused, isProcessing, isLoading } = useImportQueue()
 
   // Не показываем если нет items или идёт загрузка
@@ -129,4 +134,4 @@ export function EncodingStatusCard() {
       </Box>
     </Link>
   )
-}
+})
