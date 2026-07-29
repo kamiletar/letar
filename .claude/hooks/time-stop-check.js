@@ -14,9 +14,9 @@
 
 const fs = require('fs')
 const readline = require('readline')
+const { getStudioTimeConfig } = require('./lib/studio-time-env')
 
-const STUDIO_URL = process.env.STUDIO_URL || 'http://localhost:3024'
-const SECRET = process.env.TIME_MCP_SECRET
+const { studioUrl: STUDIO_URL, secret: SECRET } = getStudioTimeConfig()
 
 function approve() {
   console.log(JSON.stringify({ decision: 'approve' }))

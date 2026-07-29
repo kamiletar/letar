@@ -36,22 +36,33 @@ MCP-сервер: Claude Code агент сам пишет время работ
 
 ## Соединение и безопасность
 
-- **Обычный HTTP fetch**, без SSH-туннеля — в отличие от `deploy-mcp`, studio API либо локальный
-  dev-сервер (`http://localhost:3024` по умолчанию), либо публичный прод-домен.
-- **Заголовок `X-Time-Mcp-Secret`** — `TIME_MCP_SECRET` читается из `process.env`, а если не
-  задан — из `apps/studio/.env.local` (типичный случай: локальная dev-сессия). Отдельный секрет
-  от `CRON_SECRET` studio: разный периметр доверия (cron — только с dashboard-agent на одном
-  сервере, MCP — потенциально с любой машины разработчика).
-- Для не-локального таргета (прод/staging) — переопредели `STUDIO_URL` и `TIME_MCP_SECRET` через
-  `env` в `.mcp.json` (по образцу `letar-consultant`), не через `apps/studio/.env.local`.
+- **Обычный HTTP fetch**, без SSH-туннеля — `STUDIO_URL` целится либо в локальный dev-сервер
+  (`http://localhost:3024`), либо в публичный прод-домен.
+- **Заголовок `X-Time-Mcp-Secret`** — `TIME_MCP_SECRET` (и `STUDIO_URL`) читаются из
+  `process.env`, а если не заданы — из `apps/studio/.env.local`. Этот же файловый fallback
+  используют `.claude/hooks/time-heartbeat.js`/`time-stop-check.js` (через общий
+  `.claude/hooks/lib/studio-time-env.js`, дублирует парсер — хуки без внешних зависимостей) —
+  и MCP-инструменты, и хуки читают ОДНУ и ту же `apps/studio/.env.local`, если процесс не
+  переопределяет её явно. Отдельный секрет от `CRON_SECRET` studio: разный периметр доверия
+  (cron — только с dashboard-agent на одном сервере, MCP — потенциально с любой машины
+  разработчика).
+- **По умолчанию `apps/studio/.env.local` целится в прод** (`https://studio.letar.best`) — так
+  работа над клиентскими проектами не теряется в незапущенный dev-сервер. Для локального теста
+  самого тайм-трекера — временно переключить `STUDIO_URL`/`TIME_MCP_SECRET` в этом файле на
+  `localhost:3024` (комментарий в файле объясняет, как).
+- Для таргета, отличного от того, что в `apps/studio/.env.local` (например третий вариант —
+  staging), — переопредели `STUDIO_URL` и `TIME_MCP_SECRET` через `env` в `.mcp.json` (по образцу
+  `letar-consultant`); это применится только к MCP-инструментам, не к хукам (у них своё
+  окружение процесса, `.mcp.json` их не затрагивает) — для хуков в этом случае нужно
+  переопределять `process.env` в окружении, из которого запускается сам Claude Code.
 
 ## Диагностика
 
 - `time_status()` — первый шаг, если непонятно, что происходит с таймером.
-- «TIME_MCP_SECRET не найден» → либо `apps/studio/.env.local` не содержит переменную (dev), либо
-  для не-локального `STUDIO_URL` секрет нужно задать явно через env процесса.
-- «studio вернул не-JSON» / сетевая ошибка → studio dev-сервер не запущен (`nx dev studio`) или
-  `STUDIO_URL` указывает не туда.
+- «TIME_MCP_SECRET не найден» → ни `process.env`, ни `apps/studio/.env.local` не содержат
+  переменную.
+- «studio вернул не-JSON» / сетевая ошибка → studio (по текущему `STUDIO_URL`) недоступна —
+  для локального таргета проверь, что `nx dev studio` запущен.
 - 404 на `time_start`/`time_switch`/`time_log` — проект с таким `repoSlug` не заведён в
   `/owner/projects` studio.
 

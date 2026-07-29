@@ -1,10 +1,12 @@
 /**
  * Конфигурация studio-time-mcp: URL studio API и служебный секрет (заголовок X-Time-Mcp-Secret).
  *
- * По умолчанию бьёт в локальный dev-сервер studio (`http://localhost:3024`) и читает
- * TIME_MCP_SECRET из apps/studio/.env.local — типичный случай: агент трекает время локальной
- * рабочей сессии. Для другого таргета (прод/staging) — переопредели STUDIO_URL и TIME_MCP_SECRET
- * через переменные окружения процесса (например через "env" в .mcp.json, как у letar-consultant).
+ * И STUDIO_URL, и TIME_MCP_SECRET сначала берутся из process.env, а если там пусто — из
+ * apps/studio/.env.local (см. `.claude/hooks/lib/studio-time-env.js` — та же логика,
+ * задублирована там для хуков, которые не могут импортировать этот TS-модуль напрямую).
+ * По умолчанию .env.local целится в прод (studio.letar.best) — так время реальной работы над
+ * клиентскими проектами не теряется в незапущенный dev-сервер. Для локального теста самого
+ * тайм-трекера — временно переключить эти же две строки в .env.local на localhost:3024.
  */
 
 import { parseDotEnv } from '@letar/mcp-server-kit'
@@ -32,7 +34,11 @@ function readStudioLocalEnv(): Record<string, string> {
 
 /** Базовый URL studio API. */
 export function studioUrl(): string {
-  return process.env['STUDIO_URL'] ?? 'http://localhost:3024'
+  const fromEnv = process.env['STUDIO_URL']
+  if (fromEnv) {
+    return fromEnv
+  }
+  return readStudioLocalEnv()['STUDIO_URL'] ?? 'http://localhost:3024'
 }
 
 /** Служебный секрет для заголовка X-Time-Mcp-Secret. */

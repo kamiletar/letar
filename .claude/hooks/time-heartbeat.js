@@ -11,8 +11,8 @@
  * (значит трекинг в этой среде не настроен или сессия сейчас не про клиентский проект).
  */
 
-const STUDIO_URL = process.env.STUDIO_URL || 'http://localhost:3024'
-const SECRET = process.env.TIME_MCP_SECRET
+const { getStudioTimeConfig } = require('./lib/studio-time-env')
+const { studioUrl: STUDIO_URL, secret: SECRET } = getStudioTimeConfig()
 
 let input = ''
 process.stdin.setEncoding('utf8')
