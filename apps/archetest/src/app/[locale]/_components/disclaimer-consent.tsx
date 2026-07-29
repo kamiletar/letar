@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { Box, Checkbox, Link as ChakraLink, Text } from '@chakra-ui/react'
+import { Box, Link as ChakraLink, Checkbox, Text } from '@chakra-ui/react'
 import { DISCLAIMER_EN, DISCLAIMER_RU } from '../_data/disclaimer'
 
 interface DisclaimerConsentProps {

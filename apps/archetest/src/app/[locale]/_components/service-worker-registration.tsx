@@ -37,7 +37,7 @@ export function ServiceWorkerRegistration() {
       if (isAccepted) {
         try {
           const registrations = await Promise.all(
-            EXPRESS_SCOPES.map((scope) => navigator.serviceWorker.register('/sw.js', { scope })),
+            EXPRESS_SCOPES.map((scope) => navigator.serviceWorker.register('/sw.js', { scope }))
           )
           registrationsRef.current = registrations
         } catch (error) {
