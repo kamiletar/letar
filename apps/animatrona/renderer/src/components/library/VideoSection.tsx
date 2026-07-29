@@ -87,7 +87,7 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
       <AspectRatio ratio={16 / 9}>
         <Box position="relative">
           {thumbnailUrl ? (
-            <Image src={thumbnailUrl} alt={video.name || 'Video'} objectFit="cover" />
+            <Image src={thumbnailUrl} alt={video.name || 'Video'} objectFit="cover" loading="lazy" decoding="async" />
           ) : (
             <Box bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
               <Icon as={LuFilm} boxSize={12} color="fg.subtle" />

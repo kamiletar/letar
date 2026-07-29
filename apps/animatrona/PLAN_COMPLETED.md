@@ -6,6 +6,42 @@
 
 ---
 
+## v0.55.13 — Фикс: /player не воспроизводил видео (не подключён к GlobalVideoProvider) (2026-07-29)
+
+**Как обнаружено:** пользователь сообщил, что открыл файл через «Плеер» — вместо воспроизведения
+бесконечно крутился спиннер. Скрин DevTools Network показал: ни одного запроса к видеофайлу,
+только повторяющиеся RSC-фетчи `/player` — то есть видео вообще не пыталось грузиться.
+
+**Причина:** `/player` (папочный/single-file режим, без привязки к библиотеке БД) рендерит
+`<VideoPlayer src={currentVideoPath}>` напрямую. После перехода на архитектуру
+`GlobalVideoProvider` (persistent video/audio элементы на уровне layout, живут вне страниц) `src`
+проп `VideoPlayer` используется только для инфо-оверлея — реальная загрузка в persistent
+video-элемент запускается исключительно через `useGlobalVideoStore.getState().initVideo(src,
+metadata)`, а этот вызов существует только в `useGlobalVideo` хуке на странице `/watch`, завязанном
+на DB-эпизод (`episodeId`, `animeId`, `animeName`, `returnPath` — обязательные поля
+`PlaybackMetadata`). `/player` этот хук не использует (у локального файла вне библиотеки этих
+полей просто нет) — video-элемент никогда не получал src, `isLoading` в `VideoPlayer` не снимался
+(снимается только по событию `loadeddata` от video, которое без src никогда не наступит).
+
+**Реализовано:**
+
+- [global-video-store.ts](apps/animatrona/renderer/src/components/global-video/global-video-store.ts) —
+  новое действие `loadRawSrc(src: string | null, startTime?: number)`: устанавливает `src`/`mode:
+  'embedded'`/`currentTime` напрямую, без обязательных библиотечных `PlaybackMetadata` (`metadata:
+  null`). `src === null` переводит в `mode: 'hidden'`.
+- [player/page.tsx](apps/animatrona/renderer/src/app/player/page.tsx) — вызывает `loadRawSrc(currentVideoPath,
+  time)` в том же эффекте, что уже вычисляет `initialResumeTime` при смене видео; отдельный
+  cleanup-эффект вызывает `loadRawSrc(null)` при размонтировании страницы — иначе локальный файл
+  продолжил бы «играть» в video-элементе, отсоединённом от какого-либо UI (в /player нет
+  mini-player minimize-логики, в отличие от `/watch`).
+
+`toPlayableUrl({ path: src })` внутри `GlobalVideoProvider` уже идемпотентен для `http://`/`media://`
+и корректно конвертирует сырой Windows-путь (`C:\...\file.mkv` → `media://C:/.../file.mkv`) — правка
+на уровне конвертации URL не потребовалась, только сама передача src в store.
+
+Верифицировано `nx typecheck:tsgo animatrona`, `nx lint animatrona` (оба изменённых файла — 0
+замечаний), `nx build:win animatrona` (успешно, `Animatrona Setup 0.55.13.exe`).
+
 ## v0.55.12 — useEffect-аудит: убрана churn-подписка на window.keydown в useGlobalShortcuts (2026-07-29)
 
 **Задача:** продолжение ветки «Аудит производительности» из PLAN.md — конкретно «Остаток

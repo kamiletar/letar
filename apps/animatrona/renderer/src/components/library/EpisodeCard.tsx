@@ -204,6 +204,8 @@ export const EpisodeCard = memo(function EpisodeCard({
               objectFit="cover"
               w="full"
               h="full"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <Box w="full" h="full" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">

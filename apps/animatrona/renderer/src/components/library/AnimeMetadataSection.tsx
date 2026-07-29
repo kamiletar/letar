@@ -102,7 +102,15 @@ function StudioCard({ studio }: { studio: ShikimoriStudio }) {
       <Card.Body>
         <HStack gap={3}>
           {studio.imageUrl ? (
-            <Image src={studio.imageUrl} alt={studio.name} boxSize={8} borderRadius="md" objectFit="contain" />
+            <Image
+              src={studio.imageUrl}
+              alt={studio.name}
+              boxSize={8}
+              borderRadius="md"
+              objectFit="contain"
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <Icon as={LuBuilding2} boxSize={6} color="fg.muted" />
           )}
@@ -129,6 +137,8 @@ function StaffCard({ person }: { person: ShikimoriPersonRole }) {
               boxSize={10}
               borderRadius="md"
               objectFit="cover"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <Box
@@ -170,6 +180,8 @@ function CharacterCard({ role }: { role: ShikimoriCharacterRole }) {
               boxSize={10}
               borderRadius="md"
               objectFit="cover"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <Box

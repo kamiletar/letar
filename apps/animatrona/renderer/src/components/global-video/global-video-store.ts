@@ -22,6 +22,13 @@ interface GlobalVideoStore extends GlobalVideoState {
   /** Инициализировать видео (при переходе на страницу просмотра) */
   initVideo: (src: string, metadata: PlaybackMetadata, startTime?: number) => void
 
+  /**
+   * Загрузить видео без библиотечных метаданных (папочный/single-file режим плеера,
+   * где нет episodeId/animeId для полноценного initVideo) — например, /player.
+   * mode: null сбрасывает воспроизведение (переход в 'hidden').
+   */
+  loadRawSrc: (src: string | null, startTime?: number) => void
+
   /** Свернуть в mini-player (embedded → mini) */
   minimize: () => void
 
@@ -91,6 +98,14 @@ export const useGlobalVideoStore = create<GlobalVideoStore>()((set, get) => ({
       currentTime: startTime,
       isPlaying: false,
     })
+  },
+
+  loadRawSrc: (src, startTime = 0) => {
+    if (!src) {
+      set({ mode: 'hidden', src: null, metadata: null, currentTime: 0, isPlaying: false })
+      return
+    }
+    set({ mode: 'embedded', src, metadata: null, currentTime: startTime, isPlaying: false })
   },
 
   minimize: () => {

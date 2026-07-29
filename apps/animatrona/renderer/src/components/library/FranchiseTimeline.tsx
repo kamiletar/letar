@@ -197,6 +197,8 @@ function TimelineItem({ item }: { item: TimelineAnime }) {
           h="150px"
           objectFit="cover"
           borderRadius="md"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <Box w="100px" h="150px" bg="whiteAlpha.100" borderRadius="md" />

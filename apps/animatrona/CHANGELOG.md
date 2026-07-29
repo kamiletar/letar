@@ -4,6 +4,36 @@
 
 ## [Unreleased]
 
+## [0.55.13] - 2026-07-29
+
+### Changed
+
+- **Lazy load для второстепенных изображений в library-компонентах** (продолжение аудита
+  производительности) — `AnimeCard` (главная сетка каталога) уже использовал `next/image` с
+  встроенным lazy-loading; добавлены `loading="lazy"` + `decoding="async"` к оставшимся местам,
+  использующим обычный Chakra `Image` (`<img>` без lazy по умолчанию): постеры в
+  `RelatedAnimeRow.tsx`, `FranchiseTimeline.tsx` (timeline франшизы), превью в `EpisodeCard.tsx` и
+  `VideoSection.tsx`, аватары студий/персонала/персонажей в `AnimeMetadataSection.tsx` — все эти
+  списки не виртуализированы (в отличие от главной сетки) и могут содержать десятки
+  внеэкранных элементов на странице деталей аниме.
+
+### Fixed
+
+- **`/player` (папочный/single-file режим) не воспроизводил видео — бесконечный спиннер** —
+  регрессия после перехода на `GlobalVideoProvider` (persistent video element на уровне layout).
+  `<VideoPlayer src={currentVideoPath}>` использовал `src` только для инфо-оверлея
+  (`VideoPlayer.tsx` `videoInfo.filePath`), а фактическую загрузку в persistent video-элемент
+  запускает только `store.initVideo()`, вызываемый исключительно из `useGlobalVideo` на странице
+  `/watch` (DB-эпизоды с `episodeId`/`animeId`). У `/player` такого вызова не было — video-элемент
+  никогда не получал src, `isLoading` в `VideoPlayer` не снимался (ждёт `loadeddata`), в Network
+  не было ни одного запроса к файлу. Добавлено облегчённое действие `loadRawSrc(src, startTime?)`
+  в `global-video-store.ts` — грузит src напрямую, без обязательных библиотечных полей
+  `PlaybackMetadata` (episodeId/animeId/animeName/returnPath), которые для локального файла вне
+  библиотеки взять неоткуда. `/player/page.tsx` вызывает его при смене `currentVideoPath` и сбрасывает
+  (`loadRawSrc(null)`) при уходе со страницы — иначе локальный файл продолжил бы «играть» в
+  отсоединённом от UI video-элементе. Верифицировано `nx typecheck:tsgo animatrona`,
+  `nx lint animatrona` (оба файла чисты), `nx build:win animatrona`.
+
 ## [0.55.12] - 2026-07-29
 
 ### Changed

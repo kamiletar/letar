@@ -100,7 +100,15 @@ export function RelatedAnimeRow({
       {/* Постер миниатюра */}
       <Box w="40px" h="56px" flexShrink={0} borderRadius="sm" overflow="hidden" bg="bg.subtle">
         {posterUrl ? (
-          <Image src={posterUrl} alt={name || 'Аниме'} w="full" h="full" objectFit="cover" />
+          <Image
+            src={posterUrl}
+            alt={name || 'Аниме'}
+            w="full"
+            h="full"
+            objectFit="cover"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center">
             <Icon as={KindIcon} boxSize={4} color="fg.subtle" />
