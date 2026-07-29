@@ -35,17 +35,28 @@ function formatTrackDetails(track: TrackInfo, type: 'audio' | 'subtitle'): strin
   const parts: string[] = []
 
   if (type === 'audio') {
-    if (track.codec) parts.push(track.codec.toUpperCase())
-    if (track.channels) {
-      if (track.channels === 2) parts.push('2.0')
-      else if (track.channels === 6) parts.push('5.1')
-      else if (track.channels === 8) parts.push('7.1')
-      else parts.push(`${track.channels}ch`)
+    if (track.codec) {
+      parts.push(track.codec.toUpperCase())
     }
-    if (track.bitrate) parts.push(`${Math.round(track.bitrate / 1000)}kbps`)
+    if (track.channels) {
+      if (track.channels === 2) {
+        parts.push('2.0')
+      } else if (track.channels === 6) {
+        parts.push('5.1')
+      } else if (track.channels === 8) {
+        parts.push('7.1')
+      } else {
+        parts.push(`${track.channels}ch`)
+      }
+    }
+    if (track.bitrate) {
+      parts.push(`${Math.round(track.bitrate / 1000)}kbps`)
+    }
   } else {
     // Субтитры: формат
-    if (track.format || track.codec) parts.push((track.format || track.codec).toUpperCase())
+    if (track.format || track.codec) {
+      parts.push((track.format || track.codec).toUpperCase())
+    }
   }
 
   return parts.join(' · ')

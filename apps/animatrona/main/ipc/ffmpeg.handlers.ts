@@ -77,7 +77,9 @@ export function registerFFmpegHandlers(): void {
     const tempDir = await mkdtemp(path.join(os.tmpdir(), 'animatrona-fonts-'))
     try {
       const result = await extractFontsFromFile(inputPath, tempDir)
-      if (result.fonts.length === 0) return { fonts: [] }
+      if (result.fonts.length === 0) {
+        return { fonts: [] }
+      }
 
       // Загружаем каждый шрифт в IPFS прямо в main process
       const { uploadToIpfs } = await import('../services/import/import-ipfs')

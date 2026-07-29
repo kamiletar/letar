@@ -253,7 +253,9 @@ export interface ExtractedFont {
 export async function extractFontsFromFile(inputPath: string, outputDir: string): Promise<{ fonts: ExtractedFont[] }> {
   const probeData = await getFullProbe(inputPath)
   const fontsDir = await extractAttachments(inputPath, outputDir, probeData.streams)
-  if (!fontsDir) return { fonts: [] }
+  if (!fontsDir) {
+    return { fonts: [] }
+  }
 
   const { readdir } = await import('fs/promises')
   const files = await readdir(fontsDir)
@@ -314,10 +316,16 @@ export async function demuxFile(
     }).length
 
     let totalOps = audioExtractCount + subStreams.length
-    if (!skipVideo && videoStreams.length > 0) totalOps++
-    if (attachmentStreams.length > 0) totalOps++
+    if (!skipVideo && videoStreams.length > 0) {
+      totalOps++
+    }
+    if (attachmentStreams.length > 0) {
+      totalOps++
+    }
     // Минимум 1, чтобы не делить на 0
-    if (totalOps === 0) totalOps = 1
+    if (totalOps === 0) {
+      totalOps = 1
+    }
 
     let completedOps = 0
     const reportProgress = () => {

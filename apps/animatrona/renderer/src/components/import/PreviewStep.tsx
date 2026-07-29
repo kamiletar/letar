@@ -43,9 +43,13 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
   // Авто-предложение по первому проанализированному файлу (однократно)
   const autoSuggestApplied = useRef(false)
   useEffect(() => {
-    if (autoSuggestApplied.current) return
+    if (autoSuggestApplied.current) {
+      return
+    }
     const first = analysis.analyses.find((a) => a.mediaInfo)
-    if (!first?.mediaInfo) return
+    if (!first?.mediaInfo) {
+      return
+    }
     const video = first.mediaInfo.videoTracks?.[0]
     encodingSettings.applyAutoSuggest(video?.height, video?.fieldOrder, sourceYear)
     autoSuggestApplied.current = true

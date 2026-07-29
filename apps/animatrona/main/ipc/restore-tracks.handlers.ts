@@ -121,7 +121,9 @@ export function registerRestoreTracksHandlers(): void {
  * Отменяет регистрацию handlers
  */
 export function unregisterRestoreTracksHandlers(): void {
-  if (!isRegistered) return
+  if (!isRegistered) {
+    return
+  }
 
   const manager = RestoreTracksManager.getInstance()
 

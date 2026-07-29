@@ -63,7 +63,9 @@ export function useReencodeDialogState({ animeId, targetBitrate, open, onOpenCha
 
     const loadPreview = async () => {
       const api = getReencodeApi()
-      if (!api) return
+      if (!api) {
+        return
+      }
 
       setIsLoadingPreview(true)
       setError(null)
@@ -88,7 +90,9 @@ export function useReencodeDialogState({ animeId, targetBitrate, open, onOpenCha
   // Запуск перекодировки
   const handleStart = useCallback(async () => {
     const api = getReencodeApi()
-    if (!api) return
+    if (!api) {
+      return
+    }
 
     setStep('progress')
     setIsReencoding(true)
@@ -119,7 +123,9 @@ export function useReencodeDialogState({ animeId, targetBitrate, open, onOpenCha
   // Отмена перекодировки
   const handleCancel = useCallback(async () => {
     const api = getReencodeApi()
-    if (!api) return
+    if (!api) {
+      return
+    }
     await api.cancel()
   }, [])
 

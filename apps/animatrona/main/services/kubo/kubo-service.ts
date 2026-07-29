@@ -123,8 +123,12 @@ export class KuboService extends EventEmitter {
    * 2. Иначе запускает embedded Kubo
    */
   async initialize(opts?: { libraryPath?: string | null; storageMaxGb?: number }): Promise<void> {
-    if (opts?.libraryPath !== undefined) this.libraryPath = opts.libraryPath ?? null
-    if (opts?.storageMaxGb !== undefined) this.storageMaxGb = opts.storageMaxGb
+    if (opts?.libraryPath !== undefined) {
+      this.libraryPath = opts.libraryPath ?? null
+    }
+    if (opts?.storageMaxGb !== undefined) {
+      this.storageMaxGb = opts.storageMaxGb
+    }
     if (this.client) {
       log.info('Уже инициализирован', { mode: this.mode })
       return

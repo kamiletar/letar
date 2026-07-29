@@ -105,10 +105,18 @@ function EpisodeAccordionItem({ episode }: { episode: EpisodeComparison }) {
   // Set missing track IDs для O(1) lookup
   const missingIds = useMemo(() => {
     const set = new Set<string>()
-    for (const t of episode.missing.audio) set.add(t.id)
-    for (const t of episode.missing.subtitles) set.add(t.id)
-    for (const t of episode.missing.externalAudio) set.add(t.id)
-    for (const t of episode.missing.externalSubtitles) set.add(t.id)
+    for (const t of episode.missing.audio) {
+      set.add(t.id)
+    }
+    for (const t of episode.missing.subtitles) {
+      set.add(t.id)
+    }
+    for (const t of episode.missing.externalAudio) {
+      set.add(t.id)
+    }
+    for (const t of episode.missing.externalSubtitles) {
+      set.add(t.id)
+    }
     return set
   }, [episode.missing])
 

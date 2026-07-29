@@ -22,7 +22,7 @@ const log = createModuleLogger('MobileProgress')
 export async function handleProgressRequest(
   req: IncomingMessage,
   res: ServerResponse,
-  episodeId: string,
+  episodeId: string
 ): Promise<void> {
   const db = getDb()
 
@@ -91,7 +91,7 @@ async function handleSaveProgress(
   req: IncomingMessage,
   res: ServerResponse,
   db: ReturnType<typeof getDb>,
-  episodeId: string,
+  episodeId: string
 ): Promise<void> {
   // Парсим body
   const body = await parseBody(req)
@@ -152,7 +152,7 @@ async function handleSaveProgress(
           lastWatchedAt: new Date(),
         },
       }),
-    { context: 'mobile:saveProgress' },
+    { context: 'mobile:saveProgress' }
   )
 
   // Обновляем статус просмотра аниме если эпизод завершён
@@ -360,7 +360,7 @@ export async function handleLastWatchedRequest(res: ServerResponse): Promise<voi
             completed: false,
             lastWatchedAt: new Date().toISOString(),
           },
-        }),
+        })
       )
       return
     }

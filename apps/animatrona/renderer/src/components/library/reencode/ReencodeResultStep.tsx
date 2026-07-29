@@ -34,7 +34,9 @@ export function ReencodeResultStep({ state }: { state: UseReencodeDialogStateRet
     )
   }
 
-  if (!result) return null
+  if (!result) {
+    return null
+  }
 
   return (
     <>

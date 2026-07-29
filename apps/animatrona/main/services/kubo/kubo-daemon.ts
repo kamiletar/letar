@@ -69,7 +69,9 @@ export function getKuboBinaryPath(): string {
  * Для существующих пользователей без libraryPath — legacy путь userData/kubo-repo.
  */
 export function getKuboRepoPath(libraryPath?: string | null): string {
-  if (libraryPath) return path.join(libraryPath, 'ipfs')
+  if (libraryPath) {
+    return path.join(libraryPath, 'ipfs')
+  }
   return path.join(app.getPath('userData'), 'kubo-repo')
 }
 
@@ -510,7 +512,9 @@ export function spawnKuboDaemon(kuboBin: string, repoPath: string): Promise<Chil
       // Логируем каждую строку stderr отдельно
       for (const line of text.split('\n')) {
         const trimmed = line.trim()
-        if (!trimmed) continue
+        if (!trimmed) {
+          continue
+        }
         // ERROR/FATAL/PANIC/Error: — гарантированно видны
         if (
           /\b(ERROR|FATAL|PANIC|panic|fatal error|Error:)\b/.test(trimmed) ||

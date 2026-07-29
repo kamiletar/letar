@@ -6,8 +6,7 @@ import { ipcRenderer } from 'electron'
 
 export const logsPreload = {
   /** Получить tail последних N строк лога */
-  tail: (lines: number = 200): Promise<{ content: string; filePath: string | null }> =>
-    ipcRenderer.invoke('logs:tail', lines),
+  tail: (lines = 200): Promise<{ content: string; filePath: string | null }> => ipcRenderer.invoke('logs:tail', lines),
 
   /** Старт live-watch — main будет broadcastить новые строки через 'logs:newLines' */
   startWatch: (): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('logs:startWatch'),

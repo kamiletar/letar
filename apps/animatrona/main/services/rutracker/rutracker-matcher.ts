@@ -280,14 +280,18 @@ export function validateMatchMetadata(
   // Проверка года — основной индикатор правильного сезона
   if (torrent.year && anime.airedOn?.year) {
     const yearDiff = Math.abs(torrent.year - anime.airedOn.year)
-    if (yearDiff > 1) return false
+    if (yearDiff > 1) {
+      return false
+    }
   }
 
   // Проверка эпизодов — дополнительная валидация
   if (torrent.episodeCount && anime.episodes && anime.episodes > 0) {
     const epDiff = Math.abs(torrent.episodeCount - anime.episodes)
     // Более 50% разницы — явно не то
-    if (epDiff > Math.max(torrent.episodeCount, anime.episodes) * 0.5) return false
+    if (epDiff > Math.max(torrent.episodeCount, anime.episodes) * 0.5) {
+      return false
+    }
   }
 
   return true

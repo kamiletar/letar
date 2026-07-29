@@ -113,11 +113,15 @@ export function PublishingSection({
   // или только что закончилась пока пользователь был на другой странице.
   // Также проверяем чекпоинт прерванной регенерации.
   useEffect(() => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     void (async () => {
       try {
         const res = await window.electronAPI!.animeManifest.getRegenerationStatus()
-        if (!res.success || !res.data) return
+        if (!res.success || !res.data) {
+          return
+        }
         const status = res.data
         if (status.isRegenerating) {
           // Восстанавливаем UI в активном состоянии
@@ -166,7 +170,9 @@ export function PublishingSection({
     }>
   >([])
   useEffect(() => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     // На mount — подтягиваем накопленный лог из main
     void (async () => {
       try {
@@ -175,7 +181,9 @@ export function PublishingSection({
           // Мержим с live-событиями, которые успели прийти пока шёл асинхронный запрос.
           // Если просто перезаписать — потеряем события между стартом fetch и его завершением.
           setDetailedLog((prev) => {
-            if (prev.length === 0) return res.data!.log
+            if (prev.length === 0) {
+              return res.data!.log
+            }
             const fetchedIds = new Set(res.data!.log.map((e) => e.id))
             const liveExtra = prev.filter((e) => !fetchedIds.has(e.id))
             return [...res.data!.log, ...liveExtra].sort((a, b) => a.timestamp - b.timestamp)
@@ -193,10 +201,14 @@ export function PublishingSection({
     const unsub = window.electronAPI.animeManifest.onRegenerateLog((entry) => {
       setDetailedLog((prev) => {
         // Дедуп по id
-        if (prev.some((e) => e.id === entry.id)) return prev
+        if (prev.some((e) => e.id === entry.id)) {
+          return prev
+        }
         const next = [...prev, entry]
         // Ограничиваем размер для UI
-        if (next.length > 500) return next.slice(-500)
+        if (next.length > 500) {
+          return next.slice(-500)
+        }
         return next
       })
     })
@@ -208,11 +220,15 @@ export function PublishingSection({
 
   // Подписка на завершение регенерации (срабатывает даже если пользователь ушёл и вернулся)
   useEffect(() => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     const unsub = window.electronAPI.animeManifest.onRegenerateFinished(async (data) => {
       setIsRegenerating(false)
       setCurrentStep(null)
-      if (data.diskFull) setDiskFullError(true)
+      if (data.diskFull) {
+        setDiskFullError(true)
+      }
       // Подтягиваем итоговый result + healthSummary
       try {
         const statusRes = await window.electronAPI!.animeManifest.getRegenerationStatus()
@@ -237,7 +253,9 @@ export function PublishingSection({
   }
 
   const handleResume = useCallback(async () => {
-    if (!window.electronAPI || !regenCheckpoint) return
+    if (!window.electronAPI || !regenCheckpoint) {
+      return
+    }
     setIsRegenerating(true)
     setDiskFullError(false)
     setRegenResult(null)
@@ -262,7 +280,9 @@ export function PublishingSection({
       }
       try {
         const healthRes = await window.electronAPI.animeManifest.getHealthSummary()
-        if (healthRes.success && healthRes.data) setHealthSummary(healthRes.data)
+        if (healthRes.success && healthRes.data) {
+          setHealthSummary(healthRes.data)
+        }
       } catch {
         /* не критично */
       }
@@ -317,12 +337,16 @@ export function PublishingSection({
   }, [onRegenerateComplete])
 
   const handleStop = useCallback(async () => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     await window.electronAPI.animeManifest.stopRegeneration()
   }, [])
 
   const handleShowDegraded = useCallback(async () => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     try {
       const res = await window.electronAPI.animeManifest.getDegradedAndBroken()
       if (res.success && res.data) {

@@ -704,7 +704,9 @@ export async function updateAnimeManifest(
       try {
         const { CID } = await import('multiformats/cid')
         const client = getKuboService().getClientOrNull()
-        if (client) await client.pin.rm(CID.parse(oldAnime.directoryCid))
+        if (client) {
+          await client.pin.rm(CID.parse(oldAnime.directoryCid))
+        }
       } catch (error) {
         log.debug('Не удалось открепить старый directoryCid', { error: String(error) })
       }

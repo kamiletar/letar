@@ -91,7 +91,6 @@ export function BundleGroupingDialog({ open, onOpenChange, torrent, onDone }: Bu
       return
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     api.torrent
       .getFiles(torrent.infoHash)
       .then((res: { success: boolean; data?: Array<{ name: string }> }) => {

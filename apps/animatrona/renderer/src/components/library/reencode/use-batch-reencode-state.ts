@@ -59,7 +59,9 @@ export function useBatchReencodeState({ open, onOpenChange }: UseBatchReencodeSt
 
     const loadPreview = async () => {
       const api = getBatchApi()
-      if (!api) return
+      if (!api) {
+        return
+      }
 
       setIsLoadingPreview(true)
       setError(null)
@@ -84,7 +86,9 @@ export function useBatchReencodeState({ open, onOpenChange }: UseBatchReencodeSt
   // Запуск пакетной перекодировки
   const handleStart = useCallback(async () => {
     const api = getBatchApi()
-    if (!api) return
+    if (!api) {
+      return
+    }
 
     setStep('progress')
     setIsReencoding(true)
@@ -115,7 +119,9 @@ export function useBatchReencodeState({ open, onOpenChange }: UseBatchReencodeSt
   // Отмена перекодировки
   const handleCancel = useCallback(async () => {
     const api = getBatchApi()
-    if (!api) return
+    if (!api) {
+      return
+    }
     await api.batchCancel()
   }, [])
 

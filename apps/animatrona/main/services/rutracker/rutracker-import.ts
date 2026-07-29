@@ -54,20 +54,28 @@ async function findCorrectSeasonViaRelated(
   torrent: RutrackerTorrentInfo
 ): Promise<RutrackerImportResult | null> {
   const withRelated = await getAnimeWithRelated(malShikimoriId)
-  if (!withRelated?.related?.length) return null
+  if (!withRelated?.related?.length) {
+    return null
+  }
 
   // Собираем всех кандидатов из related (sequel, prequel, side_story)
   const relatedCandidates = withRelated.related.filter((rel) => rel.anime != null).map((rel) => rel.anime!)
 
-  if (relatedCandidates.length === 0) return null
+  if (relatedCandidates.length === 0) {
+    return null
+  }
 
   // Ранжируем по метаданным торрента (год, эпизоды, название, тип)
   const scores = rankCandidates(relatedCandidates, torrent)
-  if (scores.length === 0) return null
+  if (scores.length === 0) {
+    return null
+  }
 
   const best = scores[0]
   // Принимаем только если скор достаточно высокий (год и эпизоды совпадают)
-  if (best.breakdown.yearScore < 0.7) return null
+  if (best.breakdown.yearScore < 0.7) {
+    return null
+  }
 
   const match = matchFromMalRelated(best.shikimoriId, best)
   const shikimoriData = await getAnimeExtended(best.shikimoriId)
@@ -149,8 +157,12 @@ export async function processRutrackerImport(html: string, url: string): Promise
   // 4. Поиск по обоим названиям (оригинальному и русскому) для лучшего покрытия
   // Пример: "Phi Brain: Kami no Puzzle" (без "2") + "Фи Брейн: Загадка Бога 2" (с "2")
   const searchQueries = new Set<string>()
-  if (torrent.nameOriginal) searchQueries.add(torrent.nameOriginal)
-  if (torrent.nameRu && torrent.nameRu !== torrent.nameOriginal) searchQueries.add(torrent.nameRu)
+  if (torrent.nameOriginal) {
+    searchQueries.add(torrent.nameOriginal)
+  }
+  if (torrent.nameRu && torrent.nameRu !== torrent.nameOriginal) {
+    searchQueries.add(torrent.nameRu)
+  }
 
   const searchResults: ShikimoriAnimePreview[] = []
   const seenIds = new Set<string>()

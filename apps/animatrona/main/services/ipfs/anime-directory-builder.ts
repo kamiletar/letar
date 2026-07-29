@@ -309,7 +309,9 @@ export async function buildAnimeDirectory(
       { cid: animeManifest.episodePreviewsCid, name: 'episode-previews.json' },
     ]
     for (const doc of subDocs) {
-      if (!doc.cid) continue
+      if (!doc.cid) {
+        continue
+      }
       const cid = await probeOrRecover(doc.cid, { kind: 'sub-doc', detail: `meta/${doc.name}` })
       if (cid) {
         metaChildren.push({ name: doc.name, type: 'file', cid })
@@ -393,7 +395,9 @@ export async function buildAnimeDirectory(
   const deadChapterEps: number[] = []
   await Promise.all(
     anime.episodes.map(async (ep) => {
-      if (!ep.transcodedCid) return
+      if (!ep.transcodedCid) {
+        return
+      }
       let parsed: EpisodeManifest | null = null
       if (ep.manifestCid) {
         parsed = await parseEpisodeManifest(ep.manifestCid)
@@ -441,9 +445,15 @@ export async function buildAnimeDirectory(
     detail('info', `   ✓ chapters: все ${aliveCount} живых`)
   } else if (aliveCount > 0 || noChapterCount > 0) {
     const parts: string[] = []
-    if (aliveCount > 0) parts.push(`${aliveCount} живых`)
-    if (noChapterCount > 0) parts.push(`${noChapterCount} без глав`)
-    if (deadChapterEps.length > 0) parts.push(`${deadChapterEps.length} мёртвых`)
+    if (aliveCount > 0) {
+      parts.push(`${aliveCount} живых`)
+    }
+    if (noChapterCount > 0) {
+      parts.push(`${noChapterCount} без глав`)
+    }
+    if (deadChapterEps.length > 0) {
+      parts.push(`${deadChapterEps.length} мёртвых`)
+    }
     detail('info', `   — chapters: ${parts.join(', ')}`)
   }
 
@@ -722,7 +732,9 @@ export async function buildAnimeDirectory(
       ]
       const epMetaChildren: DirEntry[] = []
       for (const doc of epDocs) {
-        if (!doc.cid) continue
+        if (!doc.cid) {
+          continue
+        }
         const finalCid = await probeOrRecover(doc.cid, {
           kind: doc.kind,
           episodeNumber: ep.number,
@@ -769,7 +781,9 @@ export async function buildAnimeDirectory(
         let regenerated: { spriteCid: string; vttCid: string } | null = null
 
         const tryRegenSprite = async (): Promise<{ spriteCid: string; vttCid: string } | null> => {
-          if (regenerated) return regenerated
+          if (regenerated) {
+            return regenerated
+          }
           if (!ep.transcodedCid || !ep.durationMs) {
             detail('warn', `   ⚠ эп.${ep.number}: нет video.webm в БД, sprite не восстановить`)
             return null
@@ -830,8 +844,12 @@ export async function buildAnimeDirectory(
         }
 
         const thumbnailEntries: DirEntry[] = []
-        if (spriteCid) thumbnailEntries.push({ name: 'sprite.webp', type: 'file', cid: spriteCid })
-        if (vttCid) thumbnailEntries.push({ name: 'sprite.vtt', type: 'file', cid: vttCid })
+        if (spriteCid) {
+          thumbnailEntries.push({ name: 'sprite.webp', type: 'file', cid: spriteCid })
+        }
+        if (vttCid) {
+          thumbnailEntries.push({ name: 'sprite.vtt', type: 'file', cid: vttCid })
+        }
         if (thumbnailEntries.length > 0) {
           epChildren.push({
             name: 'thumbnails',
@@ -1123,9 +1141,15 @@ export async function buildAnimeDirectory(
     })
     // Краткая сводка в детальный лог (одна строка для UI)
     const parts: string[] = []
-    if (recovered.length > 0) parts.push(`восстановлено ${recovered.length}`)
-    if (missingCids.length > 0) parts.push(`потеряно ${missingCids.length}`)
-    if (missingFonts.length > 0) parts.push(`шрифтов нет ${missingFonts.length}`)
+    if (recovered.length > 0) {
+      parts.push(`восстановлено ${recovered.length}`)
+    }
+    if (missingCids.length > 0) {
+      parts.push(`потеряно ${missingCids.length}`)
+    }
+    if (missingFonts.length > 0) {
+      parts.push(`шрифтов нет ${missingFonts.length}`)
+    }
     detail('info', `   Σ ${parts.join(', ')}`)
   }
 
@@ -1172,7 +1196,9 @@ async function parseAnimeManifest(animeManifestCid: string | null): Promise<Anim
   }
   try {
     const content = await safeCat(animeManifestCid, 8_000)
-    if (!content) return null
+    if (!content) {
+      return null
+    }
     return JSON.parse(content.toString('utf-8')) as AnimeManifest
   } catch (error) {
     log.warn('Не удалось прочитать AnimeManifest', {
@@ -1194,7 +1220,9 @@ async function parseAnimeInfo(animeInfoCid: string | null): Promise<AnimeInfo | 
   }
   try {
     const content = await safeCat(animeInfoCid, 8_000)
-    if (!content) return null
+    if (!content) {
+      return null
+    }
     return JSON.parse(content.toString('utf-8')) as AnimeInfo
   } catch (error) {
     log.warn('Не удалось прочитать AnimeInfo', {
@@ -1278,7 +1306,9 @@ async function buildImagesEntriesWithRecovery(
 
     if (!oldCid) {
       // imageCid нет — первичная загрузка с Shikimori если есть imageUrl
-      if (!entity.imageUrl) return { category, entity, finalCid: null }
+      if (!entity.imageUrl) {
+        return { category, entity, finalCid: null }
+      }
       detail('info', `   → ${category}/${entity.name}: загружаю с Shikimori…`)
       finalCid = await recoverShikimoriImage({
         imageUrl: entity.imageUrl,
@@ -1336,8 +1366,12 @@ async function buildImagesEntriesWithRecovery(
 
   // Фаза 2: последовательное назначение слотов (reserveSlot не потокобезопасен — нужен порядок)
   for (const { category, entity, finalCid } of probeResults) {
-    if (!finalCid) continue
-    if (cidToPath.has(finalCid)) continue // уже добавлен (другая сущность с тем же CID)
+    if (!finalCid) {
+      continue
+    }
+    if (cidToPath.has(finalCid)) {
+      continue
+    } // уже добавлен (другая сущность с тем же CID)
     const fileName = reserveSlot(category, entity.name)
     cidToPath.set(finalCid, `${category}/${fileName}`)
   }
@@ -1377,7 +1411,9 @@ async function parseEpisodeManifest(episodeManifestCid: string | null): Promise<
 
   try {
     const content = await safeCat(episodeManifestCid, 8_000)
-    if (!content) return null
+    if (!content) {
+      return null
+    }
     return JSON.parse(content.toString('utf-8')) as EpisodeManifest
   } catch (error) {
     log.warn('Не удалось прочитать EpisodeManifest', {

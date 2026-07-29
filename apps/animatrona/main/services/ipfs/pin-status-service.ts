@@ -95,7 +95,9 @@ export async function isSafeToUnpinLocally(cid: string): Promise<boolean> {
   })
 
   // Нет записи → исторический CID, считаем безопасным (был до трекинга)
-  if (!record) return true
+  if (!record) {
+    return true
+  }
 
   return record.status === 'PINNED_REMOTE'
 }
@@ -158,9 +160,15 @@ export async function scanAndRegisterLocalCids(
     select: { posterCid: true, animeInfoCid: true, directoryCid: true },
   })
   for (const a of animes) {
-    if (a.posterCid) allCids.add(a.posterCid)
-    if (a.animeInfoCid) allCids.add(a.animeInfoCid)
-    if (a.directoryCid) allCids.add(a.directoryCid)
+    if (a.posterCid) {
+      allCids.add(a.posterCid)
+    }
+    if (a.animeInfoCid) {
+      allCids.add(a.animeInfoCid)
+    }
+    if (a.directoryCid) {
+      allCids.add(a.directoryCid)
+    }
   }
 
   // Episodes + вложенные треки
@@ -185,33 +193,55 @@ export async function scanAndRegisterLocalCids(
   })
 
   for (const ep of episodes) {
-    if (ep.transcodedCid) allCids.add(ep.transcodedCid)
-    if (ep.manifestCid) allCids.add(ep.manifestCid)
-    if (ep.spriteCid) allCids.add(ep.spriteCid)
-    if (ep.vttCid) allCids.add(ep.vttCid)
-    if (ep.chaptersCid) allCids.add(ep.chaptersCid)
-    if (ep.metadataCid) allCids.add(ep.metadataCid)
+    if (ep.transcodedCid) {
+      allCids.add(ep.transcodedCid)
+    }
+    if (ep.manifestCid) {
+      allCids.add(ep.manifestCid)
+    }
+    if (ep.spriteCid) {
+      allCids.add(ep.spriteCid)
+    }
+    if (ep.vttCid) {
+      allCids.add(ep.vttCid)
+    }
+    if (ep.chaptersCid) {
+      allCids.add(ep.chaptersCid)
+    }
+    if (ep.metadataCid) {
+      allCids.add(ep.metadataCid)
+    }
     if (ep.thumbnailCids) {
       try {
-        for (const cid of JSON.parse(ep.thumbnailCids) as string[]) allCids.add(cid)
+        for (const cid of JSON.parse(ep.thumbnailCids) as string[]) {
+          allCids.add(cid)
+        }
       } catch {
         /* ignore */
       }
     }
     if (ep.screenshotCids) {
       try {
-        for (const cid of JSON.parse(ep.screenshotCids) as string[]) allCids.add(cid)
+        for (const cid of JSON.parse(ep.screenshotCids) as string[]) {
+          allCids.add(cid)
+        }
       } catch {
         /* ignore */
       }
     }
     for (const t of ep.audioTracks) {
-      if (t.transcodedCid) allCids.add(t.transcodedCid)
+      if (t.transcodedCid) {
+        allCids.add(t.transcodedCid)
+      }
     }
     for (const s of ep.subtitleTracks) {
-      if (s.fileCid) allCids.add(s.fileCid)
+      if (s.fileCid) {
+        allCids.add(s.fileCid)
+      }
       for (const f of s.fonts) {
-        if (f.fileCid) allCids.add(f.fileCid)
+        if (f.fileCid) {
+          allCids.add(f.fileCid)
+        }
       }
     }
   }
@@ -219,7 +249,9 @@ export async function scanAndRegisterLocalCids(
   // Files (постеры Shikimori и т.д.)
   const files = await prisma.file.findMany({ select: { cid: true } })
   for (const f of files) {
-    if (f.cid) allCids.add(f.cid)
+    if (f.cid) {
+      allCids.add(f.cid)
+    }
   }
 
   const cidList = [...allCids]
@@ -336,7 +368,9 @@ export async function safeLocalGc(onProgress?: SafeGcProgress): Promise<SafeGcRe
  */
 export async function tryPinLocalOnly(cid: string, timeoutMs = 500): Promise<boolean> {
   const client = getKuboService().getClientOrNull()
-  if (!client) return false
+  if (!client) {
+    return false
+  }
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)

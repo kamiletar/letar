@@ -39,7 +39,9 @@ export function useMiniPlayerProgress() {
 
   const saveProgress = useCallback(
     (currentTime: number, completed = false) => {
-      if (!metadata) return
+      if (!metadata) {
+        return
+      }
 
       upsertProgress({
         where: {
@@ -67,11 +69,15 @@ export function useMiniPlayerProgress() {
 
   // Периодическое сохранение при воспроизведении в mini mode
   useEffect(() => {
-    if (mode !== 'mini' || !isPlaying || !metadata) return
+    if (mode !== 'mini' || !isPlaying || !metadata) {
+      return
+    }
 
     const interval = setInterval(() => {
       const { currentTime, duration } = useGlobalVideoStore.getState()
-      if (currentTime <= 0) return
+      if (currentTime <= 0) {
+        return
+      }
 
       // Автоотметка: если до конца ≤ 120 сек
       if (duration > 0 && duration - currentTime <= COMPLETED_THRESHOLD && !completedMarkedRef.current) {
@@ -92,7 +98,9 @@ export function useMiniPlayerProgress() {
 
   // Сохранение при закрытии MiniPlayer (переход из mini в hidden)
   useEffect(() => {
-    if (mode !== 'mini') return
+    if (mode !== 'mini') {
+      return
+    }
 
     return () => {
       const { currentTime } = useGlobalVideoStore.getState()

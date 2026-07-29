@@ -176,8 +176,12 @@ function isNewerVersion(current: string, candidate: string): boolean {
   const parse = (v: string) => v.split('.').map((n) => parseInt(n, 10) || 0)
   const [cMaj, cMin, cPatch] = parse(current)
   const [nMaj, nMin, nPatch] = parse(candidate)
-  if (nMaj !== cMaj) return nMaj > cMaj
-  if (nMin !== cMin) return nMin > cMin
+  if (nMaj !== cMaj) {
+    return nMaj > cMaj
+  }
+  if (nMin !== cMin) {
+    return nMin > cMin
+  }
   return nPatch > cPatch
 }
 

@@ -77,33 +77,47 @@ export function RestoreTracksDialog({
 
   // Сбрасываем при закрытии
   useEffect(() => {
-    if (!open) reset()
+    if (!open) {
+      reset()
+    }
   }, [open, reset])
 
   // === Автоподстановка donor path из метаданных исходника ===
   useEffect(() => {
-    if (!open || addTracksState.donorPath) return
+    if (!open || addTracksState.donorPath) {
+      return
+    }
     const api = window.electronAPI
-    if (!api?.kubo) return
+    if (!api?.kubo) {
+      return
+    }
 
     // Берём metadataCid первого эпизода
     const epWithMeta = episodes.find((ep) => ep.metadataCid)
-    if (!epWithMeta?.metadataCid) return
+    if (!epWithMeta?.metadataCid) {
+      return
+    }
 
     let cancelled = false
     void (async () => {
       try {
         const gwResult = await api.kubo.getGatewayUrl()
-        if (cancelled || !gwResult.success || !gwResult.data) return
+        if (cancelled || !gwResult.success || !gwResult.data) {
+          return
+        }
 
         const res = await fetch(`${gwResult.data}/ipfs/${epWithMeta.metadataCid}`, {
           signal: AbortSignal.timeout(10000),
         })
-        if (cancelled || !res.ok) return
+        if (cancelled || !res.ok) {
+          return
+        }
 
         const metadata = (await res.json()) as { ffprobeRaw?: { format?: { filename?: string } } }
         const filename = metadata?.ffprobeRaw?.format?.filename
-        if (cancelled || !filename) return
+        if (cancelled || !filename) {
+          return
+        }
 
         // Извлекаем parent directory (папку-донор)
         const sep = filename.includes('\\') ? '\\' : '/'
@@ -111,11 +125,15 @@ export function RestoreTracksDialog({
         parts.pop()
         const donorFolder = parts.join(sep)
 
-        if (!donorFolder || cancelled) return
+        if (!donorFolder || cancelled) {
+          return
+        }
 
         // Проверяем существование папки
         const exists = await api.fs.exists(donorFolder)
-        if (cancelled || !exists) return
+        if (cancelled || !exists) {
+          return
+        }
 
         // Автоматически запускаем сканирование
         handleScanFolder(donorFolder)
@@ -132,7 +150,9 @@ export function RestoreTracksDialog({
   // === Подписка на события main process ===
   useEffect(() => {
     const api = window.electronAPI
-    if (!api?.restoreTracks) return
+    if (!api?.restoreTracks) {
+      return
+    }
 
     const unsubProgress = api.restoreTracks.onProgress((progress: RestoreProgress) => {
       setRestoreProgress(progress)
@@ -155,7 +175,9 @@ export function RestoreTracksDialog({
 
   // Не закрываем во время обработки
   const handleClose = useCallback(() => {
-    if (restoreStage === 'processing' || isRegenerating) return
+    if (restoreStage === 'processing' || isRegenerating) {
+      return
+    }
     onOpenChange(false)
   }, [restoreStage, isRegenerating, onOpenChange])
 

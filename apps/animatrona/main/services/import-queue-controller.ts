@@ -407,7 +407,9 @@ export class ImportQueueController extends EventEmitter {
     const original = [...this.queue.values()].find(
       (i) => i.status === 'completed' && i.createdAnimeId === animeId && !i.isRetranscode
     )
-    if (!original) return
+    if (!original) {
+      return
+    }
 
     // Запустить аудит асинхронно
     this.auditSingleItem(original).catch((err) =>
@@ -440,15 +442,27 @@ export class ImportQueueController extends EventEmitter {
     const incompleteDetails: string[] = []
     for (const ep of episodes) {
       const missing: string[] = []
-      if (!ep.transcodedCid) missing.push('видео')
-      if (!ep.manifestCid) missing.push('манифест')
+      if (!ep.transcodedCid) {
+        missing.push('видео')
+      }
+      if (!ep.manifestCid) {
+        missing.push('манифест')
+      }
       const missingAudio = ep.audioTracks.filter((at) => !at.transcodedCid)
-      if (missingAudio.length > 0) missing.push(`${missingAudio.length} аудио`)
+      if (missingAudio.length > 0) {
+        missing.push(`${missingAudio.length} аудио`)
+      }
       const missingSubs = ep.subtitleTracks.filter((st) => !st.fileCid)
-      if (missingSubs.length > 0) missing.push(`${missingSubs.length} субтитров`)
+      if (missingSubs.length > 0) {
+        missing.push(`${missingSubs.length} субтитров`)
+      }
       const missingFonts = ep.subtitleTracks.flatMap((st) => st.fonts).filter((f) => !f.fileCid)
-      if (missingFonts.length > 0) missing.push(`${missingFonts.length} шрифтов`)
-      if (missing.length > 0) incompleteDetails.push(`#${ep.number} (${missing.join(', ')})`)
+      if (missingFonts.length > 0) {
+        missing.push(`${missingFonts.length} шрифтов`)
+      }
+      if (missing.length > 0) {
+        incompleteDetails.push(`#${ep.number} (${missing.join(', ')})`)
+      }
     }
 
     if (incompleteDetails.length > 0) {

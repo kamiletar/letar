@@ -60,7 +60,9 @@ export function LogsTab() {
 
   // Подгрузить tail при mount/изменении lines count
   const loadTail = useCallback(async () => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     try {
       const res = await window.electronAPI.logs.tail(tailLines)
       setFilePath(res.filePath)
@@ -80,7 +82,9 @@ export function LogsTab() {
 
   // Live-watch: подписка на новые строки
   useEffect(() => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI) {
+      return
+    }
     void window.electronAPI.logs.startWatch().then((res) => {
       if (res.success) {
         setWatching(true)
@@ -91,7 +95,9 @@ export function LogsTab() {
       setLines((prev) => {
         const combined = [...prev, ...parsed]
         // Ограничиваем размер буфера в UI чтобы не съедать память
-        if (combined.length > 5000) return combined.slice(-5000)
+        if (combined.length > 5000) {
+          return combined.slice(-5000)
+        }
         return combined
       })
     })

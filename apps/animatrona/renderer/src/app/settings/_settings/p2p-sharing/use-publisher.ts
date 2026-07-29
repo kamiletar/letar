@@ -145,7 +145,9 @@ export function usePublisher(): UsePublisherReturn {
 
   const refreshPublisher = useCallback(async () => {
     const api = window.electronAPI?.ipfs
-    if (!api) return
+    if (!api) {
+      return
+    }
     try {
       const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T> =>
         Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))])

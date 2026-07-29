@@ -32,21 +32,29 @@ export function SetupWizardOverlay() {
 
   // Загружаем инфо о диске при изменении пути
   useEffect(() => {
-    if (!libraryPath || !state?.needsSetup) return
+    if (!libraryPath || !state?.needsSetup) {
+      return
+    }
     window.electronAPI?.app.getDiskInfo(libraryPath).then((info) => {
       setFreeSpace(info?.free ?? null)
     })
   }, [libraryPath, state?.needsSetup])
 
-  if (!state?.needsSetup) return null
+  if (!state?.needsSetup) {
+    return null
+  }
 
   const handleSelectFolder = async () => {
     const folder = await window.electronAPI?.dialog.selectFolder()
-    if (folder) setLibraryPath(folder)
+    if (folder) {
+      setLibraryPath(folder)
+    }
   }
 
   const handleComplete = async () => {
-    if (!libraryPath) return
+    if (!libraryPath) {
+      return
+    }
     setIsCompleting(true)
     try {
       await window.electronAPI?.app.completeSetup(libraryPath)

@@ -37,9 +37,13 @@ let stopRegenRequested = false
  * Детектирует ENOSPC (Linux/macOS), аналоги Windows и сообщения Kubo о нехватке места.
  */
 function isDiskFullError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false
+  if (!(error instanceof Error)) {
+    return false
+  }
   const code = (error as NodeJS.ErrnoException).code
-  if (code === 'ENOSPC') return true
+  if (code === 'ENOSPC') {
+    return true
+  }
   const msg = error.message.toLowerCase()
   return (
     msg.includes('no space left') ||
@@ -497,7 +501,9 @@ export function registerAnimeManifestHandlers(): void {
    */
   createHandler('animeManifest:getRegenCheckpoint', async () => {
     const data = await regenCheckpointStore.load()
-    if (!data.startedAt) return null
+    if (!data.startedAt) {
+      return null
+    }
 
     const pending = await prisma.anime.count({
       where: {
@@ -581,10 +587,15 @@ export function registerAnimeManifestHandlers(): void {
       const summary = { complete: 0, degraded: 0, broken: 0, unknown: 0 }
       for (const row of grouped) {
         const key = row.contentHealth as 'complete' | 'degraded' | 'broken' | null
-        if (key === 'complete') summary.complete = row._count._all
-        else if (key === 'degraded') summary.degraded = row._count._all
-        else if (key === 'broken') summary.broken = row._count._all
-        else summary.unknown += row._count._all
+        if (key === 'complete') {
+          summary.complete = row._count._all
+        } else if (key === 'degraded') {
+          summary.degraded = row._count._all
+        } else if (key === 'broken') {
+          summary.broken = row._count._all
+        } else {
+          summary.unknown += row._count._all
+        }
       }
       return summary
     }

@@ -33,7 +33,9 @@ async function collectFiles(dir: string, excludeDirs: string[] = []): Promise<st
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      if (excludeDirs.includes(entry.name)) continue
+      if (excludeDirs.includes(entry.name)) {
+        continue
+      }
       result.push(...(await collectFiles(fullPath, excludeDirs)))
     } else if (entry.isFile()) {
       result.push(fullPath)
@@ -124,7 +126,9 @@ export async function runLibraryMigration(
       const rel = path.relative(fromLibraryPath, file)
       const dest = path.join(toPath, rel)
       await copyFile(file, dest)
-      if (mode === 'move') await fs.unlink(file)
+      if (mode === 'move') {
+        await fs.unlink(file)
+      }
       reportProgress(file)
     }
 
@@ -134,7 +138,9 @@ export async function runLibraryMigration(
       const rel = path.relative(fromIpfsPath, file)
       const dest = path.join(toIpfsPath, rel)
       await copyFile(file, dest)
-      if (mode === 'move') await fs.unlink(file)
+      if (mode === 'move') {
+        await fs.unlink(file)
+      }
       reportProgress(file)
     }
 

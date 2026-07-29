@@ -37,7 +37,9 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
 
   // Загружаем свободное место при выборе папки
   useEffect(() => {
-    if (!toPath) return
+    if (!toPath) {
+      return
+    }
     window.electronAPI?.app.getDiskInfo(toPath).then((info) => {
       setFreeSpace(info?.free ?? null)
     })
@@ -53,11 +55,15 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
 
   const handleSelectFolder = async () => {
     const folder = await window.electronAPI?.dialog.selectFolder()
-    if (folder) setToPath(folder)
+    if (folder) {
+      setToPath(folder)
+    }
   }
 
   const handleStart = async () => {
-    if (!toPath) return
+    if (!toPath) {
+      return
+    }
     setIsMigrating(true)
     setProgress({ phase: 'stopping-kubo', progress: 0 })
 
@@ -85,7 +91,9 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
   }
 
   const handleClose = () => {
-    if (!isMigrating) onOpenChange(false)
+    if (!isMigrating) {
+      onOpenChange(false)
+    }
   }
 
   const resetState = () => {
@@ -102,7 +110,9 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
       onOpenChange={({ open: o }) => {
         if (!o) {
           handleClose()
-          if (!isMigrating) resetState()
+          if (!isMigrating) {
+            resetState()
+          }
         }
       }}
     >

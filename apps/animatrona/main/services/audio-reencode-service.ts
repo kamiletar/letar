@@ -39,7 +39,9 @@ const log = createModuleLogger('AudioReencode')
 
 /** Парсинг строки каналов в число */
 function parseChannels(channels: string | null): number {
-  if (!channels) return 2
+  if (!channels) {
+    return 2
+  }
   // "5.1" → 6, "2.0" → 2, "7.1" → 8, "1.0" → 1, "5.1 (side)" → 6
   const match = channels.match(/^(\d+)\.(\d+)/)
   if (match) {
@@ -78,7 +80,9 @@ function buildTrackTitle(track: {
  * @returns размер в байтах или null если длительность неизвестна
  */
 function estimateFileSize(durationMs: number | null, bitrateKbps: number): number | null {
-  if (!durationMs || durationMs <= 0) return null
+  if (!durationMs || durationMs <= 0) {
+    return null
+  }
   // размер = длительность_сек * битрейт_бит/с / 8 + ~5% оверхед контейнера
   return Math.round((durationMs / 1000) * ((bitrateKbps * 1000) / 8) * 1.05)
 }
@@ -89,9 +93,13 @@ function estimateFileSize(durationMs: number | null, bitrateKbps: number): numbe
  * Пережимаем если файл на 15%+ больше ожидаемого.
  */
 function needsReencode(ipfsSize: number | null, durationMs: number | null, targetBitrateKbps: number): boolean {
-  if (!ipfsSize || ipfsSize <= 0) return false // нет файла — нечего пережимать
+  if (!ipfsSize || ipfsSize <= 0) {
+    return false
+  } // нет файла — нечего пережимать
   const expectedSize = estimateFileSize(durationMs, targetBitrateKbps)
-  if (!expectedSize) return false // неизвестная длительность — нечем оценить, пропускаем
+  if (!expectedSize) {
+    return false
+  } // неизвестная длительность — нечем оценить, пропускаем
   // Пережимаем если реальный размер больше ожидаемого на 15%+
   return ipfsSize > expectedSize * 1.15
 }
@@ -127,7 +135,9 @@ export async function previewReencode(animeId: string, targetBitrateKbps: number
   // Оценка: разница между текущим размером и ожидаемым при целевом битрейте
   const estimatedSaving = tracks.reduce((sum, t) => {
     const expectedSize = estimateFileSize(t.episode.durationMs, targetBitrateKbps)
-    if (!t.ipfsSize || !expectedSize) return sum
+    if (!t.ipfsSize || !expectedSize) {
+      return sum
+    }
     return sum + Math.max(0, t.ipfsSize - expectedSize)
   }, 0)
 
@@ -211,7 +221,9 @@ export async function reencodeAnimeAudio(
 
   /** Обработка одной дорожки */
   const processTrack = async (i: number) => {
-    if (cancelToken?.cancelled) return
+    if (cancelToken?.cancelled) {
+      return
+    }
 
     const track = dbTracks[i]
     const tp = trackProgresses[i]
@@ -229,7 +241,9 @@ export async function reencodeAnimeAudio(
       tp.percent = 100
       emit()
 
-      if (cancelToken?.cancelled) return
+      if (cancelToken?.cancelled) {
+        return
+      }
 
       // === Транскодирование ===
       tp.status = 'transcoding'
@@ -250,7 +264,9 @@ export async function reencodeAnimeAudio(
         }
       )
 
-      if (cancelToken?.cancelled) return
+      if (cancelToken?.cancelled) {
+        return
+      }
 
       // === Загрузка в IPFS ===
       tp.status = 'uploading'
@@ -311,7 +327,9 @@ export async function reencodeAnimeAudio(
   let nextIndex = 0
   const runWorker = async () => {
     while (nextIndex < dbTracks.length) {
-      if (cancelToken?.cancelled) break
+      if (cancelToken?.cancelled) {
+        break
+      }
       const idx = nextIndex++
       await processTrack(idx)
     }
@@ -379,7 +397,9 @@ export async function previewBatchReencode(): Promise<BatchReencodePreview> {
   const animeMap = new Map<string, { name: string; trackCount: number; totalSize: number; estimatedSaving: number }>()
 
   for (const track of allTracks) {
-    if (!needsReencode(track.ipfsSize, track.episode.durationMs, targetBitrateKbps)) continue
+    if (!needsReencode(track.ipfsSize, track.episode.durationMs, targetBitrateKbps)) {
+      continue
+    }
 
     const animeId = track.episode.anime.id
     const existing = animeMap.get(animeId)
@@ -451,7 +471,9 @@ export async function batchReencodeAudio(
   let totalFailed = 0
 
   for (let i = 0; i < preview.animes.length; i++) {
-    if (cancelToken?.cancelled) break
+    if (cancelToken?.cancelled) {
+      break
+    }
 
     const anime = preview.animes[i]
     progress.currentAnimeIndex = i

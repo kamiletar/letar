@@ -149,7 +149,9 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
  * Остановить relay heartbeat (очищает интервал и pending retry timeout)
  */
 export function stopRelayHeartbeat(interval: ReturnType<typeof setInterval> | null): void {
-  if (!interval) return
+  if (!interval) {
+    return
+  }
   const combined = interval as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
   if (combined.__stopHeartbeat) {
     combined.__stopHeartbeat()
@@ -290,7 +292,9 @@ export function createRelayMonitor(
  * Остановить relay monitor (очистить оба таймера)
  */
 export function stopRelayMonitor(interval: ReturnType<typeof setInterval> | null): void {
-  if (!interval) return
+  if (!interval) {
+    return
+  }
   clearInterval(interval)
   const combined = interval as ReturnType<typeof setInterval> & { __initialDelay?: ReturnType<typeof setTimeout> }
   if (combined.__initialDelay) {
@@ -306,7 +310,9 @@ async function hasRelayReservation(apiUrl: string): Promise<boolean> {
     method: 'POST',
     signal: AbortSignal.timeout(15000),
   })
-  if (!res.ok) return false
+  if (!res.ok) {
+    return false
+  }
 
   const data = (await res.json()) as { Addresses?: string[] }
   const addrs = data.Addresses ?? []

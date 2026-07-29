@@ -111,9 +111,15 @@ function getStatusInfo(status: TorrentInfo['status']): { color: string; label: s
 function pluralize(n: number, forms: [string, string, string]): string {
   const abs = Math.abs(n) % 100
   const lastDigit = abs % 10
-  if (abs > 10 && abs < 20) return forms[2]
-  if (lastDigit > 1 && lastDigit < 5) return forms[1]
-  if (lastDigit === 1) return forms[0]
+  if (abs > 10 && abs < 20) {
+    return forms[2]
+  }
+  if (lastDigit > 1 && lastDigit < 5) {
+    return forms[1]
+  }
+  if (lastDigit === 1) {
+    return forms[0]
+  }
   return forms[2]
 }
 
@@ -248,7 +254,9 @@ export function TorrentsContent() {
       const handleProgress = (p: TorrentProgress) => {
         setTorrents((prev) => {
           const idx = prev.findIndex((t) => t.infoHash === p.infoHash)
-          if (idx < 0) return prev
+          if (idx < 0) {
+            return prev
+          }
           const existing = prev[idx]
           // Мержим только изменившиеся поля, не пересоздаём files[]
           if (
@@ -276,7 +284,9 @@ export function TorrentsContent() {
     const interval = setInterval(fetchTorrents, 5000)
 
     return () => {
-      for (const unsub of unsubs) unsub()
+      for (const unsub of unsubs) {
+        unsub()
+      }
       clearInterval(interval)
     }
   }, [fetchTorrents])
@@ -299,7 +309,9 @@ export function TorrentsContent() {
     async (infoHash: string) => {
       await withBusy(infoHash, async () => {
         const api = window.electronAPI
-        if (!api?.torrent) return
+        if (!api?.torrent) {
+          return
+        }
         const res = await api.torrent.pause(infoHash)
         if (res.success) {
           setTorrents((prev) => prev.map((t) => (t.infoHash === infoHash ? { ...t, status: 'paused' as const } : t)))
@@ -313,7 +325,9 @@ export function TorrentsContent() {
     async (infoHash: string) => {
       await withBusy(infoHash, async () => {
         const api = window.electronAPI
-        if (!api?.torrent) return
+        if (!api?.torrent) {
+          return
+        }
         const res = await api.torrent.resume(infoHash)
         if (res.success) {
           setTorrents((prev) =>
@@ -333,7 +347,9 @@ export function TorrentsContent() {
     async (infoHash: string, name: string) => {
       await withBusy(infoHash, async () => {
         const api = window.electronAPI
-        if (!api?.torrent) return
+        if (!api?.torrent) {
+          return
+        }
         const res = await api.torrent.remove(infoHash, false)
         if (res.success) {
           setTorrents((prev) => prev.filter((t) => t.infoHash !== infoHash))
@@ -348,7 +364,9 @@ export function TorrentsContent() {
     async (infoHash: string, name: string) => {
       await withBusy(infoHash, async () => {
         const api = window.electronAPI
-        if (!api?.torrent) return
+        if (!api?.torrent) {
+          return
+        }
         const res = await api.torrent.remove(infoHash, true)
         if (res.success) {
           setTorrents((prev) => prev.filter((t) => t.infoHash !== infoHash))
@@ -395,7 +413,9 @@ export function TorrentsContent() {
   /** Сбросить статус импорта торрента (чтобы заново открыть визард) */
   const handleResetImportStatus = useCallback(async (infoHash: string) => {
     const api = window.electronAPI
-    if (!api?.torrent) return
+    if (!api?.torrent) {
+      return
+    }
     await api.torrent.updateMeta(infoHash, { importStatus: 'none' })
     setTorrents((prev) => prev.map((t) => (t.infoHash === infoHash ? { ...t, importStatus: 'none' as const } : t)))
     toaster.success({ title: 'Статус импорта сброшен' })
@@ -405,7 +425,9 @@ export function TorrentsContent() {
   const handleOpenAsBundle = useCallback(
     (infoHash: string) => {
       const torrent = torrents.find((t) => t.infoHash === infoHash)
-      if (!torrent) return
+      if (!torrent) {
+        return
+      }
       // Помечаем как bundle в мете и открываем диалог
       window.electronAPI?.torrent?.updateMeta(infoHash, { isBundle: true })
       setTorrents((prev) => prev.map((t) => (t.infoHash === infoHash ? { ...t, isBundle: true } : t)))
@@ -652,7 +674,9 @@ export function TorrentsContent() {
               torrentCategoryTab === 'animatrona' ? t.category === 'animatrona' : t.category !== 'animatrona'
             )
             .filter((t) => {
-              if (!searchQuery) return true
+              if (!searchQuery) {
+                return true
+              }
               const q = searchQuery.toLowerCase()
               return t.name.toLowerCase().includes(q) || (t.animeName?.toLowerCase().includes(q) ?? false)
             })
@@ -716,7 +740,9 @@ export function TorrentsContent() {
           open={bundleDialogOpen}
           onOpenChange={(open) => {
             setBundleDialogOpen(open)
-            if (!open) setBundleTorrent(null)
+            if (!open) {
+              setBundleTorrent(null)
+            }
           }}
           torrent={bundleTorrent}
           onDone={() => {
@@ -736,7 +762,9 @@ export function TorrentsContent() {
       <Dialog.Root
         open={!!confirmDelete}
         onOpenChange={(e) => {
-          if (!e.open) setConfirmDelete(null)
+          if (!e.open) {
+            setConfirmDelete(null)
+          }
         }}
       >
         <Portal>

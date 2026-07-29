@@ -133,10 +133,14 @@ function WarningDetails({ error }: { error: string }) {
 
   // Краткий текст для заголовка
   const summary = useMemo(() => {
-    if (!isMultiline) return error
+    if (!isMultiline) {
+      return error
+    }
     // Считаем количество проблемных эпизодов из аудита
     const epMatch = error.match(/(\d+) эп\. неполные/)
-    if (epMatch) return `${epMatch[1]} эп. неполные`
+    if (epMatch) {
+      return `${epMatch[1]} эп. неполные`
+    }
     // Или берём первую строку
     return lines[0].length > 60 ? `${lines[0].slice(0, 60)}…` : lines[0]
   }, [error, isMultiline, lines])

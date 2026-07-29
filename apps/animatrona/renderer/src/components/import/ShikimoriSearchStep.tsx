@@ -119,7 +119,9 @@ export function ShikimoriSearchStep({
 
   /** Результаты, отсортированные по релевантности (если есть seasonNumber) */
   const sortedResults = useMemo(() => {
-    if (!data || !seasonNumber || seasonNumber <= 1) return data
+    if (!data || !seasonNumber || seasonNumber <= 1) {
+      return data
+    }
     return [...data].sort((a, b) => seasonRelevance(b, seasonNumber) - seasonRelevance(a, seasonNumber))
   }, [data, seasonNumber])
 

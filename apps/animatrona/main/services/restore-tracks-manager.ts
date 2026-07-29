@@ -183,7 +183,9 @@ export class RestoreTracksManager extends EventEmitter {
 
   /** Обработка очереди — запуск задач до лимита concurrency */
   private processQueue(): void {
-    if (this.cancelled) return
+    if (this.cancelled) {
+      return
+    }
 
     const queued = Array.from(this.tasks.values()).filter((t) => t.status === 'queued')
 
@@ -458,7 +460,9 @@ export class RestoreTracksManager extends EventEmitter {
       if (newSubIds.length > 0) {
         const existing = new Set(fontTask.subtitleTrackIds)
         for (const id of newSubIds) {
-          if (!existing.has(id)) fontTask.subtitleTrackIds.push(id)
+          if (!existing.has(id)) {
+            fontTask.subtitleTrackIds.push(id)
+          }
         }
         log.info('FontTask дополнен новыми дорожками', {
           episodeId: fontTask.episodeId,
@@ -469,7 +473,9 @@ export class RestoreTracksManager extends EventEmitter {
     }
 
     for (const fontTask of this.fontTasks) {
-      if (this.cancelled) break
+      if (this.cancelled) {
+        break
+      }
       fontTask.status = 'running'
 
       const tempDir = await mkdtemp(path.join(os.tmpdir(), 'animatrona-fonts-'))
@@ -488,9 +494,13 @@ export class RestoreTracksManager extends EventEmitter {
         const db = getPrismaClient()
 
         for (const font of missing) {
-          if (this.cancelled) break
+          if (this.cancelled) {
+            break
+          }
           const ipfsResult = await uploadToIpfs(font.path)
-          if (!ipfsResult?.cid) continue
+          if (!ipfsResult?.cid) {
+            continue
+          }
 
           for (const trackId of fontTask.subtitleTrackIds) {
             try {
@@ -537,7 +547,9 @@ export class RestoreTracksManager extends EventEmitter {
   private setTaskProgress(task: RestoreTask, progress: number, phase?: RestoreTask['phase']): void {
     task.progress = progress
     task.lastProgressUpdate = Date.now()
-    if (phase) task.phase = phase
+    if (phase) {
+      task.phase = phase
+    }
   }
 
   /** Отправить прогресс (без throttle) */
@@ -549,7 +561,9 @@ export class RestoreTracksManager extends EventEmitter {
   /** Отправить прогресс с throttle */
   private emitProgressThrottled(): void {
     const now = Date.now()
-    if (now - this.lastProgressEmit < PROGRESS_THROTTLE) return
+    if (now - this.lastProgressEmit < PROGRESS_THROTTLE) {
+      return
+    }
     this.emitProgress()
   }
 
@@ -569,14 +583,20 @@ export class RestoreTracksManager extends EventEmitter {
 
   /** Проверка зависших задач и retry/error */
   private checkStaleTasks(): void {
-    if (this.cancelled) return
+    if (this.cancelled) {
+      return
+    }
 
     const now = Date.now()
     let changed = false
 
     for (const task of this.tasks.values()) {
-      if (task.status !== 'running') continue
-      if (now - task.lastProgressUpdate < STALE_TIMEOUT) continue
+      if (task.status !== 'running') {
+        continue
+      }
+      if (now - task.lastProgressUpdate < STALE_TIMEOUT) {
+        continue
+      }
 
       // Задача зависла
       if (task.retryCount < MAX_RETRIES) {
