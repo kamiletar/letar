@@ -79,19 +79,89 @@
 БД-порт `5463`, app-порт `3030`, домен `archetest-stage.s3.letar.best` (валиден по
 существующему DNS wildcard `*.s3.letar.best`, новая запись не нужна).
 
-**Осталось (инфраструктурная часть, не код archetest):**
+**✅ Инфраструктурная часть закрыта BlackCove (2026-07-28, тот же день):** `.env.staging`
+на s3 создан (`BETTER_AUTH_SECRET`/`POSTGRES_PASSWORD` через `openssl rand`; ⚠️ находка —
+`DB_PASSWORD` нужен ОТДЕЛЬНО от `POSTGRES_PASSWORD`, `deploy-affected.sh` строит
+`DATABASE_URL` именно из `DB_PASSWORD` — стоит перепроверить на будущих staging-инстансах
+вообще, не только archetest). NPM proxy host `archetest-stage.s3.letar.best` → `172.17.0.1:3030`
+выпущен, SSL forced. `deploy_app(archetest, staging)` реально разворачивает контейнер,
+миграции применяются (8 шт). OIDC-переменные в `.env.staging` НЕ заводились — `auth.ts:30`
+включает OIDC-плагин только если `OIDC_CLIENT_ID`/`SECRET` заданы, без них просто не
+подключается (не крашит) — ок, раз e2e не тестирует логин через Ключницу.
 
-1. `.env.staging` создать вручную на s3 (секреты, в репозиторий не попадает — как у всех
-   остальных staging-приложений). Текущий e2e-сьют (`express`/`kiosk`/`mood-check-in`/
-   `safety-net`) не проходит через OIDC-логин, поэтому staging-специфичный OIDC-клиент
-   в auth-hub заводить не пришлось — если e2e когда-нибудь начнёт покрывать вход,
-   понадобится отдельный `oauthApplication "archetest-staging"` с redirect_uri на
-   staging-домен (не переиспользовать `archetest-prod` — редирект не совпадёт).
-2. NPM proxy host на s3 для `archetest-stage.s3.letar.best` (TLS через Let's Encrypt
-   HTTP-01, форвард на хостовый порт `3030`) — задача BlackCove/владельца, как и у всех
-   остальных staging-доменов.
-3. Первый `deploy_app(archetest, staging)` → `run_e2e` → зелёный → `deploy_app(archetest,
-   production)` должен пройти без блока.
+**Живой прогон `run_e2e` (2026-07-28) — 15 упало / 6 прошло из 21.** Гейт сработал
+корректно в обе стороны (заблокировал прод и на красном e2e, и на рассинхроне коммитов) —
+сама инфраструктура гейта ЗАКРЫТА. Осталось почему упал сам сьют:
+
+### 🔧 В РАБОТЕ, не закончено — забирать со следующей сессии
+
+**1. `safety-net.spec.ts` — DATABASE_URL/BETTER_AUTH_SECRET читались из локального `.env`
+файла**, которого нет на e2e-раннере (прогон идёт против реального `https://archetest-
+stage.s3.letar.best`, не dev-сервера с файловым доступом к секретам). Правильный паттерн
+уже есть в монорепо — `createDevSessionRoute` (`@letar/auth/server`) + `devSessionLogin`
+(`@letar/e2e-testing`), см. `libs/e2e-testing/src/lib/staging-auth.ts` (используется
+svoichuzhie/driving-school/grandslamcup/studio/auth-hub/animatrona-tracker).
+
+Сделано в этой сессии (✅ закоммичено):
+
+- `apps/archetest/src/app/api/auth/dev-session/route.ts` — создан, `buildUserData` ставит
+  `disclaimerAccepted: true` (дефолт схемы `false` блокирует старт квиза на экране
+  дисклеймера, `quiz-intro.tsx`) + `roles: ['USER']`.
+- `apps/archetest-e2e/package.json` + `tsconfig.json` — подключён `@letar/e2e-testing`
+  (implicitDependencies + paths + references, по образцу `svoichuzhie-e2e`).
+- **НЕ сделано:** `safety-net.spec.ts` всё ещё в старом виде (raw `pg.Client` +
+  `loadEnvVar`/`signSessionCookie`) — сам файл ещё не переписан на
+  `page.goto('/api/auth/dev-session?email=...&token=...&redirect=/ru')` (проще, чем
+  `devSessionLogin` из либы — той нужен отдельный global-setup/storageState, тут хватит
+  прямого редиректа в одном тесте). Нужно убрать импорт `pg`, `loadEnvVar`, `signSessionCookie`,
+  оставить `buildBestOptionMap`/чтение `questions-dump.json` (это статический файл в репо,
+  не секрет — читается нормально и на раннере).
+- **Инфраструктурная зависимость, не в этом репо:** `.env.staging` archetest на s3 нужно
+  дополнить `ALLOW_DEV_SESSION=true` + `DEV_SESSION_TOKEN=<то же значение, что уже
+  использует dashboard-agent для preserve-env в`run_e2e`>` — та же пара, что у
+  svoichuzhie/driving-school и т.д. Без этого dev-session роут будет всегда отвечать 403.
+  Просить BlackCove/владельца добавить по аналогии с остальными.
+
+**2. `express.spec.ts`/`mood-check-in.spec.ts` — cookie-consent баннер перехватывал клики
+по CTA.** Не только e2e-баг — **реальный прод-баг**: `CookieBanner` (`libs/ui`, `position:
+fixed; bottom:0; zIndex:1000`) и `StickyActionBar` (`libs/ui`, `position:sticky; bottom:0;
+zIndex:"docked"≈10`) физически накладываются друг на друга (оба анкерятся в bottom экрана,
+у баннера z-index на два порядка выше) — на express/mood-check-in первого визита ссылка
+`<a href="/privacy">` из баннера перехватывает pointer-events поверх кнопки «Начать
+экспресс»/«Пропустить», это баг для ЛЮБОГО первого посетителя archetest, не только e2e.
+
+Сделано в этой сессии (НЕ закоммичено, **⚠️ не подтверждено рабочим**):
+
+- `libs/ui/src/lib/cookie-banner.tsx` — добавлен `ResizeObserver` на корневой `Box`,
+  публикующий свою высоту в CSS-переменную `--letar-cookie-banner-height` на
+  `document.documentElement` (0px, если баннер скрыт).
+- `libs/ui/src/lib/sticky-action-bar.tsx` — `bottom="0"` заменён на
+  `bottom="var(--letar-cookie-banner-height, 0px)"`, чтобы панель приподнималась над
+  баннером, когда он показан.
+- lint/typecheck `@letar/ui` зелёные, но **живая проверка в Browser pane показала, что
+  `ResizeObserver.observe()` ни разу не вызывается** (патчил `ResizeObserver` глобально,
+  считал вызовы `observe()` — 0 после принудительного `setShown(true)` через кастомный
+  ивент `archetest:open-cookie-settings`). Похоже на реальный баг в эффекте (не просто
+  артефакт свёрнутой Browser pane — тот бы просто не вызвал КОЛЛБЭК, а тут не происходит
+  даже сам вызов `observe()`), но не диагностировано до конца — возможно проблема в
+  порядке эффектов/rootRef таймингах, либо в том, что повторный показ баннера через
+  `handleOpen()` идёт по другой ветке, не через начальный маунт. **Требует отладки с нуля
+  следующей сессией** — возможно, проще заменить `ResizeObserver` на фиксированную
+  константу высоты (баннер не resizable по контенту в разумных пределах) вместо
+  измерения, если отладка не даст быстрого результата.
+- Альтернатива, если CSS-var подход не заработает быстро: жёстко захардкодить
+  `StickyActionBar`'s `bottom` в `env(safe-area-inset-bottom)` + фиксированное значение
+  (например `~180px`, примерная высота баннера с 3 чекбоксами) — менее элегантно, но
+  надёжно и без ResizeObserver-магии. Или проще всего — дать `StickyActionBar` z-index
+  ВЫШЕ баннера (`banner`/`overlay` токен) и не пытаться их разносить пространственно —
+  тогда CTA всегда кликабелен, баннер визуально может слегка перекрываться под кнопкой,
+  но это менее красиво. Решение по подходу — на следующую сессию.
+
+**Ничего из пункта 2026-07-28 не закоммичено и не запушено** — рабочая копия содержит
+все перечисленные файлы в незафиксированном виде. Следующая сессия: дописать
+`safety-net.spec.ts`, доразобрать `ResizeObserver`-баг (или сменить подход), затем
+`nx lint/typecheck:tsgo/test archetest archetest-e2e @letar/ui` → коммит → попросить
+BlackCove повторить `deploy_app(staging)` → `run_e2e` → `deploy_app(production)`.
 
 ## ⭐ СЛЕДУЮЩАЯ ЗАДАЧА: часть B аудита банка (после ревью HON)
 
