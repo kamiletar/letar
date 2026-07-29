@@ -97,6 +97,9 @@ services:
       NPM_API_EMAIL: ${NPM_API_EMAIL:-}
       NPM_API_PASSWORD: ${NPM_API_PASSWORD:-}
 
+      # GitHub Actions (опционально — повышает rate limit публичного API)
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
       # Umami Analytics API
       UMAMI_API_URL: ${UMAMI_API_URL:-https://stats.letar.best}
       UMAMI_API_USER: ${UMAMI_API_USER:-admin}

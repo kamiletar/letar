@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.22.0] — 2026-07-30
+
+### Feature: статус CI (GitHub Actions) на главной странице
+
+Карточка `GithubActionsCard` показывает последние 10 запусков workflow монорепо `letar` —
+статус (успешно/ошибка/выполняется/отменено), ветку, ссылку на GitHub. Клиент
+`src/lib/github-actions.ts` ходит в публичный GitHub REST API анонимно, `GITHUB_TOKEN`
+опционален (только поднимает rate limit). Auth-gated `GET /api/github/workflow-runs` по тому
+же паттерну, что и остальные API dashboard. Покрывает только публичный `kamiletar/letar` —
+приватные submodule-репозитории вне охвата.
+
 ## [1.21.0] — 2026-07-30
 
 ### Feature: грубый счётчик посещаемости (hits/day/domain) без ПДн

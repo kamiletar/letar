@@ -1,5 +1,6 @@
 'use client'
 
+import { GithubActionsCard } from '@/app/_components/github/GithubActionsCard'
 import { Header } from '@/app/_components/layout/Header'
 import { SystemOverview } from '@/app/_components/system/SystemOverview'
 import { Box, Container, Heading, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
@@ -18,7 +19,7 @@ const SystemHistoryChart = dynamic(
         <Spinner size="lg" color="brand.solid" />
       </Box>
     ),
-  }
+  },
 )
 
 const ProcessList = dynamic(() => import('@/app/_components/system/ProcessList').then((mod) => mod.ProcessList), {
@@ -62,6 +63,8 @@ export default function Index() {
             <ProcessList />
             <DiskUsage />
           </SimpleGrid>
+
+          <GithubActionsCard />
         </VStack>
       </Container>
     </>

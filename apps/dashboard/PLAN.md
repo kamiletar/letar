@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.21.0
+> **Версия:** 1.22.0
 > **Последнее обновление:** 2026-07-30
 
 ---
@@ -666,7 +666,32 @@ dashboard никогда не попадают, только число.
 
 ---
 
+### ✅ Интеграция с GitHub Actions (v1.22.0)
+
+**Статус:** ✅ Готово
+
+- [x] `src/lib/github-actions.ts` — клиент GitHub REST API (`/repos/kamiletar/letar/actions/runs`),
+      опциональный `GITHUB_TOKEN` для повышения rate limit (60/час → 5000/час на публичном репо)
+- [x] `GET /api/github/workflow-runs` — auth-gated роут (тот же паттерн, что `analytics/pageviews`)
+- [x] `GithubActionsCard` на главной странице — последние 10 запусков CI, статус
+      (успешно/ошибка/выполняется/отменено), ветка, ссылка на GitHub
+- [x] `GITHUB_TOKEN` добавлен в `.env.docker.example` и `docker-compose.production.yml`
+      (опционально, без значения по умолчанию работает анонимный доступ)
+- [x] `nx typecheck:tsgo`/`nx lint dashboard` — зелёные
+
+**Файлы:**
+
+- `src/lib/github-actions.ts`
+- `src/app/api/github/workflow-runs/route.ts`
+- `src/app/_components/github/GithubActionsCard.tsx`
+- `src/app/page.tsx`
+
+**Ограничение:** только `kamiletar/letar` (публичный монорепо). Приватные submodule-репозитории
+(`letar-private-*`) не покрыты — потребовался бы `GITHUB_TOKEN` с доступом к приватным репо,
+осознанно не делалось в этом проходе (см. вопрос пользователю при планировании задачи).
+
+---
+
 ## Идеи на будущее
 
-- Интеграция с GitHub Actions
 - Мониторинг SSL сертификатов
