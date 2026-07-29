@@ -1,5 +1,28 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 19) — Общий IndexedDB-хелпер для storage
+
+### Что сделано
+
+- **`src/lib/storage/indexeddb-kv.ts`** (новый) — `createKvStore<T>(dbName, storeName, { version?, keyPath?, indexes? })`,
+  возвращает `{ put, get, getAll, getAllByIndex, delete }`. Вынесен общий boilerplate,
+  которым `patches-db.ts` и `samples-db.ts` независимо дублировались: `indexedDB.open()` +
+  `onupgradeneeded` (создание стора, опциональные индексы) + промисификация транзакций put/
+  get/getAll(по индексу)/delete с единой обработкой ошибок (fallback на generic `Error`, если
+  `req.error`/`tx.error` не `Error`).
+- **`patches-db.ts`** переписан поверх `createKvStore<Patch>('synth-patches', 'patches', { indexes: [type, createdAt] })`.
+  Публичный API (`savePatch`/`listPatches`/`deletePatch`/`slugify`) не менялся — сортировка по
+  `createdAt` в `listPatches` осталась на вызывающей стороне.
+- **`samples-db.ts`** переписан поверх `createKvStore<StoredSample>('synth-samples', 'samples')`.
+  Публичный API (`saveSample`/`getSample`/`deleteSample`/`generateSampleId`) не менялся.
+- **Проверено живьём в браузере** (dev-сервер, порт 3022): сохранение/список/удаление патча
+  через новый хелпер (`savePatch`/`listPatches`/`deletePatch` — round-trip подтверждён прямым
+  чтением IndexedDB `synth-patches`); переключение на движок DRUM, загрузка синтетического
+  WAV-файла на пустой пэд через `DataTransfer` + `change`-событие (`saveSample`/`getSample`
+  round-trip в `synth-samples`, пэд в UI отразил имя файла), очистка пэда (`deleteSample`
+  убрал запись из IndexedDB). Обе базы работают без потери данных.
+- `nx typecheck:tsgo synth`, `nx lint synth`, `nx format --projects=synth` — зелёные.
+
 ## Сессия 2026-07-29 (продолжение 18) — Сэмплы на драм-пэдах
 
 ### Что сделано

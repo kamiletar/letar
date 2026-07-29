@@ -4,6 +4,15 @@
 
 ---
 
+## [0.20.1] — 2026-07-29
+
+### Изменено
+
+- **Общий IndexedDB key-value хелпер** — `src/lib/storage/indexeddb-kv.ts` (`createKvStore`).
+  `patches-db.ts` и `samples-db.ts` дублировали один и тот же boilerplate (открытие базы,
+  `onupgradeneeded`, промисификация put/get/getAll/delete с одинаковой обработкой ошибок).
+  Публичный API обоих модулей не изменился — чистый рефакторинг.
+
 ## [0.20.0] — 2026-07-29
 
 ### Добавлено

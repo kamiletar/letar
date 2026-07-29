@@ -1,27 +1,15 @@
 import type { Patch } from '@/lib/patch/schema'
+import { createKvStore } from '@/lib/storage/indexeddb-kv'
 
 // Приватное локальное хранилище патчей — IndexedDB браузера, ничего не покидает машину
 // (см. claude.md §6 «Приватность»). Публикация в /gallery — отдельный ручной шаг (копия в patches/*.json).
 
-const DB_NAME = 'synth-patches'
-const DB_VERSION = 1
-const STORE = 'patches'
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION)
-    req.onupgradeneeded = () => {
-      const db = req.result
-      if (!db.objectStoreNames.contains(STORE)) {
-        const store = db.createObjectStore(STORE, { keyPath: 'id' })
-        store.createIndex('type', 'type')
-        store.createIndex('createdAt', 'createdAt')
-      }
-    }
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error instanceof Error ? req.error : new Error('IndexedDB: не удалось открыть'))
-  })
-}
+const store = createKvStore<Patch>('synth-patches', 'patches', {
+  indexes: [
+    { name: 'type', keyPath: 'type' },
+    { name: 'createdAt', keyPath: 'createdAt' },
+  ],
+})
 
 // Транслитерация имени в id-совместимый слаг (схема патча требует /^[a-z0-9-]+$/)
 export function slugify(name: string): string {
@@ -73,36 +61,14 @@ export function slugify(name: string): string {
 }
 
 export async function savePatch(patch: Patch): Promise<void> {
-  const db = await openDb()
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite')
-    tx.objectStore(STORE).put(patch)
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error instanceof Error ? tx.error : new Error('IndexedDB: не удалось сохранить'))
-  })
-  db.close()
+  await store.put(patch)
 }
 
 export async function listPatches(type: Patch['type']): Promise<Patch[]> {
-  const db = await openDb()
-  const result = await new Promise<Patch[]>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly')
-    const index = tx.objectStore(STORE).index('type')
-    const req = index.getAll(type)
-    req.onsuccess = () => resolve(req.result as Patch[])
-    req.onerror = () => reject(req.error instanceof Error ? req.error : new Error('IndexedDB: не удалось прочитать'))
-  })
-  db.close()
+  const result = await store.getAllByIndex('type', type)
   return result.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
 export async function deletePatch(id: string): Promise<void> {
-  const db = await openDb()
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite')
-    tx.objectStore(STORE).delete(id)
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error instanceof Error ? tx.error : new Error('IndexedDB: не удалось удалить'))
-  })
-  db.close()
+  await store.delete(id)
 }
