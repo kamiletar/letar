@@ -2,6 +2,16 @@
 
 Детальное описание всех реализованных фич.
 
+## Новая cron-задача `s2-pageview-count` (2026-07-30, dashboard-dev, коммит `a3163ecd`)
+
+Добавлена в `DEFAULT_CRON_JOBS` (`src/lib/cron.ts`) как часть фичи dashboard «грубый счётчик
+посещаемости без ПДн» (см. `apps/dashboard/PLAN_COMPLETED.md` v1.21.0 за полным описанием —
+реализация целиком в dashboard, dashboard-agent только исполняет generic-задачу по расписанию).
+Каждые 10 минут, сервер s2, вызывает `POST /api/cron/pageview-count` (app: `dashboard`) —
+инкрементальный парсинг access-логов Nginx Proxy Manager. Изменение не затрагивает версию
+dashboard-agent (одна строка в существующем массиве конфигурации, без изменения логики
+исполнения задач).
+
 ## Версия 0.9.7 — агрегация по бакетам в истории метрик (2026-07-30, dashboard-agent-dev)
 
 Закрыт пункт бэклога «Агрегация за интервалы». `getHistory()` в `lib/history.ts` при
