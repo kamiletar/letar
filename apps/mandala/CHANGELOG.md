@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.40.1] - 2026-07-30
+
+### Fixed
+
+- **Telegram API через tg-proxy (обход блокировки s1/s2):** `TelegramClient` в
+  `src/lib/telegram/telegram-client.ts` хардкодил `https://api.telegram.org`, заблокированный
+  провайдером ДЦ на s1/s2. Переведён на `TELEGRAM_API_ROOT` с дефолтом `https://tg-proxy.letar.best`.
+
 ## [0.39.10] - 2026-07-22
 
 ### Fixed

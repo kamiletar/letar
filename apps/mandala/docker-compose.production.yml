@@ -67,6 +67,11 @@ services:
       # Umami Analytics (embedded at build time, but listed for reference)
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL}
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+
+      # Telegram Bot (уведомления, опционально)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      # api.telegram.org заблокирован провайдером ДЦ на s1/s2 — прокси через mail сервер
+      TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}
     volumes:
       - ./uploads:/app/apps/mandala/uploads
     depends_on:

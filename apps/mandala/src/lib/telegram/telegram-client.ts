@@ -34,7 +34,9 @@ export class TelegramClient {
     if (!botToken) {
       throw new Error('Bot token is required')
     }
-    this.baseUrl = `https://api.telegram.org/bot${botToken}`
+    // На s1/s2 api.telegram.org заблокирован провайдером ДЦ — обход через tg-proxy.letar.best
+    const telegramApiRoot = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
+    this.baseUrl = `${telegramApiRoot}/bot${botToken}`
   }
 
   /**

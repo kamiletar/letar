@@ -723,6 +723,13 @@ besides a function... You returned: [object Object]` и **cleanup никогда
 устранён `prisma migrate reset --force` с явного разрешения владельца в чате (2026-07-28), затем создана
 и применена миграция `add_consent_log`. `nx zenstack:generate`+lint+typecheck зелёные.
 
+### 2026-07-30 — Telegram API через tg-proxy (обход блокировки s1/s2)
+
+- `TelegramClient` (`src/lib/telegram/telegram-client.ts`) переведён на `TELEGRAM_API_ROOT` вместо
+  хардкода `api.telegram.org`, заблокированного провайдером ДЦ на s1/s2. Дефолт
+  `https://tg-proxy.letar.best` — компоновка через `docker-compose.production.yml`, без изменений
+  `.env.docker.enc`.
+
 ---
 
-**Последнее обновление:** 2026-07-28
+**Последнее обновление:** 2026-07-30
