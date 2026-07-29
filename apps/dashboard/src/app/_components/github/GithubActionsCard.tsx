@@ -1,7 +1,7 @@
 'use client'
 
 import type { WorkflowRun } from '@/lib/github-actions'
-import { Badge, Card, Heading, HStack, Icon, Link as ChakraLink, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Card, Link as ChakraLink, Heading, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
 import { LuCircleCheck, LuCircleX, LuExternalLink, LuLoaderCircle, LuMinus } from 'react-icons/lu'
 

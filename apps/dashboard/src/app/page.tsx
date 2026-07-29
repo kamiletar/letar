@@ -19,7 +19,7 @@ const SystemHistoryChart = dynamic(
         <Spinner size="lg" color="brand.solid" />
       </Box>
     ),
-  },
+  }
 )
 
 const ProcessList = dynamic(() => import('@/app/_components/system/ProcessList').then((mod) => mod.ProcessList), {

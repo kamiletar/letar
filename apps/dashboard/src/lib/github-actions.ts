@@ -9,15 +9,7 @@ const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/actions/runs
 
 export type WorkflowRunStatus = 'queued' | 'in_progress' | 'completed' | 'waiting' | 'requested' | 'pending'
 export type WorkflowRunConclusion =
-  | 'success'
-  | 'failure'
-  | 'neutral'
-  | 'cancelled'
-  | 'skipped'
-  | 'timed_out'
-  | 'action_required'
-  | 'stale'
-  | null
+  'success' | 'failure' | 'neutral' | 'cancelled' | 'skipped' | 'timed_out' | 'action_required' | 'stale' | null
 
 export interface WorkflowRun {
   id: number
