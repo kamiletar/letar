@@ -94,4 +94,16 @@ export const rutrackerPreload = {
 
   /** Подписка на этапы импорта (живой прогресс) */
   onImportStep: on<[string]>('rutracker:importStep'),
+
+  /**
+   * Найти источник для торрента, добавленного вручную (не через Animatrona), по ссылке
+   * в comment раздачи qBittorrent. Без повторного скачивания — файлы уже на диске/качаются.
+   */
+  findSourceForTorrent: (
+    infoHash: string
+  ): Promise<{
+    success: boolean
+    data?: { found: false } | { found: true; linked: boolean; url: string; shikimoriId?: number; animeName?: string }
+    error?: string
+  }> => ipcRenderer.invoke('rutracker:findSourceForTorrent', infoHash),
 }

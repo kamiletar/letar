@@ -449,6 +449,54 @@ export function TorrentsContent() {
     [torrents]
   )
 
+  /**
+   * Найти источник для торрента без rutrackerUrl — по ссылке в comment раздачи qBittorrent.
+   * Для торрентов, добавленных вручную (не через Animatrona). Без повторного скачивания.
+   */
+  const handleFindSource = useCallback(
+    async (infoHash: string) => {
+      await withBusy(infoHash, async () => {
+        const api = window.electronAPI
+        if (!api?.rutracker?.findSourceForTorrent) {
+          toaster.error({ title: 'API поиска источника недоступен' })
+          return
+        }
+        const res = await api.rutracker.findSourceForTorrent(infoHash)
+        if (!res.success || !res.data) {
+          toaster.error({ title: 'Ошибка поиска источника', description: res.error })
+          return
+        }
+        if (!res.data.found) {
+          toaster.info({
+            title: 'Ссылка не найдена',
+            description: 'В комментарии раздачи нет ссылки на страницу Rutracker',
+          })
+          return
+        }
+        if (res.data.linked) {
+          toaster.success({
+            title: `Источник найден: ${res.data.animeName ?? ''}`,
+            description: 'Торрент связан с раздачей Rutracker',
+          })
+          setTorrents((prev) =>
+            prev.map((t) =>
+              t.infoHash === infoHash
+                ? { ...t, rutrackerUrl: res.data.url, shikimoriId: res.data.shikimoriId, animeName: res.data.animeName }
+                : t
+            )
+          )
+        } else {
+          toaster.info({
+            title: 'Ссылка найдена, но матч неуверенный',
+            description: 'Откройте страницу и подтвердите аниме вручную во вкладке Rutracker',
+          })
+          window.electronAPI?.app?.openExternal(res.data.url)
+        }
+      })
+    },
+    [withBusy]
+  )
+
   /** Открыть ImportWizard для файлов торрента */
   const handleImport = useCallback(
     async (infoHash: string) => {
@@ -471,9 +519,12 @@ export function TorrentsContent() {
         const videoExts = ['.mkv', '.mp4', '.avi', '.webm', '.m4v', '.ts']
         const isSingleFile = videoExts.some((ext) => torrent.name.toLowerCase().endsWith(ext))
         let folderPath = torrent.path ? (isSingleFile ? torrent.path : `${torrent.path}/${torrent.name}`) : null
-        let shikimoriId: number | undefined
-        let animeName: string | undefined
-        let rutrackerUrl: string | undefined
+        // Фоллбэк на мету торрента (уже есть, если источник найден через «Найти источник»
+        // или торрент добавлен через оркестратор в прошлой сессии) — переопределяется ниже,
+        // если оркестратор вернёт более полные данные (например folderPath).
+        let shikimoriId: number | undefined = torrent.shikimoriId
+        let animeName: string | undefined = torrent.animeName
+        let rutrackerUrl: string | undefined = torrent.rutrackerUrl
         let sourceTorrentCid: string | undefined
 
         // Пытаемся получить метаданные из оркестратора (shikimoriId, animeName, rutrackerUrl)
@@ -651,6 +702,7 @@ export function TorrentsContent() {
                 onOpenAsBundle={handleOpenAsBundle}
                 onResetImportStatus={handleResetImportStatus}
                 onRecheck={handleRecheck}
+                onFindSource={handleFindSource}
               />
             ))}
         </VStack>
@@ -807,6 +859,7 @@ function TorrentCard({
   onOpenAsBundle,
   onResetImportStatus,
   onRecheck,
+  onFindSource,
 }: {
   torrent: TorrentInfo
   busy: boolean
@@ -818,6 +871,7 @@ function TorrentCard({
   onOpenAsBundle: (hash: string) => void
   onResetImportStatus: (hash: string) => void
   onRecheck: (hash: string) => void
+  onFindSource: (hash: string) => void
   onOpenRutracker?: (url: string) => void
 }) {
   const { color, label } = getStatusInfo(torrent.status)
@@ -994,6 +1048,20 @@ function TorrentCard({
                 <Icon>
                   <LuExternalLink />
                 </Icon>
+              </Button>
+            )}
+            {!torrent.rutrackerUrl && (
+              <Button
+                size="xs"
+                variant="ghost"
+                disabled={busy}
+                onClick={() => onFindSource(torrent.infoHash)}
+                title="Найти источник по ссылке в комментарии раздачи"
+              >
+                <Icon>
+                  <LuSearch />
+                </Icon>
+                Найти источник
               </Button>
             )}
             {torrent.path && (

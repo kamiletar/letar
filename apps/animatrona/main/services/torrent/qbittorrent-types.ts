@@ -158,6 +158,12 @@ export interface QBSyncResponse {
   server_state?: Partial<QBTransferInfo>
 }
 
+/** Свойства торрента (/api/v2/torrents/properties) — только используемые поля */
+export interface QBTorrentProperties {
+  /** Комментарий раздачи — у торрентов, добавленных вручную, часто содержит ссылку на страницу источника */
+  comment: string
+}
+
 /** Параметры добавления магнет-ссылки */
 export interface QBAddTorrentParams {
   /** Магнет-ссылка (можно несколько, разделённых \n) */

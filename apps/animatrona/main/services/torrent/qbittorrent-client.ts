@@ -13,6 +13,7 @@ import type {
   QBTorrentFile,
   QBTorrentFilter,
   QBTorrentInfo,
+  QBTorrentProperties,
   QBTransferInfo,
 } from './qbittorrent-types'
 
@@ -233,6 +234,13 @@ export class QBittorrentClient {
     const query = new URLSearchParams({ hash })
     const response = await this.request('GET', `/api/v2/torrents/files?${query.toString()}`)
     return (await response.json()) as QBTorrentFile[]
+  }
+
+  /** Получить свойства торрента (в т.ч. comment — часто содержит ссылку на страницу источника) */
+  async getProperties(hash: string): Promise<QBTorrentProperties> {
+    const query = new URLSearchParams({ hash })
+    const response = await this.request('GET', `/api/v2/torrents/properties?${query.toString()}`)
+    return (await response.json()) as QBTorrentProperties
   }
 
   // ========================

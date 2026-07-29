@@ -393,6 +393,13 @@ export class QBittorrentService extends EventEmitter {
     return this.client.getFiles(infoHash)
   }
 
+  /** Получить comment раздачи (часто содержит ссылку на страницу источника у торрентов, добавленных вручную) */
+  async getTorrentComment(infoHash: string): Promise<string> {
+    this.ensureClient()
+    const props = await this.client!.getProperties(infoHash)
+    return props.comment ?? ''
+  }
+
   /**
    * Экспортировать .torrent файл раздачи и залить в IPFS (pin: false — станет indirect
    * после того как войдёт в directoryCid аниме через anime-directory-builder).
