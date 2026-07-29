@@ -15,7 +15,14 @@ import { useSearchIds } from '@/app/_hooks/use-search'
 import { useDebounce, useFilterParams } from '@/components/library'
 import { toaster } from '@/components/ui/toaster'
 import type { WatchStatus } from '@/generated/prisma'
-import { useAvailableGenres, useFilterCounts, useFindManyAnime, useLocalDubGroups, useUpdateAnime } from '@/lib/hooks'
+import {
+  useAnimeIpfsSizes,
+  useAvailableGenres,
+  useFilterCounts,
+  useFindManyAnime,
+  useLocalDubGroups,
+  useUpdateAnime,
+} from '@/lib/hooks'
 
 import { groupAnimeByFranchise } from './group-anime-by-franchise'
 import type { AnimeWithFranchise, ViewMode } from './types'
@@ -262,19 +269,6 @@ export function useLibraryPage() {
       _count: {
         select: { episodes: true },
       },
-      // Размеры для отображения на карточке (только ipfsSize)
-      episodes: {
-        select: {
-          ipfsSize: true,
-          audioTracks: { select: { ipfsSize: true } },
-          subtitleTracks: {
-            select: {
-              ipfsSize: true,
-              fonts: { select: { ipfsSize: true } },
-            },
-          },
-        },
-      },
     },
     // Сортировка
     orderBy: (() => {
@@ -308,52 +302,34 @@ export function useLibraryPage() {
     select: { shikimoriId: true },
   })
 
+  // Размеры IPFS-контента — отдельной агрегацией, не через выгрузку эпизодов с дорожками
+  const { data: ipfsSizes } = useAnimeIpfsSizes()
+
   // Множество всех загруженных shikimoriId для передачи в groupAnimeByFranchise
   const allLoadedShikimoriIds = useMemo(
     () => new Set((allAnimeShikimoriIds || []).map((a) => a.shikimoriId).filter((id): id is number => id != null)),
     [allAnimeShikimoriIds]
   )
 
-  // Преобразуем _count.episodes в episodeCount и считаем суммарный размер для AnimeGrid
+  // Преобразуем _count.episodes в episodeCount и подмешиваем размеры из агрегации.
+  // genreNames считается здесь, а не в разметке сетки: новый массив на каждом рендере
+  // обнулял бы React.memo у AnimeCard, а виртуализатор перерисовывает сетку на каждый тик скролла.
   const animes: AnimeWithFranchise[] = useMemo(
     () =>
       (animesData || []).map((anime) => {
-        // Размер по категориям: видео, аудио, субтитры, шрифты
-        const episodes = (
-          anime as unknown as {
-            episodes?: Array<{
-              ipfsSize?: number | null
-              audioTracks?: Array<{ ipfsSize?: number | null }>
-              subtitleTracks?: Array<{ ipfsSize?: number | null; fonts?: Array<{ ipfsSize?: number | null }> }>
-            }>
-          }
-        ).episodes
-        let videoSize = 0
-        let audioSize = 0
-        let subtitleSize = 0
-        let fontsSize = 0
-        if (episodes) {
-          for (const ep of episodes) {
-            videoSize += ep.ipfsSize ?? 0
-            for (const at of ep.audioTracks ?? []) {
-              audioSize += at.ipfsSize ?? 0
-            }
-            for (const st of ep.subtitleTracks ?? []) {
-              subtitleSize += st.ipfsSize ?? 0
-              for (const f of st.fonts ?? []) {
-                fontsSize += f.ipfsSize ?? 0
-              }
-            }
-          }
-        }
+        const sizes = ipfsSizes?.[anime.id]
+        const genreNames = (anime as unknown as { genres?: Array<{ genre: { name: string } }> }).genres?.map(
+          (g) => g.genre.name
+        )
         return {
           ...anime,
           episodeCount: (anime as unknown as { _count?: { episodes: number } })._count?.episodes ?? 0,
-          ipfsSizeBreakdown: { video: videoSize, audio: audioSize, subtitles: subtitleSize, fonts: fontsSize },
-          totalIpfsSize: videoSize + audioSize + subtitleSize + fontsSize,
+          genreNames,
+          ipfsSizeBreakdown: sizes,
+          totalIpfsSize: sizes ? sizes.video + sizes.audio + sizes.subtitles + sizes.fonts : 0,
         }
       }),
-    [animesData]
+    [animesData, ipfsSizes]
   )
 
   const genres = genresData || []

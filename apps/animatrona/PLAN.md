@@ -1,6 +1,6 @@
 # Animatrona — План развития
 
-## Текущая версия: 0.55.6
+## Текущая версия: 0.55.9
 
 ## Черновик (новые идеи)
 
@@ -431,16 +431,31 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
   #### Направления аудита
 
   **Список аниме (критично):**
-  - [ ] Виртуализация списка (`@tanstack/react-virtual` или `react-window`) — рендерить только видимые карточки (сейчас рендерится 300+ DOM-элементов)
+  - [x] Виртуализация списка — сделано в v0.55.3/0.55.5, общий хук `useVirtualizedGrid` (v0.55.8)
   - [ ] Infinite scroll или пагинация (см. отдельная задача ниже)
-  - [ ] Мемоизация `AnimeCard` через `React.memo` — исключить лишние ре-рендеры при изменении фильтров
-  - [ ] Debounce на фильтрах/поиске — не триггерить запрос при каждом нажатии
+  - [x] **Мемоизация `AnimeCard` через `React.memo`** (v0.55.9) — сам `memo` стоял с самого начала,
+        но **не работал**: `AnimeGrid`/`FranchiseView` считали `genres={anime.genres?.map(...)}`
+        прямо в разметке, создавая новый массив на каждом рендере. Виртуализатор перерисовывает
+        сетку на каждый тик скролла → мемоизация обнулялась и все видимые карточки рендерились
+        заново каждый кадр. `genreNames` вынесен в `useMemo` в `use-library-page.ts`; заодно
+        стабилизировался `ipfsSizeBreakdown` (был новый объект на каждом пересчёте).
+  - [x] Debounce на фильтрах/поиске — уже был: `useDebounce(searchInput, 250)` в `use-library-page.ts`
   - [ ] Оптимизация изображений постеров — lazy load `loading="lazy"`, `decoding="async"`, правильный `sizes`
 
   **Запросы к БД:**
-  - [ ] Проверить наличие индексов на часто фильтруемых полях (`status`, `year`, `watchStatus`, `pinnedLocally`)
-  - [ ] `select` только нужные поля в запросах к аниме-списку (не тянуть тяжёлые JSON/BLOB поля)
-  - [ ] Отладить TanStack Query cache — убедиться что при навигации назад данные из кеша, а не новый запрос
+  - [x] Индексы на часто фильтруемых полях — проверено: `status`, `year`, `watchStatus`, `name`,
+        `shikimoriId`, `franchiseId` покрыты `@@index` в `schema.zmodel`. `pinnedLocally`,
+        `needsReupload`, `ageRating` индексов не имеют — намеренно не добавлял: это
+        низкоселективные булевы/enum-поля на таблице в сотни строк, индекс тут не окупается.
+  - [x] **`select` только нужные поля** (v0.55.9) — главная находка аудита. Запрос списка тянул
+        все `episodes` → `audioTracks` → `subtitleTracks` → `fonts` ради четырёх сумм `ipfsSize`:
+        **25 824 объекта / 757 КБ payload** на библиотеке из 338 аниме. Заменено на
+        `getAnimeIpfsSizes()` — один `$queryRaw` с `UNION ALL` + `GROUP BY` (1 057 строк, 32 КБ).
+        Замеры — в CHANGELOG [0.55.9]. ⚠️ Само время SQL выросло (7.6 → 12.9 мс, появились JOIN'ы),
+        выигрыш в объёме передачи через границу процесса, а не в базе.
+  - [x] TanStack Query cache при навигации назад — проверено, вмешательства не требует:
+        `@letar/query-provider` preset `standard` даёт `staleTime` 5 мин и `refetchOnWindowFocus: false`,
+        так что возврат в библиотеку читает кэш.
 
   **Рендер приложения:**
   - [ ] Профилировать через React DevTools Profiler — найти компоненты с дорогим рендером
@@ -628,7 +643,7 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
       конкретного аниме, `useFindUniqueAnime`, страница `library/[id]`). Если фоновый sync менял
       `watchStatus`/`userRating`, а пользователь в этот момент был на странице деталей — она не
       обновлялась до ручного перехода. Добавлена `queryClient.invalidateQueries({ queryKey:
-  ['anime'] })` по аналогии с `MobileProgressSync.tsx`.
+['anime'] })` по аналогии с `MobileProgressSync.tsx`.
 
 ---
 

@@ -166,7 +166,7 @@ export function FranchiseView({
                     episodeCount={anime.episodeCount}
                     rating={anime.rating}
                     posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
-                    genres={anime.genres?.map((g) => g.genre.name)}
+                    genres={anime.genreNames}
                     watchStatus={anime.watchStatus}
                     onPlay={onPlay}
                     onExport={onExport}

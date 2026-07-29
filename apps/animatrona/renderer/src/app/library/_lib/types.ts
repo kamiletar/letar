@@ -30,6 +30,8 @@ export interface AnimeWithFranchise {
   rating?: number | null
   poster?: { path?: string | null; cid?: string | null } | null
   genres?: { genre: { name: string } }[]
+  /** Плоский список названий жанров — стабильная ссылка для React.memo карточки */
+  genreNames?: string[]
   franchise?: { id: string; name: string } | null
   /** Статус просмотра */
   watchStatus?: WatchStatus

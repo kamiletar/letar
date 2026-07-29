@@ -64,6 +64,59 @@ export async function searchAnime(query: string, take = 20): Promise<AnimeSearch
   })
 }
 
+/** Размер IPFS-контента аниме по категориям (байты) */
+export interface AnimeIpfsSizes {
+  video: number
+  audio: number
+  subtitles: number
+  fonts: number
+}
+
+/** Строка результата агрегации размеров */
+interface SizeRow {
+  animeId: string
+  kind: keyof AnimeIpfsSizes
+  size: number | bigint | null
+}
+
+/**
+ * Суммарный размер IPFS-контента для всех аниме, по категориям.
+ *
+ * Считается одним SQL-запросом вместо выгрузки всех эпизодов с дорожками и шрифтами:
+ * при библиотеке в сотни тайтлов это десятки тысяч объектов, которые иначе проходят
+ * через сериализацию Server Action только ради четырёх чисел на карточку.
+ */
+export async function getAnimeIpfsSizes(): Promise<Record<string, AnimeIpfsSizes>> {
+  const rows = await prisma.$queryRaw<SizeRow[]>`
+    SELECT animeId, kind, SUM(size) AS size
+    FROM (
+      SELECT e.animeId AS animeId, 'video' AS kind, COALESCE(e.ipfsSize, 0) AS size
+      FROM Episode e
+      UNION ALL
+      SELECT e.animeId, 'audio', COALESCE(a.ipfsSize, 0)
+      FROM AudioTrack a
+      JOIN Episode e ON e.id = a.episodeId
+      UNION ALL
+      SELECT e.animeId, 'subtitles', COALESCE(s.ipfsSize, 0)
+      FROM SubtitleTrack s
+      JOIN Episode e ON e.id = s.episodeId
+      UNION ALL
+      SELECT e.animeId, 'fonts', COALESCE(f.ipfsSize, 0)
+      FROM SubtitleFont f
+      JOIN SubtitleTrack s ON s.id = f.subtitleTrackId
+      JOIN Episode e ON e.id = s.episodeId
+    )
+    GROUP BY animeId, kind
+  `
+
+  const result: Record<string, AnimeIpfsSizes> = {}
+  for (const row of rows) {
+    const entry = (result[row.animeId] ??= { video: 0, audio: 0, subtitles: 0, fonts: 0 })
+    entry[row.kind] = Number(row.size ?? 0)
+  }
+  return result
+}
+
 // === CREATE ===
 
 /**

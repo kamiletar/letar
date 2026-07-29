@@ -19,7 +19,8 @@ interface Anime {
   episodeCount: number
   rating?: number | null
   poster?: { cid?: string | null } | null
-  genres?: { genre: { name: string } }[]
+  /** Плоский список названий жанров — стабильная ссылка для React.memo карточки */
+  genreNames?: string[]
   /** Статус просмотра */
   watchStatus?: WatchStatus
   /** Контент закреплён локально */
@@ -173,7 +174,7 @@ export const AnimeGrid = memo(function AnimeGrid({
                       episodeCount={anime.episodeCount}
                       rating={anime.rating}
                       posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
-                      genres={anime.genres?.map((g) => g.genre.name)}
+                      genres={anime.genreNames}
                       watchStatus={anime.watchStatus}
                       pinnedLocally={anime.pinnedLocally}
                       needsReupload={anime.needsReupload}

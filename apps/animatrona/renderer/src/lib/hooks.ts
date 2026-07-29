@@ -18,10 +18,12 @@ import {
   updateAnimeRelation,
 } from '@/app/_actions/anime-relation.action'
 import {
+  type AnimeIpfsSizes,
   createAnime,
   deleteAnime,
   findManyAnime,
   findUniqueAnime,
+  getAnimeIpfsSizes,
   updateAnime,
   upsertAnimeByShikimoriId,
 } from '@/app/_actions/anime.action'
@@ -109,6 +111,17 @@ export const useFindUniqueAnime = animeHooks.useFindUnique
 export const useCreateAnime = animeHooks.useCreate
 export const useUpdateAnime = animeHooks.useUpdate
 export const useDeleteAnime = animeHooks.useDelete
+
+/** Query хук для суммарных размеров IPFS-контента всех аниме (агрегация одним SQL) */
+export function useAnimeIpfsSizes() {
+  return useQuery({
+    queryKey: ['animeIpfsSizes'],
+    queryFn: () => getAnimeIpfsSizes(),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export type { AnimeIpfsSizes }
 
 /** Mutation хук для upsert Anime по shikimoriId */
 export function useUpsertAnime() {
