@@ -6,6 +6,62 @@
 
 ---
 
+## v0.55.6 — Кросс-устройственная синхронизация: два бага + карта разрывов (2026-07-29)
+
+**Задача:** пользовательский сценарий — начал смотреть на компьютере → продолжил на телефоне
+в дороге → досмотрел на телевизоре → пауза на кухне (Алиса/колонка). Переход должен быть
+бесшовным, минимум ручных действий. Запрошено исследование, что этому мешает.
+
+**Исследование:** прошёл по цепочке Desktop (`tracker-sync.ts`) → mobile-server →
+`animatrona-mobile` (адаптеры `desktop`/`tracker`, `progressSync.ts`, `store/servers.ts`) →
+`animatrona-tv` (`api/client.ts`) → `animatrona-tracker` (`/api/watch-progress*`,
+`/api/user/watch-progress`). Вывод: частота синхронизации (push ~7с debounce, pull 30с) не была
+узким местом — бесшовность ломала топология связей. Найдено 4 структурных разрыва + 3 попутных
+бага. Полная карта — в `PLAN.md` (раздел «Синхронизация прогресса с трекером»).
+
+**Исправлено в этой сессии (мой скоуп — `apps/animatrona`):**
+
+1. `mobile-server/routes/progress.ts` → `handleSaveProgress` сохранял прогресс в SQLite и слал
+   IPC-событие в renderer, но не вызывал `TrackerSyncService.pushWatchProgressImmediate` —
+   прогресс с телефона/TV (оба ходят через mobile-server) улетал на трекер только с 5-минутным
+   полным sync, а если Desktop выключали раньше — не улетал вовсе. Добавлен push сразу после
+   upsert'а, с `episode.number` и `durationMs → duration` в секундах.
+2. `TrackerSyncService.pushWatchProgressImmediate` (`tracker-sync.ts`) использовал одно общее
+   поле `pushDebounceTimer` на весь сервис. Досмотрел серию → сразу открыл следующую →
+   `clearTimeout` отменял ещё не отправленный push предыдущей серии безвозвратно (offline-очередь
+   не подхватывала — отмена происходила до постановки в неё). Заменено на
+   `Map<string, Timer>` с ключом `` `${trackerAnimeId}:${episodeNumber}` ``.
+
+**Задокументировано, но не в моём скоупе** (записано в `PLAN.md` для `animatrona-mobile`/
+`animatrona-tv`):
+
+- TV не имеет tracker-адаптера вообще (`animatrona-tv/src/api/client.ts` — только Desktop).
+- `getLastWatched()` в `animatrona-mobile` tracker-адаптере всегда возвращает `null` — хотя
+  `GET /api/watch-progress/continue` существует, он принимает только сессию, не API Key.
+- Переключение Desktop↔Tracker в `animatrona-mobile/src/store/servers.ts` только ручное.
+- `SyncQueueItem` в `animatrona-mobile/src/services/progressSync.ts` не хранит `serverId` —
+  очередь, накопленная для одного сервера, при переключении уйдёт на другой с чужими ID.
+
+**Сознательно исключено:** WebSocket/SSE вместо pull (задержка не была причиной проблемы,
+`AppState`-triggered pull дешевле закрывает то же ощущение) и интеграция с Алисой/умными
+колонками (отдельный проект — навык в Яндекс.Диалогах, публичный HTTPS-эндпоинт, отдельный
+аудиопоток, не расширение существующих клиентов).
+
+---
+
+## v0.55.5 — Виртуализация FranchiseView (2026-07-29)
+
+**Задача:** продолжение v0.55.3 — режим каталога «По франшизам» рендерил все карточки
+(`FranchiseCard` + `AnimeCard`) разом, не виртуализирован в отличие от режима «По отдельности».
+
+**Реализация:** `FranchiseView.tsx` строит единый список элементов (`franchiseGroups` +
+`standAloneAnimes`, порядок как в исходном рендере) и виртуализирует его тем же паттерном, что
+`AnimeGrid` — `useWindowVirtualizer`, колонки по ширине контейнера через `ResizeObserver`,
+динамическая высота строки через `measureElement` (важно: `FranchiseCard` со стопкой постеров
+выше одиночной `AnimeCard`, статичная оценка размера не подошла бы).
+
+---
+
 ## v0.55.4 — Инвалидация деталей аниме при фоновой синхронизации с трекером (2026-07-29)
 
 **Задача:** пункт PLAN.md «Инвалидация кеша при фоновой синхронизации с трекером» описывал
