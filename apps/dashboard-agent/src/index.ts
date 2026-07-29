@@ -36,6 +36,7 @@ import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
 import { healthCheckRoutes } from './routes/health-check'
 import { logScanRoutes } from './routes/log-scan'
+import { metricsRoutes } from './routes/metrics'
 import { nginxRoutes } from './routes/nginx'
 import { systemRoutes } from './routes/system'
 
@@ -46,17 +47,16 @@ async function main(): Promise<void> {
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
-      transport:
-        process.env.NODE_ENV !== 'production'
-          ? {
-              target: 'pino-pretty',
-              options: {
-                colorize: true,
-                translateTime: 'HH:MM:ss',
-                ignore: 'pid,hostname',
-              },
-            }
-          : undefined,
+      transport: process.env.NODE_ENV !== 'production'
+        ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'HH:MM:ss',
+            ignore: 'pid,hostname',
+          },
+        }
+        : undefined,
     },
   })
 
@@ -112,6 +112,7 @@ async function main(): Promise<void> {
   await fastify.register(backupFreshnessRoutes)
   await fastify.register(healthCheckRoutes)
   await fastify.register(logScanRoutes)
+  await fastify.register(metricsRoutes)
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']

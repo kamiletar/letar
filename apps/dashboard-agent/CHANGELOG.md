@@ -11,6 +11,19 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.13] — 2026-07-30
+
+### Added
+
+- `src/lib/metrics-exporter.ts` + `src/routes/metrics.ts` (`GET /metrics`) — Prometheus
+  exporter: CPU/память/диск(per-mount)/сеть(per-iface)/контейнеры(per-name) в текстовом
+  формате Prometheus exposition, тонкая обёртка над `system.ts`/`docker.ts` без дублирования
+  сбора метрик. Закрывает backlog «Интеграции» (Prometheus exporter) и заодно «Grafana
+  datasource» — Grafana читает этот же формат через встроенный Prometheus datasource, Telegraf
+  тоже умеет скрейпить его напрямую (`inputs.prometheus`), отдельные реализации под них не
+  потребовались. Авторизация — существующий Bearer `AGENT_TOKEN`, без исключений в
+  `authMiddleware` (Prometheus поддерживает bearer token в scrape-конфиге).
+
 ## [0.9.12] — 2026-07-30
 
 ### Added

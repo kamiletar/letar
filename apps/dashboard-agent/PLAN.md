@@ -353,9 +353,19 @@ indexType/гранулярности ключа/стратегии персис�
 
 ### Интеграции
 
-- [ ] Prometheus exporter
-- [ ] Telegraf совместимость
-- [ ] Grafana datasource
+- [x] **Prometheus exporter (dashboard-agent-dev, 2026-07-30, `0.9.12 → 0.9.13`)** —
+      `GET /metrics` (`lib/metrics-exporter.ts` + `routes/metrics.ts`), текстовый формат
+      Prometheus exposition: CPU/память/диск(per-mount)/сеть(per-iface)/контейнеры(per-name,
+      `dashboard_agent_container_up`). Тонкая обёртка над уже существующими `system.ts`/
+      `docker.ts` — не дублирует сбор метрик. Авторизация — тот же Bearer `AGENT_TOKEN`
+      (Prometheus поддерживает bearer token в scrape-конфиге, исключение из
+      `authMiddleware` не понадобилось).
+- [x] **Grafana datasource — закрыто через Prometheus exporter выше** — Grafana умеет читать
+      Prometheus exposition format напрямую через встроенный Prometheus datasource, отдельный
+      Grafana-специфичный эндпоинт не нужен.
+- [ ] Telegraf совместимость — Telegraf тоже умеет скрейпить Prometheus exposition format
+      через `inputs.prometheus` (тот же `/metrics`), отдельная реализация под него не
+      выявила необходимости — закрыть, если появится конкретный сценарий с иным форматом.
 
 ---
 
