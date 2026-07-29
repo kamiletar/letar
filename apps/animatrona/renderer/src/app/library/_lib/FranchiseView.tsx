@@ -5,6 +5,8 @@
  */
 
 import { AspectRatio, Box, Grid, Icon, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { LuLayers } from 'react-icons/lu'
 
 import { AnimeCard, FranchiseCard } from '@/components/library'
@@ -12,6 +14,11 @@ import type { WatchStatus } from '@/generated/prisma'
 import { toPlayableUrl } from '@/lib/media-url'
 
 import type { AnimeWithFranchise, FranchiseGroup } from './types'
+
+/** Минимальная ширина карточки — та же величина, что была в `minmax(200px, 1fr)` */
+const MIN_CARD_WIDTH = 200
+/** Зазор между карточками — Chakra токен `gap={4}` (1rem) */
+const GRID_GAP = 16
 
 /** Пропсы для FranchiseView */
 export interface FranchiseViewProps {
@@ -26,6 +33,11 @@ export interface FranchiseViewProps {
   /** Колбэк для изменения статуса просмотра */
   onWatchStatusChange?: (id: string, status: WatchStatus) => void
 }
+
+/** Элемент единой сетки — франшиза или одиночное аниме, порядок как в исходном рендере */
+type ViewItem =
+  | { kind: 'franchise'; group: FranchiseGroup }
+  | { kind: 'standalone'; anime: AnimeWithFranchise }
 
 /**
  * Скелетон загрузки — плитки в формате сетки
@@ -73,81 +85,144 @@ export function FranchiseView({
   onDelete,
   onWatchStatusChange,
 }: FranchiseViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const scrollMarginRef = useRef(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  // Замеряем смещение контейнера от начала документа один раз при монтировании —
+  // используется как scrollMargin для useWindowVirtualizer (скроллится сама страница, не контейнер)
+  useLayoutEffect(() => {
+    scrollMarginRef.current = containerRef.current?.offsetTop ?? 0
+  }, [])
+
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) {
+      return
+    }
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width
+      if (width) {
+        setContainerWidth(width)
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const items: ViewItem[] = [
+    ...franchiseGroups.map((group): ViewItem => ({ kind: 'franchise', group })),
+    ...standAloneAnimes.map((anime): ViewItem => ({ kind: 'standalone', anime })),
+  ]
+
+  // Повторяет поведение CSS `repeat(auto-fill, minmax(200px, 1fr))`
+  const columns = containerWidth > 0
+    ? Math.max(1, Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP)))
+    : 1
+  const cardWidth = columns > 0 ? (containerWidth - GRID_GAP * (columns - 1)) / columns : MIN_CARD_WIDTH
+  const rowCount = Math.ceil(items.length / columns)
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: rowCount,
+    // FranchiseCard может быть выше AnimeCard (стопка постеров) — оценка грубая, уточняется через measureElement
+    estimateSize: () => cardWidth * 1.5 + 190,
+    overscan: 3,
+    scrollMargin: scrollMarginRef.current,
+  })
+
   if (isLoading) {
     return <LoadingSkeleton />
   }
 
-  const hasContent = franchiseGroups.length > 0 || standAloneAnimes.length > 0
-
-  if (!hasContent) {
+  if (items.length === 0) {
     return <EmptyState />
   }
 
   return (
-    <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4} alignItems="stretch">
-      {/* Франшизы — плитки с постерами и стопкой */}
-      {franchiseGroups.map((group) => {
-        const mainAnime = group.animes[0]
-        const relatedAnimes = group.animes.slice(1)
-
+    <Box ref={containerRef} position="relative" height={`${rowVirtualizer.getTotalSize()}px`}>
+      {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+        const startIdx = virtualRow.index * columns
+        const rowItems = items.slice(startIdx, startIdx + columns)
         return (
-          <FranchiseCard
-            key={group.franchise.id}
-            name={group.franchise.name}
-            mainAnime={{
-              id: mainAnime.id,
-              title: mainAnime.name,
-              posterUrl: toPlayableUrl({ cid: mainAnime.poster?.cid }) ?? undefined,
-              year: mainAnime.year,
-              episodesTotal: mainAnime.episodeCount,
-              episodesLoaded: mainAnime.episodeCount,
-              watchStatus: mainAnime.watchStatus,
-            }}
-            relatedAnimes={relatedAnimes.map((anime) => ({
-              id: anime.id,
-              title: anime.name,
-              posterUrl: toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined,
-              year: anime.year,
-              episodesTotal: anime.episodeCount,
-              episodesLoaded: anime.episodeCount,
-            }))}
-            missingAnimes={group.missingAnimes.map((rel) => ({
-              shikimoriId: rel.targetShikimoriId,
-              title: `Аниме #${rel.targetShikimoriId}`,
-              posterUrl: null,
-              year: null,
-              kind: null,
-            }))}
-            onPlay={onPlay}
-            onExport={onExport}
-            onRefreshMetadata={onRefreshMetadata}
-            onDelete={onDelete}
-            onWatchStatusChange={onWatchStatusChange}
-          />
+          <Box
+            key={virtualRow.key}
+            ref={rowVirtualizer.measureElement}
+            data-index={virtualRow.index}
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            transform={`translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`}
+          >
+            <Grid templateColumns={`repeat(${columns}, 1fr)`} gap={4} alignItems="stretch" pb={4}>
+              {rowItems.map((item) => {
+                if (item.kind === 'franchise') {
+                  const { group } = item
+                  const mainAnime = group.animes[0]
+                  const relatedAnimes = group.animes.slice(1)
+                  return (
+                    <FranchiseCard
+                      key={group.franchise.id}
+                      name={group.franchise.name}
+                      mainAnime={{
+                        id: mainAnime.id,
+                        title: mainAnime.name,
+                        posterUrl: toPlayableUrl({ cid: mainAnime.poster?.cid }) ?? undefined,
+                        year: mainAnime.year,
+                        episodesTotal: mainAnime.episodeCount,
+                        episodesLoaded: mainAnime.episodeCount,
+                        watchStatus: mainAnime.watchStatus,
+                      }}
+                      relatedAnimes={relatedAnimes.map((anime) => ({
+                        id: anime.id,
+                        title: anime.name,
+                        posterUrl: toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined,
+                        year: anime.year,
+                        episodesTotal: anime.episodeCount,
+                        episodesLoaded: anime.episodeCount,
+                      }))}
+                      missingAnimes={group.missingAnimes.map((rel) => ({
+                        shikimoriId: rel.targetShikimoriId,
+                        title: `Аниме #${rel.targetShikimoriId}`,
+                        posterUrl: null,
+                        year: null,
+                        kind: null,
+                      }))}
+                      onPlay={onPlay}
+                      onExport={onExport}
+                      onRefreshMetadata={onRefreshMetadata}
+                      onDelete={onDelete}
+                      onWatchStatusChange={onWatchStatusChange}
+                    />
+                  )
+                }
+
+                const { anime } = item
+                return (
+                  <AnimeCard
+                    key={anime.id}
+                    id={anime.id}
+                    name={anime.name}
+                    originalName={anime.originalName}
+                    year={anime.year}
+                    status={anime.status}
+                    episodeCount={anime.episodeCount}
+                    rating={anime.rating}
+                    posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
+                    genres={anime.genres?.map((g) => g.genre.name)}
+                    watchStatus={anime.watchStatus}
+                    onPlay={onPlay}
+                    onExport={onExport}
+                    onRefreshMetadata={onRefreshMetadata}
+                    onDelete={onDelete}
+                    onWatchStatusChange={onWatchStatusChange}
+                  />
+                )
+              })}
+            </Grid>
+          </Box>
         )
       })}
-
-      {/* Одиночные аниме без франшизы — те же AnimeCard в той же сетке */}
-      {standAloneAnimes.map((anime) => (
-        <AnimeCard
-          key={anime.id}
-          id={anime.id}
-          name={anime.name}
-          originalName={anime.originalName}
-          year={anime.year}
-          status={anime.status}
-          episodeCount={anime.episodeCount}
-          rating={anime.rating}
-          posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
-          genres={anime.genres?.map((g) => g.genre.name)}
-          watchStatus={anime.watchStatus}
-          onPlay={onPlay}
-          onExport={onExport}
-          onRefreshMetadata={onRefreshMetadata}
-          onDelete={onDelete}
-          onWatchStatusChange={onWatchStatusChange}
-        />
-      ))}
-    </Grid>
+    </Box>
   )
 }
