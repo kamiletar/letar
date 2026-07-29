@@ -112,8 +112,20 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     // прогонами — у уже существующего пользователя со накопленным прогрессом кнопка
     // называется «Продолжить тест», а не «Начать тест» (см. JSDoc выше)
     const startButton = page.getByRole('button', { name: /Начать тест|Продолжить тест/ })
-    if (await startButton.isDisabled()) {
-      const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
+    const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
+
+    // Согласие может уже быть сохранено в БД (см. JSDoc выше) — тогда DisclaimerConsent
+    // не рендерится вовсе, и разовый isDisabled() сразу после goto легко попадает в
+    // окно гидратации, где кнопка ещё временно disabled (reachedEnd/useScrollGate
+    // становится true только в useEffect после маунта). waitFor — поллинг, а не
+    // снимок, поэтому устойчив к этой гонке: если чекбокс не появился за разумное
+    // время, значит согласие уже принято, и ждём просто enabled-кнопку.
+    const checkboxAppeared = await consentCheckbox
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false)
+
+    if (checkboxAppeared) {
       await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
     }
     await expect(startButton).toBeEnabled({ timeout: 15_000 })
