@@ -1,5 +1,17 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 17) — Хелпер для настроек getUserMedia
+
+### Что сделано
+
+- **`src/lib/audio/media-constraints.ts`** (новый) — `buildMusicalAudioConstraints(deviceId)`
+  вынесла в одно место три идентичные копии `MediaTrackConstraints`
+  (`echoCancellation`/`noiseSuppression`/`autoGainControl: false` + `deviceId: { exact }`),
+  дублировавшиеся в `hardware-recorder.ts` (`HardwareRecorder.start()`),
+  `external-audio-input.ts` (`ExternalAudioInput.start()`) и `use-voice-chain.ts` (`start()`).
+  Комментарий-обоснование (голосовые фичи портят музыкальный сигнал) перенесён к новому
+  общему месту, из трёх копий оставлена одна. Чистый рефакторинг, поведение не менялось.
+
 ## Сессия 2026-07-29 (продолжение 16) — Вокальный тракт (начало Фазы 5)
 
 ### Что сделано

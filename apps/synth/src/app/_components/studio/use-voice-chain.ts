@@ -3,6 +3,7 @@
 import { getAudioContext } from '@/lib/audio/context'
 import { type AudioInputDevice, listAudioInputDevices } from '@/lib/audio/hardware-recorder'
 import { createLevelReader, type LevelReading } from '@/lib/audio/level-meter'
+import { buildMusicalAudioConstraints } from '@/lib/audio/media-constraints'
 import { MixRecorder } from '@/lib/audio/recorder'
 import {
   applyVoiceChainParams,
@@ -80,15 +81,8 @@ export function useVoiceChain(masterBus: MasterBus | null) {
     setError(null)
     try {
       const ctx = getAudioContext()
-      // echoCancellation/noiseSuppression/autoGainControl — голосовая связь, портит вокал
-      // (та же причина, что в hardware-recorder.ts)
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: { exact: selectedDeviceId },
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        },
+        audio: buildMusicalAudioConstraints(selectedDeviceId),
       })
       const source = ctx.createMediaStreamSource(stream)
       const nodes = buildVoiceChain(ctx, params)

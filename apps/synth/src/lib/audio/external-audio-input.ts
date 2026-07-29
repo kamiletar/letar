@@ -1,4 +1,5 @@
 import { type AudioInputDevice, listAudioInputDevices } from './hardware-recorder'
+import { buildMusicalAudioConstraints } from './media-constraints'
 
 export { listAudioInputDevices }
 export type { AudioInputDevice }
@@ -23,12 +24,7 @@ export class ExternalAudioInput {
 
   async start(deviceId: string): Promise<void> {
     this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        deviceId: { exact: deviceId },
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-      },
+      audio: buildMusicalAudioConstraints(deviceId),
     })
     this.source = this.ctx.createMediaStreamSource(this.stream)
     this.source.connect(this.analyser)

@@ -2,6 +2,8 @@
 // interface) — в отличие от MasterRecorder (recorder.ts), источник звука здесь физическое
 // железо через getUserMedia, а не наш собственный AudioContext.
 
+import { buildMusicalAudioConstraints } from './media-constraints'
+
 export interface AudioInputDevice {
   deviceId: string
   label: string
@@ -28,15 +30,8 @@ export class HardwareRecorder {
   private chunks: BlobPart[] = []
 
   async start(deviceId: string): Promise<void> {
-    // echoCancellation/noiseSuppression/autoGainControl рассчитаны на голосовую связь и
-    // портят музыкальный сигнал (компрессия, срез частот) — для записи инструмента отключаем
     this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        deviceId: { exact: deviceId },
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-      },
+      audio: buildMusicalAudioConstraints(deviceId),
     })
     this.chunks = []
     const recorder = new MediaRecorder(this.stream, { mimeType: 'audio/webm' })

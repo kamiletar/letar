@@ -4,6 +4,16 @@
 
 ---
 
+## [0.19.2] — 2026-07-29
+
+### Изменено
+
+- **Аудио-констрейнты `getUserMedia` вынесены в общий хелпер** — `buildMusicalAudioConstraints()`
+  (`src/lib/audio/media-constraints.ts`). Три места (`hardware-recorder.ts`,
+  `external-audio-input.ts`, `use-voice-chain.ts`) дублировали один и тот же набор
+  «выключить `echoCancellation`/`noiseSuppression`/`autoGainControl`» вместе с комментарием-
+  объяснением. Теперь правило студийного захвата звука живёт в одном месте.
+
 ## [0.19.0] — 2026-07-29
 
 ### Добавлено
