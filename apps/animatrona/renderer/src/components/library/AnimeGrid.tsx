@@ -1,7 +1,7 @@
 'use client'
 
 import { AspectRatio, Box, Checkbox, Grid, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
-import { memo, useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { LuFilm } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -84,20 +84,32 @@ export const AnimeGrid = memo(function AnimeGrid({
     estimateSize: (cardWidth) => cardWidth * 1.5 + 170,
   })
 
-  // Infinite scroll: подгружаем следующую страницу, когда виртуализатор приближается
-  // к последней уже загруженной строке (не к последней строке экрана — виртуализатор
-  // сам знает, что реально отрендерено с учётом overscan)
-  const virtualItems = rowVirtualizer.getVirtualItems()
-  const lastVirtualItemIndex = virtualItems[virtualItems.length - 1]?.index
+  // Infinite scroll: sentinel-элемент сразу под сеткой + IntersectionObserver.
+  // Раньше подгрузка была завязана на индекс последней виртуализированной строки
+  // (rowVirtualizer.getVirtualItems()) — ненадёжно: с overscan=3 срабатывало только когда
+  // пользователь долистывал практически до самого конца уже загруженных строк, и зависело от
+  // деталей поведения виртуализатора. Sentinel — стандартный паттерн infinite scroll, не зависит
+  // от внутренностей виртуализации; rootMargin запускает подгрузку заранее, до появления в вьюпорте.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
-    if (lastVirtualItemIndex === undefined || !hasNextPage || isFetchingNextPage) {
+    if (!hasNextPage) {
       return
     }
-    const rowCount = rowVirtualizer.options.count
-    if (lastVirtualItemIndex >= rowCount - 1) {
-      onLoadMore?.()
+    const el = loadMoreRef.current
+    if (!el) {
+      return
     }
-  }, [lastVirtualItemIndex, hasNextPage, isFetchingNextPage, onLoadMore, rowVirtualizer])
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+          onLoadMore?.()
+        }
+      },
+      { rootMargin: '800px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, onLoadMore])
 
   if (isLoading) {
     return (
@@ -217,6 +229,16 @@ export const AnimeGrid = memo(function AnimeGrid({
           </Box>
         )
       })}
+      {hasNextPage && (
+        <Box
+          ref={loadMoreRef}
+          position="absolute"
+          left={0}
+          right={0}
+          top={`${rowVirtualizer.getTotalSize()}px`}
+          h="1px"
+        />
+      )}
       {isFetchingNextPage && (
         <HStack
           justify="center"
