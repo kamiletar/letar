@@ -35,6 +35,22 @@
 
 ---
 
+## Фаза 2 — MCP-сервер (ментор + DAW)
+
+### Unit (Vitest)
+
+- [x] `mcp/chord-pattern.spec.ts` — генератор аккордов: интервалы всех 7 типов, block/arpeggio-up/arpeggio-down, дефолты
+- [x] `lib/mentor/schema.spec.ts` — Zod-валидация всех 5 вариантов `MentorEventSchema` + `MentorStateReportSchema`
+- [x] `lib/mentor/event-bus.spec.ts` — pub/sub: доставка, unsubscribe, несколько подписчиков
+- [ ] Не покрыто тестами: API-роуты (`/api/mentor/*`) — проверены только вручную curl'ом (см. `PLAN_COMPLETED.md`),
+      MCP `server.ts` (registerTool/resource) — проверен вручную прямым JSON-RPC по stdio, не автоматизированным тестом
+
+### Ручное
+
+- [ ] Реальный Claude Desktop → `highlight_param`/`play_demo` → золотая подсветка в открытой вкладке студии
+
+---
+
 ## Конфигурация
 
 ```ts
