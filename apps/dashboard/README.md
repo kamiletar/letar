@@ -177,7 +177,6 @@ proxy_read_timeout 86400s;
 
 - `POST /api/deploy/start` - запуск деплоя
 - `GET /api/deploy/status` - статус
-- `GET /api/deploy/history` - история
 
 ### База данных
 

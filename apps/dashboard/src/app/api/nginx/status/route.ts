@@ -1,4 +1,4 @@
-import { getNpmClientByServerId } from '@/lib/npm-client'
+import { getNpmClientByServerId } from '@/lib/nginx-proxy-manager-client'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 

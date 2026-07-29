@@ -1,4 +1,4 @@
-import { npmApi } from '@/lib/npm'
+import { npmApi } from '@/lib/nginx-proxy-manager'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 

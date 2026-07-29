@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.20.3] — 2026-07-30
+
+### Removed: мёртвая страница `/deploy/history`
+
+`GET /api/deploy/history` безусловно возвращал 501 («Deploy history is not available. Deploy runs via dashboard-agent.») независимо от query-параметров — страница `/deploy/history` всегда падала в состояние ошибки ещё до рендера фильтров (`KNOWN_APPS`, включая устаревший `label-printer`, был лишь симптомом). Удалены: страница, `/api/deploy/history/route.ts`, `/api/deploy/logs/[id]/route.ts` (тоже безусловная 501-заглушка, использовалась только удалённой страницей) и `DeployLogsDialog.tsx`. Ссылка «History» убрана с `/deploy`.
+
 ## [1.20.2] — 2026-07-30
 
 ### Refactor: `APP_PORTS` вынесен в канон `@letar/infra-config`

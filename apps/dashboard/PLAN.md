@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.20.2
+> **Версия:** 1.20.3
 > **Последнее обновление:** 2026-07-30
 
 ---
@@ -548,20 +548,24 @@ UMAMI_API_PASSWORD=<пароль>
 того же факта, продублированное текстом — а самостоятельными curated-списками с собственной бизнес-
 логикой; унификация с портами рискует незаметно расширить/сузить их поведение):
 
-- `SUPPORTED_DATABASES` (`constants.ts`) — allow-list из 3 приложений для UI восстановления бэкапов,
-  сильно уже, чем полный список БД в `dashboard-agent/database.ts` `APP_CONFIG` (16 приложений).
-  Расхождение может быть багом (недоступна кнопка восстановления для части БД), но это отдельная
-  задача — сначала выяснить, почему список узкий, прежде чем расширять
-- `KNOWN_APPS` (`deploy/history/page.tsx`) — фильтр UI из 2 значений (`dashboard`, `label-printer`),
-  `label-printer` не входит даже в `SERVER_APPS` (Electron-приложение, не деплоится через
-  `deploy-affected.sh`) — не реестр приложений, а ручной список кнопок фильтра
+- ~~`SUPPORTED_DATABASES` (`constants.ts`)~~ — снято другой задачей (2026-07-30, v1.20.3): расхождение
+  с `APP_CONFIG` (16 приложений) оказалось не багом UI восстановления, а мёртвым кодом. Реальный
+  restore/delete/migrate отключён целиком на уровне `_actions/database-actions.ts` (`@deprecated`,
+  всегда `{ success: false }`) и `/api/database/[db]/restore/route.ts` (безусловный `501`) — причина:
+  `dashboard-agent` (`routes/database.ts`) вообще не реализует restore/delete/migration-эндпоинты,
+  только `status`/`stats`/`backup`/`backups`. Сам `SUPPORTED_DATABASES` и весь читавший его
+  `api/_schemas/common.ts` (`DatabaseNameSchema`, `AppNameSchema`, `DeployStartSchema`,
+  `DatabaseRestoreSchema`, `ContainersQuerySchema`) нигде не импортировались — allow-list ни на что не
+  влиял. Список БД для кнопок бэкапа UI уже брал динамически из `/api/database/available` (живой
+  запрос к агенту), в обход этой константы. Файл `common.ts` удалён, экспорты `SUPPORTED_DATABASES`/
+  `SUPPORTED_APPS`/`DatabaseName`/`AppName` убраны из `constants.ts`
+- ~~`KNOWN_APPS` (`deploy/history/page.tsx`)~~ — снято другой задачей: страница и `/api/deploy/history`
+  оказались мёртвым кодом целиком (роут безусловно возвращал 501 «Deploy history is not available»
+  ещё до перехода на dashboard-agent), см. PLAN_COMPLETED.md v1.20.3
 - `APP_CONFIG` в `dashboard-agent/database.ts` (конфигурация БД для бэкапов: `secretsPath`,
   `containerName`, `database`, `user`) — единственный владелец этих данных сейчас (
   `dashboard/src/lib/secrets.ts` с аналогичной картой уже удалён в Фазе 2 v1.18.0), реальной
   межфайловой дупликации значений нет, только концептуальное сходство с другими картами
-
-**Если возвращаться к этой задаче** — начать с выяснения, почему `SUPPORTED_DATABASES` уже 3
-приложения, а не 16 (баг или намеренное ограничение UI), прежде чем унифицировать источник.
 
 **Зависимости:** нет, чисто внутренний рефакторинг dashboard/dashboard-agent.
 

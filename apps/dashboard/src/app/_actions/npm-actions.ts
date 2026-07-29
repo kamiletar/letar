@@ -2,8 +2,8 @@
 
 import { logFailure, logSuccess } from '@/lib/audit-log'
 import { requireAdmin } from '@/lib/auth-utils'
-import type { NpmProxyHostCreate } from '@/lib/npm'
-import { getNpmClientByServerId } from '@/lib/npm-client'
+import type { NpmProxyHostCreate } from '@/lib/nginx-proxy-manager'
+import { getNpmClientByServerId } from '@/lib/nginx-proxy-manager-client'
 
 /**
  * Создать proxy host

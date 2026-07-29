@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod/v4'
 
-import { getNpmClientByServerId } from '@/lib/npm-client'
+import { getNpmClientByServerId } from '@/lib/nginx-proxy-manager-client'
 
 export const dynamic = 'force-dynamic'
 

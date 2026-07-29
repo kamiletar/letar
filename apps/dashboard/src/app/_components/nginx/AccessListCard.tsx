@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDateOnly } from '@/lib/format'
-import type { NpmAccessList } from '@/lib/npm'
+import type { NpmAccessList } from '@/lib/nginx-proxy-manager'
 import { Badge, Box, Button, Card, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuShieldCheck, LuTrash2, LuUsers } from 'react-icons/lu'
 

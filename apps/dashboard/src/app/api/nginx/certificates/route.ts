@@ -1,4 +1,4 @@
-import { npmApi } from '@/lib/npm'
+import { npmApi } from '@/lib/nginx-proxy-manager'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'

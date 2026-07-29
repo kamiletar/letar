@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDateOnly } from '@/lib/format'
-import type { NpmProxyHost } from '@/lib/npm'
+import type { NpmProxyHost } from '@/lib/nginx-proxy-manager'
 import { Badge, Box, Button, Card, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuExternalLink, LuLock, LuTrash2 } from 'react-icons/lu'
 import { Switch } from '../ui/switch'

@@ -2,6 +2,35 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.3 — удалена мёртвая страница /deploy/history (2026-07-30)
+
+При разборе задачи «`KNOWN_APPS` содержит устаревший `label-printer`» (см. PLAN.md v1.20.2)
+выяснилось, что дело не в одной устаревшей константе фильтра. `GET /api/deploy/history/route.ts`
+безусловно возвращал `{ success: false }` с кодом 501 («Deploy history is not available. Deploy
+runs via dashboard-agent.») — без учёта query-параметров. Из-за этого `useQuery` на странице
+`/deploy/history` всегда падал в ветку `historyError` ещё до рендера фильтров: не только кнопка
+`label-printer` никогда не показывала данные, вообще ни один фильтр (включая `dashboard`) никогда
+не доходил до списка записей. Страница была мёртвым кодом целиком, а не частично устаревшим списком.
+
+Удалено вместе как один связанный кластер (всё появилось и умерло одновременно при переходе
+деплоя на dashboard-agent):
+
+- `apps/dashboard/src/app/deploy/history/page.tsx` — сама страница (с `KNOWN_APPS`)
+- `apps/dashboard/src/app/api/deploy/history/route.ts` — безусловный 501-заглушка
+- `apps/dashboard/src/app/api/deploy/logs/[id]/route.ts` — тоже безусловная 501-заглушка
+  («Not implemented. Deploy logs are managed by dashboard-agent.»), использовалась только
+  `DeployLogsDialog`
+- `apps/dashboard/src/app/_components/deploy/DeployLogsDialog.tsx` — единственный потребитель
+  удалённого роута логов
+- Ссылка «History» и импорт `LuHistory` в `apps/dashboard/src/app/deploy/page.tsx`
+- Строка `GET /api/deploy/history` в `README.md`
+
+Общий `LogsDialog` (`_components/shared/LogsDialog.tsx`) не тронут — используется отдельно
+`ContainerLogsDialog`. `/api/deploy/start`, `/api/deploy/status`, `/api/deploy/clear-logs` тоже не
+тронуты — у них есть живые вызывающие (`RemoteServerDeploy`, `DeployProgress`, `server-client/remote.ts`).
+
+Проверено: `nx typecheck:tsgo dashboard`, `nx lint dashboard` — зелёные.
+
 ## Версия 1.20.2 — единый канон APP_PORTS (2026-07-30, dashboard-dev)
 
 Закрыл первый пункт backlog «единый источник правды для реестра приложений» (найден 2026-07-15

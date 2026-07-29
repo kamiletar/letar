@@ -3,9 +3,7 @@
 import { RemoteServerDeploy } from '@/app/_components/deploy/RemoteServerDeploy'
 import { Header } from '@/app/_components/layout/Header'
 import { useServerContext } from '@/lib/contexts/ServerContext'
-import { Badge, Box, Button, Heading, HStack, Spinner, Text } from '@chakra-ui/react'
-import Link from 'next/link'
-import { LuHistory } from 'react-icons/lu'
+import { Badge, Box, Heading, HStack, Spinner, Text } from '@chakra-ui/react'
 
 export default function DeployPage() {
   const { currentServer, isLoading } = useServerContext()
@@ -23,12 +21,6 @@ export default function DeployPage() {
               </Badge>
             )}
           </HStack>
-          <Link href="/deploy/history">
-            <Button size="sm" variant="outline">
-              <LuHistory />
-              History
-            </Button>
-          </Link>
         </HStack>
 
         {isLoading && (

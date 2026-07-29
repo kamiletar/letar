@@ -5,8 +5,8 @@
 
 import { getServerSession } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
-import type { NpmConfig } from '@/lib/npm'
-import { getNpmClientForServer, npmApi } from '@/lib/npm'
+import type { NpmConfig } from '@/lib/nginx-proxy-manager'
+import { getNpmClientForServer, npmApi } from '@/lib/nginx-proxy-manager'
 
 /** Информация о NPM сервера */
 export interface NpmServerInfo {

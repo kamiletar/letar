@@ -1,4 +1,4 @@
-import { createAlert, getActiveAlerts, getAlerts, getAlertSettings } from '@/lib/alerts'
+import { AlertSeverity, AlertType, createAlert, getActiveAlerts, getAlerts, getAlertSettings } from '@/lib/alerts'
 import { sendNotification } from '@/lib/notifications'
 import { verifyCronSecret } from '@letar/api-server'
 import { NextResponse } from 'next/server'
@@ -37,18 +37,8 @@ export async function GET(request: Request) {
 
 const CreateAlertSchema = z
   .object({
-    type: z.enum([
-      'CPU_HIGH',
-      'MEMORY_HIGH',
-      'DISK_HIGH',
-      'CONTAINER_DOWN',
-      'CONTAINER_RESTARTED',
-      'DATABASE_DOWN',
-      'DEPLOY_FAILED',
-      'BACKUP_FAILED',
-      'CRON_FAILED',
-    ]),
-    severity: z.enum(['INFO', 'WARNING', 'ERROR', 'CRITICAL']),
+    type: z.enum(Object.values(AlertType) as [AlertType, ...AlertType[]]),
+    severity: z.enum(Object.values(AlertSeverity) as [AlertSeverity, ...AlertSeverity[]]),
     title: z.string().min(1).max(200),
     message: z.string().min(1).max(2000),
     metadata: z.record(z.string(), z.unknown()).optional(),
