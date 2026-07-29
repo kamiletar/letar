@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Button, Container, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { Pressable } from '@letar/ui'
+import { Pressable, StickyActionBar } from '@letar/ui'
 
 export interface MoodValue {
   /** 1 = негативная, 2 = нейтральная, 3 = позитивная */
@@ -75,11 +75,26 @@ export function MoodCheckIn({ onSubmit, onSkip, isRu }: MoodCheckInProps) {
             </Pressable>
           ))}
         </SimpleGrid>
+      </VStack>
 
+      {
+        /*
+         * StickyActionBar, не обычная inline-кнопка — `padding-bottom` внизу Container не
+         * помогает: он добавляет пространство ПОСЛЕ контента, а не поднимает то, что уже
+         * отрендерено выше, поэтому на короткой странице (контент короче вьюпорта, скролла
+         * нет) кнопка всё равно попадала бы в зону под fixed cookie-баннером. StickyActionBar
+         * (`position: sticky; bottom: var(--letar-cookie-banner-height, 0px)`) корректно
+         * приподнимается даже без скролла — sticky вычисляется по текущей позиции
+         * относительно viewport, а не требует явного пользовательского скролла.
+         * (archetest, safety-net.spec.ts/mood-check-in.spec.ts, 2026-07-29: клик по
+         * «Пропустить» перехватывала ссылка «Подробнее в политике ПДн» из баннера).
+         */
+      }
+      <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }} contentProps={{ justify: 'center' }}>
         <Button variant="ghost" size="sm" onClick={onSkip}>
           {isRu ? 'Пропустить' : 'Skip'}
         </Button>
-      </VStack>
+      </StickyActionBar>
     </Container>
   )
 }

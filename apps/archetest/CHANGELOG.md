@@ -5,6 +5,16 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.26.3] - 2026-07-29
+
+### Fixed
+
+- **`MoodCheckIn` — кнопка «Пропустить»** обёрнута в `StickyActionBar` (`@letar/ui`).
+  Была обычной inline-кнопкой в потоке документа — CSS-переменная `--letar-cookie-banner-
+  height` её не поднимала, на короткой странице (без скролла) кнопка попадала под fixed
+  cookie-баннер и перехватывалась его ссылкой (нашлось на повторном e2e-прогоне на 0.26.2:
+  `safety-net.spec.ts`/`mood-check-in.spec.ts` зависали на клике «Пропустить»).
+
 ## [0.26.2] - 2026-07-29
 
 ### Fixed
