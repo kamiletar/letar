@@ -2,7 +2,9 @@
 
 import type { DrumPad, DrumPadSynth } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
-import { filledToggleStyle } from './button-style'
+import type { ChangeEvent } from 'react'
+import { useRef } from 'react'
+import { filledToggleStyle, outlineButtonStyle } from './button-style'
 import { Knob } from './knob'
 
 const SYNTH_TYPES: DrumPadSynth['type'][] = ['808kick', 'tom', 'snare', 'clap', 'hat-closed', 'hat-open']
@@ -26,11 +28,33 @@ function defaultSynth(type: DrumPadSynth['type']): DrumPadSynth {
 interface DrumPanelProps {
   pad: DrumPad
   onChange: (pad: DrumPad) => void
+  onUploadSample: (file: File) => void
+  onRemoveSample: (sampleId: string) => void
 }
 
-export function DrumPanel({ pad, onChange }: DrumPanelProps) {
+export function DrumPanel({ pad, onChange, onUploadSample, onRemoveSample }: DrumPanelProps) {
   const synth = pad.synth
-  const setSynth = (s: DrumPadSynth) => onChange({ ...pad, synth: s })
+  const sample = pad.sample
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Синтез и сэмпл взаимоисключающи (см. DrumPadSampleSchema в schema.ts) — выбор одного гасит другой.
+  const setSynth = (s: DrumPadSynth) => onChange({ ...pad, synth: s, sample: null })
+  const setSample = (s: NonNullable<DrumPad['sample']>) => onChange({ ...pad, synth: null, sample: s })
+
+  const handleFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (file) {
+      onUploadSample(file)
+    }
+  }
+
+  const handleClearAll = () => {
+    if (sample) {
+      onRemoveSample(sample.sampleId)
+    }
+    onChange({ ...pad, synth: null, sample: null })
+  }
 
   return (
     <Box bg="bg.surface" border="1px solid" borderColor="border.DEFAULT" borderRadius="md" p={3}>
@@ -38,18 +62,18 @@ export function DrumPanel({ pad, onChange }: DrumPanelProps) {
         <Text fontSize="9px" fontWeight="600" letterSpacing="0.12em" color="fg.gold" textTransform="uppercase">
           Пэд {pad.index + 1} — {pad.name}
         </Text>
-        {synth && (
-          <button style={btnStyle(false)} onClick={() => onChange({ ...pad, synth: null })}>
+        {(synth || sample) && (
+          <button style={btnStyle(false)} onClick={handleClearAll}>
             Очистить
           </button>
         )}
       </Box>
 
-      <Box display="flex" gap={1} flexWrap="wrap" mb={synth ? 3 : 0}>
+      <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
         {SYNTH_TYPES.map((type) => (
           <button
             key={type}
-            style={btnStyle(synth?.type === type)}
+            style={btnStyle(!sample && synth?.type === type)}
             onClick={() => setSynth(synth ? { ...synth, type } : defaultSynth(type))}
           >
             {TYPE_LABEL[type]}
@@ -57,8 +81,8 @@ export function DrumPanel({ pad, onChange }: DrumPanelProps) {
         ))}
       </Box>
 
-      {synth && (
-        <Box display="flex" gap={3} flexWrap="wrap">
+      {synth && !sample && (
+        <Box display="flex" gap={3} flexWrap="wrap" mb={3}>
           <Knob
             label="pitch"
             value={synth.pitch / 127}
@@ -93,6 +117,49 @@ export function DrumPanel({ pad, onChange }: DrumPanelProps) {
           />
         </Box>
       )}
+
+      <Box borderTop="1px solid" borderColor="border.DEFAULT" pt={2}>
+        <Box display="flex" alignItems="center" gap={2} mb={sample ? 2 : 0}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            onChange={handleFilePicked}
+            style={{ display: 'none' }}
+          />
+          <button
+            style={outlineButtonStyle('default', { padding: '3px 8px', letterSpacing: '0.03em' })}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            ↑ сэмпл
+          </button>
+          {sample && (
+            <Text fontSize="9px" color="fg.gold" letterSpacing="0.02em" lineClamp={1}>
+              {sample.name}
+            </Text>
+          )}
+        </Box>
+        {sample && (
+          <Box display="flex" gap={3} flexWrap="wrap">
+            <Knob
+              label="gain"
+              value={sample.gain / 2}
+              onChange={(v) => setSample({ ...sample, gain: Math.round(v * 2 * 100) / 100 })}
+              displayValue={`${Math.round(sample.gain * 100)}%`}
+              hint="Громкость сэмпла — свой уровень поверх силы удара."
+              size={40}
+            />
+            <Knob
+              label="pitch"
+              value={(sample.pitch - 0.25) / 3.75}
+              onChange={(v) => setSample({ ...sample, pitch: Math.round((0.25 + v * 3.75) * 100) / 100 })}
+              displayValue={`×${sample.pitch.toFixed(2)}`}
+              hint="Скорость воспроизведения — грубый питч-шифт сэмпла (ниже/выше и медленнее/быстрее)."
+              size={40}
+            />
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 }

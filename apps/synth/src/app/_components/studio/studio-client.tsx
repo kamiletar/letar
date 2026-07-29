@@ -27,6 +27,7 @@ import { MentorOverlay } from './mentor-overlay'
 import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { SubtractiveColumn } from './subtractive-column'
+import { useDrumSamples } from './use-drum-samples'
 import { useDrumSequencer } from './use-drum-sequencer'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
@@ -114,8 +115,8 @@ export function StudioClient() {
   const handlePadHit = useCallback(
     (index: number, velocity: number) => {
       const pad = drumPatchRef.current.engine.pads[index]
-      if (pad?.synth) {
-        drumEngineRef.current?.trigger(pad.synth, velocity)
+      if (pad?.synth || pad?.sample) {
+        drumEngineRef.current?.trigger(pad, velocity)
       }
       flashPad(index)
       vjPulseRef.current++
@@ -138,6 +139,21 @@ export function StudioClient() {
       return { ...p, engine: { ...p.engine, pads } }
     })
   }, [])
+
+  // Загрузка сэмпла на пэд гасит синтез того же пэда — звучит либо сэмпл, либо синтез, не оба
+  // сразу (см. комментарий у DrumPadSampleSchema в schema.ts).
+  const drumSamples = useDrumSamples({
+    drumEngineRef,
+    drumPatch,
+    onPadChange: useCallback((index: number, sampleId: string, name: string) => {
+      setDrumPatch((p) => {
+        const pads = [...p.engine.pads] as DrumkitPatch['engine']['pads']
+        const pad = pads[index]
+        pads[index] = { ...pad, synth: null, sample: { sampleId, name, gain: 1, pitch: 1 } }
+        return { ...p, engine: { ...p.engine, pads } }
+      })
+    }, []),
+  })
 
   // Реально дёргает движок (SUB/FM) и подсвечивает клавишу — общая точка для прямой игры,
   // арпеджиатора и пиано-ролла, чтобы все три источника звучали и подсвечивались одинаково.
@@ -658,6 +674,8 @@ export function StudioClient() {
               onLoadDrumkit={handleLoadDrumkit}
               padMidiLearn={padMidiLearn}
               sequencer={sequencer}
+              onUploadSample={(file) => drumSamples.uploadSample(selectedPad, file)}
+              onRemoveSample={drumSamples.removeSample}
             />
           ) : (
             <FmColumn

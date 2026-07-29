@@ -1,7 +1,7 @@
 // Синтез перкуссии в стиле 808/909 — 16 пэдов, каждый удар собирается «на лету» из
 // осцилляторов и шума (без сэмплов). Velocity-sensitive: громче удар → громче и чуть ярче звук.
 
-import type { DrumPadSynth } from '../patch/schema'
+import type { DrumPad, DrumPadSample, DrumPadSynth } from '../patch/schema'
 import { midiToFreq } from './midi'
 
 // Классические соотношения частот для 909-стиля хай-хэта (6 негармоничных square-осцилляторов)
@@ -167,10 +167,36 @@ function triggerClap(
   })
 }
 
+// Проигрывает загруженный сэмпл: скорость (playbackRate) даёт грубый питч-шифт,
+// gain на пэде — собственную громкость сэмпла, поверх — velocity удара.
+function triggerSample(
+  ctx: BaseAudioContext,
+  dest: AudioNode,
+  buffer: AudioBuffer,
+  sample: DrumPadSample,
+  velocity: number,
+  now: number
+): void {
+  const src = ctx.createBufferSource()
+  src.buffer = buffer
+  src.playbackRate.value = sample.pitch
+
+  const gain = ctx.createGain()
+  gain.gain.value = Math.max(0, sample.gain * velocityScale(velocity))
+
+  src.connect(gain)
+  gain.connect(dest)
+  src.start(now)
+}
+
 export class DrumEngine {
   private readonly ctx: BaseAudioContext
   private readonly destination: AudioNode
   private readonly noiseBuffer: AudioBuffer
+  // Декодированные буферы сэмплов по sampleId — декодирование асинхронное (decodeAudioData),
+  // поэтому кэш заполняется заранее (use-drum-samples.ts), а trigger() остаётся синхронным
+  // и sample-accurate, как и синтезируемые удары.
+  private readonly sampleBuffers = new Map<string, AudioBuffer>()
 
   constructor(ctx: BaseAudioContext, destination: AudioNode) {
     this.ctx = ctx
@@ -178,14 +204,46 @@ export class DrumEngine {
     this.noiseBuffer = createNoiseBuffer(ctx)
   }
 
+  setSampleBuffer(sampleId: string, buffer: AudioBuffer): void {
+    this.sampleBuffers.set(sampleId, buffer)
+  }
+
+  hasSampleBuffer(sampleId: string): boolean {
+    return this.sampleBuffers.has(sampleId)
+  }
+
+  // Декодирование должно идти через КОНТЕКСТ ЭТОГО движка (живой AudioContext или офлайн-рендер
+  // используют разные инстансы) — AudioBuffer, полученный из чужого контекста, спецификацией
+  // не запрещён, но безопаснее и единообразнее декодировать там же, где будет воспроизводиться.
+  decodeAudioData(data: ArrayBuffer): Promise<AudioBuffer> {
+    return this.ctx.decodeAudioData(data)
+  }
+
   /**
-   * Ударяет по пэду (one-shot — не требует note-off).
+   * Ударяет по пэду (one-shot — не требует note-off): сэмпл, если он назначен, иначе синтез.
    * `when` — момент старта на аудио-часах (`ctx.currentTime`); по умолчанию «прямо сейчас».
    * Секвенсор передаёт время из lookahead-планировщика — так удар звучит sample-accurate,
    * а не с джиттером JS-таймера.
    */
-  trigger(synth: DrumPadSynth, velocity = 1, when?: number): void {
+  trigger(pad: DrumPad, velocity = 1, when?: number): void {
     const now = when ?? this.ctx.currentTime
+
+    if (pad.sample) {
+      const buffer = this.sampleBuffers.get(pad.sample.sampleId)
+      if (buffer) {
+        triggerSample(this.ctx, this.destination, buffer, pad.sample, velocity, now)
+      }
+      return
+    }
+
+    const synth = pad.synth
+    if (!synth) {
+      return
+    }
+    this.triggerSynth(synth, velocity, now)
+  }
+
+  private triggerSynth(synth: DrumPadSynth, velocity: number, now: number): void {
     switch (synth.type) {
       case '808kick':
       case 'tom':

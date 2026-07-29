@@ -3,6 +3,7 @@
 // и системного аудиостека: один и тот же патч всегда даёт побитово одинаковый файл.
 
 import type { DrumkitPatch, FmPatch, Patch, SubtractivePatch } from '../patch/schema'
+import { getSample } from '../storage/samples-db'
 import { DrumEngine } from './drums'
 import { FmEngine } from './fm'
 import { buildReverbIR } from './reverb'
@@ -90,26 +91,41 @@ async function renderFm(patch: FmPatch): Promise<AudioBuffer> {
 }
 
 async function renderDrumkit(patch: DrumkitPatch): Promise<AudioBuffer> {
-  const pads = patch.engine.pads.filter((p) => p.synth !== null)
+  const pads = patch.engine.pads.filter((p) => p.synth !== null || Boolean(p.sample))
   const stepSeconds = 0.18
   const duration = Math.max(1, pads.length * stepSeconds + 1)
   const { ctx, masterGain } = await buildMasterBus(duration, 1.2, 0.12)
   const engine = new DrumEngine(ctx, masterGain)
 
+  // Сэмплы декодируются заново под контекст рендера (см. комментарий у DrumEngine.decodeAudioData) —
+  // офлайн-рендер получает свой AudioBuffer, независимо от того, что уже декодировано в живой студии.
+  await Promise.all(
+    pads
+      .filter((pad) => pad.sample)
+      .map(async (pad) => {
+        if (!pad.sample) {
+          return
+        }
+        const stored = await getSample(pad.sample.sampleId)
+        if (!stored) {
+          return
+        }
+        const buffer = await engine.decodeAudioData(stored.data.slice(0))
+        engine.setSampleBuffer(pad.sample.sampleId, buffer)
+      })
+  )
+
   const suspends: Promise<void>[] = []
   for (let i = 0; i < pads.length; i++) {
-    const synth = pads[i].synth
-    if (!synth) {
-      continue
-    }
+    const pad = pads[i]
     if (i === 0) {
-      engine.trigger(synth, 1)
+      engine.trigger(pad, 1)
       continue
     }
     const at = i * stepSeconds
     suspends.push(
       ctx.suspend(at).then(() => {
-        engine.trigger(synth, 1)
+        engine.trigger(pad, 1)
         return ctx.resume()
       })
     )

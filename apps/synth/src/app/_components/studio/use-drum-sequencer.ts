@@ -60,11 +60,11 @@ export function useDrumSequencer({
         if (!patternRef.current[pad][stepIndex]) {
           continue
         }
-        const synth = drumPatchRef.current.engine.pads[pad]?.synth
-        if (!synth) {
+        const drumPad = drumPatchRef.current.engine.pads[pad]
+        if (!drumPad?.synth && !drumPad?.sample) {
           continue
         }
-        drumEngineRef.current?.trigger(synth, 0.9, time)
+        drumEngineRef.current?.trigger(drumPad, 0.9, time)
         setTimeout(() => onPadHit(pad), visualDelayMs)
       }
       setTimeout(() => setCurrentStep(stepIndex), visualDelayMs)

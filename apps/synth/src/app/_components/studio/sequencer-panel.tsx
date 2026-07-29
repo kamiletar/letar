@@ -56,7 +56,7 @@ export function SequencerPanel({
   onSwingChange,
   onClear,
 }: SequencerPanelProps) {
-  const soundedPads = pads.filter((pad) => pad.synth !== null)
+  const soundedPads = pads.filter((pad) => pad.synth !== null || Boolean(pad.sample))
 
   return (
     <Box bg="bg.surface" border="1px solid" borderColor="border.DEFAULT" borderRadius="md" p={3}>

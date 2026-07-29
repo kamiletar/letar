@@ -175,10 +175,25 @@ export const DrumPadSynthSchema = z.object({
   level: z.number().min(0).max(1),
 })
 
+// Сэмпл на пэде — альтернатива синтезу «на лету» (см. triggerPad() в drums.ts).
+// sampleId ссылается на бинарные данные в приватном IndexedDB-хранилище (samples-db.ts),
+// само аудио НИКОГДА не попадает в JSON патча — поэтому загруженные сэмплы (голос, брейки)
+// не утекают в публичный patches/*.json при публикации (см. publish.ts).
+export const DrumPadSampleSchema = z.object({
+  sampleId: z.string(),
+  name: z.string().max(40),
+  gain: z.number().min(0).max(2),
+  pitch: z.number().min(0.25).max(4), // множитель playbackRate
+})
+export type DrumPadSample = z.infer<typeof DrumPadSampleSchema>
+
 export const DrumPadSchema = z.object({
   index: z.number().int().min(0).max(15),
   name: z.string().max(16),
   synth: DrumPadSynthSchema.nullable(),
+  // Опционально — старые патчи его не имеют. Пэд звучит сэмплом ИЛИ синтезом, не обоими сразу
+  // (см. use-drum-samples.ts: назначение сэмпла гасит synth и наоборот).
+  sample: DrumPadSampleSchema.nullable().optional(),
 })
 
 // Паттерн степ-секвенсора (16 пэдов × 16 шагов) — опционален: старые патчи и свежесозданные

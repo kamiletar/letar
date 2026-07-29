@@ -16,6 +16,8 @@ interface DrumkitColumnProps {
   onLoadDrumkit: (p: DrumkitPatch) => void
   padMidiLearn: ReturnType<typeof usePadMidiLearn>
   sequencer: ReturnType<typeof useDrumSequencer>
+  onUploadSample: (file: File) => void
+  onRemoveSample: (sampleId: string) => void
 }
 
 // Левая колонка панелей движка drumkit: MIDI Learn пэдов, редактор выбранного пэда,
@@ -28,6 +30,8 @@ export function DrumkitColumn({
   onLoadDrumkit,
   padMidiLearn,
   sequencer,
+  onUploadSample,
+  onRemoveSample,
 }: DrumkitColumnProps) {
   return (
     <Box display="flex" flexDir="column" gap={2}>
@@ -54,7 +58,12 @@ export function DrumkitColumn({
           </Text>
         )}
       </Box>
-      <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={onPadChange} />
+      <DrumPanel
+        pad={drumPatch.engine.pads[selectedPad]}
+        onChange={onPadChange}
+        onUploadSample={onUploadSample}
+        onRemoveSample={onRemoveSample}
+      />
       <PatchLibrary type="drumkit" currentPatch={drumPatch} onLoad={(p) => onLoadDrumkit(p as DrumkitPatch)} />
       <SequencerPanel
         pads={drumPatch.engine.pads}

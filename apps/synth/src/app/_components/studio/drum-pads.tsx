@@ -60,7 +60,7 @@ export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit, mid
         return
       }
       onSelect(index)
-      if (pads[index].synth) {
+      if (pads[index].synth || pads[index].sample) {
         onHit(index, 0.85)
       }
     },
@@ -105,7 +105,7 @@ export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit, mid
             const pad = pads[index]
             const active = activePads.has(index)
             const selected = selectedIndex === index
-            const empty = !pad.synth
+            const empty = !pad.synth && !pad.sample
             const armed = midiLearn.active && midiLearn.armedPad === index
             const note = noteByPad.get(index)
             return (

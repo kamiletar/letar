@@ -1,5 +1,38 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 18) — Сэмплы на драм-пэдах
+
+### Что сделано
+
+- **`DrumPadSampleSchema` + `sample` поле на `DrumPadSchema`** (`schema.ts`) — опциональная
+  альтернатива синтезу: `sampleId` (ссылка на приватное хранилище) + `name`/`gain`/`pitch`.
+  Аудио-данные сознательно не входят в схему патча — это защита от утечки личных сэмплов
+  (голос, брейки) в публичный `patches/*.json` при публикации.
+- **`src/lib/storage/samples-db.ts`** (новый) — отдельная IndexedDB-база `synth-samples`
+  (не `synth-patches`) для бинарных сэмплов: `saveSample`/`getSample`/`deleteSample`,
+  `generateSampleId()`.
+- **`DrumEngine`** (`drums.ts`) — `trigger()` теперь принимает весь `DrumPad` (не только
+  `synth`): если у пэда есть `sample`, ищет декодированный буфер в собственном кэше
+  (`sampleBuffers: Map<sampleId, AudioBuffer>`) и проигрывает через `AudioBufferSourceNode`
+  (`playbackRate` = pitch, gain = sample.gain × velocity); иначе — прежний путь через
+  `triggerSynth()`. Новые методы `setSampleBuffer()`/`hasSampleBuffer()`/`decodeAudioData()`.
+- **`use-drum-samples.ts`** (новый хук) — `uploadSample(padIndex, file)`: декодирует файл,
+  сохраняет в `samples-db`, кэширует буфер в движке, вызывает `onPadChange`. Эффект отдельно
+  подгружает буферы уже сохранённых в патче сэмплов при смене движка/патча (нужно и для
+  первой загрузки патча из `PatchLibrary`, и для повторного создания `DrumEngine`).
+- **`drum-panel.tsx`** — секция «↑ сэмпл»: скрытый `<input type="file">` за кнопкой, имя
+  файла, ручки gain (0–200%)/pitch(×0.25–×4). Выбор синтеза гасит `sample: null` и наоборот
+  (`setSynth`/`setSample`), общая «Очистить» чистит оба и удаляет запись из `samples-db`.
+- **Call-сайты `trigger()` переведены на весь `DrumPad`**: `studio-client.tsx`
+  (`handlePadHit`), `use-drum-sequencer.ts` (`handleStep`), `render.ts` (`renderDrumkit` —
+  плюс декодирование сэмплов под свой `OfflineAudioContext` перед планированием ударов).
+  Проверки «пустой пэд» (`drum-pads.tsx`, `sequencer-panel.tsx`) учитывают и `sample`.
+- **Проверено живьём в браузере** (не в песочнице — file input работает без реального
+  железа): синтетический WAV через `DataTransfer` → `change`-событие на `<input>` → сэмпл
+  задекодирован, сохранён в `synth-samples` (подтверждено прямым чтением IndexedDB), пэд
+  переключился с «Kick» на сэмпл в UI, удар по пэду не бросил ошибок в консоли, «Очистить»
+  убрал запись из IndexedDB и из UI (round-trip подтверждён).
+
 ## Сессия 2026-07-29 (продолжение 17) — Хелпер для настроек getUserMedia
 
 ### Что сделано
