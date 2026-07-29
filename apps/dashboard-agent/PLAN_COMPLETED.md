@@ -2,6 +2,53 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.9.1 → 0.9.4 — пороговые алерты, безопасность, надёжность cron-логов (2026-07-30, dashboard-agent-dev)
+
+Сессия прошла весь короткий бэклог P1-P3 плюс блок «Безопасность» по приоритету.
+
+**0.9.2 — «Алерты при превышении порогов» (закрыт P2):** новый `lib/health-check.ts` +
+`routes/health-check.ts` (`POST /api/cron/health-check`, крон каждые 5 мин на s2). Три
+проверки за один прогон: CPU/память/диск против порогов (`HEALTH_CPU_THRESHOLD`/
+`HEALTH_MEMORY_THRESHOLD`/`HEALTH_DISK_THRESHOLD`, дефолт 90%), переходы состояний Docker-
+контейнеров (running→exited/dead — `CONTAINER_DOWN`; состояние `restarting` как индикатор
+crash-loop — `CONTAINER_RESTARTED`), доступность БД (контейнер жив, подключение — нет —
+`DATABASE_DOWN`). Алертит через `postDashboardAlert()` — важная находка: типы
+`CPU_HIGH`/`MEMORY_HIGH`/`DISK_HIGH`/`CONTAINER_DOWN`/`CONTAINER_RESTARTED`/`DATABASE_DOWN`
+существовали в `DashboardAlertType` и схеме `dashboard` с самого начала, но ни разу не
+вызывались — метрики только отдавались по запросу, без проактивного контроля. Дебаунс
+(один алерт на непрерывный эпизод) через существующий `json-state-file.ts`.
+
+**0.9.4 — Rate limiting + IP whitelist (закрыт блок «Безопасность»):** `@fastify/rate-limit`
+(600 запросов/мин на IP по умолчанию, настраивается `RATE_LIMIT_MAX`/`RATE_LIMIT_WINDOW_MS`,
+`127.0.0.1`/`::1` в allowList — не режет собственные cron-вызовы агента на себя же) и новый
+`lib/ip-whitelist.ts` (опционально через `ALLOWED_IPS`, точные IP или IPv4 CIDR, preHandler
+до `authMiddleware`). Заодно аудит PLAN.md вскрыл две ложные записи TODO — «API токен
+авторизация» (`lib/auth.ts`) и «История метрик» (`lib/history.ts`) были реализованы давно,
+просто не отмечены.
+
+**0.9.4 — Redis-персистентность логов cron-задач (закрыт Backlog «CronExecutionLog — мёртвая
+модель»):** `executionLogs` в `lib/cron.ts` теперь персистятся в Redis
+(`dashboard-agent:cron:logs:<jobId>`, TTL 30 дней) тем же паттерном, что `deployHistory` в
+`routes/deploy.ts` (0.8.3) — `rehydrateExecutionLogsFromRedis()` при старте восстанавливает
+историю, записи в статусе `running` при рестарте помечаются `error`. Осознанно выбран путь
+«Redis в самом агенте», а не «писать в БД `dashboard`» — вся остальная архитектура pull-based
+(`RemoteServerClient` дёргает REST агента на лету, ничего не копирует в БД dashboard).
+Модель `CronExecutionLog` в схеме `dashboard` остаётся неиспользуемой — решение об её
+удалении миграцией вне scope dashboard-agent (чужая файловая зона), оставлена рекомендация
+для сессии `dashboard-dev`.
+
+**Не в фокусе (сознательно):** «Отправка метрик в Dashboard» (P1) и WebSocket (P3) остались
+TODO — по итогам разбора выяснилось, что pull-модель (`RemoteServerClient`) уже закрывает
+основной сценарий «дать dashboard свежие метрики», push-инициатива от агента не имеет пока
+конкретного сценария использования.
+
+**Побочный эффект сессии:** параллельно в этом же приложении работал другой агент
+(`app-registry.ts`/`app-registry.guard.spec.ts`, версия 0.9.3, синхронизация `APP_PORTS` с
+каноном `@letar/infra-config`) — не входит в этот коммит, оставлено нетронутым в рабочем
+дереве для отдельного коммита.
+
+commit `0d9dff39`. Деплой не запрошен на момент записи.
+
 ## Версия 0.8.7 → 0.8.8 — аудит охвата бэкапов + canary свежести бэкапа Maddy (2026-07-28, root-weaver)
 
 Сессия «хвосты корневого `PLAN.md`»: сверка охвата ежедневного `pg_dump`-бэкапа БД
