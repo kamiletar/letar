@@ -20,9 +20,13 @@
  *
  * ⚠️ Парсинг `.env`/`project.json` продублирован в `libs/generators/src/utils/ports.ts` —
  * там он работает поверх виртуального Nx `Tree` (генератор правит ещё не записанные на диск
- * файлы), здесь — поверх реального диска. Дублирование осознанное: `libs/generators` —
- * Nx-плагин, загружаемый на этапе построения графа проектов, и он намеренно не тянет
- * зависимостей из `@letar/*`. При правке регулярок меняй оба файла.
+ * файлы), здесь — поверх реального диска. **При правке регулярок меняй оба файла.**
+ *
+ * Схлопнуть в один модуль нельзя — проверено запуском (2026-07-29, PLAN-INFRA.md §34.2 п.4):
+ * `libs/generators` — Nx-плагин, и импорт `@letar/*` из него падает в рантайме
+ * (`Cannot find module`), потому что `node_modules/@letar/` в воркспейсе не существует, а
+ * загрузчик плагинов регистрирует `tsconfig-paths` против корневого `tsconfig.base.json`, где
+ * `paths` для `@letar/*` нет. Типами это не ловится: `typecheck` на таком импорте зелёный.
  */
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
@@ -249,7 +253,7 @@ export function formatPortDrift(drift: PortDrift[]): string {
   return drift
     .map(
       ({ app, found, declared, file }) =>
-        `${app}: ${file} указывает ${found}, приложение объявляет ${declared.join(', ')}`
+        `${app}: ${file} указывает ${found}, приложение объявляет ${declared.join(', ')}`,
     )
     .join('\n')
 }

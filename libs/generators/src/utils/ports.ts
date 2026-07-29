@@ -1,3 +1,20 @@
+/**
+ * Разбор dev-портов приложения поверх виртуального Nx `Tree` — генератору нужно видеть файлы,
+ * которых ещё нет на диске.
+ *
+ * ⚠️ Регулярки `ENV_PORT_PATTERN`/`CLI_PORT_PATTERN` и `extractPorts` продублированы в
+ * `libs/infra-config/src/app-ports.ts` (там — поверх реального диска, для guard-теста).
+ * **При правке регулярок меняй оба файла.**
+ *
+ * Вынести общее ядро в `@letar/infra-config` и импортировать его отсюда нельзя — проверено
+ * запуском (2026-07-29, PLAN-INFRA.md §34.2 п.4). Этот файл грузится как часть Nx-плагина, и
+ * любой импорт `@letar/*` роняет генератор в рантайме с `Cannot find module`: в воркспейсе нет
+ * `node_modules/@letar/` (bun не раскладывает workspace-пакеты симлинками), а загрузчик плагинов
+ * регистрирует `tsconfig-paths` против корневого `tsconfig.base.json`, где `paths` для `@letar/*`
+ * нет — резолв построен на `exports` + `customConditions`, которые рантайм-`require` не видит.
+ * `typecheck` при этом зелёный, так что проверять только реальным `nx g ... --dry-run`.
+ */
+
 import { joinPathFragments, type Tree } from '@nx/devkit'
 
 /**
