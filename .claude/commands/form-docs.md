@@ -49,28 +49,11 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "form-docs-dev", registratio
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно!** Ни SSH, ни `deploy-affected.sh` — НИКОГДА.
+⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
+Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+`subject: "deploy-request: form-docs"`.
 
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove, а НЕ деплой сам:
-
-```
-send_message(
-  project_key: "c-web-letar",
-  sender_name: "<твоё-имя-агента>",
-  to: ["BlackCove"],
-  subject: "deploy-request: form-docs",
-  body_md: "app: form-docs
-reason: <что сделал>
-commit: <hash>",
-  topic: "deploy",
-  importance: "high",
-  ack_required: true
-)
-```
-
-Если BlackCove не отвечает 10 минут — спроси пользователя прежде чем деплоить вручную.
-
-Подробности: `.claude/rules/deploy-coordination.md`
+Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
 
 ## Проект
 

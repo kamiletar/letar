@@ -221,26 +221,11 @@ nx g @letar/generators:e2e-suite <name>
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно!** Ни SSH, ни `deploy-affected.sh` — НИКОГДА.
+⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
+Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+`subject: "deploy-request: <name>"`.
 
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove, а НЕ деплой сам:
-
-\`\`\`
-send_message(
-project_key: "c-web-letar",
-sender_name: "<твоё-имя-агента>",
-to: ["BlackCove"],
-subject: "deploy-request: <name>",
-body_md: "app: <name>\nreason: <что сделал>\ncommit: <hash>",
-topic: "deploy",
-importance: "high",
-ack_required: true
-)
-\`\`\`
-
-Если BlackCove не отвечает 10 минут — спроси пользователя прежде чем деплоить вручную.
-
-Подробности: `.claude/rules/deploy-coordination.md`
+Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
 
 ## Проект
 

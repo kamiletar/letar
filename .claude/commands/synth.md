@@ -95,7 +95,11 @@ macro_start_session(
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно!** Отправь запрос BlackCove через Agent Mail.
+⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
+Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+`subject: "deploy-request: synth"`.
+
+Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
 
 ## Проект
 
