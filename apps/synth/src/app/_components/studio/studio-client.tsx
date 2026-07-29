@@ -27,6 +27,7 @@ import { MentorOverlay } from './mentor-overlay'
 import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { SubtractiveColumn } from './subtractive-column'
+import { TeleprompterOverlay } from './teleprompter-overlay'
 import { useDrumSamples } from './use-drum-samples'
 import { useDrumSequencer } from './use-drum-sequencer'
 import { useHardwareReadout } from './use-hardware-readout'
@@ -37,6 +38,7 @@ import { useMidiMonitor } from './use-midi-monitor'
 import { usePadMidiLearn } from './use-pad-midi-learn'
 import { useRecording } from './use-recording'
 import { useStudioMentor } from './use-studio-mentor'
+import { useTeleprompter } from './use-teleprompter'
 import { useVoiceChain } from './use-voice-chain'
 import { useWavRender } from './use-wav-render'
 import { VoicePanel } from './voice-panel'
@@ -46,6 +48,8 @@ type EngineType = 'subtractive' | 'fm' | 'drumkit'
 export function StudioClient() {
   const [started, setStarted] = useState(false)
   const [vjOpen, setVjOpen] = useState(false)
+  const [teleprompterOpen, setTeleprompterOpen] = useState(false)
+  const teleprompter = useTeleprompter()
   const [patch, setPatch] = useState<SubtractivePatch>(REESE_BASS)
   const [fmPatch, setFmPatch] = useState<FmPatch>(FM_GLASS_BELLS)
   const [drumPatch, setDrumPatch] = useState<DrumkitPatch>(DRUM_KIT_1)
@@ -599,6 +603,24 @@ export function StudioClient() {
           )}
 
           {started && (
+            <button
+              onClick={() => setTeleprompterOpen(true)}
+              style={{
+                padding: '2px 8px',
+                fontSize: '10px',
+                borderRadius: '4px',
+                border: '1px solid #5a3a10',
+                background: 'transparent',
+                color: '#D4AF37',
+                cursor: 'pointer',
+                letterSpacing: '0.04em',
+              }}
+            >
+              📜 суфлёр
+            </button>
+          )}
+
+          {started && (
             <Box display="flex" alignItems="center" gap={2}>
               <button
                 style={{
@@ -823,6 +845,13 @@ export function StudioClient() {
         pulseRef={vjPulseRef}
         beatRef={vjBeatRef}
         onClose={() => setVjOpen(false)}
+      />
+
+      {/* Суфлёр — репетиция стихов перед голосом (Фаза 5) */}
+      <TeleprompterOverlay
+        open={teleprompterOpen}
+        teleprompter={teleprompter}
+        onClose={() => setTeleprompterOpen(false)}
       />
 
       {/* Оверлей «нажми чтобы начать» */}

@@ -26,4 +26,24 @@ describe('syx-file: чтение .syx-файла', () => {
     expect(result.voiceCount).toBe(32)
     expect(result.name.length).toBeGreaterThan(0)
   })
+
+  it('отдаёт полный список голосов bulk-банка для выбора в UI', async () => {
+    const bytes = readFileSync(join(__dirname, '__fixtures__/smk37-pro-presets-1.syx'))
+    const file = new File([bytes], 'bank.syx', { type: 'application/octet-stream' })
+
+    const result = await readSyxFile(file)
+
+    expect(result.voices).toHaveLength(32)
+    expect(result.voices?.[0].name).toBe(result.name)
+    expect(result.voices?.every((v) => v.name.length > 0)).toBe(true)
+  })
+
+  it('single-voice файл не заполняет voices', async () => {
+    const sysex = encodeSingleVoiceSysex(FM_BASS.engine, FM_BASS.name)
+    const file = new File([sysex], 'fm-bass.syx', { type: 'application/octet-stream' })
+
+    const result = await readSyxFile(file)
+
+    expect(result.voices).toBeUndefined()
+  })
 })
