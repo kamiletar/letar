@@ -3,6 +3,7 @@
 import type { SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
 import { type RefObject, useEffect, useRef, useState } from 'react'
+import { filledToggleStyle } from '../studio/button-style'
 import { DEFAULT_VJ_SCENE, VJ_SCENES } from './scenes'
 import { SpinGraphCanvas } from './spin-graph-canvas'
 import { useExternalAudioInput } from './use-external-audio-input'
@@ -108,16 +109,11 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
             <button
               onClick={() => handleSceneSelect(scene.id)}
               title={scene.mood}
-              style={
-                scene.id === sceneId
-                  ? {
-                      ...buttonStyle,
-                      border: '1px solid #D4AF37',
-                      color: '#F5D85A',
-                      background: 'rgba(58, 46, 8, 0.7)',
-                    }
-                  : buttonStyle
-              }
+              style={filledToggleStyle(scene.id === sceneId, {
+                padding: '4px 10px',
+                fontSize: '11px',
+                letterSpacing: '0.06em',
+              })}
             >
               {scene.name}
             </button>
@@ -126,34 +122,36 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
       </Box>
 
       <Box position="absolute" top={4} right={4} display="flex" alignItems="center" gap={2}>
-        {external.devices.length === 0 ? (
-          <Box asChild>
-            <button onClick={() => void external.refreshDevices()} style={buttonStyle}>
-              🎤 внешний вход
-            </button>
-          </Box>
-        ) : (
-          <>
+        {external.devices.length === 0
+          ? (
             <Box asChild>
-              <select
-                value={external.selectedDeviceId ?? ''}
-                onChange={(e) => external.setSelectedDeviceId(e.target.value)}
-                style={{ ...buttonStyle, cursor: 'pointer' }}
-              >
-                {external.devices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-            </Box>
-            <Box asChild>
-              <button onClick={external.toggle} style={buttonStyle}>
-                {external.active ? '● отключить вход' : '● подключить вход'}
+              <button onClick={() => void external.refreshDevices()} style={buttonStyle}>
+                🎤 внешний вход
               </button>
             </Box>
-          </>
-        )}
+          )
+          : (
+            <>
+              <Box asChild>
+                <select
+                  value={external.selectedDeviceId ?? ''}
+                  onChange={(e) => external.setSelectedDeviceId(e.target.value)}
+                  style={{ ...buttonStyle, cursor: 'pointer' }}
+                >
+                  {external.devices.map((d) => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </Box>
+              <Box asChild>
+                <button onClick={external.toggle} style={buttonStyle}>
+                  {external.active ? '● отключить вход' : '● подключить вход'}
+                </button>
+              </Box>
+            </>
+          )}
         <Box asChild>
           <button onClick={handleFullscreen} style={buttonStyle}>
             ⛶ во весь экран
