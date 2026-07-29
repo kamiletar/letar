@@ -2,6 +2,61 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.22.1 — fix: Telegram-уведомления зависали на s1/s2 (2026-07-30)
+
+**Проблема:** `Error sending Telegram notification: [TypeError: fetch failed] ETIMEDOUT` в логах
+контейнера после деплоя v1.22.0 (обнаружено BlackCove при деплое). Причина уже задокументирована
+в [deployment.md](/.claude/docs/deployment.md#telegram-api--прокси-через-mail-сервер):
+IP-диапазоны `api.telegram.org` заблокированы провайдером ДЦ на s1/s2 — как для хостовых
+процессов, так и для Docker-контейнеров. Решение (обратный прокси `tg-proxy.letar.best` на
+mail-сервере, 193.37.68.73, NL) существовало для `apps/kami` и `apps/grandslamcup`, но dashboard
+его не подключил — `src/lib/notifications.ts` и `src/app/_actions/settings-actions.ts` ходили
+в `https://api.telegram.org` напрямую в трёх местах.
+
+**Реализация:**
+
+- `TELEGRAM_API = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'` в
+  `notifications.ts` (`sendTelegramNotification`, `testTelegramNotification`,
+  `sendHeartbeatTelegram`) и тот же паттерн inline в `testTelegramAction` (settings-actions.ts).
+- `docker-compose.production.yml` — `TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}`,
+  дефолт на прокси задан прямо в compose, поэтому правка `.env.docker.enc` на проде не потребовалась.
+- Подтверждено деплоем: `env | grep TELEGRAM` в контейнере показывает переменную корректно, новых
+  `ETIMEDOUT` после запуска не зафиксировано (только хвост старых ретраев с прошлого рестарта).
+
+**Файлы:** `src/lib/notifications.ts`, `src/app/_actions/settings-actions.ts`,
+`.env.docker.example`, `docker-compose.production.yml`
+
+---
+
+## Версия 1.22.0 — статус GitHub Actions CI на главной странице (2026-07-30)
+
+**Задача:** пункт «Интеграция с GitHub Actions» висел в PLAN.md § «Идеи на будущее» без деталей.
+Уточнено с пользователем: карточка на dashboard с последними прогонами CI для публичного
+монорепо `kamiletar/letar` (без охвата приватных submodule-репозиториев — отдельный
+`GITHUB_TOKEN` с доступом к приватным репо не заводился).
+
+**Реализация:**
+
+- `src/lib/github-actions.ts` — клиент `GET /repos/kamiletar/letar/actions/runs` (публичный REST
+  API GitHub, анонимный доступ работает без токена на 60 запросов/час; опциональный
+  `GITHUB_TOKEN` поднимает лимит до 5000/час).
+- `GET /api/github/workflow-runs` — auth-gated роут, тот же паттерн, что `analytics/pageviews`
+  (`getServerSession()` → 401 без сессии).
+- `GithubActionsCard` на главной странице — последние 10 запусков, статус
+  (успешно/ошибка/выполняется/отменено) через `status`/`conclusion`, ветка, ссылка на GitHub;
+  `useQuery` с `refetchInterval: 60_000`.
+- `.claude/launch.json` — добавлена конфигурация `dashboard` (порт 3002), которой раньше не было
+  (единственное приложение без записи в launch.json на момент задачи).
+- Проверка: репозиторий подтверждён публичным (`gh api repos/kamiletar/letar` →
+  `"private":false`), `total_count: 0` в момент проверки — все 3 workflow (`publish-npm.yml`,
+  `release-animatrona.yml`, `release-mac.yml`) триггерятся только по тегам, пустой список
+  корректно обрабатывается состоянием «Запусков не найдено».
+
+**Файлы:** `src/lib/github-actions.ts`, `src/app/api/github/workflow-runs/route.ts`,
+`src/app/_components/github/GithubActionsCard.tsx`, `src/app/page.tsx`, `.claude/launch.json`
+
+---
+
 ## Версия 1.21.0 — грубый счётчик посещаемости без ПДн, дополнение к Umami (2026-07-30)
 
 **Проблема:** `UmamiScript` во всех приложениях с `@letar/ui` `CookieBanner` инициализируется
