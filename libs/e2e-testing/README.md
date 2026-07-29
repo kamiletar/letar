@@ -21,6 +21,22 @@ staging используется отдельный staging-only роут `/api/
 - `devSessionLogin(options)` — логинится через `/api/auth/dev-session`, опционально делает
   дополнительный переход (`postLoginPath`) для триггера серверных побочных эффектов, сохраняет
   `storageState`.
+- `clickWithHydrationRetry(clickTarget, waitFor, firstTimeoutMs?, retryTimeoutMs?)` — клик,
+  устойчивый к гонке гидратации React у controlled-компонентов (например Chakra
+  `Checkbox.Root`). Если клик по нативному элементу физически происходит до того, как React
+  навесил обработчик во время гидратации, состояние откатывается назад без ошибки
+  actionability. Хелпер кликает, коротко ждёт условие (`waitFor.state`: `'enabled'` или
+  `'visible'` у `waitFor.locator`), и если оно не наступило — кликает ещё раз и ждёт дольше
+  (к этому моменту гидратация уже гарантированно завершена). Найдено 2026-07-29 в archetest на
+  controlled-чекбоксе согласия.
+
+  ```ts
+  import { clickWithHydrationRetry } from '@letar/e2e-testing'
+
+  const startButton = page.getByRole('button', { name: 'Начать тест' })
+  const consentCheckbox = page.locator('[data-part="control"]').first()
+  await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
+  ```
 
 ## Пример
 

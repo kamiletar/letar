@@ -6,6 +6,11 @@
     "implicitDependencies": [
       "archetest",
       "@letar/e2e-testing"
+    ],
+    "tags": [
+      "type:e2e",
+      "scope:archetest",
+      "owner:letar"
     ]
   }
 }

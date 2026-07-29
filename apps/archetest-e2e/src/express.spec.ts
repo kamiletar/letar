@@ -1,3 +1,4 @@
+import { clickWithHydrationRetry } from '@letar/e2e-testing'
 import { expect, test } from '@playwright/test'
 
 /**
@@ -8,9 +9,8 @@ import { expect, test } from '@playwright/test'
 /**
  * Принимает информированное согласие (5.6.3) и стартует экспресс.
  *
- * Ретрай клика — гонка гидратации в WebKit/Firefox headless, не косметика. Подробности —
- * JSDoc `acceptConsentAndStart` в `mood-check-in.spec.ts` (тот же паттерн, найдено
- * 2026-07-29 на этом же чекбоксе).
+ * Ретрай клика (`clickWithHydrationRetry` из `@letar/e2e-testing`) — гонка гидратации в
+ * WebKit/Firefox headless, не косметика. Подробности гонки — в JSDoc самого хелпера.
  */
 async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   const startButton = page.getByRole('button', { name: 'Начать экспресс' })
@@ -18,13 +18,7 @@ async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   await expect(startButton).toBeDisabled()
   // Кликаем именно контрол чекбокса (в лейбле есть ссылка на /privacy — по ней не попадаем)
   const consentCheckbox = page.locator('[data-part="control"]').first()
-  await consentCheckbox.click()
-  try {
-    await expect(startButton).toBeEnabled({ timeout: 2_000 })
-  } catch {
-    await consentCheckbox.click()
-    await expect(startButton).toBeEnabled({ timeout: 5_000 })
-  }
+  await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
   await startButton.click()
 }
 
