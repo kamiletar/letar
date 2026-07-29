@@ -1,10 +1,62 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { Box, Link as ChakraLink, Checkbox, Text } from '@chakra-ui/react'
-import { DISCLAIMER_EN, DISCLAIMER_RU } from '../_data/disclaimer'
+import { Box, Button, Link as ChakraLink, Checkbox, Dialog, Portal, Text } from '@chakra-ui/react'
+import { useState } from 'react'
+import { DISCLAIMER_EN, DISCLAIMER_RU, DISCLAIMER_SUMMARY_EN, DISCLAIMER_SUMMARY_RU } from '../_data/disclaimer'
 
-interface DisclaimerConsentProps {
+interface DisclaimerSummaryProps {
+  /** Русская локаль (иначе английская) */
+  isRu: boolean
+}
+
+/**
+ * Короткая сводка дисклеймера (этап 5.6.3, UX-фикс 2026-07-29) + ссылка «Подробнее»,
+ * открывающая диалог с полным текстом. Раньше полный 4-абзацный текст показывался
+ * инлайн перед чекбоксом — пользователь должен был долистать до самого низа, чтобы
+ * увидеть чекбокс (замечание Kami: «чекбокс за пределами экрана и непонятно, что
+ * делать»). Полный текст никуда не делся — просто не блокирует экран по умолчанию.
+ */
+export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Box w="100%" maxW="lg" textAlign="left">
+      <Text fontSize="sm" color="fg.muted">
+        {isRu ? DISCLAIMER_SUMMARY_RU : DISCLAIMER_SUMMARY_EN}{' '}
+        <ChakraLink asChild color="blue.500" textDecoration="underline">
+          <button type="button" onClick={() => setOpen(true)}>
+            {isRu ? 'Подробнее' : 'Learn more'}
+          </button>
+        </ChakraLink>
+      </Text>
+
+      <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)} size="md">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>{isRu ? 'Информированное согласие' : 'Informed consent'}</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text fontSize="sm" color="fg.muted" whiteSpace="pre-line">
+                  {isRu ? DISCLAIMER_RU : DISCLAIMER_EN}
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button onClick={() => setOpen(false)}>{isRu ? 'Закрыть' : 'Close'}</Button>
+              </Dialog.Footer>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    </Box>
+  )
+}
+
+interface DisclaimerConsentCheckboxProps {
   /** Согласие проставлено */
   accepted: boolean
   /** Колбэк смены состояния чекбокса */
@@ -14,48 +66,25 @@ interface DisclaimerConsentProps {
 }
 
 /**
- * Экран информированного согласия (этап 5.6.3): полный дисклеймер + чекбокс со
- * ссылкой на политику конфиденциальности. Общий для полного квиза и экспресса.
- * Чекбокс НЕ предотмечен (152-ФЗ), стартовую кнопку гейтит вызывающий.
+ * Чекбокс согласия (этап 5.6.3, UX-фикс 2026-07-29) — живёт внутри липкой панели
+ * рядом с CTA (по образцу `CookieBanner`), а не в конце прокручиваемого текста.
+ * Чекбокс всегда на экране вместе с кнопкой, которую он разблокирует — связь
+ * «отметил → кнопка включилась» видна без скролла. `size="lg"` — увеличенный
+ * тач-таргет (WCAG 2.5.5), см. техдолг «низкая заметность чекбокса» в PLAN.md.
  */
-export function DisclaimerConsent({ accepted, onChange, isRu }: DisclaimerConsentProps) {
+export function DisclaimerConsentCheckbox({ accepted, onChange, isRu }: DisclaimerConsentCheckboxProps) {
   return (
-    <Box
-      w="100%"
-      maxW="lg"
-      p={5}
-      borderRadius="lg"
-      borderWidth="1px"
-      borderColor="border"
-      bg="bg.subtle"
-      textAlign="left"
-      // scroll-margin-bottom (не только padding-bottom на родителе!) — браузерный
-      // scrollIntoView() (и Playwright actionability, который его использует) скроллит
-      // МИНИМАЛЬНО необходимое расстояние, а не до самого низа страницы. padding-bottom
-      // на родительском контейнере защищает только «докрутили до конца», а не
-      // промежуточные позиции — scroll-margin-bottom учитывается ЛЮБЫМ scrollIntoView,
-      // гарантируя зазор от sticky-панели независимо от того, докрутили страницу
-      // полностью или ровно настолько, чтобы этот блок стал виден (archetest, 2026-07-29:
-      // Playwright реально застревал именно в этой промежуточной позиции — `checkbox__
-      // control intercepts pointer events`, т.к. попадал в перекрытую StickyActionBar+
-      // CookieBanner зону, docs — `.claude/docs/ui-components.md`).
-      scrollMarginBottom="calc(var(--letar-sticky-actionbar-height, 0px) + var(--letar-cookie-banner-height, 0px) + 1rem)"
-    >
-      <Text fontSize="xs" color="fg.muted" whiteSpace="pre-line" mb={4}>
-        {isRu ? DISCLAIMER_RU : DISCLAIMER_EN}
-      </Text>
-      <Checkbox.Root checked={accepted} onCheckedChange={(e) => onChange(!!e.checked)}>
-        <Checkbox.HiddenInput />
-        <Checkbox.Control data-testid="disclaimer-consent-checkbox" />
-        <Checkbox.Label fontSize="sm">
-          {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
-          <ChakraLink asChild color="blue.500" textDecoration="underline">
-            <Link href="/privacy" target="_blank" rel="noopener noreferrer">
-              {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
-            </Link>
-          </ChakraLink>
-        </Checkbox.Label>
-      </Checkbox.Root>
-    </Box>
+    <Checkbox.Root checked={accepted} onCheckedChange={(e) => onChange(!!e.checked)} size="lg" colorPalette="blue">
+      <Checkbox.HiddenInput />
+      <Checkbox.Control data-testid="disclaimer-consent-checkbox" />
+      <Checkbox.Label fontSize="sm" textAlign="left">
+        {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
+        <ChakraLink asChild color="blue.500" textDecoration="underline">
+          <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+            {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
+          </Link>
+        </ChakraLink>
+      </Checkbox.Label>
+    </Checkbox.Root>
   )
 }

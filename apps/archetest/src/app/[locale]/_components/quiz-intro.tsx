@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Button, Container, Heading, HStack, Progress, Text, VStack } from '@chakra-ui/react'
-import { StickyActionBar, useScrollGate } from '@letar/ui'
+import { StickyActionBar } from '@letar/ui'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { LuBrain, LuChartNoAxesCombined, LuTrendingUp } from 'react-icons/lu'
@@ -9,7 +9,7 @@ import { acceptDisclaimerAction } from '../_actions/disclaimer.action'
 import type { QuizProgress } from '../_actions/quiz.action'
 import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
-import { DisclaimerConsent } from './disclaimer-consent'
+import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
 
@@ -26,7 +26,6 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   const locale = useLocale()
   const isRu = locale === 'ru'
   const [showProfile, setShowProfile] = useState(false)
-  // Scroll-гейт интро (5.4): CTA disabled, пока не прочитан весь текст и не дано согласие
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
     // Приоритет: сервер (БД) → localStorage
     if (initialDisclaimerAccepted) {
@@ -48,9 +47,6 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
       })
     }
   }, [disclaimerAccepted])
-
-  // Scroll-гейт: пока согласие не дано — CTA включается только после прочтения текста (5.4)
-  const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !disclaimerAccepted })
 
   const hasProgress = progress && progress.totalAnswered > 0
   const hasCumulativeScores = progress?.cumulativeScores !== null && progress?.cumulativeScores !== undefined
@@ -78,18 +74,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
 
   return (
     <Container maxW={showProfile ? '6xl' : '2xl'} pt={16} pb={0}>
-      {/*
-       * pb резервирует место под StickyActionBar (высота панели + отступ от
-       * cookie-баннера, обе переменные публикует сам @letar/ui). Без этого при полной
-       * прокрутке чекбокс согласия из DisclaimerConsent (последний элемент перед
-       * панелью) физически попадал в зону, перекрытую sticky-панелью — клик по нему
-       * не долетал: `elementFromPoint` в его координатах возвращал HStack панели, а не
-       * сам чекбокс. Баг тем незаметнее, что панель ВСЕГДА видна и КАЖЕТСЯ отдельной
-       * от контента, хотя физически перекрывает его при скролле до конца (archetest,
-       * safety-net.spec.ts/mood-check-in.spec.ts, 2026-07-29 — Playwright воспроизвёл
-       * на все 3 браузерах: клик по чекбоксу не блокировался actionability-проверкой,
-       * но `Начать тест` оставался disabled, потому что состояние чекбокса не менялось).
-       */}
+      {/* pb резервирует место под StickyActionBar (высота панели + отступ от cookie-баннера) */}
       <VStack
         gap={8}
         textAlign="center"
@@ -164,10 +149,8 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
           <Text>{t('info.time')}</Text>
         </VStack>
 
-        {/* Дисклеймер с чекбоксом (скрываем если уже принято ранее) */}
-        {!disclaimerAccepted && (
-          <DisclaimerConsent accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
-        )}
+        {/* Сводка дисклеймера (скрываем если уже принято ранее); чекбокс — в StickyActionBar ниже */}
+        {!disclaimerAccepted && <DisclaimerSummary isRu={isRu} />}
 
         {/* Накопительный профиль */}
         {showProfile && chartData && (
@@ -194,29 +177,33 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
             )}
           </VStack>
         )}
-
-        {/* Маркер конца контента для scroll-гейта (5.4) */}
-        <Box ref={sentinelRef} aria-hidden h="1px" w="100%" />
       </VStack>
 
-      {/* Липкая CTA — всегда видна; старт disabled пока не прочитано и не дано согласие (5.4) */}
+      {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране (UX-фикс 2026-07-29) */}
       <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
-        <Button
-          size="lg"
-          colorPalette="blue"
-          w={{ base: '100%', sm: 'auto' }}
-          minW={{ sm: '14rem' }}
-          onClick={onStart}
-          disabled={!disclaimerAccepted || !reachedEnd}
-        >
-          {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
-        </Button>
-        {hasCumulativeScores && (
-          <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
-            <LuChartNoAxesCombined />
-            {t('myProfile')}
-          </Button>
-        )}
+        <VStack gap={3} w="100%">
+          {!disclaimerAccepted && (
+            <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
+          )}
+          <HStack gap={3} justify="center" w="100%">
+            <Button
+              size="lg"
+              colorPalette="blue"
+              w={{ base: '100%', sm: 'auto' }}
+              minW={{ sm: '14rem' }}
+              onClick={onStart}
+              disabled={!disclaimerAccepted}
+            >
+              {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
+            </Button>
+            {hasCumulativeScores && (
+              <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
+                <LuChartNoAxesCombined />
+                {t('myProfile')}
+              </Button>
+            )}
+          </HStack>
+        </VStack>
       </StickyActionBar>
     </Container>
   )

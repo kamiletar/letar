@@ -1,8 +1,8 @@
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Box, Button, Container, Heading, Icon, Text, VStack } from '@chakra-ui/react'
-import { StickyActionBar, useScrollGate } from '@letar/ui'
+import { Box, Button, Container, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { StickyActionBar } from '@letar/ui'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuHexagon, LuTimer } from 'react-icons/lu'
@@ -13,7 +13,7 @@ import type { PersonalityTypeCode } from '../_data/personality-types'
 import { computeClientScores } from '../_lib/client-scoring'
 import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { EXPRESS_RESULT_KEY } from '../_lib/storage-keys'
-import { DisclaimerConsent } from './disclaimer-consent'
+import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
 import { type ExpressAnswer, ExpressResults } from './express-results'
 import { IcebreakerCard } from './icebreaker-card'
 import { QuizProgressBar } from './quiz-progress-bar'
@@ -47,8 +47,6 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   const [state, setState] = useState<ExpressState>('intro')
   // Информированное согласие (5.6.3) — гость, хранение только в localStorage
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
-  // Scroll-гейт интро: пока согласие не дано — CTA disabled, пока не прочитан весь текст (5.4)
-  const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !disclaimerAccepted })
   const [seed, setSeed] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Map<string, number>>(new Map())
@@ -216,8 +214,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   if (state === 'intro') {
     return (
       <Container maxW="lg" pt={16} pb={0}>
-        {/* pb резервирует место под StickyActionBar — иначе чекбокс согласия при полной
-         * прокрутке физически попадает под панель (см. JSDoc в quiz-intro.tsx). */}
+        {/* pb резервирует место под StickyActionBar (высота панели + отступ от cookie-баннера) */}
         <VStack
           gap={8}
           textAlign="center"
@@ -250,27 +247,29 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
             </Text>
           </Box>
 
-          {/* Информированное согласие (5.6.3) — гейтит старт */}
-          {!disclaimerAccepted && (
-            <DisclaimerConsent accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />
-          )}
-
-          {/* Маркер конца контента для scroll-гейта (юзер должен всё прочитать) */}
-          <Box ref={sentinelRef} aria-hidden h="1px" w="100%" />
+          {/* Сводка дисклеймера (5.6.3); чекбокс — в StickyActionBar ниже */}
+          {!disclaimerAccepted && <DisclaimerSummary isRu={isRu} />}
         </VStack>
 
-        {/* Липкая CTA — всегда видна, disabled пока не прочитано и не дано согласие */}
+        {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране */}
         <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
-          <Button
-            size="lg"
-            colorPalette="purple"
-            w={{ base: '100%', sm: 'auto' }}
-            minW={{ sm: '14rem' }}
-            onClick={handleStart}
-            disabled={!disclaimerAccepted || !reachedEnd}
-          >
-            {t('start')}
-          </Button>
+          <VStack gap={3} w="100%">
+            {!disclaimerAccepted && (
+              <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />
+            )}
+            <HStack justify="center" w="100%">
+              <Button
+                size="lg"
+                colorPalette="purple"
+                w={{ base: '100%', sm: 'auto' }}
+                minW={{ sm: '14rem' }}
+                onClick={handleStart}
+                disabled={!disclaimerAccepted}
+              >
+                {t('start')}
+              </Button>
+            </HStack>
+          </VStack>
         </StickyActionBar>
       </Container>
     )
