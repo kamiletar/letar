@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
 )
 ```
 
@@ -496,6 +496,29 @@ const cookies = await context.cookies()
 if (!cookies.find((c) => c.name === 'better-auth.session_token')) {
   throw new Error('dev-session не установил cookie — вероятно 403')
 }
+```
+
+### Ручная проверка через Browser pane: смена email в открытой сессии требует явный sign-out
+
+При ручной проверке dev-session роута агентом через Claude Browser pane (preview-инструменты,
+не Playwright e2e) — повторный переход на `/api/auth/dev-session?email=...` с **другим** email
+в рамках уже открытой сессии **не перезаписывает** cookie: браузер продолжает слать старую
+сессию (например, от предыдущей проверенной роли), хотя запрос возвращает успешный редирект
+(307) и в БД действительно создаётся новая запись `Session` для нового пользователя. Прямая
+проверка `GET /api/auth/get-session` в этот момент покажет старого пользователя, а не нового —
+из-за чего агент тихо продолжает тестировать под неверной ролью и получает
+необъяснимые расхождения в правах доступа.
+
+**Решение** — явный `sign-out` перед каждой сменой роли в рамках одной проверки:
+
+```typescript
+// Перед повторным вызовом /api/auth/dev-session с другим email
+await fetch(`${baseURL}/api/auth/sign-out`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: '{}',
+})
+// Только теперь переходить на /api/auth/dev-session?email=<другая-роль>
 ```
 
 ## Чеклист перед написанием E2E тестов
