@@ -38,6 +38,39 @@ export const FxSchema = z.object({
 })
 export type FxParams = z.infer<typeof FxSchema>
 
+// === Пиано-ролл (мелодический паттерн для SUB/FM) ===
+
+export const MelodicNoteSchema = z.object({
+  note: z.number().int().min(0).max(127), // MIDI-нота
+  step: z.number().int().min(0).max(31), // шаг начала (16-е доли)
+  length: z.number().int().min(1).max(32), // длительность в шагах
+  velocity: z.number().min(0).max(1),
+})
+export type MelodicNote = z.infer<typeof MelodicNoteSchema>
+
+export const MelodicSequenceSchema = z.object({
+  notes: z.array(MelodicNoteSchema),
+  steps: z.number().int().min(8).max(32), // длина паттерна в шагах (16 = 1 такт, 32 = 2 такта)
+  bpm: z.number().int().min(40).max(240),
+  swing: z.number().min(0).max(1),
+})
+export type MelodicSequence = z.infer<typeof MelodicSequenceSchema>
+
+// === Арпеджиатор ===
+
+export const ArpModeSchema = z.enum(['up', 'down', 'up-down', 'random'])
+export type ArpMode = z.infer<typeof ArpModeSchema>
+
+export const ArpeggiatorSchema = z.object({
+  enabled: z.boolean(),
+  mode: ArpModeSchema,
+  stepsPerNote: z.number().int().min(1).max(8), // 1 = 16-я, 2 = 8-я, 4 = четверть
+  octaves: z.number().int().min(1).max(3),
+  gate: z.number().min(0.05).max(1), // доля шага, которую реально звучит нота
+  bpm: z.number().int().min(40).max(240),
+})
+export type ArpeggiatorParams = z.infer<typeof ArpeggiatorSchema>
+
 // === Субтрактивный движок ===
 
 export const SubtractiveEngineSchema = z.object({
@@ -61,6 +94,11 @@ export const SubtractiveEngineSchema = z.object({
     depth: z.number().min(0).max(1),
   }),
   fx: FxSchema,
+  // Оба поля опциональны: старые сохранённые патчи их не имеют — студия подставляет пустые
+  // дефолты в коде (см. use-piano-roll.ts / use-arpeggiator.ts), а не через z.default(), чтобы
+  // в сохранённом JSON реально отсутствовало неиспользуемое поле.
+  sequence: MelodicSequenceSchema.optional(),
+  arpeggiator: ArpeggiatorSchema.optional(),
 })
 export type SubtractiveEngineParams = z.infer<typeof SubtractiveEngineSchema>
 
@@ -122,6 +160,8 @@ export const FmEngineSchema = z.object({
     pmDepth: z.number().int().min(0).max(99),
     amDepth: z.number().int().min(0).max(99),
   }),
+  sequence: MelodicSequenceSchema.optional(),
+  arpeggiator: ArpeggiatorSchema.optional(),
 })
 export type FmEngineParams = z.infer<typeof FmEngineSchema>
 
@@ -146,6 +186,9 @@ export const DrumPadSchema = z.object({
 export const SequencerPatternSchema = z.object({
   pattern: z.array(z.array(z.boolean()).min(16).max(16)).min(16).max(16),
   bpm: z.number().int().min(40).max(240),
+  // Доля смещения нечётных 16-х долей — «покачивание» шага. Опционально: старые паттерны его
+  // не имеют, студия подставляет 0 (ровный шаг), см. use-drum-sequencer.ts.
+  swing: z.number().min(0).max(1).optional(),
 })
 export type SequencerPattern = z.infer<typeof SequencerPatternSchema>
 

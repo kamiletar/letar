@@ -15,7 +15,7 @@ function emptyPattern(): boolean[][] {
 }
 
 function emptySequence(): SequencerPattern {
-  return { pattern: emptyPattern(), bpm: 120 }
+  return { pattern: emptyPattern(), bpm: 120, swing: 0 }
 }
 
 interface UseDrumSequencerOptions {
@@ -34,6 +34,7 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
   const sequence = drumPatchRef.current.engine.sequence ?? emptySequence()
   const pattern = sequence.pattern
   const bpm = sequence.bpm
+  const swing = sequence.swing ?? 0
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
@@ -67,6 +68,10 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
   }, [bpm])
 
   useEffect(() => {
+    schedulerRef.current?.setSwing(swing)
+  }, [swing])
+
+  useEffect(() => {
     return () => {
       schedulerRef.current?.stop()
     }
@@ -77,9 +82,10 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
       schedulerRef.current = new StepSequencer(getAudioContext(), handleStep)
     }
     schedulerRef.current.setBpm(bpm)
+    schedulerRef.current.setSwing(swing)
     schedulerRef.current.start()
     setIsPlaying(true)
-  }, [bpm, handleStep])
+  }, [bpm, swing, handleStep])
 
   const stop = useCallback(() => {
     schedulerRef.current?.stop()
@@ -114,6 +120,13 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
     [updateSequence]
   )
 
+  const setSwing = useCallback(
+    (next: number) => {
+      updateSequence((prev) => ({ ...prev, swing: Math.max(0, Math.min(1, next)) }))
+    },
+    [updateSequence]
+  )
+
   const toggleStep = useCallback(
     (padIndex: number, stepIndex: number) => {
       updateSequence((prev) => {
@@ -130,5 +143,5 @@ export function useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, on
     updateSequence((prev) => ({ ...prev, pattern: emptyPattern() }))
   }, [updateSequence])
 
-  return { pattern, bpm, setBpm, isPlaying, currentStep, toggle, toggleStep, clear }
+  return { pattern, bpm, setBpm, swing, setSwing, isPlaying, currentStep, toggle, toggleStep, clear }
 }

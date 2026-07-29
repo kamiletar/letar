@@ -11,9 +11,11 @@ interface SequencerPanelProps {
   currentStep: number
   isPlaying: boolean
   bpm: number
+  swing: number
   onToggleStep: (padIndex: number, stepIndex: number) => void
   onToggle: () => void
   onBpmChange: (bpm: number) => void
+  onSwingChange: (swing: number) => void
   onClear: () => void
 }
 
@@ -47,9 +49,11 @@ export function SequencerPanel({
   currentStep,
   isPlaying,
   bpm,
+  swing,
   onToggleStep,
   onToggle,
   onBpmChange,
+  onSwingChange,
   onClear,
 }: SequencerPanelProps) {
   const soundedPads = pads.filter((pad) => pad.synth !== null)
@@ -77,6 +81,19 @@ export function SequencerPanel({
             max={240}
             style={inputStyle}
             onChange={(e) => onBpmChange(Number(e.target.value) || bpm)}
+          />
+        </Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Text fontSize="9px" color="fg.subtle" title="Смещение нечётных шагов — «покачивание» ритма">
+            свинг
+          </Text>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(swing * 100)}
+            style={{ width: '52px' }}
+            onChange={(e) => onSwingChange(Number(e.target.value) / 100)}
           />
         </Box>
         <button style={outlineButtonStyle('default', { padding: '3px 8px' })} onClick={onClear}>

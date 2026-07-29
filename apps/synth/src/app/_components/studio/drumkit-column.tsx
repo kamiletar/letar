@@ -62,9 +62,11 @@ export function DrumkitColumn({
         currentStep={sequencer.currentStep}
         isPlaying={sequencer.isPlaying}
         bpm={sequencer.bpm}
+        swing={sequencer.swing}
         onToggleStep={sequencer.toggleStep}
         onToggle={sequencer.toggle}
         onBpmChange={sequencer.setBpm}
+        onSwingChange={sequencer.setSwing}
         onClear={sequencer.clear}
       />
     </Box>

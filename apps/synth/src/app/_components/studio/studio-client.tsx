@@ -10,11 +10,19 @@ import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import { applyCC, applyEncoderValue } from '@/lib/patch/midi-mapping'
-import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
+import type {
+  ArpeggiatorParams,
+  DrumkitPatch,
+  DrumPad,
+  FmPatch,
+  MelodicSequence,
+  SubtractivePatch,
+} from '@/lib/patch/schema'
 import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ArpPanel } from './arp-panel'
 import { DrumPads } from './drum-pads'
 import { DrumkitColumn } from './drumkit-column'
 import { FmHardwareControls } from './fm-hardware-controls'
@@ -28,15 +36,20 @@ import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
+import { PianoRollPanel } from './piano-roll-panel'
+import { useArpeggiator } from './use-arpeggiator'
 import { useDrumSequencer } from './use-drum-sequencer'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
 import { useMasterBus } from './use-master-bus'
 import { useMidiMonitor } from './use-midi-monitor'
 import { usePadMidiLearn } from './use-pad-midi-learn'
+import { emptyMelodicSequence, usePianoRoll } from './use-piano-roll'
 import { useRecording } from './use-recording'
 import { useStudioMentor } from './use-studio-mentor'
 import { useWavRender } from './use-wav-render'
+
+const DEFAULT_ARP: ArpeggiatorParams = { enabled: false, mode: 'up', stepsPerNote: 2, octaves: 1, gate: 0.8, bpm: 120 }
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
 
@@ -105,7 +118,7 @@ export function StudioClient() {
       }
       flashPad(index)
     },
-    [flashPad],
+    [flashPad]
   )
 
   const sequencer = useDrumSequencer({ drumEngineRef, drumPatchRef, setDrumPatch, onPadHit: flashPad })
@@ -118,6 +131,89 @@ export function StudioClient() {
     })
   }, [])
 
+  // Реально дёргает движок (SUB/FM) и подсвечивает клавишу — общая точка для прямой игры,
+  // арпеджиатора и пиано-ролла, чтобы все три источника звучали и подсвечивались одинаково.
+  const soundNoteOn = useCallback((midiNote: number, velocity: number) => {
+    if (engineTypeRef.current === 'fm') {
+      fmEngineRef.current?.noteOn(midiNote, velocity)
+    } else if (engineTypeRef.current === 'subtractive') {
+      engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
+    }
+    setActiveNotes((prev) => new Set([...prev, midiNote]))
+  }, [])
+
+  const soundNoteOff = useCallback((midiNote: number) => {
+    if (engineTypeRef.current === 'fm') {
+      fmEngineRef.current?.noteOff(midiNote)
+    } else if (engineTypeRef.current === 'subtractive') {
+      engineRef.current?.noteOff(midiNote, patchRef.current.engine.amp.adsr.release)
+    }
+    setActiveNotes((prev) => {
+      const next = new Set(prev)
+      next.delete(midiNote)
+      return next
+    })
+  }, [])
+
+  // Арпеджиатор активен только для текущего движка (SUB/FM) — настройки живут в его патче,
+  // как и секвенсор драм-кита/пиано-ролл.
+  const currentArp =
+    engineType === 'fm'
+      ? (fmPatch.engine.arpeggiator ?? DEFAULT_ARP)
+      : engineType === 'subtractive'
+        ? (patch.engine.arpeggiator ?? DEFAULT_ARP)
+        : DEFAULT_ARP
+  const arpeggiator = useArpeggiator({ params: currentArp, noteOn: soundNoteOn, noteOff: soundNoteOff })
+  const arpEnabledRef = useRef(currentArp.enabled)
+  arpEnabledRef.current = currentArp.enabled
+
+  const setArp = useCallback((updater: (prev: ArpeggiatorParams) => ArpeggiatorParams) => {
+    if (engineTypeRef.current === 'fm') {
+      setFmPatch((p) => ({ ...p, engine: { ...p.engine, arpeggiator: updater(p.engine.arpeggiator ?? DEFAULT_ARP) } }))
+    } else if (engineTypeRef.current === 'subtractive') {
+      setPatch((p) => ({ ...p, engine: { ...p.engine, arpeggiator: updater(p.engine.arpeggiator ?? DEFAULT_ARP) } }))
+    }
+  }, [])
+
+  const handleToggleArp = useCallback(() => {
+    setArp((prev) => {
+      const next = { ...prev, enabled: !prev.enabled }
+      if (!next.enabled) {
+        arpeggiator.stopAll()
+        setActiveNotes(new Set())
+      }
+      return next
+    })
+  }, [setArp, arpeggiator])
+
+  // Пиано-ролл SUB/FM — паттерн живёт в `patch.engine.sequence`/`fmPatch.engine.sequence`.
+  const setSubSequence = useCallback((updater: (prev: MelodicSequence) => MelodicSequence) => {
+    setPatch((p) => ({ ...p, engine: { ...p.engine, sequence: updater(p.engine.sequence ?? emptyMelodicSequence()) } }))
+  }, [])
+
+  const setFmSequence = useCallback((updater: (prev: MelodicSequence) => MelodicSequence) => {
+    setFmPatch((p) => ({
+      ...p,
+      engine: { ...p.engine, sequence: updater(p.engine.sequence ?? emptyMelodicSequence()) },
+    }))
+  }, [])
+
+  const subPianoRoll = usePianoRoll({
+    sequence: patch.engine.sequence,
+    setSequence: setSubSequence,
+    noteOn: soundNoteOn,
+    noteOff: soundNoteOff,
+  })
+  const fmPianoRoll = usePianoRoll({
+    sequence: fmPatch.engine.sequence,
+    setSequence: setFmSequence,
+    noteOn: soundNoteOn,
+    noteOff: soundNoteOff,
+  })
+
+  // Точка входа для клавиатуры/MIDI/ментора: если арпеджиатор включён — нота становится частью
+  // держимого аккорда (клавиша подсвечивается «зажатой», но звук триггерит сам арпеджиатор),
+  // иначе — звучит сразу через soundNoteOn/soundNoteOff.
   const handleNoteOn = useCallback(
     (midiNote: number, velocity: number) => {
       if (engineTypeRef.current === 'drumkit') {
@@ -131,38 +227,41 @@ export function StudioClient() {
         }
         return
       }
-      if (engineTypeRef.current === 'fm') {
-        fmEngineRef.current?.noteOn(midiNote, velocity)
-      } else {
-        engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
+      if (arpEnabledRef.current) {
+        setActiveNotes((prev) => new Set([...prev, midiNote]))
+        arpeggiator.noteHeld(midiNote)
+        return
       }
-      setActiveNotes((prev) => new Set([...prev, midiNote]))
+      soundNoteOn(midiNote, velocity)
     },
-    [handlePadHit, padMidiLearn.handleLearnNote, padMidiLearn.resolve],
+    [handlePadHit, padMidiLearn.handleLearnNote, padMidiLearn.resolve, arpeggiator, soundNoteOn]
   )
 
-  const handleNoteOff = useCallback((midiNote: number) => {
-    if (engineTypeRef.current === 'drumkit') {
-      return // ударные — one-shot, note-off не нужен
-    }
-    if (engineTypeRef.current === 'fm') {
-      fmEngineRef.current?.noteOff(midiNote)
-    } else {
-      engineRef.current?.noteOff(midiNote, patchRef.current.engine.amp.adsr.release)
-    }
-    setActiveNotes((prev) => {
-      const next = new Set(prev)
-      next.delete(midiNote)
-      return next
-    })
-  }, [])
+  const handleNoteOff = useCallback(
+    (midiNote: number) => {
+      if (engineTypeRef.current === 'drumkit') {
+        return // ударные — one-shot, note-off не нужен
+      }
+      if (arpEnabledRef.current) {
+        setActiveNotes((prev) => {
+          const next = new Set(prev)
+          next.delete(midiNote)
+          return next
+        })
+        arpeggiator.noteReleased(midiNote)
+        return
+      }
+      soundNoteOff(midiNote)
+    },
+    [arpeggiator, soundNoteOff]
+  )
 
   const handleCC = useCallback(
     (cc: number, value: number) => {
       setPatch((p) => applyCC(p, cc, value))
       hardware.recordCC(cc, value)
     },
-    [hardware],
+    [hardware]
   )
 
   // Энкодеры пока управляют только SUB-патчем (как и фейдеры) — FM/DRUM живой контроль ручками
@@ -172,7 +271,7 @@ export function StudioClient() {
       setPatch((p) => applyEncoderValue(p, index, value, bank))
       hardware.recordEncoder(index, value, bank)
     },
-    [hardware],
+    [hardware]
   )
 
   // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
@@ -244,20 +343,25 @@ export function StudioClient() {
 
   // Детерминированный рендер текущего патча в WAV — по типу активного движка
   const handleRenderWav = useCallback(() => {
-    const current = engineTypeRef.current === 'fm'
-      ? fmPatchRef.current
-      : engineTypeRef.current === 'drumkit'
-      ? drumPatchRef.current
-      : patchRef.current
+    const current =
+      engineTypeRef.current === 'fm'
+        ? fmPatchRef.current
+        : engineTypeRef.current === 'drumkit'
+          ? drumPatchRef.current
+          : patchRef.current
     wavRender.render(current)
   }, [wavRender])
 
   // Загрузка сохранённого патча — по типу текущего движка
-  const handleLoadSubtractive = useCallback((p: SubtractivePatch) => {
-    engineRef.current?.allNotesOff(0.05)
-    setActiveNotes(new Set())
-    setPatch(p)
-  }, [])
+  const handleLoadSubtractive = useCallback(
+    (p: SubtractivePatch) => {
+      engineRef.current?.allNotesOff(0.05)
+      arpeggiator.stopAll()
+      setActiveNotes(new Set())
+      setPatch(p)
+    },
+    [arpeggiator]
+  )
 
   const handleLoadFm = useCallback((p: FmPatch) => {
     setFmPatch(p)
@@ -278,6 +382,7 @@ export function StudioClient() {
         } else if (engineTypeRef.current === 'subtractive') {
           engineRef.current?.allNotesOff(0.05)
         }
+        arpeggiator.stopAll()
         setActiveNotes(new Set())
 
         // Создаём FM-движок при первом переключении
@@ -297,7 +402,7 @@ export function StudioClient() {
         setEngineType(type)
       }
     },
-    [started],
+    [started, arpeggiator]
   )
 
   const handleEngineChange = useCallback(
@@ -308,7 +413,7 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes],
+    [activeNotes]
   )
 
   // FM-патч обновляется синхронно в воркслет при изменении любого параметра
@@ -549,44 +654,68 @@ export function StudioClient() {
 
         {/* Панели параметров — переключаемые по движку */}
         <MentorFocusZone active={mentor.focusSection === 'engine'} p={1}>
-          {engineType === 'subtractive'
-            ? (
-              <Box display="flex" flexDir="column" gap={2}>
-                <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-                <PatchLibrary
-                  type="subtractive"
-                  currentPatch={patch}
-                  onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
-                />
-              </Box>
-            )
-            : engineType === 'drumkit'
-            ? (
-              <DrumkitColumn
-                drumPatch={drumPatch}
-                selectedPad={selectedPad}
-                onPadChange={handlePadChange}
-                onLoadDrumkit={handleLoadDrumkit}
-                padMidiLearn={padMidiLearn}
-                sequencer={sequencer}
+          {engineType === 'subtractive' ? (
+            <Box display="flex" flexDir="column" gap={2}>
+              <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+              <PatchLibrary
+                type="subtractive"
+                currentPatch={patch}
+                onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
               />
-            )
-            : (
-              <Box display="flex" flexDir="column" gap={2}>
-                <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
-                <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
-                <FmHardwareControls
-                  midiDevices={midiDevices}
-                  syxImportStatus={syxImportStatus}
-                  sendStatus={sendStatus}
-                  readStatus={readStatus}
-                  onDownloadSyx={handleDownloadSyx}
-                  onImportSyxFile={(file) => void handleImportSyxFile(file)}
-                  onSendToHardware={handleSendToHardware}
-                  onRequestFromHardware={handleRequestFromHardware}
-                />
-              </Box>
-            )}
+              <ArpPanel params={currentArp} onChange={setArp} onToggleEnabled={handleToggleArp} />
+              <PianoRollPanel
+                notes={subPianoRoll.sequence.notes}
+                steps={subPianoRoll.sequence.steps}
+                currentStep={subPianoRoll.currentStep}
+                isPlaying={subPianoRoll.isPlaying}
+                bpm={subPianoRoll.sequence.bpm}
+                swing={subPianoRoll.sequence.swing}
+                onToggleCell={subPianoRoll.toggleCell}
+                onToggle={subPianoRoll.toggle}
+                onBpmChange={subPianoRoll.setBpm}
+                onSwingChange={subPianoRoll.setSwing}
+                onClear={subPianoRoll.clear}
+              />
+            </Box>
+          ) : engineType === 'drumkit' ? (
+            <DrumkitColumn
+              drumPatch={drumPatch}
+              selectedPad={selectedPad}
+              onPadChange={handlePadChange}
+              onLoadDrumkit={handleLoadDrumkit}
+              padMidiLearn={padMidiLearn}
+              sequencer={sequencer}
+            />
+          ) : (
+            <Box display="flex" flexDir="column" gap={2}>
+              <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+              <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
+              <FmHardwareControls
+                midiDevices={midiDevices}
+                syxImportStatus={syxImportStatus}
+                sendStatus={sendStatus}
+                readStatus={readStatus}
+                onDownloadSyx={handleDownloadSyx}
+                onImportSyxFile={(file) => void handleImportSyxFile(file)}
+                onSendToHardware={handleSendToHardware}
+                onRequestFromHardware={handleRequestFromHardware}
+              />
+              <ArpPanel params={currentArp} onChange={setArp} onToggleEnabled={handleToggleArp} />
+              <PianoRollPanel
+                notes={fmPianoRoll.sequence.notes}
+                steps={fmPianoRoll.sequence.steps}
+                currentStep={fmPianoRoll.currentStep}
+                isPlaying={fmPianoRoll.isPlaying}
+                bpm={fmPianoRoll.sequence.bpm}
+                swing={fmPianoRoll.sequence.swing}
+                onToggleCell={fmPianoRoll.toggleCell}
+                onToggle={fmPianoRoll.toggle}
+                onBpmChange={fmPianoRoll.setBpm}
+                onSwingChange={fmPianoRoll.setSwing}
+                onClear={fmPianoRoll.clear}
+              />
+            </Box>
+          )}
         </MentorFocusZone>
 
         <MentorFocusZone active={mentor.focusSection === 'midi'} p={1} display="flex" flexDir="column" gap={4}>
@@ -599,10 +728,8 @@ export function StudioClient() {
             error={midiError}
           />
 
-          {
-            /* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
-              SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */
-          }
+          {/* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
+              SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */}
           {midiDevices.length > 0 && (
             <MidiMonitor
               open={midiMonitorOpen}
@@ -643,23 +770,23 @@ export function StudioClient() {
           justifyContent="center"
           overflow="auto"
         >
-          {engineType === 'drumkit'
-            ? (
-              <DrumPads
-                pads={drumPatch.engine.pads}
-                selectedIndex={selectedPad}
-                activePads={activePads}
-                onSelect={setSelectedPad}
-                onHit={handlePadHit}
-                midiLearn={{
-                  active: padMidiLearn.active,
-                  armedPad: padMidiLearn.armedPad,
-                  map: padMidiLearn.map,
-                  onArm: padMidiLearn.armPad,
-                }}
-              />
-            )
-            : <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />}
+          {engineType === 'drumkit' ? (
+            <DrumPads
+              pads={drumPatch.engine.pads}
+              selectedIndex={selectedPad}
+              activePads={activePads}
+              onSelect={setSelectedPad}
+              onHit={handlePadHit}
+              midiLearn={{
+                active: padMidiLearn.active,
+                armedPad: padMidiLearn.armedPad,
+                map: padMidiLearn.map,
+                onArm: padMidiLearn.armPad,
+              }}
+            />
+          ) : (
+            <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
+          )}
         </MentorFocusZone>
       </Box>
 
