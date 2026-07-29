@@ -342,7 +342,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.12",
+      "version": "0.55.16",
       "dependencies": {
         "cheerio": "^1.2.0",
       },
@@ -582,7 +582,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.14.0",
+      "version": "0.17.0",
       "dependencies": {
         "@react-pdf/renderer": "^4.5.1",
       },
@@ -613,7 +613,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.21.0",
+      "version": "0.22.1",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.30.0",
       },
@@ -932,7 +932,7 @@
     },
     "libs/studio-time-mcp": {
       "name": "@letar/studio-time-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.29.0",
