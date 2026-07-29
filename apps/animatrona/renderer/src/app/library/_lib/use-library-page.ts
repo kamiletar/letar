@@ -7,6 +7,7 @@
  * v0.28.9: Переход на клиентский поиск Fuse.js через useSearchIds
  */
 
+import { useLocalStorage } from '@letar/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -78,22 +79,15 @@ export function useLibraryPage() {
   }, [])
 
   // ===== Режим отображения =====
-  const [viewMode, setViewMode] = useState<ViewMode>('individual')
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>(VIEW_MODE_STORAGE_KEY, 'individual')
 
-  // Восстановление режима из localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY) as ViewMode | null
-    if (saved === 'individual' || saved === 'franchise') {
-      setViewMode(saved)
-    }
-  }, [])
-
-  // Сохранение режима в localStorage
-  const handleViewModeChange = useCallback((details: { value: string | null }) => {
-    const mode = (details.value || 'individual') as ViewMode
-    setViewMode(mode)
-    localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
-  }, [])
+  const handleViewModeChange = useCallback(
+    (details: { value: string | null }) => {
+      const mode = (details.value || 'individual') as ViewMode
+      setViewMode(mode)
+    },
+    [setViewMode]
+  )
 
   // ===== URL sync для фильтров =====
   const { params: urlParams, setParam, setParams, resetParams } = useFilterParams()
@@ -413,8 +407,11 @@ export function useLibraryPage() {
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
   }, [])
@@ -431,7 +428,9 @@ export function useLibraryPage() {
   const handleBatchWatchStatus = useCallback(
     async (newStatus: WatchStatus) => {
       const ids = Array.from(selectedIds)
-      if (!ids.length) return
+      if (!ids.length) {
+        return
+      }
       setIsBatchUpdating(true)
       try {
         await window.electronAPI?.tracker.batchUpdateWatchStatus({ animeIds: ids, watchStatus: newStatus })
@@ -456,7 +455,9 @@ export function useLibraryPage() {
 
   const handleBatchUnpin = useCallback(async () => {
     const ids = Array.from(selectedIds)
-    if (!ids.length) return
+    if (!ids.length) {
+      return
+    }
     setIsBatchUpdating(true)
     setBatchProgress({ current: 0, total: ids.length, animeName: '' })
     const unsub = window.electronAPI?.tracker.onBatchUnpinProgress((p) => setBatchProgress(p))

@@ -9,7 +9,8 @@
     "name": "animatrona",
     "implicitDependencies": [
       "@letar/query-provider",
-      "@letar/electron-storage"
+      "@letar/electron-storage",
+      "@letar/hooks"
     ]
   },
   "scripts": {

@@ -24,7 +24,8 @@
       "@letar/video-player-react": ["../../../libs/video-player-react/src/index.ts"],
       "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
       "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"],
-      "@letar/animatrona-ui": ["../../../libs/animatrona-ui/src/index.ts"]
+      "@letar/animatrona-ui": ["../../../libs/animatrona-ui/src/index.ts"],
+      "@letar/hooks": ["../../../libs/hooks/src/index.ts"]
     },
     "plugins": [
       {
@@ -72,6 +73,9 @@
     },
     {
       "path": "../../../libs/forms"
+    },
+    {
+      "path": "../../../libs/hooks"
     }
   ]
 }

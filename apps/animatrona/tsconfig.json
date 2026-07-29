@@ -26,7 +26,8 @@
       "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
-      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
+      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"],
+      "@letar/hooks": ["../../libs/hooks/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -78,6 +79,9 @@
     },
     {
       "path": "../../libs/electron-storage"
+    },
+    {
+      "path": "../../libs/hooks"
     }
   ]
 }

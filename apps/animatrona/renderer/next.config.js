@@ -59,6 +59,7 @@ const nextConfig = {
     '@letar/animatrona-types',
     '@letar/animatrona-utils',
     '@letar/animatrona-ui',
+    '@letar/hooks',
     // Принудительно бандлим вместо экстернализации — иначе turbopack создаёт внешние модули
     // с битыми ESM зависимостями (node-fetch → fetch-blob)
     '@libsql/client',

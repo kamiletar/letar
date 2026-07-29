@@ -773,10 +773,10 @@ export function AnimeFilters({
 }
 
 // Re-exports
+export { useDebounce } from '@letar/hooks'
 export { ActiveFilters, type ActiveFilter } from './ActiveFilters'
 export { FilterChip } from './FilterChip'
 export { FiltersSkeleton } from './FiltersSkeleton'
-export { useDebounce } from './hooks/useDebounce'
 export { useFilterParams, type FilterParams } from './hooks/useFilterParams'
 export { MobileFilterDrawer } from './MobileFilterDrawer'
 export { QualityFilterGroup } from './QualityFilterGroup'
