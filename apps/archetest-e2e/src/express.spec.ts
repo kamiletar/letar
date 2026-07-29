@@ -5,14 +5,26 @@ import { expect, test } from '@playwright/test'
  * Гостевой режим: без авторизации и БД, результат живёт в localStorage.
  */
 
-/** Принимает информированное согласие (5.6.3) и стартует экспресс. */
+/**
+ * Принимает информированное согласие (5.6.3) и стартует экспресс.
+ *
+ * Ретрай клика — гонка гидратации в WebKit/Firefox headless, не косметика. Подробности —
+ * JSDoc `acceptConsentAndStart` в `mood-check-in.spec.ts` (тот же паттерн, найдено
+ * 2026-07-29 на этом же чекбоксе).
+ */
 async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   const startButton = page.getByRole('button', { name: 'Начать экспресс' })
   // Согласие не предотмечено → кнопка старта заблокирована
   await expect(startButton).toBeDisabled()
   // Кликаем именно контрол чекбокса (в лейбле есть ссылка на /privacy — по ней не попадаем)
-  await page.locator('[data-part="control"]').first().click()
-  await expect(startButton).toBeEnabled()
+  const consentCheckbox = page.locator('[data-part="control"]').first()
+  await consentCheckbox.click()
+  try {
+    await expect(startButton).toBeEnabled({ timeout: 2_000 })
+  } catch {
+    await consentCheckbox.click()
+    await expect(startButton).toBeEnabled({ timeout: 5_000 })
+  }
   await startButton.click()
 }
 
@@ -49,9 +61,13 @@ test.describe('Express Scan', () => {
 
     await answerAllQuestions(page)
 
-    // RESULTS: заголовок гексаграммы, CTA на полный тест
+    // RESULTS: заголовок гексаграммы, CTA на полный тест. Два независимых линка с этим
+    // текстом на странице — основной CTA (express-results.tsx) и в ScaleTeaser внизу
+    // (тизер оставшихся шкал) — оба ведут на "/", это осознанный дубль, не баг; .first()
+    // проверяет основной (найдено 2026-07-29 — strict mode violation после того, как
+    // остальные шаги флоу перестали падать раньше этого места).
     await expect(page.getByRole('heading', { name: 'Ваша гексаграмма' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Открыть полный тест' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Открыть полный тест' }).first()).toBeVisible()
     // QR-код (SVG от qrcode.react) присутствует
     await expect(page.locator('svg').first()).toBeVisible()
 

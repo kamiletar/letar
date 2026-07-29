@@ -25,9 +25,18 @@ test.describe('Kiosk-режим /express', () => {
     const resetButton = page.getByRole('button', { name: 'Новый посетитель' })
     await expect(resetButton).toBeVisible()
 
-    // Посетитель даёт согласие — оно записывается в localStorage
-    await page.locator('[data-part="control"]').first().click()
-    await expect(page.getByRole('button', { name: 'Начать экспресс' })).toBeEnabled()
+    // Посетитель даёт согласие — оно записывается в localStorage. Ретрай клика — гонка
+    // гидратации в WebKit/Firefox headless, не косметика (подробности — JSDoc
+    // acceptConsentAndStart в mood-check-in.spec.ts, тот же чекбокс, найдено 2026-07-29).
+    const startButton = page.getByRole('button', { name: 'Начать экспресс' })
+    const consentCheckbox = page.locator('[data-part="control"]').first()
+    await consentCheckbox.click()
+    try {
+      await expect(startButton).toBeEnabled({ timeout: 2_000 })
+    } catch {
+      await consentCheckbox.click()
+      await expect(startButton).toBeEnabled({ timeout: 5_000 })
+    }
     const consentBefore = await page.evaluate(() => localStorage.getItem('quiz_disclaimer_accepted'))
     expect(consentBefore).toBeTruthy()
 

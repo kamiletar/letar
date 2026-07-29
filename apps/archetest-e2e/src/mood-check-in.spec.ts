@@ -7,12 +7,33 @@ import { expect, test } from '@playwright/test'
  * sessionStorage), так что авторизация для проверки самого экрана не нужна.
  */
 
-/** Принимает информированное согласие (5.6.3) и стартует полный квиз. */
+/**
+ * Принимает информированное согласие (5.6.3) и стартует полный квиз.
+ *
+ * Ретрай клика по чекбоксу — не косметика: гонка гидратации в WebKit/Firefox headless
+ * (найдено 2026-07-29, воспроизведено ~на каждом втором-третьем прогоне на реальном
+ * production-билде). `Checkbox.Root` — controlled-компонент (`checked={accepted}`), и если
+ * клик по нативному `<input>` физически происходит ДО того, как React навесил свой
+ * `onCheckedChange` (хендлер прикрепляется во время гидратации), клик просто теряется:
+ * браузер визуально/нативно переключает `checked`, но контролируемый компонент при
+ * следующем рендере откатывает его назад к своему (устаревшему `false`) React-состоянию,
+ * т.к. `onChange`/`onCheckedChange` никогда не сработал. Симптом ровно такой: клик проходит
+ * без ошибки actionability, `disabled`-кнопка остаётся `disabled` все 5с таймаута.
+ * Chromium гидратируется достаточно быстро, чтобы окно гонки почти всегда было уже закрыто
+ * к моменту клика; WebKit/Firefox под headless — не всегда. Повторный клик почти всегда
+ * успешен, т.к. к этому моменту гидратация уже гарантированно завершена.
+ */
 async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   const startButton = page.getByRole('button', { name: 'Начать тест' })
   await expect(startButton).toBeDisabled()
-  await page.locator('[data-part="control"]').first().click()
-  await expect(startButton).toBeEnabled()
+  const consentCheckbox = page.locator('[data-part="control"]').first()
+  await consentCheckbox.click()
+  try {
+    await expect(startButton).toBeEnabled({ timeout: 2_000 })
+  } catch {
+    await consentCheckbox.click()
+    await expect(startButton).toBeEnabled({ timeout: 5_000 })
+  }
   await startButton.click()
 }
 
