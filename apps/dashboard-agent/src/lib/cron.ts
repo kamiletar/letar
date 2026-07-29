@@ -168,6 +168,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'studio-biweekly-hourly-invoices',
+    name: 'Biweekly Hourly Invoices (studio)',
+    app: 'studio',
+    endpoint: '/api/cron/biweekly-hourly-invoices',
+    schedule: '0 9 1,16 * *',
+    description:
+      'Автовыставление накопленных утверждённых часов по HOURLY-проектам, периоды 1–15 и 16–конец месяца (Фаза 11 блок E, §11.15)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'maddy-backup-freshness-check',
     name: 'Maddy Backup Freshness Check',
     app: 'dashboard-agent',
