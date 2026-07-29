@@ -113,5 +113,33 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff }: UsePian
     setSequence((prev) => ({ ...prev, notes: [] }))
   }, [setSequence])
 
-  return { sequence: current, isPlaying, currentStep, toggle, setBpm, setSwing, toggleCell, clear }
+  // Вставляет несколько нот одним блоком (аккорд от помощника по гармонии) на заданный шаг —
+  // сначала вычищает всё перекрывающееся в этом диапазоне шагов (любая высота), чтобы блоки
+  // не наслаивались мусором от предыдущих кликов.
+  const insertChord = useCallback(
+    (notes: number[], step: number, length: number) => {
+      setSequence((prev) => {
+        const filtered = prev.notes.filter((n) => !(step < n.step + n.length && n.step < step + length))
+        const added = notes.map((note) => ({ note, step, length, velocity: 0.8 }))
+        return { ...prev, notes: [...filtered, ...added] }
+      })
+    },
+    [setSequence]
+  )
+
+  return {
+    sequence: current,
+    isPlaying,
+    currentStep,
+    toggle,
+    setBpm,
+    setSwing,
+    toggleCell,
+    clear,
+    insertChord,
+    // Прямой доступ к звучанию ноты — нужен помощнику по гармонии для мгновенного аудирования
+    // аккорда/лада по клику, в обход самого секвенсора.
+    noteOn,
+    noteOff,
+  }
 }

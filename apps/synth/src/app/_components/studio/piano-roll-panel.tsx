@@ -20,6 +20,8 @@ interface PianoRollPanelProps {
   isPlaying: boolean
   bpm: number
   swing: number
+  /** Классы высоты (0-11) текущего лада от помощника по гармонии — подсвечивает подходящие строки. */
+  scalePitchClasses?: Set<number>
   onToggleCell: (note: number, step: number) => void
   onToggle: () => void
   onBpmChange: (bpm: number) => void
@@ -41,15 +43,17 @@ function cellStyle(
   filled: boolean,
   isPlayhead: boolean,
   isBlackRow: boolean,
-  groupStart: boolean
+  groupStart: boolean,
+  inScale: boolean
 ): React.CSSProperties {
+  const emptyBg = isBlackRow ? '#140F0A' : '#1C140C'
   return {
     width: '14px',
     height: '9px',
     minWidth: '14px',
     padding: 0,
     marginLeft: groupStart ? '3px' : 0,
-    background: filled ? '#D4AF37' : isBlackRow ? '#140F0A' : '#1C140C',
+    background: filled ? '#D4AF37' : inScale ? (isBlackRow ? '#241a08' : '#2c2008') : emptyBg,
     border: isPlayhead ? '1px solid #4FA8FF' : `1px solid ${filled ? '#D4AF37' : '#2A2018'}`,
     boxShadow: isPlayhead ? '0 0 4px #4FA8FF88' : 'none',
     cursor: 'pointer',
@@ -65,6 +69,7 @@ export function PianoRollPanel({
   isPlaying,
   bpm,
   swing,
+  scalePitchClasses,
   onToggleCell,
   onToggle,
   onBpmChange,
@@ -118,25 +123,29 @@ export function PianoRollPanel({
       </Box>
 
       <Box display="flex" flexDir="column" gap="1px" maxH="220px" overflowY="auto">
-        {ROWS.map((note) => (
-          <Box key={note} display="flex">
-            {Array.from({ length: steps }, (_, step) => {
-              const cell = cellAt(note, step)
-              return (
-                <button
-                  key={step}
-                  style={cellStyle(
-                    cell !== undefined,
-                    isPlaying && currentStep === step,
-                    isBlackKey(note),
-                    step % 4 === 0
-                  )}
-                  onClick={() => onToggleCell(note, step)}
-                />
-              )
-            })}
-          </Box>
-        ))}
+        {ROWS.map((note) => {
+          const inScale = scalePitchClasses?.has(((note % 12) + 12) % 12) ?? false
+          return (
+            <Box key={note} display="flex">
+              {Array.from({ length: steps }, (_, step) => {
+                const cell = cellAt(note, step)
+                return (
+                  <button
+                    key={step}
+                    style={cellStyle(
+                      cell !== undefined,
+                      isPlaying && currentStep === step,
+                      isBlackKey(note),
+                      step % 4 === 0,
+                      inScale
+                    )}
+                    onClick={() => onToggleCell(note, step)}
+                  />
+                )
+              })}
+            </Box>
+          )
+        })}
       </Box>
     </Box>
   )
