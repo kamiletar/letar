@@ -144,6 +144,35 @@ function calcStats(values: number[]): HistoryStats {
 }
 
 /**
+ * Делит точки на maxBuckets равных по времени бакетов и усредняет cpu/memory/disk
+ * внутри каждого. Timestamp бакета — timestamp последней точки в нём (для консистентности
+ * со временем на графике — «конец интервала», а не середина).
+ */
+function aggregateIntoBuckets(points: MetricPoint[], maxBuckets: number): MetricPoint[] {
+  const step = points.length / maxBuckets
+  const buckets: MetricPoint[] = []
+
+  for (let i = 0; i < maxBuckets; i++) {
+    const start = Math.floor(i * step)
+    const end = i === maxBuckets - 1 ? points.length : Math.floor((i + 1) * step)
+    const bucket = points.slice(start, end)
+    if (bucket.length === 0) {
+      continue
+    }
+
+    const last = bucket[bucket.length - 1]
+    buckets.push({
+      timestamp: last.timestamp,
+      cpu: bucket.reduce((sum, p) => sum + p.cpu, 0) / bucket.length,
+      memory: bucket.reduce((sum, p) => sum + p.memory, 0) / bucket.length,
+      disk: bucket.reduce((sum, p) => sum + p.disk, 0) / bucket.length,
+    })
+  }
+
+  return buckets
+}
+
+/**
  * Возвращает историю метрик за указанный период
  * @param hours — период в часах (1, 6, 24, 168, 720)
  */
@@ -151,13 +180,11 @@ export function getHistory(hours: number): HistoryData {
   const cutoff = Date.now() - hours * 60 * 60 * 1000
   const filtered = history.filter((p) => p.timestamp >= cutoff)
 
-  // Subsampling: максимум 500 точек в ответе для экономии трафика
+  // Агрегация по бакетам: максимум 500 точек в ответе для экономии трафика.
+  // Усреднение внутри бакета вместо взятия каждой N-й точки — иначе пики между
+  // выбранными точками (например кратковременный скачок CPU) пропадают из ответа.
   const MAX_RESPONSE_POINTS = 500
-  let points = filtered
-  if (points.length > MAX_RESPONSE_POINTS) {
-    const step = Math.ceil(points.length / MAX_RESPONSE_POINTS)
-    points = points.filter((_, i) => i % step === 0)
-  }
+  const points = filtered.length > MAX_RESPONSE_POINTS ? aggregateIntoBuckets(filtered, MAX_RESPONSE_POINTS) : filtered
 
   const cpuValues = points.map((p) => p.cpu)
   const memValues = points.map((p) => p.memory)
@@ -169,14 +196,13 @@ export function getHistory(hours: number): HistoryData {
     tier,
     hours,
     pointsCount: points.length,
-    stats:
-      points.length > 0
-        ? {
-            cpu: calcStats(cpuValues),
-            memory: calcStats(memValues),
-            disk: calcStats(diskValues),
-          }
-        : null,
+    stats: points.length > 0
+      ? {
+        cpu: calcStats(cpuValues),
+        memory: calcStats(memValues),
+        disk: calcStats(diskValues),
+      }
+      : null,
     data: {
       cpu: points.map((p) => ({ time: formatTime(p.timestamp), value: p.cpu, timestamp: p.timestamp })),
       memory: points.map((p) => ({ time: formatTime(p.timestamp), value: p.memory, timestamp: p.timestamp })),
