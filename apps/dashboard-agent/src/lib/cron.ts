@@ -157,6 +157,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'studio-check-budget-alerts',
+    name: 'Check Budget Alerts (studio)',
+    app: 'studio',
+    endpoint: '/api/cron/check-budget-alerts',
+    schedule: '*/30 * * * *',
+    description:
+      'Алерты 75/90/100% по потолку часов HOURLY-проектов, письмо владельцу и (по договорённости) клиенту (Фаза 11 блок D)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'maddy-backup-freshness-check',
     name: 'Maddy Backup Freshness Check',
     app: 'dashboard-agent',
@@ -218,13 +229,13 @@ function loadAllCronJobs(): CronJob[] {
   const updatedJobs = existingJobs.map((existing) => {
     const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
     if (
-      defaultJob
-      && (defaultJob.app !== existing.app
-        || defaultJob.endpoint !== existing.endpoint
-        || defaultJob.server !== existing.server)
+      defaultJob &&
+      (defaultJob.app !== existing.app ||
+        defaultJob.endpoint !== existing.endpoint ||
+        defaultJob.server !== existing.server)
     ) {
       console.warn(
-        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
+        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`
       )
       hasChanges = true
       return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }
