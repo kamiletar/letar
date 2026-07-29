@@ -4,18 +4,15 @@
 
 ## Серверная архитектура
 
-⚠️ **Таблица ниже устарела** (s1 выведен из эксплуатации, актуальный список приложений по
-серверам — [deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов)).
-Оставлена как есть до отдельного аудита всех proxy hosts; секция **NPM на s3** ниже — актуальна
-(добавлена 2026-07-11).
+**s1 выведен из эксплуатации** (2026-06-20) — все production-приложения теперь на s2. Актуальный
+список приложений по серверам — [deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов).
 
-| Сервер            | Приложения                                       | NPM               | Примечания        |
-| ----------------- | ------------------------------------------------ | ----------------- | ----------------- |
-| **s1.letar.best** | mandala, kami, pravda, animatrona-landing, umami | npm.s1.letar.best | + dashboard-agent |
-| **s2.letar.best** | driving-school, dashboard                        | npm.s2.letar.best | Dashboard здесь   |
-| **s3.letar.best** | staging-домены приложений + e2e-раннер           | (без поддомена)   | См. раздел ниже   |
+| Сервер            | Приложения                                      | NPM               | Примечания                     |
+| ----------------- | ----------------------------------------------- | ----------------- | ------------------------------ |
+| **s2.letar.best** | все production-приложения (см. deploy-agent.md) | npm.s2.letar.best | Единственный prod-сервер       |
+| **s3.letar.best** | staging-домены приложений + e2e-раннер          | (без поддомена)   | Не production, см. раздел ниже |
 
-**Docker сеть:** `kami-network` (s1/s2). На s3 у NPM собственная сеть `npm_default` —
+**Docker сеть:** `kami-network` (s2). На s3 у NPM собственная сеть `npm_default` —
 staging-приложения форвардятся через **хост-гейтвей** (`172.17.0.1:<хостовый-порт>`), не через
 `docker network connect` (NPM и staging-compose живут в разных Docker-сетях, разные жизненные
 циклы — `docker network connect` пережил бы `compose down` staging-приложения расхождением).
@@ -38,29 +35,32 @@ docker compose up -d
 
 ## Proxy Hosts по серверам
 
-### NPM на s1 (npm.s1.letar.best)
+⚠️ Таблица покрывает часть доменов, известную на момент последнего аудита — при добавлении
+proxy host сюда его тоже нужно дописать вручную, автосинхронизации с NPM нет.
 
-| Домен                            | Forward Host           | Port | SSL | Примечания          |
-| -------------------------------- | ---------------------- | ---- | --- | ------------------- |
-| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша |
-| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                 |
-| pravda.letar.best                | pravda-app             | 3007 | LE  | —                   |
-| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page        |
-| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami     |
-| npm.s1.letar.best                | localhost              | 81   | LE  | Админка NPM s1      |
-| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync        |
+### NPM на s2 (npm.s2.letar.best) — единственный production
 
-### NPM на s2 (npm.s2.letar.best)
+| Домен                            | Forward Host           | Port | SSL | Примечания           |
+| -------------------------------- | ---------------------- | ---- | --- | -------------------- |
+| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша  |
+| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                  |
+| pravda.letar.best                | pravda-app             | 3007 | LE  | —                    |
+| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page         |
+| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami      |
+| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync         |
+| направа.рф                       | driving-school-app     | 3003 | LE  | WebSocket (чат)      |
+| dash.letar.best                  | dashboard-app          | 3002 | LE  | SSE config           |
+| animatrona-tracker.letar.best    | animatrona-tracker-app | 3010 | LE  | Аниме трекер         |
+| anime.letar.best                 | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)     |
+| svoichuzhie.letar.best           | svoichuzhie-app        | 3021 | LE  | Staging (noindex)    |
+| gateway.letar.best               | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache |
+| npm.s2.letar.best                | localhost              | 81   | LE  | Админка NPM s2       |
 
-| Домен                         | Forward Host           | Port | SSL | Примечания           |
-| ----------------------------- | ---------------------- | ---- | --- | -------------------- |
-| направа.рф                    | driving-school-app     | 3003 | LE  | WebSocket (чат)      |
-| dash.letar.best               | dashboard-app          | 3002 | LE  | SSE config           |
-| animatrona-tracker.letar.best | animatrona-tracker-app | 3010 | LE  | Аниме трекер         |
-| anime.letar.best              | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)     |
-| svoichuzhie.letar.best        | svoichuzhie-app        | 3021 | LE  | Staging (noindex)    |
-| gateway.letar.best            | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache |
-| npm.s2.letar.best             | localhost              | 81   | LE  | Админка NPM s2       |
+Остальные production-приложения (auth-hub, archetest, grandslamcup, time, form-docs,
+form-example, aira-web, kami-key-the-landing, letar-landing, dsperevod, aboi и т.д.) тоже
+проксируются через NPM на s2 — актуальный список приложений сервера см.
+[deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов),
+их конкретные proxy hosts сюда ещё не сведены.
 
 ### NPM на s3 (обнаружен и задокументирован 2026-07-11 — БД `admin@letar.best`, см. `reference_npm_s3.md` в памяти агента)
 
@@ -80,8 +80,10 @@ staging-пилоте (§18 Сессия D). Публичные порты 80/81/
 | pravda-stage.s3.letar.best       | `172.17.0.1` | 3028 | LE  | Staging pravda (PLAN.md §18.7 Тираж M1), без БД/auth                         |
 | aira-web-stage.s3.letar.best     | `172.17.0.1` | 3029 | LE  | Staging aira-web (PLAN.md §18.7 Тираж M1), без БД/auth                       |
 
-⚠️ **NPM на s3 обновлён до 2.15.1** (README ниже ещё указывает устаревшую 2.13.6 — актуальную
-версию видно через `GET /api/` без авторизации). API создания сертификата в 2.15 изменился:
+⚠️ **NPM на s3 обновлён до 2.15.1** (актуальную версию видно через `GET /api/` без авторизации).
+`docker-compose.yml` для s2 также обновлён на тег `2.15.1` — применить на сервере ещё
+предстоит через `docker compose pull && docker compose up -d` (см. раздел ниже). API создания
+сертификата в 2.15 изменился:
 поле `meta` в `POST /api/nginx/certificates` теперь принимает **пустой объект** `{}` —
 `letsencrypt_email`/`letsencrypt_agree`/`dns_challenge` в payload вызывают
 `data/meta must NOT have additional properties`. Email/agree теперь настраиваются на уровне
@@ -180,12 +182,14 @@ add_header X-Cache-Status $upstream_cache_status always;
 
 ## Dashboard Agent
 
-Dashboard Agent — сервис для мониторинга удалённых серверов. Устанавливается на s1.letar.best для сбора метрик.
+Dashboard Agent — сервис для мониторинга и self-deploy на s2 (единственный production-сервер).
+Плюс staging-инстанс на s3 (`docker-compose.s3.yml`, loopback `127.0.0.1:13103:3100`, отдельный
+`AGENT_TOKEN_S3`) — для e2e-раннера, не публикуется в интернет. Подробности деплоя и токенов —
+[deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов).
 
-### Развёртывание
+### Развёртывание (первичная настройка нового сервера)
 
 ```bash
-# На s1.letar.best
 cd /home/deploy/letar
 
 # Собрать image
@@ -221,11 +225,11 @@ curl http://localhost:3100/health
 
 ### Регистрация в Dashboard
 
-В Dashboard на s2 (https://dash.letar.best) добавить сервер через UI `/servers`:
+В Dashboard (https://dash.letar.best) добавить сервер через UI `/servers`:
 
-- Name: `s1`
-- Display Name: `Основной сервер (s1)`
-- Host: `s1.letar.best`
+- Name: `s2`
+- Display Name: `Production (s2)`
+- Host: `s2.letar.best`
 - Port: `3100`
 - Agent Token: `<TOKEN_ИЗ_ШАГА_ВЫШЕ>`
 
@@ -335,5 +339,5 @@ netstat -tlnp | grep -E ':(80|81|443)'
 
 ## Версии
 
-- NPM: 2.13.6
-- Конфигурация актуальна на: 2026-01-23
+- NPM: 2.15.1 ([релиз](https://github.com/NginxProxyManager/nginx-proxy-manager/releases/tag/v2.15.1))
+- Конфигурация актуальна на: 2026-07-30
