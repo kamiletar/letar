@@ -2,6 +2,36 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.9.10 → 0.9.11 — единый APP_REGISTRY + история сетевого трафика (2026-07-30, dashboard-agent-dev)
+
+Взял в работу два пункта backlog из PLAN.md по выбору владельца.
+
+**Реестр приложений:** `lib/server-config.ts` и `lib/app-registry.ts` держали три параллельных
+`Record<string, ...>` (`SERVER_APPS`, `APP_PORTS`, `APP_HOSTS`) в двух файлах — добавление
+приложения требовало правки в нескольких местах и было источником рассинхрона (найдено
+LavenderSpring 2026-07-28 на примере `studio`). Слиты в один `APP_REGISTRY: Record<string,
+{server, port?, host?}>` в `server-config.ts`; `SERVER_APPS`/`APP_PORTS`/`APP_HOSTS` теперь
+производные экспорты (`Object.fromEntries` по записям реестра) — существующие импортёры
+(`cron.ts`, `database.ts`, `dashboard-alert.ts`) и оба guard-теста (`server-config.guard.spec.ts`,
+`app-registry.guard.spec.ts`, сверяющие с каноном `@letar/infra-config`) не потребовали изменений.
+Закрыта только локальная часть проблемы — канон `@letar/infra-config` (используется `dashboard`/
+`deploy-mcp`) по-прежнему хранит три раздельных экспорта, унификация канона вне файловой
+резервации `apps/dashboard-agent/**` этой сессии; `cron-jobs.json` (рантайм, не в git) тоже
+остаётся отдельным местом.
+
+**История сетевого трафика:** ревизия backlog-пункта «Мониторинг сетевого трафика» показала, что
+live-снимок (`getNetworkInfo()`, `GET /api/system/network`) уже существовал — не хватало именно
+исторического ряда, в отличие от cpu/memory/disk в `lib/history.ts`. Добавлены `networkRx`/
+`networkTx` (байт/сек, из `si.networkStats()`) в тот же ring-buffer (1 точка/мин, до 30 дней) —
+`GET /api/system/history` отдаёт их в `stats`/`data` наравне с остальными метриками. Аналогично
+ревизован пункт «Мониторинг логов контейнеров»: pull-доступ (`GET /api/docker/containers/:id/logs`)
+уже был реализован — реальный пробел (проактивное сканирование логов на ошибки + алерт, по
+аналогии с `lib/health-check.ts`) переформулирован в PLAN.md отдельным более узким пунктом, не
+реализовывался в этой сессии.
+
+Отображение сетевого графика в UI `dashboard` — отдельная задача вне scope (`apps/dashboard` не в
+файловой резервации).
+
 ## Версия 0.9.8 → 0.9.10 — self-deploy dashboard-agent больше не обрывает сам себя (2026-07-30, dashboard-agent-dev)
 
 Закрыт долгоживущий backlog-пункт «Self-deploy обрывает сам себя на recreate-шаге»
