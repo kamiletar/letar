@@ -1,5 +1,9 @@
 // MIDI-утилиты: ноты ↔ частоты, имена нот
 
+/** Диапазон виртуальной клавиатуры и пиано-ролла — 2 октавы от C2 (MIDI 36), хорошо для баса. */
+export const KEYBOARD_START_NOTE = 36
+export const KEYBOARD_OCTAVES = 2
+
 /** MIDI-нота → частота в Гц. A4 = 69 = 440 Hz. */
 export function midiToFreq(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12)

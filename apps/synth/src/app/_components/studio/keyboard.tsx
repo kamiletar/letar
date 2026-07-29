@@ -1,12 +1,11 @@
 'use client'
 
-import { isBlackKey, midiNoteName } from '@/lib/audio/midi'
+import { isBlackKey, KEYBOARD_OCTAVES, KEYBOARD_START_NOTE, midiNoteName } from '@/lib/audio/midi'
 import { Box } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef } from 'react'
 
-// 2 октавы начиная с C2 (MIDI 36) — хорошо для баса
-const START_NOTE = 36
-const NUM_OCTAVES = 2
+const START_NOTE = KEYBOARD_START_NOTE
+const NUM_OCTAVES = KEYBOARD_OCTAVES
 const TOTAL_KEYS = 12 * NUM_OCTAVES
 
 const WHITE_KEY_W = 34 // px

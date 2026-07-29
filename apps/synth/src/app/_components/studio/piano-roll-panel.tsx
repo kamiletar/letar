@@ -1,13 +1,13 @@
 'use client'
 
-import { isBlackKey } from '@/lib/audio/midi'
+import { isBlackKey, KEYBOARD_OCTAVES, KEYBOARD_START_NOTE } from '@/lib/audio/midi'
 import type { MelodicNote } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
 import { outlineButtonStyle } from './button-style'
 
-// Тот же диапазон, что у виртуальной клавиатуры (Keyboard) — 2 октавы от C2 (MIDI 36).
-const START_NOTE = 36
-const NUM_OCTAVES = 2
+// Тот же диапазон, что у виртуальной клавиатуры (Keyboard)
+const START_NOTE = KEYBOARD_START_NOTE
+const NUM_OCTAVES = KEYBOARD_OCTAVES
 // Сверху вниз — высокие ноты вверху, как на нотном стане, но без подписей нот («цвет вместо нот»,
 // см. PLAN.md — глаз ориентируется по светлым/тёмным полосам чёрных/белых клавиш, как на самой
 // клавиатуре под этой панелью, а не по текстовым именам).
