@@ -307,6 +307,31 @@ model AuditLog {
   @@index([username])
 }
 
+/// Грубый счётчик просмотров по домену/дню — агрегат без ПДн (без IP/UA/cookie/идентификатора
+/// посетителя), заполняется парсингом access-логов Nginx Proxy Manager (lib/pageview-counter.ts).
+/// Дополняет Umami там, где cookie-consent gate не пропускает часть трафика (см. PLAN.md).
+model PageViewCount {
+  id     String @id @default(cuid())
+  /// YYYY-MM-DD (не DateTime — избегаем сдвига дня при чтении в другом TZ)
+  date   String
+  domain String
+  count  Int    @default(0)
+
+  @@unique([date, domain])
+  @@allow('all', auth() != null)
+  @@index([domain, date(sort: Desc)])
+}
+
+/// Байтовый offset последнего прочитанного access-лога NPM на домен — инкрементальный парсинг
+/// без повторного чтения всего файла и без хранения самих строк лога.
+model PageViewLogOffset {
+  domain     String   @id
+  byteOffset BigInt   @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@allow('all', auth() != null)
+}
+
 // ============================================================================
 // MULTI-SERVER SUPPORT
 // ============================================================================

@@ -1,5 +1,21 @@
 /** Общие типы и функции для аналитики Umami */
 
+export interface DomainPageViews {
+  domain: string
+  today: number
+  last7Days: number
+}
+
+/** Загрузить грубый счётчик посещений (без ПДн) — дополнение к Umami, см. lib/pageview-counter.ts */
+export async function fetchPageViews(): Promise<DomainPageViews[]> {
+  const res = await fetch('/api/analytics/pageviews')
+  if (!res.ok) {
+    return []
+  }
+  const json = await res.json()
+  return json.data ?? []
+}
+
 export interface UmamiWebsite {
   id: string
   name: string

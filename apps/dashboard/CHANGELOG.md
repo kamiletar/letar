@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.21.0] — 2026-07-30
+
+### Feature: грубый счётчик посещаемости (hits/day/domain) без ПДн
+
+Дополняет Umami там, где cookie-consent gate не пропускает часть трафика (посетители, ушедшие до
+решения по баннеру, первый pageview у согласившихся). Новые модели `PageViewCount`/
+`PageViewLogOffset`, `src/lib/pageview-counter.ts` инкрементально парсит access-логи Nginx Proxy
+Manager через `nsenter` (без per-app middleware и без хранения IP/UA/строк лога — только число).
+Cron-задача `s2-pageview-count` в dashboard-agent каждые 10 минут, `GET /api/analytics/pageviews` +
+`PageViewsCard` на `/analytics`. Правовой разбор (152-ФЗ ст. 3) — почему обработке ПДн здесь взяться
+неоткуда — см. PLAN.md.
+
 ## [1.20.7] — 2026-07-30
 
 ### Fix: дедупликация `AlertType`/`AlertSeverity` в `api/alerts/route.ts`

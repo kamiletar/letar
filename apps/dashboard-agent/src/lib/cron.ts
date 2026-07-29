@@ -273,6 +273,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
     server: 's2',
   },
+  {
+    id: 's2-pageview-count',
+    name: 'Page View Counter (NPM access logs)',
+    app: 'dashboard',
+    endpoint: '/api/cron/pageview-count',
+    schedule: '*/10 * * * *',
+    description:
+      'Инкрементальный парсинг access-логов Nginx Proxy Manager в грубый счётчик hits/day/domain без ПДн — дополняет Umami там, где cookie-consent gate не пропускает часть трафика (см. lib/pageview-counter.ts в dashboard)',
+    enabled: true,
+    server: 's2',
+  },
 ]
 
 /**

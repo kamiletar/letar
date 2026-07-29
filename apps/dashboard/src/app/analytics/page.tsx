@@ -1,7 +1,8 @@
 'use client'
 
 import { AddSiteDialog } from '@/app/_components/analytics/AddSiteDialog'
-import { fetchEnvStatus, fetchSites } from '@/app/_components/analytics/api'
+import { fetchEnvStatus, fetchPageViews, fetchSites } from '@/app/_components/analytics/api'
+import { PageViewsCard } from '@/app/_components/analytics/PageViewsCard'
 import { SiteCard } from '@/app/_components/analytics/SiteCard'
 import { Box, Card, Heading, HStack, SimpleGrid, Spinner, Text } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
@@ -26,6 +27,12 @@ export default function AnalyticsPage() {
     staleTime: 60 * 1000,
   })
 
+  const { data: pageViews } = useQuery({
+    queryKey: ['analytics-pageviews'],
+    queryFn: fetchPageViews,
+    staleTime: 60 * 1000,
+  })
+
   if (error) {
     return (
       <Box p="8">
@@ -40,6 +47,8 @@ export default function AnalyticsPage() {
         <Heading>Аналитика</Heading>
         <AddSiteDialog />
       </HStack>
+
+      <PageViewsCard data={pageViews} />
 
       {isLoading ? (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="4">
