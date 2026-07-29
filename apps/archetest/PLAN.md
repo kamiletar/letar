@@ -122,44 +122,12 @@ svoichuzhie/driving-school/grandslamcup/studio/auth-hub/animatrona-tracker).
   svoichuzhie/driving-school и т.д. Без этого dev-session роут будет всегда отвечать 403.
   Просить BlackCove/владельца добавить по аналогии с остальными.
 
-**2. `express.spec.ts`/`mood-check-in.spec.ts` — cookie-consent баннер перехватывал клики
-по CTA.** Не только e2e-баг — **реальный прод-баг**: `CookieBanner` (`libs/ui`, `position:
-fixed; bottom:0; zIndex:1000`) и `StickyActionBar` (`libs/ui`, `position:sticky; bottom:0;
-zIndex:"docked"≈10`) физически накладываются друг на друга (оба анкерятся в bottom экрана,
-у баннера z-index на два порядка выше) — на express/mood-check-in первого визита ссылка
-`<a href="/privacy">` из баннера перехватывает pointer-events поверх кнопки «Начать
-экспресс»/«Пропустить», это баг для ЛЮБОГО первого посетителя archetest, не только e2e.
+**2. ✅ Закрыто 2026-07-29** — cookie-consent баннер перехватывал клики по CTA. Фикс
+(CSS-переменная высоты баннера, `getBoundingClientRect` вместо `ResizeObserver`) готов,
+подтверждён вживую, задокументирован в `.claude/docs/ui-components.md`. Детали — в
+`PLAN_COMPLETED.md`, сессия «2026-07-29 (продолжение)».
 
-Сделано в этой сессии (НЕ закоммичено, **⚠️ не подтверждено рабочим**):
-
-- `libs/ui/src/lib/cookie-banner.tsx` — добавлен `ResizeObserver` на корневой `Box`,
-  публикующий свою высоту в CSS-переменную `--letar-cookie-banner-height` на
-  `document.documentElement` (0px, если баннер скрыт).
-- `libs/ui/src/lib/sticky-action-bar.tsx` — `bottom="0"` заменён на
-  `bottom="var(--letar-cookie-banner-height, 0px)"`, чтобы панель приподнималась над
-  баннером, когда он показан.
-- lint/typecheck `@letar/ui` зелёные, но **живая проверка в Browser pane показала, что
-  `ResizeObserver.observe()` ни разу не вызывается** (патчил `ResizeObserver` глобально,
-  считал вызовы `observe()` — 0 после принудительного `setShown(true)` через кастомный
-  ивент `archetest:open-cookie-settings`). Похоже на реальный баг в эффекте (не просто
-  артефакт свёрнутой Browser pane — тот бы просто не вызвал КОЛЛБЭК, а тут не происходит
-  даже сам вызов `observe()`), но не диагностировано до конца — возможно проблема в
-  порядке эффектов/rootRef таймингах, либо в том, что повторный показ баннера через
-  `handleOpen()` идёт по другой ветке, не через начальный маунт. **Требует отладки с нуля
-  следующей сессией** — возможно, проще заменить `ResizeObserver` на фиксированную
-  константу высоты (баннер не resizable по контенту в разумных пределах) вместо
-  измерения, если отладка не даст быстрого результата.
-- Альтернатива, если CSS-var подход не заработает быстро: жёстко захардкодить
-  `StickyActionBar`'s `bottom` в `env(safe-area-inset-bottom)` + фиксированное значение
-  (например `~180px`, примерная высота баннера с 3 чекбоксами) — менее элегантно, но
-  надёжно и без ResizeObserver-магии. Или проще всего — дать `StickyActionBar` z-index
-  ВЫШЕ баннера (`banner`/`overlay` токен) и не пытаться их разносить пространственно —
-  тогда CTA всегда кликабелен, баннер визуально может слегка перекрываться под кнопкой,
-  но это менее красиво. Решение по подходу — на следующую сессию.
-
-**Ничего из пункта 2026-07-28 не закоммичено и не запушено** — рабочая копия содержит
-все перечисленные файлы в незафиксированном виде. Следующая сессия: дописать
-`safety-net.spec.ts`, доразобрать `ResizeObserver`-баг (или сменить подход), затем
+**Осталось из пункта 2026-07-28:** дописать `safety-net.spec.ts` (см. пункт 1 выше), затем
 `nx lint/typecheck:tsgo/test archetest archetest-e2e @letar/ui` → коммит → попросить
 BlackCove повторить `deploy_app(staging)` → `run_e2e` → `deploy_app(production)`.
 

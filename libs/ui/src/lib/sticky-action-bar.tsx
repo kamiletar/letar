@@ -43,7 +43,11 @@ export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(
     <Box
       ref={ref}
       position="sticky"
-      bottom="0"
+      // Приподнимается над CookieBanner (@letar/ui), если он сейчас показан — оба компонента
+      // bottom:0, без координации баннер (zIndex выше) перекрывает эту CTA по pointer-events
+      // (archetest, 2026-07-28: клики по «Начать экспресс»/«Пропустить» перехватывала ссылка
+      // из баннера). Переменная публикуется самим CookieBanner, 0px если он скрыт/не подключён.
+      bottom="var(--letar-cookie-banner-height, 0px)"
       insetInline="0"
       zIndex="docked"
       w="100%"

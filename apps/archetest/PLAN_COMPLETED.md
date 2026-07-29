@@ -1657,4 +1657,32 @@ archetest на s3 нужно дополнить `ALLOW_DEV_SESSION=true` + `DEV_
 
 ---
 
-**Последнее обновление:** 2026-07-28
+## Сессия 2026-07-29 (продолжение) — cookie-banner перехват CTA: закрыто, `@letar/ui` доработан
+
+**Root cause находки предыдущей сессии** (`observe()` ResizeObserver ни разу не
+вызывался): не баг эффекта React. Живой тест в Browser pane подтвердил — даже ручной
+`new ResizeObserver(cb).observe(el)` на реально видимом элементе с ненулевой высотой
+не сработал за 300мс, пока вкладка не композитит кадры (свёрнутый/неактивный пейн).
+`getBoundingClientRect()` на том же элементе в тех же условиях отработал корректно
+(форсирует layout синхронно, не зависит от композитинга).
+
+**Фикс:** `ResizeObserver` в `libs/ui/src/lib/cookie-banner.tsx` заменён на
+`useLayoutEffect` + синхронный `getBoundingClientRect()` + слушатель `window.resize`.
+Логика та же — публикация высоты баннера в CSS-переменную
+`--letar-cookie-banner-height`, которую читает `StickyActionBar`
+(`bottom="var(--letar-cookie-banner-height, 0px)"`).
+
+**Подтверждено вживую** (archetest dev-сервер, `/express`, очищенный `localStorage`):
+CSS-переменная выставляется в реальную высоту баннера (~143px), `document.
+elementFromPoint()` в точке кнопки «Начать экспресс» возвращает саму кнопку, а не
+перехватывающую ссылку баннера — CTA кликабельна, когда баннер согласия виден.
+
+`nx lint`/`nx typecheck:tsgo` для `@letar/ui` — зелёные (тестов у библиотеки нет).
+
+Задокументирован общий паттерн координации bottom-anchored компонентов (не только
+cookie-banner — актуально для будущего mobile bottom-nav и т.п.) в
+`.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов».
+
+---
+
+**Последнее обновление:** 2026-07-29

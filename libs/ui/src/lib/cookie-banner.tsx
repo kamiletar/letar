@@ -2,8 +2,17 @@
 
 import { Box, Button, Checkbox, Container, HStack, Stack, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { type CookieConsentState, createConsentConfig } from './consent-types'
+
+/**
+ * CSS-переменная с текущей высотой баннера (0, если он скрыт) — читает {@link StickyActionBar},
+ * чтобы приподняться над баннером, а не прятаться под ним. Оба компонента `position: fixed/sticky;
+ * bottom: 0` — без координации баннер (zIndex выше) визуально и по pointer-events перекрывает
+ * CTA-кнопку под собой (archetest, express/mood-check-in.spec.ts, 2026-07-28: клики по «Начать
+ * экспресс»/«Пропустить» перехватывала ссылка «Подробнее в политике ПДн» из баннера).
+ */
+const BANNER_HEIGHT_VAR = '--letar-cookie-banner-height'
 
 export interface CookieBannerProps {
   /** Ключ приложения для namespace событий/localStorage, напр. 'auth-hub' */
@@ -32,6 +41,31 @@ export function CookieBanner({
   const [shown, setShown] = useState(false)
   const [analytics, setAnalytics] = useState(false)
   const [marketing, setMarketing] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  // Публикует свою высоту в CSS-переменную, пока видим — StickyActionBar (тот же bottom:0)
+  // читает её, чтобы приподняться над баннером, а не спрятаться под ним по pointer-events.
+  // Синхронный getBoundingClientRect() + resize-листенер вместо ResizeObserver: колбэк
+  // ResizeObserver — часть рендер-пайплайна браузера и не срабатывает, пока вкладка не
+  // компоузит кадры (свёрнутая/неактивная), тогда как getBoundingClientRect форсирует layout
+  // синхронно и не зависит от этого состояния.
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    if (!shown || !rootRef.current) {
+      root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
+      return
+    }
+    const el = rootRef.current
+    function update() {
+      root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
+    }
+  }, [shown])
 
   useEffect(() => {
     try {
@@ -107,6 +141,7 @@ export function CookieBanner({
 
   return (
     <Box
+      ref={rootRef}
       position="fixed"
       bottom={0}
       left={0}

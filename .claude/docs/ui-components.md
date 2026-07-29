@@ -994,3 +994,58 @@ import { ImageMagnifier } from '@letar/ui'
 включает интерактив по `onLoad` изображения, обязан дополнительно свериться с `complete` —
 иначе баг проявится только у вернувшегося пользователя и не воспроизведётся при разработке
 с отключённым кэшем.
+
+## Координация bottom-anchored компонентов (`CookieBanner` + `StickyActionBar`)
+
+⚠️ **Любые два компонента, которые оба анкерятся в низ экрана (`position: fixed`/`sticky`,
+`bottom: 0`) — например будущий mobile bottom-nav рядом с `StickyActionBar` — физически
+накладываются друг на друга без явной координации.** Тот, у кого выше `zIndex`, перехватывает
+pointer-events поверх второго, даже если второй визуально "виден" под ним.
+
+**Прецедент (archetest, 2026-07-28):** `CookieBanner` (`libs/ui`, `position: fixed; bottom:
+0; zIndex: 1000`) и `StickyActionBar` (`libs/ui`, `position: sticky; bottom: 0; zIndex:
+"docked"`) — на первом визите (баннер согласия виден) невидимая ссылка `<a href="/privacy">`
+из баннера перехватывала клики по CTA-кнопке под ним. Баг для любого первого посетителя,
+не только в e2e.
+
+**Решение — `CookieBanner` публикует свою высоту в CSS-переменную**
+`--letar-cookie-banner-height` на `document.documentElement` (0px, если баннер скрыт),
+`StickyActionBar` читает её через `bottom="var(--letar-cookie-banner-height, 0px)"` и
+приподнимается над баннером, когда он показан. Если баннер не подключён в приложении —
+переменная не определена, `var(..., 0px)` откатывается на дефолт, поведение не меняется.
+
+⚠️ **Не используй `ResizeObserver` для измерения высоты** — его колбэк часть рендер-
+пайплайна браузера и **не срабатывает, пока вкладка/пейн не композитит кадры** (свёрнутая,
+неактивная, background tab throttling). Первая попытка фикса на `ResizeObserver` выглядела
+рабочей в коде, но не проверялась (0 срабатываний `observe()` даже при ручном вызове на
+реально видимом элементе в свёрнутом/неактивном браузерном окне). Вместо этого — синхронный `getBoundingClientRect()` в `useLayoutEffect` + слушатель
+`window.resize`: `getBoundingClientRect()` форсирует layout синхронно и не зависит от
+состояния композитинга.
+
+```tsx
+const rootRef = useRef<HTMLDivElement>(null)
+
+useLayoutEffect(() => {
+  const root = document.documentElement
+  if (!shown || !rootRef.current) {
+    root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
+    return
+  }
+  const el = rootRef.current
+  function update() {
+    root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
+  }
+  update()
+  window.addEventListener('resize', update)
+  return () => {
+    window.removeEventListener('resize', update)
+    root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
+  }
+}, [shown])
+```
+
+**Общий паттерн для будущих bottom-anchored компонентов:** нижний (менее приоритетный по
+вниманию пользователя) компонент публикует свою высоту в именованную CSS-переменную на
+`document.documentElement`, верхний (CTA) читает её через `var(--name, 0px)` в своём
+`bottom`. Не хардкодить высоту — контент баннеров/панелей меняется (перенос строк на узких
+экранах, локализация).
