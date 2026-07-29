@@ -20,6 +20,8 @@ export interface SyxImportResult {
   engine: FmEngineParams
   /** Сколько голосов было в файле — >1 значит это bulk-банк, импортирован только первый */
   voiceCount: number
+  /** Полный список голосов bulk-банка (для выбора в UI) — отсутствует для single-voice файла */
+  voices?: Array<{ name: string; engine: FmEngineParams }>
 }
 
 /** Разбирает загруженный `.syx`-файл — распознаёт как single-voice, так и 32-голосый bulk dump */
@@ -28,7 +30,7 @@ export async function readSyxFile(file: File): Promise<SyxImportResult> {
   if (buf[3] === 0x09) {
     const voices = decodeBulkDump(buf)
     const first = voices[0]
-    return { ...first, voiceCount: voices.length }
+    return { ...first, voiceCount: voices.length, voices }
   }
   const single = decodeSingleVoiceSysex(buf)
   return { ...single, voiceCount: 1 }

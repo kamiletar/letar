@@ -61,6 +61,7 @@ export function StudioClient() {
   const [sendStatus, setSendStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const [readStatus, setReadStatus] = useState<'idle' | 'requested' | 'received' | 'error'>('idle')
   const [syxImportStatus, setSyxImportStatus] = useState<'idle' | 'imported' | 'bulk-partial' | 'error'>('idle')
+  const [syxBulkVoices, setSyxBulkVoices] = useState<Array<{ name: string; engine: FmPatch['engine'] }> | null>(null)
   const [midiMonitorOpen, setMidiMonitorOpen] = useState(false)
 
   const engineRef = useRef<SubtractiveEngine | null>(null)
@@ -423,18 +424,36 @@ export function StudioClient() {
     downloadPatchSyx(fmPatchRef.current)
   }, [])
 
-  // Загружает `.syx`-файл с диска — распознаёт single-voice и 32-голосый bulk dump (импортирует первый голос)
+  // Загружает `.syx`-файл с диска — распознаёт single-voice и 32-голосый bulk dump. Bulk-банк сразу
+  // применяет первый голос (как раньше) и дополнительно открывает список всех 32 для выбора другого.
   const handleImportSyxFile = useCallback(async (file: File) => {
     try {
       const result = await readSyxFile(file)
       setFmPatch((p) => ({ ...p, name: result.name || p.name, engine: result.engine }))
       fmEngineRef.current?.updatePatch(result.engine)
+      setSyxBulkVoices(result.voices ?? null)
       setSyxImportStatus(result.voiceCount > 1 ? 'bulk-partial' : 'imported')
     } catch {
+      setSyxBulkVoices(null)
       setSyxImportStatus('error')
     }
     setTimeout(() => setSyxImportStatus('idle'), 3000)
   }, [])
+
+  // Выбор конкретного голоса из уже загруженного bulk-банка (список остаётся открытым — можно
+  // прощёлкать несколько голосов подряд, не перезагружая файл)
+  const handleSelectBulkVoice = useCallback((index: number) => {
+    setSyxBulkVoices((voices) => {
+      const chosen = voices?.[index]
+      if (chosen) {
+        setFmPatch((p) => ({ ...p, name: chosen.name || p.name, engine: chosen.engine }))
+        fmEngineRef.current?.updatePatch(chosen.engine)
+      }
+      return voices
+    })
+  }, [])
+
+  const handleDismissBulkVoices = useCallback(() => setSyxBulkVoices(null), [])
 
   const mentor = useStudioMentor({
     started,
@@ -688,6 +707,9 @@ export function StudioClient() {
               readStatus={readStatus}
               onDownloadSyx={handleDownloadSyx}
               onImportSyxFile={(file) => void handleImportSyxFile(file)}
+              bulkVoices={syxBulkVoices}
+              onSelectBulkVoice={handleSelectBulkVoice}
+              onDismissBulkVoices={handleDismissBulkVoices}
               onSendToHardware={handleSendToHardware}
               onRequestFromHardware={handleRequestFromHardware}
               currentArp={currentArp}

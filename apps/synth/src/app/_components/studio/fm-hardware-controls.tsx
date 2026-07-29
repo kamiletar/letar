@@ -22,6 +22,9 @@ interface FmHardwareControlsProps {
   readStatus: 'idle' | 'requested' | 'received' | 'error'
   onDownloadSyx: () => void
   onImportSyxFile: (file: File) => void
+  bulkVoices: Array<{ name: string }> | null
+  onSelectBulkVoice: (index: number) => void
+  onDismissBulkVoices: () => void
   onSendToHardware: () => void
   onRequestFromHardware: () => void
 }
@@ -34,6 +37,9 @@ export function FmHardwareControls({
   readStatus,
   onDownloadSyx,
   onImportSyxFile,
+  bulkVoices,
+  onSelectBulkVoice,
+  onDismissBulkVoices,
   onSendToHardware,
   onRequestFromHardware,
 }: FmHardwareControlsProps) {
@@ -85,6 +91,39 @@ export function FmHardwareControls({
           </Text>
         )}
       </Box>
+      {bulkVoices && (
+        <Box
+          display="flex"
+          flexDir="column"
+          gap={1}
+          mt={1}
+          p={2}
+          border="1px solid #5a3a10"
+          borderRadius="4px"
+          maxH="140px"
+          overflowY="auto"
+        >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Text fontSize="9px" color="fg.subtle" letterSpacing="0.04em">
+              {bulkVoices.length} голосов в банке — загружен первый, выбери другой:
+            </Text>
+            <button style={{ ...btnStyle, padding: '1px 6px' }} onClick={onDismissBulkVoices} title="Закрыть список">
+              ✕
+            </button>
+          </Box>
+          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={1}>
+            {bulkVoices.map((voice, i) => (
+              <button
+                key={`${i}-${voice.name}`}
+                style={{ ...btnStyle, textAlign: 'left', fontSize: '9px' }}
+                onClick={() => onSelectBulkVoice(i)}
+              >
+                {String(i + 1).padStart(2, '0')}. {voice.name || '(без имени)'}
+              </button>
+            ))}
+          </Box>
+        </Box>
+      )}
       {midiDevices.length > 0 && (
         <Box display="flex" alignItems="center" gap={2}>
           <button style={btnStyle} onClick={onSendToHardware}>

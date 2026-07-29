@@ -19,6 +19,9 @@ interface FmColumnProps {
   readStatus: 'idle' | 'requested' | 'received' | 'error'
   onDownloadSyx: () => void
   onImportSyxFile: (file: File) => void
+  bulkVoices: Array<{ name: string; engine: FmPatch['engine'] }> | null
+  onSelectBulkVoice: (index: number) => void
+  onDismissBulkVoices: () => void
   onSendToHardware: () => void
   onRequestFromHardware: () => void
   currentArp: ArpeggiatorParams
@@ -40,6 +43,9 @@ export function FmColumn({
   readStatus,
   onDownloadSyx,
   onImportSyxFile,
+  bulkVoices,
+  onSelectBulkVoice,
+  onDismissBulkVoices,
   onSendToHardware,
   onRequestFromHardware,
   currentArp,
@@ -58,6 +64,9 @@ export function FmColumn({
         readStatus={readStatus}
         onDownloadSyx={onDownloadSyx}
         onImportSyxFile={onImportSyxFile}
+        bulkVoices={bulkVoices}
+        onSelectBulkVoice={onSelectBulkVoice}
+        onDismissBulkVoices={onDismissBulkVoices}
         onSendToHardware={onSendToHardware}
         onRequestFromHardware={onRequestFromHardware}
       />
