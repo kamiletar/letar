@@ -440,7 +440,10 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         заново каждый кадр. `genreNames` вынесен в `useMemo` в `use-library-page.ts`; заодно
         стабилизировался `ipfsSizeBreakdown` (был новый объект на каждом пересчёте).
   - [x] Debounce на фильтрах/поиске — уже был: `useDebounce(searchInput, 250)` в `use-library-page.ts`
-  - [ ] Оптимизация изображений постеров — lazy load `loading="lazy"`, `decoding="async"`, правильный `sizes`
+  - [x] **Оптимизация изображений постеров** (v0.55.13) — `AnimeCard` (главная сетка) уже
+        использовал `next/image`. Добавлены `loading="lazy"` + `decoding="async"` к обычным Chakra
+        `Image` в невиртуализированных списках: `RelatedAnimeRow.tsx`, `FranchiseTimeline.tsx`,
+        `EpisodeCard.tsx`, `VideoSection.tsx`, `AnimeMetadataSection.tsx`.
 
   **Запросы к БД:**
   - [x] Индексы на часто фильтруемых полях — проверено: `status`, `year`, `watchStatus`, `name`,
@@ -499,6 +502,15 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
     синхронные операции в main (ffmpeg probe, IPFS pin/unpin, sql.js миграции) — искать `execSync`/
     большие синхронные циклы в `main/services/**`, кандидаты на вынос в `worker_threads` или хотя
     бы в `async`-обёртки, если сейчас блокируют IPC event loop.
+  - [x] **Побочная находка (не из плана аудита, реальный баг пользователя, v0.55.14): папочный
+        режим плеера приписывал субтитры/аудио чужих серий текущему эпизоду** —
+        `scanTracksForEpisodeInternal` (`useFolderPlayer.ts`) передавала в `scanExternalSubtitles`/
+        `scanExternalAudio` только ОДИН текущий видеофайл. `fuzzyMatchToVideo`
+        (`external-subtitle-scanner.ts`) при `videoFiles.length === 1` считает это фильмом и матчит на
+        него все субтитры/аудио из папки, включая относящиеся к другим сериям — в меню субтитров
+        сериала показывались дубли дорожек всех серий. Исправлено — передаётся полный список видео
+        папки (`[...episodes, ...bonusVideos]`), matcher теперь матчит по номеру эпизода честно. См.
+        CHANGELOG [0.55.14].
   - ⚠️ Перед стартом проверить file reservations на `apps/animatrona/**` через
     `mcp__agent-mail__file_reservation_paths` — на момент v0.55.10 параллельно работали другие
     агенты (`RoseRobin`, `AmberOwl`, `TealGorge`) над выносом хуков в `@letar/hooks` (незакоммичено,

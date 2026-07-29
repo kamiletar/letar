@@ -153,7 +153,7 @@ export function useFolderPlayer() {
 
       // Сканируем дорожки для первого эпизода
       if (episodes.length > 0) {
-        await scanTracksForEpisodeInternal(folderPath, episodes[0])
+        await scanTracksForEpisodeInternal(folderPath, episodes[0], [...episodes, ...bonusVideos])
       }
 
       return true
@@ -193,13 +193,21 @@ export function useFolderPlayer() {
     async (folderPath: string): Promise<boolean> => {
       return scanFolderInternal(folderPath)
     },
-    [scanFolderInternal]
+    [scanFolderInternal],
   )
 
   /**
    * Внутренняя функция сканирования дорожек
+   *
+   * @param allVideos Все видео папки (эпизоды + бонусы), а не только текущий —
+   * иначе fuzzyMatchToVideo в main-процессе считает единственный переданный файл
+   * фильмом и приписывает ему ВСЕ найденные субтитры/аудио папки, включая чужие серии.
    */
-  const scanTracksForEpisodeInternal = async (folderPath: string, episode: FolderEpisode) => {
+  const scanTracksForEpisodeInternal = async (
+    folderPath: string,
+    episode: FolderEpisode,
+    allVideos: FolderEpisode[],
+  ) => {
     if (!window.electronAPI) {
       return
     }
@@ -207,13 +215,13 @@ export function useFolderPlayer() {
     setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null }))
 
     try {
-      // Подготавливаем данные для сканирования
-      const videoFiles = [
-        {
-          path: episode.path,
-          episodeNumber: episode.episodeNumber ?? 0,
-        },
-      ]
+      // Подготавливаем данные для сканирования — весь список видео папки,
+      // чтобы matcher на стороне main мог сматчить субтитр к «своему» эпизоду по номеру,
+      // а не приписывал их все текущему (см. videoFiles.length === 1 branch в fuzzyMatchToVideo)
+      const videoFiles = allVideos.map((v) => ({
+        path: v.path,
+        episodeNumber: v.episodeNumber ?? 0,
+      }))
 
       // Параллельно сканируем внешние дорожки и пробим MKV (с кэшированием)
       // createHandler возвращает { success, data: ExternalAudioScanResult | ExternalSubtitleScanResult }
@@ -246,14 +254,12 @@ export function useFolderPlayer() {
       // Для фильмов (episodeNumber === null) берём все дорожки без фильтрации
       const episodeNum = episode.episodeNumber
       const externalTracks: ExternalTracksInfo = {
-        audio:
-          episodeNum !== null
-            ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
-            : audioResult.audioTracks,
-        subtitles:
-          episodeNum !== null
-            ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
-            : subsResult.subtitles,
+        audio: episodeNum !== null
+          ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
+          : audioResult.audioTracks,
+        subtitles: episodeNum !== null
+          ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
+          : subsResult.subtitles,
         audioScanResult: audioResult,
         subtitleScanResult: subsResult,
       }
@@ -307,7 +313,7 @@ export function useFolderPlayer() {
    */
   const goToEpisode = useCallback(
     async (index: number) => {
-      const { episodes, folderPath } = state
+      const { episodes, bonusVideos, folderPath } = state
       if (index < 0 || index >= episodes.length || !folderPath) {
         return
       }
@@ -319,9 +325,9 @@ export function useFolderPlayer() {
         currentBonusIndex: -1,
       }))
 
-      await scanTracksForEpisodeInternal(folderPath, episodes[index])
+      await scanTracksForEpisodeInternal(folderPath, episodes[index], [...episodes, ...bonusVideos])
     },
-    [state]
+    [state],
   )
 
   /**
@@ -329,7 +335,7 @@ export function useFolderPlayer() {
    */
   const goToBonus = useCallback(
     async (index: number) => {
-      const { bonusVideos, folderPath } = state
+      const { episodes, bonusVideos, folderPath } = state
       if (index < 0 || index >= bonusVideos.length || !folderPath) {
         return
       }
@@ -341,9 +347,9 @@ export function useFolderPlayer() {
         currentBonusIndex: index,
       }))
 
-      await scanTracksForEpisodeInternal(folderPath, bonusVideos[index])
+      await scanTracksForEpisodeInternal(folderPath, bonusVideos[index], [...episodes, ...bonusVideos])
     },
-    [state]
+    [state],
   )
 
   /**
