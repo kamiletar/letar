@@ -36,6 +36,12 @@ import path from 'node:path'
  * кнопка disabled, пока чекбокс не кликнут. Тест не может полагаться на то,
  * в каком из двух состояний окажется свежий staging-раннер, поэтому кликает
  * чекбокс только когда кнопка ещё disabled.
+ *
+ * По той же причине (персистентный `TEST_EMAIL`) у пользователя может накопиться
+ * прогресс от прошлых прогонов — тогда CTA называется «Продолжить тест», а не
+ * «Начать тест». Локатор кнопки матчит оба варианта; на сам сценарий (mood
+ * check-in + прохождение вопросов) это не влияет — 5.9.2 показывает mood check-in
+ * перед КАЖДОЙ новой порцией вопросов, и при первом старте, и при «Продолжить».
  */
 
 const ARCHETEST_DIR = path.join(__dirname, '../../archetest')
@@ -95,7 +101,10 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
       }&redirect=/ru`,
     )
 
-    const startButton = page.getByRole('button', { name: 'Начать тест' })
+    // Regex, не точный текст: TEST_EMAIL фиксированный, staging-БД персистентна между
+    // прогонами — у уже существующего пользователя со накопленным прогрессом кнопка
+    // называется «Продолжить тест», а не «Начать тест» (см. JSDoc выше)
+    const startButton = page.getByRole('button', { name: /Начать тест|Продолжить тест/ })
     if (await startButton.isDisabled()) {
       const consentCheckbox = page.locator('[data-part="control"]').first()
       await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
