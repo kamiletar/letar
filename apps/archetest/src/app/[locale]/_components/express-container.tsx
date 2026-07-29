@@ -138,7 +138,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         return next
       })
     },
-    [currentQuestion]
+    [currentQuestion],
   )
 
   const handleSkip = useCallback(() => {
@@ -216,7 +216,15 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   if (state === 'intro') {
     return (
       <Container maxW="lg" pt={16} pb={0}>
-        <VStack gap={8} textAlign="center" pb={8}>
+        {
+          /* pb резервирует место под StickyActionBar — иначе чекбокс согласия при полной
+         * прокрутке физически попадает под панель (см. JSDoc в quiz-intro.tsx). */
+        }
+        <VStack
+          gap={8}
+          textAlign="center"
+          pb="calc(var(--letar-sticky-actionbar-height, 0px) + var(--letar-cookie-banner-height, 0px) + 1rem)"
+        >
           <Icon fontSize="64px" color="purple.500">
             <LuHexagon />
           </Icon>

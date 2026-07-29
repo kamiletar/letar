@@ -5,6 +5,16 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.26.4] - 2026-07-29
+
+### Fixed
+
+- **`StickyActionBar` (`@letar/ui`)** публикует свою высоту в
+  `--letar-sticky-actionbar-height` — панель перекрывала свой же гейтящий чекбокс
+  согласия (`DisclaimerConsent`) на интро-экранах при полной прокрутке: клик
+  проходил, но состояние не менялось, потому что физически попадал в саму панель,
+  а не в чекбокс. `quiz-intro.tsx`/`express-container.tsx` резервируют место снизу.
+
 ## [0.26.3] - 2026-07-29
 
 ### Fixed

@@ -1,7 +1,7 @@
 'use client'
 
-import { Box, type BoxProps, HStack, type StackProps } from '@chakra-ui/react'
-import { forwardRef, type ReactNode } from 'react'
+import { Box, type BoxProps, HStack, mergeRefs, type StackProps } from '@chakra-ui/react'
+import { forwardRef, type ReactNode, useLayoutEffect, useRef } from 'react'
 
 export interface StickyActionBarProps extends BoxProps {
   /** Кнопки действия (обычно одна основная CTA) */
@@ -9,6 +9,18 @@ export interface StickyActionBarProps extends BoxProps {
   /** Пропсы внутреннего HStack — выравнивание и расположение кнопок */
   contentProps?: StackProps
 }
+
+/**
+ * CSS-переменная с текущей высотой панели — читают экраны, где контент выше панели
+ * должен резервировать под неё отступ (та же проблема, что решает `--letar-cookie-
+ * banner-height` у {@link CookieBanner}, но наоборот: не «поднять CTA над баннером»,
+ * а «не дать скроллящемуся контенту заехать под sticky-панель»). Прецедент (archetest,
+ * 2026-07-29): чекбокс согласия на интро квиза при полной прокрутке физически попадал
+ * под эту же панель — `position: sticky` занимает своё место в потоке, но при скролле
+ * «до конца» контент, идущий непосредственно перед панелью, оказывается в её визуально
+ * перекрытой зоне (высота панели + `bottom`-отступ от cookie-баннера).
+ */
+const ACTION_BAR_HEIGHT_VAR = '--letar-sticky-actionbar-height'
 
 /**
  * Липкая панель основного действия внизу экрана.
@@ -39,9 +51,34 @@ export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(
   { children, contentProps, ...rest },
   ref,
 ) {
+  const innerRef = useRef<HTMLDivElement>(null)
+
+  // Публикует свою высоту, чтобы контент выше мог зарезервировать под неё отступ и не
+  // оказаться в её визуально перекрытой зоне при полной прокрутке (см. JSDoc переменной
+  // выше). Тот же паттерн (ResizeObserver + getBoundingClientRect для немедленного значения
+  // при монтировании), что уже проверен на CookieBanner.
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    const el = innerRef.current
+    if (!el) {
+      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, '0px')
+      return
+    }
+    root.style.setProperty(ACTION_BAR_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
+
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
+    })
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, '0px')
+    }
+  }, [])
+
   return (
     <Box
-      ref={ref}
+      ref={mergeRefs(ref, innerRef)}
       position="sticky"
       // Приподнимается над CookieBanner (@letar/ui), если он сейчас показан — оба компонента
       // bottom:0, без координации баннер (zIndex выше) перекрывает эту CTA по pointer-events

@@ -78,7 +78,25 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
 
   return (
     <Container maxW={showProfile ? '6xl' : '2xl'} pt={16} pb={0}>
-      <VStack gap={8} textAlign="center" pb={8}>
+      {
+        /*
+         * pb резервирует место под StickyActionBar (высота панели + отступ от
+         * cookie-баннера, обе переменные публикует сам @letar/ui). Без этого при полной
+         * прокрутке чекбокс согласия из DisclaimerConsent (последний элемент перед
+         * панелью) физически попадал в зону, перекрытую sticky-панелью — клик по нему
+         * не долетал: `elementFromPoint` в его координатах возвращал HStack панели, а не
+         * сам чекбокс. Баг тем незаметнее, что панель ВСЕГДА видна и КАЖЕТСЯ отдельной
+         * от контента, хотя физически перекрывает его при скролле до конца (archetest,
+         * safety-net.spec.ts/mood-check-in.spec.ts, 2026-07-29 — Playwright воспроизвёл
+         * на все 3 браузерах: клик по чекбоксу не блокировался actionability-проверкой,
+         * но `Начать тест` оставался disabled, потому что состояние чекбокса не менялось).
+         */
+      }
+      <VStack
+        gap={8}
+        textAlign="center"
+        pb="calc(var(--letar-sticky-actionbar-height, 0px) + var(--letar-cookie-banner-height, 0px) + 1rem)"
+      >
         <LuBrain size={64} />
         <Heading size="2xl">{t('title')}</Heading>
         <Text fontSize="lg" color="fg.muted" maxW="lg">
@@ -111,19 +129,23 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                 </Progress.Track>
               </Progress.Root>
 
-              {progress!.availableCount > 0 ? (
-                <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `Доступно ещё ${
+              {progress!.availableCount > 0
+                ? (
+                  <Text fontSize="xs" color="fg.muted">
+                    {isRu
+                      ? `Доступно ещё ${
                         progress!.availableCount
                       } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                    : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
-                </Text>
-              ) : (
-                <Text fontSize="xs" color="green.500" fontWeight="bold">
-                  {isRu ? '🎉 Вы ответили на все доступные вопросы!' : '🎉 You have answered all available questions!'}
-                </Text>
-              )}
+                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                  </Text>
+                )
+                : (
+                  <Text fontSize="xs" color="green.500" fontWeight="bold">
+                    {isRu
+                      ? '🎉 Вы ответили на все доступные вопросы!'
+                      : '🎉 You have answered all available questions!'}
+                  </Text>
+                )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">
