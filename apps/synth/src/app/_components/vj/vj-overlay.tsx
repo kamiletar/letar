@@ -2,7 +2,8 @@
 
 import type { SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
-import { type RefObject, useEffect, useRef } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
+import { DEFAULT_VJ_SCENE, VJ_SCENES } from './scenes'
 import { SpinGraphCanvas } from './spin-graph-canvas'
 import { useExternalAudioInput } from './use-external-audio-input'
 
@@ -42,6 +43,19 @@ const buttonStyle = {
 export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef, beatRef, onClose }: VjOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const external = useExternalAudioInput()
+
+  // Активная визуальная сцена — ref для чтения внутри rAF-цикла графа (без пересоздания эффекта
+  // на переключение), state параллельно — только чтобы подсветить выбранную кнопку в UI.
+  const [sceneId, setSceneId] = useState(DEFAULT_VJ_SCENE.id)
+  const sceneRef = useRef(DEFAULT_VJ_SCENE)
+  const handleSceneSelect = (id: string) => {
+    const scene = VJ_SCENES.find((s) => s.id === id)
+    if (!scene) {
+      return
+    }
+    sceneRef.current = scene
+    setSceneId(id)
+  }
 
   useEffect(() => {
     if (!open) {
@@ -84,7 +98,32 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
         patchRef={patchRef}
         pulseRef={pulseRef}
         beatRef={beatRef}
+        sceneRef={sceneRef}
       />
+
+      {/* Визуальные сцены — куратoрские пресеты «настроения» графа (scenes.ts), не другой рендер */}
+      <Box position="absolute" top={4} left={4} display="flex" alignItems="center" gap={1}>
+        {VJ_SCENES.map((scene) => (
+          <Box asChild key={scene.id}>
+            <button
+              onClick={() => handleSceneSelect(scene.id)}
+              title={scene.mood}
+              style={
+                scene.id === sceneId
+                  ? {
+                      ...buttonStyle,
+                      border: '1px solid #D4AF37',
+                      color: '#F5D85A',
+                      background: 'rgba(58, 46, 8, 0.7)',
+                    }
+                  : buttonStyle
+              }
+            >
+              {scene.name}
+            </button>
+          </Box>
+        ))}
+      </Box>
 
       <Box position="absolute" top={4} right={4} display="flex" alignItems="center" gap={2}>
         {external.devices.length === 0 ? (

@@ -3,6 +3,7 @@
 import { createBandsReader } from '@/lib/audio/analyser'
 import type { SubtractivePatch } from '@/lib/patch/schema'
 import { type RefObject, useEffect, useRef } from 'react'
+import { DEFAULT_VJ_SCENE, type VjScene } from './scenes'
 
 interface SpinGraphCanvasProps {
   analyser: AnalyserNode | null
@@ -24,6 +25,13 @@ interface SpinGraphCanvasProps {
    * который держит форму даже в разреженном паттерне или в тишине между нотами.
    */
   beatRef?: RefObject<number>
+  /**
+   * Текущая визуальная «сцена» (см. `scenes.ts`) — куратoрский набор множителей на уже
+   * существующую реактивность графа (скорость вращения, теснота орбиты, чувствительность к басу
+   * и т.д.), не отдельный рендер-движок. Ref, а не проп — переключение сцены не должно
+   * пересоздавать rAF-цикл (тот же паттерн, что `patchRef`/`pulseRef`).
+   */
+  sceneRef?: RefObject<VjScene>
 }
 
 const GOLD_BRIGHT = '#F5D85A'
@@ -38,8 +46,19 @@ const VOID_BG = '#040302'
  * середина держит яркость рёбер, верха дают «искры»-частицы вдоль рёбер. Глубина/пространство
  * важнее цвета (владелец не видит цвет в звуке, но остро слышит объём) — весь визуал
  * монохромный золото/пустота, разница в яркости и радиальном размытии, не в оттенках.
+ *
+ * «Визуальные сцены» (`scenes.ts`, `sceneRef`) — куратoрские пресеты множителей на эту же
+ * реактивность (скорость, теснота орбиты, чувствительность к басу, искры, свечение, скорость
+ * колец-метронома), не отдельные рендер-движки — тот же граф в разных «настроениях».
  */
-export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef, beatRef }: SpinGraphCanvasProps) {
+export function SpinGraphCanvas({
+  analyser,
+  activeNoteCount,
+  patchRef,
+  pulseRef,
+  beatRef,
+  sceneRef,
+}: SpinGraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
   const activeNoteCountRef = useRef(activeNoteCount)
@@ -144,19 +163,27 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef,
         beatRings.push(0)
         lastBeatSeen = beatNow
       }
-      beatRings = beatRings.map((phase) => phase + 0.02).filter((phase) => phase < 1)
+      const scene = sceneRef?.current ?? DEFAULT_VJ_SCENE
+      beatRings = beatRings.map((phase) => phase + 0.02 * scene.params.ringSpeed).filter((phase) => phase < 1)
 
       // Живые ручки SUB-патча — те же, что крутят звук (cutoff/резонанс/пространство)
       const azimuth = patchRef?.current?.engine.fx.space.azimuth ?? 0
       const depth = patchRef?.current?.engine.fx.space.depth ?? 0
       const cutoff = patchRef?.current?.engine.filter.cutoff ?? 0.5
       const resonance = patchRef?.current?.engine.filter.resonance ?? 0
+      // Бас, прогнанный через чувствительность сцены — используется везде, где раньше был
+      // «сырой» smoothBass (раздувание ядра, свечение, яркость узлов); скорость вращения и
+      // смешивание середины/верхов сцена не трогает — только реакцию на бас и общий темп.
+      const bass = smoothBass * scene.params.bassSensitivity
 
       // Пустота Малевича — тёмный фон с едва заметным радиальным свечением от ядра
       ctx2d.fillStyle = VOID_BG
       ctx2d.fillRect(0, 0, w, h)
       const glow = ctx2d.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.6)
-      glow.addColorStop(0, `rgba(212, 175, 55, ${0.05 + smoothBass * 0.12 + pulseEnergy * 0.08})`)
+      glow.addColorStop(
+        0,
+        `rgba(212, 175, 55, ${(0.05 + bass * 0.12 + pulseEnergy * 0.08) * scene.params.glowIntensity})`
+      )
       glow.addColorStop(1, 'rgba(4, 3, 2, 0)')
       ctx2d.fillStyle = glow
       ctx2d.fillRect(0, 0, w, h)
@@ -172,22 +199,25 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef,
       }
 
       const baseRadius = Math.min(w, h) * 0.22
-      const coreRadius = baseRadius * (1 + smoothBass * 0.35 + pulseEnergy * 0.15)
+      const coreRadius = baseRadius * (1 + bass * 0.35 + pulseEnergy * 0.15)
 
-      // Резонанс (звенящий фильтр) ускоряет вращение ядра — та же ручка, что даёт звуку «песок»
-      coreAngleA += 0.004 + smoothMid * 0.02 + resonance * 0.03
-      coreAngleB -= 0.004 + smoothMid * 0.02 + resonance * 0.03
-      drawPenroseTriangle(cx, cy, coreRadius, coreAngleA, 0.5 + smoothBass * 0.5 + pulseEnergy * 0.3)
-      drawPenroseTriangle(cx, cy, coreRadius, coreAngleB + Math.PI, 0.5 + smoothBass * 0.5 + pulseEnergy * 0.3)
+      // Резонанс (звенящий фильтр) ускоряет вращение ядра — та же ручка, что даёт звуку «песок».
+      // rotationSpeed сцены масштабирует весь темп вращения ядра целиком.
+      coreAngleA += (0.004 + smoothMid * 0.02 + resonance * 0.03) * scene.params.rotationSpeed
+      coreAngleB -= (0.004 + smoothMid * 0.02 + resonance * 0.03) * scene.params.rotationSpeed
+      drawPenroseTriangle(cx, cy, coreRadius, coreAngleA, 0.5 + bass * 0.5 + pulseEnergy * 0.3)
+      drawPenroseTriangle(cx, cy, coreRadius, coreAngleB + Math.PI, 0.5 + bass * 0.5 + pulseEnergy * 0.3)
 
       // 6 внешних узлов — эхо 6 операторов FM-движка; чем больше держится нот, тем шире орбита.
       // depth (пространство звука — «далеко»/«близко») слегка сжимает и приглушает орбиту, как
       // перспектива; azimuth (лево-право панорамы) поворачивает саму орбиту в ту же сторону.
+      // orbitSpread сцены масштабирует итоговую теснóту/широту орбиты.
       const nodeCount = 6
       const depthScale = 1 - depth * 0.25
-      const orbitRadius = baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06) * depthScale
+      const orbitRadius =
+        baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06) * depthScale * scene.params.orbitSpread
       const azimuthOffset = azimuth * Math.PI
-      outerAngle += 0.0015 + smoothTreble * 0.01
+      outerAngle += (0.0015 + smoothTreble * 0.01) * scene.params.rotationSpeed
 
       const positions: Array<{ x: number; y: number }> = []
       for (let i = 0; i < nodeCount; i++) {
@@ -213,12 +243,13 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef,
         ctx2d.lineTo(b.x, b.y)
         ctx2d.stroke()
 
-        // «Искра» вдоль ребра на верхах — движется от a к b, положение по фазе времени
-        if (smoothTreble > 0.08) {
+        // «Искра» вдоль ребра на верхах — движется от a к b, положение по фазе времени.
+        // trebleSparkle сцены гасит искры до нуля (например, в «Минимале»).
+        if (smoothTreble > 0.08 && scene.params.trebleSparkle > 0) {
           const t = (performance.now() / 400) % 1
           const sx = a.x + (b.x - a.x) * t
           const sy = a.y + (b.y - a.y) * t
-          ctx2d.fillStyle = `rgba(245, 216, 90, ${Math.min(smoothTreble * 1.5, 0.9)})`
+          ctx2d.fillStyle = `rgba(245, 216, 90, ${Math.min(smoothTreble * 1.5 * scene.params.trebleSparkle, 0.9)})`
           ctx2d.beginPath()
           ctx2d.arc(sx, sy, 1.5, 0, Math.PI * 2)
           ctx2d.fill()
@@ -232,7 +263,7 @@ export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef,
         ctx2d.beginPath()
         ctx2d.arc(p.x, p.y, r, 0, Math.PI * 2)
         ctx2d.fill()
-        ctx2d.strokeStyle = `rgba(212, 175, 55, ${0.3 + smoothBass * 0.4})`
+        ctx2d.strokeStyle = `rgba(212, 175, 55, ${0.3 + bass * 0.4})`
         ctx2d.beginPath()
         ctx2d.arc(p.x, p.y, r + 4, 0, Math.PI * 2)
         ctx2d.stroke()
