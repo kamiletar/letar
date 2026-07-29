@@ -462,7 +462,7 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
 
   **Список аниме (критично):**
   - [x] Виртуализация списка — сделано в v0.55.3/0.55.5, общий хук `useVirtualizedGrid` (v0.55.8)
-  - [ ] Infinite scroll или пагинация (см. отдельная задача ниже)
+  - [x] Infinite scroll (v0.55.15/0.55.16, см. отдельная задача ниже)
   - [x] **Мемоизация `AnimeCard` через `React.memo`** (v0.55.9) — сам `memo` стоял с самого начала,
         но **не работал**: `AnimeGrid`/`FranchiseView` считали `genres={anime.genres?.map(...)}`
         прямо в разметке, создавая новый массив на каждом рендере. Виртуализатор перерисовывает
@@ -570,7 +570,7 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
     ломало прямой `next build`); если работа ещё не влилась в `main` — учитывать её при мёрже
     (`use-library-page.ts`, `AnimeFilters/index.tsx` уже ссылались на несуществующий пакет).
 
-- [ ] **Infinite scroll / пагинация для списка аниме**
+- [x] **Infinite scroll / пагинация для списка аниме** (v0.55.15/0.55.16)
 
   **Проблема:** Список аниме рендерит 300+ карточек одновременно — растёт вместе с библиотекой. Это убивает скролл и начальный рендер.
 
@@ -597,13 +597,18 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         `AnimeGrid` (v0.55.3): колонки по ширине контейнера, динамическая высота строки через
         `measureElement` (нужна из-за неоднородной высоты — `FranchiseCard` со стопкой постеров
         выше одиночной `AnimeCard`).
-  - [ ] Переключить `use-library-page.ts` с `findMany` на `findMany + skip/take` (cursor pagination)
-        — сознательно отложено: `groupAnimeByFranchise()` группирует по connected components на
-        основе `sourceRelations`, и ей нужен **весь** набор аниме одновременно (франшиза может
-        включать тайтлы за пределами текущей страницы) — курсорная пагинация без редизайна
-        группировки будет ломать франшизный режим (тайтл то есть в группе, то standalone, в
-        зависимости от того, что уже подгружено).
-  - [ ] Sentinel-элемент внизу → `useInfiniteQuery` подгружает следующую страницу (зависит от пункта выше)
+  - [x] **`use-library-page.ts` переключён на `useInfiniteFindManyAnime` (skip/take по 60)** (v0.55.15) —
+        `groupAnimeByFranchise()` по-прежнему получает **полный** набор (франшизный режим,
+        множественный выбор, диалог пакетной публикации — `needsFullData` в
+        `use-library-page.ts`), но обычный просмотр в режиме «По отдельности» пагинирован.
+        Подробности реализации, включая `createInfiniteFindManyHook`/`useCountAnime` — в
+        CHANGELOG.md [0.55.15] и PLAN_COMPLETED.md.
+  - [x] **Sentinel-элемент + `IntersectionObserver`** (v0.55.16) — первая версия триггера подгрузки
+        (по индексу последней виртуализированной строки, v0.55.15) оказалась ненадёжной —
+        пользователь сообщил, что дальше первой страницы список не грузится. Заменено на
+        sentinel-`Box` под сеткой + `IntersectionObserver(rootMargin: '800px')` в `AnimeGrid.tsx` —
+        не зависит от внутренностей `useWindowVirtualizer`. ⚠️ Финальная проверка пользователем
+        после этого фикса — на момент завершения сессии ещё не подтверждена.
   - [x] **Сохранять позицию скролла при навигации назад** (v0.55.7) — новый хук
         `use-scroll-restoration.ts` в `app/library/_lib/`: сохраняет `window.scrollY` в
         sessionStorage (throttled через `requestAnimationFrame`), ключ —
@@ -621,9 +626,10 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         оставили только рендер карточки и `estimateSize(cardWidth)` под свою карточку. Подробности
         — CHANGELOG.md [0.55.8].
 
-  ⚠️ Визуально не проверено — `nx typecheck:tsgo`/`nx lint` чистые, но animatrona это Electron-
-  desktop, не web-превью; ручная проверка (скролл по большой библиотеке, ресайз окна, смена
-  колонок) — на пользователе при следующем запуске приложения.
+  ✅ Проверено пользователем вживую (2026-07-29): сетка (columns) — подтверждено работает после
+  фикса `useVirtualizedGrid` (v0.55.15). Infinite scroll (подгрузка следующих страниц при скролле)
+  — ещё не подтверждено после последнего фикса (sentinel + IntersectionObserver, v0.55.16), просил
+  проверить в следующем запуске.
 
 ---
 
