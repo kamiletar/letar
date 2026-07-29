@@ -19,6 +19,7 @@ export function TrackerSyncListener() {
       // Если сервер вернул изменённые элементы — инвалидируем кэш
       if (data.serverItems > 0) {
         void queryClient.invalidateQueries({ queryKey: ['animes'] })
+        void queryClient.invalidateQueries({ queryKey: ['anime'] })
         void queryClient.invalidateQueries({ queryKey: ['watchProgress'] })
         void queryClient.invalidateQueries({ queryKey: ['filterCounts'] })
       }

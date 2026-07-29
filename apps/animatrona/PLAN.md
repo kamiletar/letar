@@ -576,7 +576,13 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
 - [ ] **ActivityPub федерация** — серверная часть в animatrona-tracker
 - [ ] **Поддержка Intel QSV и AMD AMF** — hw encode для Intel Arc (av1_qsv) и AMD RX 7000+ (av1_amf). Детекция через `ffmpeg -encoders`, отдельные наборы профилей. По фидбеку от пользователей
 - [ ] **Дедупликация дорожек в манифестах** — у аниме, импортированных до фикса audio-track-creator (unique streamIndex), могут быть дубликаты. Нужен UI для массовой регенерации
-- [x] **Инвалидация кеша при фоновой синхронизации с трекером** — `tracker-sync.ts` отправляет `broadcastToWindows('tracker:syncCompleted')` при фоновом sync, но renderer нигде не слушает это событие для инвалидации TanStack Query кеша. Если sync изменил `watchStatus`, `userRating` или прогресс — UI не обновится до ручного перехода. Нужен listener-компонент (аналог `MobileProgressSync`) для подписки на `onSyncCompleted` и инвалидации `['animes']`, `['watchProgress']`, `['filterCounts']`
+- [x] **Инвалидация кеша при фоновой синхронизации с трекером** (v0.55.4) — `TrackerSyncListener.tsx`
+      уже существовал и был подключён в `layout.tsx`, но инвалидировал только `['animes']`
+      (список), `['watchProgress']`, `['filterCounts']` — не хватало `['anime']` (детали
+      конкретного аниме, `useFindUniqueAnime`, страница `library/[id]`). Если фоновый sync менял
+      `watchStatus`/`userRating`, а пользователь в этот момент был на странице деталей — она не
+      обновлялась до ручного перехода. Добавлена `queryClient.invalidateQueries({ queryKey:
+      ['anime'] })` по аналогии с `MobileProgressSync.tsx`.
 
 ---
 
