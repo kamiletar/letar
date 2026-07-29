@@ -15,6 +15,7 @@ import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { VjOverlay } from '../vj/vj-overlay'
 import { DrumPads } from './drum-pads'
 import { DrumkitColumn } from './drumkit-column'
 import { FmColumn } from './fm-column'
@@ -41,6 +42,7 @@ type EngineType = 'subtractive' | 'fm' | 'drumkit'
 
 export function StudioClient() {
   const [started, setStarted] = useState(false)
+  const [vjOpen, setVjOpen] = useState(false)
   const [patch, setPatch] = useState<SubtractivePatch>(REESE_BASS)
   const [fmPatch, setFmPatch] = useState<FmPatch>(FM_GLASS_BELLS)
   const [drumPatch, setDrumPatch] = useState<DrumkitPatch>(DRUM_KIT_1)
@@ -522,6 +524,24 @@ export function StudioClient() {
           )}
 
           {started && (
+            <button
+              onClick={() => setVjOpen(true)}
+              style={{
+                padding: '2px 8px',
+                fontSize: '10px',
+                borderRadius: '4px',
+                border: '1px solid #5a3a10',
+                background: 'transparent',
+                color: '#D4AF37',
+                cursor: 'pointer',
+                letterSpacing: '0.04em',
+              }}
+            >
+              ◈ VJ
+            </button>
+          )}
+
+          {started && (
             <Box display="flex" alignItems="center" gap={2}>
               <button
                 style={{
@@ -712,6 +732,14 @@ export function StudioClient() {
 
       {/* Ментор — всплывающая подсказка от MCP-инструмента highlight_param */}
       <MentorOverlay highlight={mentor.highlight} onDismiss={mentor.dismissHighlight} />
+
+      {/* VJ-режим — полноэкранный реактивный спин-граф для живого выступления */}
+      <VjOverlay
+        open={vjOpen}
+        analyser={masterBus.bus?.analyser ?? null}
+        activeNoteCount={activeNotes.size}
+        onClose={() => setVjOpen(false)}
+      />
 
       {/* Оверлей «нажми чтобы начать» */}
       {!started && (

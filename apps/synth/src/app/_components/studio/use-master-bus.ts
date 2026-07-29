@@ -1,5 +1,6 @@
 'use client'
 
+import { createMasterAnalyser } from '@/lib/audio/analyser'
 import { getAudioContext } from '@/lib/audio/context'
 import { buildReverbIR } from '@/lib/audio/reverb'
 import { createSpatialPanner, setPannerPosition } from '@/lib/audio/spatial'
@@ -12,10 +13,12 @@ export interface MasterBus {
   convolver: ConvolverNode
   reverbWet: GainNode
   panner: PannerNode
+  analyser: AnalyserNode
 }
 
 // Собирает мастер-шину студии один раз при старте звука:
 // masterGain → panner (HRTF-пространство) → [dryGain → dest] + [convolver → reverbWet → dest].
+// masterGain также веткой уходит в analyser (VJ-визуал) — «tap», не влияет на звук.
 function buildBus(ctx: AudioContext, patch: SubtractivePatch): MasterBus {
   const masterGain = ctx.createGain()
   const dryGain = ctx.createGain()
@@ -28,18 +31,21 @@ function buildBus(ctx: AudioContext, patch: SubtractivePatch): MasterBus {
   const panner = createSpatialPanner(ctx)
   setPannerPosition(panner, ctx, patch.engine.fx.space.azimuth * (Math.PI / 2), patch.engine.fx.space.depth)
 
+  const analyser = createMasterAnalyser(ctx)
+
   masterGain.connect(panner)
   panner.connect(dryGain)
   dryGain.connect(ctx.destination)
   panner.connect(convolver)
   convolver.connect(reverbWet)
   reverbWet.connect(ctx.destination)
+  masterGain.connect(analyser)
 
   void buildReverbIR(ctx, patch.engine.fx.reverb.decay).then((buf) => {
     convolver.buffer = buf
   })
 
-  return { masterGain, dryGain, convolver, reverbWet, panner }
+  return { masterGain, dryGain, convolver, reverbWet, panner, analyser }
 }
 
 /**
@@ -115,5 +121,5 @@ export function useMasterBus(patch: SubtractivePatch, patchRef: RefObject<Subtra
     }
   }, [bus, started, patch.engine.fx.space.autoOrbit, patchRef])
 
-  return { start }
+  return { start, bus }
 }
