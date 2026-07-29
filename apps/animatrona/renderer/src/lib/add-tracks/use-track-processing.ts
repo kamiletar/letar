@@ -785,12 +785,16 @@ async function processFontTasks(
   createSubtitleFont: ReturnType<typeof useCreateSubtitleFont>
 ): Promise<void> {
   for (const task of fontTasks) {
-    if (isCancelledRef.current) break
+    if (isCancelledRef.current) {
+      break
+    }
 
     try {
       // 1. Извлекаем шрифты из донора (main process: extract → IPFS upload → cleanup)
       const result = await api.ffmpeg.extractFonts(task.donorPath)
-      if (!result.fonts || result.fonts.length === 0) continue
+      if (!result.fonts || result.fonts.length === 0) {
+        continue
+      }
 
       // 2. Фильтруем только недостающие (с CID)
       const missing = result.fonts.filter(
@@ -799,7 +803,9 @@ async function processFontTasks(
 
       // 3. Создаём SubtitleFont для каждой ASS дорожки эпизода
       for (const font of missing) {
-        if (isCancelledRef.current) break
+        if (isCancelledRef.current) {
+          break
+        }
 
         for (const trackId of task.subtitleTrackIds) {
           await createSubtitleFont.mutateAsync({

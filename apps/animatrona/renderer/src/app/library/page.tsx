@@ -246,8 +246,11 @@ function LibraryPageContent() {
                   colorPalette={selectionMode ? 'purple' : 'gray'}
                   size="sm"
                   onClick={() => {
-                    if (selectionMode) clearSelection()
-                    else setSelectionMode(true)
+                    if (selectionMode) {
+                      clearSelection()
+                    } else {
+                      setSelectionMode(true)
+                    }
                   }}
                 >
                   <Icon as={LuSquareCheck} mr={2} />

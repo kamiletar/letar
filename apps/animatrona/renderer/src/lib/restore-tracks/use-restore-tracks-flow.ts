@@ -379,10 +379,14 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
   // === Подтверждение → формирование задач → отправка в main process ===
 
   const confirmAndProcess = useCallback(async () => {
-    if (!comparison) return
+    if (!comparison) {
+      return
+    }
 
     const api = window.electronAPI
-    if (!api?.restoreTracks) return
+    if (!api?.restoreTracks) {
+      return
+    }
 
     const tempBaseDir = animeFolderPath || (await getTempDir())
     const restoreTasks: RestoreTask[] = []
@@ -392,7 +396,9 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
       const libraryEp = allEpisodes.find((e) => e.id === ep.episodeId)
       const episodeDir = libraryEp?.folderPath || tempBaseDir
       const matchedFile = stateManager.state.matches.find((m) => m.targetEpisode?.id === ep.episodeId)
-      if (!matchedFile) continue
+      if (!matchedFile) {
+        continue
+      }
 
       // Определяем тип задачи
       const makeTask = (track: TrackInfo, trackType: 'audio' | 'subtitle', type: RestoreTaskType): RestoreTask => ({

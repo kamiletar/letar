@@ -122,8 +122,11 @@ export default function AnimePage({ params }: AnimePageProps) {
     (value: string) => {
       const params = new URLSearchParams(searchParams.toString())
       // Дефолтный таб не записываем в URL для чистоты
-      if (value === 'episodes') params.delete('tab')
-      else params.set('tab', value)
+      if (value === 'episodes') {
+        params.delete('tab')
+      } else {
+        params.set('tab', value)
+      }
       const query = params.toString()
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
@@ -273,7 +276,9 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   const handleWatchStatusChange = useCallback(
     async (newStatus: WatchStatus) => {
-      if (!anime) return
+      if (!anime) {
+        return
+      }
       try {
         await updateAnimeMutation.mutateAsync({ where: { id: anime.id }, data: { watchStatus: newStatus } })
         await queryClient.invalidateQueries({ queryKey: ['animes'] })
@@ -318,12 +323,18 @@ export default function AnimePage({ params }: AnimePageProps) {
   }, [anime?.directoryCid, anime?.id, queryClient])
 
   const handleDetectIntros = useCallback(async () => {
-    if (!anime?.episodes?.length || !window.electronAPI?.introDetector) return
+    if (!anime?.episodes?.length || !window.electronAPI?.introDetector) {
+      return
+    }
     const episodesWithAudio: Array<{ id: string; audioCid: string; duration: number }> = []
     for (const ep of anime.episodes) {
-      if (!ep.durationMs || !ep.audioTracks?.length) continue
+      if (!ep.durationMs || !ep.audioTracks?.length) {
+        continue
+      }
       const tracks = ep.audioTracks.filter((t) => t.transcodedCid)
-      if (tracks.length === 0) continue
+      if (tracks.length === 0) {
+        continue
+      }
       const japaneseTrack =
         tracks.find((t) => t.title?.toLowerCase().includes('оригинал')) ||
         tracks.find((t) => t.language === 'ja' || t.language === 'jpn') ||
@@ -341,9 +352,13 @@ export default function AnimePage({ params }: AnimePageProps) {
       for (const result of results) {
         const hasIntro = result.introStartMs !== null && result.introEndMs !== null
         const hasOutro = result.outroStartMs !== null && result.outroEndMs !== null
-        if (!hasIntro && !hasOutro) continue
+        if (!hasIntro && !hasOutro) {
+          continue
+        }
         const ep = anime.episodes.find((e) => e.id === result.episodeId)
-        if (!ep?.manifestCid) continue
+        if (!ep?.manifestCid) {
+          continue
+        }
         const existingResult = await window.electronAPI.manifest.getChapters(ep.manifestCid)
         const existingChapters: ManifestChapter[] = existingResult.success ? (existingResult.data ?? []) : []
         const filtered = existingChapters.filter((ch) => ch.type !== 'op' && ch.type !== 'ed')
@@ -395,7 +410,9 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   // Открепить контент с диска
   const handleUnpin = useCallback(async () => {
-    if (!anime || !window.electronAPI?.tracker) return
+    if (!anime || !window.electronAPI?.tracker) {
+      return
+    }
     setIsUnpinning(true)
     try {
       const result = await window.electronAPI.tracker.unpinAnime(anime.id)
@@ -417,7 +434,9 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   // Закрепить контент на диск
   const handleRepin = useCallback(async () => {
-    if (!anime || !window.electronAPI?.tracker) return
+    if (!anime || !window.electronAPI?.tracker) {
+      return
+    }
     setIsRepinning(true)
     try {
       const result = await window.electronAPI.tracker.repinAnime(anime.id)
@@ -439,7 +458,9 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   // Загрузить новые серии из IPFS (онгоинги)
   const handleSyncEpisodes = useCallback(async () => {
-    if (!anime || !window.electronAPI?.library) return
+    if (!anime || !window.electronAPI?.library) {
+      return
+    }
     setIsSyncingEpisodes(true)
     try {
       const result = await window.electronAPI.library.syncEpisodes(anime.id)
@@ -469,17 +490,23 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   // Суммарный IPFS размер
   const { totalIpfsSize, ipfsSizeBreakdown } = useMemo(() => {
-    if (!anime?.episodes) return { totalIpfsSize: 0, ipfsSizeBreakdown: { video: 0, audio: 0, subtitles: 0, fonts: 0 } }
+    if (!anime?.episodes) {
+      return { totalIpfsSize: 0, ipfsSizeBreakdown: { video: 0, audio: 0, subtitles: 0, fonts: 0 } }
+    }
     let video = 0,
       audio = 0,
       subtitles = 0,
       fonts = 0
     for (const ep of anime.episodes) {
       video += ep.ipfsSize ?? 0
-      for (const at of ep.audioTracks) audio += at.ipfsSize ?? 0
+      for (const at of ep.audioTracks) {
+        audio += at.ipfsSize ?? 0
+      }
       for (const st of ep.subtitleTracks) {
         subtitles += st.ipfsSize ?? 0
-        for (const f of st.fonts) fonts += f.ipfsSize ?? 0
+        for (const f of st.fonts) {
+          fonts += f.ipfsSize ?? 0
+        }
       }
     }
     return { totalIpfsSize: video + audio + subtitles + fonts, ipfsSizeBreakdown: { video, audio, subtitles, fonts } }
@@ -678,7 +705,9 @@ export default function AnimePage({ params }: AnimePageProps) {
           open={isImportDialogOpen}
           onOpenChange={(open) => {
             setIsImportDialogOpen(open)
-            if (!open) setImportAnimeInfo(null)
+            if (!open) {
+              setImportAnimeInfo(null)
+            }
           }}
           preselectedShikimoriId={importAnimeInfo?.shikimoriId}
           preselectedName={importAnimeInfo?.name ?? undefined}
@@ -699,7 +728,9 @@ export default function AnimePage({ params }: AnimePageProps) {
           open={isAddTracksDialogOpen}
           onOpenChange={(open) => {
             setIsAddTracksDialogOpen(open)
-            if (!open) queryClient.invalidateQueries({ queryKey: ['animes'] })
+            if (!open) {
+              queryClient.invalidateQueries({ queryKey: ['animes'] })
+            }
           }}
           animeId={anime.id}
           animeName={anime.name}
@@ -714,7 +745,9 @@ export default function AnimePage({ params }: AnimePageProps) {
           open={isRestoreTracksDialogOpen}
           onOpenChange={(open) => {
             setIsRestoreTracksDialogOpen(open)
-            if (!open) queryClient.invalidateQueries({ queryKey: ['animes'] })
+            if (!open) {
+              queryClient.invalidateQueries({ queryKey: ['animes'] })
+            }
           }}
           animeId={anime.id}
           animeName={anime.name}
