@@ -77,6 +77,12 @@ deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг (since
 - `agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
 - Подробности: [mcp-servers.md § Deploy MCP](/.claude/docs/mcp-servers.md#deploy-mcp-letardeploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
+⚠️ **Наличие переменной в `.env.docker`/`.env.docker.enc` не означает, что она попала в БД.** Если
+приложение сидит настройки из env через идемпотентный upsert-скрипт (например
+`prisma/seed.ts`), после деплоя с `seed: true` нужно свериться либо с логом самого сида (строка
+вида «✅ настройки обновлены из env»), либо напрямую с содержимым таблицы через `postgres-*` MCP —
+не полагаться на факт, что значение когда-то было прописано в файле.
+
 **Сырой SSH (`deploy-affected.sh` напрямую) остаётся резервным каналом** для того, что
 dashboard-agent не покрывает: первичная настройка нового приложения на сервере, ручное
 вмешательство при сбое агента, provision нового сервера.
