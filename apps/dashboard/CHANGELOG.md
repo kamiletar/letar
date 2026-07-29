@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.20.2] — 2026-07-30
+
+### Refactor: `APP_PORTS` вынесен в канон `@letar/infra-config`
+
+`app-metrics.ts` больше не держит собственную карту портов приложений — импортирует `getAppPort()` из `@letar/infra-config` (тот же канон, что уже даёт `SERVER_APPS` для dashboard-agent). Список приложений, для которых dashboard делает health-check (`MONITORED_APPS`), остался локальным явным решением — канон отвечает только за «какой у кого порт», не «кого опрашивать». См. `PLAN.md` § «Единый источник правды для карты портов» за разбором, что вынесено, а что сознательно оставлено (`SUPPORTED_DATABASES`, `KNOWN_APPS`, `dashboard-agent/database.ts` `APP_CONFIG` — это curated-списки со своей бизнес-логикой, не тот же класс дупликации).
+
 ## [1.20.1] — 2026-07-28
 
 ### Refactor: `X-Cron-Secret` через `@letar/api-server`

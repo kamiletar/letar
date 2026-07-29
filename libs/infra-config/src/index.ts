@@ -1,13 +1,16 @@
 /**
  * @letar/infra-config — единый источник инфраструктурной конфигурации монорепо.
  *
- * Здесь живёт канонический маппинг «приложение → сервер», адреса серверов и порты
- * агентов. Импортируется:
+ * Здесь живёт канонический маппинг «приложение → сервер», адреса серверов, порты
+ * агентов и HTTP-порты приложений (для health-check/межконтейнерных вызовов).
+ * Импортируется:
  *   - libs/deploy-mcp (резолвинг сервера по приложению и target)
- *   - косвенно — apps/dashboard-agent через ЛОКАЛЬНУЮ копию `src/lib/server-config.ts`
- *     (его Dockerfile.production изолирован от монорепо и не видит libs/, поэтому
- *     импортировать этот пакет напрямую он не может — вместо этого копия сверяется с
- *     каноном guard-тестом `src/lib/server-config.guard.spec.ts`).
+ *   - apps/dashboard напрямую (`app-metrics.ts` — APP_PORTS для health-check)
+ *   - косвенно — apps/dashboard-agent через ЛОКАЛЬНЫЕ копии `src/lib/server-config.ts`
+ *     и `src/lib/app-registry.ts` (его Dockerfile.production изолирован от монорепо и
+ *     не видит libs/, поэтому импортировать этот пакет напрямую он не может — вместо
+ *     этого копии сверяются с каноном guard-тестами `server-config.guard.spec.ts` и
+ *     `app-registry.guard.spec.ts`).
  *
  * ⚠️ Bash-скрипт `deploy-affected.sh` держит СВОЙ список серверных приложений
  * (`S2_APPS`, строка ~107). Он НЕ импортирует этот файл (bash ≠ TS). При изменении
@@ -156,4 +159,30 @@ export type DeployTarget = 'production' | 'staging'
  */
 export function resolveDeployServer(app: string, target: DeployTarget = 'production'): InfraServer {
   return target === 'staging' ? 's3' : getServerForApp(app)
+}
+
+/**
+ * HTTP-порт, на котором приложение слушает запросы (dev/production — совпадают,
+ * см. `.claude/rules/env-files.md`). Канон для двух ранее независимых копий:
+ * `apps/dashboard/src/lib/app-metrics.ts` (health-check изнутри dashboard) и
+ * `apps/dashboard-agent/src/lib/app-registry.ts` (межконтейнерные HTTP-вызовы cron/алертов).
+ *
+ * Список — union портов, известных обеим копиям на момент объединения (2026-07-30). Каждый
+ * потребитель сам решает, какое подмножество приложений ему актуально опрашивать/вызывать —
+ * этот реестр не диктует «кого включать», только «какой у кого порт».
+ */
+export const APP_PORTS: Record<string, number> = {
+  dashboard: 3002,
+  'driving-school': 3003,
+  mandala: 3004,
+  kami: 3005,
+  'animatrona-landing': 3008,
+  dsperevod: 3019,
+  studio: 3024,
+  'dashboard-agent': 3100,
+}
+
+/** HTTP-порт приложения из канона, если известен. */
+export function getAppPort(app: string): number | undefined {
+  return APP_PORTS[app]
 }

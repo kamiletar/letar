@@ -28,7 +28,8 @@
       "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
-      "@letar/api-server": ["../../libs/api-server/src/index.ts"]
+      "@letar/api-server": ["../../libs/api-server/src/index.ts"],
+      "@letar/infra-config": ["../../libs/infra-config/src/index.ts"]
     },
     "types": ["node"],
     "outDir": "dist",
@@ -85,6 +86,9 @@
     },
     {
       "path": "../../libs/api-server"
+    },
+    {
+      "path": "../../libs/infra-config"
     }
   ]
 }

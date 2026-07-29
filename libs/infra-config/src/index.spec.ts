@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { getCurrentServer, getServerForApp, HARD_GATED_APPS, resolveDeployServer, SERVER_APPS } from './index'
+import {
+  APP_PORTS,
+  getAppPort,
+  getCurrentServer,
+  getServerForApp,
+  HARD_GATED_APPS,
+  resolveDeployServer,
+  SERVER_APPS,
+} from './index'
 
 describe('HARD_GATED_APPS', () => {
   it('содержит ровно пять активных коммерческих приложений (PLAN-INFRA.md §18.7)', () => {
@@ -29,6 +37,23 @@ describe('resolveDeployServer', () => {
   it('неизвестное приложение падает на s2 (fallback)', () => {
     expect(getServerForApp('несуществующее-приложение')).toBe('s2')
     expect(resolveDeployServer('несуществующее-приложение')).toBe('s2')
+  })
+})
+
+describe('getAppPort', () => {
+  it('возвращает известный порт из канона', () => {
+    expect(getAppPort('dashboard')).toBe(3002)
+    expect(getAppPort('dashboard-agent')).toBe(3100)
+  })
+
+  it('неизвестное приложение — undefined (нет безопасного дефолта для порта)', () => {
+    expect(getAppPort('несуществующее-приложение')).toBeUndefined()
+  })
+
+  it('согласован с APP_PORTS', () => {
+    for (const [app, port] of Object.entries(APP_PORTS)) {
+      expect(getAppPort(app)).toBe(port)
+    }
   })
 })
 

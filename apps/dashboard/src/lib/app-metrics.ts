@@ -5,21 +5,17 @@
  */
 
 import type { HealthCheck as HealthCheckDB, HealthStatus } from '@/generated/models'
+import { getAppPort } from '@letar/infra-config'
 
 import { prisma } from './db'
 
 // Реэкспорт типов для обратной совместимости
 export { HealthStatus } from '@/generated/models'
 
-// Карта портов приложений (только dynamic apps с API routes)
-const APP_PORTS: Record<string, number> = {
-  dashboard: 3002,
-  'driving-school': 3003,
-  mandala: 3004,
-  kami: 3005,
-  'animatrona-landing': 3008,
-  // pravda (3007) — статический экспорт, без API
-}
+// Приложения, для которых dashboard делает health-check (только dynamic apps с API routes,
+// pravda (3007) — статический экспорт, без API). Порт каждого — из канона @letar/infra-config,
+// сам список «кого проверяем» — решение этого модуля, не самого канона.
+const MONITORED_APPS = ['dashboard', 'driving-school', 'mandala', 'kami', 'animatrona-landing'] as const
 
 // Интерфейсы (совместимость со старым API)
 export interface HealthCheckResult {
@@ -96,7 +92,7 @@ async function saveHealthCheckResult(app: string, result: HealthCheckResult): Pr
  * Выполняет health-check для приложения
  */
 export async function performHealthCheck(app: string): Promise<HealthCheckResult> {
-  const port = APP_PORTS[app]
+  const port = getAppPort(app)
   if (!port) {
     return {
       timestamp: new Date(),
@@ -235,8 +231,7 @@ export async function getAppMetrics(app: string): Promise<AppMetrics> {
  * Получает метрики для всех приложений
  */
 export async function getAllAppMetrics(): Promise<AppMetrics[]> {
-  const apps = Object.keys(APP_PORTS)
-  const metrics = await Promise.all(apps.map((app) => getAppMetrics(app)))
+  const metrics = await Promise.all(MONITORED_APPS.map((app) => getAppMetrics(app)))
   return metrics
 }
 
@@ -247,7 +242,7 @@ export async function performAllHealthChecks(): Promise<Record<string, HealthChe
   const results: Record<string, HealthCheckResult> = {}
 
   await Promise.all(
-    Object.keys(APP_PORTS).map(async (app) => {
+    MONITORED_APPS.map(async (app) => {
       results[app] = await performHealthCheck(app)
     })
   )
@@ -259,7 +254,7 @@ export async function performAllHealthChecks(): Promise<Record<string, HealthChe
  * Получает список доступных приложений
  */
 export function getAvailableApps(): string[] {
-  return Object.keys(APP_PORTS)
+  return [...MONITORED_APPS]
 }
 
 /**

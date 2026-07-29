@@ -1,7 +1,7 @@
 # План развития Dashboard
 
-> **Версия:** 1.20.0
-> **Последнее обновление:** 2026-07-28
+> **Версия:** 1.20.2
+> **Последнее обновление:** 2026-07-30
 
 ---
 
@@ -505,13 +505,14 @@ UMAMI_API_PASSWORD=<пароль>
 
 ## Запланировано
 
-### 🔜 Рефакторинг: единый источник правды для реестра приложений
+### ✅ Рефакторинг: единый источник правды для карты портов (v1.20.1, частично)
 
 **Найдено:** 2026-07-15, при чистке мёртвых ссылок на `premium-rosstil`/`imot` (см.
 `PLAN_COMPLETED.md` v1.19.4, commit `d7e8e49`). Карта `app → port` и связанные списки продублированы
 хардкодом минимум в 6 местах, независимо друг от друга:
 
-- `apps/dashboard-agent/src/lib/cron.ts` — `APP_PORTS`, `APP_HOSTS`
+- `apps/dashboard-agent/src/lib/cron.ts` — `APP_PORTS`, `APP_HOSTS` (на деле — импорт из
+  `app-registry.ts`, см. ниже)
 - `apps/dashboard/src/lib/app-metrics.ts` — `APP_PORTS`
 - `apps/dashboard-agent/src/lib/server-config.ts` — `SERVER_APPS`
 - `apps/dashboard/src/lib/constants.ts` — `SUPPORTED_DATABASES`
@@ -524,16 +525,43 @@ UMAMI_API_PASSWORD=<пароль>
 привело к мёртвым cron-задачам и мёртвым `docker-compose` volume-маунтам после удаления
 `premium-rosstil`/`imot` (2026-07-05, обнаружено только 2026-07-15).
 
-**Задача:**
+**Что сделано (2026-07-30):** `SERVER_APPS` (`app → сервер`) уже был вынесен в канон
+`@letar/infra-config` до этой сессии (образец решения — dashboard-agent держит ЛОКАЛЬНУЮ копию в
+`server-config.ts`, потому что `Dockerfile.production` изолирован от монорепо и не видит `libs/`;
+дрейф значений ловит `server-config.guard.spec.ts`, сравнивающий копию с каноном относительным
+импортом). По тому же паттерну добавлен `APP_PORTS`/`getAppPort()` в `@letar/infra-config`:
 
-- [ ] Вынести карты `port`/`host`/`server`/`containerName` в единый источник — читать из
-      `DeployedApp` (dashboard-agent уже общается с dashboard по HTTP) либо, если БД недоступна из
-      dashboard-agent на раннем старте, держать один shared JSON/TS-модуль и импортировать его в
-      обоих приложениях вместо независимых копий.
-- [ ] `SUPPORTED_DATABASES`/`APP_CONFIG` (бэкапы) и `KNOWN_APPS`-подобные UI-списки — туда же или
-      генерировать из того же источника.
-- [ ] После рефакторинга: убедиться, что удаление приложения из монорепо требует правки только
-      одного места (плюс сам `DeployedApp` в БД).
+- [x] `apps/dashboard/src/lib/app-metrics.ts` — прямой импорт `getAppPort()` из `@letar/infra-config`
+      (dashboard не Docker-изолирован, может импортировать `libs/` напрямую; добавлено в
+      `tsconfig.json` paths/references, `package.json` dependency, `next.config.ts` transpilePackages)
+- [x] `apps/dashboard-agent/src/lib/app-registry.ts` — локальная копия значений портов (набор
+      приложений — своё решение модуля, только те, кого агент реально вызывает), дрейф от канона
+      ловит новый `app-registry.guard.spec.ts` (тот же паттерн, что `server-config.guard.spec.ts`)
+- [x] Список «кого мониторим/вызываем» в обоих файлах остался явным локальным (`MONITORED_APPS` в
+      dashboard, набор ключей в dashboard-agent) — сознательно не унифицирован с каноном, чтобы не
+      расширить тихо набор приложений, участвующих в health-check/cron-вызовах (канон описывает
+      «какой у кого порт», не «кого опрашивать»)
+- [x] Проверено: `nx typecheck:tsgo`/`typecheck`, `nx test`, `nx lint`, `nx build` для
+      `infra-config`, `dashboard`, `dashboard-agent` — зелёные
+
+**Сознательно НЕ тронуто в этом проходе** (не являются тем же классом дрейфа — значение одного и
+того же факта, продублированное текстом — а самостоятельными curated-списками с собственной бизнес-
+логикой; унификация с портами рискует незаметно расширить/сузить их поведение):
+
+- `SUPPORTED_DATABASES` (`constants.ts`) — allow-list из 3 приложений для UI восстановления бэкапов,
+  сильно уже, чем полный список БД в `dashboard-agent/database.ts` `APP_CONFIG` (16 приложений).
+  Расхождение может быть багом (недоступна кнопка восстановления для части БД), но это отдельная
+  задача — сначала выяснить, почему список узкий, прежде чем расширять
+- `KNOWN_APPS` (`deploy/history/page.tsx`) — фильтр UI из 2 значений (`dashboard`, `label-printer`),
+  `label-printer` не входит даже в `SERVER_APPS` (Electron-приложение, не деплоится через
+  `deploy-affected.sh`) — не реестр приложений, а ручной список кнопок фильтра
+- `APP_CONFIG` в `dashboard-agent/database.ts` (конфигурация БД для бэкапов: `secretsPath`,
+  `containerName`, `database`, `user`) — единственный владелец этих данных сейчас (
+  `dashboard/src/lib/secrets.ts` с аналогичной картой уже удалён в Фазе 2 v1.18.0), реальной
+  межфайловой дупликации значений нет, только концептуальное сходство с другими картами
+
+**Если возвращаться к этой задаче** — начать с выяснения, почему `SUPPORTED_DATABASES` уже 3
+приложения, а не 16 (баг или намеренное ограничение UI), прежде чем унифицировать источник.
 
 **Зависимости:** нет, чисто внутренний рефакторинг dashboard/dashboard-agent.
 
