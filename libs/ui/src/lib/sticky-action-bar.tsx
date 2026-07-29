@@ -1,7 +1,8 @@
 'use client'
 
 import { Box, type BoxProps, HStack, mergeRefs, type StackProps } from '@chakra-ui/react'
-import { forwardRef, type ReactNode, useLayoutEffect, useRef } from 'react'
+import { forwardRef, type ReactNode } from 'react'
+import { usePublishedHeight } from './use-published-height'
 
 export interface StickyActionBarProps extends BoxProps {
   /** Кнопки действия (обычно одна основная CTA) */
@@ -49,32 +50,12 @@ const ACTION_BAR_HEIGHT_VAR = '--letar-sticky-actionbar-height'
  */
 export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(function StickyActionBar(
   { children, contentProps, ...rest },
-  ref,
+  ref
 ) {
-  const innerRef = useRef<HTMLDivElement>(null)
-
   // Публикует свою высоту, чтобы контент выше мог зарезервировать под неё отступ и не
   // оказаться в её визуально перекрытой зоне при полной прокрутке (см. JSDoc переменной
-  // выше). Тот же паттерн (ResizeObserver + getBoundingClientRect для немедленного значения
-  // при монтировании), что уже проверен на CookieBanner.
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    const el = innerRef.current
-    if (!el) {
-      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, '0px')
-      return
-    }
-    root.style.setProperty(ACTION_BAR_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
-
-    const observer = new ResizeObserver(() => {
-      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      root.style.setProperty(ACTION_BAR_HEIGHT_VAR, '0px')
-    }
-  }, [])
+  // выше). Панель всегда смонтирована, когда рендерится — active всегда true.
+  const innerRef = usePublishedHeight(ACTION_BAR_HEIGHT_VAR, true)
 
   return (
     <Box

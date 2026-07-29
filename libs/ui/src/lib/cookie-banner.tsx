@@ -2,8 +2,9 @@
 
 import { Box, Button, Checkbox, Container, HStack, Stack, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { type CookieConsentState, createConsentConfig } from './consent-types'
+import { usePublishedHeight } from './use-published-height'
 
 /**
  * CSS-переменная с текущей высотой баннера (0, если он скрыт) — читает {@link StickyActionBar},
@@ -41,43 +42,9 @@ export function CookieBanner({
   const [shown, setShown] = useState(false)
   const [analytics, setAnalytics] = useState(false)
   const [marketing, setMarketing] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
   // Публикует свою высоту в CSS-переменную, пока видим — StickyActionBar (тот же bottom:0)
   // читает её, чтобы приподняться над баннером, а не спрятаться под ним по pointer-events.
-  // Синхронный getBoundingClientRect() в useLayoutEffect даёт значение до первой отрисовки,
-  // но само по себе недостаточно: на реальной странице замер иногда попадает на момент ДО
-  // того, как осядут стили/шрифты/соседние баннеры (offline-consent и т.п.) — измеренная
-  // высота оказывается неверной и раньше замораживалась навсегда, потому что единственным
-  // триггером пересчёта был `window resize`, а на статичном вьюпорте (планшет на феста, без
-  // изменения размера окна) он никогда не происходит. Подтверждено вручную: после чистой
-  // загрузки `--letar-cookie-banner-height` показывал 1655px (в 12 раз больше реальных
-  // 142px) и не исправлялся сам — только после ручного resize.
-  // ResizeObserver — правильный инструмент для «пересчитывать при любом изменении размера
-  // элемента», не только для явного resize окна; используем его как основной механизм,
-  // getBoundingClientRect — только для немедленного значения при первом монтировании (быстрее
-  // первого колбэка ResizeObserver, который приходит асинхронно).
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    if (!shown || !rootRef.current) {
-      root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
-      return
-    }
-    const el = rootRef.current
-    root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
-
-    // getBoundingClientRect() и в колбэке (не entry.contentRect) — тот считает только
-    // content-box (без border), а у баннера есть borderTopWidth, из-за чего высоты
-    // разошлись бы на 1px между первым и последующими замерами.
-    const observer = new ResizeObserver(() => {
-      root.style.setProperty(BANNER_HEIGHT_VAR, `${el.getBoundingClientRect().height}px`)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      root.style.setProperty(BANNER_HEIGHT_VAR, '0px')
-    }
-  }, [shown])
+  const rootRef = usePublishedHeight(BANNER_HEIGHT_VAR, shown)
 
   useEffect(() => {
     try {
