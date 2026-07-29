@@ -29,6 +29,17 @@ export function DisclaimerConsent({ accepted, onChange, isRu }: DisclaimerConsen
       borderColor="border"
       bg="bg.subtle"
       textAlign="left"
+      // scroll-margin-bottom (не только padding-bottom на родителе!) — браузерный
+      // scrollIntoView() (и Playwright actionability, который его использует) скроллит
+      // МИНИМАЛЬНО необходимое расстояние, а не до самого низа страницы. padding-bottom
+      // на родительском контейнере защищает только «докрутили до конца», а не
+      // промежуточные позиции — scroll-margin-bottom учитывается ЛЮБЫМ scrollIntoView,
+      // гарантируя зазор от sticky-панели независимо от того, докрутили страницу
+      // полностью или ровно настолько, чтобы этот блок стал виден (archetest, 2026-07-29:
+      // Playwright реально застревал именно в этой промежуточной позиции — `checkbox__
+      // control intercepts pointer events`, т.к. попадал в перекрытую StickyActionBar+
+      // CookieBanner зону, docs — `.claude/docs/ui-components.md`).
+      scrollMarginBottom="calc(var(--letar-sticky-actionbar-height, 0px) + var(--letar-cookie-banner-height, 0px) + 1rem)"
     >
       <Text fontSize="xs" color="fg.muted" whiteSpace="pre-line" mb={4}>
         {isRu ? DISCLAIMER_RU : DISCLAIMER_EN}

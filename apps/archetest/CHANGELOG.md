@@ -5,6 +5,16 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.26.5] - 2026-07-29
+
+### Fixed
+
+- **`DisclaimerConsent`** получил `scroll-margin-bottom` — `padding-bottom`-резерв под
+  `StickyActionBar` (0.26.4) защищал только «докрутили до самого низа», но браузерный
+  `scrollIntoView()` (и Playwright-actionability) скроллит минимально необходимое
+  расстояние, из-за чего чекбокс мог застревать в перекрытой sticky-зоне на
+  промежуточной scroll-позиции. Подтверждено настоящим Playwright (не ручными кликами).
+
 ## [0.26.4] - 2026-07-29
 
 ### Fixed
