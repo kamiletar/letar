@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.9.8 → 0.9.10 — self-deploy dashboard-agent больше не обрывает сам себя (2026-07-30, dashboard-agent-dev)
+
+Закрыт долгоживущий backlog-пункт «Self-deploy обрывает сам себя на recreate-шаге»
+(наблюдался минимум 4 раза с 2026-07-21, каждый раз чинился вручную SSH-резервом BlackCove).
+Причина: `dashboard-agent` сам хостит deploy-mcp туннель (`:13100`), через который идёт
+собственный деплой (`nsenter`-спавн `deploy-affected.sh` внутри его же контейнера) — при
+`docker compose up -d --force-recreate` старый контейнер останавливался синхронно, убивая
+вместе с собой процесс деплоя. Потребовалось три итерации, каждая нашла отдельный баг,
+подтверждённый живым прогоном на s2 самим BlackCove:
+
+1. **0.9.8 (коммит `fd1f8c6a`):** обобщён на `dashboard-agent` уже существовавший для
+   `dashboard` паттерн — detached restart-скрипт через `nohup setsid`. **Не сработало:**
+   `setsid` отвязывает процесс только от сессии/терминала, не от **cgroup** контейнера — при
+   `docker stop`/`rm` все процессы в cgroup контейнера убиваются независимо от сессии.
+   Detached-скрипт обрывался ровно на "Recreate", не успев стартовать.
+2. **0.9.9 (коммит `d689a8d6`):** заменено на `systemd-run --unit=... --collect` — transient
+   systemd-юнит в `system.slice`, отдельной от cgroup докера. **Не сработало:** голый
+   `systemd-run` без `sudo` требует polkit-авторизацию (`Interactive authentication
+   required`) — непривилегированный `deploy` не может стартовать unit в `system.slice` без
+   интерактивной сессии. Вдобавок вызов стоял в `then`-блоке `if`, поэтому его ненулевой
+   exit-код под `set -e` (действует всю жизнь `deploy-affected.sh`) убивал весь скрипт, не
+   доходя до fallback-ветки.
+3. **0.9.10 (коммит `12b2ac30`) — сработало:** вызов перенесён в условие `if` (падение внутри
+   условия `set -e` не триггерит) + добавлен `sudo -n systemd-run` (passwordless sudo у
+   `deploy` подтверждён рабочим). Живой деплой прошёл полностью автоматически: контейнер
+   пересоздался штатно (без зависания в `Created`), `/tmp/dashboard-agent-restart-*.log`
+   (владелец `root`, подтверждает запуск от sudo) показал полный цикл
+   `Creating → Created → Starting → Started` + успешный старт крон-планировщика/сборщика
+   метрик.
+
+Заодно исправлен сопутствующий баг: цикл ожидания healthcheck перед reload nginx
+(`deploy-affected.sh`) вычислял имя контейнера как `${app}-app`, но `dashboard-agent` в
+`docker-compose.production.yml` задаёт `container_name: dashboard-agent` без суффикса —
+добавлен явный кейс.
+
+**Файлы:** правки только в корневом `deploy-affected.sh` (общий скрипт для всех приложений
+монорепо, не код `dashboard-agent`), поэтому версия `dashboard-agent` бампилась как маркер
+прогресса задачи из его собственного бэклога. Полная переписка каждой итерации — в
+[PLAN.md](PLAN.md) и [CHANGELOG.md](CHANGELOG.md).
+
 ## Новая cron-задача `s2-pageview-count` (2026-07-30, dashboard-dev, коммит `a3163ecd`)
 
 Добавлена в `DEFAULT_CRON_JOBS` (`src/lib/cron.ts`) как часть фичи dashboard «грубый счётчик

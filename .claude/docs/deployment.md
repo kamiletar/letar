@@ -396,7 +396,7 @@ rollout — см. `apps/form-example/PLAN_COMPLETED.md`):
       `P1000: Authentication failed`. Если оба нужны — держи одинаковое значение в обеих переменных.
 - [ ] **`prisma/migrations/` существует и не пуста** до первого `letar.rollout`/production-деплоя.
       Если схема раньше накатывалась через `prisma db push` (без истории миграций) — `migrate
-  deploy` против непустой БД падает `P3005: database schema is not empty`. Нужен baseline:
+deploy` против непустой БД падает `P3005: database schema is not empty`. Нужен baseline:
       сгенерировать первую миграцию локально (`nx db:migrate <app> -- --name init`, при
       необходимости — `migrate dev --create-only` из текущей схемы), закоммитить, затем на
       проде выполнить `prisma migrate resolve --applied <migration_name>` (только пометка в
@@ -723,22 +723,21 @@ export SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-/home/deploy/.age/letar-key.txt}"
 
 ---
 
-### Self-деплой dashboard-agent обрывается на recreate-шаге
+### ✅ Self-деплой dashboard-agent обрывался на recreate-шаге — исправлено (2026-07-30, коммит `12b2ac30`)
 
-**Ключевой факт:** `deploy-mcp`/`deploy_app` работает через SSH-туннель (`:13100`) **в тот же самый контейнер dashboard-agent**, который выполняет и оркеструет деплой. Это не отдельная инфраструктура — деплой-агент деплоит сам себя.
+**Ключевой факт:** `deploy-mcp`/`deploy_app` работает через SSH-туннель (`:13100`) **в тот же самый контейнер dashboard-agent**, который выполняет и оркеструет деплой. Это не отдельная инфраструктура — деплой-агент деплоит сам себя. Тот же класс проблемы касается и `dashboard` (process supervisor UI на 3002).
 
-**Симптом:** при `deploy_app(dashboard-agent, production)` скрипт доходит до `docker compose up -d` → останавливает старый контейнер `dashboard-agent` → в этот момент обрывается сам процесс `deploy-affected.sh` (он жил внутри старого контейнера) → новый контейнер остаётся в статусе `Created`, но не стартует. `deploy_status` после этого падает с `Не удалось достучаться до агента на s2 (туннель :13100): fetch failed` — потому что обслуживающий туннель контейнер только что убит.
+**Было:** при `deploy_app(dashboard-agent, production)` скрипт доходил до `docker compose up -d` → останавливал старый контейнер `dashboard-agent` → в этот момент обрывался сам процесс `deploy-affected.sh` (он жил в cgroup старого контейнера) → новый контейнер оставался в статусе `Created`, но не стартовал. `deploy_status` после этого падал с `fetch failed`.
 
-**Починка (ручная, до системного фикса):**
+**Три итерации фикса в `deploy-affected.sh` (каждая нашла отдельный баг, найдено живыми прогонами на s2):**
 
-```bash
-/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
-  "cd /home/deploy/letar/apps/dashboard-agent && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && docker compose -f docker-compose.production.yml --env-file .env.docker up -d"
-```
+1. `nohup setsid` detached-скрипт (обобщение уже существовавшего для `dashboard` паттерна) — **не сработало**: `setsid` отвязывает процесс от сессии/терминала, но не от **cgroup** контейнера. При `docker stop`/`rm` все процессы в cgroup контейнера убиваются вместе с ним независимо от сессии.
+2. `systemd-run --unit=... --collect` (transient-юнит в `system.slice`, отдельной от cgroup докера) — **не сработало**: без `sudo` `systemd-run` требует polkit-авторизацию (`Interactive authentication required`), непривилегированный `deploy` не может стартовать unit в `system.slice`. Вдобавок вызов стоял в `then`-блоке `if` — под `set -e` его ошибка убивала весь скрипт, не доходя до fallback.
+3. `sudo -n systemd-run` + вызов перенесён в условие `if` (падение внутри условия `set -e` не триггерит) — **сработало**. Деплой прошёл полностью автоматически: контейнер пересоздался штатно, лог detached-скрипта (владелец `root`, подтверждает запуск от sudo) показал полный цикл `Creating → Created → Starting → Started`.
 
-Проверить `docker ps -a --filter name=dashboard-agent` — если новый контейнер `Created`, а старый `Exited`, это тот самый обрыв, а не ошибка сборки.
+**Механизм (актуальный код):** `deploy-affected.sh` для `app = dashboard | dashboard-agent` не вызывает `docker compose up -d --force-recreate` напрямую, а пишет restart-скрипт во `/tmp` и запускает его через `sudo -n systemd-run --unit=... --collect` — скрипт живёт в `system.slice`, независимо от cgroup контейнера, ждёт 3с, останавливает/удаляет старый контейнер, поднимает новый. Fallback на `nohup setsid` сохранён на случай отсутствия `systemd-run`/`sudo`, с явным предупреждением в логе, что он не решает self-deploy.
 
-**Правило на будущее:** деплой dashboard-agent на прод **всегда** рискует зависнуть на этом шаге — закладывать это как ожидаемый риск, не как аномалию. Системный фикс не применён (возможные варианты: `docker compose up -d --wait`, health-check-retry с большим таймаутом в `deploy-affected.sh`, либо запуск оркестрации через отдельный процесс/watchdog, не убиваемый вместе с самим контейнером).
+**Если снова всплывёт зависание в `Created`:** проверить `/tmp/dashboard-agent-restart-*.log` (или `dashboard-restart-*.log`) на s2 — если файла нет вообще, значит упал сам вызов `systemd-run`/`sudo` (искать в выводе `deploy-affected.sh` строку сразу после `⚠️ ... self-deploy: detached restart`); если файл есть, но обрывается на "Recreate" — тот же cgroup-баг вернулся другим путём.
 
 ---
 
