@@ -7,33 +7,12 @@
  * через переменные окружения процесса (например через "env" в .mcp.json, как у letar-consultant).
  */
 
+import { parseDotEnv } from '@letar/mcp-server-kit'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 /** Корень репозитория (cli запускается из корня через `bunx tsx`). */
 export const REPO_ROOT = process.env['STUDIO_TIME_MCP_REPO_ROOT'] ?? process.cwd()
-
-/** Парсит dotenv-содержимое в объект (кавычки снимаются). */
-function parseEnv(content: string): Record<string, string> {
-  const env: Record<string, string> = {}
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue
-    }
-    const eqIdx = trimmed.indexOf('=')
-    if (eqIdx === -1) {
-      continue
-    }
-    const key = trimmed.slice(0, eqIdx).trim()
-    let value = trimmed.slice(eqIdx + 1).trim()
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1)
-    }
-    env[key] = value
-  }
-  return env
-}
 
 let cachedLocalEnv: Record<string, string> | null = null
 
@@ -44,7 +23,7 @@ function readStudioLocalEnv(): Record<string, string> {
   }
   const path = resolve(REPO_ROOT, 'apps/studio/.env.local')
   try {
-    cachedLocalEnv = parseEnv(readFileSync(path, 'utf8'))
+    cachedLocalEnv = parseDotEnv(readFileSync(path, 'utf8'))
   } catch {
     cachedLocalEnv = {}
   }
@@ -65,8 +44,8 @@ export function timeMcpSecret(): string {
   const secret = readStudioLocalEnv()['TIME_MCP_SECRET']
   if (!secret) {
     throw new Error(
-      'TIME_MCP_SECRET не найден ни в process.env, ни в apps/studio/.env.local. '
-        + 'Для не-локального STUDIO_URL задай TIME_MCP_SECRET явно (например через "env" в .mcp.json).',
+      'TIME_MCP_SECRET не найден ни в process.env, ни в apps/studio/.env.local. ' +
+        'Для не-локального STUDIO_URL задай TIME_MCP_SECRET явно (например через "env" в .mcp.json).'
     )
   }
   return secret

@@ -6,30 +6,13 @@
  * Фаза 11 §11.4 PLAN.md: time_start/time_stop/time_switch/time_note/time_status/time_log/time_pause.
  */
 
+import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { studioTimeRequest } from './client.js'
 
 const TIME_KIND = z.enum(['WORK', 'MEETING', 'TRAVEL', 'ADMIN'])
-
-// Обе функции возвращают ОДНУ и ту же форму (с полем isError) без аннотации типа — так вывод
-// типов SDK-колбэка работает (см. libs/deploy-mcp/src/server.ts — тот же паттерн, тот же повод).
-
-/** Оборачивает результат в MCP text-content. */
-function text(body: string) {
-  return { content: [{ type: 'text' as const, text: body }], isError: false as boolean }
-}
-
-/** Оборачивает ошибку в MCP isError-ответ с диагностикой. */
-function errorText(body: string) {
-  return { content: [{ type: 'text' as const, text: body }], isError: true as boolean }
-}
-
-/** JSON-представление данных для вывода в чат. */
-function pretty(data: unknown): string {
-  return '```json\n' + JSON.stringify(data, null, 2) + '\n```'
-}
 
 export function createStudioTimeMcpServer(): McpServer {
   const server = new McpServer({ name: '@letar/studio-time-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
@@ -43,16 +26,24 @@ export function createStudioTimeMcpServer(): McpServer {
       'Записи всегда идут черновиком (status: DRAFT) — владелец утверждает их в studio перед выставлением клиенту.',
     ].join('\n'),
     {
-      app: z.string().min(1).describe(
-        'repoSlug приложения (напр. "svoichuzhie") — проект должен быть заведён в studio /owner/projects',
-      ),
-      description: z.string().min(1).max(2000).describe(
-        'Чем занимаешься по ЭТОМУ проекту — видит клиент. Без имён других клиентов/проектов, путей к файлам, внутренней кухни',
-      ),
+      app: z
+        .string()
+        .min(1)
+        .describe('repoSlug приложения (напр. "svoichuzhie") — проект должен быть заведён в studio /owner/projects'),
+      description: z
+        .string()
+        .min(1)
+        .max(2000)
+        .describe(
+          'Чем занимаешься по ЭТОМУ проекту — видит клиент. Без имён других клиентов/проектов, путей к файлам, внутренней кухни'
+        ),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
-      idempotencyKey: z.string().optional().describe(
-        'Ключ идемпотентности — повтор с тем же ключом вернёт существующую запись вместо дубля. Генерируется автоматически, если не передан',
-      ),
+      idempotencyKey: z
+        .string()
+        .optional()
+        .describe(
+          'Ключ идемпотентности — повтор с тем же ключом вернёт существующую запись вместо дубля. Генерируется автоматически, если не передан'
+        ),
     },
     async ({ app, description, kind, idempotencyKey }) => {
       const key = idempotencyKey ?? randomUUID()
@@ -65,11 +56,12 @@ export function createStudioTimeMcpServer(): McpServer {
         if (!res.ok) {
           return errorText(`❌ time_start(${app}): ${pretty(res.json)}`)
         }
-        return text(`⏱ Таймер запущен: **${app}** — ${description}\n\n${pretty(res.json.data)}`)
+        const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
+        return text(`⏱ Таймер запущен: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
       } catch (err) {
         return errorText(`❌ time_start(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── time_switch ─────────────────────────────────────────────────────────────
@@ -98,11 +90,12 @@ export function createStudioTimeMcpServer(): McpServer {
         if (!res.ok) {
           return errorText(`❌ time_switch(${app}): ${pretty(res.json)}`)
         }
-        return text(`🔀 Переключено на: **${app}** — ${description}\n\n${pretty(res.json.data)}`)
+        const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
+        return text(`🔀 Переключено на: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
       } catch (err) {
         return errorText(`❌ time_switch(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── time_stop ───────────────────────────────────────────────────────────────
@@ -144,7 +137,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_pause: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── time_note ───────────────────────────────────────────────────────────────
@@ -162,7 +155,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_note: ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   // ─── time_status ─────────────────────────────────────────────────────────────
@@ -187,7 +180,11 @@ export function createStudioTimeMcpServer(): McpServer {
     'Записывает время задним числом — не трогает активный таймер (например созвон/дорогу, которые не отследил в моменте таймером).',
     {
       app: z.string().min(1).describe('repoSlug приложения'),
-      minutes: z.number().positive().max(24 * 60).describe('Сколько минут занял этот участок работы'),
+      minutes: z
+        .number()
+        .positive()
+        .max(24 * 60)
+        .describe('Сколько минут занял этот участок работы'),
       description: z.string().min(1).max(2000).describe('Чем занимался — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
@@ -204,12 +201,12 @@ export function createStudioTimeMcpServer(): McpServer {
           return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
         }
         return text(
-          `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`,
+          `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`
         )
       } catch (err) {
         return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    },
+    }
   )
 
   return server

@@ -342,7 +342,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.0",
+      "version": "0.55.12",
       "dependencies": {
         "cheerio": "^1.2.0",
       },
@@ -395,7 +395,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.26.5",
+      "version": "0.27.0",
     },
     "apps/archetest-e2e": {
       "name": "@letar/archetest-e2e",
@@ -429,7 +429,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "dependencies": {
         "@fastify/cors": "^11.0.0",
         "@letar/email": "workspace:*",
@@ -582,7 +582,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@react-pdf/renderer": "^4.5.1",
       },
@@ -613,7 +613,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.12.1",
+      "version": "0.21.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.30.0",
       },
@@ -758,7 +758,8 @@
       "version": "0.3.0",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
-        "@modelcontextprotocol/sdk": "^1.29.0",
+        "@letar/mcp-server-kit": "workspace:*",
+        "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
       },
     },
@@ -884,6 +885,10 @@
         "@modelcontextprotocol/sdk": "^1.29.0",
       },
     },
+    "libs/mcp-server-kit": {
+      "name": "@letar/mcp-server-kit",
+      "version": "0.1.0",
+    },
     "libs/number-words": {
       "name": "@letar/number-words",
       "version": "0.1.0",
@@ -929,6 +934,7 @@
       "name": "@letar/studio-time-mcp",
       "version": "0.1.0",
       "dependencies": {
+        "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
       },
@@ -1964,6 +1970,8 @@
     "@letar/letar-landing-e2e": ["@letar/letar-landing-e2e@workspace:apps/letar-landing-e2e"],
 
     "@letar/mandala": ["@letar/mandala@workspace:apps/mandala"],
+
+    "@letar/mcp-server-kit": ["@letar/mcp-server-kit@workspace:libs/mcp-server-kit"],
 
     "@letar/number-words": ["@letar/number-words@workspace:libs/number-words"],
 

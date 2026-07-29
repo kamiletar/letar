@@ -8,6 +8,8 @@ import { studioUrl, timeMcpSecret } from './config.js'
 export interface McpTimeResponse<T = unknown> {
   data?: T
   error?: unknown
+  /** Стоп-кран (§11.15 PLAN.md studio): просрочка оплаты клиентом — только в ответе time_start/time_switch */
+  warning?: string | null
 }
 
 export interface RequestOptions {
@@ -29,9 +31,12 @@ export interface McpTimeResult<T = unknown> {
  * валидным JSON-телом `{ error }`) НЕ бросают — возвращаются как `ok: false` для читаемого
  * сообщения агенту (например 404 «проект не найден» — это ожидаемый, не исключительный случай).
  */
-export async function studioTimeRequest<T = unknown>(
-  { method = 'GET', path, body, timeoutMs = 15000 }: RequestOptions,
-): Promise<McpTimeResult<T>> {
+export async function studioTimeRequest<T = unknown>({
+  method = 'GET',
+  path,
+  body,
+  timeoutMs = 15000,
+}: RequestOptions): Promise<McpTimeResult<T>> {
   const url = `${studioUrl()}${path}`
 
   let resp: Response
