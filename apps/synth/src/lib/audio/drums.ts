@@ -22,8 +22,13 @@ function createNoiseBuffer(ctx: BaseAudioContext): AudioBuffer {
 
 // Кик/том: синус с быстрым питч-свипом сверху вниз («удар молоточка») + амп-огибающая.
 // tone управляет силой свипа — больше tone = более щёлкающая, «клик»-атака (характерно для 808).
-function triggerKickOrTom(ctx: BaseAudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
-  const now = ctx.currentTime
+function triggerKickOrTom(
+  ctx: BaseAudioContext,
+  dest: AudioNode,
+  synth: DrumPadSynth,
+  velocity: number,
+  now: number
+): void {
   const baseFreq = midiToFreq(synth.pitch)
   const sweepMult = 1 + synth.tone * 4
 
@@ -50,9 +55,9 @@ function triggerSnare(
   dest: AudioNode,
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
-  velocity: number
+  velocity: number,
+  now: number
 ): void {
-  const now = ctx.currentTime
   const baseFreq = midiToFreq(synth.pitch)
   const vel = velocityScale(velocity)
 
@@ -92,8 +97,7 @@ function triggerSnare(
 
 // Хай-хэт (закрытый/открытый — разница только в decay патча): 6 square-осцилляторов
 // в негармоничных соотношениях (классический 909-приём) → highpass → короткая/длинная огибающая.
-function triggerHat(ctx: BaseAudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number): void {
-  const now = ctx.currentTime
+function triggerHat(ctx: BaseAudioContext, dest: AudioNode, synth: DrumPadSynth, velocity: number, now: number): void {
   const baseFreq = midiToFreq(synth.pitch) * 0.5
   const stopAt = now + synth.decay + 0.1
 
@@ -128,9 +132,9 @@ function triggerClap(
   dest: AudioNode,
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
-  velocity: number
+  velocity: number,
+  now: number
 ): void {
-  const now = ctx.currentTime
   const vel = velocityScale(velocity)
 
   const bandpass = ctx.createBiquadFilter()
@@ -174,22 +178,28 @@ export class DrumEngine {
     this.noiseBuffer = createNoiseBuffer(ctx)
   }
 
-  /** Ударяет по пэду (one-shot — не требует note-off) */
-  trigger(synth: DrumPadSynth, velocity = 1): void {
+  /**
+   * Ударяет по пэду (one-shot — не требует note-off).
+   * `when` — момент старта на аудио-часах (`ctx.currentTime`); по умолчанию «прямо сейчас».
+   * Секвенсор передаёт время из lookahead-планировщика — так удар звучит sample-accurate,
+   * а не с джиттером JS-таймера.
+   */
+  trigger(synth: DrumPadSynth, velocity = 1, when?: number): void {
+    const now = when ?? this.ctx.currentTime
     switch (synth.type) {
       case '808kick':
       case 'tom':
-        triggerKickOrTom(this.ctx, this.destination, synth, velocity)
+        triggerKickOrTom(this.ctx, this.destination, synth, velocity, now)
         break
       case 'snare':
-        triggerSnare(this.ctx, this.destination, this.noiseBuffer, synth, velocity)
+        triggerSnare(this.ctx, this.destination, this.noiseBuffer, synth, velocity, now)
         break
       case 'clap':
-        triggerClap(this.ctx, this.destination, this.noiseBuffer, synth, velocity)
+        triggerClap(this.ctx, this.destination, this.noiseBuffer, synth, velocity, now)
         break
       case 'hat-closed':
       case 'hat-open':
-        triggerHat(this.ctx, this.destination, synth, velocity)
+        triggerHat(this.ctx, this.destination, synth, velocity, now)
         break
     }
   }

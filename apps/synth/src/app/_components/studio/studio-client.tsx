@@ -29,6 +29,8 @@ import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
 import { PatchLibrary } from './patch-library'
+import { SequencerPanel } from './sequencer-panel'
+import { useDrumSequencer } from './use-drum-sequencer'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
 import { useMasterBus } from './use-master-bus'
@@ -84,12 +86,8 @@ export function StudioClient() {
   const midiMonitor = useMidiMonitor()
   const padMidiLearn = usePadMidiLearn()
 
-  // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
-  const handlePadHit = useCallback((index: number, velocity: number) => {
-    const pad = drumPatchRef.current.engine.pads[index]
-    if (pad?.synth) {
-      drumEngineRef.current?.trigger(pad.synth, velocity)
-    }
+  // Подсвечивает пэд на короткое время — переиспользуется живым ударом и шагами секвенсора
+  const flashPad = useCallback((index: number) => {
     setActivePads((prev) => new Set([...prev, index]))
     setTimeout(() => {
       setActivePads((prev) => {
@@ -99,6 +97,20 @@ export function StudioClient() {
       })
     }, 100)
   }, [])
+
+  // Ударяет по пэду драм-кита (one-shot — без note-off), подсвечивает его на короткое время
+  const handlePadHit = useCallback(
+    (index: number, velocity: number) => {
+      const pad = drumPatchRef.current.engine.pads[index]
+      if (pad?.synth) {
+        drumEngineRef.current?.trigger(pad.synth, velocity)
+      }
+      flashPad(index)
+    },
+    [flashPad]
+  )
+
+  const sequencer = useDrumSequencer({ drumEngineRef, drumPatchRef, onPadHit: flashPad })
 
   const handlePadChange = useCallback((pad: DrumPad) => {
     setDrumPatch((p) => {
@@ -579,6 +591,17 @@ export function StudioClient() {
                 type="drumkit"
                 currentPatch={drumPatch}
                 onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
+              />
+              <SequencerPanel
+                pads={drumPatch.engine.pads}
+                pattern={sequencer.pattern}
+                currentStep={sequencer.currentStep}
+                isPlaying={sequencer.isPlaying}
+                bpm={sequencer.bpm}
+                onToggleStep={sequencer.toggleStep}
+                onToggle={sequencer.toggle}
+                onBpmChange={sequencer.setBpm}
+                onClear={sequencer.clear}
               />
             </Box>
           ) : (
