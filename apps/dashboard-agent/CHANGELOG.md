@@ -11,6 +11,37 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.11] — 2026-07-30
+
+### Changed
+
+- `src/lib/server-config.ts`: `SERVER_APPS`/`APP_PORTS`/`APP_HOSTS` слиты в один
+  `APP_REGISTRY` (сервер + опциональные порт/host на приложение) вместо трёх параллельных
+  `Record`'ов в двух файлах — закрывает backlog «Регистрация нового приложения разбросана по
+  3 местам» (частично: `app-registry.ts` стал тонким реэкспортом производных
+  `APP_PORTS`/`APP_HOSTS` + `getAppUrl`, канон `@letar/infra-config` по-прежнему хранит их
+  раздельно — межпроектная унификация вне scope этой сессии). Guard-тесты
+  (`server-config.guard.spec.ts`, `app-registry.guard.spec.ts`) прошли без изменений —
+  производные экспорты дают идентичные значения.
+
+### Added
+
+- `src/lib/history.ts`: история сетевого трафика (`networkRx`/`networkTx`, байт/сек) в
+  ring-буфере метрик наравне с cpu/memory/disk — `getNetworkInfo()` уже отдавал live-снимок,
+  но без исторического ряда. Закрывает backlog «Мониторинг сетевого трафика» на уровне
+  сбора/API (`GET /api/system/history` теперь включает `networkRx`/`networkTx` в `stats` и
+  `data`); отображение в UI `dashboard` — отдельная задача (не в scope: `apps/dashboard`
+  вне файловой резервации этой сессии).
+
+### Note
+
+- Backlog-пункт «Мониторинг логов контейнеров» — при ревизии оказался частично закрыт
+  раньше: `GET /api/docker/containers/:id/logs` (`lib/docker.ts:getContainerLogs`) уже
+  существовал как pull-based доступ к логам. Реального пробела — только в
+  проактивном сканировании логов на ошибки с алертингом (по аналогии с
+  `lib/health-check.ts`) — такого пока нет, оставлено в PLAN.md как отдельный, более узкий
+  backlog-пункт вместо общего "мониторинг логов".
+
 ## [0.9.10] — 2026-07-30
 
 ### Fixed

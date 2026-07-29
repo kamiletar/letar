@@ -20,7 +20,7 @@
 2. **0.9.9 (коммит `d689a8d6`):** заменено на `systemd-run --unit=... --collect` — transient
    systemd-юнит в `system.slice`, отдельной от cgroup докера. **Не сработало:** голый
    `systemd-run` без `sudo` требует polkit-авторизацию (`Interactive authentication
-   required`) — непривилегированный `deploy` не может стартовать unit в `system.slice` без
+required`) — непривилегированный `deploy` не может стартовать unit в `system.slice` без
    интерактивной сессии. Вдобавок вызов стоял в `then`-блоке `if`, поэтому его ненулевой
    exit-код под `set -e` (действует всю жизнь `deploy-affected.sh`) убивал весь скрипт, не
    доходя до fallback-ветки.

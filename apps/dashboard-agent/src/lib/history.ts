@@ -4,7 +4,7 @@
  * Сбор каждую минуту, хранение до 30 дней
  */
 
-import { getCPUInfo, getDiskInfo, getMemoryInfo } from './system'
+import { getCPUInfo, getDiskInfo, getMemoryInfo, getNetworkInfo } from './system'
 
 // =============================================================================
 // Типы
@@ -15,6 +15,8 @@ interface MetricPoint {
   cpu: number // процент загрузки CPU
   memory: number // процент использования памяти
   disk: number // процент использования основного диска
+  networkRx: number // байт/сек, входящий трафик (сумма по интерфейсам si.networkStats())
+  networkTx: number // байт/сек, исходящий трафик
 }
 
 export interface ChartDataPoint {
@@ -37,11 +39,15 @@ export interface HistoryData {
     cpu: HistoryStats
     memory: HistoryStats
     disk: HistoryStats
+    networkRx: HistoryStats
+    networkTx: HistoryStats
   } | null
   data: {
     cpu: ChartDataPoint[]
     memory: ChartDataPoint[]
     disk: ChartDataPoint[]
+    networkRx: ChartDataPoint[]
+    networkTx: ChartDataPoint[]
   }
   timeRange: {
     from: string | null
@@ -69,17 +75,29 @@ let collectionTimer: ReturnType<typeof setInterval> | null = null
  */
 async function collectMetrics(): Promise<void> {
   try {
-    const [cpu, memory, disks] = await Promise.all([getCPUInfo(), getMemoryInfo(), getDiskInfo()])
+    const [cpu, memory, disks, network] = await Promise.all([
+      getCPUInfo(),
+      getMemoryInfo(),
+      getDiskInfo(),
+      getNetworkInfo(),
+    ])
 
     // Находим основной диск (/)
     const rootDisk = disks.find((d) => d.mount === '/') ?? disks[0]
     const diskPercent = rootDisk ? (rootDisk.usedPercent ?? 0) : 0
+
+    // si.networkStats() без аргументов уже возвращает только интерфейс(ы) по умолчанию
+    // (см. system.ts:getNetworkInfo) — суммирование безопасно, двойного счёта нет.
+    const networkRx = network.stats.reduce((sum, s) => sum + s.rxSec, 0)
+    const networkTx = network.stats.reduce((sum, s) => sum + s.txSec, 0)
 
     const point: MetricPoint = {
       timestamp: Date.now(),
       cpu: cpu.currentLoad,
       memory: memory.usedPercent ?? (memory.used / memory.total) * 100,
       disk: diskPercent,
+      networkRx,
+      networkTx,
     }
 
     history.push(point)
@@ -166,6 +184,8 @@ function aggregateIntoBuckets(points: MetricPoint[], maxBuckets: number): Metric
       cpu: bucket.reduce((sum, p) => sum + p.cpu, 0) / bucket.length,
       memory: bucket.reduce((sum, p) => sum + p.memory, 0) / bucket.length,
       disk: bucket.reduce((sum, p) => sum + p.disk, 0) / bucket.length,
+      networkRx: bucket.reduce((sum, p) => sum + p.networkRx, 0) / bucket.length,
+      networkTx: bucket.reduce((sum, p) => sum + p.networkTx, 0) / bucket.length,
     })
   }
 
@@ -189,6 +209,8 @@ export function getHistory(hours: number): HistoryData {
   const cpuValues = points.map((p) => p.cpu)
   const memValues = points.map((p) => p.memory)
   const diskValues = points.map((p) => p.disk)
+  const networkRxValues = points.map((p) => p.networkRx)
+  const networkTxValues = points.map((p) => p.networkTx)
 
   const tier = hours <= 1 ? '1h' : hours <= 6 ? '6h' : hours <= 24 ? '24h' : hours <= 168 ? '7d' : '30d'
 
@@ -196,17 +218,22 @@ export function getHistory(hours: number): HistoryData {
     tier,
     hours,
     pointsCount: points.length,
-    stats: points.length > 0
-      ? {
-        cpu: calcStats(cpuValues),
-        memory: calcStats(memValues),
-        disk: calcStats(diskValues),
-      }
-      : null,
+    stats:
+      points.length > 0
+        ? {
+            cpu: calcStats(cpuValues),
+            memory: calcStats(memValues),
+            disk: calcStats(diskValues),
+            networkRx: calcStats(networkRxValues),
+            networkTx: calcStats(networkTxValues),
+          }
+        : null,
     data: {
       cpu: points.map((p) => ({ time: formatTime(p.timestamp), value: p.cpu, timestamp: p.timestamp })),
       memory: points.map((p) => ({ time: formatTime(p.timestamp), value: p.memory, timestamp: p.timestamp })),
       disk: points.map((p) => ({ time: formatTime(p.timestamp), value: p.disk, timestamp: p.timestamp })),
+      networkRx: points.map((p) => ({ time: formatTime(p.timestamp), value: p.networkRx, timestamp: p.timestamp })),
+      networkTx: points.map((p) => ({ time: formatTime(p.timestamp), value: p.networkTx, timestamp: p.timestamp })),
     },
     timeRange: {
       from: points.length > 0 ? new Date(points[0].timestamp).toISOString() : null,
