@@ -18,6 +18,9 @@ export { createApiKeyGenerator, generateApiKey, hashApiKey } from './lib/api-key
 // Cron Secret
 export { verifyCronSecret } from './lib/cron-secret'
 
+// Shared Secret
+export { verifySharedSecret } from './lib/shared-secret'
+
 // Rate Limiter
 export {
   addToBlacklist,
