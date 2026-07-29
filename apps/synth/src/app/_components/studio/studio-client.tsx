@@ -36,7 +36,9 @@ import { useMidiMonitor } from './use-midi-monitor'
 import { usePadMidiLearn } from './use-pad-midi-learn'
 import { useRecording } from './use-recording'
 import { useStudioMentor } from './use-studio-mentor'
+import { useVoiceChain } from './use-voice-chain'
 import { useWavRender } from './use-wav-render'
+import { VoicePanel } from './voice-panel'
 
 type EngineType = 'subtractive' | 'fm' | 'drumkit'
 
@@ -94,6 +96,7 @@ export function StudioClient() {
   const hardwareRecording = useHardwareRecording()
   const midiMonitor = useMidiMonitor()
   const padMidiLearn = usePadMidiLearn()
+  const voiceChain = useVoiceChain(masterBus.bus)
 
   // Подсвечивает пэд на короткое время — переиспользуется живым ударом и шагами секвенсора
   const flashPad = useCallback((index: number) => {
@@ -710,6 +713,25 @@ export function StudioClient() {
             error={hardwareRecording.error}
             onRefreshDevices={() => void hardwareRecording.refreshDevices()}
             onToggle={hardwareRecording.toggle}
+          />
+        )}
+
+        {/* Вокальный тракт: компрессор/EQ/де-эссер + монитор в наушники + запись голоса поверх бита */}
+        {started && (
+          <VoicePanel
+            devices={voiceChain.devices}
+            selectedDeviceId={voiceChain.selectedDeviceId}
+            onSelectDevice={voiceChain.setSelectedDeviceId}
+            onRefreshDevices={() => void voiceChain.refreshDevices()}
+            active={voiceChain.active}
+            onToggleActive={voiceChain.toggleActive}
+            error={voiceChain.error}
+            params={voiceChain.params}
+            onParamsChange={voiceChain.updateParams}
+            level={voiceChain.level}
+            isRecording={voiceChain.isRecording}
+            recordingUrl={voiceChain.recordingUrl}
+            onToggleRecording={voiceChain.toggleRecording}
           />
         )}
 
