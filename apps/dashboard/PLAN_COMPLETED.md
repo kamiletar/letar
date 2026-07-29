@@ -2,6 +2,26 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.20.7 — дедупликация AlertType/AlertSeverity + переименование npm.ts (2026-07-30)
+
+Две мелкие задачи из раздела «Запланировано», найденные 2026-07-28 при проектировании §25
+«Еженедельный контроль зависимостей» (`PLAN-INFRA.md`).
+
+**`AlertType`/`AlertSeverity` дедупликация:** `CreateAlertSchema` в `api/alerts/route.ts` дублировал
+строкой перечень значений `enum AlertType`/`AlertSeverity` из `schema.zmodel` внутри `z.enum([...])`.
+Расхождение уже проявлялось на практике при проектировании §25 (потребовались `DEPS_VULNERABLE`/
+`DEPS_STALE`, добавленные в схему без синхронной правки route-файла → молчаливый 400). Заменено на
+`z.enum(Object.values(AlertType) as [AlertType, ...AlertType[]])` — значения берутся из
+`@/generated/models` через реэкспорт `@/lib/alerts`, схема и API больше не могут разойтись.
+
+**Переименование `lib/npm.ts`/`lib/npm-client.ts`:** имя провоцировало путать клиент Nginx Proxy
+Manager с логикой npm-зависимостей (уже пришлось оговаривать это агенту при проектировании `/deps`).
+Переименовано в `lib/nginx-proxy-manager.ts`/`lib/nginx-proxy-manager-client.ts` через `git mv`
+(история файлов сохранена), поправлены все импорты в `_actions/npm-actions.ts`,
+`_components/nginx/*`, `api/nginx/*`, `app/nginx/*`.
+
+`nx typecheck:tsgo dashboard`/`nx lint dashboard` — зелёные после обеих правок.
+
 ## Версия 1.20.6 — health-check ходил в localhost вместо соседа по kami-network (2026-07-30)
 
 Разбор задачи: почему `/metrics` всегда показывал красный статус/0% uptime для

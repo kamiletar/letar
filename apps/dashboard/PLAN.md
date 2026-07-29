@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.20.6
+> **Версия:** 1.20.7
 > **Последнее обновление:** 2026-07-30
 
 ---
@@ -571,7 +571,7 @@ UMAMI_API_PASSWORD=<пароль>
 
 ---
 
-### 🔜 `AlertType` продублирован между схемой и API-роутом
+### ✅ `AlertType` продублирован между схемой и API-роутом (v1.20.7)
 
 **Найдено:** 2026-07-28, при проектировании §25 «Еженедельный контроль зависимостей»
 (`PLAN-INFRA.md`). Перечень значений `enum AlertType` (`schema.zmodel`) продублирован строкой
@@ -579,19 +579,21 @@ UMAMI_API_PASSWORD=<пароль>
 нового значения в схему без синхронной правки `z.enum` даёт молчаливый 400 при создании алерта
 этого типа — уже наступил на это при планировании §25 (нужны были `DEPS_VULNERABLE`/`DEPS_STALE`).
 
-**Задача:**
+**Статус:** ✅ Готово
 
-- [ ] Генерировать список допустимых значений `z.enum` из `@/generated/models` (Prisma/ZenStack
-      уже экспортирует enum как TS-union) вместо ручного перечисления строк в route-файле.
-- [ ] Проверить, нет ли того же паттерна дублирования у других enum'ов, принимаемых через
-      `POST`-роуты dashboard (`AlertSeverity` в том же файле — уже короткий и стабильный, но
-      стоит свериться).
+- [x] `z.enum` для `type` строится из `Object.values(AlertType)` (реэкспорт `@/generated/models`
+      через `@/lib/alerts`) вместо ручного перечисления строк.
+- [x] Тот же паттерн применён и к `severity` — `Object.values(AlertSeverity)` вместо
+      захардкоженного `['INFO', 'WARNING', 'ERROR', 'CRITICAL']`.
+- [x] `nx typecheck:tsgo dashboard` / `nx lint dashboard` — зелёные.
+
+**Файлы:** `src/app/api/alerts/route.ts`
 
 **Зависимости:** нет, чисто внутренний рефакторинг dashboard.
 
 ---
 
-### 🔜 Обманчивое именование `lib/npm.ts` / `lib/npm-client.ts`
+### ✅ Обманчивое именование `lib/npm.ts` / `lib/npm-client.ts` (v1.20.7)
 
 **Найдено:** 2026-07-28, при исследовании кодовой базы для §25. Файлы
 `apps/dashboard/src/lib/npm.ts` и `apps/dashboard/src/lib/npm-client.ts` — это клиент **Nginx
@@ -599,12 +601,13 @@ Proxy Manager**, а не что-либо связанное с npm-пакета�
 с будущей логикой работы с npm-зависимостями (уже пришлось явно оговаривать это агенту при
 проектировании страницы `/deps`).
 
-**Задача:**
+**Статус:** ✅ Готово
 
-- [ ] Переименовать в `lib/nginx-proxy-manager.ts` / `nginx-proxy-manager-client.ts` (или
-      `lib/npm/` → `lib/nginx-proxy-manager/`), поправить импорты.
-- [ ] Если переименование сочтено слишком шумным диффом — минимум добавить шапку-комментарий
-      `/** Клиент Nginx Proxy Manager, НЕ node package manager */` в оба файла.
+- [x] `lib/npm.ts` → `lib/nginx-proxy-manager.ts`, `lib/npm-client.ts` →
+      `lib/nginx-proxy-manager-client.ts` (переименование через `git mv`, история сохранена).
+- [x] Поправлены все импорты (`_actions/npm-actions.ts`, `_components/nginx/*`,
+      `api/nginx/*`, `app/nginx/*`) — старых `@/lib/npm` в кодовой базе не осталось.
+- [x] `nx typecheck:tsgo dashboard` / `nx lint dashboard` — зелёные.
 
 **Зависимости:** нет, чисто внутреннее переименование.
 

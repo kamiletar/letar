@@ -2,6 +2,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.20.7] — 2026-07-30
+
+### Fix: дедупликация `AlertType`/`AlertSeverity` в `api/alerts/route.ts`
+
+`z.enum` для `type`/`severity` в `CreateAlertSchema` дублировал строкой перечень значений
+`enum AlertType`/`AlertSeverity` из `schema.zmodel` — добавление нового значения в схему без
+синхронной правки `z.enum` давало молчаливый 400 при создании алерта этого типа. Теперь оба
+`z.enum` строятся из `Object.values(AlertType/AlertSeverity)` (реэкспорт `@/generated/models`).
+
+### Refactor: переименование `lib/npm.ts` → `lib/nginx-proxy-manager.ts`
+
+Файлы `lib/npm.ts`/`lib/npm-client.ts` — клиент Nginx Proxy Manager, а не node package manager;
+имя провоцировало путаницу при работе с будущей логикой npm-зависимостей. Переименованы в
+`lib/nginx-proxy-manager.ts`/`lib/nginx-proxy-manager-client.ts`, импорты поправлены.
+
 ## [1.20.6] — 2026-07-30
 
 ### Fix: health-check бил в `localhost` вместо контейнера соседа по сети
