@@ -11,6 +11,35 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.6] — 2026-07-30
+
+### Docs
+
+- **Оценка унификации дебаунс-паттерна алертов** (`lib/email-canary.ts` vs
+  `lib/backup-freshness.ts` vs `lib/health-check.ts`) — по запросу проверена возможность
+  вынести общий generic-хелпер `runDebouncedCheck<TState>` поверх `loadJsonState`/`saveJsonState`.
+  Вывод: нет — три реализации различаются не деталями, а типом триггера: email-canary — счётчик
+  `consecutiveFailures` с порогом `ALERT_THRESHOLD` на две независимые ноги; backup-freshness —
+  один плоский `alerted`, level-triggered; health-check — level-triggered `Record<string, boolean>`
+  для порогов CPU/память/диск/БД, но ОТДЕЛЬНО edge-triggered переход состояния контейнеров
+  (`Record<string, string>` с предыдущим значением, не просто boolean, плюс `restarting` вообще
+  не дебаунсится). Единый хелпер либо не покрыл бы edge-triggered случай, либо превратился в
+  конфигурационный комбайн сложнее прямого кода. Решение и критерий пересмотра — расширенный
+  комментарий в `lib/json-state-file.ts`. Код логики не менялся.
+
+## [0.9.5] — 2026-07-30
+
+### Docs
+
+- **Оценка унификации Redis-backed history (`routes/deploy.ts` vs `lib/cron.ts`)** — по запросу
+  проверена, достаточно ли похожи два места с паттерном «ring-buffer в памяти → best-effort
+  персист в Redis → rehydrate при старте → пометка running-записей как interrupted/error», чтобы
+  оправдать общий `createRedisBackedHistory<T>` уже на двух потребителях. Вывод: нет — формы
+  хранения расходятся по существу (плоский глобальный ring-buffer с индексом-LIST и одним ключом
+  на элемент в deploy.ts, vs N независимых per-job ring-buffer с индексом-SET и одним ключом на
+  группу в cron.ts), плюс разная стратегия персиста (дебаунс vs немедленно). Решение и критерий
+  возврата к вопросу — комментарий в `lib/redis.ts`. Код не менялся.
+
 ## [0.9.4] — 2026-07-30
 
 ### Added
