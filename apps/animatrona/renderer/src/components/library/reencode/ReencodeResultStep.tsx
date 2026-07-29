@@ -7,8 +7,8 @@
 import { Box, Button, Dialog, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
+import { formatBytes } from '@/lib/format-utils'
 import type { UseReencodeDialogStateReturn } from './use-reencode-dialog-state'
-import { formatBytes } from './utils'
 
 export function ReencodeResultStep({ state }: { state: UseReencodeDialogStateReturn }) {
   const { result, error, handleClose } = state

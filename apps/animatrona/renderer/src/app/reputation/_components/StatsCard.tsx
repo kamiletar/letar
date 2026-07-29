@@ -8,27 +8,13 @@
 import { Box, Card, Heading, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuActivity, LuClock, LuDownload, LuHardDrive, LuUpload, LuUsers } from 'react-icons/lu'
 
+import { formatBytes } from '@/lib/format-utils'
+
 import type { UserStats } from '../../../../../shared/types/stats'
 
 interface StatsCardProps {
   stats: UserStats | null
   isLoading?: boolean
-}
-
-/**
- * Форматирует байты в человекочитаемый формат
- */
-function formatBytes(bytes: number | string): string {
-  const numBytes = typeof bytes === 'string' ? Number(bytes) : bytes
-  if (numBytes === 0) {
-    return '0 B'
-  }
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  const k = 1024
-  const i = Math.floor(Math.log(numBytes) / Math.log(k))
-
-  return `${(numBytes / Math.pow(k, i)).toFixed(2)} ${units[i]}`
 }
 
 /**
@@ -127,8 +113,13 @@ export function StatsCard({ stats, isLoading }: StatsCardProps) {
       </Card.Header>
       <Card.Body>
         <SimpleGrid columns={{ base: 2, md: 3 }} gap={6}>
-          <StatItem icon={LuUpload} label="Отдано" value={formatBytes(stats.bytesUploaded)} color="green.400" />
-          <StatItem icon={LuDownload} label="Получено" value={formatBytes(stats.bytesDownloaded)} color="orange.400" />
+          <StatItem icon={LuUpload} label="Отдано" value={formatBytes(Number(stats.bytesUploaded))} color="green.400" />
+          <StatItem
+            icon={LuDownload}
+            label="Получено"
+            value={formatBytes(Number(stats.bytesDownloaded))}
+            color="orange.400"
+          />
           <StatItem icon={LuHardDrive} label="Ratio" value={ratio} color="purple.400" />
           <StatItem
             icon={LuClock}

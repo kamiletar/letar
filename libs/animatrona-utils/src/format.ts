@@ -31,6 +31,13 @@ export function formatFileSize(bytes: number | undefined | null): string {
 
 /**
  * Форматирование размера файла: "1.5 MB", "256 KB"
+ *
+ * Единственная реализация для всей экосистемы Animatrona — единицы латиницей,
+ * один знак после запятой начиная с KB, целое число для байт.
+ *
+ * @example formatBytes(0)          // "0 B"
+ * @example formatBytes(1536)       // "1.5 KB"
+ * @example formatBytes(undefined)  // "--"
  */
 export function formatBytes(bytes: number | undefined | null): string {
   if (bytes === null || bytes === undefined || !Number.isFinite(bytes) || bytes < 0) {
@@ -42,7 +49,9 @@ export function formatBytes(bytes: number | undefined | null): string {
 
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
   const k = 1024
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), units.length - 1)
+  // Нижняя граница нужна для дробных значений 0 < bytes < 1: там логарифм
+  // отрицательный и без клампа индекс уходит за пределы массива units
+  const i = Math.max(0, Math.min(Math.floor(Math.log(bytes) / Math.log(k)), units.length - 1))
   const value = bytes / k ** i
 
   return `${value.toFixed(i > 0 ? 1 : 0)} ${units[i]}`

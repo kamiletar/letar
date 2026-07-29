@@ -7,8 +7,8 @@
 import { Badge, Box, Button, Dialog, Flex, HStack, Icon, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
+import { formatBytes } from '@/lib/format-utils'
 import type { UseReencodeDialogStateReturn } from './use-reencode-dialog-state'
-import { formatBytes } from './utils'
 
 const STATUS_LABELS: Record<string, string> = {
   downloading: 'Скачивание...',

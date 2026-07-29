@@ -5,21 +5,13 @@ import { useEffect, useRef, useState } from 'react'
 import { LuFolder, LuHardDrive } from 'react-icons/lu'
 
 import { toaster } from '@/components/ui/toaster'
+import { formatBytes } from '@/lib/format-utils'
 import type { MigrationProgress } from '@/types/electron'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   currentLibraryPath: string | null
-}
-
-/** Форматирует байты в читаемую строку */
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Б'
-  const k = 1024
-  const sizes = ['Б', 'КБ', 'МБ', 'ГБ', 'ТБ']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
 const PHASE_LABELS: Record<MigrationProgress['phase'], string> = {

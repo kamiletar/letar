@@ -7,8 +7,8 @@
 import { Badge, Box, Button, Dialog, Flex, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuAudioLines, LuCheck, LuPlay } from 'react-icons/lu'
 
+import { formatBytes } from '@/lib/format-utils'
 import type { UseBatchReencodeStateReturn } from './use-batch-reencode-state'
-import { formatBytes } from './utils'
 
 export function BatchReencodePreviewStep({ state }: { state: UseBatchReencodeStateReturn }) {
   const { preview, isLoadingPreview, error, handleStart, handleClose } = state
