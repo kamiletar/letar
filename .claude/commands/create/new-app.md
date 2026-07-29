@@ -227,7 +227,7 @@ nx g @letar/generators:e2e-suite <name>
 
 \`\`\`
 send_message(
-project_key: "C:/web/letar",
+project_key: "c-web-letar",
 sender_name: "<твоё-имя-агента>",
 to: ["BlackCove"],
 subject: "deploy-request: <name>",
