@@ -2,8 +2,9 @@
 
 import type { SubtractivePatch } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
-import { type RefObject, useEffect, useRef, useState } from 'react'
+import { type RefObject, useRef, useState } from 'react'
 import { filledToggleStyle } from '../studio/button-style'
+import { useFullscreenOverlay } from '../use-fullscreen-overlay'
 import { DEFAULT_VJ_SCENE, VJ_SCENES } from './scenes'
 import { SpinGraphCanvas } from './spin-graph-canvas'
 import { useExternalAudioInput } from './use-external-audio-input'
@@ -42,7 +43,7 @@ const buttonStyle = {
  * не свою (см. `use-external-audio-input.ts`).
  */
 export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef, beatRef, onClose }: VjOverlayProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { containerRef, handleFullscreen } = useFullscreenOverlay(open, onClose)
   const external = useExternalAudioInput()
 
   // Активная визуальная сцена — ref для чтения внутри rAF-цикла графа (без пересоздания эффекта
@@ -58,35 +59,8 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
     setSceneId(id)
   }
 
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
-
-  useEffect(() => {
-    if (!open && document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined)
-    }
-  }, [open])
-
   if (!open) {
     return null
-  }
-
-  const handleFullscreen = () => {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined)
-    } else {
-      void containerRef.current?.requestFullscreen().catch(() => undefined)
-    }
   }
 
   const activeAnalyser = external.active ? external.analyser : analyser

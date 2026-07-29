@@ -1,5 +1,21 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 21) — Дедуп находок конца сессии 20
+
+### Что сделано
+
+- **`use-fullscreen-overlay.ts`** (`_components/`) — общий хук: Escape-закрытие, выход из
+  Fullscreen API при закрытии, `handleFullscreen()`. Вынесен из побайтового дублирования между
+  `vj-overlay.tsx` и `teleprompter-overlay.tsx` (найдено в системном осмотре в конце сессии 20).
+  Оба оверлея переведены, публичное поведение не изменилось.
+- **`local-storage-string.ts`** (`lib/patch/`) — общий load/save одиночной строки в localStorage
+  (SSR-guard + try/catch). `pad-midi-map.ts` и `teleprompter-storage.ts` дублировали этот код
+  один в один — второе вхождение того же паттерна стало поводом вынести (localStorage-аналог
+  `indexeddb-kv.ts` из сессии 19).
+- Проверено живьём в браузере: VJ и суфлёр открываются/закрываются/переключают fullscreen как
+  раньше. `nx typecheck:tsgo synth`, `nx lint synth`, `nx test synth`, `nx format` — зелёные.
+  Версия `0.22.0` → `0.22.1`.
+
 ## Сессия 2026-07-29 (продолжение 20) — Телесуфлёр + выбор голоса из bulk-банка + правка доки HRTF
 
 ### Что сделано

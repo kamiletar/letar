@@ -6,6 +6,8 @@
 // на конкретный пресет прошивки, храним переопределяемую карту в localStorage: один раз «выучил»
 // физический пэд — работает даже если владелец потом переключит пресет на железе.
 
+import { loadLocalStorageString, saveLocalStorageString } from './local-storage-string'
+
 const STORAGE_KEY = 'synth:pad-midi-map'
 const PAD_COUNT = 16
 export const DEFAULT_PAD_MIDI_BASE = 36 // GM-стандарт: нота 36 = первый пэд (канал 10)
@@ -22,14 +24,11 @@ export function defaultPadMidiMap(): PadMidiMap {
 }
 
 export function loadPadMidiMap(): PadMidiMap {
-  if (typeof window === 'undefined') {
+  const raw = loadLocalStorageString(STORAGE_KEY)
+  if (!raw) {
     return defaultPadMidiMap()
   }
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      return defaultPadMidiMap()
-    }
     return JSON.parse(raw) as PadMidiMap
   } catch {
     return defaultPadMidiMap()
@@ -37,10 +36,7 @@ export function loadPadMidiMap(): PadMidiMap {
 }
 
 export function savePadMidiMap(map: PadMidiMap): void {
-  if (typeof window === 'undefined') {
-    return
-  }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map))
+  saveLocalStorageString(STORAGE_KEY, JSON.stringify(map))
 }
 
 /** Назначает ноту пэду — снимает эту ноту с пэда, за которым она была закреплена раньше */

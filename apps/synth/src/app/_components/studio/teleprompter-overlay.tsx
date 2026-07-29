@@ -2,7 +2,7 @@
 
 import { MAX_TELEPROMPTER_SPEED, MIN_TELEPROMPTER_SPEED } from '@/lib/patch/teleprompter-storage'
 import { Box, Text, Textarea } from '@chakra-ui/react'
-import { useEffect, useRef } from 'react'
+import { useFullscreenOverlay } from '../use-fullscreen-overlay'
 import { filledToggleStyle } from './button-style'
 import { Knob } from './knob'
 import type { Teleprompter } from './use-teleprompter'
@@ -31,38 +31,11 @@ const buttonStyle = {
  * тот же Fullscreen API, что у VJ-режима).
  */
 export function TeleprompterOverlay({ open, teleprompter, onClose }: TeleprompterOverlayProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { containerRef, handleFullscreen } = useFullscreenOverlay(open, onClose)
   const { lyrics, setLyrics, speed, setSpeed, running, toggleRunning, reset, scrollRef } = teleprompter
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
-
-  useEffect(() => {
-    if (!open && document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined)
-    }
-  }, [open])
 
   if (!open) {
     return null
-  }
-
-  const handleFullscreen = () => {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined)
-    } else {
-      void containerRef.current?.requestFullscreen().catch(() => undefined)
-    }
   }
 
   return (
