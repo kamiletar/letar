@@ -64,10 +64,14 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds password noreply@let
 ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.best"
 ```
 
-### Синхронизация .env.docker
+### Доставка изменённых SMTP-настроек
+
+⛔ `./scripts/sync-env-docker.sh` устарел. Правь зашифрованный файл и коммить — на сервер он
+попадёт расшифровкой при деплое:
 
 ```bash
-./scripts/sync-env-docker.sh
+sops apps/<app>/.env.docker.enc
+git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обновить SMTP"
 ```
 
 ## Workflow: Добавить email в приложение
@@ -115,9 +119,10 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.be
    })
    ```
 
-4. **Синхронизировать на production**
+4. **Доставить на production** — зашифровать, закоммитить, запросить деплой:
    ```bash
-   ./scripts/sync-env-docker.sh
+   sops apps/<app>/.env.docker.enc
+   git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): SMTP"
    ```
 
 ## Workflow: Добавить новый домен
@@ -173,16 +178,18 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.be
    - `apps/kami/.env.docker`
    - и другие...
 
-3. **Синхронизировать на production**
+3. **Доставить на production** — перешифровать каждый затронутый файл и закоммитить:
 
    ```bash
-   ./scripts/sync-env-docker.sh
+   sops apps/<app>/.env.docker.enc
+   git add apps/*/.env.docker.enc && git commit -m "chore: обновить SMTP-пароль"
    ```
 
-4. **Перезапустить приложения**
-   ```bash
-   ssh root@194.164.245.97 "cd /home/deploy/letar && ./deploy-affected.sh"
-   ```
+4. **Запросить деплой затронутых приложений** — deploy-request к BlackCove
+   (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)).
+
+   ⛔ Не деплой сам по SSH: `deploy-affected.sh` руками запрещён, а расшифровка `.enc`
+   и перезапуск контейнеров происходят внутри штатного прогона.
 
 ## Reference
 
@@ -195,7 +202,7 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.be
 - `libs/email/` — Shared библиотека @letar/email
 - `apps/*/.env.docker` — SMTP настройки приложений
 - `/opt/maddy/config/maddy.conf` — Конфиг Maddy на сервере
-- `scripts/sync-env-docker.sh` — Скрипт синхронизации
+- `apps/*/.env.docker.enc` — они же в зашифрованном виде (источник истины, коммитится)
 
 ## Документация
 

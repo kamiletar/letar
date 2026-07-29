@@ -123,15 +123,35 @@ git add apps/<app>/.env.docker.enc
 
 Или через `sops edit` (см. выше).
 
-### Синхронизация plaintext → .enc после /sync-env
+### ⛔ `/sync-env` больше не используется
 
-После получения нового `.env.docker` через `/sync-env`:
+Раньше `.env.docker` возили на серверы по SSH (`scripts/sync-env-docker.sh`, команда `/sync-env`).
+**С переходом на SOPS этот путь мёртв** — не запускай его.
+
+Источник истины теперь один: **`.env.docker.enc` в git**. Плейнтекстовый `.env.docker` на
+сервере — производный артефакт: `deploy-affected.sh` вызывает `decrypt_sops_env()` на каждом
+прогоне, расшифровывает `.enc` поверх него и ставит `chmod 600`. Всё, что положили туда руками,
+затрётся при следующем деплое.
+
+Поэтому правильный цикл изменения секрета — **правка `.enc` и коммит**, а доставку делает деплой:
 
 ```powershell
-sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker
+sops apps/<app>/.env.docker.enc     # открывает расшифрованный файл в $EDITOR
 git add apps/<app>/.env.docker.enc
-git commit -m "chore(<app>): обновить .env.docker.enc"
+git commit -m "chore(<app>): обновить секрет X"
+# дальше — обычный deploy-request к BlackCove
 ```
+
+⚠️ **Симптом, который сбивает с толку:** если посмотреть на сервере плейнтекстовый `.env.docker`
+и не найти там переменную, это **не значит**, что её нет в системе — скорее всего checkout
+приложения просто отстаёт от коммита, где её добавили, и деплой всё починит сам. Проверять надо
+`.enc` в актуальном `main`, а не файл на сервере. Прецедент (2026-07-29): деплой Ключницы был
+остановлен из-за «отсутствующего» `OIDC_APREL8008_SECRET`, который на самом деле лежал в git
+с момента регистрации клиента.
+
+⚠️ **Никогда не «чини» недостающий секрет генерацией нового.** Секреты OIDC-клиентов — общая
+пара между Ключницей и приложением; новый секрет на одной стороне ломает вход. Сначала проверь,
+нет ли значения в `.enc` другой стороны.
 
 ---
 
@@ -193,40 +213,43 @@ sops --decrypt /home/deploy/letar/apps/auth-hub/.env.docker.enc | head -3
 
 ---
 
-## Тираж на остальные приложения
+## Подключение нового приложения
 
-После проверки пилота (auth-hub) и настройки ключа на серверах:
+Тираж завершён — специального «догоняющего» прогона больше не нужно, шифруется только новое
+приложение при первом деплое:
 
 ```powershell
 $env:SOPS_AGE_KEY_FILE = "$HOME\.age\letar-key.txt"
-$apps = @(
-  "kami", "dashboard", "driving-school", "archetest",
-  "grandslamcup", "animatrona-tracker", "aboi", "dsperevod",
-  "premium-rosstil", "imot", "time", "mandala"
-)
-foreach ($app in $apps) {
-  $src = "apps/$app/.env.docker"
-  $dst = "apps/$app/.env.docker.enc"
-  if ((Test-Path $src) -and -not (Test-Path $dst)) {
-    sops --encrypt --output $dst $src
-    git add $dst
-    Write-Host "✅ $app зашифрован"
-  } elseif (Test-Path $dst) {
-    Write-Host "⏭️  $app — уже есть .enc"
-  } else {
-    Write-Host "⚠️  $app — нет .env.docker"
-  }
-}
+sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker
+git add apps/<app>/.env.docker.enc
+git commit -m "feat(<app>): зашифрованный .env.docker.enc"
 ```
+
+Дальше `.env.docker` живёт только локально (он в `.gitignore`), а на сервер попадает
+расшифровкой из `.enc` при деплое.
+
+**Про pre-commit хук.** `scripts/hooks/pre-commit-sops.sh` авто-перешифровывает `.env.docker` →
+`.enc` перед коммитом, но он **не установлен по умолчанию** — ставится вручную после клонирования
+(см. `CLAUDE.md` § «Git hooks»). Не рассчитывай, что он есть у всех: правку `.enc` всё равно
+проверяй глазами перед `git commit`.
 
 ---
 
 ## Статус
 
-| Приложение   | `.env.docker.enc` | Сервер |
-| ------------ | ----------------- | ------ |
-| **auth-hub** | ✅ в git          | s2     |
-| остальные    | ⏳ после тиража   | —      |
+**Тираж завершён.** Все **23** приложения с `.env.docker` имеют `.enc` в git; приложений на
+plaintext-only не осталось. Актуальный список — одной командой:
+
+```bash
+for d in apps/*/; do [ -f "$d/.env.docker" ] && { [ -f "$d/.env.docker.enc" ] || echo "БЕЗ .enc: $d"; }; done
+```
+
+Пустой вывод = все зашифрованы.
+
+> Прежняя таблица «auth-hub ✅ / остальные ⏳» удалена: она отражала состояние пилота
+> (Этап 0.4) и с тех пор врала. Ручные таблицы такого рода протухают — держим проверку командой.
+> **s1 в подготовке серверов ниже — исторический раздел:** сервер выведен из эксплуатации
+> 2026-06-20, ключ актуален только на s2 (прод) и s3 (staging).
 
 ---
 

@@ -125,7 +125,9 @@ Submodule в Git — это **gitlink** (SHA-указатель), не дире�
 - НЕ tracked в letar (через корневой .gitignore)
 - НЕ tracked в приватных submodule (через их .gitignore-шаблон)
 - Лежат локально на диске в working tree
-- Синхронизируются через `/sync-env` (см. `.claude/skills/sync-env`)
+- На сервер попадают не копированием, а расшифровкой закоммиченного `.env.docker.enc` при
+  деплое — см. [secret-manager.md](/.claude/docs/secret-manager.md). Команда `/sync-env`
+  устарела и не используется
 
 ### CI/CD
 

@@ -1,103 +1,58 @@
-# Двусторонняя синхронизация .env.docker
+# ⛔ sync-env — команда устарела, не выполняй её
 
-Синхронизируй `.env.docker` файлы между локальной машиной и production серверами.
+Синхронизация `.env.docker` по SSH **больше не используется**. Если ты попал сюда по привычке
+или по ссылке из старой документации — нужный путь описан ниже, а старый сценарий
+(push/pull через `scripts/sync-env-docker.sh`) **не запускай**.
 
-## Аргументы
+## Почему
 
-- Без аргументов: все приложения
-- `<app-name>`: конкретное приложение (например, `premium-rosstil`)
-- `--push`: только push (локальные → серверы), без интерактива
-- `--pull`: только pull (серверы → локальные), без интерактива
+С переходом на SOPS + age (Этап 0.4, тираж завершён) источник истины для продовых секретов —
+**`apps/<app>/.env.docker.enc` в git**. Плейнтекстовый `.env.docker` на сервере стал производным
+артефактом: `deploy-affected.sh` вызывает `decrypt_sops_env()` на каждом прогоне и перезаписывает
+его расшифровкой `.enc`. Всё, что залито туда по SSH, затрётся следующим деплоем.
 
-## Workflow (интерактивный режим, по умолчанию)
+Дополнительно старый сценарий разошёлся с реальностью: он ходит на **s1** (выведен из
+эксплуатации 2026-06-20) и перечисляет `premium-rosstil` / `imot` — приложения, удалённые
+2026-07-05.
 
-Для каждого приложения:
+## Что делать вместо
 
-1. Скачай remote `.env.docker` с production сервера во временный файл через `pull-env-docker.sh`
-2. Сравни с локальным файлом `apps/<app>/.env.docker`
-3. Если файлы **идентичны** — пропусти, выведи `= <app> — синхронизирован`
-4. Если есть **различия** — покажи diff и спроси пользователя через AskUserQuestion:
-   - **Push** — записать локальную версию на сервер
-   - **Pull** — скачать серверную версию локально
-   - **Skip** — пропустить
-5. Применить выбранное действие
-
-## Серверы и приложения
-
-| Сервер | Хост               | Приложения                                                                               |
-| ------ | ------------------ | ---------------------------------------------------------------------------------------- |
-| s1     | root@s1.letar.best | premium-rosstil, imot, mandala, kami, pravda, umami, animatrona-landing, dashboard-agent |
-| s2     | root@s2.letar.best | dashboard, driving-school, animatrona-web, animatrona-tracker                            |
-
-## Скрипты
-
-- **Push:** `./scripts/sync-env-docker.sh [app-name]` — загрузить локальные на серверы
-- **Pull:** `./scripts/pull-env-docker.sh [app-name] [--apply]` — скачать с серверов локально
-
-## SSH
-
-На Windows использовать системный SSH:
+**Изменить секрет на проде:**
 
 ```bash
-/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa
-/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa
+sops apps/<app>/.env.docker.enc
 ```
 
-## Реализация
-
-Используй bash-скрипты для скачивания/загрузки, но **решения о направлении** принимай через AskUserQuestion. Не используй `--apply` автоматически — всегда показывай diff перед применением.
-
-### Алгоритм
-
-```
-для каждого приложения:
-  server = определи сервер (s1 или s2)
-  remote = скачай .env.docker с сервера во /tmp
-  local = apps/<app>/.env.docker
-
-  если remote == local:
-    вывести "= <app> — синхронизирован"
-  иначе если remote не существует:
-    предложить push
-  иначе если local не существует:
-    предложить pull
-  иначе:
-    показать diff
-    спросить: push / pull / skip
-```
-
-### Push одного приложения
+Откроется расшифрованный текст в `$EDITOR`. Правишь, сохраняешь, дальше:
 
 ```bash
-/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa apps/<app>/.env.docker root@<server>:/home/deploy/letar/apps/<app>/.env.docker
+git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обновить секрет"
 ```
 
-### Pull одного приложения
+Затем — обычный deploy-request к BlackCove (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)).
+Доставку на сервер делает деплой, отдельного шага не нужно.
+
+**Завести секреты новому приложению:**
 
 ```bash
-/c/Windows/System32/OpenSSH/scp.exe -i ~/.ssh/id_rsa root@<server>:/home/deploy/letar/apps/<app>/.env.docker apps/<app>/.env.docker
+sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker
 ```
 
-## После синхронизации
-
-### Авто-шифрование после pull
-
-Если были pull-изменения (локальный `.env.docker` обновлён) — автоматически перешифруй:
+**Посмотреть, что внутри, не редактируя:**
 
 ```bash
-for app in <затронутые приложения>; do
-  if command -v sops &>/dev/null && [[ -n "$SOPS_AGE_KEY_FILE" ]] && [[ -f "$SOPS_AGE_KEY_FILE" ]]; then
-    sops --encrypt --output "apps/$app/.env.docker.enc" "apps/$app/.env.docker"
-    echo "✅ $app — .env.docker.enc обновлён"
-  fi
-done
+sops --decrypt apps/<app>/.env.docker.enc
 ```
 
-Затем закоммить обновлённые `.env.docker.enc`:
+## Частая ложная тревога
 
-```bash
-git add apps/*/.env.docker.enc
-git commit -m "chore: sync .env.docker.enc после pull с сервера"
-```
+Переменной нет в `.env.docker` **на сервере** — это почти всегда значит, что checkout приложения
+отстаёт от коммита, где её добавили, а не что секрет потерян. Проверяй `.enc` в актуальном `main`.
 
-Напомни пользователю передеплоить затронутые приложения, если были push-изменения.
+⚠️ И не генерируй недостающий секрет заново, не сверив вторую сторону: секрет OIDC-клиента —
+общая пара между Ключницей и приложением, новый ключ ломает вход.
+
+## Подробнее
+
+[secret-manager.md](/.claude/docs/secret-manager.md) — установка sops/age, восстановление ключа
+из KeePassXC, ротация, настройка серверов.

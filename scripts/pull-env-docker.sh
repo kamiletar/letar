@@ -6,6 +6,13 @@
 #   ./scripts/pull-env-docker.sh --apply                # Скачать и перезаписать все
 #   ./scripts/pull-env-docker.sh dashboard-agent --apply # Скачать конкретное
 
+#
+# ⚠️ Штатной нужды в этом скрипте больше нет: источник истины — закоммиченный
+# apps/<app>/.env.docker.enc, и восстановить локальный .env.docker можно без сервера:
+#   sops --decrypt apps/<app>/.env.docker.enc > apps/<app>/.env.docker
+# Скрипт полезен только чтобы посмотреть, что реально лежит на сервере, при расследовании
+# расхождений. Подробности: .claude/docs/secret-manager.md
+
 set -e
 
 # Production серверы (s1 выведен из эксплуатации 2026-06-20, все приложения — на s2)

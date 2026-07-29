@@ -70,7 +70,8 @@ dig -x 193.37.68.73          # PTR
 
 **Решение:**
 
-- Синхронизировать пароль: `./scripts/sync-env-docker.sh`
+- Обновить пароль в `.env.docker.enc` (`sops apps/<app>/.env.docker.enc`), закоммитить и
+  запросить деплой — доставку делает он, `sync-env-docker.sh` устарел
 - Или обновить пароль на Maddy
 
 ### Письма попадают в спам
@@ -119,8 +120,10 @@ ssh root@mail.letar.best "docker exec maddy maddy creds list"
 # Сбросить пароль
 ssh root@mail.letar.best "docker exec -it maddy maddy creds password noreply@letar.best"
 
-# Обновить .env.docker и синхронизировать
-./scripts/sync-env-docker.sh
+# Записать новый пароль в зашифрованный файл и закоммитить —
+# на сервер он попадёт расшифровкой при деплое
+sops apps/<app>/.env.docker.enc
+git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): новый SMTP-пароль"
 ```
 
 ### DKIM подпись не работает

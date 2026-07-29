@@ -198,15 +198,18 @@ ssh root@mail.letar.best "docker exec maddy cat /data/dkim/letar.best.key.pub"
 3. **.env.docker** — настроить `SMTP_FROM_EMAIL` и `SMTP_FROM_NAME`
 4. **Перезапуск** — `docker restart maddy`
 
-## Синхронизация .env.docker
+## Доставка SMTP-настроек на production
+
+⛔ `./scripts/sync-env-docker.sh` **устарел** — не используй.
+
+Меняешь `SMTP_*` в зашифрованном файле, коммитишь, дальше доставку делает деплой:
 
 ```bash
-# Локально → Production
-./scripts/sync-env-docker.sh
-
-# Или используй Claude command
-# → .claude/commands/sync-env.md
+sops apps/<app>/.env.docker.enc     # правишь SMTP_FROM_EMAIL / SMTP_PASSWORD
+git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обновить SMTP"
 ```
+
+Затем — deploy-request к BlackCove. Подробности: [secret-manager.md](/.claude/docs/secret-manager.md).
 
 ## Troubleshooting
 

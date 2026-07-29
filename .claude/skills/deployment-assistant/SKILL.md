@@ -191,9 +191,17 @@ DOMAIN=shop.rosstil.ru,www.shop.rosstil.ru
    NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://stats.letar.best/script.js
    NEXT_PUBLIC_UMAMI_WEBSITE_ID=     # создаётся в Umami после деплоя
    ```
-8. **Скрипты синхронизации** — добавить приложение в:
-   - `scripts/sync-env-docker.sh` → массив `APPS`
-   - `scripts/pull-env-docker.sh` → массивы `S1_APPS`/`S2_APPS` и `ALL_APPS`
+8. **Зашифровать секреты** — `.env.docker` не коммитится, на сервер он попадает расшифровкой:
+
+   ```bash
+   sops --encrypt --output apps/<app>/.env.docker.enc apps/<app>/.env.docker
+   git add apps/<app>/.env.docker.enc
+   ```
+
+   ⛔ В `scripts/sync-env-docker.sh` / `pull-env-docker.sh` ничего добавлять не надо — они
+   устарели с переходом на SOPS (доставку делает `decrypt_sops_env()` в `deploy-affected.sh`).
+   Подробности: [secret-manager.md](/.claude/docs/secret-manager.md).
+
 9. **Зарегистрировать в Dashboard** (seed через SQL, т.к. `bun prisma db seed` не работает на production — нет Prisma client в standalone build):
 
    ```bash

@@ -1,11 +1,29 @@
 #!/bin/bash
-# Синхронизация .env.docker файлов на production серверы
-# Использование: ./scripts/sync-env-docker.sh [app-name]
-# Примеры:
-#   ./scripts/sync-env-docker.sh              # Синхронизировать все на оба сервера
-#   ./scripts/sync-env-docker.sh dashboard-agent  # Только dashboard-agent
+# ⛔ УСТАРЕЛО. Не используй — см. .claude/docs/secret-manager.md
+#
+# Скрипт возил .env.docker на серверы по SSH до перехода на SOPS + age. Сейчас источник
+# истины — закоммиченный apps/<app>/.env.docker.enc, а плейнтекст на сервере создаётся
+# расшифровкой при каждом деплое (decrypt_sops_env() в deploy-affected.sh). Всё, что этот
+# скрипт зальёт, будет затёрто следующим прогоном.
+#
+# Правильный путь: sops apps/<app>/.env.docker.enc → git commit → deploy-request к BlackCove.
+#
+# Оставлен только на случай аварийного восстановления, когда SOPS-путь недоступен.
+# Дополнительно устарел по составу: ходит на s1 (выведен из эксплуатации 2026-06-20).
 
 set -e
+
+if [ "${FORCE_LEGACY_SYNC:-}" != "1" ]; then
+  echo "⛔ sync-env-docker.sh устарел с переходом на SOPS + age." >&2
+  echo "   Секреты доставляет деплой, расшифровывая .env.docker.enc — этот скрипт бесполезен," >&2
+  echo "   а залитое им будет затёрто следующим прогоном." >&2
+  echo >&2
+  echo "   Вместо него:  sops apps/<app>/.env.docker.enc  →  git commit  →  deploy-request" >&2
+  echo "   Подробности:  .claude/docs/secret-manager.md" >&2
+  echo >&2
+  echo "   Если это всё-таки аварийное восстановление: FORCE_LEGACY_SYNC=1 $0 $*" >&2
+  exit 1
+fi
 
 # Production серверы
 SERVERS=(

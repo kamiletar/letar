@@ -122,8 +122,12 @@ rm -rf apps/<name>/* apps/<name>/.[!.]* && rmdir apps/<name>
 1. `deploy-affected.sh` → массив `S1_APPS` или `S2_APPS`
 2. `apps/dashboard/prisma/seed.ts` → `s1Apps` или `s2Apps` (name, displayName, containerName, port, type, domain)
 3. `apps/<name>/.env.docker` → создать с `DOMAIN=<domain>`
-4. `scripts/sync-env-docker.sh` → массив `APPS`
-5. `scripts/pull-env-docker.sh` → `S1_APPS`/`S2_APPS` и `ALL_APPS`
+4. `apps/<name>/.env.docker.enc` → зашифровать и **закоммитить**:
+   `sops --encrypt --output apps/<name>/.env.docker.enc apps/<name>/.env.docker`
+
+⛔ В `scripts/sync-env-docker.sh` / `pull-env-docker.sh` приложение добавлять **не нужно** —
+скрипты устарели с переходом на SOPS. Секреты доставляет деплой, расшифровывая `.enc`
+(см. [secret-manager.md](/.claude/docs/secret-manager.md)).
 
 ### Настройка MCP postgres (если есть PostgreSQL)
 
@@ -268,7 +272,8 @@ ack_required: true
 - [ ] Создать `docker-compose.production.yml`
 - [ ] Создать начальную миграцию: `nx db:migrate <name> -- --name init`
 - [ ] Добавить в `deploy-affected.sh` → `S1_APPS` или `S2_APPS`
-- [ ] Создать `.env.docker` с `DOMAIN`, `DB_PASSWORD`, `POSTGRES_PASSWORD`
-- [ ] Добавить в `scripts/sync-env-docker.sh` и `pull-env-docker.sh`
+- [ ] Создать `.env.docker` с `DOMAIN`, `DB_PASSWORD`, `POSTGRES_PASSWORD` (пароли — только
+      генератором, см. [security.md](/.claude/rules/security.md))
+- [ ] Зашифровать и закоммитить `.env.docker.enc` (`sops --encrypt --output ...`)
 - [ ] Зарегистрировать в Dashboard (SQL insert в `DeployedApp`)
 - [ ] Настроить бэкапы в dashboard-agent
