@@ -958,38 +958,51 @@ for app in $AFFECTED_APPS; do
   fi
 
   # Run docker-compose from app directory
-  # Special handling for dashboard: when deploying itself, the container restart kills the deploy process
-  # Solution: use systemd-run to start container in a separate transient unit
+  # Self-deploy: приложения, которые сами хостят канал, через который идёт этот же деплой
+  # (dashboard — process supervisor UI на 3002; dashboard-agent — deploy-mcp туннель на 3100,
+  # через nsenter-спавн деплоя проходит именно через его контейнер). force-recreate убивает
+  # старый контейнер синхронно внутри текущего процесса — если деплой сам исполняется в
+  # cgroup/сети этого контейнера (nsenter из dashboard-agent), процесс деплоя обрывается
+  # вместе с ним и новый контейнер застревает в статусе Created (найдено BlackCove, 2026-07-22,
+  # backlog dashboard-agent/PLAN.md «Self-deploy обрывает сам себя»). Решение то же, что уже
+  # было для dashboard: detached-скрипт через nohup+setsid переживает смерть родителя.
   DEPLOY_SUCCEEDED=false
-  if [ "$app" = "dashboard" ]; then
-    echo -e "${YELLOW}⚠️  Dashboard self-deploy: using systemd transient unit for reliable restart${NC}"
+  if [ "$app" = "dashboard" ] || [ "$app" = "dashboard-agent" ]; then
+    echo -e "${YELLOW}⚠️  ${app} self-deploy: detached restart (nohup+setsid) переживает пересоздание собственного контейнера${NC}"
+
+    if [ "$app" = "dashboard" ]; then
+      OLD_CONTAINER="dashboard-app"
+      POST_START_CMD="curl -s http://localhost:3002/api/monitoring/auto-start > /dev/null 2>&1 || true"
+    else
+      # container_name у dashboard-agent — "dashboard-agent" (без суффикса -app, в отличие
+      # от остальных приложений монорепо), задан в docker-compose.production.yml.
+      OLD_CONTAINER="dashboard-agent"
+      POST_START_CMD="true"
+    fi
 
     # Create a script that will start the container after a delay
-    # This script runs via systemd-run in a separate unit that survives the deploy process death
-    RESTART_SCRIPT="/tmp/dashboard-restart-$$.sh"
+    # This script runs detached, in its own session — survives the deploy process death
+    RESTART_SCRIPT="/tmp/${app}-restart-$$.sh"
     cat > "$RESTART_SCRIPT" << RESTART_EOF
 #!/bin/bash
 sleep 3
 # Stop and remove old container if exists
-docker stop dashboard-app 2>/dev/null || true
-docker rm dashboard-app 2>/dev/null || true
-# Start the new container (it was created with 'create' command)
-cd "${WORKSPACE_ROOT}/apps/dashboard"
+docker stop ${OLD_CONTAINER} 2>/dev/null || true
+docker rm ${OLD_CONTAINER} 2>/dev/null || true
+cd "${WORKSPACE_ROOT}/${APP_DIR}"
 docker compose -f $COMPOSE_FILE --env-file $ENV_FILE_NAME up -d app
 sleep 5
-# Trigger monitoring auto-start (endpoint is public, no auth needed)
-echo "Triggering monitoring auto-start..."
-curl -s http://localhost:3002/api/monitoring/auto-start > /dev/null 2>&1 || true
-docker logs --tail 10 dashboard-app
+${POST_START_CMD}
+docker logs --tail 10 ${OLD_CONTAINER}
 RESTART_EOF
     chmod +x "$RESTART_SCRIPT"
 
     # Запуск в фоне через nohup + setsid (не требует интерактивной авторизации)
     # setsid создаёт новую сессию, нohup позволяет пережить закрытие SSH
-    nohup setsid bash "$RESTART_SCRIPT" > /tmp/dashboard-restart-$$.log 2>&1 &
+    nohup setsid bash "$RESTART_SCRIPT" > /tmp/${app}-restart-$$.log 2>&1 &
 
-    echo -e "${GREEN}✅ Dashboard restart scheduled (nohup)${NC}"
-    echo -e "${BLUE}ℹ️  Dashboard will restart in ~5 seconds${NC}"
+    echo -e "${GREEN}✅ ${app} restart scheduled (nohup)${NC}"
+    echo -e "${BLUE}ℹ️  ${app} will restart in ~5 seconds${NC}"
     DEPLOY_SUCCEEDED=true
   elif grep -vE '^[[:space:]]*#' "$COMPOSE_FILE" 2> /dev/null | grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?"; then
     # Strangler-переход на zero-downtime rollout (§18.6 Сессия G): opt-in через label
@@ -1047,6 +1060,11 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
   for app in "${DEPLOYED_APPS[@]}"; do
     if [ "$STAGING" = true ]; then
       APP_CONTAINER="${app}-staging-app"
+    elif [ "$app" = "dashboard-agent" ]; then
+      # container_name без суффикса -app (docker-compose.production.yml), в отличие от
+      # остальных приложений монорепо — иначе docker inspect ниже не находит контейнер
+      # и healthcheck-ожидание молча пропускается.
+      APP_CONTAINER="dashboard-agent"
     else
       APP_CONTAINER="${app}-app"
     fi
