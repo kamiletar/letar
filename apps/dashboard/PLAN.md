@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.22.0
+> **Версия:** 1.22.1
 > **Последнее обновление:** 2026-07-30
 
 ---
@@ -663,6 +663,33 @@ dashboard никогда не попадают, только число.
 не актуально; если появится — потребуется свой `log_format` с `$host` вместо файла на хост.
 
 **Зависимости:** нет, чисто инфраструктурная задача dashboard + dashboard-agent.
+
+---
+
+### ✅ Fix: Telegram-уведомления не ходили с s1/s2 — обход через tg-proxy (v1.22.1)
+
+**Найдено:** 2026-07-30, в логах после деплоя v1.22.0 — `Error sending Telegram notification:
+[TypeError: fetch failed] ETIMEDOUT`. Причина уже задокументирована в
+[deployment.md](/.claude/docs/deployment.md#telegram-api--прокси-через-mail-сервер): IP-диапазоны
+`api.telegram.org` заблокированы провайдером ДЦ на s1/s2 (и хост, и Docker), решение —
+обратный прокси на mail-сервере (`tg-proxy.letar.best`) через `TELEGRAM_API_ROOT`. Тот же паттерн
+уже применён в `apps/kami` и `apps/grandslamcup`, но dashboard хардкодил `api.telegram.org`
+в трёх местах — конфигурацию сделали (`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`), а сам обход
+блокировки для этого приложения тогда не завели.
+
+**Статус:** ✅ Готово
+
+- [x] `src/lib/notifications.ts` — `TELEGRAM_API = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'`,
+      применено во всех трёх функциях (sendTelegramNotification, testTelegramNotification,
+      sendHeartbeatTelegram)
+- [x] `src/app/_actions/settings-actions.ts` (`testTelegramAction`) — тот же паттерн
+- [x] `TELEGRAM_API_ROOT` в `.env.docker.example`
+- [x] `docker-compose.production.yml` — `TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}`,
+      дефолт на прокси прямо в compose — работает без правки `.env.docker.enc` на проде
+- [x] `nx typecheck:tsgo`/`nx lint dashboard` — зелёные
+
+**Файлы:** `src/lib/notifications.ts`, `src/app/_actions/settings-actions.ts`,
+`.env.docker.example`, `docker-compose.production.yml`
 
 ---
 

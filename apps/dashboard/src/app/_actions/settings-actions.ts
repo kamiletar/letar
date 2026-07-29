@@ -120,7 +120,10 @@ export async function testTelegramAction() {
       return { success: false, error: 'Telegram не настроен' }
     }
 
-    const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+    // api.telegram.org заблокирован провайдером ДЦ на s1/s2 — проксируем через tg-proxy.letar.best
+    // (mail сервер, NL). См. .claude/docs/deployment.md § «Telegram API — прокси через mail сервер».
+    const telegramApiRoot = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
+    const response = await fetch(`${telegramApiRoot}/bot${settings.telegramBotToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

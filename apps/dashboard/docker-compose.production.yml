@@ -91,6 +91,8 @@ services:
       # Telegram Bot (for notifications)
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      # api.telegram.org заблокирован провайдером ДЦ на s1/s2 — прокси через mail сервер
+      TELEGRAM_API_ROOT: ${TELEGRAM_API_ROOT:-https://tg-proxy.letar.best}
 
       # Nginx Proxy Manager API
       NPM_API_URL: ${NPM_API_URL:-http://nginx-proxy-manager-app-1:81}

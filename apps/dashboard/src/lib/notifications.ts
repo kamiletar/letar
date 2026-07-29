@@ -3,6 +3,14 @@ import type { Alert } from './alerts'
 import { AlertSeverity } from './alerts'
 
 /**
+ * Базовый URL Telegram Bot API.
+ * api.telegram.org заблокирован провайдером ДЦ на s1/s2 (хост и Docker) — проксируем через
+ * `tg-proxy.letar.best` (mail сервер, NL). Тот же подход в apps/kami и apps/grandslamcup.
+ * См. .claude/docs/deployment.md § «Telegram API — прокси через mail сервер».
+ */
+const TELEGRAM_API = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org'
+
+/**
  * Получение имени сервера для уведомлений
  */
 function getServerName(): string {
@@ -27,7 +35,7 @@ export async function sendTelegramNotification(botToken: string, chatId: string,
     const emoji = getSeverityEmoji(alert.severity)
     const message = formatTelegramMessage(alert, emoji)
 
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const response = await fetch(`${TELEGRAM_API}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,7 +112,7 @@ export async function testTelegramNotification(
     const serverName = getServerName()
     const message = `✅ <b>[${serverName}] Dashboard Alert Test</b>\n\nTelegram notifications are working correctly!\n\n<b>Server:</b> ${serverName}`
 
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const response = await fetch(`${TELEGRAM_API}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,7 +154,7 @@ export async function sendHeartbeatTelegram(botToken: string, chatId: string): P
       `За последние 24 часа не было ни одного алерта.\n\n` +
       `<b>Time:</b> ${timestamp}`
 
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const response = await fetch(`${TELEGRAM_API}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

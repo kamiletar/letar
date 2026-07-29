@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.22.1] — 2026-07-30
+
+### Fix: Telegram-уведомления не доходили с s1/s2 (ETIMEDOUT)
+
+`api.telegram.org` заблокирован провайдером ДЦ на s1/s2 — прямые запросы к Bot API зависали.
+Заменили три захардкоженных URL на `TELEGRAM_API_ROOT` (по умолчанию `tg-proxy.letar.best`,
+обратный прокси на mail-сервере NL), тот же подход что в `apps/kami`/`apps/grandslamcup`.
+
 ## [1.22.0] — 2026-07-30
 
 ### Feature: статус CI (GitHub Actions) на главной странице
