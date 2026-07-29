@@ -145,6 +145,19 @@
 
 ## Открытые задачи
 
+### Дотипизировать rutracker/torrent IPC в electron.d.ts
+
+**Проблема:** `renderer/src/app/torrents/page.tsx` и `renderer/src/app/import-rutracker/page.tsx`
+живут под `// @ts-nocheck` — типы IPC-каналов `rutracker:*`/`torrent:*` объявлены только внутри
+preload-файлов (`main/preload/rutracker.preload.ts`, `main/preload/torrent.preload.ts`), но
+никогда не были добавлены в `renderer/src/types/electron.d.ts`. Каждый новый канал (последним —
+`rutracker:findSourceForTorrent`, добавлен 2026-07-29) просто наследует существующий пробел
+вместо ошибки типов, что делает `@ts-nocheck` самоподдерживающимся и растущим долгом.
+
+**Решение:** описать `rutracker`/`torrent` секции `window.electronAPI` в `electron.d.ts` (по
+образцу уже типизированных секций вроде `library`/`app`), убрать `@ts-nocheck` из обоих файлов
+и поправить всплывшие несоответствия типов.
+
 ### Миграция торрент-клиента: webtorrent → qBittorrent
 
 **Проблема:** webtorrent качает файлы в RAM (OOM при 40GB+), блокирует event loop Electron (зависание UI, каталог не открывается), вызывает вылеты приложения. Все 5 критичных багов — симптомы одной причины: JS торрент-клиент в процессе Electron.
