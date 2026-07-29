@@ -117,37 +117,53 @@ nx typecheck:tsgo <app>
 
 ## Приложения и порты
 
-### s1.letar.best
+> **Канонический источник — `apps/dashboard/prisma/seed.ts` (массив `s2Apps`).** Таблица ниже —
+> его слепок, сверенный 2026-07-29. Расходится с ним — верь seed'у и почини таблицу, а лучше
+> посмотри актуальное прямо там:
+>
+> ```bash
+> grep -A4 "name: '" apps/dashboard/prisma/seed.ts | grep -E "name:|port:|domain:"
+> ```
+>
+> Колонка «БД» выведена из наличия сервиса `postgres` в `apps/<app>/docker-compose.production.yml`.
 
-| Приложение      | Порт | Контейнер           | База данных |
-| --------------- | ---- | ------------------- | ----------- |
-| premium-rosstil | 3000 | premium-rosstil-app | PostgreSQL  |
-| imot            | 3001 | imot-app            | PostgreSQL  |
+### s2.letar.best (production)
 
-### s2.letar.best
+| Приложение           | Порт | Контейнер                | БД         | Домен                         |
+| -------------------- | ---- | ------------------------ | ---------- | ----------------------------- |
+| dashboard            | 3002 | dashboard-app            | PostgreSQL | dash.letar.best               |
+| driving-school       | 3003 | driving-school-app       | PostgreSQL | направа.рф                    |
+| mandala              | 3004 | mandala-app              | PostgreSQL | mandala.letar.best            |
+| kami                 | 3005 | kami-app                 | PostgreSQL | kami.letar.best               |
+| pravda               | 3007 | pravda-app               | Нет        | pravda.letar.best             |
+| animatrona-landing   | 3008 | animatrona-landing-app   | Нет        | animatrona.letar.best         |
+| animatrona-tracker   | 3009 | animatrona-tracker-app   | PostgreSQL | animatrona-tracker.letar.best |
+| auth-hub             | 3010 | auth-hub-app             | PostgreSQL | auth.letar.best               |
+| kami-key-the-landing | 3011 | kami-key-the-landing-app | Нет        | kamikeythe.letar.best         |
+| archetest            | 3012 | archetest-app            | PostgreSQL | archetest.letar.best          |
+| time                 | 3013 | time-app                 | PostgreSQL | time.letar.best               |
+| letar-landing        | 3015 | letar-landing-app        | Нет        | letar.best                    |
+| grandslamcup         | 3016 | grandslamcup-app         | PostgreSQL | grandslamcup.letar.best       |
+| grandslamcup-staging | 3016 | grandslamcup-staging-app | PostgreSQL | gsc-test.letar.best           |
+| aira-web             | 3017 | aira-web-app             | Нет        | aira.letar.best               |
+| aboi                 | 3018 | aboi-app                 | PostgreSQL | aboi.letar.best               |
+| dsperevod            | 3019 | dsperevod-app            | PostgreSQL | dsperevod.letar.best          |
+| form-docs            | 3020 | form-docs-app            | Нет        | forms.letar.best              |
+| svoichuzhie          | 3021 | svoichuzhie-app          | PostgreSQL | svoichuzhie.letar.best        |
+| form-example         | 3022 | form-example-app         | PostgreSQL | forms-example.letar.best      |
+| aprel8008            | 3023 | aprel8008-app            | PostgreSQL | aprel8008.ru                  |
+| studio               | 3024 | studio-app               | PostgreSQL | studio.letar.best             |
+| umami                | 3033 | umami-app                | PostgreSQL | stats.letar.best              |
 
-| Приложение           | Порт | Контейнер                | База данных | Домен                         |
-| -------------------- | ---- | ------------------------ | ----------- | ----------------------------- |
-| dashboard            | 3002 | dashboard-app            | PostgreSQL  | dash.letar.best               |
-| driving-school       | 3003 | driving-school-app       | PostgreSQL  | направа.рф                    |
-| auth-hub             | 3010 | auth-hub-app             | PostgreSQL  | auth.letar.best               |
-| animatrona-web       | 3011 | animatrona-web-app       | Нет         | anime.letar.best              |
-| archetest            | 3012 | archetest-app            | PostgreSQL  | archetest.letar.best          |
-| grandslamcup         | 3016 | grandslamcup-app         | PostgreSQL  | gsc.letar.best                |
-| time                 | 3013 | time-app                 | PostgreSQL  | time.letar.best               |
-| form-example         | 3022 | form-example-app         | PostgreSQL  | forms.letar.best              |
-| form-docs            | 3020 | form-docs-app            | Нет         | form-docs.letar.best          |
-| letar-landing        | 3015 | letar-landing-app        | Нет         | letar.best                    |
-| mandala              | 3004 | mandala-app              | PostgreSQL  | mandala.letar.best            |
-| kami                 | 3005 | kami-app                 | PostgreSQL  | kami.letar.best               |
-| pravda               | 3007 | pravda-app               | Нет         | pravda.letar.best             |
-| animatrona-landing   | 3008 | animatrona-landing-app   | Нет         | animatrona.letar.best         |
-| animatrona-tracker   | 3009 | animatrona-tracker-app   | PostgreSQL  | animatrona-tracker.letar.best |
-| umami                | 3033 | umami-app                | PostgreSQL  | stats.letar.best              |
-| kami-key-the-landing | 3011 | kami-key-the-landing-app | Нет         | kamikeythe.letar.best         |
-| grandslamcup-staging | 3016 | grandslamcup-staging-app | PostgreSQL  | gsc-test.letar.best           |
-| dsperevod            | 3019 | dsperevod-app            | PostgreSQL  | dsperevod.letar.best          |
-| aboi                 | 3019 | aboi-app                 | PostgreSQL  | aboi.letar.best               |
+⚠️ `grandslamcup` и `grandslamcup-staging` делят порт 3016 — это не опечатка, а разные
+контейнеры за разными доменами (порт публикуется на разные хостовые интерфейсы).
+
+**s1.letar.best выведен из эксплуатации 2026-06-20** — сервер больше не принадлежит letar,
+приложений на нём нет. Раздел удалён вместе с `premium-rosstil` и `imot`: оба приложения не
+поддерживаются с 2026-07-05.
+
+**Staging (s3)** — отдельный контур, порты и состав здесь не дублируются: см.
+[deployment.md](/.claude/docs/deployment.md) и `PLAN-INFRA.md` §18.7.
 
 ## Переменная DOMAIN в .env.docker
 
@@ -270,12 +286,23 @@ Dashboard UI → `/database/backups` → Настройки:
 
 **Приложения с uploads:**
 
-| Приложение      | Путь в контейнере | Что хранится          |
-| --------------- | ----------------- | --------------------- |
-| premium-rosstil | `/app/uploads/`   | Фото товаров, аватары |
-| mandala         | `/app/uploads/`   | Изображения мандал    |
-| imot            | `/app/uploads/`   | Аватары пользователей |
-| grandslamcup    | `/app/uploads/`   | Фото матчей           |
+Список ниже сверен 2026-07-29 по наличию `uploads`-маунта в `docker-compose.production.yml`.
+Проверить актуальность:
+
+```bash
+grep -l uploads apps/*/docker-compose.production.yml
+```
+
+| Приложение     | Путь в контейнере | Что хранится                 |
+| -------------- | ----------------- | ---------------------------- |
+| driving-school | `/app/uploads/`   | Документы учеников, договоры |
+| mandala        | `/app/uploads/`   | Изображения мандал           |
+| grandslamcup   | `/app/uploads/`   | Фото матчей                  |
+| kami           | `/app/uploads/`   | Аудио и произвольные файлы   |
+| aboi           | `/app/uploads/`   | Файлы, отдаются `/api/files` |
+| dsperevod      | `/app/uploads/`   | Вложения к заказам перевода  |
+| svoichuzhie    | `/app/uploads/`   | Аудио и фото                 |
+| aprel8008      | `/app/uploads/`   | Фото, загрузка из админки    |
 
 **Бекап:** Resilio Sync автоматически реплицирует `/home/deploy/letar/apps/<app>/uploads/` на Windows и pinner2. Отдельный cron не нужен.
 
