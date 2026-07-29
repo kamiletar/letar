@@ -1,12 +1,22 @@
 'use client'
 
 import { createBandsReader } from '@/lib/audio/analyser'
-import { useEffect, useRef } from 'react'
+import type { SubtractivePatch } from '@/lib/patch/schema'
+import { type RefObject, useEffect, useRef } from 'react'
 
 interface SpinGraphCanvasProps {
   analyser: AnalyserNode | null
   /** Число одновременно звучащих нот — раскрывает граф, добавляет узлам «жизни» без звука */
   activeNoteCount: number
+  /**
+   * Живой SUB-патч студии («один девайс для звука И картинки»): те же ручки/энкодеры,
+   * что крутят cutoff/резонанс/пространство звука, одновременно двигают граф. azimuth/depth
+   * реально управляют звуковым панорамированием (см. use-master-bus.ts) — не дублирующая
+   * MIDI-проводка, а чтение уже живого состояния.
+   */
+  patchRef?: RefObject<SubtractivePatch>
+  /** Счётчик ударов (нота/пэд) — растёт на каждый triggerNote/pad-hit; даёт резкую вспышку-пульс */
+  pulseRef?: RefObject<number>
 }
 
 const GOLD_BRIGHT = '#F5D85A'
@@ -22,7 +32,7 @@ const VOID_BG = '#040302'
  * важнее цвета (владелец не видит цвет в звуке, но остро слышит объём) — весь визуал
  * монохромный золото/пустота, разница в яркости и радиальном размытии, не в оттенках.
  */
-export function SpinGraphCanvas({ analyser, activeNoteCount }: SpinGraphCanvasProps) {
+export function SpinGraphCanvas({ analyser, activeNoteCount, patchRef, pulseRef }: SpinGraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
   const activeNoteCountRef = useRef(activeNoteCount)
@@ -50,6 +60,9 @@ export function SpinGraphCanvas({ analyser, activeNoteCount }: SpinGraphCanvasPr
     let smoothBass = 0
     let smoothMid = 0
     let smoothTreble = 0
+    // Вспышка-пульс на удар ноты/пэда — растёт мгновенно, затухает экспоненциально по кадрам
+    let pulseEnergy = 0
+    let lastPulseSeen = pulseRef?.current ?? 0
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1
@@ -102,43 +115,65 @@ export function SpinGraphCanvas({ analyser, activeNoteCount }: SpinGraphCanvasPr
       smoothMid += (bands.mid - smoothMid) * 0.2
       smoothTreble += (bands.treble - smoothTreble) * 0.3
 
+      // Вспышка на удар ноты/пэда: счётчик изменился с прошлого кадра → мгновенная вспышка,
+      // дальше экспоненциальное затухание (не звук, а прямой сигнал MIDI/клавиатуры — «один
+      // девайс для звука И картинки», пульс виден даже раньше, чем FFT успеет его подхватить)
+      const pulseNow = pulseRef?.current ?? 0
+      if (pulseNow !== lastPulseSeen) {
+        pulseEnergy = Math.min(pulseEnergy + 1, 1.6)
+        lastPulseSeen = pulseNow
+      }
+      pulseEnergy *= 0.88
+
+      // Живые ручки SUB-патча — те же, что крутят звук (cutoff/резонанс/пространство)
+      const azimuth = patchRef?.current?.engine.fx.space.azimuth ?? 0
+      const depth = patchRef?.current?.engine.fx.space.depth ?? 0
+      const cutoff = patchRef?.current?.engine.filter.cutoff ?? 0.5
+      const resonance = patchRef?.current?.engine.filter.resonance ?? 0
+
       // Пустота Малевича — тёмный фон с едва заметным радиальным свечением от ядра
       ctx2d.fillStyle = VOID_BG
       ctx2d.fillRect(0, 0, w, h)
       const glow = ctx2d.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.6)
-      glow.addColorStop(0, `rgba(212, 175, 55, ${0.05 + smoothBass * 0.12})`)
+      glow.addColorStop(0, `rgba(212, 175, 55, ${0.05 + smoothBass * 0.12 + pulseEnergy * 0.08})`)
       glow.addColorStop(1, 'rgba(4, 3, 2, 0)')
       ctx2d.fillStyle = glow
       ctx2d.fillRect(0, 0, w, h)
 
       const baseRadius = Math.min(w, h) * 0.22
-      const coreRadius = baseRadius * (1 + smoothBass * 0.35)
+      const coreRadius = baseRadius * (1 + smoothBass * 0.35 + pulseEnergy * 0.15)
 
-      coreAngleA += 0.004 + smoothMid * 0.02
-      coreAngleB -= 0.004 + smoothMid * 0.02
-      drawPenroseTriangle(cx, cy, coreRadius, coreAngleA, 0.5 + smoothBass * 0.5)
-      drawPenroseTriangle(cx, cy, coreRadius, coreAngleB + Math.PI, 0.5 + smoothBass * 0.5)
+      // Резонанс (звенящий фильтр) ускоряет вращение ядра — та же ручка, что даёт звуку «песок»
+      coreAngleA += 0.004 + smoothMid * 0.02 + resonance * 0.03
+      coreAngleB -= 0.004 + smoothMid * 0.02 + resonance * 0.03
+      drawPenroseTriangle(cx, cy, coreRadius, coreAngleA, 0.5 + smoothBass * 0.5 + pulseEnergy * 0.3)
+      drawPenroseTriangle(cx, cy, coreRadius, coreAngleB + Math.PI, 0.5 + smoothBass * 0.5 + pulseEnergy * 0.3)
 
-      // 6 внешних узлов — эхо 6 операторов FM-движка; чем больше держится нот, тем шире орбита
+      // 6 внешних узлов — эхо 6 операторов FM-движка; чем больше держится нот, тем шире орбита.
+      // depth (пространство звука — «далеко»/«близко») слегка сжимает и приглушает орбиту, как
+      // перспектива; azimuth (лево-право панорамы) поворачивает саму орбиту в ту же сторону.
       const nodeCount = 6
-      const orbitRadius = baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06)
+      const depthScale = 1 - depth * 0.25
+      const orbitRadius = baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06) * depthScale
+      const azimuthOffset = azimuth * Math.PI
       outerAngle += 0.0015 + smoothTreble * 0.01
 
       const positions: Array<{ x: number; y: number }> = []
       for (let i = 0; i < nodeCount; i++) {
-        const a = outerAngle + (i / nodeCount) * Math.PI * 2
+        const a = outerAngle + azimuthOffset + (i / nodeCount) * Math.PI * 2
         positions.push({ x: cx + Math.cos(a) * orbitRadius, y: cy + Math.sin(a) * orbitRadius })
       }
 
-      // Рёбра гексаграммы (каждый узел к узлу через один — рисует две наложенные треугольные звёзды)
+      // Рёбра гексаграммы (каждый узел к узлу через один — рисует две наложенные треугольные звёзды).
+      // cutoff (открытость фильтра — «занавеска яркости») подмешивается в яркость рёбер напрямую.
       ctx2d.lineWidth = 1
       for (let i = 0; i < nodeCount; i++) {
         const a = positions[i]
         const b = positions[(i + 2) % nodeCount]
         if (!a || !b) {continue}
         const grad = ctx2d.createLinearGradient(a.x, a.y, b.x, b.y)
-        grad.addColorStop(0, `rgba(212, 175, 55, ${0.15 + smoothMid * 0.35})`)
-        grad.addColorStop(1, `rgba(245, 216, 90, ${0.05 + smoothMid * 0.2})`)
+        grad.addColorStop(0, `rgba(212, 175, 55, ${0.15 + smoothMid * 0.35 + cutoff * 0.15})`)
+        grad.addColorStop(1, `rgba(245, 216, 90, ${0.05 + smoothMid * 0.2 + cutoff * 0.08})`)
         ctx2d.strokeStyle = grad
         ctx2d.beginPath()
         ctx2d.moveTo(a.x, a.y)
@@ -157,9 +192,9 @@ export function SpinGraphCanvas({ analyser, activeNoteCount }: SpinGraphCanvasPr
         }
       }
 
-      // Узлы — пульсируют от общей энергии
+      // Узлы — пульсируют от общей энергии + резкая вспышка на удар ноты/пэда
       for (const p of positions) {
-        const r = 3 + bands.overall * 6
+        const r = 3 + bands.overall * 6 + pulseEnergy * 5
         ctx2d.fillStyle = GOLD_BRIGHT
         ctx2d.beginPath()
         ctx2d.arc(p.x, p.y, r, 0, Math.PI * 2)

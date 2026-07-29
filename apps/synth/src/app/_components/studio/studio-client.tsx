@@ -76,6 +76,9 @@ export function StudioClient() {
   drumPatchRef.current = drumPatch
   const engineTypeRef = useRef(engineType)
   engineTypeRef.current = engineType
+  // Счётчик ударов для VJ-режима: растёт на каждую живую ноту/пэд, читается прямо в rAF-цикле
+  // спин-графа (SpinGraphCanvas) — без setState, чтобы не дёргать рендер студии на каждый удар
+  const vjPulseRef = useRef(0)
 
   const masterBus = useMasterBus(patch, patchRef, started)
   const recording = useRecording()
@@ -105,6 +108,7 @@ export function StudioClient() {
         drumEngineRef.current?.trigger(pad.synth, velocity)
       }
       flashPad(index)
+      vjPulseRef.current++
     },
     [flashPad]
   )
@@ -128,6 +132,7 @@ export function StudioClient() {
       engineRef.current?.noteOn(midiNote, patchRef.current.engine, velocity)
     }
     setActiveNotes((prev) => new Set([...prev, midiNote]))
+    vjPulseRef.current++
   }, [])
 
   const soundNoteOff = useCallback((midiNote: number) => {
@@ -738,6 +743,8 @@ export function StudioClient() {
         open={vjOpen}
         analyser={masterBus.bus?.analyser ?? null}
         activeNoteCount={activeNotes.size}
+        patchRef={patchRef}
+        pulseRef={vjPulseRef}
         onClose={() => setVjOpen(false)}
       />
 
