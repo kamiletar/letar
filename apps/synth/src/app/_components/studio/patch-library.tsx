@@ -6,6 +6,7 @@ import { deletePatch, listPatches, savePatch, slugify } from '@/lib/storage/patc
 import { Box, HStack, Text } from '@chakra-ui/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
+import { outlineButtonStyle } from './button-style'
 
 interface PatchLibraryProps {
   /** Тип текущего движка — библиотека показывает только патчи этого типа */
@@ -16,18 +17,8 @@ interface PatchLibraryProps {
   onLoad: (patch: Patch) => void
 }
 
-const btnStyle = (accent = false): React.CSSProperties => ({
-  background: 'transparent',
-  border: '1px solid',
-  borderColor: accent ? '#D4AF37' : '#5a3a10',
-  borderRadius: '3px',
-  color: accent ? '#EEC835' : '#D4AF37',
-  cursor: 'pointer',
-  fontSize: '10px',
-  padding: '2px 8px',
-  fontFamily: 'monospace',
-  lineHeight: 1.4,
-})
+const btnStyle = (accent = false): React.CSSProperties =>
+  outlineButtonStyle(accent ? 'active' : 'default', { padding: '2px 8px', lineHeight: 1.4, monospace: true })
 
 const inputStyle: React.CSSProperties = {
   background: '#0E0A00',

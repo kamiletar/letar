@@ -17,6 +17,7 @@ import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DrumPads } from './drum-pads'
 import { DrumPanel } from './drum-panel'
+import { FmHardwareControls } from './fm-hardware-controls'
 import { FmPanel } from './fm-panel'
 import { HardwarePanel } from './hardware-panel'
 import { HardwareRecordingPanel } from './hardware-recording-panel'
@@ -59,7 +60,6 @@ export function StudioClient() {
   const masterGainRef = useRef<GainNode | null>(null)
   const midiRef = useRef<MidiInputManager | null>(null)
   const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const syxFileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий
   const patchRef = useRef(patch)
@@ -117,7 +117,7 @@ export function StudioClient() {
       }
       setActiveNotes((prev) => new Set([...prev, midiNote]))
     },
-    [handlePadHit],
+    [handlePadHit]
   )
 
   const handleNoteOff = useCallback((midiNote: number) => {
@@ -141,7 +141,7 @@ export function StudioClient() {
       setPatch((p) => applyCC(p, cc, value))
       hardware.recordCC(cc, value)
     },
-    [hardware],
+    [hardware]
   )
 
   // Энкодеры пока управляют только SUB-патчем (как и фейдеры) — FM/DRUM живой контроль ручками
@@ -151,7 +151,7 @@ export function StudioClient() {
       setPatch((p) => applyEncoderValue(p, index, value, bank))
       hardware.recordEncoder(index, value, bank)
     },
-    [hardware],
+    [hardware]
   )
 
   // Входящий SysEx от железа — ответ на запрос дампа патча (см. handleRequestFromHardware)
@@ -222,11 +222,12 @@ export function StudioClient() {
 
   // Детерминированный рендер текущего патча в WAV — по типу активного движка
   const handleRenderWav = useCallback(() => {
-    const current = engineTypeRef.current === 'fm'
-      ? fmPatchRef.current
-      : engineTypeRef.current === 'drumkit'
-      ? drumPatchRef.current
-      : patchRef.current
+    const current =
+      engineTypeRef.current === 'fm'
+        ? fmPatchRef.current
+        : engineTypeRef.current === 'drumkit'
+          ? drumPatchRef.current
+          : patchRef.current
     wavRender.render(current)
   }, [wavRender])
 
@@ -275,7 +276,7 @@ export function StudioClient() {
         setEngineType(type)
       }
     },
-    [started],
+    [started]
   )
 
   const handleEngineChange = useCallback(
@@ -286,7 +287,7 @@ export function StudioClient() {
       }
       setPatch((p) => ({ ...p, engine }))
     },
-    [activeNotes],
+    [activeNotes]
   )
 
   // FM-патч обновляется синхронно в воркслет при изменении любого параметра
@@ -509,156 +510,40 @@ export function StudioClient() {
         )}
 
         {/* Панели параметров — переключаемые по движку */}
-        {engineType === 'subtractive'
-          ? (
-            <Box display="flex" flexDir="column" gap={2}>
-              <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-              <PatchLibrary
-                type="subtractive"
-                currentPatch={patch}
-                onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
-              />
-            </Box>
-          )
-          : engineType === 'drumkit'
-          ? (
-            <Box display="flex" flexDir="column" gap={2}>
-              <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
-              <PatchLibrary
-                type="drumkit"
-                currentPatch={drumPatch}
-                onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
-              />
-            </Box>
-          )
-          : (
-            <Box display="flex" flexDir="column" gap={2}>
-              <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
-              <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
-              <Box display="flex" alignItems="center" gap={2}>
-                <button
-                  style={{
-                    padding: '4px 10px',
-                    fontSize: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #5a3a10',
-                    background: 'transparent',
-                    color: '#D4AF37',
-                    cursor: 'pointer',
-                    letterSpacing: '0.04em',
-                  }}
-                  onClick={handleDownloadSyx}
-                  title="Скачивает патч как стандартный DX7 .syx-файл — открывается на любом DX7-совместимом железе/плагине"
-                >
-                  ↓ .syx
-                </button>
-                <input
-                  ref={syxFileInputRef}
-                  type="file"
-                  accept=".syx"
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      void handleImportSyxFile(file)
-                    }
-                    e.target.value = ''
-                  }}
-                />
-                <button
-                  style={{
-                    padding: '4px 10px',
-                    fontSize: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #5a3a10',
-                    background: 'transparent',
-                    color: '#D4AF37',
-                    cursor: 'pointer',
-                    letterSpacing: '0.04em',
-                  }}
-                  onClick={() => syxFileInputRef.current?.click()}
-                  title="Загружает .syx-файл (single-voice или 32-голосый bulk-банк — тогда импортируется первый голос)"
-                >
-                  ↑ .syx
-                </button>
-                {syxImportStatus === 'imported' && (
-                  <Text fontSize="9px" color="green.400">
-                    ✓ патч загружен
-                  </Text>
-                )}
-                {syxImportStatus === 'bulk-partial' && (
-                  <Text fontSize="9px" color="fg.subtle">
-                    ✓ загружен 1-й голос из bulk-банка
-                  </Text>
-                )}
-                {syxImportStatus === 'error' && (
-                  <Text fontSize="9px" color="red.400">
-                    ✗ не удалось разобрать файл
-                  </Text>
-                )}
-              </Box>
-              {midiDevices.length > 0 && (
-                <Box display="flex" alignItems="center" gap={2}>
-                  <button
-                    style={{
-                      padding: '4px 10px',
-                      fontSize: '10px',
-                      borderRadius: '4px',
-                      border: '1px solid #5a3a10',
-                      background: 'transparent',
-                      color: '#D4AF37',
-                      cursor: 'pointer',
-                      letterSpacing: '0.04em',
-                    }}
-                    onClick={handleSendToHardware}
-                  >
-                    Отправить в железо
-                  </button>
-                  {sendStatus === 'sent' && (
-                    <Text fontSize="9px" color="green.400">
-                      ✓ отправлено на {midiDevices[0].name}
-                    </Text>
-                  )}
-                  {sendStatus === 'error' && (
-                    <Text fontSize="9px" color="red.400">
-                      ✗ не удалось отправить
-                    </Text>
-                  )}
-                  <button
-                    style={{
-                      padding: '4px 10px',
-                      fontSize: '10px',
-                      borderRadius: '4px',
-                      border: '1px solid #5a3a10',
-                      background: 'transparent',
-                      color: '#D4AF37',
-                      cursor: 'pointer',
-                      letterSpacing: '0.04em',
-                    }}
-                    onClick={handleRequestFromHardware}
-                    title="SMK-37 PRO не отвечает на этот запрос (прошивка не поддерживает dump request) — оставлено для другого DX7-совместимого железа"
-                  >
-                    Прочитать из железа
-                  </button>
-                  {readStatus === 'requested' && (
-                    <Text fontSize="9px" color="fg.subtle">
-                      … ждём ответ
-                    </Text>
-                  )}
-                  {readStatus === 'received' && (
-                    <Text fontSize="9px" color="green.400">
-                      ✓ патч прочитан
-                    </Text>
-                  )}
-                  {readStatus === 'error' && (
-                    <Text fontSize="9px" color="red.400">
-                      ✗ не удалось прочитать
-                    </Text>
-                  )}
-                </Box>
-              )}
-            </Box>
-          )}
+        {engineType === 'subtractive' ? (
+          <Box display="flex" flexDir="column" gap={2}>
+            <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+            <PatchLibrary
+              type="subtractive"
+              currentPatch={patch}
+              onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
+            />
+          </Box>
+        ) : engineType === 'drumkit' ? (
+          <Box display="flex" flexDir="column" gap={2}>
+            <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
+            <PatchLibrary
+              type="drumkit"
+              currentPatch={drumPatch}
+              onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
+            />
+          </Box>
+        ) : (
+          <Box display="flex" flexDir="column" gap={2}>
+            <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+            <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
+            <FmHardwareControls
+              midiDevices={midiDevices}
+              syxImportStatus={syxImportStatus}
+              sendStatus={sendStatus}
+              readStatus={readStatus}
+              onDownloadSyx={handleDownloadSyx}
+              onImportSyxFile={(file) => void handleImportSyxFile(file)}
+              onSendToHardware={handleSendToHardware}
+              onRequestFromHardware={handleRequestFromHardware}
+            />
+          </Box>
+        )}
 
         {/* MIDI-статус */}
         <MidiStatus
@@ -692,17 +577,17 @@ export function StudioClient() {
 
         {/* Клавиатура или пэды — прилипает к низу */}
         <Box mt="auto" pb={4} display="flex" justifyContent="center" overflow="auto">
-          {engineType === 'drumkit'
-            ? (
-              <DrumPads
-                pads={drumPatch.engine.pads}
-                selectedIndex={selectedPad}
-                activePads={activePads}
-                onSelect={setSelectedPad}
-                onHit={handlePadHit}
-              />
-            )
-            : <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />}
+          {engineType === 'drumkit' ? (
+            <DrumPads
+              pads={drumPatch.engine.pads}
+              selectedIndex={selectedPad}
+              activePads={activePads}
+              onSelect={setSelectedPad}
+              onHit={handlePadHit}
+            />
+          ) : (
+            <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
+          )}
         </Box>
       </Box>
 

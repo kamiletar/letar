@@ -3,6 +3,7 @@
 import type { MidiDevice } from '@/lib/audio/midi-input'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import type React from 'react'
+import { outlineButtonStyle } from './button-style'
 
 interface MidiStatusProps {
   devices: MidiDevice[]
@@ -12,18 +13,8 @@ interface MidiStatusProps {
   error: string | null
 }
 
-const btnStyle = (disabled: boolean): React.CSSProperties => ({
-  background: 'transparent',
-  border: '1px solid',
-  borderColor: disabled ? '#2a1f10' : '#5a3a10',
-  borderRadius: '3px',
-  color: disabled ? '#3a2a18' : '#D4AF37',
-  cursor: disabled ? 'not-allowed' : 'pointer',
-  fontSize: '10px',
-  padding: '2px 8px',
-  fontFamily: 'monospace',
-  lineHeight: 1.4,
-})
+const btnStyle = (disabled: boolean): React.CSSProperties =>
+  outlineButtonStyle(disabled ? 'disabled' : 'default', { padding: '2px 8px', lineHeight: 1.4, monospace: true })
 
 export function MidiStatus({ devices, octaveShift, onOctaveShift, onConnect, error }: MidiStatusProps) {
   const connected = devices.length > 0

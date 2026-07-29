@@ -3,6 +3,7 @@
 import type { AudioInputDevice } from '@/lib/audio/hardware-recorder'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import type React from 'react'
+import { outlineButtonStyle } from './button-style'
 
 interface HardwareRecordingPanelProps {
   devices: AudioInputDevice[]
@@ -15,17 +16,12 @@ interface HardwareRecordingPanelProps {
   onToggle: () => void
 }
 
-const btnStyle = (variant: 'default' | 'recording' = 'default'): React.CSSProperties => ({
-  background: variant === 'recording' ? '#3A0808' : 'transparent',
-  border: `1px solid ${variant === 'recording' ? '#e05555' : '#5a3a10'}`,
-  borderRadius: '3px',
-  color: variant === 'recording' ? '#ff8080' : '#D4AF37',
-  cursor: 'pointer',
-  fontSize: '10px',
-  padding: '2px 8px',
-  fontFamily: 'monospace',
-  lineHeight: 1.4,
-})
+const btnStyle = (variant: 'default' | 'recording' = 'default'): React.CSSProperties =>
+  outlineButtonStyle(variant === 'recording' ? 'recording' : 'default', {
+    padding: '2px 8px',
+    lineHeight: 1.4,
+    monospace: true,
+  })
 
 /**
  * Запись реального звука с внешнего аудиоустройства (например, SMK-37 PRO в режиме
@@ -53,51 +49,49 @@ export function HardwareRecordingPanel({
       </Text>
 
       <HStack gap={2} flexWrap="wrap">
-        {devices.length === 0
-          ? (
-            <button style={btnStyle()} onClick={onRefreshDevices}>
-              Выбрать аудиовход
+        {devices.length === 0 ? (
+          <button style={btnStyle()} onClick={onRefreshDevices}>
+            Выбрать аудиовход
+          </button>
+        ) : (
+          <>
+            <select
+              value={selectedDeviceId ?? ''}
+              onChange={(e) => onSelectDevice(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: '1px solid #5a3a10',
+                borderRadius: '3px',
+                color: '#D4AF37',
+                fontSize: '10px',
+                padding: '2px 6px',
+                fontFamily: 'monospace',
+                maxWidth: '220px',
+              }}
+            >
+              {devices.map((d) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+            <button style={btnStyle()} onClick={onRefreshDevices} title="Обновить список устройств">
+              ⟳
             </button>
-          )
-          : (
-            <>
-              <select
-                value={selectedDeviceId ?? ''}
-                onChange={(e) => onSelectDevice(e.target.value)}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #5a3a10',
-                  borderRadius: '3px',
-                  color: '#D4AF37',
-                  fontSize: '10px',
-                  padding: '2px 6px',
-                  fontFamily: 'monospace',
-                  maxWidth: '220px',
-                }}
+            <button style={btnStyle(isRecording ? 'recording' : 'default')} onClick={onToggle}>
+              {isRecording ? '● стоп' : '● запись'}
+            </button>
+            {recordingUrl && !isRecording && (
+              <a
+                href={recordingUrl}
+                download={`synth-hardware-${Date.now()}.webm`}
+                style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
               >
-                {devices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-              <button style={btnStyle()} onClick={onRefreshDevices} title="Обновить список устройств">
-                ⟳
-              </button>
-              <button style={btnStyle(isRecording ? 'recording' : 'default')} onClick={onToggle}>
-                {isRecording ? '● стоп' : '● запись'}
-              </button>
-              {recordingUrl && !isRecording && (
-                <a
-                  href={recordingUrl}
-                  download={`synth-hardware-${Date.now()}.webm`}
-                  style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
-                >
-                  ↓ скачать запись
-                </a>
-              )}
-            </>
-          )}
+                ↓ скачать запись
+              </a>
+            )}
+          </>
+        )}
         {error && (
           <Text fontSize="9px" color="red.400">
             ✗ {error}

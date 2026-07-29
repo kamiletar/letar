@@ -2,6 +2,7 @@
 
 import type { DrumPad, DrumPadSynth } from '@/lib/patch/schema'
 import { Box, Text } from '@chakra-ui/react'
+import { filledToggleStyle } from './button-style'
 import { Knob } from './knob'
 
 const SYNTH_TYPES: DrumPadSynth['type'][] = ['808kick', 'tom', 'snare', 'clap', 'hat-closed', 'hat-open']
@@ -15,16 +16,7 @@ const TYPE_LABEL: Record<DrumPadSynth['type'], string> = {
 }
 
 function btnStyle(active: boolean): React.CSSProperties {
-  return {
-    padding: '3px 8px',
-    fontSize: '10px',
-    borderRadius: '4px',
-    border: `1px solid ${active ? '#D4AF37' : '#2A2018'}`,
-    background: active ? '#3A2E08' : '#160E0A',
-    color: active ? '#EEC835' : '#706860',
-    cursor: 'pointer',
-    letterSpacing: '0.03em',
-  }
+  return filledToggleStyle(active, { padding: '3px 8px', letterSpacing: '0.03em' })
 }
 
 function defaultSynth(type: DrumPadSynth['type']): DrumPadSynth {

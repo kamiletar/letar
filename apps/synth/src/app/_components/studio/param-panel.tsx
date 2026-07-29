@@ -4,6 +4,7 @@ import { cutoffNormToFreq } from '@/lib/audio/midi'
 import { HINTS } from '@/lib/patch/hints'
 import type { OscWave, SubtractiveEngineParams } from '@/lib/patch/schema'
 import { Box, Grid, Text } from '@chakra-ui/react'
+import { filledToggleStyle } from './button-style'
 import { Knob } from './knob'
 
 const WAVE_LABEL: Record<OscWave, string> = {
@@ -16,17 +17,7 @@ const WAVES: OscWave[] = ['sine', 'sawtooth', 'square', 'triangle']
 
 // Стили активной/неактивной мини-кнопки (CSS-объект для передачи в style)
 function btnStyle(active: boolean): React.CSSProperties {
-  return {
-    padding: '2px 6px',
-    fontSize: '10px',
-    borderRadius: '4px',
-    border: `1px solid ${active ? '#D4AF37' : '#2A2018'}`,
-    background: active ? '#3A2E08' : '#160E0A',
-    color: active ? '#EEC835' : '#706860',
-    cursor: 'pointer',
-    letterSpacing: '0.04em',
-    lineHeight: 1.4,
-  }
+  return filledToggleStyle(active, { padding: '2px 6px', letterSpacing: '0.04em', lineHeight: 1.4 })
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

@@ -3,21 +3,16 @@
 import { describeAlgorithm, getAlgorithm } from '@/lib/patch/dx7-algorithms'
 import type { FmEngineParams } from '@/lib/patch/schema'
 import { Box, Grid, Text } from '@chakra-ui/react'
+import { filledToggleStyle } from './button-style'
 import { Knob } from './knob'
 
 function algBtnStyle(active: boolean): React.CSSProperties {
-  return {
+  return filledToggleStyle(active, {
     padding: '2px 7px',
-    fontSize: '10px',
-    borderRadius: '4px',
-    border: `1px solid ${active ? '#D4AF37' : '#2A2018'}`,
-    background: active ? '#3A2E08' : '#160E0A',
-    color: active ? '#EEC835' : '#706860',
-    cursor: 'pointer',
     letterSpacing: '0.04em',
     lineHeight: 1.4,
-    whiteSpace: 'nowrap' as const,
-  }
+    whiteSpace: 'nowrap',
+  })
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
