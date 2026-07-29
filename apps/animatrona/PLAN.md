@@ -470,11 +470,34 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         5с) перерисовывали всё поддерево каждый тик. Обёрнуты в `memo`, см. CHANGELOG [0.55.10].
         Остальные 122 файла с `useEffect` (222 вызова) не проверены — точечный проход по
         наиболее «горячим» always-mounted компонентам, не полный аудит.
-  - [ ] Electron: убедиться что main process не блокирует renderer (тяжёлые операции через `worker_threads`)
+  - [x] **Electron: main process не блокирует renderer** (v0.55.14) — рендерер использует только
+        `ipcRenderer.invoke` (проверено по `main/preload/**`), `sendSync` нигде не встречается,
+        значит блокировка main-потока не морозит рендер напрямую (только задерживает конкретный
+        IPC-ответ). Рантайм-запросы к БД идут через Prisma (async) — `better-sqlite3`/синхронный
+        SQL встречается только в sql.js миграциях при старте, не в hot path. Найдена единственная
+        точка реального блокирующего синхронного вызова — `execSync('taskkill ...', {timeout:
+        5000})` в `terminateProcess`/`terminateChildProcess`
+        (`main/utils/process-control.ts:228,256`), дергается при отмене/паузе транскода
+        (`transcode-manager.ts`, `pools/base-pool.ts`) — в худшем случае блокирует main-процесс до
+        5с, если `taskkill` зависнет. Путь редкий (клик «отменить» на активной задаче), не
+        затрагивает обычный скролл/навигацию — исправление отложено (перевод на `execFile`
+        каскадно меняет сигнатуры 4 вызывающих мест в критичном для транскода коде, нужно решение
+        пользователя, не факт что стоит риска ради редкого пути).
   - [ ] Проверить размер JS бандла Next.js — `@next/bundle-analyzer` **не работает с Turbopack**
-        (дефолтный билдер этого приложения), нужен `next build --webpack` или
-        `next experimental-analyze`; попытка через `next build` напрямую в `renderer/` (в обход
-        `nx build animatrona`) не резолвит workspace-пакет `@letar/hooks` — см. CHANGELOG [0.55.10]
+        (дефолтный билдер этого приложения). **Найден и подтверждён root cause (v0.55.14):**
+        `ANALYZE=true nx build animatrona -- --webpack` теперь корректно пробрасывает флаг в
+        `next build` (в отличие от попытки v0.55.10) и резолвит `@letar/hooks` через настоящий Nx
+        таргет — но сама webpack-сборка падает ДО генерации отчёта анализатора. Причина —
+        `@libsql/client`/`@libsql/hrana-client` принудительно в `transpilePackages`
+        (`next.config.js`, обязательно для Turbopack — иначе битые ESM-зависимости), а внутри этих
+        пакетов есть platform-detection с динамическим `require`, который webpack превращает в
+        require-context (сканирует ВСЮ директорию пакета как модули) — попадают `README.md`,
+        `LICENSE`, `.d.ts` без соответствующих loader'ов → `Module parse failed`. Turbopack эту
+        директорию не сканирует целиком, поэтому в проде (Turbopack-билд) всё собирается нормально.
+        **Тупик без отдельной работы**: нужен либо webpack-специфичный `IgnorePlugin`/`ContextReplacementPlugin`
+        для `@libsql/*` (условно, только когда билдер = webpack), либо смириться и не иметь анализа
+        бандла для этого конкретного набора зависимостей. `next experimental-analyze` (альтернатива
+        из v0.55.10) не проверялась — не нашёл такой команды в CLI `next` в этой версии.
 
   **Метрики успеха:** открытие каталога <100ms, скролл 60fps без jank, переход между страницами <200ms
 
