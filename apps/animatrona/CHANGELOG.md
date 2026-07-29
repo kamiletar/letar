@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.55.2] - 2026-07-29
+
+### Changed
+
+- **Единая функция `resolveTrackKey()` в `shared/types/track-key.ts`** — ключ группировки
+  аудио/субтитров (`language:title`) был продублирован в 4 местах (`play-folder-builder.ts`,
+  `manifest-generator.ts`, `asset-bundler.ts`, `track-utils.ts`) с расходящейся логикой
+  фолбэка (не везде учитывался `dubGroup`). Теперь одна реализация с фолбэком
+  `title → dubGroup → 'default'`.
+
 ## [0.55.1] - 2026-07-29
 
 ### Fixed
