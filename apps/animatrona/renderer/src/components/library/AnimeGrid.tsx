@@ -1,13 +1,19 @@
 'use client'
 
 import { AspectRatio, Box, Checkbox, Grid, Icon, Text, VStack } from '@chakra-ui/react'
-import { memo } from 'react'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import { memo, useLayoutEffect, useRef, useState } from 'react'
 import { LuFilm } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
 import { toPlayableUrl } from '@/lib/media-url'
 
 import { AnimeCard } from './AnimeCard'
+
+/** Минимальная ширина карточки — та же величина, что была в `minmax(200px, 1fr)` */
+const MIN_CARD_WIDTH = 200
+/** Зазор между карточками — Chakra токен `gap={4}` (1rem) */
+const GRID_GAP = 16
 
 interface Anime {
   id: string
@@ -68,6 +74,45 @@ export const AnimeGrid = memo(function AnimeGrid({
   selectedIds,
   onToggleSelection,
 }: AnimeGridProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const scrollMarginRef = useRef(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  // Замеряем смещение контейнера от начала документа один раз при монтировании —
+  // используется как scrollMargin для useWindowVirtualizer (скроллится сама страница, не контейнер)
+  useLayoutEffect(() => {
+    scrollMarginRef.current = containerRef.current?.offsetTop ?? 0
+  }, [])
+
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) {
+      return
+    }
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width
+      if (width) {
+        setContainerWidth(width)
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Повторяет поведение CSS `repeat(auto-fill, minmax(200px, 1fr))`
+  const columns =
+    containerWidth > 0 ? Math.max(1, Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP))) : 1
+  const cardWidth = columns > 0 ? (containerWidth - GRID_GAP * (columns - 1)) / columns : MIN_CARD_WIDTH
+  const rowCount = Math.ceil(animes.length / columns)
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: rowCount,
+    // Постер (2:3) + текстовый блок карточки — грубая оценка, уточняется через measureElement
+    estimateSize: () => cardWidth * 1.5 + 170,
+    overscan: 3,
+    scrollMargin: scrollMarginRef.current,
+  })
+
   if (isLoading) {
     return (
       <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4} alignItems="start">
@@ -97,76 +142,95 @@ export const AnimeGrid = memo(function AnimeGrid({
   }
 
   return (
-    <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4} alignItems="stretch">
-      {animes.map((anime) => {
-        const isSelected = selectedIds?.has(anime.id) ?? false
+    <Box ref={containerRef} position="relative" height={`${rowVirtualizer.getTotalSize()}px`}>
+      {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+        const startIdx = virtualRow.index * columns
+        const rowAnimes = animes.slice(startIdx, startIdx + columns)
         return (
           <Box
-            key={anime.id}
-            position="relative"
-            onClick={selectionMode ? () => onToggleSelection?.(anime.id) : undefined}
-            cursor={selectionMode ? 'pointer' : undefined}
+            key={virtualRow.key}
+            ref={rowVirtualizer.measureElement}
+            data-index={virtualRow.index}
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            transform={`translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`}
           >
-            {/* Чекбокс в режиме выбора */}
-            {selectionMode && (
-              <Box
-                position="absolute"
-                top={2}
-                left={2}
-                zIndex={10}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleSelection?.(anime.id)
-                }}
-              >
-                <Checkbox.Root checked={isSelected} size="lg">
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control
-                    bg={isSelected ? 'purple.500' : 'blackAlpha.700'}
-                    borderColor={isSelected ? 'purple.500' : 'whiteAlpha.600'}
-                    _hover={{ borderColor: 'purple.400' }}
-                  />
-                </Checkbox.Root>
-              </Box>
-            )}
+            <Grid templateColumns={`repeat(${columns}, 1fr)`} gap={4} alignItems="stretch" pb={4}>
+              {rowAnimes.map((anime) => {
+                const isSelected = selectedIds?.has(anime.id) ?? false
+                return (
+                  <Box
+                    key={anime.id}
+                    position="relative"
+                    onClick={selectionMode ? () => onToggleSelection?.(anime.id) : undefined}
+                    cursor={selectionMode ? 'pointer' : undefined}
+                  >
+                    {/* Чекбокс в режиме выбора */}
+                    {selectionMode && (
+                      <Box
+                        position="absolute"
+                        top={2}
+                        left={2}
+                        zIndex={10}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleSelection?.(anime.id)
+                        }}
+                      >
+                        <Checkbox.Root checked={isSelected} size="lg">
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control
+                            bg={isSelected ? 'purple.500' : 'blackAlpha.700'}
+                            borderColor={isSelected ? 'purple.500' : 'whiteAlpha.600'}
+                            _hover={{ borderColor: 'purple.400' }}
+                          />
+                        </Checkbox.Root>
+                      </Box>
+                    )}
 
-            {/* Подсветка выбранной карточки */}
-            {selectionMode && isSelected && (
-              <Box
-                position="absolute"
-                inset={0}
-                borderRadius="lg"
-                border="2px solid"
-                borderColor="purple.400"
-                zIndex={5}
-                pointerEvents="none"
-              />
-            )}
+                    {/* Подсветка выбранной карточки */}
+                    {selectionMode && isSelected && (
+                      <Box
+                        position="absolute"
+                        inset={0}
+                        borderRadius="lg"
+                        border="2px solid"
+                        borderColor="purple.400"
+                        zIndex={5}
+                        pointerEvents="none"
+                      />
+                    )}
 
-            <AnimeCard
-              id={anime.id}
-              name={anime.name}
-              originalName={anime.originalName}
-              year={anime.year}
-              status={anime.status}
-              episodeCount={anime.episodeCount}
-              rating={anime.rating}
-              posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
-              genres={anime.genres?.map((g) => g.genre.name)}
-              watchStatus={anime.watchStatus}
-              pinnedLocally={anime.pinnedLocally}
-              needsReupload={anime.needsReupload}
-              totalIpfsSize={anime.totalIpfsSize}
-              ipfsSizeBreakdown={anime.ipfsSizeBreakdown}
-              onPlay={selectionMode ? undefined : onPlay}
-              onExport={selectionMode ? undefined : onExport}
-              onRefreshMetadata={selectionMode ? undefined : onRefreshMetadata}
-              onDelete={selectionMode ? undefined : onDelete}
-              onWatchStatusChange={selectionMode ? undefined : onWatchStatusChange}
-            />
+                    <AnimeCard
+                      id={anime.id}
+                      name={anime.name}
+                      originalName={anime.originalName}
+                      year={anime.year}
+                      status={anime.status}
+                      episodeCount={anime.episodeCount}
+                      rating={anime.rating}
+                      posterPath={toPlayableUrl({ cid: anime.poster?.cid }) ?? undefined}
+                      genres={anime.genres?.map((g) => g.genre.name)}
+                      watchStatus={anime.watchStatus}
+                      pinnedLocally={anime.pinnedLocally}
+                      needsReupload={anime.needsReupload}
+                      totalIpfsSize={anime.totalIpfsSize}
+                      ipfsSizeBreakdown={anime.ipfsSizeBreakdown}
+                      onPlay={selectionMode ? undefined : onPlay}
+                      onExport={selectionMode ? undefined : onExport}
+                      onRefreshMetadata={selectionMode ? undefined : onRefreshMetadata}
+                      onDelete={selectionMode ? undefined : onDelete}
+                      onWatchStatusChange={selectionMode ? undefined : onWatchStatusChange}
+                    />
+                  </Box>
+                )
+              })}
+            </Grid>
           </Box>
         )
       })}
-    </Grid>
+    </Box>
   )
 })
