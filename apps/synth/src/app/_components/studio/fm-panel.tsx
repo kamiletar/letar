@@ -1,17 +1,9 @@
 'use client'
 
+import { describeAlgorithm, getAlgorithm } from '@/lib/patch/dx7-algorithms'
 import type { FmEngineParams } from '@/lib/patch/schema'
 import { Box, Grid, Text } from '@chakra-ui/react'
 import { Knob } from './knob'
-
-// Описания 5 реализованных алгоритмов
-const ALG_LABELS: Record<number, string> = {
-  1: '5→4→3→2→1→0',
-  2: '[5→4→3]+[2→1→0]',
-  3: '[5→4→3→0]+1+2',
-  4: '[5→0][4→1][3→2]',
-  5: '0+1+2+3+4+5',
-}
 
 function algBtnStyle(active: boolean): React.CSSProperties {
   return {
@@ -44,9 +36,10 @@ interface OpCardProps {
   op: FmEngineParams['operators'][number]
   onChange: (op: FmEngineParams['operators'][number]) => void
   isCarrier: boolean
+  isFeedbackOp: boolean
 }
 
-function OpCard({ index, op, onChange, isCarrier }: OpCardProps) {
+function OpCard({ index, op, onChange, isCarrier, isFeedbackOp }: OpCardProps) {
   const set = (k: keyof typeof op, v: unknown) => onChange({ ...op, [k]: v })
   const setEgRate = (i: 0 | 1 | 2 | 3, v: number) => {
     const rates = [...op.eg.rates] as [number, number, number, number]
@@ -106,14 +99,14 @@ function OpCard({ index, op, onChange, isCarrier }: OpCardProps) {
           hint="Уровень оператора: громкость несущего или глубина модуляции."
           size={38}
         />
-        {/* Feedback только у операторов с feedback > 0 или op0 */}
-        {index === 0 && (
+        {/* Feedback — только у оператора, который использует его текущий алгоритм (fbOp) */}
+        {isFeedbackOp && (
           <Knob
             label="fb"
             value={op.feedback / 7}
             onChange={(v) => set('feedback', Math.round(v * 7))}
             displayValue={`${op.feedback}`}
-            hint="Feedback (самомодуляция). Добавляет нечётные гармоники — от тепла до шума."
+            hint="Feedback (самомодуляция или петля с соседним оператором). Добавляет нечётные гармоники — от тепла до шума."
             size={38}
           />
         )}
@@ -161,22 +154,13 @@ function OpCard({ index, op, onChange, isCarrier }: OpCardProps) {
   )
 }
 
-// Какие операторы являются несущими для каждого алгоритма (1-5)
-const CARRIER_MAP: Record<number, number[]> = {
-  1: [0],
-  2: [0, 3],
-  3: [0, 1, 2],
-  4: [0, 1, 2],
-  5: [0, 1, 2, 3, 4, 5],
-}
-
 interface FmPanelProps {
   engine: FmEngineParams
   onChange: (e: FmEngineParams) => void
 }
 
 export function FmPanel({ engine, onChange }: FmPanelProps) {
-  const carriers = CARRIER_MAP[Math.min(5, engine.algorithm)] ?? [0]
+  const alg = getAlgorithm(engine.algorithm)
 
   const setOp = (i: number, op: FmEngineParams['operators'][number]) => {
     const ops = [...engine.operators] as FmEngineParams['operators']
@@ -188,29 +172,36 @@ export function FmPanel({ engine, onChange }: FmPanelProps) {
     <Box display="flex" flexDir="column" gap={3}>
       {/* Алгоритм + описание */}
       <Section title="FM — алгоритм">
-        <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
-          {[1, 2, 3, 4, 5].map((alg) => (
+        <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+          {Array.from({ length: 32 }, (_, i) => i + 1).map((a) => (
             <button
-              key={alg}
-              style={algBtnStyle(engine.algorithm === alg)}
-              onClick={() => onChange({ ...engine, algorithm: alg })}
+              key={a}
+              style={algBtnStyle(engine.algorithm === a)}
+              onClick={() => onChange({ ...engine, algorithm: a })}
             >
-              {alg}
+              {a}
             </button>
           ))}
         </Box>
         <Text fontSize="8px" color="fg.muted" letterSpacing="0.06em" fontFamily="mono">
-          {ALG_LABELS[Math.min(5, engine.algorithm)] ?? '—'}
+          {describeAlgorithm(engine.algorithm)}
         </Text>
         <Text fontSize="8px" color="fg.subtle" mt={1}>
-          ♦ несущие · → поток модуляции · op1=OP1 (снизу вверх)
+          ♦ несущие · → поток модуляции · OP{alg.fbOp + 1} — feedback
         </Text>
       </Section>
 
       {/* 6 операторов в сетке */}
       <Grid templateColumns={{ base: '1fr 1fr', md: 'repeat(3, 1fr)' }} gap={2}>
         {engine.operators.map((op, i) => (
-          <OpCard key={i} index={i} op={op} onChange={(o) => setOp(i, o)} isCarrier={carriers.includes(i)} />
+          <OpCard
+            key={i}
+            index={i}
+            op={op}
+            onChange={(o) => setOp(i, o)}
+            isCarrier={alg.carriers.includes(i)}
+            isFeedbackOp={i === alg.fbOp}
+          />
         ))}
       </Grid>
     </Box>

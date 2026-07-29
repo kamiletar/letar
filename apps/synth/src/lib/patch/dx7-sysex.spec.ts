@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { getAlgorithm } from './dx7-algorithms'
 import { decodeBulkDump, decodeSingleVoiceSysex, encodeSingleVoiceSysex } from './dx7-sysex'
 import { FM_BASS, FM_GLASS_BELLS } from './fm-defaults'
 
@@ -27,15 +28,16 @@ describe('dx7-sysex: round-trip модели патча ↔ single-voice SysEx',
     expect(decoded.engine.pitchEg).toEqual(patch.engine.pitchEg)
     expect(decoded.engine.lfo).toEqual(patch.engine.lfo)
 
+    const fbOp = getAlgorithm(patch.engine.algorithm).fbOp
     patch.engine.operators.forEach((op, i) => {
       const decodedOp = decoded.engine.operators[i]
       expect(decodedOp.level).toBe(op.level)
       expect(decodedOp.eg).toEqual(op.eg)
       expect(decodedOp.velocitySensitivity).toBe(op.velocitySensitivity)
       expect(decodedOp.fixed).toBe(op.fixed)
-      // feedback в реальном DX7 глобален и хранится только на op0 —
+      // feedback в реальном DX7 глобален и хранится только на fbOp текущего алгоритма —
       // на остальных операторах он теряется, это ожидаемо и задокументировано
-      if (i === 0) {
+      if (i === fbOp) {
         expect(decodedOp.feedback).toBe(op.feedback)
       }
     })

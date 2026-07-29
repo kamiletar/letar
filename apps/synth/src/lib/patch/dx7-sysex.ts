@@ -1,3 +1,4 @@
+import { getAlgorithm } from './dx7-algorithms'
 import type { FmEngineParams } from './schema'
 
 // Конвертер «модель FM-патча ↔ стандартный Yamaha DX7 SysEx».
@@ -5,13 +6,10 @@ import type { FmEngineParams } from './schema'
 // заголовки, checksum и раскладка параметров совпадают с официальным DX7
 // (см. apps/synth/src/lib/patch/__fixtures__/README.md).
 //
-// ⚠️ ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (сознательно отложено, см. PLAN.md Фаза 1.5):
-// наш AudioWorklet (fm-processor.js) реализует только 5 собственных алгоритмов-
-// приближений, а не все 32 настоящих топологии DX7. Поле `algorithm` пишется/
-// читается как есть (сквозной проход байта), но НЕ гарантирует, что патч будет
-// звучать на реальном DX7-совместимом железе так же, как в браузере — это
-// требует отдельной работы (перенос точных графов модуляции из Dexed
-// AlgoDisplay.cpp). Не полагаться на это поле для звуковой точности.
+// Начиная с 2026-07-29 движок (fm-processor.js) реализует все 32 настоящих алгоритма DX7
+// (см. dx7-algorithms.ts) — поле `algorithm` кодируется/декодируется 1:1, включая feedback,
+// который применяется к правильному оператору для каждого алгоритма (не всегда op0 — см.
+// `getAlgorithm().fbOp`, алгоритмы 4/6 — особые случаи).
 //
 // Также не хранятся в нашей модели (используются DX7-дефолты при кодировании,
 // отбрасываются при декодировании): keyboard level scaling (breakpoint/depth/
@@ -119,11 +117,13 @@ export function encodeSingleVoiceSysex(engine: FmEngineParams, name: string, cha
     data.push(...encodeOperator(engine.operators[ourIndex]))
   }
 
+  const fbOp = getAlgorithm(engine.algorithm).fbOp
+
   data.push(
     ...engine.pitchEg.rates,
     ...engine.pitchEg.levels,
     Math.min(31, Math.max(0, engine.algorithm - 1)),
-    engine.operators[0].feedback,
+    engine.operators[fbOp].feedback,
     1, // OSC KEY SYNC — дефолт «включено»
     engine.lfo.speed,
     engine.lfo.delay,
@@ -132,7 +132,7 @@ export function encodeSingleVoiceSysex(engine: FmEngineParams, name: string, cha
     0, // LFO SYNC — дефолт «выключено»
     LFO_WAVE_TO_DX7[engine.lfo.wave],
     3, // PITCH MOD SENSITIVITY — дефолт
-    24 // TRANSPOSE — дефолт (24 = без транспонирования)
+    24, // TRANSPOSE — дефолт (24 = без транспонирования)
   )
 
   const paddedName = name.toUpperCase().padEnd(10, ' ').slice(0, 10)
@@ -190,10 +190,12 @@ function decodeVoiceParams(data: readonly number[]): { name: string; engine: FmE
   const g = data.slice(126, 145)
   const [pr1, pr2, pr3, pr4, pl1, pl2, pl3, pl4, alg, fb, , lfoSpeed, lfoDelay, pmDepth, amDepth, , lfoWave] = g
 
-  operators[0] = { ...operators[0], feedback: fb }
+  const algorithm = Math.min(32, Math.max(1, alg + 1))
+  const fbOp = getAlgorithm(algorithm).fbOp
+  operators[fbOp] = { ...operators[fbOp], feedback: fb }
 
   const engine: FmEngineParams = {
-    algorithm: Math.min(32, Math.max(1, alg + 1)),
+    algorithm,
     operators,
     pitchEg: { rates: [pr1, pr2, pr3, pr4], levels: [pl1, pl2, pl3, pl4] },
     lfo: {
@@ -254,10 +256,12 @@ function decodePackedVoice(bytes: readonly number[]): { name: string; engine: Fm
   const lfoByte = bytes[base + 14]
   const lfoWave = (lfoByte >> 1) & 0x07
 
-  operators[0] = { ...operators[0], feedback: fb }
+  const algorithm = Math.min(32, Math.max(1, alg + 1))
+  const fbOp = getAlgorithm(algorithm).fbOp
+  operators[fbOp] = { ...operators[fbOp], feedback: fb }
 
   const engine: FmEngineParams = {
-    algorithm: Math.min(32, Math.max(1, alg + 1)),
+    algorithm,
     operators,
     pitchEg: { rates: [pr1, pr2, pr3, pr4], levels: [pl1, pl2, pl3, pl4] },
     lfo: {

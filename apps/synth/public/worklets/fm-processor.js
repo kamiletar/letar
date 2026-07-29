@@ -1,25 +1,55 @@
 'use strict'
-// FM-синтезатор: 6 операторов, 5 алгоритмов, DX7-вдохновлённые EG
+// FM-синтезатор: 6 операторов, все 32 настоящих алгоритма DX7, DX7-вдохновлённые EG
 // Запускается в AudioWorkletGlobalScope — отдельный поток, нет доступа к DOM
 
 // ============================================================
-// 5 алгоритмов (подмножество 32 алгоритмов DX7)
-// src[i]: какие операторы модулируют оператор i (0-индекс, op0=DX7-op1)
+// Все 32 алгоритма DX7 (источник истины: src/lib/patch/dx7-algorithms.ts —
+// AudioWorklet-скрипт не может импортировать модули приложения, поэтому таблица
+// продублирована здесь; при изменении держать в синхроне с TS-версией).
+// src[i]: какие операторы модулируют оператор i (0-индекс, op0=DX7-OP1 … op5=DX7-OP6)
 // carriers: операторы, выход которых идёт в аудио
-// order: топологическая сортировка (сначала листья)
+// fbOp: единственный оператор с "обратным" ребром — на него подаётся feedback патча (0-7);
+// не всегда самомодуляция (алгоритмы 4 и 6 берут обратную связь от соседнего оператора)
 // ============================================================
 const ALGORITHMS = [
-  // 1: Цепочка 5→4→3→2→1→0 (один несущий, максимальная глубина)
-  { src: [[1], [2], [3], [4], [5], []], carriers: [0], order: [5, 4, 3, 2, 1, 0] },
-  // 2: Две 3-оп стопки [5→4→3]+[2→1→0] — колокола, EP (≈ DX7 alg 5)
-  { src: [[1], [2], [], [4], [5], []], carriers: [0, 3], order: [5, 2, 4, 1, 3, 0] },
-  // 3: Стопка [5→4→3→0] + два свободных несущих [1] [2]
-  { src: [[], [], [3], [4], [5], []], carriers: [0, 1, 2], order: [5, 4, 3, 1, 2, 0] },
-  // 4: Три пары [5→0] [4→1] [3→2]
-  { src: [[5], [4], [3], [], [], []], carriers: [0, 1, 2], order: [5, 4, 3, 0, 1, 2] },
-  // 5: Все несущие — аддитивный синтез (≈ DX7 alg 32)
-  { src: [[], [], [], [], [], []], carriers: [0, 1, 2, 3, 4, 5], order: [0, 1, 2, 3, 4, 5] },
+  { src: [[1], [], [3], [4], [5], [5]], carriers: [0, 2], fbOp: 5 }, // 1
+  { src: [[1], [1], [3], [4], [5], []], carriers: [0, 2], fbOp: 1 }, // 2
+  { src: [[1], [2], [], [4], [5], [5]], carriers: [0, 3], fbOp: 5 }, // 3
+  { src: [[1], [2], [], [4], [5], [3]], carriers: [0, 3], fbOp: 5 }, // 4
+  { src: [[1], [], [3], [], [5], [5]], carriers: [0, 2, 4], fbOp: 5 }, // 5
+  { src: [[1], [], [3], [], [5], [4]], carriers: [0, 2, 4], fbOp: 5 }, // 6
+  { src: [[1], [], [3, 4], [], [5], [5]], carriers: [0, 2], fbOp: 5 }, // 7
+  { src: [[1], [], [3, 4], [3], [5], []], carriers: [0, 2], fbOp: 3 }, // 8
+  { src: [[1], [1], [3, 4], [], [5], []], carriers: [0, 2], fbOp: 1 }, // 9
+  { src: [[1], [2], [2], [4, 5], [], []], carriers: [0, 3], fbOp: 2 }, // 10
+  { src: [[1], [2], [], [4, 5], [], [5]], carriers: [0, 3], fbOp: 5 }, // 11
+  { src: [[1], [1], [3, 4, 5], [], [], []], carriers: [0, 2], fbOp: 1 }, // 12
+  { src: [[1], [], [3, 4, 5], [], [], [5]], carriers: [0, 2], fbOp: 5 }, // 13
+  { src: [[1], [], [3], [4, 5], [], [5]], carriers: [0, 2], fbOp: 5 }, // 14
+  { src: [[1], [1], [3], [4, 5], [], []], carriers: [0, 2], fbOp: 1 }, // 15
+  { src: [[1, 2, 4], [], [3], [], [5], [5]], carriers: [0], fbOp: 5 }, // 16
+  { src: [[1, 2, 4], [1], [3], [], [5], []], carriers: [0], fbOp: 1 }, // 17
+  { src: [[1, 2, 3], [], [2], [4], [5], []], carriers: [0], fbOp: 2 }, // 18
+  { src: [[1], [2], [], [5], [5], [5]], carriers: [0, 3, 4], fbOp: 5 }, // 19
+  { src: [[2], [2], [2], [4, 5], [], []], carriers: [0, 1, 3], fbOp: 2 }, // 20
+  { src: [[2], [2], [2], [5], [5], []], carriers: [0, 1, 3, 4], fbOp: 2 }, // 21
+  { src: [[1], [], [5], [5], [5], [5]], carriers: [0, 2, 3, 4], fbOp: 5 }, // 22
+  { src: [[], [2], [], [5], [5], [5]], carriers: [0, 1, 3, 4], fbOp: 5 }, // 23
+  { src: [[], [], [5], [5], [5], [5]], carriers: [0, 1, 2, 3, 4], fbOp: 5 }, // 24
+  { src: [[], [], [], [5], [5], [5]], carriers: [0, 1, 2, 3, 4], fbOp: 5 }, // 25
+  { src: [[], [2], [], [4, 5], [], [5]], carriers: [0, 1, 3], fbOp: 5 }, // 26
+  { src: [[], [2], [2], [4, 5], [], []], carriers: [0, 1, 3], fbOp: 2 }, // 27
+  { src: [[1], [], [3], [4], [4], []], carriers: [0, 2, 5], fbOp: 4 }, // 28
+  { src: [[], [], [3], [], [5], [5]], carriers: [0, 1, 2, 4], fbOp: 5 }, // 29
+  { src: [[], [], [3], [4], [4], []], carriers: [0, 1, 2, 5], fbOp: 4 }, // 30
+  { src: [[], [], [], [], [5], [5]], carriers: [0, 1, 2, 3, 4], fbOp: 5 }, // 31
+  { src: [[], [], [], [], [], [5]], carriers: [0, 1, 2, 3, 4, 5], fbOp: 5 }, // 32
 ]
+
+// Все 32 алгоритма DX7 устроены так, что модулятор оператора i всегда имеет индекс >= i,
+// КРОМЕ ровно одного "обратного" ребра (feedback) на fbOp — поэтому фиксированный порядок
+// обработки 5→0 всегда топологически корректен без явной сортировки под каждый алгоритм.
+const PROCESS_ORDER = [5, 4, 3, 2, 1, 0]
 
 // rate (0–99) → время перехода в секундах (логарифмическая шкала)
 // rate 99 ≈ 1 мс; rate 0 ≈ 10 с
@@ -45,15 +75,14 @@ class Voice {
     // 0=Attack 1=Decay1 2=Decay2(sustain) 3=Release 4=Idle
     this.egStages = new Int32Array(6).fill(4)
 
-    this.outputs = new Float64Array(6) // выходы операторов текущего сэмпла
-    this.feedbackPrev = 0 // выход op0 предыдущего сэмпла (для feedback)
+    this.outputs = new Float64Array(6) // выходы операторов текущего сэмпла (предыдущего — для feedback-рёбер)
   }
 
   noteOn(midiNote, velocity, ops) {
     this.midiNote = midiNote
     this.vel = 0.3 + 0.7 * velocity
     this.active = true
-    this.feedbackPrev = 0
+    this.outputs.fill(0)
 
     for (let i = 0; i < 6; i++) {
       this.phases[i] = 0
@@ -89,11 +118,11 @@ class Voice {
 
     if (Math.abs(diff) <= delta) {
       this.egValues[i] = target
-      if (s === 0)
+      if (s === 0) {
         this.egStages[i] = 1 // Attack → Decay1
-      else if (s === 1)
+      } else if (s === 1) {
         this.egStages[i] = 2 // Decay1 → Decay2/sustain
-      // s=2: держим L3 до noteOff (DX7-behaviour)
+      } // s=2: держим L3 до noteOff (DX7-behaviour)
       else if (s === 3 && target <= 0.0005) this.egStages[i] = 4 // Release → Idle
     } else {
       this.egValues[i] = cur + Math.sign(diff) * delta
@@ -108,20 +137,25 @@ class Voice {
     // Максимальная глубина модуляции в радианах (DX7-style: ≈7 при level=99)
     const MOD = 7
 
-    for (const i of alg.order) {
+    for (const i of PROCESS_ORDER) {
       const op = ops[i]
       const freq = op.fixed ? op.fixedFreq : baseFreq * op.ratio
       const eg = this.stepEG(i, op.eg, sr)
       const level = (op.level / 99) * eg * this.vel
 
-      // Сумма модуляций от источников (уже вычисленных в этом сэмпле)
+      // Сумма модуляций от источников. this.outputs[src] хранит текущий сэмпл, если src уже
+      // обработан в этом же проходе (src > i — обычный «вперёд по цепочке» случай), иначе ещё
+      // не перезаписанное значение предыдущего сэмпла — это и есть feedback-рёбра алгоритмов
+      // 1-32 (не всегда самомодуляция, см. алгоритмы 4/6 в dx7-algorithms.ts), без zero-delay петель.
       let modRad = 0
-      for (const src of alg.src[i]) {
-        modRad += this.outputs[src] * MOD
-      }
-      // Feedback op0 (используем предыдущий сэмпл — no zero-delay loop)
-      if (i === 0 && op.feedback > 0) {
-        modRad += this.feedbackPrev * (op.feedback / 7) * Math.PI * 2
+      if (i === alg.fbOp && op.feedback > 0) {
+        for (const src of alg.src[i]) {
+          modRad += this.outputs[src] * (op.feedback / 7) * Math.PI * 2
+        }
+      } else {
+        for (const src of alg.src[i]) {
+          modRad += this.outputs[src] * MOD
+        }
       }
 
       // Шаг фазы (нормализованная [0,1))
@@ -131,9 +165,6 @@ class Voice {
       // Синус с фазовой модуляцией
       this.outputs[i] = Math.sin(2 * Math.PI * this.phases[i] + modRad) * level
     }
-
-    // Сохраняем выход op0 для следующего сэмпла (feedback)
-    this.feedbackPrev = this.outputs[0]
 
     // Сумма несущих → аудио-сэмпл
     let out = 0
@@ -196,8 +227,7 @@ class FmProcessor extends AudioWorkletProcessor {
   process(_inputs, outputs) {
     if (!this.patch) return true
 
-    // Выбираем алгоритм: patch.algorithm 1–5 → индекс 0–4; 6–32 → additive
-    const algIdx = Math.min(4, Math.max(0, this.patch.algorithm - 1))
+    const algIdx = Math.min(31, Math.max(0, this.patch.algorithm - 1))
     const alg = ALGORITHMS[algIdx]
     const ops = this.patch.operators
     const sr = sampleRate // глобальная константа AudioWorkletGlobalScope
