@@ -144,6 +144,8 @@ enum AlertType {
   BACKUP_FAILED
   /// Ошибка cron задачи
   CRON_FAILED
+  /// SSL сертификат скоро истекает или уже истёк
+  SSL_EXPIRING
 }
 
 /// Уровни серьёзности алертов

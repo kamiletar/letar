@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.22.1
+> **Версия:** 1.23.0
 > **Последнее обновление:** 2026-07-30
 
 ---
@@ -719,6 +719,35 @@ dashboard никогда не попадают, только число.
 
 ---
 
+### ✅ Мониторинг SSL сертификатов (v1.23.0)
+
+**Статус:** ✅ Готово
+
+**Найдено:** `/nginx/certificates` уже показывал цветные бейджи истечения (`CertificateCard`),
+но это была чисто пассивная индикация — без захода на страницу истечение не обнаруживалось.
+
+- [x] `src/lib/ssl-monitor.ts` — `checkSslCertificates()`: все сертификаты NPM с истечением
+      ≤30 дней (или уже истёкшие) собираются в единый алерт `SSL_EXPIRING` (WARNING/ERROR/
+      CRITICAL по худшему сроку), автоматическое разрешение алерта когда проблем не остаётся
+- [x] `enum AlertType` — добавлено значение `SSL_EXPIRING` (`schema.zmodel` + миграция
+      `add_ssl_expiring_alert_type`)
+- [x] `POST /api/cron/ssl-check` — auth-gated роут (тот же паттерн, что `pageview-count`)
+- [x] Cron-задача `s2-ssl-check` (`apps/dashboard-agent/src/lib/cron.ts`, ежедневно в 08:00, сервер s2)
+- [x] `nx typecheck:tsgo dashboard`, `nx typecheck dashboard-agent`, `nx lint` — зелёные
+
+**Ограничение:** дедупликация алерта — по типу, а не по домену (существующее системное
+ограничение `createAlert`, тот же паттерн что `CONTAINER_DOWN`/`CRON_FAILED`), поэтому все
+проблемные сертификаты идут одним алертом со списком доменов в сообщении, а не отдельными.
+
+**Файлы:**
+
+- `src/lib/ssl-monitor.ts`
+- `src/app/api/cron/ssl-check/route.ts`
+- `schema.zmodel`, `prisma/migrations/20260729232641_add_ssl_expiring_alert_type/`
+- `apps/dashboard-agent/src/lib/cron.ts`
+
+---
+
 ## Идеи на будущее
 
-- Мониторинг SSL сертификатов
+(пока пусто)

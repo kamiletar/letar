@@ -19,7 +19,7 @@ export function getWorkspaceDir(): string {
  */
 export function runOnHost(
   command: string,
-  timeoutMs = 30000,
+  timeoutMs = 30000
 ): Promise<{ stdout: string; stderr: string; code: number }> {
   return new Promise((resolve) => {
     const proc = spawn('nsenter', ['-t', '1', '-m', '-u', '-i', '-n', '-p', '--', 'sh', '-c', command], {

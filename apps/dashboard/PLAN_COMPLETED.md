@@ -2,6 +2,38 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 1.23.0 — проактивные алерты об истечении SSL сертификатов (2026-07-30)
+
+**Задача:** последний пункт из «Идеи на будущее» PLAN.md. `/nginx/certificates` уже показывал
+цветные бейджи истечения сертификата (`CertificateCard` — жёлтый ≤30 дней, красный истёк), но
+это была чисто пассивная UI-индикация: без захода на страницу проблема с сертификатом
+обнаруживалась только когда HTTPS уже переставал работать.
+
+**Реализация:**
+
+- `src/lib/ssl-monitor.ts` — `checkSslCertificates()`: `npmApi.getCertificates()` → фильтр
+  по `daysUntilExpiry <= 30` → если есть проблемные, единый `createAlert(SSL_EXPIRING, ...)`
+  с сообщением-списком доменов и худшей серьёзностью (WARNING >7 дней, ERROR ≤7 дней, CRITICAL
+  уже истёк), плюс `sendNotification` если Telegram включён в `AlertSettings`. Если проблемных
+  сертификатов не осталось — `resolveAlertsByType(AlertType.SSL_EXPIRING)`.
+- `enum AlertType` (`schema.zmodel`) — добавлено значение `SSL_EXPIRING`, миграция
+  `20260729232641_add_ssl_expiring_alert_type`.
+- `POST /api/cron/ssl-check` (`verifyCronSecret`, тот же паттерн что `pageview-count`) —
+  вызывается новой cron-задачей `s2-ssl-check` (`apps/dashboard-agent/src/lib/cron.ts`,
+  `0 8 * * *`, сервер s2).
+- Дедупликация алерта — по типу (не по домену), т.к. `createAlert` ищет существующий активный
+  алерт по `(type, status=ACTIVE, serverId)` без доп. измерения — тот же паттерн, что уже
+  использует `CONTAINER_DOWN`/`CRON_FAILED`. Все проблемные домены идут одним алертом со
+  списком в `message`, а не отдельными записями — сознательное решение не расширять модель
+  `Alert` под этот единственный случай.
+- Проверено: `nx typecheck:tsgo dashboard`, `nx typecheck dashboard-agent`, `nx lint dashboard`,
+  `nx lint dashboard-agent` — зелёные.
+
+**Файлы:** `src/lib/ssl-monitor.ts`, `src/app/api/cron/ssl-check/route.ts`, `schema.zmodel`,
+`prisma/migrations/20260729232641_add_ssl_expiring_alert_type/`, `apps/dashboard-agent/src/lib/cron.ts`
+
+---
+
 ## Версия 1.22.1 — fix: Telegram-уведомления зависали на s1/s2 (2026-07-30)
 
 **Проблема:** `Error sending Telegram notification: [TypeError: fetch failed] ETIMEDOUT` в логах
