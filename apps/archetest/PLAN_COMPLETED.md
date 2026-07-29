@@ -1598,4 +1598,63 @@ component within <ChakraProvider />`. Ключевой момент: тот же
 
 ---
 
+## Сессия 2026-07-28 (продолжение, вечер) — hard e2e-gate: инфраструктура закрыта, e2e-фиксы в работе
+
+### Что сделано и закоммичено
+
+- **Staging-инстанс archetest заведён с нуля** — до этой сессии его не было вообще
+  (только `docker-compose.production.yml`), что физически блокировало hard e2e-gate
+  (см. ниже) навсегда: `deploy_app(archetest, staging)` молча ничего не разворачивал.
+  Заведён `apps/archetest/docker-compose.staging.yml` по образцу dsperevod/svoichuzhie
+  (БД-порт 5463, app-порт 3030, домен `archetest-stage.s3.letar.best` под существующим
+  DNS wildcard). BlackCove довёл инфраструктуру до рабочего состояния: `.env.staging`
+  на s3, NPM proxy host с TLS, живой `deploy_app(staging)` реально разворачивает
+  контейнер и применяет миграции.
+- **Hard (fail-closed) pre-deploy e2e-gate реализован и подтверждён вживую** —
+  кросс-приложенческая инфраструктурная работа, детали в `PLAN-INFRA.md` §18.7 и
+  `libs/deploy-mcp/README.md` (не дублируется здесь). Для archetest: `deploy_app
+  (archetest, production)` теперь реально отказывает без свежего зелёного e2e —
+  проверено на обоих фейл-кейсах (упавший e2e, рассинхрон коммитов).
+- **`archetest-dev` разбужен** (был retired) для разбора e2e-фейлов после включения
+  гейта.
+- **`apps/archetest/src/app/api/auth/dev-session/route.ts`** — dev-only роут для
+  создания сессии без OIDC (`createDevSessionRoute` из `@letar/auth/server`, тот же
+  паттерн, что у svoichuzhie/driving-school/grandslamcup/studio/auth-hub/
+  animatrona-tracker). `buildUserData` явно ставит `disclaimerAccepted: true` (дефолт
+  схемы `false` блокирует старт квиза на экране дисклеймера) и `roles: ['USER']`.
+- **`apps/archetest-e2e`** подключён к `@letar/e2e-testing` (implicitDependencies +
+  tsconfig paths/references).
+
+### Живой прогон гейта нашёл: e2e-сьют archetest красный (15 упало / 6 прошло из 21)
+
+Не инфраструктурная проблема — два класса багов в тестах/приложении:
+
+1. **`safety-net.spec.ts`** — лез в БД напрямую через `pg.Client` + читал
+   `DATABASE_URL`/`BETTER_AUTH_SECRET` из локального `apps/archetest/.env(.local)`,
+   которого физически нет на e2e-раннере (прогон идёт через `BASE_URL` против
+   реального HTTPS-домена, не dev-сервера с файловым доступом к секретам). Роут
+   dev-session (см. выше) — фундамент фикса, но **сам файл `safety-net.spec.ts` ещё
+   не переписан** на новый паттерн (нужно убрать `pg`/`loadEnvVar`/`signSessionCookie`,
+   заменить на `page.goto('/api/auth/dev-session?...')`).
+2. **`express.spec.ts`/`mood-check-in.spec.ts`** — cookie-consent баннер (`CookieBanner`
+   из `@letar/ui`, `position:fixed;bottom:0;zIndex:1000`) физически перекрывает CTA
+   в `StickyActionBar` (`position:sticky;bottom:0;zIndex:"docked"≈10`) — **реальный
+   прод-баг**, не только тестовый: любой первый посетитель archetest не может
+   кликнуть «Начать экспресс»/«Пропустить», пока баннер согласия видим, потому что
+   невидимая ссылка `<a href="/privacy">` перехватывает pointer-events. Начата
+   попытка фикса через `ResizeObserver`+CSS-переменную (`libs/ui/src/lib/
+   cookie-banner.tsx` + `sticky-action-bar.tsx`) — **живая проверка в Browser pane
+   показала, что `observe()` ни разу не вызывается**, причина не диагностирована до
+   конца. **Не закоммичено** — рабочая копия содержит попытку, требует отладки или
+   замены подхода следующей сессией.
+
+### Незакрытое — см. `PLAN.md` раздел «🔧 В РАБОТЕ»
+
+Инфраструктурная зависимость на стороне сервера (не в этом репо): `.env.staging`
+archetest на s3 нужно дополнить `ALLOW_DEV_SESSION=true` + `DEV_SESSION_TOKEN` (то же
+значение, что уже использует dashboard-agent) — без этого dev-session роут всегда
+отвечает 403.
+
+---
+
 **Последнее обновление:** 2026-07-28

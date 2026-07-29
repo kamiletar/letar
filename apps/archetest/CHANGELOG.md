@@ -5,6 +5,17 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.26.1] - 2026-07-28
+
+### Added
+
+- **`docker-compose.staging.yml`** — staging-инстанс archetest заведён с нуля (не
+  существовал), снимает блокер hard pre-deploy e2e-gate (PLAN-INFRA.md §18.7).
+- **`/api/auth/dev-session`** — dev-only роут создания сессии без OIDC-редиректа
+  (`createDevSessionRoute`, `@letar/auth/server`) для e2e-тестов на staging, тот же
+  паттерн, что у svoichuzhie/driving-school/grandslamcup. Готовит закрытие
+  `safety-net.spec.ts` (пока не переписан, см. PLAN.md).
+
 ## [0.26.0] - 2026-07-28
 
 ### Added
