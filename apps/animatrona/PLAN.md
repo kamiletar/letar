@@ -484,7 +484,16 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
         группировки будет ломать франшизный режим (тайтл то есть в группе, то standalone, в
         зависимости от того, что уже подгружено).
   - [ ] Sentinel-элемент внизу → `useInfiniteQuery` подгружает следующую страницу (зависит от пункта выше)
-  - [ ] Сохранять позицию скролла при навигации назад (через sessionStorage или router state)
+  - [x] **Сохранять позицию скролла при навигации назад** (v0.55.7) — новый хук
+        `use-scroll-restoration.ts` в `app/library/_lib/`: сохраняет `window.scrollY` в
+        sessionStorage (throttled через `requestAnimationFrame`), ключ —
+        `pathname?searchParams#viewMode` (по аналогии с `FILTERS_STORAGE_KEY` в
+        `useFilterParams.ts`, но отдельный ключ и с добавлением режима отображения — у
+        individual/franchise разная высота строк). Восстановление — несколько попыток
+        `scrollTo` через `requestAnimationFrame` (до 5 кадров), т.к. виртуализированная сетка
+        (`useWindowVirtualizer`) уточняет итоговую высоту после первых кадров через
+        `measureElement` — однократный вызов сразу после монтирования промахивается.
+        Подключено в `library/page.tsx`: `useScrollRestoration(!isLoading, viewMode)`.
 
   ⚠️ Визуально не проверено — `nx typecheck:tsgo`/`nx lint` чистые, но animatrona это Electron-
   desktop, не web-превью; ручная проверка (скролл по большой библиотеке, ресайз окна, смена

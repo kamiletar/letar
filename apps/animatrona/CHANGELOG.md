@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.7] - 2026-07-29
+
+### Added
+
+- **Сохранение позиции скролла в библиотеке при возврате назад** — новый хук
+  `use-scroll-restoration.ts`: сохраняет `window.scrollY` в sessionStorage (throttled через
+  `requestAnimationFrame`), ключ включает URL-фильтры и режим отображения (individual/franchise —
+  разная высота строк). Восстановление — несколько попыток `scrollTo` через
+  `requestAnimationFrame`, т.к. виртуализированная сетка (`useWindowVirtualizer`) уточняет
+  итоговую высоту после первых кадров рендера через `measureElement`.
+
 ## [0.55.6] - 2026-07-29
 
 ### Fixed

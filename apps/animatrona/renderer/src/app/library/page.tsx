@@ -22,27 +22,27 @@ import { toaster } from '@/components/ui/toaster'
 import { Header } from '@/components/layout'
 import { AnimeFilters, AnimeGrid, BatchActionsBar, DropZone, EmptyLibraryState } from '@/components/library'
 
-import { FranchiseView, useLibraryPage } from './_lib'
+import { FranchiseView, useLibraryPage, useScrollRestoration } from './_lib'
 
 // Dynamic imports для диалогов — загружаются только при открытии
 const ImportWizardDialog = nextDynamic(
   () => import('@/components/import/ImportWizardDialog').then((mod) => mod.ImportWizardDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 
 const DeleteAnimeDialog = nextDynamic(
   () => import('@/components/library/DeleteAnimeDialog').then((mod) => mod.DeleteAnimeDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 
 const BatchPublishDialog = nextDynamic(
   () => import('@/components/library/batch-publish').then((mod) => mod.BatchPublishDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 
 const BatchReencodeDialog = nextDynamic(
   () => import('@/components/library/reencode/BatchReencodeDialog').then((mod) => mod.BatchReencodeDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 
 // Отключаем статическую генерацию для страницы библиотеки
@@ -159,6 +159,9 @@ function LibraryPageContent() {
     handleBatchUnpin,
   } = useLibraryPage()
 
+  // Восстановление позиции скролла при возврате из деталей аниме
+  useScrollRestoration(!isLoading, viewMode)
+
   // Дедупликация дорожек (кнопка в дропдауне «Обслуживание»)
   const [isDeduplicating, setIsDeduplicating] = useState(false)
   const handleDeduplicateTracks = async () => {
@@ -180,7 +183,8 @@ function LibraryPageContent() {
         } else {
           toaster.success({
             title: `Удалено дубликатов: ${total}`,
-            description: `Аудио: ${audioRemoved}, субтитры: ${subtitlesRemoved}, шрифты: ${fontsRemoved}. Рекомендуется регенерировать манифесты.`,
+            description:
+              `Аудио: ${audioRemoved}, субтитры: ${subtitlesRemoved}, шрифты: ${fontsRemoved}. Рекомендуется регенерировать манифесты.`,
           })
           await refetch()
         }
@@ -385,33 +389,35 @@ function LibraryPageContent() {
 
             {/* Сетка аниме — зависит от режима отображения */}
             <GridErrorBoundary>
-              {isEmptyWithoutFilters ? (
-                <EmptyLibraryState onImport={() => setIsImportOpen(true)} />
-              ) : viewMode === 'individual' ? (
-                <AnimeGrid
-                  animes={animes}
-                  isLoading={isLoading}
-                  onPlay={handleCardPlay}
-                  onExport={handleCardExport}
-                  onRefreshMetadata={handleCardRefreshMetadata}
-                  onDelete={handleCardDelete}
-                  onWatchStatusChange={handleWatchStatusChange}
-                  selectionMode={selectionMode}
-                  selectedIds={selectedIds}
-                  onToggleSelection={toggleSelection}
-                />
-              ) : (
-                <FranchiseView
-                  franchiseGroups={franchiseGroups}
-                  standAloneAnimes={standAloneAnimes}
-                  isLoading={isLoading}
-                  onPlay={handleCardPlay}
-                  onExport={handleCardExport}
-                  onRefreshMetadata={handleCardRefreshMetadata}
-                  onDelete={handleCardDelete}
-                  onWatchStatusChange={handleWatchStatusChange}
-                />
-              )}
+              {isEmptyWithoutFilters
+                ? <EmptyLibraryState onImport={() => setIsImportOpen(true)} />
+                : viewMode === 'individual'
+                ? (
+                  <AnimeGrid
+                    animes={animes}
+                    isLoading={isLoading}
+                    onPlay={handleCardPlay}
+                    onExport={handleCardExport}
+                    onRefreshMetadata={handleCardRefreshMetadata}
+                    onDelete={handleCardDelete}
+                    onWatchStatusChange={handleWatchStatusChange}
+                    selectionMode={selectionMode}
+                    selectedIds={selectedIds}
+                    onToggleSelection={toggleSelection}
+                  />
+                )
+                : (
+                  <FranchiseView
+                    franchiseGroups={franchiseGroups}
+                    standAloneAnimes={standAloneAnimes}
+                    isLoading={isLoading}
+                    onPlay={handleCardPlay}
+                    onExport={handleCardExport}
+                    onRefreshMetadata={handleCardRefreshMetadata}
+                    onDelete={handleCardDelete}
+                    onWatchStatusChange={handleWatchStatusChange}
+                  />
+                )}
             </GridErrorBoundary>
           </VStack>
         </Box>

@@ -65,12 +65,12 @@ async function ensureTunnel(server: InfraServer): Promise<void> {
       '-N',
       `${sshUser}@${host}`,
     ],
-    { detached: true, stdio: 'ignore' },
+    { detached: true, stdio: 'ignore' }
   ).unref()
 
   if (!(await waitForPort(tunnelPort))) {
     throw new Error(
-      `SSH-туннель к ${server} (${sshUser}@${host}) не поднялся за 15с. Проверь SSH-доступ и что агент слушает на хосте :${hostPort}.`,
+      `SSH-туннель к ${server} (${sshUser}@${host}) не поднялся за 15с. Проверь SSH-доступ и что агент слушает на хосте :${hostPort}.`
     )
   }
   tunnelled.add(server)
@@ -98,7 +98,7 @@ export interface RequestOptions {
  */
 export async function agentRequest<T = unknown>(
   server: InfraServer,
-  { method = 'GET', path, body, auth = true, timeoutMs = 30000 }: RequestOptions,
+  { method = 'GET', path, body, auth = true, timeoutMs = 30000 }: RequestOptions
 ): Promise<AgentResponse<T>> {
   await ensureTunnel(server)
   const { tunnelPort } = serverConnection(server)

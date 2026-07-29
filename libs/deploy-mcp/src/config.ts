@@ -7,6 +7,7 @@
  */
 
 import { type InfraServer, SERVERS } from '@letar/infra-config'
+import { parseDotEnv } from '@letar/mcp-server-kit'
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -31,28 +32,6 @@ export function sshConfig(): { exe: string; key: string } {
   return { exe: 'ssh', key: `${process.env['HOME']}/.ssh/id_rsa` }
 }
 
-/** Парсит dotenv-содержимое в объект (кавычки снимаются). */
-function parseEnv(content: string): Record<string, string> {
-  const env: Record<string, string> = {}
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue
-    }
-    const eqIdx = trimmed.indexOf('=')
-    if (eqIdx === -1) {
-      continue
-    }
-    const key = trimmed.slice(0, eqIdx).trim()
-    let value = trimmed.slice(eqIdx + 1).trim()
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1)
-    }
-    env[key] = value
-  }
-  return env
-}
-
 /**
  * Читает env-переменные dashboard-agent: plaintext .env.docker, иначе расшифровка
  * .env.docker.enc через sops (нужен SOPS_AGE_KEY_FILE). Результат кешируется.
@@ -67,7 +46,7 @@ function readAgentEnv(): Record<string, string> {
   const enc = resolve(dir, '.env.docker.enc')
 
   if (existsSync(plain)) {
-    cachedEnv = parseEnv(readFileSync(plain, 'utf8'))
+    cachedEnv = parseDotEnv(readFileSync(plain, 'utf8'))
     return cachedEnv
   }
   if (existsSync(enc)) {
@@ -79,7 +58,7 @@ function readAgentEnv(): Record<string, string> {
     const out = execFileSync('sops', ['-d', '--input-type', 'dotenv', '--output-type', 'dotenv', enc], {
       encoding: 'utf8',
     })
-    cachedEnv = parseEnv(out)
+    cachedEnv = parseDotEnv(out)
     return cachedEnv
   }
   throw new Error(
@@ -106,9 +85,18 @@ export function tokenForServer(server: InfraServer): string {
   return token
 }
 
-/** Текущий HEAD локального репозитория (для сверки с коммитом, на котором прогонялся e2e). */
-export function localHeadSha(): string {
-  return execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+/**
+ * SHA `origin/main` (для сверки с коммитом, на котором прогонялся e2e) — то, что реально
+ * подтянет `git pull` на сервере при деплое. НЕ используй локальный `HEAD` этого cwd: в общем
+ * рабочем каталоге монорепо параллельные агенты постоянно коммитят локально, не пушa —
+ * localHeadSha() тогда обгоняет origin/main непушнутыми чужими коммитами и hard e2e-gate
+ * блокирует деплой на коммит, который никогда не будет задеплоен (найдено BlackCove, 2026-07-29:
+ * archetest заблокирован 4 раза подряд на бегущих de8d375/062c3bb/52b709b, хотя origin/main и
+ * s2/s3 всё время стояли на протестированном 5adbadb7).
+ */
+export function originMainSha(): string {
+  execFileSync('git', ['-C', REPO_ROOT, 'fetch', '--quiet', 'origin', 'main'], { encoding: 'utf8' })
+  return execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', 'origin/main'], { encoding: 'utf8' }).trim()
 }
 
 /** Базовые данные подключения к агенту на сервере. */

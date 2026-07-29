@@ -17,10 +17,11 @@ import {
   SERVER_APPS,
   SERVERS,
 } from '@letar/infra-config'
+import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { agentRequest, type AgentResponse } from './client.js'
-import { localHeadSha } from './config.js'
+import { originMainSha } from './config.js'
 
 const serverEnum = z.enum(['s2', 's3'])
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
@@ -36,25 +37,6 @@ interface E2eGateResult {
   blocked: boolean
   /** Причины без ведущего «⚠️»/форматирования — вызывающий код сам решает, как их показать. */
   reasons: string[]
-}
-
-// Обе функции возвращают ОДНУ и ту же форму (с полем isError) без аннотации типа —
-// так вывод типов SDK-колбэка работает (аналогично form-mcp). Аннотация или union
-// из двух разных форм ломает overload-резолюцию tool() (ZodRawShapeCompat).
-
-/** Оборачивает результат в MCP text-content. */
-function text(body: string) {
-  return { content: [{ type: 'text' as const, text: body }], isError: false as boolean }
-}
-
-/** Оборачивает ошибку в MCP isError-ответ с диагностикой. */
-function errorText(body: string) {
-  return { content: [{ type: 'text' as const, text: body }], isError: true as boolean }
-}
-
-/** JSON-представление данных агента для вывода в чат. */
-function pretty(data: unknown): string {
-  return '```json\n' + JSON.stringify(data, null, 2) + '\n```'
 }
 
 /**
@@ -75,7 +57,7 @@ export async function evaluateE2eGate(
   hardGated: boolean,
   fetchStatus: (app: string) => Promise<AgentResponse<E2eStatusResponse>> = (a) =>
     agentRequest<E2eStatusResponse>('s3', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
-  getHeadSha: () => string = localHeadSha,
+  getHeadSha: () => string = originMainSha,
 ): Promise<E2eGateResult> {
   const reasons: string[] = []
   try {
