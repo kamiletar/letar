@@ -19,6 +19,7 @@ import {
 } from '@/app/_actions/anime-relation.action'
 import {
   type AnimeIpfsSizes,
+  countAnime,
   createAnime,
   deleteAnime,
   findManyAnime,
@@ -75,7 +76,7 @@ import {
 import { createSubtitleFont } from '@/app/_actions/subtitle-font.action'
 import { createSubtitleTrack, deleteSubtitleTrack, updateSubtitleTrack } from '@/app/_actions/subtitle-track.action'
 import { findUniqueWatchProgress, upsertWatchProgress } from '@/app/_actions/watch-progress.action'
-import type { Prisma } from '@/generated/prisma'
+import type { Anime, Prisma } from '@/generated/prisma'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
@@ -83,6 +84,7 @@ import {
   createCRUDHooks,
   createDeleteHook,
   createFindManyHook,
+  createInfiniteFindManyHook,
   createUpdateHook,
 } from './hooks-factory'
 
@@ -111,6 +113,25 @@ export const useFindUniqueAnime = animeHooks.useFindUnique
 export const useCreateAnime = animeHooks.useCreate
 export const useUpdateAnime = animeHooks.useUpdate
 export const useDeleteAnime = animeHooks.useDelete
+
+/**
+ * Постраничная подгрузка аниме (infinite scroll) — для режима «По отдельности», где
+ * не нужен весь набор сразу (в отличие от группировки по франшизам, см. use-library-page.ts)
+ */
+export const useInfiniteFindManyAnime = createInfiniteFindManyHook<Prisma.AnimeFindManyArgs, Anime>({
+  queryKey: 'animes',
+  queryFn: findManyAnime,
+  pageSize: 60,
+})
+
+/** Количество аниме, подходящих под фильтр — для шапки библиотеки без загрузки самих записей */
+export function useCountAnime(where?: Prisma.AnimeWhereInput) {
+  return useQuery({
+    queryKey: ['animes', 'count', where],
+    queryFn: () => countAnime(where),
+    staleTime: 30 * 1000,
+  })
+}
 
 /** Query хук для суммарных размеров IPFS-контента всех аниме (агрегация одним SQL) */
 export function useAnimeIpfsSizes() {
@@ -223,7 +244,7 @@ export const useDeleteEncodingProfile = encodingProfileHooks.useDelete
 /** Query хук для useFindFirst EncodingProfile (поиск по умолчанию) */
 export function useFindFirstEncodingProfile(
   args?: Prisma.EncodingProfileFindFirstArgs,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ['encodingProfileFirst', args],
@@ -414,7 +435,7 @@ export const useCreateSubtitleFont = createCreateHook({
 /** Query хук для useFindUnique WatchProgress */
 export function useFindUniqueWatchProgress(
   args: { where: { animeId_episodeId: { animeId: string; episodeId: string } }; include?: Prisma.WatchProgressInclude },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   const { animeId, episodeId } = args.where.animeId_episodeId
   return useQuery({
@@ -460,7 +481,7 @@ export function useUpsertWatchProgress() {
 /** Query хук для useFindUnique Settings */
 export function useFindUniqueSettings(
   args: { where: { id: string }; include?: object },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ['settings', args.where.id, args.include],

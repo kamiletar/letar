@@ -1,7 +1,7 @@
 'use client'
 
-import { AspectRatio, Box, Checkbox, Grid, Icon, Text, VStack } from '@chakra-ui/react'
-import { memo } from 'react'
+import { AspectRatio, Box, Checkbox, Grid, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { memo, useEffect } from 'react'
 import { LuFilm } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -52,6 +52,12 @@ interface AnimeGridProps {
   selectedIds?: Set<string>
   /** Переключить выбор карточки */
   onToggleSelection?: (id: string) => void
+  /** Есть ли ещё не подгруженные страницы (infinite scroll) */
+  hasNextPage?: boolean
+  /** Идёт подгрузка следующей страницы */
+  isFetchingNextPage?: boolean
+  /** Подгрузить следующую страницу */
+  onLoadMore?: () => void
 }
 
 /**
@@ -69,11 +75,29 @@ export const AnimeGrid = memo(function AnimeGrid({
   selectionMode,
   selectedIds,
   onToggleSelection,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
 }: AnimeGridProps) {
   const { containerRef, columns, rowVirtualizer } = useVirtualizedGrid(animes.length, {
     // Постер (2:3) + текстовый блок карточки — грубая оценка, уточняется через measureElement
     estimateSize: (cardWidth) => cardWidth * 1.5 + 170,
   })
+
+  // Infinite scroll: подгружаем следующую страницу, когда виртуализатор приближается
+  // к последней уже загруженной строке (не к последней строке экрана — виртуализатор
+  // сам знает, что реально отрендерено с учётом overscan)
+  const virtualItems = rowVirtualizer.getVirtualItems()
+  const lastVirtualItemIndex = virtualItems[virtualItems.length - 1]?.index
+  useEffect(() => {
+    if (lastVirtualItemIndex === undefined || !hasNextPage || isFetchingNextPage) {
+      return
+    }
+    const rowCount = rowVirtualizer.options.count
+    if (lastVirtualItemIndex >= rowCount - 1) {
+      onLoadMore?.()
+    }
+  }, [lastVirtualItemIndex, hasNextPage, isFetchingNextPage, onLoadMore, rowVirtualizer])
 
   if (isLoading) {
     return (
@@ -193,6 +217,18 @@ export const AnimeGrid = memo(function AnimeGrid({
           </Box>
         )
       })}
+      {isFetchingNextPage && (
+        <HStack
+          justify="center"
+          py={4}
+          position="absolute"
+          left={0}
+          right={0}
+          top={`${rowVirtualizer.getTotalSize()}px`}
+        >
+          <Spinner size="sm" color="purple.500" />
+        </HStack>
+      )}
     </Box>
   )
 })

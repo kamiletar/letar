@@ -141,6 +141,36 @@ franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно
 
 ## Открытые задачи
 
+- [ ] **Автоопределение глав (OP/ED) для папочного режима плеера (`/player`)**
+
+  **Проблема:** при импорте в библиотеку (`main/services/import/chapter-creator.ts`
+  `createChapters()`) главы из контейнера (ffprobe `-show_chapters`) классифицируются через
+  `detectChapterType`/`isChapterSkippable` (`main/services/import/helpers.ts`) и попадают в
+  IPFS-манифест эпизода → плеер показывает кнопку «Пропустить опенинг/эндинг». В папочном режиме
+  (`/player`, просмотр файлов с диска без импорта в библиотеку) этого нет вообще — `useFolderPlayer.ts`
+  (`scanTracksForEpisodeInternal`) вызывает `getCachedProbe()`, который уже возвращает
+  `mediaInfo.chapters` (`main/ffmpeg/probe.ts` `getChaptersAndAttachments()` — `-show_chapters`
+  входит в тот же ffprobe-вызов, что уже делается для аудио/видео/субтитров, **дополнительного
+  прохода ffmpeg не требуется**), но `embeddedTracks` в `useFolderPlayer.ts` (строки ~262–281)
+  берёт из `mediaInfo` только `audioTracks`/`subtitleTracks` — `chapters` отбрасывается.
+
+  **План реализации:**
+  1. `useFolderPlayer.ts`: прокинуть `mediaInfo.chapters` в `embeddedTracks` (или отдельное поле
+     `FolderPlayerState.chapters`) наряду с audio/subtitles.
+  2. Классификация типа (OP/ED/RECAP/PREVIEW) — переиспользовать `detectChapterType`/
+     `isChapterSkippable` из `main/services/import/helpers.ts` (та же логика, что при импорте, не
+     дублировать эвристику).
+  3. Конвертация в формат плеера — по аналогии с `manifestChapterToPlayerChapter()`
+     (`renderer/src/components/player/chapter-utils.ts`), но из секунд ffprobe (`{start, end,
+     title}`), а не из мс IPFS-манифеста (`ManifestChapter`) — нужен паралелльный конвертер
+     `probeChapterToPlayerChapter()` рядом с существующим.
+  4. Передать `chapters` в `<VideoPlayer>` на `/player/page.tsx` (проп уже поддерживается
+     компонентом для библиотечного режима — `ChapterEditor.tsx`/кнопка пропуска уже умеют её
+     рендерить, нужно только запитать данными в папочном режиме).
+
+  По ресурсам — бесплатно (данные уже вычисляются существующим ffprobe-вызовом), вся работа в
+  этой задаче — прокинуть уже готовые данные через слои, которые их сейчас отбрасывают.
+
 - [x] **Дотипизировать rutracker/torrent IPC в electron.d.ts** (v0.55.1) — описаны секции
       `rutracker`/`torrent` в `ElectronAPI` + канонические типы (`RutrackerTorrentInfo`,
       `RutrackerImportResult`, `TorrentInfo`, `TorrentProgress` и т.д.), `@ts-nocheck` убран из

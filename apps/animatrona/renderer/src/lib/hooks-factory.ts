@@ -6,7 +6,7 @@
  */
 
 import type { QueryKey, UseQueryOptions } from '@tanstack/react-query'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 // ============================================================
 // Типы конфигураций
@@ -119,6 +119,41 @@ export function createFindManyHook<TArgs, TResult>(config: FindManyConfig<TArgs,
       queryKey: [config.queryKey, args] as QueryKey,
       queryFn: () => config.queryFn(args),
       ...options,
+    })
+  }
+}
+
+/** Args для infinite-варианта findMany — take/skip управляются хуком, не передаются вручную */
+export type InfiniteFindManyArgs<TArgs> = Omit<TArgs, 'take' | 'skip'>
+
+/**
+ * Создаёт хук useInfiniteFindMany для сущности — постраничная подгрузка (`take`/`skip`)
+ * вместо загрузки всего набора одним запросом. Каждая страница — отдельная запись в кэше
+ * TanStack Query (`queryKey` включает номер страницы), страницы склеиваются в один массив.
+ *
+ * @example
+ * const useInfiniteFindManyAnime = createInfiniteFindManyHook({
+ *   queryKey: 'animes',
+ *   queryFn: findManyAnime,
+ *   pageSize: 60,
+ * })
+ */
+export function createInfiniteFindManyHook<TArgs extends { take?: number; skip?: number }, TResult>(config: {
+  queryKey: string
+  queryFn: (args?: TArgs) => Promise<TResult[]>
+  pageSize: number
+}) {
+  return function useInfiniteFindMany(
+    args?: InfiniteFindManyArgs<TArgs>,
+    options?: { enabled?: boolean },
+  ) {
+    return useInfiniteQuery({
+      queryKey: [config.queryKey, 'infinite', args] as QueryKey,
+      queryFn: ({ pageParam }) => config.queryFn({ ...(args as TArgs), take: config.pageSize, skip: pageParam }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage.length < config.pageSize ? undefined : allPages.length * config.pageSize,
+      enabled: options?.enabled,
     })
   }
 }
@@ -275,7 +310,7 @@ export function createCRUDHooks<
     TUpdateData,
     TUpdateResult,
     TDeleteResult
-  >
+  >,
 ) {
   const { keys, actions, invalidation } = config
 

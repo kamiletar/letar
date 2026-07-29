@@ -75,7 +75,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     spriteUrl,
     spriteCues,
   },
-  ref
+  ref,
 ) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -127,6 +127,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
   const [isVideoReady, setIsVideoReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  // autoPlay через ref — используется в обработчике `loadeddata`, который навешивается один раз
+  // на весь жизненный цикл video-элемента (см. эффект ниже), а не пересоздаётся на каждый рендер
+  const autoPlayRef = useRef(autoPlay)
+  autoPlayRef.current = autoPlay
+
   // Перемещаем persistent video element в контейнер VideoPlayer
   useEffect(() => {
     const container = videoContainerRef.current
@@ -141,33 +146,54 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     container.appendChild(video)
     videoRef.current = video
 
-    // Видео уже загружено (Shaka Player в Provider) — сразу готово
+    // Видео уже загружено (Shaka Player в Provider) — сразу готово. `loadeddata` в этом случае
+    // уже отгремел до маунта компонента и повторно не сработает — автоплей проверяем и здесь.
     if (video.readyState > 0) {
       setIsVideoReady(true)
       setIsLoading(false)
       setDuration(video.duration)
-    } else {
-      // Ждём загрузки (первый раз)
-      const onReady = () => {
-        setIsVideoReady(true)
-        setIsLoading(false)
-        setDuration(video.duration)
+      if (autoPlayRef.current && video.paused) {
+        video.play().catch(() => {
+          /* ignore */
+        })
       }
-      video.addEventListener('loadeddata', onReady, { once: true })
-    }
-
-    // autoPlay
-    if (autoPlay && video.paused) {
-      video.play().catch(() => {
-        /* ignore */
-      })
     }
 
     return () => {
       videoRef.current = null
       setIsVideoReady(false)
     }
-  }, [globalVideoElement, autoPlay, setDuration])
+  }, [globalVideoElement, setDuration])
+
+  // `loadeddata` персистентного video-элемента — навешивается ОДИН РАЗ на весь жизненный цикл
+  // приложения (globalVideoElement создаётся один раз в GlobalVideoProvider и никогда не
+  // меняется), поэтому срабатывает на КАЖДУЮ смену src, а не только на первый маунт этого
+  // компонента. Без этого автопродолжение в папочном режиме плеера (goNext() внутри той же
+  // смонтированной страницы /player, без навигации/ремаунта VideoPlayer) молча грузило следующую
+  // серию и оставляло её на паузе — старая логика вызывала `video.play()` только в эффекте выше
+  // с deps `[globalVideoElement, ...]`, а он не перезапускается при смене эпизода, т.к. сам
+  // video-элемент не меняется. В /watch тот же баг маскировался: переход между сериями там —
+  // это навигация на другой route, которая ремонтит VideoPlayer целиком.
+  useEffect(() => {
+    const video = globalVideoElement
+    if (!video) {
+      return
+    }
+
+    const onLoadedData = () => {
+      setIsVideoReady(true)
+      setIsLoading(false)
+      setDuration(video.duration)
+      if (autoPlayRef.current && video.paused) {
+        video.play().catch(() => {
+          /* ignore */
+        })
+      }
+    }
+
+    video.addEventListener('loadeddata', onLoadedData)
+    return () => video.removeEventListener('loadeddata', onLoadedData)
+  }, [globalVideoElement, setDuration])
 
   // Хук автоскрытия контролов
   const { showControls: showControlsOverlay, resetHideTimeout } = useAutoHideControls({
@@ -197,7 +223,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         audioRef.current.playbackRate = speed
       }
     },
-    [setPlaybackSpeed]
+    [setPlaybackSpeed],
   )
 
   const adjustPlaybackSpeed = useCallback(
@@ -211,7 +237,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       const newSpeed = PLAYBACK_SPEEDS[newIndex]
       handlePlaybackSpeedChange(newSpeed)
     },
-    [playbackSpeed, handlePlaybackSpeedChange]
+    [playbackSpeed, handlePlaybackSpeedChange],
   )
 
   // Переключение оверлея информации о видео
@@ -483,7 +509,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         </IconButton>
       </Tooltip>
     ),
-    [isPiP, togglePiP]
+    [isPiP, togglePiP],
   )
 
   return (
