@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [0.55.12] - 2026-07-29
+
+### Changed
+
+- **Продолжение useEffect-аудита (после v0.55.10): `useGlobalShortcuts` больше не пересоздаёт
+  `window`-листенер `keydown` на каждый рендер `AppShell`** — `handleKeyDown` зависел от объекта
+  `callbacks`, а `AppShell` (always-mounted layout) передавал в `useGlobalShortcuts` инлайн-объект
+  с новыми стрелочными функциями на каждый рендер (навигация, `isShortcutsOpen`/`isQuickSearchOpen`).
+  Каждый такой рендер дёргал `removeEventListener`/`addEventListener` на `window`. Колбэки теперь
+  читаются через `callbacksRef` (latest-ref паттерн), `handleKeyDown` зависит только от `router` —
+  подписка на `keydown` создаётся один раз на весь жизненный цикл приложения. Точечная проверка
+  `TitleBar.tsx`, `PageTransition.tsx`, `GlobalVideoProvider.tsx` (следующие кандидаты из плана) —
+  уже в порядке: mount-once эффекты с пустыми deps либо throttled (video timeupdate — 250ms),
+  доработки не требуют. Верифицировано `nx typecheck:tsgo animatrona` + `nx lint animatrona`
+  (файл чист).
+
 ## [0.55.11] - 2026-07-29
 
 ### Changed

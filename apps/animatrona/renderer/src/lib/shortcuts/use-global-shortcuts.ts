@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { isInputFocused, NAV_PATHS } from './shortcuts-config'
 
@@ -32,6 +32,13 @@ export interface GlobalShortcutsCallbacks {
 export function useGlobalShortcuts(callbacks: GlobalShortcutsCallbacks = {}) {
   const router = useRouter()
 
+  // Колбэки читаются из ref, а не из замыкания — вызывающий код (AppShell) передаёт
+  // новый объект callbacks на каждый рендер (инлайн-функции), и если бы handleKeyDown
+  // зависел от него напрямую, addEventListener/removeEventListener на window дёргались
+  // бы при каждом рендере always-mounted layout вместо одного раза на весь app lifecycle.
+  const callbacksRef = useRef(callbacks)
+  callbacksRef.current = callbacks
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       // Игнорируем если фокус в текстовом поле
@@ -47,34 +54,34 @@ export function useGlobalShortcuts(callbacks: GlobalShortcutsCallbacks = {}) {
       // Ctrl+K — Quick Search (code для работы в русской раскладке)
       if (ctrl && code === 'KeyK') {
         e.preventDefault()
-        callbacks.onCommandPalette?.()
+        callbacksRef.current.onCommandPalette?.()
         return
       }
 
       // / — Quick Search (альтернативный хоткей)
       if (!ctrl && !shift && key === '/') {
         e.preventDefault()
-        callbacks.onCommandPalette?.()
+        callbacksRef.current.onCommandPalette?.()
         return
       }
 
       // Ctrl+I — Импорт видео (code для работы в русской раскладке)
       if (ctrl && code === 'KeyI') {
         e.preventDefault()
-        callbacks.onImport?.()
+        callbacksRef.current.onImport?.()
         return
       }
 
       // Ctrl+/ — Показать хоткеи
       if (ctrl && key === '/') {
         e.preventDefault()
-        callbacks.onShowShortcuts?.()
+        callbacksRef.current.onShowShortcuts?.()
         return
       }
 
       // Escape — Закрыть модальное окно
       if (key === 'escape') {
-        callbacks.onEscape?.()
+        callbacksRef.current.onEscape?.()
         return
       }
 
@@ -88,7 +95,7 @@ export function useGlobalShortcuts(callbacks: GlobalShortcutsCallbacks = {}) {
         return
       }
     },
-    [callbacks, router]
+    [router]
   )
 
   useEffect(() => {

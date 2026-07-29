@@ -485,11 +485,16 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
     внутри Electron, не web-превью). Сценарий для профилирования: открыть библиотеку на реальных
     300+ аниме → поскроллить → открыть/закрыть карточку деталей → вернуться назад. Смотреть на
     компоненты с высоким self time при скролле (виртуализированная сетка тикает на каждый кадр).
-  - **Остаток useEffect-аудита** — в v0.55.10 проверен только `Sidebar` и три его карточки.
-    Следующие кандидаты на «горячие» always-mounted места (рендерятся на каждом роуте или очень
-    часто): `AppShell.tsx`, `GlobalVideoProvider.tsx` (persistent на весь layout), `TitleBar.tsx`,
-    `PageTransition.tsx`. Остальные ~120 файлов с `useEffect` — компонентные/страничные, риск ниже
-    (монтируются один раз на страницу), низкий приоритет.
+  - [x] **Остаток useEffect-аудита: `AppShell`/`GlobalVideoProvider`/`TitleBar`/`PageTransition`**
+        (v0.55.12) — проверены все четыре кандидата. Найден и пофикшен реальный баг:
+        `useGlobalShortcuts` дёргал `window.addEventListener/removeEventListener('keydown', ...)` на
+        каждый рендер `AppShell` (always-mounted layout, ре-рендерится при каждой навигации), потому
+        что `handleKeyDown` зависел от инлайн-объекта `callbacks`, пересоздаваемого в JSX на каждый
+        рендер. Исправлено latest-ref паттерном (`callbacksRef`), `handleKeyDown` зависит только от
+        `router`. `TitleBar.tsx`/`PageTransition.tsx`/`GlobalVideoProvider.tsx` — уже в порядке
+        (mount-once эффекты с пустыми deps либо throttled). Остальные ~120 файлов с `useEffect` —
+        компонентные/страничные, риск ниже (монтируются один раз на страницу), низкий приоритет,
+        не проверялись.
   - **main process / worker_threads** — не начато. Проверить: не блокируют ли renderer тяжёлые
     синхронные операции в main (ffmpeg probe, IPFS pin/unpin, sql.js миграции) — искать `execSync`/
     большие синхронные циклы в `main/services/**`, кандидаты на вынос в `worker_threads` или хотя

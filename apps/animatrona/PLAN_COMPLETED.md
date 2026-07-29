@@ -6,6 +6,41 @@
 
 ---
 
+## v0.55.12 — useEffect-аудит: убрана churn-подписка на window.keydown в useGlobalShortcuts (2026-07-29)
+
+**Задача:** продолжение ветки «Аудит производительности» из PLAN.md — конкретно «Остаток
+useEffect-аудита» для четырёх кандидатов, отмеченных после v0.55.10: `AppShell.tsx`,
+`GlobalVideoProvider.tsx`, `TitleBar.tsx`, `PageTransition.tsx`.
+
+### Находка
+
+`AppShell` — always-mounted layout, ре-рендерится при каждой навигации (`usePathname`) и смене
+`isShortcutsOpen`/`isQuickSearchOpen`. Он вызывает `useGlobalShortcuts({ onShowShortcuts: () =>
+..., onCommandPalette: () => ..., onImport: handleOpenImport, onEscape: closeSimpleModals })` —
+инлайн-объект с новыми стрелочными функциями на каждый рендер. Внутри `useGlobalShortcuts`
+`handleKeyDown` был обёрнут в `useCallback` с зависимостью `[callbacks, router]` — новый объект
+`callbacks` каждый рендер пересоздавал `handleKeyDown`, а `useEffect` с зависимостью `[handleKeyDown]`
+дёргал `window.removeEventListener`/`addEventListener('keydown', ...)` на каждый такой рендер
+вместо одного раза на весь жизненный цикл приложения.
+
+**Реализовано:** [use-global-shortcuts.ts](apps/animatrona/renderer/src/lib/shortcuts/use-global-shortcuts.ts) —
+latest-ref паттерн: `callbacksRef` хранит актуальные колбэки (обновляется на каждый рендер без
+побочных эффектов), `handleKeyDown` читает их через `callbacksRef.current` и зависит только от
+`router` (стабильная ссылка next/navigation). Подписка на `keydown` теперь создаётся один раз.
+
+**Проверка остальных трёх файлов:** `TitleBar.tsx` — mount-once эффект с пустыми deps (инициализация
+
+- подписка на maximize/unmaximize), доработок не требует. `PageTransition.tsx` — эффектов вообще
+  нет. `GlobalVideoProvider.tsx` — три эффекта: создание persistent video/audio элементов (пустые
+  deps, один раз), загрузка видео при смене `src`, синхронизация audio-дорожки при смене `audioSrc` —
+  `timeupdate` уже throttled до 250ms, лишних ре-рендеров не создаёт, доработок не требует.
+
+**Не проверено:** остальные ~120 файлов с `useEffect` в приложении — компонентные/страничные,
+монтируются один раз на страницу, риск ниже, низкий приоритет.
+
+Верифицировано `nx typecheck:tsgo animatrona`, `nx lint animatrona` (изменённый файл — 0 замечаний),
+`nx build:win animatrona` (успешно, `Animatrona Setup 0.55.12.exe`).
+
 ## v0.55.11 — Хук usePolledData: устранение дублирования в Sidebar-карточках (2026-07-29)
 
 **Задача:** `ContinueWatchingCard` и `WatchNextCard` почти дословно повторяли один и тот же каркас
