@@ -32,7 +32,7 @@ export function createConsentRoute(options: CreateConsentRouteOptions) {
         consentVersion: parsed.data.version,
       },
       request,
-      options.saveConsentLog,
+      options.saveConsentLog
     )
 
     return Response.json({ ok: true })

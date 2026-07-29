@@ -79,7 +79,7 @@ export function useScrollGate({
           observer.disconnect()
         }
       },
-      { rootMargin },
+      { rootMargin }
     )
     observer.observe(el)
     return () => observer.disconnect()

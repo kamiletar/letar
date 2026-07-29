@@ -31,7 +31,7 @@ export function buildConsentLogData(input: ConsentLogInput, request: Request): C
 export async function recordConsent(
   input: ConsentLogInput,
   request: Request,
-  save: (data: ConsentLogData) => Promise<unknown>,
+  save: (data: ConsentLogData) => Promise<unknown>
 ): Promise<void> {
   await save(buildConsentLogData(input, request))
 }

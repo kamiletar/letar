@@ -255,7 +255,7 @@ export function formatPortDrift(drift: PortDrift[]): string {
   return drift
     .map(
       ({ app, found, declared, file }) =>
-        `${app}: ${file} указывает ${found}, приложение объявляет ${declared.join(', ')}`,
+        `${app}: ${file} указывает ${found}, приложение объявляет ${declared.join(', ')}`
     )
     .join('\n')
 }

@@ -25,9 +25,7 @@ export interface AdminEditOverlayProps extends Omit<IconButtonProps, 'aria-label
  * </Box>
  * ```
  */
-export function AdminEditOverlay(
-  { href, 'aria-label': ariaLabel = 'Редактировать', ...props }: AdminEditOverlayProps,
-) {
+export function AdminEditOverlay({ href, 'aria-label': ariaLabel = 'Редактировать', ...props }: AdminEditOverlayProps) {
   return (
     <IconButton
       aria-label={ariaLabel}

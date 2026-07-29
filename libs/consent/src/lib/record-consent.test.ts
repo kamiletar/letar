@@ -15,7 +15,7 @@ describe('buildConsentLogData', () => {
         acceptedFunctional: true,
         consentVersion: 'v1',
       },
-      fakeRequest({ 'x-forwarded-for': '203.0.113.1', 'user-agent': 'test-ua' }),
+      fakeRequest({ 'x-forwarded-for': '203.0.113.1', 'user-agent': 'test-ua' })
     )
 
     expect(data).toMatchObject({
@@ -32,7 +32,7 @@ describe('buildConsentLogData', () => {
   it('userAgent — null, если заголовок отсутствует', () => {
     const data = buildConsentLogData(
       { acceptedAnalytics: false, acceptedMarketing: false, acceptedFunctional: true, consentVersion: 'v1' },
-      fakeRequest({}),
+      fakeRequest({})
     )
     expect(data.userAgent).toBeNull()
   })
@@ -51,12 +51,12 @@ describe('recordConsent', () => {
         consentVersion: 'v2',
       },
       fakeRequest({ 'x-forwarded-for': '203.0.113.2' }),
-      save,
+      save
     )
 
     expect(save).toHaveBeenCalledTimes(1)
     expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'u2', anonymousId: 'anon-1', consentVersion: 'v2' }),
+      expect.objectContaining({ userId: 'u2', anonymousId: 'anon-1', consentVersion: 'v2' })
     )
   })
 })

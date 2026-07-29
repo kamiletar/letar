@@ -18,7 +18,7 @@ import { ConfirmDialog, RatingStars, TopLoader } from '@letar/ui'
 
 ```tsx
 import { TopLoader } from '@letar/ui'
-<TopLoader />
+;<TopLoader />
 ```
 
 ### ConfirmDialog
@@ -27,7 +27,7 @@ import { TopLoader } from '@letar/ui'
 
 ```tsx
 import { ConfirmDialog } from '@letar/ui'
-<ConfirmDialog
+;<ConfirmDialog
   open={isOpen}
   onOpenChange={setIsOpen}
   title="Удалить запись?"
@@ -56,7 +56,7 @@ import { RatingDisplay, RatingStars } from '@letar/ui'
 
 ```tsx
 import { FilterField, FilterPanel, FilterRow } from '@letar/ui'
-<FilterPanel>
+;<FilterPanel>
   <FilterRow>
     <FilterField name="status" label="Статус">
       <Select options={statusOptions} />
@@ -82,7 +82,7 @@ import { RoleStat, StatCard } from '@letar/ui'
 
 ```tsx
 import { OptimizedAvatar } from '@letar/ui'
-<OptimizedAvatar src="/avatar.jpg" name="Иван" />
+;<OptimizedAvatar src="/avatar.jpg" name="Иван" />
 ```
 
 ### ReviewCard
@@ -91,7 +91,7 @@ import { OptimizedAvatar } from '@letar/ui'
 
 ```tsx
 import { ReviewCard } from '@letar/ui'
-<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
+;<ReviewCard review={{ text: 'Отличный сервис!', rating: 5 }} author={{ name: 'Анна', avatar: '/anna.jpg' }} />
 ```
 
 ### StickyActionBar
@@ -132,7 +132,7 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 
 ```tsx
 import { AdminEditOverlay } from '@letar/ui'
-<Box position="relative">
+;<Box position="relative">
   {isAdmin && <AdminEditOverlay href={`/admin/${slug}`} colorPalette="brand" />}
   <Link asChild>
     <NextLink href={`/item/${slug}`}>...карточка...</NextLink>
@@ -161,7 +161,7 @@ const nextConfig = {
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-<PhotoGallery photos={photos.map((p) => ({ src: `/api/files/${p.path}`, alt: p.alt }))} />
+;<PhotoGallery photos={photos.map((p) => ({ src: `/api/files/${p.path}`, alt: p.alt }))} />
 ```
 
 ### ImageMagnifier
@@ -176,7 +176,7 @@ Enter/Space закрепляет. При появлении в зоне види
 
 ```tsx
 import { ImageMagnifier } from '@letar/ui'
-<ImageMagnifier
+;<ImageMagnifier
   src="/demo/poster-fragment.webp"
   placeholderSrc="/demo/poster-fragment-far.webp"
   naturalWidth={3200}
@@ -205,7 +205,7 @@ import { ImageMagnifier } from '@letar/ui'
 
 ```tsx
 import { SortablePhotoGrid } from '@letar/admin-ui'
-<SortablePhotoGrid
+;<SortablePhotoGrid
   items={photos.map((p) => ({ id: p.id, imageUrl: `/api/files/${p.path}` }))}
   onReorder={(orderedIds) => reorderPhotosAction(estateSlug, orderedIds)}
   onSetCover={(id) => setCoverPhotoAction(id)}
@@ -222,7 +222,7 @@ import { SortablePhotoGrid } from '@letar/admin-ui'
 
 ```tsx
 import { FaqAccordion } from '@letar/ui'
-<FaqAccordion
+;<FaqAccordion
   items={[{ question: 'Как это работает?', answer: 'Вот так.' }]}
   variant="enclosed" // любой проп Accordion.Root проходит насквозь
   icon={<LuCircleHelp />} // опционально, одна иконка на все пункты
