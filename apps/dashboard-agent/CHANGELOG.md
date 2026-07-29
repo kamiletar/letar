@@ -11,6 +11,23 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.12] — 2026-07-30
+
+### Added
+
+- `src/lib/log-scan.ts` + `src/routes/log-scan.ts` (`POST /api/cron/log-scan`) — проактивное
+  сканирование хвоста логов запущенных контейнеров на строки с ошибками
+  (error/exception/fatal/panic/ECONNREFUSED/EACCES/ENOTFOUND/OOM, паттерн настраивается
+  `LOG_SCAN_ERROR_PATTERN`) и алерт `CRON_FAILED` при находке — закрывает пробел из backlog
+  «Мониторинг логов контейнеров»: pull-доступ к логам уже был
+  (`GET /api/docker/containers/:id/logs`), автоматического обнаружения новых ошибок не было.
+  Курсор "последняя обработанная строка" на контейнер (ISO timestamp) персистится в
+  `/home/deploy/letar/log-scan-state.json` — событийная (edge-triggered) семантика, не
+  boolean-дебаунс `health-check.ts`, чтобы не пропускать повторные независимые всплески ошибок.
+  Первая встреча контейнера не алертит накопленную историю логов — курсор инициализируется на
+  момент первого прогона. Cron-задача `log-scan` добавлена в `DEFAULT_CRON_JOBS`
+  (`*/10 * * * *`, s2).
+
 ## [0.9.11] — 2026-07-30
 
 ### Changed

@@ -35,6 +35,7 @@ import { envRoutes } from './routes/env'
 import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
 import { healthCheckRoutes } from './routes/health-check'
+import { logScanRoutes } from './routes/log-scan'
 import { nginxRoutes } from './routes/nginx'
 import { systemRoutes } from './routes/system'
 
@@ -110,6 +111,7 @@ async function main(): Promise<void> {
   await fastify.register(emailCanaryRoutes)
   await fastify.register(backupFreshnessRoutes)
   await fastify.register(healthCheckRoutes)
+  await fastify.register(logScanRoutes)
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']

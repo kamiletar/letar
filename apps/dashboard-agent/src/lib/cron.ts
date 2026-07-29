@@ -274,6 +274,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'log-scan',
+    name: 'Log Scan (сканирование логов контейнеров на ошибки)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/log-scan',
+    schedule: '*/10 * * * *',
+    description:
+      'Сканирует хвост логов запущенных контейнеров на строки с ошибками (error/exception/fatal/panic и т.п.), алертит CRON_FAILED по новым находкам с курсором per-контейнер, чтобы не повторять уже виденные строки (Backlog «Улучшения сбора метрик»)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 's2-pageview-count',
     name: 'Page View Counter (NPM access logs)',
     app: 'dashboard',
@@ -281,6 +292,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     schedule: '*/10 * * * *',
     description:
       'Инкрементальный парсинг access-логов Nginx Proxy Manager в грубый счётчик hits/day/domain без ПДн — дополняет Umami там, где cookie-consent gate не пропускает часть трафика (см. lib/pageview-counter.ts в dashboard)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 's2-ssl-check',
+    name: 'SSL Certificate Expiry Check',
+    app: 'dashboard',
+    endpoint: '/api/cron/ssl-check',
+    schedule: '0 8 * * *',
+    description:
+      'Проверка сроков действия SSL сертификатов в Nginx Proxy Manager, алерт SSL_EXPIRING с Telegram уведомлением при истечении/скором истечении (см. lib/ssl-monitor.ts в dashboard)',
     enabled: true,
     server: 's2',
   },
@@ -335,13 +357,13 @@ function loadAllCronJobs(): CronJob[] {
   const updatedJobs = existingJobs.map((existing) => {
     const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
     if (
-      defaultJob &&
-      (defaultJob.app !== existing.app ||
-        defaultJob.endpoint !== existing.endpoint ||
-        defaultJob.server !== existing.server)
+      defaultJob
+      && (defaultJob.app !== existing.app
+        || defaultJob.endpoint !== existing.endpoint
+        || defaultJob.server !== existing.server)
     ) {
       console.warn(
-        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`
+        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
       )
       hasChanges = true
       return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }
