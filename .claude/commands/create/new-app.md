@@ -157,6 +157,17 @@ rm -rf apps/<name>/* apps/<name>/.[!.]* && rmdir apps/<name>
 
 - Обязательно bind mount `./uploads:/app/apps/<name>/uploads` в docker-compose (не anonymous volume!)
 
+### Учёт времени для клиентских проектов (если приложение делается для клиента студии)
+
+Если приложение — коммерческий заказ клиента студии (не внутренний/личный проект), заведи его в
+studio, чтобы почасовая работа могла попасть в тайм-трекер (Фаза 11, `apps/studio/PLAN.md`):
+
+1. Создай `Project` в studio (`/owner/projects`, или через клиента в `/owner/clients`) с
+   `billingMode: HOURLY`, если оплата почасовая.
+2. Проставь `Project.repoSlug = "<name>"` — по этому полю MCP-тул `time_start`/`time_switch`
+   резолвит проект, без него `libs/studio-time-mcp` не сможет писать время по этому приложению.
+3. Добавь в `.claude/commands/<name>.md` раздел «Учёт времени» (шаблон — выше, в этом же файле).
+
 ### Подключение к staging e2e-гейту (опционально, когда появится e2e-сьют)
 
 `deploy_app(production)` может блокироваться, если коммит не прошёл e2e на стейдже — но только
@@ -226,6 +237,23 @@ nx g @letar/generators:e2e-suite <name>
 `subject: "deploy-request: <name>"`.
 
 Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+
+## Учёт времени
+
+<!-- Добавляй этот раздел, только если приложение делается для клиента студии по почасовой оплате.
+Образец с реальным repoSlug — apps/domwellbes/.claude/commands (`.claude/commands/domwellbes.md`). -->
+
+Проект ведётся для клиента студии по **почасовой оплате**. Когда заработает MCP-сервер учёта
+времени (`libs/studio-time-mcp`, Фаза 11 в `apps/studio/PLAN.md`) — стартовать таймер при начале
+работы:
+```
+
+time_start({ app: "<name>", description: "<что делаешь, языком клиента>" })
+
+```
+⚠️ В `description` — только предмет работы по этому проекту. Никаких других клиентов, чужих
+проектов и внутренней кухни: описание видит заказчик. При смене вида деятельности —
+`time_switch`, в конце сессии — `time_stop`.
 
 ## Проект
 

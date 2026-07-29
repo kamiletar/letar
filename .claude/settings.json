@@ -34,6 +34,25 @@
             "command": "node .claude/hooks/auto-format.js"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/time-heartbeat.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/time-stop-check.js"
+          }
+        ]
       }
     ]
   },
