@@ -11,6 +11,21 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.9] — 2026-07-30
+
+### Fixed
+
+- `deploy-affected.sh`: живой прогон 0.9.8 показал, что предыдущий фикс self-deploy
+  (nohup+setsid) не сработал — BlackCove диагностировал (message #870), что `setsid`
+  отвязывает процесс только от сессии/терминала, но не от **cgroup**: при `docker stop`/
+  `docker rm` собственного контейнера все процессы в его cgroup убиваются независимо от
+  сессии. Detached restart-скрипт обрывался ровно на "Recreate", не успев стартовать.
+  Заменено на `systemd-run --unit=... --collect` — транзиентный systemd-юнит выполняется
+  в `system.slice`, полностью отдельной от cgroup докера, с fallback на прежний
+  nohup+setsid, если `systemd-run` недоступен на хосте (с явным предупреждением, что
+  fallback не решает self-deploy). Не проверено живым деплоем — следующий self-deploy
+  `dashboard-agent` станет проверкой.
+
 ## [0.9.8] — 2026-07-30
 
 ### Fixed

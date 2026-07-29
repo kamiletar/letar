@@ -88,7 +88,7 @@ crash-loop) и доступность БД (контейнер жив, подк�
 
 ## Backlog 📋
 
-### ✅ Self-deploy обрывает сам себя на recreate-шаге — закрыто (dashboard-agent-dev, 2026-07-30)
+### 🚧 Self-deploy обрывает сам себя на recreate-шаге (dashboard-agent-dev, 2026-07-30, вторая попытка)
 
 Деплой `dashboard-agent` на прод (s2) был особым случаем: `docker compose up -d` останавливает
 старый контейнер `dashboard-agent`, который в этот момент сам обслуживает deploy-mcp туннель
@@ -98,14 +98,20 @@ crash-loop) и доступность БД (контейнер жив, подк�
 2026-07-29 при деплое 0.9.7, msg #671/#678/#691/#855 в agent-mail) — каждый раз чинилось
 вручную через SSH-резерв.
 
-**Решение:** в `deploy-affected.sh` уже существовал такой же фикс для `dashboard` (detached
-nohup+setsid restart-скрипт, переживающий смерть родительского процесса) — обобщён на
-`dashboard-agent` (условие `[ "$app" = "dashboard" ] || [ "$app" = "dashboard-agent" ]`,
-имя старого контейнера и post-start команда параметризованы по приложению). Заодно исправлен
-сопутствующий баг: цикл ожидания healthcheck перед reload nginx вычислял имя контейнера как
-`${app}-app`, но `dashboard-agent` в `docker-compose.production.yml` задаёт `container_name:
-dashboard-agent` без суффикса — добавлен явный кейс. Синтаксис проверен `bash -n`, живой
-деплой не прогонялся (следующий self-deploy `dashboard-agent` подтвердит).
+**Первая попытка (0.9.8, коммит `fd1f8c6a`) не сработала:** обобщён существовавший для
+`dashboard` фикс (detached nohup+setsid restart-скрипт) на `dashboard-agent` — но живой
+деплой 0.9.8 снова застрял на пересоздании (BlackCove, message #870). Диагноз: `setsid`
+отвязывает процесс только от сессии/терминала, а не от **cgroup контейнера** — при
+`docker stop`/`docker rm` все процессы в cgroup контейнера убиваются вместе с ним независимо
+от сессии. Detached-скрипт обрывался ровно на "Recreate".
+
+**Решение (0.9.9):** заменено на `systemd-run --unit=... --collect` — транзиентный
+systemd-юнит выполняется в `system.slice`, полностью отдельной от cgroup докера, с fallback
+на nohup+setsid если `systemd-run` недоступен (явное предупреждение в логе, что fallback не
+решает self-deploy). Заодно исправлен сопутствующий баг: цикл ожидания healthcheck перед
+reload nginx вычислял имя контейнера как `${app}-app`, но `dashboard-agent` в
+`docker-compose.production.yml` задаёт `container_name: dashboard-agent` без суффикса —
+добавлен явный кейс. Синтаксис проверен `bash -n`, живой прогон 0.9.9 ещё не выполнялся.
 
 ### Регистрация нового приложения разбросана по 3 местам (найдено LavenderSpring, 2026-07-28)
 

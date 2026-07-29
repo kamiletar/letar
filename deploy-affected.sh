@@ -961,14 +961,18 @@ for app in $AFFECTED_APPS; do
   # Self-deploy: приложения, которые сами хостят канал, через который идёт этот же деплой
   # (dashboard — process supervisor UI на 3002; dashboard-agent — deploy-mcp туннель на 3100,
   # через nsenter-спавн деплоя проходит именно через его контейнер). force-recreate убивает
-  # старый контейнер синхронно внутри текущего процесса — если деплой сам исполняется в
-  # cgroup/сети этого контейнера (nsenter из dashboard-agent), процесс деплоя обрывается
-  # вместе с ним и новый контейнер застревает в статусе Created (найдено BlackCove, 2026-07-22,
-  # backlog dashboard-agent/PLAN.md «Self-deploy обрывает сам себя»). Решение то же, что уже
-  # было для dashboard: detached-скрипт через nohup+setsid переживает смерть родителя.
+  # старый контейнер, а с ним — cgroup, в которой живёт сам процесс деплоя.
+  #
+  # ⚠️ nohup+setsid НЕ РАБОТАЕТ здесь (проверено живым деплоем 2026-07-29, коммит fd1f8c6a):
+  # setsid отвязывает процесс от сессии/терминала, но НЕ от cgroup — при docker stop/rm
+  # процессы внутри cgroup контейнера убиваются независимо от того, что они уже в новой
+  # сессии. Detached-скрипт обрывался ровно на "Recreate", не доходя до собственного запуска
+  # (диагностировал BlackCove, message #870). Нужен реальный выход из cgroup контейнера —
+  # даёт systemd-run, создающий transient-unit в system.slice (или user.slice), полностью
+  # отдельной от cgroup докера.
   DEPLOY_SUCCEEDED=false
   if [ "$app" = "dashboard" ] || [ "$app" = "dashboard-agent" ]; then
-    echo -e "${YELLOW}⚠️  ${app} self-deploy: detached restart (nohup+setsid) переживает пересоздание собственного контейнера${NC}"
+    echo -e "${YELLOW}⚠️  ${app} self-deploy: detached restart через systemd-run (переживает уничтожение cgroup собственного контейнера)${NC}"
 
     if [ "$app" = "dashboard" ]; then
       OLD_CONTAINER="dashboard-app"
@@ -980,11 +984,13 @@ for app in $AFFECTED_APPS; do
       POST_START_CMD="true"
     fi
 
-    # Create a script that will start the container after a delay
-    # This script runs detached, in its own session — survives the deploy process death
+    # Скрипт сам себе задаёт лог (exec > ... 2>&1) — не зависит от того, как его запустили
+    # (systemd-run пишет stdout юнита в journal, не в перенаправление вызывающей команды).
     RESTART_SCRIPT="/tmp/${app}-restart-$$.sh"
+    RESTART_LOG="/tmp/${app}-restart-$$.log"
     cat > "$RESTART_SCRIPT" << RESTART_EOF
 #!/bin/bash
+exec > "${RESTART_LOG}" 2>&1
 sleep 3
 # Stop and remove old container if exists
 docker stop ${OLD_CONTAINER} 2>/dev/null || true
@@ -997,12 +1003,19 @@ docker logs --tail 10 ${OLD_CONTAINER}
 RESTART_EOF
     chmod +x "$RESTART_SCRIPT"
 
-    # Запуск в фоне через nohup + setsid (не требует интерактивной авторизации)
-    # setsid создаёт новую сессию, нohup позволяет пережить закрытие SSH
-    nohup setsid bash "$RESTART_SCRIPT" > /tmp/${app}-restart-$$.log 2>&1 &
+    RESTART_UNIT="${app}-restart-$$"
+    if command -v systemd-run >/dev/null 2>&1; then
+      # --collect: юнит и его результат удаляются автоматически после завершения (не копится
+      # в `systemctl list-units --failed`). Без --scope — транзиентный service, а не scope:
+      # запускается в фоне, systemd-run возвращает управление сразу, не блокируя деплой.
+      systemd-run --unit="$RESTART_UNIT" --collect -- bash "$RESTART_SCRIPT" >/dev/null 2>&1
+      echo -e "${GREEN}✅ ${app} restart scheduled via systemd-run (unit: ${RESTART_UNIT})${NC}"
+    else
+      echo -e "${RED}❌ systemd-run недоступен на этом хосте — fallback на nohup+setsid, который НЕ переживает уничтожение cgroup контейнера (известно не работает для self-deploy, см. комментарий выше)${NC}"
+      nohup setsid bash "$RESTART_SCRIPT" > /dev/null 2>&1 &
+    fi
 
-    echo -e "${GREEN}✅ ${app} restart scheduled (nohup)${NC}"
-    echo -e "${BLUE}ℹ️  ${app} will restart in ~5 seconds${NC}"
+    echo -e "${BLUE}ℹ️  ${app} will restart in ~5 seconds (log: ${RESTART_LOG})${NC}"
     DEPLOY_SUCCEEDED=true
   elif grep -vE '^[[:space:]]*#' "$COMPOSE_FILE" 2> /dev/null | grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?"; then
     # Strangler-переход на zero-downtime rollout (§18.6 Сессия G): opt-in через label
