@@ -51,6 +51,8 @@ export interface TorrentInfo {
   bundleAnimesJson?: string
   /** Сообщение об ошибке */
   error?: string
+  /** Категория в qBittorrent ('animatrona' — добавлен через Animatrona, иначе/пусто — вручную) */
+  category?: string
 }
 
 /** Информация о файле в торренте */

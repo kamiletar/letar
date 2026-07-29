@@ -65,7 +65,13 @@ export const rutrackerPreload = {
     infoHash: string
   ): Promise<{
     success: boolean
-    data?: { shikimoriId: number; animeName: string; folderPath: string } | null
+    data?: {
+      shikimoriId: number
+      animeName: string
+      folderPath: string
+      rutrackerUrl?: string
+      torrentFileCid?: string
+    } | null
     error?: string
   }> => ipcRenderer.invoke('rutracker:getDownloadMeta', infoHash),
 

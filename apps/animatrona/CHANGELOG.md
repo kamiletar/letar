@@ -4,6 +4,33 @@
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-07-29
+
+### Added
+
+- **`play/` — standalone Web Player встроен в directoryCid** — `main/services/ipfs/play-folder-builder.ts`
+  переиспользует существующий Web Player (`web-export/asset-bundler.ts` + `manifest-generator.ts`,
+  режим `referenced`) и встраивает его как папку `play/` прямо в основной `directoryCid` каждого
+  аниме. Для просмотра теперь достаточно `<gateway>/ipfs/<directoryCid>/play/` — без Animatrona,
+  без отдельного шага экспорта. CID видео/аудио/субтитров переиспользуются из основного дерева
+  (IPFS не дублирует блоки). Главы (OP/ED) читаются из уже пропинненного `chapters.json` каждого
+  эпизода (`chaptersByEp` из pre-pass'а `buildAnimeDirectory()`) и попадают в манифест плеера —
+  ничего из того, что нужно для просмотра, не остаётся снаружи `directoryCid`.
+
+## [0.53.0] - 2026-07-29
+
+### Added
+
+- **Сохранение исходного .torrent файла в directoryCid** — `QBittorrentService` экспортирует
+  `.torrent` файл раздачи через `/api/v2/torrents/export` (qBittorrent 4.5+) как только получены
+  метаданные, заливает в IPFS (`pin: false`) и сохраняет CID (`TorrentDownload.torrentFileCid` →
+  `Anime.sourceTorrentCid`). `anime-directory-builder.ts` добавляет папку `source/` в
+  `directoryCid`: `source.json` (`{ source: { type, url }, torrentFileCid }`, расширяемо под
+  другие источники без изменения схемы манифеста) + сам `source.torrent`.
+- **Категория qBittorrent для торрентов Animatrona** — торренты, добавленные через приложение,
+  помечаются категорией `animatrona`. Вкладка «Animatrona» / «Остальное» в `torrents/page.tsx`
+  отделяет их от торрентов, добавленных вручную напрямую в qBittorrent.
+
 ## [0.52.5] - 2026-07-28
 
 ### Fixed

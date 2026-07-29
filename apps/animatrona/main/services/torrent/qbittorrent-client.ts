@@ -190,6 +190,22 @@ export class QBittorrentClient {
     return hash.toLowerCase()
   }
 
+  /**
+   * Создать категорию (идемпотентно — если уже существует, qBittorrent вернёт 409,
+   * который мы тут же проглатываем).
+   */
+  async createCategory(name: string): Promise<void> {
+    const body = new URLSearchParams({ category: name, savePath: '' })
+    try {
+      await this.request('POST', '/api/v2/torrents/createCategory', body)
+    } catch (err) {
+      if (err instanceof QBittorrentRequestError && err.status === 409) {
+        return
+      }
+      throw err
+    }
+  }
+
   /** Получить список торрентов (с фильтром) */
   async getTorrents(filter?: QBTorrentFilter, category?: string): Promise<QBTorrentInfo[]> {
     const query = new URLSearchParams()
@@ -323,6 +339,20 @@ export class QBittorrentClient {
   async getTransferInfo(): Promise<QBTransferInfo> {
     const response = await this.request('GET', '/api/v2/transfer/info')
     return (await response.json()) as QBTransferInfo
+  }
+
+  /**
+   * Экспортировать сырые байты .torrent файла раздачи.
+   *
+   * Требует qBittorrent 4.5+ (эндпоинт `/torrents/export` появился в WebAPI v2.8.19).
+   * На более старых версиях qBittorrent вернёт 404 — вызывающий код должен показать
+   * пользователю просьбу обновить qBittorrent, а не тихо пропускать сохранение источника.
+   */
+  async exportTorrent(hash: string): Promise<Buffer> {
+    const query = new URLSearchParams({ hash })
+    const response = await this.request('GET', `/api/v2/torrents/export?${query.toString()}`)
+    const arrayBuffer = await response.arrayBuffer()
+    return Buffer.from(arrayBuffer)
   }
 
   // ========================

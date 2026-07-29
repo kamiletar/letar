@@ -70,6 +70,8 @@ export interface DownloadMeta {
   animeName: string
   folderPath: string
   rutrackerUrl?: string
+  /** CID сырых байт .torrent файла в IPFS (если уже экспортирован) */
+  torrentFileCid?: string
 }
 
 /**
@@ -185,6 +187,10 @@ class RutrackerDownloadOrchestrator {
     const torrentName = torrent.name ?? ''
     const folderPath = path.join(torrentPath, torrentName)
 
+    // torrentFileCid заполняется QBittorrentService асинхронно (после metaDL) и живёт только
+    // в persist-мете — читаем его независимо от того, из памяти или из БД остальные поля
+    const savedMeta = torrentService.getShikimoriMeta(infoHash)
+
     // Из памяти оркестратора (текущая сессия)
     const download = this.downloads.get(infoHash)
     if (download) {
@@ -193,16 +199,17 @@ class RutrackerDownloadOrchestrator {
         animeName: download.params.shikimoriData.russian ?? download.params.shikimoriData.name,
         folderPath,
         rutrackerUrl: download.params.importResult.torrent.url || undefined,
+        torrentFileCid: savedMeta?.torrentFileCid,
       }
     }
 
     // Из DB persist (после перезапуска) — возвращаем даже без shikimoriId
-    const savedMeta = torrentService.getShikimoriMeta(infoHash)
     return {
       shikimoriId: savedMeta?.shikimoriId,
       animeName: savedMeta?.animeName ?? torrentName,
       folderPath,
       rutrackerUrl: savedMeta?.rutrackerUrl,
+      torrentFileCid: savedMeta?.torrentFileCid,
     }
   }
 

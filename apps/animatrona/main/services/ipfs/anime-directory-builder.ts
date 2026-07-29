@@ -19,6 +19,13 @@
  *       franchise-graph.json ← FranchiseGraphDocument
  *       relations.json       ← RelationsDocument
  *       episode-previews.json ← EpisodePreviewsDocument
+ *     source/                 ← Данные об источнике импорта (если импортировано из торрента)
+ *       source.json           ← { source: { type, url }, torrentFileCid }
+ *       source.torrent        ← Сырые байты .torrent файла (CID из Anime.sourceTorrentCid)
+ *     play/                   ← Standalone Web Player (play-folder-builder.ts) — index.html
+ *                                читает ./manifest.json (WebPlayerManifest, CID напрямую) и
+ *                                играет через IPFS-гейтвей без Animatrona/animatrona-web.
+ *                                Для просмотра нужен только <gateway>/ipfs/<directoryCid>/play/
  *     images/
  *       studios/{slug}.webp     ← AnimeInfo.studios[].imageCid
  *       persons/{slug}.webp     ← AnimeInfo.staff[].imageCid
@@ -63,6 +70,7 @@ import {
   recoverThumbnailsImg,
   regenerateMetadataJson,
 } from './cid-recovery'
+import { buildPlayFolderEntries } from './play-folder-builder'
 import type { DirEntry } from './unified-ipfs-service'
 import { addBytes, cat, createDirectoryFromCids, probeCidAvailable, safeCat, stat } from './unified-ipfs-service'
 
@@ -84,6 +92,7 @@ export interface MissingCidEntry {
     | 'image-character'
     | 'sub-doc'
     | 'poster'
+    | 'source-torrent'
   /** Старый CID который оказался недоступен */
   cid: string
   /** Номер эпизода (для per-episode потерь) */
@@ -153,21 +162,28 @@ export async function buildAnimeDirectory(
       episodes: {
         orderBy: { number: 'asc' },
         include: {
+          season: { select: { number: true } },
           // Без where-фильтра по CID — дорожки без загруженного контента должны попасть
           // в missingCids, а не молча исчезнуть из запроса ещё до того как builder их увидит.
           audioTracks: {
             select: {
               language: true,
+              title: true,
               dubGroup: true,
               transcodedCid: true,
+              streamIndex: true,
+              isDefault: true,
             },
           },
           subtitleTracks: {
             select: {
               language: true,
+              title: true,
               dubGroup: true,
               fileCid: true,
               format: true,
+              streamIndex: true,
+              isDefault: true,
               fonts: {
                 where: { fileCid: { not: null } },
                 select: { fileCid: true, fileExt: true },
@@ -304,7 +320,35 @@ export async function buildAnimeDirectory(
     entries.push({ name: 'meta', type: 'directory', children: metaChildren })
   }
 
-  // 3.6. images/ — изображения студий, персонала, персонажей из AnimeInfo.
+  // 3.6. source/ — данные об источнике импорта (Rutracker и т.д.) + сам .torrent файл.
+  // Отдельно от manifest.json/meta/, чтобы потом просто добавлять новые типы источников
+  // (nyaa, anidex, прямые ссылки) без изменения схемы основного манифеста.
+  if (anime.rutrackerUrl) {
+    const sourceChildren: DirEntry[] = []
+
+    let torrentFileCid: string | null = null
+    if (anime.sourceTorrentCid) {
+      torrentFileCid = await probeOrRecover(anime.sourceTorrentCid, {
+        kind: 'source-torrent',
+        detail: 'source/source.torrent',
+      })
+      if (torrentFileCid) {
+        sourceChildren.push({ name: 'source.torrent', type: 'file', cid: torrentFileCid })
+      }
+    }
+
+    const sourceDoc = {
+      version: 1,
+      source: { type: 'rutracker', url: anime.rutrackerUrl },
+      torrentFileCid: torrentFileCid ?? undefined,
+    }
+    const sourceJsonCid = await addBytes(Buffer.from(JSON.stringify(sourceDoc, null, 2), 'utf-8'), { pin: false })
+    sourceChildren.push({ name: 'source.json', type: 'file', cid: sourceJsonCid })
+
+    entries.push({ name: 'source', type: 'directory', children: sourceChildren })
+  }
+
+  // 3.7. images/ — изображения студий, персонала, персонажей из AnimeInfo.
   // Probe + при потере re-fetch с Shikimori через imageUrl.
   const animeInfo = await parseAnimeInfo(anime.animeInfoCid)
   if (animeInfo) {
@@ -942,6 +986,21 @@ export async function buildAnimeDirectory(
 
   // Итог по эпизодам — одна строка вместо N строк per-episode
   detail('info', `   ✓ эпизоды: ${episodeCount} построено`)
+
+  // 3.65. play/ — standalone Web Player, встроенный прямо в directoryCid. Для просмотра
+  // достаточно IPFS-гейтвея + directoryCid, без отдельного шага «Экспорт для Web Player».
+  // Строим ПОСЛЕ основного цикла по эпизодам — используем те же живые/восстановленные
+  // chaptersByEp CID, что уже попали в episodes/NN/meta/chapters.json выше. Никакого нового
+  // контента не пинится — chapters.json уже часть directoryCid, тут только читаем содержимое,
+  // чтобы плеер показал метки OP/ED.
+  detail('info', '   → play: собираю встроенный плеер…')
+  const playEntry = await buildPlayFolderEntries(anime, chaptersByEp)
+  if (playEntry) {
+    entries.push(playEntry)
+    detail('success', `   ✓ play: ${playEntry.children?.length ?? 0} элементов`)
+  } else {
+    detail('info', '   → play: нет загруженного видео, пропускаю')
+  }
 
   // Создаём виртуальную директорию
   log.info('Создаю IPFS-директорию', {

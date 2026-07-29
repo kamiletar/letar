@@ -17,7 +17,8 @@ import { EventEmitter } from 'events'
 
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { QBittorrentClient } from './qbittorrent-client'
+import { addBytes } from '../ipfs/unified-ipfs-service'
+import { QBittorrentClient, QBittorrentRequestError } from './qbittorrent-client'
 import type { QBittorrentConfig, QBTorrentInfo, QBTorrentState } from './qbittorrent-types'
 import type { AddTorrentOptions, TorrentInfo, TorrentStatus } from './types'
 
@@ -31,6 +32,15 @@ const DB_PERSIST_DEBOUNCE = 5000
 
 /** Ratio по умолчанию для авто-остановки сидирования */
 const DEFAULT_TARGET_RATIO = 2.0
+
+/**
+ * Категория qBittorrent для торрентов, добавленных через Animatrona.
+ *
+ * Позволяет отличить их от торрентов, добавленных пользователем напрямую в qBittorrent
+ * (или другим приложением) — такие показываются в UI отдельной вкладкой «Остальное»,
+ * а не смешиваются со списком, которым управляет Animatrona.
+ */
+export const ANIMATRONA_TORRENT_CATEGORY = 'animatrona'
 
 /** Статус импорта торрента */
 export type TorrentImportStatus = 'none' | 'queued' | 'imported'
@@ -48,6 +58,8 @@ interface TorrentMeta {
   bundleAnimesJson?: string
   importStatus?: TorrentImportStatus
   error?: string
+  /** CID сырых байт .torrent файла в IPFS (заполняется после получения метаданных) */
+  torrentFileCid?: string
 }
 
 /** Событие завершения файла (для orchestrator → ImportQueue) */
@@ -77,6 +89,8 @@ export class QBittorrentService extends EventEmitter {
   private completedFiles: Set<string> = new Set()
   /** Торренты, для которых уже был эмит torrent:done */
   private completedTorrents: Set<string> = new Set()
+  /** Торренты, для которых уже была попытка экспорта .torrent файла (успешная или нет) */
+  private exportedTorrentFile: Set<string> = new Set()
 
   private pollTimer: ReturnType<typeof setInterval> | null = null
   private lastRid = 0
@@ -122,6 +136,13 @@ export class QBittorrentService extends EventEmitter {
     await this.client.login(effectiveConfig)
     const version = await this.client.getVersion()
     log.info('Подключение к qBittorrent установлено', { version })
+
+    // Категория для отделения торрентов Animatrona от добавленных пользователем напрямую
+    try {
+      await this.client.createCategory(ANIMATRONA_TORRENT_CATEGORY)
+    } catch (err) {
+      log.warn('Не удалось создать категорию qBittorrent', { error: String(err) })
+    }
 
     // Восстанавливаем мета из БД
     await this.restoreFromDb()
@@ -172,6 +193,7 @@ export class QBittorrentService extends EventEmitter {
       urls: magnetURI,
       savepath: options.downloadPath,
       sequentialDownload: options.sequential ?? false,
+      category: ANIMATRONA_TORRENT_CATEGORY,
     })
 
     // Сохраняем мета
@@ -350,6 +372,7 @@ export class QBittorrentService extends EventEmitter {
     rutrackerUrl?: string
     isBundle?: boolean
     bundleAnimesJson?: string
+    torrentFileCid?: string
   } | null {
     const meta = this.meta.get(infoHash)
     if (!meta) {
@@ -361,12 +384,41 @@ export class QBittorrentService extends EventEmitter {
       rutrackerUrl: meta.rutrackerUrl,
       isBundle: meta.isBundle,
       bundleAnimesJson: meta.bundleAnimesJson,
+      torrentFileCid: meta.torrentFileCid,
     }
   }
 
   /** Получить список файлов торрента через qBittorrent API */
   async getTorrentFiles(infoHash: string) {
     return this.client.getFiles(infoHash)
+  }
+
+  /**
+   * Экспортировать .torrent файл раздачи и залить в IPFS (pin: false — станет indirect
+   * после того как войдёт в directoryCid аниме через anime-directory-builder).
+   *
+   * Требует qBittorrent 4.5+. На более старых версиях export вернёт 404 — источник
+   * (rutrackerUrl) при этом всё равно сохранится, просто без самого .torrent файла.
+   */
+  private async exportAndUploadTorrentFile(hash: string, meta: TorrentMeta): Promise<void> {
+    if (!this.client) {
+      return
+    }
+    try {
+      const bytes = await this.client.exportTorrent(hash)
+      const cid = await addBytes(bytes, { pin: false })
+      meta.torrentFileCid = cid
+      await this.persistToDb(hash, meta)
+      log.info('.torrent файл экспортирован и залит в IPFS', { hash, cid })
+    } catch (err) {
+      if (err instanceof QBittorrentRequestError && err.status === 404) {
+        log.warn('qBittorrent не поддерживает /torrents/export — обновите qBittorrent до версии 4.5 или новее', {
+          hash,
+        })
+      } else {
+        log.warn('Не удалось экспортировать .torrent файл', { hash, error: String(err) })
+      }
+    }
   }
 
   // ========================
@@ -466,6 +518,13 @@ export class QBittorrentService extends EventEmitter {
           this.emit('torrent:error', { infoHash: hash, error: merged.state })
         }
 
+        // Метаданные раздачи получены (имя и размер стали известны) — экспортируем .torrent
+        // файл и заливаем в IPFS, пока раздача ещё существует в qBittorrent. Один раз на хэш.
+        if (merged.name && merged.size > 0 && !this.exportedTorrentFile.has(hash)) {
+          this.exportedTorrentFile.add(hash)
+          void this.exportAndUploadTorrentFile(hash, meta)
+        }
+
         // Для активных торрентов проверяем завершение отдельных файлов
         if (merged.progress !== undefined && merged.progress > 0 && merged.progress < 1) {
           // Не await — проверяем файлы параллельно, не блокируя polling
@@ -548,8 +607,13 @@ export class QBittorrentService extends EventEmitter {
           bundleAnimesJson: rec.bundleAnimesJson ?? undefined,
           importStatus: (rec.importStatus as TorrentImportStatus) ?? 'none',
           error: rec.error ?? undefined,
+          torrentFileCid: rec.torrentFileCid ?? undefined,
         }
         this.meta.set(rec.infoHash, meta)
+        if (meta.torrentFileCid) {
+          // Уже экспортирован в прошлой сессии — не пытаемся повторно
+          this.exportedTorrentFile.add(rec.infoHash)
+        }
       }
       log.info('Мета восстановлена из БД', { count: records.length })
     } catch (err) {
@@ -595,6 +659,7 @@ export class QBittorrentService extends EventEmitter {
           isBundle: meta.isBundle ?? false,
           bundleAnimesJson: meta.bundleAnimesJson,
           error: meta.error,
+          torrentFileCid: meta.torrentFileCid,
           addedAt: new Date(meta.addedAt),
         },
         update: {
@@ -608,6 +673,7 @@ export class QBittorrentService extends EventEmitter {
           isBundle: meta.isBundle ?? false,
           bundleAnimesJson: meta.bundleAnimesJson,
           error: meta.error,
+          torrentFileCid: meta.torrentFileCid,
         },
       })
     } catch (err) {
@@ -676,6 +742,7 @@ export class QBittorrentService extends EventEmitter {
       isBundle: meta.isBundle ?? false,
       bundleAnimesJson: meta.bundleAnimesJson,
       error: meta.error,
+      category: info.category,
     }
   }
 

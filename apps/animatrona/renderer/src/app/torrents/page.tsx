@@ -142,6 +142,8 @@ function pluralize(n: number, forms: [string, string, string]): string {
 /** Контент страницы без Header — для встраивания в табы */
 export function TorrentsContent() {
   const [torrents, setTorrents] = useState<TorrentInfo[]>([])
+  /** Вкладка: торренты, которыми управляет Animatrona, или добавленные иначе (напрямую в qBittorrent) */
+  const [torrentCategoryTab, setTorrentCategoryTab] = useState<'animatrona' | 'other'>('animatrona')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const unsubRef = useRef<(() => void) | null>(null)
@@ -150,15 +152,16 @@ export function TorrentsContent() {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [importInitialData, setImportInitialData] = useState<
     | {
-      folderPath: string
-      videoFiles: string[]
-      skipFolderSelect?: boolean
-    }
+        folderPath: string
+        videoFiles: string[]
+        skipFolderSelect?: boolean
+      }
     | undefined
   >()
   const [importShikimoriId, setImportShikimoriId] = useState<number | undefined>()
   const [importAnimeName, setImportAnimeName] = useState<string | undefined>()
   const [importSourceUrl, setImportSourceUrl] = useState<string | undefined>()
+  const [importSourceTorrentCid, setImportSourceTorrentCid] = useState<string | undefined>()
   /** Аниме с тем же shikimoriId уже в библиотеке — реимпорт сольётся в него, а не создаст дубликат */
   const [importExistingAnimeId, setImportExistingAnimeId] = useState<string | undefined>()
   /** infoHash торрента, для которого открыт wizard (для обновления importStatus) */
@@ -202,7 +205,7 @@ export function TorrentsContent() {
         } catch {
           return { id, exists: false, animeId: undefined }
         }
-      }),
+      })
     )
     for (const { id, exists, animeId } of checks) {
       libraryMap.set(id, { exists, animeId })
@@ -283,11 +286,11 @@ export function TorrentsContent() {
           const existing = prev[idx]
           // Мержим только изменившиеся поля, не пересоздаём files[]
           if (
-            existing.progress === p.progress
-            && existing.downloadSpeed === p.downloadSpeed
-            && existing.uploadSpeed === p.uploadSpeed
-            && existing.numPeers === p.numPeers
-            && existing.status === p.status
+            existing.progress === p.progress &&
+            existing.downloadSpeed === p.downloadSpeed &&
+            existing.uploadSpeed === p.uploadSpeed &&
+            existing.numPeers === p.numPeers &&
+            existing.status === p.status
           ) {
             return prev // Ничего не изменилось — не обновляем стейт
           }
@@ -337,7 +340,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleResume = useCallback(
@@ -357,7 +360,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleRemove = useCallback(
@@ -372,7 +375,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   const handleRemoveWithFiles = useCallback(
@@ -387,7 +390,7 @@ export function TorrentsContent() {
         }
       })
     },
-    [withBusy],
+    [withBusy]
   )
 
   /** Пересчитать хеш торрента (полная верификация, fire-and-forget) */
@@ -443,7 +446,7 @@ export function TorrentsContent() {
       setBundleTorrent({ ...torrent, isBundle: true })
       setBundleDialogOpen(true)
     },
-    [torrents],
+    [torrents]
   )
 
   /** Открыть ImportWizard для файлов торрента */
@@ -471,6 +474,7 @@ export function TorrentsContent() {
         let shikimoriId: number | undefined
         let animeName: string | undefined
         let rutrackerUrl: string | undefined
+        let sourceTorrentCid: string | undefined
 
         // Пытаемся получить метаданные из оркестратора (shikimoriId, animeName, rutrackerUrl)
         if (api.rutracker) {
@@ -480,6 +484,7 @@ export function TorrentsContent() {
               shikimoriId = meta.data.shikimoriId
               animeName = meta.data.animeName
               rutrackerUrl = meta.data.rutrackerUrl
+              sourceTorrentCid = meta.data.torrentFileCid
               if (meta.data.folderPath) {
                 folderPath = meta.data.folderPath
               }
@@ -521,9 +526,9 @@ export function TorrentsContent() {
               const existingEpisodeCount = existsRes.data.episodeCount ?? 0
               if (existingEpisodeCount > 0 && existingEpisodeCount !== videoFiles.length) {
                 const proceed = window.confirm(
-                  `«${existsRes.data.animeName}» уже в библиотеке с ${existingEpisodeCount} серия(ями), `
-                    + `а в этой раздаче ${videoFiles.length}. Возможно это другой релиз/качество. `
-                    + `Всё равно слить в существующую карточку?`,
+                  `«${existsRes.data.animeName}» уже в библиотеке с ${existingEpisodeCount} серия(ями), ` +
+                    `а в этой раздаче ${videoFiles.length}. Возможно это другой релиз/качество. ` +
+                    `Всё равно слить в существующую карточку?`
                 )
                 if (!proceed) {
                   return
@@ -545,6 +550,7 @@ export function TorrentsContent() {
         setImportShikimoriId(shikimoriId)
         setImportAnimeName(animeName ?? torrent.name)
         setImportSourceUrl(rutrackerUrl)
+        setImportSourceTorrentCid(sourceTorrentCid)
         setImportExistingAnimeId(existingAnimeId)
         setImportingInfoHash(infoHash)
         setWizardKey((k) => k + 1)
@@ -554,79 +560,101 @@ export function TorrentsContent() {
         toaster.error({ title: 'Ошибка открытия импорта', description: String(err) })
       }
     },
-    [torrents],
+    [torrents]
   )
 
   return (
     <Box p={4} maxW="900px" mx="auto">
-      {loading
-        ? (
-          <VStack gap={3} align="stretch">
-            <Skeleton height="140px" borderRadius="md" />
-            <Skeleton height="140px" borderRadius="md" />
-          </VStack>
-        )
-        : torrents.length === 0
-        ? (
-          <Card.Root>
-            <Card.Body>
-              <VStack gap={3} py={8}>
-                <Icon fontSize="3xl" color="fg.muted">
-                  <LuDownload />
-                </Icon>
-                <Heading size="md" color="fg.muted">
-                  Нет активных торрентов
-                </Heading>
-                <Text color="fg.muted" fontSize="sm">
-                  Торренты появятся здесь после начала скачивания из Rutracker
-                </Text>
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-        )
-        : (
-          <VStack gap={3} align="stretch">
-            <HStack position="relative">
-              <Icon position="absolute" left={3} color="fg.muted" zIndex={1} pointerEvents="none">
-                <LuSearch />
+      {loading ? (
+        <VStack gap={3} align="stretch">
+          <Skeleton height="140px" borderRadius="md" />
+          <Skeleton height="140px" borderRadius="md" />
+        </VStack>
+      ) : torrents.length === 0 ? (
+        <Card.Root>
+          <Card.Body>
+            <VStack gap={3} py={8}>
+              <Icon fontSize="3xl" color="fg.muted">
+                <LuDownload />
               </Icon>
-              <Input
-                pl={9}
-                placeholder="Поиск по названию..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="sm"
-              />
-            </HStack>
-            <HStack justify="space-between">
+              <Heading size="md" color="fg.muted">
+                Нет активных торрентов
+              </Heading>
               <Text color="fg.muted" fontSize="sm">
-                {torrents.length} {pluralize(torrents.length, ['торрент', 'торрента', 'торрентов'])}
+                Торренты появятся здесь после начала скачивания из Rutracker
               </Text>
-              <TotalStats torrents={torrents} />
-            </HStack>
-            {torrents
-              .filter((t) => {
-                if (!searchQuery) return true
-                const q = searchQuery.toLowerCase()
-                return t.name.toLowerCase().includes(q) || (t.animeName?.toLowerCase().includes(q) ?? false)
-              })
-              .map((torrent) => (
-                <TorrentCard
-                  key={torrent.infoHash}
-                  torrent={torrent}
-                  busy={busyTorrents.has(torrent.infoHash)}
-                  onPause={handlePause}
-                  onResume={handleResume}
-                  onRemove={handleRemove}
-                  onRemoveWithFiles={(hash, name) => setConfirmDelete({ hash, name })}
-                  onImport={handleImport}
-                  onOpenAsBundle={handleOpenAsBundle}
-                  onResetImportStatus={handleResetImportStatus}
-                  onRecheck={handleRecheck}
-                />
-              ))}
-          </VStack>
-        )}
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+      ) : (
+        <VStack gap={3} align="stretch">
+          {(() => {
+            const isManaged = (t: TorrentInfo) => t.category === 'animatrona'
+            const managedCount = torrents.filter(isManaged).length
+            const otherCount = torrents.length - managedCount
+            return (
+              <HStack gap={2}>
+                <Button
+                  size="xs"
+                  variant={torrentCategoryTab === 'animatrona' ? 'solid' : 'ghost'}
+                  onClick={() => setTorrentCategoryTab('animatrona')}
+                >
+                  Animatrona ({managedCount})
+                </Button>
+                <Button
+                  size="xs"
+                  variant={torrentCategoryTab === 'other' ? 'solid' : 'ghost'}
+                  onClick={() => setTorrentCategoryTab('other')}
+                >
+                  Остальное ({otherCount})
+                </Button>
+              </HStack>
+            )
+          })()}
+          <HStack position="relative">
+            <Icon position="absolute" left={3} color="fg.muted" zIndex={1} pointerEvents="none">
+              <LuSearch />
+            </Icon>
+            <Input
+              pl={9}
+              placeholder="Поиск по названию..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="sm"
+            />
+          </HStack>
+          <HStack justify="space-between">
+            <Text color="fg.muted" fontSize="sm">
+              {torrents.length} {pluralize(torrents.length, ['торрент', 'торрента', 'торрентов'])}
+            </Text>
+            <TotalStats torrents={torrents} />
+          </HStack>
+          {torrents
+            .filter((t) =>
+              torrentCategoryTab === 'animatrona' ? t.category === 'animatrona' : t.category !== 'animatrona'
+            )
+            .filter((t) => {
+              if (!searchQuery) return true
+              const q = searchQuery.toLowerCase()
+              return t.name.toLowerCase().includes(q) || (t.animeName?.toLowerCase().includes(q) ?? false)
+            })
+            .map((torrent) => (
+              <TorrentCard
+                key={torrent.infoHash}
+                torrent={torrent}
+                busy={busyTorrents.has(torrent.infoHash)}
+                onPause={handlePause}
+                onResume={handleResume}
+                onRemove={handleRemove}
+                onRemoveWithFiles={(hash, name) => setConfirmDelete({ hash, name })}
+                onImport={handleImport}
+                onOpenAsBundle={handleOpenAsBundle}
+                onResetImportStatus={handleResetImportStatus}
+                onRecheck={handleRecheck}
+              />
+            ))}
+        </VStack>
+      )}
 
       {/* Визард импорта для кнопки «В очередь» */}
       <ImportWizardDialog
@@ -640,6 +668,7 @@ export function TorrentsContent() {
             setImportShikimoriId(undefined)
             setImportAnimeName(undefined)
             setImportSourceUrl(undefined)
+            setImportSourceTorrentCid(undefined)
             setImportExistingAnimeId(undefined)
             setImportingInfoHash(null)
           }
@@ -648,6 +677,7 @@ export function TorrentsContent() {
         preselectedShikimoriId={importShikimoriId}
         preselectedName={importAnimeName}
         sourceUrl={importSourceUrl}
+        sourceTorrentCid={importSourceTorrentCid}
         existingAnimeId={importExistingAnimeId}
         onQueued={() => {
           // Обновляем importStatus торрента в DB
@@ -801,9 +831,10 @@ function TorrentCard({
   const isPaused = torrent.status === 'paused'
   const isDownloading = torrent.status === 'downloading'
   const isFullyDownloaded = (torrent.progress ?? 0) >= 1
-  const canImport = (isSeeding || isDone || isPaused || isFullyDownloaded)
-    && torrent.importStatus !== 'queued'
-    && torrent.importStatus !== 'imported'
+  const canImport =
+    (isSeeding || isDone || isPaused || isFullyDownloaded) &&
+    torrent.importStatus !== 'queued' &&
+    torrent.importStatus !== 'imported'
 
   // Постер из Shikimori (если есть shikimoriId)
   const posterUrl = torrent.shikimoriId
@@ -1011,12 +1042,7 @@ function TorrentCard({
               </Button>
             )}
             {(isDownloading || isSeeding) && (
-              <Button
-                size="xs"
-                variant="outline"
-                disabled={busy}
-                onClick={() => onPause(torrent.infoHash)}
-              >
+              <Button size="xs" variant="outline" disabled={busy} onClick={() => onPause(torrent.infoHash)}>
                 <Icon>
                   <LuPause />
                 </Icon>

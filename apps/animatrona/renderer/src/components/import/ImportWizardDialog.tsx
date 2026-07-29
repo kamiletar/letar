@@ -78,6 +78,8 @@ interface ImportWizardDialogProps {
   initialData?: ImportInitialData
   /** URL источника (Rutracker и т.д.) — показывается в футере */
   sourceUrl?: string
+  /** CID сырых байт .torrent файла раздачи в IPFS (если уже экспортирован) */
+  sourceTorrentCid?: string
   /** Callback после успешного добавления в очередь */
   onQueued?: () => void
   /** ID существующего аниме — режим добавления/замены эпизодов без создания нового */
@@ -95,6 +97,7 @@ export function ImportWizardDialog({
   initialFolderPath,
   initialData,
   sourceUrl,
+  sourceTorrentCid,
   onQueued,
   existingAnimeId,
 }: ImportWizardDialogProps) {
@@ -408,6 +411,7 @@ export function ImportWizardDialog({
         source: parsedInfo.source,
         isBdRemux: parsedInfo.isBdRemux,
         rutrackerUrl: parsedInfo.rutrackerUrl ?? sourceUrl,
+        sourceTorrentCid,
       },
       selectedAnime: {
         id: selectedAnime.id,

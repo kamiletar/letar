@@ -1,8 +1,69 @@
 # Animatrona — План развития
 
-## Текущая версия: 0.52.5
+## Текущая версия: 0.54.0
 
 ## Черновик (новые идеи)
+
+- [x] **`play/` — standalone Web Player встроен прямо в directoryCid** (v0.54.0) — принцип:
+      ВСЁ, что нужно для просмотра, должно физически лежать внутри `directoryCid` и пиниться
+      вместе с ним — если пиннер-сервер потерян, восстановить можно только то, что реально
+      попало под recursive pin директории; полагаться на «где-то ещё есть» нельзя. IPFS не
+      дублирует блоки по CID, так что это ничего не стоит. Теперь для просмотра аниме нужен
+      только IPFS-гейтвей + `<gateway>/ipfs/<directoryCid>/play/` — без Animatrona, без
+      animatrona-web, без отдельной публикации.
+      - Новый `main/services/ipfs/play-folder-builder.ts` — переиспользует существующий
+      standalone-плеер из `web-export/asset-bundler.ts` (`buildDirectoryStructure`) и
+      `web-export/manifest-generator.ts` (`generateManifest`, режим `referenced` — src в
+      манифесте это голые CID, плеер резолвит их через gateway независимо от глубины папки).
+      Строит `QueueExportConfig` из уже загруженных Prisma-данных аниме (включены ВСЕ эпизоды
+      и ВСЕ аудио/суб-дорожки — в отличие от ручного экспорта, где пользователь выбирает
+      подмножество).
+      - `anime-directory-builder.ts` пробрасывает `play/` как ещё одну папку рядом с `meta/` и
+      `source/`, строится **после** основного цикла по эпизодам. `play/episodes/NN/video.webm`
+      и т.д. ссылаются на те же CID, что и основное дерево — IPFS не дублирует блоки, только
+      одна лишняя запись в directory listing.
+      - **Главы (OP/ED) — тоже в `play/`, не пропущены.** `chapters.json` каждого эпизода уже
+      часть `directoryCid` (`episodes/NN/meta/chapters.json`, существовало и раньше) — сама
+      по себе задача пин-безопасности тут была решена ещё до этой сессии. Не хватало только
+      того, чтобы плеер в `play/` реально показывал метки: `buildPlayFolderEntries()` получает
+      уже вычисленный `chaptersByEp` (episodeId → живой/восстановленный chaptersCid, из
+      pre-pass'а `buildAnimeDirectory()`) и читает содержимое через `safeCat()` — никакого
+      нового контента не пинится, только чтение уже пропинненного JSON для наполнения
+      `WebPlayerManifest.episodes[].chapters`.
+      - Prisma-запрос в `buildAnimeDirectory()` расширен: `season.number`, `title`/`streamIndex`/
+      `isDefault` у audio/subtitle треков (раньше выбирались только `language`/`dubGroup`).
+
+- [x] **Сохранение исходного .torrent файла в directoryCid + разделение торрентов по категории**
+      (v0.53.0) — идея: раз уже раздаём аниме по CID, разумно раздавать и сам .torrent, которым
+      его залили, плюс явно зафиксировать источник (ссылку на Рутрекер), а не только держать её
+      в БД. Реализовано: - `QBittorrentService` экспортирует `.torrent` через `/api/v2/torrents/export` (qBittorrent
+      4.5+) сразу как только метаданные раздачи получены (имя+размер стали известны), заливает
+      байты в IPFS (`pin: false`) и сохраняет CID в `TorrentDownload.torrentFileCid`. На версиях
+      qBittorrent <4.5 экспорт получает 404 — источник (ссылка) всё равно сохраняется, просто
+      без самого файла; в логе явное предупреждение с просьбой обновить qBittorrent. - CID пробрасывается через весь путь импорта (`getDownloadMeta` → `ImportWizardDialog` →
+      `ImportQueueParsedInfo.sourceTorrentCid` → `Anime.sourceTorrentCid`). - `anime-directory-builder.ts`: новая папка `source/` в `directoryCid` — `source.json`
+      (`{ source: { type, url }, torrentFileCid }`, расширяемо под другие типы источников —
+      nyaa, anidex, прямые ссылки — без изменения схемы основного манифеста) + сам файл
+      `source.torrent` (родовое имя — источник не обязательно Рутрекер). - Торренты, добавленные через Animatrona, помечаются категорией qBittorrent `animatrona`
+      (`ANIMATRONA_TORRENT_CATEGORY` в `qbittorrent-service.ts`, авто-создаётся при `init()`).
+      Вкладка «Animatrona» / «Остальное» в `torrents/page.tsx` фильтрует список по этой
+      категории — торренты, добавленные вручную через сам qBittorrent (или другим приложением),
+      больше не мешаются в общем списке. - Миграция БД `20260729010000_add_source_torrent_cid` (`Anime.sourceTorrentCid`,
+      `TorrentDownload.torrentFileCid`) применена вручную через `prisma db execute` +
+      `migrate resolve --applied` — обычный `db:migrate` упирался в рассинхронизацию чек-суммы
+      старой миграции `20260728044106_add_needs_reupload_flag` в локальной БД, а сброс dev-БД
+      уничтожил бы реальную библиотеку (это не тестовые данные, а рабочий `app.db`).
+
+- [ ] **Авто-импорт по ссылке из комментария .torrent файла** — наблюдение (2026-07-29): у торрента,
+      добавленного вручную (не через Animatrona), в свойствах qBittorrent (`/api/v2/torrents/properties`
+      → поле `comment`) часто уже лежит прямая ссылка на страницу раздачи (см. скриншот в сессии —
+      `Комментарий: https://rutracker.org/forum/viewtopic.php?t=5806099`). Для торрентов из вкладки
+      «Остальное» можно предложить действие «Найти источник»: получить `comment` через
+      `torrents/properties`, вытащить ссылку по регулярке, прогнать обычный пайплайн
+      парсинг+матчинг Rutracker (`rutracker-import.ts`) по этой ссылке — но **без повторного
+      скачивания**: файлы уже на диске (или качаются), нужно просто связать уже присутствующий
+      торрент с результатом парсинга/матчинга и сразу проставить `sourceTorrentCid` из уже
+      скачанного файла (никакого re-download). Не реализовано — отдельная задача.
 
 - [x] **E2E для импорта из Рутрекера + фикс Shikimori под TUN-VPN** (v0.52.5) — новый сьют
       `apps/animatrona-e2e/src/03-import/rutracker-import.electron.spec.ts` (навигация,
@@ -12,7 +73,7 @@
       TUN-VPN (Clash), хотя обычный Node-сокет проходил 200 OK — TUN режет по TLS-отпечатку,
       не по прокси-настройкам (`session.setProxy` тут бессилен, `resolveProxy()` возвращает
       `DIRECT`). Пофикшено переводом `main/services/shikimori/{client,anime-api,
-      franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно почищен несвязанный
+  franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно почищен несвязанный
       SSR-краш `shaka-player` (`self is not defined`), блокировавший вообще любую сборку
       `nx build:win` с 3 июля — статический импорт заменён на динамический `import()` в
       `GlobalVideoProvider.tsx`/`useShakaPlayer.ts`.

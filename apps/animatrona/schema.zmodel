@@ -410,6 +410,10 @@ model Anime {
   rutrackerUrl    String?
 
   /// @form.exclude
+  /// CID сырых байт .torrent файла раздачи в IPFS (source/source.torrent в directoryCid)
+  sourceTorrentCid String?
+
+  /// @form.exclude
   /// Франшиза к которой принадлежит аниме
   franchiseId     String?
   franchise       Franchise?  @relation(fields: [franchiseId], references: [id], onDelete: SetNull)
@@ -1367,6 +1371,9 @@ model TorrentDownload {
 
   /// URL раздачи на Rutracker
   rutrackerUrl  String?
+
+  /// CID сырых байт .torrent файла раздачи в IPFS (заполняется после получения метаданных)
+  torrentFileCid String?
 
   /// Раздача содержит несколько отдельных аниме (набор/bundle)
   isBundle      Boolean  @default(false)

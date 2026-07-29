@@ -26,6 +26,7 @@ export async function upsertAnime(data: {
   rating?: number | null
   isBdRemux?: boolean
   rutrackerUrl?: string | null
+  sourceTorrentCid?: string | null
   synonyms?: string | null
 }) {
   return prisma.anime.upsert({
@@ -43,6 +44,7 @@ export async function upsertAnime(data: {
       rating: data.rating ?? null,
       isBdRemux: data.isBdRemux ?? false,
       rutrackerUrl: data.rutrackerUrl ?? null,
+      sourceTorrentCid: data.sourceTorrentCid ?? null,
       synonyms: data.synonyms ?? null,
     },
     update: {
@@ -57,6 +59,7 @@ export async function upsertAnime(data: {
       rating: data.rating ?? undefined,
       isBdRemux: data.isBdRemux ?? undefined,
       rutrackerUrl: data.rutrackerUrl ?? undefined,
+      sourceTorrentCid: data.sourceTorrentCid ?? undefined,
       synonyms: data.synonyms ?? undefined,
     },
   })

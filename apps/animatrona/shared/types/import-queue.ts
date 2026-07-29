@@ -114,6 +114,8 @@ export interface ImportQueueParsedInfo {
   isBdRemux?: boolean
   /** URL раздачи на Rutracker (если импортировано оттуда) */
   rutrackerUrl?: string
+  /** CID сырых байт .torrent файла раздачи в IPFS (если импортировано оттуда) */
+  sourceTorrentCid?: string
 }
 
 /**
