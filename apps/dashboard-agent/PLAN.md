@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.8.6
+## Текущая версия: 0.9.4
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -48,11 +48,32 @@
 - **Не покрыто (сознательно, вне MVP):** Umami-событие (§ Этап 0 упоминает Telegram+Umami как алертинг) — текущий alert-pipeline dashboard поддерживает только Telegram (`sendNotification` в `apps/dashboard/src/lib/notifications.ts`), заводить Umami-канал ради одной этой задачи не стали.
 - [x] **Системные находки применены (2026-07-22, `0.8.1 → 0.8.2`):** (1) починена латентная бесконечная рекурсия `loadAllCronJobs ↔ saveCronConfig` в `lib/cron.ts` (обнаружена случайно в dev, не стреляла в проде); (2) `notifyDashboardAlert`/`notifyCanaryAlert` дедуплицированы в общий `lib/dashboard-alert.ts` (+ `lib/app-registry.ts` для `APP_PORTS`/`APP_HOSTS`/`getAppUrl`); (3) `email-canary.ts` переключён на `@letar/email` (`createEmailProvider`) вместо дублирования nodemailer-транспорта — потребовало добавить `bcc?` в `SendEmailParams` (`@letar/email` 0.2.0 → 0.3.0). Первый non-Next.js consumer `libs/*` в приложении на `@nx/esbuild` — проверено живым билдом + смоук-тестом. Детали — `CHANGELOG.md`.
 
-| Задача                         | Статус  | Приоритет |
-| ------------------------------ | ------- | --------- |
-| Отправка метрик в Dashboard    | ⏳ TODO | P1        |
-| Алерты при превышении порогов  | ⏳ TODO | P2        |
-| WebSocket для real-time метрик | ⏳ TODO | P3        |
+| Задача                         | Статус    | Приоритет |
+| ------------------------------ | --------- | --------- |
+| Отправка метрик в Dashboard    | ⏳ TODO   | P1        |
+| Алерты при превышении порогов  | ✅ Готово | P2        |
+| WebSocket для real-time метрик | ⏳ TODO   | P3        |
+
+**Уточнение по «Отправка метрик в Dashboard» (аудит 2026-07-30):** архитектурно это уже
+частично закрыто — `dashboard` не хранит копий метрик, а тянет их с агента на лету через
+`RemoteServerClient` (`apps/dashboard/src/lib/server-client/remote.ts` → `GET /api/system/*`
+и т.д.), с кэшем 2-15 сек на стороне агента. Пункт остаётся TODO именно в узком смысле
+«pull → push»: агент сам инициирует отправку (нужно, например, если dashboard временно
+недоступен и должен получить пропущенное) — этого нет и полноценной пользы от этого без
+конкретного сценария использования не выявлено. Не путать с «Алерты при превышении
+порогов» ниже — та часть push-модели (агент сам уведомляет о проблеме) уже реализована.
+
+### ✅ Алерты при превышении порогов — закрыто (dashboard-agent-dev, 2026-07-30)
+
+`DashboardAlertType` с самого начала содержал `CPU_HIGH`/`MEMORY_HIGH`/`DISK_HIGH`/
+`CONTAINER_DOWN`/`CONTAINER_RESTARTED`/`DATABASE_DOWN`, но их никто не вызывал — метрики
+только отдавались по запросу (`routes/system.ts`), без проактивного контроля. Добавлен
+`lib/health-check.ts` + `routes/health-check.ts` (`POST /api/cron/health-check`, крон каждые
+5 мин на s2): проверяет CPU/память/диск против порогов (`HEALTH_*_THRESHOLD`, по умолчанию
+90%), переходы состояний Docker-контейнеров (running→exited/dead, `restarting` как индикатор
+crash-loop) и доступность БД (контейнер жив, подключение — нет). Дебаунс через
+`json-state-file.ts` — тот же паттерн, что `email-canary.ts`/`backup-freshness.ts`. `0.9.1 →
+0.9.2`.
 
 ---
 
@@ -215,15 +236,22 @@ worktree или разобраться, что это).
 (`schema.zmodel`), в которую dashboard-agent **не пишет ни разу** — модель существует, но
 мертва, `apps/dashboard/src/app/cron/page.tsx` её тоже не читает.
 
-**Задача:**
+**Решено (dashboard-agent-dev, 2026-07-30, `0.9.3 → 0.9.4`):** выбран путь «Redis в самом
+dashboard-agent», не «писать в БД dashboard» — вся остальная архитектура pull-based
+(`RemoteServerClient` в dashboard дёргает REST агента на лету, ничего не копирует к себе в
+БД: system/docker/database статусы, deploy-история после 0.8.3 — тоже Redis на стороне
+агента, не БД dashboard). Заводить для cron-логов вторую модель хранения (POST в БД
+`dashboard`) было бы исключением из этого паттерна ради одной фичи.
 
-- [ ] Решить один раз: либо dashboard-agent начинает писать в `CronExecutionLog` через API
-      dashboard (по аналогии с `POST /api/alerts`), либо модель `CronExecutionLog` признаётся
-      неиспользуемой и удаляется из схемы (миграция) — держать обе версии правды дальше
-      бессмысленно.
-- [ ] Если выбрано «писать в БД» — свериться с решением по Redis из «Надёжности deploy-истории»
-      выше: возможно, разумнее тот же паттерн (Redis как быстрый буфер + периодический flush
-      в БД), а не прямой POST на каждое выполнение cron-задачи.
+- [x] `executionLogs` персистится в Redis (`dashboard-agent:cron:logs:<jobId>`, TTL 30 дней),
+      тот же паттерн, что `deployHistory` (0.8.3): `persistJobLogs()` на каждый `addLog`/
+      `updateLog`, `rehydrateExecutionLogsFromRedis()` при старте процесса восстанавливает
+      историю, записи, застигнутые в `running`, помечаются `error`.
+- [x] **Модель `CronExecutionLog` в схеме `dashboard` остаётся мёртвой** — решение об её
+      удалении миграцией сознательно оставлено вне scope dashboard-agent (это правки в
+      `apps/dashboard/schema.zmodel`, чужая зона ответственности/файловая резервация).
+      Рекомендация для сессии `dashboard-dev`: удалить модель, раз теперь официально
+      подтверждено, что она не часть источника истины ни с одной стороны.
 
 **Зависимости:** пересекается с «Единый источник правды для реестра приложений»
 (`apps/dashboard/PLAN.md` → Запланировано) — оба про рассинхрон dashboard/dashboard-agent.
@@ -232,14 +260,20 @@ worktree или разобраться, что это).
 
 - [ ] Мониторинг сетевого трафика
 - [ ] Мониторинг логов контейнеров
-- [ ] История метрик (локальный буфер)
+- [x] История метрик (локальный буфер) — `lib/history.ts`, ring-buffer до 30 дней (1 точка/мин),
+      `GET /api/system/history` (найдено при аудите PLAN.md 2026-07-30 — пункт был отмечен TODO,
+      хотя реализован уже давно)
 - [ ] Агрегация за интервалы
 
 ### Безопасность
 
-- [ ] API токен авторизация
-- [ ] Rate limiting
-- [ ] Whitelist IP адресов
+- [x] API токен авторизация — `lib/auth.ts` (`authMiddleware`, Bearer `AGENT_TOKEN`), все роуты
+      кроме `/health` (найдено при аудите PLAN.md 2026-07-30 — пункт был отмечен TODO, хотя
+      реализован уже давно)
+- [x] Rate limiting — `@fastify/rate-limit` (dashboard-agent-dev, 2026-07-30, `0.9.4`),
+      настраивается `RATE_LIMIT_MAX`/`RATE_LIMIT_WINDOW_MS`, по умолчанию 600 запросов/мин на IP
+- [x] Whitelist IP адресов — `lib/ip-whitelist.ts` (dashboard-agent-dev, 2026-07-30, `0.9.4`),
+      опционально через `ALLOWED_IPS` (точные IP или IPv4 CIDR), не задан — выключено
 
 ### Интеграции
 
@@ -268,4 +302,4 @@ nx typecheck dashboard-agent
 
 ---
 
-**Последнее обновление:** 2026-02-02
+**Последнее обновление:** 2026-07-29

@@ -11,12 +11,18 @@
  *   PORT        — порт сервера (default: 3100)
  *   HOST        — хост сервера (default: 0.0.0.0)
  *   AGENT_TOKEN — токен авторизации (обязательно для production)
+ *   ALLOWED_IPS — опционально: whitelist IP/CIDR через запятую (defence in depth поверх
+ *                 AGENT_TOKEN, см. lib/ip-whitelist.ts). Не задан — проверка выключена.
+ *                 ⚠️ Если включаешь — не забудь включить IP, с которого dashboard-agent
+ *                 сам себе ходит по cron-задачам (app: 'dashboard-agent' в cron.ts,
+ *                 обычно 127.0.0.1/localhost контейнера), иначе они начнут падать 403.
  */
 
 import Fastify from 'fastify'
 import { authMiddleware } from './lib/auth'
-import { startScheduler } from './lib/cron'
+import { rehydrateExecutionLogsFromRedis, startScheduler } from './lib/cron'
 import { startHistoryCollection } from './lib/history'
+import { ipWhitelistMiddleware } from './lib/ip-whitelist'
 import { appsRoutes } from './routes/apps'
 import { backupFreshnessRoutes } from './routes/backup-freshness'
 import { cronRoutes } from './routes/cron'
@@ -28,6 +34,7 @@ import { emailCanaryRoutes } from './routes/email-canary'
 import { envRoutes } from './routes/env'
 import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
+import { healthCheckRoutes } from './routes/health-check'
 import { nginxRoutes } from './routes/nginx'
 import { systemRoutes } from './routes/system'
 
@@ -68,6 +75,23 @@ async function main(): Promise<void> {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   })
 
+  // Rate limiting — глобальный лимит на IP, с запасом под легитимный polling
+  // dashboard (кэши в system.ts/docker.ts — 2-15 сек) и собственные cron-вызовы агента
+  // на себя же. Настраивается RATE_LIMIT_MAX/RATE_LIMIT_WINDOW_MS, не задано — дефолты ниже.
+  await fastify.register(import('@fastify/rate-limit'), {
+    max: Number(process.env.RATE_LIMIT_MAX) || 600,
+    timeWindow: Number(process.env.RATE_LIMIT_WINDOW_MS) || 60_000,
+    allowList: ['127.0.0.1', '::1'],
+    errorResponseBuilder: () => ({
+      success: false,
+      error: 'Too many requests',
+      timestamp: new Date().toISOString(),
+    }),
+  })
+
+  // IP whitelist (опционально, ALLOWED_IPS) — до аутентификации, см. lib/ip-whitelist.ts
+  fastify.addHook('preHandler', ipWhitelistMiddleware)
+
   // Middleware аутентификации (кроме /health)
   fastify.addHook('preHandler', authMiddleware)
 
@@ -85,6 +109,7 @@ async function main(): Promise<void> {
   await fastify.register(envRoutes)
   await fastify.register(emailCanaryRoutes)
   await fastify.register(backupFreshnessRoutes)
+  await fastify.register(healthCheckRoutes)
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
@@ -107,6 +132,7 @@ async function main(): Promise<void> {
     }
 
     // Автозапуск cron планировщика (всегда, агент работает только в production)
+    await rehydrateExecutionLogsFromRedis()
     fastify.log.info('Starting cron scheduler...')
     startScheduler()
 

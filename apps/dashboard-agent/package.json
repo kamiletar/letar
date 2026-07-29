@@ -1,6 +1,6 @@
 {
   "name": "dashboard-agent",
-  "version": "0.9.1",
+  "version": "0.9.4",
   "private": true,
   "description": "Lightweight monitoring agent for remote servers",
   "type": "module",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",
+    "@fastify/rate-limit": "^10",
     "@letar/email": "workspace:*",
     "@letar/redis-client": "workspace:*",
     "cron-parser": "^5.0.0",

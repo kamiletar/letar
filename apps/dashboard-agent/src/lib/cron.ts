@@ -8,6 +8,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs'
 import * as cron from 'node-cron'
 import { getAppUrl } from './app-registry'
 import { postDashboardAlert } from './dashboard-alert'
+import { getRedis } from './redis'
 import { type CronServer, getCurrentServer, SERVER_APPS } from './server-config'
 
 export type { CronServer }
@@ -80,9 +81,81 @@ function filterJobsForCurrentServer(jobs: CronJob[]): CronJob[] {
 // Scheduled задачи (node-cron tasks)
 const scheduledTasks = new Map<string, cron.ScheduledTask>()
 
-// In-memory хранилище логов (последние N записей на задачу)
+// In-memory хранилище логов (последние N записей на задачу), персистится в Redis
+// (best-effort, см. persistJobLogs/rehydrateExecutionLogsFromRedis ниже) — переживает
+// рестарт контейнера, тот же паттерн, что deployHistory в routes/deploy.ts. Закрывает
+// Backlog «Логи cron-задач в памяти, CronExecutionLog в БД dashboard — мёртвая модель»:
+// dashboard-agent пишет в свою Redis-персистентность вместо БД dashboard (та модель никем
+// не читалась и не писалась — по-прежнему остаётся мёртвой, решение по ней отдельное).
 const MAX_LOGS_PER_JOB = 50
 const executionLogs = new Map<string, CronExecutionLog[]>()
+
+const CRON_REDIS_KEY_PREFIX = 'dashboard-agent:cron:'
+const CRON_REDIS_JOBS_SET_KEY = `${CRON_REDIS_KEY_PREFIX}jobs`
+const CRON_REDIS_ITEM_TTL_SEC = 30 * 24 * 60 * 60
+
+function cronRedisLogsKey(jobId: string): string {
+  return `${CRON_REDIS_KEY_PREFIX}logs:${jobId}`
+}
+
+/** Немедленный best-effort персист всех логов одной задачи целиком (список короткий — MAX_LOGS_PER_JOB) */
+async function persistJobLogs(jobId: string): Promise<void> {
+  const r = getRedis()
+  if (!r) {
+    return
+  }
+  try {
+    const logs = executionLogs.get(jobId) || []
+    await r.set(cronRedisLogsKey(jobId), JSON.stringify(logs), 'EX', CRON_REDIS_ITEM_TTL_SEC)
+    await r.sadd(CRON_REDIS_JOBS_SET_KEY, jobId)
+  } catch {
+    // Не критично — следующий вызов executeJob попробует снова
+  }
+}
+
+/**
+ * Восстанавливает executionLogs из Redis при старте процесса. Записи, застигнутые в
+ * статусе running (агент перезапустился посреди выполнения задачи), помечаются error —
+ * реальный исход неизвестен dashboard-agent'у после рестарта.
+ */
+export async function rehydrateExecutionLogsFromRedis(): Promise<void> {
+  const r = getRedis()
+  if (!r) {
+    return
+  }
+  try {
+    const jobIds = await r.smembers(CRON_REDIS_JOBS_SET_KEY)
+    if (jobIds.length === 0) {
+      return
+    }
+    const raws = await r.mget(...jobIds.map(cronRedisLogsKey))
+    let restored = 0
+    jobIds.forEach((jobId, i) => {
+      const raw = raws[i]
+      if (!raw) {
+        return
+      }
+      try {
+        const logs = JSON.parse(raw) as CronExecutionLog[]
+        for (const log of logs) {
+          if (log.status === 'running') {
+            log.status = 'error'
+            log.error = log.error ?? 'Dashboard-agent перезапустился во время выполнения — итог неизвестен'
+          }
+        }
+        executionLogs.set(jobId, logs)
+        restored += logs.length
+      } catch {
+        // Битая запись в Redis — пропускаем
+      }
+    })
+    if (restored > 0) {
+      console.warn(`[Cron] Восстановлено ${restored} записей логов выполнения из Redis (${jobIds.length} задач)`)
+    }
+  } catch (error) {
+    console.error('[Cron] Не удалось восстановить логи выполнения из Redis:', error)
+  }
+}
 
 // Путь к конфигу (используем примонтированный volume /home/deploy/letar)
 const CONFIG_PATH = '/home/deploy/letar/cron-jobs.json'
@@ -186,6 +259,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     schedule: '0 */6 * * *',
     description:
       'Проверка свежести бэкапа Maddy (Этап 0.3): алерт BACKUP_FAILED, если самый новый maddy_*.tar.gz в /home/deploy/letar/backups/maddy старше 30ч — урок инцидента 2026-07-28 (26 дней простоя незамеченными)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'health-check',
+    name: 'Health Check (CPU/память/диск/контейнеры/БД)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/health-check',
+    schedule: '*/5 * * * *',
+    description:
+      'Проверка порогов CPU/память/диск (по умолчанию 90%), Docker-контейнеров (down/restarting) и доступности БД — алерты CPU_HIGH/MEMORY_HIGH/DISK_HIGH/CONTAINER_DOWN/CONTAINER_RESTARTED/DATABASE_DOWN (Backlog «Алерты при превышении порогов», P2, эти типы существовали в DashboardAlertType с самого начала, но никогда не вызывались)',
     enabled: true,
     server: 's2',
   },
@@ -423,6 +507,7 @@ function addLog(log: CronExecutionLog): void {
   }
 
   executionLogs.set(log.jobId, logs)
+  void persistJobLogs(log.jobId)
 }
 
 /**
@@ -434,6 +519,7 @@ function updateLog(logId: string, jobId: string, updates: Partial<CronExecutionL
   if (index !== -1) {
     logs[index] = { ...logs[index], ...updates }
   }
+  void persistJobLogs(jobId)
 }
 
 /**

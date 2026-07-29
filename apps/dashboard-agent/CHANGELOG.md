@@ -11,6 +11,50 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.4] — 2026-07-30
+
+### Added
+
+- **`@fastify/rate-limit`** — глобальный лимит `RATE_LIMIT_MAX`/`RATE_LIMIT_WINDOW_MS`
+  (по умолчанию 600 запросов/мин на IP) поверх `AGENT_TOKEN`, закрывает Backlog
+  «Безопасность → Rate limiting». `127.0.0.1`/`::1` в `allowList` — не режет собственные
+  cron-вызовы агента на себя же (`app: 'dashboard-agent'` в `cron.ts`).
+- **`lib/ip-whitelist.ts`** — опциональный whitelist `ALLOWED_IPS` (точные IP или IPv4 CIDR
+  через запятую), preHandler до `authMiddleware`. Не задан — проверка выключена, поведение
+  не меняется. Закрывает Backlog «Безопасность → Whitelist IP адресов».
+- **Redis-персистентность логов cron-задач** (`lib/cron.ts`) — `executionLogs` теперь
+  персистится в Redis (`dashboard-agent:cron:logs:<jobId>`, TTL 30 дней) по тому же паттерну,
+  что `deployHistory` в `routes/deploy.ts` (0.8.3): `rehydrateExecutionLogsFromRedis()` при
+  старте восстанавливает историю, записи в статусе `running` при рестарте помечаются `error`.
+  Закрывает половину Backlog «Логи cron-задач в памяти, `CronExecutionLog` в БД dashboard —
+  мёртвая модель» — выбран путь «переживает рестарт через Redis в самом dashboard-agent»
+  вместо записи в БД `dashboard` (та архитектура и так pull-based — `dashboard` не хранит
+  копий метрик/логов агента, только на лету запрашивает через `RemoteServerClient`).
+  Модель `CronExecutionLog` в схеме `dashboard` при этом остаётся неиспользуемой — решение
+  об её удалении миграцией вне scope dashboard-agent (см. PLAN.md Backlog).
+
+## [0.9.3] — 2026-07-30
+
+### Refactor: синхронизация `app-registry.ts` `APP_PORTS` с каноном `@letar/infra-config`
+
+Значения портов в локальной копии `APP_PORTS` (обязательна — `Dockerfile.production` изолирован от `libs/`) теперь сверяются с каноном `@letar/infra-config` guard-тестом `app-registry.guard.spec.ts`, по тому же паттерну, что уже применялся к `SERVER_APPS`/`server-config.guard.spec.ts`. Набор приложений в локальной копии не менялся — только источник истины для номеров портов.
+
+## [0.9.2] — 2026-07-30
+
+### Added
+
+- **`lib/health-check.ts` + `routes/health-check.ts`** — `POST /api/cron/health-check`
+  (крон каждые 5 мин, s2), закрывает Backlog «Алерты при превышении порогов» (P2):
+  проверяет CPU/память/диск против порогов (`HEALTH_CPU_THRESHOLD`/`HEALTH_MEMORY_THRESHOLD`/
+  `HEALTH_DISK_THRESHOLD`, по умолчанию 90%), состояние Docker-контейнеров (переход
+  running→exited/dead и состояние `restarting` как индикатор crash-loop) и доступность БД
+  (контейнер запущен, но подключение не проходит). Алертит через существующий
+  `postDashboardAlert()` типами `CPU_HIGH`/`MEMORY_HIGH`/`DISK_HIGH`/`CONTAINER_DOWN`/
+  `CONTAINER_RESTARTED`/`DATABASE_DOWN` — эти типы существовали в `DashboardAlertType` и схеме
+  `dashboard` с самого начала, но ни разу не вызывались. Дебаунс (один алерт на непрерывный
+  эпизод) через `json-state-file.ts`, тот же паттерн, что `email-canary.ts`/
+  `backup-freshness.ts`.
+
 ## [0.9.1] — 2026-07-29
 
 ### Added
