@@ -31,6 +31,18 @@
         "technologies": ["next"]
       }
     },
+    "mcp:serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx tsx src/mcp/cli.ts",
+        "cwd": "apps/synth"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Run synth MCP server via stdio (ментор + DAW)",
+        "technologies": ["mcp"]
+      }
+    },
     "start": {
       "executor": "nx:run-commands",
       "options": {

@@ -1,7 +1,10 @@
 {
   "name": "@letar/synth",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  },
   "nx": {
     "name": "synth",
     "implicitDependencies": [

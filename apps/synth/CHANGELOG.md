@@ -4,6 +4,21 @@
 
 ---
 
+## [0.11.0] — 2026-07-29
+
+### Добавлено
+
+- **MCP-сервер для Claude Desktop (Фаза 2)** — `apps/synth/src/mcp/`, `nx run synth:mcp:serve`,
+  зарегистрирован в `.mcp.json` как `synth-mcp`. Два набора инструментов:
+  - **Ментор:** `highlight_param`, `dim_all`, `focus_section`, `play_demo` (куратoрские демо-патчи
+    `reese-bass`/`glass-bells`/`breakbeat-kit-1`) — реагируют в студии золотой подсветкой/подсказкой.
+  - **DAW:** `load_patch`, `send_midi_sequence`, `generate_chord_pattern`.
+  - 3 ресурса: `synth://current-patch`, `synth://patches`, `daw://current-state`.
+- **SSE-канал ментора** — `/api/mentor/events/` (браузер подписан), `/api/mentor/emit/` (публикует
+  MCP-сервер), `/api/mentor/state/` (heartbeat состояния студии). Опциональный токен
+  `SYNTH_MENTOR_TOKEN` для публичного деплоя.
+- `MentorOverlay` и `MentorFocusZone` — визуальная реакция студии на события ментора.
+
 ## [0.10.0] — 2026-07-29
 
 ### Добавлено

@@ -1,5 +1,50 @@
 # PLAN_COMPLETED — synth
 
+## Сессия 2026-07-29 (продолжение 4) — Фаза 2: MCP-сервер (ментор + DAW)
+
+### Что сделано
+
+- **Канал ментора Next.js ↔ MCP** — MCP-сервер (отдельный Node-процесс) и Next.js dev/prod-сервер
+  общаются по HTTP, а не разделяют память напрямую: `src/lib/mentor/event-bus.ts` (in-memory pub/sub
+  на процесс Next.js, `node:events`), `POST /api/mentor/emit/` (публикация, опциональный
+  `Authorization: Bearer SYNTH_MENTOR_TOKEN`), `GET /api/mentor/events/` (SSE, `ReadableStream`),
+  `GET|POST /api/mentor/state/` (браузер репортит heartbeat своего состояния — читает MCP-ресурс
+  `daw://current-state`). Схема события — единая Zod-дискриминированная уния `src/lib/mentor/schema.ts`
+  (переиспользует существующую `PatchSchema` для `load_patch`, а не дублирует её).
+- **Браузерная сторона** — `use-mentor-events.ts` (подписка на SSE + heartbeat-репорт),
+  `MentorOverlay` (золотая всплывающая подсказка `highlight_param`, 7 сек), `MentorFocusZone`
+  (золотая рамка + автоскролл для `focus_section`) — обёрнуты вокруг 4 крупных блоков разметки
+  `studio-client.tsx` (`engine`/`hardware`/`performance`/`midi`). Точечная подсветка отдельных ручек
+  сознательно не сделана — потребовала бы рефакторинга всех панелей параметров, задел на будущее.
+- **MCP-сервер** `apps/synth/src/mcp/` (`server.ts`, `cli.ts`, `demo-patches.ts`, `chord-pattern.ts`,
+  `mentor-client.ts`) — `nx run synth:mcp:serve`, зарегистрирован в `.mcp.json` как `synth-mcp`.
+  7 инструментов: `highlight_param`, `dim_all`, `focus_section`, `play_demo` (куратoрский набор
+  `reese-bass`/`glass-bells`/`breakbeat-kit-1` с готовыми демо-фразами), `load_patch`,
+  `send_midi_sequence`, `generate_chord_pattern` (чистый генератор — интервалы аккордов + 3 стиля
+  проигрывания: block/arpeggio-up/arpeggio-down). 3 ресурса: `synth://current-patch`,
+  `synth://patches` (читает `patches/*.json`, как и `/gallery`), `daw://current-state`.
+- **SDK-грабли** (@modelcontextprotocol/sdk 1.29.0 + zod/v4 «classic» билдер): deprecated-перегрузки
+  `server.tool(name, description, shape, cb)` не тайпчекались с zod v4.4.3 — TS видел
+  `AnySchema = z3.ZodTypeAny | z4.$ZodType` и ни одна ветка не совпадала структурно с «classic»
+  ZodNumber/ZodEnum. Починилось само после апгрейда `@modelcontextprotocol/sdk` до `1.30.0` (только
+  в `apps/synth/package.json`, form-mcp/deploy-mcp не трогали) + переход на не-deprecated
+  `server.registerTool(name, { description, inputSchema }, cb)`.
+- **CJS/ESM грабли**: `apps/synth` не объявляет `"type": "module"` (это Next.js-приложение, трогать
+  рискованно) → `bunx tsx src/mcp/cli.ts` транспилирует в CJS, где top-level `await` недоступен
+  (esbuild падал с «Top-level await is currently not supported with the "cjs" output format»).
+  Починено оборачиванием в `async function main() { … }; void main()` вместо top-level await —
+  form-mcp/cli.ts избегает этого только потому, что у него свой `package.json` с `"type": "module"`.
+- **`trailingSlash: true` грабли**: у synth `next.config.mjs` включён `trailingSlash` → запросы без
+  слэша ловят `308 Permanent Redirect` (curl это показал явно: POST на `/api/mentor/emit` возвращал
+  redirect на `/api/mentor/emit/` с телом-путём вместо JSON). Все внутренние fetch/EventSource-пути
+  в `use-mentor-events.ts` и `mentor-client.ts` пишутся сразу со слэшем на конце.
+- **Проверено:** `nx lint`/`typecheck:tsgo`/`test` — зелёные. Прямой JSON-RPC по stdio
+  (`tools/list`/`resources/list`) отдаёт все 7 инструментов и 3 ресурса с валидными JSON Schema.
+  Полный цикл SSE↔emit↔state проверен curl'ом на живом dev-сервере (`nx run synth:dev` + curl).
+  ⚠️ **Не проверено:** реальный Claude Desktop → highlight_param → золотая подсказка в браузере
+  владельца — нужен ручной тест с открытой вкладкой студии (см. правило «тестировать в браузере
+  владельца» в `PLAN.md`, тот же принцип применим и здесь).
+
 ## Сессия 2026-07-29 (продолжение 3) — MIDI Learn для пэдов + MIDI-монитор
 
 ### Что сделано

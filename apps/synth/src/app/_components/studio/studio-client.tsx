@@ -10,7 +10,7 @@ import { DRUM_KIT_1 } from '@/lib/patch/drum-defaults'
 import { decodeSingleVoiceSysex, encodeSingleVoiceSysex, encodeVoiceDumpRequest } from '@/lib/patch/dx7-sysex'
 import { FM_GLASS_BELLS } from '@/lib/patch/fm-defaults'
 import { applyCC, applyEncoderValue } from '@/lib/patch/midi-mapping'
-import type { DrumkitPatch, DrumPad, FmPatch, SubtractivePatch } from '@/lib/patch/schema'
+import type { DrumkitPatch, DrumPad, FmPatch, Patch, SubtractivePatch } from '@/lib/patch/schema'
 import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
@@ -23,6 +23,8 @@ import { FmPanel } from './fm-panel'
 import { HardwarePanel } from './hardware-panel'
 import { HardwareRecordingPanel } from './hardware-recording-panel'
 import { Keyboard } from './keyboard'
+import { MentorFocusZone } from './mentor-focus-zone'
+import { MentorOverlay } from './mentor-overlay'
 import { MidiMonitor } from './midi-monitor'
 import { MidiStatus } from './midi-status'
 import { ParamPanel } from './param-panel'
@@ -30,6 +32,7 @@ import { PatchLibrary } from './patch-library'
 import { useHardwareReadout } from './use-hardware-readout'
 import { useHardwareRecording } from './use-hardware-recording'
 import { useMasterBus } from './use-master-bus'
+import { useMentorEvents, useMentorStateReport } from './use-mentor-events'
 import { useMidiMonitor } from './use-midi-monitor'
 import { usePadMidiLearn } from './use-pad-midi-learn'
 import { useRecording } from './use-recording'
@@ -335,6 +338,52 @@ export function StudioClient() {
     setTimeout(() => setSyxImportStatus('idle'), 3000)
   }, [])
 
+  // Загружает патч, пришедший от MCP-инструмента load_patch/play_demo — переключает движок при необходимости
+  const handleMentorLoadPatch = useCallback(
+    async (incoming: Patch) => {
+      if (incoming.type !== engineTypeRef.current) {
+        if (started) {
+          await handleSwitchEngine(incoming.type)
+        } else {
+          setEngineType(incoming.type)
+        }
+      }
+      if (incoming.type === 'fm') {
+        handleLoadFm(incoming)
+      } else if (incoming.type === 'drumkit') {
+        handleLoadDrumkit(incoming)
+      } else {
+        handleLoadSubtractive(incoming)
+      }
+    },
+    [started, handleSwitchEngine, handleLoadFm, handleLoadDrumkit, handleLoadSubtractive]
+  )
+
+  // Проигрывает последовательность нот от send_midi_sequence/play_demo — без запущенного звука нечего проигрывать
+  const handleMentorMidiSequence = useCallback(
+    (notes: { note: number; velocity: number; startMs: number; durationMs: number }[]) => {
+      if (!started) {
+        return
+      }
+      for (const n of notes) {
+        setTimeout(() => handleNoteOn(n.note, n.velocity), n.startMs)
+        setTimeout(() => handleNoteOff(n.note), n.startMs + n.durationMs)
+      }
+    },
+    [started, handleNoteOn, handleNoteOff]
+  )
+
+  const mentor = useMentorEvents({
+    onLoadPatch: (p) => void handleMentorLoadPatch(p),
+    onMidiSequence: handleMentorMidiSequence,
+  })
+
+  useMentorStateReport({
+    engineType,
+    patchName: engineType === 'fm' ? fmPatch.name : engineType === 'drumkit' ? drumPatch.name : patch.name,
+    started,
+  })
+
   useEffect(() => {
     return () => {
       engineRef.current?.dispose()
@@ -510,92 +559,98 @@ export function StudioClient() {
       <Box flex={1} overflow="auto" p={4} display="flex" flexDir="column" gap={4}>
         {/* Зеркало физической панели SMK-37 — только когда MIDI подключён */}
         {midiDevices.length > 0 && (
-          <HardwarePanel
-            faderValues={hardware.faderValues}
-            faderBank={hardware.faderBank}
-            encoderValues={hardware.encoderValues}
-            encoderBank={hardware.encoderBank}
-          />
+          <MentorFocusZone active={mentor.focusSection === 'hardware'} p={1}>
+            <HardwarePanel
+              faderValues={hardware.faderValues}
+              faderBank={hardware.faderBank}
+              encoderValues={hardware.encoderValues}
+              encoderBank={hardware.encoderBank}
+            />
+          </MentorFocusZone>
         )}
 
         {/* Панели параметров — переключаемые по движку */}
-        {engineType === 'subtractive' ? (
-          <Box display="flex" flexDir="column" gap={2}>
-            <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
-            <PatchLibrary
-              type="subtractive"
-              currentPatch={patch}
-              onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
-            />
-          </Box>
-        ) : engineType === 'drumkit' ? (
-          <Box display="flex" flexDir="column" gap={2}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <button
-                style={filledToggleStyle(padMidiLearn.active, { padding: '3px 8px', letterSpacing: '0.04em' })}
-                onClick={padMidiLearn.toggleActive}
-              >
-                {padMidiLearn.active ? '● обучение пэдов включено' : 'MIDI Learn: пэды'}
-              </button>
-              {padMidiLearn.active && (
-                <button
-                  style={outlineButtonStyle('default', { padding: '3px 8px', letterSpacing: '0.04em' })}
-                  onClick={padMidiLearn.reset}
-                >
-                  сбросить к дефолту
-                </button>
-              )}
-              {padMidiLearn.active && (
-                <Text fontSize="9px" color="fg.subtle" letterSpacing="0.04em">
-                  {padMidiLearn.armedPad !== null
-                    ? `жду удар по железу для пэда ${padMidiLearn.armedPad + 1}…`
-                    : 'кликни по экранному пэду, потом ударь по нужному пэду на железе'}
-                </Text>
-              )}
+        <MentorFocusZone active={mentor.focusSection === 'engine'} p={1}>
+          {engineType === 'subtractive' ? (
+            <Box display="flex" flexDir="column" gap={2}>
+              <ParamPanel engine={patch.engine} onChange={handleEngineChange} />
+              <PatchLibrary
+                type="subtractive"
+                currentPatch={patch}
+                onLoad={(p) => handleLoadSubtractive(p as SubtractivePatch)}
+              />
             </Box>
-            <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
-            <PatchLibrary
-              type="drumkit"
-              currentPatch={drumPatch}
-              onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
-            />
-          </Box>
-        ) : (
-          <Box display="flex" flexDir="column" gap={2}>
-            <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
-            <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
-            <FmHardwareControls
-              midiDevices={midiDevices}
-              syxImportStatus={syxImportStatus}
-              sendStatus={sendStatus}
-              readStatus={readStatus}
-              onDownloadSyx={handleDownloadSyx}
-              onImportSyxFile={(file) => void handleImportSyxFile(file)}
-              onSendToHardware={handleSendToHardware}
-              onRequestFromHardware={handleRequestFromHardware}
-            />
-          </Box>
-        )}
+          ) : engineType === 'drumkit' ? (
+            <Box display="flex" flexDir="column" gap={2}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <button
+                  style={filledToggleStyle(padMidiLearn.active, { padding: '3px 8px', letterSpacing: '0.04em' })}
+                  onClick={padMidiLearn.toggleActive}
+                >
+                  {padMidiLearn.active ? '● обучение пэдов включено' : 'MIDI Learn: пэды'}
+                </button>
+                {padMidiLearn.active && (
+                  <button
+                    style={outlineButtonStyle('default', { padding: '3px 8px', letterSpacing: '0.04em' })}
+                    onClick={padMidiLearn.reset}
+                  >
+                    сбросить к дефолту
+                  </button>
+                )}
+                {padMidiLearn.active && (
+                  <Text fontSize="9px" color="fg.subtle" letterSpacing="0.04em">
+                    {padMidiLearn.armedPad !== null
+                      ? `жду удар по железу для пэда ${padMidiLearn.armedPad + 1}…`
+                      : 'кликни по экранному пэду, потом ударь по нужному пэду на железе'}
+                  </Text>
+                )}
+              </Box>
+              <DrumPanel pad={drumPatch.engine.pads[selectedPad]} onChange={handlePadChange} />
+              <PatchLibrary
+                type="drumkit"
+                currentPatch={drumPatch}
+                onLoad={(p) => handleLoadDrumkit(p as DrumkitPatch)}
+              />
+            </Box>
+          ) : (
+            <Box display="flex" flexDir="column" gap={2}>
+              <FmPanel engine={fmPatch.engine} onChange={handleFmEngineChange} />
+              <PatchLibrary type="fm" currentPatch={fmPatch} onLoad={(p) => handleLoadFm(p as FmPatch)} />
+              <FmHardwareControls
+                midiDevices={midiDevices}
+                syxImportStatus={syxImportStatus}
+                sendStatus={sendStatus}
+                readStatus={readStatus}
+                onDownloadSyx={handleDownloadSyx}
+                onImportSyxFile={(file) => void handleImportSyxFile(file)}
+                onSendToHardware={handleSendToHardware}
+                onRequestFromHardware={handleRequestFromHardware}
+              />
+            </Box>
+          )}
+        </MentorFocusZone>
 
-        {/* MIDI-статус */}
-        <MidiStatus
-          devices={midiDevices}
-          octaveShift={octaveShift}
-          onOctaveShift={handleOctaveShift}
-          onConnect={handleMidiConnect}
-          error={midiError}
-        />
-
-        {/* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
-            SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */}
-        {midiDevices.length > 0 && (
-          <MidiMonitor
-            open={midiMonitorOpen}
-            entries={midiMonitor.entries}
-            onToggle={() => setMidiMonitorOpen((v) => !v)}
-            onClear={midiMonitor.clear}
+        <MentorFocusZone active={mentor.focusSection === 'midi'} p={1} display="flex" flexDir="column" gap={4}>
+          {/* MIDI-статус */}
+          <MidiStatus
+            devices={midiDevices}
+            octaveShift={octaveShift}
+            onOctaveShift={handleOctaveShift}
+            onConnect={handleMidiConnect}
+            error={midiError}
           />
-        )}
+
+          {/* Диагностика недокументированных кнопок железа (ARP/SCALE/CHORD/GLOBE/BT/PATCH/... —
+              SysEx-карта их не описывает, неизвестно, шлют ли они что-то на хост вообще) */}
+          {midiDevices.length > 0 && (
+            <MidiMonitor
+              open={midiMonitorOpen}
+              entries={midiMonitor.entries}
+              onToggle={() => setMidiMonitorOpen((v) => !v)}
+              onClear={midiMonitor.clear}
+            />
+          )}
+        </MentorFocusZone>
 
         {/* Запись реального аппаратного звука (SMK-37 как USB-audio interface) */}
         {started && (
@@ -619,7 +674,14 @@ export function StudioClient() {
         </Text>
 
         {/* Клавиатура или пэды — прилипает к низу */}
-        <Box mt="auto" pb={4} display="flex" justifyContent="center" overflow="auto">
+        <MentorFocusZone
+          active={mentor.focusSection === 'performance'}
+          mt="auto"
+          pb={4}
+          display="flex"
+          justifyContent="center"
+          overflow="auto"
+        >
           {engineType === 'drumkit' ? (
             <DrumPads
               pads={drumPatch.engine.pads}
@@ -637,8 +699,11 @@ export function StudioClient() {
           ) : (
             <Keyboard onNoteOn={handleNoteOn} onNoteOff={handleNoteOff} activeNotes={activeNotes} />
           )}
-        </Box>
+        </MentorFocusZone>
       </Box>
+
+      {/* Ментор — всплывающая подсказка от MCP-инструмента highlight_param */}
+      <MentorOverlay highlight={mentor.highlight} onDismiss={mentor.dismissHighlight} />
 
       {/* Оверлей «нажми чтобы начать» */}
       {!started && (
