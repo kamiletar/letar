@@ -17,44 +17,9 @@
  */
 
 import type { PageViewCount } from '@/generated/models'
+import { getWorkspaceDir, runOnHost } from '@/lib/host-exec'
 import { npmApi } from '@/lib/nginx-proxy-manager'
-import { spawn } from 'child_process'
 import { prisma } from './db'
-
-const ALLOWED_WORKSPACES = ['/web/letar', '/home/deploy/letar'] as const
-
-/** Выполняет команду на хосте через nsenter (тот же паттерн, что api/git/pull/route.ts) */
-function runOnHost(command: string): Promise<{ stdout: string; code: number }> {
-  return new Promise((resolve) => {
-    const proc = spawn('nsenter', ['-t', '1', '-m', '-u', '-i', '-n', '-p', '--', 'sh', '-c', command], {
-      stdio: 'pipe',
-    })
-
-    let stdout = ''
-
-    proc.stdout.on('data', (data) => {
-      stdout += data.toString()
-    })
-
-    proc.on('close', (code) => {
-      resolve({ stdout, code: code ?? 0 })
-    })
-
-    proc.on('error', () => {
-      resolve({ stdout: '', code: 1 })
-    })
-
-    setTimeout(() => {
-      proc.kill()
-      resolve({ stdout, code: 1 })
-    }, 20000)
-  })
-}
-
-function getWorkspaceDir(): string {
-  const dir = process.env.WORKSPACE_DIR || '/web/letar'
-  return ALLOWED_WORKSPACES.includes(dir as (typeof ALLOWED_WORKSPACES)[number]) ? dir : '/web/letar'
-}
 
 function accessLogPath(proxyHostId: number): string {
   return `${getWorkspaceDir()}/infra/nginx-proxy-manager/data/logs/proxy-host-${proxyHostId}_access.log`
