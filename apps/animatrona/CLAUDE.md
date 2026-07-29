@@ -193,3 +193,7 @@ await db.createRecord({ filePath: tempFilePath, cid })
 | БД         | `prisma/data/app.db`             | `%APPDATA%/Animatrona/data/app.db` |
 | Миграции   | `prisma/migrations/`             | `resources/migrations/`            |
 | Библиотека | По умолчанию `Videos/Animatrona` | Настраивается                      |
+
+## Документация
+
+- [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) — эффект с deps на ref/DOM-элемент не перезапускается повторно: либо навешивается до монтирования реального узла при условном skeleton-рендере (`useVirtualizedGrid`), либо зависит от персистентного объекта, стабильного всё время жизни приложения (`globalVideoElement` в `VideoPlayer`) — callback-ref вместо `useRef`+`useLayoutEffect([])`, событие как источник повторного срабатывания вместо самого объекта.
