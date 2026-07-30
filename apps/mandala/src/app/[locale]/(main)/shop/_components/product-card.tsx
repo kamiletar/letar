@@ -2,6 +2,7 @@
 
 import { Link as LocalizedLink } from '@/i18n/navigation'
 import { Badge, Box, Flex, Heading, Link, Text } from '@chakra-ui/react'
+import { formatRubles } from '@letar/format-utils'
 import { useTranslations } from 'next-intl'
 import NextImage from 'next/image'
 import { memo } from 'react'
@@ -51,27 +52,29 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
         >
           {/* Изображение */}
           <Box position="relative" aspectRatio={1}>
-            {firstImage ? (
-              <NextImage
-                src={firstImage.url}
-                alt={firstImage.alt || product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                style={{ objectFit: 'cover' }}
-                loading="lazy"
-              />
-            ) : (
-              <Box
-                bg={{ _light: 'gray.200', _dark: 'gray.800' }}
-                width="100%"
-                height="100%"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text color="fg.muted">{t('noImage')}</Text>
-              </Box>
-            )}
+            {firstImage
+              ? (
+                <NextImage
+                  src={firstImage.url}
+                  alt={firstImage.alt || product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  style={{ objectFit: 'cover' }}
+                  loading="lazy"
+                />
+              )
+              : (
+                <Box
+                  bg={{ _light: 'gray.200', _dark: 'gray.800' }}
+                  width="100%"
+                  height="100%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Text color="fg.muted">{t('noImage')}</Text>
+                </Box>
+              )}
 
             {!product.inStock && (
               <Badge
@@ -104,7 +107,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
 
             <Flex justify="space-between" align="center">
               <Text fontSize="xl" fontWeight="bold" color="fg">
-                {product.price.toLocaleString('ru-RU')} ₽
+                {formatRubles(product.price)}
               </Text>
 
               {product.inStock && (
