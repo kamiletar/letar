@@ -1,6 +1,6 @@
 # @letar/format-utils
 
-Утилиты форматирования данных: телефоны и даты.
+Утилиты форматирования данных: телефоны, даты и деньги.
 
 ## Установка
 
@@ -28,6 +28,24 @@ validatePhone('79001234567') // true
 
 // Только цифры
 getDigitsOnly('+7 (900) 123-45-67') // 79001234567
+```
+
+### Деньги
+
+```typescript
+import { formatKopecks, formatRubles } from '@letar/format-utils'
+
+// Сумма в рублях
+formatRubles(150000) // 150 000 ₽
+
+// Сумма, хранящаяся в копейках
+formatKopecks(15000000) // 150 000 ₽
+
+// Fallback для null/undefined
+formatRubles(null, { fallback: 'по запросу' }) // по запросу
+
+// Префикс и суффикс
+formatRubles(1500, { prefix: 'от ', suffix: ' / занятие' }) // от 1 500 ₽ / занятие
 ```
 
 ### Даты
@@ -71,6 +89,11 @@ calculateYearsFromDate(new Date('1990-05-15')) // 34
 - `normalizePhone` — нормализация номера
 - `validatePhone` — валидация номера
 - `getDigitsOnly` — извлечение цифр
+
+### Деньги
+
+- `formatRubles` — форматирование суммы в рублях
+- `formatKopecks` — форматирование суммы, хранящейся в копейках
 
 ### Даты
 

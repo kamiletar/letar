@@ -16,6 +16,10 @@ export {
   formatTime,
 } from './lib/date'
 
+// Money utilities
+export { formatKopecks, formatRubles } from './lib/money'
+export type { FormatMoneyOptions } from './lib/money'
+
 // String utilities
 export { slugify } from './lib/slugify'
 
