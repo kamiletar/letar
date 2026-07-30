@@ -55,11 +55,12 @@ const APP_REGISTRY: Record<string, AppRegistryEntry> = {
   aprel8008: { server: 's2' },
   'kami-key-the-landing': { server: 's2' },
   'letar-landing': { server: 's2' },
+  domwellbes: { server: 's2' },
 }
 
 /** Полный маппинг приложений на серверы (производное от `APP_REGISTRY`). */
 export const SERVER_APPS: Record<string, CronServer> = Object.fromEntries(
-  Object.entries(APP_REGISTRY).map(([app, entry]) => [app, entry.server])
+  Object.entries(APP_REGISTRY).map(([app, entry]) => [app, entry.server]),
 )
 
 /** Получить сервер для приложения */
@@ -71,14 +72,14 @@ export function getServerForApp(app: string): CronServer {
 export const APP_PORTS: Record<string, number> = Object.fromEntries(
   Object.entries(APP_REGISTRY)
     .filter((entry): entry is [string, AppRegistryEntry & { port: number }] => entry[1].port !== undefined)
-    .map(([app, entry]) => [app, entry.port])
+    .map(([app, entry]) => [app, entry.port]),
 )
 
 /** Карта хостов приложений, известных dashboard-agent (производное от `APP_REGISTRY`). */
 export const APP_HOSTS: Record<string, string> = Object.fromEntries(
   Object.entries(APP_REGISTRY)
     .filter((entry): entry is [string, AppRegistryEntry & { host: string }] => entry[1].host !== undefined)
-    .map(([app, entry]) => [app, entry.host])
+    .map(([app, entry]) => [app, entry.host]),
 )
 
 /**
