@@ -1,0 +1,77 @@
+// Общие поля Better Auth моделей (Account/Session/Verification), переиспользуемые
+// через ZenStack mixin (`type ... { }` + `model X with Y`) вместо копипасты между
+// приложениями. Найдено 2026-07-30: сами наборы полей идентичны в ~15 приложениях,
+// а @@allow/@@deny-политики — намеренно разные (зависят от структуры ролей
+// конкретного User), поэтому политики НЕ выносятся сюда и остаются в schema.zmodel
+// каждого приложения.
+//
+// User модель НЕ выносится — в каждом приложении она своя (разные роли, разные
+// бизнес-поля). Поэтому Account/Session ниже не объявляют relation на User —
+// её добавляет само приложение поверх mixin'а.
+//
+// Использование в apps/<app>/schema.zmodel:
+//
+//   import "../../libs/zenstack-fragments/src/better-auth"
+//
+//   model Account with AccountFields {
+//     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//     @@unique([providerId, accountId])
+//     @@index([userId])
+//     @@deny('all', true) // политика — своя для каждого приложения
+//   }
+//
+//   model Session with SessionFields {
+//     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//     @@index([userId])
+//     @@index([token])
+//     @@deny('all', true)
+//   }
+//
+//   model Verification with VerificationFields {
+//     @@index([identifier])
+//   }
+
+/// Better Auth — привязки аккаунтов (OAuth-провайдеры + credentials)
+type AccountFields {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+
+  /// Хеш пароля для email/password аутентификации
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+/// Better Auth — сессии пользователя
+type SessionFields {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Better Auth — токены верификации email / сброса пароля
+type VerificationFields {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
