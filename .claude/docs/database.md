@@ -1,6 +1,6 @@
 # База данных и ZenStack
 
-> **Версия:** ZenStack 3.3.0+ (январь 2026)
+> **Версия:** ZenStack 3.8.3 (в корневом `package.json`, июль 2026)
 
 ## ⚠️ КРИТИЧНО - Воркфлоу ZenStack
 
@@ -815,6 +815,70 @@ const orm = new ZenStackClient(schema, {
 - Исправлено разрешение полей из миксинов в импортированных файлах
 - Исправлена генерация схемы Better-Auth с кастомными полями
 - Исправлена регрессия в QaaS с параметром `externalIdMapping`
+
+## Новые возможности v3.7.0 — Full-Text и Fuzzy Search (только Postgres)
+
+> ⚠️ **TODO — внедрить проактивно.** Мы давно ждали эту фичу под поиск по каталогам/спискам
+> (товары, посты, любой текстовый контент). Как только появится задача с текстовым поиском —
+> заменять `contains`/`ILIKE` на эти операторы вместо ручного написания raw SQL или сторонних
+> поисковых движков.
+
+### Full-Text Search — `@fullText` + `fts`/`_ftsRelevance`
+
+Для длинных текстовых полей (описания, статьи, заголовки) — токенизированный поиск с учётом
+словоформ и релевантности:
+
+```zmodel
+model Article {
+  id       Int     @id @default(autoincrement())
+  title    String  @fullText
+  body     String  @fullText
+  subtitle String? @fullText
+  notes    String? // не участвует в full-text поиске
+}
+```
+
+```typescript
+await db.article.findMany({
+  where: { title: { fts: { search: 'cat & dog' } } },
+})
+
+await db.article.findMany({
+  orderBy: {
+    _ftsRelevance: { fields: ['body'], search: 'cat & dog', sort: 'desc' },
+  },
+})
+```
+
+### Fuzzy Search — `@fuzzy` + `fuzzy`/`_fuzzyRelevance`
+
+Для коротких полей, где пользователи опечатываются (имена, названия, SKU). Требует расширение
+Postgres `pg_trgm`:
+
+```zmodel
+model Flavor {
+  id          Int     @id @default(autoincrement())
+  name        String? @fuzzy
+  description String  @fuzzy
+  notes       String? // не fuzzy-searchable
+}
+```
+
+```typescript
+await db.flavor.findMany({
+  where: { name: { fuzzy: { search: 'Aple' } } }, // найдёт "Apple"
+})
+
+await db.flavor.findMany({
+  orderBy: {
+    _fuzzyRelevance: { fields: ['name'], search: 'Apple', sort: 'desc' },
+  },
+})
+```
+
+**Когда что использовать:** `fullText` — для длинного связного текста (описания, статьи, контент);
+`fuzzy` — для коротких полей, где важна устойчивость к опечаткам (имена, названия, артикулы).
+Оба требуют PostgreSQL — не работают на SQLite/MySQL.
 
 ---
 
