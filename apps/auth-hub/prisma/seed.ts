@@ -139,6 +139,18 @@ const clients = [
     ].join(','),
   },
   {
+    clientId: 'domwellbes-prod',
+    clientSecret: requireSecret('OIDC_DOMWELLBES_SECRET'),
+    name: 'DomWellbes',
+    type: 'web',
+    disabled: false,
+    skipConsent: false,
+    redirectUrls: [
+      'https://domwellbes.ru/api/auth/oauth2/callback/letar-auth',
+      'https://domwellbes.ru/sign-in',
+    ].join(','),
+  },
+  {
     clientId: 'aprel8008-prod',
     clientSecret: requireSecret('OIDC_APREL8008_SECRET'),
     name: 'Aprel8008 (7 Сестёр) — админка',
