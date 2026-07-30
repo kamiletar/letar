@@ -2912,3 +2912,17 @@ Redis как `interrupted`, а не молча исчезать при рест�
   (опционален, рискованнее, отдельная задача).
 
 ---
+
+## §37 — Инцидент: `letar-redis` открыт наружу без пароля, захвачен `REPLICAOF` ✅ ЗАКРЫТО (2026-07-30)
+
+Обнаружено при попытке владельца войти в `owner/invoices` studio: `auth.letar.best/api/auth/.well-known/openid-configuration`, `jwks`, `get-session` отдавали `500`. Локальный `auth-hub` (`nx dev`) отвечал нормально — проблема была прод-специфичной.
+
+**Причина (нашёл BlackCove):** `letar-redis` был опубликован на `0.0.0.0:6379` без `requirepass`, `ufw` выключен. Кто-то извне выполнил `REPLICAOF` на боевом инстансе — Redis ушёл в read-only `slave`, все `setex` rate-limit записи в auth-hub (`secondaryStorage`) стали падать `READONLY`, что и давало 500 на любой роут better-auth.
+
+**Исправлено:** `redis-cli replicaof no one` (роль master вернулась), порт `6379` больше не публикуется на хост (только `kami-network`), поставлен пароль (`openssl rand -hex 32`), все 4 потребителя (auth-hub, dashboard-agent, kami, driving-school) передеплоены с новым `REDIS_URL`. Проверка на компрометацию (crontab, `authorized_keys`, RDB save-path) — чисто, атака не пошла дальше захвата роли. Чек-лист на будущее — [.claude/docs/redis-security.md](/.claude/docs/redis-security.md).
+
+**Тот же класс дыры нашёлся и на s3:** `e2e-redis` (порт 6380) был открыт так же — закрыт (`requirepass` + `iptables DROP` на внешнем интерфейсе). Попутно всплыло **e2e-postgres** (порт 5499) — всё ещё дефолтные `e2e`/`e2e`, ротация пароля не сделана (блэст-радиус не оценён, 9 файлов ссылаются на порт), временно смягчено тем же `iptables DROP`. Ротация credentials e2e-postgres — отдельная незакрытая задача.
+
+**Не связанный остаточный блокер:** re-seed `studio-prod` redirectUrls (3020→3024) прогнан вместе с фиксом, но конкретно владелец после этого всё равно не смог залогиниться в `owner/invoices` — причина не установлена, см. `apps/studio/PLAN.md` (блокер вверху файла) и `PLAN_COMPLETED.md`.
+
+---
