@@ -1,5 +1,5 @@
 ---
-paths: apps/label-printer-desktop/**, apps/poster-microtext-desktop/**
+paths: apps/label-printer-desktop/**, apps/poster-microtext-desktop/**, apps/animatrona/**
 ---
 
 # Правила для Electron приложений
@@ -161,6 +161,16 @@ ONNX/torch.
 если экспортируемая страница на **глубине 0** (`out/index.html` рядом с `out/_next/`) — для
 однoстраничных Electron-приложений держи единственную реальную страницу на корне `/`, без
 вложенных роутов, иначе `_next` не найдётся относительным путём.
+
+**⚠️ Нужен Web Worker или WASM — `file://` не годится вообще, никакой `assetPrefix` не спасёт.**
+Под `file://` origin равен `null`, и Chromium блокирует и создание Worker'а
+(`Script cannot be accessed from origin 'null'`), и `fetch` к соседним файлам (схема `file` в
+fetch не поддерживается), и secure context. Конкретный случай — SubtitlesOctopus для
+ASS-субтитров: он одновременно Worker и `.wasm`. Решение — привилегированная схема `app://`
+(`protocol.registerSchemesAsPrivileged` **до** `whenReady` + `protocol.handle` после), она же
+попутно снимает хак `assetPrefix: './'` и ограничение «одна страница на корне». Подробно, с
+кодом и таблицей выбора между `file://` / `app://` / localhost-сервером —
+[electron-app-protocol.md](/.claude/docs/electron-app-protocol.md).
 
 **Electron ≥32: `File.path` у перетащенных (drag&drop) файлов больше не работает** — убрано
 из соображений безопасности. Нужен `webUtils.getPathForFile(file)` (модуль `electron`,
