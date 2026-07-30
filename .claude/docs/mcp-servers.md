@@ -507,14 +507,17 @@ mcp__prisma__getDatabaseModels()
 
 ### Tools
 
-| Инструмент      | Описание                                                               |
-| --------------- | ---------------------------------------------------------------------- |
-| `list_servers`  | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)     |
-| `agent_health`  | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный» |
-| `git_status`    | Ветка, незапушенные/входящие коммиты — проверять перед деплоем         |
-| `deploy_status` | Статус деплоя + инкрементальные логи по курсору `sinceLine`            |
-| `deploy_cancel` | Отмена текущего деплоя (SIGTERM)                                       |
-| `deploy_app`    | Запуск деплоя (`target`: `production`\|`staging`; staging → s3)        |
+| Инструмент      | Описание                                                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `list_servers`  | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)                                                      |
+| `agent_health`  | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный»                                                  |
+| `git_status`    | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                          |
+| `deploy_status` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                              |
+| `deploy_wait`   | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38) |
+| `deploy_cancel` | Отмена текущего деплоя (SIGTERM)                                                                                        |
+| `deploy_app`    | Запуск деплоя (`target`: `production`\|`staging`; staging → s3) + e2e-gate                                              |
+| `run_e2e`       | Playwright e2e на s3 против staging-контейнера (Фаза 2)                                                                 |
+| `e2e_status`    | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                       |
 
 ### Соединение и секреты
 
@@ -528,4 +531,4 @@ mcp__prisma__getDatabaseModels()
 
 - Модель доверия процедурная (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)) —
   деплоит только BlackCove по конвенции, технического ограничения по вызывающему нет.
-- Фаза 1. `run_e2e`/`e2e_status` + e2e-gate — Фаза 2 (Сессия D, §16 корневого PLAN.md).
+- Полный список инструментов, воркфлоу и e2e-gate — [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
