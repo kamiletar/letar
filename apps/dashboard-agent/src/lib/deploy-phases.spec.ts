@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { applyPhaseLine, computeStalled, type DeployPhase } from './deploy'
+import { applyPhaseLine, computeStalled, type DeployPhase } from './deploy-phases'
 
 describe('applyPhaseLine', () => {
   it('открывает фазу на ::phase:name:start', () => {
