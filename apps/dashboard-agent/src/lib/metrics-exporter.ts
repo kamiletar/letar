@@ -34,11 +34,9 @@ function renderMetric(metric: MetricLine): string {
 
   for (const sample of metric.samples) {
     const labelStr = sample.labels
-      ? `{${
-        Object.entries(sample.labels)
+      ? `{${Object.entries(sample.labels)
           .map(([k, v]) => `${k}="${escapeLabelValue(v)}"`)
-          .join(',')
-      }}`
+          .join(',')}}`
       : ''
     lines.push(`${metric.name}${labelStr} ${sample.value}`)
   }
@@ -62,7 +60,7 @@ export async function renderPrometheusMetrics(): Promise<string> {
         help: 'Текущая загрузка CPU в процентах',
         type: 'gauge',
         samples: [{ value: cpu.currentLoad }],
-      }),
+      })
     )
   } catch (error) {
     console.error('[MetricsExporter] Не удалось получить CPU:', error)
@@ -88,7 +86,7 @@ export async function renderPrometheusMetrics(): Promise<string> {
         help: 'Всего памяти в байтах',
         type: 'gauge',
         samples: [{ value: memory.total }],
-      }),
+      })
     )
   } catch (error) {
     console.error('[MetricsExporter] Не удалось получить память:', error)
@@ -108,7 +106,7 @@ export async function renderPrometheusMetrics(): Promise<string> {
         help: 'Использовано на диске в байтах, по точке монтирования',
         type: 'gauge',
         samples: disks.map((disk) => ({ labels: { mount: disk.mount }, value: disk.used })),
-      }),
+      })
     )
   } catch (error) {
     console.error('[MetricsExporter] Не удалось получить диски:', error)
@@ -128,7 +126,7 @@ export async function renderPrometheusMetrics(): Promise<string> {
         help: 'Скорость отправки по интерфейсу, байт/сек',
         type: 'gauge',
         samples: network.stats.map((stat) => ({ labels: { iface: stat.iface }, value: stat.txSec })),
-      }),
+      })
     )
   } catch (error) {
     console.error('[MetricsExporter] Не удалось получить сеть:', error)
@@ -145,7 +143,7 @@ export async function renderPrometheusMetrics(): Promise<string> {
           labels: { name: c.name, state: c.state },
           value: c.state === 'running' ? 1 : 0,
         })),
-      }),
+      })
     )
   } catch (error) {
     console.error('[MetricsExporter] Не удалось получить контейнеры:', error)

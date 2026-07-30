@@ -1325,7 +1325,7 @@ Animatrona: библиотека, каталог, импорт, очередь, 
       `dist/win-unpacked`, а значит и прогнать electron-e2e на свежем коде
 - [ ] 🔴 **Main-процесс не типизируется вообще ничем.**
       `apps/animatrona/main/tsconfig.json` имеет `include: ["src/**/*.ts", "preload/**/*.ts",
-      "../shared/**/*.ts"]`, а код лежит в `main/ffmpeg`, `main/services`, `main/ipc`, `main.ts` —
+    "../shared/**/*.ts"]`, а код лежит в `main/ffmpeg`, `main/services`, `main/ipc`, `main.ts` —
       под `src/**` не попадает почти ничего. Корневой `tsconfig.json` приложения `main` вообще
       исключает, а webpack собирает через `ts-loader` с `transpileOnly: true`. Ad-hoc прогон tsgo по
       исправленному include даёт **337 ошибок** (часть — артефакты `moduleResolution: node16`, но
@@ -1338,7 +1338,7 @@ Animatrona: библиотека, каталог, импорт, очередь, 
       исправлен и скипы убраны; остальные четыре ждут той же правки (и, вероятно, покажут реальные
       баги, когда наконец начнут выполняться)
 - [ ] **Два форматтера с противоречащими конфигами.** `dprint.json` (`trailingCommas:
-      onlyMultiLine`) против `.prettierrc` (`trailingComma: es5` + `prettier-plugin-organize-imports`).
+    onlyMultiLine`) против `.prettierrc` (`trailingComma: es5` + `prettier-plugin-organize-imports`).
       `nx format` = prettier убирает висячие запятые в списках параметров и переставляет импорты,
       хук на запись файла = dprint возвращает обратно. Из-за этого в рабочей копии постоянно висят
       «изменённые» файлы без единой смысловой правки. Нужно выбрать один и вычистить второй из
