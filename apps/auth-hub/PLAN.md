@@ -44,21 +44,32 @@
       затронутых проектах; lint-ошибки в диффе — только pre-existing долг несвязанных файлов.
       Коммиты: `8ea8b30` (forms), `29aaabd` (auth-hub), submodule-коммиты aboi `e475d5f`,
       dsperevod `14d2c0b`, svoichuzhie `3a8703a`, bump SHA `b9eaa2a`.
-- [ ] **Хрупкий парсинг ошибок Better Auth** — `login.action.ts`: маршрутизация «вход vs
-      авторегистрация» держится на `message.includes('invalid')` и т.п. — смена текстов ошибок
-      в Better Auth молча уведёт пользователей в signup. Перейти на `error.status`/`body.code`.
-- [ ] **Hydration-нестабильность `/sign-in`** — консоль сыплет «Encountered a script tag while
-      rendering React component» (вероятно, Telegram-виджет), гидрация страницы флакает
-      (мешала и автоматизации при проверке). Разобраться; кандидат — грузить виджет через
-      `next/script`.
-- [ ] **Нет vitest-инфраструктуры** — известный пробел с Этапа 2 корневого PLAN;
-      `resolveLoginEmail` проверялся скриптом на живой dev-БД. Хелпер — идеальный первый
-      кандидат на unit-покрытие (см. `.claude/docs/unit-testing.md` — обязателен
-      tsconfig.spec.json).
-- [ ] **E2e не покрывает linked-email вход** — в auth-hub-e2e 10 smoke-тестов; нового сценария
-      нет. Нужен сид пользователя с подтверждённым `UserEmail` на staging-БД (порт 5455) +
-      спека «вход по linked-адресу → сессия primary». Также донастроить `AUTH_GOOGLE_ID/SECRET`
-      в `.env.staging`, если появятся OAuth-тесты.
+- [x] **Хрупкий парсинг ошибок Better Auth — ЗАКРЫТО (2026-07-30)** — `login.action.ts`:
+      маршрутизация «вход vs авторегистрация» держалась на `message.includes('invalid')` и
+      т.п. Изучены исходники `better-auth`/`@better-auth/core` (bun cache): все ошибки sign-in
+      бросаются с фиксированным `body.code` (`INVALID_EMAIL_OR_PASSWORD`, `EMAIL_NOT_VERIFIED`),
+      sign-up — `USER_ALREADY_EXISTS[_USE_ANOTHER_EMAIL]`/`PASSWORD_TOO_SHORT`/`PASSWORD_TOO_LONG`.
+      Переведено на проверку `apiCode`/`signUpCode` вместо текста сообщения. typecheck+lint зелёные.
+- [x] **Hydration-«нестабильность» `/sign-in` — ЗАКРЫТО, не баг (2026-07-30)** — консольное
+      «Encountered a script tag while rendering React component» оказалось НЕ Telegram-виджетом:
+      источник — `ColorModeProvider` (`next-themes`), который намеренно рендерит блокирующий
+      `<script>` для защиты от FOUC (см. `.claude/docs/ui-components.md`). Воспроизведено на `/`
+      и `/sign-in` — предупреждение сайт-wide на любой странице с `ColorModeProvider`, безвредно,
+      функциональность не страдает. Чинить нечего — переход на `next/script` сломал бы защиту от
+      FOUC. Задокументировано в ui-components.md, чтобы не путать с реальным багом повторно.
+- [x] **Нет vitest-инфраструктуры — ЗАКРЫТО (2026-07-30)** — добавлены `vitest.config.ts`
+      (environment: node), `tsconfig.spec.json` + reference по образцу archetest
+      (`.claude/docs/unit-testing.md`), target `test` в `project.json`. Первый тест —
+      `resolve-login-email.spec.ts` (4 кейса: без linked-адреса, приоритет primary над linked,
+      резолв подтверждённого linked-email, игнор неподтверждённого). `nx test auth-hub` зелёный.
+- [x] **E2e не покрывает linked-email вход — ЗАКРЫТО (2026-07-30)** — `04-linked-email-login.spec.ts`
+      в auth-hub-e2e: primary-аккаунт через реальный sign-up API, linked-email — прямой вставкой
+      через новые `helpers/db.helpers.ts` (по образцу driving-school-e2e). Проверено вживую вручную
+      (curl sign-up + browser-check формы входа) — сессия резолвится под primary-аккаунтом,
+      неверный пароль не создаёт дубль. Работает только на локальном dev-раннере
+      (`requireEmailVerification=false` вне `NODE_ENV=production`) — не на staging/prod as-is.
+      Донастройка `AUTH_GOOGLE_ID/SECRET` в `.env.staging` для OAuth-тестов остаётся отдельной
+      будущей задачей, если такие тесты появятся.
 
 ## Текущий статус (ранее): v0.6.3 — Этап 8.5: merge двух аккаунтов ✅ (скрипт готов, прод-запуск не выполнялся)
 

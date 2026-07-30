@@ -4,6 +4,29 @@
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-07-30
+
+### Fixed
+
+- **Хрупкий парсинг ошибок Better Auth:** `login.action.ts` матчил текст сообщения об ошибке
+  (`message.includes('invalid')` и т.п.) для маршрутизации «вход vs авторегистрация» — смена
+  текстов ошибок в апстриме молча увела бы пользователей в signup. Переведено на стабильные
+  `body.code` (`INVALID_EMAIL_OR_PASSWORD`, `EMAIL_NOT_VERIFIED`, `USER_ALREADY_EXISTS[_USE_ANOTHER_EMAIL]`,
+  `PASSWORD_TOO_SHORT`/`PASSWORD_TOO_LONG`) из `@better-auth/core/error/codes`.
+
+### Added
+
+- **Vitest-инфраструктура:** `vitest.config.ts` + `tsconfig.spec.json`, первый unit-тест
+  `resolve-login-email.spec.ts` (4 кейса резолва linked-email).
+- **E2e: вход по linked-email** — `apps/auth-hub-e2e/src/04-linked-email-login.spec.ts` +
+  `helpers/db.helpers.ts` (прямой доступ к dev-БД через CJS-wrapper generated-клиента).
+
+### Docs
+
+- `.claude/docs/ui-components.md` — задокументировано, что консольное предупреждение
+  «Encountered a script tag» от `ColorModeProvider`/`next-themes` безвредно и сайт-wide, не баг
+  конкретной страницы (ошибочно связывалось с Telegram-виджетом).
+
 ## [0.7.2] - 2026-07-30
 
 ### Fixed

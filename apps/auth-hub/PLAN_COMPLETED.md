@@ -2,6 +2,63 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Версия 0.7.3 — 2026-07-30 (парсинг ошибок по кодам, vitest, e2e linked-email)
+
+### Хрупкий парсинг ошибок Better Auth → стабильные `body.code`
+
+`login.action.ts` маршрутизировал «вход vs авторегистрация» матчингом текста ошибки
+(`message.includes('invalid')`, `'user not found'`, `'credential account not found'` и т.п.) —
+смена текста сообщений в апстриме `better-auth` молча увела бы существующих пользователей в
+`trySignUp`. Изучены исходники `better-auth`/`@better-auth/core` (bun cache,
+`node_modules/.bun/better-auth@1.6.23.../dist/api/routes/sign-in.mjs` и `sign-up.mjs`): все
+ошибки бросаются через `APIError.from(status, BASE_ERROR_CODES.X)`, где `X.code` — стабильная
+строка, не зависящая от текста. Найденные коды: `INVALID_EMAIL_OR_PASSWORD` (единый код для
+«юзер не найден» И «неверный пароль» — namespace одинаковый в обоих случаях),
+`EMAIL_NOT_VERIFIED`, `USER_ALREADY_EXISTS[_USE_ANOTHER_EMAIL]`, `PASSWORD_TOO_SHORT`/`_LONG`.
+`login.action.ts` переведён на проверку `apiCode`/`signUpCode` вместо текста. typecheck+lint
+зелёные.
+
+### Vitest-инфраструктура + первый unit-тест
+
+`vitest.config.ts` (environment: `node` — чистая server-логика, jsdom не нужен) +
+`tsconfig.spec.json` с reference из корневого `tsconfig.json`, по образцу `archetest`
+(`.claude/docs/unit-testing.md`). Target `test` добавлен в `project.json`. Первый тест —
+`src/lib/resolve-login-email.spec.ts`, 4 кейса (без linked-адреса / приоритет primary над
+linked / резолв подтверждённого linked-email / игнор неподтверждённого), `prisma` замокан
+через `vi.mock`. `nx test auth-hub` зелёный.
+
+### E2e: вход по linked-email (закрывает пробел Этапа 8.5)
+
+`apps/auth-hub-e2e/src/04-linked-email-login.spec.ts` + новые `helpers/db.helpers.ts` и
+`helpers/prisma-cjs-wrapper.js` (по образцу `driving-school-e2e`, адаптировано под собственный
+generated-клиент auth-hub вместо shared `*-db`-либы). Primary-аккаунт создаётся через реальный
+`/api/auth/sign-up/email` (пароль хешируется штатным scrypt Better Auth — подделывать вручную
+хрупко), linked-email вставляется напрямую в БД (эквивалент состояния после self-service
+подтверждения в `/profile/emails/`, без реальной отправки письма). Два теста: успешный вход
+под primary-сессией + «Неверный пароль» без дубль-регистрации. Типизация методов Prisma —
+структурным интерфейсом (`AuthHubPrismaClient`), а не импортом полного generated-клиента:
+`tsc --build` из другого Nx-приложения падает на rootDir-границах (TS6059/TS6307) — этот же
+класс бага уже преэкзистентно сломан в `driving-school-e2e:typecheck` (`schoolPartnership`
+does not exist on generic `PrismaClient`), не повторили его здесь.
+
+⚠️ Проверено вживую ВРУЧНУЮ (curl sign-up + браузер), а не через `nx e2e` — `global-setup.ts`
+всего проекта требует `DEV_SESSION_TOKEN`/`ALLOW_DEV_SESSION` для admin-логина (используется
+`02-admin.spec.ts`), которых нет в локальном `.env.local` (по правилу `env-files.md` эта пара
+живёт только в `.env.staging`). Прецедент — `grandslamcup/.env.local` уже держит их локально
+для этой же цели; не стал заводить их auth-hub ради этой сессии, чтобы не трогать уже
+запущенный чужой dev-сервер (порт 3014 был занят процессом, стартовавшим раньше моей сессии).
+Если появится необходимость гонять `nx e2e auth-hub-e2e` локально регулярно — завести
+`ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` в `.env.local` по этому прецеденту.
+
+### Побочное: hydration-«баг» `/sign-in` из бэклога v0.6.4 — не баг
+
+Расследование планового пункта «hydration-нестабильность `/sign-in`» (подозревался
+Telegram-виджет) показало другой источник: консольное «Encountered a script tag while
+rendering React component» — это `ColorModeProvider`/`next-themes`, намеренно рендерящий
+блокирующий `<script>` для защиты от FOUC. Воспроизведено на `/` и `/sign-in` — предупреждение
+сайт-wide на любой странице с `ColorModeProvider`, безвредно. Задокументировано в
+`.claude/docs/ui-components.md`, чтобы не путать с реальным багом повторно.
+
 ## Версия 0.7.1 — 2026-07-29 (seed: localhost-redirect studio 3020 → 3024)
 
 В `redirectUrls` OIDC-клиента `studio-prod` localhost-адреса указывали на 3020 — порт, который
@@ -15,8 +72,11 @@
 Он же поймал второе расхождение: командный файл самой Ключницы объявлял 3010 при реальном 3014.
 Подробности — `PLAN-INFRA.md` §34.2.
 
-⏳ **Требует re-seed прода** (`deploy_app` с `seed: true`) — правка `seed.ts` не меняет строки в
-боевой БД сама по себе. Запрошено у BlackCove, тред `deploy-auth-hub-studio-redirect-3024`.
+✅ **Re-seed прода прогнан (2026-07-30, BlackCove, тред `auth-hub-prod-500`)** —
+`deploy_app(auth-hub, seed:true)`, exitCode 0, лог сида подтвердил `✓ studio-prod (Studio Letar)`
+среди 8 пересозданных OIDC-клиентов. redirectUrls обновлены на боевой БД, локальный вход в
+studio через прод-Ключницу восстановлен. Деплой шёл с HEAD main, попутно захватил Telegram-фикс
+`e5b56b7b` из параллельной сессии.
 
 ⚠️ **Побочная находка, ждёт проверки.** При подготовке деплоя выяснилось, что на s2 в окружении
 Ключницы не было `OIDC_APREL8008_SECRET` (7 секретов из 8), хотя в закоммиченном

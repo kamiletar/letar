@@ -79,6 +79,16 @@
         "technologies": ["zenstack", "prisma"]
       }
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "config": "apps/auth-hub/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests with Vitest",
+        "technologies": ["vitest"]
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {

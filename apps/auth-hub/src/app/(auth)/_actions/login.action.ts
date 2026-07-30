@@ -48,7 +48,9 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
 
     return { success: true, redirectTo }
   } catch (error) {
-    // Better Auth бросает APIError: реальное сообщение в body.message, code в body.code
+    // Better Auth бросает APIError: сообщение в body.message, стабильный код — в body.code.
+    // Коды определены в @better-auth/core/error/codes.ts (BASE_ERROR_CODES) и не меняются
+    // между релизами в отличие от текста message — см. bun cache better-auth/dist/api/routes/sign-in.mjs.
     const apiBody = (error as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
     const apiCode = (apiBody?.code as string | undefined) ?? ''
     const message =
@@ -57,12 +59,7 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
     console.error('[auth-hub] signIn error full:', { message, apiCode, error })
 
     // Если email не верифицирован
-    const lowerMsg = (message + apiCode).toLowerCase()
-    if (
-      lowerMsg.includes('email_not_verified') ||
-      lowerMsg.includes('not verified') ||
-      lowerMsg.includes('email not verified')
-    ) {
+    if (apiCode === 'EMAIL_NOT_VERIFIED') {
       // verifyEmailSent → форма покажет кнопку «Отправить письмо повторно» (Этап 2 PLAN.md)
       return {
         success: false,
@@ -71,16 +68,10 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
       }
     }
 
-    // Если пользователь не найден или неверный пароль — пробуем зарегистрировать
-    const lowerMessage = message.toLowerCase()
-    if (
-      lowerMessage.includes('invalid') ||
-      lowerMessage.includes('user not found') ||
-      lowerMessage.includes('credential account not found') ||
-      lowerMessage.includes('invalid_email_or_password') ||
-      lowerMessage.includes('user_not_found') ||
-      lowerMessage.includes('invalid_credentials')
-    ) {
+    // Better Auth возвращает один и тот же код INVALID_EMAIL_OR_PASSWORD и для
+    // «пользователь не найден», и для «неверный пароль» — сигнатуры sign-in.ts.
+    // Пользователь не найден или неверный пароль — пробуем зарегистрировать
+    if (apiCode === 'INVALID_EMAIL_OR_PASSWORD') {
       // Email резолвился из linked-адреса → аккаунт точно существует, пароль неверный.
       // trySignUp здесь создал бы дубль-аккаунт с linked-адресом в качестве основного.
       if (resolved) {
@@ -127,16 +118,17 @@ async function trySignUp(data: LoginInput, reqHeaders: Headers, redirectTo: stri
     return { success: true, redirectTo, created: true }
   } catch (signUpError) {
     const signUpBody = (signUpError as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
+    const signUpCode = (signUpBody?.code as string | undefined) ?? ''
     const msg =
       (signUpBody?.message as string | undefined) || (signUpError instanceof Error ? signUpError.message : '') || ''
 
-    // Аккаунт существует, но пароль неверный
-    if (msg.includes('already exists') || msg.includes('USER_ALREADY_EXISTS')) {
+    // Аккаунт существует, но пароль неверный — коды из better-auth/dist/api/routes/sign-up.mjs
+    if (signUpCode === 'USER_ALREADY_EXISTS' || signUpCode === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
       return { success: false, error: 'Неверный пароль' }
     }
 
     // Слабый пароль
-    if (msg.includes('password') && (msg.includes('weak') || msg.includes('short') || msg.includes('min'))) {
+    if (signUpCode === 'PASSWORD_TOO_SHORT' || signUpCode === 'PASSWORD_TOO_LONG') {
       return { success: false, error: 'Пароль слишком короткий (минимум 8 символов)' }
     }
 

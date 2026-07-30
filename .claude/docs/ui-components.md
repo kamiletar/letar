@@ -93,6 +93,25 @@ import './global.css'
 - `apps/mandala/src/app/theme.ts` — тема БЕЗ globalCss для body
 - `apps/driving-school/` — аналогичный подход
 
+### ⚠️ Консольное предупреждение «Encountered a script tag» — безвредно, не баг
+
+Именно этот блокирующий скрипт из п.3 выше — `next-themes` рендерит его как литеральный
+`<script>`-элемент через `React.createElement`, а не через `next/script`. React 19 ругается на
+это в dev-консоли: «Encountered a script tag while rendering React component. Scripts inside
+React components are never executed when rendering on the client.»
+
+Предупреждение **сайт-wide** — воспроизводится на любой странице любого приложения с
+`ColorModeProvider` (проверено на auth-hub: `/` и `/sign-in`, 2026-07-30), не специфично для
+конкретной страницы или компонента. Функциональность не страдает: скрипт всё равно выполняется
+при первичном SSR-рендере до гидрации (в этом и весь смысл — успеть проставить `.dark`/`.light`
+до первой отрисовки), а сама React-гидрация проходит штатно.
+
+**Не переводить на `next/script`** — его стратегии (`lazyOnload`, `afterInteractive` и т.п.)
+не гарантируют выполнение до первой отрисовки, а это ломает саму защиту от FOUC, ради которой
+скрипт существует. Это ограничение самой `next-themes` при React 19 (issue есть в апстриме),
+чинить на стороне letar нечего — можно только подавить предупреждение переопределением
+`console.error` в дев-тулинге, если оно мешает автоматизации/e2e.
+
 ## ⚠️ ВАЖНО - Использование фирменного цвета
 
 **Цвет по умолчанию для ВСЕХ кнопок:** ВСЕГДА используй `colorPalette="fg"` вместо `colorPalette="blue"`
@@ -142,7 +161,7 @@ import { DialogContent, DialogRoot, DialogTrigger } from '@chakra-ui/react'
 
 ```tsx
 import { Dialog, Portal } from '@chakra-ui/react'
-<Dialog.Root>
+;<Dialog.Root>
   <Dialog.Trigger>...</Dialog.Trigger>
 </Dialog.Root>
 ```
@@ -280,7 +299,7 @@ import { OnlyFor } from './_components/only-for';
 ```tsx
 import { Button } from '@chakra-ui/react'
 import Link from 'next/link'
-<Button asChild colorPalette="fg" size="lg">
+;<Button asChild colorPalette="fg" size="lg">
   <Link href="/auth/signin">Войти</Link>
 </Button>
 ```
@@ -661,7 +680,7 @@ export const buttonRecipe = defineRecipe({
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-<PhotoGallery
+;<PhotoGallery
   photos={photos.map((p, i) => ({
     src: `/api/files/${slug}/${p.filename}`,
     alt: `${name} — фото ${i + 1}`,
@@ -943,7 +962,7 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 
 ```tsx
 import { ImageMagnifier } from '@letar/ui'
-<ImageMagnifier
+;<ImageMagnifier
   src="/demo/poster-fragment.webp" // полный файл 1:1 — его показывает лупа
   placeholderSrc="/demo/poster-fragment-far.webp" // лёгкая копия для первого кадра
   naturalWidth={3200}
