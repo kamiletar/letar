@@ -26,6 +26,7 @@
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/zenstack-form-plugin": ["../../libs/zenstack-form-plugin/src/index.ts"]
     },
@@ -62,6 +63,9 @@
     },
     {
       "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/format-utils"
     },
     {
       "path": "../../libs/chakra-provider"

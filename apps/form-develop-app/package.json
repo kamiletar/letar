@@ -9,6 +9,7 @@
     "implicitDependencies": [
       "@letar/chakra-provider",
       "@letar/forms",
+      "@letar/format-utils",
       "@letar/query-provider"
     ]
   },

@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
+import { formatRubles } from '@letar/format-utils'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { DemoPageLayout } from '../_components'
@@ -49,12 +50,12 @@ export default function TableEditorDemoPage() {
                   width: '15%',
                   align: 'right',
                   computed: (row) => (Number(row.qty) || 0) * (Number(row.price) || 0),
-                  format: (v) => `${Number(v).toLocaleString('ru-RU')} ₽`,
+                  format: (v) => formatRubles(Number(v)),
                 },
               ]}
               addLabel="Добавить товар"
               footer={[
-                { column: 'total', aggregate: 'sum', label: 'Итого:', format: (v) => `${v.toLocaleString('ru-RU')} ₽` },
+                { column: 'total', aggregate: 'sum', label: 'Итого:', format: (v) => formatRubles(v) },
               ]}
               selectable
               helperText="Можно вставлять данные из Excel (Ctrl+V)"

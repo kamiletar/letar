@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Code, Heading, Text, VStack } from '@chakra-ui/react'
+import { formatRubles } from '@letar/format-utils'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { DemoPageLayout } from '../_components'
@@ -33,7 +34,7 @@ export default function CalculatedDemoPage() {
               name="total"
               label="Итого"
               compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
-              format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
+              format={(v) => formatRubles(Number(v))}
               deps={['price', 'qty']}
             />
             <Form.Button.Submit>Отправить</Form.Button.Submit>
@@ -59,7 +60,7 @@ export default function CalculatedDemoPage() {
               name="subtotal"
               label="Подытого"
               compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
-              format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
+              format={(v) => formatRubles(Number(v))}
               deps={['price', 'qty']}
             />
             <Form.Field.Number name="discount" label="Скидка (%)" />
@@ -71,7 +72,7 @@ export default function CalculatedDemoPage() {
                 const disc = Number(v.discount) || 0
                 return sub * (1 - disc / 100)
               }}
-              format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
+              format={(v) => formatRubles(Number(v))}
               deps={['price', 'qty', 'discount']}
             />
             <Form.Button.Submit>Оформить</Form.Button.Submit>
@@ -121,7 +122,7 @@ export default function CalculatedDemoPage() {
                   const order = v.order as Record<string, unknown>
                   return (Number(order?.price) || 0) * (Number(order?.qty) || 0)
                 }}
-                format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
+                format={(v) => formatRubles(Number(v))}
               />
             </Form.Group>
             <Form.Button.Submit>Сохранить</Form.Button.Submit>
