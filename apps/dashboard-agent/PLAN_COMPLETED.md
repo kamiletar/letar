@@ -53,6 +53,41 @@ Fastify/nginx-таймаутов на SSH-туннеле) при термина�
 только заявленный коммит. Подтверждено живьём: `git_status({server:"s2"})` → `currentCommit
 4eb93b8a2`, последующий `deploy_status` вернул непустой `phases[]`.
 
+## Версия 0.9.11 → 0.9.13 — сканирование логов на ошибки + Prometheus exporter (2026-07-30, dashboard-agent-dev)
+
+Взял в работу два пункта backlog из PLAN.md по выбору владельца.
+
+**0.9.12 — проактивное сканирование логов контейнеров.** `lib/log-scan.ts` +
+`routes/log-scan.ts` (`POST /api/cron/log-scan`, крон каждые 10 мин на s2): хвост логов
+(`getContainerLogs`, `tail=200`, только запущенные контейнеры) сканируется на строки с
+ошибками (`error|exception|fatal|panic|unhandled|ECONNREFUSED|EACCES|ENOTFOUND|OOM`,
+паттерн настраивается `LOG_SCAN_ERROR_PATTERN`). Курсор "последняя обработанная строка"
+per-контейнер (ISO timestamp из `timestamps: true`) в
+`/home/deploy/letar/log-scan-state.json` — **событийная** (edge-triggered) семантика, не
+boolean-дебаунс `health-check.ts`: иначе повторный независимый всплеск ошибок после первого
+алерта молчал бы навсегда. Первая встреча контейнера не алертит накопленную историю — курсор
+инициализируется на момент первого прогона, а не на начало лога. Алерт — переиспользован
+`AlertType.CRON_FAILED` (тот же принцип, что `email-canary.ts` — не заводили Prisma-миграцию
+в `apps/dashboard/schema.zmodel` ради одного enum-значения, вне файловой резервации сессии).
+
+**0.9.13 — Prometheus exporter.** `lib/metrics-exporter.ts` + `routes/metrics.ts`
+(`GET /metrics`, текстовый формат Prometheus exposition): CPU, память, диск (per-mount),
+сеть (per-iface), контейнеры (`dashboard_agent_container_up` per-имя). Тонкая обёртка над уже
+существующими `system.ts`/`docker.ts` — не дублирует сбор метрик, каждая группа обёрнута в
+свой try/catch (ошибка одной, например недоступный Docker-сокет, не роняет остальные).
+Закрывает разом три пункта backlog «Интеграции»: Prometheus exporter — реализован напрямую;
+Grafana datasource — не потребовал отдельного эндпоинта, Grafana умеет читать тот же формат
+через встроенный Prometheus datasource; Telegraf — туда же, `inputs.prometheus` тоже
+скрейпит `/metrics` напрямую. Авторизация — существующий Bearer `AGENT_TOKEN`, без исключения
+в `authMiddleware` (Prometheus/Grafana/Telegraf поддерживают bearer token в конфиге scrape).
+
+**Тесты:** `nx lint`/`typecheck` обоих коммитов чисты, отдельных unit-тестов не заводили —
+оба модуля тонкие обёртки над уже покрытыми `docker.ts`/`system.ts`.
+
+**Деплой:** запрошен у BlackCove через Agent Mail (коммиты `2f2eb17a`, `85b9eeaf`) — ответ
+пришёл в соседнем треде (§38-делегация BrownHeron, см. запись выше), задеплоено вместе,
+подтверждено `exitCode 0` в 03:51 UTC.
+
 ## Версия 0.9.10 → 0.9.11 — единый APP_REGISTRY + история сетевого трафика (2026-07-30, dashboard-agent-dev)
 
 Взял в работу два пункта backlog из PLAN.md по выбору владельца.
