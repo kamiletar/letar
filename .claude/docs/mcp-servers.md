@@ -16,9 +16,12 @@
 | **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health |
 | **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking`  | Структурированное пошаговое рассуждение для сложных задач                                       |
 | **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                     |
-| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД kami (read-only)                                                               |
-| **postgres-premium-rosstil** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД premium-rosstil (read-only)                                                    |
+| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                           |
+| **postgres-kami-prod**       | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                  |
+| **postgres-kami-prod-write** | `@modelcontextprotocol/server-postgres`             | Прод-БД kami, полный доступ — каждый вызов с permission prompt                                  |
 | **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                       |
+| **postgres-studio**          | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                         |
+| **postgres-studio-prod**     | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                |
 | **prisma**                   | `@prisma/mcp`                                       | Работа через Prisma schema, генерация запросов                                                  |
 
 ## Воркфлоу работы с Context7
@@ -435,18 +438,27 @@ docker compose pull && docker compose up -d
 
 ## PostgreSQL MCP (server-postgres)
 
-Прямые SQL запросы к локальным базам данных. Read-only по умолчанию — безопасно для исследования данных.
+Прямые SQL запросы к базам данных. Read-only по умолчанию — безопасно для исследования данных.
+Прод-серверы ходят через SSH-туннель, который `pg-wrapper.mjs` поднимает сам при первом запросе.
 
 ### Доступные БД
 
-| MCP сервер                 | БД             | Порт |
-| -------------------------- | -------------- | ---- |
-| `postgres-driving-school`  | driving_school | 5432 |
-| `postgres-kami`            | kami           | 5432 |
-| `postgres-premium-rosstil` | lena_premium   | 5432 |
-| `postgres-grandslamcup`    | grandslamcup   | 5453 |
+| MCP сервер                 | БД             | Порт                   | Read-only юзер |
+| -------------------------- | -------------- | ---------------------- | -------------- |
+| `postgres-driving-school`  | driving_school | 5432 (dev)             | —              |
+| `postgres-kami`            | lena_kami      | 5437 (dev)             | —              |
+| `postgres-kami-prod`       | lena_kami      | туннель 5455 → s2:5437 | `kami_ro`      |
+| `postgres-kami-prod-write` | lena_kami      | туннель 5455 → s2:5437 | нет (полный)   |
+| `postgres-grandslamcup`    | grandslamcup   | 5453 (dev)             | —              |
+| `postgres-studio`          | studio_dev     | 5446 (dev)             | —              |
+| `postgres-studio-prod`     | studio         | туннель 5456 → s2:5455 | `studio_ro`    |
 
-Остальные БД (imot, mandala, archetest, time, animatrona-tracker, dashboard, form-develop) можно добавить в `.mcp.json` по аналогии.
+Остальные БД (mandala, archetest, time, animatrona-tracker, dashboard, form-develop) можно добавить в `.mcp.json` по аналогии — см. скилл `mcp-postgres-setup`.
+
+⚠️ **Прод и dev легко перепутать по названию сервера.** Прецедент 2026-07-30: диагностику
+прод-инцидента studio (500 из-за пропущенной миграции) увело в ложный вывод «drift безобиден»,
+потому что запросы шли в `postgres-studio` (dev-база, колонки уже на месте), а не в прод.
+Для проверки прод-состояния использовать только `postgres-<app>-prod`.
 
 ### Пример
 

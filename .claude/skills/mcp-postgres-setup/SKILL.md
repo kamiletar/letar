@@ -127,7 +127,8 @@ MCP_PROD_RW_URL=postgresql://<prod-user>:<prod-password>@localhost:<tunnel-port>
 ```
 
 Выбери свободный tunnel-port (проверить занятые: `netstat -an | grep LISTEN`).
-Занятые порты в проекте: 5432 (premium-rosstil), 5437 (kami), 5453 (grandslamcup).
+Занятые порты в проекте: 5432 (driving-school), 5437 (kami dev), 5446 (studio dev),
+5453 (grandslamcup), 5455 (туннель kami-prod), 5456 (туннель studio-prod).
 
 ### Шаг P4 — Добавить прод серверы в .mcp.json
 
@@ -173,11 +174,12 @@ MCP_PROD_RW_URL=postgresql://<prod-user>:<prod-password>@localhost:<tunnel-port>
 
 ## Справочник: текущие MCP серверы
 
-| Сервер                     | Env файл                          | Переменная        | Туннель         |
-| -------------------------- | --------------------------------- | ----------------- | --------------- |
-| `postgres-kami`            | `apps/kami/.env.local`            | `MCP_LOCAL_URL`   | нет (порт 5437) |
-| `postgres-kami-prod`       | `apps/kami/.env.docker`           | `MCP_PROD_RO_URL` | 5455 → s2:5437  |
-| `postgres-kami-prod-write` | `apps/kami/.env.docker`           | `MCP_PROD_RW_URL` | 5455 → s2:5437  |
-| `postgres-driving-school`  | `apps/driving-school/.env.local`  | `DATABASE_URL`    | нет (порт 5432) |
-| `postgres-premium-rosstil` | `apps/premium-rosstil/.env.local` | `DATABASE_URL`    | нет (порт 5432) |
-| `postgres-grandslamcup`    | `apps/grandslamcup/.env.local`    | `DATABASE_URL`    | нет (порт 5453) |
+| Сервер                     | Env файл                         | Переменная        | Туннель         |
+| -------------------------- | -------------------------------- | ----------------- | --------------- |
+| `postgres-kami`            | `apps/kami/.env.local`           | `MCP_LOCAL_URL`   | нет (порт 5437) |
+| `postgres-kami-prod`       | `apps/kami/.env.docker`          | `MCP_PROD_RO_URL` | 5455 → s2:5437  |
+| `postgres-kami-prod-write` | `apps/kami/.env.docker`          | `MCP_PROD_RW_URL` | 5455 → s2:5437  |
+| `postgres-driving-school`  | `apps/driving-school/.env.local` | `DATABASE_URL`    | нет (порт 5432) |
+| `postgres-grandslamcup`    | `apps/grandslamcup/.env.local`   | `DATABASE_URL`    | нет (порт 5453) |
+| `postgres-studio`          | `apps/studio/.env.local`         | `DATABASE_URL`    | нет (порт 5446) |
+| `postgres-studio-prod`     | `apps/studio/.env.docker`        | `MCP_PROD_RO_URL` | 5456 → s2:5455  |
