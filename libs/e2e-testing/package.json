@@ -1,6 +1,6 @@
 {
   "name": "@letar/e2e-testing",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -9,6 +9,7 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./prisma-cjs-wrapper": "./src/lib/prisma-cjs-wrapper.js",
     "./package.json": "./package.json"
   }
 }
