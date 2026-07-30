@@ -23,4 +23,7 @@ export type { FormatMoneyOptions } from './lib/money'
 // String utilities
 export { slugify } from './lib/slugify'
 
+// Pluralization utilities
+export { pluralizeRu } from './lib/pluralize'
+
 // Re-export types if needed in the future
