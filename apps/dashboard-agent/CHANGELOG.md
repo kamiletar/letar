@@ -11,6 +11,29 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.14] — 2026-07-30
+
+### Added
+
+- Структурированный прогресс деплоя (PLAN-INFRA.md §38, Этапы 1–3) — вместо исключительно
+  прозы в логе:
+  - `DeployStatus.phases[]` — парсится из `::phase:name:start/ok/fail` маркеров, которые
+    теперь печатает `deploy-affected.sh` (build/rollout/wait-healthy/nginx-reload), и из уже
+    существующих `[step-id]` строк `libs/deploy-engine` (zero-downtime rollout: doctor,
+    wait-healthy, smoke-test, nginx-reload-1/2 и т.д.) — обе формы разбирает одна функция
+    `applyPhaseLine` (`src/routes/deploy.ts`).
+  - `GET /api/deploy/wait?deployId=&waitSeconds=` — long-poll вместо ручного опроса по
+    таймеру: держит запрос открытым, отпускает раньше `waitSeconds` (капается сервером на
+    120с) при терминальном статусе, смене фазы или смене признака залипания. Возвращает
+    хвост лога (20 строк), не полный курсорный лог.
+  - `stalled`/`stalledSince` в `/api/deploy/status` и `/api/deploy/wait` — watchdog залипания
+    по порогу молчания, специфичному для текущей фазы (`build` легитимно молчит минутами,
+    `nginx-reload` — секунды). Только диагностика, не убивает процесс.
+  - `libs/deploy-mcp`: новый MCP-инструмент `deploy_wait`, зеркалит `deploy_status`
+    (`deploy_status` не изменён).
+  - Этап 4 (очередь деплоев на сервере) сознательно не реализован — опционален и рискованнее,
+    вне скоупа этой сессии.
+
 ## [0.9.13] — 2026-07-30
 
 ### Added

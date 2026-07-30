@@ -67,6 +67,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Машинный маркер прогресса деплоя (PLAN-INFRA.md §38) — отдельная строка, парсится
+# dashboard-agent'ом (appendOutput → DeployStatus.phases[]). Формат: ::phase:<name>:<start|ok|fail>
+phase_marker() {
+  echo "::phase:$1:$2"
+}
+
 # Расшифровка SOPS-файла если есть .enc версия
 # Использует SOPS_AGE_KEY_FILE или SOPS_AGE_KEY для расшифровки
 decrypt_sops_env() {
@@ -814,6 +820,8 @@ for app in $AFFECTED_APPS; do
   rm -rf "$APP_DIR/out" 2>/dev/null || true
   rm -rf "node_modules/.cache" 2>/dev/null || true
 
+  phase_marker build start
+
   # Determine app type: Next.js (static/standalone) or Node.js (esbuild/bun)
   IS_STATIC_EXPORT=false
   IS_NEXTJS_APP=false
@@ -872,6 +880,7 @@ for app in $AFFECTED_APPS; do
       echo -e "${GREEN}✅ Build completed for ${app}${NC}"
     else
       echo -e "${RED}❌ Build failed for ${app}${NC}"
+      phase_marker build fail
       FAILED_APPS+=("$app")
       echo ""
       continue
@@ -885,6 +894,7 @@ for app in $AFFECTED_APPS; do
     # Static export: check for out/ directory
     if [ ! -d "$APP_DIR/out" ]; then
       echo -e "${RED}❌ Build output not found for ${app} (out/)${NC}"
+      phase_marker build fail
       FAILED_APPS+=("$app")
       echo ""
       continue
@@ -894,6 +904,7 @@ for app in $AFFECTED_APPS; do
     # Standalone: check for .next/standalone
     if [ ! -d "$APP_DIR/.next/standalone" ]; then
       echo -e "${RED}❌ Build output not found for ${app} (.next/standalone)${NC}"
+      phase_marker build fail
       FAILED_APPS+=("$app")
       echo ""
       continue
@@ -915,8 +926,10 @@ for app in $AFFECTED_APPS; do
     # rmi по тегу лишь снимает тег — образ под :latest/:staging не удаляется
     docker images "${app}" --format '{{.Tag}}' | grep -E '^[0-9a-f]{7,12}$' | tail -n +4 \
       | xargs -r -I{} docker rmi "${app}:{}" 2> /dev/null || true
+    phase_marker build ok
   else
     echo -e "${RED}❌ Docker build failed for ${app}${NC}"
+    phase_marker build fail
     FAILED_APPS+=("$app")
     echo ""
     continue
@@ -970,6 +983,7 @@ for app in $AFFECTED_APPS; do
   # (диагностировал BlackCove, message #870). Нужен реальный выход из cgroup контейнера —
   # даёт systemd-run, создающий transient-unit в system.slice (или user.slice), полностью
   # отдельной от cgroup докера.
+  phase_marker rollout start
   DEPLOY_SUCCEEDED=false
   if [ "$app" = "dashboard" ] || [ "$app" = "dashboard-agent" ]; then
     echo -e "${YELLOW}⚠️  ${app} self-deploy: detached restart через systemd-run (переживает уничтожение cgroup собственного контейнера)${NC}"
@@ -1048,6 +1062,7 @@ RESTART_EOF
   fi
 
   if [ "$DEPLOY_SUCCEEDED" = true ]; then
+    phase_marker rollout ok
     DEPLOYED_APPS+=("$app")
     save_deploy_commit "$app" "$(git -C "$WORKSPACE_ROOT" rev-parse HEAD)"
     echo -e "${BLUE}💾 Saved deployment marker for ${app}${NC}"
@@ -1067,6 +1082,7 @@ RESTART_EOF
     fi
   else
     echo -e "${RED}❌ Deployment failed for ${app}${NC}"
+    phase_marker rollout fail
     FAILED_APPS+=("$app")
   fi
 
@@ -1077,6 +1093,7 @@ done
 # Ожидание готовности контейнеров перед reload nginx
 # Без этого NPM показывает default page пока контейнер стартует (5-10 мин даунтайм)
 if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
+  phase_marker wait-healthy start
   echo -e "${YELLOW}⏳ Waiting for containers to become healthy before reloading Nginx...${NC}"
   for app in "${DEPLOYED_APPS[@]}"; do
     if [ "$STAGING" = true ]; then
@@ -1113,7 +1130,9 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
       sleep 10
     fi
   done
+  phase_marker wait-healthy ok
 
+  phase_marker nginx-reload start
   echo -e "${YELLOW}🔄 Reloading Nginx Proxy Manager to pick up new container IPs...${NC}"
   # Имя контейнера NPM различается по серверам: "nginx-proxy-manager" на s2 (прод),
   # "npm" на s3 (staging, поднят отдельно от canonical infra/nginx-proxy-manager/docker-compose.yml).
@@ -1126,8 +1145,10 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
   done
   if [ -n "$NPM_CONTAINER" ]; then
     echo -e "${GREEN}✅ Nginx reloaded successfully (container: ${NPM_CONTAINER})${NC}"
+    phase_marker nginx-reload ok
   else
     echo -e "${YELLOW}⚠️  Could not reload Nginx (container may not exist on this server)${NC}"
+    phase_marker nginx-reload fail
   fi
   echo ""
 fi

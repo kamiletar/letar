@@ -191,6 +191,51 @@ export function createDeployMcpServer(): McpServer {
     },
   )
 
+  // ─── deploy_wait ─────────────────────────────────────────────────────────────
+  server.tool(
+    'deploy_wait',
+    [
+      'Long-poll ожидание прогресса деплоя (GET /api/deploy/wait) — вместо будильника с ручным',
+      'опросом deploy_status по таймеру. Зеркалит deploy_status (тот же снапшот), но держит запрос',
+      'открытым и отпускает РАНЬШЕ waitSeconds при: терминальном статусе, смене фазы или смене',
+      'признака залипания (PLAN-INFRA.md §38). Возвращает только хвост лога (не sinceLine-курсор) —',
+      'фазы (`phases[]`) и `stalled` информативнее прозы в happy-path.',
+      'waitSeconds капается на сервере (максимум ~120с — ограничение Fastify/nginx-таймаутов',
+      'на туннеле) — при большом деплое зови повторно, пока `running: true`.',
+    ].join('\n'),
+    {
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
+      waitSeconds: z.number().int().min(1).max(120).optional().describe(
+        'Сколько максимум ждать (сервер капает до 120с)',
+      ),
+    },
+    async ({ server = 's2', deployId, waitSeconds }) => {
+      const params = new URLSearchParams()
+      if (deployId) {
+        params.set('deployId', deployId)
+      }
+      if (waitSeconds !== undefined) {
+        params.set('waitSeconds', String(waitSeconds))
+      }
+      const qs = params.toString()
+      try {
+        const res = await agentRequest(server as InfraServer, {
+          path: `/api/deploy/wait${qs ? `?${qs}` : ''}`,
+          // Long-poll держит HTTP-соединение открытым до waitSeconds (капается сервером на 120с) —
+          // дефолтный agentRequest-таймаут 30с оборвал бы его раньше, чем сервер сам отпустит ответ.
+          timeoutMs: (Math.min(waitSeconds ?? 60, 120) + 15) * 1000,
+        })
+        if (!res.success) {
+          return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
+        }
+        return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
+      } catch (err) {
+        return errorText(`❌ deploy_wait на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    },
+  )
+
   // ─── deploy_cancel ───────────────────────────────────────────────────────────
   server.tool(
     'deploy_cancel',

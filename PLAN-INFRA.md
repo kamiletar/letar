@@ -2891,4 +2891,24 @@ Redis как `interrupted`, а не молча исчезать при рест�
 `output: []` и при этом честные `running`/`exitCode`/`totalLines` — дешёвая проверка «готово?» без
 единой строки лога в контексте. Работает уже сегодня.
 
+### Статус — Этапы 1–3 ✅ РЕАЛИЗОВАНЫ (2026-07-30)
+
+- **Этап 1 (фазы):** `deploy-affected.sh` печатает `::phase:name:start/ok/fail` вокруг
+  build/rollout/wait-healthy/nginx-reload; `deploy.ts` (`applyPhaseLine`) парсит эти маркеры
+  **и** уже существующие `[step-id]` строки `libs/deploy-engine` (doctor/wait-healthy/
+  smoke-test/nginx-reload-1/2 и т.д. — не потребовалось трогать сам `deploy-engine`) в
+  `DeployStatus.phases[]`. `progressHint`/медиана длительности по истории — НЕ реализован
+  (не было в скоупе делегированной задачи, только структура фаз).
+- **Этап 2 (`deploy_wait`):** `GET /api/deploy/wait?deployId=&waitSeconds=` на dashboard-agent
+  (`EventEmitter`, капа `waitSeconds` на 120с) + зеркальный MCP-инструмент `deploy_wait` в
+  `libs/deploy-mcp` (`deploy_status` не тронут). `timeoutMs` для `agentRequest` поднимается
+  на вызове (не в `client.ts` — параметр там уже был проброшен насквозь).
+- **Этап 3 (watchdog):** `lastOutputAt` + `computeStalled()` с порогом молчания на текущую
+  открытую фазу (`build` 5 мин, `nginx-reload` 10с, дефолт 30с) — только флаг `stalled`/
+  `stalledSince` в `/api/deploy/status` и `/api/deploy/wait`, без kill процесса.
+- Тесты: `apps/dashboard-agent/src/routes/deploy.spec.ts` (15 кейсов, `applyPhaseLine` +
+  `computeStalled`). `dashboard-agent` 0.9.13 → 0.9.14.
+- **Этап 4 (очередь на сервере) — сознательно не реализован**, как и было условлено
+  (опционален, рискованнее, отдельная задача).
+
 ---

@@ -9,16 +9,17 @@ MCP-сервер: структурированный слой над REST API da
 
 ## Инструменты
 
-| Инструмент                                         | Действие                                                                                                               | Эндпоинт агента           |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                             | —                         |
-| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                        | `GET /health`             |
-| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                         | `GET /api/git/status`     |
-| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`                                                            | `GET /api/deploy/status`  |
-| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                       | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`) | `POST /api/deploy/app`    |
-| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора                             | `POST /api/e2e/run`       |
-| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                      | `GET /api/e2e/status`     |
+| Инструмент                                         | Действие                                                                                                                                | Эндпоинт агента           |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                                              | —                         |
+| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                                         | `GET /health`             |
+| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                          | `GET /api/git/status`     |
+| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                                              | `GET /api/deploy/status`  |
+| `deploy_wait({ server, deployId?, waitSeconds? })` | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled` | `GET /api/deploy/wait`    |
+| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
+| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
+| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора                                              | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
 автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
@@ -66,12 +67,18 @@ deploy_app({ app: "grandslamcup" })                                             
 git_status({ server: "s2" })                    // убедиться, что коммиты запушены
 deploy_app({ app: "time" })                      // target: "production" по умолчанию
 // → возвращает deployId
-deploy_status({ server: "s2", deployId, sinceLine: 0 })   // поллинг прогресса
-deploy_status({ server: "s2", deployId, sinceLine: <totalLines из прошлого ответа> })
+deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены фазы/терминала/stalled — повторяй, пока running: true
 ```
 
-`sinceLine` — курсор: возвращаются только новые строки лога начиная с этого номера
-(в ответе `totalLines`/`fromLine`). Экономит контекст при поллинге длинного деплоя.
+`deploy_wait` — рекомендуемый способ отслеживать прогресс (PLAN-INFRA.md §38): вместо
+будильника с ручным поллингом `deploy_status` по таймеру, держит запрос открытым и
+отпускает раньше `waitSeconds` (капается сервером на ~120с) при терминальном статусе,
+появлении новой фазы в `phases[]` или смене `stalled`. Ответ — тот же снапшот, что и
+`deploy_status`, но `output` — только хвост (20 строк), не весь лог по курсору.
+
+`deploy_status({ server, deployId, sinceLine })` остаётся для точечного снапшота и полного
+курсорного чтения лога — `sinceLine` возвращает только новые строки начиная с этого номера
+(в ответе `totalLines`/`fromLine`). Экономит контекст при явном поллинге длинного деплоя.
 
 ## Соединение и безопасность
 

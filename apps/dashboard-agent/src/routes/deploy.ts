@@ -10,6 +10,7 @@
 
 import { type ChildProcess, exec, spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { EventEmitter } from 'events'
 import type { FastifyInstance } from 'fastify'
 import { promisify } from 'util'
 import { hostExecArgs } from '../lib/host-exec'
@@ -22,6 +23,15 @@ const execAsync = promisify(exec)
 // Ограничения хранения: сколько деплоев помним и сколько строк лога на деплой
 const MAX_DEPLOY_HISTORY = 20
 const MAX_OUTPUT_LINES = 2000
+
+// Максимум секунд на один long-poll запрос /api/deploy/wait — ограничение сверху
+// (не только договорённость, но и Fastify/nginx-таймауты на туннеле), см. PLAN-INFRA.md §38 Этап 2.
+const MAX_WAIT_SECONDS = 120
+const DEFAULT_WAIT_SECONDS = 60
+
+// Сколько хвостовых строк лога отдавать из /api/deploy/wait — в happy-path вызывающий
+// ждёт смены фазы, а не читает лог целиком (см. §38 «Чего делать НЕ надо»).
+const WAIT_LOG_TAIL_LINES = 20
 
 // Статус одного деплоя
 interface DeployStatus {
@@ -42,6 +52,21 @@ interface DeployStatus {
   /** true если запись восстановлена из Redis после рестарта агента во время running=true — реальный
    * исход деплоя после этого момента неизвестен dashboard-agent'у (см. lib/redis.ts) */
   interrupted?: boolean
+  /** Структурированный прогресс — распарсен из `::phase:name:start/ok/fail` маркеров
+   * deploy-affected.sh и из уже существующих `[step-id]` строк libs/deploy-engine (rollout.ts)
+   * при zero-downtime rollout. Не заменяет прозу в `output`, а дополняет её (PLAN-INFRA.md §38). */
+  phases: DeployPhase[]
+  /** ISO-время последней строки лога — основа watchdog'а залипания (computeStalled ниже) */
+  lastOutputAt?: string
+}
+
+/** Одна фаза деплоя. `endedAt`/`ok`/`durationMs` отсутствуют пока фаза не завершилась. */
+export interface DeployPhase {
+  name: string
+  startedAt: string
+  endedAt?: string
+  ok?: boolean
+  durationMs?: number
 }
 
 // Ring-buffer истории деплоев: новые в конец, старые вытесняются. Персистится в Redis
@@ -113,7 +138,7 @@ function schedulePersist(deploy: DeployStatus): void {
     setTimeout(() => {
       pendingPersists.delete(deploy.deployId)
       void persistDeploy(deploy)
-    }, PERSIST_DEBOUNCE_MS)
+    }, PERSIST_DEBOUNCE_MS),
   )
 }
 
@@ -151,11 +176,13 @@ async function rehydrateFromRedis(): Promise<void> {
       }
       try {
         const deploy = JSON.parse(raw) as DeployStatus
+        // Записи, персистированные до §38 (нет phases в Redis) — бэкфилл пустым массивом.
+        deploy.phases = deploy.phases ?? []
         if (deploy.running) {
           deploy.running = false
           deploy.interrupted = true
-          deploy.error =
-            deploy.error ?? 'Dashboard-agent перезапустился во время этого деплоя — итоговый статус неизвестен'
+          deploy.error = deploy.error
+            ?? 'Dashboard-agent перезапустился во время этого деплоя — итоговый статус неизвестен'
           deploy.endTime = deploy.endTime ?? new Date().toISOString()
         }
         deployHistory.push(deploy)
@@ -172,11 +199,13 @@ async function rehydrateFromRedis(): Promise<void> {
 }
 
 /** Создаёт новую запись деплоя и кладёт в историю */
-function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines'>): DeployStatus {
+function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines' | 'phases'>): DeployStatus {
   const deploy: DeployStatus = {
     deployId: randomUUID(),
     output: [],
     truncatedLines: 0,
+    phases: [],
+    lastOutputAt: new Date().toISOString(),
     ...partial,
   }
   deployHistory.push(deploy)
@@ -188,14 +217,124 @@ function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'trunc
   return deploy
 }
 
-/** Добавляет строку в лог деплоя с вытеснением старых строк при переполнении */
+// =============================================================================
+// Фазы деплоя (PLAN-INFRA.md §38 Этап 1) — машинное представление прогресса вместо
+// исключительно прозы в логе.
+// =============================================================================
+
+// Маркер deploy-affected.sh: `::phase:build:start` / `::phase:build:ok` / `::phase:build:fail`
+const PHASE_MARKER_RE = /^::phase:([a-z0-9-]+):(start|ok|fail)$/
+// Уже существующие структурированные строки libs/deploy-engine (rollout.ts → cli.ts printRolloutStep):
+// `✅ [wait-healthy] описание` / `❌ [smoke-test] описание — деталь`. Синхронный шаг —
+// start и конец совпадают, durationMs изнутри rollout.ts не виден на этом уровне.
+const ROLLOUT_STEP_RE = /^(✅|❌)\s\[([a-z0-9-]+)\]/
+
+/** Мутирует массив фаз по одной строке лога. Экспортирована для unit-тестов (deploy.spec.ts) —
+ * чистая функция, без побочных эффектов кроме мутации переданного массива. */
+export function applyPhaseLine(
+  phases: DeployPhase[],
+  line: string,
+  now: () => string = () => new Date().toISOString(),
+): void {
+  const trimmed = line.trim()
+  const marker = trimmed.match(PHASE_MARKER_RE)
+  if (marker) {
+    const name = marker[1] as string
+    const state = marker[2] as 'start' | 'ok' | 'fail'
+    if (state === 'start') {
+      phases.push({ name, startedAt: now() })
+      return
+    }
+    // ok/fail закрывает последнюю ОТКРЫТУЮ фазу с этим именем (на случай если в будущем
+    // один и тот же phase-name встретится дважды за один деплой — маловероятно сегодня,
+    // но безопаснее искать с конца, а не «первую попавшуюся»).
+    for (let i = phases.length - 1; i >= 0; i--) {
+      const phase = phases[i]
+      if (phase && phase.name === name && phase.endedAt === undefined) {
+        const endedAt = now()
+        phase.endedAt = endedAt
+        phase.ok = state === 'ok'
+        phase.durationMs = Date.parse(endedAt) - Date.parse(phase.startedAt)
+        return
+      }
+    }
+    return
+  }
+  const step = trimmed.match(ROLLOUT_STEP_RE)
+  if (step) {
+    const icon = step[1]
+    const name = step[2] as string
+    const at = now()
+    phases.push({ name, startedAt: at, endedAt: at, ok: icon === '✅', durationMs: 0 })
+  }
+}
+
+/** Последняя фаза без `endedAt` — то, что сейчас идёт (для watchdog-порога, специфичного
+ * для фазы). undefined, если фаз ещё не было или все уже закрыты. */
+function currentOpenPhase(phases: DeployPhase[]): DeployPhase | undefined {
+  for (let i = phases.length - 1; i >= 0; i--) {
+    const phase = phases[i]
+    if (phase && phase.endedAt === undefined) {
+      return phase
+    }
+  }
+  return undefined
+}
+
+// Порог молчания на фазу (§38 Этап 3): build легитимно молчит минутами (nx/docker build),
+// nginx-reload — секунды. Ключ — имя фазы; для незнакомой/отсутствующей фазы — DEFAULT.
+const STALL_THRESHOLD_MS: Record<string, number> = {
+  build: 5 * 60 * 1000,
+  rollout: 90 * 1000,
+  'wait-healthy': 30 * 1000,
+  'smoke-test': 15 * 1000,
+  'nginx-reload': 10 * 1000,
+}
+const DEFAULT_STALL_THRESHOLD_MS = 30 * 1000
+
+/** Оценивает залипание по порогу молчания, специфичному для текущей открытой фазы.
+ * Только диагностика — НЕ убивает процесс (§38 «Чего делать НЕ надо»: ложное срабатывание
+ * SIGTERM посреди `docker compose up` хуже пяти лишних минут ожидания). Экспортирована для тестов. */
+export function computeStalled(
+  deploy: Pick<DeployStatus, 'running' | 'lastOutputAt' | 'phases'>,
+  now: () => number = Date.now,
+): { stalled: boolean; stalledSince?: string } {
+  if (!deploy.running || !deploy.lastOutputAt) {
+    return { stalled: false }
+  }
+  const phase = currentOpenPhase(deploy.phases)
+  const threshold = phase ? (STALL_THRESHOLD_MS[phase.name] ?? DEFAULT_STALL_THRESHOLD_MS) : DEFAULT_STALL_THRESHOLD_MS
+  const silentMs = now() - Date.parse(deploy.lastOutputAt)
+  if (silentMs > threshold) {
+    return { stalled: true, stalledSince: deploy.lastOutputAt }
+  }
+  return { stalled: false }
+}
+
+// =============================================================================
+// Long-poll ожидание прогресса (§38 Этап 2) — деплой один на процесс (isDeployRunning
+// отклоняет параллельные), поэтому один EventEmitter на все deployId с лихвой хватает.
+// =============================================================================
+
+const deployEvents = new EventEmitter()
+deployEvents.setMaxListeners(50)
+
+function emitDeployEvent(deployId: string): void {
+  deployEvents.emit(deployId)
+}
+
+/** Добавляет строку в лог деплоя с вытеснением старых строк при переполнении, обновляет
+ * фазы/lastOutputAt и будит все ожидающие deploy_wait для этого deployId. */
 function appendOutput(deploy: DeployStatus, line: string): void {
   deploy.output.push(line)
   if (deploy.output.length > MAX_OUTPUT_LINES) {
     deploy.output.shift()
     deploy.truncatedLines++
   }
+  deploy.lastOutputAt = new Date().toISOString()
+  applyPhaseLine(deploy.phases, line)
   schedulePersist(deploy)
+  emitDeployEvent(deploy.deployId)
 }
 
 /** Текущий активный или последний завершённый деплой */
@@ -234,9 +373,17 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { deployId?: string; sinceLine?: string } }>(
     '/api/deploy/status',
     async (
-      request
+      request,
     ): Promise<
-      ApiResponse<Omit<DeployStatus, 'output'> & { output: string[]; totalLines: number; fromLine: number }>
+      ApiResponse<
+        Omit<DeployStatus, 'output'> & {
+          output: string[]
+          totalLines: number
+          fromLine: number
+          stalled: boolean
+          stalledSince?: string
+        }
+      >
     > => {
       const { deployId, sinceLine } = request.query
 
@@ -256,13 +403,97 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const startIdx = Math.max(0, since - deploy.truncatedLines)
       const output = deploy.output.slice(startIdx)
       const fromLine = deploy.truncatedLines + startIdx
+      const { stalled, stalledSince } = computeStalled(deploy)
 
       return {
         success: true,
-        data: { ...deploy, output, totalLines, fromLine },
+        data: { ...deploy, output, totalLines, fromLine, stalled, stalledSince },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
+  )
+
+  /**
+   * GET /api/deploy/wait — long-poll ожидание прогресса (PLAN-INFRA.md §38 Этап 2).
+   * Query:
+   *   deployId    — конкретный деплой из истории (без него — текущий/последний)
+   *   waitSeconds — сколько максимум ждать (капится MAX_WAIT_SECONDS сверху — ограничение
+   *                 Fastify/nginx-таймаутов на туннеле, не только договорённость)
+   *
+   * Отпускает раньше waitSeconds при: терминальном статусе, смене фазы (появилась новая
+   * фаза) или смене признака залипания. В остальном — тот же снапшот, что /api/deploy/status,
+   * но output — только хвост (WAIT_LOG_TAIL_LINES), а не полный курсорный лог: в happy-path
+   * вызывающий ждёт СОБЫТИЯ, а не читает лог целиком (§38 «Чего делать НЕ надо»).
+   */
+  fastify.get<{ Querystring: { deployId?: string; waitSeconds?: string } }>(
+    '/api/deploy/wait',
+    async (
+      request,
+    ): Promise<
+      ApiResponse<
+        Omit<DeployStatus, 'output'> & {
+          output: string[]
+          totalLines: number
+          stalled: boolean
+          stalledSince?: string
+        }
+      >
+    > => {
+      const { deployId, waitSeconds } = request.query
+
+      const deploy = deployId ? deployHistory.find((d) => d.deployId === deployId) : getLatestDeploy()
+
+      if (!deploy) {
+        return {
+          success: false,
+          error: deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet',
+          timestamp: new Date().toISOString(),
+        }
+      }
+
+      const waitMs = Math.min(
+        Math.max(1, parseInt(waitSeconds ?? String(DEFAULT_WAIT_SECONDS), 10) || DEFAULT_WAIT_SECONDS),
+        MAX_WAIT_SECONDS,
+      ) * 1000
+
+      if (deploy.running) {
+        const phasesAtStart = deploy.phases.length
+        const stalledAtStart = computeStalled(deploy).stalled
+        await new Promise<void>((resolve) => {
+          let settled = false
+          const finish = (): void => {
+            if (settled) {
+              return
+            }
+            settled = true
+            clearTimeout(timer)
+            deployEvents.off(deploy.deployId, onEvent)
+            resolve()
+          }
+          const onEvent = (): void => {
+            if (!deploy.running || deploy.phases.length !== phasesAtStart) {
+              finish()
+              return
+            }
+            if (computeStalled(deploy).stalled !== stalledAtStart) {
+              finish()
+            }
+          }
+          const timer = setTimeout(finish, waitMs)
+          deployEvents.on(deploy.deployId, onEvent)
+        })
+      }
+
+      const totalLines = deploy.truncatedLines + deploy.output.length
+      const output = deploy.output.slice(-WAIT_LOG_TAIL_LINES)
+      const { stalled, stalledSince } = computeStalled(deploy)
+
+      return {
+        success: true,
+        data: { ...deploy, output, totalLines, stalled, stalledSince },
+        timestamp: new Date().toISOString(),
+      }
+    },
   )
 
   /**
@@ -276,7 +507,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         data: deployHistory.map(({ output: _output, truncatedLines: _t, ...rest }) => rest).reverse(),
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 
   /**
@@ -331,7 +562,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -362,7 +593,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       try {
         // Получаем информацию о контейнере
         const { stdout: inspectOutput } = await runDockerCommand(
-          `docker inspect ${containerId} --format '{{.Config.Image}}'`
+          `docker inspect ${containerId} --format '{{.Config.Image}}'`,
         )
         const imageName = inspectOutput.trim()
         output.push(`Container image: ${imageName}`)
@@ -411,7 +642,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -468,7 +699,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -484,7 +715,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: { appName: string; staging?: boolean; seed?: boolean } }>(
     '/api/deploy/app',
     async (
-      request
+      request,
     ): Promise<
       ApiResponse<{ deployId: string; appName: string; staging: boolean; seed: boolean; started: boolean }>
     > => {
@@ -601,6 +832,10 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.endTime = new Date().toISOString()
         currentProcess = null
         flushPersist(deploy)
+        // appendOutput выше уже разбудил ожидающих deploy_wait, но синхронно ДО этой строки —
+        // deploy.running там ещё был true. Будим ещё раз теперь, когда running реально false,
+        // иначе deploy_wait не отпускается раньше таймаута на терминальном статусе.
+        emitDeployEvent(deploy.deployId)
       })
 
       // Обрабатываем ошибки
@@ -611,6 +846,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.endTime = new Date().toISOString()
         currentProcess = null
         flushPersist(deploy)
+        emitDeployEvent(deploy.deployId)
       })
 
       // Возвращаем сразу — клиент будет опрашивать статус через /api/deploy/status
@@ -625,7 +861,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 
   /**
@@ -650,6 +886,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       running.endTime = new Date().toISOString()
       currentProcess = null
       flushPersist(running)
+      emitDeployEvent(running.deployId)
 
       return {
         success: true,
