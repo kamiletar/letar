@@ -2,6 +2,57 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.9.13 → 0.9.14 — структурированный прогресс деплоя, §38 Этапы 1-3 (2026-07-30, BrownHeron)
+
+Задача пришла делегированной от BlackCove (задокументирована ранее в `PLAN-INFRA.md` §38,
+найдено в ночь инцидента с `letar-redis` — прогресс деплоя был доступен только как проза в
+логе, замер: 418 строк лога ради одного бита «готово/не готово»).
+
+**Этап 1 — фазы.** `deploy-affected.sh` печатает машинные маркеры `::phase:name:start/ok/fail`
+отдельной строкой вокруг четырёх крупных шагов: build (nx build + docker build), rollout
+(диспетчер self-deploy/zero-downtime-rollout/force-recreate), wait-healthy (цикл ожидания
+healthcheck после per-app-цикла) и nginx-reload. `applyPhaseLine()` в
+`src/routes/deploy.ts` парсит их в `DeployStatus.phases[]`; та же функция **дополнительно**
+распознаёт уже существующие `✅/❌ [step-id] описание` строки, которые печатает
+`libs/deploy-engine` (`cli.ts printRolloutStep`) при zero-downtime rollout — doctor,
+resolve-old/new-container, wait-healthy, smoke-test, nginx-reload-1/2, stop/rm-old — без
+единой правки самого deploy-engine (вне файловой резервации сессии и вне явного скоупа
+делегированной задачи). Для force-recreate/self-deploy приложений `smoke-test` фаза не
+появляется — там её физически нет, честно отражено отсутствием записи, а не фиктивным no-op.
+
+**Этап 2 — `deploy_wait`.** Новый `GET /api/deploy/wait?deployId=&waitSeconds=` — long-poll
+на `EventEmitter` (единый на процесс, деплой всегда один — `isDeployRunning()` блокирует
+параллельные). Отпускает раньше `waitSeconds` (капается сервером на 120с — ограничение
+Fastify/nginx-таймаутов на SSH-туннеле) при терминальном статусе, появлении новой записи в
+`phases[]` или смене `stalled`. Найден и закрыт тонкий баг в процессе: `close`/`error`
+хендлеры `currentProcess` вызывают `appendOutput()` (которая уже будит ожидающих) ДО того как
+`deploy.running` реально становится `false` на следующей строке — из-за синхронности emit
+ожидающий `deploy_wait` видел `running: true` в момент события и не просыпался на терминальном
+статусе. Добавлен второй явный `emitDeployEvent()` после `deploy.running = false`. Ответ
+отдаёт только хвост лога (20 строк), не полный курсорный лог — в happy-path вызывающий ждёт
+события, а не читает лог целиком. `libs/deploy-mcp`: новый MCP-инструмент `deploy_wait`,
+зеркалит `deploy_status` (тот не тронут, как и требовалось).
+
+**Этап 3 — watchdog залипания.** `lastOutputAt` обновляется в `appendOutput()`.
+`computeStalled()` вычисляет `stalled`/`stalledSince` по порогу молчания, специфичному для
+**текущей открытой фазы** (`build` легитимно молчит 5 минут — nx/docker build, `rollout` 90с,
+`wait-healthy` 30с, `smoke-test` 15с, `nginx-reload` 10с, дефолт между фазами — 30с). Флаг
+только диагностический — процесс не убивается (ложное `SIGTERM` посреди `docker compose up`
+хуже пяти лишних минут ожидания). Surfaced и в `/api/deploy/status`, и в `/api/deploy/wait`.
+
+**Этап 4 (очередь деплоев на сервере) сознательно не реализован** — как и было условлено в
+делегированной задаче: опционален, рискованнее, нужен только в дни массового передеплоя.
+
+**Тесты:** `src/routes/deploy.spec.ts` (15 кейсов, чистые функции `applyPhaseLine` +
+`computeStalled`, без Fastify-роутов — по паттерну `server.spec.ts` в `libs/deploy-mcp`).
+`nx lint`/`typecheck` обоих проектов чисто. `0.9.13 → 0.9.14`, коммит `4eb93b8a`.
+
+**Деплой:** запрошен у BlackCove через Agent Mail, отдельный прогон не потребовался — коммит
+(запушен 03:41 UTC) попал под `git pull` уже запланированного деплоя dashboard-agent v0.9.13
+(log-scan+Prometheus, BlackCove, 03:50 UTC) — `deploy-affected.sh` тянет весь `HEAD main`, а не
+только заявленный коммит. Подтверждено живьём: `git_status({server:"s2"})` → `currentCommit
+4eb93b8a2`, последующий `deploy_status` вернул непустой `phases[]`.
+
 ## Версия 0.9.10 → 0.9.11 — единый APP_REGISTRY + история сетевого трафика (2026-07-30, dashboard-agent-dev)
 
 Взял в работу два пункта backlog из PLAN.md по выбору владельца.

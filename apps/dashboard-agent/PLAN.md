@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.9.7
+## Текущая версия: 0.9.14
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -83,6 +83,31 @@ backup-freshness — плоским level-triggered флагом, health-check �
 crash-loop) и доступность БД (контейнер жив, подключение — нет). Дебаунс через
 `json-state-file.ts` — тот же паттерн, что `email-canary.ts`/`backup-freshness.ts`. `0.9.1 →
 0.9.2`.
+
+### ✅ Структурированный прогресс деплоя (корневой PLAN-INFRA.md §38, Этапы 1-3) — закрыто (BrownHeron, 2026-07-30)
+
+Раньше прогресс деплоя был доступен только как проза в `output: string[]` — чтобы понять «на
+каком мы этапе», нужно было вычитывать сотни строк лога (замер: 418 строк ради одного бита
+«готово/не готово»). Добавлено машинное представление:
+
+- `DeployStatus.phases[]` — `applyPhaseLine()` парсит `::phase:name:start/ok/fail` маркеры,
+  которые теперь печатает `deploy-affected.sh` (build/rollout/wait-healthy/nginx-reload), **и**
+  уже существующие `[step-id]` строки `libs/deploy-engine` (zero-downtime rollout: doctor,
+  wait-healthy, smoke-test, nginx-reload-1/2) — обе формы одной функцией, без правок
+  deploy-engine.
+- `GET /api/deploy/wait?deployId=&waitSeconds=` — long-poll вместо ручного опроса по таймеру
+  (`EventEmitter`, `waitSeconds` капается на 120с — ограничение Fastify/nginx-туннеля).
+  Отпускает раньше при терминальном статусе, новой фазе или смене `stalled`.
+- `computeStalled()` — watchdog залипания, порог молчания specific для текущей открытой фазы
+  (`build` легитимно молчит 5 минут, `nginx-reload` — 10с, дефолт 30с). Только диагностический
+  флаг `stalled`/`stalledSince` в `/api/deploy/status` и `/api/deploy/wait` — НЕ убивает процесс.
+- `libs/deploy-mcp`: новый инструмент `deploy_wait`, зеркалит `deploy_status` (тот не тронут).
+- Этап 4 (очередь деплоев на сервере) сознательно не реализован — опционален и рискованнее.
+
+Тесты: `src/routes/deploy.spec.ts` (15 кейсов). `0.9.13 → 0.9.14`, коммит `4eb93b8a`. Задеплоено
+на s2 «бесплатно» — коммит попал под `git pull` внутри уже запланированного деплоя BlackCove
+(v0.9.13, log-scan+Prometheus, 2026-07-30 03:50 UTC), подтверждено живым `deploy_status` с
+непустым `phases[]`. Подробности реализации — корневой `PLAN-INFRA.md` §38.
 
 ---
 
