@@ -1,12 +1,23 @@
 #!/usr/bin/env node
 /**
- * Stop хук — два независимых напоминания про тайм-трекер studio (Фаза 11 §11.5/§11.11 PLAN.md).
+ * Stop хук — напоминание про тайм-трекер studio (Фаза 11 §11.5/§11.11 PLAN.md).
  * Первый Stop-хук в репозитории.
  *
- * 1. Незакрытый таймер: если активная запись есть — просим вызвать time_stop/time_pause.
- * 2. Эвристика смен контекста: сравнивает число задетых за сессию apps/<x>/ с числом вызовов
- *    time_switch/time_start (best-effort по транскрипту — возможны ложные срабатывания,
- *    например при чтении чужого приложения для справки без реальной работы над ним).
+ * ⚠️ Stop ≠ конец сессии. Событие Stop срабатывает в конце КАЖДОГО ответа агента, а не при
+ * завершении работы. Первая версия хука блокировала Stop при живом таймере с формулировкой
+ * «останови перед завершением сессии» — в результате агент послушно останавливал таймер после
+ * каждой реплики, дробя одну работу на десяток огрызков (найдено 2026-07-30).
+ *
+ * Поэтому живой таймер здесь больше НЕ повод блокировать:
+ * - `time-heartbeat.js` (PostToolUse) обновляет lastSeenAt на каждый вызов инструмента;
+ * - сервер сам закрывает запись по простою (`autoClosedIdle`).
+ *   Забытый таймер ловится этим, а не приставанием на каждой реплике.
+ *
+ * Остаётся одна проверка — эвристика смен контекста: сравнивает число задетых за сессию
+ * apps/<x>/ с числом вызовов time_switch/time_start (best-effort по транскрипту, возможны
+ * ложные срабатывания — например при чтении чужого приложения для справки).
+ *
+ * Когда таймер положено останавливать — `.claude/rules/time-tracking.md`.
  *
  * Fail-open во всём: нет TIME_MCP_SECRET, studio недоступен, транскрипт не читается —
  * всегда approve, не блокируем сессию по техническим причинам.
@@ -16,7 +27,9 @@ const fs = require('fs')
 const readline = require('readline')
 const { getStudioTimeConfig } = require('./lib/studio-time-env')
 
-const { studioUrl: STUDIO_URL, secret: SECRET } = getStudioTimeConfig()
+// STUDIO_URL здесь не нужен: хук больше не ходит в API, а секрет читается только как признак
+// «тайм-трекинг в этой среде настроен».
+const { secret: SECRET } = getStudioTimeConfig()
 
 function approve() {
   console.log(JSON.stringify({ decision: 'approve' }))
@@ -26,26 +39,6 @@ function approve() {
 function block(reason) {
   console.log(JSON.stringify({ decision: 'block', reason }))
   process.exit(0)
-}
-
-/** Активная запись через /api/mcp/time/status, или null (в т.ч. при любой ошибке). */
-async function fetchActiveEntry() {
-  try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 2000)
-    const resp = await fetch(`${STUDIO_URL}/api/mcp/time/status`, {
-      headers: { 'X-Time-Mcp-Secret': SECRET },
-      signal: controller.signal,
-    })
-    clearTimeout(timeout)
-    if (!resp.ok) {
-      return null
-    }
-    const json = await resp.json()
-    return json.data ?? null
-  } catch {
-    return null
-  }
 }
 
 /**
@@ -117,22 +110,8 @@ async function main() {
     return
   }
 
-  const active = await fetchActiveEntry()
-  if (active) {
-    // sessionRef заполнен и принадлежит другой сессии — таймер точно не наш, блокировать нечем
-    // (см. §11 «N» PLAN.md studio: раньше хук блокировал завершение ЛЮБОЙ сессии по чужому таймеру).
-    if (active.sessionRef && active.sessionRef !== data.session_id) {
-      approve()
-      return
-    }
-
-    const project = active.project?.title ?? active.project?.repoSlug ?? active.projectId ?? '?'
-    block(
-      `⏱ Таймер тайм-трекера studio всё ещё идёт: проект "${project}", начат ${active.startedAt}. `
-        + 'Останови через time_stop (или time_pause, если это время не для счёта клиенту) перед завершением сессии.',
-    )
-    return
-  }
+  // Живой таймер намеренно НЕ блокирует Stop — см. шапку файла. Останов таймера привязан к
+  // смыслу работы (новая задача, /end-session, прямая просьба), а не к концу реплики.
 
   const { workspaces, switches } = await analyzeTranscript(data.transcript_path)
   // -1: первая рабочая область — стартовый контекст сессии, переключение на неё не требуется

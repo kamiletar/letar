@@ -3,7 +3,8 @@
  * Тонкий HTTP-слой над /api/mcp/time/* в studio, вся бизнес-логика (резолв ставки, отсечка
  * бездействия, идемпотентность) остаётся там — см. apps/studio/src/lib/time-mcp.ts.
  *
- * Фаза 11 §11.4 PLAN.md: time_start/time_stop/time_switch/time_note/time_status/time_log/time_pause.
+ * Фаза 11 §11.4 PLAN.md: time_start/time_stop/time_switch/time_note/time_status/time_log,
+ * §11.16 time_discard (бывший time_pause), §11.19 настоящая пауза time_pause/time_resume.
  */
 
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
@@ -136,10 +137,10 @@ export function createStudioTimeMcpServer(): McpServer {
   server.tool(
     'time_pause',
     [
-      'Выключатель: останавливает активный таймер и помечает запись небиллируемой',
-      '(billable: false, nonBillReason: INTERNAL). Используй, когда копаешься в проекте из',
-      'любопытства или пробуешь подход, который не пойдёт в работу — не оставляй это как обычный time_stop,',
-      'иначе владельцу придётся вручную чистить черновик от небиллируемого времени.',
+      'Ставит активный таймер на паузу: запись остаётся открытой, но время перестаёт капать.',
+      'Возобновить — time_resume. Зови, когда владелец говорит «пауза» или отвлекается на другое;',
+      'на следующем его сообщении сразу вызывай time_resume.',
+      'Это НЕ остановка: чтобы закрыть запись, нужен time_stop, а чтобы закрыть небиллируемой — time_discard.',
     ].join('\n'),
     {},
     async () => {
@@ -151,9 +152,60 @@ export function createStudioTimeMcpServer(): McpServer {
         if (!res.json.data) {
           return text('ℹ️ Активного таймера не было.')
         }
-        return text(`⏸ Таймер остановлен, запись помечена небиллируемой (INTERNAL).\n\n${pretty(res.json.data)}`)
+        return text(`⏸ Таймер на паузе — время не идёт. Возобновить: time_resume.\n\n${pretty(res.json.data)}`)
       } catch (err) {
         return errorText(`❌ time_pause: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    },
+  )
+
+  // ─── time_resume ─────────────────────────────────────────────────────────────
+  server.tool(
+    'time_resume',
+    [
+      'Снимает паузу с активного таймера — время снова идёт.',
+      'Вызывай сразу, как владелец продолжил взаимодействие после «паузы», не дожидаясь отдельной просьбы.',
+    ].join('\n'),
+    {},
+    async () => {
+      try {
+        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/resume' })
+        if (!res.ok) {
+          return errorText(`❌ time_resume: ${pretty(res.json)}`)
+        }
+        if (!res.json.data) {
+          return text('ℹ️ Активного таймера не было.')
+        }
+        return text(`▶️ Таймер продолжен.\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_resume: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    },
+  )
+
+  // ─── time_discard ────────────────────────────────────────────────────────────
+  server.tool(
+    'time_discard',
+    [
+      'Выключатель: останавливает активный таймер и помечает запись небиллируемой',
+      '(billable: false, nonBillReason: INTERNAL). Используй, когда копаешься в проекте из',
+      'любопытства или пробуешь подход, который не пойдёт в работу — не оставляй это как обычный time_stop,',
+      'иначе владельцу придётся вручную чистить черновик от небиллируемого времени.',
+      'Раньше этот инструмент назывался time_pause, хотя ничего не приостанавливал.',
+    ].join('\n'),
+    {},
+    async () => {
+      try {
+        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/discard' })
+        if (!res.ok) {
+          return errorText(`❌ time_discard: ${pretty(res.json)}`)
+        }
+        if (!res.json.data) {
+          return text('ℹ️ Активного таймера не было.')
+        }
+        return text(`🚫 Таймер остановлен, запись помечена небиллируемой (INTERNAL).\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_discard: ${err instanceof Error ? err.message : String(err)}`)
       }
     },
   )
