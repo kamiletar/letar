@@ -43,7 +43,9 @@ model Recipe {
 
 ### Enum с метками
 
-Doc-комментарии `///` перед значениями enum становятся метками:
+⚠️ Отдельной директивы `@form.label` **не существует** — `form-mcp.get_directives('@form.label')`
+возвращает пусто. Локализованные лейблы enum-значений задаются doc-комментариями `///`
+**на самих значениях enum** (не на поле модели):
 
 ```zmodel
 enum RecipeType {
@@ -66,6 +68,12 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
   },
 })
 ```
+
+Плюс отдельный объект `RecipeTypeLabels = { SWEET: 'Сладкое', SALTY: 'Солёное' }` в том же файле.
+Без `///`-комментариев плагин генерирует лейбл транслитом из имени значения (`BRUS` → `"Brus"`).
+
+Живой прецедент — `libs/driving-school-db/schema.zmodel`, enum `AbsenceType`, и
+`apps/domwellbes/schema.zmodel`, enum `WallMaterial`/`HousePurpose`/`Floors`/`HouseStyle`.
 
 ## Автоматическое разделение @form.props
 
