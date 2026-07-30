@@ -730,6 +730,14 @@ besides a function... You returned: [object Object]` и **cleanup никогда
   `https://tg-proxy.letar.best` — компоновка через `docker-compose.production.yml`, без изменений
   `.env.docker.enc`.
 
+### v0.40.2 — 2026-07-30 — миграция на @letar/format-utils
+
+Кросс-приложенческая сессия (вела `letar`, детали в приватном журнале
+`.claude/private/PLAN-JOURNAL.md`): `shop/_components/product-card.tsx` переведён с
+`product.price.toLocaleString('ru-RU')` на `formatRubles` из общей либы `@letar/format-utils`.
+Поведение не изменилось. `nx typecheck:tsgo`/`lint` зелёные. Единственное место в приложении с
+денежным форматированием — остальные `toLocaleString('ru-RU')` в коде относятся к датам.
+
 ---
 
 **Последнее обновление:** 2026-07-30
