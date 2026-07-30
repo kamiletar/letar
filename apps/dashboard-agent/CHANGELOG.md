@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.9.15] — 2026-07-30
+
+### Added
+
+- Cron-задача `studio-check-long-timers` (`*/15 * * * *`, s2) — дёргает
+  `/api/cron/check-long-timers` studio: Web Push владельцу «таймер идёт дольше 2 часов»
+  (studio Фаза 11 §11.7, блок H; анти-дубль на стороне studio через
+  `TimeEntry.longTimerNotifiedAt`, поэтому частота опроса влияет только на задержку
+  первого уведомления).
+
 ## [0.9.14] — 2026-07-30
 
 ### Added
