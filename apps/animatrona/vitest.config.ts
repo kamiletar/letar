@@ -8,7 +8,9 @@ export default defineConfig({
     name: 'animatrona',
     environment: 'node',
     globals: true,
-    include: ['main/**/*.{test,spec}.{ts,tsx}'],
+    // shared/** — код, общий для main и renderer (например классификатор типа субтитров):
+    // тесты лежат рядом с источником, а не в main/, поэтому нужен отдельный паттерн
+    include: ['main/**/*.{test,spec}.{ts,tsx}', 'shared/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.next', 'renderer'],
     coverage: {
       provider: 'v8',

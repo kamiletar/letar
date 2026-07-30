@@ -3,6 +3,10 @@
  * Единый источник истины — избегаем дублирования
  */
 
+import type { SubtitleType } from './utils/subtitle-type'
+
+export type { SubtitleType }
+
 // === Медиа типы ===
 
 /** Информация об аудиодорожке */
@@ -21,6 +25,10 @@ export interface AudioTrack {
   bitrate?: number
   /** Количество каналов */
   channels?: number
+  /** Дорожка помечена дефолтной в контейнере (`disposition.default`) */
+  isDefault?: boolean
+  /** Дорожка помечена forced в контейнере (`disposition.forced`) */
+  isForced?: boolean
   /** Теги (для извлечения группы/автора) */
   tags?: Record<string, string>
 }
@@ -39,6 +47,12 @@ export interface SubtitleTrack {
   title: string
   /** Пути к файлам шрифтов */
   fonts: string[]
+  /** Дорожка помечена дефолтной в контейнере (`disposition.default`) */
+  isDefault?: boolean
+  /** Дорожка помечена forced — показывать даже при выключенных субтитрах */
+  isForced?: boolean
+  /** Тип содержимого: полные / надписи / песни */
+  subtitleType?: SubtitleType
   /** Теги (для извлечения типа) */
   tags?: Record<string, string>
 }

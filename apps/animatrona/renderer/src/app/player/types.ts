@@ -11,6 +11,8 @@ import type {
   MediaFileInfo,
 } from '@/types/electron'
 
+import type { SubtitleType } from '../../../../shared/utils/subtitle-type'
+
 /** Эпизод в папочном режиме (без импорта в БД) */
 export interface FolderEpisode extends MediaFileInfo {
   /** Номер эпизода (null если не удалось распарсить) */
@@ -50,6 +52,10 @@ export interface EmbeddedAudioTrack {
   channels: number
   /** Битрейт в bps */
   bitrate?: number
+  /** Помечена дефолтной в контейнере (`disposition.default`) */
+  isDefault?: boolean
+  /** Помечена forced в контейнере (`disposition.forced`) */
+  isForced?: boolean
 }
 
 /** Встроенные субтитры из MKV */
@@ -62,6 +68,12 @@ export interface EmbeddedSubtitleTrack {
   title: string
   /** Кодек (ass, subrip, hdmv_pgs_subtitle) */
   codec: string
+  /** Помечена дефолтной в контейнере (`disposition.default`) */
+  isDefault?: boolean
+  /** Помечена forced — показывать даже при выключенных субтитрах */
+  isForced?: boolean
+  /** Тип содержимого: полные / надписи / песни */
+  subtitleType?: SubtitleType
 }
 
 /** Встроенные дорожки из текущего MKV */

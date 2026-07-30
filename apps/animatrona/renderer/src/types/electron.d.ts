@@ -18,6 +18,7 @@ import type {
   QueueItem,
   QueueItemStatus,
   SampleResult,
+  SubtitleType,
   TranscodeProgress,
   TranscodeProgressExtended,
   VideoTranscodeOptions,
@@ -169,8 +170,8 @@ export interface MediaFileInfo {
   extension: string
 }
 
-/** Тип субтитров */
-export type SubtitleType = 'full' | 'signs' | 'songs'
+/** Тип субтитров — реэкспорт единого источника (`shared/utils/subtitle-type`) */
+export type { SubtitleType }
 
 /** Результат матчинга внешнего субтитра */
 export interface ExternalSubtitleMatch {

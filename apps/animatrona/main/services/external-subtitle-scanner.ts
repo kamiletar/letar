@@ -10,6 +10,7 @@
 
 import { readdir } from 'fs/promises'
 import path from 'path'
+import { detectSubtitleType, type SubtitleType } from '../../shared/utils/subtitle-type'
 import { scanDirectoryRecursive } from '../utils/fs-utils'
 import { createModuleLogger } from '../utils/logger'
 import { getSubtitleInfo } from './subtitle-parser'
@@ -41,8 +42,11 @@ const SUBTITLE_EXTENSIONS = new Set(['.ass', '.ssa', '.srt', '.vtt'])
 /** Расширения файлов шрифтов */
 const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.woff', '.woff2', '.eot'])
 
-/** Тип субтитров */
-export type SubtitleType = 'full' | 'signs' | 'songs'
+/**
+ * Тип субтитров — реэкспорт единого источника (`shared/utils/subtitle-type`).
+ * Классификатор там же и работает одинаково для внешних файлов и встроенных дорожек.
+ */
+export type { SubtitleType }
 
 /** Результат матчинга субтитра */
 export interface ExternalSubtitleMatch {
@@ -342,48 +346,6 @@ function extractGroupNameFromSubsDir(subsDir: string): string | undefined {
   return undefined
 }
 
-/** Паттерны для определения типа субтитров (signs/songs) */
-const SIGNS_PATTERNS = ['надписи', 'signs', 'надпис']
-const SONGS_PATTERNS = ['песни', 'songs', 'karaoke', 'караоке']
-
-/**
- * Определить тип субтитров по имени файла и пути
- *
- * Проверяет:
- * 1. Суффикс файла (.надписи.ass, .signs.ass)
- * 2. Имя папки (надписи/, signs/)
- */
-function detectSubtitleType(filePath: string): SubtitleType {
-  const normalized = filePath.replace(/\\/g, '/').toLowerCase()
-  const fileName = path.basename(normalized)
-  const dirParts = normalized.split('/')
-
-  // 1. Проверяем суффикс файла
-  // Убираем расширение, проверяем последнюю часть имени
-  const nameWithoutExt = fileName.replace(/\.[^.]+$/, '')
-  const nameParts = nameWithoutExt.split('.')
-  const lastPart = nameParts[nameParts.length - 1]
-
-  if (lastPart && SIGNS_PATTERNS.some((p) => lastPart.includes(p))) {
-    return 'signs'
-  }
-  if (lastPart && SONGS_PATTERNS.some((p) => lastPart.includes(p))) {
-    return 'songs'
-  }
-
-  // 2. Проверяем имя папки
-  for (const part of dirParts) {
-    if (SIGNS_PATTERNS.some((p) => part.includes(p))) {
-      return 'signs'
-    }
-    if (SONGS_PATTERNS.some((p) => part.includes(p))) {
-      return 'songs'
-    }
-  }
-
-  return 'full'
-}
-
 /**
  * Сканировать папку на внешние субтитры
  *
@@ -483,7 +445,7 @@ export async function scanForExternalSubtitles(
       const subInfo = getSubtitleInfo(subPath)
       const finalLanguage = matchResult.suffix?.lang ? normalizeLanguageCode(matchResult.suffix.lang) : subInfo.language
       const finalTitle = matchResult.suffix?.group || subInfo.title
-      const subtitleType = detectSubtitleType(subPath)
+      const subtitleType = detectSubtitleType({ filePath: subPath, title: finalTitle })
       const matchedFonts =
         subInfo.format === 'ass' || subInfo.format === 'ssa' ? matchFontsToFiles(subInfo.fontNames, availableFonts) : []
 
@@ -537,8 +499,8 @@ export async function scanForExternalSubtitles(
             : subInfo.language
           const finalTitle = matchResult.suffix?.group || subInfo.title
 
-          // Определяем тип субтитров по пути и имени файла
-          const subtitleType = detectSubtitleType(subPath)
+          // Определяем тип субтитров по названию дорожки, имени файла и пути
+          const subtitleType = detectSubtitleType({ filePath: subPath, title: finalTitle })
 
           // Матчим шрифты для ASS
           const matchedFonts =

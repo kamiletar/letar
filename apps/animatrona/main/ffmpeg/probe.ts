@@ -2,6 +2,12 @@
  * FFprobe модуль — получение информации о медиафайлах
  */
 
+import {
+  detectSubtitleType,
+  isDispositionFlagSet,
+  type StreamDisposition,
+  type SubtitleType,
+} from '../../shared/utils/subtitle-type'
 import { spawnFFprobe } from '../utils/ffmpeg-spawn'
 import type { AudioTrack, MediaInfo, VideoTrack } from './types'
 import { extractBitrate, getBitDepth } from './utils'
@@ -114,7 +120,9 @@ export function getAudioTracks(videoPath: string): Promise<AudioTrack[]> {
       '-select_streams',
       'a',
       '-show_entries',
-      'stream=index,codec_name,bit_rate,channels:stream_tags',
+      // disposition обязателен: флаги default/forced живут ТОЛЬКО в stream.disposition,
+      // в stream_tags их нет. Без него плеер не видит ни дефолтную, ни forced-дорожку
+      'stream=index,codec_name,bit_rate,channels,disposition:stream_tags',
       '-of',
       'json',
       videoPath,
@@ -138,6 +146,7 @@ export function getAudioTracks(videoPath: string): Promise<AudioTrack[]> {
             codec_name?: string
             bit_rate?: string
             channels?: number
+            disposition?: StreamDisposition
             tags?: Record<string, string | undefined>
           }) => ({
             input: videoPath,
@@ -147,6 +156,8 @@ export function getAudioTracks(videoPath: string): Promise<AudioTrack[]> {
             codec: stream.codec_name,
             bitrate: extractBitrate(stream),
             channels: stream.channels,
+            isDefault: isDispositionFlagSet(stream.disposition?.default),
+            isForced: isDispositionFlagSet(stream.disposition?.forced),
             tags: stream.tags, // Передаём все теги для парсинга на клиенте
           })
         )
@@ -248,6 +259,12 @@ export interface SubtitleTrackInfo {
   title: string
   /** Шрифты (заполняется позже) */
   fonts: string[]
+  /** Дорожка помечена как дефолтная в контейнере (`disposition.default`) */
+  isDefault?: boolean
+  /** Дорожка помечена forced — показывать даже при выключенных субтитрах */
+  isForced?: boolean
+  /** Тип содержимого: полные / надписи / песни (по названию и forced-флагу) */
+  subtitleType?: SubtitleType
 }
 
 /**
@@ -261,7 +278,9 @@ export function getSubtitleTracks(filePath: string): Promise<SubtitleTrackInfo[]
       '-select_streams',
       's',
       '-show_entries',
-      'stream=index,codec_name:stream_tags', // Запрашиваем ВСЕ теги, а не только language/title
+      // Запрашиваем ВСЕ теги, а не только language/title, плюс disposition —
+      // forced-флаг живёт только там (stream.disposition.forced), в тегах его нет
+      'stream=index,codec_name,disposition:stream_tags',
       '-of',
       'json',
       filePath,
@@ -281,13 +300,26 @@ export function getSubtitleTracks(filePath: string): Promise<SubtitleTrackInfo[]
       try {
         const json = JSON.parse(data)
         const tracks: SubtitleTrackInfo[] = (json.streams || []).map(
-          (stream: { index: number; codec_name?: string; tags?: { language?: string; title?: string } }) => ({
+          (stream: {
+            index: number
+            codec_name?: string
+            disposition?: StreamDisposition
+            tags?: { language?: string; title?: string }
+          }) => ({
             path: filePath,
             index: stream.index,
             codec: stream.codec_name || 'unknown',
             language: stream.tags?.language || 'und',
             title: stream.tags?.title || `Субтитры`,
             fonts: [],
+            isDefault: isDispositionFlagSet(stream.disposition?.default),
+            isForced: isDispositionFlagSet(stream.disposition?.forced),
+            // В классификатор идёт СЫРОЙ title из контейнера, а не подстановка «Субтитры» выше:
+            // иначе безымянная дорожка выглядела бы названной и forced-флаг никогда бы не учитывался
+            subtitleType: detectSubtitleType({
+              title: stream.tags?.title,
+              disposition: stream.disposition,
+            }),
             tags: stream.tags, // Передаём все теги для парсинга на клиенте
           })
         )

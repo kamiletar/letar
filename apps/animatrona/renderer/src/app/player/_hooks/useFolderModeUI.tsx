@@ -89,6 +89,8 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
         label: t.title || `Audio ${i + 1}`,
         language: t.language,
         codec: t.codec,
+        isDefault: t.isDefault,
+        isForced: t.isForced,
         // 'local' помечает дорожку как доступную для воспроизведения (без IPFS)
         transcodedCid: 'local',
       })
@@ -125,6 +127,9 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
           label: t.title || `Subtitle ${i + 1}`,
           language: t.language,
           codec: t.codec,
+          isDefault: t.isDefault,
+          isForced: t.isForced,
+          subtitleType: t.subtitleType,
           transcodedCid: 'local',
         })
       })
@@ -135,6 +140,8 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
         id: `external:${i}`,
         label: t.title || t.filePath.split(/[/\\]/).pop() || 'Субтитры',
         language: t.language,
+        // Тип определён тем же классификатором, что и для встроенных дорожек
+        subtitleType: t.subtitleType,
         transcodedCid: 'local',
       })
     })

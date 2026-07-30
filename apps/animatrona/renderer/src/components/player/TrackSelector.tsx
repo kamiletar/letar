@@ -8,10 +8,13 @@
  * - Субтитры (или отключить)
  */
 
-import { Box, Button, HStack, Icon, IconButton, Menu, Portal, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Icon, IconButton, Menu, Portal, Text, VStack } from '@chakra-ui/react'
 import { type RefObject } from 'react'
 import { LuCaptions, LuCheck, LuLanguages, LuPencil, LuTrash2, LuVolume2 } from 'react-icons/lu'
 
+import { formatSubtitleType } from '@/constants/dub-groups'
+
+import type { SubtitleType } from '../../../../shared/utils/subtitle-type'
 import { usePlayerContainer } from './PlayerContext'
 
 /** Информация о дорожке */
@@ -23,6 +26,10 @@ export interface TrackInfo {
   language?: string
   codec?: string
   isDefault?: boolean
+  /** Дорожка помечена forced в контейнере — показывается даже при выключенных субтитрах */
+  isForced?: boolean
+  /** Тип содержимого субтитров: полные / надписи / песни */
+  subtitleType?: SubtitleType
   /** Название группы озвучки (имя папки-дублёра) */
   dubGroup?: string
   /** CID в IPFS — дорожка готова к воспроизведению */
@@ -126,6 +133,36 @@ function isTrackPlayable(track: TrackInfo): boolean {
   return !!track.transcodedCid
 }
 
+/** Есть ли у дорожки что показать бейджами (тип субтитров или forced) */
+function hasTrackBadges(track: TrackInfo): boolean {
+  return !!track.isForced || (!!track.subtitleType && track.subtitleType !== 'full')
+}
+
+/**
+ * Бейджи дорожки: тип содержимого («Надписи», «Песни») и forced-флаг контейнера.
+ *
+ * Показываются раздельно намеренно: forced означает «показывать даже при выключенных
+ * субтитрах», а тип — что внутри. Дорожка бывает forced и полной одновременно.
+ */
+function TrackBadges({ track }: { track: TrackInfo }) {
+  const typeLabel = track.subtitleType && track.subtitleType !== 'full' ? formatSubtitleType(track.subtitleType) : null
+
+  return (
+    <>
+      {typeLabel && (
+        <Badge size="xs" colorPalette="purple" variant="subtle">
+          {typeLabel}
+        </Badge>
+      )}
+      {track.isForced && (
+        <Badge size="xs" colorPalette="orange" variant="subtle" title="Forced — показывается всегда">
+          Forced
+        </Badge>
+      )}
+    </>
+  )
+}
+
 /**
  * TrackSelector компонент
  */
@@ -204,10 +241,15 @@ export function TrackSelector({
                             {formatTrackLabel(track)}
                             {!playable && ' ⚠️'}
                           </Text>
-                          {track.codec && (
-                            <Text fontSize="xs" color={isSelected ? 'whiteAlpha.700' : 'fg.muted'}>
-                              {track.codec}
-                            </Text>
+                          {(track.codec || hasTrackBadges(track)) && (
+                            <HStack gap={1.5}>
+                              {track.codec && (
+                                <Text fontSize="xs" color={isSelected ? 'whiteAlpha.700' : 'fg.muted'}>
+                                  {track.codec}
+                                </Text>
+                              )}
+                              <TrackBadges track={track} />
+                            </HStack>
                           )}
                         </VStack>
                         <HStack gap={1}>
@@ -317,10 +359,15 @@ export function TrackSelector({
                           <Text fontSize="sm" color={isSelected ? 'white' : undefined}>
                             {formatTrackLabel(track)}
                           </Text>
-                          {track.codec && (
-                            <Text fontSize="xs" color={isSelected ? 'whiteAlpha.700' : 'fg.muted'}>
-                              {track.codec}
-                            </Text>
+                          {(track.codec || hasTrackBadges(track)) && (
+                            <HStack gap={1.5}>
+                              {track.codec && (
+                                <Text fontSize="xs" color={isSelected ? 'whiteAlpha.700' : 'fg.muted'}>
+                                  {track.codec}
+                                </Text>
+                              )}
+                              <TrackBadges track={track} />
+                            </HStack>
                           )}
                         </VStack>
                         <HStack gap={1}>

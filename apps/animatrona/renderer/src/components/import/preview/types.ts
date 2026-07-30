@@ -4,11 +4,15 @@
 
 import type { EncodingProfile } from '@/generated/prisma'
 
-import type { MediaInfo } from '../../../../../shared/types'
+import type { MediaInfo, SubtitleType } from '../../../../../shared/types'
 import type { ParsedFile } from '../FileScanStep'
 
-/** Тип субтитров: полные, надписи (signs), песни (songs) */
-export type SubtitleType = 'full' | 'signs' | 'songs'
+/**
+ * Тип субтитров: полные, надписи (signs), песни (songs).
+ * Реэкспорт единого источника — сам тип и классификатор живут в
+ * `shared/utils/subtitle-type.ts`, одинаково для внешних файлов и встроенных дорожек.
+ */
+export type { SubtitleType }
 
 /** Настройки импорта (профиль + потоки) */
 export interface ImportSettings {
