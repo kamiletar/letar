@@ -33,17 +33,22 @@ RDB save-path) дальше захвата роли дело не пошло —
    `animatrona-tracker-redis`) без `ports:` не были атакованы.
 2. **Всегда `--requirepass`**, даже для инстансов без публикации порта (defense in depth — если
    сосед по docker-сети когда-нибудь скомпрометируют, боковое перемещение к Redis без пароля
-   тривиально). Пароль — только через генератор (`openssl rand -base64 32`), см.
-   [security.md](/.claude/rules/security.md) § «Генерация паролей». Хранить в
-   `.env.docker.enc` (SOPS), пробрасывать в `command:` через `${REDIS_PASSWORD}` — не хардкодить
-   в `docker-compose*.yml` в открытом виде.
+   тривиально). Пароль — только через генератор, см. [security.md](/.claude/rules/security.md)
+   § «Генерация паролей». Хранить в `.env.docker.enc` (SOPS), пробрасывать в `command:` через
+   `${REDIS_PASSWORD}` — не хардкодить в `docker-compose*.yml` в открытом виде.
+   ⚠️ **Генерировать через `openssl rand -hex 32`, НЕ `-base64`.** Пароль подставляется прямо
+   в `REDIS_URL` (`redis://:<password>@host:port`) без percent-encoding — base64-алфавит содержит
+   `/`, `+`, `=`, а `/` в userinfo-части URL интерпретируется как разделитель пути. Node's `new URL()`
+   молча не парсит такую строку и падает `TypeError: Invalid URL` при старте приложения (поймано
+   именно на этом инциденте 2026-07-29 — `next build` auth-hub упал на `Invalid URL` с паролем,
+   содержащим `/`). Hex-алфавит (`0-9a-f`) не содержит зарезервированных URL-символов в принципе.
 3. **Если порт всё же нужно публиковать на хост** (пример: `e2e-redis` на s3 — driving-school
    staging достаёт его через `172.17.0.1:6380`, то есть через host-gateway, а не docker-сеть, из-за
    архитектуры staging-стека) — это ещё не повод оставлять без пароля. Requirepass обязателен
    независимо от того, публикуется порт или нет.
 4. **Периодически сверяться:** `docker port <container>` должен быть пуст для любого Redis,
    у которого нет documented-причины торчать наружу. `docker exec <container> redis-cli config get
-   requirepass` не должен возвращать пустую строку.
+requirepass` не должен возвращать пустую строку.
 
 ## Чеклист при заведении нового Redis-сервиса
 
