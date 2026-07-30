@@ -14,6 +14,17 @@ import { studioTimeRequest } from './client.js'
 
 const TIME_KIND = z.enum(['WORK', 'MEETING', 'TRAVEL', 'ADMIN'])
 
+/**
+ * Идентификатор текущей сессии Claude Code — привязывает открытый таймер к сессии, которая его
+ * открыла (§11 «N» PLAN.md studio). MCP-сервер запускается как дочерний stdio-процесс сессии и
+ * наследует её `CLAUDE_CODE_SESSION_ID`. Если переменной нет (запуск вне Claude Code, например
+ * вручную для отладки) — best-effort фолбэк на PID процесса, лишь бы не оставлять null там, где
+ * есть хоть какой-то способ отличить один запуск сервера от другого.
+ */
+export function defaultSessionRef(): string {
+  return process.env['CLAUDE_CODE_SESSION_ID'] || `pid-${process.pid}`
+}
+
 export function createStudioTimeMcpServer(): McpServer {
   const server = new McpServer({ name: '@letar/studio-time-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
 
@@ -35,23 +46,29 @@ export function createStudioTimeMcpServer(): McpServer {
         .min(1)
         .max(2000)
         .describe(
-          'Чем занимаешься по ЭТОМУ проекту — видит клиент. Без имён других клиентов/проектов, путей к файлам, внутренней кухни'
+          'Чем занимаешься по ЭТОМУ проекту — видит клиент. Без имён других клиентов/проектов, путей к файлам, внутренней кухни',
         ),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z
         .string()
         .optional()
         .describe(
-          'Ключ идемпотентности — повтор с тем же ключом вернёт существующую запись вместо дубля. Генерируется автоматически, если не передан'
+          'Ключ идемпотентности — повтор с тем же ключом вернёт существующую запись вместо дубля. Генерируется автоматически, если не передан',
+        ),
+      sessionRef: z
+        .string()
+        .optional()
+        .describe(
+          'Идентификатор сессии, открывшей таймер — используется Stop-хуком, чтобы не блокировать чужую сессию по этому таймеру. По умолчанию берётся из CLAUDE_CODE_SESSION_ID, передавать вручную обычно не нужно',
         ),
     },
-    async ({ app, description, kind, idempotencyKey }) => {
+    async ({ app, description, kind, idempotencyKey, sessionRef }) => {
       const key = idempotencyKey ?? randomUUID()
       try {
         const res = await studioTimeRequest({
           method: 'POST',
           path: '/api/mcp/time/start',
-          body: { app, description, kind, idempotencyKey: key },
+          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef() },
         })
         if (!res.ok) {
           return errorText(`❌ time_start(${app}): ${pretty(res.json)}`)
@@ -61,7 +78,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_start(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── time_switch ─────────────────────────────────────────────────────────────
@@ -78,14 +95,15 @@ export function createStudioTimeMcpServer(): McpServer {
       description: z.string().min(1).max(2000).describe('Чем занимаешься теперь — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
+      sessionRef: z.string().optional().describe('Идентификатор сессии — см. time_start'),
     },
-    async ({ app, description, kind, idempotencyKey }) => {
+    async ({ app, description, kind, idempotencyKey, sessionRef }) => {
       const key = idempotencyKey ?? randomUUID()
       try {
         const res = await studioTimeRequest({
           method: 'POST',
           path: '/api/mcp/time/switch',
-          body: { app, description, kind, idempotencyKey: key },
+          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef() },
         })
         if (!res.ok) {
           return errorText(`❌ time_switch(${app}): ${pretty(res.json)}`)
@@ -95,7 +113,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_switch(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── time_stop ───────────────────────────────────────────────────────────────
@@ -137,7 +155,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_pause: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── time_note ───────────────────────────────────────────────────────────────
@@ -155,7 +173,7 @@ export function createStudioTimeMcpServer(): McpServer {
       } catch (err) {
         return errorText(`❌ time_note: ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   // ─── time_status ─────────────────────────────────────────────────────────────
@@ -201,12 +219,12 @@ export function createStudioTimeMcpServer(): McpServer {
           return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
         }
         return text(
-          `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`
+          `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`,
         )
       } catch (err) {
         return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
       }
-    }
+    },
   )
 
   return server

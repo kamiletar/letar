@@ -119,10 +119,17 @@ async function main() {
 
   const active = await fetchActiveEntry()
   if (active) {
+    // sessionRef заполнен и принадлежит другой сессии — таймер точно не наш, блокировать нечем
+    // (см. §11 «N» PLAN.md studio: раньше хук блокировал завершение ЛЮБОЙ сессии по чужому таймеру).
+    if (active.sessionRef && active.sessionRef !== data.session_id) {
+      approve()
+      return
+    }
+
     const project = active.project?.title ?? active.project?.repoSlug ?? active.projectId ?? '?'
     block(
-      `⏱ Таймер тайм-трекера studio всё ещё идёт: проект "${project}", начат ${active.startedAt}. ` +
-        'Останови через time_stop (или time_pause, если это время не для счёта клиенту) перед завершением сессии.'
+      `⏱ Таймер тайм-трекера studio всё ещё идёт: проект "${project}", начат ${active.startedAt}. `
+        + 'Останови через time_stop (или time_pause, если это время не для счёта клиенту) перед завершением сессии.',
     )
     return
   }
@@ -131,10 +138,10 @@ async function main() {
   // -1: первая рабочая область — стартовый контекст сессии, переключение на неё не требуется
   if (workspaces.size > 1 && switches < workspaces.size - 1) {
     block(
-      `🔀 За сессию затронуты приложения: ${[...workspaces].join(', ')} (${workspaces.size}), а ` +
-        `time_switch/time_start вызван ${switches} раз(а). Похоже, при смене проекта забыт time_switch — ` +
-        'время могло записаться не туда (или не записаться вовсе). Если это ложное срабатывание ' +
-        '(например, читал чужой код для справки без реальной работы над ним) — можно продолжить как есть.'
+      `🔀 За сессию затронуты приложения: ${[...workspaces].join(', ')} (${workspaces.size}), а `
+        + `time_switch/time_start вызван ${switches} раз(а). Похоже, при смене проекта забыт time_switch — `
+        + 'время могло записаться не туда (или не записаться вовсе). Если это ложное срабатывание '
+        + '(например, читал чужой код для справки без реальной работы над ним) — можно продолжить как есть.',
     )
     return
   }
