@@ -55,6 +55,7 @@ imot_manual_2026-03-01T10-45-00.sql.gz
 | grandslamcup       | s2     | grandslamcup-db          | grandslamcup        |
 | dsperevod          | s2     | dsperevod-db             | dsperevod           |
 | studio             | s2     | studio-db                | studio              |
+| domwellbes         | s2     | domwellbes-db            | domwellbes          |
 
 ### API (в dashboard-agent)
 
@@ -340,12 +341,12 @@ tail -f /var/lib/resilio-sync/sync.log  # Детальный лог
 
 ### Критичные файлы
 
-| Файл/папка                       | Описание                          |
-| -------------------------------- | --------------------------------- |
-| `/opt/maddy/config/maddy.conf`   | Основной конфиг                   |
-| `/opt/maddy/docker-compose.yml`  | Docker Compose                    |
-| `/opt/maddy/data/credentials.db` | Хэши паролей SMTP-аккаунтов       |
-| `/opt/maddy/data/aliases`        | Алиасы и форварды                 |
+| Файл/папка                       | Описание                         |
+| -------------------------------- | -------------------------------- |
+| `/opt/maddy/config/maddy.conf`   | Основной конфиг                  |
+| `/opt/maddy/docker-compose.yml`  | Docker Compose                   |
+| `/opt/maddy/data/credentials.db` | Хэши паролей SMTP-аккаунтов      |
+| `/opt/maddy/data/aliases`        | Алиасы и форварды                |
 | `/opt/maddy/data/dkim_keys/`     | **DKIM private keys** ⚠️ критично |
 
 > ⚠️ Потеря DKIM private keys = нужно регенерировать ключи и менять DNS TXT-записи для всех доменов.
