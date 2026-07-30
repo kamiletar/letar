@@ -1,6 +1,17 @@
 # План разработки auth-hub
 
-## Текущий статус: v0.6.4 — Этап 8.5: вход по любому linked-email ✅ (Этап 8.5 закрыт целиком)
+## Текущий статус: v0.7.3 — бэклог плана исчерпан, план синхронизирован с кодом (2026-07-30)
+
+> **Сверка 2026-07-30 (аудит сессии auth-hub-dev):** оба оставшихся крупных блока плана давно
+> реализованы, но не были отмечены — «v0.4.0 Возврат на исходный сайт» (коммиты `71a20875`
+> 2026-05-28 + фикс `6dec3013` 2026-06-05) и «v0.5.0 RP-Initiated Logout» (`78340e8a`
+> 2026-05-29, тираж на 6 hub-client приложений `97752db8` 2026-06-06). Версии 0.6.5–0.7.3 —
+> см. [CHANGELOG.md](./CHANGELOG.md) и [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
+> Прод-инцидент `auth-hub-prod-500` (500 на всех better-auth роутах, 2026-07-29) закрыт
+> re-seed'ом BlackCove 2026-07-30: discovery/get-session/sign-in отвечают 200 (проверено curl).
+> `/api/auth/jwks` → 404 — штатно (HS256, jwt-плагин не подключён), не путать с багом.
+
+## Статус (ранее): v0.6.4 — Этап 8.5: вход по любому linked-email ✅ (Этап 8.5 закрыт целиком)
 
 ### Выполнено (v0.6.4) — 2026-07-16
 
@@ -129,7 +140,12 @@
 
 ---
 
-## v0.4.0 — Возврат на исходный сайт при смене аккаунта
+## v0.4.0 — Возврат на исходный сайт при смене аккаунта ✅ (реализовано 2026-05-28)
+
+> ✅ **Реализовано:** `oidc_pending` cookie + route `/auth/post-login` + `/api/oidc-capture` +
+> `oidc-pending-capture.tsx`; подключено в oauth-buttons/passkey/telegram/account-chooser.
+> Коммиты: `71a20875` (2026-05-28), фикс `6dec3013` (2026-06-05). Текст ниже сохранён как
+> историческая спека — реализация местами отличается в деталях (появился `/api/oidc-capture`).
 
 ### Проблема
 
@@ -312,7 +328,14 @@ apps/auth-hub/src/app/(auth)/sign-in/_components/magic-link-form.tsx ← про�
 
 ---
 
-## v0.5.0 — Глобальный выход: RP-Initiated Logout
+## v0.5.0 — Глобальный выход: RP-Initiated Logout ✅ (реализовано 2026-05-29…06-06)
+
+> ✅ **Реализовано:** `oidcLogout` в `createLogoutAction` (`@letar/auth`, коммит `78340e8a`
+> 2026-05-29) + все 6 hub-client приложений (archetest/time/grandslamcup/kami/
+> animatrona-tracker/dashboard, коммит `97752db8` 2026-06-06). Открытый вопрос п.1.1 снят:
+> Better Auth отдаёт `end_session_endpoint` в discovery — `/api/auth/oauth2/endsession`
+> (без подчёркиваний; подтверждено на проде 2026-07-30). Ручной чеклист тестирования ниже
+> формально не прогонялся — фича на проде с июня, жалоб не было.
 
 ### Проблема
 
@@ -485,7 +508,7 @@ OIDC_CLIENT_ID=archetest-prod
 Тогда в `auth.actions.ts`:
 
 ```typescript
-endSessionUrl:;
+endSessionUrl: ;
 ;`${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/end_session`
 ```
 
