@@ -105,6 +105,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "dashboard"],
       "port": 3002
+    },
+    {
+      "name": "domwellbes",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "domwellbes"],
+      "port": 3025
     }
   ]
 }
