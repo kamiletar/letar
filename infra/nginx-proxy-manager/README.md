@@ -7,10 +7,11 @@
 **s1 выведен из эксплуатации** (2026-06-20) — все production-приложения теперь на s2. Актуальный
 список приложений по серверам — [deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов).
 
-| Сервер            | Приложения                                      | NPM               | Примечания                     |
-| ----------------- | ----------------------------------------------- | ----------------- | ------------------------------ |
-| **s2.letar.best** | все production-приложения (см. deploy-agent.md) | npm.s2.letar.best | Единственный prod-сервер       |
-| **s3.letar.best** | staging-домены приложений + e2e-раннер          | (без поддомена)   | Не production, см. раздел ниже |
+| Сервер                              | Приложения                                      | NPM               | Примечания                                                                                 |
+| ----------------------------------- | ----------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------ |
+| **s2.letar.best**                   | все production-приложения (см. deploy-agent.md) | npm.s2.letar.best | Единственный prod-сервер                                                                   |
+| **s3.letar.best**                   | staging-домены приложений + e2e-раннер          | (без поддомена)   | Не production, см. раздел ниже                                                             |
+| **mail.letar.best (31.56.180.161)** | tg-proxy.letar.best, tg-in.letar.best           | localhost:81      | Отдельный NPM только для Telegram-прокси, не в git (см. раздел «Telegram API прокси» ниже) |
 
 **Docker сеть:** `kami-network` (s2). На s3 у NPM собственная сеть `npm_default` —
 staging-приложения форвардятся через **хост-гейтвей** (`172.17.0.1:<хостовый-порт>`), не через
@@ -40,21 +41,22 @@ proxy host сюда его тоже нужно дописать вручную, 
 
 ### NPM на s2 (npm.s2.letar.best) — единственный production
 
-| Домен                            | Forward Host           | Port | SSL | Примечания           |
-| -------------------------------- | ---------------------- | ---- | --- | -------------------- |
-| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша  |
-| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                  |
-| pravda.letar.best                | pravda-app             | 3007 | LE  | —                    |
-| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page         |
-| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami      |
-| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync         |
-| направа.рф                       | driving-school-app     | 3003 | LE  | WebSocket (чат)      |
-| dash.letar.best                  | dashboard-app          | 3002 | LE  | SSE config           |
-| animatrona-tracker.letar.best    | animatrona-tracker-app | 3010 | LE  | Аниме трекер         |
-| anime.letar.best                 | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)     |
-| svoichuzhie.letar.best           | svoichuzhie-app        | 3021 | LE  | Staging (noindex)    |
-| gateway.letar.best               | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache |
-| npm.s2.letar.best                | localhost              | 81   | LE  | Админка NPM s2       |
+| Домен                            | Forward Host           | Port | SSL | Примечания                                   |
+| -------------------------------- | ---------------------- | ---- | --- | -------------------------------------------- |
+| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша                          |
+| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                                          |
+| pravda.letar.best                | pravda-app             | 3007 | LE  | —                                            |
+| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page                                 |
+| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami                              |
+| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync                                 |
+| направа.рф                       | driving-school-app     | 3003 | LE  | WebSocket (чат)                              |
+| dash.letar.best                  | dashboard-app          | 3002 | LE  | SSE config                                   |
+| animatrona-tracker.letar.best    | animatrona-tracker-app | 3010 | LE  | Аниме трекер                                 |
+| anime.letar.best                 | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)                             |
+| svoichuzhie.letar.best           | svoichuzhie-app        | 3021 | LE  | Staging (noindex)                            |
+| gateway.letar.best               | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache                         |
+| domwellbes.ru, www.domwellbes.ru | domwellbes-app         | 3025 | LE  | М1, ещё не задеплоен (502 до первого деплоя) |
+| npm.s2.letar.best                | localhost              | 81   | LE  | Админка NPM s2                               |
 
 Остальные production-приложения (auth-hub, archetest, grandslamcup, time, form-docs,
 form-example, aira-web, kami-key-the-landing, letar-landing, dsperevod, aboi и т.д.) тоже
@@ -100,6 +102,29 @@ DNS покрыт существующим wildcard `*.s3 CNAME s3.letar.best`, �
 ⚠️ После создания Proxy Host через API `ssl_forced` возвращается `false`, даже если запросить
 `true` — сертификат ещё не готов в момент создания хоста. Нужен отдельный `PUT` после того, как
 `certificate_id` в ответе перестал быть `null`.
+
+## NPM на mail-сервере (tg-proxy) — отдельный, независимый инстанс
+
+Провайдер ДЦ блокирует IP-диапазоны `api.telegram.org` на s1/s2, поэтому исходящие запросы к Bot
+API и входящие webhook идут через reverse-proxy на mail-сервере (`31.56.180.161`) — отдельная
+машина, отдельная NPM, отдельная от `kami-network`/s2/s3. Подробности использования в
+приложениях — [deployment.md § Telegram API — прокси через mail сервер](/.claude/docs/deployment.md).
+
+⚠️ **2026-07-30:** обнаружено, что до этой даты NPM на mail-сервере физически не существовала —
+раздел был только планом, а `dashboard` после деплоя падал в цикл `ConnectTimeoutError`. Поднято
+по факту в этот же день.
+
+- Конфиг: `/root/nginx-proxy-manager/docker-compose.yml` на самом сервере (не в git — отдельная
+  машина вне обычного деплоя letar).
+- Админка: `http://31.56.180.161:81`, креды в KeePassXC.
+- Firewall: `ufw allow 80,443,81/tcp` (у сервера уже были открыты 22/25/465/587/993 под Maddy +
+  4001 под agent-mail — эти порты не трогать).
+- Proxy Hosts заведены через API (`POST /api/nginx/proxy-hosts` + `/api/nginx/certificates`), не
+  руками через UI — см. `.claude/docs/deployment.md` для точного тела запроса и списка Custom
+  Locations под `tg-in.letar.best`.
+- Бэкап: `/opt/npm-backup.sh` на mail-сервере (по образцу `/opt/maddy/backup.sh`), cron
+  `30 3 * * *`, ротация 14 дней локально + rsync на s2 в
+  `/home/deploy/letar/backups/nginx-proxy-manager-mail/` (подхватит Resilio Sync).
 
 ## Специальные конфигурации
 
