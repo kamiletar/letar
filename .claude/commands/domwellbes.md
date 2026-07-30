@@ -11,8 +11,8 @@
 ## Регистрация в Agent Mail
 
 ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `domwellbes-dev`.
-Токена в таблице `agent_fixed_names_tokens.md` пока нет — приложение создано позже общей
-регистрации. Если `macro_start_session` требует `registration_token`, работай без координации
+Токен есть в таблице `agent_fixed_names_tokens.md` (память, вне репо) — передавай его
+`registration_token`. Если по какой-то причине токена там не окажется — работай без координации
 (конфликтов нет — приватный submodule правит только его же агент).
 
 ```
@@ -21,6 +21,7 @@ macro_start_session(
   program: "claude-code",
   model: "claude-opus-5",
   agent_name: "domwellbes-dev",
+  registration_token: "<из agent_fixed_names_tokens.md>",
   task_description: "Разработка domwellbes: <что делаешь>",
   file_reservation_paths: ["apps/domwellbes/**"],
   file_reservation_reason: "domwellbes development"
