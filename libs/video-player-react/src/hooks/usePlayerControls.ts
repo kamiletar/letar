@@ -59,9 +59,24 @@ export interface UsePlayerControlsReturn {
 export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerControlsReturn {
   const { videoRef, audioRef, containerRef, usesSeparateAudio, usesSeparateAudioRef, duration, setIsMuted } = options
 
+  /**
+   * `video.play()` возвращает промис, который отклоняется с `AbortError`, если сразу после
+   * него вызвали `pause()` (двойной клик по кадру, быстрое нажатие Space). Это нормальное
+   * поведение браузера, а не ошибка приложения — но без `catch` оно всплывает как
+   * unhandled rejection в консоли.
+   */
+  const safePlay = useCallback((video: HTMLVideoElement) => {
+    video.play().catch(() => {
+      /* прерванный play — не ошибка */
+    })
+  }, [])
+
   const play = useCallback(() => {
-    videoRef.current?.play()
-  }, [videoRef])
+    const video = videoRef.current
+    if (video) {
+      safePlay(video)
+    }
+  }, [videoRef, safePlay])
 
   const pause = useCallback(() => {
     videoRef.current?.pause()
@@ -74,11 +89,11 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
     }
 
     if (video.paused) {
-      video.play()
+      safePlay(video)
     } else {
       video.pause()
     }
-  }, [videoRef])
+  }, [videoRef, safePlay])
 
   const seek = useCallback(
     (time: number) => {

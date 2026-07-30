@@ -75,7 +75,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     spriteUrl,
     spriteCues,
   },
-  ref,
+  ref
 ) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -223,7 +223,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         audioRef.current.playbackRate = speed
       }
     },
-    [setPlaybackSpeed],
+    [setPlaybackSpeed]
   )
 
   const adjustPlaybackSpeed = useCallback(
@@ -237,13 +237,39 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       const newSpeed = PLAYBACK_SPEEDS[newIndex]
       handlePlaybackSpeedChange(newSpeed)
     },
-    [playbackSpeed, handlePlaybackSpeedChange],
+    [playbackSpeed, handlePlaybackSpeedChange]
   )
 
   // Переключение оверлея информации о видео
   const toggleVideoInfo = useCallback(() => {
     setShowVideoInfo((prev) => !prev)
   }, [])
+
+  /**
+   * Одиночный клик по кадру — пауза/воспроизведение.
+   *
+   * Задержки нет намеренно: пауза должна отзываться сразу. Браузер на двойном клике
+   * присылает три события — `click` (detail=1) → `click` (detail=2) → `dblclick`, поэтому
+   * второй click гасим по `detail`, а изменение состояния от первого откатывает
+   * `handleVideoDoubleClick`. Итог двойного клика: полный экран, состояние
+   * воспроизведения то же, что было до него.
+   */
+  const handleVideoClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      // Часть двойного клика — обработается в onDoubleClick
+      if (event.detail > 1) {
+        return
+      }
+      controls.togglePlay()
+    },
+    [controls]
+  )
+
+  /** Двойной клик — полный экран (плюс откат паузы от первого клика двойного) */
+  const handleVideoDoubleClick = useCallback(() => {
+    controls.togglePlay()
+    controls.toggleFullscreen()
+  }, [controls])
 
   // Переключение Picture-in-Picture
   const togglePiP = useCallback(async () => {
@@ -509,7 +535,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         </IconButton>
       </Tooltip>
     ),
-    [isPiP, togglePiP],
+    [isPiP, togglePiP]
   )
 
   return (
@@ -521,11 +547,19 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       height="100%"
       cursor={showControlsOverlay ? 'default' : 'none'}
       onMouseMove={resetHideTimeout}
-      onClick={controls.togglePlay}
+      onClick={handleVideoClick}
+      onDoubleClick={handleVideoDoubleClick}
     >
       <PlayerContextProvider value={playerContextValue}>
-        {/* Контейнер для video элемента (создаётся программно в useEffect) */}
-        <div ref={videoContainerRef} style={{ width: '100%', height: '100%' }} onClick={(e) => e.stopPropagation()} />
+        {/*
+          Контейнер для video элемента (создаётся программно в useEffect).
+
+          ⚠️ Здесь НЕ должно быть onClick={e => e.stopPropagation()}: контейнер растянут на
+          100%×100%, поэтому такой обработчик глушил клик по самому кадру и пауза срабатывала
+          только по чёрным полосам вокруг видео. Контролы и хедер (SharedPlayerControls,
+          PlayerHeader) гасят всплытие у себя сами, так что двойной toggle не возникает.
+        */}
+        <div ref={videoContainerRef} style={{ width: '100%', height: '100%' }} data-testid="player-video-surface" />
 
         {/* Audio элемент для раздельных дорожек управляется GlobalVideoProvider */}
 
