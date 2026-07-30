@@ -16,6 +16,8 @@ export interface RequestOptions {
   method?: 'GET' | 'POST'
   path: string
   body?: unknown
+  /** Query-параметры — добавляются к path через URLSearchParams (пустые/undefined значения пропускаются). */
+  query?: Record<string, string | undefined>
   timeoutMs?: number
 }
 
@@ -35,9 +37,14 @@ export async function studioTimeRequest<T = unknown>({
   method = 'GET',
   path,
   body,
+  query,
   timeoutMs = 15000,
 }: RequestOptions): Promise<McpTimeResult<T>> {
-  const url = `${studioUrl()}${path}`
+  const qs = query
+    ? new URLSearchParams(Object.entries(query).filter((entry): entry is [string, string] => Boolean(entry[1])))
+      .toString()
+    : ''
+  const url = `${studioUrl()}${path}${qs ? `?${qs}` : ''}`
 
   let resp: Response
   try {

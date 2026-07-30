@@ -25,10 +25,24 @@ process.stdin.on('end', async () => {
     process.exit(0)
   }
 
+  // sessionRef скоупит heartbeat на активную запись ЭТОЙ сессии (§11 «Q» PLAN.md studio) — без
+  // него при параллельных сессиях heartbeat одной держал бы живой таймер другой (или не той).
+  // session_id — стандартное поле payload'а PostToolUse-хука, совпадает с CLAUDE_CODE_SESSION_ID,
+  // который studio-time-mcp пишет в TimeEntry.sessionRef при старте таймера этой же сессией.
+  let sessionRef = ''
+  try {
+    const data = JSON.parse(input)
+    if (typeof data?.session_id === 'string' && data.session_id) {
+      sessionRef = `?sessionRef=${encodeURIComponent(data.session_id)}`
+    }
+  } catch {
+    // Нечитаемый payload — шлём heartbeat без sessionRef, ниже он трактуется как null
+  }
+
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 1500)
-    await fetch(`${STUDIO_URL}/api/mcp/time/heartbeat`, {
+    await fetch(`${STUDIO_URL}/api/mcp/time/heartbeat${sessionRef}`, {
       method: 'POST',
       headers: { 'X-Time-Mcp-Secret': SECRET },
       signal: controller.signal,

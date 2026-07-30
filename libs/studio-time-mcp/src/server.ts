@@ -117,35 +117,56 @@ export function createStudioTimeMcpServer(): McpServer {
     },
   )
 
+  const sessionRefField = z
+    .string()
+    .optional()
+    .describe(
+      'Идентификатор сессии — см. time_start. По умолчанию берётся из CLAUDE_CODE_SESSION_ID: определяет, '
+        + 'какой из ПАРАЛЛЕЛЬНЫХ активных таймеров (свой у каждой сессии/агента, даже на одном проекте) затронуть.',
+    )
+
   // ─── time_stop ───────────────────────────────────────────────────────────────
-  server.tool('time_stop', 'Останавливает текущий активный таймер, если он есть.', {}, async () => {
-    try {
-      const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/stop' })
-      if (!res.ok) {
-        return errorText(`❌ time_stop: ${pretty(res.json)}`)
+  server.tool(
+    'time_stop',
+    'Останавливает активный таймер ЭТОЙ сессии, если он есть.',
+    { sessionRef: sessionRefField },
+    async ({ sessionRef }) => {
+      try {
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/stop',
+          body: { sessionRef: sessionRef ?? defaultSessionRef() },
+        })
+        if (!res.ok) {
+          return errorText(`❌ time_stop: ${pretty(res.json)}`)
+        }
+        if (!res.json.data) {
+          return text('ℹ️ Активного таймера не было.')
+        }
+        return text(`⏹ Таймер остановлен.\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_stop: ${err instanceof Error ? err.message : String(err)}`)
       }
-      if (!res.json.data) {
-        return text('ℹ️ Активного таймера не было.')
-      }
-      return text(`⏹ Таймер остановлен.\n\n${pretty(res.json.data)}`)
-    } catch (err) {
-      return errorText(`❌ time_stop: ${err instanceof Error ? err.message : String(err)}`)
-    }
-  })
+    },
+  )
 
   // ─── time_pause ──────────────────────────────────────────────────────────────
   server.tool(
     'time_pause',
     [
-      'Ставит активный таймер на паузу: запись остаётся открытой, но время перестаёт капать.',
+      'Ставит активный таймер ЭТОЙ сессии на паузу: запись остаётся открытой, но время перестаёт капать.',
       'Возобновить — time_resume. Зови, когда владелец говорит «пауза» или отвлекается на другое;',
       'на следующем его сообщении сразу вызывай time_resume.',
       'Это НЕ остановка: чтобы закрыть запись, нужен time_stop, а чтобы закрыть небиллируемой — time_discard.',
     ].join('\n'),
-    {},
-    async () => {
+    { sessionRef: sessionRefField },
+    async ({ sessionRef }) => {
       try {
-        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/pause' })
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/pause',
+          body: { sessionRef: sessionRef ?? defaultSessionRef() },
+        })
         if (!res.ok) {
           return errorText(`❌ time_pause: ${pretty(res.json)}`)
         }
@@ -163,13 +184,17 @@ export function createStudioTimeMcpServer(): McpServer {
   server.tool(
     'time_resume',
     [
-      'Снимает паузу с активного таймера — время снова идёт.',
+      'Снимает паузу с активного таймера ЭТОЙ сессии — время снова идёт.',
       'Вызывай сразу, как владелец продолжил взаимодействие после «паузы», не дожидаясь отдельной просьбы.',
     ].join('\n'),
-    {},
-    async () => {
+    { sessionRef: sessionRefField },
+    async ({ sessionRef }) => {
       try {
-        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/resume' })
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/resume',
+          body: { sessionRef: sessionRef ?? defaultSessionRef() },
+        })
         if (!res.ok) {
           return errorText(`❌ time_resume: ${pretty(res.json)}`)
         }
@@ -187,16 +212,20 @@ export function createStudioTimeMcpServer(): McpServer {
   server.tool(
     'time_discard',
     [
-      'Выключатель: останавливает активный таймер и помечает запись небиллируемой',
+      'Выключатель: останавливает активный таймер ЭТОЙ сессии и помечает запись небиллируемой',
       '(billable: false, nonBillReason: INTERNAL). Используй, когда копаешься в проекте из',
       'любопытства или пробуешь подход, который не пойдёт в работу — не оставляй это как обычный time_stop,',
       'иначе владельцу придётся вручную чистить черновик от небиллируемого времени.',
       'Раньше этот инструмент назывался time_pause, хотя ничего не приостанавливал.',
     ].join('\n'),
-    {},
-    async () => {
+    { sessionRef: sessionRefField },
+    async ({ sessionRef }) => {
       try {
-        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/discard' })
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/discard',
+          body: { sessionRef: sessionRef ?? defaultSessionRef() },
+        })
         if (!res.ok) {
           return errorText(`❌ time_discard: ${pretty(res.json)}`)
         }
@@ -213,11 +242,18 @@ export function createStudioTimeMcpServer(): McpServer {
   // ─── time_note ───────────────────────────────────────────────────────────────
   server.tool(
     'time_note',
-    'Уточняет описание активной записи без остановки таймера.',
-    { description: z.string().min(1).max(2000).describe('Новое описание — видит клиент') },
-    async ({ description }) => {
+    'Уточняет описание активной записи ЭТОЙ сессии без остановки таймера.',
+    {
+      description: z.string().min(1).max(2000).describe('Новое описание — видит клиент'),
+      sessionRef: sessionRefField,
+    },
+    async ({ description, sessionRef }) => {
       try {
-        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/note', body: { description } })
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/note',
+          body: { description, sessionRef: sessionRef ?? defaultSessionRef() },
+        })
         if (!res.ok) {
           return errorText(`❌ time_note: ${pretty(res.json)}`)
         }
@@ -229,20 +265,28 @@ export function createStudioTimeMcpServer(): McpServer {
   )
 
   // ─── time_status ─────────────────────────────────────────────────────────────
-  server.tool('time_status', 'Что идёт сейчас: активный проект, описание, с какого времени.', {}, async () => {
-    try {
-      const res = await studioTimeRequest({ path: '/api/mcp/time/status' })
-      if (!res.ok) {
-        return errorText(`❌ time_status: ${pretty(res.json)}`)
+  server.tool(
+    'time_status',
+    'Что идёт сейчас у ЭТОЙ сессии: активный проект, описание, с какого времени.',
+    { sessionRef: sessionRefField },
+    async ({ sessionRef }) => {
+      try {
+        const res = await studioTimeRequest({
+          path: '/api/mcp/time/status',
+          query: { sessionRef: sessionRef ?? defaultSessionRef() },
+        })
+        if (!res.ok) {
+          return errorText(`❌ time_status: ${pretty(res.json)}`)
+        }
+        if (!res.json.data) {
+          return text('ℹ️ Таймер сейчас не идёт.')
+        }
+        return text(`⏱ Идёт таймер:\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_status: ${err instanceof Error ? err.message : String(err)}`)
       }
-      if (!res.json.data) {
-        return text('ℹ️ Таймер сейчас не идёт.')
-      }
-      return text(`⏱ Идёт таймер:\n\n${pretty(res.json.data)}`)
-    } catch (err) {
-      return errorText(`❌ time_status: ${err instanceof Error ? err.message : String(err)}`)
-    }
-  })
+    },
+  )
 
   // ─── time_log ────────────────────────────────────────────────────────────────
   server.tool(
