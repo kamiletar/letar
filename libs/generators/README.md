@@ -30,6 +30,32 @@ nx g @letar/generators:e2e-suite <app> --port=3033
 [`.claude/docs/e2e-testing.md`](/.claude/docs/e2e-testing.md) § «nx e2e зависает в dev-режиме» за
 обходным путём (прогон `bunx playwright test` напрямую против вручную поднятого dev-сервера).
 
+**Приватные приложения (`apps/<app>` — submodule на `letar-private-*`, см. `.gitmodules`):** по
+конвенции `-e2e` для них тоже должен быть отдельным приватным submodule (образец — `aboi-e2e`,
+`driving-school-e2e`, `domwellbes-e2e`), а не обычной директорией публичного `letar`. Генератор
+детектирует это по `.gitmodules` автоматически:
+
+- **Без `--linkSubmodule`** (по умолчанию) — генерирует `apps/<app>-e2e` как обычно, но выводит
+  предупреждение с готовыми командами ручного переноса (создать приватный репозиторий через `gh`,
+  запушить, подключить как submodule).
+- **С `--linkSubmodule`** — после генерации сам выполняет перенос: `gh repo create
+  kamiletar/letar-private-<app>-e2e --private`, инициализирует git и пушит содержимое
+  `apps/<app>-e2e`, затем подключает его обратно как `git submodule add` и коммитит `.gitmodules`
+  в `letar`.
+
+```bash
+nx g @letar/generators:e2e-suite <app> --linkSubmodule
+```
+
+⚠️ `--linkSubmodule` добавляет генератору побочные эффекты, обычно нехарактерные для чисто
+локального Nx-генератора: сетевой вызов `gh` (создание GitHub-репозитория), `git push` в новый
+приватный репозиторий и коммит в `letar`. Это осознанный компромисс — по умолчанию (без флага)
+поведение остаётся полностью локальным, автоматизация — только по явному согласию. Требует
+авторизованного `gh` (`gh auth status`) и SSH-доступа к `github.com:kamiletar/*`. При сбое на любом
+шаге (репозиторий уже существует, push не прошёл, `apps/<app>-e2e` не удаляется из-за занятого nx
+daemon на Windows) генератор останавливается с точным описанием, что уже сделано и какую команду
+доделать вручную — не оставляет состояние без объяснения.
+
 ### `electron-app`
 
 Скаффолдит новое минимальное Electron/Nextron-приложение `apps/<name>` — тот же каркас, что
@@ -92,6 +118,8 @@ nx g @letar/generators:new-lib <name> --description="Утилиты для X"
 nx g @letar/generators:new-app <name>
 # с явным портом/именем/описанием/приватностью:
 nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё приложение" --private
+# с ZenStack/Prisma-каркасом:
+nx g @letar/generators:new-app <name> --withDb
 ```
 
 Порт по умолчанию — **следующий за максимальным занятым** `3xxx` (продолжение последовательности, а не
@@ -102,6 +130,19 @@ nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё прил
 Сгенерированное приложение **осознанно минимально** — без БД, форм, аутентификации, PWA. Это
 отправная точка, а не копия `grandslamcup`/`driving-school` — те эталоны несут специфику (Serwist,
 Better Auth, cookie-баннер и т.д.), которую не всем новым приложениям нужно тащить с первого дня.
+
+**`--withDb`** добавляет ZenStack/Prisma-инфраструктуру, которую иначе приходится копировать руками
+из другого приложения (`apps/aboi`, `apps/studio`): `prisma.config.ts` (плейсхолдер
+`DATABASE_URL`/`SHADOW_DATABASE_URL` — реальные значения кладутся в `.env.local`, см.
+`.claude/rules/env-files.md`), `schema.zmodel`-заготовка (только `datasource`/`generator client`/
+`plugin prisma`/`plugin typescript`/`plugin policy`/`plugin formSchema` — без единой модели, их
+дальше пишешь по `.claude/rules/database.md`), и таргеты `zenstack:generate`/`db:generate`/
+`db:push`/`db:migrate`/`db:studio` в `project.json`. Для `--private` вдобавок добавляется
+`src/generated/` в сгенерированный `.gitignore` submodule'а (публичным приложениям это не нужно —
+корневой `.gitignore` монорепо уже исключает `/apps/**/src/generated/`).
+
+Формы (`@letar/forms`) и аутентификация (Better Auth) каркасом **не** создаются — это отдельные шаги
+после того, как в `schema.zmodel` появятся реальные модели (`.claude/docs/forms.md`, `.claude/docs/auth.md`).
 
 **Генератор не перезаписывает существующие приложения** — если `apps/<name>` уже есть, падает с понятной
 ошибкой.

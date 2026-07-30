@@ -1,6 +1,6 @@
-import type { Tree } from '@nx/devkit'
+import { logger, type Tree } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import e2eSuiteGenerator from './generator'
 
 describe('e2e-suite generator', () => {
@@ -73,5 +73,46 @@ describe('e2e-suite generator', () => {
     const gitignore = tree.read('apps/my-app-e2e/.gitignore', 'utf-8')
     expect(gitignore).toContain('playwright/.auth/')
     expect(gitignore).toContain('test-output/')
+  })
+
+  describe('приватный submodule (apps/<app> объявлен в .gitmodules с url letar-private-*)', () => {
+    beforeEach(() => {
+      tree.write('apps/private-app/.env', 'PORT=3199\n')
+      tree.write(
+        '.gitmodules',
+        '[submodule "apps/private-app"]\n'
+          + '\tpath = apps/private-app\n'
+          + '\turl = git@github.com:kamiletar/letar-private-private-app.git\n'
+          + '[submodule "apps/another"]\n'
+          + '\tpath = apps/another\n'
+          + '\turl = git@github.com:kamiletar/letar-private-another.git\n',
+      )
+    })
+
+    it('без --linkSubmodule только предупреждает и не трогает файловую систему за пределами Tree', async () => {
+      const warnSpy = vi.spyOn(logger, 'warn')
+
+      const result = await e2eSuiteGenerator(tree, { app: 'private-app' })
+
+      expect(result).toBeUndefined()
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('приватный submodule'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('gh repo create'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('--linkSubmodule'))
+    })
+
+    it('с --linkSubmodule возвращает GeneratorCallback вместо немедленного запуска gh/git', async () => {
+      const result = await e2eSuiteGenerator(tree, { app: 'private-app', linkSubmodule: true })
+
+      expect(typeof result).toBe('function')
+    })
+
+    it('не предупреждает и не возвращает callback для публичного приложения', async () => {
+      const warnSpy = vi.spyOn(logger, 'warn')
+
+      const result = await e2eSuiteGenerator(tree, { app: 'my-app', linkSubmodule: true })
+
+      expect(result).toBeUndefined()
+      expect(warnSpy).not.toHaveBeenCalled()
+    })
   })
 })
