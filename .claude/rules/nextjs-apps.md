@@ -56,6 +56,14 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 - **MUST** использовать `proxy.ts` вместо `middleware.ts` (Next.js 16)
 - **SHOULD** Server Components по умолчанию
 - **NEVER** использовать относительные пути для глубоких импортов
+- **MUST** `export const dynamic = 'force-dynamic'` на публичной странице, показывающей данные,
+  редактируемые через админку этого же приложения (каталоги, списки объявлений/товаров/карточек).
+  Без этого Next.js App Router по умолчанию делает SSG — запекает список на этапе `next build`, и
+  более поздние изменения в БД (включая сид с демо-данными, который `deploy-affected.sh` выполняет
+  ПОСЛЕ билда: `migrate → build → seed`) не отражаются на сайте без полного ребилда. Поймано дважды
+  на одной и той же ошибке: `apps/aboi/src/app/[locale]/catalog/page.tsx` и
+  `apps/domwellbes/src/app/houses/page.tsx` + `houses/[slug]/page.tsx` (`/houses` показывал «0
+  домов» даже после успешного сида).
 
 ## Документация
 
