@@ -29,7 +29,7 @@ function PrefillForm() {
     <Form
       schema={ContactSchema}
       initialValue={{ name: '', email: '', phone: '', ...prefilled }}
-      onSubmit={async ({ value }) => {
+      onSubmit={async (value) => {
         alert(JSON.stringify(value, null, 2))
       }}
     >
