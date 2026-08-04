@@ -38,11 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Header />
             {children}
             <Toaster />
+            <CookieBanner appKey="animatrona-tracker" />
           </QueryProvider>
         </Provider>
         <Script src="/subtitles-octopus.js" strategy="beforeInteractive" />
         <UmamiScript />
-        <CookieBanner appKey="animatrona-tracker" />
       </body>
     </html>
   )
