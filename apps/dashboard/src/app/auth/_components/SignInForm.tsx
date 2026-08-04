@@ -3,7 +3,6 @@
 import { toaster } from '@/app/_components/ui/toaster'
 import { Box, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
-import { useRouter } from 'next/navigation'
 import { signInAction } from '../_actions/signin.action'
 import { type SignInFormData, SignInSchema } from '../_schemas/signin.schema'
 
@@ -13,8 +12,6 @@ const defaultValues: SignInFormData = {
 }
 
 export function SignInForm() {
-  const router = useRouter()
-
   const handleSubmit = async (data: SignInFormData) => {
     const result = await signInAction(data)
 
