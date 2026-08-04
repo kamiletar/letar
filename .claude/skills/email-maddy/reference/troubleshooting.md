@@ -36,7 +36,7 @@ dig TXT letar.best           # SPF
 dig TXT _dmarc.letar.best    # DMARC
 dig TXT default._domainkey.letar.best  # DKIM
 dig MX letar.best            # MX
-dig -x 193.37.68.73          # PTR
+dig -x 31.56.180.161         # PTR
 ```
 
 ## Типичные проблемы
@@ -102,7 +102,7 @@ dig -x 193.37.68.73          # PTR
 3. **PTR не настроен:**
 
    ```bash
-   dig -x 193.37.68.73
+   dig -x 31.56.180.161
    # Должен резолвить в mail.letar.best
    ```
 
@@ -130,25 +130,30 @@ git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): новый SM
 
 **Симптомы:** В заголовках нет DKIM-Signature
 
+⚠️ Реальный конфиг лежит в `/opt/maddy/data/maddy.conf` (не `config/maddy.conf` — тот файл
+устарел и не подключён к контейнеру). Подпись задаётся не блоками `sign dkim { domain ... }` на
+каждый домен, а единой директивой `modify { dkim $(primary_domain) $(local_domains) default }`
+внутри `submission`/`smtp` — см. `reference/maddy-config.md`.
+
 **Проверить:**
 
-1. Домен в конфиге Maddy:
+1. Домен есть в `$(local_domains)` и директива `dkim` подключена в нужном блоке:
 
    ```bash
-   ssh root@mail.letar.best "grep -A3 'sign dkim' /opt/maddy/config/maddy.conf"
+   ssh root@mail.letar.best "grep -E '\\\$\\(local_domains\\)|modify \\{|dkim ' /opt/maddy/data/maddy.conf"
    ```
 
-2. Ключ существует:
+2. Ключи существуют (генерируются лениво при первой отправке с нового домена):
 
    ```bash
-   ssh root@mail.letar.best "docker exec maddy ls -la /data/dkim/"
+   ssh root@mail.letar.best "docker exec maddy ls -la /data/dkim_keys/"
    ```
 
 3. DNS запись совпадает с ключом:
 
    ```bash
    # Публичный ключ на сервере
-   ssh root@mail.letar.best "docker exec maddy cat /data/dkim/<domain>.key.pub"
+   ssh root@mail.letar.best "docker exec maddy cat /data/dkim_keys/<domain>_default.dns"
 
    # DNS запись
    dig TXT default._domainkey.<domain>

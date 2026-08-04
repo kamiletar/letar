@@ -25,19 +25,22 @@ description: |
 
 ## Инфраструктура
 
-| Компонент  | Хост                           | Назначение  |
-| ---------- | ------------------------------ | ----------- |
-| Maddy      | mail.letar.best (193.37.68.73) | SMTP сервер |
-| Production | 194.164.245.97                 | Приложения  |
+| Компонент  | Хост                            | Назначение  |
+| ---------- | ------------------------------- | ----------- |
+| Maddy      | mail.letar.best (31.56.180.161) | SMTP сервер |
+| Production | 194.164.245.97                  | Приложения  |
 
 ### Порты Maddy
 
-| Порт | Протокол   | Назначение          |
-| ---- | ---------- | ------------------- |
-| 25   | SMTP       | Входящая почта      |
-| 465  | SMTPS      | Отправка (TLS)      |
-| 587  | Submission | Отправка (STARTTLS) |
-| 993  | IMAPS      | Чтение почты        |
+⚠️ Сервер не send-only relay — он полноценно принимает и хранит почту (архитектура "forwarding
+with reroute", подробности в `reference/maddy-config.md`).
+
+| Порт | Протокол   | Назначение                                                                                               |
+| ---- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| 25   | SMTP       | Приём входящей почты извне + DMARC/DKIM/SPF-проверка + доставка в mailbox или форвард по `/data/aliases` |
+| 465  | SMTPS      | Отправка авторизованными пользователями (implicit TLS) + проверка `authorize_sender`                     |
+| 587  | Submission | Отправка авторизованными пользователями (STARTTLS) + проверка `authorize_sender`                         |
+| 993  | IMAPS      | Чтение почты из `storage.imapsql` (реальные почтовые ящики, не только очередь исходящих)                 |
 
 ## Быстрые команды
 
@@ -127,40 +130,36 @@ git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обнови�
 
 ## Workflow: Добавить новый домен
 
-1. **Обновить конфиг Maddy**
+1. **Обновить конфиг Maddy** — реальный файл в `data/`, не `config/` (тот устарел, см.
+   `reference/maddy-config.md`):
 
    ```bash
-   ssh root@mail.letar.best "nano /opt/maddy/config/maddy.conf"
+   ssh root@mail.letar.best "nano /opt/maddy/data/maddy.conf"
    ```
 
-   Добавить:
-   - Домен в `$(local_domains)`
-   - Блок `sign dkim` для домена
+   Добавить домен в `$(local_domains)` — отдельный DKIM-ключ заводить не нужно, единая директива
+   `modify { dkim $(primary_domain) $(local_domains) default }` подпишет письма автоматически.
+   Если приложению нужны алиасы/ролевые адреса — сразу добавить записи в `/data/aliases` и
+   `/data/sender_map.txt` (паттерн описан в `reference/maddy-config.md`).
 
-2. **Создать DKIM ключ (если отдельный домен)**
-
-   ```bash
-   ssh root@mail.letar.best "docker exec maddy maddy certs --algorithm rsa2048 /data/dkim/<domain>.key"
-   ```
-
-3. **Перезапустить Maddy**
+2. **Перезапустить Maddy**
 
    ```bash
    ssh root@mail.letar.best "docker restart maddy"
    ```
 
-4. **Добавить DNS записи**
+3. **Добавить DNS записи**
    - SPF: `v=spf1 a:mail.letar.best ~all`
    - DKIM: `default._domainkey` → публичный ключ
    - DMARC: `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best`
 
-5. **Получить DKIM ключ**
+4. **Получить DKIM ключ** (генерируется лениво при первой отправке с нового домена):
 
    ```bash
-   ssh root@mail.letar.best "docker exec maddy cat /data/dkim/<domain>.key.pub"
+   ssh root@mail.letar.best "docker exec maddy cat /data/dkim_keys/<domain>_default.dns"
    ```
 
-6. **Проверить через mail-tester.com**
+5. **Проверить через mail-tester.com**
 
 ## Workflow: Изменить SMTP пароль
 
@@ -201,7 +200,8 @@ git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обнови�
 
 - `libs/email/` — Shared библиотека @letar/email
 - `apps/*/.env.docker` — SMTP настройки приложений
-- `/opt/maddy/config/maddy.conf` — Конфиг Maddy на сервере
+- `/opt/maddy/data/maddy.conf` — Конфиг Maddy на сервере (реально используемый; `config/maddy.conf`
+  рядом — устаревший, не подключён к контейнеру)
 - `apps/*/.env.docker.enc` — они же в зашифрованном виде (источник истины, коммитится)
 
 ## Документация

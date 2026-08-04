@@ -168,7 +168,8 @@ docker logs -f maddy
 
 ### Конфигурация
 
-Конфиг находится в `/opt/maddy/config/maddy.conf`
+Конфиг находится в `/opt/maddy/data/maddy.conf` (не `config/maddy.conf` — тот файл устарел и не
+подключён к контейнеру, см. `.claude/skills/email-maddy/reference/maddy-config.md`)
 
 ```bash
 # После изменений
