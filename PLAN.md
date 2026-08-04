@@ -2299,14 +2299,21 @@ Emotion», но сама команда была `"next dev"` без флага 
       `animatrona-shared`, а не напрямую от `animatrona-utils`, поэтому линк не хоистится до
       корневого `node_modules` и без `paths` резолв всё ещё падает TS2307. `typecheck:tsgo
       animatrona-tv` и `typecheck animatrona-mobile` — зелёные.
-- [ ] `form-example`: `nx zenstack:generate` не проходит — «Cannot find plugin module
+- [x] `form-example`: `nx zenstack:generate` не проходил — «Cannot find plugin module
       `@letar/zenstack-form-plugin`» (пакет существует в `libs/`, но `node_modules/@letar/` в
       репозитории нет вовсе, а CLI не умеет резолвить через `paths`), fallback `prisma generate`
-      падает без `DATABASE_URL`. Клиент Prisma сгенерирован вручную
-      (`DATABASE_URL=<заглушка> npx prisma generate`) — без него 11 из 12 `TS2339` вида «`Property
-      'contact' does not exist on PrismaClient`». Контракт тот же, что у 18 соседей (их
-      `src/generated/` в `.gitignore`, таргет предполагает, что генерация уже прошла), но у
-      `form-example` генерация сломана — на чистом checkout'е таргет будет красным.
+      падал без `DATABASE_URL`. **Закрыто (2026-08-04, PurpleSpring):** причина — у `form-example`
+      единственного среди потребителей плагина нет своего `package.json` (не в bun workspaces),
+      симлинк никогда не появлялся ни у кого. Провайдер плагина переведён на относительный путь
+      `../../libs/zenstack-form-plugin/dist/index.js` (тот же приём, что уже в
+      `form-develop-app/schema.zmodel`). Попутно вскрылось, что fallback `zenstack generate ||
+      prisma generate` был логической ошибкой, а не костылём под сломанный плагин: `@zenstackhq/cli`
+      v3.9.0 игнорирует `generator client { prisma-client-js }` целиком (PrismaClient им не
+      генерируется), а `||` после фикса плагина навсегда скрыл бы вызов `prisma generate`.
+      Заменено на `zenstack generate && prisma generate`. Проверено на чистой генерации
+      (`--skip-nx-cache`, предварительно удалён `src/generated/form-schemas/*`):
+      `nx run form-example:zenstack:generate` и `nx run form-example:typecheck:tsgo` — зелёные.
+      Подробности — `apps/form-example/PLAN_COMPLETED.md`.
 - [ ] `form-example` — единственное приложение, импортирующее `@prisma/client` напрямую, и одно из
       трёх без `output` в `generator client` (у 16 остальных — `output = "./prisma"`). Клиент
       поэтому пишется в общий хойстнутый `@prisma/client`. Побочного эффекта на соседей нет
