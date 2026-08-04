@@ -33,24 +33,11 @@ nx g @letar/generators:new-lib <lib-name> --description="Утилиты для X
 
 ### 2. Подключить к приложению
 
-В `tsconfig.json` приложения:
+Добавь `@letar/<lib-name>` в `nx.implicitDependencies` в `package.json` приложения (если
+библиотеки нет в его `dependencies`) — **это единственное обязательное** (ребро графа Nx).
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/<lib-name>": ["../../libs/<lib-name>/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/<lib-name>" }]
-}
-```
-
-Добавь `<lib-name>` в `implicitDependencies` `package.json` приложения — **это единственное
-обязательное** (ребро графа Nx). `paths` и `references` выше вспомогательные: резолв идёт через
-`customConditions` + `exports`, а `nx sync` в этом репо отключён и references не обновит.
-Подробности — [libs.md](/.claude/rules/libs.md) и
-[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
+Всё остальное (когда нужны `paths`, почему `references` не обязательны и при чём тут `nx sync`) —
+[libs.md § Подключение к приложению](/.claude/rules/libs.md#подключение-к-приложению).
 
 ### 3. Проверить
 

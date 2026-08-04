@@ -40,20 +40,9 @@ nx typecheck:tsgo mcp-server-kit
 
 ## Подключение к приложению
 
-В `tsconfig.json` приложения:
+Обязательное — одно: добавь `@letar/mcp-server-kit` в `nx.implicitDependencies` в `package.json`
+приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
+`@letar/mcp-server-kit` резолвится и без настроек приложения.
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/mcp-server-kit": ["../../libs/mcp-server-kit/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/mcp-server-kit" }]
-}
-```
-
-Затем добавь `mcp-server-kit` в `implicitDependencies` `package.json` приложения — это
-единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
-генератор `@nx/js:typescript-sync` в репо отключён (см.
-[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).
+Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
+[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

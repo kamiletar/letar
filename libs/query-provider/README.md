@@ -4,13 +4,10 @@
 
 ## Установка
 
-Библиотека уже включена в монорепо. Добавьте в `tsconfig.json` приложения:
+Библиотека уже включена в монорепо. Обязательное — одно: добавь `@letar/query-provider` в
+`nx.implicitDependencies` в `package.json` приложения (если библиотеки нет в его `dependencies`).
 
-```json
-{
-  "references": [{ "path": "../../libs/query-provider" }]
-}
-```
+Полная процедура подключения — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
 ## Использование
 

@@ -66,20 +66,9 @@ nx typecheck:tsgo electron-storage
 
 ## Подключение к приложению
 
-В `tsconfig.json` приложения:
+Обязательное — одно: добавь `@letar/electron-storage` в `nx.implicitDependencies` в `package.json`
+приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
+`@letar/electron-storage` резолвится и без настроек приложения.
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/electron-storage" }]
-}
-```
-
-Затем добавь `electron-storage` в `implicitDependencies` `package.json` приложения — это
-единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
-генератор `@nx/js:typescript-sync` в репо отключён (см.
-[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).
+Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
+[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

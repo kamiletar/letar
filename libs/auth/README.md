@@ -4,20 +4,13 @@
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий. Добавьте пути в `tsconfig.json` приложения:
+Библиотека уже включена в монорепо. Обязательное — одно: добавь `@letar/auth` в
+`nx.implicitDependencies` в `package.json` приложения (если библиотеки нет в его `dependencies`).
+Полная процедура — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/auth": ["../../libs/auth/src/index.ts"],
-      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
-      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/auth" }]
-}
-```
+⚠️ У библиотеки три точки входа: `@letar/auth`, `@letar/auth/client`, `@letar/auth/server`.
+Подпути в `paths` не наследуются — там, где `paths` вообще нужны, каждый вход прописывается своей
+строкой, иначе `TS2307`. Разбор — [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
 
 ## Модули
 

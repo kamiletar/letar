@@ -83,23 +83,12 @@ nx typecheck:tsgo redis-client
 
 ## Подключение к приложению
 
-В `tsconfig.json` приложения:
+Обязательное — одно: добавь `@letar/redis-client` в `nx.implicitDependencies` в `package.json`
+приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
+`@letar/redis-client` резолвится и без настроек приложения.
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/redis-client": ["../../libs/redis-client/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/redis-client" }]
-}
-```
-
-Затем добавь `@letar/redis-client` в `implicitDependencies` в `project.json` приложения — это
-единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
-генератор `@nx/js:typescript-sync` в репо отключён (см.
-[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).
+Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
+[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
 Для Next.js-приложений (`output: 'standalone'`) дополнительно добавь `@letar/redis-client` в
 `transpilePackages` в `next.config.*` — иначе прод-билд может не срезолвить импорт, даже если

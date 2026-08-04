@@ -12,12 +12,10 @@
 
 ## Установка
 
-```bash
-# Добавь в implicitDependencies приложения
-{
-  "implicitDependencies": ["@letar/api-server"]
-}
-```
+Библиотека уже включена в монорепо. Обязательное — одно: добавь `@letar/api-server` в
+`nx.implicitDependencies` в `package.json` приложения (если библиотеки нет в его `dependencies`).
+
+Полная процедура подключения — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
 ## Использование
 

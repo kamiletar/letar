@@ -4,18 +4,10 @@
 
 ## Установка
 
-Добавьте в `tsconfig.json` вашего приложения:
+Библиотека уже включена в монорепо. Обязательное — одно: добавь `@letar/email` в
+`nx.implicitDependencies` в `package.json` приложения (если библиотеки нет в его `dependencies`).
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/email": ["../../libs/email/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/email" }]
-}
-```
+Полная процедура подключения — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
 ## Быстрый старт
 

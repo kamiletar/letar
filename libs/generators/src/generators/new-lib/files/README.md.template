@@ -26,17 +26,9 @@ nx typecheck:tsgo <%= name %>
 
 ## Подключение к приложению
 
-В `tsconfig.json` приложения:
+Обязательное — одно: добавь `@letar/<%= name %>` в `nx.implicitDependencies` в `package.json`
+приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
+`@letar/<%= name %>` резолвится и без настроек приложения.
 
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@letar/<%= name %>": ["../../libs/<%= name %>/src/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/<%= name %>" }]
-}
-```
-
-Затем `nx sync` и добавь `<%= name %>` в `implicitDependencies` `package.json` приложения.
+Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
+[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

@@ -17,25 +17,14 @@
 
 ## Установка
 
-Библиотека уже включена в монорепо. Нужны **две** вещи (см. [libs.md](/.claude/rules/libs.md)):
+Библиотека уже включена в монорепо. Обязательное — одно: добавь `@letar/image-upload` в
+`nx.implicitDependencies` в `package.json` приложения (если библиотеки нет в его `dependencies`).
+Полная процедура — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
-```jsonc
-// apps/<app>/tsconfig.json
-{
-  "compilerOptions": {
-    "paths": {
-      // только тот вход, который реально импортируете
-      "@letar/image-upload": ["../../libs/image-upload/src/index.ts"],
-      "@letar/image-upload/server": ["../../libs/image-upload/src/server/index.ts"]
-    }
-  },
-  "references": [{ "path": "../../libs/image-upload" }]
-}
-```
-
-⚠️ Подпути в `paths` не наследуются: путь к `@letar/image-upload` **не** делает
-резолвимым `@letar/image-upload/server`. Каждый вход прописывается своей строкой,
-иначе — `TS2307`.
+⚠️ У библиотеки две точки входа: `@letar/image-upload` и `@letar/image-upload/server`. Подпути в
+`paths` не наследуются: путь к `@letar/image-upload` **не** делает резолвимым
+`@letar/image-upload/server`. Там, где `paths` вообще нужны, каждый вход прописывается своей
+строкой, иначе — `TS2307`.
 
 `transpilePackages` в `next.config` для этой библиотеки **не нужен** — она резолвится
 через `paths`, а не через `node_modules`. Подробный разбор (на примере как раз
