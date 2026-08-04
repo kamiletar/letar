@@ -1860,3 +1860,20 @@ driving-school (Этап 0.2) — вынесен в `apps/driving-school/PLAN.md
 может быть `<script>`, и он выполнится в origin приложения. Теперь `X-Content-Type-Options:
 nosniff` ставится всегда, а для `image/svg+xml` дополнительно
 `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox`.
+
+### Хвост: форматирование `tsconfig.json` (2026-08-04, OrangeHawk)
+
+- [x] Запись `@letar/image-upload/server` вносилась в `tsconfig.json` скриптом через
+      `JSON.parse` → `JSON.stringify(obj, null, 2)`. По существу менялись две строки, а diff
+      выходил 54–120 строк на файл: все однострочные массивы развернулись в многострочные.
+      Задето шесть приложений из семи (`grandslamcup` правился руками — там честные 4 строки).
+      Домашний стиль возвращён, содержимое то же (сверено `JSON.parse` включая порядок ключей),
+      `typecheck:tsgo` зелёный. Коммит `525ef26c` + по коммиту в каждом приватном submodule.
+- [x] Ловушка задокументирована в [code-style.md](/.claude/docs/code-style.md) (`8dedf9a2`):
+      dprint **не приводит** JSON к одному виду, а сохраняет форму из исходника — однострочный
+      массив остаётся однострочным, развёрнутый развёрнутым. Оба вида проходят `dprint check`,
+      поэтому расхождение не ловится ни хуком, ни `nx format`, ни typecheck. Проверять
+      `git diff --stat` после любой скриптовой правки JSON.
+- Побочно: во всех четырёх приватных submodule коммиты §29 остались незапушенными — `git push`
+  увёл origin вперёд сразу на два коммита. Незапушенный submodule ломает любой деплой
+  (`not our ref`), см. `.claude/rules/deploy-coordination.md`.
