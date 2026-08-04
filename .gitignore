@@ -55,6 +55,10 @@ Thumbs.db
 out
 next-env.d.ts
 
+# Next.js 16 `next dev` auto-generated agent-guide file (перезаписывается при каждом dev-запуске,
+# не реальная документация проекта — см. .claude/docs/nextjs16-agent-guide-files.md)
+apps/*/AGENTS.md
+
 # Cron configuration (local, may be edited via Dashboard UI)
 /cron-jobs.json
 
