@@ -9,21 +9,24 @@ import sharp from 'sharp'
 const MAX_OUTPUT_WIDTH = 2000
 const MAX_OUTPUT_HEIGHT = 2000
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-const MAX_EXTERNAL_FILE_SIZE = 5 * 1024 * 1024 // 5MB для внешних URL
 
 /**
  * OG-image API — кропит изображение по центру для Open Graph
  * GET /api/og-image?url=<path>&w=1200&h=630
  *
+ * Принимает только локальные пути (/api/files/*, /api/images/*). Ветка внешних
+ * URL была удалена — она без авторизации делала fetch на любой переданный адрес
+ * (SSRF: localhost, метаданные облака, внутренняя сеть), а оба вызывающих места
+ * (mandalas/[slug], shop/[slug]) всегда передают только getImageUrl() — локальный путь.
+ *
  * Оптимизации памяти:
  * - Лимиты на размер output (max 2000x2000)
- * - Лимиты на размер файла (10MB локальные, 5MB внешние)
+ * - Лимиты на размер файла (10MB)
  * - Streaming для локальных файлов вместо readFile
  * - Агрессивное кэширование (1 год)
  *
  * @example
  * /api/og-image?url=/api/images/abc123 — из Image
- * /api/og-image?url=https://example.com/image.jpg — внешний URL
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -91,49 +94,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Для внешних URL получаем через HTTP
-    const imageUrl = url.startsWith('/') ? new URL(url, request.url).toString() : url
-
-    const imageResponse = await fetch(imageUrl)
-
-    if (!imageResponse.ok) {
-      return NextResponse.json({ error: 'Failed to fetch image' }, { status: imageResponse.status })
-    }
-
-    // Проверяем Content-Length если доступен
-    const contentLength = imageResponse.headers.get('content-length')
-    if (contentLength && parseInt(contentLength) > MAX_EXTERNAL_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `External file too large. Max ${MAX_EXTERNAL_FILE_SIZE / 1024 / 1024}MB` },
-        { status: 413 },
-      )
-    }
-
-    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer())
-
-    // Двойная проверка размера (на случай если Content-Length не был предоставлен)
-    if (imageBuffer.length > MAX_EXTERNAL_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `External file too large. Max ${MAX_EXTERNAL_FILE_SIZE / 1024 / 1024}MB` },
-        { status: 413 },
-      )
-    }
-
-    // Кроп по центру через Sharp
-    const croppedImage = await sharp(imageBuffer)
-      .resize(w, h, {
-        fit: 'cover',
-        position: 'center',
-      })
-      .jpeg({ quality: 75 })
-      .toBuffer()
-
-    return new NextResponse(new Uint8Array(croppedImage), {
-      headers: {
-        'Content-Type': 'image/jpeg',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    })
+    // Внешние URL не поддерживаются — только /api/files/* и /api/images/*
+    return NextResponse.json({ error: 'Bad request' }, { status: 400 })
   } catch (error) {
     console.error('Error processing OG image:', error)
     return NextResponse.json({ error: 'Failed to process image' }, { status: 500 })
