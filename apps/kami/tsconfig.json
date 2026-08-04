@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "noUnusedLocals": false,
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "types": ["node"],
     "paths": {
