@@ -19,6 +19,28 @@
 
 ---
 
+## ✅ Path traversal в `/api/og-image` — ЗАКРЫТО v0.40.3 (2026-08-04)
+
+**Что было:** роут брал query-параметр `url`, проверял только префикс (`/api/files/`,
+`/api/images/`) и склеивал остаток с корнем `uploads/` через `join` без нормализации. Префикс-проверку
+проходил любой `../`, и sharp отдавал произвольный файл-изображение с диска сервера — без
+авторизации. Тот же приём нашёлся в `DELETE /api/upload?url=…`, где это уже удаление файла.
+
+**Чем закрыто:** `resolveUploadPath` из `@letar/image-upload/server` — та же защита, что в
+унифицированных `api/files/[...path]` (нормализация пути + проверка, что результат внутри корня).
+Выход за корень → 403, нулевой байт → 400.
+
+**Урок для следующих унификаций:** коммит `e7a4f8cc` свёл к общему хелперу семь роутов
+`api/files/[...path]`, но потребители того же корня `uploads/` **с другой формой URL** остались
+со старой защитой — их не видно поиском по имени роута. Искать надо по корню (`join(..., 'uploads', …)`),
+а не по семейству роутов. Аудит остальных потребителей проведён 2026-08-04, найденное вне mandala
+передано владельцу отдельно (не публикуем незакрытые находки в публичный репозиторий).
+
+**Тесты:** `src/app/api/og-image/__tests__/route.spec.ts` — 12 штук, с положительным контролем
+(реальный файл за пределами `uploads/`), чтобы 403 не путался с «файла и так нет».
+
+---
+
 ## ✅ Приоритетная задача — `/admin/products` сломан (найдено BlackCove, staging e2e, 2026-07-22) — ЗАКРЫТО v0.39.10
 
 **Контекст:** §18.7 Тираж M1 batch2 (staging-e2e-гейт монорепо, `PLAN-INFRA.md`) — после того как
@@ -85,7 +107,7 @@ SEO title-баг (`/Elfafeya Art/i` vs "Добро пожаловать в ми�
       Второй, независимый баг в этом же флоу: необязательное поле `email` в чекауте падало с
       «Некорректный email» на пустой строке — сгенерированная Zod-схема `z.string().email().optional()`
       пропускает только `undefined`/`null`, а поле по умолчанию хранит `''`. Фикс:
-      [`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) —
+      [`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) —
       `email` переопределён через `z.union([z.email(), z.literal('')])`. Оба фикса подтверждены
       вместе: полный чекаут проходит end-to-end (заказ создаётся, редирект на success), а пустые
       обязательные поля теперь показывают видимые ошибки вместо тихого блока.
@@ -105,7 +127,7 @@ SEO title-баг (`/Elfafeya Art/i` vs "Добро пожаловать в ми�
 
 **Изменённые файлы:** [`page.tsx`](src/app/[locale]/page.tsx),
 [`messages/ru.json`](messages/ru.json), [`messages/en.json`](messages/en.json),
-[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>),
+[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts),
 [`form-simple.tsx`](../../libs/forms/src/lib/declarative/form-root/form-simple.tsx),
 [`form-with-api.tsx`](../../libs/forms/src/lib/declarative/form-root/form-with-api.tsx).
 
@@ -190,7 +212,7 @@ BlackCove прогнал третий раз: **104 passed / 7 failed**. `09` �
    изображением иногда отправляла ПОЛНОСТЬЮ пустые данные (`name`, `slug`, `price` — все blank/0),
    что и объясняло бы зависание на `/new` (create action падал на unique constraint по
    дублирующемуся пустому `slug`). Добавил временный `console.log` в
-   [`product-form.tsx`](<src/app/(admin)/admin/products/_components/product-form.tsx>) и
+   [`product-form.tsx`](src/app/(admin)/admin/products/_components/product-form.tsx) и
    воспроизвёл через реальный Playwright. **Опровергнуто**: баг проявлялся только в `nx dev`
    (Turbopack HMR) — я редактировал файл прямо во время прогона теста, и React Fast Refresh
    ремаунтил компонент формы, сбрасывая состояние ровно между заполнением и сабмитом. В
@@ -250,7 +272,7 @@ HTML5 `required`; после `noValidate` эта защита исчезла, а
 строку — заказ с пустым именем/телефоном стал реально проходить и создаваться в БД (проверено:
 редирект на `/checkout/success` с настоящим `orderId`). Это прямая регрессия от фикса первого
 раунда, не флак и не тестовый баг. Фикс — `name`/`phone` в
-[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) переопределены
+[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) переопределены
 с `.min(1, 'Обязательное поле')`, аналогично уже сделанному для `email`.
 
 Заодно поймал и исправил тестовые strict-mode коллизии в
@@ -271,7 +293,7 @@ staging) и с полностью пересозданной БД (`nx db:seed` 
 в сиде), после их устранения список пуст даже без ручной чистки БД.
 
 **Изменённые файлы (четвёртый раунд):**
-[`checkout.schema.ts`](<src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts>) (`.min(1)` для
+[`checkout.schema.ts`](src/app/[locale]/(main)/checkout/_schemas/checkout.schema.ts) (`.min(1)` для
 name/phone), [`05-full-checkout.guest.spec.ts`](../mandala-e2e/src/tests/05-full-checkout.guest.spec.ts)
 (`data-field-name` вместо `name=`, `.first()` на success-сообщении).
 
@@ -584,6 +606,10 @@ name/phone), [`05-full-checkout.guest.spec.ts`](../mandala-e2e/src/tests/05-full
   - ✅ `image-upload-field.tsx` — drag-drop загрузка изображений
   - ✅ `form-image-upload.tsx` — интеграция с MandalaForm
   - ✅ Удалены дублирующие импорты между admin секциями
+  - ⬆️ **Заменено 2026-08-04 (v0.41.0):** локальные копии оказались форком
+    `@letar/image-upload`, разошедшимся с оригиналом. `image-upload-field.tsx`,
+    `_hooks/use-image-upload.ts` и `_hooks/use-file-drag-drop.ts` удалены,
+    приложение переведено на библиотеку — см. PLAN_COMPLETED.md
 - [x] **audio-controls.tsx разбит на модули** — 505 → 141 строк
   - ✅ `track-selector.tsx` — выбор треков (139 строк)
   - ✅ `audio-sync-controls.tsx` — настройки синхронизации (284 строк)

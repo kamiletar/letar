@@ -1,4 +1,5 @@
-import { existsSync, statSync } from 'fs'
+import { resolveUploadPath } from '@letar/image-upload/server'
+import { statSync } from 'fs'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { join } from 'path'
@@ -35,20 +36,40 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const decodedUrl = decodeURIComponent(url)
+    // `url` намеренно используется как есть: `searchParams.get` уже вернул
+    // раскодированное значение. Лишний decodeURIComponent превращал `%252e%252e%252f`
+    // в `../` и ронял 500 на одиночном `%` — оба случая просто не должны возникать.
 
     // Обрабатываем локальные файлы из /api/files/* или /api/images/*
-    if (decodedUrl.startsWith('/api/files/') || decodedUrl.startsWith('/api/images/')) {
+    if (url.startsWith('/api/files/') || url.startsWith('/api/images/')) {
       // Извлекаем путь после /api/files/ или /api/images/
-      const filePath = decodedUrl.replace(/^\/api\/(files|images)\//, '')
-      const fullPath = join(process.cwd(), 'uploads', filePath)
+      const filePath = url.replace(/^\/api\/(files|images)\//, '')
 
-      if (!existsSync(fullPath)) {
+      // Проверки префикса недостаточно: `/api/files/../../secret.jpg` её проходит,
+      // а `join` послушно уходит за пределы uploads/. Нормализуем путь и убеждаемся,
+      // что результат остался внутри корня — та же защита, что в @letar/image-upload/server.
+      const resolved = resolveUploadPath(join(process.cwd(), 'uploads'), filePath.split('/'))
+      if (!resolved.ok) {
+        return resolved.reason === 'traversal'
+          ? NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+          : NextResponse.json({ error: 'Bad request' }, { status: 400 })
+      }
+
+      const fullPath = resolved.absPath
+
+      let stats
+      try {
+        stats = statSync(fullPath)
+      } catch {
+        return NextResponse.json({ error: 'Image not found' }, { status: 404 })
+      }
+
+      // Каталог — это не ошибка сервера, а именно отсутствие картинки.
+      if (!stats.isFile()) {
         return NextResponse.json({ error: 'Image not found' }, { status: 404 })
       }
 
       // Проверяем размер файла
-      const stats = statSync(fullPath)
       if (stats.size > MAX_FILE_SIZE) {
         return NextResponse.json({ error: `File too large. Max ${MAX_FILE_SIZE / 1024 / 1024}MB` }, { status: 413 })
       }
@@ -71,7 +92,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Для внешних URL получаем через HTTP
-    const imageUrl = decodedUrl.startsWith('/') ? new URL(decodedUrl, request.url).toString() : decodedUrl
+    const imageUrl = url.startsWith('/') ? new URL(url, request.url).toString() : url
 
     const imageResponse = await fetch(imageUrl)
 
@@ -84,7 +105,7 @@ export async function GET(request: NextRequest) {
     if (contentLength && parseInt(contentLength) > MAX_EXTERNAL_FILE_SIZE) {
       return NextResponse.json(
         { error: `External file too large. Max ${MAX_EXTERNAL_FILE_SIZE / 1024 / 1024}MB` },
-        { status: 413 }
+        { status: 413 },
       )
     }
 
@@ -94,7 +115,7 @@ export async function GET(request: NextRequest) {
     if (imageBuffer.length > MAX_EXTERNAL_FILE_SIZE) {
       return NextResponse.json(
         { error: `External file too large. Max ${MAX_EXTERNAL_FILE_SIZE / 1024 / 1024}MB` },
-        { status: 413 }
+        { status: 413 },
       )
     }
 

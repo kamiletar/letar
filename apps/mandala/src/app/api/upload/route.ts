@@ -1,6 +1,7 @@
 import type { ImageCategory } from '@/generated/prisma'
 import { getSession } from '@/lib/auth'
 import { createImageRecord, deleteImageByPath, getImageById, getImageUrl } from '@/lib/images/create-image'
+import { resolveUploadPath } from '@letar/image-upload/server'
 import { existsSync } from 'fs'
 import { mkdir, unlink, writeFile } from 'fs/promises'
 import type { NextRequest } from 'next/server'
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: `Размер файла не должен превышать 32MB (файл: ${(file.size / 1024 / 1024).toFixed(2)} MB)` },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -136,12 +137,18 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Извлекаем путь из URL
-    const path = url.replace('/api/files/', '')
-    const filepath = join(process.cwd(), 'uploads', path)
+    const path = url.replace(/^\/api\/files\//, '')
+
+    // Тот же путь, что в /api/og-image: проверки префикса мало — `../` в остатке
+    // уводит `join` наружу, и здесь это уже не чтение, а удаление файла.
+    const resolved = resolveUploadPath(join(process.cwd(), 'uploads'), path.split('/'))
+    if (!resolved.ok) {
+      return NextResponse.json({ error: 'Некорректный URL' }, { status: 400 })
+    }
 
     // Удаляем файл
-    if (existsSync(filepath)) {
-      await unlink(filepath)
+    if (existsSync(resolved.absPath)) {
+      await unlink(resolved.absPath)
     }
 
     // Пытаемся удалить запись из БД (если существует)
