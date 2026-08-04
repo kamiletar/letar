@@ -28,6 +28,7 @@ import type {
   ScheduleFieldProps,
   SegmentedGroupFieldProps,
   SelectFieldProps,
+  SignatureFieldProps,
   SliderFieldProps,
   TagsFieldProps,
   YesNoFieldProps,
@@ -182,20 +183,7 @@ export interface FormFieldComponents {
   DataGrid: (props: DataGridFieldProps) => ReactElement
 
   // Подпись
-  Signature: (props: {
-    name?: string
-    label?: string
-    placeholder?: string
-    clearLabel?: string
-    width?: number
-    height?: number
-    mode?: 'draw' | 'type' | 'both'
-    penColor?: string
-    backgroundColor?: string
-    required?: boolean
-    disabled?: boolean
-    readOnly?: boolean
-  }) => ReactElement
+  Signature: (props: SignatureFieldProps) => ReactElement
 
   // Банковская карта
   CreditCard: (props: CreditCardFieldProps) => ReactElement
