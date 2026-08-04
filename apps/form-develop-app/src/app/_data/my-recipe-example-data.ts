@@ -1,4 +1,4 @@
-import type { RecipeType } from '@/generated/prisma'
+import type { RecipeType } from '@/generated/prisma/enums'
 
 /**
  * Тип данных формы рецепта (плоская структура для демонстрации API)

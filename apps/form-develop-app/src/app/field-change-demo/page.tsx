@@ -162,10 +162,10 @@ export default function FieldChangeDemoPage() {
                 name="country"
                 label="Страна"
                 options={[
-                  { value: 'RU', label: 'Россия' },
-                  { value: 'US', label: 'США' },
-                  { value: 'EU', label: 'Франция' },
-                  { value: 'JP', label: 'Япония' },
+                  { value: 'RU', title: 'Россия' },
+                  { value: 'US', title: 'США' },
+                  { value: 'EU', title: 'Франция' },
+                  { value: 'JP', title: 'Япония' },
                 ]}
               />
               <Form.Field.String name="currency" label="Валюта (автозаполнение)" />

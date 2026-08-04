@@ -72,7 +72,7 @@ export default function SignatureDemoPage() {
       {result && (
         <VStack gap={2} align="stretch" mt={8}>
           <Heading size="md">Submitted Data</Heading>
-          {result.signature && typeof result.signature === 'string' && result.signature.startsWith('data:') && (
+          {typeof result.signature === 'string' && result.signature.startsWith('data:') && (
             <Image
               src={result.signature as string}
               alt="Signature"
@@ -86,7 +86,7 @@ export default function SignatureDemoPage() {
             {JSON.stringify(
               { ...result, signature: result.signature ? `${(result.signature as string).slice(0, 50)}...` : '' },
               null,
-              2
+              2,
             )}
           </Code>
         </VStack>

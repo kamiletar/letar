@@ -62,7 +62,7 @@ const ContactSchema = z
  */
 function AutocompleteInspector() {
   const [attrs, setAttrs] = useState<Array<{ name: string; autocomplete: string | null }>>([])
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     // Даём время на рендер полей

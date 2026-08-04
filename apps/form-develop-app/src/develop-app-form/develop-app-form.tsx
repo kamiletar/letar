@@ -2,7 +2,7 @@
 
 // Компоненты форм используемые только внутри проекта form-develop-app
 
-import type { RecipeType } from '@/generated/prisma'
+import type { RecipeType } from '@/generated/prisma/enums'
 import { createForm, FieldSelect, type SelectOption } from '@letar/forms'
 import type { ReactElement } from 'react'
 

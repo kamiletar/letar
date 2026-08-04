@@ -1,14 +1,23 @@
 // ZenStack schema file for Form Develop App
 // Песочница для разработки @letar/forms
 
+// Prisma 7 больше не принимает `url` в datasource — строка подключения задаётся
+// в prisma.config.ts (для CLI) и в src/lib/db.ts через Pool (для рантайма).
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 plugin prisma {
   provider = '@core/prisma'
   output = './src/generated/schema.prisma'
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+// Prisma Client — нужен для типов enum'ов в UI и для PrismaClient в scripts/seed.ts.
+// output задаётся относительно сгенерированного schema.prisma → ./src/generated/prisma
+generator client {
+  provider      = "prisma-client"
+  output        = "./prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 

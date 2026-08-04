@@ -2,7 +2,7 @@
 
 import { useCreateCategory, useCreateRecipe, useFindManyCategory } from '@/lib/hooks'
 import { Badge, Box, Code, Heading, HStack, Separator, Text, VStack } from '@chakra-ui/react'
-import { Form, RelationFieldProvider, relationMeta, withUIMeta } from '@letar/forms'
+import { Form, type RelationConfig, RelationFieldProvider, relationMeta, withUIMeta } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -153,7 +153,10 @@ export default function RelationDemoPage() {
             relations={[
               {
                 model: 'Category',
-                useQuery: useFindManyCategory,
+                // RelationConfig объявлен без параметров типа, поэтому useQuery в нём —
+                // (args?: unknown). Хук с типизированными args под него не подходит по
+                // контравариантности параметров, отсюда приведение типа.
+                useQuery: useFindManyCategory as RelationConfig['useQuery'],
                 labelField: 'name',
                 descriptionField: 'description',
               },

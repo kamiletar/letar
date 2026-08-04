@@ -3,7 +3,7 @@
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
-import { DemoPageLayout } from '../_components'
+import { DemoPageLayout, SubmittedDataPreview } from '../_components'
 
 /** Генерация тестовых данных */
 function generateEmployees(count: number) {
@@ -53,6 +53,8 @@ export default function DataGridDemoPage() {
             <Form.Button.Submit>Сохранить все изменения</Form.Button.Submit>
           </Form>
         </Box>
+
+        <SubmittedDataPreview data={submittedData} />
       </VStack>
     </DemoPageLayout>
   )

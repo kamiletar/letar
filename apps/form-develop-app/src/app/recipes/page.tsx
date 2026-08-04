@@ -1,6 +1,6 @@
 'use client'
 
-import type { RecipeType } from '@/generated/prisma'
+import type { RecipeType } from '@/generated/prisma/enums'
 import { useDeleteRecipe, useFindManyRecipe } from '@/lib/hooks'
 import { Badge, Box, Button, Card, Container, Flex, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
