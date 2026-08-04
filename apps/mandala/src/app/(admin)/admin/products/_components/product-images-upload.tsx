@@ -17,8 +17,9 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { useImageUpload } from '@letar/image-upload'
+import { FileTrigger } from '@letar/ui'
 import NextImage from 'next/image'
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { LuGripVertical, LuImage, LuPlus, LuTrash2 } from 'react-icons/lu'
 
 /** ProductImage с Image relation */
@@ -55,7 +56,6 @@ export function ProductImagesUpload({
   disabled,
 }: ProductImagesUploadProps) {
   const [images, setImages] = useState<ImageItem[]>([])
-  const fileInputId = useId()
 
   // Инициализация из initialImages
   useEffect(() => {
@@ -261,29 +261,24 @@ export function ProductImagesUpload({
                     или
                   </Text>
                 </VStack>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="outline"
-                  colorPalette="purple"
-                  cursor={disabled ? 'not-allowed' : 'pointer'}
-                  opacity={disabled ? 0.5 : 1}
-                  pointerEvents={disabled ? 'none' : 'auto'}
-                >
-                  <label htmlFor={fileInputId}>
-                    <LuPlus />
-                    Добавить изображения
-                  </label>
-                </Button>
-                <input
-                  id={fileInputId}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                  disabled={disabled}
-                />
+                <FileTrigger accept="image/*" multiple disabled={disabled} onChange={handleFileSelect}>
+                  {({ htmlFor }) => (
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      colorPalette="purple"
+                      cursor={disabled ? 'not-allowed' : 'pointer'}
+                      opacity={disabled ? 0.5 : 1}
+                      pointerEvents={disabled ? 'none' : 'auto'}
+                    >
+                      <label htmlFor={htmlFor}>
+                        <LuPlus />
+                        Добавить изображения
+                      </label>
+                    </Button>
+                  )}
+                </FileTrigger>
                 <Text fontSize="xs" color="fg.muted">
                   PNG, JPG, WEBP до 32MB
                 </Text>

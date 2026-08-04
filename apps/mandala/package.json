@@ -11,7 +11,8 @@
       "@letar/analytics",
       "@letar/consent",
       "@letar/format-utils",
-      "@letar/image-upload"
+      "@letar/image-upload",
+      "@letar/ui"
     ]
   }
 }
