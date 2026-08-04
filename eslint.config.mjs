@@ -130,7 +130,16 @@ export default [
     },
   },
   {
-    files: ['**/src/client/**/*.ts', '**/src/client/**/*.tsx', '**/src/lib/**/*.tsx'],
+    // `**/src/client.ts` и `**/src/ui/**/*.tsx` — точка входа `@letar/cdek/client` не
+    // папка, а один файл, реэкспортирующий `src/ui/*`; без этих двух глобов клиентский
+    // код cdek выпадает из-под правила ниже. См. .claude/docs/lib-entry-points.md.
+    files: [
+      '**/src/client/**/*.ts',
+      '**/src/client/**/*.tsx',
+      '**/src/client.ts',
+      '**/src/lib/**/*.tsx',
+      '**/src/ui/**/*.tsx',
+    ],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
