@@ -1,44 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    // Гасим composite из tsconfig.base.json: приложение тянет исходники libs/* через paths,
-    // а composite требует, чтобы каждый затянутый файл был перечислен в include → TS6307.
-    // Так же поступает пресет tsconfig.next-app.json для остальных Next.js-приложений.
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
-    "incremental": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "paths": {
       "@/*": ["./src/*"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/demo-protection": ["../../libs/demo-protection/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "ignoreDeprecations": "6.0"
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "dist", "prisma"],
   "references": [
     {
       "path": "../../libs/demo-protection"
     },
     {
       "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/forms"
     }
   ]
 }
