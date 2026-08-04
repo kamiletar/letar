@@ -25,6 +25,13 @@ macro_start_session(
 > вместе с `agent_name`** — без токена `macro_start_session`/`register_agent` либо форкнет новую
 > случайную identity, либо откажет с «requires registration_token». Проверяй поле `name` в ответе:
 > должно вернуться `forms-coordinator`, id 222, без форка.
+>
+> ⚠️ **По завершении сессии `/end-session` эту identity ретайрит** (`retire_agent`) — при
+> следующем запуске `macro_start_session` вернёт «Agent 'forms-coordinator' is retired and no
+> longer accepts new messages». Сначала вызови `unretire_agent(project_key: "c-web-letar",
+> agent_name: "forms-coordinator", registration_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE")`,
+> потом `macro_start_session`. Тот же приём нужен и для `forms-dev` при делегации задач — его
+> токен см. `agent_fixed_names_tokens` в памяти.
 
 2. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
