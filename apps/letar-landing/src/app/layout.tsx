@@ -61,11 +61,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {/* JSON-LD для SEO — статические данные, XSS невозможен */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <CookieBanner appKey="letar-landing" consentApiUrl={null} />
+        </Provider>
         <AnalyticsGate appKey="letar-landing">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner appKey="letar-landing" consentApiUrl={null} />
       </body>
     </html>
   )
