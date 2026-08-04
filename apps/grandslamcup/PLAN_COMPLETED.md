@@ -2,6 +2,32 @@
 
 Детальное описание всех реализованных фич.
 
+## v3.38.2 — 2026-08-04 (fix: path traversal в загрузке обложки альбома)
+
+Найдено при аудите (референс — фикс `mandala`, коммит `a18f21a6`): `moveAlbumCover` в
+`_actions/album.action.ts` принимала `tempPath` из Server Action, проверенный только Zod-схемой
+(`z.string()`) и вызывающим кодом через `startsWith('albums/temp/')` — эта проверка не защищает от
+`../` внутри строки. Авторизованный poet мог переместить произвольный файл сервера в
+`uploads/albums/<albumId>/`, откуда он раздаётся публично через `/api/files/[...path]`.
+
+Исправлено через `resolveUploadPath` из `@letar/image-upload/server` (нормализация пути + проверка
+выхода за корень) — та же защита, что уже стоит в `serve-uploads.ts`.
+
+Попутно найден и закрыт независимый второй путь того же класса бага: `generateFilename`
+(`lib/upload/save-file.ts`) брал расширение файла через `originalName.split('.').pop()` без очистки
+от `/` — `join()` в `api/upload/album-cover/route.ts` мог уйти за пределы `uploads/` уже на этапе
+`writeFile`, если атакующий прислал `file.name` с `../` внутри. Расширение теперь фильтруется до
+алфавитно-цифровых символов.
+
+Тест на traversal: `_actions/__tests__/album.action.spec.ts` (5 кейсов, положительный контроль —
+реальный файл вне `uploads/`, по образцу `mandala/api/og-image/__tests__/route.spec.ts`). Для этого
+`moveAlbumCover` экспортирована из модуля, а в `vitest.config.ts` добавлен alias
+`@letar/image-upload/server` (у Vite нет доступа к путям из `tsconfig.json` в тестах — тот же приём,
+что в `mandala/vitest.config.ts`).
+
+`nx lint`/`nx typecheck:tsgo` на затронутых файлах — чисто; репо-wide ошибки в обоих командах —
+предсуществующий техдолг в несвязанных файлах (не трогали).
+
 ## v3.38.1 — 2026-07-30 (eslint: игнор сгенерированного Serwist-бандла)
 
 Найдено в `studio` (Фаза 11 блока H): после `next build --webpack` Serwist генерирует
