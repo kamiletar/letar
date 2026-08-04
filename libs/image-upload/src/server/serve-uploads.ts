@@ -64,7 +64,9 @@ export function resolveUploadPath(root: string, segments: readonly string[]): Re
   const rel = path.relative(rootAbs, target)
 
   // Пустая строка — это сам корень (каталог, не файл).
-  if (rel === '') return { ok: false, reason: 'traversal' }
+  if (rel === '') {
+    return { ok: false, reason: 'traversal' }
+  }
 
   // Сравниваем именно с `..` и `..<sep>`, а не через rel.startsWith('..'):
   // иначе легальный файл с именем `..hidden.png` был бы отвергнут.
@@ -169,7 +171,9 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
       const realRoot = await getRealRoot()
       if (realRoot) {
         const realFile = await realpath(resolved.absPath).catch(() => null)
-        if (!realFile) return new Response('Not found', { status: 404 })
+        if (!realFile) {
+          return new Response('Not found', { status: 404 })
+        }
 
         const realRel = path.relative(realRoot, realFile)
         if (realRel === '' || realRel === '..' || realRel.startsWith(`..${path.sep}`) || path.isAbsolute(realRel)) {
@@ -205,7 +209,9 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
           size,
         })
         if (extra) {
-          for (const [key, value] of Object.entries(extra)) responseHeaders.set(key, value)
+          for (const [key, value] of Object.entries(extra)) {
+            responseHeaders.set(key, value)
+          }
         }
       }
 
@@ -250,13 +256,19 @@ type ParsedRange = { start: number; end: number } | 'unsatisfiable' | undefined
  * этого достаточно для перемотки аудио/видео в плеере.
  */
 export function parseRange(header: string | null, size: number): ParsedRange {
-  if (!header) return undefined
+  if (!header) {
+    return undefined
+  }
 
   const match = header.trim().match(RANGE_PATTERN)
-  if (!match) return undefined
+  if (!match) {
+    return undefined
+  }
 
   const [, rawStart, rawEnd] = match
-  if (rawStart === '' && rawEnd === '') return undefined
+  if (rawStart === '' && rawEnd === '') {
+    return undefined
+  }
 
   let start: number
   let end: number
@@ -264,7 +276,9 @@ export function parseRange(header: string | null, size: number): ParsedRange {
   if (rawStart === '') {
     // Суффиксная форма `bytes=-N` — последние N байт.
     const suffix = Number(rawEnd)
-    if (suffix <= 0) return 'unsatisfiable'
+    if (suffix <= 0) {
+      return 'unsatisfiable'
+    }
     start = Math.max(0, size - suffix)
     end = size - 1
   } else {

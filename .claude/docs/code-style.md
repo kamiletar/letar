@@ -40,6 +40,36 @@
 - **`prefer-const`**: использовать const где возможно
 - **`no-var`**: не использовать var
 
+### ⚠️ `curly` + dprint: `eslint --fix` не помогает, скобки ставим руками
+
+`curly: ['error', 'all']` требует скобки всегда, а у dprint по умолчанию
+`ifStatement.useBraces: "whenNotSingleLine"` — он снимает скобки, если тело влезает в строку.
+Инструменты гоняют код по кругу:
+
+```ts
+if (!header) return undefined // ← curly: error
+
+// eslint --fix даёт:
+if (!header) {
+  return undefined
+} // но в одну строку: `if (!header) {return undefined}`
+
+// bunx dprint fmt возвращает обратно:
+if (!header) return undefined // ← снова curly: error
+```
+
+**Пиши скобки сразу и в три строки** — такую форму dprint не трогает:
+
+```ts
+if (!header) {
+  return undefined
+}
+```
+
+Прецедент: `libs/image-upload/src/server/serve-uploads.ts` приехал в монорепо (коммит `e7a4f8cc`)
+с восемью однострочными `if`/`for-of` — `nx lint image-upload` был красный, а `--fix` +
+`nx format` его не чинили.
+
 ## Язык комментариев
 
 - Все комментарии в коде пишутся на **русском языке**

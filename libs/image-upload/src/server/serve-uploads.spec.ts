@@ -37,7 +37,9 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  if (root) await rm(path.dirname(root), { recursive: true, force: true })
+  if (root) {
+    await rm(path.dirname(root), { recursive: true, force: true })
+  }
 })
 
 /** Вызывает обработчик так, как это делает Next.js App Router. */

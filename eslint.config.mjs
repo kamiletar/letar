@@ -91,6 +91,73 @@ export default [
       ],
     },
   },
+  // === Границы точек входа внутри одной библиотеки ===
+  // `@nx/enforce-module-boundaries` работает на уровне ПРОЕКТА: клиентская и серверная
+  // части одной библиотеки (`@letar/x` и `@letar/x/server`) для него один и тот же узел
+  // графа, теги их не различают. Поэтому границу между `src/server/` и остальным кодом
+  // библиотеки держат правила ниже. Подробнее: .claude/docs/lib-entry-points.md
+  //
+  // ⚠️ Глобы намеренно начинаются с `**/`. 58 проектов имеют свой `eslint.config.mjs`,
+  // который спредит этот массив, а ESLint 10 считает `files` относительно ТОГО файла.
+  // Путь вида `libs/*/src/server/**` там превратится в `libs/x/libs/*/src/server/**`
+  // и молча ничего не поймает.
+  {
+    files: ['**/src/server/**/*.ts', '**/src/server/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              message:
+                'src/server/ — Node-only точка входа. React здесь утяжеляет серверный бандл и ломает потребителей без React.',
+              allowTypeImports: true,
+            },
+            {
+              name: 'react-dom',
+              message: 'src/server/ — Node-only точка входа, react-dom сюда не тянем.',
+              allowTypeImports: true,
+            },
+            {
+              name: '@chakra-ui/react',
+              message: 'src/server/ — Node-only точка входа, Chakra сюда не тянем.',
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['**/src/client/**/*.ts', '**/src/client/**/*.tsx', '**/src/lib/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              // Только `@letar/*/server` и относительные пути. Голый `**/server` ловил бы
+              // `next-intl/server` и `@/types/server` — сотни ложных срабатываний.
+              group: [
+                '@letar/*/server',
+                '@letar/*/server/*',
+                './server',
+                './server/*',
+                '../server',
+                '../server/*',
+                '../../server',
+                '../../server/*',
+              ],
+              message:
+                'Клиентский код библиотеки не должен импортировать её серверную точку входа: node:fs/node:path попадут в браузерный бандл. Нужен только тип — используй `import type`.',
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
     rules: {
