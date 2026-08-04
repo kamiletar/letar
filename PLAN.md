@@ -2104,3 +2104,20 @@ Turbopack на `aboi` не эскалируется в фатальную оши
 - [ ] `nx build kami` после фикса упирается в отдельную, не связанную проблему — не заданы
       `KEYSTATIC_GITHUB_CLIENT_ID`/`KEYSTATIC_GITHUB_CLIENT_SECRET`/`KEYSTATIC_SECRET` в
       локальном окружении сборки. Требует отдельной задачи по конфигурации Keystatic в kami.
+
+## §34 — Next.js 16 `next dev` сам создаёт `AGENTS.md`/`CLAUDE.md` (2026-08-04)
+
+Найдено в `mandala` (первое приложение на Next.js 16, где реально запускался `next dev` в этой
+сессии): после запуска в untracked появились `apps/mandala/AGENTS.md` и однострочный `CLAUDE.md`
+(`@AGENTS.md`) — генерирует сам `next dev` (`generate-agent-files.js`), файл адресован ИИ-агентам
+и **пересоздаётся при каждом запуске**.
+
+- [x] `apps/*/AGENTS.md` добавлен в корневой `.gitignore` — шаблонный, шумит в `git status`
+      каждый dev-запуск, не проектная документация.
+- [x] `CLAUDE.md` в `.gitignore` **не добавлен** — в репо уже есть конвенция per-app `CLAUDE.md`
+      для ручной документации (`animatrona`, `animatrona-mobile`, `aprel8008`); стаб в mandala
+      закоммичен как обычный файл.
+- [x] Задокументировано: [nextjs16-agent-guide-files.md](/.claude/docs/nextjs16-agent-guide-files.md).
+
+Актуально для любого следующего приложения, переходящего на Next.js 16 — паттерн в `.gitignore`
+общий (`apps/*/AGENTS.md`), повторно решать не нужно.
