@@ -82,11 +82,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="ru" suppressHydrationWarning>
       <body>
         <WebSiteJsonLd />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <CookieBanner appKey="pravda" consentApiUrl={null} />
+        </Providers>
         <AnalyticsGate appKey="pravda">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner appKey="pravda" consentApiUrl={null} />
       </body>
     </html>
   )
