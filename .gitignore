@@ -188,3 +188,8 @@ apps/animatrona-tv/screen-*.png
 /libs/exoplayer-sync/android/.gradle/vcs-1/gc.properties
 # .socraticodecontextartifacts.json — конфиг проекта, коммитится (не кэш)
 .nx/migrate-runs
+
+# Зеркало .claude/skills/, созданное сторонним агентом (ChatGPT). Источник истины — .claude/,
+# зеркало расходится с ним и в репо не едет. Прецедент: устаревший совет `nx sync` пережил
+# чистку 2026-08-04 только в этой копии (PLAN.md §29).
+.agents/
