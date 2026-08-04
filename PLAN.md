@@ -2276,12 +2276,15 @@ Emotion», но сама команда была `"next dev"` без флага 
 
 ### Найдено попутно, оставлено как есть
 
-- [ ] `libs/animatrona-utils/package.json` не объявляет зависимость `@letar/animatrona-types`,
-      хотя импортирует её в `src/external-links.ts`. У `animatrona-mobile` это замаскировано
-      маппингом в `paths`, у `animatrona-tv` вылезло наружу. Сейчас закрыто на стороне приложения
-      (как и предписывает [lib-entry-points](/.claude/docs/lib-entry-points.md): при подключении
-      через `implicitDependencies` линка в `node_modules` нет, `paths` — единственный механизм),
-      но правильное место починки — сама библиотека.
+- [x] `libs/animatrona-utils/package.json` не объявляет зависимость `@letar/animatrona-types`,
+      хотя импортирует её в `src/external-links.ts`. **Починено (2026-08-04):** добавлена
+      `"@letar/animatrona-types": "workspace:*"` в `dependencies` (по образцу связки
+      `animatrona-shared → animatrona-utils`), `bun install` создал
+      `libs/animatrona-utils/node_modules/@letar/animatrona-types`. Маппинги в `paths` у
+      `animatrona-tv`/`animatrona-mobile` **оставлены** — приложения зависят от
+      `animatrona-shared`, а не напрямую от `animatrona-utils`, поэтому линк не хоистится до
+      корневого `node_modules` и без `paths` резолв всё ещё падает TS2307. `typecheck:tsgo
+      animatrona-tv` и `typecheck animatrona-mobile` — зелёные.
 - [ ] `form-example`: `nx zenstack:generate` не проходит — «Cannot find plugin module
       `@letar/zenstack-form-plugin`» (пакет существует в `libs/`, но `node_modules/@letar/` в
       репозитории нет вовсе, а CLI не умеет резолвить через `paths`), fallback `prisma generate`
