@@ -1918,13 +1918,18 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
 - [x] Механика записана в [environment.md](/.claude/docs/environment.md) — в раздел про
       `references` добавлено, что весь его список относится к `tsc --build`, которого у
       приложений нет.
-- **Побочно (не чинилось, отдельный техдолг):** утверждение «у всех девяти `typecheck:tsgo`
-  зелёный» неверно — падают два, и обе поломки к `references` отношения не имеют.
-  `form-develop-app`: не сгенерирован `@/generated/*` (нужен `nx zenstack:generate`), плюс
-  `useRef` без аргумента под типами React 19 и разъехавшийся `NativeSelectOption` из
-  `@letar/forms`. `form-docs`: `I18nUIConfig` требует аргумент типа, и `onSubmit({ value })` не
-  совпадает с сигнатурой. Ещё у трёх (`animatrona-mobile`, `animatrona-tv`, `form-example`)
-  таргета `typecheck:tsgo` нет вовсе — они не покрыты предкоммитным гейтом.
+- [x] **Побочно — закрыто (2026-08-04, StormyStream, коммиты `3a36cf6e`/`04628776`/`82eba2e1`):**
+      `form-develop-app`/`form-docs` типизированы зелёным. По пути выяснилось, что описание было
+      неполным (17 ошибок, не 5) и одна причина была диагностирована неверно: `@/generated/*`
+      не появлялся не из-за забытого `nx zenstack:generate`, а потому что в `schema.zmodel` **никогда
+      не было** блока `generator client` (проверено `git log -S`) — плюс Prisma 7 больше не принимает
+      `url` в `datasource` (P1012) и не отдаёт barrel-файл, импорты пришлось развести по подпутям
+      `/enums` и `/client`. Отдельно нашёлся и починен реальный дефект библиотеки: тип
+      `Form.Field.Signature` в `libs/forms` был рассинхронизирован с `SignatureFieldProps`
+      (`penColor`/`mode`/`readOnly` вместо `strokeColor`/`allowTyped`/…) — задеть `libs/forms/**`
+      пришлось, потому что резервации на нём держали два агента, оба оказались retired.
+      У трёх (`animatrona-mobile`, `animatrona-tv`, `form-example`) таргета `typecheck:tsgo` по-прежнему
+      нет вовсе — не покрыты предкоммитным гейтом, отдельная задача.
 - [x] **Побочно — закрыто (2026-08-04, NavySparrow, коммит `4d18c78c`):** `.claude/rules/libs.md`
       требовал «настроить ТРИ вещи» (`paths` + `references` + `implicitDependencies`) и «после
       изменений запустить `nx sync`» — обе инструкции расходились с реальностью репо и породили
