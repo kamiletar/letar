@@ -2233,12 +2233,30 @@ Emotion», но сама команда была `"next dev"` без флага 
 - [x] Задокументировано:
       [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
 
-### Не в скоупе
+### Аудит по монорепо (2026-08-04, продолжение)
 
-- [ ] Та же уязвимость (Chakra v3 + `next-themes` без явного бандлер-флага) потенциально есть в
-      `driving-school`, `dashboard`, `animatrona-tracker` и других приложениях на Chakra —
-      не проверялось целенаправленно за пределами `mandala`, чинить по факту обнаружения флаки
-      в соответствующем `*-e2e`.
+Проверены `driving-school`, `dashboard`, `animatrona-tracker` — все три сочетали Chakra v3 +
+`next-themes`'ный `ColorModeProvider` как прямого потомка `ChakraProvider`, и все три
+инферировали `dev`/`build` через Nx-плагин `@nx/next` (или частично) без явного бандлер-флага
+— т.е. Turbopack по умолчанию, подтверждено в логе dev-сервера каждого до фикса.
+
+- [x] Все три пришпилены к `--webpack` в `dev`/`build`. Для инферированных таргетов применён
+      **частичный** override (`options.command` без дублирования `cache`/`inputs`/`outputs` —
+      Nx мержит с инферированным по ключам), а не полное дублирование таргета как в `mandala`
+      — безопаснее и короче, см. новый раздел в
+      [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+- [x] `driving-school` — приватный submodule, фикс закоммичен и запушен туда отдельно
+      (`letar-private-driving-school@4d0ccaf`), SHA поднят в этом репо.
+- [ ] Живая click-race репродукция (как в `mandala`) не удалась — инструмент предпросмотра в
+      сессии терял скомпонованный кадр (`reference_browser_pane_hidden_raf`), фикс применён
+      превентивно по структурному совпадению + официальному предупреждению Chakra UI, без
+      подтверждения гонки на месте. Не блокирует — тот же паттерн уже проверен в `mandala`.
+- [ ] Не проверялись целенаправленно: лендинги (`letar-landing`, `kami-key-the-landing`,
+      `animatrona-landing`) и Electron-рендерер `animatrona` — другой профиль риска, чинить по
+      факту обнаружения.
+- Побочная находка при аудите `animatrona-tracker` (не hydration): `<CookieBanner>` рендерился
+  вне `<ChakraProvider>`, падал на первом визите без cookie-согласия — уже исправлено
+  пользователем параллельно, см. `apps/animatrona-tracker/PLAN_COMPLETED.md`.
 
 ## §37 — `typecheck:tsgo` у трёх приложений вне чек-листа (2026-08-04, EmeraldEagle)
 
