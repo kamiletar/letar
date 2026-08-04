@@ -101,11 +101,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {/* JSON-LD для SEO — статические данные (не пользовательский ввод), безопасно */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <CookieBanner appKey="kami-key-the-landing" consentApiUrl={null} />
+        </Provider>
         <AnalyticsGate appKey="kami-key-the-landing">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner appKey="kami-key-the-landing" consentApiUrl={null} />
       </body>
     </html>
   )
