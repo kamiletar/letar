@@ -1948,12 +1948,21 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
       вспомогательные, у `paths` отдельно оговорён случай из
       [lib-entry-points.md](/.claude/docs/lib-entry-points.md) (подключение только через
       `implicitDependencies` → линка в `node_modules` нет → `paths` единственный механизм резолва).
-- **Побочно (не чинилось, отдельный техдолг):** совет `nx sync` живёт ещё в ~12 местах —
-  `.claude/skills/nx-monorepo/*` (и её копия в `.agents/skills/`), `.claude/skills/nextjs-expert/`,
-  `.claude/agents/monorepo-health-check.md`, `.claude/commands/create/new-lib.md`,
-  README четырёх библиотек (`redis-client`, `mcp-server-kit`, `electron-storage`, `consent`),
-  `libs/generators/README.md` и `lib-entry-points.md:245` («references … поддерживается через
-  `nx sync`»). Все они повторяют ту же неверную для letar рекомендацию.
+- [x] **Побочно — закрыто (2026-08-04, PinkCreek):** совет `nx sync` вычищен из оставшихся 14 мест
+      в 13 файлах — `.claude/skills/nx-monorepo/*` (SKILL + три reference-файла),
+      `.claude/skills/nextjs-expert/reference/troubleshooting.md`,
+      `.claude/agents/monorepo-health-check.md`, `.claude/commands/create/new-lib.md`,
+      `lib-entry-points.md` (п.4 чек-листа) и README пяти библиотек (`redis-client`,
+      `mcp-server-kit`, `electron-storage`, `consent`, `generators`). Где команда была просто
+      строкой в списке утилит — убрана; где была единственным рецептом (`TS6059`, «TypeScript
+      errors после изменений») — заменена на ручную правку `references` с оговоркой, что
+      приложениям они обычно не нужны вовсе. В `new-lib` и README «три обязательных места» / «затем
+      `nx sync`» сведены к одному обязательному — ребру графа Nx.
+- **Ложные срабатывания грепа, которые трогать НЕ надо:** `nx sync grandslamcup-android` в
+  `apps/grandslamcup/PLAN.md` — это Capacitor-таргет проекта, а не `@nx/js:typescript-sync`.
+  Ещё шесть вхождений лежат в `.agents/skills/` — untracked-зеркале `.claude/skills/` (в git его
+  нет вовсе), поэтому правки там не коммитятся; если зеркало живое, его надо пересоздавать из
+  `.claude/`, а не править.
 
 ## §30 — `@letar/image-upload`: клиентская часть доведена до состояния, пригодного к переиспользованию (2026-08-04)
 
