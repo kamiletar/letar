@@ -5,6 +5,7 @@
  */
 import path from 'node:path'
 import { expect, test } from '../fixtures/auth.fixture'
+import { SLOW_ACTION_TIMEOUT } from '../fixtures/timeouts'
 
 // Уникальный timestamp для тестовых данных
 const timestamp = Date.now()
@@ -41,18 +42,22 @@ test.describe('Админ: Полный CRUD мандалы', () => {
       // Ждём реального завершения загрузки, а не фиксированную паузу — imageId
       // обязательное поле формы (requiredImageIdSchema), submit заблокируется
       // клиентской валидацией пока не появится превью с кнопкой "Удалить";
-      // под параллельной e2e-нагрузкой на staging загрузка может занять больше 2с
-      await expect(adminPage.getByRole('button', { name: /удалить/i })).toBeVisible({ timeout: 15000 })
+      // под параллельной e2e-нагрузкой на staging загрузка может занять больше 2с,
+      // а на локальном dev-сервере ещё и компилируется сам /api/upload (см. timeouts.ts)
+      await expect(adminPage.getByRole('button', { name: /удалить/i })).toBeVisible({
+        timeout: SLOW_ACTION_TIMEOUT,
+      })
 
       // Клик "Создать мандалу"
       await adminPage.getByRole('button', { name: /создать мандалу/i }).click()
 
       // Проверка редиректа на страницу мандалы (может быть /edit или просто /:id)
-      await expect(adminPage).toHaveURL(/\/admin\/mandalas\/[^/]+/, { timeout: 15000 })
+      await expect(adminPage).toHaveURL(/\/admin\/mandalas\/[^/]+/, { timeout: SLOW_ACTION_TIMEOUT })
       // Убедимся что это не страница /new
-      // 15s — под параллельной e2e-нагрузкой на общий staging-контейнер редирект после
-      // Server Action может занимать больше 5с (см. nextjs-server-action-redirect-race.md)
-      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 15000 })
+      // Редирект после Server Action может занимать больше 5с — под параллельной e2e-нагрузкой
+      // на общий staging-контейнер (см. nextjs-server-action-redirect-race.md) и на компиляции
+      // action'а с целевой страницей локально
+      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: SLOW_ACTION_TIMEOUT })
 
       // Сохраняем ID мандалы из URL (с или без /edit)
       const url = adminPage.url()

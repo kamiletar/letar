@@ -3,7 +3,21 @@
  *
  * Проверяем CRUD операции для мандал
  */
+import type { Page } from '@playwright/test'
 import { expect, test } from '../fixtures/auth.fixture'
+
+/**
+ * Ссылка «Создать мандалу» из шапки списка.
+ *
+ * На `/admin/mandalas` таких ссылок может быть две: в шапке страницы и в EmptyState
+ * («Нет мандал» → «Создать мандалу»). Сид создаёт 0 мандал, поэтому EmptyState виден
+ * всегда и `getByRole` без сужения падает в strict mode. Берём именно шапочную —
+ * `data-testid="page-header"` в `apps/mandala/src/app/(admin)/admin/mandalas/page.tsx`,
+ * а не `.first()` вслепую: порядок в DOM не является контрактом.
+ */
+function createMandalaLink(page: Page) {
+  return page.getByTestId('page-header').getByRole('link', { name: /создать мандалу/i })
+}
 
 test.describe('Админ: Мандалы', () => {
   test.describe('Список мандал', () => {
@@ -29,14 +43,16 @@ test.describe('Админ: Мандалы', () => {
 
     test('есть кнопка создания новой мандалы', async ({ adminPage }) => {
       await adminPage.goto('/admin/mandalas')
-      // Кнопка "Создать мандалу"
-      await expect(adminPage.getByRole('link', { name: /создать мандалу/i })).toBeVisible()
+      // Кнопка "Создать мандалу" — только из шапки страницы: на пустом списке
+      // такая же ссылка есть в EmptyState, и без сужения область поиска даёт
+      // два совпадения (strict mode violation)
+      await expect(createMandalaLink(adminPage)).toBeVisible()
     })
 
     test('можно перейти к созданию мандалы', async ({ adminPage }) => {
       await adminPage.goto('/admin/mandalas')
       await expect(adminPage.getByRole('heading', { name: 'Мандалы' })).toBeVisible()
-      const createLink = adminPage.getByRole('link', { name: /создать мандалу/i })
+      const createLink = createMandalaLink(adminPage)
       await expect(createLink).toBeVisible()
       await createLink.click()
       await adminPage.waitForURL(/\/admin\/mandalas\/new/, { timeout: 15000 })

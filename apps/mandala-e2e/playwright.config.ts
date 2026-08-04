@@ -10,6 +10,20 @@ loadEnvConfig(path.join(workspaceRoot, 'apps/mandala'))
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:3004'
 
+/**
+ * Прогон идёт против локального `next dev`, а не собранного образа.
+ *
+ * Разница принципиальная: dev-сервер компилирует каждый маршрут и каждый route handler
+ * по первому запросу. Холодный заход на страницу, Server Action с `redirect()` и особенно
+ * `/api/upload` (тянет sharp) стабильно уходят за 10–20 секунд — это компиляция, а не
+ * приложение. Замеры на этой машине: один и тот же прогон дважды подряд ронял РАЗНЫЕ тесты
+ * (07:24 и 08:26 против 07:67, 08:77 и 09:81), а каждый из них поодиночке проходил.
+ *
+ * Поэтому дефолтные таймауты, подобранные под staging, локально умножаются. Ассерты при
+ * этом не ослабляются — меняется только запас времени на компиляцию.
+ */
+const isLocalDevServer = !process.env['BASE_URL']
+
 // Пути к файлам состояния авторизации
 const ADMIN_STORAGE_STATE = 'playwright/.auth/admin.json'
 
@@ -33,12 +47,12 @@ export default defineConfig({
     video: 'on-first-retry',
   },
 
-  // Таймаут для каждого теста
-  timeout: 30000,
+  // Таймаут для каждого теста (локально — с запасом на компиляцию dev-сервера)
+  timeout: isLocalDevServer ? 90000 : 30000,
 
   // Таймаут для expect assertions
   expect: {
-    timeout: 5000,
+    timeout: isLocalDevServer ? 15000 : 5000,
   },
 
   // Повторы при ошибках

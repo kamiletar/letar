@@ -5,6 +5,7 @@
  */
 import path from 'node:path'
 import { expect, test } from '../fixtures/auth.fixture'
+import { SLOW_ACTION_TIMEOUT } from '../fixtures/timeouts'
 
 // Уникальный timestamp для тестовых данных
 const timestamp = Date.now()
@@ -51,18 +52,24 @@ test.describe('Админ: Полный CRUD товара', () => {
       const fileInput = adminPage.locator('input[type="file"]').first()
       await fileInput.setInputFiles(testImagePath)
 
-      // Ожидание превью изображения
-      await adminPage.waitForTimeout(2000) // Ждём upload
+      // Ждём реального завершения загрузки, а не фиксированную паузу: превью с кнопкой
+      // «Удалить» — единственный признак, что upload дошёл до конца. Пауза в 2с врала —
+      // товар создавался вообще без изображения, если загрузка не успевала (тот же фикс
+      // уже сделан в 07-full-mandala-crud и 10-integration-full-flow)
+      await expect(adminPage.getByRole('button', { name: /удалить/i }).first()).toBeVisible({
+        timeout: SLOW_ACTION_TIMEOUT,
+      })
 
       // Клик "Создать товар"
       await adminPage.getByRole('button', { name: /создать товар/i }).click()
 
       // Проверка редиректа на страницу товара (может быть /edit или просто /:id)
-      await expect(adminPage).toHaveURL(/\/admin\/products\/[^/]+/, { timeout: 15000 })
+      await expect(adminPage).toHaveURL(/\/admin\/products\/[^/]+/, { timeout: SLOW_ACTION_TIMEOUT })
       // Убедимся что это не страница /new
-      // 15s — под параллельной e2e-нагрузкой на общий staging-контейнер редирект после
-      // Server Action может занимать больше 5с (см. nextjs-server-action-redirect-race.md)
-      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 15000 })
+      // Редирект после Server Action может занимать больше 5с — под параллельной e2e-нагрузкой
+      // на общий staging-контейнер (см. nextjs-server-action-redirect-race.md) и на компиляции
+      // action'а с целевой страницей локально
+      await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: SLOW_ACTION_TIMEOUT })
 
       // Сохраняем ID товара из URL (с или без /edit)
       const url = adminPage.url()
@@ -128,7 +135,7 @@ test.describe('Админ: Полный CRUD товара', () => {
       await adminPage.getByRole('button', { name: /удалить товар/i }).click()
 
       // Проверка редиректа на список товаров
-      await expect(adminPage).toHaveURL(/\/admin\/products$/, { timeout: 15000 })
+      await expect(adminPage).toHaveURL(/\/admin\/products$/, { timeout: SLOW_ACTION_TIMEOUT })
 
       // Проверка что товар удалён из списка
       await expect(adminPage.getByText(testProductName)).not.toBeVisible({ timeout: 5000 })

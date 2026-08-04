@@ -19,6 +19,42 @@
 
 ---
 
+## ✅ 6 падающих e2e-тестов admin-chromium — ЗАКРЫТО v0.40.4 (2026-08-04)
+
+**Что было:** `nx e2e mandala-e2e -- --project=admin-chromium` стабильно ронял 6 тестов из 55,
+обнаружено при проверке миграции на `@letar/image-upload` — падения к ней не относились.
+
+**Причина 1 (4 теста):** `CookieBanner` (`@letar/ui`, `position: fixed; bottom: 0; zIndex: 1000`)
+на первом визите перекрывает submit-кнопку в конце длинных форм — Playwright ретраит клик до
+таймаута («subtree intercepts pointer events»). Починено проставлением cookie-согласия в
+localStorage рядом с сессией в `auth.setup.ts` — баннер не рендерится ни в одном тесте.
+Новый файл `apps/mandala-e2e/src/fixtures/cookie-consent.ts`.
+
+**Причина 2 (2 теста):** `getByRole('link', { name: /создать мандалу/i })` без сужения находит
+два совпадения на пустом списке мандал — ссылка есть и в шапке, и в `EmptyState`. Починено
+`data-testid="page-header"` на контейнере шапки + локатор в тестах, который ищет только внутри
+него (не `.first()` — порядок в DOM не контракт).
+
+**Побочная находка (не в исходных 6, чинилась заодно):** локальный `nx e2e` идёт против `next
+dev`, который компилирует маршруты/route handler'ы по первому запросу — загрузка изображения и
+редирект после Server Action стабильно уходили за 10–20с, из-за чего набор падающих тестов
+менялся от прогона к прогону при одном и том же коде. Таймауты разведены по `BASE_URL` в
+`playwright.config.ts` + новый `apps/mandala-e2e/src/fixtures/timeouts.ts`
+(`SLOW_ACTION_TIMEOUT`). Заодно убрана `waitForTimeout(2000)`-ставка на загрузку файла в
+`08-full-product-crud.admin.spec.ts` — если upload не успевал, тест «проходил», создав товар
+вообще без изображения.
+
+**Не в скоупе, вынесено отдельно:** `03-admin-products.admin.spec.ts` периодически теряет клик
+по навигационной ссылке из-за React hydration mismatch в `ColorModeProvider` (next-themes) —
+существовал до этой сессии, не связан ни с cookie-баннером, ни с strict mode. Задача на
+расследование выделена отдельно.
+
+**Документация:** новый раздел в [e2e-testing.md](/.claude/docs/e2e-testing.md) — «Дубль CTA:
+шапка страницы + EmptyState», «Cookie-баннер перехватывает клики по submit-кнопкам», «Локальный
+`nx e2e` идёт против `next dev`». Плюс заметка в [PLAN_TESTING.md](./PLAN_TESTING.md).
+
+---
+
 ## ✅ Path traversal в `/api/og-image` — ЗАКРЫТО v0.40.3 (2026-08-04)
 
 **Что было:** роут брал query-параметр `url`, проверял только префикс (`/api/files/`,

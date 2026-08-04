@@ -20,6 +20,24 @@ nx e2e mandala-e2e
 nx e2e mandala-e2e -- --ui    # С UI
 ```
 
+### E2E: что нужно до запуска
+
+1. **Засеянная dev-БД** — `nx db:seed mandala`. Без неё нет тестового админа
+   (`admin@elfafeya.art`), и `auth.setup.ts` не создаст `playwright/.auth/admin.json`.
+2. Больше ничего: `webServer` в `playwright.config.ts` сам поднимает `nx run mandala:dev`.
+
+⚠️ **Локальный прогон идёт против `next dev`, а не собранного приложения.** Dev-сервер
+компилирует маршруты и route handler'ы по первому запросу, поэтому холодный заход на страницу,
+Server Action с `redirect()` и `/api/upload` (тянет sharp) уходят за 10–20 секунд. Таймауты
+разведены по окружениям через `BASE_URL` — `playwright.config.ts` и `src/fixtures/timeouts.ts`
+(`SLOW_ACTION_TIMEOUT`). Подробности и симптоматика («набор падающих тестов меняется от прогона
+к прогону, каждый по отдельности зелёный») — в
+[e2e-testing.md](/.claude/docs/e2e-testing.md#локальный-nx-e2e-идёт-против-next-dev-а-не-против-собранного-приложения).
+
+Cookie-согласие проставляется в `auth.setup.ts` вместе с сессией — иначе `CookieBanner`
+(`fixed; bottom: 0`) перехватывает клики по submit-кнопкам в конце длинных форм. См.
+`src/fixtures/cookie-consent.ts`.
+
 ## Unit-тесты по модулям
 
 ### lib/actions (55 тестов)

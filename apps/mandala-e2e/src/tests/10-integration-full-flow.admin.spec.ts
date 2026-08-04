@@ -8,10 +8,11 @@
  * 4. Админ видит заказ и меняет статус
  * 5. Cleanup: удаление тестового товара
  */
-import { test as base, expect } from '@playwright/test'
+import { expect, test as base } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ADMIN_STORAGE_STATE } from '../fixtures/storage-state'
+import { SLOW_ACTION_TIMEOUT } from '../fixtures/timeouts'
 
 // Уникальные данные для теста
 const timestamp = Date.now()
@@ -111,18 +112,22 @@ test.describe('Интеграционный flow: товар → заказ → 
 
     // Ждём реального завершения загрузки, а не фиксированную паузу — под
     // параллельной e2e-нагрузкой на staging загрузка может занять больше 2с
-    // (см. тот же фикс в 07-full-mandala-crud.admin.spec.ts)
-    await expect(adminPage.getByRole('button', { name: /удалить/i }).first()).toBeVisible({ timeout: 15000 })
+    // (см. тот же фикс в 07-full-mandala-crud.admin.spec.ts), а локально к этому добавляется
+    // компиляция самого /api/upload на dev-сервере (см. fixtures/timeouts.ts)
+    await expect(adminPage.getByRole('button', { name: /удалить/i }).first()).toBeVisible({
+      timeout: SLOW_ACTION_TIMEOUT,
+    })
 
     // Создание товара
     await adminPage.getByRole('button', { name: /создать товар/i }).click()
 
     // Ждём редиректа на страницу товара (может быть /edit или просто /:id)
-    await expect(adminPage).toHaveURL(/\/admin\/products\/[^/]+/, { timeout: 15000 })
+    await expect(adminPage).toHaveURL(/\/admin\/products\/[^/]+/, { timeout: SLOW_ACTION_TIMEOUT })
     // Убедимся что это не страница /new
-    // 15s — под параллельной e2e-нагрузкой на общий staging-контейнер редирект после
-    // Server Action может занимать больше 5с (см. nextjs-server-action-redirect-race.md)
-    await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 15000 })
+    // Редирект после Server Action может занимать больше 5с — под параллельной e2e-нагрузкой
+    // на общий staging-контейнер (см. nextjs-server-action-redirect-race.md) и на компиляции
+    // action'а с целевой страницей локально
+    await adminPage.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: SLOW_ACTION_TIMEOUT })
 
     // Сохраняем ID товара (с или без /edit)
     const url = adminPage.url()

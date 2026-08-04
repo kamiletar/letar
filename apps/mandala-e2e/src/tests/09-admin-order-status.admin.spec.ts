@@ -4,6 +4,7 @@
  * Проверяем изменение статусов на странице детализации заказа
  */
 import { expect, test } from '../fixtures/auth.fixture'
+import { SLOW_ACTION_TIMEOUT } from '../fixtures/timeouts'
 
 test.describe('Админ: Управление статусами заказов', () => {
   test('можно открыть страницу заказа и увидеть информацию', async ({ adminPage }) => {
@@ -55,7 +56,8 @@ test.describe('Админ: Управление статусами заказо�
     await firstOrderLink.click()
 
     // Ждём перехода на страницу деталей заказа
-    await expect(adminPage).toHaveURL(/\/admin\/orders\/[^/]+$/, { timeout: 10000 })
+    // Локально сюда попадает компиляция маршрута /admin/orders/[id] (см. fixtures/timeouts.ts)
+    await expect(adminPage).toHaveURL(/\/admin\/orders\/[^/]+$/, { timeout: SLOW_ACTION_TIMEOUT })
 
     // Ждём загрузки страницы деталей — ищем заголовок "Заказ"
     await expect(adminPage.getByRole('heading', { name: /заказ/i })).toBeVisible({ timeout: 10000 })
@@ -99,7 +101,8 @@ test.describe('Админ: Управление статусами заказо�
     await firstOrderLink.click()
 
     // Ждём перехода на страницу деталей заказа
-    await expect(adminPage).toHaveURL(/\/admin\/orders\/[^/]+$/, { timeout: 10000 })
+    // Локально сюда попадает компиляция маршрута /admin/orders/[id] (см. fixtures/timeouts.ts)
+    await expect(adminPage).toHaveURL(/\/admin\/orders\/[^/]+$/, { timeout: SLOW_ACTION_TIMEOUT })
 
     // Ждём загрузки страницы деталей — ищем заголовок "Заказ"
     await expect(adminPage.getByRole('heading', { name: /заказ/i })).toBeVisible({ timeout: 10000 })

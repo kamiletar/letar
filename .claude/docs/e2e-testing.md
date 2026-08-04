@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images'
+  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -444,6 +444,115 @@ await expect(page.getByText(/ожида|pending/i)).toBeVisible()
 await expect(page.getByRole('combobox')).toBeVisible() // Для select
 await expect(page.getByText('Ожидают:').first()).toBeVisible() // Для бейджа
 ```
+
+### Дубль CTA: шапка страницы + EmptyState
+
+Типовой admin-список рендерит ссылку «Создать X» дважды: в шапке рядом с заголовком и внутри
+`EmptyState` (`@letar/admin-ui`), когда записей нет. На чистом сиде видны обе — `getByRole('link',
+{ name: /создать X/i })` падает в strict mode.
+
+`.first()` тут — не решение: порядок в DOM не контракт, и тест молча начнёт кликать по другой
+кнопке, если вёрстку переставят. Правильно — сузить область поиска до шапки, повесив на её
+контейнер `data-testid`:
+
+```tsx
+// apps/<app>/src/app/(admin)/admin/<entity>/page.tsx
+<HStack justify="space-between" data-testid="page-header">
+  <Heading>Мандалы</Heading>
+  <Button asChild>
+    <Link href="/admin/mandalas/new">Создать мандалу</Link>
+  </Button>
+</HStack>
+```
+
+```typescript
+const createLink = page.getByTestId('page-header').getByRole('link', { name: /создать мандалу/i })
+```
+
+## Cookie-баннер перехватывает клики по submit-кнопкам
+
+`CookieBanner` (`@letar/ui`) висит `position: fixed; bottom: 0; zIndex: 1000`. Submit-кнопка в
+конце длинной формы после скролла оказывается ровно под ним, и Playwright ретраит клик до
+таймаута: «`<div class="chakra-stack …">` subtree intercepts pointer events». Падает окружение,
+а не форма — и падает только там, где форма достаточно длинная, поэтому баг выглядит случайным.
+
+Это тот же класс проблемы, что и координация bottom-anchored компонентов
+([ui-components.md](/.claude/docs/ui-components.md#координация-bottom-anchored-компонентов-cookiebanner--stickyactionbar)),
+но в e2e его чинить надо не вёрсткой, а состоянием: **проставить согласие рядом с сессией**, тогда
+баннер не отрендерится вовсе (`shown === false`) ни в одном тесте.
+
+```typescript
+// apps/<app>-e2e/src/fixtures/auth.setup.ts
+setup('authenticate as admin', async ({ page }) => {
+  // ... логин через UI ...
+  await page.goto('/admin')
+
+  // Ключ localStorage: `${appKey}.consent.${policyVersion}` — формат задаёт
+  // createConsentConfig() в libs/ui/src/lib/consent-types.ts, appKey берётся
+  // из <CookieBanner appKey="…" /> в layout приложения
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      'mandala.consent.v1',
+      JSON.stringify({
+        necessary: true,
+        analytics: false,
+        marketing: false,
+        version: 'v1',
+        acceptedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    )
+  })
+
+  // storageState() забирает localStorage посещённых origin'ов — согласие уезжает
+  // в admin.json вместе с cookies сессии и достаётся всем тестам проекта
+  await page.context().storageState({ path: ADMIN_STORAGE_STATE })
+})
+```
+
+⚠️ `createConsentConfig` **нельзя** импортировать из `@letar/ui` в spec-файлы: barrel тянет
+React/Chakra-компоненты, которые в Node-раннере Playwright не грузятся. Ключ дублируется строкой
+с комментарием-ссылкой на источник.
+
+Гостевые контексты (`storageState: { cookies: [], origins: [] }`) согласие не получают —
+им, если понадобится, нужен `context.addInitScript()` с той же записью.
+
+## Локальный `nx e2e` идёт против `next dev`, а не против собранного приложения
+
+`webServer.command` в `playwright.config.ts` поднимает `nx run <app>:dev`. Dev-сервер компилирует
+каждый маршрут и каждый route handler **по первому запросу**, поэтому холодные операции стабильно
+уходят за 10–20 секунд:
+
+- первый заход на страницу (в том числе переход по ссылке — URL не меняется, пока навигация не
+  закоммичена, так что `toHaveURL` с дефолтными 5 секундами не дожидается);
+- Server Action с `redirect()` — компилируется и сам action, и целевая страница;
+- `/api/upload` — тянет `sharp`.
+
+Симптом характерный: **набор падающих тестов меняется от прогона к прогону при одном и том же
+коде, а каждый из них поодиночке проходит**. Замер на mandala-e2e (2026-08-04): два одинаковых
+полных прогона уронили разные пятёрки тестов, все они были зелёными в изоляции.
+
+Не лечится ретраями и не является багом приложения. Решение — развести таймауты по окружениям,
+опираясь на `BASE_URL` (задан → staging/собранный образ, не задан → локальный dev-сервер):
+
+```typescript
+// playwright.config.ts
+const isLocalDevServer = !process.env['BASE_URL']
+
+export default defineConfig({
+  timeout: isLocalDevServer ? 90000 : 30000,
+  expect: { timeout: isLocalDevServer ? 15000 : 5000 },
+})
+```
+
+```typescript
+// src/fixtures/timeouts.ts — для загрузки изображений и Server Action + redirect
+export const SLOW_ACTION_TIMEOUT = process.env['BASE_URL'] ? 15000 : 45000
+```
+
+⚠️ Заодно **не заменяй ожидание загрузки файла на `waitForTimeout`**. `await page.waitForTimeout(2000)`
+после `setInputFiles` — не ожидание, а ставка: если upload не успел, форма отправляется вообще без
+изображения и тест «проходит», проверив не тот сценарий. Ждать нужно признак завершения — превью с
+кнопкой удаления.
 
 ## E2E-логин без OIDC на staging: `NODE_ENV` не годится как индикатор окружения
 

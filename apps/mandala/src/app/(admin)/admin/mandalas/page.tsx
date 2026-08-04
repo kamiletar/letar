@@ -69,7 +69,8 @@ export default async function MandalasListPage({ searchParams }: MandalasPagePro
 
   return (
     <Stack gap={6}>
-      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
+      {/* data-testid — якорь для e2e: такая же ссылка «Создать мандалу» есть в EmptyState, и на пустом списке обе видны одновременно */}
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3} data-testid="page-header">
         <Heading size={{ base: 'md', md: 'lg' }}>Мандалы</Heading>
         <Button colorPalette="purple" asChild size={{ base: 'sm', md: 'md' }}>
           <Link href="/admin/mandalas/new">

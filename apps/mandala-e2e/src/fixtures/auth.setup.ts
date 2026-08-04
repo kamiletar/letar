@@ -7,6 +7,7 @@
  * ВАЖНО: Требуется тестовый админ в базе (seed.ts создаёт его)
  */
 import { expect, test as setup } from '@playwright/test'
+import { seedCookieConsent } from './cookie-consent'
 import { ADMIN_STORAGE_STATE } from './storage-state'
 
 /**
@@ -54,7 +55,13 @@ setup('authenticate as admin', async ({ page }) => {
   await page.goto('/admin')
   await expect(page).toHaveURL(/\/admin/, { timeout: 10000 })
 
+  // Проставляем cookie-согласие рядом с сессией — иначе CookieBanner (fixed; bottom: 0)
+  // перехватывает клики по submit-кнопкам в конце длинных форм. См. cookie-consent.ts
+  await seedCookieConsent(page)
+
   // Сохраняем состояние для переиспользования в тестах
+  // storageState() забирает и localStorage посещённых origin'ов, поэтому согласие
+  // уезжает в admin.json вместе с cookies сессии
   await page.context().storageState({ path: ADMIN_STORAGE_STATE })
 
   console.log(`✓ Admin session saved to ${ADMIN_STORAGE_STATE}`)
