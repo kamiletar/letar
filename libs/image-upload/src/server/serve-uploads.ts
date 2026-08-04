@@ -139,7 +139,7 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
   let realRootPromise: Promise<string | null> | undefined
 
   const getRealRoot = () => {
-    realRootPromise ??= realpath(path.resolve(root)).catch(() => null)
+    realRootPromise ??= realpath(path.resolve(/* turbopackIgnore: true */ root)).catch(() => null)
     return realRootPromise
   }
 
@@ -156,7 +156,7 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
 
       let fileStat
       try {
-        fileStat = await stat(resolved.absPath)
+        fileStat = await stat(/* turbopackIgnore: true */ resolved.absPath)
       } catch {
         return new Response('Not found', { status: 404 })
       }
@@ -170,7 +170,7 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
       // этого не видит, поэтому сверяем ещё и реальные пути.
       const realRoot = await getRealRoot()
       if (realRoot) {
-        const realFile = await realpath(resolved.absPath).catch(() => null)
+        const realFile = await realpath(/* turbopackIgnore: true */ resolved.absPath).catch(() => null)
         if (!realFile) {
           return new Response('Not found', { status: 404 })
         }

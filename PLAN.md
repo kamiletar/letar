@@ -1974,32 +1974,37 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
 потребителей и 0 тестов») его вскрывает. Стоит разово пройтись по остальным `libs/*` на тот же
 паттерн (`"targets": {}` + `grep -r "@letar/<lib>" apps/*/src` даёт 0 совпадений).
 
-## §31 — `@letar/image-upload/server`: Turbopack ронял `nx build kami` на трейсинге ФС (2026-08-04)
+## §33 — Резолв `@letar/*` с подпутями: `paths` — единственный механизм, `transpilePackages` не нужен (2026-08-04)
 
-`nx build kami` падал на `Failed to collect page data for /api/keystatic/[...params]` — ошибка
-формально про несвязанный роут, реальная причина глубже: `serve-uploads.ts` (см. §29) вызывает
-`fs.stat`/`fs.realpath` с путём, вычисленным динамически (`path.resolve(root)` с
-пользовательским `root`). Turbopack (Next.js 16.3.0) детектит такой вызов как «нужно трейсить
-весь проект целиком» и на это падает сбор page data — не только для роута `/api/files/[...path]`,
-а для сборки в целом.
+Проверка утверждения из README `libs/image-upload`, что для подключения библиотеки нужны три
+вещи включая `transpilePackages` в `next.config`, иначе «typecheck пройдёт, а прод-билд упадёт на
+Module not found». `apps/kami/next.config.js` не содержит `@letar/image-upload` в
+`transpilePackages`, при этом `kami` импортирует `@letar/image-upload/server`.
 
-`apps/aboi` тот же хелпер не ронял: разница не в самом вызове, а в том, что предупреждение
-Turbopack на `aboi` не эскалируется в фатальную ошибку сборки — воспроизводится нестабильно
-по конкретному роуту-соседу, поэтому «не падает у другого потребителя» не значит «безопасно».
+- [x] `nx build kami` (Turbopack) и `nx build grandslamcup` (webpack) — оба доходят до
+      `✓ Compiled successfully` без записи в `transpilePackages`. Import trace Turbopack
+      подтверждает: специфер резолвится прямо в исходник под `libs/`, минуя `node_modules`.
+- [x] Корневая причина: `node_modules/@letar` в монорепо не существует вовсе. Bun линкует
+      workspace-либы в `apps/<app>/node_modules/@letar/` только для объявленных в `dependencies`
+      приложения. Все семь потребителей `image-upload` объявляют зависимость через
+      `nx.implicitDependencies` (граф Nx, не установка пакета) — линка нет, поэтому `paths` в
+      tsconfig приложения остаётся единственным резолвером. `transpilePackages` снимает правило
+      «не компилировать `node_modules`» — снимать нечего, специфер туда и не попадает.
+- [x] Промах в `paths` для подпути проверен напрямую (сравнение двух конфигов `tsgo` на одном
+      файле-импортёре): `error TS2307: Cannot find module`. При `typescript.ignoreBuildErrors:
+      true` (так у `kami` и `grandslamcup`) эта ошибка в билде не всплывает — ловит только
+      `nx typecheck:tsgo <app>`.
+- [x] Задокументировано в [library-dual-entry-points.md](/.claude/docs/library-dual-entry-points.md),
+      ссылка добавлена в `CLAUDE.md`. Разметка (`type:*`-теги, `enforce-module-boundaries`,
+      eslint-граница client/server) — в соседнем `lib-entry-points.md`, дублирования нет.
+- [x] Побочно найдено: `serve-uploads.ts` давал Turbopack-предупреждения о трейсинге всего
+      проекта — вынесено фоновой задачей отдельному агенту (фикс не входил в скоуп этой сессии),
+      исправлено, см. §32.
 
-- [x] Три вызова (`realpath` в `getRealRoot`, `stat`, `realpath` при проверке симлинка) обёрнуты
-      комментарием `/* turbopackIgnore: true */` — ровно способ, который рекомендует сам Next.js
-      в тексте ошибки. Путь и так самостоятельно нормализуется и проверяется на traversal
-      (`resolveUploadPath`), трейсинг ФС тут не давал защиты — только ломал билд.
-- [x] Проверено: `nx build kami` зелёный, предупреждения о трейсинге исчезли; `nx build aboi`
-      (второй потребитель `@letar/image-upload/server`) остаётся зелёным без изменений.
-- [x] Версия `@letar/image-upload` поднята 0.1.0 → 0.1.1.
-
-### Не в скоупе
-
-- [ ] `nx build kami` после фикса упирается в отдельную, не связанную проблему — не заданы
-      `KEYSTATIC_GITHUB_CLIENT_ID`/`KEYSTATIC_GITHUB_CLIENT_SECRET`/`KEYSTATIC_SECRET` в
-      локальном окружении сборки. Требует отдельной задачи по конфигурации Keystatic в kami.
+Оба билда (`kami`, `grandslamcup`) всё равно падали на более поздних, не связанных с резолвом
+причинах — `kami` без `KEYSTATIC_*` в локальном окружении, `grandslamcup` без доступа к БД. Для
+вопроса про `transpilePackages` неважно: `Module not found` вылезает на фазе компиляции, а она в
+обоих случаях зелёная.
 
 ## §31 — Пресет `tsconfig.next-app.json`: 18 из 31 `tsconfig.json` унифицированы (2026-08-04, root-weaver)
 
@@ -2061,9 +2066,9 @@ Turbopack на `aboi` не эскалируется в фатальную оши
       отличаются по стеку).
 - [ ] `noUnusedLocals: false` у 6 приложений — эмпирически не нужен, но снятие не сделано (см.
       выше).
-- [ ] Найденный попутно баг `apps/kami` (Turbopack трассирует весь проект из-за нестатического
-      `path.resolve` в `libs/image-upload/src/server/serve-uploads.ts:142`) — вынесен отдельной
-      задачей, не относится к tsconfig.
+- [x] Найденный попутно баг `apps/kami` (Turbopack трассирует весь проект из-за нестатического
+      `path.resolve` в `libs/image-upload/src/server/serve-uploads.ts:142`) — не относился к
+      tsconfig, исправлен отдельно, см. §32.
 
 ### Урок
 
@@ -2071,3 +2076,31 @@ Turbopack на `aboi` не эскалируется в фатальную оши
 наследуемый `tsconfig.json`. Без него унификация молча ломает `outDir`/`include`/`exclude`
 каждого приложения, и обнаруживается это не typecheck'ом (он использует уже неверные пути
 как есть), а только явным сравнением списка проверяемых файлов до/после.
+
+## §32 — `@letar/image-upload/server`: Turbopack ронял `nx build kami` на трейсинге ФС (2026-08-04)
+
+Баг найден попутно в §31 (root-weaver), исправлен отдельно — не относится к tsconfig.
+`nx build kami` падал на `Failed to collect page data for /api/keystatic/[...params]` — ошибка
+формально про несвязанный роут, реальная причина глубже: `serve-uploads.ts` (см. §29) вызывает
+`fs.stat`/`fs.realpath` с путём, вычисленным динамически (`path.resolve(root)` с
+пользовательским `root`). Turbopack (Next.js 16.3.0) детектит такой вызов как «нужно трейсить
+весь проект целиком» и на это падает сбор page data — не только для роута `/api/files/[...path]`,
+а для сборки в целом.
+
+`apps/aboi` тот же хелпер не ронял: разница не в самом вызове, а в том, что предупреждение
+Turbopack на `aboi` не эскалируется в фатальную ошибку сборки — воспроизводится нестабильно
+по конкретному роуту-соседу, поэтому «не падает у другого потребителя» не значит «безопасно».
+
+- [x] Три вызова (`realpath` в `getRealRoot`, `stat`, `realpath` при проверке симлинка) обёрнуты
+      комментарием `/* turbopackIgnore: true */` — ровно способ, который рекомендует сам Next.js
+      в тексте ошибки. Путь и так самостоятельно нормализуется и проверяется на traversal
+      (`resolveUploadPath`), трейсинг ФС тут не давал защиты — только ломал билд.
+- [x] Проверено: `nx build kami` зелёный, предупреждения о трейсинге исчезли; `nx build aboi`
+      (второй потребитель `@letar/image-upload/server`) остаётся зелёным без изменений.
+- [x] Версия `@letar/image-upload` поднята 0.1.0 → 0.1.1.
+
+### Не в скоупе
+
+- [ ] `nx build kami` после фикса упирается в отдельную, не связанную проблему — не заданы
+      `KEYSTATIC_GITHUB_CLIENT_ID`/`KEYSTATIC_GITHUB_CLIENT_SECRET`/`KEYSTATIC_SECRET` в
+      локальном окружении сборки. Требует отдельной задачи по конфигурации Keystatic в kami.
