@@ -16,7 +16,10 @@ import { join } from 'path'
 export function generateFilename(originalName: string): string {
   const timestamp = Date.now()
   const randomString = Math.random().toString(36).substring(2, 15)
-  const extension = originalName.split('.').pop() || 'bin'
+  const rawExtension = originalName.split('.').pop() || 'bin'
+  // Расширение попадает в путь на диске — вырезаем всё, кроме буквенно-цифровых
+  // символов, иначе `../` внутри originalName пробивает join() до записи файла.
+  const extension = rawExtension.replace(/[^a-zA-Z0-9]/g, '') || 'bin'
   return `${timestamp}-${randomString}.${extension}`
 }
 
@@ -39,7 +42,7 @@ export async function ensureUploadDir(subdir: string): Promise<string> {
 export async function saveFileToDisk(
   file: File,
   subdir: string,
-  filename: string
+  filename: string,
 ): Promise<{ path: string; buffer: Buffer }> {
   const uploadsDir = await ensureUploadDir(subdir)
   const filepath = join(uploadsDir, filename)

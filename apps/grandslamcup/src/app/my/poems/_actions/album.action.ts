@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db'
 import { requirePoetAction } from '@/lib/roles'
 import { transliterate } from '@/lib/transliterate'
+import { resolveUploadPath } from '@letar/image-upload/server'
 import { mkdir, rename } from 'fs/promises'
 import { revalidatePath } from 'next/cache'
 import { join } from 'path'
@@ -68,12 +69,18 @@ async function generateAlbumSlug(title: string, excludeId?: string): Promise<str
   }
 }
 
-async function moveAlbumCover(tempPath: string, albumId: string): Promise<string> {
+export async function moveAlbumCover(tempPath: string, albumId: string): Promise<string> {
+  const uploadsRoot = join(process.cwd(), 'uploads')
+  const resolvedTemp = resolveUploadPath(uploadsRoot, tempPath.split('/'))
+  if (!resolvedTemp.ok) {
+    throw new Error('Некорректный путь временной обложки')
+  }
+
   const filename = tempPath.split('/').pop()!
-  const destDir = join(process.cwd(), 'uploads', 'albums', albumId)
+  const destDir = join(uploadsRoot, 'albums', albumId)
   await mkdir(destDir, { recursive: true })
   const destPath = `albums/${albumId}/${filename}`
-  await rename(join(process.cwd(), 'uploads', tempPath), join(process.cwd(), 'uploads', destPath))
+  await rename(resolvedTemp.absPath, join(uploadsRoot, destPath))
   return destPath
 }
 
@@ -301,7 +308,7 @@ export async function reorderAlbumPoemsAction(input: unknown) {
         where: { albumId, poemId },
         data: { sortOrder: index },
       })
-    )
+    ),
   )
 
   revalidatePath('/my/poems')
