@@ -1,5 +1,21 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Фикс: CookieBanner вне ChakraProvider ронял первый визит (2026-08-04)
+
+В `layout.tsx` `<CookieBanner appKey="animatrona-tracker" />` рендерился после закрывающего
+`</Provider>` — вне дерева ChakraProvider. `CookieBanner` (`libs/ui/src/lib/cookie-banner.tsx`)
+использует Chakra-компоненты и `useContext`, который требует `ChakraProvider` выше по дереву.
+
+Баннер по умолчанию скрыт и раскрывается через `useEffect` только при первом посещении (когда в
+localStorage ещё нет ключа cookie-согласия) — поэтому баг не ловился в обычной ручной проверке и
+в e2e, где localStorage уже содержит согласие. Любой настоящий первый посетитель без сохранённого
+согласия получал `ContextError` и пустой экран «This page couldn't load».
+
+Исправление: перенёс `<CookieBanner>` внутрь `<Provider>`/`<QueryProvider>`, рядом с
+`Header`/`children`/`Toaster`. Проверено вручную в браузере с очищенным `localStorage` —
+баннер отображается, ошибок в консоли нет. `Script`/`UmamiScript` оставлены снаружи `Provider`
+(не Chakra-компоненты, ChakraProvider им не нужен).
+
 ## 152-ФЗ: consent-инфраструктура с нуля (2026-07-28)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
