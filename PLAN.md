@@ -1994,9 +1994,9 @@ Module not found». `apps/kami/next.config.js` не содержит `@letar/ima
       файле-импортёре): `error TS2307: Cannot find module`. При `typescript.ignoreBuildErrors:
       true` (так у `kami` и `grandslamcup`) эта ошибка в билде не всплывает — ловит только
       `nx typecheck:tsgo <app>`.
-- [x] Задокументировано в [library-dual-entry-points.md](/.claude/docs/library-dual-entry-points.md),
-      ссылка добавлена в `CLAUDE.md`. Разметка (`type:*`-теги, `enforce-module-boundaries`,
-      eslint-граница client/server) — в соседнем `lib-entry-points.md`, дублирования нет.
+- [x] Задокументировано в [lib-entry-points.md](/.claude/docs/lib-entry-points.md) (изначально
+      было в отдельном `library-dual-entry-points.md` — слито в один документ 2026-08-04:
+      два дока про один и тот же паттерн с пересекающимися чек-листами хуже одного).
 - [x] Побочно найдено: `serve-uploads.ts` давал Turbopack-предупреждения о трейсинге всего
       проекта — вынесено фоновой задачей отдельному агенту (фикс не входил в скоуп этой сессии),
       исправлено, см. §32.
@@ -2064,8 +2064,16 @@ Module not found». `apps/kami/next.config.js` не содержит `@letar/ima
 
 - [ ] Оставшиеся 13 приложений вне пресета (не требуется — либо уже единообразны, либо законно
       отличаются по стеку).
-- [ ] `noUnusedLocals: false` у 6 приложений — эмпирически не нужен, но снятие не сделано (см.
-      выше).
+- [x] `noUnusedLocals: false`/`noUnusedParameters: false` у 7 приложений (список расширился на
+      `auth-hub`/`dashboard`/`kami` — там оверрайд был только `noUnusedLocals`) убраны отдельной
+      сессией 2026-08-04. `driving-school`, `animatrona-tracker`, `mandala`, `form-develop-app`,
+      `auth-hub`, `dashboard`, `kami` — `typecheck:tsgo` зелёный на всех после снятия. По пути
+      вычищено 4 реально неиспользуемых места (TS6133), успевших появиться уже после замера:
+      `FileSchema` (`form-develop-app`), `IPFS_GATEWAY` + `setIsLoading` (`animatrona-tracker`),
+      `router` (`dashboard`). `mandala` откатывался дважды параллельным агентом `mandala-dev`
+      (эксклюзивная резервация `apps/mandala/**`) — после координации через agent-mail он применил
+      правку сам, коммит `18f67ddf`. `driving-school` — submodule, запушен отдельно + обновлён SHA
+      в основном репо.
 - [x] Найденный попутно баг `apps/kami` (Turbopack трассирует весь проект из-за нестатического
       `path.resolve` в `libs/image-upload/src/server/serve-uploads.ts:142`) — не относился к
       tsconfig, исправлен отдельно, см. §32.

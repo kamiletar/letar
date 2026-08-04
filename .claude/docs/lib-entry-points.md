@@ -1,7 +1,9 @@
 # Несколько точек входа в одной библиотеке
 
 Что гарантируют Nx-теги и `@nx/enforce-module-boundaries`, когда одна библиотека несёт и
-клиентский React-код, и Node-only серверный, — и чем на самом деле держится граница между ними.
+клиентский React-код, и Node-only серверный, — и чем на самом деле держится граница между ними
+на уровне линта. Вторая половина документа — как это резолвится на уровне сборки: что делает
+`paths`, при чём тут `node_modules` и почему `transpilePackages` не нужен.
 
 ## Как выглядит расхождение
 
@@ -106,17 +108,192 @@ export default [...baseConfig, { ignores: ['**/out-tsc'] }]
 `@letar/*/server` и относительные `../server`, а не `**/server`. Голый `**/server` поймал бы
 `next-intl/server` и `@/types/server`, которых в репо сотни.
 
+## Как это резолвится на уровне сборки
+
+Governance (теги, `no-restricted-imports`) — выше. Здесь — что конкретно резолвит специфер
+`@letar/x/server` при `nx build`/`nx typecheck:tsgo`, что ломается при промахе и почему
+`transpilePackages` тут не нужен. Разобрано на `@letar/image-upload` — единственной библиотеке
+с подпутём, у которой семь потребителей сразу, что даёт статистику вместо одного примера.
+
+### `exports` в package.json библиотеки
+
+[libs/image-upload/package.json](/libs/image-upload/package.json):
+
+```json
+{
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "import": "./src/index.ts", "default": "./src/index.ts" },
+    "./server": {
+      "types": "./src/server/index.ts",
+      "import": "./src/server/index.ts",
+      "default": "./src/server/index.ts"
+    },
+    "./package.json": "./package.json"
+  }
+}
+```
+
+`main`/`types` описывают только `.` — подпуть обязан быть отдельным ключом в `exports`.
+
+### `paths` в tsconfig КАЖДОГО приложения — отдельно на подпуть
+
+⚠️ Ключ `@letar/image-upload` **не покрывает** `@letar/image-upload/server`: `paths` матчится по
+строке, а не по префиксу пакета.
+
+```json
+"@letar/image-upload": ["../../libs/image-upload/src/index.ts"],
+"@letar/image-upload/server": ["../../libs/image-upload/src/server/index.ts"]
+```
+
+| Приложение   | Что прописано                                                           |
+| ------------ | ----------------------------------------------------------------------- |
+| mandala      | оба входа — [tsconfig.json:35-36](/apps/mandala/tsconfig.json)          |
+| kami         | только серверный — [tsconfig.json:32](/apps/kami/tsconfig.json)         |
+| grandslamcup | только серверный — [tsconfig.json:32](/apps/grandslamcup/tsconfig.json) |
+
+Приложение может быть потребителем **только** серверного входа: у `kami` и `grandslamcup` записи
+для `.` нет вообще — библиотека нужна им исключительно ради `createUploadsRoute` в
+`api/files/[...path]/route.ts`. Это законная конфигурация, не недоделка.
+
+Промах в `paths` даёт `error TS2307: Cannot find module '@letar/image-upload/server'` — проверено
+сравнением двух конфигов `tsgo` на одном файле-импортёре: с записью резолв уходит внутрь
+`libs/image-upload/src/server/serve-uploads.ts`, без записи — TS2307 на строке импорта.
+
+⚠️ У `kami` и `grandslamcup` в `next.config` стоит `typescript.ignoreBuildErrors: true`, поэтому
+TS2307 **в билде не всплывёт** — промах ловит только `nx typecheck:tsgo <app>`.
+
+### Почему `paths` — несущая конструкция, а не удобство
+
+В корне монорепо **нет `node_modules/@letar`** — ни каталога, ни симлинков (`lstat` → `ENOENT`).
+Bun линкует workspace-библиотеки в `apps/<app>/node_modules/@letar/` только для объявленных в
+`dependencies` самого приложения:
+
+```bash
+ls apps/studio/node_modules/@letar      # hooks
+ls apps/dashboard/node_modules/@letar   # analytics chakra-provider forms infra-config ui
+ls apps/kami/node_modules/@letar        # пусто
+```
+
+Все семь потребителей `image-upload` (`aboi`, `aprel8008`, `domwellbes`, `driving-school`,
+`grandslamcup`, `kami`, `mandala`) объявляют `@letar/*` через `nx.implicitDependencies` — это граф
+Nx, а не установка пакета. Линка не появляется, поэтому **`paths` остаётся единственным
+механизмом резолва**.
+
+Обратная сторона: у `studio` импорт `@letar/hooks` работает вообще без записи в `paths` (либа в
+`dependencies` → линк есть), и `nx typecheck:tsgo studio` зелёный. Не бери это за образец — при
+`implicitDependencies` так не будет.
+
+### `transpilePackages` — НЕ нужен
+
+Для библиотеки, резолвящейся через `paths`, запись в `transpilePackages` не требуется.
+
+- [apps/kami/next.config.js:36](/apps/kami/next.config.js) перечисляет пять пакетов, и
+  `@letar/image-upload` среди них нет — при том что `src/app/api/files/[...path]/route.ts`
+  импортирует `@letar/image-upload/server`. `nx build kami` доходит до `✓ Compiled successfully`
+  — а это ровно та фаза, где вылез бы `Module not found`. Turbopack в трейсе прямо показывает,
+  что затянул исходник библиотеки:
+
+  ```
+  Import trace:
+    App Route:
+      ./libs/image-upload/src/server/serve-uploads.ts
+      ./apps/kami/src/app/api/files/[...path]/route.ts
+  ```
+
+- [apps/grandslamcup/next.config.mjs](/apps/grandslamcup/next.config.mjs) не имеет
+  `transpilePackages` вовсе, хотя тянет `@letar/forms`, `@letar/ui`, `@letar/auth`,
+  `@letar/chakra-provider` и серверный вход `image-upload`. `nx build grandslamcup` тоже доходит
+  до `✓ Compiled successfully`. То же отсутствие `transpilePackages` — у `aprel8008`,
+  `dsperevod`, `studio`.
+
+Важно, что эти два случая закрывают **оба бандлера**: `kami` собирается Turbopack'ом,
+`grandslamcup` — webpack'ом (`next build --webpack`). Правило «не компилировать `node_modules`»,
+которое снимает `transpilePackages`, — исторически webpack'овое, так что webpack-подтверждение
+здесь весомее.
+
+⚠️ Целиком локально ни тот, ни другой билд не проходит — но оба падают **позже** фазы компиляции
+и по причинам, не связанным с резолвом библиотек: `kami` — на `/api/keystatic/[...params]` без
+`KEYSTATIC_*` (они только в `.env.docker`, а локальный `next build` грузит `.env.local`/`.env`),
+`grandslamcup` — на «Collecting page data» без доступа к БД (`EACCES` при `acquireConnection`).
+Для вопроса про `transpilePackages` это неважно: `Module not found` вылезает на фазе компиляции,
+а она в обоих случаях зелёная.
+
+**Причина.** `transpilePackages` снимает дефолтное правило Next.js «не компилировать то, что лежит
+в `node_modules`». Через `paths` специфер резолвится сразу в исходник под `libs/` — файл вне
+`node_modules`, который Next компилирует как обычный файл проекта. Снимать нечего.
+
+То же говорит Nx в деприкейшен-предупреждении, которое печатается при каждом билде:
+
+> `withNx()` from `@nx/next` is deprecated… Next.js transpiles workspace libraries automatically.
+
+⚠️ Уточнение к прецеденту из [deploy-coordination.md](/.claude/rules/deploy-coordination.md)
+(«typecheck зелёный, прод-билд падает на `Module not found`» при транзитивном реэкспорте одной
+`@letar/*`-либы из другой): чинится он добавлением **`paths`** для транзитивной библиотеки, а не
+`transpilePackages`. Показательно, что `aprel8008` имеет `@letar/format-utils` в `paths` и не имеет
+`transpilePackages` вовсе. Сам совет «прогони `nx build <app>` после нового импорта из `libs/`»
+остаётся в силе — меняется только то, что чинить по факту падения.
+
 ## Заводишь библиотеку со второй точкой входа — чек-лист
 
 1. Серверный код — в `src/server/`, клиентский — в `src/client/` или `src/lib/`.
 2. Подпуть в `exports` библиотечного `package.json` (образец — `@letar/auth`).
 3. `paths` в `tsconfig.json` каждого приложения-потребителя **на подпуть отдельно**:
    `"@letar/x/server": ["../../libs/x/src/server/index.ts"]`.
-4. Раздел про серверную часть в README библиотеки — тег `type:*` про неё не расскажет.
-5. Тег не трогаем: он про `.`.
+4. `references` в `tsconfig.json` приложения — на библиотеку целиком, одна на все подпути
+   (`{ "path": "../../libs/x" }`); поддерживается через `nx sync`.
+5. `nx.implicitDependencies` в `package.json` приложения — для графа Nx.
+6. `transpilePackages` — **не добавлять**: библиотеке, резолвящейся через `paths`, он не нужен.
+7. Раздел про серверную часть в README библиотеки — тег `type:*` про неё не расскажет.
+8. Тег не трогаем: он про `.`.
+
+Промах в п.3 ловит `nx typecheck:tsgo <app>` (может быть замаскирован `ignoreBuildErrors`),
+промах в п.2 — `nx build <app>`.
+
+## Проверено на остальных четырёх библиотеках (2026-08-04)
+
+`image-upload` был первым — ниже результат прогона `bunx eslint <lib>/src` (и глазами по структуре
+`src/`) на оставшихся четырёх из таблицы выше.
+
+| Библиотека | `no-restricted-imports` нарушений | Структура                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth`     | 0                                 | Чисто: `src/server/`, `src/client/` — оба глоба ловят всё содержимое.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `pin-auth` | 0                                 | Чисто: `src/server/`, `src/client/`, плюс `src/email/` (изоморфные шаблоны без импортов) и `src/schemas/` (только `zod`). Тега `type:*` не было вообще — добавлен `type:core` (см. ниже).                                                                                                                                                                                                                                                                                                                                                                                                |
+| `cdek`     | 0 (до правки — не покрывалось)    | **Была дыра**: `./client` — не папка `src/client/`, а один файл `src/client.ts`, реэкспортирующий `src/ui/*.tsx`. Ни `**/src/client/**`, ни `**/src/lib/**/*.tsx` его не ловили — правило молчало бы даже на живой импорт `react`/`../server` в этих файлах. Почищено ниже.                                                                                                                                                                                                                                                                                                              |
+| `forms`    | 0                                 | **Известный, не почищенный зазор**: серверная captcha (`src/lib/captcha/verify.ts`) и `src/lib/server-errors/*` лежат не в `src/server/`, а в `src/lib/`. Оба правила их не видят вообще (не `src/server/`, и это `.ts`, а не `.tsx`, так что второй глоб `**/src/lib/**/*.tsx` тоже мимо). Сейчас нарушений нет (`verify.ts`/`server-errors` не тянут React), поэтому не трогаем — переезд в `src/server/` сломал бы `./server-errors` в `exports` и пример из JSDoc (`@letar/forms/captcha/server`), это отдельная задача с более широким блэст-радиусом, не входит в проверку границ. |
+
+### Правка: `cdek` — добавлены два глоба под клиентское правило
+
+`eslint.config.mjs` (блок «клиентская часть тянет серверную», строки ~132-138) расширен:
+
+```js
+files: [
+  '**/src/client/**/*.ts',
+  '**/src/client/**/*.tsx',
+  '**/src/client.ts', // ← новое: одиночный файл-точка входа (cdek)
+  '**/src/lib/**/*.tsx',
+  '**/src/ui/**/*.tsx', // ← новое: cdek держит клиентские компоненты в src/ui/, не src/lib/
+],
+```
+
+Проверено `eslint --print-config libs/cdek/src/client.ts` и
+`eslint --print-config libs/cdek/src/ui/pvz-picker.tsx` — правило `no-restricted-imports` с
+запретом `@letar/*/server`/`../server` теперь в конфиге обоих файлов. `libs/cdek/eslint.config.mjs`
+(свой конфиг проекта) — просто `[...baseConfig, { ignores: ['**/out-tsc'] }]`, ловушка из раздела
+выше («`files`-глобы с путём от корня») тут не в игре: новые глобы уже начинаются с `**/`.
+
+### Правка: `pin-auth` — добавлен тег `type:core`
+
+`libs/pin-auth/project.json` тегов не имел вообще (`type:*` отсутствовал). Добавлен `type:core` —
+по аналогии с `@letar/auth`, ближайшим структурным аналогом (тот же паттерн `./server` + `./client`
+
+- доп. точки входа). Безопасно: единственное правило `depConstraints`, ссылающееся на `type:*`,
+  закомментировано (см. «Что теги делают на самом деле» выше) — тег ничего не блокирует, только
+  документирует точку входа `.`.
 
 ## Ссылки
 
 - `libs/image-upload/README.md` § «Серверная часть» — сам API `createUploadsRoute`.
-- `PLAN.md` §29 — зачем серверную раздачу вообще вынесли в библиотеку.
+- `PLAN.md` §29, §33 — зачем серверную раздачу вообще вынесли в библиотеку и разбор резолва.
 - [libs.md](/.claude/rules/libs.md) — общие правила библиотек.
