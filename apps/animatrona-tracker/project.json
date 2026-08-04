@@ -15,14 +15,26 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next build",
+        "command": "next build --webpack",
         "cwd": "apps/animatrona-tracker"
       },
       "dependsOn": ["^build"],
       "cache": false,
       "outputs": ["{workspaceRoot}/apps/animatrona-tracker/.next"],
       "metadata": {
-        "description": "Build production bundle",
+        "description": "Build production bundle (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)",
+        "technologies": ["next"]
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next dev --webpack",
+        "cwd": "apps/animatrona-tracker"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Start development server (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)",
         "technologies": ["next"]
       }
     },

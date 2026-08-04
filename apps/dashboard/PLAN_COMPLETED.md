@@ -2,6 +2,33 @@
 
 Детальное описание всех реализованных фич.
 
+## Turbopack по умолчанию + Chakra/next-themes — риск гидратации (2026-08-04)
+
+Аудит по мотивам находки в `apps/mandala` ([доки](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):
+Next.js 16 без явного `--webpack`/`--turbopack` выбирает Turbopack, что в связке с
+`ChakraProvider` (через `@letar/chakra-provider`'s `RootChakraProvider`) и `next-themes`'ным
+`ColorModeProvider` (`src/app/_components/ui/color-mode.tsx` + `theme-provider.tsx`) может
+триггерить hydration mismatch (см. официальный доки Chakra UI, раздел «Hydration errors»).
+
+Подтверждено: `nx dev dashboard` (без флага) стартовал на Turbopack
+(`▲ Next.js 16.3.0 (Turbopack)`). `dev`/`build` инферились Nx-плагином `@nx/next` без флага
+(в `project.json` был только частичный override `build.dependsOn`).
+
+Применён фикс: добавлен `options.command: "next build/dev --webpack"` как **частичный**
+override инферированного таргета (не полное дублирование, как в mandala) — Nx мержит
+project.json-таргет с инферированным по ключам, так что `cache`/`inputs`/`outputs` у `build`
+сохранились от плагина, изменился только сам флаг команды. Это более безопасный паттерн для
+приложений, где `dev`/`build` инферятся (см. также driving-school ниже) — подтверждено через
+`nx show project dashboard --json` (cache/inputs/outputs не изменились).
+
+Проверено: `nx dev dashboard` поднимается на webpack (`▲ Next.js 16.3.0 (webpack)`), страница
+`/` (редирект на логин «Войти через Ключницу») рендерится без ошибок в консоли.
+
+⚠️ Инструмент предпросмотра (Browser pane, `preview_start`) для порта dashboard периодически
+отдавал «navigation denied or failed» и терял `serverId` сразу после старта — воспроизвелось
+и на исходном (Turbopack) варианте, не связано с этим фиксом. Обошлось прямым запуском
+`nx dev dashboard` в фоне через Bash и навигацией на уже поднятый сервер.
+
 ## Версия 1.23.0 — проактивные алерты об истечении SSL сертификатов (2026-07-30)
 
 **Задача:** последний пункт из «Идеи на будущее» PLAN.md. `/nginx/certificates` уже показывал

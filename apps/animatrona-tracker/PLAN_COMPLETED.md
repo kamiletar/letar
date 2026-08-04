@@ -1,5 +1,31 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Turbopack по умолчанию + Chakra/next-themes — риск гидратации (2026-08-04)
+
+Аудит по мотивам находки в `apps/mandala` ([доки](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):
+Next.js 16 без явного `--webpack`/`--turbopack` выбирает Turbopack, что в связке с
+`ChakraProvider`'s `<Global>` (emotion, SSR рендерит `<style>`, клиент — `null`) и
+`next-themes`'ным `<script>` (`ColorModeProvider`, `apps/animatrona-tracker/src/app/_components/ui/color-mode.tsx`)
+может триггерить hydration mismatch.
+
+Подтверждено: `nx dev animatrona-tracker` (без флага) стартовал именно на Turbopack
+(`▲ Next.js 16.3.0 (Turbopack)`), провайдер собран по тому же паттерну
+(`ChakraProvider` → `ColorModeProvider`/`NextThemesProvider`), что и в mandala.
+Точную click-race репродукцию (клик по ссылке сразу после навигации, как в mandala) через
+Browser pane сделать не удалось — окружение показывало «ref map not initialized»/failed
+screenshot из-за скрытой панели браузера (см. `reference_browser_pane_hidden_raf` в памяти),
+а не из-за самого приложения.
+
+Применён тот же фикс, что в mandala: явный `--webpack` в `dev`/`build`. `build` был уже
+явным таргетом в `project.json` — добавлен флаг. `dev`-таргет раньше инферился Nx-плагином
+`@nx/next` без флага — добавлен явный override с тем же executor'ом (`nx:run-commands`),
+что и у инферированного. Проверено: `nx dev`/сервер поднимается на webpack
+(`▲ Next.js 16.3.0 (webpack)`), страница рендерится без ошибок в консоли.
+
+`nx e2e animatrona-tracker-e2e` не удалось прогнать — `webServer` конфиг playwright слушает
+порт из `.env` (`PORT=3010`), который на машине уже занят посторонним процессом
+(`EADDRINUSE`, не связано с этим фиксом — воспроизводилось и до правки).
+
 ## Фикс: CookieBanner вне ChakraProvider ронял первый визит (2026-08-04)
 
 В `layout.tsx` `<CookieBanner appKey="animatrona-tracker" />` рендерился после закрывающего

@@ -211,7 +211,21 @@
       }
     },
     "build": {
-      "dependsOn": ["zenstack:generate", "db:generate"]
+      "dependsOn": ["zenstack:generate", "db:generate"],
+      "options": {
+        "command": "next build --webpack"
+      },
+      "metadata": {
+        "description": "Build production bundle (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)"
+      }
+    },
+    "dev": {
+      "options": {
+        "command": "next dev --webpack"
+      },
+      "metadata": {
+        "description": "Start development server (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)"
+      }
     }
   }
 }
