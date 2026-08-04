@@ -1,5 +1,43 @@
 # Выполненные задачи — form-example
 
+## Сессия 2026-08-04 — таргет zenstack:generate починен
+
+Обнаружено в сессии §37 корневого `PLAN.md`: таргет `zenstack:generate` был сломан на чистом
+checkout'е, обходился вручную сгенерированным клиентом мимо таргета.
+
+- **Корневая причина:** `apps/form-example` — единственное приложение среди потребителей
+  `@letar/zenstack-form-plugin`, у которого нет собственного `package.json` (не участвует в bun
+  workspaces индивидуально). Из-за этого нигде не появляется симлинк
+  `node_modules/@letar/zenstack-form-plugin`, а `provider = '@letar/zenstack-form-plugin'` в
+  `schema.zmodel` не резолвится обычным Node-разрешением модулей (ZenStack CLI — Node-процесс,
+  не TypeScript, `tsconfig` paths/`customConditions` ему не помогают).
+- **Фикс:** `provider` переведён на относительный путь к сборке —
+  `'../../libs/zenstack-form-plugin/dist/index.js'` — тем же приёмом, что уже применён в
+  `apps/form-develop-app/schema.zmodel`.
+- **Побочная находка:** сам fallback `zenstack generate || (... npx prisma generate)` был
+  логической ошибкой, а не временным костылём под сломанный плагин. `@zenstackhq/cli` v3.9.0
+  игнорирует блок `generator client { provider = 'prisma-client-js' }` в zmodel (warning
+  `"generator" is not used by ZenStack`) — Prisma Client им не генерируется вообще. `||`
+  означал, что после фикса плагина `zenstack generate` стал бы успешным и полностью скрывал
+  вызов `prisma generate`, оставляя `PrismaClient` не пересгенерированным. Заменено на
+  последовательное `zenstack generate && prisma generate` (без `npx` — бинарь берётся из
+  `node_modules/.bin` монорепо через nx, `npx` в подкаталоге без своего `package.json` вместо
+  этого лез в registry за посторонним пакетом `zenstack@2.22.3`).
+- Также раскрылась причина, почему `npx zenstack generate` руками из `apps/form-example` вообще
+  не работал ни разу: `npx` в каталоге без локального `node_modules` не поднимается по дереву до
+  корневого `node_modules/.bin` (в отличие от PATH, который получает процесс, запущенный через
+  `nx`) — и подтягивал из npm registry несвязанный пакет `zenstack@2.22.3` вместо
+  `@zenstackhq/cli@3.9.0` монорепо.
+- Проверено на чистой генерации (`--skip-nx-cache`, `rm -rf src/generated/form-schemas/*`):
+  `nx run form-example:zenstack:generate` и `nx run form-example:typecheck:tsgo` — оба зелёные.
+  Регенерированные `.form.ts`-файлы отличаются только форматированием более новой версии
+  плагина, содержательных регрессий нет.
+- Оставлено на будущее (не в скоупе этой сессии — низкий приоритет, апп единственный без
+  `output = "./prisma"` в `generator client`, PrismaClient пишется в общий хойстнутый
+  `node_modules/@prisma/client`): миграция на паттерн `plugin prisma` + `plugin typescript` по
+  образцу `form-develop-app`, чтобы ZenStack v3 сам генерировал `prisma/schema.prisma` из
+  `schema.zmodel` вместо ручной синхронизации двух файлов.
+
 ## Сессия 2026-07-15 — rollout-профиль включён, деплой закрыт
 
 - `letar.rollout: 'true'` раскомментирован в `docker-compose.production.yml` — приложение

@@ -12,8 +12,11 @@ generator client {
 }
 
 // @letar/zenstack-form-plugin generates Zod schemas with .meta({ ui: {...} })
+// provider — относительный путь к сборке, а не имя пакета: у form-example нет своего
+// package.json (не участвует в bun workspaces), поэтому node_modules/@letar не резолвится —
+// тот же приём, что и в apps/form-develop-app/schema.zmodel.
 plugin formSchema {
-  provider = '@letar/zenstack-form-plugin'
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
   output = './src/generated/form-schemas'
 }
 

@@ -8,12 +8,13 @@
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "zenstack generate || (echo 'zenstack generate skipped — fallback to prisma generate' && npx prisma generate)",
+        "command": "zenstack generate && prisma generate",
         "cwd": "apps/form-example"
       },
       "cache": true,
       "inputs": [
         "{projectRoot}/schema.zmodel",
+        "{projectRoot}/prisma/schema.prisma",
         {
           "runtime": "node -p process.platform"
         }
