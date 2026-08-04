@@ -90,9 +90,65 @@ React component» — оно остаётся и под webpack (это отде
 `ui-components.md` артефакт того, как `next-themes` рендерит свой блокирующий скрипт), но НЕ
 сопровождается «Hydration failed... tree will be regenerated» и не ломает клики.
 
-## Что дальше
+## Частичный override для инферируемых `dev`/`build` (Nx-плагин `@nx/next`)
 
-Любое приложение монорепо, сочетающее Chakra v3 + `next-themes` (`driving-school`, `dashboard`,
-`animatrona-tracker` и т.д.), потенциально подвержено той же гонке, если его `dev`/`build`
-не пришпилены к webpack явно — не проверялось целенаправленно за пределами `mandala`, чинить
-по факту обнаружения там же, где всплывёт (например при флаки в другом `*-e2e`).
+У части приложений (`dashboard`, `animatrona-tracker`'s `dev`, `driving-school`) таргеты
+`dev`/`build` в `project.json` не объявлены явно — их генерирует `createNodesV2` плагина
+`@nx/next` (см. `node_modules/@nx/next/dist/src/plugins/plugin.js`), который жёстко зашивает
+команду `next dev`/`next build` без опции добавить CLI-флаги. Плагин этого не поддерживает
+(нет `devArgs`/`buildArgs` в опциях), поэтому единственный путь — override в `project.json`.
+
+**Не обязательно дублировать весь таргет** (как сделано в `mandala` — полный явный executor
+с `cache`/`inputs`/`outputs`, скопированными вручную). Nx мержит одноимённый таргет из
+`project.json` с инферированным **по ключам**: если в `project.json` указать только
+`options.command`, остальные поля (`cache`, `inputs`, `outputs`, `dependsOn`) остаются от
+плагина без изменений — то есть кэширование `build`-таргета не ломается. Проверяется через
+`nx show project <app> --json` до/после правки — сравнить `targets.build`/`targets.dev`.
+
+```jsonc
+// project.json — минимальный override, без дублирования cache/inputs/outputs
+"build": {
+  "options": { "command": "next build --webpack" }
+},
+"dev": {
+  "options": { "command": "next dev --webpack" }
+}
+```
+
+Этот паттерн применён в `dashboard`/`driving-school` (2026-08-04). Для `mandala` его задним
+числом не применяли — оба варианта рабочие, полное дублирование просто избыточно многословнее.
+
+## Аудит по всему монорепо (2026-08-04)
+
+Проверены приложения, сочетающие `ChakraProvider` (Chakra v3) и `next-themes`'ный
+`ColorModeProvider` как прямой потомок — той же связке, что вызвала баг в `mandala`:
+
+| Приложение           | Было (dev/build)                   | Бандлер до фикса | Статус                                               |
+| -------------------- | ---------------------------------- | ---------------- | ---------------------------------------------------- |
+| `mandala`            | явные, `next dev`/`next build`     | Turbopack        | ✅ исправлено ранее (эталон)                         |
+| `animatrona-tracker` | `build` явный, `dev` инферился     | Turbopack        | ✅ исправлено — `--webpack` в обоих                  |
+| `dashboard`          | оба инферились (частичный `build`) | Turbopack        | ✅ исправлено — частичный override `options.command` |
+| `driving-school`     | оба инферились (submodule)         | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf` |
+
+Для всех трёх подтверждён Turbopack в логе dev-сервера до фикса
+(`▲ Next.js 16.3.0 (Turbopack)`) и webpack после (`▲ Next.js 16.3.0 (webpack)`), а также
+чистый рендер страницы без ошибок консоли на webpack. Точную click-race репродукцию (как в
+mandala — клик сразу после навигации) через Browser pane повторить не удалось: инструмент
+предпросмотра в этой сессии периодически терял скомпонованный кадр («Screenshot timed out»,
+«ref map not initialized», «navigation denied or failed») из-за скрытой панели браузера —
+известная false-negative ловушка (`reference_browser_pane_hidden_raf` в памяти), не связанная
+с самим приложением. Фикс применён превентивно на основании структурного совпадения
+(Turbopack + `ChakraProvider` + `ColorModeProvider`-потомок) и официального предупреждения
+Chakra UI, без дожидания живой репродукции гонки.
+
+Побочная находка при аудите `animatrona-tracker` (не хydration, отдельный баг, уже исправлен
+пользователем в параллельной сессии 2026-08-04): `<CookieBanner>` рендерился в `layout.tsx`
+вне дерева `<Provider>`(ChakraProvider) — падал `Runtime ContextError` на первом визите без
+сохранённого cookie-согласия (баннер скрыт до первого рендера, поэтому не ловилось в
+e2e/ручной проверке с уже принятым согласием). См. `apps/animatrona-tracker/PLAN_COMPLETED.md`.
+
+Не проверялись целенаправленно приложения-лендинги (`letar-landing`, `kami-key-the-landing`,
+`animatrona-landing`) и Electron-рендерер `animatrona` — у них другой профиль риска (лендинги
+почти без интерактивности сразу после навигации; Electron-рендерер собирается отдельно от
+`next dev`/`next build` через `bun x next dev`, не через Nx-инферированные таргеты) — чинить
+по факту обнаружения, если всплывёт.
