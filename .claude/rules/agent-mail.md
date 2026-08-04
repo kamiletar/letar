@@ -113,11 +113,11 @@ release_file_reservations(
 
 ## Фиксированные имена координаторов
 
-| Агент            | Имя          | Роль                           |
-| ---------------- | ------------ | ------------------------------ |
-| Deploy Agent     | `BlackCove`  | Единственный кто деплоит       |
-| Forms Coord      | `FormsCoord` | Владелец libs/forms ecosystem  |
-| Animatrona Coord | `GrayMill`   | Владелец libs/animatrona-types |
+| Агент            | Имя                 | Роль                           |
+| ---------------- | ------------------- | ------------------------------ |
+| Deploy Agent     | `BlackCove`         | Единственный кто деплоит       |
+| Forms Coord      | `forms-coordinator` | Владелец libs/forms ecosystem  |
+| Animatrona Coord | `GrayMill`          | Владелец libs/animatrona-types |
 
 ## Ключи проекта
 

@@ -506,14 +506,21 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
 - **Запросил:** root-weaver
 - **Приоритет:** high
 - **Описание:** `apps/dsperevod-e2e/src/callback-drawer.spec.ts` — все 4 теста (маска телефона + 3 сценария отправки) падают **только в WebKit**, все — на шаге ввода телефона (`phoneInput.pressSequentially('9185568172', { delay: 20 })` не приводит к ожидаемому значению маски). Chromium/Firefox проходят. Обнаружено §18.7 Тираж M1 batch2 (staging-e2e-гейт), не диагностировано глубоко — не в скоупе root-weaver (компонент `FieldPhone`, `libs/forms/src/lib/declarative/form-fields/specialized/field-phone.tsx`, использует `use-mask-input`/`withMask`, юнит-тестов на реальный ввод клавиш нет, только рендер/начальное значение — `field-phone.spec.tsx`). Подозрение: `withMask`/событийная модель WebKit (Safari) не синхронизируется с `pressSequentially` так же, как Chromium/Firefox — известный класс проблем у masked-input библиотек в WebKit.
-- **Статус:** ожидание
+- **Статус:** в работе → forms-dev (thread `form-dsperevod-phone-webkit`, 2026-08-04)
 
 #### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie)
 
 - **Запросил:** MagentaRaven
 - **Приоритет:** high
 - **Описание:** новый провайдер `smartcaptcha` рядом с turnstile/recaptcha/hcaptcha (`libs/forms/src/lib/captcha/`). Причина: РФ-проект (152-ФЗ) — Turnstile/reCAPTCHA отправляют IP и телеметрию браузера на зарубежные серверы (трансграничная передача ПДн), SmartCaptcha хранит данные в РФ. Серверная верификация: `POST https://smartcaptcha.yandexcloud.net/validate`. Нужно к Фазе 1–2 svoichuzhie (регистрация фан-клуба, подписка) — сейчас не блокирует (идёт Фаза 0, дизайн).
-- **Статус:** ожидание
+- **Статус:** в работе → forms-dev (thread `form-svoichuzhie-smartcaptcha`, 2026-08-04)
+
+#### [2026-08-04] Серверный код forms не под `src/server/` — граница `no-restricted-imports` его не видит
+
+- **Запросил:** GoldCreek (аудит границ `src/server/` на auth/pin-auth/cdek/forms)
+- **Приоритет:** low
+- **Описание:** `src/lib/captcha/verify.ts` (серверная верификация CAPTCHA) и `src/lib/server-errors/*` (экспортируется как `./server-errors` в `exports`) лежат в `src/lib/`, а не в `src/server/`. Правило `no-restricted-imports` в корневом `eslint.config.mjs` матчит только `**/src/server/**` — эти файлы вне его области. Нарушений сейчас нет (React/Chakra не тянут), но граница не защищает от будущей регрессии. Перенос меняет публичную поверхность API (`exports["./server-errors"]` в `libs/forms/package.json`, JSDoc-пример в `verify.ts` → `@letar/forms/captcha/server`) — паттерн есть готовый, образец `@letar/auth` (`src/server/` + `./server` в `exports` + `paths` на подпуть в каждом приложении-потребителе).
+- **Статус:** ожидание (не блокирует)
 
 ### Документация и DX
 

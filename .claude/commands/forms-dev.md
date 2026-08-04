@@ -57,7 +57,7 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: 
 
 После изучения документации:
 
-- Если есть задачи от FormsCoord (topic: `forms-task`) — **обработай их первыми**
+- Если есть задачи от forms-coordinator (topic: `forms-task`) — **обработай их первыми**
 - Если есть входящие запросы (topic: `form-feature-request`) — обработай следующими
 - Если есть backlog запросы в PLAN.md — обработай следующими
 - Иначе — определи текущую фазу и выбери задачу из плана

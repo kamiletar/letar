@@ -11,14 +11,20 @@ macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
-  agent_name: "FormsCoord",
+  agent_name: "forms-coordinator",
+  registration_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE",
   task_description: "Forms Coordinator — координация экосистемы форм",
   file_reservation_paths: ["libs/forms/**", "libs/zenstack-form-plugin/**", "libs/form-mcp/**"],
   file_reservation_reason: "forms ecosystem ownership"
 )
 ```
 
-> **Имя `FormsCoord` — фиксированное.**
+> **Имя `forms-coordinator` — фиксированное kebab-case identity** (id 222, зарегистрирована
+> 2026-08-04). Прежнее имя `FormsCoord` (CamelCase) протухло в agent-mail — идентичная история
+> с `GrayMill` (см. `agent_fixed_names_tokens` в памяти). **Всегда передавай `registration_token`
+> вместе с `agent_name`** — без токена `macro_start_session`/`register_agent` либо форкнет новую
+> случайную identity, либо откажет с «requires registration_token». Проверяй поле `name` в ответе:
+> должно вернуться `forms-coordinator`, id 222, без форка.
 
 2. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
@@ -31,7 +37,8 @@ macro_start_session(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "FormsCoord",
+  sender_name: "forms-coordinator",
+  sender_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE",
   to: [],
   broadcast: true,
   subject: "Forms Coordinator готов",
