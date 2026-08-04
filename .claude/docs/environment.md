@@ -435,6 +435,45 @@ error TS6059: File 'libs/my-lib/src/index.ts' is not under 'rootDir'
 error TS6307: File not listed within file list of project
 ```
 
+### ⚠️ Всё вышесказанное относится к `tsc --build` — а приложения его не используют
+
+Список выше описывает режим сборки по project references (`tsc --build`). **Ни одно приложение
+в `apps/` его не запускает.** Все taргеты типизации приложений — однопроектный режим
+(`tsgo --noEmit`, `tsc --noEmit`, `tsgo --project <файл> --noEmit`), где `references` в резолве
+не участвуют вовсе. `tsc --build` живёт только в `build`-таргетах библиотек
+(`tsc --build tsconfig.lib.json --emitDeclarationOnly`) — вот там references обязательны.
+
+Почему так вышло: штатный Nx-таргет `typecheck` от `@nx/js/typescript` (единственный, кто звал
+бы `tsc --build` для приложения) **Nx сам отключает**, когда приложение ставит `noEmit: true` —
+подменяет команду на `echo "The 'typecheck' target is disabled because one or more project
+references set 'noEmit: true' in their tsconfig."`. Проверить: `nx show project <app> --json`.
+Из-за этого и завели собственный `typecheck:tsgo`.
+
+Следствия, проверенные на замере 2026-08-04 (§29 в [PLAN.md](/PLAN.md)):
+
+- **Рассинхрон `paths` ↔ `references` в `apps/*/tsconfig.json` ничего не ломает** и выравнивания
+  не требует. На тот момент у девяти приложений `paths` ссылались на либы без парного
+  `references`, у `dashboard` — наоборот; ни typecheck, ни билд, ни `nx affected` не страдали.
+- **Граф Nx строится по импортам, а не по `references`.** Проверка:
+  `nx show projects --affected --files=libs/forms/src/index.ts` включает `animatrona`, у которого
+  `reference` на `forms` нет. Значит `nx affected`, порядок задач и `dependsOn: ["^…"]` целы.
+- **Резолв `@letar/*` вообще не зависит ни от `references`, ни от `paths`**: `tsconfig.base.json`
+  задаёт `customConditions: ["@letar/source"]`, а каждый `libs/*/package.json` объявляет
+  `exports` с этим условием, ведущим на `src/index.ts`. Поэтому `dashboard` импортирует
+  `@letar/forms` и `@letar/chakra-provider`, не имея для них ни одной записи в `paths`.
+- **`@nx/js:typescript-sync` намеренно отключён** в `nx.json` (`sync.disabledTaskSyncGenerators`),
+  а `nx sync` / `nx sync:check` не вызываются ни в CI, ни в git-хуках. Так что совет «после
+  изменений запусти `nx sync`» в этом репо не работает — references правятся руками либо
+  не правятся вовсе.
+- Часть приложений (десктопные и мобильные) вместо `references` **инлайнит исходники либ прямо в
+  программу** через `include: ["../../libs/X/src/**/*.ts"]`. При такой модели `reference`
+  избыточен по определению — файлы уже в программе.
+
+**Практический вывод:** новую либу подключаешь — достаточно, чтобы импорт резолвился
+(`exports` в её `package.json`) и чтобы Nx видел ребро графа. `paths` и `references` в
+приложении — вспомогательные, их рассинхрон не является дефектом и чинить его «ради симметрии»
+не нужно.
+
 ### ⚠️ TS6059 может вернуться даже с корректными `references` — в `next build`
 
 `references` исправляет `TS6059` для `nx typecheck:tsgo` (и вообще для `tsc --build`), но **не

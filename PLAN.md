@@ -1877,3 +1877,54 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
 - Побочно: во всех четырёх приватных submodule коммиты §29 остались незапушенными — `git push`
   увёл origin вперёд сразу на два коммита. Незапушенный submodule ломает любой деплой
   (`not our ref`), см. `.claude/rules/deploy-coordination.md`.
+
+### Хвост: рассинхрон `paths` ↔ `references` в `tsconfig.json` — правок не требует (2026-08-04, BrightRaven)
+
+- [x] Разобрана находка предыдущего хвоста: у девяти приложений `compilerOptions.paths`
+      ссылались на `../../libs/X` без парного `{ "path": "../../libs/X" }` в `references`.
+      **Вердикт — не дефект, файлы не тронуты.** `references` читает только `tsc --build`, а
+      **ни одно приложение его не запускает**: все таргеты типизации приложений однопроектные
+      (`tsgo --noEmit`, `tsc --noEmit`, `tsgo --project … --noEmit`). `tsc --build` живёт
+      исключительно в `build`-таргетах библиотек.
+- [x] Первопричина найдена: штатный Nx-таргет `typecheck` от `@nx/js/typescript` — единственный,
+      кто звал бы `tsc --build` для приложения, — **Nx сам отключает** при `noEmit: true`,
+      подменяя команду на `echo "The 'typecheck' target is disabled because one or more project
+      references set 'noEmit: true'…"`. Отсюда и собственный `typecheck:tsgo`. Согласованно с
+      этим в `nx.json` намеренно выключен `@nx/js:typescript-sync`, а `nx sync`/`sync:check` не
+      вызываются ни в CI, ни в хуках — то есть синхронизировать эти два списка в репо нечем и
+      незачем.
+- [x] Проверено, что рассинхрон не задевает ни один канал:
+      **граф Nx** строится по импортам, а не по `references` —
+      `nx show projects --affected --files=libs/forms/src/index.ts` включает `animatrona`, у
+      которого reference на `forms` нет (значит `nx affected`, порядок задач и `dependsOn: ["^…"]`
+      целы); **резолв модулей** идёт через `customConditions: ["@letar/source"]` +
+      `exports` в `libs/*/package.json`, а не через `paths` — доказательство: `dashboard`
+      импортирует `@letar/forms` и `@letar/chakra-provider`, вообще не имея для них `paths`;
+      **контрольный эксперимент** — добавление недостающего reference в `kami-key-the` не изменило
+      результат typecheck (зелёный до и после), правка откачена.
+- [x] Обратный случай (reference без `paths`) тоже проверен — один: `dashboard`
+      (`chakra-provider`, `forms`, `ui`). Безвреден по той же причине. Битых `references`
+      (на несуществующий `libs/X/tsconfig.json`) нет ни одного.
+- [x] У пяти из девяти приложений исходники либ **инлайнятся прямо в программу** через
+      `include: ["../../libs/X/src/**/*.ts"]` — при этой модели reference избыточен по
+      определению, файлы уже в программе. Это не единый стиль репо, а две сосуществующие модели.
+- [x] Генератор `nx g @letar/generators:new-app` проверен — шаблон
+      `files/tsconfig.json.template` заполняет оба списка одними и теми же тремя либами
+      (`chakra-provider`, `ui`, `analytics`), рассинхрона не порождает. Динамической дописки
+      `paths`/`references` в `generator.ts` нет.
+- [x] Автопроверка (ESLint-правило / шаг `nx lint` / pre-commit) **не ставится намеренно** —
+      гейт на инвариант, который ни на что не влияет, давал бы только ложные срабатывания и
+      принуждал к правкам ради симметрии.
+- [x] Механика записана в [environment.md](/.claude/docs/environment.md) — в раздел про
+      `references` добавлено, что весь его список относится к `tsc --build`, которого у
+      приложений нет.
+- **Побочно (не чинилось, отдельный техдолг):** утверждение «у всех девяти `typecheck:tsgo`
+  зелёный» неверно — падают два, и обе поломки к `references` отношения не имеют.
+  `form-develop-app`: не сгенерирован `@/generated/*` (нужен `nx zenstack:generate`), плюс
+  `useRef` без аргумента под типами React 19 и разъехавшийся `NativeSelectOption` из
+  `@letar/forms`. `form-docs`: `I18nUIConfig` требует аргумент типа, и `onSubmit({ value })` не
+  совпадает с сигнатурой. Ещё у трёх (`animatrona-mobile`, `animatrona-tv`, `form-example`)
+  таргета `typecheck:tsgo` нет вовсе — они не покрыты предкоммитным гейтом.
+- **Побочно:** `.claude/rules/libs.md` требует «настроить ТРИ вещи» (`paths` + `references` +
+  `implicitDependencies`) и «после изменений запустить `nx sync`» — обе инструкции расходятся с
+  реальностью репо. Файл не правился: в нём лежат чужие незакоммиченные изменения.
