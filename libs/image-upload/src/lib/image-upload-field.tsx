@@ -2,10 +2,10 @@
 
 import type { BoxProps } from '@chakra-ui/react'
 import { Box, Field, Spinner, Text, VStack } from '@chakra-ui/react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Dropzone } from './dropzone'
 import { ImagePreview, type ImagePreviewProps, type RenderImageArgs } from './image-preview'
-import type { ImageCategory, ImageUrlResolver } from './types'
+import type { ImageCategory, ImageUrlResolver, UploadedImage } from './types'
 import { useImagePreviewUrl } from './use-image-preview-url'
 import { useImageUpload } from './use-image-upload'
 
@@ -116,6 +116,12 @@ export function ImageUploadField({
   previewSize = 150,
   previewProps,
 }: ImageUploadFieldProps) {
+  // Ссылка, которую сервер вернул при загрузке. Резолвер её не перезапрашивает:
+  // лишний round-trip, а если он не отработает — превью не появится вовсе,
+  // хотя файл уже лежит на сервере. Держим вместе со значением, которому она
+  // соответствует, чтобы не показать её после смены value извне.
+  const [justUploaded, setJustUploaded] = useState<UploadedImage | null>(null)
+
   const {
     upload,
     isUploading,
@@ -127,15 +133,20 @@ export function ImageUploadField({
     category,
     disabled,
     onUploadSuccess: (image) => {
+      setJustUploaded(image)
       onChange?.(image.id || image.url)
     },
   })
 
-  const { previewUrl, isLoading: isLoadingPreview } = useImagePreviewUrl({
+  const { previewUrl: resolvedUrl, isLoading: isLoadingPreview } = useImagePreviewUrl({
     value,
     resolveImageUrl,
     imageEndpoint,
   })
+
+  // Ссылка из ответа годится, только пока value указывает на этот же файл
+  const isJustUploadedValue = !!justUploaded && !!value && (value === justUploaded.id || value === justUploaded.url)
+  const previewUrl = isJustUploadedValue ? justUploaded.url : resolvedUrl
 
   const handleFilesSelected = useCallback(
     (files: FileList) => {
@@ -149,6 +160,7 @@ export function ImageUploadField({
 
   const handleRemove = useCallback(() => {
     clearError()
+    setJustUploaded(null)
     onChange?.(null)
   }, [onChange, clearError])
 
