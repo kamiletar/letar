@@ -27,6 +27,9 @@
   ],
   "references": [
     {
+      "path": "./tsconfig.spec.json"
+    },
+    {
       "path": "../../libs/consent"
     },
     {

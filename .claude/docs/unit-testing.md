@@ -79,7 +79,21 @@ references** — иначе трансформация падает. В Next.js-
 `pravda`, `animatrona`, `aboi`, `label-printer-desktop`, `libs/label-printer-core`,
 `libs/auth`, `libs/email`, `libs/contract-generator`, `studio` (2026-07-28, первые тесты
 биллинга/интеграции Точка Банк — заодно потребовался alias `@letar/email` в `vitest.config.ts`,
-которого не хватало для резолва в тестах server actions).
+которого не хватало для резолва в тестах server actions), `grandslamcup` (2026-08-04, первый
+реальный тест — `album.action.spec.ts` на path traversal при перемещении обложки альбома).
+
+**⚠️ Отсутствие `TSCONFIG_ERROR` у конкретного приложения — не доказательство, что фикс не
+нужен.** У `grandslamcup` первый тест (2026-08-04) прошёл БЕЗ `tsconfig.spec.json` — расследование
+показало, что не потому что `@nx/vitest:test`-executor как-то иначе резолвит tsconfig, а потому
+что bun хоистит **разные версии vite** в разные `node_modules/.bun/` в зависимости от графа
+зависимостей: у `grandslamcup` вложенный vitest резолвировал `vite@8.2.0` (баг не воспроизводится),
+у `archetest` в то же самое время — `vite@8.1.3` (баг воспроизводится, проверено эмпирически —
+временное отключение его `tsconfig.spec.json` тут же вернуло `TSCONFIG_ERROR` на
+`vitest.setup.tsx`). Какую версию получит конкретное приложение — решает `bun install`/lockfile,
+не архитектура приложения; это может измениться при следующей переустановке зависимостей.
+**Правило:** писать `tsconfig.spec.json` для любого приложения с реальными тестовыми файлами
+превентивно, по образцу (`archetest`/`mandala`), не дожидаясь фактического `TSCONFIG_ERROR` —
+его отсутствие сегодня ничего не гарантирует на завтра.
 
 **Особый случай — Electron-приложения (main/ исключён из корневого tsconfig.json):**
 у `animatrona` и `label-printer-desktop` каталог `main/` явно в `exclude` корневого
@@ -122,9 +136,10 @@ has not been built from source file '.../shared/visibility-model.ts'.
 `label-printer-desktop`) — сначала посмотри, какой из двух случаев твой.
 
 **Проекты без vitest вообще (не в скоупе фикса)** — есть `vitest.config.ts`, но 0 тестовых
-файлов: `aira-web`, `dsperevod`, `grandslamcup`, `time`, `svoichuzhie`, `synth`,
+файлов: `aira-web`, `dsperevod`, `time`, `svoichuzhie`, `synth`,
 `aprel8008`, `animatrona-tracker`, `libs/cdek`, `libs/image-upload`, `libs/query-provider`.
-Не требуют tsconfig.spec.json пока не появятся первые тесты.
+Не требуют tsconfig.spec.json пока не появятся первые тесты. (`grandslamcup` получил первый тест
+2026-08-04 и переехал в список исправленных выше.)
 
 **Найдена отдельная, более глубокая проблема — kami и dashboard:** у обоих нет ни
 `vitest.config.ts`, ни target `test` в `project.json`. `specs/index.spec.tsx` — протухший
