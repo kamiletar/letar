@@ -28,15 +28,13 @@ export interface DropzoneProps extends Omit<BoxProps, 'onChange'> {
    * Кастомный контент
    */
   children?: ReactNode
-  /**
-   * Цветовая схема
-   * @default 'blue'
-   */
-  colorPalette?: string
 }
 
 /**
  * Базовый компонент Dropzone для drag-and-drop загрузки файлов
+ *
+ * Цвета берутся из `colorPalette` темы — своих оттенков компонент не задаёт,
+ * поэтому одинаково выглядит в светлой и тёмной теме.
  *
  * @example
  * ```tsx
@@ -67,7 +65,7 @@ export function Dropzone({
         setIsDragOver(true)
       }
     },
-    [disabled]
+    [disabled],
   )
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -91,7 +89,7 @@ export function Dropzone({
         onFilesSelected(files)
       }
     },
-    [disabled, onFilesSelected]
+    [disabled, onFilesSelected],
   )
 
   const handleClick = useCallback(() => {
@@ -109,30 +107,29 @@ export function Dropzone({
       // Сбросить input для возможности повторной загрузки
       e.target.value = ''
     },
-    [onFilesSelected]
+    [onFilesSelected],
   )
 
   return (
     <Box
       position="relative"
+      colorPalette={colorPalette}
       borderWidth="2px"
       borderStyle="dashed"
-      borderColor={isDragOver ? `${colorPalette}.500` : disabled ? 'gray.300' : `${colorPalette}.200`}
+      borderColor={isDragOver ? 'colorPalette.solid' : disabled ? 'border' : 'colorPalette.muted'}
       borderRadius="lg"
-      bg={isDragOver ? `${colorPalette}.50` : disabled ? 'gray.50' : 'transparent'}
+      bg={isDragOver ? 'colorPalette.subtle' : disabled ? 'bg.muted' : 'transparent'}
       p={6}
       textAlign="center"
       cursor={disabled ? 'not-allowed' : 'pointer'}
       opacity={disabled ? 0.6 : 1}
       transition="all 0.2s"
-      _hover={
-        disabled
-          ? undefined
-          : {
-              borderColor: `${colorPalette}.400`,
-              bg: `${colorPalette}.50`,
-            }
-      }
+      _hover={disabled
+        ? undefined
+        : {
+          borderColor: 'colorPalette.emphasized',
+          bg: 'colorPalette.subtle',
+        }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -150,10 +147,10 @@ export function Dropzone({
       />
 
       {children || (
-        <VStack gap={2} color={disabled ? 'gray.400' : `${colorPalette}.600`}>
+        <VStack gap={2} color={disabled ? 'fg.subtle' : 'colorPalette.fg'}>
           <Icon boxSize={10}>{isDragOver ? <LuUpload /> : <LuImagePlus />}</Icon>
           <Text fontWeight="medium">{isDragOver ? 'Отпустите для загрузки' : 'Перетащите изображения сюда'}</Text>
-          <Text fontSize="sm" color="gray.500">
+          <Text fontSize="sm" color="fg.muted">
             или нажмите для выбора
           </Text>
         </VStack>

@@ -36,6 +36,8 @@ export interface UseFileDragDropReturn {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   /** Очистить ошибку */
   clearError: () => void
+  /** Установить текст ошибки вручную */
+  setError: (message: string | null) => void
   /** Установить состояние uploading вручную */
   setIsUploading: (value: boolean) => void
 }
@@ -43,6 +45,9 @@ export interface UseFileDragDropReturn {
 /**
  * Хук для drag-n-drop загрузки файлов.
  * Инкапсулирует общую логику drag/drop, валидации и состояний.
+ *
+ * Не привязан к изображениям: `acceptTypes` принимает любой MIME-шаблон,
+ * поэтому хук годится и для аудио, и для документов.
  *
  * @example
  * ```tsx
@@ -81,7 +86,7 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
       }
       return file.type === acceptTypes
     },
-    [acceptTypes]
+    [acceptTypes],
   )
 
   /**
@@ -118,7 +123,7 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
         setIsUploading(false)
       }
     },
-    [onUpload, validateFile, getTypeErrorMessage]
+    [onUpload, validateFile, getTypeErrorMessage],
   )
 
   /**
@@ -146,7 +151,7 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
         uploadFile(files[0])
       }
     },
-    [disabled, multiple, uploadFile]
+    [disabled, multiple, uploadFile],
   )
 
   /**
@@ -172,7 +177,7 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
       // Сброс input для возможности повторной загрузки того же файла
       e.target.value = ''
     },
-    [disabled, multiple, uploadFile]
+    [disabled, multiple, uploadFile],
   )
 
   /**
@@ -203,6 +208,7 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
     dragHandlers,
     handleFileSelect,
     clearError,
+    setError,
     setIsUploading,
   }
 }

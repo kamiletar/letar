@@ -1,15 +1,20 @@
 'use client'
 
+import type { BoxProps } from '@chakra-ui/react'
 import { Box, Field, Spinner, Text, VStack } from '@chakra-ui/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { Dropzone } from './dropzone'
-import { ImagePreview } from './image-preview'
-import type { ImageCategory } from './use-image-upload'
+import { ImagePreview, type ImagePreviewProps, type RenderImageArgs } from './image-preview'
+import type { ImageCategory, ImageUrlResolver } from './types'
+import { useImagePreviewUrl } from './use-image-preview-url'
 import { useImageUpload } from './use-image-upload'
+
+/** Пропсы превью, которыми поле управляет само. */
+type ManagedPreviewProps = 'src' | 'status' | 'onRemove' | 'showRemoveButton' | 'renderImage'
 
 export interface ImageUploadFieldProps {
   /**
-   * Текущее значение (ID изображения)
+   * Текущее значение: ID изображения либо готовая ссылка
    */
   value?: string | null
   /**
@@ -25,7 +30,7 @@ export interface ImageUploadFieldProps {
    */
   helperText?: string
   /**
-   * Текст ошибки
+   * Текст ошибки извне (например, от валидации формы)
    */
   error?: string
   /**
@@ -52,15 +57,32 @@ export interface ImageUploadFieldProps {
    */
   imageEndpoint?: string
   /**
+   * Как превратить `value` в ссылку для показа.
+   *
+   * По умолчанию — шаблон `<imageEndpoint>/<value>`. Если эндпоинт отдаёт
+   * JSON с описанием, а не байты картинки, передайте
+   * `createMetadataUrlResolver()`.
+   */
+  resolveImageUrl?: ImageUrlResolver
+  /**
+   * Своя отрисовка картинки (например, `next/image`)
+   */
+  renderImage?: (args: RenderImageArgs) => React.ReactNode
+  /**
    * Цветовая схема
    * @default 'blue'
    */
-  colorPalette?: string
+  colorPalette?: BoxProps['colorPalette']
   /**
-   * Размер превью
+   * Размер превью и минимальная высота зоны загрузки
    * @default 150
    */
   previewSize?: number
+  /**
+   * Дополнительные пропсы превью — например, чтобы сделать его
+   * прямоугольным вместо квадратного
+   */
+  previewProps?: Omit<ImagePreviewProps, ManagedPreviewProps>
 }
 
 /**
@@ -87,35 +109,33 @@ export function ImageUploadField({
   disabled = false,
   category = 'OTHER',
   uploadEndpoint = '/api/upload',
-  imageEndpoint = '/api/images',
+  imageEndpoint,
+  resolveImageUrl,
+  renderImage,
   colorPalette = 'blue',
   previewSize = 150,
+  previewProps,
 }: ImageUploadFieldProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false)
-
-  const { upload, isUploading } = useImageUpload({
+  const {
+    upload,
+    isUploading,
+    error: uploadError,
+    clearError,
+  } = useImageUpload({
     uploadEndpoint,
+    imageEndpoint,
     category,
+    disabled,
     onUploadSuccess: (image) => {
-      onChange?.(image.id)
-      setPreviewUrl(image.url)
-    },
-    onUploadError: (err) => {
-      console.error('Upload error:', err)
+      onChange?.(image.id || image.url)
     },
   })
 
-  // Загружаем превью при изменении value
-  useEffect(() => {
-    if (value) {
-      setIsLoadingPreview(true)
-      setPreviewUrl(`${imageEndpoint}/${value}`)
-      setIsLoadingPreview(false)
-    } else {
-      setPreviewUrl(null)
-    }
-  }, [value, imageEndpoint])
+  const { previewUrl, isLoading: isLoadingPreview } = useImagePreviewUrl({
+    value,
+    resolveImageUrl,
+    imageEndpoint,
+  })
 
   const handleFilesSelected = useCallback(
     (files: FileList) => {
@@ -124,53 +144,69 @@ export function ImageUploadField({
         upload(file)
       }
     },
-    [upload]
+    [upload],
   )
 
   const handleRemove = useCallback(() => {
+    clearError()
     onChange?.(null)
-    setPreviewUrl(null)
-  }, [onChange])
+  }, [onChange, clearError])
 
-  const hasImage = !!value && !!previewUrl
   const isLoading = isUploading || isLoadingPreview
-  const isInvalid = !!error
+  const displayError = error || uploadError
+  const isInvalid = !!displayError
+  // Пока превью разрешается, показываем плашку превью, а не зону загрузки —
+  // иначе при открытии формы с уже выбранной картинкой мигает dropzone
+  const hasImage = !!value && (!!previewUrl || isLoadingPreview)
 
   return (
     <Field.Root required={required} invalid={isInvalid} disabled={disabled}>
-      {label && <Field.Label>{label}</Field.Label>}
+      {label && (
+        <Field.Label>
+          {label}
+          <Field.RequiredIndicator />
+        </Field.Label>
+      )}
 
       <Box>
-        {hasImage ? (
-          <ImagePreview
-            src={previewUrl}
-            size={previewSize}
-            status={isLoading ? 'uploading' : 'success'}
-            onRemove={disabled ? undefined : handleRemove}
-            showRemoveButton={!disabled}
-          />
-        ) : (
-          <Dropzone
-            onFilesSelected={handleFilesSelected}
-            disabled={disabled || isLoading}
-            colorPalette={colorPalette}
-            minH={`${previewSize}px`}
-          >
-            {isLoading ? (
-              <VStack gap={2}>
-                <Spinner size="lg" color={`${colorPalette}.500`} />
-                <Text fontSize="sm" color="gray.500">
-                  Загрузка...
-                </Text>
-              </VStack>
-            ) : undefined}
-          </Dropzone>
-        )}
+        {hasImage
+          ? (
+            <ImagePreview
+              src={previewUrl ?? ''}
+              // Осмысленный alt важнее дефолтного «Image preview»
+              alt={label ?? 'Image preview'}
+              size={previewSize}
+              status={isLoading ? 'uploading' : 'success'}
+              onRemove={disabled ? undefined : handleRemove}
+              showRemoveButton={!disabled}
+              renderImage={previewUrl ? renderImage : undefined}
+              {...previewProps}
+            />
+          )
+          : (
+            <Dropzone
+              onFilesSelected={handleFilesSelected}
+              disabled={disabled || isLoading}
+              colorPalette={colorPalette}
+              minH={`${previewSize}px`}
+            >
+              {isLoading
+                ? (
+                  <VStack gap={2} colorPalette={colorPalette}>
+                    <Spinner size="lg" color="colorPalette.solid" />
+                    <Text fontSize="sm" color="fg.muted">
+                      Загрузка...
+                    </Text>
+                  </VStack>
+                )
+                : undefined}
+            </Dropzone>
+          )}
       </Box>
 
       {helperText && !isInvalid && <Field.HelperText>{helperText}</Field.HelperText>}
 
-      {isInvalid && <Field.ErrorText>{error}</Field.ErrorText>}
+      {isInvalid && <Field.ErrorText>{displayError}</Field.ErrorText>}
     </Field.Root>
   )
 }

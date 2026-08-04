@@ -1,29 +1,32 @@
 /**
  * Тесты для хука useFileDragDrop.
+ *
+ * Перенесены из apps/mandala вместе с самим хуком (2026-08-04).
  */
 
 import { act, renderHook } from '@testing-library/react'
-import { useFileDragDrop } from '../use-file-drag-drop'
+import type { ChangeEvent, DragEvent } from 'react'
+import { useFileDragDrop } from './use-file-drag-drop'
 
 describe('useFileDragDrop', () => {
   const createMockFile = (type: string, name = 'test.jpg'): File => {
     return new File(['content'], name, { type })
   }
 
-  const createMockDragEvent = (files: File[]): React.DragEvent => {
+  const createMockDragEvent = (files: File[]): DragEvent => {
     return {
       preventDefault: vi.fn(),
       dataTransfer: { files },
-    } as unknown as React.DragEvent
+    } as unknown as DragEvent
   }
 
-  const createMockInputEvent = (files: File[]): React.ChangeEvent<HTMLInputElement> => {
+  const createMockInputEvent = (files: File[]): ChangeEvent<HTMLInputElement> => {
     return {
       target: {
         files,
         value: 'C:\\fakepath\\test.jpg',
       },
-    } as unknown as React.ChangeEvent<HTMLInputElement>
+    } as unknown as ChangeEvent<HTMLInputElement>
   }
 
   describe('начальное состояние', () => {
@@ -52,7 +55,7 @@ describe('useFileDragDrop', () => {
 
       const event = {
         preventDefault: vi.fn(),
-      } as unknown as React.DragEvent
+      } as unknown as DragEvent
 
       act(() => {
         result.current.dragHandlers.onDragOver(event)
@@ -68,7 +71,7 @@ describe('useFileDragDrop', () => {
       act(() => {
         result.current.dragHandlers.onDragOver({
           preventDefault: vi.fn(),
-        } as unknown as React.DragEvent)
+        } as unknown as DragEvent)
       })
 
       expect(result.current.isDragging).toBe(true)
@@ -76,7 +79,7 @@ describe('useFileDragDrop', () => {
       act(() => {
         result.current.dragHandlers.onDragLeave({
           preventDefault: vi.fn(),
-        } as unknown as React.DragEvent)
+        } as unknown as DragEvent)
       })
 
       expect(result.current.isDragging).toBe(false)
@@ -88,7 +91,7 @@ describe('useFileDragDrop', () => {
       act(() => {
         result.current.dragHandlers.onDragOver({
           preventDefault: vi.fn(),
-        } as unknown as React.DragEvent)
+        } as unknown as DragEvent)
       })
 
       expect(result.current.isDragging).toBe(false)
@@ -250,7 +253,7 @@ describe('useFileDragDrop', () => {
 
       const event = {
         target: { files: null },
-      } as unknown as React.ChangeEvent<HTMLInputElement>
+      } as unknown as ChangeEvent<HTMLInputElement>
 
       await act(async () => {
         result.current.handleFileSelect(event)
@@ -262,7 +265,7 @@ describe('useFileDragDrop', () => {
 
   describe('состояние загрузки', () => {
     it('должен установить isUploading=true во время загрузки', async () => {
-      let resolveUpload: () => void
+      let resolveUpload: (() => void) | undefined
       const onUpload = vi.fn().mockImplementation(() => {
         return new Promise<void>((resolve) => {
           resolveUpload = resolve
@@ -326,6 +329,18 @@ describe('useFileDragDrop', () => {
       })
 
       expect(result.current.error).toBeNull()
+    })
+  })
+
+  describe('setError', () => {
+    it('должен позволить установить ошибку вручную', () => {
+      const { result } = renderHook(() => useFileDragDrop({ onUpload: vi.fn() }))
+
+      act(() => {
+        result.current.setError('Файл слишком большой')
+      })
+
+      expect(result.current.error).toBe('Файл слишком большой')
     })
   })
 

@@ -32,6 +32,7 @@ const nextConfig = {
     '@letar/analytics',
     '@letar/format-utils',
     '@letar/admin-ui',
+    '@letar/image-upload',
   ],
   // Оптимизация изображений
   images: {

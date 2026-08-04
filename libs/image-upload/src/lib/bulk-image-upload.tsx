@@ -1,15 +1,17 @@
 'use client'
 
+import type { BoxProps } from '@chakra-ui/react'
 import { Box, Card, HStack, Text, VStack } from '@chakra-ui/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Dropzone } from './dropzone'
-import { ImagePreview, ImagePreviewGrid } from './image-preview'
-import type { ImageCategory, UploadedImage } from './use-image-upload'
+import { ImagePreview, ImagePreviewGrid, type RenderImageArgs } from './image-preview'
+import { createEndpointUrlResolver, DEFAULT_IMAGE_ENDPOINT } from './image-url'
+import type { ImageCategory, UploadedImage } from './types'
 import { useImageUpload } from './use-image-upload'
 
 export interface BulkImageUploadProps {
   /**
-   * Текущие изображения (массив ID)
+   * Текущие изображения (массив ID либо готовых ссылок)
    */
   value?: string[]
   /**
@@ -48,10 +50,21 @@ export interface BulkImageUploadProps {
    */
   imageEndpoint?: string
   /**
+   * Как превратить сохранённое значение в ссылку.
+   *
+   * По умолчанию — шаблон `<imageEndpoint>/<value>`. Асинхронные резолверы
+   * здесь не поддерживаются: сетка рисует ссылки синхронно.
+   */
+  resolveImageUrl?: (value: string) => string | null
+  /**
+   * Своя отрисовка картинки (например, `next/image`)
+   */
+  renderImage?: (args: RenderImageArgs) => React.ReactNode
+  /**
    * Цветовая схема
    * @default 'blue'
    */
-  colorPalette?: string
+  colorPalette?: BoxProps['colorPalette']
   /**
    * Размер превью
    * @default 100
@@ -92,31 +105,44 @@ export function BulkImageUpload({
   disabled = false,
   category = 'OTHER',
   uploadEndpoint = '/api/upload',
-  imageEndpoint = '/api/images',
+  imageEndpoint = DEFAULT_IMAGE_ENDPOINT,
+  resolveImageUrl,
+  renderImage,
   colorPalette = 'blue',
   previewSize = 100,
   onUploadComplete,
 }: BulkImageUploadProps) {
   const [images, setImages] = useState<ImageItem[]>([])
 
+  const resolveUrl = useMemo(() => {
+    if (resolveImageUrl) {
+      return resolveImageUrl
+    }
+    const resolver = createEndpointUrlResolver(imageEndpoint)
+    return (item: string) => resolver(item) as string | null
+  }, [resolveImageUrl, imageEndpoint])
+
   // Синхронизация с value
   useEffect(() => {
     const newImages: ImageItem[] = value.map((id, index) => ({
       id,
-      url: `${imageEndpoint}/${id}`,
+      url: resolveUrl(id) ?? '',
       order: index + 1,
     }))
     setImages(newImages)
-  }, [value, imageEndpoint])
+  }, [value, resolveUrl])
 
   const { uploadMany, files, isUploading, clearFiles } = useImageUpload({
     uploadEndpoint,
+    imageEndpoint,
     category,
+    multiple: true,
+    disabled,
     onUploadSuccess: (image) => {
       setImages((prev) => [
         ...prev,
         {
-          id: image.id,
+          id: image.id || image.url,
           url: image.url,
           order: prev.length + 1,
         },
@@ -151,7 +177,7 @@ export function BulkImageUpload({
         clearFiles()
       }
     },
-    [maxImages, images.length, uploadMany, onUploadComplete, clearFiles]
+    [maxImages, images.length, uploadMany, onUploadComplete, clearFiles],
   )
 
   const handleRemove = useCallback((id: string) => {
@@ -174,9 +200,11 @@ export function BulkImageUpload({
               <Card.Title fontSize="md">
                 {title}
                 {images.length > 0 && (
-                  <Text as="span" color="gray.500" fontWeight="normal" ml={2}>
-                    ({images.length}
-                    {maxImages && `/${maxImages}`})
+                  <Text color="fg.muted" fontWeight="normal" ml={2} asChild>
+                    <span>
+                      ({images.length}
+                      {maxImages && `/${maxImages}`})
+                    </span>
                   </Text>
                 )}
               </Card.Title>
@@ -198,6 +226,7 @@ export function BulkImageUpload({
                   status="success"
                   order={image.order}
                   size={previewSize}
+                  renderImage={renderImage}
                   onRemove={disabled ? undefined : () => handleRemove(image.id)}
                   showRemoveButton={!disabled}
                 />
@@ -227,7 +256,7 @@ export function BulkImageUpload({
               colorPalette={colorPalette}
             >
               {isUploading && uploadingCount > 0 && (
-                <VStack gap={2} color={`${colorPalette}.600`}>
+                <VStack gap={2} colorPalette={colorPalette} color="colorPalette.fg">
                   <Text fontWeight="medium">Загрузка... ({uploadingCount})</Text>
                 </VStack>
               )}
@@ -236,8 +265,8 @@ export function BulkImageUpload({
 
           {/* Сообщение о лимите */}
           {!canUploadMore && (
-            <Box p={4} borderWidth="1px" borderRadius="md" borderColor="gray.200" textAlign="center">
-              <Text color="gray.500" fontSize="sm">
+            <Box p={4} borderWidth="1px" borderRadius="md" borderColor="border" textAlign="center">
+              <Text color="fg.muted" fontSize="sm">
                 Достигнут лимит изображений ({maxImages})
               </Text>
             </Box>

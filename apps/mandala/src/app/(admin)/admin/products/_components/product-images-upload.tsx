@@ -18,8 +18,8 @@ import {
 } from '@chakra-ui/react'
 import NextImage from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
+import { useImageUpload } from '@letar/image-upload'
 import { LuGripVertical, LuImage, LuPlus, LuTrash2 } from 'react-icons/lu'
-import { useImageUpload } from '../../_hooks'
 
 /** ProductImage с Image relation */
 export type ProductImageWithImage = ProductImage & { image: ImageModel }
@@ -93,7 +93,7 @@ export function ProductImagesUpload({
     category: 'PRODUCT',
     multiple: true,
     disabled,
-    onSuccess: (result) => {
+    onUploadSuccess: (result) => {
       // Добавляем новое изображение
       const newImage: ImageItem = {
         id: `new-${Date.now()}-${Math.random()}`,

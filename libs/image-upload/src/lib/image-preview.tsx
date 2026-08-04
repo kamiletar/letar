@@ -2,8 +2,17 @@
 
 import type { BoxProps } from '@chakra-ui/react'
 import { Box, Float, IconButton, Spinner } from '@chakra-ui/react'
+import type { ReactNode } from 'react'
 import { LuCheck, LuCircleAlert, LuX } from 'react-icons/lu'
-import type { UploadStatus } from './use-image-upload'
+import type { UploadStatus } from './types'
+
+/** Параметры, передаваемые в {@link ImagePreviewProps.renderImage}. */
+export interface RenderImageArgs {
+  /** Ссылка на изображение */
+  src: string
+  /** Alt текст */
+  alt: string
+}
 
 export interface ImagePreviewProps extends Omit<BoxProps, 'children'> {
   /**
@@ -36,6 +45,20 @@ export interface ImagePreviewProps extends Omit<BoxProps, 'children'> {
    * @default 100
    */
   size?: number | string
+  /**
+   * Своя отрисовка картинки вместо обычного `<img>`.
+   *
+   * Нужна приложениям на Next.js, чтобы подставить `next/image` с его
+   * оптимизацией. Библиотека намеренно не зависит от `next` сама.
+   *
+   * @example
+   * ```tsx
+   * renderImage={({ src, alt }) => (
+   *   <NextImage src={src} alt={alt} fill sizes="150px" style={{ objectFit: 'cover' }} />
+   * )}
+   * ```
+   */
+  renderImage?: (args: RenderImageArgs) => ReactNode
 }
 
 /**
@@ -44,7 +67,7 @@ export interface ImagePreviewProps extends Omit<BoxProps, 'children'> {
  * @example
  * ```tsx
  * <ImagePreview
- *   src="/api/images/123"
+ *   src="/api/files/products/1.jpg"
  *   status="success"
  *   onRemove={() => handleRemove('123')}
  *   order={1}
@@ -59,6 +82,7 @@ export function ImagePreview({
   showRemoveButton = true,
   order,
   size = 100,
+  renderImage,
   ...boxProps
 }: ImagePreviewProps) {
   const sizeValue = typeof size === 'number' ? `${size}px` : size
@@ -71,19 +95,28 @@ export function ImagePreview({
       borderRadius="md"
       overflow="hidden"
       borderWidth="2px"
-      borderColor={status === 'error' ? 'red.300' : status === 'success' ? 'green.300' : 'gray.200'}
+      borderColor={status === 'error' ? 'border.error' : status === 'success' ? 'green.emphasized' : 'border'}
       {...boxProps}
     >
       {/* Изображение */}
-      <img
-        src={src}
-        alt={alt}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-      />
+      {renderImage
+        ? (
+          renderImage({ src, alt })
+        )
+        : (
+          // Библиотека не зависит от next — приложениям на Next.js для
+          // подстановки `next/image` служит проп renderImage
+          // oxlint-disable-next-line no-img-element
+          <img
+            src={src}
+            alt={alt}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        )}
 
       {/* Оверлей статуса */}
       {status === 'uploading' && (
@@ -107,15 +140,16 @@ export function ImagePreview({
           display="flex"
           alignItems="center"
           justifyContent="center"
+          color="red.fg"
         >
-          <Box as={LuCircleAlert} boxSize={6} color="red.300" />
+          <LuCircleAlert size={24} />
         </Box>
       )}
 
       {status === 'success' && (
         <Float placement="bottom-end" offset="4">
-          <Box bg="green.500" color="white" borderRadius="full" p={0.5}>
-            <Box as={LuCheck} boxSize={3} />
+          <Box bg="green.solid" color="green.contrast" borderRadius="full" p={0.5} lineHeight={0}>
+            <LuCheck size={12} />
           </Box>
         </Float>
       )}
