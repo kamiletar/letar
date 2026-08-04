@@ -49,6 +49,12 @@
       "options": {
         "cwd": "apps/animatrona-mobile"
       }
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --noEmit",
+      "options": {
+        "cwd": "apps/animatrona-mobile"
+      }
     }
   }
 }

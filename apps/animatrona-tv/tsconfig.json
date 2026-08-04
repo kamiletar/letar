@@ -1,13 +1,14 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@letar/exoplayer-ass": ["../../libs/exoplayer-ass/src"],
       "@letar/exoplayer-sync": ["../../libs/exoplayer-sync/src"],
-      "@letar/animatrona-shared": ["../../libs/animatrona-shared/src"]
+      "@letar/animatrona-shared": ["../../libs/animatrona-shared/src"],
+      "@letar/animatrona-utils": ["../../libs/animatrona-utils/src"],
+      "@letar/animatrona-types": ["../../libs/animatrona-types/src"]
     },
     "types": ["react-native"],
     "ignoreDeprecations": "6.0"

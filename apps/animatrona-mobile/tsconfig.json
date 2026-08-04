@@ -4,9 +4,8 @@
     "module": "esnext",
     "strict": true,
     "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@letar/exoplayer-ass": ["../../libs/exoplayer-ass/src"],
       "@letar/exoplayer-ass/*": ["../../libs/exoplayer-ass/src/*"],
       "@letar/exoplayer-sync": ["../../libs/exoplayer-sync/src"],

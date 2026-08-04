@@ -2225,3 +2225,85 @@ Emotion», но сама команда была `"next dev"` без флага 
       `driving-school`, `dashboard`, `animatrona-tracker` и других приложениях на Chakra —
       не проверялось целенаправленно за пределами `mandala`, чинить по факту обнаружения флаки
       в соответствующем `*-e2e`.
+
+## §37 — `typecheck:tsgo` у трёх приложений вне чек-листа (2026-08-04, EmeraldEagle)
+
+Продолжает §31. Чек-лист из CLAUDE.md «`nx format` → `nx lint` → `nx typecheck:tsgo`» молча
+пропускал три приложения, то есть прогон по ним ничего не доказывал: `form-example` (не было ни
+`typecheck`, ни `typecheck:tsgo`), `animatrona-mobile` и `animatrona-tv` (только `typecheck` на
+`tsc`).
+
+### Что сделано
+
+- [x] Таргет `typecheck:tsgo` добавлен всем трём, зелёный на всех. Форма выбрана по соседям:
+      у RN-приложений — зеркало их же `typecheck` (`command` + `cwd`, без кэша, как рядом стоящий
+      таргет), у `form-example` — Next.js-форма как у `kami` (`nx:run-commands` + `cache` +
+      `inputs` + `metadata`). `dependsOn` не добавлялся — его нет ни у одного из 18 соседей.
+- [x] `animatrona-tv`: существующий `typecheck` **был красным ещё до этой сессии** — не регрессия,
+      а незамеченное падение. Причина не в коде: `extends` вёл на подпуть
+      `@react-native/typescript-config/tsconfig.json`, которого нет в `exports` пакета (там только
+      `"."` и `"./strict"`). Базовый конфиг RN не применялся вовсе, отсюда конфликты `lib.dom.d.ts`
+      с типами RN и `TS2300 Duplicate identifier`. Починено переходом на bare-имя — ровно так, как
+      уже было у `animatrona-mobile`.
+- [x] Оба RN-приложения: убран `baseUrl`, `paths` приведены к виду `./src/*`. TypeScript 7 (`tsgo`)
+      `baseUrl` не поддерживает в принципе (TS5102), а без него нерелятивные `paths` запрещены
+      (TS5090). На `tsc` 6.x правка не влияет — таргет `typecheck` остался зелёным у обоих.
+      Рантайм не затронут: алиасы для Metro задаёт babel `module-resolver`, а не tsconfig.
+- [x] `animatrona-tv`: в `paths` добавлены `@letar/animatrona-utils` и `@letar/animatrona-types`
+      (было только `animatrona-shared`, а он реэкспортирует утилиты, те тянут типы).
+- [x] `form-example`: `composite: false` плюс погашенные `declaration`/`declarationMap`/
+      `emitDeclarationOnly`. Приложение наследуется от `tsconfig.base.json` **напрямую, минуя
+      пресет** `tsconfig.next-app.json`, и вместе с ним получало `composite: true` — отсюда 245×
+      `TS6307` на каждый файл `libs/forms`, затянутый через `paths`. Пресет гасит composite ровно
+      так же; `include`/`exclude` намеренно не трогались, чтобы не сузить набор проверяемых файлов
+      (у приложения он шире пресетного: `**/*` вместо `src/**/*`, то есть покрыты ещё
+      `next.config.ts` и `prisma.config.ts`).
+- [x] `form-example`: исправлена единственная настоящая ошибка кода — `onSubmit={async ({ value })`
+      в `examples/url-prefill/page.tsx` при фактической сигнатуре `(data) => …`. Все остальные
+      20+ примеров приложения используют правильную форму, этот файл выбивался.
+
+### Верификация
+
+- `nx run-many -t typecheck:tsgo -p form-example,animatrona-mobile,animatrona-tv` — зелёный,
+  5.7s без кэша.
+- Существующий `typecheck` (`tsc`) у обоих RN-приложений остался зелёным — правка `paths` под
+  TS7 не сломала TS6.
+- `form-example`: сверен список проверяемых файлов — 71 файл приложения в программе (`--listFiles`),
+  сужения покрытия нет.
+- `lint` у `form-example` и `animatrona-mobile` красный **и до, и после** правок: ошибки в файлах,
+  которых эта сессия не касалась (`curly`, `no-empty-function` в примерах и `src/api/*`).
+  Не чинилось — другой таргет, другой класс задачи.
+
+### Найдено попутно, оставлено как есть
+
+- [ ] `libs/animatrona-utils/package.json` не объявляет зависимость `@letar/animatrona-types`,
+      хотя импортирует её в `src/external-links.ts`. У `animatrona-mobile` это замаскировано
+      маппингом в `paths`, у `animatrona-tv` вылезло наружу. Сейчас закрыто на стороне приложения
+      (как и предписывает [lib-entry-points](/.claude/docs/lib-entry-points.md): при подключении
+      через `implicitDependencies` линка в `node_modules` нет, `paths` — единственный механизм),
+      но правильное место починки — сама библиотека.
+- [ ] `form-example`: `nx zenstack:generate` не проходит — «Cannot find plugin module
+      `@letar/zenstack-form-plugin`» (пакет существует в `libs/`, но `node_modules/@letar/` в
+      репозитории нет вовсе, а CLI не умеет резолвить через `paths`), fallback `prisma generate`
+      падает без `DATABASE_URL`. Клиент Prisma сгенерирован вручную
+      (`DATABASE_URL=<заглушка> npx prisma generate`) — без него 11 из 12 `TS2339` вида «`Property
+      'contact' does not exist on PrismaClient`». Контракт тот же, что у 18 соседей (их
+      `src/generated/` в `.gitignore`, таргет предполагает, что генерация уже прошла), но у
+      `form-example` генерация сломана — на чистом checkout'е таргет будет красным.
+- [ ] `form-example` — единственное приложение, импортирующее `@prisma/client` напрямую, и одно из
+      трёх без `output` в `generator client` (у 16 остальных — `output = "./prisma"`). Клиент
+      поэтому пишется в общий хойстнутый `@prisma/client`. Побочного эффекта на соседей нет
+      (никто больше оттуда не импортирует), но паттерн устаревший.
+- [ ] `form-example` не попал ни в 18 переведённых на пресет приложений §31, ни в 13
+      задокументированных исключений в [tsconfig-presets.md](/.claude/docs/tsconfig-presets.md) —
+      он там не упомянут вовсе. Пропуск не обоснован, а не замечен; перевод на пресет — отдельная
+      задача (он сузит `include` до `src/**/*`, это осознанное решение, а не побочный эффект).
+- [ ] Дыра шире, чем три приложения из постановки: `dashboard-agent` тоже без `typecheck:tsgo`
+      (bare Node-сервис, `typecheck` на `tsc` есть). `umami` — `type:infra` без таргетов вообще,
+      стороннее приложение, типизировать нечего: законное исключение.
+
+### Урок
+
+Отсутствие таргета и **красный** таргет — разные болезни, и вторая прячется лучше. `animatrona-tv`
+имел `typecheck`, formально был «покрыт» и всё это время падал на резолве `extends`, а не на коде.
+Аудит покрытия обязан заканчиваться прогоном, а не проверкой наличия ключа в `project.json`.
