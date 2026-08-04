@@ -872,6 +872,44 @@ per-app `CLAUDE.md` для ручной документации (animatrona, an
 `apps/mandala/CLAUDE.md` закоммичен как обычный файл. Подробности —
 [nextjs16-agent-guide-files.md](/.claude/docs/nextjs16-agent-guide-files.md).
 
+### v0.40.6 — 2026-08-04 — hydration mismatch в admin e2e из-за Turbopack по умолчанию
+
+`03-admin-products.admin.spec.ts` (тесты «есть кнопка сохранения», «можно открыть товар из
+списка») периодически падали не на бизнес-логике, а на том, что клик по ссылке/кнопке не
+приводил к смене URL — `toHaveURL` таймаутился. В логе dev-сервера в этот момент: `Hydration
+failed because the server rendered HTML didn't match the client... this tree will be regenerated
+on the client`, с расхождением `<script>` (next-themes) vs `<style data-emotion="css-global...">`
+в `ColorModeProvider`.
+
+**Причина:** двухслойная. (1) `ChakraProvider`'s `<Global>` (emotion) на SSR буквально рендерит
+`<style data-emotion>`-элемент в дереве, а на клиенте — `null` (стили вставляются через
+`useInsertionEffect` в обход реконсиляции) — часть архитектуры Emotion, само по себе не проблема.
+(2) Next.js 16 без явного бандлер-флага выбирает Turbopack бандлером по умолчанию для `next
+dev`/`next build` (`next/dist/lib/bundler.js`: `bundlerFlags.size === 0` → `Bundler.Turbopack`).
+Именно под Turbopack комбинация из (1) с `next-themes`'ным `<script>`-тегом (оба — первые дети
+`ChakraProvider`/`ColorModeProvider`) триггерит настоящий hydration mismatch — React отбрасывает
+и заново монтирует **всё поддерево `<body>`**, и клик Playwright, случившийся в этот момент,
+теряется (обработчик навешен на уже удалённый DOM-узел). Под webpack та же комбинация не
+мисматчится. Официально задокументировано самим Chakra UI:
+<https://chakra-ui.com/docs/get-started/frameworks/next-app> § «Hydration errors».
+
+Ловушка: комментарий в `apps/mandala/project.json` уже утверждал `"Start development server (без
+Turbopack из-за бага с Emotion)"`, но сама команда была `"next dev"` без флага — намерение
+зафиксировали, а флаг забыли добавить. Комментарий рядом с командой — не доказательство того, что
+она делает, проверять надо сам флаг.
+
+**Решение:** `--webpack` в `dev`/`build` командах `apps/mandala/project.json`. Не решается через
+`next.config.js` — выбор бандлера читается из CLI-флага/env раньше чтения конфига.
+
+**Проверено:** два чистых прогона `nx e2e mandala-e2e -- --project=admin-chromium --grep
+"Товары"` подряд — 11/11, без флуктуаций. Тест «есть кнопка сохранения» ускорился с 11.4с до
+0.6с (раньше время съедала гонка с ремонтом дерева).
+
+**Не в скоупе:** та же уязвимость (Chakra v3 + `next-themes` без явного бандлер-флага)
+потенциально есть в `driving-school`, `dashboard`, `animatrona-tracker` и других — не проверялось
+целенаправленно, чинить по факту обнаружения. Подробный разбор —
+[nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+
 ---
 
 **Последнее обновление:** 2026-08-04

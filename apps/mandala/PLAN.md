@@ -65,10 +65,16 @@ dev`, который компилирует маршруты/route handler'ы п
 `08-full-product-crud.admin.spec.ts` — если upload не успевал, тест «проходил», создав товар
 вообще без изображения.
 
-**Не в скоупе, вынесено отдельно:** `03-admin-products.admin.spec.ts` периодически теряет клик
-по навигационной ссылке из-за React hydration mismatch в `ColorModeProvider` (next-themes) —
-существовал до этой сессии, не связан ни с cookie-баннером, ни с strict mode. Задача на
-расследование выделена отдельно.
+**Не в скоупе, вынесено отдельно → ✅ ЗАКРЫТО (2026-08-04):** `03-admin-products.admin.spec.ts`
+периодически терял клик по навигационной ссылке из-за React hydration mismatch в
+`ColorModeProvider` (next-themes) — не связан ни с cookie-баннером, ни с strict mode. Причина:
+Next.js 16 без явного бандлер-флага выбирает Turbopack по умолчанию, а под Turbopack связка
+`ChakraProvider`'s `<Global>` (emotion) + `next-themes`'ный `<script>` триггерит настоящий hydration
+mismatch — React отбрасывает и заново монтирует всё поддерево `<body>`, клик Playwright иногда
+попадает в этот момент. Официально задокументировано Chakra UI (chakra-ui.com → «Hydration
+errors»). Фикс — `--webpack` в `dev`/`build` командах `project.json` (комментарий там уже
+утверждал «без Turbopack», но сам флаг забыли добавить). Подтверждено двумя чистыми прогонами
+подряд, 11/11. Детали — [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
 
 **Документация:** новый раздел в [e2e-testing.md](/.claude/docs/e2e-testing.md) — «Дубль CTA:
 шапка страницы + EmptyState», «Cookie-баннер перехватывает клики по submit-кнопкам», «Локальный
