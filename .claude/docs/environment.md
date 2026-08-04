@@ -239,25 +239,29 @@ nx test premium-rosstil           # Запустить тесты
 nx e2e premium-rosstil-e2e        # Запустить E2E тесты
 ```
 
-### Nx Sync - Автоматическая синхронизация TypeScript references
+### Nx Sync — в letar отключён, синхронизировать references нечем
+
+⛔ **Генератор `@nx/js:typescript-sync` намеренно выключен** в [nx.json](/nx.json)
+(`sync.disabledTaskSyncGenerators`), а `nx sync` / `nx sync:check` не вызываются ни в CI, ни в
+git-хуках. Автозапуска «после генераторов, при build и т.д.» тоже нет — его делал бы ровно этот
+отключённый генератор.
+
+Практически это значит: **совет «после добавления библиотеки запусти `nx sync`» в этом репо не
+работает** — `references` в `tsconfig.json` правятся руками либо не правятся вовсе. И правок этих
+обычно не требуется: почему рассинхрон `paths` ↔ `references` ничего не ломает — ниже, в разделе
+«⚠️ Всё вышесказанное относится к `tsc --build` — а приложения его не используют».
+
+Дальше — справка о том, что делает Nx **вообще** (в репозиториях, где генератор включён), а не
+руководство к действию здесь:
 
 ```bash
 nx sync --check               # Проверить актуальность TypeScript project references
-nx sync                       # Автоматически обновить references во всех tsconfig.json
+nx sync                       # Обновить references во всех tsconfig.json
 ```
 
-**Что делает Nx Sync:**
-
-- Автоматически поддерживает `references` в `tsconfig.json` актуальными на основе project graph
+- Поддерживает `references` в `tsconfig.json` актуальными на основе project graph
 - Добавляет/удаляет references при изменении зависимостей между проектами
-- Работает с генератором `@nx/js:typescript-sync`
-
-**Когда использовать:**
-
-- После добавления новой shared библиотеки в `/libs/`
-- После изменения dependencies между проектами
-- Если видишь ошибки типа "Cannot find module '@letar/...'"
-- Nx автоматически запускает sync при необходимости (после генераторов, при build и т.д.)
+- Работает через генератор `@nx/js:typescript-sync`
 
 ## Dev-порты приложений
 
@@ -378,9 +382,18 @@ nx test infra-config
 
 ### Подключение библиотеки к приложению
 
-**ВАЖНО:** Для корректной работы TypeScript нужно настроить ТРИ вещи:
+⚠️ **Читай вместе с разделом-поправкой ниже** — «⚠️ Всё вышесказанное относится к `tsc --build` —
+а приложения его не используют». Ниже перечислена полная обвязка, но **обязательна из неё только
+одна вещь — ребро графа Nx** (п. 3). Сам резолв импорта `@letar/*` не держится ни на `paths`, ни
+на `references`: его обеспечивают `customConditions: ["@letar/source"]` в `tsconfig.base.json` +
+`exports` в `libs/<name>/package.json`.
 
-1. **paths в tsconfig.json приложения:**
+1. **paths в tsconfig.json приложения** — вспомогательные (помогают редактору), но становятся
+   **единственным** механизмом резолва, когда линка библиотеки в `apps/<app>/node_modules/@letar/`
+   нет. Bun линкует только то, что объявлено в `dependencies` самого приложения — значит при
+   подключении через один лишь `implicitDependencies` (п. 3) `exports`-условию резолвить нечего и
+   `paths` нужны обязательно, причём **отдельной строкой на каждый подпуть** (`./server`,
+   `./client`). Детали — [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
 
    ```json
    "paths": {
@@ -388,7 +401,9 @@ nx test infra-config
    }
    ```
 
-2. **references в tsconfig.json приложения:**
+2. **references в tsconfig.json приложения** — не обязательны: их читает только `tsc --build`,
+   которого нет ни у одного приложения в `apps/`. Безвредны и помогают редактору; отсутствие
+   парного `references` при заполненных `paths` — не дефект.
 
    ```json
    "references": [
@@ -396,7 +411,8 @@ nx test infra-config
    ]
    ```
 
-3. **implicitDependencies в package.json приложения:**
+3. **implicitDependencies в package.json приложения — обязательно**, если библиотеки нет в
+   `dependencies`. Только так Nx узнаёт о ребре графа:
    ```json
    "nx": {
      "implicitDependencies": [
