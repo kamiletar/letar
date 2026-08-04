@@ -113,48 +113,61 @@ export function ScorerLineupDialog({
                     {error}
                   </Text>
                 )}
-                {roster.length === 0 ? (
-                  <Text fontSize="sm" color="fg.muted">
-                    У команды нет активного состава. Обратитесь к организатору.
-                  </Text>
-                ) : (
-                  <VStack gap={2} align="stretch">
-                    {roster.map((player) => {
-                      const isCoachRole = player.role === 'COACH' || player.role === 'ASSISTANT_COACH'
-                      const isSelected = selected.has(player.id)
-                      return (
-                        <Box
-                          key={player.id}
-                          as="label"
-                          p={2}
-                          borderWidth="1px"
-                          borderColor={isSelected ? 'blue.solid' : 'border.muted'}
-                          borderRadius="md"
-                          bg={isSelected ? 'blue.subtle' : 'bg.panel'}
-                          cursor="pointer"
-                          _hover={{ borderColor: 'blue.muted' }}
-                          display="flex"
-                          alignItems="center"
-                          gap={2}
-                        >
-                          {/* Единственный обработчик — на hidden input. Box как label вызывает его клик автоматически. */}
-                          <Checkbox.Root checked={isSelected} onCheckedChange={() => toggle(player.id)} variant="solid">
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                          </Checkbox.Root>
-                          <Text fontSize="sm" flex={1}>
-                            {player.name}
-                            {isCoachRole && (
-                              <Text as="span" fontSize="xs" color="fg.muted" ml={2}>
-                                ({player.role === 'COACH' ? 'тренер' : 'зам. тренера'})
-                              </Text>
-                            )}
-                          </Text>
-                        </Box>
-                      )
-                    })}
-                  </VStack>
-                )}
+                {roster.length === 0
+                  ? (
+                    <Text fontSize="sm" color="fg.muted">
+                      У команды нет активного состава. Обратитесь к организатору.
+                    </Text>
+                  )
+                  : (
+                    <VStack gap={2} align="stretch">
+                      {roster.map((player) => {
+                        const isCoachRole = player.role === 'COACH' || player.role === 'ASSISTANT_COACH'
+                        const isSelected = selected.has(player.id)
+                        return (
+                          <Box
+                            key={player.id}
+                            onClick={() => toggle(player.id)}
+                            p={2}
+                            borderWidth="1px"
+                            borderColor={isSelected ? 'blue.solid' : 'border.muted'}
+                            borderRadius="md"
+                            bg={isSelected ? 'blue.subtle' : 'bg.panel'}
+                            cursor="pointer"
+                            _hover={{ borderColor: 'blue.muted' }}
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                          >
+                            {
+                              /* Box больше не <label> — строка целиком кликабельна через onClick={toggle}.
+                              У Checkbox.Root свой onCheckedChange={toggle}: без stopPropagation клик по самому
+                              чекбоксу всплыл бы до Box и вызвал toggle дважды (двойной тоггл, как в антипаттерне
+                              из .claude/rules/components.md). stopPropagation на Checkbox.Root это исключает —
+                              клик обрабатывается ровно одним обработчиком, независимо где кликнули внутри строки. */
+                            }
+                            <Checkbox.Root
+                              checked={isSelected}
+                              onCheckedChange={() => toggle(player.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              variant="solid"
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                            </Checkbox.Root>
+                            <Text fontSize="sm" flex={1}>
+                              {player.name}
+                              {isCoachRole && (
+                                <Text as="span" fontSize="xs" color="fg.muted" ml={2}>
+                                  ({player.role === 'COACH' ? 'тренер' : 'зам. тренера'})
+                                </Text>
+                              )}
+                            </Text>
+                          </Box>
+                        )
+                      })}
+                    </VStack>
+                  )}
               </VStack>
             </Dialog.Body>
             <Dialog.Footer>

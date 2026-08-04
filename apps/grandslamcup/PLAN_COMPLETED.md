@@ -707,4 +707,29 @@ adapter по образцу `animatrona-tracker/prisma/seed.ts`. Провере�
 
 ---
 
-**Последнее обновление:** 2026-07-21 (фикс `prisma/seed.ts`; код — v3.37.4)
+## `ScorerLineupDialog` — `Box as="label"` заменён на `asChild` + onClick (2026-08-04, v3.38.3)
+
+`.claude/rules/components.md` запрещает проп `as=` в Chakra UI v3. В строке выбора игрока
+(`_components/scorer-lineup-dialog.tsx`, диалог заявки состава счетоводом) `Box as="label"`
+оборачивал `Checkbox.Root` — комментарий рядом объяснял, что единственный обработчик клика висит
+на скрытом input чекбокса, а `Box`-как-`label` просто ретранслирует клик туда.
+
+Наивная замена на `asChild` + вложенный `<label><Checkbox.Root/></label>` создала бы
+задокументированный в том же файле антипаттерн «`<input>` вложен в `<label>`» — двойной toggle
+на клике прямо по чекбоксу (клик по input срабатывает напрямую + всплывает до label и
+активирует его повторно).
+
+Решение проще, чем `htmlFor`/`id`-пара: `Checkbox.Root` в Chakra v3 — не нативный `<input>`, а
+компонент со своим `Checkbox.HiddenInput` внутри, так что `label`-семантика вообще не нужна.
+`Box` избавлен от `as`/`asChild` целиком, вместо этого строка целиком кликабельна через
+`onClick={() => toggle(player.id)}`; `Checkbox.Root` сохранил свой `onCheckedChange`, но с
+`onClick={(e) => e.stopPropagation()}`, чтобы клик по самому чекбоксу не всплывал до строки и не
+вызывал `toggle` дважды.
+
+Проверено: `nx lint grandslamcup` — файл чист (221 существующая ошибка `curly` в других файлах
+приложения не связана с правкой); `nx typecheck:tsgo grandslamcup` — 6 ошибок в других файлах,
+файл не затронут.
+
+---
+
+**Последнее обновление:** 2026-08-04 (фикс `Box as="label"` в `ScorerLineupDialog`; код — v3.38.3)
