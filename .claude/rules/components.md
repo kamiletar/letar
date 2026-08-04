@@ -89,6 +89,36 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 <FaKeyboard size={16} />
 ```
 
+### ⚠️ Антипаттерн: `<input>` вложен в `<label>` после замены `as="label"`
+
+Частый паттерн — кастомная кнопка загрузки файла или чекбокса: `<label>` оборачивает скрытый
+`<input>`, чтобы клик по видимому тексту открывал системный диалог/тогглил чекбокс. При наивной
+замене `as="label"` → `asChild` + `<label>` вложенность **сохраняют**, и это ломает клик:
+клик по `<input>` срабатывает напрямую, событие всплывает до `<label>`, `<label>` повторно
+активирует тот же `<input>` — двойной toggle. Для чекбокса — состояние переключается дважды
+(визуально ничего не меняется), для `<input type="file">` — риск повторного открытия
+системного файлового диалога.
+
+Наступали дважды: `apps/svoichuzhie/PLAN_COMPLETED.md` (запись 2026-06-13, «input/label без
+вложения») и `apps/mandala/PLAN_COMPLETED.md` (v0.40.4, 2026-08-04).
+
+```tsx
+// ❌ АНТИПАТТЕРН — input вложен в label, двойной toggle клика
+<Box asChild>
+  <label>
+    Текст
+    <input type="checkbox" onChange={...} style={{ display: 'none' }} />
+  </label>
+</Box>
+
+// ✅ label и input — СОСЕДИ через htmlFor/id, не вложены
+const inputId = useId()
+<Box asChild>
+  <label htmlFor={inputId}>Текст</label>
+</Box>
+<input id={inputId} type="checkbox" onChange={...} style={{ display: 'none' }} />
+```
+
 ## Правила
 
 - `'use client'` для интерактивных компонентов
