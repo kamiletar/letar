@@ -1,6 +1,6 @@
 {
   "name": "@letar/mandala",
-  "version": "0.40.3",
+  "version": "0.40.4",
   "private": true,
   "nx": {
     "name": "mandala",

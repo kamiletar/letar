@@ -793,6 +793,32 @@ besides a function... You returned: [object Object]` и **cleanup никогда
 empty-state рендерится вторая ссылка «Создать мандалу» — похоже, уже поймано и чинится отдельно
 (см. `data-testid="page-header"` в `admin/mandalas/page.tsx`, не моя правка).
 
+### v0.40.4 — 2026-08-04 — фикс `as="label"` в `product-images-upload.tsx`
+
+Точечный фикс, обнаруженный ревью сразу после миграции на `@letar/image-upload` (v0.41.0/0.40.3
+выше): кнопка «Добавить изображения» в
+[`product-images-upload.tsx`](src/app/(admin)/admin/products/_components/product-images-upload.tsx)
+была написана как `<Button as="label">` со вложенным `<input type="file">` внутри — запрещённый в
+Chakra UI v3 проп `as=` (`.claude/rules/components.md`).
+
+Первая попытка фикса — `Button asChild` + `<label>` со вложенным `<input>` внутри — оказалась
+той же ошибкой, что уже ловилась в `svoichuzhie` (см. `apps/svoichuzhie/PLAN_COMPLETED.md`,
+запись 2026-06-13): вложение `<input>` в `<label>` даёт двойной toggle (клик активирует input
+напрямую, событие всплывает к label, label активирует input повторно). Для чекбоксов это баг,
+для `<input type="file">` — риск повторного открытия системного диалога выбора файла.
+
+**Финальное решение:** `<label htmlFor={fileInputId}>` (через `Button asChild`) как **сосед**
+`<input id={fileInputId}>`, не родитель — проверенный в репозитории паттерн. `fileInputId`
+получен через `useId()`. `disabled` убран с `<label>` (невалидный HTML-атрибут для этого тега),
+визуальное отключение — через `cursor`/`opacity`/`pointerEvents="none"` на `Button`.
+
+**Проверено:** `nx lint mandala`, `nx typecheck:tsgo mandala` — чисто. Живой клик по кнопке в
+браузере **не проверен** — локальный dev-сервер не пропустил автоматизированный логин в админку
+(сабмит формы входа не срабатывал ни по клику, ни по Enter, ни через `form.requestSubmit()`;
+похоже на несвязанную проблему окружения — automation-инструмент выставляет `value` инпутов в
+обход React-стейта, который отслеживает react-hook-form). Стоит вручную кликнуть на
+`/admin/products/new` при следующей работе с этим компонентом.
+
 ---
 
 **Последнее обновление:** 2026-08-04

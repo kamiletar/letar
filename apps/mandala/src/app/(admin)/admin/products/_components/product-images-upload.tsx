@@ -16,9 +16,9 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import NextImage from 'next/image'
-import { useCallback, useEffect, useState } from 'react'
 import { useImageUpload } from '@letar/image-upload'
+import NextImage from 'next/image'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { LuGripVertical, LuImage, LuPlus, LuTrash2 } from 'react-icons/lu'
 
 /** ProductImage с Image relation */
@@ -55,6 +55,7 @@ export function ProductImagesUpload({
   disabled,
 }: ProductImagesUploadProps) {
   const [images, setImages] = useState<ImageItem[]>([])
+  const fileInputId = useId()
 
   // Инициализация из initialImages
   useEffect(() => {
@@ -76,10 +77,10 @@ export function ProductImagesUpload({
         newImages.map((img, idx) => ({
           imageId: img.imageId,
           order: idx,
-        }))
+        })),
       )
     },
-    [onChange]
+    [onChange],
   )
 
   // Хук загрузки изображений
@@ -116,7 +117,7 @@ export function ProductImagesUpload({
       setImages(newImages)
       notifyChange(newImages)
     },
-    [images, notifyChange]
+    [images, notifyChange],
   )
 
   // Перемещение изображения (вверх/вниз)
@@ -137,7 +138,7 @@ export function ProductImagesUpload({
       setImages(newImages)
       notifyChange(newImages)
     },
-    [images, notifyChange]
+    [images, notifyChange],
   )
 
   return (
@@ -238,30 +239,44 @@ export function ProductImagesUpload({
         _hover={!disabled ? { borderColor: 'purple.400' } : undefined}
       >
         <Center>
-          {isUploading ? (
-            <VStack gap={3}>
-              <Spinner size="lg" color="purple.500" />
-              <Text fontSize="sm" color="fg.muted">
-                Загрузка...
-              </Text>
-            </VStack>
-          ) : (
-            <VStack gap={3}>
-              <Icon fontSize="2xl" color="fg.muted">
-                <LuImage />
-              </Icon>
-              <VStack gap={1}>
-                <Text fontSize="sm" fontWeight="medium">
-                  Перетащите изображения сюда
-                </Text>
-                <Text fontSize="xs" color="fg.muted">
-                  или
+          {isUploading
+            ? (
+              <VStack gap={3}>
+                <Spinner size="lg" color="purple.500" />
+                <Text fontSize="sm" color="fg.muted">
+                  Загрузка...
                 </Text>
               </VStack>
-              <Button as="label" size="sm" variant="outline" colorPalette="purple" cursor="pointer" disabled={disabled}>
-                <LuPlus />
-                Добавить изображения
+            )
+            : (
+              <VStack gap={3}>
+                <Icon fontSize="2xl" color="fg.muted">
+                  <LuImage />
+                </Icon>
+                <VStack gap={1}>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Перетащите изображения сюда
+                  </Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    или
+                  </Text>
+                </VStack>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  colorPalette="purple"
+                  cursor={disabled ? 'not-allowed' : 'pointer'}
+                  opacity={disabled ? 0.5 : 1}
+                  pointerEvents={disabled ? 'none' : 'auto'}
+                >
+                  <label htmlFor={fileInputId}>
+                    <LuPlus />
+                    Добавить изображения
+                  </label>
+                </Button>
                 <input
+                  id={fileInputId}
                   type="file"
                   accept="image/*"
                   multiple
@@ -269,12 +284,11 @@ export function ProductImagesUpload({
                   style={{ display: 'none' }}
                   disabled={disabled}
                 />
-              </Button>
-              <Text fontSize="xs" color="fg.muted">
-                PNG, JPG, WEBP до 32MB
-              </Text>
-            </VStack>
-          )}
+                <Text fontSize="xs" color="fg.muted">
+                  PNG, JPG, WEBP до 32MB
+                </Text>
+              </VStack>
+            )}
         </Center>
       </Box>
 
