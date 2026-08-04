@@ -1963,6 +1963,26 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
       errors после изменений») — заменена на ручную правку `references` с оговоркой, что
       приложениям они обычно не нужны вовсе. В `new-lib` и README «три обязательных места» / «затем
       `nx sync`» сведены к одному обязательному — ребру графа Nx.
+- [x] **Побочно — закрыто (2026-08-04, LilacHollow, коммит `605d43b1`):** устранена причина, по
+      которой три пункта выше пришлось править по многу раз — блок «подключение библиотеки к
+      приложению» (json с `paths`/`references` + фраза про `implicitDependencies`) лежал копиями в
+      13 местах. Детали оставлены **только** в `.claude/rules/libs.md` § «Подключение к
+      приложению», туда же добавлена врезка «это единственное место, не копируй подробности».
+      Остальные — одна фраза «что обязательно» + ссылка: 10 README библиотек (`redis-client`,
+      `consent`, `electron-storage`, `mcp-server-kit`, `analytics`, `query-provider`, `email`,
+      `auth`, `image-upload`, `api-server`), `libs/generators/README.md`,
+      `.claude/commands/create/new-lib.md`. Шесть из десяти README нашлись сверх исходного списка:
+      греп по `nx sync` их не видел, блок разошёлся и без этой строки.
+- **Главное здесь — не README, а шаблон:**
+  `libs/generators/src/generators/new-lib/files/README.md.template` всё ещё нёс **исходный
+  неверный текст** («затем `nx sync`»). Правки `4d18c78c`/`5cb023ea` его не касались, то есть
+  четыре одинаковых README — его выхлоп, и следующая же `nx g new-lib` принесла бы копию
+  снова. Симптом расползания видно и по формулировкам: `redis-client` требовал
+  `implicitDependencies` в `project.json`, остальные — в `package.json`.
+  Специфика README сохранена: `transpilePackages` под `output: 'standalone'` (`redis-client`),
+  перечень точек входа `./server`/`./client` (`auth`, `image-upload`). Правка `libs.md` уехала
+  в чужой коммит `470a69ea` — другой агент закоммитил файл целиком; содержимое на месте,
+  переписывать историю не стал.
 - **Ложные срабатывания грепа, которые трогать НЕ надо:** `nx sync grandslamcup-android` в
   `apps/grandslamcup/PLAN.md` — это Capacitor-таргет проекта, а не `@nx/js:typescript-sync`.
   Ещё шесть вхождений лежат в `.agents/skills/` — untracked-зеркале `.claude/skills/` (в git его
