@@ -96,7 +96,12 @@
         "cwd": "apps/auth-hub"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/tsconfig.next-app.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check TypeScript files",
         "technologies": ["typescript"]
@@ -109,7 +114,12 @@
         "cwd": "apps/auth-hub"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/tsconfig.next-app.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check TypeScript files with tsgo (38x faster)",
         "technologies": ["typescript", "tsgo"]

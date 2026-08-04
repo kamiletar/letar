@@ -1,0 +1,47 @@
+{
+  "//": "Пресет для Next.js-приложений монорепо (наследуется между tsconfig.base.json и apps/<app>/tsconfig.json).",
+  "//1": "Пути записаны через ${configDir} — он резолвится относительно КОНФИГА ПРИЛОЖЕНИЯ, а не этого файла.",
+  "//2": "Обычный относительный путь здесь уехал бы в корень репо (проверено: 'dist' → '../dist').",
+  "//3": "Осознанные отличия приложений и что сюда НЕ выносится — .claude/docs/tsconfig-presets.md",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node", "react", "react-dom"],
+    "plugins": [{ "name": "next" }],
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "incremental": true,
+    "outDir": "${configDir}/dist",
+    "tsBuildInfoFile": "${configDir}/dist/tsconfig.tsbuildinfo",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "${configDir}/src/**/*.ts",
+    "${configDir}/src/**/*.tsx",
+    "${configDir}/src/**/*.js",
+    "${configDir}/src/**/*.jsx",
+    "${configDir}/next-env.d.ts",
+    "${configDir}/.next/types/**/*.ts"
+  ],
+  "exclude": [
+    "${configDir}/node_modules",
+    "${configDir}/.next",
+    "${configDir}/dist",
+    "${configDir}/out-tsc",
+    "${configDir}/eslint.config.mjs",
+    "${configDir}/src/generated/**/*.js",
+    "${configDir}/src/generated/**/*.mjs",
+    "${configDir}/src/**/*.spec.ts",
+    "${configDir}/src/**/*.spec.tsx",
+    "${configDir}/src/**/*.test.ts",
+    "${configDir}/src/**/*.test.tsx"
+  ]
+}

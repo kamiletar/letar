@@ -12,7 +12,12 @@
         "cwd": "apps/time"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/tsconfig.next-app.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check TypeScript files",
         "technologies": ["typescript"]
@@ -25,7 +30,12 @@
         "cwd": "apps/time"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/tsconfig.next-app.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check TypeScript files with tsgo (38x faster)",
         "technologies": ["typescript", "tsgo"]
@@ -38,7 +48,12 @@
         "cwd": "apps/time"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/tsconfig.next-app.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "🆕 Пилот TS7 GA (typescript@7.0.2 через bunx, изолированно от workspace tsc/tsgo)",
         "technologies": ["typescript"]

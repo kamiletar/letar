@@ -1,23 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "jsx": "preserve",
-    "noEmit": true,
-    "emitDeclarationOnly": false,
-    "esModuleInterop": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "resolveJsonModule": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],
@@ -36,18 +22,15 @@
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/redis-client": ["../../libs/redis-client/src/index.ts"]
-    },
-    "types": ["node"],
-    "outDir": "dist",
-    "rootDir": "../..",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
-    "ignoreDeprecations": "6.0"
+    }
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
     "src/**/*.js",
     "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "../../libs/analytics/src/**/*.ts",
     "../../libs/analytics/src/**/*.tsx",
     "../../libs/query-provider/src/**/*.ts",
@@ -64,23 +47,18 @@
     "../../libs/video-player-react/src/**/*.tsx",
     "../../libs/video-player-core/src/**/*.ts",
     "../../libs/auth/src/**/*.ts",
-    "../../libs/auth/src/**/*.tsx",
-    "../../apps/animatrona-tracker/.next/types/**/*.ts",
-    "../../dist/apps/animatrona-tracker/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "../../libs/auth/src/**/*.tsx"
   ],
   "exclude": [
-    "out-tsc",
-    "dist",
-    "node_modules",
-    "jest.config.ts",
-    "jest.config.cts",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
     ".next",
-    "eslint.config.js",
-    "eslint.config.cjs",
+    "dist",
     "eslint.config.mjs",
+    "node_modules",
+    "out-tsc",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
     "src/generated/**/*.js",
     "src/generated/**/*.mjs",
     "src/generated/**/runtime/**/*",

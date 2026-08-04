@@ -1,26 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "jsx": "preserve",
-    "noEmit": true,
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
     "noUnusedLocals": false,
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],
@@ -34,38 +17,16 @@
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/email": ["../../libs/email/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"]
-    },
-    "types": ["node"],
-    "outDir": "dist",
-    "rootDir": "../..",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
-    "ignoreDeprecations": "6.0"
+    }
   },
   "include": [
-    "keystatic.config.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
     "src/**/*.js",
     "src/**/*.jsx",
-    "../../apps/kami/.next/types/**/*.ts",
-    "../../dist/apps/kami/.next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "out-tsc",
-    "dist",
-    "node_modules",
-    "jest.config.ts",
-    "jest.config.cts",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    ".next",
-    "eslint.config.js",
-    "eslint.config.cjs",
-    "eslint.config.mjs"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "keystatic.config.ts"
   ],
   "references": [
     {
