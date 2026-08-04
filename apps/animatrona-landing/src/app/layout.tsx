@@ -101,11 +101,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* JSON-LD для SEO — статические данные, безопасно */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <SkipLink />
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <CookieBanner appKey="animatrona-landing" consentApiUrl={null} />
+        </Provider>
         <AnalyticsGate appKey="animatrona-landing">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner appKey="animatrona-landing" consentApiUrl={null} />
       </body>
     </html>
   )
