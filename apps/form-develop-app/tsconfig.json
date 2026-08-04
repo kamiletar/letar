@@ -1,8 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
     "paths": {
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],

@@ -23,12 +23,6 @@ const ContactSchema = z
   })
   .strip()
 
-const FileSchema = z
-  .object({
-    document: z.any().optional(),
-  })
-  .strip()
-
 export default function SecurityDemoPage() {
   const [result, setResult] = useState<string | null>(null)
   const [fileResult, setFileResult] = useState<string | null>(null)
