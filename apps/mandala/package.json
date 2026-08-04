@@ -10,7 +10,8 @@
       "@letar/hooks",
       "@letar/analytics",
       "@letar/consent",
-      "@letar/format-utils"
+      "@letar/format-utils",
+      "@letar/image-upload"
     ]
   }
 }

@@ -7,7 +7,8 @@
       "@letar/chakra-provider",
       "@letar/yandex-metrika",
       "@letar/analytics",
-      "@letar/consent"
+      "@letar/consent",
+      "@letar/image-upload"
     ]
   },
   "prisma": {

@@ -8,6 +8,7 @@
       "@letar/chakra-provider",
       "@letar/query-provider",
       "@letar/forms",
+      "@letar/image-upload",
       "@letar/ui",
       "@letar/analytics",
       "@letar/auth",

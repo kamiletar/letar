@@ -29,6 +29,7 @@
       "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
       "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/image-upload/server": ["../../libs/image-upload/src/server/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"]
     },
     "outDir": "dist",
@@ -71,6 +72,9 @@
     },
     {
       "path": "../../libs/forms"
+    },
+    {
+      "path": "../../libs/image-upload"
     },
     {
       "path": "../../libs/hooks"
