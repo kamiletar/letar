@@ -21,26 +21,26 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next build",
+        "command": "next build --webpack",
         "cwd": "apps/mandala"
       },
       "dependsOn": ["update-sw-version", "^build"],
       "cache": false,
       "outputs": ["{workspaceRoot}/apps/mandala/.next"],
       "metadata": {
-        "description": "Build production bundle",
+        "description": "Build production bundle (без Turbopack из-за бага с гидратацией Emotion)",
         "technologies": ["next"]
       }
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev",
+        "command": "next dev --webpack",
         "cwd": "apps/mandala"
       },
       "cache": false,
       "metadata": {
-        "description": "Start development server (без Turbopack из-за бага с Emotion)",
+        "description": "Start development server (без Turbopack из-за бага с гидратацией Emotion)",
         "technologies": ["next"]
       }
     },
