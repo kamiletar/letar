@@ -113,6 +113,21 @@
 - Deprecated type aliases централизация
 - error.tsx и not-found.tsx
 
+### Фикс typecheck:tsgo (2026-08-04)
+
+Приложение не проходило `nx typecheck:tsgo` (17 ошибок, техдолг из корневого `PLAN.md` §29).
+
+- `schema.zmodel` никогда не имел блока `generator client` — добавлен, `@/generated/prisma`
+  стал реально генерироваться. Попутно `datasource.url` вынесен в `prisma.config.ts` (Prisma 7
+  P1012).
+- Импорты enum'ов/`PrismaClient` переведены на подпути `@/generated/prisma/enums` и `/client` —
+  Prisma 7 больше не отдаёт barrel-файл.
+- `field-change-demo`: `NativeSelectOption` использует `title`, не `label`.
+- `relation-demo`: приведение `useQuery` к `RelationConfig['useQuery']` — пропс объявлен без
+  параметров типа.
+- `data-grid-demo`: собранные `submittedData` не отображались — добавлен `SubmittedDataPreview`.
+- Мелкие точечные фиксы (useRef с initialValue, unknown в JSX).
+
 ---
 
-**Последнее обновление:** 2026-03-31
+**Последнее обновление:** 2026-08-04

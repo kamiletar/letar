@@ -72,6 +72,14 @@ file-reservations на будущие пакеты Фазы 7 (`forms-core` + с
 - TanStack Form DevTools интеграция
 - createForm() фабрика с extraSelects/Comboboxes/Fields
 
+### Фикс типа Form.Field.Signature (2026-08-04)
+
+`form-compound-types.ts`: тип поля `Signature` был вручную выписанным литералом,
+разошедшимся с реальным `SignatureFieldProps` (объявлял несуществующие `penColor`/`mode`/
+`readOnly`, не знал про рабочие `strokeColor`/`strokeWidth`/`allowTyped`/`typedFont`/
+`exportFormat`). Рантайм-привязка была верной, ломался только typecheck потребителей
+(`form-develop-app`). Заменён на прямую ссылку на `SignatureFieldProps`.
+
 ---
 
-**Последнее обновление:** 2026-04-04
+**Последнее обновление:** 2026-08-04

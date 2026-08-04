@@ -16,6 +16,15 @@
 - guides/server-errors.mdx + .ru.mdx — Server Error Mapping
 - guides/undo-redo.mdx — Undo/Redo
 
+### Фикс typecheck:tsgo (2026-08-04)
+
+Приложение не проходило `nx typecheck:tsgo` (техдолг из корневого `PLAN.md` §29).
+
+- `demo/url-prefill`: `onSubmit` в `@letar/forms` отдаёт значения формы напрямую, а не `{ value }`.
+- `providers.tsx`: пропс `i18n` типизирован через `RootProviderProps['i18n']` вместо
+  дженерик-типа `I18nUIConfig` (он требовал параметр типа и не совпадал с тем, что реально
+  приходит из `i18nUI.provider(lang)`).
+
 ---
 
-**Последнее обновление:** 2026-04-04
+**Последнее обновление:** 2026-08-04
