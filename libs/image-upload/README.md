@@ -2,29 +2,44 @@
 
 Компоненты загрузки изображений с drag-and-drop, превью и интеграцией с API.
 
+## Две точки входа
+
+У библиотеки их две, и подключаются они независимо:
+
+| Вход                         | Что внутри                       | Кому нужен                     |
+| ---------------------------- | -------------------------------- | ------------------------------ |
+| `@letar/image-upload`        | React-компоненты и хуки (Chakra) | приложениям с формами загрузки |
+| `@letar/image-upload/server` | раздача `uploads/` (`node:fs`)   | всем, кто отдаёт файлы         |
+
+Разделение нужно, чтобы Node-only код не тянул за собой React и Chakra. Подключать
+обе сразу не обязательно: сейчас клиентскую часть использует только `mandala`,
+а серверную — все семь приложений.
+
 ## Установка
 
-Библиотека уже включена в монорепо. Для подключения к приложению нужны **три** вещи
-(см. [libs.md](/.claude/rules/libs.md)):
+Библиотека уже включена в монорепо. Нужны **две** вещи (см. [libs.md](/.claude/rules/libs.md)):
 
 ```jsonc
 // apps/<app>/tsconfig.json
 {
   "compilerOptions": {
-    "paths": { "@letar/image-upload": ["../../libs/image-upload/src/index.ts"] }
+    "paths": {
+      // только тот вход, который реально импортируете
+      "@letar/image-upload": ["../../libs/image-upload/src/index.ts"],
+      "@letar/image-upload/server": ["../../libs/image-upload/src/server/index.ts"]
+    }
   },
   "references": [{ "path": "../../libs/image-upload" }]
 }
 ```
 
-```js
-// apps/<app>/next.config.js
-module.exports = {
-  transpilePackages: ['@letar/image-upload'],
-}
-```
+⚠️ Подпути в `paths` не наследуются: путь к `@letar/image-upload` **не** делает
+резолвимым `@letar/image-upload/server`. Каждый вход прописывается своей строкой,
+иначе — `TS2307`.
 
-⚠️ Без `transpilePackages` `typecheck` пройдёт, а прод-билд упадёт на `Module not found`.
+`transpilePackages` в `next.config` для этой библиотеки **не нужен** — она резолвится
+через `paths`, а не через `node_modules`. Подробный разбор (на примере как раз
+`@letar/image-upload`) — в [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
 
 ## Две схемы хранения — и как выбрать
 
@@ -110,6 +125,12 @@ function CustomUploader() {
   return <Dropzone onFilesSelected={handleFiles} multiple colorPalette="purple" />
 }
 ```
+
+⚠️ Сразу после успешной загрузки поле показывает ссылку из ответа `onUploadSuccess`
+напрямую, не дожидаясь `useImagePreviewUrl` — иначе пока асинхронный резолвер не
+отработает, превью не появится, хотя файл уже на сервере. Как только `value` меняется
+на что-то другое (например, форма открыта заново с другим `value` извне), поле
+переключается обратно на `resolveImageUrl`.
 
 ### next/image вместо `<img>`
 
@@ -226,16 +247,6 @@ type ImageCategory = KnownImageCategory | (string & Record<never, never>)
 `border`, `border.error`) и `colorPalette.*`. Поэтому вид корректен в светлой и
 тёмной теме, а перекрасить всё можно одним пропом `colorPalette`.
 
-## Зависимости
-
-- `@chakra-ui/react` >= 3.0.0
-- `react` >= 18.0.0
-- `react-icons` (для иконок)
-
-## Потребители
-
-- `apps/mandala` — админка мандал и товаров (с `next/image` и резолвером метаданных)
-
 ## Серверная часть — `@letar/image-upload/server`
 
 Раздача загруженных файлов из `uploads/`. Отдельная точка входа: Node-only код
@@ -299,3 +310,23 @@ export const GET = createUploadsRoute({
 `X-Content-Type-Options: nosniff` ставится всегда. Для `image/svg+xml` дополнительно
 выставляется `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox` —
 загруженный пользователем SVG это исполняемый документ, внутри может быть `<script>`.
+
+## Зависимости
+
+Нужны только клиентской точке входа:
+
+- `@chakra-ui/react` >= 3.0.0
+- `react` >= 18.0.0
+- `react-icons` (для иконок)
+
+`@letar/image-upload/server` не зависит ни от одной из них — только на `node:*`.
+
+## Потребители
+
+Клиентская часть:
+
+- `apps/mandala` — админка мандал и товаров (с `next/image` и резолвером метаданных)
+
+Серверная часть — все семь приложений, раздающих `uploads/`: `aboi`, `aprel8008`,
+`domwellbes`, `driving-school`, `grandslamcup`, `kami`, `mandala`. Шесть из них
+подключают **только** `@letar/image-upload/server`, без основного входа.
