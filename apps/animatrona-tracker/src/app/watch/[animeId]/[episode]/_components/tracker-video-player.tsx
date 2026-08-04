@@ -170,12 +170,12 @@ export function TrackerVideoPlayer({
   const currentSubtitle = subtitleTrackIndex >= 0 ? manifest.subtitleTracks[subtitleTrackIndex] : null
   const audioUrl = useMemo(
     () => (usesSeparateAudio && currentAudioTrack ? getAudioUrl(currentAudioTrack) : null),
-    [usesSeparateAudio, currentAudioTrack]
+    [usesSeparateAudio, currentAudioTrack],
   )
   const subtitleUrl = useMemo(() => (currentSubtitle ? getSubtitleUrl(currentSubtitle) : null), [currentSubtitle])
   const fontUrls = useMemo(
     () => (currentSubtitle?.fonts ? getFontUrls(currentSubtitle.fonts) : []),
-    [currentSubtitle?.fonts]
+    [currentSubtitle?.fonts],
   )
   const isAssSubtitle = currentSubtitle?.format === 'ass' || currentSubtitle?.format === 'ssa'
 
@@ -193,7 +193,6 @@ export function TrackerVideoPlayer({
     isMuted,
     isVideoBlocked,
     setIsVideoBlocked,
-    setIsLoading,
   } = useShakaPlayer({
     videoUrl,
     startTime,
@@ -345,7 +344,7 @@ export function TrackerVideoPlayer({
       }
       video.currentTime = (value[0] / 100) * duration
     },
-    [duration]
+    [duration],
   )
 
   const handleVolumeChange = useCallback((value: number[]) => {
@@ -615,7 +614,7 @@ export function TrackerVideoPlayer({
       manifest.subtitleTracks,
       subtitleTrackIndex,
       handleSubtitleChange,
-    ]
+    ],
   )
 
   // ─── Render ────────────────────────────────────────────────────────

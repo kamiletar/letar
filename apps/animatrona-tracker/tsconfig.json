@@ -1,8 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],

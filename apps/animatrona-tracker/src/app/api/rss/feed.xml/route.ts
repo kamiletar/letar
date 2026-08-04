@@ -9,7 +9,6 @@ import { prisma } from '@/lib/db'
 import { generateRssXml, type RssItem } from '@/lib/rss'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://animatrona-tracker.letar.best'
-const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://ipfs.letar.best'
 
 export async function GET() {
   const anime = await prisma.anime.findMany({
