@@ -350,7 +350,7 @@ nx db:migrate:deploy premium-rosstil
 # Открытие Prisma Studio GUI
 nx db:studio premium-rosstil
 
-# Наполнение базы данных тестовыми данными
+# Наполнение базы данных тестовыми данными (конвенция — seed-scripts.md)
 nx db:seed premium-rosstil
 
 # Сброс базы данных и применение всех миграций
@@ -359,6 +359,10 @@ nx db:reset premium-rosstil
 # Генерация только Prisma Client (редко нужно)
 nx db:generate premium-rosstil
 ```
+
+> **Как писать `prisma/seed.ts`:** подключение ORM-клиента напрямую (не через `@/lib/db`),
+> идемпотентность (`upsert` по естественному ключу / `findFirst`+`create` без него), Nx target —
+> см. [seed-scripts.md](seed-scripts.md).
 
 ## ⚠️ КРИТИЧНО - `PrismaClient` в server-only скриптах (seed, миграции)
 
@@ -1154,3 +1158,34 @@ SELECT column::text AS column_raw FROM table;
 **Касается** любого приложения, где есть колонки `timestamp without time zone` и подключён
 `postgres-*` MCP (не только конкретное приложение, где баг был найден) — не гоняйся за
 несуществующим сдвигом, если единственный источник расхождения — вывод MCP-запроса.
+
+## ⚠️ `EACCES` от Prisma-адаптера на dev — чаще всего остановленный Docker-контейнер БД, не права
+
+**Симптом:** `nx dev <app>` падает 500 на любой странице, которая делает запрос к БД. В логе —
+`Error: Failed to execute query: AggregateError` с `dbErrorCode: 'EACCES'` где-то внутри стека.
+Выглядит как отказ в доступе на уровне роли/прав Postgres или `pg_hba.conf`.
+
+**Частая настоящая причина:** локальный dev-Postgres приложения (контейнер вида
+`<app>-postgres-dev` из `docker-compose.dev.yml`) просто не запущен — порт из `DATABASE_URL` в
+`.env.local` никто не слушает. Драйвер Prisma/`pg` мисклассифицирует «соединение недоступно» как
+`EACCES`, хотя реальной причины «в доступе отказано» на стороне Postgres нет вообще — сервер
+физически не поднят.
+
+**Диагностика — раньше, чем лезть в права роли:**
+
+```bash
+docker ps --format "{{.Names}}\t{{.Ports}}" | grep <app>-postgres
+docker ps -a --format "{{.Names}}\t{{.Ports}}\t{{.Status}}" | grep <app>-postgres  # если не нашлось — искать среди остановленных
+```
+
+Если контейнер `Exited` — просто поднять его обратно, данные в volume при этом сохраняются
+(миграции повторно гонять не нужно):
+
+```bash
+cd apps/<app> && docker compose -f docker-compose.dev.yml up -d db
+```
+
+**Прецедент:** `dsperevod`, 2026-08-04 — контейнер `dsperevod-postgres-dev` был остановлен 6 дней
+как побочный эффект перезагрузки машины, никто не обратил внимания. `EACCES` в логе указывал на
+запрос `prisma.socialProvider.findMany()` в `libs/auth/src/server/social-loader.ts` — выглядело
+как проблема прав `SocialProvider`/access policy, но модель и данные были ни при чём.
