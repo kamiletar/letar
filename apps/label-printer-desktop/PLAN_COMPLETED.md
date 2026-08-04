@@ -4,6 +4,14 @@
 
 ## Версия 0.5.x (Unreleased)
 
+### Фикс антипаттерна `as="label"` в batch/page.tsx
+
+`renderer/app/batch/page.tsx` использовал `<Text as="label">` с вложенным `<input type="file">`
+внутри — запрещённый Chakra UI v3 проп `as` (см. `.claude/rules/components.md`) плюс вложенность
+`<input>` в `<label>`, создающая риск повторного открытия системного файлового диалога. Заменено
+на `<Text asChild><label htmlFor={fileInputId}>` с соседним `<input id={fileInputId} .../>`,
+связь через `useId()`. Стилизация (`color`, `cursor`, `_hover`) сохранена без изменений.
+
 ### Реальные ассеты для TSX шаблонов
 
 - **Логотип РОССТИЛЬ** — упрощённый SVG с звёздами, бриллиантом и названием бренда

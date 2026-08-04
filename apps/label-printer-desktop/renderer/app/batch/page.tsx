@@ -15,7 +15,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useId, useState } from 'react'
 import {
   LuCircleAlert,
   LuCircleCheck,
@@ -102,7 +102,12 @@ const QueueItemRow = memo(function QueueItemRow({
       </Table.Cell>
       <Table.Cell>
         {item.status === 'pending' && (
-          <Button variant="ghost" size="sm" colorPalette="red" onClick={() => onRemove(item.id)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            colorPalette="red"
+            onClick={() => onRemove(item.id)}
+          >
             <LuX />
           </Button>
         )}
@@ -112,6 +117,7 @@ const QueueItemRow = memo(function QueueItemRow({
 })
 
 export default function BatchPage() {
+  const fileInputId = useId()
   const [items, setItems] = useState<QueueItem[]>([])
   const [batchState, setBatchState] = useState<BatchState>('idle')
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -170,7 +176,7 @@ export default function BatchPage() {
       }
       reader.readAsText(file)
     },
-    [addCodesToQueue]
+    [addCodesToQueue],
   )
 
   // Парсинг PDF файла (извлечение DataMatrix кодов)
@@ -240,7 +246,7 @@ export default function BatchPage() {
         })
       }
     },
-    [addCodesToQueue]
+    [addCodesToQueue],
   )
 
   // Универсальный парсинг файла
@@ -260,7 +266,7 @@ export default function BatchPage() {
         })
       }
     },
-    [parsePDFFile, parseTextFile]
+    [parsePDFFile, parseTextFile],
   )
 
   // Обработка drag & drop
@@ -287,7 +293,7 @@ export default function BatchPage() {
         })
       }
     },
-    [parseFile]
+    [parseFile],
   )
 
   // Выбор файла через input
@@ -299,7 +305,7 @@ export default function BatchPage() {
       }
       e.target.value = '' // Сброс для повторного выбора того же файла
     },
-    [parseFile]
+    [parseFile],
   )
 
   // Печать одного элемента
@@ -421,16 +427,17 @@ export default function BatchPage() {
               <VStack gap={1}>
                 <Text fontWeight="medium">
                   Перетащите файл сюда или{' '}
-                  <Text as="label" color="blue.500" cursor="pointer" _hover={{ textDecoration: 'underline' }}>
-                    выберите файл
-                    <input
-                      type="file"
-                      accept=".csv,.txt,.pdf"
-                      multiple
-                      style={{ display: 'none' }}
-                      onChange={handleFileSelect}
-                    />
+                  <Text asChild color="blue.500" cursor="pointer" _hover={{ textDecoration: 'underline' }}>
+                    <label htmlFor={fileInputId}>выберите файл</label>
                   </Text>
+                  <input
+                    id={fileInputId}
+                    type="file"
+                    accept=".csv,.txt,.pdf"
+                    multiple
+                    style={{ display: 'none' }}
+                    onChange={handleFileSelect}
+                  />
                 </Text>
                 <Text fontSize="sm" color="fg.muted">
                   Поддерживаются PDF (DataMatrix), CSV и TXT файлы
@@ -491,26 +498,30 @@ export default function BatchPage() {
 
                 {/* Кнопки управления */}
                 <HStack gap={2}>
-                  {batchState === 'idle' || batchState === 'ready' || batchState === 'done' ? (
-                    <Button
-                      colorPalette="blue"
-                      onClick={startPrinting}
-                      disabled={selected === 0 || items.every((i) => i.status !== 'pending')}
-                    >
-                      <LuPlay />
-                      Начать печать ({selected})
-                    </Button>
-                  ) : batchState === 'printing' ? (
-                    <Button colorPalette="yellow" onClick={pausePrinting}>
-                      <LuPause />
-                      Пауза
-                    </Button>
-                  ) : (
-                    <Button colorPalette="blue" onClick={resumePrinting}>
-                      <LuPlay />
-                      Продолжить
-                    </Button>
-                  )}
+                  {batchState === 'idle' || batchState === 'ready' || batchState === 'done'
+                    ? (
+                      <Button
+                        colorPalette="blue"
+                        onClick={startPrinting}
+                        disabled={selected === 0 || items.every((i) => i.status !== 'pending')}
+                      >
+                        <LuPlay />
+                        Начать печать ({selected})
+                      </Button>
+                    )
+                    : batchState === 'printing'
+                    ? (
+                      <Button colorPalette="yellow" onClick={pausePrinting}>
+                        <LuPause />
+                        Пауза
+                      </Button>
+                    )
+                    : (
+                      <Button colorPalette="blue" onClick={resumePrinting}>
+                        <LuPlay />
+                        Продолжить
+                      </Button>
+                    )}
                   <Button variant="outline" colorPalette="red" onClick={clearList}>
                     <LuTrash2 />
                     Очистить
