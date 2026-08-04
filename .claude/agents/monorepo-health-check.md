@@ -107,9 +107,6 @@ nx affected --graph
 # Проверить workspace
 nx workspace-lint
 
-# Синхронизировать конфиги
-nx sync
-
 # Сбросить кэш
 nx reset
 ```

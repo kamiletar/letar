@@ -183,12 +183,12 @@ import { Button } from '@letar/ui'
 }
 ```
 
-### Автоматическая синхронизация
+### Синхронизация references — только вручную
 
-```bash
-# Синхронизировать references с зависимостями
-nx sync
-```
+⛔ `nx sync` в этом репо не работает: генератор `@nx/js:typescript-sync` отключён в `nx.json`
+(`sync.disabledTaskSyncGenerators`), в CI и хуках не вызывается. `references` правятся руками —
+и обычно не требуют правки: их читает только `tsc --build`, которого у приложений нет.
+Детали — [environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
 
 ---
 
@@ -203,8 +203,8 @@ nx generate @nx/next:app my-app --directory=apps/my-app
 Затем:
 
 1. Добавь теги в project.json
-2. Настрой implicitDependencies
-3. Запусти `nx sync`
+2. Настрой implicitDependencies — это и есть ребро графа Nx
+3. `references`/`paths` в `tsconfig.json` — по необходимости и вручную (`nx sync` отключён)
 
 ### Библиотека
 
@@ -216,7 +216,7 @@ nx generate @nx/react:lib my-lib --directory=libs/my-lib
 
 1. Добавь теги
 2. Добавь path alias в tsconfig.base.json
-3. Запусти `nx sync`
+3. Подключи к приложениям через `implicitDependencies` (`nx sync` тут не поможет — отключён)
 
 ---
 

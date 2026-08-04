@@ -122,7 +122,6 @@ nx show project <name> --web # Открыть в браузере
 
 ```bash
 nx reset                     # Очистить кэш и перезапустить daemon
-nx sync                      # Синхронизировать tsconfig references
 nx report                    # Информация о workspace
 nx daemon                    # Статус daemon
 nx daemon --stop             # Остановить daemon

@@ -91,12 +91,8 @@ ls apps/premium-rosstil/.next
 
 ### TS6059: File is not under 'rootDir'
 
-```bash
-# Добавь references в tsconfig.json
-nx sync
-
-# Или вручную:
-```
+Добавь `references` в `tsconfig.json` **вручную** — `nx sync` в этом репо отключён
+(`@nx/js:typescript-sync` в `sync.disabledTaskSyncGenerators`):
 
 ```json
 // apps/my-app/tsconfig.json
@@ -104,6 +100,10 @@ nx sync
   "references": [{ "path": "../../libs/my-lib" }]
 }
 ```
+
+⚠️ Приложениям `references` обычно не нужны вовсе: их читает только `tsc --build`, а таргеты
+типизации в `apps/` однопроектные (`tsgo --noEmit`). Если `TS6059` вылез в `next build` — это
+отдельный случай, см. [environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
 
 ### Cannot find module '@letar/...'
 
@@ -352,9 +352,6 @@ nx graph
 
 # Очистить всё
 nx reset
-
-# Синхронизировать references
-nx sync
 ```
 
 ---

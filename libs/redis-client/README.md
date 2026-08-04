@@ -96,7 +96,10 @@ nx typecheck:tsgo redis-client
 }
 ```
 
-Затем `nx sync` и добавь `@letar/redis-client` в `implicitDependencies` в `project.json` приложения.
+Затем добавь `@letar/redis-client` в `implicitDependencies` в `project.json` приложения — это
+единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
+генератор `@nx/js:typescript-sync` в репо отключён (см.
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).
 
 Для Next.js-приложений (`output: 'standalone'`) дополнительно добавь `@letar/redis-client` в
 `transpilePackages` в `next.config.*` — иначе прод-билд может не срезолвить импорт, даже если

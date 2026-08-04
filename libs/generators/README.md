@@ -102,9 +102,11 @@ nx g @letar/generators:new-lib <name> --description="Утилиты для X"
 **Генератор не перезаписывает существующие библиотеки** — если `libs/<name>` уже есть, падает с понятной
 ошибкой.
 
-⚠️ **После генерации:** подключение к приложению — три обязательных места (`.claude/rules/libs.md`):
-`paths` и `references` в `tsconfig.json` приложения, `implicitDependencies` в его `package.json`, затем
-`nx sync`.
+⚠️ **После генерации:** подключение к приложению — обязательно **одно** место
+(`.claude/rules/libs.md`): `implicitDependencies` в `package.json` приложения, чтобы Nx видел ребро
+графа. `paths`/`references` в его `tsconfig.json` — вспомогательные (`paths` обязательны только
+когда либа подключена без `dependencies` и линка в `node_modules` нет). `nx sync` запускать не
+надо — генератор `@nx/js:typescript-sync` в репо отключён.
 
 ### `new-app`
 

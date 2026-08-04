@@ -79,4 +79,7 @@ nx typecheck:tsgo electron-storage
 }
 ```
 
-Затем `nx sync` и добавь `electron-storage` в `implicitDependencies` `package.json` приложения.
+Затем добавь `electron-storage` в `implicitDependencies` `package.json` приложения — это
+единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
+генератор `@nx/js:typescript-sync` в репо отключён (см.
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).

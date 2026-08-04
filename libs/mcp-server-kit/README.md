@@ -28,7 +28,7 @@ import { errorText, parseDotEnv, pretty, text } from '@letar/mcp-server-kit'
 
 ### `pretty(data: unknown): string`
 
-Форматирует данные как markdown-блок ` ```json ... ``` ` для вывода в чат.
+Форматирует данные как markdown-блок `` ```json ... ``` `` для вывода в чат.
 
 ## Команды
 
@@ -53,4 +53,7 @@ nx typecheck:tsgo mcp-server-kit
 }
 ```
 
-Затем `nx sync` и добавь `mcp-server-kit` в `implicitDependencies` `package.json` приложения.
+Затем добавь `mcp-server-kit` в `implicitDependencies` `package.json` приложения — это
+единственное обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит:
+генератор `@nx/js:typescript-sync` в репо отключён (см.
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).

@@ -36,9 +36,13 @@ nx affected -t test        # Тестировать только изменён�
 # Утилиты
 nx graph                   # Визуализация зависимостей
 nx reset                   # Очистить кэш и daemon
-nx sync                    # Синхронизация tsconfig references
 nx show project <name>     # Информация о проекте
 ```
+
+⛔ **`nx sync` здесь не работает** — генератор `@nx/js:typescript-sync` отключён в `nx.json`
+(`sync.disabledTaskSyncGenerators`), в CI и git-хуках не вызывается. `references` в `tsconfig.json`
+правятся руками, и чаще всего не требуют правки вовсе:
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
 
 ---
 

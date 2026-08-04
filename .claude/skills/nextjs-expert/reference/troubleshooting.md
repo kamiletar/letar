@@ -418,12 +418,12 @@ nx reset
 ### TypeScript errors после изменений
 
 ```bash
-# Синхронизировать references
-nx sync
-
 # Пересобрать все
 nx run-many -t build --all --skip-nx-cache
 ```
+
+⛔ Не ищи здесь `nx sync` — генератор `@nx/js:typescript-sync` отключён в `nx.json`, references он
+не обновит. Правятся вручную, см. [environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
 
 ---
 

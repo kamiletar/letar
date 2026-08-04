@@ -46,7 +46,11 @@ nx g @letar/generators:new-lib <lib-name> --description="Утилиты для X
 }
 ```
 
-Добавь `<lib-name>` в `implicitDependencies` `package.json` приложения, затем `nx sync`.
+Добавь `<lib-name>` в `implicitDependencies` `package.json` приложения — **это единственное
+обязательное** (ребро графа Nx). `paths` и `references` выше вспомогательные: резолв идёт через
+`customConditions` + `exports`, а `nx sync` в этом репо отключён и references не обновит.
+Подробности — [libs.md](/.claude/rules/libs.md) и
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек).
 
 ### 3. Проверить
 
@@ -61,8 +65,8 @@ nx test <lib-name>
 - [ ] `nx g @letar/generators:new-lib <lib-name>` выполнен
 - [ ] Реализация в `src/lib/`, экспорт через `src/index.ts`
 - [ ] README.md дополнен реальным API (генератор создаёт только заглушку)
-- [ ] Подключено к нужным приложениям (paths + references + implicitDependencies)
-- [ ] `nx sync` выполнен
+- [ ] Подключено к нужным приложениям (обязательно — `implicitDependencies`; `paths`/`references`
+      по необходимости)
 - [ ] typecheck/lint/test зелёные
 
 ## Документация

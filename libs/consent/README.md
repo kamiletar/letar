@@ -85,4 +85,7 @@ nx typecheck:tsgo consent
 }
 ```
 
-Затем `nx sync` и добавь `consent` в `implicitDependencies` `package.json` приложения.
+Затем добавь `consent` в `implicitDependencies` `package.json` приложения — это единственное
+обязательное. `paths`/`references` выше вспомогательные, а `nx sync` их не обновит: генератор
+`@nx/js:typescript-sync` в репо отключён (см.
+[environment.md](/.claude/docs/environment.md#разработка-shared-библиотек)).
