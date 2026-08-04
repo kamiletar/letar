@@ -2174,3 +2174,36 @@ Turbopack на `aboi` не эскалируется в фатальную оши
 - [ ] Перенос серверного кода `forms` (`captcha/verify.ts`, `server-errors/*`) в `src/server/` —
       сломает существующие подпути `exports`, требует отдельной задачи и координации с
       форма-экосистемой (`FormsCoord`).
+
+## §36 — Next.js 16 Turbopack по умолчанию ломает гидратацию Chakra v3 + next-themes (2026-08-04)
+
+Найдено в `mandala`: `03-admin-products.admin.spec.ts` периодически терял клик по
+навигационной ссылке/кнопке — `toHaveURL` таймаутился. В логе dev-сервера в этот момент:
+`Hydration failed... this tree will be regenerated on the client`, расхождение `<script>`
+(next-themes) vs `<style data-emotion="css-global...">` в `ColorModeProvider`.
+
+Причина двухслойная: (1) `ChakraProvider`'s `<Global>` (emotion) на SSR рендерит настоящий
+`<style>`-элемент в дереве, на клиенте — `null` (часть архитектуры Emotion, само по себе не
+проблема); (2) **Next.js 16 без явного бандлер-флага выбирает Turbopack бандлером по умолчанию**
+для `next dev`/`next build` (`next/dist/lib/bundler.js`: `bundlerFlags.size === 0` →
+`Bundler.Turbopack`). Именно под Turbopack комбинация (1) с `next-themes`'ным `<script>`-тегом
+триггерит настоящий hydration mismatch — React отбрасывает и заново монтирует **всё поддерево
+`<body>`**, и клик, случившийся в этот момент, теряется. Под webpack та же комбинация не
+мисматчится. Официально задокументировано Chakra UI: chakra-ui.com/docs/get-started/frameworks/next-app
+§ «Hydration errors».
+
+Ловушка: комментарий в `apps/mandala/project.json` уже утверждал «без Turbopack из-за бага с
+Emotion», но сама команда была `"next dev"` без флага — намерение зафиксировали, флаг забыли.
+
+- [x] `apps/mandala/project.json` — `--webpack` добавлен в `dev`/`build`.
+- [x] Проверено: два чистых прогона `nx e2e mandala-e2e -- --project=admin-chromium --grep
+      "Товары"` подряд, 11/11, без флуктуаций.
+- [x] Задокументировано:
+      [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+
+### Не в скоупе
+
+- [ ] Та же уязвимость (Chakra v3 + `next-themes` без явного бандлер-флага) потенциально есть в
+      `driving-school`, `dashboard`, `animatrona-tracker` и других приложениях на Chakra —
+      не проверялось целенаправленно за пределами `mandala`, чинить по факту обнаружения флаки
+      в соответствующем `*-e2e`.
