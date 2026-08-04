@@ -860,6 +860,18 @@ Chakra UI v3 проп `as=` (`.claude/rules/components.md`).
 обход React-стейта, который отслеживает react-hook-form). Стоит вручную кликнуть на
 `/admin/products/new` при следующей работе с этим компонентом.
 
+### v0.40.5 — 2026-08-04 — auto-generated `AGENTS.md`/`CLAUDE.md` от Next.js 16
+
+После `next dev` в untracked появились `AGENTS.md` и однострочный `CLAUDE.md` (`@AGENTS.md`) —
+Next.js 16 сам создаёт их при запуске dev-сервера (`generate-agent-files.js`), файл адресован
+ИИ-агентам и пересоздаётся при каждом запуске. Первое приложение в монорепо, где паттерн замечен.
+
+**Решение:** `apps/*/AGENTS.md` добавлен в корневой `.gitignore` (пересоздаётся каждый dev-запуск,
+не реальная документация). `CLAUDE.md` в `.gitignore` **не добавлен** — в репо уже есть конвенция
+per-app `CLAUDE.md` для ручной документации (animatrona, animatrona-mobile, aprel8008), стаб
+`apps/mandala/CLAUDE.md` закоммичен как обычный файл. Подробности —
+[nextjs16-agent-guide-files.md](/.claude/docs/nextjs16-agent-guide-files.md).
+
 ---
 
 **Последнее обновление:** 2026-08-04
