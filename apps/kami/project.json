@@ -198,6 +198,13 @@
         "description": "Check file formatting with dprint",
         "technologies": ["dprint"]
       }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "apps/kami/vitest.config.ts"
+      }
     }
   }
 }
