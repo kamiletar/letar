@@ -2498,11 +2498,33 @@ Codex наравне с Claude Code.
 - [x] `aboi` и `domwellbes` — приватные submodule, изменения закоммичены и запушены в их
       репозитории отдельно, потом зафиксирован bump SHA в `letar`.
 
-### Не сделано
+### Не сделано (закрыто ниже)
 
-- Сами POST-хендлеры не унифицированы — схемы хранения (Image-в-БД vs файл-на-диске) достаточно
-  разные, чтобы объединение того, что вокруг sharp-вызова, дало не переиспользование, а
-  условную развилку внутри общей функции. Вынесена только действительно идентичная часть.
+- ~~Сами POST-хендлеры не унифицированы~~ — закрыто в тот же день для пары, где это оказалось
+  безопасно (см. «Продолжение» ниже). `aboi`/`domwellbes` архитектурно другие — не трогались.
+
+### Продолжение в тот же день: CRUD-репозиторий и POST/DELETE-хендлер
+
+При ревью после основного рефакторинга обнаружилось, что `mandala` и `kami` дублировали друг
+друга ещё в двух слоях, не только в sharp-вызове:
+
+- [x] `createImageRepository()` в
+      [libs/image-upload/src/server/image-repository.ts](/libs/image-upload/src/server/image-repository.ts) —
+      CRUD над моделью `Image` (`createImageRecord`/`updateImageMetadata`/`deleteImageRecord`/
+      `deleteImageByPath`/`getImageById`/`getImageByPath`), был на 100% идентичен между `mandala` и
+      `kami` (различался только импорт app-специфичного Prisma/ZenStack клиента). Делегат типизирован
+      через `any` в сигнатуре метода — бивариантная проверка параметров у TypeScript снимает
+      конфликт между разными сгенерированными ORM-типами `mandala`/`kami`, без потери типа
+      результата (`TImage` инферится из реального клиента).
+- [x] `createImageUploadRoute()` в
+      [libs/image-upload/src/server/image-upload-route.ts](/libs/image-upload/src/server/image-upload-route.ts) —
+      `POST`/`DELETE /api/upload` дублировались байт-в-байт (различалась только проверка роли:
+      `session.user.role !== 'ADMIN'` в `mandala` vs `session.user.roles.includes('ADMIN')` в
+      `kami`). Фабрика параметризована `getSession`/`isAuthorized`/`repository`/`getImageUrl`.
+- [x] 5 unit-тестов на `createImageRepository` через in-memory fake-делегат
+      ([image-repository.spec.ts](/libs/image-upload/src/server/image-repository.spec.ts)).
+- [x] `nx typecheck @letar/image-upload` → `typecheck:tsgo`/`lint`/`build` зелёные для обоих
+      приложений после каждого шага.
 
 ## §40 — Генератор `new-crud-admin`: рассмотрен и отклонён (2026-08-05)
 
@@ -2519,3 +2541,35 @@ Codex наравне с Claude Code.
       и задокументирован паттерн self-referencing `parentId` через `NativeSelect` —
       [tree-model-parent-select.md](/.claude/docs/tree-model-parent-select.md). Проверено грепом
       по монорепо: пока встречается только в `domwellbes`.
+
+## §41 — `@letar/auth/client`: `createSignInWithLetarAuth` вынесен из девяти приложений (2026-08-05)
+
+Все hub-client приложения дословно копировали вход через Ключницу — `authClient.signIn.oauth2({
+providerId: 'letar-auth', callbackURL })` с ручным `try/catch` и `switch(status)` на
+429/500/502/503. Пять из девяти (`studio`, `archetest`, `time`, `aprel8008`, `domwellbes`)
+хардкодили фиксированный `callbackURL`, из-за чего после логина пользователя всегда кидало на
+главную вместо страницы, откуда он кликнул «Войти» — реально диагностировано как баг только в
+`studio` (сессия по студийному тайм-трекеру), но паттерн тот же во всех пяти.
+
+### Что сделано
+
+- [x] `createSignInWithLetarAuth(authClient, options?)` в
+      [libs/auth/src/client/factories/create-sign-in-with-letar-auth.ts](/libs/auth/src/client/factories/create-sign-in-with-letar-auth.ts) —
+      общая обработка ошибок + настраиваемый `defaultCallbackURL` (по умолчанию текущая
+      страница) + опциональный `onError` для toast-уведомлений.
+- [x] Все 9 приложений (`dashboard`, `kami`, `animatrona-tracker`, `grandslamcup`, `archetest`,
+      `time`, `studio`, `aprel8008`, `domwellbes`) переведены на хелпер с сохранением текущего
+      поведения; попутно исправлен баг потери callbackURL в пяти из них.
+- [x] `README.md` библиотеки дополнен разделом API с примерами трёх сценариев использования.
+- [x] `nx typecheck:tsgo`/`nx lint` — зелёные для всех 9; `nx build` — зелёный для 7, у
+      `animatrona-tracker`/`grandslamcup` падает только на локальном prerender без Postgres
+      (ECONNREFUSED на `localhost:5439`), к изменению не относится.
+- [x] `studio`, `aprel8008`, `domwellbes` — приватные submodule, изменения закоммичены и
+      запушены в их репозитории отдельно, потом зафиксирован bump SHA в `letar`.
+
+### Не сделано
+
+- Возврат `signInWithLetarAuth` унифицирован на `Promise<string | null>` — у `dashboard`/`kami`
+  раньше был другой контракт (сырой результат `oauth2()`/void). Единственный внешний потребитель,
+  которому это было важно (`apps/dashboard/.../LetarAuthButton.tsx`), обновлён; остальные вызовы
+  результат не проверяли.
