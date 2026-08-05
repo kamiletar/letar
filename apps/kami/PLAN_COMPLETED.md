@@ -116,4 +116,15 @@
 
 ---
 
-**Последнее обновление:** 2026-03-21
+### Рефакторинг: sharp-обработка загрузки изображений вынесена в `@letar/image-upload/server`
+
+`createImageRecord`/`processImageBuffer` (`src/lib/images/create-image.ts`) дублировали sharp-код
+с `aboi`, `mandala` и `domwellbes` — декодирование буфера, метаданные, генерация `blurDataURL`.
+Общая часть выделена в `processUploadImage()` (`libs/image-upload/src/server/process-upload-image.ts`),
+`processImageBuffer` (реэкспортируется из `src/lib/images/index.ts`) теперь тонкая обёртка над
+ней с сохранённым поведением (try/catch → null при ошибке, blurDataURL 10×10/blur 1/WebP q20 по
+умолчанию).
+
+---
+
+**Последнее обновление:** 2026-08-05

@@ -954,4 +954,14 @@ Playwright's `nameInput.fill()` — быстрый скриптовый ввод
 
 ---
 
-**Последнее обновление:** 2026-08-04
+### Рефакторинг: sharp-обработка загрузки изображений вынесена в `@letar/image-upload/server`
+
+`createImageRecord`/`processImageBuffer` (`src/lib/images/create-image.ts`) дублировали sharp-код
+с `aboi`, `kami` и `domwellbes` — декодирование буфера, метаданные, генерация `blurDataURL`.
+Общая часть выделена в `processUploadImage()` (`libs/image-upload/src/server/process-upload-image.ts`),
+`processImageBuffer` теперь тонкая обёртка над ней с сохранённым поведением (try/catch → null при
+ошибке, blurDataURL 10×10/blur 1/WebP q20 по умолчанию).
+
+---
+
+**Последнее обновление:** 2026-08-05

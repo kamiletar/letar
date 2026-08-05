@@ -1,6 +1,6 @@
 import type { ImageCategory } from '@/generated/prisma'
 import { prisma } from '@/lib/db'
-import sharp from 'sharp'
+import { processUploadImage } from '@letar/image-upload/server'
 
 export interface CreateImageParams {
   filename: string
@@ -37,25 +37,8 @@ export async function processImageBuffer(buffer: Buffer): Promise<{
   blurDataURL: string | null
 }> {
   try {
-    // Создаём единый Sharp instance — декодирование происходит один раз
-    const image = sharp(buffer)
-
-    // Получаем metadata (использует уже декодированный буфер)
-    const metadata = await image.metadata()
-
-    // Создаём blur на основе того же instance (клонирует внутренний state)
-    const blurBuffer = await image
-      .clone() // Клонируем, чтобы не мутировать оригинал
-      .resize(10, 10, { fit: 'inside' })
-      .blur(1)
-      .webp({ quality: 20 })
-      .toBuffer()
-
-    return {
-      width: metadata.width ?? null,
-      height: metadata.height ?? null,
-      blurDataURL: `data:image/webp;base64,${blurBuffer.toString('base64')}`,
-    }
+    const { width, height, blurDataURL } = await processUploadImage(buffer, { blurDataURL: true })
+    return { width, height, blurDataURL }
   } catch {
     return { width: null, height: null, blurDataURL: null }
   }

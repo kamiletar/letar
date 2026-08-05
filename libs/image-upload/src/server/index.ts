@@ -12,3 +12,12 @@ export {
   resolveUploadPath,
   type UploadFileContext,
 } from './serve-uploads'
+
+// === Обработка изображений при загрузке (sharp) ===
+export {
+  processUploadImage,
+  type ProcessUploadImageBlurOptions,
+  type ProcessUploadImageOptions,
+  type ProcessUploadImageResizeOptions,
+  type ProcessUploadImageResult,
+} from './process-upload-image'

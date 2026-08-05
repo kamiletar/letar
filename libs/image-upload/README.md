@@ -300,6 +300,43 @@ export const GET = createUploadsRoute({
 выставляется `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox` —
 загруженный пользователем SVG это исполняемый документ, внутри может быть `<script>`.
 
+### processUploadImage — sharp-обработка загружаемого изображения
+
+Единая точка для декодирования буфера, EXIF-ротации, ресайза, перекодирования в WebP и
+генерации `blurDataURL` — снимает дублирование, которое было в `aboi`, `mandala`, `kami` и
+`domwellbes`: у каждого приложения своя схема хранения (`Image` в БД vs файл на диске), но
+сама sharp-обработка не зависела от схемы. Буфер декодируется один раз, производные операции
+(ресайз, blur) идут через `sharp().clone()`.
+
+```ts
+import { processUploadImage } from '@letar/image-upload/server'
+
+// Только метаданные — без ресайза и перекодирования (буфер возвращается как есть)
+const { width, height } = await processUploadImage(buffer)
+
+// Ресайз + WebP, без blurDataURL (схема «файл на диске»)
+const { data, width, height } = await processUploadImage(buffer, {
+  rotate: true, // применить EXIF-ориентацию до ресайза
+  resize: { width: 2400, height: 2400, fit: 'inside', withoutEnlargement: true },
+  format: 'webp',
+  quality: 82,
+})
+
+// blurDataURL для placeholder="blur" (схема «Image в БД»), без изменения самого файла
+const { width, height, blurDataURL } = await processUploadImage(buffer, { blurDataURL: true })
+```
+
+| Опция         | Тип                                            | По умолчанию | Назначение                                      |
+| ------------- | ---------------------------------------------- | ------------ | ----------------------------------------------- |
+| `rotate`      | `boolean`                                      | `false`      | Применить EXIF-ориентацию перед resize/blur     |
+| `resize`      | `{ width, height, fit?, withoutEnlargement? }` | —            | Без опции размеры не меняются                   |
+| `format`      | `'webp'`                                       | —            | Без опции буфер возвращается как есть           |
+| `quality`     | `number`                                       | `82`         | Качество перекодирования (действует с `format`) |
+| `blurDataURL` | `boolean \| { size?, blur?, quality? }`        | —            | `true` — превью 10×10, blur 1, WebP q20         |
+
+Функция бросает исключение, если sharp не смог распознать буфер — ловите на месте вызова и
+формируйте HTTP-ответ/сообщение под конвенции своего приложения (см. `aboi`/`domwellbes`).
+
 ## Зависимости
 
 Нужны только клиентской точке входа:
