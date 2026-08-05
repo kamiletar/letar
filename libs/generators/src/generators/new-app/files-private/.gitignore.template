@@ -7,6 +7,8 @@ node_modules/
 
 # Сборка
 .next/
+# Генерируется Next.js при каждом dev/build, содержимое отличается между режимами
+next-env.d.ts
 out/
 dist/
 *.tsbuildinfo

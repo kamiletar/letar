@@ -71,7 +71,8 @@ describe('new-app generator', () => {
     expect(tree.exists('apps/my-app/project.json')).toBe(true)
     expect(tree.exists('apps/my-app/tsconfig.json')).toBe(true)
     expect(tree.exists('apps/my-app/next.config.mjs')).toBe(true)
-    expect(tree.exists('apps/my-app/next-env.d.ts')).toBe(true)
+    // next-env.d.ts не генерируем: его создаёт сам Next при первом dev/build, и он под .gitignore
+    expect(tree.exists('apps/my-app/next-env.d.ts')).toBe(false)
     expect(tree.exists('apps/my-app/eslint.config.mjs')).toBe(true)
     expect(tree.exists('apps/my-app/vitest.config.ts')).toBe(true)
     expect(tree.exists('apps/my-app/vitest.setup.tsx')).toBe(true)
