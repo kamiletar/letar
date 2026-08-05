@@ -189,7 +189,10 @@ apps/animatrona-tv/screen-*.png
 # .socraticodecontextartifacts.json — конфиг проекта, коммитится (не кэш)
 .nx/migrate-runs
 
-# Зеркало .claude/skills/, созданное сторонним агентом (ChatGPT). Источник истины — .claude/,
-# зеркало расходится с ним и в репо не едет. Прецедент: устаревший совет `nx sync` пережил
-# чистку 2026-08-04 только в этой копии (PLAN.md §29).
+# Зеркало .claude/skills/ для сторонних агентов (Codex/ChatGPT). Источник истины — .claude/,
+# каталог генерируется из него и в репо не едет:
+#   bun scripts/sync-agent-skills.ts           # пересобрать
+#   bun scripts/sync-agent-skills.ts --check   # проверить расхождение
+# Прецедент, из-за которого зеркало сделали производным: устаревший совет `nx sync` пережил
+# чистку 2026-08-04 только в этой копии (PLAN.md §29). Подробнее — .claude/docs/agent-skills-mirror.md
 .agents/
