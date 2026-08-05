@@ -1148,6 +1148,53 @@ production)` — теперь технически возможен (staging-к�
 
 ---
 
+## §18.8 — `.env.staging` не шифруется и не трекается: завести `.env.staging.enc` по образцу `.env.docker.enc` 🆕
+
+> Добавлено 2026-08-05 (сессия domwellbes: staging-окружение + dev-session bypass для админки).
+
+### Проблема
+
+Прод-секреты (`.env.docker`) шифруются SOPS+age и хранятся в git как `.env.docker.enc`
+(Этап 0.4) — единый источник истины, деплой расшифровывает на лету. **Staging-секреты
+(`.env.staging`) в этот процесс не входят вовсе:** в git трекается только `.env.staging.example`
+(шаблон-плейсхолдер), а реальный файл с паролями БД/`BETTER_AUTH_SECRET`/`DEV_SESSION_TOKEN`
+существует только на s3, заводится BlackCove вручную и нигде не бэкапится и не версионируется.
+
+Обнаружено на примере `domwellbes`: `.gitignore` submodule даже не игнорировал сам
+`.env.staging` явно (только допускал `.env.staging.example`) — до правки файл при неосторожном
+`git add .` на s3 мог случайно закоммититься **в открытом виде**. Тот же пробел в `.gitignore`
+найден у `aboi` (чинится параллельным треком). Раз секреты живут на диске сервера без
+шифрованной копии в git — это ещё и точка потери данных: пересоздание s3 требует ручного
+восстановления `.env.staging` каждого staging-приложения по памяти/переписке, не из репозитория.
+
+### Что сделать
+
+- Завести `.env.staging.enc` для каждого приложения со staging-окружением (`grandslamcup`,
+  `aboi`, `aprel8008`, `archetest`, `auth-hub`, `driving-school`, `dsperevod`, `mandala`,
+  `pravda`, `svoichuzhie`, `time`, `domwellbes`) — тем же SOPS+age конвейером, что и
+  `.env.docker.enc` (`sops --encrypt --output apps/<app>/.env.staging.enc apps/<app>/.env.staging`)
+  — [secret-manager.md](/.claude/docs/secret-manager.md).
+- Обновить pre-commit хук `scripts/hooks/pre-commit-sops.sh` — он сейчас шифрует только
+  `.env.docker` → `.env.docker.enc` ([env-files.md](/.claude/rules/env-files.md)); нужно то же
+  правило для `.env.staging` → `.env.staging.enc`.
+- Обновить `.gitignore` каждого приложения: `.env.staging` игнорируется, `.env.staging.enc`
+  трекается (симметрично `.env.docker`/`.env.docker.enc`).
+- Обновить деплой (`deploy-affected.sh --staging`) — расшифровка `.env.staging.enc` на s3 тем же
+  `decrypt_sops_env()`, что уже используется для `.env.docker.enc`.
+- ⛔ **Отдельно проверить:** `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` живут только в
+  `.env.staging`, никогда в `.env.docker`/`.env.docker.enc` — это правило не меняется, шифрование
+  `.env.staging.enc` его не отменяет и не ослабляет ([env-files.md](/.claude/rules/env-files.md)).
+- Одноразовая миграция: снять текущие `.env.staging` с серверов (там, где они уже заведены —
+  как минимум `grandslamcup`), зашифровать и закоммитить как отправную точку.
+
+### DoD
+
+Пилот на одном приложении (кандидат — `domwellbes`, единственный, где `.env.staging` ещё не
+заведён на сервере вообще — можно сразу делать правильно, без миграции существующего файла) →
+хук проверен на реальном коммите → тираж на остальные 11 приложений.
+
+---
+
 ## §19 — TypeScript 7 GA: план тиража на остальные проекты 🆕
 
 > Контекст: 8 июля 2026 Microsoft выпустил стабильный **TypeScript 7.0** — Go-порт компилятора (ранее известный
