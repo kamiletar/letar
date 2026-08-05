@@ -24,16 +24,16 @@
 
 // Auth client factories
 export {
-  createAuthClient,
-  createAuthClientWithOAuth,
   type AuthClient,
   type AuthClientOptions,
   type AuthClientWithOAuth,
   type AuthClientWithOAuthOptions,
+  createAuthClient,
+  createAuthClientWithOAuth,
 } from './create-auth-client'
 
 // Components
-export { createAuthGuard, type AuthGuardProps } from './auth-guard'
+export { type AuthGuardProps, createAuthGuard } from './auth-guard'
 export {
   createOAuthButtons,
   type OAuthButtonsProps,
@@ -42,31 +42,37 @@ export {
 } from './oauth-buttons'
 export { OnlyFor, type OnlyForProps } from './only-for'
 export {
-  ResendVerificationButton,
   type ResendCapableAuthClient,
+  ResendVerificationButton,
   type ResendVerificationButtonProps,
 } from './resend-verification-button'
 export { SessionProvider, type SessionProviderProps } from './session-provider'
 
 // Factories
-export { createTypedUseSession, type TypedSessionResult } from './factories'
+export {
+  createSignInWithLetarAuth,
+  type CreateSignInWithLetarAuthOptions,
+  createTypedUseSession,
+  getLetarAuthErrorMessage,
+  type TypedSessionResult,
+} from './factories'
 
 // Connected Accounts
 export {
   AccountCard,
   ConnectedAccountsList,
+  type ConnectedAccountsListProps,
   providerColors,
   providerNames,
-  type ConnectedAccountsListProps,
 } from './connected-accounts'
 
 // Auth Mode (Tier 1 / Tier 2 informed-consent, Этап 8 корневого PLAN.md)
 export {
   AuthModeRequestForm,
-  AuthModeSettings,
   type AuthModeRequestFormProps,
   type AuthModeRequestResult,
   type AuthModeRequestRow,
+  AuthModeSettings,
   type AuthModeSettingsProps,
   type AuthModeTierPoint,
 } from './auth-mode'
@@ -75,8 +81,8 @@ export {
 // dsperevod → aboi → driving-school)
 export {
   SocialProviderForm,
-  SocialProvidersList,
   type SocialProviderFormProps,
+  SocialProvidersList,
   type SocialProvidersListProps,
 } from './social-providers'
 

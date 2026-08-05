@@ -702,6 +702,48 @@ Redis настроен с `lazyConnect: true` — не падает при ст�
 
 Добавляет метод `signIn.oauth2({ providerId: 'yandex' })` для кастомных OAuth провайдеров.
 
+#### `createSignInWithLetarAuth(authClient, options?)`
+
+Создаёт функцию входа через Ключницу (`auth.letar.best`, `providerId: 'letar-auth'`) с общей
+обработкой ошибок (429/500/502/503 → понятные русские сообщения). Извлечено из дословного дубля
+в 9 приложениях (dashboard, kami, animatrona-tracker, grandslamcup, studio, archetest, time,
+aprel8008, domwellbes) — до выноса каждое приложение копировало один и тот же `try/catch` +
+`switch (status)`.
+
+```typescript
+// apps/my-app/src/lib/auth-client.ts
+import { type AuthClientWithOAuth, createAuthClientWithOAuth, createSignInWithLetarAuth } from '@letar/auth/client'
+
+export const authClient: AuthClientWithOAuth = createAuthClientWithOAuth()
+export const { useSession, signOut } = authClient
+
+// Базовый вариант — callbackURL по умолчанию берётся из текущей страницы (pathname + search)
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient)
+
+// С toast-уведомлением об ошибке
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient, {
+  onError: (message) => toaster.create({ type: 'error', title: message }),
+})
+
+// С фиксированным дефолтным callbackURL вместо текущей страницы
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient, { defaultCallbackURL: '/' })
+```
+
+Возвращает функцию `signInWithLetarAuth(callbackURL?: string): Promise<string | null>` —
+`null` при успехе (произойдёт redirect), строка человекопонятной ошибки при неудаче.
+
+| Опция                | Тип                        | По умолчанию                                  | Описание                                                                          |
+| --------------------- | -------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `providerId`          | `string`                   | `'letar-auth'`                                | providerId генерик-OAuth на стороне Ключницы                                     |
+| `defaultCallbackURL`  | `string \| (() => string)` | текущий `pathname + search`                    | Куда вернуть пользователя, если явный `callbackURL` не передан в саму функцию      |
+| `onError`             | `(message: string) => void`| —                                              | Колбэк с сообщением об ошибке (например для toast)                                |
+
+> ⚠️ Дефолт «текущая страница» — намеренно лучшее поведение, чем фиксированный `'/'`: без него
+> после логина пользователя всегда кидает на главную вместо страницы, откуда он кликнул «Войти»
+> (найдено на `studio`, до выноса пять приложений хардкодили фиксированный `callbackURL`).
+> Приложениям, где нужен именно фиксированный дефолт (например разные виджеты входа на одной
+> странице), передавай `defaultCallbackURL` явно.
+
 #### `OnlyFor<TRole>`
 
 Компонент условного рендеринга по роли.
