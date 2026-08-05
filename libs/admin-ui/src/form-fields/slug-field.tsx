@@ -66,7 +66,7 @@ export function SlugField<T extends Record<string, unknown>>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(form.setFieldValue as any)(name, value)
     },
-    [form]
+    [form],
   )
 
   // Связь активна: slug автоматически генерируется из названия

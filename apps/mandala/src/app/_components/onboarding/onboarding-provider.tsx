@@ -37,7 +37,6 @@ interface OnboardingProviderProps {
 export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(-1)
   const [isCompleted, setIsCompleted] = useState(true)
-  const [isReady, setIsReady] = useState(false)
 
   // Проверка localStorage при монтировании
   useEffect(() => {
@@ -46,7 +45,6 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       setIsCompleted(false)
       // Не запускаем автоматически — пользователь может запустить через меню
     }
-    setIsReady(true)
   }, [])
 
   const isActive = currentStepIndex >= 0 && currentStepIndex < ONBOARDING_STEPS.length
@@ -98,14 +96,16 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       restart,
       isCompleted,
     }),
-    [currentStep, currentStepIndex, isActive, nextStep, prevStep, skip, restart, isCompleted]
+    [currentStep, currentStepIndex, isActive, nextStep, prevStep, skip, restart, isCompleted],
   )
 
-  // Не рендерим до проверки localStorage
-  if (!isReady) {
-    return <>{children}</>
-  }
-
+  // ВАЖНО: Provider рендерится всегда с одним и тем же типом элемента.
+  // Условный переход <>{children}</> → <Provider>{children}</Provider> после
+  // useEffect (isReady меняется false→true) меняет тип элемента на этой позиции
+  // дерева — React расценивает это как другой компонент и полностью
+  // размонтирует/заново монтирует ВСЁ поддерево children (весь app/layout.tsx),
+  // включая любые введённые пользователем значения в формах. isReady используется
+  // только внутри value, а не для выбора между разными обёртками.
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>
 }
 

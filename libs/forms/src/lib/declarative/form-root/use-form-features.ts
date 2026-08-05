@@ -81,7 +81,7 @@ export function useFormFeatures<TData extends object>({
         return { success: false, error: error instanceof Error ? error.message : 'Error отправки' }
       }
     },
-    [onlineSubmit, isPersistenceEnabled, persistenceResult]
+    [onlineSubmit, isPersistenceEnabled, persistenceResult],
   )
 
   // Hook offline (if вkeyён)
@@ -102,11 +102,11 @@ export function useFormFeatures<TData extends object>({
   // State offline для contextа form
   const offlineState: FormOfflineState | undefined = isOfflineEnabled
     ? {
-        isOffline: offlineForm.isOffline,
-        pendingCount: offlineForm.pendingCount,
-        isProcessing: offlineForm.isProcessing,
-        clearPersistence: isPersistenceEnabled ? persistenceResult.clearSavedData : undefined,
-      }
+      isOffline: offlineForm.isOffline,
+      pendingCount: offlineForm.pendingCount,
+      isProcessing: offlineForm.isProcessing,
+      clearPersistence: isPersistenceEnabled ? persistenceResult.clearSavedData : undefined,
+    }
     : undefined
 
   // Handler submit
@@ -124,7 +124,7 @@ export function useFormFeatures<TData extends object>({
         }
       }
     },
-    [isOfflineEnabled, offlineForm, onlineSubmit, isPersistenceEnabled, persistenceResult]
+    [isOfflineEnabled, offlineForm, onlineSubmit, isPersistenceEnabled, persistenceResult],
   )
 
   // Подписка на изменения form для persistence
@@ -149,7 +149,7 @@ export function useFormFeatures<TData extends object>({
       }
       return () => subscription.unsubscribe()
     },
-    [isPersistenceEnabled, persistenceResult]
+    [isPersistenceEnabled, persistenceResult],
   )
 
   // Восстановление данных из persistence
@@ -171,7 +171,7 @@ export function useFormFeatures<TData extends object>({
         persistenceResult.markRestoreComplete()
       }, 0)
     },
-    [isPersistenceEnabled, persistenceResult]
+    [isPersistenceEnabled, persistenceResult],
   )
 
   return {
