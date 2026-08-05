@@ -1,6 +1,6 @@
 'use client'
 
-import { type AuthClientWithOAuth, createAuthClientWithOAuth } from '@letar/auth/client'
+import { type AuthClientWithOAuth, createAuthClientWithOAuth, createSignInWithLetarAuth } from '@letar/auth/client'
 import { usernameClient } from 'better-auth/client/plugins'
 
 /**
@@ -22,12 +22,7 @@ export const { useSession, signIn, signOut, getSession } = authClient
 /**
  * Войти через ключницу (auth.letar.best)
  */
-export async function signInWithLetarAuth(callbackURL = '/') {
-  return authClient.signIn.oauth2({
-    providerId: 'letar-auth',
-    callbackURL,
-  })
-}
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient, { defaultCallbackURL: '/' })
 
 // Типы для совместимости
 export type Session = typeof authClient.$Infer.Session

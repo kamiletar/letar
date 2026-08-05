@@ -16,19 +16,9 @@ export function LetarAuthButton() {
     setError(null)
     setLoading(true)
 
-    try {
-      const result = await signInWithLetarAuth('/')
-
-      if (result?.error) {
-        if (result.error.status === 429) {
-          setError('Слишком много попыток. Подождите минуту и попробуйте снова.')
-        } else {
-          setError('Не удалось подключиться к серверу авторизации. Попробуйте позже.')
-        }
-        setLoading(false)
-      }
-    } catch {
-      setError('Ошибка сети. Попробуйте позже.')
+    const errorMessage = await signInWithLetarAuth('/')
+    if (errorMessage) {
+      setError(errorMessage)
       setLoading(false)
     }
   }
