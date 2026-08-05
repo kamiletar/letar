@@ -90,6 +90,8 @@ nx typecheck:tsgo redis-client
 Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
 [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
 
-Для Next.js-приложений (`output: 'standalone'`) дополнительно добавь `@letar/redis-client` в
-`transpilePackages` в `next.config.*` — иначе прод-билд может не срезолвить импорт, даже если
-`typecheck:tsgo` чист (см. `.claude/docs/nextjs-standalone-tracing.md`).
+`transpilePackages` в `next.config.*` добавлять **не нужно** — в том числе при
+`output: 'standalone'`. Оба текущих Next.js-потребителя (`animatrona-tracker` — webpack,
+`svoichuzhie` — Turbopack) собираются полностью и без этой записи, проверено удалением
+2026-08-05. Почему так — [lib-entry-points.md](/.claude/docs/lib-entry-points.md), раздел
+«`transpilePackages` — НЕ нужен».
