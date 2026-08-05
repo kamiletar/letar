@@ -128,6 +128,14 @@
 - `data-grid-demo`: собранные `submittedData` не отображались — добавлен `SubmittedDataPreview`.
 - Мелкие точечные фиксы (useRef с initialValue, unknown в JSX).
 
+### Фикс nx lint (2026-08-05)
+
+Приложение не проходило `nx lint` (6 ошибок, все правило `curly`).
+
+- `autofill-demo/page.tsx`, `filters-state-demo/page.tsx`: однострочные `if (cond) return x`
+  переведены в блочную форму `if (cond) { return x }`. `--fix` не годится — dprint снимает
+  фигурные скобки с однострочного `if` обратно при автоформатировании, конфликтуя с ESLint.
+
 ---
 
-**Последнее обновление:** 2026-08-04
+**Последнее обновление:** 2026-08-05
