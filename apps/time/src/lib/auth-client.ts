@@ -1,6 +1,6 @@
 'use client'
 
-import { type AuthClientWithOAuth, createAuthClientWithOAuth } from '@letar/auth/client'
+import { type AuthClientWithOAuth, createAuthClientWithOAuth, createSignInWithLetarAuth } from '@letar/auth/client'
 
 /**
  * Клиент авторизации для time
@@ -12,11 +12,6 @@ export const authClient: AuthClientWithOAuth = createAuthClientWithOAuth()
 export const { useSession, signOut } = authClient
 
 /**
- * Войти через ключницу
+ * Войти через ключницу. Если callbackURL не передан — используется текущая страница.
  */
-export function signInWithLetarAuth() {
-  return authClient.signIn.oauth2({
-    providerId: 'letar-auth',
-    callbackURL: '/',
-  })
-}
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient)
