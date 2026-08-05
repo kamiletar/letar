@@ -1989,6 +1989,25 @@ nosniff` ставится всегда, а для `image/svg+xml` дополни
   нет вовсе), поэтому правки там не коммитятся; если зеркало живое, его надо пересоздавать из
   `.claude/`, а не править.
 
+- [x] **Побочно — закрыто (2026-08-05, CalmHarbor, коммит `d978f12c`):** «специфика README»,
+      которую предыдущий пункт сознательно сохранил при дедупликации, — совет `redis-client`
+      добавлять библиотеку в `transpilePackages` при `output: 'standalone'` — оказалась **неверной**
+      и прямо противоречила [lib-entry-points.md](/.claude/docs/lib-entry-points.md) («не
+      добавлять»). Ссылка README на
+      [nextjs-standalone-tracing.md](/.claude/docs/nextjs-standalone-tracing.md) совет не
+      подтверждала: тот документ про `outputFileTracingIncludes` и `transpilePackages` не упоминает
+      вообще. Проверено удалением записи у обоих Next.js-потребителей `@letar/redis-client` (у
+      обоих `output: 'standalone'`, оба подключены через `implicitDependencies` + `paths`, оба
+      держали её в конфиге): `animatrona-tracker` (webpack) — `nx build` зелёный целиком, а не
+      только до компиляции, код библиотеки в тех же 19 серверных чанках,
+      `.next/standalone/node_modules` идентичен baseline; второй потребитель (приватный submodule,
+      Turbopack) — тоже зелёный. Источник истины — `lib-entry-points.md`: добавлены проверка
+      обратным ходом и подраздел «`transpilePackages` ≠ `outputFileTracingIncludes`» (разные фазы
+      сборки, разные симптомы, разные способы поймать — `nx build` против запуска контейнера).
+      README сведён к одной фразе со ссылкой; в `nextjs-standalone-tracing.md` — врезка, что этот
+      класс багов `transpilePackages` не лечит и на `.next/standalone` он не влияет. Существующие
+      записи в конфигах двух приложений оставлены как есть: безвредны, но не обязательны.
+
 ## §30 — `@letar/image-upload`: клиентская часть доведена до состояния, пригодного к переиспользованию (2026-08-04)
 
 Дополняет §29 (там — серверный хелпер раздачи `uploads/`). Здесь — клиентская половина: хук
