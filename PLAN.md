@@ -2469,3 +2469,35 @@ Codex наравне с Claude Code.
 - Nx target для `sync-agent-skills.ts` не заводился — в репо нет корневого `project.json`, а
   заводить его ради одного скрипта избыточно; конвенция репо (`scripts/*.ts` вызывается напрямую
   через `bun`) соблюдена.
+
+## §39 — `@letar/image-upload/server`: sharp-обработка загрузки вынесена из четырёх приложений (2026-08-05)
+
+Продолжение §29-§32. Четыре приложения (`aboi`, `mandala`, `kami`, `domwellbes`) реализовывали
+`POST /api/upload` с разными схемами хранения (`Image` в БД vs файл на диске), но с почти
+одинаковым inline-кодом «прочитать buffer → sharp → resize/webp/metadata/blurDataURL».
+
+### Что сделано
+
+- [x] `processUploadImage()` в
+      [libs/image-upload/src/server/process-upload-image.ts](/libs/image-upload/src/server/process-upload-image.ts)
+      (экспорт из `@letar/image-upload/server`) — декодирует буфер один раз, дальше опционально
+      EXIF-ротация, resize, перекодирование в WebP и генерация `blurDataURL`; производные операции
+      идут через `sharp().clone()`, а не повторное декодирование.
+- [x] 8 unit-тестов ([process-upload-image.spec.ts](/libs/image-upload/src/server/process-upload-image.spec.ts)) —
+      картинки генерируются `sharp({create: ...})`, без фикстур в репозитории.
+- [x] Все четыре приложения переведены на общую функцию с сохранением прежнего поведения:
+      `aboi` — только metadata (без ресайза, намеренно); `mandala`/`kami` — с `blurDataURL`;
+      `domwellbes` — EXIF-ротация + resize 2400px + WebP q82, без blur.
+- [x] Задета уже задокументированная ловушка §30/[libs.md](/.claude/rules/libs.md) — у
+      `@letar/image-upload` есть локальный `dist/`, декларации пересобраны через
+      `nx typecheck @letar/image-upload` перед тем, как новый экспорт стал виден `typecheck:tsgo`
+      приложений-потребителей.
+- [x] `README.md` библиотеки дополнен разделом с опциями и примерами трёх сценариев использования.
+- [x] `aboi` и `domwellbes` — приватные submodule, изменения закоммичены и запушены в их
+      репозитории отдельно, потом зафиксирован bump SHA в `letar`.
+
+### Не сделано
+
+- Сами POST-хендлеры не унифицированы — схемы хранения (Image-в-БД vs файл-на-диске) достаточно
+  разные, чтобы объединение того, что вокруг sharp-вызова, дало не переиспользование, а
+  условную развилку внутри общей функции. Вынесена только действительно идентичная часть.
