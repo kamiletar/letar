@@ -125,6 +125,14 @@
 ней с сохранённым поведением (try/catch → null при ошибке, blurDataURL 10×10/blur 1/WebP q20 по
 умолчанию).
 
+### Рефакторинг: CRUD Image и POST/DELETE /api/upload вынесены в @letar/image-upload/server
+
+Продолжение предыдущего пункта. `create-image.ts` был на 100% идентичен `mandala` (кроме импорта
+Prisma/ZenStack-клиента) — вынесен в `createImageRepository()`. `POST`/`DELETE /api/upload`
+дублировались с `mandala` байт-в-байт (различалась только проверка роли: `role` vs `roles[]`) —
+вынесены в `createImageUploadRoute()`. Оба файла в kami теперь только декларативная сборка опций
+(сессия, `isAuthorized`, репозиторий, `getImageUrl`), логика — в библиотеке.
+
 ---
 
 **Последнее обновление:** 2026-08-05
