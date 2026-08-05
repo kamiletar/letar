@@ -108,6 +108,49 @@ export default [...baseConfig, { ignores: ['**/out-tsc'] }]
 `@letar/*/server` и относительные `../server`, а не `**/server`. Голый `**/server` поймал бы
 `next-intl/server` и `@/types/server`, которых в репо сотни.
 
+## ⚠️ Вторая ловушка: `@nx/eslint:lint` меняет cwd — `ignores` резолвится не от файла
+
+Зеркальный случай к ловушке выше, только с `ignores` вместо `files` и с другой причиной.
+
+[apps/form-docs/eslint.config.mjs](/apps/form-docs/eslint.config.mjs) игнорирует генерируемые
+Fumadocs-файлы (`src/.source/*.ts` — `@ts-nocheck`, `{}`-типы, всё равно перезаписывается при
+каждом `next dev`/`next build`):
+
+```js
+export default [
+  ...baseConfig,
+  { ignores: ['.source/**', '.next/**', '**/out-tsc'] },
+]
+```
+
+Прямой `bunx eslint .`, запущенный из `apps/form-docs`, это уважает — `.source/**` резолвится
+относительно cwd, который совпадает с каталогом конфига. `nx run form-docs:lint` — нет: `.source`
+линтится как обычный код, падает на `@typescript-eslint/ban-ts-comment` и
+`no-empty-object-type` (2026-08-05, [PLAN_COMPLETED.md](/apps/form-docs/PLAN_COMPLETED.md)).
+
+**Причина — не resolve конфига (это чинит `findFlatConfigFile`, см. код `@nx/eslint:lint`
+executor'а), а cwd.** `lint.impl.js` делает `process.chdir(systemRoot)` — переключает cwd на
+корень workspace **до** инстанцирования `ESLint`, специально чтобы `lintFilePatterns` из
+`project.json` резолвились предсказуемо с любого места запуска. Побочный эффект: `ignores`
+(в отличие от `files`, для которых нужен отдельный конфиг-файл) в этой версии ESLint 10 берёт
+базовый путь от `cwd` инстанса, а не от каталога `overrideConfigFile` — проверено напрямую
+`new ESLint({ overrideConfigFile: '.../form-docs/eslint.config.mjs', cwd: <root> })` даёт те же
+незаигноренные файлы, что и `nx run`; тот же вызов с `cwd: <resolve('apps/form-docs')>` их
+убирает.
+
+Починка — писать `ignores` путём **от корня workspace**, а не от каталога проекта:
+
+```js
+ignores: ;
+;['apps/form-docs/.source/**', 'apps/form-docs/.next/**', '**/out-tsc']
+```
+
+Симптом почти неотличим от предыдущей ловушки (`ignores`, знакомый по прямому запуску, тихо не
+срабатывает через `nx lint`) — но лечится противоположно: там глоб просили писать `**/`-независимым
+от каталога, здесь ровно наоборот, привязывать к каталогу проекта явным путём от корня. Диагностика
+та же: если `bunx eslint .` из каталога проекта ведёт себя иначе, чем `nx run <project>:lint` —
+подозревать резолв путей, а не сам список правил.
+
 ## Как это резолвится на уровне сборки
 
 Governance (теги, `no-restricted-imports`) — выше. Здесь — что конкретно резолвит специфер
