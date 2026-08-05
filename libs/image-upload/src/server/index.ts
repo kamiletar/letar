@@ -21,3 +21,6 @@ export {
   type ProcessUploadImageResizeOptions,
   type ProcessUploadImageResult,
 } from './process-upload-image'
+
+// === CRUD-репозиторий модели Image (схема «Image в БД») ===
+export { type CreateImageRecordInput, createImageRepository, type ImageRepositoryDelegate } from './image-repository'
