@@ -68,7 +68,7 @@ function AutocompleteInspector() {
     // Даём время на рендер полей
     timerRef.current = setTimeout(() => {
       const inputs = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-        'input[data-field-name], textarea[data-field-name]'
+        'input[data-field-name], textarea[data-field-name]',
       )
       const result = Array.from(inputs).map((input) => ({
         name: input.getAttribute('data-field-name') ?? '?',
@@ -80,7 +80,9 @@ function AutocompleteInspector() {
     return () => clearTimeout(timerRef.current)
   }, [])
 
-  if (attrs.length === 0) return null
+  if (attrs.length === 0) {
+    return null
+  }
 
   return (
     <VStack gap={1} align="stretch" p={4} bg="bg.subtle" borderRadius="md">

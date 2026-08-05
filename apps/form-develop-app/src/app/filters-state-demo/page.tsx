@@ -52,9 +52,15 @@ function FilteredResults() {
           if (filters.search && !item.title.toLowerCase().includes(filters.search.toLowerCase())) {
             return false
           }
-          if (filters.category !== 'all' && item.category !== filters.category) return false
-          if (item.rating < filters.minRating) return false
-          if (filters.onlyFavorites && !item.favorite) return false
+          if (filters.category !== 'all' && item.category !== filters.category) {
+            return false
+          }
+          if (item.rating < filters.minRating) {
+            return false
+          }
+          if (filters.onlyFavorites && !item.favorite) {
+            return false
+          }
           if (filters.tags.length > 0 && !filters.tags.some((tag) => item.tags.includes(tag))) {
             return false
           }
@@ -70,44 +76,46 @@ function FilteredResults() {
               </Badge>
             </HStack>
 
-            {results.length === 0 ? (
-              <Box py={8} textAlign="center" color="gray.500">
-                Ничего не найдено. Измените фильтры.
-              </Box>
-            ) : (
-              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
-                {results.map((item) => (
-                  <Card.Root key={item.id} variant="outline" size="sm">
-                    <Card.Body>
-                      <HStack justify="space-between">
-                        <Text fontWeight="medium">{item.title}</Text>
-                        {item.favorite && <Text color="yellow.500">★</Text>}
-                      </HStack>
-                      <HStack gap={1} mt={2} wrap="wrap">
-                        <Badge colorPalette="blue" size="sm">
-                          {item.category}
-                        </Badge>
-                        {'★'
-                          .repeat(item.rating)
-                          .split('')
-                          .map((s, i) => (
-                            <Text key={i} color="yellow.400" fontSize="xs">
-                              {s}
-                            </Text>
+            {results.length === 0
+              ? (
+                <Box py={8} textAlign="center" color="gray.500">
+                  Ничего не найдено. Измените фильтры.
+                </Box>
+              )
+              : (
+                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
+                  {results.map((item) => (
+                    <Card.Root key={item.id} variant="outline" size="sm">
+                      <Card.Body>
+                        <HStack justify="space-between">
+                          <Text fontWeight="medium">{item.title}</Text>
+                          {item.favorite && <Text color="yellow.500">★</Text>}
+                        </HStack>
+                        <HStack gap={1} mt={2} wrap="wrap">
+                          <Badge colorPalette="blue" size="sm">
+                            {item.category}
+                          </Badge>
+                          {'★'
+                            .repeat(item.rating)
+                            .split('')
+                            .map((s, i) => (
+                              <Text key={i} color="yellow.400" fontSize="xs">
+                                {s}
+                              </Text>
+                            ))}
+                        </HStack>
+                        <HStack gap={1} mt={1} wrap="wrap">
+                          {item.tags.map((tag) => (
+                            <Tag.Root key={tag} size="sm" variant="subtle">
+                              <Tag.Label>{tag}</Tag.Label>
+                            </Tag.Root>
                           ))}
-                      </HStack>
-                      <HStack gap={1} mt={1} wrap="wrap">
-                        {item.tags.map((tag) => (
-                          <Tag.Root key={tag} size="sm" variant="subtle">
-                            <Tag.Label>{tag}</Tag.Label>
-                          </Tag.Root>
-                        ))}
-                      </HStack>
-                    </Card.Body>
-                  </Card.Root>
-                ))}
-              </SimpleGrid>
-            )}
+                        </HStack>
+                      </Card.Body>
+                    </Card.Root>
+                  ))}
+                </SimpleGrid>
+              )}
           </Box>
         )
       }}
@@ -119,7 +127,9 @@ function FilteredResults() {
 
 function ActiveFiltersCount() {
   const count = useActiveFiltersCount(defaultFilters)
-  if (count === 0) return null
+  if (count === 0) {
+    return null
+  }
   return (
     <Badge colorPalette="red" borderRadius="full">
       {count}
@@ -149,7 +159,9 @@ function ExternalControls({ formRef }: { formRef: ReturnType<typeof useFormRef<F
             variant="outline"
             colorPalette="purple"
             onClick={() => {
-              if (!formRef.current) return
+              if (!formRef.current) {
+                return
+              }
               // Сбрасываем до дефолтов, потом применяем пресет
               const form = formRef.current
               Object.entries(defaultFilters).forEach(([key, val]) => {
