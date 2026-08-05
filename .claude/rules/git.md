@@ -121,6 +121,7 @@ Submodule видит только собственный `.gitignore`, а его
 ```
 node_modules/
 .next/
+next-env.d.ts
 out/
 dist/
 *.tsbuildinfo
@@ -131,6 +132,13 @@ test-results/
 playwright-report/
 *.log
 ```
+
+⚠️ `next-env.d.ts` в этом списке не для красоты: файл генерирует сам Next.js, и его содержимое
+зависит от режима — `next dev` пишет ссылки на `./.next/dev/types/`, `next build` на
+`./.next/types/`. Пока он трекался, каждая сборка меняла его туда-сюда и шумела в `git status`
+при деплое. Документация Next 16 требует того же («should not be tracked by version control»),
+а корневой `.gitignore` монорепо его уже игнорирует — но на submodule не действует. Вычищен из
+шести submodule 2026-08-05; `nx typecheck:tsgo` и `next build` без него работают.
 
 > Обычные (не submodule) приложения монорепо — `apps/archetest`, `apps/kami` и прочие — своего
 > `.gitignore` **не требуют**: они часть корневого репо и закрыты его правилами.
