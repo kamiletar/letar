@@ -89,7 +89,7 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
       })
       startTransition(() => {})
     },
-    [matchId, performanceId, dimension]
+    [matchId, performanceId, dimension],
   )
 
   // Ref для handleVote — чтобы не перерегистрировать слушатель клавиш при каждом рендере
@@ -152,7 +152,6 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
         const colorConfig = judge.color ? JUDGE_COLORS[judge.color] : null
         const isPhoneJudge = !!judge.color
         const chakra = colorConfig?.chakra ?? 'gray'
-        const label = colorConfig ? `${colorConfig.emoji} ${judge.name}` : `✋ Слот ${judge.judgeNumber}`
         const selectedScore = selectedScores[judge.judgeNumber] ?? null
 
         return (
@@ -201,14 +200,12 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
                     bg={isSelected ? `${accent}.solid` : 'bg.subtle'}
                     color={isSelected ? 'white' : 'fg'}
                     opacity={isJudgeLoading && !isLoading ? 0.4 : 1}
-                    _hover={
-                      isJudgeLoading
-                        ? {}
-                        : {
-                            borderColor: `${accent}.solid`,
-                            bg: isSelected ? `${accent}.solid` : `${accent}.subtle`,
-                          }
-                    }
+                    _hover={isJudgeLoading
+                      ? {}
+                      : {
+                        borderColor: `${accent}.solid`,
+                        bg: isSelected ? `${accent}.solid` : `${accent}.subtle`,
+                      }}
                     onClick={() => {
                       if (!isJudgeLoading) void handleVote(judge, score)
                     }}

@@ -2,6 +2,38 @@
 
 Детальное описание всех реализованных фич.
 
+## v3.38.4 — 2026-08-05 (fix: 6 ошибок typecheck:tsgo + tsconfig.spec.json приведён к стандарту)
+
+**typecheck:** починены 6 предсуществующих ошибок `nx typecheck:tsgo grandslamcup` (не связаны с
+tsconfig.spec.json ниже, найдены попутно):
+
+- `admin/settings/page.tsx` — `initialConfig` не передавал `autoAnnouncement`/`autoHalfTime`/
+  `autoResult` в `TelegramSettingsForm`, хотя поля есть в `TelegramConfig` (schema.zmodel:1536-1540).
+- `match/[id]/presenter/_actions/presenter.action.ts` — `let replacement: T | null = null`,
+  присваиваемый только внутри колбэка `updateMatchState`, снаружи TS видел исходный `null` и после
+  `if (replacement)` схлопывал тип до `never` (воспроизводится и обычным `tsc`, не баг tsgo).
+  Стандартный обход — ref-объект (`{ value: T | null }`): доступ к свойству не подвержен той же
+  проблеме с контролем потока через замыкание.
+- `score/_components/scorer-vote-input.tsx` — мёртвая переменная `label` (нигде не рендерилась).
+- `score/_components/wizard/step-pair-results.tsx` — `Badge size="xl"` не входит в допустимые
+  значения Chakra v3 (`xs|sm|md|lg`); визуальный размер и так задавался через `fontSize="2xl"`.
+
+**tsconfig.spec.json:** ⚠️-пометка в `.claude/docs/unit-testing.md` про «обязательный
+tsconfig.spec.json» долго не относилась к grandslamcup — в приложении не было ни одного теста.
+Первый реальный тест появился в v3.38.2 (`album.action.spec.ts`), но `nx test grandslamcup` прошёл
+и без `tsconfig.spec.json`. Причина — версия vite резолвится per-package по peer-dep хешу в общем
+bun-сторе (`node_modules/.bun/vite@X+<hash>`): у grandslamcup хешнулась `vite@8.2.0`, где баг
+per-file tsconfig-резолва oxc (описан в unit-testing.md) не воспроизводится, тогда как у archetest —
+`vite@8.1.3`, где воспроизводится (проверено эмпирически: временный снос `tsconfig.spec.json` в
+archetest даёт `TSCONFIG_ERROR`, в grandslamcup — нет). Это делает отсутствие файла у grandslamcup
+случайной удачей, а не гарантией: любой будущий `bun install`/апдейт зависимостей может перехешить
+peer-deps и подсунуть другую версию vite. Добавлен `tsconfig.spec.json` по образцу `mandala` —
+приводит приложение к общему стандарту монорепо и снимает эту хрупкость. Подробности и общий вывод
+про версии vite — `.claude/docs/unit-testing.md`.
+
+`nx test grandslamcup` + `nx typecheck:tsgo grandslamcup` + `nx lint grandslamcup` (227 ошибок —
+предсуществующий репо-wide техдолг `curly`/пр. в несвязанных файлах, не трогали) — проверено.
+
 ## v3.38.2 — 2026-08-04 (fix: path traversal в загрузке обложки альбома)
 
 Найдено при аудите (референс — фикс `mandala`, коммит `a18f21a6`): `moveAlbumCover` в

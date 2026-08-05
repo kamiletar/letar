@@ -18,13 +18,23 @@ export default async function SettingsPage() {
 
   const initialConfig = config
     ? {
-        botToken: config.botToken
-          ? `${'*'.repeat(Math.max(0, config.botToken.length - 8))}${config.botToken.slice(-8)}`
-          : '',
-        botTokenSet: !!config.botToken,
-        enabled: config.enabled,
-      }
-    : { botToken: '', botTokenSet: false, enabled: false }
+      botToken: config.botToken
+        ? `${'*'.repeat(Math.max(0, config.botToken.length - 8))}${config.botToken.slice(-8)}`
+        : '',
+      botTokenSet: !!config.botToken,
+      enabled: config.enabled,
+      autoAnnouncement: config.autoAnnouncement,
+      autoHalfTime: config.autoHalfTime,
+      autoResult: config.autoResult,
+    }
+    : {
+      botToken: '',
+      botTokenSet: false,
+      enabled: false,
+      autoAnnouncement: false,
+      autoHalfTime: false,
+      autoResult: false,
+    }
 
   return (
     <VStack gap={6} align="stretch">

@@ -67,14 +67,13 @@ export function StepPairResults({ match, matchState }: StepPairResultsProps) {
   }, [])
 
   // Определяем победителя пары по totalScore
-  const winner =
-    pair.length === 2 && pair[0].totalScore !== null && pair[1].totalScore !== null
-      ? pair[0].totalScore > pair[1].totalScore
-        ? pair[0]
-        : pair[1].totalScore > pair[0].totalScore
-          ? pair[1]
-          : null
+  const winner = pair.length === 2 && pair[0].totalScore !== null && pair[1].totalScore !== null
+    ? pair[0].totalScore > pair[1].totalScore
+      ? pair[0]
+      : pair[1].totalScore > pair[0].totalScore
+      ? pair[1]
       : null
+    : null
 
   return (
     <VStack gap={5} align="stretch" py={4}>
@@ -114,7 +113,7 @@ export function StepPairResults({ match, matchState }: StepPairResultsProps) {
                   <Text fontWeight="bold" fontSize="xl">
                     Итого:
                   </Text>
-                  <Badge colorPalette="blue" size="xl" fontSize="2xl" px={4} py={2}>
+                  <Badge colorPalette="blue" size="lg" fontSize="2xl" px={4} py={2}>
                     {perf.totalScore ?? '—'}
                   </Badge>
                 </Flex>

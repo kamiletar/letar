@@ -59,10 +59,9 @@ export async function stopTimerAction(matchId: string, clientElapsedSec?: number
 
     // Используем клиентское время если передано и разумно (не более 5с от серверного)
     const serverElapsed = (Date.now() - state.timer.startedAt) / 1000
-    const elapsed =
-      clientElapsedSec !== undefined && Math.abs(clientElapsedSec - serverElapsed) < 5
-        ? clientElapsedSec
-        : serverElapsed
+    const elapsed = clientElapsedSec !== undefined && Math.abs(clientElapsedSec - serverElapsed) < 5
+      ? clientElapsedSec
+      : serverElapsed
     const totalSec = Math.round(state.timer.accumulatedSec + elapsed)
 
     updateMatchState(matchId, (s) => {
@@ -208,7 +207,10 @@ export async function approveJudgeRecusalAction(matchId: string, judgeColor: str
       data: { status: 'RECUSED' },
     })
 
-    let replacement: { name: string; sessionId: string } | null = null
+    // Обычная `let` здесь не годится: TS не отслеживает присваивание внутри
+    // замыкания updateMatchState и после вызова видит только исходный `null`.
+    // Ref-объект обходит это — доступ к свойству перепроверяется на каждом чтении.
+    const replacementRef: { value: { name: string; sessionId: string } | null } = { value: null }
 
     updateMatchState(matchId, (s) => {
       // Удаляем отведённого судью
@@ -222,7 +224,7 @@ export async function approveJudgeRecusalAction(matchId: string, judgeColor: str
       // Автозамена: берём первого из очереди
       if (s.judgeQueue.length > 0) {
         const next = s.judgeQueue.shift()!
-        replacement = { name: next.name, sessionId: next.sessionId }
+        replacementRef.value = { name: next.name, sessionId: next.sessionId }
 
         // Промоутим из очереди в активные судьи с освободившимся цветом
         s.judges.push({
@@ -241,9 +243,9 @@ export async function approveJudgeRecusalAction(matchId: string, judgeColor: str
     })
 
     // Обновляем замену в БД
-    if (replacement) {
+    if (replacementRef.value) {
       await prisma.judgeSession.update({
-        where: { id: replacement.sessionId },
+        where: { id: replacementRef.value.sessionId },
         data: {
           status: 'ACTIVE',
           color: freedColor as 'RED' | 'BLUE' | 'GREEN' | 'YELLOW' | 'PURPLE',
@@ -270,7 +272,7 @@ export async function approveJudgeRecusalAction(matchId: string, judgeColor: str
       judgeNumber: freedNumber,
       judgeColor,
       judgeName: judge.name,
-      replacement: replacement ? { name: replacement.name, color: freedColor } : null,
+      replacement: replacementRef.value ? { name: replacementRef.value.name, color: freedColor } : null,
     })
     broadcastState(matchId)
 
@@ -278,7 +280,7 @@ export async function approveJudgeRecusalAction(matchId: string, judgeColor: str
       success: true,
       judgeName: judge.name,
       judgeColor,
-      replacement: replacement?.name ?? null,
+      replacement: replacementRef.value?.name ?? null,
     }
   } catch (error) {
     console.error('[approveJudgeRecusalAction] ошибка:', error)
