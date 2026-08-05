@@ -1,7 +1,7 @@
 'use client'
 
 import type { UserRole } from '@/generated/prisma'
-import { createTypedUseSession } from '@letar/auth/client'
+import { createSignInWithLetarAuth, createTypedUseSession } from '@letar/auth/client'
 import { genericOAuthClient, organizationClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 
@@ -30,12 +30,7 @@ export const { signIn, signOut } = authClient
 /**
  * Войти через Ключницу (auth.letar.best) — единственный способ авторизации.
  */
-export async function signInWithLetarAuth(callbackURL = '/') {
-  return authClient.signIn.oauth2({
-    providerId: 'letar-auth',
-    callbackURL,
-  })
-}
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient, { defaultCallbackURL: '/' })
 
 /**
  * Расширенный тип пользователя с ролями
