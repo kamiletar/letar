@@ -1,5 +1,33 @@
 # Выполненные задачи — Kami
 
+## Локальный `nx build kami` разблокирован: недостающие env-переменные Keystatic (2026-08-05)
+
+`nx build kami` падал на этапе Collecting page data — сначала из-за Turbopack-трейсинга ФС в
+`@letar/image-upload/server` (фикс см. корневой `PLAN.md` §32), затем, после устранения этого
+бага, на `Failed to collect page data for /api/keystatic/[...params]`: не хватало
+`KEYSTATIC_GITHUB_CLIENT_ID`/`KEYSTATIC_GITHUB_CLIENT_SECRET`/`KEYSTATIC_SECRET`.
+
+Причина в целом классе ошибки из `.claude/rules/env-files.md` — `NODE_ENV` на `next build`
+**всегда** `production`, поэтому и `keystatic.config.ts` (`storage: isProd ? 'github' : 'local'`),
+и `src/lib/keystatic.ts` (`reader` через `createGitHubReader` на проде) используют GitHub-хранилище
+даже при локальной сборке, а не только на реальном проде.
+
+- Добавлены в `apps/kami/.env.local` (не коммитится, прод-значения из уже расшифрованного
+  `.env.docker`): `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
+  `KEYSTATIC_SECRET`.
+- После этого `generateStaticParams` в `/blog/[slug]` начал падать на 403 `API rate limit
+  exceeded` — `createGitHubReader` без токена бьёт в анонимный лимит GitHub REST API. Добавлен
+  `GITHUB_PAT` (тоже прод-значение) — тот же токен, что `reader.ts` подставляет как
+  `token: process.env.GITHUB_PAT`.
+- `nx build kami --skip-nx-cache` теперь проходит целиком без флагов/обходов.
+
+### Урок
+
+Все четыре переменные нужны локально не потому, что разработка «превратилась в прод», а потому
+что сам факт вызова `next build` включает прод-ветку конфига Keystatic. Любое приложение, где
+`isProd`/аналог завязан на `NODE_ENV`, потенциально требует прод-секретов для одной лишь
+локальной сборки — не только для реального деплоя.
+
 ## Версия 0.33.1 — чистка мёртвых demo-ссылок в портфолио (2026-07-28)
 
 Найдено при повторном аудите хвостов decommission `imot`/`premium-rosstil`
