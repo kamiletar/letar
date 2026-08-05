@@ -12,7 +12,6 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
   },
-  transpilePackages: ['@letar/ui', '@letar/analytics', '@letar/chakra-provider'],
 }
 
 module.exports = composePlugins(withNx)(nextConfig)

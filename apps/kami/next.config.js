@@ -32,14 +32,6 @@ const nextConfig = {
   experimental: {
     proxyClientMaxBodySize: '500mb',
   },
-  // Транспиляция workspace библиотек
-  transpilePackages: [
-    '@letar/analytics',
-    '@letar/auth',
-    '@letar/chakra-provider',
-    '@letar/yandex-metrika',
-    '@letar/email',
-  ],
 }
 
 // Базовые плагины

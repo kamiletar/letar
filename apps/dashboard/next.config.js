@@ -18,9 +18,9 @@ const nextConfig = {
     tsconfigPath: './tsconfig.json',
   },
   experimental: {
-    optimizePackageImports: ['@chakra-ui/react'],
+    // Tree-shaking тяжёлых пакетов (recharts/react-icons перенесены из мёртвого next.config.ts)
+    optimizePackageImports: ['@chakra-ui/react', 'recharts', 'react-icons'],
   },
-  transpilePackages: ['@letar/ui', '@letar/forms', '@letar/analytics', '@letar/chakra-provider', '@letar/auth'],
   // External packages that should not be bundled (native Node.js modules)
   serverExternalPackages: ['dockerode', 'docker-modem', 'ssh2', 'systeminformation', 'simple-git'],
 }

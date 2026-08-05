@@ -7,11 +7,10 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
 
-  // Транспиляция workspace библиотек
-  transpilePackages: ['@letar/auth', '@letar/analytics', '@letar/chakra-provider', '@letar/email', '@letar/forms'],
-
-  // Оптимизация bundle size
-  optimizePackageImports: ['@chakra-ui/react', 'react-icons'],
+  // Оптимизация bundle size (ключ живёт в experimental — на верхнем уровне Next его игнорирует)
+  experimental: {
+    optimizePackageImports: ['@chakra-ui/react', 'react-icons'],
+  },
 
   // geoip-lite содержит бинарные .dat файлы — не бандлить, оставить как runtime require
   serverExternalPackages: ['geoip-lite'],

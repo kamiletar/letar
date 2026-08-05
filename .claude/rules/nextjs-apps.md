@@ -50,6 +50,25 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 }
 ```
 
+## ⛔ Один `next.config.*` на приложение
+
+Next ищет конфиг строго по порядку `next.config.js` → `.mjs` → `.ts` (`CONFIG_FILES` в
+`next/dist/shared/lib/constants.js`) и берёт **первый найденный**, молча игнорируя остальные.
+Но `@nx/next/plugin` при построении графа читает **свой** — так что второй файл не безобиден:
+`throw` внутри него валит `nx build` целиком, хотя сама сборка этот файл не применяет.
+
+Прецедент (2026-08-05): у `dashboard` лежали и `next.config.js`, и `next.config.ts` с
+расходящимися списками `transpilePackages` и `optimizePackageImports`; `.ts` был написан позже и
+не применялся вовсе. Проверяется маркером — `console.log` в каждом файле и один `nx build`:
+печатается ровно один.
+
+Заводишь конфиг — правь существующий, не создавай второй в другом расширении.
+
+⚠️ `optimizePackageImports` в Next 16 — по-прежнему **внутри `experimental`**
+(`ExperimentalConfig` в `next/dist/server/config-shared.d.ts`). На верхнем уровне Next его просто
+не видит. Ошибка встречалась дважды: в мёртвом `dashboard/next.config.ts` и в живом
+`auth-hub/next.config.ts`.
+
 ## Правила
 
 - **MUST** использовать App Router, **NEVER** Pages Router

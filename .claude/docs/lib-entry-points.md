@@ -232,6 +232,10 @@ Nx, а не установка пакета. Линка не появляетс�
 
 Для библиотеки, резолвящейся через `paths`, запись в `transpilePackages` не требуется.
 
+⚡ **Итог массовой проверки 2026-08-05: опция снята во всех приложениях монорепо.** Ниже —
+рассуждение и первые доказательства, в конце раздела — «Сплошная проверка» с результатами по
+всем 20 конфигам. Если пишешь новый `next.config.*`, `@letar/*` туда просто не добавляй.
+
 - [apps/kami/next.config.js:36](/apps/kami/next.config.js) перечисляет пять пакетов, и
   `@letar/image-upload` среди них нет — при том что `src/app/api/files/[...path]/route.ts`
   импортирует `@letar/image-upload/server`. `nx build kami` доходит до `✓ Compiled successfully`
@@ -312,6 +316,44 @@ Next.js-потребителей `output: 'standalone'`, оба подключа
 и лечится он `outputFileTracingIncludes`. `transpilePackages` в том документе не фигурирует
 вообще — на standalone-вывод он не влияет: у `animatrona-tracker` содержимое `.next/standalone`
 от удаления записи не изменилось (проверка выше).
+
+### Сплошная проверка: опция снята везде (2026-08-05)
+
+Разделы выше доказывали «не нужен» на отдельных примерах. Здесь — сплошной проход: `@letar/*`
+убраны из **всех** конфигов монорепо, где они были, и каждое приложение собрано.
+
+| Группа                  | Приложения                                                                                                                                                                          | Результат                                                                       |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Публичные web (13)      | `aira-web`, `animatrona-landing`, `animatrona-tracker`, `archetest`, `auth-hub`, `dashboard`, `kami`, `kami-key-the-landing`, `letar-landing`, `mandala`, `pravda`, `synth`, `time` | 13/13 `✓ Compiled successfully`, ни одного `Module not found`                   |
+| Приватные submodule (4) | `aboi`, `domwellbes`, `driving-school`, `svoichuzhie`                                                                                                                               | 4/4 скомпилировались; три из них — полностью зелёный билд                       |
+| Electron-renderer (3)   | `animatrona`, `label-printer-desktop`, `poster-microtext-desktop`                                                                                                                   | `animatrona` — полный зелёный билд; двое падают одинаково до и после (см. ниже) |
+
+Покрыты оба бандлера: `animatrona-tracker`, `dashboard`, `driving-school` собираются webpack'ом,
+остальные — Turbopack'ом. Шаблон генератора `electron-app` тоже почищен, чтобы новые десктопные
+приложения не рождались с этой записью (шаблон `new-app` её и не имел).
+
+⚠️ **Что осталось в `transpilePackages` намеренно:** в
+[apps/animatrona/renderer/next.config.js](/apps/animatrona/renderer/next.config.js) — `@libsql/*`
+и `@prisma/adapter-libsql`/`driver-adapter-utils`/`debug`. Это не workspace-библиотеки, а
+настоящие пакеты из `node_modules`, которым нужен принудительный бандлинг вместо экстернализации
+(иначе Turbopack собирает внешние модули с битыми ESM-зависимостями `node-fetch` → `fetch-blob`).
+Правило «`@letar/*` не нужны» на них не распространяется.
+
+**Приложения, чей билд не проходит локально по причинам, не связанным с этой правкой** — для
+каждого сделана сверка «исходный конфиг из `git HEAD` → та же ошибка»:
+
+| Приложение                          | Где падает             | Причина                                                                                                                                     |
+| ----------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `synth`                             | `Running TypeScript`   | `TS6305` на `out-tsc/spec/vitest.config.d.ts` (project references)                                                                          |
+| `auth-hub`, `aboi`                  | `Collecting page data` | роуты Better Auth требуют env, которых нет в локальном `.env.local`                                                                         |
+| `label-printer-desktop/renderer`    | компиляция             | несгенерированные `src/generated/form-schemas` и `../../schema`                                                                             |
+| `poster-microtext-desktop/renderer` | резолв самого `next`   | `turbopack.root` в submodule со своим `.git` — см. [turbopack-private-submodule-root.md](/.claude/docs/turbopack-private-submodule-root.md) |
+
+⚠️ **Методическая ловушка этой проверки: `.next` от предыдущей сборки даёт ложный зелёный.**
+`label-printer-desktop/renderer` в первом прогоне отчитался `✓ Compiled successfully in 1815ms` —
+1.8 секунды на приложение, которое с чистого кэша не компилируется вовсе. Сверять два конфига
+можно только с `rm -rf .next` перед каждым запуском; аномально быстрая сборка — сигнал, что
+сравниваешь кэш, а не код.
 
 ## Заводишь библиотеку со второй точкой входа — чек-лист
 

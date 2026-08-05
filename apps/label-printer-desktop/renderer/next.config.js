@@ -15,8 +15,6 @@ module.exports = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Транспиляция монорепо-библиотек
-  transpilePackages: ['@letar/chakra-provider', '@letar/query-provider', '@letar/forms'],
   // Исключаем dev-only зависимости из standalone bundle (~15 MB экономии)
   serverExternalPackages: ['typescript'],
   webpack: (config, { isServer }) => {

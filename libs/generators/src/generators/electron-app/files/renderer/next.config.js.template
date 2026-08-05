@@ -15,7 +15,6 @@ module.exports = {
     unoptimized: true,
   },
   turbopack: {},
-  transpilePackages: ['@letar/chakra-provider'],
   webpack: (config, { isServer }) => {
     // В dev режиме для renderer используем electron-renderer
     if (!isServer && !isProd) {

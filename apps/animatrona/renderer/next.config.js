@@ -50,18 +50,10 @@ const nextConfig = {
     loaderFile: './src/lib/image-loader.ts',
   },
 
-  // Транспиляция shared библиотек из монорепо + Prisma libsql адаптер (принудительный бандлинг)
+  // Принудительно бандлим вместо экстернализации — иначе turbopack создаёт внешние модули
+  // с битыми ESM зависимостями (node-fetch → fetch-blob).
+  // Библиотеки @letar/* сюда не входят: они резолвятся в исходники под libs/, вне node_modules.
   transpilePackages: [
-    '@letar/ui',
-    '@letar/chakra-provider',
-    '@letar/forms',
-    '@letar/query-provider',
-    '@letar/animatrona-types',
-    '@letar/animatrona-utils',
-    '@letar/animatrona-ui',
-    '@letar/hooks',
-    // Принудительно бандлим вместо экстернализации — иначе turbopack создаёт внешние модули
-    // с битыми ESM зависимостями (node-fetch → fetch-blob)
     '@libsql/client',
     '@libsql/core',
     '@libsql/hrana-client',

@@ -25,15 +25,6 @@ const nextConfig = {
   nx: {
     svgr: false,
   },
-  // Транспиляция workspace библиотек для корректного резолва peerDependencies
-  transpilePackages: [
-    '@letar/forms',
-    '@letar/chakra-provider',
-    '@letar/analytics',
-    '@letar/format-utils',
-    '@letar/admin-ui',
-    '@letar/image-upload',
-  ],
   // Оптимизация изображений
   images: {
     formats: ['image/avif', 'image/webp'],

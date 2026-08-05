@@ -34,7 +34,6 @@ const nextConfig = {
   },
   // Пустой turbopack — подавляет ошибку при наличии webpack config от Serwist
   turbopack: {},
-  transpilePackages: ['@letar/analytics', '@letar/auth', '@letar/chakra-provider'],
 }
 
 const plugins = [withNx, withNextIntl, withSerwist]
