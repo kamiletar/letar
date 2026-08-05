@@ -99,7 +99,7 @@ export default function FieldWatchersDemoPage() {
           <Form
             schema={CitySchema}
             initialValue={{ name: '', slug: '' }}
-            onSubmit={async () => {}}
+            onSubmit={(data) => addLog(`submit city: ${JSON.stringify(data)}`)}
             onFieldChange={{
               name: (value, { setFieldValue }) => {
                 addLog(`name → slug: "${transliterate(String(value))}"`)
@@ -119,7 +119,11 @@ export default function FieldWatchersDemoPage() {
           <Heading size="sm" mb={2}>
             Form.Watch — country → currency
           </Heading>
-          <Form schema={CountrySchema} initialValue={{ country: 'RU', currency: 'RUB' }} onSubmit={async () => {}}>
+          <Form
+            schema={CountrySchema}
+            initialValue={{ country: 'RU', currency: 'RUB' }}
+            onSubmit={(data) => addLog(`submit country: ${JSON.stringify(data)}`)}
+          >
             <Stack gap={3}>
               <Form.Field.NativeSelect name="country" options={countryOptions} />
               <Form.Field.String name="currency" />

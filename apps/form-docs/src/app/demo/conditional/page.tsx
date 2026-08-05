@@ -2,8 +2,9 @@
 
 import { ChakraProvider, defaultSystem, Stack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
-
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   customerType: z.enum(['individual', 'company']).meta({
@@ -56,9 +57,15 @@ const themeOptions = [
 ]
 
 export default function ConditionalDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
-      <Form schema={Schema} initialValue={{ customerType: 'individual', hasPremium: false }} onSubmit={async () => {}}>
+      <Form
+        schema={Schema}
+        initialValue={{ customerType: 'individual', hasPremium: false }}
+        onSubmit={(data) => setSubmitted(data)}
+      >
         <Stack gap={4}>
           <Form.Field.Select name="customerType" options={customerTypeOptions} />
 
@@ -80,6 +87,7 @@ export default function ConditionalDemoPage() {
 
           <Form.DebugValues showInProduction />
           <Form.Button.Submit>Submit</Form.Button.Submit>
+          <SubmittedDataPreview data={submitted} />
         </Stack>
       </Form>
     </ChakraProvider>

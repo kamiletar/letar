@@ -1,8 +1,10 @@
 'use client'
 
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { ChakraProvider, defaultSystem, Stack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   name: z.string().meta({ ui: { title: 'Full Name', placeholder: 'John Doe' } }),
@@ -19,15 +21,21 @@ const Schema = z.object({
 })
 
 export default function AutoFieldsDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
-      <Form.FromSchema
-        schema={Schema}
-        initialValue={{ name: '', email: '', age: 25, newsletter: false }}
-        onSubmit={async () => {}}
-        submitLabel="Create"
-        debug
-      />
+      <Stack gap={4}>
+        <Form.FromSchema
+          schema={Schema}
+          initialValue={{ name: '', email: '', age: 25, newsletter: false }}
+          onSubmit={(data) => setSubmitted(data)}
+          submitLabel="Create"
+          debug
+        />
+
+        <SubmittedDataPreview data={submitted} />
+      </Stack>
     </ChakraProvider>
   )
 }

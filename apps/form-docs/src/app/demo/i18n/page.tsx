@@ -4,6 +4,7 @@ import { Button, ChakraProvider, defaultSystem, HStack, Stack } from '@chakra-ui
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const translations: Record<string, Record<string, { title: string; placeholder?: string }>> = {
   en: {
@@ -22,6 +23,7 @@ const translations: Record<string, Record<string, { title: string; placeholder?:
 
 export default function I18nDemoPage() {
   const [locale, setLocale] = useState('en')
+  const [submitted, setSubmitted] = useState<unknown>(null)
   const t = translations[locale]!
 
   const Schema = z.object({
@@ -47,7 +49,7 @@ export default function I18nDemoPage() {
           key={locale}
           schema={Schema}
           initialValue={{ name: '', description: '', price: 0, active: true }}
-          onSubmit={async () => {}}
+          onSubmit={(data) => setSubmitted(data)}
         >
           <Stack gap={3}>
             <Form.Field.String name="name" />
@@ -58,6 +60,8 @@ export default function I18nDemoPage() {
             <Form.Button.Submit>{locale === 'ru' ? 'Сохранить' : 'Save'}</Form.Button.Submit>
           </Stack>
         </Form>
+
+        <SubmittedDataPreview data={submitted} title={locale === 'ru' ? 'Отправлено:' : 'Submitted:'} />
       </Stack>
     </ChakraProvider>
   )

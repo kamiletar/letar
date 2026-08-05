@@ -2,8 +2,9 @@
 
 import { ChakraProvider, defaultSystem, Heading, Stack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
-
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   framework: z.string().meta({ ui: { title: 'Select' } }),
@@ -26,12 +27,14 @@ const planOptions = [
 ]
 
 export default function SelectDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
       <Form
         schema={Schema}
         initialValue={{ framework: '', plan: 'free', agree: false, notifications: true }}
-        onSubmit={async () => {}}
+        onSubmit={(data) => setSubmitted(data)}
       >
         <Stack gap={4}>
           <Heading size="sm">Selection Fields</Heading>
@@ -41,6 +44,7 @@ export default function SelectDemoPage() {
           <Form.Field.Switch name="notifications" />
           <Form.DebugValues showInProduction />
           <Form.Button.Submit>Submit</Form.Button.Submit>
+          <SubmittedDataPreview data={submitted} />
         </Stack>
       </Form>
     </ChakraProvider>

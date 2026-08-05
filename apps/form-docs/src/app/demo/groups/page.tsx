@@ -2,8 +2,9 @@
 
 import { ChakraProvider, defaultSystem, Heading, Stack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
-
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   address: z.object({
@@ -14,17 +15,19 @@ const Schema = z.object({
   phones: z.array(
     z.object({
       number: z.string().meta({ ui: { title: 'Phone Number' } }),
-    })
+    }),
   ),
 })
 
 export default function GroupsDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
       <Form
         schema={Schema}
         initialValue={{ address: { city: '', street: '', zip: '' }, phones: [{ number: '' }] }}
-        onSubmit={async () => {}}
+        onSubmit={(data) => setSubmitted(data)}
       >
         <Stack gap={4}>
           <Heading size="sm">Nested Group</Heading>
@@ -44,6 +47,7 @@ export default function GroupsDemoPage() {
 
           <Form.DebugValues showInProduction />
           <Form.Button.Submit>Submit</Form.Button.Submit>
+          <SubmittedDataPreview data={submitted} />
         </Stack>
       </Form>
     </ChakraProvider>

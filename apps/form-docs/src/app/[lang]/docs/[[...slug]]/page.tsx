@@ -7,7 +7,9 @@ export default async function Page({ params }: { params: Promise<{ lang: string;
   const { lang, slug } = await params
   const page = source.getPage(slug, lang)
 
-  if (!page) notFound()
+  if (!page) {
+    notFound()
+  }
 
   const Mdx = page.data.body
 

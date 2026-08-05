@@ -2,8 +2,9 @@
 
 import { ChakraProvider, defaultSystem, Stack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
-
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   firstName: z.string().meta({
@@ -40,6 +41,8 @@ const languageOptions = [
 ]
 
 export default function MultiStepDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
       <Form
@@ -53,7 +56,7 @@ export default function MultiStepDemoPage() {
           newsletter: false,
           language: 'en',
         }}
-        onSubmit={async () => {}}
+        onSubmit={(data) => setSubmitted(data)}
       >
         <Form.Steps animated validateOnNext>
           <Form.Steps.Step title="Personal Info">
@@ -80,6 +83,8 @@ export default function MultiStepDemoPage() {
 
           <Form.Steps.Navigation />
         </Form.Steps>
+
+        <SubmittedDataPreview data={submitted} />
       </Form>
     </ChakraProvider>
   )

@@ -2,7 +2,9 @@
 
 import { Box, ChakraProvider, defaultSystem, Heading, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { useState } from 'react'
 import { z } from 'zod/v4'
+import { SubmittedDataPreview } from '../_components'
 
 const Schema = z.object({
   title: z.string().meta({ ui: { title: 'Title', placeholder: 'Article title' } }),
@@ -11,6 +13,8 @@ const Schema = z.object({
 })
 
 export default function UndoRedoDemoPage() {
+  const [submitted, setSubmitted] = useState<unknown>(null)
+
   return (
     <ChakraProvider value={defaultSystem}>
       <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
@@ -21,7 +25,11 @@ export default function UndoRedoDemoPage() {
           </Text>
         </Box>
 
-        <Form schema={Schema} initialValue={{ title: '', content: '', tags: '' }} onSubmit={async () => {}}>
+        <Form
+          schema={Schema}
+          initialValue={{ title: '', content: '', tags: '' }}
+          onSubmit={(data) => setSubmitted(data)}
+        >
           <Stack gap={4}>
             <Form.Field.String name="title" />
             <Form.Field.Textarea name="content" />
@@ -30,6 +38,8 @@ export default function UndoRedoDemoPage() {
             <Form.Button.Submit>Save</Form.Button.Submit>
           </Stack>
         </Form>
+
+        <SubmittedDataPreview data={submitted} />
       </VStack>
     </ChakraProvider>
   )

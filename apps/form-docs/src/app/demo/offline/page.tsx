@@ -46,9 +46,9 @@ export default function OfflineDemoPage() {
           initialValue={{ title: '', location: '', notes: '' }}
           onSubmit={async (data) => {
             if (isOnline) {
-              alert('Submitted online!')
+              alert(`Submitted online: ${JSON.stringify(data, null, 2)}`)
             } else {
-              alert('Saved to offline queue!')
+              alert(`Saved to offline queue: ${JSON.stringify(data, null, 2)}`)
             }
           }}
         >
