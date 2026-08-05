@@ -1,6 +1,6 @@
 'use client'
 
-import { type AuthClientWithOAuth, createAuthClientWithOAuth } from '@letar/auth/client'
+import { type AuthClientWithOAuth, createAuthClientWithOAuth, createSignInWithLetarAuth } from '@letar/auth/client'
 
 /**
  * Better Auth клиент для клиентских компонентов
@@ -19,11 +19,4 @@ export const { useSession, signIn, signUp, signOut } = authClient
  * (pathname + search), чтобы после логина пользователь вернулся ровно туда,
  * откуда кликнул «Войти». Передача явного значения перекрывает этот дефолт.
  */
-export async function signInWithLetarAuth(callbackURL?: string) {
-  const target =
-    callbackURL ?? (typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/')
-  return authClient.signIn.oauth2({
-    providerId: 'letar-auth',
-    callbackURL: target,
-  })
-}
+export const signInWithLetarAuth = createSignInWithLetarAuth(authClient)
