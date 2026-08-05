@@ -24,3 +24,11 @@ export {
 
 // === CRUD-репозиторий модели Image (схема «Image в БД») ===
 export { type CreateImageRecordInput, createImageRepository, type ImageRepositoryDelegate } from './image-repository'
+
+// === POST/DELETE /api/upload (схема «Image в БД», файл сохраняется как есть) ===
+export {
+  createImageUploadRoute,
+  type CreateImageUploadRouteOptions,
+  type ImageUploadRouteImage,
+  type ImageUploadRouteRepository,
+} from './image-upload-route'

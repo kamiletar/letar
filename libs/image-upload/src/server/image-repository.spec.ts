@@ -30,19 +30,25 @@ function makeFakeDelegate() {
     },
     async update({ where, data }) {
       const record = store.get(where.id)
-      if (!record) throw new Error('not found')
+      if (!record) {
+        throw new Error('not found')
+      }
       const updated = { ...record, ...data }
       store.set(record.id, updated)
       return updated
     },
     async delete({ where }) {
       const record = where.id ? store.get(where.id) : [...store.values()].find((r) => r.path === where.path)
-      if (!record) throw new Error('not found')
+      if (!record) {
+        throw new Error('not found')
+      }
       store.delete(record.id)
       return record
     },
     async findUnique({ where }) {
-      if (where.id) return store.get(where.id) ?? null
+      if (where.id) {
+        return store.get(where.id) ?? null
+      }
       return [...store.values()].find((r) => r.path === where.path) ?? null
     },
   }
@@ -139,7 +145,7 @@ describe('createImageRepository', () => {
     await repo.deleteImageRecord(byId.id)
     expect(await repo.getImageById(byId.id)).toBeNull()
 
-    const byPath = await repo.createImageRecord({
+    await repo.createImageRecord({
       filename: 'f.png',
       path: 'images/f.png',
       mimeType: 'image/png',
