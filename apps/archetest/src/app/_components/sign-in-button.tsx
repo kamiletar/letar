@@ -39,7 +39,7 @@ export function SignInButton() {
   }
 
   return (
-    <Button onClick={signInWithLetarAuth} variant="outline" size="lg" w="full">
+    <Button onClick={() => signInWithLetarAuth()} variant="outline" size="lg" w="full">
       Войти для сохранения результатов
     </Button>
   )

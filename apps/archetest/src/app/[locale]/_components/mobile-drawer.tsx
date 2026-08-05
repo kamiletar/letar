@@ -113,7 +113,7 @@ export function MobileDrawer() {
           {!isSessionPending && (
             <MobileAuthSection
               session={session?.user ?? null}
-              onSignIn={signInWithLetarAuth}
+              onSignIn={() => signInWithLetarAuth()}
               onSignOut={logoutAction}
               onClose={close}
               profileHref="/settings"
