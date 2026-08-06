@@ -23,12 +23,13 @@ import { useDebounce, useOnlineStatus, usePendingMutations } from '@letar/hooks'
 
 ### Browser Hooks
 
-| Хук                              | Описание                                     |
-| -------------------------------- | -------------------------------------------- |
-| `useOnlineStatus()`              | Статус подключения к интернету (boolean)     |
-| `useScrollDirection(threshold?)` | Направление скролла ('up' \| 'down' \| null) |
-| `useMediaQuery(query)`           | Отслеживание CSS media query                 |
-| `useWindowSize()`                | Размеры окна { width, height }               |
+| Хук                               | Описание                                                                               |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `useOnlineStatus()`               | Статус подключения к интернету (boolean)                                               |
+| `useScrollDirection(threshold?)`  | Направление скролла ('up' \| 'down' \| null)                                           |
+| `useMediaQuery(query)`            | Отслеживание CSS media query                                                           |
+| `useWindowSize()`                 | Размеры окна { width, height }                                                         |
+| `useInfiniteScrollSentinel(opts)` | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref |
 
 ### TanStack Query Hooks
 
@@ -71,6 +72,34 @@ function Header() {
     <Box transform={isHidden ? 'translateY(-100%)' : 'translateY(0)'}>
       <Navigation />
     </Box>
+  )
+}
+```
+
+### Infinite scroll списка
+
+```tsx
+import { useInfiniteScrollSentinel } from '@letar/hooks'
+import { useInfiniteQuery } from '@tanstack/react-query'
+
+function ItemList() {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery() /* ... */
+
+  const sentinelRef = useInfiniteScrollSentinel({
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore: fetchNextPage,
+  })
+
+  return (
+    <>
+      {data?.pages
+        .flatMap((page) => page.items)
+        .map((item) => (
+          <ItemCard key={item.id} item={item} />
+        ))}
+      {hasNextPage && <Box ref={sentinelRef} h="1px" />}
+    </>
   )
 }
 ```
