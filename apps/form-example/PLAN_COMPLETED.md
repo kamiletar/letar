@@ -1,5 +1,37 @@
 # Выполненные задачи — form-example
 
+## Сессия 2026-08-06 — package.json создан + lint-ошибки в демо-страницах починены
+
+### `package.json` + `nx.implicitDependencies`
+
+Приложение вообще не имело `package.json` (только `tsconfig.json`) — единственное среди `apps/*`
+в таком состоянии (см. корневую причину сломанного `zenstack:generate` в сессии 2026-08-04 ниже:
+тогда фикс был через относительный `provider`-путь в `schema.zmodel`, а не через добавление
+`package.json`). По правилу [libs.md](/.claude/rules/libs.md) создан `package.json` (`name:
+"form-example"`, `version: "0.1.1"` — по последней записи `CHANGELOG.md`) с `nx.implicitDependencies:
+["@letar/forms", "@letar/demo-protection", "@letar/analytics", "@letar/seo"]` — сверено с `paths`
+в `tsconfig.json`. `nx show project form-example` после правки резолвит то же имя проекта, что и
+раньше (через `project.json`), регрессии нет.
+
+⚠️ `nx typecheck:tsgo form-example` по-прежнему падает (11 ошибок `TS2339` на `db.product` и
+т.п.) — это не связано с этой правкой: `zenstack:generate` для приложения падает независимо,
+из-за отсутствующего `DATABASE_URL` в локальном `.env.local` (уже задокументировано в
+[PLAN-INFRA.md §45](/PLAN-INFRA.md)). Подтверждено на чистом состоянии: ошибка та же и без
+`package.json`.
+
+### Lint-ошибки в демо-страницах (pre-existing, не связаны с добавлением package.json)
+
+`nx lint form-example` падал на 5 ошибках в 3 файлах — не следствие правок этой сессии, чинилось
+заодно:
+
+- `examples/theming/page.tsx` (×2), `examples/undo-redo/page.tsx` — пустые `onSubmit={async () =>
+  {}}` (`@typescript-eslint/no-empty-function`) заменены на no-op с комментарием-пояснением.
+- `examples/async-validation/page.tsx` — `curly`: однострочный `if` без фигурных скобок.
+- `examples/persistence/page.tsx` — `no-empty`: пустой `catch {}` дополнен комментарием.
+
+`nx lint form-example` — зелёный (остались только 3 несвязанных pre-existing warning
+`Unused eslint-disable directive` в `input.ts`/`models.ts`/`schema.ts`, вне скоупа).
+
 ## Сессия 2026-08-04 — таргет zenstack:generate починен
 
 Обнаружено в сессии §37 корневого `PLAN.md`: таргет `zenstack:generate` был сломан на чистом

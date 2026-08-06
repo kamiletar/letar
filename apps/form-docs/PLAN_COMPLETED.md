@@ -1,5 +1,20 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-06 — `nx.implicitDependencies` в package.json
+
+По правилу [libs.md](/.claude/rules/libs.md) («Подключение к приложению»): каждая `@letar/*`-
+зависимость приложения обязана быть перечислена в `nx.implicitDependencies` его `package.json` —
+без этого ребро в графе Nx не строится (`nx affected`, порядок сборки, инвалидация кэша для этой
+зависимости не работают, даже если импорт компилируется через `paths` в `tsconfig.json`).
+`form-docs` имел `package.json`, но без поля `nx` вообще.
+
+- Добавлено `"nx": { "name": "form-docs", "implicitDependencies": ["@letar/forms",
+  "@letar/chakra-provider", "@letar/analytics", "@letar/seo"] }` — сверено с `paths` в
+  `tsconfig.json` (подпуть `@letar/forms/analytics` — та же библиотека `@letar/forms`, отдельной
+  записи не требует).
+- `nx show project form-docs`, `nx typecheck:tsgo form-docs`, `nx lint form-docs` — зелёные, имя
+  проекта не разъехалось.
+
 ## v0.1.0 (2026-04-04)
 
 ### Реализовано
