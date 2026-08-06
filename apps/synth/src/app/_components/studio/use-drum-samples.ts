@@ -6,8 +6,8 @@
 // sampleId (загрузка сохранённого патча), буфер подгружается из IndexedDB без участия пользователя.
 
 import type { DrumEngine } from '@/lib/audio/drums'
-import { deleteSample, generateSampleId, getSample, saveSample } from '@/lib/storage/samples-db'
 import type { DrumkitPatch } from '@/lib/patch/schema'
+import { deleteSample, generateSampleId, getSample, saveSample } from '@/lib/storage/samples-db'
 import type { RefObject } from 'react'
 import { useCallback, useEffect } from 'react'
 
