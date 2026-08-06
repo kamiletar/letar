@@ -10,6 +10,8 @@
  * - git stash (скрытие чужих изменений)
  * - rm -rf / или rm -rf * (опасное удаление)
  * - bare ssh (Git Bash SSH плодит зомби ssh-agent.exe → No buffer space available)
+ * - nx run-many -t format без --projects/--exclude (заходит в 7 submodule, PLAN-INFRA.md §32)
+ * - встроенный nx format / nx format:write (это Prettier, а не dprint — тот же §32)
  *
  * Exit codes:
  * - 0: разрешить выполнение
@@ -84,6 +86,57 @@ process.stdin.on('end', () => {
         '\n\u26d4 BLOCKED: Bare ssh из Git Bash плодит зомби ssh-agent.exe!\n'
           + 'Используй Windows SSH:\n'
           + '  /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@server "command"\n',
+      )
+      process.exit(2)
+    }
+
+    // --- Форматтер: два вектора массовой порчи из PLAN-INFRA.md §32 ---
+
+    // Вектор 1. Встроенная команда Nx `nx format`/`nx format:write` — это Prettier, а не dprint.
+    // Собственного .prettierrc в репозитории нет (удалён при закрытии §32), поэтому Prettier
+    // отработает на дефолтах: двойные кавычки, точки с запятой, сломанный markdown в плановых
+    // файлах — максимально далеко от dprint.json. Прецедент: 480 переписанных файлов в трёх
+    // библиотеках. `nx format:check` не блокируем — он ничего не пишет.
+    // Не путать с таргетом `format` (`nx run-many -t format`) — тот вызывает dprint, имя совпало
+    // случайно.
+    // ⚠️ Обе проверки ниже привязаны к ПОЗИЦИИ КОМАНДЫ (начало строки, после &&/||/;/|), а не
+    // ищутся где угодно в строке. Иначе хук блокирует сам себя: эти команды постоянно
+    // упоминаются в тексте — в сообщениях коммитов через heredoc, в документации, в echo.
+    // Наступали дважды за одну сессию, пока правило было без якоря.
+    const CMD_START = String.raw`(?:^|[\n;|]|&&|\|\|)\s*(?:bunx\s+|npx\s+|bun\s+run\s+)?`
+
+    if (new RegExp(CMD_START + String.raw`nx\s+format(?::write)?(?!\S)`).test(command)) {
+      console.error(
+        '\n⛔ BLOCKED: `nx format` — это встроенная команда Nx, она запускает Prettier, а не dprint.\n'
+          + 'Своего .prettierrc в репозитории нет, Prettier отработает на дефолтах и перепишет\n'
+          + 'файлы против dprint.json (прецедент — 480 файлов, PLAN-INFRA.md §32).\n'
+          + 'Нужен форматтер репозитория: nx run-many -t format --projects=<твои проекты>\n',
+      )
+      process.exit(2)
+    }
+
+    // Вектор 2. `nx run-many -t format` без ограничения области.
+    // Семь submodule-приложений объявляют таргет `format` с cwd внутри себя, а `excludes`
+    // корневого dprint.json при таком запуске не применяются (сопоставляются относительно
+    // каталога конфига, а обход идёт от cwd). Итог — прогон пишет в 2089 файлов чужих
+    // репозиториев. Сейчас без диффа (конфиги совпадают), но касаться чужого рабочего дерева
+    // всё равно незачем. Разбор — .claude/docs/dprint-worktree-submodule-scope.md.
+    // Вырезаем ровно одну инвокацию run-many (до конца строки или следующего разделителя),
+    // чтобы `--projects` из соседней команды или из текста сообщения не считался ограничением.
+    const runMany = command.match(new RegExp(CMD_START + String.raw`nx\s+run-many\b[^\n;|&]*`))
+    const runManyTargets = runMany?.[0].match(/(?:-t|--targets?)[=\s]+([\w:,-]+)/)
+    const formatsBlanket = runManyTargets
+      && runManyTargets[1].split(',').includes('format')
+      && !/--projects[=\s]|--exclude[=\s]|\s-p[=\s]/.test(runMany[0])
+    if (formatsBlanket) {
+      console.error(
+        '\n⛔ BLOCKED: `nx run-many -t format` без --projects заходит в семь приватных\n'
+          + 'submodule-приложений (aboi, aprel8008, domwellbes, driving-school, dsperevod,\n'
+          + 'studio, svoichuzhie) — 2089 файлов чужих репозиториев.\n'
+          + 'Ограничь область: nx run-many -t format --projects=<твои проекты>\n'
+          + 'Список проектов с таргетом: nx show projects --with-target format\n'
+          + 'Если действительно нужен прогон по всему публичному репо — `dprint fmt` из корня,\n'
+          + 'он excludes уважает. Разбор: .claude/docs/dprint-worktree-submodule-scope.md\n',
       )
       process.exit(2)
     }
