@@ -15,6 +15,9 @@ const templatesDir = templatesDirFor(import.meta.url)
  */
 const privateTemplatesDir = templatesDirFor(import.meta.url, 'files-private')
 
+/** Шаблоны ZenStack/Prisma-каркаса (`--withDb`) — prisma.config.ts + schema.zmodel-заготовка. */
+const dbTemplatesDir = templatesDirFor(import.meta.url, 'files-db')
+
 export default async function newAppGenerator(tree: Tree, options: NewAppGeneratorSchema): Promise<void> {
   const { name } = options
   const appDir = joinPathFragments('apps', name)
@@ -24,9 +27,10 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
   const port = options.port ?? resolveNextFreePort(tree)
   const displayName = options.displayName ?? toDisplayName(name)
   const description = options.description ?? `${displayName} — Next.js приложение`
+  const withDb = options.withDb ?? false
 
   if (options.private) {
-    generateFiles(tree, privateTemplatesDir, appDir, { name })
+    generateFiles(tree, privateTemplatesDir, appDir, { name, withDb })
   }
 
   generateFiles(tree, templatesDir, appDir, {
@@ -36,7 +40,12 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     displayName,
     description,
     year: new Date().getFullYear(),
+    withDb,
   })
+
+  if (withDb) {
+    generateFiles(tree, dbTemplatesDir, appDir, { name, displayName })
+  }
 
   await formatFiles(tree)
 
@@ -47,10 +56,19 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     `Umami website ID пустой в NEXT_PUBLIC_UMAMI_WEBSITE_ID (.env.docker создаётся на этапе деплоя) — ` +
       `заполнится после регистрации сайта в Umami.`
   )
-  logger.info(
-    'Каркас минимален (нет БД/форм/auth) — это осознанно: schema.zmodel, БД, ZenStack-формы, Better Auth ' +
-      'подключаются отдельно по .claude/rules/database.md и .claude/docs/forms.md, когда появится реальная нужда.'
-  )
+  if (withDb) {
+    logger.info(
+      'ZenStack/Prisma-каркас подключён (prisma.config.ts, schema.zmodel-заготовка без моделей, ' +
+        'zenstack:generate/db:* таргеты). Дальше: опиши модели в schema.zmodel → создай ' +
+        `apps/${name}/.env.local с DATABASE_URL → nx zenstack:generate ${name} → nx db:migrate ${name} -- --name init. ` +
+        'Формы/auth каркас не создаёт — см. .claude/docs/forms.md и .claude/docs/auth.md.'
+    )
+  } else {
+    logger.info(
+      'Каркас минимален (нет БД/форм/auth) — это осознанно: schema.zmodel, БД, ZenStack-формы, Better Auth ' +
+        'подключаются отдельно по .claude/rules/database.md и .claude/docs/forms.md, когда появится реальная нужда.'
+    )
+  }
   logger.info(
     'Дальнейшие шаги (регистрация в Dashboard, бэкапы, docker-compose.production, e2e-gate, submodule) — ' +
       'см. раздел «Дальнейшие шаги» в .claude/commands/create/new-app.md, они намеренно не автоматизированы.'

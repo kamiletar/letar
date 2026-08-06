@@ -1,0 +1,34 @@
+// ZenStack schema для <%= displayName %>
+//
+// Каркас сгенерирован `nx g @letar/generators:new-app --withDb` — моделей ещё нет.
+// Дальше: опиши модели ниже, затем `nx zenstack:generate <%= name %>` → `nx db:migrate <%= name %> -- --name init`.
+// Воркфлоу и запреты (НИКОГДА db:push на production) — .claude/rules/database.md.
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// Генерация Zod схем с UI метаданными для @letar/forms
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}

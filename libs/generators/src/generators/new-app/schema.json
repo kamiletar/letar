@@ -29,6 +29,11 @@
       "type": "boolean",
       "description": "Приложение приватное (будет отдельным git submodule) — влияет только на подсказки после генерации",
       "default": false
+    },
+    "withDb": {
+      "type": "boolean",
+      "description": "Подключить ZenStack/Prisma-инфраструктуру (prisma.config.ts, schema.zmodel-каркас, zenstack:generate/db:* таргеты в project.json)",
+      "default": false
     }
   },
   "required": ["name"]

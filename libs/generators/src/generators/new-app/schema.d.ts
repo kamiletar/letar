@@ -4,4 +4,5 @@ export interface NewAppGeneratorSchema {
   displayName?: string
   description?: string
   private?: boolean
+  withDb?: boolean
 }
