@@ -28,11 +28,14 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bunx dprint fmt --config ../../dprint.json libs/label-printer-core",
-        "cwd": "{workspaceRoot}"
+        "command": "dprint fmt",
+        "cwd": "libs/label-printer-core"
       },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"]
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
     },
     "typecheck:tsgo": {
       "command": "tsgo --project libs/label-printer-core/tsconfig.lib.json --noEmit"

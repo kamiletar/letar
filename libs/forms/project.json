@@ -44,26 +44,26 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+        "command": "dprint fmt",
         "cwd": "libs/forms"
       },
       "cache": false,
       "metadata": {
-        "description": "Format files with Prettier",
-        "technologies": ["prettier"]
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+        "command": "dprint check",
         "cwd": "libs/forms"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.prettierrc", "{workspaceRoot}/.prettierignore"],
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
       "metadata": {
-        "description": "Check file formatting",
-        "technologies": ["prettier"]
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
       }
     },
     "typecheck": {

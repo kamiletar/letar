@@ -53,13 +53,13 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "prettier --write .",
+        "command": "dprint fmt",
         "cwd": "libs/ui"
       },
       "cache": false,
       "metadata": {
-        "description": "Format source files with Prettier",
-        "technologies": ["prettier"]
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
       }
     },
     "oxlint": {
