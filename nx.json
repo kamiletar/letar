@@ -105,7 +105,7 @@
       "cache": true,
       "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"]
     },
-    "dprint": {
+    "format": {
       "executor": "nx:run-commands",
       "options": {
         "command": "bunx dprint fmt \"{projectRoot}/**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -117,7 +117,7 @@
         "technologies": ["dprint"]
       }
     },
-    "dprint:check": {
+    "format:check": {
       "executor": "nx:run-commands",
       "options": {
         "command": "bunx dprint check \"{projectRoot}/**/*.{ts,tsx,js,jsx,json,md}\"",
