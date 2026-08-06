@@ -65,7 +65,16 @@
       "command": "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit"
     },
     "format": {
-      "command": "dprint fmt apps/label-printer-desktop/**/*.{ts,tsx,json}"
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt **/*.{ts,tsx,json}",
+        "cwd": "apps/label-printer-desktop"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
     },
     "zenstack:generate": {
       "command": "zenstack generate --schema apps/label-printer-desktop/schema.zmodel",

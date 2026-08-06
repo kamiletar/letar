@@ -223,7 +223,16 @@
       "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit"
     },
     "format": {
-      "command": "dprint fmt apps/animatrona/{main,renderer,shared,preload}/**/*.{ts,tsx,json} apps/animatrona/*.{ts,json}"
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt {main,renderer,shared,preload}/**/*.{ts,tsx,json} *.{ts,json}",
+        "cwd": "apps/animatrona"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
     },
     "zenstack:generate": {
       "executor": "nx:run-commands",
