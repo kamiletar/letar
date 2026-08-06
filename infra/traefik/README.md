@@ -38,24 +38,28 @@ ACME-челленджи всей зоны.
 
 ### 3. Учётные данные acme-dns
 
-Файл аккаунтов lego нужен на s3. Копируется с s2 **напрямую**, минуя репозиторий:
+Файл аккаунтов lego нужен на s3. Копируется с s2 **напрямую**, минуя репозиторий.
+
+⚠️ **На s3 кладём только ключ `s3.letar.best`, не весь файл.** На s2 их два: `letar.best` (для
+`*.letar.best`) и `s3.letar.best` (для `*.s3.letar.best`) — wildcard покрывает ровно один уровень
+имени, поэтому staging-домены вида `<app>-stage.s3.letar.best` первым сертификатом не покрываются.
+Traefik на s3 выпускает только второй, первый ему не нужен никогда. Положить туда оба означало бы,
+что компрометация **staging**-сервера даёт валидный сертификат на весь продакшен-домен.
 
 ```bash
-# с s2, права сохранить: каталог 700, файл 600, root:root
-scp /home/deploy/lego/acme-dns-accounts.json deploy@s3.letar.best:/tmp/
+# на s2 — вырезать только нужный ключ
+python3 -c "import json;d=json.load(open('/home/deploy/lego/acme-dns-accounts.json'));json.dump({'s3.letar.best':d['s3.letar.best']},open('/tmp/s3-accounts.json','w'))"
+scp /tmp/s3-accounts.json deploy@s3.letar.best:/tmp/ && shred -u /tmp/s3-accounts.json
+
 # на s3
 mkdir -p /home/deploy/lego && chown root:root /home/deploy/lego && chmod 700 /home/deploy/lego
-mv /tmp/acme-dns-accounts.json /home/deploy/lego/ && chmod 600 /home/deploy/lego/acme-dns-accounts.json
+mv /tmp/s3-accounts.json /home/deploy/lego/acme-dns-accounts.json
+chmod 600 /home/deploy/lego/acme-dns-accounts.json
 ```
 
 ⚠️ В git этот файл не кладём даже зашифрованным — пока. Конвейер `.enc` для инфра-сервисов ещё не
-заведён, см. §18.8. Как заведётся — перевести сюда, а ручной `scp` убрать: сейчас восстановление s3
-с нуля требует помнить про этот шаг.
-
-Файл содержит **два** аккаунта: `letar.best` (для `*.letar.best`) и `s3.letar.best` (для
-`*.s3.letar.best`). Wildcard покрывает ровно один уровень имени, поэтому staging-домены вида
-`<app>-stage.s3.letar.best` первым сертификатом **не покрываются** — это отдельная пара
-аккаунт + `CNAME`.
+заведён, см. [§18.8.1](/PLAN-INFRA.md). Как заведётся — перевести сюда, а ручной `scp` убрать:
+сейчас восстановление s3 с нуля требует помнить про этот шаг, а помнить его будет некому.
 
 ### 4. Дашборд
 
