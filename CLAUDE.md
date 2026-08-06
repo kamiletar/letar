@@ -54,12 +54,14 @@ chmod +x .git/hooks/pre-commit
 
 **Перед коммитом:** `nx run-many -t format --projects=<твои проекты>` → `nx lint` → `nx typecheck:tsgo`
 
-⛔ **`nx run-many -t format` без `--projects` заходит внутрь семи приватных submodule-приложений**
+⚠️ **`nx run-many -t format` без `--projects` заходит внутрь семи приватных submodule-приложений**
 (aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie — 2089 файлов).
 Их таргет `format` запускает dprint с `cwd` внутри submodule, а `excludes` корневого
 `dprint.json` в таком запуске не применяются — они сопоставляются относительно каталога конфига,
-а обход идёт от `cwd`. Замер и разбор — [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
-Всегда ограничивай прогон своими проектами; список — `nx show projects --with-target format`.
+а обход идёт от `cwd`. С 2026-08-06 у каждого submodule свой `dprint.json` с теми же правилами,
+поэтому прогон даёт **ноль изменений** — но файлы он всё равно трогает. Ограничивай прогон
+своими проектами; список — `nx show projects --with-target format`. Замер и разбор —
+[dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
 
 ⚠️ Это НЕ то же самое, что голое `nx format` (без `run-many -t`) — та встроенная команда Nx
 запускает Prettier, конфликтующий с dprint (правки друг друга откатывают, ломает markdown в
