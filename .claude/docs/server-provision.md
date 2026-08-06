@@ -31,6 +31,10 @@ DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -q
 DEBIAN_FRONTEND=noninteractive apt-get install -y -q fail2ban curl wget unzip ufw
 ```
 
+⚠️ `ufw` здесь только **устанавливается**. Настройка — в §2.5 ниже, и её нельзя пропускать:
+до 2026-08-06 этого раздела не было вовсе, и на s2 `ufw` так и остался в состоянии
+`Status: inactive` — то есть на единственном прод-сервере firewall не работал.
+
 ### 2.3 Настроить fail2ban
 
 ```bash
@@ -57,6 +61,42 @@ sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_
 sed -i 's/^PermitRootLogin yes/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
 sshd -t && systemctl reload ssh
 ```
+
+### 2.5 Настроить firewall
+
+⚠️ **Прочитать [firewall.md](firewall.md) до выполнения.** Ключевой факт: `ufw` **не защищает
+порты, опубликованные Docker'ом** — они проходят по цепочке `FORWARD` мимо `INPUT`, где живут
+правила ufw. Поэтому «включил ufw — закрыл сервер» неверно, и порядок шагов ниже именно такой.
+
+**Шаг 1 — публикация портов только на loopback (главное).** В `docker-compose*.yml` любого
+сервиса порт пишется как `- '127.0.0.1:<port>:<port>'`. Голая форма `- '<port>:<port>'`
+означает `0.0.0.0` — доступно всему интернету. Если потребители в той же docker-сети, блок
+`ports:` не нужен вовсе.
+
+**Шаг 2 — `ufw` для хостовых служб.** Сначала посмотреть, что реально слушает сам хост:
+
+```bash
+ss -tulnp
+```
+
+Затем разрешить нужное и только потом включать. Порядок обязателен — `ufw enable` с дефолтной
+политикой обрывает SSH:
+
+```bash
+ufw allow 22/tcp                       # СНАЧАЛА SSH
+ufw allow 80,443/tcp                   # прокси (NPM/Traefik)
+ufw allow 53                           # acme-dns, если он на этом сервере (tcp+udp)
+echo 'ufw disable' | at now + 10 min   # подстраховка ДО включения
+ufw enable
+ufw status verbose                     # единственная достоверная проверка
+```
+
+Убедиться из **нового** SSH-окна, что вход работает, и только тогда снять подстраховку
+(`atq` → `atrm <job>`).
+
+⚠️ `systemctl is-active ufw` может отдавать `active` при `ufw status` = `inactive` — юнит
+поднят, правила не применены. Проверять только `ufw status verbose` и наличием цепочек
+`ufw-*` в `iptables -S`.
 
 ## 3. Установка инструментов разработки
 
@@ -146,6 +186,7 @@ IPFS_API_TOKEN=...          # опц., для внешних pinning services
 
 ## Связанные доки
 
+- [firewall.md](firewall.md) — почему `ufw` не закрывает Docker-порты, чем закрывать вместо него
 - [deployment.md](deployment.md) — Docker, docker-compose, deploy-affected.sh
 - [secret-manager.md](secret-manager.md) — SOPS + age, шифрование .env.docker
 - [backup-architecture.md](backup-architecture.md) — Resilio, бэкапы
