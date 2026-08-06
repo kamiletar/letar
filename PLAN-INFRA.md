@@ -3293,3 +3293,50 @@ file '.../out-tsc/spec/vitest.config.d.ts' has not been built from source file
 уже отдельно отслеживается в `PLAN.md`, смешивать с этой находкой не стал.
 
 ---
+
+## §46 — Два блокера батча деплоя (kami OOM, time P3018) ✅ ЗАКРЫТО (2026-08-06)
+
+**kami: `next build` (Turbopack) убивался SIGKILL на s2 дважды подряд, ровно на ~6.5 минуте.**
+`NODE_OPTIONS=--max-old-space-size=8192` уже стоял в `deploy-affected.sh`, но это лимит V8-хипа —
+Turbopack в Next.js 16 (production build без явного `--webpack`) выполняется нативным Rust-
+процессом **вне** V8-хипа, так что этот флаг его вообще не ограничивает. На s2 в момент падения
+было 15GB RAM, из них ~7.3GB заняты другими ~28 контейнерами (`docker stats`/`free -h`), т.е.
+процессу Turbopack физически было где расти до OOM-килла ядра — никакого явного cgroup-лимита
+на сам build-процесс `docker build` не поставлено.
+
+Тот же класс проблемы уже чинился в четырёх приложениях по другим поводам (эмоция-гидратация —
+[nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md),
+Serwist SW не поддерживается Turbopack — `grandslamcup`/`archetest`). У `kami` в `project.json`
+таргет `build` не переопределял executor и наследовал инферированный `@nx/next/plugin`
+(`next build` → Turbopack по умолчанию), а в `next.config.js` вдобавок был явный блок
+`turbopack: {}` с комментарием «используется для Next.js 16 production build» — то есть кто-то
+осознанно на неё переключился. Починено: `build` таргет переопределён на
+`next build --webpack` (dev-таргет не трогался — у kami его вообще нет в `project.json`,
+локальная разработка не страдала). Локально `next build --webpack` компилируется за 79с; на s2 —
+за 3.8 мин без падения, деплой прошёл (`exitCode 0`).
+
+**time: `migrate deploy` падал P3018 (`relation "User" already exists`, код 42P07)
+на первой же миграции `20260728041249_init`.** Проверка `_prisma_migrations` в прод-БД показала
+единственную запись — саму эту миграцию, `started_at` сегодняшним числом, `finished_at NULL`,
+`applied_steps_count 0` — то есть это бухгалтерия самой неудачной попытки, а не свидетельство
+более раннего успешного применения. При этом реальные таблицы (`User`, `ConsentLog`,
+`NotificationLog`, `NotificationSubscription`) уже существовали и `User` содержал 1 реальную
+строку — схема была создана мимо `migrate deploy` (похоже на `db push` на раннем этапе
+поднятия прод-окружения). Сверка колонок/типов/индексов/FK из `psql \d` для всех четырёх таблиц
+с текстом `migration.sql` дала точное совпадение — это не drift, база соответствует ровно тому,
+что должна была создать эта миграция.
+
+Дамп прод-БД от неудачной попытки уже лежал в
+`/home/deploy/pre-migrate-dumps/time-8ba146646-20260806-132406.sql.gz` (сам `deploy-affected.sh`
+делает дамп перед каждой попыткой миграции). После сверки — `prisma migrate resolve --applied
+20260728041249_init` (запущено на s2 из чекаута `/home/deploy/letar/apps/time`, `DATABASE_URL`
+через `localhost:5445` — опубликованный порт `time-db`, тот же паттерн, что `deploy-affected.sh`
+использует на build-шаге). `migrate status` после — «Database schema is up to date!», повторный
+`deploy_app({ app: "time" })` прошёл (`exitCode 0`, «No pending migrations»).
+
+**Открытый вопрос не расследовался дальше** (не блокирует, но стоит держать в уме): как именно
+схема `time` оказалась в проде без записи в `_prisma_migrations` — `db push` на прод запрещён
+правилом [database.md](/.claude/rules/database.md), но по факту, похоже, применялся на раннем
+этапе поднятия приложения до того, как этот запрет стал строго соблюдаться.
+
+---
