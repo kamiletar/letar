@@ -1,5 +1,23 @@
 # Time — Выполненные задачи
 
+## 2026-08-06 (SEO-гейт индексации, сессия по инфра-трекам PLAN-INFRA.md §33)
+
+Часть кросс-приложенческого захода по `PLAN-INFRA.md` §33 (SEO-фундамент для приложений без
+`robots.ts`/`sitemap.ts`). `time` — единственное из девяти приложений в этой сессии, где нашёлся
+реальный производственный баг, не просто отсутствие файла:
+
+- **Найдено:** `generateMetadata()` в `[locale]/layout.tsx` отдавал `robots: { index: true, follow:
+  true }` **безусловно**, без проверки окружения — staging (`time-stage.s3.letar.best`) индексировался
+  поисковиками наравне с продом.
+- **Починено:** подключена `@letar/seo` (`isProductionDomain()` — гейт «прод или нет» через сверку
+  реального `NEXT_PUBLIC_BASE_URL`, `NODE_ENV` для этого не годится, см. `PRODUCTION_URL =
+  'https://time.letar.best'` в layout), `robots: { index: isProductionDomain(...), follow:
+  isProductionDomain(...) }`.
+- Добавлены `src/app/robots.ts` (закрыт `/profile`, `/sign-in`, `/unsubscribe`, `/api/` — не
+  контент) и `src/app/sitemap.ts` (главная + `/privacy` на всех 40 локалях, `alternates.languages`
+  на каждую запись).
+- `nx build time` — зелёный, `robots.txt`/`sitemap.xml` подтверждены в выводе сборки.
+
 ## v0.5.0 — 2026-07-28 (152-ФЗ: consent-инфраструктура с нуля + первый baseline миграций)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
