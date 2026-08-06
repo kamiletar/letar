@@ -82,15 +82,23 @@ HTTP API наружу **не открывать** — он опубликова�
 
 ## Регистрация аккаунта (однократно)
 
+⚠️ В рабочем конфиге стоит `disable_registration = true` — чтобы завести аккаунт, сначала временно
+вернуть `false` и **сделать `docker restart`** (см. врезку выше про `up -d`).
+
 ```bash
-curl -s -X POST http://127.0.0.1:8053/register | tee /root/acme-dns-account.json
+mkdir -p /root/lego && chmod 700 /root/lego
+curl -s -X POST http://127.0.0.1:8053/register
 ```
 
 Ответ содержит `username`, `password`, `fulldomain`, `subdomain`. Из него нужны:
 
 - `fulldomain` — в `CNAME`-запись `_acme-challenge` (см. таблицу выше);
-- весь JSON — в файл аккаунтов lego (`ACME_DNS_STORAGE_PATH`), формат — объект, где ключ это
-  домен: `{"letar.best": { ...ответ регистрации... }}`.
+- весь JSON — в файл аккаунтов lego `/root/lego/acme-dns-accounts.json` (`chmod 600`), формат —
+  объект, где ключ это домен: `{"letar.best": { ...ответ регистрации... }}`.
+
+Не сохранять ответ во временный файл «пока разберусь» и не пересылать в переписку агентов —
+писать сразу в целевой файл. Прецедент 2026-08-06: первый аккаунт пришлось ротировать именно
+из-за этого.
 
 ⚠️ Учётные данные из этого ответа — секрет: кто ими владеет, тот подменяет ACME-челленджи всей
 зоны. Хранить как остальные секреты ([secret-manager.md](/.claude/docs/secret-manager.md)), в
@@ -100,13 +108,35 @@ curl -s -X POST http://127.0.0.1:8053/register | tee /root/acme-dns-account.json
 
 ## Проверка (DoD милестона M1a)
 
-Цепочка делегирования проверяется **без Traefik**, голым lego:
+Цепочка делегирования проверяется **без Traefik**, голым lego. Ставить его на сервер не нужно и не
+надо — постоянным ACME-клиентом будет Traefik, а отдельный бинарь на s2 станет мусором, который
+никто не обновляет. Запускаем одноразовым контейнером:
 
 ```bash
-ACME_DNS_API_BASE=http://127.0.0.1:8053 \
-ACME_DNS_STORAGE_PATH=/root/.lego-acme-dns-accounts.json \
-lego --dns acme-dns --email <адрес> -d '*.letar.best' -d letar.best --accept-tos run
+docker run --rm \
+  --network host \
+  -v /root/lego:/lego \
+  -e ACME_DNS_API_BASE=http://127.0.0.1:8053 \
+  -e ACME_DNS_STORAGE_PATH=/lego/acme-dns-accounts.json \
+  goacme/lego:v4 \
+  --dns acme-dns \
+  --server https://acme-staging-v02.api.letsencrypt.org/directory \
+  --email kami@letar.best --accept-tos \
+  --path /lego \
+  -d '*.letar.best' -d letar.best run
 ```
+
+- `--network host` обязателен: API acme-dns слушает `127.0.0.1:8053`, из bridge-сети контейнер туда
+  не достучится.
+- Монтируется **каталог**, а не одиночный файл аккаунтов: lego может переписать хранилище, а bind
+  одиночного файла на такое реагирует плохо.
+- ⚠️ **Сначала staging-директория Let's Encrypt**, как в команде выше. У боевой жёсткие лимиты на
+  неудачные попытки, а это первый прогон цепочки. На боевую переключаться (убрать `--server`)
+  только после зелёного staging-прогона.
+
+Почта ACME-аккаунта — `kami@letar.best` (решение владельца 2026-08-06). На неё приходят
+уведомления Let's Encrypt об истечении сертификатов, поэтому доставку на этот ящик стоит
+проверять — см. canary-мониторинг почты, `PLAN.md` Этап 0.7.
 
 Промежуточные проверки, если что-то не сходится:
 
@@ -129,7 +159,9 @@ dig +short CNAME _acme-challenge.letar.best
 через 90 дней в худший момент. Бэкапить:
 
 - `data/acme-dns.db` — база выданных поддоменов;
-- файл аккаунтов lego (`ACME_DNS_STORAGE_PATH`) — без него клиент не сможет обновить `TXT`.
+- `/root/lego/acme-dns-accounts.json` — файл аккаунтов lego, без него клиент не сможет обновить
+  `TXT`. Восстановить его нельзя: `disable_registration = true`, а даже с открытой регистрацией
+  новый аккаунт даст новый `fulldomain`, то есть потребует правки боевой `CNAME`-записи в зоне.
 
 ## Версия образа
 
