@@ -57,6 +57,13 @@
         "description": "Type-check library and generate declarations",
         "technologies": ["typescript"]
       }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/demo-protection/vitest.config.ts"
+      }
     }
   }
 }

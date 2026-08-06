@@ -5,7 +5,7 @@
     "outDir": "./dist",
     "declaration": true,
     "lib": ["dom", "dom.iterable", "esnext"],
-    "types": [],
+    "types": ["vitest/globals", "node"],
     "paths": {
       "@letar/animatrona-types": ["../animatrona-types/src/index.ts"]
     },

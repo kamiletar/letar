@@ -42,6 +42,13 @@
         "technologies": ["typescript"]
       }
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/e2e-testing/vitest.config.ts"
+      }
+    },
     "oxlint": {
       "executor": "nx:run-commands",
       "options": {

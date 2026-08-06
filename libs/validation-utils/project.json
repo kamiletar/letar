@@ -58,6 +58,13 @@
         "technologies": ["typescript"]
       }
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/validation-utils/vitest.config.ts"
+      }
+    },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
       "options": {
