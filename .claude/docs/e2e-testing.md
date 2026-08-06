@@ -630,6 +630,59 @@ await fetch(`${baseURL}/api/auth/sign-out`, {
 // Только теперь переходить на /api/auth/dev-session?email=<другая-роль>
 ```
 
+## `genericOAuth` не регистрируется без обоих `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET` — ломает тест на редирект на Ключницу
+
+### Проблема
+
+Приложения, подключающие Better Auth плагин `genericOAuth` (провайдер `letar-auth`, редирект на
+Ключницу `auth.letar.best`) условно — по образцу `apps/studio/src/lib/auth.ts`:
+
+```typescript
+genericOAuth({
+  config: process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
+    ? [{ providerId: 'letar-auth', clientId: ..., clientSecret: ..., ... }]
+    : [],
+})
+```
+
+Если оба `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET` в `.env.staging` пустые — плагин регистрируется
+с пустым списком провайдеров, и весь его OAuth-эндпоинт **не появляется вовсе** (это не «редирект
+не заходит», а «редиректа нет вообще, кнопка «Войти» никуда не ведёт»). Заполнить оба пустыми
+строками по аналогии с `archetest`/`driving-school` (где на staging «OAuth-провайдеры по-настоящему
+не заходят — оставить пустыми, тесты используют только dev-session») здесь неверно: то правило
+верно только для приложений, у которых e2e **не проверяет** сам факт редиректа.
+
+`apps/studio-e2e/src/02-auth-redirect.spec.ts:29` именно это и проверяет — кликает «Войти» и ждёт
+`page.waitForURL(/auth\.letar\.best/)`. С пустыми credentials эндпоинта нет, редиректа не
+происходит, тест падает по таймауту (упало при первом staging-прогоне studio, 2026-08-06).
+
+### Решение — переиспользовать прод-клиент, не заводить staging-клиент в auth-hub
+
+```bash
+# apps/studio/.env.staging.example
+OIDC_CLIENT_ID=studio-prod
+OIDC_CLIENT_SECRET=change-me   # реальное прод-значение, см. .env.local/.env.docker.enc
+OIDC_DISCOVERY_URL=https://auth.letar.best/api/auth/.well-known/openid-configuration
+```
+
+Это безопасно именно для теста такого рода: auth-hub сверяет `redirect_uri` с зарегистрированным
+клиентом **только на этапе callback**, после того как пользователь ввёл код — не на этапе
+начального редиректа. `02-auth-redirect.spec.ts` дальше начального ухода на `auth.letar.best` не
+идёт, поэтому несовпадение `redirect_uri` прод-клиента со staging-доменом здесь не всплывает.
+Заводить отдельный staging `oauthApplication` в auth-hub не нужно. Значения secret не путешествуют
+по agent-mail/чатам — берутся из `.env.local`/`.env.docker.enc` (sops) того же приложения.
+
+### Проверено на других приложениях с genericOAuth — сейчас не задето
+
+`archetest` (нет `.env.staging.example`, `safety-net.spec.ts` использует только dev-session, без
+проверки редиректа на `auth.letar.best`) и `driving-school` (`.env.staging.example` намеренно
+держит OIDC-переменные пустыми, ни один тест в `driving-school-e2e` не проверяет факт ухода на
+`auth.letar.best`) этим багом не затронуты — у них просто нет теста, который бы его поймал. Если в
+будущем к любому из них добавится тест по образцу `02-auth-redirect.spec.ts` (проверка
+`waitForURL(/auth\.letar\.best/)`), тот же самый пустой-env паттерн его сломает — перед добавлением
+такого теста сначала заполнить `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET` прод-значениями по образцу
+`studio`, а не копировать комментарий «оставить пустыми» из `driving-school`.
+
 ## Чеклист перед написанием E2E тестов
 
 - [ ] **Скаффолд нового сьюта — через генератор**, не копипастой:
