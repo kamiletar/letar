@@ -82,6 +82,7 @@ staging-пилоте (§18 Сессия D). Публичные порты 80/81/
 | pravda-stage.s3.letar.best       | `172.17.0.1` | 3028 | LE  | Staging pravda (PLAN.md §18.7 Тираж M1), без БД/auth                         |
 | aira-web-stage.s3.letar.best     | `172.17.0.1` | 3029 | LE  | Staging aira-web (PLAN.md §18.7 Тираж M1), без БД/auth                       |
 | domwellbes-stage.s3.letar.best   | `172.17.0.1` | 3031 | LE  | Staging domwellbes, заведён 2026-08-06 (см. троблшутинг ниже)                |
+| studio-stage.s3.letar.best       | `172.17.0.1` | 3032 | LE  | Staging studio, заведён 2026-08-06 при первом тираже e2e-гейта для studio    |
 
 ⚠️ **NPM на s3 обновлён до 2.15.1** (актуальную версию видно через `GET /api/` без авторизации).
 `docker-compose.yml` для s2 также обновлён на тег `2.15.1` — применить на сервере ещё
@@ -120,6 +121,15 @@ Certbot is already running`. Лок в `/tmp/certbot-log-*/log` внутри к�
 (deploy-request domwellbes staging, 2026-08-06) как шаг 3 «настроить NPM host», но фактически не
 был заведён до живого репорта `ERR_SSL_UNRECOGNIZED_NAME_ALERT` от разработчика приложения —
 инфра-шаги из тела deploy-request легко потерять, если они не единственный экшн в запросе.
+
+⚠️ **Порядок важен для e2e:** NPM host для нового staging-приложения нужно завести **до** первого
+`run_e2e`, не после `deploy_app(staging)`. Прецедент studio (тот же день): `run_e2e` запустился
+раньше, чем host — `baseUrl` оказался недостижим, Playwright тихо поднял локальный fallback
+`next dev --turbopack` (см. `webServer.reuseExistingServer` в `playwright.config.ts` и
+предупреждение в описании инструмента `run_e2e` про этот механизм), который тут же упал
+`EADDRINUSE` на порт, занятый staging-контейнером того же приложения. Симптом в логе e2e —
+`[WebServer] Failed to start server` вместо реальных упавших тестов; чинится не правкой теста, а
+просто повторным `run_e2e` после того, как домен стал живым (`curl -I https://<app>-stage...` → `200`).
 
 ## NPM на mail-сервере (tg-proxy) — отдельный, независимый инстанс
 
