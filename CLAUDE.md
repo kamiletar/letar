@@ -52,7 +52,14 @@ chmod +x .git/hooks/pre-commit
 - **Не создавай новые приложения/библиотеки руками:** `nx g @letar/generators:new-app <name>` (чистый Next.js + Chakra v3 каркас, без boilerplate, который потом вычищаешь) и `nx g @letar/generators:new-lib <name>` — см. `libs/generators/README.md`.
 - **Документируй:** Найденные особенности добавляй в `.claude/docs/`. **Превентивно обновляй существующие doc-файлы** когда поведение системы изменилось, и **создавай новые** когда появился значимый паттерн/решение которого ещё нет в docs — не жди явного запроса. Это касается в том числе **UI/UX паттернов**: компонентов Chakra UI, паттернов форм, анимаций, адаптивной вёрстки, accessibility-решений. После изменения doc-файла добавь ссылку в раздел «Документация» этого файла если её ещё нет.
 
-**Перед коммитом:** `nx run-many -t format` → `nx lint` → `nx typecheck:tsgo`
+**Перед коммитом:** `nx run-many -t format --projects=<твои проекты>` → `nx lint` → `nx typecheck:tsgo`
+
+⛔ **`nx run-many -t format` без `--projects` заходит внутрь семи приватных submodule-приложений**
+(aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie — 2089 файлов).
+Их таргет `format` запускает dprint с `cwd` внутри submodule, а `excludes` корневого
+`dprint.json` в таком запуске не применяются — они сопоставляются относительно каталога конфига,
+а обход идёт от `cwd`. Замер и разбор — [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
+Всегда ограничивай прогон своими проектами; список — `nx show projects --with-target format`.
 
 ⚠️ Это НЕ то же самое, что голое `nx format` (без `run-many -t`) — та встроенная команда Nx
 запускает Prettier, конфликтующий с dprint (правки друг друга откатывают, ломает markdown в
