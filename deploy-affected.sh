@@ -685,6 +685,15 @@ for app in $AFFECTED_APPS; do
     # DATABASE_URL for build - connect to Docker DB via localhost with dynamic port
     export DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${DB_PORT:-5432}/${DB_NAME}?schema=public"
     echo "DATABASE_URL configured for ${DB_USER:-lena_user}@localhost:${DB_PORT:-5432}/${DB_NAME}"
+  elif [ "$HAS_DB_SERVICE" -gt 0 ]; then
+    # ${app} явно объявляет db-сервис в ${COMPOSE_FILE}, но ${ENV_FILE_NAME} не найден в
+    # apps/${app}/ на момент проверки — блок выше молча пропускался целиком, включая
+    # DATABASE_URL и последующий шаг применения миграций (711 ниже, тот же гейт), без единой
+    # строки в логе деплоя. На практике это выглядит как здоровый деплой, который на самом
+    # деле оставляет БД непримигрированной — обнаружено на первом staging-деплое domwellbes
+    # (BlackCove создал .env.staging позже, чем скрипт успел его проверить).
+    echo -e "${RED}⚠️  ${ENV_FILE_NAME} not found for ${app} in $(pwd) — skipping DB startup, DATABASE_URL export and migrations for this deploy.${NC}"
+    echo -e "${RED}   If ${app} needs a database, create ${ENV_FILE_NAME} BEFORE running this deploy and re-run.${NC}"
   fi
 
   cd "$WORKSPACE_ROOT"
