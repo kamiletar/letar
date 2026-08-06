@@ -122,6 +122,22 @@ computedFields: {
 }
 ```
 
+⚠️ **Операнд сравнения с `DateTime`-колонкой — строка, а не `Date`.** ZenStack мапит `DateTime`
+на `string` в Kysely-схеме (`MapBaseType` в `@zenstackhq/orm`), хотя сам параметр поля типизирован
+как `Date`. Поэтому внутри реализации нужен явный `.toISOString()`:
+
+```typescript
+// ❌ TS2345: Argument of type 'Date' is not assignable to parameter of type
+//    'OperandValueExpressionOrList<…, "Invoice.paidAt">'
+.where('Invoice.paidAt', '>=', args.since)
+
+// ❌ то же самое с обёрткой — RawBuilder<Date> тоже не подходит
+.where('Invoice.paidAt', '>=', sql.val(args.since))
+
+// ✅ значения в колонке хранятся в UTC, toISOString() тоже UTC
+.where('Invoice.paidAt', '>=', new Date(args.since).toISOString())
+```
+
 ### Передача аргументов в запросах
 
 Параметризованное поле не возвращается «по умолчанию» (ему нужны аргументы) — обычный
@@ -161,19 +177,24 @@ await db.user.groupBy({
 
 Параметризованные computed-поля закрывают паттерн «диапазон дат считается в TS-обвязке
 (`startOfMonth`/`getMonthRangeStudioTz`), запрос тянет сырые записи, суммирование — вручную через
-`reduce` в компоненте/PDF-рендерере» — частый в `studio` (часы/выручка за период). Кандидаты
-(зафиксировано 2026-08-04):
+`reduce` в компоненте/PDF-рендерере». **Применено 2026-08-06** в `studio`:
+`Client.paidRevenueKopecks(since: DateTime)` — виджет «топ-5 клиентов по выручке» на
+`/owner/finance` больше не тянет всю историю оплаченных счетов в память, БД сама суммирует,
+сортирует и отдаёт пять строк (`where`/`orderBy` по computed-полю с `args`).
 
-- `apps/studio/src/lib/time-server.ts` (`getBudgetAlertsToSend`, `getTotalBillableSecondsForProject`)
-  — сумма `TimeEntry.durationSec` по проекту, потенциально `hoursForPeriod(start, end)`.
-- `apps/studio/src/lib/pdf/time-report-pdf.tsx` + `apps/studio/src/app/api/cabinet/time/[projectId]/pdf/route.tsx`
-  — часы и сумма за период для акта/отчёта клиенту.
-- `apps/studio/src/app/(cabinet)/cabinet/time/page.tsx` + `project-time-section.tsx`
-  — дублирует ту же логику для личного кабинета клиента.
-- `apps/studio/src/app/(owner)/owner/page.tsx` — выручка за месяц (`Payment.aggregate` уже на
-  уровне БД, но диапазон вычисляется в TS и не переиспользуется как поле модели).
+**Где параметризованное поле НЕ окупается** (разобрано там же, оставлено как есть):
 
-Миграция не выполнена — это карта возможностей на будущее, не текущее состояние `schema.zmodel`.
+- Строки уже загружены для таблицы или PDF (отчёт клиенту за месяц) — `SUM` в SQL не экономит
+  ни запроса, ни трафика, а только дублирует логику.
+- Бизнес-правило суммы сложнее `SUM` (в `studio` — `computeReportLineAmount`: `REWORK` считается
+  по нулю). TS-версия всё равно нужна для суммы каждой строки, а SQL-версия сделала бы правило
+  живущим в двух местах — это не дедуп, а его противоположность.
+- Соседние места считают «то же самое» с **разными** фильтрами (кабинет клиента показывает и
+  черновики, PDF/CSV — нет). Одно поле на всех молча поменяло бы поведение части из них.
+
+Отдельно: если поле уже есть и **без** параметров, сначала проверь, не зовут ли его обёртку
+в цикле. В `studio` `getTotalBillableSecondsForProject` был запросом-на-проект внутри `map` по
+проектам (N+1) — лечится не новым полем, а выбором существующего в общем `findMany`.
 
 ## Использование в запросах
 
