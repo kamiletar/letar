@@ -86,14 +86,14 @@ HTTP API наружу **не открывать** — он опубликова�
 вернуть `false` и **сделать `docker restart`** (см. врезку выше про `up -d`).
 
 ```bash
-mkdir -p /root/lego && chmod 700 /root/lego
+mkdir -p /home/deploy/lego && chmod 700 /home/deploy/lego
 curl -s -X POST http://127.0.0.1:8053/register
 ```
 
 Ответ содержит `username`, `password`, `fulldomain`, `subdomain`. Из него нужны:
 
 - `fulldomain` — в `CNAME`-запись `_acme-challenge` (см. таблицу выше);
-- весь JSON — в файл аккаунтов lego `/root/lego/acme-dns-accounts.json` (`chmod 600`), формат —
+- весь JSON — в файл аккаунтов lego `/home/deploy/lego/acme-dns-accounts.json` (`chmod 600`), формат —
   объект, где ключ это домен: `{"letar.best": { ...ответ регистрации... }}`.
 
 Не сохранять ответ во временный файл «пока разберусь» и не пересылать в переписку агентов —
@@ -115,7 +115,7 @@ curl -s -X POST http://127.0.0.1:8053/register
 ```bash
 docker run --rm \
   --network host \
-  -v /root/lego:/lego \
+  -v /home/deploy/lego:/lego \
   -e ACME_DNS_API_BASE=http://127.0.0.1:8053 \
   -e ACME_DNS_STORAGE_PATH=/lego/acme-dns-accounts.json \
   goacme/lego:v4 \
@@ -130,6 +130,12 @@ docker run --rm \
   не достучится.
 - Монтируется **каталог**, а не одиночный файл аккаунтов: lego может переписать хранилище, а bind
   одиночного файла на такое реагирует плохо.
+- ⚠️ **Файл аккаунтов лежит под `/home/deploy/`, а не в `/root/` — намеренно.** На s2 docker-демон
+  не видит `/root`: попытка смонтировать `/root/lego` падает с `not a directory`, хотя каталог
+  существует и это подтверждает `stat`, а тот же тест на `/home/deploy/...` проходит (проверено
+  2026-08-06). Не workaround: долгосрочный потребитель этого файла — Traefik, тоже контейнер,
+  так что путь обязан быть видим демону. Права те же (`root:root`, каталог `700`, файл `600`) —
+  пользователь `deploy` владеет родительским каталогом, но внутрь не войдёт и файл не прочитает.
 - ⚠️ **Сначала staging-директория Let's Encrypt**, как в команде выше. У боевой жёсткие лимиты на
   неудачные попытки, а это первый прогон цепочки. На боевую переключаться (убрать `--server`)
   только после зелёного staging-прогона.
@@ -159,7 +165,7 @@ dig +short CNAME _acme-challenge.letar.best
 через 90 дней в худший момент. Бэкапить:
 
 - `data/acme-dns.db` — база выданных поддоменов;
-- `/root/lego/acme-dns-accounts.json` — файл аккаунтов lego, без него клиент не сможет обновить
+- `/home/deploy/lego/acme-dns-accounts.json` — файл аккаунтов lego, без него клиент не сможет обновить
   `TXT`. Восстановить его нельзя: `disable_registration = true`, а даже с открытой регистрацией
   новый аккаунт даст новый `fulldomain`, то есть потребует правки боевой `CNAME`-записи в зоне.
 
