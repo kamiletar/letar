@@ -172,10 +172,10 @@ metadata)`, а этот вызов существует только в `useGlob
 
 - [global-video-store.ts](apps/animatrona/renderer/src/components/global-video/global-video-store.ts) —
   новое действие `loadRawSrc(src: string | null, startTime?: number)`: устанавливает `src`/`mode:
-  'embedded'`/`currentTime` напрямую, без обязательных библиотечных `PlaybackMetadata` (`metadata:
-  null`). `src === null` переводит в `mode: 'hidden'`.
+'embedded'`/`currentTime` напрямую, без обязательных библиотечных `PlaybackMetadata` (`metadata:
+null`). `src === null` переводит в `mode: 'hidden'`.
 - [player/page.tsx](apps/animatrona/renderer/src/app/player/page.tsx) — вызывает `loadRawSrc(currentVideoPath,
-  time)` в том же эффекте, что уже вычисляет `initialResumeTime` при смене видео; отдельный
+time)` в том же эффекте, что уже вычисляет `initialResumeTime` при смене видео; отдельный
   cleanup-эффект вызывает `loadRawSrc(null)` при размонтировании страницы — иначе локальный файл
   продолжил бы «играть» в video-элементе, отсоединённом от какого-либо UI (в /player нет
   mini-player minimize-логики, в отличие от `/watch`).

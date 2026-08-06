@@ -31,7 +31,7 @@ export async function findUniqueAnime(id: string, include?: Prisma.AnimeInclude)
  */
 export async function findAnimeByShikimoriId(
   shikimoriId: number,
-  include?: Prisma.AnimeInclude,
+  include?: Prisma.AnimeInclude
 ): Promise<Anime | null> {
   return prisma.anime.findUnique({
     where: { shikimoriId },

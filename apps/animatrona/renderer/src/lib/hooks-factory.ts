@@ -143,10 +143,7 @@ export function createInfiniteFindManyHook<TArgs extends { take?: number; skip?:
   queryFn: (args?: TArgs) => Promise<TResult[]>
   pageSize: number
 }) {
-  return function useInfiniteFindMany(
-    args?: InfiniteFindManyArgs<TArgs>,
-    options?: { enabled?: boolean },
-  ) {
+  return function useInfiniteFindMany(args?: InfiniteFindManyArgs<TArgs>, options?: { enabled?: boolean }) {
     return useInfiniteQuery({
       queryKey: [config.queryKey, 'infinite', args] as QueryKey,
       queryFn: ({ pageParam }) => config.queryFn({ ...(args as TArgs), take: config.pageSize, skip: pageParam }),
@@ -310,7 +307,7 @@ export function createCRUDHooks<
     TUpdateData,
     TUpdateResult,
     TDeleteResult
-  >,
+  >
 ) {
   const { keys, actions, invalidation } = config
 

@@ -92,7 +92,7 @@ export function useLibraryPage() {
       const mode = (details.value || 'individual') as ViewMode
       setViewMode(mode)
     },
-    [setViewMode],
+    [setViewMode]
   )
 
   // ===== URL sync для фильтров =====
@@ -248,7 +248,7 @@ export function useLibraryPage() {
       pinnedStatusFilter,
       reuploadStatusFilter,
       ageRatingFilter,
-    ],
+    ]
   )
 
   // SELECT — общий для пагинированного и полного запроса (не зависит от фильтров)
@@ -290,7 +290,7 @@ export function useLibraryPage() {
           select: { episodes: true },
         },
       }) satisfies Prisma.AnimeSelect,
-    [],
+    []
   )
 
   // ORDER BY
@@ -336,13 +336,13 @@ export function useLibraryPage() {
     isFetchingNextPage,
   } = useInfiniteFindManyAnime(
     { where: whereClause, select: selectClause, orderBy: orderByClause },
-    { enabled: !needsFullData },
+    { enabled: !needsFullData }
   )
 
   // Полный запрос — только когда действительно нужен весь набор (см. needsFullData выше)
   const { data: fullAnimesData, isLoading: isLoadingFull } = useFindManyAnime(
     { where: whereClause, select: selectClause, orderBy: orderByClause },
-    { enabled: needsFullData },
+    { enabled: needsFullData }
   )
 
   const animesData = needsFullData ? fullAnimesData : infiniteAnimesData?.pages.flat()
@@ -354,10 +354,7 @@ export function useLibraryPage() {
 
   // Обновить данные (после дедупликации/удаления/публикации) — инвалидирует все варианты
   // запроса аниме разом (полный, постраничный, count имеют общий префикс ключа 'animes')
-  const refetch = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ['animes'] }),
-    [queryClient],
-  )
+  const refetch = useCallback(() => queryClient.invalidateQueries({ queryKey: ['animes'] }), [queryClient])
 
   // Запрос для ВСЕХ shikimoriId (без фильтров) — нужен для корректной группировки по франшизам
   const { data: allAnimeShikimoriIds } = useFindManyAnime({
@@ -370,7 +367,7 @@ export function useLibraryPage() {
   // Множество всех загруженных shikimoriId для передачи в groupAnimeByFranchise
   const allLoadedShikimoriIds = useMemo(
     () => new Set((allAnimeShikimoriIds || []).map((a) => a.shikimoriId).filter((id): id is number => id != null)),
-    [allAnimeShikimoriIds],
+    [allAnimeShikimoriIds]
   )
 
   // Преобразуем _count.episodes в episodeCount и подмешиваем размеры из агрегации.
@@ -381,7 +378,7 @@ export function useLibraryPage() {
       (animesData || []).map((anime) => {
         const sizes = ipfsSizes?.[anime.id]
         const genreNames = (anime as unknown as { genres?: Array<{ genre: { name: string } }> }).genres?.map(
-          (g) => g.genre.name,
+          (g) => g.genre.name
         )
         return {
           ...anime,
@@ -391,7 +388,7 @@ export function useLibraryPage() {
           totalIpfsSize: sizes ? sizes.video + sizes.audio + sizes.subtitles + sizes.fonts : 0,
         }
       }),
-    [animesData, ipfsSizes],
+    [animesData, ipfsSizes]
   )
 
   const genres = genresData || []
@@ -399,7 +396,7 @@ export function useLibraryPage() {
   // Группировка аниме по франшизам
   const { franchiseGroups, standAloneAnimes } = useMemo(
     () => groupAnimeByFranchise(animes, allLoadedShikimoriIds),
-    [animes, allLoadedShikimoriIds],
+    [animes, allLoadedShikimoriIds]
   )
 
   // ===== Handlers =====
@@ -412,14 +409,14 @@ export function useLibraryPage() {
     (id: string) => {
       router.push(`/library/${id}`)
     },
-    [router],
+    [router]
   )
 
   const handleCardExport = useCallback(
     (id: string) => {
       router.push(`/library/${id}?openExport=true`)
     },
-    [router],
+    [router]
   )
 
   const handleCardRefreshMetadata = useCallback(
@@ -427,7 +424,7 @@ export function useLibraryPage() {
       router.push(`/library/${id}`)
       toaster.info({ title: 'Откройте меню аниме и нажмите "Обновить метаданные"' })
     },
-    [router],
+    [router]
   )
 
   const handleCardDelete = useCallback((id: string) => {
@@ -463,7 +460,7 @@ export function useLibraryPage() {
         })
       }
     },
-    [updateAnimeMutation, queryClient],
+    [updateAnimeMutation, queryClient]
   )
 
   // ===== Batch selection =====
@@ -517,7 +514,7 @@ export function useLibraryPage() {
         setIsBatchUpdating(false)
       }
     },
-    [selectedIds, queryClient, clearSelection],
+    [selectedIds, queryClient, clearSelection]
   )
 
   const handleBatchUnpin = useCallback(async () => {
@@ -552,17 +549,18 @@ export function useLibraryPage() {
   // Проверка: пустая библиотека без фильтров?
   // totalCount, а не animes.length — при пагинации animes может быть пустым локально,
   // пока ещё не пришла первая страница, хотя тайтлы в библиотеке есть
-  const isEmptyWithoutFilters = !isLoading
-    && (totalCount ?? animes.length) === 0
-    && !searchInput
-    && !status
-    && !yearMin
-    && !yearMax
-    && !genre
-    && !studio
-    && !fandubber
-    && !director
-    && !watchStatusFilter
+  const isEmptyWithoutFilters =
+    !isLoading &&
+    (totalCount ?? animes.length) === 0 &&
+    !searchInput &&
+    !status &&
+    !yearMin &&
+    !yearMax &&
+    !genre &&
+    !studio &&
+    !fandubber &&
+    !director &&
+    !watchStatusFilter
 
   return {
     // State

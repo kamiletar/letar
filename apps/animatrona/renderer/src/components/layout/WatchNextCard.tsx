@@ -77,19 +77,19 @@ export const WatchNextCard = memo(function WatchNextCard() {
         {/* Контент */}
         <HStack gap={3}>
           {/* Мини-постер */}
-          {suggestion.posterPath
-            ? (
-              <Image
-                src={toMediaUrl(suggestion.posterPath) ?? undefined}
-                alt={suggestion.name}
-                w="40px"
-                h="60px"
-                objectFit="cover"
-                borderRadius="sm"
-                flexShrink={0}
-              />
-            )
-            : <Box w="40px" h="60px" bg="whiteAlpha.200" borderRadius="sm" flexShrink={0} />}
+          {suggestion.posterPath ? (
+            <Image
+              src={toMediaUrl(suggestion.posterPath) ?? undefined}
+              alt={suggestion.name}
+              w="40px"
+              h="60px"
+              objectFit="cover"
+              borderRadius="sm"
+              flexShrink={0}
+            />
+          ) : (
+            <Box w="40px" h="60px" bg="whiteAlpha.200" borderRadius="sm" flexShrink={0} />
+          )}
 
           {/* Информация */}
           <VStack align="start" gap={0.5} flex={1} minW={0}>

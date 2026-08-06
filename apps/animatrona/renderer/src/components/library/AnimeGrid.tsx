@@ -1,7 +1,8 @@
 'use client'
 
 import { AspectRatio, Box, Checkbox, Grid, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
-import { memo, useEffect, useRef } from 'react'
+import { useInfiniteScrollSentinel } from '@letar/hooks'
+import { memo } from 'react'
 import { LuFilm } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -84,32 +85,16 @@ export const AnimeGrid = memo(function AnimeGrid({
     estimateSize: (cardWidth) => cardWidth * 1.5 + 170,
   })
 
-  // Infinite scroll: sentinel-элемент сразу под сеткой + IntersectionObserver.
+  // Infinite scroll: sentinel-элемент сразу под сеткой + IntersectionObserver (@letar/hooks).
   // Раньше подгрузка была завязана на индекс последней виртуализированной строки
   // (rowVirtualizer.getVirtualItems()) — ненадёжно: с overscan=3 срабатывало только когда
   // пользователь долистывал практически до самого конца уже загруженных строк, и зависело от
-  // деталей поведения виртуализатора. Sentinel — стандартный паттерн infinite scroll, не зависит
-  // от внутренностей виртуализации; rootMargin запускает подгрузку заранее, до появления в вьюпорте.
-  const loadMoreRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => {
-    if (!hasNextPage) {
-      return
-    }
-    const el = loadMoreRef.current
-    if (!el) {
-      return
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
-          onLoadMore?.()
-        }
-      },
-      { rootMargin: '800px' },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [hasNextPage, isFetchingNextPage, onLoadMore])
+  // деталей поведения виртуализатора.
+  const loadMoreRef = useInfiniteScrollSentinel({
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore: () => onLoadMore?.(),
+  })
 
   if (isLoading) {
     return (
