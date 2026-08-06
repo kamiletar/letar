@@ -4,10 +4,12 @@ import { TSPLService } from './tspl.service'
 
 describe('TSPLService', () => {
   const mockConfig: PrinterConfig = {
-    printerName: 'TestPrinter',
+    name: 'TestPrinter',
+    mode: 'mock',
     settings: {
       width: 58,
       height: 39,
+      dpi: 300,
       gap: 2,
       orientation: 0,
       speed: 4,
@@ -15,9 +17,9 @@ describe('TSPLService', () => {
       copies: 1,
     },
     connection: {
-      type: 'USB',
-      vendorId: 0x1234,
-      productId: 0x5678,
+      type: 'usb',
+      path: '/dev/usb/lp0',
+      baudRate: 9600,
     },
   }
 
