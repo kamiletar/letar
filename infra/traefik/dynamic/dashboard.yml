@@ -1,0 +1,26 @@
+# Дашборд Traefik — динамическая конфигурация (PLAN-INFRA.md §48)
+#
+# Дашборд read-only: показывает роутеры, сервисы, middleware и состояние healthcheck.
+# Завести хост через него НЕЛЬЗЯ — маршруты описываются label'ами в compose приложения.
+#
+# ⚠️ Файл с парой логин/хеш (`auth/dashboard-users`) в git НЕ хранится, он создаётся
+# на сервере — см. README, раздел «Дашборд». Пароль генерировать только инструментом
+# (`openssl rand`), не придумывать руками.
+
+http:
+  routers:
+    dashboard:
+      rule: 'Host(`traefik.s3.letar.best`)'
+      entryPoints:
+        - websecure
+      service: 'api@internal'
+      middlewares:
+        - dashboard-auth
+      tls:
+        certResolver: dns
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        usersFile: '/etc/traefik/auth/dashboard-users'
+        removeHeader: true

@@ -1,0 +1,36 @@
+# Traefik — обратный прокси для s3 (пилот, PLAN-INFRA.md §48 M1b)
+#
+# ⚠️ Пилотная фаза: NPM на s3 продолжает держать 80/443 и остаётся путём отката.
+#    Traefik слушает 8080/8443, чтобы они не дрались за порты. Переключение портов —
+#    отдельный шаг M2, после того как маршруты подтверждены.
+#
+# Запуск: docker compose up -d
+# Дашборд: https://traefik.s3.letar.best:8443 (basicAuth, см. README)
+
+services:
+  traefik:
+    image: 'traefik:v3.6.25'
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - '8080:80' # HTTP — пилотный порт, не 80
+      - '8443:443/tcp' # HTTPS
+      - '8443:443/udp' # HTTP/3 (QUIC) — тот же номер, обязательно UDP
+    environment:
+      # API acme-dns живёт на s2 и наружу не смотрит; сюда ходим через
+      # NPM-хост с Access List по IP s3 — см. README «Доступ к acme-dns».
+      ACME_DNS_API_BASE: 'https://acme-api.letar.best'
+      ACME_DNS_STORAGE_PATH: '/acme-data/acme-dns-accounts.json'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
+      - ./auth:/etc/traefik/auth:ro # файл basicAuth, не в git
+      - ./acme:/acme # acme.json с приватными ключами, не в git
+      - /home/deploy/lego:/acme-data:ro # учётные данные acme-dns, не в git
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true

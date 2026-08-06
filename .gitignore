@@ -164,6 +164,10 @@ infra/nginx-proxy-manager/letsencrypt/
 
 # acme-dns — база выданных поддоменов (per-server, в бэкапах, не в git)
 infra/acme-dns/data/
+
+# Traefik — секреты и выпущенные сертификаты (per-server, не в git)
+infra/traefik/acme/
+infra/traefik/auth/
 apps/animatrona/dist*/
 
 # Android build artifacts

@@ -1,0 +1,83 @@
+# Traefik — статическая конфигурация (PLAN-INFRA.md §48)
+#
+# Читается один раз при старте. Правка требует ПЕРЕЗАПУСКА контейнера, а не `up -d`
+# — та же грабля, что у acme-dns: compose сравнивает описание сервиса, а не содержимое
+# смонтированных файлов. Динамическая часть (роутеры, middleware) живёт в ./dynamic/
+# и перечитывается на лету.
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: INFO
+
+accessLog: {}
+
+api:
+  dashboard: true
+  # ⛔ insecure: true вешает дашборд на :8080 БЕЗ авторизации — это карта всей
+  # внутренней сети наружу. Дашборд отдаётся роутером из dynamic/dashboard.yml
+  # с basicAuth поверх TLS.
+  insecure: false
+
+entryPoints:
+  web:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ':443'
+    http3:
+      # HTTP/3 слушает UDP на том же номере порта. В compose он проброшен явно
+      # (`8443:443/udp`) — без этого QUIC просто не согласуется, а браузер молча
+      # откатится на TCP через Alt-Svc, и «не работает» будет незаметно.
+      advertisedPort: 8443
+    http:
+      tls:
+        certResolver: dns
+        domains:
+          - main: 's3.letar.best'
+            sans:
+              - '*.s3.letar.best'
+
+providers:
+  docker:
+    endpoint: 'unix:///var/run/docker.sock'
+    # Ничего не публикуем без явного `traefik.enable=true` на контейнере.
+    exposedByDefault: false
+    network: traefik-network
+
+  file:
+    directory: '/etc/traefik/dynamic'
+    watch: true
+
+certificatesResolvers:
+  # Основной резолвер: DNS-01 через собственный acme-dns на s2.
+  # Регистратора не трогает вообще — ни при выпуске, ни при продлении.
+  dns:
+    acme:
+      email: 'kami@letar.best'
+      storage: '/acme/acme.json'
+      dnsChallenge:
+        provider: 'acme-dns'
+        # Спрашиваем публичные резолверы напрямую: внутренний резолвер сервера
+        # может отдавать закэшированный отрицательный ответ и Traefik решит,
+        # что запись не разошлась.
+        resolvers:
+          - '1.1.1.1:53'
+          - '8.8.8.8:53'
+
+  # Резервный резолвер под собственные домены приложений вне зоны letar.best
+  # (для них wildcard не делаем — решение владельца). Пока не используется
+  # ни одним роутером; понадобится в M3.
+  http:
+    acme:
+      email: 'kami@letar.best'
+      storage: '/acme/acme-http.json'
+      httpChallenge:
+        entryPoint: web
