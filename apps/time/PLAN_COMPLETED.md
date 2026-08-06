@@ -147,3 +147,14 @@ bunx playwright test`, минуя зависающий в dev-режиме `nx e
 - Найдена и задокументирована ловушка: обычный `bun install` пакета `typescript@7` в корневом `package.json`
   подменяет общий bin `tsc` для всего workspace молча, несмотря на алиас-имя зависимости
 - commit `4698c97`
+
+## 2026-08-06 — Фикс деплоя: P3018 на миграции `20260728041249_init` (BlackCove)
+
+`migrate deploy` падал `relation "User" already exists` (42P07). Прод-схема (`User`,
+`ConsentLog`, `NotificationLog`, `NotificationSubscription`, 1 реальная строка в `User`) уже
+существовала, но не была записана в `_prisma_migrations` — похоже на `db push` при раннем
+поднятии окружения. Сверка колонок/индексов/FK из `psql \d` с `migration.sql` дала точное
+совпадение — не drift. Дамп прод-БД от неудачной попытки уже лежал в
+`/home/deploy/pre-migrate-dumps/`. Разрешено через `prisma migrate resolve --applied
+20260728041249_init` на s2. Повторный деплой прошёл (`exitCode 0`). Подробности — `PLAN-INFRA.md`
+§46.

@@ -135,4 +135,15 @@ Prisma/ZenStack-клиента) — вынесен в `createImageRepository()`.
 
 ---
 
-**Последнее обновление:** 2026-08-05
+## 2026-08-06 — Фикс деплоя: OOM при сборке на s2 (BlackCove)
+
+`nx build kami` дважды падал SIGKILL на s2 ровно на ~6.5 минуте. Причина — Turbopack
+(production build по умолчанию в Next 16) работает нативным Rust-процессом вне V8-хипа,
+`NODE_OPTIONS=--max-old-space-size` его не ограничивает; на s2 было всего 4.5GB свободной RAM.
+`build`-таргет в `project.json` переопределён на `next build --webpack` (тот же паттерн, что уже
+у dashboard/grandslamcup/archetest/studio). Локально webpack компилируется за 79с, на s2 — за
+3.8 мин без падения. Деплой прошёл (`exitCode 0`). Подробности — `PLAN-INFRA.md` §46.
+
+---
+
+**Последнее обновление:** 2026-08-06
