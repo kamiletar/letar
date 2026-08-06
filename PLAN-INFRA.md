@@ -2550,6 +2550,27 @@ submodule-приложений и в обоих worktree). `dprint check` по �
 origin) — тоже давно слита в `main`, `git branch -D` + `git push origin --delete`.
 `.claude/worktrees/` теперь пуст.
 
+### Дополнение 2026-08-06 (вечер): targetDefaults `dprint`→`format` и постоянная документация ловушки
+
+При аудите обнаружилось, что DoD-пункт «`CLAUDE.md` называет ту же команду, что реально
+форматирует репозиторий» был закрыт лишь наполовину: `CLAUDE.md:55` действительно называл
+`nx run-many -t dprint`, но в `nx.json` `targetDefaults` под именами `dprint`/`dprint:check`
+были **мёртвой конфигурацией** — `targetDefaults` в Nx не создают таргет, только донастраивают
+уже объявленный, а ни один `project.json` в репозитории таргет с именем `dprint` не объявлял.
+Подтверждено: `nx run kami:dprint:check` → `Cannot find target 'dprint' for project 'kami'`,
+`nx run-many -t dprint --dry-run` → «No tasks were run». Реальный работающий механизм — 22
+app-level таргета `format`/`format:check` (сохранились со старого именования, ни разу не
+подключённые к `targetDefaults`). Переименовал `targetDefaults` в `nx.json` на `format`/
+`format:check`, чтобы они реально применялись к тем же 22 проектам; `CLAUDE.md` — без изменений
+(там уже правильное имя команды, `-t dprint` в проверенном ранее пункте DoD относился именно к
+названию таргета, а не к самому вызову). Побочный инцидент при проверке — `nx run-many -t format
+--dry-run` не является настоящим dry-run для `nx:run-commands` executor и реально прогнал
+форматтеры по нескольким `libs/*` и submodule `apps/studio`; откачено полностью. Постоянная
+документация обеих ловушек (dprint не различает границы worktree/submodule + `--dry-run` не
+дожидается выполнения) — новый файл
+[dprint-worktree-submodule-scope.md](/.claude/docs/dprint-worktree-submodule-scope.md), со
+ссылкой из `CLAUDE.md` и указателем в `.claude/rules/git.md` рядом с разделом про submodule.
+
 ### ⚠️ Неполное закрытие: три библиотеки продолжали запускать Prettier (найдено и починено 2026-08-06)
 
 Закрытие выше проверяло **файлы** (`dprint check` зелёный) и **корневой конфиг**
@@ -3393,6 +3414,38 @@ time, studio, aprel8008, domwellbes) деплой на s2 не запускал 
    единичный баг, а системный пробел в пайплайне.
 
 **Приоритет:** высокий — блокирует прод-деплой минимум 9 приложений прямо сейчас.
+
+### Дополнение 2026-08-06: 4 либы, ранее исключённые из soft-gate Step 2.45, все починены
+
+Мягкий гейт `nx run-many -t typecheck --projects="$LIB_PROJECTS"` в Step 2.45 (не хардблокирует
+деплой) находил 4 либы с собственными багами, не связанными с самим §43. Все четыре починены:
+
+- **`@letar/deploy-mcp`, `@letar/deploy-engine`, `label-printer-core`** — `TS6307` (`tsc --build`
+  требует, чтобы каждый достижимый из spec-файла источник был явно в file list проекта). Узкий
+  `include` в `tsconfig.spec.json` (только `*.spec.ts`/`*.test.ts`/`*.d.ts`) не покрывал обычные
+  `.ts`-исходники, которые эти spec-файлы импортируют. Расширил `include` до `src/**/*.ts` во
+  всех трёх. У `label-printer-core` фикс вскрыл отдельный замаскированный баг — тестовая
+  фикстура `tspl.service.spec.ts` не соответствовала актуальной `config.schema.ts` (нет `dpi`,
+  `printerName` вместо `name`, `mode` не указан, `connection.type` в неверном регистре с
+  несуществующими полями вместо `path`/`baudRate`) — приведена в соответствие.
+- **`@letar/form-mcp`** — на первый взгляд другой баг (`TS2769`/`TS2322` на каждом
+  `server.tool()`/`server.prompt()`, "ZodString is missing properties from ZodType"), но
+  оказался уже задокументированной в `.claude/docs/mcp-server-pattern.md` ловушкой: `package.json`
+  держал `@modelcontextprotocol/sdk` на диапазоне `"^1.29.0"` вместо точного пина, из-за чего bun
+  резолвил либу на SDK 1.30.0 (нужен `apps/synth`), чья внутренняя `zod` (4.4.3) разошлась с
+  `zod`, который использует сама либа (4.3.6). Точный пин `"1.29.0"` (по образцу `deploy-mcp`/
+  `studio-time-mcp`) + `bun install` — типы снова совпадают.
+
+⚠️ **16 других либ ещё держат тот же узкий `include`** в `tsconfig.spec.json`, что было причиной
+`TS6307` у первых трёх (`auth`, `consent`, `electron-storage`, `email`, `format-utils`, `forms`,
+`generators`, `github-releases`, `infra-config`, `mcp-server-kit`, `number-words`, `pin-auth`,
+`redis-client`, `seo`, `studio-time-mcp`, `zenstack-fragments`) — сейчас у них либо явный
+typecheck-таргет, минующий аггрегированный `tsconfig.json` (как `auth`/`form-mcp` до этой
+сессии), либо просто нет ещё spec-файла с межфайловым импортом, который бы вскрыл баг. Латентный,
+не проявившийся риск — см. предложение по общему пресету в конце сессии (не применялось).
+
+**Все 47 либ монорепо теперь зелёные на `nx typecheck`** — soft-gate Step 2.45 прошёл впервые
+целиком без предупреждений.
 
 ---
 
