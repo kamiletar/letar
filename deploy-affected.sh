@@ -439,20 +439,14 @@ if [ -n "$LIB_PROJECTS" ]; then
   if [ "$SKIP_NX_CACHE" = true ]; then
     LIB_TYPECHECK_CACHE_FLAG="--skip-nx-cache"
   fi
-  # Не хардгейтим деплой этим шагом. Замер 2026-08-06 нашёл 4 либы с собственным, не связанным
-  # с этим фиксом багом typecheck — 3 из них (@letar/deploy-mcp, @letar/deploy-engine,
-  # label-printer-core) починены (узкий include в tsconfig.spec.json не покрывал обычные .ts
-  # исходники, TS6307 при tsc --build). @letar/form-mcp остаётся сломанной отдельным багом:
-  # server.prompt() из @modelcontextprotocol/sdk@1.29.0 типизирован через собственный compat-слой
-  # zod-compat.d.ts (AnySchema = z3.ZodTypeAny | z4.$ZodType из 'zod/v4/core'), а form-mcp
-  # передаёт схемы из обычного `import { z } from 'zod'` — структурно не то же самое, что
-  # 'zod/v4/core', отсюда "ZodString is missing properties from ZodType". Не duplicate-install
-  # (в bun.lock один физический zod@4.4.3) и не версия пина в package.json — нужна отдельная
-  # правка кода form-mcp/src/index.ts под compat-слой SDK, не тема этого фикса. Жёсткий exit 1
+  # Не хардгейтим деплой этим шагом: даже полностью зелёный typecheck по всем libs/* — это
+  # подстраховка, не гарантия (замер 2026-08-06 нашёл и починил 4 отдельных бага в 4 либах,
+  # два из них — рассинхрон версий SDK/zod между копиями, невидимый до полного пересоздания
+  # tsbuildinfo, см. PLAN-INFRA.md §43 и .claude/docs/mcp-server-pattern.md). Жёсткий exit 1
   # здесь заблокировал бы ВСЕ деплои поломкой не связанных с деплоем tool-либ. Если сломался
   # реально нужный lib — это всплывёт явной ошибкой ниже, на сборке самого приложения.
   if ! nx run-many -t typecheck --projects="$LIB_PROJECTS" $LIB_TYPECHECK_CACHE_FLAG; then
-    echo -e "${YELLOW}⚠️  Часть libs/* не прошла typecheck (известный — @letar/form-mcp, см. PLAN-INFRA.md §43). Продолжаю — сборка приложения ниже покажет, было ли это критично.${NC}"
+    echo -e "${YELLOW}⚠️  Часть libs/* не прошла typecheck (см. PLAN-INFRA.md §43). Продолжаю — сборка приложения ниже покажет, было ли это критично.${NC}"
   else
     echo -e "${GREEN}✅ libs/*/dist up to date${NC}"
   fi

@@ -129,10 +129,12 @@ Argument of type 'string' is not assignable to parameter of type 'ZodRawShapeCom
 grep -n '"@letar/deploy-mcp"' -A3 bun.lock | grep modelcontextprotocol
 ```
 
-Затем `bun install` заново. `libs/studio-time-mcp` (самая новая) с самого начала заведена с
-точным пином `1.29.0` — новые MCP-либы следует создавать по её образцу, а не по `deploy-mcp`/
-`form-mcp`, у которых диапазон остался как техдолг. `@letar/mcp-server-kit` от этой ловушки
-не зависит — сам SDK не импортирует, версию `@modelcontextprotocol/sdk` не резолвит.
+Затем `bun install` заново. Все три существующие MCP-либы (`deploy-mcp`, `form-mcp`,
+`studio-time-mcp`) сейчас на точном пине `1.29.0` — `form-mcp` был последним с диапазоном,
+починен 2026-08-06 (диагностировано через `nx typecheck @letar/form-mcp`: `No overload matches
+this call ... ZodRawShapeCompat` на каждом `server.tool()`/`server.prompt()`; после точного пина
+и `bun install` — зелёный). `@letar/mcp-server-kit` от этой ловушки не зависит — сам SDK не
+импортирует, версию `@modelcontextprotocol/sdk` не резолвит.
 
 ## Формат ответа тула — `@letar/mcp-server-kit`
 
