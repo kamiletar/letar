@@ -2,5 +2,9 @@
   "name": "form-docs",
   "version": "0.1.7",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "nx": {
+    "name": "form-docs",
+    "implicitDependencies": ["@letar/forms", "@letar/chakra-provider", "@letar/analytics", "@letar/seo"]
+  }
 }

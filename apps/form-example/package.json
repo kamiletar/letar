@@ -1,0 +1,9 @@
+{
+  "name": "form-example",
+  "version": "0.1.1",
+  "private": true,
+  "nx": {
+    "name": "form-example",
+    "implicitDependencies": ["@letar/forms", "@letar/demo-protection", "@letar/analytics", "@letar/seo"]
+  }
+}
