@@ -45,28 +45,53 @@ proxy host сюда его тоже нужно дописать вручную, 
 
 ### NPM на s2 (npm.s2.letar.best) — единственный production
 
-| Домен                            | Forward Host           | Port | SSL | Примечания                                   |
-| -------------------------------- | ---------------------- | ---- | --- | -------------------------------------------- |
-| mandala.letar.best               | mandala-app            | 3004 | LE  | PWA: sw.js без кэша                          |
-| kami.letar.best                  | kami-app               | 3005 | LE  | CMS                                          |
-| pravda.letar.best                | pravda-app             | 3007 | LE  | —                                            |
-| animatrona.letar.best            | animatrona-landing-app | 3008 | LE  | Landing page                                 |
-| stats.letar.best                 | umami-app              | 3000 | LE  | Аналитика Umami                              |
-| sync.letar.best, sync.rosstil.ru | 172.17.0.1             | 8888 | LE  | Relisio sync                                 |
-| направа.рф                       | driving-school-app     | 3003 | LE  | WebSocket (чат)                              |
-| dash.letar.best                  | dashboard-app          | 3002 | LE  | SSE config                                   |
-| animatrona-tracker.letar.best    | animatrona-tracker-app | 3010 | LE  | Аниме трекер                                 |
-| anime.letar.best                 | animatrona-web-app     | 3011 | LE  | Аниме веб (IPFS)                             |
-| svoichuzhie.letar.best           | svoichuzhie-app        | 3021 | LE  | Staging (noindex)                            |
-| gateway.letar.best               | animatrona-gateway     | 8080 | LE  | IPFS Gateway + cache                         |
-| domwellbes.ru, www.domwellbes.ru | domwellbes-app         | 3025 | LE  | М1, ещё не задеплоен (502 до первого деплоя) |
-| npm.s2.letar.best                | localhost              | 81   | LE  | Админка NPM s2                               |
+> **Сверено с сервером 2026-08-06** (`grep` по `data/nginx/proxy_host/*.conf` — поля
+> `server_name` / `set $server` / `set $port`, снимал BlackCove в рамках `PLAN-INFRA.md` §49).
+> Всего на s2 **26** proxy host'ов. Ниже — те, что на `*.letar.best`; приложения на собственных
+> коммерческих доменах в публичный репозиторий не выносим (см.
+> [public-repo-hygiene.md](/.claude/rules/public-repo-hygiene.md)), полная таблица всех 26 —
+> в приватных доках, `.claude/private/INFRA-PROXY-HOSTS.md`.
 
-Остальные production-приложения (auth-hub, archetest, grandslamcup, time, form-docs,
-form-example, aira-web, kami-key-the-landing, letar-landing, dsperevod, aboi и т.д.) тоже
-проксируются через NPM на s2 — актуальный список приложений сервера см.
-[deploy-agent.md § Маппинг серверов](/.claude/commands/deploy-agent.md#маппинг-серверов),
-их конкретные proxy hosts сюда ещё не сведены.
+| conf | Домен                         | Forward Host             | Port | SSL | Примечания           |
+| ---- | ----------------------------- | ------------------------ | ---- | --- | -------------------- |
+| 1    | npm.s2.letar.best             | localhost                | 81   | LE  | Админка NPM s2       |
+| 7    | dash.letar.best               | dashboard-app            | 3002 | LE  | SSE config           |
+| 11   | gateway.letar.best            | animatrona-gateway       | 8080 | LE  | IPFS Gateway + cache |
+| 12   | auth.letar.best               | auth-hub-app             | 3010 | LE  | Ключница (OIDC)      |
+| 13   | archetest.letar.best          | archetest-app            | 3012 | LE  | —                    |
+| 14   | time.letar.best               | time-app                 | 3013 | LE  | —                    |
+| 15   | forms.letar.best              | form-docs-app            | 3020 | LE  | Docs @letar/forms    |
+| 16   | forms-example.letar.best      | form-example-app         | 3022 | LE  | Примеры @letar/forms |
+| 18   | grandslamcup.letar.best       | grandslamcup-app         | 3016 | LE  | —                    |
+| 19   | aira.letar.best               | aira-web-app             | 3017 | LE  | —                    |
+| 20   | gsc-test.letar.best           | grandslamcup-staging-app | 3018 | LE  | Staging grandslamcup |
+| 21   | mandala.letar.best            | mandala-app              | 3004 | LE  | PWA: sw.js без кэша  |
+| 22   | kami.letar.best               | kami-app                 | 3005 | LE  | CMS                  |
+| 23   | pravda.letar.best             | pravda-app               | 3007 | LE  | —                    |
+| 24   | animatrona.letar.best         | animatrona-landing-app   | 3008 | LE  | Landing page         |
+| 25   | animatrona-tracker.letar.best | animatrona-tracker-app   | 3010 | LE  | Аниме трекер         |
+| 26   | kamikeythe.letar.best         | kami-key-the-landing-app | 3011 | LE  | —                    |
+| 27   | letar.best                    | letar-landing-app        | 3015 | LE  | Корневой домен       |
+| 28   | stats.letar.best              | umami-app                | 3000 | LE  | Аналитика Umami      |
+| 33   | studio.letar.best             | studio-app               | 3024 | LE  | —                    |
+
+Пропуски в нумерации `conf` (2–6, 8, 10, 17, 29–32, 34) — это либо удалённые когда-то хосты,
+либо приложения на коммерческих доменах, вынесенные в приватные доки.
+
+⚠️ **Все 26 форвардят по имени контейнера через `kami-network`** — ни одного `172.17.0.1` во
+всём списке, в отличие от s3 (см. ниже), где весь staging идёт через хост-гейтвей. Практическое
+следствие: хостовая публикация app-портов на s2 не нужна ни одному приложению, и порты
+3002/3017/3024 переведены на `127.0.0.1` (`PLAN-INFRA.md` §49). Заводишь новый хост на s2 —
+пиши **имя контейнера**, а не `172.17.0.1`.
+
+⚠️ **Две строки прежней версии этой таблицы в снимке не нашлись** — `anime.letar.best`
+(`animatrona-web-app:3011`) и пара хостов Resilio sync (`172.17.0.1:8888`).
+Либо их удалили из NPM и забыли убрать отсюда, либо они живут не на s2. Третья разошлась
+по домену: `svoichuzhie` теперь на собственном домене, а не на поддомене `letar.best`.
+Это ровно та деградация ручной таблицы, ради которой затеян §48 (конфигурация прокси не в git).
+
+⚠️ **`media-nginx` в NPM отсутствует вовсе**, хотя на s2 публикует `0.0.0.0:3101`. Значит его
+трафик идёт мимо этого прокси. Не трогать вслепую — сначала найти потребителя.
 
 ### NPM на s3 (обнаружен и задокументирован 2026-07-11 — БД `admin@letar.best`, см. `reference_npm_s3.md` в памяти агента)
 
