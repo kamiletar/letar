@@ -5,6 +5,18 @@
   "projectType": "application",
   "tags": ["type:app", "scope:infra", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/kami-key-the"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "dev": {
       "executor": "nx:run-commands",
       "options": {

@@ -5,6 +5,18 @@
   "projectType": "application",
   "tags": ["type:app", "scope:form-example", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/form-example"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {

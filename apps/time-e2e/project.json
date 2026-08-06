@@ -6,6 +6,18 @@
   "tags": ["type:e2e", "scope:time", "owner:letar"],
   "implicitDependencies": ["time"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/time-e2e"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "e2e": {
       "executor": "@nx/playwright:playwright",
       "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],

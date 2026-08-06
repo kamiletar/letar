@@ -6,6 +6,18 @@
   "tags": ["type:app", "scope:infra", "owner:letar"],
   "implicitDependencies": ["@letar/email", "@letar/redis-client"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/dashboard-agent"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "build": {
       "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
