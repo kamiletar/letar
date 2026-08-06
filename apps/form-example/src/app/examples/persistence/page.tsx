@@ -36,7 +36,9 @@ export default function PersistencePage() {
         setInitialValue(JSON.parse(saved))
         setHasSaved(true)
       }
-    } catch {}
+    } catch {
+      // некорректные данные в localStorage — используем значения по умолчанию
+    }
   }, [])
 
   const handleClear = useCallback(() => {
@@ -51,8 +53,8 @@ export default function PersistencePage() {
       <div>
         <Heading size="lg">Form Persistence</Heading>
         <Text color="fg.muted">
-          Form data is saved to <Code>localStorage</Code> on submit. Click "Save Draft" to persist, then refresh the
-          page — your data is restored!
+          Form data is saved to <Code>localStorage</Code>{' '}
+          on submit. Click "Save Draft" to persist, then refresh the page — your data is restored!
         </Text>
       </div>
 

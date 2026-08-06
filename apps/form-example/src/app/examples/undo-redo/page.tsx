@@ -31,7 +31,9 @@ export default function UndoRedoExamplePage() {
       <Form
         schema={ArticleSchema}
         initialValue={{ title: '', slug: '', content: '', published: false }}
-        onSubmit={async () => {}}
+        onSubmit={() => {
+          // демо: отправка не требуется
+        }}
       >
         <Form.Field.String name="title" />
         <Form.Field.String name="slug" />

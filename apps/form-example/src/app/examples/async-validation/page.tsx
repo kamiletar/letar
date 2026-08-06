@@ -7,7 +7,9 @@ import { useState } from 'react'
 /** Имитация проверки email */
 async function checkEmail(value: unknown): Promise<string | undefined> {
   await new Promise((r) => setTimeout(r, 800))
-  if (String(value) === 'taken@example.com') return 'Email already registered'
+  if (String(value) === 'taken@example.com') {
+    return 'Email already registered'
+  }
   return undefined
 }
 

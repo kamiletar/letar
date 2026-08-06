@@ -79,7 +79,9 @@ export default function ThemingPage() {
         <Form
           schema={Schema}
           initialValue={{ name: '', email: '', plan: 'starter', agree: false }}
-          onSubmit={async () => {}}
+          onSubmit={() => {
+            // демо: отправка не требуется
+          }}
         >
           <Stack gap={4}>
             <Form.Field.String name="name" />
@@ -100,7 +102,9 @@ export default function ThemingPage() {
           <Form
             schema={Schema}
             initialValue={{ name: '', email: '', plan: 'growth', agree: false }}
-            onSubmit={async () => {}}
+            onSubmit={() => {
+              // демо: отправка не требуется
+            }}
           >
             <Stack gap={4}>
               <Form.Field.String name="name" />
