@@ -12,7 +12,8 @@
 
 services:
   acme-dns:
-    image: 'joohoi/acme-dns:v2.0.2'
+    # ⚠️ НЕ поднимать до v2.x — там сломан sqlite3, см. README «Версия образа»
+    image: 'joohoi/acme-dns:v1.0'
     container_name: acme-dns
     restart: unless-stopped
     ports:
