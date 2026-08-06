@@ -3798,10 +3798,19 @@ through the ufw firewall settings, effectively ignoring your firewall configurat
 Заменить в `docker-compose.production.yml` всех приложений `- '<port>:5432'` на
 `- '127.0.0.1:<port>:5432'`; то же для 3002/3017/3024/3100/3101.
 Работает без firewall вообще, едет обычным деплоем per-app, `deploy-affected.sh` не ломается
-(он и так ходит через `localhost`). Проверить два места, которые ходят к портам не с самого
-хоста: SSH-туннель deploy-mcp (`localhost:3100` на хосте — не пострадает) и `postgres-*` MCP
-из `.mcp.json`, если какой-то из них подключается к s2 напрямую по внешнему IP — такие
-переводить на SSH-туннель.
+(он и так ходит через `localhost`).
+
+✅ **Потребители проверены — ни один не сломается:**
+
+- `postgres-kami-prod`, `postgres-kami-prod-write`, `postgres-studio-prod` в `.mcp.json` уже
+  ходят **через SSH-туннель** (`pg-wrapper.mjs … --tunnel <локальный> root@s2.letar.best
+  <удалённый>`). Туннель подключается к `localhost:<порт>` уже на самом s2, то есть привязка
+  к `127.0.0.1` для него прозрачна;
+- `deploy-mcp` достаёт `dashboard-agent` тоже туннелем;
+- миграции/сид в `deploy-affected.sh` идут с хоста на `localhost:${DB_PORT}`.
+
+Прямых подключений к s2 по внешнему IP:порту не нашлось ни одного. Уровень 1 — чистая правка
+compose без изменений в тулинге.
 
 ✅ **Парсер `deploy-affected.sh` править не нужно — проверено.** Опасение было в разборе
 `DB_PORT=$(grep -A 1 "ports:" … | grep -o "[0-9]\+:5432" | cut -d: -f1 | head -1)`: на строке
