@@ -3242,3 +3242,54 @@ time, studio, aprel8008, domwellbes) деплой на s2 не запускал 
 **Приоритет:** высокий — блокирует прод-деплой минимум 9 приложений прямо сейчас.
 
 ---
+
+## §45 — Аудит «падающих не по своей вине» `nx build` на чистом чекауте ✅ ЗАКРЫТО (2026-08-06)
+
+При точечной проверке `nx build <app>` в сессии по трекам PLAN-INFRA (добавление `libs/seo`/
+`libs/github-releases`) всплыли три падения сборки в приложениях, не связанных с самой правкой
+(подтверждено откатом правок сессии — падают и на чистом состоянии). Разобрано каждое отдельно,
+не чинилось вслепую скопом.
+
+**`apps/synth` — реальный баг конфигурации, починен.** `nx build synth` падал `TS6305: Output
+file '.../out-tsc/spec/vitest.config.d.ts' has not been built from source file
+'.../vitest.config.ts'`. Похож по коду ошибки на §43 выше, но **другая причина**: там —
+недособранные `libs/*/dist`, здесь — `apps/synth/tsconfig.json` был единственным во всём
+монорепо Next.js-приложением с `"include": ["**/*.ts", ...]` вместо `"src/**/*.ts"` — голый
+паттерн подтягивал корневой `vitest.config.ts` в основной (non-composite) tsc-прогон, а его
+типы существуют только через `composite`-ссылку на `tsconfig.spec.json`. Проверено: не стейл-
+артефакт (падает и после `rm -rf out-tsc *.tsbuildinfo .next/cache/.tsbuildinfo`), не
+единичный для монорепо паттерн (сверены все Next.js-приложения с кастомным, не через
+`tsconfig.next-app.json`, tsconfig — только `synth` матчил и `vitest.config.ts`, и держал
+`tsconfig.spec` reference). Фикс — сузить `include` до `src/**/*.ts`/`src/**/*.tsx` (по образцу
+остальных приложений); `nx build synth` и `nx typecheck:tsgo synth` зелёные.
+
+**`apps/form-example` и `apps/auth-hub` — не баги, пробел в документации по локальному
+сетапу.** Оба падают из-за отсутствующего локального окружения, а не кода:
+
+- `form-example` — нет `DATABASE_URL` в `.env.local` (только в `.env.docker` для деплоя),
+  `nx zenstack:generate form-example` падает `PrismaConfigEnvError`, дальше типы `PrismaClient`
+  устаревшие → `TS2339` на несвязанных с правкой полях.
+- `auth-hub` — `DATABASE_URL` есть, но `AUTH_ENCRYPTION_KEY` в `.env.local` нет; `next build`
+  всегда ставит `NODE_ENV=production` (уже задокументированная ловушка,
+  [env-files.md](/.claude/rules/env-files.md)), поэтому production-проверка обязательности
+  ключа в `src/lib/db.ts` роняет сборку даже локально: `Failed to collect page data for
+  /api/consent`.
+
+Оба — состояние конкретной рабочей копии (недостающий локальный `.env.local`), не системная
+проблема кода. Задокументирован общий паттерн в
+[environment.md § `nx build <app>` для приложений с БД требует настроенного локального
+окружения](/.claude/docs/environment.md) — как отличать «нет `DATABASE_URL` вовсе» от «есть
+`DATABASE_URL`, но не хватает production-required секрета», и что чинить в каждом случае.
+Секреты `form-example`/`auth-hub` не генерировались автоматически (правило security.md — только
+явным действием владельца через генератор).
+
+**Систематическая проверка по всем 19 приложениям с `schema.zmodel`.** Гипотеза «у большинства
+нет `DATABASE_URL` локально, поэтому массово падают» не подтвердилась: 16 из 19 имеют
+`DATABASE_URL` в `.env.local`, только `form-example` (описан выше) и два не-веб-приложения
+(`animatrona`, `label-printer-desktop` — Electron, своя модель окружения) — без него. Массового
+пробела нет, широкий прогон `nx build` по всем приложениям не потребовался.
+
+`apps/aboi` (Turbopack filesystem-tracing в `image-upload-route.ts`) сознательно не трогался —
+уже отдельно отслеживается в `PLAN.md`, смешивать с этой находкой не стал.
+
+---

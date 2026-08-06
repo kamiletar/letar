@@ -334,6 +334,29 @@ nx test infra-config
 
 - `NEXT_PUBLIC_YM_COUNTER_ID` - ID счётчика Яндекс Метрики
 
+### ⚠️ `nx build <app>` для приложений с БД требует настроенного локального окружения
+
+`next build` собирает production-бандл — в том числе прогоняет `generateStaticParams`/collect
+page data для серверных роутов, которым нужен реальный `PrismaClient`/секреты. На свежем чекауте
+без локальной настройки это падает по двум разным причинам, которые легко спутать с багом
+в коде:
+
+1. **Нет `DATABASE_URL` вовсе** — `zenstack:generate` падает `PrismaConfigEnvError`, типы
+   `PrismaClient` не генерируются, и `nx build`/`nx typecheck:tsgo` сыплют `TS2339: Property 'x'
+   does not exist on type 'PrismaClient'` в местах, никак не связанных с правкой. Чинится:
+   `.env.local` с `DATABASE_URL` для этого приложения (см. `mcp-postgres-setup` skill) → `nx
+   zenstack:generate <app>`.
+2. **`DATABASE_URL` есть, но не хватает секрета, требуемого в production-режиме** — `next build`
+   всегда выставляет `NODE_ENV=production` (см. [env-files.md § NODE_ENV ловушка](/.claude/rules/env-files.md)), поэтому любая серверная проверка вида `if
+   (NODE_ENV === 'production' && !process.env.MY_SECRET) throw` сработает и на локальной сборке.
+   Симптом — `Failed to collect page data for /api/...` с причиной в `[cause]`. Чинится: добавить
+   недостающий секрет в `.env.local` (генерировать через `openssl rand`, не придумывать вручную —
+   см. `security.md`), а не править саму проверку.
+
+Ни то, ни другое не значит, что сборка сломана в коде — это состояние конкретной рабочей копии,
+где не выполнен полный локальный сетап приложения. Перед тем как чинить «падающий build»,
+сначала проверь `.env.local` этого приложения на оба случая.
+
 ## Разработка shared библиотек
 
 ### Создание новой библиотеки
