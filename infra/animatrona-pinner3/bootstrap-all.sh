@@ -19,7 +19,7 @@ RELAY_PEER_ID="12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA"
 PINNER1_PEER_ID="12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j"
 GATEWAY_PEER_ID="12D3KooWJtQXuNd4g5w3fH7bCSj4o4DA1PLBFjRGowiBbf6zqxa6"
 
-RELAY_REGISTER_URL="http://193.37.68.73:41080/register"
+RELAY_REGISTER_URL="http://31.56.180.161:41080/register"
 
 echo "=== Бутстрап всех IPFS нод ==="
 echo ""
@@ -49,10 +49,10 @@ register_on_relay "$GATEWAY_PEER_ID" "gateway"
 
 echo ""
 
-# --- 2. Обновить peering на pinner1 (mail, 193.37.68.73) ---
+# --- 2. Обновить peering на pinner1 (mail, 31.56.180.161) ---
 echo "--- 2. Pinner1 (mail) — обновление peering (pinner2 → pinner3) ---"
-ssh root@193.37.68.73 "docker exec animatrona-pinner ipfs config --json Peering.Peers '[
-  {\"ID\": \"$RELAY_PEER_ID\", \"Addrs\": [\"/ip4/193.37.68.73/tcp/41001\"]},
+ssh root@31.56.180.161 "docker exec animatrona-pinner ipfs config --json Peering.Peers '[
+  {\"ID\": \"$RELAY_PEER_ID\", \"Addrs\": [\"/ip4/31.56.180.161/tcp/41001\"]},
   {\"ID\": \"$GATEWAY_PEER_ID\", \"Addrs\": [\"/ip4/185.28.85.195/tcp/42001\"]},
   {\"ID\": \"$PINNER3_PEER_ID\", \"Addrs\": [\"/ip4/188.127.235.38/tcp/4001\"]}
 ]' && docker-compose restart"
@@ -62,8 +62,8 @@ echo ""
 # --- 3. Обновить peering на gateway (s2, 185.28.85.195) ---
 echo "--- 3. Gateway (s2) — обновление peering (pinner2 → pinner3) ---"
 ssh root@s2.letar.best "docker exec animatrona-gateway ipfs config --json Peering.Peers '[
-  {\"ID\": \"$RELAY_PEER_ID\", \"Addrs\": [\"/ip4/193.37.68.73/tcp/41001\"]},
-  {\"ID\": \"$PINNER1_PEER_ID\", \"Addrs\": [\"/ip4/193.37.68.73/tcp/43001\"]},
+  {\"ID\": \"$RELAY_PEER_ID\", \"Addrs\": [\"/ip4/31.56.180.161/tcp/41001\"]},
+  {\"ID\": \"$PINNER1_PEER_ID\", \"Addrs\": [\"/ip4/31.56.180.161/tcp/43001\"]},
   {\"ID\": \"$PINNER3_PEER_ID\", \"Addrs\": [\"/ip4/188.127.235.38/tcp/4001\"]}
 ]' && cd /root/animatrona-gateway && docker compose restart"
 echo "  ✅ Gateway peering обновлён"
@@ -80,7 +80,7 @@ ssh root@188.127.235.38 "docker exec animatrona-pinner3 ipfs swarm peers" 2>/dev
 
 echo ""
 echo "Pinner1 peers:"
-ssh root@193.37.68.73 "docker exec animatrona-pinner ipfs swarm peers" 2>/dev/null || echo "  (не удалось подключиться)"
+ssh root@31.56.180.161 "docker exec animatrona-pinner ipfs swarm peers" 2>/dev/null || echo "  (не удалось подключиться)"
 
 echo ""
 echo "Gateway peers:"

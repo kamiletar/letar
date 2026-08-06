@@ -58,7 +58,7 @@ PINNER3_PEER_ID="12D3KooWP5hrqw8HHXUGaepSSRhsa8isoTAbcnRnKkjgHhWRLxiV"
 docker exec $CONTAINER ipfs config --json Peering.Peers "[
   {
     \"ID\": \"$RELAY_PEER_ID\",
-    \"Addrs\": [\"/ip4/193.37.68.73/tcp/41001\"]
+    \"Addrs\": [\"/ip4/31.56.180.161/tcp/41001\"]
   },
   {
     \"ID\": \"$GATEWAY_PEER_ID\",
@@ -73,7 +73,7 @@ docker exec $CONTAINER ipfs config --json Peering.Peers "[
 # --- Bootstrap ---
 # Relay + Pinner3 + стандартные (БЕЗ pinner2)
 docker exec $CONTAINER ipfs bootstrap rm --all
-docker exec $CONTAINER ipfs bootstrap add /ip4/193.37.68.73/tcp/41001/p2p/$RELAY_PEER_ID
+docker exec $CONTAINER ipfs bootstrap add /ip4/31.56.180.161/tcp/41001/p2p/$RELAY_PEER_ID
 docker exec $CONTAINER ipfs bootstrap add /ip4/188.127.235.38/tcp/4001/p2p/$PINNER3_PEER_ID
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa
@@ -107,11 +107,11 @@ echo ""
 echo "PeerId:     $PEER_ID"
 echo "AUTH_TOKEN: $AUTH_TOKEN"
 echo ""
-echo "API:   http://193.37.68.73:5011/api/v0/"
+echo "API:   http://31.56.180.161:5011/api/v0/"
 echo "Swarm: 43001/tcp+udp"
 echo ""
 echo "Для добавления в трекер:"
-echo "  URL:        http://193.37.68.73:5011"
+echo "  URL:        http://31.56.180.161:5011"
 echo "  Auth Token: $AUTH_TOKEN"
 echo ""
 echo "=== ВНИМАНИЕ: взаимный peering ==="
@@ -119,7 +119,7 @@ echo "На s2 (gateway) и pinner3 нужно добавить этот пинн
 echo ""
 echo "Gateway (s2):"
 echo "  docker exec animatrona-gateway ipfs config --json Peering.Peers.+ '{"
-echo "    \"ID\": \"$PEER_ID\", \"Addrs\": [\"/ip4/193.37.68.73/tcp/43001\"]"
+echo "    \"ID\": \"$PEER_ID\", \"Addrs\": [\"/ip4/31.56.180.161/tcp/43001\"]"
 echo "  }'"
 echo ""
 echo "Pinner3 уже знает про pinner1 если setup.sh запущен после обновления."

@@ -4,10 +4,10 @@
 
 ## Текущий деплой
 
-- **Сервер:** 193.37.68.73
+- **Сервер:** 31.56.180.161 (mail.letar.best)
 - **Порт:** 41001 (TCP + UDP)
 - **PeerId:** `12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA`
-- **Multiaddr:** `/ip4/193.37.68.73/tcp/41001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA`
+- **Multiaddr:** `/ip4/31.56.180.161/tcp/41001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA`
 
 ## Характеристики
 

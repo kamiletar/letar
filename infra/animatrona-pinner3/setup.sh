@@ -89,11 +89,11 @@ GATEWAY_PEER_ID="12D3KooWJtQXuNd4g5w3fH7bCSj4o4DA1PLBFjRGowiBbf6zqxa6"
 docker exec $CONTAINER ipfs config --json Peering.Peers "[
   {
     \"ID\": \"$RELAY_PEER_ID\",
-    \"Addrs\": [\"/ip4/193.37.68.73/tcp/41001\"]
+    \"Addrs\": [\"/ip4/31.56.180.161/tcp/41001\"]
   },
   {
     \"ID\": \"$PINNER1_PEER_ID\",
-    \"Addrs\": [\"/ip4/193.37.68.73/tcp/43001\"]
+    \"Addrs\": [\"/ip4/31.56.180.161/tcp/43001\"]
   },
   {
     \"ID\": \"$GATEWAY_PEER_ID\",
@@ -104,8 +104,8 @@ docker exec $CONTAINER ipfs config --json Peering.Peers "[
 # --- Bootstrap ---
 # Relay первым, pinner1 вторым, затем стандартные
 docker exec $CONTAINER ipfs bootstrap rm --all
-docker exec $CONTAINER ipfs bootstrap add /ip4/193.37.68.73/tcp/41001/p2p/$RELAY_PEER_ID
-docker exec $CONTAINER ipfs bootstrap add /ip4/193.37.68.73/tcp/43001/p2p/$PINNER1_PEER_ID
+docker exec $CONTAINER ipfs bootstrap add /ip4/31.56.180.161/tcp/41001/p2p/$RELAY_PEER_ID
+docker exec $CONTAINER ipfs bootstrap add /ip4/31.56.180.161/tcp/43001/p2p/$PINNER1_PEER_ID
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb
@@ -190,7 +190,7 @@ sleep 5
 PEER_ID=$(docker exec $CONTAINER ipfs id -f='<id>')
 echo ""
 echo "Регистрация на relay-сервере..."
-REGISTER_RESULT=$(curl -s -w "\n%{http_code}" -X POST http://193.37.68.73:41080/register \
+REGISTER_RESULT=$(curl -s -w "\n%{http_code}" -X POST http://31.56.180.161:41080/register \
   -H "Content-Type: application/json" \
   -d "{\"peer_id\": \"$PEER_ID\", \"app_version\": \"pinner3\"}")
 HTTP_CODE=$(echo "$REGISTER_RESULT" | tail -1)

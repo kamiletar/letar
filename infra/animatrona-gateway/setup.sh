@@ -42,19 +42,19 @@ docker exec $CONTAINER ipfs config --json Swarm.ConnMgr.GracePeriod '"1m"'
 docker exec $CONTAINER ipfs config --json Peering.Peers '[
   {
     "ID": "12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA",
-    "Addrs": ["/ip4/193.37.68.73/tcp/41001"]
+    "Addrs": ["/ip4/31.56.180.161/tcp/41001"]
   },
   {
     "ID": "12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j",
-    "Addrs": ["/ip4/193.37.68.73/tcp/43001"]
+    "Addrs": ["/ip4/31.56.180.161/tcp/43001"]
   }
 ]'
 
 # --- Bootstrap ---
 # Relay + пиннер первыми, затем стандартные
 docker exec $CONTAINER ipfs bootstrap rm --all
-docker exec $CONTAINER ipfs bootstrap add /ip4/193.37.68.73/tcp/41001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA
-docker exec $CONTAINER ipfs bootstrap add /ip4/193.37.68.73/tcp/43001/p2p/12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j
+docker exec $CONTAINER ipfs bootstrap add /ip4/31.56.180.161/tcp/41001/p2p/12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA
+docker exec $CONTAINER ipfs bootstrap add /ip4/31.56.180.161/tcp/43001/p2p/12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa
 docker exec $CONTAINER ipfs bootstrap add /dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb
@@ -88,4 +88,4 @@ echo "Для добавления PeerId локального ПК (peering):"
 echo "  docker exec $CONTAINER ipfs config --json Peering.Peers '[...]'"
 echo ""
 echo "Проверка подключения к relay:"
-echo "  docker exec $CONTAINER ipfs swarm peers | grep 193.37.68.73"
+echo "  docker exec $CONTAINER ipfs swarm peers | grep 31.56.180.161"

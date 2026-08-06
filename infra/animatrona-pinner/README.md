@@ -5,7 +5,7 @@ bearer-токеном.
 
 ## Текущий деплой
 
-- **Сервер:** mail.letar.best (193.37.68.73)
+- **Сервер:** mail.letar.best (31.56.180.161)
 - **Swarm:** 43001 (TCP + UDP, не конфликтует с relay `41001`)
 - **API:** `5011` — открыт наружу, доступ только через bearer-токен (`API.Authorizations`)
 - **PeerId:** `12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j`
