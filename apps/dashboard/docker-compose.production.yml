@@ -33,7 +33,10 @@ services:
       db:
         condition: service_healthy
     ports:
-      - '3002:3002'
+      # Только loopback (§49): NPM форвардит по имени контейнера через kami-network
+      # (dash.letar.best → dashboard-app:3002, проверено в data/nginx/proxy_host/7.conf),
+      # хостовая публикация нужна не была.
+      - '127.0.0.1:3002:3002'
     env_file:
       - .env.docker
     # Required for nsenter to execute commands on host (git pull, etc.)

@@ -4,7 +4,9 @@ services:
     container_name: aira-web-app
     restart: always
     ports:
-      - '3017:3017'
+      # Только loopback (§49): NPM форвардит по имени контейнера через kami-network
+      # (aira.letar.best → aira-web-app:3017, проверено в data/nginx/proxy_host/19.conf).
+      - '127.0.0.1:3017:3017'
     environment:
       TZ: Europe/Moscow
       FORCE_COLOR: '1'
