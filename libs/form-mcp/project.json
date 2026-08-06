@@ -102,6 +102,13 @@
         "technologies": ["typescript", "tsgo"]
       }
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/form-mcp/vitest.config.ts"
+      }
+    },
     "build:npm": {
       "executor": "nx:run-commands",
       "options": {

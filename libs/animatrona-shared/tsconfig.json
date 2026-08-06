@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "types": [],
+    "types": ["vitest/globals", "node"],
     "paths": {
       "@letar/animatrona-utils": ["../animatrona-utils/src/index.ts"]
     },

@@ -28,6 +28,13 @@
       "options": {
         "cwd": "libs/animatrona-shared"
       }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/animatrona-shared/vitest.config.ts"
+      }
     }
   }
 }
