@@ -161,6 +161,9 @@ infra/agent-mail/.env
 # Nginx Proxy Manager local data (per-server)
 infra/nginx-proxy-manager/data/
 infra/nginx-proxy-manager/letsencrypt/
+
+# acme-dns — база выданных поддоменов (per-server, в бэкапах, не в git)
+infra/acme-dns/data/
 apps/animatrona/dist*/
 
 # Android build artifacts

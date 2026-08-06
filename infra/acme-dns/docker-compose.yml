@@ -1,0 +1,30 @@
+# acme-dns — минимальный авторитативный DNS-сервер только под ACME-челленджи
+# Документация: https://github.com/joohoi/acme-dns
+# Трек: PLAN-INFRA.md §48 (M1a)
+#
+# Запуск: docker compose up -d
+# Регистрация аккаунта (однократно): curl -X POST http://127.0.0.1:8053/register
+#
+# ⚠️ Порт 53 открыт всему интернету намеренно — валидаторы Let's Encrypt приходят
+#    с произвольных адресов, ограничить их по IP нельзя.
+# ⚠️ HTTP API наружу НЕ публикуется: только loopback. Traefik с другого сервера
+#    получит доступ отдельным proxy host с Access List — это шаг M1b, не M1a.
+
+services:
+  acme-dns:
+    image: 'joohoi/acme-dns:v2.0.2'
+    container_name: acme-dns
+    restart: unless-stopped
+    ports:
+      - '53:53/udp' # DNS — публично, иначе LE не проверит челлендж
+      - '53:53/tcp' # DNS over TCP (ответы > 512 байт, retry резолверов)
+      - '127.0.0.1:8053:80' # HTTP API — только loopback
+    volumes:
+      - ./config:/etc/acme-dns:ro
+      - ./data:/var/lib/acme-dns
+    networks:
+      - kami-network
+
+networks:
+  kami-network:
+    external: true
