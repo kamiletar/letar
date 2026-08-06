@@ -1,17 +1,7 @@
-const GITHUB_API = 'https://api.github.com/repos/kamiletar/aira/releases/latest'
+import { fetchLatestRelease } from '@letar/github-releases'
 
-interface GitHubAsset {
-  name: string
-  browser_download_url: string
-  size: number
-}
-
-interface GitHubRelease {
-  tag_name: string
-  published_at: string
-  body: string
-  assets: GitHubAsset[]
-}
+const OWNER = 'kamiletar'
+const REPO = 'aira'
 
 export type Platform = 'linux' | 'macos' | 'windows' | 'android' | 'unknown'
 export type Arch = 'x86_64' | 'aarch64' | 'unknown'
@@ -90,52 +80,36 @@ function parseAsset(name: string): { platform: Platform; arch: Arch; kind: Asset
 }
 
 /**
- * Fetch latest release from GitHub Releases API.
+ * Fetch latest release from GitHub Releases API (@letar/github-releases).
  * Uses Next.js ISR — revalidates every hour.
  * Returns null if no release found or fetch fails.
  */
 export async function getLatestRelease(): Promise<ReleaseInfo | null> {
-  try {
-    const headers: HeadersInit = { Accept: 'application/vnd.github+json' }
-
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`
-    }
-
-    const res = await fetch(GITHUB_API, {
-      headers,
-      next: { revalidate: 3600 },
-    })
-
-    if (!res.ok) {
-      return null
-    }
-
-    const release: GitHubRelease = await res.json()
-
-    const assets: ReleaseAsset[] = release.assets
-      .map((a) => {
-        const meta = parseAsset(a.name)
-        if (!meta) {
-          return null
-        }
-        return {
-          name: a.name,
-          url: a.browser_download_url,
-          size: a.size,
-          ...meta,
-        }
-      })
-      .filter((a): a is ReleaseAsset => a !== null)
-
-    return {
-      version: release.tag_name,
-      publishedAt: release.published_at,
-      changelog: release.body,
-      assets,
-    }
-  } catch {
+  const release = await fetchLatestRelease({ owner: OWNER, repo: REPO, token: process.env.GITHUB_TOKEN })
+  if (!release) {
     return null
+  }
+
+  const assets: ReleaseAsset[] = release.assets
+    .map((a) => {
+      const meta = parseAsset(a.name)
+      if (!meta) {
+        return null
+      }
+      return {
+        name: a.name,
+        url: a.browser_download_url,
+        size: a.size,
+        ...meta,
+      }
+    })
+    .filter((a): a is ReleaseAsset => a !== null)
+
+  return {
+    version: release.tag_name,
+    publishedAt: release.published_at,
+    changelog: release.body ?? '',
+    assets,
   }
 }
 
@@ -167,10 +141,4 @@ export function findAssetByKind(
   return assets.find((a) => a.platform === platform && a.arch === arch && a.kind === kind)
 }
 
-/**
- * Format bytes to human-readable size.
- */
-export function formatSize(bytes: number): string {
-  const mb = bytes / (1024 * 1024)
-  return `${mb.toFixed(1)} MB`
-}
+export { formatFileSize as formatSize } from '@letar/github-releases'

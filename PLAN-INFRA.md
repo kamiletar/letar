@@ -2816,7 +2816,7 @@ Python), TUI-консоль, hybrid search, build slots, Product Bus (кросс
 
 ---
 
-## §36 — GitHub Releases API написан дважды, а фильтр по префиксу тега нужен обоим 🆕 (2026-07-30)
+## §36 — GitHub Releases API написан дважды, а фильтр по префиксу тега нужен обоим ✅ ЗАКРЫТО (2026-08-06)
 
 Найдено при планировании браузерного демо Aira.
 
@@ -2847,6 +2847,35 @@ Python), TUI-консоль, hybrid search, build slots, Product Bus (кросс
 ⚠️ Учесть при переносе: у Aira релизы остаются в **отдельном** репозитории `kamiletar/aira`
 (самостоятельный OSS-проект со своим потоком релизов) — либа обязана поддерживать и «свой репо без
 фильтра», и «общий репо с фильтром по префиксу».
+
+### Что сделано (2026-08-06)
+
+- [x] `libs/github-releases` (`@letar/github-releases`) — `fetchLatestRelease`/`fetchReleases`
+      (ISR+токен, фильтр по `tagPrefix` через листинг `/releases` — `/releases/latest` не умеет
+      фильтровать по тегу), `formatFileSize`. 7 unit-тестов (мокнутый `fetch`), `nx test/lint/
+      typecheck:tsgo` зелёные.
+- [x] Оба приложения переведены на общий фетчер, **специфика оставлена как и планировалось**:
+      разбор ассетов по платформе/архитектуре/installer-vs-portable — свой у `aira-web`
+      (`parseAsset`/`findAsset`/`findAssetByKind`), разбор release notes и `.exe`/`.dmg`/
+      `.AppImage`-паттерны — свои у `animatrona-landing`. Публичный API обоих `src/lib/github.ts`
+      не менялся (те же имена экспортов), чтобы не трогать компоненты-потребители
+      (`hero.tsx`/`download-section.tsx`/`page.tsx`/`downloads-section.tsx`).
+- [x] `nx build` обоих приложений — зелёный; `animatrona-landing` во время сборки реально дошёл
+      до `api.github.com` через новый общий фетчер (страница `/` использует ISR, ошибок не было).
+- [x] `tagPrefix` реализован, но **не включён** ни в одном из двух приложений — они по-прежнему
+      читают из своих отдельных репозиториев (`kamiletar/aira`, `kamiletar/animatrona`), не из
+      монорепо `letar`. Возможность появится сама, когда/если релизы desktop-приложений реально
+      переедут на теги `<app>-v*` в `letar` — эта миграция сама по себе не входила в §36.
+- [ ] `apps/animatrona-landing/src/lib/github.ts`: типы `getLatestRelease`/`getAllReleases`
+      кастуются из узкого `GitHubRelease` библиотеки в собственный широкий `Release`
+      (`id`/`name`/`html_url`/`content_type`/`download_count` — их нет в типе библиотеки, но они
+      есть в реальном JSON от GitHub, так что каст не меняет рантайм-поведение) — решение
+      сознательное (см. README библиотеки), но стоит иметь в виду при следующей правке этого файла.
+- [ ] Замечена, но не тронута: `console.error` при неуспехе запроса была в оригинальном
+      `animatrona-landing/src/lib/github.ts` и пропала при переходе на общий фетчер (`aira-web`
+      такого логирования не имел изначально, теперь оба ведут себя как `aira-web` — тихий
+      `null`/`[]`). Если пропажа логов окажется значимой, добавить `onError`-колбэк в
+      `fetchReleases`/`fetchLatestRelease` библиотеки, а не возвращать её точечно в приложение.
 
 ---
 

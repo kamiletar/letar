@@ -1,68 +1,32 @@
 import type { MacOSAssets, ParsedRelease, Platform, Release, ReleaseChange } from '@/types/release'
+import { fetchLatestRelease, fetchReleases } from '@letar/github-releases'
 
-const GITHUB_API = 'https://api.github.com/repos'
 const OWNER = process.env.GITHUB_OWNER || 'kamiletar'
 const REPO = process.env.GITHUB_REPO || 'animatrona'
 
 /**
- * Получить заголовки для GitHub API
+ * @letar/github-releases типизирует ответ узким срезом полей (см. его README) — сам ответ
+ * GitHub возвращает полный объект Release, поэтому каст на более широкий локальный тип не меняет
+ * рантайм-поведение, только расширяет то, что видит TypeScript.
  */
-function getHeaders(): HeadersInit {
-  const headers: HeadersInit = {
-    Accept: 'application/vnd.github.v3+json',
-  }
-
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
-  }
-
-  return headers
+function asRelease(release: Awaited<ReturnType<typeof fetchLatestRelease>>): Release | null {
+  return release as unknown as Release | null
 }
 
 /**
  * Получить последний релиз
  */
 export async function getLatestRelease(): Promise<Release | null> {
-  try {
-    const res = await fetch(`${GITHUB_API}/${OWNER}/${REPO}/releases/latest`, {
-      headers: getHeaders(),
-      next: { revalidate: 3600 }, // Кэш 1 час
-    })
-
-    if (!res.ok) {
-      console.error('Failed to fetch latest release:', res.status)
-      return null
-    }
-
-    return res.json()
-  } catch (error) {
-    console.error('Error fetching latest release:', error)
-    return null
-  }
+  const release = await fetchLatestRelease({ owner: OWNER, repo: REPO, token: process.env.GITHUB_TOKEN })
+  return asRelease(release)
 }
 
 /**
  * Получить все релизы
  */
 export async function getAllReleases(limit = 10): Promise<Release[]> {
-  try {
-    const res = await fetch(`${GITHUB_API}/${OWNER}/${REPO}/releases?per_page=${limit}`, {
-      headers: getHeaders(),
-      next: { revalidate: 3600 },
-    })
-
-    if (!res.ok) {
-      console.error('Failed to fetch releases:', res.status)
-      return []
-    }
-
-    const releases: Release[] = await res.json()
-    // Фильтруем черновики и пререлизы
-    return releases.filter((r) => !r.draft)
-  } catch (error) {
-    console.error('Error fetching releases:', error)
-    return []
-  }
+  const releases = await fetchReleases({ owner: OWNER, repo: REPO, token: process.env.GITHUB_TOKEN, limit })
+  return releases as unknown as Release[]
 }
 
 /**
@@ -84,7 +48,7 @@ export function parseReleaseNotes(body: string | null): ReleaseChange[] {
 
     // Определяем тип изменения по эмодзи или префиксу
     let type: ReleaseChange['type'] = 'improvement'
-    let text = trimmed
+    let text: string
 
     if (trimmed.includes('✨') || trimmed.toLowerCase().includes('feat')) {
       type = 'feature'
@@ -131,26 +95,14 @@ export function findMacOSAssets(release: Release): MacOSAssets {
   // Паттерны: -arm64.dmg для Apple Silicon, -x64.dmg или без суффикса для Intel
   const arm64 = dmgAssets.find((asset) => /-arm64\.dmg$/i.test(asset.name)) || null
   // x64 может быть с суффиксом -x64 или без архитектуры (legacy)
-  const x64 =
-    dmgAssets.find((asset) => /-x64\.dmg$/i.test(asset.name)) ||
-    dmgAssets.find((asset) => !/-arm64\.dmg$/i.test(asset.name)) ||
-    null
+  const x64 = dmgAssets.find((asset) => /-x64\.dmg$/i.test(asset.name))
+    || dmgAssets.find((asset) => !/-arm64\.dmg$/i.test(asset.name))
+    || null
 
   return { arm64, x64 }
 }
 
-/**
- * Форматирование размера файла
- */
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} B`
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
+export { formatFileSize } from '@letar/github-releases'
 
 /**
  * Парсинг релиза в удобный формат

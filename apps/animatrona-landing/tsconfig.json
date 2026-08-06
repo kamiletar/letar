@@ -21,7 +21,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
-      "@letar/ui": ["../../libs/ui/src/index.ts"]
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/github-releases": ["../../libs/github-releases/src/index.ts"]
     },
     "types": [],
     "noUncheckedSideEffectImports": false,
@@ -35,6 +36,9 @@
     },
     {
       "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/github-releases"
     }
   ]
 }

@@ -6,7 +6,8 @@
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/hooks": ["../../libs/hooks/src/index.ts"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/github-releases": ["../../libs/github-releases/src/index.ts"]
     }
   },
   "references": [
@@ -21,6 +22,9 @@
     },
     {
       "path": "../../libs/analytics"
+    },
+    {
+      "path": "../../libs/github-releases"
     }
   ]
 }
