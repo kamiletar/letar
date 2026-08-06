@@ -108,7 +108,15 @@
       }
     },
     "build": {
-      "dependsOn": ["update-sw-version", "^build", "^typecheck"]
+      "executor": "nx:run-commands",
+      "dependsOn": ["update-sw-version", "^build", "^typecheck"],
+      "options": {
+        "command": "next build --webpack",
+        "cwd": "apps/kami"
+      },
+      "metadata": {
+        "description": "Build production bundle (без Turbopack — OOM на s2: Turbopack — нативный Rust-процесс вне V8-хипа, NODE_OPTIONS=--max-old-space-size его не ограничивает, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
