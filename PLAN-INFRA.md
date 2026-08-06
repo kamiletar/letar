@@ -1098,8 +1098,11 @@ svoichuzhie, aboi, aprel8008**. У всех пяти уже есть `<app>-e2e`
 **Статус (2026-07-28, обновлено root-weaver):** ✅ **код реализован и покрыт тестами**, ⏳ **не
 подтверждён вживую** — приоритет отдан archetest как самому срочному из пяти:
 
-- `HARD_GATED_APPS` (`archetest`, `dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`) в
-  `libs/infra-config/src/index.ts`.
+- `HARD_GATED_APPS` (`archetest`, `dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`, `studio` —
+  добавлен 2026-08-06) в `libs/infra-config/src/index.ts`. У `studio` staging-инфраструктуры не
+  было вообще (не входил в тираж M1) — заведена по факту первого гейтованного деплоя
+  (`apps/studio/docker-compose.staging.yml` + `.env.staging.example`, порты s3 app `3032`/db
+  `5465`), гейт подтверждён живым прогоном (15/16 → фикс OIDC-креды в примере → 16/16 → deploy).
 - `evaluateE2eGate()` в `libs/deploy-mcp/src/server.ts` (переименована из `checkE2eGate`) —
   fail-closed для этих 5: `deploy_app(production)` возвращает `isError` ДО вызова
   `/api/deploy/app`, если для приложения нет прогона / прогон упал / коммит не совпадает /
