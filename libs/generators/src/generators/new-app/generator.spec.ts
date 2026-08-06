@@ -40,7 +40,7 @@ describe('new-app generator', () => {
     tree.write('apps/existing/.env', 'PORT=3005\n')
     tree.write(
       'apps/landing/project.json',
-      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } })
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } }),
     )
     tree.write('apps/dashboard/.env.local', 'PORT=3016\n')
 
@@ -127,6 +127,9 @@ describe('new-app generator', () => {
     expect(gitignore).toContain('*.tsbuildinfo')
     // .env с одним лишь PORT коммитится (см. .claude/rules/env-files.md) — игнорить его нельзя
     expect(gitignore).not.toMatch(/^\.env$/m)
+    // uploads/ — расхождение с корневым .gitignore монорепо (PLAN-INFRA.md §39): первый же
+    // `git add .` на сервере иначе унесёт пользовательские загрузки в коммит submodule
+    expect(gitignore).toContain('uploads/')
   })
 
   it('публичному приложению .gitignore не создаётся — его закрывает корневой репо', async () => {
@@ -157,5 +160,53 @@ describe('new-app generator', () => {
     expect(project.sourceRoot).toBe('apps/my-app/src')
     expect(project.projectType).toBe('application')
     expect(project.targets.test.options.config).toBe('apps/my-app/vitest.config.ts')
+  })
+
+  it('без --withDb не создаёт ZenStack/Prisma-каркас', async () => {
+    await newAppGenerator(tree, { name: 'my-app' })
+
+    expect(tree.exists('apps/my-app/prisma.config.ts')).toBe(false)
+    expect(tree.exists('apps/my-app/schema.zmodel')).toBe(false)
+
+    const project = JSON.parse(tree.read('apps/my-app/project.json', 'utf-8') ?? '{}')
+    expect(project.targets['zenstack:generate']).toBeUndefined()
+    expect(project.targets['db:migrate']).toBeUndefined()
+  })
+
+  it('--withDb создаёт prisma.config.ts, schema.zmodel-заготовку и db-таргеты в project.json', async () => {
+    await newAppGenerator(tree, { name: 'my-app', withDb: true })
+
+    expect(tree.exists('apps/my-app/prisma.config.ts')).toBe(true)
+
+    const schema = tree.read('apps/my-app/schema.zmodel', 'utf-8') ?? ''
+    expect(schema).toContain('datasource db')
+    expect(schema).toContain('generator client')
+    expect(schema).toContain('plugin policy')
+    expect(schema).toContain('plugin formSchema')
+
+    const project = JSON.parse(tree.read('apps/my-app/project.json', 'utf-8') ?? '{}')
+    expect(project.targets['zenstack:generate']).toBeDefined()
+    expect(project.targets['db:generate']).toBeDefined()
+    expect(project.targets['db:push']).toBeDefined()
+    expect(project.targets['db:migrate']).toBeDefined()
+    expect(project.targets['db:studio']).toBeDefined()
+    expect(project.targets['db:migrate'].options.cwd).toBe('apps/my-app')
+    // остальные таргеты (typecheck и т.д.) не затираются условным блоком
+    expect(project.targets.typecheck).toBeDefined()
+    expect(project.targets.test.options.config).toBe('apps/my-app/vitest.config.ts')
+  })
+
+  it('--withDb --private добавляет src/generated/ в .gitignore приватного приложения', async () => {
+    await newAppGenerator(tree, { name: 'my-app', withDb: true, private: true })
+
+    const gitignore = tree.read('apps/my-app/.gitignore', 'utf-8') ?? ''
+    expect(gitignore).toContain('src/generated/')
+  })
+
+  it('--private без --withDb не добавляет src/generated/ в .gitignore', async () => {
+    await newAppGenerator(tree, { name: 'my-app', private: true })
+
+    const gitignore = tree.read('apps/my-app/.gitignore', 'utf-8') ?? ''
+    expect(gitignore).not.toContain('src/generated/')
   })
 })

@@ -21,6 +21,9 @@ dist/
 !.env.docker.example
 !.env.staging.example
 
+# Загруженные файлы — вне git (см. .claude/docs/images.md)
+uploads/
+
 # Тесты
 /coverage
 test-results/
@@ -32,3 +35,8 @@ playwright-report/
 # OS
 .DS_Store
 Thumbs.db
+<% if (withDb) { -%>
+
+# Генерируемые файлы (zenstack:generate)
+src/generated/
+<% } -%>
