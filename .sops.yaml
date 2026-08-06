@@ -1,3 +1,5 @@
 creation_rules:
   - path_regex: \.env\.docker(\.enc)?$
     age: age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza
+  - path_regex: \.env\.staging(\.enc)?$
+    age: age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza

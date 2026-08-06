@@ -1148,9 +1148,11 @@ production)` — теперь технически возможен (staging-к�
 
 ---
 
-## §18.8 — `.env.staging` не шифруется и не трекается: завести `.env.staging.enc` по образцу `.env.docker.enc` 🆕
+## §18.8 — `.env.staging` не шифруется и не трекается: завести `.env.staging.enc` по образцу `.env.docker.enc` 🟡 ПИЛОТ ГОТОВ
 
 > Добавлено 2026-08-05 (сессия domwellbes: staging-окружение + dev-session bypass для админки).
+> Пилот на `domwellbes` закрыт 2026-08-06 (см. «Что сделано» ниже) — тираж на остальные 11
+> приложений ещё не начат.
 
 ### Проблема
 
@@ -1192,6 +1194,43 @@ production)` — теперь технически возможен (staging-к�
 Пилот на одном приложении (кандидат — `domwellbes`, единственный, где `.env.staging` ещё не
 заведён на сервере вообще — можно сразу делать правильно, без миграции существующего файла) →
 хук проверен на реальном коммите → тираж на остальные 11 приложений.
+
+### Что сделано (пилот `domwellbes`, 2026-08-06)
+
+- [x] `.sops.yaml` — добавлено правило `\.env\.staging(\.enc)?$` (было только `\.env\.docker(\.enc)?$`,
+      без этого `sops --encrypt` падал `no matching creation rules found`).
+- [x] `scripts/hooks/pre-commit-sops.sh` обобщён на `.env.staging.enc` **и** переработан под два
+      контекста запуска: из корня суперпроекта (`apps/<app>/...`, обычные приложения монорепо) и из
+      корня самого приложения (`./...`) — коммит **внутри** приватного submodule запускает хук из
+      `.git/modules/apps/<app>/hooks/pre-commit` с cwd = корень submodule, где префикса `apps/*/` не
+      существует физически. Старый хук эту разницу не учитывал вовсе (и остался бы немым для
+      submodule-коммитов, даже если бы просто добавить `.env.staging.enc` в старый паттерн).
+- [x] Хук переустановлен в обе рабочие копии — `.git/hooks/pre-commit` (суперпроект) и
+      `.git/modules/apps/domwellbes/hooks/pre-commit` (submodule) — раньше он не был установлен для
+      submodule вообще, только для суперпроекта.
+- [x] `apps/domwellbes/.env.staging` заведён локально (секреты — `openssl rand -base64 32`,
+      не вручную), зашифрован в `.env.staging.enc`, закоммичен и запушен в
+      `letar-private-domwellbes` (коммит `f82b056`).
+- [x] **Хук проверен на реальном коммите:** правка `.env.staging` без ручного `sops encrypt` + обычный
+      `git commit` → хук сам перешифровал и добавил `.env.staging.enc` в коммит (лог `[sops]
+      Шифрую... / Зашифровано и добавлено в коммит: 1 файл(ов)`). Тестовый мусор убран отдельным
+      коммитом `972f6ca`.
+- [x] `.gitignore` `domwellbes`/`aboi` — уже корректны (`.env.staging` игнорируется,
+      `.env.staging.enc` нет) — оказалось починено параллельным треком до этой сессии, отдельная
+      правка не потребовалась.
+- [ ] **Не проверено:** `decrypt_sops_env()` в `deploy-affected.sh` — по чтению кода уже работает
+      **без изменений** для staging (использует переменную `ENV_FILE_NAME`, которая при `--staging`
+      равна `.env.staging`, так что `enc_file` автоматически резолвится в `.env.staging.enc`) — но
+      живой прогон через staging-деплой (`deploy_app({ target: 'staging' })`) не выполнялся в этой
+      сессии, только чтение исходника. Первый реальный staging-деплой `domwellbes` подтвердит или
+      опровергнет это на практике.
+- [ ] Тираж на остальные 11 приложений (`grandslamcup`, `aboi`, `aprel8008`, `archetest`, `auth-hub`,
+      `driving-school`, `dsperevod`, `mandala`, `pravda`, `svoichuzhie`, `time`) — не начат. Для
+      приложений, где `.env.staging` уже существует на s3 (минимум `grandslamcup`) — потребуется
+      снять текущий файл с сервера перед шифрованием (см. «Одноразовая миграция» выше), не завести
+      с нуля как у `domwellbes`.
+- [ ] Хук нужно доустановить в `.git/modules/apps/<app>/hooks/pre-commit` для каждого остального
+      submodule по мере тиража — не автоматизировано, копируется вручную как в этой сессии.
 
 ---
 
@@ -3008,5 +3047,50 @@ Redis как `interrupted`, а не молча исчезать при рест�
    существования `.gitignore`, а покрытие ключевых путей.
 
 **Приоритет:** невысокий, но дешёвый — п.1 закрывает приток новых случаев одной строкой.
+
+---
+
+## §43 — `deploy-affected.sh` не пересобирает `libs/*/dist` перед сборкой приложений 🆕 (2026-08-06)
+
+Обнаружено BlackCove при проде-деплое §41 (`createSignInWithLetarAuth` вынесен из девяти
+приложений) — деплой `dashboard` на s2 упал на `next build` с 12 ошибками TypeScript
+`TS6305` («Output file has not been built from source file»), все указывают на `libs/*/dist`:
+
+```
+libs/auth/dist/server/index.d.ts       ← @letar/auth/server
+libs/auth/dist/client/index.d.ts       ← @letar/auth/client (createSignInWithLetarAuth)
+libs/query-provider/dist/index.d.ts    ← @letar/query-provider
+libs/chakra-provider/dist/index.d.ts   ← @letar/chakra-provider
+libs/forms/dist/index.d.ts             ← @letar/forms
+libs/api-server/dist/src/index.d.ts    ← @letar/api-server
+libs/analytics/dist/index.d.ts         ← @letar/analytics
+libs/infra-config/dist/index.d.ts      ← @letar/infra-config
+```
+
+**Причина (по грепу `deploy-affected.sh`, не подтверждено запуском с `--verbose`):** скрипт явно
+пересобирает только `@letar/zenstack-form-plugin` перед сборкой приложений (комментарий в
+скрипте про свежий сервер: "первый живой staging-деплой", §18 Сессия D). Остальные `libs/*`,
+резолвящиеся через TS project references (`lib-entry-points.md`), полагаются на то, что их
+`dist/` уже актуален — либо от предыдущего деплоя, либо от закэшированного Nx-артефакта. Правка
+`@letar/auth/client` в §41 задела разом 8 либ, и хотя бы одна из них не пересобралась перед
+сборкой `dashboard`.
+
+Остальные 8 приложений из того же батча (kami, animatrona-tracker, grandslamcup, archetest,
+time, studio, aprel8008, domwellbes) деплой на s2 не запускал — та же цепочка изменённых либ,
+высокая вероятность той же стены. Деплой батча приостановлен, ждёт этого фикса.
+
+**Что предлагается.**
+
+1. Найти реальный шаг сборки `libs/*` в `deploy-affected.sh` (или его отсутствие) —
+   `--verbose`-прогон на s2 покажет, действительно ли только `zenstack-form-plugin` собирается
+   явно.
+2. Если явного шага для остальных `libs/*` нет — добавить `nx run-many -t build --projects=libs/*`
+   (или affected-версию) перед `nx build <app>`, по аналогии с уже существующим шагом для
+   `zenstack-form-plugin`.
+3. Проверить, не тот же ли класс проблемы всплывёт при следующем изменении любой другой
+   часто-используемой библиотеки (`@letar/ui`, `@letar/hooks` и т.п.) — если да, это не
+   единичный баг, а системный пробел в пайплайне.
+
+**Приоритет:** высокий — блокирует прод-деплой минимум 9 приложений прямо сейчас.
 
 ---
