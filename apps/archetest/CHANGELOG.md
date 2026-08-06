@@ -52,7 +52,7 @@
   4. `isDisabled()` — разовый снимок DOM, не поллинг — ловил переходное
      `disabled`-состояние в окне гидратации до того, как `useScrollGate`
      выставлял `reachedEnd=true`; заменено на `waitFor({state: 'visible',
-     timeout: 5_000})`.
+timeout: 5_000})`.
   - **Итог: `deploy_app(archetest, production)` — полный e2e-сьют 21/21 на
     chromium/firefox/webkit**, hard e2e-gate впервые пройден живым деплоем.
 

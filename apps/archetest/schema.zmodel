@@ -1,6 +1,8 @@
 // Архетест — тест типа личности
 // Авторизация через ключницу (auth.letar.best)
 
+import "../../libs/zenstack-fragments/src/better-auth"
+
 datasource db {
   provider = "postgresql"
 }
@@ -83,21 +85,7 @@ model User {
 }
 
 // Better Auth — аккаунты OAuth
-model Account {
-  id                    String    @id @default(cuid())
-  userId                String
-  accountId             String
-  providerId            String
-  accessToken           String?
-  refreshToken          String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  idToken               String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
+model Account with AccountFields {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
@@ -106,16 +94,7 @@ model Account {
 }
 
 // Better Auth — сессии
-model Session {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  expiresAt   DateTime
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+model Session with SessionFields {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@deny('all', true)
@@ -124,14 +103,7 @@ model Session {
 }
 
 // Better Auth — верификация
-model Verification {
-  id          String   @id @default(cuid())
-  identifier  String
-  value       String
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+model Verification with VerificationFields {
   @@deny('all', true)
   @@index([identifier])
 }

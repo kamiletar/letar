@@ -101,11 +101,9 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     const bestOptionByScenario = buildBestOptionMap()
 
     await page.goto(
-      `/api/auth/dev-session?email=${encodeURIComponent(TEST_EMAIL)}&token=${
-        encodeURIComponent(
-          devSessionToken,
-        )
-      }&redirect=/ru`,
+      `/api/auth/dev-session?email=${encodeURIComponent(TEST_EMAIL)}&token=${encodeURIComponent(
+        devSessionToken
+      )}&redirect=/ru`
     )
 
     // Regex, не точный текст: TEST_EMAIL фиксированный, staging-БД персистентна между
