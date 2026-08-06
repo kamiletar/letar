@@ -20,9 +20,6 @@ COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/standalone ./
 COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/static ./apps/animatrona-tracker/.next/static
 COPY --chown=nextjs:nodejs apps/animatrona-tracker/public ./apps/animatrona-tracker/public
 
-# Копируем хэшированные модули Turbopack (pg для PostgreSQL)
-COPY --chown=nextjs:nodejs apps/animatrona-tracker/.next/node_modules ./apps/animatrona-tracker/.next/node_modules
-
 USER nextjs
 
 EXPOSE 3010
