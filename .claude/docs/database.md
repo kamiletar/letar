@@ -17,7 +17,10 @@
    - `src/generated/zod/` - Zod схемы валидации для всех моделей
    - `src/generated/zenstack/` - Enhanced Prisma клиент с политиками доступа
    - `src/generated/hooks/` - TanStack Query хуки (опционально)
-3. Запусти `nx db:push <app-name>` (dev) или `nx db:migrate <app-name>` (prod) для обновления базы данных
+3. Обнови базу данных — `nx db:push <app-name>` только на **локальной** dev-базе для
+   быстрого прототипирования, `nx db:migrate <app-name>` для создания migration file (обязателен
+   для production). Разрушающие операции на production запрещены — единственный источник по
+   этому воркфлоу: [database.md](/.claude/rules/database.md)
 
 **Важно:** `zenstack:generate` автоматически запускает `prisma generate`, поэтому отдельный `db:generate` обычно не нужен!
 
@@ -330,34 +333,34 @@ enum OrderStatus {
 
 ```bash
 # Генерация Prisma схемы из ZenStack
-nx zenstack:generate premium-rosstil
+nx zenstack:generate <app-name>
 
 # Watch mode — автоматическая регенерация при изменении schema.zmodel (v3.2.0+)
-nx zenstack:generate premium-rosstil -- --watch
+nx zenstack:generate <app-name> -- --watch
 
-# Отправка схемы в базу данных (разработка)
-nx db:push premium-rosstil
+# Отправка схемы в базу данных (только локальная dev-база, см. rules/database.md)
+nx db:push <app-name>
 
 # Отправка с принудительным сбросом (⚠️ деструктивно!)
-nx db:push:data-loss premium-rosstil
+nx db:push:data-loss <app-name>
 
 # Создание и применение миграции
-nx db:migrate premium-rosstil
+nx db:migrate <app-name>
 
 # Применение миграций (продакшн)
-nx db:migrate:deploy premium-rosstil
+nx db:migrate:deploy <app-name>
 
 # Открытие Prisma Studio GUI
-nx db:studio premium-rosstil
+nx db:studio <app-name>
 
 # Наполнение базы данных тестовыми данными (конвенция — seed-scripts.md)
-nx db:seed premium-rosstil
+nx db:seed <app-name>
 
 # Сброс базы данных и применение всех миграций
-nx db:reset premium-rosstil
+nx db:reset <app-name>
 
 # Генерация только Prisma Client (редко нужно)
-nx db:generate premium-rosstil
+nx db:generate <app-name>
 ```
 
 > **Как писать `prisma/seed.ts`:** подключение ORM-клиента напрямую (не через `@/lib/db`),
@@ -492,16 +495,20 @@ try {
 
 ## Стратегия миграций
 
+> Полный воркфлоу, включая запрет `db:push`/`prisma migrate dev` на production и рецепт при
+> drift — единственный источник: [rules/database.md](/.claude/rules/database.md). Ниже —
+> краткая выжимка, не расходящаяся с ним.
+
 **Разработка:**
 
-- Используй `nx db:push premium-rosstil` для быстрых итераций схемы
+- `nx db:push <app-name>` — только на **локальной** dev-базе, для быстрых итераций схемы
 - Файлы миграций не создаются, прямая отправка схемы в БД
 
 **Продакшн:**
 
-1. Создай миграцию: `nx db:migrate premium-rosstil`
+1. Создай миграцию: `nx db:migrate <app-name>`
 2. Закоммить файлы миграций в git
-3. Задеплой и примени: `nx db:migrate:deploy premium-rosstil`
+3. Задеплой и примени: `nx db:migrate:deploy <app-name>`
 4. Миграции версионированы и безопасны для продакшна
 
 ### ⚠️ Изменил схему — файл миграции обязан ехать в ТОМ ЖЕ коммите

@@ -29,7 +29,9 @@ description: |
 
 1. **Редактируй** `apps/<app>/schema.zmodel` (источник истины)
 2. **Генерируй** `nx zenstack:generate <app>`
-3. **Применяй** `nx db:push <app>` (dev) или `nx db:migrate <app>` (prod)
+3. **Применяй** — `nx db:push <app>` только на локальной dev-базе, `nx db:migrate <app>`
+   создаёт migration file (обязателен для production; полный воркфлоу и запреты —
+   [rules/database.md](/.claude/rules/database.md))
 
 ## Критичные правила
 

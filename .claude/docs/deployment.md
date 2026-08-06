@@ -397,8 +397,11 @@ rollout — см. `apps/form-example/PLAN_COMPLETED.md`):
 - [ ] **`prisma/migrations/` существует и не пуста** до первого `letar.rollout`/production-деплоя.
       Если схема раньше накатывалась через `prisma db push` (без истории миграций) — `migrate
 deploy` против непустой БД падает `P3005: database schema is not empty`. Нужен baseline:
-      сгенерировать первую миграцию локально (`nx db:migrate <app> -- --name init`, при
-      необходимости — `migrate dev --create-only` из текущей схемы), закоммитить, затем на
+      сгенерировать первую миграцию локально (`nx db:migrate <app> -- --name init`). ⚠️ **Не**
+      `migrate dev --create-only` — в Prisma 7 команда интерактивна и падает в агентской сессии
+      («environment is non-interactive»). Неинтерактивный путь — `prisma migrate diff` → SQL в
+      папку миграции → закоммитить (подробный рецепт с флагами Prisma 7 —
+      [database.md](/.claude/rules/database.md)), затем на
       проде выполнить `prisma migrate resolve --applied <migration_name>` (только пометка в
       `_prisma_migrations`, без реального DDL — схема там уже такая).
 
