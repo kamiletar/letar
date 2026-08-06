@@ -5,6 +5,18 @@
   "projectType": "library",
   "tags": ["scope:animatrona", "type:ui", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/animatrona-ui"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "oxlint": {
       "executor": "nx:run-commands",
       "options": {

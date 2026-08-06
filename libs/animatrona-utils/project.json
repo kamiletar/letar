@@ -5,6 +5,18 @@
   "projectType": "library",
   "tags": ["scope:shared", "type:lib", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/animatrona-utils"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "oxlint": {
       "executor": "nx:run-commands",
       "options": {

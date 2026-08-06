@@ -1,4 +1,18 @@
 {
   "name": "animatrona-types",
-  "tags": ["scope:shared", "type:lib", "owner:letar"]
+  "tags": ["scope:shared", "type:lib", "owner:letar"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/animatrona-types"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    }
+  }
 }

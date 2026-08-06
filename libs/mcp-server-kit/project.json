@@ -5,6 +5,18 @@
   "projectType": "library",
   "tags": ["scope:shared", "type:util", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/mcp-server-kit"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {

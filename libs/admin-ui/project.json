@@ -3,5 +3,19 @@
   "name": "@letar/admin-ui",
   "projectType": "library",
   "sourceRoot": "libs/admin-ui/src",
-  "tags": ["scope:shared", "type:ui", "owner:letar"]
+  "tags": ["scope:shared", "type:ui", "owner:letar"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/admin-ui"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    }
+  }
 }

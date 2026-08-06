@@ -5,6 +5,18 @@
   "projectType": "library",
   "tags": ["scope:shared", "type:native-module", "owner:letar"],
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/exoplayer-sync"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
