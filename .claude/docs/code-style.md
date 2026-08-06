@@ -68,7 +68,7 @@ if (!header) {
 
 Прецедент: `libs/image-upload/src/server/serve-uploads.ts` приехал в монорепо (коммит `e7a4f8cc`)
 с восемью однострочными `if`/`for-of` — `nx lint image-upload` был красный, а `--fix` +
-`nx format` его не чинили.
+`nx dprint image-upload` его не чинили.
 
 ## Язык комментариев
 
@@ -96,7 +96,7 @@ const MyComponent = ({ user }: { user: User }) => {
 Для автоматического форматирования используй команду:
 
 ```bash
-nx format <app-name>
+nx dprint <app-name>
 ```
 
 ## Проверка стиля

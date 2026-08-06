@@ -232,7 +232,7 @@ nx db:studio premium-rosstil          # Открыть Prisma Studio
 ### Форматирование, линтинг и тесты
 
 ```bash
-nx format premium-rosstil         # Форматирование кода (dprint)
+nx dprint premium-rosstil         # Форматирование кода (dprint)
 nx lint premium-rosstil           # Запустить линтинг
 nx typecheck:tsgo premium-rosstil # Проверка типов (быстро!)
 nx test premium-rosstil           # Запустить тесты
