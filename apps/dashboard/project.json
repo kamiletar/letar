@@ -211,7 +211,7 @@
       }
     },
     "build": {
-      "dependsOn": ["zenstack:generate", "db:generate", "^build"],
+      "dependsOn": ["zenstack:generate", "db:generate", "^build", "^typecheck"],
       "options": {
         "command": "next build --webpack"
       },

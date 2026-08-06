@@ -108,7 +108,7 @@
       }
     },
     "build": {
-      "dependsOn": ["update-sw-version", "^build"]
+      "dependsOn": ["update-sw-version", "^build", "^typecheck"]
     },
     "typecheck": {
       "executor": "nx:run-commands",
