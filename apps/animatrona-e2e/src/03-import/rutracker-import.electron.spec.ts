@@ -268,7 +268,10 @@ test.describe('Импорт из Rutracker — реальная сеть (без
 
     const hasError = await rutrackerPage.errorText.isVisible().catch(() => false)
     if (hasError) {
-      const errorMessage = await ctx.page.getByText(/попробовать снова/i).locator('..').textContent()
+      const errorMessage = await ctx.page
+        .getByText(/попробовать снова/i)
+        .locator('..')
+        .textContent()
       throw new Error(`Импорт с реальным Shikimori упал на этапе ошибки. Текст на экране: ${errorMessage}`)
     }
 

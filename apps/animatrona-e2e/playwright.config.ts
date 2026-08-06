@@ -77,12 +77,12 @@ export default defineConfig({
   ...(process.env['SKIP_DEV_WEBSERVER']
     ? {}
     : {
-      webServer: {
-        command: 'cd apps/animatrona/renderer && next dev -p 3007',
-        url: baseURL,
-        reuseExistingServer: true,
-        cwd: workspaceRoot,
-        timeout: 180000,
-      },
-    }),
+        webServer: {
+          command: 'cd apps/animatrona/renderer && next dev -p 3007',
+          url: baseURL,
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 180000,
+        },
+      }),
 })
