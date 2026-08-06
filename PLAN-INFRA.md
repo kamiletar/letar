@@ -1218,6 +1218,17 @@ production)` — теперь технически возможен (staging-к�
 - [x] `.gitignore` `domwellbes`/`aboi` — уже корректны (`.env.staging` игнорируется,
       `.env.staging.enc` нет) — оказалось починено параллельным треком до этой сессии, отдельная
       правка не потребовалась.
+- [x] Хук установлен во **всех** приватных submodule монорепо, не только в `domwellbes`:
+      `apps/aboi`, `apps/aboi-e2e`, `apps/aprel8008`, `apps/domwellbes-e2e`,
+      `apps/driving-school`, `apps/driving-school-e2e`, `apps/dsperevod`,
+      `apps/poster-microtext-desktop`, `apps/studio`, `apps/studio-e2e`, `apps/svoichuzhie`,
+      `libs/driving-school-db`, `.claude/private`. Путь установки различается по типу
+      submodule: обычный gitlink-submodule хранит хуки в `.git/modules/<путь>/hooks/pre-commit`
+      суперпроекта; четыре submodule (`aprel8008`, `poster-microtext-desktop`, `studio`,
+      `svoichuzhie`) физически имеют собственный `.git`-каталог (не gitlink), поэтому хук лежит
+      прямо в `<путь>/.git/hooks/pre-commit`. Пустой прогон (без `.enc`-файлов рядом, без
+      `SOPS_AGE_KEY_FILE` в окружении) проверен на всех тринадцати — хук тихо завершается
+      `exit 0`, не блокирует обычный коммит.
 - [ ] **Не проверено:** `decrypt_sops_env()` в `deploy-affected.sh` — по чтению кода уже работает
       **без изменений** для staging (использует переменную `ENV_FILE_NAME`, которая при `--staging`
       равна `.env.staging`, так что `enc_file` автоматически резолвится в `.env.staging.enc`) — но
