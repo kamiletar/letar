@@ -3356,3 +3356,38 @@ SQL, `applied_steps_count = 1`). **Ни один из них сейчас не �
 `build`-таргет всегда идёт через `--webpack`, блок был безвредным, но вводил в заблуждение.
 
 ---
+
+## §47 — Разгрёб «разошедшихся» агентов: коммит накопленных изменений по всему репо (2026-08-06)
+
+К началу сессии `git status` показывал грязное дерево почти по всей монорепе — результат
+параллельной работы нескольких агентов, каждый из которых доделал свою задачу, но не закоммитил.
+Владелец подтвердил: агенты уже разошлись, можно фиксировать всё как есть.
+
+Помимо коммитов, найдено и удалено 3 мусорных артефакта security-тестов path traversal
+(`apps/8dc986ac-*.png`, `apps/aboi/uploads-evil/`, `apps/etc/` — файлы с текстом `fake-image`
+внутри, не годились в репо). `.codex/` добавлен в корневой `.gitignore`; `AGENTS.md`
+(автогенерируемый `next dev`, см. [nextjs16-agent-guide-files.md](/.claude/docs/nextjs16-agent-guide-files.md))
+добавлен в `.gitignore` submodule `driving-school` и `studio` — раньше это было учтено только в
+корневом `.gitignore`, который на submodule не действует.
+
+Заодно частично закрыт техдолг [[project_tg_proxy_npm_deployed]] (устаревший IP relay-сервера
+`193.37.68.73` → `31.56.180.161`): исправлены 6 живых конфигурационных файлов
+`infra/animatrona-gateway/pinner/pinner3/relay` (`setup.sh`, `bootstrap-all.sh`, `README.md`).
+Оставшиеся упоминания IP — в исторических `PLAN_COMPLETED.md`/`CHANGELOG.md` разных приложений и
+в `server-migration-letar.md`, трогать не стал: это записи о прошлом, а не live-конфиг.
+
+**Важно — обнаружена гонка агентов вживую:** во время сессии другой агент параллельно делал
+`git reset`+commit в этом же working tree (`infra/nginx-proxy-manager` про domwellbes-stage) —
+`git log`/`reflog` на несколько секунд показывали разное HEAD. Коммиты не потерялись, но это
+живое подтверждение риска из [agent-mail.md](/.claude/rules/agent-mail.md)/[git.md](/.claude/rules/git.md):
+несколько агентов физически пишут в один `.git`-каталог одновременно, без изоляции по worktree.
+
+Что закоммичено (13 коммитов в `letar`, плюс отдельные коммиты в submodule `aboi`,
+`aprel8008`, `driving-school`, `studio`, все запушены): доки (deployment/pwa-offline/dns-records +
+новые period-navigation-pattern/seed-scripts), генератор `new-app` (опциональный шаблон БД),
+`libs/hooks` (`useInfiniteScrollSentinel`), рефакторинг `animatrona` (виртуализация сетки
+библиотеки), `animatrona-e2e` тесты, рефакторинг `archetest`/`aprel8008`/`dashboard` на общий
+ZenStack-фрагмент `libs/zenstack-fragments/src/better-auth` (`Account`/`Session`/`Verification`
+вместо дублирования полей), `synth`, IP-фикс инфры, playwright storageState.
+
+---
