@@ -423,6 +423,39 @@ fi
 echo -e "${GREEN}✅ zenstack-form-plugin ready${NC}"
 echo ""
 
+# Step 2.45: Пересобрать dist/*.d.ts всех libs/* (PLAN-INFRA.md §43).
+# У 45 из 46 libs нет отдельного таргета "build" — dist/*.d.ts производит их "typecheck"
+# (tsc --build ... --emitDeclarationOnly, см. libs.md). Приложение резолвит @letar/* через TS
+# project references на эти dist/ (lib-entry-points.md), и nx build/typecheck:tsgo приложения
+# пересобирает их только для либ, у которых есть рёбро в графе (package.json dependencies или
+# nx.implicitDependencies). Найдено 2026-08-06: правка в @letar/auth/client задела 8 либ разом,
+# деплой dashboard упал TS6305 ("Output file has not been built from source file") на устаревшем
+# dist/*.d.ts. Явный прогон typecheck по ВСЕМ libs перед сборкой приложений закрывает пробел
+# независимо от того, объявлена ли зависимость в графе.
+echo -e "${YELLOW}🔧 Rebuilding libs/*/dist declarations (typecheck)...${NC}"
+LIB_PROJECTS=$(nx show projects --type=lib 2>/dev/null | tr -d '[]"')
+if [ -n "$LIB_PROJECTS" ]; then
+  LIB_TYPECHECK_CACHE_FLAG=""
+  if [ "$SKIP_NX_CACHE" = true ]; then
+    LIB_TYPECHECK_CACHE_FLAG="--skip-nx-cache"
+  fi
+  # Не хардгейтим деплой этим шагом: замер 2026-08-06 нашёл 4 либы (@letar/deploy-mcp,
+  # @letar/deploy-engine, @letar/form-mcp, label-printer-core) с собственным, не связанным с
+  # этим фиксом багом typecheck (inferred tsconfig.json не перечисляет spec-файлы, TS6307) —
+  # ни одно приложение из S2_APPS их не импортирует, но nx run-many всё равно тянет их в граф
+  # транзитивно через ^typecheck (--exclude на них не действует, проверено). Жёсткий exit 1
+  # здесь заблокировал бы ВСЕ деплои поломкой не связанных с деплоем tool-либ. Если сломался
+  # реально нужный lib — это всплывёт явной ошибкой ниже, на сборке самого приложения.
+  if ! nx run-many -t typecheck --projects="$LIB_PROJECTS" $LIB_TYPECHECK_CACHE_FLAG; then
+    echo -e "${YELLOW}⚠️  Часть libs/* не прошла typecheck (известные — deploy-mcp/deploy-engine/form-mcp/label-printer-core, см. PLAN-INFRA.md §43). Продолжаю — сборка приложения ниже покажет, было ли это критично.${NC}"
+  else
+    echo -e "${GREEN}✅ libs/*/dist up to date${NC}"
+  fi
+else
+  echo -e "${YELLOW}⚠️  nx show projects --type=lib вернул пусто — пропускаю${NC}"
+fi
+echo ""
+
 # Step 2.5: Create cron-jobs.json if not exists (for Dashboard)
 if [ ! -f "cron-jobs.json" ] && [ -f "cron-jobs.example.json" ]; then
   cp cron-jobs.example.json cron-jobs.json
