@@ -81,6 +81,7 @@ staging-пилоте (§18 Сессия D). Публичные порты 80/81/
 | dsperevod-stage.s3.letar.best    | `172.17.0.1` | 3027 | LE  | Staging dsperevod (PLAN.md §18.7 Тираж M1)                                   |
 | pravda-stage.s3.letar.best       | `172.17.0.1` | 3028 | LE  | Staging pravda (PLAN.md §18.7 Тираж M1), без БД/auth                         |
 | aira-web-stage.s3.letar.best     | `172.17.0.1` | 3029 | LE  | Staging aira-web (PLAN.md §18.7 Тираж M1), без БД/auth                       |
+| domwellbes-stage.s3.letar.best   | `172.17.0.1` | 3031 | LE  | Staging domwellbes, заведён 2026-08-06 (см. троблшутинг ниже)                |
 
 ⚠️ **NPM на s3 обновлён до 2.15.1** (актуальную версию видно через `GET /api/` без авторизации).
 `docker-compose.yml` для s2 также обновлён на тег `2.15.1` — применить на сервере ещё
@@ -102,6 +103,23 @@ DNS покрыт существующим wildcard `*.s3 CNAME s3.letar.best`, �
 ⚠️ После создания Proxy Host через API `ssl_forced` возвращается `false`, даже если запросить
 `true` — сертификат ещё не готов в момент создания хоста. Нужен отдельный `PUT` после того, как
 `certificate_id` в ответе перестал быть `null`.
+
+⚠️ **Живой инцидент 2026-08-06 (domwellbes-stage):** запрос `POST /api/nginx/proxy-hosts` с
+`certificate_id: "new"` синхронно ждёт выпуска Let's Encrypt сертификата внутри того же HTTP-запроса
+— при таймауте клиента (30с) host всё равно создаётся в БД (`certificate_id: 0`, без сертификата),
+а зависший внутри контейнера `certbot`-процесс держит файловый лок ещё какое-то время, из-за чего
+следующий `POST /api/nginx/certificates` для того же домена падает `500: Another instance of
+Certbot is already running`. Лок в `/tmp/certbot-log-*/log` внутри контейнера `npm` — самоочищается
+за секунды, повторный запрос обычно проходит. Рабочая последовательность при таком развале:
+
+1. `POST /api/nginx/certificates` (провайдер `letsencrypt`, `meta: {}`) отдельно, дождаться `201`
+   с непустым `letencrypt_certificate` в ответе.
+2. `PUT /api/nginx/proxy-hosts/{id}` с `certificate_id` из шага 1 и `ssl_forced: true`.
+
+Также: `domwellbes-stage.s3.letar.best` был запрошен ещё в инфра-запросе `#1022`
+(deploy-request domwellbes staging, 2026-08-06) как шаг 3 «настроить NPM host», но фактически не
+был заведён до живого репорта `ERR_SSL_UNRECOGNIZED_NAME_ALERT` от разработчика приложения —
+инфра-шаги из тела deploy-request легко потерять, если они не единственный экшн в запросе.
 
 ## NPM на mail-сервере (tg-proxy) — отдельный, независимый инстанс
 
