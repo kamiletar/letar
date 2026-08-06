@@ -26,8 +26,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
     tsconfigPath: './tsconfig.json',
   },
-  // Turbopack — используется для Next.js 16 production build
-  turbopack: {},
   // Лимит body для proxy (для загрузки файлов до 500MB)
   experimental: {
     proxyClientMaxBodySize: '500mb',
