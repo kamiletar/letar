@@ -10,8 +10,8 @@ import {
 } from './index'
 
 describe('HARD_GATED_APPS', () => {
-  it('содержит ровно пять активных коммерческих приложений (PLAN-INFRA.md §18.7)', () => {
-    expect(HARD_GATED_APPS).toEqual(['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008'])
+  it('содержит активные коммерческие приложения (PLAN-INFRA.md §18.7)', () => {
+    expect(HARD_GATED_APPS).toEqual(['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008', 'studio'])
   })
 
   it('каждое hard-gated приложение известно SERVER_APPS (не опечатка в имени)', () => {

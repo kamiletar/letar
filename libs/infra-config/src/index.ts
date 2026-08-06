@@ -125,9 +125,10 @@ export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time', 'aboi', 'aira-w
  * из этого списка, если e2e на staging не прошёл/не прогонялся/устарел/не на том коммите.
  * Владелец решил применить сразу ко всем пяти активным коммерческим приложениям, без
  * warn-only периода — реакция на прод-инцидент archetest v0.25.5 (сломанный рендер,
- * не пойманный HTTP-проверками деплоя).
+ * не пойманный HTTP-проверками деплоя). `studio` добавлен позже (2026-08-06) — тоже
+ * коммерческое приложение (тайм-трекинг и инвойсы владельца), изначально пропущено.
  */
-export const HARD_GATED_APPS: string[] = ['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008']
+export const HARD_GATED_APPS: string[] = ['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008', 'studio']
 
 /**
  * Определяет текущий сервер по env `SERVER_NAME` или hostname. Fallback — s2.
