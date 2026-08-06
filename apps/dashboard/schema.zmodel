@@ -1,6 +1,8 @@
 // ZenStack schema file for Dashboard application
 // Панель мониторинга серверной инфраструктуры
 
+import "../../libs/zenstack-fragments/src/better-auth"
+
 datasource db {
   provider = "postgresql"
 }
@@ -64,23 +66,8 @@ model User {
 }
 
 /// OAuth аккаунты (Better Auth)
-model Account {
-  id                    String    @id @default(cuid())
-  userId                String
-  providerId            String
-  accountId             String
-  accessToken           String?
-  refreshToken          String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  idToken               String?
-  password              String?
-
+model Account with AccountFields {
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
 
   @@unique([providerId, accountId])
   @@index([userId])
@@ -88,33 +75,16 @@ model Account {
 }
 
 /// Сессии пользователей (Better Auth)
-model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
-
+model Session with SessionFields {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@allow('all', auth() == user)
 }
 
 /// Токены верификации (Better Auth)
-model Verification {
-  id         String   @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
+model Verification with VerificationFields {
   type       String   @default("EMAIL_VERIFICATION")
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
   @@index([identifier])
   @@deny('all', true)

@@ -180,7 +180,7 @@ model OauthApplication {
   name                  String
   icon                  String?
   metadata              String?
-  redirectUrls          String   // JSON массив redirect URIs
+  redirectUrls          String   // CSV-строка redirect URI (через запятую) — better-auth OIDC делает res.redirectUrls.split(",")
   type                  String   @default("web")
   disabled              Boolean  @default(false)
   skipConsent           Boolean  @default(false)
