@@ -375,21 +375,23 @@ export function DownloadsSection({ release }: DownloadsSectionProps) {
           {/* Карточки платформ */}
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} w="full" maxW="4xl">
             {sortedPlatforms.map((platform) =>
-              platform === 'macos' ? (
-                <MacOSCard
-                  key={platform}
-                  release={release}
-                  isCurrentPlatform={currentPlatform === 'macos'}
-                  detectedArch={macArch}
-                />
-              ) : (
-                <PlatformCard
-                  key={platform}
-                  platform={platform}
-                  release={release}
-                  isCurrentPlatform={platform === currentPlatform}
-                />
-              )
+              platform === 'macos'
+                ? (
+                  <MacOSCard
+                    key={platform}
+                    release={release}
+                    isCurrentPlatform={currentPlatform === 'macos'}
+                    detectedArch={macArch}
+                  />
+                )
+                : (
+                  <PlatformCard
+                    key={platform}
+                    platform={platform}
+                    release={release}
+                    isCurrentPlatform={platform === currentPlatform}
+                  />
+                )
             )}
           </SimpleGrid>
 

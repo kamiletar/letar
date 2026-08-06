@@ -61,7 +61,7 @@ export function SharedProgressBar({
       setContainerWidth(rect.width)
       setHoverTime(fraction * duration)
     },
-    [hasPreview, duration]
+    [hasPreview, duration],
   )
 
   const handleMouseEnter = useCallback(() => {

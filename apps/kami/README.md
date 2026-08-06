@@ -63,7 +63,7 @@ function MyComponent() {
 
 ```tsx
 import { OnlyFor } from '@/app/_components/only-for'
-;<OnlyFor role="ADMIN">
+<OnlyFor role="ADMIN">
   <AdminOnlyContent />
 </OnlyFor>
 ```

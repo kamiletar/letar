@@ -246,135 +246,150 @@ export default function FriendlyMatchPage() {
       </Flex>
 
       {/* === Входящие вызовы === */}
-      {loadingChallenges ? (
-        <Flex justify="center" py={6}>
-          <Spinner />
-        </Flex>
-      ) : challenges.length > 0 ? (
-        <Box>
-          <Heading size="md" mb={3}>
-            Входящие вызовы
-          </Heading>
-          <VStack gap={3} align="stretch">
-            {challenges.map((ch) => (
-              <Box key={ch.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="2px" borderColor="orange.muted">
-                <Flex justify="space-between" align="start" flexWrap="wrap" gap={3}>
-                  <Box flex={1}>
-                    <HStack gap={2} mb={1}>
-                      <Badge colorPalette="orange" size="sm">
-                        Вызов
-                      </Badge>
-                      <Text fontWeight="semibold">{ch.fromTeamSeason.team.name}</Text>
+      {loadingChallenges
+        ? (
+          <Flex justify="center" py={6}>
+            <Spinner />
+          </Flex>
+        )
+        : challenges.length > 0
+        ? (
+          <Box>
+            <Heading size="md" mb={3}>
+              Входящие вызовы
+            </Heading>
+            <VStack gap={3} align="stretch">
+              {challenges.map((ch) => (
+                <Box key={ch.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="2px" borderColor="orange.muted">
+                  <Flex justify="space-between" align="start" flexWrap="wrap" gap={3}>
+                    <Box flex={1}>
+                      <HStack gap={2} mb={1}>
+                        <Badge colorPalette="orange" size="sm">
+                          Вызов
+                        </Badge>
+                        <Text fontWeight="semibold">{ch.fromTeamSeason.team.name}</Text>
+                      </HStack>
+                      <VStack gap={0.5} align="stretch">
+                        {ch.submittedBy.name && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Тренер: {ch.submittedBy.name}
+                          </Text>
+                        )}
+                        {ch.venue && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Площадка: {ch.venue.name}
+                          </Text>
+                        )}
+                        {ch.preferredDate && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Дата: {formatDateNumeric(ch.preferredDate)}
+                          </Text>
+                        )}
+                        {ch.note && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Комментарий: {ch.note}
+                          </Text>
+                        )}
+                        <Text fontSize="xs" color="fg.muted">
+                          Получен: {formatDateNumeric(ch.createdAt)}
+                        </Text>
+                      </VStack>
+                    </Box>
+                    <HStack gap={2}>
+                      <Button
+                        size="sm"
+                        colorPalette="green"
+                        loading={responding === ch.id}
+                        onClick={() =>
+                          handleAcceptChallenge(ch.id)}
+                      >
+                        <LuCheck size={14} />
+                        Принять
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorPalette="red"
+                        variant="outline"
+                        onClick={() =>
+                          setDeclineTarget(ch)}
+                      >
+                        <LuX size={14} />
+                        Отклонить
+                      </Button>
                     </HStack>
-                    <VStack gap={0.5} align="stretch">
-                      {ch.submittedBy.name && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Тренер: {ch.submittedBy.name}
-                        </Text>
-                      )}
-                      {ch.venue && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Площадка: {ch.venue.name}
-                        </Text>
-                      )}
-                      {ch.preferredDate && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Дата: {formatDateNumeric(ch.preferredDate)}
-                        </Text>
-                      )}
-                      {ch.note && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Комментарий: {ch.note}
-                        </Text>
-                      )}
-                      <Text fontSize="xs" color="fg.muted">
-                        Получен: {formatDateNumeric(ch.createdAt)}
-                      </Text>
-                    </VStack>
-                  </Box>
-                  <HStack gap={2}>
-                    <Button
-                      size="sm"
-                      colorPalette="green"
-                      loading={responding === ch.id}
-                      onClick={() => handleAcceptChallenge(ch.id)}
-                    >
-                      <LuCheck size={14} />
-                      Принять
-                    </Button>
-                    <Button size="sm" colorPalette="red" variant="outline" onClick={() => setDeclineTarget(ch)}>
-                      <LuX size={14} />
-                      Отклонить
-                    </Button>
-                  </HStack>
-                </Flex>
-              </Box>
-            ))}
-          </VStack>
-        </Box>
-      ) : null}
+                  </Flex>
+                </Box>
+              ))}
+            </VStack>
+          </Box>
+        )
+        : null}
 
       {/* === Мои заявки === */}
       <Box>
         <Heading size="md" mb={3}>
           Мои заявки
         </Heading>
-        {loading ? (
-          <Flex justify="center" py={12}>
-            <Spinner size="lg" />
-          </Flex>
-        ) : requests.length === 0 ? (
-          <EmptyState>
-            <Text color="fg.muted">Нет заявок на товарищеские матчи</Text>
-            <Text fontSize="sm" color="fg.muted" mt={1}>
-              Вызовите любую команду вашего сезона на товарищеский матч
-            </Text>
-          </EmptyState>
-        ) : (
-          <VStack gap={3} align="stretch">
-            {requests.map((req) => (
-              <Box key={req.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
-                <Flex justify="space-between" align="start" flexWrap="wrap" gap={2}>
-                  <Box flex={1}>
-                    <HStack gap={2} mb={1}>
-                      <Text fontWeight="semibold">
-                        {req.fromTeamSeason.team.name} vs {req.toTeamSeason.team.name}
-                      </Text>
-                      <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
-                        {statusLabel[req.status] ?? req.status}
+        {loading
+          ? (
+            <Flex justify="center" py={12}>
+              <Spinner size="lg" />
+            </Flex>
+          )
+          : requests.length === 0
+          ? (
+            <EmptyState>
+              <Text color="fg.muted">Нет заявок на товарищеские матчи</Text>
+              <Text fontSize="sm" color="fg.muted" mt={1}>
+                Вызовите любую команду вашего сезона на товарищеский матч
+              </Text>
+            </EmptyState>
+          )
+          : (
+            <VStack gap={3} align="stretch">
+              {requests.map((req) => (
+                <Box key={req.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
+                  <Flex justify="space-between" align="start" flexWrap="wrap" gap={2}>
+                    <Box flex={1}>
+                      <HStack gap={2} mb={1}>
+                        <Text fontWeight="semibold">
+                          {req.fromTeamSeason.team.name} vs {req.toTeamSeason.team.name}
+                        </Text>
+                        <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
+                          {statusLabel[req.status] ?? req.status}
+                        </Badge>
+                      </HStack>
+                      <VStack gap={0.5} align="stretch">
+                        {req.venue && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Площадка: {req.venue.name}
+                          </Text>
+                        )}
+                        {req.preferredDate && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Дата: {formatDateNumeric(req.preferredDate)}
+                          </Text>
+                        )}
+                        {req.note && (
+                          <Text fontSize="sm" color="fg.muted">
+                            Комментарий: {req.note}
+                          </Text>
+                        )}
+                        <Text fontSize="xs" color="fg.muted">
+                          Подана: {formatDateNumeric(req.createdAt)}
+                        </Text>
+                      </VStack>
+                    </Box>
+                    {req.status === 'APPROVED' && req.match && (
+                      <Badge colorPalette="blue" size="sm">
+                        Матч создан
                       </Badge>
-                    </HStack>
-                    <VStack gap={0.5} align="stretch">
-                      {req.venue && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Площадка: {req.venue.name}
-                        </Text>
-                      )}
-                      {req.preferredDate && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Дата: {formatDateNumeric(req.preferredDate)}
-                        </Text>
-                      )}
-                      {req.note && (
-                        <Text fontSize="sm" color="fg.muted">
-                          Комментарий: {req.note}
-                        </Text>
-                      )}
-                      <Text fontSize="xs" color="fg.muted">
-                        Подана: {formatDateNumeric(req.createdAt)}
-                      </Text>
-                    </VStack>
-                  </Box>
-                  {req.status === 'APPROVED' && req.match && (
-                    <Badge colorPalette="blue" size="sm">
-                      Матч создан
-                    </Badge>
-                  )}
-                </Flex>
-              </Box>
-            ))}
-          </VStack>
-        )}
+                    )}
+                  </Flex>
+                </Box>
+              ))}
+            </VStack>
+          )}
       </Box>
 
       {/* === Диалог создания вызова === */}
@@ -387,60 +402,65 @@ export default function FriendlyMatchPage() {
                 <Dialog.Title>Вызвать на товарищеский матч</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                {loadingOptions ? (
-                  <Flex justify="center" py={6}>
-                    <Spinner />
-                  </Flex>
-                ) : (
-                  <VStack gap={4} align="stretch">
-                    <Field.Root required>
-                      <Field.Label>Соперник</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field value={toTeamSeasonId} onChange={(e) => setToTeamSeasonId(e.target.value)}>
-                          <option value="">Выберите команду...</option>
-                          {teams.map((t) => (
-                            <option key={t.id} value={t.id}>
-                              {t.teamName}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                      </NativeSelect.Root>
-                    </Field.Root>
+                {loadingOptions
+                  ? (
+                    <Flex justify="center" py={6}>
+                      <Spinner />
+                    </Flex>
+                  )
+                  : (
+                    <VStack gap={4} align="stretch">
+                      <Field.Root required>
+                        <Field.Label>Соперник</Field.Label>
+                        <NativeSelect.Root>
+                          <NativeSelect.Field
+                            value={toTeamSeasonId}
+                            onChange={(e) => setToTeamSeasonId(e.target.value)}
+                          >
+                            <option value="">Выберите команду...</option>
+                            {teams.map((t) => (
+                              <option key={t.id} value={t.id}>
+                                {t.teamName}
+                              </option>
+                            ))}
+                          </NativeSelect.Field>
+                        </NativeSelect.Root>
+                      </Field.Root>
 
-                    <Field.Root>
-                      <Field.Label>Площадка (необязательно)</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field value={venueId} onChange={(e) => setVenueId(e.target.value)}>
-                          <option value="">Любая / на усмотрение админа</option>
-                          {venues.map((v) => (
-                            <option key={v.id} value={v.id}>
-                              {v.name}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                      </NativeSelect.Root>
-                    </Field.Root>
+                      <Field.Root>
+                        <Field.Label>Площадка (необязательно)</Field.Label>
+                        <NativeSelect.Root>
+                          <NativeSelect.Field value={venueId} onChange={(e) => setVenueId(e.target.value)}>
+                            <option value="">Любая / на усмотрение админа</option>
+                            {venues.map((v) => (
+                              <option key={v.id} value={v.id}>
+                                {v.name}
+                              </option>
+                            ))}
+                          </NativeSelect.Field>
+                        </NativeSelect.Root>
+                      </Field.Root>
 
-                    <Field.Root>
-                      <Field.Label>Желаемая дата (необязательно)</Field.Label>
-                      <Input
-                        type="datetime-local"
-                        value={preferredDate}
-                        onChange={(e) => setPreferredDate(e.target.value)}
-                      />
-                    </Field.Root>
+                      <Field.Root>
+                        <Field.Label>Желаемая дата (необязательно)</Field.Label>
+                        <Input
+                          type="datetime-local"
+                          value={preferredDate}
+                          onChange={(e) => setPreferredDate(e.target.value)}
+                        />
+                      </Field.Root>
 
-                    <Field.Root>
-                      <Field.Label>Комментарий (необязательно)</Field.Label>
-                      <Textarea
-                        placeholder="Причина, пожелания..."
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                        rows={2}
-                      />
-                    </Field.Root>
-                  </VStack>
-                )}
+                      <Field.Root>
+                        <Field.Label>Комментарий (необязательно)</Field.Label>
+                        <Textarea
+                          placeholder="Причина, пожелания..."
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          rows={2}
+                        />
+                      </Field.Root>
+                    </VStack>
+                  )}
               </Dialog.Body>
               <Dialog.Footer>
                 <Flex gap={3}>

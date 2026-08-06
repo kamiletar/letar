@@ -56,7 +56,7 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }:
         getAudioContext(),
         (note, vel) => noteOnRef.current(note, vel),
         (note) => noteOffRef.current(note),
-        () => sequenceRef.current
+        () => sequenceRef.current,
       )
     }
     schedulerRef.current.start((step) => {
@@ -87,14 +87,14 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }:
     (bpm: number) => {
       setSequence((prev) => ({ ...prev, bpm: Math.max(40, Math.min(240, bpm)) }))
     },
-    [setSequence]
+    [setSequence],
   )
 
   const setSwing = useCallback(
     (swing: number) => {
       setSequence((prev) => ({ ...prev, swing: Math.max(0, Math.min(1, swing)) }))
     },
-    [setSequence]
+    [setSequence],
   )
 
   // Клик по ячейке: пусто → нота длиной 1 шаг; клик по существующей ноте — удлиняет по циклу
@@ -116,7 +116,7 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }:
         return { ...prev, notes: [...prev.notes, { note, step, length: CYCLE_LENGTHS[0], velocity: 0.8 }] }
       })
     },
-    [setSequence]
+    [setSequence],
   )
 
   const clear = useCallback(() => {
@@ -134,7 +134,7 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }:
         return { ...prev, notes: [...filtered, ...added] }
       })
     },
-    [setSequence]
+    [setSequence],
   )
 
   return {

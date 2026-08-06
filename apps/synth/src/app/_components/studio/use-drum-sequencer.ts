@@ -72,7 +72,7 @@ export function useDrumSequencer({
         setTimeout(() => onBeat?.(stepIndex), visualDelayMs)
       }
     },
-    [drumEngineRef, drumPatchRef, onPadHit, onBeat]
+    [drumEngineRef, drumPatchRef, onPadHit, onBeat],
   )
 
   useEffect(() => {
@@ -122,21 +122,21 @@ export function useDrumSequencer({
         engine: { ...prev.engine, sequence: updater(prev.engine.sequence ?? emptySequence()) },
       }))
     },
-    [setDrumPatch]
+    [setDrumPatch],
   )
 
   const setBpm = useCallback(
     (next: number) => {
       updateSequence((prev) => ({ ...prev, bpm: Math.max(40, Math.min(240, next)) }))
     },
-    [updateSequence]
+    [updateSequence],
   )
 
   const setSwing = useCallback(
     (next: number) => {
       updateSequence((prev) => ({ ...prev, swing: Math.max(0, Math.min(1, next)) }))
     },
-    [updateSequence]
+    [updateSequence],
   )
 
   const toggleStep = useCallback(
@@ -148,7 +148,7 @@ export function useDrumSequencer({
         return { ...prev, pattern: next }
       })
     },
-    [updateSequence]
+    [updateSequence],
   )
 
   const clear = useCallback(() => {

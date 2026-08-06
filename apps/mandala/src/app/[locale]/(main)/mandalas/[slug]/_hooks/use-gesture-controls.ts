@@ -121,7 +121,7 @@ export function useGestureControls({
         setIsGesturing(true)
       }
     },
-    [enabled, containerRef]
+    [enabled, containerRef],
   )
 
   /**
@@ -208,7 +208,7 @@ export function useGestureControls({
         }
       }
     },
-    [enabled, containerRef, swipeThreshold, onVolumeChange, onSeek, onNavigatePrev, onNavigateNext, onRotate, getAngle]
+    [enabled, containerRef, swipeThreshold, onVolumeChange, onSeek, onNavigatePrev, onNavigateNext, onRotate, getAngle],
   )
 
   /**
@@ -261,7 +261,7 @@ export function useGestureControls({
       isEdgeStartRef.current = 'center'
       setIsGesturing(false)
     },
-    [enabled, swipeThreshold, doubleTapTimeout, onDoubleTap, onNavigatePrev, onNavigateNext]
+    [enabled, swipeThreshold, doubleTapTimeout, onDoubleTap, onNavigatePrev, onNavigateNext],
   )
 
   // Подписка на события через useEventListeners
@@ -272,7 +272,7 @@ export function useGestureControls({
       touchmove: handleTouchMove as (e: Event) => void,
       touchend: handleTouchEnd as (e: Event) => void,
     },
-    { passive: true }
+    { passive: true },
   )
 
   return {

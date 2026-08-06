@@ -100,12 +100,11 @@ export function transformSlotsToSections(slots: BracketSlotRow[]): BracketSectio
     .filter((type) => byStage.has(type))
     .map((type) => {
       const rounds = byStage.get(type)!
-      const roundNames =
-        type === 'PLAYOFF_UPPER'
-          ? UPPER_ROUND_NAMES
-          : type === 'PLAYOFF_LOWER'
-            ? LOWER_ROUND_NAMES
-            : { 1: 'Гранд-финал' }
+      const roundNames = type === 'PLAYOFF_UPPER'
+        ? UPPER_ROUND_NAMES
+        : type === 'PLAYOFF_LOWER'
+        ? LOWER_ROUND_NAMES
+        : { 1: 'Гранд-финал' }
 
       const bracketRounds: BracketRound[] = [...rounds.entries()]
         .sort(([a], [b]) => a - b)
@@ -128,7 +127,7 @@ function slotsToMatches(
   slots: BracketSlotRow[],
   roundNumber: number,
   stageType: string,
-  slotMap: Map<string, BracketSlotRow>
+  slotMap: Map<string, BracketSlotRow>,
 ): BracketMatch[] {
   const sorted = [...slots].sort((a, b) => a.slotNumber - b.slotNumber)
 

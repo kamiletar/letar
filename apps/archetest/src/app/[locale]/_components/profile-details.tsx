@@ -44,7 +44,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
   // Без relevantCounts (клиентский фолбэк гостя/сетевой ошибки) — прежняя сортировка без интервалов
   const ranking = useMemo(
     () => (relevantCounts ? computeIpsativeRanking(scores, relevantCounts, { exclude: STATE_CODES }) : null),
-    [scores, relevantCounts]
+    [scores, relevantCounts],
   )
 
   // Топ-3 ведущих ЧЕРТ (состояния BAR/DPR исключены — они в отдельном блоке «Состояния»)
@@ -83,10 +83,9 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
         // Перекрывающиеся интервалы соседей = статистически неразличимы: честно говорим,
         // что порядок условен, вместо ложной точности «61,2% > 60,8%»
         const next = top3[i + 1]
-        const tiedWithNext =
-          type.ipsative !== undefined &&
-          next?.ipsative !== undefined &&
-          type.ipsative.tieGroup === next.ipsative.tieGroup
+        const tiedWithNext = type.ipsative !== undefined
+          && next?.ipsative !== undefined
+          && type.ipsative.tieGroup === next.ipsative.tieGroup
         return (
           <Fragment key={type.code}>
             <DevelopmentalProfileCard
@@ -110,8 +109,8 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
       })}
 
       {/* Взаимодействие топ-2 */}
-      {top3.length >= 2 &&
-        (() => {
+      {top3.length >= 2
+        && (() => {
           const interaction = getInteraction(top3[0].code, top3[1].code)
           if (!interaction) {
             return null
@@ -133,7 +132,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                       {replaceTypeCodes(
                         isRu ? interaction.dynamic : interaction.dynamicEn || interaction.dynamic,
                         isRu,
-                        showClinical
+                        showClinical,
                       )}
                     </Text>
                   </Box>
@@ -145,7 +144,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                       {replaceTypeCodes(
                         isRu ? interaction.strengths : interaction.strengthsEn || interaction.strengths,
                         isRu,
-                        showClinical
+                        showClinical,
                       )}
                     </Text>
                   </Box>
@@ -157,7 +156,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                       {replaceTypeCodes(
                         isRu ? interaction.risks : interaction.risksEn || interaction.risks,
                         isRu,
-                        showClinical
+                        showClinical,
                       )}
                     </Text>
                   </Box>
@@ -169,7 +168,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                       {replaceTypeCodes(
                         isRu ? interaction.advice : interaction.adviceEn || interaction.advice,
                         isRu,
-                        showClinical
+                        showClinical,
                       )}
                     </Text>
                   </Box>

@@ -149,7 +149,7 @@ if (dump.length !== TOTAL_QUESTIONS) {
 }
 if (Object.keys(maxJson.per_question_max).length !== dump.length) {
   throw new Error(
-    `Справочник: ${Object.keys(maxJson.per_question_max).length} записей против ${dump.length} вопросов дампа`
+    `Справочник: ${Object.keys(maxJson.per_question_max).length} записей против ${dump.length} вопросов дампа`,
   )
 }
 if (VALIDITY_CHECKS.length !== 6) {
@@ -488,7 +488,7 @@ if (missingKnown.length > 0) {
 const now = new Date().toISOString().slice(0, 10)
 const strongPairs = nearDuplicates.filter((p) => p.similarity >= NEAR_DUP_STRONG)
 const strongStory = storyDuplicates.filter(
-  (p) => p.similarity >= STORY_DUP_SURE || (p.similarity >= STORY_DUP_STRONG && p.rareCore)
+  (p) => p.similarity >= STORY_DUP_SURE || (p.similarity >= STORY_DUP_STRONG && p.rareCore),
 )
 
 const summaryRows: [string, number, string][] = [
@@ -534,11 +534,11 @@ mdLines.push('> и `QUESTION_BANK_VERSION` не изменяются (грани
 mdLines.push('>')
 mdLines.push(`> Банк: **${dump.length}** вопросов (активных ${dump.filter((q) => q.active).length}), `)
 mdLines.push(
-  `> из них ${validitySortOrders.size} attention-check (№${[...validitySortOrders].map((s) => s + 1).join(', №')})`
+  `> из них ${validitySortOrders.size} attention-check (№${[...validitySortOrders].map((s) => s + 1).join(', №')})`,
 )
 mdLines.push(
-  `> исключены из проверок скоринга. Ядро v1 — ${v1Count - validitySortOrders.size} вопросов ` +
-    `(+ ${validitySortOrders.size} чек-вопросов), батчи 5.1/5.5 — ${dump.length - v1Count}.`
+  `> исключены из проверок скоринга. Ядро v1 — ${v1Count - validitySortOrders.size} вопросов `
+    + `(+ ${validitySortOrders.size} чек-вопросов), батчи 5.1/5.5 — ${dump.length - v1Count}.`,
 )
 mdLines.push('')
 mdLines.push('## Сводка')
@@ -572,7 +572,7 @@ if (strongPairs.length === 0) {
   for (const p of strongPairs) {
     const mark = p.similarity >= NEAR_DUP_EXACTISH ? ' ⚠️' : ''
     mdLines.push(
-      `| ${p.similarity}${mark} | №${p.a} ↔ №${p.b} | «${short(p.scenarioA, 60)}» ↔ «${short(p.scenarioB, 60)}» |`
+      `| ${p.similarity}${mark} | №${p.a} ↔ №${p.b} | «${short(p.scenarioA, 60)}» ↔ «${short(p.scenarioB, 60)}» |`,
     )
   }
 }
@@ -592,18 +592,20 @@ if (strongStory.length === 0) {
   mdLines.push('| ---: | --- | --- | --- |')
   for (const p of strongStory) {
     mdLines.push(
-      `| ${p.similarity} | №${p.a} ↔ №${p.b} | ${p.sharedStems.join(', ')} | «${short(p.scenarioA, 55)}» ↔ «${short(
-        p.scenarioB,
-        55
-      )}» |`
+      `| ${p.similarity} | №${p.a} ↔ №${p.b} | ${p.sharedStems.join(', ')} | «${short(p.scenarioA, 55)}» ↔ «${
+        short(
+          p.scenarioB,
+          55,
+        )
+      }» |`,
     )
   }
 }
 mdLines.push('')
 mdLines.push(
-  `Пар слабее порогов (≥ ${NEAR_DUP_MIN} Жаккар / ≥ ${STORY_DUP_MIN} containment): ` +
-    `${nearDuplicates.length - strongPairs.length + storyDuplicates.length - strongStory.length} — ` +
-    `полный список в \`question-bank-audit.json\`.`
+  `Пар слабее порогов (≥ ${NEAR_DUP_MIN} Жаккар / ≥ ${STORY_DUP_MIN} containment): `
+    + `${nearDuplicates.length - strongPairs.length + storyDuplicates.length - strongStory.length} — `
+    + `полный список в \`question-bank-audit.json\`.`,
 )
 mdLines.push('')
 
@@ -667,8 +669,8 @@ const most = coverage[coverage.length - 1]
 const least = coverage[0]
 mdLines.push('')
 mdLines.push(
-  `Перекос: ${most.code} (${most.relevantDump}) против ${least.code} (${least.relevantDump}) — ` +
-    `разница в ${Math.round(most.relevantDump / Math.max(1, least.relevantDump))} раз.`
+  `Перекос: ${most.code} (${most.relevantDump}) против ${least.code} (${least.relevantDump}) — `
+    + `разница в ${Math.round(most.relevantDump / Math.max(1, least.relevantDump))} раз.`,
 )
 mdLines.push('')
 
@@ -706,10 +708,10 @@ if (outOfRangeScores.length > 0) {
 mdLines.push('## 6. Полнота EN-локализации')
 mdLines.push('')
 mdLines.push(
-  `Не переведено (EN пуст, содержит кириллицу или совпадает с RU): ` +
-    `**${enScenarioUntranslated.length} сценариев из ${dump.length}** ` +
-    `(${Math.round((enScenarioUntranslated.length / dump.length) * 100)}% банка), ` +
-    `вопросов с непереведёнными вариантами — ${enOptionsUntranslated.length}.`
+  `Не переведено (EN пуст, содержит кириллицу или совпадает с RU): `
+    + `**${enScenarioUntranslated.length} сценариев из ${dump.length}** `
+    + `(${Math.round((enScenarioUntranslated.length / dump.length) * 100)}% банка), `
+    + `вопросов с непереведёнными вариантами — ${enOptionsUntranslated.length}.`,
 )
 mdLines.push('')
 if (enScenarioUntranslated.length > 0) {
@@ -725,7 +727,7 @@ mdLines.push('')
 mdLines.push('## 7. Reverse-баланс')
 mdLines.push('')
 mdLines.push(
-  `Метка \`_reverse\` существует только в батч-файлах — у ядра v1 (${v1Count - validitySortOrders.size} вопросов)`
+  `Метка \`_reverse\` существует только в батч-файлах — у ядра v1 (${v1Count - validitySortOrders.size} вопросов)`,
 )
 mdLines.push('разметки нет вовсе, его reverse-баланс машинно не оценить (кандидат в задачи ревью).')
 mdLines.push('')
@@ -742,12 +744,12 @@ mdLines.push('')
 mdLines.push('- Нормализация текста: нижний регистр, ё→е, пунктуация и лишние пробелы убраны.')
 mdLines.push('- Почти-дубли формулировок: коэффициент Жаккара по множествам символьных триграмм')
 mdLines.push(
-  `  нормализованных сценариев. Пороги: ≥ ${NEAR_DUP_EXACTISH} — почти дословный, ≥ ${NEAR_DUP_STRONG} — в отчёт, ≥ ${NEAR_DUP_MIN} — в JSON.`
+  `  нормализованных сценариев. Пороги: ≥ ${NEAR_DUP_EXACTISH} — почти дословный, ≥ ${NEAR_DUP_STRONG} — в отчёт, ≥ ${NEAR_DUP_MIN} — в JSON.`,
 )
 mdLines.push('- Сюжетные дубли: стемы (первые 4 символа) слов ≥ 3 букв вне стоп-листа; IDF-взвешенный')
 mdLines.push('  containment = Σidf(общих) / min(Σidf сторон); в MD — при редком общем стеме')
 mdLines.push(
-  `  (df ≤ ${STORY_RARE_DF}) или containment ≥ ${STORY_DUP_SURE}. Калибровка — по контрольным парам из PLAN:`
+  `  (df ≤ ${STORY_RARE_DF}) или containment ≥ ${STORY_DUP_SURE}. Калибровка — по контрольным парам из PLAN:`,
 )
 mdLines.push('  «нашли кошелёк» №43↔№1176 (0.70), «кассир и сдача» №8↔№1986 (0.62) — обе ловятся.')
 mdLines.push('- «Релевантный вопрос» шкалы — хотя бы один вариант даёт ей положительный балл')

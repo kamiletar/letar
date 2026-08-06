@@ -207,78 +207,78 @@ export function FieldTableEditor({
                 borderWidth="1px"
                 borderRadius="md"
                 onKeyDown={handleKeyDown}
-                onPaste={
-                  clipboard
-                    ? (e) => {
-                        // Не перехватываем paste внутри input
-                        const target = e.target as HTMLElement
-                        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
-                        if (disabled || readOnly || !canAdd) return
-                        // Парсинг TSV из clipboard (Excel/Sheets)
-                        const text = e.clipboardData?.getData('text/plain')
-                        if (!text) return
-                        const parsed = parseTSV(text)
-                        if (parsed.length === 0) return
-                        e.preventDefault()
-                        const editableCols = columns.filter((col) => !col.computed && !col.readOnly)
-                        for (const rawRow of parsed) {
-                          if (maxRows !== undefined && rows.length >= maxRows) break
-                          const row: Record<string, unknown> = {}
-                          for (let i = 0; i < editableCols.length && i < rawRow.length; i++) {
-                            row[editableCols[i].name] = coerceValue(rawRow[i], editableCols[i])
-                          }
-                          arrayField.pushValue(row)
-                        }
+                onPaste={clipboard
+                  ? (e) => {
+                    // Не перехватываем paste внутри input
+                    const target = e.target as HTMLElement
+                    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+                    if (disabled || readOnly || !canAdd) return
+                    // Парсинг TSV из clipboard (Excel/Sheets)
+                    const text = e.clipboardData?.getData('text/plain')
+                    if (!text) return
+                    const parsed = parseTSV(text)
+                    if (parsed.length === 0) return
+                    e.preventDefault()
+                    const editableCols = columns.filter((col) => !col.computed && !col.readOnly)
+                    for (const rawRow of parsed) {
+                      if (maxRows !== undefined && rows.length >= maxRows) break
+                      const row: Record<string, unknown> = {}
+                      for (let i = 0; i < editableCols.length && i < rawRow.length; i++) {
+                        row[editableCols[i].name] = coerceValue(rawRow[i], editableCols[i])
                       }
-                    : undefined
-                }
+                      arrayField.pushValue(row)
+                    }
+                  }
+                  : undefined}
               >
                 <Table.Root size={size} striped={striped} interactive variant="outline">
                   <TableEditorHeader selectable={selectable} sortable={sortable} />
 
                   <Table.Body>
-                    {rows.length === 0 ? (
-                      <Table.Row>
-                        <Table.Cell
-                          colSpan={
-                            columns.length +
-                            (selectable && !readOnly ? 1 : 0) +
-                            (sortable && !readOnly ? 1 : 0) +
-                            (!readOnly ? 1 : 0)
-                          }
-                          textAlign="center"
-                          py="8"
+                    {rows.length === 0
+                      ? (
+                        <Table.Row>
+                          <Table.Cell
+                            colSpan={columns.length
+                              + (selectable && !readOnly ? 1 : 0)
+                              + (sortable && !readOnly ? 1 : 0)
+                              + (!readOnly ? 1 : 0)}
+                            textAlign="center"
+                            py="8"
+                          >
+                            <Text color="fg.muted">{emptyText}</Text>
+                          </Table.Cell>
+                        </Table.Row>
+                      )
+                      : sortable && !readOnly
+                      ? (
+                        <SortableWrapper
+                          items={rows.map((_, i) => `${fullPath}-${i}`)}
+                          onReorder={(oldIdx, newIdx) => moveRow(oldIdx, newIdx)}
                         >
-                          <Text color="fg.muted">{emptyText}</Text>
-                        </Table.Cell>
-                      </Table.Row>
-                    ) : sortable && !readOnly ? (
-                      <SortableWrapper
-                        items={rows.map((_, i) => `${fullPath}-${i}`)}
-                        onReorder={(oldIdx, newIdx) => moveRow(oldIdx, newIdx)}
-                      >
-                        {rows.map((rowData, rowIndex) => (
-                          <SortableItem key={`${fullPath}-${rowIndex}`} id={`${fullPath}-${rowIndex}`}>
-                            <TableEditorRow
-                              rowIndex={rowIndex}
-                              rowData={rowData}
-                              selectable={selectable}
-                              sortable={sortable}
-                            />
-                          </SortableItem>
-                        ))}
-                      </SortableWrapper>
-                    ) : (
-                      rows.map((rowData, rowIndex) => (
-                        <TableEditorRow
-                          key={rowIndex}
-                          rowIndex={rowIndex}
-                          rowData={rowData}
-                          selectable={selectable}
-                          sortable={sortable}
-                        />
-                      ))
-                    )}
+                          {rows.map((rowData, rowIndex) => (
+                            <SortableItem key={`${fullPath}-${rowIndex}`} id={`${fullPath}-${rowIndex}`}>
+                              <TableEditorRow
+                                rowIndex={rowIndex}
+                                rowData={rowData}
+                                selectable={selectable}
+                                sortable={sortable}
+                              />
+                            </SortableItem>
+                          ))}
+                        </SortableWrapper>
+                      )
+                      : (
+                        rows.map((rowData, rowIndex) => (
+                          <TableEditorRow
+                            key={rowIndex}
+                            rowIndex={rowIndex}
+                            rowData={rowData}
+                            selectable={selectable}
+                            sortable={sortable}
+                          />
+                        ))
+                      )}
                   </Table.Body>
 
                   {footer && footer.length > 0 && (

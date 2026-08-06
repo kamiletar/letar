@@ -71,13 +71,13 @@ export function AdminPageLayout({
       {/* Основной контент в Card */}
       <Card.Root>
         <Card.Body p={0}>
-          {isEmpty ? (
-            <Box p={6}>
-              <Text color="fg.muted">{emptyText}</Text>
-            </Box>
-          ) : (
-            children
-          )}
+          {isEmpty
+            ? (
+              <Box p={6}>
+                <Text color="fg.muted">{emptyText}</Text>
+              </Box>
+            )
+            : children}
         </Card.Body>
       </Card.Root>
 

@@ -72,7 +72,7 @@ export function parseAnsi(text: string): ReactNode {
           parts.push(
             <span key={parts.length} style={currentStyle}>
               {textContent}
-            </span>
+            </span>,
           )
         } else {
           parts.push(<Fragment key={parts.length}>{textContent}</Fragment>)
@@ -136,7 +136,7 @@ export function parseAnsi(text: string): ReactNode {
         parts.push(
           <span key={parts.length} style={currentStyle}>
             {textContent}
-          </span>
+          </span>,
         )
       } else {
         parts.push(<Fragment key={parts.length}>{textContent}</Fragment>)

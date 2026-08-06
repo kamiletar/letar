@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: `Максимальный размер 15 МБ (файл: ${(file.size / 1024 / 1024).toFixed(1)} МБ)` },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -67,9 +67,8 @@ export async function POST(request: NextRequest) {
 
     // Проверяем доступ: ADMIN или тренер одной из команд
     const isAdmin = user.roles?.includes('ADMIN')
-    const isTeamMember =
-      match.homeTeam.playerTeamSeasons.some((pts) => pts.player.userId === user.id) ||
-      match.awayTeam.playerTeamSeasons.some((pts) => pts.player.userId === user.id)
+    const isTeamMember = match.homeTeam.playerTeamSeasons.some((pts) => pts.player.userId === user.id)
+      || match.awayTeam.playerTeamSeasons.some((pts) => pts.player.userId === user.id)
 
     if (!isAdmin && !isTeamMember) {
       return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })

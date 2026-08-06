@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
         { error: `Максимальный размер — 500MB (файл: ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
-        { status: 400 }
+        { status: 400 },
       )
     }
 

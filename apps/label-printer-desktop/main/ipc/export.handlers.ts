@@ -14,7 +14,7 @@ import { jsonStoreLogger, logger } from '../utils/logger-helper'
 const historyStorage = createJsonStore<HistoryData>(
   STORAGE_FILES.history,
   { jobs: [] },
-  { dir: devDataDir(), logger: jsonStoreLogger }
+  { dir: devDataDir(), logger: jsonStoreLogger },
 )
 
 /**
@@ -95,7 +95,7 @@ export function registerExportHandlers(): void {
         logger.error('[ExportIPC]', 'export:history-excel error', error)
         return { success: false, error: error instanceof Error ? error.message : 'Ошибка экспорта' }
       }
-    }
+    },
   )
 
   // Экспорт статистики в PDF (через printToPDF)
@@ -116,10 +116,9 @@ export function registerExportHandlers(): void {
         const uniqueGtins = new Set(jobs.map((j) => j.gtin)).size
 
         // Создание HTML для PDF
-        const dateRange =
-          params.startDate || params.endDate
-            ? `Период: ${params.startDate || 'начало'} — ${params.endDate || 'конец'}`
-            : 'За всё время'
+        const dateRange = params.startDate || params.endDate
+          ? `Период: ${params.startDate || 'начало'} — ${params.endDate || 'конец'}`
+          : 'За всё время'
 
         const html = `
           <!DOCTYPE html>
@@ -246,6 +245,6 @@ export function registerExportHandlers(): void {
         logger.error('[ExportIPC]', 'export:stats-pdf error', error)
         return { success: false, error: error instanceof Error ? error.message : 'Ошибка экспорта' }
       }
-    }
+    },
   )
 }

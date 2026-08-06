@@ -108,7 +108,7 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
           break
       }
     },
-    [router, onOpenChange, onShowShortcuts, onImport]
+    [router, onOpenChange, onShowShortcuts, onImport],
   )
 
   // Обработка клавиатуры
@@ -135,11 +135,16 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
           break
       }
     },
-    [flatCommands, selectedIndex, executeCommand, onOpenChange]
+    [flatCommands, selectedIndex, executeCommand, onOpenChange],
   )
 
   return (
-    <Dialog.Root open={open} onOpenChange={(e) => onOpenChange(e.open)} placement="top" motionPreset="slide-in-top">
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => onOpenChange(e.open)}
+      placement="top"
+      motionPreset="slide-in-top"
+    >
       <Dialog.Backdrop bg="overlay.backdrop" />
       <Dialog.Positioner pt={20}>
         <Dialog.Content
@@ -178,79 +183,81 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
 
           {/* Список команд */}
           <Box maxH="400px" overflowY="auto" py={2}>
-            {flatCommands.length === 0 ? (
-              <Flex py={8} justify="center" align="center" color="fg.subtle">
-                <Text>Ничего не найдено</Text>
-              </Flex>
-            ) : (
-              Array.from(groupedCommands.entries()).map(([category, commands]) => (
-                <Box key={category} mb={2}>
-                  {/* Заголовок категории */}
-                  <Text
-                    fontSize="xs"
-                    fontWeight="semibold"
-                    color="fg.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="wider"
-                    px={4}
-                    py={1}
-                  >
-                    {CATEGORY_LABELS[category]}
-                  </Text>
+            {flatCommands.length === 0
+              ? (
+                <Flex py={8} justify="center" align="center" color="fg.subtle">
+                  <Text>Ничего не найдено</Text>
+                </Flex>
+              )
+              : (
+                Array.from(groupedCommands.entries()).map(([category, commands]) => (
+                  <Box key={category} mb={2}>
+                    {/* Заголовок категории */}
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="fg.subtle"
+                      textTransform="uppercase"
+                      letterSpacing="wider"
+                      px={4}
+                      py={1}
+                    >
+                      {CATEGORY_LABELS[category]}
+                    </Text>
 
-                  {/* Команды */}
-                  <VStack align="stretch" gap={0}>
-                    {commands.map((cmd) => {
-                      const isSelected = flatCommands[selectedIndex]?.id === cmd.id
+                    {/* Команды */}
+                    <VStack align="stretch" gap={0}>
+                      {commands.map((cmd) => {
+                        const isSelected = flatCommands[selectedIndex]?.id === cmd.id
 
-                      return (
-                        <Flex
-                          key={cmd.id}
-                          px={4}
-                          py={2}
-                          align="center"
-                          gap={3}
-                          cursor="pointer"
-                          bg={isSelected ? 'state.selected.bg' : 'transparent'}
-                          _hover={{ bg: 'state.hover' }}
-                          _active={{ bg: 'state.active', transform: 'scale(0.99)' }}
-                          onClick={() => executeCommand(cmd)}
-                          borderLeftWidth={2}
-                          borderLeftColor={isSelected ? 'primary.solid' : 'transparent'}
-                          transition="all 0.1s ease-out"
-                        >
-                          {/* Иконка */}
-                          <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
+                        return (
+                          <Flex
+                            key={cmd.id}
+                            px={4}
+                            py={2}
+                            align="center"
+                            gap={3}
+                            cursor="pointer"
+                            bg={isSelected ? 'state.selected.bg' : 'transparent'}
+                            _hover={{ bg: 'state.hover' }}
+                            _active={{ bg: 'state.active', transform: 'scale(0.99)' }}
+                            onClick={() => executeCommand(cmd)}
+                            borderLeftWidth={2}
+                            borderLeftColor={isSelected ? 'primary.solid' : 'transparent'}
+                            transition="all 0.1s ease-out"
+                          >
+                            {/* Иконка */}
+                            <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
 
-                          {/* Текст */}
-                          <Box flex={1}>
-                            <Text fontSize="sm" fontWeight="medium" color={isSelected ? 'fg' : 'fg.muted'}>
-                              {cmd.label}
-                            </Text>
-                            {cmd.description && (
-                              <Text fontSize="xs" color="fg.subtle">
-                                {cmd.description}
+                            {/* Текст */}
+                            <Box flex={1}>
+                              <Text fontSize="sm" fontWeight="medium" color={isSelected ? 'fg' : 'fg.muted'}>
+                                {cmd.label}
                               </Text>
-                            )}
-                          </Box>
+                              {cmd.description && (
+                                <Text fontSize="xs" color="fg.subtle">
+                                  {cmd.description}
+                                </Text>
+                              )}
+                            </Box>
 
-                          {/* Хоткей */}
-                          {cmd.shortcut && (
-                            <HStack gap={1} flexShrink={0}>
-                              {cmd.shortcut.map((key, i) => (
-                                <Kbd key={i} bg="bg.muted" borderColor="border" fontSize="xs" px={1.5}>
-                                  {key}
-                                </Kbd>
-                              ))}
-                            </HStack>
-                          )}
-                        </Flex>
-                      )
-                    })}
-                  </VStack>
-                </Box>
-              ))
-            )}
+                            {/* Хоткей */}
+                            {cmd.shortcut && (
+                              <HStack gap={1} flexShrink={0}>
+                                {cmd.shortcut.map((key, i) => (
+                                  <Kbd key={i} bg="bg.muted" borderColor="border" fontSize="xs" px={1.5}>
+                                    {key}
+                                  </Kbd>
+                                ))}
+                              </HStack>
+                            )}
+                          </Flex>
+                        )
+                      })}
+                    </VStack>
+                  </Box>
+                ))
+              )}
           </Box>
 
           {/* Футер с подсказками */}

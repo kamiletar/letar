@@ -23,7 +23,7 @@ describe('TanStackFormField', () => {
     render(
       <TanStackFormField name="email" field={mockField}>
         <TestComponent />
-      </TanStackFormField>
+      </TanStackFormField>,
     )
 
     expect(screen.getByTestId('value')).toHaveTextContent('test@example.com')
@@ -42,7 +42,7 @@ describe('TanStackFormField', () => {
         <TanStackFormField name="email" field={mockField}>
           <TestComponent />
         </TanStackFormField>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('user.email')
@@ -59,7 +59,7 @@ describe('TanStackFormField', () => {
             <span data-testid="value">{field.state.value as string}</span>
           </>
         )}
-      </TanStackFormField>
+      </TanStackFormField>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('email')
@@ -79,7 +79,7 @@ describe('TanStackFormField', () => {
         <TanStackFormField name="email" field={mockField}>
           <TestComponent />
         </TanStackFormField>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('original')).toHaveTextContent('email')

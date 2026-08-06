@@ -38,7 +38,7 @@ function getClient(): KuboRPCClient {
 export async function addFile(
   filePath: string,
   onProgress?: (bytes: number) => void,
-  opts?: { pin?: boolean }
+  opts?: { pin?: boolean },
 ): Promise<IpfsAddResult> {
   const client = getClient()
   const { createReadStream } = await import('fs')
@@ -392,7 +392,7 @@ export async function createDirectoryFromCids(entries: DirEntry[]): Promise<stri
  */
 export async function addDirectory(
   dirPath: string,
-  recursive = true
+  recursive = true,
 ): Promise<{ files: IpfsAddResult[]; rootCid: string }> {
   const client = getClient()
   const results: IpfsAddResult[] = []

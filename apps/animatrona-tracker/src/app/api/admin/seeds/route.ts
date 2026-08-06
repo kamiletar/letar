@@ -167,7 +167,7 @@ export async function GET() {
 
   // Сортируем: больше онлайн сидов → выше
   const result = Array.from(animeMap.values()).sort(
-    (a, b) => b.onlineCount - a.onlineCount || b.seeds.length - a.seeds.length
+    (a, b) => b.onlineCount - a.onlineCount || b.seeds.length - a.seeds.length,
   )
 
   return NextResponse.json({ data: result })

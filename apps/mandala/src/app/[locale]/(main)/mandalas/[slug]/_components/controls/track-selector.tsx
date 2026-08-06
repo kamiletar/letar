@@ -77,7 +77,7 @@ export function TrackSelector({
         onChange({ customAudioTrackId: null, audioTrack: id })
       }
     },
-    [onChange]
+    [onChange],
   )
 
   return (

@@ -153,7 +153,7 @@ export async function getRandomQuestionsAction(count = 50): Promise<QuizQuestion
  */
 export async function calculateScores(
   answers: { questionId: string; selectedOption: number }[],
-  db: ReturnType<typeof getEnhancedPrisma>
+  db: ReturnType<typeof getEnhancedPrisma>,
 ): Promise<QuizScores> {
   // Загружаем вопросы из БД для авторитетного подсчёта
   const questionIds = answers.map((a) => a.questionId)
@@ -163,7 +163,7 @@ export async function calculateScores(
   })
 
   const questionsMap = new Map(
-    questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }])
+    questions.map((q) => [q.id, { options: JSON.parse(q.options) as QuizOptionData[], sortOrder: q.sortOrder }]),
   )
 
   // Ядру передаются только найденные в БД вопросы (неизвестные id игнорируются)
@@ -181,7 +181,7 @@ export async function calculateScores(
 
 /** Сохранить результаты квиза */
 export async function submitQuizAction(
-  input: z.input<typeof SubmitQuizSchema>
+  input: z.input<typeof SubmitQuizSchema>,
 ): Promise<{ data?: SubmitQuizResult; error?: string }> {
   const session = await getSession()
   if (!session) {
@@ -225,10 +225,10 @@ export async function submitQuizAction(
       // Пропущенные вопросы — в отдельную таблицу
       ...(skipped.length > 0
         ? {
-            skippedQuestions: {
-              create: skipped.map((questionId) => ({ questionId })),
-            },
-          }
+          skippedQuestions: {
+            create: skipped.map((questionId) => ({ questionId })),
+          },
+        }
         : {}),
     },
   })
@@ -239,17 +239,17 @@ export async function submitQuizAction(
 
   // 5.9.3 (гибрид): вошла ли сессия в XP — первая ли она валидная за текущие UTC-сутки
   const utcDayStart = new Date(
-    Date.UTC(completedAt.getUTCFullYear(), completedAt.getUTCMonth(), completedAt.getUTCDate())
+    Date.UTC(completedAt.getUTCFullYear(), completedAt.getUTCMonth(), completedAt.getUTCDate()),
   )
 
   const [averagedScores, newAchievements, rankInfo, progressData, earlierTodayCount] = await Promise.all([
     getAveragedScores(db, session.user.id),
     validity.isValid
       ? checkAndAwardAchievements(session.user.id, {
-          answeredCount: answers.length,
-          scores: scores.normalized,
-          completedAt,
-        })
+        answeredCount: answers.length,
+        scores: scores.normalized,
+        completedAt,
+      })
       : Promise.resolve([]),
     validity.isValid ? recalcLeaderboardEntry(session.user.id) : Promise.resolve(null),
     // Считаем прогресс после сохранения
@@ -310,7 +310,7 @@ export async function submitQuizAction(
  */
 async function getAveragedScores(
   db: ReturnType<typeof getEnhancedPrisma>,
-  userId: string
+  userId: string,
 ): Promise<Record<PersonalityTypeCode, number> | null> {
   // Усредняем только валидные сессии текущей версии банка: у разных версий разный
   // actual_max (несопоставимы), невалидные протоколы — шум (в истории остаются)
@@ -456,18 +456,20 @@ export async function getQuizProgressAction(): Promise<QuizProgress | null> {
 }
 
 /** Получить историю квизов пользователя */
-export async function getQuizHistoryAction(): Promise<{
-  sessions: Array<{
-    id: string
-    answeredCount: number
-    scores: Record<PersonalityTypeCode, number> | null
-    completedAt: Date | null
-    createdAt: Date
-    /** Версия банка вопросов — сессии разных версий несопоставимы на графиках */
-    questionBankVersion: number
-  }>
-  averagedScores: Record<PersonalityTypeCode, number> | null
-} | null> {
+export async function getQuizHistoryAction(): Promise<
+  {
+    sessions: Array<{
+      id: string
+      answeredCount: number
+      scores: Record<PersonalityTypeCode, number> | null
+      completedAt: Date | null
+      createdAt: Date
+      /** Версия банка вопросов — сессии разных версий несопоставимы на графиках */
+      questionBankVersion: number
+    }>
+    averagedScores: Record<PersonalityTypeCode, number> | null
+  } | null
+> {
   const session = await getSession()
   if (!session) {
     return null

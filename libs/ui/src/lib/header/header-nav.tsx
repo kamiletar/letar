@@ -71,7 +71,7 @@ export function HeaderNav({
       }
       return pathname.startsWith(item.href)
     },
-    [pathname]
+    [pathname],
   )
 
   const handleClick = useCallback(() => {

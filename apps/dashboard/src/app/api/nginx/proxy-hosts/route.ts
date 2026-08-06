@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: 'NPM не настроен для этого сервера',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: parsed.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         success: true,
         data: host,
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
     console.error('Error creating proxy host:', error)
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

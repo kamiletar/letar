@@ -157,19 +157,17 @@ export function useTrackProcessing(options: UseTrackProcessingOptions) {
         const allProgress: FileProgress[] = [
           ...allAudioTasks.map((t) => ({
             id: t.id,
-            fileName:
-              t.type === 'embedded'
-                ? `[MKV] ${t.trackInfo.title || t.trackInfo.language || 'audio'}`
-                : t.trackInfo.title || t.trackInfo.filePath?.split(/[/\\]/).pop() || 'audio',
+            fileName: t.type === 'embedded'
+              ? `[MKV] ${t.trackInfo.title || t.trackInfo.language || 'audio'}`
+              : t.trackInfo.title || t.trackInfo.filePath?.split(/[/\\]/).pop() || 'audio',
             phase: 'waiting' as const,
             percent: 0,
           })),
           ...allSubtitleTasks.map((t) => ({
             id: t.id,
-            fileName:
-              t.type === 'embedded'
-                ? `[SUB] ${t.trackInfo.title || t.trackInfo.language || 'subtitle'}`
-                : t.trackInfo.title || t.trackInfo.filePath?.split(/[/\\]/).pop() || 'subtitle',
+            fileName: t.type === 'embedded'
+              ? `[SUB] ${t.trackInfo.title || t.trackInfo.language || 'subtitle'}`
+              : t.trackInfo.title || t.trackInfo.filePath?.split(/[/\\]/).pop() || 'subtitle',
             phase: 'waiting' as const,
             percent: 0,
           })),
@@ -221,7 +219,7 @@ export function useTrackProcessing(options: UseTrackProcessingOptions) {
             incrementAddedTracks,
             addRecord,
             createAudioTrack,
-            audioBitrate
+            audioBitrate,
           )
         }
 
@@ -240,7 +238,7 @@ export function useTrackProcessing(options: UseTrackProcessingOptions) {
             incrementAddedTracks,
             addRecord,
             createSubtitleTrack,
-            createSubtitleFont
+            createSubtitleFont,
           )
         }
 
@@ -302,7 +300,7 @@ export function useTrackProcessing(options: UseTrackProcessingOptions) {
       updateFileProgress,
       incrementAddedTracks,
       addRecord,
-    ]
+    ],
   )
 
   /**
@@ -381,7 +379,7 @@ async function processAudio(
   incrementAddedTracks: (type: 'audio' | 'subtitle') => void,
   addRecord: (record: { type: 'audio' | 'subtitle'; id: string; filePath: string }) => void,
   createAudioTrack: ReturnType<typeof useCreateAudioTrack>,
-  audioBitrate: number
+  audioBitrate: number,
 ): Promise<void> {
   const { id, type, donorPath, episodeId, episodeDir, trackInfo } = task
 
@@ -524,7 +522,7 @@ async function processSubtitle(
   incrementAddedTracks: (type: 'audio' | 'subtitle') => void,
   addRecord: (record: { type: 'audio' | 'subtitle'; id: string; filePath: string }) => void,
   createSubtitleTrack: ReturnType<typeof useCreateSubtitleTrack>,
-  createSubtitleFont: ReturnType<typeof useCreateSubtitleFont>
+  createSubtitleFont: ReturnType<typeof useCreateSubtitleFont>,
 ): Promise<void> {
   const { id, type, donorPath, episodeId, episodeDir, trackInfo } = task
 
@@ -782,7 +780,7 @@ async function processFontTasks(
   fontTasks: FontTask[],
   api: NonNullable<typeof window.electronAPI>,
   isCancelledRef: React.RefObject<boolean>,
-  createSubtitleFont: ReturnType<typeof useCreateSubtitleFont>
+  createSubtitleFont: ReturnType<typeof useCreateSubtitleFont>,
 ): Promise<void> {
   for (const task of fontTasks) {
     if (isCancelledRef.current) {
@@ -798,7 +796,7 @@ async function processFontTasks(
 
       // 2. Фильтруем только недостающие (с CID)
       const missing = result.fonts.filter(
-        (f) => f.cid && task.missingFonts.some((m) => normalizeFontName(m) === normalizeFontName(f.fileName))
+        (f) => f.cid && task.missingFonts.some((m) => normalizeFontName(m) === normalizeFontName(f.fileName)),
       )
 
       // 3. Создаём SubtitleFont для каждой ASS дорожки эпизода

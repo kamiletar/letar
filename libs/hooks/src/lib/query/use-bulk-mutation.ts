@@ -23,7 +23,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
  */
 export function useBulkMutation<TData, TResult = unknown>(
   mutationFn: (data: TData) => Promise<TResult>,
-  invalidateKeys?: string[]
+  invalidateKeys?: string[],
 ) {
   const queryClient = useQueryClient()
 

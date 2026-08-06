@@ -58,7 +58,7 @@ describe('detectSubtitleType — приоритеты источников', () 
       detectSubtitleType({
         title: 'Полные субтитры',
         disposition: { forced: 1 },
-      })
+      }),
     ).toBe('full')
   })
 
@@ -67,7 +67,7 @@ describe('detectSubtitleType — приоритеты источников', () 
       detectSubtitleType({
         title: 'Песни',
         filePath: 'D:/Anime/надписи/ep01.ass',
-      })
+      }),
     ).toBe('songs')
   })
 

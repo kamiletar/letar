@@ -95,7 +95,7 @@ export function useGlobalShortcuts(callbacks: GlobalShortcutsCallbacks = {}) {
         return
       }
     },
-    [router]
+    [router],
   )
 
   useEffect(() => {

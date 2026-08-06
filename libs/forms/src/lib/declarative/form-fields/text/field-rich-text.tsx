@@ -213,14 +213,14 @@ function RichTextEditor({
       // Add Image extension only if imageUpload is configured
       ...(imageUpload
         ? [
-            TiptapImage.configure({
-              inline: false,
-              allowBase64: false,
-              HTMLAttributes: {
-                class: 'richtext-image',
-              },
-            }),
-          ]
+          TiptapImage.configure({
+            inline: false,
+            allowBase64: false,
+            HTMLAttributes: {
+              class: 'richtext-image',
+            },
+          }),
+        ]
         : []),
     ]
 

@@ -75,7 +75,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     spriteUrl,
     spriteCues,
   },
-  ref
+  ref,
 ) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -223,7 +223,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         audioRef.current.playbackRate = speed
       }
     },
-    [setPlaybackSpeed]
+    [setPlaybackSpeed],
   )
 
   const adjustPlaybackSpeed = useCallback(
@@ -237,7 +237,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       const newSpeed = PLAYBACK_SPEEDS[newIndex]
       handlePlaybackSpeedChange(newSpeed)
     },
-    [playbackSpeed, handlePlaybackSpeedChange]
+    [playbackSpeed, handlePlaybackSpeedChange],
   )
 
   // Переключение оверлея информации о видео
@@ -262,7 +262,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       }
       controls.togglePlay()
     },
-    [controls]
+    [controls],
   )
 
   /** Двойной клик — полный экран (плюс откат паузы от первого клика двойного) */
@@ -535,7 +535,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
         </IconButton>
       </Tooltip>
     ),
-    [isPiP, togglePiP]
+    [isPiP, togglePiP],
   )
 
   return (
@@ -551,14 +551,16 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
       onDoubleClick={handleVideoDoubleClick}
     >
       <PlayerContextProvider value={playerContextValue}>
-        {/*
+        {
+          /*
           Контейнер для video элемента (создаётся программно в useEffect).
 
           ⚠️ Здесь НЕ должно быть onClick={e => e.stopPropagation()}: контейнер растянут на
           100%×100%, поэтому такой обработчик глушил клик по самому кадру и пауза срабатывала
           только по чёрным полосам вокруг видео. Контролы и хедер (SharedPlayerControls,
           PlayerHeader) гасят всплытие у себя сами, так что двойной toggle не возникает.
-        */}
+        */
+        }
         <div ref={videoContainerRef} style={{ width: '100%', height: '100%' }} data-testid="player-video-surface" />
 
         {/* Audio элемент для раздельных дорожек управляется GlobalVideoProvider */}

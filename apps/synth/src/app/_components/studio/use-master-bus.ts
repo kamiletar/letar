@@ -65,7 +65,7 @@ export function useMasterBus(patch: SubtractivePatch, patchRef: RefObject<Subtra
       setBus(built)
       return built
     },
-    [patchRef]
+    [patchRef],
   )
 
   // Мгновенно обновляем wet gain при движении ручки

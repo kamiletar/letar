@@ -87,16 +87,18 @@ export function BracketConnectors({ containerRef, section }: BracketConnectorsPr
     <Box position="absolute" inset={0} pointerEvents="none" display={{ base: 'none', lg: 'block' }} zIndex={0}>
       <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible' }}>
         {paths.map((path) =>
-          path ? (
-            <path
-              key={path.key}
-              d={path.d}
-              fill="none"
-              stroke="var(--chakra-colors-border-emphasized)"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-            />
-          ) : null
+          path
+            ? (
+              <path
+                key={path.key}
+                d={path.d}
+                fill="none"
+                stroke="var(--chakra-colors-border-emphasized)"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+              />
+            )
+            : null
         )}
       </svg>
     </Box>

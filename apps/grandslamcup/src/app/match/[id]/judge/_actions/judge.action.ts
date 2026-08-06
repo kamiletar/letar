@@ -9,7 +9,7 @@
  */
 
 import { prisma } from '@/lib/db'
-import { type JudgeColor, COLOR_ORDER } from '@/lib/judge-colors'
+import { COLOR_ORDER, type JudgeColor } from '@/lib/judge-colors'
 import { calculateAdjusted, calculateTotal, isValidScore, JUDGES_COUNT } from '@/lib/scoring'
 import { broadcastMatchEvent, broadcastState } from '@/lib/sse/broadcast'
 import { getMatchState, updateMatchState } from '@/lib/sse/match-state'
@@ -75,7 +75,7 @@ export async function registerJudgeAction(matchId: string, half: number, inviteK
   const warnings: string[] = []
   if (duplicateByFingerprint) {
     warnings.push(
-      `Устройство ${name} уже использовалось для судейства (тайм ${duplicateByFingerprint.half}, судья #${duplicateByFingerprint.judgeNumber})`
+      `Устройство ${name} уже использовалось для судейства (тайм ${duplicateByFingerprint.half}, судья #${duplicateByFingerprint.judgeNumber})`,
     )
   }
   if (duplicateByName) {
@@ -164,7 +164,7 @@ export async function submitVoteAction(
   matchId: string,
   performanceId: string,
   dimension: 'TEXT' | 'DELIVERY',
-  score: number
+  score: number,
 ) {
   if (!isValidScore(score)) {
     return { success: false, error: 'Оценка должна быть от 1 до 5' }

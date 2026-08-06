@@ -8,7 +8,7 @@
  */
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { type JudgeColor, JUDGE_COLORS } from '@/lib/judge-colors'
+import { JUDGE_COLORS, type JudgeColor } from '@/lib/judge-colors'
 import { Badge, Box, Button, Circle, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuShieldOff } from 'react-icons/lu'
@@ -80,8 +80,10 @@ export function JudgeRecusal({ matchId, coachToken, judges, allowed }: JudgeRecu
         </Button>
       </Flex>
       <VStack gap={2} align="stretch">
-        {/* Отводить можно только судей с цветом (зарегистрированных через QR).
-            Ручные слоты отводу не подлежат — ими управляет счётовод напрямую. */}
+        {
+          /* Отводить можно только судей с цветом (зарегистрированных через QR).
+            Ручные слоты отводу не подлежат — ими управляет счётовод напрямую. */
+        }
         {judges
           .filter((j): j is typeof j & { color: NonNullable<typeof j.color> } => j.color !== null)
           .map((judge) => {
@@ -98,7 +100,8 @@ export function JudgeRecusal({ matchId, coachToken, judges, allowed }: JudgeRecu
                 <Button
                   size="xs"
                   colorPalette="orange"
-                  onClick={() => handleRecusal(judge.color)}
+                  onClick={() =>
+                    handleRecusal(judge.color)}
                   loading={requesting === judge.color}
                   disabled={requesting !== null}
                 >

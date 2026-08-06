@@ -21,7 +21,7 @@ import { fetchIpfsJson } from './ipfs-fetch'
  */
 export async function loadEpisodeManifest(
   directoryCid: string,
-  episodeNumber: number
+  episodeNumber: number,
 ): Promise<{ manifest: EpisodeManifest; episodeInfo: AnimeManifestEpisode } | null> {
   try {
     // 1. Загружаем AnimeManifest

@@ -11,10 +11,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params
   return {
     title: locale === 'ru' ? 'Аудио' : 'Audio',
-    description:
-      locale === 'ru'
-        ? 'Коллекция аудиозаписей Ками — музыка, миксы и подкасты для прослушивания онлайн'
-        : "Kami's audio collection — music, mixes and podcasts to listen online",
+    description: locale === 'ru'
+      ? 'Коллекция аудиозаписей Ками — музыка, миксы и подкасты для прослушивания онлайн'
+      : "Kami's audio collection — music, mixes and podcasts to listen online",
     alternates: {
       canonical: `/${locale}/audio`,
       languages: { ru: '/ru/audio', en: '/en/audio' },
@@ -53,36 +52,42 @@ export default async function AudioListPage({ params }: PageProps) {
           Аудио
         </Heading>
 
-        {audioFiles.length === 0 ? (
-          <Text color="fg.muted" textAlign="center">
-            Аудиозаписей пока нет.
-          </Text>
-        ) : (
-          <VStack gap={3} align="stretch">
-            {audioFiles.map((audio) => (
-              <Link key={audio.id} href={`/${locale}/audio/${audio.slug}`}>
-                <Card.Root _hover={{ shadow: 'md', borderColor: 'purple.200' }} transition="all 0.2s" cursor="pointer">
-                  <Card.Body py={3} px={4}>
-                    <HStack justify="space-between">
-                      <VStack gap={0} align="start">
-                        <Text fontWeight="medium">{audio.title}</Text>
-                        {audio.artist && (
-                          <Text fontSize="sm" color="fg.muted">
-                            {audio.artist}
-                          </Text>
-                        )}
-                      </VStack>
-                      <HStack gap={3} color="fg.muted" fontSize="sm">
-                        <Text>{formatSize(audio.size)}</Text>
-                        <Text>{new Date(audio.uploadedAt).toLocaleDateString('ru-RU')}</Text>
+        {audioFiles.length === 0
+          ? (
+            <Text color="fg.muted" textAlign="center">
+              Аудиозаписей пока нет.
+            </Text>
+          )
+          : (
+            <VStack gap={3} align="stretch">
+              {audioFiles.map((audio) => (
+                <Link key={audio.id} href={`/${locale}/audio/${audio.slug}`}>
+                  <Card.Root
+                    _hover={{ shadow: 'md', borderColor: 'purple.200' }}
+                    transition="all 0.2s"
+                    cursor="pointer"
+                  >
+                    <Card.Body py={3} px={4}>
+                      <HStack justify="space-between">
+                        <VStack gap={0} align="start">
+                          <Text fontWeight="medium">{audio.title}</Text>
+                          {audio.artist && (
+                            <Text fontSize="sm" color="fg.muted">
+                              {audio.artist}
+                            </Text>
+                          )}
+                        </VStack>
+                        <HStack gap={3} color="fg.muted" fontSize="sm">
+                          <Text>{formatSize(audio.size)}</Text>
+                          <Text>{new Date(audio.uploadedAt).toLocaleDateString('ru-RU')}</Text>
+                        </HStack>
                       </HStack>
-                    </HStack>
-                  </Card.Body>
-                </Card.Root>
-              </Link>
-            ))}
-          </VStack>
-        )}
+                    </Card.Body>
+                  </Card.Root>
+                </Link>
+              ))}
+            </VStack>
+          )}
       </VStack>
     </Box>
   )

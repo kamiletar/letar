@@ -22,11 +22,11 @@ function serializeItems(items: Record<string, unknown>[]) {
     ...item,
     anime: item.anime
       ? {
-          ...(item.anime as Record<string, unknown>),
-          directorySize: (item.anime as Record<string, unknown>).directorySize
-            ? Number((item.anime as Record<string, unknown>).directorySize)
-            : null,
-        }
+        ...(item.anime as Record<string, unknown>),
+        directorySize: (item.anime as Record<string, unknown>).directorySize
+          ? Number((item.anime as Record<string, unknown>).directorySize)
+          : null,
+      }
       : null,
   }))
 }
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     jobs.sort(
       (
         a: { status: string; progressBlocks: number; createdAt: Date },
-        b: { status: string; progressBlocks: number; createdAt: Date }
+        b: { status: string; progressBlocks: number; createdAt: Date },
       ) => {
         const activeA = a.status === 'PINNING' && a.progressBlocks > 0 ? 1 : 0
         const activeB = b.status === 'PINNING' && b.progressBlocks > 0 ? 1 : 0
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
           return pA - pB
         }
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      }
+      },
     )
 
     return NextResponse.json({ data: serializeItems(jobs) })

@@ -61,7 +61,7 @@ async function fetchAnimeInfo(animeInfoCid: string): Promise<AnimeInfo | null> {
  */
 export function useAnimeInfo(
   animeInfoCid: string | null | undefined,
-  options: UseAnimeInfoOptions = {}
+  options: UseAnimeInfoOptions = {},
 ): UseAnimeInfoResult {
   const { enabled = true, staleTime = 10 * 60 * 1000 } = options
 

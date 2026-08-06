@@ -17,7 +17,7 @@ describe('FieldNumberInput', () => {
           <Form initialValue={{ qty: 1 }} onSubmit={vi.fn()}>
             <Form.Field.NumberInput name="qty" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldNumberInput', () => {
           <Form initialValue={{ qty: 1 }} onSubmit={vi.fn()}>
             <Form.Field.NumberInput name="qty" label="Количество" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Количество')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('FieldNumberInput', () => {
           <Form initialValue={{ qty: 42 }} onSubmit={vi.fn()}>
             <Form.Field.NumberInput name="qty" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toHaveValue('42')
@@ -53,7 +53,7 @@ describe('FieldNumberInput', () => {
           <Form initialValue={{ qty: 0 }} onSubmit={vi.fn()}>
             <Form.Field.NumberInput name="qty" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const buttons = screen.getAllByRole('button')
@@ -68,7 +68,7 @@ describe('FieldNumberInput', () => {
           <Form initialValue={{ qty: 5 }} onSubmit={vi.fn()}>
             <Form.Field.NumberInput name="qty" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toBeDisabled()

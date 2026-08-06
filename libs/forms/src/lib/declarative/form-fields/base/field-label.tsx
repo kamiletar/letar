@@ -40,14 +40,14 @@ export function FieldLabel({ label, tooltip, required }: FieldLabelProps): React
 
   return (
     <Field.Label>
-      {tooltip ? (
-        <HStack gap={1}>
-          <span>{label}</span>
-          <FieldTooltip {...tooltip} />
-        </HStack>
-      ) : (
-        label
-      )}
+      {tooltip
+        ? (
+          <HStack gap={1}>
+            <span>{label}</span>
+            <FieldTooltip {...tooltip} />
+          </HStack>
+        )
+        : label}
       {required && <Field.RequiredIndicator />}
     </Field.Label>
   )

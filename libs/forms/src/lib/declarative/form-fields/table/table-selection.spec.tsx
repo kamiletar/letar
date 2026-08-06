@@ -36,7 +36,7 @@ describe('TableEditor row selection', () => {
             selectable
           />
         </Form>
-      </Wrapper>
+      </Wrapper>,
     )
   }
 

@@ -61,10 +61,12 @@ export const FieldDateTimePicker = createField<DateTimePickerFieldProps, string>
     const { minDateTime, maxDateTime, timeStep = 15 } = componentProps
 
     // Convert Date to string if needed
-    const minDateTimeStr =
-      minDateTime instanceof Date ? minDateTime.toISOString().slice(0, 16) : minDateTime?.slice(0, 16)
-    const maxDateTimeStr =
-      maxDateTime instanceof Date ? maxDateTime.toISOString().slice(0, 16) : maxDateTime?.slice(0, 16)
+    const minDateTimeStr = minDateTime instanceof Date
+      ? minDateTime.toISOString().slice(0, 16)
+      : minDateTime?.slice(0, 16)
+    const maxDateTimeStr = maxDateTime instanceof Date
+      ? maxDateTime.toISOString().slice(0, 16)
+      : maxDateTime?.slice(0, 16)
 
     const minDate = minDateTimeStr?.slice(0, 10)
     const maxDate = maxDateTimeStr?.slice(0, 10)

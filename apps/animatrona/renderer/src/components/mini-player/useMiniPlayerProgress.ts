@@ -64,7 +64,7 @@ export function useMiniPlayerProgress() {
         },
       })
     },
-    [metadata, upsertProgress]
+    [metadata, upsertProgress],
   )
 
   // Периодическое сохранение при воспроизведении в mini mode

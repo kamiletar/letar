@@ -98,11 +98,9 @@ export function StepStartMatch({ match }: StepStartMatchProps) {
           teamSeasonId={lineupDialogTeam === 'home' ? match.homeTeam.id : match.awayTeam.id}
           teamName={lineupDialogTeam === 'home' ? match.homeTeam.name : match.awayTeam.name}
           roster={lineupDialogTeam === 'home' ? match.homeTeam.roster : match.awayTeam.roster}
-          currentLineup={
-            lineupDialogTeam === 'home'
-              ? match.homeTeam.players.map((p) => p.id)
-              : match.awayTeam.players.map((p) => p.id)
-          }
+          currentLineup={lineupDialogTeam === 'home'
+            ? match.homeTeam.players.map((p) => p.id)
+            : match.awayTeam.players.map((p) => p.id)}
         />
       )}
     </VStack>

@@ -16,7 +16,7 @@ describe('FieldSlider', () => {
         <Form initialValue={{ rating: 5 }} onSubmit={vi.fn()}>
           <Form.Field.Slider name="rating" label="Рейтинг" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Рейтинг')).toBeInTheDocument()
@@ -28,7 +28,7 @@ describe('FieldSlider', () => {
         <Form initialValue={{ rating: 7 }} onSubmit={vi.fn()}>
           <Form.Field.Slider name="rating" min={0} max={10} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const slider = screen.getByRole('slider')
@@ -40,7 +40,7 @@ describe('FieldSlider', () => {
         <Form initialValue={{ rating: 5 }} onSubmit={vi.fn()}>
           <Form.Field.Slider name="rating" min={1} max={10} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const slider = screen.getByRole('slider')
@@ -55,7 +55,7 @@ describe('FieldSlider', () => {
         <Form initialValue={{ rating: 5 }} onSubmit={vi.fn()}>
           <Form.Field.Slider name="rating" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const slider = screen.getByRole('slider')
@@ -67,7 +67,7 @@ describe('FieldSlider', () => {
         <Form initialValue={{ rating: 5 }} onSubmit={vi.fn()}>
           <Form.Field.Slider name="rating" helperText="Перетащите ползунок" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Перетащите ползунок')).toBeInTheDocument()

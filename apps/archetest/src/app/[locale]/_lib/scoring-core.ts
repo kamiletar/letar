@@ -113,7 +113,7 @@ export function computeActualMax(scale: string, answeredSortOrders: number[], da
 /** Число отвеченных релевантных вопросов по каждой шкале */
 export function countRelevantAnswered(
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): Record<ScaleCode, number> {
   const counts: Record<string, number> = {}
   for (const code of SCORED_SCALE_CODES) {
@@ -190,7 +190,7 @@ export function bankCoverage(relevant: number, totalInBank: number): number {
 export function getScaleConfidence(
   scale: string,
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): ScaleConfidence {
   let relevant = 0
   for (const so of answeredSortOrders) {
@@ -206,7 +206,7 @@ export function getScaleConfidence(
 export function getScaleBankCoverage(
   scale: string,
   answeredSortOrders: number[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): number {
   let relevant = 0
   for (const so of answeredSortOrders) {
@@ -225,7 +225,7 @@ export function getScaleBankCoverage(
  */
 export function computeScoresCore(
   answered: AnsweredQuestionInput[],
-  data: ScoringData = BANK_SCORING_DATA
+  data: ScoringData = BANK_SCORING_DATA,
 ): QuizScores {
   const raw: Record<string, number> = {}
   for (const code of SCORED_SCALE_CODES) {

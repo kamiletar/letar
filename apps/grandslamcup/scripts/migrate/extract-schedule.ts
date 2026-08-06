@@ -71,7 +71,7 @@ function parseScheduleBlock(text: string, msgId: number, msgDate: string): Sched
   for (const line of lines) {
     // Строка с датой и командами: "2.04, чт: X-Y" или "2.04 (чт): X vs Y" или "02.04: X — Y"
     const dateTeamMatch = line.match(
-      /^(\d{1,2})\.(\d{2})(?:\s*,?\s*(?:\(?\s*[а-яА-ЯёЁa-zA-Z]{2}\s*\)?\s*)?)?[:\s]+(.+?)\s*[-–—]\s*(.+?)$/
+      /^(\d{1,2})\.(\d{2})(?:\s*,?\s*(?:\(?\s*[а-яА-ЯёЁa-zA-Z]{2}\s*\)?\s*)?)?[:\s]+(.+?)\s*[-–—]\s*(.+?)$/,
     )
     if (dateTeamMatch) {
       // Сохранить предыдущий

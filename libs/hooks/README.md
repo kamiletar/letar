@@ -95,9 +95,7 @@ function ItemList() {
     <>
       {data?.pages
         .flatMap((page) => page.items)
-        .map((item) => (
-          <ItemCard key={item.id} item={item} />
-        ))}
+        .map((item) => <ItemCard key={item.id} item={item} />)}
       {hasNextPage && <Box ref={sentinelRef} h="1px" />}
     </>
   )

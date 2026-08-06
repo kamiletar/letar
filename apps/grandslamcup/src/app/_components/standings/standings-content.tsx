@@ -145,9 +145,9 @@ export async function StandingsContent({ citySlug, cityId, seasonSlug, view = 't
       )}
 
       {/* Перекрёстная таблица */}
-      {view === 'cross' &&
-        !isSwiss &&
-        [...leagues.entries()]
+      {view === 'cross'
+        && !isSwiss
+        && [...leagues.entries()]
           .sort(([, a], [, b]) => (a[0]?.league.order ?? 0) - (b[0]?.league.order ?? 0))
           .map(([leagueName, teams]) => {
             // Та же логика: скрываем команды без игр, если сезон уже стартовал
@@ -168,8 +168,8 @@ export async function StandingsContent({ citySlug, cityId, seasonSlug, view = 't
           })}
 
       {/* Обычная таблица */}
-      {view === 'table' &&
-        [...leagues.entries()]
+      {view === 'table'
+        && [...leagues.entries()]
           .sort(([, a], [, b]) => (a[0]?.league.order ?? 0) - (b[0]?.league.order ?? 0))
           .map(([leagueName, teams]) => {
             const allRows = teams.map((ts) => ({
@@ -193,54 +193,52 @@ export async function StandingsContent({ citySlug, cityId, seasonSlug, view = 't
                   {leagueName}
                 </Heading>
                 <DataTableWrapper>
-                  {isSwiss ? (
-                    <Grid templateColumns="40px 1fr repeat(4, 60px)" gap={0} fontSize="sm" minW="400px">
-                      {[
-                        { label: '#', tooltip: 'Позиция' },
-                        { label: 'Команда' },
-                        { label: 'W', tooltip: 'Победы (Wins)' },
-                        { label: 'L', tooltip: 'Поражения (Losses)' },
-                        { label: 'Заб', tooltip: 'Забитые баллы' },
-                        { label: 'Разн', tooltip: 'Разница баллов' },
-                      ].map((h) => (
-                        <TableHeader key={h.label} label={h.label} tooltip={h.tooltip} />
-                      ))}
-                      {rows.map((row, i) => (
-                        <SwissRow
-                          key={row.teamSlug}
-                          row={row}
-                          position={i + 1}
-                          total={rows.length}
-                          teamLinkPrefix={teamLinkPrefix}
-                        />
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Grid templateColumns="40px 1fr repeat(7, 50px)" gap={0} fontSize="sm" minW="500px">
-                      {[
-                        { label: '#', tooltip: 'Позиция' },
-                        { label: 'Команда' },
-                        { label: 'И', tooltip: 'Игры' },
-                        { label: 'В', tooltip: 'Победы' },
-                        { label: 'Н', tooltip: 'Ничьи' },
-                        { label: 'П', tooltip: 'Поражения' },
-                        { label: 'Заб', tooltip: 'Забитые баллы' },
-                        { label: 'Проп', tooltip: 'Пропущенные баллы' },
-                        { label: 'О', tooltip: 'Очки' },
-                      ].map((h) => (
-                        <TableHeader key={h.label} label={h.label} tooltip={h.tooltip} />
-                      ))}
-                      {rows.map((row, i) => (
-                        <StandingsRow
-                          key={row.teamSlug}
-                          row={row}
-                          position={i + 1}
-                          total={rows.length}
-                          teamLinkPrefix={teamLinkPrefix}
-                        />
-                      ))}
-                    </Grid>
-                  )}
+                  {isSwiss
+                    ? (
+                      <Grid templateColumns="40px 1fr repeat(4, 60px)" gap={0} fontSize="sm" minW="400px">
+                        {[
+                          { label: '#', tooltip: 'Позиция' },
+                          { label: 'Команда' },
+                          { label: 'W', tooltip: 'Победы (Wins)' },
+                          { label: 'L', tooltip: 'Поражения (Losses)' },
+                          { label: 'Заб', tooltip: 'Забитые баллы' },
+                          { label: 'Разн', tooltip: 'Разница баллов' },
+                        ].map((h) => <TableHeader key={h.label} label={h.label} tooltip={h.tooltip} />)}
+                        {rows.map((row, i) => (
+                          <SwissRow
+                            key={row.teamSlug}
+                            row={row}
+                            position={i + 1}
+                            total={rows.length}
+                            teamLinkPrefix={teamLinkPrefix}
+                          />
+                        ))}
+                      </Grid>
+                    )
+                    : (
+                      <Grid templateColumns="40px 1fr repeat(7, 50px)" gap={0} fontSize="sm" minW="500px">
+                        {[
+                          { label: '#', tooltip: 'Позиция' },
+                          { label: 'Команда' },
+                          { label: 'И', tooltip: 'Игры' },
+                          { label: 'В', tooltip: 'Победы' },
+                          { label: 'Н', tooltip: 'Ничьи' },
+                          { label: 'П', tooltip: 'Поражения' },
+                          { label: 'Заб', tooltip: 'Забитые баллы' },
+                          { label: 'Проп', tooltip: 'Пропущенные баллы' },
+                          { label: 'О', tooltip: 'Очки' },
+                        ].map((h) => <TableHeader key={h.label} label={h.label} tooltip={h.tooltip} />)}
+                        {rows.map((row, i) => (
+                          <StandingsRow
+                            key={row.teamSlug}
+                            row={row}
+                            position={i + 1}
+                            total={rows.length}
+                            teamLinkPrefix={teamLinkPrefix}
+                          />
+                        ))}
+                      </Grid>
+                    )}
                 </DataTableWrapper>
               </Box>
             )

@@ -188,7 +188,7 @@ export async function serverAction() {
   if (!session) throw new Error('Unauthorized')
 } // СТАЛО (Better Auth)
 
-;('use server')
+'use server'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 
@@ -212,7 +212,7 @@ export function Component() {
   const isPending = status === 'loading'
 } // СТАЛО (Better Auth)
 
-;('use client')
+'use client'
 import { signIn, signOut, useSession } from '@/lib/auth-client'
 
 export function Component() {
@@ -478,7 +478,7 @@ model Verification {
 Убедись, что добавлен плагин `nextCookies()`:
 
 ```typescript
-plugins:;
+plugins: ;
 ;[nextCookies()]
 ```
 

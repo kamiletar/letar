@@ -156,7 +156,7 @@ export default function HistoryPage() {
     if (search) {
       const searchLower = search.toLowerCase()
       result = result.filter(
-        (h) => h.animeName.toLowerCase().includes(searchLower) || h.animeNameRu?.toLowerCase().includes(searchLower)
+        (h) => h.animeName.toLowerCase().includes(searchLower) || h.animeNameRu?.toLowerCase().includes(searchLower),
       )
     }
 
@@ -278,124 +278,126 @@ export default function HistoryPage() {
           </Flex>
 
           {/* Список */}
-          {isLoading ? (
-            <VStack gap={3}>
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} height="100px" borderRadius="lg" />
-              ))}
-            </VStack>
-          ) : filteredHistory.length === 0 ? (
-            <EmptyState.Root>
-              <EmptyState.Content>
-                <EmptyState.Indicator>
-                  <LuHistory />
-                </EmptyState.Indicator>
-                <EmptyState.Title>История пуста</EmptyState.Title>
-                <EmptyState.Description>
-                  {search ? 'Ничего не найдено по запросу' : 'Завершённые импорты будут отображаться здесь'}
-                </EmptyState.Description>
-              </EmptyState.Content>
-            </EmptyState.Root>
-          ) : (
-            <VStack gap={3} align="stretch">
-              {filteredHistory.map((entry) => (
-                <Card.Root key={entry.id} size="sm">
-                  <Card.Body>
-                    <Flex gap={4} align="flex-start">
-                      {/* Постер */}
-                      {entry.posterUrl ? (
-                        <Image
-                          src={entry.posterUrl}
-                          alt={entry.animeName}
-                          width="60px"
-                          height="85px"
-                          borderRadius="md"
-                          objectFit="cover"
-                          flexShrink={0}
-                        />
-                      ) : (
-                        <Box width="60px" height="85px" borderRadius="md" bg="bg.subtle" flexShrink={0} />
-                      )}
+          {isLoading
+            ? (
+              <VStack gap={3}>
+                {[1, 2, 3].map((i) => <Skeleton key={i} height="100px" borderRadius="lg" />)}
+              </VStack>
+            )
+            : filteredHistory.length === 0
+            ? (
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <LuHistory />
+                  </EmptyState.Indicator>
+                  <EmptyState.Title>История пуста</EmptyState.Title>
+                  <EmptyState.Description>
+                    {search ? 'Ничего не найдено по запросу' : 'Завершённые импорты будут отображаться здесь'}
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
+            )
+            : (
+              <VStack gap={3} align="stretch">
+                {filteredHistory.map((entry) => (
+                  <Card.Root key={entry.id} size="sm">
+                    <Card.Body>
+                      <Flex gap={4} align="flex-start">
+                        {/* Постер */}
+                        {entry.posterUrl
+                          ? (
+                            <Image
+                              src={entry.posterUrl}
+                              alt={entry.animeName}
+                              width="60px"
+                              height="85px"
+                              borderRadius="md"
+                              objectFit="cover"
+                              flexShrink={0}
+                            />
+                          )
+                          : <Box width="60px" height="85px" borderRadius="md" bg="bg.subtle" flexShrink={0} />}
 
-                      {/* Информация */}
-                      <VStack align="stretch" flex={1} gap={2}>
-                        <Flex justify="space-between" align="flex-start">
-                          <VStack align="start" gap={0}>
-                            <HStack gap={2}>
-                              <Text fontWeight="medium">{entry.animeNameRu || entry.animeName}</Text>
-                              <Badge colorPalette={statusColors[entry.status]} size="sm">
-                                {entry.status === 'completed' && <LuCheck />}
-                                {entry.status === 'error' && <LuCircleX />}
-                                {entry.status === 'cancelled' && <LuX />}
-                                {statusLabels[entry.status]}
-                              </Badge>
+                        {/* Информация */}
+                        <VStack align="stretch" flex={1} gap={2}>
+                          <Flex justify="space-between" align="flex-start">
+                            <VStack align="start" gap={0}>
+                              <HStack gap={2}>
+                                <Text fontWeight="medium">{entry.animeNameRu || entry.animeName}</Text>
+                                <Badge colorPalette={statusColors[entry.status]} size="sm">
+                                  {entry.status === 'completed' && <LuCheck />}
+                                  {entry.status === 'error' && <LuCircleX />}
+                                  {entry.status === 'cancelled' && <LuX />}
+                                  {statusLabels[entry.status]}
+                                </Badge>
+                              </HStack>
+                              {entry.animeNameRu && (
+                                <Text fontSize="sm" color="fg.muted">
+                                  {entry.animeName}
+                                </Text>
+                              )}
+                            </VStack>
+                            <Tooltip content="Удалить из истории">
+                              <IconButton
+                                aria-label="Удалить"
+                                variant="ghost"
+                                size="xs"
+                                colorPalette="red"
+                                onClick={() => handleDelete(entry.id)}
+                              >
+                                <LuTrash2 />
+                              </IconButton>
+                            </Tooltip>
+                          </Flex>
+
+                          {/* Метрики */}
+                          <HStack gap={4} wrap="wrap" fontSize="sm" color="fg.muted">
+                            <HStack gap={1}>
+                              <LuCalendar size={14} />
+                              <Text>{formatDate(entry.completedAt)}</Text>
                             </HStack>
-                            {entry.animeNameRu && (
-                              <Text fontSize="sm" color="fg.muted">
-                                {entry.animeName}
-                              </Text>
+                            <HStack gap={1}>
+                              <LuClock size={14} />
+                              <Text>{formatDuration(entry.durationMs)}</Text>
+                            </HStack>
+                            <HStack gap={1}>
+                              <LuHardDrive size={14} />
+                              <Text>{entry.episodesCount} эп.</Text>
+                            </HStack>
+                            {entry.vmafScore && (
+                              <HStack gap={1}>
+                                <LuTarget size={14} />
+                                <Text>VMAF {entry.vmafScore}</Text>
+                              </HStack>
                             )}
-                          </VStack>
-                          <Tooltip content="Удалить из истории">
-                            <IconButton
-                              aria-label="Удалить"
-                              variant="ghost"
-                              size="xs"
-                              colorPalette="red"
-                              onClick={() => handleDelete(entry.id)}
-                            >
-                              <LuTrash2 />
-                            </IconButton>
-                          </Tooltip>
-                        </Flex>
+                            {entry.cqValue && (
+                              <HStack gap={1}>
+                                <LuMonitor size={14} />
+                                <Text>CQ {entry.cqValue}</Text>
+                              </HStack>
+                            )}
+                            {entry.usedCpuFallback && (
+                              <Badge colorPalette="blue" size="sm">
+                                <LuCpu size={12} />
+                                CPU
+                              </Badge>
+                            )}
+                          </HStack>
 
-                        {/* Метрики */}
-                        <HStack gap={4} wrap="wrap" fontSize="sm" color="fg.muted">
-                          <HStack gap={1}>
-                            <LuCalendar size={14} />
-                            <Text>{formatDate(entry.completedAt)}</Text>
-                          </HStack>
-                          <HStack gap={1}>
-                            <LuClock size={14} />
-                            <Text>{formatDuration(entry.durationMs)}</Text>
-                          </HStack>
-                          <HStack gap={1}>
-                            <LuHardDrive size={14} />
-                            <Text>{entry.episodesCount} эп.</Text>
-                          </HStack>
-                          {entry.vmafScore && (
-                            <HStack gap={1}>
-                              <LuTarget size={14} />
-                              <Text>VMAF {entry.vmafScore}</Text>
-                            </HStack>
+                          {/* Ошибка */}
+                          {entry.errorMessage && (
+                            <Text fontSize="sm" color="red.400">
+                              {entry.errorMessage}
+                            </Text>
                           )}
-                          {entry.cqValue && (
-                            <HStack gap={1}>
-                              <LuMonitor size={14} />
-                              <Text>CQ {entry.cqValue}</Text>
-                            </HStack>
-                          )}
-                          {entry.usedCpuFallback && (
-                            <Badge colorPalette="blue" size="sm">
-                              <LuCpu size={12} />
-                              CPU
-                            </Badge>
-                          )}
-                        </HStack>
-
-                        {/* Ошибка */}
-                        {entry.errorMessage && (
-                          <Text fontSize="sm" color="red.400">
-                            {entry.errorMessage}
-                          </Text>
-                        )}
-                      </VStack>
-                    </Flex>
-                  </Card.Body>
-                </Card.Root>
-              ))}
-            </VStack>
-          )}
+                        </VStack>
+                      </Flex>
+                    </Card.Body>
+                  </Card.Root>
+                ))}
+              </VStack>
+            )}
         </VStack>
       </Box>
     </Box>

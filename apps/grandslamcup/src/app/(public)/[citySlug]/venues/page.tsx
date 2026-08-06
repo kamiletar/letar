@@ -12,7 +12,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { VenueCard } from './_components/venue-card'
-import { YandexMap, type MapMarker } from './_components/yandex-map'
+import { type MapMarker, YandexMap } from './_components/yandex-map'
 
 type Params = Promise<{ citySlug: string }>
 type SearchParams = Promise<{ q?: string }>
@@ -61,13 +61,12 @@ export default async function VenuesPage({ params, searchParams }: { params: Par
       href: `/${citySlug}/venues/${v.slug}`,
     }))
 
-  const defaultCenter: [number, number] =
-    markers.length > 0
-      ? [
-          markers.reduce((sum, m) => sum + m.coordinates[0], 0) / markers.length,
-          markers.reduce((sum, m) => sum + m.coordinates[1], 0) / markers.length,
-        ]
-      : [59.9343, 30.3351]
+  const defaultCenter: [number, number] = markers.length > 0
+    ? [
+      markers.reduce((sum, m) => sum + m.coordinates[0], 0) / markers.length,
+      markers.reduce((sum, m) => sum + m.coordinates[1], 0) / markers.length,
+    ]
+    : [59.9343, 30.3351]
 
   return (
     <VStack gap={6} align="stretch">

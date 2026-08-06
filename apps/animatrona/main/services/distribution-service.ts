@@ -29,7 +29,7 @@ const trackerConfigStore = createJsonStore<TrackerConfig>(
     apiKey: '',
     enabled: false,
   },
-  { mergeDefaults: true, logger: log }
+  { mergeDefaults: true, logger: log },
 )
 
 /** Загрузить конфигурацию трекера, null если не настроен */
@@ -253,11 +253,11 @@ export class DistributionService {
 
     // Не отправляем если нет изменений
     if (
-      delta.bytesUploaded === 0 &&
-      delta.bytesDownloaded === 0 &&
-      delta.seedingTimeMs === 0 &&
-      delta.peersHelped === 0 &&
-      delta.uptimeMs === 0
+      delta.bytesUploaded === 0
+      && delta.bytesDownloaded === 0
+      && delta.seedingTimeMs === 0
+      && delta.peersHelped === 0
+      && delta.uptimeMs === 0
     ) {
       return
     }
@@ -302,14 +302,13 @@ export class DistributionService {
     })
 
     // Помечаем все раздачи как OFFLINE
-    const offlinePromises =
-      this.distributions.size > 0
-        ? Array.from(this.distributions.values()).map((dist) =>
-            updateDistribution(config, dist.id, { status: 'OFFLINE' }).catch(() => {
-              /* игнорируем ошибки при shutdown */
-            })
-          )
-        : []
+    const offlinePromises = this.distributions.size > 0
+      ? Array.from(this.distributions.values()).map((dist) =>
+        updateDistribution(config, dist.id, { status: 'OFFLINE' }).catch(() => {
+          /* игнорируем ошибки при shutdown */
+        })
+      )
+      : []
 
     if (offlinePromises.length > 0) {
       log.info('Останавливаем раздачи', { count: this.distributions.size })

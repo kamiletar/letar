@@ -126,8 +126,7 @@ export const RecipeUpdateFormSchema = RecipeCreateFormSchema.partial()
 ```tsx
 import { Form } from '@letar/forms'
 import { RecipeCreateFormSchema } from './generated/form-schemas'
-
-;<Form.FromSchema
+<Form.FromSchema
   schema={RecipeCreateFormSchema}
   initialValue={data}
   onSubmit={handleSubmit}

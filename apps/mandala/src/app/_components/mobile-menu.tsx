@@ -95,35 +95,37 @@ export function MobileMenu() {
                   {t('help')}
                 </Button>
 
-                {session ? (
-                  <>
-                    {session.user?.role === 'ADMIN' && (
-                      <NextLink href="/admin" onClick={handleClose}>
-                        <Button variant="ghost" colorPalette="gray" w="full" justifyContent="flex-start">
-                          <LuSettings />
-                          {t('admin')}
-                        </Button>
-                      </NextLink>
-                    )}
-                    <Button
-                      variant="ghost"
-                      colorPalette="gray"
-                      w="full"
-                      justifyContent="flex-start"
-                      onClick={handleSignOut}
-                    >
-                      <LuLogOut />
-                      {tAuth('signOut')}
-                    </Button>
-                  </>
-                ) : (
-                  <LocalizedLink href="/sign-in" onClick={handleClose}>
-                    <Button variant="solid" colorPalette="purple" w="full">
-                      <LuLogIn />
-                      {tAuth('signIn')}
-                    </Button>
-                  </LocalizedLink>
-                )}
+                {session
+                  ? (
+                    <>
+                      {session.user?.role === 'ADMIN' && (
+                        <NextLink href="/admin" onClick={handleClose}>
+                          <Button variant="ghost" colorPalette="gray" w="full" justifyContent="flex-start">
+                            <LuSettings />
+                            {t('admin')}
+                          </Button>
+                        </NextLink>
+                      )}
+                      <Button
+                        variant="ghost"
+                        colorPalette="gray"
+                        w="full"
+                        justifyContent="flex-start"
+                        onClick={handleSignOut}
+                      >
+                        <LuLogOut />
+                        {tAuth('signOut')}
+                      </Button>
+                    </>
+                  )
+                  : (
+                    <LocalizedLink href="/sign-in" onClick={handleClose}>
+                      <Button variant="solid" colorPalette="purple" w="full">
+                        <LuLogIn />
+                        {tAuth('signIn')}
+                      </Button>
+                    </LocalizedLink>
+                  )}
               </VStack>
             </Drawer.Body>
             <Drawer.CloseTrigger asChild>

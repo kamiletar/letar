@@ -255,32 +255,34 @@ export default function OfflineDemoPage() {
           <Heading size="sm" mb={3}>
             Очередь синхронизации ({queueLength})
           </Heading>
-          {queueLength === 0 ? (
-            <Text fontSize="sm" color="fg.muted">
-              Очередь пуста
-            </Text>
-          ) : (
-            <VStack align="stretch" gap={2}>
-              {queue.map((item) => (
-                <Box key={item.id} p={2} bg="white" borderRadius="sm" borderWidth="1px" _dark={{ bg: 'gray.700' }}>
-                  <HStack justify="space-between">
-                    <Text fontSize="xs" fontWeight="medium">
-                      {item.action.type}
+          {queueLength === 0
+            ? (
+              <Text fontSize="sm" color="fg.muted">
+                Очередь пуста
+              </Text>
+            )
+            : (
+              <VStack align="stretch" gap={2}>
+                {queue.map((item) => (
+                  <Box key={item.id} p={2} bg="white" borderRadius="sm" borderWidth="1px" _dark={{ bg: 'gray.700' }}>
+                    <HStack justify="space-between">
+                      <Text fontSize="xs" fontWeight="medium">
+                        {item.action.type}
+                      </Text>
+                      <Badge
+                        size="sm"
+                        colorPalette={item.status === 'PENDING' ? 'orange' : item.status === 'SYNCED' ? 'green' : 'red'}
+                      >
+                        {item.status}
+                      </Badge>
+                    </HStack>
+                    <Text fontSize="xs" color="fg.muted">
+                      {new Date(item.createdAt).toLocaleTimeString()}
                     </Text>
-                    <Badge
-                      size="sm"
-                      colorPalette={item.status === 'PENDING' ? 'orange' : item.status === 'SYNCED' ? 'green' : 'red'}
-                    >
-                      {item.status}
-                    </Badge>
-                  </HStack>
-                  <Text fontSize="xs" color="fg.muted">
-                    {new Date(item.createdAt).toLocaleTimeString()}
-                  </Text>
-                </Box>
-              ))}
-            </VStack>
-          )}
+                  </Box>
+                ))}
+              </VStack>
+            )}
         </Box>
 
         {/* Event Log */}
@@ -288,40 +290,40 @@ export default function OfflineDemoPage() {
           <Heading size="sm" mb={3}>
             Лог событий
           </Heading>
-          {logs.length === 0 ? (
-            <Text fontSize="sm" color="fg.muted">
-              Нет событий
-            </Text>
-          ) : (
-            <VStack align="stretch" gap={2} maxH="300px" overflowY="auto">
-              {logs.map((log) => (
-                <Box key={log.id} p={2} bg="white" borderRadius="sm" borderWidth="1px" _dark={{ bg: 'gray.700' }}>
-                  <HStack justify="space-between">
-                    <Badge
-                      size="sm"
-                      colorPalette={
-                        log.type === 'success'
+          {logs.length === 0
+            ? (
+              <Text fontSize="sm" color="fg.muted">
+                Нет событий
+              </Text>
+            )
+            : (
+              <VStack align="stretch" gap={2} maxH="300px" overflowY="auto">
+                {logs.map((log) => (
+                  <Box key={log.id} p={2} bg="white" borderRadius="sm" borderWidth="1px" _dark={{ bg: 'gray.700' }}>
+                    <HStack justify="space-between">
+                      <Badge
+                        size="sm"
+                        colorPalette={log.type === 'success'
                           ? 'green'
                           : log.type === 'error'
-                            ? 'red'
-                            : log.type === 'warning'
-                              ? 'orange'
-                              : 'blue'
-                      }
-                    >
-                      {log.type}
-                    </Badge>
-                    <Text fontSize="xs" color="fg.muted">
-                      {log.timestamp.toLocaleTimeString()}
+                          ? 'red'
+                          : log.type === 'warning'
+                          ? 'orange'
+                          : 'blue'}
+                      >
+                        {log.type}
+                      </Badge>
+                      <Text fontSize="xs" color="fg.muted">
+                        {log.timestamp.toLocaleTimeString()}
+                      </Text>
+                    </HStack>
+                    <Text fontSize="xs" mt={1}>
+                      {log.message}
                     </Text>
-                  </HStack>
-                  <Text fontSize="xs" mt={1}>
-                    {log.message}
-                  </Text>
-                </Box>
-              ))}
-            </VStack>
-          )}
+                  </Box>
+                ))}
+              </VStack>
+            )}
         </Box>
       </HStack>
 

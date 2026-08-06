@@ -100,7 +100,7 @@ export function parseTSV(text: string): string[][] {
 export function buildTSV(
   rows: Record<string, unknown>[],
   columns: ResolvedColumn[],
-  selectedIndices?: Set<number>
+  selectedIndices?: Set<number>,
 ): string {
   // Заголовки
   const headers = columns.map((c) => c.label).join('\t')
@@ -127,7 +127,7 @@ export function computeAggregate(
   rows: Record<string, unknown>[],
   columnName: string,
   type: 'sum' | 'avg' | 'count' | 'min' | 'max',
-  computeFn?: (row: Record<string, unknown>) => unknown
+  computeFn?: (row: Record<string, unknown>) => unknown,
 ): number {
   const values = rows
     .map((row) => {

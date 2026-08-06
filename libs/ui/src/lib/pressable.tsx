@@ -91,9 +91,7 @@ export function Pressable({ children, onPointerDown: externalOnPointerDown, ...p
       {...props}
     >
       {children}
-      {ripples.map((r) => (
-        <RippleEl key={r.id} x={r.x} y={r.y} size={r.size} />
-      ))}
+      {ripples.map((r) => <RippleEl key={r.id} x={r.x} y={r.y} size={r.size} />)}
     </Box>
   )
 }

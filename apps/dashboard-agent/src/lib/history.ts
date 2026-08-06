@@ -218,16 +218,15 @@ export function getHistory(hours: number): HistoryData {
     tier,
     hours,
     pointsCount: points.length,
-    stats:
-      points.length > 0
-        ? {
-            cpu: calcStats(cpuValues),
-            memory: calcStats(memValues),
-            disk: calcStats(diskValues),
-            networkRx: calcStats(networkRxValues),
-            networkTx: calcStats(networkTxValues),
-          }
-        : null,
+    stats: points.length > 0
+      ? {
+        cpu: calcStats(cpuValues),
+        memory: calcStats(memValues),
+        disk: calcStats(diskValues),
+        networkRx: calcStats(networkRxValues),
+        networkTx: calcStats(networkTxValues),
+      }
+      : null,
     data: {
       cpu: points.map((p) => ({ time: formatTime(p.timestamp), value: p.cpu, timestamp: p.timestamp })),
       memory: points.map((p) => ({ time: formatTime(p.timestamp), value: p.memory, timestamp: p.timestamp })),

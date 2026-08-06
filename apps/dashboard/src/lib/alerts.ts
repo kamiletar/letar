@@ -123,7 +123,7 @@ export async function createAlert(
   title: string,
   message: string,
   metadata?: JsonMetadata,
-  serverId?: string | null
+  serverId?: string | null,
 ): Promise<Alert> {
   try {
     // Если serverId не указан, используем локальный сервер

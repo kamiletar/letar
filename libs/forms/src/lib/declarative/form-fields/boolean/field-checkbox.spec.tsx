@@ -19,7 +19,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('checkbox')).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" label="Я согласен" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Я согласен')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ active: true }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="active" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('checkbox')).toBeChecked()
@@ -57,7 +57,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ active: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="active" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('checkbox')).not.toBeChecked()
@@ -71,7 +71,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" label="Agree" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const checkbox = screen.getByRole('checkbox')
@@ -88,7 +88,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: true }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const checkbox = screen.getByRole('checkbox')
@@ -107,7 +107,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('checkbox')).toBeDisabled()
@@ -119,7 +119,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: true }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" readOnly />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Chakra Checkbox устанавливает data-readonly на корневой элемент
@@ -135,7 +135,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" colorPalette="green" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Chakra устанавливает data-colorpalette атрибут
@@ -149,7 +149,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="agree" size="lg" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const checkboxRoot = screen.getByRole('checkbox').closest('[data-scope="checkbox"]')
@@ -164,7 +164,7 @@ describe('FieldCheckbox', () => {
           <Form initialValue={{ terms: false }} onSubmit={vi.fn()}>
             <Form.Field.Checkbox name="terms" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const checkboxRoot = screen.getByRole('checkbox').closest('[data-field-name]')

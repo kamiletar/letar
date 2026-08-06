@@ -65,10 +65,9 @@ export function EpisodesTab({ episodes, watchProgress, onEditNames }: EpisodesTa
           const watchStatus = progress?.completed ? 'completed' : progress ? 'in_progress' : 'unwatched'
 
           // Вычисляем процент просмотра
-          const watchPercent =
-            progress && episode.durationMs && progress.currentTime
-              ? Math.min(100, ((progress.currentTime * 1000) / episode.durationMs) * 100)
-              : 0
+          const watchPercent = progress && episode.durationMs && progress.currentTime
+            ? Math.min(100, ((progress.currentTime * 1000) / episode.durationMs) * 100)
+            : 0
 
           return (
             <EpisodeCard

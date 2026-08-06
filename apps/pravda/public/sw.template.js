@@ -28,7 +28,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Precaching pages...')
       return cache.addAll(PRECACHE_URLS)
-    })
+    }),
   )
   self.skipWaiting()
 })
@@ -44,9 +44,9 @@ self.addEventListener('activate', (event) => {
           .map((name) => {
             console.log('[SW] Deleting old cache:', name)
             return caches.delete(name)
-          })
+          }),
       )
-    })
+    }),
   )
   self.clients.claim()
 })
@@ -101,7 +101,7 @@ self.addEventListener('fetch', (event) => {
           statusText: 'Service Unavailable',
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         })
-      })
+      }),
   )
 })
 

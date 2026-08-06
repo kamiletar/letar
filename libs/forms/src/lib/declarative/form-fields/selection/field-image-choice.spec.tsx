@@ -23,7 +23,7 @@ describe('FieldImageChoice', () => {
         <Form initialValue={{ pet: '' }} onSubmit={vi.fn()}>
           <Form.Field.ImageChoice name="pet" label="Питомец" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Питомец')).toBeInTheDocument()
@@ -37,7 +37,7 @@ describe('FieldImageChoice', () => {
         <Form initialValue={{ pet: '' }} onSubmit={vi.fn()}>
           <Form.Field.ImageChoice name="pet" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const images = screen.getAllByRole('img')
@@ -52,7 +52,7 @@ describe('FieldImageChoice', () => {
         <Form initialValue={{ pet: '' }} onSubmit={vi.fn()}>
           <Form.Field.ImageChoice name="pet" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       // Кликаем на карточку — не должно быть ошибок
@@ -66,7 +66,7 @@ describe('FieldImageChoice', () => {
         <Form initialValue={{ pet: '' }} onSubmit={vi.fn()}>
           <Form.Field.ImageChoice name="pet" options={options} helperText="Выберите питомца" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Выберите питомца')).toBeInTheDocument()

@@ -36,21 +36,25 @@ describe('computeArmorRadar', () => {
   })
 
   it('каждый квадрант заполнен на обоих языках', () => {
-    for (const [p, a] of [
-      [80, 80],
-      [80, 20],
-      [20, 80],
-      [10, 10],
-    ]) {
+    for (
+      const [p, a] of [
+        [80, 80],
+        [80, 20],
+        [20, 80],
+        [10, 10],
+      ]
+    ) {
       const idx = computeArmorRadar(p, a)
-      for (const field of [
-        idx.label,
-        idx.labelEn,
-        idx.description,
-        idx.descriptionEn,
-        idx.attention,
-        idx.attentionEn,
-      ]) {
+      for (
+        const field of [
+          idx.label,
+          idx.labelEn,
+          idx.description,
+          idx.descriptionEn,
+          idx.attention,
+          idx.attentionEn,
+        ]
+      ) {
         expect(field, `квадрант ${idx.quadrant}`).toBeTruthy()
       }
     }

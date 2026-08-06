@@ -238,9 +238,7 @@ export async function DownloadSection() {
           </VStack>
 
           <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6} w="full">
-            {platforms.map((platform) => (
-              <PlatformCard key={platform.name} {...platform} />
-            ))}
+            {platforms.map((platform) => <PlatformCard key={platform.name} {...platform} />)}
           </Grid>
 
           {/* Установка через Cargo */}

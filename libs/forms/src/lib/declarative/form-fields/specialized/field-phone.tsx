@@ -91,7 +91,7 @@ export const FieldPhone = createField<PhoneFieldProps, string, PhoneFieldState>(
           maskCallback(element)
         }
       },
-      [mask, autoUnmask]
+      [mask, autoUnmask],
     )
 
     return { maskRef }

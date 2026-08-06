@@ -135,7 +135,7 @@ function extractParams(
   params: URLSearchParams,
   fields: string[],
   mapping?: Record<string, string>,
-  schema?: { safeParse: (data: unknown) => { success: boolean; data?: unknown } }
+  schema?: { safeParse: (data: unknown) => { success: boolean; data?: unknown } },
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {}
 

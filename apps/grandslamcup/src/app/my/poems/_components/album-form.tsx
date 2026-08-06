@@ -22,7 +22,7 @@ export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [coverImage, setCoverImage] = useState<string | null>(initialData?.coverImage ?? null)
   const [publishedAt, setPublishedAt] = useState<string>(
-    initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().slice(0, 10) : ''
+    initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().slice(0, 10) : '',
   )
   const [saving, setSaving] = useState(false)
 
@@ -36,16 +36,16 @@ export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
     try {
       const result = albumId
         ? await updateAlbumAction({
-            albumId,
-            title: title.trim(),
-            coverImage,
-            publishedAt: publishedAt || null,
-          })
+          albumId,
+          title: title.trim(),
+          coverImage,
+          publishedAt: publishedAt || null,
+        })
         : await createAlbumAction({
-            title: title.trim(),
-            coverImage,
-            publishedAt: publishedAt || null,
-          })
+          title: title.trim(),
+          coverImage,
+          publishedAt: publishedAt || null,
+        })
 
       if ('error' in result && result.error) {
         const msg = typeof result.error === 'string' ? result.error : 'Ошибка сохранения'

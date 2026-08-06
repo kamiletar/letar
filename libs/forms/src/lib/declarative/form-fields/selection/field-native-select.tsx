@@ -37,7 +37,8 @@ export const FieldNativeSelect = createField<NativeSelectFieldProps, string>({
       <NativeSelect.Root>
         <NativeSelect.Field
           value={(field.state.value as string) ?? ''}
-          onChange={(e) => field.handleChange((e.target as HTMLSelectElement).value)}
+          onChange={(e) =>
+            field.handleChange((e.target as HTMLSelectElement).value)}
           onBlur={field.handleBlur}
           data-field-name={fullPath}
         >

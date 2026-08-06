@@ -49,7 +49,7 @@ export function SwissRoundPreview({
       pairs.map((p) => ({
         homeTeamSeasonId: p.home.teamSeasonId,
         awayTeamSeasonId: p.away.teamSeasonId,
-      }))
+      })),
     )
   }
 

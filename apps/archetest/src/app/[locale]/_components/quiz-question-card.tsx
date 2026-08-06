@@ -60,7 +60,7 @@ export function QuizQuestionCard({
       onAnswer(originalIndex)
       setJustAnswered(true)
     },
-    [onAnswer]
+    [onAnswer],
   )
 
   return (
@@ -77,8 +77,9 @@ export function QuizQuestionCard({
       <SimpleGrid columns={1} gap={3} w="100%">
         {options.map((opt) => {
           // Оптимистичное выделение имеет приоритет над ответом родителя (0ms lag)
-          const isSelected =
-            optimisticIndex !== null ? optimisticIndex === opt.originalIndex : selectedOption === opt.originalIndex
+          const isSelected = optimisticIndex !== null
+            ? optimisticIndex === opt.originalIndex
+            : selectedOption === opt.originalIndex
           return (
             <Button
               key={opt.originalIndex}

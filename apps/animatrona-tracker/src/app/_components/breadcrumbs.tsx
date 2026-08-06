@@ -59,9 +59,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                 <LuChevronRight />
               </Breadcrumb.Separator>
               <Breadcrumb.Item>
-                {isLast || !item.href ? (
-                  <Text color="fg">{item.label}</Text>
-                ) : (
+                {isLast || !item.href ? <Text color="fg">{item.label}</Text> : (
                   <Breadcrumb.Link asChild>
                     <Link asChild color="fg.muted" _hover={{ color: 'fg' }}>
                       <NextLink href={item.href}>{item.label}</NextLink>

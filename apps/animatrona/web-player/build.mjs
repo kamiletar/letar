@@ -35,13 +35,13 @@ async function buildPlayer() {
     logLevel: 'info',
     ...(isWatch
       ? {
-          watch: {
-            onRebuild(error, result) {
-              if (error) console.error('Rebuild failed:', error)
-              else console.log('Rebuild succeeded')
-            },
+        watch: {
+          onRebuild(error, result) {
+            if (error) console.error('Rebuild failed:', error)
+            else console.log('Rebuild succeeded')
           },
-        }
+        },
+      }
       : {}),
   })
 

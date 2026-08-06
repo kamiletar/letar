@@ -125,10 +125,9 @@ import { useFormStatus } from 'react-dom'
 function SubmitButton() {
   const { pending, data, method, action } = useFormStatus()
   return <button disabled={pending}>{pending ? 'Отправляем...' : 'Отправить'}</button>
-}
+} // Использование — внутри <form>
 
-// Использование — внутри <form>
-;<form action={serverAction}>
+<form action={serverAction}>
   <input name="email" />
   <SubmitButton /> {/* автоматически видит pending состояние формы */}
 </form>
@@ -207,9 +206,7 @@ export default async function ProductsPage() {
 
   return (
     <div>
-      {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
-      ))}
+      {products.map((p) => <ProductCard key={p.id} product={p} />)}
     </div>
   )
 }
@@ -291,10 +288,9 @@ export default async function StudentsPage() {
   })
 
   return <StudentsList students={students} />
-}
+} // Клиентский компонент с формой через @letar/forms
 
-// Клиентский компонент с формой через @letar/forms
-;('use client')
+'use client'
 import { Form } from '@letar/forms'
 
 export function StudentsList({ students }) {
@@ -311,10 +307,9 @@ export async function createStudent(data: StudentCreateInput) {
   const session = await auth()
   const db = getEnhancedPrisma(session?.user)
   return db.studentProfile.create({ data })
-}
+} // Форма
 
-// Форма
-;<Form schema={StudentSchema} initialValue={{}} onSubmit={createStudent}>
+<Form schema={StudentSchema} initialValue={{}} onSubmit={createStudent}>
   <Form.Field.String name="name" />
   <Form.Button.Submit />
 </Form>

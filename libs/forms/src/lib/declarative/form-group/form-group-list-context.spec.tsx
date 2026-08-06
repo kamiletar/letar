@@ -31,7 +31,7 @@ describe('FormGroupListContext', () => {
       render(
         <FormGroupListContext.Provider value={mockListContext}>
           <TestComponent />
-        </FormGroupListContext.Provider>
+        </FormGroupListContext.Provider>,
       )
 
       expect(screen.getByTestId('length')).toHaveTextContent('2')
@@ -79,7 +79,7 @@ describe('FormGroupListItemContext', () => {
       render(
         <FormGroupListItemContext.Provider value={mockItemContext}>
           <TestComponent />
-        </FormGroupListItemContext.Provider>
+        </FormGroupListItemContext.Provider>,
       )
 
       expect(screen.getByTestId('index')).toHaveTextContent('1')
@@ -97,7 +97,7 @@ describe('FormGroupListItemContext', () => {
       }
 
       expect(() => render(<TestComponent />)).toThrow(
-        'useFormGroupListItemContext must be used inside Form.Group.List item'
+        'useFormGroupListItemContext must be used inside Form.Group.List item',
       )
 
       consoleError.mockRestore()

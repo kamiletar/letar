@@ -49,8 +49,9 @@ export function useVirtualizedGrid(itemCount: number, { estimateSize, overscan =
     return () => observer.disconnect()
   }, [containerEl])
 
-  const columns =
-    containerWidth > 0 ? Math.max(1, Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP))) : 1
+  const columns = containerWidth > 0
+    ? Math.max(1, Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP)))
+    : 1
   const cardWidth = columns > 0 ? (containerWidth - GRID_GAP * (columns - 1)) / columns : MIN_CARD_WIDTH
   const rowCount = Math.ceil(itemCount / columns)
 

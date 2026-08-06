@@ -70,17 +70,17 @@ export function createBaseTemplate(params: BaseTemplateParams): string {
             <td style="padding: 20px 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #eee;">
               <p style="margin: 0; font-size: 12px; color: #999;">
                 ${
-                  footerText ||
-                  `Это автоматическое письмо от <a href="${branding.appUrl}" style="color: ${branding.buttonColor};">${branding.appName}</a>.`
-                }
+    footerText
+    || `Это автоматическое письмо от <a href="${branding.appUrl}" style="color: ${branding.buttonColor};">${branding.appName}</a>.`
+  }
               </p>
               ${
-                branding.unsubscribeUrl
-                  ? `<p style="margin: 10px 0 0; font-size: 11px; color: #bbb;">
+    branding.unsubscribeUrl
+      ? `<p style="margin: 10px 0 0; font-size: 11px; color: #bbb;">
                   <a href="${branding.unsubscribeUrl}" style="color: #999; text-decoration: underline;">Отписаться от рассылок</a>
                 </p>`
-                  : ''
-              }
+      : ''
+  }
             </td>
           </tr>
         </table>

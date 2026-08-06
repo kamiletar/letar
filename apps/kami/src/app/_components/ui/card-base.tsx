@@ -19,7 +19,7 @@ interface CardBaseProps extends BoxProps {
 export const CardBase = memo(
   forwardRef<HTMLDivElement, CardBaseProps>(function CardBase(
     { hoverColor = 'purple.500', liftOnHover = true, variant = 'default', children, ...props },
-    ref
+    ref,
   ) {
     const bgColor = variant === 'muted' ? { base: 'gray.50', _dark: 'gray.900' } : { base: 'white', _dark: 'gray.900' }
 
@@ -31,20 +31,18 @@ export const CardBase = memo(
         bg={bgColor}
         border="1px solid"
         borderColor={{ base: 'gray.200', _dark: 'gray.700' }}
-        _hover={
-          liftOnHover
-            ? {
-                borderColor: hoverColor,
-                transform: 'translateY(-4px)',
-                boxShadow: 'lg',
-              }
-            : { borderColor: hoverColor }
-        }
+        _hover={liftOnHover
+          ? {
+            borderColor: hoverColor,
+            transform: 'translateY(-4px)',
+            boxShadow: 'lg',
+          }
+          : { borderColor: hoverColor }}
         transition="all 0.3s"
         {...props}
       >
         {children}
       </Box>
     )
-  })
+  }),
 )

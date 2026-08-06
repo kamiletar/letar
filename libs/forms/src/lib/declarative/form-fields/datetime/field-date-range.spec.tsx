@@ -16,7 +16,7 @@ describe('FieldDateRange', () => {
         <Form initialValue={{ period: { start: '', end: '' } }} onSubmit={vi.fn()}>
           <Form.Field.DateRange name="period" label="Период" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Период')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('FieldDateRange', () => {
         <Form initialValue={{ period: { start: '', end: '' } }} onSubmit={vi.fn()}>
           <Form.Field.DateRange name="period" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       // DateRange рендерит два input'а
@@ -42,7 +42,7 @@ describe('FieldDateRange', () => {
         <Form initialValue={{ period: { start: '', end: '' } }} onSubmit={vi.fn()}>
           <Form.Field.DateRange name="period" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const inputs = container.querySelectorAll('input')
@@ -56,7 +56,7 @@ describe('FieldDateRange', () => {
         <Form initialValue={{ period: { start: '', end: '' } }} onSubmit={vi.fn()}>
           <Form.Field.DateRange name="period" helperText="Выберите диапазон дат" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Выберите диапазон дат')).toBeInTheDocument()

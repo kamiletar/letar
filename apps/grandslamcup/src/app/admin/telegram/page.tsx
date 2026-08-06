@@ -102,85 +102,91 @@ export default async function AdminTelegramPage() {
         )}
 
         {/* Таблица сообщений */}
-        {messages.length === 0 ? (
-          <Box bg="bg.panel" borderRadius="lg" borderWidth="1px" borderColor="border.muted" p={8} textAlign="center">
-            <Text color="fg.muted">
-              Бот ещё не отправил ни одного отслеживаемого сообщения. Отправьте анонс матча из админки или дождитесь
-              автопубликации.
-            </Text>
-          </Box>
-        ) : (
-          <Box bg="bg.panel" borderRadius="lg" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-            <Table.Root size="sm">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>Дата</Table.ColumnHeader>
-                  <Table.ColumnHeader>Тип</Table.ColumnHeader>
-                  <Table.ColumnHeader>Матч</Table.ColumnHeader>
-                  <Table.ColumnHeader>Реакции</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="end">Всего</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {messages.map((msg) => {
-                  const totalReactions = msg.reactions.reduce((s, r) => s + r.count, 0)
-                  return (
-                    <Table.Row key={msg.id}>
-                      <Table.Cell>
-                        <Text fontSize="xs" color="fg.muted">
-                          {new Date(msg.sentAt).toLocaleString('ru-RU', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={TYPE_COLORS[msg.type] ?? 'gray'} size="sm">
-                          {TYPE_LABELS[msg.type] ?? msg.type}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        {msg.match ? (
-                          <Box asChild>
-                            <Link href={`/admin/matches/${msg.match.id}`}>
-                              <Text fontSize="sm" _hover={{ color: 'brand.solid' }}>
-                                {msg.match.homeTeam.team.name} vs {msg.match.awayTeam.team.name}
-                              </Text>
-                            </Link>
-                          </Box>
-                        ) : (
+        {messages.length === 0
+          ? (
+            <Box bg="bg.panel" borderRadius="lg" borderWidth="1px" borderColor="border.muted" p={8} textAlign="center">
+              <Text color="fg.muted">
+                Бот ещё не отправил ни одного отслеживаемого сообщения. Отправьте анонс матча из админки или дождитесь
+                автопубликации.
+              </Text>
+            </Box>
+          )
+          : (
+            <Box bg="bg.panel" borderRadius="lg" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+              <Table.Root size="sm">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Дата</Table.ColumnHeader>
+                    <Table.ColumnHeader>Тип</Table.ColumnHeader>
+                    <Table.ColumnHeader>Матч</Table.ColumnHeader>
+                    <Table.ColumnHeader>Реакции</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="end">Всего</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {messages.map((msg) => {
+                    const totalReactions = msg.reactions.reduce((s, r) => s + r.count, 0)
+                    return (
+                      <Table.Row key={msg.id}>
+                        <Table.Cell>
                           <Text fontSize="xs" color="fg.muted">
-                            —
+                            {new Date(msg.sentAt).toLocaleString('ru-RU', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </Text>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell>
-                        {msg.reactions.length === 0 ? (
-                          <Text fontSize="xs" color="fg.muted">
-                            нет
-                          </Text>
-                        ) : (
-                          <HStack gap={2} wrap="wrap">
-                            {msg.reactions.map((r) => (
-                              <Text key={r.id} fontSize="sm">
-                                {r.emoji} {r.count}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={TYPE_COLORS[msg.type] ?? 'gray'} size="sm">
+                            {TYPE_LABELS[msg.type] ?? msg.type}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
+                          {msg.match
+                            ? (
+                              <Box asChild>
+                                <Link href={`/admin/matches/${msg.match.id}`}>
+                                  <Text fontSize="sm" _hover={{ color: 'brand.solid' }}>
+                                    {msg.match.homeTeam.team.name} vs {msg.match.awayTeam.team.name}
+                                  </Text>
+                                </Link>
+                              </Box>
+                            )
+                            : (
+                              <Text fontSize="xs" color="fg.muted">
+                                —
                               </Text>
-                            ))}
-                          </HStack>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell textAlign="end">
-                        <Text fontWeight={totalReactions > 0 ? 'semibold' : 'normal'}>{totalReactions}</Text>
-                      </Table.Cell>
-                    </Table.Row>
-                  )
-                })}
-              </Table.Body>
-            </Table.Root>
-          </Box>
-        )}
+                            )}
+                        </Table.Cell>
+                        <Table.Cell>
+                          {msg.reactions.length === 0
+                            ? (
+                              <Text fontSize="xs" color="fg.muted">
+                                нет
+                              </Text>
+                            )
+                            : (
+                              <HStack gap={2} wrap="wrap">
+                                {msg.reactions.map((r) => (
+                                  <Text key={r.id} fontSize="sm">
+                                    {r.emoji} {r.count}
+                                  </Text>
+                                ))}
+                              </HStack>
+                            )}
+                        </Table.Cell>
+                        <Table.Cell textAlign="end">
+                          <Text fontWeight={totalReactions > 0 ? 'semibold' : 'normal'}>{totalReactions}</Text>
+                        </Table.Cell>
+                      </Table.Row>
+                    )
+                  })}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          )}
       </VStack>
     </Container>
   )

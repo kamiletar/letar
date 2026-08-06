@@ -49,7 +49,7 @@ function parseRedirectUrls(raw: string): string {
 }
 
 export async function createClientAction(
-  formData: FormData
+  formData: FormData,
 ): Promise<{ error: ClientActionError } | { clientId: string; secret: string }> {
   await requireAdmin()
 
@@ -97,7 +97,7 @@ export async function createClientAction(
 
 export async function updateClientAction(
   clientId: string,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ error: ClientActionError } | { success: true }> {
   await requireAdmin()
 

@@ -26,7 +26,7 @@ import type { FormApiConfig, FormApiResult } from './types'
  */
 export function useFormApi<TData extends object>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: FormApiConfig<TData, any>
+  config: FormApiConfig<TData, any>,
 ): FormApiResult<TData> {
   const isEditMode = !!config.id
 
@@ -36,7 +36,7 @@ export function useFormApi<TData extends object>(
       where: { id: config.id ?? '' },
       include: config.query.include,
     },
-    { enabled: isEditMode }
+    { enabled: isEditMode },
   )
 
   // Call mutation hooks (always, hooks rules)
@@ -62,7 +62,7 @@ export function useFormApi<TData extends object>(
         })
       }
     },
-    [isEditMode, config.id, config.transformData, createMutation, updateMutation]
+    [isEditMode, config.id, config.transformData, createMutation, updateMutation],
   )
 
   // Get mutation error (whichever one was used)
@@ -93,6 +93,6 @@ export function useFormApi<TData extends object>(
       updateMutation.isPending,
       mutationError,
       submit,
-    ]
+    ],
   )
 }

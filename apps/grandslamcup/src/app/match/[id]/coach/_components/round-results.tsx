@@ -57,15 +57,17 @@ export function RoundResults({ performances, coachTeamSeasonId }: RoundResultsPr
                     <Text fontSize="sm" fontWeight={isOurs ? 'semibold' : 'normal'} color={isOurs ? 'fg' : 'fg.muted'}>
                       {p.playerName}
                     </Text>
-                    {p.totalScore !== null ? (
-                      <Badge colorPalette={isOurs ? 'green' : 'gray'} size="sm">
-                        {p.totalScore}
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="yellow" size="sm">
-                        ...
-                      </Badge>
-                    )}
+                    {p.totalScore !== null
+                      ? (
+                        <Badge colorPalette={isOurs ? 'green' : 'gray'} size="sm">
+                          {p.totalScore}
+                        </Badge>
+                      )
+                      : (
+                        <Badge colorPalette="yellow" size="sm">
+                          ...
+                        </Badge>
+                      )}
                   </Flex>
                 )
               })}

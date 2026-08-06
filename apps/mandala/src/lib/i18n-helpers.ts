@@ -47,7 +47,7 @@ export function useLocalizedField(locale: string) {
 export function getLocalizedFields<T extends Record<string, unknown>, K extends keyof T>(
   item: T,
   fields: K[],
-  locale: string
+  locale: string,
 ): Record<K, string> {
   const result = {} as Record<K, string>
   for (const field of fields) {

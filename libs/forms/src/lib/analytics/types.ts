@@ -6,13 +6,13 @@ export type FormAnalyticsEvent =
   | { type: 'field_correction'; field: string; timestamp: number; correctionCount: number }
   | { type: 'step_change'; from: number; to: number; timestamp: number }
   | {
-      type: 'form_abandon'
-      lastField: string
-      filledFields: number
-      totalFields: number
-      timestamp: number
-      totalTimeMs: number
-    }
+    type: 'form_abandon'
+    lastField: string
+    filledFields: number
+    totalFields: number
+    timestamp: number
+    totalTimeMs: number
+  }
   | { type: 'form_complete'; totalTimeMs: number; fieldTimes: Map<string, FieldAnalytics>; timestamp: number }
 
 /** Аналитика по отдельному полю */

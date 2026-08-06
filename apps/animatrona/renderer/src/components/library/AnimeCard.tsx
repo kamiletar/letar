@@ -137,19 +137,21 @@ export const AnimeCard = memo(function AnimeCard({
       <NextLink href={`/library/${id}`}>
         {/* Постер — нативный aspectRatio для работы с NextImage fill */}
         <Box position="relative" w="full" css={{ aspectRatio: '2/3' }} overflow="hidden">
-          {posterPath ? (
-            <NextImage
-              src={getImageSrc(posterPath)}
-              alt={name}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-              <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
-            </Box>
-          )}
+          {posterPath
+            ? (
+              <NextImage
+                src={getImageSrc(posterPath)}
+                alt={name}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                style={{ objectFit: 'cover' }}
+              />
+            )
+            : (
+              <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
+                <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
+              </Box>
+            )}
 
           {/* Quick Actions меню (появляется при hover) */}
           <Box
@@ -314,31 +316,39 @@ export const AnimeCard = memo(function AnimeCard({
               <Text fontSize="xs" color="white">
                 {pluralizeEpisodes(episodeCount)}
               </Text>
-              {totalIpfsSize ? (
-                <Tooltip.Root openDelay={300}>
-                  <Tooltip.Trigger asChild>
-                    <Text fontSize="xs" color="white" cursor="default">
-                      {formatBytes(totalIpfsSize)}
-                    </Text>
-                  </Tooltip.Trigger>
-                  <Portal>
-                    <Tooltip.Positioner>
-                      <Tooltip.Content>
-                        {ipfsSizeBreakdown && (
-                          <VStack align="start" gap={0} fontSize="xs">
-                            {ipfsSizeBreakdown.video > 0 && <Text>Видео: {formatBytes(ipfsSizeBreakdown.video)}</Text>}
-                            {ipfsSizeBreakdown.audio > 0 && <Text>Аудио: {formatBytes(ipfsSizeBreakdown.audio)}</Text>}
-                            {ipfsSizeBreakdown.subtitles > 0 && (
-                              <Text>Субтитры: {formatBytes(ipfsSizeBreakdown.subtitles)}</Text>
-                            )}
-                            {ipfsSizeBreakdown.fonts > 0 && <Text>Шрифты: {formatBytes(ipfsSizeBreakdown.fonts)}</Text>}
-                          </VStack>
-                        )}
-                      </Tooltip.Content>
-                    </Tooltip.Positioner>
-                  </Portal>
-                </Tooltip.Root>
-              ) : null}
+              {totalIpfsSize
+                ? (
+                  <Tooltip.Root openDelay={300}>
+                    <Tooltip.Trigger asChild>
+                      <Text fontSize="xs" color="white" cursor="default">
+                        {formatBytes(totalIpfsSize)}
+                      </Text>
+                    </Tooltip.Trigger>
+                    <Portal>
+                      <Tooltip.Positioner>
+                        <Tooltip.Content>
+                          {ipfsSizeBreakdown && (
+                            <VStack align="start" gap={0} fontSize="xs">
+                              {ipfsSizeBreakdown.video > 0 && (
+                                <Text>Видео: {formatBytes(ipfsSizeBreakdown.video)}</Text>
+                              )}
+                              {ipfsSizeBreakdown.audio > 0 && (
+                                <Text>Аудио: {formatBytes(ipfsSizeBreakdown.audio)}</Text>
+                              )}
+                              {ipfsSizeBreakdown.subtitles > 0 && (
+                                <Text>Субтитры: {formatBytes(ipfsSizeBreakdown.subtitles)}</Text>
+                              )}
+                              {ipfsSizeBreakdown.fonts > 0 && (
+                                <Text>Шрифты: {formatBytes(ipfsSizeBreakdown.fonts)}</Text>
+                              )}
+                            </VStack>
+                          )}
+                        </Tooltip.Content>
+                      </Tooltip.Positioner>
+                    </Portal>
+                  </Tooltip.Root>
+                )
+                : null}
             </HStack>
           </Box>
         </Box>

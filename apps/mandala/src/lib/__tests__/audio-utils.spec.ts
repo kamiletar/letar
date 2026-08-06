@@ -202,7 +202,7 @@ describe('detectBeat', () => {
       1.5, // thresholdMultiplier (0.3 * 1.5 = 0.45, 0.6 > 0.45)
       0.1, // minBassLevel
       0, // lastBeatTime
-      100 // cooldown
+      100, // cooldown
     )
 
     expect(result).toBe(true)
@@ -215,7 +215,7 @@ describe('detectBeat', () => {
       1.5, // thresholdMultiplier (0.3 * 1.5 = 0.45, 0.4 < 0.45)
       0.1, // minBassLevel
       0, // lastBeatTime
-      100 // cooldown
+      100, // cooldown
     )
 
     expect(result).toBe(false)
@@ -228,7 +228,7 @@ describe('detectBeat', () => {
       1.5, // thresholdMultiplier
       0.1, // minBassLevel
       0, // lastBeatTime
-      100 // cooldown
+      100, // cooldown
     )
 
     expect(result).toBe(false)
@@ -243,7 +243,7 @@ describe('detectBeat', () => {
       1.5, // thresholdMultiplier
       0.1, // minBassLevel
       950, // lastBeatTime
-      100 // cooldown
+      100, // cooldown
     )
 
     expect(result).toBe(false)
@@ -258,7 +258,7 @@ describe('detectBeat', () => {
       1.5, // thresholdMultiplier
       0.1, // minBassLevel
       800, // lastBeatTime
-      100 // cooldown
+      100, // cooldown
     )
 
     expect(result).toBe(true)

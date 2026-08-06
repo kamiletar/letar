@@ -24,7 +24,7 @@ const log = createModuleLogger('Activities')
  */
 export async function handleActivity(
   activity: ActivityPubActivity,
-  prisma: PrismaClient
+  prisma: PrismaClient,
 ): Promise<ActivityHandleResult> {
   const type = activity.type as ActivityType
 

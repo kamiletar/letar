@@ -167,22 +167,17 @@ function StatusPieChart() {
           dataKey="value"
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
         >
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
+          {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
         </Pie>
         <Tooltip />
         <Legend />
       </PieChart>
     </ResponsiveContainer>
   )
-}
+} // Donut (innerRadius задаёт дырку)
 
-// Donut (innerRadius задаёт дырку)
-;<Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
-  {pieData.map((entry, index) => (
-    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-  ))}
+<Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
+  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
 </Pie>
 ```
 
@@ -243,7 +238,7 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
-;<Tooltip content={<CustomTooltip />} />
+<Tooltip content={<CustomTooltip />} />
 ```
 
 ---
@@ -269,8 +264,7 @@ import { ReferenceLine, ReferenceArea } from 'recharts'
 
 ```tsx
 import { LabelList } from 'recharts'
-
-;<Bar dataKey="revenue">
+<Bar dataKey="revenue">
   <LabelList dataKey="revenue" position="top" formatter={(v) => `${v} ₽`} />
 </Bar>
 ```

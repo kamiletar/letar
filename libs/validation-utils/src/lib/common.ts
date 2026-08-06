@@ -6,7 +6,7 @@ import { z } from 'zod/v4'
  */
 export const emailSchema = z.preprocess(
   (val) => (val === undefined || val === null ? '' : val),
-  z.string().min(1, 'Введите адрес электронной почты').email('Введите корректный email')
+  z.string().min(1, 'Введите адрес электронной почты').email('Введите корректный email'),
 )
 
 /**

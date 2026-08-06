@@ -77,7 +77,7 @@ export function registerRestoreTracksHandlers(): void {
       } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : String(error) }
       }
-    }
+    },
   )
 
   ipcMain.handle('restoreTracks:cancel', async () => {

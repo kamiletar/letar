@@ -89,22 +89,21 @@ export const DARK_CORE_SENSITIVITY_DELTA = DARK_CORE_FLAVOR_THRESHOLD / 3
 export const DARK_CORE_TOP_N = 5
 
 /** Обязательная оговорка о метрике — UI не имеет права показать индекс без неё */
-export const DARK_CORE_CAVEAT =
-  'Приближение, а не измерение D: композит четырёх шкал коррелирует с полным D-фактором ' +
-  'на r ≈ .85 (Hilbig et al., 2023), тогда как сам D измеряется инструментами D70/D35/D16. ' +
-  'Баллы — процент от максимума по отвеченным вопросам, а не перцентиль: сказать «выше, ' +
-  'чем у N% людей» нельзя до накопления нормативной выборки. Отклонение шкалы от ядра — ' +
-  'гипотеза для проверки в разговоре, а не находка: постоянный сдвиг шкалы из-за ' +
-  'формулировок пунктов неотличим от индивидуального «вкуса».'
+export const DARK_CORE_CAVEAT = 'Приближение, а не измерение D: композит четырёх шкал коррелирует с полным D-фактором '
+  + 'на r ≈ .85 (Hilbig et al., 2023), тогда как сам D измеряется инструментами D70/D35/D16. '
+  + 'Баллы — процент от максимума по отвеченным вопросам, а не перцентиль: сказать «выше, '
+  + 'чем у N% людей» нельзя до накопления нормативной выборки. Отклонение шкалы от ядра — '
+  + 'гипотеза для проверки в разговоре, а не находка: постоянный сдвиг шкалы из-за '
+  + 'формулировок пунктов неотличим от индивидуального «вкуса».'
 
 export const DARK_CORE_CAVEAT_EN =
-  'An approximation, not a measurement of D: the four-scale composite correlates with the ' +
-  'full D factor at r ≈ .85 (Hilbig et al., 2023), while D itself is measured with the ' +
-  'D70/D35/D16 inventories. Scores are a percentage of the maximum across answered items, ' +
-  'not a percentile: “higher than N% of people” cannot be claimed until a normative sample ' +
-  'is collected. A scale’s deviation from the core is a hypothesis to explore in conversation, ' +
-  'not a finding: a constant scale shift caused by item wording is indistinguishable from an ' +
-  'individual “flavor”.'
+  'An approximation, not a measurement of D: the four-scale composite correlates with the '
+  + 'full D factor at r ≈ .85 (Hilbig et al., 2023), while D itself is measured with the '
+  + 'D70/D35/D16 inventories. Scores are a percentage of the maximum across answered items, '
+  + 'not a percentile: “higher than N% of people” cannot be claimed until a normative sample '
+  + 'is collected. A scale’s deviation from the core is a hypothesis to explore in conversation, '
+  + 'not a finding: a constant scale shift caused by item wording is indistinguishable from an '
+  + 'individual “flavor”.'
 
 /** Код шкалы, входящей в тёмное ядро */
 export type DarkCoreCode = (typeof DARK_CORE_CODES)[number]
@@ -393,7 +392,7 @@ export function minConfidence(list: readonly ScaleConfidence[]): ScaleConfidence
 export function isDarkScaleMeasured(
   code: DarkCoreCode,
   relevantCounts: Partial<Record<ScaleCode, number>>,
-  minN: number = DARK_CORE_MIN_N
+  minN: number = DARK_CORE_MIN_N,
 ): boolean {
   return (relevantCounts[code] ?? 0) >= minN
 }
@@ -483,8 +482,9 @@ export function computeDarkCore(input: DarkCoreInput, options?: DarkCoreOptions)
 
   // Анализ чувствительности: тот же расчёт без нарциссического «восхищения»
   const coreWithoutNarcissism = computeSubsetMean(DARK_CORE_CODES_NO_NAR, normalized, relevantCounts, minN)
-  const narcissismDelta =
-    coreWithoutNarcissism !== null && includedCodes.includes('NAR') ? round1(core - coreWithoutNarcissism) : null
+  const narcissismDelta = coreWithoutNarcissism !== null && includedCodes.includes('NAR')
+    ? round1(core - coreWithoutNarcissism)
+    : null
   const narcissismDrivesEstimate = narcissismDelta !== null && Math.abs(narcissismDelta) >= flavorThreshold / 3
 
   const structure = classifyStructure(flavors, flavorThreshold)
@@ -548,7 +548,7 @@ function computeSubsetMean(
   codes: readonly DarkCoreCode[],
   normalized: Partial<Record<ScaleCode, number>>,
   relevantCounts: Partial<Record<ScaleCode, number>>,
-  minN: number
+  minN: number,
 ): number | null {
   const measured = codes.filter((code) => isDarkScaleMeasured(code, relevantCounts, minN))
   if (measured.length < DARK_CORE_MIN_SCALES_NO_NAR) {
@@ -561,7 +561,7 @@ function computeSubsetMean(
 /** Шкала с худшей достоверностью среди измеренных */
 function pickWeakestCode(
   codes: DarkCoreCode[],
-  confidence: Partial<Record<ScaleCode, ScaleConfidence>>
+  confidence: Partial<Record<ScaleCode, ScaleConfidence>>,
 ): DarkCoreCode | null {
   let weakest: DarkCoreCode | null = null
   let weakestIdx = CONFIDENCE_ORDER.length
@@ -580,7 +580,7 @@ function buildProfileContext(
   ranking: readonly IpsativeScale[],
   includedCodes: DarkCoreCode[],
   core: number,
-  topN: number
+  topN: number,
 ): DarkCoreProfileContext | null {
   if (ranking.length === 0) {
     return null

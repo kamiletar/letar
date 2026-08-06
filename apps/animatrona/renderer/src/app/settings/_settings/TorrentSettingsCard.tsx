@@ -67,7 +67,7 @@ export function TorrentSettingsCard() {
       saveTorrentSettings(updated)
       toaster.success({ title: 'Настройки торрента сохранены' })
     },
-    [settings]
+    [settings],
   )
 
   const handleSelectFolder = useCallback(async () => {

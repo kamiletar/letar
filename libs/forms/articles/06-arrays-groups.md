@@ -162,14 +162,14 @@ interface Order {
 {
   /* Вертикальный список (по умолчанию) */
 }
-;<Form.Group.List name="steps" sortable direction="vertical">
+<Form.Group.List name="steps" sortable direction="vertical">
   ...
 </Form.Group.List>
 
 {
   /* Горизонтальный (например, карточки) */
 }
-;<Form.Group.List name="slides" sortable direction="horizontal">
+<Form.Group.List name="slides" sortable direction="horizontal">
   ...
 </Form.Group.List>
 ```
@@ -239,7 +239,7 @@ const OrderSchema = z.object({
         product: z.string().min(1, 'Выберите товар'),
         quantity: z.number().min(1, 'Минимум 1'),
         price: z.number().min(0),
-      })
+      }),
     )
     .min(1, 'Добавьте хотя бы один товар') // Валидация длины массива
     .max(20, 'Максимум 20 позиций'),

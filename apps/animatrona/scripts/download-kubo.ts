@@ -159,10 +159,10 @@ async function main() {
 
       // Проверяем версию только для текущей платформы
       if (
-        (platform === 'win' && process.platform === 'win32') ||
-        (platform === 'linux' && process.platform === 'linux') ||
-        (platform === 'darwin' && process.platform === 'darwin' && process.arch !== 'arm64') ||
-        (platform === 'darwin-arm64' && process.platform === 'darwin' && process.arch === 'arm64')
+        (platform === 'win' && process.platform === 'win32')
+        || (platform === 'linux' && process.platform === 'linux')
+        || (platform === 'darwin' && process.platform === 'darwin' && process.arch !== 'arm64')
+        || (platform === 'darwin-arm64' && process.platform === 'darwin' && process.arch === 'arm64')
       ) {
         try {
           const { stdout } = await execAsync(`"${kuboBin}" version`)
@@ -197,7 +197,7 @@ async function main() {
     if (config.ext === 'zip') {
       // Windows: PowerShell Expand-Archive
       await execAsync(
-        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`
+        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`,
       )
     } else if (config.ext === 'tar.gz') {
       // tar.gz: используем tar
@@ -252,10 +252,10 @@ async function main() {
 
       // Проверяем версию только для текущей платформы
       if (
-        (platform === 'win' && process.platform === 'win32') ||
-        (platform === 'linux' && process.platform === 'linux') ||
-        (platform === 'darwin' && process.platform === 'darwin' && process.arch !== 'arm64') ||
-        (platform === 'darwin-arm64' && process.platform === 'darwin' && process.arch === 'arm64')
+        (platform === 'win' && process.platform === 'win32')
+        || (platform === 'linux' && process.platform === 'linux')
+        || (platform === 'darwin' && process.platform === 'darwin' && process.arch !== 'arm64')
+        || (platform === 'darwin-arm64' && process.platform === 'darwin' && process.arch === 'arm64')
       ) {
         try {
           const { stdout } = await execAsync(`"${kuboBin}" version`)

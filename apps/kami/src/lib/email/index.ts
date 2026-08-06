@@ -6,8 +6,8 @@
  */
 
 export {
-  sendConsultingRequestNotification,
-  sendHireRequestNotification,
   type ConsultingRequestEmailData,
   type HireRequestEmailData,
+  sendConsultingRequestNotification,
+  sendHireRequestNotification,
 } from './email-service'

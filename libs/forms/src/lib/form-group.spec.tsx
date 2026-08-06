@@ -13,7 +13,7 @@ describe('FormGroup', () => {
     render(
       <FormGroup name="user">
         <TestComponent />
-      </FormGroup>
+      </FormGroup>,
     )
 
     // Assert
@@ -31,7 +31,7 @@ describe('FormGroup', () => {
         <FormGroup name="address">
           <TestComponent />
         </FormGroup>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('user.address')
@@ -59,7 +59,7 @@ describe('FormGroup', () => {
         <FormGroup name="address">
           <TestComponent />
         </FormGroup>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('original')).toHaveTextContent('address')

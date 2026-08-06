@@ -86,80 +86,86 @@ export function PinnedListClient() {
       </Box>
 
       <Container maxW="container.xl" py={8}>
-        {isLoading ? (
-          <Center py={12}>
-            <Spinner size="lg" />
-          </Center>
-        ) : isError ? (
-          <Center py={12}>
-            <VStack gap={2}>
-              <Text color="red.500">Ошибка загрузки</Text>
-              <Button size="sm" onClick={() => refetch()}>
-                Повторить
-              </Button>
-            </VStack>
-          </Center>
-        ) : items.length === 0 ? (
-          <Center py={12}>
-            <VStack gap={2}>
-              <Icon as={LuPin} boxSize={12} color="fg.muted" />
-              <Text color="fg.muted" fontSize="lg">
-                Нет запиненных аниме
+        {isLoading
+          ? (
+            <Center py={12}>
+              <Spinner size="lg" />
+            </Center>
+          )
+          : isError
+          ? (
+            <Center py={12}>
+              <VStack gap={2}>
+                <Text color="red.500">Ошибка загрузки</Text>
+                <Button size="sm" onClick={() => refetch()}>
+                  Повторить
+                </Button>
+              </VStack>
+            </Center>
+          )
+          : items.length === 0
+          ? (
+            <Center py={12}>
+              <VStack gap={2}>
+                <Icon as={LuPin} boxSize={12} color="fg.muted" />
+                <Text color="fg.muted" fontSize="lg">
+                  Нет запиненных аниме
+                </Text>
+              </VStack>
+            </Center>
+          )
+          : (
+            <VStack align="stretch" gap={4}>
+              {/* Общий размер */}
+              <Text fontSize="sm" color="fg.muted">
+                Общий размер: {formatFileSize(items.reduce((sum, item) => sum + item.totalSize, 0))}
               </Text>
-            </VStack>
-          </Center>
-        ) : (
-          <VStack align="stretch" gap={4}>
-            {/* Общий размер */}
-            <Text fontSize="sm" color="fg.muted">
-              Общий размер: {formatFileSize(items.reduce((sum, item) => sum + item.totalSize, 0))}
-            </Text>
 
-            {items.map((item) => (
-              <Box key={item.anime.id} bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px">
-                <Flex justify="space-between" align="center" mb={2}>
-                  <HStack gap={3}>
-                    <Text fontWeight="semibold" fontSize="lg">
-                      {item.anime.title}
+              {items.map((item) => (
+                <Box key={item.anime.id} bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px">
+                  <Flex justify="space-between" align="center" mb={2}>
+                    <HStack gap={3}>
+                      <Text fontWeight="semibold" fontSize="lg">
+                        {item.anime.title}
+                      </Text>
+                      {item.anime.shikimoriId && (
+                        <Badge colorPalette="purple" size="sm">
+                          #{item.anime.shikimoriId}
+                        </Badge>
+                      )}
+                    </HStack>
+                    <Text fontSize="xs" color="fg.muted">
+                      {new Date(item.pinnedAt).toLocaleString('ru')}
                     </Text>
-                    {item.anime.shikimoriId && (
-                      <Badge colorPalette="purple" size="sm">
-                        #{item.anime.shikimoriId}
-                      </Badge>
+                  </Flex>
+
+                  <HStack gap={4} flexWrap="wrap">
+                    <Text fontSize="sm" color="fg.muted">
+                      {formatFileSize(item.totalSize)}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted">
+                      {item.cidCount} CID
+                    </Text>
+                    {item.createdBy.name && (
+                      <Text fontSize="sm" color="fg.muted">
+                        Автор: {item.createdBy.name}
+                      </Text>
                     )}
                   </HStack>
-                  <Text fontSize="xs" color="fg.muted">
-                    {new Date(item.pinnedAt).toLocaleString('ru')}
-                  </Text>
-                </Flex>
 
-                <HStack gap={4} flexWrap="wrap">
-                  <Text fontSize="sm" color="fg.muted">
-                    {formatFileSize(item.totalSize)}
-                  </Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    {item.cidCount} CID
-                  </Text>
-                  {item.createdBy.name && (
-                    <Text fontSize="sm" color="fg.muted">
-                      Автор: {item.createdBy.name}
-                    </Text>
-                  )}
-                </HStack>
-
-                {/* Серверы */}
-                <HStack gap={2} mt={2}>
-                  <Icon as={LuServer} color="fg.muted" boxSize={4} />
-                  {item.servers.map((server) => (
-                    <Badge key={server.id} colorPalette={server.status === 'ONLINE' ? 'green' : 'gray'} size="sm">
-                      {server.name}
-                    </Badge>
-                  ))}
-                </HStack>
-              </Box>
-            ))}
-          </VStack>
-        )}
+                  {/* Серверы */}
+                  <HStack gap={2} mt={2}>
+                    <Icon as={LuServer} color="fg.muted" boxSize={4} />
+                    {item.servers.map((server) => (
+                      <Badge key={server.id} colorPalette={server.status === 'ONLINE' ? 'green' : 'gray'} size="sm">
+                        {server.name}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </Box>
+              ))}
+            </VStack>
+          )}
       </Container>
     </Box>
   )

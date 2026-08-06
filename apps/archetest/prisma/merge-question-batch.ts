@@ -205,9 +205,9 @@ if (!updateMode) {
     for (const q of qs) {
       if (existingScenarios.has(q.scenario)) {
         throw new Error(
-          `${scale}: сценарий уже в дампе — «${q.scenario.slice(0, 50)}…». ` +
-            `Повторный merge? Если это правка формулировки — добавьте вопросу поле ` +
-            `"_updateOf" (id записи или её прежний scenario) и запустите с --update.`
+          `${scale}: сценарий уже в дампе — «${q.scenario.slice(0, 50)}…». `
+            + `Повторный merge? Если это правка формулировки — добавьте вопросу поле `
+            + `"_updateOf" (id записи или её прежний scenario) и запустите с --update.`,
         )
       }
     }
@@ -248,8 +248,8 @@ if (updateMode) {
       const target = byId.get(key) ?? byScenario.get(key)
       if (!target) {
         throw new Error(
-          `${scale}: не найден вопрос для правки — "_updateOf": «${key.slice(0, 60)}…». ` +
-            `Ожидается id записи в questions-dump.json или её прежний scenario.`
+          `${scale}: не найден вопрос для правки — "_updateOf": «${key.slice(0, 60)}…». `
+            + `Ожидается id записи в questions-dump.json или её прежний scenario.`,
         )
       }
 
@@ -272,28 +272,26 @@ if (updateMode) {
        * а не хранятся в ответе.
        */
       const oldOptions = JSON.parse(target.options) as BatchOption[]
-      const scoringChanged =
-        maxChanged ||
-        oldOptions.length !== q.options.length ||
-        q.options.some((o, idx) => JSON.stringify(o.scoring) !== JSON.stringify(oldOptions[idx]?.scoring ?? {}))
+      const scoringChanged = maxChanged
+        || oldOptions.length !== q.options.length
+        || q.options.some((o, idx) => JSON.stringify(o.scoring) !== JSON.stringify(oldOptions[idx]?.scoring ?? {}))
 
       if (scoringChanged && !allowScoringChange) {
         throw new Error(
-          `${scale}: правка вопроса #${qnum} меняет баллы` +
-            (maxChanged
+          `${scale}: правка вопроса #${qnum} меняет баллы`
+            + (maxChanged
               ? ` — максимум вопроса: ${codes.map((c) => `${c} ${oldMax[c] ?? 0}→${newMax[c] ?? 0}`).join(', ')}`
-              : ' в вариантах (максимум вопроса при этом не сдвинулся)') +
-            `. Баллы пересчитываются из вариантов при каждом чтении, поэтому изменение задевает ` +
-            `и уже записанные сессии. Если оно осознанное — перезапустите с --allow-scoring-change ` +
-            `и поднимите QUESTION_BANK_VERSION в src/app/[locale]/_data/question-bank-version.ts.`
+              : ' в вариантах (максимум вопроса при этом не сдвинулся)')
+            + `. Баллы пересчитываются из вариантов при каждом чтении, поэтому изменение задевает `
+            + `и уже записанные сессии. Если оно осознанное — перезапустите с --allow-scoring-change `
+            + `и поднимите QUESTION_BANK_VERSION в src/app/[locale]/_data/question-bank-version.ts.`,
         )
       }
 
-      const textChanged =
-        target.scenario !== q.scenario ||
-        target.scenarioEn !== q.scenarioEn ||
-        target.options !==
-          JSON.stringify(q.options.map((o) => ({ text: o.text, textEn: o.textEn, scoring: o.scoring })))
+      const textChanged = target.scenario !== q.scenario
+        || target.scenarioEn !== q.scenarioEn
+        || target.options
+          !== JSON.stringify(q.options.map((o) => ({ text: o.text, textEn: o.textEn, scoring: o.scoring })))
       if (!textChanged && !scoringChanged) {
         report.push(`  #${qnum} (${scale}): без изменений, пропущен`)
         continue

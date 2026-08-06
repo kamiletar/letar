@@ -53,7 +53,7 @@ export function computeMvp(performances: PerformanceLike[], isFinished: boolean)
     performances.map((p) => ({
       playerName: playerDisplayName(p.player),
       totalScore: p.totalScore,
-    }))
+    })),
   )
 
   return result
@@ -71,7 +71,7 @@ export function splitByHalves<T extends { half: number }>(performances: T[]): { 
 export function computeWinner(
   homeScore: number,
   awayScore: number,
-  isFinished: boolean
+  isFinished: boolean,
 ): { homeWins: boolean; awayWins: boolean } {
   return {
     homeWins: isFinished && homeScore > awayScore,

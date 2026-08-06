@@ -47,11 +47,13 @@ grep -r "dangerouslySetInnerHTML" --include="*.tsx"
 
 ```tsx
 // React экранирует автоматически
-;<div>{userInput}</div>
+<div>
+  {userInput}
+</div>
 
 // Если нужен HTML — санитизация
 import DOMPurify from 'dompurify'
-;<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />
+<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />
 ```
 
 ### 3. Broken Access Control

@@ -25,10 +25,9 @@ function useIsDarkMode(): boolean {
     // next-themes sets class or data-theme on <html>
     const check = () => {
       const html = document.documentElement
-      const isDarkNow =
-        html.classList.contains('dark') ||
-        html.getAttribute('data-theme') === 'dark' ||
-        html.style.colorScheme === 'dark'
+      const isDarkNow = html.classList.contains('dark')
+        || html.getAttribute('data-theme') === 'dark'
+        || html.style.colorScheme === 'dark'
       setIsDark(isDarkNow)
     }
 

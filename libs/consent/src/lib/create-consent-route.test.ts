@@ -49,7 +49,7 @@ describe('createConsentRoute', () => {
         acceptedMarketing: false,
         acceptedFunctional: true,
         consentVersion: 'v1.2026',
-      })
+      }),
     )
   })
 

@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation'
-import { Box, Link as ChakraLink, Container, Heading, Table, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, Link as ChakraLink, Table, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
@@ -107,8 +107,12 @@ function ForProfessionalsView({ locale }: { locale: string }) {
           </Table.Root>
           <Text>
             {isRu
-              ? `Валидированное ядро — ${CORE_SCALE_COUNT - 1} из ${CORE_SCALE_COUNT} текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: в ядре это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.`
-              : `The validated core covers ${CORE_SCALE_COUNT - 1} of the ${CORE_SCALE_COUNT} current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.`}
+              ? `Валидированное ядро — ${
+                CORE_SCALE_COUNT - 1
+              } из ${CORE_SCALE_COUNT} текущих шкал (таблица выше). Отдельно от него — авторские/экспериментальные конструкты без прямого валидированного прототипа: в ядре это шкала MAS («Самоотверженный», авторский конструкт мазохистического паттерна). Такие шкалы в интерфейсе всегда помечены как «бета» и должны интерпретироваться с осторожностью, отдельно от ядра.`
+              : `The validated core covers ${
+                CORE_SCALE_COUNT - 1
+              } of the ${CORE_SCALE_COUNT} current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale ("Self-Sacrificing", an original masochistic-pattern construct). Such scales are always marked "beta" in the UI and should be interpreted with caution, apart from the core.`}
           </Text>
           <Text>
             {isRu
@@ -165,26 +169,25 @@ function ForProfessionalsView({ locale }: { locale: string }) {
           <VStack align="start" gap={1} pl={2}>
             {(isRu
               ? [
-                  'Негативная аффективность — BOR, DPR, AVD, DEP',
-                  'Отстранённость — SZD, AVD, PAR',
-                  'Антагонизм (AMPD) / Диссоциальность (МКБ-11) — NAR, ANT, PAG; из расширенного набора — MAC, SAD',
-                  'Расторможенность — ANT, BOR, HIS',
-                  'Ананкастия (МКБ-11) — OBC; Психотизм (AMPD) — SZT',
-                  '«Пограничный паттерн» (спецификатор МКБ-11) — BOR',
-                ]
+                'Негативная аффективность — BOR, DPR, AVD, DEP',
+                'Отстранённость — SZD, AVD, PAR',
+                'Антагонизм (AMPD) / Диссоциальность (МКБ-11) — NAR, ANT, PAG; из расширенного набора — MAC, SAD',
+                'Расторможенность — ANT, BOR, HIS',
+                'Ананкастия (МКБ-11) — OBC; Психотизм (AMPD) — SZT',
+                '«Пограничный паттерн» (спецификатор МКБ-11) — BOR',
+              ]
               : [
-                  'Negative Affectivity — BOR, DPR, AVD, DEP',
-                  'Detachment — SZD, AVD, PAR',
-                  'Antagonism (AMPD) / Dissociality (ICD-11) — NAR, ANT, PAG; from the extended set — MAC, SAD',
-                  'Disinhibition — ANT, BOR, HIS',
-                  'Anankastia (ICD-11) — OBC; Psychoticism (AMPD) — SZT',
-                  '"Borderline pattern" (ICD-11 specifier) — BOR',
-                ]
-            ).map((item) => (
-              <Text key={item} fontSize="sm">
-                • {item}
-              </Text>
-            ))}
+                'Negative Affectivity — BOR, DPR, AVD, DEP',
+                'Detachment — SZD, AVD, PAR',
+                'Antagonism (AMPD) / Dissociality (ICD-11) — NAR, ANT, PAG; from the extended set — MAC, SAD',
+                'Disinhibition — ANT, BOR, HIS',
+                'Anankastia (ICD-11) — OBC; Psychoticism (AMPD) — SZT',
+                '"Borderline pattern" (ICD-11 specifier) — BOR',
+              ]).map((item) => (
+                <Text key={item} fontSize="sm">
+                  • {item}
+                </Text>
+              ))}
           </VStack>
         </Section>
 
@@ -317,25 +320,27 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         {/* Кабинет психолога */}
         <Section title={isRu ? 'Кабинет психолога на платформе' : 'Psychologist Cabinet on the Platform'}>
           <Text>
-            {isRu ? (
-              <>
-                На платформе доступен кабинет психолога — инструмент для отслеживания результатов ваших клиентов. Для
-                активации кабинета нажмите «Я специалист» на{' '}
-                <ChakraLink asChild color="blue.500">
-                  <Link href="/cabinet">странице кабинета</Link>
-                </ChakraLink>
-                .
-              </>
-            ) : (
-              <>
-                The platform features a psychologist cabinet — a tool for tracking your clients' results. To activate
-                the cabinet, click "I'm a Professional" on the{' '}
-                <ChakraLink asChild color="blue.500">
-                  <Link href="/cabinet">cabinet page</Link>
-                </ChakraLink>
-                .
-              </>
-            )}
+            {isRu
+              ? (
+                <>
+                  На платформе доступен кабинет психолога — инструмент для отслеживания результатов ваших клиентов. Для
+                  активации кабинета нажмите «Я специалист» на{' '}
+                  <ChakraLink asChild color="blue.500">
+                    <Link href="/cabinet">странице кабинета</Link>
+                  </ChakraLink>
+                  .
+                </>
+              )
+              : (
+                <>
+                  The platform features a psychologist cabinet — a tool for tracking your clients' results. To activate
+                  the cabinet, click "I'm a Professional" on the{' '}
+                  <ChakraLink asChild color="blue.500">
+                    <Link href="/cabinet">cabinet page</Link>
+                  </ChakraLink>
+                  .
+                </>
+              )}
           </Text>
           <Text>
             {isRu
@@ -345,22 +350,19 @@ function ForProfessionalsView({ locale }: { locale: string }) {
           <VStack align="start" gap={1} pl={2}>
             {(isRu
               ? [
-                  'Кумулятивному профилю клиента с клиническими названиями шкал',
-                  'Динамике результатов по сессиям (график изменений)',
-                  'Радарной диаграмме профиля',
-                  'Топ-3 выраженных типов с описаниями взаимодействий',
-                  'Личным заметкам о клиенте (видны только вам)',
-                ]
+                'Кумулятивному профилю клиента с клиническими названиями шкал',
+                'Динамике результатов по сессиям (график изменений)',
+                'Радарной диаграмме профиля',
+                'Топ-3 выраженных типов с описаниями взаимодействий',
+                'Личным заметкам о клиенте (видны только вам)',
+              ]
               : [
-                  "Client's cumulative profile with clinical scale names",
-                  'Results dynamics across sessions (change chart)',
-                  'Profile radar diagram',
-                  'Top 3 prominent types with interaction descriptions',
-                  'Personal client notes (visible only to you)',
-                ]
-            ).map((item) => (
-              <Text key={item}>• {item}</Text>
-            ))}
+                "Client's cumulative profile with clinical scale names",
+                'Results dynamics across sessions (change chart)',
+                'Profile radar diagram',
+                'Top 3 prominent types with interaction descriptions',
+                'Personal client notes (visible only to you)',
+              ]).map((item) => <Text key={item}>• {item}</Text>)}
           </VStack>
           <Text>
             {isRu
@@ -394,12 +396,12 @@ function ForProfessionalsView({ locale }: { locale: string }) {
                     {type.cluster === 'A'
                       ? 'A'
                       : type.cluster === 'B'
-                        ? 'B'
-                        : type.cluster === 'C'
-                          ? 'C'
-                          : isRu
-                            ? 'Доп.'
-                            : 'Suppl.'}
+                      ? 'B'
+                      : type.cluster === 'C'
+                      ? 'C'
+                      : isRu
+                      ? 'Доп.'
+                      : 'Suppl.'}
                   </Table.Cell>
                 </Table.Row>
               ))}

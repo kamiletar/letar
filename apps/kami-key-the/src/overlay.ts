@@ -234,7 +234,7 @@ const WNDPROC = koffi.proto('intptr_t __stdcall WNDPROC(void*, uint32, uintptr_t
 // user32
 const RegisterClassExW = user32.func('uint16 RegisterClassExW(WNDCLASSEXW*)')
 const CreateWindowExW = user32.func(
-  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)'
+  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)',
 )
 const ShowWindow = user32.func('bool ShowWindow(void*, int)')
 const DestroyWindow = user32.func('bool DestroyWindow(void*)')
@@ -255,7 +255,7 @@ const SWP_NOZORDER = 0x0004
 // gdi32
 const CreateSolidBrush = gdi32.func('void* CreateSolidBrush(uint32)')
 const CreateFontW = gdi32.func(
-  'void* CreateFontW(int, int, int, int, int, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, const char16_t*)'
+  'void* CreateFontW(int, int, int, int, int, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, const char16_t*)',
 )
 const SelectObject = gdi32.func('void* SelectObject(void*, void*)')
 const SetBkMode = gdi32.func('int SetBkMode(void*, int)')
@@ -382,7 +382,7 @@ function paintOverlay(hwnd: unknown): void {
             y + half,
             x + halfW,
             y + keyH - p,
-            DT_BASE | DT_LEFT | DT_VCENTER
+            DT_BASE | DT_LEFT | DT_VCENTER,
           )
 
           // Верх-право: AltGr shift символ (если есть)
@@ -483,7 +483,7 @@ export function initOverlay(): boolean {
       null,
       null,
       hInstance,
-      null
+      null,
     )
 
     if (!overlayHwnd) {

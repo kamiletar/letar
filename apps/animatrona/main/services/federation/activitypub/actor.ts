@@ -86,10 +86,10 @@ export function parseRemoteActor(json: unknown): ActivityPubActor | null {
 
   // Проверяем обязательные поля
   if (
-    typeof obj.id !== 'string' ||
-    obj.type !== 'Service' ||
-    typeof obj.inbox !== 'string' ||
-    typeof obj.outbox !== 'string'
+    typeof obj.id !== 'string'
+    || obj.type !== 'Service'
+    || typeof obj.inbox !== 'string'
+    || typeof obj.outbox !== 'string'
   ) {
     return null
   }
@@ -132,18 +132,15 @@ export function parseRemoteActor(json: unknown): ActivityPubActor | null {
       language: typeof meta.language === 'string' ? meta.language : 'ru',
       version: typeof meta.version === 'string' ? meta.version : 'unknown',
       stats: {
-        animeCount:
-          typeof (meta.stats as Record<string, unknown>)?.animeCount === 'number'
-            ? (meta.stats as Record<string, number>).animeCount
-            : 0,
-        episodeCount:
-          typeof (meta.stats as Record<string, unknown>)?.episodeCount === 'number'
-            ? (meta.stats as Record<string, number>).episodeCount
-            : 0,
-        totalSize:
-          typeof (meta.stats as Record<string, unknown>)?.totalSize === 'number'
-            ? (meta.stats as Record<string, number>).totalSize
-            : 0,
+        animeCount: typeof (meta.stats as Record<string, unknown>)?.animeCount === 'number'
+          ? (meta.stats as Record<string, number>).animeCount
+          : 0,
+        episodeCount: typeof (meta.stats as Record<string, unknown>)?.episodeCount === 'number'
+          ? (meta.stats as Record<string, number>).episodeCount
+          : 0,
+        totalSize: typeof (meta.stats as Record<string, unknown>)?.totalSize === 'number'
+          ? (meta.stats as Record<string, number>).totalSize
+          : 0,
       },
     }
   }
@@ -194,9 +191,9 @@ export function getBaseUrlFromActor(actor: ActivityPubActor): string {
 export function isAnimatronaTracker(actor: ActivityPubActor): boolean {
   // Проверяем наличие Animatrona-специфичных полей
   return (
-    actor.type === 'Service' &&
-    !!actor.endpoints?.content &&
-    !!actor.endpoints?.announces &&
-    !!actor['animatrona:metadata']
+    actor.type === 'Service'
+    && !!actor.endpoints?.content
+    && !!actor.endpoints?.announces
+    && !!actor['animatrona:metadata']
   )
 }

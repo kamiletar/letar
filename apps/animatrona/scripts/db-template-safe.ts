@@ -90,7 +90,7 @@ async function main() {
       await runCommand(
         'npx',
         ['prisma', 'db', 'push', '--schema', tempSchemaPath, '--url', `file:${appDbPath}`, '--accept-data-loss'],
-        env
+        env,
       )
     } finally {
       // Удаляем временный schema файл

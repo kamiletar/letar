@@ -92,7 +92,7 @@ export function FranchiseTimelineView({
         window.open(node.url, '_blank', 'noopener,noreferrer')
       }
     },
-    [router, currentShikimoriId]
+    [router, currentShikimoriId],
   )
 
   return (

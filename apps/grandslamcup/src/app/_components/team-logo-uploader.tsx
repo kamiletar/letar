@@ -90,15 +90,15 @@ export function TeamLogoUploader({ teamId, currentLogo, size = 160 }: TeamLogoUp
         onClick={() => !uploading && inputRef.current?.click()}
       >
         {/* Текущий логотип или плейсхолдер */}
-        {logoUrl ? (
-          <Image src={logoUrl} alt="Логотип команды" fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
-        ) : (
-          <Flex align="center" justify="center" h="full" bg="bg.subtle">
-            <Circle size={16} bg="brand.subtle" color="brand.solid">
-              <LuUsers size={32} />
-            </Circle>
-          </Flex>
-        )}
+        {logoUrl
+          ? <Image src={logoUrl} alt="Логотип команды" fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
+          : (
+            <Flex align="center" justify="center" h="full" bg="bg.subtle">
+              <Circle size={16} bg="brand.subtle" color="brand.solid">
+                <LuUsers size={32} />
+              </Circle>
+            </Flex>
+          )}
 
         {/* Overlay при наведении */}
         <Flex
@@ -111,9 +111,7 @@ export function TeamLogoUploader({ teamId, currentLogo, size = 160 }: TeamLogoUp
           opacity={uploading ? 1 : 0}
           transition="opacity 0.2s"
         >
-          {uploading ? (
-            <Spinner color="white" size="lg" />
-          ) : (
+          {uploading ? <Spinner color="white" size="lg" /> : (
             <VStack gap={1}>
               <LuCamera size={24} color="white" />
               <Text fontSize="xs" color="white" fontWeight="medium">

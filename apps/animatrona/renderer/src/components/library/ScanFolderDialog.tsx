@@ -59,11 +59,12 @@ export function ScanFolderDialog({
       getInitialSelection: (file: BaseScannedFile) =>
         file.episodeNumber !== null && !existingEpisodeNumbers.includes(file.episodeNumber),
     }),
-    [existingEpisodeNumbers]
+    [existingEpisodeNumbers],
   )
 
-  const { files, isScanning, scan, toggleFile, toggleAll, reset, selectedCount, totalWithNumbers } =
-    useScanFolder(scanOptions)
+  const { files, isScanning, scan, toggleFile, toggleAll, reset, selectedCount, totalWithNumbers } = useScanFolder(
+    scanOptions,
+  )
 
   /** Выбрать папку */
   const handleSelectFolder = useCallback(async () => {
@@ -83,7 +84,7 @@ export function ScanFolderDialog({
   /** Импортировать выбранные эпизоды */
   const handleImport = useCallback(async () => {
     const selectedFiles = files.filter(
-      (f): f is BaseScannedFile & { episodeNumber: number } => f.selected && f.episodeNumber !== null
+      (f): f is BaseScannedFile & { episodeNumber: number } => f.selected && f.episodeNumber !== null,
     )
     if (selectedFiles.length === 0) {
       return
@@ -132,9 +133,11 @@ export function ScanFolderDialog({
       } else if (successCount > 0) {
         toaster.success({
           title: 'Частичный импорт',
-          description: `Добавлено ${successCount} из ${selectedFiles.length}. Ошибки: ${errors
-            .map((e) => `#${e.episode}`)
-            .join(', ')}`,
+          description: `Добавлено ${successCount} из ${selectedFiles.length}. Ошибки: ${
+            errors
+              .map((e) => `#${e.episode}`)
+              .join(', ')
+          }`,
         })
       } else {
         toaster.error({
@@ -237,8 +240,8 @@ export function ScanFolderDialog({
                         </Table.Header>
                         <Table.Body>
                           {files.map((file, index) => {
-                            const isExisting =
-                              file.episodeNumber !== null && existingEpisodeNumbers.includes(file.episodeNumber)
+                            const isExisting = file.episodeNumber !== null
+                              && existingEpisodeNumbers.includes(file.episodeNumber)
 
                             return (
                               <Table.Row
@@ -259,18 +262,18 @@ export function ScanFolderDialog({
                                   </Checkbox.Root>
                                 </Table.Cell>
                                 <Table.Cell>
-                                  {file.episodeNumber !== null ? (
-                                    <HStack gap={1}>
-                                      <Text fontWeight="medium">{file.episodeNumber}</Text>
-                                      {isExisting && (
-                                        <Badge size="sm" colorPalette="yellow">
-                                          есть
-                                        </Badge>
-                                      )}
-                                    </HStack>
-                                  ) : (
-                                    <Text color="fg.subtle">—</Text>
-                                  )}
+                                  {file.episodeNumber !== null
+                                    ? (
+                                      <HStack gap={1}>
+                                        <Text fontWeight="medium">{file.episodeNumber}</Text>
+                                        {isExisting && (
+                                          <Badge size="sm" colorPalette="yellow">
+                                            есть
+                                          </Badge>
+                                        )}
+                                      </HStack>
+                                    )
+                                    : <Text color="fg.subtle">—</Text>}
                                 </Table.Cell>
                                 <Table.Cell>
                                   <HStack gap={2}>
@@ -316,17 +319,19 @@ export function ScanFolderDialog({
                     <Button variant="outline">Отмена</Button>
                   </Dialog.ActionTrigger>
                   <Button colorPalette="purple" onClick={handleImport} disabled={selectedCount === 0 || isImporting}>
-                    {isImporting ? (
-                      <>
-                        <Spinner size="sm" mr={2} />
-                        Импорт...
-                      </>
-                    ) : (
-                      <>
-                        <Icon as={LuImport} mr={2} />
-                        Импортировать ({selectedCount})
-                      </>
-                    )}
+                    {isImporting
+                      ? (
+                        <>
+                          <Spinner size="sm" mr={2} />
+                          Импорт...
+                        </>
+                      )
+                      : (
+                        <>
+                          <Icon as={LuImport} mr={2} />
+                          Импортировать ({selectedCount})
+                        </>
+                      )}
                   </Button>
                 </HStack>
               </HStack>

@@ -325,7 +325,7 @@ class WebPlayer {
       const key = `${track.language}:${track.title}`
       const item = createDropdownItem(
         `${track.title} (${track.language.toUpperCase()})`,
-        key === this.currentAudioTrack
+        key === this.currentAudioTrack,
       )
       item.addEventListener('click', () => {
         this.selectAudioTrack(key)
@@ -360,7 +360,7 @@ class WebPlayer {
       const key = `${track.language}:${track.title}`
       const item = createDropdownItem(
         `${track.title} (${track.language.toUpperCase()})`,
-        key === this.currentSubtitleTrack
+        key === this.currentSubtitleTrack,
       )
       item.addEventListener('click', () => {
         this.selectSubtitleTrack(key)

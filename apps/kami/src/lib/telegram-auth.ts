@@ -54,7 +54,7 @@ export function isTelegramAuthFresh(authDate: number, maxAgeSeconds = 300): bool
  */
 export function validateTelegramAuth(
   data: TelegramAuthData,
-  botToken: string
+  botToken: string,
 ): { valid: true; user: Omit<TelegramAuthData, 'hash'> } | { valid: false; error: string } {
   // Проверяем HMAC подпись
   if (!verifyTelegramAuth(data, botToken)) {

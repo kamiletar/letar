@@ -37,8 +37,9 @@ export default async function PoetDashboardPage() {
   })
 
   const totalPerformances = performances.length
-  const avgScore =
-    totalPerformances > 0 ? performances.reduce((sum, p) => sum + (p.totalScore ?? 0), 0) / totalPerformances : 0
+  const avgScore = totalPerformances > 0
+    ? performances.reduce((sum, p) => sum + (p.totalScore ?? 0), 0) / totalPerformances
+    : 0
   const bestScore = totalPerformances > 0 ? Math.max(...performances.map((p) => p.totalScore ?? 0)) : 0
   // Тренд: среднее последних 3 vs предыдущих 3
   let trend: 'up' | 'down' | 'stable' = 'stable'
@@ -55,22 +56,22 @@ export default async function PoetDashboardPage() {
   // Ближайшие матчи команды (если есть команда)
   const upcomingMatches = teamSeason
     ? await prisma.match.findMany({
-        where: {
-          status: 'SCHEDULED',
-          OR: [{ homeTeamId: teamSeason.teamSeasonId }, { awayTeamId: teamSeason.teamSeasonId }],
+      where: {
+        status: 'SCHEDULED',
+        OR: [{ homeTeamId: teamSeason.teamSeasonId }, { awayTeamId: teamSeason.teamSeasonId }],
+      },
+      include: {
+        homeTeam: { include: { team: { select: { name: true } } } },
+        awayTeam: { include: { team: { select: { name: true } } } },
+        venue: { select: { name: true } },
+        lineups: {
+          where: { playerId: poet.playerId },
+          select: { id: true },
         },
-        include: {
-          homeTeam: { include: { team: { select: { name: true } } } },
-          awayTeam: { include: { team: { select: { name: true } } } },
-          venue: { select: { name: true } },
-          lineups: {
-            where: { playerId: poet.playerId },
-            select: { id: true },
-          },
-        },
-        orderBy: { scheduledAt: 'asc' },
-        take: 5,
-      })
+      },
+      orderBy: { scheduledAt: 'asc' },
+      take: 5,
+    })
     : []
 
   // Последние стихи
@@ -91,34 +92,36 @@ export default async function PoetDashboardPage() {
           <Heading size="md" mb={3}>
             Моя команда
           </Heading>
-          {teamSeason ? (
-            <VStack gap={2} align="stretch">
-              <Flex justify="space-between">
-                <Text color="fg.muted" fontSize="sm">
-                  Команда
-                </Text>
-                <Text fontSize="sm" fontWeight="semibold">
-                  {teamSeason.teamSeason.team.name}
-                </Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text color="fg.muted" fontSize="sm">
-                  Лига
-                </Text>
-                <Text fontSize="sm">{teamSeason.teamSeason.league?.name ?? '—'}</Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text color="fg.muted" fontSize="sm">
-                  Сезон
-                </Text>
-                <Text fontSize="sm">{teamSeason.teamSeason.season.name}</Text>
-              </Flex>
-            </VStack>
-          ) : (
-            <Text color="fg.muted" fontSize="sm">
-              Вы не состоите в команде в текущем сезоне
-            </Text>
-          )}
+          {teamSeason
+            ? (
+              <VStack gap={2} align="stretch">
+                <Flex justify="space-between">
+                  <Text color="fg.muted" fontSize="sm">
+                    Команда
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {teamSeason.teamSeason.team.name}
+                  </Text>
+                </Flex>
+                <Flex justify="space-between">
+                  <Text color="fg.muted" fontSize="sm">
+                    Лига
+                  </Text>
+                  <Text fontSize="sm">{teamSeason.teamSeason.league?.name ?? '—'}</Text>
+                </Flex>
+                <Flex justify="space-between">
+                  <Text color="fg.muted" fontSize="sm">
+                    Сезон
+                  </Text>
+                  <Text fontSize="sm">{teamSeason.teamSeason.season.name}</Text>
+                </Flex>
+              </VStack>
+            )
+            : (
+              <Text color="fg.muted" fontSize="sm">
+                Вы не состоите в команде в текущем сезоне
+              </Text>
+            )}
         </Box>
 
         {/* Статистика */}
@@ -182,44 +185,55 @@ export default async function PoetDashboardPage() {
         <Heading size="md" mb={3}>
           Ближайшие матчи
         </Heading>
-        {upcomingMatches.length === 0 ? (
-          <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
-            <Text color="fg.muted">Нет запланированных матчей</Text>
-          </Box>
-        ) : (
-          <VStack gap={3} align="stretch">
-            {upcomingMatches.map((match) => {
-              const isHome = match.homeTeamId === teamSeason?.teamSeasonId
-              const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
-              const inLineup = match.lineups.length > 0
+        {upcomingMatches.length === 0
+          ? (
+            <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
+              <Text color="fg.muted">Нет запланированных матчей</Text>
+            </Box>
+          )
+          : (
+            <VStack gap={3} align="stretch">
+              {upcomingMatches.map((match) => {
+                const isHome = match.homeTeamId === teamSeason?.teamSeasonId
+                const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
+                const inLineup = match.lineups.length > 0
 
-              return (
-                <Box key={match.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
-                  <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
-                    <Box>
-                      <Text fontWeight="semibold">
-                        vs {opponent} ({isHome ? 'дома' : 'в гостях'})
-                      </Text>
-                      <Text fontSize="sm" color="fg.muted">
-                        {match.venue?.name ?? '—'}
-                        {match.scheduledAt && ` · ${formatDateTimeFull(match.scheduledAt)}`}
-                      </Text>
-                    </Box>
-                    {inLineup ? (
-                      <Badge colorPalette="green" size="sm">
-                        В заявке
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm">
-                        Не в заявке
-                      </Badge>
-                    )}
-                  </Flex>
-                </Box>
-              )
-            })}
-          </VStack>
-        )}
+                return (
+                  <Box
+                    key={match.id}
+                    bg="bg.panel"
+                    borderRadius="xl"
+                    p={4}
+                    borderWidth="1px"
+                    borderColor="border.muted"
+                  >
+                    <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                      <Box>
+                        <Text fontWeight="semibold">
+                          vs {opponent} ({isHome ? 'дома' : 'в гостях'})
+                        </Text>
+                        <Text fontSize="sm" color="fg.muted">
+                          {match.venue?.name ?? '—'}
+                          {match.scheduledAt && ` · ${formatDateTimeFull(match.scheduledAt)}`}
+                        </Text>
+                      </Box>
+                      {inLineup
+                        ? (
+                          <Badge colorPalette="green" size="sm">
+                            В заявке
+                          </Badge>
+                        )
+                        : (
+                          <Badge colorPalette="gray" size="sm">
+                            Не в заявке
+                          </Badge>
+                        )}
+                    </Flex>
+                  </Box>
+                )
+              })}
+            </VStack>
+          )}
       </Box>
 
       {/* Последние стихи */}
@@ -232,29 +246,31 @@ export default async function PoetDashboardPage() {
             </Text>
           </Link>
         </Flex>
-        {poems.length === 0 ? (
-          <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
-            <Text color="fg.muted">У вас пока нет стихов</Text>
-          </Box>
-        ) : (
-          <VStack gap={3} align="stretch">
-            {poems.map((poem) => (
-              <Box key={poem.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
-                <Flex justify="space-between" align="center">
-                  <Box>
-                    <Text fontWeight="semibold">{poem.title}</Text>
-                    <Text fontSize="xs" color="fg.muted">
-                      {formatDate(poem.createdAt)}
-                    </Text>
-                  </Box>
-                  <Badge colorPalette={poem.published ? 'green' : 'gray'} size="sm">
-                    {poem.published ? 'Опубликовано' : 'Черновик'}
-                  </Badge>
-                </Flex>
-              </Box>
-            ))}
-          </VStack>
-        )}
+        {poems.length === 0
+          ? (
+            <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
+              <Text color="fg.muted">У вас пока нет стихов</Text>
+            </Box>
+          )
+          : (
+            <VStack gap={3} align="stretch">
+              {poems.map((poem) => (
+                <Box key={poem.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
+                  <Flex justify="space-between" align="center">
+                    <Box>
+                      <Text fontWeight="semibold">{poem.title}</Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        {formatDate(poem.createdAt)}
+                      </Text>
+                    </Box>
+                    <Badge colorPalette={poem.published ? 'green' : 'gray'} size="sm">
+                      {poem.published ? 'Опубликовано' : 'Черновик'}
+                    </Badge>
+                  </Flex>
+                </Box>
+              ))}
+            </VStack>
+          )}
       </Box>
     </VStack>
   )

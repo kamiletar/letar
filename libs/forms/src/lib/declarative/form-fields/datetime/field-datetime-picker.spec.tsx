@@ -16,7 +16,7 @@ describe('FieldDateTimePicker', () => {
         <Form initialValue={{ event: '' }} onSubmit={vi.fn()}>
           <Form.Field.DateTimePicker name="event" label="Дата события" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Дата события')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('FieldDateTimePicker', () => {
         <Form initialValue={{ event: '' }} onSubmit={vi.fn()}>
           <Form.Field.DateTimePicker name="event" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const inputs = container.querySelectorAll('input')
@@ -41,7 +41,7 @@ describe('FieldDateTimePicker', () => {
         <Form initialValue={{ event: '' }} onSubmit={vi.fn()}>
           <Form.Field.DateTimePicker name="event" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const inputs = container.querySelectorAll('input')
@@ -55,7 +55,7 @@ describe('FieldDateTimePicker', () => {
         <Form initialValue={{ event: '' }} onSubmit={vi.fn()}>
           <Form.Field.DateTimePicker name="event" helperText="Выберите дату и время" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Выберите дату и время')).toBeInTheDocument()

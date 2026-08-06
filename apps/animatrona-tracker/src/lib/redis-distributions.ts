@@ -32,7 +32,7 @@ export interface OnlinePeerData {
 export async function setDistributionOnline(
   peerId: string,
   cid: string,
-  data: { distId: string; userId: string; animeId: string | null; size: number | bigint }
+  data: { distId: string; userId: string; animeId: string | null; size: number | bigint },
 ): Promise<void> {
   const r = getRedis()
   if (!r) {

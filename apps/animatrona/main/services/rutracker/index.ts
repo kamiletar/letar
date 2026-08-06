@@ -4,15 +4,15 @@
 
 export { confirmShikimoriMatch, processRutrackerImport, type RutrackerImportResult } from './rutracker-import'
 export {
+  type CandidateScore,
   isAutoMatchConfident,
   matchFromDirectLink,
   matchFromMalLink,
   matchFromSearch,
+  type MatchResult,
   normalizeTitle,
   rankCandidates,
   titleSimilarity,
-  type CandidateScore,
-  type MatchResult,
 } from './rutracker-matcher'
 export { parseRutrackerPage, parseTitle } from './rutracker-parser'
 export type {

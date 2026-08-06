@@ -39,7 +39,7 @@ export function aggregatePoints(points: SystemMetricPoint[]): SystemMetricPoint 
       diskTotal: 0,
       rxBytes: 0,
       txBytes: 0,
-    }
+    },
   )
 
   const count = points.length
@@ -69,7 +69,7 @@ export function aggregatePoints(points: SystemMetricPoint[]): SystemMetricPoint 
 export async function aggregateToNextTier(
   fromTier: MetricTier,
   toTier: MetricTier,
-  pointsToAggregate: number
+  pointsToAggregate: number,
 ): Promise<void> {
   try {
     // Получаем последнюю агрегированную точку на целевом уровне

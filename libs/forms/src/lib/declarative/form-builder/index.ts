@@ -1,6 +1,6 @@
 export {
-  FormBuilder,
   type FieldConfig,
+  FormBuilder,
   type FormBuilderConfig,
   type FormBuilderProps,
   type FormBuilderSection,

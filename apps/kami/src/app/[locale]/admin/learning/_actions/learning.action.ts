@@ -67,18 +67,16 @@ export async function updateLearningItemAction(id: string, data: unknown): Promi
       data: {
         ...parsed.data,
         // Преобразование дат из строк в Date (если переданы)
-        startedAt:
-          parsed.data.startedAt !== undefined
-            ? parsed.data.startedAt
-              ? new Date(parsed.data.startedAt)
-              : null
-            : undefined,
-        completedAt:
-          parsed.data.completedAt !== undefined
-            ? parsed.data.completedAt
-              ? new Date(parsed.data.completedAt)
-              : null
-            : undefined,
+        startedAt: parsed.data.startedAt !== undefined
+          ? parsed.data.startedAt
+            ? new Date(parsed.data.startedAt)
+            : null
+          : undefined,
+        completedAt: parsed.data.completedAt !== undefined
+          ? parsed.data.completedAt
+            ? new Date(parsed.data.completedAt)
+            : null
+          : undefined,
       },
     })
 

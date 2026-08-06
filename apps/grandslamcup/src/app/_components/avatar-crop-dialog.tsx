@@ -45,7 +45,7 @@ async function getCroppedImage(imageSrc: string, pixelCrop: Area): Promise<Blob>
     0,
     0,
     pixelCrop.width,
-    pixelCrop.height
+    pixelCrop.height,
   )
 
   return new Promise<Blob>((resolve, reject) => {
@@ -55,7 +55,7 @@ async function getCroppedImage(imageSrc: string, pixelCrop: Area): Promise<Blob>
         else reject(new Error('Не удалось обрезать изображение'))
       },
       'image/jpeg',
-      0.9
+      0.9,
     )
   })
 }

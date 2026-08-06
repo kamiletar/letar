@@ -131,25 +131,25 @@ export const FieldListbox = createField<ListboxFieldProps, string | string[], Li
 
           <Listbox.Content maxH={componentProps.maxHeight}>
             {fieldState.groups
-              ? /* Grouped options */
-                Array.from(fieldState.groups.entries()).map(([groupName, groupOptions]) => (
-                  <Listbox.ItemGroup key={groupName}>
-                    {groupName && <Listbox.ItemGroupLabel>{groupName}</Listbox.ItemGroupLabel>}
-                    {groupOptions.map((opt) => (
-                      <Listbox.Item item={opt} key={opt.value}>
-                        <Listbox.ItemText>{getOptionLabel(opt)}</Listbox.ItemText>
-                        <Listbox.ItemIndicator />
-                      </Listbox.Item>
-                    ))}
-                  </Listbox.ItemGroup>
-                ))
-              : /* Flat options */
-                componentProps.options.map((opt) => (
-                  <Listbox.Item item={opt} key={opt.value}>
-                    <Listbox.ItemText>{getOptionLabel(opt)}</Listbox.ItemText>
-                    <Listbox.ItemIndicator />
-                  </Listbox.Item>
-                ))}
+              /* Grouped options */
+              ? Array.from(fieldState.groups.entries()).map(([groupName, groupOptions]) => (
+                <Listbox.ItemGroup key={groupName}>
+                  {groupName && <Listbox.ItemGroupLabel>{groupName}</Listbox.ItemGroupLabel>}
+                  {groupOptions.map((opt) => (
+                    <Listbox.Item item={opt} key={opt.value}>
+                      <Listbox.ItemText>{getOptionLabel(opt)}</Listbox.ItemText>
+                      <Listbox.ItemIndicator />
+                    </Listbox.Item>
+                  ))}
+                </Listbox.ItemGroup>
+              ))
+              /* Flat options */
+              : componentProps.options.map((opt) => (
+                <Listbox.Item item={opt} key={opt.value}>
+                  <Listbox.ItemText>{getOptionLabel(opt)}</Listbox.ItemText>
+                  <Listbox.ItemIndicator />
+                </Listbox.Item>
+              ))}
           </Listbox.Content>
         </Listbox.Root>
 

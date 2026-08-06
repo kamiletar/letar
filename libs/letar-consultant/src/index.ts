@@ -4,13 +4,13 @@
  */
 
 export {
+  type ChatMessage,
   checkOllamaHealth,
   listOllamaModels,
   ollamaChat,
-  type ChatMessage,
   type OllamaConfig,
   type OllamaResponse,
 } from './llm.js'
 export { buildMessages, type ConsultMode } from './prompt.js'
-export { formatChunksForPrompt, retrieveChunks, type CodeChunk, type RetrieveConfig } from './retrieve.js'
+export { type CodeChunk, formatChunksForPrompt, retrieveChunks, type RetrieveConfig } from './retrieve.js'
 export { createLetarConsultantServer, type LetarConsultantOptions } from './server.js'

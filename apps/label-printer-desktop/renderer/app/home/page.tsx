@@ -122,7 +122,7 @@ export default function HomePage() {
       setProductDialogScanKey(getScanKey(scan))
       setProductDialogOpen(true)
     },
-    [getScanKey]
+    [getScanKey],
   )
 
   // Сохранение нового товара
@@ -139,7 +139,7 @@ export default function HomePage() {
 
       updateScanWithProduct(productDialogScanKey, product)
     },
-    [productDialogScanKey, updateScanWithProduct]
+    [productDialogScanKey, updateScanWithProduct],
   )
 
   return (

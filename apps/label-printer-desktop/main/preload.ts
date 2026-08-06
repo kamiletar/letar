@@ -36,7 +36,7 @@ const electronAPI = {
 
     /** Генерация баркодов для предпросмотра в renderer */
     generateBarcodes: (
-      code: string
+      code: string,
     ): Promise<{
       dataMatrixBase64: string
       gtinBarcodeBase64: string
@@ -69,7 +69,7 @@ const electronAPI = {
     /** Получить статистику за период (для сравнения) */
     getStatsForPeriod: (
       startDate: string,
-      endDate: string
+      endDate: string,
     ): Promise<{ totalPrinted: number; totalScanned: number; duplicatesBlocked: number; daysCount: number }> =>
       ipcRenderer.invoke('database:statsForPeriod', { startDate, endDate }),
 
@@ -105,14 +105,14 @@ const electronAPI = {
 
     /** Создать профиль */
     create: (
-      profile: Omit<PrinterProfile, 'id' | 'createdAt' | 'updatedAt'>
+      profile: Omit<PrinterProfile, 'id' | 'createdAt' | 'updatedAt'>,
     ): Promise<{ success: boolean; profile?: PrinterProfile; error?: string }> =>
       ipcRenderer.invoke('profiles:create', profile),
 
     /** Обновить профиль */
     update: (
       id: string,
-      updates: Partial<PrinterProfile>
+      updates: Partial<PrinterProfile>,
     ): Promise<{ success: boolean; profile?: PrinterProfile; error?: string }> =>
       ipcRenderer.invoke('profiles:update', id, updates),
 
@@ -167,7 +167,7 @@ const electronAPI = {
   pdf: {
     /** Парсить PDF файл и извлечь DataMatrix коды */
     parse: (
-      filePath: string
+      filePath: string,
     ): Promise<{
       success: boolean
       data?: {
@@ -181,7 +181,7 @@ const electronAPI = {
 
     /** Парсить PDF из base64 */
     parseBase64: (
-      base64: string
+      base64: string,
     ): Promise<{
       success: boolean
       data?: {
@@ -245,7 +245,7 @@ const electronAPI = {
         error: string | null
         version: string | null
         progress: number | null
-      }) => void
+      }) => void,
     ) => {
       const handler = (
         _event: Electron.IpcRendererEvent,
@@ -256,7 +256,7 @@ const electronAPI = {
           error: string | null
           version: string | null
           progress: number | null
-        }
+        },
       ) => callback(status)
       ipcRenderer.on('update-status', handler)
       return () => ipcRenderer.removeListener('update-status', handler)

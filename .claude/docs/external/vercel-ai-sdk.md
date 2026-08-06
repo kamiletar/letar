@@ -199,7 +199,7 @@ const { object } = await generateObject({
         z.object({
           name: z.string(),
           amount: z.string(),
-        })
+        }),
       ),
       steps: z.array(z.string()),
     }),

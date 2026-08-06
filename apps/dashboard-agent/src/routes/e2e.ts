@@ -124,7 +124,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
     async (
-      request
+      request,
     ): Promise<
       ApiResponse<{
         run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
@@ -150,7 +150,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 
   /**
@@ -217,7 +217,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         run,
         `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${
           grep ? ` (grep=${grep})` : ''
-        } against ${baseUrl}`
+        } against ${baseUrl}`,
       )
 
       // Коммит фиксируем ДО прогона — это то, что реально протестировано (не что задеплоено).
@@ -248,7 +248,8 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // с SOPS_AGE_KEY_FILE в deploy-affected.sh) — без --preserve-env BASE_URL/DEV_SESSION_TOKEN
       // не долетают до `bunx nx e2e`, Playwright не видит staging baseUrl и поднимает свой
       // `nx dev` против dev-БД (регрессия, найдена BlackCove на живом прогоне 2026-07-11).
-      const nxCommand = `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
+      const nxCommand =
+        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
@@ -278,19 +279,23 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       }, E2E_RUN_TIMEOUT_MS)
 
       currentProcess.stdout?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, line)
         }
       })
 
       currentProcess.stderr?.on('data', (data: Buffer) => {
-        for (const line of data
-          .toString()
-          .split('\n')
-          .filter((l) => l.trim())) {
+        for (
+          const line of data
+            .toString()
+            .split('\n')
+            .filter((l) => l.trim())
+        ) {
           appendOutput(run, `⚠️ ${line}`)
         }
       })
@@ -336,6 +341,6 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         data: { runId: run.runId, app, started: true },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 }

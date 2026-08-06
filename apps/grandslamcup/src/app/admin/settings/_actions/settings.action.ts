@@ -33,24 +33,24 @@ export const getTelegramConfigAction = adminGuard(async () => {
   return {
     data: config
       ? {
-          // Маскируем токен — показываем только последние 8 символов
-          botToken: config.botToken
-            ? `${'*'.repeat(Math.max(0, config.botToken.length - 8))}${config.botToken.slice(-8)}`
-            : '',
-          botTokenSet: !!config.botToken,
-          enabled: config.enabled,
-          autoAnnouncement: config.autoAnnouncement,
-          autoHalfTime: config.autoHalfTime,
-          autoResult: config.autoResult,
-        }
+        // Маскируем токен — показываем только последние 8 символов
+        botToken: config.botToken
+          ? `${'*'.repeat(Math.max(0, config.botToken.length - 8))}${config.botToken.slice(-8)}`
+          : '',
+        botTokenSet: !!config.botToken,
+        enabled: config.enabled,
+        autoAnnouncement: config.autoAnnouncement,
+        autoHalfTime: config.autoHalfTime,
+        autoResult: config.autoResult,
+      }
       : {
-          botToken: '',
-          botTokenSet: false,
-          enabled: false,
-          autoAnnouncement: false,
-          autoHalfTime: false,
-          autoResult: false,
-        },
+        botToken: '',
+        botTokenSet: false,
+        enabled: false,
+        autoAnnouncement: false,
+        autoHalfTime: false,
+        autoResult: false,
+      },
   }
 })
 

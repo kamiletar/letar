@@ -27,7 +27,7 @@ export function FormI18nWrapper({ children }: FormI18nWrapperProps) {
         return key
       }
     },
-    [nextIntlT]
+    [nextIntlT],
   )
 
   return (

@@ -23,8 +23,9 @@ let batchCancelToken: { cancelled: boolean } | null = null
  */
 export function registerAudioReencodeHandlers(): void {
   // Предпросмотр: список дорожек для перекодировки
-  createHandler('audio:reencode-preview', async (animeId: string, targetBitrate: number) =>
-    previewReencode(animeId, targetBitrate)
+  createHandler(
+    'audio:reencode-preview',
+    async (animeId: string, targetBitrate: number) => previewReencode(animeId, targetBitrate),
   )
 
   // Запуск перекодировки с progress events
@@ -39,7 +40,7 @@ export function registerAudioReencodeHandlers(): void {
         (progress) => {
           win?.webContents.send('audio:reencode-progress', progress)
         },
-        activeCancelToken
+        activeCancelToken,
       )
     } finally {
       activeCancelToken = null

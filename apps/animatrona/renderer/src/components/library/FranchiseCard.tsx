@@ -97,13 +97,13 @@ function FranchiseModalCard({
       transition="all 0.15s ease-out"
       cursor={isMissing ? 'default' : 'pointer'}
     >
-      {anime.posterUrl ? (
-        <NextImage src={anime.posterUrl} alt={anime.title} fill sizes="140px" style={{ objectFit: 'cover' }} />
-      ) : (
-        <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-          <Icon as={KindIcon} boxSize={8} color="fg.subtle" />
-        </Box>
-      )}
+      {anime.posterUrl
+        ? <NextImage src={anime.posterUrl} alt={anime.title} fill sizes="140px" style={{ objectFit: 'cover' }} />
+        : (
+          <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
+            <Icon as={KindIcon} boxSize={8} color="fg.subtle" />
+          </Box>
+        )}
 
       {/* Оверлей снизу с названием */}
       <Box position="absolute" bottom={0} left={0} right={0} bg="overlay.heavy" p={2}>
@@ -218,19 +218,21 @@ export function FranchiseCard({
 
           {/* Главный постер */}
           <Box position="absolute" top={0} left={0} right={0} bottom={0} zIndex={2} borderRadius="md" overflow="hidden">
-            {mainAnime.posterUrl ? (
-              <NextImage
-                src={mainAnime.posterUrl}
-                alt={mainAnime.title}
-                fill
-                sizes="(max-width: 640px) 50vw, 200px"
-                style={{ objectFit: 'cover' }}
-              />
-            ) : (
-              <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-                <Icon as={MainKindIcon} boxSize={12} color="fg.subtle" />
-              </Box>
-            )}
+            {mainAnime.posterUrl
+              ? (
+                <NextImage
+                  src={mainAnime.posterUrl}
+                  alt={mainAnime.title}
+                  fill
+                  sizes="(max-width: 640px) 50vw, 200px"
+                  style={{ objectFit: 'cover' }}
+                />
+              )
+              : (
+                <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
+                  <Icon as={MainKindIcon} boxSize={12} color="fg.subtle" />
+                </Box>
+              )}
           </Box>
 
           {/* Бейдж: количество загруженных / общее */}
@@ -371,9 +373,7 @@ export function FranchiseCard({
                   ))}
 
                   {/* Незагруженные аниме — grayscale, без ссылки */}
-                  {missingAnimes.map((anime) => (
-                    <FranchiseModalCard key={anime.shikimoriId} anime={anime} isMissing />
-                  ))}
+                  {missingAnimes.map((anime) => <FranchiseModalCard key={anime.shikimoriId} anime={anime} isMissing />)}
                 </Grid>
               </Dialog.Body>
             </Dialog.Content>

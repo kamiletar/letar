@@ -136,56 +136,58 @@ export function EditMatchButton({ matchId, posterUrl, canEdit }: EditMatchButton
               <Dialog.Body>
                 <VStack gap={4} align="stretch">
                   {/* Текущий постер или зона загрузки */}
-                  {preview ? (
-                    <Box position="relative">
-                      <Image src={preview} alt="Постер матча" borderRadius="lg" maxH="400px" mx="auto" />
-                      <Flex position="absolute" top={2} right={2} gap={1}>
-                        <Button
-                          size="xs"
-                          colorPalette="brand"
-                          onClick={() => fileRef.current?.click()}
-                          loading={uploading}
-                        >
-                          <LuUpload size={12} />
-                          Заменить
-                        </Button>
-                        <Button
-                          size="xs"
-                          colorPalette="red"
-                          variant="subtle"
-                          onClick={handleRemovePoster}
-                          loading={uploading}
-                        >
-                          <LuTrash2 size={12} />
-                        </Button>
+                  {preview
+                    ? (
+                      <Box position="relative">
+                        <Image src={preview} alt="Постер матча" borderRadius="lg" maxH="400px" mx="auto" />
+                        <Flex position="absolute" top={2} right={2} gap={1}>
+                          <Button
+                            size="xs"
+                            colorPalette="brand"
+                            onClick={() => fileRef.current?.click()}
+                            loading={uploading}
+                          >
+                            <LuUpload size={12} />
+                            Заменить
+                          </Button>
+                          <Button
+                            size="xs"
+                            colorPalette="red"
+                            variant="subtle"
+                            onClick={handleRemovePoster}
+                            loading={uploading}
+                          >
+                            <LuTrash2 size={12} />
+                          </Button>
+                        </Flex>
+                      </Box>
+                    )
+                    : (
+                      <Flex
+                        direction="column"
+                        align="center"
+                        justify="center"
+                        borderWidth="2px"
+                        borderStyle="dashed"
+                        borderColor="border"
+                        borderRadius="lg"
+                        p={8}
+                        cursor="pointer"
+                        _hover={{ borderColor: 'brand.solid', bg: 'bg.subtle' }}
+                        transition="all 0.2s"
+                        onClick={() => fileRef.current?.click()}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={handleDrop}
+                      >
+                        <LuImage size={32} />
+                        <Text mt={2} fontSize="sm" color="fg.muted">
+                          Нажмите, перетащите или Ctrl+V
+                        </Text>
+                        <Text fontSize="xs" color="fg.subtle">
+                          JPG, PNG, WebP — до 5 МБ
+                        </Text>
                       </Flex>
-                    </Box>
-                  ) : (
-                    <Flex
-                      direction="column"
-                      align="center"
-                      justify="center"
-                      borderWidth="2px"
-                      borderStyle="dashed"
-                      borderColor="border"
-                      borderRadius="lg"
-                      p={8}
-                      cursor="pointer"
-                      _hover={{ borderColor: 'brand.solid', bg: 'bg.subtle' }}
-                      transition="all 0.2s"
-                      onClick={() => fileRef.current?.click()}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={handleDrop}
-                    >
-                      <LuImage size={32} />
-                      <Text mt={2} fontSize="sm" color="fg.muted">
-                        Нажмите, перетащите или Ctrl+V
-                      </Text>
-                      <Text fontSize="xs" color="fg.subtle">
-                        JPG, PNG, WebP — до 5 МБ
-                      </Text>
-                    </Flex>
-                  )}
+                    )}
 
                   <input
                     ref={fileRef}

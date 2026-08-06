@@ -182,10 +182,12 @@ export default function ControlledStateDemoPage() {
           </Text>
         </Box>
 
-        {/*
+        {
+          /*
           Form без onSubmit — просто controlled state.
           Все изменения полей доступны через form.Subscribe внутри формы.
-        */}
+        */
+        }
         <Form initialValue={initialSettings} schema={DisplaySettingsSchema}>
           <Grid templateColumns={{ base: '1fr', lg: '350px 1fr' }} gap={6}>
             {/* Панель настроек */}

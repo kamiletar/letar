@@ -77,82 +77,84 @@ export default async function PresentersPage({ params }: { params: Params }) {
         </Text>
       </Flex>
 
-      {presenters.length > 0 ? (
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-          {presenters.map((p) => (
-            <Box
-              key={p.id}
-              borderRadius="xl"
-              borderWidth="1px"
-              borderColor="border"
-              bg="bg.panel"
-              overflow="hidden"
-              p={5}
-            >
-              <Flex gap={3} align="center" mb={4}>
-                <Circle size={12} bg="purple.subtle" color="purple.solid">
-                  <LuMic size={24} />
-                </Circle>
-                <VStack gap={0} align="start">
-                  <Text fontWeight="bold" fontSize="lg">
-                    {p.name}
-                  </Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    {p.matches.length} {p.matches.length === 1 ? 'матч' : p.matches.length < 5 ? 'матча' : 'матчей'}
-                  </Text>
-                </VStack>
-              </Flex>
+      {presenters.length > 0
+        ? (
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+            {presenters.map((p) => (
+              <Box
+                key={p.id}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="border"
+                bg="bg.panel"
+                overflow="hidden"
+                p={5}
+              >
+                <Flex gap={3} align="center" mb={4}>
+                  <Circle size={12} bg="purple.subtle" color="purple.solid">
+                    <LuMic size={24} />
+                  </Circle>
+                  <VStack gap={0} align="start">
+                    <Text fontWeight="bold" fontSize="lg">
+                      {p.name}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted">
+                      {p.matches.length} {p.matches.length === 1 ? 'матч' : p.matches.length < 5 ? 'матча' : 'матчей'}
+                    </Text>
+                  </VStack>
+                </Flex>
 
-              {/* История матчей */}
-              <VStack gap={2} align="stretch">
-                {p.matches.slice(0, 5).map((m) => (
-                  <Link key={m.id} href={`/${citySlug}/matches/${m.id}`}>
-                    <Flex
-                      gap={2}
-                      align="center"
-                      fontSize="sm"
-                      py={1}
-                      px={2}
-                      borderRadius="md"
-                      _hover={{ bg: 'bg.subtle' }}
-                    >
-                      <LuCalendar size={14} />
-                      <Text fontWeight="medium">
-                        {m.homeTeam.team.name} — {m.awayTeam.team.name}
-                      </Text>
-                      {m.scheduledAt && (
-                        <Text color="fg.muted" fontSize="xs" ml="auto">
-                          {new Date(m.scheduledAt).toLocaleDateString('ru-RU')}
+                {/* История матчей */}
+                <VStack gap={2} align="stretch">
+                  {p.matches.slice(0, 5).map((m) => (
+                    <Link key={m.id} href={`/${citySlug}/matches/${m.id}`}>
+                      <Flex
+                        gap={2}
+                        align="center"
+                        fontSize="sm"
+                        py={1}
+                        px={2}
+                        borderRadius="md"
+                        _hover={{ bg: 'bg.subtle' }}
+                      >
+                        <LuCalendar size={14} />
+                        <Text fontWeight="medium">
+                          {m.homeTeam.team.name} — {m.awayTeam.team.name}
                         </Text>
-                      )}
-                      <Badge size="sm" colorPalette={m.status === 'FINISHED' ? 'gray' : 'blue'}>
-                        {m.status === 'FINISHED' ? 'Завершён' : 'Запланирован'}
-                      </Badge>
-                    </Flex>
-                  </Link>
-                ))}
-                {p.matches.length > 5 && (
-                  <Text fontSize="xs" color="fg.muted" textAlign="center">
-                    и ещё {p.matches.length - 5}...
-                  </Text>
-                )}
-              </VStack>
-            </Box>
-          ))}
-        </SimpleGrid>
-      ) : (
-        <VStack py={16} textAlign="center" gap={4}>
-          <Circle size={20} bg="purple.50" _dark={{ bg: 'purple.950' }}>
-            <LuMic size={40} color="var(--chakra-colors-purple-solid)" />
-          </Circle>
-          <Heading size="md" color="fg.muted">
-            Ведущие пока не назначены
-          </Heading>
-          <Text fontSize="sm" color="fg.subtle">
-            Ведущие появятся после назначения на матчи
-          </Text>
-        </VStack>
-      )}
+                        {m.scheduledAt && (
+                          <Text color="fg.muted" fontSize="xs" ml="auto">
+                            {new Date(m.scheduledAt).toLocaleDateString('ru-RU')}
+                          </Text>
+                        )}
+                        <Badge size="sm" colorPalette={m.status === 'FINISHED' ? 'gray' : 'blue'}>
+                          {m.status === 'FINISHED' ? 'Завершён' : 'Запланирован'}
+                        </Badge>
+                      </Flex>
+                    </Link>
+                  ))}
+                  {p.matches.length > 5 && (
+                    <Text fontSize="xs" color="fg.muted" textAlign="center">
+                      и ещё {p.matches.length - 5}...
+                    </Text>
+                  )}
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        )
+        : (
+          <VStack py={16} textAlign="center" gap={4}>
+            <Circle size={20} bg="purple.50" _dark={{ bg: 'purple.950' }}>
+              <LuMic size={40} color="var(--chakra-colors-purple-solid)" />
+            </Circle>
+            <Heading size="md" color="fg.muted">
+              Ведущие пока не назначены
+            </Heading>
+            <Text fontSize="sm" color="fg.subtle">
+              Ведущие появятся после назначения на матчи
+            </Text>
+          </VStack>
+        )}
     </VStack>
   )
 }

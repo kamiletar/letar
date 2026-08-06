@@ -152,7 +152,7 @@ export function getLocalizedValue(
   i18n: FormI18nContextValue | null,
   i18nKey: string | undefined,
   property: 'title' | 'placeholder' | 'description' | 'label',
-  fallback: string | undefined
+  fallback: string | undefined,
 ): string | undefined {
   if (!i18n || !i18nKey) {
     return fallback

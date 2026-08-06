@@ -228,7 +228,8 @@ export default function I18nDemoPage() {
         </Heading>
         <VStack align="stretch" gap={2} fontSize="sm">
           <Text>
-            1. <strong>zenstack-form-plugin</strong> генерирует схемы с <Code>i18nKey</Code> и <Code>validation.*</Code>{' '}
+            1. <strong>zenstack-form-plugin</strong> генерирует схемы с <Code>i18nKey</Code> и <Code>validation.*</Code>
+            {' '}
             ключами
           </Text>
           <Text>

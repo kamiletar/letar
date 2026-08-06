@@ -16,7 +16,7 @@ interface RelationInput {
 export async function upsertAnimeRelations(
   prisma: PrismaClient,
   animeId: string,
-  relations: RelationInput[]
+  relations: RelationInput[],
 ): Promise<void> {
   for (const rel of relations) {
     const targetAnime = await prisma.anime.findUnique({

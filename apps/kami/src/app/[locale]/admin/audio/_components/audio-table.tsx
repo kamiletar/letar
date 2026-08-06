@@ -60,7 +60,7 @@ export function AudioTable({ audioFiles, locale }: AudioTableProps) {
         toaster.error({ title: error instanceof Error ? error.message : 'Ошибка' })
       }
     },
-    [router]
+    [router],
   )
 
   const copyLink = useCallback(
@@ -69,7 +69,7 @@ export function AudioTable({ audioFiles, locale }: AudioTableProps) {
       navigator.clipboard.writeText(url)
       toaster.success({ title: 'Ссылка скопирована' })
     },
-    [locale]
+    [locale],
   )
 
   if (audioFiles.length === 0) {

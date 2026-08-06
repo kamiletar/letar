@@ -81,10 +81,12 @@ function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number):
 /**
  * Singleton promise для ORM
  */
-let ormPromise: Promise<{
-  client: ReturnType<typeof ZenStackClient.prototype.$use>
-  saveDb: ReturnType<typeof debounce<() => void>>
-}> | null = null
+let ormPromise:
+  | Promise<{
+    client: ReturnType<typeof ZenStackClient.prototype.$use>
+    saveDb: ReturnType<typeof debounce<() => void>>
+  }>
+  | null = null
 
 /**
  * Инициализация sql.js и ZenStack ORM
@@ -120,7 +122,7 @@ async function initOrm() {
     const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
     console.warn(
       '[db-orm] Tables in DB:',
-      tables[0]?.values.map((v: unknown[]) => v[0])
+      tables[0]?.values.map((v: unknown[]) => v[0]),
     )
   } catch (err) {
     console.error('[db-orm] Failed to list tables:', err)
@@ -145,11 +147,10 @@ async function initOrm() {
 
               if (typeof modelValue === 'function') {
                 const methodName = String(modelProp)
-                const isMutation =
-                  methodName.startsWith('create') ||
-                  methodName.startsWith('update') ||
-                  methodName.startsWith('delete') ||
-                  methodName.startsWith('upsert')
+                const isMutation = methodName.startsWith('create')
+                  || methodName.startsWith('update')
+                  || methodName.startsWith('delete')
+                  || methodName.startsWith('upsert')
 
                 if (isMutation) {
                   return async (...args: unknown[]) => {

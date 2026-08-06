@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     console.error('Error in /api/system/network:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to get network info' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

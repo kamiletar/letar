@@ -50,7 +50,7 @@ export interface PinVerificationActions {
   /** Server action для верификации PIN */
   onVerifyPin: (
     email: string,
-    pin: string
+    pin: string,
   ) => Promise<{ success: true; token: string } | { success: false; error: string }>
   /** Server action для повторной отправки PIN */
   onResendPin: (email: string) => Promise<{ success: true } | { success: false; error: string }>
@@ -82,7 +82,7 @@ export interface PinVerificationActions {
  */
 export function usePinVerification(
   config: UsePinVerificationConfig,
-  actions: PinVerificationActions
+  actions: PinVerificationActions,
 ): UsePinVerificationResult {
   const {
     email,
@@ -138,7 +138,7 @@ export function usePinVerification(
         setError('Произошла ошибка. Попробуйте ещё раз.')
       }
     },
-    [email, pinLength, actions, onVerified]
+    [email, pinLength, actions, onVerified],
   )
 
   // Повторная отправка

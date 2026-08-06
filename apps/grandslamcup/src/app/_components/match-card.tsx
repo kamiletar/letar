@@ -134,34 +134,38 @@ export function MatchCard({
               )}
               {homeTeamName}
             </Text>
-            {isFinished && homeScore !== null && awayScore !== null ? (
-              <Text fontWeight="bold" fontSize={scoreFontSize} fontFamily="mono" flexShrink={0} letterSpacing="wider">
-                {homeScore}
-                <Box asChild color="fg.muted" mx={1} fontSize="md">
-                  <span>:</span>
-                </Box>
-                {awayScore}
-              </Text>
-            ) : isLive ? (
-              <Text
-                fontWeight="bold"
-                fontSize={scoreFontSize}
-                fontFamily="mono"
-                flexShrink={0}
-                color="brand.solid"
-                letterSpacing="wider"
-              >
-                {homeScore ?? 0}
-                <Box asChild color="fg.muted" mx={1} fontSize="md">
-                  <span>:</span>
-                </Box>
-                {awayScore ?? 0}
-              </Text>
-            ) : (
-              <Text color="fg.subtle" fontSize="sm" flexShrink={0} fontWeight="medium">
-                vs
-              </Text>
-            )}
+            {isFinished && homeScore !== null && awayScore !== null
+              ? (
+                <Text fontWeight="bold" fontSize={scoreFontSize} fontFamily="mono" flexShrink={0} letterSpacing="wider">
+                  {homeScore}
+                  <Box asChild color="fg.muted" mx={1} fontSize="md">
+                    <span>:</span>
+                  </Box>
+                  {awayScore}
+                </Text>
+              )
+              : isLive
+              ? (
+                <Text
+                  fontWeight="bold"
+                  fontSize={scoreFontSize}
+                  fontFamily="mono"
+                  flexShrink={0}
+                  color="brand.solid"
+                  letterSpacing="wider"
+                >
+                  {homeScore ?? 0}
+                  <Box asChild color="fg.muted" mx={1} fontSize="md">
+                    <span>:</span>
+                  </Box>
+                  {awayScore ?? 0}
+                </Text>
+              )
+              : (
+                <Text color="fg.subtle" fontSize="sm" flexShrink={0} fontWeight="medium">
+                  vs
+                </Text>
+              )}
             <Text
               fontWeight={awayWins ? 'bold' : 'semibold'}
               fontSize={teamFontSize}

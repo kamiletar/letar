@@ -8,12 +8,12 @@ import {
   Badge,
   Box,
   Button,
-  Switch as ChakraSwitch,
   Flex,
   Heading,
   HStack,
   Icon,
   Input,
+  Switch as ChakraSwitch,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -57,119 +57,121 @@ export function SchedulerSection({
         </Badge>
       </HStack>
 
-      {!ipfsRunning ? (
-        <Text color="fg.subtle">Запустите IPFS ноду для настройки автообновления</Text>
-      ) : scheduler.isLoading ? (
-        <Text color="fg.subtle">Загрузка...</Text>
-      ) : (
-        <VStack align="stretch" gap={4}>
-          {/* Переключатели */}
-          <Flex justify="space-between" align="center">
-            <VStack align="start" gap={0}>
-              <Text fontSize="sm">Включить автообновление</Text>
-              <Text fontSize="xs" color="fg.subtle">
-                Автоматически проверять подписки на новый контент
-              </Text>
-            </VStack>
-            <ChakraSwitch.Root
-              checked={config?.enabled ?? false}
-              onCheckedChange={(e) => {
-                void onUpdateConfig({ enabled: e.checked }).then(() => {
-                  // Автозапуск/остановка при изменении enabled
-                  if (e.checked && !isRunning) {
-                    void onStart()
-                  } else if (!e.checked && isRunning) {
-                    void onStop()
-                  }
-                })
-              }}
-            >
-              <ChakraSwitch.HiddenInput />
-              <ChakraSwitch.Control />
-            </ChakraSwitch.Root>
-          </Flex>
-
-          {config?.enabled && (
-            <>
-              <Flex justify="space-between" align="center">
-                <Text fontSize="sm">Интервал проверки (минут)</Text>
-                <Input
-                  size="sm"
-                  type="number"
-                  w="80px"
-                  min={5}
-                  max={1440}
-                  value={config?.intervalMinutes ?? 60}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value, 10)
-                    if (val >= 5 && val <= 1440) {
-                      void onUpdateConfig({ intervalMinutes: val })
+      {!ipfsRunning
+        ? <Text color="fg.subtle">Запустите IPFS ноду для настройки автообновления</Text>
+        : scheduler.isLoading
+        ? <Text color="fg.subtle">Загрузка...</Text>
+        : (
+          <VStack align="stretch" gap={4}>
+            {/* Переключатели */}
+            <Flex justify="space-between" align="center">
+              <VStack align="start" gap={0}>
+                <Text fontSize="sm">Включить автообновление</Text>
+                <Text fontSize="xs" color="fg.subtle">
+                  Автоматически проверять подписки на новый контент
+                </Text>
+              </VStack>
+              <ChakraSwitch.Root
+                checked={config?.enabled ?? false}
+                onCheckedChange={(e) => {
+                  void onUpdateConfig({ enabled: e.checked }).then(() => {
+                    // Автозапуск/остановка при изменении enabled
+                    if (e.checked && !isRunning) {
+                      void onStart()
+                    } else if (!e.checked && isRunning) {
+                      void onStop()
                     }
-                  }}
-                />
-              </Flex>
+                  })
+                }}
+              >
+                <ChakraSwitch.HiddenInput />
+                <ChakraSwitch.Control />
+              </ChakraSwitch.Root>
+            </Flex>
 
-              <Flex justify="space-between" align="center">
-                <VStack align="start" gap={0}>
-                  <Text fontSize="sm">Показывать уведомления</Text>
-                  <Text fontSize="xs" color="fg.subtle">
-                    Уведомлять о новом контенте в подписках
-                  </Text>
-                </VStack>
-                <ChakraSwitch.Root
-                  checked={config?.showNotifications ?? true}
-                  onCheckedChange={(e) => void onUpdateConfig({ showNotifications: e.checked })}
-                >
-                  <ChakraSwitch.HiddenInput />
-                  <ChakraSwitch.Control />
-                </ChakraSwitch.Root>
-              </Flex>
+            {config?.enabled && (
+              <>
+                <Flex justify="space-between" align="center">
+                  <Text fontSize="sm">Интервал проверки (минут)</Text>
+                  <Input
+                    size="sm"
+                    type="number"
+                    w="80px"
+                    min={5}
+                    max={1440}
+                    value={config?.intervalMinutes ?? 60}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10)
+                      if (val >= 5 && val <= 1440) {
+                        void onUpdateConfig({ intervalMinutes: val })
+                      }
+                    }}
+                  />
+                </Flex>
 
-              <Flex justify="space-between" align="center">
-                <VStack align="start" gap={0}>
-                  <Text fontSize="sm">Автоматический пининг</Text>
-                  <Text fontSize="xs" color="fg.subtle">
-                    Автоматически закреплять новый контент
-                  </Text>
-                </VStack>
-                <ChakraSwitch.Root
-                  checked={config?.autoPinEnabled ?? true}
-                  onCheckedChange={(e) => void onUpdateConfig({ autoPinEnabled: e.checked })}
-                >
-                  <ChakraSwitch.HiddenInput />
-                  <ChakraSwitch.Control />
-                </ChakraSwitch.Root>
-              </Flex>
-            </>
-          )}
+                <Flex justify="space-between" align="center">
+                  <VStack align="start" gap={0}>
+                    <Text fontSize="sm">Показывать уведомления</Text>
+                    <Text fontSize="xs" color="fg.subtle">
+                      Уведомлять о новом контенте в подписках
+                    </Text>
+                  </VStack>
+                  <ChakraSwitch.Root
+                    checked={config?.showNotifications ?? true}
+                    onCheckedChange={(e) => void onUpdateConfig({ showNotifications: e.checked })}
+                  >
+                    <ChakraSwitch.HiddenInput />
+                    <ChakraSwitch.Control />
+                  </ChakraSwitch.Root>
+                </Flex>
 
-          {/* Последняя проверка */}
-          {scheduler.status?.lastCheckAt && (
-            <Text fontSize="xs" color="fg.subtle">
-              Последняя проверка: {formatDate(scheduler.status.lastCheckAt)}
-            </Text>
-          )}
-
-          {/* Кнопки управления */}
-          <HStack>
-            {isRunning ? (
-              <Button size="sm" variant="outline" colorPalette="orange" onClick={onStop}>
-                <Icon as={LuPause} mr={2} />
-                Приостановить
-              </Button>
-            ) : (
-              <Button size="sm" colorPalette="orange" onClick={onStart} disabled={!config?.enabled}>
-                <Icon as={LuPlay} mr={2} />
-                Запустить
-              </Button>
+                <Flex justify="space-between" align="center">
+                  <VStack align="start" gap={0}>
+                    <Text fontSize="sm">Автоматический пининг</Text>
+                    <Text fontSize="xs" color="fg.subtle">
+                      Автоматически закреплять новый контент
+                    </Text>
+                  </VStack>
+                  <ChakraSwitch.Root
+                    checked={config?.autoPinEnabled ?? true}
+                    onCheckedChange={(e) => void onUpdateConfig({ autoPinEnabled: e.checked })}
+                  >
+                    <ChakraSwitch.HiddenInput />
+                    <ChakraSwitch.Control />
+                  </ChakraSwitch.Root>
+                </Flex>
+              </>
             )}
-            <Button size="sm" variant="outline" onClick={onCheckNow}>
-              <Icon as={LuRefreshCw} mr={2} />
-              Проверить сейчас
-            </Button>
-          </HStack>
-        </VStack>
-      )}
+
+            {/* Последняя проверка */}
+            {scheduler.status?.lastCheckAt && (
+              <Text fontSize="xs" color="fg.subtle">
+                Последняя проверка: {formatDate(scheduler.status.lastCheckAt)}
+              </Text>
+            )}
+
+            {/* Кнопки управления */}
+            <HStack>
+              {isRunning
+                ? (
+                  <Button size="sm" variant="outline" colorPalette="orange" onClick={onStop}>
+                    <Icon as={LuPause} mr={2} />
+                    Приостановить
+                  </Button>
+                )
+                : (
+                  <Button size="sm" colorPalette="orange" onClick={onStart} disabled={!config?.enabled}>
+                    <Icon as={LuPlay} mr={2} />
+                    Запустить
+                  </Button>
+                )}
+              <Button size="sm" variant="outline" onClick={onCheckNow}>
+                <Icon as={LuRefreshCw} mr={2} />
+                Проверить сейчас
+              </Button>
+            </HStack>
+          </VStack>
+        )}
     </Box>
   )
 }

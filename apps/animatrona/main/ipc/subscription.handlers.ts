@@ -71,7 +71,7 @@ export function registerSubscriptionHandlers(): void {
         broadcastToWindows('subscription:updated', subscription)
       }
       return subscription
-    }
+    },
   )
 
   // Обновить данные подписки (проверить IPNS)
@@ -107,20 +107,19 @@ export function registerSubscriptionHandlers(): void {
       return library
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      const cause =
-        err instanceof Error && (err as Error & { cause?: unknown }).cause
-          ? String((err as Error & { cause?: unknown }).cause)
-          : ''
+      const cause = err instanceof Error && (err as Error & { cause?: unknown }).cause
+        ? String((err as Error & { cause?: unknown }).cause)
+        : ''
       // IPNS может указывать на директорию (пользователь не публиковал библиотеку)
       if (message.includes('dag node is a directory') || message.includes('is a directory')) {
         return null
       }
       // Таймаут — контент недоступен в сети IPFS (нет коннекта между нодами)
       if (
-        cause.includes('UND_ERR_HEADERS_TIMEOUT') ||
-        cause.includes('HeadersTimeoutError') ||
-        message.includes('fetch failed') ||
-        message.includes('terminated')
+        cause.includes('UND_ERR_HEADERS_TIMEOUT')
+        || cause.includes('HeadersTimeoutError')
+        || message.includes('fetch failed')
+        || message.includes('terminated')
       ) {
         return null
       }

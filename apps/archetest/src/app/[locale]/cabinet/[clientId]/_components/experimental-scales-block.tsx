@@ -79,8 +79,8 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
                       ? scale.whenHigh
                       : scale.whenHighEn
                     : isRu
-                      ? scale.description
-                      : scale.descriptionEn}
+                    ? scale.description
+                    : scale.descriptionEn}
                 </Text>
                 <Text fontSize="2xs" color="fg.subtle" mt={1}>
                   {isRu ? 'Прототип: ' : 'Prototype: '}

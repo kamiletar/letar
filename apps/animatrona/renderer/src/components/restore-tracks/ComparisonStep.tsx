@@ -50,16 +50,18 @@ function StatRow({
         <Badge variant="subtle" colorPalette="blue" size="sm">
           Библ: {libraryCount}
         </Badge>
-        {isOk ? (
-          <Badge colorPalette="green" size="sm">
-            <Icon as={LuCheck} boxSize={3} mr={0.5} />
-            OK
-          </Badge>
-        ) : (
-          <Badge colorPalette="red" size="sm">
-            +{missingCount}
-          </Badge>
-        )}
+        {isOk
+          ? (
+            <Badge colorPalette="green" size="sm">
+              <Icon as={LuCheck} boxSize={3} mr={0.5} />
+              OK
+            </Badge>
+          )
+          : (
+            <Badge colorPalette="red" size="sm">
+              +{missingCount}
+            </Badge>
+          )}
       </HStack>
     </HStack>
   )
@@ -91,11 +93,11 @@ function TrackSection({
 /** Есть ли пропущенные дорожки в эпизоде */
 function hasMissing(ep: EpisodeComparison): boolean {
   return (
-    ep.missing.audio.length > 0 ||
-    ep.missing.subtitles.length > 0 ||
-    ep.missing.externalAudio.length > 0 ||
-    ep.missing.externalSubtitles.length > 0 ||
-    ep.missing.fonts.length > 0
+    ep.missing.audio.length > 0
+    || ep.missing.subtitles.length > 0
+    || ep.missing.externalAudio.length > 0
+    || ep.missing.externalSubtitles.length > 0
+    || ep.missing.fonts.length > 0
   )
 }
 
@@ -132,11 +134,10 @@ function EpisodeAccordionItem({ episode }: { episode: EpisodeComparison }) {
     return groups
   }, [episode.donor.externalAudio])
 
-  const totalDonor =
-    episode.donor.audio.length +
-    episode.donor.subtitles.length +
-    episode.donor.externalAudio.length +
-    episode.donor.externalSubtitles.length
+  const totalDonor = episode.donor.audio.length
+    + episode.donor.subtitles.length
+    + episode.donor.externalAudio.length
+    + episode.donor.externalSubtitles.length
   const totalMissing = missingIds.size + episode.missing.fonts.length
   const isOk = totalMissing === 0
 
@@ -150,130 +151,136 @@ function EpisodeAccordionItem({ episode }: { episode: EpisodeComparison }) {
           <Badge variant="subtle" colorPalette="purple" size="sm" minW="50px" justifyContent="center">
             EP {episode.episodeNumber}
           </Badge>
-          {isOk ? (
-            <Badge colorPalette="green" size="sm">
-              <Icon as={LuCheck} boxSize={3} mr={0.5} />
-              OK
-            </Badge>
-          ) : (
-            <Text fontSize="xs" color="orange.fg">
-              {totalMissing} отсут. / {totalDonor} всего
-            </Text>
-          )}
+          {isOk
+            ? (
+              <Badge colorPalette="green" size="sm">
+                <Icon as={LuCheck} boxSize={3} mr={0.5} />
+                OK
+              </Badge>
+            )
+            : (
+              <Text fontSize="xs" color="orange.fg">
+                {totalMissing} отсут. / {totalDonor} всего
+              </Text>
+            )}
         </HStack>
         <Accordion.ItemIndicator />
       </Accordion.ItemTrigger>
 
       <Accordion.ItemContent>
         <Accordion.ItemBody>
-          {!hasContent ? (
-            <Text fontSize="xs" color="fg.muted">
-              Нет дорожек в доноре
-            </Text>
-          ) : (
-            <VStack gap={3} align="stretch">
-              {/* Аудио из MKV */}
-              {episode.donor.audio.length > 0 && (
-                <TrackSection label="Аудио из MKV" icon={LuMusic}>
-                  <VStack gap={1} align="stretch">
-                    {episode.donor.audio.map((t) => (
-                      <DonorTrackCard key={t.id} track={t} type="audio" isMissing={missingIds.has(t.id)} />
-                    ))}
-                  </VStack>
-                </TrackSection>
-              )}
+          {!hasContent
+            ? (
+              <Text fontSize="xs" color="fg.muted">
+                Нет дорожек в доноре
+              </Text>
+            )
+            : (
+              <VStack gap={3} align="stretch">
+                {/* Аудио из MKV */}
+                {episode.donor.audio.length > 0 && (
+                  <TrackSection label="Аудио из MKV" icon={LuMusic}>
+                    <VStack gap={1} align="stretch">
+                      {episode.donor.audio.map((t) => (
+                        <DonorTrackCard key={t.id} track={t} type="audio" isMissing={missingIds.has(t.id)} />
+                      ))}
+                    </VStack>
+                  </TrackSection>
+                )}
 
-              {/* Внешние озвучки по dubGroup */}
-              {extAudioGroups.size > 0 && (
-                <TrackSection label="Внешние озвучки" icon={LuFileAudio}>
-                  <VStack gap={2} align="stretch">
-                    {Array.from(extAudioGroups.entries()).map(([group, tracks]) => {
-                      const groupMissing = tracks.filter((t) => missingIds.has(t.id)).length
-                      return (
-                        <Box key={group} borderWidth="1px" borderColor="border" borderRadius="md" p={2}>
-                          <HStack mb={1.5} gap={2}>
-                            <Text fontSize="xs" fontWeight="medium">
-                              {group}
-                            </Text>
-                            <Badge size="sm" variant="subtle" colorPalette="purple">
-                              {tracks.length}
-                            </Badge>
-                            {groupMissing > 0 && (
-                              <Badge size="sm" colorPalette="orange">
-                                +{groupMissing}
-                              </Badge>
-                            )}
-                          </HStack>
-                          <VStack gap={1} align="stretch">
-                            {tracks.map((t) => (
-                              <DonorTrackCard key={t.id} track={t} type="audio" isMissing={missingIds.has(t.id)} />
-                            ))}
-                          </VStack>
-                        </Box>
-                      )
-                    })}
-                  </VStack>
-                </TrackSection>
-              )}
-
-              {/* Субтитры из MKV */}
-              {episode.donor.subtitles.length > 0 && (
-                <TrackSection label="Субтитры" icon={LuCaptions}>
-                  <VStack gap={1} align="stretch">
-                    {episode.donor.subtitles.map((t) => (
-                      <DonorTrackCard key={t.id} track={t} type="subtitle" isMissing={missingIds.has(t.id)} />
-                    ))}
-                  </VStack>
-                </TrackSection>
-              )}
-
-              {/* Внешние субтитры */}
-              {episode.donor.externalSubtitles.length > 0 && (
-                <TrackSection label="Внешние субтитры" icon={LuCaptions}>
-                  <VStack gap={1} align="stretch">
-                    {episode.donor.externalSubtitles.map((t) => (
-                      <DonorTrackCard key={t.id} track={t} type="subtitle" isMissing={missingIds.has(t.id)} />
-                    ))}
-                  </VStack>
-                </TrackSection>
-              )}
-
-              {/* Шрифты */}
-              {episode.donor.fonts.length > 0 && (
-                <TrackSection
-                  label={`Шрифты (${
-                    episode.missing.fonts.length > 0 ? `${episode.missing.fonts.length} отсутствует` : 'все на месте'
-                  })`}
-                  icon={LuType}
-                >
-                  {episode.missing.fonts.length === 0 ? (
-                    <Text fontSize="xs" color="green.fg">
-                      Все {episode.donor.fonts.length} шрифтов на месте
-                    </Text>
-                  ) : (
-                    <VStack gap={0.5} align="stretch">
-                      {episode.donor.fonts.map((fontName) => {
-                        const isMissing = episode.missing.fonts.includes(fontName)
+                {/* Внешние озвучки по dubGroup */}
+                {extAudioGroups.size > 0 && (
+                  <TrackSection label="Внешние озвучки" icon={LuFileAudio}>
+                    <VStack gap={2} align="stretch">
+                      {Array.from(extAudioGroups.entries()).map(([group, tracks]) => {
+                        const groupMissing = tracks.filter((t) => missingIds.has(t.id)).length
                         return (
-                          <HStack key={fontName} gap={2}>
-                            <Icon
-                              as={isMissing ? LuTriangleAlert : LuCheck}
-                              color={isMissing ? 'orange.500' : 'green.500'}
-                              boxSize={3}
-                              flexShrink={0}
-                            />
-                            <Text fontSize="xs" color={isMissing ? 'fg' : 'fg.muted'}>
-                              {fontName}
-                            </Text>
-                          </HStack>
+                          <Box key={group} borderWidth="1px" borderColor="border" borderRadius="md" p={2}>
+                            <HStack mb={1.5} gap={2}>
+                              <Text fontSize="xs" fontWeight="medium">
+                                {group}
+                              </Text>
+                              <Badge size="sm" variant="subtle" colorPalette="purple">
+                                {tracks.length}
+                              </Badge>
+                              {groupMissing > 0 && (
+                                <Badge size="sm" colorPalette="orange">
+                                  +{groupMissing}
+                                </Badge>
+                              )}
+                            </HStack>
+                            <VStack gap={1} align="stretch">
+                              {tracks.map((t) => (
+                                <DonorTrackCard key={t.id} track={t} type="audio" isMissing={missingIds.has(t.id)} />
+                              ))}
+                            </VStack>
+                          </Box>
                         )
                       })}
                     </VStack>
-                  )}
-                </TrackSection>
-              )}
-            </VStack>
-          )}
+                  </TrackSection>
+                )}
+
+                {/* Субтитры из MKV */}
+                {episode.donor.subtitles.length > 0 && (
+                  <TrackSection label="Субтитры" icon={LuCaptions}>
+                    <VStack gap={1} align="stretch">
+                      {episode.donor.subtitles.map((t) => (
+                        <DonorTrackCard key={t.id} track={t} type="subtitle" isMissing={missingIds.has(t.id)} />
+                      ))}
+                    </VStack>
+                  </TrackSection>
+                )}
+
+                {/* Внешние субтитры */}
+                {episode.donor.externalSubtitles.length > 0 && (
+                  <TrackSection label="Внешние субтитры" icon={LuCaptions}>
+                    <VStack gap={1} align="stretch">
+                      {episode.donor.externalSubtitles.map((t) => (
+                        <DonorTrackCard key={t.id} track={t} type="subtitle" isMissing={missingIds.has(t.id)} />
+                      ))}
+                    </VStack>
+                  </TrackSection>
+                )}
+
+                {/* Шрифты */}
+                {episode.donor.fonts.length > 0 && (
+                  <TrackSection
+                    label={`Шрифты (${
+                      episode.missing.fonts.length > 0 ? `${episode.missing.fonts.length} отсутствует` : 'все на месте'
+                    })`}
+                    icon={LuType}
+                  >
+                    {episode.missing.fonts.length === 0
+                      ? (
+                        <Text fontSize="xs" color="green.fg">
+                          Все {episode.donor.fonts.length} шрифтов на месте
+                        </Text>
+                      )
+                      : (
+                        <VStack gap={0.5} align="stretch">
+                          {episode.donor.fonts.map((fontName) => {
+                            const isMissing = episode.missing.fonts.includes(fontName)
+                            return (
+                              <HStack key={fontName} gap={2}>
+                                <Icon
+                                  as={isMissing ? LuTriangleAlert : LuCheck}
+                                  color={isMissing ? 'orange.500' : 'green.500'}
+                                  boxSize={3}
+                                  flexShrink={0}
+                                />
+                                <Text fontSize="xs" color={isMissing ? 'fg' : 'fg.muted'}>
+                                  {fontName}
+                                </Text>
+                              </HStack>
+                            )
+                          })}
+                        </VStack>
+                      )}
+                  </TrackSection>
+                )}
+              </VStack>
+            )}
         </Accordion.ItemBody>
       </Accordion.ItemContent>
     </Accordion.Item>
@@ -308,26 +315,28 @@ export function ComparisonStep({ comparison }: ComparisonStepProps) {
       {/* Заголовок */}
       <Box textAlign="center">
         <VStack gap={2}>
-          {allOk ? (
-            <>
-              <Icon as={LuCheck} boxSize={12} color="green.500" />
-              <Text fontSize="lg" fontWeight="medium" color="green.500">
-                Все дорожки на месте
-              </Text>
-              <Text fontSize="sm" color="fg.muted">
-                Библиотека содержит все дорожки из донора
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text fontSize="lg" fontWeight="medium">
-                Сравнение: донор vs библиотека
-              </Text>
-              <Text fontSize="sm" color="fg.muted">
-                Проанализировано {episodes.length} эпизодов
-              </Text>
-            </>
-          )}
+          {allOk
+            ? (
+              <>
+                <Icon as={LuCheck} boxSize={12} color="green.500" />
+                <Text fontSize="lg" fontWeight="medium" color="green.500">
+                  Все дорожки на месте
+                </Text>
+                <Text fontSize="sm" color="fg.muted">
+                  Библиотека содержит все дорожки из донора
+                </Text>
+              </>
+            )
+            : (
+              <>
+                <Text fontSize="lg" fontWeight="medium">
+                  Сравнение: донор vs библиотека
+                </Text>
+                <Text fontSize="sm" color="fg.muted">
+                  Проанализировано {episodes.length} эпизодов
+                </Text>
+              </>
+            )}
         </VStack>
       </Box>
 
@@ -401,9 +410,7 @@ export function ComparisonStep({ comparison }: ComparisonStepProps) {
           </Text>
           <Box maxH="400px" overflowY="auto" borderRadius="md">
             <Accordion.Root multiple defaultValue={expandedEpisodes} size="sm" variant="enclosed">
-              {episodes.map((ep) => (
-                <EpisodeAccordionItem key={ep.episodeId} episode={ep} />
-              ))}
+              {episodes.map((ep) => <EpisodeAccordionItem key={ep.episodeId} episode={ep} />)}
             </Accordion.Root>
           </Box>
         </VStack>

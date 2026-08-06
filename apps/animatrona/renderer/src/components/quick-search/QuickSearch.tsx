@@ -98,7 +98,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
       onOpenChange(false)
       router.push(`/library/${anime.id}`)
     },
-    [router, onOpenChange]
+    [router, onOpenChange],
   )
 
   // Выполнение команды
@@ -142,7 +142,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
           break
       }
     },
-    [router, onOpenChange, onShowShortcuts, onImport]
+    [router, onOpenChange, onShowShortcuts, onImport],
   )
 
   // Keyboard navigation
@@ -171,7 +171,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
           break
       }
     },
-    [displayMode, flatCommands, results, selectedIndex, totalItems, executeCommand, navigateToAnime, onOpenChange]
+    [displayMode, flatCommands, results, selectedIndex, totalItems, executeCommand, navigateToAnime, onOpenChange],
   )
 
   // Показывать empty state только после ввода и загрузки
@@ -180,7 +180,12 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
   const showCommands = displayMode === 'commands'
 
   return (
-    <Dialog.Root open={open} onOpenChange={(e) => onOpenChange(e.open)} placement="top" motionPreset="slide-in-top">
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => onOpenChange(e.open)}
+      placement="top"
+      motionPreset="slide-in-top"
+    >
       <Dialog.Backdrop bg="overlay.backdrop" />
       <Dialog.Positioner pt={20}>
         <Dialog.Content
@@ -226,79 +231,81 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
             {/* Команды (пустой запрос) */}
             {showCommands && (
               <>
-                {flatCommands.length === 0 ? (
-                  <Flex py={8} justify="center" align="center" color="fg.subtle">
-                    <Text>Ничего не найдено</Text>
-                  </Flex>
-                ) : (
-                  Array.from(groupedCommands.entries()).map(([category, commands]) => (
-                    <Box key={category} mb={2}>
-                      {/* Заголовок категории */}
-                      <Text
-                        fontSize="xs"
-                        fontWeight="semibold"
-                        color="fg.subtle"
-                        textTransform="uppercase"
-                        letterSpacing="wider"
-                        px={4}
-                        py={1}
-                      >
-                        {CATEGORY_LABELS[category]}
-                      </Text>
+                {flatCommands.length === 0
+                  ? (
+                    <Flex py={8} justify="center" align="center" color="fg.subtle">
+                      <Text>Ничего не найдено</Text>
+                    </Flex>
+                  )
+                  : (
+                    Array.from(groupedCommands.entries()).map(([category, commands]) => (
+                      <Box key={category} mb={2}>
+                        {/* Заголовок категории */}
+                        <Text
+                          fontSize="xs"
+                          fontWeight="semibold"
+                          color="fg.subtle"
+                          textTransform="uppercase"
+                          letterSpacing="wider"
+                          px={4}
+                          py={1}
+                        >
+                          {CATEGORY_LABELS[category]}
+                        </Text>
 
-                      {/* Команды */}
-                      <VStack align="stretch" gap={0}>
-                        {commands.map((cmd) => {
-                          const isSelected = flatCommands[selectedIndex]?.id === cmd.id
+                        {/* Команды */}
+                        <VStack align="stretch" gap={0}>
+                          {commands.map((cmd) => {
+                            const isSelected = flatCommands[selectedIndex]?.id === cmd.id
 
-                          return (
-                            <Flex
-                              key={cmd.id}
-                              px={4}
-                              py={2}
-                              align="center"
-                              gap={3}
-                              cursor="pointer"
-                              bg={isSelected ? 'state.selected.bg' : 'transparent'}
-                              _hover={{ bg: 'state.hover' }}
-                              _active={{ bg: 'state.active', transform: 'scale(0.99)' }}
-                              onClick={() => executeCommand(cmd)}
-                              borderLeftWidth={2}
-                              borderLeftColor={isSelected ? 'primary.solid' : 'transparent'}
-                              transition="all 0.1s ease-out"
-                            >
-                              {/* Иконка */}
-                              <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
+                            return (
+                              <Flex
+                                key={cmd.id}
+                                px={4}
+                                py={2}
+                                align="center"
+                                gap={3}
+                                cursor="pointer"
+                                bg={isSelected ? 'state.selected.bg' : 'transparent'}
+                                _hover={{ bg: 'state.hover' }}
+                                _active={{ bg: 'state.active', transform: 'scale(0.99)' }}
+                                onClick={() => executeCommand(cmd)}
+                                borderLeftWidth={2}
+                                borderLeftColor={isSelected ? 'primary.solid' : 'transparent'}
+                                transition="all 0.1s ease-out"
+                              >
+                                {/* Иконка */}
+                                <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
 
-                              {/* Текст */}
-                              <Box flex={1}>
-                                <Text fontSize="sm" fontWeight="medium" color={isSelected ? 'fg' : 'fg.muted'}>
-                                  {cmd.label}
-                                </Text>
-                                {cmd.description && (
-                                  <Text fontSize="xs" color="fg.subtle">
-                                    {cmd.description}
+                                {/* Текст */}
+                                <Box flex={1}>
+                                  <Text fontSize="sm" fontWeight="medium" color={isSelected ? 'fg' : 'fg.muted'}>
+                                    {cmd.label}
                                   </Text>
-                                )}
-                              </Box>
+                                  {cmd.description && (
+                                    <Text fontSize="xs" color="fg.subtle">
+                                      {cmd.description}
+                                    </Text>
+                                  )}
+                                </Box>
 
-                              {/* Хоткей */}
-                              {cmd.shortcut && (
-                                <HStack gap={1} flexShrink={0}>
-                                  {cmd.shortcut.map((key, i) => (
-                                    <Kbd key={i} bg="bg.muted" borderColor="border" fontSize="xs" px={1.5}>
-                                      {key}
-                                    </Kbd>
-                                  ))}
-                                </HStack>
-                              )}
-                            </Flex>
-                          )
-                        })}
-                      </VStack>
-                    </Box>
-                  ))
-                )}
+                                {/* Хоткей */}
+                                {cmd.shortcut && (
+                                  <HStack gap={1} flexShrink={0}>
+                                    {cmd.shortcut.map((key, i) => (
+                                      <Kbd key={i} bg="bg.muted" borderColor="border" fontSize="xs" px={1.5}>
+                                        {key}
+                                      </Kbd>
+                                    ))}
+                                  </HStack>
+                                )}
+                              </Flex>
+                            )
+                          })}
+                        </VStack>
+                      </Box>
+                    ))
+                  )}
               </>
             )}
 
@@ -342,19 +349,21 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
                       >
                         {/* Постер */}
                         <Box w="40px" h="56px" flexShrink={0} borderRadius="sm" overflow="hidden" bg="bg.emphasized">
-                          {anime.posterPath ? (
-                            <Image
-                              src={toMediaUrl(anime.posterPath) ?? undefined}
-                              alt={anime.name}
-                              w="full"
-                              h="full"
-                              objectFit="cover"
-                            />
-                          ) : (
-                            <Flex w="full" h="full" align="center" justify="center">
-                              <Icon as={LuFilm} color="fg.subtle" boxSize={4} />
-                            </Flex>
-                          )}
+                          {anime.posterPath
+                            ? (
+                              <Image
+                                src={toMediaUrl(anime.posterPath) ?? undefined}
+                                alt={anime.name}
+                                w="full"
+                                h="full"
+                                objectFit="cover"
+                              />
+                            )
+                            : (
+                              <Flex w="full" h="full" align="center" justify="center">
+                                <Icon as={LuFilm} color="fg.subtle" boxSize={4} />
+                              </Flex>
+                            )}
                         </Box>
 
                         {/* Информация */}

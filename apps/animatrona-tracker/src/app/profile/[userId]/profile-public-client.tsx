@@ -105,30 +105,32 @@ export function PublicProfileClient({
           <Box bg="bg.panel" p={8} borderRadius="xl" borderWidth="1px">
             <Flex gap={6} align="center" direction={{ base: 'column', sm: 'row' }}>
               {/* Аватар */}
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name || 'Аватар'}
-                  boxSize={20}
-                  borderRadius="full"
-                  objectFit="cover"
-                />
-              ) : (
-                <Box
-                  w={20}
-                  h={20}
-                  borderRadius="full"
-                  bg="brand.500"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  color="white"
-                  fontSize="3xl"
-                  fontWeight="bold"
-                >
-                  {user.name?.[0]?.toUpperCase() || '?'}
-                </Box>
-              )}
+              {user.image
+                ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name || 'Аватар'}
+                    boxSize={20}
+                    borderRadius="full"
+                    objectFit="cover"
+                  />
+                )
+                : (
+                  <Box
+                    w={20}
+                    h={20}
+                    borderRadius="full"
+                    bg="brand.500"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="white"
+                    fontSize="3xl"
+                    fontWeight="bold"
+                  >
+                    {user.name?.[0]?.toUpperCase() || '?'}
+                  </Box>
+                )}
 
               <VStack align={{ base: 'center', sm: 'flex-start' }} gap={2}>
                 <HStack gap={3} flexWrap="wrap">
@@ -306,53 +308,55 @@ export function PublicProfileClient({
               Опубликованные аниме
             </Heading>
 
-            {publishedAnime.length === 0 ? (
-              <Box textAlign="center" py={12} bg="bg.panel" borderRadius="xl" borderWidth="1px">
-                <Icon as={LuFilm} boxSize={10} color="fg.muted" mb={3} />
-                <Text color="fg.muted">Пока нет опубликованных аниме</Text>
-              </Box>
-            ) : (
-              <Grid
-                templateColumns={{
-                  base: 'repeat(2, 1fr)',
-                  sm: 'repeat(3, 1fr)',
-                  md: 'repeat(4, 1fr)',
-                  lg: 'repeat(6, 1fr)',
-                }}
-                gap={4}
-              >
-                {publishedAnime.map((anime) => (
-                  <NextLink key={anime.id} href={`/anime/${anime.directoryCid || anime.id}`}>
-                    <Box
-                      bg="bg.panel"
-                      borderRadius="lg"
-                      borderWidth="1px"
-                      overflow="hidden"
-                      transition="all 0.2s"
-                      _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
-                    >
-                      <Image
-                        src={resolveImageUrl(anime.coverUrl)}
-                        alt={anime.title}
-                        aspectRatio="2/3"
-                        objectFit="cover"
-                        w="100%"
-                      />
-                      <Box p={2}>
-                        <Text fontSize="sm" fontWeight="medium" lineClamp={2}>
-                          {anime.title}
-                        </Text>
-                        {anime.year && (
-                          <Text fontSize="xs" color="fg.muted">
-                            {anime.year}
+            {publishedAnime.length === 0
+              ? (
+                <Box textAlign="center" py={12} bg="bg.panel" borderRadius="xl" borderWidth="1px">
+                  <Icon as={LuFilm} boxSize={10} color="fg.muted" mb={3} />
+                  <Text color="fg.muted">Пока нет опубликованных аниме</Text>
+                </Box>
+              )
+              : (
+                <Grid
+                  templateColumns={{
+                    base: 'repeat(2, 1fr)',
+                    sm: 'repeat(3, 1fr)',
+                    md: 'repeat(4, 1fr)',
+                    lg: 'repeat(6, 1fr)',
+                  }}
+                  gap={4}
+                >
+                  {publishedAnime.map((anime) => (
+                    <NextLink key={anime.id} href={`/anime/${anime.directoryCid || anime.id}`}>
+                      <Box
+                        bg="bg.panel"
+                        borderRadius="lg"
+                        borderWidth="1px"
+                        overflow="hidden"
+                        transition="all 0.2s"
+                        _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
+                      >
+                        <Image
+                          src={resolveImageUrl(anime.coverUrl)}
+                          alt={anime.title}
+                          aspectRatio="2/3"
+                          objectFit="cover"
+                          w="100%"
+                        />
+                        <Box p={2}>
+                          <Text fontSize="sm" fontWeight="medium" lineClamp={2}>
+                            {anime.title}
                           </Text>
-                        )}
+                          {anime.year && (
+                            <Text fontSize="xs" color="fg.muted">
+                              {anime.year}
+                            </Text>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                  </NextLink>
-                ))}
-              </Grid>
-            )}
+                    </NextLink>
+                  ))}
+                </Grid>
+              )}
 
             {publishedCount > 12 && (
               <Box textAlign="center" mt={4}>

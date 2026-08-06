@@ -34,7 +34,7 @@ interface PrismaWithSocialProvider {
 export function createSocialProviderLoader(
   prisma: PrismaWithSocialProvider,
   decrypt: typeof DecryptFn,
-  key: Buffer
+  key: Buffer,
 ): () => Promise<SocialProvidersMap | null> {
   return async () => {
     const providers = await prisma.socialProvider.findMany({

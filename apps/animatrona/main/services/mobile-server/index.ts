@@ -4,7 +4,7 @@
  * Экспортирует singleton сервера и утилиты.
  */
 
-export { MobileServer, getMobileServer, type MobileServerOptions } from './server'
+export { getMobileServer, MobileServer, type MobileServerOptions } from './server'
 export type {
   IpInfo,
   MobileAnime,

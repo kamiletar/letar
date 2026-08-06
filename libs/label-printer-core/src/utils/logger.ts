@@ -29,9 +29,9 @@ export class Logger {
               const { timestamp, level, message, ...meta } = info
               const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : ''
               return `[${timestamp}] ${level}: ${message}${metaStr}`
-            })
+            }),
           ),
-        })
+        }),
       )
     }
 
@@ -46,7 +46,7 @@ export class Logger {
           maxsize: parseSize(config.maxSize),
           maxFiles: config.maxFiles,
           format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-        })
+        }),
       )
 
       transports.push(
@@ -55,7 +55,7 @@ export class Logger {
           maxsize: parseSize(config.maxSize),
           maxFiles: config.maxFiles,
           format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-        })
+        }),
       )
     }
 

@@ -138,7 +138,7 @@ export function createOAuthButtons(authClient: AuthClientWithOAuth) {
           setLoadingProvider(null)
         }
       },
-      [callbackUrl]
+      [callbackUrl],
     )
 
     // Нормализуем провайдеров в единый формат

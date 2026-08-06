@@ -12,7 +12,7 @@ type AnimeMetadata = ReturnType<typeof extractAnimeMetadata>
 /** Общие поля метаданных для update/create аниме */
 export function buildAnimeMetadataFields(
   metadata: AnimeMetadata,
-  payload: { directoryBlocks?: number; directorySize?: number }
+  payload: { directoryBlocks?: number; directorySize?: number },
 ) {
   return {
     title: metadata.title,
@@ -30,8 +30,8 @@ export function buildAnimeMetadataFields(
     directorySize: metadata.directorySize
       ? BigInt(metadata.directorySize)
       : payload.directorySize !== undefined
-        ? BigInt(payload.directorySize)
-        : undefined,
+      ? BigInt(payload.directorySize)
+      : undefined,
   }
 }
 

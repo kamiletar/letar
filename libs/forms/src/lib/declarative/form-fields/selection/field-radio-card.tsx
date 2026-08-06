@@ -35,7 +35,7 @@ interface RadioCardFieldState {
   handleKeyDown: (
     e: KeyboardEvent<HTMLDivElement>,
     currentValue: string | undefined,
-    handleChange: (value: string) => void
+    handleChange: (value: string) => void,
   ) => void
 }
 
@@ -81,7 +81,7 @@ export const FieldRadioCard = createField<RadioCardFieldProps, string, RadioCard
       (
         e: KeyboardEvent<HTMLDivElement>,
         currentValue: string | undefined,
-        handleChange: (value: string) => void
+        handleChange: (value: string) => void,
       ): void => {
         if (!componentProps.keyboardNavigation || enabledOptions.length === 0) {
           return
@@ -106,15 +106,14 @@ export const FieldRadioCard = createField<RadioCardFieldProps, string, RadioCard
           newIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % enabledOptions.length
         } else {
           // Back (cycle to last if at beginning)
-          newIndex =
-            currentIndex === -1
-              ? enabledOptions.length - 1
-              : (currentIndex - 1 + enabledOptions.length) % enabledOptions.length
+          newIndex = currentIndex === -1
+            ? enabledOptions.length - 1
+            : (currentIndex - 1 + enabledOptions.length) % enabledOptions.length
         }
 
         handleChange(enabledOptions[newIndex].value)
       },
-      [componentProps.keyboardNavigation, enabledOptions, componentProps.orientation]
+      [componentProps.keyboardNavigation, enabledOptions, componentProps.orientation],
     )
 
     return { enabledOptions, handleKeyDown }
@@ -132,11 +131,9 @@ export const FieldRadioCard = createField<RadioCardFieldProps, string, RadioCard
         <RadioCard.Root
           value={currentValue ?? ''}
           onValueChange={(details) => field.handleChange(details.value)}
-          onKeyDown={
-            componentProps.keyboardNavigation
-              ? (e) => fieldState.handleKeyDown(e, currentValue, field.handleChange)
-              : undefined
-          }
+          onKeyDown={componentProps.keyboardNavigation
+            ? (e) => fieldState.handleKeyDown(e, currentValue, field.handleChange)
+            : undefined}
           disabled={resolved.disabled}
           name={fullPath}
           size={componentProps.size ?? 'md'}

@@ -21,7 +21,7 @@ export const fsPreload = {
   scanFolder: (
     folderPath: string,
     recursive?: boolean,
-    mediaTypes?: ('video' | 'audio')[]
+    mediaTypes?: ('video' | 'audio')[],
   ): Promise<{ success: boolean; files: Array<{ path: string; name: string; size: number; extension: string }> }> =>
     ipcRenderer.invoke('fs:scanFolder', folderPath, recursive ?? true, mediaTypes ?? ['video']),
 
@@ -52,18 +52,18 @@ export const fsPreload = {
   /** Сканировать внешние субтитры (папки Rus Sub/, Subs/ и т.д.) */
   scanExternalSubtitles: (
     videoFolderPath: string,
-    videoFiles: Array<{ path: string; episodeNumber: number }>
+    videoFiles: Array<{ path: string; episodeNumber: number }>,
   ): Promise<ExternalSubtitleScanResult> => ipcRenderer.invoke('fs:scanExternalSubtitles', videoFolderPath, videoFiles),
 
   /** Сканировать внешние аудио (папки Rus Sound/, Audio/ и т.д.) */
   scanExternalAudio: (
     videoFolderPath: string,
-    videoFiles: Array<{ path: string; episodeNumber: number }>
+    videoFiles: Array<{ path: string; episodeNumber: number }>,
   ): Promise<ExternalAudioScanResult> => ipcRenderer.invoke('fs:scanExternalAudio', videoFolderPath, videoFiles),
 
   /** Получить метаданные изображения (размеры, blur placeholder) */
   getImageMetadata: (
-    filePath: string
+    filePath: string,
   ): Promise<{
     success: boolean
     width?: number
@@ -93,7 +93,7 @@ export const subtitlePreload = {
   previewShift: (
     inputPath: string,
     offsetMs: number,
-    limit?: number
+    limit?: number,
   ): Promise<{
     events: Array<{ start: string; end: string; text: string }>
     total: number

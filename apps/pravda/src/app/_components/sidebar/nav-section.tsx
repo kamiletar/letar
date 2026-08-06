@@ -47,9 +47,7 @@ export const NavSection = memo(function NavSection({ title, items, defaultOpen =
 
         <Collapsible.Content>
           <VStack align="stretch" gap={0.5} mt={1}>
-            {items.map((item) => (
-              <NavItem key={item.href} title={item.title} href={item.href} />
-            ))}
+            {items.map((item) => <NavItem key={item.href} title={item.title} href={item.href} />)}
           </VStack>
         </Collapsible.Content>
       </Collapsible.Root>

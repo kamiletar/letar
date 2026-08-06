@@ -39,7 +39,7 @@ export function useOfflineStatus(): boolean {
       }
     },
     () => !navigator.onLine, // Клиентское значение
-    () => false // SSR fallback (считаем онлайн)
+    () => false, // SSR fallback (считаем онлайн)
   )
 }
 ```
@@ -68,7 +68,7 @@ export function useOnlineStatus(): boolean {
       }
     },
     () => navigator.onLine,
-    () => true // SSR fallback
+    () => true, // SSR fallback
   )
 }
 ```
@@ -97,7 +97,7 @@ export function usePendingMutations(): number {
         .getAll()
         .filter((m) => m.state.status === 'pending').length
     },
-    () => 0 // SSR fallback
+    () => 0, // SSR fallback
   )
 }
 ```
@@ -160,7 +160,7 @@ export function useNetworkQuality(): NetworkQuality {
 
       return 'fast' // Fallback
     },
-    () => 'fast' // SSR fallback
+    () => 'fast', // SSR fallback
   )
 }
 ```
@@ -282,7 +282,7 @@ export function useStorageQuota(): StorageQuota | null {
 useSyncExternalStore(
   subscribe, // Подписка на изменения
   getSnapshot, // Получение текущего значения (клиент)
-  getServerSnapshot // Получение значения (SSR)
+  getServerSnapshot, // Получение значения (SSR)
 )
 ```
 

@@ -60,22 +60,24 @@ export function FormReadOnlyView<T extends Record<string, unknown>>({
         const formatter = formatters[key]
         const displayValue = formatter ? formatter(value) : formatValue(value)
 
-        return compact ? (
-          <HStack key={key} justify="space-between" fontSize="sm">
-            <Text color="fg.muted" fontWeight="medium">
-              {label}
-            </Text>
-            <Text>{displayValue}</Text>
-          </HStack>
-        ) : (
-          <Box key={key}>
-            <Text fontSize="xs" color="fg.muted" fontWeight="medium" mb={1}>
-              {label}
-            </Text>
-            <Text fontSize="sm">{displayValue}</Text>
-            {index < entries.length - 1 && <Separator mt={3} />}
-          </Box>
-        )
+        return compact
+          ? (
+            <HStack key={key} justify="space-between" fontSize="sm">
+              <Text color="fg.muted" fontWeight="medium">
+                {label}
+              </Text>
+              <Text>{displayValue}</Text>
+            </HStack>
+          )
+          : (
+            <Box key={key}>
+              <Text fontSize="xs" color="fg.muted" fontWeight="medium" mb={1}>
+                {label}
+              </Text>
+              <Text fontSize="sm">{displayValue}</Text>
+              {index < entries.length - 1 && <Separator mt={3} />}
+            </Box>
+          )
       })}
     </VStack>
   )

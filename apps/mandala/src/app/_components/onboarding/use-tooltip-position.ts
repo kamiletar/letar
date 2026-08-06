@@ -39,7 +39,7 @@ export interface UseTooltipPositionReturn {
 export function calculateTooltipPosition(
   target: HTMLElement,
   tooltip: HTMLElement,
-  stepPosition: OnboardingStep['position']
+  stepPosition: OnboardingStep['position'],
 ): TooltipPosition {
   const targetRect = target.getBoundingClientRect()
   const tooltipRect = tooltip.getBoundingClientRect()

@@ -17,23 +17,23 @@ interface ModerationTabProps {
 export function ModerationTab({ pendingAnime, pinServers, userRole, onModerate }: ModerationTabProps) {
   return (
     <VStack align="stretch" gap={4} mt={4}>
-      {pendingAnime.length === 0 ? (
-        <EmptyState icon={LuCheck} title="Всё проверено!" subtitle="Нет аниме на модерации" />
-      ) : (
-        pendingAnime.map((anime) => (
-          <AnimeModerationCard
-            key={anime.id}
-            anime={anime}
-            pinServers={pinServers}
-            userRole={userRole}
-            onApprove={() => onModerate(anime.id, 'approve')}
-            onApproveAndPin={() => onModerate(anime.id, 'approve', true)}
-            onApproveReplacement={() => onModerate(anime.id, 'approve_replacement')}
-            onApproveReplacementAndPin={() => onModerate(anime.id, 'approve_replacement', true)}
-            onReject={() => onModerate(anime.id, 'reject')}
-          />
-        ))
-      )}
+      {pendingAnime.length === 0
+        ? <EmptyState icon={LuCheck} title="Всё проверено!" subtitle="Нет аниме на модерации" />
+        : (
+          pendingAnime.map((anime) => (
+            <AnimeModerationCard
+              key={anime.id}
+              anime={anime}
+              pinServers={pinServers}
+              userRole={userRole}
+              onApprove={() => onModerate(anime.id, 'approve')}
+              onApproveAndPin={() => onModerate(anime.id, 'approve', true)}
+              onApproveReplacement={() => onModerate(anime.id, 'approve_replacement')}
+              onApproveReplacementAndPin={() => onModerate(anime.id, 'approve_replacement', true)}
+              onReject={() => onModerate(anime.id, 'reject')}
+            />
+          ))
+        )}
     </VStack>
   )
 }

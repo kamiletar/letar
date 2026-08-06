@@ -1,8 +1,8 @@
 // Хук для управления верификацией PIN
 export {
-  usePinVerification,
   type PinVerificationActions,
   type PinVerificationState,
+  usePinVerification,
   type UsePinVerificationConfig,
   type UsePinVerificationResult,
 } from './use-pin-verification'

@@ -139,7 +139,7 @@ describe('traverseSchema', () => {
         z.object({
           phone: z.string(),
           email: z.string(),
-        })
+        }),
       ),
     })
 

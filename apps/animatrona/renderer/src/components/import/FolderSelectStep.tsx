@@ -45,8 +45,9 @@ export function FolderSelectStep({
     // createHandler возвращает { success, data: path }, но типы в preload указывают string
     const rawResult = await window.electronAPI.dialog.selectFolder()
     // Определяем формат ответа — может быть string напрямую или { success, data }
-    const path =
-      typeof rawResult === 'string' ? rawResult : (rawResult as { success: boolean; data?: string } | null)?.data
+    const path = typeof rawResult === 'string'
+      ? rawResult
+      : (rawResult as { success: boolean; data?: string } | null)?.data
 
     if (path) {
       setIsScanning(true)
@@ -81,8 +82,9 @@ export function FolderSelectStep({
     ])
 
     // Определяем формат ответа — может быть string напрямую или { success, data }
-    const filePath =
-      typeof rawResult === 'string' ? rawResult : (rawResult as { success: boolean; data?: string } | null)?.data
+    const filePath = typeof rawResult === 'string'
+      ? rawResult
+      : (rawResult as { success: boolean; data?: string } | null)?.data
 
     if (filePath) {
       // Получаем директорию файла (для внешних субтитров)

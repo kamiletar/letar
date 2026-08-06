@@ -29,7 +29,7 @@ export async function emailCanaryRoutes(fastify: FastifyInstance): Promise<void>
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -51,6 +51,6 @@ export async function emailCanaryRoutes(fastify: FastifyInstance): Promise<void>
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

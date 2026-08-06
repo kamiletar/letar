@@ -80,7 +80,7 @@ export function describeNetError(error: unknown, url?: string): string {
     return buildMessage(
       'fetch failed',
       'сбой сетевого запроса Node.js без деталей — обычно блокировка DPI, VPN или отсутствие интернета',
-      host
+      host,
     )
   }
 
@@ -206,9 +206,9 @@ async function probeRealRequest(hostname: string, request?: ProbeRequest): Promi
         const location = res.headers.location
         finish(
           isRedirect
-            ? `Реальный запрос (${method} ${path}) дошёл, но сервер ответил редиректом ${statusCode} → "${location}". ` +
-                `fetch() при 301/302 превращает POST в GET и теряет тело запроса — если это домен переехал, нужно обновить основной endpoint в коде`
-            : `Реальный запрос (${method} ${path}) через обычный сокет прошёл успешно, сервер ответил ${statusCode} — блокировка, вероятно, непостоянна (rate-limit) либо проблема была временной, попробуйте ещё раз`
+            ? `Реальный запрос (${method} ${path}) дошёл, но сервер ответил редиректом ${statusCode} → "${location}". `
+              + `fetch() при 301/302 превращает POST в GET и теряет тело запроса — если это домен переехал, нужно обновить основной endpoint в коде`
+            : `Реальный запрос (${method} ${path}) через обычный сокет прошёл успешно, сервер ответил ${statusCode} — блокировка, вероятно, непостоянна (rate-limit) либо проблема была временной, попробуйте ещё раз`,
         )
       })
     })
@@ -218,14 +218,14 @@ async function probeRealRequest(hostname: string, request?: ProbeRequest): Promi
       finish(
         gotResponse
           ? `Ответ (${statusCode}) начал приходить, но не завершился за 25с — обрыв в процессе передачи (похоже на блокировку по содержимому потока)`
-          : `TLS есть, но именно на запрос ${method} ${path} сервер не отвечает (таймаут 25с) — похоже на блокировку конкретно этого запроса по содержимому (антибот-защита сайта или DPI), либо на очень медленный/перегруженный прокси-узел`
+          : `TLS есть, но именно на запрос ${method} ${path} сервер не отвечает (таймаут 25с) — похоже на блокировку конкретно этого запроса по содержимому (антибот-защита сайта или DPI), либо на очень медленный/перегруженный прокси-узел`,
       )
     })
     req.on('error', (err) => {
       finish(
         gotResponse
           ? `Ответ (${statusCode}) начал приходить, но соединение оборвалось ("${err.message}")`
-          : `При отправке запроса ${method} ${path} соединение оборвалось ("${err.message}") — похоже на блокировку по содержимому запроса (антибот-защита сайта или DPI)`
+          : `При отправке запроса ${method} ${path} соединение оборвалось ("${err.message}") — похоже на блокировку по содержимому запроса (антибот-защита сайта или DPI)`,
       )
     })
 
@@ -247,7 +247,7 @@ async function probeRealRequest(hostname: string, request?: ProbeRequest): Promi
 export async function describeNetErrorWithDiagnostics(
   error: unknown,
   url?: string,
-  request?: ProbeRequest
+  request?: ProbeRequest,
 ): Promise<string> {
   const base = describeNetError(error, url)
   const host = url ? safeHostname(url) : undefined

@@ -35,7 +35,8 @@ const ROSSTIL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2
 export const logoRosstilBase64 = `data:image/svg+xml;base64,${Buffer.from(ROSSTIL_LOGO_SVG).toString('base64')}`
 
 // === ЗНАК EAC (Евразийское соответствие) ===
-const EAC_SIGN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" fill="none" stroke="#000" stroke-width="1.5">
+const EAC_SIGN_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" fill="none" stroke="#000" stroke-width="1.5">
   <!-- E -->
   <path d="M5,5 L5,35 M5,5 L18,5 M5,20 L15,20 M5,35 L18,35"/>
   <!-- A -->
@@ -49,7 +50,8 @@ export const eacSignBase64 = `data:image/svg+xml;base64,${Buffer.from(EAC_SIGN_S
 // === ИКОНКИ УХОДА ЗА ОДЕЖДОЙ (ISO 3758) ===
 
 // Стирка 40°C
-const CARE_WASH_40_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_WASH_40_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M2,8 Q12,12 22,8 L22,20 Q12,24 2,20 Z"/>
   <text x="12" y="16" text-anchor="middle" font-family="Arial" font-size="7" fill="#000" stroke="none">40</text>
 </svg>`
@@ -57,7 +59,8 @@ const CARE_WASH_40_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2
 export const careWash40Base64 = `data:image/svg+xml;base64,${Buffer.from(CARE_WASH_40_SVG).toString('base64')}`
 
 // Стирка 30°C
-const CARE_WASH_30_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_WASH_30_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M2,8 Q12,12 22,8 L22,20 Q12,24 2,20 Z"/>
   <text x="12" y="16" text-anchor="middle" font-family="Arial" font-size="7" fill="#000" stroke="none">30</text>
 </svg>`
@@ -65,7 +68,8 @@ const CARE_WASH_30_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2
 export const careWash30Base64 = `data:image/svg+xml;base64,${Buffer.from(CARE_WASH_30_SVG).toString('base64')}`
 
 // Отбеливание запрещено (перечёркнутый треугольник)
-const CARE_NO_BLEACH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_NO_BLEACH_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <polygon points="12,4 2,22 22,22"/>
   <line x1="4" y1="4" x2="20" y2="20"/>
 </svg>`
@@ -73,7 +77,8 @@ const CARE_NO_BLEACH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 export const careNoBleachBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_NO_BLEACH_SVG).toString('base64')}`
 
 // Глажка средняя температура (2 точки)
-const CARE_IRON_MEDIUM_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_IRON_MEDIUM_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M2,18 L2,10 L22,6 L22,18 Z"/>
   <circle cx="9" cy="13" r="1.5" fill="#000" stroke="none"/>
   <circle cx="15" cy="13" r="1.5" fill="#000" stroke="none"/>
@@ -82,7 +87,8 @@ const CARE_IRON_MEDIUM_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0
 export const careIronMediumBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_IRON_MEDIUM_SVG).toString('base64')}`
 
 // Глажка низкая температура (1 точка)
-const CARE_IRON_LOW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_IRON_LOW_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M2,18 L2,10 L22,6 L22,18 Z"/>
   <circle cx="12" cy="13" r="1.5" fill="#000" stroke="none"/>
 </svg>`
@@ -90,7 +96,8 @@ const CARE_IRON_LOW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
 export const careIronLowBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_IRON_LOW_SVG).toString('base64')}`
 
 // Химчистка P (профессиональная)
-const CARE_DRY_CLEAN_P_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_DRY_CLEAN_P_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <circle cx="12" cy="12" r="10"/>
   <text x="12" y="16" text-anchor="middle" font-family="Arial" font-size="10" fill="#000" stroke="none">P</text>
 </svg>`
@@ -98,7 +105,8 @@ const CARE_DRY_CLEAN_P_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0
 export const careDryCleanPBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_DRY_CLEAN_P_SVG).toString('base64')}`
 
 // Химчистка запрещена
-const CARE_NO_DRY_CLEAN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_NO_DRY_CLEAN_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <circle cx="12" cy="12" r="10"/>
   <line x1="4" y1="4" x2="20" y2="20"/>
 </svg>`
@@ -106,29 +114,36 @@ const CARE_NO_DRY_CLEAN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
 export const careNoDryCleanBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_NO_DRY_CLEAN_SVG).toString('base64')}`
 
 // Сушка в барабане разрешена (низкая температура)
-const CARE_TUMBLE_DRY_LOW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_TUMBLE_DRY_LOW_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <rect x="2" y="2" width="20" height="20" rx="2"/>
   <circle cx="12" cy="12" r="6"/>
   <circle cx="12" cy="12" r="1.5" fill="#000" stroke="none"/>
 </svg>`
 
-export const careTumbleDryLowBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_TUMBLE_DRY_LOW_SVG).toString(
-  'base64'
-)}`
+export const careTumbleDryLowBase64 = `data:image/svg+xml;base64,${
+  Buffer.from(CARE_TUMBLE_DRY_LOW_SVG).toString(
+    'base64',
+  )
+}`
 
 // Сушка в барабане запрещена
-const CARE_NO_TUMBLE_DRY_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_NO_TUMBLE_DRY_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <rect x="2" y="2" width="20" height="20" rx="2"/>
   <circle cx="12" cy="12" r="6"/>
   <line x1="4" y1="4" x2="20" y2="20"/>
 </svg>`
 
-export const careNoTumbleDryBase64 = `data:image/svg+xml;base64,${Buffer.from(CARE_NO_TUMBLE_DRY_SVG).toString(
-  'base64'
-)}`
+export const careNoTumbleDryBase64 = `data:image/svg+xml;base64,${
+  Buffer.from(CARE_NO_TUMBLE_DRY_SVG).toString(
+    'base64',
+  )
+}`
 
 // Естественная сушка (вертикальная линия в квадрате)
-const CARE_LINE_DRY_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_LINE_DRY_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5">
   <rect x="2" y="2" width="20" height="20" rx="2"/>
   <line x1="12" y1="6" x2="12" y2="18"/>
 </svg>`
@@ -197,13 +212,13 @@ export function getCareIconsByComposition(composition: string): string[] {
 
   // Деликатные ткани
   if (
-    lowerComp.includes('шерст') ||
-    lowerComp.includes('шёлк') ||
-    lowerComp.includes('шелк') ||
-    lowerComp.includes('кашемир') ||
-    lowerComp.includes('wool') ||
-    lowerComp.includes('silk') ||
-    lowerComp.includes('cashmere')
+    lowerComp.includes('шерст')
+    || lowerComp.includes('шёлк')
+    || lowerComp.includes('шелк')
+    || lowerComp.includes('кашемир')
+    || lowerComp.includes('wool')
+    || lowerComp.includes('silk')
+    || lowerComp.includes('cashmere')
   ) {
     return careSetDelicate
   }

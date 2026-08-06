@@ -56,7 +56,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         .optional()
         .default('auto')
         .describe(
-          'Режим: navigation (где что находится), architecture (паттерны), convention (конвенции letar), auto (автоопределение)'
+          'Режим: navigation (где что находится), architecture (паттерны), convention (конвенции letar), auto (автоопределение)',
         ),
       files: z
         .array(z.string())
@@ -124,7 +124,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
       return {
         content: [{ type: 'text', text: answer }],
       }
-    }
+    },
   )
 
   // ─── TOOL: consultant_status ────────────────────────────────────────────────
@@ -161,8 +161,8 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         ollamaOk ? `**Модели**: ${models.join(', ') || '(нет)'}` : '',
         ollamaOk
           ? `**Текущая модель** (\`${model}\`): ${
-              currentModelAvailable ? '✅ доступна' : '❌ не найдена — запусти: `ollama pull ' + model + '`'
-            }`
+            currentModelAvailable ? '✅ доступна' : '❌ не найдена — запусти: `ollama pull ' + model + '`'
+          }`
           : '',
         !hasInferenceModel && ollamaOk
           ? `⚠️ Нет inference-модели. Рекомендуется: \`ollama pull qwen2.5-coder:7b\``
@@ -184,7 +184,7 @@ export function createLetarConsultantServer(options: LetarConsultantOptions = {}
         .join('\n')
 
       return { content: [{ type: 'text', text: lines }] }
-    }
+    },
   )
 
   return server

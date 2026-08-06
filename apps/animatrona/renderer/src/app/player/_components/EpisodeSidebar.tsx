@@ -195,13 +195,13 @@ const EpisodeItem = memo(function EpisodeItem({
       <HStack gap={2} align="start">
         {/* Индикатор воспроизведения */}
         <Box w={5} h={5} flexShrink={0} mt={0.5}>
-          {isActive ? (
-            <Icon as={LuPlay} color="brand.400" boxSize={5} />
-          ) : (
-            <Text fontSize="sm" color="fg.subtle" fontWeight="medium" textAlign="center">
-              {episode.episodeNumber ?? index + 1}
-            </Text>
-          )}
+          {isActive
+            ? <Icon as={LuPlay} color="brand.400" boxSize={5} />
+            : (
+              <Text fontSize="sm" color="fg.subtle" fontWeight="medium" textAlign="center">
+                {episode.episodeNumber ?? index + 1}
+              </Text>
+            )}
         </Box>
 
         {/* Информация об эпизоде */}

@@ -5,8 +5,10 @@ import { sendVerificationEmail } from '@letar/email'
 import { createTokenManager } from '@letar/pin-auth/server'
 import { tokenManagerAdapter } from '../_adapters/pin-auth-adapters'
 
-export type ResendPinResult =
-  { success: true } | { success: false; error: 'RATE_LIMITED' | 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'UNKNOWN_ERROR' }
+export type ResendPinResult = { success: true } | {
+  success: false
+  error: 'RATE_LIMITED' | 'NOT_FOUND' | 'ALREADY_VERIFIED' | 'UNKNOWN_ERROR'
+}
 
 /**
  * Менеджер токенов с настройками для mandala
@@ -47,7 +49,7 @@ export async function resendVerificationPinAction(email: string): Promise<Resend
       appName: 'Elfafeya Art',
       headerColor: '#8B7355',
       buttonColor: '#A67C52',
-    }
+    },
   )
 
   if (!emailResult.success) {

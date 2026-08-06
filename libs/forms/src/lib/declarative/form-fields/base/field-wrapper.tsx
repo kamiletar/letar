@@ -64,11 +64,9 @@ export const FieldWrapper = memo(function FieldWrapper({
       disabled={resolved.disabled}
       readOnly={resolved.readOnly}
       data-validating={isValidating || undefined}
-      css={
-        isValidating
-          ? { '& input, & textarea, & select': { borderColor: 'blue.200', _focus: { borderColor: 'blue.400' } } }
-          : undefined
-      }
+      css={isValidating
+        ? { '& input, & textarea, & select': { borderColor: 'blue.200', _focus: { borderColor: 'blue.400' } } }
+        : undefined}
     >
       <FieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
       {children}

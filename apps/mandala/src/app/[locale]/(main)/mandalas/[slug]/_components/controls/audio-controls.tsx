@@ -105,7 +105,7 @@ export function AudioControls(props: AudioControlsProps) {
         audioPreset: 'custom',
       })
     },
-    [onChange]
+    [onChange],
   )
 
   return (

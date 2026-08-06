@@ -37,9 +37,7 @@ test.describe('Мобильная адаптивность', () => {
     await expect(dialog.getByRole('link', { name: 'Документация' })).toBeVisible()
   })
 
-  test('клик по пункту "Документация" в мобильном меню закрывает Drawer и открывает /docs/quick-start', async ({
-    page,
-  }) => {
+  test('клик по пункту "Документация" в мобильном меню закрывает Drawer и открывает /docs/quick-start', async ({ page }) => {
     await page.goto('/')
 
     const menuButton = page.getByRole('button', { name: 'Открыть меню' })

@@ -77,10 +77,10 @@ export function ChapterMarkers({
     // Находим текущую главу
     const currentChapter = chapters.find(
       (chapter) =>
-        chapter.type &&
-        SKIPPABLE_TYPES.has(chapter.type) &&
-        currentTime >= chapter.startTime &&
-        currentTime < chapter.endTime - 3 // Не показываем если осталось меньше 3 сек
+        chapter.type
+        && SKIPPABLE_TYPES.has(chapter.type)
+        && currentTime >= chapter.startTime
+        && currentTime < chapter.endTime - 3, // Не показываем если осталось меньше 3 сек
     )
 
     setActiveSkipChapter(currentChapter || null)

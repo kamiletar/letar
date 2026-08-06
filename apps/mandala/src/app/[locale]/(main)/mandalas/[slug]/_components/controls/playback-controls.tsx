@@ -18,13 +18,48 @@ import { formatMsToSeconds, SliderControl } from './slider-control'
  */
 export const SPIN_DURATION_STEPS = [
   // 1-10 сек (шаг 1)
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
   // 15-60 сек (шаг 5)
-  15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
+  15,
+  20,
+  25,
+  30,
+  35,
+  40,
+  45,
+  50,
+  55,
+  60,
   // 2-10 мин (шаг 1 мин)
-  120, 180, 240, 300, 360, 420, 480, 540, 600,
+  120,
+  180,
+  240,
+  300,
+  360,
+  420,
+  480,
+  540,
+  600,
   // 15-60 мин (шаг 5 мин)
-  900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600,
+  900,
+  1200,
+  1500,
+  1800,
+  2100,
+  2400,
+  2700,
+  3000,
+  3300,
+  3600,
 ] as const
 
 // =============================================================================
@@ -86,7 +121,7 @@ export function SpinSpeedSlider({ spinDuration, onChange, variant = 'normal' }: 
       const newDuration = SPIN_DURATION_STEPS[index]
       onChange(newDuration)
     },
-    [onChange]
+    [onChange],
   )
 
   const isFullscreen = variant === 'fullscreen'

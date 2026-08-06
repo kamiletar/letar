@@ -11,7 +11,7 @@
 
 ```tsx
 import { MandalaForm } from '@/mandala-form'
-;<MandalaForm initialValue={data} schema={Schema} onSubmit={handleSubmit}>
+<MandalaForm initialValue={data} schema={Schema} onSubmit={handleSubmit}>
   {/* Обычные поля */}
   <MandalaForm.Field.String name="name" label="Название" />
   <MandalaForm.Field.Textarea name="description" label="Описание" />

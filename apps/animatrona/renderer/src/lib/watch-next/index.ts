@@ -10,10 +10,10 @@ export {
 } from './get-sequel-suggestion'
 
 export {
+  type AnimeForOrder,
   computeWatchOrder,
   getWatchOrderPosition,
   groupByEpoch,
-  type AnimeForOrder,
   type WatchOrderEpoch,
   type WatchOrderPosition,
 } from './compute-order'

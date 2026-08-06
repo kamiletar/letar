@@ -139,7 +139,7 @@ export function deleteSubscription(id: string): boolean {
  */
 export function updateSubscription(
   id: string,
-  data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit' | 'lastKnownCid' | 'lastCheckedAt'>>
+  data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit' | 'lastKnownCid' | 'lastCheckedAt'>>,
 ): Subscription | null {
   const subscriptions = loadSubscriptions()
   const subscription = subscriptions.find((s) => s.id === id)

@@ -21,7 +21,7 @@ import { PlayerPage } from './pages/Player'
 /** Хук для определения prefers-reduced-motion */
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
 
   useEffect(() => {
@@ -94,14 +94,14 @@ export function App() {
   const pageTransitionStyles = prefersReducedMotion
     ? {}
     : {
-        transition: 'opacity 0.15s ease-out, transform 0.15s ease-out',
-        opacity: isNavigating ? 0 : 1,
-        transform: isNavigating
-          ? direction === 'forward'
-            ? 'translateX(-20px)'
-            : 'translateX(20px)'
-          : 'translateX(0)',
-      }
+      transition: 'opacity 0.15s ease-out, transform 0.15s ease-out',
+      opacity: isNavigating ? 0 : 1,
+      transform: isNavigating
+        ? direction === 'forward'
+          ? 'translateX(-20px)'
+          : 'translateX(20px)'
+        : 'translateX(0)',
+    }
 
   return (
     <Box minH="100vh" bg="gray.950" color="white">

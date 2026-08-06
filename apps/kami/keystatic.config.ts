@@ -5,15 +5,15 @@ const isProd = process.env.NODE_ENV === 'production'
 export default config({
   storage: isProd
     ? {
-        kind: 'github',
-        repo: {
-          owner: 'kamiletar',
-          name: 'kami-blog',
-        },
-      }
-    : {
-        kind: 'local',
+      kind: 'github',
+      repo: {
+        owner: 'kamiletar',
+        name: 'kami-blog',
       },
+    }
+    : {
+      kind: 'local',
+    },
   collections: {
     posts: collection({
       label: 'Статьи блога',

@@ -68,7 +68,7 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
     (ratio: number) => {
       if (duration > 0) onSeek(ratio * duration)
     },
-    [duration, onSeek]
+    [duration, onSeek],
   )
 
   const pan = Gesture.Pan()
@@ -107,10 +107,10 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
     const ratio = isDragging.value
       ? dragRatio.value
       : seekTargetRatio.value >= 0
-        ? seekTargetRatio.value
-        : duration > 0
-          ? currentTime / duration
-          : 0
+      ? seekTargetRatio.value
+      : duration > 0
+      ? currentTime / duration
+      : 0
     return { width: `${ratio * 100}%` }
   })
 
@@ -119,10 +119,10 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
     const ratio = isDragging.value
       ? dragRatio.value
       : seekTargetRatio.value >= 0
-        ? seekTargetRatio.value
-        : duration > 0
-          ? currentTime / duration
-          : 0
+      ? seekTargetRatio.value
+      : duration > 0
+      ? currentTime / duration
+      : 0
     const size = THUMB_SIZE * thumbScale.value
     return {
       left: `${ratio * 100}%`,

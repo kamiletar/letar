@@ -117,31 +117,35 @@ export default async function OrdersListPage({ searchParams }: OrdersPageProps) 
         </Suspense>
       </HStack>
 
-      {orders.length === 0 ? (
-        hasFilters ? (
-          <Box py={8} textAlign="center">
-            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-          </Box>
-        ) : (
-          <EmptyState
-            icon={LuPackage}
-            title="Нет заказов"
-            description="Заказы появятся после оформления покупки клиентами"
-          />
+      {orders.length === 0
+        ? (
+          hasFilters
+            ? (
+              <Box py={8} textAlign="center">
+                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+              </Box>
+            )
+            : (
+              <EmptyState
+                icon={LuPackage}
+                title="Нет заказов"
+                description="Заказы появятся после оформления покупки клиентами"
+              />
+            )
         )
-      ) : (
-        <>
-          <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={8} />}>
-            {/* ZenStack v3: приводим к типу с relations */}
-            <OrdersTable orders={orders as unknown as OrderWithItems[]} />
-          </Suspense>
+        : (
+          <>
+            <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={8} />}>
+              {/* ZenStack v3: приводим к типу с relations */}
+              <OrdersTable orders={orders as unknown as OrderWithItems[]} />
+            </Suspense>
 
-          {/* Пагинация */}
-          <Suspense fallback={<Box h="48px" />}>
-            <Pagination total={total} pageSize={PAGE_SIZE} />
-          </Suspense>
-        </>
-      )}
+            {/* Пагинация */}
+            <Suspense fallback={<Box h="48px" />}>
+              <Pagination total={total} pageSize={PAGE_SIZE} />
+            </Suspense>
+          </>
+        )}
     </Stack>
   )
 }

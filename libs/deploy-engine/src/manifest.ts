@@ -19,7 +19,7 @@ export async function readManifest(executor: DeployEngineExecutor, app: string):
   } catch (err) {
     throw new Error(
       `Повреждён deploy-manifest для ${app} (не JSON): ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err }
+      { cause: err },
     )
   }
   const parsed = DeployManifestSchema.safeParse(json)
@@ -33,7 +33,7 @@ export async function readManifest(executor: DeployEngineExecutor, app: string):
 export async function appendManifestEntry(
   executor: DeployEngineExecutor,
   app: string,
-  entry: DeployManifestEntry
+  entry: DeployManifestEntry,
 ): Promise<DeployManifest> {
   const manifest = await readManifest(executor, app)
   const updated: DeployManifest = { app, entries: [...manifest.entries, entry] }

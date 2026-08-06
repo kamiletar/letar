@@ -199,8 +199,8 @@ describe('generateConstraintHint', () => {
             schemaType: 'array',
             array: { maxItems: 1 },
           },
-          'ru'
-        )
+          'ru',
+        ),
       ).toBe('Максимум 1 элемент')
 
       expect(
@@ -209,8 +209,8 @@ describe('generateConstraintHint', () => {
             schemaType: 'array',
             array: { maxItems: 2 },
           },
-          'ru'
-        )
+          'ru',
+        ),
       ).toBe('Максимум 2 элемента')
 
       expect(
@@ -219,8 +219,8 @@ describe('generateConstraintHint', () => {
             schemaType: 'array',
             array: { maxItems: 5 },
           },
-          'ru'
-        )
+          'ru',
+        ),
       ).toBe('Максимум 5 элементов')
     })
 
@@ -231,8 +231,8 @@ describe('generateConstraintHint', () => {
             schemaType: 'date',
             date: { min: '2024-01-01' },
           },
-          'ru'
-        )
+          'ru',
+        ),
       ).toContain('Не ранее')
 
       expect(
@@ -241,8 +241,8 @@ describe('generateConstraintHint', () => {
             schemaType: 'date',
             date: { max: '2024-12-31' },
           },
-          'ru'
-        )
+          'ru',
+        ),
       ).toContain('Не позднее')
     })
   })
@@ -285,7 +285,7 @@ describe('generateConstraintHint', () => {
       expect(
         generateConstraintHint(constraints, 'de', {
           string_min: 'Mindestens {n} Zeichen',
-        })
+        }),
       ).toBe('Mindestens 2 Zeichen')
     })
   })

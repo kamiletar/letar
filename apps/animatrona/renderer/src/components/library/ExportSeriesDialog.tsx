@@ -37,11 +37,18 @@ export function ExportSeriesDialog({ open, onOpenChange, anime, defaultExportPat
             </Dialog.Header>
 
             {state.step === 'config' && (
-              <ExportConfigStep state={state} anime={anime} onClose={() => onOpenChange(false)} />
+              <ExportConfigStep
+                state={state}
+                anime={anime}
+                onClose={() => onOpenChange(false)}
+              />
             )}
             {state.step === 'progress' && <ExportProgressStep state={state} />}
             {(state.step === 'done' || state.step === 'result') && (
-              <ExportResultStep state={state} onClose={() => onOpenChange(false)} />
+              <ExportResultStep
+                state={state}
+                onClose={() => onOpenChange(false)}
+              />
             )}
 
             {!state.isExporting && (

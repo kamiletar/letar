@@ -37,13 +37,13 @@ export const auth = betterAuth({
   // OAuth провайдеры
   socialProviders: {
     // Google OAuth
-    ...(process.env.AUTH_GOOGLE_ID &&
-      process.env.AUTH_GOOGLE_SECRET && {
-        google: {
-          clientId: process.env.AUTH_GOOGLE_ID,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET,
-        },
-      }),
+    ...(process.env.AUTH_GOOGLE_ID
+      && process.env.AUTH_GOOGLE_SECRET && {
+      google: {
+        clientId: process.env.AUTH_GOOGLE_ID,
+        clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      },
+    }),
   },
 
   // Плагины

@@ -114,41 +114,45 @@ export function ProfileSection({ onProfileUpdated }: ProfileSectionProps) {
             <Text fontSize="xs" color="fg.muted" fontWeight="medium">
               Отображаемое имя
             </Text>
-            {isEditing ? (
-              <Editable.Root
-                value={editedName}
-                onValueChange={(e) => setEditedName(e.value)}
-                placeholder="Введите имя"
-                activationMode="focus"
-                autoFocus
-              >
-                <Editable.Preview />
-                <Editable.Input fontSize="xl" fontWeight="semibold" maxLength={50} />
-              </Editable.Root>
-            ) : (
-              <Text fontSize="xl" fontWeight="semibold">
-                {profile?.displayName || 'Анонимус'}
-              </Text>
-            )}
+            {isEditing
+              ? (
+                <Editable.Root
+                  value={editedName}
+                  onValueChange={(e) => setEditedName(e.value)}
+                  placeholder="Введите имя"
+                  activationMode="focus"
+                  autoFocus
+                >
+                  <Editable.Preview />
+                  <Editable.Input fontSize="xl" fontWeight="semibold" maxLength={50} />
+                </Editable.Root>
+              )
+              : (
+                <Text fontSize="xl" fontWeight="semibold">
+                  {profile?.displayName || 'Анонимус'}
+                </Text>
+              )}
           </VStack>
 
-          {isEditing ? (
-            <HStack gap={2}>
-              <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>
-                <LuX />
-                Отмена
+          {isEditing
+            ? (
+              <HStack gap={2}>
+                <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>
+                  <LuX />
+                  Отмена
+                </Button>
+                <Button size="sm" colorPalette="blue" onClick={handleSave} loading={isSaving}>
+                  <LuSave />
+                  Сохранить
+                </Button>
+              </HStack>
+            )
+            : (
+              <Button size="sm" variant="ghost" onClick={handleStartEdit}>
+                <LuPencil />
+                Изменить
               </Button>
-              <Button size="sm" colorPalette="blue" onClick={handleSave} loading={isSaving}>
-                <LuSave />
-                Сохранить
-              </Button>
-            </HStack>
-          ) : (
-            <Button size="sm" variant="ghost" onClick={handleStartEdit}>
-              <LuPencil />
-              Изменить
-            </Button>
-          )}
+            )}
         </Flex>
       </Box>
 
@@ -174,10 +178,10 @@ export function ProfileSection({ onProfileUpdated }: ProfileSectionProps) {
             <Text fontSize="sm">
               {profile?.createdAt
                 ? new Date(profile.createdAt).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })
                 : '—'}
             </Text>
           </HStack>

@@ -105,7 +105,7 @@ export function useGlobalVideo({ playerRef, episodeId, episode, videoSrc }: UseG
       updateTime(time)
       updateDuration(duration)
     },
-    [updateTime, updateDuration]
+    [updateTime, updateDuration],
   )
 
   // Обработчик изменения состояния воспроизведения
@@ -113,7 +113,7 @@ export function useGlobalVideo({ playerRef, episodeId, episode, videoSrc }: UseG
     (isPlaying: boolean) => {
       updatePlayingState(isPlaying)
     },
-    [updatePlayingState]
+    [updatePlayingState],
   )
 
   // Сворачивание в mini-player при уходе со страницы

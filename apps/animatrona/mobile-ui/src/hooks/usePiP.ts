@@ -21,7 +21,7 @@ export function usePiP(options: UsePiPOptions) {
   // Проверка поддержки
   useEffect(() => {
     setIsSupported(
-      typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled
+      typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled,
     )
   }, [])
 

@@ -17,7 +17,7 @@ describe('FieldAddress', () => {
           <Form initialValue={{ address: '' }} onSubmit={vi.fn()}>
             <Form.Field.Address name="address" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldAddress', () => {
           <Form initialValue={{ address: '' }} onSubmit={vi.fn()}>
             <Form.Field.Address name="address" label="Адрес" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Адрес')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('FieldAddress', () => {
           <Form initialValue={{ address: '' }} onSubmit={vi.fn()}>
             <Form.Field.Address name="address" placeholder="Начните ввод адреса..." />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByPlaceholderText('Начните ввод адреса...')).toBeInTheDocument()
@@ -55,7 +55,7 @@ describe('FieldAddress', () => {
           <Form initialValue={{ address: '' }} onSubmit={vi.fn()}>
             <Form.Field.Address name="address" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()

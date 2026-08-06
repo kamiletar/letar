@@ -60,7 +60,7 @@ async function fetchContainers(serverId: string | null, withStats = false) {
 async function controlContainerApi(
   containerId: string,
   action: 'start' | 'stop' | 'restart',
-  serverId: string | null
+  serverId: string | null,
 ): Promise<{ success: boolean; containerId?: string; error?: string }> {
   const body: Record<string, string> = { containerId, action }
   if (serverId) {
@@ -116,7 +116,7 @@ export default function ContainersPage() {
             return container
         }
       })
-    }
+    },
   )
 
   // Обработчик Start с useOptimistic
@@ -247,7 +247,7 @@ export default function ContainersPage() {
   const runningDatabases = displayContainers.filter((c) => isRunningOrTransitioning(c) && isDatabase(c.image))
   const runningWebApps = displayContainers.filter((c) => isRunningOrTransitioning(c) && !isDatabase(c.image))
   const stoppedContainers = displayContainers.filter(
-    (c) => c.state !== 'running' && c.state !== 'starting' && c.state !== 'restarting' && c.state !== 'removing'
+    (c) => c.state !== 'running' && c.state !== 'starting' && c.state !== 'restarting' && c.state !== 'removing',
   )
 
   return (
@@ -304,9 +304,8 @@ export default function ContainersPage() {
                   {...container}
                   onStop={() => handleStop(container.id)}
                   onRestart={() => handleRestart(container.id)}
-                  isTransitioning={
-                    container.state === 'starting' || container.state === 'stopping' || container.state === 'restarting'
-                  }
+                  isTransitioning={container.state === 'starting' || container.state === 'stopping'
+                    || container.state === 'restarting'}
                 />
               ))}
             </SimpleGrid>
@@ -326,9 +325,8 @@ export default function ContainersPage() {
                   {...container}
                   onStop={() => handleStop(container.id)}
                   onRestart={() => handleRestart(container.id)}
-                  isTransitioning={
-                    container.state === 'starting' || container.state === 'stopping' || container.state === 'restarting'
-                  }
+                  isTransitioning={container.state === 'starting' || container.state === 'stopping'
+                    || container.state === 'restarting'}
                 />
               ))}
             </SimpleGrid>

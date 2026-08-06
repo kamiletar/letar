@@ -38,7 +38,7 @@ export type DeletableModel = 'mandala' | 'product' | 'contentPage' | 'contactMes
 export function createDeleteAction(
   model: DeletableModel,
   redirectPath: string,
-  entityName: string
+  entityName: string,
 ): (id: string) => Promise<never> {
   return async function deleteEntity(id: string): Promise<never> {
     const { db } = await assertAdminAuth()

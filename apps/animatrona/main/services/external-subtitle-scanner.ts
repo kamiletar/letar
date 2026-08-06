@@ -169,7 +169,7 @@ function normalizeLanguageCode(code: string): string {
  */
 function fuzzyMatchToVideo(
   subtitleFileName: string,
-  videoFiles: Array<{ path: string; episodeNumber: number }>
+  videoFiles: Array<{ path: string; episodeNumber: number }>,
 ): MatchResult | null {
   const subBaseName = path.basename(subtitleFileName, path.extname(subtitleFileName)).toLowerCase()
 
@@ -298,7 +298,7 @@ async function collectFonts(fontDirs: string[]): Promise<Map<string, string>> {
  */
 function matchFontsToFiles(
   fontNames: string[],
-  availableFonts: Map<string, string>
+  availableFonts: Map<string, string>,
 ): Array<{ name: string; path: string }> {
   const matched: Array<{ name: string; path: string }> = []
 
@@ -354,7 +354,7 @@ function extractGroupNameFromSubsDir(subsDir: string): string | undefined {
  */
 export async function scanForExternalSubtitles(
   videoFolderPath: string,
-  videoFiles: Array<{ path: string; episodeNumber: number }>
+  videoFiles: Array<{ path: string; episodeNumber: number }>,
 ): Promise<ExternalSubtitleScanResult> {
   log.info('Scanning for external subtitles', { path: videoFolderPath, videoCount: videoFiles.length })
 
@@ -446,8 +446,9 @@ export async function scanForExternalSubtitles(
       const finalLanguage = matchResult.suffix?.lang ? normalizeLanguageCode(matchResult.suffix.lang) : subInfo.language
       const finalTitle = matchResult.suffix?.group || subInfo.title
       const subtitleType = detectSubtitleType({ filePath: subPath, title: finalTitle })
-      const matchedFonts =
-        subInfo.format === 'ass' || subInfo.format === 'ssa' ? matchFontsToFiles(subInfo.fontNames, availableFonts) : []
+      const matchedFonts = subInfo.format === 'ass' || subInfo.format === 'ssa'
+        ? matchFontsToFiles(subInfo.fontNames, availableFonts)
+        : []
 
       result.subtitles.push({
         filePath: subPath,
@@ -503,10 +504,9 @@ export async function scanForExternalSubtitles(
           const subtitleType = detectSubtitleType({ filePath: subPath, title: finalTitle })
 
           // Матчим шрифты для ASS
-          const matchedFonts =
-            subInfo.format === 'ass' || subInfo.format === 'ssa'
-              ? matchFontsToFiles(subInfo.fontNames, availableFonts)
-              : []
+          const matchedFonts = subInfo.format === 'ass' || subInfo.format === 'ssa'
+            ? matchFontsToFiles(subInfo.fontNames, availableFonts)
+            : []
 
           result.subtitles.push({
             filePath: subPath,

@@ -28,7 +28,7 @@ describe('onFieldChange prop', () => {
           <Form.Field.String name="name" label="Name" />
           <Form.Field.String name="slug" label="Slug" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const nameInput = screen.getByLabelText('Name')
@@ -61,7 +61,7 @@ describe('onFieldChange prop', () => {
           <Form.Field.String name="name" label="Name" />
           <Form.Field.String name="other" label="Other" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const otherInput = screen.getByLabelText('Other')
@@ -92,7 +92,7 @@ describe('onFieldChange prop', () => {
           <Form.Field.String name="name" label="Name" />
           <Form.Field.String name="slug" label="Slug" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const nameInput = screen.getByLabelText('Name')
@@ -116,7 +116,7 @@ describe('Form.Watch', () => {
           <Form.Field.String name="city" label="City" />
           <FormWatch field="city" onChange={onChange} />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const input = screen.getByLabelText('City')
@@ -136,7 +136,7 @@ describe('Form.Watch', () => {
         <Form initialValue={{ x: '' }} onSubmit={vi.fn()}>
           <FormWatch field="x" onChange={vi.fn()} />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // FormWatch renderless — только form внутри
@@ -154,7 +154,7 @@ describe('Form.Watch', () => {
         <Form initialValue={{ name: 'initial' }} onSubmit={vi.fn()}>
           <FormWatch field="name" onChange={onChange} />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Даём время на монтирование
@@ -181,7 +181,7 @@ describe('Form.Watch', () => {
             }}
           />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const countryInput = screen.getByLabelText('Country') as HTMLInputElement

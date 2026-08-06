@@ -84,7 +84,7 @@ describe('buildSvgString', () => {
       50,
       '"><script>alert(1)</script>',
       2,
-      'white'
+      'white',
     )
     expect(svg).not.toContain('<script>')
     expect(svg).toContain('&lt;script&gt;')

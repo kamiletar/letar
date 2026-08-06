@@ -78,11 +78,9 @@ export function PullToRefresh({ state, pullDistance, progress, show }: PullToRef
           transition={state === 'idle' ? 'transform 0.3s ease-out' : 'transform 0.15s ease-out'}
           transform={`rotate(${rotation}deg)`}
         >
-          {isRefreshing ? (
-            <Spinner size="sm" color="purple.400" />
-          ) : (
-            <LuArrowDown size={18} color="var(--chakra-colors-purple-400)" />
-          )}
+          {isRefreshing
+            ? <Spinner size="sm" color="purple.400" />
+            : <LuArrowDown size={18} color="var(--chakra-colors-purple-400)" />}
         </Box>
 
         {/* Текст */}

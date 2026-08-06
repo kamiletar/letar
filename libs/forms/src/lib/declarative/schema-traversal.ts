@@ -186,7 +186,7 @@ function analyzeArrayElement(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod internal schema type
   elementSchema: any,
   parentPath: string,
-  ctx: TraversalContext
+  ctx: TraversalContext,
 ): SchemaFieldInfo | undefined {
   if (!canTraverse(elementSchema, ctx)) {
     return undefined
@@ -231,7 +231,7 @@ function traverseSchemaShape(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod internal shape type
   shape: Record<string, any>,
   parentPath = '',
-  ctx: TraversalContext = createTraversalContext()
+  ctx: TraversalContext = createTraversalContext(),
 ): SchemaFieldInfo[] {
   const fields: SchemaFieldInfo[] = []
 
@@ -342,7 +342,7 @@ export function getFieldPaths(fields: SchemaFieldInfo[], recursive = true): stri
  */
 export function filterFields(
   fields: SchemaFieldInfo[],
-  options: { include?: string[]; exclude?: string[] }
+  options: { include?: string[]; exclude?: string[] },
 ): SchemaFieldInfo[] {
   const { include, exclude } = options
 

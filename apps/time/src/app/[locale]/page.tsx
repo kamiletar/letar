@@ -49,31 +49,33 @@ export default function WhatHourPage() {
       >
         <VStack gap={6}>
           <VStack gap={4} aria-live="polite" aria-atomic="true">
-            {isSpecialNumber ? (
-              <Text
-                fontSize={{ base: '4vmin', md: '4.2vmin' }}
-                fontWeight="100"
-                letterSpacing="0.08em"
-                lineHeight="1.4"
-                textTransform="lowercase"
-                _firstLetter={{ textTransform: 'uppercase' }}
-              >
-                {numberToWords(hour - 1, locale)} {t('hoursPassed')}
-              </Text>
-            ) : (
-              <Text
-                fontSize={{ base: '4vmin', md: '4.2vmin' }}
-                fontWeight="100"
-                letterSpacing="0.08em"
-                lineHeight="1.4"
-              >
-                {t('now')}{' '}
-                <Text as="span" fontWeight="300">
-                  {numberToOrdinal(hour, locale)}
-                </Text>{' '}
-                {t('hour')}
-              </Text>
-            )}
+            {isSpecialNumber
+              ? (
+                <Text
+                  fontSize={{ base: '4vmin', md: '4.2vmin' }}
+                  fontWeight="100"
+                  letterSpacing="0.08em"
+                  lineHeight="1.4"
+                  textTransform="lowercase"
+                  _firstLetter={{ textTransform: 'uppercase' }}
+                >
+                  {numberToWords(hour - 1, locale)} {t('hoursPassed')}
+                </Text>
+              )
+              : (
+                <Text
+                  fontSize={{ base: '4vmin', md: '4.2vmin' }}
+                  fontWeight="100"
+                  letterSpacing="0.08em"
+                  lineHeight="1.4"
+                >
+                  {t('now')}{' '}
+                  <Text as="span" fontWeight="300">
+                    {numberToOrdinal(hour, locale)}
+                  </Text>{' '}
+                  {t('hour')}
+                </Text>
+              )}
           </VStack>
 
           <Countdown />

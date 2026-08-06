@@ -57,7 +57,7 @@ test.describe('Мобильный UI: горизонтальная прокру�
    */
   async function checkNoHorizontalScroll(
     page: import('@playwright/test').Page,
-    _docName: string
+    _docName: string,
   ): Promise<{ hasOverflow: boolean; scrollWidth: number; clientWidth: number }> {
     const result = await page.evaluate(() => {
       const body = document.body
@@ -92,8 +92,9 @@ test.describe('Мобильный UI: горизонтальная прокру�
         if (rect.right > viewportWidth + 1) {
           const tag = el.tagName.toLowerCase()
           // className может быть SVGAnimatedString для SVG элементов
-          const classNameStr =
-            typeof el.className === 'string' ? el.className : el.className?.baseVal || el.getAttribute('class') || ''
+          const classNameStr = typeof el.className === 'string'
+            ? el.className
+            : el.className?.baseVal || el.getAttribute('class') || ''
           const classes = classNameStr ? `.${classNameStr.split(' ').filter(Boolean).join('.')}` : ''
           const id = el.id ? `#${el.id}` : ''
           overflowing.push(`${tag}${id}${classes} (right: ${Math.round(rect.right)}px)`)
@@ -184,7 +185,7 @@ test.describe('Мобильный UI: горизонтальная прокру�
     }
 
     expect(hasOverflow, `Главная страница имеет горизонтальную прокрутку (${scrollWidth}px > ${clientWidth}px)`).toBe(
-      false
+      false,
     )
   })
 
@@ -219,7 +220,7 @@ test.describe('Мобильный UI: горизонтальная прокру�
     }
 
     expect(hasOverflow, `Страница поиска имеет горизонтальную прокрутку (${scrollWidth}px > ${clientWidth}px)`).toBe(
-      false
+      false,
     )
   })
 
@@ -246,7 +247,7 @@ test.describe('Мобильный UI: горизонтальная прокру�
     }
 
     expect(hasOverflow, `Страница закладок имеет горизонтальную прокрутку (${scrollWidth}px > ${clientWidth}px)`).toBe(
-      false
+      false,
     )
   })
 
@@ -277,7 +278,7 @@ test.describe('Мобильный UI: горизонтальная прокру�
 
       expect(
         hasOverflow,
-        `Страница ${categoryPath} имеет горизонтальную прокрутку (${scrollWidth}px > ${clientWidth}px)`
+        `Страница ${categoryPath} имеет горизонтальную прокрутку (${scrollWidth}px > ${clientWidth}px)`,
       ).toBe(false)
     }
   })

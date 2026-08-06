@@ -114,41 +114,41 @@ export default async function AdminDashboardPage() {
           </HStack>
         </Card.Header>
         <Card.Body>
-          {recentRequests.length === 0 ? (
-            <Text color="fg.muted">Заявок пока нет</Text>
-          ) : (
-            <VStack gap={3} align="stretch">
-              {recentRequests.map((request) => (
-                <HStack
-                  key={request.id}
-                  justify="space-between"
-                  p={3}
-                  borderRadius="md"
-                  bg={{ base: 'gray.50', _dark: 'gray.800' }}
-                >
-                  <VStack align="start" gap={0}>
-                    <Text fontWeight="medium">{request.name}</Text>
-                    <Text fontSize="sm" color="fg.muted">
-                      {request.email}
-                    </Text>
-                  </VStack>
-                  <HStack gap={2}>
-                    {request.serviceType && (
-                      <Badge variant="subtle" colorPalette="gray">
-                        {request.serviceType}
+          {recentRequests.length === 0
+            ? <Text color="fg.muted">Заявок пока нет</Text>
+            : (
+              <VStack gap={3} align="stretch">
+                {recentRequests.map((request) => (
+                  <HStack
+                    key={request.id}
+                    justify="space-between"
+                    p={3}
+                    borderRadius="md"
+                    bg={{ base: 'gray.50', _dark: 'gray.800' }}
+                  >
+                    <VStack align="start" gap={0}>
+                      <Text fontWeight="medium">{request.name}</Text>
+                      <Text fontSize="sm" color="fg.muted">
+                        {request.email}
+                      </Text>
+                    </VStack>
+                    <HStack gap={2}>
+                      {request.serviceType && (
+                        <Badge variant="subtle" colorPalette="gray">
+                          {request.serviceType}
+                        </Badge>
+                      )}
+                      <Badge variant="subtle" colorPalette={statusColors[request.status] || 'gray'}>
+                        {statusLabels[request.status] || request.status}
                       </Badge>
-                    )}
-                    <Badge variant="subtle" colorPalette={statusColors[request.status] || 'gray'}>
-                      {statusLabels[request.status] || request.status}
-                    </Badge>
-                    <Text fontSize="sm" color="fg.muted">
-                      {new Date(request.createdAt).toLocaleDateString('ru-RU')}
-                    </Text>
+                      <Text fontSize="sm" color="fg.muted">
+                        {new Date(request.createdAt).toLocaleDateString('ru-RU')}
+                      </Text>
+                    </HStack>
                   </HStack>
-                </HStack>
-              ))}
-            </VStack>
-          )}
+                ))}
+              </VStack>
+            )}
         </Card.Body>
       </Card.Root>
     </VStack>

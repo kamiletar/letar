@@ -48,8 +48,8 @@ export default function AutoFieldsAdvancedPage() {
       <div>
         <Heading size="lg">Advanced Auto Fields</Heading>
         <Text color="fg.muted">
-          <Code>Form.FromSchema</Code> generates the entire form. Use <Code>Form.AutoFields</Code> for more control with
-          include/exclude.
+          <Code>Form.FromSchema</Code> generates the entire form. Use <Code>Form.AutoFields</Code>{' '}
+          for more control with include/exclude.
         </Text>
       </div>
 

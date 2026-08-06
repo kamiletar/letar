@@ -19,7 +19,7 @@ import { Header } from '@/components/layout'
 // Dynamic import для визарда — загружается только при открытии
 const ImportWizardDialog = nextDynamic(
   () => import('@/components/import/ImportWizardDialog').then((mod) => mod.ImportWizardDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 
 import { ImportCidContentEmbedded } from '../import-cid/page'

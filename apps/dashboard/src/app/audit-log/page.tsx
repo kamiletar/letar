@@ -80,7 +80,7 @@ async function fetchAuditLog(
   offset: number,
   actionFilter?: string,
   usernameFilter?: string,
-  successFilter?: string
+  successFilter?: string,
 ): Promise<AuditLogResponse> {
   const params = new URLSearchParams()
   params.set('limit', limit.toString())
@@ -273,64 +273,66 @@ export default function AuditLogPage() {
         </Box>
 
         {/* Entries */}
-        {auditLog?.entries && auditLog.entries.length > 0 ? (
-          <VStack gap="3" align="stretch">
-            {auditLog.entries.map((entry, index) => (
-              <Card.Root key={`${entry.timestamp}-${index}`}>
-                <Card.Body py="3">
-                  <HStack justify="space-between" flexWrap="wrap" gap="2">
-                    <HStack gap="3" flexWrap="wrap">
-                      <Badge colorPalette={getActionColor(entry.action)} size="sm">
-                        {getActionLabel(entry.action)}
-                      </Badge>
-                      <Badge colorPalette={entry.success ? 'green' : 'red'} size="sm" variant="outline">
-                        {entry.success ? 'Success' : 'Failed'}
-                      </Badge>
-                      {entry.resource && (
-                        <Text fontFamily="mono" fontSize="sm" color="fg.muted">
-                          {entry.resource}
-                        </Text>
-                      )}
-                    </HStack>
-                    <HStack gap="3" fontSize="sm" color="fg.muted">
-                      <HStack gap="1">
-                        <Badge colorPalette={entry.role === 'ADMIN' ? 'red' : 'blue'} size="xs">
-                          {entry.role}
+        {auditLog?.entries && auditLog.entries.length > 0
+          ? (
+            <VStack gap="3" align="stretch">
+              {auditLog.entries.map((entry, index) => (
+                <Card.Root key={`${entry.timestamp}-${index}`}>
+                  <Card.Body py="3">
+                    <HStack justify="space-between" flexWrap="wrap" gap="2">
+                      <HStack gap="3" flexWrap="wrap">
+                        <Badge colorPalette={getActionColor(entry.action)} size="sm">
+                          {getActionLabel(entry.action)}
                         </Badge>
-                        <Text>{entry.username}</Text>
+                        <Badge colorPalette={entry.success ? 'green' : 'red'} size="sm" variant="outline">
+                          {entry.success ? 'Success' : 'Failed'}
+                        </Badge>
+                        {entry.resource && (
+                          <Text fontFamily="mono" fontSize="sm" color="fg.muted">
+                            {entry.resource}
+                          </Text>
+                        )}
                       </HStack>
-                      <Text>{formatDateTime(entry.timestamp)}</Text>
+                      <HStack gap="3" fontSize="sm" color="fg.muted">
+                        <HStack gap="1">
+                          <Badge colorPalette={entry.role === 'ADMIN' ? 'red' : 'blue'} size="xs">
+                            {entry.role}
+                          </Badge>
+                          <Text>{entry.username}</Text>
+                        </HStack>
+                        <Text>{formatDateTime(entry.timestamp)}</Text>
+                      </HStack>
                     </HStack>
-                  </HStack>
 
-                  {entry.error && (
-                    <Text fontSize="sm" color="red.400" mt="2">
-                      Error: {entry.error}
-                    </Text>
-                  )}
-
-                  {entry.details && Object.keys(entry.details).length > 0 && (
-                    <Box mt="2">
-                      <Text fontSize="xs" color="fg.muted">
-                        {Object.entries(entry.details)
-                          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-                          .join(' • ')}
+                    {entry.error && (
+                      <Text fontSize="sm" color="red.400" mt="2">
+                        Error: {entry.error}
                       </Text>
-                    </Box>
-                  )}
-                </Card.Body>
-              </Card.Root>
-            ))}
-          </VStack>
-        ) : (
-          <Card.Root>
-            <Card.Body>
-              <Text color="fg.muted" textAlign="center">
-                No audit log entries found
-              </Text>
-            </Card.Body>
-          </Card.Root>
-        )}
+                    )}
+
+                    {entry.details && Object.keys(entry.details).length > 0 && (
+                      <Box mt="2">
+                        <Text fontSize="xs" color="fg.muted">
+                          {Object.entries(entry.details)
+                            .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+                            .join(' • ')}
+                        </Text>
+                      </Box>
+                    )}
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </VStack>
+          )
+          : (
+            <Card.Root>
+              <Card.Body>
+                <Text color="fg.muted" textAlign="center">
+                  No audit log entries found
+                </Text>
+              </Card.Body>
+            </Card.Root>
+          )}
 
         {/* Pagination */}
         {totalPages > 1 && (

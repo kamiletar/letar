@@ -41,8 +41,9 @@ export function AdminHeader({ userName }: AdminHeaderProps) {
                             <VStack gap={0} align="stretch">
                               {navItems.map((item) => {
                                 const IconComponent = item.icon
-                                const isActive =
-                                  item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href)
+                                const isActive = item.href === '/admin'
+                                  ? pathname === '/admin'
+                                  : pathname.startsWith(item.href)
 
                                 return (
                                   <Link key={item.href} href={item.href} onClick={() => store.setOpen(false)}>

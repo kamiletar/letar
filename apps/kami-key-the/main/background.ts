@@ -343,7 +343,7 @@ app.whenReady().then(() => {
     // AltGr+Shift+Ё → открыть редактор
     () => {
       openEditorWindow()
-    }
+    },
   )
 
   // Запускаем message pump

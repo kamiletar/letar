@@ -49,7 +49,7 @@ async function upsert(table: string, data: Record<string, any>, uniqueCol: strin
 
   await pool.query(
     `INSERT INTO "${table}" (${colList}) VALUES (${valList}) ON CONFLICT ("${uniqueCol}") DO NOTHING`,
-    vals
+    vals,
   )
 
   const result = await pool.query(`SELECT "id" FROM "${table}" WHERE "${uniqueCol}" = $1 LIMIT 1`, [data[uniqueCol]])
@@ -66,7 +66,7 @@ async function upsertComposite(table: string, data: Record<string, any>, uniqueC
 
   await pool.query(
     `INSERT INTO "${table}" (${colList}) VALUES (${valList}) ON CONFLICT (${conflictList}) DO NOTHING`,
-    vals
+    vals,
   )
 
   const whereParts = uniqueCols.map((c, i) => `"${c}" = $${i + 1}`)
@@ -315,7 +315,7 @@ async function main() {
   // Загружаем v2 JSON (Sonnet 4.6 экстракция)
   const spbData: CleanData = JSON.parse(readFileSync(join(import.meta.dirname, 'manual-data/spb-v2.json'), 'utf-8'))
   const moscowData: CleanData = JSON.parse(
-    readFileSync(join(import.meta.dirname, 'manual-data/moscow-v2.json'), 'utf-8')
+    readFileSync(join(import.meta.dirname, 'manual-data/moscow-v2.json'), 'utf-8'),
   )
 
   // Загружаем расписание (анонсы будущих матчей)
@@ -379,7 +379,7 @@ async function main() {
   const scheduledMoscow = moscowData.matches.filter((m) => m.homeScore === null).length
   const scheduledSpb = spbData.matches.filter((m) => m.homeScore === null).length
   console.log(
-    `Матчи: СПб ${spbData.matches.length} (${scheduledSpb} scheduled), Москва ${moscowData.matches.length} (${scheduledMoscow} scheduled)`
+    `Матчи: СПб ${spbData.matches.length} (${scheduledSpb} scheduled), Москва ${moscowData.matches.length} (${scheduledMoscow} scheduled)`,
   )
 
   // -----------------------------------------------
@@ -467,7 +467,7 @@ async function main() {
           cityId,
           address: v.address ?? null,
         }),
-        'slug'
+        'slug',
       )
       venueMap.set(v.name, id)
     }
@@ -497,7 +497,7 @@ async function main() {
           cityId,
           address: m.address ?? null,
         }),
-        'slug'
+        'slug',
       )
       venueMap.set(m.venue, id)
     }
@@ -530,7 +530,7 @@ async function main() {
       homeVenuesEnabled: true,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   seasonIds['spb-s2'] = await upsert(
@@ -549,7 +549,7 @@ async function main() {
       homeVenuesEnabled: true,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   seasonIds['spb-s3'] = await upsert(
@@ -568,7 +568,7 @@ async function main() {
       homeVenuesEnabled: true,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   seasonIds['moscow-s1'] = await upsert(
@@ -587,7 +587,7 @@ async function main() {
       homeVenuesEnabled: false,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   seasonIds['moscow-s2'] = await upsert(
@@ -606,7 +606,7 @@ async function main() {
       homeVenuesEnabled: false,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   for (const [key, id] of Object.entries(seasonIds)) {
@@ -628,7 +628,7 @@ async function main() {
       seasonId: seasonIds['spb-s1'],
       order: 1,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
 
   // СПб С2 — две лиги
@@ -640,7 +640,7 @@ async function main() {
       seasonId: seasonIds['spb-s2'],
       order: 1,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
   leagueIds['spb-s2-1l'] = await upsertComposite(
     'League',
@@ -650,7 +650,7 @@ async function main() {
       seasonId: seasonIds['spb-s2'],
       order: 2,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
 
   // СПб С3, Москва С1, Москва С2 — по одной лиге
@@ -663,7 +663,7 @@ async function main() {
         seasonId: seasonIds[sk],
         order: 1,
       },
-      ['seasonId', 'name']
+      ['seasonId', 'name'],
     )
   }
 
@@ -684,7 +684,7 @@ async function main() {
         seasonId: seasonIds[sk],
         number: 1,
       },
-      ['seasonId', 'number']
+      ['seasonId', 'number'],
     )
   }
 
@@ -698,7 +698,7 @@ async function main() {
         roundId: roundIds[sk],
         number: 1,
       },
-      ['roundId', 'number']
+      ['roundId', 'number'],
     )
   }
 
@@ -768,7 +768,7 @@ async function main() {
         telegramLink: info?.telegramUrl ?? null,
         previousNames: `{${previousNames.map((n) => `"${n}"`).join(',')}}`,
       }),
-      'slug'
+      'slug',
     )
     teamMap.set(name, id)
   }
@@ -809,7 +809,7 @@ async function main() {
           seasonId: seasonIds[sk],
           leagueId: getLeagueId(name, sk),
         },
-        ['teamId', 'seasonId']
+        ['teamId', 'seasonId'],
       )
       teamSeasonMap.set(key, id)
       tsCount++
@@ -883,7 +883,7 @@ async function main() {
         cityId,
         bio: profile?.bio ?? null,
       }),
-      'slug'
+      'slug',
     )
     playerMap.set(name, id)
   }
@@ -924,7 +924,7 @@ async function main() {
             teamSeasonId,
             role: 'PLAYER',
           },
-          ['playerId', 'teamSeasonId']
+          ['playerId', 'teamSeasonId'],
         )
         ptsCount++
       } catch {
@@ -979,7 +979,7 @@ async function main() {
               seasonId: seasonIds[sk],
               leagueId: lid,
             },
-            ['teamId', 'seasonId']
+            ['teamId', 'seasonId'],
           )
           teamSeasonMap.set(homeTsKey, tsId)
         }
@@ -994,7 +994,7 @@ async function main() {
               seasonId: seasonIds[sk],
               leagueId: lid,
             },
-            ['teamId', 'seasonId']
+            ['teamId', 'seasonId'],
           )
           teamSeasonMap.set(awayTsKey, tsId)
         }
@@ -1063,7 +1063,7 @@ async function main() {
             cuid(),
             NOW,
             NOW,
-          ]
+          ],
         )
         matchCount++
       } catch (err: any) {
@@ -1103,7 +1103,7 @@ async function main() {
             ts_h."seasonId" as "seasonId"
      FROM "Match" m
      JOIN "TeamSeason" ts_h ON ts_h."id" = m."homeTeamId"
-     WHERE m."status" = 'FINISHED'`
+     WHERE m."status" = 'FINISHED'`,
   )
 
   for (const row of matchRows.rows) {
@@ -1187,7 +1187,7 @@ async function main() {
             stats.scored,
             stats.conceded,
             stats.scored - stats.conceded,
-          ]
+          ],
         )
         standingsCount++
       } catch {
@@ -1216,7 +1216,7 @@ async function main() {
     await upsertComposite(
       'Stage',
       { id: cuid(), seasonId: moscowS2Id, name: st.name, type: st.type, order: st.order },
-      ['seasonId', 'order']
+      ['seasonId', 'order'],
     )
   }
   console.log(`  Stages: ${stageTypes.length} (bracket будет сгенерирован после швейцарки)`)

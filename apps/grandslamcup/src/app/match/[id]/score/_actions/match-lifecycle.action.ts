@@ -199,8 +199,11 @@ export async function setVictoryPoemAction(matchId: string, playerId: string) {
       else if (p.teamSeasonId === match.awayTeamId) awayScore += p.totalScore ?? 0
     }
 
-    const winnerTeamSeasonId =
-      homeScore > awayScore ? match.homeTeamId : awayScore > homeScore ? match.awayTeamId : null
+    const winnerTeamSeasonId = homeScore > awayScore
+      ? match.homeTeamId
+      : awayScore > homeScore
+      ? match.awayTeamId
+      : null
     if (!winnerTeamSeasonId) {
       return { success: false as const, error: 'Ничья — победное стихотворение не назначается' }
     }

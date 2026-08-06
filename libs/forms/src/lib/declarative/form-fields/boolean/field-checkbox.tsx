@@ -43,14 +43,16 @@ export const FieldCheckbox = createField<CheckboxFieldProps, boolean>({
         <Checkbox.Control />
         {resolved.label && (
           <Checkbox.Label>
-            {resolved.tooltip ? (
-              <HStack gap={1}>
-                <span>{resolved.label}</span>
-                <FieldTooltip {...resolved.tooltip} />
-              </HStack>
-            ) : (
-              resolved.label
-            )}
+            {resolved.tooltip
+              ? (
+                <HStack gap={1}>
+                  <span>{resolved.label}</span>
+                  <FieldTooltip {...resolved.tooltip} />
+                </HStack>
+              )
+              : (
+                resolved.label
+              )}
           </Checkbox.Label>
         )}
       </Checkbox.Root>

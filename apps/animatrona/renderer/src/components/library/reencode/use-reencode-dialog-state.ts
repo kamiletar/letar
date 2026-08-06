@@ -13,17 +13,17 @@ function getReencodeApi() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (window.electronAPI as any)?.audioReencode as
     | {
-        preview: (
-          animeId: string,
-          targetBitrate: number
-        ) => Promise<{ success: boolean; data?: ReencodePreview; error?: string }>
-        start: (
-          animeId: string,
-          targetBitrate: number
-        ) => Promise<{ success: boolean; data?: ReencodeResult; error?: string }>
-        cancel: () => Promise<{ success: boolean; error?: string }>
-        onProgress: (cb: (progress: ReencodeProgress) => void) => () => void
-      }
+      preview: (
+        animeId: string,
+        targetBitrate: number,
+      ) => Promise<{ success: boolean; data?: ReencodePreview; error?: string }>
+      start: (
+        animeId: string,
+        targetBitrate: number,
+      ) => Promise<{ success: boolean; data?: ReencodeResult; error?: string }>
+      cancel: () => Promise<{ success: boolean; error?: string }>
+      onProgress: (cb: (progress: ReencodeProgress) => void) => () => void
+    }
     | undefined
 }
 

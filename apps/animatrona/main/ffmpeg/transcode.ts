@@ -26,7 +26,7 @@ export async function transcodeVideo(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
 
@@ -60,7 +60,7 @@ export async function transcodeVideo(
       '-temporal-aq',
       '1',
       '-aq-strength',
-      '15'
+      '15',
     )
   } else {
     // CPU кодеки
@@ -126,7 +126,7 @@ export async function transcodeAudio(
   inputPath: string,
   outputPath: string,
   options: AudioTranscodeOptions,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   console.warn('[transcodeAudio] input:', inputPath, '→ output:', outputPath)
 
@@ -221,7 +221,7 @@ export async function transcodeAudioVBR(
   inputPath: string,
   outputPath: string,
   options: AudioTranscodeVBROptions,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
 
@@ -305,7 +305,7 @@ export async function transcodeVideoWithProfile(
   outputPath: string,
   profile: EncodingProfileOptions,
   sourceBitDepth = 8,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
 
@@ -392,7 +392,7 @@ export async function encodeSample(
   startTime = 0,
   duration = 300,
   sourceBitDepth = 8,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<{ success: boolean; outputPath: string; encodingTime: number; outputSize: number }> {
   // Стратегия кодирования определяет hwaccel и deband
   const strategy = getEncoderStrategy(profile.useGpu)
@@ -482,8 +482,8 @@ export async function encodeSample(
         const stderrTail = stderrBuffer.slice(-500)
         reject(
           new Error(
-            `ffmpeg sample encode with profile "${profile.name}" exited with code ${code}\nStderr: ${stderrTail}`
-          )
+            `ffmpeg sample encode with profile "${profile.name}" exited with code ${code}\nStderr: ${stderrTail}`,
+          ),
         )
       }
     })

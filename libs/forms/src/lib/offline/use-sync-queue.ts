@@ -67,7 +67,7 @@ export function useSyncQueue(): UseSyncQueueResult {
   const queue = useSyncExternalStore(
     (callback) => defaultSyncQueueStore.subscribe(callback),
     () => defaultSyncQueueStore.getQueue(),
-    () => EMPTY_QUEUE // SSR fallback
+    () => EMPTY_QUEUE, // SSR fallback
   )
 
   // Initialize on mount
@@ -102,7 +102,7 @@ export function useSyncQueue(): UseSyncQueueResult {
         setIsProcessing(false)
       }
     },
-    [isOffline]
+    [isOffline],
   )
 
   return {

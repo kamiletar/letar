@@ -23,5 +23,5 @@ export type { TranslateFunction, TranslateParams } from './form-i18n-provider'
 export { useLocalizedOptions } from './use-localized-options'
 export type { LocalizableOption } from './use-localized-options'
 
-export { SIZE_ORIGINS, STRING_FORMATS, ZOD_ERROR_CODES, createFormErrorMap } from './create-form-error-map'
+export { createFormErrorMap, SIZE_ORIGINS, STRING_FORMATS, ZOD_ERROR_CODES } from './create-form-error-map'
 export type { FormErrorMapConfig, ZodErrorCode } from './create-form-error-map'

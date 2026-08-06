@@ -218,13 +218,22 @@ export function ReviewCard({
           {/* Действия */}
           <HStack gap={2}>
             {canRespond && !review.response && !showResponseForm && (
-              <Button variant="ghost" size="sm" onClick={() => setShowResponseForm(true)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowResponseForm(true)}
+              >
                 <LuMessageSquare />
                 Ответить
               </Button>
             )}
             {!isAuthor && onReport && (
-              <Button variant="ghost" size="sm" colorPalette="red" onClick={() => onReport(review.id)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                colorPalette="red"
+                onClick={() => onReport(review.id)}
+              >
                 <LuFlag />
                 Пожаловаться
               </Button>

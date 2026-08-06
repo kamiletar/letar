@@ -72,14 +72,14 @@ export function FormInfoBlock({
   return (
     <Alert.Root status={status} variant={appearance} size={size} colorPalette={colorPalette}>
       <Alert.Indicator />
-      {title ? (
-        <Box>
-          <Alert.Title>{title}</Alert.Title>
-          <Alert.Description>{children}</Alert.Description>
-        </Box>
-      ) : (
-        <Alert.Description>{children}</Alert.Description>
-      )}
+      {title
+        ? (
+          <Box>
+            <Alert.Title>{title}</Alert.Title>
+            <Alert.Description>{children}</Alert.Description>
+          </Box>
+        )
+        : <Alert.Description>{children}</Alert.Description>}
     </Alert.Root>
   )
 }

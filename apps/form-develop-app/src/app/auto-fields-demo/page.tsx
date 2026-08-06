@@ -286,8 +286,8 @@ published: z.boolean().meta({ ui: { fieldType: 'switch' } })
             Поддерживаемые fieldType
           </Heading>
           <Text color="fg.muted" mb={4}>
-            В <Code>meta(&#123; ui: &#123; fieldType: &apos;...&apos; &#125; &#125;)</Code> можно указать любой тип
-            поля:
+            В <Code>meta(&#123; ui: &#123; fieldType: &apos;...&apos; &#125; &#125;)</Code>{' '}
+            можно указать любой тип поля:
           </Text>
 
           <HStack gap={8} flexWrap="wrap">

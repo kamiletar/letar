@@ -23,7 +23,7 @@ describe('FieldListbox', () => {
           <Form initialValue={{ color: '' }} onSubmit={vi.fn()}>
             <Form.Field.Listbox name="color" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('listbox')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('FieldListbox', () => {
           <Form initialValue={{ color: '' }} onSubmit={vi.fn()}>
             <Form.Field.Listbox name="color" label="Цвет" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Цвет')).toBeInTheDocument()
@@ -47,7 +47,7 @@ describe('FieldListbox', () => {
           <Form initialValue={{ color: '' }} onSubmit={vi.fn()}>
             <Form.Field.Listbox name="color" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Красный')).toBeInTheDocument()
@@ -63,7 +63,7 @@ describe('FieldListbox', () => {
           <Form initialValue={{ color: '' }} onSubmit={vi.fn()}>
             <Form.Field.Listbox name="color" options={options} disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Listbox в disabled режиме — проверяем что компонент рендерится
@@ -79,7 +79,7 @@ describe('FieldListbox', () => {
           <Form initialValue={{ color: 'green' }} onSubmit={vi.fn()}>
             <Form.Field.Listbox name="color" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Выбранный элемент должен быть отмечен

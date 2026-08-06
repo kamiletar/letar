@@ -35,8 +35,8 @@ export type { SubtitleRenderFormat as SubtitleFormat } from '@letar/video-player
 export {
   AUDIO_SYNC_THRESHOLD,
   HIDE_CONTROLS_TIMEOUT,
-  SKIPPABLE_CHAPTER_TYPES,
   SKIP_LABELS,
   SKIP_TIME,
+  SKIPPABLE_CHAPTER_TYPES,
   VOLUME_STEP,
 } from '@letar/video-player-core'

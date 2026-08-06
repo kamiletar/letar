@@ -180,7 +180,7 @@ export async function applyKuboConfig(
   kuboBin: string,
   repoPath: string,
   ports: KuboCurrentPorts,
-  storageMaxGb = 500
+  storageMaxGb = 500,
 ): Promise<void> {
   // Формируем Swarm адреса с текущими портами
   const swarmAddresses = [
@@ -211,7 +211,7 @@ export async function applyKuboConfig(
   // Добавляем публичные libp2p bootstrap ноды (из hardcoded fallback)
   const publicBootstrapNodes = KUBO_CONFIG.Bootstrap.filter(
     (addr: string) =>
-      addr.startsWith('/dnsaddr/bootstrap.libp2p.io') || isPublicLibp2pBootstrap(addr, syncResponse.servers)
+      addr.startsWith('/dnsaddr/bootstrap.libp2p.io') || isPublicLibp2pBootstrap(addr, syncResponse.servers),
   )
 
   const finalBootstrap = [...syncedBootstrap, ...publicBootstrapNodes]
@@ -517,9 +517,9 @@ export function spawnKuboDaemon(kuboBin: string, repoPath: string): Promise<Chil
         }
         // ERROR/FATAL/PANIC/Error: — гарантированно видны
         if (
-          /\b(ERROR|FATAL|PANIC|panic|fatal error|Error:)\b/.test(trimmed) ||
-          trimmed.includes('failed to') ||
-          trimmed.includes('error:')
+          /\b(ERROR|FATAL|PANIC|panic|fatal error|Error:)\b/.test(trimmed)
+          || trimmed.includes('failed to')
+          || trimmed.includes('error:')
         ) {
           log.error(`Kubo stderr: ${trimmed}`)
         } else if (trimmed.includes('autorelay') || trimmed.includes('failed to reserve')) {
@@ -566,7 +566,7 @@ export function spawnKuboDaemon(kuboBin: string, repoPath: string): Promise<Chil
 export async function prepareKuboRepo(
   kuboBin: string,
   repoPath: string,
-  storageMaxGb = 500
+  storageMaxGb = 500,
 ): Promise<KuboCurrentPorts> {
   await fs.mkdir(repoPath, { recursive: true })
   log.info('Kubo repo path', { repoPath })

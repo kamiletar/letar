@@ -108,7 +108,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
           setIsLoading(false)
         }
       },
-      [provider, minChars]
+      [provider, minChars],
     )
 
     // Load on debounced query change

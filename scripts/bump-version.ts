@@ -106,7 +106,7 @@ async function updateRegexFile(
   filePath: string,
   pattern: RegExp,
   replacement: (version: string) => string,
-  newVersion: string
+  newVersion: string,
 ): Promise<void> {
   const content = await readFile(filePath, 'utf-8')
 

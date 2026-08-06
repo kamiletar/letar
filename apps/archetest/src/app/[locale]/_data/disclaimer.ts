@@ -17,7 +17,8 @@ export const DISCLAIMER_SUMMARY_RU = 'Это инструмент самопоз
 export const DISCLAIMER_SUMMARY_EN = 'This is a self-discovery tool, not a diagnosis or a medical opinion.'
 
 /** Полный текст дисклеймера (из disclaimer.md от психолога) */
-export const DISCLAIMER_RU = `Данный тест является инструментом самопознания и не предназначен для постановки медицинских или психологических диагнозов. Результаты теста носят ориентировочный характер и отражают выраженность определённых личностных черт, а не наличие психического расстройства.
+export const DISCLAIMER_RU =
+  `Данный тест является инструментом самопознания и не предназначен для постановки медицинских или психологических диагнозов. Результаты теста носят ориентировочный характер и отражают выраженность определённых личностных черт, а не наличие психического расстройства.
 
 Тест не заменяет консультацию квалифицированного специалиста — психолога, психотерапевта или психиатра. Если результаты вызывают у вас беспокойство или вы испытываете трудности в повседневной жизни, рекомендуется обратиться к специалисту для профессиональной оценки.
 
@@ -25,7 +26,8 @@ export const DISCLAIMER_RU = `Данный тест является инстр�
 
 Каждый человек уникален. Любой тип личности имеет свои сильные стороны и зоны роста. Высокий балл по какой-либо шкале не означает «проблему» — он указывает на выраженную черту, которая может быть как ресурсом, так и источником трудностей в зависимости от контекста.`
 
-export const DISCLAIMER_EN = `This test is a self-discovery tool and is not intended for medical or psychological diagnosis. Results are indicative and reflect the expression of certain personality traits, not the presence of a mental disorder.
+export const DISCLAIMER_EN =
+  `This test is a self-discovery tool and is not intended for medical or psychological diagnosis. Results are indicative and reflect the expression of certain personality traits, not the presence of a mental disorder.
 
 The test does not replace consultation with a qualified specialist — psychologist, psychotherapist, or psychiatrist. If results cause concern or you experience difficulties in everyday life, professional evaluation is recommended.
 

@@ -79,58 +79,62 @@ export function MatchPhotoSection({
       </Flex>
 
       {/* Галерея с кнопками удаления */}
-      {localPhotos.length > 0 &&
-      (canDeleteAll || (currentUserId && localPhotos.some((p) => p.uploadedById === currentUserId))) ? (
-        /* Режим с кнопками удаления — своя сетка вместо PhotoGallery */
-        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={2} mb={4}>
-          {localPhotos.map((photo) => (
-            <Box
-              key={photo.id}
-              position="relative"
-              borderRadius="lg"
-              overflow="hidden"
-              aspectRatio={4 / 3}
-              bg="bg.subtle"
-            >
-              <Image
-                src={`/api/files/${photo.path}`}
-                alt={photo.caption ?? 'Фото матча'}
-                fill
-                style={{ objectFit: 'cover' }}
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              />
-              {canDeletePhoto(photo) && (
-                <Box position="absolute" top={1} right={1}>
-                  <IconButton
-                    size="xs"
-                    colorPalette="red"
-                    variant="solid"
-                    aria-label="Удалить фото"
-                    loading={deletingId === photo.id}
-                    onClick={() => handleDelete(photo.id)}
-                    opacity={0.85}
-                    _hover={{ opacity: 1 }}
-                  >
-                    <LuTrash2 size={12} />
-                  </IconButton>
-                </Box>
-              )}
-              {photo.caption && (
-                <Box position="absolute" bottom={0} left={0} right={0} bg="blackAlpha.600" px={2} py={1}>
-                  <Text fontSize="xs" color="white" lineClamp={1}>
-                    {photo.caption}
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          ))}
-        </SimpleGrid>
-      ) : localPhotos.length > 0 ? (
-        /* Обычная галерея без кнопок удаления */
-        <Box mb={4}>
-          <PhotoGallery photos={localPhotos} />
-        </Box>
-      ) : null}
+      {localPhotos.length > 0
+          && (canDeleteAll || (currentUserId && localPhotos.some((p) => p.uploadedById === currentUserId)))
+        ? (
+          /* Режим с кнопками удаления — своя сетка вместо PhotoGallery */
+          <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={2} mb={4}>
+            {localPhotos.map((photo) => (
+              <Box
+                key={photo.id}
+                position="relative"
+                borderRadius="lg"
+                overflow="hidden"
+                aspectRatio={4 / 3}
+                bg="bg.subtle"
+              >
+                <Image
+                  src={`/api/files/${photo.path}`}
+                  alt={photo.caption ?? 'Фото матча'}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
+                {canDeletePhoto(photo) && (
+                  <Box position="absolute" top={1} right={1}>
+                    <IconButton
+                      size="xs"
+                      colorPalette="red"
+                      variant="solid"
+                      aria-label="Удалить фото"
+                      loading={deletingId === photo.id}
+                      onClick={() => handleDelete(photo.id)}
+                      opacity={0.85}
+                      _hover={{ opacity: 1 }}
+                    >
+                      <LuTrash2 size={12} />
+                    </IconButton>
+                  </Box>
+                )}
+                {photo.caption && (
+                  <Box position="absolute" bottom={0} left={0} right={0} bg="blackAlpha.600" px={2} py={1}>
+                    <Text fontSize="xs" color="white" lineClamp={1}>
+                      {photo.caption}
+                    </Text>
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </SimpleGrid>
+        )
+        : localPhotos.length > 0
+        ? (
+          /* Обычная галерея без кнопок удаления */
+          <Box mb={4}>
+            <PhotoGallery photos={localPhotos} />
+          </Box>
+        )
+        : null}
 
       {/* Загрузчик — только для участников команды */}
       {canUpload && (

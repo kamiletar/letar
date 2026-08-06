@@ -108,8 +108,8 @@ function PreviewItem({ item, onEdit, onRemove }: PreviewItemProps) {
                     <RecommendationBadge recommendation={videoRec} />
                   </HStack>
                 )}
-                {audioRecs &&
-                  Object.entries(audioRecs).map(([idx, rec]) => (
+                {audioRecs
+                  && Object.entries(audioRecs).map(([idx, rec]) => (
                     <HStack key={idx} gap={1}>
                       <Text fontSize="xs" color="fg.subtle">
                         Аудио {idx}:

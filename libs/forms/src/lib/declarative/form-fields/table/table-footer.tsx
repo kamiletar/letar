@@ -42,16 +42,18 @@ export function TableEditorFooter({ footerDefs, selectable, sortable }: TableFoo
           const agg = aggregates.get(col.name)
           return (
             <Table.Cell key={col.name} textAlign={col.align}>
-              {agg ? (
-                <Text>
-                  {agg.def.label && (
-                    <Text as="span" color="fg.muted" mr="1">
-                      {agg.def.label}
-                    </Text>
-                  )}
-                  {agg.def.format ? agg.def.format(agg.value) : agg.value.toLocaleString()}
-                </Text>
-              ) : null}
+              {agg
+                ? (
+                  <Text>
+                    {agg.def.label && (
+                      <Text as="span" color="fg.muted" mr="1">
+                        {agg.def.label}
+                      </Text>
+                    )}
+                    {agg.def.format ? agg.def.format(agg.value) : agg.value.toLocaleString()}
+                  </Text>
+                )
+                : null}
             </Table.Cell>
           )
         })}

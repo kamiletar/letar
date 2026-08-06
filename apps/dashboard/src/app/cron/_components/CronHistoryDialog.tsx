@@ -103,63 +103,67 @@ export function CronHistoryDialog({ jobId, serverId, open, onOpenChange }: CronH
           <DialogCloseTrigger />
         </DialogHeader>
         <DialogBody pb="6">
-          {isLoading ? (
-            <Box textAlign="center" py="8">
-              <Spinner size="lg" />
-            </Box>
-          ) : error ? (
-            <Text color="red.500">Ошибка загрузки истории</Text>
-          ) : data?.logs.length === 0 ? (
-            <Box textAlign="center" py="8">
-              <Text color="fg.muted">Нет истории выполнений</Text>
-            </Box>
-          ) : (
-            <Table.Root size="sm">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>Время</Table.ColumnHeader>
-                  <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                  <Table.ColumnHeader>Код</Table.ColumnHeader>
-                  <Table.ColumnHeader>Длительность</Table.ColumnHeader>
-                  <Table.ColumnHeader>Ошибка</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {data?.logs.map((log) => (
-                  <Table.Row key={log.id}>
-                    <Table.Cell>
-                      <VStack align="start" gap="0">
-                        <Text fontSize="sm">{formatDateTime(log.startedAt)}</Text>
-                      </VStack>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Badge colorPalette={getStatusColor(log.status)} size="sm">
-                        <HStack gap="1">
-                          <StatusIcon status={log.status} />
-                          <span>{log.status}</span>
-                        </HStack>
-                      </Badge>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Text fontSize="sm" fontFamily="mono">
-                        {log.statusCode ?? '-'}
-                      </Text>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Text fontSize="sm">{formatDuration(log.duration)}</Text>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {log.error && (
-                        <Text fontSize="xs" color="red.500" maxW="300px" truncate title={log.error}>
-                          {log.error}
-                        </Text>
-                      )}
-                    </Table.Cell>
+          {isLoading
+            ? (
+              <Box textAlign="center" py="8">
+                <Spinner size="lg" />
+              </Box>
+            )
+            : error
+            ? <Text color="red.500">Ошибка загрузки истории</Text>
+            : data?.logs.length === 0
+            ? (
+              <Box textAlign="center" py="8">
+                <Text color="fg.muted">Нет истории выполнений</Text>
+              </Box>
+            )
+            : (
+              <Table.Root size="sm">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Время</Table.ColumnHeader>
+                    <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                    <Table.ColumnHeader>Код</Table.ColumnHeader>
+                    <Table.ColumnHeader>Длительность</Table.ColumnHeader>
+                    <Table.ColumnHeader>Ошибка</Table.ColumnHeader>
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
-          )}
+                </Table.Header>
+                <Table.Body>
+                  {data?.logs.map((log) => (
+                    <Table.Row key={log.id}>
+                      <Table.Cell>
+                        <VStack align="start" gap="0">
+                          <Text fontSize="sm">{formatDateTime(log.startedAt)}</Text>
+                        </VStack>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge colorPalette={getStatusColor(log.status)} size="sm">
+                          <HStack gap="1">
+                            <StatusIcon status={log.status} />
+                            <span>{log.status}</span>
+                          </HStack>
+                        </Badge>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Text fontSize="sm" fontFamily="mono">
+                          {log.statusCode ?? '-'}
+                        </Text>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Text fontSize="sm">{formatDuration(log.duration)}</Text>
+                      </Table.Cell>
+                      <Table.Cell>
+                        {log.error && (
+                          <Text fontSize="xs" color="red.500" maxW="300px" truncate title={log.error}>
+                            {log.error}
+                          </Text>
+                        )}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            )}
         </DialogBody>
       </DialogContent>
     </DialogRoot>

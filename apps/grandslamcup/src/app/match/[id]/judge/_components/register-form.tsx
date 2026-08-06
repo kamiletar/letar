@@ -18,7 +18,7 @@ interface RegisterFormProps {
     judgeNumber: number,
     color?: JudgeColor | null,
     isQueued?: boolean,
-    queuePosition?: number
+    queuePosition?: number,
   ) => void
 }
 
@@ -50,7 +50,7 @@ export function RegisterForm({ matchId, half, inviteKey, onRegistered }: Registe
         result.judgeNumber,
         result.color as JudgeColor | null | undefined,
         result.isQueued as boolean | undefined,
-        result.queuePosition as number | undefined
+        result.queuePosition as number | undefined,
       )
     } else if (!result.success) {
       setError(result.error ?? 'Ошибка регистрации')

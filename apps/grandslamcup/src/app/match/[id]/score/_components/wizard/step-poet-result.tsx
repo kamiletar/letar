@@ -200,41 +200,41 @@ function ScoreBlock({
       <VStack gap={2} align="stretch">
         {votes.length > 0
           ? votes
-              .slice()
-              .sort((a, b) => a.judgeNumber - b.judgeNumber)
-              .map((v) => {
-                const isOutlier = outlierJudgeNumbers.has(v.judgeNumber)
-                return (
-                  <Flex key={v.judgeNumber} justify="space-between" align="center">
-                    <Text fontSize="sm" color={isOutlier ? 'fg.muted' : 'fg'}>
-                      Судья {v.judgeNumber}
-                      {v.judgeName ? ` — ${v.judgeName}` : ''}
-                    </Text>
-                    <Badge
-                      colorPalette={isOutlier ? 'red' : 'green'}
-                      variant={isOutlier ? 'outline' : 'solid'}
-                      size="md"
-                    >
-                      {v.score}
-                      {isOutlier && ' ⛔'}
-                    </Badge>
-                  </Flex>
-                )
-              })
-          : scores.map((s, i) => {
-              const isOutlier = outlierIndices.has(i)
+            .slice()
+            .sort((a, b) => a.judgeNumber - b.judgeNumber)
+            .map((v) => {
+              const isOutlier = outlierJudgeNumbers.has(v.judgeNumber)
               return (
-                <Flex key={i} justify="space-between" align="center">
+                <Flex key={v.judgeNumber} justify="space-between" align="center">
                   <Text fontSize="sm" color={isOutlier ? 'fg.muted' : 'fg'}>
-                    Судья {i + 1}
+                    Судья {v.judgeNumber}
+                    {v.judgeName ? ` — ${v.judgeName}` : ''}
                   </Text>
-                  <Badge colorPalette={isOutlier ? 'red' : 'green'} variant={isOutlier ? 'outline' : 'solid'} size="md">
-                    {s}
+                  <Badge
+                    colorPalette={isOutlier ? 'red' : 'green'}
+                    variant={isOutlier ? 'outline' : 'solid'}
+                    size="md"
+                  >
+                    {v.score}
                     {isOutlier && ' ⛔'}
                   </Badge>
                 </Flex>
               )
-            })}
+            })
+          : scores.map((s, i) => {
+            const isOutlier = outlierIndices.has(i)
+            return (
+              <Flex key={i} justify="space-between" align="center">
+                <Text fontSize="sm" color={isOutlier ? 'fg.muted' : 'fg'}>
+                  Судья {i + 1}
+                </Text>
+                <Badge colorPalette={isOutlier ? 'red' : 'green'} variant={isOutlier ? 'outline' : 'solid'} size="md">
+                  {s}
+                  {isOutlier && ' ⛔'}
+                </Badge>
+              </Flex>
+            )
+          })}
       </VStack>
     </Box>
   )

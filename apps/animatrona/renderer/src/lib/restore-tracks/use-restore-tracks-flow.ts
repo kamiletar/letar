@@ -171,7 +171,7 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
       await scanDonorFolder(folderPath)
       setRestoreStage('matching')
     },
-    [scanDonorFolder]
+    [scanDonorFolder],
   )
 
   // === Probe + сравнение ===
@@ -284,12 +284,12 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
         // Сравнение субтитров: по языку + формату
         const librarySubKeys = new Set(readySubTracks.map((t) => `${t.language}:${t.format}`))
         const missingSubtitles = probe.subtitleTracks.filter(
-          (d) => !librarySubKeys.has(`${d.language}:${d.format || d.codec}`)
+          (d) => !librarySubKeys.has(`${d.language}:${d.format || d.codec}`),
         )
 
         // Внешние субтитры — добавляем все (у них нет аналогов в библиотеке по streamIndex)
         const missingExtSubs = probe.externalSubtitles.filter(
-          (d) => !librarySubKeys.has(`${d.language}:${d.format || d.codec}`)
+          (d) => !librarySubKeys.has(`${d.language}:${d.format || d.codec}`),
         )
 
         // Внешние аудио — по dubGroup (нормализация: убираем [] для совместимости)
@@ -298,17 +298,17 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
           readyAudioTracks
             .map((t) => t.dubGroup)
             .filter((g): g is string => !!g)
-            .map(normDubGroup)
+            .map(normDubGroup),
         )
         const missingExtAudio = allExternalAudio.filter(
-          (d) => !d.dubGroup || !libraryDubGroups.has(normDubGroup(d.dubGroup))
+          (d) => !d.dubGroup || !libraryDubGroups.has(normDubGroup(d.dubGroup)),
         )
 
         // Шрифты: из MKV attachments vs SubtitleFont в БД
         // Нормализуем обе стороны — удаляем расширение и приводим к lowercase
         const normalizeFontName = (name: string) => name.toLowerCase().replace(/\.(ttf|otf|ttc|woff2?)$/i, '')
         const libraryFontNames = new Set(
-          libraryEp.subtitleTracks.flatMap((t) => t.fonts.map((f) => normalizeFontName(f.fontName)))
+          libraryEp.subtitleTracks.flatMap((t) => t.fonts.map((f) => normalizeFontName(f.fontName))),
         )
         const donorFonts = extra?.attachmentFonts || []
         const missingFonts = donorFonts.filter((f) => !libraryFontNames.has(normalizeFontName(f)))
@@ -358,12 +358,11 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
         externalSubtitles: episodes.reduce((s, e) => s + e.missing.externalSubtitles.length, 0),
       }
 
-      const totalTracksToRestore =
-        totalMissing.audio +
-        totalMissing.subtitles +
-        totalMissing.externalAudio +
-        totalMissing.externalSubtitles +
-        totalMissing.fonts
+      const totalTracksToRestore = totalMissing.audio
+        + totalMissing.subtitles
+        + totalMissing.externalAudio
+        + totalMissing.externalSubtitles
+        + totalMissing.fonts
 
       setComparison({ episodes, totalMissing, totalTracksToRestore })
 
@@ -531,7 +530,7 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
         await api.restoreTracks.setConcurrency(value)
       }
     },
-    [stateManagerSetConcurrency]
+    [stateManagerSetConcurrency],
   )
 
   // === Сброс ===

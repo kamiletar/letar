@@ -42,10 +42,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   const home = match.homeTeam.team.name
   const away = match.awayTeam.team.name
-  const description =
-    match.status === 'FINISHED'
-      ? `${home} ${match.homeScore} : ${match.awayScore} ${away} — результат матча`
-      : `${home} vs ${away} — матч Кубка Большого Слэма`
+  const description = match.status === 'FINISHED'
+    ? `${home} ${match.homeScore} : ${match.awayScore} ${away} — результат матча`
+    : `${home} vs ${away} — матч Кубка Большого Слэма`
 
   const ogImages = match.posterUrl ? [{ url: `/api/files/${match.posterUrl}`, alt: `${home} vs ${away}` }] : undefined
 
@@ -151,12 +150,12 @@ export default async function MatchPage({ params }: { params: Params }) {
   // Может ли текущий пользователь загружать фото (участник команды)
   const canUploadPhoto = currentUserId
     ? match.homeTeam.playerTeamSeasons?.some(
-        (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId
-      ) ||
-      match.awayTeam.playerTeamSeasons?.some(
-        (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId
-      ) ||
-      canEditMatch
+      (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId,
+    )
+      || match.awayTeam.playerTeamSeasons?.some(
+        (pts: { player: { userId: string | null } }) => pts.player.userId === currentUserId,
+      )
+      || canEditMatch
     : false
 
   const isFinished = match.status === 'FINISHED'
@@ -171,12 +170,12 @@ export default async function MatchPage({ params }: { params: Params }) {
 
   const mvp = isFinished
     ? findMatchMVP(
-        match.performances.map((p) => ({
-          playerName: p.player.name,
-          playerSlug: p.player.slug,
-          totalScore: p.totalScore,
-        }))
-      )
+      match.performances.map((p) => ({
+        playerName: p.player.name,
+        playerSlug: p.player.slug,
+        totalScore: p.totalScore,
+      })),
+    )
     : null
 
   const half1 = match.performances.filter((p) => p.half === 1)
@@ -250,15 +249,17 @@ export default async function MatchPage({ params }: { params: Params }) {
 
         {/* Мета: сезон, тур */}
         <VStack gap={1} mb={6} position="relative">
-          {match.tour ? (
-            <Text fontSize="xs" color="whiteAlpha.500" textTransform="uppercase" letterSpacing="wide">
-              {match.tour.round.season.name} — {match.tour.round.name}, Тур {match.tour.number}
-            </Text>
-          ) : (
-            <Text fontSize="xs" color="whiteAlpha.500" textTransform="uppercase" letterSpacing="wide">
-              Товарищеский матч
-            </Text>
-          )}
+          {match.tour
+            ? (
+              <Text fontSize="xs" color="whiteAlpha.500" textTransform="uppercase" letterSpacing="wide">
+                {match.tour.round.season.name} — {match.tour.round.name}, Тур {match.tour.number}
+              </Text>
+            )
+            : (
+              <Text fontSize="xs" color="whiteAlpha.500" textTransform="uppercase" letterSpacing="wide">
+                Товарищеский матч
+              </Text>
+            )}
           {match.league && (
             <Badge colorPalette="brand" variant="subtle" size="sm">
               {match.league.name}
@@ -272,21 +273,23 @@ export default async function MatchPage({ params }: { params: Params }) {
           <VStack gap={2} flex={1} align="center">
             <Link href={`/${citySlug}/teams/${homeTeam.slug}`}>
               <Box w={{ base: 12, md: 16 }} h={{ base: 12, md: 16 }} borderRadius="xl" overflow="hidden">
-                {homeTeam.logo ? (
-                  <Image
-                    src={`/api/files/${homeTeam.logo}`}
-                    alt={homeTeam.name}
-                    width={64}
-                    height={64}
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                  />
-                ) : (
-                  <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
-                    <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
-                      {homeTeam.name.charAt(0)}
-                    </Text>
-                  </Flex>
-                )}
+                {homeTeam.logo
+                  ? (
+                    <Image
+                      src={`/api/files/${homeTeam.logo}`}
+                      alt={homeTeam.name}
+                      width={64}
+                      height={64}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    />
+                  )
+                  : (
+                    <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
+                      <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
+                        {homeTeam.name.charAt(0)}
+                      </Text>
+                    </Flex>
+                  )}
               </Box>
             </Link>
             <Link href={`/${citySlug}/teams/${homeTeam.slug}`}>
@@ -303,47 +306,51 @@ export default async function MatchPage({ params }: { params: Params }) {
           </VStack>
 
           {/* Счёт */}
-          {isFinished || isLive ? (
-            <Text
-              fontSize={{ base: '4xl', md: '6xl' }}
-              fontWeight="bold"
-              fontFamily="mono"
-              color={isLive ? 'brand.400' : 'white'}
-              letterSpacing="wider"
-              flexShrink={0}
-              className={isLive ? 'live-pulse' : undefined}
-            >
-              {match.homeScore}
-              <Text display="inline" color="whiteAlpha.400" mx={{ base: 1, md: 2 }}>
-                :
+          {isFinished || isLive
+            ? (
+              <Text
+                fontSize={{ base: '4xl', md: '6xl' }}
+                fontWeight="bold"
+                fontFamily="mono"
+                color={isLive ? 'brand.400' : 'white'}
+                letterSpacing="wider"
+                flexShrink={0}
+                className={isLive ? 'live-pulse' : undefined}
+              >
+                {match.homeScore}
+                <Text display="inline" color="whiteAlpha.400" mx={{ base: 1, md: 2 }}>
+                  :
+                </Text>
+                {match.awayScore}
               </Text>
-              {match.awayScore}
-            </Text>
-          ) : (
-            <Text fontSize={{ base: '2xl', md: '4xl' }} color="whiteAlpha.400" fontWeight="medium" flexShrink={0}>
-              vs
-            </Text>
-          )}
+            )
+            : (
+              <Text fontSize={{ base: '2xl', md: '4xl' }} color="whiteAlpha.400" fontWeight="medium" flexShrink={0}>
+                vs
+              </Text>
+            )}
 
           {/* Гостевая команда */}
           <VStack gap={2} flex={1} align="center">
             <Link href={`/${citySlug}/teams/${awayTeam.slug}`}>
               <Box w={{ base: 12, md: 16 }} h={{ base: 12, md: 16 }} borderRadius="xl" overflow="hidden">
-                {awayTeam.logo ? (
-                  <Image
-                    src={`/api/files/${awayTeam.logo}`}
-                    alt={awayTeam.name}
-                    width={64}
-                    height={64}
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                  />
-                ) : (
-                  <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
-                    <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
-                      {awayTeam.name.charAt(0)}
-                    </Text>
-                  </Flex>
-                )}
+                {awayTeam.logo
+                  ? (
+                    <Image
+                      src={`/api/files/${awayTeam.logo}`}
+                      alt={awayTeam.name}
+                      width={64}
+                      height={64}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    />
+                  )
+                  : (
+                    <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
+                      <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
+                        {awayTeam.name.charAt(0)}
+                      </Text>
+                    </Flex>
+                  )}
               </Box>
             </Link>
             <Link href={`/${citySlug}/teams/${awayTeam.slug}`}>

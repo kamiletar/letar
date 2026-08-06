@@ -39,7 +39,7 @@ export function requireApiKey(request: NextRequest): NextResponse | null {
         error: 'Unauthorized',
         message: 'Invalid or missing API key. Include X-Dashboard-Secret header.',
       },
-      { status: 401 }
+      { status: 401 },
     )
   }
 

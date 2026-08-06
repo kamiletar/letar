@@ -36,11 +36,11 @@ export function useEpisodeNavigation(options: UseEpisodeNavigationOptions) {
   const { data: allEpisodes } = useFindManyEpisode(
     episode?.animeId
       ? {
-          where: { animeId: episode.animeId },
-          orderBy: { number: 'asc' },
-          select: { id: true, number: true, name: true, thumbnailCids: true },
-        }
-      : undefined
+        where: { animeId: episode.animeId },
+        orderBy: { number: 'asc' },
+        select: { id: true, number: true, name: true, thumbnailCids: true },
+      }
+      : undefined,
   )
 
   // Находим предыдущий и следующий эпизоды

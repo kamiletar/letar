@@ -126,7 +126,7 @@ async function main() {
     console.error(`[canary] ❌ FAIL: ${message}`)
 
     await sendTelegramAlert(
-      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`
+      `🚨 *letar email canary FAIL*\nFrom: \`${CANARY_FROM}\`\nTo: \`${CANARY_TO}\`\nError: ${message}`,
     )
     process.exit(1)
   }

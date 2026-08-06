@@ -196,7 +196,12 @@ export default function TransfersPage() {
                         <Table.Cell fontWeight="medium">{p.playerName}</Table.Cell>
                         <Table.Cell color="fg.muted">{p.teamName}</Table.Cell>
                         <Table.Cell>
-                          <Button size="xs" colorPalette="teal" variant="outline" onClick={() => setTransferTarget(p)}>
+                          <Button
+                            size="xs"
+                            colorPalette="teal"
+                            variant="outline"
+                            onClick={() => setTransferTarget(p)}
+                          >
                             Трансфер
                           </Button>
                         </Table.Cell>
@@ -215,52 +220,54 @@ export default function TransfersPage() {
         <Heading size="md" mb={3}>
           Мои заявки
         </Heading>
-        {loadingApps ? (
-          <Flex justify="center" py={8}>
-            <Spinner />
-          </Flex>
-        ) : applications.length === 0 ? (
-          <Text color="fg.muted">Нет поданных заявок</Text>
-        ) : (
-          <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-            <Box overflowX="auto">
-              <Table.Root size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Тип</Table.ColumnHeader>
-                    <Table.ColumnHeader>Игрок</Table.ColumnHeader>
-                    <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                    <Table.ColumnHeader>Дата</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {applications.map((app) => (
-                    <Table.Row key={app.id}>
-                      <Table.Cell>
-                        <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
-                          {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell fontWeight="medium">
-                        {app.type === 'TRANSFER'
-                          ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
-                          : (app.playerName ?? '—')}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={statusColor[app.status]} size="sm">
-                          {statusLabel[app.status]}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell fontSize="sm" color="fg.muted">
-                        {formatDateNumeric(app.createdAt)}
-                      </Table.Cell>
+        {loadingApps
+          ? (
+            <Flex justify="center" py={8}>
+              <Spinner />
+            </Flex>
+          )
+          : applications.length === 0
+          ? <Text color="fg.muted">Нет поданных заявок</Text>
+          : (
+            <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+              <Box overflowX="auto">
+                <Table.Root size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Тип</Table.ColumnHeader>
+                      <Table.ColumnHeader>Игрок</Table.ColumnHeader>
+                      <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                      <Table.ColumnHeader>Дата</Table.ColumnHeader>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
+                  </Table.Header>
+                  <Table.Body>
+                    {applications.map((app) => (
+                      <Table.Row key={app.id}>
+                        <Table.Cell>
+                          <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
+                            {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell fontWeight="medium">
+                          {app.type === 'TRANSFER'
+                            ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
+                            : (app.playerName ?? '—')}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={statusColor[app.status]} size="sm">
+                            {statusLabel[app.status]}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell fontSize="sm" color="fg.muted">
+                          {formatDateNumeric(app.createdAt)}
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </Box>
             </Box>
-          </Box>
-        )}
+          )}
       </Box>
 
       {/* Диалог подтверждения трансфера */}

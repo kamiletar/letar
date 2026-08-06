@@ -131,7 +131,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
           dispatchCommand('pause', [])
         },
       }),
-      [dispatchCommand]
+      [dispatchCommand],
     )
 
     /** Обработчик загрузки */
@@ -139,7 +139,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
       (event: { nativeEvent: OnLoadData }) => {
         onLoad?.(event.nativeEvent)
       },
-      [onLoad]
+      [onLoad],
     )
 
     /** Обработчик прогресса */
@@ -147,7 +147,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
       (event: { nativeEvent: OnProgressData }) => {
         onProgress?.(event.nativeEvent)
       },
-      [onProgress]
+      [onProgress],
     )
 
     /** Обработчик ошибки */
@@ -155,7 +155,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
       (event: { nativeEvent: OnErrorData }) => {
         onError?.(event.nativeEvent)
       },
-      [onError]
+      [onError],
     )
 
     /** Обработчик окончания */
@@ -168,7 +168,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
       (event: { nativeEvent: OnSeekData }) => {
         onSeek?.(event.nativeEvent)
       },
-      [onSeek]
+      [onSeek],
     )
 
     // На iOS пока не поддерживается — возвращаем placeholder
@@ -197,7 +197,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
         onSyncVideoSeek={handleSeek}
       />
     )
-  }
+  },
 )
 
 const styles = StyleSheet.create({

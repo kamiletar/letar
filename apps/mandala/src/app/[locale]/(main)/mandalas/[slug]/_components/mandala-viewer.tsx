@@ -121,7 +121,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
     (newSettings: Partial<ViewerSettings>) => {
       updateSettings(newSettings)
     },
-    [updateSettings]
+    [updateSettings],
   )
 
   // Browser fullscreen (скрывает панель браузера)
@@ -205,7 +205,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
   const audioAnalyzerData = useAudioAnalyzer(
     audioElement,
     !audioSyncDisabled && settings.audioSyncEnabled && settings.audioSyncMode !== 'off',
-    settings.audioSource
+    settings.audioSource,
   )
 
   // Вычисление синхронизированных эффектов
@@ -289,7 +289,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
       isReverse: settings.isReverse,
       crossfadeDuration: settings.crossfadeDuration,
     }),
-    [settings.spinDuration, settings.isPaused, settings.isReverse, settings.crossfadeDuration]
+    [settings.spinDuration, settings.isPaused, settings.isReverse, settings.crossfadeDuration],
   )
 
   const glowSettings = useMemo(
@@ -298,7 +298,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
       glowColor: settings.glowColor,
       glowIntensity: settings.glowIntensity,
     }),
-    [settings.glowEnabled, settings.glowColor, settings.glowIntensity]
+    [settings.glowEnabled, settings.glowColor, settings.glowIntensity],
   )
 
   const effectSettings = useMemo(
@@ -306,7 +306,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
       effectType: settings.effectType,
       gradientDuration: settings.gradientDuration,
     }),
-    [settings.effectType, settings.gradientDuration]
+    [settings.effectType, settings.gradientDuration],
   )
 
   const vignetteSettings = useMemo(
@@ -314,7 +314,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
       vignetteEnabled: settings.vignetteEnabled,
       vignetteIntensity: settings.vignetteIntensity,
     }),
-    [settings.vignetteEnabled, settings.vignetteIntensity]
+    [settings.vignetteEnabled, settings.vignetteIntensity],
   )
 
   // Обработчик выбора пресета
@@ -325,7 +325,7 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
         currentPreset: presetId,
       })
     },
-    [updateSettings]
+    [updateSettings],
   )
 
   // Стабильные callbacks для MeditationTimer — избегаем рестарта интервала

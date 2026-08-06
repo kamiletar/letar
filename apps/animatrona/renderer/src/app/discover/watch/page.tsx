@@ -99,7 +99,7 @@ function DiscoverWatchContent() {
   const shikimoriId = animeDetail?.shikimoriId ? Number(animeDetail.shikimoriId) : null
   const { data: localAnimes } = useFindManyAnime(
     { where: { shikimoriId: shikimoriId ?? undefined }, select: { id: true } },
-    { enabled: shikimoriId != null }
+    { enabled: shikimoriId != null },
   )
   const isInLibrary = (localAnimes?.length ?? 0) > 0
 
@@ -185,12 +185,11 @@ function DiscoverWatchContent() {
   }, [animeDetail?.episodes, episodeNumber])
 
   const prevEpisode = currentEpIndex > 0 ? animeDetail!.episodes[currentEpIndex - 1] : null
-  const nextEpisode =
-    animeDetail?.episodes && currentEpIndex >= 0 && currentEpIndex < animeDetail.episodes.length - 1
-      ? animeDetail.episodes[currentEpIndex + 1]
-      : null
-  const isLastEpisode =
-    animeDetail?.episodes && currentEpIndex >= 0 && currentEpIndex === animeDetail.episodes.length - 1
+  const nextEpisode = animeDetail?.episodes && currentEpIndex >= 0 && currentEpIndex < animeDetail.episodes.length - 1
+    ? animeDetail.episodes[currentEpIndex + 1]
+    : null
+  const isLastEpisode = animeDetail?.episodes && currentEpIndex >= 0
+    && currentEpIndex === animeDetail.episodes.length - 1
 
   // Прогресс просмотра (БД)
   const discoverProgress = useDiscoverProgress({
@@ -242,7 +241,7 @@ function DiscoverWatchContent() {
     if (trackMode === 'dub') {
       // Озвучка — ищем субтитры-надписи (signs)
       const signs = episodeData.subtitleTracks.find(
-        (t) => t.title?.toLowerCase().includes('sign') || t.title?.toLowerCase().includes('надпис')
+        (t) => t.title?.toLowerCase().includes('sign') || t.title?.toLowerCase().includes('надпис'),
       )
       return signs ?? null
     }
@@ -296,7 +295,7 @@ function DiscoverWatchContent() {
       setIsCompletionOpen(false)
       router.push(`/discover/watch?${params.toString()}`)
     },
-    [title, animeId]
+    [title, animeId],
   )
 
   const goToPrevEpisode = useCallback(() => {
@@ -375,9 +374,9 @@ function DiscoverWatchContent() {
         for (const ch of episodeData.chapters) {
           const type = ch.type
           if (
-            (type === 'OP' || type === 'ED' || type === 'RECAP' || type === 'PREVIEW') &&
-            time >= ch.startTime &&
-            time < ch.endTime - 0.5
+            (type === 'OP' || type === 'ED' || type === 'RECAP' || type === 'PREVIEW')
+            && time >= ch.startTime
+            && time < ch.endTime - 0.5
           ) {
             const skipKey = `${ch.id}-${ch.startTime}`
             if (lastSkipRef.current !== skipKey) {
@@ -408,7 +407,7 @@ function DiscoverWatchContent() {
       discoverProgress,
       selectedAudioTrackId,
       selectedSubtitleTrackId,
-    ]
+    ],
   )
 
   /** Обработчик окончания видео */
@@ -517,16 +516,12 @@ function DiscoverWatchContent() {
           hasNextEpisode={!!nextEpisode}
           onPrevEpisode={goToPrevEpisode}
           onNextEpisode={goToNextEpisode}
-          prevEpisodeTooltip={
-            prevEpisode
-              ? `Эпизод ${prevEpisode.number}${prevEpisode.title ? `: ${prevEpisode.title}` : ''}`
-              : 'Это первый эпизод'
-          }
-          nextEpisodeTooltip={
-            nextEpisode
-              ? `Эпизод ${nextEpisode.number}${nextEpisode.title ? `: ${nextEpisode.title}` : ''}`
-              : 'Это последний эпизод'
-          }
+          prevEpisodeTooltip={prevEpisode
+            ? `Эпизод ${prevEpisode.number}${prevEpisode.title ? `: ${prevEpisode.title}` : ''}`
+            : 'Это первый эпизод'}
+          nextEpisodeTooltip={nextEpisode
+            ? `Эпизод ${nextEpisode.number}${nextEpisode.title ? `: ${nextEpisode.title}` : ''}`
+            : 'Это последний эпизод'}
           headerLeft={
             <HStack gap={2}>
               <Button onClick={handleBack} variant="ghost" size="sm" color="white" _hover={{ bg: 'whiteAlpha.200' }}>

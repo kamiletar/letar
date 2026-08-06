@@ -90,7 +90,7 @@ const AUTOCOMPLETE_MAP: Record<string, string> = {
 export function resolveAutoComplete(
   fieldName: string,
   metaAutocomplete?: string,
-  propAutocomplete?: string
+  propAutocomplete?: string,
 ): string | undefined {
   // 1. Prop имеет наивысший приоритет
   if (propAutocomplete !== undefined) {

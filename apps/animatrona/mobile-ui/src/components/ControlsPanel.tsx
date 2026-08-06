@@ -38,9 +38,9 @@ export function ControlsPanel({ position, visible, children }: ControlsPanelProp
       transition="transform 0.3s ease-out, opacity 0.2s ease-out"
       pointerEvents={visible ? 'auto' : 'none'}
       // Градиентный фон с большей непрозрачностью
-      bgGradient={
-        isTop ? 'linear(to-b, black/80, black/40, transparent)' : 'linear(to-t, black/80, black/40, transparent)'
-      }
+      bgGradient={isTop
+        ? 'linear(to-b, black/80, black/40, transparent)'
+        : 'linear(to-t, black/80, black/40, transparent)'}
       p={4}
       // Высокий z-index для fullscreen режима
       zIndex={9999}

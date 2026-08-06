@@ -22,7 +22,7 @@ export async function findManyEncodingProfiles(args?: Prisma.EncodingProfileFind
  */
 export async function findUniqueEncodingProfile(
   id: string,
-  include?: Prisma.EncodingProfileInclude
+  include?: Prisma.EncodingProfileInclude,
 ): Promise<EncodingProfile | null> {
   return prisma.encodingProfile.findUnique({
     where: { id },
@@ -34,7 +34,7 @@ export async function findUniqueEncodingProfile(
  * Получить первый профиль по условию (для профиля по умолчанию)
  */
 export async function findFirstEncodingProfile(
-  args?: Prisma.EncodingProfileFindFirstArgs
+  args?: Prisma.EncodingProfileFindFirstArgs,
 ): Promise<EncodingProfile | null> {
   return prisma.encodingProfile.findFirst(args)
 }
@@ -73,7 +73,7 @@ export async function createEncodingProfile(data: Prisma.EncodingProfileCreateIn
  */
 export async function updateEncodingProfile(
   id: string,
-  data: Prisma.EncodingProfileUpdateInput
+  data: Prisma.EncodingProfileUpdateInput,
 ): Promise<EncodingProfile> {
   // Если профиль становится default, сбрасываем флаг у остальных
   if (data.isDefault === true) {

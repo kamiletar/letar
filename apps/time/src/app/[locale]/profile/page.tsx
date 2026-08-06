@@ -114,45 +114,47 @@ export default function ProfilePage() {
           <Text fontWeight="200">{session.user.email}</Text>
         </HStack>
 
-        {hasSubscription ? (
-          <>
-            <VStack w="full" align="start" gap={3}>
-              {checkboxes.map(({ key, label }) => (
-                <Checkbox.Root
-                  key={key}
-                  checked={settings[key]}
-                  onCheckedChange={(details) => {
-                    setSettings((prev) => ({ ...prev, [key]: !!details.checked }))
-                    setSaved(false)
-                  }}
-                >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control />
-                  <Checkbox.Label fontWeight="100">{label}</Checkbox.Label>
-                </Checkbox.Root>
-              ))}
-            </VStack>
+        {hasSubscription
+          ? (
+            <>
+              <VStack w="full" align="start" gap={3}>
+                {checkboxes.map(({ key, label }) => (
+                  <Checkbox.Root
+                    key={key}
+                    checked={settings[key]}
+                    onCheckedChange={(details) => {
+                      setSettings((prev) => ({ ...prev, [key]: !!details.checked }))
+                      setSaved(false)
+                    }}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                    <Checkbox.Label fontWeight="100">{label}</Checkbox.Label>
+                  </Checkbox.Root>
+                ))}
+              </VStack>
 
-            <HStack w="full" gap={3}>
-              <Button flex={1} variant="outline" fontWeight="200" onClick={handleSave}>
-                {saved ? <LuCheck /> : <LuSave />}
-                {saved ? t('saved') : t('save')}
+              <HStack w="full" gap={3}>
+                <Button flex={1} variant="outline" fontWeight="200" onClick={handleSave}>
+                  {saved ? <LuCheck /> : <LuSave />}
+                  {saved ? t('saved') : t('save')}
+                </Button>
+                <Button flex={1} variant="ghost" fontWeight="100" colorPalette="red" onClick={handleUnsubscribe}>
+                  {t('unsubscribe')}
+                </Button>
+              </HStack>
+            </>
+          )
+          : (
+            <VStack gap={3}>
+              <Text fontWeight="100" color="fg.muted" textAlign="center">
+                {t('noSubscription')}
+              </Text>
+              <Button variant="outline" fontWeight="200" onClick={handleCreate}>
+                {t('createSubscription')}
               </Button>
-              <Button flex={1} variant="ghost" fontWeight="100" colorPalette="red" onClick={handleUnsubscribe}>
-                {t('unsubscribe')}
-              </Button>
-            </HStack>
-          </>
-        ) : (
-          <VStack gap={3}>
-            <Text fontWeight="100" color="fg.muted" textAlign="center">
-              {t('noSubscription')}
-            </Text>
-            <Button variant="outline" fontWeight="200" onClick={handleCreate}>
-              {t('createSubscription')}
-            </Button>
-          </VStack>
-        )}
+            </VStack>
+          )}
       </VStack>
     </Box>
   )

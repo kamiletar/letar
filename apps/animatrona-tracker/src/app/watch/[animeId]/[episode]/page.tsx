@@ -82,7 +82,7 @@ const findAnimeBySlug = cache(async (slug: string, user?: Parameters<typeof getE
 async function loadWatchProgress(
   user: Parameters<typeof getEnhancedPrisma>[0],
   animeId: string,
-  episodeNumber: number
+  episodeNumber: number,
 ) {
   const db = getEnhancedPrisma(user)
 
@@ -139,8 +139,9 @@ export default async function WatchPage({ params }: WatchPageProps) {
   }
 
   // Slug для навигации: PUBLISHED → shikimoriId, остальные → directoryCid
-  const animeSlug =
-    anime.status === 'PUBLISHED' && anime.shikimoriId ? String(anime.shikimoriId) : (anime.directoryCid ?? anime.id)
+  const animeSlug = anime.status === 'PUBLISHED' && anime.shikimoriId
+    ? String(anime.shikimoriId)
+    : (anime.directoryCid ?? anime.id)
 
   // Неавторизованные пользователи могут смотреть только первый эпизод
   if (!session?.user && episodeNumber > 1) {
@@ -284,7 +285,9 @@ export default async function WatchPage({ params }: WatchPageProps) {
 
   // Приоритет trackMode: per-anime override > глобальный из профиля > null (клиент решит)
   const initialTrackMode = (watchData?.trackMode ?? userPreferredTrackMode ?? null) as
-    'RUSSIAN_DUB' | 'ORIGINAL_SUB' | null
+    | 'RUSSIAN_DUB'
+    | 'ORIGINAL_SUB'
+    | null
 
   return (
     <TrackerVideoPlayer

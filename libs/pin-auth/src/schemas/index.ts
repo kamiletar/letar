@@ -1,1 +1,1 @@
-export { VerifyPinSchema, createPinSchema, type CreatePinSchemaConfig, type VerifyPinFormData } from './pin.schema'
+export { createPinSchema, type CreatePinSchemaConfig, type VerifyPinFormData, VerifyPinSchema } from './pin.schema'

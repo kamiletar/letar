@@ -59,7 +59,7 @@ export async function POST() {
         nowStatus: newStatus,
         usedBytes: stat.repoSize ?? null,
       }
-    })
+    }),
   )
 
   return NextResponse.json({ data: results })

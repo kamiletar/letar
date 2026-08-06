@@ -115,7 +115,7 @@ export const PasswordStrengthMeter = React.forwardRef<HTMLDivElement, PasswordSt
         {label && <HStack textStyle="xs">{label}</HStack>}
       </HStack>
     )
-  }
+  },
 )
 
 function getColorPalette(percent: number) {

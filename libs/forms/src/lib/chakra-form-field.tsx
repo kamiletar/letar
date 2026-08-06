@@ -55,12 +55,11 @@ export const ChakraFormField = forwardRef<HTMLDivElement, ChakraFormFieldProps>(
   const isInvalid = invalid ?? hasErrors
 
   // Format error messages
-  const errorMessages =
-    errorText ??
-    (hasErrors
+  const errorMessages = errorText
+    ?? (hasErrors
       ? fieldErrors
-          .map((e: unknown) => (typeof e === 'string' ? e : ((e as { message?: string }).message ?? String(e))))
-          .join(', ')
+        .map((e: unknown) => (typeof e === 'string' ? e : ((e as { message?: string }).message ?? String(e))))
+        .join(', ')
       : undefined)
 
   // Workaround: Chakra UI Field types do not include children in Next.js 16 production build

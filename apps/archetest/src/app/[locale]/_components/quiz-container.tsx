@@ -71,7 +71,7 @@ export function QuizContainer({
   /** Число отвеченных релевантных вопросов по шкалам (от сервера) — вход ipsative-интервалов (5.6) */
   const [relevantCounts, setRelevantCounts] = useState<Record<PersonalityTypeCode, number> | null>(null)
   const [averagedScores, setAveragedScores] = useState<Record<PersonalityTypeCode, number> | null>(
-    initialProgress?.averagedScores ?? null
+    initialProgress?.averagedScores ?? null,
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [newAchievements, setNewAchievements] = useState<string[]>([])
@@ -119,7 +119,7 @@ export function QuizContainer({
         }
       }
     },
-    [isRu]
+    [isRu],
   )
 
   // Проверяем pending данные из sessionStorage при маунте
@@ -219,7 +219,7 @@ export function QuizContainer({
         // sessionStorage недоступен — игнорируем
       }
     },
-    [seed, skipped, mood, sessionLocale]
+    [seed, skipped, mood, sessionLocale],
   )
 
   // Ответ на вопрос
@@ -236,7 +236,7 @@ export function QuizContainer({
         return next
       })
     },
-    [currentQuestion, saveProgress]
+    [currentQuestion, saveProgress],
   )
 
   // Пропуск вопроса (убрать ответ если был, добавить в skipped)
@@ -289,7 +289,7 @@ export function QuizContainer({
   const calculateClientScores = useCallback(
     (answerMap: Map<string, number>): Record<PersonalityTypeCode, number> =>
       computeClientScores(answerMap, currentQuestions),
-    [currentQuestions]
+    [currentQuestions],
   )
 
   // Завершить тест
@@ -474,14 +474,12 @@ export function QuizContainer({
             current={currentIndex}
             total={shuffledQuestions.length}
             answered={answers.size}
-            globalProgress={
-              progress
-                ? {
-                    totalAnswered: progress.totalAnswered + answers.size,
-                    totalQuestions: progress.totalQuestions,
-                  }
-                : undefined
-            }
+            globalProgress={progress
+              ? {
+                totalAnswered: progress.totalAnswered + answers.size,
+                totalQuestions: progress.totalQuestions,
+              }
+              : undefined}
           />
           <QuizQuestionCard
             scenario={isRu ? currentQuestion.scenario : currentQuestion.scenarioEn}
@@ -604,16 +602,14 @@ export function QuizContainer({
           newAchievements={newAchievements}
           rankInfo={rankInfo}
           xpCountedToday={xpCountedToday}
-          progress={
-            progress
-              ? {
-                  totalAnswered: progress.totalAnswered,
-                  totalQuestions: progress.totalQuestions,
-                  coveragePercent: progress.coveragePercent,
-                  availableCount: progress.availableCount,
-                }
-              : undefined
-          }
+          progress={progress
+            ? {
+              totalAnswered: progress.totalAnswered,
+              totalQuestions: progress.totalQuestions,
+              coveragePercent: progress.coveragePercent,
+              availableCount: progress.availableCount,
+            }
+            : undefined}
         />
       </>
     )

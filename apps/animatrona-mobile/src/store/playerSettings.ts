@@ -51,6 +51,6 @@ export const usePlayerSettingsStore = create<PlayerSettingsState>()(
     {
       name: 'animatrona-player-settings',
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 )

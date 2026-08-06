@@ -9,7 +9,7 @@ import { navData } from '../../_components/sidebar'
 export const metadata: Metadata = getCategoryMetadata(
   'Регламенты',
   'Документы, устанавливающие порядок проведения процедур: Дуэльный, Вечевой и Муниципальный регламенты.',
-  '/regulations'
+  '/regulations',
 )
 
 export default function RegulationsPage() {

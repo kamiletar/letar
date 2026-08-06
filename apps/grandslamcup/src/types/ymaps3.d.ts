@@ -26,10 +26,10 @@ interface Ymaps3MarkerOptions {
 
 interface Ymaps3Api {
   ready: Promise<void>
-  YMap: new (container: HTMLElement, options: Ymaps3MapOptions) => Ymaps3Map
-  YMapDefaultSchemeLayer: new (options?: Record<string, unknown>) => any
-  YMapDefaultFeaturesLayer: new (options?: Record<string, unknown>) => any
-  YMapMarker: new (options: { coordinates: [number, number] }, element?: HTMLElement) => any
+  YMap: new(container: HTMLElement, options: Ymaps3MapOptions) => Ymaps3Map
+  YMapDefaultSchemeLayer: new(options?: Record<string, unknown>) => any
+  YMapDefaultFeaturesLayer: new(options?: Record<string, unknown>) => any
+  YMapMarker: new(options: { coordinates: [number, number] }, element?: HTMLElement) => any
 }
 
 declare global {

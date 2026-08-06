@@ -74,11 +74,11 @@ export function isRetryableError(error: Error): boolean {
   // Сетевые ошибки и таймауты
   const message = error.message.toLowerCase()
   if (
-    message.includes('timeout') ||
-    message.includes('connection') ||
-    message.includes('busy') ||
-    message.includes('недоступен') ||
-    message.includes('занят')
+    message.includes('timeout')
+    || message.includes('connection')
+    || message.includes('busy')
+    || message.includes('недоступен')
+    || message.includes('занят')
   ) {
     return true
   }
@@ -95,7 +95,7 @@ export function calculateDelay(
   initialDelayMs: number,
   backoffMultiplier: number,
   maxDelayMs: number,
-  jitter: boolean
+  jitter: boolean,
 ): number {
   // Экспоненциальный backoff: delay = initialDelay * multiplier^(attempt-1)
   const exponentialDelay = initialDelayMs * Math.pow(backoffMultiplier, attempt - 1)
@@ -211,7 +211,7 @@ export async function retry<T>(fn: () => Promise<T>, options: RetryOptions = {})
  */
 export function withRetry<TArgs extends unknown[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): (...args: TArgs) => Promise<RetryResult<TResult>> {
   return async (...args: TArgs) => {
     return retry(() => fn(...args), options)

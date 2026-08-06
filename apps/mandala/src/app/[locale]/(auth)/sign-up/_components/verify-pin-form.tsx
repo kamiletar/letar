@@ -116,7 +116,7 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
         setIsVerifying(false)
       }
     },
-    [email, router, tErrors]
+    [email, router, tErrors],
   )
 
   // Повторная отправка PIN-кода
@@ -239,15 +239,17 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
       </VStack>
 
       <Box textAlign="center">
-        {canResend ? (
-          <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
-            {t('resendCode')}
-          </Button>
-        ) : (
-          <Text color="fg.muted" fontSize="sm">
-            {t('resendIn', { seconds: resendCountdown })}
-          </Text>
-        )}
+        {canResend
+          ? (
+            <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
+              {t('resendCode')}
+            </Button>
+          )
+          : (
+            <Text color="fg.muted" fontSize="sm">
+              {t('resendIn', { seconds: resendCountdown })}
+            </Text>
+          )}
       </Box>
 
       <Text color="fg.muted" fontSize="xs" textAlign="center">

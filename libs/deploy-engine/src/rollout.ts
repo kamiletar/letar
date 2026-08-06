@@ -87,7 +87,7 @@ async function listAppContainers(executor: DeployEngineExecutor, projectName: st
 /** Резолвит имя единственного существующего контейнера сервиса `app` ДО scale-up (пока их ровно один). */
 async function resolveOldContainer(
   executor: DeployEngineExecutor,
-  projectName: string
+  projectName: string,
 ): Promise<{ name?: string; error?: string }> {
   const names = await listAppContainers(executor, projectName)
   if (names.length !== 1) {
@@ -109,7 +109,7 @@ async function resolveOldContainer(
 async function resolveNewContainer(
   executor: DeployEngineExecutor,
   projectName: string,
-  oldContainer: string
+  oldContainer: string,
 ): Promise<{ name?: string; error?: string }> {
   const names = await listAppContainers(executor, projectName)
   const candidates = names.filter((n) => n !== oldContainer)
@@ -137,7 +137,7 @@ async function resolveNewContainer(
 async function smokeTest(
   executor: DeployEngineExecutor,
   app: string,
-  newContainer: string
+  newContainer: string,
 ): Promise<{ ok: boolean; detail?: string }> {
   const composePath = composePathForApp(app)
   const raw = await executor.readFile(composePath)
@@ -163,7 +163,7 @@ async function waitHealthy(
   containerName: string,
   timeoutMs: number,
   pollIntervalMs: number,
-  sleep: (ms: number) => Promise<void>
+  sleep: (ms: number) => Promise<void>,
 ): Promise<{ ok: boolean; detail?: string }> {
   const deadline = Date.now() + timeoutMs
   for (;;) {
@@ -193,7 +193,7 @@ export async function runRollout(
   app: string,
   options: RolloutOptions,
   sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
-  onStep?: (step: RolloutStep) => void
+  onStep?: (step: RolloutStep) => void,
 ): Promise<RolloutResult> {
   const steps: RolloutStep[] = []
   const push = (step: RolloutStep): RolloutStep => {
@@ -248,7 +248,7 @@ export async function runRollout(
       'app=2',
       'app',
     ],
-    { cwd: dir, env: scaleUpEnv }
+    { cwd: dir, env: scaleUpEnv },
   )
   push({
     id: 'scale-up',
@@ -277,7 +277,7 @@ export async function runRollout(
     newContainer,
     options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS,
     options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS,
-    sleep
+    sleep,
   )
   push({
     id: 'wait-healthy',

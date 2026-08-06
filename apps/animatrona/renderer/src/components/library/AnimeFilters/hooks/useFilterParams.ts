@@ -100,7 +100,7 @@ export function useFilterParams() {
       reuploadStatus: searchParams.get('reupload') || '',
       ageRatingFilter: searchParams.get('age') || '',
     }),
-    [searchParams]
+    [searchParams],
   )
 
   // Восстановление фильтров из sessionStorage при первом рендере (если URL пустой)
@@ -192,7 +192,7 @@ export function useFilterParams() {
       const query = current.toString()
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams],
   )
 
   // Обновить один параметр
@@ -200,7 +200,7 @@ export function useFilterParams() {
     <K extends keyof FilterParams>(key: K, value: FilterParams[K]) => {
       updateUrl({ [key]: value })
     },
-    [updateUrl]
+    [updateUrl],
   )
 
   // Обновить несколько параметров
@@ -208,7 +208,7 @@ export function useFilterParams() {
     (newParams: Partial<FilterParams>) => {
       updateUrl(newParams)
     },
-    [updateUrl]
+    [updateUrl],
   )
 
   // Сбросить все параметры (и очистить sessionStorage)

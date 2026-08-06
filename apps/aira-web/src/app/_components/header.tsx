@@ -62,7 +62,8 @@ export function Header() {
                 aria-label={isOpen ? t('closeMenu') : t('openMenu')}
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() =>
+                  setIsOpen(!isOpen)}
               >
                 {isOpen ? <LuX size={20} /> : <LuMenu size={20} />}
               </IconButton>

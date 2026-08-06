@@ -27,7 +27,7 @@ async function main() {
         update: {},
         create: genre,
       })
-    )
+    ),
   )
 
   // Создаём настройки по умолчанию
@@ -94,7 +94,7 @@ async function main() {
             genreId: genre.id,
           },
         })
-      )
+      ),
     )
   }
 
@@ -117,7 +117,7 @@ async function main() {
           transcodeStatus: 'QUEUED',
         },
       })
-    )
+    ),
   )
 }
 

@@ -105,7 +105,7 @@ export function useWatchProgress() {
     (filePath: string): WatchProgressEntry | null => {
       return storage[filePath] ?? pendingUpdatesRef.current.get(filePath) ?? null
     },
-    [storage]
+    [storage],
   )
 
   /**
@@ -128,7 +128,7 @@ export function useWatchProgress() {
       // Устанавливаем новый таймер
       saveTimeoutRef.current = setTimeout(flushToStorage, SAVE_INTERVAL)
     },
-    [flushToStorage]
+    [flushToStorage],
   )
 
   /**
@@ -143,7 +143,7 @@ export function useWatchProgress() {
       })
       flushToStorage()
     },
-    [flushToStorage]
+    [flushToStorage],
   )
 
   /**
@@ -175,7 +175,7 @@ export function useWatchProgress() {
       const percent = (entry.time / entry.duration) * 100
       return percent >= MIN_PROGRESS_PERCENT && percent <= MAX_PROGRESS_PERCENT
     },
-    [getProgress]
+    [getProgress],
   )
 
   /**
@@ -196,7 +196,7 @@ export function useWatchProgress() {
 
       return entry.time
     },
-    [getProgress]
+    [getProgress],
   )
 
   /**
@@ -210,7 +210,7 @@ export function useWatchProgress() {
       }
       return Math.min(100, Math.round((entry.time / entry.duration) * 100))
     },
-    [getProgress]
+    [getProgress],
   )
 
   /**

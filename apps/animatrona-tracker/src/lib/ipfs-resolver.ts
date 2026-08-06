@@ -56,7 +56,7 @@ export async function resolveAnimeFromDirectory(directoryCid: string): Promise<R
         `Не удалось загрузить данные из IPFS. Первая попытка: ${
           firstError instanceof Error ? firstError.message : String(firstError)
         }`,
-        { cause: firstError }
+        { cause: firstError },
       )
     }
 
@@ -64,10 +64,10 @@ export async function resolveAnimeFromDirectory(directoryCid: string): Promise<R
       return await resolveWithGateway(directoryCid, workingGateway)
     } catch (secondError) {
       throw new Error(
-        `Не удалось загрузить данные из IPFS после двух попыток. ` +
-          `Gateway 1: ${firstError instanceof Error ? firstError.message : String(firstError)}. ` +
-          `Gateway 2: ${secondError instanceof Error ? secondError.message : String(secondError)}`,
-        { cause: secondError }
+        `Не удалось загрузить данные из IPFS после двух попыток. `
+          + `Gateway 1: ${firstError instanceof Error ? firstError.message : String(firstError)}. `
+          + `Gateway 2: ${secondError instanceof Error ? secondError.message : String(secondError)}`,
+        { cause: secondError },
       )
     }
   }
@@ -131,10 +131,9 @@ export function extractAnimeMetadata(resolved: ResolvedAnime) {
     // Первая студия
     studio: (animeInfo?.studios ?? manifest.studios)?.[0]?.name,
     // Жанры: приоритет русские названия
-    genres:
-      (animeInfo?.genres ?? manifest.genres)
-        ?.map((g: { nameRu?: string; name: string }) => g.nameRu || g.name)
-        .filter(Boolean) ?? [],
+    genres: (animeInfo?.genres ?? manifest.genres)
+      ?.map((g: { nameRu?: string; name: string }) => g.nameRu || g.name)
+      .filter(Boolean) ?? [],
     // Внешние ID из externalIds (AnimeInfo приоритетнее manifest)
     shikimoriId: animeInfo?.externalIds?.shikimori ?? manifest.externalIds?.shikimori ?? null,
     malId: animeInfo?.externalIds?.mal ?? manifest.externalIds?.mal ?? null,
@@ -178,7 +177,7 @@ export interface ResolvedRelation {
  */
 export async function resolveRelations(
   manifest: AnimeManifest,
-  shikimoriId: number | null | undefined
+  shikimoriId: number | null | undefined,
 ): Promise<ResolvedRelation[]> {
   if (!manifest.franchiseGraphCid || !shikimoriId) {
     return []

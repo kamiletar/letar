@@ -18,7 +18,7 @@ export function FormSlotPicker() {
     (slot: SlotOption | null) => {
       form.setFieldValue('preferredTime', slot?.value || '')
     },
-    [form]
+    [form],
   )
 
   return (

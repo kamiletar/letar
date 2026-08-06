@@ -53,6 +53,6 @@ export async function GET(request: NextRequest) {
       teamSeasonId: pts.teamSeasonId,
       teamName: pts.teamSeason.team.name,
       role: pts.role,
-    }))
+    })),
   )
 }

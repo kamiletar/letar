@@ -152,11 +152,9 @@ function createStore<T = Record<string, unknown>>(initial: T) {
 }
 
 // Conditional generic
-type DeepReadonly<T> = T extends (infer U)[]
-  ? ReadonlyArray<DeepReadonly<U>>
-  : T extends object
-    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
-    : T
+type DeepReadonly<T> = T extends (infer U)[] ? ReadonlyArray<DeepReadonly<U>>
+  : T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+  : T
 ```
 
 ---

@@ -36,10 +36,10 @@ const config = {
     // Перехватываем импорты singleton пакетов из библиотек
     resolveRequest: (context, moduleName, platform) => {
       if (
-        moduleName === 'react' ||
-        moduleName === 'react-native' ||
-        moduleName.startsWith('react-native/') ||
-        moduleName.startsWith('react/')
+        moduleName === 'react'
+        || moduleName === 'react-native'
+        || moduleName.startsWith('react-native/')
+        || moduleName.startsWith('react/')
       ) {
         return {
           filePath: require.resolve(moduleName, { paths: [projectRoot] }),

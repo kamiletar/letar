@@ -22,7 +22,7 @@ export interface SlotRect {
  */
 export function useBracketPositions(
   containerRef: RefObject<HTMLDivElement | null>,
-  slotIds: string[]
+  slotIds: string[],
 ): Map<string, SlotRect> {
   const [positions, setPositions] = useState<Map<string, SlotRect>>(new Map())
 

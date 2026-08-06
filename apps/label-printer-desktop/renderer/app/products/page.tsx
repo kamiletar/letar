@@ -108,8 +108,8 @@ export default function ProductsPage() {
   } = useFindManyProduct({
     where: search
       ? {
-          OR: [{ gtin: { contains: search } }, { name: { contains: search } }, { articleCode: { contains: search } }],
-        }
+        OR: [{ gtin: { contains: search } }, { name: { contains: search } }, { articleCode: { contains: search } }],
+      }
       : undefined,
     orderBy: { updatedAt: 'desc' },
   })
@@ -198,18 +198,16 @@ export default function ProductsPage() {
       const mappedData: ImportedProduct[] = jsonData.map((row) => ({
         gtin: String(row['GTIN'] || row['gtin'] || row['Штрихкод'] || row['штрихкод'] || '').trim(),
         name: String(row['Название'] || row['название'] || row['Name'] || row['name'] || '').trim(),
-        articleCode:
-          String(row['Артикул'] || row['артикул'] || row['ArticleCode'] || row['articleCode'] || '').trim() ||
-          undefined,
-        composition:
-          String(row['Состав'] || row['состав'] || row['Composition'] || row['composition'] || '').trim() || undefined,
+        articleCode: String(row['Артикул'] || row['артикул'] || row['ArticleCode'] || row['articleCode'] || '').trim()
+          || undefined,
+        composition: String(row['Состав'] || row['состав'] || row['Composition'] || row['composition'] || '').trim()
+          || undefined,
         color: String(row['Цвет'] || row['цвет'] || row['Color'] || row['color'] || '').trim() || undefined,
-        manufacturer:
-          String(
-            row['Производитель'] || row['производитель'] || row['Manufacturer'] || row['manufacturer'] || ''
-          ).trim() || undefined,
-        category:
-          String(row['Категория'] || row['категория'] || row['Category'] || row['category'] || '').trim() || undefined,
+        manufacturer: String(
+          row['Производитель'] || row['производитель'] || row['Manufacturer'] || row['manufacturer'] || '',
+        ).trim() || undefined,
+        category: String(row['Категория'] || row['категория'] || row['Category'] || row['category'] || '').trim()
+          || undefined,
       }))
 
       // Фильтруем только записи с GTIN и названием
@@ -328,40 +326,47 @@ export default function ProductsPage() {
         {/* Таблица товаров */}
         <Card.Root>
           <Card.Body p={0}>
-            {isLoading ? (
-              <Box p={8} textAlign="center">
-                <Text color="fg.muted">Загрузка...</Text>
-              </Box>
-            ) : !products?.length ? (
-              <Box py={12}>
-                <AppEmptyState
-                  type="products"
-                  action={
-                    search
+            {isLoading
+              ? (
+                <Box p={8} textAlign="center">
+                  <Text color="fg.muted">Загрузка...</Text>
+                </Box>
+              )
+              : !products?.length
+              ? (
+                <Box py={12}>
+                  <AppEmptyState
+                    type="products"
+                    action={search
                       ? { label: 'Сбросить поиск', onClick: () => setSearch('') }
-                      : { label: 'Добавить товар', onClick: () => setIsCreateOpen(true) }
-                  }
-                />
-              </Box>
-            ) : (
-              <Table.Root>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>GTIN</Table.ColumnHeader>
-                    <Table.ColumnHeader>Название</Table.ColumnHeader>
-                    <Table.ColumnHeader>Артикул</Table.ColumnHeader>
-                    <Table.ColumnHeader>Состав</Table.ColumnHeader>
-                    <Table.ColumnHeader>Цвет</Table.ColumnHeader>
-                    <Table.ColumnHeader width="100px">Действия</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {products.map((product) => (
-                    <ProductRow key={product.id} product={product} onEdit={setEditingProduct} onDelete={handleDelete} />
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            )}
+                      : { label: 'Добавить товар', onClick: () => setIsCreateOpen(true) }}
+                  />
+                </Box>
+              )
+              : (
+                <Table.Root>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>GTIN</Table.ColumnHeader>
+                      <Table.ColumnHeader>Название</Table.ColumnHeader>
+                      <Table.ColumnHeader>Артикул</Table.ColumnHeader>
+                      <Table.ColumnHeader>Состав</Table.ColumnHeader>
+                      <Table.ColumnHeader>Цвет</Table.ColumnHeader>
+                      <Table.ColumnHeader width="100px">Действия</Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {products.map((product) => (
+                      <ProductRow
+                        key={product.id}
+                        product={product}
+                        onEdit={setEditingProduct}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              )}
           </Card.Body>
         </Card.Root>
 

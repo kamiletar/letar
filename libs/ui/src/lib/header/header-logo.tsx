@@ -37,8 +37,8 @@ export interface HeaderLogoProps extends Omit<BoxProps, 'children'> {
  * ```
  */
 export function HeaderLogo({ href = '/', children, asText = true, ...boxProps }: HeaderLogoProps) {
-  const content =
-    typeof children === 'string' && asText ? (
+  const content = typeof children === 'string' && asText
+    ? (
       <Text
         fontSize="xl"
         fontWeight="bold"
@@ -49,9 +49,8 @@ export function HeaderLogo({ href = '/', children, asText = true, ...boxProps }:
       >
         {children}
       </Text>
-    ) : (
-      children
     )
+    : children
 
   return (
     <Box asChild flexShrink={0} {...boxProps}>

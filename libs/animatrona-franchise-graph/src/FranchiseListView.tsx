@@ -62,7 +62,7 @@ export function FranchiseListView({ graph, currentShikimoriId, libraryMap = new 
         window.open(node.url, '_blank', 'noopener,noreferrer')
       }
     },
-    [router, currentShikimoriId]
+    [router, currentShikimoriId],
   )
 
   return (

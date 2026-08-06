@@ -36,7 +36,7 @@ export function SpeedSelector({ speed, onSpeedChange }: SpeedSelectorProps) {
       onSpeedChange(s)
       setIsOpen(false)
     },
-    [onSpeedChange]
+    [onSpeedChange],
   )
 
   return (

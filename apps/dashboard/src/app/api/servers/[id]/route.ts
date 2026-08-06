@@ -43,23 +43,23 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
     // Для локального сервера разрешаем редактировать только NPM credentials
     const data = existing.isLocal
       ? {
-          // Локальный сервер: только NPM поля
-          ...(npmUrl !== undefined && { npmUrl: npmUrl || null }),
-          ...(npmEmail !== undefined && { npmEmail: npmEmail || null }),
-          ...(npmPassword !== undefined && { npmPassword: npmPassword || null }),
-        }
+        // Локальный сервер: только NPM поля
+        ...(npmUrl !== undefined && { npmUrl: npmUrl || null }),
+        ...(npmEmail !== undefined && { npmEmail: npmEmail || null }),
+        ...(npmPassword !== undefined && { npmPassword: npmPassword || null }),
+      }
       : {
-          // Удалённый сервер: все поля
-          ...(name !== undefined && { name }),
-          ...(displayName !== undefined && { displayName }),
-          ...(host !== undefined && { host }),
-          ...(port !== undefined && { port }),
-          ...(isActive !== undefined && { isActive }),
-          ...(agentToken !== undefined && { agentToken }),
-          ...(npmUrl !== undefined && { npmUrl: npmUrl || null }),
-          ...(npmEmail !== undefined && { npmEmail: npmEmail || null }),
-          ...(npmPassword !== undefined && { npmPassword: npmPassword || null }),
-        }
+        // Удалённый сервер: все поля
+        ...(name !== undefined && { name }),
+        ...(displayName !== undefined && { displayName }),
+        ...(host !== undefined && { host }),
+        ...(port !== undefined && { port }),
+        ...(isActive !== undefined && { isActive }),
+        ...(agentToken !== undefined && { agentToken }),
+        ...(npmUrl !== undefined && { npmUrl: npmUrl || null }),
+        ...(npmEmail !== undefined && { npmEmail: npmEmail || null }),
+        ...(npmPassword !== undefined && { npmPassword: npmPassword || null }),
+      }
 
     const server = await db.server.update({
       where: { id },

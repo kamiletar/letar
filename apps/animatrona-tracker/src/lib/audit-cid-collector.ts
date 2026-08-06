@@ -105,7 +105,7 @@ async function traverseEpisodeManifest(
   manifestCid: string,
   cids: Set<string>,
   job: AuditJob,
-  animeName: string
+  animeName: string,
 ): Promise<void> {
   const manifest = await safeFetchJson(manifestCid, job, `EpisodeManifest ${animeName}`)
   if (!manifest) {
@@ -141,12 +141,12 @@ async function traverseAnimeManifest(
   directoryCid: string,
   cids: Set<string>,
   job: AuditJob,
-  animeName: string
+  animeName: string,
 ): Promise<void> {
   const manifest = await fetchJsonFromPath(
     `${GATEWAY_URL}/ipfs/${directoryCid}/manifest.json`,
     job,
-    `AnimeManifest ${animeName}`
+    `AnimeManifest ${animeName}`,
   )
   if (!manifest) {
     return

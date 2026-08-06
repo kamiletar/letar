@@ -49,7 +49,7 @@ export function ConsultingForm() {
         })
       })
     },
-    [t]
+    [t],
   )
 
   if (isSubmitted) {

@@ -15,7 +15,7 @@ const TestWrapper = ({ children }: { children: ReactNode }) =>
 // Создаём мок контекста формы
 function createMockFormContext(
   schema?: z.ZodType,
-  options?: { disabled?: boolean; readOnly?: boolean }
+  options?: { disabled?: boolean; readOnly?: boolean },
 ): DeclarativeFormContextValue {
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -89,14 +89,16 @@ export const FieldRating = createField<RatingFieldProps, number>({
         >
           {resolved.label && (
             <RatingGroup.Label>
-              {resolved.tooltip ? (
-                <HStack gap={1}>
-                  <span>{resolved.label}</span>
-                  <FieldTooltip {...resolved.tooltip} />
-                </HStack>
-              ) : (
-                resolved.label
-              )}
+              {resolved.tooltip
+                ? (
+                  <HStack gap={1}>
+                    <span>{resolved.label}</span>
+                    <FieldTooltip {...resolved.tooltip} />
+                  </HStack>
+                )
+                : (
+                  resolved.label
+                )}
             </RatingGroup.Label>
           )}
           <RatingGroup.HiddenInput onBlur={field.handleBlur} />

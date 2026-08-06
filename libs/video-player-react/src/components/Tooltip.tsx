@@ -6,7 +6,7 @@
  * Общий компонент для Electron и Web плееров
  */
 
-import { Tooltip as ChakraTooltip, Portal } from '@chakra-ui/react'
+import { Portal, Tooltip as ChakraTooltip } from '@chakra-ui/react'
 import * as React from 'react'
 
 export interface TooltipProps extends ChakraTooltip.RootProps {

@@ -74,20 +74,18 @@ export function computeTrend(scores: number[]): string {
 export async function computePlayerStats(
   perfs: PlayerPerf[],
   currentSeasonId: string | undefined,
-  playerId: string
+  playerId: string,
 ): Promise<PlayerStats> {
   const matchesPlayed = perfs.length
   const totalScore = perfs.reduce((sum, p) => sum + p.totalScore!, 0)
   const avgScore = matchesPlayed > 0 ? Math.round((totalScore / matchesPlayed) * 10) / 10 : 0
   const bestScore = matchesPlayed > 0 ? Math.max(...perfs.map((p) => p.totalScore!)) : 0
-  const avgText =
-    matchesPlayed > 0
-      ? Math.round((perfs.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
-      : 0
-  const avgDelivery =
-    matchesPlayed > 0
-      ? Math.round((perfs.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
-      : 0
+  const avgText = matchesPlayed > 0
+    ? Math.round((perfs.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    : 0
+  const avgDelivery = matchesPlayed > 0
+    ? Math.round((perfs.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    : 0
   const trend = computeTrend(perfs.map((p) => p.totalScore!))
 
   // Тридцатки
@@ -100,10 +98,9 @@ export async function computePlayerStats(
 
   // Среднее время
   const perfsWithDuration = perfs.filter((p) => p.durationSec !== null && p.durationSec !== undefined)
-  const avgDurationSec =
-    perfsWithDuration.length > 0
-      ? Math.round(perfsWithDuration.reduce((sum, p) => sum + p.durationSec!, 0) / perfsWithDuration.length)
-      : null
+  const avgDurationSec = perfsWithDuration.length > 0
+    ? Math.round(perfsWithDuration.reduce((sum, p) => sum + p.durationSec!, 0) / perfsWithDuration.length)
+    : null
 
   // Процент побед в раундах
   let roundWins = 0
@@ -117,11 +114,11 @@ export async function computePlayerStats(
     for (const perf of perfs) {
       const opponent = allMatchPerfs.find(
         (op) =>
-          op.matchId === perf.match.id &&
-          op.half === perf.half &&
-          op.roundNumber === perf.roundNumber &&
-          op.teamSeasonId !== (perf as unknown as { teamSeasonId: string }).teamSeasonId &&
-          op.playerId !== playerId
+          op.matchId === perf.match.id
+          && op.half === perf.half
+          && op.roundNumber === perf.roundNumber
+          && op.teamSeasonId !== (perf as unknown as { teamSeasonId: string }).teamSeasonId
+          && op.playerId !== playerId,
       )
       if (opponent && opponent.totalScore !== null && opponent.totalScore !== undefined) {
         if (perf.totalScore! > opponent.totalScore) {

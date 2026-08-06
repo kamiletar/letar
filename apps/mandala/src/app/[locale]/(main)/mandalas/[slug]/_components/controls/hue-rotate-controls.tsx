@@ -77,8 +77,7 @@ export function HueRotateControls({
               <NativeSelect.Field
                 value={hueRotateMode}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  onChange({ hueRotateMode: e.target.value as HueRotateMode })
-                }
+                  onChange({ hueRotateMode: e.target.value as HueRotateMode })}
               >
                 {Object.entries(HUE_ROTATE_MODE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>

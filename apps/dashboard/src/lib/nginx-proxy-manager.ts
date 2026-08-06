@@ -356,7 +356,7 @@ export function getNpmClientForServer(
     npmUrl?: string | null
     npmEmail?: string | null
     npmPassword?: string | null
-  } | null
+  } | null,
 ): NpmApiClient {
   // Если сервер не указан или нет NPM конфигурации — используем локальный
   if (!server || !server.npmUrl || !server.npmEmail || !server.npmPassword) {

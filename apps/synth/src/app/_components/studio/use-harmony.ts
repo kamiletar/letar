@@ -39,7 +39,7 @@ export function useHarmony(pianoRoll: ReturnType<typeof usePianoRoll>) {
         }
       }, durationMs)
     },
-    [pianoRoll]
+    [pianoRoll],
   )
 
   // Проигрывает лад по одной ноте вверх на октаву от корня — «на что похож этот лад».
@@ -64,7 +64,7 @@ export function useHarmony(pianoRoll: ReturnType<typeof usePianoRoll>) {
       pianoRoll.insertChord(chord.notes, at, CHORD_LENGTH_STEPS)
       setCursor((c) => (c + CHORD_LENGTH_STEPS) % steps)
     },
-    [previewNotes, pianoRoll, cursor]
+    [previewNotes, pianoRoll, cursor],
   )
 
   const resetCursor = useCallback(() => setCursor(0), [])

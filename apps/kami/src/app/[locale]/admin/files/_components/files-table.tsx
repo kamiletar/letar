@@ -55,7 +55,7 @@ export function FilesTable({ files }: FilesTableProps) {
         toaster.error({ title: error instanceof Error ? error.message : 'Ошибка' })
       }
     },
-    [router, confirm]
+    [router, confirm],
   )
 
   const copyLink = useCallback((path: string) => {

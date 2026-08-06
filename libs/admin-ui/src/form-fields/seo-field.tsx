@@ -75,7 +75,7 @@ export function SeoField<T extends Record<string, unknown>>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(form.setFieldValue as any)(name, value)
     },
-    [form]
+    [form],
   )
 
   const getValues = useCallback(() => form.state.values as unknown as T, [form])
@@ -160,7 +160,7 @@ export function SeoField<T extends Record<string, unknown>>({
       setMetaTitleValue(value)
       setFieldValue(metaTitleName, value as T[typeof metaTitleName])
     },
-    [metaTitleName, isTitleLinked, setFieldValue]
+    [metaTitleName, isTitleLinked, setFieldValue],
   )
 
   // Обработка изменения metaDescription
@@ -173,7 +173,7 @@ export function SeoField<T extends Record<string, unknown>>({
       setMetaDescriptionValue(value)
       setFieldValue(metaDescriptionName, value as T[typeof metaDescriptionName])
     },
-    [metaDescriptionName, isDescriptionLinked, setFieldValue]
+    [metaDescriptionName, isDescriptionLinked, setFieldValue],
   )
 
   // Автоматическое обновление при связи

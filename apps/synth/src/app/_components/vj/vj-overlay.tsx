@@ -96,34 +96,36 @@ export function VjOverlay({ open, analyser, activeNoteCount, patchRef, pulseRef,
       </Box>
 
       <Box position="absolute" top={4} right={4} display="flex" alignItems="center" gap={2}>
-        {external.devices.length === 0 ? (
-          <Box asChild>
-            <button onClick={() => void external.refreshDevices()} style={buttonStyle}>
-              🎤 внешний вход
-            </button>
-          </Box>
-        ) : (
-          <>
+        {external.devices.length === 0
+          ? (
             <Box asChild>
-              <select
-                value={external.selectedDeviceId ?? ''}
-                onChange={(e) => external.setSelectedDeviceId(e.target.value)}
-                style={{ ...buttonStyle, cursor: 'pointer' }}
-              >
-                {external.devices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-            </Box>
-            <Box asChild>
-              <button onClick={external.toggle} style={buttonStyle}>
-                {external.active ? '● отключить вход' : '● подключить вход'}
+              <button onClick={() => void external.refreshDevices()} style={buttonStyle}>
+                🎤 внешний вход
               </button>
             </Box>
-          </>
-        )}
+          )
+          : (
+            <>
+              <Box asChild>
+                <select
+                  value={external.selectedDeviceId ?? ''}
+                  onChange={(e) => external.setSelectedDeviceId(e.target.value)}
+                  style={{ ...buttonStyle, cursor: 'pointer' }}
+                >
+                  {external.devices.map((d) => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </Box>
+              <Box asChild>
+                <button onClick={external.toggle} style={buttonStyle}>
+                  {external.active ? '● отключить вход' : '● подключить вход'}
+                </button>
+              </Box>
+            </>
+          )}
         <Box asChild>
           <button onClick={handleFullscreen} style={buttonStyle}>
             ⛶ во весь экран

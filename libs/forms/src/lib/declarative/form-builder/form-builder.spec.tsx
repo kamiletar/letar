@@ -21,7 +21,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ firstName: '', lastName: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Имя')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Личные данные')).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ firstName: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('First Name')).toBeInTheDocument()
@@ -74,7 +74,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ age: 25 }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Возраст')).toBeInTheDocument()
@@ -88,7 +88,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ agree: false }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Согласен')).toBeInTheDocument()
@@ -112,7 +112,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ role: 'user' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Роль')).toBeInTheDocument()
@@ -126,7 +126,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ name: '' }} onSubmit={vi.fn()} submitLabel="Создать" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Создать')).toBeInTheDocument()
@@ -140,7 +140,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ name: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Save')).toBeInTheDocument()
@@ -154,7 +154,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ description: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Описание')).toBeInTheDocument()
@@ -168,7 +168,7 @@ describe('FormBuilder', () => {
     render(
       <TestWrapper>
         <FormBuilder config={config} initialValue={{ password: '' }} onSubmit={vi.fn()} />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Пароль')).toBeInTheDocument()

@@ -166,15 +166,17 @@ export function PlayersClient({
                         </Link>
                       </Table.Cell>
                       <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
-                        {player.city ? (
-                          <Badge variant="subtle" size="sm">
-                            {player.city.name}
-                          </Badge>
-                        ) : (
-                          <Text color="fg.muted" fontSize="sm">
-                            —
-                          </Text>
-                        )}
+                        {player.city
+                          ? (
+                            <Badge variant="subtle" size="sm">
+                              {player.city.name}
+                            </Badge>
+                          )
+                          : (
+                            <Text color="fg.muted" fontSize="sm">
+                              —
+                            </Text>
+                          )}
                       </Table.Cell>
                       <Table.Cell>{player._count.playerTeamSeasons}</Table.Cell>
                       <Table.Cell>{player._count.performances}</Table.Cell>

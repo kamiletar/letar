@@ -113,7 +113,7 @@ describe('runRollout', () => {
       executor,
       'time',
       { npmContainerName: 'nginx-proxy-manager', deployTag: 'abc1234' },
-      noopSleep
+      noopSleep,
     )
 
     expect(result.ok).toBe(true)
@@ -138,7 +138,7 @@ describe('runRollout', () => {
         command: 'docker',
         args: expect.arrayContaining(['compose', 'up', '-d', '--no-recreate', '--scale', 'app=2']),
         cwd: 'apps/time',
-      })
+      }),
     )
 
     // healthcheck опрашивает именно новый контейнер (index 2, старый остаётся нетронутым)
@@ -174,8 +174,12 @@ describe('runRollout', () => {
     })
 
     const seenSteps: string[] = []
-    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep, (step) =>
-      seenSteps.push(step.id)
+    const result = await runRollout(
+      executor,
+      'time',
+      { npmContainerName: 'nginx-proxy-manager' },
+      noopSleep,
+      (step) => seenSteps.push(step.id),
     )
 
     // onStep видел ровно те же шаги, в том же порядке, что и итоговый result.steps —
@@ -215,7 +219,7 @@ describe('runRollout', () => {
       executor,
       'time',
       { npmContainerName: 'nginx-proxy-manager', healthTimeoutMs: 10, pollIntervalMs: 1 },
-      noopSleep
+      noopSleep,
     )
 
     expect(result.ok).toBe(false)
@@ -345,8 +349,8 @@ services:
   })
 
   it(
-    'резолвит новый контейнер по фактическому индексу Docker Compose, а не по хардкоду -app-2 ' +
-      '(инцидент auth-hub: старый контейнер уже -app-3, scale-up создаёт -app-4)',
+    'резолвит новый контейнер по фактическому индексу Docker Compose, а не по хардкоду -app-2 '
+      + '(инцидент auth-hub: старый контейнер уже -app-3, scale-up создаёт -app-4)',
     async () => {
       const { executor, calls } = memoryExecutor({
         composeText: READY_COMPOSE,
@@ -368,7 +372,7 @@ services:
       // старый (-app-3) останавливается и удаляется, не новый
       expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-3')
       expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app-3')
-    }
+    },
   )
 
   it('падает на resolve-new-container, если scale-up не создал новый контейнер', async () => {

@@ -44,11 +44,13 @@ export function RemoteServerDeploy({ server }: Props) {
   const [isPulling, startPullTransition] = useTransition()
 
   // Deploy dialog state
-  const [deployDialog, setDeployDialog] = useState<{
-    isOpen: boolean
-    appId: string
-    appName: string
-  } | null>(null)
+  const [deployDialog, setDeployDialog] = useState<
+    {
+      isOpen: boolean
+      appId: string
+      appName: string
+    } | null
+  >(null)
 
   // Используем приложения из пропсов (уже загружены в ServerContext)
   const apps = server.apps || []
@@ -84,7 +86,7 @@ export function RemoteServerDeploy({ server }: Props) {
     incomingCommits,
     (state: GitIncomingResponse | undefined, _action: PullAction) => {
       return state ? { ...state, count: 0, commits: [] } : state
-    }
+    },
   )
 
   const refetch = () => {
@@ -309,10 +311,9 @@ export function RemoteServerDeploy({ server }: Props) {
                 {!gitStatus.status.isClean && (
                   <Text color="fg.muted" fontSize="xs">
                     (
-                    {(gitStatus.status.modified?.length ?? 0) +
-                      (gitStatus.status.created?.length ?? 0) +
-                      (gitStatus.status.deleted?.length ?? 0)}{' '}
-                    files)
+                    {(gitStatus.status.modified?.length ?? 0)
+                      + (gitStatus.status.created?.length ?? 0)
+                      + (gitStatus.status.deleted?.length ?? 0)} files)
                   </Text>
                 )}
                 {isPulling && <Spinner size="xs" color="green.400" />}
@@ -339,73 +340,77 @@ export function RemoteServerDeploy({ server }: Props) {
       )}
 
       {/* Список приложений */}
-      {apps.length === 0 ? (
-        <Card.Root>
-          <Card.Body>
-            <Text color="fg.muted" textAlign="center">
-              На сервере нет приложений. Добавьте их в разделе "Серверы".
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="4">
-          {apps.map((app) => (
-            <Card.Root key={app.id}>
-              <Card.Body>
-                <VStack align="stretch" gap="3">
-                  <HStack justify="space-between">
-                    <VStack align="start" gap="0">
-                      <Text fontWeight="bold">{app.displayName}</Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        {app.name}
-                      </Text>
-                    </VStack>
-                    <Badge colorPalette={app.type === 'WEB' ? 'blue' : 'gray'} size="sm">
-                      {app.type}
-                    </Badge>
-                  </HStack>
-
-                  {app.containerName && (
-                    <HStack fontSize="sm">
-                      <Text color="fg.muted">Контейнер:</Text>
-                      <Text fontFamily="mono">{app.containerName}</Text>
+      {apps.length === 0
+        ? (
+          <Card.Root>
+            <Card.Body>
+              <Text color="fg.muted" textAlign="center">
+                На сервере нет приложений. Добавьте их в разделе "Серверы".
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        )
+        : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="4">
+            {apps.map((app) => (
+              <Card.Root key={app.id}>
+                <Card.Body>
+                  <VStack align="stretch" gap="3">
+                    <HStack justify="space-between">
+                      <VStack align="start" gap="0">
+                        <Text fontWeight="bold">{app.displayName}</Text>
+                        <Text fontSize="xs" color="fg.muted">
+                          {app.name}
+                        </Text>
+                      </VStack>
+                      <Badge colorPalette={app.type === 'WEB' ? 'blue' : 'gray'} size="sm">
+                        {app.type}
+                      </Badge>
                     </HStack>
-                  )}
 
-                  {app.port && (
+                    {app.containerName && (
+                      <HStack fontSize="sm">
+                        <Text color="fg.muted">Контейнер:</Text>
+                        <Text fontFamily="mono">{app.containerName}</Text>
+                      </HStack>
+                    )}
+
+                    {app.port && (
+                      <HStack fontSize="sm">
+                        <Text color="fg.muted">Порт:</Text>
+                        <Text>{app.port}</Text>
+                      </HStack>
+                    )}
+
                     <HStack fontSize="sm">
-                      <Text color="fg.muted">Порт:</Text>
-                      <Text>{app.port}</Text>
+                      <Text color="fg.muted">Последний деплой:</Text>
+                      <Text>{formatLastDeployed(app.lastDeployed)}</Text>
                     </HStack>
-                  )}
 
-                  <HStack fontSize="sm">
-                    <Text color="fg.muted">Последний деплой:</Text>
-                    <Text>{formatLastDeployed(app.lastDeployed)}</Text>
-                  </HStack>
-
-                  {app.containerName ? (
-                    <Button
-                      colorPalette="green"
-                      size="sm"
-                      onClick={() => handleDeployApp(app.id)}
-                      loading={deployingAppId === app.id}
-                      disabled={deployingAll || deployingAppId !== null}
-                    >
-                      <LuRocket />
-                      Деплой
-                    </Button>
-                  ) : (
-                    <Text fontSize="xs" color="fg.muted" textAlign="center">
-                      Контейнер не указан
-                    </Text>
-                  )}
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </SimpleGrid>
-      )}
+                    {app.containerName
+                      ? (
+                        <Button
+                          colorPalette="green"
+                          size="sm"
+                          onClick={() => handleDeployApp(app.id)}
+                          loading={deployingAppId === app.id}
+                          disabled={deployingAll || deployingAppId !== null}
+                        >
+                          <LuRocket />
+                          Деплой
+                        </Button>
+                      )
+                      : (
+                        <Text fontSize="xs" color="fg.muted" textAlign="center">
+                          Контейнер не указан
+                        </Text>
+                      )}
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
+            ))}
+          </SimpleGrid>
+        )}
 
       {/* Deploy Log Dialog */}
       {deployDialog && (

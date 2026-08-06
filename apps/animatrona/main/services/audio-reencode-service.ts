@@ -162,7 +162,7 @@ export async function reencodeAnimeAudio(
   animeId: string,
   targetBitrateKbps: number,
   onProgress?: (progress: ReencodeProgress) => void,
-  cancelToken?: { cancelled: boolean }
+  cancelToken?: { cancelled: boolean },
 ): Promise<ReencodeResult> {
   const targetBitrateBps = targetBitrateKbps * 1000
   // Уникальная temp-директория для каждого аниме — избегаем race condition при пакетной обработке
@@ -261,7 +261,7 @@ export async function reencodeAnimeAudio(
         (ffProgress) => {
           tp.percent = Math.round(ffProgress.percent)
           emit()
-        }
+        },
       )
 
       if (cancelToken?.cancelled) {
@@ -438,7 +438,7 @@ export async function previewBatchReencode(): Promise<BatchReencodePreview> {
  */
 export async function batchReencodeAudio(
   onProgress?: (progress: BatchReencodeProgress) => void,
-  cancelToken?: { cancelled: boolean }
+  cancelToken?: { cancelled: boolean },
 ): Promise<BatchReencodeResult> {
   const targetBitrateKbps = await getTargetBitrate()
 
@@ -489,7 +489,7 @@ export async function batchReencodeAudio(
           progress.trackProgress = trackProgress
           emit()
         },
-        cancelToken
+        cancelToken,
       )
 
       totalReencoded += result.reencoded

@@ -57,7 +57,7 @@ async function setupIsolatedDatabase(userDataDir: string, libraryPath: string): 
     db.run(
       `INSERT INTO Settings (id, libraryPath, outputPath, updatedAt) VALUES (?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET libraryPath = excluded.libraryPath, outputPath = excluded.outputPath, updatedAt = excluded.updatedAt`,
-      ['default', libraryPath, libraryPath, now]
+      ['default', libraryPath, libraryPath, now],
     )
 
     // Сохраняем изменения
@@ -128,7 +128,7 @@ export async function launchElectronApp(options?: {
 
   if (!fs.existsSync(appPath)) {
     throw new Error(
-      `Electron app not found at ${appPath}. ` + 'Run "bun nx build:win animatrona" first to create production build.'
+      `Electron app not found at ${appPath}. ` + 'Run "bun nx build:win animatrona" first to create production build.',
     )
   }
 
@@ -490,7 +490,7 @@ export async function launchElectronWithSeededDb(
   options?: {
     windowTimeout?: number
     recordVideo?: boolean
-  }
+  },
 ): Promise<ElectronTestContext & { userDataDir: string; libraryPath: string }> {
   const { windowTimeout = 30000, recordVideo = true } = options || {}
 
@@ -498,7 +498,7 @@ export async function launchElectronWithSeededDb(
 
   if (!fs.existsSync(appPath)) {
     throw new Error(
-      `Electron app not found at ${appPath}. ` + 'Run "bun nx build:win animatrona" first to create production build.'
+      `Electron app not found at ${appPath}. ` + 'Run "bun nx build:win animatrona" first to create production build.',
     )
   }
 

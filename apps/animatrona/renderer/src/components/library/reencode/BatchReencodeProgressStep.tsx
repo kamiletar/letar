@@ -37,20 +37,20 @@ export function BatchReencodeProgressStep({ state }: { state: UseBatchReencodeSt
   let currentAnimePercent = 0
   if (trackProgress && trackProgress.totalTracks > 0) {
     const activeTracks = trackProgress.tracks.filter(
-      (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading'
+      (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading',
     )
     const activeProgress = activeTracks.reduce((sum, t) => sum + t.percent / 100, 0)
     currentAnimePercent = ((trackProgress.completedTracks + activeProgress) / trackProgress.totalTracks) * 100
   }
 
-  const overallPercent =
-    progress.totalAnimes > 0 ? ((progress.completedAnimes + currentAnimePercent / 100) / progress.totalAnimes) * 100 : 0
+  const overallPercent = progress.totalAnimes > 0
+    ? ((progress.completedAnimes + currentAnimePercent / 100) / progress.totalAnimes) * 100
+    : 0
 
   // Активные дорожки текущего аниме
-  const activeTracks =
-    trackProgress?.tracks.filter(
-      (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading'
-    ) ?? []
+  const activeTracks = trackProgress?.tracks.filter(
+    (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading',
+  ) ?? []
 
   return (
     <>

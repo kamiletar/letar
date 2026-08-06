@@ -181,66 +181,68 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
               <Heading size="sm">Ваши ключи ({keys.length}/5)</Heading>
             </Box>
 
-            {keys.length === 0 ? (
-              <Box textAlign="center" py={12}>
-                <Icon as={LuKey} boxSize={10} color="fg.muted" mb={4} />
-                <Text color="fg.muted">У вас пока нет API ключей</Text>
-              </Box>
-            ) : (
-              <Table.Root>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Название</Table.ColumnHeader>
-                    <Table.ColumnHeader>Последнее использование</Table.ColumnHeader>
-                    <Table.ColumnHeader>Создан</Table.ColumnHeader>
-                    <Table.ColumnHeader w="100px">Действия</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {keys.map((key) => (
-                    <Table.Row key={key.id}>
-                      <Table.Cell>
-                        <HStack gap={2}>
-                          <Icon as={LuKey} color="fg.muted" />
-                          <Text fontWeight="medium">{key.name}</Text>
-                        </HStack>
-                      </Table.Cell>
-                      <Table.Cell>
-                        {key.lastUsedAt ? (
-                          <Badge colorPalette="green">
-                            {new Date(key.lastUsedAt).toLocaleDateString('ru', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </Badge>
-                        ) : (
-                          <Badge colorPalette="gray">Не использовался</Badge>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text color="fg.muted" fontSize="sm">
-                          {new Date(key.createdAt).toLocaleDateString('ru')}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <IconButton
-                          aria-label="Удалить"
-                          variant="ghost"
-                          colorPalette="red"
-                          size="sm"
-                          disabled={isPending}
-                          onClick={() => setDeleteTarget({ id: key.id, name: key.name })}
-                        >
-                          <Icon as={LuTrash2} />
-                        </IconButton>
-                      </Table.Cell>
+            {keys.length === 0
+              ? (
+                <Box textAlign="center" py={12}>
+                  <Icon as={LuKey} boxSize={10} color="fg.muted" mb={4} />
+                  <Text color="fg.muted">У вас пока нет API ключей</Text>
+                </Box>
+              )
+              : (
+                <Table.Root>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Название</Table.ColumnHeader>
+                      <Table.ColumnHeader>Последнее использование</Table.ColumnHeader>
+                      <Table.ColumnHeader>Создан</Table.ColumnHeader>
+                      <Table.ColumnHeader w="100px">Действия</Table.ColumnHeader>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            )}
+                  </Table.Header>
+                  <Table.Body>
+                    {keys.map((key) => (
+                      <Table.Row key={key.id}>
+                        <Table.Cell>
+                          <HStack gap={2}>
+                            <Icon as={LuKey} color="fg.muted" />
+                            <Text fontWeight="medium">{key.name}</Text>
+                          </HStack>
+                        </Table.Cell>
+                        <Table.Cell>
+                          {key.lastUsedAt
+                            ? (
+                              <Badge colorPalette="green">
+                                {new Date(key.lastUsedAt).toLocaleDateString('ru', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </Badge>
+                            )
+                            : <Badge colorPalette="gray">Не использовался</Badge>}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Text color="fg.muted" fontSize="sm">
+                            {new Date(key.createdAt).toLocaleDateString('ru')}
+                          </Text>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <IconButton
+                            aria-label="Удалить"
+                            variant="ghost"
+                            colorPalette="red"
+                            size="sm"
+                            disabled={isPending}
+                            onClick={() => setDeleteTarget({ id: key.id, name: key.name })}
+                          >
+                            <Icon as={LuTrash2} />
+                          </IconButton>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              )}
           </Box>
 
           {/* Инструкция */}
@@ -278,8 +280,9 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
               </Dialog.Header>
               <Dialog.Body>
                 <Text>
-                  Удалить ключ <strong>&ldquo;{deleteTarget?.name}&rdquo;</strong>? Это действие нельзя отменить.
-                  Приложения, использующие этот ключ, потеряют доступ.
+                  Удалить ключ{' '}
+                  <strong>&ldquo;{deleteTarget?.name}&rdquo;</strong>? Это действие нельзя отменить. Приложения,
+                  использующие этот ключ, потеряют доступ.
                 </Text>
               </Dialog.Body>
               <Dialog.Footer>

@@ -78,7 +78,7 @@ export function createEncryptedOauthApplicationClient<
         case 'findMany':
           return async (args?: object) => {
             const results = await (target.findMany as (a?: object) => Promise<Array<{ clientSecret?: string | null }>>)(
-              args
+              args,
             )
             return results.map(decryptResult)
           }
@@ -87,7 +87,7 @@ export function createEncryptedOauthApplicationClient<
           return async (args?: object) => {
             const result = await (
               target[prop as 'findUnique' | 'findFirst'] as (
-                a?: object
+                a?: object,
               ) => Promise<{ clientSecret?: string | null } | null>
             )(args)
             return decryptResult(result)
@@ -135,13 +135,13 @@ export function createEncryptedOauthApplicationClient<
 export function createEncryptedOauthAccessTokenClient<
   T extends {
     findMany(
-      args?: object
+      args?: object,
     ): Promise<Array<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>>
     findUnique(
-      args: object
+      args: object,
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     findFirst(
-      args?: object
+      args?: object,
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     create(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
     update(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
@@ -243,13 +243,13 @@ export function createEncryptedOauthAccessTokenClient<
 export function createEncryptedAccountClient<
   T extends {
     findMany(
-      args?: object
+      args?: object,
     ): Promise<Array<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>>
     findFirst(
-      args?: object
+      args?: object,
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     findUnique(
-      args: object
+      args: object,
     ): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown } | null>
     create(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>
     update(args: object): Promise<{ accessToken?: string | null; refreshToken?: string | null; [k: string]: unknown }>

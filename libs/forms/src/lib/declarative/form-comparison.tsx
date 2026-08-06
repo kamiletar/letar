@@ -46,7 +46,7 @@ export function FormComparison<T extends Record<string, unknown>>({
   } catch {}
 
   const allKeys = [...new Set([...Object.keys(original), ...Object.keys(current)])].filter(
-    (key) => !exclude.includes(key)
+    (key) => !exclude.includes(key),
   )
 
   const entries = allKeys
@@ -85,26 +85,26 @@ export function FormComparison<T extends Record<string, unknown>>({
               </Text>
             )}
           </Text>
-          {entry.changed ? (
-            <HStack gap={4} fontSize="sm">
-              <Box flex={1}>
-                <Text fontSize="xs" color="red.500" mb={0.5}>
-                  Было:
-                </Text>
-                <Text textDecoration="line-through" color="fg.muted">
-                  {formatValue(entry.oldValue)}
-                </Text>
-              </Box>
-              <Box flex={1}>
-                <Text fontSize="xs" color="green.500" mb={0.5}>
-                  Стало:
-                </Text>
-                <Text fontWeight="medium">{formatValue(entry.newValue)}</Text>
-              </Box>
-            </HStack>
-          ) : (
-            <Text fontSize="sm">{formatValue(entry.newValue)}</Text>
-          )}
+          {entry.changed
+            ? (
+              <HStack gap={4} fontSize="sm">
+                <Box flex={1}>
+                  <Text fontSize="xs" color="red.500" mb={0.5}>
+                    Было:
+                  </Text>
+                  <Text textDecoration="line-through" color="fg.muted">
+                    {formatValue(entry.oldValue)}
+                  </Text>
+                </Box>
+                <Box flex={1}>
+                  <Text fontSize="xs" color="green.500" mb={0.5}>
+                    Стало:
+                  </Text>
+                  <Text fontWeight="medium">{formatValue(entry.newValue)}</Text>
+                </Box>
+              </HStack>
+            )
+            : <Text fontSize="sm">{formatValue(entry.newValue)}</Text>}
           {index < entries.length - 1 && <Separator mt={2} />}
         </Box>
       ))}

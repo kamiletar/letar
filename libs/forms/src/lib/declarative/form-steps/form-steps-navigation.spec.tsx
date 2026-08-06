@@ -70,8 +70,8 @@ function createWrapper(formContext: DeclarativeFormContextValue, stepsContext: F
       createElement(
         DeclarativeFormContext.Provider,
         { value: formContext },
-        createElement(FormStepsContext.Provider, { value: stepsContext }, children)
-      )
+        createElement(FormStepsContext.Provider, { value: stepsContext }, children),
+      ),
     )
 }
 

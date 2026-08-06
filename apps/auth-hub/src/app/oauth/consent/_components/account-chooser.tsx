@@ -55,7 +55,7 @@ export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
         window.location.href = res.url
       }
     },
-    [consentCode, clientId, scope]
+    [consentCode, clientId, scope],
   )
 
   const handleContinue = useCallback(async () => {

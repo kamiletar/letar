@@ -712,7 +712,7 @@ class SeederAggregator {
         } catch {
           return { seeders: 0, leechers: 0 }
         }
-      })
+      }),
     )
 
     const stats = results
@@ -791,17 +791,16 @@ class TrackerTrustScoring {
     const normalizedRT = Math.max(0, 1 - reputation.metrics.responseTime / 1000)
 
     // Оценка взаимодействий
-    const interactionScore =
-      reputation.interactions.flagsReceived > 0
-        ? 1 - reputation.interactions.flagsConfirmed / reputation.interactions.flagsReceived
-        : 1
+    const interactionScore = reputation.interactions.flagsReceived > 0
+      ? 1 - reputation.interactions.flagsConfirmed / reputation.interactions.flagsReceived
+      : 1
 
     return (
-      weights.uptime * reputation.metrics.uptime +
-      weights.responseTime * normalizedRT +
-      weights.contentQuality * reputation.metrics.contentQuality +
-      weights.moderationScore * reputation.metrics.moderationScore +
-      weights.interactions * interactionScore
+      weights.uptime * reputation.metrics.uptime
+      + weights.responseTime * normalizedRT
+      + weights.contentQuality * reputation.metrics.contentQuality
+      + weights.moderationScore * reputation.metrics.moderationScore
+      + weights.interactions * interactionScore
     )
   }
 
@@ -881,12 +880,11 @@ class ReputationCalculator {
     const daysInNetwork = (Date.now() - metrics.joinedAt.getTime()) / (24 * 3600 * 1000)
     const longevityScore = Math.min(1, (daysInNetwork / 365) * 0.7 + (metrics.consecutiveDays / 30) * 0.3)
 
-    const totalScore =
-      weights.ratio * ratioScore +
-      weights.seedingTime * seedingScore +
-      weights.uniqueContent * contentScore +
-      weights.helpedPeers * helpScore +
-      weights.longevity * longevityScore
+    const totalScore = weights.ratio * ratioScore
+      + weights.seedingTime * seedingScore
+      + weights.uniqueContent * contentScore
+      + weights.helpedPeers * helpScore
+      + weights.longevity * longevityScore
 
     // Нормализация к 100
     return Math.round(totalScore * 100)
@@ -1032,16 +1030,15 @@ class BonusPointsSystem {
   calculateBonusPoints(
     contentSize: number,
     seedingTimeHours: number,
-    contentAge: number // дни с момента добавления
+    contentAge: number, // дни с момента добавления
   ): number {
     // Базовые очки: 1 point за 1GB за 1 час
     const basePoints = (contentSize / 1024 ** 3) * seedingTimeHours
 
     // Множитель за старый контент (мотивация сидить редкий контент)
-    const ageMultiplier =
-      contentAge > 180
-        ? 2.0 // 2x для контента старше 6 месяцев
-        : 1.0 + contentAge / 180 // линейный рост до 2x
+    const ageMultiplier = contentAge > 180
+      ? 2.0 // 2x для контента старше 6 месяцев
+      : 1.0 + contentAge / 180 // линейный рост до 2x
 
     // Множитель за мало-раздаваемый контент
     const rarenessMultiplier = await this.getRarenessMultiplier(contentCID)
@@ -1263,7 +1260,7 @@ class FederatedModerationHandler {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(report),
         })
-      )
+      ),
     )
   }
 }
@@ -1554,7 +1551,7 @@ class RatingAggregator {
   calculateWeightedRating(
     contentRatings: ContentRating[],
     globalAverage: number = 7.0,
-    minimumVotes: number = 10
+    minimumVotes: number = 10,
   ): number {
     const totalVotes = contentRatings.length
     const averageRating = contentRatings.reduce((sum, r) => sum + r.score, 0) / totalVotes
@@ -1812,11 +1809,11 @@ class RecommendationEngine {
         const otherLibrary = await this.db.getLibrary(otherUser.id)
         const similarity = this.jaccardSimilarity(
           userLibrary.items.map((i) => i.contentId),
-          otherLibrary.items.map((i) => i.contentId)
+          otherLibrary.items.map((i) => i.contentId),
         )
 
         return { userId: otherUser.id, similarity }
-      })
+      }),
     )
 
     return similarities
@@ -2407,7 +2404,7 @@ const ContentCreateSchema = z.object({
     z.object({
       number: z.number().int().positive(),
       videoCID: z.string().regex(/^Qm[a-zA-Z0-9]{44}$/),
-    })
+    }),
   ),
 })
 
@@ -2668,9 +2665,7 @@ async function loadUntrustedContent(cid: string) {
 
   {/* Grid */}
   <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4}>
-    {library.map((item) => (
-      <AnimeCard key={item.id} anime={item} />
-    ))}
+    {library.map((item) => <AnimeCard key={item.id} anime={item} />)}
   </Grid>
 </Box>
 ```

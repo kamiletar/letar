@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     console.error('Error in /api/database/stats:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

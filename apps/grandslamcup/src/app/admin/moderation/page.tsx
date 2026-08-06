@@ -99,10 +99,9 @@ export default function ModerationPage() {
     setProcessing(true)
     try {
       const { app, action } = actionTarget
-      const result =
-        action === 'approve'
-          ? await approveApplicationAction({ id: app.id, moderatorNote: note || undefined })
-          : await rejectApplicationAction({ id: app.id, moderatorNote: note })
+      const result = action === 'approve'
+        ? await approveApplicationAction({ id: app.id, moderatorNote: note || undefined })
+        : await rejectApplicationAction({ id: app.id, moderatorNote: note })
 
       if ('error' in result) {
         toaster.error({ title: String(result.error) })
@@ -152,164 +151,168 @@ export default function ModerationPage() {
         </Flex>
       </Flex>
 
-      {loading ? (
-        <Flex justify="center" py={12}>
-          <Spinner size="lg" />
-        </Flex>
-      ) : apps.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">Нет заявок</Text>
-        </EmptyState>
-      ) : (
-        <AdminResponsiveList
-          items={apps}
-          renderCard={(app) => (
-            <AdminCard key={app.id}>
-              <Flex justify="space-between" align="start" mb={2}>
-                <Box>
-                  <Flex gap={2} align="center" mb={1}>
-                    <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
-                      {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
-                    </Badge>
-                    <Badge colorPalette={statusColor[app.status]} size="sm">
-                      {statusLabel[app.status]}
-                    </Badge>
-                  </Flex>
-                  <Text fontWeight="semibold" fontSize="sm">
-                    {app.type === 'TRANSFER'
-                      ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
-                      : (app.playerName ?? '—')}
+      {loading
+        ? (
+          <Flex justify="center" py={12}>
+            <Spinner size="lg" />
+          </Flex>
+        )
+        : apps.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">Нет заявок</Text>
+          </EmptyState>
+        )
+        : (
+          <AdminResponsiveList
+            items={apps}
+            renderCard={(app) => (
+              <AdminCard key={app.id}>
+                <Flex justify="space-between" align="start" mb={2}>
+                  <Box>
+                    <Flex gap={2} align="center" mb={1}>
+                      <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
+                        {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
+                      </Badge>
+                      <Badge colorPalette={statusColor[app.status]} size="sm">
+                        {statusLabel[app.status]}
+                      </Badge>
+                    </Flex>
+                    <Text fontWeight="semibold" fontSize="sm">
+                      {app.type === 'TRANSFER'
+                        ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
+                        : (app.playerName ?? '—')}
+                    </Text>
+                  </Box>
+                  {app.status === 'PENDING' && (
+                    <HStack gap={1}>
+                      <Button
+                        size="sm"
+                        colorPalette="green"
+                        onClick={() => {
+                          setActionTarget({ app, action: 'approve' })
+                          setNote('')
+                        }}
+                      >
+                        <LuCheck size={14} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorPalette="red"
+                        variant="outline"
+                        onClick={() => {
+                          setActionTarget({ app, action: 'reject' })
+                          setNote('')
+                        }}
+                      >
+                        <LuX size={14} />
+                      </Button>
+                    </HStack>
+                  )}
+                </Flex>
+                <AdminCardRow label="Команда">
+                  <Text fontSize="sm">{app.toTeamSeason.team.name}</Text>
+                </AdminCardRow>
+                <AdminCardRow label="Сезон">
+                  <Text fontSize="sm" color="fg.muted">
+                    {app.toTeamSeason.season.name}
                   </Text>
-                </Box>
-                {app.status === 'PENDING' && (
-                  <HStack gap={1}>
-                    <Button
-                      size="sm"
-                      colorPalette="green"
-                      onClick={() => {
-                        setActionTarget({ app, action: 'approve' })
-                        setNote('')
-                      }}
-                    >
-                      <LuCheck size={14} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorPalette="red"
-                      variant="outline"
-                      onClick={() => {
-                        setActionTarget({ app, action: 'reject' })
-                        setNote('')
-                      }}
-                    >
-                      <LuX size={14} />
-                    </Button>
-                  </HStack>
-                )}
-              </Flex>
-              <AdminCardRow label="Команда">
-                <Text fontSize="sm">{app.toTeamSeason.team.name}</Text>
-              </AdminCardRow>
-              <AdminCardRow label="Сезон">
-                <Text fontSize="sm" color="fg.muted">
-                  {app.toTeamSeason.season.name}
-                </Text>
-              </AdminCardRow>
-              <AdminCardRow label="Роль">
-                <Text fontSize="sm">{roleLabel[app.role] ?? app.role}</Text>
-              </AdminCardRow>
-              <AdminCardRow label="Дата">
-                <Text fontSize="sm" color="fg.muted">
-                  {formatDateNumeric(app.createdAt)}
-                </Text>
-              </AdminCardRow>
-            </AdminCard>
-          )}
-          tableContent={
-            <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-              <Box overflowX="auto">
-                <Table.Root>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Тип</Table.ColumnHeader>
-                      <Table.ColumnHeader>Игрок</Table.ColumnHeader>
-                      <Table.ColumnHeader>Команда</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>Роль</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>Подал</Table.ColumnHeader>
-                      <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
-                      <Table.ColumnHeader w="140px" />
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {apps.map((app) => (
-                      <Table.Row key={app.id}>
-                        <Table.Cell>
-                          <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
-                            {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell fontWeight="medium">
-                          {app.type === 'TRANSFER'
-                            ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
-                            : (app.playerName ?? '—')}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="sm">{app.toTeamSeason.team.name}</Text>
-                          <Text fontSize="xs" color="fg.muted">
-                            {app.toTeamSeason.season.name}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm">
-                          {roleLabel[app.role] ?? app.role}
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm" color="fg.muted">
-                          {app.submittedBy.name ?? '—'}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={statusColor[app.status]} size="sm">
-                            {statusLabel[app.status]}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm" color="fg.muted">
-                          {formatDateNumeric(app.createdAt)}
-                        </Table.Cell>
-                        <Table.Cell>
-                          {app.status === 'PENDING' && (
-                            <HStack gap={1}>
-                              <Button
-                                size="sm"
-                                colorPalette="green"
-                                onClick={() => {
-                                  setActionTarget({ app, action: 'approve' })
-                                  setNote('')
-                                }}
-                              >
-                                <LuCheck size={14} />
-                              </Button>
-                              <Button
-                                size="sm"
-                                colorPalette="red"
-                                variant="outline"
-                                onClick={() => {
-                                  setActionTarget({ app, action: 'reject' })
-                                  setNote('')
-                                }}
-                              >
-                                <LuX size={14} />
-                              </Button>
-                            </HStack>
-                          )}
-                        </Table.Cell>
+                </AdminCardRow>
+                <AdminCardRow label="Роль">
+                  <Text fontSize="sm">{roleLabel[app.role] ?? app.role}</Text>
+                </AdminCardRow>
+                <AdminCardRow label="Дата">
+                  <Text fontSize="sm" color="fg.muted">
+                    {formatDateNumeric(app.createdAt)}
+                  </Text>
+                </AdminCardRow>
+              </AdminCard>
+            )}
+            tableContent={
+              <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+                <Box overflowX="auto">
+                  <Table.Root>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Тип</Table.ColumnHeader>
+                        <Table.ColumnHeader>Игрок</Table.ColumnHeader>
+                        <Table.ColumnHeader>Команда</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>Роль</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>Подал</Table.ColumnHeader>
+                        <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
+                        <Table.ColumnHeader w="140px" />
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
+                    </Table.Header>
+                    <Table.Body>
+                      {apps.map((app) => (
+                        <Table.Row key={app.id}>
+                          <Table.Cell>
+                            <Badge colorPalette={app.type === 'TRANSFER' ? 'blue' : 'gray'} size="sm">
+                              {app.type === 'TRANSFER' ? 'Трансфер' : 'Новый'}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell fontWeight="medium">
+                            {app.type === 'TRANSFER'
+                              ? `${app.player?.name ?? '?'} (из ${app.fromTeamSeason?.team.name ?? '?'})`
+                              : (app.playerName ?? '—')}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text fontSize="sm">{app.toTeamSeason.team.name}</Text>
+                            <Text fontSize="xs" color="fg.muted">
+                              {app.toTeamSeason.season.name}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm">
+                            {roleLabel[app.role] ?? app.role}
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm" color="fg.muted">
+                            {app.submittedBy.name ?? '—'}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={statusColor[app.status]} size="sm">
+                              {statusLabel[app.status]}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm" color="fg.muted">
+                            {formatDateNumeric(app.createdAt)}
+                          </Table.Cell>
+                          <Table.Cell>
+                            {app.status === 'PENDING' && (
+                              <HStack gap={1}>
+                                <Button
+                                  size="sm"
+                                  colorPalette="green"
+                                  onClick={() => {
+                                    setActionTarget({ app, action: 'approve' })
+                                    setNote('')
+                                  }}
+                                >
+                                  <LuCheck size={14} />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  colorPalette="red"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setActionTarget({ app, action: 'reject' })
+                                    setNote('')
+                                  }}
+                                >
+                                  <LuX size={14} />
+                                </Button>
+                              </HStack>
+                            )}
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
+                </Box>
               </Box>
-            </Box>
-          }
-        />
-      )}
+            }
+          />
+        )}
 
       {/* Диалог одобрения/отклонения */}
       <Dialog.Root open={!!actionTarget} onOpenChange={(e) => !e.open && setActionTarget(null)}>

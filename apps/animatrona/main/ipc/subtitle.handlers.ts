@@ -13,7 +13,8 @@ export function registerSubtitleHandlers(): void {
   createHandler('subtitle:shift', (options: ShiftSubtitlesOptions) => shiftSubtitles(options))
 
   // Предпросмотр сдвига (первые N событий)
-  createHandler('subtitle:previewShift', (inputPath: string, offsetMs: number, limit = 5) =>
-    previewShift(inputPath, offsetMs, limit)
+  createHandler(
+    'subtitle:previewShift',
+    (inputPath: string, offsetMs: number, limit = 5) => previewShift(inputPath, offsetMs, limit),
   )
 }

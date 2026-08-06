@@ -60,7 +60,7 @@ export function useChapterAutoSkip(options: UseChapterAutoSkipOptions) {
       // RECAP и PREVIEW пропускаются только при override
       return false
     },
-    [autoSkipEnabled, settings?.skipOpening, settings?.skipEnding]
+    [autoSkipEnabled, settings?.skipOpening, settings?.skipEnding],
   )
 
   // Автопропуск skippable глав (OP/ED/recap/preview)
@@ -72,9 +72,9 @@ export function useChapterAutoSkip(options: UseChapterAutoSkipOptions) {
     // Найти текущую skippable главу
     const currentSkippableChapter = chapters.find(
       (chapter) =>
-        shouldSkipChapter(chapter.type) &&
-        currentPlaybackTime >= chapter.startTime &&
-        currentPlaybackTime < chapter.endTime - 1 // -1 сек чтобы не пропустить в последнюю секунду
+        shouldSkipChapter(chapter.type)
+        && currentPlaybackTime >= chapter.startTime
+        && currentPlaybackTime < chapter.endTime - 1, // -1 сек чтобы не пропустить в последнюю секунду
     )
 
     if (currentSkippableChapter && lastSkippedChapterRef.current !== currentSkippableChapter.id) {

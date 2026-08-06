@@ -124,137 +124,143 @@ export default function AdminSuspensionsPage() {
       </Flex>
 
       {/* Таблица */}
-      {loading ? (
-        <Flex justify="center" py={12}>
-          <Spinner size="lg" />
-        </Flex>
-      ) : suspensions.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">Нет отстранений</Text>
-        </EmptyState>
-      ) : (
-        <AdminResponsiveList
-          items={suspensions}
-          renderCard={(s) => (
-            <AdminCard key={s.id}>
-              <Flex justify="space-between" align="start" mb={2}>
-                <Box>
-                  <Link href={`/admin/players/${s.player.id}`}>
-                    <Text fontWeight="semibold" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
-                      {playerDisplayName(s.player)}
+      {loading
+        ? (
+          <Flex justify="center" py={12}>
+            <Spinner size="lg" />
+          </Flex>
+        )
+        : suspensions.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">Нет отстранений</Text>
+          </EmptyState>
+        )
+        : (
+          <AdminResponsiveList
+            items={suspensions}
+            renderCard={(s) => (
+              <AdminCard key={s.id}>
+                <Flex justify="space-between" align="start" mb={2}>
+                  <Box>
+                    <Link href={`/admin/players/${s.player.id}`}>
+                      <Text fontWeight="semibold" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
+                        {playerDisplayName(s.player)}
+                      </Text>
+                    </Link>
+                    <Text fontSize="xs" color="fg.muted">
+                      {s.season.name}
                     </Text>
-                  </Link>
-                  <Text fontSize="xs" color="fg.muted">
-                    {s.season.name}
-                  </Text>
-                </Box>
-                <Flex gap={2} align="center">
-                  <Badge colorPalette={s.active ? 'red' : 'gray'} variant="subtle" size="sm">
-                    {s.active ? 'Активно' : 'Истёк'}
-                  </Badge>
-                  {s.active && (
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      colorPalette="red"
-                      onClick={() => handleDeactivate(s.id)}
-                      loading={deactivating === s.id}
-                      disabled={deactivating !== null}
-                    >
-                      <LuX size={12} />
-                    </Button>
-                  )}
+                  </Box>
+                  <Flex gap={2} align="center">
+                    <Badge colorPalette={s.active ? 'red' : 'gray'} variant="subtle" size="sm">
+                      {s.active ? 'Активно' : 'Истёк'}
+                    </Badge>
+                    {s.active && (
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        colorPalette="red"
+                        onClick={() => handleDeactivate(s.id)}
+                        loading={deactivating === s.id}
+                        disabled={deactivating !== null}
+                      >
+                        <LuX size={12} />
+                      </Button>
+                    )}
+                  </Flex>
                 </Flex>
-              </Flex>
-              <AdminCardRow label="Причина">
-                <Badge colorPalette={reasonColor(s.reason)} variant="subtle" size="sm">
-                  {reasonLabel(s.reason)}
-                </Badge>
-              </AdminCardRow>
-              <AdminCardRow label="Длительность">
-                <Text fontSize="sm">{s.untilEndOfSeason ? 'До конца сезона' : `${s.matchesLeft} матч.`}</Text>
-              </AdminCardRow>
-              <AdminCardRow label="Дата">
-                <Text fontSize="sm" color="fg.muted">
-                  {formatDateNumeric(s.startedAt)}
-                </Text>
-              </AdminCardRow>
-            </AdminCard>
-          )}
-          tableContent={
-            <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-              <Box overflowX="auto">
-                <Table.Root>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Поэт</Table.ColumnHeader>
-                      <Table.ColumnHeader>Сезон</Table.ColumnHeader>
-                      <Table.ColumnHeader>Причина</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Длительность</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
-                      <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                      <Table.ColumnHeader w="80px" />
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {suspensions.map((s) => (
-                      <Table.Row key={s.id}>
-                        <Table.Cell>
-                          <Link href={`/admin/players/${s.player.id}`}>
-                            <Text fontWeight="medium" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
-                              {playerDisplayName(s.player)}
-                            </Text>
-                          </Link>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="sm" color="fg.muted">
-                            {s.season.name}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={reasonColor(s.reason)} variant="subtle" size="sm">
-                            {reasonLabel(s.reason)}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
-                          <Text fontSize="sm" fontFamily="mono">
-                            {s.untilEndOfSeason ? 'До конца сезона' : `${s.matchesLeft} матч.`}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
-                          <Text fontSize="sm" color="fg.muted">
-                            {formatDateNumeric(s.startedAt)}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={s.active ? 'red' : 'gray'} variant="subtle" size="sm">
-                            {s.active ? 'Активно' : 'Истёк'}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          {s.active && (
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              colorPalette="red"
-                              onClick={() => handleDeactivate(s.id)}
-                              loading={deactivating === s.id}
-                              disabled={deactivating !== null}
-                              title="Снять отстранение"
-                            >
-                              <LuX size={12} />
-                            </Button>
-                          )}
-                        </Table.Cell>
+                <AdminCardRow label="Причина">
+                  <Badge colorPalette={reasonColor(s.reason)} variant="subtle" size="sm">
+                    {reasonLabel(s.reason)}
+                  </Badge>
+                </AdminCardRow>
+                <AdminCardRow label="Длительность">
+                  <Text fontSize="sm">{s.untilEndOfSeason ? 'До конца сезона' : `${s.matchesLeft} матч.`}</Text>
+                </AdminCardRow>
+                <AdminCardRow label="Дата">
+                  <Text fontSize="sm" color="fg.muted">
+                    {formatDateNumeric(s.startedAt)}
+                  </Text>
+                </AdminCardRow>
+              </AdminCard>
+            )}
+            tableContent={
+              <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+                <Box overflowX="auto">
+                  <Table.Root>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Поэт</Table.ColumnHeader>
+                        <Table.ColumnHeader>Сезон</Table.ColumnHeader>
+                        <Table.ColumnHeader>Причина</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>
+                          Длительность
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
+                        <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                        <Table.ColumnHeader w="80px" />
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
+                    </Table.Header>
+                    <Table.Body>
+                      {suspensions.map((s) => (
+                        <Table.Row key={s.id}>
+                          <Table.Cell>
+                            <Link href={`/admin/players/${s.player.id}`}>
+                              <Text fontWeight="medium" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
+                                {playerDisplayName(s.player)}
+                              </Text>
+                            </Link>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text fontSize="sm" color="fg.muted">
+                              {s.season.name}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={reasonColor(s.reason)} variant="subtle" size="sm">
+                              {reasonLabel(s.reason)}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
+                            <Text fontSize="sm" fontFamily="mono">
+                              {s.untilEndOfSeason ? 'До конца сезона' : `${s.matchesLeft} матч.`}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
+                            <Text fontSize="sm" color="fg.muted">
+                              {formatDateNumeric(s.startedAt)}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={s.active ? 'red' : 'gray'} variant="subtle" size="sm">
+                              {s.active ? 'Активно' : 'Истёк'}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {s.active && (
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                colorPalette="red"
+                                onClick={() => handleDeactivate(s.id)}
+                                loading={deactivating === s.id}
+                                disabled={deactivating !== null}
+                                title="Снять отстранение"
+                              >
+                                <LuX size={12} />
+                              </Button>
+                            )}
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
+                </Box>
               </Box>
-            </Box>
-          }
-        />
-      )}
+            }
+          />
+        )}
     </VStack>
   )
 }

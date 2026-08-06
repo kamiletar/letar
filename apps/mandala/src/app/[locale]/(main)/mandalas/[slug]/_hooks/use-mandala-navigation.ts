@@ -44,13 +44,13 @@ export function useMandalaNavigation({
   // Предыдущая мандала (с циклом на последнюю)
   const prevMandala = useMemo(
     () => (currentIndex > 0 ? allMandalas[currentIndex - 1] : allMandalas[allMandalas.length - 1]),
-    [allMandalas, currentIndex]
+    [allMandalas, currentIndex],
   )
 
   // Следующая мандала (с циклом на первую)
   const nextMandala = useMemo(
     () => (currentIndex < allMandalas.length - 1 ? allMandalas[currentIndex + 1] : allMandalas[0]),
-    [allMandalas, currentIndex]
+    [allMandalas, currentIndex],
   )
 
   // Навигация по slug (обновляет URL без перезагрузки)
@@ -63,7 +63,7 @@ export function useMandalaNavigation({
         window.history.replaceState({}, '', `/mandalas/${slug}`)
       }
     },
-    [allMandalas]
+    [allMandalas],
   )
 
   return {

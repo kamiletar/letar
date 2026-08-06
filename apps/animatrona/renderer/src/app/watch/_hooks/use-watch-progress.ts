@@ -35,7 +35,7 @@ interface UseWatchProgressOptions {
     progress: {
       selectedAudioTrackId: string | null
       selectedSubtitleTrackId: string | null
-    } | null
+    } | null,
   ) => void
 }
 
@@ -79,7 +79,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
         },
       },
     },
-    { enabled: !!episode?.animeId }
+    { enabled: !!episode?.animeId },
   )
 
   // Мутация для сохранения прогресса
@@ -149,7 +149,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
 
     if (!subtitleTrackSelected && episode.anime.lastSelectedSubtitleDubGroup) {
       const trackByDubGroup = episode.subtitleTracks.find(
-        (t) => t.dubGroup === episode.anime.lastSelectedSubtitleDubGroup
+        (t) => t.dubGroup === episode.anime.lastSelectedSubtitleDubGroup,
       )
       if (trackByDubGroup) {
         onSetSelectedSubtitleTrackId(trackByDubGroup.id)
@@ -160,7 +160,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
     // Fallback по языку если dubGroup не найден
     if (!subtitleTrackSelected && episode.anime.lastSelectedSubtitleLanguage) {
       const trackByLanguage = episode.subtitleTracks.find(
-        (t) => t.language === episode.anime.lastSelectedSubtitleLanguage
+        (t) => t.language === episode.anime.lastSelectedSubtitleLanguage,
       )
       if (trackByLanguage) {
         onSetSelectedSubtitleTrackId(trackByLanguage.id)
@@ -172,10 +172,10 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
     onProgressReady?.(
       watchProgressData
         ? {
-            selectedAudioTrackId: audioTrackSelected ? watchProgressData.selectedAudioTrackId : null,
-            selectedSubtitleTrackId: subtitleTrackSelected ? watchProgressData.selectedSubtitleTrackId : null,
-          }
-        : null
+          selectedAudioTrackId: audioTrackSelected ? watchProgressData.selectedAudioTrackId : null,
+          selectedSubtitleTrackId: subtitleTrackSelected ? watchProgressData.selectedSubtitleTrackId : null,
+        }
+        : null,
     )
 
     setProgressLoaded(true)
@@ -307,7 +307,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
         }
       }
     },
-    [episode, selectedAudioTrackId, selectedSubtitleTrackId, upsertProgress, playerRef]
+    [episode, selectedAudioTrackId, selectedSubtitleTrackId, upsertProgress, playerRef],
   )
 
   // Обработчик обновления времени видео (throttle вместо debounce!)
@@ -328,7 +328,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
         saveProgress(time)
       }
     },
-    [saveProgress]
+    [saveProgress],
   )
 
   // Сохранение при размонтировании (переход на другую страницу/эпизод)

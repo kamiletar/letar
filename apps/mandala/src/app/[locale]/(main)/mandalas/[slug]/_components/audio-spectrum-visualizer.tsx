@@ -149,9 +149,11 @@ export function AudioSpectrumVisualizer({
       if (value > 0.6) {
         ctx.beginPath()
         ctx.arc(x2, y2, 2 + value * 2, 0, 2 * Math.PI)
-        ctx.fillStyle = `${color}${Math.floor(value * 200)
-          .toString(16)
-          .padStart(2, '0')}`
+        ctx.fillStyle = `${color}${
+          Math.floor(value * 200)
+            .toString(16)
+            .padStart(2, '0')
+        }`
         ctx.fill()
       }
     }

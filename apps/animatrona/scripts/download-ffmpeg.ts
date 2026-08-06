@@ -138,8 +138,8 @@ async function main() {
 
       // Проверяем libsvtav1 только для текущей платформы
       if (
-        (platform === 'win' && process.platform === 'win32') ||
-        (platform === 'linux' && process.platform === 'linux')
+        (platform === 'win' && process.platform === 'win32')
+        || (platform === 'linux' && process.platform === 'linux')
       ) {
         try {
           const { stdout } = await execAsync(`"${ffmpegBin}" -encoders 2>&1`)
@@ -178,7 +178,7 @@ async function main() {
     if (config.ext === 'zip') {
       // Windows: PowerShell Expand-Archive
       await execAsync(
-        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`
+        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`,
       )
     } else if (config.ext === 'tar.xz') {
       // tar.xz: используем tar (доступен на Linux и Windows 10+)
@@ -239,8 +239,8 @@ async function main() {
 
       // Проверяем версию только для текущей платформы
       if (
-        (platform === 'win' && process.platform === 'win32') ||
-        (platform === 'linux' && process.platform === 'linux')
+        (platform === 'win' && process.platform === 'win32')
+        || (platform === 'linux' && process.platform === 'linux')
       ) {
         try {
           const { stdout } = await execAsync(`"${ffmpegBin}" -version`)

@@ -26,7 +26,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -72,7 +72,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

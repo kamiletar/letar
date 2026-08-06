@@ -246,9 +246,8 @@ async function collectExpectedRoots(): Promise<Map<string, string>> {
  */
 export async function findOrphanedPins(
   pinnedList?: PinInfo[],
-
   _onProgress?: (current: number, total: number, name: string) => void,
-  onStep?: (step: string) => void
+  onStep?: (step: string) => void,
 ): Promise<OrphanAuditResult> {
   log.info('=== Аудит хранилища: старт ===')
 

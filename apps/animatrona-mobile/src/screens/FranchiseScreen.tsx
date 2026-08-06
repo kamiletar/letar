@@ -32,7 +32,7 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
       Haptics.light()
       navigation.navigate('Anime', { animeId })
     },
-    [navigation]
+    [navigation],
   )
 
   const progressPercent = group.totalEpisodes > 0 ? Math.round((group.totalWatched / group.totalEpisodes) * 100) : 0
@@ -73,7 +73,7 @@ export function FranchiseScreen({ route, navigation }: FranchiseScreenProps) {
         </TouchableOpacity>
       )
     },
-    [handleAnimePress, layout.cardWidth, posterMap]
+    [handleAnimePress, layout.cardWidth, posterMap],
   )
 
   return (

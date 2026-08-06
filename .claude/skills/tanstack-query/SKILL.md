@@ -99,7 +99,7 @@ const { data, isLoading } = useFindManyOrder(
     refetchInterval: 30 * 1000, // Каждые 30 сек
     enabled: isAuthenticated, // Условный запрос
     select: (data) => data.filter((o) => o.total > 100),
-  }
+  },
 )
 ```
 

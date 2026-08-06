@@ -84,7 +84,7 @@ export function MobileAccessCard() {
         setIsToggling(false)
       }
     },
-    [upsertSettings]
+    [upsertSettings],
   )
 
   const handleRefreshIp = useCallback(async () => {
@@ -204,9 +204,11 @@ export function MobileAccessCard() {
                             <Text
                               fontFamily="mono"
                               fontSize="sm"
-                              color={
-                                ipInfo.type === 'lan' ? 'green.400' : ipInfo.type === 'vpn' ? 'yellow.400' : 'fg.subtle'
-                              }
+                              color={ipInfo.type === 'lan'
+                                ? 'green.400'
+                                : ipInfo.type === 'vpn'
+                                ? 'yellow.400'
+                                : 'fg.subtle'}
                               userSelect="all"
                             >
                               http://{ipInfo.ip}:{status.port}
@@ -237,8 +239,9 @@ export function MobileAccessCard() {
               {/* Инструкция */}
               <Box bg="blue.950" borderRadius="lg" p={4} borderLeft="4px solid" borderColor="blue.400">
                 <Text fontSize="sm" color="blue.200">
-                  <strong>Подсказка:</strong> Телефон должен быть подключён к той же Wi-Fi сети, что и компьютер.
-                  Откройте камеру и наведите на QR-код или введите адрес вручную в браузере.
+                  <strong>Подсказка:</strong>{' '}
+                  Телефон должен быть подключён к той же Wi-Fi сети, что и компьютер. Откройте камеру и наведите на
+                  QR-код или введите адрес вручную в браузере.
                 </Text>
               </Box>
             </>

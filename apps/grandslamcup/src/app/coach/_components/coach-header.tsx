@@ -41,8 +41,9 @@ export function CoachHeader({ teamName }: CoachHeaderProps) {
                             <VStack gap={0} align="stretch">
                               {coachNavItems.map((item) => {
                                 const IconComponent = item.icon
-                                const isActive =
-                                  item.href === '/coach' ? pathname === '/coach' : pathname.startsWith(item.href)
+                                const isActive = item.href === '/coach'
+                                  ? pathname === '/coach'
+                                  : pathname.startsWith(item.href)
 
                                 return (
                                   <Link key={item.href} href={item.href} onClick={() => store.setOpen(false)}>

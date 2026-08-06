@@ -61,27 +61,34 @@ export function AccountCard({
           </VStack>
         </HStack>
 
-        {isLinked ? (
-          <HStack gap={2}>
-            <Badge colorPalette="green">Подключено</Badge>
-            <Button
-              size="sm"
-              variant="ghost"
-              colorPalette="red"
-              onClick={() => onUnlink(providerId)}
-              loading={loading}
-              disabled={!canUnlink}
-            >
-              Отключить
-            </Button>
-          </HStack>
-        ) : (
-          customLinkWidget || (
-            <Button size="sm" colorPalette={color} onClick={() => onLink(providerId)} loading={loading}>
-              Подключить
-            </Button>
+        {isLinked
+          ? (
+            <HStack gap={2}>
+              <Badge colorPalette="green">Подключено</Badge>
+              <Button
+                size="sm"
+                variant="ghost"
+                colorPalette="red"
+                onClick={() => onUnlink(providerId)}
+                loading={loading}
+                disabled={!canUnlink}
+              >
+                Отключить
+              </Button>
+            </HStack>
           )
-        )}
+          : (
+            customLinkWidget || (
+              <Button
+                size="sm"
+                colorPalette={color}
+                onClick={() => onLink(providerId)}
+                loading={loading}
+              >
+                Подключить
+              </Button>
+            )
+          )}
       </HStack>
 
       {isLinked && !canUnlink && (

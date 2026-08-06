@@ -63,7 +63,7 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
       pressedKeys.current.add(note)
       onNoteOn(note, 0.8)
     },
-    [onNoteOn]
+    [onNoteOn],
   )
 
   const handleNoteOff = useCallback(
@@ -71,7 +71,7 @@ export function Keyboard({ onNoteOn, onNoteOff, activeNotes = new Set() }: Keybo
       pressedKeys.current.delete(note)
       onNoteOff(note)
     },
-    [onNoteOff]
+    [onNoteOff],
   )
 
   // Клавиши компьютера

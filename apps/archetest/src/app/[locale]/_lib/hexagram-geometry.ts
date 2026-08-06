@@ -63,7 +63,7 @@ const DARK_ANGLES = { ANT: 270, NAR: 150, MAC: 30 } as const
  */
 export function computeHexagramGeometry(
   scores: Partial<Record<PersonalityTypeCode, number>>,
-  size: number = DEFAULT_SIZE
+  size: number = DEFAULT_SIZE,
 ): HexagramGeometry {
   const center: Point = { x: size / 2, y: size / 2 }
   const maxRadius = size * RADIUS_RATIO

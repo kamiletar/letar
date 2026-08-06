@@ -87,7 +87,7 @@ export function Header() {
   return <h1>{t('hello')}</h1>
 } // С параметрами
 
-;<p>{t('welcome', { name: 'Иван' })}</p>
+<p>{t('welcome', { name: 'Иван' })}</p>
 ```
 
 ## Критичные правила

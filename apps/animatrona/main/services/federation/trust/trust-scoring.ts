@@ -56,11 +56,10 @@ export function calculateTrustScore(metrics: TrustMetrics): number {
   const syncScore = totalSyncs > 0 ? (metrics.successfulSyncs / totalSyncs) * 100 : 50 // Neutral для новых трекеров
 
   // Взвешенная сумма
-  const score =
-    uptimeScore * WEIGHTS.uptime +
-    responseScore * WEIGHTS.responseTime +
-    qualityScore * WEIGHTS.quality +
-    syncScore * WEIGHTS.syncSuccess
+  const score = uptimeScore * WEIGHTS.uptime
+    + responseScore * WEIGHTS.responseTime
+    + qualityScore * WEIGHTS.quality
+    + syncScore * WEIGHTS.syncSuccess
 
   return Math.round(Math.max(0, Math.min(100, score)))
 }
@@ -135,14 +134,14 @@ export function updateMetricsAfterInteraction(
   interaction: {
     success: boolean
     responseTimeMs: number
-  }
+  },
 ): TrustMetrics {
   const _totalInteractions = currentMetrics.successfulSyncs + currentMetrics.failedSyncs + 1
 
   // Экспоненциальное скользящее среднее для времени ответа
   const alpha = 0.2 // Коэффициент сглаживания
   const newAvgResponseTime = Math.round(
-    alpha * interaction.responseTimeMs + (1 - alpha) * currentMetrics.avgResponseTimeMs
+    alpha * interaction.responseTimeMs + (1 - alpha) * currentMetrics.avgResponseTimeMs,
   )
 
   return {

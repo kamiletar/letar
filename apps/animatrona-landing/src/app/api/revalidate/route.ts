@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         error: 'Revalidation failed',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

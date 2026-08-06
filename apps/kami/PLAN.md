@@ -447,7 +447,7 @@
     .color(
       () => a.fft[1],
       0.5,
-      () => a.fft[2]
+      () => a.fft[2],
     )
     .modulate(noise(3))
     .out()

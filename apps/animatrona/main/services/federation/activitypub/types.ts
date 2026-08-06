@@ -8,7 +8,6 @@
 // Реэкспорт основных типов
 export {
   ACTIVITYPUB_CONTEXT,
-  SECURITY_CONTEXT,
   type ActivityPubActivity,
   type ActivityPubActor,
   type ActivityPubPublicKey,
@@ -16,6 +15,7 @@ export {
   type CreateActivity,
   type DeleteActivity,
   type ParsedSignature,
+  SECURITY_CONTEXT,
   type SignatureHeaders,
   type UpdateActivity,
   type VideoEpisodeObject,

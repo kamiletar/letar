@@ -87,47 +87,49 @@ export function VoicePanel({
       </Text>
 
       <Box display="flex" alignItems="center" gap={2} flexWrap="wrap" mb={3}>
-        {devices.length === 0 ? (
-          <button style={outlineButtonStyle('default', { padding: '2px 8px' })} onClick={onRefreshDevices}>
-            Выбрать микрофон
-          </button>
-        ) : (
-          <>
-            <select
-              value={selectedDeviceId ?? ''}
-              onChange={(e) => onSelectDevice(e.target.value)}
-              style={{
-                background: 'transparent',
-                border: '1px solid #5a3a10',
-                borderRadius: '3px',
-                color: '#D4AF37',
-                fontSize: '10px',
-                padding: '2px 6px',
-                fontFamily: 'monospace',
-                maxWidth: '220px',
-              }}
-            >
-              {devices.map((d) => (
-                <option key={d.deviceId} value={d.deviceId}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-            <button
-              style={outlineButtonStyle('default', { padding: '2px 8px' })}
-              onClick={onRefreshDevices}
-              title="Обновить список"
-            >
-              ⟳
+        {devices.length === 0
+          ? (
+            <button style={outlineButtonStyle('default', { padding: '2px 8px' })} onClick={onRefreshDevices}>
+              Выбрать микрофон
             </button>
-            <button
-              style={outlineButtonStyle(active ? 'active' : 'default', { padding: '2px 8px' })}
-              onClick={onToggleActive}
-            >
-              {active ? '● монитор вкл' : '○ включить монитор'}
-            </button>
-          </>
-        )}
+          )
+          : (
+            <>
+              <select
+                value={selectedDeviceId ?? ''}
+                onChange={(e) => onSelectDevice(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #5a3a10',
+                  borderRadius: '3px',
+                  color: '#D4AF37',
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  fontFamily: 'monospace',
+                  maxWidth: '220px',
+                }}
+              >
+                {devices.map((d) => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                style={outlineButtonStyle('default', { padding: '2px 8px' })}
+                onClick={onRefreshDevices}
+                title="Обновить список"
+              >
+                ⟳
+              </button>
+              <button
+                style={outlineButtonStyle(active ? 'active' : 'default', { padding: '2px 8px' })}
+                onClick={onToggleActive}
+              >
+                {active ? '● монитор вкл' : '○ включить монитор'}
+              </button>
+            </>
+          )}
         {active && <LevelMeterBar level={level} />}
         {error && (
           <Text fontSize="9px" color="red.400">

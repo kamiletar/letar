@@ -282,7 +282,7 @@ function ProductPreview() {
   )
 } // Использование: preview обновляется при каждом изменении полей
 
-;<Form schema={ProductSchema} initialValue={data} onSubmit={save}>
+<Form schema={ProductSchema} initialValue={data} onSubmit={save}>
   <HStack align="start">
     <VStack flex={1}>
       <Form.Field.String name="name" />
@@ -333,7 +333,7 @@ export const AppForm = createForm({
 
 ```tsx
 import { AppForm } from '@/lib/form'
-;<AppForm schema={Schema} initialValue={data} onSubmit={save}>
+<AppForm schema={Schema} initialValue={data} onSubmit={save}>
   <AppForm.Field.String name="title" />
   <AppForm.Select.Category name="categoryId" /> {/* Кастомный */}
   <AppForm.Combobox.Brand name="brandId" /> {/* Lazy-loaded */}
@@ -394,10 +394,8 @@ Combobox с 10 000 городов не грузится, пока не ренд�
 Бонус schema-driven архитектуры — `FormSkeleton`. Поскольку Zod-схема содержит информацию о количестве и типах полей, библиотека может сгенерировать loading-скелетон автоматически:
 
 ```tsx
-import { FormSkeleton } from '@letar/forms'
-
-// Пока данные грузятся — скелетон, повторяющий структуру формы
-;<FormSkeleton fields={OrderSchema} showSubmit />
+import { FormSkeleton } from '@letar/forms' // Пока данные грузятся — скелетон, повторяющий структуру формы
+<FormSkeleton fields={OrderSchema} showSubmit />
 ```
 
 Без schema-driven архитектуры это 15–20 строк ручных `<Skeleton />` компонентов, которые нужно поддерживать синхронно с формой.

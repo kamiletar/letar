@@ -110,7 +110,7 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
         },
       ])
     },
-    [refreshStorage]
+    [refreshStorage],
   )
 
   const handleDeleteAnime = useCallback(
@@ -133,14 +133,14 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
         },
       ])
     },
-    [groupedDownloads, removeAnimeDownloads, refreshStorage]
+    [groupedDownloads, removeAnimeDownloads, refreshStorage],
   )
 
   const handleCancelTask = useCallback(
     (taskId: string) => {
       removeFromQueue(taskId)
     },
-    [removeFromQueue]
+    [removeFromQueue],
   )
 
   const handlePlayEpisode = useCallback(
@@ -151,7 +151,7 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
         animeId: ep.animeId,
       })
     },
-    [navigation]
+    [navigation],
   )
 
   const handleClearPosterCache = useCallback(() => {
@@ -180,7 +180,7 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
             refreshStorage()
           },
         },
-      ]
+      ],
     )
   }, [refreshStorage])
 
@@ -202,7 +202,7 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
             refreshStorage()
           },
         },
-      ]
+      ],
     )
   }, [refreshStorage])
 
@@ -228,15 +228,15 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
                 <View style={styles.taskMeta}>
                   <Text style={styles.taskStatus}>
                     {item.data.status === 'queued' && 'В очереди'}
-                    {item.data.status === 'downloading' &&
-                      `Загрузка${
+                    {item.data.status === 'downloading'
+                      && `Загрузка${
                         item.data.currentItem === 'audio'
                           ? ' аудио'
                           : item.data.currentItem === 'subtitle'
-                            ? ' субтитров'
-                            : item.data.currentItem === 'font'
-                              ? ' шрифтов'
-                              : ''
+                          ? ' субтитров'
+                          : item.data.currentItem === 'font'
+                          ? ' шрифтов'
+                          : ''
                       }`}
                     {item.data.status === 'paused' && 'Пауза'}
                     {item.data.status === 'error' && `Ошибка: ${item.data.errorMessage}`}
@@ -313,12 +313,14 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
                             styles.storageBarSegment,
                             styles.storageBarDownloads,
                             {
-                              width: `${Math.max(
-                                2,
-                                (storageInfo.downloadedBytes /
-                                  (storageInfo.totalUsedBytes + storageInfo.availableBytes)) *
-                                  100
-                              )}%`,
+                              width: `${
+                                Math.max(
+                                  2,
+                                  (storageInfo.downloadedBytes
+                                    / (storageInfo.totalUsedBytes + storageInfo.availableBytes))
+                                    * 100,
+                                )
+                              }%`,
                             },
                           ]}
                         />
@@ -329,12 +331,14 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
                             styles.storageBarSegment,
                             styles.storageBarPosters,
                             {
-                              width: `${Math.max(
-                                1,
-                                (storageInfo.posterCacheBytes /
-                                  (storageInfo.totalUsedBytes + storageInfo.availableBytes)) *
-                                  100
-                              )}%`,
+                              width: `${
+                                Math.max(
+                                  1,
+                                  (storageInfo.posterCacheBytes
+                                    / (storageInfo.totalUsedBytes + storageInfo.availableBytes))
+                                    * 100,
+                                )
+                              }%`,
                             },
                           ]}
                         />
@@ -378,7 +382,10 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
                   {/* Кнопки управления кэшем */}
                   <View style={styles.storageActions}>
                     {storageInfo.posterCacheBytes > 0 && (
-                      <TouchableOpacity style={styles.storageActionButton} onPress={() => handleClearPosterCache()}>
+                      <TouchableOpacity
+                        style={styles.storageActionButton}
+                        onPress={() => handleClearPosterCache()}
+                      >
                         <Text style={styles.storageActionText}>Очистить постеры</Text>
                       </TouchableOpacity>
                     )}
@@ -414,7 +421,7 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
       handleClearPosterCache,
       handleClearMetadata,
       handleClearAll,
-    ]
+    ],
   )
 
   const keyExtractor = useCallback((item: ListItem, index: number) => {
@@ -447,24 +454,26 @@ export function DownloadsScreen({ navigation }: DownloadsScreenProps) {
         <View style={styles.headerSpacer} />
       </View>
 
-      {isEmpty ? (
-        <ScrollView contentContainerStyle={styles.emptyScrollContent}>
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📥</Text>
-            <Text style={styles.emptyText}>Нет скачанных эпизодов</Text>
-            <Text style={styles.emptySubtext}>Скачайте эпизоды для оффлайн просмотра на странице аниме</Text>
-          </View>
-          {/* Секция хранилища даже при пустых загрузках */}
-          {renderItem({ item: { type: 'storage_info' } } as { item: ListItem })}
-        </ScrollView>
-      ) : (
-        <FlatList
-          data={listData}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
+      {isEmpty
+        ? (
+          <ScrollView contentContainerStyle={styles.emptyScrollContent}>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>📥</Text>
+              <Text style={styles.emptyText}>Нет скачанных эпизодов</Text>
+              <Text style={styles.emptySubtext}>Скачайте эпизоды для оффлайн просмотра на странице аниме</Text>
+            </View>
+            {/* Секция хранилища даже при пустых загрузках */}
+            {renderItem({ item: { type: 'storage_info' } } as { item: ListItem })}
+          </ScrollView>
+        )
+        : (
+          <FlatList
+            data={listData}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
     </SafeAreaView>
   )
 }

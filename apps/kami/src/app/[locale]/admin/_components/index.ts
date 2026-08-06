@@ -5,8 +5,8 @@
 export { AdminPageLayout, type AdminPageLayoutProps } from './admin-page-layout'
 export {
   PublishStatusBadge,
-  RatingStars,
   type PublishStatusBadgeProps,
+  RatingStars,
   type RatingStarsProps,
 } from './admin-status-badges'
 export { AdminTableActions, type AdminTableActionsProps } from './admin-table-actions'

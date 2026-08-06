@@ -57,7 +57,7 @@ export default async function MatchOGImage({ params }: { params: Params }) {
       >
         Матч не найден
       </div>,
-      { ...size }
+      { ...size },
     )
   }
 
@@ -70,11 +70,11 @@ export default async function MatchOGImage({ params }: { params: Params }) {
   // MVP матча
   const mvp = isFinished
     ? findMatchMVP(
-        match.performances.map((p) => ({
-          playerName: p.player.name,
-          totalScore: p.totalScore,
-        }))
-      )
+      match.performances.map((p) => ({
+        playerName: p.player.name,
+        totalScore: p.totalScore,
+      })),
+    )
     : null
 
   const dateStr = match.scheduledAt ? formatDate(match.scheduledAt) : ''
@@ -144,20 +144,20 @@ export default async function MatchOGImage({ params }: { params: Params }) {
             alignItems: 'center',
           }}
         >
-          {isFinished ? (
-            <span
-              style={{
-                fontSize: 96,
-                fontWeight: 800,
-                fontFamily: 'monospace',
-                letterSpacing: '0.05em',
-              }}
-            >
-              {match.homeScore} : {match.awayScore}
-            </span>
-          ) : (
-            <span style={{ fontSize: 64, color: '#666' }}>vs</span>
-          )}
+          {isFinished
+            ? (
+              <span
+                style={{
+                  fontSize: 96,
+                  fontWeight: 800,
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {match.homeScore} : {match.awayScore}
+              </span>
+            )
+            : <span style={{ fontSize: 64, color: '#666' }}>vs</span>}
           <span
             style={{
               fontSize: 18,
@@ -212,6 +212,6 @@ export default async function MatchOGImage({ params }: { params: Params }) {
         <span style={{ fontSize: 18, color: '#666' }}>{dateStr}</span>
       </div>
     </div>,
-    { ...size }
+    { ...size },
   )
 }

@@ -86,7 +86,7 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
       // Отмечаем шаблон как использованный
       markAsUsed(template.id)
     },
-    [setSelectedProfileId, setVmafEnabled, setTargetVmaf, setVideoMaxConcurrent, setAudioMaxConcurrent, markAsUsed]
+    [setSelectedProfileId, setVmafEnabled, setTargetVmaf, setVideoMaxConcurrent, setAudioMaxConcurrent, markAsUsed],
   )
 
   return (
@@ -130,9 +130,7 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
                 </Text>
               </VStack>
               <Box w="200px">
-                {isLoadingProfiles ? (
-                  <Spinner size="sm" />
-                ) : (
+                {isLoadingProfiles ? <Spinner size="sm" /> : (
                   <NativeSelect.Root size="sm">
                     <NativeSelect.Field
                       value={selectedProfileId ?? ''}

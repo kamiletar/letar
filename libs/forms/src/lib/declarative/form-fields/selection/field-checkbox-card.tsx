@@ -76,14 +76,16 @@ export const FieldCheckboxCard = createField<CheckboxCardFieldProps, string[]>({
         >
           {resolved.label && (
             <Fieldset.Legend mb={2}>
-              {resolved.tooltip ? (
-                <HStack gap={1}>
-                  <span>{resolved.label}</span>
-                  <FieldTooltip {...resolved.tooltip} />
-                </HStack>
-              ) : (
-                resolved.label
-              )}
+              {resolved.tooltip
+                ? (
+                  <HStack gap={1}>
+                    <span>{resolved.label}</span>
+                    <FieldTooltip {...resolved.tooltip} />
+                  </HStack>
+                )
+                : (
+                  resolved.label
+                )}
               {resolved.required && (
                 <span
                   role="presentation"
@@ -125,9 +127,7 @@ export const FieldCheckboxCard = createField<CheckboxCardFieldProps, string[]>({
           </Flex>
         </CheckboxGroup>
 
-        {hasError ? (
-          <Fieldset.ErrorText>{errorMessage}</Fieldset.ErrorText>
-        ) : (
+        {hasError ? <Fieldset.ErrorText>{errorMessage}</Fieldset.ErrorText> : (
           resolved.helperText && <Fieldset.HelperText>{resolved.helperText}</Fieldset.HelperText>
         )}
       </Fieldset.Root>

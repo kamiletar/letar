@@ -131,7 +131,7 @@ export function ServerContextProvider({ children }: ServerContextProviderProps) 
       selectServer,
       refetch: fetchServers,
     }),
-    [currentServer, selectedServerId, servers, isLoading, error, selectServer, fetchServers]
+    [currentServer, selectedServerId, servers, isLoading, error, selectServer, fetchServers],
   )
 
   return <ServerContext value={value}>{children}</ServerContext>

@@ -367,13 +367,13 @@ export function VmafAutoDialog({
 
     const overallPercent = progress
       ? Math.max(
-          0,
-          ((progress.currentIteration -
-            1 +
-            (progress.stage === 'calculating' ? 0.7 : progress.stage === 'encoding' ? 0.3 : 0)) /
-            progress.totalIterations) *
-            100
-        )
+        0,
+        ((progress.currentIteration
+          - 1
+          + (progress.stage === 'calculating' ? 0.7 : progress.stage === 'encoding' ? 0.3 : 0))
+          / progress.totalIterations)
+          * 100,
+      )
       : 0
 
     return (
@@ -439,11 +439,9 @@ export function VmafAutoDialog({
                         <Text color="fg.subtle" fontSize="xs">
                           {formatFileSize(iter.size)}
                         </Text>
-                        {iter.vmaf >= targetVmaf ? (
-                          <Icon as={LuCheck} color="status.success" />
-                        ) : (
-                          <Icon as={LuX} color="status.error" />
-                        )}
+                        {iter.vmaf >= targetVmaf
+                          ? <Icon as={LuCheck} color="status.success" />
+                          : <Icon as={LuX} color="status.error" />}
                       </HStack>
                     </Flex>
                   ))}

@@ -122,7 +122,7 @@ export function useProfile(): UseProfileReturn {
         return false
       }
     },
-    [api]
+    [api],
   )
 
   /**
@@ -171,7 +171,7 @@ export function useProfile(): UseProfileReturn {
         return false
       }
     },
-    [api]
+    [api],
   )
 
   /**
@@ -191,7 +191,7 @@ export function useProfile(): UseProfileReturn {
         return false
       }
     },
-    [api]
+    [api],
   )
 
   return {

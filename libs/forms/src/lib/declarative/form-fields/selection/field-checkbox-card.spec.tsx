@@ -23,7 +23,7 @@ describe('FieldCheckboxCard', () => {
           <Form initialValue={{ plans: [] }} onSubmit={vi.fn()}>
             <Form.Field.CheckboxCard name="plans" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const checkboxes = screen.getAllByRole('checkbox')
@@ -36,7 +36,7 @@ describe('FieldCheckboxCard', () => {
           <Form initialValue={{ plans: [] }} onSubmit={vi.fn()}>
             <Form.Field.CheckboxCard name="plans" label="Тарифы" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Тарифы')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('FieldCheckboxCard', () => {
           <Form initialValue={{ plans: [] }} onSubmit={vi.fn()}>
             <Form.Field.CheckboxCard name="plans" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Базовый')).toBeInTheDocument()

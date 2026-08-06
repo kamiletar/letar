@@ -67,7 +67,7 @@ export interface FieldRenderProps<TValue = unknown, TState = Record<string, neve
  * including Field.Root wrapper and error display.
  */
 export type FieldRenderFn<P extends BaseFieldProps, TValue = unknown, TState = Record<string, never>> = (
-  props: FieldRenderProps<TValue, TState> & { componentProps: Omit<P, keyof BaseFieldProps> }
+  props: FieldRenderProps<TValue, TState> & { componentProps: Omit<P, keyof BaseFieldProps> },
 ) => ReactElement
 
 /**
@@ -170,7 +170,7 @@ export interface CreateFieldOptions<P extends BaseFieldProps, TValue = unknown, 
  * ```
  */
 export function createField<P extends BaseFieldProps, TValue = unknown, TState = Record<string, never>>(
-  options: CreateFieldOptions<P, TValue, TState>
+  options: CreateFieldOptions<P, TValue, TState>,
 ): (props: P) => ReactElement {
   const { displayName, render } = options
   // Use no-op hook by default so the call is always unconditional
@@ -224,7 +224,7 @@ export function createField<P extends BaseFieldProps, TValue = unknown, TState =
     const asyncValidation = useAsyncFieldValidation(
       declarativeCtx?.schema,
       fullPath,
-      asyncValidate ? { asyncValidate, asyncDebounce, asyncTrigger } : undefined
+      asyncValidate ? { asyncValidate, asyncDebounce, asyncTrigger } : undefined,
     )
 
     return (

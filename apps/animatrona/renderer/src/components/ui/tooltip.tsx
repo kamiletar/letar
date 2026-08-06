@@ -4,7 +4,7 @@
  * Tooltip - обёртка для Chakra UI v3 Tooltip
  */
 
-import { Tooltip as ChakraTooltip, Portal } from '@chakra-ui/react'
+import { Portal, Tooltip as ChakraTooltip } from '@chakra-ui/react'
 import * as React from 'react'
 
 export interface TooltipProps extends ChakraTooltip.RootProps {

@@ -68,9 +68,7 @@ export function ProductCard({ product }) {
 
 ```tsx
 <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} gap={{ base: 2, md: 4 }}>
-  {products.map((product) => (
-    <ProductCard key={product.id} product={product} />
-  ))}
+  {products.map((product) => <ProductCard key={product.id} product={product} />)}
 </SimpleGrid>
 ```
 

@@ -205,18 +205,18 @@ export function AddFriendDialog({ open, onClose, onRequestSent }: AddFriendDialo
               <Heading size="sm" mb={2}>
                 Ваш Friend Code
               </Heading>
-              {profile?.friendCode ? (
-                <HStack p={3} bg="bg.subtle" borderRadius="md" justify="space-between">
-                  <Text fontFamily="mono" fontSize="xl" fontWeight="bold">
-                    {profile.friendCode}
-                  </Text>
-                  <Button size="sm" variant="ghost" onClick={handleCopyMyCode}>
-                    Копировать
-                  </Button>
-                </HStack>
-              ) : (
-                <Text color="fg.muted">Создайте профиль для получения кода</Text>
-              )}
+              {profile?.friendCode
+                ? (
+                  <HStack p={3} bg="bg.subtle" borderRadius="md" justify="space-between">
+                    <Text fontFamily="mono" fontSize="xl" fontWeight="bold">
+                      {profile.friendCode}
+                    </Text>
+                    <Button size="sm" variant="ghost" onClick={handleCopyMyCode}>
+                      Копировать
+                    </Button>
+                  </HStack>
+                )
+                : <Text color="fg.muted">Создайте профиль для получения кода</Text>}
             </Box>
           </VStack>
         </DialogBody>

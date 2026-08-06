@@ -192,7 +192,7 @@ export const watchPartyPreload = {
 
   /** Отправить реакцию */
   sendReaction: (
-    reaction: string
+    reaction: string,
   ): Promise<{ success: boolean; data?: WatchPartyChatMessage | null; error?: string }> =>
     ipcRenderer.invoke('watch-party:sendReaction', reaction),
 
@@ -225,7 +225,7 @@ export const deepLinkPreload = {
     roomId: string,
     roomName: string,
     hostName: string,
-    animeName: string
+    animeName: string,
   ): Promise<{ success: boolean; data?: WatchPartyInvite; error?: string }> =>
     ipcRenderer.invoke('deep-link:generateWatchPartyInvite', roomId, roomName, hostName, animeName),
 
@@ -242,6 +242,7 @@ export const deepLinkPreload = {
     ipcRenderer.invoke('deep-link:notificationsSupported'),
 
   /** Подписка на получение deep link */
-  onReceived:
-    on<[{ type: 'party_join' | 'friend_add' | 'unknown'; data: Record<string, string> }]>('deep-link:received'),
+  onReceived: on<[{ type: 'party_join' | 'friend_add' | 'unknown'; data: Record<string, string> }]>(
+    'deep-link:received',
+  ),
 }

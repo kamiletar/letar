@@ -19,7 +19,7 @@ describe('DeclarativeFormContext', () => {
       render(
         <DeclarativeFormContext.Provider value={mockContextValue}>
           <TestComponent />
-        </DeclarativeFormContext.Provider>
+        </DeclarativeFormContext.Provider>,
       )
 
       expect(screen.getByTestId('form')).toHaveTextContent('has form')
@@ -50,7 +50,7 @@ describe('DeclarativeFormContext', () => {
       render(
         <DeclarativeFormContext.Provider value={mockContextValue}>
           <TestComponent />
-        </DeclarativeFormContext.Provider>
+        </DeclarativeFormContext.Provider>,
       )
 
       expect(screen.getByTestId('form')).toHaveTextContent('has form')

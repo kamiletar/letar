@@ -317,46 +317,52 @@ export const LogViewerDrawer = memo(function LogViewerDrawer({ open, onOpenChang
               color="gray.300"
               p={3}
             >
-              {filteredLogs.length === 0 ? (
-                <VStack py={8} color="gray.500">
-                  <LuTerminal size={32} />
-                  <Text>Нет логов</Text>
-                  <Text fontSize="xs" color="gray.600">
-                    Логи появятся при транскодировании
-                  </Text>
-                </VStack>
-              ) : (
-                filteredLogs.map((log, index) => (
-                  <Box
-                    key={`${log.timestamp}-${index}`}
-                    py={0.5}
-                    borderBottomWidth="1px"
-                    borderColor="whiteAlpha.100"
-                    _last={{ borderBottom: 'none' }}
-                  >
-                    <HStack gap={2} align="flex-start">
-                      <Text color="gray.600" flexShrink={0} whiteSpace="nowrap">
-                        {formatTime(log.timestamp)}
-                      </Text>
-                      <Text
-                        color={levelColors[log.level]}
-                        flexShrink={0}
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                        minW="50px"
-                      >
-                        {log.level}
-                      </Text>
-                      <Text
-                        color={log.level === 'error' ? 'red.300' : log.level === 'warning' ? 'yellow.300' : 'gray.300'}
-                        wordBreak="break-word"
-                      >
-                        {log.message}
-                      </Text>
-                    </HStack>
-                  </Box>
-                ))
-              )}
+              {filteredLogs.length === 0
+                ? (
+                  <VStack py={8} color="gray.500">
+                    <LuTerminal size={32} />
+                    <Text>Нет логов</Text>
+                    <Text fontSize="xs" color="gray.600">
+                      Логи появятся при транскодировании
+                    </Text>
+                  </VStack>
+                )
+                : (
+                  filteredLogs.map((log, index) => (
+                    <Box
+                      key={`${log.timestamp}-${index}`}
+                      py={0.5}
+                      borderBottomWidth="1px"
+                      borderColor="whiteAlpha.100"
+                      _last={{ borderBottom: 'none' }}
+                    >
+                      <HStack gap={2} align="flex-start">
+                        <Text color="gray.600" flexShrink={0} whiteSpace="nowrap">
+                          {formatTime(log.timestamp)}
+                        </Text>
+                        <Text
+                          color={levelColors[log.level]}
+                          flexShrink={0}
+                          fontWeight="medium"
+                          textTransform="uppercase"
+                          minW="50px"
+                        >
+                          {log.level}
+                        </Text>
+                        <Text
+                          color={log.level === 'error'
+                            ? 'red.300'
+                            : log.level === 'warning'
+                            ? 'yellow.300'
+                            : 'gray.300'}
+                          wordBreak="break-word"
+                        >
+                          {log.message}
+                        </Text>
+                      </HStack>
+                    </Box>
+                  ))
+                )}
             </Box>
           </Drawer.Body>
         </Drawer.Content>

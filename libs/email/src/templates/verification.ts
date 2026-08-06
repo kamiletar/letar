@@ -32,7 +32,7 @@ export function createVerificationEmailHtml(params: VerificationTemplateParams):
 
   let content = createGreeting(userName)
   content += createParagraph(
-    `Спасибо за регистрацию на ${branding.appName}. Для завершения регистрации, пожалуйста, подтвердите ваш email.`
+    `Спасибо за регистрацию на ${branding.appName}. Для завершения регистрации, пожалуйста, подтвердите ваш email.`,
   )
 
   if (pin) {

@@ -19,7 +19,7 @@ describe('dx7-algorithms: структурные инварианты всех 3
       })
       expect(backwardEdges).toHaveLength(1)
       expect(backwardEdges[0].i).toBe(alg.fbOp)
-    }
+    },
   )
 
   it.each(DX7_ALGORITHMS.map((alg, i) => [i + 1, alg] as const))(
@@ -29,7 +29,7 @@ describe('dx7-algorithms: структурные инварианты всех 3
         expect(carrier).toBeGreaterThanOrEqual(0)
         expect(carrier).toBeLessThanOrEqual(5)
       }
-    }
+    },
   )
 
   it('getAlgorithm зажимает вне диапазона 1-32', () => {

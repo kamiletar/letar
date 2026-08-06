@@ -215,7 +215,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
           INSERT INTO _prisma_migrations (id, checksum, migration_name, started_at, finished_at, applied_steps_count)
           VALUES (?, '', ?, datetime('now'), datetime('now'), 0)
         `,
-          [migrationId, initMigration.name]
+          [migrationId, initMigration.name],
         )
         log.info('Marked init migration as applied (legacy baseline)', { migration: initMigration.name })
       }
@@ -247,7 +247,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
       if (migration.name.includes('remove_anime_manifest_cid')) {
         try {
           const legacyResult = db.exec(
-            'SELECT id, manifestCid FROM Anime WHERE manifestCid IS NOT NULL AND directoryCid IS NULL'
+            'SELECT id, manifestCid FROM Anime WHERE manifestCid IS NOT NULL AND directoryCid IS NULL',
           )
           const values = legacyResult[0]?.values ?? []
           if (values.length > 0) {
@@ -281,7 +281,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
         INSERT INTO _prisma_migrations (id, checksum, migration_name, started_at)
         VALUES (?, '', ?, datetime('now'))
       `,
-        [migrationId, migration.name]
+        [migrationId, migration.name],
       )
 
       // Разбиваем SQL на отдельные команды
@@ -295,10 +295,9 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
         } catch (cmdErr) {
           const errMsg = String(cmdErr)
           // Ідемпотентні помилки: колонка/таблиця вже існують (legacy БД вже має частину схеми)
-          const isIdempotent =
-            errMsg.includes('duplicate column name') ||
-            errMsg.includes('already exists') ||
-            (errMsg.includes('table') && errMsg.includes('exists'))
+          const isIdempotent = errMsg.includes('duplicate column name')
+            || errMsg.includes('already exists')
+            || (errMsg.includes('table') && errMsg.includes('exists'))
           if (isIdempotent) {
             log.warn('Migration command skipped (already applied)', { migration: migration.name, error: errMsg })
             stepsApplied++
@@ -317,7 +316,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
         SET finished_at = datetime('now'), applied_steps_count = ?
         WHERE id = ?
       `,
-        [stepsApplied, migrationId]
+        [stepsApplied, migrationId],
       )
 
       log.info('Migration applied successfully', { name: migration.name, steps: stepsApplied })
@@ -435,7 +434,7 @@ async function restoreTracksFromDedup(dbPath: string): Promise<void> {
             get('ipfsSize'),
             get('createdAt'),
             get('updatedAt'),
-          ]
+          ],
         )
         audioRestored++
       }
@@ -482,7 +481,7 @@ async function restoreTracksFromDedup(dbPath: string): Promise<void> {
             get('ipfsSize'),
             get('isDefault') ? 1 : 0,
             get('createdAt'),
-          ]
+          ],
         )
         subsRestored++
       }
@@ -515,7 +514,7 @@ async function restoreTracksFromDedup(dbPath: string): Promise<void> {
         currentDb.run(
           `INSERT INTO SubtitleFont (id, subtitleTrackId, fontName, fileExt, fileCid, ipfsSize)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [id, get('subtitleTrackId'), get('fontName'), get('fileExt'), get('fileCid'), get('ipfsSize')]
+          [id, get('subtitleTrackId'), get('fontName'), get('fileExt'), get('fileCid'), get('ipfsSize')],
         )
         fontsRestored++
       }

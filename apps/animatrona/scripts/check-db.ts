@@ -19,7 +19,7 @@ console.log(`Poster table exists: ${posterExists}`)
 // Проверяем примененные миграции
 try {
   const migrations = await db.execute(
-    'SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY migration_name'
+    'SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY migration_name',
   )
   console.log('\n=== Примененные миграции ===')
   for (const row of migrations.rows) {

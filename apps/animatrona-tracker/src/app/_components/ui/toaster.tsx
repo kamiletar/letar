@@ -1,6 +1,6 @@
 'use client'
 
-import { Toaster as ChakraToaster, createToaster, Portal, Stack, Toast } from '@chakra-ui/react'
+import { createToaster, Portal, Stack, Toast, Toaster as ChakraToaster } from '@chakra-ui/react'
 
 /**
  * Toaster instance для использования в приложении

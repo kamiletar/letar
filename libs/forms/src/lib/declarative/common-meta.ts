@@ -133,29 +133,29 @@ export function relationMeta(config: {
 export function enumMeta<T extends string>(
   config:
     | {
-        /** Field title */
-        title: string
-        /** Component type for display (default nativeSelect) */
-        fieldType?: SelectionFieldType
-        /** Mapping of enum values to custom labels */
-        labels: Record<T, string>
-        /** Field description */
-        description?: string
-        /** Additional props */
-        fieldProps?: Record<string, unknown>
-      }
+      /** Field title */
+      title: string
+      /** Component type for display (default nativeSelect) */
+      fieldType?: SelectionFieldType
+      /** Mapping of enum values to custom labels */
+      labels: Record<T, string>
+      /** Field description */
+      description?: string
+      /** Additional props */
+      fieldProps?: Record<string, unknown>
+    }
     | {
-        /** Field title */
-        title: string
-        /** Component type for display (default nativeSelect) */
-        fieldType?: SelectionFieldType
-        /** Full options with value, label and optional description */
-        options: Array<{ value: T; label: string; description?: string }>
-        /** Field description */
-        description?: string
-        /** Additional props */
-        fieldProps?: Record<string, unknown>
-      }
+      /** Field title */
+      title: string
+      /** Component type for display (default nativeSelect) */
+      fieldType?: SelectionFieldType
+      /** Full options with value, label and optional description */
+      options: Array<{ value: T; label: string; description?: string }>
+      /** Field description */
+      description?: string
+      /** Additional props */
+      fieldProps?: Record<string, unknown>
+    },
 ): FieldUIMeta {
   // Determine options from labels or directly
   let options: Array<{ value: string; label: string; description?: string }>

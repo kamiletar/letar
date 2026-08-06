@@ -207,8 +207,7 @@ model Product {
 ```tsx
 // Использование сгенерированных схем
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-
-;<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
+<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
 ```
 
 ## Обработка серверных ошибок

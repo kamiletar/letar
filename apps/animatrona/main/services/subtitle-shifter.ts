@@ -40,10 +40,10 @@ function parseAssTime(time: string): number {
   }
   const [, h, m, s, cs] = match
   return (
-    parseInt(h, 10) * 3600000 + // часы -> мс
-    parseInt(m, 10) * 60000 + // минуты -> мс
-    parseInt(s, 10) * 1000 + // секунды -> мс
-    parseInt(cs, 10) * 10 // сотые -> мс
+    parseInt(h, 10) * 3600000 // часы -> мс
+    + parseInt(m, 10) * 60000 // минуты -> мс
+    + parseInt(s, 10) * 1000 // секунды -> мс
+    + parseInt(cs, 10) * 10 // сотые -> мс
   )
 }
 
@@ -61,9 +61,11 @@ function formatAssTime(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60) % 60
   const hours = Math.floor(totalSeconds / 3600)
 
-  return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds
-    .toString()
-    .padStart(2, '0')}`
+  return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${
+    centiseconds
+      .toString()
+      .padStart(2, '0')
+  }`
 }
 
 /**
@@ -140,9 +142,11 @@ function formatSrtTime(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60) % 60
   const hours = Math.floor(totalSeconds / 3600)
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
-    .toString()
-    .padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${
+    seconds
+      .toString()
+      .padStart(2, '0')
+  },${milliseconds.toString().padStart(3, '0')}`
 }
 
 /**
@@ -289,7 +293,7 @@ export async function shiftSubtitles(options: ShiftSubtitlesOptions): Promise<Sh
 export async function previewShift(
   inputPath: string,
   offsetMs: number,
-  limit = 5
+  limit = 5,
 ): Promise<{ events: Array<{ start: string; end: string; text: string }>; total: number }> {
   const content = await fs.readFile(inputPath, 'utf8')
   const ext = path.extname(inputPath).toLowerCase()

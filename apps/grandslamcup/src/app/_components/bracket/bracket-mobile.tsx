@@ -57,9 +57,7 @@ export function BracketMobile({ sections }: TournamentBracketProps) {
       {/* Список матчей */}
       {activeRound && (
         <VStack gap={3} align="stretch">
-          {activeRound.matches.map((match) => (
-            <BracketMatchCard key={match.slotId} match={match} width="100%" />
-          ))}
+          {activeRound.matches.map((match) => <BracketMatchCard key={match.slotId} match={match} width="100%" />)}
           {activeRound.matches.length === 0 && (
             <Text color="fg.muted" textAlign="center" py={8}>
               Нет матчей в этом раунде

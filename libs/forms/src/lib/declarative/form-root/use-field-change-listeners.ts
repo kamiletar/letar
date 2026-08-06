@@ -60,7 +60,7 @@ export function useFieldChangeListeners(form: AppFormApi, onFieldChange?: OnFiel
         return form.state.values as Record<string, unknown>
       },
     }),
-    [form]
+    [form],
   )
 
   // Инициализация начальных значений отслеживаемых полей

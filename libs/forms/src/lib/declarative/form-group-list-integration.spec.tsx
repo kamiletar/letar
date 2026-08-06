@@ -28,7 +28,7 @@ describe('FormGroupList Integration', () => {
             <FieldNumber name="price" label="Цена" />
           </Form.Group.List>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Ждём async инициализацию
@@ -65,7 +65,7 @@ describe('FormGroupList Integration', () => {
             <FieldString name="name" label="Название" />
           </Form.Group.List>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -86,7 +86,7 @@ describe('FormGroupList Integration', () => {
             <FieldString name="name" label="Название" />
           </Form.Group.List>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('FormGroupList Integration', () => {
             <FieldString name="name" label="Название" />
           </Form.Group.List>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {

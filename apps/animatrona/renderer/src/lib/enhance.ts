@@ -84,10 +84,12 @@ const DB_PATH = getDatabasePath()
 /**
  * Кэш для sql.js Database и ORM
  */
-let dbPromise: Promise<{
-  orm: ReturnType<typeof ZenStackClient.prototype.$use>
-  saveDb: () => void
-}> | null = null
+let dbPromise:
+  | Promise<{
+    orm: ReturnType<typeof ZenStackClient.prototype.$use>
+    saveDb: () => void
+  }>
+  | null = null
 
 /**
  * Инициализация sql.js и ZenStack ORM
@@ -141,11 +143,10 @@ async function initDatabase() {
                 // Если это мутация (create, update, delete, etc.)
                 if (typeof modelValue === 'function') {
                   const methodName = String(modelProp)
-                  const isMutation =
-                    methodName.startsWith('create') ||
-                    methodName.startsWith('update') ||
-                    methodName.startsWith('delete') ||
-                    methodName.startsWith('upsert')
+                  const isMutation = methodName.startsWith('create')
+                    || methodName.startsWith('update')
+                    || methodName.startsWith('delete')
+                    || methodName.startsWith('upsert')
 
                   if (isMutation) {
                     return async (...args: unknown[]) => {

@@ -59,7 +59,7 @@ export function useAudioAnalyzer(
   audioElement: HTMLAudioElement | null,
   enabled: boolean,
   audioSource: AudioSource = 'player',
-  options: UseAudioAnalyzerOptions = {}
+  options: UseAudioAnalyzerOptions = {},
 ): AudioAnalyzerData {
   const {
     fftSize = DEFAULT_ANALYZER_OPTIONS.fftSize,
@@ -239,7 +239,7 @@ export function useAudioAnalyzer(
         energyThresholdMultiplier,
         minBassLevel,
         lastBeatTimeRef.current,
-        beatCooldown
+        beatCooldown,
       )
 
       if (beatDetected) {

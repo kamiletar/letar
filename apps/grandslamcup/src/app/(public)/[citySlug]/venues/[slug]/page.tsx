@@ -76,30 +76,32 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
       <Box borderRadius="2xl" overflow="hidden" position="relative">
         {/* Фото или gradient placeholder */}
         <Box position="relative" w="full" h={{ base: '200px', md: '300px' }}>
-          {venue.photo ? (
-            <Image
-              src={venue.photo.startsWith('http') ? venue.photo : `/api/files/${venue.photo}`}
-              alt={venue.name}
-              fill
-              sizes="100vw"
-              style={{ objectFit: 'cover' }}
-              priority
-            />
-          ) : (
-            <Flex
-              align="center"
-              justify="center"
-              h="full"
-              bg="brand.950"
-              bgGradient="to-br"
-              gradientFrom="brand.950"
-              gradientTo="brand.900"
-            >
-              <Circle size={20} bg="brand.800" color="whiteAlpha.400">
-                <LuMapPin size={40} />
-              </Circle>
-            </Flex>
-          )}
+          {venue.photo
+            ? (
+              <Image
+                src={venue.photo.startsWith('http') ? venue.photo : `/api/files/${venue.photo}`}
+                alt={venue.name}
+                fill
+                sizes="100vw"
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            )
+            : (
+              <Flex
+                align="center"
+                justify="center"
+                h="full"
+                bg="brand.950"
+                bgGradient="to-br"
+                gradientFrom="brand.950"
+                gradientTo="brand.900"
+              >
+                <Circle size={20} bg="brand.800" color="whiteAlpha.400">
+                  <LuMapPin size={40} />
+                </Circle>
+              </Flex>
+            )}
           {/* Gradient overlay для текста */}
           <Box
             position="absolute"
@@ -125,27 +127,29 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
 
       {/* Адрес + ссылки */}
       <Flex gap={4} align="center" flexWrap="wrap">
-        {venue.address &&
-          (yandexMapsUrl ? (
-            <Link href={yandexMapsUrl} target="_blank" rel="noopener noreferrer">
-              <HStack
-                gap={1.5}
-                color="fg.muted"
-                fontSize="sm"
-                _hover={{ color: 'brand.solid' }}
-                transition="color 0.15s"
-              >
+        {venue.address
+          && (yandexMapsUrl
+            ? (
+              <Link href={yandexMapsUrl} target="_blank" rel="noopener noreferrer">
+                <HStack
+                  gap={1.5}
+                  color="fg.muted"
+                  fontSize="sm"
+                  _hover={{ color: 'brand.solid' }}
+                  transition="color 0.15s"
+                >
+                  <LuMapPin size={16} />
+                  <Text>{venue.address}</Text>
+                  <LuExternalLink size={12} />
+                </HStack>
+              </Link>
+            )
+            : (
+              <HStack gap={1.5} color="fg.muted" fontSize="sm">
                 <LuMapPin size={16} />
                 <Text>{venue.address}</Text>
-                <LuExternalLink size={12} />
               </HStack>
-            </Link>
-          ) : (
-            <HStack gap={1.5} color="fg.muted" fontSize="sm">
-              <LuMapPin size={16} />
-              <Text>{venue.address}</Text>
-            </HStack>
-          ))}
+            ))}
         <SocialLinks socialLinks={parseSocialLinks(venue.socialLinks)} variant="full" />
       </Flex>
 
@@ -161,34 +165,36 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
         <SectionHeading size="md" mb={3}>
           Домашние команды
         </SectionHeading>
-        {venue.teams.length === 0 ? (
-          <Text color="fg.subtle" fontSize="sm">
-            Нет домашних команд
-          </Text>
-        ) : (
-          <HStack gap={3} flexWrap="wrap">
-            {venue.teams.map((team) => (
-              <Link key={team.slug} href={`/${citySlug}/teams/${team.slug}`}>
-                <HStack
-                  gap={2}
-                  px={4}
-                  py={2}
-                  borderRadius="lg"
-                  borderWidth="1px"
-                  borderColor="border"
-                  bg="bg.panel"
-                  _hover={{ borderColor: 'brand.solid', shadow: 'sm' }}
-                  transition="all 0.15s"
-                >
-                  <LuUsers size={16} />
-                  <Text fontWeight="medium" fontSize="sm">
-                    {team.name}
-                  </Text>
-                </HStack>
-              </Link>
-            ))}
-          </HStack>
-        )}
+        {venue.teams.length === 0
+          ? (
+            <Text color="fg.subtle" fontSize="sm">
+              Нет домашних команд
+            </Text>
+          )
+          : (
+            <HStack gap={3} flexWrap="wrap">
+              {venue.teams.map((team) => (
+                <Link key={team.slug} href={`/${citySlug}/teams/${team.slug}`}>
+                  <HStack
+                    gap={2}
+                    px={4}
+                    py={2}
+                    borderRadius="lg"
+                    borderWidth="1px"
+                    borderColor="border"
+                    bg="bg.panel"
+                    _hover={{ borderColor: 'brand.solid', shadow: 'sm' }}
+                    transition="all 0.15s"
+                  >
+                    <LuUsers size={16} />
+                    <Text fontWeight="medium" fontSize="sm">
+                      {team.name}
+                    </Text>
+                  </HStack>
+                </Link>
+              ))}
+            </HStack>
+          )}
       </Box>
 
       {/* Последние матчи */}

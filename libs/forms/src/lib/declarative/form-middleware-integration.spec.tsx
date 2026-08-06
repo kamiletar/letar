@@ -25,7 +25,7 @@ describe('Form Middleware Integration', () => {
         >
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -40,7 +40,7 @@ describe('Form Middleware Integration', () => {
         <Form initialValue={{ name: '' }} onSubmit={vi.fn()} middleware={{}}>
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -54,7 +54,7 @@ describe('Form Middleware Integration', () => {
         <Form initialValue={{ name: '' }} onSubmit={vi.fn()} middleware={undefined}>
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -74,7 +74,7 @@ describe('Form Middleware Integration', () => {
         >
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -94,7 +94,7 @@ describe('Form Middleware Integration', () => {
         >
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -114,7 +114,7 @@ describe('Form Middleware Integration', () => {
         >
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {

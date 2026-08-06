@@ -29,8 +29,9 @@ export function registerLibraryHandlers(): void {
   createHandler('library:ensureEpisodeDirectory', (options: OutputPathOptions) => ensureEpisodeDirectory(options))
 
   // Создать папку для аниме
-  createHandler('library:ensureAnimeDirectory', (libraryPath: string, animeName: string) =>
-    ensureAnimeDirectory(libraryPath, animeName)
+  createHandler(
+    'library:ensureAnimeDirectory',
+    (libraryPath: string, animeName: string) => ensureAnimeDirectory(libraryPath, animeName),
   )
 
   // Проверить, есть ли аниме с таким shikimoriId в библиотеке
@@ -41,12 +42,12 @@ export function registerLibraryHandlers(): void {
     })
     return anime
       ? {
-          exists: true,
-          animeId: anime.id,
-          animeName: anime.name,
-          episodeCount: anime.episodeCount,
-          needsReupload: anime.needsReupload,
-        }
+        exists: true,
+        animeId: anime.id,
+        animeName: anime.name,
+        episodeCount: anime.episodeCount,
+        needsReupload: anime.needsReupload,
+      }
       : { exists: false }
   })
 

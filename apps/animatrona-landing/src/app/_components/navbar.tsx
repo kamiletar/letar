@@ -60,7 +60,7 @@ export function Navbar() {
       {
         rootMargin: '-50% 0px -50% 0px',
         threshold: 0,
-      }
+      },
     )
 
     // Наблюдаем за всеми секциями (только якорные ссылки)
@@ -114,35 +114,31 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={
-                  item.isPage
-                    ? undefined
-                    : (e) => {
-                        e.preventDefault()
-                        scrollToSection(item.href)
-                      }
-                }
+                onClick={item.isPage
+                  ? undefined
+                  : (e) => {
+                    e.preventDefault()
+                    scrollToSection(item.href)
+                  }}
                 color={activeSection === item.href ? 'white' : 'gray.400'}
                 fontSize="sm"
                 fontWeight="medium"
                 transition="color 0.2s"
                 position="relative"
                 _hover={{ color: 'white', textDecoration: 'none' }}
-                _after={
-                  activeSection === item.href
-                    ? {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: '-8px',
-                        left: 0,
-                        right: 0,
-                        height: '2px',
-                        bg: 'brand.500',
-                        borderRadius: 'full',
-                        transition: 'all 0.2s ease',
-                      }
-                    : undefined
-                }
+                _after={activeSection === item.href
+                  ? {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    bg: 'brand.500',
+                    borderRadius: 'full',
+                    transition: 'all 0.2s ease',
+                  }
+                  : undefined}
               >
                 {item.label}
               </Link>
@@ -198,14 +194,12 @@ export function Navbar() {
                           <Link
                             key={item.href}
                             href={item.href}
-                            onClick={
-                              item.isPage
-                                ? () => setDrawerOpen(false)
-                                : (e) => {
-                                    e.preventDefault()
-                                    scrollToSection(item.href)
-                                  }
-                            }
+                            onClick={item.isPage
+                              ? () => setDrawerOpen(false)
+                              : (e) => {
+                                e.preventDefault()
+                                scrollToSection(item.href)
+                              }}
                             color={activeSection === item.href ? 'white' : 'gray.400'}
                             fontSize="lg"
                             fontWeight="medium"

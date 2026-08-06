@@ -317,7 +317,7 @@ export class UserProfileSync extends EventEmitter {
             offset += chunk.length
           }
           return 0
-        })
+        }),
       )
 
       const profile = JSON.parse(content) as PublicProfile

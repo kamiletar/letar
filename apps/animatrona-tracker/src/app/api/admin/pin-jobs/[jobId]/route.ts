@@ -31,7 +31,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Params
   if (job.status === 'PINNED') {
     return NextResponse.json(
       { error: 'Нельзя удалить запинованное задание — сначала открепите контент' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 

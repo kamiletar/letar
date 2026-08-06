@@ -85,24 +85,26 @@ export function HarmonyPanel({
       </Box>
 
       {/* Аккорды ступеней лада — клик и звучит, и ложится в пиано-ролл */}
-      {chords.length > 0 ? (
-        <Box display="flex" gap={1} flexWrap="wrap">
-          {chords.map((chord) => (
-            <button
-              key={chord.degree}
-              title={`Ступень ${chord.degree} — ${QUALITY_LABEL[chord.quality]}`}
-              style={outlineButtonStyle('default', { padding: '4px 8px', fontSize: '9px' })}
-              onClick={() => onPlayChord(chord)}
-            >
-              {chord.degree}. {QUALITY_LABEL[chord.quality]}
-            </button>
-          ))}
-        </Box>
-      ) : (
-        <Text fontSize="9px" color="fg.subtle">
-          У пентатоники нет ступенчатых аккордов — просто играй ноты лада на слух.
-        </Text>
-      )}
+      {chords.length > 0
+        ? (
+          <Box display="flex" gap={1} flexWrap="wrap">
+            {chords.map((chord) => (
+              <button
+                key={chord.degree}
+                title={`Ступень ${chord.degree} — ${QUALITY_LABEL[chord.quality]}`}
+                style={outlineButtonStyle('default', { padding: '4px 8px', fontSize: '9px' })}
+                onClick={() => onPlayChord(chord)}
+              >
+                {chord.degree}. {QUALITY_LABEL[chord.quality]}
+              </button>
+            ))}
+          </Box>
+        )
+        : (
+          <Text fontSize="9px" color="fg.subtle">
+            У пентатоники нет ступенчатых аккордов — просто играй ноты лада на слух.
+          </Text>
+        )}
     </Box>
   )
 }

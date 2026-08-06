@@ -16,7 +16,7 @@ export const torrentPreload = {
   /** Добавить торрент по магнет-ссылке */
   add: (
     magnetURI: string,
-    options: AddTorrentOptions
+    options: AddTorrentOptions,
   ): Promise<{ success: boolean; data?: TorrentInfo; error?: string }> =>
     ipcRenderer.invoke('torrent:add', magnetURI, options),
 
@@ -43,7 +43,7 @@ export const torrentPreload = {
   /** Обновить метаданные торрента (importStatus, isBundle и т.д.) */
   updateMeta: (
     infoHash: string,
-    update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string }
+    update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string },
   ): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('torrent:updateMeta', infoHash, update),
 
   /** Пересчитать хеш торрента (полная верификация кусков) */
@@ -52,7 +52,7 @@ export const torrentPreload = {
 
   /** Получить список файлов торрента */
   getFiles: (
-    infoHash: string
+    infoHash: string,
   ): Promise<{
     success: boolean
     data?: Array<{ index: number; name: string; size: number; progress: number }>

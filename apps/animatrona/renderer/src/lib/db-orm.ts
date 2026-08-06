@@ -107,11 +107,10 @@ async function initOrm() {
 
               if (typeof modelValue === 'function') {
                 const methodName = String(modelProp)
-                const isMutation =
-                  methodName.startsWith('create') ||
-                  methodName.startsWith('update') ||
-                  methodName.startsWith('delete') ||
-                  methodName.startsWith('upsert')
+                const isMutation = methodName.startsWith('create')
+                  || methodName.startsWith('update')
+                  || methodName.startsWith('delete')
+                  || methodName.startsWith('upsert')
 
                 if (isMutation) {
                   return async (...args: unknown[]) => {

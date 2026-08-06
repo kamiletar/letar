@@ -36,7 +36,7 @@ export function SearchInput({ placeholder = 'Поиск...', basePath, paramName
       const qs = params.toString()
       router.push(qs ? `${basePath}?${qs}` : basePath)
     },
-    [router, searchParams, basePath, paramName]
+    [router, searchParams, basePath, paramName],
   )
 
   /** Debounce 300ms */

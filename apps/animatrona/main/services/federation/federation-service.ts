@@ -100,7 +100,7 @@ export class FederationService {
    * Обновить настройки федерации
    */
   async updateSettings(
-    update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>
+    update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>,
   ): Promise<FederationOperationResult<FederationSettings>> {
     try {
       const settings = await this.prisma.federationSettings.upsert({

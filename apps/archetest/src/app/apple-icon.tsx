@@ -25,6 +25,6 @@ export default function AppleIcon() {
     >
       Ψ
     </div>,
-    { ...size }
+    { ...size },
   )
 }

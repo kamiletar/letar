@@ -121,93 +121,99 @@ export default function NetworksPage() {
         </HStack>
 
         {/* Networks Table */}
-        {sortedNetworks.length > 0 ? (
-          <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-            <Table.Root size="sm">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>Name</Table.ColumnHeader>
-                  <Table.ColumnHeader>Driver</Table.ColumnHeader>
-                  <Table.ColumnHeader>Scope</Table.ColumnHeader>
-                  <Table.ColumnHeader>Subnet</Table.ColumnHeader>
-                  <Table.ColumnHeader>Containers</Table.ColumnHeader>
-                  <Table.ColumnHeader>Created</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {sortedNetworks.map((network) => {
-                  const containerCount = Object.keys(network.Containers || {}).length
-                  const subnet = network.IPAM?.Config?.[0]?.Subnet || 'N/A'
-                  const isSystem = ['bridge', 'host', 'none'].includes(network.Name)
+        {sortedNetworks.length > 0
+          ? (
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+              <Table.Root size="sm">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Name</Table.ColumnHeader>
+                    <Table.ColumnHeader>Driver</Table.ColumnHeader>
+                    <Table.ColumnHeader>Scope</Table.ColumnHeader>
+                    <Table.ColumnHeader>Subnet</Table.ColumnHeader>
+                    <Table.ColumnHeader>Containers</Table.ColumnHeader>
+                    <Table.ColumnHeader>Created</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {sortedNetworks.map((network) => {
+                    const containerCount = Object.keys(network.Containers || {}).length
+                    const subnet = network.IPAM?.Config?.[0]?.Subnet || 'N/A'
+                    const isSystem = ['bridge', 'host', 'none'].includes(network.Name)
 
-                  return (
-                    <Table.Row key={network.Id}>
-                      <Table.Cell>
-                        <HStack>
+                    return (
+                      <Table.Row key={network.Id}>
+                        <Table.Cell>
+                          <HStack>
+                            <Text fontFamily="mono" fontSize="sm">
+                              {network.Name}
+                            </Text>
+                            {isSystem && (
+                              <Badge colorPalette="gray" size="sm">
+                                system
+                              </Badge>
+                            )}
+                            {network.Internal && (
+                              <Badge colorPalette="orange" size="sm">
+                                internal
+                              </Badge>
+                            )}
+                          </HStack>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge
+                            colorPalette={network.Driver === 'bridge'
+                              ? 'blue'
+                              : network.Driver === 'overlay'
+                              ? 'purple'
+                              : 'gray'}
+                            size="sm"
+                          >
+                            {network.Driver}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={network.Scope === 'local' ? 'green' : 'purple'} size="sm">
+                            {network.Scope}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
                           <Text fontFamily="mono" fontSize="sm">
-                            {network.Name}
+                            {subnet}
                           </Text>
-                          {isSystem && (
-                            <Badge colorPalette="gray" size="sm">
-                              system
-                            </Badge>
-                          )}
-                          {network.Internal && (
-                            <Badge colorPalette="orange" size="sm">
-                              internal
-                            </Badge>
-                          )}
-                        </HStack>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge
-                          colorPalette={
-                            network.Driver === 'bridge' ? 'blue' : network.Driver === 'overlay' ? 'purple' : 'gray'
-                          }
-                          size="sm"
-                        >
-                          {network.Driver}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={network.Scope === 'local' ? 'green' : 'purple'} size="sm">
-                          {network.Scope}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontFamily="mono" fontSize="sm">
-                          {subnet}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        {containerCount > 0 ? (
-                          <VStack align="start" gap="1">
-                            <Badge colorPalette="green" size="sm">
-                              {containerCount} connected
-                            </Badge>
-                          </VStack>
-                        ) : (
-                          <Text color="fg.muted" fontSize="sm">
-                            0
+                        </Table.Cell>
+                        <Table.Cell>
+                          {containerCount > 0
+                            ? (
+                              <VStack align="start" gap="1">
+                                <Badge colorPalette="green" size="sm">
+                                  {containerCount} connected
+                                </Badge>
+                              </VStack>
+                            )
+                            : (
+                              <Text color="fg.muted" fontSize="sm">
+                                0
+                              </Text>
+                            )}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Text fontSize="sm" color="fg.muted">
+                            {formatDateTime(network.Created)}
                           </Text>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="fg.muted">
-                          {formatDateTime(network.Created)}
-                        </Text>
-                      </Table.Cell>
-                    </Table.Row>
-                  )
-                })}
-              </Table.Body>
-            </Table.Root>
-          </Box>
-        ) : (
-          <Box textAlign="center" py="12">
-            <Text color="fg.muted">No networks found</Text>
-          </Box>
-        )}
+                        </Table.Cell>
+                      </Table.Row>
+                    )
+                  })}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          )
+          : (
+            <Box textAlign="center" py="12">
+              <Text color="fg.muted">No networks found</Text>
+            </Box>
+          )}
       </Box>
     </>
   )

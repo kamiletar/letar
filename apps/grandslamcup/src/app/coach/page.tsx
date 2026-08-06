@@ -59,8 +59,9 @@ export default async function CoachDashboardPage() {
   })
 
   // Средний балл команды
-  const avgTeamScore =
-    performances.length > 0 ? performances.reduce((sum, p) => sum + (p.totalScore ?? 0), 0) / performances.length : 0
+  const avgTeamScore = performances.length > 0
+    ? performances.reduce((sum, p) => sum + (p.totalScore ?? 0), 0) / performances.length
+    : 0
 
   // Топ-3 перформера (минимум 3 выступления)
   const playerStats = new Map<string, { name: string; slug: string; total: number; count: number }>()
@@ -259,26 +260,28 @@ export default async function CoachDashboardPage() {
             <Text fontSize="xs" color="fg.muted" mb={2} textAlign="center">
               Топ перформеры
             </Text>
-            {topPerformers.length === 0 ? (
-              <Text fontSize="xs" color="fg.muted" textAlign="center">
-                Мало данных
-              </Text>
-            ) : (
-              <VStack gap={1} align="stretch">
-                {topPerformers.map((p, i) => (
-                  <Flex key={p.slug} justify="space-between" align="center">
-                    <Link href={citySlug ? `/${citySlug}/players/${p.slug}` : `/players/${p.slug}`}>
-                      <Text fontSize="xs" truncate _hover={{ color: 'brand.solid' }}>
-                        {i + 1}. {p.name}
-                      </Text>
-                    </Link>
-                    <Badge colorPalette="teal" size="sm">
-                      {p.avg.toFixed(1)}
-                    </Badge>
-                  </Flex>
-                ))}
-              </VStack>
-            )}
+            {topPerformers.length === 0
+              ? (
+                <Text fontSize="xs" color="fg.muted" textAlign="center">
+                  Мало данных
+                </Text>
+              )
+              : (
+                <VStack gap={1} align="stretch">
+                  {topPerformers.map((p, i) => (
+                    <Flex key={p.slug} justify="space-between" align="center">
+                      <Link href={citySlug ? `/${citySlug}/players/${p.slug}` : `/players/${p.slug}`}>
+                        <Text fontSize="xs" truncate _hover={{ color: 'brand.solid' }}>
+                          {i + 1}. {p.name}
+                        </Text>
+                      </Link>
+                      <Badge colorPalette="teal" size="sm">
+                        {p.avg.toFixed(1)}
+                      </Badge>
+                    </Flex>
+                  ))}
+                </VStack>
+              )}
           </Box>
         </SimpleGrid>
       </Box>
@@ -293,67 +296,80 @@ export default async function CoachDashboardPage() {
             </Text>
           </Link>
         </Flex>
-        {upcomingMatches.length === 0 ? (
-          <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
-            <Text color="fg.muted">Нет запланированных матчей</Text>
-          </Box>
-        ) : (
-          <VStack gap={3} align="stretch">
-            {upcomingMatches.map((match) => {
-              const isHome = match.homeTeamId === coach.teamSeasonId
-              const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
-              const hasLineup = match.lineups.length > 0
-              const hoursUntil = match.scheduledAt
-                ? (new Date(match.scheduledAt).getTime() - Date.now()) / (1000 * 60 * 60)
-                : Infinity
-              const canSubmit = !hasLineup && hoursUntil >= 6
+        {upcomingMatches.length === 0
+          ? (
+            <Box bg="bg.panel" p={6} borderRadius="xl" textAlign="center">
+              <Text color="fg.muted">Нет запланированных матчей</Text>
+            </Box>
+          )
+          : (
+            <VStack gap={3} align="stretch">
+              {upcomingMatches.map((match) => {
+                const isHome = match.homeTeamId === coach.teamSeasonId
+                const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
+                const hasLineup = match.lineups.length > 0
+                const hoursUntil = match.scheduledAt
+                  ? (new Date(match.scheduledAt).getTime() - Date.now()) / (1000 * 60 * 60)
+                  : Infinity
+                const canSubmit = !hasLineup && hoursUntil >= 6
 
-              return (
-                <Box key={match.id} bg="bg.panel" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.muted">
-                  <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
-                    <Box flex={1}>
-                      <Text fontWeight="semibold">
-                        vs {opponent} ({isHome ? 'дома' : 'в гостях'})
-                      </Text>
-                      <Text fontSize="sm" color="fg.muted">
-                        {match.venue?.name ?? '—'}
-                        {match.scheduledAt && ` · ${formatDateTimeFull(match.scheduledAt)}`}
-                      </Text>
-                      {/* Предупреждения по времени */}
-                      {!hasLineup && hoursUntil < 6 && (
-                        <Text fontSize="xs" color="red.500" mt={1}>
-                          Заявка невозможна (менее 6 часов до матча)
+                return (
+                  <Box
+                    key={match.id}
+                    bg="bg.panel"
+                    borderRadius="xl"
+                    p={4}
+                    borderWidth="1px"
+                    borderColor="border.muted"
+                  >
+                    <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                      <Box flex={1}>
+                        <Text fontWeight="semibold">
+                          vs {opponent} ({isHome ? 'дома' : 'в гостях'})
                         </Text>
-                      )}
-                      {!hasLineup && hoursUntil >= 6 && hoursUntil < 24 && (
-                        <Text fontSize="xs" color="yellow.500" mt={1}>
-                          Осталось менее суток — заявьте состав!
+                        <Text fontSize="sm" color="fg.muted">
+                          {match.venue?.name ?? '—'}
+                          {match.scheduledAt && ` · ${formatDateTimeFull(match.scheduledAt)}`}
                         </Text>
-                      )}
-                    </Box>
-                    <Flex gap={2} align="center">
-                      {hasLineup ? (
-                        <Badge colorPalette="green" size="sm">
-                          Заявка подана
-                        </Badge>
-                      ) : canSubmit ? (
-                        <Link href={`/coach/matches/${match.id}/lineup`}>
-                          <Button size="sm" colorPalette="teal">
-                            Заявить состав
-                          </Button>
-                        </Link>
-                      ) : (
-                        <Badge colorPalette="red" size="sm">
-                          Нет заявки
-                        </Badge>
-                      )}
+                        {/* Предупреждения по времени */}
+                        {!hasLineup && hoursUntil < 6 && (
+                          <Text fontSize="xs" color="red.500" mt={1}>
+                            Заявка невозможна (менее 6 часов до матча)
+                          </Text>
+                        )}
+                        {!hasLineup && hoursUntil >= 6 && hoursUntil < 24 && (
+                          <Text fontSize="xs" color="yellow.500" mt={1}>
+                            Осталось менее суток — заявьте состав!
+                          </Text>
+                        )}
+                      </Box>
+                      <Flex gap={2} align="center">
+                        {hasLineup
+                          ? (
+                            <Badge colorPalette="green" size="sm">
+                              Заявка подана
+                            </Badge>
+                          )
+                          : canSubmit
+                          ? (
+                            <Link href={`/coach/matches/${match.id}/lineup`}>
+                              <Button size="sm" colorPalette="teal">
+                                Заявить состав
+                              </Button>
+                            </Link>
+                          )
+                          : (
+                            <Badge colorPalette="red" size="sm">
+                              Нет заявки
+                            </Badge>
+                          )}
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </Box>
-              )
-            })}
-          </VStack>
-        )}
+                  </Box>
+                )
+              })}
+            </VStack>
+          )}
       </Box>
     </VStack>
   )

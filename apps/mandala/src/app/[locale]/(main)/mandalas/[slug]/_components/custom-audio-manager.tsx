@@ -87,7 +87,7 @@ export function CustomAudioManager({
         setError(errors.join('\n'))
       }
     },
-    [onAddTrack]
+    [onAddTrack],
   )
 
   /**
@@ -102,7 +102,7 @@ export function CustomAudioManager({
       // Сбрасываем input для повторной загрузки тех же файлов
       e.target.value = ''
     },
-    [handleFilesUpload]
+    [handleFilesUpload],
   )
 
   /**
@@ -133,7 +133,7 @@ export function CustomAudioManager({
 
       handleFilesUpload(audioFiles)
     },
-    [handleFilesUpload]
+    [handleFilesUpload],
   )
 
   /**
@@ -147,7 +147,7 @@ export function CustomAudioManager({
         setError('Не удалось удалить трек')
       }
     },
-    [onRemoveTrack]
+    [onRemoveTrack],
   )
 
   return (

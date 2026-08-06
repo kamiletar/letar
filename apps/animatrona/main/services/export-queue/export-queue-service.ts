@@ -409,10 +409,9 @@ export class ExportQueueService extends EventEmitter {
       if (result.success) {
         this.completeTask(task.id)
       } else {
-        const errorMsg =
-          result.failedEpisodes.length > 0
-            ? `Failed: ${result.failedEpisodes.map((e) => e.error).join(', ')}`
-            : 'Export failed'
+        const errorMsg = result.failedEpisodes.length > 0
+          ? `Failed: ${result.failedEpisodes.map((e) => e.error).join(', ')}`
+          : 'Export failed'
         this.failTask(task.id, errorMsg)
       }
     } catch (error) {

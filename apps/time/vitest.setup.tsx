@@ -83,10 +83,10 @@ const originalError = console.error
 beforeAll(() => {
   console.error = (...args: unknown[]) => {
     if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render') ||
-        args[0].includes('Not implemented: HTMLFormElement.prototype.requestSubmit') ||
-        args[0].includes('was not wrapped in act('))
+      typeof args[0] === 'string'
+      && (args[0].includes('Warning: ReactDOM.render')
+        || args[0].includes('Not implemented: HTMLFormElement.prototype.requestSubmit')
+        || args[0].includes('was not wrapped in act('))
     ) {
       return
     }

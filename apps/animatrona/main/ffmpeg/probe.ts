@@ -159,7 +159,7 @@ export function getAudioTracks(videoPath: string): Promise<AudioTrack[]> {
             isDefault: isDispositionFlagSet(stream.disposition?.default),
             isForced: isDispositionFlagSet(stream.disposition?.forced),
             tags: stream.tags, // Передаём все теги для парсинга на клиенте
-          })
+          }),
         )
         resolve(tracks)
       } catch (error) {
@@ -233,7 +233,7 @@ export function getVideoTracks(filePath: string): Promise<VideoTrack[]> {
               colorSpace: stream.color_space,
               profile: stream.profile,
             }
-          }
+          },
         )
         resolve(tracks)
       } catch (error) {
@@ -321,7 +321,7 @@ export function getSubtitleTracks(filePath: string): Promise<SubtitleTrackInfo[]
               disposition: stream.disposition,
             }),
             tags: stream.tags, // Передаём все теги для парсинга на клиенте
-          })
+          }),
         )
         resolve(tracks)
       } catch {
@@ -337,7 +337,7 @@ export function getSubtitleTracks(filePath: string): Promise<SubtitleTrackInfo[]
  * Извлечь главы и вложения из медиафайла через ffprobe
  */
 async function getChaptersAndAttachments(
-  filePath: string
+  filePath: string,
 ): Promise<{ chapters: MediaInfo['chapters']; attachmentFonts: string[] }> {
   return new Promise((resolve) => {
     const ff = spawnFFprobe(['-v', 'error', '-show_chapters', '-show_streams', '-of', 'json', filePath])
@@ -364,9 +364,9 @@ async function getChaptersAndAttachments(
         const attachmentFonts: string[] = (data.streams || [])
           .filter(
             (s: { codec_type?: string; tags?: { filename?: string } }) =>
-              s.codec_type === 'attachment' &&
-              s.tags?.filename &&
-              FONT_EXTS.some((ext) => (s.tags?.filename || '').toLowerCase().endsWith(ext))
+              s.codec_type === 'attachment'
+              && s.tags?.filename
+              && FONT_EXTS.some((ext) => (s.tags?.filename || '').toLowerCase().endsWith(ext)),
           )
           .map((s: { tags: { filename: string } }) => s.tags.filename)
 

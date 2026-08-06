@@ -96,8 +96,8 @@ export function SettingsScreen({ navigation }: SettingsScreenProps) {
                 {connectionStatus === 'connected'
                   ? 'Подключено'
                   : connectionStatus === 'checking'
-                    ? 'Проверка...'
-                    : 'Ошибка'}
+                  ? 'Проверка...'
+                  : 'Ошибка'}
               </Text>
             </View>
           </View>

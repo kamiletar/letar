@@ -59,15 +59,17 @@ export function Breadcrumbs() {
           return (
             <Fragment key={crumb.href}>
               <Breadcrumb.Item>
-                {isLast ? (
-                  <Breadcrumb.CurrentLink color="fg.default" fontWeight="medium">
-                    {crumb.title}
-                  </Breadcrumb.CurrentLink>
-                ) : (
-                  <Breadcrumb.Link asChild color="fg.muted" _hover={{ color: 'brand.600' }}>
-                    <NextLink href={crumb.href}>{crumb.title}</NextLink>
-                  </Breadcrumb.Link>
-                )}
+                {isLast
+                  ? (
+                    <Breadcrumb.CurrentLink color="fg.default" fontWeight="medium">
+                      {crumb.title}
+                    </Breadcrumb.CurrentLink>
+                  )
+                  : (
+                    <Breadcrumb.Link asChild color="fg.muted" _hover={{ color: 'brand.600' }}>
+                      <NextLink href={crumb.href}>{crumb.title}</NextLink>
+                    </Breadcrumb.Link>
+                  )}
               </Breadcrumb.Item>
               {!isLast && <Breadcrumb.Separator />}
             </Fragment>

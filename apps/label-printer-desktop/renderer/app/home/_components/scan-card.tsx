@@ -98,33 +98,37 @@ export function ScanCard({ scan, scanKey, labelRef, onAddProduct, onPrint, allow
 
           {/* Код и детали */}
           <VStack align="start" gap={0} flex={1}>
-            {scan.parsedCode ? (
-              <VStack align="start" gap={0}>
-                <HStack gap={2}>
-                  <Text fontWeight="semibold">{scan.parsedCode.gtin13}</Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    S/N: {scan.parsedCode.serialNumber}
-                  </Text>
-                </HStack>
-                {scan.product ? (
-                  <Text fontSize="sm" color="blue.500" fontWeight="medium">
-                    {scan.product.name}
-                    {scan.product.articleCode && ` (${scan.product.articleCode})`}
-                  </Text>
-                ) : (
-                  scan.status === 'preview' && (
-                    <Text fontSize="sm" color="orange.500" fontWeight="medium">
-                      Товар не найден в базе
+            {scan.parsedCode
+              ? (
+                <VStack align="start" gap={0}>
+                  <HStack gap={2}>
+                    <Text fontWeight="semibold">{scan.parsedCode.gtin13}</Text>
+                    <Text fontSize="sm" color="fg.muted">
+                      S/N: {scan.parsedCode.serialNumber}
                     </Text>
-                  )
-                )}
-              </VStack>
-            ) : (
-              <Text fontFamily="mono" fontSize="sm">
-                {scan.code.substring(0, 50)}
-                {scan.code.length > 50 && '...'}
-              </Text>
-            )}
+                  </HStack>
+                  {scan.product
+                    ? (
+                      <Text fontSize="sm" color="blue.500" fontWeight="medium">
+                        {scan.product.name}
+                        {scan.product.articleCode && ` (${scan.product.articleCode})`}
+                      </Text>
+                    )
+                    : (
+                      scan.status === 'preview' && (
+                        <Text fontSize="sm" color="orange.500" fontWeight="medium">
+                          Товар не найден в базе
+                        </Text>
+                      )
+                    )}
+                </VStack>
+              )
+              : (
+                <Text fontFamily="mono" fontSize="sm">
+                  {scan.code.substring(0, 50)}
+                  {scan.code.length > 50 && '...'}
+                </Text>
+              )}
             <Text fontSize="xs" color="fg.muted">
               {scan.timestamp.toLocaleTimeString()}
             </Text>
@@ -134,7 +138,12 @@ export function ScanCard({ scan, scanKey, labelRef, onAddProduct, onPrint, allow
           <HStack gap={2}>
             {/* Кнопка добавления товара (если не найден) */}
             {scan.status === 'preview' && !scan.product && (
-              <Button size="sm" colorPalette="orange" variant="outline" onClick={() => onAddProduct(scan)}>
+              <Button
+                size="sm"
+                colorPalette="orange"
+                variant="outline"
+                onClick={() => onAddProduct(scan)}
+              >
                 <LuPlus />
                 Добавить товар
               </Button>
@@ -147,13 +156,11 @@ export function ScanCard({ scan, scanKey, labelRef, onAddProduct, onPrint, allow
                 variant={isDuplicateBlocked ? 'outline' : 'solid'}
                 onClick={() => onPrint(scan)}
                 disabled={!scan.product || isDuplicateBlocked}
-                title={
-                  !scan.product
-                    ? 'Сначала добавьте товар'
-                    : isDuplicateBlocked
-                      ? 'Этот код уже был напечатан'
-                      : undefined
-                }
+                title={!scan.product
+                  ? 'Сначала добавьте товар'
+                  : isDuplicateBlocked
+                  ? 'Этот код уже был напечатан'
+                  : undefined}
               >
                 <LuPrinter />
                 {isDuplicateBlocked ? 'Уже напечатан' : 'Печать'}

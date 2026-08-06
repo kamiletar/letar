@@ -50,8 +50,8 @@ export function timeMcpSecret(): string {
   const secret = readStudioLocalEnv()['TIME_MCP_SECRET']
   if (!secret) {
     throw new Error(
-      'TIME_MCP_SECRET не найден ни в process.env, ни в apps/studio/.env.local. ' +
-        'Для не-локального STUDIO_URL задай TIME_MCP_SECRET явно (например через "env" в .mcp.json).'
+      'TIME_MCP_SECRET не найден ни в process.env, ни в apps/studio/.env.local. '
+        + 'Для не-локального STUDIO_URL задай TIME_MCP_SECRET явно (например через "env" в .mcp.json).',
     )
   }
   return secret

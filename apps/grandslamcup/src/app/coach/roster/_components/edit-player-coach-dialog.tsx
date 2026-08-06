@@ -166,39 +166,47 @@ export function EditPlayerCoachDialog({ player, onClose }: EditPlayerCoachDialog
                   <Text fontSize="sm" fontWeight="semibold" mb={2}>
                     Привязка аккаунта
                   </Text>
-                  {player.hasUser ? (
-                    <Flex justify="space-between" align="center">
-                      <HStack gap={2}>
-                        <Badge colorPalette="green" size="sm">
-                          Привязан
-                        </Badge>
-                      </HStack>
-                      <Button size="xs" variant="outline" colorPalette="red" onClick={handleUnlink} loading={unlinking}>
-                        <LuUnlink size={14} />
-                        Отвязать
-                      </Button>
-                    </Flex>
-                  ) : (
-                    <Flex gap={2}>
-                      <Input
-                        value={linkEmail}
-                        onChange={(e) => setLinkEmail(e.target.value)}
-                        placeholder="Email пользователя"
-                        size="sm"
-                        flex={1}
-                      />
-                      <Button
-                        size="sm"
-                        colorPalette="teal"
-                        onClick={handleLink}
-                        loading={linking}
-                        disabled={!linkEmail.trim()}
-                      >
-                        <LuLink size={14} />
-                        Привязать
-                      </Button>
-                    </Flex>
-                  )}
+                  {player.hasUser
+                    ? (
+                      <Flex justify="space-between" align="center">
+                        <HStack gap={2}>
+                          <Badge colorPalette="green" size="sm">
+                            Привязан
+                          </Badge>
+                        </HStack>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          colorPalette="red"
+                          onClick={handleUnlink}
+                          loading={unlinking}
+                        >
+                          <LuUnlink size={14} />
+                          Отвязать
+                        </Button>
+                      </Flex>
+                    )
+                    : (
+                      <Flex gap={2}>
+                        <Input
+                          value={linkEmail}
+                          onChange={(e) => setLinkEmail(e.target.value)}
+                          placeholder="Email пользователя"
+                          size="sm"
+                          flex={1}
+                        />
+                        <Button
+                          size="sm"
+                          colorPalette="teal"
+                          onClick={handleLink}
+                          loading={linking}
+                          disabled={!linkEmail.trim()}
+                        >
+                          <LuLink size={14} />
+                          Привязать
+                        </Button>
+                      </Flex>
+                    )}
                 </Box>
               </VStack>
             </Dialog.Body>

@@ -213,7 +213,7 @@ export class PinManager extends EventEmitter {
   async listPins(): Promise<PinInfo[]> {
     await this.initialize()
     return Array.from(this.pins.values()).sort(
-      (a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime()
+      (a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime(),
     )
   }
 

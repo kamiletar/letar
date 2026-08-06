@@ -63,7 +63,7 @@ export function SearchFilter({ placeholder = 'Поиск...', paramName = 'q' }:
         router.push(`${pathname}?${params.toString()}`)
       })
     },
-    [pathname, router, searchParams, paramName]
+    [pathname, router, searchParams, paramName],
   )
 
   // Debounce через useEffect — правильная очистка таймаута
@@ -116,15 +116,17 @@ export function SearchFilter({ placeholder = 'Поиск...', paramName = 'q' }:
         disabled={isPending}
         flex={1}
       />
-      {inputValue ? (
-        <IconButton aria-label="Очистить поиск" variant="ghost" size="sm" onClick={handleClear} disabled={isPending}>
-          <LuX />
-        </IconButton>
-      ) : (
-        <IconButton aria-label="Поиск" variant="ghost" size="sm" disabled>
-          <LuSearch />
-        </IconButton>
-      )}
+      {inputValue
+        ? (
+          <IconButton aria-label="Очистить поиск" variant="ghost" size="sm" onClick={handleClear} disabled={isPending}>
+            <LuX />
+          </IconButton>
+        )
+        : (
+          <IconButton aria-label="Поиск" variant="ghost" size="sm" disabled>
+            <LuSearch />
+          </IconButton>
+        )}
     </HStack>
   )
 }

@@ -74,58 +74,60 @@ export async function NewsContent({ citySlug, cityId, cityName }: NewsContentPro
         {cityName ? `Новости — ${cityName}` : 'Новости'}
       </Heading>
 
-      {posts.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">{cityName ? `Пока нет новостей для ${cityName}` : 'Пока нет новостей'}</Text>
-        </EmptyState>
-      ) : (
-        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6}>
-          {posts.map((post) => (
-            <Link key={post.id} href={getPostHref(post)}>
-              <Card.Root
-                h="100%"
-                _hover={{ shadow: 'lg', borderColor: 'brand.fg' }}
-                transition="all 0.2s"
-                cursor="pointer"
-                overflow="hidden"
-              >
-                {post.coverImage && (
-                  <Box position="relative" h="180px" bg="bg.subtle">
-                    <Image
-                      src={post.coverImage.startsWith('/') ? post.coverImage : getPhotoUrl(post.coverImage)}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </Box>
-                )}
-                <Card.Body>
-                  <VStack gap={2} align="start">
-                    {getCityBadge(post)}
-                    {post.match && (
-                      <Badge colorPalette="blue" size="sm">
-                        Обзор: {post.match.homeTeam.team.name} — {post.match.awayTeam.team.name}
-                      </Badge>
-                    )}
-                    <Heading size="md" lineClamp={2}>
-                      {post.title}
-                    </Heading>
-                    {post.excerpt && (
-                      <Text fontSize="sm" color="fg.muted" lineClamp={3}>
-                        {post.excerpt}
+      {posts.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">{cityName ? `Пока нет новостей для ${cityName}` : 'Пока нет новостей'}</Text>
+          </EmptyState>
+        )
+        : (
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6}>
+            {posts.map((post) => (
+              <Link key={post.id} href={getPostHref(post)}>
+                <Card.Root
+                  h="100%"
+                  _hover={{ shadow: 'lg', borderColor: 'brand.fg' }}
+                  transition="all 0.2s"
+                  cursor="pointer"
+                  overflow="hidden"
+                >
+                  {post.coverImage && (
+                    <Box position="relative" h="180px" bg="bg.subtle">
+                      <Image
+                        src={post.coverImage.startsWith('/') ? post.coverImage : getPhotoUrl(post.coverImage)}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </Box>
+                  )}
+                  <Card.Body>
+                    <VStack gap={2} align="start">
+                      {getCityBadge(post)}
+                      {post.match && (
+                        <Badge colorPalette="blue" size="sm">
+                          Обзор: {post.match.homeTeam.team.name} — {post.match.awayTeam.team.name}
+                        </Badge>
+                      )}
+                      <Heading size="md" lineClamp={2}>
+                        {post.title}
+                      </Heading>
+                      {post.excerpt && (
+                        <Text fontSize="sm" color="fg.muted" lineClamp={3}>
+                          {post.excerpt}
+                        </Text>
+                      )}
+                      <Text fontSize="xs" color="fg.subtle">
+                        {post.publishedAt ? formatDate(post.publishedAt) : ''}
                       </Text>
-                    )}
-                    <Text fontSize="xs" color="fg.subtle">
-                      {post.publishedAt ? formatDate(post.publishedAt) : ''}
-                    </Text>
-                  </VStack>
-                </Card.Body>
-              </Card.Root>
-            </Link>
-          ))}
-        </Grid>
-      )}
+                    </VStack>
+                  </Card.Body>
+                </Card.Root>
+              </Link>
+            ))}
+          </Grid>
+        )}
     </VStack>
   )
 }

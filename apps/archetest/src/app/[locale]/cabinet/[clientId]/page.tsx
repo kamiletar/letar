@@ -162,29 +162,31 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
 
               {/* DisplayName */}
               <VStack align="end" gap={1}>
-                {editingName ? (
-                  <HStack gap={2}>
-                    <Input
-                      size="sm"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder={t('displayName')}
-                      w="200px"
-                    />
-                    <Button size="sm" onClick={handleSaveDisplayName}>
-                      <LuSave size={14} />
-                    </Button>
-                  </HStack>
-                ) : (
-                  <HStack gap={1}>
-                    <Text fontSize="sm" color="fg.muted">
-                      {detail.link.displayName || t('displayName')}
-                    </Text>
-                    <Button size="xs" variant="ghost" onClick={() => setEditingName(true)}>
-                      <LuPencil size={12} />
-                    </Button>
-                  </HStack>
-                )}
+                {editingName
+                  ? (
+                    <HStack gap={2}>
+                      <Input
+                        size="sm"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder={t('displayName')}
+                        w="200px"
+                      />
+                      <Button size="sm" onClick={handleSaveDisplayName}>
+                        <LuSave size={14} />
+                      </Button>
+                    </HStack>
+                  )
+                  : (
+                    <HStack gap={1}>
+                      <Text fontSize="sm" color="fg.muted">
+                        {detail.link.displayName || t('displayName')}
+                      </Text>
+                      <Button size="xs" variant="ghost" onClick={() => setEditingName(true)}>
+                        <LuPencil size={12} />
+                      </Button>
+                    </HStack>
+                  )}
                 <Text fontSize="xs" color="fg.muted">
                   {t('displayNameHint')}
                 </Text>
@@ -214,15 +216,17 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
           </Card.Root>
         )}
 
-        {/* Экспериментальные шкалы (этап 5.5) — только если клиент отвечал на их вопросы.
-            Измеренность считаем по числу ответов: балл 0 бывает и при отсутствии данных */}
-        {detail.cumulativeScores &&
-          EXPERIMENTAL_SCALE_CODES.some((code) => (detail.scoreRelevantCounts?.[code] ?? 0) > 0) && (
-            <ExperimentalScalesBlock
-              scores={detail.cumulativeScores}
-              relevantCounts={detail.scoreRelevantCounts ?? undefined}
-            />
-          )}
+        {
+          /* Экспериментальные шкалы (этап 5.5) — только если клиент отвечал на их вопросы.
+            Измеренность считаем по числу ответов: балл 0 бывает и при отсутствии данных */
+        }
+        {detail.cumulativeScores
+          && EXPERIMENTAL_SCALE_CODES.some((code) => (detail.scoreRelevantCounts?.[code] ?? 0) > 0) && (
+          <ExperimentalScalesBlock
+            scores={detail.cumulativeScores}
+            relevantCounts={detail.scoreRelevantCounts ?? undefined}
+          />
+        )}
 
         {/* Тёмное ядро (Фаза 3) — гейт вычислен модулем, не условием «балл > 0» */}
         {darkCore && darkCore.structure !== 'insufficient' && <DarkCoreBlock index={darkCore} />}

@@ -146,63 +146,65 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
     <>
       <Dialog.Body>
         <VStack gap={4} align="stretch">
-          {state.result?.success ? (
-            <>
-              <Box p={4} bg="green.subtle" borderRadius="md" textAlign="center">
-                <Icon as={LuCheck} boxSize={8} color="green.fg" mb={2} />
-                <Text fontWeight="bold" fontSize="lg" color="green.fg">
-                  Экспорт завершён!
+          {state.result?.success
+            ? (
+              <>
+                <Box p={4} bg="green.subtle" borderRadius="md" textAlign="center">
+                  <Icon as={LuCheck} boxSize={8} color="green.fg" mb={2} />
+                  <Text fontWeight="bold" fontSize="lg" color="green.fg">
+                    Экспорт завершён!
+                  </Text>
+                  <Text color="green.fg" opacity={0.8}>
+                    Экспортировано {state.result.exportedFiles.length} файлов
+                  </Text>
+                </Box>
+
+                {/* Пропущенные эпизоды */}
+                {state.result.skippedEpisodes.length > 0 && (
+                  <Box>
+                    <Text fontWeight="medium" mb={2} color="yellow.300">
+                      Пропущено ({state.result.skippedEpisodes.length}):
+                    </Text>
+                    <VStack gap={1} align="stretch">
+                      {state.result.skippedEpisodes.map((ep) => (
+                        <Text key={ep.episodeId} fontSize="sm" color="fg.muted">
+                          • {ep.reason}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+
+                {/* Ошибки */}
+                {state.result.failedEpisodes.length > 0 && (
+                  <Box>
+                    <Text fontWeight="medium" mb={2} color="red.300">
+                      Ошибки ({state.result.failedEpisodes.length}):
+                    </Text>
+                    <VStack gap={1} align="stretch">
+                      {state.result.failedEpisodes.map((ep) => (
+                        <Text key={ep.episodeId} fontSize="sm" color="red.400">
+                          • {ep.error}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+              </>
+            )
+            : (
+              <Box p={4} bg="red.subtle" borderRadius="md" textAlign="center">
+                <Icon as={LuX} boxSize={8} color="red.fg" mb={2} />
+                <Text fontWeight="bold" fontSize="lg" color="red.fg">
+                  Экспорт не удался
                 </Text>
-                <Text color="green.fg" opacity={0.8}>
-                  Экспортировано {state.result.exportedFiles.length} файлов
-                </Text>
+                {state.result?.failedEpisodes.map((ep) => (
+                  <Text key={ep.episodeId} color="red.fg" opacity={0.8} fontSize="sm">
+                    {ep.error}
+                  </Text>
+                ))}
               </Box>
-
-              {/* Пропущенные эпизоды */}
-              {state.result.skippedEpisodes.length > 0 && (
-                <Box>
-                  <Text fontWeight="medium" mb={2} color="yellow.300">
-                    Пропущено ({state.result.skippedEpisodes.length}):
-                  </Text>
-                  <VStack gap={1} align="stretch">
-                    {state.result.skippedEpisodes.map((ep) => (
-                      <Text key={ep.episodeId} fontSize="sm" color="fg.muted">
-                        • {ep.reason}
-                      </Text>
-                    ))}
-                  </VStack>
-                </Box>
-              )}
-
-              {/* Ошибки */}
-              {state.result.failedEpisodes.length > 0 && (
-                <Box>
-                  <Text fontWeight="medium" mb={2} color="red.300">
-                    Ошибки ({state.result.failedEpisodes.length}):
-                  </Text>
-                  <VStack gap={1} align="stretch">
-                    {state.result.failedEpisodes.map((ep) => (
-                      <Text key={ep.episodeId} fontSize="sm" color="red.400">
-                        • {ep.error}
-                      </Text>
-                    ))}
-                  </VStack>
-                </Box>
-              )}
-            </>
-          ) : (
-            <Box p={4} bg="red.subtle" borderRadius="md" textAlign="center">
-              <Icon as={LuX} boxSize={8} color="red.fg" mb={2} />
-              <Text fontWeight="bold" fontSize="lg" color="red.fg">
-                Экспорт не удался
-              </Text>
-              {state.result?.failedEpisodes.map((ep) => (
-                <Text key={ep.episodeId} color="red.fg" opacity={0.8} fontSize="sm">
-                  {ep.error}
-                </Text>
-              ))}
-            </Box>
-          )}
+            )}
         </VStack>
       </Dialog.Body>
 

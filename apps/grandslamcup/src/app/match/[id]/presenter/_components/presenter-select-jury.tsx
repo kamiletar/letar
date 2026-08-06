@@ -46,33 +46,35 @@ export function PresenterSelectJury({ match, matchState }: PresenterSelectJuryPr
       </Box>
 
       {/* QR-код */}
-      {inviteUrl ? (
-        <Box bg="white" p={4} borderRadius="xl" borderWidth="2px" borderColor="border.muted" textAlign="center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(inviteUrl)}`}
-            alt="QR-код для подключения судей"
-            width={300}
-            height={300}
-            style={{ margin: '0 auto', display: 'block', maxWidth: '100%' }}
-          />
-          <Text fontSize="xs" color="fg.muted" mt={2} wordBreak="break-all">
-            {inviteUrl}
-          </Text>
-        </Box>
-      ) : (
-        <Box
-          bg="bg.subtle"
-          p={8}
-          borderRadius="xl"
-          textAlign="center"
-          borderWidth="2px"
-          borderStyle="dashed"
-          borderColor="border.muted"
-        >
-          <Text color="fg.muted">QR-код появится когда скорер запустит матч</Text>
-        </Box>
-      )}
+      {inviteUrl
+        ? (
+          <Box bg="white" p={4} borderRadius="xl" borderWidth="2px" borderColor="border.muted" textAlign="center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(inviteUrl)}`}
+              alt="QR-код для подключения судей"
+              width={300}
+              height={300}
+              style={{ margin: '0 auto', display: 'block', maxWidth: '100%' }}
+            />
+            <Text fontSize="xs" color="fg.muted" mt={2} wordBreak="break-all">
+              {inviteUrl}
+            </Text>
+          </Box>
+        )
+        : (
+          <Box
+            bg="bg.subtle"
+            p={8}
+            borderRadius="xl"
+            textAlign="center"
+            borderWidth="2px"
+            borderStyle="dashed"
+            borderColor="border.muted"
+          >
+            <Text color="fg.muted">QR-код появится когда скорер запустит матч</Text>
+          </Box>
+        )}
 
       {/* Список слотов судей */}
       <VStack gap={2} align="stretch">

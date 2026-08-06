@@ -58,7 +58,7 @@ export interface MembershipLike<TRole extends string = string> {
 export type MembershipChecker<TMembership extends MembershipLike, TRole extends string = string> = (
   memberships: TMembership[] | undefined | null,
   keyValue: string,
-  roles?: TRole[]
+  roles?: TRole[],
 ) => boolean
 
 /**
@@ -68,7 +68,7 @@ export function createMembershipChecker<
   TMembership extends { [key: string]: unknown; role: TRole },
   TRole extends string = string,
 >(
-  keyName: string
+  keyName: string,
 ): {
   isMember: (memberships: TMembership[] | undefined | null, keyValue: string) => boolean
   hasRole: (memberships: TMembership[] | undefined | null, keyValue: string, role: TRole) => boolean

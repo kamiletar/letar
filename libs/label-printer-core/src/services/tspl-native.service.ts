@@ -43,7 +43,7 @@ export class TSPLNativeService {
       const dmSize = Math.round(labelConfig.elements.datamatrix.size)
 
       commands.push(
-        `DMATRIX ${dmX}, ${dmY}, ${dmSize}, ${dmSize}, x${labelConfig.elements.datamatrix.moduleSize}, "${code.fullCode}"`
+        `DMATRIX ${dmX}, ${dmY}, ${dmSize}, ${dmSize}, x${labelConfig.elements.datamatrix.moduleSize}, "${code.fullCode}"`,
       )
     }
 

@@ -39,7 +39,7 @@ export default function BookmarksPage() {
       acc[category].push(bookmark)
       return acc
     },
-    {} as Record<string, typeof bookmarks>
+    {} as Record<string, typeof bookmarks>,
   )
 
   const categories = Object.keys(groupedBookmarks)

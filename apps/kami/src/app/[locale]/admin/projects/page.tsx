@@ -81,13 +81,13 @@ export default async function ProjectsAdminPage({ params, searchParams }: Projec
                   </HStack>
                 </Table.Cell>
                 <Table.Cell>
-                  {project.demoUrl ? (
-                    <Text fontSize="sm" color="fg.muted" truncate maxW="200px">
-                      {project.demoUrl.replace('https://', '')}
-                    </Text>
-                  ) : (
-                    <Text color="fg.muted">—</Text>
-                  )}
+                  {project.demoUrl
+                    ? (
+                      <Text fontSize="sm" color="fg.muted" truncate maxW="200px">
+                        {project.demoUrl.replace('https://', '')}
+                      </Text>
+                    )
+                    : <Text color="fg.muted">—</Text>}
                 </Table.Cell>
                 <Table.Cell textAlign="right">
                   <AdminTableActions editPath={`/${locale}/admin/projects/${project.id}`} />

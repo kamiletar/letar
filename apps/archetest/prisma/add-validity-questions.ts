@@ -137,5 +137,5 @@ writeFileSync(MAXJSON, JSON.stringify(maxJson, null, 2), 'utf-8')
 console.log(
   `Добавлено ${newRecords.length} чек-вопросов (sortOrder ${dump.length}..${sortOrder - 1}), банк: ${
     dump.length + newRecords.length
-  }`
+  }`,
 )

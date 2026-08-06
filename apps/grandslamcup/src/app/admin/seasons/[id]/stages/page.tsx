@@ -170,78 +170,80 @@ export default function StagesPage() {
         </HStack>
       </Flex>
 
-      {stages.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">Этапы ещё не созданы. Нажмите «Создать этапы» для швейцарской системы.</Text>
-        </EmptyState>
-      ) : (
-        <>
-          {/* Прогресс текущего тура */}
-          <SwissProgressCard progress={progress} />
+      {stages.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">Этапы ещё не созданы. Нажмите «Создать этапы» для швейцарской системы.</Text>
+          </EmptyState>
+        )
+        : (
+          <>
+            {/* Прогресс текущего тура */}
+            <SwissProgressCard progress={progress} />
 
-          {/* Таблица этапов */}
-          <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-            <Box overflowX="auto">
-              <Table.Root>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>#</Table.ColumnHeader>
-                    <Table.ColumnHeader>Название</Table.ColumnHeader>
-                    <Table.ColumnHeader>Тип</Table.ColumnHeader>
-                    <Table.ColumnHeader>Туры</Table.ColumnHeader>
-                    <Table.ColumnHeader>Слоты сетки</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {stages.map((stage) => (
-                    <Table.Row key={stage.id}>
-                      <Table.Cell>{stage.order}</Table.Cell>
-                      <Table.Cell fontWeight="medium">{stage.name}</Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={stageTypeColor[stage.type] ?? 'gray'} size="sm">
-                          {stageTypeLabel[stage.type] ?? stage.type}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>{stage.rounds.length}</Table.Cell>
-                      <Table.Cell>{stage._count.bracketSlots || '—'}</Table.Cell>
+            {/* Таблица этапов */}
+            <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+              <Box overflowX="auto">
+                <Table.Root>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>#</Table.ColumnHeader>
+                      <Table.ColumnHeader>Название</Table.ColumnHeader>
+                      <Table.ColumnHeader>Тип</Table.ColumnHeader>
+                      <Table.ColumnHeader>Туры</Table.ColumnHeader>
+                      <Table.ColumnHeader>Слоты сетки</Table.ColumnHeader>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
+                  </Table.Header>
+                  <Table.Body>
+                    {stages.map((stage) => (
+                      <Table.Row key={stage.id}>
+                        <Table.Cell>{stage.order}</Table.Cell>
+                        <Table.Cell fontWeight="medium">{stage.name}</Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={stageTypeColor[stage.type] ?? 'gray'} size="sm">
+                            {stageTypeLabel[stage.type] ?? stage.type}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>{stage.rounds.length}</Table.Cell>
+                        <Table.Cell>{stage._count.bracketSlots || '—'}</Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </Box>
             </Box>
-          </Box>
 
-          {/* Кнопки действий */}
-          <Flex gap={3} wrap="wrap">
-            <Button
-              colorPalette="teal"
-              size="sm"
-              onClick={handlePreviewRound}
-              loading={actionLoading === 'round'}
-              disabled={progress !== null && !progress.allFinished && progress.totalMatches > 0}
-            >
-              <LuDices size={16} />
-              Сгенерировать тур
-            </Button>
-            <Button
-              colorPalette="purple"
-              size="sm"
-              variant="outline"
-              onClick={handleGenerateBracket}
-              loading={actionLoading === 'bracket'}
-            >
-              <LuGrid2X2 size={16} />
-              Создать сетку плей-офф
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={`/admin/seasons/${seasonId}/bracket`}>
-                <LuTrophy size={16} />
-                Визуализация сетки
-              </a>
-            </Button>
-          </Flex>
-        </>
-      )}
+            {/* Кнопки действий */}
+            <Flex gap={3} wrap="wrap">
+              <Button
+                colorPalette="teal"
+                size="sm"
+                onClick={handlePreviewRound}
+                loading={actionLoading === 'round'}
+                disabled={progress !== null && !progress.allFinished && progress.totalMatches > 0}
+              >
+                <LuDices size={16} />
+                Сгенерировать тур
+              </Button>
+              <Button
+                colorPalette="purple"
+                size="sm"
+                variant="outline"
+                onClick={handleGenerateBracket}
+                loading={actionLoading === 'bracket'}
+              >
+                <LuGrid2X2 size={16} />
+                Создать сетку плей-офф
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <a href={`/admin/seasons/${seasonId}/bracket`}>
+                  <LuTrophy size={16} />
+                  Визуализация сетки
+                </a>
+              </Button>
+            </Flex>
+          </>
+        )}
 
       {/* Модал превью пар */}
       {preview && (

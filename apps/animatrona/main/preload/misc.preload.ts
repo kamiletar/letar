@@ -19,7 +19,7 @@ export const legacyOnPreload = {
 export const introDetectorPreload = {
   /** Определить OP/ED для списка эпизодов (минимум 2) */
   detect: async (
-    episodes: Array<{ id: string; sourcePath: string; duration: number }>
+    episodes: Array<{ id: string; sourcePath: string; duration: number }>,
   ): Promise<
     Array<{
       episodeId: string
@@ -37,7 +37,7 @@ export const introDetectorPreload = {
   },
   /** Определить OP/ED из IPFS (скачивает аудиодорожки во temp файлы) */
   detectFromIpfs: async (
-    episodes: Array<{ id: string; audioCid: string; duration: number }>
+    episodes: Array<{ id: string; audioCid: string; duration: number }>,
   ): Promise<
     Array<{
       episodeId: string

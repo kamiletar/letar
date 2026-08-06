@@ -36,13 +36,12 @@ export default async function VenuesPage() {
     }))
 
   // Центр карты — Санкт-Петербург по умолчанию
-  const defaultCenter: [number, number] =
-    markers.length > 0
-      ? [
-          markers.reduce((sum, m) => sum + m.coordinates[0], 0) / markers.length,
-          markers.reduce((sum, m) => sum + m.coordinates[1], 0) / markers.length,
-        ]
-      : [59.9343, 30.3351] // Санкт-Петербург
+  const defaultCenter: [number, number] = markers.length > 0
+    ? [
+      markers.reduce((sum, m) => sum + m.coordinates[0], 0) / markers.length,
+      markers.reduce((sum, m) => sum + m.coordinates[1], 0) / markers.length,
+    ]
+    : [59.9343, 30.3351] // Санкт-Петербург
 
   return (
     <VStack gap={6} align="stretch">

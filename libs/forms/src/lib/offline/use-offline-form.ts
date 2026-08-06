@@ -120,7 +120,7 @@ export function useOfflineForm<T extends object>({
         }
       }
     },
-    [isOffline, actionType, addAction, onlineSubmit, onSuccess, onQueued, onError]
+    [isOffline, actionType, addAction, onlineSubmit, onSuccess, onQueued, onError],
   )
 
   /**
@@ -136,7 +136,7 @@ export function useOfflineForm<T extends object>({
 
       return onlineSubmit(action.payload as T)
     },
-    [actionType, onlineSubmit]
+    [actionType, onlineSubmit],
   )
 
   // Automatic sync when connection is restored

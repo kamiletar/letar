@@ -141,7 +141,7 @@ async function main() {
 
     if (config.ext === 'zip') {
       await execAsync(
-        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`
+        `powershell -Command "Expand-Archive -Path '${tempFile}' -DestinationPath '${extractDir}' -Force"`,
       )
     } else if (config.ext === 'tar.gz') {
       const isWindows = process.platform === 'win32'

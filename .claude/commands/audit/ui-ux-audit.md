@@ -102,7 +102,7 @@
 ```tsx
 // ✅ Правильно
 import { Form } from '@letar/forms'
-;<Form schema={Schema} initialValue={data} onSubmit={save}>
+<Form schema={Schema} initialValue={data} onSubmit={save}>
   <Form.Field.String name="title" />
   <Form.Button.Submit>Сохранить</Form.Button.Submit>
 </Form>
@@ -169,8 +169,8 @@ ANALYZE=true nx build <app>
 
 ### Сводка
 
-| Область       | Статус   | Критичные | Важные | Рекомендации |
-| ------------- | -------- | --------- | ------ | ------------ |
+| Область       | Статус  | Критичные | Важные | Рекомендации |
+| ------------- | ------- | --------- | ------ | ------------ |
 | Design System | ✅/⚠️/❌ | N         | N      | N            |
 | Accessibility | ✅/⚠️/❌ | N         | N      | N            |
 | Responsive    | ✅/⚠️/❌ | N         | N      | N            |

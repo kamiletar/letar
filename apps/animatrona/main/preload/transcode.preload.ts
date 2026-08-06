@@ -20,7 +20,7 @@ export const transcodePreload = {
   /** Добавить файл в очередь */
   addToQueue: (
     filePath: string,
-    settings?: PerFileTranscodeSettings
+    settings?: PerFileTranscodeSettings,
   ): Promise<{ success: boolean; id?: string; error?: string }> =>
     ipcRenderer.invoke('transcode:addToQueue', filePath, settings),
 
@@ -112,7 +112,7 @@ export const parallelTranscodePreload = {
   startNewBatch: (
     items: BatchImportItem[],
     batchId?: string,
-    concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number }
+    concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('parallelTranscode:startNewBatch', { items, batchId, concurrency }),
 
@@ -261,7 +261,7 @@ export const parallelTranscodePreload = {
 
   /** Получить логи конкретной видео-задачи */
   getVideoTaskLogs: (
-    taskId: string
+    taskId: string,
   ): Promise<{
     success: boolean
     data?: Array<{ timestamp: number; taskId: string; level: 'info' | 'warning' | 'error'; message: string }>
@@ -278,6 +278,6 @@ export const parallelTranscodePreload = {
 
   /** Подписка на новые записи логов (real-time) */
   onVideoLogEntry: on<[string, { timestamp: number; level: 'info' | 'warning' | 'error'; message: string }]>(
-    'parallelTranscode:videoLogEntry'
+    'parallelTranscode:videoLogEntry',
   ),
 }

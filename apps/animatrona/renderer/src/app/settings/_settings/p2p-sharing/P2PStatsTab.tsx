@@ -52,7 +52,7 @@ const MAX_CHART_POINTS = 180
 /** Фильтрация и прореживание данных bandwidth по периоду */
 function filterAndThinBandwidth(
   history: BandwidthPoint[],
-  period: SpeedPeriod
+  period: SpeedPeriod,
 ): { chartData: BandwidthPoint[]; avgIn: number; avgOut: number } {
   const cutoff = Date.now() - PERIOD_MS[period]
   const filtered = history.filter((p) => p.timestamp >= cutoff)
@@ -243,7 +243,7 @@ export function P2PStatsTab() {
   // Фильтрация и прореживание bandwidth по выбранному периоду
   const { chartData, avgIn, avgOut } = useMemo(
     () => filterAndThinBandwidth(bandwidthHistory, speedPeriod),
-    [bandwidthHistory, speedPeriod]
+    [bandwidthHistory, speedPeriod],
   )
 
   // Преобразуем дневную историю для BarChart
@@ -335,56 +335,60 @@ export function P2PStatsTab() {
           </HStack>
         )}
 
-        {!isRunning ? (
-          <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
-            <Text color="fg.subtle">IPFS не запущена. Запустите ноду для отслеживания скорости.</Text>
-          </Box>
-        ) : chartData.length < 2 ? (
-          <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
-            <Text color="fg.subtle">Сбор данных... ({bandwidthHistory.length}/2 точек)</Text>
-          </Box>
-        ) : (
-          <Box bg="bg.subtle" borderRadius="lg" p={4} h="250px">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis
-                  dataKey="time"
-                  tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  tickFormatter={formatSpeedAxis}
-                  tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
-                  width={70}
-                />
-                <Tooltip content={<BandwidthTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="inSpeed"
-                  name="Входящий"
-                  stroke="#48BB78"
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="outSpeed"
-                  name="Исходящий"
-                  stroke="#ED8936"
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={false}
-                />
-                <Legend
-                  wrapperStyle={{ fontSize: '12px' }}
-                  formatter={(value: string) => (value === 'Входящий' ? '↓ Входящий' : '↑ Исходящий')}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
-        )}
+        {!isRunning
+          ? (
+            <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
+              <Text color="fg.subtle">IPFS не запущена. Запустите ноду для отслеживания скорости.</Text>
+            </Box>
+          )
+          : chartData.length < 2
+          ? (
+            <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
+              <Text color="fg.subtle">Сбор данных... ({bandwidthHistory.length}/2 точек)</Text>
+            </Box>
+          )
+          : (
+            <Box bg="bg.subtle" borderRadius="lg" p={4} h="250px">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tickFormatter={formatSpeedAxis}
+                    tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
+                    width={70}
+                  />
+                  <Tooltip content={<BandwidthTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="inSpeed"
+                    name="Входящий"
+                    stroke="#48BB78"
+                    strokeWidth={2}
+                    dot={false}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="outSpeed"
+                    name="Исходящий"
+                    stroke="#ED8936"
+                    strokeWidth={2}
+                    dot={false}
+                    isAnimationActive={false}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px' }}
+                    formatter={(value: string) => (value === 'Входящий' ? '↓ Входящий' : '↑ Исходящий')}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          )}
       </Box>
 
       {/* Блок 3: Дневной трафик за 30 дней */}
@@ -392,32 +396,34 @@ export function P2PStatsTab() {
         <Heading size="sm" mb={4}>
           Трафик по дням (30 дней)
         </Heading>
-        {dailyChartData.length === 0 ? (
-          <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
-            <Text color="fg.subtle">Нет данных за последние 30 дней. Начните раздавать контент!</Text>
-          </Box>
-        ) : (
-          <Box bg="bg.subtle" borderRadius="lg" p={4} h="250px">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailyChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }} />
-                <YAxis
-                  tickFormatter={formatBytesAxis}
-                  tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
-                  width={70}
-                />
-                <Tooltip content={<DailyTooltip />} />
-                <Bar dataKey="uploaded" name="Отдано" stackId="traffic" fill="#48BB78" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="downloaded" name="Скачано" stackId="traffic" fill="#4299E1" radius={[2, 2, 0, 0]} />
-                <Legend
-                  wrapperStyle={{ fontSize: '12px' }}
-                  formatter={(value: string) => (value === 'Отдано' ? '↑ Отдано' : '↓ Скачано')}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-        )}
+        {dailyChartData.length === 0
+          ? (
+            <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
+              <Text color="fg.subtle">Нет данных за последние 30 дней. Начните раздавать контент!</Text>
+            </Box>
+          )
+          : (
+            <Box bg="bg.subtle" borderRadius="lg" p={4} h="250px">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dailyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }} />
+                  <YAxis
+                    tickFormatter={formatBytesAxis}
+                    tick={{ fontSize: 10, fill: 'var(--chakra-colors-fg-subtle)' }}
+                    width={70}
+                  />
+                  <Tooltip content={<DailyTooltip />} />
+                  <Bar dataKey="uploaded" name="Отдано" stackId="traffic" fill="#48BB78" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="downloaded" name="Скачано" stackId="traffic" fill="#4299E1" radius={[2, 2, 0, 0]} />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px' }}
+                    formatter={(value: string) => (value === 'Отдано' ? '↑ Отдано' : '↓ Скачано')}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          )}
       </Box>
 
       {/* Блок 4: Текущая сессия — живые метрики */}

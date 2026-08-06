@@ -118,14 +118,16 @@ export function OnboardingTooltip() {
                     </Button>
                   )}
                   <Button size="sm" colorPalette="brand" onClick={nextStep}>
-                    {currentStepIndex < totalSteps - 1 ? (
-                      <>
-                        Далее
-                        <LuArrowRight size={14} />
-                      </>
-                    ) : (
-                      'Готово'
-                    )}
+                    {currentStepIndex < totalSteps - 1
+                      ? (
+                        <>
+                          Далее
+                          <LuArrowRight size={14} />
+                        </>
+                      )
+                      : (
+                        'Готово'
+                      )}
                   </Button>
                 </HStack>
               </HStack>

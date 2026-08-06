@@ -29,10 +29,10 @@ export function BracketMatchCard({ match, width = '200px' }: BracketMatchCardPro
   const borderColor = isLive
     ? 'colorPalette.solid'
     : isFinished
-      ? 'border.emphasized'
-      : isTbd
-        ? 'border.muted'
-        : 'border'
+    ? 'border.emphasized'
+    : isTbd
+    ? 'border.muted'
+    : 'border'
 
   const card = (
     <Box

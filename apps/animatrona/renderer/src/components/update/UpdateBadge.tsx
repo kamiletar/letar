@@ -29,9 +29,9 @@ export function UpdateBadge() {
   // 1. Обновление доступно, загружается или загружено
   // 2. Версия не в списке пропущенных
   const shouldShow =
-    (status.status === 'available' || status.status === 'downloading' || status.status === 'downloaded') &&
-    status.updateInfo &&
-    !skippedVersions.includes(status.updateInfo.version)
+    (status.status === 'available' || status.status === 'downloading' || status.status === 'downloaded')
+    && status.updateInfo
+    && !skippedVersions.includes(status.updateInfo.version)
 
   if (!shouldShow) {
     return null

@@ -54,7 +54,8 @@ export function registerExportQueueHandlers(): void {
   createHandler('export-queue:getSettings', () => service.getSettings())
 
   // Обновить настройки
-  createHandler('export-queue:updateSettings', (settings: Partial<ExportQueueSettings>) =>
-    service.updateSettings(settings)
+  createHandler(
+    'export-queue:updateSettings',
+    (settings: Partial<ExportQueueSettings>) => service.updateSettings(settings),
   )
 }

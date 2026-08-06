@@ -172,11 +172,9 @@ export function AnimePageClient({
         episodeCount={episodes.length}
         totalDuration={totalDuration}
         totalSize={totalSize}
-        genres={
-          anime.genres.length > 0
-            ? anime.genres
-            : manifest?.genres?.map((g: { nameRu?: string; name: string }) => g.nameRu || g.name)
-        }
+        genres={anime.genres.length > 0
+          ? anime.genres
+          : manifest?.genres?.map((g: { nameRu?: string; name: string }) => g.nameRu || g.name)}
         themes={manifest?.themes?.map((t: { nameRu?: string; name: string }) => t.nameRu || t.name)}
         posterUrl={posterUrl}
         isBdRemux={manifest?.isBdRemux}
@@ -219,20 +217,21 @@ export function AnimePageClient({
                 licensor={manifest?.licensor}
               />
             ),
-            related:
-              relations.length > 0 ? <RelatedSection relations={relations} libraryMap={libraryMapObj} /> : undefined,
-            franchise:
-              franchiseGraph && franchiseGraph.nodes?.length > 0 ? (
+            related: relations.length > 0
+              ? <RelatedSection relations={relations} libraryMap={libraryMapObj} />
+              : undefined,
+            franchise: franchiseGraph && franchiseGraph.nodes?.length > 0
+              ? (
                 <FranchiseGraphDynamic
                   graph={franchiseGraph}
                   currentShikimoriId={anime.shikimoriId || undefined}
                   libraryMap={libraryMapObj}
                 />
-              ) : undefined,
-            similar:
-              similarAnime.length > 0 ? (
-                <SimilarSection items={similarAnime} currentGenres={anime.genres} />
-              ) : undefined,
+              )
+              : undefined,
+            similar: similarAnime.length > 0
+              ? <SimilarSection items={similarAnime} currentGenres={anime.genres} />
+              : undefined,
             videos: videos.length > 0 ? <VideoSection videos={videos} /> : undefined,
             comments: (
               <CommentsSection
@@ -242,9 +241,9 @@ export function AnimePageClient({
                 currentUserRole={userRole}
               />
             ),
-            admin: adminData ? (
-              <AdminSection pinnedOn={adminData.pinnedOn} viewers={adminData.viewers} viewCount={anime.viewCount} />
-            ) : undefined,
+            admin: adminData
+              ? <AdminSection pinnedOn={adminData.pinnedOn} viewers={adminData.viewers} viewCount={anime.viewCount} />
+              : undefined,
           }}
         />
       </Container>

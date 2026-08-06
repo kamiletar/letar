@@ -34,7 +34,7 @@ export const DialogCloseTrigger = React.forwardRef<HTMLButtonElement, ChakraDial
         </CloseButton>
       </ChakraDialog.CloseTrigger>
     )
-  }
+  },
 )
 
 export const DialogRoot = ChakraDialog.Root

@@ -108,7 +108,7 @@ export function useTableNavigation({
         }
       }
     },
-    [readOnly, editableIndices, rowCount, canAdd, addRow, setEditingCell, focusCell]
+    [readOnly, editableIndices, rowCount, canAdd, addRow, setEditingCell, focusCell],
   )
 
   /**
@@ -158,7 +158,7 @@ export function useTableNavigation({
           break
       }
     },
-    [editingCell, setEditingCell, moveToNext, focusCell, rowCount]
+    [editingCell, setEditingCell, moveToNext, focusCell, rowCount],
   )
 
   return { containerRef, handleKeyDown, focusCell }

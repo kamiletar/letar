@@ -11,7 +11,7 @@ function loadFixture(name: string): string {
 describe('parseTitle', () => {
   it('парсит стандартный заголовок аниме-раздачи', () => {
     const result = parseTitle(
-      'Тетрадь Смерти / Death Note [TV] [37 из 37] [RUS(ext), JAP+Sub] [2006, психологический триллер, мистика, BDRip] [1080p]'
+      'Тетрадь Смерти / Death Note [TV] [37 из 37] [RUS(ext), JAP+Sub] [2006, психологический триллер, мистика, BDRip] [1080p]',
     )
 
     expect(result.nameRu).toBe('Тетрадь Смерти')
@@ -29,7 +29,7 @@ describe('parseTitle', () => {
 
   it('парсит заголовок с 720p и WEB-DL', () => {
     const result = parseTitle(
-      'Эрго Прокси / Ergo Proxy [TV] [23 из 23] [RUS, JAP] [2006, научная фантастика, киберпанк, WEB-DL] [720p]'
+      'Эрго Прокси / Ergo Proxy [TV] [23 из 23] [RUS, JAP] [2006, научная фантастика, киберпанк, WEB-DL] [720p]',
     )
 
     expect(result.nameRu).toBe('Эрго Прокси')
@@ -41,7 +41,7 @@ describe('parseTitle', () => {
 
   it('парсит заголовок с эпизодами 13+1', () => {
     const result = parseTitle(
-      'Стальной алхимик / Fullmetal Alchemist [TV+Special] [13+1 из 13+1] [RUS] [2003, приключения, BDRip] [1080p]'
+      'Стальной алхимик / Fullmetal Alchemist [TV+Special] [13+1 из 13+1] [RUS] [2003, приключения, BDRip] [1080p]',
     )
 
     expect(result.type).toBe('TV+Special')

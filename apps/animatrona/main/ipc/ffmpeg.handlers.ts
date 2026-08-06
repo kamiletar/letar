@@ -139,7 +139,7 @@ export function registerFFmpegHandlers(): void {
         },
       })
       return { thumbnails: result.thumbnails, fullSize: result.fullSize }
-    }
+    },
   )
 
   // Генерация thumbnail sprite sheet для hover preview
@@ -148,7 +148,7 @@ export function registerFFmpegHandlers(): void {
     async (inputPath: string, outputDir: string, duration: number, options?: SpriteSheetOptions) => {
       const result = await generateThumbnailSprite(inputPath, outputDir, duration, options)
       return { spritePath: result.spritePath, vttPath: result.vttPath, spriteSize: result.spriteSize }
-    }
+    },
   )
 
   // === Handlers с прогрессом (используют event.sender) ===
@@ -162,7 +162,7 @@ export function registerFFmpegHandlers(): void {
       await transcodeVideo(input, output, options, (progress) => {
         win?.webContents.send('ffmpeg:progress', { type: 'video', ...progress })
       })
-    }
+    },
   )
 
   // Транскодирование аудио
@@ -174,7 +174,7 @@ export function registerFFmpegHandlers(): void {
       await transcodeAudio(input, output, options, (progress) => {
         win?.webContents.send('ffmpeg:progress', { type: 'audio', ...progress })
       })
-    }
+    },
   )
 
   // Мерж в MKV
@@ -197,7 +197,7 @@ export function registerFFmpegHandlers(): void {
       })
       const outputStat = await stat(output)
       return { outputPath: output, outputSize: outputStat.size }
-    }
+    },
   )
 
   // Транскодирование видео с профилем
@@ -211,7 +211,7 @@ export function registerFFmpegHandlers(): void {
       })
       const outputStat = await stat(output)
       return { outputPath: output, outputSize: outputStat.size }
-    }
+    },
   )
 
   // Кодирование тестового сэмпла
@@ -226,7 +226,7 @@ export function registerFFmpegHandlers(): void {
         startTime?: number
         duration?: number
         sourceBitDepth?: number
-      }
+      },
     ) => {
       const outputDir = path.dirname(options.outputPath)
       await mkdir(outputDir, { recursive: true })
@@ -241,8 +241,8 @@ export function registerFFmpegHandlers(): void {
         options.sourceBitDepth ?? 8,
         (progress) => {
           win?.webContents.send('ffmpeg:progress', { type: 'sample', profileName: options.profile.name, ...progress })
-        }
+        },
       )
-    }
+    },
   )
 }

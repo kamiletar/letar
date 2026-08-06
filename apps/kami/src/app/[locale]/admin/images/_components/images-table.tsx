@@ -169,15 +169,17 @@ export function ImagesTable({ images }: ImagesTableProps) {
                   <Text fontSize="sm">{formatSize(image.size)}</Text>
                 </Table.Cell>
                 <Table.Cell>
-                  {image.width && image.height ? (
-                    <Text fontSize="sm">
-                      {image.width}×{image.height}
-                    </Text>
-                  ) : (
-                    <Text fontSize="sm" color="fg.muted">
-                      —
-                    </Text>
-                  )}
+                  {image.width && image.height
+                    ? (
+                      <Text fontSize="sm">
+                        {image.width}×{image.height}
+                      </Text>
+                    )
+                    : (
+                      <Text fontSize="sm" color="fg.muted">
+                        —
+                      </Text>
+                    )}
                 </Table.Cell>
                 <Table.Cell>
                   <Text fontSize="sm">{formatDate(image.uploadedAt)}</Text>

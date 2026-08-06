@@ -142,9 +142,7 @@ return (
   <>
     {data.pages.map((page, i) => (
       <Fragment key={i}>
-        {page.items.map((item) => (
-          <ProductCard key={item.id} product={item} />
-        ))}
+        {page.items.map((item) => <ProductCard key={item.id} product={item} />)}
       </Fragment>
     ))}
     <Button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
@@ -262,9 +260,7 @@ function ProductsList() {
   const { data } = useQuery({ queryKey: ['products'], queryFn: fetchProducts })
   return (
     <div>
-      {data?.map((p) => (
-        <ProductCard key={p.id} product={p} />
-      ))}
+      {data?.map((p) => <ProductCard key={p.id} product={p} />)}
     </div>
   )
 }

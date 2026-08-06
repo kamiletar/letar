@@ -86,12 +86,12 @@ export function FormWatch({ field, onChange }: FormWatchProps): ReactElement | n
       }
       return () => subscription.unsubscribe()
     },
-    [form]
+    [form],
   )
 
   const getValueSnapshot = useCallback(
     () => getNestedValue(form.state.values as Record<string, unknown>, fullPath),
-    [form, fullPath]
+    [form, fullPath],
   )
 
   // Подписка на значение поля
@@ -110,7 +110,7 @@ export function FormWatch({ field, onChange }: FormWatchProps): ReactElement | n
         return form.state.values as Record<string, unknown>
       },
     }),
-    [form]
+    [form],
   )
 
   // Предыдущее значение для детекции изменений

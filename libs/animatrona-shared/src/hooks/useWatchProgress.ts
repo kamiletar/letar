@@ -243,7 +243,7 @@ export const formatTimeForDisplay = formatDuration
  */
 export async function getStoredProgress(
   episodeId: string,
-  storageKeyPrefix: string = DEFAULT_STORAGE_KEY_PREFIX
+  storageKeyPrefix: string = DEFAULT_STORAGE_KEY_PREFIX,
 ): Promise<WatchProgressData | null> {
   try {
     const storageKey = `${storageKeyPrefix}${episodeId}`

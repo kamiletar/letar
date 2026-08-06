@@ -66,7 +66,7 @@ export default async function ShopPage() {
     products.map((p) => ({
       url: `${SITE_URL}/shop/${p.slug}`,
       name: p.name,
-    }))
+    })),
   )
 
   return (
@@ -82,26 +82,26 @@ export default async function ShopPage() {
           </Text>
         </Box>
 
-        {products.length === 0 ? (
-          <Box textAlign="center" py={10}>
-            <Text fontSize="xl" color="fg.muted">
-              {t('empty')}
-            </Text>
-          </Box>
-        ) : (
-          <Grid
-            templateColumns={{
-              base: '1fr',
-              md: 'repeat(2, 1fr)',
-              lg: 'repeat(3, 1fr)',
-            }}
-            gap={6}
-          >
-            {productsWithUrls.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </Grid>
-        )}
+        {products.length === 0
+          ? (
+            <Box textAlign="center" py={10}>
+              <Text fontSize="xl" color="fg.muted">
+                {t('empty')}
+              </Text>
+            </Box>
+          )
+          : (
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                md: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)',
+              }}
+              gap={6}
+            >
+              {productsWithUrls.map((product) => <ProductCard key={product.id} product={product} />)}
+            </Grid>
+          )}
       </Container>
     </>
   )

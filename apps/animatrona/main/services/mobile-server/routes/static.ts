@@ -39,7 +39,7 @@ export async function handleStaticRequest(
   _req: IncomingMessage,
   res: ServerResponse,
   pathname: string,
-  staticPath: string | null
+  staticPath: string | null,
 ): Promise<void> {
   // Если нет пути к статике — возвращаем заглушку
   if (!staticPath) {

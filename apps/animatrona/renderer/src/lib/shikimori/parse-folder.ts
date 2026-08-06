@@ -273,8 +273,8 @@ export function parseFolderName(folderPath: string, fileNames?: string[]): Parse
   const isBdRemux = folderResult.isBdRemux || bdRemuxInFiles
 
   // Если имя папки информативное (не просто цифры или короткое) — используем его
-  const isFolderNameGood =
-    folderResult.name.length > 3 && !/^\d+$/.test(folderResult.name) && !/^(season|s)\s*\d+$/i.test(folderResult.name)
+  const isFolderNameGood = folderResult.name.length > 3 && !/^\d+$/.test(folderResult.name)
+    && !/^(season|s)\s*\d+$/i.test(folderResult.name)
 
   if (isFolderNameGood) {
     return {

@@ -65,7 +65,7 @@ describe('Ре-рендеры @letar/forms', () => {
             </tracker.Track>
           ))}
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Сбрасываем счётчики после начального рендера
@@ -121,7 +121,7 @@ describe('Ре-рендеры @letar/forms', () => {
             </tracker.Track>
           </Form.When>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     tracker.reset()

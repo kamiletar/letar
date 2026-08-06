@@ -123,7 +123,7 @@ export function useTemplates(): UseTemplatesReturn {
         return null
       }
     },
-    []
+    [],
   )
 
   /**
@@ -183,7 +183,7 @@ export function useTemplates(): UseTemplatesReturn {
     (id: string): ImportTemplate | undefined => {
       return templates.find((t) => t.id === id)
     },
-    [templates]
+    [templates],
   )
 
   return {

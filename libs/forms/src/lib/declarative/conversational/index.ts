@@ -1,2 +1,2 @@
 export { ConversationalMode, type ConversationalModeProps } from './conversational-mode'
-export { useConversationalState, type ConversationalState } from './use-conversational-state'
+export { type ConversationalState, useConversationalState } from './use-conversational-state'

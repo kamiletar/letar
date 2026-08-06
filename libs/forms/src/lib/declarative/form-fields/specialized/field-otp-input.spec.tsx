@@ -17,7 +17,7 @@ describe('FieldOTPInput', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.OTPInput name="code" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')
@@ -30,7 +30,7 @@ describe('FieldOTPInput', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.OTPInput name="code" label="Код подтверждения" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Код подтверждения')).toBeInTheDocument()
@@ -44,7 +44,7 @@ describe('FieldOTPInput', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.OTPInput name="code" onResend={vi.fn()} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('button', { name: /submit again/i })).toBeInTheDocument()
@@ -56,7 +56,7 @@ describe('FieldOTPInput', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.OTPInput name="code" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.queryByRole('button', { name: /submit again/i })).not.toBeInTheDocument()
@@ -70,7 +70,7 @@ describe('FieldOTPInput', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.OTPInput name="code" length={4} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')

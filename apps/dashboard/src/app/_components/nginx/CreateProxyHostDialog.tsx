@@ -57,7 +57,7 @@ export function CreateProxyHostDialog({ apps, serverId, existingHosts = [] }: Cr
 
   // Фильтруем только web приложения с Docker, которые ещё не имеют proxy host
   const webApps = apps.filter(
-    (app) => app.type === 'web' && app.hasDocker && !usedContainerNames.has(app.containerName ?? '')
+    (app) => app.type === 'web' && app.hasDocker && !usedContainerNames.has(app.containerName ?? ''),
   )
 
   /**
@@ -246,7 +246,7 @@ export function CreateProxyHostDialog({ apps, serverId, existingHosts = [] }: Cr
                         const val = e.target.value
                         updateField(
                           'certificate_id',
-                          val === 'new' ? 'new' : val === 'none' ? undefined : parseInt(val)
+                          val === 'new' ? 'new' : val === 'none' ? undefined : parseInt(val),
                         )
                       }}
                     >

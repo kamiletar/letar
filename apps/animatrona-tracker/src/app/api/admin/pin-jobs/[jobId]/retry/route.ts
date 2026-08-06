@@ -32,7 +32,7 @@ export async function POST(_request: NextRequest, { params }: { params: Params }
   if (job.status !== 'FAILED') {
     return NextResponse.json(
       { error: `Повтор возможен только для статуса FAILED, текущий: ${job.status}` },
-      { status: 400 }
+      { status: 400 },
     )
   }
 
@@ -48,7 +48,7 @@ export async function POST(_request: NextRequest, { params }: { params: Params }
     console.error('[retry] Ошибка при повторе задания:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Внутренняя ошибка сервера' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

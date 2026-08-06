@@ -17,7 +17,7 @@ describe('Form.InfoBlock', () => {
     render(
       <TestWrapper>
         <FormInfoBlock>Заполните все поля</FormInfoBlock>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Заполните все поля')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('Form.InfoBlock', () => {
     render(
       <TestWrapper>
         <FormInfoBlock title="Важно">Описание блока</FormInfoBlock>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Важно')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('Form.InfoBlock', () => {
       const { unmount } = render(
         <TestWrapper>
           <FormInfoBlock variant={variant}>Текст {variant}</FormInfoBlock>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText(`Текст ${variant}`)).toBeInTheDocument()
@@ -58,7 +58,7 @@ describe('Form.InfoBlock', () => {
           </Form.InfoBlock>
           <Form.Field.String name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Внимание')).toBeInTheDocument()
@@ -72,7 +72,7 @@ describe('Form.Divider', () => {
     const { container } = render(
       <TestWrapper>
         <FormDivider />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Separator рендерит hr элемент
@@ -83,7 +83,7 @@ describe('Form.Divider', () => {
     render(
       <TestWrapper>
         <FormDivider label="Контактные данные" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Контактные данные')).toBeInTheDocument()
@@ -97,7 +97,7 @@ describe('Form.Divider', () => {
           <Form.Divider label="Контакты" />
           <Form.Field.String name="email" label="Email" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Контакты')).toBeInTheDocument()
@@ -114,7 +114,7 @@ describe('Form.Field.Hidden', () => {
           <Form.Field.String name="name" label="Имя" />
           <Form.Field.Hidden name="secret" value="hidden-value" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Поле не должно быть видимым
@@ -133,7 +133,7 @@ describe('Form.Field.Hidden', () => {
           <Form.Field.Hidden name="utm" value="google" />
           <Form.Button.Submit>Отправить</Form.Button.Submit>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Подождём синхронизацию value через useEffect
@@ -162,7 +162,7 @@ describe('Form.Field.Hidden', () => {
           <Form.Field.Hidden name="code" value="v1" />
           <Form.Button.Submit>OK</Form.Button.Submit>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Ждём установки начального значения
@@ -176,7 +176,7 @@ describe('Form.Field.Hidden', () => {
           <Form.Field.Hidden name="code" value="v2" />
           <Form.Button.Submit>OK</Form.Button.Submit>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await act(async () => {

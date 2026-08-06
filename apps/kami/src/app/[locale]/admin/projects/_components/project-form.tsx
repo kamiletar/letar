@@ -47,8 +47,9 @@ export function ProjectForm({ project, locale }: ProjectFormProps) {
         if (!result.success) {
           toaster.error({
             title: 'Ошибка',
-            description:
-              result.error === 'VALIDATION_ERROR' ? 'Проверьте правильность заполнения формы' : 'Не удалось сохранить',
+            description: result.error === 'VALIDATION_ERROR'
+              ? 'Проверьте правильность заполнения формы'
+              : 'Не удалось сохранить',
           })
           return
         }
@@ -61,7 +62,7 @@ export function ProjectForm({ project, locale }: ProjectFormProps) {
         router.push(`/${locale}/admin/projects`)
       })
     },
-    [isEditing, project, locale, router]
+    [isEditing, project, locale, router],
   )
 
   const handleDelete = useCallback(async () => {
@@ -87,33 +88,33 @@ export function ProjectForm({ project, locale }: ProjectFormProps) {
 
   const initialValues = project
     ? {
-        title: project.title,
-        titleEn: project.titleEn,
-        slug: project.slug,
-        description: project.description,
-        descriptionEn: project.descriptionEn,
-        image: project.image ?? '',
-        demoUrl: project.demoUrl ?? '',
-        codeUrl: project.codeUrl ?? '',
-        caseUrl: project.caseUrl ?? '',
-        featured: project.featured,
-        order: project.order,
-        technologies: project.technologies,
-      }
+      title: project.title,
+      titleEn: project.titleEn,
+      slug: project.slug,
+      description: project.description,
+      descriptionEn: project.descriptionEn,
+      image: project.image ?? '',
+      demoUrl: project.demoUrl ?? '',
+      codeUrl: project.codeUrl ?? '',
+      caseUrl: project.caseUrl ?? '',
+      featured: project.featured,
+      order: project.order,
+      technologies: project.technologies,
+    }
     : {
-        title: '',
-        titleEn: '',
-        slug: '',
-        description: '',
-        descriptionEn: '',
-        image: '',
-        demoUrl: '',
-        codeUrl: '',
-        caseUrl: '',
-        featured: false,
-        order: 0,
-        technologies: [] as string[],
-      }
+      title: '',
+      titleEn: '',
+      slug: '',
+      description: '',
+      descriptionEn: '',
+      image: '',
+      demoUrl: '',
+      codeUrl: '',
+      caseUrl: '',
+      featured: false,
+      order: 0,
+      technologies: [] as string[],
+    }
 
   return (
     <>

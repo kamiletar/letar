@@ -193,7 +193,7 @@ export function useFolderPlayer() {
     async (folderPath: string): Promise<boolean> => {
       return scanFolderInternal(folderPath)
     },
-    [scanFolderInternal]
+    [scanFolderInternal],
   )
 
   /**
@@ -206,7 +206,7 @@ export function useFolderPlayer() {
   const scanTracksForEpisodeInternal = async (
     folderPath: string,
     episode: FolderEpisode,
-    allVideos: FolderEpisode[]
+    allVideos: FolderEpisode[],
   ) => {
     if (!window.electronAPI) {
       return
@@ -254,14 +254,12 @@ export function useFolderPlayer() {
       // Для фильмов (episodeNumber === null) берём все дорожки без фильтрации
       const episodeNum = episode.episodeNumber
       const externalTracks: ExternalTracksInfo = {
-        audio:
-          episodeNum !== null
-            ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
-            : audioResult.audioTracks,
-        subtitles:
-          episodeNum !== null
-            ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
-            : subsResult.subtitles,
+        audio: episodeNum !== null
+          ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
+          : audioResult.audioTracks,
+        subtitles: episodeNum !== null
+          ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
+          : subsResult.subtitles,
         audioScanResult: audioResult,
         subtitleScanResult: subsResult,
       }
@@ -334,7 +332,7 @@ export function useFolderPlayer() {
 
       await scanTracksForEpisodeInternal(folderPath, episodes[index], [...episodes, ...bonusVideos])
     },
-    [state]
+    [state],
   )
 
   /**
@@ -356,7 +354,7 @@ export function useFolderPlayer() {
 
       await scanTracksForEpisodeInternal(folderPath, bonusVideos[index], [...episodes, ...bonusVideos])
     },
-    [state]
+    [state],
   )
 
   /**

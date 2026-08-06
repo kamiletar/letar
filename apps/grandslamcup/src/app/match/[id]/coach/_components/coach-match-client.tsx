@@ -18,8 +18,8 @@ import type { LineupStatus } from '@/generated/prisma'
 import { requestTimeoutAction, sendPlayerAction } from '../_actions/coach-match.action'
 import { JudgeRecusal } from './judge-recusal'
 import { MatchScoreReadonly } from './match-score-readonly'
-import { PlayerList, type PlayerLineupItem } from './player-list'
-import { RoundResults, type PerformanceResult } from './round-results'
+import { type PlayerLineupItem, PlayerList } from './player-list'
+import { type PerformanceResult, RoundResults } from './round-results'
 
 export interface CoachMatchData {
   id: string
@@ -92,10 +92,10 @@ export function CoachMatchClient({ match }: CoachMatchClientProps) {
     return myTeam.players.map((p) => {
       // Проверяем в каких таймах игрок выступал
       const playedHalf1 = performances.some(
-        (perf) => perf.teamSeasonId === match.coachTeamSeasonId && perf.half === 1 && perf.playerName === p.name
+        (perf) => perf.teamSeasonId === match.coachTeamSeasonId && perf.half === 1 && perf.playerName === p.name,
       )
       const playedHalf2 = performances.some(
-        (perf) => perf.teamSeasonId === match.coachTeamSeasonId && perf.half === 2 && perf.playerName === p.name
+        (perf) => perf.teamSeasonId === match.coachTeamSeasonId && perf.half === 2 && perf.playerName === p.name,
       )
       return {
         id: p.id,
@@ -115,15 +115,15 @@ export function CoachMatchClient({ match }: CoachMatchClientProps) {
     // Замена — это когда запасной (SUBSTITUTE/REPLACEMENT) выступил во 2-м тайме
     return performances.filter(
       (perf) =>
-        perf.teamSeasonId === match.coachTeamSeasonId &&
-        perf.half === 2 &&
-        myTeam.players.some((p) => p.name === perf.playerName && p.status === 'SUBSTITUTE')
+        perf.teamSeasonId === match.coachTeamSeasonId
+        && perf.half === 2
+        && myTeam.players.some((p) => p.name === perf.playerName && p.status === 'SUBSTITUTE'),
     ).length
   }, [performances, currentHalf, match.coachTeamSeasonId, myTeam.players])
 
   // Можно ли сейчас выпустить игрока
-  const canSendPlayer =
-    matchStatus === 'LIVE' && (matchState?.phase === 'IDLE' || matchState?.phase === 'ROUND_COMPLETE')
+  const canSendPlayer = matchStatus === 'LIVE'
+    && (matchState?.phase === 'IDLE' || matchState?.phase === 'ROUND_COMPLETE')
 
   const handleSendPlayer = async (playerId: string, playerName: string) => {
     const result = await sendPlayerAction(match.id, match.coachToken, playerId, playerName, teamName)

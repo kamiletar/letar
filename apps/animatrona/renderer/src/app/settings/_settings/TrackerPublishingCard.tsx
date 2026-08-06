@@ -15,12 +15,12 @@ import {
   Box,
   Button,
   Card,
-  Switch as ChakraSwitch,
   Flex,
   Heading,
   HStack,
   Icon,
   Input,
+  Switch as ChakraSwitch,
   Text,
   VStack,
 } from '@chakra-ui/react'

@@ -41,7 +41,7 @@ export function StepPerformerPick({ match, matchState }: StepPerformerPickProps)
 
   // Игроки которые уже выступали в текущем тайме (нельзя выбирать повторно в одном тайме)
   const playedInHalfIds = new Set(
-    match.performances.filter((p) => p.half === half && p.teamSeasonId === pickingTeam.id).map((p) => p.playerName) // по имени (id в performances нет)
+    match.performances.filter((p) => p.half === half && p.teamSeasonId === pickingTeam.id).map((p) => p.playerName), // по имени (id в performances нет)
   )
 
   const handlePick = useCallback(
@@ -55,7 +55,7 @@ export function StepPerformerPick({ match, matchState }: StepPerformerPickProps)
       }
       router.refresh()
     },
-    [match.id, pickingTeam.id, pickingTeam.name, router]
+    [match.id, pickingTeam.id, pickingTeam.name, router],
   )
 
   const handleStartPerformance = useCallback(async () => {
@@ -80,96 +80,98 @@ export function StepPerformerPick({ match, matchState }: StepPerformerPickProps)
         <Text color="fg.muted">{performerIndex === 0 ? 'Первый поэт пары' : 'Второй поэт пары'}</Text>
       </Box>
 
-      {currentPerf ? (
-        // Поэт уже выбран, ждём старта голосования
-        <Box bg="blue.subtle" p={6} borderRadius="xl" borderWidth="2px" borderColor="blue.solid">
-          <Text fontSize="sm" color="fg.muted" textAlign="center">
-            Готов к выступлению:
-          </Text>
-          <Heading size="2xl" textAlign="center" my={3}>
-            🎤 {currentPerf.playerName}
-          </Heading>
-          <Text textAlign="center" color="fg.muted" mb={4}>
-            {currentPerf.teamName}
-          </Text>
-          <Button
-            size="xl"
-            w="full"
-            colorPalette="blue"
-            onClick={handleStartPerformance}
-            loading={pending}
-            fontSize="lg"
-            py={7}
-          >
-            ▶ Начать выступление
-          </Button>
-          {error && (
-            <Text color="red.fg" fontSize="sm" textAlign="center" mt={2}>
-              {error}
+      {currentPerf
+        ? (
+          // Поэт уже выбран, ждём старта голосования
+          <Box bg="blue.subtle" p={6} borderRadius="xl" borderWidth="2px" borderColor="blue.solid">
+            <Text fontSize="sm" color="fg.muted" textAlign="center">
+              Готов к выступлению:
             </Text>
-          )}
-        </Box>
-      ) : (
-        // Ждём выбора от тренера / ручной выбор
-        <>
-          <Box
-            bg="yellow.subtle"
-            p={6}
-            borderRadius="xl"
-            textAlign="center"
-            borderWidth="2px"
-            borderColor="yellow.solid"
-          >
-            <Heading size="lg" mb={1}>
-              ⏳ Тренер команды {pickingTeam.name} выбирает поэта...
+            <Heading size="2xl" textAlign="center" my={3}>
+              🎤 {currentPerf.playerName}
             </Heading>
-            <Text fontSize="sm" color="fg.muted">
-              Тренер выбирает через свой интерфейс, либо вы можете выбрать вручную ниже.
+            <Text textAlign="center" color="fg.muted" mb={4}>
+              {currentPerf.teamName}
             </Text>
+            <Button
+              size="xl"
+              w="full"
+              colorPalette="blue"
+              onClick={handleStartPerformance}
+              loading={pending}
+              fontSize="lg"
+              py={7}
+            >
+              ▶ Начать выступление
+            </Button>
+            {error && (
+              <Text color="red.fg" fontSize="sm" textAlign="center" mt={2}>
+                {error}
+              </Text>
+            )}
           </Box>
+        )
+        : (
+          // Ждём выбора от тренера / ручной выбор
+          <>
+            <Box
+              bg="yellow.subtle"
+              p={6}
+              borderRadius="xl"
+              textAlign="center"
+              borderWidth="2px"
+              borderColor="yellow.solid"
+            >
+              <Heading size="lg" mb={1}>
+                ⏳ Тренер команды {pickingTeam.name} выбирает поэта...
+              </Heading>
+              <Text fontSize="sm" color="fg.muted">
+                Тренер выбирает через свой интерфейс, либо вы можете выбрать вручную ниже.
+              </Text>
+            </Box>
 
-          <Box>
-            <Text fontSize="sm" fontWeight="bold" mb={2}>
-              Ручной выбор ({pickingTeam.name}):
-            </Text>
-            <SimpleGrid columns={{ base: 2, sm: 3 }} gap={2}>
-              {pickingTeam.players.map((player) => {
-                const alreadyPlayed = playedInHalfIds.has(player.name)
-                return (
-                  <Button
-                    key={player.id}
-                    size="md"
-                    variant={alreadyPlayed ? 'ghost' : 'outline'}
-                    disabled={alreadyPlayed || pending}
-                    onClick={() => handlePick(player.id, player.name)}
-                    h="auto"
-                    py={3}
-                    whiteSpace="normal"
-                  >
-                    <VStack gap={0}>
-                      <LuUser size={14} />
-                      <Text fontSize="sm" lineClamp={2}>
-                        {player.name}
-                      </Text>
-                      {alreadyPlayed && (
-                        <Badge size="sm" colorPalette="gray">
-                          уже выступал
-                        </Badge>
-                      )}
-                    </VStack>
-                  </Button>
-                )
-              })}
-            </SimpleGrid>
-          </Box>
+            <Box>
+              <Text fontSize="sm" fontWeight="bold" mb={2}>
+                Ручной выбор ({pickingTeam.name}):
+              </Text>
+              <SimpleGrid columns={{ base: 2, sm: 3 }} gap={2}>
+                {pickingTeam.players.map((player) => {
+                  const alreadyPlayed = playedInHalfIds.has(player.name)
+                  return (
+                    <Button
+                      key={player.id}
+                      size="md"
+                      variant={alreadyPlayed ? 'ghost' : 'outline'}
+                      disabled={alreadyPlayed || pending}
+                      onClick={() => handlePick(player.id, player.name)}
+                      h="auto"
+                      py={3}
+                      whiteSpace="normal"
+                    >
+                      <VStack gap={0}>
+                        <LuUser size={14} />
+                        <Text fontSize="sm" lineClamp={2}>
+                          {player.name}
+                        </Text>
+                        {alreadyPlayed && (
+                          <Badge size="sm" colorPalette="gray">
+                            уже выступал
+                          </Badge>
+                        )}
+                      </VStack>
+                    </Button>
+                  )
+                })}
+              </SimpleGrid>
+            </Box>
 
-          {error && (
-            <Text color="red.fg" fontSize="sm" textAlign="center">
-              {error}
-            </Text>
-          )}
-        </>
-      )}
+            {error && (
+              <Text color="red.fg" fontSize="sm" textAlign="center">
+                {error}
+              </Text>
+            )}
+          </>
+        )}
     </VStack>
   )
 }

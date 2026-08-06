@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       parsed.data.severity,
       parsed.data.title,
       parsed.data.message,
-      parsed.data.metadata
+      parsed.data.metadata,
     )
 
     const settings = await getAlertSettings()
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     console.error('Error creating alert in /api/alerts:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

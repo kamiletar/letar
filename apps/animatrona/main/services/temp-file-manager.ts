@@ -43,7 +43,7 @@ export class TempFileManager {
     // Уникальная директория для этой сессии экспорта
     this.sessionDir = path.join(
       TempFileManager.BASE_TEMP_DIR,
-      `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     )
   }
 

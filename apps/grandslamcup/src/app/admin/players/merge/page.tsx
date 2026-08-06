@@ -93,7 +93,7 @@ export default function MergePlayersPage() {
       const q = search.toLowerCase()
       return allPlayers.filter((p) => p.id !== excludeId && p.name.toLowerCase().includes(q)).slice(0, 10)
     },
-    [allPlayers]
+    [allPlayers],
   )
 
   const sourceResults = filterPlayers(sourceSearch, targetId)
@@ -159,219 +159,232 @@ export default function MergePlayersPage() {
         <Heading size="lg">Объединение дублей</Heading>
       </HStack>
 
-      {loadingPlayers ? (
-        <Flex justify="center" py={12}>
-          <Spinner size="lg" />
-        </Flex>
-      ) : (
-        <>
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-            {/* Исходный профиль (будет удалён) */}
-            <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
-              <Heading size="sm" mb={3} color="red.fg">
-                Исходный профиль (будет удалён)
-              </Heading>
-              <Input
-                placeholder="Поиск по имени..."
-                value={sourceSearch}
-                onChange={(e) => {
-                  setSourceSearch(e.target.value)
-                  if (sourceId) {
-                    setSourceId(null)
-                  }
-                }}
-                mb={2}
-              />
-              {selectedSource ? (
-                <Box bg="red.subtle" borderRadius="md" p={3}>
-                  <Flex justify="space-between" align="center">
-                    <Box>
-                      <Text fontWeight="semibold">{selectedSource.name}</Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        {selectedSource.city?.name ?? 'Без города'} | {selectedSource._count.performances} выступлений |{' '}
-                        {selectedSource._count.playerTeamSeasons} команд
-                      </Text>
-                    </Box>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => {
-                        setSourceId(null)
-                        setSourceSearch('')
-                      }}
-                    >
-                      Сменить
-                    </Button>
-                  </Flex>
-                </Box>
-              ) : (
-                sourceSearch.trim() && (
-                  <VStack gap={1} align="stretch" maxH="200px" overflowY="auto">
-                    {sourceResults.length === 0 ? (
-                      <Text fontSize="sm" color="fg.muted">
-                        Ничего не найдено
-                      </Text>
-                    ) : (
-                      sourceResults.map((p) => (
-                        <Box
-                          key={p.id}
-                          px={3}
-                          py={2}
-                          borderRadius="md"
-                          cursor="pointer"
-                          _hover={{ bg: 'bg.subtle' }}
-                          onClick={() => {
-                            setSourceId(p.id)
-                            setSourceSearch(p.name)
-                          }}
-                        >
-                          <Text fontSize="sm" fontWeight="medium">
-                            {p.name}
-                          </Text>
+      {loadingPlayers
+        ? (
+          <Flex justify="center" py={12}>
+            <Spinner size="lg" />
+          </Flex>
+        )
+        : (
+          <>
+            <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
+              {/* Исходный профиль (будет удалён) */}
+              <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
+                <Heading size="sm" mb={3} color="red.fg">
+                  Исходный профиль (будет удалён)
+                </Heading>
+                <Input
+                  placeholder="Поиск по имени..."
+                  value={sourceSearch}
+                  onChange={(e) => {
+                    setSourceSearch(e.target.value)
+                    if (sourceId) {
+                      setSourceId(null)
+                    }
+                  }}
+                  mb={2}
+                />
+                {selectedSource
+                  ? (
+                    <Box bg="red.subtle" borderRadius="md" p={3}>
+                      <Flex justify="space-between" align="center">
+                        <Box>
+                          <Text fontWeight="semibold">{selectedSource.name}</Text>
                           <Text fontSize="xs" color="fg.muted">
-                            {p.city?.name ?? 'Без города'} | {p._count.performances} выступлений
+                            {selectedSource.city?.name ?? 'Без города'} | {selectedSource._count.performances}{' '}
+                            выступлений | {selectedSource._count.playerTeamSeasons} команд
                           </Text>
                         </Box>
-                      ))
-                    )}
-                  </VStack>
-                )
-              )}
-            </Box>
-
-            {/* Целевой профиль (останется) */}
-            <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
-              <Heading size="sm" mb={3} color="green.fg">
-                Целевой профиль (останется)
-              </Heading>
-              <Input
-                placeholder="Поиск по имени..."
-                value={targetSearch}
-                onChange={(e) => {
-                  setTargetSearch(e.target.value)
-                  if (targetId) {
-                    setTargetId(null)
-                  }
-                }}
-                mb={2}
-              />
-              {selectedTarget ? (
-                <Box bg="green.subtle" borderRadius="md" p={3}>
-                  <Flex justify="space-between" align="center">
-                    <Box>
-                      <Text fontWeight="semibold">{selectedTarget.name}</Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        {selectedTarget.city?.name ?? 'Без города'} | {selectedTarget._count.performances} выступлений |{' '}
-                        {selectedTarget._count.playerTeamSeasons} команд
-                      </Text>
-                    </Box>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => {
-                        setTargetId(null)
-                        setTargetSearch('')
-                      }}
-                    >
-                      Сменить
-                    </Button>
-                  </Flex>
-                </Box>
-              ) : (
-                targetSearch.trim() && (
-                  <VStack gap={1} align="stretch" maxH="200px" overflowY="auto">
-                    {targetResults.length === 0 ? (
-                      <Text fontSize="sm" color="fg.muted">
-                        Ничего не найдено
-                      </Text>
-                    ) : (
-                      targetResults.map((p) => (
-                        <Box
-                          key={p.id}
-                          px={3}
-                          py={2}
-                          borderRadius="md"
-                          cursor="pointer"
-                          _hover={{ bg: 'bg.subtle' }}
+                        <Button
+                          size="xs"
+                          variant="ghost"
                           onClick={() => {
-                            setTargetId(p.id)
-                            setTargetSearch(p.name)
+                            setSourceId(null)
+                            setSourceSearch('')
                           }}
                         >
-                          <Text fontSize="sm" fontWeight="medium">
-                            {p.name}
-                          </Text>
+                          Сменить
+                        </Button>
+                      </Flex>
+                    </Box>
+                  )
+                  : (
+                    sourceSearch.trim() && (
+                      <VStack gap={1} align="stretch" maxH="200px" overflowY="auto">
+                        {sourceResults.length === 0
+                          ? (
+                            <Text fontSize="sm" color="fg.muted">
+                              Ничего не найдено
+                            </Text>
+                          )
+                          : (
+                            sourceResults.map((p) => (
+                              <Box
+                                key={p.id}
+                                px={3}
+                                py={2}
+                                borderRadius="md"
+                                cursor="pointer"
+                                _hover={{ bg: 'bg.subtle' }}
+                                onClick={() => {
+                                  setSourceId(p.id)
+                                  setSourceSearch(p.name)
+                                }}
+                              >
+                                <Text fontSize="sm" fontWeight="medium">
+                                  {p.name}
+                                </Text>
+                                <Text fontSize="xs" color="fg.muted">
+                                  {p.city?.name ?? 'Без города'} | {p._count.performances} выступлений
+                                </Text>
+                              </Box>
+                            ))
+                          )}
+                      </VStack>
+                    )
+                  )}
+              </Box>
+
+              {/* Целевой профиль (останется) */}
+              <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
+                <Heading size="sm" mb={3} color="green.fg">
+                  Целевой профиль (останется)
+                </Heading>
+                <Input
+                  placeholder="Поиск по имени..."
+                  value={targetSearch}
+                  onChange={(e) => {
+                    setTargetSearch(e.target.value)
+                    if (targetId) {
+                      setTargetId(null)
+                    }
+                  }}
+                  mb={2}
+                />
+                {selectedTarget
+                  ? (
+                    <Box bg="green.subtle" borderRadius="md" p={3}>
+                      <Flex justify="space-between" align="center">
+                        <Box>
+                          <Text fontWeight="semibold">{selectedTarget.name}</Text>
                           <Text fontSize="xs" color="fg.muted">
-                            {p.city?.name ?? 'Без города'} | {p._count.performances} выступлений
+                            {selectedTarget.city?.name ?? 'Без города'} | {selectedTarget._count.performances}{' '}
+                            выступлений | {selectedTarget._count.playerTeamSeasons} команд
                           </Text>
                         </Box>
-                      ))
-                    )}
-                  </VStack>
-                )
-              )}
-            </Box>
-          </SimpleGrid>
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => {
+                            setTargetId(null)
+                            setTargetSearch('')
+                          }}
+                        >
+                          Сменить
+                        </Button>
+                      </Flex>
+                    </Box>
+                  )
+                  : (
+                    targetSearch.trim() && (
+                      <VStack gap={1} align="stretch" maxH="200px" overflowY="auto">
+                        {targetResults.length === 0
+                          ? (
+                            <Text fontSize="sm" color="fg.muted">
+                              Ничего не найдено
+                            </Text>
+                          )
+                          : (
+                            targetResults.map((p) => (
+                              <Box
+                                key={p.id}
+                                px={3}
+                                py={2}
+                                borderRadius="md"
+                                cursor="pointer"
+                                _hover={{ bg: 'bg.subtle' }}
+                                onClick={() => {
+                                  setTargetId(p.id)
+                                  setTargetSearch(p.name)
+                                }}
+                              >
+                                <Text fontSize="sm" fontWeight="medium">
+                                  {p.name}
+                                </Text>
+                                <Text fontSize="xs" color="fg.muted">
+                                  {p.city?.name ?? 'Без города'} | {p._count.performances} выступлений
+                                </Text>
+                              </Box>
+                            ))
+                          )}
+                      </VStack>
+                    )
+                  )}
+              </Box>
+            </SimpleGrid>
 
-          {/* Preview */}
-          {loadingPreview && (
-            <Flex justify="center" py={6}>
-              <Spinner />
-            </Flex>
-          )}
-
-          {preview && (
-            <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
-              <Heading size="sm" mb={3}>
-                Что будет перенесено
-              </Heading>
-              <Flex align="center" gap={3} mb={4} flexWrap="wrap">
-                <Badge colorPalette="red" size="lg">
-                  {preview.source.name}
-                </Badge>
-                <LuArrowRight size={20} />
-                <Badge colorPalette="green" size="lg">
-                  {preview.target.name}
-                </Badge>
+            {/* Preview */}
+            {loadingPreview && (
+              <Flex justify="center" py={6}>
+                <Spinner />
               </Flex>
-              <SimpleGrid columns={{ base: 2, md: 3 }} gap={3}>
-                <StatBox label="Выступления" value={preview.counts.performances} />
-                <StatBox label="Заявки на матчи" value={preview.counts.lineups} />
-                <StatBox label="Команды" value={preview.counts.teamSeasons} />
-                <StatBox label="Рейтинги" value={preview.counts.ratings} />
-                <StatBox label="Стихи" value={preview.counts.poems} />
-                <StatBox label="Дисквалификации" value={preview.counts.suspensions} />
-              </SimpleGrid>
+            )}
 
-              {preview.willTransferUser && (
-                <Box mt={3} p={3} bg="blue.subtle" borderRadius="md">
-                  <Text fontSize="sm" color="blue.fg">
-                    Привязка аккаунта будет перенесена на целевой профиль.
-                  </Text>
-                </Box>
-              )}
+            {preview && (
+              <Box bg="bg.panel" borderRadius="xl" p={5} borderWidth="1px" borderColor="border.muted">
+                <Heading size="sm" mb={3}>
+                  Что будет перенесено
+                </Heading>
+                <Flex align="center" gap={3} mb={4} flexWrap="wrap">
+                  <Badge colorPalette="red" size="lg">
+                    {preview.source.name}
+                  </Badge>
+                  <LuArrowRight size={20} />
+                  <Badge colorPalette="green" size="lg">
+                    {preview.target.name}
+                  </Badge>
+                </Flex>
+                <SimpleGrid columns={{ base: 2, md: 3 }} gap={3}>
+                  <StatBox label="Выступления" value={preview.counts.performances} />
+                  <StatBox label="Заявки на матчи" value={preview.counts.lineups} />
+                  <StatBox label="Команды" value={preview.counts.teamSeasons} />
+                  <StatBox label="Рейтинги" value={preview.counts.ratings} />
+                  <StatBox label="Стихи" value={preview.counts.poems} />
+                  <StatBox label="Дисквалификации" value={preview.counts.suspensions} />
+                </SimpleGrid>
 
-              {preview.userConflict && (
-                <Box mt={3} p={3} bg="yellow.subtle" borderRadius="md">
-                  <Flex gap={2} align="center">
-                    <LuTriangleAlert size={16} />
-                    <Text fontSize="sm" color="yellow.fg">
-                      Оба профиля привязаны к аккаунтам. Привязка исходного будет потеряна.
+                {preview.willTransferUser && (
+                  <Box mt={3} p={3} bg="blue.subtle" borderRadius="md">
+                    <Text fontSize="sm" color="blue.fg">
+                      Привязка аккаунта будет перенесена на целевой профиль.
                     </Text>
-                  </Flex>
-                </Box>
-              )}
+                  </Box>
+                )}
 
-              <Flex justify="flex-end" mt={4}>
-                <Button colorPalette="red" onClick={() => setConfirmOpen(true)}>
-                  <LuMerge size={16} />
-                  Объединить
-                </Button>
-              </Flex>
-            </Box>
-          )}
-        </>
-      )}
+                {preview.userConflict && (
+                  <Box mt={3} p={3} bg="yellow.subtle" borderRadius="md">
+                    <Flex gap={2} align="center">
+                      <LuTriangleAlert size={16} />
+                      <Text fontSize="sm" color="yellow.fg">
+                        Оба профиля привязаны к аккаунтам. Привязка исходного будет потеряна.
+                      </Text>
+                    </Flex>
+                  </Box>
+                )}
+
+                <Flex justify="flex-end" mt={4}>
+                  <Button
+                    colorPalette="red"
+                    onClick={() => setConfirmOpen(true)}
+                  >
+                    <LuMerge size={16} />
+                    Объединить
+                  </Button>
+                </Flex>
+              </Box>
+            )}
+          </>
+        )}
 
       {/* Диалог подтверждения */}
       <Dialog.Root open={confirmOpen} onOpenChange={(e) => !e.open && setConfirmOpen(false)}>
@@ -389,8 +402,8 @@ export default function MergePlayersPage() {
                       Это действие необратимо!
                     </Text>
                     <Text fontSize="sm" mt={1}>
-                      Профиль <strong>{preview?.source.name}</strong> будет удалён. Все его данные будут перенесены в
-                      профиль <strong>{preview?.target.name}</strong>.
+                      Профиль <strong>{preview?.source.name}</strong>{' '}
+                      будет удалён. Все его данные будут перенесены в профиль <strong>{preview?.target.name}</strong>.
                     </Text>
                   </Box>
                 </VStack>

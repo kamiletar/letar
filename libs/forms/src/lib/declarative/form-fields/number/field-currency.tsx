@@ -51,7 +51,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
         minimumFractionDigits: decimalScale,
         maximumFractionDigits: decimalScale,
       }),
-      [currency, currencyDisplay, decimalScale]
+      [currency, currencyDisplay, decimalScale],
     )
 
     return { formatOptions }

@@ -220,7 +220,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         },
       })
     },
-    [episode, selectedSubtitleTrackId, upsertProgress, updateAnime, playerRef]
+    [episode, selectedSubtitleTrackId, upsertProgress, updateAnime, playerRef],
   )
 
   // Обработчик изменения дорожки субтитров
@@ -272,7 +272,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         },
       })
     },
-    [episode, selectedAudioTrackId, upsertProgress, updateAnime, playerRef]
+    [episode, selectedAudioTrackId, upsertProgress, updateAnime, playerRef],
   )
 
   // Открыть редактор аудио дорожки
@@ -288,7 +288,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         })
       }
     },
-    [episode?.audioTracks]
+    [episode?.audioTracks],
   )
 
   // Открыть редактор дорожки субтитров
@@ -304,7 +304,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         })
       }
     },
-    [episode?.subtitleTracks]
+    [episode?.subtitleTracks],
   )
 
   // Сохранить изменения дорожки
@@ -322,7 +322,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         })
       }
     },
-    [editingTrack?.type, updateAudioTrack, updateSubtitleTrack]
+    [editingTrack?.type, updateAudioTrack, updateSubtitleTrack],
   )
 
   // Удалить дорожку
@@ -342,7 +342,7 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
         deleteSubtitleTrack({ where: { id } })
       }
     },
-    [editingTrack?.type, selectedAudioTrackId, selectedSubtitleTrackId, deleteAudioTrack, deleteSubtitleTrack]
+    [editingTrack?.type, selectedAudioTrackId, selectedSubtitleTrackId, deleteAudioTrack, deleteSubtitleTrack],
   )
 
   // Закрыть редактор дорожки

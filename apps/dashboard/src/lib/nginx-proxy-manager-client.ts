@@ -84,12 +84,12 @@ export async function getNpmClientByServerId(serverId?: string | null): Promise<
     client: getNpmClientForServer(server),
     server: hasNpm
       ? {
-          id: server.id,
-          name: server.name,
-          displayName: server.displayName,
-          npmUrl: server.npmUrl!,
-          npmEmail: server.npmEmail!,
-        }
+        id: server.id,
+        name: server.name,
+        displayName: server.displayName,
+        npmUrl: server.npmUrl!,
+        npmEmail: server.npmEmail!,
+      }
       : null,
     hasNpm,
   }

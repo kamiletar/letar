@@ -194,15 +194,17 @@ export function RosterAdminClient({ teamId: _teamId, teamName: _teamName, teamCi
                     </VStack>
                   </Table.Cell>
                   <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
-                    {p.hasUser ? (
-                      <Badge colorPalette="green" size="sm">
-                        Привязан
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm" variant="outline">
-                        —
-                      </Badge>
-                    )}
+                    {p.hasUser
+                      ? (
+                        <Badge colorPalette="green" size="sm">
+                          Привязан
+                        </Badge>
+                      )
+                      : (
+                        <Badge colorPalette="gray" size="sm" variant="outline">
+                          —
+                        </Badge>
+                      )}
                   </Table.Cell>
                   <Table.Cell>
                     <HStack gap={1}>

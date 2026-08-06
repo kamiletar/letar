@@ -162,9 +162,9 @@ export class RestoreTracksManager extends EventEmitter {
   /** Проверить, идёт ли обработка */
   isProcessing(): boolean {
     return (
-      this.runningIds.size > 0 ||
-      Array.from(this.tasks.values()).some((t) => t.status === 'queued') ||
-      this.fontTasks.some((ft) => ft.status === 'queued' || ft.status === 'running')
+      this.runningIds.size > 0
+      || Array.from(this.tasks.values()).some((t) => t.status === 'queued')
+      || this.fontTasks.some((ft) => ft.status === 'queued' || ft.status === 'running')
     )
   }
 
@@ -216,7 +216,7 @@ export class RestoreTracksManager extends EventEmitter {
 
     // Если все дорожки обработаны — шрифты
     const allTracksFinished = Array.from(this.tasks.values()).every(
-      (t) => t.status !== 'queued' && t.status !== 'running'
+      (t) => t.status !== 'queued' && t.status !== 'running',
     )
     if (allTracksFinished && !this.fontsProcessed && this.fontTasks.length > 0) {
       this.fontsProcessed = true
@@ -232,7 +232,7 @@ export class RestoreTracksManager extends EventEmitter {
   /** Проверка завершения всех задач */
   private checkCompletion(): void {
     const allTracksFinished = Array.from(this.tasks.values()).every(
-      (t) => t.status !== 'queued' && t.status !== 'running'
+      (t) => t.status !== 'queued' && t.status !== 'running',
     )
     const allFontsFinished = this.fontTasks.every((ft) => ft.status !== 'queued' && ft.status !== 'running')
 
@@ -307,7 +307,7 @@ export class RestoreTracksManager extends EventEmitter {
           task.progress = 10 + (progress.percent ?? 0) * 0.6
           task.lastProgressUpdate = Date.now()
           this.emitProgressThrottled()
-        }
+        },
       )
     } else {
       await copyFile(sourcePath, destPath)
@@ -373,7 +373,7 @@ export class RestoreTracksManager extends EventEmitter {
     const nextIndex = (Date.now() + Math.random() * 10000) | 0
     const destPath = path.join(
       episodeDir,
-      `subs_${trackInfo.isExternal ? 'ext' : 'donor'}_${nextIndex}_${lang}.${format}`
+      `subs_${trackInfo.isExternal ? 'ext' : 'donor'}_${nextIndex}_${lang}.${format}`,
     )
 
     // Создаём директорию эпизода если не существует (IPFS-first — локальные папки удаляются)
@@ -448,12 +448,12 @@ export class RestoreTracksManager extends EventEmitter {
       const newSubIds = Array.from(this.tasks.values())
         .filter(
           (t) =>
-            t.trackType === 'subtitle' &&
-            t.status === 'completed' &&
-            t.episodeId === fontTask.episodeId &&
-            t.resultDbId &&
+            t.trackType === 'subtitle'
+            && t.status === 'completed'
+            && t.episodeId === fontTask.episodeId
+            && t.resultDbId
             // Только ASS/SSA форматы нуждаются в шрифтах
-            (t.trackInfo.format === 'ass' || t.trackInfo.format === 'ssa')
+            && (t.trackInfo.format === 'ass' || t.trackInfo.format === 'ssa'),
         )
         .map((t) => t.resultDbId!)
 

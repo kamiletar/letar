@@ -254,7 +254,7 @@ export function formatDurationMinutes(seconds: number | undefined | null): strin
  */
 export function calculateCompressionRatio(
   inputSize: number | undefined,
-  outputSize: number | undefined
+  outputSize: number | undefined,
 ): number | undefined {
   if (!inputSize || !outputSize || inputSize === 0) {
     return undefined

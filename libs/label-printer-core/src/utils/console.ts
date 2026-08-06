@@ -73,10 +73,10 @@ export class Console {
     Console.printSeparator()
     console.log(
       chalk.bold(
-        `Статистика: напечатано ${chalk.green(stats.printed)} | ` +
-          `дубликатов ${chalk.yellow(stats.duplicates)} | ` +
-          `ошибок ${chalk.red(stats.errors)}`
-      )
+        `Статистика: напечатано ${chalk.green(stats.printed)} | `
+          + `дубликатов ${chalk.yellow(stats.duplicates)} | `
+          + `ошибок ${chalk.red(stats.errors)}`,
+      ),
     )
     Console.printSeparator()
   }

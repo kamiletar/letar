@@ -273,7 +273,7 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
         }
       }, debounceMs)
     },
-    [storageKey, debounceMs, isDialogOpen]
+    [storageKey, debounceMs, isDialogOpen],
   )
 
   // Clear saved data

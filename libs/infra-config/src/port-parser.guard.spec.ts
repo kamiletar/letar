@@ -55,7 +55,7 @@ const sources = Object.fromEntries(
   Object.entries(COPIES).map(([label, relativePath]) => [
     label,
     readFileSync(join(workspaceRoot, relativePath), 'utf-8'),
-  ])
+  ]),
 ) as Record<keyof typeof COPIES, string>
 
 describe('сверка парсера dev-портов между копиями', () => {
@@ -71,20 +71,20 @@ describe('сверка парсера dev-портов между копиями
     for (const { file, literal } of found) {
       expect(
         literal,
-        `\nВ ${file} не найдена константа ${name}.\n\n` +
-          'Либо её переименовали — поправь SHARED_PATTERNS в этом тесте,\n' +
-          'либо парсер переехал — поправь COPIES.\n'
+        `\nВ ${file} не найдена константа ${name}.\n\n`
+          + 'Либо её переименовали — поправь SHARED_PATTERNS в этом тесте,\n'
+          + 'либо парсер переехал — поправь COPIES.\n',
       ).toBeDefined()
     }
 
     const [first, second] = found
     expect(
       second?.literal,
-      `\n${name} разъехался между копиями парсера:\n\n` +
-        `  ${first?.file}\n    ${first?.literal}\n\n` +
-        `  ${second?.file}\n    ${second?.literal}\n\n` +
-        'Приведи обе копии к одному виду. Схлопнуть их в один модуль нельзя —\n' +
-        'причина в PLAN-INFRA.md §34.2 п.4 (Nx-плагин не может импортировать @letar/*).\n'
+      `\n${name} разъехался между копиями парсера:\n\n`
+        + `  ${first?.file}\n    ${first?.literal}\n\n`
+        + `  ${second?.file}\n    ${second?.literal}\n\n`
+        + 'Приведи обе копии к одному виду. Схлопнуть их в один модуль нельзя —\n'
+        + 'причина в PLAN-INFRA.md §34.2 п.4 (Nx-плагин не может импортировать @letar/*).\n',
     ).toBe(first?.literal)
   })
 })

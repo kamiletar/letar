@@ -105,7 +105,7 @@ async function main() {
           '-N',
           tunnelSshHost,
         ],
-        { detached: true, stdio: 'ignore' }
+        { detached: true, stdio: 'ignore' },
       ).unref()
 
       const ok = await waitForPort(tunnelLocalPort)

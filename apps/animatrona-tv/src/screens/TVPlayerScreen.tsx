@@ -179,7 +179,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       setCurrentTime(clampedPosition)
       showControlsTemporarily()
     },
-    [duration, showControlsTemporarily]
+    [duration, showControlsTemporarily],
   )
 
   /** Загрузка видео */
@@ -199,7 +199,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       playerRef.current?.play()
       setIsPlaying(true)
     },
-    [startTime, watchProgress.savedPosition, handleSeek]
+    [startTime, watchProgress.savedPosition, handleSeek],
   )
 
   /** Прогресс воспроизведения */
@@ -266,7 +266,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       }
       setShowAudioSelector(false)
     },
-    [episode]
+    [episode],
   )
 
   /** Выбор субтитров */
@@ -285,7 +285,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       }
       setShowSubtitleSelector(false)
     },
-    [episode]
+    [episode],
   )
 
   // Очистка таймера при размонтировании

@@ -23,7 +23,12 @@ export interface PinValidationConfig {
 }
 
 export type PinValidationError =
-  'NOT_FOUND' | 'INVALID_PIN' | 'PIN_EXPIRED' | 'TOO_MANY_ATTEMPTS' | 'USER_NOT_FOUND' | 'UNKNOWN_ERROR'
+  | 'NOT_FOUND'
+  | 'INVALID_PIN'
+  | 'PIN_EXPIRED'
+  | 'TOO_MANY_ATTEMPTS'
+  | 'USER_NOT_FOUND'
+  | 'UNKNOWN_ERROR'
 
 export type PinValidationResult = { success: true; token: string } | { success: false; error: PinValidationError }
 
@@ -86,7 +91,7 @@ export function createPinValidator(config: PinValidationConfig = {}) {
       identifier: string,
       pin: string,
       adapter: PinValidatorAdapter,
-      tokenGenerator: () => string
+      tokenGenerator: () => string,
     ): Promise<PinValidationResult> {
       try {
         // Находим токен верификации

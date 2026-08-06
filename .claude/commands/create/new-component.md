@@ -62,7 +62,7 @@ export { MyComponent } from './lib/my-component'
 import { MyComponent } from '@letar/ui'
 // или
 import { MyComponent } from '@/app/_components/my-component'
-;<MyComponent title="Hello" variant="outline" />
+<MyComponent title="Hello" variant="outline" />
 ```
 
 ## Паттерны Chakra UI v3

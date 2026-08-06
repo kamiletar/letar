@@ -39,7 +39,7 @@ async function readSubtitlesOctopusFiles(): Promise<DirEntry[]> {
         'animatrona',
         'renderer',
         'public',
-        'default.woff2'
+        'default.woff2',
       )
     } else {
       // Dev: файлы в node_modules/libass-wasm/dist/js/
@@ -180,7 +180,7 @@ export async function bundleAssets(
   outputDir: string,
   mode: WebPlayerResourceMode,
   selectedEpisodes: number[],
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
 ): Promise<void> {
   // Создаём основную директорию
   await fs.mkdir(outputDir, { recursive: true })
@@ -285,7 +285,7 @@ export async function bundleAssets(
 export async function buildDirectoryStructure(
   config: QueueExportConfig,
   selectedEpisodes: number[],
-  manifest: WebPlayerManifest
+  manifest: WebPlayerManifest,
 ): Promise<DirEntry[]> {
   const entries: DirEntry[] = []
 

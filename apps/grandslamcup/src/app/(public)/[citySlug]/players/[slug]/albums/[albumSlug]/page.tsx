@@ -85,19 +85,21 @@ export default async function AlbumPage({ params }: { params: Params }) {
           borderColor="whiteAlpha.100"
           flexShrink={0}
         >
-          {album.coverImage ? (
-            <Image
-              src={album.coverImage.startsWith('http') ? album.coverImage : `/api/files/${album.coverImage}`}
-              alt={album.title}
-              width={128}
-              height={128}
-              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-            />
-          ) : (
-            <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.400">
-              <LuBookOpen size={40} />
-            </Box>
-          )}
+          {album.coverImage
+            ? (
+              <Image
+                src={album.coverImage.startsWith('http') ? album.coverImage : `/api/files/${album.coverImage}`}
+                alt={album.title}
+                width={128}
+                height={128}
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+              />
+            )
+            : (
+              <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.400">
+                <LuBookOpen size={40} />
+              </Box>
+            )}
         </Box>
 
         <VStack align="start" gap={1} flex={1}>
@@ -113,12 +115,11 @@ export default async function AlbumPage({ params }: { params: Params }) {
             </Text>
           </Link>
           <Text fontSize="sm" color="fg.muted">
-            {album.albumPoems.length}{' '}
-            {album.albumPoems.length === 1
+            {album.albumPoems.length} {album.albumPoems.length === 1
               ? 'стихотворение'
               : album.albumPoems.length < 5
-                ? 'стихотворения'
-                : 'стихотворений'}
+              ? 'стихотворения'
+              : 'стихотворений'}
           </Text>
         </VStack>
       </HStack>

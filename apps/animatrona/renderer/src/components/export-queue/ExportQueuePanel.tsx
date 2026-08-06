@@ -95,11 +95,10 @@ function ExportTaskCard({
   const canCancel = task.status !== 'completed' && task.status !== 'cancelled'
 
   // Общий прогресс (fetch + encode)
-  const totalProgress =
-    task.progress.totalEpisodes > 0
-      ? ((task.progress.currentEpisode - 1) / task.progress.totalEpisodes) * 100 +
-        (task.progress.fetchProgress * 0.3 + task.progress.encodeProgress * 0.7) / task.progress.totalEpisodes
-      : 0
+  const totalProgress = task.progress.totalEpisodes > 0
+    ? ((task.progress.currentEpisode - 1) / task.progress.totalEpisodes) * 100
+      + (task.progress.fetchProgress * 0.3 + task.progress.encodeProgress * 0.7) / task.progress.totalEpisodes
+    : 0
 
   return (
     <Box p={3} borderWidth="1px" borderRadius="md" bg="bg.subtle" _hover={{ bg: 'bg.muted' }}>
@@ -188,7 +187,7 @@ export function ExportQueuePanel() {
   }
 
   const completedCount = tasks.filter(
-    (t) => t.status === 'completed' || t.status === 'cancelled' || t.status === 'failed'
+    (t) => t.status === 'completed' || t.status === 'cancelled' || t.status === 'failed',
   ).length
 
   return (
@@ -200,7 +199,8 @@ export function ExportQueuePanel() {
         justify="space-between"
         align="center"
         cursor="pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() =>
+          setIsExpanded(!isExpanded)}
         _hover={{ bg: 'bg.subtle' }}
       >
         <HStack>
@@ -246,9 +246,12 @@ export function ExportQueuePanel() {
                   key={task.id}
                   task={task}
                   onCancel={() => cancelTask(task.id)}
-                  onPause={() => pauseTask(task.id)}
-                  onResume={() => resumeTask(task.id)}
-                  onRetry={() => retryTask(task.id)}
+                  onPause={() =>
+                    pauseTask(task.id)}
+                  onResume={() =>
+                    resumeTask(task.id)}
+                  onRetry={() =>
+                    retryTask(task.id)}
                 />
               ))}
             </Stack>

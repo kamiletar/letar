@@ -355,8 +355,8 @@ async function main() {
       updated++
       affectedAnimeIds.add(ep.animeId)
       console.log(
-        `  ✅ ${ep.animeName} ep${ep.number}: ${ep.manifestCid.slice(0, 12)}... → ${newCid.slice(0, 12)}... ` +
-          `(audio: ${manifest.audioTracks.length}, subs: ${manifest.subtitleTracks.length})`
+        `  ✅ ${ep.animeName} ep${ep.number}: ${ep.manifestCid.slice(0, 12)}... → ${newCid.slice(0, 12)}... `
+          + `(audio: ${manifest.audioTracks.length}, subs: ${manifest.subtitleTracks.length})`,
       )
     } catch (e) {
       failed++
@@ -374,7 +374,7 @@ async function main() {
 
   if (affectedAnimeIds.size > 0) {
     console.log(
-      '\n⚠️  Перезапустите Animatrona Desktop и вызовите publisher:publish для обновления AnimeManifest и IPNS'
+      '\n⚠️  Перезапустите Animatrona Desktop и вызовите publisher:publish для обновления AnimeManifest и IPNS',
     )
   }
 

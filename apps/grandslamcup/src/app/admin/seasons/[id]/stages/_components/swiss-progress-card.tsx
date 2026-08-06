@@ -53,15 +53,17 @@ export function SwissProgressCard({ progress }: SwissProgressCardProps) {
             <Text fontWeight="bold" fontSize="md">
               Тур {progress.roundNumber}
             </Text>
-            {progress.allFinished ? (
-              <Badge colorPalette="green" size="sm">
-                Завершён
-              </Badge>
-            ) : (
-              <Badge colorPalette="blue" size="sm">
-                В процессе
-              </Badge>
-            )}
+            {progress.allFinished
+              ? (
+                <Badge colorPalette="green" size="sm">
+                  Завершён
+                </Badge>
+              )
+              : (
+                <Badge colorPalette="blue" size="sm">
+                  В процессе
+                </Badge>
+              )}
           </HStack>
           <Text fontSize="sm" color="fg.muted">
             {progress.finishedMatches} / {progress.totalMatches} матчей

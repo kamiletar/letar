@@ -135,7 +135,7 @@ async function createEpisodesForAnime(animeId: string, episodes: AnimeManifestEp
  */
 export async function syncAnimeEpisodes(
   animeId: string,
-  directoryCid: string
+  directoryCid: string,
 ): Promise<{ added: number; total: number }> {
   log.info('Синхронизация эпизодов из IPFS', { animeId, directoryCid })
 
@@ -214,7 +214,7 @@ export async function syncAnimeEpisodes(
  */
 export async function importAnimeFromManifest(
   inputCid: string,
-  options?: { pin?: boolean }
+  options?: { pin?: boolean },
 ): Promise<{ success: boolean; animeId?: string; animeName?: string; episodeCount?: number; error?: string }> {
   const pin = options?.pin ?? false
   try {

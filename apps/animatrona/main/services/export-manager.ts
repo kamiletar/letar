@@ -287,7 +287,7 @@ export class ExportManager extends EventEmitter {
     config: ExportConfig,
     episode: EpisodeExportData,
     index: number,
-    outputDir: string
+    outputDir: string,
   ): Promise<string> {
     // Генерируем имя файла
     const outputFileName = this.generateFileName(config, episode)
@@ -510,9 +510,9 @@ export class ExportManager extends EventEmitter {
    */
   private isSkippableError(error: string): boolean {
     return (
-      error.includes('Видеофайл не найден') ||
-      error.includes('Видео не мигрировано в IPFS') ||
-      error.includes('Нет выбранных аудиодорожек')
+      error.includes('Видеофайл не найден')
+      || error.includes('Видео не мигрировано в IPFS')
+      || error.includes('Нет выбранных аудиодорожек')
     )
   }
 
@@ -524,7 +524,7 @@ export class ExportManager extends EventEmitter {
     status: EpisodeExportProgress['status'],
     percent: number,
     error?: string,
-    outputPath?: string
+    outputPath?: string,
   ): void {
     if (this.progress.episodes[index]) {
       this.progress.episodes[index] = {

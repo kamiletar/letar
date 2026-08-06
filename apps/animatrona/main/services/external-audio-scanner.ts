@@ -127,7 +127,7 @@ interface MatchResult {
  */
 export function fuzzyMatchToVideo(
   audioFileName: string,
-  videoFiles: Array<{ path: string; episodeNumber: number }>
+  videoFiles: Array<{ path: string; episodeNumber: number }>,
 ): MatchResult | null {
   const audioBaseName = path.basename(audioFileName, path.extname(audioFileName)).toLowerCase()
 
@@ -251,11 +251,11 @@ export function detectLanguageFromFolder(folderName: string): string {
  * Получить информацию об аудиофайле через FFprobe
  */
 async function probeAudioFile(
-  filePath: string
+  filePath: string,
 ): Promise<{ codec: string; channels: number; bitrate: number; language: string }> {
   try {
     const { stdout } = await execAsync(
-      `ffprobe -v quiet -print_format json -show_streams -select_streams a:0 "${filePath}"`
+      `ffprobe -v quiet -print_format json -show_streams -select_streams a:0 "${filePath}"`,
     )
 
     const data = JSON.parse(stdout)
@@ -285,7 +285,7 @@ async function probeAudioFile(
  */
 export async function scanForExternalAudio(
   videoFolderPath: string,
-  videoFiles: Array<{ path: string; episodeNumber: number }>
+  videoFiles: Array<{ path: string; episodeNumber: number }>,
 ): Promise<ExternalAudioScanResult> {
   log.info('Scanning for external audio', { path: videoFolderPath, videoCount: videoFiles.length })
 
@@ -359,15 +359,16 @@ export async function scanForExternalAudio(
           // Структура: RUS Sound/[badPuss]/episode.mka → "badPuss"
           // Структура: Sounds/AniLibria/episode.mka    → "AniLibria" (без скобок — сам basename)
           const parentDir = path.dirname(audioPath)
-          const groupName =
-            parentDir !== audioDir ? extractGroupNameFromAudioDir(parentDir) || path.basename(parentDir) : topGroupName
+          const groupName = parentDir !== audioDir
+            ? extractGroupNameFromAudioDir(parentDir) || path.basename(parentDir)
+            : topGroupName
 
           // Приоритет языка: суффикс файла > метаданные FFprobe > имя папки
           const finalLanguage = matchResult.suffix?.lang
             ? normalizeLanguageCode(matchResult.suffix.lang)
             : audioInfo.language !== 'und'
-              ? audioInfo.language
-              : language
+            ? audioInfo.language
+            : language
           const titleFromFilename = extractTitleFromAudioFilename(audioFileName)
           const finalTitle = matchResult.suffix?.group || titleFromFilename || groupName
           const finalGroupName = matchResult.suffix?.group || groupName

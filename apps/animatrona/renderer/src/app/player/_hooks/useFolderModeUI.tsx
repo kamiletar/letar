@@ -191,8 +191,9 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
   // === Текущий субтитр ===
 
   /** Текущий выбранный субтитр (только внешние пока поддерживаются) */
-  const currentSubtitleTrack =
-    selectedSubtitleIndex !== null ? folderPlayer.externalTracks.subtitles[selectedSubtitleIndex] : null
+  const currentSubtitleTrack = selectedSubtitleIndex !== null
+    ? folderPlayer.externalTracks.subtitles[selectedSubtitleIndex]
+    : null
 
   // Конвертируем пути в media:// URL (file:// заблокирован Electron)
   const currentSubtitlePath = currentSubtitleTrack?.filePath
@@ -267,7 +268,7 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
       resetTrackSelection()
       folderPlayer.goToEpisode(index)
     },
-    [folderPlayer, saveProgressBeforeSwitch, resetTrackSelection]
+    [folderPlayer, saveProgressBeforeSwitch, resetTrackSelection],
   )
 
   /** Переход к бонусу */
@@ -277,7 +278,7 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
       resetTrackSelection()
       folderPlayer.goToBonus(index)
     },
-    [folderPlayer, saveProgressBeforeSwitch, resetTrackSelection]
+    [folderPlayer, saveProgressBeforeSwitch, resetTrackSelection],
   )
 
   /** Предыдущий эпизод */

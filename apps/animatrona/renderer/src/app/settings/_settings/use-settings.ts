@@ -144,7 +144,7 @@ export function useSettings() {
         update: { [field]: value },
       })
     },
-    [upsertSettings]
+    [upsertSettings],
   )
 
   // Сохранение с обновлением трея
@@ -153,7 +153,7 @@ export function useSettings() {
       handleSave(field, value)
       window.electronAPI?.tray.updateSettings({ [field]: value })
     },
-    [handleSave]
+    [handleSave],
   )
 
   return {

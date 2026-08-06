@@ -131,7 +131,7 @@ export async function getCombinedSystemMetrics(hours: number): Promise<SystemMet
  */
 export function formatSystemMetricsForChart(
   points: SystemMetricPoint[],
-  hours: number
+  hours: number,
 ): {
   cpu: Array<{ time: string; value: number; timestamp: number }>
   memory: Array<{ time: string; value: number; timestamp: number }>

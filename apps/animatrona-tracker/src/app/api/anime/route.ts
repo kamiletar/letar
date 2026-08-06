@@ -34,7 +34,7 @@ import { z } from 'zod/v4'
 async function saveAnimeRelations(
   animeId: string,
   manifest: import('@letar/animatrona-types').AnimeManifest,
-  shikimoriId: number | null | undefined
+  shikimoriId: number | null | undefined,
 ) {
   const relations = await resolveRelations(manifest, shikimoriId)
   if (relations.length === 0) {
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json(
       { error: 'Unauthorized. Требуется API Key в заголовке Authorization: Bearer <key>' },
-      { status: 401 }
+      { status: 401 },
     )
   }
 
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
             episodeCount: metadata.episodes.length,
           },
         },
-        { status: 200 }
+        { status: 200 },
       )
     }
 
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
               replaced: true,
             },
           },
-          { status: 200 }
+          { status: 200 },
         )
       }
 
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
           replacesAnimeId: replacesAnimeId ?? null,
         },
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
     console.error('Ошибка публикации аниме:', error)
@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
     if (prismaError.code === 'P2004' || prismaError.message?.includes('denied')) {
       return NextResponse.json(
         { error: 'Нет прав для обновления этого аниме. Возможно, оно загружено другим пользователем.' },
-        { status: 403 }
+        { status: 403 },
       )
     }
 
@@ -391,8 +391,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       db.anime.count({ where }),
-    ])
-  )
+    ]))
 
   return NextResponse.json(
     {
@@ -413,6 +412,6 @@ export async function GET(request: NextRequest) {
         // Кэширование публичного каталога — CDN 60 сек, stale 5 мин
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
-    }
+    },
   )
 }

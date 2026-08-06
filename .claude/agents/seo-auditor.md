@@ -68,7 +68,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
 ```tsx
 import { JsonLd } from '@/app/_components/json-ld'
-;<JsonLd
+<JsonLd
   data={{
     '@context': 'https://schema.org',
     '@type': 'Product',

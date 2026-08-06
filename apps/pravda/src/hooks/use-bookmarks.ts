@@ -98,7 +98,7 @@ export function useBookmarks() {
   const bookmarks = useSyncExternalStore(
     subscribe,
     getBookmarks,
-    () => [] // SSR fallback
+    () => [], // SSR fallback
   )
 
   /**
@@ -131,7 +131,7 @@ export function useBookmarks() {
     (id: string) => {
       return bookmarks.some((b) => b.id === id)
     },
-    [bookmarks]
+    [bookmarks],
   )
 
   /**
@@ -145,7 +145,7 @@ export function useBookmarks() {
         addBookmark(bookmark)
       }
     },
-    [isBookmarked, removeBookmark, addBookmark]
+    [isBookmarked, removeBookmark, addBookmark],
   )
 
   /**

@@ -73,25 +73,25 @@ export function registerHistoryHandlers(): void {
   // Получить записи с фильтром
   ipcMain.handle(
     'history:get',
-    createValidatedHandler(historyFilterSchema.optional(), (filter?: ImportHistoryFilter) => getHistory(filter))
+    createValidatedHandler(historyFilterSchema.optional(), (filter?: ImportHistoryFilter) => getHistory(filter)),
   )
 
   // Получить запись по ID
   ipcMain.handle(
     'history:getById',
-    createValidatedHandler(idSchema, (id: string) => getHistoryById(id))
+    createValidatedHandler(idSchema, (id: string) => getHistoryById(id)),
   )
 
   // Добавить запись
   ipcMain.handle(
     'history:add',
-    createValidatedHandler(historyCreateSchema, (data: ImportHistoryCreateData) => addHistoryEntry(data))
+    createValidatedHandler(historyCreateSchema, (data: ImportHistoryCreateData) => addHistoryEntry(data)),
   )
 
   // Удалить запись
   ipcMain.handle(
     'history:delete',
-    createValidatedHandler(idSchema, (id: string) => deleteHistoryEntry(id))
+    createValidatedHandler(idSchema, (id: string) => deleteHistoryEntry(id)),
   )
 
   // Очистить историю

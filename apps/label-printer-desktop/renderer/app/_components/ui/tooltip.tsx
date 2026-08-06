@@ -1,6 +1,6 @@
 'use client'
 
-import { Tooltip as ChakraTooltip, Portal, type TooltipRootProps } from '@chakra-ui/react'
+import { Portal, Tooltip as ChakraTooltip, type TooltipRootProps } from '@chakra-ui/react'
 import { forwardRef, type ReactNode, type RefObject } from 'react'
 
 export interface TooltipProps extends TooltipRootProps {

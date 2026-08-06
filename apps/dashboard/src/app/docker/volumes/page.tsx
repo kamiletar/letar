@@ -134,60 +134,62 @@ export default function VolumesPage() {
             <Heading size="md" mb="4">
               Docker Volumes
             </Heading>
-            {volumes.length > 0 ? (
-              <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-                <Table.Root size="sm">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Name</Table.ColumnHeader>
-                      <Table.ColumnHeader>Driver</Table.ColumnHeader>
-                      <Table.ColumnHeader>Size</Table.ColumnHeader>
-                      <Table.ColumnHeader>Refs</Table.ColumnHeader>
-                      <Table.ColumnHeader>Scope</Table.ColumnHeader>
-                      <Table.ColumnHeader>Created</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {volumes.map((volume) => (
-                      <Table.Row key={volume.Name}>
-                        <Table.Cell>
-                          <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate>
-                            {volume.Name}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette="blue" size="sm">
-                            {volume.Driver}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          {volume.UsageData?.Size !== undefined && volume.UsageData.Size >= 0
-                            ? formatBytes(volume.UsageData.Size)
-                            : 'N/A'}
-                        </Table.Cell>
-                        <Table.Cell>
-                          {volume.UsageData?.RefCount !== undefined ? volume.UsageData.RefCount : 'N/A'}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={volume.Scope === 'local' ? 'green' : 'purple'} size="sm">
-                            {volume.Scope}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="sm" color="fg.muted">
-                            {formatDateTime(volume.CreatedAt)}
-                          </Text>
-                        </Table.Cell>
+            {volumes.length > 0
+              ? (
+                <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+                  <Table.Root size="sm">
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Name</Table.ColumnHeader>
+                        <Table.ColumnHeader>Driver</Table.ColumnHeader>
+                        <Table.ColumnHeader>Size</Table.ColumnHeader>
+                        <Table.ColumnHeader>Refs</Table.ColumnHeader>
+                        <Table.ColumnHeader>Scope</Table.ColumnHeader>
+                        <Table.ColumnHeader>Created</Table.ColumnHeader>
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              </Box>
-            ) : (
-              <Box textAlign="center" py="8" borderWidth="1px" borderRadius="lg">
-                <Text color="fg.muted">No Docker volumes found</Text>
-              </Box>
-            )}
+                    </Table.Header>
+                    <Table.Body>
+                      {volumes.map((volume) => (
+                        <Table.Row key={volume.Name}>
+                          <Table.Cell>
+                            <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate>
+                              {volume.Name}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette="blue" size="sm">
+                              {volume.Driver}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {volume.UsageData?.Size !== undefined && volume.UsageData.Size >= 0
+                              ? formatBytes(volume.UsageData.Size)
+                              : 'N/A'}
+                          </Table.Cell>
+                          <Table.Cell>
+                            {volume.UsageData?.RefCount !== undefined ? volume.UsageData.RefCount : 'N/A'}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={volume.Scope === 'local' ? 'green' : 'purple'} size="sm">
+                              {volume.Scope}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text fontSize="sm" color="fg.muted">
+                              {formatDateTime(volume.CreatedAt)}
+                            </Text>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
+                </Box>
+              )
+              : (
+                <Box textAlign="center" py="8" borderWidth="1px" borderRadius="lg">
+                  <Text color="fg.muted">No Docker volumes found</Text>
+                </Box>
+              )}
           </Box>
 
           {/* Bind Mounts Table */}
@@ -195,56 +197,58 @@ export default function VolumesPage() {
             <Heading size="md" mb="4">
               Bind Mounts
             </Heading>
-            {bindMounts.length > 0 ? (
-              <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-                <Table.Root size="sm">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Host Path</Table.ColumnHeader>
-                      <Table.ColumnHeader>Container Path</Table.ColumnHeader>
-                      <Table.ColumnHeader>Container</Table.ColumnHeader>
-                      <Table.ColumnHeader>Mode</Table.ColumnHeader>
-                      <Table.ColumnHeader>Status</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {bindMounts.map((mount, index) => (
-                      <Table.Row key={`${mount.ContainerId}-${mount.Destination}-${index}`}>
-                        <Table.Cell>
-                          <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate title={mount.Source}>
-                            {mount.Source}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate title={mount.Destination}>
-                            {mount.Destination}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {mount.ContainerName}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={mount.RW ? 'green' : 'orange'} size="sm">
-                            {mount.RW ? 'rw' : 'ro'}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={mount.ContainerState === 'running' ? 'green' : 'gray'} size="sm">
-                            {mount.ContainerState}
-                          </Badge>
-                        </Table.Cell>
+            {bindMounts.length > 0
+              ? (
+                <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+                  <Table.Root size="sm">
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Host Path</Table.ColumnHeader>
+                        <Table.ColumnHeader>Container Path</Table.ColumnHeader>
+                        <Table.ColumnHeader>Container</Table.ColumnHeader>
+                        <Table.ColumnHeader>Mode</Table.ColumnHeader>
+                        <Table.ColumnHeader>Status</Table.ColumnHeader>
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              </Box>
-            ) : (
-              <Box textAlign="center" py="8" borderWidth="1px" borderRadius="lg">
-                <Text color="fg.muted">No bind mounts found</Text>
-              </Box>
-            )}
+                    </Table.Header>
+                    <Table.Body>
+                      {bindMounts.map((mount, index) => (
+                        <Table.Row key={`${mount.ContainerId}-${mount.Destination}-${index}`}>
+                          <Table.Cell>
+                            <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate title={mount.Source}>
+                              {mount.Source}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text fontFamily="mono" fontSize="sm" maxW="300px" truncate title={mount.Destination}>
+                              {mount.Destination}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {mount.ContainerName}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={mount.RW ? 'green' : 'orange'} size="sm">
+                              {mount.RW ? 'rw' : 'ro'}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={mount.ContainerState === 'running' ? 'green' : 'gray'} size="sm">
+                              {mount.ContainerState}
+                            </Badge>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
+                </Box>
+              )
+              : (
+                <Box textAlign="center" py="8" borderWidth="1px" borderRadius="lg">
+                  <Text color="fg.muted">No bind mounts found</Text>
+                </Box>
+              )}
           </Box>
         </VStack>
       </Box>

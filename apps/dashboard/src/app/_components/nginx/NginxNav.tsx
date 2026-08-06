@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Link as ChakraLink, HStack } from '@chakra-ui/react'
+import { Box, HStack, Link as ChakraLink } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 

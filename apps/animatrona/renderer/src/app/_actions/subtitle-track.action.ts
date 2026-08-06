@@ -21,7 +21,7 @@ export async function findManySubtitleTracks(args?: Prisma.SubtitleTrackFindMany
  */
 export async function findUniqueSubtitleTrack(
   id: string,
-  include?: Prisma.SubtitleTrackInclude
+  include?: Prisma.SubtitleTrackInclude,
 ): Promise<SubtitleTrack | null> {
   return prisma.subtitleTrack.findUnique({
     where: { id },
@@ -42,7 +42,7 @@ export async function createSubtitleTrack(data: Prisma.SubtitleTrackUncheckedCre
  * Создать несколько субтитров
  */
 export async function createManySubtitleTracks(
-  data: Prisma.SubtitleTrackCreateManyInput[]
+  data: Prisma.SubtitleTrackCreateManyInput[],
 ): Promise<{ count: number }> {
   return prisma.subtitleTrack.createMany({ data })
 }
@@ -113,7 +113,7 @@ export async function batchDeleteSubtitleTracks(trackIds: string[]): Promise<{ c
  */
 export async function batchUpdateSubtitleTracks(
   trackIds: string[],
-  data: { language?: string; dubGroup?: string | null }
+  data: { language?: string; dubGroup?: string | null },
 ): Promise<{ count: number }> {
   return prisma.subtitleTrack.updateMany({
     where: { id: { in: trackIds } },

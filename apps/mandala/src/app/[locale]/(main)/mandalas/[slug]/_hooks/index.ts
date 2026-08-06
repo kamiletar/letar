@@ -8,21 +8,21 @@ export { getVariantStyles, useVariantStyles, type VariantStyles, type ViewerVari
 
 // Canvas эффекты
 export {
-  useCanvasEffect,
   type CanvasSize,
+  useCanvasEffect,
   type UseCanvasEffectOptions,
   type UseCanvasEffectProps,
 } from './use-canvas-effect'
 
 // Аудио
-export { useAudioAnalyzer, type AudioAnalyzerData } from './use-audio-analyzer'
+export { type AudioAnalyzerData, useAudioAnalyzer } from './use-audio-analyzer'
 export { useAudioKeyboardShortcuts } from './use-audio-keyboard-shortcuts'
-export { useAudioPlayback, type PlaylistItem } from './use-audio-playback'
+export { type PlaylistItem, useAudioPlayback } from './use-audio-playback'
 export { useAudioSyncedEffects } from './use-audio-synced-effects'
 export { useCustomAudioTracks } from './use-custom-audio-tracks'
 
 // Визуальные эффекты
-export { useBreathingScale, type BreathingMode } from './use-breathing-scale'
+export { type BreathingMode, useBreathingScale } from './use-breathing-scale'
 export { useHueRotateEffect } from './use-hue-rotate-effect'
 
 // Управление

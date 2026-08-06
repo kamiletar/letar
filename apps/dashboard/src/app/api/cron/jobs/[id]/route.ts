@@ -29,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 },
     )
   }
 }
@@ -67,7 +67,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 },
     )
   }
 }

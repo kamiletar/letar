@@ -34,11 +34,12 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
 
   // Суммируем прогресс всех активных дорожек для общего процента
   const activeTracks = progress.tracks.filter(
-    (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading'
+    (t) => t.status === 'downloading' || t.status === 'transcoding' || t.status === 'uploading',
   )
   const activeProgress = activeTracks.reduce((sum, t) => sum + t.percent / 100, 0)
-  const overallPercent =
-    progress.totalTracks > 0 ? ((progress.completedTracks + activeProgress) / progress.totalTracks) * 100 : 0
+  const overallPercent = progress.totalTracks > 0
+    ? ((progress.completedTracks + activeProgress) / progress.totalTracks) * 100
+    : 0
 
   return (
     <>
@@ -87,16 +88,13 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
                   justify="space-between"
                   align="center"
                   p={2}
-                  bg={
-                    track.status === 'transcoding' || track.status === 'downloading' || track.status === 'uploading'
-                      ? 'purple.subtle'
-                      : 'bg.subtle'
-                  }
-                  color={
-                    track.status === 'transcoding' || track.status === 'downloading' || track.status === 'uploading'
-                      ? 'purple.fg'
-                      : undefined
-                  }
+                  bg={track.status === 'transcoding' || track.status === 'downloading' || track.status === 'uploading'
+                    ? 'purple.subtle'
+                    : 'bg.subtle'}
+                  color={track.status === 'transcoding' || track.status === 'downloading'
+                      || track.status === 'uploading'
+                    ? 'purple.fg'
+                    : undefined}
                   borderRadius="md"
                 >
                   <Text fontSize="sm">
@@ -104,9 +102,9 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
                   </Text>
                   <HStack gap={2}>
                     {track.status === 'pending' && <Badge colorPalette="gray">Ожидание</Badge>}
-                    {(track.status === 'downloading' ||
-                      track.status === 'transcoding' ||
-                      track.status === 'uploading') && (
+                    {(track.status === 'downloading'
+                      || track.status === 'transcoding'
+                      || track.status === 'uploading') && (
                       <Badge colorPalette="purple">{Math.round(track.percent)}%</Badge>
                     )}
                     {track.status === 'done' && (

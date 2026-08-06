@@ -156,33 +156,35 @@ export default function SubscriptionLibraryPage({ params }: SubscriptionPageProp
         </HStack>
 
         {/* Содержимое */}
-        {!library ? (
-          <VStack py={8} gap={4}>
-            <Text color="fg.subtle">Нет данных — нажмите «Обновить» для загрузки библиотеки через IPNS</Text>
-            <Button colorPalette="purple" onClick={() => void handleRefresh()} loading={isRefreshing}>
-              <Icon as={LuRefreshCw} />
-              Обновить
-            </Button>
-          </VStack>
-        ) : (
-          <Grid
-            templateColumns={{
-              base: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-              xl: 'repeat(4, 1fr)',
-            }}
-            gap={4}
-          >
-            {library.animes.map((anime, idx) => (
-              <PublishedAnimeCard
-                key={idx}
-                anime={anime}
-                onImport={handleImport}
-                isImporting={importingCid === anime.directoryCid}
-              />
-            ))}
-          </Grid>
-        )}
+        {!library
+          ? (
+            <VStack py={8} gap={4}>
+              <Text color="fg.subtle">Нет данных — нажмите «Обновить» для загрузки библиотеки через IPNS</Text>
+              <Button colorPalette="purple" onClick={() => void handleRefresh()} loading={isRefreshing}>
+                <Icon as={LuRefreshCw} />
+                Обновить
+              </Button>
+            </VStack>
+          )
+          : (
+            <Grid
+              templateColumns={{
+                base: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                xl: 'repeat(4, 1fr)',
+              }}
+              gap={4}
+            >
+              {library.animes.map((anime, idx) => (
+                <PublishedAnimeCard
+                  key={idx}
+                  anime={anime}
+                  onImport={handleImport}
+                  isImporting={importingCid === anime.directoryCid}
+                />
+              ))}
+            </Grid>
+          )}
       </Box>
     </Box>
   )
@@ -202,13 +204,13 @@ function PublishedAnimeCard({ anime, onImport, isImporting }: PublishedAnimeCard
     <Box bg="bg.subtle" borderRadius="lg" overflow="hidden" borderWidth="1px" borderColor="border.subtle">
       {/* Постер */}
       <Box position="relative" aspectRatio="2/3" bg="bg.muted">
-        {posterUrl ? (
-          <Image src={posterUrl} alt={anime.name} w="full" h="full" objectFit="cover" />
-        ) : (
-          <VStack justify="center" h="full" color="fg.subtle">
-            <Text fontSize="xs">Нет постера</Text>
-          </VStack>
-        )}
+        {posterUrl
+          ? <Image src={posterUrl} alt={anime.name} w="full" h="full" objectFit="cover" />
+          : (
+            <VStack justify="center" h="full" color="fg.subtle">
+              <Text fontSize="xs">Нет постера</Text>
+            </VStack>
+          )}
       </Box>
 
       {/* Информация */}

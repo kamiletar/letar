@@ -27,7 +27,7 @@ export async function upsertDiscoverWatchProgress(
     posterCid?: string | null
     trackerAnimeId?: string | null
     directoryCid?: string | null
-  }
+  },
 ): Promise<DiscoverWatchProgress> {
   return withDbRetry(() =>
     prisma.discoverWatchProgress.upsert({
@@ -72,7 +72,7 @@ export async function upsertDiscoverWatchProgress(
  */
 export async function findDiscoverWatchProgress(
   shikimoriId: number,
-  episodeNumber: number
+  episodeNumber: number,
 ): Promise<DiscoverWatchProgress | null> {
   return prisma.discoverWatchProgress.findUnique({
     where: {

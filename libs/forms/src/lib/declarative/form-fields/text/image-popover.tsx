@@ -123,7 +123,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
         }
       }
     },
-    [editor, config, maxSize]
+    [editor, config, maxSize],
   )
 
   /**
@@ -138,7 +138,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
       // Reset input for re-selecting the same file
       e.target.value = ''
     },
-    [handleUpload]
+    [handleUpload],
   )
 
   /**
@@ -154,7 +154,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
         handleUpload(file)
       }
     },
-    [handleUpload]
+    [handleUpload],
   )
 
   /**

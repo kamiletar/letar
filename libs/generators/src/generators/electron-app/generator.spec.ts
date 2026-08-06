@@ -10,7 +10,7 @@ function writeRootPackageJson(tree: Tree, deps: Record<string, string> = {}, dev
       name: '@letar/source',
       dependencies: deps,
       devDependencies: devDeps,
-    })
+    }),
   )
 }
 
@@ -35,31 +35,33 @@ describe('electron-app generator', () => {
   it('создаёт полный набор файлов приложения', async () => {
     await electronAppGenerator(tree, { name: 'my-app' })
 
-    for (const file of [
-      'apps/my-app/main/background.ts',
-      'apps/my-app/main/preload.ts',
-      'apps/my-app/main/ipc/index.ts',
-      'apps/my-app/main/ipc/app.handlers.ts',
-      'apps/my-app/main/webpack.config.js',
-      'apps/my-app/renderer/app/page.tsx',
-      'apps/my-app/renderer/app/layout.tsx',
-      'apps/my-app/renderer/app/_components/providers.tsx',
-      'apps/my-app/renderer/types/electron.d.ts',
-      'apps/my-app/renderer/next.config.js',
-      'apps/my-app/renderer/tsconfig.json',
-      'apps/my-app/resources/icon.svg',
-      'apps/my-app/scripts/dev.js',
-      'apps/my-app/scripts/generate-icons.mjs',
-      'apps/my-app/package.json',
-      'apps/my-app/project.json',
-      'apps/my-app/tsconfig.json',
-      'apps/my-app/electron-builder.yml',
-      'apps/my-app/nextron.config.js',
-      'apps/my-app/.gitignore',
-      'apps/my-app/README.md',
-      'apps/my-app/PLAN.md',
-      'apps/my-app/PLAN_TESTING.md',
-    ]) {
+    for (
+      const file of [
+        'apps/my-app/main/background.ts',
+        'apps/my-app/main/preload.ts',
+        'apps/my-app/main/ipc/index.ts',
+        'apps/my-app/main/ipc/app.handlers.ts',
+        'apps/my-app/main/webpack.config.js',
+        'apps/my-app/renderer/app/page.tsx',
+        'apps/my-app/renderer/app/layout.tsx',
+        'apps/my-app/renderer/app/_components/providers.tsx',
+        'apps/my-app/renderer/types/electron.d.ts',
+        'apps/my-app/renderer/next.config.js',
+        'apps/my-app/renderer/tsconfig.json',
+        'apps/my-app/resources/icon.svg',
+        'apps/my-app/scripts/dev.js',
+        'apps/my-app/scripts/generate-icons.mjs',
+        'apps/my-app/package.json',
+        'apps/my-app/project.json',
+        'apps/my-app/tsconfig.json',
+        'apps/my-app/electron-builder.yml',
+        'apps/my-app/nextron.config.js',
+        'apps/my-app/.gitignore',
+        'apps/my-app/README.md',
+        'apps/my-app/PLAN.md',
+        'apps/my-app/PLAN_TESTING.md',
+      ]
+    ) {
       expect(tree.exists(file)).toBe(true)
     }
   })

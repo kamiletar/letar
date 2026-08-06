@@ -234,7 +234,7 @@ export function useFederation() {
         return null
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const removeTracker = useCallback(
@@ -255,7 +255,7 @@ export function useFederation() {
         return false
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const refreshTracker = useCallback(
@@ -274,7 +274,7 @@ export function useFederation() {
         return false
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const setTrustLevel = useCallback(
@@ -295,7 +295,7 @@ export function useFederation() {
         return false
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const blockTracker = useCallback(
@@ -314,7 +314,7 @@ export function useFederation() {
         return false
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const unblockTracker = useCallback(
@@ -333,7 +333,7 @@ export function useFederation() {
         return false
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   // ============================================================================
@@ -376,7 +376,7 @@ export function useFederation() {
         return null
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   const syncAll = useCallback(
@@ -412,7 +412,7 @@ export function useFederation() {
         return null
       }
     },
-    [loadTrackers]
+    [loadTrackers],
   )
 
   // ============================================================================

@@ -44,7 +44,7 @@ export interface LabelTemplateProps {
  */
 export const LabelTemplate = forwardRef<HTMLDivElement, LabelTemplateProps>(function LabelTemplate(
   { data, width = 685, height = 461 },
-  ref
+  ref,
 ) {
   const { product, dataMatrixBase64, gtinBarcodeBase64 } = data
   // TODO: заменить статичный uhod.src на динамические иконки

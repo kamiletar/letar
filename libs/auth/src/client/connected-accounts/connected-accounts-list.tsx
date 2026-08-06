@@ -173,13 +173,13 @@ export function ConnectedAccountsList({
             </VStack>
           </HStack>
 
-          {hasPassword ? (
-            <Badge colorPalette="green">Установлен</Badge>
-          ) : (
-            <Button asChild size="sm" colorPalette="orange" variant="outline">
-              <a href={changePasswordUrl}>Установить пароль</a>
-            </Button>
-          )}
+          {hasPassword
+            ? <Badge colorPalette="green">Установлен</Badge>
+            : (
+              <Button asChild size="sm" colorPalette="orange" variant="outline">
+                <a href={changePasswordUrl}>Установить пароль</a>
+              </Button>
+            )}
         </HStack>
       </Box>
 
@@ -207,8 +207,9 @@ export function ConnectedAccountsList({
       {/* Информационный блок */}
       <Box borderWidth="1px" borderRadius="lg" p={4} bg="blue.50" _dark={{ bg: 'blue.900' }}>
         <Text fontSize="sm" color="gray.700" _dark={{ color: 'gray.300' }}>
-          <strong>Совет:</strong> Подключите несколько способов входа для большей безопасности и удобства. Если один
-          способ будет недоступен, вы всегда сможете войти через другой.
+          <strong>Совет:</strong>{' '}
+          Подключите несколько способов входа для большей безопасности и удобства. Если один способ будет недоступен, вы
+          всегда сможете войти через другой.
         </Text>
       </Box>
     </VStack>

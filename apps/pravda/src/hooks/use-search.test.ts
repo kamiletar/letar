@@ -35,7 +35,7 @@ const mockSearchIndex = vi.hoisted(
         content: 'Ставка налога на прибыль составляет двадцать процентов',
         href: '/codes/tax#article-5',
       },
-    ] as SearchItem[]
+    ] as SearchItem[],
 )
 
 // Мокаем модуль search-index
@@ -109,7 +109,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.results.length).toBeGreaterThan(0)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
 
     expect(result.current.isSearching).toBe(true)
@@ -137,7 +137,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.groupedResults.length).toBeGreaterThan(0)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
 
     // Проверяем структуру группы
@@ -165,7 +165,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.results.length).toBeGreaterThan(0)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
 
     // Проверяем что matches присутствуют
@@ -192,7 +192,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.hasResults).toBe(true)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
 
     // После очистки снова false
@@ -203,7 +203,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.hasResults).toBe(false)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
   })
 
@@ -250,7 +250,7 @@ describe('useSearch', () => {
       () => {
         expect(result.current.isPending).toBe(false)
       },
-      { timeout: DEBOUNCE_DELAY + 100 }
+      { timeout: DEBOUNCE_DELAY + 100 },
     )
   })
 })

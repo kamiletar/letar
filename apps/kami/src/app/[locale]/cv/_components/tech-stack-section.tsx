@@ -25,9 +25,7 @@ export function TechStackSection({ t }: TechStackSectionProps) {
       </Heading>
 
       <HStack gap={3} flexWrap="wrap">
-        {TECH_STACK.map((tech) => (
-          <TechBadge key={tech}>{tech}</TechBadge>
-        ))}
+        {TECH_STACK.map((tech) => <TechBadge key={tech}>{tech}</TechBadge>)}
       </HStack>
     </VStack>
   )

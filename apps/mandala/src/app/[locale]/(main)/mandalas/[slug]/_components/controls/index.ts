@@ -4,11 +4,11 @@
 
 // Универсальный слайдер
 export {
-  SliderControl,
   formatDuration,
   formatMsToSeconds,
   formatPercent,
   formatSeconds,
+  SliderControl,
   type SliderControlProps,
 } from './slider-control'
 
@@ -17,11 +17,11 @@ export { FullscreenPauseButton, FullscreenReverseButton, PauseSwitch, ReverseSwi
 
 // Управление скоростью
 export {
+  findClosestStepIndex,
+  formatSpeed,
   GradientSpeedSlider,
   SPIN_DURATION_STEPS,
   SpinSpeedSlider,
-  findClosestStepIndex,
-  formatSpeed,
 } from './playback-controls'
 
 // Эффекты

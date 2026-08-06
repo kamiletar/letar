@@ -26,8 +26,9 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
   // Проверка поддержки
   useEffect(() => {
     setIsSupported(
-      typeof document.fullscreenEnabled !== 'undefined' ||
-        typeof (document as unknown as { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled !== 'undefined'
+      typeof document.fullscreenEnabled !== 'undefined'
+        || typeof (document as unknown as { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
+          !== 'undefined',
     )
 
     // Начальное состояние

@@ -151,7 +151,7 @@ describe('RelationFieldProvider', () => {
       render(
         <RelationFieldProvider relations={[{ model: 'Test', useQuery: mockQuery, labelField: 'name' }]}>
           <div data-testid="child">Child content</div>
-        </RelationFieldProvider>
+        </RelationFieldProvider>,
       )
 
       expect(screen.getByTestId('child')).toBeInTheDocument()
@@ -180,7 +180,7 @@ describe('RelationFieldProvider', () => {
           categories: useRelationOptions('Category'),
           tags: useRelationOptions('Tag'),
         }),
-        { wrapper }
+        { wrapper },
       )
 
       await waitFor(() => {
@@ -199,7 +199,7 @@ describe('RelationFieldProvider', () => {
       render(
         <RelationFieldProvider relations={[{ model: 'Category', useQuery: mockQuery, labelField: 'name', queryArgs }]}>
           <div>Test</div>
-        </RelationFieldProvider>
+        </RelationFieldProvider>,
       )
 
       expect(mockQuery).toHaveBeenCalledWith(queryArgs)

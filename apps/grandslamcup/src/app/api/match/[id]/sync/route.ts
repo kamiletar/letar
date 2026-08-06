@@ -101,7 +101,7 @@ async function executeOperation(matchId: string, op: SyncOperation): Promise<{ s
         payload.performanceId as string,
         payload.judgeNumber as number,
         payload.dimension as 'TEXT' | 'DELIVERY',
-        payload.score as number
+        payload.score as number,
       )
       return { success: !!result.success, error: 'error' in result ? String(result.error) : undefined }
     }
@@ -112,7 +112,7 @@ async function executeOperation(matchId: string, op: SyncOperation): Promise<{ s
         payload.playerId as string,
         payload.playerName as string,
         payload.teamSeasonId as string,
-        payload.teamName as string
+        payload.teamName as string,
       )
       return { success: !!result.success, error: 'error' in result ? String(result.error) : undefined }
     }
@@ -138,7 +138,7 @@ async function executeOperation(matchId: string, op: SyncOperation): Promise<{ s
         payload.performanceId as string,
         payload.cardType as CardType,
         payload.cardReason as CardReason,
-        (payload.note as string) || undefined
+        (payload.note as string) || undefined,
       )
       return { success: !!result.success, error: 'error' in result ? String(result.error) : undefined }
     }

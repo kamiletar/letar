@@ -38,7 +38,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={SimpleSchema} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -51,7 +51,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={SimpleSchema} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -68,7 +68,7 @@ describe('FormFromSchema', () => {
             onSubmit={vi.fn()}
             submitLabel="Create"
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -80,7 +80,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={SimpleSchema} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -92,7 +92,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={SimpleSchema} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} showReset />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -110,7 +110,7 @@ describe('FormFromSchema', () => {
             showReset
             resetLabel="Cancel"
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -129,7 +129,7 @@ describe('FormFromSchema', () => {
             onSubmit={vi.fn()}
             exclude={['email']}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -153,7 +153,7 @@ describe('FormFromSchema', () => {
             onSubmit={vi.fn()}
             exclude={['a', 'c']}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -173,7 +173,7 @@ describe('FormFromSchema', () => {
             initialValue={{ name: 'John', email: 'john@test.com' }}
             onSubmit={vi.fn()}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -194,7 +194,7 @@ describe('FormFromSchema', () => {
             initialValue={{ name: 'Test', email: 'test@test.com' }}
             onSubmit={onSubmit}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -208,7 +208,7 @@ describe('FormFromSchema', () => {
           expect.objectContaining({
             name: 'Test',
             email: 'test@test.com',
-          })
+          }),
         )
       })
     })
@@ -223,7 +223,7 @@ describe('FormFromSchema', () => {
             initialValue={{ name: 'Async', email: 'async@test.com' }}
             onSubmit={onSubmit}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -243,7 +243,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={SimpleSchema} initialValue={{ name: '', email: '' }} onSubmit={vi.fn()} disabled />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -265,7 +265,7 @@ describe('FormFromSchema', () => {
             onSubmit={vi.fn()}
             beforeButtons={<div data-testid="before-buttons">Before Content</div>}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -282,7 +282,7 @@ describe('FormFromSchema', () => {
             onSubmit={vi.fn()}
             afterButtons={<div data-testid="after-buttons">After Content</div>}
           />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -296,7 +296,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={NumberSchema} initialValue={{ title: '', age: 25 }} onSubmit={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -309,7 +309,7 @@ describe('FormFromSchema', () => {
       render(
         <TestWrapper>
           <FormFromSchema schema={CheckboxSchema} initialValue={{ name: '', agree: false }} onSubmit={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {

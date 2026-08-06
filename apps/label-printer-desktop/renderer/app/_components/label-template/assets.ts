@@ -4,7 +4,8 @@
  */
 
 // === ЛОГОТИП РОССТИЛЬ (лавровый венок с галстуком) ===
-const ROSSTIL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none" stroke="#000" stroke-width="1.5">
+const ROSSTIL_LOGO_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none" stroke="#000" stroke-width="1.5">
   <!-- Галстук с узлом -->
   <polygon points="60,2 55,8 57,8 54,10 52,8 48,15 60,12 72,15 68,8 66,10 63,8 65,8" fill="#000" stroke="none"/>
   <path d="M52,15 L48,55 L60,62 L72,55 L68,15 Z" fill="#000" stroke="none"/>
@@ -55,7 +56,8 @@ export const eacSignBase64 = `data:image/svg+xml;base64,${btoa(EAC_SIGN_SVG)}`
 // === ИКОНКИ УХОДА ЗА ОДЕЖДОЙ (как в оригинале) ===
 
 // Стирка 40°C (таз с водой и волнами)
-const CARE_WASH_40_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_WASH_40_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M4,10 Q16,14 28,10 L28,26 Q16,30 4,26 Z"/>
   <path d="M8,17 Q10,15 12,17 Q14,19 16,17 Q18,15 20,17 Q22,19 24,17" fill="none" stroke="#000" stroke-width="1.2"/>
   <text x="16" y="25" text-anchor="middle" font-family="Arial" font-size="9" font-weight="bold" fill="#000" stroke="none">40</text>
@@ -63,14 +65,16 @@ const CARE_WASH_40_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3
 export const careWash40Base64 = `data:image/svg+xml;base64,${btoa(CARE_WASH_40_SVG)}`
 
 // Не отбеливать (перечёркнутый треугольник)
-const CARE_NO_BLEACH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_NO_BLEACH_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
   <polygon points="16,4 3,28 29,28"/>
   <line x1="6" y1="6" x2="26" y2="26"/>
 </svg>`
 export const careNoBleachBase64 = `data:image/svg+xml;base64,${btoa(CARE_NO_BLEACH_SVG)}`
 
 // Глажка (утюг с 2 точками — средний режим)
-const CARE_IRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_IRON_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
   <path d="M4,24 L4,14 L28,8 L28,24 Z"/>
   <circle cx="13" cy="17" r="1.5" fill="#000" stroke="none"/>
   <circle cx="19" cy="17" r="1.5" fill="#000" stroke="none"/>
@@ -78,14 +82,16 @@ const CARE_IRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 3
 export const careIronBase64 = `data:image/svg+xml;base64,${btoa(CARE_IRON_SVG)}`
 
 // Химчистка P (круг с буквой P)
-const CARE_DRY_CLEAN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_DRY_CLEAN_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
   <circle cx="16" cy="16" r="13"/>
   <text x="16" y="21" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold" fill="#000" stroke="none">P</text>
 </svg>`
 export const careDryCleanBase64 = `data:image/svg+xml;base64,${btoa(CARE_DRY_CLEAN_SVG)}`
 
 // Сушка в барабане запрещена (квадрат с кругом и крестом)
-const CARE_NO_TUMBLE_DRY_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
+const CARE_NO_TUMBLE_DRY_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.5">
   <rect x="3" y="3" width="26" height="26"/>
   <circle cx="16" cy="16" r="8"/>
   <line x1="6" y1="6" x2="26" y2="26"/>

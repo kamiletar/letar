@@ -70,7 +70,7 @@ export async function addStoragePoint(
   appName: string,
   uploads: number,
   nextStatic: number,
-  publicSize: number
+  publicSize: number,
 ): Promise<boolean> {
   const history = await loadStorageHistory(appName)
   const now = Date.now()

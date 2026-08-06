@@ -164,7 +164,7 @@ describe('fuzzyMatchToVideo', () => {
   it('точный матч по имени (без расширения)', () => {
     const result = fuzzyMatchToVideo(
       '[Yousei-raws] Haiyore! Nyaruko-san 01 [BDrip 1920x1080 x264 FLAC].mka',
-      videoFiles
+      videoFiles,
     )
     expect(result).toEqual({ episodeNumber: 1 })
   })
@@ -172,7 +172,7 @@ describe('fuzzyMatchToVideo', () => {
   it('матч по префиксу (startsWith)', () => {
     const result = fuzzyMatchToVideo(
       '[Yousei-raws] Haiyore! Nyaruko-san 02 [BDrip 1920x1080 x264 FLAC].extra.mka',
-      videoFiles
+      videoFiles,
     )
     expect(result).toEqual({ episodeNumber: 2 })
   })
@@ -180,7 +180,7 @@ describe('fuzzyMatchToVideo', () => {
   it('матч с суффиксом .lang_group', () => {
     const result = fuzzyMatchToVideo(
       '[Yousei-raws] Haiyore! Nyaruko-san 12 [BDrip 1920x1080 x264 FLAC].ru_AniLibria.mka',
-      videoFiles
+      videoFiles,
     )
     expect(result).toEqual({
       episodeNumber: 12,
@@ -196,7 +196,7 @@ describe('fuzzyMatchToVideo', () => {
   it('case-insensitive матч', () => {
     const result = fuzzyMatchToVideo(
       '[YOUSEI-RAWS] HAIYORE! NYARUKO-SAN 01 [BDRIP 1920X1080 X264 FLAC].mka',
-      videoFiles
+      videoFiles,
     )
     expect(result).toEqual({ episodeNumber: 1 })
   })
@@ -217,25 +217,25 @@ describe('логика определения groupName из подпапок', 
 
   it('RUS Sound/[badPuss]/episode.mka → "badPuss"', () => {
     expect(resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/[badPuss]/episode.mka')).toBe(
-      'badPuss'
+      'badPuss',
     )
   })
 
   it('RUS Sound [Team]/episode.mka → "Team" (скобки в самой аудио-папке)', () => {
     expect(
-      resolveGroupName('C:/Downloads/Anime/RUS Sound [Team]', 'C:/Downloads/Anime/RUS Sound [Team]/episode.mka')
+      resolveGroupName('C:/Downloads/Anime/RUS Sound [Team]', 'C:/Downloads/Anime/RUS Sound [Team]/episode.mka'),
     ).toBe('Team')
   })
 
   it('RUS Sound/episode.mka → "RUS Sound" (файл напрямую в аудио-папке)', () => {
     expect(resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/episode.mka')).toBe(
-      'RUS Sound'
+      'RUS Sound',
     )
   })
 
   it('RUS Sound/[Мирра & JeFerson]/episode.mka → кириллица в скобках', () => {
     expect(
-      resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/[Мирра & JeFerson]/episode.mka')
+      resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/[Мирра & JeFerson]/episode.mka'),
     ).toBe('Мирра & JeFerson')
   })
 
@@ -250,8 +250,8 @@ describe('логика определения groupName из подпапок', 
     expect(
       resolveGroupName(
         'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds',
-        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/AniLibria/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka'
-      )
+        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/AniLibria/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka',
+      ),
     ).toBe('AniLibria')
   })
 
@@ -259,8 +259,8 @@ describe('логика определения groupName из подпапок', 
     expect(
       resolveGroupName(
         'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds',
-        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/Crunchyroll/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka'
-      )
+        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/Crunchyroll/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka',
+      ),
     ).toBe('Crunchyroll')
   })
 
@@ -268,8 +268,8 @@ describe('логика определения groupName из подпапок', 
     expect(
       resolveGroupName(
         'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds',
-        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/JAM CLUB/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka'
-      )
+        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/JAM CLUB/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka',
+      ),
     ).toBe('JAM CLUB')
   })
 
@@ -277,15 +277,15 @@ describe('логика определения groupName из подпапок', 
     expect(
       resolveGroupName(
         'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds',
-        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/Onibaku Group/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka'
-      )
+        'C:/Downloads/[Beatrice-Raws] Re.Zero - 2nd Season [BDRip 1080p HEVC TrueHD]/Sounds/Onibaku Group/[Beatrice-Raws] Re.Zero - 2nd Season - 01 [BDRip 1080p HEVC TrueHD].mka',
+      ),
     ).toBe('Onibaku Group')
   })
 
   // --- RUS Sound/plain_subfolder — теперь правильно использует имя подпапки ---
   it('RUS Sound/plain_subfolder/episode.mka → "plain_subfolder" (basename подпапки)', () => {
     expect(
-      resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/plain_subfolder/episode.mka')
+      resolveGroupName('C:/Downloads/Anime/RUS Sound', 'C:/Downloads/Anime/RUS Sound/plain_subfolder/episode.mka'),
     ).toBe('plain_subfolder')
   })
 })

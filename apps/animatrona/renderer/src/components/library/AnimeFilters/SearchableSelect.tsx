@@ -150,39 +150,41 @@ export function SearchableSelect({
                   },
                 }}
               >
-                {filteredItems.length === 0 ? (
-                  <Box p={3} textAlign="center">
-                    <Text fontSize="sm" color="fg.subtle">
-                      Ничего не найдено
-                    </Text>
-                  </Box>
-                ) : (
-                  filteredItems.map((item) => (
-                    <Button
-                      key={item.value}
-                      variant="ghost"
-                      size="sm"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      w="full"
-                      px={3}
-                      py={2}
-                      h="auto"
-                      minH="36px"
-                      fontWeight="normal"
-                      textAlign="left"
-                      borderRadius={0}
-                      bg={item.value === value ? 'purple.subtle' : 'transparent'}
-                      color={item.value === value ? 'purple.fg' : 'fg'}
-                      _hover={{ bg: item.value === value ? 'purple.subtle' : 'bg.muted' }}
-                      onClick={() => handleSelect(item.value)}
-                    >
-                      <Text truncate>{item.label}</Text>
-                      {item.value === value && <Icon as={LuCheck} boxSize={4} color="purple.500" />}
-                    </Button>
-                  ))
-                )}
+                {filteredItems.length === 0
+                  ? (
+                    <Box p={3} textAlign="center">
+                      <Text fontSize="sm" color="fg.subtle">
+                        Ничего не найдено
+                      </Text>
+                    </Box>
+                  )
+                  : (
+                    filteredItems.map((item) => (
+                      <Button
+                        key={item.value}
+                        variant="ghost"
+                        size="sm"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        w="full"
+                        px={3}
+                        py={2}
+                        h="auto"
+                        minH="36px"
+                        fontWeight="normal"
+                        textAlign="left"
+                        borderRadius={0}
+                        bg={item.value === value ? 'purple.subtle' : 'transparent'}
+                        color={item.value === value ? 'purple.fg' : 'fg'}
+                        _hover={{ bg: item.value === value ? 'purple.subtle' : 'bg.muted' }}
+                        onClick={() => handleSelect(item.value)}
+                      >
+                        <Text truncate>{item.label}</Text>
+                        {item.value === value && <Icon as={LuCheck} boxSize={4} color="purple.500" />}
+                      </Button>
+                    ))
+                  )}
               </VStack>
             </Popover.Body>
           </Popover.Content>

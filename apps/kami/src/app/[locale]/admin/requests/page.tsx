@@ -130,13 +130,13 @@ export default async function RequestsPage({ params, searchParams }: RequestsPag
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>
-                  {request.bookedSlots.length > 0 ? (
-                    <Badge variant="subtle" colorPalette="purple">
-                      {request.bookedSlots.length}
-                    </Badge>
-                  ) : (
-                    <Text color="fg.muted">—</Text>
-                  )}
+                  {request.bookedSlots.length > 0
+                    ? (
+                      <Badge variant="subtle" colorPalette="purple">
+                        {request.bookedSlots.length}
+                      </Badge>
+                    )
+                    : <Text color="fg.muted">—</Text>}
                 </Table.Cell>
                 <Table.Cell>
                   <Text fontSize="sm" color="fg.muted">

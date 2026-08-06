@@ -377,10 +377,10 @@ export function EncodingInfoDialog({
                       </EncodingSection>
 
                       {/* Энкодер и VMAF */}
-                      {(settings.encoderType ||
-                        settings.vmafScore !== undefined ||
-                        settings.transcodeDurationMs !== undefined ||
-                        settings.activeGpuWorkers !== undefined) && (
+                      {(settings.encoderType
+                        || settings.vmafScore !== undefined
+                        || settings.transcodeDurationMs !== undefined
+                        || settings.activeGpuWorkers !== undefined) && (
                         <EncodingSection
                           icon={settings.encoderType === 'cpu' ? LuCpu : LuMonitor}
                           color="blue.400"
@@ -462,8 +462,8 @@ export function EncodingInfoDialog({
                               </DataList.Item>
                             )}
 
-                            {(settings.videoMaxConcurrent !== undefined ||
-                              settings.audioMaxConcurrent !== undefined) && (
+                            {(settings.videoMaxConcurrent !== undefined
+                              || settings.audioMaxConcurrent !== undefined) && (
                               <DataList.Item>
                                 <DataList.ItemLabel color="fg.muted">Лимиты потоков</DataList.ItemLabel>
                                 <DataList.ItemValue>
@@ -487,10 +487,10 @@ export function EncodingInfoDialog({
                       )}
 
                       {/* Исходное видео */}
-                      {(settings.sourceCodec ||
-                        settings.sourceWidth ||
-                        settings.sourceBitrate ||
-                        settings.sourceBitDepth) && (
+                      {(settings.sourceCodec
+                        || settings.sourceWidth
+                        || settings.sourceBitrate
+                        || settings.sourceBitDepth) && (
                         <EncodingSection icon={LuFileVideo} color="teal.400" title="Исходное видео">
                           <DataList.Root size="sm">
                             {settings.sourceCodec && (
@@ -594,13 +594,11 @@ export function EncodingInfoDialog({
                                 <DataList.ItemValue>
                                   <Text
                                     fontWeight="bold"
-                                    color={
-                                      Number(savings) > 50
-                                        ? 'green.400'
-                                        : Number(savings) > 30
-                                          ? 'yellow.400'
-                                          : 'orange.400'
-                                    }
+                                    color={Number(savings) > 50
+                                      ? 'green.400'
+                                      : Number(savings) > 30
+                                      ? 'yellow.400'
+                                      : 'orange.400'}
                                   >
                                     {savings}%
                                   </Text>
@@ -616,14 +614,14 @@ export function EncodingInfoDialog({
               </Dialog.Body>
 
               <Dialog.Footer justifyContent="space-between">
-                {metadataCid ? (
-                  <Button variant="outline" size="sm" onClick={handleShowMediaInfo}>
-                    <Icon as={LuFileVideo} mr={1} />
-                    Медиаинфо исходника
-                  </Button>
-                ) : (
-                  <Box />
-                )}
+                {metadataCid
+                  ? (
+                    <Button variant="outline" size="sm" onClick={handleShowMediaInfo}>
+                      <Icon as={LuFileVideo} mr={1} />
+                      Медиаинфо исходника
+                    </Button>
+                  )
+                  : <Box />}
                 <Button onClick={() => onOpenChange(false)}>Закрыть</Button>
               </Dialog.Footer>
             </Dialog.Content>

@@ -88,8 +88,8 @@ const useSettingsStore = create(
       name: 'letar-settings', // ключ в storage
       storage: createJSONStorage(() => localStorage), // по умолчанию
       partialize: (state) => ({ theme: state.theme }), // сохранять только часть
-    }
-  )
+    },
+  ),
 )
 ```
 
@@ -111,7 +111,7 @@ const useStore = create(
         const item = state.items.find((i) => i.id === id)
         if (item) Object.assign(item, data)
       }),
-  }))
+  })),
 )
 ```
 
@@ -135,9 +135,9 @@ const useStore = create<State>()(
       immer((set) => ({
         // ...
       })),
-      { name: 'store' }
-    )
-  )
+      { name: 'store' },
+    ),
+  ),
 )
 ```
 
@@ -192,7 +192,7 @@ const unsub = useBearStore.subscribe(
   (bears, prevBears) => {
     // listener
     console.log('Bears changed:', bears)
-  }
+  },
 )
 unsub() // отписаться
 ```
@@ -252,12 +252,12 @@ export const useUIStore = create<UIStore>()(
     activeModal: null,
     openModal: (id) => set({ activeModal: id }),
     closeModal: () => set({ activeModal: null }),
-  }))
+  })),
 )
 
 // Использование
 const { sidebarOpen, toggleSidebar } = useUIStore(
-  useShallow((s) => ({ sidebarOpen: s.sidebarOpen, toggleSidebar: s.toggleSidebar }))
+  useShallow((s) => ({ sidebarOpen: s.sidebarOpen, toggleSidebar: s.toggleSidebar })),
 )
 ```
 

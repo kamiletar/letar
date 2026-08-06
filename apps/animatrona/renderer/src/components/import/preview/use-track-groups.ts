@@ -145,7 +145,7 @@ export function useTrackGroups(options: UseTrackGroupsOptions) {
         }
       })
     },
-    [audioRecommendations]
+    [audioRecommendations],
   )
 
   /**
@@ -169,7 +169,7 @@ export function useTrackGroups(options: UseTrackGroupsOptions) {
         }
       })
     },
-    [subtitleRecommendations]
+    [subtitleRecommendations],
   )
 
   return {

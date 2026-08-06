@@ -18,13 +18,13 @@ export default async function electronAppGenerator(tree: Tree, options: Electron
 
   const rootPkg = readJson(tree, 'package.json')
   const electronRange = rootPkg.dependencies?.electron ?? rootPkg.devDependencies?.electron
-  const electronBuilderRange =
-    rootPkg.dependencies?.['electron-builder'] ?? rootPkg.devDependencies?.['electron-builder']
+  const electronBuilderRange = rootPkg.dependencies?.['electron-builder']
+    ?? rootPkg.devDependencies?.['electron-builder']
 
   if (!electronRange || !electronBuilderRange) {
     throw new Error(
-      'Не найдены electron/electron-builder в dependencies или devDependencies корневого package.json — ' +
-        'без них electron-builder не сможет определить точную версию для сборки.'
+      'Не найдены electron/electron-builder в dependencies или devDependencies корневого package.json — '
+        + 'без них electron-builder не сможет определить точную версию для сборки.',
     )
   }
 
@@ -50,8 +50,8 @@ export default async function electronAppGenerator(tree: Tree, options: Electron
   logger.info(`Иконка: замени resources/icon.svg, затем "node scripts/generate-icons.mjs" из apps/${name}.`)
   if (options.private) {
     logger.info(
-      'Приложение помечено как приватное — заведи submodule по инструкции в ' +
-        '.claude/commands/create/new-app.md § «Приватные приложения» (gh repo create → git submodule add).'
+      'Приложение помечено как приватное — заведи submodule по инструкции в '
+        + '.claude/commands/create/new-app.md § «Приватные приложения» (gh repo create → git submodule add).',
     )
   }
 }

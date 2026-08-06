@@ -67,8 +67,9 @@ export function registerImportQueueHandlers(): void {
   createHandler('import-queue:remove-item', (itemId: string) => controller.removeItem(itemId))
 
   // Повторить обработку item с ошибкой
-  createHandler('import-queue:retry-item', (itemId: string, options?: { skipCompressionCheck?: boolean }) =>
-    controller.retryItem(itemId, options)
+  createHandler(
+    'import-queue:retry-item',
+    (itemId: string, options?: { skipCompressionCheck?: boolean }) => controller.retryItem(itemId, options),
   )
 
   // Пометить completed item как failed (для повторного импорта)
@@ -84,8 +85,9 @@ export function registerImportQueueHandlers(): void {
   createHandler('import-queue:get-item', (itemId: string) => controller.getItem(itemId))
 
   // Очистить завершённые items (опционально только успешные)
-  createHandler('import-queue:clear-completed', (options?: { onlySuccess?: boolean }) =>
-    controller.clearCompleted(options)
+  createHandler(
+    'import-queue:clear-completed',
+    (options?: { onlySuccess?: boolean }) => controller.clearCompleted(options),
   )
 
   // Установить автозапуск
@@ -98,17 +100,19 @@ export function registerImportQueueHandlers(): void {
   createHandler(
     'import-queue:retry-missing',
     (itemId: string, preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string }) =>
-      controller.retryMissingEpisodes(itemId, preEncodeOptions)
+      controller.retryMissingEpisodes(itemId, preEncodeOptions),
   )
 
   // Изменить порядок элементов в очереди (drag & drop)
-  createHandler('import-queue:reorder-items', (activeId: string, overId: string) =>
-    controller.reorderItems(activeId, overId)
+  createHandler(
+    'import-queue:reorder-items',
+    (activeId: string, overId: string) => controller.reorderItems(activeId, overId),
   )
 
   // Обновить данные item (профиль, параллельность, sync offset и т.д.)
-  createHandler('import-queue:update-item', (itemId: string, data: Partial<ImportQueueAddData>) =>
-    controller.updateItem(itemId, data)
+  createHandler(
+    'import-queue:update-item',
+    (itemId: string, data: Partial<ImportQueueAddData>) => controller.updateItem(itemId, data),
   )
 
   // ==========================================
@@ -116,8 +120,9 @@ export function registerImportQueueHandlers(): void {
   // ==========================================
 
   // Обновить статус item
-  createHandler('import-queue:update-status', (itemId: string, status: ImportQueueStatus, error?: string) =>
-    controller.updateItemStatus(itemId, status, error)
+  createHandler(
+    'import-queue:update-status',
+    (itemId: string, status: ImportQueueStatus, error?: string) => controller.updateItemStatus(itemId, status, error),
   )
 
   // Обновить прогресс item
@@ -128,23 +133,26 @@ export function registerImportQueueHandlers(): void {
       progress: number,
       currentFileName?: string,
       currentStage?: string,
-      detailProgress?: ImportQueueDetailProgress
-    ) => controller.updateItemProgress(itemId, progress, currentFileName, currentStage, detailProgress)
+      detailProgress?: ImportQueueDetailProgress,
+    ) => controller.updateItemProgress(itemId, progress, currentFileName, currentStage, detailProgress),
   )
 
   // Обновить VMAF прогресс
-  createHandler('import-queue:update-vmaf-progress', (itemId: string, vmafProgress: ImportQueueVmafProgress) =>
-    controller.updateVmafProgress(itemId, vmafProgress)
+  createHandler(
+    'import-queue:update-vmaf-progress',
+    (itemId: string, vmafProgress: ImportQueueVmafProgress) => controller.updateVmafProgress(itemId, vmafProgress),
   )
 
   // Установить результат VMAF
-  createHandler('import-queue:set-vmaf-result', (itemId: string, result: ImportQueueVmafResult) =>
-    controller.setVmafResult(itemId, result)
+  createHandler(
+    'import-queue:set-vmaf-result',
+    (itemId: string, result: ImportQueueVmafResult) => controller.setVmafResult(itemId, result),
   )
 
   // Установить результат импорта (animeId)
-  createHandler('import-queue:set-import-result', (itemId: string, animeId: string) =>
-    controller.setImportResult(itemId, animeId)
+  createHandler(
+    'import-queue:set-import-result',
+    (itemId: string, animeId: string) => controller.setImportResult(itemId, animeId),
   )
 
   // Handlers registered (no logging needed)

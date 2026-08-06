@@ -74,18 +74,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Формируем Docker disk usage в формате который ожидает компонент DiskUsage
     let docker:
       | {
-          images: { total: number; totalHuman: string; count: number; percent: number; details: [] }
-          containers: { total: number; totalHuman: string; count: number; percent: number; details: [] }
-          volumes: { total: number; totalHuman: string; count: number; percent: number; details: [] }
-          buildCache: { total: number; totalHuman: string; count: number; percent: number; details: [] }
-          totalSize: number
-          totalSizeHuman: string
-          totalPercent: number
-        }
+        images: { total: number; totalHuman: string; count: number; percent: number; details: [] }
+        containers: { total: number; totalHuman: string; count: number; percent: number; details: [] }
+        volumes: { total: number; totalHuman: string; count: number; percent: number; details: [] }
+        buildCache: { total: number; totalHuman: string; count: number; percent: number; details: [] }
+        totalSize: number
+        totalSizeHuman: string
+        totalPercent: number
+      }
       | undefined = undefined
     if (dockerDf) {
-      const totalDockerSize =
-        dockerDf.images.size + dockerDf.containers.size + dockerDf.volumes.size + dockerDf.buildCache.size
+      const totalDockerSize = dockerDf.images.size + dockerDf.containers.size + dockerDf.volumes.size
+        + dockerDf.buildCache.size
       const diskSize = totalSize || 1
 
       docker = {

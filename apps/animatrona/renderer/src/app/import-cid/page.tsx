@@ -132,7 +132,7 @@ export function ImportCidContentEmbedded() {
         setIsLoading(false)
       }
     },
-    [cidInput]
+    [cidInput],
   )
 
   // Загрузить эпизоды из IPFS после загрузки манифеста
@@ -148,7 +148,7 @@ export function ImportCidContentEmbedded() {
         const res = await fetch(url)
         const data = (await res.json()) as EpisodesDocument
         const sorted = (data.episodes || []).sort(
-          (a: AnimeManifestEpisode, b: AnimeManifestEpisode) => a.number - b.number
+          (a: AnimeManifestEpisode, b: AnimeManifestEpisode) => a.number - b.number,
         )
         setEpisodes(sorted)
       } catch {
@@ -203,7 +203,7 @@ export function ImportCidContentEmbedded() {
         setIsImporting(false)
       }
     },
-    [cidInput, manifest, router]
+    [cidInput, manifest, router],
   )
 
   // Автозагрузка CID из search params (deep link: animatrona://import/<cid>)
@@ -225,7 +225,7 @@ export function ImportCidContentEmbedded() {
         handlePreview()
       }
     },
-    [handlePreview, isLoading]
+    [handlePreview, isLoading],
   )
 
   /**
@@ -510,24 +510,26 @@ export function ImportCidContentEmbedded() {
                               {formatSize(ep.size)}
                             </Text>
                           )}
-                          {canPlay ? (
-                            <IconButton
-                              aria-label={`Смотреть эпизод ${ep.number}`}
-                              size="xs"
-                              variant={isActive ? 'solid' : 'ghost'}
-                              colorPalette="purple"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handlePlay(ep)
-                              }}
-                            >
-                              <LuPlay />
-                            </IconButton>
-                          ) : (
-                            <Text fontSize="xs" color="fg.subtle">
-                              нет видео
-                            </Text>
-                          )}
+                          {canPlay
+                            ? (
+                              <IconButton
+                                aria-label={`Смотреть эпизод ${ep.number}`}
+                                size="xs"
+                                variant={isActive ? 'solid' : 'ghost'}
+                                colorPalette="purple"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handlePlay(ep)
+                                }}
+                              >
+                                <LuPlay />
+                              </IconButton>
+                            )
+                            : (
+                              <Text fontSize="xs" color="fg.subtle">
+                                нет видео
+                              </Text>
+                            )}
                         </HStack>
                       </HStack>
                     )

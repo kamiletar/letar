@@ -86,6 +86,6 @@ export async function appsRoutes(fastify: FastifyInstance): Promise<void> {
         },
         timestamp: new Date().toISOString(),
       }
-    }
+    },
   )
 }

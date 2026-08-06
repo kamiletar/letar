@@ -38,7 +38,7 @@ export function useInvalidateQueries() {
         ...options,
       })
     },
-    [queryClient]
+    [queryClient],
   )
 
   /**
@@ -58,7 +58,7 @@ export function useInvalidateQueries() {
         refetchType: 'active',
       })
     },
-    [queryClient]
+    [queryClient],
   )
 
   /**
@@ -68,7 +68,7 @@ export function useInvalidateQueries() {
     async (queryKey: unknown[]) => {
       await queryClient.resetQueries({ queryKey })
     },
-    [queryClient]
+    [queryClient],
   )
 
   return {

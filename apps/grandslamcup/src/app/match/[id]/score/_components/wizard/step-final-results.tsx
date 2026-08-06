@@ -98,10 +98,10 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
           <Table.Body>
             {[1, 2].map((half) => {
               const hp = match.performances.filter(
-                (p) => p.half === half && p.teamSeasonId === match.homeTeam.id && p.totalScore !== null
+                (p) => p.half === half && p.teamSeasonId === match.homeTeam.id && p.totalScore !== null,
               )
               const ap = match.performances.filter(
-                (p) => p.half === half && p.teamSeasonId === match.awayTeam.id && p.totalScore !== null
+                (p) => p.half === half && p.teamSeasonId === match.awayTeam.id && p.totalScore !== null,
               )
               const hs = hp.reduce((s, p) => s + (p.totalScore ?? 0), 0)
               const as_ = ap.reduce((s, p) => s + (p.totalScore ?? 0), 0)

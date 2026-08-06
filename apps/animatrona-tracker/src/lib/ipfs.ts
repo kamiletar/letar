@@ -80,7 +80,7 @@ export function getIpfsUrl(cid: string, path?: string, userSettings?: UserIpfsSe
 export function resolveImageUrl(
   url: string | null | undefined,
   fallback = '/placeholder-poster.png',
-  userSettings?: UserIpfsSettings
+  userSettings?: UserIpfsSettings,
 ): string {
   if (!url) {
     return fallback
@@ -164,7 +164,7 @@ export async function findWorkingGateway(userSettings?: UserIpfsSettings): Promi
         return gateway
       }
       throw new Error('unhealthy')
-    })
+    }),
   ).catch(() => null)
 
   return result

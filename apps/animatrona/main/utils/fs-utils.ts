@@ -29,7 +29,7 @@ export async function* scanDirectoryRecursive(
   dir: string,
   extensions: Set<string>,
   maxDepth = 3,
-  currentDepth = 0
+  currentDepth = 0,
 ): AsyncGenerator<string> {
   if (currentDepth > maxDepth) {
     return

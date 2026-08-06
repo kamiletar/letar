@@ -64,17 +64,19 @@ export const Pagination = memo(function Pagination({ total, pageSize = 20, curre
     <HStack justify="center" gap={2} py={4}>
       {/* Предыдущая страница */}
       <Button asChild={page > 1} variant="ghost" size="sm" disabled={page <= 1} aria-label="Предыдущая страница">
-        {page > 1 ? (
-          <Link href={getPageUrl(page - 1)}>
+        {page > 1
+          ? (
+            <Link href={getPageUrl(page - 1)}>
+              <Icon>
+                <ChevronLeft />
+              </Icon>
+            </Link>
+          )
+          : (
             <Icon>
               <ChevronLeft />
             </Icon>
-          </Link>
-        ) : (
-          <Icon>
-            <ChevronLeft />
-          </Icon>
-        )}
+          )}
       </Button>
 
       {/* Первая страница и многоточие */}
@@ -126,17 +128,19 @@ export const Pagination = memo(function Pagination({ total, pageSize = 20, curre
         disabled={page >= totalPages}
         aria-label="Следующая страница"
       >
-        {page < totalPages ? (
-          <Link href={getPageUrl(page + 1)}>
+        {page < totalPages
+          ? (
+            <Link href={getPageUrl(page + 1)}>
+              <Icon>
+                <ChevronRight />
+              </Icon>
+            </Link>
+          )
+          : (
             <Icon>
               <ChevronRight />
             </Icon>
-          </Link>
-        ) : (
-          <Icon>
-            <ChevronRight />
-          </Icon>
-        )}
+          )}
       </Button>
     </HStack>
   )

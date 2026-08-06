@@ -15,7 +15,7 @@
  */
 export function serializeBigIntFields<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
-  fields: K[]
+  fields: K[],
 ): { [P in keyof T]: P extends K ? number : T[P] } {
   const result = { ...obj } as Record<string, unknown>
   for (const field of fields) {
@@ -34,7 +34,7 @@ export function serializeBigIntFields<T extends Record<string, unknown>, K exten
  */
 export function serializeBigIntArray<T extends Record<string, unknown>, K extends keyof T>(
   items: T[],
-  fields: K[]
+  fields: K[],
 ): Array<{ [P in keyof T]: P extends K ? number : T[P] }> {
   return items.map((item) => serializeBigIntFields(item, fields))
 }

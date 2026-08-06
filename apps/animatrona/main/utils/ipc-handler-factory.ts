@@ -62,7 +62,7 @@ type HandlerFnWithEvent<TArgs extends unknown[], TResult> = (
 export function createHandler<TArgs extends unknown[], TResult>(
   channel: string,
   handler: HandlerFn<TArgs, TResult>,
-  options: { logErrors?: boolean; logPrefix?: string } = {}
+  options: { logErrors?: boolean; logPrefix?: string } = {},
 ): void {
   const { logErrors = true, logPrefix = '[IPC]' } = options
 
@@ -98,7 +98,7 @@ export function createHandler<TArgs extends unknown[], TResult>(
 export function createHandlerWithEvent<TArgs extends unknown[], TResult>(
   channel: string,
   handler: HandlerFnWithEvent<TArgs, TResult>,
-  options: { logErrors?: boolean; logPrefix?: string } = {}
+  options: { logErrors?: boolean; logPrefix?: string } = {},
 ): void {
   const { logErrors = true, logPrefix = '[IPC]' } = options
 
@@ -137,7 +137,7 @@ export function createHandlerWithEvent<TArgs extends unknown[], TResult>(
 export function createHandlers<T extends Record<string, HandlerFn<any[], any>>>(
   prefix: string,
   handlers: T,
-  options: { logErrors?: boolean; logPrefix?: string } = {}
+  options: { logErrors?: boolean; logPrefix?: string } = {},
 ): void {
   for (const [name, handler] of Object.entries(handlers)) {
     createHandler(`${prefix}:${name}`, handler, options)
@@ -178,7 +178,7 @@ export function broadcastToWindows(channel: string, ...args: unknown[]): void {
 export function forwardEvent<T extends { on: (event: string, listener: (...args: any[]) => void) => void }>(
   emitter: T,
   eventName: string,
-  channel: string
+  channel: string,
 ): void {
   emitter.on(eventName, (...args: unknown[]) => {
     broadcastToWindows(channel, ...args)
@@ -201,7 +201,7 @@ export function forwardEvent<T extends { on: (event: string, listener: (...args:
 export function forwardEvents<T extends { on: (event: string, listener: (...args: any[]) => void) => void }>(
   emitter: T,
   prefix: string,
-  eventMap: Record<string, string>
+  eventMap: Record<string, string>,
 ): void {
   for (const [eventName, channelSuffix] of Object.entries(eventMap)) {
     forwardEvent(emitter, eventName, `${prefix}:${channelSuffix}`)
@@ -293,7 +293,7 @@ export interface QueueServiceInterface<TAddData = unknown, TTask = unknown> {
  */
 export function createQueueHandlers<TAddData = unknown, TTask = unknown>(
   prefix: string,
-  service: QueueServiceInterface<TAddData, TTask>
+  service: QueueServiceInterface<TAddData, TTask>,
 ): void {
   if (service.addTask) {
     createHandler(`${prefix}:add`, (data: TAddData) => service.addTask!(data))

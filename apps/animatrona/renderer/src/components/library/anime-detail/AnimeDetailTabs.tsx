@@ -50,10 +50,9 @@ export function AnimeDetailTabs({
   children,
 }: AnimeDetailTabsProps) {
   // Контролируемый режим (value + onValueChange) или неконтролируемый (defaultValue)
-  const tabsProps =
-    value != null
-      ? { value, onValueChange: (details: { value: string }) => onValueChange?.(details.value) }
-      : { defaultValue: 'episodes' as const }
+  const tabsProps = value != null
+    ? { value, onValueChange: (details: { value: string }) => onValueChange?.(details.value) }
+    : { defaultValue: 'episodes' as const }
 
   return (
     <Tabs.Root {...tabsProps} lazyMount unmountOnExit={false}>

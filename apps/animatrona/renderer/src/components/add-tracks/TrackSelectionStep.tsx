@@ -28,7 +28,7 @@ interface TrackSelectionStepProps {
     episodeId: string,
     episodeDir: string,
     type: 'audio' | 'subtitle',
-    track: TrackInfo
+    track: TrackInfo,
   ) => void
   /** Выбрать все дорожки типа */
   onSelectAllOfType: (type: 'audio' | 'subtitle') => void
@@ -340,7 +340,12 @@ export function TrackSelectionStep({
             </Button>
           )}
           {onDeselectByLanguage && (
-            <Button size="sm" variant="ghost" colorPalette="red" onClick={() => onDeselectByLanguage(['jpn', 'ja'])}>
+            <Button
+              size="sm"
+              variant="ghost"
+              colorPalette="red"
+              onClick={() => onDeselectByLanguage(['jpn', 'ja'])}
+            >
               −jpn
             </Button>
           )}

@@ -275,17 +275,16 @@ function LatestAnimeCard({ anime, progress }: { anime: LatestAnimeItem; progress
   const coverUrl = resolveImageUrl(anime.coverUrl)
   const totalEpisodes = anime._count.episodes
   const hasProgress = progress && (progress.watchedEpisodes > 0 || progress.lastEpisode !== null)
-  const overallProgress =
-    hasProgress && totalEpisodes > 0
-      ? Math.min(
-          Math.round(
-            ((progress.watchedEpisodes + (progress.lastEpisodeProgress > 0 ? progress.lastEpisodeProgress / 100 : 0)) /
-              totalEpisodes) *
-              100
-          ),
-          100
-        )
-      : 0
+  const overallProgress = hasProgress && totalEpisodes > 0
+    ? Math.min(
+      Math.round(
+        ((progress.watchedEpisodes + (progress.lastEpisodeProgress > 0 ? progress.lastEpisodeProgress / 100 : 0))
+          / totalEpisodes)
+          * 100,
+      ),
+      100,
+    )
+    : 0
 
   return (
     <NextLink href={`/anime/${slug}`}>
@@ -313,14 +312,16 @@ function LatestAnimeCard({ anime, progress }: { anime: LatestAnimeItem; progress
               alignItems="center"
               gap={1}
             >
-              {progress.watchedEpisodes === totalEpisodes ? (
-                <>
-                  <Icon as={LuCheck} boxSize={3} />
-                  Просмотрено
-                </>
-              ) : (
-                `${progress.watchedEpisodes}/${totalEpisodes} эп.`
-              )}
+              {progress.watchedEpisodes === totalEpisodes
+                ? (
+                  <>
+                    <Icon as={LuCheck} boxSize={3} />
+                    Просмотрено
+                  </>
+                )
+                : (
+                  `${progress.watchedEpisodes}/${totalEpisodes} эп.`
+                )}
             </Badge>
           )}
 

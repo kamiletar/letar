@@ -53,10 +53,10 @@ export async function loadBonusPoints(): Promise<BonusPoints> {
 
     // Валидация данных
     if (
-      typeof parsed.balance !== 'number' ||
-      typeof parsed.totalEarned !== 'number' ||
-      typeof parsed.totalSpent !== 'number' ||
-      !Array.isArray(parsed.transactions)
+      typeof parsed.balance !== 'number'
+      || typeof parsed.totalEarned !== 'number'
+      || typeof parsed.totalSpent !== 'number'
+      || !Array.isArray(parsed.transactions)
     ) {
       log.warn('Неверный формат данных, создаём новые')
       cache = createInitialBonusPoints()

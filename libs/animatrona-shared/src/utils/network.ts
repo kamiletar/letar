@@ -18,11 +18,11 @@ export function isNetworkError(error: unknown): boolean {
   if (error instanceof Error) {
     const msg = error.message.toLowerCase()
     return (
-      msg.includes('network request failed') ||
-      msg.includes('нет соединения с сервером') ||
-      msg.includes('failed to fetch') ||
-      msg.includes('timeout') ||
-      error.name === 'AbortError'
+      msg.includes('network request failed')
+      || msg.includes('нет соединения с сервером')
+      || msg.includes('failed to fetch')
+      || msg.includes('timeout')
+      || error.name === 'AbortError'
     )
   }
   return false

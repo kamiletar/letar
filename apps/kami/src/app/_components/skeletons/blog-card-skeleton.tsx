@@ -41,9 +41,7 @@ export function BlogCardSkeleton() {
 export function BlogListSkeleton({ count = 4 }: { count?: number }) {
   return (
     <>
-      {Array.from({ length: count }).map((_, i) => (
-        <BlogCardSkeleton key={`skeleton-${i}`} />
-      ))}
+      {Array.from({ length: count }).map((_, i) => <BlogCardSkeleton key={`skeleton-${i}`} />)}
     </>
   )
 }

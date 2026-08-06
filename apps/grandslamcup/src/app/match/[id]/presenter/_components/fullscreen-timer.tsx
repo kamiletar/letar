@@ -205,33 +205,35 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
 
       {/* Кнопки управления — крупные */}
       <HStack gap={{ base: 3, md: 6 }}>
-        {!timer.isRunning ? (
-          <Button
-            onClick={handleStart}
-            disabled={isPending}
-            colorPalette="green"
-            size="2xl"
-            fontWeight="bold"
-            px={{ base: 6, md: 12 }}
-            py={{ base: 6, md: 8 }}
-            fontSize={{ base: 'lg', md: '2xl' }}
-          >
-            <LuPlay /> Старт
-          </Button>
-        ) : (
-          <Button
-            onClick={handleStop}
-            disabled={isPending}
-            colorPalette="red"
-            size="2xl"
-            fontWeight="bold"
-            px={{ base: 6, md: 12 }}
-            py={{ base: 6, md: 8 }}
-            fontSize={{ base: 'lg', md: '2xl' }}
-          >
-            <LuPause /> Стоп
-          </Button>
-        )}
+        {!timer.isRunning
+          ? (
+            <Button
+              onClick={handleStart}
+              disabled={isPending}
+              colorPalette="green"
+              size="2xl"
+              fontWeight="bold"
+              px={{ base: 6, md: 12 }}
+              py={{ base: 6, md: 8 }}
+              fontSize={{ base: 'lg', md: '2xl' }}
+            >
+              <LuPlay /> Старт
+            </Button>
+          )
+          : (
+            <Button
+              onClick={handleStop}
+              disabled={isPending}
+              colorPalette="red"
+              size="2xl"
+              fontWeight="bold"
+              px={{ base: 6, md: 12 }}
+              py={{ base: 6, md: 8 }}
+              fontSize={{ base: 'lg', md: '2xl' }}
+            >
+              <LuPause /> Стоп
+            </Button>
+          )}
         <Button
           onClick={handleReset}
           disabled={isPending || timer.isRunning}

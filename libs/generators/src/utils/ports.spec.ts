@@ -37,7 +37,7 @@ describe('collectAppPorts', () => {
   it('читает порт из project.json — `next dev -p <порт>`', () => {
     tree.write(
       'apps/my-app/project.json',
-      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3008' } } } })
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3008' } } } }),
     )
 
     expect(collectAppPorts(tree, 'my-app')).toEqual([3008])
@@ -46,7 +46,7 @@ describe('collectAppPorts', () => {
   it('читает порт из project.json — `--port=<порт>`', () => {
     tree.write(
       'apps/my-app/project.json',
-      JSON.stringify({ targets: { dev: { options: { command: 'next dev --port=3009' } } } })
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev --port=3009' } } } }),
     )
 
     expect(collectAppPorts(tree, 'my-app')).toEqual([3009])
@@ -55,7 +55,7 @@ describe('collectAppPorts', () => {
   it('игнорирует порты вне диапазона 3xxx (react-native --port 8083)', () => {
     tree.write(
       'apps/my-app/project.json',
-      JSON.stringify({ targets: { start: { options: { command: 'react-native start --port 8083' } } } })
+      JSON.stringify({ targets: { start: { options: { command: 'react-native start --port 8083' } } } }),
     )
 
     expect(collectAppPorts(tree, 'my-app')).toEqual([])
@@ -84,7 +84,7 @@ describe('resolveAppPort', () => {
   it('берёт порт из project.json, если .env нет', () => {
     tree.write(
       'apps/my-app/project.json',
-      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } })
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } }),
     )
 
     expect(resolveAppPort(tree, 'my-app')).toBe(3015)
@@ -121,7 +121,7 @@ describe('resolveNextFreePort', () => {
     tree.write('apps/a/.env', 'PORT=3010\n')
     tree.write(
       'apps/landing/project.json',
-      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } })
+      JSON.stringify({ targets: { dev: { options: { command: 'next dev -p 3015' } } } }),
     )
 
     expect(resolveNextFreePort(tree)).toBe(3016)

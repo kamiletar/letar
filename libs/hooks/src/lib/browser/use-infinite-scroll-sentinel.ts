@@ -49,7 +49,7 @@ export function useInfiniteScrollSentinel({
           onLoadMore()
         }
       },
-      { rootMargin }
+      { rootMargin },
     )
     observer.observe(sentinelEl)
     return () => observer.disconnect()

@@ -50,25 +50,25 @@ export default function AnalyticsPage() {
 
       <PageViewsCard data={pageViews} />
 
-      {isLoading ? (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card.Root key={i}>
-              <Card.Body p="5">
-                <Spinner />
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </SimpleGrid>
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="4">
-          {sites
-            ?.toSorted((a, b) => a.name.localeCompare(b.name))
-            .map((site) => (
-              <SiteCard key={site.id} site={site} envConfigured={envStatus?.[site.domain] ?? null} />
+      {isLoading
+        ? (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card.Root key={i}>
+                <Card.Body p="5">
+                  <Spinner />
+                </Card.Body>
+              </Card.Root>
             ))}
-        </SimpleGrid>
-      )}
+          </SimpleGrid>
+        )
+        : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="4">
+            {sites
+              ?.toSorted((a, b) => a.name.localeCompare(b.name))
+              .map((site) => <SiteCard key={site.id} site={site} envConfigured={envStatus?.[site.domain] ?? null} />)}
+          </SimpleGrid>
+        )}
 
       {sites?.length === 0 && (
         <Text color="fg.muted" textAlign="center" py="12">

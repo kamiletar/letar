@@ -23,7 +23,7 @@ describe('FieldRadioCard', () => {
           <Form initialValue={{ plan: '' }} onSubmit={vi.fn()}>
             <Form.Field.RadioCard name="plan" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const radios = screen.getAllByRole('radio')
@@ -36,7 +36,7 @@ describe('FieldRadioCard', () => {
           <Form initialValue={{ plan: '' }} onSubmit={vi.fn()}>
             <Form.Field.RadioCard name="plan" label="Тарифный план" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Тарифный план')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('FieldRadioCard', () => {
           <Form initialValue={{ plan: '' }} onSubmit={vi.fn()}>
             <Form.Field.RadioCard name="plan" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Бесплатный')).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('FieldRadioCard', () => {
           <Form initialValue={{ plan: 'pro' }} onSubmit={vi.fn()}>
             <Form.Field.RadioCard name="plan" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const proRadio = screen.getAllByRole('radio')[1]

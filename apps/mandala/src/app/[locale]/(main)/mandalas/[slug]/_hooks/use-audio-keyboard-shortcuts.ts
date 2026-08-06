@@ -65,7 +65,7 @@ export function useAudioKeyboardShortcuts({
       const newVolume = Math.max(0, Math.min(100, settings.audioVolume + delta))
       onSettingsChange({ audioVolume: newVolume })
     },
-    [settings.audioVolume, onSettingsChange]
+    [settings.audioVolume, onSettingsChange],
   )
 
   /**
@@ -147,14 +147,14 @@ export function useAudioKeyboardShortcuts({
           onPrevTrack?.()
           break
 
-        // TODO: Seek и Loop требуют ref на audio элемент
-        // case 'ArrowLeft': seek(-10)
-        // case 'ArrowRight': seek(10)
-        // case 'KeyL': toggleLoop()
-        // case 'Digit1'-'Digit9': seekToPercent(digit * 10)
+          // TODO: Seek и Loop требуют ref на audio элемент
+          // case 'ArrowLeft': seek(-10)
+          // case 'ArrowRight': seek(10)
+          // case 'KeyL': toggleLoop()
+          // case 'Digit1'-'Digit9': seekToPercent(digit * 10)
       }
     },
-    [togglePlayback, changeVolume, toggleMute, toggleBreathing, onToggleSpectrum, onNextTrack, onPrevTrack]
+    [togglePlayback, changeVolume, toggleMute, toggleBreathing, onToggleSpectrum, onNextTrack, onPrevTrack],
   )
 
   /**

@@ -40,7 +40,7 @@ function getResourcePath(cid: string, relativePath: string, mode: WebPlayerResou
  * Конвертирует главы в формат Web Player
  */
 function convertChapters(
-  chapters: Array<{ startMs: number; endMs: number; title: string | null; type: string }>
+  chapters: Array<{ startMs: number; endMs: number; title: string | null; type: string }>,
 ): WebPlayerChapter[] {
   return chapters.map((ch) => ({
     start: ch.startMs / 1000,
@@ -75,7 +75,7 @@ export function generateManifest(options: ManifestOptions): WebPlayerManifest {
         src: getResourcePath(
           t.transcodedCid,
           `episodes/${String(ep.number).padStart(2, '0')}/audio/${t.language}.m4a`,
-          mode
+          mode,
         ),
       }))
 
@@ -96,7 +96,7 @@ export function generateManifest(options: ManifestOptions): WebPlayerManifest {
           src: getResourcePath(
             t.fileCid,
             `episodes/${String(ep.number).padStart(2, '0')}/subs/${t.language}.ass`,
-            mode
+            mode,
           ),
           // Шрифты всегда по локальным путям — они добавляются в структуру директории
           // Префикс ./ чтобы getUrl не добавлял gateway

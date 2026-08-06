@@ -3,10 +3,10 @@ import {
   Badge,
   Box,
   Button,
-  Link as ChakraLink,
   Container,
   Heading,
   HStack,
+  Link as ChakraLink,
   SimpleGrid,
   Text,
   VStack,
@@ -27,10 +27,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('title'),
-    description:
-      locale === 'ru'
-        ? 'Портфолио проектов Ками: веб-приложения, дашборды и SaaS решения'
-        : "Kami's project portfolio: web applications, dashboards and SaaS solutions",
+    description: locale === 'ru'
+      ? 'Портфолио проектов Ками: веб-приложения, дашборды и SaaS решения'
+      : "Kami's project portfolio: web applications, dashboards and SaaS solutions",
     alternates: {
       canonical: `/${locale}/projects`,
       languages: { ru: '/ru/projects', en: '/en/projects' },

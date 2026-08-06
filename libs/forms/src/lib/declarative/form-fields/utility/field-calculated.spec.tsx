@@ -25,7 +25,7 @@ describe('Form.Field.Calculated', () => {
             compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)}
           />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Начальное значение: 10 * 2 = 20
@@ -45,7 +45,7 @@ describe('Form.Field.Calculated', () => {
             format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
           />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -62,7 +62,7 @@ describe('Form.Field.Calculated', () => {
           <Form.Field.Calculated name="total" compute={(v) => (Number(v.price) || 0) * (Number(v.qty) || 0)} hidden />
           <Form.DebugValues showInProduction />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Не должно быть видимого элемента
@@ -75,7 +75,7 @@ describe('Form.Field.Calculated', () => {
         <Form initialValue={{ x: 1, result: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Calculated name="result" label="Результат" compute={(v) => Number(v.x) * 2} />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -98,7 +98,7 @@ describe('Form.Field.Calculated', () => {
           <Form.Field.Calculated name="sum" label="Сумма" compute={(v) => (Number(v.a) || 0) + (Number(v.b) || 0)} />
           <Form.Button.Submit>Отправить</Form.Button.Submit>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Ждём вычисления
@@ -131,7 +131,7 @@ describe('Form.Field.Calculated', () => {
             deps={['price', 'qty']}
           />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Начальное: 10 * 1 = 10
@@ -167,7 +167,7 @@ describe('Form.Field.Calculated', () => {
             />
           </Form.Group>
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -181,7 +181,7 @@ describe('Form.Field.Calculated', () => {
         <Form initialValue={{ x: 1, result: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Calculated name="result" label="Мой результат" compute={(v) => Number(v.x)} />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {

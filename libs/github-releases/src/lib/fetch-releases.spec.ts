@@ -24,7 +24,7 @@ describe('fetchLatestRelease', () => {
     expect(release?.tag_name).toBe('v1.0.0')
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.github.com/repos/kamiletar/aira/releases/latest',
-      expect.anything()
+      expect.anything(),
     )
   })
 
@@ -68,7 +68,7 @@ describe('fetchReleases', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => [mockRelease('v3', true), mockRelease('v2', false, true), mockRelease('v1')],
-      })
+      }),
     )
 
     const releases = await fetchReleases({ owner: 'kamiletar', repo: 'aira' })

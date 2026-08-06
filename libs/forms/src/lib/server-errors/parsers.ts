@@ -17,39 +17,39 @@ import type {
 
 function isPrismaError(error: unknown): error is PrismaError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof (error as PrismaError).code === 'string' &&
-    (error as PrismaError).code.startsWith('P')
+    typeof error === 'object'
+    && error !== null
+    && 'code' in error
+    && typeof (error as PrismaError).code === 'string'
+    && (error as PrismaError).code.startsWith('P')
   )
 }
 
 function isZodFlatError(error: unknown): error is ZodFlatError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'fieldErrors' in error &&
-    typeof (error as ZodFlatError).fieldErrors === 'object'
+    typeof error === 'object'
+    && error !== null
+    && 'fieldErrors' in error
+    && typeof (error as ZodFlatError).fieldErrors === 'object'
   )
 }
 
 function isZenStackError(error: unknown): error is ZenStackError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'reason' in error &&
-    typeof (error as ZenStackError).reason === 'string'
+    typeof error === 'object'
+    && error !== null
+    && 'reason' in error
+    && typeof (error as ZenStackError).reason === 'string'
   )
 }
 
 function isActionResultError(error: unknown): error is ActionResultError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'success' in error &&
-    (error as ActionResultError).success === false &&
-    'error' in error
+    typeof error === 'object'
+    && error !== null
+    && 'success' in error
+    && (error as ActionResultError).success === false
+    && 'error' in error
   )
 }
 
@@ -87,7 +87,7 @@ type Locale = keyof typeof PRISMA_MESSAGES
 export function parsePrismaError(
   error: unknown,
   fieldMap?: FieldErrorMap,
-  locale: Locale = 'ru'
+  locale: Locale = 'ru',
 ): MappedServerErrors | null {
   if (!isPrismaError(error)) return null
 
@@ -152,7 +152,7 @@ export function parsePrismaError(
 export function parseZenStackError(
   error: unknown,
   fieldMap?: FieldErrorMap,
-  locale: Locale = 'ru'
+  locale: Locale = 'ru',
 ): MappedServerErrors | null {
   if (!isZenStackError(error)) return null
 
@@ -160,14 +160,13 @@ export function parseZenStackError(
 
   switch (error.reason) {
     case 'rejected-by-policy': {
-      const message =
-        locale === 'ru'
-          ? error.rejectedByPolicyReason === 'cannot-read-back'
-            ? 'Операция выполнена, но результат недоступен из-за ограничений доступа'
-            : 'Нет доступа для выполнения этой операции'
-          : error.rejectedByPolicyReason === 'cannot-read-back'
-            ? 'Operation succeeded but result is not accessible due to permissions'
-            : 'Access denied for this operation'
+      const message = locale === 'ru'
+        ? error.rejectedByPolicyReason === 'cannot-read-back'
+          ? 'Операция выполнена, но результат недоступен из-за ограничений доступа'
+          : 'Нет доступа для выполнения этой операции'
+        : error.rejectedByPolicyReason === 'cannot-read-back'
+        ? 'Operation succeeded but result is not accessible due to permissions'
+        : 'Access denied for this operation'
       result.formErrors.push(message)
       break
     }
@@ -259,7 +258,7 @@ export function parseActionResultError(error: unknown): MappedServerErrors | nul
 export function parseErrorObject(
   error: unknown,
   fieldMap?: FieldErrorMap,
-  locale: Locale = 'ru'
+  locale: Locale = 'ru',
 ): MappedServerErrors | null {
   if (!(error instanceof Error)) return null
 

@@ -155,28 +155,28 @@
 {
   /* Значение не равно */
 }
-;<Form.When field="role" isNot="guest">
+<Form.When field="role" isNot="guest">
   <Form.Field.String name="email" />
 </Form.When>
 
 {
   /* Значение из списка */
 }
-;<Form.When field="country" isOneOf={['RU', 'BY', 'KZ']}>
+<Form.When field="country" isOneOf={['RU', 'BY', 'KZ']}>
   <Form.Field.Phone name="phone" />
 </Form.When>
 
 {
   /* Кастомное условие */
 }
-;<Form.When field="age" condition={(age) => age >= 18}>
+<Form.When field="age" condition={(age) => age >= 18}>
   <Form.Field.Checkbox name="drivingLicense" />
 </Form.When>
 
 {
   /* Булево поле */
 }
-;<Form.When field="hasDiscount" is={true}>
+<Form.When field="hasDiscount" is={true}>
   <Form.Field.Percentage name="discountPercent" />
 </Form.When>
 ```

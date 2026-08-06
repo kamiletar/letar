@@ -80,25 +80,23 @@ export async function buildAnimeInfo(params: {
     ageRating: shikimoriData?.rating ?? undefined,
     duration: shikimoriData?.duration ?? undefined,
     source: restSource?.toUpperCase() ?? undefined,
-    genres:
-      genres.length > 0
-        ? genres
-        : (shikimoriData?.genres
-            ?.filter((g) => g.kind === 'genre')
-            .map((g) => ({ name: g.name, nameRu: g.russian, id: parseInt(g.id, 10), slug: g.name })) ?? undefined),
-    themes:
-      themes.length > 0
-        ? themes
-        : (shikimoriData?.genres
-            ?.filter((g) => g.kind === 'theme')
-            .map((g) => ({ name: g.name, nameRu: g.russian, id: parseInt(g.id, 10) })) ?? undefined),
+    genres: genres.length > 0
+      ? genres
+      : (shikimoriData?.genres
+        ?.filter((g) => g.kind === 'genre')
+        .map((g) => ({ name: g.name, nameRu: g.russian, id: parseInt(g.id, 10), slug: g.name })) ?? undefined),
+    themes: themes.length > 0
+      ? themes
+      : (shikimoriData?.genres
+        ?.filter((g) => g.kind === 'theme')
+        .map((g) => ({ name: g.name, nameRu: g.russian, id: parseInt(g.id, 10) })) ?? undefined),
 
     // Статус и параметры
     episodeCount,
     status,
     rating,
-    licensor:
-      shikimoriData?.licenseNameRu ?? (shikimoriData?.licensors?.length ? shikimoriData.licensors[0] : undefined),
+    licensor: shikimoriData?.licenseNameRu
+      ?? (shikimoriData?.licensors?.length ? shikimoriData.licensors[0] : undefined),
     nextEpisodeAt: shikimoriData?.nextEpisodeAt ?? undefined,
 
     // Описание

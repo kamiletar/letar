@@ -110,7 +110,7 @@ export function useChapterNav({ manifestChapters, currentTime, videoRef }: UseCh
     }
     const SKIPPABLE = new Set(['OP', 'ED', 'RECAP', 'PREVIEW'])
     const current = chapters.find(
-      (ch) => ch.type && SKIPPABLE.has(ch.type) && currentTime >= ch.startTime && currentTime < ch.endTime - 1
+      (ch) => ch.type && SKIPPABLE.has(ch.type) && currentTime >= ch.startTime && currentTime < ch.endTime - 1,
     )
     if (current && lastAutoSkippedRef.current !== current.id) {
       lastAutoSkippedRef.current = current.id

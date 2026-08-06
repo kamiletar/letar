@@ -83,9 +83,7 @@ export function AdminBreadcrumbs({ pathNames = {}, baseUrl = '/admin' }: AdminBr
               <LuChevronRight />
             </Breadcrumb.Separator>
             <Breadcrumb.Item>
-              {crumb.isLast ? (
-                <Text color="fg">{crumb.label}</Text>
-              ) : (
+              {crumb.isLast ? <Text color="fg">{crumb.label}</Text> : (
                 <Breadcrumb.Link asChild>
                   <Link href={crumb.href} color="fg.muted" _hover={{ color: 'fg' }}>
                     {crumb.label}

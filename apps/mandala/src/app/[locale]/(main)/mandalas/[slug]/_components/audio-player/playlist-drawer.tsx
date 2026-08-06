@@ -107,24 +107,26 @@ function SortableTrackItem({ track, index, isCurrent, onSelect }: SortableTrackI
           justifyContent="center"
           flexShrink={0}
         >
-          {isCurrent ? (
-            <Box display="flex" gap="2px" alignItems="flex-end" h="12px">
-              {[0, 1, 2].map((i) => (
-                <Box
-                  key={i}
-                  w="2px"
-                  bg="white"
-                  borderRadius="full"
-                  animation={`equalizer 0.5s ease-in-out ${i * 0.1}s infinite alternate`}
-                  h={`${6 + i * 2}px`}
-                />
-              ))}
-            </Box>
-          ) : (
-            <Text fontSize="xs" color="gray.400">
-              {index + 1}
-            </Text>
-          )}
+          {isCurrent
+            ? (
+              <Box display="flex" gap="2px" alignItems="flex-end" h="12px">
+                {[0, 1, 2].map((i) => (
+                  <Box
+                    key={i}
+                    w="2px"
+                    bg="white"
+                    borderRadius="full"
+                    animation={`equalizer 0.5s ease-in-out ${i * 0.1}s infinite alternate`}
+                    h={`${6 + i * 2}px`}
+                  />
+                ))}
+              </Box>
+            )
+            : (
+              <Text fontSize="xs" color="gray.400">
+                {index + 1}
+              </Text>
+            )}
         </Box>
 
         {/* Track name */}
@@ -182,7 +184,7 @@ export function PlaylistDrawer({
         }
       }
     },
-    [playlist, onReorder]
+    [playlist, onReorder],
   )
 
   // Уникальные ID для SortableContext
@@ -252,27 +254,29 @@ export function PlaylistDrawer({
 
           {/* Body */}
           <Drawer.Body p={0} overflowY="auto">
-            {playlist.length > 0 ? (
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={trackIds} strategy={verticalListSortingStrategy}>
-                  <VStack align="stretch" gap={0}>
-                    {playlist.map((track, index) => (
-                      <SortableTrackItem
-                        key={`${track.type}-${track.id}`}
-                        track={track}
-                        index={index}
-                        isCurrent={index === currentIndex}
-                        onSelect={() => onTrackSelect(index)}
-                      />
-                    ))}
-                  </VStack>
-                </SortableContext>
-              </DndContext>
-            ) : (
-              <Box py={8} textAlign="center">
-                <Text color="gray.500">Нет доступных треков</Text>
-              </Box>
-            )}
+            {playlist.length > 0
+              ? (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={trackIds} strategy={verticalListSortingStrategy}>
+                    <VStack align="stretch" gap={0}>
+                      {playlist.map((track, index) => (
+                        <SortableTrackItem
+                          key={`${track.type}-${track.id}`}
+                          track={track}
+                          index={index}
+                          isCurrent={index === currentIndex}
+                          onSelect={() => onTrackSelect(index)}
+                        />
+                      ))}
+                    </VStack>
+                  </SortableContext>
+                </DndContext>
+              )
+              : (
+                <Box py={8} textAlign="center">
+                  <Text color="gray.500">Нет доступных треков</Text>
+                </Box>
+              )}
           </Drawer.Body>
 
           {/* CSS для анимации эквалайзера */}

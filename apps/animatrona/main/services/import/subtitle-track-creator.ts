@@ -49,7 +49,7 @@ export async function createSubtitleTracks(
   fileAnalyses: FileAnalysisLike[] | undefined,
   episodeNumber: number,
   episodeOutputDir: string,
-  externalSubsMap: Map<number, ExternalSubtitleMatch[]>
+  externalSubsMap: Map<number, ExternalSubtitleMatch[]>,
 ): Promise<void> {
   const fileAnalysis = fileAnalyses?.find((a) => a.episodeNumber === episodeNumber)
   const selectedSubs = fileAnalysis?.subtitleRecommendations.filter((r) => r.enabled) || []
@@ -67,7 +67,7 @@ async function processSelectedSubtitles(
   episodeId: string,
   demuxResult: DemuxResult,
   selectedSubs: SubtitleRecommendation[],
-  episodeOutputDir: string
+  episodeOutputDir: string,
 ): Promise<void> {
   let isFirstSub = true
 
@@ -115,7 +115,7 @@ async function processExternalSubtitle(
   episodeId: string,
   rec: SubtitleRecommendation,
   episodeOutputDir: string,
-  isDefault: boolean
+  isDefault: boolean,
 ): Promise<void> {
   const extPath = rec.externalPath
   if (!extPath) {
@@ -176,7 +176,7 @@ async function processEmbeddedSubtitles(episodeId: string, demuxResult: DemuxRes
         fileCid: embSubResult?.cid ?? undefined,
         ipfsSize: embSubResult?.size ?? undefined,
       })
-    })
+    }),
   )
 }
 
@@ -185,7 +185,7 @@ async function processExternalSubtitles(
   episodeId: string,
   episodeNumber: number,
   episodeOutputDir: string,
-  externalSubsMap: Map<number, ExternalSubtitleMatch[]>
+  externalSubsMap: Map<number, ExternalSubtitleMatch[]>,
 ): Promise<void> {
   const extSubs = externalSubsMap.get(episodeNumber) || []
 
@@ -229,7 +229,7 @@ async function processExternalSubtitles(
 async function processFonts(
   subtitleTrackId: string,
   matchedFonts: Array<{ name: string; path: string }>,
-  episodeOutputDir: string
+  episodeOutputDir: string,
 ): Promise<void> {
   const fontsDir = path.join(episodeOutputDir, 'fonts')
   if (!fs.existsSync(fontsDir)) {

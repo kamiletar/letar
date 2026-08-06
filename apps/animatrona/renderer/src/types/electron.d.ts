@@ -1288,7 +1288,7 @@ export interface ElectronAPI {
     scanFolder: (
       folderPath: string,
       recursive?: boolean,
-      mediaTypes?: ('video' | 'audio')[]
+      mediaTypes?: ('video' | 'audio')[],
     ) => Promise<{ success: boolean; files: MediaFileInfo[] }>
     /** Удалить файл или папку (по умолчанию в корзину) */
     delete: (targetPath: string, moveToTrash?: boolean) => Promise<{ success: boolean; error?: string }>
@@ -1301,12 +1301,12 @@ export interface ElectronAPI {
     /** Сканировать внешние субтитры (Rus Sub/, Eng Sub/ и т.д.) */
     scanExternalSubtitles: (
       videoFolderPath: string,
-      videoFiles: Array<{ path: string; episodeNumber: number }>
+      videoFiles: Array<{ path: string; episodeNumber: number }>,
     ) => Promise<ExternalSubtitleScanResult>
     /** Сканировать внешние аудио (Rus Sound/, Audio/ и т.д.) */
     scanExternalAudio: (
       videoFolderPath: string,
-      videoFiles: Array<{ path: string; episodeNumber: number }>
+      videoFiles: Array<{ path: string; episodeNumber: number }>,
     ) => Promise<ExternalAudioScanResult>
     /** Получить метаданные изображения (размеры, blur placeholder) */
     getImageMetadata: (filePath: string) => Promise<{
@@ -1333,7 +1333,7 @@ export interface ElectronAPI {
     previewShift: (
       inputPath: string,
       offsetMs: number,
-      limit?: number
+      limit?: number,
     ) => Promise<{
       events: Array<{ start: string; end: string; text: string }>
       total: number
@@ -1349,12 +1349,12 @@ export interface ElectronAPI {
     resolveOutputPath: (options: LibraryPathOptions) => Promise<{ success: boolean; data?: string; error?: string }>
     /** Создать структуру папок для эпизода */
     ensureEpisodeDirectory: (
-      options: LibraryPathOptions
+      options: LibraryPathOptions,
     ) => Promise<{ success: boolean; data?: string; error?: string }>
     /** Создать папку для аниме (для постера и других общих файлов) */
     ensureAnimeDirectory: (
       libraryPath: string,
-      animeName: string
+      animeName: string,
     ) => Promise<{ success: boolean; data?: string; error?: string }>
     /** Проверить, есть ли аниме с таким shikimoriId в библиотеке */
     checkAnimeExists: (shikimoriId: number) => Promise<{
@@ -1394,7 +1394,7 @@ export interface ElectronAPI {
     downloadPoster: (
       posterUrl: string,
       animeId: string,
-      options?: { fileName?: string; savePath?: string }
+      options?: { fileName?: string; savePath?: string },
     ) => Promise<{
       success: boolean
       localPath?: string
@@ -1509,7 +1509,7 @@ export interface ElectronAPI {
     /** Импортировать аниме из IPFS (directoryCid или manifestCid) */
     import: (
       cid: string,
-      pin?: boolean
+      pin?: boolean,
     ) => Promise<{
       success: boolean
       data?: { animeId: string; animeName: string; episodeCount: number }
@@ -1552,7 +1552,7 @@ export interface ElectronAPI {
         animeName: string
         status: 'processing' | 'ok' | 'error'
         error?: string
-      }) => void
+      }) => void,
     ) => () => void
 
     /** Точечная регенерация EpisodeManifest + AnimeManifest + directoryCid для одного аниме */
@@ -1616,12 +1616,12 @@ export interface ElectronAPI {
         level: 'info' | 'warn' | 'error' | 'success'
         message: string
         meta?: Record<string, unknown>
-      }) => void
+      }) => void,
     ) => () => void
 
     /** Подписка на завершение регенерации */
     onRegenerateFinished: (
-      callback: (data: { success: number; failed: number; stopped?: boolean; diskFull?: boolean }) => void
+      callback: (data: { success: number; failed: number; stopped?: boolean; diskFull?: boolean }) => void,
     ) => () => void
 
     /** Список аниме с потерями для UI-отчёта */
@@ -1669,7 +1669,7 @@ export interface ElectronAPI {
         audioTrackOverrides?: TrackOverride[]
         /** Переопределения для субтитров (язык, dubGroup из UI) */
         subtitleTrackOverrides?: TrackOverride[]
-      }
+      },
     ) => Promise<{
       success: boolean
       manifestPath?: string
@@ -1688,7 +1688,7 @@ export interface ElectronAPI {
       navigation: {
         nextEpisode?: { id: string; manifestPath: string }
         prevEpisode?: { id: string; manifestPath: string }
-      }
+      },
     ) => Promise<{ success: boolean; error?: string }>
     /** Обновить thumbnails в манифесте (с CID для IPFS) */
     updateThumbnails: (
@@ -1696,28 +1696,28 @@ export interface ElectronAPI {
       thumbnails: {
         vttCid: string
         spriteCid: string
-      }
+      },
     ) => Promise<{ success: boolean; error?: string }>
     /** Batch-обновление навигации между эпизодами через IPFS */
     updateNavigationBatch: (
-      episodes: Array<{ id: string; manifestCid: string }>
+      episodes: Array<{ id: string; manifestCid: string }>,
     ) => Promise<{ success: boolean; data?: Record<string, string>; error?: string }>
     /** Получить главы эпизода из IPFS манифеста */
     getChapters: (manifestCid: string) => Promise<{ success: boolean; data?: ManifestChapter[]; error?: string }>
     /** Обновить главы эпизода через IPFS */
     updateChapters: (
       episodeId: string,
-      chapters: ManifestChapter[]
+      chapters: ManifestChapter[],
     ) => Promise<{ success: boolean; data?: string; error?: string }>
     /** Копировать главы из одного эпизода в другие */
     copyChapters: (
       sourceEpisodeId: string,
       targetEpisodeIds: string[],
-      chapterTypes: string[]
+      chapterTypes: string[],
     ) => Promise<{ success: boolean; data?: { count: number; skipped: number }; error?: string }>
     /** Генерация RECAP/PREVIEW глав */
     generateRecapPreview: (
-      episodes: Array<{ id: string; manifestCid: string; durationMs: number }>
+      episodes: Array<{ id: string; manifestCid: string; durationMs: number }>,
     ) => Promise<{ success: boolean; data?: { created: number; skipped: number }; error?: string }>
     /** Обновить информацию о кодировании в манифесте */
     updateEncoding: (
@@ -1754,7 +1754,7 @@ export interface ElectronAPI {
         sourceHeight?: number
         sourceBitrate?: number
         sourceBitDepth?: number
-      }
+      },
     ) => Promise<{ success: boolean; error?: string }>
     /** Обновить CID'ы медиафайлов в манифесте перед загрузкой в IPFS */
     updateMediaCids: (
@@ -1768,7 +1768,7 @@ export interface ElectronAPI {
         fontCids?: Record<string, string>
         sizes?: Record<string, number>
         metadataCid?: string
-      }
+      },
     ) => Promise<{ success: boolean; error?: string }>
     /** Получить информацию о кодировании из IPFS манифеста */
     getEncoding: (manifestCid: string) => Promise<{ success: boolean; data?: ManifestEncodingInfo; error?: string }>
@@ -1777,7 +1777,7 @@ export interface ElectronAPI {
     /** Полная перестройка аудио/субтитров в манифесте из БД (включая внешние дорожки) */
     rebuildTracksFromDb: (
       manifestPath: string,
-      episodeId: string
+      episodeId: string,
     ) => Promise<{ success: boolean; data?: { changed: boolean }; error?: string }>
   }
 
@@ -1801,13 +1801,13 @@ export interface ElectronAPI {
     extractStream: (
       inputPath: string,
       outputPath: string,
-      streamSpec: string
+      streamSpec: string,
     ) => Promise<{ success: boolean; path: string; size: number }>
     /** Транскодирование аудио VBR (умный подбор битрейта) */
     transcodeAudioVBR: (
       input: string,
       output: string,
-      options: AudioTranscodeVBROptions
+      options: AudioTranscodeVBROptions,
     ) => Promise<AudioTranscodeResult>
     /** Кодирование тестового сэмпла */
     encodeSample: (options: {
@@ -1823,7 +1823,7 @@ export interface ElectronAPI {
       inputPath: string,
       outputDir: string,
       duration: number,
-      options: ScreenshotOptions
+      options: ScreenshotOptions,
     ) => Promise<ScreenshotResult>
     /** Генерация thumbnail sprite sheet для hover preview */
     generateThumbnailSprite: (
@@ -1836,7 +1836,7 @@ export interface ElectronAPI {
         frameHeight?: number
         columns?: number
         quality?: number
-      }
+      },
     ) => Promise<{
       success: boolean
       spritePath: string
@@ -1873,7 +1873,7 @@ export interface ElectronAPI {
     calculate: (
       encoded: string,
       original: string,
-      options?: VmafOptions
+      options?: VmafOptions,
     ) => Promise<{ success: boolean; data?: VmafResult; error?: string }>
 
     /** Поиск оптимального CQ для целевого VMAF */
@@ -1882,7 +1882,7 @@ export interface ElectronAPI {
       videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
       options?: Partial<CqSearchOptions>,
       preferCpu?: boolean,
-      itemId?: string
+      itemId?: string,
     ) => Promise<{ success: boolean; data?: CqSearchResult; error?: string }>
 
     /** Подписка на прогресс поиска CQ */
@@ -1894,7 +1894,7 @@ export interface ElectronAPI {
     /** Добавить файл в очередь */
     addToQueue: (
       filePath: string,
-      settings?: PerFileTranscodeSettings
+      settings?: PerFileTranscodeSettings,
     ) => Promise<{ success: boolean; id?: string; error?: string }>
 
     /** Удалить из очереди */
@@ -1973,7 +1973,7 @@ export interface ElectronAPI {
     startNewBatch: (
       items: BatchImportItem[],
       batchId?: string,
-      concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number }
+      concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number },
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Получить текущий batch ID */
@@ -2043,8 +2043,8 @@ export interface ElectronAPI {
           ffmpegCommand?: string
           transcodeDurationMs?: number
           activeGpuWorkers?: number
-        }
-      ) => void
+        },
+      ) => void,
     ) => () => void
 
     /** Подписка на завершение аудиодорожки */
@@ -2054,13 +2054,13 @@ export interface ElectronAPI {
         outputPath: string,
         episodeId: string,
         passthrough?: boolean,
-        originalCodec?: string
-      ) => void
+        originalCodec?: string,
+      ) => void,
     ) => () => void
 
     /** Подписка на завершение элемента (видео + все аудио готовы) */
     onItemCompleted: (
-      callback: (itemId: string, episodeId: string, success: boolean, errorMessage?: string) => void
+      callback: (itemId: string, episodeId: string, success: boolean, errorMessage?: string) => void,
     ) => () => void
 
     /** Подписка на ошибку батча */
@@ -2135,8 +2135,8 @@ export interface ElectronAPI {
     onVideoLogEntry: (
       callback: (
         taskId: string,
-        entry: { timestamp: number; level: 'info' | 'warning' | 'error'; message: string }
-      ) => void
+        entry: { timestamp: number; level: 'info' | 'warning' | 'error'; message: string },
+      ) => void,
     ) => () => void
   }
 
@@ -2175,7 +2175,7 @@ export interface ElectronAPI {
     /** Повторить обработку item с ошибкой */
     retryItem: (
       itemId: string,
-      options?: { skipCompressionCheck?: boolean }
+      options?: { skipCompressionCheck?: boolean },
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Пометить completed item как failed (для повторного импорта) */
@@ -2191,7 +2191,7 @@ export interface ElectronAPI {
     /** Переделать недостающие эпизоды (retranscode mode, опционально с pre-encode) */
     retryMissing: (
       itemId: string,
-      preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string }
+      preEncodeOptions?: { enabled: boolean; crf?: number; preset?: string },
     ) => Promise<{ success: boolean; data?: { newItemId?: string }; error?: string }>
 
     /** Отменить всю очередь */
@@ -2221,7 +2221,7 @@ export interface ElectronAPI {
     updateStatus: (
       itemId: string,
       status: ImportQueueStatus,
-      error?: string
+      error?: string,
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Обновить прогресс item */
@@ -2230,13 +2230,13 @@ export interface ElectronAPI {
       progress: number,
       currentFileName?: string,
       currentStage?: string,
-      detailProgress?: ImportQueueDetailProgress
+      detailProgress?: ImportQueueDetailProgress,
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Обновить VMAF прогресс */
     updateVmafProgress: (
       itemId: string,
-      vmafProgress: ImportQueueVmafProgress
+      vmafProgress: ImportQueueVmafProgress,
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Установить результат VMAF */
@@ -2252,7 +2252,7 @@ export interface ElectronAPI {
 
     /** Подписка на изменение статуса item */
     onItemStatus: (
-      callback: (data: { itemId: string; status: ImportQueueStatus; error?: string }) => void
+      callback: (data: { itemId: string; status: ImportQueueStatus; error?: string }) => void,
     ) => () => void
 
     /** Подписка на изменение прогресса item */
@@ -2264,7 +2264,7 @@ export interface ElectronAPI {
         currentStage?: string
         detailProgress?: ImportQueueDetailProgress
         vmafProgress?: ImportQueueVmafProgress
-      }) => void
+      }) => void,
     ) => () => void
 
     /** Подписка на инвалидацию кэша (main → renderer после завершения импорта в main process) */
@@ -2285,7 +2285,7 @@ export interface ElectronAPI {
     /** Обновить шаблон */
     update: (
       id: string,
-      data: ImportTemplateUpdateData
+      data: ImportTemplateUpdateData,
     ) => Promise<{ success: boolean; data?: ImportTemplate; error?: string }>
 
     /** Удалить шаблон */
@@ -2397,7 +2397,7 @@ export interface ElectronAPI {
     /** Добавить директорию в IPFS */
     addDirectory: (
       dirPath: string,
-      recursive?: boolean
+      recursive?: boolean,
     ) => Promise<{ success: boolean; data?: { files: IpfsAddResult[]; rootCid: string }; error?: string }>
 
     /** Прочитать контент по CID (возвращает base64) */
@@ -2551,7 +2551,7 @@ export interface ElectronAPI {
     /** Опубликовать CID под IPNS именем текущей ноды */
     ipnsPublish: (
       cid: string,
-      lifetime?: string
+      lifetime?: string,
     ) => Promise<{ success: boolean; data?: IpnsPublishResult; error?: string }>
 
     /** Разрешить IPNS имя в CID */
@@ -2579,7 +2579,7 @@ export interface ElectronAPI {
 
     /** Добавить подписку */
     subscriptionAdd: (
-      data: SubscriptionCreateData
+      data: SubscriptionCreateData,
     ) => Promise<{ success: boolean; data?: Subscription; error?: string }>
 
     /** Удалить подписку */
@@ -2588,7 +2588,7 @@ export interface ElectronAPI {
     /** Обновить настройки подписки */
     subscriptionUpdate: (
       id: string,
-      data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>
+      data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>,
     ) => Promise<{ success: boolean; data?: Subscription | null; error?: string }>
 
     /** Обновить данные подписки (проверить IPNS) */
@@ -2599,7 +2599,7 @@ export interface ElectronAPI {
 
     /** Загрузить библиотеку подписки из IPFS по lastKnownCid */
     subscriptionFetchLibrary: (
-      id: string
+      id: string,
     ) => Promise<{ success: boolean; data?: PublishedLibrary | null; error?: string }>
 
     /** Подписка на добавление подписки */
@@ -2624,7 +2624,7 @@ export interface ElectronAPI {
 
     /** Обновить конфигурацию публикации */
     publisherUpdateConfig: (
-      updates: Partial<PublisherConfig>
+      updates: Partial<PublisherConfig>,
     ) => Promise<{ success: boolean; data?: PublisherConfig; error?: string }>
 
     /** Опубликовать библиотеку (автоматически получает данные из БД) */
@@ -2668,12 +2668,12 @@ export interface ElectronAPI {
 
     /** Подписка на прогресс миграции */
     onPublisherMigrationProgress: (
-      callback: (progress: { current: number; total: number; animeName: string; episodeNumber: number }) => void
+      callback: (progress: { current: number; total: number; animeName: string; episodeNumber: number }) => void,
     ) => () => void
 
     /** Удалить контент конкретного аниме из IPFS (вызывать ПЕРЕД удалением из БД) */
     publisherDeleteAnimeContent: (
-      animeId: string
+      animeId: string,
     ) => Promise<{ success: boolean; data?: { deletedCids: number; cids: string[] }; error?: string }>
 
     /** Очистить библиотеку (удалить все аниме из БД и IPFS) */
@@ -2765,7 +2765,7 @@ export interface ElectronAPI {
           isReplacement?: boolean
           replacesAnimeId?: string
         }
-      }) => void
+      }) => void,
     ) => () => void
 
     // === Subscription Scheduler ===
@@ -2778,7 +2778,7 @@ export interface ElectronAPI {
 
     /** Обновить конфигурацию планировщика */
     schedulerUpdateConfig: (
-      updates: Partial<SchedulerConfig>
+      updates: Partial<SchedulerConfig>,
     ) => Promise<{ success: boolean; data?: SchedulerConfig; error?: string }>
 
     /** Запустить планировщик */
@@ -2806,12 +2806,12 @@ export interface ElectronAPI {
 
     /** Обновить конфигурацию remote pinning */
     remotePinUpdateConfig: (
-      updates: Partial<RemotePinConfig>
+      updates: Partial<RemotePinConfig>,
     ) => Promise<{ success: boolean; data?: RemotePinConfig; error?: string }>
 
     /** Обновить конфигурацию Pinata */
     remotePinUpdatePinataConfig: (
-      updates: Partial<PinataConfig>
+      updates: Partial<PinataConfig>,
     ) => Promise<{ success: boolean; data?: RemotePinConfig; error?: string }>
 
     /** Проверить JWT токен Pinata */
@@ -2820,7 +2820,7 @@ export interface ElectronAPI {
     /** Закрепить CID на Pinata */
     remotePinPin: (
       cid: string,
-      options?: RemotePinOptions
+      options?: RemotePinOptions,
     ) => Promise<{ success: boolean; data?: PinataPinJob; error?: string }>
 
     /** Открепить CID с Pinata */
@@ -2829,7 +2829,7 @@ export interface ElectronAPI {
     /** Получить список пинов на Pinata */
     remotePinList: (
       limit?: number,
-      offset?: number
+      offset?: number,
     ) => Promise<{ success: boolean; data?: RemotePin[]; error?: string }>
 
     /** Получить информацию о пине */
@@ -2845,7 +2845,7 @@ export interface ElectronAPI {
     remotePinUpdateMetadata: (
       cid: string,
       name: string,
-      keyvalues?: Record<string, string>
+      keyvalues?: Record<string, string>,
     ) => Promise<{ success: boolean; error?: string }>
 
     /** Получить статус pin job */
@@ -2901,7 +2901,7 @@ export interface ElectronAPI {
 
     /** Обновить настройки федерации */
     updateSettings: (
-      update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>
+      update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>,
     ) => Promise<FederationOperationResult<FederationSettings>>
 
     /** Сгенерировать ключи для HTTP Signatures */
@@ -3014,7 +3014,7 @@ export interface ElectronAPI {
     spend: (
       amount: number,
       description: string,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, unknown>,
     ) => Promise<{
       success: boolean
       data?: { success: boolean; error?: string; transaction?: BonusTransaction; newBalance?: number }
@@ -3024,7 +3024,7 @@ export interface ElectronAPI {
     reset: () => Promise<{ success: boolean; data?: BonusPoints; error?: string }>
     /** Подписка на изменение баланса */
     onBalanceChanged: (
-      callback: (event: { oldBalance: number; newBalance: number; transaction: BonusTransaction }) => void
+      callback: (event: { oldBalance: number; newBalance: number; transaction: BonusTransaction }) => void,
     ) => () => void
     /** Подписка на заработок очков */
     onPointsEarned: (callback: (data: { amount: number; type: string; description: string }) => void) => () => void
@@ -3182,13 +3182,13 @@ export interface ElectronAPI {
     sendMessage: (text: string) => Promise<{ success: boolean; data?: WatchPartyChatMessage | null; error?: string }>
     /** Отправить реакцию */
     sendReaction: (
-      reaction: string
+      reaction: string,
     ) => Promise<{ success: boolean; data?: WatchPartyChatMessage | null; error?: string }>
     /** Подписка на обновление playback */
     onPlaybackUpdated: (callback: (data: { roomId: string; state: WatchPartyPlaybackState }) => void) => () => void
     /** Подписка на присоединение участника */
     onParticipantJoined: (
-      callback: (data: { roomId: string; participant: WatchPartyParticipant }) => void
+      callback: (data: { roomId: string; participant: WatchPartyParticipant }) => void,
     ) => () => void
     /** Подписка на уход участника */
     onParticipantLeft: (callback: (data: { roomId: string; peerId: string }) => void) => () => void
@@ -3209,7 +3209,7 @@ export interface ElectronAPI {
       roomId: string,
       roomName: string,
       hostName: string,
-      animeName: string
+      animeName: string,
     ) => Promise<{ success: boolean; data?: WatchPartyInvite; error?: string }>
     /** Сгенерировать link для добавления друга */
     generateFriendLink: (friendCode: string) => Promise<{ success: boolean; data?: string; error?: string }>
@@ -3219,7 +3219,7 @@ export interface ElectronAPI {
     notificationsSupported: () => Promise<{ success: boolean; data?: boolean; error?: string }>
     /** Подписка на получение deep link */
     onReceived: (
-      callback: (data: { type: 'party_join' | 'friend_add' | 'unknown'; data: Record<string, string> }) => void
+      callback: (data: { type: 'party_join' | 'friend_add' | 'unknown'; data: Record<string, string> }) => void,
     ) => () => void
   }
 
@@ -3315,12 +3315,12 @@ export interface ElectronAPI {
     /** Предпросмотр: список дорожек для перекодировки */
     preview: (
       animeId: string,
-      targetBitrate: number
+      targetBitrate: number,
     ) => Promise<{ success: boolean; data?: ReencodePreview; error?: string }>
     /** Запуск перекодировки */
     start: (
       animeId: string,
-      targetBitrate: number
+      targetBitrate: number,
     ) => Promise<{ success: boolean; data?: ReencodeResult; error?: string }>
     /** Отмена перекодировки */
     cancel: () => Promise<{ success: boolean; error?: string }>
@@ -3334,7 +3334,7 @@ export interface ElectronAPI {
     start: (
       tasks: import('../../../../shared/types/restore-tracks').RestoreTask[],
       fontTasks: import('../../../../shared/types/restore-tracks').RestoreFontTask[],
-      config: import('../../../../shared/types/restore-tracks').RestoreConfig
+      config: import('../../../../shared/types/restore-tracks').RestoreConfig,
     ) => Promise<{ success: boolean; error?: string }>
     /** Отменить */
     cancel: () => Promise<{ success: boolean }>
@@ -3349,13 +3349,13 @@ export interface ElectronAPI {
     isProcessing: () => Promise<{ success: boolean; data?: boolean }>
     /** Подписка на прогресс */
     onProgress: (
-      callback: (progress: import('../../../../shared/types/restore-tracks').RestoreProgress) => void
+      callback: (progress: import('../../../../shared/types/restore-tracks').RestoreProgress) => void,
     ) => () => void
     /** Задача завершена */
     onTaskCompleted: (callback: (taskId: string, success: boolean) => void) => () => void
     /** Всё завершено */
     onCompleted: (
-      callback: (progress: import('../../../../shared/types/restore-tracks').RestoreProgress) => void
+      callback: (progress: import('../../../../shared/types/restore-tracks').RestoreProgress) => void,
     ) => () => void
     /** Ошибка задачи */
     onTaskError: (callback: (taskId: string, error: string) => void) => () => void
@@ -3375,7 +3375,7 @@ export interface ElectronAPI {
     confirmMatch: (shikimoriId: number) => Promise<{ success: boolean; data?: ShikimoriAnimeExtended; error?: string }>
     /** Запустить скачивание торрента → автоматический импорт по завершении */
     startDownload: (
-      params: StartDownloadParams
+      params: StartDownloadParams,
     ) => Promise<{ success: boolean; data?: StartDownloadResult; error?: string }>
     /** Метаданные загрузки для кнопки «В очередь» */
     getDownloadMeta: (infoHash: string) => Promise<{
@@ -3398,7 +3398,7 @@ export interface ElectronAPI {
     /** Отменить загрузку */
     cancelDownload: (
       infoHash: string,
-      deleteFiles?: boolean
+      deleteFiles?: boolean,
     ) => Promise<{ success: boolean; data?: boolean; error?: string }>
     /** Подписка на этапы импорта (живой прогресс) */
     onImportStep: (callback: (step: string) => void) => () => void
@@ -3420,7 +3420,7 @@ export interface ElectronAPI {
     /** Добавить торрент по магнет-ссылке */
     add: (
       magnetURI: string,
-      options: AddTorrentOptions
+      options: AddTorrentOptions,
     ) => Promise<{ success: boolean; data?: TorrentInfo; error?: string }>
     /** Приостановить торрент */
     pause: (infoHash: string) => Promise<{ success: boolean; data?: boolean; error?: string }>
@@ -3435,7 +3435,7 @@ export interface ElectronAPI {
     /** Обновить метаданные торрента (importStatus, isBundle и т.д.) */
     updateMeta: (
       infoHash: string,
-      update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string }
+      update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string },
     ) => Promise<{ success: boolean; error?: string }>
     /** Пересчитать хеш торрента (полная верификация кусков) */
     recheck: (infoHash: string) => Promise<{ success: boolean; data?: boolean; error?: string }>

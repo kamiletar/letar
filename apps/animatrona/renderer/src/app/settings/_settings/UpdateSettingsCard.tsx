@@ -132,9 +132,9 @@ export function UpdateSettingsCard({
           )}
 
           {/* Кнопка проверки */}
-          {(updateStatus.status === 'idle' ||
-            updateStatus.status === 'not-available' ||
-            updateStatus.status === 'error') && (
+          {(updateStatus.status === 'idle'
+            || updateStatus.status === 'not-available'
+            || updateStatus.status === 'error') && (
             <Button variant="outline" size="sm" onClick={onCheckUpdates} alignSelf="flex-start">
               <Icon as={LuRefreshCw} />
               Проверить обновления

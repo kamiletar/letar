@@ -40,7 +40,7 @@ const VERIFY_URLS: Record<CaptchaProvider, string> = {
  */
 export async function verifyCaptcha(
   token: string | undefined | null,
-  options: CaptchaVerifyOptions
+  options: CaptchaVerifyOptions,
 ): Promise<CaptchaVerifyResult> {
   if (!token) {
     return { success: false, errorCodes: ['missing-input-response'] }

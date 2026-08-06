@@ -117,7 +117,7 @@ export async function createMainWindow(): Promise<BrowserWindow> {
           'Access-Control-Allow-Origin': ['*'],
         },
       })
-    }
+    },
   )
 
   // Показываем окно когда оно готово и закрываем splash

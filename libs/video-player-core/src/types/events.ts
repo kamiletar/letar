@@ -35,8 +35,7 @@ export interface PlayerEventMap {
 }
 
 /** Тип обработчика события */
-export type PlayerEventHandler<K extends keyof PlayerEventMap> = PlayerEventMap[K] extends void
-  ? () => void
+export type PlayerEventHandler<K extends keyof PlayerEventMap> = PlayerEventMap[K] extends void ? () => void
   : (data: PlayerEventMap[K]) => void
 
 /** Тип подписки на событие */

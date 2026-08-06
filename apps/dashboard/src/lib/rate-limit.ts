@@ -47,7 +47,7 @@ export interface RateLimitConfig {
  */
 export function checkRateLimit(
   key: string,
-  config: RateLimitConfig = {}
+  config: RateLimitConfig = {},
 ): { allowed: boolean; remaining: number; resetAt: number } {
   const { maxRequests = RATE_LIMIT.maxRequests, windowSeconds = RATE_LIMIT.windowSeconds } = config
   const now = Date.now()

@@ -307,7 +307,7 @@ export function createCRUDHooks<
     TUpdateData,
     TUpdateResult,
     TDeleteResult
-  >
+  >,
 ) {
   const { keys, actions, invalidation } = config
 

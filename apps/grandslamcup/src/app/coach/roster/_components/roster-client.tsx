@@ -145,15 +145,17 @@ export function RosterClient({ roster, pendingCount, citySlug }: RosterClientPro
                     </VStack>
                   </Table.Cell>
                   <Table.Cell display={{ base: 'none', md: 'table-cell' }}>
-                    {pts.hasUser ? (
-                      <Badge colorPalette="green" size="sm" variant="subtle">
-                        Привязан
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm" variant="outline">
-                        Без аккаунта
-                      </Badge>
-                    )}
+                    {pts.hasUser
+                      ? (
+                        <Badge colorPalette="green" size="sm" variant="subtle">
+                          Привязан
+                        </Badge>
+                      )
+                      : (
+                        <Badge colorPalette="gray" size="sm" variant="outline">
+                          Без аккаунта
+                        </Badge>
+                      )}
                   </Table.Cell>
                   <Table.Cell>
                     <HStack gap={1}>

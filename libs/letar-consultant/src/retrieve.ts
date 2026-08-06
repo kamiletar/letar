@@ -164,10 +164,12 @@ export function formatChunksForPrompt(chunks: CodeChunk[]): string {
   return chunks
     .map((chunk, i) => {
       const location = chunk.startLine ? `${chunk.filePath}:${chunk.startLine}` : chunk.filePath
-      return `### [${i + 1}] ${location} (score: ${chunk.score.toFixed(2)})\n\`\`\`\n${chunk.content.slice(
-        0,
-        800
-      )}\n\`\`\``
+      return `### [${i + 1}] ${location} (score: ${chunk.score.toFixed(2)})\n\`\`\`\n${
+        chunk.content.slice(
+          0,
+          800,
+        )
+      }\n\`\`\``
     })
     .join('\n\n')
 }

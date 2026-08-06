@@ -77,16 +77,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       dockerMemory: dockerMemory
         ? {
-            total: dockerMemory.totalDockerMemory,
-            containerCount: dockerMemory.containerCount,
-            containers: dockerMemory.containers.map((c) => ({
-              id: c.id,
-              name: c.name,
-              memoryUsage: c.memoryUsage,
-              memoryLimit: c.memoryLimit,
-              memoryPercent: c.memoryPercent,
-            })),
-          }
+          total: dockerMemory.totalDockerMemory,
+          containerCount: dockerMemory.containerCount,
+          containers: dockerMemory.containers.map((c) => ({
+            id: c.id,
+            name: c.name,
+            memoryUsage: c.memoryUsage,
+            memoryLimit: c.memoryLimit,
+            memoryPercent: c.memoryPercent,
+          })),
+        }
         : undefined,
     })
   } catch (error) {

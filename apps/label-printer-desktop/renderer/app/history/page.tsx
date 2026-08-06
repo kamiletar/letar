@@ -363,57 +363,61 @@ export default function HistoryPage() {
         {/* Таблица */}
         <Card.Root>
           <Card.Body p={0}>
-            {isLoading ? (
-              <Box p={8} textAlign="center">
-                <Text color="fg.muted">Загрузка...</Text>
-              </Box>
-            ) : !printJobs?.length ? (
-              <Box py={12}>
-                {hasFilters ? (
-                  <AppEmptyState
-                    type="history"
-                    action={{
-                      label: 'Сбросить фильтры',
-                      onClick: handleResetFilters,
-                    }}
-                  />
-                ) : (
-                  <AppEmptyState type="history" />
-                )}
-              </Box>
-            ) : (
-              <Table.Root>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader w="40px">
-                      <Checkbox.Root
-                        checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
-                        onCheckedChange={toggleSelectAll}
-                      >
-                        <Checkbox.HiddenInput />
-                        <Checkbox.Control />
-                      </Checkbox.Root>
-                    </Table.ColumnHeader>
-                    <Table.ColumnHeader>GTIN</Table.ColumnHeader>
-                    <Table.ColumnHeader>Серийный номер</Table.ColumnHeader>
-                    <Table.ColumnHeader>Сканирований</Table.ColumnHeader>
-                    <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                    <Table.ColumnHeader>Первое сканирование</Table.ColumnHeader>
-                    <Table.ColumnHeader>Последнее</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {printJobs.map((job) => (
-                    <PrintJobRow
-                      key={job.id}
-                      job={job}
-                      isSelected={selectedIds.has(job.id)}
-                      onToggleSelection={toggleSelection}
-                    />
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            )}
+            {isLoading
+              ? (
+                <Box p={8} textAlign="center">
+                  <Text color="fg.muted">Загрузка...</Text>
+                </Box>
+              )
+              : !printJobs?.length
+              ? (
+                <Box py={12}>
+                  {hasFilters
+                    ? (
+                      <AppEmptyState
+                        type="history"
+                        action={{
+                          label: 'Сбросить фильтры',
+                          onClick: handleResetFilters,
+                        }}
+                      />
+                    )
+                    : <AppEmptyState type="history" />}
+                </Box>
+              )
+              : (
+                <Table.Root>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader w="40px">
+                        <Checkbox.Root
+                          checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
+                          onCheckedChange={toggleSelectAll}
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                        </Checkbox.Root>
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader>GTIN</Table.ColumnHeader>
+                      <Table.ColumnHeader>Серийный номер</Table.ColumnHeader>
+                      <Table.ColumnHeader>Сканирований</Table.ColumnHeader>
+                      <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                      <Table.ColumnHeader>Первое сканирование</Table.ColumnHeader>
+                      <Table.ColumnHeader>Последнее</Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {printJobs.map((job) => (
+                      <PrintJobRow
+                        key={job.id}
+                        job={job}
+                        isSelected={selectedIds.has(job.id)}
+                        onToggleSelection={toggleSelection}
+                      />
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              )}
           </Card.Body>
         </Card.Root>
 

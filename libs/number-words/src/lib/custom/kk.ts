@@ -71,14 +71,13 @@ export function ordinal(n: number): string {
   // Определяем мягкость по последней гласной
   const softVowels = 'еёиіөүэю'
   const hardVowels = 'аоуұыя'
-  const isSoft =
-    [...card].reverse().some((ch) => {
+  const isSoft = [...card].reverse().some((ch) => {
       if (softVowels.includes(ch)) return true
       if (hardVowels.includes(ch)) return true
       return false
     }) && [...card].reverse().find((ch) => softVowels.includes(ch) || hardVowels.includes(ch))
-      ? softVowels.includes([...card].reverse().find((ch) => softVowels.includes(ch) || hardVowels.includes(ch))!)
-      : false
+    ? softVowels.includes([...card].reverse().find((ch) => softVowels.includes(ch) || hardVowels.includes(ch))!)
+    : false
 
   const vowels = softVowels + hardVowels
 

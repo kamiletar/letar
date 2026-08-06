@@ -1,4 +1,4 @@
-import { Box, Link as ChakraLink, Container, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { setRequestLocale } from 'next-intl/server'
 

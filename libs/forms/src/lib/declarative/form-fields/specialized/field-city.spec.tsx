@@ -17,7 +17,7 @@ describe('FieldCity', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.City name="city" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldCity', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.City name="city" label="Город" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Город')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('FieldCity', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.City name="city" placeholder="Введите город" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByPlaceholderText('Введите город')).toBeInTheDocument()
@@ -55,7 +55,7 @@ describe('FieldCity', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.City name="city" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()

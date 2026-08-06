@@ -11,7 +11,8 @@ interface OrderButtonProps {
 export function OrderButton({ product }: OrderButtonProps) {
   const handleOrder = () => {
     // Формируем текст для заказа
-    const orderText = `Здравствуйте! Хочу заказать: ${product.name}\nЦена: ${product.price} ₽\n\nСсылка: ${window.location.href}`
+    const orderText =
+      `Здравствуйте! Хочу заказать: ${product.name}\nЦена: ${product.price} ₽\n\nСсылка: ${window.location.href}`
 
     // Копируем в буфер обмена
     navigator.clipboard

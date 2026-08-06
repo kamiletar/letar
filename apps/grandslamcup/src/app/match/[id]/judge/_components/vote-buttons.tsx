@@ -7,7 +7,7 @@
  */
 
 import type { ConnectionStatus } from '@/app/_hooks/use-match-sse'
-import { type JudgeColor, JUDGE_COLORS } from '@/lib/judge-colors'
+import { JUDGE_COLORS, type JudgeColor } from '@/lib/judge-colors'
 import { Box, Button, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { submitVoteAction } from '../_actions/judge.action'
@@ -61,7 +61,7 @@ export function VoteButtons({
         setError(result.error ?? 'Ошибка голосования')
       }
     },
-    [matchId, performanceId, dimension]
+    [matchId, performanceId, dimension],
   )
 
   // Подтверждение голоса с возможностью изменить

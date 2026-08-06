@@ -100,16 +100,16 @@ export function FileScanStep({
       const newFiles = files.map((f, i) =>
         i === index
           ? {
-              ...f,
-              episodeNumber,
-              // Автоматически выбираем при назначении номера
-              selected: episodeNumber !== null ? true : f.selected,
-            }
+            ...f,
+            episodeNumber,
+            // Автоматически выбираем при назначении номера
+            selected: episodeNumber !== null ? true : f.selected,
+          }
           : f
       )
       onFilesChange(newFiles)
     },
-    [files, onFilesChange]
+    [files, onFilesChange],
   )
 
   /** Автонумерация всех файлов */
@@ -231,7 +231,7 @@ export function FileScanStep({
       const newFiles = files.map((f, i) => (i === index ? { ...f, selected: !f.selected } : f))
       onFilesChange(newFiles)
     },
-    [files, onFilesChange]
+    [files, onFilesChange],
   )
 
   /** Выбрать только сериал */
@@ -345,22 +345,24 @@ export function FileScanStep({
       </HStack>
 
       {/* Подсказка с количеством эпизодов из Shikimori + предупреждение при несовпадении */}
-      {episodesCount &&
-        episodesCount > 0 &&
-        (selectedCount !== episodesCount ? (
-          <Alert.Root status="warning" size="sm" borderRadius="md">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Description fontSize="sm">
-                Выбрано {selectedCount}, а по Shikimori — {episodesCount} эпизодов
-              </Alert.Description>
-            </Alert.Content>
-          </Alert.Root>
-        ) : (
-          <Text fontSize="sm" color="fg.subtle">
-            💡 По Shikimori: {episodesCount} эпизодов
-          </Text>
-        ))}
+      {episodesCount
+        && episodesCount > 0
+        && (selectedCount !== episodesCount
+          ? (
+            <Alert.Root status="warning" size="sm" borderRadius="md">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Description fontSize="sm">
+                  Выбрано {selectedCount}, а по Shikimori — {episodesCount} эпизодов
+                </Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )
+          : (
+            <Text fontSize="sm" color="fg.subtle">
+              💡 По Shikimori: {episodesCount} эпизодов
+            </Text>
+          ))}
 
       {/* Загрузка */}
       {isScanning && (
@@ -388,7 +390,10 @@ export function FileScanStep({
               {files.map((file, index) => (
                 <Table.Row key={file.path} _hover={{ bg: 'bg.subtle' }}>
                   <Table.Cell>
-                    <Checkbox.Root checked={file.selected} onCheckedChange={() => toggleFile(index)}>
+                    <Checkbox.Root
+                      checked={file.selected}
+                      onCheckedChange={() => toggleFile(index)}
+                    >
                       <Checkbox.HiddenInput />
                       <Checkbox.Control>
                         <Checkbox.Indicator />
@@ -399,19 +404,21 @@ export function FileScanStep({
                     <NativeSelect.Root size="xs" width="70px" variant="outline">
                       <NativeSelect.Field
                         value={file.episodeNumber?.toString() ?? ''}
-                        onChange={(e) => handleEpisodeChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleEpisodeChange(index, e.target.value)}
                       >
                         <option value="">—</option>
                         {/* Генерируем опции 0, 1, 2, ... maxEpisode (0 для прологов/нулевых эпизодов) */}
-                        {Array.from({ length: maxEpisode + 1 }, (_, i) => i).map((num) => {
-                          const isUsed = usedEpisodes.has(num) && file.episodeNumber !== num
-                          return (
-                            <option key={num} value={num} disabled={isUsed}>
-                              {num === 0 ? '0 (пролог)' : num}
-                              {isUsed ? ' ✗' : ''}
-                            </option>
-                          )
-                        })}
+                        {Array.from({ length: maxEpisode + 1 }, (_, i) =>
+                          i).map((num) => {
+                            const isUsed = usedEpisodes.has(num) && file.episodeNumber !== num
+                            return (
+                              <option key={num} value={num} disabled={isUsed}>
+                                {num === 0 ? '0 (пролог)' : num}
+                                {isUsed ? ' ✗' : ''}
+                              </option>
+                            )
+                          })}
                       </NativeSelect.Field>
                       <NativeSelect.Indicator />
                     </NativeSelect.Root>
@@ -420,13 +427,11 @@ export function FileScanStep({
                     <HStack gap={2}>
                       <Icon
                         as={LuFileVideo}
-                        color={
-                          file.episodeType === 'movie'
-                            ? 'blue.400'
-                            : file.episodeType === 'ova'
-                              ? 'orange.400'
-                              : 'purple.400'
-                        }
+                        color={file.episodeType === 'movie'
+                          ? 'blue.400'
+                          : file.episodeType === 'ova'
+                          ? 'orange.400'
+                          : 'purple.400'}
                         flexShrink={0}
                       />
                       <Text truncate maxW="350px" title={file.name}>

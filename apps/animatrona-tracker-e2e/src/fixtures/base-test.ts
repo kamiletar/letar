@@ -3,7 +3,7 @@
  * зеркалит структуру apps/grandslamcup-e2e/src/fixtures/base-test.ts.
  */
 
-import { test as base, expect } from '@playwright/test'
+import { expect, test as base } from '@playwright/test'
 
 export const test = base.extend({})
 

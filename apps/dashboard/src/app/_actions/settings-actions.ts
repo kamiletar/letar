@@ -128,7 +128,8 @@ export async function testTelegramAction() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: settings.telegramChatId,
-        text: '🔔 Тестовое уведомление от Dashboard\n\nЕсли вы видите это сообщение, Telegram уведомления работают корректно.',
+        text:
+          '🔔 Тестовое уведомление от Dashboard\n\nЕсли вы видите это сообщение, Telegram уведомления работают корректно.',
         parse_mode: 'HTML',
       }),
     })

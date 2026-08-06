@@ -56,10 +56,9 @@ export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, i
                       <VStack gap={0} align="stretch" flex={1}>
                         {navItems.map((item) => {
                           const IconComponent = item.icon
-                          const isActive =
-                            item.href === '/' || item.href === cityPrefix
-                              ? pathname === item.href
-                              : pathname.startsWith(item.href)
+                          const isActive = item.href === '/' || item.href === cityPrefix
+                            ? pathname === item.href
+                            : pathname.startsWith(item.href)
 
                           return (
                             <Pressable key={item.href} borderRadius="none">

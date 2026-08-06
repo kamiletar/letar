@@ -175,7 +175,7 @@ export function BreathingGuide({
 
       animationRef.current = requestAnimationFrame(animate)
     },
-    [cycleDuration, pattern]
+    [cycleDuration, pattern],
   )
 
   /**
@@ -207,14 +207,13 @@ export function BreathingGuide({
   }
 
   // Масштаб кольца на основе фазы
-  const ringScale =
-    phase === 'inhale'
-      ? 1 + phaseProgress * 0.15
-      : phase === 'exhale'
-        ? 1.15 - phaseProgress * 0.15
-        : phase === 'holdIn'
-          ? 1.15
-          : 1
+  const ringScale = phase === 'inhale'
+    ? 1 + phaseProgress * 0.15
+    : phase === 'exhale'
+    ? 1.15 - phaseProgress * 0.15
+    : phase === 'holdIn'
+    ? 1.15
+    : 1
 
   // Прозрачность на основе фазы
   const ringOpacity = phase === 'holdIn' || phase === 'holdOut' ? 0.3 + phaseProgress * 0.1 : 0.4
@@ -298,10 +297,9 @@ export function BreathingGuide({
             <HStack gap={1}>
               {(['inhale', 'holdIn', 'exhale', 'holdOut'] as Phase[]).map((p) => {
                 const isActive = p === phase
-                const isPast =
-                  (p === 'inhale' && (phase === 'holdIn' || phase === 'exhale' || phase === 'holdOut')) ||
-                  (p === 'holdIn' && (phase === 'exhale' || phase === 'holdOut')) ||
-                  (p === 'exhale' && phase === 'holdOut')
+                const isPast = (p === 'inhale' && (phase === 'holdIn' || phase === 'exhale' || phase === 'holdOut'))
+                  || (p === 'holdIn' && (phase === 'exhale' || phase === 'holdOut'))
+                  || (p === 'exhale' && phase === 'holdOut')
 
                 // Пропускаем фазы с нулевой длительностью
                 const phaseDuration = pattern[p]

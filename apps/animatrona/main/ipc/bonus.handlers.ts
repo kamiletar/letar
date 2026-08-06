@@ -21,8 +21,10 @@ export function registerBonusHandlers(): void {
   createHandler('bonus:getTransactions', (limit?: number) => service.getTransactions(limit))
 
   // Потратить очки
-  createHandler('bonus:spend', (amount: number, description: string, metadata?: Record<string, unknown>) =>
-    service.spend(amount, description, metadata)
+  createHandler(
+    'bonus:spend',
+    (amount: number, description: string, metadata?: Record<string, unknown>) =>
+      service.spend(amount, description, metadata),
   )
 
   // Сбросить бонусы (для тестов)

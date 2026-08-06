@@ -129,7 +129,7 @@ export function PinJobsTab() {
         observerRef.current.observe(node)
       }
     },
-    [isFetchingNextPage, hasNextPage, fetchNextPage]
+    [isFetchingNextPage, hasNextPage, fetchNextPage],
   )
 
   // Cleanup observer
@@ -285,47 +285,49 @@ export function PinJobsTab() {
       </HStack>
 
       <VStack align="stretch" gap={4}>
-        {isLoading ? (
-          <VStack align="stretch" gap={3}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Box key={i} bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px">
-                <HStack mb={2}>
-                  <Skeleton h="20px" w="120px" />
-                  <Skeleton h="20px" w="80px" ml="auto" />
-                </HStack>
-                <SkeletonText noOfLines={2} gap={2} />
-              </Box>
-            ))}
-          </VStack>
-        ) : isError ? (
-          <Center py={12}>
-            <VStack gap={2}>
-              <Text color="red.500">Ошибка загрузки заданий</Text>
-              <Button size="sm" onClick={() => refetchAll()}>
-                Повторить
-              </Button>
+        {isLoading
+          ? (
+            <VStack align="stretch" gap={3}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Box key={i} bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px">
+                  <HStack mb={2}>
+                    <Skeleton h="20px" w="120px" />
+                    <Skeleton h="20px" w="80px" ml="auto" />
+                  </HStack>
+                  <SkeletonText noOfLines={2} gap={2} />
+                </Box>
+              ))}
             </VStack>
-          </Center>
-        ) : allJobs.length === 0 ? (
-          <EmptyState icon={LuPin} title="Нет заданий" subtitle="Задания появятся после пиннинга контента" />
-        ) : (
-          <>
-            {allJobs.map((job) => (
-              <PinJobCard key={job.id} job={job} onMutate={() => refetchAll()} />
-            ))}
+          )
+          : isError
+          ? (
+            <Center py={12}>
+              <VStack gap={2}>
+                <Text color="red.500">Ошибка загрузки заданий</Text>
+                <Button size="sm" onClick={() => refetchAll()}>
+                  Повторить
+                </Button>
+              </VStack>
+            </Center>
+          )
+          : allJobs.length === 0
+          ? <EmptyState icon={LuPin} title="Нет заданий" subtitle="Задания появятся после пиннинга контента" />
+          : (
+            <>
+              {allJobs.map((job) => <PinJobCard key={job.id} job={job} onMutate={() => refetchAll()} />)}
 
-            {/* Сентинель для infinite scroll завершённых заданий */}
-            {hasNextPage && (
-              <Box ref={lastElementRef} py={4}>
-                {isFetchingNextPage && (
-                  <Center>
-                    <Spinner size="sm" />
-                  </Center>
-                )}
-              </Box>
-            )}
-          </>
-        )}
+              {/* Сентинель для infinite scroll завершённых заданий */}
+              {hasNextPage && (
+                <Box ref={lastElementRef} py={4}>
+                  {isFetchingNextPage && (
+                    <Center>
+                      <Spinner size="sm" />
+                    </Center>
+                  )}
+                </Box>
+              )}
+            </>
+          )}
       </VStack>
     </>
   )

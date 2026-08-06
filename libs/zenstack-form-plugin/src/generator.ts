@@ -123,7 +123,7 @@ export async function generate(context: CliGeneratorContext): Promise<void> {
   // Generate index.ts
   const indexCode = generateIndexCode(
     enums.map((e) => e.name),
-    models.map((m) => m.name)
+    models.map((m) => m.name),
   )
   await writeFileWithDir(join(outputDir, 'index.ts'), indexCode)
 

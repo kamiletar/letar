@@ -268,7 +268,7 @@ export const createNodesV2: CreateNodesV2 = [
             },
           },
         }
-      })
+      }),
     )
   },
 ]

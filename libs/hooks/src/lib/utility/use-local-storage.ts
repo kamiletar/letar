@@ -25,7 +25,7 @@ import { useCallback, useEffect, useState } from 'react'
  */
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, (value: T | ((prev: T) => T)) => void, () => void] {
   // Получить начальное значение
   const readValue = useCallback((): T => {
@@ -65,7 +65,7 @@ export function useLocalStorage<T>(
         console.warn(`Ошибка записи в localStorage ключа "${key}":`, error)
       }
     },
-    [key, storedValue]
+    [key, storedValue],
   )
 
   // Удаление

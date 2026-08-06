@@ -78,13 +78,12 @@ export const searchStaffUsersAction = adminGuard(async (query: string, role: 'pr
   }
 
   // Без запроса — показываем частых
-  const frequentUsers =
-    frequentIds.length > 0
-      ? await prisma.user.findMany({
-          where: { id: { in: frequentIds } },
-          select: { id: true, name: true, email: true },
-        })
-      : []
+  const frequentUsers = frequentIds.length > 0
+    ? await prisma.user.findMany({
+      where: { id: { in: frequentIds } },
+      select: { id: true, name: true, email: true },
+    })
+    : []
 
   // Сортируем по частоте
   const sorted = frequentUsers.sort((a, b) => {

@@ -21,7 +21,7 @@ export class ImageService {
       // Create a blank white template if not exists
       const whitePixelPng = Buffer.from(
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8////fwYACQAB/d+nVgAAAABJRU5ErkJggg==',
-        'base64'
+        'base64',
       )
       const blankTemplate = await Jimp.read(whitePixelPng)
       blankTemplate.resize({ w: config.width, h: config.height })

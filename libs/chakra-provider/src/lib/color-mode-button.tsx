@@ -30,5 +30,5 @@ export const ColorModeButton = forwardRef<HTMLButtonElement, ColorModeButtonProp
         {resolvedColorMode === 'dark' ? <LuSun /> : <LuMoon />}
       </IconButton>
     )
-  }
+  },
 )

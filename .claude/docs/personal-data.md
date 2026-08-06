@@ -125,10 +125,9 @@ const [consentAccepted, setConsentAccepted] = useState(false)
 if (!consentAccepted) {
   setError('Необходимо согласие с политикой обработки персональных данных')
   return
-}
+} // JSX:
 
-// JSX:
-;<Checkbox.Root
+<Checkbox.Root
   checked={consentAccepted}
   onCheckedChange={(e) => setConsentAccepted(!!e.checked)}
   colorPalette="brand"

@@ -166,7 +166,7 @@ export function ImageMagnifier({
         }
         frameRef.current = requestAnimationFrame(step)
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     )
 
     observer.observe(node)
@@ -191,7 +191,7 @@ export function ImageMagnifier({
       setLens({ x: event.clientX - rect.left, y: event.clientY - rect.top })
       setTouched(true)
     },
-    [loaded, stopDemo]
+    [loaded, stopDemo],
   )
 
   // Тап ставит лупу в точку и оставляет её там: водить пальцем нельзя,
@@ -211,7 +211,7 @@ export function ImageMagnifier({
       setPinned(true)
       setTouched(true)
     },
-    [loaded, stopDemo]
+    [loaded, stopDemo],
   )
 
   const handleKeyDown = useCallback(
@@ -255,7 +255,7 @@ export function ImageMagnifier({
         y: Math.max(0, Math.min(rect.height, current.y + move[1])),
       })
     },
-    [lens, loaded, stopDemo]
+    [lens, loaded, stopDemo],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -297,9 +297,11 @@ export function ImageMagnifier({
       _focusVisible={{ outline: '2px solid', outlineColor: 'brand.solid', outlineOffset: '2px' }}
       {...boxProps}
     >
-      {/* unoptimized обязателен: лупа берёт фон по тому же URL и считает позицию
+      {
+        /* unoptimized обязателен: лупа берёт фон по тому же URL и считает позицию
           от натуральных размеров. Через /_next/image пришла бы масштабированная
-          копия — координаты разъехались бы, а буквы потеряли бы резкость */}
+          копия — координаты разъехались бы, а буквы потеряли бы резкость */
+      }
       <Box asChild opacity={loaded ? 1 : 0} transition="opacity 0.4s ease" userSelect="none">
         <Image
           ref={imageRef}

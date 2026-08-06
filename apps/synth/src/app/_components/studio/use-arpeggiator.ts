@@ -39,7 +39,7 @@ export function useArpeggiator({ params, noteOn, noteOff }: UseArpeggiatorOption
         getAudioContext(),
         (note, vel) => noteOnRef.current(note, vel),
         (note) => noteOffRef.current(note),
-        () => paramsRef.current
+        () => paramsRef.current,
       )
     }
     return arpRef.current
@@ -49,7 +49,7 @@ export function useArpeggiator({ params, noteOn, noteOff }: UseArpeggiatorOption
     (note: number) => {
       ensure().noteHeld(note)
     },
-    [ensure]
+    [ensure],
   )
 
   const noteReleased = useCallback((note: number) => {

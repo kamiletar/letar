@@ -92,7 +92,7 @@ export function WatchStatusSelector({
       setLocalRating(newRating)
       onRatingChange?.(newRating)
     },
-    [onRatingChange]
+    [onRatingChange],
   )
 
   const buttonSize = size === 'sm' ? { px: 2, py: 1 } : { px: 3, py: 2 }

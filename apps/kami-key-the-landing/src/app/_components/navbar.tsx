@@ -47,7 +47,7 @@ export function Navbar() {
             }
           }
         },
-        { rootMargin: '-40% 0px -50% 0px', threshold: 0 }
+        { rootMargin: '-40% 0px -50% 0px', threshold: 0 },
       )
       observer.observe(el)
       observers.push(observer)

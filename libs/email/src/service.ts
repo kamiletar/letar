@@ -57,7 +57,7 @@ export function getBrandingFromEnv(): BrandingConfig {
  */
 export async function sendVerificationEmail(
   params: VerificationEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
@@ -88,7 +88,7 @@ export async function sendVerificationEmail(
  */
 export async function sendPasswordResetEmail(
   params: PasswordResetEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
@@ -119,7 +119,7 @@ export async function sendPasswordResetEmail(
  */
 export async function sendMagicLinkEmail(
   params: MagicLinkEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
@@ -151,7 +151,7 @@ export async function sendMagicLinkEmail(
  */
 export async function sendInvitationEmail(
   params: InvitationEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
@@ -199,7 +199,7 @@ export interface StudentActivationEmailParams {
  */
 export async function sendStudentActivationEmail(
   params: StudentActivationEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
@@ -242,7 +242,7 @@ export async function sendStudentActivationEmail(
  */
 export async function sendGenericEmail(
   params: GenericEmailParams,
-  branding?: Partial<BrandingConfig>
+  branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())

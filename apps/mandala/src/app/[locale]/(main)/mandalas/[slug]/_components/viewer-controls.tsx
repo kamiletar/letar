@@ -99,29 +99,29 @@ export function ViewerControls({
   const handleControlsModeAdvanced = useCallback(() => onSettingsChangeRef.current({ controlsMode: 'advanced' }), [])
   const handleSpinDurationChange = useCallback(
     (duration: number) => onSettingsChangeRef.current({ spinDuration: duration }),
-    []
+    [],
   )
   const handleGradientDurationChange = useCallback(
     (duration: number) => onSettingsChangeRef.current({ gradientDuration: duration }),
-    []
+    [],
   )
   const handlePausedChange = useCallback((paused: boolean) => onSettingsChangeRef.current({ isPaused: paused }), [])
   const handleReverseChange = useCallback((reverse: boolean) => onSettingsChangeRef.current({ isReverse: reverse }), [])
   const handleAudioEnabledChange = useCallback(
     (e: { checked: boolean }) => onSettingsChangeRef.current({ audioEnabled: e.checked }),
-    []
+    [],
   )
   const handleAutoNextEnabledChange = useCallback(
     (e: { checked: boolean }) => onSettingsChangeRef.current({ autoNextEnabled: e.checked }),
-    []
+    [],
   )
   const handleAutoNextIntervalChange = useCallback(
     (details: { value: number[] }) => onSettingsChangeRef.current({ autoNextInterval: details.value[0] }),
-    []
+    [],
   )
   const handleCrossfadeDurationChange = useCallback(
     (details: { value: number[] }) => onSettingsChangeRef.current({ crossfadeDuration: details.value[0] }),
-    []
+    [],
   )
 
   // ===== Авто-режимы =====

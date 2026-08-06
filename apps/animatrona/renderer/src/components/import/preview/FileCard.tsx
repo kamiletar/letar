@@ -35,7 +35,7 @@ export function FileCard({
   const handleGroupEdit = (
     type: 'audio' | 'subtitle',
     groupId: string,
-    edit: Parameters<NonNullable<typeof onTrackGroupEdit>>[3]
+    edit: Parameters<NonNullable<typeof onTrackGroupEdit>>[3],
   ) => {
     if (onTrackGroupEdit && file.episodeNumber !== null) {
       onTrackGroupEdit(file.episodeNumber, type, groupId, edit)
@@ -46,7 +46,7 @@ export function FileCard({
   const handleApplyToAll = (
     type: 'audio' | 'subtitle',
     groupId: string,
-    edit: Parameters<NonNullable<typeof onApplyToAll>>[2]
+    edit: Parameters<NonNullable<typeof onApplyToAll>>[2],
   ) => {
     if (onApplyToAll) {
       onApplyToAll(type, groupId, edit)
@@ -150,8 +150,7 @@ export function FileCard({
                           <Checkbox.Root
                             checked={rec.enabled}
                             onCheckedChange={(e) =>
-                              onToggleTrack(analysis.file.episodeNumber ?? 0, rec.trackIndex, e.checked === true)
-                            }
+                              onToggleTrack(analysis.file.episodeNumber ?? 0, rec.trackIndex, e.checked === true)}
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
@@ -197,8 +196,7 @@ export function FileCard({
                         <Checkbox.Root
                           checked={rec.enabled}
                           onCheckedChange={(e) =>
-                            onToggleTrack(analysis.file.episodeNumber ?? 0, rec.trackIndex, e.checked === true)
-                          }
+                            onToggleTrack(analysis.file.episodeNumber ?? 0, rec.trackIndex, e.checked === true)}
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
@@ -247,7 +245,8 @@ export function FileCard({
                     <HStack gap={3}>
                       <Checkbox.Root
                         checked={rec.enabled}
-                        onCheckedChange={(e) => onToggleSubtitle(file.episodeNumber ?? 0, idx, e.checked === true)}
+                        onCheckedChange={(e) =>
+                          onToggleSubtitle(file.episodeNumber ?? 0, idx, e.checked === true)}
                       >
                         <Checkbox.HiddenInput />
                         <Checkbox.Control />

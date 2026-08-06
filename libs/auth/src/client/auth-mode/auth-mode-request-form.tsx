@@ -20,7 +20,8 @@ export interface AuthModeRequestFormProps {
  */
 export function AuthModeRequestForm({
   onRequest,
-  successMessage = 'Решение записано. Сам переход не выполняется автоматически — с вами свяжется разработчик для согласования миграции данных.',
+  successMessage =
+    'Решение записано. Сам переход не выполняется автоматически — с вами свяжется разработчик для согласования миграции данных.',
 }: AuthModeRequestFormProps) {
   const [acknowledged, setAcknowledged] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle')

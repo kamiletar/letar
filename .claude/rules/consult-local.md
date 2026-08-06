@@ -14,8 +14,8 @@
 - **Низкая уверенность** в конвенции — лучше спросить локальную модель
 
 ```typescript
-mcp__letar -
-  consultant__consult_letar({
+mcp__letar
+  - consultant__consult_letar({
     question:
       'Как в letar реализована мультитенантность в driving-school? Какой паттерн использовать для нового приложения?',
     mode: 'architecture', // navigation | architecture | convention | auto

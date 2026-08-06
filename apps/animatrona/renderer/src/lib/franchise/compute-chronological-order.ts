@@ -115,7 +115,7 @@ export function computeChronologicalOrder(graph: ShikimoriFranchiseGraph): Map<n
  */
 export function getFranchiseSeasonNumber(
   graph: ShikimoriFranchiseGraph | null,
-  shikimoriId: number | null | undefined
+  shikimoriId: number | null | undefined,
 ): number {
   if (!graph || !shikimoriId) {
     return 1

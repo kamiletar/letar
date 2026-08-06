@@ -60,7 +60,7 @@ export interface CalendarEventData {
  * Создаёт событие в Google Calendar
  */
 export async function createCalendarEvent(
-  data: CalendarEventData
+  data: CalendarEventData,
 ): Promise<{ success: boolean; eventId?: string; error?: string }> {
   const calendar = getCalendarClient()
 
@@ -150,7 +150,7 @@ export async function deleteCalendarEvent(eventId: string): Promise<{ success: b
  */
 export async function getCalendarEvents(
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<{ success: boolean; events?: calendar_v3.Schema$Event[]; error?: string }> {
   const calendar = getCalendarClient()
 
@@ -249,7 +249,7 @@ export async function syncBookedSlotsWithCalendar(): Promise<{
           where: { id },
           data: { calendarEventId },
         })
-      )
+      ),
     )
     result.created = successfulUpdates.length
   }

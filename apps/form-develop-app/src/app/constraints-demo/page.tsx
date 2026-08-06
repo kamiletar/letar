@@ -323,7 +323,7 @@ export default function ConstraintsDemoPage() {
             Object.entries(submittedData).map(([key, value]) => [
               key,
               value instanceof Date ? value.toISOString().split('T')[0] : value,
-            ])
+            ]),
           )}
           title="Отправленные данные:"
         />

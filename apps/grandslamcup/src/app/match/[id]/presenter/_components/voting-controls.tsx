@@ -39,21 +39,20 @@ export function VotingControls({ matchId, matchState }: VotingControlsProps) {
   }, [])
 
   // Метка текущей фазы
-  const phaseLabel =
-    (
-      {
-        IDLE: 'Ожидание',
-        PERFORMING: 'Выступление',
-        TEXT_VOTING: 'Голосование за ТЕКСТ',
-        TEXT_COMPLETE: 'Текст подсчитан',
-        DELIVERY_VOTING: 'Голосование за ПОДАЧУ',
-        DELIVERY_COMPLETE: 'Подача подсчитана',
-        ROUND_COMPLETE: 'Раунд завершён',
-        POET_RESULT: 'Результат поэта',
-        HALF_SUMMARY: 'Итоги тайма',
-        INTERMISSION: 'Перерыв',
-      } as Record<string, string>
-    )[phase] ?? phase
+  const phaseLabel = (
+    {
+      IDLE: 'Ожидание',
+      PERFORMING: 'Выступление',
+      TEXT_VOTING: 'Голосование за ТЕКСТ',
+      TEXT_COMPLETE: 'Текст подсчитан',
+      DELIVERY_VOTING: 'Голосование за ПОДАЧУ',
+      DELIVERY_COMPLETE: 'Подача подсчитана',
+      ROUND_COMPLETE: 'Раунд завершён',
+      POET_RESULT: 'Результат поэта',
+      HALF_SUMMARY: 'Итоги тайма',
+      INTERMISSION: 'Перерыв',
+    } as Record<string, string>
+  )[phase] ?? phase
 
   return (
     <VStack gap={3} w="full">

@@ -31,14 +31,14 @@
 // Session helpers
 export { createAuthChecks } from './checks'
 export { AuthError, createAuthGuards, type GuardOptions } from './guards'
-export { createSessionHelpers, type AuthInstance } from './session'
+export { type AuthInstance, createSessionHelpers } from './session'
 
 // Factories
 export {
   createDevSessionRoute,
+  type CreateDevSessionRouteOptions,
   createLogoutAction,
   createRoleGuards,
-  type CreateDevSessionRouteOptions,
   type DevSessionPrismaClient,
   type LogoutActionOptions,
   type RoleGuardOptions,

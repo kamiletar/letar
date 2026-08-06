@@ -61,7 +61,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
   displayName: 'FieldSelect',
   useFieldState: (
     componentProps: Omit<SelectFieldProps, keyof BaseFieldProps>,
-    resolved: ResolvedFieldProps
+    resolved: ResolvedFieldProps,
   ): SelectFieldState => {
     // Options: props take priority, fallback to schema meta
     const sourceOptions = componentProps.options ?? resolved.options ?? []
@@ -74,7 +74,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
           value: String(opt.value),
           disabled: opt.disabled,
         })),
-      [sourceOptions]
+      [sourceOptions],
     )
 
     // Create collection from normalized options
@@ -85,7 +85,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
           itemToString: getOptionLabel,
           itemToValue: (item) => item.value,
         }),
-      [normalizedOptions]
+      [normalizedOptions],
     )
 
     // Auto-determine clearable: show clear button if field is optional

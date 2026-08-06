@@ -20,7 +20,7 @@ Touch targets, accessibility и UX паттерны для мобильных у
 | Size | Высота | Touch-friendly              |
 | ---- | ------ | --------------------------- |
 | `xs` | 24px   | ❌ Слишком мало             |
-| `sm` | 32px   | ⚠️ Только desktop           |
+| `sm` | 32px   | ⚠️ Только desktop            |
 | `md` | 40px   | ✅ Почти OK                 |
 | `lg` | 48px   | ✅ Рекомендуется для mobile |
 

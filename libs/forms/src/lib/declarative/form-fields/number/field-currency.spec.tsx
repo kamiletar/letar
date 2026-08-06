@@ -16,7 +16,7 @@ describe('FieldCurrency', () => {
         <Form initialValue={{ price: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Currency name="price" label="Цена" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Цена')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldCurrency', () => {
         <Form initialValue={{ price: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Currency name="price" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const input = container.querySelector('[data-field-name="price"]')
@@ -43,7 +43,7 @@ describe('FieldCurrency', () => {
         <Form initialValue={{ price: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Currency name="price" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const input = screen.getByRole('spinbutton')
@@ -55,7 +55,7 @@ describe('FieldCurrency', () => {
         <Form initialValue={{ price: 0 }} onSubmit={vi.fn()}>
           <Form.Field.Currency name="price" helperText="Укажите стоимость" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Укажите стоимость')).toBeInTheDocument()

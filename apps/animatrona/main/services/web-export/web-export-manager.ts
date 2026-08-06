@@ -189,7 +189,7 @@ export class WebExportManager extends EventEmitter {
   private async publishVirtual(
     config: QueueExportConfig,
     options: WebExportOptions,
-    emitProgress: (progress: WebExportProgress) => void
+    emitProgress: (progress: WebExportProgress) => void,
   ): Promise<WebExportResult> {
     emitProgress({
       stage: 'preparing',

@@ -72,7 +72,7 @@ export function NativeAssView({
     UIManager.dispatchViewManagerCommand(
       nodeHandle,
       UIManager.getViewManagerConfig('AssSubtitleView').Commands.loadContent,
-      [assContent]
+      [assContent],
     )
   }, [assContent])
 
@@ -90,7 +90,7 @@ export function NativeAssView({
     UIManager.dispatchViewManagerCommand(
       nodeHandle,
       UIManager.getViewManagerConfig('AssSubtitleView').Commands.setFrameSize,
-      [videoWidth, videoHeight]
+      [videoWidth, videoHeight],
     )
   }, [videoWidth, videoHeight])
 

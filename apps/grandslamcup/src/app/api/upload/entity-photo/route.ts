@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
       if (!isAdmin) {
         const isCoach = player.playerTeamSeasons.some(
           (pts) =>
-            pts.teamSeason.season.status === 'ACTIVE' &&
-            pts.teamSeason.playerTeamSeasons.some((c) => c.player.userId === user.id)
+            pts.teamSeason.season.status === 'ACTIVE'
+            && pts.teamSeason.playerTeamSeasons.some((c) => c.player.userId === user.id),
         )
         if (!isCoach) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
       }

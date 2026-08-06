@@ -149,7 +149,7 @@ function formatEncodingSummary(e: EpisodeFullSummary['encoding']): string {
 /** Сравнить верхнеуровневые поля двух IPFS манифестов */
 function computeManifestDiffs(
   oldM: ManifestTopLevelSummary,
-  newM: ManifestTopLevelSummary
+  newM: ManifestTopLevelSummary,
 ): { label: string; oldVal: string; newVal: string }[] {
   const diffs: { label: string; oldVal: string; newVal: string }[] = []
 
@@ -182,7 +182,7 @@ function computeManifestDiffs(
     check(
       'Описание',
       oi.descriptionLength > 0 ? `${oi.descriptionLength} символов` : '—',
-      ni.descriptionLength > 0 ? `${ni.descriptionLength} символов` : '—'
+      ni.descriptionLength > 0 ? `${ni.descriptionLength} символов` : '—',
     )
     check('Жанры (инфо)', oi.genres.join(', ') || '—', ni.genres.join(', ') || '—')
     check('Студии (инфо)', oi.studios.join(', ') || '—', ni.studios.join(', ') || '—')
@@ -205,7 +205,7 @@ function computeManifestDiffs(
     check(
       'Размер (манифест)',
       oldM.directorySize ? formatFileSize(oldM.directorySize) : '—',
-      newM.directorySize ? formatFileSize(newM.directorySize) : '—'
+      newM.directorySize ? formatFileSize(newM.directorySize) : '—',
     )
   }
   if (oldM.directoryBlocks || newM.directoryBlocks) {
@@ -280,75 +280,72 @@ function computeDeepEpisodeDiff(oldEps: EpisodeFullSummary[], newEps: EpisodeFul
     const bothLoaded = oldEp.manifestLoaded && newEp.manifestLoaded
 
     // Сравниваем каждый аспект (только если оба манифеста загрузились)
-    const videoDiff =
-      bothLoaded && oldEp.video && newEp.video
-        ? (() => {
-            const oldStr = formatVideoSummary(oldEp.video)
-            const newStr = formatVideoSummary(newEp.video)
-            return oldStr !== newStr ? { old: oldStr, new: newStr } : null
-          })()
-        : null
+    const videoDiff = bothLoaded && oldEp.video && newEp.video
+      ? (() => {
+        const oldStr = formatVideoSummary(oldEp.video)
+        const newStr = formatVideoSummary(newEp.video)
+        return oldStr !== newStr ? { old: oldStr, new: newStr } : null
+      })()
+      : null
 
-    const encodingDiff =
-      bothLoaded && oldEp.encoding && newEp.encoding
-        ? (() => {
-            const oldStr = formatEncodingSummary(oldEp.encoding)
-            const newStr = formatEncodingSummary(newEp.encoding)
-            return oldStr !== newStr ? { old: oldStr, new: newStr } : null
-          })()
-        : null
+    const encodingDiff = bothLoaded && oldEp.encoding && newEp.encoding
+      ? (() => {
+        const oldStr = formatEncodingSummary(oldEp.encoding)
+        const newStr = formatEncodingSummary(newEp.encoding)
+        return oldStr !== newStr ? { old: oldStr, new: newStr } : null
+      })()
+      : null
 
     const audioChanges = bothLoaded ? computeTrackDiff(oldEp.audioTracks, newEp.audioTracks, formatAudioTrack) : null
     const subtitleChanges = bothLoaded
       ? computeTrackDiff(oldEp.subtitleTracks, newEp.subtitleTracks, formatSubtitleTrack)
       : null
 
-    const sizeDiff =
-      oldEp.size !== newEp.size ? { old: formatFileSize(oldEp.size), new: formatFileSize(newEp.size) } : null
+    const sizeDiff = oldEp.size !== newEp.size
+      ? { old: formatFileSize(oldEp.size), new: formatFileSize(newEp.size) }
+      : null
 
-    const chaptersDiff =
-      oldEp.hasChapters !== newEp.hasChapters || oldEp.chaptersCount !== newEp.chaptersCount
-        ? `${oldEp.hasChapters ? `${oldEp.chaptersCount} глав` : 'нет'} → ${
-            newEp.hasChapters ? `${newEp.chaptersCount} глав` : 'нет'
-          }`
-        : null
+    const chaptersDiff = oldEp.hasChapters !== newEp.hasChapters || oldEp.chaptersCount !== newEp.chaptersCount
+      ? `${oldEp.hasChapters ? `${oldEp.chaptersCount} глав` : 'нет'} → ${
+        newEp.hasChapters ? `${newEp.chaptersCount} глав` : 'нет'
+      }`
+      : null
 
-    const thumbnailsDiff =
-      oldEp.hasThumbnails !== newEp.hasThumbnails
-        ? `${oldEp.hasThumbnails ? 'есть' : 'нет'} → ${newEp.hasThumbnails ? 'есть' : 'нет'}`
-        : null
+    const thumbnailsDiff = oldEp.hasThumbnails !== newEp.hasThumbnails
+      ? `${oldEp.hasThumbnails ? 'есть' : 'нет'} → ${newEp.hasThumbnails ? 'есть' : 'нет'}`
+      : null
 
-    const screenshotsDiff =
-      oldEp.screenshotsCount !== newEp.screenshotsCount ? `${oldEp.screenshotsCount} → ${newEp.screenshotsCount}` : null
+    const screenshotsDiff = oldEp.screenshotsCount !== newEp.screenshotsCount
+      ? `${oldEp.screenshotsCount} → ${newEp.screenshotsCount}`
+      : null
 
     // Определяем, не загрузился ли манифест
-    const loadFailed =
-      !oldEp.manifestLoaded && !newEp.manifestLoaded
-        ? ('both' as const)
-        : !oldEp.manifestLoaded
-          ? ('old' as const)
-          : !newEp.manifestLoaded
-            ? ('new' as const)
-            : undefined
+    const loadFailed = !oldEp.manifestLoaded && !newEp.manifestLoaded
+      ? ('both' as const)
+      : !oldEp.manifestLoaded
+      ? ('old' as const)
+      : !newEp.manifestLoaded
+      ? ('new' as const)
+      : undefined
 
-    const contentChanged =
-      videoDiff ||
-      encodingDiff ||
-      audioChanges ||
-      subtitleChanges ||
-      sizeDiff ||
-      chaptersDiff ||
-      thumbnailsDiff ||
-      screenshotsDiff ||
-      oldEp.name !== newEp.name
+    const contentChanged = videoDiff
+      || encodingDiff
+      || audioChanges
+      || subtitleChanges
+      || sizeDiff
+      || chaptersDiff
+      || thumbnailsDiff
+      || screenshotsDiff
+      || oldEp.name !== newEp.name
 
     const cidChanged = oldEp.manifestCid !== newEp.manifestCid
     const cidOnlyChange = cidChanged && !contentChanged && !loadFailed
 
     // Сводка треков нового эпизода (для информационного отображения)
     const newAudioTracks = newEp.audioTracks.length > 0 ? newEp.audioTracks.map(formatAudioTrack) : undefined
-    const newSubtitleTracks =
-      newEp.subtitleTracks.length > 0 ? newEp.subtitleTracks.map(formatSubtitleTrack) : undefined
+    const newSubtitleTracks = newEp.subtitleTracks.length > 0
+      ? newEp.subtitleTracks.map(formatSubtitleTrack)
+      : undefined
     const newVideoSummary = newEp.video ? formatVideoSummary(newEp.video) : undefined
 
     if (cidChanged || contentChanged || loadFailed) {
@@ -443,7 +440,7 @@ function AutoDiff({
   check(
     'Размер',
     current.directorySize ? formatFileSize(current.directorySize) : '',
-    replacement.directorySize ? formatFileSize(replacement.directorySize) : ''
+    replacement.directorySize ? formatFileSize(replacement.directorySize) : '',
   )
 
   const cidChanged = (current.directoryCid ?? '') !== (replacement.directoryCid ?? '')
@@ -478,11 +475,11 @@ function AutoDiff({
   }, [episodeChanges])
 
   if (
-    diffs.length === 0 &&
-    !cidChanged &&
-    !deepLoading &&
-    manifestDiffs.length === 0 &&
-    (!episodeChanges || episodeChanges.every((e) => e.type === 'unchanged'))
+    diffs.length === 0
+    && !cidChanged
+    && !deepLoading
+    && manifestDiffs.length === 0
+    && (!episodeChanges || episodeChanges.every((e) => e.type === 'unchanged'))
   ) {
     return null
   }
@@ -498,9 +495,7 @@ function AutoDiff({
             Отличия:
           </Text>
           <VStack align="flex-start" gap={1} mb={3}>
-            {diffs.map((d) => (
-              <DiffRow key={d.label} label={d.label} oldVal={d.oldVal} newVal={d.newVal} />
-            ))}
+            {diffs.map((d) => <DiffRow key={d.label} label={d.label} oldVal={d.oldVal} newVal={d.newVal} />)}
           </VStack>
         </>
       )}
@@ -511,34 +506,34 @@ function AutoDiff({
           <Text fontWeight="semibold" minW="100px">
             Directory CID:
           </Text>
-          {current.directoryCid ? (
-            <Link
-              color="red.400"
-              textDecoration="line-through"
-              href={`${gateway}/ipfs/${current.directoryCid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              fontSize="sm"
-            >
-              {shortCid(current.directoryCid)}
-            </Link>
-          ) : (
-            <Text color="red.400">—</Text>
-          )}
+          {current.directoryCid
+            ? (
+              <Link
+                color="red.400"
+                textDecoration="line-through"
+                href={`${gateway}/ipfs/${current.directoryCid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                fontSize="sm"
+              >
+                {shortCid(current.directoryCid)}
+              </Link>
+            )
+            : <Text color="red.400">—</Text>}
           <Text>→</Text>
-          {replacement.directoryCid ? (
-            <Link
-              color="green.400"
-              href={`${gateway}/ipfs/${replacement.directoryCid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              fontSize="sm"
-            >
-              {shortCid(replacement.directoryCid)}
-            </Link>
-          ) : (
-            <Text color="green.400">—</Text>
-          )}
+          {replacement.directoryCid
+            ? (
+              <Link
+                color="green.400"
+                href={`${gateway}/ipfs/${replacement.directoryCid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                fontSize="sm"
+              >
+                {shortCid(replacement.directoryCid)}
+              </Link>
+            )
+            : <Text color="green.400">—</Text>}
         </HStack>
       )}
 
@@ -549,9 +544,7 @@ function AutoDiff({
             Манифест (IPFS):
           </Text>
           <VStack align="flex-start" gap={1} mb={3}>
-            {manifestDiffs.map((d) => (
-              <DiffRow key={d.label} label={d.label} oldVal={d.oldVal} newVal={d.newVal} />
-            ))}
+            {manifestDiffs.map((d) => <DiffRow key={d.label} label={d.label} oldVal={d.oldVal} newVal={d.newVal} />)}
           </VStack>
         </>
       )}
@@ -611,9 +604,7 @@ function AutoDiff({
         <VStack align="stretch" gap={1}>
           {episodeChanges
             .filter((e) => e.type !== 'unchanged')
-            .map((ep) => (
-              <DeepEpisodeChangeRow key={`${ep.type}-${ep.number}`} change={ep} />
-            ))}
+            .map((ep) => <DeepEpisodeChangeRow key={`${ep.type}-${ep.number}`} change={ep} />)}
         </VStack>
       )}
 
@@ -678,15 +669,14 @@ function DeepEpisodeChangeRow({ change }: { change: EpisodeDeepChange }) {
   }
 
   // changed — показываем все детали
-  const hasDetails =
-    change.videoDiff ||
-    change.encodingDiff ||
-    change.audioChanges ||
-    change.subtitleChanges ||
-    change.sizeDiff ||
-    change.chaptersDiff ||
-    change.thumbnailsDiff ||
-    change.screenshotsDiff
+  const hasDetails = change.videoDiff
+    || change.encodingDiff
+    || change.audioChanges
+    || change.subtitleChanges
+    || change.sizeDiff
+    || change.chaptersDiff
+    || change.thumbnailsDiff
+    || change.screenshotsDiff
 
   // CID-only: серый фон, иначе оранжевый
   const bgColor = change.cidOnlyChange && !hasDetails ? 'gray.50/50' : 'orange.50/50'
@@ -722,8 +712,8 @@ function DeepEpisodeChangeRow({ change }: { change: EpisodeDeepChange }) {
             {change.loadFailed === 'both'
               ? 'Не удалось загрузить манифесты обоих эпизодов'
               : change.loadFailed === 'new'
-                ? 'Не удалось загрузить манифест нового эпизода'
-                : 'Не удалось загрузить манифест текущего эпизода'}
+              ? 'Не удалось загрузить манифест нового эпизода'
+              : 'Не удалось загрузить манифест текущего эпизода'}
           </Text>
           <Text color="fg.muted">(сравнение треков недоступно)</Text>
         </HStack>
@@ -870,7 +860,7 @@ function formatSubtitleTrack(t: SubtitleTrackSummary): string {
 function computeTrackDiff<T>(
   oldTracks: T[] | undefined,
   newTracks: T[] | undefined,
-  format: (t: T) => string
+  format: (t: T) => string,
 ): TrackChanges | null {
   if (!oldTracks && !newTracks) {
     return null

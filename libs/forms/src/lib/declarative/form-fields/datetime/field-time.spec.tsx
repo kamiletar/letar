@@ -16,7 +16,7 @@ describe('FieldTime', () => {
         <Form initialValue={{ startTime: '' }} onSubmit={vi.fn()}>
           <Form.Field.Time name="startTime" label="Время начала" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Время начала')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('FieldTime', () => {
         <Form initialValue={{ startTime: '' }} onSubmit={vi.fn()}>
           <Form.Field.Time name="startTime" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       // Нативный input type="time"
@@ -42,7 +42,7 @@ describe('FieldTime', () => {
         <Form initialValue={{ startTime: '' }} onSubmit={vi.fn()}>
           <Form.Field.Time name="startTime" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const input = container.querySelector('input[type="time"]')
@@ -54,7 +54,7 @@ describe('FieldTime', () => {
         <Form initialValue={{ startTime: '' }} onSubmit={vi.fn()}>
           <Form.Field.Time name="startTime" helperText="Формат 24 часа" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Формат 24 часа')).toBeInTheDocument()

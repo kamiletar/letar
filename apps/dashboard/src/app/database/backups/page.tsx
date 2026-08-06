@@ -58,7 +58,7 @@ async function fetchBackups(databases: string[], serverId: string | null) {
         ? `/api/database/${db}/backups?serverId=${encodeURIComponent(serverId)}`
         : `/api/database/${db}/backups`
       return fetch(url)
-    })
+    }),
   )
 
   const allBackups: Backup[] = []
@@ -119,7 +119,7 @@ export default function BackupsPage() {
   // Оптимистичное состояние — добавление placeholder при создании бэкапа
   const [optimisticBackups, addOptimisticBackup] = useOptimistic(
     backups || [],
-    (currentBackups: Backup[], newBackup: Backup) => [newBackup, ...currentBackups]
+    (currentBackups: Backup[], newBackup: Backup) => [newBackup, ...currentBackups],
   )
 
   // Обработчик создания бэкапа с оптимистичным UI
@@ -241,7 +241,7 @@ export default function BackupsPage() {
       acc[backup.dbName].push(backup)
       return acc
     },
-    {} as Record<string, Backup[]>
+    {} as Record<string, Backup[]>,
   )
 
   // Подсчитываем статистику (исключаем placeholder'ы)
@@ -300,15 +300,20 @@ export default function BackupsPage() {
 
         {/* Create Backup Buttons */}
         <HStack mb="6" flexWrap="wrap" gap="2">
-          {availableDatabases && availableDatabases.length > 0 ? (
-            availableDatabases.map((dbName) => (
-              <Button key={dbName} colorPalette="brand" onClick={() => handleCreateBackup(dbName)} loading={isCreating}>
-                Create: {dbName}
-              </Button>
-            ))
-          ) : (
-            <Text color="fg.muted">Нет доступных баз данных на этом сервере</Text>
-          )}
+          {availableDatabases && availableDatabases.length > 0
+            ? (
+              availableDatabases.map((dbName) => (
+                <Button
+                  key={dbName}
+                  colorPalette="brand"
+                  onClick={() => handleCreateBackup(dbName)}
+                  loading={isCreating}
+                >
+                  Create: {dbName}
+                </Button>
+              ))
+            )
+            : <Text color="fg.muted">Нет доступных баз данных на этом сервере</Text>}
         </HStack>
 
         {/* Backups by Database */}
@@ -374,18 +379,20 @@ export default function BackupsPage() {
                             bg={backup.isCreating ? 'bg.emphasized' : undefined}
                           >
                             <Table.Cell pl="4">
-                              {backup.isCreating ? (
-                                <HStack gap="2">
-                                  <Spinner size="xs" />
-                                  <Text fontSize="xs" fontFamily="mono" color="fg.muted">
-                                    Creating backup...
+                              {backup.isCreating
+                                ? (
+                                  <HStack gap="2">
+                                    <Spinner size="xs" />
+                                    <Text fontSize="xs" fontFamily="mono" color="fg.muted">
+                                      Creating backup...
+                                    </Text>
+                                  </HStack>
+                                )
+                                : (
+                                  <Text fontSize="xs" fontFamily="mono">
+                                    {backup.filename}
                                   </Text>
-                                </HStack>
-                              ) : (
-                                <Text fontSize="xs" fontFamily="mono">
-                                  {backup.filename}
-                                </Text>
-                              )}
+                                )}
                             </Table.Cell>
                             <Table.Cell>
                               <Badge
@@ -406,46 +413,47 @@ export default function BackupsPage() {
                               </Text>
                             </Table.Cell>
                             <Table.Cell pr="4">
-                              {backup.isCreating ? (
-                                <Text fontSize="xs" color="fg.muted">
-                                  Please wait...
-                                </Text>
-                              ) : (
-                                <HStack gap="2">
-                                  <Button size="xs" variant="outline" colorPalette="fg" asChild>
-                                    {/* oxlint-disable-next-line eslint-plugin-next/no-html-link-for-pages -- download attribute requires <a> tag */}
-                                    <a
-                                      href={`/api/database/${backup.dbName}/backups/${backup.id}/download`}
-                                      download={backup.filename}
+                              {backup.isCreating
+                                ? (
+                                  <Text fontSize="xs" color="fg.muted">
+                                    Please wait...
+                                  </Text>
+                                )
+                                : (
+                                  <HStack gap="2">
+                                    <Button size="xs" variant="outline" colorPalette="fg" asChild>
+                                      {/* oxlint-disable-next-line eslint-plugin-next/no-html-link-for-pages -- download attribute requires <a> tag */}
+                                      <a
+                                        href={`/api/database/${backup.dbName}/backups/${backup.id}/download`}
+                                        download={backup.filename}
+                                      >
+                                        <LuDownload />
+                                        Download
+                                      </a>
+                                    </Button>
+                                    <Button
+                                      size="xs"
+                                      colorPalette="orange"
+                                      onClick={() =>
+                                        restoreMutation.mutate({
+                                          dbName: backup.dbName,
+                                          backupId: backup.id,
+                                        })}
+                                      loading={restoreMutation.isPending}
                                     >
-                                      <LuDownload />
-                                      Download
-                                    </a>
-                                  </Button>
-                                  <Button
-                                    size="xs"
-                                    colorPalette="orange"
-                                    onClick={() =>
-                                      restoreMutation.mutate({
-                                        dbName: backup.dbName,
-                                        backupId: backup.id,
-                                      })
-                                    }
-                                    loading={restoreMutation.isPending}
-                                  >
-                                    Restore
-                                  </Button>
-                                  <Button
-                                    size="xs"
-                                    variant="outline"
-                                    colorPalette="red"
-                                    onClick={() => deleteMutation.mutate(backup.id)}
-                                    loading={deleteMutation.isPending}
-                                  >
-                                    Delete
-                                  </Button>
-                                </HStack>
-                              )}
+                                      Restore
+                                    </Button>
+                                    <Button
+                                      size="xs"
+                                      variant="outline"
+                                      colorPalette="red"
+                                      onClick={() => deleteMutation.mutate(backup.id)}
+                                      loading={deleteMutation.isPending}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </HStack>
+                                )}
                             </Table.Cell>
                           </Table.Row>
                         ))}

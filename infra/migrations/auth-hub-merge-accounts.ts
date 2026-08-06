@@ -121,11 +121,11 @@ async function main() {
   console.log(`Canonical: ${canonical.id} (${canonical.email}) roles=${canonical.roles}`)
   console.log(`Duplicate: ${duplicate.id} (${duplicate.email}) roles=${duplicate.roles}`)
   console.log(
-    `  Account: ${duplicate.accounts.length}, Passkey: ${duplicate.passkeys.length}, ` +
-      `OauthApplication: ${duplicate.oauthApplications.length}, OauthAccessToken: ${duplicate.oauthAccessTokens.length}, ` +
-      `OauthConsent: ${duplicate.oauthConsents.length}, ProjectProfile: ${duplicate.projectProfiles.length}, ` +
-      `TelegramToken: ${duplicate.telegramTokens.length}, ConsentLog: ${duplicate.consentLogs.length}, ` +
-      `UserEmail: ${duplicate.additionalEmails.length}`
+    `  Account: ${duplicate.accounts.length}, Passkey: ${duplicate.passkeys.length}, `
+      + `OauthApplication: ${duplicate.oauthApplications.length}, OauthAccessToken: ${duplicate.oauthAccessTokens.length}, `
+      + `OauthConsent: ${duplicate.oauthConsents.length}, ProjectProfile: ${duplicate.projectProfiles.length}, `
+      + `TelegramToken: ${duplicate.telegramTokens.length}, ConsentLog: ${duplicate.consentLogs.length}, `
+      + `UserEmail: ${duplicate.additionalEmails.length}`,
   )
 
   if (DRY_RUN) {
@@ -140,11 +140,11 @@ async function main() {
     // Account — по одной записи, из-за составного @@unique([providerId, accountId])
     for (const acc of duplicate.accounts) {
       const exactClash = canonical.accounts.find(
-        (a) => a.providerId === acc.providerId && a.accountId === acc.accountId
+        (a) => a.providerId === acc.providerId && a.accountId === acc.accountId,
       )
       if (exactClash) {
         console.warn(
-          `  ⚠️  Account providerId=${acc.providerId} accountId=${acc.accountId} уже есть у canonical — удаляю дубликат у duplicate`
+          `  ⚠️  Account providerId=${acc.providerId} accountId=${acc.accountId} уже есть у canonical — удаляю дубликат у duplicate`,
         )
         await tx.account.delete({ where: { id: acc.id } })
         continue
@@ -209,12 +209,16 @@ async function main() {
         await tx.projectProfile.update({ where: { id: existing.id }, data: { roles: mergedRoles } })
         await tx.projectProfile.delete({ where: { id: pp.id } })
         console.warn(
-          `  ⚠️  ProjectProfile projectSlug=${pp.projectSlug}: конфликт — roles объединены [${mergedRoles.join(
-            ', '
-          )}], ` +
-            `metadata duplicate ОТБРОШЕНА (canonical сохранена), сверить вручную если нужно: ${JSON.stringify(
-              pp.metadata
-            )}`
+          `  ⚠️  ProjectProfile projectSlug=${pp.projectSlug}: конфликт — roles объединены [${
+            mergedRoles.join(
+              ', ',
+            )
+          }], `
+            + `metadata duplicate ОТБРОШЕНА (canonical сохранена), сверить вручную если нужно: ${
+              JSON.stringify(
+                pp.metadata,
+              )
+            }`,
         )
       } else {
         await tx.projectProfile.update({ where: { id: pp.id }, data: { userId: canonical.id } })
@@ -237,7 +241,7 @@ async function main() {
         data: { userId: canonical.id, email: duplicate.email, verified: duplicate.emailVerified },
       })
       console.log(
-        `  ✅ Email duplicate сохранён как доп. адрес canonical: ${duplicate.email} (verified=${duplicate.emailVerified})`
+        `  ✅ Email duplicate сохранён как доп. адрес canonical: ${duplicate.email} (verified=${duplicate.emailVerified})`,
       )
     }
 

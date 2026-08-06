@@ -73,7 +73,7 @@ export function useDrumSamples({ drumEngineRef, drumPatch, onPadChange }: UseDru
       engine.setSampleBuffer(sampleId, buffer)
       onPadChange(padIndex, sampleId, file.name)
     },
-    [drumEngineRef, onPadChange]
+    [drumEngineRef, onPadChange],
   )
 
   const removeSample = useCallback(async (sampleId: string) => {

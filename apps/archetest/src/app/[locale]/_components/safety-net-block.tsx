@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, Box, Link as ChakraLink, HStack, Text, VStack } from '@chakra-ui/react'
+import { Alert, Box, HStack, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import { LuHeartPulse, LuPhone } from 'react-icons/lu'
 import { CRISIS_HELPLINES, DARK_REASSURANCE_COPY, SAFETY_NET_COPY } from '../_data/crisis-resources'
 

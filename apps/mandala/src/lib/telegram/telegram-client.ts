@@ -20,7 +20,7 @@ export class TelegramClientError extends Error {
   constructor(
     message: string,
     public readonly code?: number,
-    public readonly description?: string
+    public readonly description?: string,
   ) {
     super(message)
     this.name = 'TelegramClientError'

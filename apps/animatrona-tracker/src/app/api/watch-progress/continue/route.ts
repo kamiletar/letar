@@ -52,8 +52,7 @@ export async function GET() {
       },
       orderBy: { updatedAt: 'desc' },
       take: 10,
-    })
-  )
+    }))
 
   // Формируем ответ
   const items = libraryItems

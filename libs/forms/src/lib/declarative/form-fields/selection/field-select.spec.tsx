@@ -24,7 +24,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('combobox')).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" label="Фреймворк" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Фреймворк')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" placeholder="Выберите фреймворк" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Выберите фреймворк')).toBeInTheDocument()
@@ -62,7 +62,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: 'react' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Select trigger показывает выбранное значение
@@ -76,7 +76,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" placeholder="Select..." options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const trigger = screen.getByRole('combobox')
@@ -94,7 +94,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" options={testOptions} disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('combobox')).toHaveAttribute('data-disabled', '')
@@ -106,7 +106,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" label="Framework" options={testOptions} required />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('*')).toBeInTheDocument()
@@ -120,7 +120,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: 'react' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Clear trigger должен быть доступен для optional полей
@@ -134,7 +134,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ framework: 'react' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="framework" options={testOptions} clearable={false} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const selectRoot = screen.getByRole('combobox').closest('[data-scope="select"]')
@@ -149,7 +149,7 @@ describe('FieldSelect', () => {
           <Form initialValue={{ status: '' }} onSubmit={vi.fn()}>
             <Form.Field.Select name="status" options={testOptions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const selectRoot = screen.getByRole('combobox').closest('[data-field-name]')

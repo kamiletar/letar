@@ -88,7 +88,7 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
       }
       const lower = q.toLowerCase()
       let matches = symbols.filter(
-        (s) => s.n.toLowerCase().includes(lower) || (s.s && s.s.toLowerCase().includes(lower))
+        (s) => s.n.toLowerCase().includes(lower) || (s.s && s.s.toLowerCase().includes(lower)),
       )
       // Фильтр по категории
       if (categoryId !== 'all') {
@@ -98,7 +98,7 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
       setHighlightIndex(-1)
       setVisibleCount(PAGE_SIZE)
     },
-    [symbols, categoryId, activeCategory]
+    [symbols, categoryId, activeCategory],
   )
 
   useEffect(() => {
@@ -141,8 +141,8 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
   const fullList = results.length > 0 ? results : query.trim().length < 2 && categoryId === 'all' ? recentSymbols : []
   const activeList = fullList.slice(0, visibleCount)
   const hasMore = fullList.length > visibleCount
-  const showingRecent =
-    results.length === 0 && query.trim().length < 2 && categoryId === 'all' && recentSymbols.length > 0
+  const showingRecent = results.length === 0 && query.trim().length < 2 && categoryId === 'all'
+    && recentSymbols.length > 0
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (activeList.length === 0) {
@@ -235,8 +235,10 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
                 cursor="grab"
                 draggable
                 onDragStart={(e) => handleDragStart(e, s)}
-                onMouseEnter={() => setHighlightIndex(idx)}
-                onClick={() => handleAssign(s, 'char')}
+                onMouseEnter={() =>
+                  setHighlightIndex(idx)}
+                onClick={() =>
+                  handleAssign(s, 'char')}
               >
                 <Text fontSize="2xl" w="36px" textAlign="center" pointerEvents="none">
                   {ch}
@@ -293,7 +295,8 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
                 variant="ghost"
                 color="#6c7ae0"
                 _hover={{ bg: '#2a2a4a' }}
-                onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                onClick={() =>
+                  setVisibleCount((prev) => prev + PAGE_SIZE)}
               >
                 Показать ещё ({fullList.length - visibleCount} из {fullList.length})
               </Button>

@@ -169,11 +169,11 @@ function extractPoetLinks(text: string): PoetLinks[] {
         .replace(/[:：\-–—()（）]/g, '')
         .trim()
       if (
-        textBeforeUrl &&
-        textBeforeUrl.length > 1 &&
-        textBeforeUrl.length < 60 &&
-        !textBeforeUrl.includes('#') &&
-        !NOT_NAME_PATTERNS.test(textBeforeUrl)
+        textBeforeUrl
+        && textBeforeUrl.length > 1
+        && textBeforeUrl.length < 60
+        && !textBeforeUrl.includes('#')
+        && !NOT_NAME_PATTERNS.test(textBeforeUrl)
       ) {
         if (!currentName) {
           currentName = cleanPoetName(textBeforeUrl)
@@ -186,13 +186,12 @@ function extractPoetLinks(text: string): PoetLinks[] {
       // Строка без URL — может быть именем поэта
       const cleaned = cleanPoetName(trimmed)
 
-      const isLikelyName =
-        cleaned &&
-        cleaned.length > 1 &&
-        cleaned.length < 60 &&
-        !cleaned.includes('#') &&
-        !cleaned.includes('http') &&
-        !NOT_NAME_PATTERNS.test(cleaned)
+      const isLikelyName = cleaned
+        && cleaned.length > 1
+        && cleaned.length < 60
+        && !cleaned.includes('#')
+        && !cleaned.includes('http')
+        && !NOT_NAME_PATTERNS.test(cleaned)
 
       if (isLikelyName) {
         flushCurrent()
@@ -222,7 +221,7 @@ async function main() {
 
   // 2. Загружаем всех игроков
   const { rows: players } = await pool.query<{ id: string; name: string; slug: string; socialLinks: unknown }>(
-    'SELECT id, name, slug, "socialLinks" FROM "Player"'
+    'SELECT id, name, slug, "socialLinks" FROM "Player"',
   )
   console.log(`Игроков в БД: ${players.length}`)
 

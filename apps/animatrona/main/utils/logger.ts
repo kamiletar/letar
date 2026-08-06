@@ -275,7 +275,8 @@ function createLogger(context: string[]): Logger {
 
     // Консоль (с цветами)
     const metaStr = formatMeta(meta, truncate)
-    const output = `${COLORS.dim}${timestamp}${COLORS.reset} ${levelColor}${levelLabel}${COLORS.reset} ${contextStr}${message}${metaStr}`
+    const output =
+      `${COLORS.dim}${timestamp}${COLORS.reset} ${levelColor}${levelLabel}${COLORS.reset} ${contextStr}${message}${metaStr}`
 
     switch (level) {
       case 'debug':

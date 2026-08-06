@@ -136,22 +136,24 @@ export function PerformanceTimer({ matchId, timer, showControls = false }: Perfo
 
       {showControls && (
         <HStack gap={2} w="full">
-          {!timer.isRunning ? (
-            <Button
-              onClick={handleStart}
-              disabled={isPending}
-              colorPalette="green"
-              size="lg"
-              flex={1}
-              fontWeight="bold"
-            >
-              ▶ Старт
-            </Button>
-          ) : (
-            <Button onClick={handleStop} disabled={isPending} colorPalette="red" size="lg" flex={1} fontWeight="bold">
-              ⏹ Стоп
-            </Button>
-          )}
+          {!timer.isRunning
+            ? (
+              <Button
+                onClick={handleStart}
+                disabled={isPending}
+                colorPalette="green"
+                size="lg"
+                flex={1}
+                fontWeight="bold"
+              >
+                ▶ Старт
+              </Button>
+            )
+            : (
+              <Button onClick={handleStop} disabled={isPending} colorPalette="red" size="lg" flex={1} fontWeight="bold">
+                ⏹ Стоп
+              </Button>
+            )}
           <Button
             onClick={handleReset}
             disabled={isPending || timer.isRunning}

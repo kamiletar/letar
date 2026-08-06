@@ -164,7 +164,7 @@ export function collectEnumTranslations(enums: EnumInfo[]): I18nTranslations['en
  */
 async function loadCustomTranslations(
   translationsPath: string,
-  schemaDir: string
+  schemaDir: string,
 ): Promise<Record<string, ValidationTranslations> | undefined> {
   try {
     const fullPath = resolve(schemaDir, translationsPath)
@@ -187,7 +187,7 @@ async function loadCustomTranslations(
  */
 export function getValidationTranslations(
   locale: string,
-  customTranslations?: Record<string, ValidationTranslations>
+  customTranslations?: Record<string, ValidationTranslations>,
 ): ValidationTranslations {
   return customTranslations?.[locale] ?? BUILTIN_TRANSLATIONS[locale] ?? BUILTIN_TRANSLATIONS.en
 }
@@ -214,7 +214,7 @@ async function readExistingTranslations(filePath: string): Promise<Record<string
  */
 function mergeTranslations(
   source: Record<string, unknown>,
-  existing: Record<string, unknown>
+  existing: Record<string, unknown>,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {}
 
@@ -278,7 +278,7 @@ function collectValidationKeys(obj: Record<string, unknown>, prefix: string): st
 function collectAllKeys(
   translations: I18nTranslations,
   validationTranslations: ValidationTranslations | null,
-  prefix = ''
+  prefix = '',
 ): string[] {
   const keys: string[] = []
 
@@ -303,7 +303,7 @@ function collectAllKeys(
   // Validation keys: validation.too_small.string, validation.invalid_format.email, etc.
   if (validationTranslations) {
     keys.push(
-      ...collectValidationKeys(validationTranslations as unknown as Record<string, unknown>, `${prefix}validation`)
+      ...collectValidationKeys(validationTranslations as unknown as Record<string, unknown>, `${prefix}validation`),
     )
   }
 
@@ -365,7 +365,7 @@ async function writeFileWithDir(filePath: string, content: string): Promise<void
 export async function generateI18nFiles(
   translations: I18nTranslations,
   config: I18nConfig,
-  schemaDir: string
+  schemaDir: string,
 ): Promise<void> {
   const outputDir = resolve(schemaDir, config.output)
 
@@ -409,6 +409,6 @@ export async function generateI18nFiles(
 
   // eslint-disable-next-line no-console
   console.log(
-    `[zenstack-form-plugin] Generated i18n files: ${config.locales.length} locale(s), ${allKeys.length} key(s)`
+    `[zenstack-form-plugin] Generated i18n files: ${config.locales.length} locale(s), ${allKeys.length} key(s)`,
   )
 }

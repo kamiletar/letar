@@ -149,7 +149,8 @@ async function checkContainers(state: HealthCheckState): Promise<string[]> {
         type: 'CONTAINER_RESTARTED',
         severity: 'WARNING',
         title: `Контейнер перезапускается: ${container.name}`,
-        message: `Контейнер ${container.name} в состоянии restarting — похоже на crash-loop. Status: ${container.status}`,
+        message:
+          `Контейнер ${container.name} в состоянии restarting — похоже на crash-loop. Status: ${container.status}`,
         metadata: { jobId: 'health-check', container: container.name, status: container.status },
       })
       triggered.push('CONTAINER_RESTARTED')
@@ -206,7 +207,8 @@ async function checkDatabases(state: HealthCheckState): Promise<string[]> {
         type: 'DATABASE_DOWN',
         severity: 'ERROR',
         title: `БД недоступна: ${status.name}`,
-        message: `Контейнер ${status.containerStatus.containerName} запущен, но подключение к БД ${status.database} не удалось.`,
+        message:
+          `Контейнер ${status.containerStatus.containerName} запущен, но подключение к БД ${status.database} не удалось.`,
         metadata: { jobId: 'health-check', app: status.name, host: status.host, port: status.port },
       })
       triggered.push('DATABASE_DOWN')

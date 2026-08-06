@@ -54,7 +54,7 @@ export function useConversationalState(totalFields: number): ConversationalState
         setIsCompleted(false)
       }
     },
-    [totalFields]
+    [totalFields],
   )
 
   return {

@@ -334,11 +334,10 @@ export async function getNetworks(): Promise<DockerNetwork[]> {
       scope: net.Scope || '',
       ipam: {
         driver: net.IPAM?.Driver || '',
-        config:
-          net.IPAM?.Config?.map((c) => ({
-            subnet: c.Subnet,
-            gateway: c.Gateway,
-          })) || [],
+        config: net.IPAM?.Config?.map((c) => ({
+          subnet: c.Subnet,
+          gateway: c.Gateway,
+        })) || [],
       },
       containers: Object.entries(net.Containers || {}).map(([, info]) => ({
         name: (info as { Name: string; IPv4Address: string }).Name,
@@ -369,11 +368,10 @@ export async function getDockerDiskUsage(): Promise<DockerDiskUsage> {
       },
       volumes: {
         total: df.Volumes?.length || 0,
-        size:
-          df.Volumes?.reduce(
-            (sum: number, v: { UsageData?: { Size?: number } }) => sum + (v.UsageData?.Size || 0),
-            0
-          ) || 0,
+        size: df.Volumes?.reduce(
+          (sum: number, v: { UsageData?: { Size?: number } }) => sum + (v.UsageData?.Size || 0),
+          0,
+        ) || 0,
       },
       buildCache: {
         total: df.BuildCache?.length || 0,
@@ -439,11 +437,10 @@ export async function pruneSystem(): Promise<{ spaceReclaimed: number }> {
         .catch(() => ({ SpaceReclaimed: 0 })),
     ])
 
-    const spaceReclaimed =
-      (containers.SpaceReclaimed || 0) +
-      (images.SpaceReclaimed || 0) +
-      (volumes.SpaceReclaimed || 0) +
-      (buildCache.SpaceReclaimed || 0)
+    const spaceReclaimed = (containers.SpaceReclaimed || 0)
+      + (images.SpaceReclaimed || 0)
+      + (volumes.SpaceReclaimed || 0)
+      + (buildCache.SpaceReclaimed || 0)
 
     return { spaceReclaimed }
   } catch (error) {

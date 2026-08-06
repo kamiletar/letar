@@ -24,7 +24,7 @@ export {
 export { mergeMKV } from './merge'
 
 // Demux (извлечение потоков)
-export { demuxFile, extractFontsFromFile, extractStream, type ExtractedFont } from './demux'
+export { demuxFile, type ExtractedFont, extractFontsFromFile, extractStream } from './demux'
 
 // Подбор битрейта
 export { formatBitrate, formatSourceBitrate, suggestAudioBitrate } from './bitrate'
@@ -32,10 +32,10 @@ export { formatBitrate, formatSourceBitrate, suggestAudioBitrate } from './bitra
 // Скриншоты
 export {
   extractFrame,
+  type FrameOptions,
   generateScreenshots,
   generateThumbnailSprite,
   getScreenshotSize,
-  type FrameOptions,
   type ScreenshotOptions,
   type ScreenshotResult,
   type SpriteSheetOptions,

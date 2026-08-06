@@ -49,7 +49,7 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
           break
       }
     },
-    [enabled, adapters, formId, config]
+    [enabled, adapters, formId, config],
   )
 
   // Инициализация адаптеров
@@ -101,7 +101,7 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
         })
       }
     },
-    [enabled, trackCorrections, fieldAnalytics, emit]
+    [enabled, trackCorrections, fieldAnalytics, emit],
   )
 
   // Трекинг blur
@@ -122,7 +122,7 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
 
       emit({ type: 'field_blur', field, timestamp: now, timeSpentMs })
     },
-    [enabled, emit]
+    [enabled, emit],
   )
 
   // Трекинг ошибки
@@ -137,7 +137,7 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
       })
       emit({ type: 'field_error', field, error, timestamp: Date.now() })
     },
-    [enabled, emit]
+    [enabled, emit],
   )
 
   // Глобальный перехват focus/blur на инпутах формы

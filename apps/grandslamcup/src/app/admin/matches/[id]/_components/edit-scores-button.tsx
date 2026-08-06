@@ -23,10 +23,10 @@ export function EditScoresButton({ performanceId, currentTextScores, currentDeli
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [textScores, setTextScores] = useState<number[]>(
-    currentTextScores.length === 5 ? [...currentTextScores] : [3, 3, 3, 3, 3]
+    currentTextScores.length === 5 ? [...currentTextScores] : [3, 3, 3, 3, 3],
   )
   const [deliveryScores, setDeliveryScores] = useState<number[]>(
-    currentDeliveryScores.length === 5 ? [...currentDeliveryScores] : [3, 3, 3, 3, 3]
+    currentDeliveryScores.length === 5 ? [...currentDeliveryScores] : [3, 3, 3, 3, 3],
   )
 
   const updateScore = (type: 'text' | 'delivery', index: number, value: string) => {

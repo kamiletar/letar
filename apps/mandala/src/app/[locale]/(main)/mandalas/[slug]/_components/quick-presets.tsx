@@ -50,7 +50,7 @@ export function QuickPresets({ currentPreset, onSelectPreset, visible = true }: 
       const preset = ATMOSPHERE_PRESETS[presetId]
       onSelectPreset(presetId, preset.settings)
     },
-    [onSelectPreset]
+    [onSelectPreset],
   )
 
   return (

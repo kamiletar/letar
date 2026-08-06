@@ -20,8 +20,8 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
-  HStack,
   Heading,
+  HStack,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -140,7 +140,7 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
         setError('Не удалось завершить выступление')
       }
     },
-    [match.id]
+    [match.id],
   )
 
   const handleEndClick = useCallback(() => {
@@ -157,23 +157,25 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
   return (
     <VStack gap={5} align="stretch" py={4}>
       {/* Имя поэта */}
-      {currentPerf ? (
-        <Box textAlign="center">
-          <Badge colorPalette="blue" size="lg" mb={2}>
-            {currentPerf.teamName}
-          </Badge>
-          <Heading size="2xl" mb={1}>
-            🎤 {currentPerf.playerName}
-          </Heading>
-          <Text fontSize="sm" color="fg.muted">
-            Тайм {matchState?.currentHalf ?? 1} · Раунд {matchState?.currentRound ?? 1}
-          </Text>
-        </Box>
-      ) : (
-        <Box textAlign="center" py={4}>
-          <Text color="fg.muted">Ожидание данных...</Text>
-        </Box>
-      )}
+      {currentPerf
+        ? (
+          <Box textAlign="center">
+            <Badge colorPalette="blue" size="lg" mb={2}>
+              {currentPerf.teamName}
+            </Badge>
+            <Heading size="2xl" mb={1}>
+              🎤 {currentPerf.playerName}
+            </Heading>
+            <Text fontSize="sm" color="fg.muted">
+              Тайм {matchState?.currentHalf ?? 1} · Раунд {matchState?.currentRound ?? 1}
+            </Text>
+          </Box>
+        )
+        : (
+          <Box textAlign="center" py={4}>
+            <Text color="fg.muted">Ожидание данных...</Text>
+          </Box>
+        )}
 
       {/* Таймер — read-only, только если ведущий его запустил */}
       {hasTimer && (

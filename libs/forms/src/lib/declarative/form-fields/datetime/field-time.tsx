@@ -27,7 +27,8 @@ export const FieldTime = createField<TimeFieldProps, string>({
       <Input
         type="time"
         value={(field.state.value as string) ?? ''}
-        onChange={(e) => field.handleChange((e.target as HTMLInputElement).value)}
+        onChange={(e) =>
+          field.handleChange((e.target as HTMLInputElement).value)}
         onBlur={field.handleBlur}
         placeholder={resolved.placeholder}
         min={componentProps.min}

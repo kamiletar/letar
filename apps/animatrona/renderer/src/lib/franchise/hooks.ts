@@ -146,7 +146,7 @@ export function useSyncRelations() {
         setIsSyncing(false)
       }
     },
-    [fetchRelated, updateAnime, queryClient]
+    [fetchRelated, updateAnime, queryClient],
   )
 
   return { syncRelations: syncRelationsForAnime, isSyncing, error }
@@ -159,21 +159,21 @@ export function useAnimeRelations(animeId: string | undefined) {
   return useFindManyAnimeRelation(
     animeId
       ? {
-          where: { sourceAnimeId: animeId },
-          orderBy: { createdAt: 'asc' },
-          include: {
-            targetAnime: {
-              select: {
-                id: true,
-                name: true,
-                year: true,
-                posterCid: true,
-                poster: { select: { cid: true } },
-              },
+        where: { sourceAnimeId: animeId },
+        orderBy: { createdAt: 'asc' },
+        include: {
+          targetAnime: {
+            select: {
+              id: true,
+              name: true,
+              year: true,
+              posterCid: true,
+              poster: { select: { cid: true } },
             },
           },
-        }
-      : undefined
+        },
+      }
+      : undefined,
   )
 }
 
@@ -181,7 +181,7 @@ export function useAnimeRelations(animeId: string | undefined) {
  * Проверить, загружено ли связанное аниме в библиотеку
  */
 export function useCheckRelatedInLibrary(
-  relations: Array<{ targetShikimoriId: number; targetAnimeId: string | null }>
+  relations: Array<{ targetShikimoriId: number; targetAnimeId: string | null }>,
 ) {
   // Подсчитываем загруженные
   const loadedCount = relations.filter((r) => r.targetAnimeId !== null).length

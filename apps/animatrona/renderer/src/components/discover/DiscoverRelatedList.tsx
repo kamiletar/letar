@@ -117,13 +117,13 @@ export function DiscoverRelatedList({ relations }: DiscoverRelatedListProps) {
                 >
                   {/* Постер */}
                   <Box position="relative" aspectRatio="2/3" bg="bg.subtle">
-                    {posterUrl ? (
-                      <Image src={posterUrl} alt={rel.targetName ?? 'Постер'} objectFit="cover" w="100%" h="100%" />
-                    ) : (
-                      <Box w="100%" h="100%" display="flex" alignItems="center" justifyContent="center">
-                        <Icon as={LuLink2} boxSize={8} color="fg.subtle" />
-                      </Box>
-                    )}
+                    {posterUrl
+                      ? <Image src={posterUrl} alt={rel.targetName ?? 'Постер'} objectFit="cover" w="100%" h="100%" />
+                      : (
+                        <Box w="100%" h="100%" display="flex" alignItems="center" justifyContent="center">
+                          <Icon as={LuLink2} boxSize={8} color="fg.subtle" />
+                        </Box>
+                      )}
 
                     {/* Бейдж типа связи */}
                     <Badge position="absolute" top={1} left={1} colorPalette={info.color} size="sm" fontSize="2xs">

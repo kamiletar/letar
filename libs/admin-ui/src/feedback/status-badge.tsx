@@ -57,7 +57,7 @@ export function StatusBadge({ type, value }: StatusBadgeProps) {
  * Создать кастомный StatusBadge с дополнительными конфигурациями
  */
 export function createStatusBadge<T extends string>(
-  customConfig: Record<T, Record<string, { color: string; label: string }>>
+  customConfig: Record<T, Record<string, { color: string; label: string }>>,
 ) {
   return function CustomStatusBadge({ type, value }: { type: T; value: boolean | string }) {
     const key = typeof value === 'boolean' ? String(value) : value

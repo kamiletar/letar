@@ -38,7 +38,7 @@ export async function mapStudios(shikimori: ShikimoriAnimeExtended): Promise<Ani
   prewarmCache(
     cached
       .filter((c): c is typeof c & { imageUrl: string; imageCid: string } => Boolean(c.imageUrl && c.imageCid))
-      .map((c) => ({ url: c.imageUrl, cid: c.imageCid }))
+      .map((c) => ({ url: c.imageUrl, cid: c.imageCid })),
   )
 
   const results: AnimeManifestStudio[] = []
@@ -88,7 +88,7 @@ export async function mapStaff(shikimori: ShikimoriAnimeExtended): Promise<Anime
   prewarmCache(
     cached
       .filter((c): c is typeof c & { imageUrl: string; imageCid: string } => Boolean(c.imageUrl && c.imageCid))
-      .map((c) => ({ url: c.imageUrl, cid: c.imageCid }))
+      .map((c) => ({ url: c.imageUrl, cid: c.imageCid })),
   )
 
   const results: AnimeManifestPerson[] = []
@@ -145,7 +145,7 @@ export async function mapCharacters(shikimori: ShikimoriAnimeExtended): Promise<
   prewarmCache(
     cached
       .filter((c): c is typeof c & { imageUrl: string; imageCid: string } => Boolean(c.imageUrl && c.imageCid))
-      .map((c) => ({ url: c.imageUrl, cid: c.imageCid }))
+      .map((c) => ({ url: c.imageUrl, cid: c.imageCid })),
   )
 
   const results: AnimeManifestCharacter[] = []
@@ -216,7 +216,7 @@ export function mapVideos(shikimori: ShikimoriAnimeExtended): AnimeManifestVideo
  */
 export function extractExternalIds(
   shikimoriId: number | null | undefined,
-  externalLinks: ShikimoriAnimeExtended['externalLinks'] | undefined
+  externalLinks: ShikimoriAnimeExtended['externalLinks'] | undefined,
 ): AnimeManifestExternalIds {
   const ids: AnimeManifestExternalIds = {}
 

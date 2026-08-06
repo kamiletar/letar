@@ -159,7 +159,7 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -183,7 +183,7 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -213,6 +213,6 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

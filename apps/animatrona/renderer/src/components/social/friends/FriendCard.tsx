@@ -93,21 +93,25 @@ export function FriendCard({ friend, onRemove, onBlock, onViewProfile }: FriendC
 
         <VStack align="start" gap={0}>
           <Text fontWeight="medium">{friend.displayName}</Text>
-          {friend.isOnline ? (
-            friend.watching ? (
-              <Text fontSize="sm" color="blue.500">
-                Смотрит: {friend.watching.animeName} эп. {friend.watching.episodeNumber}
-              </Text>
-            ) : (
-              <Text fontSize="sm" color="green.500">
-                В сети
-              </Text>
+          {friend.isOnline
+            ? (
+              friend.watching
+                ? (
+                  <Text fontSize="sm" color="blue.500">
+                    Смотрит: {friend.watching.animeName} эп. {friend.watching.episodeNumber}
+                  </Text>
+                )
+                : (
+                  <Text fontSize="sm" color="green.500">
+                    В сети
+                  </Text>
+                )
             )
-          ) : (
-            <Text fontSize="sm" color="fg.muted">
-              {formatLastSeen(friend.lastSeenAt)}
-            </Text>
-          )}
+            : (
+              <Text fontSize="sm" color="fg.muted">
+                {formatLastSeen(friend.lastSeenAt)}
+              </Text>
+            )}
         </VStack>
       </HStack>
 

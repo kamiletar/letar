@@ -107,8 +107,10 @@ app.post<{ Params: { appId: string } }>('/api/v1/:appId/video/upload', async (re
   const { appId } = req.params
 
   // Получаем webhookUrl — либо из токена (браузерный аплоад), либо из query
-  const tokenPayload = (req as unknown as Record<string, unknown>)._uploadPayload as
-    { videoId?: string; webhookUrl?: string } | undefined
+  const tokenPayload = (req as unknown as Record<string, unknown>)._uploadPayload as {
+    videoId?: string
+    webhookUrl?: string
+  } | undefined
   const webhookUrl = tokenPayload?.webhookUrl ?? (req.query as Record<string, string>).webhookUrl
 
   const data = await req.file()

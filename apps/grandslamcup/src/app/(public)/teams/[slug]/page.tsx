@@ -63,16 +63,16 @@ export default async function TeamPage({ params }: { params: Params }) {
   // Матчи команды
   const matches = currentTs
     ? await prisma.match.findMany({
-        where: {
-          OR: [{ homeTeamId: currentTs.id }, { awayTeamId: currentTs.id }],
-        },
-        orderBy: { scheduledAt: 'asc' },
-        include: {
-          homeTeam: { include: { team: { select: { name: true } } } },
-          awayTeam: { include: { team: { select: { name: true } } } },
-          venue: { select: { name: true } },
-        },
-      })
+      where: {
+        OR: [{ homeTeamId: currentTs.id }, { awayTeamId: currentTs.id }],
+      },
+      orderBy: { scheduledAt: 'asc' },
+      include: {
+        homeTeam: { include: { team: { select: { name: true } } } },
+        awayTeam: { include: { team: { select: { name: true } } } },
+        venue: { select: { name: true } },
+      },
+    })
     : []
 
   // Статистика
@@ -147,7 +147,9 @@ export default async function TeamPage({ params }: { params: Params }) {
                 Тренерский штаб
               </Text>
               {currentTs.playerTeamSeasons
-                .filter((pts) => pts.role !== 'PLAYER')
+                .filter((pts) =>
+                  pts.role !== 'PLAYER'
+                )
                 .map((pts) => (
                   <Link key={pts.id} href={`/players/${pts.player.slug}`}>
                     <Flex align="center" gap={2} py={1} _hover={{ color: 'brand.solid' }}>

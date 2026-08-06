@@ -103,7 +103,7 @@ export function useGestures(options: UseGesturesOptions) {
       gestureTypeRef.current = null
       initialValueRef.current = currentTime
     },
-    [currentTime]
+    [currentTime],
   )
 
   // Обработчик движения
@@ -164,7 +164,7 @@ export function useGestures(options: UseGesturesOptions) {
         })
       }
     },
-    [onSeekStart, duration, hapticEnabled, clearHideTimeout]
+    [onSeekStart, duration, hapticEnabled, clearHideTimeout],
   )
 
   // Обработчик окончания касания

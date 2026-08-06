@@ -97,7 +97,7 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
 
 // Оптимизация изображений
 import Image from 'next/image'
-;<Image src={src} width={800} height={600} loading="lazy" />
+<Image src={src} width={800} height={600} loading="lazy" />
 ```
 
 ### React

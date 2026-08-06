@@ -43,15 +43,13 @@ export function CityForm({ city }: CityFormProps) {
           telegramChatId: city?.telegramChatId ?? '',
         }}
         onSubmit={handleSubmit}
-        onFieldChange={
-          !isEdit
-            ? {
-                name: (value, { setFieldValue }) => {
-                  setFieldValue('slug', transliterate(String(value ?? '')))
-                },
-              }
-            : undefined
-        }
+        onFieldChange={!isEdit
+          ? {
+            name: (value, { setFieldValue }) => {
+              setFieldValue('slug', transliterate(String(value ?? '')))
+            },
+          }
+          : undefined}
       >
         <GrandSlamCupForm.Field.String name="name" />
         <GrandSlamCupForm.Field.String name="slug" />

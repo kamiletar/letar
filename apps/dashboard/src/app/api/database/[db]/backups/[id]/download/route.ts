@@ -81,7 +81,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

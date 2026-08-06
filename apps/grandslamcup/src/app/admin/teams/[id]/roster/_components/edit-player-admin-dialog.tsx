@@ -218,35 +218,37 @@ export function EditPlayerAdminDialog({ player, onClose }: EditPlayerAdminDialog
                   <Text fontSize="sm" fontWeight="semibold" mb={2}>
                     Привязка аккаунта
                   </Text>
-                  {player.hasUser ? (
-                    <Flex justify="space-between" align="center">
-                      <Badge colorPalette="green" size="sm">
-                        Привязан
-                      </Badge>
-                      <Button size="xs" variant="outline" colorPalette="red" onClick={handleUnlink}>
-                        <LuUnlink size={14} /> Отвязать
-                      </Button>
-                    </Flex>
-                  ) : (
-                    <Flex gap={2}>
-                      <Input
-                        value={linkEmail}
-                        onChange={(e) => setLinkEmail(e.target.value)}
-                        placeholder="Email"
-                        size="sm"
-                        flex={1}
-                      />
-                      <Button
-                        size="sm"
-                        colorPalette="teal"
-                        onClick={handleLink}
-                        loading={linking}
-                        disabled={!linkEmail.trim()}
-                      >
-                        <LuLink size={14} /> Привязать
-                      </Button>
-                    </Flex>
-                  )}
+                  {player.hasUser
+                    ? (
+                      <Flex justify="space-between" align="center">
+                        <Badge colorPalette="green" size="sm">
+                          Привязан
+                        </Badge>
+                        <Button size="xs" variant="outline" colorPalette="red" onClick={handleUnlink}>
+                          <LuUnlink size={14} /> Отвязать
+                        </Button>
+                      </Flex>
+                    )
+                    : (
+                      <Flex gap={2}>
+                        <Input
+                          value={linkEmail}
+                          onChange={(e) => setLinkEmail(e.target.value)}
+                          placeholder="Email"
+                          size="sm"
+                          flex={1}
+                        />
+                        <Button
+                          size="sm"
+                          colorPalette="teal"
+                          onClick={handleLink}
+                          loading={linking}
+                          disabled={!linkEmail.trim()}
+                        >
+                          <LuLink size={14} /> Привязать
+                        </Button>
+                      </Flex>
+                    )}
                 </Box>
               </VStack>
             </Dialog.Body>

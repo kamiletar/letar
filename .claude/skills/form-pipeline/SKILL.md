@@ -32,7 +32,7 @@ description: |
 ```tsx
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
 import { Form } from '@letar/forms'
-;<Form schema={ProductCreateFormSchema} initialValue={data} onSubmit={save}>
+<Form schema={ProductCreateFormSchema} initialValue={data} onSubmit={save}>
   <Form.AutoFields />
   <Form.Button.Submit>Сохранить</Form.Button.Submit>
 </Form>

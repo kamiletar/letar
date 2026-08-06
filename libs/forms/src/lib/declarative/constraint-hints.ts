@@ -173,7 +173,7 @@ function getTranslations(locale: string, custom?: Partial<ConstraintHintTranslat
 export function generateConstraintHint(
   constraints: ZodConstraints | undefined,
   locale: string = 'en',
-  customTranslations?: Partial<ConstraintHintTranslations>
+  customTranslations?: Partial<ConstraintHintTranslations>,
 ): string | undefined {
   if (!constraints) {
     return undefined
@@ -202,7 +202,7 @@ export function generateConstraintHint(
 function generateStringHint(
   constraints: ZodStringConstraints | undefined,
   locale: string,
-  t: ConstraintHintTranslations
+  t: ConstraintHintTranslations,
 ): string | undefined {
   if (!constraints) return undefined
 
@@ -237,7 +237,7 @@ function generateStringHint(
 function generateNumberHint(
   constraints: ZodNumberConstraints | undefined,
   locale: string,
-  t: ConstraintHintTranslations
+  t: ConstraintHintTranslations,
 ): string | undefined {
   if (!constraints) return undefined
 
@@ -266,7 +266,7 @@ function generateNumberHint(
 function generateDateHint(
   constraints: ZodDateConstraints | undefined,
   locale: string,
-  t: ConstraintHintTranslations
+  t: ConstraintHintTranslations,
 ): string | undefined {
   if (!constraints) return undefined
 
@@ -290,7 +290,7 @@ function generateDateHint(
 function generateArrayHint(
   constraints: ZodArrayConstraints | undefined,
   locale: string,
-  t: ConstraintHintTranslations
+  t: ConstraintHintTranslations,
 ): string | undefined {
   if (!constraints) return undefined
 

@@ -42,7 +42,7 @@ export const ffmpegPreload = {
 
   /** Извлечение шрифтов из MKV attachments (extract + IPFS upload + cleanup) */
   extractFonts: (
-    inputPath: string
+    inputPath: string,
   ): Promise<{
     fonts: Array<{ name: string; ext: string; fileName: string; cid: string | null; ipfsSize: number | null }>
   }> => ipcRenderer.invoke('ffmpeg:extractFonts', inputPath),
@@ -51,7 +51,7 @@ export const ffmpegPreload = {
   extractStream: (
     inputPath: string,
     outputPath: string,
-    streamSpec: string
+    streamSpec: string,
   ): Promise<{ success: boolean; path: string; size: number }> =>
     ipcRenderer.invoke('ffmpeg:extractStream', inputPath, outputPath, streamSpec),
 
@@ -59,7 +59,7 @@ export const ffmpegPreload = {
   transcodeAudioVBR: (
     input: string,
     output: string,
-    options: AudioTranscodeVBROptions
+    options: AudioTranscodeVBROptions,
   ): Promise<OperationResult & { outputPath?: string }> =>
     ipcRenderer.invoke('ffmpeg:transcodeAudioVBR', input, output, options),
 
@@ -86,7 +86,7 @@ export const ffmpegPreload = {
       fullWidth?: number
       quality?: number
       skipStartPercent?: number
-    }
+    },
   ): Promise<{
     success: boolean
     thumbnails: string[]
@@ -112,7 +112,7 @@ export const ffmpegPreload = {
       frameHeight?: number
       columns?: number
       quality?: number
-    }
+    },
   ): Promise<{
     success: boolean
     spritePath: string

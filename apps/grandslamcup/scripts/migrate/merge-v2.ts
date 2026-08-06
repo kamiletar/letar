@@ -242,7 +242,7 @@ function main() {
 
   console.log(`\n  До дедупликации: ${moscowRaw.matches.length} матчей`)
   console.log(
-    `  После: ${moscow.matches.length} матчей, ${moscow.rosters.length} составов, ${moscow.profiles.length} профилей, ${moscow.venues.length} площадок, ${moscow.teams.length} команд`
+    `  После: ${moscow.matches.length} матчей, ${moscow.rosters.length} составов, ${moscow.profiles.length} профилей, ${moscow.venues.length} площадок, ${moscow.teams.length} команд`,
   )
 
   const mNullHA = moscow.matches.filter((m) => !m.home || !m.away).length
@@ -270,7 +270,7 @@ function main() {
 
   console.log(`\n  До дедупликации: ${spbRaw.matches.length} матчей`)
   console.log(
-    `  После: ${spb.matches.length} матчей, ${spb.rosters.length} составов, ${spb.profiles.length} профилей, ${spb.venues.length} площадок, ${spb.teams.length} команд`
+    `  После: ${spb.matches.length} матчей, ${spb.rosters.length} составов, ${spb.profiles.length} профилей, ${spb.venues.length} площадок, ${spb.teams.length} команд`,
   )
 
   const sNullHA = spb.matches.filter((m) => !m.home || !m.away).length
@@ -297,7 +297,7 @@ function main() {
   const v1sNull = v1Spb.matches.filter((m: any) => !m.home || !m.away).length
 
   console.log(
-    `\n  Москва матчи: ${v1Moscow.matches.length} → ${moscow.matches.length} (null h/a: ${v1mNull} → ${mNullHA})`
+    `\n  Москва матчи: ${v1Moscow.matches.length} → ${moscow.matches.length} (null h/a: ${v1mNull} → ${mNullHA})`,
   )
   console.log(`  СПб матчи: ${v1Spb.matches.length} → ${spb.matches.length} (null h/a: ${v1sNull} → ${sNullHA})`)
   console.log(`  Москва профили: ${v1Moscow.profiles.length} → ${moscow.profiles.length}`)

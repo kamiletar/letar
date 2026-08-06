@@ -261,7 +261,7 @@ export function useImportWizardState(_options: UseImportWizardStateOptions = {})
     if (state.donor.enabled && state.donor.files.length > 0) {
       const hasMatches = state.files.some(
         (f) =>
-          f.selected && f.episodeNumber !== null && state.donor.files.some((d) => d.episodeNumber === f.episodeNumber)
+          f.selected && f.episodeNumber !== null && state.donor.files.some((d) => d.episodeNumber === f.episodeNumber),
       )
       if (hasMatches) {
         return DONOR_STEPS
@@ -324,7 +324,7 @@ export function useImportWizardState(_options: UseImportWizardStateOptions = {})
         processedInitialPathRef.current = null
       },
     }),
-    []
+    [],
   )
 
   return {

@@ -52,11 +52,19 @@ function SimilarCard({ item, currentGenres }: { item: SimilarAnimeItem; currentG
         _hover={{ borderColor: 'purple.500', shadow: 'md' }}
       >
         {/* Постер */}
-        {coverUrl ? (
-          <Image src={coverUrl} alt={item.title} w="48px" h="68px" objectFit="cover" borderRadius="sm" flexShrink={0} />
-        ) : (
-          <Box w="48px" h="68px" bg="bg.muted" borderRadius="sm" flexShrink={0} />
-        )}
+        {coverUrl
+          ? (
+            <Image
+              src={coverUrl}
+              alt={item.title}
+              w="48px"
+              h="68px"
+              objectFit="cover"
+              borderRadius="sm"
+              flexShrink={0}
+            />
+          )
+          : <Box w="48px" h="68px" bg="bg.muted" borderRadius="sm" flexShrink={0} />}
 
         {/* Информация */}
         <VStack align="start" gap={1} flex={1} minW={0}>
@@ -112,9 +120,7 @@ export function SimilarSection({ items, currentGenres }: SimilarSectionProps) {
 
   return (
     <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
-      {items.map((item) => (
-        <SimilarCard key={item.id} item={item} currentGenres={currentGenres} />
-      ))}
+      {items.map((item) => <SimilarCard key={item.id} item={item} currentGenres={currentGenres} />)}
     </SimpleGrid>
   )
 }

@@ -61,15 +61,17 @@ export function ResultStep({ result, onClose, onRetry }: ResultStepProps) {
           <VStack gap={0} align="stretch">
             {result.results.map((item, i) => (
               <HStack key={i} px={3} py={2} borderBottomWidth={1} borderColor="border.subtle">
-                {item.result.success ? (
-                  <Badge size="sm" colorPalette="green" variant="subtle">
-                    <Icon as={LuCheck} boxSize={3} />
-                  </Badge>
-                ) : (
-                  <Badge size="sm" colorPalette="red" variant="subtle">
-                    <Icon as={LuX} boxSize={3} />
-                  </Badge>
-                )}
+                {item.result.success
+                  ? (
+                    <Badge size="sm" colorPalette="green" variant="subtle">
+                      <Icon as={LuCheck} boxSize={3} />
+                    </Badge>
+                  )
+                  : (
+                    <Badge size="sm" colorPalette="red" variant="subtle">
+                      <Icon as={LuX} boxSize={3} />
+                    </Badge>
+                  )}
                 <Text fontSize="sm" flex={1} truncate>
                   {item.animeName}
                 </Text>

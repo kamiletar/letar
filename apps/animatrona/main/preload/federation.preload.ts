@@ -25,7 +25,7 @@ export const federationPreload = {
 
   /** Обновить настройки федерации */
   updateSettings: (
-    update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>
+    update: Partial<Omit<FederationSettings, 'hasPrivateKey'>>,
   ): Promise<FederationOperationResult<FederationSettings>> => ipcRenderer.invoke('federation:updateSettings', update),
 
   /** Сгенерировать ключи для HTTP Signatures */

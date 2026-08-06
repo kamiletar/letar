@@ -124,7 +124,7 @@ export function ImageDropzone({ folder, onUpload }: ImageDropzoneProps) {
         setIsUploading(false)
       }
     },
-    [folder, onUpload]
+    [folder, onUpload],
   )
 
   return (
@@ -142,9 +142,7 @@ export function ImageDropzone({ folder, onUpload }: ImageDropzoneProps) {
       textAlign="center"
       cursor="pointer"
     >
-      {isUploading ? (
-        <Spinner />
-      ) : (
+      {isUploading ? <Spinner /> : (
         <VStack>
           <Text>Перетащите изображение сюда</Text>
           <Text fontSize="sm" color="gray.500">

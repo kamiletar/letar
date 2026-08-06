@@ -216,11 +216,9 @@ export function TrackSelector({
                       disabled={!playable}
                       // Используем data-selected для CSS, hover из slot recipe
                       data-selected={isSelected || undefined}
-                      title={
-                        !playable
-                          ? 'Дорожка не транскодирована. Перекодируйте эпизод для использования этой дорожки.'
-                          : undefined
-                      }
+                      title={!playable
+                        ? 'Дорожка не транскодирована. Перекодируйте эпизод для использования этой дорожки.'
+                        : undefined}
                       css={{
                         '&[data-selected]': {
                           bg: 'purple.700',

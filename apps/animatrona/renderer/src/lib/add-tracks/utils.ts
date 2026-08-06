@@ -78,7 +78,7 @@ export async function runWithConcurrency<T>(
   items: T[],
   fn: (item: T, index: number) => Promise<void>,
   limitRef: React.RefObject<number>,
-  isCancelledRef: React.RefObject<boolean>
+  isCancelledRef: React.RefObject<boolean>,
 ): Promise<void> {
   const executing: Promise<void>[] = []
 

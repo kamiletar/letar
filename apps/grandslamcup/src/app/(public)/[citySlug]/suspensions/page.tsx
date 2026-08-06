@@ -99,134 +99,136 @@ export default async function SuspensionsPage({
         <SuspensionFilter activeOnly={showActiveOnly} citySlug={citySlug} />
       </Flex>
 
-      {suspensions.length === 0 ? (
-        <Box bg="bg.panel" borderRadius="xl" p={8} borderWidth="1px" borderColor="border" textAlign="center">
-          <Text color="fg.muted" fontSize="lg">
-            Нет отстранённых поэтов
-          </Text>
-        </Box>
-      ) : (
-        <DataTableWrapper>
-          <Grid
-            templateColumns={{ base: '1fr 1fr 1fr 100px', md: '1fr 1fr 1fr 120px 120px 90px' }}
-            gap={0}
-            fontSize="sm"
-            minW="500px"
-          >
-            {/* Заголовки */}
-            {['Поэт', 'Команда', 'Причина', 'Начало', 'Матчей осталось', 'Статус'].map((h, i) => (
-              <Box
-                key={h}
-                px={3}
-                py={2}
-                fontWeight="bold"
-                fontSize="xs"
-                textTransform="uppercase"
-                letterSpacing="wide"
-                bg={{ base: 'gray.100', _dark: 'brand.950' }}
-                color={{ base: 'fg.muted', _dark: 'gray.300' }}
-                borderBottomWidth="2px"
-                borderBottomColor="brand.solid"
-                /* На мобильных скрываем Начало и Матчей */
-                display={i >= 3 && i <= 4 ? { base: 'none', md: 'block' } : undefined}
-              >
-                {h}
-              </Box>
-            ))}
-
-            {/* Строки */}
-            {suspensions.map((s, i) => {
-              const currentTeam = s.player.playerTeamSeasons[0]
-              const isActive = s.active
-
-              return (
-                <Box key={s.id} display="contents">
-                  {/* Поэт */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                  >
-                    <Link href={`/${citySlug}/players/${s.player.slug}`}>
-                      <Text fontWeight="medium" _hover={{ color: 'brand.solid' }} transition="color 0.15s">
-                        {playerDisplayName(s.player)}
-                      </Text>
-                    </Link>
-                  </Box>
-
-                  {/* Команда */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                  >
-                    <Text color="fg.muted" fontSize="sm">
-                      {currentTeam?.teamSeason.team.name ?? '—'}
-                    </Text>
-                  </Box>
-
-                  {/* Причина */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                  >
-                    <Text fontSize="sm">{reasonLabel(s.reason)}</Text>
-                  </Box>
-
-                  {/* Начало (скрыто на мобильных) */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                    display={{ base: 'none', md: 'block' }}
-                  >
-                    <Text fontSize="sm" color="fg.muted">
-                      {formatDate(s.startedAt)}
-                    </Text>
-                  </Box>
-
-                  {/* Матчей осталось (скрыто на мобильных) */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    textAlign="center"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                    display={{ base: 'none', md: 'block' }}
-                  >
-                    <Text fontFamily="mono" fontWeight="bold">
-                      {s.untilEndOfSeason ? 'До конца сезона' : s.matchesLeft}
-                    </Text>
-                  </Box>
-
-                  {/* Статус */}
-                  <Box
-                    px={3}
-                    py={2}
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.muted"
-                    bg={i % 2 === 1 ? 'bg.subtle' : undefined}
-                  >
-                    <Badge colorPalette={isActive ? 'red' : 'gray'} variant="subtle" size="sm">
-                      {isActive ? 'Активно' : 'Истёк'}
-                    </Badge>
-                  </Box>
+      {suspensions.length === 0
+        ? (
+          <Box bg="bg.panel" borderRadius="xl" p={8} borderWidth="1px" borderColor="border" textAlign="center">
+            <Text color="fg.muted" fontSize="lg">
+              Нет отстранённых поэтов
+            </Text>
+          </Box>
+        )
+        : (
+          <DataTableWrapper>
+            <Grid
+              templateColumns={{ base: '1fr 1fr 1fr 100px', md: '1fr 1fr 1fr 120px 120px 90px' }}
+              gap={0}
+              fontSize="sm"
+              minW="500px"
+            >
+              {/* Заголовки */}
+              {['Поэт', 'Команда', 'Причина', 'Начало', 'Матчей осталось', 'Статус'].map((h, i) => (
+                <Box
+                  key={h}
+                  px={3}
+                  py={2}
+                  fontWeight="bold"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  letterSpacing="wide"
+                  bg={{ base: 'gray.100', _dark: 'brand.950' }}
+                  color={{ base: 'fg.muted', _dark: 'gray.300' }}
+                  borderBottomWidth="2px"
+                  borderBottomColor="brand.solid"
+                  /* На мобильных скрываем Начало и Матчей */
+                  display={i >= 3 && i <= 4 ? { base: 'none', md: 'block' } : undefined}
+                >
+                  {h}
                 </Box>
-              )
-            })}
-          </Grid>
-        </DataTableWrapper>
-      )}
+              ))}
+
+              {/* Строки */}
+              {suspensions.map((s, i) => {
+                const currentTeam = s.player.playerTeamSeasons[0]
+                const isActive = s.active
+
+                return (
+                  <Box key={s.id} display="contents">
+                    {/* Поэт */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                    >
+                      <Link href={`/${citySlug}/players/${s.player.slug}`}>
+                        <Text fontWeight="medium" _hover={{ color: 'brand.solid' }} transition="color 0.15s">
+                          {playerDisplayName(s.player)}
+                        </Text>
+                      </Link>
+                    </Box>
+
+                    {/* Команда */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                    >
+                      <Text color="fg.muted" fontSize="sm">
+                        {currentTeam?.teamSeason.team.name ?? '—'}
+                      </Text>
+                    </Box>
+
+                    {/* Причина */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                    >
+                      <Text fontSize="sm">{reasonLabel(s.reason)}</Text>
+                    </Box>
+
+                    {/* Начало (скрыто на мобильных) */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                      display={{ base: 'none', md: 'block' }}
+                    >
+                      <Text fontSize="sm" color="fg.muted">
+                        {formatDate(s.startedAt)}
+                      </Text>
+                    </Box>
+
+                    {/* Матчей осталось (скрыто на мобильных) */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      textAlign="center"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                      display={{ base: 'none', md: 'block' }}
+                    >
+                      <Text fontFamily="mono" fontWeight="bold">
+                        {s.untilEndOfSeason ? 'До конца сезона' : s.matchesLeft}
+                      </Text>
+                    </Box>
+
+                    {/* Статус */}
+                    <Box
+                      px={3}
+                      py={2}
+                      borderBottomWidth="1px"
+                      borderBottomColor="border.muted"
+                      bg={i % 2 === 1 ? 'bg.subtle' : undefined}
+                    >
+                      <Badge colorPalette={isActive ? 'red' : 'gray'} variant="subtle" size="sm">
+                        {isActive ? 'Активно' : 'Истёк'}
+                      </Badge>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Grid>
+          </DataTableWrapper>
+        )}
     </VStack>
   )
 }

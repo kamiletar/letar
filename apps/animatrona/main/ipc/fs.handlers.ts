@@ -105,8 +105,8 @@ export function registerFsHandlers(): void {
     'fs:scanExternalSubtitles',
     (
       videoFolderPath: string,
-      videoFiles: Array<{ path: string; episodeNumber: number }>
-    ): Promise<ExternalSubtitleScanResult> => scanForExternalSubtitles(videoFolderPath, videoFiles)
+      videoFiles: Array<{ path: string; episodeNumber: number }>,
+    ): Promise<ExternalSubtitleScanResult> => scanForExternalSubtitles(videoFolderPath, videoFiles),
   )
 
   // Сканирование внешних аудиодорожек
@@ -114,8 +114,8 @@ export function registerFsHandlers(): void {
     'fs:scanExternalAudio',
     (
       videoFolderPath: string,
-      videoFiles: Array<{ path: string; episodeNumber: number }>
-    ): Promise<ExternalAudioScanResult> => scanForExternalAudio(videoFolderPath, videoFiles)
+      videoFiles: Array<{ path: string; episodeNumber: number }>,
+    ): Promise<ExternalAudioScanResult> => scanForExternalAudio(videoFolderPath, videoFiles),
   )
 
   // Получение метаданных изображения (размеры, blur placeholder)
@@ -165,7 +165,7 @@ export function registerFsHandlers(): void {
 async function scanFolderForMedia(
   folderPath: string,
   recursive: boolean,
-  mediaTypes: MediaType[]
+  mediaTypes: MediaType[],
 ): Promise<MediaFileInfo[]> {
   const results: MediaFileInfo[] = []
 

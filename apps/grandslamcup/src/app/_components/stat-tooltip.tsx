@@ -76,23 +76,23 @@ export function StatBlock({
 
   return (
     <VStack gap={0}>
-      {tooltip ? (
-        <Tooltip.Root openDelay={200} closeDelay={0}>
-          <Tooltip.Trigger asChild>{labelEl}</Tooltip.Trigger>
-          <Portal>
-            <Tooltip.Positioner>
-              <Tooltip.Content>
-                <Tooltip.Arrow>
-                  <Tooltip.ArrowTip />
-                </Tooltip.Arrow>
-                {tooltip}
-              </Tooltip.Content>
-            </Tooltip.Positioner>
-          </Portal>
-        </Tooltip.Root>
-      ) : (
-        labelEl
-      )}
+      {tooltip
+        ? (
+          <Tooltip.Root openDelay={200} closeDelay={0}>
+            <Tooltip.Trigger asChild>{labelEl}</Tooltip.Trigger>
+            <Portal>
+              <Tooltip.Positioner>
+                <Tooltip.Content>
+                  <Tooltip.Arrow>
+                    <Tooltip.ArrowTip />
+                  </Tooltip.Arrow>
+                  {tooltip}
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Portal>
+          </Tooltip.Root>
+        )
+        : labelEl}
       <Text fontSize="lg" fontWeight={bold ? 'bold' : 'semibold'}>
         {value}
       </Text>

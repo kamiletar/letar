@@ -20,7 +20,7 @@ export interface UseSubscriptionsReturn {
   removeSubscription: (id: string) => Promise<boolean>
   updateSubscription: (
     id: string,
-    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>
+    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>,
   ) => Promise<Subscription | null>
   refreshSubscription: (id: string) => Promise<SubscriptionRefreshResult | null>
   refreshAllSubscriptions: () => Promise<void>
@@ -142,7 +142,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
   const updateSubscription = useCallback(
     async (
       id: string,
-      data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>
+      data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>,
     ): Promise<Subscription | null> => {
       const api = window.electronAPI?.ipfs
       if (!api) {
@@ -160,7 +160,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         return null
       }
     },
-    []
+    [],
   )
 
   const refreshSubscription = useCallback(async (id: string): Promise<SubscriptionRefreshResult | null> => {

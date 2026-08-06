@@ -52,6 +52,6 @@ export function useOfflineStatus(): boolean {
       }
     },
     () => isOffline,
-    () => false // SSR fallback — assume online
+    () => false, // SSR fallback — assume online
   )
 }

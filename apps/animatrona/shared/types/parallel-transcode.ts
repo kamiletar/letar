@@ -323,7 +323,7 @@ export interface ParallelTranscodeEvents {
     outputPath: string,
     episodeId: string,
     passthrough?: boolean,
-    originalCodec?: string
+    originalCodec?: string,
   ) => void
   /** Элемент импорта завершён (все видео и аудио готовы) */
   itemCompleted: (itemId: string, episodeId: string) => void

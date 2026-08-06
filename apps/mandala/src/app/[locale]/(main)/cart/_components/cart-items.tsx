@@ -47,7 +47,7 @@ const CartItemCard = memo(function CartItemCard({
         onUpdateQuantity(item.productId, qty)
       }
     },
-    [item.productId, onUpdateQuantity]
+    [item.productId, onUpdateQuantity],
   )
 
   const handleRemove = useCallback(() => {

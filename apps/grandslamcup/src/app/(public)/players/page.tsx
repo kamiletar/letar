@@ -168,27 +168,29 @@ export default async function PlayersPage({ searchParams }: { searchParams: Sear
                   >
                     {/* Фото или плейсхолдер */}
                     <Box position="relative" w="full" pt="100%" bg="bg.subtle">
-                      {p.photo ? (
-                        <Image
-                          src={p.photo.startsWith('http') ? p.photo : `/api/files/${p.photo}`}
-                          alt={p.name}
-                          fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <Flex
-                          position="absolute"
-                          inset={0}
-                          align="center"
-                          justify="center"
-                          bg={{ base: 'gray.100', _dark: 'gray.800' }}
-                        >
-                          <Circle size={14} bg="brand.subtle" color="brand.solid">
-                            <LuUserRound size={28} />
-                          </Circle>
-                        </Flex>
-                      )}
+                      {p.photo
+                        ? (
+                          <Image
+                            src={p.photo.startsWith('http') ? p.photo : `/api/files/${p.photo}`}
+                            alt={p.name}
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        )
+                        : (
+                          <Flex
+                            position="absolute"
+                            inset={0}
+                            align="center"
+                            justify="center"
+                            bg={{ base: 'gray.100', _dark: 'gray.800' }}
+                          >
+                            <Circle size={14} bg="brand.subtle" color="brand.solid">
+                              <LuUserRound size={28} />
+                            </Circle>
+                          </Flex>
+                        )}
                     </Box>
                     {/* Имя + команда */}
                     <VStack gap={0.5} px={3} py={2.5} align="start">

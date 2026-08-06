@@ -35,14 +35,14 @@ export interface SelectionFieldLabelProps {
 export function SelectionFieldLabel({ label, tooltip, required }: SelectionFieldLabelProps): ReactElement {
   return (
     <>
-      {tooltip ? (
-        <HStack gap={1}>
-          <span>{label}</span>
-          <FieldTooltip {...tooltip} />
-        </HStack>
-      ) : (
-        label
-      )}
+      {tooltip
+        ? (
+          <HStack gap={1}>
+            <span>{label}</span>
+            <FieldTooltip {...tooltip} />
+          </HStack>
+        )
+        : label}
       {required && <Field.RequiredIndicator />}
     </>
   )

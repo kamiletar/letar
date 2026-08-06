@@ -158,30 +158,32 @@ export function FormStepsNavigation({
         </Button>
       )}
 
-      {showNext &&
-        (isLastStep ? (
-          <Button
-            type="submit"
-            variant={nextVariant}
-            size={size}
-            colorPalette={colorPalette}
-            onClick={handleSubmit}
-            loading={isSubmittingForm}
-            disabled={isSubmittingForm || isNavigating || isSkipping}
-          >
-            {submitLabel}
-          </Button>
-        ) : (
-          <Button
-            variant={nextVariant}
-            size={size}
-            onClick={handleNext}
-            loading={isNavigating}
-            colorPalette={colorPalette}
-          >
-            {nextLabel}
-          </Button>
-        ))}
+      {showNext
+        && (isLastStep
+          ? (
+            <Button
+              type="submit"
+              variant={nextVariant}
+              size={size}
+              colorPalette={colorPalette}
+              onClick={handleSubmit}
+              loading={isSubmittingForm}
+              disabled={isSubmittingForm || isNavigating || isSkipping}
+            >
+              {submitLabel}
+            </Button>
+          )
+          : (
+            <Button
+              variant={nextVariant}
+              size={size}
+              onClick={handleNext}
+              loading={isNavigating}
+              colorPalette={colorPalette}
+            >
+              {nextLabel}
+            </Button>
+          ))}
     </ButtonGroup>
   )
 }

@@ -114,7 +114,7 @@ export function selectAudioTrack(tracks: AudioTrack[], preference: TrackPreferen
 export function selectSubtitleTrack(
   tracks: SubtitleTrack[],
   preference: TrackPreference,
-  selectedAudioIsRussian: boolean
+  selectedAudioIsRussian: boolean,
 ): SubtitleTrack | null {
   if (tracks.length === 0) {
     return null

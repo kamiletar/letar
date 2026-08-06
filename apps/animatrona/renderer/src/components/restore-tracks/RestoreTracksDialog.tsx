@@ -186,7 +186,7 @@ export function RestoreTracksDialog({
       setConcurrencyLocal(value)
       void setConcurrency(value)
     },
-    [setConcurrency]
+    [setConcurrency],
   )
 
   const isProcessing = restoreStage === 'processing' && !isRegenerating
@@ -218,10 +218,11 @@ export function RestoreTracksDialog({
 
             <Dialog.Body py={4}>
               {/* Шаг 1: Выбор папки */}
-              {restoreStage === 'folder' &&
-                (addTracksState.stage === 'idle' ||
-                  addTracksState.stage === 'folder' ||
-                  addTracksState.stage === 'scanning') && (
+              {restoreStage === 'folder'
+                && (addTracksState.stage === 'idle'
+                  || addTracksState.stage === 'folder'
+                  || addTracksState.stage === 'scanning')
+                && (
                   <DonorFolderStep
                     donorPath={addTracksState.donorPath}
                     donorFiles={addTracksState.donorFiles}
@@ -311,14 +312,16 @@ export function RestoreTracksDialog({
                     colorPalette={isDone ? 'purple' : undefined}
                     onClick={handleClose}
                   >
-                    {isDone ? (
-                      <>
-                        <Icon as={LuCheck} mr={1} />
-                        Готово
-                      </>
-                    ) : (
-                      'Отмена'
-                    )}
+                    {isDone
+                      ? (
+                        <>
+                          <Icon as={LuCheck} mr={1} />
+                          Готово
+                        </>
+                      )
+                      : (
+                        'Отмена'
+                      )}
                   </Button>
                 )}
 
@@ -338,14 +341,14 @@ export function RestoreTracksDialog({
                     {comparison.totalMissing.fonts > 0 ? ` (+${comparison.totalMissing.fonts} шрифтов)` : ''}
                   </Button>
                 )}
-                {restoreStage === 'comparison' &&
-                  comparison &&
-                  comparison.totalTracksToRestore === 0 &&
-                  comparison.totalMissing.fonts > 0 && (
-                    <Button colorPalette="purple" onClick={confirmAndProcess}>
-                      Восстановить {comparison.totalMissing.fonts} шрифтов
-                    </Button>
-                  )}
+                {restoreStage === 'comparison'
+                  && comparison
+                  && comparison.totalTracksToRestore === 0
+                  && comparison.totalMissing.fonts > 0 && (
+                  <Button colorPalette="purple" onClick={confirmAndProcess}>
+                    Восстановить {comparison.totalMissing.fonts} шрифтов
+                  </Button>
+                )}
               </HStack>
             </Dialog.Footer>
           </Dialog.Content>
@@ -429,27 +432,23 @@ function RestoreProcessingView({
           {/* Активные */}
           {taskDetails
             .filter((t) => t.status === 'running')
-            .map((t) => (
-              <TaskItem key={t.id} task={t} />
-            ))}
+            .map((t) => <TaskItem key={t.id} task={t} />)}
           {/* Ожидающие (первые 3) */}
           {taskDetails
             .filter((t) => t.status === 'queued')
             .slice(0, 3)
-            .map((t) => (
-              <TaskItem key={t.id} task={t} />
-            ))}
+            .map((t) => <TaskItem key={t.id} task={t} />)}
           {taskDetails.filter((t) => t.status === 'queued').length > 3 && (
             <Text fontSize="xs" color="fg.subtle" textAlign="center">
-              + ещё {taskDetails.filter((t) => t.status === 'queued').length - 3} в очереди
+              + ещё {taskDetails.filter((t) =>
+                t.status === 'queued'
+              ).length - 3} в очереди
             </Text>
           )}
           {/* Ошибки */}
           {taskDetails
             .filter((t) => t.status === 'error')
-            .map((t) => (
-              <TaskItem key={t.id} task={t} />
-            ))}
+            .map((t) => <TaskItem key={t.id} task={t} />)}
         </VStack>
       </Box>
 

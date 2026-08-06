@@ -134,7 +134,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       return cache.addAll(PRECACHE_URLS)
-    })
+    }),
   )
   self.skipWaiting()
 })
@@ -143,9 +143,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter((name) => name !== STATIC_CACHE && name !== IMAGE_CACHE).map((name) => caches.delete(name))
+        cacheNames.filter((name) => name !== STATIC_CACHE && name !== IMAGE_CACHE).map((name) => caches.delete(name)),
       )
-    })
+    }),
   )
   self.clients.claim()
 })
@@ -205,7 +205,7 @@ self.addEventListener('push', (event) => {
         clients.forEach((client) => {
           client.postMessage({ type: 'INVALIDATE_PRODUCTS' })
         })
-      })
+      }),
     )
   }
 })

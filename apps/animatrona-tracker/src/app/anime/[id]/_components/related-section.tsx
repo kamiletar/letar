@@ -65,19 +65,19 @@ function RelationCard({ relation, librarySlug }: { relation: AnimeManifestRelati
       _hover={{ borderColor: 'purple.500', shadow: 'md' }}
     >
       {/* Постер */}
-      {relation.targetPosterUrl ? (
-        <Image
-          src={relation.targetPosterUrl}
-          alt={relation.targetName || ''}
-          w="48px"
-          h="68px"
-          objectFit="cover"
-          borderRadius="sm"
-          flexShrink={0}
-        />
-      ) : (
-        <Box w="48px" h="68px" bg="bg.muted" borderRadius="sm" flexShrink={0} />
-      )}
+      {relation.targetPosterUrl
+        ? (
+          <Image
+            src={relation.targetPosterUrl}
+            alt={relation.targetName || ''}
+            w="48px"
+            h="68px"
+            objectFit="cover"
+            borderRadius="sm"
+            flexShrink={0}
+          />
+        )
+        : <Box w="48px" h="68px" bg="bg.muted" borderRadius="sm" flexShrink={0} />}
 
       {/* Информация */}
       <VStack align="start" gap={1} flex={1} minW={0}>

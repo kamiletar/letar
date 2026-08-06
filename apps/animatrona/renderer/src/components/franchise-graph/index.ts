@@ -3,16 +3,16 @@
  */
 
 // Главный компонент
-export { FranchiseGraph, default } from './FranchiseGraph'
+export { default, FranchiseGraph } from './FranchiseGraph'
 
 // Типы
 export { KIND_COLORS, KIND_LABELS, RELATION_LABELS } from './types'
 export type {
-  AnimeNodeData,
   AnimeNode as AnimeNodeType,
+  AnimeNodeData,
   FranchiseGraphProps,
-  RelationEdgeData,
   RelationEdge as RelationEdgeType,
+  RelationEdgeData,
   ViewMode,
 } from './types'
 

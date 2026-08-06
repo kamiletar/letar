@@ -103,94 +103,96 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
         </HStack>
 
         {/* Грид аниме */}
-        {filtered.length === 0 ? (
-          <Box textAlign="center" py={16}>
-            <Text color="fg.muted" fontSize="lg">
-              {filter === 'ALL' ? 'Библиотека пуста. Добавьте аниме из каталога!' : 'Нет аниме с таким статусом'}
-            </Text>
-            <Button asChild mt={4} colorPalette="brand">
-              <NextLink href="/anime">Перейти в каталог</NextLink>
-            </Button>
-          </Box>
-        ) : (
-          <Grid
-            templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }}
-            gap={4}
-          >
-            {filtered.map((item) => {
-              const status = WATCH_STATUS_MAP[item.watchStatus] || WATCH_STATUS_MAP.NOT_STARTED
-              const completedEpisodes = item.watchProgress.filter((p) => p.completed).length
-              const totalEpisodes = item.anime._count.episodes
+        {filtered.length === 0
+          ? (
+            <Box textAlign="center" py={16}>
+              <Text color="fg.muted" fontSize="lg">
+                {filter === 'ALL' ? 'Библиотека пуста. Добавьте аниме из каталога!' : 'Нет аниме с таким статусом'}
+              </Text>
+              <Button asChild mt={4} colorPalette="brand">
+                <NextLink href="/anime">Перейти в каталог</NextLink>
+              </Button>
+            </Box>
+          )
+          : (
+            <Grid
+              templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }}
+              gap={4}
+            >
+              {filtered.map((item) => {
+                const status = WATCH_STATUS_MAP[item.watchStatus] || WATCH_STATUS_MAP.NOT_STARTED
+                const completedEpisodes = item.watchProgress.filter((p) => p.completed).length
+                const totalEpisodes = item.anime._count.episodes
 
-              return (
-                <Box
-                  key={item.id}
-                  borderWidth="1px"
-                  borderRadius="xl"
-                  overflow="hidden"
-                  transition="all 0.2s"
-                  _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
-                >
-                  {/* Постер */}
-                  <Box position="relative" asChild>
-                    <NextLink href={`/anime/${item.anime.id}`}>
-                      <Image
-                        src={resolveImageUrl(item.anime.coverUrl)}
-                        alt={item.anime.title}
-                        w="100%"
-                        aspectRatio="2/3"
-                        objectFit="cover"
-                      />
-                      {/* Бейдж local/remote */}
-                      <Badge
-                        position="absolute"
-                        top={2}
-                        right={2}
-                        colorPalette={item.pinnedLocally ? 'green' : 'blue'}
-                        size="sm"
-                      >
-                        <Icon as={item.pinnedLocally ? LuHardDrive : LuCloud} mr={1} />
-                        {item.pinnedLocally ? 'Локально' : 'Облако'}
-                      </Badge>
-                    </NextLink>
-                  </Box>
+                return (
+                  <Box
+                    key={item.id}
+                    borderWidth="1px"
+                    borderRadius="xl"
+                    overflow="hidden"
+                    transition="all 0.2s"
+                    _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
+                  >
+                    {/* Постер */}
+                    <Box position="relative" asChild>
+                      <NextLink href={`/anime/${item.anime.id}`}>
+                        <Image
+                          src={resolveImageUrl(item.anime.coverUrl)}
+                          alt={item.anime.title}
+                          w="100%"
+                          aspectRatio="2/3"
+                          objectFit="cover"
+                        />
+                        {/* Бейдж local/remote */}
+                        <Badge
+                          position="absolute"
+                          top={2}
+                          right={2}
+                          colorPalette={item.pinnedLocally ? 'green' : 'blue'}
+                          size="sm"
+                        >
+                          <Icon as={item.pinnedLocally ? LuHardDrive : LuCloud} mr={1} />
+                          {item.pinnedLocally ? 'Локально' : 'Облако'}
+                        </Badge>
+                      </NextLink>
+                    </Box>
 
-                  {/* Информация */}
-                  <VStack align="stretch" p={3} gap={2}>
-                    <Text fontWeight="semibold" lineClamp={2} fontSize="sm">
-                      {item.anime.title}
-                    </Text>
-
-                    <HStack justify="space-between">
-                      <Badge colorPalette={status.color} size="sm">
-                        {status.label}
-                      </Badge>
-                      {item.userRating !== null && item.userRating !== undefined && (
-                        <HStack gap={1}>
-                          <Icon as={LuStar} color="yellow.400" boxSize={3} />
-                          <Text fontSize="xs">{item.userRating}</Text>
-                        </HStack>
-                      )}
-                    </HStack>
-
-                    {/* Прогресс */}
-                    {totalEpisodes > 0 && (
-                      <Text fontSize="xs" color="fg.muted">
-                        {completedEpisodes} / {totalEpisodes} эпизодов
+                    {/* Информация */}
+                    <VStack align="stretch" p={3} gap={2}>
+                      <Text fontWeight="semibold" lineClamp={2} fontSize="sm">
+                        {item.anime.title}
                       </Text>
-                    )}
 
-                    {/* Кнопка удаления */}
-                    <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemove(item.id)}>
-                      <Icon as={LuTrash2} mr={1} />
-                      Удалить
-                    </Button>
-                  </VStack>
-                </Box>
-              )
-            })}
-          </Grid>
-        )}
+                      <HStack justify="space-between">
+                        <Badge colorPalette={status.color} size="sm">
+                          {status.label}
+                        </Badge>
+                        {item.userRating !== null && item.userRating !== undefined && (
+                          <HStack gap={1}>
+                            <Icon as={LuStar} color="yellow.400" boxSize={3} />
+                            <Text fontSize="xs">{item.userRating}</Text>
+                          </HStack>
+                        )}
+                      </HStack>
+
+                      {/* Прогресс */}
+                      {totalEpisodes > 0 && (
+                        <Text fontSize="xs" color="fg.muted">
+                          {completedEpisodes} / {totalEpisodes} эпизодов
+                        </Text>
+                      )}
+
+                      {/* Кнопка удаления */}
+                      <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemove(item.id)}>
+                        <Icon as={LuTrash2} mr={1} />
+                        Удалить
+                      </Button>
+                    </VStack>
+                  </Box>
+                )
+              })}
+            </Grid>
+          )}
       </VStack>
     </Container>
   )

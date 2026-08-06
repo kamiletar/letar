@@ -389,10 +389,9 @@ export function registerFederationHandlers(): void {
     }
 
     // Простой расчёт trust score на основе метрик
-    const successRate =
-      tracker.successfulSyncs && tracker.failedSyncs
-        ? tracker.successfulSyncs / (tracker.successfulSyncs + tracker.failedSyncs)
-        : 0.5
+    const successRate = tracker.successfulSyncs && tracker.failedSyncs
+      ? tracker.successfulSyncs / (tracker.successfulSyncs + tracker.failedSyncs)
+      : 0.5
 
     const uptime = (tracker.uptimePercent ?? 0) / 100
     const quality = tracker.contentQuality ?? 0.5

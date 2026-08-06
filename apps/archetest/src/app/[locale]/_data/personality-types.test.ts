@@ -47,19 +47,21 @@ describe('шкалы ядра (22 = 13 + 9)', () => {
 
   it('каждая запись заполнена на обоих языках', () => {
     for (const t of PERSONALITY_TYPES) {
-      for (const field of [
-        t.label,
-        t.labelEn,
-        t.clinical,
-        t.clinicalEn,
-        t.archetype,
-        t.archetypeEn,
-        t.description,
-        t.descriptionEn,
-        t.whenHigh,
-        t.whenHighEn,
-        t.color,
-      ]) {
+      for (
+        const field of [
+          t.label,
+          t.labelEn,
+          t.clinical,
+          t.clinicalEn,
+          t.archetype,
+          t.archetypeEn,
+          t.description,
+          t.descriptionEn,
+          t.whenHigh,
+          t.whenHighEn,
+          t.color,
+        ]
+      ) {
         expect(field, `пустое поле у ${t.code}`).toBeTruthy()
       }
       expect(t.color).toMatch(/^#[0-9A-Fa-f]{6}$/)
@@ -100,21 +102,23 @@ describe('экспериментальные шкалы (этап 5.5, вне я
     expect(EXPERIMENTAL_SCALES).toHaveLength(EXPERIMENTAL_SCALE_CODES.length)
     for (const s of EXPERIMENTAL_SCALES) {
       expect(EXPERIMENTAL_SCALE_CODES).toContain(s.code)
-      for (const field of [
-        s.label,
-        s.labelEn,
-        s.clinical,
-        s.clinicalEn,
-        s.archetype,
-        s.archetypeEn,
-        s.description,
-        s.descriptionEn,
-        s.whenHigh,
-        s.whenHighEn,
-        s.color,
-        s.prototype,
-        s.prototypeEn,
-      ]) {
+      for (
+        const field of [
+          s.label,
+          s.labelEn,
+          s.clinical,
+          s.clinicalEn,
+          s.archetype,
+          s.archetypeEn,
+          s.description,
+          s.descriptionEn,
+          s.whenHigh,
+          s.whenHighEn,
+          s.color,
+          s.prototype,
+          s.prototypeEn,
+        ]
+      ) {
         expect(field, `пустое поле у ${s.code}`).toBeTruthy()
       }
       expect(s.color).toMatch(/^#[0-9A-Fa-f]{6}$/)
@@ -164,7 +168,7 @@ describe('триады и гексаграмма', () => {
     expect(HEXAGRAM_SCALE_CODES).toHaveLength(8)
     expect(new Set(HEXAGRAM_SCALE_CODES).size).toBe(8)
     expect(HEXAGRAM_SCALE_CODES).toEqual(
-      expect.arrayContaining([...LIGHT_TRIAD_CODES, ...DARK_TRIAD_CODES, 'SAD', 'MAS'])
+      expect.arrayContaining([...LIGHT_TRIAD_CODES, ...DARK_TRIAD_CODES, 'SAD', 'MAS']),
     )
     // DIR сознательно НЕ входит в гексаграмму/экспресс (решение 2026-07-03)
     expect(HEXAGRAM_SCALE_CODES).not.toContain('DIR')

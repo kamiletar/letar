@@ -68,7 +68,7 @@ export function EditorPage() {
       originalJson.current = JSON.stringify(cfg)
       const idx = Math.max(
         0,
-        cfg.layouts.findIndex((l) => l.name === cfg.activeLayout)
+        cfg.layouts.findIndex((l) => l.name === cfg.activeLayout),
       )
       setActiveLayoutIndex(idx)
     })
@@ -149,7 +149,7 @@ export function EditorPage() {
     setSelectedKey(null)
     const idx = Math.max(
       0,
-      cfg.layouts.findIndex((l) => l.name === cfg.activeLayout)
+      cfg.layouts.findIndex((l) => l.name === cfg.activeLayout),
     )
     setActiveLayoutIndex(idx)
     toaster.create({ title: 'Сброшено к сохранённой версии', type: 'info', duration: 2000 })
@@ -240,7 +240,7 @@ export function EditorPage() {
       }
       reader.readAsText(file)
     },
-    [config, pushUndo]
+    [config, pushUndo],
   )
 
   // Назначение символа
@@ -273,7 +273,7 @@ export function EditorPage() {
       setConfig({ ...config, layouts })
       triggerFlash(selectedKey.vk)
     },
-    [config, selectedKey, activeLayoutIndex, pushUndo, triggerFlash]
+    [config, selectedKey, activeLayoutIndex, pushUndo, triggerFlash],
   )
 
   // Drag-and-drop: назначение символа на произвольную клавишу
@@ -306,7 +306,7 @@ export function EditorPage() {
       setConfig({ ...config, layouts })
       triggerFlash(vk)
     },
-    [config, activeLayoutIndex, pushUndo, triggerFlash]
+    [config, activeLayoutIndex, pushUndo, triggerFlash],
   )
 
   const removeMapping = useCallback(
@@ -334,7 +334,7 @@ export function EditorPage() {
       const layouts = config.layouts.map((l, i) => (i === activeLayoutIndex ? { ...l, mappings } : l))
       setConfig({ ...config, layouts })
     },
-    [config, selectedKey, activeLayoutIndex, pushUndo]
+    [config, selectedKey, activeLayoutIndex, pushUndo],
   )
 
   if (!config) {
@@ -357,9 +357,7 @@ export function EditorPage() {
         <Box as="span" color="#6c7ae0">
           KamiKeyThe
         </Box>
-        {
-          ' \u2014 \u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440 \u043C\u0430\u043F\u043F\u0438\u043D\u0433\u043E\u0432'
-        }
+        {' \u2014 \u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440 \u043C\u0430\u043F\u043F\u0438\u043D\u0433\u043E\u0432'}
       </Heading>
 
       <LayoutTabs

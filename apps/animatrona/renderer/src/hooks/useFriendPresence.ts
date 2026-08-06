@@ -43,7 +43,7 @@ export function useFriendPresence(): UseFriendPresenceReturn {
       const p = presence[peerId]
       return p !== undefined && p.status !== 'offline'
     },
-    [presence]
+    [presence],
   )
 
   // Получить что смотрит друг
@@ -51,7 +51,7 @@ export function useFriendPresence(): UseFriendPresenceReturn {
     (peerId: string): WatchingInfo | undefined => {
       return presence[peerId]?.watching
     },
-    [presence]
+    [presence],
   )
 
   // Обновить настройки

@@ -1,20 +1,20 @@
 export {
+  type CardBrand,
   CardBrandIcon,
+  type CardBrandInfo,
   CreditCardField,
+  type CreditCardFieldProps,
+  type CreditCardLayout,
   creditCardSchema,
   detectBrand,
   formatCardNumber,
   formatExpiry,
   isExpiryValid,
   luhn,
-  type CardBrand,
-  type CardBrandInfo,
-  type CreditCardFieldProps,
-  type CreditCardLayout,
 } from './credit-card'
 export { FieldAddress } from './field-address'
 export { FieldCity } from './field-city'
-export { FieldColorPicker, type ColorPickerFieldProps } from './field-color-picker'
+export { type ColorPickerFieldProps, FieldColorPicker } from './field-color-picker'
 export { FieldFileUpload, type FileUploadFieldProps } from './field-file-upload'
 export { FieldOTPInput } from './field-otp-input'
 export { FieldPhone } from './field-phone'

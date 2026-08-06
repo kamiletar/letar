@@ -25,7 +25,7 @@ function mk(
     counts?: Partial<Record<ScaleCode, number>>
     confidence?: Partial<Record<ScaleCode, ScaleConfidence>>
     ranking?: IpsativeScale[]
-  }
+  },
 ): DarkCoreInput {
   const relevantCounts: Partial<Record<ScaleCode, number>> = {}
   const confidence: Partial<Record<ScaleCode, ScaleConfidence>> = {}
@@ -188,8 +188,8 @@ describe('computeDarkCore — достоверность', () => {
         { MAC: 50, NAR: 50, ANT: 50, SAD: 50 },
         {
           confidence: { MAC: 'high', NAR: 'moderate', ANT: 'low', SAD: 'insufficient' },
-        }
-      )
+        },
+      ),
     )
     expect(mixed.confidence).toBe('insufficient')
     expect(mixed.weakestCode).toBe('SAD')
@@ -263,14 +263,16 @@ describe('computeDarkCore — полнота текстов', () => {
     for (const input of cases) {
       const idx = computeDarkCore(input)
       seen.add(idx.structure)
-      for (const field of [
-        idx.label,
-        idx.labelEn,
-        idx.description,
-        idx.descriptionEn,
-        idx.attention,
-        idx.attentionEn,
-      ]) {
+      for (
+        const field of [
+          idx.label,
+          idx.labelEn,
+          idx.description,
+          idx.descriptionEn,
+          idx.attention,
+          idx.attentionEn,
+        ]
+      ) {
         expect(field, `структура ${idx.structure}`).toBeTruthy()
       }
     }
@@ -281,14 +283,16 @@ describe('computeDarkCore — полнота текстов', () => {
     const idx = computeDarkCore(mk({ MAC: 40, NAR: 50, ANT: 60, SAD: 70 }))
     expect(idx.flavors).toHaveLength(4)
     for (const flavor of idx.flavors) {
-      for (const field of [
-        flavor.label,
-        flavor.labelEn,
-        flavor.description,
-        flavor.descriptionEn,
-        flavor.residual,
-        flavor.residualEn,
-      ]) {
+      for (
+        const field of [
+          flavor.label,
+          flavor.labelEn,
+          flavor.description,
+          flavor.descriptionEn,
+          flavor.residual,
+          flavor.residualEn,
+        ]
+      ) {
         expect(field, `вкус ${flavor.code}`).toBeTruthy()
       }
     }

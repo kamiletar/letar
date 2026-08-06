@@ -79,20 +79,22 @@ function ShowcaseCard({ item, index }: { item: ShowcaseItem; index: number }) {
       >
         {/* Скриншот */}
         <Box position="relative" aspectRatio={16 / 10} bg="gray.900">
-          {imageError ? (
-            <VStack h="full" justify="center" color="gray.600">
-              <Text>Изображение недоступно</Text>
-            </VStack>
-          ) : (
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              style={{ objectFit: 'cover' }}
-              onError={handleImageError}
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          )}
+          {imageError
+            ? (
+              <VStack h="full" justify="center" color="gray.600">
+                <Text>Изображение недоступно</Text>
+              </VStack>
+            )
+            : (
+              <Image
+                src={item.image}
+                alt={item.title}
+                fill
+                style={{ objectFit: 'cover' }}
+                onError={handleImageError}
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            )}
         </Box>
 
         {/* Подпись */}
@@ -133,9 +135,7 @@ export function AppShowcaseSection() {
 
           {/* Bento Grid */}
           <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6} w="full">
-            {SHOWCASE_ITEMS.map((item, index) => (
-              <ShowcaseCard key={item.title} item={item} index={index} />
-            ))}
+            {SHOWCASE_ITEMS.map((item, index) => <ShowcaseCard key={item.title} item={item} index={index} />)}
           </Grid>
         </VStack>
       </Container>

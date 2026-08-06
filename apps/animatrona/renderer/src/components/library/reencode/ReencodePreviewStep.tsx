@@ -92,11 +92,9 @@ export function ReencodePreviewStep({ state }: { state: UseReencodeDialogStateRe
                     </Text>
                   </HStack>
                   <HStack gap={2}>
-                    {track.bitrate ? (
-                      <Badge colorPalette="orange">{Math.round(track.bitrate / 1000)} kbps</Badge>
-                    ) : (
-                      <Badge colorPalette="gray">неизвестно</Badge>
-                    )}
+                    {track.bitrate
+                      ? <Badge colorPalette="orange">{Math.round(track.bitrate / 1000)} kbps</Badge>
+                      : <Badge colorPalette="gray">неизвестно</Badge>}
                     {track.ipfsSize && (
                       <Text fontSize="xs" color="fg.muted">
                         {formatBytes(track.ipfsSize)}

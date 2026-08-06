@@ -110,9 +110,7 @@ export const FieldPinInput = createField<PinInputFieldProps, string>({
         >
           <PinInput.HiddenInput />
           <PinInput.Control>
-            {Array.from({ length: count }).map((_, index) => (
-              <PinInput.Input key={index} index={index} />
-            ))}
+            {Array.from({ length: count }).map((_, index) => <PinInput.Input key={index} index={index} />)}
           </PinInput.Control>
         </PinInput.Root>
       </FieldWrapper>

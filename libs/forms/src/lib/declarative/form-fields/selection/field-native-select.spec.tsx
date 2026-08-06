@@ -23,7 +23,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'ru' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" label="Страна" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Страна')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'ru' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const optionElements = container.querySelectorAll('option')
@@ -50,7 +50,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'us' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByRole('combobox')).toHaveValue('us')
@@ -64,7 +64,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'ru' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const select = screen.getByRole('combobox')
@@ -79,7 +79,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'ru' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByRole('combobox')).toBeDisabled()
@@ -90,7 +90,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: '' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} placeholder="Выберите страну" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Выберите страну')).toBeInTheDocument()
@@ -101,7 +101,7 @@ describe('FieldNativeSelect', () => {
         <Form initialValue={{ country: 'ru' }} onSubmit={vi.fn()}>
           <Form.Field.NativeSelect name="country" options={options} helperText="Страна проживания" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Страна проживания')).toBeInTheDocument()

@@ -79,7 +79,7 @@ export async function handleLibraryRequest(
   _req: IncomingMessage,
   res: ServerResponse,
   action: RouteAction,
-  animeId?: string
+  animeId?: string,
 ): Promise<void> {
   const db = getDb()
 
@@ -216,10 +216,9 @@ async function handleAnimeDetails(res: ServerResponse, db: ReturnType<typeof get
 
       const audioTracks: MobileAudioTrack[] = ep.audioTracks.map((at) => {
         // Вычисляем отображаемое имя: title || "Язык (dubGroup)" || язык
-        const name =
-          at.title ||
-          (at.dubGroup ? `${at.language.toUpperCase()} (${at.dubGroup})` : null) ||
-          at.language.toUpperCase()
+        const name = at.title
+          || (at.dubGroup ? `${at.language.toUpperCase()} (${at.dubGroup})` : null)
+          || at.language.toUpperCase()
 
         return {
           id: at.id,
@@ -236,10 +235,9 @@ async function handleAnimeDetails(res: ServerResponse, db: ReturnType<typeof get
 
       const subtitleTracks: MobileSubtitleTrack[] = ep.subtitleTracks.map((st) => {
         // Вычисляем отображаемое имя: title || "Язык (dubGroup)" || язык
-        const name =
-          st.title ||
-          (st.dubGroup ? `${st.language.toUpperCase()} (${st.dubGroup})` : null) ||
-          st.language.toUpperCase()
+        const name = st.title
+          || (st.dubGroup ? `${st.language.toUpperCase()} (${st.dubGroup})` : null)
+          || st.language.toUpperCase()
 
         return {
           id: st.id,
@@ -250,10 +248,9 @@ async function handleAnimeDetails(res: ServerResponse, db: ReturnType<typeof get
           format: st.format,
           isDefault: st.isDefault,
           fileCid: st.fileCid,
-          fontCids:
-            (st as { fonts?: { fileCid: string | null }[] }).fonts
-              ?.filter((f) => f.fileCid)
-              .map((f) => f.fileCid as string) ?? [],
+          fontCids: (st as { fonts?: { fileCid: string | null }[] }).fonts
+            ?.filter((f) => f.fileCid)
+            .map((f) => f.fileCid as string) ?? [],
         }
       })
 
@@ -273,16 +270,16 @@ async function handleAnimeDetails(res: ServerResponse, db: ReturnType<typeof get
         videoCid,
         progress: progress
           ? {
-              currentTime: progress.currentTime,
-              completed: progress.completed,
-              lastWatchedAt: progress.lastWatchedAt.toISOString(),
-            }
+            currentTime: progress.currentTime,
+            completed: progress.completed,
+            lastWatchedAt: progress.lastWatchedAt.toISOString(),
+          }
           : null,
         audioTracks,
         subtitleTracks,
         chapters,
       }
-    })
+    }),
   )
 
   const response = {

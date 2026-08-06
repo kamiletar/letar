@@ -284,7 +284,12 @@ export function BackButton() {
   const router = useRouter()
 
   return (
-    <IconButton display={{ base: 'flex', md: 'none' }} variant="ghost" aria-label="Назад" onClick={() => router.back()}>
+    <IconButton
+      display={{ base: 'flex', md: 'none' }}
+      variant="ghost"
+      aria-label="Назад"
+      onClick={() => router.back()}
+    >
       <LuArrowLeft />
     </IconButton>
   )

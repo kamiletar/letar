@@ -58,7 +58,7 @@ export const MyAppForm = createForm({
 
 ```tsx
 import { MyAppForm } from '@/my-app-form'
-;<MyAppForm initialValue={defaults} onSubmit={handleSubmit}>
+<MyAppForm initialValue={defaults} onSubmit={handleSubmit}>
   <MyAppForm.Field.String name="title" label="Название" />
   <MyAppForm.Select.Status name="status" label="Статус" />
   <MyAppForm.Combobox.User name="userId" label="Пользователь" />

@@ -74,7 +74,7 @@ export function AnimatedSolidColor(props: AnimatedSolidColorProps) {
       ctx.fillStyle = currentColor
       ctx.fillRect(0, 0, size.width, size.height)
     },
-    [durationMs]
+    [durationMs],
   )
 
   const { canvasRef, size, canvasStyle } = useCanvasEffect(props, {

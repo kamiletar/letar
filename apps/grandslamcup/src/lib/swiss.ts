@@ -88,7 +88,7 @@ export function generateSwissRound(teams: SwissTeamRecord[], previousPairs: Set<
 /** Формирует пары внутри группы, избегая повторов */
 function pairWithinGroup(
   teams: SwissTeamRecord[],
-  previousPairs: Set<string>
+  previousPairs: Set<string>,
 ): { pairs: SwissPair[]; unpaired: SwissTeamRecord[] } {
   const pairs: SwissPair[] = []
   const used = new Set<string>()

@@ -58,7 +58,7 @@ describe('createField', () => {
           <Form initialValue={{ name: 'test' }} onSubmit={vi.fn()}>
             <TestField name="name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -86,7 +86,7 @@ describe('createField', () => {
           <Form initialValue={{ username: '' }} onSubmit={vi.fn()}>
             <TestField name="username" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -110,7 +110,7 @@ describe('createField', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <TestField name="name" testProp="custom-value" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -136,7 +136,7 @@ describe('createField', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <TestField name="name" label="Имя пользователя" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -164,7 +164,7 @@ describe('createField', () => {
           <Form schema={Schema} initialValue={{ email: '' }} onSubmit={vi.fn()}>
             <TestField name="email" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -192,7 +192,7 @@ describe('createField', () => {
           <Form schema={Schema} initialValue={{ email: '' }} onSubmit={vi.fn()}>
             <TestField name="email" label="Из props" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -223,7 +223,7 @@ describe('createField', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()} disabled>
             <TestField name="name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -265,7 +265,7 @@ describe('createField', () => {
           <Form initialValue={{ password: 'secret' }} onSubmit={vi.fn()}>
             <TestField name="password" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -290,7 +290,10 @@ describe('createField', () => {
           return {}
         },
         render: ({ field }) => (
-          <Input value={field.state.value ?? ''} onChange={(e) => field.handleChange(e.target.value)} />
+          <Input
+            value={field.state.value ?? ''}
+            onChange={(e) => field.handleChange(e.target.value)}
+          />
         ),
       })
 
@@ -299,7 +302,7 @@ describe('createField', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <TestField name="name" label="Test Label" placeholder="Test Placeholder" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -323,7 +326,8 @@ describe('createField', () => {
             <Input
               data-testid="email-input"
               value={field.state.value ?? ''}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={(e) =>
+                field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
             />
           </FieldWrapper>
@@ -335,7 +339,7 @@ describe('createField', () => {
           <Form schema={Schema} initialValue={{ email: 'invalid' }} onSubmit={vi.fn()}>
             <TestField name="email" label="Email" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Вводим невалидное значение и вызываем blur для триггера валидации
@@ -349,7 +353,7 @@ describe('createField', () => {
         () => {
           expect(screen.getByText('Неверный email')).toBeInTheDocument()
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       )
     })
   })
@@ -362,7 +366,7 @@ describe('FieldError', () => {
         <Field.Root invalid>
           <FieldError hasError={true} errorMessage="Ошибка валидации" helperText="Подсказка" />
         </Field.Root>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Ошибка валидации')).toBeInTheDocument()
@@ -375,7 +379,7 @@ describe('FieldError', () => {
         <Field.Root>
           <FieldError hasError={false} errorMessage="" helperText="Это подсказка" />
         </Field.Root>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Это подсказка')).toBeInTheDocument()
@@ -387,7 +391,7 @@ describe('FieldError', () => {
         <Field.Root>
           <FieldError hasError={false} errorMessage="" helperText={undefined} />
         </Field.Root>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Field.Root должен быть пустым (кроме самого div)

@@ -19,7 +19,7 @@ async function query<T = Record<string, unknown>>(sql: string, params?: unknown[
 async function main() {
   // Активный сезон СПб
   const [season] = await query<{ id: string; name: string }>(
-    `SELECT s.id, s.name FROM "Season" s JOIN "City" c ON s."cityId" = c.id WHERE s.status = 'ACTIVE' AND c.slug = 'spb' LIMIT 1`
+    `SELECT s.id, s.name FROM "Season" s JOIN "City" c ON s."cityId" = c.id WHERE s.status = 'ACTIVE' AND c.slug = 'spb' LIMIT 1`,
   )
   if (!season) {
     throw new Error('Нет активного сезона СПб')
@@ -28,7 +28,7 @@ async function main() {
 
   // Команды
   const teams = await query<{ id: string; name: string }>(
-    `SELECT id, name FROM "Team" WHERE name IN ('Пыжыки', 'ПЗК', 'Болт')`
+    `SELECT id, name FROM "Team" WHERE name IN ('Пыжыки', 'ПЗК', 'Болт')`,
   )
   console.log('Команды:', teams.map((t) => t.name).join(', '))
 
@@ -40,7 +40,7 @@ async function main() {
   // TeamSeason
   const teamSeasons = await query<{ id: string; teamid: string }>(
     `SELECT ts.id, ts."teamId" as teamid FROM "TeamSeason" ts WHERE ts."seasonId" = $1 AND ts."teamId" = ANY($2)`,
-    [season.id, [teamId('Пыжыки'), teamId('ПЗК'), teamId('Болт')]]
+    [season.id, [teamId('Пыжыки'), teamId('ПЗК'), teamId('Болт')]],
   )
   const tsId = (tId: string) => teamSeasons.find((ts) => ts.teamid === tId)?.id
   if (!tsId(teamId('Пыжыки')!) || !tsId(teamId('ПЗК')!) || !tsId(teamId('Болт')!)) {
@@ -49,10 +49,10 @@ async function main() {
 
   // Площадки
   const [glagol] = await query<{ id: string; name: string }>(
-    `SELECT id, name FROM "Venue" WHERE name ILIKE '%Глагол%' LIMIT 1`
+    `SELECT id, name FROM "Venue" WHERE name ILIKE '%Глагол%' LIMIT 1`,
   )
   const [fishFab] = await query<{ id: string; name: string }>(
-    `SELECT id, name FROM "Venue" WHERE name ILIKE '%Fish%' LIMIT 1`
+    `SELECT id, name FROM "Venue" WHERE name ILIKE '%Fish%' LIMIT 1`,
   )
   console.log('Площадки:', glagol?.name, fishFab?.name)
 
@@ -78,7 +78,7 @@ async function main() {
       cuid(),
       cuid(),
       cuid(),
-    ]
+    ],
   )
   console.log('Матч 1 создан: Пыжыки vs ПЗК, 06.04, Глагол')
 
@@ -97,7 +97,7 @@ async function main() {
       cuid(),
       cuid(),
       cuid(),
-    ]
+    ],
   )
   console.log('Матч 2 создан: Болт vs ПЗК, 07.04, Fish bar Fabrique')
 }

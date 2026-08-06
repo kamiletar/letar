@@ -572,7 +572,7 @@ export default function ClientComponent() {
 
 ```tsx
 import Image from 'next/image'
-;<Image
+<Image
   src="/path/to/image.jpg"
   alt="Описание"
   width={800}

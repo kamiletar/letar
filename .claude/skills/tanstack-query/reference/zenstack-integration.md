@@ -235,7 +235,7 @@ const { data } = useFindManyOrder(
     enabled: isAuthenticated, // Условный запрос
     select: (data) => data.filter((o) => o.total > 100), // Трансформация
     placeholderData: [], // Пока грузится
-  }
+  },
 )
 ```
 

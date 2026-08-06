@@ -112,53 +112,55 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
           <Text style={styles.sectionTitle}>Сервер</Text>
 
           {/* Текущий URL / Редактирование */}
-          {isEditing ? (
-            <View style={styles.editContainer}>
-              <TextInput
-                ref={inputRef}
-                style={styles.input}
-                value={serverUrl}
-                onChangeText={setServerUrl}
-                placeholder="http://192.168.1.100:21123"
-                placeholderTextColor="#666"
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-              />
-              {error && <Text style={styles.errorText}>{error}</Text>}
-              <View style={styles.editButtons}>
-                <Pressable
-                  style={({ focused }) => [styles.button, styles.buttonPrimary, focused && styles.buttonFocused]}
-                  onPress={handleSaveUrl}
-                  disabled={isSaving}
-                  hasTVPreferredFocus
-                >
-                  <Text style={styles.buttonText}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Text>
-                </Pressable>
+          {isEditing
+            ? (
+              <View style={styles.editContainer}>
+                <TextInput
+                  ref={inputRef}
+                  style={styles.input}
+                  value={serverUrl}
+                  onChangeText={setServerUrl}
+                  placeholder="http://192.168.1.100:21123"
+                  placeholderTextColor="#666"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                />
+                {error && <Text style={styles.errorText}>{error}</Text>}
+                <View style={styles.editButtons}>
+                  <Pressable
+                    style={({ focused }) => [styles.button, styles.buttonPrimary, focused && styles.buttonFocused]}
+                    onPress={handleSaveUrl}
+                    disabled={isSaving}
+                    hasTVPreferredFocus
+                  >
+                    <Text style={styles.buttonText}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={({ focused }) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
+                    onPress={handleCancelEdit}
+                    disabled={isSaving}
+                  >
+                    <Text style={styles.buttonText}>Отмена</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )
+            : (
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>URL сервера</Text>
+                  <Text style={styles.settingValue}>{connection?.serverUrl || 'Не подключен'}</Text>
+                </View>
                 <Pressable
                   style={({ focused }) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
-                  onPress={handleCancelEdit}
-                  disabled={isSaving}
+                  onPress={handleEditUrl}
+                  hasTVPreferredFocus
                 >
-                  <Text style={styles.buttonText}>Отмена</Text>
+                  <Text style={styles.buttonText}>Изменить</Text>
                 </Pressable>
               </View>
-            </View>
-          ) : (
-            <View style={styles.settingRow}>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingLabel}>URL сервера</Text>
-                <Text style={styles.settingValue}>{connection?.serverUrl || 'Не подключен'}</Text>
-              </View>
-              <Pressable
-                style={({ focused }) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
-                onPress={handleEditUrl}
-                hasTVPreferredFocus
-              >
-                <Text style={styles.buttonText}>Изменить</Text>
-              </Pressable>
-            </View>
-          )}
+            )}
 
           {/* Кнопка отключения */}
           {!isEditing && connection && (

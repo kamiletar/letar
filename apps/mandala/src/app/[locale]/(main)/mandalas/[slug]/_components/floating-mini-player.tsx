@@ -225,256 +225,258 @@ export function FloatingMiniPlayer({
       />
 
       <AnimatePresence mode="wait">
-        {isCollapsed ? (
-          /* Свёрнутое состояние — пульсирующая точка */
-          <MotionBox
-            key="collapsed"
-            position="fixed"
-            bottom="max(24px, env(safe-area-inset-bottom))" // Учёт notch на iPhone
-            right={6}
-            width="40px"
-            height="40px"
-            borderRadius="full"
-            bg="purple.500"
-            cursor="pointer"
-            zIndex={10101}
-            onClick={handleCollapsedClick}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            boxShadow={isPlaying ? '0 0 20px rgba(139, 92, 246, 0.6)' : '0 0 10px rgba(139, 92, 246, 0.3)'}
-          >
-            <LuMusic size={20} color="white" />
-          </MotionBox>
-        ) : (
-          /* Развёрнутое состояние */
-          <MotionBox
-            key="expanded"
-            position="fixed"
-            bottom="max(24px, env(safe-area-inset-bottom))"
-            right={6}
-            drag
-            dragConstraints={constraintsRef}
-            dragElastic={0.1}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => {
-              setIsHovered(false)
-              setShowVolume(false)
-            }}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            zIndex={10101}
-          >
-            <Box
-              bg="rgba(20, 20, 30, 0.8)"
-              backdropFilter="blur(16px)"
-              borderRadius="xl"
-              border="1px solid"
-              borderColor="whiteAlpha.200"
-              boxShadow="0 8px 32px rgba(0, 0, 0, 0.4)"
-              overflow="hidden"
-              minW="280px"
-              cursor="grab"
-              _active={{ cursor: 'grabbing' }}
+        {isCollapsed
+          ? (
+            /* Свёрнутое состояние — пульсирующая точка */
+            <MotionBox
+              key="collapsed"
+              position="fixed"
+              bottom="max(24px, env(safe-area-inset-bottom))" // Учёт notch на iPhone
+              right={6}
+              width="40px"
+              height="40px"
+              borderRadius="full"
+              bg="purple.500"
+              cursor="pointer"
+              zIndex={10101}
+              onClick={handleCollapsedClick}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              boxShadow={isPlaying ? '0 0 20px rgba(139, 92, 246, 0.6)' : '0 0 10px rgba(139, 92, 246, 0.3)'}
             >
-              <VStack gap={0} p={3} align="stretch">
-                {/* Название трека с навигацией */}
-                <HStack justify="space-between" gap={2} mb={2}>
-                  {/* Prev button */}
-                  <IconButton
-                    aria-label={t('prevTrack')}
-                    size="xs"
-                    variant="ghost"
-                    colorPalette="gray"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onPrevTrack()
-                    }}
-                  >
-                    <LuSkipBack />
-                  </IconButton>
-
-                  {/* Track info */}
-                  <VStack gap={0} flex={1} minW={0}>
-                    <HStack gap={2} w="100%" justify="center">
-                      <Box color="purple.400" flexShrink={0}>
-                        <LuMusic size={14} />
-                      </Box>
-                      <Text fontSize="sm" fontWeight="medium" color="white" lineClamp={1} title={trackName}>
-                        {trackName || 'Нет трека'}
-                      </Text>
-                    </HStack>
-                    {/* Playlist position indicator */}
-                    {playlistLength > 0 && (
-                      <Text fontSize="xs" color="gray.500">
-                        {currentIndex + 1} / {playlistLength}
-                      </Text>
-                    )}
-                  </VStack>
-
-                  {/* Next button */}
-                  <IconButton
-                    aria-label={t('nextTrack')}
-                    size="xs"
-                    variant="ghost"
-                    colorPalette="gray"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onNextTrack()
-                    }}
-                  >
-                    <LuSkipForward />
-                  </IconButton>
-                </HStack>
-
-                {/* Seekable progress bar with time */}
-                <Box onClick={(e) => e.stopPropagation()} mb={2}>
-                  <SeekableProgress
-                    progress={progress}
-                    currentTime={currentTime}
-                    duration={duration}
-                    onSeek={onSeek}
-                    showTime={true}
-                  />
-                </Box>
-
-                {/* Controls row */}
-                <HStack justify="space-between" gap={1}>
-                  {/* Left controls: repeat, shuffle */}
-                  <HStack gap={0}>
+              <LuMusic size={20} color="white" />
+            </MotionBox>
+          )
+          : (
+            /* Развёрнутое состояние */
+            <MotionBox
+              key="expanded"
+              position="fixed"
+              bottom="max(24px, env(safe-area-inset-bottom))"
+              right={6}
+              drag
+              dragConstraints={constraintsRef}
+              dragElastic={0.1}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => {
+                setIsHovered(false)
+                setShowVolume(false)
+              }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              zIndex={10101}
+            >
+              <Box
+                bg="rgba(20, 20, 30, 0.8)"
+                backdropFilter="blur(16px)"
+                borderRadius="xl"
+                border="1px solid"
+                borderColor="whiteAlpha.200"
+                boxShadow="0 8px 32px rgba(0, 0, 0, 0.4)"
+                overflow="hidden"
+                minW="280px"
+                cursor="grab"
+                _active={{ cursor: 'grabbing' }}
+              >
+                <VStack gap={0} p={3} align="stretch">
+                  {/* Название трека с навигацией */}
+                  <HStack justify="space-between" gap={2} mb={2}>
+                    {/* Prev button */}
                     <IconButton
-                      aria-label={`Повтор: ${REPEAT_MODE_LABELS[repeatMode]}`}
+                      aria-label={t('prevTrack')}
                       size="xs"
                       variant="ghost"
-                      colorPalette={repeatMode !== 'off' ? 'purple' : 'gray'}
-                      opacity={repeatMode === 'off' ? 0.5 : 1}
+                      colorPalette="gray"
                       onClick={(e) => {
                         e.stopPropagation()
-                        onToggleRepeat()
-                      }}
-                      title={REPEAT_MODE_LABELS[repeatMode]}
-                    >
-                      <RepeatIcon mode={repeatMode} />
-                    </IconButton>
-
-                    <IconButton
-                      aria-label={isShuffled ? t('disableShuffle') : t('enableShuffle')}
-                      size="xs"
-                      variant="ghost"
-                      colorPalette={isShuffled ? 'purple' : 'gray'}
-                      opacity={isShuffled ? 1 : 0.5}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleShuffle()
+                        onPrevTrack()
                       }}
                     >
-                      <LuShuffle />
-                    </IconButton>
-                  </HStack>
-
-                  {/* Right controls: playlist, volume, play/pause */}
-                  <HStack gap={1}>
-                    {/* Playlist button */}
-                    <IconButton
-                      aria-label={t('openPlaylist')}
-                      size="sm"
-                      variant="ghost"
-                      colorPalette="purple"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleTogglePlaylist()
-                      }}
-                    >
-                      <LuList />
+                      <LuSkipBack />
                     </IconButton>
 
-                    {/* Volume toggle */}
-                    <IconButton
-                      aria-label={volume > 0 ? t('mute') : t('unmute')}
-                      size="sm"
-                      variant="ghost"
-                      colorPalette="purple"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setShowVolume(!showVolume)
-                      }}
-                    >
-                      {volume > 0 ? <LuVolume2 /> : <LuVolumeX />}
-                    </IconButton>
-
-                    {/* Play/Pause */}
-                    <IconButton
-                      aria-label={isPlaying ? t('pause') : t('play')}
-                      size="sm"
-                      variant="solid"
-                      colorPalette="purple"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onPlayPause()
-                      }}
-                    >
-                      {isPlaying ? <LuPause /> : <LuPlay />}
-                    </IconButton>
-                  </HStack>
-                </HStack>
-
-                {/* Volume slider */}
-                <AnimatePresence>
-                  {showVolume && (
-                    <MotionBox
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      overflow="hidden"
-                    >
-                      <HStack gap={2} pt={2}>
-                        <IconButton
-                          aria-label="Mute"
-                          size="xs"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleMuteToggle()
-                          }}
-                        >
-                          {volume > 0 ? <LuVolume2 size={14} /> : <LuVolumeX size={14} />}
-                        </IconButton>
-                        <Slider.Root
-                          size="sm"
-                          value={[volume]}
-                          onValueChange={(details) => onVolumeChange(details.value[0])}
-                          min={0}
-                          max={100}
-                          step={1}
-                          flex={1}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Slider.Control>
-                            <Slider.Track>
-                              <Slider.Range />
-                            </Slider.Track>
-                            <Slider.Thumb index={0} />
-                          </Slider.Control>
-                        </Slider.Root>
-                        <Text fontSize="xs" color="gray.400" minW="32px" textAlign="right">
-                          {volume}%
+                    {/* Track info */}
+                    <VStack gap={0} flex={1} minW={0}>
+                      <HStack gap={2} w="100%" justify="center">
+                        <Box color="purple.400" flexShrink={0}>
+                          <LuMusic size={14} />
+                        </Box>
+                        <Text fontSize="sm" fontWeight="medium" color="white" lineClamp={1} title={trackName}>
+                          {trackName || 'Нет трека'}
                         </Text>
                       </HStack>
-                    </MotionBox>
-                  )}
-                </AnimatePresence>
-              </VStack>
-            </Box>
-          </MotionBox>
-        )}
+                      {/* Playlist position indicator */}
+                      {playlistLength > 0 && (
+                        <Text fontSize="xs" color="gray.500">
+                          {currentIndex + 1} / {playlistLength}
+                        </Text>
+                      )}
+                    </VStack>
+
+                    {/* Next button */}
+                    <IconButton
+                      aria-label={t('nextTrack')}
+                      size="xs"
+                      variant="ghost"
+                      colorPalette="gray"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onNextTrack()
+                      }}
+                    >
+                      <LuSkipForward />
+                    </IconButton>
+                  </HStack>
+
+                  {/* Seekable progress bar with time */}
+                  <Box onClick={(e) => e.stopPropagation()} mb={2}>
+                    <SeekableProgress
+                      progress={progress}
+                      currentTime={currentTime}
+                      duration={duration}
+                      onSeek={onSeek}
+                      showTime={true}
+                    />
+                  </Box>
+
+                  {/* Controls row */}
+                  <HStack justify="space-between" gap={1}>
+                    {/* Left controls: repeat, shuffle */}
+                    <HStack gap={0}>
+                      <IconButton
+                        aria-label={`Повтор: ${REPEAT_MODE_LABELS[repeatMode]}`}
+                        size="xs"
+                        variant="ghost"
+                        colorPalette={repeatMode !== 'off' ? 'purple' : 'gray'}
+                        opacity={repeatMode === 'off' ? 0.5 : 1}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleRepeat()
+                        }}
+                        title={REPEAT_MODE_LABELS[repeatMode]}
+                      >
+                        <RepeatIcon mode={repeatMode} />
+                      </IconButton>
+
+                      <IconButton
+                        aria-label={isShuffled ? t('disableShuffle') : t('enableShuffle')}
+                        size="xs"
+                        variant="ghost"
+                        colorPalette={isShuffled ? 'purple' : 'gray'}
+                        opacity={isShuffled ? 1 : 0.5}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleShuffle()
+                        }}
+                      >
+                        <LuShuffle />
+                      </IconButton>
+                    </HStack>
+
+                    {/* Right controls: playlist, volume, play/pause */}
+                    <HStack gap={1}>
+                      {/* Playlist button */}
+                      <IconButton
+                        aria-label={t('openPlaylist')}
+                        size="sm"
+                        variant="ghost"
+                        colorPalette="purple"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTogglePlaylist()
+                        }}
+                      >
+                        <LuList />
+                      </IconButton>
+
+                      {/* Volume toggle */}
+                      <IconButton
+                        aria-label={volume > 0 ? t('mute') : t('unmute')}
+                        size="sm"
+                        variant="ghost"
+                        colorPalette="purple"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowVolume(!showVolume)
+                        }}
+                      >
+                        {volume > 0 ? <LuVolume2 /> : <LuVolumeX />}
+                      </IconButton>
+
+                      {/* Play/Pause */}
+                      <IconButton
+                        aria-label={isPlaying ? t('pause') : t('play')}
+                        size="sm"
+                        variant="solid"
+                        colorPalette="purple"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onPlayPause()
+                        }}
+                      >
+                        {isPlaying ? <LuPause /> : <LuPlay />}
+                      </IconButton>
+                    </HStack>
+                  </HStack>
+
+                  {/* Volume slider */}
+                  <AnimatePresence>
+                    {showVolume && (
+                      <MotionBox
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        overflow="hidden"
+                      >
+                        <HStack gap={2} pt={2}>
+                          <IconButton
+                            aria-label="Mute"
+                            size="xs"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleMuteToggle()
+                            }}
+                          >
+                            {volume > 0 ? <LuVolume2 size={14} /> : <LuVolumeX size={14} />}
+                          </IconButton>
+                          <Slider.Root
+                            size="sm"
+                            value={[volume]}
+                            onValueChange={(details) => onVolumeChange(details.value[0])}
+                            min={0}
+                            max={100}
+                            step={1}
+                            flex={1}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Slider.Control>
+                              <Slider.Track>
+                                <Slider.Range />
+                              </Slider.Track>
+                              <Slider.Thumb index={0} />
+                            </Slider.Control>
+                          </Slider.Root>
+                          <Text fontSize="xs" color="gray.400" minW="32px" textAlign="right">
+                            {volume}%
+                          </Text>
+                        </HStack>
+                      </MotionBox>
+                    )}
+                  </AnimatePresence>
+                </VStack>
+              </Box>
+            </MotionBox>
+          )}
       </AnimatePresence>
 
       {/* Playlist drawer */}

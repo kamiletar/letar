@@ -83,16 +83,16 @@ export default async function TeamPage({ params }: { params: Params }) {
   // Матчи команды
   const matches = currentTs
     ? await prisma.match.findMany({
-        where: {
-          OR: [{ homeTeamId: currentTs.id }, { awayTeamId: currentTs.id }],
-        },
-        orderBy: { scheduledAt: 'asc' },
-        include: {
-          homeTeam: { include: { team: { select: { name: true } } } },
-          awayTeam: { include: { team: { select: { name: true } } } },
-          venue: { select: { name: true } },
-        },
-      })
+      where: {
+        OR: [{ homeTeamId: currentTs.id }, { awayTeamId: currentTs.id }],
+      },
+      orderBy: { scheduledAt: 'asc' },
+      include: {
+        homeTeam: { include: { team: { select: { name: true } } } },
+        awayTeam: { include: { team: { select: { name: true } } } },
+        venue: { select: { name: true } },
+      },
+    })
     : []
 
   // Статистика
@@ -122,9 +122,9 @@ export default async function TeamPage({ params }: { params: Params }) {
   // Карточки команды за текущий сезон
   const teamCards = currentTs
     ? await prisma.card.findMany({
-        where: { teamSeasonId: currentTs.id },
-        select: { type: true },
-      })
+      where: { teamSeasonId: currentTs.id },
+      select: { type: true },
+    })
     : []
   const yellowCards = teamCards.filter((c) => c.type === 'YELLOW').length
   const redCards = teamCards.filter((c) => c.type === 'RED').length
@@ -132,14 +132,13 @@ export default async function TeamPage({ params }: { params: Params }) {
   // Разделяем состав: тренерский штаб и играющие поэты
   // Тренеры/замы всегда в штабе; играющие тренеры (isPlaying=true) также среди поэтов
   const coaches = currentTs?.playerTeamSeasons.filter((pts) => pts.role !== 'PLAYER') ?? []
-  const players =
-    currentTs?.playerTeamSeasons.filter((pts) => {
-      if (pts.role === 'PLAYER') {
-        return true
-      }
-      // Играющие тренеры показываются и среди поэтов
-      return pts.isPlaying === true
-    }) ?? []
+  const players = currentTs?.playerTeamSeasons.filter((pts) => {
+    if (pts.role === 'PLAYER') {
+      return true
+    }
+    // Играющие тренеры показываются и среди поэтов
+    return pts.isPlaying === true
+  }) ?? []
 
   return (
     <VStack gap={8} align="stretch">
@@ -180,19 +179,21 @@ export default async function TeamPage({ params }: { params: Params }) {
             borderWidth="2px"
             borderColor="whiteAlpha.200"
           >
-            {team.logo ? (
-              <Image
-                src={`/api/files/${team.logo}`}
-                alt={team.name}
-                width={112}
-                height={112}
-                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-              />
-            ) : (
-              <Flex align="center" justify="center" h="full" bg="brand.800">
-                <LuUsers size={40} color="rgba(255,255,255,0.4)" />
-              </Flex>
-            )}
+            {team.logo
+              ? (
+                <Image
+                  src={`/api/files/${team.logo}`}
+                  alt={team.name}
+                  width={112}
+                  height={112}
+                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                />
+              )
+              : (
+                <Flex align="center" justify="center" h="full" bg="brand.800">
+                  <LuUsers size={40} color="rgba(255,255,255,0.4)" />
+                </Flex>
+              )}
           </Box>
 
           {/* Информация */}
@@ -360,19 +361,21 @@ export default async function TeamPage({ params }: { params: Params }) {
                       transition="all 0.2s"
                     >
                       <Box w={10} h={10} borderRadius="lg" overflow="hidden" flexShrink={0} position="relative">
-                        {pts.player.photo ? (
-                          <Image
-                            src={`/api/files/${pts.player.photo}`}
-                            alt={pts.player.name}
-                            fill
-                            sizes="40px"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <Circle size={10} bg="brand.subtle" color="brand.solid">
-                            <LuUserRound size={20} />
-                          </Circle>
-                        )}
+                        {pts.player.photo
+                          ? (
+                            <Image
+                              src={`/api/files/${pts.player.photo}`}
+                              alt={pts.player.name}
+                              fill
+                              sizes="40px"
+                              style={{ objectFit: 'cover' }}
+                            />
+                          )
+                          : (
+                            <Circle size={10} bg="brand.subtle" color="brand.solid">
+                              <LuUserRound size={20} />
+                            </Circle>
+                          )}
                       </Box>
                       <VStack gap={0} align="start">
                         <Text fontWeight="semibold" fontSize="sm">
@@ -404,27 +407,29 @@ export default async function TeamPage({ params }: { params: Params }) {
                 >
                   {/* Фото */}
                   <Box position="relative" w="full" pt="100%" bg="bg.subtle">
-                    {pts.player.photo ? (
-                      <Image
-                        src={`/api/files/${pts.player.photo}`}
-                        alt={pts.player.name}
-                        fill
-                        sizes="(max-width: 640px) 33vw, 16vw"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <Flex
-                        position="absolute"
-                        inset={0}
-                        align="center"
-                        justify="center"
-                        bg={{ base: 'gray.100', _dark: 'gray.800' }}
-                      >
-                        <Circle size={10} bg="brand.subtle" color="brand.solid">
-                          <LuUserRound size={20} />
-                        </Circle>
-                      </Flex>
-                    )}
+                    {pts.player.photo
+                      ? (
+                        <Image
+                          src={`/api/files/${pts.player.photo}`}
+                          alt={pts.player.name}
+                          fill
+                          sizes="(max-width: 640px) 33vw, 16vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      )
+                      : (
+                        <Flex
+                          position="absolute"
+                          inset={0}
+                          align="center"
+                          justify="center"
+                          bg={{ base: 'gray.100', _dark: 'gray.800' }}
+                        >
+                          <Circle size={10} bg="brand.subtle" color="brand.solid">
+                            <LuUserRound size={20} />
+                          </Circle>
+                        </Flex>
+                      )}
                   </Box>
                   <Box px={2} py={2} textAlign="center">
                     <Text fontWeight="medium" fontSize="xs" lineClamp={1}>

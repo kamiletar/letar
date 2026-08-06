@@ -74,7 +74,7 @@ export function useAnimeManifest(
   options?: UseAnimeManifestOptions & {
     /** @deprecated TODO: удалить после миграции всех клиентов на directoryCid */
     fallbackManifestCid?: string | null
-  }
+  },
 ): UseAnimeManifestResult {
   const { enabled = true, staleTime = 5 * 60 * 1000, fallbackManifestCid } = options ?? {}
 

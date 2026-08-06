@@ -28,7 +28,7 @@ export interface UseDeepLinkReturn {
     roomId: string,
     roomName: string,
     hostName: string,
-    animeName: string
+    animeName: string,
   ) => Promise<WatchPartyInvite | null>
   /** Сгенерировать link для добавления друга */
   generateFriendLink: (friendCode: string) => Promise<string | null>
@@ -60,7 +60,7 @@ export function useDeepLink(): UseDeepLinkReturn {
         return null
       }
     },
-    []
+    [],
   )
 
   // Сгенерировать link для добавления друга

@@ -86,7 +86,7 @@ export function ShareButton({
         console.error('Ошибка скачивания:', error)
       }
     },
-    [mandalaImageUrl, mandalaName]
+    [mandalaImageUrl, mandalaName],
   )
 
   // Простой вариант для fullscreen

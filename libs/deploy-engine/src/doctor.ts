@@ -84,7 +84,8 @@ function checkDeployTagImage(service: ComposeService, app: string): DoctorCheck 
   const passed = image.includes('${DEPLOY_TAG')
   return {
     id: 'deploy-tag-image',
-    description: `image использует '\${DEPLOY_TAG:-latest}' вместо хардкода тега (например '${app}:\${DEPLOY_TAG:-latest}')`,
+    description:
+      `image использует '\${DEPLOY_TAG:-latest}' вместо хардкода тега (например '${app}:\${DEPLOY_TAG:-latest}')`,
     passed,
     severity: 'required',
     detail: passed ? undefined : `image: ${image || '(не задан)'}`,

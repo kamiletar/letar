@@ -133,7 +133,7 @@ class PinataService {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<{ success: boolean; data?: T; error?: string }> {
     const jwt = await this.getJwt()
     if (!jwt) {
@@ -169,7 +169,7 @@ class PinataService {
    */
   async pinByCid(
     cid: string,
-    options: RemotePinOptions = {}
+    options: RemotePinOptions = {},
   ): Promise<{ success: boolean; data?: PinataPinJob; error?: string }> {
     log.info('Pin by CID', { cid })
 
@@ -381,7 +381,7 @@ class PinataService {
   async updateMetadata(
     cid: string,
     name: string,
-    keyvalues?: Record<string, string>
+    keyvalues?: Record<string, string>,
   ): Promise<{ success: boolean; error?: string }> {
     const body: Record<string, unknown> = {
       ipfsPinHash: cid,

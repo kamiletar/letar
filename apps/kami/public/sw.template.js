@@ -38,9 +38,9 @@ self.addEventListener('install', (event) => {
           cache.add(url).catch((err) => {
             console.warn(`[SW] Failed to cache ${url}:`, err.message)
           })
-        )
+        ),
       )
-    })
+    }),
   )
   self.skipWaiting()
 })
@@ -56,9 +56,9 @@ self.addEventListener('activate', (event) => {
           .map((name) => {
             console.log('[SW] Deleting old cache:', name)
             return caches.delete(name)
-          })
+          }),
       )
-    })
+    }),
   )
   self.clients.claim()
 })
@@ -128,7 +128,7 @@ self.addEventListener('fetch', (event) => {
           statusText: 'Service Unavailable',
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         })
-      })
+      }),
   )
 })
 
@@ -167,7 +167,7 @@ self.addEventListener('notificationclick', (event) => {
         return self.clients.openWindow(url)
       }
       return undefined
-    })
+    }),
   )
 })
 

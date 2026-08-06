@@ -69,7 +69,12 @@ export function ImageList({ images, onRemove }: ImageListProps) {
               </Table.Cell>
               <Table.Cell>
                 {!isUsed && onRemove && (
-                  <Button size="xs" variant="outline" colorPalette="red" onClick={() => onRemove(image.id)}>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    colorPalette="red"
+                    onClick={() => onRemove(image.id)}
+                  >
                     Remove
                   </Button>
                 )}

@@ -198,62 +198,64 @@ export function TeamInvite({ companyName }: TeamInviteProps) {
             <Collapsible.Content>
               <VStack gap={4} pt={4} align="stretch">
                 {/* Шаг 1: Создание организации */}
-                {!organizationId ? (
-                  <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
-                    <VStack gap={3}>
-                      <Text fontSize="sm">{t('createOrgDescription')}</Text>
-                      <Button colorPalette="brand" onClick={handleCreateOrganization} loading={creating} size="sm">
-                        {t('createOrg')}
-                      </Button>
-                    </VStack>
-                  </Box>
-                ) : (
-                  <>
-                    {/* Шаг 2: Добавление email'ов */}
-                    <VStack gap={3} align="stretch">
-                      {/* oxlint-disable-next-line react/no-array-index-key -- Редактируемый список */}
-                      {emails.map((email, index) => (
-                        <HStack key={index} gap={2}>
-                          <Field.Root flex={1}>
-                            <Input
-                              type="email"
-                              placeholder={t('emailPlaceholder')}
-                              value={email}
-                              onChange={(e) => updateEmail(index, e.target.value)}
-                            />
-                          </Field.Root>
-                          {emails.length > 1 && (
-                            <IconButton
-                              aria-label={t('removeEmail')}
-                              variant="ghost"
-                              colorPalette="red"
-                              size="sm"
-                              onClick={() => removeEmailField(index)}
-                            >
-                              <LuTrash2 />
-                            </IconButton>
-                          )}
-                        </HStack>
-                      ))}
+                {!organizationId
+                  ? (
+                    <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
+                      <VStack gap={3}>
+                        <Text fontSize="sm">{t('createOrgDescription')}</Text>
+                        <Button colorPalette="brand" onClick={handleCreateOrganization} loading={creating} size="sm">
+                          {t('createOrg')}
+                        </Button>
+                      </VStack>
+                    </Box>
+                  )
+                  : (
+                    <>
+                      {/* Шаг 2: Добавление email'ов */}
+                      <VStack gap={3} align="stretch">
+                        {/* oxlint-disable-next-line react/no-array-index-key -- Редактируемый список */}
+                        {emails.map((email, index) => (
+                          <HStack key={index} gap={2}>
+                            <Field.Root flex={1}>
+                              <Input
+                                type="email"
+                                placeholder={t('emailPlaceholder')}
+                                value={email}
+                                onChange={(e) => updateEmail(index, e.target.value)}
+                              />
+                            </Field.Root>
+                            {emails.length > 1 && (
+                              <IconButton
+                                aria-label={t('removeEmail')}
+                                variant="ghost"
+                                colorPalette="red"
+                                size="sm"
+                                onClick={() => removeEmailField(index)}
+                              >
+                                <LuTrash2 />
+                              </IconButton>
+                            )}
+                          </HStack>
+                        ))}
 
-                      <Button variant="ghost" size="sm" onClick={addEmailField} alignSelf="start">
-                        <LuPlus />
-                        {t('addEmail')}
-                      </Button>
-                    </VStack>
+                        <Button variant="ghost" size="sm" onClick={addEmailField} alignSelf="start">
+                          <LuPlus />
+                          {t('addEmail')}
+                        </Button>
+                      </VStack>
 
-                    {/* Кнопка отправки */}
-                    <Button
-                      colorPalette="brand"
-                      onClick={handleInvite}
-                      loading={inviting}
-                      disabled={!emails.some((e) => e.trim())}
-                    >
-                      <LuSend />
-                      {t('sendInvites')}
-                    </Button>
-                  </>
-                )}
+                      {/* Кнопка отправки */}
+                      <Button
+                        colorPalette="brand"
+                        onClick={handleInvite}
+                        loading={inviting}
+                        disabled={!emails.some((e) => e.trim())}
+                      >
+                        <LuSend />
+                        {t('sendInvites')}
+                      </Button>
+                    </>
+                  )}
               </VStack>
             </Collapsible.Content>
           </Collapsible.Root>

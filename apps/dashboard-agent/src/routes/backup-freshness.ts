@@ -29,6 +29,6 @@ export async function backupFreshnessRoutes(fastify: FastifyInstance): Promise<v
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

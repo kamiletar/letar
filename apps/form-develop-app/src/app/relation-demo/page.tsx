@@ -32,7 +32,7 @@ const RecipeFormSchema = withUIMeta(
       labelField: 'name',
       fieldType: 'select',
     }),
-  }
+  },
 )
 
 type RecipeFormData = z.infer<typeof RecipeFormSchema>

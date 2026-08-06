@@ -88,7 +88,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
       syncTime(newTime)
       setCurrentTime(newTime)
     },
-    [currentTime, duration, syncTime]
+    [currentTime, duration, syncTime],
   )
 
   // Покадровый шаг
@@ -98,7 +98,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
       const frameDuration = 1 / fps
       seek(forward ? frameDuration : -frameDuration)
     },
-    [seek]
+    [seek],
   )
 
   // Mute/Unmute

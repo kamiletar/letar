@@ -50,31 +50,33 @@ export function SwissMatchCard({ match, citySlug }: SwissMatchCardProps) {
 
       {/* Счёт */}
       <Flex gap={1} align="center" flexShrink={0} minW={{ base: '56px', md: '48px' }} justify="center">
-        {isFinished || isLive ? (
-          <>
-            <Text
-              fontSize={{ base: 'clamp(0.9375rem, 4vw, 1.25rem)', md: 'xs' }}
-              fontWeight={homeIsWinner ? 'bold' : 'medium'}
-              color={homeIsWinner ? 'green.fg' : 'fg'}
-            >
-              {homeScore}
-            </Text>
+        {isFinished || isLive
+          ? (
+            <>
+              <Text
+                fontSize={{ base: 'clamp(0.9375rem, 4vw, 1.25rem)', md: 'xs' }}
+                fontWeight={homeIsWinner ? 'bold' : 'medium'}
+                color={homeIsWinner ? 'green.fg' : 'fg'}
+              >
+                {homeScore}
+              </Text>
+              <Text fontSize={{ base: 'clamp(0.75rem, 3vw, 1rem)', md: '2xs' }} color="fg.subtle">
+                :
+              </Text>
+              <Text
+                fontSize={{ base: 'clamp(0.9375rem, 4vw, 1.25rem)', md: 'xs' }}
+                fontWeight={awayIsWinner ? 'bold' : 'medium'}
+                color={awayIsWinner ? 'green.fg' : 'fg'}
+              >
+                {awayScore}
+              </Text>
+            </>
+          )
+          : (
             <Text fontSize={{ base: 'clamp(0.75rem, 3vw, 1rem)', md: '2xs' }} color="fg.subtle">
-              :
+              vs
             </Text>
-            <Text
-              fontSize={{ base: 'clamp(0.9375rem, 4vw, 1.25rem)', md: 'xs' }}
-              fontWeight={awayIsWinner ? 'bold' : 'medium'}
-              color={awayIsWinner ? 'green.fg' : 'fg'}
-            >
-              {awayScore}
-            </Text>
-          </>
-        ) : (
-          <Text fontSize={{ base: 'clamp(0.75rem, 3vw, 1rem)', md: '2xs' }} color="fg.subtle">
-            vs
-          </Text>
-        )}
+          )}
         {isLive && (
           <Badge size="xs" colorPalette="red" ml={1}>
             LIVE

@@ -155,7 +155,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
   displayName: 'FieldCombobox',
   useFieldState: (
     componentProps: Omit<ComboboxFieldProps, keyof BaseFieldProps>,
-    resolved: ResolvedFieldProps
+    resolved: ResolvedFieldProps,
   ): ComboboxFieldState => {
     // Async search with debounce via shared hook
     const {
@@ -270,40 +270,40 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
                 )}
 
                 {/* Empty result */}
-                {!fieldState.isLoading &&
-                  fieldState.options.length === 0 &&
-                  fieldState.inputValue.length >= minChars && (
-                    <Combobox.Empty>{componentProps.emptyMessage ?? 'Nothing found'}</Combobox.Empty>
-                  )}
+                {!fieldState.isLoading
+                  && fieldState.options.length === 0
+                  && fieldState.inputValue.length >= minChars && (
+                  <Combobox.Empty>{componentProps.emptyMessage ?? 'Nothing found'}</Combobox.Empty>
+                )}
 
                 {/* Hint about minimum characters */}
-                {!fieldState.isLoading &&
-                  fieldState.options.length === 0 &&
-                  fieldState.inputValue.length < minChars &&
-                  fieldState.inputValue.length > 0 && (
-                    <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
-                  )}
+                {!fieldState.isLoading
+                  && fieldState.options.length === 0
+                  && fieldState.inputValue.length < minChars
+                  && fieldState.inputValue.length > 0 && (
+                  <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
+                )}
 
                 {/* Grouped options */}
                 {fieldState.groups
                   ? Array.from(fieldState.groups.entries()).map(([groupName, groupOptions]) => (
-                      <Combobox.ItemGroup key={groupName}>
-                        {groupName && <Combobox.ItemGroupLabel>{groupName}</Combobox.ItemGroupLabel>}
-                        {groupOptions.map((opt) => (
-                          <Combobox.Item item={opt} key={opt.value}>
-                            <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
-                            <Combobox.ItemIndicator />
-                          </Combobox.Item>
-                        ))}
-                      </Combobox.ItemGroup>
-                    ))
-                  : /* Flat options */
-                    fieldState.options.map((opt) => (
-                      <Combobox.Item item={opt} key={opt.value}>
-                        <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
-                        <Combobox.ItemIndicator />
-                      </Combobox.Item>
-                    ))}
+                    <Combobox.ItemGroup key={groupName}>
+                      {groupName && <Combobox.ItemGroupLabel>{groupName}</Combobox.ItemGroupLabel>}
+                      {groupOptions.map((opt) => (
+                        <Combobox.Item item={opt} key={opt.value}>
+                          <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
+                          <Combobox.ItemIndicator />
+                        </Combobox.Item>
+                      ))}
+                    </Combobox.ItemGroup>
+                  ))
+                  /* Flat options */
+                  : fieldState.options.map((opt) => (
+                    <Combobox.Item item={opt} key={opt.value}>
+                      <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
+                      <Combobox.ItemIndicator />
+                    </Combobox.Item>
+                  ))}
               </Combobox.Content>
             </Combobox.Positioner>
           </Portal>

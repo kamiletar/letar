@@ -28,7 +28,7 @@ export async function updatePeerCount(
   client: KuboRPCClient | null,
   apiUrl: string | null,
   previousCount: number,
-  previousBlockstoreSize: number
+  previousBlockstoreSize: number,
 ): Promise<PeerCountResult> {
   if (!client) {
     return { count: previousCount, cachedBlockstoreSize: previousBlockstoreSize }

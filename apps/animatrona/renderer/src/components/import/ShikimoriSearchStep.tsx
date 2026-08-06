@@ -139,7 +139,7 @@ export function ShikimoriSearchStep({
         handleSearch()
       }
     },
-    [handleSearch]
+    [handleSearch],
   )
 
   return (
@@ -232,7 +232,13 @@ export function ShikimoriSearchStep({
               </Text>
               <Text fontWeight="medium">{selectedAnime.russian ?? selectedAnime.name}</Text>
             </VStack>
-            <Button size="xs" variant="ghost" colorPalette="purple" onClick={() => onAnimeSelect(null)}>
+            <Button
+              size="xs"
+              variant="ghost"
+              colorPalette="purple"
+              onClick={() =>
+                onAnimeSelect(null)}
+            >
               Изменить
             </Button>
           </HStack>

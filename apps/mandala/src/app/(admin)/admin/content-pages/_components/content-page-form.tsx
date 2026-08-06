@@ -20,23 +20,23 @@ export function ContentPageForm({ contentPage, onSubmit }: ContentPageFormProps)
     toFormValues: (cp) =>
       cp
         ? {
-            slug: cp.slug,
-            title: cp.title,
-            content: cp.content,
-            metaTitle: cp.metaTitle || '',
-            metaDescription: cp.metaDescription || '',
-            ogImageId: cp.ogImageId || '',
-            published: cp.published,
-          }
+          slug: cp.slug,
+          title: cp.title,
+          content: cp.content,
+          metaTitle: cp.metaTitle || '',
+          metaDescription: cp.metaDescription || '',
+          ogImageId: cp.ogImageId || '',
+          published: cp.published,
+        }
         : {
-            slug: '',
-            title: '',
-            content: '',
-            metaTitle: '',
-            metaDescription: '',
-            ogImageId: '',
-            published: true,
-          },
+          slug: '',
+          title: '',
+          content: '',
+          metaTitle: '',
+          metaDescription: '',
+          ogImageId: '',
+          published: true,
+        },
     onSubmit,
   })
 

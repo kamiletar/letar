@@ -36,7 +36,7 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
         matches: updateMatch(s.matches, donorFilePath, targetEpisode),
       }))
     },
-    [setState]
+    [setState],
   )
 
   /**
@@ -62,7 +62,7 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
         }
       })
     },
-    [setState]
+    [setState],
   )
 
   /**
@@ -86,10 +86,9 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
           const episodeDir = episode?.folderPath || animeFolderPath
 
           // Собираем все дорожки указанного типа (встроенные + внешние)
-          const tracks =
-            type === 'audio'
-              ? [...probeResult.audioTracks, ...Array.from(probeResult.externalAudioByGroup.values()).flat()]
-              : [...probeResult.subtitleTracks, ...probeResult.externalSubtitles]
+          const tracks = type === 'audio'
+            ? [...probeResult.audioTracks, ...Array.from(probeResult.externalAudioByGroup.values()).flat()]
+            : [...probeResult.subtitleTracks, ...probeResult.externalSubtitles]
 
           for (const track of tracks) {
             if (!newSelected.find((t) => t.track.id === track.id)) {
@@ -107,7 +106,7 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
         return { ...s, selectedTracks: newSelected }
       })
     },
-    [episodes, setState]
+    [episodes, setState],
   )
 
   /**
@@ -160,7 +159,7 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
         return { ...s, selectedTracks: newSelected }
       })
     },
-    [episodes, setState]
+    [episodes, setState],
   )
 
   /**
@@ -176,7 +175,7 @@ export function useTrackSelection(options: UseTrackSelectionOptions) {
         }),
       }))
     },
-    [setState]
+    [setState],
   )
 
   return {

@@ -47,7 +47,7 @@ export function ExclusionsSection() {
       const updated = processes.filter((_, i) => i !== index)
       saveList(updated)
     },
-    [processes, saveList]
+    [processes, saveList],
   )
 
   // Определить текущее foreground-приложение с countdown

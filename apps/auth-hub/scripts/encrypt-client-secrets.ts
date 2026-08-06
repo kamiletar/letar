@@ -49,7 +49,7 @@ async function run() {
   console.log(
     `[encrypt-client-secrets] ${
       IS_DRY_RUN ? '--- DRY RUN (передай --execute для реального запуска) ---' : '--- EXECUTE ---'
-    }`
+    }`,
   )
 
   const clients = await orm.oauthApplication.findMany({})
@@ -87,7 +87,7 @@ async function run() {
   console.log(
     `\n[encrypt-client-secrets] Итого: ${alreadyEncrypted} уже зашифровано, ${toEncrypt} ${
       IS_DRY_RUN ? 'ожидают' : 'зашифровано'
-    }`
+    }`,
   )
 
   if (IS_DRY_RUN && toEncrypt > 0) {

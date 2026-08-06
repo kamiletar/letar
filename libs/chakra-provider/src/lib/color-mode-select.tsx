@@ -21,16 +21,14 @@ export interface ColorModeSelectProps extends Omit<SegmentGroupRootProps, 'value
  */
 export const ColorModeSelect = forwardRef<HTMLDivElement, ColorModeSelectProps>(function ColorModeSelect(
   { iconOnly = false, ...props },
-  ref
+  ref,
 ) {
   const { colorMode, setColorMode } = useColorMode()
 
   // Преобразуем items в формат для SegmentGroup.Items
   const items = colorModeItems.map((item) => ({
     value: item.value,
-    label: iconOnly ? (
-      <HStack title={item.label}>{item.icon}</HStack>
-    ) : (
+    label: iconOnly ? <HStack title={item.label}>{item.icon}</HStack> : (
       <HStack>
         {item.icon}
         {item.label}

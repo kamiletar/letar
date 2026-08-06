@@ -153,7 +153,7 @@ export const createLeagueAction = adminGuard(
       }
       return { success: false, error: 'Ошибка создания лиги' }
     }
-  }
+  },
 )
 
 export const deleteLeagueAction = adminGuard(async (id: string, seasonId: string): Promise<ActionResult> => {

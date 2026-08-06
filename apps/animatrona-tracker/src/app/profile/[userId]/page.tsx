@@ -76,7 +76,7 @@ export default async function PublicProfilePage({ params }: { params: Params }) 
         db.userWatchProgress.count({
           where: { libraryItem: { userId }, completed: true },
         }),
-      ])
+      ]),
   )
 
   // Количество опубликованных (всего)
@@ -86,10 +86,10 @@ export default async function PublicProfilePage({ params }: { params: Params }) 
 
   const distributionStats = distStats
     ? {
-        totalBytesUploaded: Number(distStats.totalBytesUploaded),
-        totalSeedingTimeMs: Number(distStats.totalSeedingTimeMs),
-        totalPeersHelped: distStats.totalPeersHelped,
-      }
+      totalBytesUploaded: Number(distStats.totalBytesUploaded),
+      totalSeedingTimeMs: Number(distStats.totalSeedingTimeMs),
+      totalPeersHelped: distStats.totalPeersHelped,
+    }
     : null
 
   return (

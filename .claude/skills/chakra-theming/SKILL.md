@@ -56,7 +56,7 @@ semanticTokens: {
 ```tsx
 // app/layout.tsx
 import { ThemeProvider } from 'next-themes'
-;<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
   <ChakraProvider value={system}>{children}</ChakraProvider>
 </ThemeProvider>
 ```

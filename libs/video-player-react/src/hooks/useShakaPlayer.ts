@@ -14,7 +14,7 @@ interface ShakaPlayerInterface {
     installAll: () => void
   }
   Player: {
-    new (): ShakaPlayerInstance
+    new(): ShakaPlayerInstance
     isBrowserSupported: () => boolean
   }
 }

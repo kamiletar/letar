@@ -39,7 +39,7 @@ export interface LocalizableOption {
  * ```
  */
 export function useLocalizedOptions(
-  options: LocalizableOption[] | undefined
+  options: LocalizableOption[] | undefined,
 ): { value: string | number; label: string; disabled?: boolean }[] {
   const i18n = useFormI18n()
 

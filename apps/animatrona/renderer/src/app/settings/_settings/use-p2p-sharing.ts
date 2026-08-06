@@ -52,7 +52,7 @@ export interface UseP2PSharingReturn {
   removeSubscription: (id: string) => Promise<boolean>
   updateSubscription: (
     id: string,
-    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>
+    data: Partial<Pick<Subscription, 'displayName' | 'autoPin' | 'autoPinLimit'>>,
   ) => Promise<Subscription | null>
   refreshSubscription: (id: string) => Promise<SubscriptionRefreshResult | null>
   refreshAllSubscriptions: () => Promise<void>

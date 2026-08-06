@@ -18,7 +18,7 @@ describe('Form + Field Integration', () => {
           <FieldString name="name" label="Имя" />
           <FieldNumber name="age" label="Возраст" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -34,7 +34,7 @@ describe('Form + Field Integration', () => {
           <FieldString name="name" label="Имя" />
           <FieldNumber name="age" label="Возраст" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -54,7 +54,7 @@ describe('Form + Field Integration', () => {
         <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
           <FormInfo />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -68,7 +68,7 @@ describe('Form + Field Integration', () => {
         <Form initialValue={{ name: '' }} onSubmit={vi.fn()} disabled>
           <FieldString name="name" label="Имя" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {
@@ -84,7 +84,7 @@ describe('Form + Field Integration', () => {
         <Form initialValue={{ agree: false }} onSubmit={vi.fn()}>
           <FieldCheckbox name="agree" label="Согласен" />
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await waitFor(() => {

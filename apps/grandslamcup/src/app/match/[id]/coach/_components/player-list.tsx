@@ -81,7 +81,7 @@ function canPlayerBeSelected(
   lineupStatus: LineupStatus,
   currentHalf: number,
   substitutionsUsed: number,
-  maxSubstitutions: number
+  maxSubstitutions: number,
 ): boolean {
   // Уже выступил в этом тайме или в обоих — нельзя
   if (matchStatus === 'played_this_half' || matchStatus === 'played_both') {
@@ -136,9 +136,8 @@ export function PlayerList({
 
   const renderPlayer = (player: PlayerLineupItem & { matchStatus: PlayerMatchStatus }) => {
     const badge = statusBadgeInfo(player.matchStatus, player.status)
-    const playerCanGo =
-      canSendPlayer &&
-      canPlayerBeSelected(player.matchStatus, player.status, currentHalf, substitutionsUsed, maxSubstitutions)
+    const playerCanGo = canSendPlayer
+      && canPlayerBeSelected(player.matchStatus, player.status, currentHalf, substitutionsUsed, maxSubstitutions)
     const isSending = sendingId === player.id
 
     return (
@@ -148,9 +147,9 @@ export function PlayerList({
         justify="space-between"
         p={3}
         minH="56px"
-        bg={
-          player.matchStatus === 'played_this_half' || player.matchStatus === 'played_both' ? 'bg.muted' : 'bg.subtle'
-        }
+        bg={player.matchStatus === 'played_this_half' || player.matchStatus === 'played_both'
+          ? 'bg.muted'
+          : 'bg.subtle'}
         borderRadius="lg"
         borderWidth="1px"
         borderColor="border.subtle"

@@ -43,7 +43,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
     { stageType: 'PLAYOFF_UPPER', roundNumber: 1, slotNumber: 5, label: 'WB R1 #5', seed: 7 },
     { stageType: 'PLAYOFF_UPPER', roundNumber: 1, slotNumber: 6, label: 'WB R1 #6', seed: 10 },
     { stageType: 'PLAYOFF_UPPER', roundNumber: 1, slotNumber: 7, label: 'WB R1 #7', seed: 8 },
-    { stageType: 'PLAYOFF_UPPER', roundNumber: 1, slotNumber: 8, label: 'WB R1 #8', seed: 9 }
+    { stageType: 'PLAYOFF_UPPER', roundNumber: 1, slotNumber: 8, label: 'WB R1 #8', seed: 9 },
   )
 
   // WB R2 (4 матча): 1vs(поб 8/9), 2vs(поб 7/10), 3vs(поб 6/11), 4vs(поб 5/12)
@@ -79,7 +79,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
       label: 'WB R2 #4',
       seed: 4,
       source2: 'PLAYOFF_UPPER:1:1',
-    }
+    },
   )
 
   // WB SF (2 матча)
@@ -99,7 +99,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
       label: 'WB SF #2',
       source1: 'PLAYOFF_UPPER:2:3',
       source2: 'PLAYOFF_UPPER:2:4',
-    }
+    },
   )
 
   // WB Final (1 матч)
@@ -120,7 +120,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
     { stageType: 'PLAYOFF_LOWER', roundNumber: 1, slotNumber: 1, label: 'LB R1 #1', seed: 13 },
     { stageType: 'PLAYOFF_LOWER', roundNumber: 1, slotNumber: 2, label: 'LB R1 #2', seed: 16 },
     { stageType: 'PLAYOFF_LOWER', roundNumber: 1, slotNumber: 3, label: 'LB R1 #3', seed: 14 },
-    { stageType: 'PLAYOFF_LOWER', roundNumber: 1, slotNumber: 4, label: 'LB R1 #4', seed: 15 }
+    { stageType: 'PLAYOFF_LOWER', roundNumber: 1, slotNumber: 4, label: 'LB R1 #4', seed: 15 },
   )
 
   // LB R2 (2 матча): проигравшие из WB R1
@@ -140,7 +140,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
       label: 'LB R2 #2',
       source1: 'PLAYOFF_UPPER:1:5:loser',
       source2: 'PLAYOFF_UPPER:1:7:loser',
-    }
+    },
   )
 
   // LB R3 (победитель LB R1 vs LB R1)
@@ -185,7 +185,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
       slotNumber: 4,
       label: 'LB R4 #4',
       source2: 'PLAYOFF_UPPER:2:4:loser',
-    }
+    },
   )
 
   // LB R5 / Четвертьфинал (2 матча)
@@ -205,7 +205,7 @@ export function generateDE16Bracket(): BracketSlotDef[] {
       label: 'LB QF #2',
       source1: 'PLAYOFF_LOWER:4:3',
       source2: 'PLAYOFF_LOWER:4:4',
-    }
+    },
   )
 
   // LB SF (1 матч)

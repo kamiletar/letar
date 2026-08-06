@@ -41,7 +41,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         headers: {
           'Cache-Control': 'no-store, max-age=0',
         },
-      }
+      },
     )
   } catch {
     return NextResponse.json({ verified: false, error: 'Database error' }, { status: 500 })

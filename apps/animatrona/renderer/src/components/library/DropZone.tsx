@@ -97,7 +97,7 @@ export function DropZone({ onFolderDrop, children }: DropZoneProps) {
       console.log('[DropZone] Calling onFolderDrop with:', filePath)
       onFolderDrop(filePath)
     },
-    [onFolderDrop]
+    [onFolderDrop],
   )
 
   return (

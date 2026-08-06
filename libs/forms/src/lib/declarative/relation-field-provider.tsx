@@ -212,17 +212,17 @@ export function RelationFieldProvider({
         // Check if data has changed
         const prevState = prev[model]
         if (
-          prevState &&
-          prevState.isLoading === state.isLoading &&
-          prevState.error === state.error &&
-          deepEqual(prevState.options, state.options)
+          prevState
+          && prevState.isLoading === state.isLoading
+          && prevState.error === state.error
+          && deepEqual(prevState.options, state.options)
         ) {
           return prev // No changes
         }
         return { ...prev, [model]: state }
       })
     },
-    []
+    [],
   )
 
   // Context value
@@ -237,15 +237,13 @@ export function RelationFieldProvider({
         },
       relations: relationsState,
     }),
-    [relationsState]
+    [relationsState],
   )
 
   return (
     <RelationFieldContext.Provider value={contextValue}>
       {/* Render loaders for each relation */}
-      {relations.map((config) => (
-        <RelationLoader key={config.model} config={config} onLoaded={handleLoaded} />
-      ))}
+      {relations.map((config) => <RelationLoader key={config.model} config={config} onLoaded={handleLoaded} />)}
       {children}
     </RelationFieldContext.Provider>
   )
@@ -263,7 +261,7 @@ export function RelationFieldProvider({
  */
 export function withRelations<P extends object>(
   Component: React.ComponentType<P>,
-  relations: RelationConfig[]
+  relations: RelationConfig[],
 ): React.FC<P> {
   const WrappedComponent = (props: P) => (
     <RelationFieldProvider relations={relations}>

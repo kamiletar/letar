@@ -17,7 +17,7 @@ export function setPannerPosition(
   panner: PannerNode,
   ctx: BaseAudioContext,
   angleRadians: number,
-  depth: number
+  depth: number,
 ): void {
   const radius = 1 + depth * 8
   const now = ctx.currentTime

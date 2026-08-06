@@ -175,10 +175,10 @@ export const auth = createAuth({
 
   // OAuth-провайдеры настраиваются ОДИН РАЗ для всех приложений монорепо
   socialProviders: {
-    ...(process.env.AUTH_GOOGLE_ID &&
-      process.env.AUTH_GOOGLE_SECRET && {
-        google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
-      }),
+    ...(process.env.AUTH_GOOGLE_ID
+      && process.env.AUTH_GOOGLE_SECRET && {
+      google: { clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET },
+    }),
     // github, facebook, vk — аналогично
   },
 
@@ -489,7 +489,7 @@ const { getSession, getCurrentUser } = createSessionHelpers<Session>(auth)
 
 const { requireAuth, requireRole, requireAdmin } = createAuthGuards(
   getSession,
-  (session) => session.user as SessionUser
+  (session) => session.user as SessionUser,
 )
 
 const { isAuthenticated, hasRole, isAdmin } = createAuthChecks(getCurrentUser)
@@ -732,11 +732,11 @@ export const signInWithLetarAuth = createSignInWithLetarAuth(authClient, { defau
 Возвращает функцию `signInWithLetarAuth(callbackURL?: string): Promise<string | null>` —
 `null` при успехе (произойдёт redirect), строка человекопонятной ошибки при неудаче.
 
-| Опция                | Тип                        | По умолчанию                                  | Описание                                                                          |
-| --------------------- | -------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `providerId`          | `string`                   | `'letar-auth'`                                | providerId генерик-OAuth на стороне Ключницы                                     |
-| `defaultCallbackURL`  | `string \| (() => string)` | текущий `pathname + search`                    | Куда вернуть пользователя, если явный `callbackURL` не передан в саму функцию      |
-| `onError`             | `(message: string) => void`| —                                              | Колбэк с сообщением об ошибке (например для toast)                                |
+| Опция                | Тип                         | По умолчанию                | Описание                                                                      |
+| -------------------- | --------------------------- | --------------------------- | ----------------------------------------------------------------------------- |
+| `providerId`         | `string`                    | `'letar-auth'`              | providerId генерик-OAuth на стороне Ключницы                                  |
+| `defaultCallbackURL` | `string \| (() => string)`  | текущий `pathname + search` | Куда вернуть пользователя, если явный `callbackURL` не передан в саму функцию |
+| `onError`            | `(message: string) => void` | —                           | Колбэк с сообщением об ошибке (например для toast)                            |
 
 > ⚠️ Дефолт «текущая страница» — намеренно лучшее поведение, чем фиксированный `'/'`: без него
 > после логина пользователя всегда кидает на главную вместо страницы, откуда он кликнул «Войти»
@@ -916,9 +916,9 @@ export async function requestAuthModeMigration(acknowledgedRisks: boolean) {
 | `successMessage?`  | `string`                                                           | Текст алерта после успешной фиксации (переопределить для доп. рисков — например VK/Yandex у driving-school) |
 | `footer?`          | `ReactNode`                                                        | Доп. контент под таблицей (например ссылка на общий журнал аудита)                                          |
 
-> Полные примеры: [`apps/dsperevod`](<../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/page.tsx>),
+> Полные примеры: [`apps/dsperevod`](../../apps/dsperevod/src/app/(admin)/admin/settings/auth-mode/page.tsx),
 > [`apps/aboi`](../../apps/aboi/src/app/[locale]/admin/settings/auth-mode/page.tsx),
-> [`apps/driving-school`](<../../apps/driving-school/src/app/(owner)/owner/settings/auth-mode/page.tsx>).
+> [`apps/driving-school`](../../apps/driving-school/src/app/(owner)/owner/settings/auth-mode/page.tsx).
 
 ---
 
@@ -1042,9 +1042,9 @@ export const { createSocialProvider, updateSocialProvider, deleteSocialProvider,
 | `unauthorizedMessage?` | `string`                                        | `'Требуется авторизация'`                            |
 | `keyMissingMessage?`   | `string`                                        | `'AUTH_ENCRYPTION_KEY не настроен на сервере — ...'` |
 
-> Полные примеры: [`apps/dsperevod`](<../../apps/dsperevod/src/app/(admin)/admin/social-providers/>),
+> Полные примеры: [`apps/dsperevod`](../../apps/dsperevod/src/app/(admin)/admin/social-providers/),
 > [`apps/aboi`](../../apps/aboi/src/app/[locale]/admin/social-providers/),
-> [`apps/driving-school`](<../../apps/driving-school/src/app/(owner)/owner/settings/social-providers/>).
+> [`apps/driving-school`](../../apps/driving-school/src/app/(owner)/owner/settings/social-providers/).
 
 ---
 

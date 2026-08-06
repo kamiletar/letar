@@ -121,16 +121,18 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
                 </Table.Cell>
                 <Table.Cell color="fg.muted">{formatSize(file.size)}</Table.Cell>
                 <Table.Cell>
-                  {file.mediaInfo ? (
-                    <Text fontSize="sm" color="fg.muted">
-                      {file.mediaInfo.videoTracks[0]?.codec || 'N/A'} • {file.mediaInfo.videoTracks[0]?.width}x
-                      {file.mediaInfo.videoTracks[0]?.height}
-                    </Text>
-                  ) : (
-                    <Text fontSize="sm" color="fg.subtle">
-                      —
-                    </Text>
-                  )}
+                  {file.mediaInfo
+                    ? (
+                      <Text fontSize="sm" color="fg.muted">
+                        {file.mediaInfo.videoTracks[0]?.codec || 'N/A'} • {file.mediaInfo.videoTracks[0]?.width}x
+                        {file.mediaInfo.videoTracks[0]?.height}
+                      </Text>
+                    )
+                    : (
+                      <Text fontSize="sm" color="fg.subtle">
+                        —
+                      </Text>
+                    )}
                 </Table.Cell>
                 <Table.Cell>{getStatusBadge(file.status)}</Table.Cell>
                 {showProgress && (

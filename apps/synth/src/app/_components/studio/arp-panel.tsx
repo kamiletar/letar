@@ -84,8 +84,7 @@ export function ArpPanel({ params, onChange, onToggleEnabled }: ArpPanelProps) {
             max={3}
             style={smallInputStyle}
             onChange={(e) =>
-              onChange((prev) => ({ ...prev, octaves: Math.max(1, Math.min(3, Number(e.target.value) || 1)) }))
-            }
+              onChange((prev) => ({ ...prev, octaves: Math.max(1, Math.min(3, Number(e.target.value) || 1)) }))}
           />
         </Box>
 
@@ -118,8 +117,7 @@ export function ArpPanel({ params, onChange, onToggleEnabled }: ArpPanelProps) {
             max={240}
             style={smallInputStyle}
             onChange={(e) =>
-              onChange((prev) => ({ ...prev, bpm: Math.max(40, Math.min(240, Number(e.target.value) || prev.bpm)) }))
-            }
+              onChange((prev) => ({ ...prev, bpm: Math.max(40, Math.min(240, Number(e.target.value) || prev.bpm)) }))}
           />
         </Box>
       </Box>

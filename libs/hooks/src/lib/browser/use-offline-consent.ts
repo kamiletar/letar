@@ -123,7 +123,7 @@ export function useOfflineConsent(storageKey: string) {
       window.addEventListener('storage', handleStorage)
       return () => window.removeEventListener('storage', handleStorage)
     },
-    [storageKey]
+    [storageKey],
   )
 
   const getSnapshot = useCallback(() => getConsentState(storageKey), [storageKey])
@@ -131,7 +131,7 @@ export function useOfflineConsent(storageKey: string) {
   const consent = useSyncExternalStore(
     subscribe,
     getSnapshot,
-    () => 'pending' as OfflineConsentState // SSR fallback
+    () => 'pending' as OfflineConsentState, // SSR fallback
   )
 
   /** Принять оффлайн режим. */

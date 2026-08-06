@@ -228,7 +228,7 @@ export function PlayerPage() {
 
   // Double-tap ripple
   const [doubleTapRipple, setDoubleTapRipple] = useState<{ x: number; y: number; direction: 'left' | 'right' } | null>(
-    null
+    null,
   )
 
   // Автосохранение прогресса
@@ -275,18 +275,18 @@ export function PlayerPage() {
   // Мемоизированные URL субтитров и шрифтов (чтобы избежать пересоздания SubtitlesOctopus)
   const subtitleUrl = useMemo(
     () => (currentSubtitleTrack?.fileCid ? getIpfsUrl(currentSubtitleTrack.fileCid) : null),
-    [currentSubtitleTrack?.fileCid]
+    [currentSubtitleTrack?.fileCid],
   )
   const subtitleFonts = useMemo(
     () => currentSubtitleTrack?.fontCids.map((cid) => getIpfsUrl(cid)) ?? [],
-    [currentSubtitleTrack?.fontCids]
+    [currentSubtitleTrack?.fontCids],
   )
 
   // URL видео и аудио
   const videoUrl = useMemo(() => (episode ? getEpisodeVideoUrl(episode) : null), [episode])
   const audioUrl = useMemo(
     () => (currentAudioTrack?.audioCid ? getAudioCidUrl(currentAudioTrack.audioCid) : null),
-    [currentAudioTrack]
+    [currentAudioTrack],
   )
 
   // Mobile Player хук
@@ -463,8 +463,8 @@ export function PlayerPage() {
               }
             }
             if (animePref.subtitleTrackId !== undefined) {
-              const hasTrack =
-                animePref.subtitleTrackId === null || ep.subtitleTracks.some((t) => t.id === animePref.subtitleTrackId)
+              const hasTrack = animePref.subtitleTrackId === null
+                || ep.subtitleTracks.some((t) => t.id === animePref.subtitleTrackId)
               if (hasTrack) {
                 setSelectedSubtitleTrack(animePref.subtitleTrackId)
               }
@@ -564,7 +564,7 @@ export function PlayerPage() {
       }
       saveTrackPreferences(prefs)
     },
-    [searchParams]
+    [searchParams],
   )
 
   // Обработка окончания видео
@@ -728,7 +728,7 @@ export function PlayerPage() {
       needsFullscreen,
       isFullscreen,
       enterFullscreen,
-    ]
+    ],
   )
 
   // Выбор аудио дорожки

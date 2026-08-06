@@ -41,7 +41,7 @@ export function FriendsList({ onlineOnly = false, title = 'Друзья' }: Frie
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       result = result.filter(
-        (f) => f.displayName.toLowerCase().includes(query) || f.friendCode.toLowerCase().includes(query)
+        (f) => f.displayName.toLowerCase().includes(query) || f.friendCode.toLowerCase().includes(query),
       )
     }
 
@@ -131,30 +131,34 @@ export function FriendsList({ onlineOnly = false, title = 'Друзья' }: Frie
       )}
 
       {/* Список друзей */}
-      {filteredFriends.length === 0 ? (
-        <VStack py={8} color="fg.muted">
-          {friends.length === 0 ? (
-            <>
-              <LuUsers size={48} />
-              <Text>У вас пока нет друзей</Text>
-              <Button size="sm" colorPalette="blue" onClick={() => setIsAddDialogOpen(true)}>
-                Добавить первого друга
-              </Button>
-            </>
-          ) : (
-            <>
-              <LuSearch size={32} />
-              <Text>Ничего не найдено</Text>
-            </>
-          )}
-        </VStack>
-      ) : (
-        <VStack gap={2} align="stretch">
-          {filteredFriends.map((friend) => (
-            <FriendCard key={friend.peerId} friend={friend} onRemove={handleRemoveFriend} onBlock={handleBlockUser} />
-          ))}
-        </VStack>
-      )}
+      {filteredFriends.length === 0
+        ? (
+          <VStack py={8} color="fg.muted">
+            {friends.length === 0
+              ? (
+                <>
+                  <LuUsers size={48} />
+                  <Text>У вас пока нет друзей</Text>
+                  <Button size="sm" colorPalette="blue" onClick={() => setIsAddDialogOpen(true)}>
+                    Добавить первого друга
+                  </Button>
+                </>
+              )
+              : (
+                <>
+                  <LuSearch size={32} />
+                  <Text>Ничего не найдено</Text>
+                </>
+              )}
+          </VStack>
+        )
+        : (
+          <VStack gap={2} align="stretch">
+            {filteredFriends.map((friend) => (
+              <FriendCard key={friend.peerId} friend={friend} onRemove={handleRemoveFriend} onBlock={handleBlockUser} />
+            ))}
+          </VStack>
+        )}
 
       {/* Диалог добавления друга */}
       <AddFriendDialog

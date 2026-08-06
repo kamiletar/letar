@@ -28,7 +28,7 @@ test.describe('Recipe CRUDL', () => {
       portions: number
       componentTitle?: string
       componentWeight?: number
-    }
+    },
   ) {
     // Fill title field
     await getField(page, 'title').fill(data.title)

@@ -25,7 +25,7 @@ function startVoice(
   dest: AudioNode,
   patch: SubtractiveEngineParams,
   midiNote: number,
-  velocity: number
+  velocity: number,
 ): Voice {
   const now = ctx.currentTime
   const freq = midiToFreq(midiNote)

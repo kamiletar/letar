@@ -7,6 +7,6 @@ import { NextResponse } from 'next/server'
 export function POST() {
   return NextResponse.json(
     { success: false, error: 'Not implemented. Deploy logs are managed by dashboard-agent.' },
-    { status: 501 }
+    { status: 501 },
   )
 }

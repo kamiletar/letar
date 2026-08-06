@@ -182,7 +182,7 @@ export function SpinGraphCanvas({
       const glow = ctx2d.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.6)
       glow.addColorStop(
         0,
-        `rgba(212, 175, 55, ${(0.05 + bass * 0.12 + pulseEnergy * 0.08) * scene.params.glowIntensity})`
+        `rgba(212, 175, 55, ${(0.05 + bass * 0.12 + pulseEnergy * 0.08) * scene.params.glowIntensity})`,
       )
       glow.addColorStop(1, 'rgba(4, 3, 2, 0)')
       ctx2d.fillStyle = glow
@@ -214,8 +214,8 @@ export function SpinGraphCanvas({
       // orbitSpread сцены масштабирует итоговую теснóту/широту орбиты.
       const nodeCount = 6
       const depthScale = 1 - depth * 0.25
-      const orbitRadius =
-        baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06) * depthScale * scene.params.orbitSpread
+      const orbitRadius = baseRadius * (2.2 + Math.min(activeNoteCountRef.current, 8) * 0.06) * depthScale
+        * scene.params.orbitSpread
       const azimuthOffset = azimuth * Math.PI
       outerAngle += (0.0015 + smoothTreble * 0.01) * scene.params.rotationSpeed
 

@@ -21,7 +21,7 @@ export const ProgressCircleRing = React.forwardRef<SVGSVGElement, ProgressCircle
         <ChakraProgressCircle.Range stroke={color} strokeLinecap={cap} />
       </ChakraProgressCircle.Circle>
     )
-  }
+  },
 )
 
 /**
@@ -34,7 +34,7 @@ export const ProgressCircleValueText = React.forwardRef<HTMLDivElement, ChakraPr
         <ChakraProgressCircle.ValueText {...props} ref={ref} />
       </AbsoluteCenter>
     )
-  }
+  },
 )
 
 export const ProgressCircleRoot = ChakraProgressCircle.Root

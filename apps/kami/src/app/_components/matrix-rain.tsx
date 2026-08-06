@@ -92,7 +92,7 @@ export function MatrixRain({
     columnRecipeRef.current = Array.from({ length: columns }, () => Math.floor(Math.random() * RECIPES.length))
     columnCharIdxRef.current = Array.from(
       { length: columns },
-      () => Math.floor(Math.random() * 100) // случайная стартовая позиция в тексте
+      () => Math.floor(Math.random() * 100), // случайная стартовая позиция в тексте
     )
   }, [])
 
@@ -134,7 +134,7 @@ export function MatrixRain({
         dropsRef.current[i]++
       }
     },
-    [color, fontSize, fadeOpacity, bgRgb]
+    [color, fontSize, fadeOpacity, bgRgb],
   )
 
   // Обработка resize

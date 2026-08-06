@@ -75,11 +75,13 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
         setError(res.error ?? 'Не удалось изменить слот')
       }
     },
-    [match.id]
+    [match.id],
   )
 
   const inviteUrl = inviteKey
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/match/${match.id}/judge?half=${currentHalf}&invite=${inviteKey}`
+    ? `${
+      typeof window !== 'undefined' ? window.location.origin : ''
+    }/match/${match.id}/judge?half=${currentHalf}&invite=${inviteKey}`
     : null
 
   const slotsFilled = judges.length
@@ -124,23 +126,23 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
           borderWidth="1px"
           borderColor="border.muted"
         >
-          {inviteUrl ? (
-            <>
-              <Box display="flex" justifyContent="center">
-                <QRCodeSVG
-                  value={inviteUrl}
-                  size={480}
-                  style={{ width: '100%', height: 'auto', maxWidth: '480px' }}
-                  level="M"
-                />
-              </Box>
-              <Text fontSize="xs" color="gray.600" mt={3} wordBreak="break-all">
-                {inviteUrl}
-              </Text>
-            </>
-          ) : (
-            <Text color="gray.500">Генерация инвайта...</Text>
-          )}
+          {inviteUrl
+            ? (
+              <>
+                <Box display="flex" justifyContent="center">
+                  <QRCodeSVG
+                    value={inviteUrl}
+                    size={480}
+                    style={{ width: '100%', height: 'auto', maxWidth: '480px' }}
+                    level="M"
+                  />
+                </Box>
+                <Text fontSize="xs" color="gray.600" mt={3} wordBreak="break-all">
+                  {inviteUrl}
+                </Text>
+              </>
+            )
+            : <Text color="gray.500">Генерация инвайта...</Text>}
         </Box>
 
         {/* Слоты судей */}
@@ -170,24 +172,26 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
               >
                 <Flex justify="space-between" align="center" gap={2}>
                   <HStack gap={2} flex={1} minW={0}>
-                    {filledByQR ? (
-                      <>
-                        <Text fontSize="lg">{colorConfig.emoji}</Text>
-                        <Text fontWeight="medium" lineClamp={1}>
-                          {judge.name}
-                        </Text>
-                        <Badge colorPalette="green" size="sm">
-                          ✓ Подключён
-                        </Badge>
-                      </>
-                    ) : (
-                      <>
-                        <Text fontSize="lg">{colorConfig.emoji}</Text>
-                        <Text fontWeight="medium" color="fg.muted">
-                          Слот {slotNum} ({colorConfig.name})
-                        </Text>
-                      </>
-                    )}
+                    {filledByQR
+                      ? (
+                        <>
+                          <Text fontSize="lg">{colorConfig.emoji}</Text>
+                          <Text fontWeight="medium" lineClamp={1}>
+                            {judge.name}
+                          </Text>
+                          <Badge colorPalette="green" size="sm">
+                            ✓ Подключён
+                          </Badge>
+                        </>
+                      )
+                      : (
+                        <>
+                          <Text fontSize="lg">{colorConfig.emoji}</Text>
+                          <Text fontWeight="medium" color="fg.muted">
+                            Слот {slotNum} ({colorConfig.name})
+                          </Text>
+                        </>
+                      )}
                   </HStack>
 
                   {/* Галочка «управляется вручную» — доступна только если слот не занят QR */}

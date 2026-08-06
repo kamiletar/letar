@@ -63,8 +63,7 @@ export function TeleprompterOverlay({ open, teleprompter, onClose }: Teleprompte
           <Knob
             value={(speed - MIN_TELEPROMPTER_SPEED) / (MAX_TELEPROMPTER_SPEED - MIN_TELEPROMPTER_SPEED)}
             onChange={(v) =>
-              setSpeed(Math.round(MIN_TELEPROMPTER_SPEED + v * (MAX_TELEPROMPTER_SPEED - MIN_TELEPROMPTER_SPEED)))
-            }
+              setSpeed(Math.round(MIN_TELEPROMPTER_SPEED + v * (MAX_TELEPROMPTER_SPEED - MIN_TELEPROMPTER_SPEED)))}
             label="скорость"
             hint="Скорость автопрокрутки текста — темп твоего чтения на сцене."
             displayValue={`${speed}px/с`}
@@ -85,42 +84,44 @@ export function TeleprompterOverlay({ open, teleprompter, onClose }: Teleprompte
         </Box>
       </Box>
 
-      {running ? (
-        <Box ref={scrollRef} flex={1} overflowY="hidden" px={8} py={12}>
-          <Text
-            fontSize="40px"
-            lineHeight={1.6}
-            color="fg.gold"
-            textAlign="center"
-            whiteSpace="pre-wrap"
-            maxW="900px"
-            mx="auto"
-          >
-            {lyrics || '(пусто — поставь на паузу и впиши текст)'}
-          </Text>
-          {/* Хвост пустого пространства — чтобы последняя строка тоже успела прокрутиться до центра */}
-          <Box h="60vh" />
-        </Box>
-      ) : (
-        <Box flex={1} p={8} display="flex" flexDir="column">
-          <Text fontSize="10px" color="fg.subtle" mb={2} letterSpacing="0.06em">
-            Пауза — режим правки. Впиши или вставь текст, потом «▶ поехали».
-          </Text>
-          <Textarea
-            value={lyrics}
-            onChange={(e) => setLyrics(e.target.value)}
-            placeholder="Текст стихов…"
-            flex={1}
-            fontSize="18px"
-            lineHeight={1.6}
-            color="fg.gold"
-            bg="bg.surface"
-            border="1px solid"
-            borderColor="border.DEFAULT"
-            resize="none"
-          />
-        </Box>
-      )}
+      {running
+        ? (
+          <Box ref={scrollRef} flex={1} overflowY="hidden" px={8} py={12}>
+            <Text
+              fontSize="40px"
+              lineHeight={1.6}
+              color="fg.gold"
+              textAlign="center"
+              whiteSpace="pre-wrap"
+              maxW="900px"
+              mx="auto"
+            >
+              {lyrics || '(пусто — поставь на паузу и впиши текст)'}
+            </Text>
+            {/* Хвост пустого пространства — чтобы последняя строка тоже успела прокрутиться до центра */}
+            <Box h="60vh" />
+          </Box>
+        )
+        : (
+          <Box flex={1} p={8} display="flex" flexDir="column">
+            <Text fontSize="10px" color="fg.subtle" mb={2} letterSpacing="0.06em">
+              Пауза — режим правки. Впиши или вставь текст, потом «▶ поехали».
+            </Text>
+            <Textarea
+              value={lyrics}
+              onChange={(e) => setLyrics(e.target.value)}
+              placeholder="Текст стихов…"
+              flex={1}
+              fontSize="18px"
+              lineHeight={1.6}
+              color="fg.gold"
+              bg="bg.surface"
+              border="1px solid"
+              borderColor="border.DEFAULT"
+              resize="none"
+            />
+          </Box>
+        )}
     </Box>
   )
 }

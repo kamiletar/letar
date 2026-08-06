@@ -161,7 +161,7 @@ export const RegisterSchema = withPasswordConfirmation(
     email: emailSchema,
     password: strongPasswordSchema,
     confirmPassword: z.string(),
-  })
+  }),
 ).strip()
 ```
 

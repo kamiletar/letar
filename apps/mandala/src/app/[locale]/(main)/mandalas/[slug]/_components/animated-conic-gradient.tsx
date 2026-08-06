@@ -58,7 +58,7 @@ export function AnimatedConicGradient(props: AnimatedConicGradientProps) {
       ctx.fillStyle = gradient
       ctx.fillRect(0, 0, size.width, size.height)
     },
-    [durationMs]
+    [durationMs],
   )
 
   const { canvasRef, size, canvasStyle } = useCanvasEffect(props, {

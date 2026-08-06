@@ -38,7 +38,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       return { success: true, data: status, timestamp: new Date().toISOString() }
-    }
+    },
   )
 
   /**
@@ -141,6 +141,6 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         })
       }
-    }
+    },
   )
 }

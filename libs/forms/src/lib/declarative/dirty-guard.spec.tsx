@@ -110,7 +110,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard />
           <a href="/other-page">Go to other page</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       // Кликаем на ссылку
@@ -132,7 +132,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard />
           <a href="https://external.com">External link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       const link = screen.getByText('External link')
@@ -151,7 +151,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard />
           <a href="/other-page">Go to other page</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       const link = screen.getByText('Go to other page')
@@ -172,7 +172,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard />
           <a href="/other-page">Go to other page</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       // Кликаем на ссылку чтобы показать диалог
@@ -203,7 +203,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard />
           <a href="/other-page">Go to other page</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       // Кликаем на ссылку
@@ -231,7 +231,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard dialogTitle="Уходите?" />
           <a href="/other-page">Link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       await userEvent.click(screen.getByText('Link'))
@@ -250,7 +250,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard dialogDescription="Данные будут потеряны!" />
           <a href="/other-page">Link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       await userEvent.click(screen.getByText('Link'))
@@ -269,7 +269,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard confirmText="Да, уйти" cancelText="Нет, остаться" />
           <a href="/other-page">Link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       await userEvent.click(screen.getByText('Link'))
@@ -292,7 +292,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard onBlock={onBlock} />
           <a href="/other-page">Link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       await userEvent.click(screen.getByText('Link'))
@@ -310,7 +310,7 @@ describe('DirtyGuard', () => {
           <DirtyGuard onBlock={onBlock} />
           <a href="/other-page">Link</a>
         </div>,
-        { wrapper }
+        { wrapper },
       )
 
       await userEvent.click(screen.getByText('Link'))

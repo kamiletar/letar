@@ -45,10 +45,10 @@ export function useThrottle<T extends (...args: unknown[]) => void>(callback: T,
             callback(...args)
             lastRun.current = Date.now()
           },
-          delay - (now - lastRun.current)
+          delay - (now - lastRun.current),
         )
       }
     }) as T,
-    [callback, delay]
+    [callback, delay],
   )
 }

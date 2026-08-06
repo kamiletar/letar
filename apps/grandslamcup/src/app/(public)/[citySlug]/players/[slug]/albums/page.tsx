@@ -73,33 +73,35 @@ export default async function PlayerAlbumsPage({ params }: { params: Params }) {
         Альбомы
       </Heading>
 
-      {player.albums.length > 0 ? (
-        <Grid
-          templateColumns={{
-            base: 'repeat(2, 1fr)',
-            sm: 'repeat(3, 1fr)',
-            md: 'repeat(4, 1fr)',
-            lg: 'repeat(5, 1fr)',
-          }}
-          gap={4}
-        >
-          {player.albums.map((album) => (
-            <AlbumPoster
-              key={album.id}
-              title={album.title}
-              href={`/${citySlug}/players/${slug}/albums/${album.slug}`}
-              coverImage={album.coverImage}
-              year={album.publishedAt ? new Date(album.publishedAt).getFullYear() : null}
-              count={album._count.albumPoems}
-              variant="album"
-            />
-          ))}
-        </Grid>
-      ) : (
-        <Text color="fg.muted" textAlign="center" py={16}>
-          Поэт ещё не опубликовал ни одного альбома
-        </Text>
-      )}
+      {player.albums.length > 0
+        ? (
+          <Grid
+            templateColumns={{
+              base: 'repeat(2, 1fr)',
+              sm: 'repeat(3, 1fr)',
+              md: 'repeat(4, 1fr)',
+              lg: 'repeat(5, 1fr)',
+            }}
+            gap={4}
+          >
+            {player.albums.map((album) => (
+              <AlbumPoster
+                key={album.id}
+                title={album.title}
+                href={`/${citySlug}/players/${slug}/albums/${album.slug}`}
+                coverImage={album.coverImage}
+                year={album.publishedAt ? new Date(album.publishedAt).getFullYear() : null}
+                count={album._count.albumPoems}
+                variant="album"
+              />
+            ))}
+          </Grid>
+        )
+        : (
+          <Text color="fg.muted" textAlign="center" py={16}>
+            Поэт ещё не опубликовал ни одного альбома
+          </Text>
+        )}
     </VStack>
   )
 }

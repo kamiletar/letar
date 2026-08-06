@@ -1,6 +1,6 @@
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Badge, Box, Button, Card, Code, HStack, Heading, Stack, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'

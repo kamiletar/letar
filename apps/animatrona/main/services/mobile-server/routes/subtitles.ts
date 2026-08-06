@@ -22,7 +22,7 @@ const log = createModuleLogger('MobileSubtitles')
 export async function handleSubtitlesRequest(
   _req: IncomingMessage,
   res: ServerResponse,
-  subtitlePath: string
+  subtitlePath: string,
 ): Promise<void> {
   const decodedPath = decodeURIComponent(subtitlePath)
 
@@ -208,7 +208,7 @@ export async function handleIpfsSubtitlesRequest(
   _req: IncomingMessage,
   res: ServerResponse,
   cid: string,
-  format: string
+  format: string,
 ): Promise<void> {
   const gatewayUrl = getIpfsUrl(cid)!
 

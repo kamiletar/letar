@@ -29,6 +29,6 @@ export async function logScanRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

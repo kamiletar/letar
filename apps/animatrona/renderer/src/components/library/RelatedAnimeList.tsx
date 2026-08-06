@@ -80,14 +80,14 @@ export function RelatedAnimeList({ animeId, shikimoriId, relationsCheckedAt, onD
         acc[kind].push(relation)
         return acc
       },
-      {} as Record<string, RelationType[]>
+      {} as Record<string, RelationType[]>,
     )
   }, [relations])
 
   // Мемоизация сортировки групп
   const sortedGroups = useMemo(
     () => RELATION_ORDER.filter((kind) => groupedRelations[kind]?.length > 0),
-    [groupedRelations]
+    [groupedRelations],
   )
 
   const handleSync = async () => {

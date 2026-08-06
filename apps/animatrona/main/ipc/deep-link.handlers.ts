@@ -30,15 +30,16 @@ export function registerDeepLinkHandlers(): void {
   createHandler(
     'deep-link:generateWatchPartyInvite',
     (roomId: string, roomName: string, hostName: string, animeName: string) =>
-      deepLinkService.generateWatchPartyInvite(roomId, roomName, hostName, animeName)
+      deepLinkService.generateWatchPartyInvite(roomId, roomName, hostName, animeName),
   )
 
   // Сгенерировать link для добавления друга
   createHandler('deep-link:generateFriendLink', (friendCode: string) => deepLinkService.generateFriendLink(friendCode))
 
   // Показать уведомление о приглашении
-  createHandler('deep-link:showInviteNotification', (invite: WatchPartyInvite) =>
-    deepLinkService.showInviteNotification(invite)
+  createHandler(
+    'deep-link:showInviteNotification',
+    (invite: WatchPartyInvite) => deepLinkService.showInviteNotification(invite),
   )
 
   // Проверить, поддерживаются ли уведомления

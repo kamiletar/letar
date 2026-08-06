@@ -208,13 +208,11 @@ export function QualityFilterGroup({
                   variant="ghost"
                   size="sm"
                   w="full"
-                  onClick={
-                    onQualityClear ??
-                    (() => {
+                  onClick={onQualityClear
+                    ?? (() => {
                       onResolutionChange('')
                       onBitDepthChange('')
-                    })
-                  }
+                    })}
                 >
                   Сбросить качество
                 </Button>

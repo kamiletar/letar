@@ -41,7 +41,7 @@ import type { RenderFormOptions, RenderFormResult } from './types'
  */
 export function renderForm<TData extends Record<string, unknown> = Record<string, unknown>>(
   Component: ComponentType<Record<string, unknown>>,
-  options?: RenderFormOptions<TData>
+  options?: RenderFormOptions<TData>,
 ): RenderFormResult<TData> {
   // Создаём мок onSubmit если не передан
   const onSubmit = options?.onSubmit ?? createMockFn()
@@ -76,8 +76,8 @@ export function renderForm<TData extends Record<string, unknown> = Record<string
 function createMockFn(): (...args: unknown[]) => void {
   // vitest
   if (typeof globalThis !== 'undefined' && 'vi' in globalThis) {
-    return (globalThis as Record<string, unknown>).vi &&
-      typeof ((globalThis as Record<string, unknown>).vi as Record<string, unknown>).fn === 'function'
+    return (globalThis as Record<string, unknown>).vi
+        && typeof ((globalThis as Record<string, unknown>).vi as Record<string, unknown>).fn === 'function'
       ? ((globalThis as Record<string, unknown>).vi as { fn: () => (...args: unknown[]) => void }).fn()
       : noopMock()
   }

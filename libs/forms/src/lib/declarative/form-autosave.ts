@@ -63,7 +63,7 @@ export interface UseFormAutosaveResult {
 export function useFormAutosave(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any,
-  config: FormAutosaveConfig
+  config: FormAutosaveConfig,
 ): UseFormAutosaveResult {
   const { endpoint, interval = 5000, debounce = 1000, draftId, method = 'POST', headers = {}, onSave, onError } = config
 
@@ -143,7 +143,7 @@ export function useFormAutosave(
         }
       }
     },
-    [endpoint, method, headers, draftId, onSave, onError]
+    [endpoint, method, headers, draftId, onSave, onError],
   )
 
   /** Принудительное сохранение */

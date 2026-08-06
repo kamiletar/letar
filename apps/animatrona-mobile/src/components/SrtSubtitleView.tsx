@@ -43,10 +43,10 @@ function parseSrtTime(timeStr: string): number {
 
   const [, hours, minutes, seconds, ms] = match
   return (
-    Number.parseInt(hours, 10) * 3600000 +
-    Number.parseInt(minutes, 10) * 60000 +
-    Number.parseInt(seconds, 10) * 1000 +
-    Number.parseInt(ms, 10)
+    Number.parseInt(hours, 10) * 3600000
+    + Number.parseInt(minutes, 10) * 60000
+    + Number.parseInt(seconds, 10) * 1000
+    + Number.parseInt(ms, 10)
   )
 }
 

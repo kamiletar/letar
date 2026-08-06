@@ -77,7 +77,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         }
       }
     },
-    [hasResults, results, selectedIndex, router, onOpenChange]
+    [hasResults, results, selectedIndex, router, onOpenChange],
   )
 
   // Сброс индекса при изменении результатов
@@ -100,11 +100,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {/* Поисковая строка */}
             <Box borderBottomWidth="1px" borderBottomColor="border">
               <HStack px={4} gap={3}>
-                {isPending || isLoading ? (
-                  <Spinner size="sm" color="brand.500" />
-                ) : (
-                  <LuSearch color="var(--chakra-colors-fg-muted)" />
-                )}
+                {isPending || isLoading
+                  ? <Spinner size="sm" color="brand.500" />
+                  : <LuSearch color="var(--chakra-colors-fg-muted)" />}
                 <Input
                   ref={inputRef}
                   value={query}
@@ -126,72 +124,78 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
             {/* Результаты */}
             <Box maxH="400px" overflowY="auto" css={scrollbarStyles}>
-              {isLoading ? (
-                <Flex justify="center" align="center" py={8}>
-                  <Spinner size="lg" color="brand.500" />
-                </Flex>
-              ) : isSearching && !hasResults ? (
-                <Flex justify="center" align="center" py={8}>
-                  <Text color="fg.muted">Ничего не найдено</Text>
-                </Flex>
-              ) : hasResults ? (
-                <VStack align="stretch" gap={0} py={2}>
-                  {results.map((result, index) => {
-                    const isSelected = index === selectedIndex
-                    const { item, matches } = result
+              {isLoading
+                ? (
+                  <Flex justify="center" align="center" py={8}>
+                    <Spinner size="lg" color="brand.500" />
+                  </Flex>
+                )
+                : isSearching && !hasResults
+                ? (
+                  <Flex justify="center" align="center" py={8}>
+                    <Text color="fg.muted">Ничего не найдено</Text>
+                  </Flex>
+                )
+                : hasResults
+                ? (
+                  <VStack align="stretch" gap={0} py={2}>
+                    {results.map((result, index) => {
+                      const isSelected = index === selectedIndex
+                      const { item, matches } = result
 
-                    return (
-                      <Link
-                        key={`${item.href}-${item.articleNumber}`}
-                        href={item.href}
-                        onClick={() => onOpenChange(false)}
-                        display="block"
-                        px={4}
-                        py={3}
-                        bg={isSelected ? 'brand.50' : 'transparent'}
-                        borderLeftWidth={isSelected ? '3px' : '0'}
-                        borderLeftColor="brand.500"
-                        transition="all 0.1s ease"
-                        _hover={{ bg: 'bg.subtle', textDecoration: 'none' }}
-                        _dark={{
-                          bg: isSelected ? 'brand.950' : 'transparent',
-                        }}
-                        onMouseEnter={() => setSelectedIndex(index)}
-                      >
-                        <HStack justify="space-between" align="flex-start" mb={1}>
-                          <HStack gap={2}>
-                            <Badge colorPalette="red" size="sm">
-                              Ст. {item.articleNumber}
+                      return (
+                        <Link
+                          key={`${item.href}-${item.articleNumber}`}
+                          href={item.href}
+                          onClick={() => onOpenChange(false)}
+                          display="block"
+                          px={4}
+                          py={3}
+                          bg={isSelected ? 'brand.50' : 'transparent'}
+                          borderLeftWidth={isSelected ? '3px' : '0'}
+                          borderLeftColor="brand.500"
+                          transition="all 0.1s ease"
+                          _hover={{ bg: 'bg.subtle', textDecoration: 'none' }}
+                          _dark={{
+                            bg: isSelected ? 'brand.950' : 'transparent',
+                          }}
+                          onMouseEnter={() => setSelectedIndex(index)}
+                        >
+                          <HStack justify="space-between" align="flex-start" mb={1}>
+                            <HStack gap={2}>
+                              <Badge colorPalette="red" size="sm">
+                                Ст. {item.articleNumber}
+                              </Badge>
+                              <Text fontSize="sm" fontWeight="medium" color="fg.default">
+                                {item.title}
+                              </Text>
+                            </HStack>
+                            <Badge size="sm" variant="subtle" colorPalette="gray">
+                              {item.category}
                             </Badge>
-                            <Text fontSize="sm" fontWeight="medium" color="fg.default">
-                              {item.title}
-                            </Text>
                           </HStack>
-                          <Badge size="sm" variant="subtle" colorPalette="gray">
-                            {item.category}
-                          </Badge>
-                        </HStack>
-                        <Text fontSize="xs" color="fg.muted" lineClamp={2}>
-                          <Highlight text={item.content} matches={matches} fieldKey="content" />
-                        </Text>
-                      </Link>
-                    )
-                  })}
-                </VStack>
-              ) : (
-                <Flex direction="column" align="center" justify="center" py={8} gap={2}>
-                  <Text color="fg.muted" fontSize="sm">
-                    Введите запрос для поиска
-                  </Text>
-                  <HStack gap={2} fontSize="xs" color="fg.muted">
-                    <Kbd>↑</Kbd>
-                    <Kbd>↓</Kbd>
-                    <Text>для навигации</Text>
-                    <Kbd>Enter</Kbd>
-                    <Text>для перехода</Text>
-                  </HStack>
-                </Flex>
-              )}
+                          <Text fontSize="xs" color="fg.muted" lineClamp={2}>
+                            <Highlight text={item.content} matches={matches} fieldKey="content" />
+                          </Text>
+                        </Link>
+                      )
+                    })}
+                  </VStack>
+                )
+                : (
+                  <Flex direction="column" align="center" justify="center" py={8} gap={2}>
+                    <Text color="fg.muted" fontSize="sm">
+                      Введите запрос для поиска
+                    </Text>
+                    <HStack gap={2} fontSize="xs" color="fg.muted">
+                      <Kbd>↑</Kbd>
+                      <Kbd>↓</Kbd>
+                      <Text>для навигации</Text>
+                      <Kbd>Enter</Kbd>
+                      <Text>для перехода</Text>
+                    </HStack>
+                  </Flex>
+                )}
             </Box>
 
             <Dialog.CloseTrigger asChild position="absolute" top={3} right={3}>

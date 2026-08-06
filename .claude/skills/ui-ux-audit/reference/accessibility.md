@@ -193,7 +193,7 @@
 ```tsx
 // Модальные окна должны ловить focus
 import { FocusTrap } from '@chakra-ui/react'
-;<Dialog.Content>
+<Dialog.Content>
   <FocusTrap>
     <Dialog.Header />
     <Dialog.Body>

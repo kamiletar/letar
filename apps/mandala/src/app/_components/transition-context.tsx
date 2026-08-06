@@ -48,7 +48,7 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
         router.push(href)
       })
     },
-    [router]
+    [router],
   )
 
   return <TransitionContext.Provider value={{ navigateWithTransition }}>{children}</TransitionContext.Provider>

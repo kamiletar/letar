@@ -84,10 +84,10 @@ export function calculateItemPrice(product: Product): number {
 
   // Проверить активную распродажу
   if (
-    product.salePrice &&
-    product.saleStart &&
-    product.saleStart <= now &&
-    (!product.saleEnd || product.saleEnd >= now)
+    product.salePrice
+    && product.saleStart
+    && product.saleStart <= now
+    && (!product.saleEnd || product.saleEnd >= now)
   ) {
     return product.salePrice
   }
@@ -98,7 +98,7 @@ export function calculateItemPrice(product: Product): number {
 export async function calculateOrderTotal(
   items: { productId: string; quantity: number }[],
   promoCode?: string,
-  userId?: string
+  userId?: string,
 ): Promise<PriceResult> {
   const db = await getEnhancedPrisma()
 
@@ -165,7 +165,7 @@ export async function validatePromoCode(
   code: string,
   subtotal: number,
   userId: string,
-  items: { productId: string; quantity: number }[]
+  items: { productId: string; quantity: number }[],
 ): Promise<PromoValidation> {
   const db = await getEnhancedPrisma()
   const now = new Date()
@@ -247,7 +247,7 @@ export async function validatePromoCode(
 
 async function calculateApplicableAmount(
   promo: PromoCode,
-  items: { productId: string; quantity: number }[]
+  items: { productId: string; quantity: number }[],
 ): Promise<number> {
   const db = await getEnhancedPrisma()
 

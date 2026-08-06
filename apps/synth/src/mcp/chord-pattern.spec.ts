@@ -38,10 +38,14 @@ describe('generateChordPattern', () => {
 
   it('sus2/sus4: интервалы без терции', () => {
     expect(generateChordPattern({ root: 60, chordType: 'sus2', style: 'block' }).map((n) => n.note)).toEqual([
-      60, 62, 67,
+      60,
+      62,
+      67,
     ])
     expect(generateChordPattern({ root: 60, chordType: 'sus4', style: 'block' }).map((n) => n.note)).toEqual([
-      60, 65, 67,
+      60,
+      65,
+      67,
     ])
   })
 })

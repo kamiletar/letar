@@ -100,7 +100,7 @@ export function SoundscapeSelector({
       }
       return MEDITATION_TRACKS.filter((t) => t.category === category)
     },
-    [customTracks]
+    [customTracks],
   )
 
   /** Определить текущую выбранную категорию */
@@ -138,7 +138,7 @@ export function SoundscapeSelector({
       }
       onClose()
     },
-    [stopPreview, onSelectTrack, onSelectCustomTrack, onClose]
+    [stopPreview, onSelectTrack, onSelectCustomTrack, onClose],
   )
 
   /** Очистка при закрытии */
@@ -175,20 +175,22 @@ export function SoundscapeSelector({
           <Box maxW="800px" mx="auto" p={6} pt={8}>
             {/* Header */}
             <HStack justify="space-between" mb={8}>
-              {selectedCategory ? (
-                <HStack gap={3}>
-                  <IconButton aria-label="Назад" variant="ghost" size="lg" onClick={() => setSelectedCategory(null)}>
-                    <LuChevronLeft />
-                  </IconButton>
+              {selectedCategory
+                ? (
+                  <HStack gap={3}>
+                    <IconButton aria-label="Назад" variant="ghost" size="lg" onClick={() => setSelectedCategory(null)}>
+                      <LuChevronLeft />
+                    </IconButton>
+                    <Heading size="lg" color="white">
+                      {CATEGORIES.find((c) => c.id === selectedCategory)?.name}
+                    </Heading>
+                  </HStack>
+                )
+                : (
                   <Heading size="lg" color="white">
-                    {CATEGORIES.find((c) => c.id === selectedCategory)?.name}
+                    Выберите саундскейп
                   </Heading>
-                </HStack>
-              ) : (
-                <Heading size="lg" color="white">
-                  Выберите саундскейп
-                </Heading>
-              )}
+                )}
 
               <IconButton aria-label="Закрыть" variant="ghost" size="lg" onClick={onClose}>
                 <LuX />
@@ -197,80 +199,82 @@ export function SoundscapeSelector({
 
             {/* Категории или треки */}
             <AnimatePresence mode="wait">
-              {!selectedCategory ? (
-                /* Сетка категорий */
-                <MotionBox
-                  key="categories"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap={4}>
-                    {CATEGORIES.map((category) => (
-                      <CategoryCard
-                        key={category.id}
-                        category={category}
-                        isSelected={
-                          category.id === 'custom'
+              {!selectedCategory
+                ? (
+                  /* Сетка категорий */
+                  <MotionBox
+                    key="categories"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap={4}>
+                      {CATEGORIES.map((category) => (
+                        <CategoryCard
+                          key={category.id}
+                          category={category}
+                          isSelected={category.id === 'custom'
                             ? !!currentCustomTrackId
-                            : !currentCustomTrackId &&
-                              MEDITATION_TRACKS.find((t) => t.id === currentTrackId)?.category === category.id
-                        }
-                        onClick={() => setSelectedCategory(category.id)}
-                        tracksCount={getTracksForCategory(category.id).length}
-                      />
-                    ))}
-                  </Grid>
-                </MotionBox>
-              ) : (
-                /* Список треков категории */
-                <MotionBox
-                  key="tracks"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                >
-                  <VStack align="stretch" gap={2}>
-                    {selectedCategory === 'custom' && customTracks.length === 0 ? (
-                      <Box textAlign="center" py={8}>
-                        <Text color="gray.400" mb={4}>
-                          Нет загруженных треков
-                        </Text>
-                        {onOpenTrackManager && (
-                          <IconButton
-                            aria-label="Загрузить треки"
-                            size="lg"
-                            colorPalette="purple"
-                            onClick={() => {
-                              onClose()
-                              onOpenTrackManager()
-                            }}
-                          >
-                            <LuMusic />
-                          </IconButton>
-                        )}
-                      </Box>
-                    ) : (
-                      getTracksForCategory(selectedCategory).map((track) => {
-                        const isCustom = selectedCategory === 'custom'
-                        const isSelected = isCustom
-                          ? currentCustomTrackId === track.id
-                          : !currentCustomTrackId && currentTrackId === track.id
-
-                        return (
-                          <TrackCard
-                            key={track.id}
-                            name={track.name}
-                            isSelected={isSelected}
-                            onClick={() => handleTrackSelect(track.id, isCustom)}
-                            isPreviewPlaying={previewTrackId === track.id}
-                          />
+                            : !currentCustomTrackId
+                              && MEDITATION_TRACKS.find((t) => t.id === currentTrackId)?.category === category.id}
+                          onClick={() => setSelectedCategory(category.id)}
+                          tracksCount={getTracksForCategory(category.id).length}
+                        />
+                      ))}
+                    </Grid>
+                  </MotionBox>
+                )
+                : (
+                  /* Список треков категории */
+                  <MotionBox
+                    key="tracks"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <VStack align="stretch" gap={2}>
+                      {selectedCategory === 'custom' && customTracks.length === 0
+                        ? (
+                          <Box textAlign="center" py={8}>
+                            <Text color="gray.400" mb={4}>
+                              Нет загруженных треков
+                            </Text>
+                            {onOpenTrackManager && (
+                              <IconButton
+                                aria-label="Загрузить треки"
+                                size="lg"
+                                colorPalette="purple"
+                                onClick={() => {
+                                  onClose()
+                                  onOpenTrackManager()
+                                }}
+                              >
+                                <LuMusic />
+                              </IconButton>
+                            )}
+                          </Box>
                         )
-                      })
-                    )}
-                  </VStack>
-                </MotionBox>
-              )}
+                        : (
+                          getTracksForCategory(selectedCategory).map((track) => {
+                            const isCustom = selectedCategory === 'custom'
+                            const isSelected = isCustom
+                              ? currentCustomTrackId === track.id
+                              : !currentCustomTrackId && currentTrackId === track.id
+
+                            return (
+                              <TrackCard
+                                key={track.id}
+                                name={track.name}
+                                isSelected={isSelected}
+                                onClick={() => handleTrackSelect(track.id, isCustom)}
+                                isPreviewPlaying={previewTrackId === track.id}
+                              />
+                            )
+                          })
+                        )}
+                    </VStack>
+                  </MotionBox>
+                )}
             </AnimatePresence>
           </Box>
         </MotionBox>

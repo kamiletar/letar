@@ -61,37 +61,41 @@ export function ProgressStep({
 
       {/* Список обработанных */}
       <Box maxH="300px" overflowY="auto" borderWidth={1} borderRadius="md">
-        {processedItems.length === 0 ? (
-          <Box p={4} textAlign="center">
-            <Text fontSize="sm" color="fg.muted">
-              Ожидание...
-            </Text>
-          </Box>
-        ) : (
-          <VStack gap={0} align="stretch">
-            {processedItems.map((item, i) => (
-              <HStack key={i} px={3} py={2} borderBottomWidth={1} borderColor="border.subtle">
-                {item.result?.success ? (
-                  <Badge size="sm" colorPalette="green" variant="subtle">
-                    <Icon as={LuCheck} boxSize={3} />
-                  </Badge>
-                ) : (
-                  <Badge size="sm" colorPalette="red" variant="subtle">
-                    <Icon as={LuX} boxSize={3} />
-                  </Badge>
-                )}
-                <Text fontSize="sm" flex={1} truncate>
-                  {item.animeName}
-                </Text>
-                {item.result && !item.result.success && item.result.error && (
-                  <Text fontSize="xs" color="red.fg" truncate maxW="200px" title={item.result.error}>
-                    {item.result.error}
+        {processedItems.length === 0
+          ? (
+            <Box p={4} textAlign="center">
+              <Text fontSize="sm" color="fg.muted">
+                Ожидание...
+              </Text>
+            </Box>
+          )
+          : (
+            <VStack gap={0} align="stretch">
+              {processedItems.map((item, i) => (
+                <HStack key={i} px={3} py={2} borderBottomWidth={1} borderColor="border.subtle">
+                  {item.result?.success
+                    ? (
+                      <Badge size="sm" colorPalette="green" variant="subtle">
+                        <Icon as={LuCheck} boxSize={3} />
+                      </Badge>
+                    )
+                    : (
+                      <Badge size="sm" colorPalette="red" variant="subtle">
+                        <Icon as={LuX} boxSize={3} />
+                      </Badge>
+                    )}
+                  <Text fontSize="sm" flex={1} truncate>
+                    {item.animeName}
                   </Text>
-                )}
-              </HStack>
-            ))}
-          </VStack>
-        )}
+                  {item.result && !item.result.success && item.result.error && (
+                    <Text fontSize="xs" color="red.fg" truncate maxW="200px" title={item.result.error}>
+                      {item.result.error}
+                    </Text>
+                  )}
+                </HStack>
+              ))}
+            </VStack>
+          )}
       </Box>
 
       {/* Кнопка отмены */}

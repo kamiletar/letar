@@ -33,7 +33,7 @@ self.addEventListener('install', (event) => {
       }
 
       console.log('[SW] Прекеширование завершено')
-    })()
+    })(),
   )
 
   self.skipWaiting()
@@ -52,9 +52,9 @@ self.addEventListener('activate', (event) => {
           .map((name) => {
             console.log('[SW] Удаление старого кэша:', name)
             return caches.delete(name)
-          })
+          }),
       )
-    })
+    }),
   )
   self.clients.claim()
 })
@@ -106,7 +106,7 @@ self.addEventListener('fetch', (event) => {
           statusText: 'Service Unavailable',
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         })
-      })
+      }),
   )
 })
 

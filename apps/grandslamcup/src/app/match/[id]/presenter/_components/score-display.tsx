@@ -64,8 +64,8 @@ export function ScoreDisplay({
   const perfData = performances.find((p) => p.id === currentPerf.performanceId)
 
   // Определяем имена судей из последнего vote:complete / score:calculated
-  const textVotes =
-    perfData?.votes.filter((v) => v.dimension === 'TEXT').sort((a, b) => a.judgeNumber - b.judgeNumber) ?? []
+  const textVotes = perfData?.votes.filter((v) => v.dimension === 'TEXT').sort((a, b) => a.judgeNumber - b.judgeNumber)
+    ?? []
   const deliveryVotes =
     perfData?.votes.filter((v) => v.dimension === 'DELIVERY').sort((a, b) => a.judgeNumber - b.judgeNumber) ?? []
 

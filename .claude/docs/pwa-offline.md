@@ -363,9 +363,7 @@ export function ProductList({ categorySlug }: { categorySlug: string }) {
     <div>
       {!isOnline && <OfflineBanner />}
       {isStale && <StaleDataBanner />}
-      {products?.map((product) => (
-        <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-      ))}
+      {products?.map((product) => <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />)}
     </div>
   )
 }
@@ -523,7 +521,7 @@ export function useFeature() {
       return () => listeners.delete(callback)
     },
     () => globalState,
-    () => globalState
+    () => globalState,
   )
 
   useEffect(() => {
@@ -648,22 +646,26 @@ export function SyncStatus() {
       zIndex={9999}
     >
       <HStack gap={2}>
-        {!isOnline ? (
-          <>
-            <Icon as={FaExclamationTriangle} />
-            <Text fontSize="sm">Оффлайн</Text>
-          </>
-        ) : pendingCount > 0 ? (
-          <>
-            <Spinner size="sm" />
-            <Text fontSize="sm">Синхронизация ({pendingCount})...</Text>
-          </>
-        ) : (
-          <>
-            <Icon as={FaCloud} />
-            <Text fontSize="sm">Синхронизировано</Text>
-          </>
-        )}
+        {!isOnline
+          ? (
+            <>
+              <Icon as={FaExclamationTriangle} />
+              <Text fontSize="sm">Оффлайн</Text>
+            </>
+          )
+          : pendingCount > 0
+          ? (
+            <>
+              <Spinner size="sm" />
+              <Text fontSize="sm">Синхронизация ({pendingCount})...</Text>
+            </>
+          )
+          : (
+            <>
+              <Icon as={FaCloud} />
+              <Text fontSize="sm">Синхронизировано</Text>
+            </>
+          )}
       </HStack>
     </Box>
   )
@@ -737,10 +739,12 @@ export function ProductCardWithPrefetch({ product }: { product: Product }) {
       queryKey: ['Product', 'findUnique', { where: { slug: product.slug } }],
       queryFn: () =>
         fetch(
-          `/api/model/product/findUnique?q=${JSON.stringify({
-            where: { slug: product.slug },
-            include: { images: true, sizes: true },
-          })}`
+          `/api/model/product/findUnique?q=${
+            JSON.stringify({
+              where: { slug: product.slug },
+              include: { images: true, sizes: true },
+            })
+          }`,
         ).then((r) => r.json()),
       staleTime: 5 * 60 * 1000,
     })
@@ -774,7 +778,7 @@ self.addEventListener('push', (event) => {
             client.postMessage({ type: 'INVALIDATE_PRODUCTS' })
           })
         }),
-      ])
+      ]),
     )
   }
 })

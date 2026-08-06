@@ -81,7 +81,7 @@ export function useAdminForm<TEntity, TFormInput>({
 
   const persistence = useMemo(
     () => createFormPersistence(entityKey, entity ? getId(entity) : undefined),
-    [entityKey, entity, getId]
+    [entityKey, entity, getId],
   )
 
   const handleSubmit = useCallback(
@@ -97,7 +97,7 @@ export function useAdminForm<TEntity, TFormInput>({
         toaster.success({ title: successMessage })
       }
     },
-    [onSubmit, successMessage]
+    [onSubmit, successMessage],
   )
 
   return {

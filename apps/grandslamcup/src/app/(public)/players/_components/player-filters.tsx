@@ -38,7 +38,7 @@ export function PlayerFilters({ seasons, cities, teams, currentSeason, currentCi
       }
       router.push(`/players?${params.toString()}`)
     },
-    [router, searchParams]
+    [router, searchParams],
   )
 
   return (

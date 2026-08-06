@@ -112,7 +112,7 @@ export function migrateComposeToRollout(yamlText: string, appName: string): Migr
     warnings.push(
       innerPort
         ? `healthcheck отсутствует — добавь вручную (вероятный порт из снятого ports: ${innerPort})`
-        : 'healthcheck отсутствует и порт не удалось определить из ports — добавь вручную'
+        : 'healthcheck отсутствует и порт не удалось определить из ports — добавь вручную',
     )
   }
 

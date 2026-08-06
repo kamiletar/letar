@@ -53,7 +53,7 @@ async function takeScreenshots() {
         // Ищем кнопку fullscreen
         const fullscreenBtn = page
           .locator(
-            'button:has-text("На весь экран"), button[aria-label*="fullscreen"], button[aria-label*="Fullscreen"]'
+            'button:has-text("На весь экран"), button[aria-label*="fullscreen"], button[aria-label*="Fullscreen"]',
           )
           .first()
         if ((await fullscreenBtn.count()) > 0) {

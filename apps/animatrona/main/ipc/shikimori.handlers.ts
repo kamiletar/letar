@@ -32,7 +32,7 @@ export function registerShikimoriHandlers(): void {
   createHandler(
     'shikimori:downloadPoster',
     (posterUrl: string, animeId: string, options?: { fileName?: string; savePath?: string }) =>
-      downloadPoster(posterUrl, animeId, options)
+      downloadPoster(posterUrl, animeId, options),
   )
 
   // Получить аниме со связанными

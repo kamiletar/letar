@@ -217,8 +217,7 @@ import { Button } from '@chakra-ui/react'
 
 ```tsx
 import { Button, Dialog, Portal } from '@chakra-ui/react'
-
-;<Dialog.Root>
+<Dialog.Root>
   <Dialog.Trigger asChild>
     <Button>Открыть</Button>
   </Dialog.Trigger>
@@ -246,10 +245,8 @@ import { Button, Dialog, Portal } from '@chakra-ui/react'
 ### Toaster
 
 ```tsx
-import { Toaster, toaster } from '@/components/ui/toaster'
-
-// В layout
-;<Toaster />
+import { Toaster, toaster } from '@/components/ui/toaster' // В layout
+<Toaster />
 
 // Везде
 toaster.success({ title: 'Сохранено!', description: 'Данные обновлены' })

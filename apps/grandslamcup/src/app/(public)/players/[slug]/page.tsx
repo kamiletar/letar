@@ -82,14 +82,12 @@ export default async function PlayerPage({ params }: { params: Params }) {
   const bestScore = matchesPlayed > 0 ? Math.max(...perfs.map((p) => p.totalScore!)) : 0
 
   // Текст/подача отдельно
-  const avgText =
-    matchesPlayed > 0
-      ? Math.round((perfs.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
-      : 0
-  const avgDelivery =
-    matchesPlayed > 0
-      ? Math.round((perfs.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
-      : 0
+  const avgText = matchesPlayed > 0
+    ? Math.round((perfs.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    : 0
+  const avgDelivery = matchesPlayed > 0
+    ? Math.round((perfs.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    : 0
 
   // Тренд (последние 3 vs предыдущие 3)
   const trend = computeTrend(perfs.map((p) => p.totalScore!))
@@ -349,7 +347,7 @@ function computeSeasonStats(
     deliveryAdjusted: number | null
     teamSeason: { seasonId: string }
     match: { scheduledAt: Date | null }
-  }>
+  }>,
 ) {
   // Нужна информация о сезоне — берём из teamSeason
   const bySeasonId = new Map<string, typeof perfs>()

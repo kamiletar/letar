@@ -17,7 +17,7 @@ import { requireAdminAction } from '@/lib/roles'
  * })
  */
 export function adminGuard<TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>
+  fn: (...args: TArgs) => Promise<TResult>,
 ): (...args: TArgs) => Promise<TResult | { success: false; error: string }> {
   return async (...args: TArgs) => {
     const auth = await requireAdminAction()

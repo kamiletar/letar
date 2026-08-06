@@ -108,32 +108,34 @@ export function AnimeHeroBase({
       >
         {/* Постер */}
         <Box position="relative" flexShrink={0}>
-          {posterUrl ? (
-            <Image
-              src={posterUrl}
-              w={{ base: '140px', md: '160px', lg: '180px' }}
-              borderRadius="lg"
-              shadow="2xl"
-              alt={name}
-              cursor="pointer"
-              onClick={() => setIsLightboxOpen(true)}
-              transition="transform 0.2s, box-shadow 0.2s"
-              _hover={{ transform: 'scale(1.02)', shadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }}
-              title="Нажмите для просмотра в полном размере"
-            />
-          ) : (
-            <Box
-              w={{ base: '140px', md: '160px', lg: '180px' }}
-              aspectRatio={2 / 3}
-              bg="bg.subtle"
-              borderRadius="lg"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
-            </Box>
-          )}
+          {posterUrl
+            ? (
+              <Image
+                src={posterUrl}
+                w={{ base: '140px', md: '160px', lg: '180px' }}
+                borderRadius="lg"
+                shadow="2xl"
+                alt={name}
+                cursor="pointer"
+                onClick={() => setIsLightboxOpen(true)}
+                transition="transform 0.2s, box-shadow 0.2s"
+                _hover={{ transform: 'scale(1.02)', shadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }}
+                title="Нажмите для просмотра в полном размере"
+              />
+            )
+            : (
+              <Box
+                w={{ base: '140px', md: '160px', lg: '180px' }}
+                aspectRatio={2 / 3}
+                bg="bg.subtle"
+                borderRadius="lg"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
+              </Box>
+            )}
 
           {/* Оверлей на постере (progress bar и т.д.) */}
           {posterOverlaySlot}

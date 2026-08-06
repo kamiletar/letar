@@ -157,7 +157,7 @@ npx lighthouse https://localhost:3000 --view
 ```tsx
 // Next.js Image оптимизация
 import Image from 'next/image'
-;<Image src="/hero.jpg" width={800} height={600} loading="lazy" placeholder="blur" blurDataURL={blurHash} />
+<Image src="/hero.jpg" width={800} height={600} loading="lazy" placeholder="blur" blurDataURL={blurHash} />
 ```
 
 ## Чеклист

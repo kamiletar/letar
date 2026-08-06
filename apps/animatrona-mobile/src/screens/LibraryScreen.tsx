@@ -147,7 +147,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
         return
       }
       fetchData(true)
-    }, [fetchData])
+    }, [fetchData]),
   )
 
   // Серверный поиск для Tracker (при изменении debouncedSearch)
@@ -216,7 +216,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
       Haptics.light()
       navigation.navigate('Anime', { animeId })
     },
-    [navigation]
+    [navigation],
   )
 
   const handleFranchisePress = useCallback(
@@ -224,7 +224,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
       Haptics.light()
       navigation.navigate('Franchise', { group: JSON.stringify(group) })
     },
-    [navigation]
+    [navigation],
   )
 
   const handleContinueWatching = useCallback(() => {
@@ -253,7 +253,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
       shadowRadius: 8,
       elevation: 8,
     }),
-    [layout.cardWidth, layout.cardGap]
+    [layout.cardWidth, layout.cardGap],
   )
 
   const renderAnimeItem = useCallback(
@@ -288,7 +288,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
         </TouchableOpacity>
       )
     },
-    [handleAnimePress, cardStyle, isLandscape, posterMap]
+    [handleAnimePress, cardStyle, isLandscape, posterMap],
   )
 
   if (loading && !refreshing) {
@@ -318,144 +318,146 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header — компактный в landscape */}
       <View style={[styles.header, isLandscape && styles.headerLandscape]}>
-        {isLandscape ? (
-          // Landscape: всё в одну строку
-          <View style={styles.headerRowLandscape}>
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => {
-                Haptics.light()
-                navigation.navigate('Settings')
-              }}
-            >
-              <Settings2 size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-            {(downloadedCount > 0 || activeDownloads > 0) && (
+        {isLandscape
+          ? (
+            // Landscape: всё в одну строку
+            <View style={styles.headerRowLandscape}>
               <TouchableOpacity
                 style={styles.settingsButton}
                 onPress={() => {
                   Haptics.light()
-                  navigation.navigate('Downloads')
+                  navigation.navigate('Settings')
                 }}
               >
-                <Download size={20} color="#FFFFFF" />
-                {activeDownloads > 0 && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{activeDownloads}</Text>
-                  </View>
-                )}
+                <Settings2 size={20} color="#FFFFFF" />
               </TouchableOpacity>
-            )}
-            <ServerSwitcher onServerChange={() => fetchData(true)} />
-            <TextInput
-              style={styles.searchInputLandscape}
-              placeholder="Поиск..."
-              placeholderTextColor="#718096"
-              value={search}
-              onChangeText={setSearch}
-            />
-            {/* Фильтры в landscape — горизонтальный скролл */}
-            <FlatList
-              horizontal
-              data={WATCH_STATUS_FILTERS}
-              keyExtractor={(item) => item.value}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.filtersContainerLandscape}
-              renderItem={({ item: filter }) => (
-                <TouchableOpacity
-                  style={[styles.filterChipSmall, statusFilter === filter.value && styles.filterChipActive]}
-                  onPress={() => {
-                    Haptics.light()
-                    setStatusFilter(filter.value)
-                  }}
-                >
-                  <Text
-                    style={[styles.filterChipTextSmall, statusFilter === filter.value && styles.filterChipTextActive]}
-                  >
-                    {filter.label}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        ) : (
-          // Portrait: вертикальный layout
-          <>
-            <View style={styles.headerRow}>
-              <ServerSwitcher onServerChange={() => fetchData(true)} />
-              <View style={styles.headerActions}>
-                {(downloadedCount > 0 || activeDownloads > 0) && (
-                  <TouchableOpacity
-                    style={styles.settingsButton}
-                    onPress={() => {
-                      Haptics.light()
-                      navigation.navigate('Downloads')
-                    }}
-                  >
-                    <Download size={20} color="#FFFFFF" />
-                    {activeDownloads > 0 && (
-                      <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{activeDownloads}</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                )}
-                {/* Toggle: список / франшизы */}
-                <TouchableOpacity
-                  style={[styles.settingsButton, viewMode === 'franchise' && styles.viewModeActive]}
-                  onPress={() => {
-                    Haptics.light()
-                    setViewMode((prev) => (prev === 'list' ? 'franchise' : 'list'))
-                  }}
-                >
-                  <Text style={styles.viewModeIcon}>{viewMode === 'franchise' ? '📦' : '📋'}</Text>
-                </TouchableOpacity>
+              {(downloadedCount > 0 || activeDownloads > 0) && (
                 <TouchableOpacity
                   style={styles.settingsButton}
                   onPress={() => {
                     Haptics.light()
-                    navigation.navigate('Settings')
+                    navigation.navigate('Downloads')
                   }}
                 >
-                  <Settings2 size={20} color="#FFFFFF" />
+                  <Download size={20} color="#FFFFFF" />
+                  {activeDownloads > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{activeDownloads}</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Поиск */}
-            <View style={styles.searchContainer}>
+              )}
+              <ServerSwitcher onServerChange={() => fetchData(true)} />
               <TextInput
-                style={styles.searchInput}
-                placeholder="Поиск аниме..."
+                style={styles.searchInputLandscape}
+                placeholder="Поиск..."
                 placeholderTextColor="#718096"
                 value={search}
                 onChangeText={setSearch}
               />
+              {/* Фильтры в landscape — горизонтальный скролл */}
+              <FlatList
+                horizontal
+                data={WATCH_STATUS_FILTERS}
+                keyExtractor={(item) => item.value}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filtersContainerLandscape}
+                renderItem={({ item: filter }) => (
+                  <TouchableOpacity
+                    style={[styles.filterChipSmall, statusFilter === filter.value && styles.filterChipActive]}
+                    onPress={() => {
+                      Haptics.light()
+                      setStatusFilter(filter.value)
+                    }}
+                  >
+                    <Text
+                      style={[styles.filterChipTextSmall, statusFilter === filter.value && styles.filterChipTextActive]}
+                    >
+                      {filter.label}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
             </View>
+          )
+          : (
+            // Portrait: вертикальный layout
+            <>
+              <View style={styles.headerRow}>
+                <ServerSwitcher onServerChange={() => fetchData(true)} />
+                <View style={styles.headerActions}>
+                  {(downloadedCount > 0 || activeDownloads > 0) && (
+                    <TouchableOpacity
+                      style={styles.settingsButton}
+                      onPress={() => {
+                        Haptics.light()
+                        navigation.navigate('Downloads')
+                      }}
+                    >
+                      <Download size={20} color="#FFFFFF" />
+                      {activeDownloads > 0 && (
+                        <View style={styles.badge}>
+                          <Text style={styles.badgeText}>{activeDownloads}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                  {/* Toggle: список / франшизы */}
+                  <TouchableOpacity
+                    style={[styles.settingsButton, viewMode === 'franchise' && styles.viewModeActive]}
+                    onPress={() => {
+                      Haptics.light()
+                      setViewMode((prev) => (prev === 'list' ? 'franchise' : 'list'))
+                    }}
+                  >
+                    <Text style={styles.viewModeIcon}>{viewMode === 'franchise' ? '📦' : '📋'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.settingsButton}
+                    onPress={() => {
+                      Haptics.light()
+                      navigation.navigate('Settings')
+                    }}
+                  >
+                    <Settings2 size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-            {/* Фильтры */}
-            <FlatList
-              horizontal
-              data={WATCH_STATUS_FILTERS}
-              keyExtractor={(item) => item.value}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.filtersContainer}
-              renderItem={({ item: filter }) => (
-                <TouchableOpacity
-                  style={[styles.filterChip, statusFilter === filter.value && styles.filterChipActive]}
-                  onPress={() => {
-                    Haptics.light()
-                    setStatusFilter(filter.value)
-                  }}
-                >
-                  <Text style={[styles.filterChipText, statusFilter === filter.value && styles.filterChipTextActive]}>
-                    {filter.label}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </>
-        )}
+              {/* Поиск */}
+              <View style={styles.searchContainer}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Поиск аниме..."
+                  placeholderTextColor="#718096"
+                  value={search}
+                  onChangeText={setSearch}
+                />
+              </View>
+
+              {/* Фильтры */}
+              <FlatList
+                horizontal
+                data={WATCH_STATUS_FILTERS}
+                keyExtractor={(item) => item.value}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filtersContainer}
+                renderItem={({ item: filter }) => (
+                  <TouchableOpacity
+                    style={[styles.filterChip, statusFilter === filter.value && styles.filterChipActive]}
+                    onPress={() => {
+                      Haptics.light()
+                      setStatusFilter(filter.value)
+                    }}
+                  >
+                    <Text style={[styles.filterChipText, statusFilter === filter.value && styles.filterChipTextActive]}>
+                      {filter.label}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </>
+          )}
       </View>
 
       {/* Продолжить просмотр */}
@@ -476,69 +478,71 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
       )}
 
       {/* Список — адаптивный грид или франшизы */}
-      {viewMode === 'franchise' ? (
-        <FlatList
-          key={`franchise-${layout.numColumns}`}
-          data={franchiseGroups}
-          keyExtractor={(item) => item.key}
-          numColumns={layout.numColumns}
-          columnWrapperStyle={[styles.row, { gap: layout.cardGap }]}
-          contentContainerStyle={[styles.listContent, { padding: layout.contentPadding }]}
-          renderItem={({ item: group }: { item: FranchiseGroup }) => (
-            <FranchiseCard
-              group={group}
-              posterUrl={getPosterUrlCached(group.items[0].id, posterMap)}
-              onAnimePress={handleAnimePress}
-              onFranchisePress={handleFranchisePress}
-              width={layout.cardWidth}
-            />
-          )}
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          removeClippedSubviews
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => fetchData(true)}
-              colors={['#805AD5']}
-              tintColor="#805AD5"
-              progressBackgroundColor="#1A202C"
-            />
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>{debouncedSearch ? 'Ничего не найдено' : 'Библиотека пуста'}</Text>
-            </View>
-          }
-        />
-      ) : (
-        <FlatList
-          key={`grid-${layout.numColumns}`}
-          data={filteredAnime}
-          keyExtractor={(item) => item.id}
-          numColumns={layout.numColumns}
-          columnWrapperStyle={[styles.row, { gap: layout.cardGap }]}
-          contentContainerStyle={[styles.listContent, { padding: layout.contentPadding }]}
-          renderItem={renderAnimeItem}
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          removeClippedSubviews
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => fetchData(true)}
-              colors={['#805AD5']}
-              tintColor="#805AD5"
-              progressBackgroundColor="#1A202C"
-            />
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>{debouncedSearch ? 'Ничего не найдено' : 'Библиотека пуста'}</Text>
-            </View>
-          }
-        />
-      )}
+      {viewMode === 'franchise'
+        ? (
+          <FlatList
+            key={`franchise-${layout.numColumns}`}
+            data={franchiseGroups}
+            keyExtractor={(item) => item.key}
+            numColumns={layout.numColumns}
+            columnWrapperStyle={[styles.row, { gap: layout.cardGap }]}
+            contentContainerStyle={[styles.listContent, { padding: layout.contentPadding }]}
+            renderItem={({ item: group }: { item: FranchiseGroup }) => (
+              <FranchiseCard
+                group={group}
+                posterUrl={getPosterUrlCached(group.items[0].id, posterMap)}
+                onAnimePress={handleAnimePress}
+                onFranchisePress={handleFranchisePress}
+                width={layout.cardWidth}
+              />
+            )}
+            windowSize={5}
+            maxToRenderPerBatch={10}
+            removeClippedSubviews
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchData(true)}
+                colors={['#805AD5']}
+                tintColor="#805AD5"
+                progressBackgroundColor="#1A202C"
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{debouncedSearch ? 'Ничего не найдено' : 'Библиотека пуста'}</Text>
+              </View>
+            }
+          />
+        )
+        : (
+          <FlatList
+            key={`grid-${layout.numColumns}`}
+            data={filteredAnime}
+            keyExtractor={(item) => item.id}
+            numColumns={layout.numColumns}
+            columnWrapperStyle={[styles.row, { gap: layout.cardGap }]}
+            contentContainerStyle={[styles.listContent, { padding: layout.contentPadding }]}
+            renderItem={renderAnimeItem}
+            windowSize={5}
+            maxToRenderPerBatch={10}
+            removeClippedSubviews
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchData(true)}
+                colors={['#805AD5']}
+                tintColor="#805AD5"
+                progressBackgroundColor="#1A202C"
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{debouncedSearch ? 'Ничего не найдено' : 'Библиотека пуста'}</Text>
+              </View>
+            }
+          />
+        )}
     </SafeAreaView>
   )
 }

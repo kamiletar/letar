@@ -19,39 +19,39 @@ interface ProductFormProps {
 export function ProductForm({ product, onSubmit }: ProductFormProps) {
   // Состояние изображений (управляется отдельно от формы)
   const [productImages, setProductImages] = useState<ProductImageInput[]>(
-    product?.images?.map((img) => ({ imageId: img.imageId, order: img.order })) ?? []
+    product?.images?.map((img) => ({ imageId: img.imageId, order: img.order })) ?? [],
   )
 
   const defaultValues: AdminProductFormInput = useMemo(
     () =>
       product
         ? {
-            slug: product.slug,
-            name: product.name,
-            description: product.description,
-            price: product.price,
-            productImages: product.images?.map((img) => ({ imageId: img.imageId, order: img.order })) ?? [],
-            metaTitle: product.metaTitle || '',
-            metaDescription: product.metaDescription || '',
-            ogImageId: product.ogImageId || '',
-            order: product.order,
-            published: product.published,
-            stock: product.stock,
-          }
+          slug: product.slug,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          productImages: product.images?.map((img) => ({ imageId: img.imageId, order: img.order })) ?? [],
+          metaTitle: product.metaTitle || '',
+          metaDescription: product.metaDescription || '',
+          ogImageId: product.ogImageId || '',
+          order: product.order,
+          published: product.published,
+          stock: product.stock,
+        }
         : {
-            slug: '',
-            name: '',
-            description: '',
-            price: 0,
-            productImages: [],
-            metaTitle: '',
-            metaDescription: '',
-            ogImageId: '',
-            order: 0,
-            published: true,
-            stock: 1,
-          },
-    [product]
+          slug: '',
+          name: '',
+          description: '',
+          price: 0,
+          productImages: [],
+          metaTitle: '',
+          metaDescription: '',
+          ogImageId: '',
+          order: 0,
+          published: true,
+          stock: 1,
+        },
+    [product],
   )
 
   const handleSubmit = async (data: AdminProductFormInput) => {

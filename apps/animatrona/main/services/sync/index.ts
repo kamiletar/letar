@@ -7,7 +7,7 @@
 
 export { generateFriendCode, isValidFriendCodeFormat, normalizeFriendCode, verifyFriendCode } from './friend-code'
 export { FriendRequestsSync, getFriendRequestsSync } from './friend-requests-sync'
-export { PresenceSync, getPresenceSync } from './presence-sync'
-export { UserProfileSync, getUserProfileSync } from './user-profile-sync'
-export { WatchPartySync, getWatchPartySync } from './watch-party-sync'
-export { WatchProgressSync, getWatchProgressSync } from './watch-progress-sync'
+export { getPresenceSync, PresenceSync } from './presence-sync'
+export { getUserProfileSync, UserProfileSync } from './user-profile-sync'
+export { getWatchPartySync, WatchPartySync } from './watch-party-sync'
+export { getWatchProgressSync, WatchProgressSync } from './watch-progress-sync'

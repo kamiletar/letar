@@ -101,7 +101,7 @@ export class ImportService {
     startCidTracking()
 
     const selectedFiles = (entry.files ?? []).filter(
-      (f): f is typeof f & { episodeNumber: number } => f.selected && f.episodeNumber !== null
+      (f): f is typeof f & { episodeNumber: number } => f.selected && f.episodeNumber !== null,
     )
 
     if (selectedFiles.length === 0) {
@@ -115,12 +115,11 @@ export class ImportService {
     const audioMaxConcurrent = importSettings?.audioMaxConcurrent ?? 4
     // Anime4K нагружает GPU Vulkan — ограничиваем до 1 параллельного видео
     const videoMaxConcurrent = importSettings?.anime4kEnabled ? 1 : (importSettings?.videoMaxConcurrent ?? 2)
-    const useCpuFallback =
-      entry.vmafResult?.useCpuFallback ||
-      entry.encodingProfile?.preferCpu ||
-      entry.encodingProfile?.useGpu === false ||
-      entry.globalUseGpu === false ||
-      entry.forceCpu === true
+    const useCpuFallback = entry.vmafResult?.useCpuFallback
+      || entry.encodingProfile?.preferCpu
+      || entry.encodingProfile?.useGpu === false
+      || entry.globalUseGpu === false
+      || entry.forceCpu === true
     const vmafScore = entry.vmafResult?.vmafScore
     const syncOffset = entry.syncOffset ?? 0
     const fileAnalyses = entry.fileAnalyses
@@ -199,16 +198,16 @@ export class ImportService {
       this.emitProgress(4, 'Сканирование субтитров...', 'creating_anime')
       const externalSubsMap = entry.isFileMode
         ? new Map<
-            number,
-            Array<{
-              filePath: string
-              episodeNumber: number | null
-              language: string
-              format: string
-              title?: string
-              matchedFonts?: Array<{ name: string; path: string }>
-            }>
-          >()
+          number,
+          Array<{
+            filePath: string
+            episodeNumber: number | null
+            language: string
+            format: string
+            title?: string
+            matchedFonts?: Array<{ name: string; path: string }>
+          }>
+        >()
         : await this.scanExternalSubs(entry.folderPath, selectedFiles)
 
       // 4.5. Pre-encode: пережимаем исходники в H264 если включено
@@ -247,7 +246,7 @@ export class ImportService {
                 const fileProgress = (i + percent / 100) / selectedFiles.length
                 this.emitProgress(1 + Math.round(fileProgress * 4), label, 'pre-encode')
               },
-              cancelSignal
+              cancelSignal,
             )
             // Подменяем путь на temp — дальше pipeline работает с пережатым файлом
             preEncodeTempFiles.push(result.tempPath)
@@ -260,7 +259,9 @@ export class ImportService {
               cleanupPreEncodeTemp(tempPath)
             }
             throw new Error(
-              `Pre-encode эпизода #${file.episodeNumber} не удался: ${err instanceof Error ? err.message : String(err)}`
+              `Pre-encode эпизода #${file.episodeNumber} не удался: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
             )
           }
         }
@@ -416,7 +417,7 @@ export class ImportService {
           fileAnalyses,
           file.episodeNumber,
           episodeOutputDir,
-          externalSubsMap
+          externalSubsMap,
         )
 
         // Главы
@@ -473,9 +474,8 @@ export class ImportService {
           }
 
           // Размер видеопотока в исходнике (без аудио/сабов) для честного сравнения экономии
-          const sourceStreamSize =
-            demuxResult.video?.size ??
-            (demuxResult.video?.bitrate && demuxResult.video?.duration
+          const sourceStreamSize = demuxResult.video?.size
+            ?? (demuxResult.video?.bitrate && demuxResult.video?.duration
               ? Math.round((demuxResult.video.bitrate * demuxResult.video.duration) / 8)
               : undefined)
 
@@ -534,7 +534,7 @@ export class ImportService {
             log.error('Ошибка обработки файла, пропускаем', { file: file.name, error: errMsg })
             return null
           }
-        })
+        }),
       )
       batchItems.push(...batchResults.filter((item): item is BatchImportItem => item !== null))
 
@@ -558,7 +558,7 @@ export class ImportService {
             })),
             (percent, stage) => {
               this.emitProgress(13 + Math.round(percent * 0.02), `OP/ED: ${stage}`, 'detecting_intros')
-            }
+            },
           )
 
           // Сохраняем результаты как главы
@@ -610,7 +610,7 @@ export class ImportService {
           batchItems,
           postProcessDataMap,
           videoMaxConcurrent,
-          audioMaxConcurrent
+          audioMaxConcurrent,
         )
 
         if (this._isCancelled) {
@@ -850,7 +850,7 @@ export class ImportService {
 
   private async downloadAndSavePoster(
     selectedAnime: ImportQueueEntry['selectedAnime'],
-    folderPath: string
+    folderPath: string,
   ): Promise<string | undefined> {
     try {
       // Проверяем, есть ли постер у аниме с таким же shikimoriId (из предыдущего импорта)
@@ -922,7 +922,7 @@ export class ImportService {
     selectedAnime: ImportQueueEntry['selectedAnime'],
     parsedInfo: ImportQueueEntry['parsedInfo'],
     folderPath: string,
-    posterId?: string
+    posterId?: string,
   ): Promise<string> {
     const animeResult = await db.upsertAnime({
       name: selectedAnime.russian ?? selectedAnime.name,
@@ -944,7 +944,7 @@ export class ImportService {
   private async createSeasonRecord(
     animeId: string,
     selectedAnime: ImportQueueEntry['selectedAnime'],
-    parsedInfo: ImportQueueEntry['parsedInfo']
+    parsedInfo: ImportQueueEntry['parsedInfo'],
   ): Promise<string> {
     const seasonNum = parsedInfo.seasonNumber ?? 1
     const result = await db.upsertSeason({
@@ -958,7 +958,7 @@ export class ImportService {
 
   private async saveGenresIfAvailable(
     animeId: string,
-    selectedAnime: ImportQueueEntry['selectedAnime']
+    selectedAnime: ImportQueueEntry['selectedAnime'],
   ): Promise<void> {
     // selectedAnime может содержать genres из расширенных данных Shikimori
     const extAnime = selectedAnime as { genres?: Array<{ id: number; name: string; russian: string; kind?: string }> }
@@ -974,7 +974,7 @@ export class ImportService {
           name: g.name,
           russian: g.russian,
           kind: g.kind ?? 'genre',
-        }))
+        })),
       )
     } catch (err) {
       log.warn('Не удалось сохранить жанры', { error: String(err) })
@@ -983,12 +983,12 @@ export class ImportService {
 
   private async scanExternalSubs(
     folderPath: string,
-    selectedFiles: Array<{ path: string; episodeNumber: number }>
+    selectedFiles: Array<{ path: string; episodeNumber: number }>,
   ): Promise<Map<number, ExternalSubtitleMatch[]>> {
     try {
       const result = await scanForExternalSubtitles(
         folderPath,
-        selectedFiles.map((f) => ({ path: f.path, episodeNumber: f.episodeNumber }))
+        selectedFiles.map((f) => ({ path: f.path, episodeNumber: f.episodeNumber })),
       )
 
       // scanForExternalSubtitles возвращает { subtitles[] }, группируем в Map по episodeNumber
@@ -1017,7 +1017,7 @@ export class ImportService {
     batchItems: BatchImportItem[],
     postProcessDataMap: Map<string, PostProcessData>,
     videoMaxConcurrent: number,
-    audioMaxConcurrent: number
+    audioMaxConcurrent: number,
   ): Promise<Set<string>> {
     const ptm = ParallelTranscodeManager.getInstance()
     const completedIds = new Set<string>()
@@ -1092,7 +1092,7 @@ export class ImportService {
         _itemId: string,
         episodeId: string,
         _outputPath: string,
-        meta: { ffmpegCommand?: string; transcodeDurationMs?: number; activeGpuWorkers?: number }
+        meta: { ffmpegCommand?: string; transcodeDurationMs?: number; activeGpuWorkers?: number },
       ) => {
         this.videoEncodingMeta.set(episodeId, meta)
       }
@@ -1174,7 +1174,7 @@ export class ImportService {
   }
 
   private async runPostProcess(
-    postProcessDataMap: Map<string, PostProcessData>
+    postProcessDataMap: Map<string, PostProcessData>,
   ): Promise<{ failedEpisodes: Array<{ number: number; error: string }> }> {
     const episodes = Array.from(postProcessDataMap.values())
     const totalEpisodes = episodes.length
@@ -1203,7 +1203,7 @@ export class ImportService {
 
             if (screenshotResult.thumbnails?.length) {
               const thumbnailResults = await Promise.all(
-                screenshotResult.thumbnails.map((p: string) => uploadToIpfs(p))
+                screenshotResult.thumbnails.map((p: string) => uploadToIpfs(p)),
               )
               const validThumbnailCids = thumbnailResults
                 .filter((r): r is NonNullable<typeof r> => r !== null)
@@ -1221,7 +1221,7 @@ export class ImportService {
 
               if (screenshotResult.fullSize?.length) {
                 const screenshotResults = await Promise.all(
-                  screenshotResult.fullSize.map((p: string) => uploadToIpfs(p))
+                  screenshotResult.fullSize.map((p: string) => uploadToIpfs(p)),
                 )
                 const validScreenshotCids = screenshotResults
                   .filter((r): r is NonNullable<typeof r> => r !== null)
@@ -1305,9 +1305,8 @@ export class ImportService {
         if (data.videoOptions) {
           try {
             const encodingMeta = this.videoEncodingMeta.get(data.episodeId)
-            const sourceSizeNum =
-              data.demuxResult.video?.size ??
-              (data.demuxResult.video?.bitrate && data.demuxResult.video?.duration
+            const sourceSizeNum = data.demuxResult.video?.size
+              ?? (data.demuxResult.video?.bitrate && data.demuxResult.video?.duration
                 ? Math.round((data.demuxResult.video.bitrate * data.demuxResult.video.duration) / 8)
                 : undefined)
             let transcodedSizeNum: number | undefined
@@ -1351,7 +1350,7 @@ export class ImportService {
         this.emitProgress(
           93 + (i / totalEpisodes) * 4,
           `${epLabel}: загрузка видео в IPFS...`,
-          'postprocess_ipfs_video'
+          'postprocess_ipfs_video',
         )
         const videoUploadResult = await uploadToIpfs(data.videoOutputPath)
         const transcodedCid = videoUploadResult?.cid
@@ -1544,7 +1543,7 @@ export class ImportService {
 
       await db.syncAnimeRelations(
         animeId,
-        relatedAnimes.map((r) => ({ targetShikimoriId: r.shikimoriId, relationKind: r.relationKind }))
+        relatedAnimes.map((r) => ({ targetShikimoriId: r.shikimoriId, relationKind: r.relationKind })),
       )
 
       // Франшиза
@@ -1565,7 +1564,7 @@ export class ImportService {
     try {
       const episodes = await db.findManyEpisodes(animeId)
       const episodesWithManifest = episodes.filter(
-        (ep): ep is typeof ep & { manifestCid: string } => ep.manifestCid !== null
+        (ep): ep is typeof ep & { manifestCid: string } => ep.manifestCid !== null,
       )
 
       if (episodesWithManifest.length < 2) {

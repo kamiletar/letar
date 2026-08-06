@@ -115,14 +115,16 @@ export async function POST() {
   let usersUpdated = 0
   for (const uploader of uploaders) {
     const userId = uploader.uploadedById
-    const animeAgg = uploaderAnimeMap.get(userId) as
-      { totalViewers: number; totalLibraryAdds: number; ratings: number[] } | undefined
+    const animeAgg = uploaderAnimeMap.get(userId) as {
+      totalViewers: number
+      totalLibraryAdds: number
+      ratings: number[]
+    } | undefined
     const distStats = distStatsMap.get(userId)
 
-    const avgUserRating =
-      animeAgg && animeAgg.ratings.length > 0
-        ? animeAgg.ratings.reduce((sum, r) => sum + r, 0) / animeAgg.ratings.length
-        : null
+    const avgUserRating = animeAgg && animeAgg.ratings.length > 0
+      ? animeAgg.ratings.reduce((sum, r) => sum + r, 0) / animeAgg.ratings.length
+      : null
 
     const score = calculateUploaderScore({
       publishedAnimeCount: uploader._count.id,

@@ -41,12 +41,11 @@ export function useMelodicPerformance({
   engineTypeRef.current = engineType
 
   // Арпеджиатор активен только для текущего движка (SUB/FM)
-  const currentArp =
-    engineType === 'fm'
-      ? (fmPatch.engine.arpeggiator ?? DEFAULT_ARP)
-      : engineType === 'subtractive'
-        ? (patch.engine.arpeggiator ?? DEFAULT_ARP)
-        : DEFAULT_ARP
+  const currentArp = engineType === 'fm'
+    ? (fmPatch.engine.arpeggiator ?? DEFAULT_ARP)
+    : engineType === 'subtractive'
+    ? (patch.engine.arpeggiator ?? DEFAULT_ARP)
+    : DEFAULT_ARP
   const arpeggiator = useArpeggiator({ params: currentArp, noteOn: soundNoteOn, noteOff: soundNoteOff })
   const arpEnabledRef = useRef(currentArp.enabled)
   arpEnabledRef.current = currentArp.enabled
@@ -62,7 +61,7 @@ export function useMelodicPerformance({
         setPatch((p) => ({ ...p, engine: { ...p.engine, arpeggiator: updater(p.engine.arpeggiator ?? DEFAULT_ARP) } }))
       }
     },
-    [setPatch, setFmPatch]
+    [setPatch, setFmPatch],
   )
 
   const handleToggleArp = useCallback(() => {
@@ -84,7 +83,7 @@ export function useMelodicPerformance({
         engine: { ...p.engine, sequence: updater(p.engine.sequence ?? emptyMelodicSequence()) },
       }))
     },
-    [setPatch]
+    [setPatch],
   )
 
   const setFmSequence = useCallback(
@@ -94,7 +93,7 @@ export function useMelodicPerformance({
         engine: { ...p.engine, sequence: updater(p.engine.sequence ?? emptyMelodicSequence()) },
       }))
     },
-    [setFmPatch]
+    [setFmPatch],
   )
 
   const subPianoRoll = usePianoRoll({

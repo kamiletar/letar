@@ -93,9 +93,9 @@ test.describe('Theme Persistence', () => {
     // Способ 3: localStorage
     const storedTheme = await ctx.page.evaluate(() => {
       return (
-        localStorage.getItem('chakra-ui-color-mode') ||
-        localStorage.getItem('theme') ||
-        localStorage.getItem('colorMode')
+        localStorage.getItem('chakra-ui-color-mode')
+        || localStorage.getItem('theme')
+        || localStorage.getItem('colorMode')
       )
     })
     return storedTheme
@@ -107,7 +107,7 @@ test.describe('Theme Persistence', () => {
   async function setTheme(theme: 'dark' | 'light' | 'system'): Promise<boolean> {
     // Ищем опцию темы
     const themeOption = ctx.page.getByText(
-      new RegExp(theme === 'dark' ? 'тёмная|dark' : theme === 'light' ? 'светлая|light' : 'системная|system', 'i')
+      new RegExp(theme === 'dark' ? 'тёмная|dark' : theme === 'light' ? 'светлая|light' : 'системная|system', 'i'),
     )
 
     const isVisible = await themeOption
@@ -249,10 +249,10 @@ test.describe('Theme Persistence', () => {
     const storedTheme = await ctx.page.evaluate(() => {
       // Chakra UI v3 может использовать разные ключи
       return (
-        localStorage.getItem('chakra-ui-color-mode') ||
-        localStorage.getItem('theme') ||
-        localStorage.getItem('animatrona:theme') ||
-        localStorage.getItem('colorMode')
+        localStorage.getItem('chakra-ui-color-mode')
+        || localStorage.getItem('theme')
+        || localStorage.getItem('animatrona:theme')
+        || localStorage.getItem('colorMode')
       )
     })
 
@@ -312,9 +312,9 @@ test.describe('Theme Persistence - Edge Cases', () => {
     // Проверяем что тема установлена как system
     const storedTheme = await ctx.page.evaluate(() => {
       return (
-        localStorage.getItem('chakra-ui-color-mode') ||
-        localStorage.getItem('theme') ||
-        localStorage.getItem('colorMode')
+        localStorage.getItem('chakra-ui-color-mode')
+        || localStorage.getItem('theme')
+        || localStorage.getItem('colorMode')
       )
     })
 

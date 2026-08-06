@@ -37,7 +37,7 @@ import { useDeclarativeField } from './base-field'
  */
 export function useResolvedFieldProps(
   name: string | undefined,
-  props: BaseFieldProps
+  props: BaseFieldProps,
 ): {
   form: ReturnType<typeof useDeclarativeField>['form']
   fullPath: string

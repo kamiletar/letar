@@ -64,13 +64,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${SITE_URL}/shop/${slug}`,
       images: ogImageUrl
         ? [
-            {
-              url: ogImageUrl,
-              width: 1200,
-              height: 630,
-              alt: product.name,
-            },
-          ]
+          {
+            url: ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: product.name,
+          },
+        ]
         : [],
     },
   }
@@ -163,15 +163,17 @@ export default async function ProductPage({ params }: Props) {
           {/* Информация о товаре */}
           <Box>
             <Flex gap={3} mb={4}>
-              {product.inStock ? (
-                <Badge colorPalette="green" size="lg" bg="green.700" color="white">
-                  {t('inStock')}
-                </Badge>
-              ) : (
-                <Badge colorPalette="red" size="lg" bg="red.600" color="white">
-                  {t('outOfStock')}
-                </Badge>
-              )}
+              {product.inStock
+                ? (
+                  <Badge colorPalette="green" size="lg" bg="green.700" color="white">
+                    {t('inStock')}
+                  </Badge>
+                )
+                : (
+                  <Badge colorPalette="red" size="lg" bg="red.600" color="white">
+                    {t('outOfStock')}
+                  </Badge>
+                )}
             </Flex>
 
             <Heading as="h1" size="2xl" color="fg" mb={4}>

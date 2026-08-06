@@ -50,17 +50,16 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
 
   const hasProgress = progress && (progress.watchedEpisodes > 0 || progress.lastEpisode !== null)
   const totalEpisodes = anime._count.episodes
-  const overallProgress =
-    hasProgress && totalEpisodes > 0
-      ? Math.min(
-          Math.round(
-            ((progress.watchedEpisodes + (progress.lastEpisodeProgress > 0 ? progress.lastEpisodeProgress / 100 : 0)) /
-              totalEpisodes) *
-              100
-          ),
-          100
-        )
-      : 0
+  const overallProgress = hasProgress && totalEpisodes > 0
+    ? Math.min(
+      Math.round(
+        ((progress.watchedEpisodes + (progress.lastEpisodeProgress > 0 ? progress.lastEpisodeProgress / 100 : 0))
+          / totalEpisodes)
+          * 100,
+      ),
+      100,
+    )
+    : 0
 
   return (
     <NextLink href={href}>
@@ -88,14 +87,16 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
               alignItems="center"
               gap={1}
             >
-              {progress.watchedEpisodes === totalEpisodes ? (
-                <>
-                  <Icon as={LuCheck} boxSize={3} />
-                  Просмотрено
-                </>
-              ) : (
-                `${progress.watchedEpisodes}/${totalEpisodes} эп.`
-              )}
+              {progress.watchedEpisodes === totalEpisodes
+                ? (
+                  <>
+                    <Icon as={LuCheck} boxSize={3} />
+                    Просмотрено
+                  </>
+                )
+                : (
+                  `${progress.watchedEpisodes}/${totalEpisodes} эп.`
+                )}
             </Badge>
           )}
 

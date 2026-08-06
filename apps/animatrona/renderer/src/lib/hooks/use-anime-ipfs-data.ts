@@ -209,7 +209,7 @@ async function loadAnimeIpfsData(directoryCid: string): Promise<{
       manifestEntries.map(async ([number, cid]) => {
         const manifest = await fetchIpfsJson<EpisodeManifest>(cid)
         return { number, manifest }
-      })
+      }),
     )
 
     for (const { number, manifest } of loadedManifests) {

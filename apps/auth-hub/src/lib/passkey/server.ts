@@ -78,7 +78,7 @@ export async function generatePasskeyRegistrationOptions(userId: string, userNam
 export async function verifyPasskeyRegistration(
   userId: string,
   response: RegistrationResponseJSON,
-  deviceName?: string
+  deviceName?: string,
 ) {
   const expectedChallenge = getChallenge(`reg:${userId}`)
   if (!expectedChallenge) {
@@ -119,7 +119,7 @@ export async function verifyPasskeyRegistration(
 // ========================================
 
 export async function generatePasskeyAuthenticationOptions(
-  existingPasskeys: Array<{ id: string; transports: string | null }>
+  existingPasskeys: Array<{ id: string; transports: string | null }>,
 ) {
   const allowCredentials: PublicKeyCredentialDescriptorJSON[] = existingPasskeys.map((pk) => ({
     id: pk.id,
@@ -145,12 +145,11 @@ export async function verifyPasskeyAuthentication(
     publicKey: Buffer
     counter: bigint
     transports: string | null
-  }
+  },
 ) {
-  const expectedChallenge =
-    getChallenge(`auth:${response.response.clientDataJSON}`) ??
+  const expectedChallenge = getChallenge(`auth:${response.response.clientDataJSON}`)
     // Декодируем clientDataJSON для получения challenge
-    (() => {
+    ?? (() => {
       try {
         const decoded = JSON.parse(Buffer.from(response.response.clientDataJSON, 'base64url').toString())
         return getChallenge(`auth:${decoded.challenge}`)

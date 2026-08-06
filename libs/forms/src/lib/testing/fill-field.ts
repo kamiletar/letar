@@ -58,7 +58,7 @@ export async function fillField(name: string, value: unknown): Promise<void> {
   }
 
   throw new Error(
-    `fillField: не удалось определить тип поля "${name}" (tag: ${tagName}, type: ${inputType}). Используйте userEvent напрямую.`
+    `fillField: не удалось определить тип поля "${name}" (tag: ${tagName}, type: ${inputType}). Используйте userEvent напрямую.`,
   )
 }
 

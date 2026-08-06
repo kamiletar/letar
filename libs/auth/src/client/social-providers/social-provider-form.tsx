@@ -8,9 +8,9 @@ import { useState, useTransition } from 'react'
 import type { SocialProviderActionResult, SocialProviderInput } from '../../types'
 
 const DEFAULT_ALERT_DESCRIPTION =
-  'Это ваше собственное OAuth-приложение — вы несёте риск бана, домен письма верификации остаётся ' +
-  'вашим. Client Secret шифруется перед сохранением (AES-256-GCM) и после сохранения не показывается — ' +
-  'только последние 4 символа.'
+  'Это ваше собственное OAuth-приложение — вы несёте риск бана, домен письма верификации остаётся '
+  + 'вашим. Client Secret шифруется перед сохранением (AES-256-GCM) и после сохранения не показывается — '
+  + 'только последние 4 символа.'
 
 export interface SocialProviderFormProps {
   /** Есть при редактировании, отсутствует при создании */

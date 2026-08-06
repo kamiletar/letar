@@ -25,7 +25,7 @@ export interface DeployEngineExecutor {
   runCommand(
     command: string,
     args: string[],
-    opts?: { cwd?: string; env?: Record<string, string> }
+    opts?: { cwd?: string; env?: Record<string, string> },
   ): Promise<CommandResult>
   /** Читает файл относительно корня репозитория; `null`, если файла нет. */
   readFile(path: string): Promise<string | null>
@@ -57,7 +57,7 @@ export function createNodeExecutor(rootDir?: string): DeployEngineExecutor {
           (error, stdout, stderr) => {
             const exitCode = error ? (typeof error.code === 'number' ? error.code : 1) : 0
             resolvePromise({ stdout: stdout.toString(), stderr: stderr.toString(), exitCode })
-          }
+          },
         )
       })
     },

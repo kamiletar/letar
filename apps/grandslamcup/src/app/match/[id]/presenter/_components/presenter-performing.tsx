@@ -19,8 +19,8 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
-  HStack,
   Heading,
+  HStack,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -77,9 +77,9 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
     // Если SSE ещё не пришёл (startedAt null), пробуем восстановить из sessionStorage
     const fallbackStartedAt = !timer.startedAt
       ? (() => {
-          const saved = sessionStorage.getItem(sessionKey)
-          return saved ? Number(saved) : null
-        })()
+        const saved = sessionStorage.getItem(sessionKey)
+        return saved ? Number(saved) : null
+      })()
       : null
 
     const effectiveStartedAt = timer.startedAt ?? fallbackStartedAt
@@ -179,7 +179,7 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
         setError('Не удалось завершить выступление')
       }
     },
-    [match.id]
+    [match.id],
   )
 
   const handleEndClick = useCallback(() => {
@@ -220,31 +220,33 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
 
       {/* Кнопки управления */}
       <HStack gap={2} w="full">
-        {timer.isRunning ? (
-          <Button
-            onClick={handleStop}
-            disabled={isPending}
-            colorPalette="red"
-            size="xl"
-            flex={1}
-            fontWeight="bold"
-            py={7}
-          >
-            ⏹ Стоп
-          </Button>
-        ) : (
-          <Button
-            onClick={handleStart}
-            disabled={isPending}
-            colorPalette="green"
-            size="xl"
-            flex={1}
-            fontWeight="bold"
-            py={7}
-          >
-            ▶ Продолжить
-          </Button>
-        )}
+        {timer.isRunning
+          ? (
+            <Button
+              onClick={handleStop}
+              disabled={isPending}
+              colorPalette="red"
+              size="xl"
+              flex={1}
+              fontWeight="bold"
+              py={7}
+            >
+              ⏹ Стоп
+            </Button>
+          )
+          : (
+            <Button
+              onClick={handleStart}
+              disabled={isPending}
+              colorPalette="green"
+              size="xl"
+              flex={1}
+              fontWeight="bold"
+              py={7}
+            >
+              ▶ Продолжить
+            </Button>
+          )}
         <Button
           onClick={() => setShowResetDialog(true)}
           disabled={isPending}

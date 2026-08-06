@@ -13,7 +13,7 @@ import { jsonStoreLogger, logger } from '../utils/logger-helper'
 const historyStorage = createJsonStore<HistoryData>(
   STORAGE_FILES.history,
   { jobs: [] },
-  { dir: devDataDir(), logger: jsonStoreLogger }
+  { dir: devDataDir(), logger: jsonStoreLogger },
 )
 
 /**
@@ -26,7 +26,7 @@ export function registerDatabaseHandlers(): void {
       const data = await historyStorage.load()
       // Сортируем по дате (новые первые) и применяем пагинацию
       const sorted = data.jobs.sort(
-        (a, b) => new Date(b.firstScannedAt).getTime() - new Date(a.firstScannedAt).getTime()
+        (a, b) => new Date(b.firstScannedAt).getTime() - new Date(a.firstScannedAt).getTime(),
       )
       return sorted.slice(offset, offset + limit)
     } catch (error) {
@@ -155,7 +155,7 @@ export function registerDatabaseHandlers(): void {
           daysCount: 0,
         }
       }
-    }
+    },
   )
 
   // Добавить задание в историю (вызывается из print handlers)

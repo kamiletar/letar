@@ -92,31 +92,35 @@ export default async function ContentPagesListPage({ searchParams }: ContentPage
         </Suspense>
       </HStack>
 
-      {pages.length === 0 ? (
-        hasFilters ? (
-          <Box py={8} textAlign="center">
-            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-          </Box>
-        ) : (
-          <EmptyState
-            icon={LuFileText}
-            title="Нет страниц"
-            description="Создайте первую страницу контента"
-            action={{ label: 'Создать страницу', href: '/admin/content-pages/new' }}
-          />
+      {pages.length === 0
+        ? (
+          hasFilters
+            ? (
+              <Box py={8} textAlign="center">
+                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+              </Box>
+            )
+            : (
+              <EmptyState
+                icon={LuFileText}
+                title="Нет страниц"
+                description="Создайте первую страницу контента"
+                action={{ label: 'Создать страницу', href: '/admin/content-pages/new' }}
+              />
+            )
         )
-      ) : (
-        <>
-          <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
-            <ContentPagesTable pages={pages} />
-          </Suspense>
+        : (
+          <>
+            <Suspense fallback={<TableSkeleton rows={PAGE_SIZE} columns={6} />}>
+              <ContentPagesTable pages={pages} />
+            </Suspense>
 
-          {/* Пагинация */}
-          <Suspense fallback={<Box h="48px" />}>
-            <Pagination total={total} pageSize={PAGE_SIZE} />
-          </Suspense>
-        </>
-      )}
+            {/* Пагинация */}
+            <Suspense fallback={<Box h="48px" />}>
+              <Pagination total={total} pageSize={PAGE_SIZE} />
+            </Suspense>
+          </>
+        )}
     </Stack>
   )
 }

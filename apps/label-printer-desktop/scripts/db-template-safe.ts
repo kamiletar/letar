@@ -82,7 +82,7 @@ async function main() {
     await runCommand(
       'npx',
       ['prisma', 'db', 'push', '--schema', 'src/generated/schema.prisma', '--accept-data-loss', '--skip-generate'],
-      env
+      env,
     )
 
     // 5. Добавляем таблицу _prisma_migrations с записью обо всех миграциях

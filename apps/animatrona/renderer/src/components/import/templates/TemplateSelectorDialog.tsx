@@ -107,18 +107,20 @@ function TemplateCard({
 
         <HStack gap={4} flexWrap="wrap">
           {/* VMAF статус */}
-          {template.vmafSettings.enabled ? (
-            <HStack gap={1}>
-              <Icon as={LuTarget} color="yellow.400" boxSize={3} />
-              <Text fontSize="xs" color="fg.subtle">
-                VMAF {template.vmafSettings.targetVmaf}
+          {template.vmafSettings.enabled
+            ? (
+              <HStack gap={1}>
+                <Icon as={LuTarget} color="yellow.400" boxSize={3} />
+                <Text fontSize="xs" color="fg.subtle">
+                  VMAF {template.vmafSettings.targetVmaf}
+                </Text>
+              </HStack>
+            )
+            : (
+              <Text fontSize="xs" color="fg.muted">
+                Без VMAF
               </Text>
-            </HStack>
-          ) : (
-            <Text fontSize="xs" color="fg.muted">
-              Без VMAF
-            </Text>
-          )}
+            )}
 
           {/* Параллельность */}
           <HStack gap={1}>
@@ -175,31 +177,35 @@ export function TemplateSelectorDialog({ open, onClose, onSelect }: TemplateSele
           </Dialog.Header>
 
           <Dialog.Body py={4} overflowY="auto">
-            {isLoading ? (
-              <VStack py={8}>
-                <Spinner size="lg" color="purple.400" />
-                <Text color="fg.subtle">Загрузка шаблонов...</Text>
-              </VStack>
-            ) : templates.length === 0 ? (
-              <VStack py={8} gap={2}>
-                <Icon as={LuBookmark} boxSize={12} color="fg.muted" />
-                <Text color="fg.subtle">Нет сохранённых шаблонов</Text>
-                <Text fontSize="sm" color="fg.muted">
-                  Создайте шаблон, чтобы быстро применять настройки
-                </Text>
-              </VStack>
-            ) : (
-              <VStack gap={2} align="stretch">
-                {templates.map((template) => (
-                  <TemplateCard
-                    key={template.id}
-                    template={template}
-                    onSelect={() => handleSelect(template)}
-                    onDelete={() => handleDelete(template.id)}
-                  />
-                ))}
-              </VStack>
-            )}
+            {isLoading
+              ? (
+                <VStack py={8}>
+                  <Spinner size="lg" color="purple.400" />
+                  <Text color="fg.subtle">Загрузка шаблонов...</Text>
+                </VStack>
+              )
+              : templates.length === 0
+              ? (
+                <VStack py={8} gap={2}>
+                  <Icon as={LuBookmark} boxSize={12} color="fg.muted" />
+                  <Text color="fg.subtle">Нет сохранённых шаблонов</Text>
+                  <Text fontSize="sm" color="fg.muted">
+                    Создайте шаблон, чтобы быстро применять настройки
+                  </Text>
+                </VStack>
+              )
+              : (
+                <VStack gap={2} align="stretch">
+                  {templates.map((template) => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      onSelect={() => handleSelect(template)}
+                      onDelete={() => handleDelete(template.id)}
+                    />
+                  ))}
+                </VStack>
+              )}
           </Dialog.Body>
 
           <Dialog.Footer borderTopWidth="1px" borderColor="border.subtle">

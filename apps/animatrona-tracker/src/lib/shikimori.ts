@@ -133,7 +133,7 @@ export async function getShikimoriUserRates(accessToken: string): Promise<Shikim
   const user = await getShikimoriUser(accessToken)
   const rates = await fetchShikimoriApi<ShikimoriUserRate[]>(
     `/api/v2/user_rates?user_id=${user.id}&target_type=Anime&limit=5000`,
-    accessToken
+    accessToken,
   )
   return rates
 }

@@ -138,7 +138,7 @@ export function useLockScreen(): UseLockScreenResult {
         startIconTimer()
       }
     },
-    [clearProgressInterval, isLocked, startIconTimer]
+    [clearProgressInterval, isLocked, startIconTimer],
   )
 
   /** Long press для разблокировки */

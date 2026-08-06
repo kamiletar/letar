@@ -16,15 +16,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
       bg="bg.card"
       backdropFilter="blur(10px)"
       transition="all 0.2s"
-      _hover={
-        project.url
-          ? {
-              borderColor: 'brand.500',
-              transform: 'translateY(-2px)',
-              shadow: '0 4px 20px rgba(49, 151, 149, 0.15)',
-            }
-          : undefined
-      }
+      _hover={project.url
+        ? {
+          borderColor: 'brand.500',
+          transform: 'translateY(-2px)',
+          shadow: '0 4px 20px rgba(49, 151, 149, 0.15)',
+        }
+        : undefined}
       height="full"
     >
       <Flex direction="column" gap={3} height="full">

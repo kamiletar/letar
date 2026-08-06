@@ -15,7 +15,7 @@ test.describe('Validation Form', () => {
       page
         .locator('[data-scope="field"]')
         .filter({ has: page.locator('[data-part="error-text"]') })
-        .first()
+        .first(),
     ).toBeVisible()
   })
 })

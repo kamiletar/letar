@@ -50,7 +50,7 @@ const ACTION_BAR_HEIGHT_VAR = '--letar-sticky-actionbar-height'
  */
 export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(function StickyActionBar(
   { children, contentProps, ...rest },
-  ref
+  ref,
 ) {
   // Публикует свою высоту, чтобы контент выше мог зарезервировать под неё отступ и не
   // оказаться в её визуально перекрытой зоне при полной прокрутке (см. JSDoc переменной

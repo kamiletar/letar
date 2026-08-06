@@ -53,8 +53,8 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
     // между релизами в отличие от текста message — см. bun cache better-auth/dist/api/routes/sign-in.mjs.
     const apiBody = (error as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
     const apiCode = (apiBody?.code as string | undefined) ?? ''
-    const message =
-      (apiBody?.message as string | undefined) || (error instanceof Error ? error.message : '') || 'Неизвестная ошибка'
+    const message = (apiBody?.message as string | undefined) || (error instanceof Error ? error.message : '')
+      || 'Неизвестная ошибка'
 
     console.error('[auth-hub] signIn error full:', { message, apiCode, error })
 
@@ -119,8 +119,8 @@ async function trySignUp(data: LoginInput, reqHeaders: Headers, redirectTo: stri
   } catch (signUpError) {
     const signUpBody = (signUpError as Record<string, unknown> | null)?.body as Record<string, unknown> | undefined
     const signUpCode = (signUpBody?.code as string | undefined) ?? ''
-    const msg =
-      (signUpBody?.message as string | undefined) || (signUpError instanceof Error ? signUpError.message : '') || ''
+    const msg = (signUpBody?.message as string | undefined) || (signUpError instanceof Error ? signUpError.message : '')
+      || ''
 
     // Аккаунт существует, но пароль неверный — коды из better-auth/dist/api/routes/sign-up.mjs
     if (signUpCode === 'USER_ALREADY_EXISTS' || signUpCode === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {

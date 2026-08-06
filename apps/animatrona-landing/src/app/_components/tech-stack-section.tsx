@@ -146,9 +146,7 @@ export function TechStackSection() {
             whileInView="visible"
             viewport={{ once: true, margin: '-50px' }}
           >
-            {TECH_STACK.map((tech) => (
-              <TechCard key={tech.name} tech={tech} />
-            ))}
+            {TECH_STACK.map((tech) => <TechCard key={tech.name} tech={tech} />)}
           </MotionSimpleGrid>
 
           {/* Дополнительные технологии */}

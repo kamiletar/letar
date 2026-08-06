@@ -89,7 +89,7 @@ const QUADRANTS: Record<ArmorRadarQuadrant, Omit<ArmorRadarIndex, 'physical' | '
 export function computeArmorRadar(
   physical: number,
   affective: number,
-  threshold: number = ARMOR_RADAR_THRESHOLD
+  threshold: number = ARMOR_RADAR_THRESHOLD,
 ): ArmorRadarIndex {
   const armorHigh = physical >= threshold
   const radarHigh = affective >= threshold

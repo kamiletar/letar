@@ -18,10 +18,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('title'),
-    description:
-      locale === 'ru'
-        ? `Узнайте больше о Ками — архитекторе ПО с ${new Date().getFullYear() - 2002}+ годами опыта`
-        : `Learn more about Kami — a software architect with ${new Date().getFullYear() - 2002}+ years of experience`,
+    description: locale === 'ru'
+      ? `Узнайте больше о Ками — архитекторе ПО с ${new Date().getFullYear() - 2002}+ годами опыта`
+      : `Learn more about Kami — a software architect with ${new Date().getFullYear() - 2002}+ years of experience`,
     alternates: {
       canonical: `/${locale}/about`,
       languages: { ru: '/ru/about', en: '/en/about' },

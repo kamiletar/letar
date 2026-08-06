@@ -45,10 +45,10 @@ export { createEmailProvider, getConfigFromEnv, isMailhogEnabled, resetTransport
 
 // === Репорт провалов отправки (централизованный лог + опциональный алертер) ===
 export {
-  reportEmailFailure,
-  setEmailFailureAlerter,
   type EmailFailureAlerter,
   type EmailFailureInfo,
+  reportEmailFailure,
+  setEmailFailureAlerter,
 } from './failure-report'
 
 // === Высокоуровневые функции отправки ===

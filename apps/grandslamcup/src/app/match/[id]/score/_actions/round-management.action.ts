@@ -156,7 +156,7 @@ export async function setCurrentPerformerAction(
   playerId: string,
   playerName: string,
   teamSeasonId: string,
-  teamName: string
+  teamName: string,
 ) {
   const state = getMatchState(matchId)
 

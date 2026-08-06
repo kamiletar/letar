@@ -27,21 +27,27 @@ export function EncodingSettingsBadges({ item, compact = false }: EncodingSettin
   return (
     <HStack gap={2} flexWrap="wrap">
       {/* VMAF / CQ */}
-      {vmafResult ? (
-        <Badge colorPalette="green" variant="subtle" size="sm">
-          <Icon as={LuTarget} boxSize={3} mr={1} />
-          CQ {vmafResult.optimalCq} (VMAF {vmafResult.vmafScore.toFixed(0)})
-        </Badge>
-      ) : vmafSettings?.enabled ? (
-        <Badge colorPalette="yellow" variant="subtle" size="sm">
-          <Icon as={LuTarget} boxSize={3} mr={1} />
-          VMAF {vmafSettings.targetVmaf} → ?
-        </Badge>
-      ) : importSettings?.cqOverride ? (
-        <Badge colorPalette="gray" variant="subtle" size="sm">
-          CQ {importSettings.cqOverride}
-        </Badge>
-      ) : null}
+      {vmafResult
+        ? (
+          <Badge colorPalette="green" variant="subtle" size="sm">
+            <Icon as={LuTarget} boxSize={3} mr={1} />
+            CQ {vmafResult.optimalCq} (VMAF {vmafResult.vmafScore.toFixed(0)})
+          </Badge>
+        )
+        : vmafSettings?.enabled
+        ? (
+          <Badge colorPalette="yellow" variant="subtle" size="sm">
+            <Icon as={LuTarget} boxSize={3} mr={1} />
+            VMAF {vmafSettings.targetVmaf} → ?
+          </Badge>
+        )
+        : importSettings?.cqOverride
+        ? (
+          <Badge colorPalette="gray" variant="subtle" size="sm">
+            CQ {importSettings.cqOverride}
+          </Badge>
+        )
+        : null}
 
       {/* Кодек (в полном режиме) */}
       {!compact && (

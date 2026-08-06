@@ -225,10 +225,9 @@ function FilterUrlSync() {
       }}
     </Form.Subscribe>
   )
-}
+} // Использование:
 
-// Использование:
-;<Form schema={FilterSchema} initialValue={{ ...defaultFilters, ...prefilled }} onSubmit={async () => {}}>
+<Form schema={FilterSchema} initialValue={{ ...defaultFilters, ...prefilled }} onSubmit={async () => {}}>
   <FilterUrlSync />
   {/* поля */}
 </Form>

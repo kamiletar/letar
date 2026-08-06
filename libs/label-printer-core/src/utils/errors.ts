@@ -6,7 +6,7 @@
 export class MarkingCodeError extends Error {
   constructor(
     message: string,
-    public code: string
+    public code: string,
   ) {
     super(message)
     this.name = 'MarkingCodeError'
@@ -26,7 +26,7 @@ export class DuplicateCodeError extends MarkingCodeError {
   constructor(
     message: string,
     code: string,
-    public firstScannedAt?: string
+    public firstScannedAt?: string,
   ) {
     super(message, code)
     this.name = 'DuplicateCodeError'
@@ -45,7 +45,7 @@ export class InvalidGTINError extends MarkingCodeError {
 export class PrinterError extends Error {
   constructor(
     message: string,
-    public status?: string
+    public status?: string,
   ) {
     super(message)
     this.name = 'PrinterError'

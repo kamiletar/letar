@@ -63,36 +63,36 @@ export function HeaderRoot({
     () =>
       sticky
         ? {
-            position: 'sticky' as const,
-            top: 0,
-            zIndex: 100,
-          }
+          position: 'sticky' as const,
+          top: 0,
+          zIndex: 100,
+        }
         : {},
-    [sticky]
+    [sticky],
   )
 
   const blurStyles = useMemo(
     () =>
       blurBackdrop
         ? {
-            backdropFilter: 'blur(10px)',
-            bg: 'bg/80',
-          }
+          backdropFilter: 'blur(10px)',
+          bg: 'bg/80',
+        }
         : {
-            bg: 'bg',
-          },
-    [blurBackdrop]
+          bg: 'bg',
+        },
+    [blurBackdrop],
   )
 
   const visibilityStyles = useMemo(
     () =>
       hideOnScroll
         ? {
-            transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
-            transition: 'transform 0.3s ease-in-out',
-          }
+          transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
+          transition: 'transform 0.3s ease-in-out',
+        }
         : {},
-    [hideOnScroll, isVisible]
+    [hideOnScroll, isVisible],
   )
 
   return (

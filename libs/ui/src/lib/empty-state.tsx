@@ -35,7 +35,7 @@ export interface AppEmptyStateProps extends ChakraEmptyState.RootProps {
  */
 export const AppEmptyState = forwardRef<HTMLDivElement, AppEmptyStateProps>(function AppEmptyState(
   { title, description, icon = <LuInbox />, actionLabel, actionHref, onAction, children, ...rest },
-  ref
+  ref,
 ) {
   return (
     <ChakraEmptyState.Root ref={ref} {...rest}>
@@ -50,15 +50,17 @@ export const AppEmptyState = forwardRef<HTMLDivElement, AppEmptyStateProps>(func
         {/* Кнопка действия */}
         {actionLabel && (actionHref || onAction) && (
           <>
-            {actionHref ? (
-              <Button asChild colorPalette="brand">
-                <a href={actionHref}>{actionLabel}</a>
-              </Button>
-            ) : (
-              <Button colorPalette="brand" onClick={onAction}>
-                {actionLabel}
-              </Button>
-            )}
+            {actionHref
+              ? (
+                <Button asChild colorPalette="brand">
+                  <a href={actionHref}>{actionLabel}</a>
+                </Button>
+              )
+              : (
+                <Button colorPalette="brand" onClick={onAction}>
+                  {actionLabel}
+                </Button>
+              )}
           </>
         )}
 

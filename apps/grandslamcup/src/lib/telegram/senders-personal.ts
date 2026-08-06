@@ -60,12 +60,12 @@ export async function sendCoachLineupReminder(matchId: string): Promise<SendResu
     const teamName = coach.teamSeason.team.name
     const dateStr = match.scheduledAt
       ? new Date(match.scheduledAt).toLocaleString('ru-RU', {
-          day: 'numeric',
-          month: 'long',
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZone: 'Europe/Moscow',
-        })
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Moscow',
+      })
       : ''
 
     const text = [

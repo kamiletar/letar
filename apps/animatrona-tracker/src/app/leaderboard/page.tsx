@@ -110,13 +110,12 @@ async function fetchLeaderboardData() {
     userIds.add(item.userId)
   }
 
-  const users =
-    userIds.size > 0
-      ? await db.user.findMany({
-          where: { id: { in: [...userIds] } },
-          select: { id: true, name: true },
-        })
-      : []
+  const users = userIds.size > 0
+    ? await db.user.findMany({
+      where: { id: { in: [...userIds] } },
+      select: { id: true, name: true },
+    })
+    : []
 
   const userMap: Record<string, string> = {}
   for (const u of users) {

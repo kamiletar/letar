@@ -10,15 +10,15 @@ export {
 export { useAppForm, withForm } from './lib/form-hook'
 
 // Base form components (for naming/grouping)
-export { FormField, useFormField, type FormFieldContextValue, type FormFieldProps } from './lib/form-field'
-export { FormGroup, useFormGroup, type FormGroupContextValue, type FormGroupProps } from './lib/form-group'
+export { FormField, type FormFieldContextValue, type FormFieldProps, useFormField } from './lib/form-field'
+export { FormGroup, type FormGroupContextValue, type FormGroupProps, useFormGroup } from './lib/form-group'
 
 // Components with TanStack Form integration
 export {
   TanStackFormField,
-  useTanStackFormField,
   type TanStackFormFieldContextValue,
   type TanStackFormFieldProps,
+  useTanStackFormField,
 } from './lib/tanstack-form-field'
 
 // Components with Chakra UI integration
@@ -27,13 +27,13 @@ export { ChakraFormField, type ChakraFormFieldProps } from './lib/chakra-form-fi
 // Array field components
 export {
   FormGroupList,
-  FormGroupListItem,
-  useFormGroupList,
-  useFormGroupListItem,
   type FormGroupListContextValue,
+  FormGroupListItem,
   type FormGroupListItemContextValue,
   type FormGroupListItemProps,
   type FormGroupListProps,
+  useFormGroupList,
+  useFormGroupListItem,
 } from './lib/form-group-list'
 
 // Types
@@ -41,8 +41,13 @@ export type { BaseFieldProps, DeepKeys, DeepValue, FieldApi, FormApi } from './l
 
 // Declarative forms API
 export {
+  booleanMeta,
   ButtonSubmit,
+  commonMeta,
+  createForm,
+  dateMeta,
   DeclarativeFormContext,
+  enumMeta,
   FieldCombobox,
   FieldListbox,
   FieldNumber,
@@ -55,14 +60,9 @@ export {
   // State management helpers
   FormSubscribe,
   FormUrlSync,
+  numberMeta,
   // Relation field provider
   RelationFieldProvider,
-  booleanMeta,
-  commonMeta,
-  createForm,
-  dateMeta,
-  enumMeta,
-  numberMeta,
   // Metadata helpers
   relationMeta,
   textMeta,
@@ -116,8 +116,8 @@ export type {
   SegmentedGroupFieldProps,
   SegmentedGroupOption,
   SelectFieldProps,
-  SelectOption,
   SelectionFieldType,
+  SelectOption,
   StringFieldProps,
   SubmitButtonProps,
   UIMetaConfig,
@@ -127,6 +127,8 @@ export type {
 } from './lib/declarative'
 
 export {
+  type CalculatedFieldProps,
+  type FieldActionsResult,
   FieldCalculated,
   FieldHidden,
   FormDivider,
@@ -135,8 +137,6 @@ export {
   useFieldActions,
   useFormApi,
   useFormStepsContext,
-  type CalculatedFieldProps,
-  type FieldActionsResult,
 } from './lib/declarative'
 
 // Hooks for async search (Combobox, Autocomplete)
@@ -144,7 +144,7 @@ export { useAsyncSearch, useDebounce } from './lib/declarative'
 export type { AsyncQueryFn, AsyncQueryResult, UseAsyncSearchOptions, UseAsyncSearchResult } from './lib/declarative'
 
 // Field UI components
-export { FieldLabel, FieldTooltip, type FieldLabelProps, type FieldTooltipProps } from './lib/declarative'
+export { FieldLabel, type FieldLabelProps, FieldTooltip, type FieldTooltipProps } from './lib/declarative'
 
 // Context utilities
 export {
@@ -244,8 +244,8 @@ export type {
   ActionResultError,
   FieldError,
   FieldErrorMap,
-  MapServerErrorsConfig,
   MappedServerErrors,
+  MapServerErrorsConfig,
   PrismaError,
   ZenStackError,
   ZodFlatError,

@@ -175,43 +175,50 @@ export function CommentCard({
           </HStack>
 
           {/* Текст или форма редактирования */}
-          {isEditing ? (
-            <VStack align="stretch" gap={2}>
-              <Textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                rows={3}
-                maxLength={2000}
-                autoFocus
-              />
-              <HStack>
-                <Button size="xs" colorPalette="brand" onClick={handleSaveEdit} loading={loading}>
-                  Сохранить
-                </Button>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => {
-                    setIsEditing(false)
-                    setEditText(comment.text)
-                  }}
-                >
-                  Отмена
-                </Button>
-              </HStack>
-            </VStack>
-          ) : (
-            <Text fontSize="sm" whiteSpace="pre-wrap">
-              {comment.text}
-            </Text>
-          )}
+          {isEditing
+            ? (
+              <VStack align="stretch" gap={2}>
+                <Textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  rows={3}
+                  maxLength={2000}
+                  autoFocus
+                />
+                <HStack>
+                  <Button size="xs" colorPalette="brand" onClick={handleSaveEdit} loading={loading}>
+                    Сохранить
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsEditing(false)
+                      setEditText(comment.text)
+                    }}
+                  >
+                    Отмена
+                  </Button>
+                </HStack>
+              </VStack>
+            )
+            : (
+              <Text fontSize="sm" whiteSpace="pre-wrap">
+                {comment.text}
+              </Text>
+            )}
 
           {/* Кнопки действий */}
           {!isEditing && (
             <HStack gap={1} mt={1}>
               {/* Ответить (только для top-level, только авторизованным) */}
               {!isReply && currentUserId && (
-                <Button size="xs" variant="ghost" color="fg.muted" onClick={() => setIsReplying(!isReplying)}>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  color="fg.muted"
+                  onClick={() => setIsReplying(!isReplying)}
+                >
                   <Icon as={isReplying ? LuX : LuReply} />
                   {isReplying ? 'Отмена' : 'Ответить'}
                 </Button>

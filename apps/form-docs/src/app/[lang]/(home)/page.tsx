@@ -31,27 +31,21 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
       <div className="mt-16 grid max-w-3xl gap-6 text-left md:grid-cols-3">
         <FeatureCard
           title={isRu ? '40+ типов полей' : '40+ Field Types'}
-          description={
-            isRu
-              ? 'String, Number, Select, Date, Phone, FileUpload, RichText и многое другое.'
-              : 'String, Number, Select, Date, Phone, FileUpload, RichText, and many more.'
-          }
+          description={isRu
+            ? 'String, Number, Select, Date, Phone, FileUpload, RichText и многое другое.'
+            : 'String, Number, Select, Date, Phone, FileUpload, RichText, and many more.'}
         />
         <FeatureCard
           title={isRu ? 'Схема = логика' : 'Schema-Driven'}
-          description={
-            isRu
-              ? 'Валидация и UI метаданные в Zod схеме. JSX содержит только вёрстку.'
-              : 'Define validation and UI metadata in Zod schema. JSX stays clean.'
-          }
+          description={isRu
+            ? 'Валидация и UI метаданные в Zod схеме. JSX содержит только вёрстку.'
+            : 'Define validation and UI metadata in Zod schema. JSX stays clean.'}
         />
         <FeatureCard
           title={isRu ? 'Всё включено' : 'Batteries Included'}
-          description={
-            isRu
-              ? 'Мультистеп формы, условные поля, оффлайн режим, i18n, drag & drop.'
-              : 'Multi-step forms, conditional fields, offline mode, i18n, drag & drop.'
-          }
+          description={isRu
+            ? 'Мультистеп формы, условные поля, оффлайн режим, i18n, drag & drop.'
+            : 'Multi-step forms, conditional fields, offline mode, i18n, drag & drop.'}
         />
       </div>
     </main>

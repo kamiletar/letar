@@ -101,19 +101,19 @@ function StudioCard({ studio }: { studio: ShikimoriStudio }) {
     <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle" size="sm">
       <Card.Body>
         <HStack gap={3}>
-          {studio.imageUrl ? (
-            <Image
-              src={studio.imageUrl}
-              alt={studio.name}
-              boxSize={8}
-              borderRadius="md"
-              objectFit="contain"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <Icon as={LuBuilding2} boxSize={6} color="fg.muted" />
-          )}
+          {studio.imageUrl
+            ? (
+              <Image
+                src={studio.imageUrl}
+                alt={studio.name}
+                boxSize={8}
+                borderRadius="md"
+                objectFit="contain"
+                loading="lazy"
+                decoding="async"
+              />
+            )
+            : <Icon as={LuBuilding2} boxSize={6} color="fg.muted" />}
           <Text fontWeight="medium" fontSize="sm">
             {studio.name}
           </Text>
@@ -130,28 +130,30 @@ function StaffCard({ person }: { person: ShikimoriPersonRole }) {
     <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle" size="sm">
       <Card.Body>
         <HStack gap={3}>
-          {person.person.poster?.mainUrl ? (
-            <Image
-              src={person.person.poster.mainUrl}
-              alt={person.person.name}
-              boxSize={10}
-              borderRadius="md"
-              objectFit="cover"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <Box
-              boxSize={10}
-              bg="bg.subtle"
-              borderRadius="md"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Icon as={LuUser} boxSize={5} color="fg.subtle" />
-            </Box>
-          )}
+          {person.person.poster?.mainUrl
+            ? (
+              <Image
+                src={person.person.poster.mainUrl}
+                alt={person.person.name}
+                boxSize={10}
+                borderRadius="md"
+                objectFit="cover"
+                loading="lazy"
+                decoding="async"
+              />
+            )
+            : (
+              <Box
+                boxSize={10}
+                bg="bg.subtle"
+                borderRadius="md"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={LuUser} boxSize={5} color="fg.subtle" />
+              </Box>
+            )}
           <VStack align="start" gap={0}>
             <Text fontWeight="medium" fontSize="sm">
               {person.person.russian || person.person.name}
@@ -173,28 +175,30 @@ function CharacterCard({ role }: { role: ShikimoriCharacterRole }) {
     <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle" size="sm">
       <Card.Body>
         <HStack gap={3}>
-          {role.character.poster?.mainUrl ? (
-            <Image
-              src={role.character.poster.mainUrl}
-              alt={role.character.name}
-              boxSize={10}
-              borderRadius="md"
-              objectFit="cover"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <Box
-              boxSize={10}
-              bg="bg.subtle"
-              borderRadius="md"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Icon as={LuUsers} boxSize={5} color="fg.subtle" />
-            </Box>
-          )}
+          {role.character.poster?.mainUrl
+            ? (
+              <Image
+                src={role.character.poster.mainUrl}
+                alt={role.character.name}
+                boxSize={10}
+                borderRadius="md"
+                objectFit="cover"
+                loading="lazy"
+                decoding="async"
+              />
+            )
+            : (
+              <Box
+                boxSize={10}
+                bg="bg.subtle"
+                borderRadius="md"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={LuUsers} boxSize={5} color="fg.subtle" />
+              </Box>
+            )}
           <VStack align="start" gap={0}>
             <Text fontWeight="medium" fontSize="sm">
               {role.character.russian || role.character.name}
@@ -348,7 +352,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
       (p) =>
         p.rolesEn.some((r) =>
           ['Original_Creator', 'Character_Design', 'Music', 'Series_Composition'].includes(r.replace(' ', '_'))
-        ) || p.rolesRu.some((r) => ['Автор оригинала', 'Дизайн персонажей', 'Музыка', 'Сценарий'].includes(r))
+        ) || p.rolesRu.some((r) => ['Автор оригинала', 'Дизайн персонажей', 'Музыка', 'Сценарий'].includes(r)),
     )
     .slice(0, 8)
 
@@ -367,7 +371,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
 
   // Локальные озвучки которых нет в Shikimori
   const unmatchedLocalGroups = localDubGroups.filter(
-    (local) => !data.fandubbers.some((shikimori) => matchFandubber(shikimori, [local]))
+    (local) => !data.fandubbers.some((shikimori) => matchFandubber(shikimori, [local])),
   )
 
   // Нет данных для отображения
@@ -419,9 +423,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                     <Heading size="sm">Студия</Heading>
                   </HStack>
                   <Wrap gap={2}>
-                    {data.studios.map((studio) => (
-                      <StudioCard key={studio.id} studio={studio} />
-                    ))}
+                    {data.studios.map((studio) => <StudioCard key={studio.id} studio={studio} />)}
                   </Wrap>
                 </Box>
               )}
@@ -434,9 +436,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                     <Heading size="sm">Режиссёр</Heading>
                   </HStack>
                   <Wrap gap={2}>
-                    {directors.map((person) => (
-                      <StaffCard key={person.id} person={person} />
-                    ))}
+                    {directors.map((person) => <StaffCard key={person.id} person={person} />)}
                   </Wrap>
                 </Box>
               )}
@@ -473,9 +473,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                         Главные
                       </Text>
                       <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={2}>
-                        {mainCharacters.map((role) => (
-                          <CharacterCard key={role.id} role={role} />
-                        ))}
+                        {mainCharacters.map((role) => <CharacterCard key={role.id} role={role} />)}
                       </Grid>
                     </Box>
                   )}
@@ -487,9 +485,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                         Второстепенные
                       </Text>
                       <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={2}>
-                        {supportingCharacters.map((role) => (
-                          <CharacterCard key={role.id} role={role} />
-                        ))}
+                        {supportingCharacters.map((role) => <CharacterCard key={role.id} role={role} />)}
                       </Grid>
                     </Box>
                   )}

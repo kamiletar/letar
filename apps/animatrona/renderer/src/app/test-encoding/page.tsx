@@ -81,7 +81,7 @@ export function TestEncodingContent() {
 
   // Шаг 4: Сравнение
   const [compareVideos, setCompareVideos] = useState<{ a: string; b: string; labelA: string; labelB: string } | null>(
-    null
+    null,
   )
 
   // Выбрать файл
@@ -243,13 +243,13 @@ export function TestEncodingContent() {
             prev.map((job) =>
               job.profileId === profile.id
                 ? {
-                    ...job,
-                    status: 'done',
-                    progress: 100,
-                    outputPath: result.outputPath,
-                    outputSize: result.outputSize,
-                    encodingTime: result.encodingTime,
-                  }
+                  ...job,
+                  status: 'done',
+                  progress: 100,
+                  outputPath: result.outputPath,
+                  outputSize: result.outputSize,
+                  encodingTime: result.encodingTime,
+                }
                 : job
             )
           )
@@ -534,15 +534,13 @@ export function TestEncodingContent() {
                     <HStack justify="space-between" mb={2}>
                       <Text fontWeight="medium">{job.profileName}</Text>
                       <Badge
-                        colorPalette={
-                          job.status === 'done'
-                            ? 'green'
-                            : job.status === 'error'
-                              ? 'red'
-                              : job.status === 'encoding'
-                                ? 'purple'
-                                : 'gray'
-                        }
+                        colorPalette={job.status === 'done'
+                          ? 'green'
+                          : job.status === 'error'
+                          ? 'red'
+                          : job.status === 'encoding'
+                          ? 'purple'
+                          : 'gray'}
                       >
                         {job.status === 'pending' && 'Ожидание'}
                         {job.status === 'encoding' && 'Кодирование...'}
@@ -667,17 +665,21 @@ export function TestEncodingContent() {
               {step === 1 ? 'К настройкам' : 'Назад'}
             </Button>
 
-            {step === 2 ? (
-              <Button colorPalette="purple" onClick={startEncoding} disabled={!canProceed() || isEncoding}>
-                <Icon as={LuPlay} mr={2} />
-                Начать кодирование
-              </Button>
-            ) : step < 3 ? (
-              <Button colorPalette="purple" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
-                Далее
-                <Icon as={LuArrowRight} ml={2} />
-              </Button>
-            ) : null}
+            {step === 2
+              ? (
+                <Button colorPalette="purple" onClick={startEncoding} disabled={!canProceed() || isEncoding}>
+                  <Icon as={LuPlay} mr={2} />
+                  Начать кодирование
+                </Button>
+              )
+              : step < 3
+              ? (
+                <Button colorPalette="purple" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
+                  Далее
+                  <Icon as={LuArrowRight} ml={2} />
+                </Button>
+              )
+              : null}
           </HStack>
         )}
       </VStack>

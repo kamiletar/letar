@@ -77,82 +77,84 @@ export default async function ScorersPage({ params }: { params: Params }) {
         </Text>
       </Flex>
 
-      {scorers.length > 0 ? (
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-          {scorers.map((s) => (
-            <Box
-              key={s.id}
-              borderRadius="xl"
-              borderWidth="1px"
-              borderColor="border"
-              bg="bg.panel"
-              overflow="hidden"
-              p={5}
-            >
-              <Flex gap={3} align="center" mb={4}>
-                <Circle size={12} bg="blue.subtle" color="blue.solid">
-                  <LuClipboardList size={24} />
-                </Circle>
-                <VStack gap={0} align="start">
-                  <Text fontWeight="bold" fontSize="lg">
-                    {s.name}
-                  </Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    {s.matches.length} {s.matches.length === 1 ? 'матч' : s.matches.length < 5 ? 'матча' : 'матчей'}
-                  </Text>
-                </VStack>
-              </Flex>
+      {scorers.length > 0
+        ? (
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+            {scorers.map((s) => (
+              <Box
+                key={s.id}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="border"
+                bg="bg.panel"
+                overflow="hidden"
+                p={5}
+              >
+                <Flex gap={3} align="center" mb={4}>
+                  <Circle size={12} bg="blue.subtle" color="blue.solid">
+                    <LuClipboardList size={24} />
+                  </Circle>
+                  <VStack gap={0} align="start">
+                    <Text fontWeight="bold" fontSize="lg">
+                      {s.name}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted">
+                      {s.matches.length} {s.matches.length === 1 ? 'матч' : s.matches.length < 5 ? 'матча' : 'матчей'}
+                    </Text>
+                  </VStack>
+                </Flex>
 
-              {/* История матчей */}
-              <VStack gap={2} align="stretch">
-                {s.matches.slice(0, 5).map((m) => (
-                  <Link key={m.id} href={`/${citySlug}/matches/${m.id}`}>
-                    <Flex
-                      gap={2}
-                      align="center"
-                      fontSize="sm"
-                      py={1}
-                      px={2}
-                      borderRadius="md"
-                      _hover={{ bg: 'bg.subtle' }}
-                    >
-                      <LuCalendar size={14} />
-                      <Text fontWeight="medium">
-                        {m.homeTeam.team.name} — {m.awayTeam.team.name}
-                      </Text>
-                      {m.scheduledAt && (
-                        <Text color="fg.muted" fontSize="xs" ml="auto">
-                          {new Date(m.scheduledAt).toLocaleDateString('ru-RU')}
+                {/* История матчей */}
+                <VStack gap={2} align="stretch">
+                  {s.matches.slice(0, 5).map((m) => (
+                    <Link key={m.id} href={`/${citySlug}/matches/${m.id}`}>
+                      <Flex
+                        gap={2}
+                        align="center"
+                        fontSize="sm"
+                        py={1}
+                        px={2}
+                        borderRadius="md"
+                        _hover={{ bg: 'bg.subtle' }}
+                      >
+                        <LuCalendar size={14} />
+                        <Text fontWeight="medium">
+                          {m.homeTeam.team.name} — {m.awayTeam.team.name}
                         </Text>
-                      )}
-                      <Badge size="sm" colorPalette={m.status === 'FINISHED' ? 'gray' : 'blue'}>
-                        {m.status === 'FINISHED' ? 'Завершён' : 'Запланирован'}
-                      </Badge>
-                    </Flex>
-                  </Link>
-                ))}
-                {s.matches.length > 5 && (
-                  <Text fontSize="xs" color="fg.muted" textAlign="center">
-                    и ещё {s.matches.length - 5}...
-                  </Text>
-                )}
-              </VStack>
-            </Box>
-          ))}
-        </SimpleGrid>
-      ) : (
-        <VStack py={16} textAlign="center" gap={4}>
-          <Circle size={20} bg="blue.50" _dark={{ bg: 'blue.950' }}>
-            <LuClipboardList size={40} color="var(--chakra-colors-blue-solid)" />
-          </Circle>
-          <Heading size="md" color="fg.muted">
-            Счетоводы пока не назначены
-          </Heading>
-          <Text fontSize="sm" color="fg.subtle">
-            Счетоводы появятся после назначения на матчи
-          </Text>
-        </VStack>
-      )}
+                        {m.scheduledAt && (
+                          <Text color="fg.muted" fontSize="xs" ml="auto">
+                            {new Date(m.scheduledAt).toLocaleDateString('ru-RU')}
+                          </Text>
+                        )}
+                        <Badge size="sm" colorPalette={m.status === 'FINISHED' ? 'gray' : 'blue'}>
+                          {m.status === 'FINISHED' ? 'Завершён' : 'Запланирован'}
+                        </Badge>
+                      </Flex>
+                    </Link>
+                  ))}
+                  {s.matches.length > 5 && (
+                    <Text fontSize="xs" color="fg.muted" textAlign="center">
+                      и ещё {s.matches.length - 5}...
+                    </Text>
+                  )}
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        )
+        : (
+          <VStack py={16} textAlign="center" gap={4}>
+            <Circle size={20} bg="blue.50" _dark={{ bg: 'blue.950' }}>
+              <LuClipboardList size={40} color="var(--chakra-colors-blue-solid)" />
+            </Circle>
+            <Heading size="md" color="fg.muted">
+              Счетоводы пока не назначены
+            </Heading>
+            <Text fontSize="sm" color="fg.subtle">
+              Счетоводы появятся после назначения на матчи
+            </Text>
+          </VStack>
+        )}
     </VStack>
   )
 }

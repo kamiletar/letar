@@ -104,7 +104,7 @@ export type WatchOrderPosition = 'before' | 'current' | 'after'
 
 export function getWatchOrderPosition(
   relationType: RelationKind | undefined,
-  isCurrentAnime: boolean
+  isCurrentAnime: boolean,
 ): WatchOrderPosition {
   if (isCurrentAnime) {
     return 'current'

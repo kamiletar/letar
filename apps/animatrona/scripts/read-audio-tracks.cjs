@@ -14,7 +14,7 @@ const queueItems = db
   FROM ImportQueueItem
   ORDER BY addedAt DESC
   LIMIT 3
-`
+`,
   )
   .all()
 console.log('\n=== ImportQueueItem ===')
@@ -30,7 +30,7 @@ const episode = db
   JOIN Anime a ON e.animeId = a.id
   ORDER BY e.createdAt DESC
   LIMIT 1
-`
+`,
   )
   .get()
 
@@ -45,7 +45,7 @@ if (episode) {
     FROM AudioTrack
     WHERE episodeId = ?
     ORDER BY streamIndex
-  `
+  `,
     )
     .all(episode.id)
 

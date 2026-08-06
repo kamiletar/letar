@@ -145,8 +145,9 @@ export function ImportWizardDialog({
   // Динамический override для preselectedShikimoriId (undefined = не задан, null = явно сброшен)
   const [preselectedIdOverride, setPreselectedIdOverride] = useState<number | null | undefined>(undefined)
   // Эффективный preselectedId: override > prop
-  const effectivePreselectedId =
-    preselectedIdOverride === undefined ? preselectedShikimoriId : (preselectedIdOverride ?? undefined)
+  const effectivePreselectedId = preselectedIdOverride === undefined
+    ? preselectedShikimoriId
+    : (preselectedIdOverride ?? undefined)
 
   // Шаг 6: Предпросмотр и настройки
   const [fileAnalyses, setFileAnalyses] = useState<FileAnalysis[]>([])
@@ -161,7 +162,7 @@ export function ImportWizardDialog({
     // Если донор включён и есть совпадающие файлы — показываем шаг калибровки
     if (donorEnabled && donorFiles.length > 0) {
       const hasMatches = files.some(
-        (f) => f.selected && f.episodeNumber !== null && donorFiles.some((d) => d.episodeNumber === f.episodeNumber)
+        (f) => f.selected && f.episodeNumber !== null && donorFiles.some((d) => d.episodeNumber === f.episodeNumber),
       )
       if (hasMatches) {
         return DONOR_STEPS
@@ -334,7 +335,7 @@ export function ImportWizardDialog({
         return names[step - 1] || 'unknown'
       }
     },
-    [wizardSteps.length]
+    [wizardSteps.length],
   )
 
   /** Проверка возможности перехода на следующий шаг */
@@ -424,9 +425,11 @@ export function ImportWizardDialog({
         status: selectedAnime.status,
         episodes: selectedAnime.episodes,
         airedOn: selectedAnime.airedOn
-          ? `${selectedAnime.airedOn.year}-${String(selectedAnime.airedOn.month ?? 1).padStart(2, '0')}-${String(
-              selectedAnime.airedOn.day ?? 1
-            ).padStart(2, '0')}`
+          ? `${selectedAnime.airedOn.year}-${String(selectedAnime.airedOn.month ?? 1).padStart(2, '0')}-${
+            String(
+              selectedAnime.airedOn.day ?? 1,
+            ).padStart(2, '0')
+          }`
           : null,
       },
       files: files.map((f) => ({
@@ -447,43 +450,43 @@ export function ImportWizardDialog({
       // VMAF настройки (подбор CQ выполняется в очереди)
       vmafSettings: importSettings.vmafEnabled
         ? {
-            enabled: true,
-            targetVmaf: importSettings.targetVmaf ?? 94,
-          }
+          enabled: true,
+          targetVmaf: importSettings.targetVmaf ?? 94,
+        }
         : undefined,
       // Данные профиля кодирования для main process (VMAF и транскодирование)
       encodingProfile: importSettings.selectedProfile
         ? {
-            id: importSettings.selectedProfile.id,
-            name: importSettings.selectedProfile.name,
-            codec: importSettings.selectedProfile.codec as 'AV1' | 'HEVC' | 'H264',
-            useGpu: importSettings.selectedProfile.useGpu,
-            rateControl: importSettings.selectedProfile.rateControl as 'CONSTQP' | 'VBR',
-            cq: importSettings.selectedProfile.cq,
-            maxBitrate: importSettings.selectedProfile.maxBitrate,
-            preset: importSettings.selectedProfile.preset,
-            tune: importSettings.selectedProfile.tune,
-            multipass: importSettings.selectedProfile.multipass,
-            spatialAq: importSettings.selectedProfile.spatialAq,
-            temporalAq: importSettings.selectedProfile.temporalAq,
-            aqStrength: importSettings.selectedProfile.aqStrength,
-            lookahead: importSettings.selectedProfile.lookahead,
-            lookaheadLevel: importSettings.selectedProfile.lookaheadLevel,
-            gopSize: importSettings.selectedProfile.gopSize,
-            bRefMode: importSettings.selectedProfile.bRefMode,
-            bFrames: null, // Not in schema, use null
-            preferCpu: importSettings.selectedProfile.preferCpu ?? false,
-          }
+          id: importSettings.selectedProfile.id,
+          name: importSettings.selectedProfile.name,
+          codec: importSettings.selectedProfile.codec as 'AV1' | 'HEVC' | 'H264',
+          useGpu: importSettings.selectedProfile.useGpu,
+          rateControl: importSettings.selectedProfile.rateControl as 'CONSTQP' | 'VBR',
+          cq: importSettings.selectedProfile.cq,
+          maxBitrate: importSettings.selectedProfile.maxBitrate,
+          preset: importSettings.selectedProfile.preset,
+          tune: importSettings.selectedProfile.tune,
+          multipass: importSettings.selectedProfile.multipass,
+          spatialAq: importSettings.selectedProfile.spatialAq,
+          temporalAq: importSettings.selectedProfile.temporalAq,
+          aqStrength: importSettings.selectedProfile.aqStrength,
+          lookahead: importSettings.selectedProfile.lookahead,
+          lookaheadLevel: importSettings.selectedProfile.lookaheadLevel,
+          gopSize: importSettings.selectedProfile.gopSize,
+          bRefMode: importSettings.selectedProfile.bRefMode,
+          bFrames: null, // Not in schema, use null
+          preferCpu: importSettings.selectedProfile.preferCpu ?? false,
+        }
         : undefined,
       // Данные донора (если включён)
       donorPath: donorEnabled ? donorPath : null,
       donorFiles: donorEnabled
         ? donorFiles.map((f) => ({
-            path: f.path,
-            name: f.name,
-            episodeNumber: f.episodeNumber,
-            selected: f.selected,
-          }))
+          path: f.path,
+          name: f.name,
+          episodeNumber: f.episodeNumber,
+          selected: f.selected,
+        }))
         : [],
       syncOffset: donorEnabled ? syncOffset : 0,
       // Режим добавления/замены эпизодов существующего аниме
@@ -552,10 +555,10 @@ export function ImportWizardDialog({
       const selectedCount = files.filter((f) => f.selected).length
       // Pending = есть номер, НЕ выбран, НЕ в очереди
       const pendingOva = files.filter(
-        (f) => f.episodeType === 'ova' && f.episodeNumber !== null && !f.selected && !newQueuedPaths.has(f.path)
+        (f) => f.episodeType === 'ova' && f.episodeNumber !== null && !f.selected && !newQueuedPaths.has(f.path),
       )
       const pendingRegular = files.filter(
-        (f) => f.episodeType === 'regular' && f.episodeNumber !== null && !f.selected && !newQueuedPaths.has(f.path)
+        (f) => f.episodeType === 'regular' && f.episodeNumber !== null && !f.selected && !newQueuedPaths.has(f.path),
       )
 
       // Добавили сериал → переключаемся на спешлы
@@ -630,7 +633,7 @@ export function ImportWizardDialog({
             }
             setQueuedFilePaths(paths)
           }
-        }
+        },
       )
       .catch(() => {
         // Ошибка не критична
@@ -759,35 +762,36 @@ export function ImportWizardDialog({
                       Назад
                     </Button>
                   )}
-                  {sourceUrl ? (
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      color="fg.muted"
-                      onClick={() => window.electronAPI?.app.openExternal(sourceUrl)}
-                      title={sourceUrl}
-                    >
-                      <Icon as={LuExternalLink} mr={1} />
-                      Rutracker
-                    </Button>
-                  ) : (
-                    parsedInfo?.animeName && (
+                  {sourceUrl
+                    ? (
                       <Button
                         variant="ghost"
                         size="xs"
                         color="fg.muted"
-                        onClick={() =>
-                          window.electronAPI?.app.openExternal(
-                            `https://rutracker.org/forum/tracker.php?nm=${encodeURIComponent(parsedInfo.animeName)}`
-                          )
-                        }
-                        title="Поиск на Rutracker"
+                        onClick={() => window.electronAPI?.app.openExternal(sourceUrl)}
+                        title={sourceUrl}
                       >
                         <Icon as={LuExternalLink} mr={1} />
                         Rutracker
                       </Button>
                     )
-                  )}
+                    : (
+                      parsedInfo?.animeName && (
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          color="fg.muted"
+                          onClick={() =>
+                            window.electronAPI?.app.openExternal(
+                              `https://rutracker.org/forum/tracker.php?nm=${encodeURIComponent(parsedInfo.animeName)}`,
+                            )}
+                          title="Поиск на Rutracker"
+                        >
+                          <Icon as={LuExternalLink} mr={1} />
+                          Rutracker
+                        </Button>
+                      )
+                    )}
                 </HStack>
 
                 {/* Правая часть */}
@@ -809,7 +813,9 @@ export function ImportWizardDialog({
                   {getLogicalStep(currentStep) === 'settings' && (
                     <Button colorPalette="purple" onClick={addToQueue} disabled={!canGoNext()}>
                       <Icon as={LuListPlus} mr={2} />В очередь (
-                      {fileAnalyses.filter((a) => a.mediaInfo !== null).length})
+                      {fileAnalyses.filter((a) =>
+                        a.mediaInfo !== null
+                      ).length})
                     </Button>
                   )}
                 </HStack>

@@ -32,7 +32,7 @@ export declare function seedAnime(
     shikimoriId?: number
     year?: number
     status?: string
-  }
+  },
 ): Promise<void>
 /**
  * Добавить тестовый эпизод в БД
@@ -46,7 +46,7 @@ export declare function seedEpisode(
     number: number
     name?: string
     filePath?: string
-  }
+  },
 ): Promise<void>
 /**
  * Получить количество аниме в БД
@@ -61,12 +61,14 @@ export declare function getEpisodeCount(dbPath: string): Promise<number>
  */
 export declare function findAnimeByName(
   dbPath: string,
-  name: string
-): Promise<{
-  id: string
-  name: string
-  shikimoriId: number | null
-} | null>
+  name: string,
+): Promise<
+  {
+    id: string
+    name: string
+    shikimoriId: number | null
+  } | null
+>
 /**
  * Получить все аниме
  */

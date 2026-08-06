@@ -150,152 +150,164 @@ export default function FriendlyModerationPage() {
         </HStack>
       </Flex>
 
-      {loading ? (
-        <Flex justify="center" py={12}>
-          <Spinner size="lg" />
-        </Flex>
-      ) : requests.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">Нет заявок</Text>
-        </EmptyState>
-      ) : (
-        <AdminResponsiveList
-          items={requests}
-          renderCard={(req) => (
-            <AdminCard key={req.id}>
-              <Flex justify="space-between" align="start" mb={2}>
-                <Box>
-                  <Text fontWeight="semibold" fontSize="sm">
-                    {req.fromTeamSeason.team.name} vs {req.toTeamSeason.team.name}
-                  </Text>
-                  <Text fontSize="xs" color="fg.muted">
-                    {req.fromTeamSeason.season.name}
-                  </Text>
-                </Box>
-                <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
-                  {statusLabel[req.status] ?? req.status}
-                </Badge>
-              </Flex>
-              {req.venue && (
-                <AdminCardRow label="Площадка">
-                  <Text fontSize="sm">{req.venue.name}</Text>
-                </AdminCardRow>
-              )}
-              {req.preferredDate && (
-                <AdminCardRow label="Дата">
-                  <Text fontSize="sm">{formatDateNumeric(req.preferredDate)}</Text>
-                </AdminCardRow>
-              )}
-              {req.status === 'ACCEPTED' && (
-                <Flex gap={2} pt={3} mt={2} borderTopWidth="1px" borderColor="border.muted" justify="flex-end">
-                  <Button
-                    size="sm"
-                    colorPalette="green"
-                    loading={processing === req.id}
-                    onClick={() => handleApprove(req)}
-                  >
-                    <LuCheck size={14} /> Одобрить
-                  </Button>
-                  <Button size="sm" colorPalette="red" variant="outline" onClick={() => setRejectTarget(req)}>
-                    <LuX size={14} /> Отклонить
-                  </Button>
+      {loading
+        ? (
+          <Flex justify="center" py={12}>
+            <Spinner size="lg" />
+          </Flex>
+        )
+        : requests.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">Нет заявок</Text>
+          </EmptyState>
+        )
+        : (
+          <AdminResponsiveList
+            items={requests}
+            renderCard={(req) => (
+              <AdminCard key={req.id}>
+                <Flex justify="space-between" align="start" mb={2}>
+                  <Box>
+                    <Text fontWeight="semibold" fontSize="sm">
+                      {req.fromTeamSeason.team.name} vs {req.toTeamSeason.team.name}
+                    </Text>
+                    <Text fontSize="xs" color="fg.muted">
+                      {req.fromTeamSeason.season.name}
+                    </Text>
+                  </Box>
+                  <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
+                    {statusLabel[req.status] ?? req.status}
+                  </Badge>
                 </Flex>
-              )}
-              {req.status === 'APPROVED' && req.match && (
-                <Flex pt={2} justify="flex-end">
-                  <Link href="/admin/matches">
-                    <Badge colorPalette="blue" size="sm" cursor="pointer">
-                      Матч
-                    </Badge>
-                  </Link>
-                </Flex>
-              )}
-            </AdminCard>
-          )}
-          tableContent={
-            <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-              <Box overflowX="auto">
-                <Table.Root>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Инициатор</Table.ColumnHeader>
-                      <Table.ColumnHeader>Соперник</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Площадка</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
-                      <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>
-                        Подал / Принял
-                      </Table.ColumnHeader>
-                      <Table.ColumnHeader>Статус</Table.ColumnHeader>
-                      <Table.ColumnHeader w="140px" />
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {requests.map((req) => (
-                      <Table.Row key={req.id}>
-                        <Table.Cell fontWeight="medium">
-                          {req.fromTeamSeason.team.name}
-                          <Text fontSize="xs" color="fg.muted">
-                            {req.fromTeamSeason.season.name}
-                          </Text>
-                        </Table.Cell>
-                        <Table.Cell>{req.toTeamSeason.team.name}</Table.Cell>
-                        <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm">
-                          {req.venue?.name ?? '—'}
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm">
-                          {req.preferredDate ? formatDateNumeric(req.preferredDate) : '—'}
-                        </Table.Cell>
-                        <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm" color="fg.muted">
-                          {req.submittedBy.name ?? '—'}
-                          {req.respondedBy?.name && (
-                            <Text fontSize="xs" color="fg.muted">
-                              Принял: {req.respondedBy.name}
-                            </Text>
-                          )}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
-                            {statusLabel[req.status] ?? req.status}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          {req.status === 'ACCEPTED' && (
-                            <HStack gap={1}>
-                              <Button
-                                size="sm"
-                                colorPalette="green"
-                                loading={processing === req.id}
-                                onClick={() => handleApprove(req)}
-                              >
-                                <LuCheck size={14} />
-                              </Button>
-                              <Button
-                                size="sm"
-                                colorPalette="red"
-                                variant="outline"
-                                onClick={() => setRejectTarget(req)}
-                              >
-                                <LuX size={14} />
-                              </Button>
-                            </HStack>
-                          )}
-                          {req.status === 'APPROVED' && req.match && (
-                            <Link href="/admin/matches">
-                              <Badge colorPalette="blue" size="sm" cursor="pointer">
-                                Матч
-                              </Badge>
-                            </Link>
-                          )}
-                        </Table.Cell>
+                {req.venue && (
+                  <AdminCardRow label="Площадка">
+                    <Text fontSize="sm">{req.venue.name}</Text>
+                  </AdminCardRow>
+                )}
+                {req.preferredDate && (
+                  <AdminCardRow label="Дата">
+                    <Text fontSize="sm">{formatDateNumeric(req.preferredDate)}</Text>
+                  </AdminCardRow>
+                )}
+                {req.status === 'ACCEPTED' && (
+                  <Flex gap={2} pt={3} mt={2} borderTopWidth="1px" borderColor="border.muted" justify="flex-end">
+                    <Button
+                      size="sm"
+                      colorPalette="green"
+                      loading={processing === req.id}
+                      onClick={() =>
+                        handleApprove(req)}
+                    >
+                      <LuCheck size={14} /> Одобрить
+                    </Button>
+                    <Button
+                      size="sm"
+                      colorPalette="red"
+                      variant="outline"
+                      onClick={() =>
+                        setRejectTarget(req)}
+                    >
+                      <LuX size={14} /> Отклонить
+                    </Button>
+                  </Flex>
+                )}
+                {req.status === 'APPROVED' && req.match && (
+                  <Flex pt={2} justify="flex-end">
+                    <Link href="/admin/matches">
+                      <Badge colorPalette="blue" size="sm" cursor="pointer">
+                        Матч
+                      </Badge>
+                    </Link>
+                  </Flex>
+                )}
+              </AdminCard>
+            )}
+            tableContent={
+              <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+                <Box overflowX="auto">
+                  <Table.Root>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Инициатор</Table.ColumnHeader>
+                        <Table.ColumnHeader>Соперник</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Площадка</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', md: 'table-cell' }}>Дата</Table.ColumnHeader>
+                        <Table.ColumnHeader display={{ base: 'none', lg: 'table-cell' }}>
+                          Подал / Принял
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader>Статус</Table.ColumnHeader>
+                        <Table.ColumnHeader w="140px" />
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
+                    </Table.Header>
+                    <Table.Body>
+                      {requests.map((req) => (
+                        <Table.Row key={req.id}>
+                          <Table.Cell fontWeight="medium">
+                            {req.fromTeamSeason.team.name}
+                            <Text fontSize="xs" color="fg.muted">
+                              {req.fromTeamSeason.season.name}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>{req.toTeamSeason.team.name}</Table.Cell>
+                          <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm">
+                            {req.venue?.name ?? '—'}
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', md: 'table-cell' }} fontSize="sm">
+                            {req.preferredDate ? formatDateNumeric(req.preferredDate) : '—'}
+                          </Table.Cell>
+                          <Table.Cell display={{ base: 'none', lg: 'table-cell' }} fontSize="sm" color="fg.muted">
+                            {req.submittedBy.name ?? '—'}
+                            {req.respondedBy?.name && (
+                              <Text fontSize="xs" color="fg.muted">
+                                Принял: {req.respondedBy.name}
+                              </Text>
+                            )}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={statusColor[req.status] ?? 'gray'} size="sm">
+                              {statusLabel[req.status] ?? req.status}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {req.status === 'ACCEPTED' && (
+                              <HStack gap={1}>
+                                <Button
+                                  size="sm"
+                                  colorPalette="green"
+                                  loading={processing === req.id}
+                                  onClick={() => handleApprove(req)}
+                                >
+                                  <LuCheck size={14} />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  colorPalette="red"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setRejectTarget(req)}
+                                >
+                                  <LuX size={14} />
+                                </Button>
+                              </HStack>
+                            )}
+                            {req.status === 'APPROVED' && req.match && (
+                              <Link href="/admin/matches">
+                                <Badge colorPalette="blue" size="sm" cursor="pointer">
+                                  Матч
+                                </Badge>
+                              </Link>
+                            )}
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
+                </Box>
               </Box>
-            </Box>
-          }
-        />
-      )}
+            }
+          />
+        )}
 
       {/* Диалог подтверждения отклонения */}
       <Dialog.Root open={!!rejectTarget} onOpenChange={(e) => !e.open && setRejectTarget(null)}>

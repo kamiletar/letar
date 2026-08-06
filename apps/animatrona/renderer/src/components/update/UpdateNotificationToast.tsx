@@ -59,20 +59,18 @@ export function UpdateNotificationToast({
   const icon = type === 'available' ? LuDownload : type === 'downloaded' ? LuInfo : LuInfo
 
   // Заголовок
-  const title =
-    type === 'available'
-      ? `Доступно обновление v${version}`
-      : type === 'downloaded'
-        ? `Обновление v${version} готово`
-        : 'Ошибка обновления'
+  const title = type === 'available'
+    ? `Доступно обновление v${version}`
+    : type === 'downloaded'
+    ? `Обновление v${version} готово`
+    : 'Ошибка обновления'
 
   // Описание
-  const desc =
-    type === 'error'
-      ? errorMessage || 'Произошла ошибка при проверке обновлений'
-      : type === 'downloaded'
-        ? 'Приложение будет перезапущено для установки'
-        : description || 'Исправления ошибок и улучшения'
+  const desc = type === 'error'
+    ? errorMessage || 'Произошла ошибка при проверке обновлений'
+    : type === 'downloaded'
+    ? 'Приложение будет перезапущено для установки'
+    : description || 'Исправления ошибок и улучшения'
 
   return (
     <Box

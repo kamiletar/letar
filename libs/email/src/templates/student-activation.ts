@@ -31,7 +31,7 @@ export function createStudentActivationEmailHtml(params: StudentActivationTempla
   content += createParagraph(`Автошкола <strong>${schoolName}</strong> приглашает вас на обучение.`)
 
   content += createParagraph(
-    'Для завершения регистрации и доступа к личному кабинету перейдите по ссылке ниже и задайте пароль.'
+    'Для завершения регистрации и доступа к личному кабинету перейдите по ссылке ниже и задайте пароль.',
   )
 
   content += createParagraph(`Ссылка действительна в течение <strong>${expiresInDays} дней</strong>.`, '#666')
@@ -51,7 +51,7 @@ export function createStudentActivationEmailHtml(params: StudentActivationTempla
   `
 
   content += createSmallText(
-    'Если вы не записывались в автошколу или получили это письмо по ошибке, просто проигнорируйте его.'
+    'Если вы не записывались в автошколу или получили это письмо по ошибке, просто проигнорируйте его.',
   )
 
   return createBaseTemplate({

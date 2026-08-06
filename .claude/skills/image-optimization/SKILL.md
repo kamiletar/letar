@@ -44,7 +44,7 @@ const { id, url } = await fetch('/api/images/upload', {
 
 ```tsx
 import Image from 'next/image'
-;<Image src={`/api/images/${imageId}`} alt="Product" width={400} height={300} loading="lazy" />
+<Image src={`/api/images/${imageId}`} alt="Product" width={400} height={300} loading="lazy" />
 ```
 
 ## Reference файлы

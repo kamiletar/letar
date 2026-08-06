@@ -58,7 +58,7 @@ beforeAll(() => {
       "  { clientId: 'gamma-prod', redirectUrls: [",
       "    'http://localhost:3999/sign-in',",
       "  ].join(',') },",
-    ].join('\n')
+    ].join('\n'),
   )
 })
 

@@ -151,13 +151,13 @@ export function CrossTable({ teams, matches, citySlug }: CrossTableProps) {
                   const bgColor = isWin
                     ? 'var(--chakra-colors-green-subtle)'
                     : isDraw
-                      ? 'var(--chakra-colors-gray-subtle)'
-                      : 'var(--chakra-colors-red-subtle)'
+                    ? 'var(--chakra-colors-gray-subtle)'
+                    : 'var(--chakra-colors-red-subtle)'
                   const textColor = isWin
                     ? 'var(--chakra-colors-green-fg)'
                     : isDraw
-                      ? 'var(--chakra-colors-fg-muted)'
-                      : 'var(--chakra-colors-red-fg)'
+                    ? 'var(--chakra-colors-fg-muted)'
+                    : 'var(--chakra-colors-red-fg)'
 
                   return (
                     <td

@@ -135,7 +135,7 @@ class BonusService extends EventEmitter {
     type: BonusTransactionType,
     amount: number,
     description: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): BonusTransaction {
     const oldBalance = this.bonusPoints.balance
 

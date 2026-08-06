@@ -83,7 +83,7 @@ describe('FormWithApi', () => {
             <FieldString name="title" label="Title" />
             <FieldNumber name="count" label="Count" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -103,7 +103,7 @@ describe('FormWithApi', () => {
             <FieldString name="title" label="Title" />
             <FieldNumber name="count" label="Count" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -123,7 +123,7 @@ describe('FormWithApi', () => {
           <FormWithApi api={createMockApiConfig()} initialValue={{ title: '', count: 0 }} schema={TestSchema}>
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -146,7 +146,7 @@ describe('FormWithApi', () => {
           <FormWithApi api={createMockApiConfig()} initialValue={{ title: '', count: 0 }} schema={TestSchema}>
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -174,7 +174,7 @@ describe('FormWithApi', () => {
           >
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -200,7 +200,7 @@ describe('FormWithApi', () => {
           >
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -224,7 +224,7 @@ describe('FormWithApi', () => {
           <FormWithApi api={createMockApiConfig()} initialValue={{ title: 'New Item', count: 0 }} schema={TestSchema}>
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -255,7 +255,7 @@ describe('FormWithApi', () => {
             <FieldString name="title" label="Title" />
             <button type="submit">Submit</button>
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -292,7 +292,7 @@ describe('FormWithApi', () => {
             <FieldString name="title" label="Title" />
             <button type="submit">Save</button>
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -319,7 +319,7 @@ describe('FormWithApi', () => {
           <FormWithApi api={createMockApiConfig()} initialValue={{ title: '', count: 0 }} schema={TestSchema} disabled>
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -353,7 +353,7 @@ describe('FormWithApi', () => {
             <FieldString name="title" label="Title" />
             <button type="submit">Save</button>
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -390,7 +390,7 @@ describe('FormWithApi', () => {
           >
             <FieldString name="title" label="Title" />
           </FormWithApi>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {

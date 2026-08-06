@@ -108,7 +108,7 @@ export function useFieldActions<TValue = unknown>(fieldName: string): FieldActio
       }
       return result as TValue
     },
-    [fullPath]
+    [fullPath],
   )
 
   // Подписка на store — выносим useCallback ДО useSyncExternalStore
@@ -122,12 +122,12 @@ export function useFieldActions<TValue = unknown>(fieldName: string): FieldActio
       }
       return () => subscription.unsubscribe()
     },
-    [form]
+    [form],
   )
 
   const getValueSnapshot = useCallback(
     () => getNestedValue(form.state.values as Record<string, unknown>),
-    [form, getNestedValue]
+    [form, getNestedValue],
   )
 
   const getMetaSnapshot = useCallback(() => {
@@ -146,7 +146,7 @@ export function useFieldActions<TValue = unknown>(fieldName: string): FieldActio
     (newValue: TValue) => {
       form.setFieldValue(fullPath, newValue)
     },
-    [form, fullPath]
+    [form, fullPath],
   )
 
   // Set field error
@@ -157,7 +157,7 @@ export function useFieldActions<TValue = unknown>(fieldName: string): FieldActio
         errors: [error],
       }))
     },
-    [form, fullPath]
+    [form, fullPath],
   )
 
   // Clear field error

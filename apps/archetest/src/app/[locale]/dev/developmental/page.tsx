@@ -15,7 +15,7 @@ import { ALL_SCALE_CODES, STATE_CODES } from '../../_data/personality-types'
 export default function DevelopmentalDevPage() {
   // Примерные баллы: состояния выражены, чтобы блок «Состояния» отрисовался
   const sampleScores = Object.fromEntries(
-    ALL_SCALE_CODES.map((code) => [code, STATE_CODES.includes(code) ? 65 : 50])
+    ALL_SCALE_CODES.map((code) => [code, STATE_CODES.includes(code) ? 65 : 50]),
   ) as Record<(typeof ALL_SCALE_CODES)[number], number>
 
   const traitCodes = ALL_SCALE_CODES.filter((code) => !STATE_CODES.includes(code))
@@ -23,7 +23,7 @@ export default function DevelopmentalDevPage() {
   // Профиль для ipsative-превью: топ-2 статистически неразличимы (перекрытие интервалов
   // при n=40), третья черта — в отдельной группе (тай-нота должна быть между 1 и 2, но не 2 и 3)
   const ipsativeScores = Object.fromEntries(
-    ALL_SCALE_CODES.map((code) => [code, STATE_CODES.includes(code) ? 65 : 15])
+    ALL_SCALE_CODES.map((code) => [code, STATE_CODES.includes(code) ? 65 : 15]),
   ) as Record<(typeof ALL_SCALE_CODES)[number], number>
   ipsativeScores.MAC = 72
   ipsativeScores.SZD = 66

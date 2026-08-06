@@ -126,7 +126,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
           }
         }
       },
-      [provider, minChars, locations]
+      [provider, minChars, locations],
     )
 
     // Загрузка при изменении debounced запроса

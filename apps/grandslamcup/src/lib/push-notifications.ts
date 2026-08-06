@@ -30,7 +30,7 @@ export interface PushPayload {
 /** Отправить push-уведомление на одну подписку */
 async function sendToSubscription(
   subscription: { endpoint: string; p256dh: string; auth: string },
-  payload: PushPayload
+  payload: PushPayload,
 ): Promise<boolean> {
   if (!vapidPublicKey || !vapidPrivateKey) {
     console.warn('VAPID ключи не настроены, push пропущен')

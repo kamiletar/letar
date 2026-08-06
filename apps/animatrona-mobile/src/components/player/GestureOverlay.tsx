@@ -143,7 +143,7 @@ export function GestureOverlay(props: GestureOverlayProps) {
         }),
       ]).start()
     },
-    [indicatorOpacity, indicatorScale]
+    [indicatorOpacity, indicatorScale],
   )
 
   const hideIndicator = useCallback(() => {
@@ -272,10 +272,10 @@ export function GestureOverlay(props: GestureOverlayProps) {
 
           // При зуме > 1: однопальцевый свайп = pan (сдвиг видео)
           if (
-            currentZoom > 1 &&
-            gestureActiveRef.current !== 'volume' &&
-            gestureActiveRef.current !== 'brightness' &&
-            gestureActiveRef.current !== 'seek'
+            currentZoom > 1
+            && gestureActiveRef.current !== 'volume'
+            && gestureActiveRef.current !== 'brightness'
+            && gestureActiveRef.current !== 'seek'
           ) {
             if (gestureActiveRef.current !== 'zoom-pan' && hasMovedRef.current) {
               gestureActiveRef.current = 'zoom-pan'
@@ -396,12 +396,18 @@ export function GestureOverlay(props: GestureOverlayProps) {
             const { pageX } = evt.nativeEvent
             const now = Date.now()
             const thirdWidth = screenWidth / 3
-            const tapZone: 'left' | 'center' | 'right' =
-              pageX < thirdWidth ? 'left' : pageX > thirdWidth * 2 ? 'right' : 'center'
+            const tapZone: 'left' | 'center' | 'right' = pageX < thirdWidth
+              ? 'left'
+              : pageX > thirdWidth * 2
+              ? 'right'
+              : 'center'
             const timeSinceLastTap = now - lastTapTimeRef.current
             // Определяем зону предыдущего тапа для мульти-тапа
-            const lastThird =
-              lastTapXRef.current < thirdWidth ? 'left' : lastTapXRef.current > thirdWidth * 2 ? 'right' : 'center'
+            const lastThird = lastTapXRef.current < thirdWidth
+              ? 'left'
+              : lastTapXRef.current > thirdWidth * 2
+              ? 'right'
+              : 'center'
 
             // Мульти-тап на той же стороне (кумулятивный ±10с как VLC)
             if (timeSinceLastTap < DOUBLE_TAP_DELAY && tapZone === lastThird) {
@@ -462,7 +468,7 @@ export function GestureOverlay(props: GestureOverlayProps) {
           gestureActiveRef.current = 'none'
         },
       }),
-    [disabled, screenWidth, screenHeight, clearTimers, showIndicator, hideIndicator]
+    [disabled, screenWidth, screenHeight, clearTimers, showIndicator, hideIndicator],
   )
 
   return (

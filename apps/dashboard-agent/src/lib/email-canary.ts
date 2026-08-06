@@ -161,9 +161,8 @@ async function waitForCanaryMessage(opts: {
         resolve({
           ok: false,
           latencyMs: null,
-          error:
-            (clientError as Error | null)?.message ??
-            `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
+          error: (clientError as Error | null)?.message
+            ?? `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
         })
       }, hardDeadlineMs)
     }),
@@ -179,7 +178,7 @@ async function waitForCanaryMessage(opts: {
 async function waitForCanaryMessageInner(
   client: ImapFlow,
   token: string,
-  getClientError: () => Error | null
+  getClientError: () => Error | null,
 ): Promise<WaitResult> {
   const startedAt = Date.now()
 
@@ -271,7 +270,7 @@ async function checkExternalLeg(token: string): Promise<EmailCanaryLegResult> {
 async function notifyCanaryAlert(
   leg: 'internal' | 'external',
   consecutiveFailures: number,
-  detail: string
+  detail: string,
 ): Promise<void> {
   await postDashboardAlert({
     type: 'CRON_FAILED',
@@ -289,7 +288,7 @@ async function notifyCanaryAlert(
 async function updateLegState(
   leg: 'internal' | 'external',
   state: CanaryLegState,
-  result: EmailCanaryLegResult
+  result: EmailCanaryLegResult,
 ): Promise<{ state: CanaryLegState; alerted: boolean }> {
   if (!result.configured) {
     return { state, alerted: false }
@@ -326,14 +325,14 @@ export async function runEmailCanaryCheck(): Promise<EmailCanaryRunResult> {
   const [internal, external]: [EmailCanaryLegResult, EmailCanaryLegResult] = sendOk
     ? await Promise.all([checkInternalLeg(token), checkExternalLeg(token)])
     : [
-        { configured: Boolean(process.env.EMAIL_CANARY_SMTP_USER), ok: false, latencyMs: null, error: sendError },
-        {
-          configured: Boolean(process.env.EMAIL_CANARY_EXTERNAL_IMAP_USER),
-          ok: false,
-          latencyMs: null,
-          error: sendError,
-        },
-      ]
+      { configured: Boolean(process.env.EMAIL_CANARY_SMTP_USER), ok: false, latencyMs: null, error: sendError },
+      {
+        configured: Boolean(process.env.EMAIL_CANARY_EXTERNAL_IMAP_USER),
+        ok: false,
+        latencyMs: null,
+        error: sendError,
+      },
+    ]
 
   const prevState = loadState()
   const alertsSent: string[] = []

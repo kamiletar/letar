@@ -103,41 +103,55 @@ export default function FriendsPage() {
                 </HStack>
               </Heading>
 
-              {isLoading ? (
-                <VStack py={8}>
-                  <Spinner />
-                  <Text color="fg.muted">Загрузка...</Text>
-                </VStack>
-              ) : error ? (
-                <Text color="red.500">{error}</Text>
-              ) : incomingRequests.length === 0 ? (
-                <VStack py={8} color="fg.muted">
-                  <LuInbox size={48} />
-                  <Text>Нет входящих запросов</Text>
-                </VStack>
-              ) : (
-                <VStack gap={3} align="stretch">
-                  {incomingRequests.map((request) => (
-                    <HStack key={request.id} p={4} bg="bg.subtle" borderRadius="md" justify="space-between">
-                      <VStack align="start" gap={1}>
-                        <Text fontWeight="medium">{request.fromDisplayName}</Text>
-                        <Text fontSize="sm" color="fg.muted" fontFamily="mono">
-                          {request.fromFriendCode}
-                        </Text>
-                      </VStack>
-                      <HStack>
-                        <Button size="sm" colorPalette="green" onClick={() => handleAcceptRequest(request.id)}>
-                          <LuUserCheck />
-                          Принять
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleRejectRequest(request.id)}>
-                          Отклонить
-                        </Button>
+              {isLoading
+                ? (
+                  <VStack py={8}>
+                    <Spinner />
+                    <Text color="fg.muted">Загрузка...</Text>
+                  </VStack>
+                )
+                : error
+                ? <Text color="red.500">{error}</Text>
+                : incomingRequests.length === 0
+                ? (
+                  <VStack py={8} color="fg.muted">
+                    <LuInbox size={48} />
+                    <Text>Нет входящих запросов</Text>
+                  </VStack>
+                )
+                : (
+                  <VStack gap={3} align="stretch">
+                    {incomingRequests.map((request) => (
+                      <HStack key={request.id} p={4} bg="bg.subtle" borderRadius="md" justify="space-between">
+                        <VStack align="start" gap={1}>
+                          <Text fontWeight="medium">{request.fromDisplayName}</Text>
+                          <Text fontSize="sm" color="fg.muted" fontFamily="mono">
+                            {request.fromFriendCode}
+                          </Text>
+                        </VStack>
+                        <HStack>
+                          <Button
+                            size="sm"
+                            colorPalette="green"
+                            onClick={() =>
+                              handleAcceptRequest(request.id)}
+                          >
+                            <LuUserCheck />
+                            Принять
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              handleRejectRequest(request.id)}
+                          >
+                            Отклонить
+                          </Button>
+                        </HStack>
                       </HStack>
-                    </HStack>
-                  ))}
-                </VStack>
-              )}
+                    ))}
+                  </VStack>
+                )}
             </Box>
           </Tabs.Content>
 
@@ -151,31 +165,35 @@ export default function FriendsPage() {
                 </HStack>
               </Heading>
 
-              {isLoading ? (
-                <VStack py={8}>
-                  <Spinner />
-                  <Text color="fg.muted">Загрузка...</Text>
-                </VStack>
-              ) : outgoingRequests.length === 0 ? (
-                <VStack py={8} color="fg.muted">
-                  <LuSend size={48} />
-                  <Text>Нет исходящих запросов</Text>
-                </VStack>
-              ) : (
-                <VStack gap={3} align="stretch">
-                  {outgoingRequests.map((request) => (
-                    <HStack key={request.id} p={4} bg="bg.subtle" borderRadius="md" justify="space-between">
-                      <VStack align="start" gap={1}>
-                        <Text fontWeight="medium">Запрос отправлен</Text>
-                        <Text fontSize="sm" color="fg.muted" fontFamily="mono">
-                          {request.toPeerId}
-                        </Text>
-                      </VStack>
-                      <Badge colorPalette="yellow">Ожидает ответа</Badge>
-                    </HStack>
-                  ))}
-                </VStack>
-              )}
+              {isLoading
+                ? (
+                  <VStack py={8}>
+                    <Spinner />
+                    <Text color="fg.muted">Загрузка...</Text>
+                  </VStack>
+                )
+                : outgoingRequests.length === 0
+                ? (
+                  <VStack py={8} color="fg.muted">
+                    <LuSend size={48} />
+                    <Text>Нет исходящих запросов</Text>
+                  </VStack>
+                )
+                : (
+                  <VStack gap={3} align="stretch">
+                    {outgoingRequests.map((request) => (
+                      <HStack key={request.id} p={4} bg="bg.subtle" borderRadius="md" justify="space-between">
+                        <VStack align="start" gap={1}>
+                          <Text fontWeight="medium">Запрос отправлен</Text>
+                          <Text fontSize="sm" color="fg.muted" fontFamily="mono">
+                            {request.toPeerId}
+                          </Text>
+                        </VStack>
+                        <Badge colorPalette="yellow">Ожидает ответа</Badge>
+                      </HStack>
+                    ))}
+                  </VStack>
+                )}
             </Box>
           </Tabs.Content>
         </Tabs.Root>

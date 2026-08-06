@@ -80,7 +80,7 @@ export function useTableClipboard({
         added++
       }
     },
-    [disabled, readOnly, canAdd, columns, maxRows, currentRowCount, pushRow]
+    [disabled, readOnly, canAdd, columns, maxRows, currentRowCount, pushRow],
   )
 
   /**
@@ -95,7 +95,7 @@ export function useTableClipboard({
       const tsv = buildTSV(rows, columns, selectedRows)
       e.clipboardData?.setData('text/plain', tsv)
     },
-    [selectedRows, rows, columns]
+    [selectedRows, rows, columns],
   )
 
   return { handlePaste, handleCopy }

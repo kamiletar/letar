@@ -78,19 +78,21 @@ export function AlbumsList({ albums }: AlbumsListProps) {
           >
             {/* Обложка */}
             <Box h={32} bg="brand.950" position="relative">
-              {album.coverImage ? (
-                <Image
-                  src={album.coverImage.startsWith('http') ? album.coverImage : `/api/files/${album.coverImage}`}
-                  alt={album.title}
-                  w="full"
-                  h="full"
-                  objectFit="cover"
-                />
-              ) : (
-                <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.600">
-                  <LuBookOpen size={36} />
-                </Box>
-              )}
+              {album.coverImage
+                ? (
+                  <Image
+                    src={album.coverImage.startsWith('http') ? album.coverImage : `/api/files/${album.coverImage}`}
+                    alt={album.title}
+                    w="full"
+                    h="full"
+                    objectFit="cover"
+                  />
+                )
+                : (
+                  <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.600">
+                    <LuBookOpen size={36} />
+                  </Box>
+                )}
             </Box>
 
             {/* Информация */}
@@ -105,12 +107,11 @@ export function AlbumsList({ albums }: AlbumsListProps) {
               </HStack>
 
               <Text fontSize="xs" color="fg.muted">
-                {album._count.albumPoems}{' '}
-                {album._count.albumPoems === 1
+                {album._count.albumPoems} {album._count.albumPoems === 1
                   ? 'стихотворение'
                   : album._count.albumPoems < 5
-                    ? 'стихотворения'
-                    : 'стихотворений'}
+                  ? 'стихотворения'
+                  : 'стихотворений'}
               </Text>
 
               <HStack gap={1} w="full" justify="flex-end">

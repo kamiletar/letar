@@ -112,7 +112,7 @@ async function renderDrumkit(patch: DrumkitPatch): Promise<AudioBuffer> {
         }
         const buffer = await engine.decodeAudioData(stored.data.slice(0))
         engine.setSampleBuffer(pad.sample.sampleId, buffer)
-      })
+      }),
   )
 
   const suspends: Promise<void>[] = []
@@ -127,7 +127,7 @@ async function renderDrumkit(patch: DrumkitPatch): Promise<AudioBuffer> {
       ctx.suspend(at).then(() => {
         engine.trigger(pad, 1)
         return ctx.resume()
-      })
+      }),
     )
   }
 

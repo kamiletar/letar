@@ -33,11 +33,10 @@ export async function createProduct(data: CreateProductInput): Promise<MutationR
         inStock: (parsed.data.stock ?? 1) > 0, // Вычисляется автоматически
         // Создаём ProductImage записи
         images: {
-          create:
-            parsed.data.productImages?.map((img) => ({
-              imageId: img.imageId,
-              order: img.order,
-            })) ?? [],
+          create: parsed.data.productImages?.map((img) => ({
+            imageId: img.imageId,
+            order: img.order,
+          })) ?? [],
         },
       },
     })

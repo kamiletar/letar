@@ -67,7 +67,7 @@ export function PatchLibrary({ type, currentPatch, onLoad }: PatchLibraryProps) 
       e.stopPropagation()
       void deletePatch(id).then(refresh)
     },
-    [refresh]
+    [refresh],
   )
 
   const handlePublish = useCallback((patch: Patch, e: React.MouseEvent) => {

@@ -68,7 +68,7 @@ async function upsert(table: string, data: Record<string, any>, uniqueCol: strin
 
   await pool.query(
     `INSERT INTO "${table}" (${colList}) VALUES (${valList}) ON CONFLICT ("${uniqueCol}") DO NOTHING`,
-    vals
+    vals,
   )
 
   const result = await pool.query(`SELECT "id" FROM "${table}" WHERE "${uniqueCol}" = $1 LIMIT 1`, [data[uniqueCol]])
@@ -85,7 +85,7 @@ async function upsertComposite(table: string, data: Record<string, any>, uniqueC
 
   await pool.query(
     `INSERT INTO "${table}" (${colList}) VALUES (${valList}) ON CONFLICT (${conflictList}) DO NOTHING`,
-    vals
+    vals,
   )
 
   const whereParts = uniqueCols.map((c, i) => `"${c}" = $${i + 1}`)
@@ -98,7 +98,7 @@ async function upsertComposite(table: string, data: Record<string, any>, uniqueC
 async function insertIfNotExists(
   table: string,
   data: Record<string, any>,
-  checkCols: string[]
+  checkCols: string[],
 ): Promise<string | null> {
   const checkParts = checkCols.map((c, i) => `"${c}" = $${i + 1}`)
   const checkVals = checkCols.map((c) => data[c])
@@ -147,7 +147,7 @@ async function main() {
         cityId,
         address: v.address || null,
       }),
-      'slug'
+      'slug',
     )
     venueMap.set(v.name, id)
   }
@@ -167,7 +167,7 @@ async function main() {
       transferWindowOpen: false,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
 
   const s2Id = await upsert(
@@ -182,7 +182,7 @@ async function main() {
       transferWindowOpen: false,
       showLiveScore: true,
     }),
-    'slug'
+    'slug',
   )
   console.log(`  С1: ${s1Id}, С2: ${s2Id}`)
 
@@ -196,7 +196,7 @@ async function main() {
       name: 'Основная',
       order: 1,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
 
   const s2VLId = await upsertComposite(
@@ -207,7 +207,7 @@ async function main() {
       name: 'Высшая Лига',
       order: 1,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
 
   const s2PLId = await upsertComposite(
@@ -218,7 +218,7 @@ async function main() {
       name: 'Первая Лига',
       order: 2,
     },
-    ['seasonId', 'name']
+    ['seasonId', 'name'],
   )
 
   // 5. Круги
@@ -231,7 +231,7 @@ async function main() {
       name: 'Круг 1',
       number: 1,
     },
-    ['seasonId', 'number']
+    ['seasonId', 'number'],
   )
 
   const s2RoundId = await upsertComposite(
@@ -242,7 +242,7 @@ async function main() {
       name: 'Круг 1',
       number: 1,
     },
-    ['seasonId', 'number']
+    ['seasonId', 'number'],
   )
 
   // 6. Туры С2
@@ -257,7 +257,7 @@ async function main() {
         roundId: s2RoundId,
         number: i,
       },
-      ['roundId', 'number']
+      ['roundId', 'number'],
     )
     s2TourMap.set(i, tourId)
   }
@@ -272,7 +272,7 @@ async function main() {
         roundId: s1RoundId,
         number: i,
       },
-      ['roundId', 'number']
+      ['roundId', 'number'],
     )
     s1TourMap.set(i, tourId)
   }
@@ -334,7 +334,7 @@ async function main() {
         previousNames: previousNames.length > 0 ? `{${previousNames.join(',')}}` : '{}',
         description: teamPage?.description || null,
       }),
-      'slug'
+      'slug',
     )
 
     teamMap.set(name, teamId)
@@ -367,7 +367,7 @@ async function main() {
             name: cleanName,
             slug,
           }),
-          'slug'
+          'slug',
         )
         playerMap.set(cleanName, playerId)
       } catch (err) {
@@ -398,7 +398,7 @@ async function main() {
         seasonId: s2Id,
         leagueId: s2VLId,
       },
-      ['teamId', 'seasonId']
+      ['teamId', 'seasonId'],
     )
     tsMap.set(`${name}:s2`, id)
   }
@@ -420,7 +420,7 @@ async function main() {
         seasonId: s2Id,
         leagueId: s2PLId,
       },
-      ['teamId', 'seasonId']
+      ['teamId', 'seasonId'],
     )
     tsMap.set(`${name}:s2`, id)
   }
@@ -448,7 +448,7 @@ async function main() {
         seasonId: s1Id,
         leagueId: s1LeagueId,
       },
-      ['teamId', 'seasonId']
+      ['teamId', 'seasonId'],
     )
     tsMap.set(`${name}:s1`, id)
   }
@@ -491,7 +491,7 @@ async function main() {
             role,
             joinedAt: NOW,
           },
-          ['playerId', 'teamSeasonId']
+          ['playerId', 'teamSeasonId'],
         )
         ptsCount++
       } catch (err) {
@@ -543,7 +543,7 @@ async function main() {
         homeCoachToken: cuid(),
         awayCoachToken: cuid(),
       }),
-      ['tourId', 'homeTeamId', 'awayTeamId']
+      ['tourId', 'homeTeamId', 'awayTeamId'],
     )
 
     if (matchId) {
@@ -599,7 +599,7 @@ async function main() {
         homeCoachToken: cuid(),
         awayCoachToken: cuid(),
       }),
-      ['tourId', 'homeTeamId', 'awayTeamId']
+      ['tourId', 'homeTeamId', 'awayTeamId'],
     )
 
     if (matchId) {

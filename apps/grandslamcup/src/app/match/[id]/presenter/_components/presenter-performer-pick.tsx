@@ -49,7 +49,7 @@ export function PresenterPerformerPick({ match, matchState }: PresenterPerformer
 
   // Игроки, уже выступавшие в текущем тайме
   const playedInHalfNames = new Set(
-    match.performances.filter((p) => p.half === half && p.teamSeasonId === pickingTeam.id).map((p) => p.playerName)
+    match.performances.filter((p) => p.half === half && p.teamSeasonId === pickingTeam.id).map((p) => p.playerName),
   )
 
   const handlePick = useCallback(
@@ -63,7 +63,7 @@ export function PresenterPerformerPick({ match, matchState }: PresenterPerformer
       }
       router.refresh()
     },
-    [match.id, pickingTeam.id, pickingTeam.name, router]
+    [match.id, pickingTeam.id, pickingTeam.name, router],
   )
 
   const handleStart = useCallback(async () => {
@@ -87,82 +87,84 @@ export function PresenterPerformerPick({ match, matchState }: PresenterPerformer
         <Text color="fg.muted">{performerIndex === 0 ? 'Первый поэт пары' : 'Второй поэт пары'}</Text>
       </Box>
 
-      {currentPerf ? (
-        // Поэт выбран — показываем имя и кнопку старта
-        <VStack gap={4} align="stretch">
-          <Box bg="blue.subtle" p={6} borderRadius="xl" borderWidth="2px" borderColor="blue.solid" textAlign="center">
-            <Badge colorPalette={pickingTeamIsHome ? 'blue' : 'orange'} size="lg" mb={3}>
-              {currentPerf.teamName}
-            </Badge>
-            <Heading size="4xl" mb={2}>
-              🎤 {currentPerf.playerName}
-            </Heading>
-            <Text color="fg.muted">Готов к выступлению</Text>
-          </Box>
+      {currentPerf
+        ? (
+          // Поэт выбран — показываем имя и кнопку старта
+          <VStack gap={4} align="stretch">
+            <Box bg="blue.subtle" p={6} borderRadius="xl" borderWidth="2px" borderColor="blue.solid" textAlign="center">
+              <Badge colorPalette={pickingTeamIsHome ? 'blue' : 'orange'} size="lg" mb={3}>
+                {currentPerf.teamName}
+              </Badge>
+              <Heading size="4xl" mb={2}>
+                🎤 {currentPerf.playerName}
+              </Heading>
+              <Text color="fg.muted">Готов к выступлению</Text>
+            </Box>
 
-          {error && (
-            <Text color="red.fg" fontSize="sm" textAlign="center">
-              {error}
-            </Text>
-          )}
+            {error && (
+              <Text color="red.fg" fontSize="sm" textAlign="center">
+                {error}
+              </Text>
+            )}
 
-          <Button size="2xl" colorPalette="blue" onClick={handleStart} loading={pending} py={8} fontSize="xl">
-            ▶ Начать выступление
-          </Button>
-        </VStack>
-      ) : (
-        // Выбор поэта — большие кнопки по одной на строку
-        <VStack gap={3} align="stretch">
-          <Box
-            textAlign="center"
-            bg="yellow.subtle"
-            p={4}
-            borderRadius="xl"
-            borderWidth="2px"
-            borderColor="yellow.solid"
-          >
-            <Heading size="lg" mb={1}>
-              {pickingTeam.name}
-            </Heading>
-            <Text fontSize="sm" color="fg.muted">
-              Выберите поэта
-            </Text>
-          </Box>
+            <Button size="2xl" colorPalette="blue" onClick={handleStart} loading={pending} py={8} fontSize="xl">
+              ▶ Начать выступление
+            </Button>
+          </VStack>
+        )
+        : (
+          // Выбор поэта — большие кнопки по одной на строку
+          <VStack gap={3} align="stretch">
+            <Box
+              textAlign="center"
+              bg="yellow.subtle"
+              p={4}
+              borderRadius="xl"
+              borderWidth="2px"
+              borderColor="yellow.solid"
+            >
+              <Heading size="lg" mb={1}>
+                {pickingTeam.name}
+              </Heading>
+              <Text fontSize="sm" color="fg.muted">
+                Выберите поэта
+              </Text>
+            </Box>
 
-          {pickingTeam.players.map((player) => {
-            const alreadyPlayed = playedInHalfNames.has(player.name)
-            return (
-              <Button
-                key={player.id}
-                size="2xl"
-                variant={alreadyPlayed ? 'ghost' : 'outline'}
-                disabled={alreadyPlayed || pending}
-                onClick={() => handlePick(player.id, player.name)}
-                w="full"
-                py={7}
-                fontSize="xl"
-                whiteSpace="normal"
-                h="auto"
-              >
-                <VStack gap={1}>
-                  <Text>{player.name}</Text>
-                  {alreadyPlayed && (
-                    <Badge size="sm" colorPalette="gray">
-                      уже выступал
-                    </Badge>
-                  )}
-                </VStack>
-              </Button>
-            )
-          })}
+            {pickingTeam.players.map((player) => {
+              const alreadyPlayed = playedInHalfNames.has(player.name)
+              return (
+                <Button
+                  key={player.id}
+                  size="2xl"
+                  variant={alreadyPlayed ? 'ghost' : 'outline'}
+                  disabled={alreadyPlayed || pending}
+                  onClick={() => handlePick(player.id, player.name)}
+                  w="full"
+                  py={7}
+                  fontSize="xl"
+                  whiteSpace="normal"
+                  h="auto"
+                >
+                  <VStack gap={1}>
+                    <Text>{player.name}</Text>
+                    {alreadyPlayed && (
+                      <Badge size="sm" colorPalette="gray">
+                        уже выступал
+                      </Badge>
+                    )}
+                  </VStack>
+                </Button>
+              )
+            })}
 
-          {error && (
-            <Text color="red.fg" fontSize="sm" textAlign="center">
-              {error}
-            </Text>
-          )}
-        </VStack>
-      )}
+            {error && (
+              <Text color="red.fg" fontSize="sm" textAlign="center">
+                {error}
+              </Text>
+            )}
+          </VStack>
+        )}
     </VStack>
   )
 }

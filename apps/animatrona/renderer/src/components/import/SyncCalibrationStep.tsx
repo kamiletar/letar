@@ -177,13 +177,11 @@ export function SyncCalibrationStep({
           value={syncOffset}
           onChange={onSyncOffsetChange}
           label="Смещение донора"
-          hint={
-            syncOffset === 0
-              ? 'Синхронизация не требуется'
-              : syncOffset > 0
-                ? `Донор опережает на ${syncOffset}мс → обрезаем начало дорожек`
-                : `Донор отстаёт на ${Math.abs(syncOffset)}мс → добавляем тишину в начало`
-          }
+          hint={syncOffset === 0
+            ? 'Синхронизация не требуется'
+            : syncOffset > 0
+            ? `Донор опережает на ${syncOffset}мс → обрезаем начало дорожек`
+            : `Донор отстаёт на ${Math.abs(syncOffset)}мс → добавляем тишину в начало`}
           showButtons
         />
       </Box>
@@ -258,8 +256,9 @@ export function SyncCalibrationStep({
       {showPlayer && (
         <Box p={3} bg="bg.panel" borderRadius="md">
           <Text fontSize="xs" color="fg.subtle" textAlign="center">
-            <strong>Горячие клавиши:</strong> Space — play/pause • ←/→ — ±10мс • Shift+←/→ — ±100мс • Ctrl+←/→ — ±1000мс
-            • Home — сброс • D — скрыть донор • M — звук • F — полноэкранный
+            <strong>Горячие клавиши:</strong>{' '}
+            Space — play/pause • ←/→ — ±10мс • Shift+←/→ — ±100мс • Ctrl+←/→ — ±1000мс • Home — сброс • D — скрыть донор
+            • M — звук • F — полноэкранный
           </Text>
         </Box>
       )}

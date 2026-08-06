@@ -197,52 +197,52 @@ export default function AppLogsPage({ params: paramsPromise }: { params: Promise
               maxH="70vh"
               overflowY="auto"
             >
-              {filteredLogs.length === 0 ? (
-                <Text color="gray.500">No logs to display</Text>
-              ) : (
-                <VStack align="stretch" gap="1">
-                  {filteredLogs.map((log, idx) => {
-                    if (log.type === 'connected') {
-                      return (
-                        <Text key={idx} color="blue.300">
-                          Connected to {log.containerName}
-                        </Text>
-                      )
-                    }
+              {filteredLogs.length === 0
+                ? <Text color="gray.500">No logs to display</Text>
+                : (
+                  <VStack align="stretch" gap="1">
+                    {filteredLogs.map((log, idx) => {
+                      if (log.type === 'connected') {
+                        return (
+                          <Text key={idx} color="blue.300">
+                            Connected to {log.containerName}
+                          </Text>
+                        )
+                      }
 
-                    if (log.type === 'end') {
-                      return (
-                        <Text key={idx} color="yellow.300">
-                          Stream ended
-                        </Text>
-                      )
-                    }
+                      if (log.type === 'end') {
+                        return (
+                          <Text key={idx} color="yellow.300">
+                            Stream ended
+                          </Text>
+                        )
+                      }
 
-                    if (log.type === 'error') {
-                      return (
-                        <Text key={idx} color="red.300">
-                          Error: {log.message}
-                        </Text>
-                      )
-                    }
+                      if (log.type === 'error') {
+                        return (
+                          <Text key={idx} color="red.300">
+                            Error: {log.message}
+                          </Text>
+                        )
+                      }
 
-                    return (
-                      <HStack key={idx} gap="2" alignItems="flex-start" wordBreak="break-all">
-                        <Text color="gray.500" flexShrink={0}>
-                          [{formatTime(log.timestamp)}]
-                        </Text>
-                        <Badge colorPalette={log.stream === 'stderr' ? 'red' : 'blue'} size="xs" flexShrink={0}>
-                          {log.stream}
-                        </Badge>
-                        <Text flex="1" color={log.stream === 'stderr' ? 'red.200' : 'green.200'}>
-                          {log.message}
-                        </Text>
-                      </HStack>
-                    )
-                  })}
-                  <div ref={logsEndRef} />
-                </VStack>
-              )}
+                      return (
+                        <HStack key={idx} gap="2" alignItems="flex-start" wordBreak="break-all">
+                          <Text color="gray.500" flexShrink={0}>
+                            [{formatTime(log.timestamp)}]
+                          </Text>
+                          <Badge colorPalette={log.stream === 'stderr' ? 'red' : 'blue'} size="xs" flexShrink={0}>
+                            {log.stream}
+                          </Badge>
+                          <Text flex="1" color={log.stream === 'stderr' ? 'red.200' : 'green.200'}>
+                            {log.message}
+                          </Text>
+                        </HStack>
+                      )
+                    })}
+                    <div ref={logsEndRef} />
+                  </VStack>
+                )}
             </Box>
           </Card.Body>
         </Card.Root>

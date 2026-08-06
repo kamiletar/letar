@@ -91,7 +91,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setItems([])
       },
     }),
-    []
+    [],
   )
 
   // Данные корзины — меняются при изменении items

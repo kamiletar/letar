@@ -130,7 +130,7 @@ export function getFederationSettings(): StoredFederationSettings {
  * Обновить настройки федерации
  */
 export function updateFederationSettings(
-  update: Partial<Omit<StoredFederationSettings, 'hasPrivateKey'>>
+  update: Partial<Omit<StoredFederationSettings, 'hasPrivateKey'>>,
 ): StoredFederationSettings {
   const current = getFederationSettings()
   const updated: StoredFederationSettings = {
@@ -285,7 +285,7 @@ export function updateTrackerMetrics(
     avgResponseTimeMs?: number
     contentQuality?: number
     lastCheckedAt?: string
-  }
+  },
 ): StoredTracker | undefined {
   return updateTracker(id, metrics)
 }
@@ -298,7 +298,7 @@ export function updateTrackerSyncStats(
   stats: {
     contentSynced?: number
     lastSyncAt?: string
-  }
+  },
 ): StoredTracker | undefined {
   return updateTracker(id, stats)
 }

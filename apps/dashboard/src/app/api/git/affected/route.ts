@@ -7,6 +7,6 @@ import { NextResponse } from 'next/server'
 export function GET() {
   return NextResponse.json(
     { success: false, error: 'Not implemented. Dashboard has no direct git/Nx access.' },
-    { status: 501 }
+    { status: 501 },
   )
 }

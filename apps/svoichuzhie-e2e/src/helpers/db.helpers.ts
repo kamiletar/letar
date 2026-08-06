@@ -136,7 +136,7 @@ export async function ensureTestProduct(): Promise<TestProduct> {
 /** Создаёт оплаченный заказ с ненулевой deliveryCost для проверки страницы /merch/orders/[token]. */
 export async function createTestOrderWithDelivery(
   product: TestProduct,
-  deliveryCost: number
+  deliveryCost: number,
 ): Promise<{ accessToken: string }> {
   const db = (await getPrisma()) as any
 

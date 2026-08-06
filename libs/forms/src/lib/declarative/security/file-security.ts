@@ -96,7 +96,7 @@ export async function detectMimeType(file: File): Promise<string | null> {
  */
 export async function validateMimeType(
   file: File,
-  allowedTypes: string[]
+  allowedTypes: string[],
 ): Promise<{ valid: boolean; detectedMime: string | null; reason?: string }> {
   const detectedMime = await detectMimeType(file)
 
@@ -174,7 +174,7 @@ export async function stripExifMetadata(file: File): Promise<File> {
           resolve(new File([blob], file.name, { type: outputType, lastModified: Date.now() }))
         },
         outputType,
-        quality
+        quality,
       )
     }
 

@@ -275,7 +275,7 @@ describe('parseEpisodeNumber', () => {
     // Kimetsu no Yaiba — формат ` - XX [`
     it('[VCB-Studio] Kimetsu no Yaiba - Mugen Ressha-Hen - 01 [BDRip 1080p x265 FLAC].mkv', () => {
       expect(
-        parseEpisodeNumber('[VCB-Studio] Kimetsu no Yaiba - Mugen Ressha-Hen - 01 [BDRip 1080p x265 FLAC].mkv')
+        parseEpisodeNumber('[VCB-Studio] Kimetsu no Yaiba - Mugen Ressha-Hen - 01 [BDRip 1080p x265 FLAC].mkv'),
       ).toBe(1)
     })
 
@@ -288,15 +288,15 @@ describe('parseEpisodeNumber', () => {
     it('[anti-raws]Danganronpa - Kibou no Gakuen to Zetsubou no Koukousei The Animation ep.01[BDRemux].mkv', () => {
       expect(
         parseEpisodeNumber(
-          '[anti-raws]Danganronpa - Kibou no Gakuen to Zetsubou no Koukousei The Animation ep.01[BDRemux].mkv'
-        )
+          '[anti-raws]Danganronpa - Kibou no Gakuen to Zetsubou no Koukousei The Animation ep.01[BDRemux].mkv',
+        ),
       ).toBe(1)
     })
 
     // Danganronpa 3 — формат ep.XX
     it('[anti-raws]Danganronpa 3 The End of Kibougamine Gakuen - Mirai Hen ep.12[BDRemux].mkv', () => {
       expect(
-        parseEpisodeNumber('[anti-raws]Danganronpa 3 The End of Kibougamine Gakuen - Mirai Hen ep.12[BDRemux].mkv')
+        parseEpisodeNumber('[anti-raws]Danganronpa 3 The End of Kibougamine Gakuen - Mirai Hen ep.12[BDRemux].mkv'),
       ).toBe(12)
     })
 

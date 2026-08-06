@@ -14,9 +14,7 @@ export function ProjectsSection() {
           {projectCategories.map((category) => (
             <CategoryBlock key={category.title} title={category.title} defaultCollapsed={category.defaultCollapsed}>
               <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={4}>
-                {category.projects.map((project) => (
-                  <ProjectCard key={project.name} project={project} />
-                ))}
+                {category.projects.map((project) => <ProjectCard key={project.name} project={project} />)}
               </SimpleGrid>
             </CategoryBlock>
           ))}

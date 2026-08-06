@@ -64,12 +64,11 @@ export const GpuWorkerCard = memo(
         boxShadow: useCpuFallback
           ? '0 0 20px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           : '0 0 20px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        animation:
-          !prefersReducedMotion && progress > 0 && progress < 100
-            ? `${pulseAnimation} 2s ease-in-out infinite`
-            : undefined,
+        animation: !prefersReducedMotion && progress > 0 && progress < 100
+          ? `${pulseAnimation} 2s ease-in-out infinite`
+          : undefined,
       }),
-      [useCpuFallback, progress, prefersReducedMotion]
+      [useCpuFallback, progress, prefersReducedMotion],
     )
 
     return (
@@ -211,5 +210,5 @@ export const GpuWorkerCard = memo(
     }
 
     return true
-  }
+  },
 )

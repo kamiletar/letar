@@ -85,7 +85,7 @@ export function ConversationalMode({
         state.next()
       }
     },
-    [state, onComplete]
+    [state, onComplete],
   )
 
   // Завершённое состояние
@@ -142,15 +142,17 @@ export function ConversationalMode({
           <Text fontSize="xs" color="fg.muted">
             Enter ↵
           </Text>
-          {state.isLast ? (
-            <Button colorPalette="blue" onClick={onComplete} size="sm">
-              {submitLabel}
-            </Button>
-          ) : (
-            <Button colorPalette="blue" onClick={state.next} size="sm">
-              {nextLabel} →
-            </Button>
-          )}
+          {state.isLast
+            ? (
+              <Button colorPalette="blue" onClick={onComplete} size="sm">
+                {submitLabel}
+              </Button>
+            )
+            : (
+              <Button colorPalette="blue" onClick={state.next} size="sm">
+                {nextLabel} →
+              </Button>
+            )}
         </HStack>
       </Flex>
     </VStack>

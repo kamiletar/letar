@@ -34,22 +34,18 @@ export function PressableButton({
       position="relative"
       overflow="hidden"
       data-pressable
-      onPointerDown={
-        isDisabled
-          ? undefined
-          : (e) => {
-              onPointerDown(e)
-              externalOnPointerDown?.(e)
-            }
-      }
+      onPointerDown={isDisabled
+        ? undefined
+        : (e) => {
+          onPointerDown(e)
+          externalOnPointerDown?.(e)
+        }}
       disabled={disabled}
       loading={loading}
       {...props}
     >
       {children}
-      {ripples.map((r) => (
-        <RippleEl key={r.id} x={r.x} y={r.y} size={r.size} />
-      ))}
+      {ripples.map((r) => <RippleEl key={r.id} x={r.x} y={r.y} size={r.size} />)}
     </Button>
   )
 }

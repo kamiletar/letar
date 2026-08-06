@@ -17,7 +17,7 @@ describe('FieldEditable', () => {
           <Form initialValue={{ title: 'Заголовок' }} onSubmit={vi.fn()}>
             <Form.Field.Editable name="title" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Заголовок')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldEditable', () => {
           <Form initialValue={{ title: '' }} onSubmit={vi.fn()}>
             <Form.Field.Editable name="title" label="Название" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Название')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('FieldEditable', () => {
           <Form initialValue={{ title: '' }} onSubmit={vi.fn()}>
             <Form.Field.Editable name="title" placeholder="Нажмите для редактирования" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Нажмите для редактирования')).toBeInTheDocument()
@@ -55,7 +55,7 @@ describe('FieldEditable', () => {
           <Form initialValue={{ title: 'Текст' }} onSubmit={vi.fn()}>
             <Form.Field.Editable name="title" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Editable в disabled режиме не должен быть интерактивным

@@ -19,17 +19,17 @@ export function DiffRow({ label, oldVal, newVal }: DiffRowProps) {
       <Text fontWeight="semibold" minW="100px">
         {label}:
       </Text>
-      {changed ? (
-        <>
-          <Text color="red.400" textDecoration="line-through">
-            {oldVal || '—'}
-          </Text>
-          <Text>→</Text>
-          <Text color="green.400">{newVal || '—'}</Text>
-        </>
-      ) : (
-        <Text color="fg.muted">{oldVal || '—'}</Text>
-      )}
+      {changed
+        ? (
+          <>
+            <Text color="red.400" textDecoration="line-through">
+              {oldVal || '—'}
+            </Text>
+            <Text>→</Text>
+            <Text color="green.400">{newVal || '—'}</Text>
+          </>
+        )
+        : <Text color="fg.muted">{oldVal || '—'}</Text>}
     </HStack>
   )
 }

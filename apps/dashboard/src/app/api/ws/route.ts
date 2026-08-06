@@ -6,6 +6,6 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   return NextResponse.json(
     { error: 'WebSocket endpoint deprecated. Use /api/stream/unified for SSE streaming.' },
-    { status: 410 }
+    { status: 410 },
   )
 }

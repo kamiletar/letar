@@ -48,77 +48,83 @@ export default async function OrganizersPage({ params }: { params: Params }) {
         )}
       </Flex>
 
-      {organizers.length > 0 ? (
-        <>
-          {/* Сетка карточек организаторов */}
-          <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={5}>
-            {organizers.map((org) => (
-              <Box
-                key={org.slug}
-                borderRadius="2xl"
-                borderWidth="1px"
-                borderColor="border"
-                bg="bg.panel"
-                overflow="hidden"
-                transition="box-shadow 0.15s"
-                _hover={{ boxShadow: 'md' }}
-              >
-                {/* Фото */}
-                <Box position="relative" aspectRatio={1} bg="bg.subtle">
-                  <Image
-                    src={`/organizers/${org.slug}.jpg`}
-                    alt={org.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                </Box>
+      {organizers.length > 0
+        ? (
+          <>
+            {/* Сетка карточек организаторов */}
+            <Box
+              display="grid"
+              gridTemplateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+              gap={5}
+            >
+              {organizers.map((org) => (
+                <Box
+                  key={org.slug}
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  borderColor="border"
+                  bg="bg.panel"
+                  overflow="hidden"
+                  transition="box-shadow 0.15s"
+                  _hover={{ boxShadow: 'md' }}
+                >
+                  {/* Фото */}
+                  <Box position="relative" aspectRatio={1} bg="bg.subtle">
+                    <Image
+                      src={`/organizers/${org.slug}.jpg`}
+                      alt={org.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </Box>
 
-                {/* Текст */}
-                <Box p={4}>
-                  <Flex justify="space-between" align="start" gap={2} mb={1}>
-                    <Text fontWeight="bold" fontSize="lg" lineClamp={1}>
-                      {org.name}
+                  {/* Текст */}
+                  <Box p={4}>
+                    <Flex justify="space-between" align="start" gap={2} mb={1}>
+                      <Text fontWeight="bold" fontSize="lg" lineClamp={1}>
+                        {org.name}
+                      </Text>
+                      {org.socialUrl && (
+                        <Box asChild flexShrink={0} color="fg.muted" _hover={{ color: 'brand.solid' }} mt={0.5}>
+                          <Link
+                            href={org.socialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`Профиль ${org.name}`}
+                          >
+                            <LuExternalLink size={16} />
+                          </Link>
+                        </Box>
+                      )}
+                    </Flex>
+                    <Text fontSize="sm" color="fg.muted" lineClamp={3}>
+                      {org.bio}
                     </Text>
-                    {org.socialUrl && (
-                      <Box asChild flexShrink={0} color="fg.muted" _hover={{ color: 'brand.solid' }} mt={0.5}>
-                        <Link
-                          href={org.socialUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`Профиль ${org.name}`}
-                        >
-                          <LuExternalLink size={16} />
-                        </Link>
-                      </Box>
-                    )}
-                  </Flex>
-                  <Text fontSize="sm" color="fg.muted" lineClamp={3}>
-                    {org.bio}
-                  </Text>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
-          </Box>
+              ))}
+            </Box>
 
-          {/* Дисклеймер */}
-          <Box bg="bg.subtle" borderRadius="xl" px={5} py={4} borderWidth="1px" borderColor="border.muted">
-            <Text fontSize="sm" color="fg.muted" textAlign="center">
-              💾 Оргкомитет отвечает за все организационные вопросы по проведению КБС в Москве, но не влияет на итоговые
-              результаты матчей и оценки команд.
-            </Text>
-          </Box>
-        </>
-      ) : (
-        <VStack py={16} textAlign="center" gap={4}>
-          <Box color="fg.subtle">
-            <LuUsersRound size={48} />
-          </Box>
-          <Heading size="md" color="fg.muted">
-            Информация об оргкомитете появится позже
-          </Heading>
-        </VStack>
-      )}
+            {/* Дисклеймер */}
+            <Box bg="bg.subtle" borderRadius="xl" px={5} py={4} borderWidth="1px" borderColor="border.muted">
+              <Text fontSize="sm" color="fg.muted" textAlign="center">
+                💾 Оргкомитет отвечает за все организационные вопросы по проведению КБС в Москве, но не влияет на
+                итоговые результаты матчей и оценки команд.
+              </Text>
+            </Box>
+          </>
+        )
+        : (
+          <VStack py={16} textAlign="center" gap={4}>
+            <Box color="fg.subtle">
+              <LuUsersRound size={48} />
+            </Box>
+            <Heading size="md" color="fg.muted">
+              Информация об оргкомитете появится позже
+            </Heading>
+          </VStack>
+        )}
     </VStack>
   )
 }

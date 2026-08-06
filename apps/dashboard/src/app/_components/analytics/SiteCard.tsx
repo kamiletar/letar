@@ -1,7 +1,7 @@
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Badge, Card, Link as ChakraLink, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
+import { Badge, Card, HStack, Icon, IconButton, Link as ChakraLink, Spinner, Text } from '@chakra-ui/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { LuCheck, LuExternalLink, LuEye, LuFileDown, LuUser } from 'react-icons/lu'
@@ -94,35 +94,35 @@ export function SiteCard({ site, envConfigured }: SiteCardProps) {
         </Text>
 
         {/* Метрики — одна компактная строка */}
-        {isLoading ? (
-          <Spinner size="xs" />
-        ) : stats ? (
-          <HStack gap="4" fontSize="xs" color="fg.muted">
-            <HStack gap="1">
-              <Icon size="xs">
-                <LuEye />
-              </Icon>
-              <Text fontWeight="medium" color="fg" fontSize="sm">
-                {stats.pageviews.toLocaleString('ru-RU')}
+        {isLoading ? <Spinner size="xs" /> : stats
+          ? (
+            <HStack gap="4" fontSize="xs" color="fg.muted">
+              <HStack gap="1">
+                <Icon size="xs">
+                  <LuEye />
+                </Icon>
+                <Text fontWeight="medium" color="fg" fontSize="sm">
+                  {stats.pageviews.toLocaleString('ru-RU')}
+                </Text>
+              </HStack>
+              <HStack gap="1">
+                <Icon size="xs">
+                  <LuUser />
+                </Icon>
+                <Text fontWeight="medium" color="fg" fontSize="sm">
+                  {stats.visitors.toLocaleString('ru-RU')}
+                </Text>
+              </HStack>
+              <Text ml="auto" fontWeight="medium" fontSize="sm" color={bounceColor(br)}>
+                {br}%
               </Text>
             </HStack>
-            <HStack gap="1">
-              <Icon size="xs">
-                <LuUser />
-              </Icon>
-              <Text fontWeight="medium" color="fg" fontSize="sm">
-                {stats.visitors.toLocaleString('ru-RU')}
-              </Text>
-            </HStack>
-            <Text ml="auto" fontWeight="medium" fontSize="sm" color={bounceColor(br)}>
-              {br}%
+          )
+          : (
+            <Text fontSize="xs" color="fg.muted">
+              Нет данных
             </Text>
-          </HStack>
-        ) : (
-          <Text fontSize="xs" color="fg.muted">
-            Нет данных
-          </Text>
-        )}
+          )}
 
         {/* Ссылки: Umami + записать env */}
         <HStack justify="space-between" mt="2">
@@ -149,11 +149,9 @@ export function SiteCard({ site, envConfigured }: SiteCardProps) {
             colorPalette={envState === 'done' ? 'green' : envConfigured === false ? 'orange' : 'gray'}
             onClick={handleWriteEnv}
             loading={envState === 'writing'}
-            title={
-              envConfigured === false
-                ? 'Umami ID не сохранён — нажми чтобы сохранить'
-                : 'Сохранить Umami Website ID в БД'
-            }
+            title={envConfigured === false
+              ? 'Umami ID не сохранён — нажми чтобы сохранить'
+              : 'Сохранить Umami Website ID в БД'}
           >
             {envState === 'done' ? <LuCheck /> : <LuFileDown />}
           </IconButton>

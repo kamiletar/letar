@@ -24,7 +24,7 @@ export function LocaleSwitcher() {
       router.replace(pathname, { locale: newLocale })
       setIsOpen(false)
     },
-    [router, pathname]
+    [router, pathname],
   )
 
   const handleMouseEnter = () => {

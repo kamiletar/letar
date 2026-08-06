@@ -41,35 +41,37 @@ export function FormStepsIndicator({
     <Steps.List>
       {steps.map((step) => (
         <Steps.Item key={step.index} index={step.index}>
-          {isClickable ? (
-            <Steps.Trigger>
-              <Steps.Indicator>
-                <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
-              </Steps.Indicator>
-              {showDescriptions && step.description ? (
-                <Box>
-                  <Steps.Title>{step.title}</Steps.Title>
-                  <Steps.Description>{step.description}</Steps.Description>
-                </Box>
-              ) : (
-                <Steps.Title>{step.title}</Steps.Title>
-              )}
-            </Steps.Trigger>
-          ) : (
-            <>
-              <Steps.Indicator>
-                <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
-              </Steps.Indicator>
-              {showDescriptions && step.description ? (
-                <Box>
-                  <Steps.Title>{step.title}</Steps.Title>
-                  <Steps.Description>{step.description}</Steps.Description>
-                </Box>
-              ) : (
-                <Steps.Title>{step.title}</Steps.Title>
-              )}
-            </>
-          )}
+          {isClickable
+            ? (
+              <Steps.Trigger>
+                <Steps.Indicator>
+                  <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
+                </Steps.Indicator>
+                {showDescriptions && step.description
+                  ? (
+                    <Box>
+                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Description>{step.description}</Steps.Description>
+                    </Box>
+                  )
+                  : <Steps.Title>{step.title}</Steps.Title>}
+              </Steps.Trigger>
+            )
+            : (
+              <>
+                <Steps.Indicator>
+                  <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
+                </Steps.Indicator>
+                {showDescriptions && step.description
+                  ? (
+                    <Box>
+                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Description>{step.description}</Steps.Description>
+                    </Box>
+                  )
+                  : <Steps.Title>{step.title}</Steps.Title>}
+              </>
+            )}
           <Steps.Separator />
         </Steps.Item>
       ))}

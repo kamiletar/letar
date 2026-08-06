@@ -84,7 +84,7 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
         return newHistory
       })
     },
-    [maxPoints, intervalMs]
+    [maxPoints, intervalMs],
   )
 
   const clearHistory = useCallback(() => {

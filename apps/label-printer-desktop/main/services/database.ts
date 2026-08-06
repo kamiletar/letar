@@ -195,7 +195,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
             INSERT INTO _prisma_migrations (id, checksum, migration_name, started_at, finished_at, applied_steps_count)
             VALUES (?, '', ?, datetime('now'), datetime('now'), 0)
           `,
-            [migrationId, initMigration.name]
+            [migrationId, initMigration.name],
           )
           getLogger().info('[Database] Marked init migration as applied (legacy baseline)', {
             migration: initMigration.name,
@@ -245,7 +245,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
         INSERT INTO _prisma_migrations (id, checksum, migration_name, started_at)
         VALUES (?, '', ?, datetime('now'))
       `,
-        [migrationId, migration.name]
+        [migrationId, migration.name],
       )
 
       // Разбиваем SQL на отдельные команды
@@ -281,7 +281,7 @@ async function applyPrismaMigrations(dbPath: string): Promise<void> {
         SET finished_at = datetime('now'), applied_steps_count = ?
         WHERE id = ?
       `,
-        [stepsApplied, migrationId]
+        [stepsApplied, migrationId],
       )
 
       getLogger().info('[Database] Migration applied', { name: migration.name, steps: stepsApplied })

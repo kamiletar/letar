@@ -133,9 +133,7 @@ export function PlayerRatingTable({ players, citySlug, showDetailedStats = false
                 borderLeftWidth={rank === 1 ? '4px' : undefined}
                 borderLeftColor={rank === 1 ? 'yellow.500' : undefined}
               >
-                {medal ? (
-                  <Text fontSize="md">{medal}</Text>
-                ) : (
+                {medal ? <Text fontSize="md">{medal}</Text> : (
                   <Text fontSize="sm" color="fg.muted" fontWeight="medium">
                     {rank}
                   </Text>

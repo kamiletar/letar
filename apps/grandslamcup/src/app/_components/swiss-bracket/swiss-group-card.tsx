@@ -32,8 +32,11 @@ function getGroupColor(wins: number, losses: number): string {
 
 export function SwissGroupCard({ group, nodeType, teams, citySlug }: SwissGroupCardProps) {
   const isTerminal = nodeType !== 'group'
-  const color =
-    nodeType === 'advanced' ? 'green' : nodeType === 'eliminated' ? 'red' : getGroupColor(group.wins, group.losses)
+  const color = nodeType === 'advanced'
+    ? 'green'
+    : nodeType === 'eliminated'
+    ? 'red'
+    : getGroupColor(group.wins, group.losses)
 
   return (
     <Box
@@ -73,7 +76,9 @@ export function SwissGroupCard({ group, nodeType, teams, citySlug }: SwissGroupC
         )}
         {nodeType === 'group' && group.matches.length > 0 && (
           <Text fontSize={{ base: 'clamp(0.75rem, 3vw, 1rem)', md: '2xs' }} color="fg.subtle">
-            {group.matches.filter((m) => m.status === 'FINISHED').length}/{group.matches.length}
+            {group.matches.filter((m) =>
+              m.status === 'FINISHED'
+            ).length}/{group.matches.length}
           </Text>
         )}
       </Flex>
@@ -83,9 +88,7 @@ export function SwissGroupCard({ group, nodeType, teams, citySlug }: SwissGroupC
         {/* Матчи (для обычных групп) */}
         {nodeType === 'group' && group.matches.length > 0 && (
           <VStack gap={1.5} align="stretch">
-            {group.matches.map((match) => (
-              <SwissMatchCard key={match.matchId} match={match} citySlug={citySlug} />
-            ))}
+            {group.matches.map((match) => <SwissMatchCard key={match.matchId} match={match} citySlug={citySlug} />)}
           </VStack>
         )}
 

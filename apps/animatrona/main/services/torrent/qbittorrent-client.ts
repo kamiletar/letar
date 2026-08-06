@@ -31,7 +31,7 @@ export class QBittorrentAuthError extends Error {
 export class QBittorrentRequestError extends Error {
   constructor(
     message: string,
-    public readonly status: number
+    public readonly status: number,
   ) {
     super(message)
     this.name = 'QBittorrentRequestError'
@@ -413,7 +413,7 @@ export class QBittorrentClient {
     if (!response.ok) {
       throw new QBittorrentRequestError(
         `${method} ${path} failed: HTTP ${response.status} ${response.statusText}`,
-        response.status
+        response.status,
       )
     }
 

@@ -64,7 +64,7 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
         setLoadingMore(false)
       }
     },
-    [animeId]
+    [animeId],
   )
 
   useEffect(() => {
@@ -106,73 +106,79 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
   return (
     <VStack align="stretch" gap={6}>
       {/* Форма нового комментария */}
-      {isAuthenticated ? (
-        <VStack align="stretch" gap={3}>
-          <Textarea
-            placeholder="Напишите комментарий..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            rows={3}
-            maxLength={2000}
-          />
-          <Box>
-            <Button
-              colorPalette="brand"
-              size="sm"
-              onClick={handleSubmit}
-              loading={submitting}
-              disabled={!newComment.trim()}
-            >
-              <Icon as={LuSend} />
-              Отправить
+      {isAuthenticated
+        ? (
+          <VStack align="stretch" gap={3}>
+            <Textarea
+              placeholder="Напишите комментарий..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              rows={3}
+              maxLength={2000}
+            />
+            <Box>
+              <Button
+                colorPalette="brand"
+                size="sm"
+                onClick={handleSubmit}
+                loading={submitting}
+                disabled={!newComment.trim()}
+              >
+                <Icon as={LuSend} />
+                Отправить
+              </Button>
+            </Box>
+          </VStack>
+        )
+        : (
+          <Box p={4} bg="bg.subtle" borderRadius="lg" textAlign="center">
+            <Text color="fg.muted" mb={3}>
+              <Icon as={LuMessageCircle} mr={2} verticalAlign="middle" />
+              Войдите, чтобы оставить комментарий
+            </Text>
+            <Button asChild size="sm" colorPalette="brand" variant="outline">
+              <NextLink href="/sign-in">
+                <Icon as={LuLogIn} />
+                Войти
+              </NextLink>
             </Button>
           </Box>
-        </VStack>
-      ) : (
-        <Box p={4} bg="bg.subtle" borderRadius="lg" textAlign="center">
-          <Text color="fg.muted" mb={3}>
-            <Icon as={LuMessageCircle} mr={2} verticalAlign="middle" />
-            Войдите, чтобы оставить комментарий
-          </Text>
-          <Button asChild size="sm" colorPalette="brand" variant="outline">
-            <NextLink href="/sign-in">
-              <Icon as={LuLogIn} />
-              Войти
-            </NextLink>
-          </Button>
-        </Box>
-      )}
+        )}
 
       {/* Список комментариев */}
-      {loading ? (
-        <VStack align="stretch" gap={4}>
-          {[1, 2, 3].map((i) => (
-            <Box key={i}>
-              <Skeleton height="16px" width="120px" mb={2} />
-              <Skeleton height="40px" />
-            </Box>
-          ))}
-        </VStack>
-      ) : comments.length === 0 ? (
-        <Box textAlign="center" py={8}>
-          <Icon as={LuMessageCircle} boxSize={8} color="fg.muted" mb={3} />
-          <Text color="fg.muted">Комментариев пока нет. Будьте первым!</Text>
-        </Box>
-      ) : (
-        <VStack align="stretch" gap={4} divideY="1px" divideColor="border.subtle">
-          {comments.map((comment) => (
-            <Box key={comment.id} pt={4} _first={{ pt: 0 }}>
-              <CommentCard
-                comment={comment}
-                currentUserId={currentUserId}
-                currentUserRole={currentUserRole}
-                animeId={animeId}
-                onReplyCreated={handleReplyCreated}
-              />
-            </Box>
-          ))}
-        </VStack>
-      )}
+      {loading
+        ? (
+          <VStack align="stretch" gap={4}>
+            {[1, 2, 3].map((i) => (
+              <Box key={i}>
+                <Skeleton height="16px" width="120px" mb={2} />
+                <Skeleton height="40px" />
+              </Box>
+            ))}
+          </VStack>
+        )
+        : comments.length === 0
+        ? (
+          <Box textAlign="center" py={8}>
+            <Icon as={LuMessageCircle} boxSize={8} color="fg.muted" mb={3} />
+            <Text color="fg.muted">Комментариев пока нет. Будьте первым!</Text>
+          </Box>
+        )
+        : (
+          <VStack align="stretch" gap={4} divideY="1px" divideColor="border.subtle">
+            {comments.map((comment) => (
+              <Box key={comment.id} pt={4} _first={{ pt: 0 }}>
+                <CommentCard
+                  comment={comment}
+                  currentUserId={currentUserId}
+                  currentUserRole={currentUserRole}
+                  animeId={animeId}
+                  onReplyCreated={handleReplyCreated}
+                />
+              </Box>
+            ))}
+          </VStack>
+        )}
 
       {/* Кнопка "Показать ещё" */}
       {nextCursor && (

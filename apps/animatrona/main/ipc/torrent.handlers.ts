@@ -66,7 +66,7 @@ export function registerTorrentHandlers(): void {
     (infoHash: string, update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string }) => {
       getTorrentService().updateMeta(infoHash, update)
       return true
-    }
+    },
   )
 
   // Остановить клиент
@@ -107,6 +107,6 @@ export function registerTorrentHandlers(): void {
         log.warn('qbittorrent:testConnection failed', { error: message })
         return { success: false, error: message }
       }
-    }
+    },
   )
 }

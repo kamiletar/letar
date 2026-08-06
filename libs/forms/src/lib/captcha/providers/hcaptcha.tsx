@@ -34,7 +34,7 @@ export function HcaptchaProvider({
     (token: string) => {
       onSuccess(token)
     },
-    [onSuccess]
+    [onSuccess],
   )
 
   useEffect(() => {

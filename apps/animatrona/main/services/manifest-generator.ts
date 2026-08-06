@@ -143,7 +143,7 @@ function findTrackOverride(overrides: TrackOverride[] | undefined, streamIndex: 
  */
 export async function generateManifestFromDemux(
   demuxResult: DemuxResult,
-  options: GenerateManifestOptions
+  options: GenerateManifestOptions,
 ): Promise<GenerateManifestResult> {
   try {
     const { episodeId, outputDir, animeInfo, audioTrackOverrides, subtitleTrackOverrides } = options
@@ -392,7 +392,7 @@ interface DbSubtitleTrackData {
 export function rebuildManifestTracks(
   manifest: EpisodeManifest,
   dbAudioTracks: DbAudioTrackData[],
-  dbSubtitleTracks: DbSubtitleTrackData[]
+  dbSubtitleTracks: DbSubtitleTrackData[],
 ): { manifest: EpisodeManifest; changed: boolean } {
   let changed = false
 
@@ -428,7 +428,7 @@ export function rebuildManifestTracks(
         isDefault,
         cid,
         dubGroup,
-      }))
+      })),
     )
 
   if (serializeAudio(manifest.audioTracks) !== serializeAudio(newAudioTracks)) {
@@ -455,9 +455,8 @@ export function rebuildManifestTracks(
           name: f.fontName,
           cid: f.fileCid!,
           fileExt: f.fileExt !== 'ttf' ? f.fileExt : undefined,
-          size:
-            manifest.subtitleTracks.flatMap((m) => m.fonts ?? []).find((mf) => mf.cid === f.fileCid)?.size ??
-            (f.ipfsSize || undefined),
+          size: manifest.subtitleTracks.flatMap((m) => m.fonts ?? []).find((mf) => mf.cid === f.fileCid)?.size
+            ?? (f.ipfsSize || undefined),
         })),
     }))
 
@@ -472,7 +471,7 @@ export function rebuildManifestTracks(
         isDefault,
         cid,
         dubGroup,
-      }))
+      })),
     )
 
   if (serializeSub(manifest.subtitleTracks) !== serializeSub(newSubtitleTracks)) {
@@ -492,7 +491,7 @@ export function rebuildManifestTracks(
 export function rebuildManifestTracksFromFile(
   manifestPath: string,
   dbAudioTracks: DbAudioTrackData[],
-  dbSubtitleTracks: DbSubtitleTrackData[]
+  dbSubtitleTracks: DbSubtitleTrackData[],
 ): boolean {
   const manifest = readManifest(manifestPath)
   if (!manifest) {
@@ -533,7 +532,7 @@ export function updateManifestMediaCids(
     sizes?: Record<string, number>
     /** CID metadata.json исходника в IPFS */
     metadataCid?: string
-  }
+  },
 ): boolean {
   try {
     const manifest = readManifest(manifestPath)

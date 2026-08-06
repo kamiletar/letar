@@ -147,7 +147,7 @@ async function fetchIpfsPath<T>(dirCid: string, path: string): Promise<T> {
  */
 async function resolveEpisodeManifestCid(
   directoryCid: string,
-  episodeNumber: number
+  episodeNumber: number,
 ): Promise<{ manifestCid: string; videoCid?: string } | null> {
   // 1. Загружаем AnimeManifest
   const animeManifest = await fetchIpfsPath<AnimeManifest>(directoryCid, 'manifest.json')
@@ -212,8 +212,8 @@ async function loadEpisodeData(manifestCid: string): Promise<DiscoverEpisodeData
   let spriteUrl: string | null = null
   const thumbnails = manifest.thumbnailsCid
     ? await fetchIpfsJson<{ thumbnails: { vttCid: string; spriteCid: string } }>(manifest.thumbnailsCid)
-        .then((d) => d.thumbnails)
-        .catch(() => manifest.thumbnails)
+      .then((d) => d.thumbnails)
+      .catch(() => manifest.thumbnails)
     : manifest.thumbnails
 
   if (thumbnails?.vttCid && thumbnails?.spriteCid) {
@@ -258,7 +258,7 @@ async function loadEpisodeData(manifestCid: string): Promise<DiscoverEpisodeData
 export function useDiscoverEpisode(
   directoryCid: string | null | undefined,
   episodeNumber: number | null | undefined,
-  videoCidFallback: string | null | undefined
+  videoCidFallback: string | null | undefined,
 ) {
   return useQuery<DiscoverEpisodeData | null>({
     queryKey: ['discoverEpisode', directoryCid, episodeNumber, videoCidFallback],

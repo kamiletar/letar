@@ -163,88 +163,93 @@ export function CompletionOverlay({
               </VStack>
 
               {/* Рекомендация сиквела */}
-              {isLoading ? (
-                <Box textAlign="center" py={8}>
-                  <Spinner size="lg" color="purple.400" />
-                  <Text color="whiteAlpha.600" mt={2} fontSize="sm">
-                    Ищем продолжение...
-                  </Text>
-                </Box>
-              ) : suggestion ? (
-                <Box bg="whiteAlpha.100" borderRadius="xl" p={6} border="1px" borderColor="whiteAlpha.200">
-                  <VStack gap={4} align="stretch">
-                    <HStack gap={2}>
-                      <Icon as={LuArrowRight} color="purple.400" />
-                      <Text color="whiteAlpha.800" fontWeight="medium">
-                        Что смотреть дальше
-                      </Text>
-                    </HStack>
-
-                    <HStack gap={4}>
-                      {/* Постер */}
-                      {suggestion.posterPath ? (
-                        <Image
-                          src={toMediaUrl(suggestion.posterPath) ?? undefined}
-                          alt={suggestion.name}
-                          w="80px"
-                          h="120px"
-                          objectFit="cover"
-                          borderRadius="md"
-                          flexShrink={0}
-                        />
-                      ) : (
-                        <Box w="80px" h="120px" bg="whiteAlpha.200" borderRadius="md" flexShrink={0} />
-                      )}
-
-                      {/* Информация */}
-                      <VStack align="start" gap={1} flex={1}>
-                        <Text color="purple.400" fontSize="xs" textTransform="uppercase" fontWeight="bold">
-                          {suggestion.relationLabel}
+              {isLoading
+                ? (
+                  <Box textAlign="center" py={8}>
+                    <Spinner size="lg" color="purple.400" />
+                    <Text color="whiteAlpha.600" mt={2} fontSize="sm">
+                      Ищем продолжение...
+                    </Text>
+                  </Box>
+                )
+                : suggestion
+                ? (
+                  <Box bg="whiteAlpha.100" borderRadius="xl" p={6} border="1px" borderColor="whiteAlpha.200">
+                    <VStack gap={4} align="stretch">
+                      <HStack gap={2}>
+                        <Icon as={LuArrowRight} color="purple.400" />
+                        <Text color="whiteAlpha.800" fontWeight="medium">
+                          Что смотреть дальше
                         </Text>
-                        <Text color="player.control" fontWeight="medium" lineClamp={2}>
-                          {suggestion.name}
-                        </Text>
-                        {suggestion.year && (
-                          <Text color="whiteAlpha.600" fontSize="sm">
-                            {suggestion.year}
+                      </HStack>
+
+                      <HStack gap={4}>
+                        {/* Постер */}
+                        {suggestion.posterPath
+                          ? (
+                            <Image
+                              src={toMediaUrl(suggestion.posterPath) ?? undefined}
+                              alt={suggestion.name}
+                              w="80px"
+                              h="120px"
+                              objectFit="cover"
+                              borderRadius="md"
+                              flexShrink={0}
+                            />
+                          )
+                          : <Box w="80px" h="120px" bg="whiteAlpha.200" borderRadius="md" flexShrink={0} />}
+
+                        {/* Информация */}
+                        <VStack align="start" gap={1} flex={1}>
+                          <Text color="purple.400" fontSize="xs" textTransform="uppercase" fontWeight="bold">
+                            {suggestion.relationLabel}
                           </Text>
-                        )}
-                        <Text color="whiteAlpha.500" fontSize="xs">
-                          {suggestion.reason}
-                        </Text>
-                        {suggestion.isInLibrary && suggestion.loadedEpisodeCount > 0 && (
-                          <Text color="green.400" fontSize="xs">
-                            {suggestion.loadedEpisodeCount} эпизод
-                            {suggestion.loadedEpisodeCount === 1
-                              ? ''
-                              : suggestion.loadedEpisodeCount < 5
+                          <Text color="player.control" fontWeight="medium" lineClamp={2}>
+                            {suggestion.name}
+                          </Text>
+                          {suggestion.year && (
+                            <Text color="whiteAlpha.600" fontSize="sm">
+                              {suggestion.year}
+                            </Text>
+                          )}
+                          <Text color="whiteAlpha.500" fontSize="xs">
+                            {suggestion.reason}
+                          </Text>
+                          {suggestion.isInLibrary && suggestion.loadedEpisodeCount > 0 && (
+                            <Text color="green.400" fontSize="xs">
+                              {suggestion.loadedEpisodeCount} эпизод
+                              {suggestion.loadedEpisodeCount === 1
+                                ? ''
+                                : suggestion.loadedEpisodeCount < 5
                                 ? 'а'
-                                : 'ов'}{' '}
-                            в библиотеке
-                          </Text>
-                        )}
-                      </VStack>
-                    </HStack>
+                                : 'ов'} в библиотеке
+                            </Text>
+                          )}
+                        </VStack>
+                      </HStack>
 
-                    {/* Кнопки действия */}
-                    {suggestion.isInLibrary && suggestion.firstEpisodeId ? (
-                      <Button colorPalette="purple" size="lg" onClick={handleWatchSequel}>
-                        <Icon as={LuPlay} mr={2} />
-                        Смотреть {suggestion.relationLabel.toLowerCase()}
-                      </Button>
-                    ) : (
-                      <Button colorPalette="purple" variant="outline" size="lg" onClick={handleAddToLibrary}>
-                        <Icon as={LuDownload} mr={2} />
-                        Добавить в библиотеку
-                      </Button>
-                    )}
-                  </VStack>
-                </Box>
-              ) : (
-                <Box textAlign="center" py={4}>
-                  <Text color="whiteAlpha.500">Продолжение не найдено</Text>
-                </Box>
-              )}
+                      {/* Кнопки действия */}
+                      {suggestion.isInLibrary && suggestion.firstEpisodeId
+                        ? (
+                          <Button colorPalette="purple" size="lg" onClick={handleWatchSequel}>
+                            <Icon as={LuPlay} mr={2} />
+                            Смотреть {suggestion.relationLabel.toLowerCase()}
+                          </Button>
+                        )
+                        : (
+                          <Button colorPalette="purple" variant="outline" size="lg" onClick={handleAddToLibrary}>
+                            <Icon as={LuDownload} mr={2} />
+                            Добавить в библиотеку
+                          </Button>
+                        )}
+                    </VStack>
+                  </Box>
+                )
+                : (
+                  <Box textAlign="center" py={4}>
+                    <Text color="whiteAlpha.500">Продолжение не найдено</Text>
+                  </Box>
+                )}
 
               {/* Дополнительные действия */}
               <HStack gap={4} justify="center">

@@ -277,7 +277,12 @@ export function UpdateSettingsCardNew() {
                 {skippedVersions.map((version) => (
                   <HStack key={version} justify="space-between" p={2} bg="bg.muted" borderRadius="md">
                     <Text fontSize="sm">v{version}</Text>
-                    <Button size="xs" variant="ghost" onClick={() => unskipVersion(version)}>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() =>
+                        unskipVersion(version)}
+                    >
                       <LuX />
                       Отменить пропуск
                     </Button>

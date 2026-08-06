@@ -11,7 +11,7 @@ import { ALL_SCALE_CODES, type PersonalityTypeCode } from '../_data/personality-
  */
 export function computeClientScores(
   answers: Map<string, number>,
-  questions: QuizQuestionDTO[]
+  questions: QuizQuestionDTO[],
 ): Record<PersonalityTypeCode, number> {
   const raw: Record<string, number> = {}
   const actualMax: Record<string, number> = {}

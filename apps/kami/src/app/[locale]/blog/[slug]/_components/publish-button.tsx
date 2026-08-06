@@ -101,36 +101,38 @@ export function PublishButton({ slug, isAdmin }: PublishButtonProps) {
             )}
 
             {/* Кнопки публикации */}
-            {unpublishedPlatforms.length > 0 ? (
-              <>
-                <Text fontSize="xs" fontWeight="semibold" color="fg.muted">
-                  Опубликовать в
-                </Text>
-                {unpublishedPlatforms.map((platform) => (
+            {unpublishedPlatforms.length > 0
+              ? (
+                <>
+                  <Text fontSize="xs" fontWeight="semibold" color="fg.muted">
+                    Опубликовать в
+                  </Text>
+                  {unpublishedPlatforms.map((platform) => (
+                    <Button
+                      key={platform.id}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handlePublish([platform.id])}
+                      disabled={isPending}
+                    >
+                      {platform.name}
+                    </Button>
+                  ))}
                   <Button
-                    key={platform.id}
                     size="sm"
-                    variant="outline"
-                    onClick={() => handlePublish([platform.id])}
+                    colorPalette="green"
+                    onClick={() => handlePublish(unpublishedPlatforms.map((p) => p.id))}
                     disabled={isPending}
                   >
-                    {platform.name}
+                    {isPending ? 'Публикация...' : 'Во все сразу'}
                   </Button>
-                ))}
-                <Button
-                  size="sm"
-                  colorPalette="green"
-                  onClick={() => handlePublish(unpublishedPlatforms.map((p) => p.id))}
-                  disabled={isPending}
-                >
-                  {isPending ? 'Публикация...' : 'Во все сразу'}
-                </Button>
-              </>
-            ) : (
-              <Text fontSize="sm" color="fg.muted">
-                Опубликовано везде
-              </Text>
-            )}
+                </>
+              )
+              : (
+                <Text fontSize="sm" color="fg.muted">
+                  Опубликовано везде
+                </Text>
+              )}
           </VStack>
         </Box>
       )}

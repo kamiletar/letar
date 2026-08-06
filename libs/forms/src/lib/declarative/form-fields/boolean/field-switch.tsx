@@ -45,14 +45,16 @@ export const FieldSwitch = createField<SwitchFieldProps, boolean>({
         </Switch.Control>
         {resolved.label && (
           <Switch.Label>
-            {resolved.tooltip ? (
-              <HStack gap={1}>
-                <span>{resolved.label}</span>
-                <FieldTooltip {...resolved.tooltip} />
-              </HStack>
-            ) : (
-              resolved.label
-            )}
+            {resolved.tooltip
+              ? (
+                <HStack gap={1}>
+                  <span>{resolved.label}</span>
+                  <FieldTooltip {...resolved.tooltip} />
+                </HStack>
+              )
+              : (
+                resolved.label
+              )}
           </Switch.Label>
         )}
       </Switch.Root>

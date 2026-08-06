@@ -50,31 +50,31 @@ import type { ManifestChapter } from '@/types/electron'
 // Dynamic imports для диалогов — загружаются только при открытии
 const ImportWizardDialog = nextDynamic(
   () => import('@/components/import/ImportWizardDialog').then((mod) => mod.ImportWizardDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const EditAnimeDialog = nextDynamic(
   () => import('@/components/library/EditAnimeDialog').then((mod) => mod.EditAnimeDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const DeleteAnimeDialog = nextDynamic(
   () => import('@/components/library/DeleteAnimeDialog').then((mod) => mod.DeleteAnimeDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const ExportSeriesDialog = nextDynamic(
   () => import('@/components/library/ExportSeriesDialog').then((mod) => mod.ExportSeriesDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const AddTracksWizardDialog = nextDynamic(
   () => import('@/components/add-tracks/AddTracksWizardDialog').then((mod) => mod.AddTracksWizardDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const RestoreTracksDialog = nextDynamic(
   () => import('@/components/restore-tracks/RestoreTracksDialog').then((mod) => mod.RestoreTracksDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 const ReencodeAudioDialog = nextDynamic(
   () => import('@/components/library/reencode').then((mod) => mod.ReencodeAudioDialog),
-  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> }
+  { ssr: false, loading: () => <Spinner size="lg" color="purple.500" /> },
 )
 /** Тип SubtitleTrack с шрифтами */
 type SubtitleTrackWithFonts = SubtitleTrack & {
@@ -130,7 +130,7 @@ export default function AnimePage({ params }: AnimePageProps) {
       const query = params.toString()
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
-    [searchParams, pathname, router]
+    [searchParams, pathname, router],
   )
   const updateAnimeMutation = useUpdateAnime()
   const { data: appSettings } = useFindUniqueSettings({ where: { id: 'default' } })
@@ -292,7 +292,7 @@ export default function AnimePage({ params }: AnimePageProps) {
         })
       }
     },
-    [anime, updateAnimeMutation, queryClient]
+    [anime, updateAnimeMutation, queryClient],
   )
 
   const handlePublishToTracker = useCallback(async () => {
@@ -335,11 +335,10 @@ export default function AnimePage({ params }: AnimePageProps) {
       if (tracks.length === 0) {
         continue
       }
-      const japaneseTrack =
-        tracks.find((t) => t.title?.toLowerCase().includes('оригинал')) ||
-        tracks.find((t) => t.language === 'ja' || t.language === 'jpn') ||
-        tracks.find((t) => t.title?.toLowerCase().includes('japanese')) ||
-        tracks[0]
+      const japaneseTrack = tracks.find((t) => t.title?.toLowerCase().includes('оригинал'))
+        || tracks.find((t) => t.language === 'ja' || t.language === 'jpn')
+        || tracks.find((t) => t.title?.toLowerCase().includes('japanese'))
+        || tracks[0]
       episodesWithAudio.push({ id: ep.id, audioCid: japaneseTrack.transcodedCid!, duration: ep.durationMs })
     }
     if (episodesWithAudio.length < 2) {
@@ -402,10 +401,10 @@ export default function AnimePage({ params }: AnimePageProps) {
   // Наличие битых дорожек
   const hasBrokenTracks = anime?.episodes?.some(
     (ep) =>
-      ep.audioTracks.length === 0 ||
-      ep.audioTracks.some((t) => !t.transcodedCid) ||
-      ep.subtitleTracks.length === 0 ||
-      ep.subtitleTracks.some((t) => !t.fileCid)
+      ep.audioTracks.length === 0
+      || ep.audioTracks.some((t) => !t.transcodedCid)
+      || ep.subtitleTracks.length === 0
+      || ep.subtitleTracks.some((t) => !t.fileCid),
   )
 
   // Открепить контент с диска
@@ -638,16 +637,12 @@ export default function AnimePage({ params }: AnimePageProps) {
               about: <AboutTab animeId={anime.id} shikimoriId={anime.shikimoriId} />,
               tracks: (
                 <TracksTab
-                  audioTracks={
-                    anime.episodes?.flatMap((ep) =>
-                      ep.audioTracks.map((track) => ({ ...track, episodeNumber: ep.number }))
-                    ) || []
-                  }
-                  subtitleTracks={
-                    anime.episodes?.flatMap((ep) =>
-                      ep.subtitleTracks.map((track) => ({ ...track, episodeNumber: ep.number }))
-                    ) || []
-                  }
+                  audioTracks={anime.episodes?.flatMap((ep) =>
+                    ep.audioTracks.map((track) => ({ ...track, episodeNumber: ep.number }))
+                  ) || []}
+                  subtitleTracks={anime.episodes?.flatMap((ep) =>
+                    ep.subtitleTracks.map((track) => ({ ...track, episodeNumber: ep.number }))
+                  ) || []}
                 />
               ),
               related: (
@@ -735,9 +730,8 @@ export default function AnimePage({ params }: AnimePageProps) {
           animeId={anime.id}
           animeName={anime.name}
           animeFolderPath={anime.folderPath ?? ''}
-          episodes={
-            anime.episodes?.map((ep) => ({ id: ep.id, number: ep.number, transcodedCid: ep.transcodedCid })) || []
-          }
+          episodes={anime.episodes?.map((ep) => ({ id: ep.id, number: ep.number, transcodedCid: ep.transcodedCid }))
+            || []}
         />
       )}
       {isRestoreTracksDialogOpen && (
@@ -752,17 +746,15 @@ export default function AnimePage({ params }: AnimePageProps) {
           animeId={anime.id}
           animeName={anime.name}
           animeFolderPath={anime.folderPath ?? ''}
-          episodes={
-            anime.episodes?.map((ep) => ({
-              id: ep.id,
-              number: ep.number,
-              folderPath: ep.folderPath,
-              transcodedCid: ep.transcodedCid,
-              metadataCid: ep.metadataCid,
-              audioTracks: ep.audioTracks,
-              subtitleTracks: ep.subtitleTracks,
-            })) || []
-          }
+          episodes={anime.episodes?.map((ep) => ({
+            id: ep.id,
+            number: ep.number,
+            folderPath: ep.folderPath,
+            transcodedCid: ep.transcodedCid,
+            metadataCid: ep.metadataCid,
+            audioTracks: ep.audioTracks,
+            subtitleTracks: ep.subtitleTracks,
+          })) || []}
         />
       )}
       {isEpisodeNameEditorOpen && (

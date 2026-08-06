@@ -66,7 +66,7 @@ export function createDaDataProvider(config: DaDataConfig): AddressProvider {
           label: s.value,
           value: s.value,
           data: s.data,
-        })
+        }),
       )
     },
   }

@@ -83,7 +83,7 @@ export function TableOfContents() {
           }
         }
       },
-      { rootMargin: '-80px 0px -80% 0px' }
+      { rootMargin: '-80px 0px -80% 0px' },
     )
 
     for (const el of elements) {

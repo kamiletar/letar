@@ -202,8 +202,9 @@ const updateTodo = useMutation({
     const previousTodos = queryClient.getQueryData(['todos'])
 
     // 3. Оптимистично обновить
-    queryClient.setQueryData(['todos'], (old) =>
-      old?.map((todo) => (todo.id === newTodo.id ? { ...todo, ...newTodo } : todo))
+    queryClient.setQueryData(
+      ['todos'],
+      (old) => old?.map((todo) => (todo.id === newTodo.id ? { ...todo, ...newTodo } : todo)),
     )
 
     // 4. Вернуть context для rollback

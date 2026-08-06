@@ -14,7 +14,7 @@ export function escapeHtml(text: string): string {
 /** Ссылка на профиль поэта */
 export function playerLink(
   player: { name: string; slug: string; disambiguation?: string | null },
-  citySlug: string
+  citySlug: string,
 ): string {
   const display = escapeHtml(playerDisplayName(player))
   return `<a href="${SITE_URL}/${citySlug}/players/${player.slug}">${display}</a>`
@@ -42,7 +42,7 @@ export function yandexMapsLink(
   name: string,
   lat?: number | null,
   lng?: number | null,
-  address?: string | null
+  address?: string | null,
 ): string {
   const display = escapeHtml(name + (address ? `, ${address}` : ''))
   if (lat && lng) {

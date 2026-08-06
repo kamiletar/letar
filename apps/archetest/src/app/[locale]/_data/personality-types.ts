@@ -602,7 +602,7 @@ export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES
  * раскрывает полный тест. BAR/DPR (STATE_CODES) исключены — упомянуты отдельно.
  */
 export const TEASER_SCALE_CODES: PersonalityTypeCode[] = ALL_SCALE_CODES.filter(
-  (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code)
+  (code) => !HEXAGRAM_SCALE_CODES.includes(code) && !STATE_CODES.includes(code),
 )
 
 /**
@@ -762,7 +762,7 @@ export const PUBLIC_CONSTRUCT_SCALES: PersonalityTypeCode[] = HEXAGRAM_SCALE_COD
 export function getScaleName(
   code: PersonalityTypeCode,
   options: { audience: ScaleNameAudience; triadAlias?: boolean },
-  isRu: boolean
+  isRu: boolean,
 ): string {
   if (options.triadAlias) {
     const display = DARK_TRIAD_DISPLAY[code]

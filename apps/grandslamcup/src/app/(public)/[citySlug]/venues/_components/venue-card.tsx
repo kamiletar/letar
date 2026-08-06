@@ -33,27 +33,29 @@ export function VenueCard({ slug, name, cityName: _cityName, address, photo, tea
       >
         {/* Фото или плейсхолдер */}
         <Box position="relative" w="full" pt="56%" bg="bg.subtle">
-          {photo ? (
-            <Image
-              src={photo.startsWith('http') ? photo : `/api/files/${photo}`}
-              alt={name}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <Flex
-              position="absolute"
-              inset={0}
-              align="center"
-              justify="center"
-              bg={{ base: 'gray.100', _dark: 'gray.800' }}
-            >
-              <Circle size={14} bg="brand.subtle" color="brand.solid">
-                <LuMapPin size={28} />
-              </Circle>
-            </Flex>
-          )}
+          {photo
+            ? (
+              <Image
+                src={photo.startsWith('http') ? photo : `/api/files/${photo}`}
+                alt={name}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                style={{ objectFit: 'cover' }}
+              />
+            )
+            : (
+              <Flex
+                position="absolute"
+                inset={0}
+                align="center"
+                justify="center"
+                bg={{ base: 'gray.100', _dark: 'gray.800' }}
+              >
+                <Circle size={14} bg="brand.subtle" color="brand.solid">
+                  <LuMapPin size={28} />
+                </Circle>
+              </Flex>
+            )}
         </Box>
 
         {/* Контент */}

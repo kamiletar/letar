@@ -162,20 +162,22 @@ export function ImportFlowSection() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {imageErrors[currentStep] ? (
-                    <VStack h="full" justify="center" color="gray.600">
-                      <Text>Изображение недоступно</Text>
-                    </VStack>
-                  ) : (
-                    <Image
-                      src={step.image}
-                      alt={step.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      onError={() => handleImageError(currentStep)}
-                      sizes="(max-width: 768px) 100vw, 900px"
-                    />
-                  )}
+                  {imageErrors[currentStep]
+                    ? (
+                      <VStack h="full" justify="center" color="gray.600">
+                        <Text>Изображение недоступно</Text>
+                      </VStack>
+                    )
+                    : (
+                      <Image
+                        src={step.image}
+                        alt={step.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        onError={() => handleImageError(currentStep)}
+                        sizes="(max-width: 768px) 100vw, 900px"
+                      />
+                    )}
                 </MotionBox>
               </AnimatePresence>
 

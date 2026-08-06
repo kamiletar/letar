@@ -77,7 +77,7 @@ describe('createForm', () => {
             <AppForm.Field.String name="title" label="Название" />
             <AppForm.Button.Submit>Сохранить</AppForm.Button.Submit>
           </AppForm>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Название')).toBeInTheDocument()
@@ -104,7 +104,7 @@ describe('createForm', () => {
           <AppForm initialValue={{ type: '' }} onSubmit={vi.fn()}>
             <AppForm.Select.Type name="type" label="Тип" />
           </AppForm>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByTestId('select-type')).toHaveTextContent('MockSelect: Тип')
@@ -130,7 +130,7 @@ describe('createForm', () => {
           <AppForm initialValue={{ userId: '' }} onSubmit={vi.fn()}>
             <AppForm.Combobox.User name="userId" label="Пользователь" />
           </AppForm>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByTestId('combobox-userId')).toHaveTextContent('MockCombobox: Пользователь')

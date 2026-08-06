@@ -91,9 +91,7 @@ function ScaleGroup({
       <Text fontSize="xs" fontWeight="bold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
         {title}
       </Text>
-      {codes.map((code) => (
-        <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />
-      ))}
+      {codes.map((code) => <ScaleRow key={code} code={code} score={scores[code] ?? 0} isRu={isRu} />)}
     </VStack>
   )
 }

@@ -16,7 +16,7 @@ export interface GuardOptions {
 export class AuthError extends Error {
   constructor(
     message: string,
-    public code: 'UNAUTHORIZED' | 'FORBIDDEN'
+    public code: 'UNAUTHORIZED' | 'FORBIDDEN',
   ) {
     super(message)
     this.name = 'AuthError'
@@ -51,7 +51,7 @@ export class AuthError extends Error {
  */
 export function createAuthGuards<TSession, TUser extends { role: string }>(
   getSession: () => Promise<TSession | null>,
-  getUserFromSession: (session: TSession) => TUser
+  getUserFromSession: (session: TSession) => TUser,
 ) {
   /**
    * Требует авторизованного пользователя
@@ -79,7 +79,7 @@ export function createAuthGuards<TSession, TUser extends { role: string }>(
    */
   async function requireRole(
     roles: string | string[],
-    options: GuardOptions = {}
+    options: GuardOptions = {},
   ): Promise<{ session: TSession; user: TUser }> {
     const { redirectTo = '/', throwOnError = false } = options
 

@@ -257,7 +257,7 @@ export interface FormPropsWithApi<TData extends object> {
 export type UseQueryHook<TData = any, TInclude = any> = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: { where: { id: string }; include?: TInclude } | any,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   data: TData | undefined
   isLoading: boolean

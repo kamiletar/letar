@@ -85,7 +85,7 @@ export function checkApiAvailable(port: number, retries = 10): Promise<boolean> 
           res.resume()
           log.debug('Kubo API ответил', { statusCode: res.statusCode })
           resolve(res.statusCode === 200)
-        }
+        },
       )
 
       req.on('error', (err) => {

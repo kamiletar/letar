@@ -104,5 +104,5 @@ export const ColorModeButton = forwardRef<HTMLButtonElement, ColorModeButtonProp
         </IconButton>
       </ClientOnly>
     )
-  }
+  },
 )

@@ -59,8 +59,7 @@ function extractLinks(html: string): Set<string> {
     // Внутренняя ссылка типа /slug
     if (href.startsWith('/') && !href.startsWith('//')) {
       slug = href.slice(1).split('#')[0].split('?')[0]
-    }
-    // Полный URL grandslamcup.ru/slug
+    } // Полный URL grandslamcup.ru/slug
     else if (href.includes('grandslamcup.ru/')) {
       const match = href.match(/grandslamcup\.ru\/([a-z0-9/_-]+)/i)
       if (match) {

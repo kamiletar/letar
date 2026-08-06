@@ -54,13 +54,15 @@ export function TelegramSettingsForm({ initialConfig }: TelegramSettingsFormProp
   const [webhookBusy, startWebhook] = useTransition()
   const [testChatId, setTestChatId] = useState('')
   const [cities, setCities] = useState<Array<{ id: string; name: string; telegramChatId: string | null }>>([])
-  const [webhookInfo, setWebhookInfo] = useState<{
-    url: string
-    pendingUpdates: number
-    lastError: string | null
-    lastErrorDate: string | null
-    allowedUpdates: string[]
-  } | null>(null)
+  const [webhookInfo, setWebhookInfo] = useState<
+    {
+      url: string
+      pendingUpdates: number
+      lastError: string | null
+      lastErrorDate: string | null
+      allowedUpdates: string[]
+    } | null
+  >(null)
 
   useEffect(() => {
     getCitiesWithChatIdAction().then((result) => {
@@ -369,8 +371,9 @@ export function TelegramSettingsForm({ initialConfig }: TelegramSettingsFormProp
       {/* Подсказка */}
       <Box p={4} bg="bg.subtle" borderRadius="md">
         <Text fontSize="sm" color="fg.muted">
-          <b>Chat ID каналов</b> настраивается в разделе «Города» — у каждого города свой канал. Бот должен быть
-          добавлен администратором канала.
+          <b>Chat ID каналов</b>{' '}
+          настраивается в разделе «Города» — у каждого города свой канал. Бот должен быть добавлен администратором
+          канала.
         </Text>
       </Box>
     </VStack>

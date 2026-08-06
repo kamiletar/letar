@@ -81,7 +81,7 @@ describe('runDoctor', () => {
     expect(report.ready).toBe(false)
     const failedIds = report.checks.filter((c) => !c.passed).map((c) => c.id)
     expect(failedIds).toEqual(
-      expect.arrayContaining(['no-container-name', 'no-ports', 'network-alias', 'deploy-tag-image', 'rollout-label'])
+      expect.arrayContaining(['no-container-name', 'no-ports', 'network-alias', 'deploy-tag-image', 'rollout-label']),
     )
     // healthcheck уже есть на этом приложении (сессия №53) — не должен фигурировать среди провалов
     expect(failedIds).not.toContain('healthcheck')

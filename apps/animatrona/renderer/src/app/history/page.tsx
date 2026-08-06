@@ -204,24 +204,214 @@ export default function HistoryPage() {
 
           {/* История библиотеки */}
           <Tabs.Content value="library">
-            {libraryLoading && libraryPage === 0 ? (
-              <VStack py={12}>
-                <Spinner size="xl" color="purple.500" />
-                <Text color="fg.muted">Загрузка истории...</Text>
-              </VStack>
-            ) : libraryHistory && libraryHistory.items.length > 0 ? (
-              <VStack gap={3} align="stretch">
-                {libraryHistory.items.map((item) => {
-                  const durationSec = item.durationMs ? item.durationMs / 1000 : 0
-                  const progressPercent = durationSec > 0 ? Math.min(100, (item.currentTime / durationSec) * 100) : 0
+            {libraryLoading && libraryPage === 0
+              ? (
+                <VStack py={12}>
+                  <Spinner size="xl" color="purple.500" />
+                  <Text color="fg.muted">Загрузка истории...</Text>
+                </VStack>
+              )
+              : libraryHistory && libraryHistory.items.length > 0
+              ? (
+                <VStack gap={3} align="stretch">
+                  {libraryHistory.items.map((item) => {
+                    const durationSec = item.durationMs ? item.durationMs / 1000 : 0
+                    const progressPercent = durationSec > 0 ? Math.min(100, (item.currentTime / durationSec) * 100) : 0
 
-                  return (
-                    <Link key={item.id} href={`/watch/${item.episodeId}`}>
+                    return (
+                      <Link key={item.id} href={`/watch/${item.episodeId}`}>
+                        <Card.Root
+                          bg="bg.panel"
+                          border="1px"
+                          borderColor="border"
+                          _hover={{ borderColor: 'primary.muted', bg: 'state.hover' }}
+                          transition="all 0.15s ease-out"
+                          cursor="pointer"
+                        >
+                          <Card.Body p={4}>
+                            <HStack gap={4}>
+                              {/* Информация */}
+                              <VStack flex={1} align="start" gap={1} minW={0}>
+                                <Text fontWeight="medium" lineClamp={1}>
+                                  {item.animeName}
+                                </Text>
+                                <Text fontSize="sm" color="fg.muted">
+                                  Эпизод {item.episodeNumber}
+                                  {item.episodeName ? ` — ${item.episodeName}` : ''}
+                                </Text>
+                                <HStack fontSize="xs" color="fg.subtle" gap={2}>
+                                  <Text>
+                                    {formatTime(item.currentTime)}
+                                    {durationSec > 0 && ` / ${formatTime(durationSec)}`}
+                                  </Text>
+                                  <Text>•</Text>
+                                  <Text>
+                                    {formatDistanceToNow(new Date(item.lastWatchedAt), {
+                                      addSuffix: true,
+                                      locale: ru,
+                                    })}
+                                  </Text>
+                                </HStack>
+                              </VStack>
+
+                              {/* Прогресс и кнопка */}
+                              <VStack gap={2} align="end">
+                                {item.completed
+                                  ? <Badge colorPalette="green">Просмотрено</Badge>
+                                  : <Badge colorPalette="blue">{Math.round(progressPercent)}%</Badge>}
+                                <Button size="sm" colorPalette="purple">
+                                  <Icon as={LuPlay} mr={1} />
+                                  Продолжить
+                                </Button>
+                              </VStack>
+                            </HStack>
+
+                            {/* Прогресс бар */}
+                            {!item.completed && (
+                              <Box mt={3}>
+                                <Box h="3px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
+                                  <Box
+                                    w={`${progressPercent}%`}
+                                    h="full"
+                                    bg="primary.solid"
+                                    transition="width 0.3s ease"
+                                  />
+                                </Box>
+                              </Box>
+                            )}
+                          </Card.Body>
+                        </Card.Root>
+                      </Link>
+                    )
+                  })}
+
+                  {/* Кнопка загрузки ещё */}
+                  {libraryHistory.hasMore && (
+                    <Button
+                      variant="outline"
+                      onClick={handleLoadMore}
+                      loading={libraryLoading}
+                      alignSelf="center"
+                      mt={4}
+                    >
+                      Загрузить ещё
+                    </Button>
+                  )}
+                </VStack>
+              )
+              : (
+                <VStack py={12} gap={4}>
+                  <Icon as={LuLibrary} boxSize={16} color="fg.subtle" />
+                  <Heading size="md" color="fg.muted">
+                    История пуста
+                  </Heading>
+                  <Text color="fg.subtle">Начните смотреть аниме из библиотеки</Text>
+                  <Link href="/library">
+                    <Button colorPalette="purple">Перейти в библиотеку</Button>
+                  </Link>
+                </VStack>
+              )}
+          </Tabs.Content>
+
+          {/* История папок */}
+          <Tabs.Content value="folders">
+            {folderHistory.length > 0
+              ? (
+                <VStack gap={3} align="stretch">
+                  {folderHistory.map((entry) => (
+                    <Card.Root
+                      key={entry.folderPath}
+                      bg="bg.panel"
+                      border="1px"
+                      borderColor="border"
+                      _hover={{ borderColor: 'primary.muted', bg: 'state.hover' }}
+                      transition="all 0.15s ease-out"
+                    >
+                      <Card.Body p={4}>
+                        <HStack gap={4}>
+                          {/* Иконка */}
+                          <Box p={3} borderRadius="md" bg="bg.muted">
+                            <Icon as={LuFolderOpen} boxSize={6} color="primary.solid" />
+                          </Box>
+
+                          {/* Информация */}
+                          <VStack flex={1} align="start" gap={1} minW={0}>
+                            <Text fontWeight="medium" lineClamp={1} title={entry.folderName}>
+                              {entry.folderName}
+                            </Text>
+                            <HStack fontSize="sm" color="fg.muted" gap={2}>
+                              <Text>
+                                {entry.episodeCount} эпизод{getEpisodeSuffix(entry.episodeCount)}
+                              </Text>
+                              <Text>•</Text>
+                              <Text>
+                                {formatDistanceToNow(new Date(entry.lastOpenedAt), {
+                                  addSuffix: true,
+                                  locale: ru,
+                                })}
+                              </Text>
+                            </HStack>
+                            <Text fontSize="xs" color="fg.subtle" lineClamp={1} title={entry.folderPath}>
+                              {entry.folderPath}
+                            </Text>
+                          </VStack>
+
+                          {/* Кнопки */}
+                          <HStack gap={2}>
+                            <Link href={`/player?folder=${encodeURIComponent(entry.folderPath)}`}>
+                              <Button size="sm" colorPalette="purple">
+                                <Icon as={LuPlay} mr={1} />
+                                Открыть
+                              </Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              colorPalette="red"
+                              onClick={() => handleRemoveFolder(entry.folderPath)}
+                            >
+                              <Icon as={LuTrash2} />
+                            </Button>
+                          </HStack>
+                        </HStack>
+                      </Card.Body>
+                    </Card.Root>
+                  ))}
+                </VStack>
+              )
+              : (
+                <VStack py={12} gap={4}>
+                  <Icon as={LuFolderOpen} boxSize={16} color="fg.subtle" />
+                  <Heading size="md" color="fg.muted">
+                    История пуста
+                  </Heading>
+                  <Text color="fg.subtle">Откройте папку с видео в плеере</Text>
+                  <Link href="/player">
+                    <Button colorPalette="purple">Открыть плеер</Button>
+                  </Link>
+                </VStack>
+              )}
+          </Tabs.Content>
+
+          {/* Раздел "Смотрел" — аниме с прогрессом */}
+          <Tabs.Content value="watched">
+            {watchedLoading && watchedPage === 0
+              ? (
+                <VStack py={12}>
+                  <Spinner size="xl" color="green.500" />
+                  <Text color="fg.muted">Загрузка...</Text>
+                </VStack>
+              )
+              : watchedAnime && watchedAnime.items.length > 0
+              ? (
+                <VStack gap={3} align="stretch">
+                  {watchedAnime.items.map((item) => (
+                    <Link key={item.animeId} href={`/library/${item.animeId}`}>
                       <Card.Root
                         bg="bg.panel"
                         border="1px"
                         borderColor="border"
-                        _hover={{ borderColor: 'primary.muted', bg: 'state.hover' }}
+                        _hover={{ borderColor: 'green.muted', bg: 'state.hover' }}
                         transition="all 0.15s ease-out"
                         cursor="pointer"
                       >
@@ -232,15 +422,19 @@ export default function HistoryPage() {
                               <Text fontWeight="medium" lineClamp={1}>
                                 {item.animeName}
                               </Text>
-                              <Text fontSize="sm" color="fg.muted">
-                                Эпизод {item.episodeNumber}
-                                {item.episodeName ? ` — ${item.episodeName}` : ''}
-                              </Text>
-                              <HStack fontSize="xs" color="fg.subtle" gap={2}>
+                              <HStack fontSize="sm" color="fg.muted" gap={2}>
                                 <Text>
-                                  {formatTime(item.currentTime)}
-                                  {durationSec > 0 && ` / ${formatTime(durationSec)}`}
+                                  {item.watchedEpisodes} / {item.totalEpisodes} эпизод
+                                  {getEpisodeSuffix(item.totalEpisodes)}
                                 </Text>
+                                {item.inProgressEpisodes > 0 && (
+                                  <Badge colorPalette="blue" size="sm">
+                                    +{item.inProgressEpisodes} в процессе
+                                  </Badge>
+                                )}
+                              </HStack>
+                              <HStack fontSize="xs" color="fg.subtle" gap={2}>
+                                <Text>Эпизод {item.lastEpisodeNumber}</Text>
                                 <Text>•</Text>
                                 <Text>
                                   {formatDistanceToNow(new Date(item.lastWatchedAt), {
@@ -251,14 +445,33 @@ export default function HistoryPage() {
                               </HStack>
                             </VStack>
 
-                            {/* Прогресс и кнопка */}
+                            {/* Прогресс и статус */}
                             <VStack gap={2} align="end">
-                              {item.completed ? (
-                                <Badge colorPalette="green">Просмотрено</Badge>
-                              ) : (
-                                <Badge colorPalette="blue">{Math.round(progressPercent)}%</Badge>
-                              )}
-                              <Button size="sm" colorPalette="purple">
+                              <Badge
+                                colorPalette={item.watchStatus === 'COMPLETED'
+                                  ? 'green'
+                                  : item.watchStatus === 'WATCHING'
+                                  ? 'blue'
+                                  : item.watchStatus === 'ON_HOLD'
+                                  ? 'yellow'
+                                  : item.watchStatus === 'DROPPED'
+                                  ? 'red'
+                                  : 'gray'}
+                              >
+                                {item.watchStatus === 'NOT_STARTED'
+                                  ? 'Не начато'
+                                  : item.watchStatus === 'WATCHING'
+                                  ? 'Смотрю'
+                                  : item.watchStatus === 'COMPLETED'
+                                  ? 'Просмотрено'
+                                  : item.watchStatus === 'ON_HOLD'
+                                  ? 'Отложено'
+                                  : item.watchStatus === 'DROPPED'
+                                  ? 'Брошено'
+                                  : 'Запланировано'}
+                              </Badge>
+                              <Badge colorPalette="purple">{item.overallProgress}%</Badge>
+                              <Button size="sm" colorPalette="green">
                                 <Icon as={LuPlay} mr={1} />
                                 Продолжить
                               </Button>
@@ -266,13 +479,13 @@ export default function HistoryPage() {
                           </HStack>
 
                           {/* Прогресс бар */}
-                          {!item.completed && (
+                          {item.overallProgress < 100 && (
                             <Box mt={3}>
                               <Box h="3px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
                                 <Box
-                                  w={`${progressPercent}%`}
+                                  w={`${item.overallProgress}%`}
                                   h="full"
-                                  bg="primary.solid"
+                                  bg="green.solid"
                                   transition="width 0.3s ease"
                                 />
                               </Box>
@@ -281,235 +494,34 @@ export default function HistoryPage() {
                         </Card.Body>
                       </Card.Root>
                     </Link>
-                  )
-                })}
+                  ))}
 
-                {/* Кнопка загрузки ещё */}
-                {libraryHistory.hasMore && (
-                  <Button variant="outline" onClick={handleLoadMore} loading={libraryLoading} alignSelf="center" mt={4}>
-                    Загрузить ещё
-                  </Button>
-                )}
-              </VStack>
-            ) : (
-              <VStack py={12} gap={4}>
-                <Icon as={LuLibrary} boxSize={16} color="fg.subtle" />
-                <Heading size="md" color="fg.muted">
-                  История пуста
-                </Heading>
-                <Text color="fg.subtle">Начните смотреть аниме из библиотеки</Text>
-                <Link href="/library">
-                  <Button colorPalette="purple">Перейти в библиотеку</Button>
-                </Link>
-              </VStack>
-            )}
-          </Tabs.Content>
-
-          {/* История папок */}
-          <Tabs.Content value="folders">
-            {folderHistory.length > 0 ? (
-              <VStack gap={3} align="stretch">
-                {folderHistory.map((entry) => (
-                  <Card.Root
-                    key={entry.folderPath}
-                    bg="bg.panel"
-                    border="1px"
-                    borderColor="border"
-                    _hover={{ borderColor: 'primary.muted', bg: 'state.hover' }}
-                    transition="all 0.15s ease-out"
-                  >
-                    <Card.Body p={4}>
-                      <HStack gap={4}>
-                        {/* Иконка */}
-                        <Box p={3} borderRadius="md" bg="bg.muted">
-                          <Icon as={LuFolderOpen} boxSize={6} color="primary.solid" />
-                        </Box>
-
-                        {/* Информация */}
-                        <VStack flex={1} align="start" gap={1} minW={0}>
-                          <Text fontWeight="medium" lineClamp={1} title={entry.folderName}>
-                            {entry.folderName}
-                          </Text>
-                          <HStack fontSize="sm" color="fg.muted" gap={2}>
-                            <Text>
-                              {entry.episodeCount} эпизод{getEpisodeSuffix(entry.episodeCount)}
-                            </Text>
-                            <Text>•</Text>
-                            <Text>
-                              {formatDistanceToNow(new Date(entry.lastOpenedAt), {
-                                addSuffix: true,
-                                locale: ru,
-                              })}
-                            </Text>
-                          </HStack>
-                          <Text fontSize="xs" color="fg.subtle" lineClamp={1} title={entry.folderPath}>
-                            {entry.folderPath}
-                          </Text>
-                        </VStack>
-
-                        {/* Кнопки */}
-                        <HStack gap={2}>
-                          <Link href={`/player?folder=${encodeURIComponent(entry.folderPath)}`}>
-                            <Button size="sm" colorPalette="purple">
-                              <Icon as={LuPlay} mr={1} />
-                              Открыть
-                            </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            colorPalette="red"
-                            onClick={() => handleRemoveFolder(entry.folderPath)}
-                          >
-                            <Icon as={LuTrash2} />
-                          </Button>
-                        </HStack>
-                      </HStack>
-                    </Card.Body>
-                  </Card.Root>
-                ))}
-              </VStack>
-            ) : (
-              <VStack py={12} gap={4}>
-                <Icon as={LuFolderOpen} boxSize={16} color="fg.subtle" />
-                <Heading size="md" color="fg.muted">
-                  История пуста
-                </Heading>
-                <Text color="fg.subtle">Откройте папку с видео в плеере</Text>
-                <Link href="/player">
-                  <Button colorPalette="purple">Открыть плеер</Button>
-                </Link>
-              </VStack>
-            )}
-          </Tabs.Content>
-
-          {/* Раздел "Смотрел" — аниме с прогрессом */}
-          <Tabs.Content value="watched">
-            {watchedLoading && watchedPage === 0 ? (
-              <VStack py={12}>
-                <Spinner size="xl" color="green.500" />
-                <Text color="fg.muted">Загрузка...</Text>
-              </VStack>
-            ) : watchedAnime && watchedAnime.items.length > 0 ? (
-              <VStack gap={3} align="stretch">
-                {watchedAnime.items.map((item) => (
-                  <Link key={item.animeId} href={`/library/${item.animeId}`}>
-                    <Card.Root
-                      bg="bg.panel"
-                      border="1px"
-                      borderColor="border"
-                      _hover={{ borderColor: 'green.muted', bg: 'state.hover' }}
-                      transition="all 0.15s ease-out"
-                      cursor="pointer"
+                  {/* Кнопка загрузки ещё */}
+                  {watchedAnime.hasMore && (
+                    <Button
+                      variant="outline"
+                      onClick={handleLoadMoreWatched}
+                      loading={watchedLoading}
+                      alignSelf="center"
+                      mt={4}
                     >
-                      <Card.Body p={4}>
-                        <HStack gap={4}>
-                          {/* Информация */}
-                          <VStack flex={1} align="start" gap={1} minW={0}>
-                            <Text fontWeight="medium" lineClamp={1}>
-                              {item.animeName}
-                            </Text>
-                            <HStack fontSize="sm" color="fg.muted" gap={2}>
-                              <Text>
-                                {item.watchedEpisodes} / {item.totalEpisodes} эпизод
-                                {getEpisodeSuffix(item.totalEpisodes)}
-                              </Text>
-                              {item.inProgressEpisodes > 0 && (
-                                <Badge colorPalette="blue" size="sm">
-                                  +{item.inProgressEpisodes} в процессе
-                                </Badge>
-                              )}
-                            </HStack>
-                            <HStack fontSize="xs" color="fg.subtle" gap={2}>
-                              <Text>Эпизод {item.lastEpisodeNumber}</Text>
-                              <Text>•</Text>
-                              <Text>
-                                {formatDistanceToNow(new Date(item.lastWatchedAt), {
-                                  addSuffix: true,
-                                  locale: ru,
-                                })}
-                              </Text>
-                            </HStack>
-                          </VStack>
-
-                          {/* Прогресс и статус */}
-                          <VStack gap={2} align="end">
-                            <Badge
-                              colorPalette={
-                                item.watchStatus === 'COMPLETED'
-                                  ? 'green'
-                                  : item.watchStatus === 'WATCHING'
-                                    ? 'blue'
-                                    : item.watchStatus === 'ON_HOLD'
-                                      ? 'yellow'
-                                      : item.watchStatus === 'DROPPED'
-                                        ? 'red'
-                                        : 'gray'
-                              }
-                            >
-                              {item.watchStatus === 'NOT_STARTED'
-                                ? 'Не начато'
-                                : item.watchStatus === 'WATCHING'
-                                  ? 'Смотрю'
-                                  : item.watchStatus === 'COMPLETED'
-                                    ? 'Просмотрено'
-                                    : item.watchStatus === 'ON_HOLD'
-                                      ? 'Отложено'
-                                      : item.watchStatus === 'DROPPED'
-                                        ? 'Брошено'
-                                        : 'Запланировано'}
-                            </Badge>
-                            <Badge colorPalette="purple">{item.overallProgress}%</Badge>
-                            <Button size="sm" colorPalette="green">
-                              <Icon as={LuPlay} mr={1} />
-                              Продолжить
-                            </Button>
-                          </VStack>
-                        </HStack>
-
-                        {/* Прогресс бар */}
-                        {item.overallProgress < 100 && (
-                          <Box mt={3}>
-                            <Box h="3px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
-                              <Box
-                                w={`${item.overallProgress}%`}
-                                h="full"
-                                bg="green.solid"
-                                transition="width 0.3s ease"
-                              />
-                            </Box>
-                          </Box>
-                        )}
-                      </Card.Body>
-                    </Card.Root>
+                      Загрузить ещё
+                    </Button>
+                  )}
+                </VStack>
+              )
+              : (
+                <VStack py={12} gap={4}>
+                  <Icon as={LuEye} boxSize={16} color="fg.subtle" />
+                  <Heading size="md" color="fg.muted">
+                    Список пуст
+                  </Heading>
+                  <Text color="fg.subtle">Начните смотреть аниме из библиотеки</Text>
+                  <Link href="/library">
+                    <Button colorPalette="green">Перейти в библиотеку</Button>
                   </Link>
-                ))}
-
-                {/* Кнопка загрузки ещё */}
-                {watchedAnime.hasMore && (
-                  <Button
-                    variant="outline"
-                    onClick={handleLoadMoreWatched}
-                    loading={watchedLoading}
-                    alignSelf="center"
-                    mt={4}
-                  >
-                    Загрузить ещё
-                  </Button>
-                )}
-              </VStack>
-            ) : (
-              <VStack py={12} gap={4}>
-                <Icon as={LuEye} boxSize={16} color="fg.subtle" />
-                <Heading size="md" color="fg.muted">
-                  Список пуст
-                </Heading>
-                <Text color="fg.subtle">Начните смотреть аниме из библиотеки</Text>
-                <Link href="/library">
-                  <Button colorPalette="green">Перейти в библиотеку</Button>
-                </Link>
-              </VStack>
-            )}
+                </VStack>
+              )}
           </Tabs.Content>
         </Tabs.Root>
       </Box>

@@ -150,7 +150,7 @@ export function useSubtitles(options: UseSubtitlesOptions): UseSubtitlesReturn {
         setIsLoading(false)
       }
     },
-    [videoRef]
+    [videoRef],
   )
 
   const show = useCallback(() => {

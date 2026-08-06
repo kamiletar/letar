@@ -152,7 +152,7 @@ export function MandalaCanvas({
       scale: number,
       opacity: number,
       width: number,
-      height: number
+      height: number,
     ) => {
       if (!layer.bgImage) {
         return
@@ -228,7 +228,7 @@ export function MandalaCanvas({
 
       ctx.restore()
     },
-    []
+    [],
   )
 
   // Анимационный цикл

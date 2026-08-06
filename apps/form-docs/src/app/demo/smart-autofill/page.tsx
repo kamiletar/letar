@@ -51,8 +51,8 @@ export default function SmartAutofillDemoPage() {
         <Stack gap={6}>
           <Heading size="xl">Smart Autofill Demo</Heading>
           <Text color="fg.muted">
-            Fields automatically get correct <Code>autocomplete</Code> attributes based on their names. Try browser
-            autofill (Ctrl+Shift+A).
+            Fields automatically get correct <Code>autocomplete</Code>{' '}
+            attributes based on their names. Try browser autofill (Ctrl+Shift+A).
           </Text>
 
           <Form

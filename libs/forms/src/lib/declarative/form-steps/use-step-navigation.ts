@@ -234,7 +234,7 @@ export function useStepNavigation({
         onStepChangeRef.current?.(step)
       }
     },
-    [setInternalStep]
+    [setInternalStep],
   )
 
   // Skip to end (without validation)

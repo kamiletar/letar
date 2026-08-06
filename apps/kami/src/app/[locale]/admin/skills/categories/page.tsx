@@ -73,13 +73,13 @@ export default async function SkillCategoriesPage({ params, searchParams }: Skil
                   </Text>
                 </Table.Cell>
                 <Table.Cell>
-                  {category.icon ? (
-                    <Badge variant="subtle" colorPalette="gray">
-                      {category.icon}
-                    </Badge>
-                  ) : (
-                    <Text color="fg.muted">—</Text>
-                  )}
+                  {category.icon
+                    ? (
+                      <Badge variant="subtle" colorPalette="gray">
+                        {category.icon}
+                      </Badge>
+                    )
+                    : <Text color="fg.muted">—</Text>}
                 </Table.Cell>
                 <Table.Cell>
                   <Badge variant="subtle" colorPalette="purple">

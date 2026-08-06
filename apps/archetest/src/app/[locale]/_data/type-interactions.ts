@@ -742,7 +742,7 @@ export const MOOD_MODIFIERS: MoodModifier[] = [
 /** Найти взаимодействие по паре кодов (порядок не важен) */
 export function getInteraction(code1: PersonalityTypeCode, code2: PersonalityTypeCode): TypeInteraction | undefined {
   return TYPE_INTERACTIONS.find(
-    (i) => (i.type1 === code1 && i.type2 === code2) || (i.type1 === code2 && i.type2 === code1)
+    (i) => (i.type1 === code1 && i.type2 === code2) || (i.type1 === code2 && i.type2 === code1),
   )
 }
 

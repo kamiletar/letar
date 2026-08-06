@@ -9,7 +9,7 @@
  */
 
 import type { ConnectionStatus } from '@/app/_hooks/use-match-sse'
-import { type JudgeColor, JUDGE_COLORS } from '@/lib/judge-colors'
+import { JUDGE_COLORS, type JudgeColor } from '@/lib/judge-colors'
 import type { VotingPhase } from '@/lib/sse/match-state'
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 
@@ -44,12 +44,11 @@ export function WaitingScreen({
   matchStatus,
   connectionStatus,
 }: WaitingScreenProps) {
-  const message =
-    matchStatus === 'FINISHED'
-      ? 'Матч завершён. Спасибо за участие!'
-      : matchStatus === 'SCHEDULED'
-        ? 'Матч ещё не начался. Подождите...'
-        : (MESSAGES[phase] ?? 'Ожидание...')
+  const message = matchStatus === 'FINISHED'
+    ? 'Матч завершён. Спасибо за участие!'
+    : matchStatus === 'SCHEDULED'
+    ? 'Матч ещё не начался. Подождите...'
+    : (MESSAGES[phase] ?? 'Ожидание...')
 
   // Судья в очереди — серый фон
   if (isQueued) {

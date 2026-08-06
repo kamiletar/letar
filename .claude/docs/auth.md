@@ -706,8 +706,7 @@ Server Actions и `proxy.ts` для защиты `/admin/*`. Здесь он в�
 
 ```tsx
 import { AdminEditOverlay } from '@letar/ui'
-
-;<AdminEditOverlay href={`/admin/${slug}`} aria-label="Редактировать" colorPalette="brand" />
+<AdminEditOverlay href={`/admin/${slug}`} aria-label="Редактировать" colorPalette="brand" />
 ```
 
 Для инлайн-кнопки с текстом (не оверлей, а рядом с заголовком) shared-компонента пока нет —
@@ -1074,7 +1073,7 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
       }
       setIsVerifying(false)
     },
-    [email]
+    [email],
   )
 
   // 4. Повторная отправка PIN
@@ -1153,15 +1152,17 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
 
       {/* Повторная отправка с countdown */}
       <Box textAlign="center">
-        {canResend ? (
-          <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
-            Отправить код повторно
-          </Button>
-        ) : (
-          <Text color="fg.muted" fontSize="sm">
-            Отправить повторно через {resendCountdown} сек
-          </Text>
-        )}
+        {canResend
+          ? (
+            <Button variant="ghost" size="sm" onClick={handleResend} loading={isResending}>
+              Отправить код повторно
+            </Button>
+          )
+          : (
+            <Text color="fg.muted" fontSize="sm">
+              Отправить повторно через {resendCountdown} сек
+            </Text>
+          )}
       </Box>
 
       <Text color="fg.muted" fontSize="xs" textAlign="center">
@@ -1379,7 +1380,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           clearInterval(interval)
           controller.close()
         },
-        5 * 60 * 1000
+        5 * 60 * 1000,
       )
     },
   })

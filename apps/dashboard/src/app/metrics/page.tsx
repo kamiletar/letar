@@ -71,49 +71,51 @@ function MetricCard({ metrics }: { metrics: AppMetrics }) {
           </HStack>
 
           {/* Метрики */}
-          {metrics.totalChecks > 0 ? (
-            <SimpleGrid columns={2} gap="4">
-              <Stat.Root>
-                <Stat.Label>Avg Response</Stat.Label>
-                <Stat.ValueText>{formatDuration(metrics.avgResponseTime)}</Stat.ValueText>
-              </Stat.Root>
+          {metrics.totalChecks > 0
+            ? (
+              <SimpleGrid columns={2} gap="4">
+                <Stat.Root>
+                  <Stat.Label>Avg Response</Stat.Label>
+                  <Stat.ValueText>{formatDuration(metrics.avgResponseTime)}</Stat.ValueText>
+                </Stat.Root>
 
-              <Stat.Root>
-                <Stat.Label>Uptime</Stat.Label>
-                <Stat.ValueText>
-                  <Text
-                    as="span"
-                    color={metrics.uptime >= 99 ? 'green.500' : metrics.uptime >= 95 ? 'yellow.500' : 'red.500'}
-                  >
-                    {metrics.uptime}%
-                  </Text>
-                </Stat.ValueText>
-              </Stat.Root>
+                <Stat.Root>
+                  <Stat.Label>Uptime</Stat.Label>
+                  <Stat.ValueText>
+                    <Text
+                      as="span"
+                      color={metrics.uptime >= 99 ? 'green.500' : metrics.uptime >= 95 ? 'yellow.500' : 'red.500'}
+                    >
+                      {metrics.uptime}%
+                    </Text>
+                  </Stat.ValueText>
+                </Stat.Root>
 
-              <Stat.Root>
-                <Stat.Label>Error Rate</Stat.Label>
-                <Stat.ValueText>
-                  <Text
-                    as="span"
-                    color={metrics.errorRate === 0 ? 'green.500' : metrics.errorRate < 5 ? 'yellow.500' : 'red.500'}
-                  >
-                    {metrics.errorRate}%
-                  </Text>
-                </Stat.ValueText>
-              </Stat.Root>
+                <Stat.Root>
+                  <Stat.Label>Error Rate</Stat.Label>
+                  <Stat.ValueText>
+                    <Text
+                      as="span"
+                      color={metrics.errorRate === 0 ? 'green.500' : metrics.errorRate < 5 ? 'yellow.500' : 'red.500'}
+                    >
+                      {metrics.errorRate}%
+                    </Text>
+                  </Stat.ValueText>
+                </Stat.Root>
 
-              <Stat.Root>
-                <Stat.Label>Min/Max</Stat.Label>
-                <Stat.ValueText fontSize="sm">
-                  {formatDuration(metrics.minResponseTime)} / {formatDuration(metrics.maxResponseTime)}
-                </Stat.ValueText>
-              </Stat.Root>
-            </SimpleGrid>
-          ) : (
-            <Text color="gray.500" fontSize="sm">
-              Нет данных. Запустите проверку.
-            </Text>
-          )}
+                <Stat.Root>
+                  <Stat.Label>Min/Max</Stat.Label>
+                  <Stat.ValueText fontSize="sm">
+                    {formatDuration(metrics.minResponseTime)} / {formatDuration(metrics.maxResponseTime)}
+                  </Stat.ValueText>
+                </Stat.Root>
+              </SimpleGrid>
+            )
+            : (
+              <Text color="gray.500" fontSize="sm">
+                Нет данных. Запустите проверку.
+              </Text>
+            )}
 
           {/* Последняя проверка */}
           {metrics.lastCheck && (
@@ -185,32 +187,36 @@ export default function MetricsPage() {
         <HStack justify="space-between" mb="6">
           <Heading>Метрики приложений</Heading>
           <Button colorPalette="blue" onClick={handleRunChecks} disabled={mutation.isPending || isPending}>
-            {mutation.isPending || isPending ? (
-              <>
-                <Spinner size="sm" mr="2" />
-                Проверка...
-              </>
-            ) : (
-              'Запустить проверку'
-            )}
+            {mutation.isPending || isPending
+              ? (
+                <>
+                  <Spinner size="sm" mr="2" />
+                  Проверка...
+                </>
+              )
+              : (
+                'Запустить проверку'
+              )}
           </Button>
         </HStack>
 
-        {isLoading ? (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card.Root key={i}>
-                <Card.Body p="5">
-                  <Spinner />
-                </Card.Body>
-              </Card.Root>
-            ))}
-          </SimpleGrid>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
-            {Array.isArray(data?.metrics) && data.metrics.map((m) => <MetricCard key={m.app} metrics={m} />)}
-          </SimpleGrid>
-        )}
+        {isLoading
+          ? (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card.Root key={i}>
+                  <Card.Body p="5">
+                    <Spinner />
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </SimpleGrid>
+          )
+          : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
+              {Array.isArray(data?.metrics) && data.metrics.map((m) => <MetricCard key={m.app} metrics={m} />)}
+            </SimpleGrid>
+          )}
       </Box>
     </>
   )

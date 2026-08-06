@@ -34,7 +34,7 @@ describe('FieldSegmentedGroup', () => {
           <Form initialValue={{ period: 'day' }} onSubmit={vi.fn()}>
             <Form.Field.SegmentedGroup name="period" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // SegmentGroup рендерит radio элементы
@@ -48,7 +48,7 @@ describe('FieldSegmentedGroup', () => {
           <Form initialValue={{ period: 'day' }} onSubmit={vi.fn()}>
             <Form.Field.SegmentedGroup name="period" label="Период" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Период')).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe('FieldSegmentedGroup', () => {
           <Form initialValue={{ period: 'day' }} onSubmit={vi.fn()}>
             <Form.Field.SegmentedGroup name="period" options={options} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('День')).toBeInTheDocument()

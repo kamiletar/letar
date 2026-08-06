@@ -3,7 +3,7 @@
 import { toaster } from '@/app/_components/ui/toaster'
 import { ArchetestForm } from '@/archetest-form'
 import { Link } from '@/i18n/navigation'
-import { Box, Link as ChakraLink, Checkbox, Text, VStack } from '@chakra-ui/react'
+import { Box, Checkbox, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'

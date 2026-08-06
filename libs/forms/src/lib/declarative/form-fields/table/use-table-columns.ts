@@ -148,7 +148,7 @@ export function useTableColumns(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any,
   arrayPath: string,
-  userColumns?: TableColumnDef[]
+  userColumns?: TableColumnDef[],
 ): ResolvedColumn[] {
   return useMemo(() => {
     // Извлекаем поля элемента массива из schema

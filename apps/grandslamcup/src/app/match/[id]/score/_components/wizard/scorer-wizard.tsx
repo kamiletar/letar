@@ -69,7 +69,7 @@ export function ScorerWizard({ match }: ScorerWizardProps) {
       finalResultsConfirmed,
       performances: match.performances.map((p) => ({ half: p.half, totalScore: p.totalScore })),
     },
-    matchState
+    matchState,
   )
 
   const currentHalf = matchState?.currentHalf ?? 1
@@ -106,7 +106,10 @@ export function ScorerWizard({ match }: ScorerWizardProps) {
         {step === 'HALF_SUMMARY' && <StepHalfSummary match={match} matchState={matchState} />}
         {step === 'INTERMISSION' && <StepIntermission match={match} />}
         {step === 'FINAL_RESULTS' && (
-          <StepFinalResults match={match} onConfirm={() => setFinalResultsConfirmed(true)} />
+          <StepFinalResults
+            match={match}
+            onConfirm={() => setFinalResultsConfirmed(true)}
+          />
         )}
         {step === 'VICTORY_POEM' && <StepVictoryPoem match={match} />}
         {step === 'MATCH_FINISHED' && <StepMatchFinished match={match} />}

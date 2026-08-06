@@ -137,7 +137,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         router.push(`/watch/${id}`)
       }
     },
-    [id, onPlay]
+    [id, onPlay],
   )
 
   // Открыть лайтбокс
@@ -150,7 +150,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         setLightboxOpen(true)
       }
     },
-    [currentIndex, fullScreenshots.length]
+    [currentIndex, fullScreenshots.length],
   )
 
   // Открыть диалог информации о кодировании
@@ -170,7 +170,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         src: toPlayableUrl({ cid }) || '',
         alt: `Эпизод ${number} — кадр ${i + 1}`,
       })),
-    [fullScreenshots, number]
+    [fullScreenshots, number],
   )
 
   // Бейдж статуса — используем константу вместо создания объекта
@@ -197,21 +197,23 @@ export const EpisodeCard = memo(function EpisodeCard({
       >
         {/* Thumbnail (16:9) */}
         <Box position="relative" aspectRatio={16 / 9} cursor="pointer" onClick={handlePlayClick}>
-          {currentThumbnail ? (
-            <Image
-              src={toPlayableUrl({ cid: currentThumbnail }) || undefined}
-              alt={`Эпизод ${number}`}
-              objectFit="cover"
-              w="full"
-              h="full"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <Box w="full" h="full" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
-              <Icon as={LuPlay} boxSize={10} color="fg.subtle" />
-            </Box>
-          )}
+          {currentThumbnail
+            ? (
+              <Image
+                src={toPlayableUrl({ cid: currentThumbnail }) || undefined}
+                alt={`Эпизод ${number}`}
+                objectFit="cover"
+                w="full"
+                h="full"
+                loading="lazy"
+                decoding="async"
+              />
+            )
+            : (
+              <Box w="full" h="full" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
+                <Icon as={LuPlay} boxSize={10} color="fg.subtle" />
+              </Box>
+            )}
 
           {/* Overlay с кнопками при hover */}
           {isHovering && (

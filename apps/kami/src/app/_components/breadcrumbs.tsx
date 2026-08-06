@@ -44,21 +44,23 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
               </Icon>
             </Breadcrumb.Separator>
             <Breadcrumb.Item>
-              {item.href ? (
-                <Breadcrumb.Link
-                  asChild
-                  color="fg.muted"
-                  fontSize="sm"
-                  _hover={{ color: 'fg.500' }}
-                  transition="color 0.2s"
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </Breadcrumb.Link>
-              ) : (
-                <Breadcrumb.CurrentLink fontSize="sm" color="fg" fontWeight="medium">
-                  {item.label}
-                </Breadcrumb.CurrentLink>
-              )}
+              {item.href
+                ? (
+                  <Breadcrumb.Link
+                    asChild
+                    color="fg.muted"
+                    fontSize="sm"
+                    _hover={{ color: 'fg.500' }}
+                    transition="color 0.2s"
+                  >
+                    <Link href={item.href}>{item.label}</Link>
+                  </Breadcrumb.Link>
+                )
+                : (
+                  <Breadcrumb.CurrentLink fontSize="sm" color="fg" fontWeight="medium">
+                    {item.label}
+                  </Breadcrumb.CurrentLink>
+                )}
             </Breadcrumb.Item>
           </Fragment>
         ))}

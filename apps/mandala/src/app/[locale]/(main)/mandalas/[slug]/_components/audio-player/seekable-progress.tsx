@@ -103,7 +103,7 @@ export function SeekableProgress({
       setHoverProgress(newProgress)
       onSeek(newProgress)
     },
-    [getProgressFromEvent, onSeek]
+    [getProgressFromEvent, onSeek],
   )
 
   const handleMouseEnter = useCallback(
@@ -111,7 +111,7 @@ export function SeekableProgress({
       const newProgress = getProgressFromEvent(e.clientX)
       setHoverProgress(newProgress)
     },
-    [getProgressFromEvent]
+    [getProgressFromEvent],
   )
 
   const handleMouseMove = useCallback(
@@ -119,7 +119,7 @@ export function SeekableProgress({
       const newProgress = getProgressFromEvent(e.clientX)
       setHoverProgress(newProgress)
     },
-    [getProgressFromEvent]
+    [getProgressFromEvent],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -137,7 +137,7 @@ export function SeekableProgress({
       const newProgress = getProgressFromEvent(touch.clientX)
       onSeek(newProgress)
     },
-    [getProgressFromEvent, onSeek]
+    [getProgressFromEvent, onSeek],
   )
 
   const handleTouchMove = useCallback(
@@ -149,7 +149,7 @@ export function SeekableProgress({
       const newProgress = getProgressFromEvent(touch.clientX)
       onSeek(newProgress)
     },
-    [getProgressFromEvent, onSeek]
+    [getProgressFromEvent, onSeek],
   )
 
   const handleTouchEnd = useCallback(() => {

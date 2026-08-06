@@ -95,11 +95,11 @@ async function buildRssFeed(): Promise<string> {
       <description>${description}</description>
       <pubDate>${pubDate}</pubDate>
       <guid isPermaLink="true">${link}</guid>${
-        coverUrl
-          ? `
+      coverUrl
+        ? `
       <enclosure url="${escapeXml(coverUrl)}" type="image/jpeg" />`
-          : ''
-      }
+        : ''
+    }
     </item>`
   })
 

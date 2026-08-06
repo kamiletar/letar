@@ -175,9 +175,9 @@ export function FormWithApi<TData extends object>({
   // Restore data from persistence
   useEffect(() => {
     if (
-      !features.isPersistenceEnabled ||
-      !features.persistenceResult.shouldRestore ||
-      !features.persistenceResult.savedData
+      !features.isPersistenceEnabled
+      || !features.persistenceResult.shouldRestore
+      || !features.persistenceResult.savedData
     ) {
       return
     }

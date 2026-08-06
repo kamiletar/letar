@@ -54,7 +54,7 @@ export function SkillCategoryForm({ category, locale }: SkillCategoryFormProps) 
         router.push(`/${locale}/admin/skills/categories`)
       })
     },
-    [isEditing, category, locale, router]
+    [isEditing, category, locale, router],
   )
 
   const handleDelete = useCallback(async () => {
@@ -81,19 +81,19 @@ export function SkillCategoryForm({ category, locale }: SkillCategoryFormProps) 
   // Начальные значения для формы
   const initialValues = category
     ? {
-        name: category.name,
-        nameEn: category.nameEn,
-        slug: category.slug,
-        icon: category.icon ?? '',
-        order: category.order,
-      }
+      name: category.name,
+      nameEn: category.nameEn,
+      slug: category.slug,
+      icon: category.icon ?? '',
+      order: category.order,
+    }
     : {
-        name: '',
-        nameEn: '',
-        slug: '',
-        icon: '',
-        order: 0,
-      }
+      name: '',
+      nameEn: '',
+      slug: '',
+      icon: '',
+      order: 0,
+    }
 
   return (
     <>

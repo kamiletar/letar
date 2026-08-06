@@ -171,9 +171,8 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
                   bg="#2a6a2a"
                   color="white"
                   _hover={{ bg: '#3a8a3a' }}
-                  disabled={
-                    !renameName.trim() || existingNames.some((n, i) => i !== renameIndex && n === renameName.trim())
-                  }
+                  disabled={!renameName.trim()
+                    || existingNames.some((n, i) => i !== renameIndex && n === renameName.trim())}
                   onClick={handleRenameConfirm}
                 >
                   Сохранить

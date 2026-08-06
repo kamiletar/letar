@@ -35,13 +35,15 @@ export function StandingsViewToggle({ currentView }: StandingsViewToggleProps) {
     <HStack gap={0} borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden" alignSelf="start">
       <ToggleButton
         active={currentView === 'table'}
-        onClick={() => toggle('table')}
+        onClick={() =>
+          toggle('table')}
         icon={<LuTable size={14} />}
         label="Таблица"
       />
       <ToggleButton
         active={currentView === 'cross'}
-        onClick={() => toggle('cross')}
+        onClick={() =>
+          toggle('cross')}
         icon={<LuGrid3X3 size={14} />}
         label="Перекрёстная"
       />

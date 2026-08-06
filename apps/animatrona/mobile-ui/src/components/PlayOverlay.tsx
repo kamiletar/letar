@@ -48,9 +48,7 @@ export function PlayOverlay({ visible, episodeName, animeName, isLoading, onPlay
         <Text color="white" fontSize="xl" fontWeight="semibold">
           {episodeName}
         </Text>
-        {isLoading ? (
-          <Spinner size="xl" color="purple.500" />
-        ) : (
+        {isLoading ? <Spinner size="xl" color="purple.500" /> : (
           <IconButton
             aria-label="Воспроизвести"
             size="2xl"

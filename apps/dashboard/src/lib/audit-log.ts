@@ -141,7 +141,7 @@ export async function logSuccess(
   role: string,
   action: AuditAction,
   resource?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ): Promise<void> {
   await logAuditEvent({
     username,
@@ -162,7 +162,7 @@ export async function logFailure(
   action: AuditAction,
   error: string,
   resource?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ): Promise<void> {
   await logAuditEvent({
     username,

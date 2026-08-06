@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useFormAutosave, type FormAutosaveConfig } from './form-autosave'
+import { type FormAutosaveConfig, useFormAutosave } from './form-autosave'
 
 // Мок form объект
 function createMockForm(values: Record<string, unknown> = { name: 'test' }) {
@@ -18,7 +18,7 @@ describe('useFormAutosave', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ id: 'draft-1' }),
-      })
+      }),
     )
     // Мок localStorage
     const store: Record<string, string> = {}
@@ -202,7 +202,7 @@ describe('useFormAutosave', () => {
         vi.fn().mockResolvedValue({
           ok: true,
           json: () => Promise.resolve({ name: 'saved-name', email: 'saved@test.com' }),
-        })
+        }),
       )
 
       const form = createMockForm()

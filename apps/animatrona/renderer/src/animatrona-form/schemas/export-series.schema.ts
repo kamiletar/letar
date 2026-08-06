@@ -70,18 +70,20 @@ export const ExportSeriesSchema = z
     outputDir: z.string().min(1, 'Выберите папку для экспорта'),
 
     /** Паттерн именования файлов */
-    namingPattern: z.enum([
-      // Legacy patterns
-      '[{Anime}] - S{ss}E{nn} - {Episode}',
-      '{Anime} - {nn}',
-      'S{ss}E{nn} - {Episode}',
-      '{Anime} - S{ss}E{nn}',
-      // New patterns (год в начале)
-      '{Year} - {Anime} - S{ss}E{nn}',
-      '{Year} - {Anime}',
-      '{Year} - {Anime} - OVA{nn}',
-      '{Year} - {Anime} - SP{nn}',
-    ] as const),
+    namingPattern: z.enum(
+      [
+        // Legacy patterns
+        '[{Anime}] - S{ss}E{nn} - {Episode}',
+        '{Anime} - {nn}',
+        'S{ss}E{nn} - {Episode}',
+        '{Anime} - S{ss}E{nn}',
+        // New patterns (год в начале)
+        '{Year} - {Anime} - S{ss}E{nn}',
+        '{Year} - {Anime}',
+        '{Year} - {Anime} - OVA{nn}',
+        '{Year} - {Anime} - SP{nn}',
+      ] as const,
+    ),
 
     /** Создавать структуру папок (franchise/year-name) */
     createFolderStructure: z.boolean().default(true),

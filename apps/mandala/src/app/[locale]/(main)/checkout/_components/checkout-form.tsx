@@ -55,9 +55,9 @@ export function CheckoutForm() {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-        }))
+        })),
       ),
-    [items]
+    [items],
   )
 
   const defaultValues: CheckoutFormInput = {

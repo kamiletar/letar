@@ -47,12 +47,12 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
                 category: f.category,
               })),
               null,
-              2
+              2,
             ),
           },
         ],
       }
-    }
+    },
   )
 
   server.tool(
@@ -77,7 +77,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
         result.details = field.details
       }
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
-    }
+    },
   )
 
   server.tool(
@@ -98,7 +98,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
       // Generate an example based on the field type
       const example = generateFieldExample(field)
       return { content: [{ type: 'text', text: example }] }
-    }
+    },
   )
 
   server.tool(
@@ -108,7 +108,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
       pattern: z
         .string()
         .describe(
-          'Pattern name: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action'
+          'Pattern name: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action',
         ),
     },
     async ({ pattern }) => {
@@ -129,7 +129,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
       return {
         content: [{ type: 'text', text: `# ${p.title}\n\n${p.description}\n\n\`\`\`tsx\n${p.example}\n\`\`\`` }],
       }
-    }
+    },
   )
 
   server.tool(
@@ -141,7 +141,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
       return {
         content: [{ type: 'text', text: JSON.stringify(directives, null, 2) }],
       }
-    }
+    },
   )
 
   server.tool(
@@ -156,7 +156,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
             label: z.string().describe('Field label'),
             required: z.boolean().optional().describe('Required field'),
             validation: z.string().optional().describe('Additional Zod validation'),
-          })
+          }),
         )
         .describe('Array of field specifications'),
       formName: z.string().optional().describe('Form component name'),
@@ -165,7 +165,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
     async ({ fields, formName = 'MyForm', withSchema = true }) => {
       const code = generateFormCode(fields, formName, withSchema)
       return { content: [{ type: 'text', text: code }] }
-    }
+    },
   )
 
   // ─── RESOURCES ───────────────────────────────────────────
@@ -202,7 +202,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
             text: docs.raw[entry.key as keyof typeof docs.raw] || `# ${entry.name}\n\nDocumentation not available.`,
           },
         ],
-      })
+      }),
     )
   }
 
@@ -227,7 +227,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
           },
         },
       ],
-    })
+    }),
   )
 
   server.prompt(
@@ -248,7 +248,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
           },
         },
       ],
-    })
+    }),
   )
 
   server.prompt(
@@ -267,7 +267,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
           },
         },
       ],
-    })
+    }),
   )
 
   return server
@@ -299,7 +299,7 @@ function generateFieldExample(field: FieldInfo): string {
 function generateFormCode(
   fields: Array<{ name: string; type: string; label: string; required?: boolean; validation?: string }>,
   formName: string,
-  withSchema: boolean
+  withSchema: boolean,
 ): string {
   const lines: string[] = []
 

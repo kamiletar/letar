@@ -23,35 +23,35 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
   target: HTMLElement | null | undefined,
   eventName: K,
   handler: (event: HTMLElementEventMap[K]) => void,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void
 
 export function useEventListener<K extends keyof WindowEventMap>(
   target: Window | null | undefined,
   eventName: K,
   handler: (event: WindowEventMap[K]) => void,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void
 
 export function useEventListener<K extends keyof DocumentEventMap>(
   target: Document | null | undefined,
   eventName: K,
   handler: (event: DocumentEventMap[K]) => void,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void
 
 export function useEventListener(
   target: HTMLMediaElement | null | undefined,
   eventName: string,
   handler: (event: Event) => void,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void
 
 export function useEventListener(
   target: EventTarget | null | undefined,
   eventName: string,
   handler: (event: Event) => void,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void {
   // Сохраняем handler в ref, чтобы избежать пересоздания слушателя
   // при каждом изменении handler
@@ -96,7 +96,7 @@ export function useEventListener(
 export function useEventListeners<T extends EventTarget>(
   target: T | null | undefined,
   handlers: Record<string, (event: Event) => void>,
-  options?: AddEventListenerOptions
+  options?: AddEventListenerOptions,
 ): void {
   // Сохраняем handlers в ref
   const savedHandlers = useRef(handlers)

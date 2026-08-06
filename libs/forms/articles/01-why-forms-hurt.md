@@ -306,11 +306,9 @@ const { fields } = useFieldArray({ control, name: 'items' })
     </InputLeftElement>
     <Input id="email" {...register('email')} placeholder="user@example.com" />
   </InputGroup>
-  {errors.email ? (
-    <FormErrorMessage>{errors.email.message}</FormErrorMessage>
-  ) : (
-    <FormHelperText>Используется для входа</FormHelperText>
-  )}
+  {errors.email
+    ? <FormErrorMessage>{errors.email.message}</FormErrorMessage>
+    : <FormHelperText>Используется для входа</FormHelperText>}
 </FormControl>
 
 // Теперь повторите для password, name, phone, address...
@@ -352,18 +350,22 @@ const handleSubmit = async (data: FormValues) => {
     setIsSubmitting(false)
   }
 } // В JSX:
-;<button type="submit" disabled={isSubmitting} className={isSubmitting ? 'btn-loading' : 'btn-primary'}>
-  {isSubmitting ? (
-    <>
-      <Spinner size="sm" /> Отправка...
-    </>
-  ) : isSuccess ? (
-    <>
-      <CheckIcon /> Отправлено!
-    </>
-  ) : (
-    'Сохранить'
-  )}
+<button type="submit" disabled={isSubmitting} className={isSubmitting ? 'btn-loading' : 'btn-primary'}>
+  {isSubmitting
+    ? (
+      <>
+        <Spinner size="sm" /> Отправка...
+      </>
+    )
+    : isSuccess
+    ? (
+      <>
+        <CheckIcon /> Отправлено!
+      </>
+    )
+    : (
+      'Сохранить'
+    )}
 </button>
 {
   submitError && <div className="error">{submitError}</div>
@@ -394,13 +396,13 @@ const handleSubmit = async (data: FormValues) => {
     value={email}
     onChange={handleChange}
   />
-  {errors.email ? (
-    <span id="email-error" role="alert">
-      {errors.email}
-    </span>
-  ) : (
-    <span id="email-hint">Используется для входа</span>
-  )}
+  {errors.email
+    ? (
+      <span id="email-error" role="alert">
+        {errors.email}
+      </span>
+    )
+    : <span id="email-hint">Используется для входа</span>}
 </div>
 ```
 

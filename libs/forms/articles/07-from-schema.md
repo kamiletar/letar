@@ -312,8 +312,7 @@ const config = {
 
 ```tsx
 import { ConversationalMode } from '@letar/forms'
-
-;<Form schema={SurveySchema} initialValue={{ name: '', satisfaction: 0, feedback: '' }} onSubmit={submitSurvey}>
+<Form schema={SurveySchema} initialValue={{ name: '', satisfaction: 0, feedback: '' }} onSubmit={submitSurvey}>
   <ConversationalMode showProgress showQuestionNumber completedScreen={<Text>Спасибо за ответы!</Text>}>
     <Form.Field.String name="name" label="Как вас зовут?" />
     <Form.Field.Rating name="satisfaction" label="Оцените сервис" />

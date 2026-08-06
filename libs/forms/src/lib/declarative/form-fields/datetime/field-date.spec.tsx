@@ -22,7 +22,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = getDateInput()
@@ -36,7 +36,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ birthDate: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="birthDate" label="Дата рождения" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Дата рождения')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ eventDate: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="eventDate" placeholder="Выберите дату" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = getDateInput()
@@ -63,7 +63,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '2024-06-15' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveValue('2024-06-15')
@@ -75,7 +75,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: new Date('2024-03-20') }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveValue('2024-03-20')
@@ -87,7 +87,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveValue('')
@@ -101,7 +101,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" min="2024-01-01" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveAttribute('min', '2024-01-01')
@@ -113,7 +113,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" max="2024-12-31" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveAttribute('max', '2024-12-31')
@@ -125,7 +125,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" min="2024-01-01" max="2024-12-31" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = getDateInput()
@@ -141,7 +141,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toBeDisabled()
@@ -153,7 +153,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" label="Date" required />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('*')).toBeInTheDocument()
@@ -167,7 +167,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ date: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="date" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = getDateInput()
@@ -186,7 +186,7 @@ describe('FieldDate', () => {
           <Form initialValue={{ eventDate: '' }} onSubmit={vi.fn()}>
             <Form.Field.Date name="eventDate" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(getDateInput()).toHaveAttribute('data-field-name', 'eventDate')

@@ -51,7 +51,7 @@ export async function handleIpfsRequest(
   req: IncomingMessage,
   res: ServerResponse,
   cid: string,
-  isHead = false
+  isHead = false,
 ): Promise<void> {
   if (!cid) {
     sendError(res, 400, 'Missing CID')

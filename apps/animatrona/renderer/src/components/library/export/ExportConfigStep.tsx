@@ -265,8 +265,7 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
                           track={track}
                           isDefault={state.defaultSubtitleKey === key}
                           onSetDefault={() =>
-                            state.setDefaultSubtitleKey(state.defaultSubtitleKey === key ? null : key)
-                          }
+                            state.setDefaultSubtitleKey(state.defaultSubtitleKey === key ? null : key)}
                           colorPalette="purple"
                           showDefaultButton
                         />

@@ -236,35 +236,37 @@ function ModerationActions({
       )}
 
       {/* Кнопки замены (если это кандидат на замену) */}
-      {isReplacement ? (
-        <>
-          <Button colorPalette="orange" variant="outline" size="sm" onClick={onApproveReplacement}>
-            <Icon as={LuArrowRightLeft} mr={2} />
-            Одобрить замену
-          </Button>
-          {userRole === 'ADMIN' && (
-            <Button colorPalette="orange" size="sm" onClick={onApproveReplacementAndPin} disabled={!hasOnlineServers}>
-              <Icon as={LuArrowRightLeft} mr={1} />
-              <Icon as={LuPin} mr={1} />
-              Замена + запинить
+      {isReplacement
+        ? (
+          <>
+            <Button colorPalette="orange" variant="outline" size="sm" onClick={onApproveReplacement}>
+              <Icon as={LuArrowRightLeft} mr={2} />
+              Одобрить замену
             </Button>
-          )}
-        </>
-      ) : (
-        <>
-          <Button colorPalette="green" variant="outline" size="sm" onClick={onApprove}>
-            <Icon as={LuCheck} mr={2} />
-            Одобрить
-          </Button>
-          {userRole === 'ADMIN' && (
-            <Button colorPalette="green" size="sm" onClick={onApproveAndPin} disabled={!hasOnlineServers}>
-              <Icon as={LuCheck} mr={1} />
-              <Icon as={LuPin} mr={1} />
-              Одобрить + запинить
+            {userRole === 'ADMIN' && (
+              <Button colorPalette="orange" size="sm" onClick={onApproveReplacementAndPin} disabled={!hasOnlineServers}>
+                <Icon as={LuArrowRightLeft} mr={1} />
+                <Icon as={LuPin} mr={1} />
+                Замена + запинить
+              </Button>
+            )}
+          </>
+        )
+        : (
+          <>
+            <Button colorPalette="green" variant="outline" size="sm" onClick={onApprove}>
+              <Icon as={LuCheck} mr={2} />
+              Одобрить
             </Button>
-          )}
-        </>
-      )}
+            {userRole === 'ADMIN' && (
+              <Button colorPalette="green" size="sm" onClick={onApproveAndPin} disabled={!hasOnlineServers}>
+                <Icon as={LuCheck} mr={1} />
+                <Icon as={LuPin} mr={1} />
+                Одобрить + запинить
+              </Button>
+            )}
+          </>
+        )}
 
       <Button colorPalette="red" variant="outline" size="sm" onClick={onReject}>
         <Icon as={LuX} mr={2} />

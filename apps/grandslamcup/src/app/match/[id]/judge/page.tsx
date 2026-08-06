@@ -56,14 +56,12 @@ export default async function JudgePage({ params, searchParams }: { params: Para
       matchStatus={match.status}
       half={half ? parseInt(half) : 1}
       inviteKey={invite ?? null}
-      existingSession={
-        existingSession
-          ? {
-              name: existingSession.name,
-              judgeNumber: existingSession.judgeNumber,
-            }
-          : null
-      }
+      existingSession={existingSession
+        ? {
+          name: existingSession.name,
+          judgeNumber: existingSession.judgeNumber,
+        }
+        : null}
     />
   )
 }

@@ -90,9 +90,9 @@ export const FpsSparkline = memo(
       return true
     }
     return (
-      prev.data[len - 1] === next.data[len - 1] &&
-      prev.data[Math.max(0, len - 2)] === next.data[Math.max(0, len - 2)] &&
-      prev.data[Math.max(0, len - 3)] === next.data[Math.max(0, len - 3)]
+      prev.data[len - 1] === next.data[len - 1]
+      && prev.data[Math.max(0, len - 2)] === next.data[Math.max(0, len - 2)]
+      && prev.data[Math.max(0, len - 3)] === next.data[Math.max(0, len - 3)]
     )
-  }
+  },
 )

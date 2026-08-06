@@ -47,7 +47,7 @@ function main() {
         data.profiles?.length || 0
       } профилей, ${data.venues?.length || 0} площадок, ${data.rounds?.length || 0} раундов, ${
         data.teams?.length || 0
-      } команд`
+      } команд`,
     )
 
     if (data.matches) {

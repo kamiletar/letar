@@ -266,8 +266,7 @@ export default function SurveyPage() {
                     onValueChange={(details) =>
                       updateAnswer(question.id, {
                         selectedOption: details.value || undefined,
-                      })
-                    }
+                      })}
                   >
                     <VStack align="start" gap={2}>
                       {question.options.map((option) => (

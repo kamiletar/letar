@@ -176,7 +176,7 @@ interface NativeSelectOptionResolved {
 function resolveSelectOptions(
   fieldProps: Record<string, unknown>,
   relationOptions?: RelationOption[],
-  enumValues?: string[]
+  enumValues?: string[],
 ): SelectOptionResolved[] | undefined {
   // 1. Explicit options in fieldProps (highest priority)
   if (fieldProps.options && Array.isArray(fieldProps.options)) {
@@ -206,7 +206,7 @@ function resolveSelectOptions(
 function resolveNativeSelectOptions(
   fieldProps: Record<string, unknown>,
   relationOptions?: RelationOption[],
-  enumValues?: string[]
+  enumValues?: string[],
 ): NativeSelectOptionResolved[] | undefined {
   // 1. Explicit options in fieldProps (highest priority)
   if (fieldProps.options && Array.isArray(fieldProps.options)) {

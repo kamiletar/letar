@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       {
         error: error instanceof Error ? error.message : 'Failed to control container',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

@@ -63,7 +63,7 @@ describe('appendManifestEntry / latestEntry / entryBySha', () => {
     const manifest = await appendManifestEntry(
       executor,
       'time',
-      entry({ deployId: 'deploy-2', sha: 'b'.repeat(40), timestamp: '2026-07-12T09:00:00.000Z' })
+      entry({ deployId: 'deploy-2', sha: 'b'.repeat(40), timestamp: '2026-07-12T09:00:00.000Z' }),
     )
 
     expect(manifest.entries).toHaveLength(2)

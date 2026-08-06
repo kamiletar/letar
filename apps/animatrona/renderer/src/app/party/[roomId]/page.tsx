@@ -167,30 +167,34 @@ export default function WatchPartyPage() {
 
               <HStack>
                 {/* Кнопки управления */}
-                {playbackState?.isPlaying ? (
-                  <Button variant="outline" size="sm" onClick={pause}>
-                    <LuPause />
-                    Пауза
-                  </Button>
-                ) : (
-                  <Button colorPalette="green" size="sm" onClick={play}>
-                    <LuPlay />
-                    Играть
-                  </Button>
-                )}
+                {playbackState?.isPlaying
+                  ? (
+                    <Button variant="outline" size="sm" onClick={pause}>
+                      <LuPause />
+                      Пауза
+                    </Button>
+                  )
+                  : (
+                    <Button colorPalette="green" size="sm" onClick={play}>
+                      <LuPlay />
+                      Играть
+                    </Button>
+                  )}
 
                 {/* Покинуть / Закрыть */}
-                {isHost ? (
-                  <Button colorPalette="red" variant="outline" size="sm" onClick={handleClose}>
-                    <LuX />
-                    Закрыть комнату
-                  </Button>
-                ) : (
-                  <Button variant="ghost" size="sm" onClick={handleLeave}>
-                    <LuDoorOpen />
-                    Покинуть
-                  </Button>
-                )}
+                {isHost
+                  ? (
+                    <Button colorPalette="red" variant="outline" size="sm" onClick={handleClose}>
+                      <LuX />
+                      Закрыть комнату
+                    </Button>
+                  )
+                  : (
+                    <Button variant="ghost" size="sm" onClick={handleLeave}>
+                      <LuDoorOpen />
+                      Покинуть
+                    </Button>
+                  )}
               </HStack>
             </HStack>
 

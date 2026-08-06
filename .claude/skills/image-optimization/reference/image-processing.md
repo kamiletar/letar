@@ -22,7 +22,7 @@ interface ThumbnailOptions {
 export async function generateThumbnail(
   inputPath: string,
   outputPath: string,
-  options: ThumbnailOptions
+  options: ThumbnailOptions,
 ): Promise<void> {
   await sharp(inputPath)
     .resize(options.width, options.height, {

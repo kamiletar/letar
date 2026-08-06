@@ -114,7 +114,7 @@ export default function ProxyHostsPage() {
         return state.filter((host) => host.id !== action.hostId)
       }
       return state
-    }
+    },
   )
 
   // Обработчик Toggle с useOptimistic

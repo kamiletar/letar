@@ -14,8 +14,8 @@ const DEFAULT_PROVIDER_LABELS: Record<string, string> = {
 }
 
 const DEFAULT_DESCRIPTION =
-  'Собственные OAuth-приложения (Tier 2) — вход своими ключами, без Ключницы letar.best. Client ' +
-  'Secret хранится зашифрованным и никогда не показывается после сохранения.'
+  'Собственные OAuth-приложения (Tier 2) — вход своими ключами, без Ключницы letar.best. Client '
+  + 'Secret хранится зашифрованным и никогда не показывается после сохранения.'
 
 export interface SocialProvidersListProps {
   providers: SocialProviderRow[]

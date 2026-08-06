@@ -16,14 +16,16 @@ export interface CreateUnlinkActionOptions<TUser extends { id: string }> {
    */
   getDb: (user: TUser) => {
     user: {
-      findUnique: (args: { where: { id: string }; include: { accounts: true } }) => Promise<{
-        id: string
-        accounts: Array<{
-          providerId: string
-          accountId: string
-          password?: string | null
-        }>
-      } | null>
+      findUnique: (args: { where: { id: string }; include: { accounts: true } }) => Promise<
+        {
+          id: string
+          accounts: Array<{
+            providerId: string
+            accountId: string
+            password?: string | null
+          }>
+        } | null
+      >
     }
     account: {
       delete: (args: {

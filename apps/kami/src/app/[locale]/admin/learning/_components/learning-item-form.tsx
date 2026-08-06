@@ -39,8 +39,9 @@ export function LearningItemForm({ item, locale }: LearningItemFormProps) {
         if (!result.success) {
           toaster.error({
             title: 'Ошибка',
-            description:
-              result.error === 'VALIDATION_ERROR' ? 'Проверьте правильность заполнения формы' : 'Не удалось сохранить',
+            description: result.error === 'VALIDATION_ERROR'
+              ? 'Проверьте правильность заполнения формы'
+              : 'Не удалось сохранить',
           })
           return
         }
@@ -53,7 +54,7 @@ export function LearningItemForm({ item, locale }: LearningItemFormProps) {
         router.push(`/${locale}/admin/learning`)
       })
     },
-    [isEditing, item, locale, router]
+    [isEditing, item, locale, router],
   )
 
   const handleDelete = useCallback(async () => {
@@ -80,45 +81,45 @@ export function LearningItemForm({ item, locale }: LearningItemFormProps) {
   // Начальные значения для формы
   const initialValues = item
     ? {
-        title: item.title,
-        titleEn: item.titleEn ?? '',
-        author: item.author ?? '',
-        url: item.url ?? '',
-        coverImage: item.coverImage ?? '',
-        type: item.type,
-        category: item.category ?? '',
-        tags: item.tags,
-        status: item.status,
-        rating: item.rating ?? undefined,
-        notes: item.notes ?? '',
-        notesEn: item.notesEn ?? '',
-        startedAt: item.startedAt ?? undefined,
-        completedAt: item.completedAt ?? undefined,
-        year: item.year ?? undefined,
-        isPublished: item.isPublished,
-        isFeatured: item.isFeatured,
-        order: item.order,
-      }
+      title: item.title,
+      titleEn: item.titleEn ?? '',
+      author: item.author ?? '',
+      url: item.url ?? '',
+      coverImage: item.coverImage ?? '',
+      type: item.type,
+      category: item.category ?? '',
+      tags: item.tags,
+      status: item.status,
+      rating: item.rating ?? undefined,
+      notes: item.notes ?? '',
+      notesEn: item.notesEn ?? '',
+      startedAt: item.startedAt ?? undefined,
+      completedAt: item.completedAt ?? undefined,
+      year: item.year ?? undefined,
+      isPublished: item.isPublished,
+      isFeatured: item.isFeatured,
+      order: item.order,
+    }
     : {
-        title: '',
-        titleEn: '',
-        author: '',
-        url: '',
-        coverImage: '',
-        type: 'BOOK' as const,
-        category: '',
-        tags: [] as string[],
-        status: 'WANT_TO_LEARN' as const,
-        rating: undefined,
-        notes: '',
-        notesEn: '',
-        startedAt: undefined,
-        completedAt: undefined,
-        year: undefined,
-        isPublished: false,
-        isFeatured: false,
-        order: 0,
-      }
+      title: '',
+      titleEn: '',
+      author: '',
+      url: '',
+      coverImage: '',
+      type: 'BOOK' as const,
+      category: '',
+      tags: [] as string[],
+      status: 'WANT_TO_LEARN' as const,
+      rating: undefined,
+      notes: '',
+      notesEn: '',
+      startedAt: undefined,
+      completedAt: undefined,
+      year: undefined,
+      isPublished: false,
+      isFeatured: false,
+      order: 0,
+    }
 
   return (
     <>

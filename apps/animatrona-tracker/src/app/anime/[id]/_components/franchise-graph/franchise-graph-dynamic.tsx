@@ -16,7 +16,7 @@ const FranchiseGraphView = dynamic(
   {
     ssr: false,
     loading: () => <Skeleton h="500px" borderRadius="lg" />,
-  }
+  },
 )
 
 export function FranchiseGraphDynamic(props: FranchiseGraphViewProps) {

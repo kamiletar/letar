@@ -15,7 +15,7 @@ export async function enterManualVoteAction(
   performanceId: string,
   judgeNumber: number,
   dimension: 'TEXT' | 'DELIVERY',
-  score: number
+  score: number,
 ) {
   if (!isValidScore(score)) {
     return { success: false, error: 'Оценка должна быть от 1 до 5' }
@@ -73,7 +73,7 @@ export async function resetJudgeVoteAction(
   matchId: string,
   performanceId: string,
   judgeNumber: number,
-  dimension: 'TEXT' | 'DELIVERY'
+  dimension: 'TEXT' | 'DELIVERY',
 ) {
   const state = getMatchState(matchId)
   const judge = state.judges.find((j) => j.judgeNumber === judgeNumber)
@@ -227,7 +227,7 @@ export async function forceCompleteVotingAction(matchId: string, dimension: 'TEX
 export async function updatePerformanceScoresAction(
   performanceId: string,
   dimension: 'TEXT' | 'DELIVERY',
-  scores: number[]
+  scores: number[],
 ) {
   // Валидация оценок
   if (!Array.isArray(scores) || scores.length === 0 || scores.length > JUDGES_COUNT) {

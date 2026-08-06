@@ -28,7 +28,7 @@ export async function publishToTracker(
   manifestCid: string,
   animeInfo: AnimeInfo | null,
   episodes: AnimeManifestEpisode[],
-  directoryCid?: string
+  directoryCid?: string,
 ): Promise<TrackerPublishResult>
 
 // СТАЛО (2 параметра, payload из 1 поля):

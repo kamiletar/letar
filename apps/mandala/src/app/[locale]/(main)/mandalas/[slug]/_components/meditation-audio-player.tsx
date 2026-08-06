@@ -76,7 +76,7 @@ export function MeditationAudioPlayer({
       audioRef.current = element
       onAudioRef?.(element)
     },
-    [onAudioRef]
+    [onAudioRef],
   )
 
   // Обновление громкости

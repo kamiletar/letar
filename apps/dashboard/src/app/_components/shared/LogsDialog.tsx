@@ -156,25 +156,29 @@ export function LogsDialog({
               whiteSpace="pre-wrap"
               wordBreak="break-all"
             >
-              {isLoading && !logs ? (
-                <HStack justify="center" py="8">
-                  <Spinner size="sm" />
-                  <Text color="fg.muted">Загрузка логов...</Text>
-                </HStack>
-              ) : error ? (
-                <Text color="red.400">
-                  Ошибка: {error instanceof Error ? error.message : 'Не удалось загрузить логи'}
-                </Text>
-              ) : logs ? (
-                logs.split('\n').map((line, index) => (
-                  /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Log lines are append-only */
-                  <Box key={index} display="block">
-                    <AnsiText text={line} />
-                  </Box>
-                ))
-              ) : (
-                <Text color="fg.muted">Логи отсутствуют</Text>
-              )}
+              {isLoading && !logs
+                ? (
+                  <HStack justify="center" py="8">
+                    <Spinner size="sm" />
+                    <Text color="fg.muted">Загрузка логов...</Text>
+                  </HStack>
+                )
+                : error
+                ? (
+                  <Text color="red.400">
+                    Ошибка: {error instanceof Error ? error.message : 'Не удалось загрузить логи'}
+                  </Text>
+                )
+                : logs
+                ? (
+                  logs.split('\n').map((line, index) => (
+                    /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Log lines are append-only */
+                    <Box key={index} display="block">
+                      <AnsiText text={line} />
+                    </Box>
+                  ))
+                )
+                : <Text color="fg.muted">Логи отсутствуют</Text>}
             </Box>
 
             {/* Футер */}

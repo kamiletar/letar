@@ -57,7 +57,7 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
         setUploading(false)
       }
     },
-    [poemId, onChange]
+    [poemId, onChange],
   )
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,24 +131,26 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
       >
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
         <VStack gap={2}>
-          {uploading ? (
-            <Flex align="center" gap={2}>
-              <Spinner size="sm" />
-              <Text fontSize="sm" color="gray.500">
-                Загрузка...
-              </Text>
-            </Flex>
-          ) : (
-            <>
-              <LuImagePlus size={32} color="var(--chakra-colors-gray-400)" />
-              <Text fontSize="sm" color="gray.500">
-                Перетащите изображение или нажмите для выбора
-              </Text>
-              <Text fontSize="xs" color="gray.400">
-                JPG, PNG, WebP — до 15 МБ
-              </Text>
-            </>
-          )}
+          {uploading
+            ? (
+              <Flex align="center" gap={2}>
+                <Spinner size="sm" />
+                <Text fontSize="sm" color="gray.500">
+                  Загрузка...
+                </Text>
+              </Flex>
+            )
+            : (
+              <>
+                <LuImagePlus size={32} color="var(--chakra-colors-gray-400)" />
+                <Text fontSize="sm" color="gray.500">
+                  Перетащите изображение или нажмите для выбора
+                </Text>
+                <Text fontSize="xs" color="gray.400">
+                  JPG, PNG, WebP — до 15 МБ
+                </Text>
+              </>
+            )}
         </VStack>
       </Box>
       {error && (

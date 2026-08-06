@@ -24,9 +24,7 @@ export default function AdminLoading() {
 
           {/* Табы */}
           <HStack gap={2}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} h="36px" w="100px" borderRadius="md" />
-            ))}
+            {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} h="36px" w="100px" borderRadius="md" />)}
           </HStack>
 
           {/* Контент */}

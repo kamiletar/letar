@@ -106,7 +106,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
 
       return cumulativeHueRef.current
     },
-    []
+    [],
   )
 
   /**
@@ -145,7 +145,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
 
       return finalHue
     },
-    []
+    [],
   )
 
   /**
@@ -158,7 +158,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
       baseSpeed: number,
       bassModulation: number,
       beatJumpSize: number,
-      modeConfig: HueRotateModeConfig | null
+      modeConfig: HueRotateModeConfig | null,
     ): number => {
       // 1. Базовое вращение (зависит от режима)
       const effectiveBaseSpeed = modeConfig ? modeConfig.defaultBaseSpeed : baseSpeed
@@ -187,7 +187,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
 
       return finalHue
     },
-    []
+    [],
   )
 
   /**
@@ -234,7 +234,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
             settings.baseSpeed,
             settings.bassModulation,
             settings.beatJumpSize,
-            modeConfig
+            modeConfig,
           )
           break
       }
@@ -258,7 +258,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
       calculateMultiBandHue,
       calculateBeatDrivenHue,
       calculateCombinedHue,
-    ]
+    ],
   )
 
   // Запуск/остановка анимации

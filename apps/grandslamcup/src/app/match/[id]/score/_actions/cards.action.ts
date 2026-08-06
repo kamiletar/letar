@@ -15,7 +15,7 @@ export async function issueCardAction(
   performanceId: string,
   cardType: CardType,
   reason: CardReason,
-  note?: string
+  note?: string,
 ) {
   // Загружаем контекст матча и сезона
   const performance = await prisma.playerPerformance.findUnique({

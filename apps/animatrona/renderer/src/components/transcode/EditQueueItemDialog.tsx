@@ -74,7 +74,7 @@ export const EditQueueItemDialog = memo(function EditQueueItemDialog({
         setUncontrolledIsOpen(e.open)
       }
     },
-    [item, isControlled, onClose]
+    [item, isControlled, onClose],
   )
 
   // Сохранение изменений

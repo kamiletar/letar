@@ -123,7 +123,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ pr
 ```typescript
 // lib/inventory/check-availability.ts
 export async function checkAvailability(
-  items: { productId: string; variantId?: string; quantity: number }[]
+  items: { productId: string; variantId?: string; quantity: number }[],
 ): Promise<{ available: boolean; unavailable: string[] }> {
   const db = await getEnhancedPrisma()
   const unavailable: string[] = []
@@ -163,7 +163,7 @@ export async function checkAvailability(
 // lib/inventory/reserve.ts
 export async function reserveStock(
   orderId: string,
-  items: { productId: string; variantId?: string; quantity: number }[]
+  items: { productId: string; variantId?: string; quantity: number }[],
 ) {
   const db = await getEnhancedPrisma()
 
@@ -361,8 +361,7 @@ export function InventoryTable() {
                     setAdjustment((prev) => ({
                       ...prev,
                       [product.id]: parseInt(e.target.value) || 0,
-                    }))
-                  }
+                    }))}
                 />
                 <Button size="sm" onClick={() => handleAdjust(product.id, 'RECEIVED')}>
                   Приход

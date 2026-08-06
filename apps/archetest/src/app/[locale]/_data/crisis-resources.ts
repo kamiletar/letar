@@ -86,8 +86,10 @@ export const SAFETY_NET_COPY = {
     en: 'Your answers reflect noticeable emotional strain',
   },
   body: {
-    ru: 'Это не диагноз и не оценка — тест не ставит диагнозов. Но если вы сейчас переживаете тяжёлый период, помните: поддержка доступна, и обратиться за ней — проявление заботы о себе, а не слабость.',
-    en: 'This is not a diagnosis or a verdict — the test does not diagnose. But if you are going through a hard time right now, remember: support is available, and reaching for it is an act of self-care, not weakness.',
+    ru:
+      'Это не диагноз и не оценка — тест не ставит диагнозов. Но если вы сейчас переживаете тяжёлый период, помните: поддержка доступна, и обратиться за ней — проявление заботы о себе, а не слабость.',
+    en:
+      'This is not a diagnosis or a verdict — the test does not diagnose. But if you are going through a hard time right now, remember: support is available, and reaching for it is an act of self-care, not weakness.',
   },
   helplinesTitle: {
     ru: 'Куда можно обратиться',
@@ -106,7 +108,9 @@ export const DARK_REASSURANCE_COPY = {
     en: 'About high scores on the "dark" scales',
   },
   body: {
-    ru: 'Высокий балл здесь — не ярлык и не приговор. Эти шкалы описывают стиль поведения в определённых ситуациях, а не «плохого человека». Осознанная черта — это ресурс, которым можно управлять: там, где она мешает, её можно замечать и направлять.',
-    en: 'A high score here is not a label or a verdict. These scales describe a behavioral style in particular situations, not a "bad person". A trait you are aware of is a resource you can steer: where it gets in the way, you can notice it and redirect it.',
+    ru:
+      'Высокий балл здесь — не ярлык и не приговор. Эти шкалы описывают стиль поведения в определённых ситуациях, а не «плохого человека». Осознанная черта — это ресурс, которым можно управлять: там, где она мешает, её можно замечать и направлять.',
+    en:
+      'A high score here is not a label or a verdict. These scales describe a behavioral style in particular situations, not a "bad person". A trait you are aware of is a resource you can steer: where it gets in the way, you can notice it and redirect it.',
   },
 } as const

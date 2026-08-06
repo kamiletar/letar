@@ -44,20 +44,18 @@ export const MandalaCard = memo(function MandalaCard({ mandala, index }: Mandala
       borderRadius="xl"
       cursor="pointer"
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
-      animate={
-        isInView
-          ? {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              transition: {
-                duration: 0.5,
-                delay: index * 0.08,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              },
-            }
-          : {}
-      }
+      animate={isInView
+        ? {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: {
+            duration: 0.5,
+            delay: index * 0.08,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          },
+        }
+        : {}}
       whileHover={{
         scale: 1.02,
         boxShadow: '0 0 30px rgba(202, 158, 103, 0.5), 0 0 60px rgba(202, 158, 103, 0.3)',

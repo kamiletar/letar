@@ -4,8 +4,8 @@ export {
   type AuthModeRequestResult,
 } from './auth-mode-request-form'
 export {
-  AuthModeSettings,
   type AuthModeRequestRow,
+  AuthModeSettings,
   type AuthModeSettingsProps,
   type AuthModeTierPoint,
 } from './auth-mode-settings'

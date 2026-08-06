@@ -50,8 +50,8 @@ export class ConfigLoader {
     // Check if config file exists
     if (!fs.existsSync(finalConfigPath)) {
       throw new Error(
-        `Configuration file not found: ${finalConfigPath}\n` +
-          `Please ensure the config file exists or set LABEL_PRINTER_CONFIG_PATH environment variable.`
+        `Configuration file not found: ${finalConfigPath}\n`
+          + `Please ensure the config file exists or set LABEL_PRINTER_CONFIG_PATH environment variable.`,
       )
     }
 

@@ -59,9 +59,7 @@ export default async function ProfilePage() {
             <Stack gap={5}>
               <HStack gap={4}>
                 <Avatar.Root size="xl">
-                  {user.image ? (
-                    <Avatar.Image src={user.image} alt={user.name ?? ''} />
-                  ) : (
+                  {user.image ? <Avatar.Image src={user.image} alt={user.name ?? ''} /> : (
                     <Avatar.Fallback>
                       <LuUser size={24} />
                     </Avatar.Fallback>
@@ -100,8 +98,7 @@ export default async function ProfilePage() {
 
               {/* Дата регистрации */}
               <Text fontSize="sm" color="fg.muted">
-                Зарегистрирован:{' '}
-                {new Date(user.createdAt).toLocaleDateString('ru-RU', {
+                Зарегистрирован: {new Date(user.createdAt).toLocaleDateString('ru-RU', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',

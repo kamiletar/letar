@@ -85,7 +85,7 @@ self.addEventListener('install', (event) => {
         console.warn('[SW] Failed to fetch precache manifest:', e)
         // Продолжаем работу со статическими страницами
       }
-    })()
+    })(),
   )
 
   self.skipWaiting()
@@ -102,9 +102,9 @@ self.addEventListener('activate', (event) => {
           .map((name) => {
             console.log('[SW] Deleting old cache:', name)
             return caches.delete(name)
-          })
+          }),
       )
-    })
+    }),
   )
   self.clients.claim()
 })
@@ -170,7 +170,7 @@ self.addEventListener('fetch', (event) => {
           statusText: 'Service Unavailable',
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         })
-      })
+      }),
   )
 })
 

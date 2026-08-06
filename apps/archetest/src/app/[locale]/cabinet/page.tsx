@@ -87,56 +87,60 @@ export default function CabinetPage() {
           <Heading size="xl">{t('title')}</Heading>
         </HStack>
 
-        {loading ? (
-          <HStack gap={2} color="fg.muted">
-            <Spinner size="sm" />
-            <Text>Загрузка...</Text>
-          </HStack>
-        ) : clients.length === 0 ? (
-          <Card.Root w="100%" variant="outline">
-            <Card.Body>
-              <VStack gap={2}>
-                <Text fontWeight="bold">{t('noClients')}</Text>
-                <Text fontSize="sm" color="fg.muted">
-                  {t('noClientsHint')}
-                </Text>
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-        ) : (
-          <Table.Root size="sm" w="100%">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>{t('clientName')}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t('clientEmail')}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t('status')}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t('linkedAt')}</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {clients.map((client) => (
-                <Table.Row key={client.id}>
-                  <Table.Cell>
-                    {client.status === 'ACTIVE' ? (
-                      <Box asChild fontWeight="bold" color="fg" _hover={{ textDecoration: 'underline' }}>
-                        <Link href={`/cabinet/${client.clientId}`}>{client.clientName}</Link>
-                      </Box>
-                    ) : (
-                      <Text color="fg.muted">{client.clientName}</Text>
-                    )}
-                  </Table.Cell>
-                  <Table.Cell color="fg.muted">{client.clientEmail}</Table.Cell>
-                  <Table.Cell>
-                    <Badge colorPalette={client.status === 'ACTIVE' ? 'green' : 'gray'}>
-                      {client.status === 'ACTIVE' ? t('active') : t('revoked')}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell color="fg.muted">{new Date(client.createdAt).toLocaleDateString()}</Table.Cell>
+        {loading
+          ? (
+            <HStack gap={2} color="fg.muted">
+              <Spinner size="sm" />
+              <Text>Загрузка...</Text>
+            </HStack>
+          )
+          : clients.length === 0
+          ? (
+            <Card.Root w="100%" variant="outline">
+              <Card.Body>
+                <VStack gap={2}>
+                  <Text fontWeight="bold">{t('noClients')}</Text>
+                  <Text fontSize="sm" color="fg.muted">
+                    {t('noClientsHint')}
+                  </Text>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+          )
+          : (
+            <Table.Root size="sm" w="100%">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>{t('clientName')}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{t('clientEmail')}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{t('status')}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{t('linkedAt')}</Table.ColumnHeader>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        )}
+              </Table.Header>
+              <Table.Body>
+                {clients.map((client) => (
+                  <Table.Row key={client.id}>
+                    <Table.Cell>
+                      {client.status === 'ACTIVE'
+                        ? (
+                          <Box asChild fontWeight="bold" color="fg" _hover={{ textDecoration: 'underline' }}>
+                            <Link href={`/cabinet/${client.clientId}`}>{client.clientName}</Link>
+                          </Box>
+                        )
+                        : <Text color="fg.muted">{client.clientName}</Text>}
+                    </Table.Cell>
+                    <Table.Cell color="fg.muted">{client.clientEmail}</Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette={client.status === 'ACTIVE' ? 'green' : 'gray'}>
+                        {client.status === 'ACTIVE' ? t('active') : t('revoked')}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell color="fg.muted">{new Date(client.createdAt).toLocaleDateString()}</Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          )}
       </VStack>
     </Container>
   )

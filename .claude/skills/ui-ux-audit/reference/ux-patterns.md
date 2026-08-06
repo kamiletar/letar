@@ -6,7 +6,7 @@
 
 ```tsx
 // ✅ Консистентная навигация
-;<Box as="nav" aria-label="Главное меню">
+<Box as="nav" aria-label="Главное меню">
   <HStack gap={4}>
     <NavLink href="/" isActive={pathname === '/'}>
       Главная
@@ -322,7 +322,7 @@ model Product {
 
 ```tsx
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-;<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
+<Form.FromSchema schema={ProductCreateFormSchema} initialValue={data} onSubmit={save} />
 ```
 
 ### Offline формы

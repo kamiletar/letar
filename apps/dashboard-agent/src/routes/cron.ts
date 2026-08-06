@@ -112,7 +112,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -145,7 +145,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -192,7 +192,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -230,7 +230,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 
   /**
@@ -271,6 +271,6 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

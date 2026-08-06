@@ -194,88 +194,90 @@ export function DonorSelectStep({
       {enabled && (
         <>
           {/* Кнопка выбора папки или выбранная папка */}
-          {!donorPath ? (
-            <Box textAlign="center">
-              <Button
-                size="lg"
-                variant="outline"
-                colorPalette="purple"
-                onClick={handleSelectFolder}
-                h="auto"
-                py={6}
-                px={8}
-                disabled={isScanning}
-              >
-                <VStack gap={2}>
-                  <Icon as={isScanning ? Spinner : LuFolderOpen} boxSize={8} />
-                  <Text>{isScanning ? 'Сканирование...' : 'Выбрать папку донора'}</Text>
-                </VStack>
-              </Button>
-            </Box>
-          ) : (
-            <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="purple.700">
-              <VStack gap={3} align="stretch">
-                {/* Путь и кнопка удаления */}
-                <HStack justify="space-between">
-                  <HStack gap={2} flex={1} minW={0}>
-                    <Icon as={LuFolder} color="purple.400" flexShrink={0} />
-                    <Text fontSize="sm" color="fg.muted" truncate>
-                      {donorPath}
-                    </Text>
-                  </HStack>
-                  <Button size="xs" variant="ghost" colorPalette="red" onClick={handleClearDonor}>
-                    <Icon as={LuX} />
-                  </Button>
-                </HStack>
-
-                {/* Статистика */}
-                <HStack gap={4} flexWrap="wrap">
-                  <Badge colorPalette="purple" variant="subtle">
-                    {donorFiles.length} видео
-                  </Badge>
-                  {externalTracks && externalTracks.audio > 0 && (
-                    <Badge colorPalette="green" variant="subtle">
-                      {externalTracks.audio} внешних аудио
-                    </Badge>
-                  )}
-                  {externalTracks && externalTracks.subs > 0 && (
-                    <Badge colorPalette="blue" variant="subtle">
-                      {externalTracks.subs} внешних субтитров
-                    </Badge>
-                  )}
-                </HStack>
-
-                {/* Информация о матчинге */}
-                {matchInfo && (
-                  <Box p={3} bg="bg.subtle" borderRadius="md">
-                    <HStack justify="space-between">
-                      <Text fontSize="sm" color="fg.subtle">
-                        Соответствие эпизодов:
+          {!donorPath
+            ? (
+              <Box textAlign="center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  colorPalette="purple"
+                  onClick={handleSelectFolder}
+                  h="auto"
+                  py={6}
+                  px={8}
+                  disabled={isScanning}
+                >
+                  <VStack gap={2}>
+                    <Icon as={isScanning ? Spinner : LuFolderOpen} boxSize={8} />
+                    <Text>{isScanning ? 'Сканирование...' : 'Выбрать папку донора'}</Text>
+                  </VStack>
+                </Button>
+              </Box>
+            )
+            : (
+              <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="purple.700">
+                <VStack gap={3} align="stretch">
+                  {/* Путь и кнопка удаления */}
+                  <HStack justify="space-between">
+                    <HStack gap={2} flex={1} minW={0}>
+                      <Icon as={LuFolder} color="purple.400" flexShrink={0} />
+                      <Text fontSize="sm" color="fg.muted" truncate>
+                        {donorPath}
                       </Text>
-                      <HStack gap={2}>
-                        {matchInfo.matched > 0 && (
-                          <HStack gap={1} color="green.400">
-                            <Icon as={LuCheck} boxSize={4} />
-                            <Text fontSize="sm" fontWeight="medium">
-                              {matchInfo.matched} найдено
-                            </Text>
-                          </HStack>
-                        )}
-                        {matchInfo.unmatched > 0 && (
-                          <HStack gap={1} color="orange.400">
-                            <Icon as={LuX} boxSize={4} />
-                            <Text fontSize="sm" fontWeight="medium">
-                              {matchInfo.unmatched} не найдено
-                            </Text>
-                          </HStack>
-                        )}
-                      </HStack>
                     </HStack>
-                  </Box>
-                )}
-              </VStack>
-            </Box>
-          )}
+                    <Button size="xs" variant="ghost" colorPalette="red" onClick={handleClearDonor}>
+                      <Icon as={LuX} />
+                    </Button>
+                  </HStack>
+
+                  {/* Статистика */}
+                  <HStack gap={4} flexWrap="wrap">
+                    <Badge colorPalette="purple" variant="subtle">
+                      {donorFiles.length} видео
+                    </Badge>
+                    {externalTracks && externalTracks.audio > 0 && (
+                      <Badge colorPalette="green" variant="subtle">
+                        {externalTracks.audio} внешних аудио
+                      </Badge>
+                    )}
+                    {externalTracks && externalTracks.subs > 0 && (
+                      <Badge colorPalette="blue" variant="subtle">
+                        {externalTracks.subs} внешних субтитров
+                      </Badge>
+                    )}
+                  </HStack>
+
+                  {/* Информация о матчинге */}
+                  {matchInfo && (
+                    <Box p={3} bg="bg.subtle" borderRadius="md">
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg.subtle">
+                          Соответствие эпизодов:
+                        </Text>
+                        <HStack gap={2}>
+                          {matchInfo.matched > 0 && (
+                            <HStack gap={1} color="green.400">
+                              <Icon as={LuCheck} boxSize={4} />
+                              <Text fontSize="sm" fontWeight="medium">
+                                {matchInfo.matched} найдено
+                              </Text>
+                            </HStack>
+                          )}
+                          {matchInfo.unmatched > 0 && (
+                            <HStack gap={1} color="orange.400">
+                              <Icon as={LuX} boxSize={4} />
+                              <Text fontSize="sm" fontWeight="medium">
+                                {matchInfo.unmatched} не найдено
+                              </Text>
+                            </HStack>
+                          )}
+                        </HStack>
+                      </HStack>
+                    </Box>
+                  )}
+                </VStack>
+              </Box>
+            )}
 
           {/* Таблица файлов донора */}
           {donorPath && donorFiles.length > 0 && (
@@ -290,7 +292,9 @@ export function DonorSelectStep({
                 </Table.Header>
                 <Table.Body>
                   {donorFiles.map((file) => {
-                    const hasMatch = originalFiles.some((o) => o.selected && o.episodeNumber === file.episodeNumber)
+                    const hasMatch = originalFiles.some((o) =>
+                      o.selected && o.episodeNumber === file.episodeNumber
+                    )
                     return (
                       <Table.Row
                         key={file.path}
@@ -298,13 +302,13 @@ export function DonorSelectStep({
                         _hover={{ bg: 'bg.subtle' }}
                       >
                         <Table.Cell>
-                          {file.episodeNumber !== null ? (
-                            <Badge colorPalette="purple" variant="subtle">
-                              {file.episodeNumber}
-                            </Badge>
-                          ) : (
-                            <Text color="fg.subtle">—</Text>
-                          )}
+                          {file.episodeNumber !== null
+                            ? (
+                              <Badge colorPalette="purple" variant="subtle">
+                                {file.episodeNumber}
+                              </Badge>
+                            )
+                            : <Text color="fg.subtle">—</Text>}
                         </Table.Cell>
                         <Table.Cell>
                           <HStack gap={2}>
@@ -315,17 +319,19 @@ export function DonorSelectStep({
                           </HStack>
                         </Table.Cell>
                         <Table.Cell>
-                          {file.episodeNumber !== null &&
-                            (hasMatch ? (
-                              <Badge colorPalette="green" variant="subtle">
-                                <Icon as={LuCheck} mr={1} />
-                                Найден
-                              </Badge>
-                            ) : (
-                              <Badge colorPalette="gray" variant="subtle">
-                                Пропущен
-                              </Badge>
-                            ))}
+                          {file.episodeNumber !== null
+                            && (hasMatch
+                              ? (
+                                <Badge colorPalette="green" variant="subtle">
+                                  <Icon as={LuCheck} mr={1} />
+                                  Найден
+                                </Badge>
+                              )
+                              : (
+                                <Badge colorPalette="gray" variant="subtle">
+                                  Пропущен
+                                </Badge>
+                              ))}
                         </Table.Cell>
                       </Table.Row>
                     )
@@ -339,8 +345,8 @@ export function DonorSelectStep({
           {donorPath && matchInfo && matchInfo.unmatched > 0 && (
             <Box p={3} bg="orange.900/20" borderRadius="md" borderWidth="1px" borderColor="orange.800/50">
               <Text fontSize="sm" color="orange.400">
-                ⚠️ Для {matchInfo.unmatched} эпизод(ов) не найдены соответствующие файлы в доноре. Они будут
-                импортированы без дорожек донора.
+                ⚠️ Для {matchInfo.unmatched}{' '}
+                эпизод(ов) не найдены соответствующие файлы в доноре. Они будут импортированы без дорожек донора.
               </Text>
             </Box>
           )}

@@ -47,7 +47,7 @@ export function ServerSwitcher({ onServerChange }: ServerSwitcherProps) {
       await checkConnection()
       onServerChange?.()
     },
-    [activeServerId, setActiveServer, checkConnection, onServerChange]
+    [activeServerId, setActiveServer, checkConnection, onServerChange],
   )
 
   const handleAddServer = useCallback(() => {

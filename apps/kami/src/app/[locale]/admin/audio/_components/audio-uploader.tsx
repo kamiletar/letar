@@ -196,31 +196,31 @@ export function AudioUploader() {
                 key={item.id}
                 p={3}
                 borderRadius="md"
-                bg={
-                  item.status === 'success'
-                    ? { base: 'green.50', _dark: 'green.950/20' }
-                    : item.status === 'error'
-                      ? { base: 'red.50', _dark: 'red.950/20' }
-                      : 'bg.subtle'
-                }
+                bg={item.status === 'success'
+                  ? { base: 'green.50', _dark: 'green.950/20' }
+                  : item.status === 'error'
+                  ? { base: 'red.50', _dark: 'red.950/20' }
+                  : 'bg.subtle'}
                 gap={3}
               >
                 <Icon boxSize={5} color="fg.muted" flexShrink={0}>
                   <Music />
                 </Icon>
                 <VStack align="start" flex={1} gap={1}>
-                  {item.status === 'pending' ? (
-                    <Input
-                      size="sm"
-                      value={item.title}
-                      onChange={(e) => updateTitle(item.id, e.target.value)}
-                      placeholder="Название"
-                    />
-                  ) : (
-                    <Text fontSize="sm" fontWeight="medium">
-                      {item.title}
-                    </Text>
-                  )}
+                  {item.status === 'pending'
+                    ? (
+                      <Input
+                        size="sm"
+                        value={item.title}
+                        onChange={(e) => updateTitle(item.id, e.target.value)}
+                        placeholder="Название"
+                      />
+                    )
+                    : (
+                      <Text fontSize="sm" fontWeight="medium">
+                        {item.title}
+                      </Text>
+                    )}
                   <Text fontSize="xs" color="fg.muted">
                     {item.file.name} — {(item.file.size / 1024 / 1024).toFixed(1)} МБ
                   </Text>
@@ -231,26 +231,29 @@ export function AudioUploader() {
                   )}
                 </VStack>
                 <Badge
-                  colorPalette={
-                    item.status === 'success'
-                      ? 'green'
-                      : item.status === 'error'
-                        ? 'red'
-                        : item.status === 'uploading'
-                          ? 'blue'
-                          : 'gray'
-                  }
+                  colorPalette={item.status === 'success'
+                    ? 'green'
+                    : item.status === 'error'
+                    ? 'red'
+                    : item.status === 'uploading'
+                    ? 'blue'
+                    : 'gray'}
                 >
                   {item.status === 'success'
                     ? 'Загружено'
                     : item.status === 'error'
-                      ? 'Ошибка'
-                      : item.status === 'uploading'
-                        ? 'Загрузка...'
-                        : 'Ожидание'}
+                    ? 'Ошибка'
+                    : item.status === 'uploading'
+                    ? 'Загрузка...'
+                    : 'Ожидание'}
                 </Badge>
                 {item.status === 'pending' && (
-                  <Button size="xs" variant="ghost" colorPalette="red" onClick={() => removeFromQueue(item.id)}>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    colorPalette="red"
+                    onClick={() => removeFromQueue(item.id)}
+                  >
                     <Trash2 size={14} />
                   </Button>
                 )}

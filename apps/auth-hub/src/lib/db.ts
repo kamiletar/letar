@@ -50,19 +50,19 @@ function wrapWithEncryption(base: OrmType, key: Buffer): OrmType {
       if (prop === 'oauthApplication') {
         return createEncryptedOauthApplicationClient(
           Reflect.get(target, prop, receiver) as Parameters<typeof createEncryptedOauthApplicationClient>[0],
-          key
+          key,
         )
       }
       if (prop === 'oauthAccessToken') {
         return createEncryptedOauthAccessTokenClient(
           Reflect.get(target, prop, receiver) as Parameters<typeof createEncryptedOauthAccessTokenClient>[0],
-          key
+          key,
         )
       }
       if (prop === 'account') {
         return createEncryptedAccountClient(
           Reflect.get(target, prop, receiver) as Parameters<typeof createEncryptedAccountClient>[0],
-          key
+          key,
         )
       }
       const value = Reflect.get(target, prop, receiver)

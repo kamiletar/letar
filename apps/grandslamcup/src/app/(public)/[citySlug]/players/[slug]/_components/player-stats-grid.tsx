@@ -85,7 +85,11 @@ export function PlayerStatsGrid({ stats }: PlayerStatsGridProps) {
       <StatCard label="Лучший" value={stats.bestScore} icon={<LuTrophy size={18} />} />
       <TrendCard trend={stats.trend} />
       {stats.perfectScores > 0 && (
-        <StatCard label="Тридцатки" value={stats.perfectScores} icon={<LuStar size={18} />} />
+        <StatCard
+          label="Тридцатки"
+          value={stats.perfectScores}
+          icon={<LuStar size={18} />}
+        />
       )}
       {stats.totalRounds > 0 && (
         <StatCard

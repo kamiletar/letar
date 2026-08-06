@@ -49,9 +49,7 @@ export function AvailabilityRulesTable({ locale, rules }: AvailabilityRulesTable
         </HStack>
       </Card.Header>
       <Card.Body>
-        {rules.length === 0 ? (
-          <Text color="fg.muted">Правила доступности не настроены</Text>
-        ) : (
+        {rules.length === 0 ? <Text color="fg.muted">Правила доступности не настроены</Text> : (
           <Box overflowX="auto">
             <Table.Root>
               <Table.Header>

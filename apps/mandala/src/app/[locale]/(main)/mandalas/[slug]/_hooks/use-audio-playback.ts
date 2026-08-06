@@ -181,7 +181,7 @@ export function useAudioPlayback({
         onSettingsChange({ audioTrack: track.id, customAudioTrackId: null })
       }
     },
-    [playlist, onSettingsChange]
+    [playlist, onSettingsChange],
   )
 
   // Получить следующий индекс с учётом shuffle
@@ -312,7 +312,7 @@ export function useAudioPlayback({
       const clampedProgress = Math.max(0, Math.min(1, progress))
       audioElement.currentTime = clampedProgress * duration
     },
-    [audioElement, duration]
+    [audioElement, duration],
   )
 
   // Переключение режима повтора (off -> one -> all -> off)

@@ -60,86 +60,90 @@ export function EncodingProfilesCard({ profiles, isLoading, onRefetch }: Encodin
         </HStack>
       </Card.Header>
       <Card.Body>
-        {isLoading ? (
-          <HStack justify="center" py={4}>
-            <Spinner size="sm" />
-            <Text color="fg.subtle">Загрузка профилей...</Text>
-          </HStack>
-        ) : profiles && profiles.length > 0 ? (
-          <VStack gap={2} align="stretch">
-            {profiles.map((profile) => (
-              <Box key={profile.id} p={3} bg="bg.subtle" borderRadius="md" transition="background 0.2s">
-                <HStack justify="space-between">
-                  <Link href={`/settings/profiles/${profile.id}`} style={{ flex: 1 }}>
-                    <HStack gap={3} _hover={{ opacity: 0.8 }} cursor="pointer">
-                      {profile.isDefault && <Icon as={LuStar} color="yellow.400" boxSize={4} />}
-                      <Box>
-                        <HStack gap={2}>
-                          <Text fontWeight="medium">{profile.name}</Text>
-                          {profile.isBuiltIn && (
-                            <Badge size="sm" colorPalette="purple" variant="subtle">
-                              Встроенный
-                            </Badge>
-                          )}
-                        </HStack>
-                        <HStack gap={2} mt={1}>
-                          <Badge size="xs" variant="outline">
-                            CQ:{profile.cq}
-                          </Badge>
-                          <Badge size="xs" variant="outline">
-                            {profile.preset}
-                          </Badge>
-                          {profile.tune !== 'NONE' && (
+        {isLoading
+          ? (
+            <HStack justify="center" py={4}>
+              <Spinner size="sm" />
+              <Text color="fg.subtle">Загрузка профилей...</Text>
+            </HStack>
+          )
+          : profiles && profiles.length > 0
+          ? (
+            <VStack gap={2} align="stretch">
+              {profiles.map((profile) => (
+                <Box key={profile.id} p={3} bg="bg.subtle" borderRadius="md" transition="background 0.2s">
+                  <HStack justify="space-between">
+                    <Link href={`/settings/profiles/${profile.id}`} style={{ flex: 1 }}>
+                      <HStack gap={3} _hover={{ opacity: 0.8 }} cursor="pointer">
+                        {profile.isDefault && <Icon as={LuStar} color="yellow.400" boxSize={4} />}
+                        <Box>
+                          <HStack gap={2}>
+                            <Text fontWeight="medium">{profile.name}</Text>
+                            {profile.isBuiltIn && (
+                              <Badge size="sm" colorPalette="purple" variant="subtle">
+                                Встроенный
+                              </Badge>
+                            )}
+                          </HStack>
+                          <HStack gap={2} mt={1}>
                             <Badge size="xs" variant="outline">
-                              {profile.tune.toLowerCase()}
+                              CQ:{profile.cq}
                             </Badge>
-                          )}
-                          <Badge size="xs" variant="outline">
-                            {profile.rateControl}
-                          </Badge>
-                        </HStack>
-                      </Box>
-                    </HStack>
-                  </Link>
-                  <HStack gap={1}>
-                    {/* Сделать по умолчанию */}
-                    {!profile.isDefault && (
-                      <Tooltip content="Сделать по умолчанию">
+                            <Badge size="xs" variant="outline">
+                              {profile.preset}
+                            </Badge>
+                            {profile.tune !== 'NONE' && (
+                              <Badge size="xs" variant="outline">
+                                {profile.tune.toLowerCase()}
+                              </Badge>
+                            )}
+                            <Badge size="xs" variant="outline">
+                              {profile.rateControl}
+                            </Badge>
+                          </HStack>
+                        </Box>
+                      </HStack>
+                    </Link>
+                    <HStack gap={1}>
+                      {/* Сделать по умолчанию */}
+                      {!profile.isDefault && (
+                        <Tooltip content="Сделать по умолчанию">
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleSetDefault(profile)
+                            }}
+                          >
+                            <Icon as={LuStar} boxSize={4} />
+                          </Button>
+                        </Tooltip>
+                      )}
+                      {/* Копировать */}
+                      <Tooltip content="Копировать профиль">
                         <Button
                           size="xs"
                           variant="ghost"
                           onClick={(e) => {
                             e.preventDefault()
-                            handleSetDefault(profile)
+                            handleDuplicate(profile)
                           }}
                         >
-                          <Icon as={LuStar} boxSize={4} />
+                          <Icon as={LuCopy} boxSize={4} />
                         </Button>
                       </Tooltip>
-                    )}
-                    {/* Копировать */}
-                    <Tooltip content="Копировать профиль">
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handleDuplicate(profile)
-                        }}
-                      >
-                        <Icon as={LuCopy} boxSize={4} />
-                      </Button>
-                    </Tooltip>
+                    </HStack>
                   </HStack>
-                </HStack>
-              </Box>
-            ))}
-          </VStack>
-        ) : (
-          <Text color="fg.subtle" textAlign="center" py={4}>
-            Нет профилей кодирования
-          </Text>
-        )}
+                </Box>
+              ))}
+            </VStack>
+          )
+          : (
+            <Text color="fg.subtle" textAlign="center" py={4}>
+              Нет профилей кодирования
+            </Text>
+          )}
       </Card.Body>
     </Card.Root>
   )

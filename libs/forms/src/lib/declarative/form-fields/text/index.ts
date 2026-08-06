@@ -1,4 +1,4 @@
-export { FieldEditable, type EditableFieldProps } from './field-editable'
+export { type EditableFieldProps, FieldEditable } from './field-editable'
 export { FieldMaskedInput } from './field-masked-input'
 export { FieldPassword } from './field-password'
 export { FieldPasswordStrength } from './field-password-strength'

@@ -179,7 +179,7 @@ describe('TableOfContents', () => {
       act(() => {
         mockIntersectionCallback?.(
           [{ isIntersecting: true, target: elements[0] } as IntersectionObserverEntry],
-          {} as IntersectionObserver
+          {} as IntersectionObserver,
         )
       })
 

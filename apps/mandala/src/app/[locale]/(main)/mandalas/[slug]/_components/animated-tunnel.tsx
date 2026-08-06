@@ -75,7 +75,7 @@ export function AnimatedTunnel(props: AnimatedTunnelProps) {
       ctx.fillStyle = glowGradient
       ctx.fillRect(0, 0, size.width, size.height)
     },
-    [durationMs]
+    [durationMs],
   )
 
   const { canvasRef, size, canvasStyle } = useCanvasEffect(props, {

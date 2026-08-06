@@ -73,7 +73,7 @@ interface DownloadsState {
     task: Omit<
       DownloadTask,
       'id' | 'status' | 'progress' | 'downloadedBytes' | 'totalBytes' | 'currentItem' | 'errorMessage' | 'createdAt'
-    >
+    >,
   ) => string
   /** Обновить прогресс загрузки */
   updateProgress: (
@@ -81,7 +81,7 @@ interface DownloadsState {
     progress: number,
     downloadedBytes: number,
     totalBytes: number,
-    currentItem?: DownloadTask['currentItem']
+    currentItem?: DownloadTask['currentItem'],
   ) => void
   /** Начать загрузку (queued → downloading) */
   startDownload: (taskId: string) => void
@@ -274,6 +274,6 @@ export const useDownloadsStore = create<DownloadsState>()(
         }
         return persisted as DownloadsState
       },
-    }
-  )
+    },
+  ),
 )

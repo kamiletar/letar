@@ -295,10 +295,9 @@ export default async function LocaleLayout({ children, params }) {
       </body>
     </html>
   )
-}
+} // Типовой компонент с переводами
 
-// Типовой компонент с переводами
-;('use client')
+'use client'
 import { useTranslations } from 'next-intl'
 
 export function ProductCard({ product }) {

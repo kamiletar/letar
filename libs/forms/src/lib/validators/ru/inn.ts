@@ -74,6 +74,6 @@ export function innSchema() {
         if (v.length === 12) return validateInn12(v)
         return false
       },
-      { message: 'Неверная контрольная сумма ИНН' }
+      { message: 'Неверная контрольная сумма ИНН' },
     )
 }

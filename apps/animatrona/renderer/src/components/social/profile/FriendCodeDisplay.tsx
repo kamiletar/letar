@@ -103,10 +103,12 @@ export function FriendCodeDisplay({ friendCode, showQR = false, size = 'md' }: F
       {/* QR Code Placeholder */}
       {qrVisible && (
         <Box p={6} borderRadius="lg" bg="white" borderWidth="1px" borderColor="border.subtle" textAlign="center">
-          {/*
+          {
+            /*
             QR код можно добавить позже с помощью библиотеки qrcode.react
             Пока показываем placeholder
-          */}
+          */
+          }
           <Box
             w="200px"
             h="200px"

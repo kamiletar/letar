@@ -97,7 +97,7 @@ export function useWatchParty(): UseWatchPartyReturn {
         setIsLoading(false)
       }
     },
-    []
+    [],
   )
 
   // Присоединиться к комнате

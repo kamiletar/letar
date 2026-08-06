@@ -105,7 +105,7 @@ export function useWelcomePortalState({
         handleClose()
       }
     },
-    [handleClose]
+    [handleClose],
   )
 
   return {

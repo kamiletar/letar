@@ -66,7 +66,7 @@ export const FieldMaskedInput = createField<MaskedInputFieldProps, string, Maske
           maskCallback(element)
         }
       },
-      [mask, placeholderChar, showMaskOnFocus, showMaskOnHover, clearIncomplete, autoUnmask]
+      [mask, placeholderChar, showMaskOnFocus, showMaskOnHover, clearIncomplete, autoUnmask],
     )
 
     return { maskRef }
@@ -77,7 +77,8 @@ export const FieldMaskedInput = createField<MaskedInputFieldProps, string, Maske
       <Input
         ref={fieldState.maskRef}
         value={(field.state.value as string) ?? ''}
-        onChange={(e) => field.handleChange(e.target.value)}
+        onChange={(e) =>
+          field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         placeholder={resolved.placeholder}
         data-field-name={fullPath}

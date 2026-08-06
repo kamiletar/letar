@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Tooltip as ChakraTooltip, Circle, Portal, Text, VStack } from '@chakra-ui/react'
+import { Box, Circle, Portal, Text, Tooltip as ChakraTooltip, VStack } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
 import { LuCircleHelp } from 'react-icons/lu'
 import type { FieldTooltipMeta } from '../../types'

@@ -170,10 +170,12 @@ export async function getSequelSuggestion(animeId: string): Promise<SequelSugges
  *
  * Ищет завершённые аниме с незначатыми сиквелами
  */
-export async function getWatchNextSuggestion(): Promise<{
-  completedAnime: { id: string; name: string }
-  suggestion: SequelSuggestion
-} | null> {
+export async function getWatchNextSuggestion(): Promise<
+  {
+    completedAnime: { id: string; name: string }
+    suggestion: SequelSuggestion
+  } | null
+> {
   const db = prisma
 
   // Находим завершённые аниме (от новых к старым)

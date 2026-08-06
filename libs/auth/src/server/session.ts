@@ -26,7 +26,7 @@ export type AuthInstance = {
  * ```
  */
 export function createSessionHelpers<TSession, TUser = TSession extends { user: infer U } ? U : never>(
-  auth: AuthInstance
+  auth: AuthInstance,
 ) {
   /**
    * Получает сессию текущего пользователя

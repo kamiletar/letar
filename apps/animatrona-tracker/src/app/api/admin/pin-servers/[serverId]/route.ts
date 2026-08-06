@@ -108,7 +108,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Params
         } catch {
           // Ошибка отмены не блокирует удаление сервера
         }
-      })
+      }),
     )
   }
 

@@ -75,7 +75,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     async ({ name: paramName, message }) => {
       await mentor.emit({ kind: 'highlight_param', name: paramName, message })
       return { content: [{ type: 'text', text: `Подсветил «${paramName}» в студии.` }] }
-    }
+    },
   )
 
   server.registerTool(
@@ -84,7 +84,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     async () => {
       await mentor.emit({ kind: 'dim_all' })
       return { content: [{ type: 'text', text: 'Подсветки погашены.' }] }
-    }
+    },
   )
 
   server.registerTool(
@@ -97,21 +97,23 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     async ({ section }) => {
       await mentor.emit({ kind: 'focus_section', section })
       return { content: [{ type: 'text', text: `Фокус на блоке «${section}».` }] }
-    }
+    },
   )
 
   server.registerTool(
     'play_demo',
     {
-      description: `Загружает куратoрский демо-патч в студию и сразу проигрывает короткую демо-фразу. Доступные id: ${listDemoPatchIds().join(
-        ', '
-      )}.`,
+      description: `Загружает куратoрский демо-патч в студию и сразу проигрывает короткую демо-фразу. Доступные id: ${
+        listDemoPatchIds().join(
+          ', ',
+        )
+      }.`,
       inputSchema: { patchId: z.enum(listDemoPatchIds() as [string, ...string[]]) },
     },
     async ({ patchId }) => {
       await playDemoSequence(mentor, patchId)
       return { content: [{ type: 'text', text: `Играю демо «${patchId}» — звук пойдёт, если студия запущена (▶).` }] }
-    }
+    },
   )
 
   // ─── ИНСТРУМЕНТЫ DAW ─────────────────────────────────────
@@ -126,7 +128,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     async ({ patch }) => {
       await mentor.emit({ kind: 'load_patch', patch })
       return { content: [{ type: 'text', text: `Патч «${patch.name}» (${patch.type}) отправлен в студию.` }] }
-    }
+    },
   )
 
   server.registerTool(
@@ -139,15 +141,17 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     async ({ notes }) => {
       await mentor.emit({ kind: 'midi_sequence', notes })
       return { content: [{ type: 'text', text: `Отправлено ${notes.length} нот в студию.` }] }
-    }
+    },
   )
 
   server.registerTool(
     'generate_chord_pattern',
     {
-      description: `Генерирует и сразу проигрывает аккорд от заданной MIDI-ноты. Типы аккордов: ${CHORD_TYPES.join(
-        ', '
-      )}. Стили: ${CHORD_STYLES.join(', ')}.`,
+      description: `Генерирует и сразу проигрывает аккорд от заданной MIDI-ноты. Типы аккордов: ${
+        CHORD_TYPES.join(
+          ', ',
+        )
+      }. Стили: ${CHORD_STYLES.join(', ')}.`,
       inputSchema: {
         root: z.number().int().min(0).max(127).describe('MIDI-нота корня, напр. 60 = C4'),
         chordType: z.enum(CHORD_TYPES),
@@ -168,7 +172,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
           },
         ],
       }
-    }
+    },
   )
 
   // ─── РЕСУРСЫ ─────────────────────────────────────────────
@@ -192,7 +196,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
           },
         ],
       }
-    }
+    },
   )
 
   server.resource(
@@ -207,7 +211,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
       return {
         contents: [{ uri: 'synth://patches', mimeType: 'application/json', text: JSON.stringify(patches, null, 2) }],
       }
-    }
+    },
   )
 
   server.resource(
@@ -223,7 +227,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
       return {
         contents: [{ uri: 'daw://current-state', mimeType: 'application/json', text: JSON.stringify(state, null, 2) }],
       }
-    }
+    },
   )
 
   return server

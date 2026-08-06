@@ -86,7 +86,7 @@ async function main(): Promise<void> {
           envFile: values['env-file'],
         },
         undefined,
-        printRolloutStep
+        printRolloutStep,
       )
       printRolloutSummary(result)
       process.exit(result.ok ? 0 : 1)
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
     }
     default: {
       console.error(
-        `Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout, migrate-compose`
+        `Неизвестная подкоманда: ${subcommand ?? '(пусто)'}\nДоступно: doctor, status, rollout, migrate-compose`,
       )
       process.exit(2)
     }

@@ -100,23 +100,21 @@ function FeatureCard({ feature }: FeatureCardProps) {
         borderWidth={feature.isMain ? '2px' : '1px'}
         borderColor={feature.isMain ? 'transparent' : 'gray.800'}
         // Gradient border для главной фичи
-        _before={
-          feature.isMain
-            ? {
-                content: '""',
-                position: 'absolute',
-                inset: '-2px',
-                borderRadius: 'xl',
-                padding: '2px',
-                background:
-                  'linear-gradient(135deg, rgba(139, 61, 255, 0.8), rgba(192, 132, 252, 0.4), rgba(139, 61, 255, 0.8))',
-                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                WebkitMaskComposite: 'xor',
-                maskComposite: 'exclude',
-                zIndex: -1,
-              }
-            : undefined
-        }
+        _before={feature.isMain
+          ? {
+            content: '""',
+            position: 'absolute',
+            inset: '-2px',
+            borderRadius: 'xl',
+            padding: '2px',
+            background:
+              'linear-gradient(135deg, rgba(139, 61, 255, 0.8), rgba(192, 132, 252, 0.4), rgba(139, 61, 255, 0.8))',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+            zIndex: -1,
+          }
+          : undefined}
         _hover={{
           boxShadow: feature.isMain ? '0 0 40px rgba(139, 61, 255, 0.3)' : '0 0 30px rgba(139, 61, 255, 0.2)',
         }}
@@ -198,9 +196,7 @@ export function FeaturesSection() {
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
           >
-            {FEATURES.map((feature) => (
-              <FeatureCard key={feature.title} feature={feature} />
-            ))}
+            {FEATURES.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}
           </MotionSimpleGrid>
         </VStack>
       </Container>

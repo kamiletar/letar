@@ -61,7 +61,7 @@ export function CaptchaField(props: CaptchaFieldProps) {
 
       props.onSuccess?.(captchaToken)
     },
-    [formCtx, props.onSuccess]
+    [formCtx, props.onSuccess],
   )
 
   const handleError = useCallback(
@@ -72,7 +72,7 @@ export function CaptchaField(props: CaptchaFieldProps) {
       }
       props.onError?.(error)
     },
-    [formCtx, props.onError]
+    [formCtx, props.onError],
   )
 
   const handleExpire = useCallback(() => {
@@ -87,8 +87,8 @@ export function CaptchaField(props: CaptchaFieldProps) {
   if (!provider || !siteKey) {
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        '[Form.Captcha] provider и siteKey обязательны. ' +
-          'Передайте через пропсы или настройте captcha в createForm().'
+        '[Form.Captcha] provider и siteKey обязательны. '
+          + 'Передайте через пропсы или настройте captcha в createForm().',
       )
     }
     return null

@@ -210,7 +210,7 @@ messages/form-schemas/
 ```tsx
 import { FormI18nProvider } from '@letar/forms'
 import { useLocale, useTranslations } from 'next-intl' // setupZodErrorMap — глобальный перевод ошибок валидации
-;<FormI18nProvider t={useTranslations('formSchemas')} locale={useLocale()} setupZodErrorMap>
+<FormI18nProvider t={useTranslations('formSchemas')} locale={useLocale()} setupZodErrorMap>
   <Form schema={Schema} initialValue={data} onSubmit={save}>
     ...
   </Form>
@@ -253,8 +253,8 @@ import { useLocale, useTranslations } from 'next-intl' // setupZodErrorMap — �
 
 Выведи таблицу:
 
-| Проверка      | Статус       | Комментарий          |
-| ------------- | ------------ | -------------------- |
+| Проверка      | Статус      | Комментарий          |
+| ------------- | ----------- | -------------------- |
 | createForm    | ✅/❌/⚠️     | Путь или проблема    |
 | Select'ы      | ✅/❌/⚠️     | N из M enum'ов       |
 | Labels        | ✅/❌/⚠️     | ...                  |

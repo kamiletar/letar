@@ -1,1 +1,1 @@
-export { FieldAuto, camelCaseToLabel, type AutoFieldConfig, type AutoFieldProps } from './field-auto'
+export { type AutoFieldConfig, type AutoFieldProps, camelCaseToLabel, FieldAuto } from './field-auto'

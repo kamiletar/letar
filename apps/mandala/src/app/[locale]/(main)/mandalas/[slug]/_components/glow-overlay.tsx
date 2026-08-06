@@ -30,9 +30,11 @@ export function GlowOverlay({ enabled, color = '#8B5CF6', intensity = 50, pulseI
   const effectiveOpacity = baseOpacity * (1 + pulseIntensity * 0.5)
 
   // Добавляем прозрачность к цвету
-  const colorWithAlpha = `${color}${Math.round(effectiveOpacity * 255)
-    .toString(16)
-    .padStart(2, '0')}`
+  const colorWithAlpha = `${color}${
+    Math.round(effectiveOpacity * 255)
+      .toString(16)
+      .padStart(2, '0')
+  }`
 
   return (
     <Box

@@ -113,7 +113,7 @@ function FranchiseGraphInner({
         onNodeClick(data.shikimoriId)
       }
     },
-    [onNodeClick]
+    [onNodeClick],
   )
 
   return (

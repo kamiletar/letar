@@ -409,11 +409,11 @@ export default function SettingsPage() {
     setSettings((prev) =>
       prev
         ? {
-            ...prev,
-            printerSpeed: profile.printerSpeed,
-            printerDensity: profile.printerDensity,
-            copies: profile.copies,
-          }
+          ...prev,
+          printerSpeed: profile.printerSpeed,
+          printerDensity: profile.printerDensity,
+          copies: profile.copies,
+        }
         : null
     )
     setSelectedPrinter(profile.printerName)
@@ -506,37 +506,37 @@ export default function SettingsPage() {
                       {/* Выбор принтера из списка */}
                       <Field.Root>
                         <Field.Label>Принтер</Field.Label>
-                        {printersLoading ? (
-                          <Skeleton height="40px" />
-                        ) : printers.length > 0 ? (
-                          <NativeSelect.Root>
-                            <NativeSelect.Field
-                              value={selectedPrinter}
-                              onChange={(e) => setSelectedPrinter(e.currentTarget.value)}
-                            >
-                              {printers.map((p) => (
-                                <option key={p.name} value={p.name}>
-                                  {p.displayName} {p.isDefault && '(по умолчанию)'}
-                                </option>
-                              ))}
-                            </NativeSelect.Field>
-                            <NativeSelect.Indicator />
-                          </NativeSelect.Root>
-                        ) : (
-                          <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="fg.muted">
-                              Принтеры не найдены. Введите имя вручную:
-                            </Text>
+                        {printersLoading ? <Skeleton height="40px" /> : printers.length > 0
+                          ? (
                             <NativeSelect.Root>
                               <NativeSelect.Field
-                                as="input"
                                 value={selectedPrinter}
                                 onChange={(e) => setSelectedPrinter(e.currentTarget.value)}
-                                placeholder="Имя принтера"
-                              />
+                              >
+                                {printers.map((p) => (
+                                  <option key={p.name} value={p.name}>
+                                    {p.displayName} {p.isDefault && '(по умолчанию)'}
+                                  </option>
+                                ))}
+                              </NativeSelect.Field>
+                              <NativeSelect.Indicator />
                             </NativeSelect.Root>
-                          </VStack>
-                        )}
+                          )
+                          : (
+                            <VStack align="stretch" gap={2}>
+                              <Text fontSize="sm" color="fg.muted">
+                                Принтеры не найдены. Введите имя вручную:
+                              </Text>
+                              <NativeSelect.Root>
+                                <NativeSelect.Field
+                                  as="input"
+                                  value={selectedPrinter}
+                                  onChange={(e) => setSelectedPrinter(e.currentTarget.value)}
+                                  placeholder="Имя принтера"
+                                />
+                              </NativeSelect.Root>
+                            </VStack>
+                          )}
                       </Field.Root>
 
                       <Form.Field.RadioCard
@@ -689,64 +689,66 @@ export default function SettingsPage() {
                     />
                   </Card.Header>
                   <Card.Body>
-                    {profiles.length === 0 ? (
-                      <Text color="fg.muted" textAlign="center" py={4}>
-                        Нет сохранённых профилей. Создайте первый профиль выше.
-                      </Text>
-                    ) : (
-                      <VStack gap={3} align="stretch">
-                        {profiles.map((profile) => (
-                          <Box
-                            key={profile.id}
-                            p={4}
-                            borderRadius="md"
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _hover={{ bg: 'bg.subtle' }}
-                          >
-                            <HStack justify="space-between">
-                              <VStack align="start" gap={1}>
-                                <Text fontWeight="medium">{profile.name}</Text>
-                                <HStack gap={4} fontSize="sm" color="fg.muted">
-                                  <Text>
-                                    Принтер: <strong>{profile.printerName}</strong>
-                                  </Text>
-                                  <Text>
-                                    Скорость: <strong>{profile.printerSpeed}</strong>
-                                  </Text>
-                                  <Text>
-                                    Плотность: <strong>{profile.printerDensity}</strong>
-                                  </Text>
-                                  <Text>
-                                    Копии: <strong>{profile.copies}</strong>
-                                  </Text>
+                    {profiles.length === 0
+                      ? (
+                        <Text color="fg.muted" textAlign="center" py={4}>
+                          Нет сохранённых профилей. Создайте первый профиль выше.
+                        </Text>
+                      )
+                      : (
+                        <VStack gap={3} align="stretch">
+                          {profiles.map((profile) => (
+                            <Box
+                              key={profile.id}
+                              p={4}
+                              borderRadius="md"
+                              border="1px solid"
+                              borderColor="border.subtle"
+                              _hover={{ bg: 'bg.subtle' }}
+                            >
+                              <HStack justify="space-between">
+                                <VStack align="start" gap={1}>
+                                  <Text fontWeight="medium">{profile.name}</Text>
+                                  <HStack gap={4} fontSize="sm" color="fg.muted">
+                                    <Text>
+                                      Принтер: <strong>{profile.printerName}</strong>
+                                    </Text>
+                                    <Text>
+                                      Скорость: <strong>{profile.printerSpeed}</strong>
+                                    </Text>
+                                    <Text>
+                                      Плотность: <strong>{profile.printerDensity}</strong>
+                                    </Text>
+                                    <Text>
+                                      Копии: <strong>{profile.copies}</strong>
+                                    </Text>
+                                  </HStack>
+                                </VStack>
+                                <HStack gap={2}>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    colorPalette="blue"
+                                    onClick={() => handleApplyProfile(profile)}
+                                  >
+                                    <LuSave />
+                                    Применить
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    colorPalette="red"
+                                    onClick={() => handleDeleteProfile(profile.id)}
+                                    loading={deletingProfileId === profile.id}
+                                  >
+                                    <LuTrash2 />
+                                  </Button>
                                 </HStack>
-                              </VStack>
-                              <HStack gap={2}>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  colorPalette="blue"
-                                  onClick={() => handleApplyProfile(profile)}
-                                >
-                                  <LuSave />
-                                  Применить
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  colorPalette="red"
-                                  onClick={() => handleDeleteProfile(profile.id)}
-                                  loading={deletingProfileId === profile.id}
-                                >
-                                  <LuTrash2 />
-                                </Button>
                               </HStack>
-                            </HStack>
-                          </Box>
-                        ))}
-                      </VStack>
-                    )}
+                            </Box>
+                          ))}
+                        </VStack>
+                      )}
                   </Card.Body>
                 </Card.Root>
               </VStack>
@@ -809,16 +811,16 @@ export default function SettingsPage() {
                         </Box>
                       )}
 
-                      {updateStatus &&
-                        updateStatus.progress !== null &&
-                        updateStatus.progress < 100 &&
-                        !updateStatus.downloaded && (
-                          <Box p={3} bg="orange.subtle" borderRadius="md">
-                            <Text fontWeight="medium" color="orange.fg">
-                              Загрузка обновления... {updateStatus.progress}%
-                            </Text>
-                          </Box>
-                        )}
+                      {updateStatus
+                        && updateStatus.progress !== null
+                        && updateStatus.progress < 100
+                        && !updateStatus.downloaded && (
+                        <Box p={3} bg="orange.subtle" borderRadius="md">
+                          <Text fontWeight="medium" color="orange.fg">
+                            Загрузка обновления... {updateStatus.progress}%
+                          </Text>
+                        </Box>
+                      )}
 
                       {updateStatus?.downloaded && (
                         <Box p={3} bg="green.subtle" borderRadius="md">

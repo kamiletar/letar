@@ -25,10 +25,10 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(function Field
           {Array.isArray(errorText)
             ? errorText.join(', ')
             : typeof errorText === 'string'
-              ? errorText
-              : typeof errorText === 'object'
-                ? JSON.stringify(errorText)
-                : String(errorText)}
+            ? errorText
+            : typeof errorText === 'object'
+            ? JSON.stringify(errorText)
+            : String(errorText)}
         </ChakraField.ErrorText>
       )}
     </ChakraField.Root>

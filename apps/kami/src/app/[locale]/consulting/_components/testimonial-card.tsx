@@ -56,11 +56,9 @@ export const TestimonialCard = memo(function TestimonialCard({
         {/* Автор */}
         <HStack gap={3} pt={2}>
           <Avatar.Root size="sm">
-            {authorAvatar ? (
-              <Avatar.Image src={authorAvatar} alt={authorName} />
-            ) : (
-              <Avatar.Fallback>{authorName.slice(0, 2).toUpperCase()}</Avatar.Fallback>
-            )}
+            {authorAvatar
+              ? <Avatar.Image src={authorAvatar} alt={authorName} />
+              : <Avatar.Fallback>{authorName.slice(0, 2).toUpperCase()}</Avatar.Fallback>}
           </Avatar.Root>
           <VStack align="start" gap={0}>
             <Text fontWeight="semibold" fontSize="sm">

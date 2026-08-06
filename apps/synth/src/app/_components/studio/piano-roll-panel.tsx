@@ -44,7 +44,7 @@ function cellStyle(
   isPlayhead: boolean,
   isBlackRow: boolean,
   groupStart: boolean,
-  inScale: boolean
+  inScale: boolean,
 ): React.CSSProperties {
   const emptyBg = isBlackRow ? '#140F0A' : '#1C140C'
   return {
@@ -137,7 +137,7 @@ export function PianoRollPanel({
                       isPlaying && currentStep === step,
                       isBlackKey(note),
                       step % 4 === 0,
-                      inScale
+                      inScale,
                     )}
                     onClick={() => onToggleCell(note, step)}
                   />

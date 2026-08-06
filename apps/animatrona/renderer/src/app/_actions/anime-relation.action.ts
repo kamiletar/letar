@@ -22,7 +22,7 @@ export async function findManyAnimeRelations(args?: Prisma.AnimeRelationFindMany
  */
 export async function findUniqueAnimeRelation(
   id: string,
-  include?: Prisma.AnimeRelationInclude
+  include?: Prisma.AnimeRelationInclude,
 ): Promise<AnimeRelation | null> {
   return prisma.animeRelation.findUnique({
     where: { id },
@@ -35,7 +35,7 @@ export async function findUniqueAnimeRelation(
  */
 export async function findAnimeRelationsByAnimeId(
   animeId: string,
-  include?: Prisma.AnimeRelationInclude
+  include?: Prisma.AnimeRelationInclude,
 ): Promise<AnimeRelation[]> {
   return prisma.animeRelation.findMany({
     where: { sourceAnimeId: animeId },
@@ -56,7 +56,7 @@ export async function createAnimeRelation(data: Prisma.AnimeRelationUncheckedCre
  * Создать несколько связей
  */
 export async function createManyAnimeRelations(
-  data: Prisma.AnimeRelationCreateManyInput[]
+  data: Prisma.AnimeRelationCreateManyInput[],
 ): Promise<{ count: number }> {
   return prisma.animeRelation.createMany({ data })
 }
@@ -67,7 +67,7 @@ export async function createManyAnimeRelations(
  */
 export async function syncAnimeRelations(
   sourceAnimeId: string,
-  relations: Omit<Prisma.AnimeRelationCreateManyInput, 'sourceAnimeId'>[]
+  relations: Omit<Prisma.AnimeRelationCreateManyInput, 'sourceAnimeId'>[],
 ): Promise<{ count: number }> {
   // Удаляем все существующие связи для этого аниме
   await prisma.animeRelation.deleteMany({

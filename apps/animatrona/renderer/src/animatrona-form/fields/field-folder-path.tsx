@@ -80,14 +80,14 @@ export function FieldFolderPath({
           <Field.Root invalid={hasError} required={required} disabled={disabled} readOnly={readOnly}>
             {label && (
               <Field.Label>
-                {tooltip ? (
-                  <HStack gap={1}>
-                    <span>{label}</span>
-                    <FieldTooltip {...tooltip} />
-                  </HStack>
-                ) : (
-                  label
-                )}
+                {tooltip
+                  ? (
+                    <HStack gap={1}>
+                      <span>{label}</span>
+                      <FieldTooltip {...tooltip} />
+                    </HStack>
+                  )
+                  : label}
                 {required && <Field.RequiredIndicator />}
               </Field.Label>
             )}
@@ -103,26 +103,28 @@ export function FieldFolderPath({
                 display="flex"
                 alignItems="center"
               >
-                {value ? (
-                  <Text fontSize="sm" wordBreak="break-all">
-                    {value}
-                  </Text>
-                ) : (
-                  <Text fontSize="sm" color="fg.subtle">
-                    {placeholder}
-                  </Text>
-                )}
+                {value
+                  ? (
+                    <Text fontSize="sm" wordBreak="break-all">
+                      {value}
+                    </Text>
+                  )
+                  : (
+                    <Text fontSize="sm" color="fg.subtle">
+                      {placeholder}
+                    </Text>
+                  )}
               </Box>
               <Button variant="outline" onClick={handleSelectFolder} disabled={disabled || readOnly} size="sm">
                 <LuFolderOpen />
                 {buttonText}
               </Button>
             </HStack>
-            {hasError ? (
-              <Field.ErrorText>{errors.map((e: { message?: string }) => e?.message ?? e).join(', ')}</Field.ErrorText>
-            ) : (
-              helperText && <Field.HelperText>{helperText}</Field.HelperText>
-            )}
+            {hasError
+              ? <Field.ErrorText>{errors.map((e: { message?: string }) => e?.message ?? e).join(', ')}</Field.ErrorText>
+              : (
+                helperText && <Field.HelperText>{helperText}</Field.HelperText>
+              )}
           </Field.Root>
         )
       }}

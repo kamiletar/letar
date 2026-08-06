@@ -233,10 +233,9 @@ function DraggableCard() {
       </motion.div>
     </div>
   )
-}
+} // Только по одной оси
 
-// Только по одной оси
-;<motion.div drag="x" dragConstraints={{ left: -100, right: 100 }} />
+<motion.div drag="x" dragConstraints={{ left: -100, right: 100 }} />
 ```
 
 ---

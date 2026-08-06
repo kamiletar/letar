@@ -198,48 +198,50 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
           Организатор городов
         </Heading>
 
-        {user.organizedCities.length > 0 ? (
-          <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden" mb={4}>
-            <Box overflowX="auto">
-              <Table.Root size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Город</Table.ColumnHeader>
-                    <Table.ColumnHeader>Назначен</Table.ColumnHeader>
-                    <Table.ColumnHeader w="60px" />
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {user.organizedCities.map((oc) => (
-                    <Table.Row key={oc.id}>
-                      <Table.Cell fontWeight="medium">{oc.city.name}</Table.Cell>
-                      <Table.Cell fontSize="sm" color="fg.muted">
-                        {formatDate(oc.createdAt)}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          minW="44px"
-                          minH="44px"
-                          colorPalette="red"
-                          aria-label="Снять организатора"
-                          onClick={() => setRemoveTarget(oc)}
-                        >
-                          <Icon as={LuTrash2} />
-                        </Button>
-                      </Table.Cell>
+        {user.organizedCities.length > 0
+          ? (
+            <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden" mb={4}>
+              <Box overflowX="auto">
+                <Table.Root size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Город</Table.ColumnHeader>
+                      <Table.ColumnHeader>Назначен</Table.ColumnHeader>
+                      <Table.ColumnHeader w="60px" />
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
+                  </Table.Header>
+                  <Table.Body>
+                    {user.organizedCities.map((oc) => (
+                      <Table.Row key={oc.id}>
+                        <Table.Cell fontWeight="medium">{oc.city.name}</Table.Cell>
+                        <Table.Cell fontSize="sm" color="fg.muted">
+                          {formatDate(oc.createdAt)}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            minW="44px"
+                            minH="44px"
+                            colorPalette="red"
+                            aria-label="Снять организатора"
+                            onClick={() => setRemoveTarget(oc)}
+                          >
+                            <Icon as={LuTrash2} />
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </Box>
             </Box>
-          </Box>
-        ) : (
-          <Text color="fg.muted" mb={4}>
-            Не назначен организатором ни одного города
-          </Text>
-        )}
+          )
+          : (
+            <Text color="fg.muted" mb={4}>
+              Не назначен организатором ни одного города
+            </Text>
+          )}
 
         {/* Добавление города */}
         {availableCities.length > 0 && (
@@ -374,78 +376,85 @@ function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: str
         Привязка поэта
       </Heading>
 
-      {player ? (
-        <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
-          <HStack gap={2}>
-            <Badge colorPalette="green">Привязан</Badge>
-            <Link href={`/admin/players/${player.id}`}>
-              <Text fontSize="sm" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
-                {player.name}
-              </Text>
-            </Link>
-          </HStack>
-          <Button size="sm" variant="outline" colorPalette="red" onClick={handleUnlink} loading={unlinking}>
-            <Icon as={LuUnlink} />
-            Отвязать
-          </Button>
-        </Flex>
-      ) : (
-        <VStack align="stretch" gap={3}>
-          <Text fontSize="sm" color="fg.muted">
-            Нет привязанного поэта. Найдите по имени:
-          </Text>
-          <HStack gap={2}>
-            <Box position="relative" maxW="350px" flex={1}>
-              <Input
-                size="sm"
-                placeholder="Поиск поэта по имени..."
-                value={query}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </Box>
-            {searching && (
-              <Text fontSize="xs" color="fg.muted">
-                Поиск...
+      {player
+        ? (
+          <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
+            <HStack gap={2}>
+              <Badge colorPalette="green">Привязан</Badge>
+              <Link href={`/admin/players/${player.id}`}>
+                <Text fontSize="sm" color="brand.fg" _hover={{ textDecoration: 'underline' }}>
+                  {player.name}
+                </Text>
+              </Link>
+            </HStack>
+            <Button size="sm" variant="outline" colorPalette="red" onClick={handleUnlink} loading={unlinking}>
+              <Icon as={LuUnlink} />
+              Отвязать
+            </Button>
+          </Flex>
+        )
+        : (
+          <VStack align="stretch" gap={3}>
+            <Text fontSize="sm" color="fg.muted">
+              Нет привязанного поэта. Найдите по имени:
+            </Text>
+            <HStack gap={2}>
+              <Box position="relative" maxW="350px" flex={1}>
+                <Input
+                  size="sm"
+                  placeholder="Поиск поэта по имени..."
+                  value={query}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </Box>
+              {searching && (
+                <Text fontSize="xs" color="fg.muted">
+                  Поиск...
+                </Text>
+              )}
+            </HStack>
+
+            {results.length > 0 && (
+              <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden">
+                <Table.Root size="sm">
+                  <Table.Body>
+                    {results.map((p) => (
+                      <Table.Row key={p.id}>
+                        <Table.Cell>
+                          <Text fontWeight="medium" fontSize="sm">
+                            {p.name}
+                          </Text>
+                          {p.city && (
+                            <Text fontSize="xs" color="fg.muted">
+                              {p.city.name}
+                            </Text>
+                          )}
+                        </Table.Cell>
+                        <Table.Cell textAlign="right">
+                          <Button
+                            size="sm"
+                            colorPalette="brand"
+                            onClick={() => handleLink(p.id)}
+                            loading={linking}
+                          >
+                            <Icon as={LuLink} />
+                            Привязать
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </Box>
+            )}
+
+            {query.trim().length >= 2 && !searching && results.length === 0 && (
+              <Text fontSize="sm" color="fg.muted">
+                Поэты без привязки не найдены
               </Text>
             )}
-          </HStack>
-
-          {results.length > 0 && (
-            <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden">
-              <Table.Root size="sm">
-                <Table.Body>
-                  {results.map((p) => (
-                    <Table.Row key={p.id}>
-                      <Table.Cell>
-                        <Text fontWeight="medium" fontSize="sm">
-                          {p.name}
-                        </Text>
-                        {p.city && (
-                          <Text fontSize="xs" color="fg.muted">
-                            {p.city.name}
-                          </Text>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell textAlign="right">
-                        <Button size="sm" colorPalette="brand" onClick={() => handleLink(p.id)} loading={linking}>
-                          <Icon as={LuLink} />
-                          Привязать
-                        </Button>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Box>
-          )}
-
-          {query.trim().length >= 2 && !searching && results.length === 0 && (
-            <Text fontSize="sm" color="fg.muted">
-              Поэты без привязки не найдены
-            </Text>
-          )}
-        </VStack>
-      )}
+          </VStack>
+        )}
     </Box>
   )
 }

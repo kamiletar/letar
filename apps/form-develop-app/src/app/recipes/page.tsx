@@ -69,66 +69,68 @@ export default function RecipesListPage() {
           </Button>
         </Flex>
 
-        {recipes.length === 0 ? (
-          <Box textAlign="center" py={10}>
-            <Text color="gray.500" fontSize="lg">
-              Нет рецептов. Создайте первый!
-            </Text>
-          </Box>
-        ) : (
-          <VStack gap={4} align="stretch">
-            {recipes.map((recipe) => (
-              <Card.Root key={recipe.id}>
-                <Card.Body>
-                  <Flex justify="space-between" align="start">
-                    <VStack align="start" gap={2}>
-                      <Heading size="md">{recipe.title}</Heading>
-                      <HStack gap={2}>
-                        <Badge colorPalette="blue">{recipe.portions} порций</Badge>
-                        {recipe.info?.base?.type && (
-                          <Badge colorPalette={recipe.info.base.type === 'SWEET' ? 'pink' : 'green'}>
-                            {recipe.info.base.type === 'SWEET' ? 'Сладкое' : 'Солёное'}
-                          </Badge>
-                        )}
-                        {recipe.info?.base?.rating && recipe.info.base.rating > 0 && (
-                          <Badge colorPalette="yellow">Рейтинг: {recipe.info.base.rating}</Badge>
-                        )}
-                      </HStack>
-                      {recipe.components && recipe.components.length > 0 && (
-                        <Text fontSize="sm" color="gray.500">
-                          {recipe.components.length} ингредиентов
-                        </Text>
-                      )}
-                      {recipe.tags && recipe.tags.length > 0 && (
-                        <HStack gap={1} flexWrap="wrap">
-                          {recipe.tags.map((tag, index) => (
-                            <Badge key={index} variant="outline" size="sm">
-                              {tag}
+        {recipes.length === 0
+          ? (
+            <Box textAlign="center" py={10}>
+              <Text color="gray.500" fontSize="lg">
+                Нет рецептов. Создайте первый!
+              </Text>
+            </Box>
+          )
+          : (
+            <VStack gap={4} align="stretch">
+              {recipes.map((recipe) => (
+                <Card.Root key={recipe.id}>
+                  <Card.Body>
+                    <Flex justify="space-between" align="start">
+                      <VStack align="start" gap={2}>
+                        <Heading size="md">{recipe.title}</Heading>
+                        <HStack gap={2}>
+                          <Badge colorPalette="blue">{recipe.portions} порций</Badge>
+                          {recipe.info?.base?.type && (
+                            <Badge colorPalette={recipe.info.base.type === 'SWEET' ? 'pink' : 'green'}>
+                              {recipe.info.base.type === 'SWEET' ? 'Сладкое' : 'Солёное'}
                             </Badge>
-                          ))}
+                          )}
+                          {recipe.info?.base?.rating && recipe.info.base.rating > 0 && (
+                            <Badge colorPalette="yellow">Рейтинг: {recipe.info.base.rating}</Badge>
+                          )}
                         </HStack>
-                      )}
-                    </VStack>
-                    <HStack gap={2}>
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/recipes/${recipe.id}`}>Редактировать</Link>
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorPalette="red"
-                        variant="ghost"
-                        onClick={() => handleDelete(recipe.id, recipe.title)}
-                        loading={deleteRecipe.isPending}
-                      >
-                        Удалить
-                      </Button>
-                    </HStack>
-                  </Flex>
-                </Card.Body>
-              </Card.Root>
-            ))}
-          </VStack>
-        )}
+                        {recipe.components && recipe.components.length > 0 && (
+                          <Text fontSize="sm" color="gray.500">
+                            {recipe.components.length} ингредиентов
+                          </Text>
+                        )}
+                        {recipe.tags && recipe.tags.length > 0 && (
+                          <HStack gap={1} flexWrap="wrap">
+                            {recipe.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline" size="sm">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </HStack>
+                        )}
+                      </VStack>
+                      <HStack gap={2}>
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/recipes/${recipe.id}`}>Редактировать</Link>
+                        </Button>
+                        <Button
+                          size="sm"
+                          colorPalette="red"
+                          variant="ghost"
+                          onClick={() => handleDelete(recipe.id, recipe.title)}
+                          loading={deleteRecipe.isPending}
+                        >
+                          Удалить
+                        </Button>
+                      </HStack>
+                    </Flex>
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </VStack>
+          )}
       </VStack>
     </Container>
   )

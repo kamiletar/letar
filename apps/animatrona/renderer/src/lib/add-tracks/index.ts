@@ -14,10 +14,10 @@
 
 // Типы
 export type {
+  AddedRecord,
   AddTracksProgress,
   AddTracksStage,
   AddTracksState,
-  AddedRecord,
   AudioTask,
   DonorProbeResult,
   FileProgress,

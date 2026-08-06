@@ -105,7 +105,7 @@ export class ImageGeneratorService {
     templateBuffer: Buffer | null,
     dataMatrixData: string,
     gtinData: string,
-    labelConfig: LabelConfig
+    labelConfig: LabelConfig,
   ): Promise<Buffer> {
     const logger = Logger.getInstance()
     const { width, height } = labelConfig
@@ -127,7 +127,7 @@ export class ImageGeneratorService {
       // Create white background - используем fromBuffer с пустым PNG
       const whitePixelPng = Buffer.from(
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8////fwYACQAB/d+nVgAAAABJRU5ErkJggg==',
-        'base64'
+        'base64',
       )
       base = await Jimp.read(whitePixelPng)
       base.resize({ w: width, h: height })
@@ -137,7 +137,7 @@ export class ImageGeneratorService {
     if (labelConfig.elements.datamatrix.enabled) {
       const dataMatrixPng = await ImageGeneratorService.generateDataMatrix(
         dataMatrixData,
-        labelConfig.elements.datamatrix.size
+        labelConfig.elements.datamatrix.size,
       )
 
       logger.info('Resizing DataMatrix', {
@@ -160,7 +160,7 @@ export class ImageGeneratorService {
       const gtinBarcodePng = await ImageGeneratorService.generateGTINBarcode(
         gtinData,
         labelConfig.elements.gtin.width,
-        labelConfig.elements.gtin.height
+        labelConfig.elements.gtin.height,
       )
 
       logger.info('Resizing GTIN barcode', {

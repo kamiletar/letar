@@ -90,7 +90,7 @@ export function describeAlgorithm(algorithm: number): string {
       chain
         .map((op) => op + 1)
         .reverse()
-        .join('→')
+        .join('→'),
     )
   }
 

@@ -219,7 +219,7 @@ export function FormSteps({
       direction,
       hideFieldsFromValidation,
       showFieldsForValidation,
-    ]
+    ],
   )
 
   // Handle step change from Chakra Steps
@@ -232,7 +232,7 @@ export function FormSteps({
       }
       goToStep(details.step)
     },
-    [linear, currentStep, goToStep]
+    [linear, currentStep, goToStep],
   )
 
   return (

@@ -98,9 +98,9 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
 
   const existingPlagiarisms = seasonId
     ? await prisma.playerSuspension.findMany({
-        where: { playerId: { in: playerIds }, seasonId, reason: 'PLAGIARISM', active: true },
-        select: { playerId: true },
-      })
+      where: { playerId: { in: playerIds }, seasonId, reason: 'PLAGIARISM', active: true },
+      select: { playerId: true },
+    })
     : []
 
   const plagiarizedPlayerIds = new Set(existingPlagiarisms.map((s) => s.playerId))
@@ -165,9 +165,9 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
         <StatCard
           icon={<LuTrophy size={18} />}
           label="Турнирные очки"
-          value={
-            match.homePoints !== null && match.awayPoints !== null ? `${match.homePoints} : ${match.awayPoints}` : '—'
-          }
+          value={match.homePoints !== null && match.awayPoints !== null
+            ? `${match.homePoints} : ${match.awayPoints}`
+            : '—'}
           color="green"
         />
         <StatCard
@@ -198,9 +198,7 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
                 {homeWins && <LuTrophy size={14} color="var(--chakra-colors-brand-solid)" />}
               </HStack>
               <VStack gap={1} align="stretch">
-                {homeLineup.map((l) => (
-                  <LineupRow key={l.id} player={l.player} status={l.status} align="right" />
-                ))}
+                {homeLineup.map((l) => <LineupRow key={l.id} player={l.player} status={l.status} align="right" />)}
                 {homeLineup.length === 0 && (
                   <Text fontSize="sm" color="fg.subtle" textAlign="right">
                     Состав не подан
@@ -217,9 +215,7 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
                 </Text>
               </HStack>
               <VStack gap={1} align="stretch">
-                {awayLineup.map((l) => (
-                  <LineupRow key={l.id} player={l.player} status={l.status} align="left" />
-                ))}
+                {awayLineup.map((l) => <LineupRow key={l.id} player={l.player} status={l.status} align="left" />)}
                 {awayLineup.length === 0 && (
                   <Text fontSize="sm" color="fg.subtle">
                     Состав не подан

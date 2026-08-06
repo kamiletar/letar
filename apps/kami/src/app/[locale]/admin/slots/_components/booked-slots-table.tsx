@@ -43,9 +43,7 @@ export function BookedSlotsTable({ locale, slots }: BookedSlotsTableProps) {
         </HStack>
       </Card.Header>
       <Card.Body>
-        {slots.length === 0 ? (
-          <Text color="fg.muted">Нет предстоящих слотов</Text>
-        ) : (
+        {slots.length === 0 ? <Text color="fg.muted">Нет предстоящих слотов</Text> : (
           <Box overflowX="auto">
             <Table.Root>
               <Table.Header>

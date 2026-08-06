@@ -12,9 +12,7 @@ export default function LibraryLoading() {
 
         {/* Фильтры */}
         <HStack gap={2}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} h="32px" w="80px" borderRadius="md" />
-          ))}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} h="32px" w="80px" borderRadius="md" />)}
         </HStack>
 
         {/* Грид */}

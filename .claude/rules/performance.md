@@ -25,7 +25,7 @@ import * as Chakra from '@chakra-ui/react' // ❌ Тянет весь пакет
 ```tsx
 // ✅ Next.js Image — автооптимизация
 import Image from 'next/image'
-;<Image
+<Image
   src="/hero.jpg"
   width={800}
   height={600}

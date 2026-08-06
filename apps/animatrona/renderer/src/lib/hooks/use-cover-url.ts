@@ -41,6 +41,6 @@ export function useCoverUrl() {
       const base = gatewayUrl || 'http://127.0.0.1:8081'
       return `${base}/ipfs/${cid}`
     },
-    [gatewayUrl]
+    [gatewayUrl],
   )
 }

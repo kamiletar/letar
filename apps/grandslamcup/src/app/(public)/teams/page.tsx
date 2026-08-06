@@ -71,28 +71,30 @@ export default async function TeamsPage() {
 
                 <VStack gap={3} align="start">
                   <HStack gap={3} align="center">
-                    {team.logo ? (
-                      <Box w={10} h={10} borderRadius="lg" overflow="hidden" flexShrink={0} position="relative">
-                        <Image
-                          src={`/api/files/${team.logo}`}
-                          alt={team.name}
-                          fill
-                          sizes="40px"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </Box>
-                    ) : (
-                      <Circle
-                        size={10}
-                        bg="brand.subtle"
-                        color="brand.solid"
-                        fontWeight="bold"
-                        fontSize="lg"
-                        flexShrink={0}
-                      >
-                        {initial}
-                      </Circle>
-                    )}
+                    {team.logo
+                      ? (
+                        <Box w={10} h={10} borderRadius="lg" overflow="hidden" flexShrink={0} position="relative">
+                          <Image
+                            src={`/api/files/${team.logo}`}
+                            alt={team.name}
+                            fill
+                            sizes="40px"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </Box>
+                      )
+                      : (
+                        <Circle
+                          size={10}
+                          bg="brand.subtle"
+                          color="brand.solid"
+                          fontWeight="bold"
+                          fontSize="lg"
+                          flexShrink={0}
+                        >
+                          {initial}
+                        </Circle>
+                      )}
                     <VStack gap={0} align="start">
                       <Heading size="md" lineClamp={1}>
                         {team.name}

@@ -79,13 +79,13 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
     >
       <AspectRatio ratio={16 / 9}>
         <Box position="relative">
-          {thumbnailUrl ? (
-            <Image src={thumbnailUrl} alt={video.name || 'Video'} objectFit="cover" />
-          ) : (
-            <Box bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
-              <Icon as={LuFilm} boxSize={12} color="fg.subtle" />
-            </Box>
-          )}
+          {thumbnailUrl
+            ? <Image src={thumbnailUrl} alt={video.name || 'Video'} objectFit="cover" />
+            : (
+              <Box bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
+                <Icon as={LuFilm} boxSize={12} color="fg.subtle" />
+              </Box>
+            )}
 
           {/* Оверлей с кнопкой play */}
           <Box
@@ -165,28 +165,30 @@ function VideoPlayerDialog({
             </Dialog.Header>
 
             <Dialog.Body p={0}>
-              {embedUrl ? (
-                <AspectRatio ratio={16 / 9}>
-                  <iframe
-                    src={embedUrl}
-                    title={video.name || 'Video'}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ border: 'none' }}
-                  />
-                </AspectRatio>
-              ) : (
-                <VStack py={12} gap={4}>
-                  <Icon as={LuFilm} boxSize={16} color="fg.subtle" />
-                  <Text color="fg.muted">Видео недоступно для embed</Text>
-                  <a href={video.url} target="_blank" rel="noopener noreferrer">
-                    <Button colorPalette="purple">
-                      <Icon as={LuExternalLink} mr={2} />
-                      Открыть в браузере
-                    </Button>
-                  </a>
-                </VStack>
-              )}
+              {embedUrl
+                ? (
+                  <AspectRatio ratio={16 / 9}>
+                    <iframe
+                      src={embedUrl}
+                      title={video.name || 'Video'}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ border: 'none' }}
+                    />
+                  </AspectRatio>
+                )
+                : (
+                  <VStack py={12} gap={4}>
+                    <Icon as={LuFilm} boxSize={16} color="fg.subtle" />
+                    <Text color="fg.muted">Видео недоступно для embed</Text>
+                    <a href={video.url} target="_blank" rel="noopener noreferrer">
+                      <Button colorPalette="purple">
+                        <Icon as={LuExternalLink} mr={2} />
+                        Открыть в браузере
+                      </Button>
+                    </a>
+                  </VStack>
+                )}
             </Dialog.Body>
           </Dialog.Content>
         </Dialog.Positioner>

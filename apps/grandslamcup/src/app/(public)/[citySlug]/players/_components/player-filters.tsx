@@ -57,7 +57,7 @@ export function PlayerFilters({
       const qs = params.toString()
       router.push(qs ? `${basePath}?${qs}` : basePath)
     },
-    [router, searchParams, basePath]
+    [router, searchParams, basePath],
   )
 
   function handleQueryChange(e: React.ChangeEvent<HTMLInputElement>) {

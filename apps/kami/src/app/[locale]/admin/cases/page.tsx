@@ -76,13 +76,13 @@ export default async function CasesPage({ params, searchParams }: CasesPageProps
                 </Table.Cell>
                 <Table.Cell>
                   <VStack align="start" gap={0}>
-                    {caseItem.clientName ? (
-                      <Text fontSize="sm">{caseItem.clientName}</Text>
-                    ) : (
-                      <Text fontSize="sm" color="fg.muted">
-                        —
-                      </Text>
-                    )}
+                    {caseItem.clientName
+                      ? <Text fontSize="sm">{caseItem.clientName}</Text>
+                      : (
+                        <Text fontSize="sm" color="fg.muted">
+                          —
+                        </Text>
+                      )}
                     {caseItem.industry && (
                       <Badge variant="subtle" colorPalette="gray" size="sm">
                         {caseItem.industry}
@@ -91,13 +91,13 @@ export default async function CasesPage({ params, searchParams }: CasesPageProps
                   </VStack>
                 </Table.Cell>
                 <Table.Cell>
-                  {caseItem.serviceType ? (
-                    <Badge variant="subtle" colorPalette="blue">
-                      {SERVICE_TYPE_LABELS[caseItem.serviceType] || caseItem.serviceType}
-                    </Badge>
-                  ) : (
-                    <Text color="fg.muted">—</Text>
-                  )}
+                  {caseItem.serviceType
+                    ? (
+                      <Badge variant="subtle" colorPalette="blue">
+                        {SERVICE_TYPE_LABELS[caseItem.serviceType] || caseItem.serviceType}
+                      </Badge>
+                    )
+                    : <Text color="fg.muted">—</Text>}
                 </Table.Cell>
                 <Table.Cell>
                   <PublishStatusBadge isPublished={caseItem.isPublished} isFeatured={caseItem.isFeatured} />

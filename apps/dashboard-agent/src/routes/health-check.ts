@@ -30,6 +30,6 @@ export async function healthCheckRoutes(fastify: FastifyInstance): Promise<void>
           timestamp: new Date().toISOString(),
         }
       }
-    }
+    },
   )
 }

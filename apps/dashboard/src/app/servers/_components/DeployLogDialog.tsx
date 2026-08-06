@@ -282,17 +282,17 @@ export function DeployLogDialog({ isOpen, serverId, appId, appName, onClose, onD
           <Dialog.Header>
             <Dialog.Title>
               <HStack>
-                {isDeploying ? (
-                  <Spinner size="sm" />
-                ) : error ? (
-                  <Box color="red.500">
-                    <LuX />
-                  </Box>
-                ) : (
-                  <Box color="green.500">
-                    <LuCheck />
-                  </Box>
-                )}
+                {isDeploying ? <Spinner size="sm" /> : error
+                  ? (
+                    <Box color="red.500">
+                      <LuX />
+                    </Box>
+                  )
+                  : (
+                    <Box color="green.500">
+                      <LuCheck />
+                    </Box>
+                  )}
                 <Text>Деплой {appName}</Text>
               </HStack>
             </Dialog.Title>

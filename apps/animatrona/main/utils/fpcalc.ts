@@ -89,7 +89,7 @@ export function isFpcalcAvailable(): boolean {
 export async function extractFingerprint(
   filePath: string,
   startSec: number,
-  durationSec: number
+  durationSec: number,
 ): Promise<Uint32Array> {
   const fpcalcPath = getFpcalcPath()
   if (!fpcalcPath) {
@@ -117,7 +117,7 @@ async function extractFingerprintWithFfmpeg(
   fpcalcPath: string,
   filePath: string,
   startSec: number,
-  durationSec: number
+  durationSec: number,
 ): Promise<Uint32Array> {
   const { runFFmpeg } = await import('./ffmpeg-spawn')
   const os = await import('os')

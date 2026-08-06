@@ -189,20 +189,20 @@ function TimelineItem({ item }: { item: TimelineAnime }) {
       </Box>
 
       {/* Постер */}
-      {item.posterPath ? (
-        <Image
-          src={toMediaUrl(item.posterPath) ?? undefined}
-          alt={item.name}
-          w="100px"
-          h="150px"
-          objectFit="cover"
-          borderRadius="md"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <Box w="100px" h="150px" bg="whiteAlpha.100" borderRadius="md" />
-      )}
+      {item.posterPath
+        ? (
+          <Image
+            src={toMediaUrl(item.posterPath) ?? undefined}
+            alt={item.name}
+            w="100px"
+            h="150px"
+            objectFit="cover"
+            borderRadius="md"
+            loading="lazy"
+            decoding="async"
+          />
+        )
+        : <Box w="100px" h="150px" bg="whiteAlpha.100" borderRadius="md" />}
 
       {/* Информация */}
       <VStack gap={0.5} align="center" w="full">

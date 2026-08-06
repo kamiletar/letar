@@ -79,26 +79,28 @@ export function StatusBar() {
         <Icon color={isReady ? 'green.500' : 'red.500'}>
           <LuPrinter />
         </Icon>
-        {printers.length > 0 ? (
-          <NativeSelect.Root size="xs" w="auto" minW="150px">
-            <NativeSelect.Field
-              value={currentPrinter}
-              onChange={(e) => handlePrinterChange(e.currentTarget.value)}
-              fontSize="sm"
-            >
-              {printers.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.displayName}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        ) : (
-          <Text fontSize="sm" color="fg.muted">
-            {status?.name || 'Принтер не настроен'}
-          </Text>
-        )}
+        {printers.length > 0
+          ? (
+            <NativeSelect.Root size="xs" w="auto" minW="150px">
+              <NativeSelect.Field
+                value={currentPrinter}
+                onChange={(e) => handlePrinterChange(e.currentTarget.value)}
+                fontSize="sm"
+              >
+                {printers.map((p) => (
+                  <option key={p.name} value={p.name}>
+                    {p.displayName}
+                  </option>
+                ))}
+              </NativeSelect.Field>
+              <NativeSelect.Indicator />
+            </NativeSelect.Root>
+          )
+          : (
+            <Text fontSize="sm" color="fg.muted">
+              {status?.name || 'Принтер не настроен'}
+            </Text>
+          )}
         {status?.mode === 'MOCK' && (
           <Badge size="sm" colorPalette="yellow">
             Тест

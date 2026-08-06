@@ -21,7 +21,7 @@ describe('FormWhen', () => {
               <span data-testid="company-fields">Company Fields</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -37,7 +37,7 @@ describe('FormWhen', () => {
               <span data-testid="company-fields">Company Fields</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -53,7 +53,7 @@ describe('FormWhen', () => {
               <span data-testid="agreed">Agreed!</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -71,7 +71,7 @@ describe('FormWhen', () => {
               <span data-testid="active-content">Active Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -87,7 +87,7 @@ describe('FormWhen', () => {
               <span data-testid="active-content">Active Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -105,7 +105,7 @@ describe('FormWhen', () => {
               <span data-testid="admin-panel">Admin Panel</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -121,7 +121,7 @@ describe('FormWhen', () => {
               <span data-testid="admin-panel">Admin Panel</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -139,7 +139,7 @@ describe('FormWhen', () => {
               <span data-testid="user-content">User Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -155,7 +155,7 @@ describe('FormWhen', () => {
               <span data-testid="user-content">User Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -173,7 +173,7 @@ describe('FormWhen', () => {
               <span data-testid="adult-content">Adult Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -189,7 +189,7 @@ describe('FormWhen', () => {
               <span data-testid="adult-content">Adult Content</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -207,7 +207,7 @@ describe('FormWhen', () => {
               <span data-testid="has-name">Has Name</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -223,7 +223,7 @@ describe('FormWhen', () => {
               <span data-testid="has-name">Has Name</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -241,7 +241,7 @@ describe('FormWhen', () => {
               <span data-testid="premium">Premium Features</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -258,7 +258,7 @@ describe('FormWhen', () => {
               <span data-testid="premium">Premium Features</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {
@@ -278,7 +278,7 @@ describe('FormWhen', () => {
               <span data-testid="details">Detailed Information</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Изначально скрыто
@@ -306,7 +306,7 @@ describe('FormWhen', () => {
               <span data-testid="notification-settings">Notification Settings</span>
             </FormWhen>
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {

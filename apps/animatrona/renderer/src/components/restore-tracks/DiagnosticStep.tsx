@@ -141,16 +141,20 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
       {/* Кнопка */}
       <Box textAlign="center">
         <Button colorPalette="purple" size="lg" onClick={handleClean} disabled={isCleaning}>
-          {isCleaning ? (
-            <>
-              <Spinner size="sm" mr={2} />
-              Очистка...
-            </>
-          ) : brokenTracks.length > 0 ? (
-            'Очистить битые записи и продолжить'
-          ) : (
-            'Продолжить к выбору папки'
-          )}
+          {isCleaning
+            ? (
+              <>
+                <Spinner size="sm" mr={2} />
+                Очистка...
+              </>
+            )
+            : brokenTracks.length > 0
+            ? (
+              'Очистить битые записи и продолжить'
+            )
+            : (
+              'Продолжить к выбору папки'
+            )}
         </Button>
       </Box>
 

@@ -46,8 +46,9 @@ export function PoetHeader({ playerName, publicProfileHref }: PoetHeaderProps) {
                             <VStack gap={0} align="stretch">
                               {poetNavItems.map((item) => {
                                 const IconComponent = item.icon
-                                const isActive =
-                                  item.href === '/poet' ? pathname === '/poet' : pathname.startsWith(item.href)
+                                const isActive = item.href === '/poet'
+                                  ? pathname === '/poet'
+                                  : pathname.startsWith(item.href)
 
                                 return (
                                   <Link key={item.href} href={item.href} onClick={() => store.setOpen(false)}>

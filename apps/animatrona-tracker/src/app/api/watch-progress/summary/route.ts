@@ -68,8 +68,9 @@ export async function GET(request: NextRequest) {
         // Считаем lastEpisode даже без duration (mobile может не отправлять duration)
         if (summary.lastEpisode === null || p.episodeNumber > summary.lastEpisode) {
           summary.lastEpisode = p.episodeNumber
-          summary.lastEpisodeProgress =
-            p.duration > 0 ? Math.min(Math.round((p.currentTime / p.duration) * 100), 100) : -1 // -1 = прогресс неизвестен (duration не передан)
+          summary.lastEpisodeProgress = p.duration > 0
+            ? Math.min(Math.round((p.currentTime / p.duration) * 100), 100)
+            : -1 // -1 = прогресс неизвестен (duration не передан)
         }
       }
     }

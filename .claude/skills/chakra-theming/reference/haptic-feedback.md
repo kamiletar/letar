@@ -75,7 +75,7 @@ export function useHapticFeedback() {
         return false
       }
     },
-    [canVibrate]
+    [canVibrate],
   )
 
   const cancel = useCallback(() => {

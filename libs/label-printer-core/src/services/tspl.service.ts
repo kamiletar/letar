@@ -128,7 +128,7 @@ export class TSPLService {
     bytesPerRow: number,
     height: number,
     mode: number,
-    hexData: string
+    hexData: string,
   ): string {
     return `BITMAP ${x}, ${y}, ${bytesPerRow}, ${height}, ${mode}, ${hexData}`
   }
@@ -193,7 +193,7 @@ export class TSPLService {
     dataMatrixCode: string,
     gtinCode: string,
     templateBuffer: Buffer | null,
-    config: PrinterConfig
+    config: PrinterConfig,
   ): Promise<string> {
     const commands: string[] = []
 

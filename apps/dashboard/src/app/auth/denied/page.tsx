@@ -28,8 +28,7 @@ export default function DeniedPage() {
                       window.location.href = '/auth/signin'
                     },
                   },
-                })
-              }
+                })}
             >
               <LuLogOut />
               Выйти

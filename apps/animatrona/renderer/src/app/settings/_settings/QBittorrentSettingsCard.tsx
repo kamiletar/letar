@@ -97,7 +97,7 @@ export function QBittorrentSettingsCard() {
             description: error instanceof Error ? error.message : String(error),
           })
         },
-      }
+      },
     )
   }, [url, username, password, upsertSettings])
 

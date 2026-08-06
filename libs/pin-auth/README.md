@@ -73,7 +73,7 @@ const result = await validator.verifyPin(
       })
     },
   },
-  generateToken
+  generateToken,
 )
 
 if (result.success) {
@@ -133,7 +133,7 @@ function VerifyPinForm({ email }: { email: string }) {
     {
       onVerifyPin: verifyPinAction,
       onResendPin: resendPinAction,
-    }
+    },
   )
 
   return (
@@ -141,11 +141,9 @@ function VerifyPinForm({ email }: { email: string }) {
       <PinInput onComplete={verifyPin} disabled={isVerifying} />
       {error && <Text color="red">{error}</Text>}
 
-      {canResend ? (
-        <Button onClick={resendPin}>Отправить повторно</Button>
-      ) : (
-        <Text>Повторно через {resendSecondsLeft} сек</Text>
-      )}
+      {canResend
+        ? <Button onClick={resendPin}>Отправить повторно</Button>
+        : <Text>Повторно через {resendSecondsLeft} сек</Text>}
     </form>
   )
 }
@@ -196,7 +194,7 @@ const { html, text, subject } = formatVerificationEmail(
     appName: 'MyApp',
     primaryColor: '#1a365d',
     accentColor: '#CA9E67',
-  }
+  },
 )
 
 await emailProvider.send({ to: email, subject, html, text })
@@ -211,7 +209,7 @@ import { formatResetPasswordEmail } from '@letar/pin-auth/email'
 
 const { html, text, subject } = formatResetPasswordEmail(
   { userName: 'Иван', resetUrl: 'https://...', pin: '123456' },
-  { appUrl: 'https://my-app.com', appName: 'MyApp' }
+  { appUrl: 'https://my-app.com', appName: 'MyApp' },
 )
 ```
 

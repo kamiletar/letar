@@ -380,7 +380,7 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
       Steps: Form.Steps,
       AutoFields: Form.AutoFields,
       FromSchema: Form.FromSchema,
-    }
+    },
   )
 
   return ExtendedForm as ExtendedForm

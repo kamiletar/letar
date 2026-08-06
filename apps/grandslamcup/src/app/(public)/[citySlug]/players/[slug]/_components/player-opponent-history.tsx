@@ -50,11 +50,11 @@ export async function PlayerOpponentHistory({ perfs, playerId }: PlayerOpponentH
   for (const perf of perfs) {
     const opponent = allMatchPerfs.find(
       (op) =>
-        op.matchId === perf.match.id &&
-        op.half === perf.half &&
-        op.roundNumber === perf.roundNumber &&
-        op.playerId !== playerId &&
-        op.totalScore !== null
+        op.matchId === perf.match.id
+        && op.half === perf.half
+        && op.roundNumber === perf.roundNumber
+        && op.playerId !== playerId
+        && op.totalScore !== null,
     )
     if (!opponent) {
       continue

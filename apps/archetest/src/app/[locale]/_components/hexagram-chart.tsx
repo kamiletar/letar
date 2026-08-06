@@ -35,7 +35,7 @@ interface HexagramChartProps {
  * При prefers-reduced-motion значения применяются мгновенно.
  */
 function useAnimatedScores(
-  target: Partial<Record<PersonalityTypeCode, number>>
+  target: Partial<Record<PersonalityTypeCode, number>>,
 ): Partial<Record<PersonalityTypeCode, number>> {
   const [animated, setAnimated] = useState<Partial<Record<PersonalityTypeCode, number>>>({})
   const currentRef = useRef<Partial<Record<PersonalityTypeCode, number>>>({})

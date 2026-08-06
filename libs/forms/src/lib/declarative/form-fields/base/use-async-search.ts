@@ -109,7 +109,7 @@ export interface UseAsyncSearchResult<TData = unknown> {
  * ```
  */
 export function useAsyncSearch<TData = unknown>(
-  options: UseAsyncSearchOptions<TData> = {}
+  options: UseAsyncSearchOptions<TData> = {},
 ): UseAsyncSearchResult<TData> {
   const { useQuery, debounce = 300, minChars = 1, initialValue = '' } = options
 

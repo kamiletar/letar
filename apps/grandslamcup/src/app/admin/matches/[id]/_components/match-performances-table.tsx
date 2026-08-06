@@ -129,13 +129,13 @@ export function MatchPerformancesTable({ performances, plagiarizedPlayerIds }: M
                           />
                         </Table.Cell>
                         <Table.Cell>
-                          {isPlagiarized ? (
-                            <Badge colorPalette="purple" variant="surface" size="sm">
-                              Плагиат
-                            </Badge>
-                          ) : (
-                            <PlagiarismButton performanceId={perf.id} playerName={playerDisplayName(perf.player)} />
-                          )}
+                          {isPlagiarized
+                            ? (
+                              <Badge colorPalette="purple" variant="surface" size="sm">
+                                Плагиат
+                              </Badge>
+                            )
+                            : <PlagiarismButton performanceId={perf.id} playerName={playerDisplayName(perf.player)} />}
                         </Table.Cell>
                       </Table.Row>
                     )

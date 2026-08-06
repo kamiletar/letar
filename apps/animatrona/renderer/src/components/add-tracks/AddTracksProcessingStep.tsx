@@ -230,9 +230,8 @@ export function AddTracksProcessingStep({
 
             {/* Общий прогресс */}
             <Progress.Root
-              value={
-                (progress.fileProgress.filter((f) => f.phase === 'done').length / progress.fileProgress.length) * 100
-              }
+              value={(progress.fileProgress.filter((f) => f.phase === 'done').length / progress.fileProgress.length)
+                * 100}
               size="lg"
               colorPalette="purple"
             >
@@ -247,34 +246,28 @@ export function AddTracksProcessingStep({
                 {/* Активные файлы */}
                 {progress.fileProgress
                   .filter((f) => f.phase === 'transcode' || f.phase === 'copy')
-                  .map((file) => (
-                    <FileProgressItem key={file.id} file={file} />
-                  ))}
+                  .map((file) => <FileProgressItem key={file.id} file={file} />)}
                 {/* Ожидающие */}
                 {progress.fileProgress
                   .filter((f) => f.phase === 'waiting')
                   .slice(0, 3)
-                  .map((file) => (
-                    <FileProgressItem key={file.id} file={file} />
-                  ))}
+                  .map((file) => <FileProgressItem key={file.id} file={file} />)}
                 {progress.fileProgress.filter((f) => f.phase === 'waiting').length > 3 && (
                   <Text fontSize="xs" color="fg.subtle" textAlign="center">
-                    + ещё {progress.fileProgress.filter((f) => f.phase === 'waiting').length - 3} в очереди
+                    + ещё {progress.fileProgress.filter((f) =>
+                      f.phase === 'waiting'
+                    ).length - 3} в очереди
                   </Text>
                 )}
                 {/* Завершённые (последние 3) */}
                 {progress.fileProgress
                   .filter((f) => f.phase === 'done')
                   .slice(-3)
-                  .map((file) => (
-                    <FileProgressItem key={file.id} file={file} />
-                  ))}
+                  .map((file) => <FileProgressItem key={file.id} file={file} />)}
                 {/* Ошибки */}
                 {progress.fileProgress
                   .filter((f) => f.phase === 'error')
-                  .map((file) => (
-                    <FileProgressItem key={file.id} file={file} />
-                  ))}
+                  .map((file) => <FileProgressItem key={file.id} file={file} />)}
               </VStack>
             </Box>
           </VStack>

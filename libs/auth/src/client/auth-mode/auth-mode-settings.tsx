@@ -99,9 +99,7 @@ export function AuthModeSettings({
             Tier 2 — свои ключи (standalone)
           </Heading>
           <List.Root fontSize="sm" color="fg.muted" gap={1} ps={4}>
-            {tier2Points.map((point) => (
-              <List.Item key={point}>{point}</List.Item>
-            ))}
+            {tier2Points.map((point) => <List.Item key={point}>{point}</List.Item>)}
           </List.Root>
         </Card.Root>
 

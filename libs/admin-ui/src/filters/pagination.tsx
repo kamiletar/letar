@@ -167,23 +167,25 @@ export function Pagination({ total, pageSize = 10, paramName = 'page', colorPale
       {/* Номера страниц */}
       <HStack gap={1}>
         {getPageNumbers().map((page, index) =>
-          page === 'ellipsis' ? (
-            <Text key={`ellipsis-${index}`} px={2} color="fg.muted">
-              ...
-            </Text>
-          ) : (
-            <Button
-              key={page}
-              size="sm"
-              variant={page === currentPage ? 'solid' : 'ghost'}
-              colorPalette={page === currentPage ? colorPalette : 'gray'}
-              onClick={() => goToPage(page)}
-              disabled={isPending}
-              minW="32px"
-            >
-              {page}
-            </Button>
-          )
+          page === 'ellipsis'
+            ? (
+              <Text key={`ellipsis-${index}`} px={2} color="fg.muted">
+                ...
+              </Text>
+            )
+            : (
+              <Button
+                key={page}
+                size="sm"
+                variant={page === currentPage ? 'solid' : 'ghost'}
+                colorPalette={page === currentPage ? colorPalette : 'gray'}
+                onClick={() => goToPage(page)}
+                disabled={isPending}
+                minW="32px"
+              >
+                {page}
+              </Button>
+            )
         )}
       </HStack>
 

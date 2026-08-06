@@ -22,14 +22,14 @@ export const vmafPreload = {
   calculate: (
     encoded: string,
     original: string,
-    options?: VmafOptions
+    options?: VmafOptions,
   ): Promise<{ success: boolean; data?: VmafResult; error?: string }> =>
     ipcRenderer.invoke('vmaf:calculate', encoded, original, options),
 
   /** Пакетный расчёт VMAF для нескольких пар */
   calculateBatch: (
     pairs: Array<[string, string]>,
-    options?: VmafOptions
+    options?: VmafOptions,
   ): Promise<{ success: boolean; data?: VmafResult[]; error?: string }> =>
     ipcRenderer.invoke('vmaf:calculateBatch', pairs, options),
 
@@ -44,7 +44,7 @@ export const vmafPreload = {
     videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
     options?: Partial<CqSearchOptions>,
     preferCpu?: boolean,
-    itemId?: string
+    itemId?: string,
   ): Promise<{ success: boolean; data?: CqSearchResult; error?: string }> =>
     ipcRenderer.invoke('vmaf:findOptimalCQ', inputPath, videoOptions, options, preferCpu ?? false, itemId),
 
@@ -52,7 +52,7 @@ export const vmafPreload = {
   extractSamples: (
     inputPath: string,
     outputDir: string,
-    config?: Partial<SampleConfig>
+    config?: Partial<SampleConfig>,
   ): Promise<{ success: boolean; data?: string[]; error?: string }> =>
     ipcRenderer.invoke('vmaf:extractSamples', inputPath, outputDir, config),
 

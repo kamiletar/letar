@@ -81,7 +81,13 @@ export function MockScannerPanel({
                   Случайный код
                 </Button>
                 {SAMPLE_CODES.slice(0, 2).map((code, i) => (
-                  <Button key={i} size="sm" variant="ghost" onClick={() => onScanCode(code)} fontFamily="mono">
+                  <Button
+                    key={i}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onScanCode(code)}
+                    fontFamily="mono"
+                  >
                     {code.substring(2, 16)}...
                   </Button>
                 ))}

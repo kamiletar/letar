@@ -28,7 +28,7 @@ export function registerWebExportHandlers(): void {
       } finally {
         manager.off('progress', progressHandler)
       }
-    }
+    },
   )
 
   // Отмена экспорта

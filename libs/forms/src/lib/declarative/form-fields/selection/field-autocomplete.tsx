@@ -230,19 +230,19 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
                 )}
 
                 {/* Empty result */}
-                {!fieldState.isLoading &&
-                  fieldState.suggestions.length === 0 &&
-                  fieldState.inputValue.length >= minChars && (
-                    <Combobox.Empty>{componentProps.emptyMessage ?? 'No suggestions'}</Combobox.Empty>
-                  )}
+                {!fieldState.isLoading
+                  && fieldState.suggestions.length === 0
+                  && fieldState.inputValue.length >= minChars && (
+                  <Combobox.Empty>{componentProps.emptyMessage ?? 'No suggestions'}</Combobox.Empty>
+                )}
 
                 {/* Hint about minimum characters */}
-                {!fieldState.isLoading &&
-                  fieldState.suggestions.length === 0 &&
-                  fieldState.inputValue.length < minChars &&
-                  fieldState.inputValue.length > 0 && (
-                    <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
-                  )}
+                {!fieldState.isLoading
+                  && fieldState.suggestions.length === 0
+                  && fieldState.inputValue.length < minChars
+                  && fieldState.inputValue.length > 0 && (
+                  <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
+                )}
 
                 {/* Suggestions */}
                 {fieldState.suggestions.map((item) => (

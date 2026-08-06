@@ -51,17 +51,16 @@ export async function GET(request: Request) {
   const matchLines = matches.map((m) => {
     const time = m.scheduledAt
       ? new Date(m.scheduledAt.getTime() + mskOffset).toLocaleTimeString('ru-RU', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+        hour: '2-digit',
+        minute: '2-digit',
+      })
       : '??:??'
     return `${time} ${m.homeTeam.team.name} — ${m.awayTeam.team.name}`
   })
 
-  const body =
-    matches.length === 1
-      ? `${matchLines[0]}${matches[0].venue ? ` (${matches[0].venue.name})` : ''}`
-      : matchLines.join('\n')
+  const body = matches.length === 1
+    ? `${matchLines[0]}${matches[0].venue ? ` (${matches[0].venue.name})` : ''}`
+    : matchLines.join('\n')
 
   const result = await sendPushToAll({
     title: matches.length === 1 ? 'Матч завтра!' : `Матчи завтра: ${matches.length}`,

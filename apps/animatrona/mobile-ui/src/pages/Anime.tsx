@@ -135,7 +135,7 @@ export function AnimePage() {
       acc[key].push(ep)
       return acc
     },
-    {} as Record<number, Episode[]>
+    {} as Record<number, Episode[]>,
   )
 
   const animeStatus = ANIME_STATUS_MAP[anime.status] || { label: anime.status, color: 'gray' }
@@ -334,9 +334,7 @@ export function AnimePage() {
                       transition: 'max-height 0.3s ease-out, opacity 0.2s ease-out',
                     }}
                   >
-                    {episodes.map((ep) => (
-                      <EpisodeRow key={ep.id} episode={ep} animeId={anime.id} />
-                    ))}
+                    {episodes.map((ep) => <EpisodeRow key={ep.id} episode={ep} animeId={anime.id} />)}
                   </Box>
                 </Box>
               )
@@ -357,10 +355,9 @@ function EpisodeRow({ episode, animeId }: { episode: Episode; animeId: string })
   const hasProgress = episode.progress && episode.progress.currentTime > 0
 
   // Процент просмотра
-  const progressPercent =
-    hasProgress && episode.durationMs
-      ? Math.round((episode.progress!.currentTime / (episode.durationMs / 1000)) * 100)
-      : 0
+  const progressPercent = hasProgress && episode.durationMs
+    ? Math.round((episode.progress!.currentTime / (episode.durationMs / 1000)) * 100)
+    : 0
 
   // Форматирование длительности
   const formatDuration = (ms: number | null) => {

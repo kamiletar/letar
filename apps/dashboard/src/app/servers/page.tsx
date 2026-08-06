@@ -40,12 +40,14 @@ export default function ServersPage() {
   const [deployingAppId] = useState<string | null>(null)
 
   // Deploy dialog state
-  const [deployDialog, setDeployDialog] = useState<{
-    isOpen: boolean
-    serverId: string
-    appId: string
-    appName: string
-  } | null>(null)
+  const [deployDialog, setDeployDialog] = useState<
+    {
+      isOpen: boolean
+      serverId: string
+      appId: string
+      appName: string
+    } | null
+  >(null)
 
   // Fetch servers
   const { data: servers = [], isLoading } = useQuery({
@@ -373,124 +375,128 @@ export default function ServersPage() {
           )}
 
           {/* Servers List with Apps */}
-          {isLoading ? (
-            <Box p="8" textAlign="center">
-              <Spinner size="lg" />
-            </Box>
-          ) : servers.length === 0 ? (
-            <Box p="8" textAlign="center">
-              <Text color="fg.muted">Нет серверов</Text>
-            </Box>
-          ) : (
-            <Accordion.Root multiple defaultValue={servers.map((s) => s.id)}>
-              {servers.map((server) => (
-                <Accordion.Item key={server.id} value={server.id}>
-                  <Accordion.ItemTrigger>
-                    <HStack flex="1" justify="space-between" pr="4">
-                      <HStack gap="3">
-                        <Box>
-                          <Text fontWeight="medium">{server.displayName}</Text>
-                          <Text fontSize="xs" color="fg.muted">
-                            {server.name}
+          {isLoading
+            ? (
+              <Box p="8" textAlign="center">
+                <Spinner size="lg" />
+              </Box>
+            )
+            : servers.length === 0
+            ? (
+              <Box p="8" textAlign="center">
+                <Text color="fg.muted">Нет серверов</Text>
+              </Box>
+            )
+            : (
+              <Accordion.Root multiple defaultValue={servers.map((s) => s.id)}>
+                {servers.map((server) => (
+                  <Accordion.Item key={server.id} value={server.id}>
+                    <Accordion.ItemTrigger>
+                      <HStack flex="1" justify="space-between" pr="4">
+                        <HStack gap="3">
+                          <Box>
+                            <Text fontWeight="medium">{server.displayName}</Text>
+                            <Text fontSize="xs" color="fg.muted">
+                              {server.name}
+                            </Text>
+                          </Box>
+                          <HealthBadge
+                            server={server}
+                            status={healthStatus[server.id]}
+                            onCheck={() => handleCheckHealth(server)}
+                          />
+                        </HStack>
+                        <HStack gap="2">
+                          <Text fontSize="sm" fontFamily="mono" color="fg.muted">
+                            {server.host}:{server.port}
                           </Text>
-                        </Box>
-                        <HealthBadge
-                          server={server}
-                          status={healthStatus[server.id]}
-                          onCheck={() => handleCheckHealth(server)}
-                        />
-                      </HStack>
-                      <HStack gap="2">
-                        <Text fontSize="sm" fontFamily="mono" color="fg.muted">
-                          {server.host}:{server.port}
-                        </Text>
-                        <Badge colorPalette="gray">{server.apps?.length || 0} прил.</Badge>
-                        <HStack gap="1" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            aria-label="Редактировать"
-                            size="xs"
-                            variant="ghost"
-                            onClick={() => handleEditServer(server)}
-                          >
-                            <LuPencil />
-                          </IconButton>
-                          {!server.isLocal && (
+                          <Badge colorPalette="gray">{server.apps?.length || 0} прил.</Badge>
+                          <HStack gap="1" onClick={(e) => e.stopPropagation()}>
                             <IconButton
-                              aria-label="Удалить"
+                              aria-label="Редактировать"
                               size="xs"
                               variant="ghost"
-                              colorPalette="red"
-                              onClick={() => handleDeleteServer(server.id)}
+                              onClick={() => handleEditServer(server)}
                             >
-                              <LuTrash2 />
+                              <LuPencil />
                             </IconButton>
-                          )}
+                            {!server.isLocal && (
+                              <IconButton
+                                aria-label="Удалить"
+                                size="xs"
+                                variant="ghost"
+                                colorPalette="red"
+                                onClick={() => handleDeleteServer(server.id)}
+                              >
+                                <LuTrash2 />
+                              </IconButton>
+                            )}
+                          </HStack>
                         </HStack>
                       </HStack>
-                    </HStack>
-                    <Accordion.ItemIndicator />
-                  </Accordion.ItemTrigger>
-                  <Accordion.ItemContent>
-                    <Box p="4" bg="bg.subtle" borderRadius="md">
-                      {/* App Actions */}
-                      <HStack justify="space-between" mb="4">
-                        <Text fontWeight="medium">Приложения</Text>
-                        <HStack gap="2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDiscoverApps(server.id)}
-                            loading={isDiscovering[server.id]}
-                          >
-                            <LuScan />
-                            Сканировать
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setAddingAppServerId(server.id)
-                              setEditingAppId(null)
-                              setAppForm(emptyAppForm)
-                            }}
-                          >
-                            <LuPlus />
-                            Добавить
-                          </Button>
+                      <Accordion.ItemIndicator />
+                    </Accordion.ItemTrigger>
+                    <Accordion.ItemContent>
+                      <Box p="4" bg="bg.subtle" borderRadius="md">
+                        {/* App Actions */}
+                        <HStack justify="space-between" mb="4">
+                          <Text fontWeight="medium">Приложения</Text>
+                          <HStack gap="2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDiscoverApps(server.id)}
+                              loading={isDiscovering[server.id]}
+                            >
+                              <LuScan />
+                              Сканировать
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setAddingAppServerId(server.id)
+                                setEditingAppId(null)
+                                setAppForm(emptyAppForm)
+                              }}
+                            >
+                              <LuPlus />
+                              Добавить
+                            </Button>
+                          </HStack>
                         </HStack>
-                      </HStack>
 
-                      {/* Discovered Apps */}
-                      <DiscoveredApps
-                        apps={discoveredApps[server.id] || []}
-                        onAddApp={(app) => handleAddDiscoveredApp(server.id, app)}
-                      />
-
-                      {/* App Form */}
-                      {addingAppServerId === server.id && (
-                        <AppForm
-                          form={appForm}
-                          isEditing={!!editingAppId}
-                          isSaving={createAppMutation.isPending || updateAppMutation.isPending}
-                          onFormChange={setAppForm}
-                          onSave={() => handleSaveApp(server.id)}
-                          onCancel={handleCancelApp}
+                        {/* Discovered Apps */}
+                        <DiscoveredApps
+                          apps={discoveredApps[server.id] || []}
+                          onAddApp={(app) => handleAddDiscoveredApp(server.id, app)}
                         />
-                      )}
 
-                      {/* Apps Table */}
-                      <AppsTable
-                        apps={server.apps || []}
-                        deployingAppId={deployingAppId}
-                        onEdit={(app) => handleEditApp(server.id, app)}
-                        onDelete={(appId) => handleDeleteApp(server.id, appId)}
-                        onDeploy={(appId) => handleDeployApp(server.id, appId)}
-                      />
-                    </Box>
-                  </Accordion.ItemContent>
-                </Accordion.Item>
-              ))}
-            </Accordion.Root>
-          )}
+                        {/* App Form */}
+                        {addingAppServerId === server.id && (
+                          <AppForm
+                            form={appForm}
+                            isEditing={!!editingAppId}
+                            isSaving={createAppMutation.isPending || updateAppMutation.isPending}
+                            onFormChange={setAppForm}
+                            onSave={() => handleSaveApp(server.id)}
+                            onCancel={handleCancelApp}
+                          />
+                        )}
+
+                        {/* Apps Table */}
+                        <AppsTable
+                          apps={server.apps || []}
+                          deployingAppId={deployingAppId}
+                          onEdit={(app) => handleEditApp(server.id, app)}
+                          onDelete={(appId) => handleDeleteApp(server.id, appId)}
+                          onDeploy={(appId) => handleDeployApp(server.id, appId)}
+                        />
+                      </Box>
+                    </Accordion.ItemContent>
+                  </Accordion.Item>
+                ))}
+              </Accordion.Root>
+            )}
         </VStack>
       </Box>
 

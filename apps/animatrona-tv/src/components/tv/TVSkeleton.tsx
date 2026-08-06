@@ -28,7 +28,7 @@ function SkeletonCard(): React.JSX.Element {
           duration: 800,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     )
     animation.start()
     return () => animation.stop()
@@ -51,9 +51,7 @@ export function SkeletonRow(): React.JSX.Element {
     <View style={styles.row}>
       <View style={styles.rowTitleSkeleton} />
       <View style={styles.cardsContainer}>
-        {Array.from({ length: 5 }, (_, i) => (
-          <SkeletonCard key={i} />
-        ))}
+        {Array.from({ length: 5 }, (_, i) => <SkeletonCard key={i} />)}
       </View>
     </View>
   )

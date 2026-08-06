@@ -30,7 +30,7 @@ const activeChildProcesses = new Set<ChildProcess>()
  */
 function trackedExec(
   command: string,
-  options: { shell?: string; timeout?: number } = {}
+  options: { shell?: string; timeout?: number } = {},
 ): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = exec(command, options, (error, stdout, stderr) => {
@@ -99,7 +99,7 @@ export class WindowsPrinterService {
   constructor(
     printerConfig: PrinterConfig,
     labelConfig: LabelConfig,
-    _behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean }
+    _behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean },
   ) {
     this.printerConfig = printerConfig
     this.labelConfig = labelConfig
@@ -137,7 +137,7 @@ export class WindowsPrinterService {
           availablePrinters: printers.map((p) => p.name),
         })
         throw new Error(
-          `Printer "${this.printerName}" not found. Available printers: ${printers.map((p) => p.name).join(', ')}`
+          `Printer "${this.printerName}" not found. Available printers: ${printers.map((p) => p.name).join(', ')}`,
         )
       }
 
@@ -156,7 +156,7 @@ export class WindowsPrinterService {
     try {
       const { stdout } = await trackedExec(
         `"${WINDOWS_POWERSHELL}" -NonInteractive -Command "Get-Printer | Select-Object Name, PrinterStatus, PortName | ConvertTo-Json"`,
-        { timeout: 10000 }
+        { timeout: 10000 },
       )
       const printers = JSON.parse(stdout)
       if (Array.isArray(printers)) {
@@ -233,7 +233,8 @@ export class WindowsPrinterService {
 
     try {
       // 4. Отправляем через winspool.drv
-      const psCommand = `"${WINDOWS_POWERSHELL}" -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -PrinterName "${this.printerName}" -FilePath "${tempFile}"`
+      const psCommand =
+        `"${WINDOWS_POWERSHELL}" -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -PrinterName "${this.printerName}" -FilePath "${tempFile}"`
       const { stdout, stderr } = await trackedExec(psCommand, { shell: 'cmd.exe', timeout: 30000 })
 
       if (!stdout || !stdout.includes('SUCCESS')) {
@@ -271,7 +272,7 @@ export class WindowsPrinterService {
         templateBuffer,
         markingCode.fullCode,
         markingCode.gtin,
-        this.labelConfig
+        this.labelConfig,
       )
 
       // Сохраняем для отладки
@@ -353,7 +354,8 @@ export class WindowsPrinterService {
       this.logger.debug('TSPL commands preview:', { commands: tsplCommands.substring(0, 500) })
 
       // Отправляем RAW данные через PowerShell
-      const psCommand = `"${WINDOWS_POWERSHELL}" -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -PrinterName "${this.printerName}" -FilePath "${tempFile}"`
+      const psCommand =
+        `"${WINDOWS_POWERSHELL}" -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -PrinterName "${this.printerName}" -FilePath "${tempFile}"`
       const { stdout, stderr } = await trackedExec(psCommand, { shell: 'cmd.exe' })
 
       // Удаляем временный файл
@@ -394,7 +396,7 @@ export class WindowsPrinterService {
     try {
       const { stdout } = await trackedExec(
         `"${WINDOWS_POWERSHELL}" -NonInteractive -Command "Get-Printer | Select-Object Name, PrinterStatus, @{Name='IsDefault';Expression={$_.Default}} | ConvertTo-Json"`,
-        { timeout: 10000 }
+        { timeout: 10000 },
       )
       const printers = JSON.parse(stdout)
       if (Array.isArray(printers)) {

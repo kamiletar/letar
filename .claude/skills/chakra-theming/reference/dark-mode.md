@@ -81,7 +81,7 @@ interface UseColorModeReturn {
 
 ```tsx
 import { ColorModeButton } from '@/components/ui/color-mode' // Готовый компонент с иконками
-;<ColorModeButton />
+<ColorModeButton />
 ```
 
 Пример реализации:
@@ -223,7 +223,7 @@ semanticTokens: {
 
 ```tsx
 import { ColorModeScript } from '@chakra-ui/react'
-;<html>
+<html>
   <head>
     <ColorModeScript initialColorMode="system" />
   </head>

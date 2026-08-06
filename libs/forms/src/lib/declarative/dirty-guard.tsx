@@ -146,11 +146,11 @@ export function DirtyGuard({
 
       // Skip external links and special protocols
       if (
-        href.startsWith('http://') ||
-        href.startsWith('https://') ||
-        href.startsWith('mailto:') ||
-        href.startsWith('tel:') ||
-        href.startsWith('#')
+        href.startsWith('http://')
+        || href.startsWith('https://')
+        || href.startsWith('mailto:')
+        || href.startsWith('tel:')
+        || href.startsWith('#')
       ) {
         return
       }

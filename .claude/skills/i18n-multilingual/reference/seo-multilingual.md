@@ -86,8 +86,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 
   // Найти перевод для текущей локали
-  const translation =
-    product?.translations.find((t) => t.locale === locale) || product?.translations.find((t) => t.locale === 'ru') // Fallback
+  const translation = product?.translations.find((t) => t.locale === locale)
+    || product?.translations.find((t) => t.locale === 'ru') // Fallback
 
   if (!product || !translation) {
     return { title: t('notFound') }
@@ -160,8 +160,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const productEntries = products.map((product) => {
     const languages: Record<string, string> = {}
     for (const trans of product.translations) {
-      const path =
-        trans.locale === defaultLocale ? `/products/${product.id}` : `/${trans.locale}/products/${product.id}`
+      const path = trans.locale === defaultLocale
+        ? `/products/${product.id}`
+        : `/${trans.locale}/products/${product.id}`
       languages[trans.locale] = `${baseUrl}${path}`
     }
 

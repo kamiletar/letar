@@ -46,13 +46,13 @@ function isDiskFullError(error: unknown): boolean {
   }
   const msg = error.message.toLowerCase()
   return (
-    msg.includes('no space left') ||
-    msg.includes('not enough space') ||
-    msg.includes('disk full') ||
-    msg.includes('enospc') ||
-    msg.includes('insufficient storage') ||
-    msg.includes('datastore is full') ||
-    msg.includes('not enough free disk')
+    msg.includes('no space left')
+    || msg.includes('not enough space')
+    || msg.includes('disk full')
+    || msg.includes('enospc')
+    || msg.includes('insufficient storage')
+    || msg.includes('datastore is full')
+    || msg.includes('not enough free disk')
   )
 }
 
@@ -156,7 +156,7 @@ export function registerAnimeManifestHandlers(): void {
     'animeManifest:generateBatch',
     async (
       animeIds: string[],
-      onProgress?: (current: number, total: number, animeName: string) => void
+      onProgress?: (current: number, total: number, animeName: string) => void,
     ): Promise<{ success: number; failed: number; errors: Array<{ animeId: string; error: string }> }> => {
       log.info('Batch-генерация AnimeManifest', { count: animeIds.length })
 
@@ -196,7 +196,7 @@ export function registerAnimeManifestHandlers(): void {
 
       log.info('Batch-генерация завершена', { success: result.success, failed: result.failed })
       return result
-    }
+    },
   )
 
   /**
@@ -223,11 +223,11 @@ export function registerAnimeManifestHandlers(): void {
     'animeManifest:import',
     async (
       cid: string,
-      pin?: boolean
+      pin?: boolean,
     ): Promise<{ success: boolean; animeId?: string; animeName?: string; episodeCount?: number; error?: string }> => {
       log.info('Импорт аниме из IPFS', { cid, pin })
       return importAnimeFromManifest(cid, { pin })
-    }
+    },
   )
 
   /**
@@ -318,7 +318,7 @@ export function registerAnimeManifestHandlers(): void {
           })
           logEntry(
             'error',
-            `🚫 Мало места на диске (${freeGb} ГБ < 30 ГБ) — регенерация остановлена. Обработано: ${i} из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`
+            `🚫 Мало места на диске (${freeGb} ГБ < 30 ГБ) — регенерация остановлена. Обработано: ${i} из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`,
           )
           regenerationState.finish(result)
           broadcastToWindows('manifest:regenerateFinished', {
@@ -441,7 +441,7 @@ export function registerAnimeManifestHandlers(): void {
               'error',
               `🚫 Нет места на диске! Регенерация остановлена. Обработано: ${
                 i + 1
-              } из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`
+              } из ${allAnimes.length}. Освободите место и возобновите с чекпоинта.`,
             )
             broadcastToWindows('manifest:regenerateProgress', {
               current: i + 1,
@@ -465,7 +465,7 @@ export function registerAnimeManifestHandlers(): void {
       log.info('Регенерация завершена', { success: result.success, failed: result.failed })
       logEntry(
         result.failed > 0 ? 'warn' : 'success',
-        `Готово: ${result.success} успешно${result.failed > 0 ? `, ${result.failed} ошибок` : ''}`
+        `Готово: ${result.success} успешно${result.failed > 0 ? `, ${result.failed} ошибок` : ''}`,
       )
       regenerationState.finish(result)
       broadcastToWindows('manifest:regenerateFinished', {
@@ -477,7 +477,7 @@ export function registerAnimeManifestHandlers(): void {
       await regenCheckpointStore.save({ startedAt: null, total: 0 })
 
       return result
-    }
+    },
   )
 
   /**
@@ -598,7 +598,7 @@ export function registerAnimeManifestHandlers(): void {
         }
       }
       return summary
-    }
+    },
   )
 
   /**
@@ -626,6 +626,6 @@ export function registerAnimeManifestHandlers(): void {
         },
         orderBy: [{ contentHealth: 'desc' }, { name: 'asc' }],
       })
-    }
+    },
   )
 }

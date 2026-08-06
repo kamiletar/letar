@@ -31,15 +31,15 @@
 
 После перезапуска сессии включать по одному, проверять мелькание окон.
 
-| #   | Что                     | Тип    | Файл настроек                                       | Как включить                                        |
-| --- | ----------------------- | ------ | --------------------------------------------------- | --------------------------------------------------- |
-| 1   | **hookify**             | плагин | `~/.claude/settings.json`                           | `"hookify@claude-plugins-official": true`           |
-| 2   | **context-mode**        | плагин | `~/.claude/settings.json` + `.claude/settings.json` | `"context-mode@claude-context-mode": true` в обоих  |
-| 3   | **security-guidance**   | плагин | `~/.claude/settings.json`                           | `"security-guidance@claude-plugins-official": true` |
-| 4   | **validate-bash.js**    | проект | `.claude/settings.json`                             | Добавить PreToolUse Bash хук                        |
-| 5   | **kill-e2e-port.js**    | проект | `.claude/settings.json`                             | Добавить PreToolUse Bash хук                        |
-| 6   | **auto-format.js**      | проект | `.claude/settings.json`                             | Добавить PostToolUse Write\|Edit хук                |
-| 7   | **start-agent-mail.js** | проект | `.claude/settings.json`                             | Добавить SessionStart хук                           |
+| # | Что                     | Тип    | Файл настроек                                       | Как включить                                        |
+| - | ----------------------- | ------ | --------------------------------------------------- | --------------------------------------------------- |
+| 1 | **hookify**             | плагин | `~/.claude/settings.json`                           | `"hookify@claude-plugins-official": true`           |
+| 2 | **context-mode**        | плагин | `~/.claude/settings.json` + `.claude/settings.json` | `"context-mode@claude-context-mode": true` в обоих  |
+| 3 | **security-guidance**   | плагин | `~/.claude/settings.json`                           | `"security-guidance@claude-plugins-official": true` |
+| 4 | **validate-bash.js**    | проект | `.claude/settings.json`                             | Добавить PreToolUse Bash хук                        |
+| 5 | **kill-e2e-port.js**    | проект | `.claude/settings.json`                             | Добавить PreToolUse Bash хук                        |
+| 6 | **auto-format.js**      | проект | `.claude/settings.json`                             | Добавить PostToolUse Write\|Edit хук                |
+| 7 | **start-agent-mail.js** | проект | `.claude/settings.json`                             | Добавить SessionStart хук                           |
 
 ## Частота срабатывания хуков (до отключения)
 
@@ -78,12 +78,12 @@ cp C:/Users/Kami/.claude/settings.json.bak C:/Users/Kami/.claude/settings.json
 
 ## Результаты тестирования
 
-| #   | Компонент           | Окна мелькают? | Заметки |
-| --- | ------------------- | -------------- | ------- |
-| 1   | hookify             |                |         |
-| 2   | context-mode        |                |         |
-| 3   | security-guidance   |                |         |
-| 4   | validate-bash.js    |                |         |
-| 5   | kill-e2e-port.js    |                |         |
-| 6   | auto-format.js      |                |         |
-| 7   | start-agent-mail.js |                |         |
+| # | Компонент           | Окна мелькают? | Заметки |
+| - | ------------------- | -------------- | ------- |
+| 1 | hookify             |                |         |
+| 2 | context-mode        |                |         |
+| 3 | security-guidance   |                |         |
+| 4 | validate-bash.js    |                |         |
+| 5 | kill-e2e-port.js    |                |         |
+| 6 | auto-format.js      |                |         |
+| 7 | start-agent-mail.js |                |         |

@@ -36,10 +36,9 @@ export function ExpandableText({
   const collapsedHeightRef = useRef<number>(0)
 
   // Проверяем prefers-reduced-motion
-  const prefersReducedMotion =
-    respectReducedMotion && typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      : false
+  const prefersReducedMotion = respectReducedMotion && typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
 
   // Измеряем высоту текста для определения необходимости кнопки
   useLayoutEffect(() => {
@@ -117,16 +116,14 @@ export function ExpandableText({
           color={color}
           fontSize={fontSize}
           lineHeight="tall"
-          css={
-            !isExpanded && needsExpansion
-              ? {
-                  display: '-webkit-box',
-                  WebkitLineClamp: maxLines,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }
-              : undefined
-          }
+          css={!isExpanded && needsExpansion
+            ? {
+              display: '-webkit-box',
+              WebkitLineClamp: maxLines,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }
+            : undefined}
         >
           {text}
         </Text>
@@ -148,17 +145,19 @@ export function ExpandableText({
           _hover={{ color: 'purple.300' }}
           _active={{ transform: 'scale(0.98)' }}
         >
-          {isExpanded ? (
-            <>
-              <LuChevronUp size={16} />
-              Свернуть
-            </>
-          ) : (
-            <>
-              <LuChevronDown size={16} />
-              Показать полностью
-            </>
-          )}
+          {isExpanded
+            ? (
+              <>
+                <LuChevronUp size={16} />
+                Свернуть
+              </>
+            )
+            : (
+              <>
+                <LuChevronDown size={16} />
+                Показать полностью
+              </>
+            )}
         </Box>
       )}
     </Box>

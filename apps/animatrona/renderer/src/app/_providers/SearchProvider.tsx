@@ -124,7 +124,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
         year: r.item.year,
       }))
     },
-    [fuse]
+    [fuse],
   )
 
   /**
@@ -149,7 +149,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
       const results = fuse.search(searchQuery, { limit: 1000 })
       return results.map((r) => r.item.id)
     },
-    [fuse]
+    [fuse],
   )
 
   const value = useMemo<SearchContextValue>(
@@ -160,7 +160,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
       isLoading,
       error: error as Error | null,
     }),
-    [search, searchIds, anime, isLoading, error]
+    [search, searchIds, anime, isLoading, error],
   )
 
   return <SearchContext value={value}>{children}</SearchContext>

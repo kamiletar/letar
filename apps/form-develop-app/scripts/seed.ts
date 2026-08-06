@@ -92,11 +92,11 @@ async function main() {
       base: recipe.info?.base ? { type: recipe.info.base.type, rating: recipe.info.base.rating } : null,
       additional: recipe.info?.additional
         ? {
-            similarMyRecipes: recipe.info.additional.similarMyRecipes.map((r) => ({
-              id: r.id,
-              title: r.title,
-            })),
-          }
+          similarMyRecipes: recipe.info.additional.similarMyRecipes.map((r) => ({
+            id: r.id,
+            title: r.title,
+          })),
+        }
         : null,
     },
     tags: recipe.tags,

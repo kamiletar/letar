@@ -62,7 +62,7 @@ interface SubtitlesOctopusOptions {
 
 declare global {
   interface Window {
-    SubtitlesOctopus?: new (options: SubtitlesOctopusOptions) => SubtitlesOctopusInstance
+    SubtitlesOctopus?: new(options: SubtitlesOctopusOptions) => SubtitlesOctopusInstance
   }
 }
 

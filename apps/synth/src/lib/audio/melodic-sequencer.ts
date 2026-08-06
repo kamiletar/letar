@@ -43,7 +43,7 @@ export class MelodicSequencer {
     this.scheduler = new StepSequencer(
       this.ctx,
       (stepIndex, time) => this.handleStep(stepIndex, time, onStepVisual),
-      seq.steps
+      seq.steps,
     )
     this.scheduler.setBpm(seq.bpm)
     this.scheduler.setSwing(seq.swing)

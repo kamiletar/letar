@@ -344,7 +344,7 @@ export function WorkflowDiagram({ steps }: { steps: WorkflowStep[] }) {
       position: { x: i * 200, y: 100 },
       data: { label: step.label },
       type: step.status === 'active' ? 'default' : 'output',
-    }))
+    })),
   )
 
   const [edges] = useEdgesState(
@@ -353,7 +353,7 @@ export function WorkflowDiagram({ steps }: { steps: WorkflowStep[] }) {
       source: step.id,
       target: steps[i + 1].id,
       animated: steps[i + 1].status === 'active',
-    }))
+    })),
   )
 
   return (

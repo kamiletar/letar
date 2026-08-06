@@ -17,7 +17,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('radiogroup')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" label="Оценка" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Оценка')).toBeInTheDocument()
@@ -41,7 +41,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const radios = screen.getAllByRole('radio')
@@ -54,7 +54,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" count={10} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const radios = screen.getAllByRole('radio')
@@ -69,7 +69,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 3 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const group = screen.getByRole('radiogroup')
@@ -82,7 +82,7 @@ describe('FieldRating', () => {
           <Form initialValue={{ rating: 3 }} onSubmit={vi.fn()}>
             <Form.Field.Rating name="rating" readOnly />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const group = screen.getByRole('radiogroup')

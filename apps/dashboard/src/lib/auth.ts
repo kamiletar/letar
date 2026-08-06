@@ -37,20 +37,19 @@ export const auth = betterAuth({
     username(),
     nextCookies(),
     genericOAuth({
-      config:
-        process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
-          ? [
-              {
-                providerId: 'letar-auth',
-                discoveryUrl:
-                  process.env.OIDC_DISCOVERY_URL || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
-                clientId: process.env.OIDC_CLIENT_ID,
-                clientSecret: process.env.OIDC_CLIENT_SECRET,
-                scopes: ['openid', 'profile', 'email', 'offline_access'],
-                pkce: true,
-              },
-            ]
-          : [],
+      config: process.env.OIDC_CLIENT_ID && process.env.OIDC_CLIENT_SECRET
+        ? [
+          {
+            providerId: 'letar-auth',
+            discoveryUrl: process.env.OIDC_DISCOVERY_URL
+              || 'https://auth.letar.best/api/auth/.well-known/openid-configuration',
+            clientId: process.env.OIDC_CLIENT_ID,
+            clientSecret: process.env.OIDC_CLIENT_SECRET,
+            scopes: ['openid', 'profile', 'email', 'offline_access'],
+            pkce: true,
+          },
+        ]
+        : [],
     }),
   ],
 

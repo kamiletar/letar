@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           size: Number(distribution.size),
         },
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
     console.error('Distribution create error:', error)

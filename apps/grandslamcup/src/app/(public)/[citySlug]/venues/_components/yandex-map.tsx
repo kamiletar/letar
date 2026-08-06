@@ -67,7 +67,8 @@ export function YandexMap({ center, zoom = 12, markers = [], height = '400px' }:
     const MARKER_COLOR = '#E53E3E'
     for (const marker of markers) {
       const el = document.createElement('div')
-      el.style.cssText = `width:24px;height:24px;background:${MARKER_COLOR};border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;transform:translate(-50%,-50%);`
+      el.style.cssText =
+        `width:24px;height:24px;background:${MARKER_COLOR};border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;transform:translate(-50%,-50%);`
 
       if (marker.href) {
         el.onclick = () => {
@@ -82,8 +83,8 @@ export function YandexMap({ center, zoom = 12, markers = [], height = '400px' }:
           {
             coordinates: [marker.coordinates[1], marker.coordinates[0]], // [lng, lat]
           },
-          el
-        )
+          el,
+        ),
       )
     }
 

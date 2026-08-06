@@ -274,7 +274,7 @@ export class ActivityPubClient {
    */
   private async signedFetch(
     url: string,
-    options: { method: 'GET' | 'POST' | 'DELETE'; body?: string; headers?: Record<string, string> }
+    options: { method: 'GET' | 'POST' | 'DELETE'; body?: string; headers?: Record<string, string> },
   ): Promise<Response> {
     // Получаем ключи если ещё не загружены
     if (!this.privateKeyPem) {

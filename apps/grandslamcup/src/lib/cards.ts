@@ -70,7 +70,7 @@ export function checkCardConsequences(
   rules: CardRules,
   cardType: 'YELLOW' | 'RED',
   playerYellowsInMatch: number,
-  teamYellowsInSeason: number
+  teamYellowsInSeason: number,
 ): CardCheckResult {
   const result: CardCheckResult = {
     upgradeToRed: false,

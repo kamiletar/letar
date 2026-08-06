@@ -19,7 +19,7 @@ describe('FieldAutocomplete', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.Autocomplete name="city" suggestions={suggestions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('combobox')).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe('FieldAutocomplete', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.Autocomplete name="city" label="Город" suggestions={suggestions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Город')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('FieldAutocomplete', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.Autocomplete name="city" placeholder="Начните ввод..." suggestions={suggestions} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByPlaceholderText('Начните ввод...')).toBeInTheDocument()
@@ -57,7 +57,7 @@ describe('FieldAutocomplete', () => {
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
             <Form.Field.Autocomplete name="city" suggestions={suggestions} disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('combobox')).toBeDisabled()

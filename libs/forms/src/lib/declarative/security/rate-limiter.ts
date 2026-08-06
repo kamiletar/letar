@@ -69,7 +69,7 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
         // sessionStorage недоступен — graceful degradation
       }
     },
-    [storageKey]
+    [storageKey],
   )
 
   // Запустить таймер обратного отсчёта
@@ -94,7 +94,7 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
       updateTimer()
       timerRef.current = setInterval(updateTimer, 1000)
     },
-    [getAttempts, saveAttempts]
+    [getAttempts, saveAttempts],
   )
 
   // Зарегистрировать попытку — возвращает true если разрешено

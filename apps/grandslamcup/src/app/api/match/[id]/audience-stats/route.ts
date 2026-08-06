@@ -50,7 +50,7 @@ export async function GET(_request: NextRequest, { params }: { params: Params })
           avgTotal: Math.round((avgText + avgDelivery) * 10) / 10,
         },
       ]
-    })
+    }),
   )
 
   return NextResponse.json({ data: stats, totalVoters: new Set(votes.map((v) => v.performanceId)).size })

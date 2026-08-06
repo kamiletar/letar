@@ -101,7 +101,7 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
       'onPictureInPictureModeChanged',
       (event: { isInPipMode: boolean }) => {
         updatePipState(event.isInPipMode)
-      }
+      },
     )
 
     const pipActionSubscription = pipEmitter.addListener('onPipAction', (event: { action: PipAction }) => {
@@ -185,7 +185,7 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
         console.error('Failed to update PiP playback state:', error)
       }
     },
-    [isPipAvailable]
+    [isPipAvailable],
   )
 
   return {

@@ -39,7 +39,7 @@ export interface VerificationEmailConfig {
  */
 export function formatVerificationEmail(
   params: VerificationEmailParams,
-  config: VerificationEmailConfig
+  config: VerificationEmailConfig,
 ): EmailContent {
   const { userName, verificationUrl, pin } = params
   const { appUrl, appName, primaryColor = '#1a365d', accentColor = '#CA9E67', pinExpiresMinutes = 10 } = config
@@ -195,7 +195,7 @@ export interface ResetPasswordEmailConfig {
  */
 export function formatResetPasswordEmail(
   params: ResetPasswordEmailParams,
-  config: ResetPasswordEmailConfig
+  config: ResetPasswordEmailConfig,
 ): EmailContent {
   const { userName, resetUrl, pin } = params
   const {
@@ -273,8 +273,8 @@ ${pinBlock}
 
               <p style="margin: 20px 0 0; font-size: 12px; color: #999;">
                 Ссылка действительна в течение <strong>${linkExpiresHours} ${
-                  linkExpiresHours === 1 ? 'часа' : 'часов'
-                }</strong>.
+    linkExpiresHours === 1 ? 'часа' : 'часов'
+  }</strong>.
               </p>
 
               <p style="margin: 20px 0 0; font-size: 12px; color: #999;">

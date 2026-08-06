@@ -43,7 +43,7 @@ export default async function MandalasPage() {
     mandalas.map((m) => ({
       url: `${SITE_URL}/mandalas/${m.slug}`,
       name: m.name,
-    }))
+    })),
   )
 
   return (

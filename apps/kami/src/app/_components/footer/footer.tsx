@@ -5,11 +5,11 @@ import { Link } from '@/i18n/navigation'
 import { CONTACT } from '@/lib/utils/constants'
 import {
   Box,
-  Link as ChakraLink,
   Container,
   Heading,
   HStack,
   Icon,
+  Link as ChakraLink,
   Separator,
   SimpleGrid,
   Text,

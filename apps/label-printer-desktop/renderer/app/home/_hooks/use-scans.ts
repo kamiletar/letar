@@ -117,7 +117,7 @@ export function useScans() {
         })
       }
     },
-    [updateScan]
+    [updateScan],
   )
 
   /** Обновить скан после создания товара */

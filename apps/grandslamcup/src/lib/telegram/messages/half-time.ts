@@ -29,7 +29,7 @@ export async function formatHalfTimeResult(matchId: string, half: number): Promi
   // Лучший игрок тайма
   const bestPerf = halfPerfs.reduce(
     (best, p) => ((p.totalScore ?? 0) > (best?.totalScore ?? 0) ? p : best),
-    halfPerfs[0]
+    halfPerfs[0],
   )
 
   const parts = [

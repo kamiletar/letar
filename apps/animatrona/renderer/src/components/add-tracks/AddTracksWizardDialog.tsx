@@ -251,30 +251,32 @@ export function AddTracksWizardDialog({
 
               {(state.stage === 'probing' || state.stage === 'selection') && (
                 <>
-                  {state.stage === 'probing' ? (
-                    <VStack py={8}>
-                      <Text color="fg.muted">Анализ файлов...</Text>
-                    </VStack>
-                  ) : (
-                    <TrackSelectionStep
-                      matches={state.matches}
-                      probeResults={state.probeResults}
-                      selectedTracks={state.selectedTracks}
-                      libraryEpisodes={episodes}
-                      animeFolderPath={animeFolderPath}
-                      onToggleTrack={toggleTrackSelection}
-                      onSelectAllOfType={selectAllTracksOfType}
-                      onSelectByLanguage={selectByLanguage}
-                      onDeselectByLanguage={deselectByLanguage}
-                    />
-                  )}
+                  {state.stage === 'probing'
+                    ? (
+                      <VStack py={8}>
+                        <Text color="fg.muted">Анализ файлов...</Text>
+                      </VStack>
+                    )
+                    : (
+                      <TrackSelectionStep
+                        matches={state.matches}
+                        probeResults={state.probeResults}
+                        selectedTracks={state.selectedTracks}
+                        libraryEpisodes={episodes}
+                        animeFolderPath={animeFolderPath}
+                        onToggleTrack={toggleTrackSelection}
+                        onSelectAllOfType={selectAllTracksOfType}
+                        onSelectByLanguage={selectByLanguage}
+                        onDeselectByLanguage={deselectByLanguage}
+                      />
+                    )}
                 </>
               )}
 
-              {(state.stage === 'processing' ||
-                state.stage === 'done' ||
-                state.stage === 'error' ||
-                state.stage === 'cancelled') && (
+              {(state.stage === 'processing'
+                || state.stage === 'done'
+                || state.stage === 'error'
+                || state.stage === 'cancelled') && (
                 <AddTracksProcessingStep
                   stage={state.stage}
                   progress={state.progress}
@@ -319,17 +321,19 @@ export function AddTracksWizardDialog({
                   {/* Далее */}
                   {(state.stage === 'matching' || state.stage === 'calibration' || state.stage === 'selection') && (
                     <Button colorPalette="purple" onClick={handleNext} disabled={!canProceed()}>
-                      {state.stage === 'selection' ? (
-                        <>
-                          Добавить дорожки
-                          <Icon as={LuArrowRight} ml={1} />
-                        </>
-                      ) : (
-                        <>
-                          Далее
-                          <Icon as={LuArrowRight} ml={1} />
-                        </>
-                      )}
+                      {state.stage === 'selection'
+                        ? (
+                          <>
+                            Добавить дорожки
+                            <Icon as={LuArrowRight} ml={1} />
+                          </>
+                        )
+                        : (
+                          <>
+                            Далее
+                            <Icon as={LuArrowRight} ml={1} />
+                          </>
+                        )}
                     </Button>
                   )}
                 </HStack>

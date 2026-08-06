@@ -39,10 +39,10 @@ export function passkeyPlugin(): BetterAuthPlugin {
           const options = await generatePasskeyRegistrationOptions(
             session.user.id,
             session.user.name ?? '',
-            session.user.email
+            session.user.email,
           )
           return ctx.json(options)
-        }
+        },
       ),
 
       passkeyRegisterVerify: createAuthEndpoint(
@@ -64,7 +64,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           const passkeyData = await verifyPasskeyRegistration(
             session.user.id,
             ctx.body.response as unknown as Parameters<typeof verifyPasskeyRegistration>[1],
-            ctx.body.name
+            ctx.body.name,
           )
 
           await ctx.context.adapter.create({
@@ -73,7 +73,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           })
 
           return ctx.json({ verified: true })
-        }
+        },
       ),
 
       passkeyAuthOptions: createAuthEndpoint(
@@ -89,7 +89,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           } catch {
             return ctx.json({ error: 'Не удалось получить параметры входа' }, { status: 500 })
           }
-        }
+        },
       ),
 
       passkeyAuthVerify: createAuthEndpoint(
@@ -136,7 +136,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
               publicKey: passkey.publicKey,
               counter: passkey.counter,
               transports: passkey.transports,
-            }
+            },
           )
 
           // Обновляем счётчик (защита от replay-атак)
@@ -159,7 +159,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
             verified: true,
             user: { id: userRecord.id, email: userRecord.email, name: userRecord.name },
           })
-        }
+        },
       ),
 
       passkeyDelete: createAuthEndpoint(
@@ -196,7 +196,7 @@ export function passkeyPlugin(): BetterAuthPlugin {
           })
 
           return ctx.json({ deleted: true })
-        }
+        },
       ),
     },
 

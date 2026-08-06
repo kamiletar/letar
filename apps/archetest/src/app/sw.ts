@@ -45,7 +45,7 @@ self.addEventListener('install', (event) => {
     caches
       .open(EXPRESS_CACHE)
       .then((cache) => cache.addAll(EXPRESS_URLS))
-      .catch(() => undefined)
+      .catch(() => undefined),
   )
 })
 

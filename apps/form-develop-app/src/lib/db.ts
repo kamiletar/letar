@@ -7,9 +7,8 @@ import { Pool } from 'pg'
 // Singleton для PostgreSQL pool (избегаем множественных подключений в dev режиме)
 const globalForPool = globalThis as unknown as { pool: Pool }
 
-const pool =
-  globalForPool.pool ??
-  new Pool({
+const pool = globalForPool.pool
+  ?? new Pool({
     connectionString: process.env.DATABASE_URL,
   })
 

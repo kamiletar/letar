@@ -115,8 +115,8 @@ export function DarkCoreBlock({ index }: DarkCoreBlockProps) {
                     ? flavor.description
                     : flavor.descriptionEn
                   : isRu
-                    ? flavor.residual
-                    : flavor.residualEn}
+                  ? flavor.residual
+                  : flavor.residualEn}
               </Text>
               <Text fontSize="2xs" color="fg.subtle" mt={1}>
                 {isRu ? 'Ответов: ' : 'Answers: '}
@@ -135,8 +135,8 @@ export function DarkCoreBlock({ index }: DarkCoreBlockProps) {
                 {isRu ? 'Уровень ядра: ' : 'Core level: '}
                 {index.core}%
               </Text>
-              {index.coreCiLow !== null &&
-                ` (${isRu ? 'интервал' : 'interval'} ${index.coreCiLow}–${index.coreCiHigh}%)`}
+              {index.coreCiLow !== null
+                && ` (${isRu ? 'интервал' : 'interval'} ${index.coreCiLow}–${index.coreCiHigh}%)`}
             </Text>
             {index.spread !== null && (
               <Text fontSize="xs" color="fg.muted" mt={1}>
@@ -148,11 +148,11 @@ export function DarkCoreBlock({ index }: DarkCoreBlockProps) {
               <Text fontSize="xs" color="fg.muted" mt={1}>
                 {isRu
                   ? `Внутри профиля: тёмные шкалы занимают в среднем ${index.profile.meanRank}-е место из ${index.profile.totalScales}, ${index.profile.inTopN} из них — в топ-${index.profile.topN}. Ядро ${
-                      index.profile.coreVsProfile >= 0 ? 'выше' : 'ниже'
-                    } собственного фона профиля на ${Math.abs(index.profile.coreVsProfile)} пунктов.`
+                    index.profile.coreVsProfile >= 0 ? 'выше' : 'ниже'
+                  } собственного фона профиля на ${Math.abs(index.profile.coreVsProfile)} пунктов.`
                   : `Within the profile: dark scales rank ${index.profile.meanRank} on average out of ${index.profile.totalScales}, ${index.profile.inTopN} of them in the top ${index.profile.topN}. The core is ${
-                      index.profile.coreVsProfile >= 0 ? 'above' : 'below'
-                    } the profile’s own baseline by ${Math.abs(index.profile.coreVsProfile)} points.`}
+                    index.profile.coreVsProfile >= 0 ? 'above' : 'below'
+                  } the profile’s own baseline by ${Math.abs(index.profile.coreVsProfile)} points.`}
               </Text>
             )}
             {index.missingCodes.length > 0 && (
@@ -169,12 +169,16 @@ export function DarkCoreBlock({ index }: DarkCoreBlockProps) {
           <Box p={3} bg="bg.subtle" borderRadius="md" mb={3}>
             <Text fontSize="xs" color="fg.muted">
               {isRu
-                ? `Без нарциссизма ядро составило бы ${index.coreWithoutNarcissism}% (разница ${signed(
-                    index.narcissismDelta ?? 0
-                  )}). Нарциссическое «восхищение» — агентный, по сути не-аверсивный компонент, и именно оно хуже прочего представляет общее ядро (Hilbig et al., 2023). Оценку стоит читать с поправкой на это.`
-                : `Without narcissism the core would be ${index.coreWithoutNarcissism}% (difference ${signed(
-                    index.narcissismDelta ?? 0
-                  )}). Narcissistic “admiration” is an agentic, essentially non-aversive component, and it represents the common core worst of all (Hilbig et al., 2023). Read the estimate with that in mind.`}
+                ? `Без нарциссизма ядро составило бы ${index.coreWithoutNarcissism}% (разница ${
+                  signed(
+                    index.narcissismDelta ?? 0,
+                  )
+                }). Нарциссическое «восхищение» — агентный, по сути не-аверсивный компонент, и именно оно хуже прочего представляет общее ядро (Hilbig et al., 2023). Оценку стоит читать с поправкой на это.`
+                : `Without narcissism the core would be ${index.coreWithoutNarcissism}% (difference ${
+                  signed(
+                    index.narcissismDelta ?? 0,
+                  )
+                }). Narcissistic “admiration” is an agentic, essentially non-aversive component, and it represents the common core worst of all (Hilbig et al., 2023). Read the estimate with that in mind.`}
             </Text>
           </Box>
         )}

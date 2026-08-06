@@ -35,7 +35,7 @@ export function createPasswordResetEmailHtml(params: PasswordResetTemplateParams
 
   let content = createGreeting(userName)
   content += createParagraph(
-    `Вы запросили сброс пароля для вашего аккаунта на ${branding.appName}. Нажмите кнопку ниже, чтобы создать новый пароль.`
+    `Вы запросили сброс пароля для вашего аккаунта на ${branding.appName}. Нажмите кнопку ниже, чтобы создать новый пароль.`,
   )
 
   // PIN-код если есть
@@ -47,7 +47,7 @@ export function createPasswordResetEmailHtml(params: PasswordResetTemplateParams
   content += createLinkFallback(resetUrl, branding.buttonColor)
   content += createWarning(`Ссылка действительна <strong>${expiresInMinutes} минут</strong>. Не передавайте её никому!`)
   content += createSmallText(
-    `Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо. Ваш пароль останется без изменений.`
+    `Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо. Ваш пароль останется без изменений.`,
   )
 
   return createBaseTemplate({

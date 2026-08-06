@@ -18,4 +18,4 @@ export { mergeMKV } from './merge'
 export { averageVmaf, calculateVMAF, calculateVMAFBatch, findOptimalCQ } from './vmaf'
 
 // Сэмплирование
-export { cleanupSamples, encodeSamplesParallel, extractSamples, type EncodedSample } from './sample'
+export { cleanupSamples, type EncodedSample, encodeSamplesParallel, extractSamples } from './sample'

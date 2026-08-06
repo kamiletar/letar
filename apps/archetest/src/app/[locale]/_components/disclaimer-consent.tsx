@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { Box, Button, Link as ChakraLink, Checkbox, Dialog, Portal, Text } from '@chakra-ui/react'
+import { Box, Button, Checkbox, Dialog, Link as ChakraLink, Portal, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import { DISCLAIMER_EN, DISCLAIMER_RU, DISCLAIMER_SUMMARY_EN, DISCLAIMER_SUMMARY_RU } from '../_data/disclaimer'
 

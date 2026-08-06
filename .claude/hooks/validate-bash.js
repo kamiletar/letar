@@ -77,13 +77,13 @@ process.stdin.on('end', () => {
     // Правильно: /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa
     // Ловим ssh только как команду (в начале или после &&/||/;), не внутри строковых аргументов
     const bareSSH = /(?:^|(?:&&|\|\||;)\s*)(?:unset\s+\w+\s*&&\s*)*(?:SSH_AUTH_SOCK=\S*\s+)?ssh\s+(?!.*\.exe)/.test(
-      command
+      command,
     )
     if (bareSSH) {
       console.error(
-        '\n\u26d4 BLOCKED: Bare ssh из Git Bash плодит зомби ssh-agent.exe!\n' +
-          'Используй Windows SSH:\n' +
-          '  /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@server "command"\n'
+        '\n\u26d4 BLOCKED: Bare ssh из Git Bash плодит зомби ssh-agent.exe!\n'
+          + 'Используй Windows SSH:\n'
+          + '  /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@server "command"\n',
       )
       process.exit(2)
     }

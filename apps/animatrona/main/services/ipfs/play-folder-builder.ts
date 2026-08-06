@@ -89,7 +89,7 @@ async function readChapters(chaptersCid: string): Promise<ChaptersDocument['chap
  */
 export async function buildPlayFolderEntries(
   anime: PlayFolderAnime,
-  chaptersByEp?: Map<string, string>
+  chaptersByEp?: Map<string, string>,
 ): Promise<DirEntry | null> {
   const episodesWithVideo = anime.episodes.filter((ep) => !!ep.transcodedCid)
   if (episodesWithVideo.length === 0) {
@@ -128,7 +128,7 @@ export async function buildPlayFolderEntries(
           })),
         chapters,
       } satisfies QueueEpisodeExportData
-    })
+    }),
   )
 
   // Все ключи дорожек по всем эпизодам — плеер сам решает, какие показать для конкретной серии

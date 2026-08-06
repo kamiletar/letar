@@ -18,7 +18,7 @@ interface ProfilesData {
 const profilesStorage = createJsonStore<ProfilesData>(
   STORAGE_FILES.profiles,
   { profiles: [] },
-  { dir: devDataDir(), logger: jsonStoreLogger }
+  { dir: devDataDir(), logger: jsonStoreLogger },
 )
 
 /**
@@ -74,7 +74,7 @@ export function registerProfilesHandlers(): void {
         logger.error('[ProfilesIPC]', 'profiles:create error', error)
         return { success: false, error: String(error) }
       }
-    }
+    },
   )
 
   // Обновить профиль
@@ -99,7 +99,7 @@ export function registerProfilesHandlers(): void {
         logger.error('[ProfilesIPC]', 'profiles:update error', error)
         return { success: false, error: String(error) }
       }
-    }
+    },
   )
 
   // Удалить профиль

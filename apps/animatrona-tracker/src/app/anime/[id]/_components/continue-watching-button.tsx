@@ -35,7 +35,7 @@ interface PlayTarget {
 /** Определяет целевой эпизод и текст кнопки */
 function getPlayTarget(
   episodes: ContinueWatchingButtonProps['episodes'],
-  progress?: Record<number, { currentTime: number; percent: number }>
+  progress?: Record<number, { currentTime: number; percent: number }>,
 ): PlayTarget | null {
   if (episodes.length === 0) {
     return null

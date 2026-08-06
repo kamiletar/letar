@@ -219,7 +219,7 @@ function extractBracketGroups(text: string): string[] {
  */
 export function parsePostFields(
   $: cheerio.CheerioAPI,
-  postBody: cheerio.Cheerio<cheerio.Element>
+  postBody: cheerio.Cheerio<cheerio.Element>,
 ): Record<string, string> {
   const fields: Record<string, string> = {}
 
@@ -352,7 +352,7 @@ function parseSingleDubGroup(raw: string, defaultType: 'dub' | 'sub'): Rutracker
 /** Парсит MediaInfo из спойлера */
 export function parseMediaInfo(
   $: cheerio.CheerioAPI,
-  postBody: cheerio.Cheerio<cheerio.Element>
+  postBody: cheerio.Cheerio<cheerio.Element>,
 ): RutrackerMediaInfo | undefined {
   // Ищем спойлер с заголовком "MediaInfo" или "Mediainfo"
   let mediaInfoText = ''

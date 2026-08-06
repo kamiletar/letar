@@ -36,7 +36,7 @@ export function TableOfContents({ items, locale }: Props) {
       {
         rootMargin: '-80px 0px -70% 0px',
         threshold: 0,
-      }
+      },
     )
 
     headings.forEach((heading) => observer.observe(heading))

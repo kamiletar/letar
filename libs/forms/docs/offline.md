@@ -6,7 +6,7 @@
 
 ```tsx
 import { Form } from '@letar/forms'
-;<Form initialValue={data} onSubmit={handleSubmit}>
+<Form initialValue={data} onSubmit={handleSubmit}>
   {/* Показывается когда браузер оффлайн */}
   <Form.OfflineIndicator />
 
@@ -37,7 +37,7 @@ import { Form } from '@letar/forms'
 
 ```tsx
 import { FormSyncStatus } from '@letar/forms/offline' // В layout или header
-;<FormSyncStatus
+<FormSyncStatus
   showWhenEmpty={false} // Показывать когда очередь пуста
   syncingLabel="Синхронизация..." // Текст при синхронизации
   pendingLabel={(count) => `Ожидает: ${count}`} // Текст с очередью

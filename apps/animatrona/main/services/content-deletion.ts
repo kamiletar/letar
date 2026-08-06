@@ -54,7 +54,7 @@ export interface DeleteAnimeContentOptions {
  */
 export async function deleteAnimeContent(
   animeId: string,
-  options: DeleteAnimeContentOptions = {}
+  options: DeleteAnimeContentOptions = {},
 ): Promise<DeleteAnimeContentResult> {
   log.info('Удаление контента аниме из IPFS', { animeId })
 

@@ -20,16 +20,14 @@ export async function clickWithHydrationRetry(
   clickTarget: Locator,
   waitFor: { locator: Locator; state: 'enabled' | 'visible' },
   firstTimeoutMs = 2_000,
-  retryTimeoutMs = 5_000
+  retryTimeoutMs = 5_000,
 ): Promise<void> {
-  const assert =
-    waitFor.state === 'enabled'
-      ? () => expect(waitFor.locator).toBeEnabled({ timeout: firstTimeoutMs })
-      : () => expect(waitFor.locator).toBeVisible({ timeout: firstTimeoutMs })
-  const assertRetry =
-    waitFor.state === 'enabled'
-      ? () => expect(waitFor.locator).toBeEnabled({ timeout: retryTimeoutMs })
-      : () => expect(waitFor.locator).toBeVisible({ timeout: retryTimeoutMs })
+  const assert = waitFor.state === 'enabled'
+    ? () => expect(waitFor.locator).toBeEnabled({ timeout: firstTimeoutMs })
+    : () => expect(waitFor.locator).toBeVisible({ timeout: firstTimeoutMs })
+  const assertRetry = waitFor.state === 'enabled'
+    ? () => expect(waitFor.locator).toBeEnabled({ timeout: retryTimeoutMs })
+    : () => expect(waitFor.locator).toBeVisible({ timeout: retryTimeoutMs })
 
   await clickTarget.click()
   try {

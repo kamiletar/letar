@@ -1,2 +1,2 @@
-export { usePrint, useScannerConnection, type UsePrintProps, type UseScannerConnectionProps } from './use-scanner'
-export { useScans, type ScanEvent } from './use-scans'
+export { usePrint, type UsePrintProps, useScannerConnection, type UseScannerConnectionProps } from './use-scanner'
+export { type ScanEvent, useScans } from './use-scans'

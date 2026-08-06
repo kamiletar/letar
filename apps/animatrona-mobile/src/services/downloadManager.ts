@@ -395,7 +395,7 @@ async function downloadFile(
   url: string,
   destPath: string,
   _taskId: string,
-  onProgress?: (received: number, total: number) => void
+  onProgress?: (received: number, total: number) => void,
 ): Promise<void> {
   const task = ReactNativeBlobUtil.config({
     path: destPath,
@@ -434,7 +434,7 @@ async function downloadFile(
     // Проверка 1: зависание на 100%
     if (reachedFullAt && now - reachedFullAt > STALL_AT_100_TIMEOUT) {
       console.warn(
-        `[downloadFile] Зависание на 100% (${Math.round((now - reachedFullAt) / 1000)}с), проверяю файл на диске...`
+        `[downloadFile] Зависание на 100% (${Math.round((now - reachedFullAt) / 1000)}с), проверяю файл на диске...`,
       )
       try {
         const fileSize = await getFileSize(destPath)

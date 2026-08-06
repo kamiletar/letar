@@ -67,7 +67,8 @@ export default async function ProtocolPage({ params }: { params: Params }) {
   return (
     <div style={{ fontFamily: 'serif', maxWidth: '800px', margin: '0 auto', padding: '20px', color: '#000' }}>
       {/* Стили для печати */}
-      <style>{`
+      <style>
+        {`
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
@@ -81,7 +82,8 @@ export default async function ProtocolPage({ params }: { params: Params }) {
         th { background: #eee; font-weight: bold; }
         td.name { text-align: left; }
         h1, h2, h3 { margin: 8px 0; }
-      `}</style>
+      `}
+      </style>
 
       {/* Кнопка печати (не печатается) */}
       <div className="no-print" style={{ marginBottom: '20px', textAlign: 'center' }}>
@@ -133,17 +135,13 @@ export default async function ProtocolPage({ params }: { params: Params }) {
         <div style={{ flex: 1 }}>
           <h3>{match.homeTeam.team.name}</h3>
           <ol style={{ fontSize: '13px', paddingLeft: '20px' }}>
-            {match.homeTeam.lineups.map((l) => (
-              <li key={l.id}>{l.player.name}</li>
-            ))}
+            {match.homeTeam.lineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
           </ol>
         </div>
         <div style={{ flex: 1 }}>
           <h3>{match.awayTeam.team.name}</h3>
           <ol style={{ fontSize: '13px', paddingLeft: '20px' }}>
-            {match.awayTeam.lineups.map((l) => (
-              <li key={l.id}>{l.player.name}</li>
-            ))}
+            {match.awayTeam.lineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
           </ol>
         </div>
       </div>

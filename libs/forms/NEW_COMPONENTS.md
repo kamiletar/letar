@@ -211,7 +211,7 @@ const OrderSchema = z.object({
 
 ```tsx
 // Вариант 1: через JSX
-;<Form.Field.Calculated
+<Form.Field.Calculated
   name="total"
   label="Итого"
   compute={(values) => values.price * values.qty}

@@ -18,7 +18,7 @@ export interface FileValidationOptions {
 export async function extractAndValidateFile(
   request: Request,
   fieldName: string,
-  options: FileValidationOptions
+  options: FileValidationOptions,
 ): Promise<
   { file: File; formData: FormData; error?: never } | { file?: never; formData?: never; error: NextResponse }
 > {
@@ -49,7 +49,7 @@ export async function extractAndValidateFile(
       return {
         error: NextResponse.json(
           { error: `Размер файла (${fileMB}MB) превышает максимум ${maxMB}MB` },
-          { status: 400 }
+          { status: 400 },
         ),
       }
     }

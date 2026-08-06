@@ -25,7 +25,7 @@ export async function submitForm(buttonText?: string): Promise<void> {
     throw new Error(
       `submitForm: кнопка сабмита не найдена${
         buttonText ? ` (текст: "${buttonText}")` : ''
-      }. Проверьте наличие button[type="submit"] или Form.Button.Submit.`
+      }. Проверьте наличие button[type="submit"] или Form.Button.Submit.`,
     )
   }
 

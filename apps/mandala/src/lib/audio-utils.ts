@@ -152,7 +152,7 @@ export function detectBeat(
   thresholdMultiplier: number,
   minBassLevel: number,
   lastBeatTime: number,
-  cooldown: number
+  cooldown: number,
 ): boolean {
   const now = performance.now()
   return currentBass > avgBass * thresholdMultiplier && currentBass > minBassLevel && now - lastBeatTime > cooldown

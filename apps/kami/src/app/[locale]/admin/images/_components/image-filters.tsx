@@ -37,7 +37,7 @@ export function ImageFilters({ currentCategory, currentSearch, locale }: ImageFi
         router.push(`/${locale}/admin/images?${params.toString()}`)
       })
     },
-    [router, searchParams, locale]
+    [router, searchParams, locale],
   )
 
   const handleSearchSubmit = (e: React.FormEvent) => {

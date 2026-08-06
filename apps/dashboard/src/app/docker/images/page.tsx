@@ -64,9 +64,11 @@ export default function ImagesPage() {
       queryClient.invalidateQueries({ queryKey: ['docker-images', selectedServerId] })
       toaster.create({
         title: 'Images pruned successfully',
-        description: `Deleted ${'deleted' in result ? (result as { deleted: number }).deleted : 0} images, reclaimed ${formatBytes(
-          'spaceReclaimed' in result ? (result as { spaceReclaimed: number }).spaceReclaimed : 0
-        )}`,
+        description: `Deleted ${'deleted' in result ? (result as { deleted: number }).deleted : 0} images, reclaimed ${
+          formatBytes(
+            'spaceReclaimed' in result ? (result as { spaceReclaimed: number }).spaceReclaimed : 0,
+          )
+        }`,
         type: 'success',
       })
     },
@@ -180,18 +182,20 @@ export default function ImagesPage() {
         </HStack>
 
         {/* Images table */}
-        {data?.images && data.images.length > 0 ? (
-          <Box bg="bg.subtle" borderRadius="lg" p="4">
-            <ImageList
-              images={data.images}
-              onRemove={isRemote ? undefined : (imageId) => removeMutation.mutate(imageId)}
-            />
-          </Box>
-        ) : (
-          <Box textAlign="center" py="12">
-            <Text color="fg.muted">No images found</Text>
-          </Box>
-        )}
+        {data?.images && data.images.length > 0
+          ? (
+            <Box bg="bg.subtle" borderRadius="lg" p="4">
+              <ImageList
+                images={data.images}
+                onRemove={isRemote ? undefined : (imageId) => removeMutation.mutate(imageId)}
+              />
+            </Box>
+          )
+          : (
+            <Box textAlign="center" py="12">
+              <Text color="fg.muted">No images found</Text>
+            </Box>
+          )}
       </Box>
     </>
   )

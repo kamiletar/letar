@@ -85,10 +85,9 @@ export function useBatchPublish(animes: BatchAnimeItem[]) {
   const publishableAnimes = animes.filter((a) => a.directoryCid != null)
 
   // Фильтрованный список по watchStatus
-  const filteredAnimes =
-    watchStatusFilter === 'ALL'
-      ? publishableAnimes
-      : publishableAnimes.filter((a) => a.watchStatus === watchStatusFilter)
+  const filteredAnimes = watchStatusFilter === 'ALL'
+    ? publishableAnimes
+    : publishableAnimes.filter((a) => a.watchStatus === watchStatusFilter)
 
   /** Переключить выбор одного аниме */
   const toggleSelection = useCallback((id: string) => {
@@ -117,8 +116,10 @@ export function useBatchPublish(animes: BatchAnimeItem[]) {
   const selectUnpublished = useCallback(() => {
     setSelectedIds(
       new Set(
-        filteredAnimes.filter((a) => !a.trackerPublishedAt || a.trackerPublishedCid !== a.directoryCid).map((a) => a.id)
-      )
+        filteredAnimes.filter((a) => !a.trackerPublishedAt || a.trackerPublishedCid !== a.directoryCid).map((a) =>
+          a.id
+        ),
+      ),
     )
   }, [filteredAnimes])
 
@@ -169,7 +170,7 @@ export function useBatchPublish(animes: BatchAnimeItem[]) {
             },
           ])
         }
-      }
+      },
     )
     cleanupRef.current = cleanup
 

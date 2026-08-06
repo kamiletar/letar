@@ -39,6 +39,6 @@ export function registerSettingsHandlers(): void {
           error: error instanceof Error ? error.message : String(error),
         }
       }
-    }
+    },
   )
 }

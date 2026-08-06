@@ -154,7 +154,7 @@ const ScheduleContent = memo(function ScheduleContent({
       }
       field.handleChange(newSchedule)
     },
-    [schedule, field, defaultOpenTime, defaultCloseTime]
+    [schedule, field, defaultOpenTime, defaultCloseTime],
   )
 
   const handleTimeChange = useCallback(
@@ -169,7 +169,7 @@ const ScheduleContent = memo(function ScheduleContent({
       }
       field.handleChange(newSchedule)
     },
-    [schedule, field]
+    [schedule, field],
   )
 
   const handleCopyToWeekdays = useCallback(() => {
@@ -295,31 +295,33 @@ const ScheduleContent = memo(function ScheduleContent({
                 </HStack>
 
                 {/* Time fields */}
-                {isEnabled ? (
-                  <HStack gap={2}>
-                    <Input
-                      type="time"
-                      size="sm"
-                      width="120px"
-                      value={daySchedule?.open || defaultOpenTime}
-                      onChange={(e) => handleTimeChange(day, 'open', e.target.value)}
-                      disabled={disabled || readOnly}
-                    />
-                    <Text color="fg.muted">—</Text>
-                    <Input
-                      type="time"
-                      size="sm"
-                      width="120px"
-                      value={daySchedule?.close || defaultCloseTime}
-                      onChange={(e) => handleTimeChange(day, 'close', e.target.value)}
-                      disabled={disabled || readOnly}
-                    />
-                  </HStack>
-                ) : (
-                  <Text fontSize="sm" color="fg.muted">
-                    {offLabel}
-                  </Text>
-                )}
+                {isEnabled
+                  ? (
+                    <HStack gap={2}>
+                      <Input
+                        type="time"
+                        size="sm"
+                        width="120px"
+                        value={daySchedule?.open || defaultOpenTime}
+                        onChange={(e) => handleTimeChange(day, 'open', e.target.value)}
+                        disabled={disabled || readOnly}
+                      />
+                      <Text color="fg.muted">—</Text>
+                      <Input
+                        type="time"
+                        size="sm"
+                        width="120px"
+                        value={daySchedule?.close || defaultCloseTime}
+                        onChange={(e) => handleTimeChange(day, 'close', e.target.value)}
+                        disabled={disabled || readOnly}
+                      />
+                    </HStack>
+                  )
+                  : (
+                    <Text fontSize="sm" color="fg.muted">
+                      {offLabel}
+                    </Text>
+                  )}
               </HStack>
             </Box>
           )

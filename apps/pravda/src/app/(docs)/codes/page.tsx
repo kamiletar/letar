@@ -9,7 +9,7 @@ import { navData } from '../../_components/sidebar'
 export const metadata: Metadata = getCategoryMetadata(
   'Кодексы',
   'Систематизированные своды норм права: Налоговый, Уголовный, Семейный, Трудовой и другие кодексы Руси.',
-  '/codes'
+  '/codes',
 )
 
 export default function CodesPage() {

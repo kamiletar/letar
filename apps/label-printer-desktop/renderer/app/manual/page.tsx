@@ -138,28 +138,30 @@ export default function ManualPage() {
               <Heading size="md">Предпросмотр этикетки</Heading>
             </Card.Header>
             <Card.Body>
-              {preview ? (
-                <Image
-                  src={preview}
-                  alt="Предпросмотр этикетки"
-                  borderRadius="md"
-                  border="1px solid"
-                  borderColor="border.subtle"
-                />
-              ) : (
-                <Box
-                  h="200px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  borderRadius="md"
-                  bg="bg.subtle"
-                  border="2px dashed"
-                  borderColor="border.subtle"
-                >
-                  <Text color="fg.muted">Нажмите &quot;Предпросмотр&quot; для генерации</Text>
-                </Box>
-              )}
+              {preview
+                ? (
+                  <Image
+                    src={preview}
+                    alt="Предпросмотр этикетки"
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor="border.subtle"
+                  />
+                )
+                : (
+                  <Box
+                    h="200px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    borderRadius="md"
+                    bg="bg.subtle"
+                    border="2px dashed"
+                    borderColor="border.subtle"
+                  >
+                    <Text color="fg.muted">Нажмите &quot;Предпросмотр&quot; для генерации</Text>
+                  </Box>
+                )}
             </Card.Body>
           </Card.Root>
         </HStack>

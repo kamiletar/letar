@@ -30,14 +30,17 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
   const { data: localMatch } = useFindManyAnime(
     shikimoriId != null
       ? {
-          where: { shikimoriId },
-          select: { id: true, directoryCid: true, trackerPublishedCid: true },
-          take: 1,
-        }
-      : { where: { id: '__never__' }, select: { id: true }, take: 0 }
+        where: { shikimoriId },
+        select: { id: true, directoryCid: true, trackerPublishedCid: true },
+        take: 1,
+      }
+      : { where: { id: '__never__' }, select: { id: true }, take: 0 },
   )
-  const localAnime = localMatch?.[0] as
-    { id: string; directoryCid?: string | null; trackerPublishedCid?: string | null } | undefined
+  const localAnime = localMatch?.[0] as {
+    id: string
+    directoryCid?: string | null
+    trackerPublishedCid?: string | null
+  } | undefined
   const localId = localAnime?.id
 
   // Определяем статус синхронизации CID
@@ -150,7 +153,7 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
       }
       router.push(`/discover/watch?${searchParams.toString()}`)
     },
-    [anime?.title, animeId]
+    [anime?.title, animeId],
   )
 
   if (loading) {
@@ -187,34 +190,36 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
   /** CTA кнопки для AnimeHero */
   const ctaSlot = (
     <>
-      {localId ? (
-        <>
-          <Button colorPalette="green" onClick={() => router.push(`/library/${localId}`)}>
-            <Icon as={LuLibrary} />
-            Открыть в библиотеке
-          </Button>
-          {/* Версия на трекере отличается — предложить действие */}
-          {syncStatus === 'local-newer' && (
-            <Button colorPalette="blue" onClick={handlePublishToTracker} loading={publishing} variant="outline">
-              <Icon as={LuUpload} />
-              Опубликовать на трекер
+      {localId
+        ? (
+          <>
+            <Button colorPalette="green" onClick={() => router.push(`/library/${localId}`)}>
+              <Icon as={LuLibrary} />
+              Открыть в библиотеке
             </Button>
-          )}
-          {syncStatus === 'tracker-newer' && (
-            <Button colorPalette="orange" onClick={handleUpdateFromTracker} loading={importingCid} variant="outline">
-              <Icon as={LuRefreshCw} />
-              Обновить из трекера
-            </Button>
-          )}
-        </>
-      ) : (
-        anime.directoryCid && (
-          <Button colorPalette="green" onClick={handleImport} loading={importingCid}>
-            <Icon as={LuDownload} />
-            Импортировать
-          </Button>
+            {/* Версия на трекере отличается — предложить действие */}
+            {syncStatus === 'local-newer' && (
+              <Button colorPalette="blue" onClick={handlePublishToTracker} loading={publishing} variant="outline">
+                <Icon as={LuUpload} />
+                Опубликовать на трекер
+              </Button>
+            )}
+            {syncStatus === 'tracker-newer' && (
+              <Button colorPalette="orange" onClick={handleUpdateFromTracker} loading={importingCid} variant="outline">
+                <Icon as={LuRefreshCw} />
+                Обновить из трекера
+              </Button>
+            )}
+          </>
         )
-      )}
+        : (
+          anime.directoryCid && (
+            <Button colorPalette="green" onClick={handleImport} loading={importingCid}>
+              <Icon as={LuDownload} />
+              Импортировать
+            </Button>
+          )
+        )}
       {anime.episodes.length > 0 && (
         <Button colorPalette="purple" onClick={() => handlePlayEpisode(anime.episodes[0])}>
           <Icon as={LuPlay} />
@@ -299,22 +304,25 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
                   shikimoriId={anime.shikimoriId}
                 />
               ),
-              related:
-                ipfsData.relations.length > 0 ? <DiscoverRelatedList relations={ipfsData.relations} /> : undefined,
-              franchise: anime.shikimoriId ? (
-                <FranchiseTab
-                  animeId={animeId}
-                  shikimoriId={anime.shikimoriId}
-                  franchiseId={null}
-                  animeName={anime.title}
-                />
-              ) : undefined,
-              videos: ipfsData.animeInfo?.videos?.length ? (
-                <VideoSection videos={ipfsData.animeInfo.videos} />
-              ) : undefined,
-              tracks: ipfsData.tracksSummary ? (
-                <DiscoverTracksView tracksSummary={ipfsData.tracksSummary} />
-              ) : undefined,
+              related: ipfsData.relations.length > 0
+                ? <DiscoverRelatedList relations={ipfsData.relations} />
+                : undefined,
+              franchise: anime.shikimoriId
+                ? (
+                  <FranchiseTab
+                    animeId={animeId}
+                    shikimoriId={anime.shikimoriId}
+                    franchiseId={null}
+                    animeName={anime.title}
+                  />
+                )
+                : undefined,
+              videos: ipfsData.animeInfo?.videos?.length
+                ? <VideoSection videos={ipfsData.animeInfo.videos} />
+                : undefined,
+              tracks: ipfsData.tracksSummary
+                ? <DiscoverTracksView tracksSummary={ipfsData.tracksSummary} />
+                : undefined,
             }}
           </AnimeDetailTabs>
         </Box>

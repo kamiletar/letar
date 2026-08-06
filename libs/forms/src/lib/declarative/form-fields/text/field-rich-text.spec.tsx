@@ -17,7 +17,7 @@ describe('FieldRichText', () => {
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
             <Form.Field.RichText name="content" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Tiptap рендерит contenteditable div
@@ -31,7 +31,7 @@ describe('FieldRichText', () => {
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
             <Form.Field.RichText name="content" label="Описание" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Описание')).toBeInTheDocument()

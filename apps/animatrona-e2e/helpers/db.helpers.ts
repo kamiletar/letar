@@ -93,7 +93,7 @@ export async function seedAnime(
     shikimoriId?: number
     year?: number
     status?: string
-  }
+  },
 ): Promise<void> {
   const SQL = await getSqlJs()
   const buffer = fs.readFileSync(dbPath)
@@ -113,7 +113,7 @@ export async function seedAnime(
         anime.status || 'NOT_STARTED',
         now,
         now,
-      ]
+      ],
     )
 
     // Сохраняем изменения
@@ -142,7 +142,7 @@ export async function seedEpisode(
     name?: string
     sourcePath?: string
     transcodedPath?: string
-  }
+  },
 ): Promise<void> {
   const SQL = await getSqlJs()
   const buffer = fs.readFileSync(dbPath)
@@ -163,7 +163,7 @@ export async function seedEpisode(
         episode.transcodedPath || null,
         now,
         now,
-      ]
+      ],
     )
 
     fs.writeFileSync(dbPath, Buffer.from(db.export()))
@@ -209,7 +209,7 @@ export async function getEpisodeCount(dbPath: string): Promise<number> {
  */
 export async function findAnimeByName(
   dbPath: string,
-  name: string
+  name: string,
 ): Promise<{ id: string; name: string; shikimoriId: number | null } | null> {
   const SQL = await getSqlJs()
   const buffer = fs.readFileSync(dbPath)
@@ -240,7 +240,7 @@ export async function findAnimeByName(
  * Получить все аниме
  */
 export async function getAllAnime(
-  dbPath: string
+  dbPath: string,
 ): Promise<Array<{ id: string; name: string; shikimoriId: number | null }>> {
   const SQL = await getSqlJs()
   const buffer = fs.readFileSync(dbPath)
@@ -333,7 +333,7 @@ export async function createSeededDatabase(data: WatchPageSeedData): Promise<{
 export async function copyDatabaseToUserData(
   sourcePath: string,
   userDataDir: string,
-  libraryPath?: string
+  libraryPath?: string,
 ): Promise<void> {
   const targetDir = path.join(userDataDir, 'data')
   const targetPath = path.join(targetDir, 'app.db')

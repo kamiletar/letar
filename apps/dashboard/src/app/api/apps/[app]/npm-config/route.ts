@@ -25,8 +25,8 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
       if (server) {
         const data =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dashboard-agent клиент может не иметь fetchRaw в типах
-          (await (client as any).fetchRaw?.(`/api/apps/${app}/npm-config`)) ??
-          (await fetchFromAgent(server.host, server.port, server.agentToken ?? '', app))
+          (await (client as any).fetchRaw?.(`/api/apps/${app}/npm-config`))
+            ?? (await fetchFromAgent(server.host, server.port, server.agentToken ?? '', app))
 
         return NextResponse.json({ success: true, data })
       }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     console.error(`Error getting NPM config for app ${app}:`, error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

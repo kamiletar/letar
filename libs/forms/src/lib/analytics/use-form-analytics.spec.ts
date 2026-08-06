@@ -44,13 +44,13 @@ describe('Analytics adapters', () => {
           timestamp: Date.now(),
           totalTimeMs: 15000,
         },
-        'register'
+        'register',
       )
       expect(mockYm).toHaveBeenCalledWith(
         12345,
         'reachGoal',
         'form_register_abandon',
-        expect.objectContaining({ lastField: 'password' })
+        expect.objectContaining({ lastField: 'password' }),
       )
       delete (globalThis as Record<string, unknown>).ym
     })
@@ -67,7 +67,7 @@ describe('Analytics adapters', () => {
       const adapter = createGtagAdapter()
       adapter.track(
         { type: 'form_complete', totalTimeMs: 30000, fieldTimes: new Map(), timestamp: Date.now() },
-        'checkout'
+        'checkout',
       )
       expect(mockGtag).toHaveBeenCalledWith('event', 'form_complete', expect.objectContaining({ form_id: 'checkout' }))
       delete (globalThis as Record<string, unknown>).gtag
@@ -86,7 +86,7 @@ describe('Analytics adapters', () => {
       adapter.track({ type: 'field_error', field: 'email', error: 'Invalid', timestamp: Date.now() })
       expect(mockCapture).toHaveBeenCalledWith(
         'form_field_error',
-        expect.objectContaining({ field: 'email', error: 'Invalid' })
+        expect.objectContaining({ field: 'email', error: 'Invalid' }),
       )
       delete (globalThis as Record<string, unknown>).posthog
     })

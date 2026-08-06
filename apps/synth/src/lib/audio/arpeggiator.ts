@@ -98,8 +98,9 @@ export class Arpeggiator {
     }
 
     const order = buildArpOrder(this.heldNotes, params.mode === 'random' ? 'up' : params.mode, params.octaves)
-    const note =
-      params.mode === 'random' ? order[Math.floor(Math.random() * order.length)] : order[this.cursor % order.length]
+    const note = params.mode === 'random'
+      ? order[Math.floor(Math.random() * order.length)]
+      : order[this.cursor % order.length]
     this.cursor++
 
     const stepDuration = 60 / params.bpm / 4

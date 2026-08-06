@@ -18,7 +18,7 @@ describe('assertTargetIsFree', () => {
     tree.write('apps/my-app/package.json', '{}')
 
     expect(() => assertTargetIsFree(tree, 'apps/my-app', 'приложения')).toThrow(
-      'apps/my-app уже существует — генератор не перезаписывает существующие приложения'
+      'apps/my-app уже существует — генератор не перезаписывает существующие приложения',
     )
   })
 
@@ -26,7 +26,7 @@ describe('assertTargetIsFree', () => {
     tree.write('libs/my-lib/package.json', '{}')
 
     expect(() => assertTargetIsFree(tree, 'libs/my-lib', 'библиотеки')).toThrow(
-      'не перезаписывает существующие библиотеки'
+      'не перезаписывает существующие библиотеки',
     )
   })
 })

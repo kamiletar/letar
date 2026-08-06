@@ -8,7 +8,7 @@
  * - full: иконки с подписями (для профилей)
  */
 
-import { Link as ChakraLink, Flex, IconButton, Text } from '@chakra-ui/react'
+import { Flex, IconButton, Link as ChakraLink, Text } from '@chakra-ui/react'
 import { FaInstagram, FaTiktok, FaTwitter, FaYoutube } from 'react-icons/fa'
 import { LuBookOpen, LuExternalLink, LuSend } from 'react-icons/lu'
 
@@ -25,7 +25,7 @@ export function parseSocialLinks(json: unknown): SocialLink[] {
   }
   return json.filter(
     (item): item is SocialLink =>
-      typeof item === 'object' && item !== null && typeof item.platform === 'string' && typeof item.url === 'string'
+      typeof item === 'object' && item !== null && typeof item.platform === 'string' && typeof item.url === 'string',
   )
 }
 

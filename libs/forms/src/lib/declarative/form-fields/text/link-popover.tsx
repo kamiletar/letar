@@ -62,7 +62,7 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
         handleClose()
       }
     },
-    [handleSubmit, handleClose]
+    [handleSubmit, handleClose],
   )
 
   return (

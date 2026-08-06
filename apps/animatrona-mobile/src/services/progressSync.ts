@@ -50,7 +50,7 @@ async function setQueue(queue: SyncQueueItem[]): Promise<void> {
 /** Добавить прогресс в очередь синхронизации */
 export async function queueProgressSync(
   episodeId: string,
-  data: { currentTime: number; completed?: boolean; duration?: number }
+  data: { currentTime: number; completed?: boolean; duration?: number },
 ): Promise<void> {
   const queue = await getQueue()
 

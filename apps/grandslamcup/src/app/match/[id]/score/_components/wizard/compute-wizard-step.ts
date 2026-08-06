@@ -42,7 +42,7 @@ export function countPairs(performances: Array<{ half: number; totalScore: numbe
 /** Пар в тайме (5 пар = 10 завершённых выступлений) */
 export function countCompletedPairsInHalf(
   performances: Array<{ half: number; totalScore: number | null }>,
-  half: number
+  half: number,
 ): number {
   const completed = performances.filter((p) => p.half === half && p.totalScore !== null).length
   return Math.floor(completed / 2)

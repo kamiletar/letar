@@ -100,7 +100,7 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
       setVolume(value)
       setIsMuted(value === 0)
     },
-    [audioRef]
+    [audioRef],
   )
 
   const toggleMute = useCallback(() => {

@@ -140,30 +140,32 @@ export function MatchHeroAdmin({
           <TeamColumn name={homeName} logo={homeLogo} highlighted={homeWins} dimmed={isFinished && !homeWins} />
 
           {/* Счёт */}
-          {isFinished || isLive ? (
-            <Text
-              fontSize={{ base: '4xl', md: '6xl' }}
-              fontWeight="bold"
-              fontFamily="mono"
-              color={isLive ? 'brand.400' : 'white'}
-              letterSpacing="wider"
-              flexShrink={0}
-              className={isLive ? 'live-pulse' : undefined}
-            >
-              {homeScore}
-              <Text display="inline" color="whiteAlpha.400" mx={{ base: 1, md: 2 }}>
-                :
+          {isFinished || isLive
+            ? (
+              <Text
+                fontSize={{ base: '4xl', md: '6xl' }}
+                fontWeight="bold"
+                fontFamily="mono"
+                color={isLive ? 'brand.400' : 'white'}
+                letterSpacing="wider"
+                flexShrink={0}
+                className={isLive ? 'live-pulse' : undefined}
+              >
+                {homeScore}
+                <Text display="inline" color="whiteAlpha.400" mx={{ base: 1, md: 2 }}>
+                  :
+                </Text>
+                {awayScore}
               </Text>
-              {awayScore}
-            </Text>
-          ) : (
-            <HStack gap={2} flexShrink={0}>
-              <LuSwords size={24} color="var(--chakra-colors-white-alpha-400)" />
-              <Text fontSize={{ base: '2xl', md: '4xl' }} color="whiteAlpha.400" fontWeight="medium">
-                vs
-              </Text>
-            </HStack>
-          )}
+            )
+            : (
+              <HStack gap={2} flexShrink={0}>
+                <LuSwords size={24} color="var(--chakra-colors-white-alpha-400)" />
+                <Text fontSize={{ base: '2xl', md: '4xl' }} color="whiteAlpha.400" fontWeight="medium">
+                  vs
+                </Text>
+              </HStack>
+            )}
 
           {/* Гостевая команда */}
           <TeamColumn name={awayName} logo={awayLogo} highlighted={awayWins} dimmed={isFinished && !awayWins} />
@@ -206,21 +208,23 @@ function TeamColumn({
   return (
     <VStack gap={2} flex={1} align="center">
       <Box w={{ base: 12, md: 16 }} h={{ base: 12, md: 16 }} borderRadius="xl" overflow="hidden">
-        {logo ? (
-          <Image
-            src={`/api/files/${logo}`}
-            alt={name}
-            width={64}
-            height={64}
-            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-          />
-        ) : (
-          <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
-            <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
-              {name.charAt(0)}
-            </Text>
-          </Flex>
-        )}
+        {logo
+          ? (
+            <Image
+              src={`/api/files/${logo}`}
+              alt={name}
+              width={64}
+              height={64}
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+            />
+          )
+          : (
+            <Flex align="center" justify="center" h="full" bg="brand.800" borderRadius="xl">
+              <Text color="whiteAlpha.400" fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
+                {name.charAt(0)}
+              </Text>
+            </Flex>
+          )}
       </Box>
       <Heading
         size={{ base: 'md', md: 'xl' }}

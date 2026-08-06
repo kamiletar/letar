@@ -103,14 +103,14 @@ export function FieldCqSlider({
           <Field.Root invalid={hasError} required={required} disabled={disabled} readOnly={readOnly}>
             {label && (
               <Field.Label>
-                {tooltip ? (
-                  <HStack gap={1}>
-                    <span>{label}</span>
-                    <FieldTooltip {...tooltip} />
-                  </HStack>
-                ) : (
-                  label
-                )}
+                {tooltip
+                  ? (
+                    <HStack gap={1}>
+                      <span>{label}</span>
+                      <FieldTooltip {...tooltip} />
+                    </HStack>
+                  )
+                  : label}
                 {required && <Field.RequiredIndicator />}
               </Field.Label>
             )}
@@ -158,11 +158,11 @@ export function FieldCqSlider({
               )}
             </VStack>
 
-            {hasError ? (
-              <Field.ErrorText>{errors.map((e: { message?: string }) => e?.message ?? e).join(', ')}</Field.ErrorText>
-            ) : (
-              helperText && <Field.HelperText>{helperText}</Field.HelperText>
-            )}
+            {hasError
+              ? <Field.ErrorText>{errors.map((e: { message?: string }) => e?.message ?? e).join(', ')}</Field.ErrorText>
+              : (
+                helperText && <Field.HelperText>{helperText}</Field.HelperText>
+              )}
           </Field.Root>
         )
       }}

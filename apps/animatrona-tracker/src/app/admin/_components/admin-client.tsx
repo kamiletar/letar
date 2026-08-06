@@ -172,7 +172,7 @@ export function AdminClient({
         flushBatch()
       }, BATCH_DEBOUNCE_MS)
     },
-    [flushBatch]
+    [flushBatch],
   )
 
   return (

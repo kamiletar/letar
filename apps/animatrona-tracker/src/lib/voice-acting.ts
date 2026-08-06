@@ -79,7 +79,7 @@ export function extractVoiceActingCodes(epManifest: EpisodeManifest | null | und
  */
 export async function updateVoiceActingFromIpfs(
   animeId: string,
-  directoryCid: string | null | undefined
+  directoryCid: string | null | undefined,
 ): Promise<{ updated: boolean; codes: string[] }> {
   try {
     if (!directoryCid) {

@@ -34,7 +34,7 @@ describe('сверка dev-портов между источниками', () =
     const drift = driftFrom('command-file')
     expect(
       drift,
-      `\n${formatPortDrift(drift)}\n\nПравь командный файл — истина в apps/<app>/.env (или project.json).\n`
+      `\n${formatPortDrift(drift)}\n\nПравь командный файл — истина в apps/<app>/.env (или project.json).\n`,
     ).toEqual([])
   })
 
@@ -42,10 +42,10 @@ describe('сверка dev-портов между источниками', () =
     const drift = driftFrom('auth-hub-seed')
     expect(
       drift,
-      `\n${formatPortDrift(drift)}\n\n` +
-        'Правь apps/auth-hub/prisma/seed.ts. Учти: локальные приложения ходят в ПРОД-Ключницу,\n' +
-        'поэтому после правки нужен re-seed боевого auth-hub (deploy_app с seed: true) — иначе\n' +
-        'локальный вход продолжит падать с invalid redirect_uri.\n'
+      `\n${formatPortDrift(drift)}\n\n`
+        + 'Правь apps/auth-hub/prisma/seed.ts. Учти: локальные приложения ходят в ПРОД-Ключницу,\n'
+        + 'поэтому после правки нужен re-seed боевого auth-hub (deploy_app с seed: true) — иначе\n'
+        + 'локальный вход продолжит падать с invalid redirect_uri.\n',
     ).toEqual([])
   })
 })

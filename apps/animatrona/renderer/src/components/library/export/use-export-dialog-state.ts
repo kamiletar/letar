@@ -105,13 +105,12 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
   const previewInfo = useMemo(() => {
     const year = anime.year || new Date().getFullYear()
     const seasonStr = String(franchiseSeasonNumber).padStart(2, '0')
-    const sampleFileName =
-      namingPattern
-        .replace('{Anime}', anime.name)
-        .replace('{Year}', String(year))
-        .replace('{nn}', '01')
-        .replace('{ss}', seasonStr)
-        .replace('{Episode}', 'Episode 1') + '.mkv'
+    const sampleFileName = namingPattern
+      .replace('{Anime}', anime.name)
+      .replace('{Year}', String(year))
+      .replace('{nn}', '01')
+      .replace('{ss}', seasonStr)
+      .replace('{Episode}', 'Episode 1') + '.mkv'
 
     let folderPath = ''
     if (createFolderStructure) {
@@ -128,7 +127,7 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
   // Sensors для drag-and-drop
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
   // Собираем доступные дорожки
@@ -140,8 +139,8 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
     return anime.episodes
       .filter(
         (ep) =>
-          ep.transcodedCid && // Видео мигрировано в IPFS
-          ep.audioTracks.some((t) => t.transcodedCid) // Хотя бы одна аудио в IPFS
+          ep.transcodedCid // Видео мигрировано в IPFS
+          && ep.audioTracks.some((t) => t.transcodedCid), // Хотя бы одна аудио в IPFS
       )
       .sort((a, b) => a.number - b.number)
   }, [anime.episodes])
@@ -269,8 +268,9 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
       selectedAudioKeys,
       selectedSubtitleKeys,
       defaultAudioIndex: defaultAudioIndex >= 0 ? defaultAudioIndex : 0,
-      defaultSubtitleIndex:
-        defaultSubtitleIndex !== undefined && defaultSubtitleIndex >= 0 ? defaultSubtitleIndex : undefined,
+      defaultSubtitleIndex: defaultSubtitleIndex !== undefined && defaultSubtitleIndex >= 0
+        ? defaultSubtitleIndex
+        : undefined,
       franchise: anime.franchise ?? undefined,
       seasonType: anime.seasonType ?? undefined,
       createFolderStructure,

@@ -54,15 +54,13 @@ export function TeamForm({ team }: TeamFormProps) {
           description: team?.description ?? '',
         }}
         onSubmit={handleSubmit}
-        onFieldChange={
-          !isEdit
-            ? {
-                name: (value, { setFieldValue }) => {
-                  setFieldValue('slug', transliterate(String(value ?? '')))
-                },
-              }
-            : undefined
-        }
+        onFieldChange={!isEdit
+          ? {
+            name: (value, { setFieldValue }) => {
+              setFieldValue('slug', transliterate(String(value ?? '')))
+            },
+          }
+          : undefined}
       >
         <GrandSlamCupForm.Field.String name="name" />
         <GrandSlamCupForm.Field.String name="slug" />

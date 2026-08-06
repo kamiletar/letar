@@ -134,7 +134,7 @@ export async function getProgress(episodeId: string): Promise<WatchProgress | nu
 /** Сохранить прогресс эпизода */
 export async function saveProgress(
   episodeId: string,
-  data: { currentTime: number; completed?: boolean }
+  data: { currentTime: number; completed?: boolean },
 ): Promise<WatchProgress> {
   const response = await fetch(`${API_BASE}/progress/${episodeId}`, {
     method: 'POST',

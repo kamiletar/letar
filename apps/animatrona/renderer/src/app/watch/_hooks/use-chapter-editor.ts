@@ -53,7 +53,7 @@ export function useChapterEditor(options: UseChapterEditorOptions) {
     (time: number) => {
       playerRef.current?.seek(time)
     },
-    [playerRef]
+    [playerRef],
   )
 
   // Обновление времени воспроизведения (вызывается из handleTimeUpdate)
@@ -85,7 +85,7 @@ export function useChapterEditor(options: UseChapterEditorOptions) {
 
       invalidateChapters()
     },
-    [episodeId, invalidateChapters]
+    [episodeId, invalidateChapters],
   )
 
   // Копировать OP/ED на другие эпизоды
@@ -105,7 +105,7 @@ export function useChapterEditor(options: UseChapterEditorOptions) {
         setIsCopying(false)
       }
     },
-    [episodeId, invalidateChapters]
+    [episodeId, invalidateChapters],
   )
 
   // Генерация RECAP/PREVIEW для выбранных эпизодов
@@ -139,7 +139,7 @@ export function useChapterEditor(options: UseChapterEditorOptions) {
         setIsGenerating(false)
       }
     },
-    [episodeId, manifestCid, durationMs, invalidateChapters]
+    [episodeId, manifestCid, durationMs, invalidateChapters],
   )
 
   // Toggle редактора глав

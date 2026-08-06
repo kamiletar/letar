@@ -116,7 +116,13 @@ export function SetupWizardOverlay() {
               </Box>
             </Text>
 
-            <Button colorPalette="purple" size="lg" w="full" disabled={!libraryPath} onClick={() => setStep(2)}>
+            <Button
+              colorPalette="purple"
+              size="lg"
+              w="full"
+              disabled={!libraryPath}
+              onClick={() => setStep(2)}
+            >
               Далее
             </Button>
           </VStack>
@@ -144,7 +150,12 @@ export function SetupWizardOverlay() {
             </Text>
 
             <HStack gap={3} w="full">
-              <Button variant="outline" flex={1} onClick={() => setStep(1)} disabled={isCompleting}>
+              <Button
+                variant="outline"
+                flex={1}
+                onClick={() => setStep(1)}
+                disabled={isCompleting}
+              >
                 Назад
               </Button>
               <Button colorPalette="purple" flex={1} onClick={handleComplete} loading={isCompleting}>

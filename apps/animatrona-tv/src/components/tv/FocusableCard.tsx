@@ -56,18 +56,20 @@ export function FocusableCard({
       >
         {/* Изображение */}
         <View style={styles.imageContainer}>
-          {imageUrl && !imageError ? (
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.image}
-              resizeMode="cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <Text style={styles.placeholderText}>{title.charAt(0)}</Text>
-            </View>
-          )}
+          {imageUrl && !imageError
+            ? (
+              <Image
+                source={{ uri: imageUrl }}
+                style={styles.image}
+                resizeMode="cover"
+                onError={() => setImageError(true)}
+              />
+            )
+            : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.placeholderText}>{title.charAt(0)}</Text>
+              </View>
+            )}
 
           {/* Прогресс-бар просмотра */}
           {progress != null && progress > 0 && progress < 100 && (

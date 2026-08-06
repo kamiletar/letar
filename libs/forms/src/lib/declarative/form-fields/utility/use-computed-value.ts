@@ -88,7 +88,7 @@ export function useComputedValue({
       }
       return () => subscription.unsubscribe()
     },
-    [form]
+    [form],
   )
 
   // Снапшот: вычисляем значение
@@ -108,8 +108,8 @@ export function useComputedValue({
     if (computingFields.has(fieldPath)) {
       if (process.env.NODE_ENV !== 'production') {
         console.error(
-          `[Form.Field.Calculated] Обнаружена циклическая зависимость: поле "${fieldPath}" ` +
-            `уже вычисляется. Текущая цепочка: ${[...computingFields].join(' → ')} → ${fieldPath}`
+          `[Form.Field.Calculated] Обнаружена циклическая зависимость: поле "${fieldPath}" `
+            + `уже вычисляется. Текущая цепочка: ${[...computingFields].join(' → ')} → ${fieldPath}`,
         )
       }
       return cachedResultRef.current

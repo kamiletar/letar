@@ -70,7 +70,9 @@ function main() {
     const filename = `chunk-${i + 1}.json`
     writeFileSync(join(CHUNKS_DIR, filename), chunks[i], 'utf-8')
     console.log(
-      `  ${filename}: ${items.length} сообщений, ${(chunks[i].length / 1024).toFixed(0)} KB, ${firstDate} — ${lastDate}`
+      `  ${filename}: ${items.length} сообщений, ${
+        (chunks[i].length / 1024).toFixed(0)
+      } KB, ${firstDate} — ${lastDate}`,
     )
   }
 

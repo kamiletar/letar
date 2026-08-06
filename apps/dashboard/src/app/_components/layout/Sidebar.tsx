@@ -8,12 +8,12 @@ import type { UserRole } from '@/lib/auth.types'
 import {
   Badge,
   Box,
-  Link as ChakraLink,
   CloseButton,
   Drawer,
   Flex,
   Icon,
   IconButton,
+  Link as ChakraLink,
   Portal,
   Text,
   VStack,

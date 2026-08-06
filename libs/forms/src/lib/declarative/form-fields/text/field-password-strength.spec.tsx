@@ -16,7 +16,7 @@ describe('FieldPasswordStrength', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.PasswordStrength name="password" label="Пароль" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Пароль')).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('FieldPasswordStrength', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.PasswordStrength name="password" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const input = container.querySelector('input')
@@ -41,7 +41,7 @@ describe('FieldPasswordStrength', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.PasswordStrength name="password" disabled />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       const input = container.querySelector('input')
@@ -53,7 +53,7 @@ describe('FieldPasswordStrength', () => {
         <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
           <Form.Field.PasswordStrength name="password" helperText="Придумайте надёжный пароль" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       expect(screen.getByText('Придумайте надёжный пароль')).toBeInTheDocument()

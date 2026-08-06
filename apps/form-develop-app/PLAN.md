@@ -117,7 +117,7 @@
 
 ```tsx
 import { Form } from '@letar/forms'
-;<Form initialValue={{ title: '', count: 0 }} onSubmit={handleSubmit}>
+<Form initialValue={{ title: '', count: 0 }} onSubmit={handleSubmit}>
   <Form.Field.String name="title" label="Title" />
   <Form.Field.Number name="count" label="Count" />
   <Form.Button.Submit>Save</Form.Button.Submit>
@@ -1068,7 +1068,7 @@ type SyncActionType = BaseSyncActionType | keyof SyncActionTypeRegistry
 
 ```tsx
 // Form БЕЗ onSubmit — только controlled state
-;<Form initialValue={settings} schema={SettingsSchema}>
+<Form initialValue={settings} schema={SettingsSchema}>
   <Form.Field.Slider name="fontSize" min={12} max={32} showValue />
   <Form.Field.Slider name="columns" min={1} max={4} step={1} />
 

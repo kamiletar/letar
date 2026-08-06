@@ -23,5 +23,5 @@ export const regenCheckpointStore = createJsonStore<RegenCheckpointData>(
     startedAt: null,
     total: 0,
   },
-  { mergeDefaults: true, logger: log }
+  { mergeDefaults: true, logger: log },
 )

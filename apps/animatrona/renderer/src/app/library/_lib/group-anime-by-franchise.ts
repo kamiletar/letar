@@ -30,7 +30,7 @@ const STRONG_RELATION_KINDS = new Set([
  */
 export function groupAnimeByFranchise(
   animes: AnimeWithFranchise[],
-  allLoadedShikimoriIds: Set<number>
+  allLoadedShikimoriIds: Set<number>,
 ): {
   franchiseGroups: FranchiseGroup[]
   standAloneAnimes: AnimeWithFranchise[]
@@ -152,7 +152,7 @@ export function groupAnimeByFranchise(
  */
 function collectMissingAnimes(
   component: AnimeWithFranchise[],
-  allLoadedShikimoriIds: Set<number>
+  allLoadedShikimoriIds: Set<number>,
 ): AnimeRelationInfo[] {
   const seen = new Set<number>()
   const missing: AnimeRelationInfo[] = []

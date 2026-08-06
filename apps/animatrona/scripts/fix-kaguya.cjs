@@ -12,7 +12,7 @@ const anime = db
     `
   SELECT id, name FROM Anime
   WHERE name LIKE '%Кагуя%' OR name LIKE '%Kaguya%'
-`
+`,
   )
   .get()
 

@@ -60,7 +60,7 @@ interface SelectOptions<T> {
  */
 export function selectExpressQuestions<T extends ExpressSelectable>(
   questions: T[],
-  options: SelectOptions<T> = {}
+  options: SelectOptions<T> = {},
 ): T[] {
   const perScale = options.perScale ?? EXPRESS_QUESTIONS_PER_SCALE
   const dominantOf = options.dominantOf ?? ((q: T) => expressDominantScale(q.sortOrder))

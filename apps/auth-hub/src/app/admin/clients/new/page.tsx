@@ -31,11 +31,9 @@ export default function NewClientPage() {
         Новый OAuth-клиент
       </Heading>
 
-      {stage === 'risks' ? (
-        <RisksConsent onAccept={() => setStage('form')} />
-      ) : (
-        <ClientForm mode="create" onSubmit={handleCreate} />
-      )}
+      {stage === 'risks'
+        ? <RisksConsent onAccept={() => setStage('form')} />
+        : <ClientForm mode="create" onSubmit={handleCreate} />}
     </Box>
   )
 }

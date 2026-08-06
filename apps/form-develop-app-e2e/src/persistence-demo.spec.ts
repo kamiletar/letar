@@ -99,7 +99,7 @@ test.describe('Form Persistence', () => {
   test('should discard data when clicking Start fresh button', async ({ page, browserName }) => {
     test.skip(
       browserName === 'webkit' || browserName === 'firefox',
-      'Portal/Dialog timing issues on non-chromium browsers'
+      'Portal/Dialog timing issues on non-chromium browsers',
     )
     // First, save some data
     await getField(page, 'title').fill('Discarded Title')

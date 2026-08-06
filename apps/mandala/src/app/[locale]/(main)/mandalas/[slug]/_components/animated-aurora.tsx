@@ -45,9 +45,8 @@ export function AnimatedAurora(props: AnimatedAuroraProps) {
 
       for (let x = 0; x <= size.width; x += 10) {
         // Волнистое смещение по Y
-        const waveOffset =
-          Math.sin((x / size.width) * Math.PI * 3 + time * 0.5 + i) * 50 +
-          Math.sin((x / size.width) * Math.PI * 5 + time * 0.8 + i * 2) * 30
+        const waveOffset = Math.sin((x / size.width) * Math.PI * 3 + time * 0.5 + i) * 50
+          + Math.sin((x / size.width) * Math.PI * 5 + time * 0.8 + i * 2) * 30
 
         const y = baseY + waveOffset
         ctx.lineTo(x, y)

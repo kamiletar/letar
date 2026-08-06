@@ -51,7 +51,7 @@ export function TableCell({ rowIndex, colIndex, column, rowData }: TableCellProp
         startEdit()
       }
     },
-    [isReadOnly, startEdit]
+    [isReadOnly, startEdit],
   )
 
   // Вычисляемое значение — ранний return после хуков
@@ -165,7 +165,7 @@ function EditingCell({
         // Пусть всплывает — обработается use-table-navigation
       }
     },
-    [setEditingCell]
+    [setEditingCell],
   )
 
   // Enum → NativeSelect

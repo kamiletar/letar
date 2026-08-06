@@ -185,8 +185,8 @@ export const useServersStore = create<ServersState>()(
           }
         }
       },
-    }
-  )
+    },
+  ),
 )
 
 /**

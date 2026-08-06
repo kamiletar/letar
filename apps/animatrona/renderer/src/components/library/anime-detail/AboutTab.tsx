@@ -61,13 +61,13 @@ export function AboutTab({ description, animeId, shikimoriId }: AboutTabProps) {
     <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
       {/* Левая колонка: Описание */}
       <VStack align="stretch" gap={4}>
-        {description ? (
-          <Box>
-            <DescriptionRenderer description={description} localAnimeMap={localAnimeMap} />
-          </Box>
-        ) : (
-          <Box color="fg.subtle">Описание отсутствует</Box>
-        )}
+        {description
+          ? (
+            <Box>
+              <DescriptionRenderer description={description} localAnimeMap={localAnimeMap} />
+            </Box>
+          )
+          : <Box color="fg.subtle">Описание отсутствует</Box>}
       </VStack>
 
       {/* Правая колонка: Метаданные */}

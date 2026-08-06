@@ -36,19 +36,21 @@ export function AlbumPoster({ title, href, coverImage, year, count, variant = 'a
           borderWidth="1px"
           borderColor="whiteAlpha.100"
         >
-          {coverImage && !isMisc && !isAll ? (
-            <Image
-              src={coverImage.startsWith('http') ? coverImage : `/api/files/${coverImage}`}
-              alt={title}
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 45vw, 180px"
-            />
-          ) : (
-            <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.400">
-              {isMisc ? <LuScrollText size={40} /> : isAll ? <LuLayoutGrid size={40} /> : <LuBookOpen size={40} />}
-            </Box>
-          )}
+          {coverImage && !isMisc && !isAll
+            ? (
+              <Image
+                src={coverImage.startsWith('http') ? coverImage : `/api/files/${coverImage}`}
+                alt={title}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 768px) 45vw, 180px"
+              />
+            )
+            : (
+              <Box display="flex" alignItems="center" justifyContent="center" h="full" color="brand.400">
+                {isMisc ? <LuScrollText size={40} /> : isAll ? <LuLayoutGrid size={40} /> : <LuBookOpen size={40} />}
+              </Box>
+            )}
         </Box>
 
         {/* Подпись */}

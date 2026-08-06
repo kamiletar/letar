@@ -81,62 +81,64 @@ export function SelectStep({
 
       {/* Список аниме */}
       <Box maxH="400px" overflowY="auto" borderWidth={1} borderRadius="md">
-        {filteredAnimes.length === 0 ? (
-          <Box p={6} textAlign="center">
-            <Text color="fg.muted">Нет аниме для публикации</Text>
-            <Text fontSize="sm" color="fg.subtle" mt={1}>
-              Для публикации нужна IPFS-директория (directoryCid)
-            </Text>
-          </Box>
-        ) : (
-          <VStack gap={0} align="stretch">
-            {filteredAnimes.map((anime) => {
-              const isSelected = selectedIds.has(anime.id)
-              const isPublished = !!anime.trackerPublishedAt
-              const needsUpdate = isPublished && anime.trackerPublishedCid !== anime.directoryCid
-              const statusConfig = WATCH_STATUS_CONFIG[anime.watchStatus as WatchStatus]
+        {filteredAnimes.length === 0
+          ? (
+            <Box p={6} textAlign="center">
+              <Text color="fg.muted">Нет аниме для публикации</Text>
+              <Text fontSize="sm" color="fg.subtle" mt={1}>
+                Для публикации нужна IPFS-директория (directoryCid)
+              </Text>
+            </Box>
+          )
+          : (
+            <VStack gap={0} align="stretch">
+              {filteredAnimes.map((anime) => {
+                const isSelected = selectedIds.has(anime.id)
+                const isPublished = !!anime.trackerPublishedAt
+                const needsUpdate = isPublished && anime.trackerPublishedCid !== anime.directoryCid
+                const statusConfig = WATCH_STATUS_CONFIG[anime.watchStatus as WatchStatus]
 
-              return (
-                <HStack
-                  key={anime.id}
-                  px={3}
-                  py={2}
-                  cursor="pointer"
-                  bg={isSelected ? 'colorPalette.subtle' : 'transparent'}
-                  _hover={{ bg: isSelected ? 'colorPalette.subtle' : 'bg.subtle' }}
-                  onClick={() => onToggleSelection(anime.id)}
-                  borderBottomWidth={1}
-                  borderColor="border.subtle"
-                >
-                  <Checkbox.Root checked={isSelected} onCheckedChange={() => onToggleSelection(anime.id)}>
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                  </Checkbox.Root>
+                return (
+                  <HStack
+                    key={anime.id}
+                    px={3}
+                    py={2}
+                    cursor="pointer"
+                    bg={isSelected ? 'colorPalette.subtle' : 'transparent'}
+                    _hover={{ bg: isSelected ? 'colorPalette.subtle' : 'bg.subtle' }}
+                    onClick={() => onToggleSelection(anime.id)}
+                    borderBottomWidth={1}
+                    borderColor="border.subtle"
+                  >
+                    <Checkbox.Root checked={isSelected} onCheckedChange={() => onToggleSelection(anime.id)}>
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
 
-                  <VStack gap={0} align="start" flex={1} minW={0}>
-                    <Text fontSize="sm" fontWeight="medium" truncate>
-                      {anime.name}
-                    </Text>
-                    <HStack gap={2}>
-                      {statusConfig && (
-                        <Text fontSize="xs" color={statusConfig.color}>
-                          {statusConfig.label}
-                        </Text>
-                      )}
-                    </HStack>
-                  </VStack>
+                    <VStack gap={0} align="start" flex={1} minW={0}>
+                      <Text fontSize="sm" fontWeight="medium" truncate>
+                        {anime.name}
+                      </Text>
+                      <HStack gap={2}>
+                        {statusConfig && (
+                          <Text fontSize="xs" color={statusConfig.color}>
+                            {statusConfig.label}
+                          </Text>
+                        )}
+                      </HStack>
+                    </VStack>
 
-                  {isPublished && (
-                    <Badge size="sm" colorPalette={needsUpdate ? 'orange' : 'green'} variant="subtle">
-                      <Icon as={needsUpdate ? LuRefreshCw : LuCheck} boxSize={3} mr={1} />
-                      {needsUpdate ? 'Обновить' : 'Опубликовано'}
-                    </Badge>
-                  )}
-                </HStack>
-              )
-            })}
-          </VStack>
-        )}
+                    {isPublished && (
+                      <Badge size="sm" colorPalette={needsUpdate ? 'orange' : 'green'} variant="subtle">
+                        <Icon as={needsUpdate ? LuRefreshCw : LuCheck} boxSize={3} mr={1} />
+                        {needsUpdate ? 'Обновить' : 'Опубликовано'}
+                      </Badge>
+                    )}
+                  </HStack>
+                )
+              })}
+            </VStack>
+          )}
       </Box>
 
       {/* Кнопка старта */}

@@ -205,10 +205,10 @@ class PeerSyncService {
 
     // Relay исключаем из Peering (управляется через StaticRelays, см. kubo-config.ts:184-188)
     const apiPeerIdsToKeepInPeering = new Set<string>(
-      response.servers.filter((s) => this.isPeering(s) && s.role !== 'relay').map((s) => s.peerId)
+      response.servers.filter((s) => this.isPeering(s) && s.role !== 'relay').map((s) => s.peerId),
     )
     const apiPeerIdsToKeepInBootstrap = new Set<string>(
-      response.servers.filter((s) => this.isBootstrap(s)).map((s) => s.peerId)
+      response.servers.filter((s) => this.isBootstrap(s)).map((s) => s.peerId),
     )
 
     // ========================

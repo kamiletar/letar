@@ -228,7 +228,7 @@ async function seedNewQuestions(): Promise<{ created: number; skipped: number; e
       await pool.query(
         `INSERT INTO "QuizQuestion" (id, "sortOrder", scenario, "scenarioEn", options, active, "createdAt")
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-        [id, sortOrder, q.scenario, '', JSON.stringify(options), true]
+        [id, sortOrder, q.scenario, '', JSON.stringify(options), true],
       )
 
       created++
@@ -237,7 +237,7 @@ async function seedNewQuestions(): Promise<{ created: number; skipped: number; e
         console.log(
           `  ... обработано ${
             qNum - questionNumbers[0] + 1
-          }/${questionNumbers.length} (создано: ${created}, пропущено: ${skipped})`
+          }/${questionNumbers.length} (создано: ${created}, пропущено: ${skipped})`,
         )
       }
     } catch (err) {

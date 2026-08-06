@@ -70,8 +70,9 @@ export default async function AnalyticsPage() {
 
   // Общая статистика
   const allScores = votes.map((v) => v.score)
-  const overallAvg =
-    allScores.length > 0 ? Math.round((allScores.reduce((s, v) => s + v, 0) / allScores.length) * 100) / 100 : 0
+  const overallAvg = allScores.length > 0
+    ? Math.round((allScores.reduce((s, v) => s + v, 0) / allScores.length) * 100) / 100
+    : 0
 
   return (
     <VStack gap={6} align="stretch">

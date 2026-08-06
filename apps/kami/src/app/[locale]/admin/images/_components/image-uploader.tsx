@@ -251,13 +251,11 @@ export function ImageUploader() {
                 key={item.id}
                 p={2}
                 borderRadius="md"
-                bg={
-                  item.status === 'success'
-                    ? { base: 'green.50', _dark: 'green.950/20' }
-                    : item.status === 'error'
-                      ? { base: 'red.50', _dark: 'red.950/20' }
-                      : 'bg.subtle'
-                }
+                bg={item.status === 'success'
+                  ? { base: 'green.50', _dark: 'green.950/20' }
+                  : item.status === 'error'
+                  ? { base: 'red.50', _dark: 'red.950/20' }
+                  : 'bg.subtle'}
                 gap={3}
               >
                 <Box w="50px" h="50px" borderRadius="md" overflow="hidden" flexShrink={0}>
@@ -284,26 +282,29 @@ export function ImageUploader() {
                   )}
                 </VStack>
                 <Badge
-                  colorPalette={
-                    item.status === 'success'
-                      ? 'green'
-                      : item.status === 'error'
-                        ? 'red'
-                        : item.status === 'uploading'
-                          ? 'blue'
-                          : 'gray'
-                  }
+                  colorPalette={item.status === 'success'
+                    ? 'green'
+                    : item.status === 'error'
+                    ? 'red'
+                    : item.status === 'uploading'
+                    ? 'blue'
+                    : 'gray'}
                 >
                   {item.status === 'success'
                     ? 'Загружено'
                     : item.status === 'error'
-                      ? 'Ошибка'
-                      : item.status === 'uploading'
-                        ? 'Загрузка...'
-                        : 'Ожидание'}
+                    ? 'Ошибка'
+                    : item.status === 'uploading'
+                    ? 'Загрузка...'
+                    : 'Ожидание'}
                 </Badge>
                 {item.status === 'pending' && (
-                  <Button size="xs" variant="ghost" colorPalette="red" onClick={() => removeFromQueue(item.id)}>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    colorPalette="red"
+                    onClick={() => removeFromQueue(item.id)}
+                  >
                     <Trash2 size={14} />
                   </Button>
                 )}

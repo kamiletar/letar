@@ -37,11 +37,11 @@ export default async function LiveMatchPage({ params }: { params: Params }) {
   const cityId = match.venue?.cityId
   const donateLinks = cityId
     ? await prisma.donateLink.findMany({
-        where: { cityId, active: true },
-        select: { name: true, url: true, description: true },
-        orderBy: { order: 'asc' },
-        take: 3,
-      })
+      where: { cityId, active: true },
+      select: { name: true, url: true, description: true },
+      orderBy: { order: 'asc' },
+      take: 3,
+    })
     : []
 
   return (

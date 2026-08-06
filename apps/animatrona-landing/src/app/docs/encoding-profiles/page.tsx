@@ -95,9 +95,11 @@ export default function EncodingProfilesPage() {
                 <Table.Row key={profile.name} _hover={{ bg: 'gray.900/50' }}>
                   <Table.Cell>
                     <Badge
-                      colorPalette={
-                        profile.name === 'Quality' ? 'purple' : profile.name === 'Balanced' ? 'blue' : 'green'
-                      }
+                      colorPalette={profile.name === 'Quality'
+                        ? 'purple'
+                        : profile.name === 'Balanced'
+                        ? 'blue'
+                        : 'green'}
                     >
                       {profile.name}
                     </Badge>
@@ -160,8 +162,9 @@ export default function EncodingProfilesPage() {
       {/* Подсказка */}
       <Box p={4} bg="brand.500/10" borderRadius="lg" borderLeft="4px solid" borderColor="brand.500">
         <Text fontSize="sm" color="gray.300">
-          <strong>Рекомендация:</strong> Для большинства случаев используйте профиль «Balanced» — он обеспечивает
-          отличное качество при разумной скорости кодирования.
+          <strong>Рекомендация:</strong>{' '}
+          Для большинства случаев используйте профиль «Balanced» — он обеспечивает отличное качество при разумной
+          скорости кодирования.
         </Text>
       </Box>
     </VStack>

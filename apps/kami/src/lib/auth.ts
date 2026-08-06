@@ -27,8 +27,8 @@ export const auth = createAuth({
     storage: process.env.REDIS_URL
       ? 'secondary-storage'
       : process.env.NODE_ENV === 'production'
-        ? 'database'
-        : 'memory',
+      ? 'database'
+      : 'memory',
     customRules: {
       '/organization/*': { window: 60, max: 30 },
     },

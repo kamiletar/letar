@@ -12,7 +12,7 @@ import type { RateLimitResult } from './rate-limiter'
 export function apiError(
   error: string,
   status: number,
-  code?: string
+  code?: string,
 ): { body: { error: string; code?: string }; status: number } {
   return {
     body: { error, ...(code && { code }) },
@@ -25,7 +25,7 @@ export function apiError(
  */
 export function apiSuccess<T>(
   data: T,
-  meta?: { total?: number; page?: number; limit?: number }
+  meta?: { total?: number; page?: number; limit?: number },
 ): {
   body: { data: T; meta?: { total?: number; page?: number; limit?: number } }
   status: 200

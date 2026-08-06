@@ -68,9 +68,9 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
   // Подгружаем данные pending пользователя если есть заявка
   const pendingUser = player.pendingUserId
     ? await prisma.user.findUnique({
-        where: { id: player.pendingUserId },
-        select: { id: true, name: true, email: true },
-      })
+      where: { id: player.pendingUserId },
+      select: { id: true, name: true, email: true },
+    })
     : null
 
   const perfCount = player.performances.length
@@ -90,19 +90,21 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
 
       {/* Hero */}
       <Flex gap={6} align="start" flexWrap="wrap">
-        {player.photo ? (
-          <Image
-            src={`/api/files/${player.photo}`}
-            alt={player.name}
-            width={120}
-            height={120}
-            style={{ borderRadius: '50%', objectFit: 'cover' }}
-          />
-        ) : (
-          <Flex w={120} h={120} bg="bg.subtle" borderRadius="full" align="center" justify="center">
-            <LuUserRound size={48} color="var(--chakra-colors-fg-muted)" />
-          </Flex>
-        )}
+        {player.photo
+          ? (
+            <Image
+              src={`/api/files/${player.photo}`}
+              alt={player.name}
+              width={120}
+              height={120}
+              style={{ borderRadius: '50%', objectFit: 'cover' }}
+            />
+          )
+          : (
+            <Flex w={120} h={120} bg="bg.subtle" borderRadius="full" align="center" justify="center">
+              <LuUserRound size={48} color="var(--chakra-colors-fg-muted)" />
+            </Flex>
+          )}
         <VStack align="start" gap={2}>
           <HStack gap={2}>
             <Heading size="xl">{playerDisplayName(player)}</Heading>

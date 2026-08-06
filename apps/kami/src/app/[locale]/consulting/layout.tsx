@@ -9,10 +9,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   return {
     title: locale === 'ru' ? 'Консалтинг' : 'Consulting',
-    description:
-      locale === 'ru'
-        ? 'Консалтинг по архитектуре и разработке — код-ревью, аудиты, менторство и техническое лидерство'
-        : 'Architecture and development consulting — code reviews, audits, mentoring and technical leadership',
+    description: locale === 'ru'
+      ? 'Консалтинг по архитектуре и разработке — код-ревью, аудиты, менторство и техническое лидерство'
+      : 'Architecture and development consulting — code reviews, audits, mentoring and technical leadership',
     alternates: {
       canonical: `/${locale}/consulting`,
       languages: { ru: '/ru/consulting', en: '/en/consulting' },

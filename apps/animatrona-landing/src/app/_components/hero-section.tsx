@@ -150,7 +150,7 @@ function TypingText({ phrases }: { phrases: string[] }) {
           }
         }
       },
-      isDeleting ? 30 : 80
+      isDeleting ? 30 : 80,
     )
 
     return () => clearTimeout(timeout)
@@ -208,9 +208,9 @@ export function HeroSection({ release }: HeroSectionProps) {
     if (platform === 'macos') {
       const macAssets = release.assets.macos
       return (
-        macAssets[macArch]?.browser_download_url ||
-        macAssets.arm64?.browser_download_url ||
-        macAssets.x64?.browser_download_url
+        macAssets[macArch]?.browser_download_url
+        || macAssets.arm64?.browser_download_url
+        || macAssets.x64?.browser_download_url
       )
     }
     return release.assets[platform]?.browser_download_url
@@ -320,41 +320,43 @@ export function HeroSection({ release }: HeroSectionProps) {
             {/* Кнопки */}
             <HStack gap={4} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'start' }}>
               {/* Smart Download Button */}
-              {downloadUrl ? (
-                <Button
-                  asChild
-                  size={{ base: 'lg', md: 'xl' }}
-                  colorPalette="purple"
-                  className="glow"
-                  transition="all 0.2s"
-                  _hover={{
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
-                  }}
-                >
-                  <Link href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                    <Icon as={platformInfo.icon} />
-                    Скачать для {platformInfo.name}
-                  </Link>
-                </Button>
-              ) : (
-                <Button
-                  asChild
-                  size={{ base: 'lg', md: 'xl' }}
-                  colorPalette="purple"
-                  className="glow"
-                  transition="all 0.2s"
-                  _hover={{
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
-                  }}
-                >
-                  <Link href="#downloads">
-                    <Icon as={LuDownload} />
-                    Скачать
-                  </Link>
-                </Button>
-              )}
+              {downloadUrl
+                ? (
+                  <Button
+                    asChild
+                    size={{ base: 'lg', md: 'xl' }}
+                    colorPalette="purple"
+                    className="glow"
+                    transition="all 0.2s"
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
+                    }}
+                  >
+                    <Link href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                      <Icon as={platformInfo.icon} />
+                      Скачать для {platformInfo.name}
+                    </Link>
+                  </Button>
+                )
+                : (
+                  <Button
+                    asChild
+                    size={{ base: 'lg', md: 'xl' }}
+                    colorPalette="purple"
+                    className="glow"
+                    transition="all 0.2s"
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
+                    }}
+                  >
+                    <Link href="#downloads">
+                      <Icon as={LuDownload} />
+                      Скачать
+                    </Link>
+                  </Button>
+                )}
 
               <Button
                 asChild
@@ -432,9 +434,7 @@ export function HeroSection({ release }: HeroSectionProps) {
                 alignItems="center"
                 justifyContent="center"
               >
-                {imageError ? (
-                  <ScreenshotPlaceholder />
-                ) : (
+                {imageError ? <ScreenshotPlaceholder /> : (
                   <Image
                     src="/screenshots/library.png"
                     alt="Animatrona - Библиотека аниме"

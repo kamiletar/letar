@@ -53,26 +53,28 @@ function TeamLineup({
       <Text fontWeight="bold" fontSize="md" color={`${palette}.fg`} mb={3} textAlign="center">
         {team.name}
       </Text>
-      {team.players.length === 0 ? (
-        <Text fontSize="sm" color="fg.muted" textAlign="center">
-          Состав не объявлен
-        </Text>
-      ) : (
-        <VStack gap={1} align="stretch">
-          {team.players.map((p) => (
-            <HStack key={p.id} justify="space-between">
-              <Text fontSize="sm" truncate>
-                {p.name}
-              </Text>
-              {p.status === 'CAPTAIN' && (
-                <Badge colorPalette={palette} size="sm">
-                  К
-                </Badge>
-              )}
-            </HStack>
-          ))}
-        </VStack>
-      )}
+      {team.players.length === 0
+        ? (
+          <Text fontSize="sm" color="fg.muted" textAlign="center">
+            Состав не объявлен
+          </Text>
+        )
+        : (
+          <VStack gap={1} align="stretch">
+            {team.players.map((p) => (
+              <HStack key={p.id} justify="space-between">
+                <Text fontSize="sm" truncate>
+                  {p.name}
+                </Text>
+                {p.status === 'CAPTAIN' && (
+                  <Badge colorPalette={palette} size="sm">
+                    К
+                  </Badge>
+                )}
+              </HStack>
+            ))}
+          </VStack>
+        )}
     </Box>
   )
 }

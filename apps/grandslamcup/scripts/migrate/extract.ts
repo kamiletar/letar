@@ -58,7 +58,7 @@ export function extractSchedule(): RawScheduleMatch[] {
     // "1Л: 4.12 (чт) Бездна. Весёлые ребята 245:233 Апостроф"
     // \w не матчит кириллицу в JS, используем [а-яА-ЯёЁa-zA-Z]
     const played = trimmed.match(
-      /^(ВЛ|1Л):\s*(\d{1,2}\.\d{2})\s*\(([а-яА-ЯёЁa-zA-Z]+)\)\s*(.+?)\.\s*(.+?)\s+(\d+):(\d+)\s+(.+)$/
+      /^(ВЛ|1Л):\s*(\d{1,2}\.\d{2})\s*\(([а-яА-ЯёЁa-zA-Z]+)\)\s*(.+?)\.\s*(.+?)\s+(\d+):(\d+)\s+(.+)$/,
     )
     if (played) {
       matches.push({
@@ -234,7 +234,7 @@ export function extractTeam(filename: string): RawTeam | null {
 export function extractTeams(): RawTeam[] {
   const teams: RawTeam[] = []
   const teamFiles = readdirSync(CACHE_DIR).filter(
-    (f) => f.endsWith('.html') && !f.includes('__') && !['index', 'results', 'rules'].includes(f.replace('.html', ''))
+    (f) => f.endsWith('.html') && !f.includes('__') && !['index', 'results', 'rules'].includes(f.replace('.html', '')),
   )
   for (const file of teamFiles) {
     const team = extractTeam(file)
@@ -270,7 +270,7 @@ export function extractSeason1Results(): RawResultMatch[] {
     // Формат без пробелов: "Шь - Чумные1:0272-249"
     // result = "1:0" или "0:1" или "1/2:1/2", score = "272-249"
     const m = entry.match(
-      /(\d{2}\.\d{2}\.\d{4}),?\s*[а-яА-ЯёЁa-zA-Z]+(\d{2}-\d{2})\s*["""«]([^"""»]+)["""»]\s*\(([^)]*)\)\s+(.+?)\s+-\s+(.+?)(1:0|0:1|1\/2:1\/2)(\d+-\d+)/
+      /(\d{2}\.\d{2}\.\d{4}),?\s*[а-яА-ЯёЁa-zA-Z]+(\d{2}-\d{2})\s*["""«]([^"""»]+)["""»]\s*\(([^)]*)\)\s+(.+?)\s+-\s+(.+?)(1:0|0:1|1\/2:1\/2)(\d+-\d+)/,
     )
     if (m) {
       matches.push({
@@ -376,7 +376,7 @@ export function extractPoets(): RawPoet[] {
 /** Извлечь уникальные стадионы */
 export function extractVenues(
   schedule: RawScheduleMatch[],
-  s1Results: RawResultMatch[]
+  s1Results: RawResultMatch[],
 ): { name: string; address?: string }[] {
   const venueMap = new Map<string, string>()
   for (const m of schedule) {
@@ -407,7 +407,7 @@ if (import.meta.main) {
     console.log(
       `  Тур ${m.tour} ${m.league}: ${m.homeTeam} ${m.homeScore ?? '?'}:${
         m.awayScore ?? '?'
-      } ${m.awayTeam} @ ${m.venue}`
+      } ${m.awayTeam} @ ${m.venue}`,
     )
   }
 

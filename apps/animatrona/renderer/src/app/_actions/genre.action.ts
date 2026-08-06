@@ -70,7 +70,7 @@ function generateSlug(name: string): string {
  */
 export async function saveGenresAndThemes(
   animeId: string,
-  genres: ShikimoriGenreInput[]
+  genres: ShikimoriGenreInput[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Удаляем старые связи

@@ -164,7 +164,7 @@ export async function hasSvtAv1(): Promise<boolean> {
 
 /** Скачать и установить FFmpeg */
 export async function installFFmpeg(
-  onProgress?: (progress: { stage: string; percent?: number }) => void
+  onProgress?: (progress: { stage: string; percent?: number }) => void,
 ): Promise<void> {
   const ffmpegDir = getFFmpegDir()
   const tempZip = path.join(app.getPath('temp'), 'ffmpeg-download.zip')

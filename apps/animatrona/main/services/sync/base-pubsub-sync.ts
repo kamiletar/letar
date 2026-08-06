@@ -77,7 +77,7 @@ export abstract class BasePubSubSync extends EventEmitter {
     topic: string,
     onMessage: (data: T) => void,
     retryOnError = true,
-    attempt = 0
+    attempt = 0,
   ): Promise<void> {
     const kuboService = getKuboService()
     const client = kuboService.getClientOrNull()

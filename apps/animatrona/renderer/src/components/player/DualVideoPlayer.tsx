@@ -95,7 +95,7 @@ export function DualVideoPlayer({
         donor.currentTime = clampedTime
       }
     },
-    [offsetSec]
+    [offsetSec],
   )
 
   /**
@@ -110,7 +110,7 @@ export function DualVideoPlayer({
       syncDonorTime(time)
       setCurrentTime(time)
     },
-    [syncDonorTime]
+    [syncDonorTime],
   )
 
   // Play/Pause
@@ -140,7 +140,7 @@ export function DualVideoPlayer({
       const newTime = Math.max(0, Math.min(duration, currentTime + delta))
       syncTime(newTime)
     },
-    [currentTime, duration, syncTime]
+    [currentTime, duration, syncTime],
   )
 
   // Покадровый шаг
@@ -150,7 +150,7 @@ export function DualVideoPlayer({
       const frameDuration = 1 / fps
       seek(forward ? frameDuration : -frameDuration)
     },
-    [seek]
+    [seek],
   )
 
   // Изменение смещения
@@ -158,7 +158,7 @@ export function DualVideoPlayer({
     (deltaMs: number) => {
       onOffsetChange(offsetMs + deltaMs)
     },
-    [offsetMs, onOffsetChange]
+    [offsetMs, onOffsetChange],
   )
 
   // Mute/Unmute

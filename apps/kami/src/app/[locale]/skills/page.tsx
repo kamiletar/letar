@@ -5,10 +5,10 @@ import {
   Badge,
   Box,
   Button,
-  Link as ChakraLink,
   Container,
   Heading,
   HStack,
+  Link as ChakraLink,
   SimpleGrid,
   Text,
   VStack,
@@ -28,10 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('title'),
-    description:
-      locale === 'ru'
-        ? 'Технологии и инструменты, с которыми работает Ками: React, Next.js, TypeScript и другие'
-        : 'Technologies and tools Kami works with: React, Next.js, TypeScript and more',
+    description: locale === 'ru'
+      ? 'Технологии и инструменты, с которыми работает Ками: React, Next.js, TypeScript и другие'
+      : 'Technologies and tools Kami works with: React, Next.js, TypeScript and more',
     alternates: {
       canonical: `/${locale}/skills`,
       languages: { ru: '/ru/skills', en: '/en/skills' },
@@ -141,11 +140,13 @@ export default async function SkillsPage({ params }: Props) {
                         </Badge>
                         {(() => {
                           const years = getYearsOfExperience(skill)
-                          return years ? (
-                            <Text fontSize="xs" color="fg.subtle">
-                              {years}+ {l('лет', 'years')}
-                            </Text>
-                          ) : null
+                          return years
+                            ? (
+                              <Text fontSize="xs" color="fg.subtle">
+                                {years}+ {l('лет', 'years')}
+                              </Text>
+                            )
+                            : null
                         })()}
                       </HStack>
                     </VStack>

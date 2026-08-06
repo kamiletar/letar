@@ -48,7 +48,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
         minimumFractionDigits: decimalScale,
         maximumFractionDigits: decimalScale,
       }),
-      [decimalScale]
+      [decimalScale],
     )
 
     return { formatOptions }

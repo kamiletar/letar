@@ -83,7 +83,7 @@ export function registerPrinterHandlers(): void {
 
       // Ищем настроенный принтер
       const found = printers.find(
-        (p) => p.name === configuredPrinterName || p.name.includes(configuredPrinterName.replace('_', ' '))
+        (p) => p.name === configuredPrinterName || p.name.includes(configuredPrinterName.replace('_', ' ')),
       )
 
       if (found) {
@@ -96,7 +96,7 @@ export function registerPrinterHandlers(): void {
           const escapedName = found.name.replace(/'/g, "''")
           const { stdout: wmiOut } = await execAsync(
             `"${WINDOWS_POWERSHELL}" -NonInteractive -Command "Get-CimInstance Win32_Printer | Where-Object { $_.Name -eq '${escapedName}' } | Select-Object WorkOffline, PortName | ConvertTo-Json"`,
-            { timeout: 5000 }
+            { timeout: 5000 },
           )
           const wmiData = JSON.parse(wmiOut.trim())
           // Виртуальные принтеры (PORTPROMPT:, FILE:, NUL:) всегда доступны
@@ -124,8 +124,8 @@ export function registerPrinterHandlers(): void {
           error: isReady
             ? undefined
             : isOffline
-              ? 'Принтер офлайн — проверьте подключение'
-              : `Статус принтера: ${found.status}`,
+            ? 'Принтер офлайн — проверьте подключение'
+            : `Статус принтера: ${found.status}`,
         }
       } else {
         // Принтер не найден - показываем список доступных
@@ -134,10 +134,9 @@ export function registerPrinterHandlers(): void {
           connected: false,
           name: configuredPrinterName,
           mode: 'MOCK',
-          error:
-            printers.length > 0
-              ? `Принтер "${configuredPrinterName}" не найден. Доступны: ${availableNames}`
-              : 'Принтеры не найдены в системе',
+          error: printers.length > 0
+            ? `Принтер "${configuredPrinterName}" не найден. Доступны: ${availableNames}`
+            : 'Принтеры не найдены в системе',
         }
       }
     } catch (error) {
@@ -206,7 +205,7 @@ export function registerPrinterHandlers(): void {
           templateBuffer,
           markingCode.fullCode,
           GS1Parser.extractGTIN13(markingCode.gtin),
-          labelConfig
+          labelConfig,
         )
         logger.info('Label image generated', { size: imageBuffer.length })
 
@@ -230,7 +229,7 @@ export function registerPrinterHandlers(): void {
                 delayMs,
               })
             },
-          }
+          },
         )
 
         if (retryResult.success) {

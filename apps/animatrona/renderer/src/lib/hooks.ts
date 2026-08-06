@@ -244,7 +244,7 @@ export const useDeleteEncodingProfile = encodingProfileHooks.useDelete
 /** Query хук для useFindFirst EncodingProfile (поиск по умолчанию) */
 export function useFindFirstEncodingProfile(
   args?: Prisma.EncodingProfileFindFirstArgs,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ['encodingProfileFirst', args],
@@ -435,7 +435,7 @@ export const useCreateSubtitleFont = createCreateHook({
 /** Query хук для useFindUnique WatchProgress */
 export function useFindUniqueWatchProgress(
   args: { where: { animeId_episodeId: { animeId: string; episodeId: string } }; include?: Prisma.WatchProgressInclude },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   const { animeId, episodeId } = args.where.animeId_episodeId
   return useQuery({
@@ -481,7 +481,7 @@ export function useUpsertWatchProgress() {
 /** Query хук для useFindUnique Settings */
 export function useFindUniqueSettings(
   args: { where: { id: string }; include?: object },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ['settings', args.where.id, args.include],

@@ -17,11 +17,11 @@ function getBatchApi() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (window.electronAPI as any)?.audioReencode as
     | {
-        batchPreview: () => Promise<{ success: boolean; data?: BatchReencodePreview; error?: string }>
-        batchStart: () => Promise<{ success: boolean; data?: BatchReencodeResult; error?: string }>
-        batchCancel: () => Promise<{ success: boolean; error?: string }>
-        onBatchProgress: (cb: (progress: BatchReencodeProgress) => void) => () => void
-      }
+      batchPreview: () => Promise<{ success: boolean; data?: BatchReencodePreview; error?: string }>
+      batchStart: () => Promise<{ success: boolean; data?: BatchReencodeResult; error?: string }>
+      batchCancel: () => Promise<{ success: boolean; error?: string }>
+      onBatchProgress: (cb: (progress: BatchReencodeProgress) => void) => () => void
+    }
     | undefined
 }
 

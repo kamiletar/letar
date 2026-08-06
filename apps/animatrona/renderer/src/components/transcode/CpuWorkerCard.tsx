@@ -76,5 +76,5 @@ export const CpuWorkerCard = memo(
     }
 
     return true
-  }
+  },
 )

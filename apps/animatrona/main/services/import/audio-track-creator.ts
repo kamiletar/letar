@@ -52,7 +52,7 @@ export async function createAudioTracks(
   episodeId: string,
   demuxResult: DemuxResult,
   fileAnalyses: FileAnalysisLike[] | undefined,
-  episodeNumber: number
+  episodeNumber: number,
 ): Promise<AudioTrackToTranscode[]> {
   const audioTracksToTranscode: AudioTrackToTranscode[] = []
 

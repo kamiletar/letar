@@ -90,16 +90,16 @@ export function ShikimoriAnimeCard({
   const hoverStyle = isDisabled
     ? undefined
     : {
-        bg: isSelected ? 'purple.900/50' : 'bg.subtle',
-        borderColor: isSelected ? 'purple.500' : 'border.subtle',
-      }
+      bg: isSelected ? 'purple.900/50' : 'bg.subtle',
+      borderColor: isSelected ? 'purple.500' : 'border.subtle',
+    }
 
   const activeStyle = isDisabled
     ? undefined
     : {
-        transform: 'scale(0.98)',
-        bg: isSelected ? 'purple.900/70' : 'bg.subtle',
-      }
+      transform: 'scale(0.98)',
+      bg: isSelected ? 'purple.900/70' : 'bg.subtle',
+    }
 
   return (
     <Box
@@ -139,11 +139,9 @@ export function ShikimoriAnimeCard({
       <HStack gap={3} align="start">
         {/* Постер */}
         <Box w="60px" h="85px" flexShrink={0} borderRadius="md" overflow="hidden" bg="bg.subtle">
-          {posterUrl ? (
-            <Image src={posterUrl} alt={anime.russian ?? anime.name} w="full" h="full" objectFit="cover" />
-          ) : (
-            <Box w="full" h="full" bg="bg.subtle" />
-          )}
+          {posterUrl
+            ? <Image src={posterUrl} alt={anime.russian ?? anime.name} w="full" h="full" objectFit="cover" />
+            : <Box w="full" h="full" bg="bg.subtle" />}
         </Box>
 
         {/* Информация */}

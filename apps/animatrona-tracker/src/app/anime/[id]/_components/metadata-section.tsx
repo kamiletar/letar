@@ -152,15 +152,17 @@ function Characters({ characters }: { characters: AnimeManifestCharacter[] }) {
       {hasMore && (
         <Flex justify="center" mt={3}>
           <Button variant="ghost" size="sm" onClick={() => setExpanded(!expanded)}>
-            {expanded ? (
-              <>
-                <LuChevronUp /> Свернуть
-              </>
-            ) : (
-              <>
-                <LuChevronDown /> Ещё {characters.length - INITIAL_COUNT}
-              </>
-            )}
+            {expanded
+              ? (
+                <>
+                  <LuChevronUp /> Свернуть
+                </>
+              )
+              : (
+                <>
+                  <LuChevronDown /> Ещё {characters.length - INITIAL_COUNT}
+                </>
+              )}
           </Button>
         </Flex>
       )}
@@ -169,12 +171,11 @@ function Characters({ characters }: { characters: AnimeManifestCharacter[] }) {
 }
 
 export function MetadataSection({ studios, staff, characters, fandubbers, fansubbers }: MetadataSectionProps) {
-  const hasContent =
-    (studios && studios.length > 0) ||
-    (staff && staff.length > 0) ||
-    (characters && characters.length > 0) ||
-    (fandubbers && fandubbers.length > 0) ||
-    (fansubbers && fansubbers.length > 0)
+  const hasContent = (studios && studios.length > 0)
+    || (staff && staff.length > 0)
+    || (characters && characters.length > 0)
+    || (fandubbers && fandubbers.length > 0)
+    || (fansubbers && fansubbers.length > 0)
 
   if (!hasContent) {
     return null

@@ -44,7 +44,7 @@ export function on<TArgs extends unknown[]>(channel: string): (callback: (...arg
  * Создаёт invoke-метод с возвращаемым типом { success, data?, error? }
  */
 export function invokeResult<TArgs extends unknown[], TData>(
-  channel: string
+  channel: string,
 ): (...args: TArgs) => Promise<{ success: boolean; data?: TData; error?: string }> {
   return invoke<TArgs, { success: boolean; data?: TData; error?: string }>(channel)
 }

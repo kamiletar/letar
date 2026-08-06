@@ -18,7 +18,7 @@ export async function POST() {
           success: false,
           error: 'Telegram notifications are disabled',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -28,7 +28,7 @@ export async function POST() {
           success: false,
           error: 'Telegram bot token or chat ID not configured',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -45,7 +45,7 @@ export async function POST() {
           success: false,
           error: result.error,
         },
-        { status: 500 }
+        { status: 500 },
       )
     }
   } catch (error) {
@@ -55,7 +55,7 @@ export async function POST() {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

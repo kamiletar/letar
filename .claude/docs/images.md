@@ -252,8 +252,7 @@ const slides = photos.map((p) => ({
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-
-;<PhotoGallery
+<PhotoGallery
   photos={photos.map((p, i) => ({
     src: `/api/files/estates/${slug}/${p.filename}`,
     alt: `${estateName} — фото ${i + 1}`,

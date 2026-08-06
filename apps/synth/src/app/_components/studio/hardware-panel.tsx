@@ -67,9 +67,7 @@ export function HardwarePanel({ faderValues, faderBank, encoderValues, encoderBa
             фейдеры · банк {faderBank}
           </Text>
           <Box display="flex" gap={4}>
-            {faderValues.map((v, i) => (
-              <Fader key={i} value={v} label={faderLabels[i] ?? '—'} />
-            ))}
+            {faderValues.map((v, i) => <Fader key={i} value={v} label={faderLabels[i] ?? '—'} />)}
           </Box>
         </Box>
 

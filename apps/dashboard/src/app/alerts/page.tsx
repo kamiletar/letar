@@ -236,9 +236,7 @@ export default function AlertsPage() {
               Active Alerts
             </Heading>
             <VStack gap="4" align="stretch">
-              {activeAlerts.map((alert) => (
-                <AlertCard key={alert.id} alert={alert} />
-              ))}
+              {activeAlerts.map((alert) => <AlertCard key={alert.id} alert={alert} />)}
             </VStack>
           </Box>
         )}
@@ -250,9 +248,7 @@ export default function AlertsPage() {
               Acknowledged Alerts
             </Heading>
             <VStack gap="4" align="stretch">
-              {acknowledgedAlerts.map((alert) => (
-                <AlertCard key={alert.id} alert={alert} />
-              ))}
+              {acknowledgedAlerts.map((alert) => <AlertCard key={alert.id} alert={alert} />)}
             </VStack>
           </Box>
         )}
@@ -264,9 +260,7 @@ export default function AlertsPage() {
               Resolved Alerts
             </Heading>
             <VStack gap="4" align="stretch">
-              {resolvedAlerts.slice(0, 10).map((alert) => (
-                <AlertCard key={alert.id} alert={alert} />
-              ))}
+              {resolvedAlerts.slice(0, 10).map((alert) => <AlertCard key={alert.id} alert={alert} />)}
             </VStack>
           </Box>
         )}

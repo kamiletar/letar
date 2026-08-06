@@ -34,7 +34,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
   const [overallProgress, setOverallProgress] = useState(0)
 
   const selectedFiles = files.filter(
-    (f): f is ParsedFile & { episodeNumber: number } => f.selected && f.episodeNumber !== null
+    (f): f is ParsedFile & { episodeNumber: number } => f.selected && f.episodeNumber !== null,
   )
 
   /** Анализ одного файла через probe (без извлечения) */
@@ -79,12 +79,11 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
         // 1. Из тегов (если есть)
         if (track.tags) {
           // Часто используется PERFORMER или SUMMARY в MKV
-          const rawGroup =
-            track.tags.PERFORMER ||
-            track.tags.performer ||
-            track.tags.SUMMARY ||
-            track.tags.summary ||
-            track.tags.comment
+          const rawGroup = track.tags.PERFORMER
+            || track.tags.performer
+            || track.tags.SUMMARY
+            || track.tags.summary
+            || track.tags.comment
           if (rawGroup) {
             dubGroup = rawGroup.trim()
           }
@@ -139,10 +138,10 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
         if (titleLower.includes('sign') || titleLower.includes('надписи') || titleLower.includes('forced')) {
           subtitleType = 'signs'
         } else if (
-          titleLower.includes('song') ||
-          titleLower.includes('op/ed') ||
-          titleLower.includes('lyrics') ||
-          titleLower.includes('песни')
+          titleLower.includes('song')
+          || titleLower.includes('op/ed')
+          || titleLower.includes('lyrics')
+          || titleLower.includes('песни')
         ) {
           subtitleType = 'songs'
         } else {
@@ -154,8 +153,8 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
 
         // 1. Из тегов
         if (sub.tags) {
-          const rawGroup =
-            sub.tags.PERFORMER || sub.tags.performer || sub.tags.SUMMARY || sub.tags.summary || sub.tags.comment
+          const rawGroup = sub.tags.PERFORMER || sub.tags.performer || sub.tags.SUMMARY || sub.tags.summary
+            || sub.tags.comment
           if (rawGroup) {
             dubGroup = rawGroup.trim()
           }
@@ -384,7 +383,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
             '[PreviewStep] Найдено внешних аудио:',
             externalAudio.audioTracks.length,
             'из папок:',
-            externalAudio.audioDirs
+            externalAudio.audioDirs,
           )
         }
       } catch (error) {
@@ -486,7 +485,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
         })
       )
     },
-    []
+    [],
   )
 
   /**
@@ -500,7 +499,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
       if (type === 'subtitle' && groupId.startsWith('external:')) {
         for (const analysis of prev) {
           const sourceRec = analysis.subtitleRecommendations.find(
-            (rec) => (rec.groupId || createSubtitleGroupId(rec)) === groupId
+            (rec) => (rec.groupId || createSubtitleGroupId(rec)) === groupId,
           )
           if (sourceRec?.externalPath) {
             subtitleCrossKey = {
@@ -518,7 +517,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
             groupId,
             'in',
             prev.length,
-            'analyses'
+            'analyses',
           )
         }
       }

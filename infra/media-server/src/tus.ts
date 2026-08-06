@@ -189,6 +189,6 @@ export function registerTusRoutes(app: FastifyInstance): void {
       if (state) await deleteTusState(appId, videoId)
       reply.header('Tus-Resumable', '1.0.0')
       return reply.code(204).send()
-    }
+    },
   )
 }

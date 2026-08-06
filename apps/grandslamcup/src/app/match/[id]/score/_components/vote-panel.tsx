@@ -77,7 +77,7 @@ export function VotePanel({
       setLoading(null)
       router.refresh()
     },
-    [router]
+    [router],
   )
 
   const currentPerf = currentPerformances[currentPerformerIndex]
@@ -126,8 +126,7 @@ export function VotePanel({
                   matchId={matchId}
                   onSelectPlayer={async (playerId, playerName) => {
                     await handleAction('player', () =>
-                      setCurrentPerformerAction(matchId, playerId, playerName, homeTeam.id, homeTeam.name)
-                    )
+                      setCurrentPerformerAction(matchId, playerId, playerName, homeTeam.id, homeTeam.name))
                   }}
                   loading={loading === 'player'}
                 />
@@ -136,8 +135,7 @@ export function VotePanel({
                   matchId={matchId}
                   onSelectPlayer={async (playerId, playerName) => {
                     await handleAction('player', () =>
-                      setCurrentPerformerAction(matchId, playerId, playerName, awayTeam.id, awayTeam.name)
-                    )
+                      setCurrentPerformerAction(matchId, playerId, playerName, awayTeam.id, awayTeam.name))
                   }}
                   loading={loading === 'player'}
                 />
@@ -151,7 +149,8 @@ export function VotePanel({
               colorPalette="blue"
               size="lg"
               loading={loading === 'textVote'}
-              onClick={() => handleAction('textVote', () => startTextVotingAction(matchId))}
+              onClick={() =>
+                handleAction('textVote', () => startTextVotingAction(matchId))}
             >
               ▶ Голосование: ТЕКСТ
             </Button>
@@ -162,7 +161,8 @@ export function VotePanel({
               colorPalette="purple"
               size="lg"
               loading={loading === 'deliveryVote'}
-              onClick={() => handleAction('deliveryVote', () => startDeliveryVotingAction(matchId))}
+              onClick={() =>
+                handleAction('deliveryVote', () => startDeliveryVotingAction(matchId))}
             >
               ▶ Голосование: ПОДАЧА
             </Button>
@@ -173,7 +173,8 @@ export function VotePanel({
               colorPalette="orange"
               size="lg"
               loading={loading === 'next'}
-              onClick={() => handleAction('next', () => nextRoundAction(matchId))}
+              onClick={() =>
+                handleAction('next', () => nextRoundAction(matchId))}
             >
               → Следующий
             </Button>
@@ -193,9 +194,7 @@ export function VotePanel({
                   loading={loading === 'forceComplete'}
                   onClick={() =>
                     handleAction('forceComplete', () =>
-                      forceCompleteVotingAction(matchId, phase === 'TEXT_VOTING' ? 'TEXT' : 'DELIVERY')
-                    )
-                  }
+                      forceCompleteVotingAction(matchId, phase === 'TEXT_VOTING' ? 'TEXT' : 'DELIVERY'))}
                 >
                   Завершить с неполным жюри
                 </Button>
@@ -250,13 +249,15 @@ export function VotePanel({
                         playerName={p.playerName}
                         initialTextScores={p.textScores}
                         initialDeliveryScores={p.deliveryScores}
-                        onSaved={() => router.refresh()}
+                        onSaved={() =>
+                          router.refresh()}
                       />
                       <CardDialog
                         matchId={matchId}
                         performanceId={p.id}
                         playerName={p.playerName}
-                        onIssued={() => router.refresh()}
+                        onIssued={() =>
+                          router.refresh()}
                       />
                     </Flex>
                   </Flex>

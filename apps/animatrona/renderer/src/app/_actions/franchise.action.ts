@@ -47,7 +47,7 @@ export async function createFranchise(data: Prisma.FranchiseCreateInput): Promis
  */
 export async function upsertFranchiseByRootShikimoriId(
   rootShikimoriId: number,
-  data: { name: string }
+  data: { name: string },
 ): Promise<Franchise> {
   return prisma.franchise.upsert({
     where: { rootShikimoriId },
@@ -94,7 +94,7 @@ export async function deleteFranchise(id: string): Promise<{ success: boolean; e
  */
 export async function findFranchiseByRootShikimoriId(
   rootShikimoriId: number,
-  include?: Prisma.FranchiseInclude
+  include?: Prisma.FranchiseInclude,
 ): Promise<Franchise | null> {
   return prisma.franchise.findUnique({
     where: { rootShikimoriId },
@@ -119,7 +119,7 @@ export async function syncFranchiseFromGraph(
   graphCid: string | null,
   rootShikimoriId: number,
   franchiseName: string,
-  shikimoriIds: number[]
+  shikimoriIds: number[],
 ): Promise<{ franchise: Franchise; updatedAnimeCount: number }> {
   // Upsert франшизу по rootShikimoriId
   const franchise = await prisma.franchise.upsert({
@@ -155,7 +155,7 @@ export async function syncFranchiseFromGraph(
 export async function updateFranchiseGraphCid(
   franchiseId: string,
   graphCid: string,
-  franchiseName?: string
+  franchiseName?: string,
 ): Promise<Franchise> {
   return prisma.franchise.update({
     where: { id: franchiseId },

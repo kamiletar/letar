@@ -331,30 +331,30 @@ export function LibraryPage() {
 
         {/* Список */}
         <Container py={4}>
-          {loading ? (
-            <Grid templateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']} gap={4}>
-              {[...Array(6)].map((_, i) => (
-                <AnimeCardSkeleton key={i} />
-              ))}
-            </Grid>
-          ) : showEmptyState ? (
-            <EmptyState />
-          ) : filteredAnime.length === 0 ? (
-            <VStack py={12} gap={2}>
-              <Text color="gray.500">Ничего не найдено</Text>
-              {search && (
-                <Text color="gray.600" fontSize="sm">
-                  Попробуйте изменить запрос
-                </Text>
-              )}
-            </VStack>
-          ) : (
-            <Grid templateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']} gap={4}>
-              {filteredAnime.map((item) => (
-                <AnimeCard key={item.id} anime={item} />
-              ))}
-            </Grid>
-          )}
+          {loading
+            ? (
+              <Grid templateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']} gap={4}>
+                {[...Array(6)].map((_, i) => <AnimeCardSkeleton key={i} />)}
+              </Grid>
+            )
+            : showEmptyState
+            ? <EmptyState />
+            : filteredAnime.length === 0
+            ? (
+              <VStack py={12} gap={2}>
+                <Text color="gray.500">Ничего не найдено</Text>
+                {search && (
+                  <Text color="gray.600" fontSize="sm">
+                    Попробуйте изменить запрос
+                  </Text>
+                )}
+              </VStack>
+            )
+            : (
+              <Grid templateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']} gap={4}>
+                {filteredAnime.map((item) => <AnimeCard key={item.id} anime={item} />)}
+              </Grid>
+            )}
         </Container>
 
         {/* Safe area снизу */}

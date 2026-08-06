@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch cron jobs',
       },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 },
     )
   }
 }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to control cron scheduler',
       },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 },
     )
   }
 }

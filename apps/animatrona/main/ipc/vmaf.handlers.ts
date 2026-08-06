@@ -14,18 +14,22 @@ import { createHandler, createHandlerWithEvent } from '../utils/ipc-handler-fact
  */
 export function registerVmafHandlers(): void {
   // Расчёт VMAF между двумя видео
-  createHandler('vmaf:calculate', (encoded: string, original: string, options?: VmafOptions) =>
-    calculateVMAF(encoded, original, options)
+  createHandler(
+    'vmaf:calculate',
+    (encoded: string, original: string, options?: VmafOptions) => calculateVMAF(encoded, original, options),
   )
 
   // Пакетный расчёт VMAF
-  createHandler('vmaf:calculateBatch', (pairs: Array<[string, string]>, options?: VmafOptions) =>
-    calculateVMAFBatch(pairs, options)
+  createHandler(
+    'vmaf:calculateBatch',
+    (pairs: Array<[string, string]>, options?: VmafOptions) => calculateVMAFBatch(pairs, options),
   )
 
   // Извлечение сэмплов из видео
-  createHandler('vmaf:extractSamples', (inputPath: string, outputDir: string, config?: Partial<SampleConfig>) =>
-    extractSamples(inputPath, outputDir, config)
+  createHandler(
+    'vmaf:extractSamples',
+    (inputPath: string, outputDir: string, config?: Partial<SampleConfig>) =>
+      extractSamples(inputPath, outputDir, config),
   )
 
   // Очистка временных файлов
@@ -40,7 +44,7 @@ export function registerVmafHandlers(): void {
       videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
       options?: Partial<CqSearchOptions>,
       preferCpu = false,
-      itemId?: string
+      itemId?: string,
     ) => {
       const win = BrowserWindow.fromWebContents(event.sender)
       const manager = ParallelTranscodeManager.getInstance()
@@ -57,7 +61,7 @@ export function registerVmafHandlers(): void {
           // Отправляем прогресс в renderer
           win?.webContents.send('vmaf:progress', progress)
         },
-        preferCpu
+        preferCpu,
       )
 
       // Очищаем прогресс после завершения
@@ -66,6 +70,6 @@ export function registerVmafHandlers(): void {
       }
 
       return result
-    }
+    },
   )
 }

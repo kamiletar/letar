@@ -80,7 +80,7 @@ export async function registerWithRelay(peerId: string | null): Promise<void> {
             reject(new Error(`Relay вернул ${res.statusCode}: ${data}`))
           }
         })
-      }
+      },
     )
     req.on('error', (err) => reject(err))
     req.on('timeout', () => {
@@ -130,7 +130,7 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
     () => {
       doHeartbeat().catch(() => {})
     },
-    30 * 60 * 1000
+    30 * 60 * 1000,
   ) as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
 
   // Прикрепляем cleanup функцию для clearTimeout retryTimeout при shutdown
@@ -191,7 +191,7 @@ export interface RelayMonitorOptions {
  */
 export function createRelayMonitor(
   getApiUrl: () => string | null,
-  options?: RelayMonitorOptions
+  options?: RelayMonitorOptions,
 ): ReturnType<typeof setInterval> {
   const { onRestartNeeded } = options ?? {}
 

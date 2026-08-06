@@ -89,7 +89,7 @@ const WNDPROC_N = koffi.proto('intptr_t __stdcall WNDPROC_N(void*, uint32, uintp
 
 const RegisterClassExW = user32.func('uint16 RegisterClassExW(WNDCLASSEX_N*)')
 const CreateWindowExW = user32.func(
-  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)'
+  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)',
 )
 const ShowWindow = user32.func('bool ShowWindow(void*, int)')
 const DestroyWindow = user32.func('bool DestroyWindow(void*)')
@@ -109,7 +109,7 @@ const UpdateWindow = user32.func('bool UpdateWindow(void*)')
 
 const CreateSolidBrush = gdi32.func('void* CreateSolidBrush(uint32)')
 const CreateFontW = gdi32.func(
-  'void* CreateFontW(int, int, int, int, int, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, const char16_t*)'
+  'void* CreateFontW(int, int, int, int, int, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, const char16_t*)',
 )
 const SelectObject = gdi32.func('void* SelectObject(void*, void*)')
 const SetBkMode = gdi32.func('int SetBkMode(void*, int)')
@@ -219,7 +219,7 @@ export function initNotification(): boolean {
       null,
       null,
       hInstance,
-      null
+      null,
     )
 
     if (!notifyHwnd) {

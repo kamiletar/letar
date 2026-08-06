@@ -54,15 +54,13 @@ function AchievementItem({ achievement }: AchievementItemProps) {
               {isUnlocked && (
                 <Badge
                   size="xs"
-                  colorPalette={
-                    achievement.tier === 'gold'
-                      ? 'yellow'
-                      : achievement.tier === 'silver'
-                        ? 'gray'
-                        : achievement.tier === 'platinum'
-                          ? 'purple'
-                          : 'orange'
-                  }
+                  colorPalette={achievement.tier === 'gold'
+                    ? 'yellow'
+                    : achievement.tier === 'silver'
+                    ? 'gray'
+                    : achievement.tier === 'platinum'
+                    ? 'purple'
+                    : 'orange'}
                 >
                   +{achievement.bonusReward} очков
                 </Badge>
@@ -152,15 +150,15 @@ export function AchievementsCard({ achievements, isLoading }: AchievementsCardPr
         </HStack>
       </Card.Header>
       <Card.Body>
-        {achievements.length === 0 ? (
-          <Text color="fg.subtle">Нет доступных достижений</Text>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
-            {sortedAchievements.map((achievement) => (
-              <AchievementItem key={achievement.id} achievement={achievement} />
-            ))}
-          </SimpleGrid>
-        )}
+        {achievements.length === 0
+          ? <Text color="fg.subtle">Нет доступных достижений</Text>
+          : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
+              {sortedAchievements.map((achievement) => (
+                <AchievementItem key={achievement.id} achievement={achievement} />
+              ))}
+            </SimpleGrid>
+          )}
       </Card.Body>
     </Card.Root>
   )

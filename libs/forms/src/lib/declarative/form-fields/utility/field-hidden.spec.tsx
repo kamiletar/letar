@@ -16,7 +16,7 @@ describe('FieldHidden', () => {
         <Form initialValue={{ utm_source: '' }} onSubmit={vi.fn()}>
           <Form.Field.Hidden name="utm_source" value="landing" />
         </Form>,
-        { wrapper: TestWrapper }
+        { wrapper: TestWrapper },
       )
 
       // Hidden поле не должно рендерить видимых элементов
@@ -31,7 +31,7 @@ describe('FieldHidden', () => {
           <Form initialValue={{ ref: '' }} onSubmit={vi.fn()}>
             <Form.Field.Hidden name="ref" value="abc123" />
           </Form>,
-          { wrapper: TestWrapper }
+          { wrapper: TestWrapper },
         )
       }).not.toThrow()
     })

@@ -43,7 +43,7 @@ export const SlotPicker = memo(function SlotPicker({ value, onChange, daysAhead 
     (slot: SlotOption) => {
       onChange?.(slot)
     },
-    [onChange]
+    [onChange],
   )
 
   const dates = Object.keys(groupedSlots)

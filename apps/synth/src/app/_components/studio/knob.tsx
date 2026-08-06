@@ -49,7 +49,7 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
       startY.current = e.clientY
       startVal.current = value
     },
-    [value]
+    [value],
   )
 
   const onPointerMove = useCallback(
@@ -61,7 +61,7 @@ export function Knob({ value, onChange, label, hint, size = 52, displayValue }: 
       const delta = (startY.current - e.clientY) / 150
       onChange(Math.max(0, Math.min(1, startVal.current + delta)))
     },
-    [onChange]
+    [onChange],
   )
 
   const onPointerUp = useCallback(() => {

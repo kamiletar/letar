@@ -70,15 +70,17 @@ export function ChatPanel({ messages, onSendMessage, onSendReaction, messagesEnd
 
       {/* Сообщения */}
       <VStack align="stretch" gap={2} flex={1} overflow="auto" px={4} py={2}>
-        {messages.length === 0 ? (
-          <Text color="fg.muted" fontSize="sm" textAlign="center" py={4}>
-            Нет сообщений. Напишите что-нибудь!
-          </Text>
-        ) : (
-          messages.map((message) => (
-            <ChatMessage key={message.id} message={message} isOwn={message.senderId === currentPeerId} />
-          ))
-        )}
+        {messages.length === 0
+          ? (
+            <Text color="fg.muted" fontSize="sm" textAlign="center" py={4}>
+              Нет сообщений. Напишите что-нибудь!
+            </Text>
+          )
+          : (
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} isOwn={message.senderId === currentPeerId} />
+            ))
+          )}
         <div ref={messagesEndRef} />
       </VStack>
 

@@ -396,52 +396,56 @@ export function CronScheduleDialog({
 
                 {/* Статус валидации */}
                 <Box>
-                  {isValidating ? (
-                    <HStack gap="2">
-                      <Spinner size="sm" />
-                      <Text fontSize="sm" color="fg.muted">
-                        Проверка...
-                      </Text>
-                    </HStack>
-                  ) : validation ? (
-                    <VStack align="stretch" gap="3">
-                      <HStack>
-                        <Badge colorPalette={validation.valid ? 'green' : 'red'} size="sm">
-                          {validation.valid ? <LuCheck /> : <LuX />}
-                          {validation.valid ? 'Корректно' : 'Ошибка'}
-                        </Badge>
-                        {validation.description && (
-                          <Text fontSize="sm" color="fg.muted">
-                            {validation.description}
+                  {isValidating
+                    ? (
+                      <HStack gap="2">
+                        <Spinner size="sm" />
+                        <Text fontSize="sm" color="fg.muted">
+                          Проверка...
+                        </Text>
+                      </HStack>
+                    )
+                    : validation
+                    ? (
+                      <VStack align="stretch" gap="3">
+                        <HStack>
+                          <Badge colorPalette={validation.valid ? 'green' : 'red'} size="sm">
+                            {validation.valid ? <LuCheck /> : <LuX />}
+                            {validation.valid ? 'Корректно' : 'Ошибка'}
+                          </Badge>
+                          {validation.description && (
+                            <Text fontSize="sm" color="fg.muted">
+                              {validation.description}
+                            </Text>
+                          )}
+                        </HStack>
+
+                        {validation.error && (
+                          <Text fontSize="sm" color="red.500">
+                            {validation.error}
                           </Text>
                         )}
-                      </HStack>
 
-                      {validation.error && (
-                        <Text fontSize="sm" color="red.500">
-                          {validation.error}
-                        </Text>
-                      )}
-
-                      {validation.valid && validation.nextRuns && validation.nextRuns.length > 0 && (
-                        <Box>
-                          <HStack gap="1" mb="2">
-                            <LuCalendar size={14} />
-                            <Text fontSize="sm" fontWeight="medium">
-                              Следующие запуски:
-                            </Text>
-                          </HStack>
-                          <VStack align="stretch" gap="1">
-                            {validation.nextRuns.map((run, i) => (
-                              <Text key={`run-${i}`} fontSize="sm" color="fg.muted" fontFamily="mono">
-                                {formatNextRun(run)}
+                        {validation.valid && validation.nextRuns && validation.nextRuns.length > 0 && (
+                          <Box>
+                            <HStack gap="1" mb="2">
+                              <LuCalendar size={14} />
+                              <Text fontSize="sm" fontWeight="medium">
+                                Следующие запуски:
                               </Text>
-                            ))}
-                          </VStack>
-                        </Box>
-                      )}
-                    </VStack>
-                  ) : null}
+                            </HStack>
+                            <VStack align="stretch" gap="1">
+                              {validation.nextRuns.map((run, i) => (
+                                <Text key={`run-${i}`} fontSize="sm" color="fg.muted" fontFamily="mono">
+                                  {formatNextRun(run)}
+                                </Text>
+                              ))}
+                            </VStack>
+                          </Box>
+                        )}
+                      </VStack>
+                    )
+                    : null}
                 </Box>
               </VStack>
             </Dialog.Body>

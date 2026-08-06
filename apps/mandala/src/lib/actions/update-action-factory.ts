@@ -65,7 +65,7 @@ export interface UpdateActionConfig<TSchema extends z.ZodSchema> {
  * @returns Async функция обновления (принимает id и data)
  */
 export function createUpdateAction<TSchema extends z.ZodSchema>(
-  config: UpdateActionConfig<TSchema>
+  config: UpdateActionConfig<TSchema>,
 ): (id: string, data: z.infer<TSchema>) => Promise<MutationResult> {
   const { model, schema, redirectPath, entityName, uniqueField, uniqueErrorMessage, transformData } = config
 

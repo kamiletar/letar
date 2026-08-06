@@ -171,7 +171,7 @@ export function withUIMeta<T extends z.ZodRawShape>(schema: z.ZodObject<T>, conf
  */
 export function withUIMetaDeep<T extends z.ZodRawShape>(
   schema: z.ZodObject<T>,
-  config: DeepUIMetaConfig<T>
+  config: DeepUIMetaConfig<T>,
 ): z.ZodObject<T> {
   const shape = schema.shape
   const newShape: MutableShape = {}

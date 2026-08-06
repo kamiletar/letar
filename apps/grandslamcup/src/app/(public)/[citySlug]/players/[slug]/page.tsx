@@ -126,7 +126,7 @@ export default async function PlayerPage({ params }: { params: Params }) {
   // Серверная проверка прав
   const canEdit = await canEditPlayer(
     player.userId,
-    player.playerTeamSeasons.map((pts) => pts.teamSeasonId)
+    player.playerTeamSeasons.map((pts) => pts.teamSeasonId),
   )
 
   const currentTeam = player.playerTeamSeasons[0]
@@ -180,19 +180,21 @@ export default async function PlayerPage({ params }: { params: Params }) {
             borderWidth="2px"
             borderColor="whiteAlpha.200"
           >
-            {player.photo ? (
-              <Image
-                src={player.photo.startsWith('http') ? player.photo : `/api/files/${player.photo}`}
-                alt={player.name}
-                width={128}
-                height={128}
-                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-              />
-            ) : (
-              <Flex align="center" justify="center" h="full" bg="brand.800">
-                <LuUserRound size={48} color="rgba(255,255,255,0.3)" />
-              </Flex>
-            )}
+            {player.photo
+              ? (
+                <Image
+                  src={player.photo.startsWith('http') ? player.photo : `/api/files/${player.photo}`}
+                  alt={player.name}
+                  width={128}
+                  height={128}
+                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                />
+              )
+              : (
+                <Flex align="center" justify="center" h="full" bg="brand.800">
+                  <LuUserRound size={48} color="rgba(255,255,255,0.3)" />
+                </Flex>
+              )}
           </Box>
 
           {/* Информация */}

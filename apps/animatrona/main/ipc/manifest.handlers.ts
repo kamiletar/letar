@@ -39,8 +39,9 @@ const log = createModuleLogger('ManifestHandlers')
  */
 export function registerManifestHandlers(): void {
   // Генерация манифеста из результатов demux
-  createHandler('manifest:generate', (demuxResult: DemuxResult, options: GenerateManifestOptions) =>
-    generateManifestFromDemux(demuxResult, options)
+  createHandler(
+    'manifest:generate',
+    (demuxResult: DemuxResult, options: GenerateManifestOptions) => generateManifestFromDemux(demuxResult, options),
   )
 
   // Чтение существующего манифеста
@@ -60,11 +61,11 @@ export function registerManifestHandlers(): void {
       navigation: {
         nextEpisode?: { id: string; manifestPath: string }
         prevEpisode?: { id: string; manifestPath: string }
-      }
+      },
     ) => {
       const success = updateManifestNavigation(manifestPath, navigation)
       return { success }
-    }
+    },
   )
 
   // Обновление thumbnails в манифесте (загрузка в IPFS как ThumbnailsDocument)
@@ -91,11 +92,11 @@ export function registerManifestHandlers(): void {
         audioTrackChannels?: Record<string, string>
         subtitleTrackCids?: Record<string, string>
         fontCids?: Record<string, string>
-      }
+      },
     ) => {
       const success = updateManifestMediaCids(manifestPath, options)
       return { success }
-    }
+    },
   )
 
   // Полная перестройка аудио/субтитров в манифесте из БД (для import-processor)
@@ -341,7 +342,7 @@ export function registerManifestHandlers(): void {
         }
         throw error
       }
-    }
+    },
   )
 
   /**
@@ -435,7 +436,7 @@ export function registerManifestHandlers(): void {
     async (
       sourceEpisodeId: string,
       targetEpisodeIds: string[],
-      chapterTypes: string[]
+      chapterTypes: string[],
     ): Promise<{ count: number; skipped: number }> => {
       log.info('Копирование глав', { sourceEpisodeId, targetCount: targetEpisodeIds.length, chapterTypes })
 
@@ -517,7 +518,7 @@ export function registerManifestHandlers(): void {
 
       log.info('Копирование глав завершено', { count, skipped })
       return { count, skipped }
-    }
+    },
   )
 
   /**
@@ -526,7 +527,7 @@ export function registerManifestHandlers(): void {
   createHandler(
     'manifest:generateRecapPreview',
     async (
-      episodes: Array<{ id: string; manifestCid: string; durationMs: number }>
+      episodes: Array<{ id: string; manifestCid: string; durationMs: number }>,
     ): Promise<{ created: number; skipped: number }> => {
       log.info('Генерация RECAP/PREVIEW', { count: episodes.length })
 
@@ -610,7 +611,7 @@ export function registerManifestHandlers(): void {
 
       log.info('Генерация RECAP/PREVIEW завершена', { created, skipped })
       return { created, skipped }
-    }
+    },
   )
 }
 

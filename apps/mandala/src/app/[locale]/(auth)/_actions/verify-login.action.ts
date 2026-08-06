@@ -13,7 +13,7 @@ import { cookies } from 'next/headers'
  */
 export async function verifyAndLoginUser(
   email: string,
-  verificationToken: string
+  verificationToken: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     // Находим токен (Better Auth: verification.value вместо verificationToken.token)

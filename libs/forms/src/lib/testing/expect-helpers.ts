@@ -25,7 +25,7 @@ export function expectFieldError(name: string, message: string): void {
     // Собираем все тексты в контейнере для диагностики
     const allText = container.textContent ?? ''
     throw new Error(
-      `expectFieldError: ошибка "${message}" не найдена в поле "${name}". Содержимое поля: "${allText.slice(0, 200)}"`
+      `expectFieldError: ошибка "${message}" не найдена в поле "${name}". Содержимое поля: "${allText.slice(0, 200)}"`,
     )
   }
 }

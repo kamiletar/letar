@@ -93,7 +93,7 @@ export class TrackerRegistry {
    */
   async add(
     url: string,
-    initialTrustLevel?: TrustLevel
+    initialTrustLevel?: TrustLevel,
   ): Promise<{
     success: boolean
     tracker?: TrackerInfo
@@ -266,9 +266,9 @@ export class TrackerRegistry {
 
     return registry.filter(
       (t) =>
-        t.name.toLowerCase().includes(lowerQuery) ||
-        t.url.toLowerCase().includes(lowerQuery) ||
-        t.description?.toLowerCase().includes(lowerQuery)
+        t.name.toLowerCase().includes(lowerQuery)
+        || t.url.toLowerCase().includes(lowerQuery)
+        || t.description?.toLowerCase().includes(lowerQuery),
     )
   }
 

@@ -13,8 +13,10 @@ const TOKEN_EXPIRY = {
   VERIFICATION: 24 * 60 * 60 * 1000, // 24 часа
 } as const
 
-export type RegisterResult =
-  { success: true; email: string } | { success: false; error: 'EMAIL_EXISTS' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR' }
+export type RegisterResult = { success: true; email: string } | {
+  success: false
+  error: 'EMAIL_EXISTS' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR'
+}
 
 /**
  * Хеширование пароля в формате Better Auth (scrypt)
@@ -105,7 +107,7 @@ export async function registerUser(data: RegisterFormData): Promise<RegisterResu
         appName: 'Elfafeya Art',
         headerColor: '#8B7355',
         buttonColor: '#A67C52',
-      }
+      },
     )
 
     if (!emailResult.success) {

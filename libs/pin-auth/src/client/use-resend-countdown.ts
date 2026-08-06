@@ -62,7 +62,7 @@ export function useResendCountdown(config: UseResendCountdownConfig = {}): UseRe
     (seconds?: number) => {
       setSecondsLeft(seconds ?? initialSeconds)
     },
-    [initialSeconds]
+    [initialSeconds],
   )
 
   return {

@@ -27,7 +27,7 @@ module.exports = {
     config.plugins = config.plugins || []
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^node-datachannel(\/polyfill)?$/, nodeDatchannelMock),
-      new webpack.NormalModuleReplacementPlugin(/^@libp2p\/webrtc$/, libp2pWebrtcMock)
+      new webpack.NormalModuleReplacementPlugin(/^@libp2p\/webrtc$/, libp2pWebrtcMock),
     )
 
     return config

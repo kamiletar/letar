@@ -44,7 +44,7 @@ export function PresenterPairResults({ match, matchState }: PresenterPairResults
 
   // Пары в текущем тайме с завершёнными оценками
   const completedPairsInHalf = Math.floor(
-    match.performances.filter((p) => p.half === half && p.totalScore !== null).length / 2
+    match.performances.filter((p) => p.half === half && p.totalScore !== null).length / 2,
   )
   const isLastPair = completedPairsInHalf >= 5
 
@@ -52,14 +52,13 @@ export function PresenterPairResults({ match, matchState }: PresenterPairResults
     .filter((p) => p.half === half && p.roundNumber === round && p.totalScore !== null)
     .slice(0, 2)
 
-  const winner =
-    pair.length === 2 && pair[0].totalScore !== null && pair[1].totalScore !== null
-      ? pair[0].totalScore > pair[1].totalScore
-        ? pair[0]
-        : pair[1].totalScore > pair[0].totalScore
-          ? pair[1]
-          : null
+  const winner = pair.length === 2 && pair[0].totalScore !== null && pair[1].totalScore !== null
+    ? pair[0].totalScore > pair[1].totalScore
+      ? pair[0]
+      : pair[1].totalScore > pair[0].totalScore
+      ? pair[1]
       : null
+    : null
 
   const handleNext = useCallback(async () => {
     setPending(true)

@@ -31,10 +31,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   const home = match.homeTeam.team.name
   const away = match.awayTeam.team.name
-  const description =
-    match.status === 'FINISHED'
-      ? `${home} ${match.homeScore} : ${match.awayScore} ${away} — результат матча`
-      : `${home} vs ${away} — матч Кубка Большого Слэма`
+  const description = match.status === 'FINISHED'
+    ? `${home} ${match.homeScore} : ${match.awayScore} ${away} — результат матча`
+    : `${home} vs ${away} — матч Кубка Большого Слэма`
 
   const ogImages = match.posterUrl ? [{ url: `/api/files/${match.posterUrl}`, alt: `${home} vs ${away}` }] : undefined
 
@@ -105,12 +104,12 @@ export default async function MatchPage({ params }: { params: Params }) {
   // MVP матча
   const mvp = isFinished
     ? findMatchMVP(
-        match.performances.map((p) => ({
-          playerName: p.player.name,
-          playerSlug: p.player.slug,
-          totalScore: p.totalScore,
-        }))
-      )
+      match.performances.map((p) => ({
+        playerName: p.player.name,
+        playerSlug: p.player.slug,
+        totalScore: p.totalScore,
+      })),
+    )
     : null
 
   // Группируем перформансы по таймам
@@ -144,15 +143,17 @@ export default async function MatchPage({ params }: { params: Params }) {
               {homeTeamName}
             </Text>
           </VStack>
-          {isFinished ? (
-            <Text fontSize="4xl" fontWeight="bold" fontFamily="mono">
-              {match.homeScore} : {match.awayScore}
-            </Text>
-          ) : (
-            <Text fontSize="2xl" color="fg.muted">
-              vs
-            </Text>
-          )}
+          {isFinished
+            ? (
+              <Text fontSize="4xl" fontWeight="bold" fontFamily="mono">
+                {match.homeScore} : {match.awayScore}
+              </Text>
+            )
+            : (
+              <Text fontSize="2xl" color="fg.muted">
+                vs
+              </Text>
+            )}
           <VStack gap={1} flex={1}>
             <Text fontSize="lg" fontWeight="bold">
               {awayTeamName}

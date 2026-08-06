@@ -135,7 +135,7 @@ export function usePlayerGestures({
       }
       return 'center'
     },
-    [screenWidth]
+    [screenWidth],
   )
 
   /** Обработчик double-tap */
@@ -163,7 +163,7 @@ export function usePlayerGestures({
         }, 300)
       }
     },
-    [currentTime, duration, getZone, haptic, onSeek]
+    [currentTime, duration, getZone, haptic, onSeek],
   )
 
   /** Обработчик начала pan жеста */
@@ -200,7 +200,7 @@ export function usePlayerGestures({
         }))
       }
     },
-    [brightness, currentTime, getZone, haptic, volume]
+    [brightness, currentTime, getZone, haptic, volume],
   )
 
   /** Обработчик обновления pan жеста */
@@ -230,7 +230,7 @@ export function usePlayerGestures({
         setGestureState((prev) => ({ ...prev, seekDelta: Math.round(seekSeconds) }))
       }
     },
-    [onVolumeChange, setBrightness]
+    [onVolumeChange, setBrightness],
   )
 
   /** Обработчик окончания pan жеста */

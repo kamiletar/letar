@@ -13,7 +13,7 @@ declare module 'sql.js' {
   export type SqlValue = string | number | Uint8Array | null
 
   export interface DatabaseConstructor {
-    new (data?: ArrayLike<number> | Buffer | null): Database
+    new(data?: ArrayLike<number> | Buffer | null): Database
   }
 
   export interface Database {

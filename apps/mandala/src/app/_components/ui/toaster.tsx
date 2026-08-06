@@ -1,7 +1,7 @@
 'use client'
 
 import type { CreateToasterReturn } from '@chakra-ui/react'
-import { Toaster as ChakraToaster, createToaster, Portal, Stack, Toast } from '@chakra-ui/react'
+import { createToaster, Portal, Stack, Toast, Toaster as ChakraToaster } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 
 export const toaster: CreateToasterReturn = createToaster({

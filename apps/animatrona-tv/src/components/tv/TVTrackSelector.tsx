@@ -66,16 +66,16 @@ export function TVTrackSelector({
                 {item.isSelected && <Text style={styles.checkmark}>✓</Text>}
               </Pressable>
             )}
-            ListFooterComponent={
-              showDisableOption ? (
+            ListFooterComponent={showDisableOption
+              ? (
                 <Pressable
                   style={({ focused }) => [styles.trackItem, styles.disableItem, focused && styles.trackItemFocused]}
                   onPress={() => onSelect(null)}
                 >
                   <Text style={styles.trackLabel}>Выключить</Text>
                 </Pressable>
-              ) : null
-            }
+              )
+              : null}
           />
 
           {/* Кнопка закрытия */}

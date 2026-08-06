@@ -59,7 +59,7 @@ bun add @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities
 
 ```tsx
 import { SortablePhotoGrid } from '@letar/admin-ui'
-;<SortablePhotoGrid
+<SortablePhotoGrid
   items={photos.map((p) => ({ id: p.id, imageUrl: `/api/files/${p.path}` }))}
   onReorder={(orderedIds) => reorderPhotosAction(estateSlug, orderedIds)}
   onSetCover={(id) => setCoverPhotoAction(id)}
@@ -133,7 +133,7 @@ export default function AdminLayout({ children }) {
   )
 } // В списке
 
-;<GenericAdminTable
+<GenericAdminTable
   items={products}
   columns={[
     { header: 'Название', accessor: 'name', fontWeight: 'medium' },

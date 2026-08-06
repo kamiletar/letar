@@ -101,13 +101,11 @@ export function RatingStars({
           }}
           cursor={isInteractive ? 'pointer' : 'default'}
           transition="transform 0.1s"
-          _hover={
-            isInteractive
-              ? {
-                  transform: 'scale(1.1)',
-                }
-              : {}
-          }
+          _hover={isInteractive
+            ? {
+              transform: 'scale(1.1)',
+            }
+            : {}}
           aria-label={`${star} звёзд`}
           role={isInteractive ? 'button' : undefined}
           tabIndex={isInteractive ? 0 : undefined}

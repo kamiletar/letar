@@ -27,7 +27,7 @@ import { TestWrapper } from './test-wrapper'
 export function renderComparison(
   original: Record<string, unknown>,
   current: Record<string, unknown>,
-  options?: Record<string, unknown>
+  options?: Record<string, unknown>,
 ): RenderResult {
   // Ленивый импорт — FormComparison из основного пакета
   // eslint-disable-next-line @typescript-eslint/no-require-imports

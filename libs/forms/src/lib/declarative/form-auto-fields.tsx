@@ -42,7 +42,7 @@ export interface AutoFieldsProps {
 function renderField(
   field: SchemaFieldInfo,
   recursive: boolean,
-  fieldWrapper?: (props: { name: string; children: ReactNode }) => ReactElement
+  fieldWrapper?: (props: { name: string; children: ReactNode }) => ReactElement,
 ): ReactElement {
   const { name, zodType, ui } = field
 

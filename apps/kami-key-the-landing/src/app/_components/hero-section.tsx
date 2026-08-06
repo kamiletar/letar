@@ -200,7 +200,8 @@ export function HeroSection() {
         transform="translateX(-50%)"
         animation="float 3s ease-in-out infinite"
         cursor="pointer"
-        onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+        onClick={() =>
+          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
         aria-label="Перейти к возможностям"
         role="button"
         tabIndex={0}

@@ -37,18 +37,18 @@ export default async function DataDeletionPage({ params, searchParams }: Props) 
             {t('title')}
           </Heading>
 
-          {code ? (
-            <VStack gap={4} align="stretch">
-              <Text color="fg.muted">{t('statusComplete')}</Text>
-              <Box p={4} borderWidth="1px" borderRadius="md" bg="bg.muted">
-                <Text fontSize="sm" color="fg.muted">
-                  {t('confirmationCode')}: <strong>{code}</strong>
-                </Text>
-              </Box>
-            </VStack>
-          ) : (
-            <Text color="fg.muted">{t('description')}</Text>
-          )}
+          {code
+            ? (
+              <VStack gap={4} align="stretch">
+                <Text color="fg.muted">{t('statusComplete')}</Text>
+                <Box p={4} borderWidth="1px" borderRadius="md" bg="bg.muted">
+                  <Text fontSize="sm" color="fg.muted">
+                    {t('confirmationCode')}: <strong>{code}</strong>
+                  </Text>
+                </Box>
+              </VStack>
+            )
+            : <Text color="fg.muted">{t('description')}</Text>}
         </VStack>
       </Container>
     </Box>

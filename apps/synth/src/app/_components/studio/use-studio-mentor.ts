@@ -55,7 +55,7 @@ export function useStudioMentor({
         handleLoadSubtractive(incoming)
       }
     },
-    [engineType, started, setEngineType, handleSwitchEngine, handleLoadFm, handleLoadDrumkit, handleLoadSubtractive]
+    [engineType, started, setEngineType, handleSwitchEngine, handleLoadFm, handleLoadDrumkit, handleLoadSubtractive],
   )
 
   // Проигрывает последовательность нот от send_midi_sequence/play_demo — без запущенного звука нечего проигрывать
@@ -69,7 +69,7 @@ export function useStudioMentor({
         setTimeout(() => handleNoteOff(n.note), n.startMs + n.durationMs)
       }
     },
-    [started, handleNoteOn, handleNoteOff]
+    [started, handleNoteOn, handleNoteOff],
   )
 
   const mentor = useMentorEvents({

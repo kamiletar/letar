@@ -361,7 +361,7 @@ export class TranscodeManager extends EventEmitter {
 
       // Найти следующий ready элемент
       const nextItem = this.getQueue().find(
-        (i) => i.status === 'ready' || (i.status === 'pending' && i.settings?.skipTranscode)
+        (i) => i.status === 'ready' || (i.status === 'pending' && i.settings?.skipTranscode),
       )
 
       if (!nextItem) {
@@ -501,7 +501,7 @@ export class TranscodeManager extends EventEmitter {
         '-tune',
         'hq',
         '-rc',
-        'constqp'
+        'constqp',
       )
     } else {
       const cpuCodecs = {

@@ -26,7 +26,7 @@ export function useFormHistory<T>(
     setFieldValue: (field: string, value: unknown) => void
     reset: () => void
   },
-  config?: FormHistoryConfig
+  config?: FormHistoryConfig,
 ): UseFormHistoryResult<T> {
   const {
     maxHistory = 50,
@@ -81,7 +81,7 @@ export function useFormHistory<T>(
         return newIndex
       })
     },
-    [currentIndex, maxHistory]
+    [currentIndex, maxHistory],
   )
 
   // Подписка на изменения формы с debounce
@@ -130,7 +130,7 @@ export function useFormHistory<T>(
         isUndoRedoRef.current = false
       }, 0)
     },
-    [form]
+    [form],
   )
 
   const undo = useCallback(() => {

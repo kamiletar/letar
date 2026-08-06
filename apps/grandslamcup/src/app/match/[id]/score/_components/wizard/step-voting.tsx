@@ -189,24 +189,26 @@ export function StepVoting({ match, matchState, dimension }: StepVotingProps) {
 
       {/* Кнопки действий */}
       <VStack gap={2} align="stretch">
-        {canGoNext ? (
-          <Button
-            size="xl"
-            colorPalette="green"
-            onClick={handleNextDimension}
-            loading={pending === 'next'}
-            py={7}
-            fontSize="lg"
-          >
-            ✓ {dimension === 'TEXT' ? 'Текст оценён — к подаче' : 'Показать результат поэта'}
-          </Button>
-        ) : (
-          <Box textAlign="center" bg="yellow.subtle" p={3} borderRadius="md">
-            <Text fontSize="sm" color="fg.muted">
-              Ждём все 5 оценок {allVoted ? '(фаза ещё не обновилась)' : ''}
-            </Text>
-          </Box>
-        )}
+        {canGoNext
+          ? (
+            <Button
+              size="xl"
+              colorPalette="green"
+              onClick={handleNextDimension}
+              loading={pending === 'next'}
+              py={7}
+              fontSize="lg"
+            >
+              ✓ {dimension === 'TEXT' ? 'Текст оценён — к подаче' : 'Показать результат поэта'}
+            </Button>
+          )
+          : (
+            <Box textAlign="center" bg="yellow.subtle" p={3} borderRadius="md">
+              <Text fontSize="sm" color="fg.muted">
+                Ждём все 5 оценок {allVoted ? '(фаза ещё не обновилась)' : ''}
+              </Text>
+            </Box>
+          )}
 
         {!canGoNext && forceUnlockedAt && (
           <Button

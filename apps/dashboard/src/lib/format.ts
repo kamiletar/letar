@@ -196,7 +196,16 @@ export function formatDurationSeconds(seconds: number): string {
 // =============================================================================
 
 type ContainerState =
-  'running' | 'exited' | 'paused' | 'restarting' | 'starting' | 'stopping' | 'removing' | 'created' | 'dead' | string
+  | 'running'
+  | 'exited'
+  | 'paused'
+  | 'restarting'
+  | 'starting'
+  | 'stopping'
+  | 'removing'
+  | 'created'
+  | 'dead'
+  | string
 
 /**
  * Возвращает цвет для состояния контейнера

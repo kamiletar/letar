@@ -27,7 +27,7 @@ type LazyImportFn<T> = () => Promise<{ default: T } | T>
  */
 export function createLazyComponent<T extends AnyComponent>(
   importFn: LazyImportFn<T>,
-  fallbackHeight = '40px'
+  fallbackHeight = '40px',
 ): ComponentType<React.ComponentProps<T>> {
   const LazyComponent = lazy(async () => {
     const module = await importFn()
@@ -70,14 +70,14 @@ export function createLazyComponent<T extends AnyComponent>(
  */
 export function createLazyComponents<T extends Record<string, LazyImportFn<AnyComponent>>>(
   imports: T,
-  fallbackHeight = '40px'
+  fallbackHeight = '40px',
 ): { [K in keyof T]: AnyComponent } {
   return Object.entries(imports).reduce(
     (acc, [name, importFn]) => ({
       ...acc,
       [name]: createLazyComponent(importFn, fallbackHeight),
     }),
-    {} as { [K in keyof T]: AnyComponent }
+    {} as { [K in keyof T]: AnyComponent },
   )
 }
 

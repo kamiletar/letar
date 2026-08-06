@@ -64,30 +64,32 @@ export function EditorPanel({ selectedKey, mapping, symbols, isDirty, onAssign, 
           >
             AltGr+{keyLabel}
           </Box>
-          {mapping ? (
-            <>
-              <Text fontSize="2xl" w="40px" textAlign="center" color="#6c7ae0">
-                {displayChar(mapping.char)}
+          {mapping
+            ? (
+              <>
+                <Text fontSize="2xl" w="40px" textAlign="center" color="#6c7ae0">
+                  {displayChar(mapping.char)}
+                </Text>
+                <Text color="#888" fontSize="xs" flex="1">
+                  {toUnicode(mapping.char)} {mapping.label}
+                </Text>
+                <Button
+                  size="xs"
+                  bg="#3a1e1e"
+                  color="#c66"
+                  border="1px solid #5a3a3a"
+                  _hover={{ bg: '#5a2a2a' }}
+                  onClick={() => onRemove('char')}
+                >
+                  Убрать
+                </Button>
+              </>
+            )
+            : (
+              <Text color="#555" fontSize="sm" fontStyle="italic">
+                не назначен
               </Text>
-              <Text color="#888" fontSize="xs" flex="1">
-                {toUnicode(mapping.char)} {mapping.label}
-              </Text>
-              <Button
-                size="xs"
-                bg="#3a1e1e"
-                color="#c66"
-                border="1px solid #5a3a3a"
-                _hover={{ bg: '#5a2a2a' }}
-                onClick={() => onRemove('char')}
-              >
-                Убрать
-              </Button>
-            </>
-          ) : (
-            <Text color="#555" fontSize="sm" fontStyle="italic">
-              не назначен
-            </Text>
-          )}
+            )}
         </Flex>
 
         {/* AltGr+Shift слот */}
@@ -105,30 +107,32 @@ export function EditorPanel({ selectedKey, mapping, symbols, isDirty, onAssign, 
           >
             AltGr+Shift+{keyLabel}
           </Box>
-          {mapping?.shiftChar ? (
-            <>
-              <Text fontSize="2xl" w="40px" textAlign="center" color="#4a6ae0">
-                {displayChar(mapping.shiftChar)}
+          {mapping?.shiftChar
+            ? (
+              <>
+                <Text fontSize="2xl" w="40px" textAlign="center" color="#4a6ae0">
+                  {displayChar(mapping.shiftChar)}
+                </Text>
+                <Text color="#888" fontSize="xs" flex="1">
+                  {toUnicode(mapping.shiftChar)} {mapping.shiftLabel ?? ''}
+                </Text>
+                <Button
+                  size="xs"
+                  bg="#3a1e1e"
+                  color="#c66"
+                  border="1px solid #5a3a3a"
+                  _hover={{ bg: '#5a2a2a' }}
+                  onClick={() => onRemove('shiftChar')}
+                >
+                  Убрать
+                </Button>
+              </>
+            )
+            : (
+              <Text color="#555" fontSize="sm" fontStyle="italic">
+                {mapping ? 'не назначен' : 'сначала назначьте AltGr'}
               </Text>
-              <Text color="#888" fontSize="xs" flex="1">
-                {toUnicode(mapping.shiftChar)} {mapping.shiftLabel ?? ''}
-              </Text>
-              <Button
-                size="xs"
-                bg="#3a1e1e"
-                color="#c66"
-                border="1px solid #5a3a3a"
-                _hover={{ bg: '#5a2a2a' }}
-                onClick={() => onRemove('shiftChar')}
-              >
-                Убрать
-              </Button>
-            </>
-          ) : (
-            <Text color="#555" fontSize="sm" fontStyle="italic">
-              {mapping ? 'не назначен' : 'сначала назначьте AltGr'}
-            </Text>
-          )}
+            )}
         </Flex>
       </Box>
 

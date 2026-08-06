@@ -85,9 +85,11 @@ export function WizardHeader({
             Тайм {currentHalf} · Раунд {currentRound}
           </Badge>
           <Badge
-            colorPalette={
-              connectionStatus === 'connected' ? 'green' : connectionStatus === 'connecting' ? 'yellow' : 'red'
-            }
+            colorPalette={connectionStatus === 'connected'
+              ? 'green'
+              : connectionStatus === 'connecting'
+              ? 'yellow'
+              : 'red'}
             size="sm"
           >
             {connectionStatus === 'connected' ? '●' : connectionStatus === 'connecting' ? '○' : '✕'}

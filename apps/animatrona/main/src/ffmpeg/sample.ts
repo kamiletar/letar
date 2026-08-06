@@ -76,7 +76,7 @@ export async function extractSamples(
   inputPath: string,
   outputDir: string,
   config?: Partial<SampleConfig>,
-  videoFilter?: string
+  videoFilter?: string,
 ): Promise<string[]> {
   const cfg: SampleConfig = { ...DEFAULT_SAMPLE_CONFIG, ...config }
   const duration = await getVideoDuration(inputPath)
@@ -114,7 +114,7 @@ async function extractSample(
   outputPath: string,
   startTime: number,
   duration: number,
-  videoFilter?: string
+  videoFilter?: string,
 ): Promise<void> {
   // Используем FFV1 — истинно lossless кодек, сохраняет 10-bit
   // libx264 CRF 0 не поддерживает 10-bit без специальной сборки
@@ -136,7 +136,7 @@ async function extractSample(
     '1', // Large context (лучше сжатие)
     '-slicecrc',
     '1', // Проверка целостности
-    outputPath
+    outputPath,
   )
 
   return new Promise((resolve, reject) => {
@@ -171,7 +171,7 @@ async function extractSample(
 export async function encodeSamplesParallel(
   samples: string[],
   outputDir: string,
-  options: VideoTranscodeOptions
+  options: VideoTranscodeOptions,
 ): Promise<EncodedSample[]> {
   // Создаём папку если не существует
   if (!fs.existsSync(outputDir)) {
@@ -207,7 +207,7 @@ export async function encodeSamplesParallelWithFallback(
   samples: string[],
   outputDir: string,
   options: VideoTranscodeOptions,
-  preferCpu = false
+  preferCpu = false,
 ): Promise<EncodedSamplesResult> {
   // Создаём папку если не существует
   if (!fs.existsSync(outputDir)) {
@@ -289,7 +289,7 @@ async function encodeSample(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
-  forceCpu: boolean
+  forceCpu: boolean,
 ): Promise<EncodedSample> {
   const startTime = Date.now()
   const duration = await getVideoDuration(inputPath)
@@ -351,7 +351,7 @@ function buildEncodingArgs(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
-  forceCpu: boolean
+  forceCpu: boolean,
 ): string[] {
   // Начинаем с -y (overwrite)
   const args = ['-y']

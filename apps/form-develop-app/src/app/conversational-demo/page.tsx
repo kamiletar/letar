@@ -21,7 +21,8 @@ export default function ConversationalDemoPage() {
               recommend: undefined,
               feedback: '',
             }}
-            onSubmit={(data) => setSubmittedData(data as Record<string, unknown>)}
+            onSubmit={(data) =>
+              setSubmittedData(data as Record<string, unknown>)}
           >
             <ConversationalMode
               showProgress

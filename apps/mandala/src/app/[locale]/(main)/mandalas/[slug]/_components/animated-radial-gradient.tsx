@@ -63,7 +63,7 @@ export function AnimatedRadialGradient(props: AnimatedRadialGradientProps) {
       ctx.fillStyle = gradient
       ctx.fill()
     },
-    [durationMs]
+    [durationMs],
   )
 
   const { canvasRef, size, canvasStyle } = useCanvasEffect(props, {

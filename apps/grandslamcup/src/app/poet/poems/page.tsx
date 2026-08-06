@@ -40,60 +40,62 @@ export default async function PoetPoemsPage() {
         </Button>
       </Flex>
 
-      {poems.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted" mb={4}>
-            У вас пока нет стихотворений
-          </Text>
-          <Button colorPalette="teal" asChild>
-            <Link href="/poet/poems/create">Написать первое стихотворение</Link>
-          </Button>
-        </EmptyState>
-      ) : (
-        <VStack gap={3} align="stretch">
-          {poems.map((poem) => (
-            <Box
-              key={poem.id}
-              bg="bg.panel"
-              borderRadius="xl"
-              p={4}
-              borderWidth="1px"
-              borderColor="border"
-              _hover={{ shadow: 'sm', borderColor: 'border.emphasized' }}
-              transition="all 0.15s"
-            >
-              <Flex justify="space-between" align="start" gap={4}>
-                <VStack gap={1} align="start" flex={1} minW={0}>
-                  <HStack gap={2}>
-                    <Text fontWeight="semibold" lineClamp={1}>
-                      {poem.title}
+      {poems.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted" mb={4}>
+              У вас пока нет стихотворений
+            </Text>
+            <Button colorPalette="teal" asChild>
+              <Link href="/poet/poems/create">Написать первое стихотворение</Link>
+            </Button>
+          </EmptyState>
+        )
+        : (
+          <VStack gap={3} align="stretch">
+            {poems.map((poem) => (
+              <Box
+                key={poem.id}
+                bg="bg.panel"
+                borderRadius="xl"
+                p={4}
+                borderWidth="1px"
+                borderColor="border"
+                _hover={{ shadow: 'sm', borderColor: 'border.emphasized' }}
+                transition="all 0.15s"
+              >
+                <Flex justify="space-between" align="start" gap={4}>
+                  <VStack gap={1} align="start" flex={1} minW={0}>
+                    <HStack gap={2}>
+                      <Text fontWeight="semibold" lineClamp={1}>
+                        {poem.title}
+                      </Text>
+                      <Badge colorPalette={poem.published ? 'green' : 'gray'} variant="subtle" size="sm" flexShrink={0}>
+                        {poem.published ? 'Опубликовано' : 'Черновик'}
+                      </Badge>
+                    </HStack>
+                    <Text fontSize="sm" color="fg.muted" lineClamp={2} whiteSpace="pre-wrap">
+                      {poem.text.slice(0, 100)}
+                      {poem.text.length > 100 ? '...' : ''}
                     </Text>
-                    <Badge colorPalette={poem.published ? 'green' : 'gray'} variant="subtle" size="sm" flexShrink={0}>
-                      {poem.published ? 'Опубликовано' : 'Черновик'}
-                    </Badge>
+                    <Text fontSize="xs" color="fg.subtle">
+                      {formatDate(poem.createdAt)}
+                    </Text>
+                  </VStack>
+                  <HStack gap={2} flexShrink={0}>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/poet/poems/${poem.id}/edit`}>
+                        <LuPenLine size={16} />
+                        Редактировать
+                      </Link>
+                    </Button>
+                    <DeletePoemButton poemId={poem.id} poemTitle={poem.title} />
                   </HStack>
-                  <Text fontSize="sm" color="fg.muted" lineClamp={2} whiteSpace="pre-wrap">
-                    {poem.text.slice(0, 100)}
-                    {poem.text.length > 100 ? '...' : ''}
-                  </Text>
-                  <Text fontSize="xs" color="fg.subtle">
-                    {formatDate(poem.createdAt)}
-                  </Text>
-                </VStack>
-                <HStack gap={2} flexShrink={0}>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/poet/poems/${poem.id}/edit`}>
-                      <LuPenLine size={16} />
-                      Редактировать
-                    </Link>
-                  </Button>
-                  <DeletePoemButton poemId={poem.id} poemTitle={poem.title} />
-                </HStack>
-              </Flex>
-            </Box>
-          ))}
-        </VStack>
-      )}
+                </Flex>
+              </Box>
+            ))}
+          </VStack>
+        )}
     </VStack>
   )
 }

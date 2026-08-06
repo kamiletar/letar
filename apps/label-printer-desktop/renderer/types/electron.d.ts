@@ -145,11 +145,11 @@ export interface ElectronAPI {
     list: () => Promise<PrinterProfile[]>
     get: (id: string) => Promise<PrinterProfile | null>
     create: (
-      profile: Omit<PrinterProfile, 'id' | 'createdAt' | 'updatedAt'>
+      profile: Omit<PrinterProfile, 'id' | 'createdAt' | 'updatedAt'>,
     ) => Promise<{ success: boolean; profile?: PrinterProfile; error?: string }>
     update: (
       id: string,
-      updates: Partial<PrinterProfile>
+      updates: Partial<PrinterProfile>,
     ) => Promise<{ success: boolean; profile?: PrinterProfile; error?: string }>
     delete: (id: string) => Promise<{ success: boolean; error?: string }>
   }

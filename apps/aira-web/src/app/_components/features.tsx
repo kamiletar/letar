@@ -100,9 +100,7 @@ export async function Features() {
 
           {/* Сетка фич */}
           <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6} w="full">
-            {features.map((feature) => (
-              <FeatureCard key={feature.title} {...feature} />
-            ))}
+            {features.map((feature) => <FeatureCard key={feature.title} {...feature} />)}
           </Grid>
         </VStack>
       </Container>

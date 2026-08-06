@@ -154,27 +154,31 @@ export const FieldSlider = createField<SliderFieldProps, number>({
         >
           {resolved.label && !showValue && (
             <Slider.Label>
-              {resolved.tooltip ? (
-                <HStack gap={1}>
-                  <span>{resolved.label}</span>
-                  <FieldTooltip {...resolved.tooltip} />
-                </HStack>
-              ) : (
-                resolved.label
-              )}
+              {resolved.tooltip
+                ? (
+                  <HStack gap={1}>
+                    <span>{resolved.label}</span>
+                    <FieldTooltip {...resolved.tooltip} />
+                  </HStack>
+                )
+                : (
+                  resolved.label
+                )}
             </Slider.Label>
           )}
           {resolved.label && showValue && (
             <HStack justify="space-between">
               <Slider.Label>
-                {resolved.tooltip ? (
-                  <HStack gap={1}>
-                    <span>{resolved.label}</span>
-                    <FieldTooltip {...resolved.tooltip} />
-                  </HStack>
-                ) : (
-                  resolved.label
-                )}
+                {resolved.tooltip
+                  ? (
+                    <HStack gap={1}>
+                      <span>{resolved.label}</span>
+                      <FieldTooltip {...resolved.tooltip} />
+                    </HStack>
+                  )
+                  : (
+                    resolved.label
+                  )}
               </Slider.Label>
               <Slider.ValueText />
             </HStack>

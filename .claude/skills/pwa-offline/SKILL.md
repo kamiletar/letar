@@ -92,7 +92,7 @@ export function useOnlineStatus() {
       }
     },
     () => navigator.onLine,
-    () => true // SSR fallback
+    () => true, // SSR fallback
   )
 }
 ```

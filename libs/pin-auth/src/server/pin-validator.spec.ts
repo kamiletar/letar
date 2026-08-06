@@ -3,18 +3,17 @@ import { createPinValidator, type PinValidatorAdapter, type VerificationTokenDat
 
 /** Создаёт мок-адаптер с заданным токеном верификации. */
 function createMockAdapter(token: Partial<VerificationTokenData> | null): PinValidatorAdapter {
-  const fullToken: VerificationTokenData | null =
-    token === null
-      ? null
-      : {
-          token: 'tok-1',
-          identifier: 'user@example.com',
-          pin: '123456',
-          pinExpires: new Date(Date.now() + 10 * 60 * 1000),
-          pinAttempts: 0,
-          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          ...token,
-        }
+  const fullToken: VerificationTokenData | null = token === null
+    ? null
+    : {
+      token: 'tok-1',
+      identifier: 'user@example.com',
+      pin: '123456',
+      pinExpires: new Date(Date.now() + 10 * 60 * 1000),
+      pinAttempts: 0,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      ...token,
+    }
 
   return {
     findToken: vi.fn().mockResolvedValue(fullToken),

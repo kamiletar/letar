@@ -17,7 +17,7 @@ describe('FieldColorPicker', () => {
           <Form initialValue={{ color: '#FF0000' }} onSubmit={vi.fn()}>
             <Form.Field.ColorPicker name="color" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // ColorPicker рендерит trigger button
@@ -30,7 +30,7 @@ describe('FieldColorPicker', () => {
           <Form initialValue={{ color: '#000000' }} onSubmit={vi.fn()}>
             <Form.Field.ColorPicker name="color" label="Цвет" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Цвет')).toBeInTheDocument()
@@ -42,7 +42,7 @@ describe('FieldColorPicker', () => {
           <Form initialValue={{ color: '#FF0000' }} onSubmit={vi.fn()}>
             <Form.Field.ColorPicker name="color" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // ColorPicker рендерит несколько textbox (hidden + channel input)
@@ -58,7 +58,7 @@ describe('FieldColorPicker', () => {
           <Form initialValue={{ color: '#000000' }} onSubmit={vi.fn()}>
             <Form.Field.ColorPicker name="color" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const button = screen.getByRole('button')
@@ -73,7 +73,7 @@ describe('FieldColorPicker', () => {
           <Form initialValue={{ color: '#48BB78' }} onSubmit={vi.fn()}>
             <Form.Field.ColorPicker name="color" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // ColorPicker рендерит input с значением цвета

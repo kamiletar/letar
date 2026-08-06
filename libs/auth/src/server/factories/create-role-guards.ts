@@ -54,7 +54,7 @@ export interface RoleGuardOptions<TRole extends string = string> {
 export function createRoleGuards<TSession, TUser extends { id: string; roles: TRole[] }, TRole extends string = string>(
   getSession: () => Promise<TSession | null>,
   getUserFromSession: (session: TSession) => TUser,
-  options: RoleGuardOptions<TRole> = {}
+  options: RoleGuardOptions<TRole> = {},
 ) {
   const { refetchRoles, signInUrl = '/sign-in', forbiddenUrl = '/' } = options
 

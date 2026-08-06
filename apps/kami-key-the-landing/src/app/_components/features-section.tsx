@@ -59,7 +59,7 @@ export function FeaturesSection() {
           observer.disconnect()
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     )
     observer.observe(el)
     return () => observer.disconnect()

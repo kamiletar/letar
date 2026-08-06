@@ -15,10 +15,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('title'),
-    description:
-      locale === 'ru'
-        ? 'Резюме Ками Летар — Software Architect с 8+ годами опыта разработки'
-        : 'Resume of Kami Letar — Software Architect with 8+ years of development experience',
+    description: locale === 'ru'
+      ? 'Резюме Ками Летар — Software Architect с 8+ годами опыта разработки'
+      : 'Resume of Kami Letar — Software Architect with 8+ years of development experience',
     alternates: {
       canonical: `/${locale}/cv`,
       languages: { ru: '/ru/cv', en: '/en/cv' },

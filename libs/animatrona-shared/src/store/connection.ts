@@ -133,7 +133,7 @@ export function createConnectionStore(storageKey: string) {
           connection: state.connection,
           // Не сохраняем isConnected — проверяем при запуске
         }),
-      }
-    )
+      },
+    ),
   )
 }

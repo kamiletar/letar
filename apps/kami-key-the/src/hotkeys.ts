@@ -106,7 +106,7 @@ const WNDPROC_HK = koffi.proto('intptr_t __stdcall WNDPROC_HK(void*, uint32, uin
 
 const RegisterClassExW_HK = user32.func('uint16 RegisterClassExW(WNDCLASSEXW_HK*)')
 const CreateWindowExW_HK = user32.func(
-  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)'
+  'void* CreateWindowExW(uint32, const char16_t*, const char16_t*, uint32, int, int, int, int, void*, void*, void*, void*)',
 )
 const DefWindowProcW_HK = user32.func('intptr_t DefWindowProcW(void*, uint32, uintptr_t, intptr_t)')
 const DestroyWindow_HK = user32.func('bool DestroyWindow(void*)')
@@ -343,7 +343,7 @@ export function initHotkeyWindow(): boolean {
     null,
     null,
     hInstance,
-    null
+    null,
   )
 
   if (!hotkeyHwnd) {

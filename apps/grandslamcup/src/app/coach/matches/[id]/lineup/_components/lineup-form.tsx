@@ -165,56 +165,58 @@ export function LineupForm({
 
       {/* Список игроков */}
       <Box bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflow="hidden">
-        {players.length === 0 ? (
-          <Box p={8} textAlign="center">
-            <Text color="fg.muted">В команде нет активных игроков</Text>
-          </Box>
-        ) : (
-          <VStack gap={0} align="stretch">
-            {players.map((player) => {
-              const isChecked = selectedIds.has(player.id)
-              const isMaxReached = false // без верхнего лимита
+        {players.length === 0
+          ? (
+            <Box p={8} textAlign="center">
+              <Text color="fg.muted">В команде нет активных игроков</Text>
+            </Box>
+          )
+          : (
+            <VStack gap={0} align="stretch">
+              {players.map((player) => {
+                const isChecked = selectedIds.has(player.id)
+                const isMaxReached = false // без верхнего лимита
 
-              return (
-                <Flex
-                  key={player.id}
-                  px={4}
-                  py={3}
-                  align="center"
-                  gap={3}
-                  borderBottomWidth="1px"
-                  borderColor="border.muted"
-                  _last={{ borderBottomWidth: 0 }}
-                  cursor={isDisabled || isMaxReached ? 'default' : 'pointer'}
-                  bg={isChecked ? 'blue.subtle' : 'transparent'}
-                  _hover={!isDisabled && !isMaxReached ? { bg: isChecked ? 'blue.subtle' : 'bg.subtle' } : undefined}
-                  onClick={() => {
-                    if (!isDisabled && !isMaxReached) {
-                      togglePlayer(player.id)
-                    } else if (!isDisabled && isChecked) {
-                      togglePlayer(player.id)
-                    }
-                  }}
-                >
-                  <Checkbox.Root
-                    checked={isChecked}
-                    disabled={isDisabled || (isMaxReached && !isChecked)}
-                    onCheckedChange={() => togglePlayer(player.id)}
+                return (
+                  <Flex
+                    key={player.id}
+                    px={4}
+                    py={3}
+                    align="center"
+                    gap={3}
+                    borderBottomWidth="1px"
+                    borderColor="border.muted"
+                    _last={{ borderBottomWidth: 0 }}
+                    cursor={isDisabled || isMaxReached ? 'default' : 'pointer'}
+                    bg={isChecked ? 'blue.subtle' : 'transparent'}
+                    _hover={!isDisabled && !isMaxReached ? { bg: isChecked ? 'blue.subtle' : 'bg.subtle' } : undefined}
+                    onClick={() => {
+                      if (!isDisabled && !isMaxReached) {
+                        togglePlayer(player.id)
+                      } else if (!isDisabled && isChecked) {
+                        togglePlayer(player.id)
+                      }
+                    }}
                   >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                  </Checkbox.Root>
-                  <Text flex={1} fontWeight={isChecked ? 'medium' : 'normal'}>
-                    {player.name}
-                  </Text>
-                  <Badge colorPalette={ROLE_COLOR[player.role] ?? 'gray'} size="sm">
-                    {ROLE_LABEL[player.role] ?? player.role}
-                  </Badge>
-                </Flex>
-              )
-            })}
-          </VStack>
-        )}
+                    <Checkbox.Root
+                      checked={isChecked}
+                      disabled={isDisabled || (isMaxReached && !isChecked)}
+                      onCheckedChange={() => togglePlayer(player.id)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
+                    <Text flex={1} fontWeight={isChecked ? 'medium' : 'normal'}>
+                      {player.name}
+                    </Text>
+                    <Badge colorPalette={ROLE_COLOR[player.role] ?? 'gray'} size="sm">
+                      {ROLE_LABEL[player.role] ?? player.role}
+                    </Badge>
+                  </Flex>
+                )
+              })}
+            </VStack>
+          )}
       </Box>
 
       {/* Кнопки */}

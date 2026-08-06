@@ -152,8 +152,7 @@ export default function SettingsPage() {
                           setRevokeTarget({
                             id: link.id,
                             name: link.psychologist.name || link.psychologist.email,
-                          })
-                        }
+                          })}
                       >
                         <LuShieldOff size={14} />
                         {t('revoke')}

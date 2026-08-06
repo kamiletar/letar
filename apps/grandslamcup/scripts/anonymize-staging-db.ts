@@ -43,8 +43,8 @@ if (!DATABASE_URL) {
 // grandslamcup-staging-db (см. docker-compose.staging.yml), продовая — в grandslamcup-db.
 if (!DATABASE_URL.includes('grandslamcup-staging-db') && !DATABASE_URL.includes('localhost')) {
   throw new Error(
-    `DATABASE_URL "${DATABASE_URL}" не похож на staging (ожидался хост grandslamcup-staging-db или localhost). ` +
-      'Останавливаюсь — этот скрипт необратимо перезаписывает данные.'
+    `DATABASE_URL "${DATABASE_URL}" не похож на staging (ожидался хост grandslamcup-staging-db или localhost). `
+      + 'Останавливаюсь — этот скрипт необратимо перезаписывает данные.',
   )
 }
 
@@ -77,7 +77,7 @@ async function main(): Promise<void> {
       image = NULL,
       "telegramChatId" = NULL,
       "emailVerified" = true
-     WHERE email != 'admin@grandslamcup.ru'`
+     WHERE email != 'admin@grandslamcup.ru'`,
   )
 
   // RosterApplication — контакты нерассмотренной заявки (не публичные данные до апрува).
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
       "playerTelegram" = NULL,
       "playerVk" = NULL,
       "playerBio" = NULL
-     WHERE "playerTelegram" IS NOT NULL OR "playerVk" IS NOT NULL OR "playerBio" IS NOT NULL`
+     WHERE "playerTelegram" IS NOT NULL OR "playerVk" IS NOT NULL OR "playerBio" IS NOT NULL`,
   )
 
   console.log('Готово. Player/City/Team/Match/Standings/Poem и остальные публичные модели не тронуты.')

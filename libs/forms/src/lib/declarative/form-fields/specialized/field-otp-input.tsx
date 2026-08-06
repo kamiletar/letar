@@ -134,15 +134,17 @@ export const FieldOTPInput = createField<OTPInputFieldProps, string, OTPFieldSta
 
           {onResend && (
             <HStack mt={3} justify="center">
-              {countdown > 0 ? (
-                <Text fontSize="sm" color="fg.muted">
-                  Redo in {formatCountdown(countdown)}
-                </Text>
-              ) : (
-                <Button variant="ghost" size="sm" onClick={handleResend} disabled={isResending} loading={isResending}>
-                  Submit again
-                </Button>
-              )}
+              {countdown > 0
+                ? (
+                  <Text fontSize="sm" color="fg.muted">
+                    Redo in {formatCountdown(countdown)}
+                  </Text>
+                )
+                : (
+                  <Button variant="ghost" size="sm" onClick={handleResend} disabled={isResending} loading={isResending}>
+                    Submit again
+                  </Button>
+                )}
             </HStack>
           )}
         </Box>

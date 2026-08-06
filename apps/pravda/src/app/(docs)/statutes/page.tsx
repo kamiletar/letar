@@ -9,7 +9,7 @@ import { navData } from '../../_components/sidebar'
 export const metadata: Metadata = getCategoryMetadata(
   'Уставы',
   'Нормативные документы, определяющие порядок организации: Церковный, Торговый, Военный, Образовательный и другие уставы.',
-  '/statutes'
+  '/statutes',
 )
 
 export default function ChartersPage() {

@@ -19,7 +19,7 @@ import { findLastDiscoverWatched } from './discover-watch-progress.action'
 export async function findUniqueWatchProgress(
   animeId: string,
   episodeId: string,
-  include?: Prisma.WatchProgressInclude
+  include?: Prisma.WatchProgressInclude,
 ): Promise<WatchProgress | null> {
   return prisma.watchProgress.findUnique({
     where: {
@@ -34,7 +34,7 @@ export async function findUniqueWatchProgress(
  */
 export async function findWatchProgressByAnimeId(
   animeId: string,
-  include?: Prisma.WatchProgressInclude
+  include?: Prisma.WatchProgressInclude,
 ): Promise<WatchProgress[]> {
   return prisma.watchProgress.findMany({
     where: { animeId },
@@ -61,7 +61,7 @@ export async function findLastWatchedEpisode(animeId: string): Promise<WatchProg
 export async function upsertWatchProgress(
   animeId: string,
   episodeId: string,
-  data: Prisma.WatchProgressUncheckedUpdateInput
+  data: Prisma.WatchProgressUncheckedUpdateInput,
 ): Promise<WatchProgress> {
   // retry при блокировке БД (конкуренция с импортом)
   return withDbRetry(() =>
@@ -116,7 +116,7 @@ export async function markEpisodeCompleted(animeId: string, episodeId: string): 
  */
 export async function deleteWatchProgress(
   animeId: string,
-  episodeId: string
+  episodeId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await prisma.watchProgress.delete({
@@ -292,7 +292,7 @@ export async function findWatchHistory(options: {
 export async function updateAnimeWatchStatus(
   animeId: string,
   status: WatchStatus,
-  userRating?: number
+  userRating?: number,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await withDbRetry(() =>
@@ -377,7 +377,7 @@ export async function findWatchedAnime(options: { page?: number; limit?: number 
       // Находим самый поздний прогресс
       const latestProgress = anime.watchProgress.reduce(
         (max, p) => (p.lastWatchedAt > max.lastWatchedAt ? p : max),
-        anime.watchProgress[0]
+        anime.watchProgress[0],
       )
 
       const watchedEpisodes = anime.watchProgress.filter((p) => p.completed).length

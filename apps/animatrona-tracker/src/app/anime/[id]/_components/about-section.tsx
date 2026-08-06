@@ -52,13 +52,13 @@ export function AboutSection({
     <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
       {/* Левая колонка: Описание */}
       <VStack align="stretch" gap={4}>
-        {description ? (
-          <Text color="fg" fontSize="sm" lineHeight="tall" whiteSpace="pre-line">
-            {description}
-          </Text>
-        ) : (
-          <Text color="fg.subtle">Описание отсутствует</Text>
-        )}
+        {description
+          ? (
+            <Text color="fg" fontSize="sm" lineHeight="tall" whiteSpace="pre-line">
+              {description}
+            </Text>
+          )
+          : <Text color="fg.subtle">Описание отсутствует</Text>}
 
         {/* Дополнительная информация */}
         {(source || licensor) && (

@@ -56,7 +56,7 @@ export function CommentForm({ postSlug, parentId, onSuccess, onCancel, placehold
         throw new Error(result.error) // Прерываем submit, чтобы форма не сбросилась
       }
     },
-    [postSlug, parentId, router, onSuccess, t]
+    [postSlug, parentId, router, onSuccess, t],
   )
 
   if (!session?.user) {

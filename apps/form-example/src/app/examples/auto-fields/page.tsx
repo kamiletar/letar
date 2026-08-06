@@ -36,8 +36,8 @@ export default function AutoFieldsPage() {
       <div>
         <Heading size="lg">Auto Fields</Heading>
         <Text color="fg.muted">
-          <Code>Form.FromSchema</Code> generates the entire form from a Zod schema — one line of code, zero manual field
-          definitions.
+          <Code>Form.FromSchema</Code>{' '}
+          generates the entire form from a Zod schema — one line of code, zero manual field definitions.
         </Text>
       </div>
 

@@ -10,8 +10,8 @@ export default function ZenstackPage() {
       <div>
         <Heading size="lg">ZenStack Plugin</Heading>
         <Text color="fg.muted">
-          Schemas generated from <Code>schema.zmodel</Code> with <Code>@letar/zenstack-form-plugin</Code>. The form
-          below is built entirely from generated code.
+          Schemas generated from <Code>schema.zmodel</Code> with{' '}
+          <Code>@letar/zenstack-form-plugin</Code>. The form below is built entirely from generated code.
         </Text>
       </div>
 

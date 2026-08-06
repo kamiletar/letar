@@ -18,16 +18,21 @@ export type ActionResult<T = void> = { success: true; data?: T } | { success: fa
  * Используется для форм с серверной валидацией.
  * @template T - Тип данных при успехе
  */
-export type ActionResultWithField<T = void> =
-  { success: true; data?: T } | { success: false; error: string; field?: string }
+export type ActionResultWithField<T = void> = { success: true; data?: T } | {
+  success: false
+  error: string
+  field?: string
+}
 
 /**
  * Результат действия с редиректом.
  * Используется когда после успеха нужен редирект на другую страницу.
  * @template T - Тип данных при успехе
  */
-export type ActionResultWithRedirect<T = void> =
-  { success: true; data?: T; redirectTo?: string } | { success: false; error: string }
+export type ActionResultWithRedirect<T = void> = { success: true; data?: T; redirectTo?: string } | {
+  success: false
+  error: string
+}
 
 // =============================================================================
 // Специализированные типы

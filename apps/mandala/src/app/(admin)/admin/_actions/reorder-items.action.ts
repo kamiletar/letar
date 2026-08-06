@@ -12,7 +12,7 @@ import { REORDER_CONFIGS, type ReorderableModel } from './reorder-config'
  */
 export async function reorderItems(
   model: ReorderableModel,
-  orderedIds: string[]
+  orderedIds: string[],
 ): Promise<{ success: boolean; error?: string }> {
   const authResult = await requireAdminAuth()
   if (!authResult.success) {
@@ -33,7 +33,7 @@ export async function reorderItems(
           where: { id },
           data: { order: index },
         })
-      )
+      ),
     )
 
     // Инвалидируем кэш

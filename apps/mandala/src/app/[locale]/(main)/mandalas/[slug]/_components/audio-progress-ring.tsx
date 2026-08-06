@@ -131,7 +131,7 @@ export function AudioProgressRing({
         setProgress(newProgress)
       }
     },
-    [audioElement, duration]
+    [audioElement, duration],
   )
 
   /**
@@ -142,7 +142,7 @@ export function AudioProgressRing({
       const newProgress = getProgressFromEvent(event.clientX, event.clientY)
       seekTo(newProgress)
     },
-    [getProgressFromEvent, seekTo]
+    [getProgressFromEvent, seekTo],
   )
 
   /**
@@ -156,7 +156,7 @@ export function AudioProgressRing({
       const newProgress = getProgressFromEvent(event.clientX, event.clientY)
       setProgress(newProgress)
     },
-    [getProgressFromEvent]
+    [getProgressFromEvent],
   )
 
   /**

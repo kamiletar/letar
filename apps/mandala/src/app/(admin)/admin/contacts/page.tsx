@@ -69,8 +69,7 @@ export default async function ContactMessagesPage({ searchParams }: ContactsPage
     <Stack gap={6}>
       <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
         <Heading size={{ base: 'md', md: 'lg' }}>
-          Сообщения{' '}
-          {unreadCount > 0 && (
+          Сообщения {unreadCount > 0 && (
             <Badge colorPalette="red" fontSize={{ base: 'sm', md: 'md' }} ml={2}>
               {unreadCount} новых
             </Badge>
@@ -94,71 +93,73 @@ export default async function ContactMessagesPage({ searchParams }: ContactsPage
         </Suspense>
       </HStack>
 
-      {messages.length === 0 ? (
-        hasFilters ? (
-          <Box py={8} textAlign="center">
-            <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
-          </Box>
-        ) : (
-          <EmptyState
-            icon={LuMail}
-            title="Нет сообщений"
-            description="Сообщения появятся когда посетители заполнят форму обратной связи"
-          />
+      {messages.length === 0
+        ? (
+          hasFilters
+            ? (
+              <Box py={8} textAlign="center">
+                <Text color="fg.muted">Ничего не найдено по заданным фильтрам</Text>
+              </Box>
+            )
+            : (
+              <EmptyState
+                icon={LuMail}
+                title="Нет сообщений"
+                description="Сообщения появятся когда посетители заполнят форму обратной связи"
+              />
+            )
         )
-      ) : (
-        <>
-          <VStack gap={4} align="stretch">
-            {messages.map((message) => (
-              <Card.Root
-                key={message.id}
-                bg={
-                  message.read
+        : (
+          <>
+            <VStack gap={4} align="stretch">
+              {messages.map((message) => (
+                <Card.Root
+                  key={message.id}
+                  bg={message.read
                     ? { _light: 'blackAlpha.50', _dark: 'whiteAlpha.50' }
-                    : { _light: 'blackAlpha.100', _dark: 'whiteAlpha.100' }
-                }
-                borderColor={message.read ? 'border.subtle' : 'purple.500'}
-                borderWidth={message.read ? '1px' : '2px'}
-              >
-                <Card.Header>
-                  <HStack justify="space-between" align="flex-start">
-                    <Box>
-                      <Text fontWeight="bold" color="fg">
-                        {message.name}
-                      </Text>
-                      <Link href={`mailto:${message.email}`} color="fg" fontSize="sm" _hover={{ color: 'fg.brand' }}>
-                        {message.email}
-                      </Link>
-                    </Box>
-                    <HStack gap={2}>
-                      <Text fontSize="sm" color="fg.muted">
-                        {new Date(message.createdAt).toLocaleString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </Text>
-                      {!message.read && <MarkAsReadButton messageId={message.id} />}
+                    : { _light: 'blackAlpha.100', _dark: 'whiteAlpha.100' }}
+                  borderColor={message.read ? 'border.subtle' : 'purple.500'}
+                  borderWidth={message.read ? '1px' : '2px'}
+                >
+                  <Card.Header>
+                    <HStack justify="space-between" align="flex-start">
+                      <Box>
+                        <Text fontWeight="bold" color="fg">
+                          {message.name}
+                        </Text>
+                        <Link href={`mailto:${message.email}`} color="fg" fontSize="sm" _hover={{ color: 'fg.brand' }}>
+                          {message.email}
+                        </Link>
+                      </Box>
+                      <HStack gap={2}>
+                        <Text fontSize="sm" color="fg.muted">
+                          {new Date(message.createdAt).toLocaleString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </Text>
+                        {!message.read && <MarkAsReadButton messageId={message.id} />}
+                      </HStack>
                     </HStack>
-                  </HStack>
-                </Card.Header>
-                <Card.Body>
-                  <Text color="fg.muted" whiteSpace="pre-wrap">
-                    {message.message}
-                  </Text>
-                </Card.Body>
-              </Card.Root>
-            ))}
-          </VStack>
+                  </Card.Header>
+                  <Card.Body>
+                    <Text color="fg.muted" whiteSpace="pre-wrap">
+                      {message.message}
+                    </Text>
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </VStack>
 
-          {/* Пагинация */}
-          <Suspense fallback={<Box h="48px" />}>
-            <Pagination total={total} pageSize={PAGE_SIZE} />
-          </Suspense>
-        </>
-      )}
+            {/* Пагинация */}
+            <Suspense fallback={<Box h="48px" />}>
+              <Pagination total={total} pageSize={PAGE_SIZE} />
+            </Suspense>
+          </>
+        )}
     </Stack>
   )
 }

@@ -90,7 +90,7 @@ export function OffsetInput({
         }
       }
     },
-    [inputValue, onChange]
+    [inputValue, onChange],
   )
 
   // Быстрые кнопки
@@ -98,7 +98,7 @@ export function OffsetInput({
     (delta: number) => {
       onChange(value + delta)
     },
-    [onChange, value]
+    [onChange, value],
   )
 
   return (

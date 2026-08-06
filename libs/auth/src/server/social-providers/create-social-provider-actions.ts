@@ -33,7 +33,7 @@ const DEFAULT_KEY_MISSING_MESSAGE = 'AUTH_ENCRYPTION_KEY не настроен �
  * ```
  */
 export function createSocialProviderActions<TUser>(
-  options: CreateSocialProviderActionsOptions<TUser>
+  options: CreateSocialProviderActionsOptions<TUser>,
 ): SocialProviderActions {
   const {
     requireAuth,

@@ -159,7 +159,7 @@ export async function setupShikimoriMock(
     delay?: number
     /** Имитировать ошибку */
     simulateError?: boolean
-  } = {}
+  } = {},
 ): Promise<void> {
   const { searchResults = [], detailsById = {}, delay = 100, simulateError = false } = options
 
@@ -193,8 +193,8 @@ export async function setupShikimoriMock(
       // Фильтруем результаты по поисковому запросу
       const filteredResults = searchResults.filter(
         (anime) =>
-          anime.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          anime.russian.toLowerCase().includes(searchTerm.toLowerCase())
+          anime.name.toLowerCase().includes(searchTerm.toLowerCase())
+          || anime.russian.toLowerCase().includes(searchTerm.toLowerCase()),
       )
 
       await route.fulfill({

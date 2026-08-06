@@ -52,7 +52,7 @@ export async function sendPlayerAction(
   coachToken: string,
   playerId: string,
   playerName: string,
-  teamName: string
+  teamName: string,
 ) {
   const ctx = await validateCoachToken(matchId, coachToken)
   if (!ctx) {
@@ -105,12 +105,11 @@ export async function sendPlayerAction(
     })
 
     // Обновляем MatchLineup статус
-    const newStatus =
-      state.currentHalf === 1
-        ? 'STARTER_HALF1'
-        : lineup.status === 'STARTER_HALF1'
-          ? 'STARTER_HALF1' // уже играл в 1-м, оставляем
-          : 'STARTER_HALF2'
+    const newStatus = state.currentHalf === 1
+      ? 'STARTER_HALF1'
+      : lineup.status === 'STARTER_HALF1'
+      ? 'STARTER_HALF1' // уже играл в 1-м, оставляем
+      : 'STARTER_HALF2'
 
     if (lineup.status === 'UNUSED' || lineup.status === 'SUBSTITUTE') {
       await prisma.matchLineup.update({
@@ -153,7 +152,7 @@ export async function substitutePlayerAction(
   matchId: string,
   coachToken: string,
   outPlayerId: string,
-  inPlayerId: string
+  inPlayerId: string,
 ) {
   const ctx = await validateCoachToken(matchId, coachToken)
   if (!ctx) {

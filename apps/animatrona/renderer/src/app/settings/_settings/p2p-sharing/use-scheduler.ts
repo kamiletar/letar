@@ -17,7 +17,7 @@ export interface UseSchedulerReturn {
   stopScheduler: () => Promise<void>
   checkNow: (
     setIsRefreshing: (value: boolean) => void,
-    setRefreshResults: (results: SubscriptionRefreshResult[]) => void
+    setRefreshResults: (results: SubscriptionRefreshResult[]) => void,
   ) => Promise<void>
 }
 
@@ -131,7 +131,7 @@ export function useScheduler(onChecked?: (results: SubscriptionRefreshResult[]) 
   const checkNow = useCallback(
     async (
       setIsRefreshing: (value: boolean) => void,
-      setRefreshResults: (results: SubscriptionRefreshResult[]) => void
+      setRefreshResults: (results: SubscriptionRefreshResult[]) => void,
     ) => {
       const api = window.electronAPI?.ipfs
       if (!api) {
@@ -147,7 +147,7 @@ export function useScheduler(onChecked?: (results: SubscriptionRefreshResult[]) 
         setScheduler((prev) => ({ ...prev, error: String(error) }))
       }
     },
-    []
+    [],
   )
 
   return { scheduler, updateSchedulerConfig, startScheduler, stopScheduler, checkNow }

@@ -231,7 +231,7 @@ function onAudioTrackCompleted(
   outputPath: string,
   episodeId: string,
   passthrough?: boolean,
-  originalCodec?: string
+  originalCodec?: string,
 ): void {
   broadcastToWindows(
     'parallelTranscode:audioTrackCompleted',
@@ -239,7 +239,7 @@ function onAudioTrackCompleted(
     outputPath,
     episodeId,
     passthrough,
-    originalCodec
+    originalCodec,
   )
 }
 
@@ -283,7 +283,7 @@ function onVmafProgress(itemId: string, progress: CqSearchProgress): void {
 /** Событие для real-time логов (зарезервировано для будущего использования) */
 function _onVideoLogEntry(
   taskId: string,
-  entry: { timestamp: number; level: 'info' | 'warning' | 'error'; message: string }
+  entry: { timestamp: number; level: 'info' | 'warning' | 'error'; message: string },
 ): void {
   broadcastToWindows('parallelTranscode:videoLogEntry', taskId, entry)
 }
@@ -330,7 +330,7 @@ export function registerParallelTranscodeHandlers(): void {
     'parallelTranscode:addBatch',
     createValidatedHandler(addBatchSchema, async (items: BatchImportItem[]) => {
       manager.addBatch(items)
-    })
+    }),
   )
 
   // Добавить batch эпизодов с batchId
@@ -340,8 +340,8 @@ export function registerParallelTranscodeHandlers(): void {
       addBatchWithIdSchema,
       async ({ items, batchId }: { items: BatchImportItem[]; batchId?: string }) => {
         manager.addBatch(items, batchId)
-      }
-    )
+      },
+    ),
   )
 
   // Начать новый batch с полным сбросом + лимиты конкурентности
@@ -359,8 +359,8 @@ export function registerParallelTranscodeHandlers(): void {
         concurrency?: { videoMaxConcurrent?: number; audioMaxConcurrent?: number }
       }) => {
         manager.startNewBatch(items, batchId, concurrency)
-      }
-    )
+      },
+    ),
   )
 
   // Получить текущий batch ID
@@ -399,7 +399,7 @@ export function registerParallelTranscodeHandlers(): void {
     createValidatedHandler(concurrencySchema, async (value: number) => {
       manager.setAudioMaxConcurrent(value)
       return manager.getAudioMaxConcurrent()
-    })
+    }),
   )
 
   // Установить лимит параллельных видео-задач
@@ -408,7 +408,7 @@ export function registerParallelTranscodeHandlers(): void {
     createValidatedHandler(concurrencySchema, async (value: number) => {
       manager.setVideoMaxConcurrent(value)
       return manager.getVideoMaxConcurrent()
-    })
+    }),
   )
 
   // Добавить один элемент
@@ -416,7 +416,7 @@ export function registerParallelTranscodeHandlers(): void {
     'parallelTranscode:addItem',
     createValidatedHandler(batchImportItemSchema, async (item: BatchImportItem) => {
       manager.addImportItem(item)
-    })
+    }),
   )
 
   // Получить агрегированный прогресс (без валидации — нет входных данных)
@@ -437,7 +437,7 @@ export function registerParallelTranscodeHandlers(): void {
     'parallelTranscode:getItem',
     createValidatedHandler(itemIdSchema, async (itemId: string) => {
       return manager.getItem(itemId)
-    })
+    }),
   )
 
   // Получить все элементы
@@ -497,7 +497,7 @@ export function registerParallelTranscodeHandlers(): void {
     'parallelTranscode:cancelItem',
     createValidatedHandler(itemIdSchema, async (itemId: string) => {
       return manager.cancelItem(itemId)
-    })
+    }),
   )
 
   // Отменить всё
@@ -536,7 +536,7 @@ export function registerParallelTranscodeHandlers(): void {
         return manager.getVmafProgress(itemId)
       }
       return manager.getAllVmafProgress()
-    })
+    }),
   )
 
   // Получить все VMAF прогрессы

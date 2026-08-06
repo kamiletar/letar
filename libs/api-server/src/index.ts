@@ -39,7 +39,7 @@ export {
   setCustomLimit,
 } from './lib/rate-limiter'
 
-export type { RateLimitResult, RateLimiterConfig, RateLimiterInstance } from './lib/rate-limiter'
+export type { RateLimiterConfig, RateLimiterInstance, RateLimitResult } from './lib/rate-limiter'
 
 // Role Utils
 export { createMembershipChecker, createRoleChecker, hasAllRoles, hasAnyRole, hasRole } from './lib/role-utils'

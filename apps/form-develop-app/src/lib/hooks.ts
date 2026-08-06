@@ -19,7 +19,7 @@ import { useClientQueries } from '@zenstackhq/tanstack-query/react'
 /** Query хук для useFindUnique совместимый с FormApiConfig */
 export function useFindUniqueRecipe(
   args: { where: { id: string }; include?: object },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   const client = useClientQueries(schema)
   return client.recipe.useFindUnique(args, options)

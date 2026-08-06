@@ -141,8 +141,8 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     // Exclude: system fields, id, relation fields, model references
     // BUT: keep FK fields with @form.relation for select rendering
     const hasFormRelation = !!formMeta.relation
-    const shouldExclude =
-      formMeta.exclude || isId || hasRelationAttr || (isModelRef && !hasFormRelation) || isSystemField
+    const shouldExclude = formMeta.exclude || isId || hasRelationAttr || (isModelRef && !hasFormRelation)
+      || isSystemField
 
     if (shouldExclude) {
       excludedFields.push(field.name)
@@ -331,7 +331,7 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
 export function generateModelCode(
   modelInfo: ModelInfo,
   enumNames: Set<string>,
-  i18nConfig: I18nConfig | null = null
+  i18nConfig: I18nConfig | null = null,
 ): string {
   const { name, fields, excludedFields } = modelInfo
 

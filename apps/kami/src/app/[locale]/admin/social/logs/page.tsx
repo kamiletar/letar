@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db'
 import { ADMIN_PAGE_SIZE } from '@/lib/utils/constants'
-import { Badge, Box, Link as ChakraLink, HStack, Table, Text } from '@chakra-ui/react'
+import { Badge, Box, HStack, Link as ChakraLink, Table, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AdminPageLayout } from '../../_components'
@@ -128,34 +128,36 @@ export default async function SocialLogsPage({ params, searchParams }: LogsPageP
                   <Text fontSize="sm" color="fg.muted">
                     {cp.publishedAt
                       ? new Date(cp.publishedAt).toLocaleDateString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
                       : new Date(cp.createdAt).toLocaleDateString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
                   </Text>
                 </Table.Cell>
                 <Table.Cell>
-                  {cp.externalUrl ? (
-                    <ChakraLink
-                      href={cp.externalUrl}
-                      target="_blank"
-                      fontSize="sm"
-                      color={{ base: 'blue.500', _dark: 'blue.300' }}
-                    >
-                      Открыть ↗
-                    </ChakraLink>
-                  ) : (
-                    <Text fontSize="sm" color="fg.muted">
-                      —
-                    </Text>
-                  )}
+                  {cp.externalUrl
+                    ? (
+                      <ChakraLink
+                        href={cp.externalUrl}
+                        target="_blank"
+                        fontSize="sm"
+                        color={{ base: 'blue.500', _dark: 'blue.300' }}
+                      >
+                        Открыть ↗
+                      </ChakraLink>
+                    )
+                    : (
+                      <Text fontSize="sm" color="fg.muted">
+                        —
+                      </Text>
+                    )}
                 </Table.Cell>
               </Table.Row>
             ))}

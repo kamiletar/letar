@@ -158,26 +158,28 @@ function SortableRow<T extends TableItem>({
 
       {/* Действия */}
       <Table.Cell>
-        {renderActions ? (
-          renderActions(item)
-        ) : (
-          <HStack gap={1} justify="flex-end">
-            {viewHref && (
-              <IconButton aria-label="Просмотр" variant="ghost" size="sm" asChild>
-                <Link href={`${viewHref}/${item.id}`}>
-                  <LuEye />
-                </Link>
-              </IconButton>
-            )}
-            {editHref && (
-              <IconButton aria-label="Редактировать" variant="ghost" size="sm" asChild>
-                <Link href={`${editHref}/${item.id}/edit`}>
-                  <LuPencil />
-                </Link>
-              </IconButton>
-            )}
-          </HStack>
-        )}
+        {renderActions
+          ? (
+            renderActions(item)
+          )
+          : (
+            <HStack gap={1} justify="flex-end">
+              {viewHref && (
+                <IconButton aria-label="Просмотр" variant="ghost" size="sm" asChild>
+                  <Link href={`${viewHref}/${item.id}`}>
+                    <LuEye />
+                  </Link>
+                </IconButton>
+              )}
+              {editHref && (
+                <IconButton aria-label="Редактировать" variant="ghost" size="sm" asChild>
+                  <Link href={`${editHref}/${item.id}/edit`}>
+                    <LuPencil />
+                  </Link>
+                </IconButton>
+              )}
+            </HStack>
+          )}
       </Table.Cell>
     </Table.Row>
   )
@@ -270,26 +272,28 @@ function SortableCard<T extends TableItem>({
           </HStack>
 
           {/* Действия — увеличенные touch targets для мобильных */}
-          {renderActions ? (
-            renderActions(item)
-          ) : (
-            <HStack gap={2}>
-              {viewHref && (
-                <IconButton aria-label="Просмотр" variant="ghost" size="md" minW="44px" minH="44px" asChild>
-                  <Link href={`${viewHref}/${item.id}`}>
-                    <LuEye size={20} />
-                  </Link>
-                </IconButton>
-              )}
-              {editHref && (
-                <IconButton aria-label="Редактировать" variant="ghost" size="md" minW="44px" minH="44px" asChild>
-                  <Link href={`${editHref}/${item.id}/edit`}>
-                    <LuPencil size={20} />
-                  </Link>
-                </IconButton>
-              )}
-            </HStack>
-          )}
+          {renderActions
+            ? (
+              renderActions(item)
+            )
+            : (
+              <HStack gap={2}>
+                {viewHref && (
+                  <IconButton aria-label="Просмотр" variant="ghost" size="md" minW="44px" minH="44px" asChild>
+                    <Link href={`${viewHref}/${item.id}`}>
+                      <LuEye size={20} />
+                    </Link>
+                  </IconButton>
+                )}
+                {editHref && (
+                  <IconButton aria-label="Редактировать" variant="ghost" size="md" minW="44px" minH="44px" asChild>
+                    <Link href={`${editHref}/${item.id}/edit`}>
+                      <LuPencil size={20} />
+                    </Link>
+                  </IconButton>
+                )}
+              </HStack>
+            )}
         </Flex>
 
         {/* Поля данных */}
@@ -377,7 +381,7 @@ export function GenericAdminTable<T extends TableItem>({
         tolerance: 5,
       },
     }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor),
   )
 
   /** Обработчик bulk action */
@@ -425,78 +429,29 @@ export function GenericAdminTable<T extends TableItem>({
         onDragEnd={handleDragEnd}
       >
         {/* Мобильный режим: карточки */}
-        {isMobile ? (
-          <Stack gap={3} opacity={isPending ? 0.7 : 1} transition="opacity 0.2s">
-            {/* Header с чекбоксом "выбрать все" — увеличенная зона касания */}
-            <Flex align="center" gap={2} px={2}>
-              <Box minW="44px" minH="44px" display="flex" alignItems="center" justifyContent="center">
-                <Checkbox.Root
-                  checked={selection.isAllSelected ? true : selection.isIndeterminate ? 'indeterminate' : false}
-                  onCheckedChange={() => selection.toggleAll()}
-                  size="lg"
-                >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control />
-                </Checkbox.Root>
-              </Box>
-              <Text fontSize="sm" color="fg.muted">
-                Выбрать все
-              </Text>
-            </Flex>
+        {isMobile
+          ? (
+            <Stack gap={3} opacity={isPending ? 0.7 : 1} transition="opacity 0.2s">
+              {/* Header с чекбоксом "выбрать все" — увеличенная зона касания */}
+              <Flex align="center" gap={2} px={2}>
+                <Box minW="44px" minH="44px" display="flex" alignItems="center" justifyContent="center">
+                  <Checkbox.Root
+                    checked={selection.isAllSelected ? true : selection.isIndeterminate ? 'indeterminate' : false}
+                    onCheckedChange={() => selection.toggleAll()}
+                    size="lg"
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                  </Checkbox.Root>
+                </Box>
+                <Text fontSize="sm" color="fg.muted">
+                  Выбрать все
+                </Text>
+              </Flex>
 
-            <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-              {items.map((item) => (
-                <SortableCard
-                  key={item.id}
-                  item={item}
-                  columns={columns}
-                  isSelected={selection.isSelected(item.id)}
-                  onToggle={() => selection.toggle(item.id)}
-                  viewHref={viewHref}
-                  editHref={editHref}
-                  renderActions={renderActions}
-                  colorPalette={colorPalette}
-                />
-              ))}
-            </SortableContext>
-          </Stack>
-        ) : (
-          /* Десктопный режим: таблица */
-          <Table.Root opacity={isPending ? 0.7 : 1} transition="opacity 0.2s">
-            <Table.Header>
-              <Table.Row>
-                {/* Ручка + Checkbox */}
-                <Table.ColumnHeader w="80px">
-                  <HStack gap={2}>
-                    <Box w="16px" />
-                    <Checkbox.Root
-                      checked={selection.isAllSelected ? true : selection.isIndeterminate ? 'indeterminate' : false}
-                      onCheckedChange={() => selection.toggleAll()}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                    </Checkbox.Root>
-                  </HStack>
-                </Table.ColumnHeader>
-
-                {/* Динамические колонки */}
-                {columns.map((column) => (
-                  <Table.ColumnHeader key={column.header} w={column.width} textAlign={column.textAlign}>
-                    {column.header}
-                  </Table.ColumnHeader>
-                ))}
-
-                {/* Колонка порядка */}
-                {showOrderColumn && <Table.ColumnHeader>Порядок</Table.ColumnHeader>}
-
-                {/* Действия */}
-                <Table.ColumnHeader textAlign="right">Действия</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
               <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
                 {items.map((item) => (
-                  <SortableRow
+                  <SortableCard
                     key={item.id}
                     item={item}
                     columns={columns}
@@ -505,14 +460,65 @@ export function GenericAdminTable<T extends TableItem>({
                     viewHref={viewHref}
                     editHref={editHref}
                     renderActions={renderActions}
-                    showOrderColumn={showOrderColumn}
                     colorPalette={colorPalette}
                   />
                 ))}
               </SortableContext>
-            </Table.Body>
-          </Table.Root>
-        )}
+            </Stack>
+          )
+          : (
+            /* Десктопный режим: таблица */
+            <Table.Root opacity={isPending ? 0.7 : 1} transition="opacity 0.2s">
+              <Table.Header>
+                <Table.Row>
+                  {/* Ручка + Checkbox */}
+                  <Table.ColumnHeader w="80px">
+                    <HStack gap={2}>
+                      <Box w="16px" />
+                      <Checkbox.Root
+                        checked={selection.isAllSelected ? true : selection.isIndeterminate ? 'indeterminate' : false}
+                        onCheckedChange={() => selection.toggleAll()}
+                      >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                      </Checkbox.Root>
+                    </HStack>
+                  </Table.ColumnHeader>
+
+                  {/* Динамические колонки */}
+                  {columns.map((column) => (
+                    <Table.ColumnHeader key={column.header} w={column.width} textAlign={column.textAlign}>
+                      {column.header}
+                    </Table.ColumnHeader>
+                  ))}
+
+                  {/* Колонка порядка */}
+                  {showOrderColumn && <Table.ColumnHeader>Порядок</Table.ColumnHeader>}
+
+                  {/* Действия */}
+                  <Table.ColumnHeader textAlign="right">Действия</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+                  {items.map((item) => (
+                    <SortableRow
+                      key={item.id}
+                      item={item}
+                      columns={columns}
+                      isSelected={selection.isSelected(item.id)}
+                      onToggle={() => selection.toggle(item.id)}
+                      viewHref={viewHref}
+                      editHref={editHref}
+                      renderActions={renderActions}
+                      showOrderColumn={showOrderColumn}
+                      colorPalette={colorPalette}
+                    />
+                  ))}
+                </SortableContext>
+              </Table.Body>
+            </Table.Root>
+          )}
       </DndContext>
 
       {resolvedBulkActions.length > 0 && (

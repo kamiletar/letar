@@ -96,11 +96,9 @@ function AppCardWithData({ app, serverId }: { app: AppFromServer; serverId: stri
       type={isWeb ? 'web' : 'cli'}
       port={app.port ?? undefined}
       status={containerStatus ? { running: containerStatus.running, uptime: containerStatus.uptime } : undefined}
-      stats={
-        containerStatus?.running && containerStatus.cpu !== undefined
-          ? { cpu: containerStatus.cpu, memory: containerStatus.memory ?? 0 }
-          : undefined
-      }
+      stats={containerStatus?.running && containerStatus.cpu !== undefined
+        ? { cpu: containerStatus.cpu, memory: containerStatus.memory ?? 0 }
+        : undefined}
       storage={storage ? { total: storage.total } : undefined}
     />
   )
@@ -153,15 +151,13 @@ export default function AppsPage() {
       <Box p="8">
         <Heading mb="6">Приложения — {currentServer.displayName}</Heading>
 
-        {apps.length === 0 ? (
-          <Text color="fg.muted">На этом сервере нет приложений</Text>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
-            {apps.map((app) => (
-              <AppCardWithData key={app.id} app={app} serverId={selectedServerId} />
-            ))}
-          </SimpleGrid>
-        )}
+        {apps.length === 0
+          ? <Text color="fg.muted">На этом сервере нет приложений</Text>
+          : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="6">
+              {apps.map((app) => <AppCardWithData key={app.id} app={app} serverId={selectedServerId} />)}
+            </SimpleGrid>
+          )}
       </Box>
     </>
   )

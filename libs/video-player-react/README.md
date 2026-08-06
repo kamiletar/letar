@@ -110,7 +110,7 @@ function VideoPlayerWithSeparateAudio({ videoSrc, audioTracks, currentAudioTrack
 
   const currentTrack = useMemo(
     () => audioTracks.find((t) => t.id === currentAudioTrackId),
-    [audioTracks, currentAudioTrackId]
+    [audioTracks, currentAudioTrackId],
   )
 
   const { videoRef, isVideoReady } = useShakaPlayer({

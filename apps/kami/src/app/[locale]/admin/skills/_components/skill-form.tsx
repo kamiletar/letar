@@ -54,8 +54,9 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
         if (!result.success) {
           toaster.error({
             title: 'Ошибка',
-            description:
-              result.error === 'VALIDATION_ERROR' ? 'Проверьте правильность заполнения формы' : 'Не удалось сохранить',
+            description: result.error === 'VALIDATION_ERROR'
+              ? 'Проверьте правильность заполнения формы'
+              : 'Не удалось сохранить',
           })
           return
         }
@@ -68,7 +69,7 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
         router.push(`/${locale}/admin/skills`)
       })
     },
-    [isEditing, skill, locale, router, experienceMode]
+    [isEditing, skill, locale, router, experienceMode],
   )
 
   const handleDelete = useCallback(async () => {
@@ -101,31 +102,31 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
   // Начальные значения для формы
   const initialValues = skill
     ? {
-        name: skill.name,
-        slug: skill.slug,
-        level: skill.level,
-        years: skill.years ?? undefined,
-        startYear: skill.startYear ?? undefined,
-        icon: skill.icon ?? '',
-        description: skill.description ?? '',
-        url: skill.url ?? '',
-        order: skill.order,
-        featured: skill.featured,
-        categoryId: skill.categoryId,
-      }
+      name: skill.name,
+      slug: skill.slug,
+      level: skill.level,
+      years: skill.years ?? undefined,
+      startYear: skill.startYear ?? undefined,
+      icon: skill.icon ?? '',
+      description: skill.description ?? '',
+      url: skill.url ?? '',
+      order: skill.order,
+      featured: skill.featured,
+      categoryId: skill.categoryId,
+    }
     : {
-        name: '',
-        slug: '',
-        level: 'INTERMEDIATE' as const,
-        years: undefined,
-        startYear: undefined,
-        icon: '',
-        description: '',
-        url: '',
-        order: 0,
-        featured: false,
-        categoryId: categories[0]?.id ?? '',
-      }
+      name: '',
+      slug: '',
+      level: 'INTERMEDIATE' as const,
+      years: undefined,
+      startYear: undefined,
+      icon: '',
+      description: '',
+      url: '',
+      order: 0,
+      featured: false,
+      categoryId: categories[0]?.id ?? '',
+    }
 
   const calculatedYears = skill?.startYear ? calculateYearsFromStartYear(skill.startYear) : null
 
@@ -175,30 +176,32 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
                   </Button>
                 </HStack>
 
-                {experienceMode === 'years' ? (
-                  <KamiForm.Field.Number
-                    name="years"
-                    label="Лет опыта"
-                    placeholder="9"
-                    min={0}
-                    max={50}
-                    step={0.5}
-                    helperText="Введите количество лет опыта вручную"
-                  />
-                ) : (
-                  <Stack gap={2}>
+                {experienceMode === 'years'
+                  ? (
                     <KamiForm.Field.Number
-                      name="startYear"
-                      label="Год начала практики"
-                      placeholder="2016"
-                      min={1990}
-                      max={new Date().getFullYear()}
-                      helperText={`Количество лет будет обновляться автоматически. ${
-                        calculatedYears !== null ? `Сейчас: ${calculatedYears} лет` : ''
-                      }`}
+                      name="years"
+                      label="Лет опыта"
+                      placeholder="9"
+                      min={0}
+                      max={50}
+                      step={0.5}
+                      helperText="Введите количество лет опыта вручную"
                     />
-                  </Stack>
-                )}
+                  )
+                  : (
+                    <Stack gap={2}>
+                      <KamiForm.Field.Number
+                        name="startYear"
+                        label="Год начала практики"
+                        placeholder="2016"
+                        min={1990}
+                        max={new Date().getFullYear()}
+                        helperText={`Количество лет будет обновляться автоматически. ${
+                          calculatedYears !== null ? `Сейчас: ${calculatedYears} лет` : ''
+                        }`}
+                      />
+                    </Stack>
+                  )}
               </Box>
 
               {/* Дополнительно */}

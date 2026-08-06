@@ -44,11 +44,13 @@ export function LiveDisplayClient({ match, donateLinks = [] }: LiveDisplayClient
   const [awayScore, setAwayScore] = useState(match.awayScore)
   const [matchStatus, setMatchStatus] = useState(match.status)
   const [scoreFlash, setScoreFlash] = useState(false)
-  const [audienceStats, setAudienceStats] = useState<{
-    count: number
-    avgText: number
-    avgDelivery: number
-  } | null>(null)
+  const [audienceStats, setAudienceStats] = useState<
+    {
+      count: number
+      avgText: number
+      avgDelivery: number
+    } | null
+  >(null)
 
   // SSE подключение (public, без токена)
   const { matchState, status: sseStatus } = useMatchSSE({
@@ -106,10 +108,9 @@ export function LiveDisplayClient({ match, donateLinks = [] }: LiveDisplayClient
 
   // Определяем: показывать ли экран перерыва
   const phase = matchState?.phase
-  const isIntermission =
-    matchStatus === 'LIVE' &&
-    (phase === 'IDLE' || phase === 'ROUND_COMPLETE') &&
-    !matchState?.currentPerformances[matchState?.currentPerformerIndex ?? 0]
+  const isIntermission = matchStatus === 'LIVE'
+    && (phase === 'IDLE' || phase === 'ROUND_COMPLETE')
+    && !matchState?.currentPerformances[matchState?.currentPerformerIndex ?? 0]
 
   return (
     <Box

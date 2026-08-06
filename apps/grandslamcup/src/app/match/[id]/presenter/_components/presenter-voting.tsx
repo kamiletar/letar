@@ -60,23 +60,25 @@ export function PresenterVoting({ matchState, step }: PresenterVotingProps) {
   return (
     <VStack gap={5} align="stretch" py={4}>
       {/* Поэт */}
-      {currentPerf ? (
-        <Box textAlign="center">
-          <Badge colorPalette="blue" size="lg" mb={2}>
-            {currentPerf.teamName}
-          </Badge>
-          <Heading size="3xl" mb={1}>
-            🎤 {currentPerf.playerName}
-          </Heading>
-          <Text color="fg.muted" fontSize="sm">
-            Тайм {matchState?.currentHalf ?? 1} · Раунд {matchState?.currentRound ?? 1}
-          </Text>
-        </Box>
-      ) : (
-        <Box textAlign="center" py={4}>
-          <Text color="fg.muted">Ожидание данных...</Text>
-        </Box>
-      )}
+      {currentPerf
+        ? (
+          <Box textAlign="center">
+            <Badge colorPalette="blue" size="lg" mb={2}>
+              {currentPerf.teamName}
+            </Badge>
+            <Heading size="3xl" mb={1}>
+              🎤 {currentPerf.playerName}
+            </Heading>
+            <Text color="fg.muted" fontSize="sm">
+              Тайм {matchState?.currentHalf ?? 1} · Раунд {matchState?.currentRound ?? 1}
+            </Text>
+          </Box>
+        )
+        : (
+          <Box textAlign="center" py={4}>
+            <Text color="fg.muted">Ожидание данных...</Text>
+          </Box>
+        )}
 
       {/* Тип голосования */}
       <Box textAlign="center" bg="blue.subtle" p={3} borderRadius="xl" borderWidth="2px" borderColor="blue.solid">
@@ -103,53 +105,54 @@ export function PresenterVoting({ matchState, step }: PresenterVotingProps) {
           {(judges.length > 0
             ? [...judges].sort((a, b) => a.judgeNumber - b.judgeNumber)
             : [1, 2, 3, 4, 5].map((n) => ({
-                judgeNumber: n,
-                name: '',
-                color: null,
-                hasVoted: false,
-                sessionId: String(n),
-                manual: true,
-              }))
-          ).map((judge) => {
-            const score = scores[judge.judgeNumber]
-            const hasScore = score !== undefined
-            const colorPalette = judge.color ? (JUDGE_COLOR_MAP[judge.color] ?? 'gray') : 'gray'
-            return (
-              <HStack
-                key={judge.judgeNumber}
-                p={3}
-                borderRadius="lg"
-                bg={judge.hasVoted ? 'green.subtle' : 'bg.panel'}
-                borderWidth="2px"
-                borderColor={judge.hasVoted ? 'green.solid' : 'border.muted'}
-                justify="space-between"
-              >
-                <HStack gap={2}>
-                  <Badge colorPalette={colorPalette} size="lg" fontSize="md" minW="8" textAlign="center">
-                    {judge.judgeNumber}
-                  </Badge>
-                  <Text fontSize="md" fontWeight="medium">
-                    {judge.name || `Судья ${judge.judgeNumber}`}
-                  </Text>
+              judgeNumber: n,
+              name: '',
+              color: null,
+              hasVoted: false,
+              sessionId: String(n),
+              manual: true,
+            }))).map((judge) => {
+              const score = scores[judge.judgeNumber]
+              const hasScore = score !== undefined
+              const colorPalette = judge.color ? (JUDGE_COLOR_MAP[judge.color] ?? 'gray') : 'gray'
+              return (
+                <HStack
+                  key={judge.judgeNumber}
+                  p={3}
+                  borderRadius="lg"
+                  bg={judge.hasVoted ? 'green.subtle' : 'bg.panel'}
+                  borderWidth="2px"
+                  borderColor={judge.hasVoted ? 'green.solid' : 'border.muted'}
+                  justify="space-between"
+                >
+                  <HStack gap={2}>
+                    <Badge colorPalette={colorPalette} size="lg" fontSize="md" minW="8" textAlign="center">
+                      {judge.judgeNumber}
+                    </Badge>
+                    <Text fontSize="md" fontWeight="medium">
+                      {judge.name || `Судья ${judge.judgeNumber}`}
+                    </Text>
+                  </HStack>
+                  {hasScore
+                    ? (
+                      <Text
+                        fontSize="3xl"
+                        fontWeight="bold"
+                        color={outlierJudgeNumbers.has(judge.judgeNumber) ? 'red.fg' : 'green.fg'}
+                        fontFamily="mono"
+                        textDecoration={outlierJudgeNumbers.has(judge.judgeNumber) ? 'line-through' : undefined}
+                      >
+                        {score}
+                      </Text>
+                    )
+                    : (
+                      <Text fontSize="2xl" color="fg.subtle">
+                        ○
+                      </Text>
+                    )}
                 </HStack>
-                {hasScore ? (
-                  <Text
-                    fontSize="3xl"
-                    fontWeight="bold"
-                    color={outlierJudgeNumbers.has(judge.judgeNumber) ? 'red.fg' : 'green.fg'}
-                    fontFamily="mono"
-                    textDecoration={outlierJudgeNumbers.has(judge.judgeNumber) ? 'line-through' : undefined}
-                  >
-                    {score}
-                  </Text>
-                ) : (
-                  <Text fontSize="2xl" color="fg.subtle">
-                    ○
-                  </Text>
-                )}
-              </HStack>
-            )
-          })}
+              )
+            })}
         </VStack>
       </Box>
 

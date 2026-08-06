@@ -99,21 +99,23 @@ export function RelatedAnimeRow({
     >
       {/* Постер миниатюра */}
       <Box w="40px" h="56px" flexShrink={0} borderRadius="sm" overflow="hidden" bg="bg.subtle">
-        {posterUrl ? (
-          <Image
-            src={posterUrl}
-            alt={name || 'Аниме'}
-            w="full"
-            h="full"
-            objectFit="cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center">
-            <Icon as={KindIcon} boxSize={4} color="fg.subtle" />
-          </Box>
-        )}
+        {posterUrl
+          ? (
+            <Image
+              src={posterUrl}
+              alt={name || 'Аниме'}
+              w="full"
+              h="full"
+              objectFit="cover"
+              loading="lazy"
+              decoding="async"
+            />
+          )
+          : (
+            <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center">
+              <Icon as={KindIcon} boxSize={4} color="fg.subtle" />
+            </Box>
+          )}
       </Box>
 
       {/* Информация */}
@@ -140,9 +142,7 @@ export function RelatedAnimeRow({
 
       {/* Статус / Действие */}
       <Box flexShrink={0}>
-        {isLoaded ? (
-          <Icon as={LuCheck} boxSize={5} color="green.400" />
-        ) : (
+        {isLoaded ? <Icon as={LuCheck} boxSize={5} color="green.400" /> : (
           <Icon
             as={LuDownload}
             boxSize={5}

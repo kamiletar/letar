@@ -99,7 +99,7 @@ export function FranchiseTab({
         setIsLoading(false)
       }
     },
-    [shikimoriId, animeName]
+    [shikimoriId, animeName],
   )
 
   // Загружаем граф и список аниме в библиотеке при монтировании

@@ -30,21 +30,21 @@ export default function QrDevPage() {
         <Heading size="lg">QR-коды для раздатки</Heading>
         {origin
           ? targets.map((target) => {
-              const url = `${origin}${target.path}`
-              return (
-                <VStack key={target.path} gap={3}>
-                  <Text fontWeight="bold" fontSize="lg">
-                    {target.label}
-                  </Text>
-                  <Box p={4} bg="white" borderWidth="1px" borderColor="black">
-                    <QRCodeSVG value={url} size={240} level="M" />
-                  </Box>
-                  <Text fontSize="sm" fontFamily="mono">
-                    {url}
-                  </Text>
-                </VStack>
-              )
-            })
+            const url = `${origin}${target.path}`
+            return (
+              <VStack key={target.path} gap={3}>
+                <Text fontWeight="bold" fontSize="lg">
+                  {target.label}
+                </Text>
+                <Box p={4} bg="white" borderWidth="1px" borderColor="black">
+                  <QRCodeSVG value={url} size={240} level="M" />
+                </Box>
+                <Text fontSize="sm" fontFamily="mono">
+                  {url}
+                </Text>
+              </VStack>
+            )
+          })
           : null}
       </VStack>
     </Container>

@@ -79,7 +79,7 @@ export function useDeletePrintJob() {
 /** Query хук для useFindUnique Settings */
 export function useFindUniqueSettings(
   args: { where: { id: string }; include?: object },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   const client = useClientQueries(schema)
   return client.settings.useFindUnique(args, options)

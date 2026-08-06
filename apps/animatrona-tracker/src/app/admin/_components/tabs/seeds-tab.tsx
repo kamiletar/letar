@@ -139,9 +139,7 @@ function AnimeSeedCard({ animeSeed }: { animeSeed: AnimeSeed }) {
 
       {/* Список сидов */}
       <VStack align="stretch" gap={1}>
-        {animeSeed.seeds.map((seed, i) => (
-          <SeedRow key={`${seed.type}-${seed.name}-${i}`} seed={seed} />
-        ))}
+        {animeSeed.seeds.map((seed, i) => <SeedRow key={`${seed.type}-${seed.name}-${i}`} seed={seed} />)}
       </VStack>
     </Box>
   )
@@ -249,9 +247,7 @@ export function SeedsTab() {
       </Grid>
 
       {/* Список аниме */}
-      {seeds.map((animeSeed) => (
-        <AnimeSeedCard key={animeSeed.animeId} animeSeed={animeSeed} />
-      ))}
+      {seeds.map((animeSeed) => <AnimeSeedCard key={animeSeed.animeId} animeSeed={animeSeed} />)}
     </VStack>
   )
 }

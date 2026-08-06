@@ -13,7 +13,7 @@ const BatchModerateSchema = z.object({
         id: z.string(),
         action: z.enum(['approve', 'reject', 'approve_replacement']),
         pin: z.boolean().optional(),
-      })
+      }),
     )
     .min(1)
     .max(50),

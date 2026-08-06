@@ -38,7 +38,7 @@ interface OptimizedImageProps extends Omit<BoxProps, 'as'> {
 export const OptimizedImage = memo(
   forwardRef<HTMLDivElement, OptimizedImageProps>(function OptimizedImage(
     { src, alt, imgWidth, imgHeight, priority = false, quality = 75, ...boxProps },
-    ref
+    ref,
   ) {
     // Если указаны imgWidth/imgHeight — не используем fill
     const useFill = !imgWidth && !imgHeight
@@ -58,5 +58,5 @@ export const OptimizedImage = memo(
         />
       </Box>
     )
-  })
+  }),
 )

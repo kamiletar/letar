@@ -164,9 +164,7 @@ export function ProductList({ categorySlug }: { categorySlug: string }) {
     <div>
       {!isOnline && <OfflineBanner />}
       {isStale && <StaleDataBanner />}
-      {products?.map((product) => (
-        <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-      ))}
+      {products?.map((product) => <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />)}
     </div>
   )
 }
@@ -190,10 +188,12 @@ export function ProductCardWithPrefetch({ product }: { product: Product }) {
       queryKey: ['Product', 'findUnique', { where: { slug: product.slug } }],
       queryFn: () =>
         fetch(
-          `/api/model/product/findUnique?q=${JSON.stringify({
-            where: { slug: product.slug },
-            include: { images: true, sizes: true },
-          })}`
+          `/api/model/product/findUnique?q=${
+            JSON.stringify({
+              where: { slug: product.slug },
+              include: { images: true, sizes: true },
+            })
+          }`,
         ).then((r) => r.json()),
       staleTime: 5 * 60 * 1000,
     })

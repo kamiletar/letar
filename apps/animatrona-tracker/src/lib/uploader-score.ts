@@ -54,12 +54,11 @@ export interface UploaderScoreInput {
 
 /** Рассчитать score загрузчика */
 export function calculateUploaderScore(input: UploaderScoreInput): number {
-  const score =
-    input.publishedAnimeCount * 100 +
-    input.totalViewers * 2 +
-    input.totalLibraryAdds * 5 +
-    (input.avgUserRating ?? 0) * 50 +
-    Math.floor(input.totalBytesUploaded / ONE_GB) * 10
+  const score = input.publishedAnimeCount * 100
+    + input.totalViewers * 2
+    + input.totalLibraryAdds * 5
+    + (input.avgUserRating ?? 0) * 50
+    + Math.floor(input.totalBytesUploaded / ONE_GB) * 10
 
   return Math.round(score)
 }

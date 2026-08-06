@@ -115,9 +115,8 @@ export function PresenterClient({ match }: PresenterClientProps) {
     requestFullscreenSafe(document.documentElement)
 
     const onFsChange = () => {
-      const el =
-        document.fullscreenElement ??
-        (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      const el = document.fullscreenElement
+        ?? (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
       setIsFullscreen(!!el)
     }
     document.addEventListener('fullscreenchange', onFsChange)
@@ -135,7 +134,7 @@ export function PresenterClient({ match }: PresenterClientProps) {
       victoryPoemPlayerId: match.victoryPoemPlayerId,
       performances: match.performances.map((p) => ({ half: p.half, totalScore: p.totalScore })),
     },
-    matchState
+    matchState,
   )
 
   const handleFullscreen = () => {

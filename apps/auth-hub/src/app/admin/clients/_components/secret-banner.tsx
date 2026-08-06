@@ -41,8 +41,8 @@ export function SecretBanner({ secret, clientId }: SecretBannerProps) {
         <Alert.Description>
           <Stack gap={3} mt={2}>
             <Text fontSize="sm">
-              Секрет клиента <Code fontSize="xs">{clientId}</Code> показывается только один раз и недоступен после
-              перезагрузки страницы.
+              Секрет клиента <Code fontSize="xs">{clientId}</Code>{' '}
+              показывается только один раз и недоступен после перезагрузки страницы.
             </Text>
             <Box bg="bg.subtle" p={3} borderRadius="md" borderWidth={1} borderColor="border">
               <Code fontSize="sm" whiteSpace="pre-wrap" wordBreak="break-all">

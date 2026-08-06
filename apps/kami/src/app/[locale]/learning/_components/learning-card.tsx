@@ -1,6 +1,6 @@
 import { OptimizedImage } from '@/app/_components/ui/optimized-image'
 import type { LearningItemType, LearningStatus } from '@/generated/prisma'
-import { Badge, Card, Link as ChakraLink, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Card, Heading, HStack, Icon, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import { ExternalLink, Star } from 'lucide-react'
 import { memo } from 'react'
 
@@ -62,16 +62,16 @@ export const LearningCard = memo(function LearningCard({ item, locale, typeIcon,
 
           <VStack gap={1} align="start">
             <Heading size="md" lineClamp={2}>
-              {item.url ? (
-                <ChakraLink href={item.url} target="_blank" rel="noopener noreferrer">
-                  {title}
-                  <Icon boxSize={3} ml={1} display="inline">
-                    <ExternalLink />
-                  </Icon>
-                </ChakraLink>
-              ) : (
-                title
-              )}
+              {item.url
+                ? (
+                  <ChakraLink href={item.url} target="_blank" rel="noopener noreferrer">
+                    {title}
+                    <Icon boxSize={3} ml={1} display="inline">
+                      <ExternalLink />
+                    </Icon>
+                  </ChakraLink>
+                )
+                : title}
             </Heading>
             {item.author && (
               <Text fontSize="sm" color="fg.muted">
@@ -101,8 +101,7 @@ export const LearningCard = memo(function LearningCard({ item, locale, typeIcon,
 
           {item.completedAt && (
             <Text fontSize="xs" color="fg.muted">
-              {t('completedOn')}{' '}
-              {new Date(item.completedAt).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
+              {t('completedOn')} {new Date(item.completedAt).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
                 month: 'short',
                 year: 'numeric',
               })}

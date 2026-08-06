@@ -131,7 +131,7 @@ export function MiniPlayer() {
         videoElement.currentTime = time
       }
     },
-    [videoElement]
+    [videoElement],
   )
 
   // Закрыть mini-player

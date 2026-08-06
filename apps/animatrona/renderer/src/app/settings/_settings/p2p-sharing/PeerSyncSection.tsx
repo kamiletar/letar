@@ -230,44 +230,48 @@ export function PeerSyncSection() {
       )}
 
       {/* Список peers */}
-      {isLoading && !status ? (
-        <Text fontSize="sm" color="fg.muted">
-          Загрузка...
-        </Text>
-      ) : status && status.peers.length > 0 ? (
-        <VStack align="stretch" gap={2}>
-          {status.peers.map((peer) => (
-            <Box key={peer.id} p={3} borderWidth="1px" borderRadius="md" bg="bg.subtle">
-              <HStack justify="space-between" mb={1}>
-                <HStack gap={2}>
-                  <Icon as={LuServer} boxSize={4} color="fg.muted" />
-                  <Text fontWeight="semibold" fontSize="sm">
-                    {peer.name}
+      {isLoading && !status
+        ? (
+          <Text fontSize="sm" color="fg.muted">
+            Загрузка...
+          </Text>
+        )
+        : status && status.peers.length > 0
+        ? (
+          <VStack align="stretch" gap={2}>
+            {status.peers.map((peer) => (
+              <Box key={peer.id} p={3} borderWidth="1px" borderRadius="md" bg="bg.subtle">
+                <HStack justify="space-between" mb={1}>
+                  <HStack gap={2}>
+                    <Icon as={LuServer} boxSize={4} color="fg.muted" />
+                    <Text fontWeight="semibold" fontSize="sm">
+                      {peer.name}
+                    </Text>
+                    <RoleBadge role={peer.role} />
+                    <Badge size="sm" variant="subtle">
+                      {peer.peeringRole}
+                    </Badge>
+                  </HStack>
+                  <Text fontSize="2xs" fontFamily="mono" color="fg.subtle">
+                    ...{peer.peerId.slice(-12)}
                   </Text>
-                  <RoleBadge role={peer.role} />
-                  <Badge size="sm" variant="subtle">
-                    {peer.peeringRole}
-                  </Badge>
                 </HStack>
-                <Text fontSize="2xs" fontFamily="mono" color="fg.subtle">
-                  ...{peer.peerId.slice(-12)}
-                </Text>
-              </HStack>
-              <VStack align="start" gap={0.5} mt={1}>
-                {peer.multiaddrs.map((addr) => (
-                  <Text key={addr} fontSize="2xs" fontFamily="mono" color="fg.muted" lineClamp={1}>
-                    {addr}
-                  </Text>
-                ))}
-              </VStack>
-            </Box>
-          ))}
-        </VStack>
-      ) : (
-        <Text fontSize="sm" color="fg.muted">
-          Нет данных
-        </Text>
-      )}
+                <VStack align="start" gap={0.5} mt={1}>
+                  {peer.multiaddrs.map((addr) => (
+                    <Text key={addr} fontSize="2xs" fontFamily="mono" color="fg.muted" lineClamp={1}>
+                      {addr}
+                    </Text>
+                  ))}
+                </VStack>
+              </Box>
+            ))}
+          </VStack>
+        )
+        : (
+          <Text fontSize="sm" color="fg.muted">
+            Нет данных
+          </Text>
+        )}
     </Box>
   )
 }

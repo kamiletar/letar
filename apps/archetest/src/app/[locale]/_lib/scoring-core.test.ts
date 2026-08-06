@@ -212,7 +212,7 @@ describe('изоляция ядра от экспериментальных шк
         { sortOrder: 0, selectedOption: 0, options: opts({ MAC: 3 }) },
         { sortOrder: 1, selectedOption: 0, options: opts({ RES_PHYS: 3 }) },
       ],
-      isoData
+      isoData,
     )
     expect(coreOnly.normalized.MAC).toBe(100)
     expect(withExp.normalized.MAC).toBe(100)

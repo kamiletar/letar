@@ -8,10 +8,10 @@
  * OrbitDB и Helia полностью удалены — используется SQLite + Kubo PubSub.
  */
 
-export { IpnsService, getIpnsService } from './ipns-service'
+export { getIpnsService, IpnsService } from './ipns-service'
 export type { IpnsPublishResult, IpnsResolveResult } from './ipns-service'
 export { getBlockstorePath, getDatastorePath, getIpfsDataDir, loadOrCreatePeerId } from './peer-id-manager'
-export { PinManager, getPinManager } from './pin-manager'
+export { getPinManager, PinManager } from './pin-manager'
 export type { PinInfo, PinStats } from './pin-manager'
 
 // UnixFS — теперь использует UnifiedIPFS (Kubo-based)

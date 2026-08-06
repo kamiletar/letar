@@ -210,7 +210,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     (urls: string[]) => {
       sendMessage({ type: 'PREFETCH', urls })
     },
-    [sendMessage]
+    [sendMessage],
   )
 
   /**
@@ -220,7 +220,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     (schedule: unknown) => {
       sendMessage({ type: 'CACHE_SCHEDULE', schedule })
     },
-    [sendMessage]
+    [sendMessage],
   )
 
   /**
@@ -230,7 +230,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     (urls: string[]) => {
       sendMessage({ type: 'CACHE_IMAGES', urls })
     },
-    [sendMessage]
+    [sendMessage],
   )
 
   /**

@@ -188,21 +188,23 @@ export default function CertificatesPage() {
         </HStack>
 
         {/* Certificates grid */}
-        {sortedCertificates.length > 0 ? (
-          <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} gap="6">
-            {sortedCertificates.map((certificate) => (
-              <CertificateCard
-                key={certificate.id}
-                certificate={certificate}
-                onDelete={() => handleDelete(certificate.id)}
-              />
-            ))}
-          </SimpleGrid>
-        ) : (
-          <Box textAlign="center" py="12">
-            <Text color="fg.muted">No certificates found</Text>
-          </Box>
-        )}
+        {sortedCertificates.length > 0
+          ? (
+            <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} gap="6">
+              {sortedCertificates.map((certificate) => (
+                <CertificateCard
+                  key={certificate.id}
+                  certificate={certificate}
+                  onDelete={() => handleDelete(certificate.id)}
+                />
+              ))}
+            </SimpleGrid>
+          )
+          : (
+            <Box textAlign="center" py="12">
+              <Text color="fg.muted">No certificates found</Text>
+            </Box>
+          )}
       </Box>
     </>
   )

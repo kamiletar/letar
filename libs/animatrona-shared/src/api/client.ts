@@ -183,7 +183,7 @@ export function createApiClient(getStore: GetConnectionStore) {
   /** Сохранить прогресс эпизода */
   async function saveProgress(
     episodeId: string,
-    data: { currentTime: number; completed?: boolean }
+    data: { currentTime: number; completed?: boolean },
   ): Promise<WatchProgress> {
     return fetchApi<WatchProgress>(`/progress/${episodeId}`, {
       method: 'POST',

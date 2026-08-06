@@ -64,7 +64,7 @@ export function wilsonInterval(p: number, n: number, z: number = IPSATIVE_Z): { 
 /** Перекрываются ли интервалы двух шкал (следовательно — статистически неразличимы) */
 export function intervalsOverlap(
   a: Pick<IpsativeScale, 'ciLow' | 'ciHigh'>,
-  b: Pick<IpsativeScale, 'ciLow' | 'ciHigh'>
+  b: Pick<IpsativeScale, 'ciLow' | 'ciHigh'>,
 ) {
   return a.ciLow <= b.ciHigh && b.ciLow <= a.ciHigh
 }
@@ -77,7 +77,7 @@ export function intervalsOverlap(
 export function computeIpsativeRanking(
   normalized: Record<PersonalityTypeCode, number>,
   relevantCounts: Record<PersonalityTypeCode, number>,
-  options?: { exclude?: readonly PersonalityTypeCode[] }
+  options?: { exclude?: readonly PersonalityTypeCode[] },
 ): IpsativeScale[] {
   const excluded = new Set(options?.exclude ?? [])
 

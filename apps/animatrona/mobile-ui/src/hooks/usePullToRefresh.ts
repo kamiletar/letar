@@ -84,7 +84,7 @@ export function usePullToRefresh(options: UsePullToRefreshOptions): UsePullToRef
       isPullingRef.current = false
       hadHapticRef.current = false
     },
-    [disabled, state]
+    [disabled, state],
   )
 
   // Обработчик движения
@@ -148,7 +148,7 @@ export function usePullToRefresh(options: UsePullToRefreshOptions): UsePullToRef
         hadHapticRef.current = false
       }
     },
-    [disabled, state, threshold, maxPull, hapticEnabled]
+    [disabled, state, threshold, maxPull, hapticEnabled],
   )
 
   // Обработчик окончания касания

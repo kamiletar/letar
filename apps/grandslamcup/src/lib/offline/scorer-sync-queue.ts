@@ -30,7 +30,7 @@ export interface SyncResult {
 export async function queueScorerOperation(
   matchId: string,
   type: ScorerOperationType,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ): Promise<ScorerOperation> {
   const op = await enqueueOperation({ matchId, type, payload })
 
@@ -46,7 +46,7 @@ async function requestBackgroundSync(): Promise<void> {
     if ('serviceWorker' in navigator && 'SyncManager' in window) {
       const reg = await navigator.serviceWorker.ready
       await (reg as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register(
-        'scorer-sync'
+        'scorer-sync',
       )
     }
   } catch {

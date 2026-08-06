@@ -156,7 +156,7 @@ export class ContentSyncService {
   private async processContent(
     tracker: Tracker,
     response: ContentResponse,
-    options?: SyncOptions
+    options?: SyncOptions,
   ): Promise<SyncResult> {
     const result: SyncResult = {
       tracker: tracker.url,

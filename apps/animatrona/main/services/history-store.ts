@@ -84,7 +84,7 @@ export function getHistory(filter?: ImportHistoryFilter): ImportHistoryEntry[] {
     if (filter.search) {
       const searchLower = filter.search.toLowerCase()
       history = history.filter(
-        (h) => h.animeName.toLowerCase().includes(searchLower) || h.animeNameRu?.toLowerCase().includes(searchLower)
+        (h) => h.animeName.toLowerCase().includes(searchLower) || h.animeNameRu?.toLowerCase().includes(searchLower),
       )
     }
 

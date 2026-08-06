@@ -135,7 +135,7 @@ export function useWishlist() {
       return () => listeners.delete(callback)
     },
     () => globalState,
-    () => globalState
+    () => globalState,
   )
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export function useWishlist() {
         await addItem(productId)
       }
     },
-    [addItem, removeItem]
+    [addItem, removeItem],
   )
 
   const isInWishlist = useCallback((productId: number): boolean => {
@@ -298,7 +298,7 @@ const CURRENT_VERSION = 2
 async function loadWithMigration<T>(
   key: string,
   migrate: (oldData: unknown, oldVersion: number) => T,
-  defaultValue: T
+  defaultValue: T,
 ): Promise<T> {
   const stored = await get<StorageState<unknown>>(key)
 

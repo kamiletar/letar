@@ -148,8 +148,7 @@ export async function OrderSummary({ order }: { order: Order }) {
     <div>
       <p>Дата заказа: {format.dateTime(order.createdAt, { dateStyle: 'long' })}</p>
       <p>
-        Сумма:{' '}
-        {format.number(order.total / 100, {
+        Сумма: {format.number(order.total / 100, {
           style: 'currency',
           currency: 'RUB',
         })}

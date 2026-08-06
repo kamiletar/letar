@@ -69,92 +69,99 @@ export function SubscriptionsSection({
         )}
       </HStack>
 
-      {!ipfsRunning ? (
-        <Text color="fg.subtle">Запустите IPFS ноду для управления подписками</Text>
-      ) : subscriptions.isLoading ? (
-        <Text color="fg.subtle">Загрузка...</Text>
-      ) : (
-        <VStack align="stretch" gap={3}>
-          {/* Форма добавления */}
-          {showAddForm && (
-            <Box p={3} bg="bg.subtle" borderRadius="md">
-              <VStack align="stretch" gap={2}>
-                <Input
-                  size="sm"
-                  value={newIpnsName}
-                  onChange={(e) => setNewIpnsName(e.target.value)}
-                  placeholder="IPNS адрес (PeerId)"
-                />
-                <Input
-                  size="sm"
-                  value={newDisplayName}
-                  onChange={(e) => setNewDisplayName(e.target.value)}
-                  placeholder="Отображаемое имя"
-                />
-                <HStack justify="flex-end">
-                  <Button size="xs" variant="ghost" onClick={() => setShowAddForm(false)}>
-                    Отмена
-                  </Button>
-                  <Button
-                    size="xs"
-                    colorPalette="green"
-                    onClick={handleAdd}
-                    disabled={!newIpnsName.trim() || !newDisplayName.trim()}
-                  >
-                    Добавить
-                  </Button>
-                </HStack>
-              </VStack>
-            </Box>
-          )}
-
-          {/* Список подписок */}
-          {subscriptions.list.length === 0 ? (
-            <Text color="fg.subtle" fontSize="sm">
-              Нет подписок. Добавьте первую подписку, чтобы следить за библиотекой другого пользователя.
-            </Text>
-          ) : (
-            subscriptions.list.map((sub) => (
-              <Box key={sub.id} p={3} bg="bg.subtle" borderRadius="md">
-                <Flex justify="space-between" align="flex-start" mb={2}>
-                  <VStack align="start" gap={0}>
-                    <Text fontWeight="medium">{sub.displayName}</Text>
-                    <Text fontFamily="mono" fontSize="xs" color="fg.subtle" maxW="200px" truncate>
-                      {sub.ipnsName}
-                    </Text>
-                  </VStack>
-                  <HStack gap={1}>
-                    <IconButton
+      {!ipfsRunning
+        ? <Text color="fg.subtle">Запустите IPFS ноду для управления подписками</Text>
+        : subscriptions.isLoading
+        ? <Text color="fg.subtle">Загрузка...</Text>
+        : (
+          <VStack align="stretch" gap={3}>
+            {/* Форма добавления */}
+            {showAddForm && (
+              <Box p={3} bg="bg.subtle" borderRadius="md">
+                <VStack align="stretch" gap={2}>
+                  <Input
+                    size="sm"
+                    value={newIpnsName}
+                    onChange={(e) => setNewIpnsName(e.target.value)}
+                    placeholder="IPNS адрес (PeerId)"
+                  />
+                  <Input
+                    size="sm"
+                    value={newDisplayName}
+                    onChange={(e) => setNewDisplayName(e.target.value)}
+                    placeholder="Отображаемое имя"
+                  />
+                  <HStack justify="flex-end">
+                    <Button size="xs" variant="ghost" onClick={() => setShowAddForm(false)}>
+                      Отмена
+                    </Button>
+                    <Button
                       size="xs"
-                      variant="ghost"
-                      onClick={() => router.push(`/subscriptions/${sub.id}`)}
-                      aria-label="Просмотреть библиотеку"
+                      colorPalette="green"
+                      onClick={handleAdd}
+                      disabled={!newIpnsName.trim() || !newDisplayName.trim()}
                     >
-                      <LuExternalLink />
-                    </IconButton>
-                    <IconButton size="xs" variant="ghost" onClick={() => void onRefresh(sub.id)} aria-label="Обновить">
-                      <LuRefreshCw />
-                    </IconButton>
-                    <IconButton
-                      size="xs"
-                      variant="ghost"
-                      colorPalette="red"
-                      onClick={() => void onRemove(sub.id)}
-                      aria-label="Удалить"
-                    >
-                      <LuTrash2 />
-                    </IconButton>
+                      Добавить
+                    </Button>
                   </HStack>
-                </Flex>
-                <Flex justify="space-between" fontSize="xs" color="fg.subtle">
-                  <Text>Проверено: {formatDate(sub.lastCheckedAt)}</Text>
-                  <HStack gap={2}>{sub.autoPin && <Badge size="xs">Auto-pin</Badge>}</HStack>
-                </Flex>
+                </VStack>
               </Box>
-            ))
-          )}
-        </VStack>
-      )}
+            )}
+
+            {/* Список подписок */}
+            {subscriptions.list.length === 0
+              ? (
+                <Text color="fg.subtle" fontSize="sm">
+                  Нет подписок. Добавьте первую подписку, чтобы следить за библиотекой другого пользователя.
+                </Text>
+              )
+              : (
+                subscriptions.list.map((sub) => (
+                  <Box key={sub.id} p={3} bg="bg.subtle" borderRadius="md">
+                    <Flex justify="space-between" align="flex-start" mb={2}>
+                      <VStack align="start" gap={0}>
+                        <Text fontWeight="medium">{sub.displayName}</Text>
+                        <Text fontFamily="mono" fontSize="xs" color="fg.subtle" maxW="200px" truncate>
+                          {sub.ipnsName}
+                        </Text>
+                      </VStack>
+                      <HStack gap={1}>
+                        <IconButton
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => router.push(`/subscriptions/${sub.id}`)}
+                          aria-label="Просмотреть библиотеку"
+                        >
+                          <LuExternalLink />
+                        </IconButton>
+                        <IconButton
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => void onRefresh(sub.id)}
+                          aria-label="Обновить"
+                        >
+                          <LuRefreshCw />
+                        </IconButton>
+                        <IconButton
+                          size="xs"
+                          variant="ghost"
+                          colorPalette="red"
+                          onClick={() => void onRemove(sub.id)}
+                          aria-label="Удалить"
+                        >
+                          <LuTrash2 />
+                        </IconButton>
+                      </HStack>
+                    </Flex>
+                    <Flex justify="space-between" fontSize="xs" color="fg.subtle">
+                      <Text>Проверено: {formatDate(sub.lastCheckedAt)}</Text>
+                      <HStack gap={2}>{sub.autoPin && <Badge size="xs">Auto-pin</Badge>}</HStack>
+                    </Flex>
+                  </Box>
+                ))
+              )}
+          </VStack>
+        )}
     </Box>
   )
 }

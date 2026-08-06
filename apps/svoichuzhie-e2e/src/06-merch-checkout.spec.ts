@@ -95,10 +95,10 @@ test.describe('06b — Доставка оплачивается СДЭКу пр
               ],
             },
             version: 1,
-          })
+          }),
         )
       },
-      { p: product }
+      { p: product },
     )
 
     await page.goto('/merch/checkout')

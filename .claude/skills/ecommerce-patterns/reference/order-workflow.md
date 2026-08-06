@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         {
           error: `Недостаточно товара: ${item.product.name}`,
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
   }
@@ -198,7 +198,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       {
         error: `Нельзя перейти из ${order.status} в ${status}`,
       },
-      { status: 400 }
+      { status: 400 },
     )
   }
 

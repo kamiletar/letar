@@ -1,6 +1,14 @@
 /** Опции сортировки */
 export type SortOption =
-  'title' | '-title' | '-updatedAt' | '-createdAt' | '-watchedAt' | 'year' | '-year' | '-rating' | '-episodeCount'
+  | 'title'
+  | '-title'
+  | '-updatedAt'
+  | '-createdAt'
+  | '-watchedAt'
+  | 'year'
+  | '-year'
+  | '-rating'
+  | '-episodeCount'
 
 /** Пропсы для компонента фильтров */
 export interface AnimeFiltersProps {

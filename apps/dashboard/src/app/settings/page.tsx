@@ -126,7 +126,7 @@ export default function SettingsPage() {
     (state: OptimisticState, update: Partial<OptimisticState>) => ({
       ...state,
       ...update,
-    })
+    }),
   )
 
   // Update local state when settings are fetched
@@ -377,37 +377,39 @@ export default function SettingsPage() {
                 )}
 
                 <HStack gap="2" pt="2">
-                  {monitoringStatus?.isRunning ? (
-                    <>
+                  {monitoringStatus?.isRunning
+                    ? (
+                      <>
+                        <Button
+                          size="sm"
+                          colorPalette="red"
+                          variant="outline"
+                          onClick={() => handleMonitoringControl('stop')}
+                          loading={isPending}
+                        >
+                          Остановить
+                        </Button>
+                        <Button
+                          size="sm"
+                          colorPalette="blue"
+                          variant="outline"
+                          onClick={() => handleMonitoringControl('restart')}
+                          loading={isPending}
+                        >
+                          Перезапустить
+                        </Button>
+                      </>
+                    )
+                    : (
                       <Button
                         size="sm"
-                        colorPalette="red"
-                        variant="outline"
-                        onClick={() => handleMonitoringControl('stop')}
+                        colorPalette="green"
+                        onClick={() => handleMonitoringControl('start')}
                         loading={isPending}
                       >
-                        Остановить
+                        Запустить мониторинг
                       </Button>
-                      <Button
-                        size="sm"
-                        colorPalette="blue"
-                        variant="outline"
-                        onClick={() => handleMonitoringControl('restart')}
-                        loading={isPending}
-                      >
-                        Перезапустить
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      colorPalette="green"
-                      onClick={() => handleMonitoringControl('start')}
-                      loading={isPending}
-                    >
-                      Запустить мониторинг
-                    </Button>
-                  )}
+                    )}
                 </HStack>
               </VStack>
             </Card.Body>
@@ -436,8 +438,7 @@ export default function SettingsPage() {
                       setSettings({
                         ...settings,
                         checkInterval: parseInt(e.target.value, 10) || 30,
-                      })
-                    }
+                      })}
                   />
                 </Field>
               </VStack>
@@ -459,8 +460,7 @@ export default function SettingsPage() {
                       setSettings({
                         ...settings,
                         cpuThreshold: parseInt(e.target.value, 10) || 80,
-                      })
-                    }
+                      })}
                   />
                 </Field>
 
@@ -472,8 +472,7 @@ export default function SettingsPage() {
                       setSettings({
                         ...settings,
                         memoryThreshold: parseInt(e.target.value, 10) || 90,
-                      })
-                    }
+                      })}
                   />
                 </Field>
 
@@ -485,8 +484,7 @@ export default function SettingsPage() {
                       setSettings({
                         ...settings,
                         diskThreshold: parseInt(e.target.value, 10) || 85,
-                      })
-                    }
+                      })}
                   />
                 </Field>
               </VStack>
@@ -561,8 +559,7 @@ export default function SettingsPage() {
                       setBackupSettings({
                         ...backupSettings,
                         retentionDays: parseInt(e.target.value, 10) || 30,
-                      })
-                    }
+                      })}
                     disabled={!displayAutoCleanupEnabled}
                   />
                 </Field>
@@ -575,8 +572,7 @@ export default function SettingsPage() {
                       setBackupSettings({
                         ...backupSettings,
                         keepMinimum: parseInt(e.target.value, 10) || 3,
-                      })
-                    }
+                      })}
                     disabled={!displayAutoCleanupEnabled}
                   />
                 </Field>

@@ -59,11 +59,11 @@ export function PinServersTab({ pinServers, userRole, onRefresh }: PinServersTab
         )}
       </HStack>
       <VStack align="stretch" gap={4}>
-        {pinServers.length === 0 ? (
-          <EmptyState icon={LuServer} title="Нет серверов" subtitle="Добавьте пин-сервер для хранения контента" />
-        ) : (
-          pinServers.map((server) => <PinServerCard key={server.id} server={server} />)
-        )}
+        {pinServers.length === 0
+          ? <EmptyState icon={LuServer} title="Нет серверов" subtitle="Добавьте пин-сервер для хранения контента" />
+          : (
+            pinServers.map((server) => <PinServerCard key={server.id} server={server} />)
+          )}
       </VStack>
       {userRole === 'ADMIN' && pinServers.length > 0 && <AuditPinsSection pinServers={pinServers} />}
       <AddPinServerDialog open={addServerOpen} onOpenChange={setAddServerOpen} />

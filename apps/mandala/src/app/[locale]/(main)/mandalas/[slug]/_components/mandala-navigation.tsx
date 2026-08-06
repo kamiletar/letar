@@ -53,7 +53,7 @@ export function MandalaNavigation({
         router.push(`/mandalas/${slug}`)
       }
     },
-    [router, onNavigate]
+    [router, onNavigate],
   )
 
   // Обработка клавиатуры для навигации
@@ -65,7 +65,7 @@ export function MandalaNavigation({
         navigate(nextMandala.slug)
       }
     },
-    [navigate, prevMandala, nextMandala]
+    [navigate, prevMandala, nextMandala],
   )
 
   useEffect(() => {
@@ -129,32 +129,34 @@ export function MandalaNavigation({
           onMouseEnter={() => setHoveredSide('prev')}
           onMouseLeave={() => setHoveredSide(null)}
         >
-          {isFullscreen ? (
-            <IconButton
-              aria-label={`Предыдущая: ${prevMandala.name}`}
-              colorPalette="gray"
-              variant="solid"
-              size="lg"
-              rounded="full"
-              onClick={() => navigate(prevMandala.slug)}
-            >
-              <LuChevronLeft size={24} />
-            </IconButton>
-          ) : (
-            <Link asChild>
-              <LocalizedLink href={`/mandalas/${prevMandala.slug}`}>
-                <IconButton
-                  aria-label={`Предыдущая: ${prevMandala.name}`}
-                  colorPalette="fg"
-                  variant="ghost"
-                  size="lg"
-                  rounded="full"
-                >
-                  <LuChevronLeft size={24} />
-                </IconButton>
-              </LocalizedLink>
-            </Link>
-          )}
+          {isFullscreen
+            ? (
+              <IconButton
+                aria-label={`Предыдущая: ${prevMandala.name}`}
+                colorPalette="gray"
+                variant="solid"
+                size="lg"
+                rounded="full"
+                onClick={() => navigate(prevMandala.slug)}
+              >
+                <LuChevronLeft size={24} />
+              </IconButton>
+            )
+            : (
+              <Link asChild>
+                <LocalizedLink href={`/mandalas/${prevMandala.slug}`}>
+                  <IconButton
+                    aria-label={`Предыдущая: ${prevMandala.name}`}
+                    colorPalette="fg"
+                    variant="ghost"
+                    size="lg"
+                    rounded="full"
+                  >
+                    <LuChevronLeft size={24} />
+                  </IconButton>
+                </LocalizedLink>
+              </Link>
+            )}
 
           {/* Превью при наведении */}
           {hoveredSide === 'prev' && !isFullscreen && (
@@ -196,32 +198,34 @@ export function MandalaNavigation({
           onMouseEnter={() => setHoveredSide('next')}
           onMouseLeave={() => setHoveredSide(null)}
         >
-          {isFullscreen ? (
-            <IconButton
-              aria-label={`Следующая: ${nextMandala.name}`}
-              colorPalette="gray"
-              variant="solid"
-              size="lg"
-              rounded="full"
-              onClick={() => navigate(nextMandala.slug)}
-            >
-              <LuChevronRight size={24} />
-            </IconButton>
-          ) : (
-            <Link asChild>
-              <LocalizedLink href={`/mandalas/${nextMandala.slug}`}>
-                <IconButton
-                  aria-label={`Следующая: ${nextMandala.name}`}
-                  colorPalette="fg"
-                  variant="ghost"
-                  size="lg"
-                  rounded="full"
-                >
-                  <LuChevronRight size={24} />
-                </IconButton>
-              </LocalizedLink>
-            </Link>
-          )}
+          {isFullscreen
+            ? (
+              <IconButton
+                aria-label={`Следующая: ${nextMandala.name}`}
+                colorPalette="gray"
+                variant="solid"
+                size="lg"
+                rounded="full"
+                onClick={() => navigate(nextMandala.slug)}
+              >
+                <LuChevronRight size={24} />
+              </IconButton>
+            )
+            : (
+              <Link asChild>
+                <LocalizedLink href={`/mandalas/${nextMandala.slug}`}>
+                  <IconButton
+                    aria-label={`Следующая: ${nextMandala.name}`}
+                    colorPalette="fg"
+                    variant="ghost"
+                    size="lg"
+                    rounded="full"
+                  >
+                    <LuChevronRight size={24} />
+                  </IconButton>
+                </LocalizedLink>
+              </Link>
+            )}
 
           {/* Превью при наведении */}
           {hoveredSide === 'next' && !isFullscreen && (

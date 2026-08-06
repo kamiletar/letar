@@ -179,21 +179,23 @@ export default function AccessListsPage() {
         </HStack>
 
         {/* Access lists grid */}
-        {sortedAccessLists.length > 0 ? (
-          <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} gap="6">
-            {sortedAccessLists.map((accessList) => (
-              <AccessListCard
-                key={accessList.id}
-                accessList={accessList}
-                onDelete={() => handleDelete(accessList.id)}
-              />
-            ))}
-          </SimpleGrid>
-        ) : (
-          <Box textAlign="center" py="12">
-            <Text color="fg.muted">No access lists found</Text>
-          </Box>
-        )}
+        {sortedAccessLists.length > 0
+          ? (
+            <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} gap="6">
+              {sortedAccessLists.map((accessList) => (
+                <AccessListCard
+                  key={accessList.id}
+                  accessList={accessList}
+                  onDelete={() => handleDelete(accessList.id)}
+                />
+              ))}
+            </SimpleGrid>
+          )
+          : (
+            <Box textAlign="center" py="12">
+              <Text color="fg.muted">No access lists found</Text>
+            </Box>
+          )}
       </Box>
     </>
   )

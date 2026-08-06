@@ -127,7 +127,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
           }
         },
       }),
-      []
+      [],
     )
 
     /** Обработчик загрузки */
@@ -135,7 +135,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
       (event: { nativeEvent: OnLoadData }) => {
         onLoad?.(event.nativeEvent)
       },
-      [onLoad]
+      [onLoad],
     )
 
     /** Обработчик прогресса */
@@ -143,7 +143,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
       (event: { nativeEvent: OnProgressData }) => {
         onProgress?.(event.nativeEvent)
       },
-      [onProgress]
+      [onProgress],
     )
 
     /** Обработчик ошибки */
@@ -152,7 +152,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
         console.error('[SyncVideoPlayer] onError:', event.nativeEvent)
         onError?.(event.nativeEvent)
       },
-      [onError]
+      [onError],
     )
 
     /** Обработчик окончания */
@@ -165,7 +165,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
       (event: { nativeEvent: OnSeekData }) => {
         onSeek?.(event.nativeEvent)
       },
-      [onSeek]
+      [onSeek],
     )
 
     /** Обработчик тапа */
@@ -173,7 +173,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
       (event: { nativeEvent: OnTapData }) => {
         onTap?.(event.nativeEvent)
       },
-      [onTap]
+      [onTap],
     )
 
     // На iOS пока не поддерживается — возвращаем placeholder
@@ -206,7 +206,7 @@ export const SyncVideoPlayer = forwardRef<SyncVideoPlayerRef, SyncVideoPlayerPro
         onSyncVideoTap={handleTap}
       />
     )
-  }
+  },
 )
 
 const styles = StyleSheet.create({

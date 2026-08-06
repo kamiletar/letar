@@ -21,7 +21,7 @@ const BasicSchema = z.object({
     z.object({
       name: z.string().meta({ ui: { title: 'Contact Name' } }),
       phone: z.string().meta({ ui: { title: 'Phone Number' } }),
-    })
+    }),
   ),
 })
 
@@ -32,7 +32,7 @@ const SortableSchema = z.object({
     z.object({
       title: z.string().meta({ ui: { title: 'Skill', placeholder: 'e.g. TypeScript' } }),
       level: z.enum(['junior', 'middle', 'senior']).meta({ ui: { title: 'Level' } }),
-    })
+    }),
   ),
 })
 
@@ -53,9 +53,9 @@ const NestedSchema = z.object({
         z.object({
           title: z.string().meta({ ui: { title: 'Lesson Title' } }),
           duration: z.string().meta({ ui: { title: 'Duration (min)' } }),
-        })
+        }),
       ),
-    })
+    }),
   ),
 })
 

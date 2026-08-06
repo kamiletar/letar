@@ -65,10 +65,9 @@ export function TranscodeStats({ progress, inputSize }: TranscodeStatsProps) {
   }
 
   const compressionRatio = calculateCompressionRatio(inputSize, progress.outputSize)
-  const eta =
-    progress.speed && progress.currentTime && progress.totalDuration
-      ? (progress.totalDuration - progress.currentTime) / progress.speed
-      : undefined
+  const eta = progress.speed && progress.currentTime && progress.totalDuration
+    ? (progress.totalDuration - progress.currentTime) / progress.speed
+    : undefined
 
   return (
     <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle">
@@ -103,11 +102,9 @@ export function TranscodeStats({ progress, inputSize }: TranscodeStatsProps) {
           <StatItem
             icon={LuHardDrive}
             label="Размер"
-            value={
-              compressionRatio !== undefined
-                ? `${formatBytes(progress.outputSize)} (${compressionRatio.toFixed(0)}%)`
-                : formatBytes(progress.outputSize)
-            }
+            value={compressionRatio !== undefined
+              ? `${formatBytes(progress.outputSize)} (${compressionRatio.toFixed(0)}%)`
+              : formatBytes(progress.outputSize)}
             color="accent.solid"
           />
         </Grid>

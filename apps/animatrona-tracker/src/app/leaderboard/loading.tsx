@@ -17,9 +17,7 @@ export default function LeaderboardLoading() {
         <VStack align="stretch" gap={4}>
           {/* Табы */}
           <HStack gap={2} flexWrap="wrap">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={i} h="36px" w="100px" borderRadius="md" />
-            ))}
+            {Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} h="36px" w="100px" borderRadius="md" />)}
           </HStack>
 
           {/* Таблица */}

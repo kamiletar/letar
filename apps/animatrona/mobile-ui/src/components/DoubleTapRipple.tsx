@@ -73,21 +73,27 @@ export function DoubleTapRipple({ trigger }: DoubleTapRippleProps) {
 
           {/* Иконки направления */}
           <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" display="flex" gap={0}>
-            {ripple.direction === 'left' ? (
-              <>
-                <LuChevronLeft size={28} color="white" style={{ animation: 'fadeInChevron 0.3s ease-out' }} />
-                <LuChevronLeft size={28} color="white" style={{ animation: 'fadeInChevron 0.3s ease-out 0.1s both' }} />
-              </>
-            ) : (
-              <>
-                <LuChevronRight size={28} color="white" style={{ animation: 'fadeInChevron 0.3s ease-out' }} />
-                <LuChevronRight
-                  size={28}
-                  color="white"
-                  style={{ animation: 'fadeInChevron 0.3s ease-out 0.1s both' }}
-                />
-              </>
-            )}
+            {ripple.direction === 'left'
+              ? (
+                <>
+                  <LuChevronLeft size={28} color="white" style={{ animation: 'fadeInChevron 0.3s ease-out' }} />
+                  <LuChevronLeft
+                    size={28}
+                    color="white"
+                    style={{ animation: 'fadeInChevron 0.3s ease-out 0.1s both' }}
+                  />
+                </>
+              )
+              : (
+                <>
+                  <LuChevronRight size={28} color="white" style={{ animation: 'fadeInChevron 0.3s ease-out' }} />
+                  <LuChevronRight
+                    size={28}
+                    color="white"
+                    style={{ animation: 'fadeInChevron 0.3s ease-out 0.1s both' }}
+                  />
+                </>
+              )}
           </Box>
         </Box>
       ))}

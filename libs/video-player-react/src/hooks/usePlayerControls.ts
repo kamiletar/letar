@@ -104,7 +104,7 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
 
       video.currentTime = Math.max(0, Math.min(time, duration))
     },
-    [videoRef, duration]
+    [videoRef, duration],
   )
 
   const handleSeek = useCallback(
@@ -116,7 +116,7 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
       const newTime = (value[0] / 100) * duration
       seek(newTime)
     },
-    [duration, seek]
+    [duration, seek],
   )
 
   const setVolume = useCallback(
@@ -137,14 +137,14 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
         video.muted = clampedVolume === 0
       }
     },
-    [videoRef, audioRef, usesSeparateAudioRef, setIsMuted]
+    [videoRef, audioRef, usesSeparateAudioRef, setIsMuted],
   )
 
   const handleVolumeChange = useCallback(
     (value: number[]) => {
       setVolume(value[0] / 100)
     },
-    [setVolume]
+    [setVolume],
   )
 
   const toggleMute = useCallback(() => {
@@ -181,7 +181,7 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
 
       video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, duration))
     },
-    [videoRef, duration]
+    [videoRef, duration],
   )
 
   const setPlaybackRate = useCallback(
@@ -196,7 +196,7 @@ export function usePlayerControls(options: UsePlayerControlsOptions): UsePlayerC
         audio.playbackRate = rate
       }
     },
-    [videoRef, audioRef, usesSeparateAudioRef]
+    [videoRef, audioRef, usesSeparateAudioRef],
   )
 
   return {

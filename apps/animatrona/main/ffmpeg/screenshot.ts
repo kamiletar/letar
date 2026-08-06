@@ -101,7 +101,7 @@ export function extractFrame(
   inputPath: string,
   outputPath: string,
   timeSeconds: number,
-  options: FrameOptions = { format: 'webp' }
+  options: FrameOptions = { format: 'webp' },
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const { format, width, quality = 80 } = options
@@ -178,7 +178,7 @@ export async function generateScreenshots(
   inputPath: string,
   outputDir: string,
   duration: number,
-  options: ScreenshotOptions
+  options: ScreenshotOptions,
 ): Promise<ScreenshotResult> {
   const {
     count,
@@ -310,7 +310,7 @@ function generateSpriteVTT(
   frameCount: number,
   frameWidth: number,
   frameHeight: number,
-  columns: number
+  columns: number,
 ): string {
   const lines: string[] = ['WEBVTT', '']
 
@@ -358,7 +358,7 @@ export async function generateThumbnailSprite(
   inputPath: string,
   outputDir: string,
   duration: number,
-  options: SpriteSheetOptions = {}
+  options: SpriteSheetOptions = {},
 ): Promise<SpriteSheetResult> {
   const { frameCount = 100, frameWidth = 160, frameHeight = 90, columns = 10, quality = 75 } = options
 

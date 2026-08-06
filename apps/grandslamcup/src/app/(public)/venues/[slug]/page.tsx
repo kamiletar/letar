@@ -108,19 +108,19 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
           <Heading size="md" mb={3}>
             Домашние команды
           </Heading>
-          {venue.teams.length === 0 ? (
-            <Text color="fg.muted">Нет домашних команд</Text>
-          ) : (
-            <VStack gap={2} align="stretch">
-              {venue.teams.map((team) => (
-                <Link key={team.slug} href={`/teams/${team.slug}`}>
-                  <Text fontWeight="medium" _hover={{ textDecoration: 'underline', color: 'brand.fg' }}>
-                    {team.name}
-                  </Text>
-                </Link>
-              ))}
-            </VStack>
-          )}
+          {venue.teams.length === 0
+            ? <Text color="fg.muted">Нет домашних команд</Text>
+            : (
+              <VStack gap={2} align="stretch">
+                {venue.teams.map((team) => (
+                  <Link key={team.slug} href={`/teams/${team.slug}`}>
+                    <Text fontWeight="medium" _hover={{ textDecoration: 'underline', color: 'brand.fg' }}>
+                      {team.name}
+                    </Text>
+                  </Link>
+                ))}
+              </VStack>
+            )}
         </Box>
       </SimpleGrid>
 

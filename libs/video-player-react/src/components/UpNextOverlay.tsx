@@ -121,12 +121,11 @@ export function UpNextOverlay({
   }, [next?.type])
 
   // Форматируем подзаголовок
-  const formattedSubtitle =
-    next?.type === 'episode'
-      ? `Эпизод ${next.subtitle || ''}`
-      : next?.type === 'anime'
-        ? next.subtitle || 'Продолжение'
-        : null
+  const formattedSubtitle = next?.type === 'episode'
+    ? `Эпизод ${next.subtitle || ''}`
+    : next?.type === 'anime'
+    ? next.subtitle || 'Продолжение'
+    : null
 
   return (
     <AnimatePresence>
@@ -153,13 +152,13 @@ export function UpNextOverlay({
           >
             {/* Превью/постер */}
             <Box position="relative" h="120px" bg="blackAlpha.500">
-              {next.posterUrl ? (
-                <Image src={next.posterUrl} alt={next.title} w="full" h="full" objectFit="cover" opacity={0.7} />
-              ) : (
-                <Box w="full" h="full" bg="whiteAlpha.100" display="flex" alignItems="center" justifyContent="center">
-                  <Icon as={LuPlay} boxSize={10} color="whiteAlpha.500" />
-                </Box>
-              )}
+              {next.posterUrl
+                ? <Image src={next.posterUrl} alt={next.title} w="full" h="full" objectFit="cover" opacity={0.7} />
+                : (
+                  <Box w="full" h="full" bg="whiteAlpha.100" display="flex" alignItems="center" justifyContent="center">
+                    <Icon as={LuPlay} boxSize={10} color="whiteAlpha.500" />
+                  </Box>
+                )}
 
               {/* Кнопка закрытия */}
               <Button

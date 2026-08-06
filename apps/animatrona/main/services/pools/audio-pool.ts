@@ -36,7 +36,7 @@ interface AudioProgressTracker {
 function parseFFmpegProgress(
   str: string,
   duration: number,
-  startTime: number
+  startTime: number,
 ): Partial<TranscodeProgressExtended> | null {
   const time = parseTimeToSeconds(str)
   if (time === null) {
@@ -149,8 +149,9 @@ export class AudioPool extends BasePool<AudioPoolTask> {
         continue
       }
 
-      const eta =
-        tracker.lastSpeed > 0 ? Math.max(0, (duration - estimatedTime) / tracker.lastSpeed) : (task.progress.eta ?? 0)
+      const eta = tracker.lastSpeed > 0
+        ? Math.max(0, (duration - estimatedTime) / tracker.lastSpeed)
+        : (task.progress.eta ?? 0)
 
       this.emit('taskProgress', taskId, {
         ...task.progress,
@@ -292,7 +293,7 @@ export class AudioPool extends BasePool<AudioPoolTask> {
       args.push(
         '-c:a',
         'copy',
-        '-vn' // Без видео
+        '-vn', // Без видео
       )
     } else {
       // Отрицательное смещение: донор отстаёт → добавить тишину через adelay
@@ -303,7 +304,7 @@ export class AudioPool extends BasePool<AudioPoolTask> {
         // Для многоканального аудио (5.1, 7.1) — все каналы получат одинаковую задержку
         args.push(
           '-af',
-          `adelay=${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}`
+          `adelay=${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}|${delayMs}`,
         )
       }
 
@@ -312,7 +313,7 @@ export class AudioPool extends BasePool<AudioPoolTask> {
         'aac',
         '-b:a',
         `${options.targetBitrate}k`,
-        '-vn' // Без видео
+        '-vn', // Без видео
       )
 
       // Опциональные параметры (только при транскодировании)

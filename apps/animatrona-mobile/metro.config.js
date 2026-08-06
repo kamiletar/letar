@@ -40,24 +40,24 @@ const config = {
       // ВАЖНО: в bun monorepo нативные модули могут дублироваться через .bun/ cache,
       // что приводит к "Tried to register two views with the same name"
       if (
-        moduleName === 'react' ||
-        moduleName === 'react-native' ||
-        moduleName.startsWith('react-native/') ||
-        moduleName.startsWith('react/') ||
-        moduleName === 'react-native-safe-area-context' ||
-        moduleName.startsWith('react-native-safe-area-context/') ||
-        moduleName === 'react-native-gesture-handler' ||
-        moduleName.startsWith('react-native-gesture-handler/') ||
-        moduleName === 'react-native-screens' ||
-        moduleName.startsWith('react-native-screens/') ||
-        moduleName === 'react-native-svg' ||
-        moduleName.startsWith('react-native-svg/') ||
-        moduleName === 'react-native-reanimated' ||
-        moduleName.startsWith('react-native-reanimated/') ||
-        moduleName === 'react-native-video' ||
-        moduleName.startsWith('react-native-video/') ||
-        moduleName === '@react-native-async-storage/async-storage' ||
-        moduleName.startsWith('@react-native-async-storage/async-storage/')
+        moduleName === 'react'
+        || moduleName === 'react-native'
+        || moduleName.startsWith('react-native/')
+        || moduleName.startsWith('react/')
+        || moduleName === 'react-native-safe-area-context'
+        || moduleName.startsWith('react-native-safe-area-context/')
+        || moduleName === 'react-native-gesture-handler'
+        || moduleName.startsWith('react-native-gesture-handler/')
+        || moduleName === 'react-native-screens'
+        || moduleName.startsWith('react-native-screens/')
+        || moduleName === 'react-native-svg'
+        || moduleName.startsWith('react-native-svg/')
+        || moduleName === 'react-native-reanimated'
+        || moduleName.startsWith('react-native-reanimated/')
+        || moduleName === 'react-native-video'
+        || moduleName.startsWith('react-native-video/')
+        || moduleName === '@react-native-async-storage/async-storage'
+        || moduleName.startsWith('@react-native-async-storage/async-storage/')
       ) {
         return {
           filePath: require.resolve(moduleName, { paths: [projectRoot] }),

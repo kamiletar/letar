@@ -33,24 +33,26 @@ export default function SignInPage() {
     <Box minH="100vh" bg="bg" display="flex" alignItems="center" justifyContent="center">
       <Container maxW="sm">
         <VStack gap={4} bg="bg.surface" p={8} borderRadius="xl" shadow="lg" border="1px solid" borderColor="border">
-          {loading ? (
-            <>
-              <Spinner size="xl" color="brand.500" />
-              <Text color="fg.muted" textAlign="center">
-                Перенаправление на auth.letar.best...
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text color="fg.error" textAlign="center" fontSize="sm">
-                {error}
-              </Text>
-              <Button onClick={attemptSignIn} variant="outline" size="md">
-                <LuRefreshCw />
-                Попробовать снова
-              </Button>
-            </>
-          )}
+          {loading
+            ? (
+              <>
+                <Spinner size="xl" color="brand.500" />
+                <Text color="fg.muted" textAlign="center">
+                  Перенаправление на auth.letar.best...
+                </Text>
+              </>
+            )
+            : (
+              <>
+                <Text color="fg.error" textAlign="center" fontSize="sm">
+                  {error}
+                </Text>
+                <Button onClick={attemptSignIn} variant="outline" size="md">
+                  <LuRefreshCw />
+                  Попробовать снова
+                </Button>
+              </>
+            )}
         </VStack>
       </Container>
     </Box>

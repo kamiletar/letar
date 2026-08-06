@@ -43,7 +43,7 @@ export async function findEpisodesByAnimeId(animeId: string, include?: Prisma.Ep
 export async function findEpisodeByNumber(
   animeId: string,
   number: number,
-  include?: Prisma.EpisodeInclude
+  include?: Prisma.EpisodeInclude,
 ): Promise<Episode | null> {
   return prisma.episode.findUnique({
     where: {

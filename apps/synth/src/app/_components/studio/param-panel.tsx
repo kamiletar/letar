@@ -59,7 +59,7 @@ interface ParamPanelProps {
 function patchEngine<K extends keyof SubtractiveEngineParams>(
   engine: SubtractiveEngineParams,
   key: K,
-  value: SubtractiveEngineParams[K]
+  value: SubtractiveEngineParams[K],
 ): SubtractiveEngineParams {
   return { ...engine, [key]: value }
 }
@@ -144,7 +144,11 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
       <Section title="Filter">
         <Box display="flex" gap="2px" mb={2}>
           {(['lowpass', 'highpass', 'bandpass'] as const).map((t) => (
-            <button key={t} style={btnStyle(engine.filter.type === t)} onClick={() => setFilter('type', t)}>
+            <button
+              key={t}
+              style={btnStyle(engine.filter.type === t)}
+              onClick={() => setFilter('type', t)}
+            >
               {t === 'lowpass' ? 'LP' : t === 'highpass' ? 'HP' : 'BP'}
             </button>
           ))}
@@ -182,9 +186,9 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
               label={k[0].toUpperCase()}
               value={k === 'sustain' ? engine.filter.adsr[k] : engine.filter.adsr[k] / 10}
               onChange={(v) => setFilterAdsr(k, k === 'sustain' ? v : Math.round(v * 100) / 10)}
-              displayValue={
-                k === 'sustain' ? `${Math.round(engine.filter.adsr[k] * 100)}%` : `${engine.filter.adsr[k].toFixed(2)}s`
-              }
+              displayValue={k === 'sustain'
+                ? `${Math.round(engine.filter.adsr[k] * 100)}%`
+                : `${engine.filter.adsr[k].toFixed(2)}s`}
               hint={HINTS[`adsr.${k}`]}
               size={40}
             />
@@ -213,9 +217,9 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
               label={k[0].toUpperCase()}
               value={k === 'sustain' ? engine.amp.adsr[k] : engine.amp.adsr[k] / 10}
               onChange={(v) => setAmpAdsr(k, k === 'sustain' ? v : Math.round(v * 100) / 10)}
-              displayValue={
-                k === 'sustain' ? `${Math.round(engine.amp.adsr[k] * 100)}%` : `${engine.amp.adsr[k].toFixed(2)}s`
-              }
+              displayValue={k === 'sustain'
+                ? `${Math.round(engine.amp.adsr[k] * 100)}%`
+                : `${engine.amp.adsr[k].toFixed(2)}s`}
               hint={HINTS[`adsr.${k}`]}
               size={40}
             />
@@ -250,11 +254,9 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
             label="азимут"
             value={(engine.fx.space.azimuth + 1) / 2}
             onChange={(v) => setFxSpace('azimuth', Math.round((v * 2 - 1) * 100) / 100)}
-            displayValue={
-              engine.fx.space.azimuth === 0
-                ? 'центр'
-                : `${Math.abs(Math.round(engine.fx.space.azimuth * 90))}° ${engine.fx.space.azimuth < 0 ? 'Л' : 'П'}`
-            }
+            displayValue={engine.fx.space.azimuth === 0
+              ? 'центр'
+              : `${Math.abs(Math.round(engine.fx.space.azimuth * 90))}° ${engine.fx.space.azimuth < 0 ? 'Л' : 'П'}`}
             hint={HINTS['fx.space.azimuth']}
           />
           <Knob
@@ -286,7 +288,11 @@ export function ParamPanel({ engine, onChange }: ParamPanelProps) {
       <Section title="LFO">
         <Box display="flex" gap="2px" mb={2}>
           {(['cutoff', 'pitch', 'amp'] as const).map((t) => (
-            <button key={t} style={btnStyle(engine.lfo.target === t)} onClick={() => setLfo('target', t)}>
+            <button
+              key={t}
+              style={btnStyle(engine.lfo.target === t)}
+              onClick={() => setLfo('target', t)}
+            >
               {t}
             </button>
           ))}

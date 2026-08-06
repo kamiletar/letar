@@ -76,7 +76,7 @@ export function FranchiseGraphView({
         window.open(data.shikimoriUrl, '_blank', 'noopener,noreferrer')
       }
     },
-    [router]
+    [router],
   )
 
   /** SVG-маркер стрелки для рёбер */
@@ -84,7 +84,7 @@ export function FranchiseGraphView({
     () => ({
       markerEnd: { type: 'arrow' as const, width: 16, height: 16 },
     }),
-    []
+    [],
   )
 
   /** Статистика по узлам */
@@ -120,7 +120,7 @@ export function FranchiseGraphView({
       }
       return resolvedColors.gray
     },
-    [resolvedColors]
+    [resolvedColors],
   )
 
   // Пустой граф

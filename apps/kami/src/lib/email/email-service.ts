@@ -95,12 +95,14 @@ function formatHireRequestEmailContent(data: HireRequestEmailData): { html: stri
               </h2>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 25px;">
                 ${field('Компания', data.companyName)}
-                ${field(
-                  'Сайт',
-                  data.companyWebsite
-                    ? `<a href="${data.companyWebsite}" style="color: #3182ce;">${data.companyWebsite}</a>`
-                    : undefined
-                )}
+                ${
+    field(
+      'Сайт',
+      data.companyWebsite
+        ? `<a href="${data.companyWebsite}" style="color: #3182ce;">${data.companyWebsite}</a>`
+        : undefined,
+    )
+  }
                 ${field('Размер', data.companySize)}
                 ${field('Индустрия', data.industry)}
               </table>
@@ -158,32 +160,38 @@ function formatHireRequestEmailContent(data: HireRequestEmailData): { html: stri
               </h2>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 25px;">
                 ${field('Имя', data.contactName)}
-                ${field(
-                  'Email',
-                  `<a href="mailto:${data.contactEmail}" style="color: #3182ce;">${data.contactEmail}</a>`
-                )}
-                ${field(
-                  'Telegram',
-                  data.contactTelegram
-                    ? `<a href="https://t.me/${data.contactTelegram.replace(
-                        '@',
-                        ''
-                      )}" style="color: #3182ce;">${data.contactTelegram}</a>`
-                    : undefined
-                )}
+                ${
+    field(
+      'Email',
+      `<a href="mailto:${data.contactEmail}" style="color: #3182ce;">${data.contactEmail}</a>`,
+    )
+  }
+                ${
+    field(
+      'Telegram',
+      data.contactTelegram
+        ? `<a href="https://t.me/${
+          data.contactTelegram.replace(
+            '@',
+            '',
+          )
+        }" style="color: #3182ce;">${data.contactTelegram}</a>`
+        : undefined,
+    )
+  }
               </table>
 
               <!-- Сообщение -->
               ${
-                data.message
-                  ? `
+    data.message
+      ? `
               <h2 style="margin: 0 0 15px; font-size: 18px; color: #2d3748; border-bottom: 2px solid #38a169; padding-bottom: 8px;">
                 💬 Сообщение
               </h2>
               <p style="margin: 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; white-space: pre-wrap;">${data.message}</p>
               `
-                  : ''
-              }
+      : ''
+  }
             </td>
           </tr>
 
@@ -255,7 +263,7 @@ function formatHireRequestEmailContent(data: HireRequestEmailData): { html: stri
  * Отправляет уведомление о новой заявке на работу
  */
 export async function sendHireRequestNotification(
-  data: HireRequestEmailData
+  data: HireRequestEmailData,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   // Email получателя (владелец сайта)
   const notifyTo = process.env.HIRE_NOTIFY_EMAIL || process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
@@ -370,12 +378,14 @@ function formatConsultingRequestEmailContent(data: ConsultingRequestEmailData): 
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 25px;">
                 ${field('Имя', data.name)}
                 ${field('Email', `<a href="mailto:${data.email}" style="color: #805ad5;">${data.email}</a>`)}
-                ${field(
-                  'Telegram',
-                  data.telegram
-                    ? `<a href="https://t.me/${data.telegram.replace('@', '')}" style="color: #805ad5;">${data.telegram}</a>`
-                    : undefined
-                )}
+                ${
+    field(
+      'Telegram',
+      data.telegram
+        ? `<a href="https://t.me/${data.telegram.replace('@', '')}" style="color: #805ad5;">${data.telegram}</a>`
+        : undefined,
+    )
+  }
                 ${field('Компания', data.company)}
               </table>
 
@@ -384,28 +394,34 @@ function formatConsultingRequestEmailContent(data: ConsultingRequestEmailData): 
                 📋 Детали проекта
               </h2>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 25px;">
-                ${field(
-                  'Тип услуги',
-                  data.serviceType ? serviceTypeLabels[data.serviceType] || data.serviceType : undefined
-                )}
-                ${field(
-                  'Тип проекта',
-                  data.projectType ? projectTypeLabels[data.projectType] || data.projectType : undefined
-                )}
+                ${
+    field(
+      'Тип услуги',
+      data.serviceType ? serviceTypeLabels[data.serviceType] || data.serviceType : undefined,
+    )
+  }
+                ${
+    field(
+      'Тип проекта',
+      data.projectType ? projectTypeLabels[data.projectType] || data.projectType : undefined,
+    )
+  }
                 ${field('Бюджет', data.budget ? budgetLabels[data.budget] || data.budget : undefined)}
                 ${field('Сроки', data.timeline ? timelineLabels[data.timeline] || data.timeline : undefined)}
-                ${field(
-                  '🗓️ Предпочтительное время',
-                  data.preferredTime
-                    ? new Date(data.preferredTime).toLocaleString('ru-RU', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : undefined
-                )}
+                ${
+    field(
+      '🗓️ Предпочтительное время',
+      data.preferredTime
+        ? new Date(data.preferredTime).toLocaleString('ru-RU', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+        : undefined,
+    )
+  }
               </table>
 
               <!-- Описание задачи -->
@@ -451,13 +467,13 @@ function formatConsultingRequestEmailContent(data: ConsultingRequestEmailData): 
       '🗓️ Предпочтительное время',
       data.preferredTime
         ? new Date(data.preferredTime).toLocaleString('ru-RU', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : undefined
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+        : undefined,
     ),
     '',
     '📝 ОПИСАНИЕ ЗАДАЧИ',
@@ -476,14 +492,13 @@ function formatConsultingRequestEmailContent(data: ConsultingRequestEmailData): 
  * Отправляет уведомление о новой заявке на консультацию
  */
 export async function sendConsultingRequestNotification(
-  data: ConsultingRequestEmailData
+  data: ConsultingRequestEmailData,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   // Email получателя (владелец сайта)
-  const notifyTo =
-    process.env.CONSULTING_NOTIFY_EMAIL ||
-    process.env.HIRE_NOTIFY_EMAIL ||
-    process.env.SMTP_FROM_EMAIL ||
-    process.env.SMTP_USER
+  const notifyTo = process.env.CONSULTING_NOTIFY_EMAIL
+    || process.env.HIRE_NOTIFY_EMAIL
+    || process.env.SMTP_FROM_EMAIL
+    || process.env.SMTP_USER
   if (!notifyTo) {
     console.error('[Email] No recipient configured for consulting notifications')
     return { success: false, error: 'No recipient configured' }

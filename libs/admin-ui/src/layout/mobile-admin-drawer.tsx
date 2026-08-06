@@ -90,11 +90,9 @@ export function MobileAdminDrawer({
                       py={3}
                       borderRadius="md"
                       bg={isActive ? { _light: `${colorPalette}.100`, _dark: `${colorPalette}.900` } : 'transparent'}
-                      color={
-                        isActive
-                          ? { _light: `${colorPalette}.700`, _dark: `${colorPalette}.200` }
-                          : { _light: 'gray.600', _dark: 'gray.400' }
-                      }
+                      color={isActive
+                        ? { _light: `${colorPalette}.700`, _dark: `${colorPalette}.200` }
+                        : { _light: 'gray.600', _dark: 'gray.400' }}
                       fontWeight={isActive ? 'medium' : 'normal'}
                       _hover={{
                         bg: isActive

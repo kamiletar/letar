@@ -32,7 +32,7 @@ export type { DirEntry } from './unified-ipfs-service'
 export async function addFile(
   filePath: string,
   onProgress?: (bytes: number) => void,
-  opts?: { pin?: boolean }
+  opts?: { pin?: boolean },
 ): Promise<IpfsAddResult> {
   log.info('addFile → UnifiedIPFS', { filePath, pin: opts?.pin ?? true })
   return UnifiedIPFS.addFile(filePath, onProgress, opts)
@@ -47,7 +47,7 @@ export async function addFile(
  */
 export async function addDirectory(
   dirPath: string,
-  recursive = true
+  recursive = true,
 ): Promise<{ files: IpfsAddResult[]; rootCid: string }> {
   log.info('addDirectory → UnifiedIPFS', { dirPath })
   return UnifiedIPFS.addDirectory(dirPath, recursive)

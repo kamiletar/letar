@@ -214,10 +214,10 @@ function serializeStatus() {
     status: updateStatus.status,
     updateInfo: updateStatus.updateInfo
       ? {
-          version: updateStatus.updateInfo.version,
-          releaseDate: updateStatus.updateInfo.releaseDate,
-          releaseNotes: normalizeReleaseNotes(updateStatus.updateInfo.releaseNotes),
-        }
+        version: updateStatus.updateInfo.version,
+        releaseDate: updateStatus.updateInfo.releaseDate,
+        releaseNotes: normalizeReleaseNotes(updateStatus.updateInfo.releaseNotes),
+      }
       : null,
     downloadProgress: updateStatus.downloadProgress,
     error: updateStatus.error,

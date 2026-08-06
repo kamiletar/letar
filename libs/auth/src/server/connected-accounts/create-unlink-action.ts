@@ -30,7 +30,7 @@ const noopLogger = {
  * ```
  */
 export function createUnlinkAccountAction<TUser extends { id: string }>(
-  options: CreateUnlinkActionOptions<TUser>
+  options: CreateUnlinkActionOptions<TUser>,
 ): (providerId: string) => Promise<UnlinkAccountResult> {
   const {
     getSession,

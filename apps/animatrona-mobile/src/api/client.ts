@@ -122,7 +122,7 @@ export function getApiBase(): string {
 async function withCacheFallback<T>(
   fetcher: () => Promise<T>,
   getCached: () => Promise<T | null>,
-  setCache: (data: T) => Promise<void>
+  setCache: (data: T) => Promise<void>,
 ): Promise<T> {
   try {
     const data = await fetcher()
@@ -174,7 +174,7 @@ export async function getLibrary(options?: LibraryOptions): Promise<AnimeListIte
   return withCacheFallback(
     () => getAdapter().getLibrary(options),
     () => getCachedLibrary(sid),
-    (data) => setCachedLibrary(sid, data)
+    (data) => setCachedLibrary(sid, data),
   )
 }
 
@@ -184,7 +184,7 @@ export async function getAnimeDetails(animeId: string): Promise<AnimeDetails> {
   return withCacheFallback(
     () => getAdapter().getAnimeDetails(animeId),
     () => getCachedAnimeDetails(sid, animeId),
-    (data) => setCachedAnimeDetails(sid, animeId, data)
+    (data) => setCachedAnimeDetails(sid, animeId, data),
   )
 }
 

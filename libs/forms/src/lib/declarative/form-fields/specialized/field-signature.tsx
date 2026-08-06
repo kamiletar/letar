@@ -86,18 +86,19 @@ export function buildSvgString(
   height: number,
   strokeColor: string,
   strokeWidth: number,
-  backgroundColor: string
+  backgroundColor: string,
 ): string {
   const paths = strokes
     .filter((s) => s.points.length > 0)
     .map((stroke) => {
       const [first, ...rest] = stroke.points
-      const d =
-        `M${first.x.toFixed(1)},${first.y.toFixed(1)}` +
-        rest.map((p) => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('')
-      return `<path d="${d}" fill="none" stroke="${escapeXml(
-        strokeColor
-      )}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`
+      const d = `M${first.x.toFixed(1)},${first.y.toFixed(1)}`
+        + rest.map((p) => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('')
+      return `<path d="${d}" fill="none" stroke="${
+        escapeXml(
+          strokeColor,
+        )
+      }" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`
     })
     .join('\n  ')
 
@@ -116,14 +117,16 @@ export function buildTypedSvgString(
   height: number,
   strokeColor: string,
   backgroundColor: string,
-  typedFont: string
+  typedFont: string,
 ): string {
   const fontSize = Math.min(height * 0.4, 48)
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <rect width="${width}" height="${height}" fill="${escapeXml(backgroundColor)}"/>
-  <text x="${width / 2}" y="${height / 2}" text-anchor="middle" dominant-baseline="central" font-family="${escapeXml(
-    typedFont
-  )}" font-size="${fontSize}" fill="${escapeXml(strokeColor)}">${escapeXml(text)}</text>
+  <text x="${width / 2}" y="${height / 2}" text-anchor="middle" dominant-baseline="central" font-family="${
+    escapeXml(
+      typedFont,
+    )
+  }" font-size="${fontSize}" fill="${escapeXml(strokeColor)}">${escapeXml(text)}</text>
 </svg>`
 }
 
@@ -237,7 +240,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
         ctx.beginPath()
         ctx.moveTo(x, y)
       },
-      [strokeColor, strokeWidth]
+      [strokeColor, strokeWidth],
     )
 
     // Рисовать
@@ -273,7 +276,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
 
       if (exportFormat === 'svg') {
         return svgToDataUri(
-          buildSvgString(strokesRef.current, canvasWidth, canvasHeight, strokeColor, strokeWidth, backgroundColor)
+          buildSvgString(strokesRef.current, canvasWidth, canvasHeight, strokeColor, strokeWidth, backgroundColor),
         )
       }
       return canvas.toDataURL('image/png')
@@ -317,12 +320,12 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
 
         if (exportFormat === 'svg') {
           return svgToDataUri(
-            buildTypedSvgString(text, canvasWidth, canvasHeight, strokeColor, backgroundColor, typedFont)
+            buildTypedSvgString(text, canvasWidth, canvasHeight, strokeColor, backgroundColor, typedFont),
           )
         }
         return canvas.toDataURL('image/png')
       },
-      [backgroundColor, strokeColor, typedFont, exportFormat, canvasWidth, canvasHeight]
+      [backgroundColor, strokeColor, typedFont, exportFormat, canvasWidth, canvasHeight],
     )
 
     return {
@@ -441,32 +444,26 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
               tabIndex={0}
               onMouseDown={mode === 'draw' ? startDrawing : undefined}
               onMouseMove={mode === 'draw' ? draw : undefined}
-              onMouseUp={
-                mode === 'draw'
-                  ? () => {
-                      const dataUrl = stopDrawing()
-                      if (dataUrl) field.handleChange(dataUrl)
-                    }
-                  : undefined
-              }
-              onMouseLeave={
-                mode === 'draw'
-                  ? () => {
-                      const dataUrl = stopDrawing()
-                      if (dataUrl) field.handleChange(dataUrl)
-                    }
-                  : undefined
-              }
+              onMouseUp={mode === 'draw'
+                ? () => {
+                  const dataUrl = stopDrawing()
+                  if (dataUrl) field.handleChange(dataUrl)
+                }
+                : undefined}
+              onMouseLeave={mode === 'draw'
+                ? () => {
+                  const dataUrl = stopDrawing()
+                  if (dataUrl) field.handleChange(dataUrl)
+                }
+                : undefined}
               onTouchStart={mode === 'draw' ? startDrawing : undefined}
               onTouchMove={mode === 'draw' ? draw : undefined}
-              onTouchEnd={
-                mode === 'draw'
-                  ? () => {
-                      const dataUrl = stopDrawing()
-                      if (dataUrl) field.handleChange(dataUrl)
-                    }
-                  : undefined
-              }
+              onTouchEnd={mode === 'draw'
+                ? () => {
+                  const dataUrl = stopDrawing()
+                  if (dataUrl) field.handleChange(dataUrl)
+                }
+                : undefined}
             />
 
             {/* Placeholder */}

@@ -124,7 +124,7 @@ async function probeDisplayInfo(inputPath: string): Promise<DisplayInfo> {
 export async function buildAnime4KFilter(
   inputPath: string,
   shaderPath: string,
-  denoiseEnabled = false
+  denoiseEnabled = false,
 ): Promise<string> {
   const info = await probeDisplayInfo(inputPath)
 
@@ -158,7 +158,7 @@ export async function buildAnime4KFilter(
     `setsar=1`,
     `scale=${displayWidth}:${height}:flags=lanczos`,
     `libplacebo=custom_shader_path='${shaderEsc}':w=${targetW}:h=${targetH}:upscaler=none`,
-    `setsar=1`
+    `setsar=1`,
   )
 
   return parts.join(',')

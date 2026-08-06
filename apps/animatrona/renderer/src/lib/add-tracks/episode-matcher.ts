@@ -146,7 +146,7 @@ export function createDonorFile(filePath: string, dubGroup: string | null = null
  */
 export function matchDonorFilesToEpisodes(
   donorFiles: DonorFile[],
-  libraryEpisodes: Array<{ id: string; number: number }>
+  libraryEpisodes: Array<{ id: string; number: number }>,
 ): EpisodeMatch[] {
   // Создаём карту: номер эпизода → эпизод
   const episodeMap = new Map<number, { id: string; number: number }>()
@@ -181,7 +181,7 @@ export function matchDonorFilesToEpisodes(
 export function updateMatch(
   matches: EpisodeMatch[],
   donorFilePath: string,
-  targetEpisode: { id: string; number: number } | null
+  targetEpisode: { id: string; number: number } | null,
 ): EpisodeMatch[] {
   return matches.map((match) => {
     if (match.donorFile.path !== donorFilePath) {

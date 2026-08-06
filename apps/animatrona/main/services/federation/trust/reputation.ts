@@ -200,10 +200,9 @@ export class ReputationTracker {
 
     // Рассчитываем среднее время ответа (только успешных)
     const successfulChecks = history.filter((h) => h.success)
-    const avgResponseTimeMs =
-      successfulChecks.length > 0
-        ? Math.round(successfulChecks.reduce((sum, h) => sum + h.responseTimeMs, 0) / successfulChecks.length)
-        : 0
+    const avgResponseTimeMs = successfulChecks.length > 0
+      ? Math.round(successfulChecks.reduce((sum, h) => sum + h.responseTimeMs, 0) / successfulChecks.length)
+      : 0
 
     await this.prisma.tracker.update({
       where: { id: trackerId },

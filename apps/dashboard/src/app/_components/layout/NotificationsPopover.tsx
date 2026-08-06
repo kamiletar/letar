@@ -87,7 +87,7 @@ export const NotificationsPopover = () => {
   // Оптимистичное состояние — мгновенное удаление алерта из списка
   const [optimisticAlerts, addOptimisticAction] = useOptimistic(
     data?.alerts || [],
-    (currentAlerts: Alert[], alertIdToRemove: string) => currentAlerts.filter((alert) => alert.id !== alertIdToRemove)
+    (currentAlerts: Alert[], alertIdToRemove: string) => currentAlerts.filter((alert) => alert.id !== alertIdToRemove),
   )
 
   // Обработчик acknowledge с оптимистичным обновлением
@@ -151,59 +151,63 @@ export const NotificationsPopover = () => {
               </Flex>
             </Popover.Header>
             <Popover.Body p="0" overflowY="auto" maxH="280px">
-              {isLoading ? (
-                <Flex justify="center" py="6">
-                  <Spinner size="sm" />
-                </Flex>
-              ) : alerts.length === 0 ? (
-                <Box py="6" textAlign="center">
-                  <Text color="fg.muted" fontSize="sm">
-                    Нет активных уведомлений
-                  </Text>
-                </Box>
-              ) : (
-                <VStack gap="0" align="stretch">
-                  {alerts.slice(0, 5).map((alert) => (
-                    <Box
-                      key={alert.id}
-                      px="4"
-                      py="3"
-                      borderBottomWidth="1px"
-                      borderColor="border.muted"
-                      _hover={{ bg: 'bg.emphasized' }}
-                    >
-                      <Flex justify="space-between" align="start" gap="2">
-                        <VStack align="start" gap="1" flex="1">
-                          <HStack gap="2">
-                            <Badge colorPalette={getSeverityColor(alert.severity)} size="xs">
-                              {alert.severity}
-                            </Badge>
-                            <Text fontSize="xs" color="fg.muted">
-                              {formatTimeAgo(alert.createdAt)}
+              {isLoading
+                ? (
+                  <Flex justify="center" py="6">
+                    <Spinner size="sm" />
+                  </Flex>
+                )
+                : alerts.length === 0
+                ? (
+                  <Box py="6" textAlign="center">
+                    <Text color="fg.muted" fontSize="sm">
+                      Нет активных уведомлений
+                    </Text>
+                  </Box>
+                )
+                : (
+                  <VStack gap="0" align="stretch">
+                    {alerts.slice(0, 5).map((alert) => (
+                      <Box
+                        key={alert.id}
+                        px="4"
+                        py="3"
+                        borderBottomWidth="1px"
+                        borderColor="border.muted"
+                        _hover={{ bg: 'bg.emphasized' }}
+                      >
+                        <Flex justify="space-between" align="start" gap="2">
+                          <VStack align="start" gap="1" flex="1">
+                            <HStack gap="2">
+                              <Badge colorPalette={getSeverityColor(alert.severity)} size="xs">
+                                {alert.severity}
+                              </Badge>
+                              <Text fontSize="xs" color="fg.muted">
+                                {formatTimeAgo(alert.createdAt)}
+                              </Text>
+                            </HStack>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {alert.title}
                             </Text>
-                          </HStack>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {alert.title}
-                          </Text>
-                          <Text fontSize="xs" color="fg.muted" lineClamp={2}>
-                            {alert.message}
-                          </Text>
-                        </VStack>
-                        <IconButton
-                          aria-label="Acknowledge"
-                          size="xs"
-                          variant="ghost"
-                          colorPalette="green"
-                          onClick={() => handleAcknowledge(alert.id)}
-                          loading={isPending}
-                        >
-                          <LuCheck size={14} />
-                        </IconButton>
-                      </Flex>
-                    </Box>
-                  ))}
-                </VStack>
-              )}
+                            <Text fontSize="xs" color="fg.muted" lineClamp={2}>
+                              {alert.message}
+                            </Text>
+                          </VStack>
+                          <IconButton
+                            aria-label="Acknowledge"
+                            size="xs"
+                            variant="ghost"
+                            colorPalette="green"
+                            onClick={() => handleAcknowledge(alert.id)}
+                            loading={isPending}
+                          >
+                            <LuCheck size={14} />
+                          </IconButton>
+                        </Flex>
+                      </Box>
+                    ))}
+                  </VStack>
+                )}
             </Popover.Body>
             <Popover.Footer borderTopWidth="1px" borderColor="border.muted" py="2">
               <Link href="/alerts">

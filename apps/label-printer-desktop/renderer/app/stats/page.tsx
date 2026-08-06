@@ -160,12 +160,15 @@ export default function StatsPage() {
   }
 
   // Вычисляем дельты для сравнения
-  const printedDelta =
-    period1Stats && period2Stats ? calcDelta(period1Stats.totalPrinted, period2Stats.totalPrinted) : null
-  const scannedDelta =
-    period1Stats && period2Stats ? calcDelta(period1Stats.totalScanned, period2Stats.totalScanned) : null
-  const duplicatesDelta =
-    period1Stats && period2Stats ? calcDelta(period1Stats.duplicatesBlocked, period2Stats.duplicatesBlocked) : null
+  const printedDelta = period1Stats && period2Stats
+    ? calcDelta(period1Stats.totalPrinted, period2Stats.totalPrinted)
+    : null
+  const scannedDelta = period1Stats && period2Stats
+    ? calcDelta(period1Stats.totalScanned, period2Stats.totalScanned)
+    : null
+  const duplicatesDelta = period1Stats && period2Stats
+    ? calcDelta(period1Stats.duplicatesBlocked, period2Stats.duplicatesBlocked)
+    : null
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -256,51 +259,53 @@ export default function StatsPage() {
         </Card.Root>
 
         {/* Статистика */}
-        {isLoading ? (
-          <Card.Root>
-            <Card.Body>
-              <Text textAlign="center" color="fg.muted">
-                Загрузка статистики...
-              </Text>
-            </Card.Body>
-          </Card.Root>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
-            <MetricCard
-              title="Всего напечатано"
-              value={stats?.totalPrinted ?? 0}
-              description="этикеток за всё время"
-              icon={<LuPrinter />}
-              colorScheme="blue"
-            />
+        {isLoading
+          ? (
+            <Card.Root>
+              <Card.Body>
+                <Text textAlign="center" color="fg.muted">
+                  Загрузка статистики...
+                </Text>
+              </Card.Body>
+            </Card.Root>
+          )
+          : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
+              <MetricCard
+                title="Всего напечатано"
+                value={stats?.totalPrinted ?? 0}
+                description="этикеток за всё время"
+                icon={<LuPrinter />}
+                colorScheme="blue"
+              />
 
-            <MetricCard
-              title="Сегодня"
-              value={stats?.todayPrinted ?? 0}
-              description="этикеток напечатано"
-              icon={<LuTrendingUp />}
-              colorScheme="green"
-            />
+              <MetricCard
+                title="Сегодня"
+                value={stats?.todayPrinted ?? 0}
+                description="этикеток напечатано"
+                icon={<LuTrendingUp />}
+                colorScheme="green"
+              />
 
-            <MetricCard
-              title="Дубликаты"
-              value={stats?.duplicatesBlocked ?? 0}
-              description="заблокировано"
-              icon={<LuBan />}
-              colorScheme="orange"
-            />
+              <MetricCard
+                title="Дубликаты"
+                value={stats?.duplicatesBlocked ?? 0}
+                description="заблокировано"
+                icon={<LuBan />}
+                colorScheme="orange"
+              />
 
-            <MetricCard
-              title="Последняя печать"
-              value={stats?.lastPrintTime ? new Date(stats.lastPrintTime).toLocaleTimeString('ru-RU') : '—'}
-              description={
-                stats?.lastPrintTime ? new Date(stats.lastPrintTime).toLocaleDateString('ru-RU') : 'нет данных'
-              }
-              icon={<LuCalendar />}
-              colorScheme="purple"
-            />
-          </SimpleGrid>
-        )}
+              <MetricCard
+                title="Последняя печать"
+                value={stats?.lastPrintTime ? new Date(stats.lastPrintTime).toLocaleTimeString('ru-RU') : '—'}
+                description={stats?.lastPrintTime
+                  ? new Date(stats.lastPrintTime).toLocaleDateString('ru-RU')
+                  : 'нет данных'}
+                icon={<LuCalendar />}
+                colorScheme="purple"
+              />
+            </SimpleGrid>
+          )}
 
         {/* Результаты сравнения периодов */}
         {compareMode && period1Stats && period2Stats && (
@@ -339,9 +344,11 @@ export default function StatsPage() {
                   {printedDelta && (
                     <Badge
                       mt={2}
-                      colorPalette={
-                        printedDelta.type === 'up' ? 'green' : printedDelta.type === 'down' ? 'red' : 'gray'
-                      }
+                      colorPalette={printedDelta.type === 'up'
+                        ? 'green'
+                        : printedDelta.type === 'down'
+                        ? 'red'
+                        : 'gray'}
                     >
                       {printedDelta.type === 'up' && <LuArrowUp />}
                       {printedDelta.type === 'down' && <LuArrowDown />}
@@ -380,9 +387,11 @@ export default function StatsPage() {
                   {scannedDelta && (
                     <Badge
                       mt={2}
-                      colorPalette={
-                        scannedDelta.type === 'up' ? 'green' : scannedDelta.type === 'down' ? 'red' : 'gray'
-                      }
+                      colorPalette={scannedDelta.type === 'up'
+                        ? 'green'
+                        : scannedDelta.type === 'down'
+                        ? 'red'
+                        : 'gray'}
                     >
                       {scannedDelta.type === 'up' && <LuArrowUp />}
                       {scannedDelta.type === 'down' && <LuArrowDown />}
@@ -421,9 +430,11 @@ export default function StatsPage() {
                   {duplicatesDelta && (
                     <Badge
                       mt={2}
-                      colorPalette={
-                        duplicatesDelta.type === 'down' ? 'green' : duplicatesDelta.type === 'up' ? 'red' : 'gray'
-                      }
+                      colorPalette={duplicatesDelta.type === 'down'
+                        ? 'green'
+                        : duplicatesDelta.type === 'up'
+                        ? 'red'
+                        : 'gray'}
                     >
                       {duplicatesDelta.type === 'up' && <LuArrowUp />}
                       {duplicatesDelta.type === 'down' && <LuArrowDown />}

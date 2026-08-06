@@ -82,7 +82,7 @@ export function getAudioTracks(videoPath: string): Promise<AudioTrack[]> {
             codec: stream.codec_name,
             bitrate: stream.bit_rate ? parseInt(stream.bit_rate, 10) : undefined,
             channels: stream.channels,
-          })
+          }),
         )
         resolve(tracks)
       } catch (error) {
@@ -151,7 +151,7 @@ export function getVideoTracks(filePath: string): Promise<VideoTrack[]> {
               fps,
               fieldOrder: stream.field_order,
             }
-          }
+          },
         )
         resolve(tracks)
       } catch (error) {

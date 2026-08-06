@@ -198,7 +198,7 @@ export function useDiscoverProgress({
         }
       }
     },
-    [numericShikimoriId, epNum]
+    [numericShikimoriId, epNum],
   )
 
   const initialAudioTrackId = useMemo(() => savedAudioTrackId, [savedAudioTrackId])

@@ -56,7 +56,7 @@ const trackerConfigStore = createJsonStore<TrackerConfig>(
     apiKey: '',
     enabled: false,
   },
-  { mergeDefaults: true, logger: log }
+  { mergeDefaults: true, logger: log },
 )
 
 /** Загрузить конфигурацию tracker */
@@ -290,7 +290,7 @@ export function registerTrackerHandlers(): void {
     async (params?: { page?: number; limit?: number; q?: string }): Promise<TrackerCatalogResult> => {
       const config = await loadTrackerConfig()
       return fetchTrackerCatalog(config, params)
-    }
+    },
   )
 
   // Получить детали аниме с трекера (публичный endpoint — не требует API ключ)
@@ -401,7 +401,7 @@ export function registerTrackerHandlers(): void {
       // Используем sync service для debounced push + offline queue
       // Он сам сделает lookup trackerAnimeId если нужно
       getTrackerSyncService().pushWatchProgressImmediate(params)
-    }
+    },
   )
 
   // Немедленный push watchStatus одного аниме на трекер
@@ -428,7 +428,7 @@ export function registerTrackerHandlers(): void {
         return { success: false, error: 'API ключ не настроен' }
       }
       return fetchLibraryFromTracker(config)
-    }
+    },
   )
 
   // Добавить аниме из трекера в библиотеку

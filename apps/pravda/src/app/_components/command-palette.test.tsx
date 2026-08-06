@@ -177,7 +177,7 @@ describe('CommandPalette', () => {
       rerender(
         <TestWrapper>
           <CommandPalette open={true} onOpenChange={vi.fn()} />
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       await waitFor(() => {

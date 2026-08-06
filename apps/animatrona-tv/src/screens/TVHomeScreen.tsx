@@ -61,7 +61,7 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
       lastFocusedAnimeIdRef.current = animeId
       navigation.navigate('Anime', { animeId })
     },
-    [navigation]
+    [navigation],
   )
 
   /** Продолжить просмотр */

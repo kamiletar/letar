@@ -36,7 +36,7 @@ export function RecaptchaProvider({
     (token: string) => {
       onSuccess(token)
     },
-    [onSuccess]
+    [onSuccess],
   )
 
   useEffect(() => {

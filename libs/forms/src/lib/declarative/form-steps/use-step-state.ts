@@ -72,10 +72,10 @@ export function useStepState(): UseStepStateResult {
         const old = prev[existing]
         // Compare significant fields — if unchanged, don't update state
         if (
-          old.title === step.title &&
-          old.description === step.description &&
-          old.fieldNames.length === step.fieldNames.length &&
-          old.fieldNames.every((f, i) => f === step.fieldNames[i])
+          old.title === step.title
+          && old.description === step.description
+          && old.fieldNames.length === step.fieldNames.length
+          && old.fieldNames.every((f, i) => f === step.fieldNames[i])
         ) {
           return prev // No changes — return the same object
         }

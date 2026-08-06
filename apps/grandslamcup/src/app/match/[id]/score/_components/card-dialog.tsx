@@ -36,12 +36,14 @@ export function CardDialog({ matchId, performanceId, playerName, onIssued }: Car
   const [reason, setReason] = useState<CardReason>('OTHER')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{
-    actualType: string
-    upgradeToRed: boolean
-    disqualifyTeam: boolean
-    suspension: boolean
-  } | null>(null)
+  const [result, setResult] = useState<
+    {
+      actualType: string
+      upgradeToRed: boolean
+      disqualifyTeam: boolean
+      suspension: boolean
+    } | null
+  >(null)
 
   const handleIssue = useCallback(async () => {
     setLoading(true)
@@ -95,90 +97,96 @@ export function CardDialog({ matchId, performanceId, playerName, onIssued }: Car
             <Dialog.CloseTrigger />
 
             <Dialog.Body>
-              {result ? (
-                /* Результат выдачи */
-                <VStack gap={3}>
-                  <Badge
-                    size="lg"
-                    colorPalette={result.actualType === 'RED' ? 'red' : 'yellow'}
-                    px={4}
-                    py={2}
-                    fontSize="lg"
-                  >
-                    {result.actualType === 'RED' ? '🟥 КРАСНАЯ' : '🟨 ЖЁЛТАЯ'}
-                  </Badge>
-                  {result.upgradeToRed && (
-                    <Text color="red.fg" fontWeight="bold">
-                      ⚠️ 2 жёлтых за матч = автоматическая красная!
-                    </Text>
-                  )}
-                  {result.suspension && <Text color="red.fg">Игрок отстранён от следующих матчей</Text>}
-                  {result.disqualifyTeam && (
-                    <Text color="red.fg" fontWeight="bold" fontSize="lg">
-                      🚫 КОМАНДА ДИСКВАЛИФИЦИРОВАНА (5 жёлтых за сезон)
-                    </Text>
-                  )}
-                </VStack>
-              ) : (
-                /* Форма выдачи */
-                <VStack gap={4} align="stretch">
-                  {/* Тип карточки */}
-                  <Box>
-                    <Text fontWeight="medium" mb={2}>
-                      Тип
-                    </Text>
-                    <Flex gap={2}>
-                      <Button
-                        flex={1}
-                        size="lg"
-                        colorPalette="yellow"
-                        variant={cardType === 'YELLOW' ? 'solid' : 'outline'}
-                        onClick={() => setCardType('YELLOW')}
-                      >
-                        🟨 Жёлтая
-                      </Button>
-                      <Button
-                        flex={1}
-                        size="lg"
-                        colorPalette="red"
-                        variant={cardType === 'RED' ? 'solid' : 'outline'}
-                        onClick={() => setCardType('RED')}
-                      >
-                        🟥 Красная
-                      </Button>
-                    </Flex>
-                  </Box>
-
-                  {/* Причина */}
-                  <Box>
-                    <Text fontWeight="medium" mb={2}>
-                      Причина
-                    </Text>
-                    <VStack gap={1} align="stretch">
-                      {CARD_REASONS.map((r) => (
+              {result
+                ? (
+                  /* Результат выдачи */
+                  <VStack gap={3}>
+                    <Badge
+                      size="lg"
+                      colorPalette={result.actualType === 'RED' ? 'red' : 'yellow'}
+                      px={4}
+                      py={2}
+                      fontSize="lg"
+                    >
+                      {result.actualType === 'RED' ? '🟥 КРАСНАЯ' : '🟨 ЖЁЛТАЯ'}
+                    </Badge>
+                    {result.upgradeToRed && (
+                      <Text color="red.fg" fontWeight="bold">
+                        ⚠️ 2 жёлтых за матч = автоматическая красная!
+                      </Text>
+                    )}
+                    {result.suspension && <Text color="red.fg">Игрок отстранён от следующих матчей</Text>}
+                    {result.disqualifyTeam && (
+                      <Text color="red.fg" fontWeight="bold" fontSize="lg">
+                        🚫 КОМАНДА ДИСКВАЛИФИЦИРОВАНА (5 жёлтых за сезон)
+                      </Text>
+                    )}
+                  </VStack>
+                )
+                : (
+                  /* Форма выдачи */
+                  <VStack gap={4} align="stretch">
+                    {/* Тип карточки */}
+                    <Box>
+                      <Text fontWeight="medium" mb={2}>
+                        Тип
+                      </Text>
+                      <Flex gap={2}>
                         <Button
-                          key={r.value}
-                          size="sm"
-                          variant={reason === r.value ? 'solid' : 'outline'}
-                          colorPalette={reason === r.value ? 'blue' : 'gray'}
-                          onClick={() => setReason(r.value)}
-                          justifyContent="flex-start"
+                          flex={1}
+                          size="lg"
+                          colorPalette="yellow"
+                          variant={cardType === 'YELLOW' ? 'solid' : 'outline'}
+                          onClick={() => setCardType('YELLOW')}
                         >
-                          {r.label}
+                          🟨 Жёлтая
                         </Button>
-                      ))}
-                    </VStack>
-                  </Box>
+                        <Button
+                          flex={1}
+                          size="lg"
+                          colorPalette="red"
+                          variant={cardType === 'RED' ? 'solid' : 'outline'}
+                          onClick={() => setCardType('RED')}
+                        >
+                          🟥 Красная
+                        </Button>
+                      </Flex>
+                    </Box>
 
-                  {/* Комментарий */}
-                  <Box>
-                    <Text fontWeight="medium" mb={2}>
-                      Комментарий (необязательно)
-                    </Text>
-                    <Input placeholder="Описание нарушения..." value={note} onChange={(e) => setNote(e.target.value)} />
-                  </Box>
-                </VStack>
-              )}
+                    {/* Причина */}
+                    <Box>
+                      <Text fontWeight="medium" mb={2}>
+                        Причина
+                      </Text>
+                      <VStack gap={1} align="stretch">
+                        {CARD_REASONS.map((r) => (
+                          <Button
+                            key={r.value}
+                            size="sm"
+                            variant={reason === r.value ? 'solid' : 'outline'}
+                            colorPalette={reason === r.value ? 'blue' : 'gray'}
+                            onClick={() => setReason(r.value)}
+                            justifyContent="flex-start"
+                          >
+                            {r.label}
+                          </Button>
+                        ))}
+                      </VStack>
+                    </Box>
+
+                    {/* Комментарий */}
+                    <Box>
+                      <Text fontWeight="medium" mb={2}>
+                        Комментарий (необязательно)
+                      </Text>
+                      <Input
+                        placeholder="Описание нарушения..."
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                      />
+                    </Box>
+                  </VStack>
+                )}
             </Dialog.Body>
 
             {!result && (

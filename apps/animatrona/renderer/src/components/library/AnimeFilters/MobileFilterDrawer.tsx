@@ -150,7 +150,7 @@ export function MobileFilterDrawer({
       createListCollection({
         items: [{ value: '', label: 'Все жанры' }, ...genres.map((g) => ({ value: g.id, label: g.name }))],
       }),
-    [genres]
+    [genres],
   )
 
   const studioCollection = useMemo(
@@ -158,7 +158,7 @@ export function MobileFilterDrawer({
       createListCollection({
         items: [{ value: '', label: 'Все студии' }, ...studios.map((s) => ({ value: s.id, label: s.name }))],
       }),
-    [studios]
+    [studios],
   )
 
   const fandubberCollection = useMemo(
@@ -166,7 +166,7 @@ export function MobileFilterDrawer({
       createListCollection({
         items: [{ value: '', label: 'Любая озвучка' }, ...fandubbers.map((f) => ({ value: f.id, label: f.name }))],
       }),
-    [fandubbers]
+    [fandubbers],
   )
 
   const directorCollection = useMemo(
@@ -174,7 +174,7 @@ export function MobileFilterDrawer({
       createListCollection({
         items: [{ value: '', label: 'Любой режиссёр' }, ...directors.map((d) => ({ value: d.id, label: d.name }))],
       }),
-    [directors]
+    [directors],
   )
 
   // Подсчёт активных фильтров

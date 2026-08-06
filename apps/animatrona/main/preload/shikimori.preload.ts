@@ -29,7 +29,7 @@ export const shikimoriPreload = {
 
   /** Получить детали аниме по Shikimori ID */
   getDetails: (
-    shikimoriId: number
+    shikimoriId: number,
   ): Promise<{
     success: boolean
     data?: ShikimoriAnimeDetails
@@ -40,7 +40,7 @@ export const shikimoriPreload = {
   downloadPoster: async (
     posterUrl: string,
     animeId: string,
-    options?: { fileName?: string; savePath?: string }
+    options?: { fileName?: string; savePath?: string },
   ): Promise<{
     success: boolean
     localPath?: string
@@ -69,7 +69,7 @@ export const shikimoriPreload = {
 
   /** Получить аниме со связанными */
   getWithRelated: (
-    shikimoriId: number
+    shikimoriId: number,
   ): Promise<{
     success: boolean
     data?: ShikimoriAnimeWithRelated
@@ -78,7 +78,7 @@ export const shikimoriPreload = {
 
   /** Получить расширенные метаданные (v0.5.1) */
   getExtended: (
-    shikimoriId: number
+    shikimoriId: number,
   ): Promise<{
     success: boolean
     data?: ShikimoriAnimeExtended
@@ -90,7 +90,7 @@ export const shikimoriPreload = {
 export const franchisePreload = {
   /** Получить связанные аниме из Shikimori (GraphQL) */
   fetchRelated: (
-    shikimoriId: number
+    shikimoriId: number,
   ): Promise<{
     success: boolean
     data?: {
@@ -102,7 +102,7 @@ export const franchisePreload = {
 
   /** Получить граф франшизы из REST API Shikimori */
   fetchGraph: (
-    shikimoriId: number
+    shikimoriId: number,
   ): Promise<{
     success: boolean
     data?: {

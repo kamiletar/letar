@@ -39,7 +39,7 @@ const FolderItem = memo(function FolderItem({
         onSelect()
       }
     },
-    [onSelect]
+    [onSelect],
   )
 
   const handleRemove = useCallback(
@@ -47,7 +47,7 @@ const FolderItem = memo(function FolderItem({
       e.stopPropagation()
       onRemove()
     },
-    [onRemove]
+    [onRemove],
   )
 
   return (

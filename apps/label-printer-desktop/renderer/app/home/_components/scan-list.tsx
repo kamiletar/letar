@@ -32,32 +32,34 @@ export function ScanList({ scans, labelRef, getScanKey, onAddProduct, onPrint, a
         Последние сканирования
       </Heading>
 
-      {scans.length === 0 ? (
-        <Card.Root>
-          <Card.Body>
-            <Text textAlign="center" color="fg.muted">
-              Пока нет сканирований
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <VStack gap={2} align="stretch">
-          {scans.map((scan, index) => {
-            const scanKey = getScanKey(scan)
-            return (
-              <ScanCard
-                key={`${scan.code}-${index}`}
-                scan={scan}
-                scanKey={scanKey}
-                labelRef={labelRef}
-                onAddProduct={onAddProduct}
-                onPrint={onPrint}
-                allowDuplicates={allowDuplicates}
-              />
-            )
-          })}
-        </VStack>
-      )}
+      {scans.length === 0
+        ? (
+          <Card.Root>
+            <Card.Body>
+              <Text textAlign="center" color="fg.muted">
+                Пока нет сканирований
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        )
+        : (
+          <VStack gap={2} align="stretch">
+            {scans.map((scan, index) => {
+              const scanKey = getScanKey(scan)
+              return (
+                <ScanCard
+                  key={`${scan.code}-${index}`}
+                  scan={scan}
+                  scanKey={scanKey}
+                  labelRef={labelRef}
+                  onAddProduct={onAddProduct}
+                  onPrint={onPrint}
+                  allowDuplicates={allowDuplicates}
+                />
+              )
+            })}
+          </VStack>
+        )}
     </Box>
   )
 }

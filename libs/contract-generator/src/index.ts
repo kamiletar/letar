@@ -49,10 +49,10 @@ export type {
 
 // Рендерер шаблонов (безопасен везде - не использует Node.js API)
 export {
-  PLACEHOLDERS,
   createTestData,
   extractPlaceholders,
   getGroupedPlaceholders,
+  PLACEHOLDERS,
   renderTemplate,
   validateTemplateData,
 } from './template-renderer'

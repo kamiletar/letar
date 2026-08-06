@@ -79,7 +79,7 @@ export function useFolderHistory() {
         return updated
       })
     },
-    [saveToStorage]
+    [saveToStorage],
   )
 
   /**
@@ -93,7 +93,7 @@ export function useFolderHistory() {
         return updated
       })
     },
-    [saveToStorage]
+    [saveToStorage],
   )
 
   /**

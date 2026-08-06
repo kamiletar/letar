@@ -25,7 +25,7 @@ export function registerWatchPartyHandlers(): void {
       contentCid?: string
       isPrivate?: boolean
       maxParticipants?: number
-    }) => watchPartySync.createRoom(options)
+    }) => watchPartySync.createRoom(options),
   )
 
   createHandler('watch-party:join', (roomId: string) => watchPartySync.joinRoom(roomId))
@@ -46,17 +46,21 @@ export function registerWatchPartyHandlers(): void {
   createHandler('watch-party:sendReaction', (reaction: string) => watchPartySync.sendReaction(reaction))
 
   // === События ===
-  watchPartySync.on('playback:updated', (roomId, state) =>
-    broadcastToWindows('watch-party:playbackUpdated', { roomId, state })
+  watchPartySync.on(
+    'playback:updated',
+    (roomId, state) => broadcastToWindows('watch-party:playbackUpdated', { roomId, state }),
   )
-  watchPartySync.on('participant:joined', (roomId, participant) =>
-    broadcastToWindows('watch-party:participantJoined', { roomId, participant })
+  watchPartySync.on(
+    'participant:joined',
+    (roomId, participant) => broadcastToWindows('watch-party:participantJoined', { roomId, participant }),
   )
-  watchPartySync.on('participant:left', (roomId, peerId) =>
-    broadcastToWindows('watch-party:participantLeft', { roomId, peerId })
+  watchPartySync.on(
+    'participant:left',
+    (roomId, peerId) => broadcastToWindows('watch-party:participantLeft', { roomId, peerId }),
   )
-  watchPartySync.on('message:received', (roomId, message) =>
-    broadcastToWindows('watch-party:messageReceived', { roomId, message })
+  watchPartySync.on(
+    'message:received',
+    (roomId, message) => broadcastToWindows('watch-party:messageReceived', { roomId, message }),
   )
   watchPartySync.on('room:closed', (roomId) => broadcastToWindows('watch-party:roomClosed', { roomId }))
 }

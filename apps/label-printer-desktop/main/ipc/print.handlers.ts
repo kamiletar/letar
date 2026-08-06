@@ -138,7 +138,7 @@ export function registerPrintHandlers(): void {
         templateBuffer,
         markingCode.fullCode,
         GS1Parser.extractGTIN13(markingCode.gtin),
-        labelConfig
+        labelConfig,
       )
 
       // Отправляем готовое изображение на печать (без повторной генерации)

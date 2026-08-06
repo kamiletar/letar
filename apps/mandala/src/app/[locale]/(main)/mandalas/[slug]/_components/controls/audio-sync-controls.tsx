@@ -90,7 +90,7 @@ export function AudioSyncControls({
         })
       }
     },
-    [onChange]
+    [onChange],
   )
 
   return (

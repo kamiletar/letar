@@ -253,7 +253,7 @@ export function TracksTab({ audioTracks, subtitleTracks }: TracksTabProps) {
         }
       })
     },
-    [editLanguage, editDubGroup, cancelEditing, queryClient]
+    [editLanguage, editDubGroup, cancelEditing, queryClient],
   )
 
   /**
@@ -316,7 +316,7 @@ export function TracksTab({ audioTracks, subtitleTracks }: TracksTabProps) {
         }
       })
     },
-    [queryClient]
+    [queryClient],
   )
 
   if (trackGroups.length === 0) {

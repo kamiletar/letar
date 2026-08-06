@@ -39,7 +39,7 @@ export interface ApiSuggestionsResult<T> {
  */
 export function useApiSuggestions<T>(
   fetchFn: () => Promise<T[]>,
-  dependencies: DependencyList = []
+  dependencies: DependencyList = [],
 ): ApiSuggestionsResult<T> {
   const [data, setData] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState(false)

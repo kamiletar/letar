@@ -162,83 +162,85 @@ export function CreateSuspensionDialog({ onCreated }: CreateSuspensionDialogProp
           <Text fontSize="sm" fontWeight="medium" mb={1}>
             Поэт
           </Text>
-          {selectedPlayer ? (
-            <Flex align="center" gap={2} bg="brand.subtle" px={3} py={2} borderRadius="md">
-              <Text fontWeight="medium">{selectedPlayer.name}</Text>
-              {selectedPlayer.disambiguation && (
-                <Text fontSize="xs" color="fg.muted">
-                  ({selectedPlayer.disambiguation})
-                </Text>
-              )}
-              <Button
-                variant="ghost"
-                size="xs"
-                ml="auto"
-                onClick={() => {
-                  setSelectedPlayer(null)
-                  setQuery('')
-                }}
-              >
-                <LuX size={14} />
-              </Button>
-            </Flex>
-          ) : (
-            <Box position="relative">
-              <HStack gap={2}>
-                <LuSearch size={14} />
-                <Input
-                  placeholder="Поиск по имени..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  size="sm"
-                />
-              </HStack>
-              {players.length > 0 && (
-                <Box
-                  position="absolute"
-                  top="100%"
-                  left={0}
-                  right={0}
-                  zIndex={10}
-                  bg="bg.panel"
-                  borderWidth="1px"
-                  borderColor="border.muted"
-                  borderRadius="md"
-                  shadow="lg"
-                  mt={1}
-                  maxH="200px"
-                  overflowY="auto"
+          {selectedPlayer
+            ? (
+              <Flex align="center" gap={2} bg="brand.subtle" px={3} py={2} borderRadius="md">
+                <Text fontWeight="medium">{selectedPlayer.name}</Text>
+                {selectedPlayer.disambiguation && (
+                  <Text fontSize="xs" color="fg.muted">
+                    ({selectedPlayer.disambiguation})
+                  </Text>
+                )}
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  ml="auto"
+                  onClick={() => {
+                    setSelectedPlayer(null)
+                    setQuery('')
+                  }}
                 >
-                  {players.map((p) => (
-                    <Box
-                      key={p.id}
-                      px={3}
-                      py={2}
-                      cursor="pointer"
-                      _hover={{ bg: 'bg.subtle' }}
-                      onClick={() => {
-                        setSelectedPlayer(p)
-                        setPlayers([])
-                        setQuery('')
-                      }}
-                    >
-                      <Text fontSize="sm">{p.name}</Text>
-                      {p.disambiguation && (
-                        <Text fontSize="xs" color="fg.muted">
-                          {p.disambiguation}
-                        </Text>
-                      )}
-                    </Box>
-                  ))}
-                </Box>
-              )}
-              {searching && (
-                <Text fontSize="xs" color="fg.muted" mt={1}>
-                  Поиск...
-                </Text>
-              )}
-            </Box>
-          )}
+                  <LuX size={14} />
+                </Button>
+              </Flex>
+            )
+            : (
+              <Box position="relative">
+                <HStack gap={2}>
+                  <LuSearch size={14} />
+                  <Input
+                    placeholder="Поиск по имени..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    size="sm"
+                  />
+                </HStack>
+                {players.length > 0 && (
+                  <Box
+                    position="absolute"
+                    top="100%"
+                    left={0}
+                    right={0}
+                    zIndex={10}
+                    bg="bg.panel"
+                    borderWidth="1px"
+                    borderColor="border.muted"
+                    borderRadius="md"
+                    shadow="lg"
+                    mt={1}
+                    maxH="200px"
+                    overflowY="auto"
+                  >
+                    {players.map((p) => (
+                      <Box
+                        key={p.id}
+                        px={3}
+                        py={2}
+                        cursor="pointer"
+                        _hover={{ bg: 'bg.subtle' }}
+                        onClick={() => {
+                          setSelectedPlayer(p)
+                          setPlayers([])
+                          setQuery('')
+                        }}
+                      >
+                        <Text fontSize="sm">{p.name}</Text>
+                        {p.disambiguation && (
+                          <Text fontSize="xs" color="fg.muted">
+                            {p.disambiguation}
+                          </Text>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+                {searching && (
+                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                    Поиск...
+                  </Text>
+                )}
+              </Box>
+            )}
         </Box>
 
         {/* Сезон */}

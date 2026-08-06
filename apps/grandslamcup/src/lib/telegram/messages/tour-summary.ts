@@ -67,9 +67,11 @@ export async function formatTourSummary(tourId: string): Promise<{ text: string;
   if (bestPerf?.player && bestPerf.totalScore) {
     parts.push(
       '',
-      `⭐ <b>Лучший:</b> ${playerLink(bestPerf.player, citySlug)} (${bestPerf.totalScore}) — ${escapeHtml(
-        bestPerf.teamSeason.team.name
-      )}`
+      `⭐ <b>Лучший:</b> ${playerLink(bestPerf.player, citySlug)} (${bestPerf.totalScore}) — ${
+        escapeHtml(
+          bestPerf.teamSeason.team.name,
+        )
+      }`,
     )
   }
 

@@ -20,8 +20,9 @@ export function registerPresenceHandlers(): void {
   createHandler('presence:stop', () => presenceSync.stop())
 
   // === Настройки ===
-  createHandler('presence:updateSettings', (settings: Partial<PresenceSettings>) =>
-    presenceSync.updateSettings(settings)
+  createHandler(
+    'presence:updateSettings',
+    (settings: Partial<PresenceSettings>) => presenceSync.updateSettings(settings),
   )
 
   // === Watching ===
@@ -42,8 +43,9 @@ export function registerPresenceHandlers(): void {
   createHandler('presence:isFriendOnline', (peerId: string) => presenceSync.isFriendOnline(peerId))
 
   // === Подписки на события ===
-  presenceSync.on('presence:updated', (peerId: string, presence) =>
-    broadcastToWindows('presence:updated', { peerId, presence })
+  presenceSync.on(
+    'presence:updated',
+    (peerId: string, presence) => broadcastToWindows('presence:updated', { peerId, presence }),
   )
   presenceSync.on('friend:online', (peerId: string) => broadcastToWindows('presence:friendOnline', peerId))
   presenceSync.on('friend:offline', (peerId: string) => broadcastToWindows('presence:friendOffline', peerId))

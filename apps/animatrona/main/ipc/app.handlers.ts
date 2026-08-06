@@ -142,9 +142,8 @@ async function getFolderSize(folderPath: string): Promise<number> {
  * Обновляет состояние блокировки сна
  */
 function updatePowerSaveBlocker(): void {
-  const shouldBlock =
-    powerSaveState.manualEnabled ||
-    (powerSaveState.autoEnabled && (powerSaveState.isTranscoding || powerSaveState.isPlaybackActive))
+  const shouldBlock = powerSaveState.manualEnabled
+    || (powerSaveState.autoEnabled && (powerSaveState.isTranscoding || powerSaveState.isPlaybackActive))
 
   if (shouldBlock && powerSaveState.blockerId === null) {
     powerSaveState.blockerId = powerSaveBlocker.start('prevent-display-sleep')

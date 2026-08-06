@@ -29,7 +29,7 @@ import type { PdfOptions, PdfResult } from './pdf-generator'
 export async function generatePdfFromReact(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   element: any,
-  _options?: PdfOptions
+  _options?: PdfOptions,
 ): Promise<PdfResult> {
   // Динамический импорт @react-pdf/renderer для tree-shaking
   const { renderToBuffer } = await import('@react-pdf/renderer')
@@ -51,7 +51,7 @@ export async function generatePdfFromReact(
  */
 export async function generatePdfStreamFromReact(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  element: any
+  element: any,
 ): Promise<NodeJS.ReadableStream> {
   const { renderToStream } = await import('@react-pdf/renderer')
   return renderToStream(element)

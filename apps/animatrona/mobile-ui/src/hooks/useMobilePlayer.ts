@@ -136,7 +136,7 @@ export function useMobilePlayer(options: UseMobilePlayerOptions): UseMobilePlaye
         })
         setIsLoading(false)
         onErrorRef.current?.(
-          new Error('Не удалось загрузить видео. Возможно, формат не поддерживается вашим браузером (AV1).')
+          new Error('Не удалось загрузить видео. Возможно, формат не поддерживается вашим браузером (AV1).'),
         )
       }
     }, 30000)
@@ -447,7 +447,7 @@ export function useMobilePlayer(options: UseMobilePlayerOptions): UseMobilePlaye
       }
       seek(video.currentTime + seconds)
     },
-    [seek]
+    [seek],
   )
 
   return {

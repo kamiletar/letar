@@ -35,7 +35,7 @@ export async function transcodeVideo(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
 
@@ -69,7 +69,7 @@ export async function transcodeVideo(
       '-temporal-aq',
       '1',
       '-aq-strength',
-      '15'
+      '15',
     )
   } else {
     // CPU кодеки
@@ -134,7 +134,7 @@ export async function transcodeAudio(
   inputPath: string,
   outputPath: string,
   options: AudioTranscodeOptions,
-  onProgress?: (progress: TranscodeProgress) => void
+  onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
   const { syncOffset } = options

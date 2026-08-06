@@ -117,13 +117,13 @@ export function MatchLineups({
 function PlayerAvatar({ photo, name }: { photo: string | null; name: string }) {
   return (
     <Box w={7} h={7} borderRadius="md" overflow="hidden" flexShrink={0} position="relative">
-      {photo ? (
-        <Image src={`/api/files/${photo}`} alt={name} fill sizes="28px" style={{ objectFit: 'cover' }} />
-      ) : (
-        <Circle size={7} bg="bg.subtle" color="fg.muted">
-          <LuUserRound size={14} />
-        </Circle>
-      )}
+      {photo
+        ? <Image src={`/api/files/${photo}`} alt={name} fill sizes="28px" style={{ objectFit: 'cover' }} />
+        : (
+          <Circle size={7} bg="bg.subtle" color="fg.muted">
+            <LuUserRound size={14} />
+          </Circle>
+        )}
     </Box>
   )
 }

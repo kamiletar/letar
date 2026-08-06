@@ -48,11 +48,11 @@ export function BreathingOverlay({ enabled, cycleDuration = 8, showHints = true 
                 setTimeout(() => {
                   setPhase('hold-out')
                   timeouts.push(setTimeout(runCycle, holdOutTime))
-                }, exhaleTime)
+                }, exhaleTime),
               )
-            }, holdInTime)
+            }, holdInTime),
           )
-        }, inhaleTime)
+        }, inhaleTime),
       )
     }
 
@@ -99,9 +99,9 @@ export function BreathingOverlay({ enabled, cycleDuration = 8, showHints = true 
         position="absolute"
         inset={0}
         pointerEvents="none"
-        animation={
-          isExpanding ? `breathe-in ${animationDuration} ease-in-out` : `breathe-out ${animationDuration} ease-in-out`
-        }
+        animation={isExpanding
+          ? `breathe-in ${animationDuration} ease-in-out`
+          : `breathe-out ${animationDuration} ease-in-out`}
         style={{ transformOrigin: 'center center' }}
       />
 

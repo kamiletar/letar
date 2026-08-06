@@ -100,7 +100,7 @@ export function usePrint({ labelRefs, getScanKey, onUpdateScan }: UsePrintProps)
         })
       }
     },
-    [labelRefs, getScanKey, onUpdateScan]
+    [labelRefs, getScanKey, onUpdateScan],
   )
 
   return { handlePrint }

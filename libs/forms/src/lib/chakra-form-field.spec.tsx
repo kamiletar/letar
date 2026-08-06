@@ -29,7 +29,7 @@ describe('ChakraFormField', () => {
             <input data-testid="input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Email')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('ChakraFormField', () => {
             <input data-testid="input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Рабочий email')).toBeInTheDocument()
@@ -61,7 +61,7 @@ describe('ChakraFormField', () => {
             <input data-testid="input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Некорректный email')).toBeInTheDocument()
@@ -77,7 +77,7 @@ describe('ChakraFormField', () => {
             <input data-testid="input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.queryByText('Подсказка')).not.toBeInTheDocument()
@@ -94,7 +94,7 @@ describe('ChakraFormField', () => {
             <input data-testid="custom-input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByTestId('custom-input')).toBeInTheDocument()
@@ -110,7 +110,7 @@ describe('ChakraFormField', () => {
             <input data-testid="input" />
           </ChakraFormField>
         </TanStackFormField>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     expect(screen.getByText('Кастомная ошибка')).toBeInTheDocument()

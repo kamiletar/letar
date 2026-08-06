@@ -9,7 +9,11 @@ import { system } from '@/theme'
 // Моки для дочерних компонентов
 vi.mock('./command-palette', () => ({
   CommandPalette: vi.fn(({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => (
-    <div data-testid="command-palette" data-open={open} onClick={() => onOpenChange(false)}>
+    <div
+      data-testid="command-palette"
+      data-open={open}
+      onClick={() => onOpenChange(false)}
+    >
       CommandPalette
     </div>
   )),

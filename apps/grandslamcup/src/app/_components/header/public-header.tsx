@@ -93,9 +93,7 @@ export function PublicHeader() {
             {/* Войти / Юзер — всегда виден */}
             <Flex align="center" gap={1} flexShrink={0}>
               {user && <PushSubscribeButton />}
-              {isPending ? (
-                <Spinner size="sm" color="fg.muted" />
-              ) : (
+              {isPending ? <Spinner size="sm" color="fg.muted" /> : (
                 <UserMenu
                   session={session?.user ?? null}
                   onSignIn={() => signInWithLetarAuth()}
@@ -109,23 +107,23 @@ export function PublicHeader() {
                     ...(isPoet ? [{ value: 'poet', label: 'Кабинет поэта', href: '/poet', icon: LuPenLine }] : []),
                     ...(isScorer
                       ? [
-                          {
-                            value: 'scorer',
-                            label: 'Кабинет счетовода',
-                            href: '/my/scorer-matches',
-                            icon: LuCalculator,
-                          },
-                        ]
+                        {
+                          value: 'scorer',
+                          label: 'Кабинет счетовода',
+                          href: '/my/scorer-matches',
+                          icon: LuCalculator,
+                        },
+                      ]
                       : []),
                     ...(isPresenter
                       ? [
-                          {
-                            value: 'presenter',
-                            label: 'Кабинет ведущего',
-                            href: '/my/presenter-matches',
-                            icon: LuMic,
-                          },
-                        ]
+                        {
+                          value: 'presenter',
+                          label: 'Кабинет ведущего',
+                          href: '/my/presenter-matches',
+                          icon: LuMic,
+                        },
+                      ]
                       : []),
                   ]}
                 />

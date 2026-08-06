@@ -71,7 +71,7 @@ const procs = {
 
   initiateTransfer: async (
     client,
-    args: { connectionId: string; toInstructorId: string; reason?: string; transferBalance: boolean }
+    args: { connectionId: string; toInstructorId: string; reason?: string; transferBalance: boolean },
   ) => {
     // Бизнес-логика передачи ученика
     const connection = await client.studentInstructorConnection.findUnique({
@@ -150,7 +150,7 @@ const handleSignUp = () => {
       onSuccess: (user) => {
         console.log('User created:', user)
       },
-    }
+    },
   )
 }
 ```

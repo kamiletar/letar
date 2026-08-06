@@ -23,7 +23,7 @@ import type {
 export const animeManifestPreload = {
   /** Генерировать манифест аниме и опубликовать в IPFS */
   generate: (
-    input: GenerateAnimeManifestInput
+    input: GenerateAnimeManifestInput,
   ): Promise<{ success: boolean; data?: GenerateAnimeManifestResult; error?: string }> =>
     ipcRenderer.invoke('animeManifest:generate', input),
 
@@ -41,7 +41,7 @@ export const animeManifestPreload = {
 
   /** Batch-генерация манифестов для нескольких аниме */
   generateBatch: (
-    animeIds: string[]
+    animeIds: string[],
   ): Promise<{
     success: boolean
     data?: { success: number; failed: number; errors: Array<{ animeId: string; error: string }> }
@@ -58,7 +58,7 @@ export const animeManifestPreload = {
   /** Импортировать аниме из IPFS (directoryCid или manifestCid) */
   import: (
     cid: string,
-    pin?: boolean
+    pin?: boolean,
   ): Promise<{
     success: boolean
     data?: { animeId: string; animeName: string; episodeCount: number }
@@ -137,7 +137,7 @@ export const animeManifestPreload = {
     ipcRenderer.invoke('animeManifest:resetRegenerationState'),
 
   /** Подписка на старт новой регенерации — renderer должен очистить старый лог */
-  onRegenerateStarted: (callback: (data: { total: number }) => void): (() => void) => {
+  onRegenerateStarted: (callback: (data: { total: number }) => void): () => void => {
     const handler = (_event: unknown, data: unknown) => callback(data as { total: number })
     ipcRenderer.on('manifest:regenerateStarted', handler)
     return () => ipcRenderer.removeListener('manifest:regenerateStarted', handler)
@@ -151,8 +151,8 @@ export const animeManifestPreload = {
       level: 'info' | 'warn' | 'error' | 'success'
       message: string
       meta?: Record<string, unknown>
-    }) => void
-  ): (() => void) => {
+    }) => void,
+  ): () => void => {
     const handler = (_event: unknown, entry: unknown) => callback(entry as Parameters<typeof callback>[0])
     ipcRenderer.on('manifest:regenerateLog', handler)
     return () => ipcRenderer.removeListener('manifest:regenerateLog', handler)
@@ -160,8 +160,8 @@ export const animeManifestPreload = {
 
   /** Подписка на завершение регенерации */
   onRegenerateFinished: (
-    callback: (data: { success: number; failed: number; stopped?: boolean; diskFull?: boolean }) => void
-  ): (() => void) => {
+    callback: (data: { success: number; failed: number; stopped?: boolean; diskFull?: boolean }) => void,
+  ): () => void => {
     const handler = (_event: unknown, data: unknown) =>
       callback(data as { success: number; failed: number; stopped?: boolean; diskFull?: boolean })
     ipcRenderer.on('manifest:regenerateFinished', handler)
@@ -189,8 +189,8 @@ export const animeManifestPreload = {
       animeName: string
       status: 'processing' | 'ok' | 'error'
       error?: string
-    }) => void
-  ): (() => void) => {
+    }) => void,
+  ): () => void => {
     const handler = (
       _event: Electron.IpcRendererEvent,
       data: {
@@ -199,7 +199,7 @@ export const animeManifestPreload = {
         animeName: string
         status: 'processing' | 'ok' | 'error'
         error?: string
-      }
+      },
     ) => callback(data)
     ipcRenderer.on('manifest:regenerateProgress', handler)
     return () => ipcRenderer.removeListener('manifest:regenerateProgress', handler)
@@ -207,7 +207,7 @@ export const animeManifestPreload = {
 
   /** Точечная регенерация EpisodeManifest + AnimeManifest + directoryCid для одного аниме */
   regenerateForAnime: (
-    animeId: string
+    animeId: string,
   ): Promise<{
     success: boolean
     data?: { updated: number; failed: number }
@@ -241,7 +241,7 @@ export const manifestPreload = {
         episodeNumber: number
         episodeName?: string
       }
-    }
+    },
   ): Promise<{
     success: boolean
     manifestPath?: string
@@ -251,7 +251,7 @@ export const manifestPreload = {
 
   /** Прочитать существующий манифест */
   read: (
-    manifestPath: string
+    manifestPath: string,
   ): Promise<{
     success: boolean
     data?: EpisodeManifest
@@ -264,7 +264,7 @@ export const manifestPreload = {
     navigation: {
       nextEpisode?: { id: string; manifestPath: string }
       prevEpisode?: { id: string; manifestPath: string }
-    }
+    },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('manifest:updateNavigation', manifestPath, navigation),
 
@@ -274,13 +274,13 @@ export const manifestPreload = {
     thumbnails: {
       vttCid: string
       spriteCid: string
-    }
+    },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('manifest:updateThumbnails', manifestPath, thumbnails),
 
   /** Batch-обновление навигации между эпизодами через IPFS */
   updateNavigationBatch: (
-    episodes: Array<{ id: string; manifestCid: string }>
+    episodes: Array<{ id: string; manifestCid: string }>,
   ): Promise<{ success: boolean; data?: Record<string, string>; error?: string }> =>
     ipcRenderer.invoke('manifest:updateNavigationBatch', episodes),
 
@@ -291,7 +291,7 @@ export const manifestPreload = {
   /** Обновить главы эпизода через IPFS */
   updateChapters: (
     episodeId: string,
-    chapters: ManifestChapter[]
+    chapters: ManifestChapter[],
   ): Promise<{ success: boolean; data?: string; error?: string }> =>
     ipcRenderer.invoke('manifest:updateChapters', episodeId, chapters),
 
@@ -299,13 +299,13 @@ export const manifestPreload = {
   copyChapters: (
     sourceEpisodeId: string,
     targetEpisodeIds: string[],
-    chapterTypes: string[]
+    chapterTypes: string[],
   ): Promise<{ success: boolean; data?: { count: number; skipped: number }; error?: string }> =>
     ipcRenderer.invoke('manifest:copyChapters', sourceEpisodeId, targetEpisodeIds, chapterTypes),
 
   /** Генерация RECAP/PREVIEW глав */
   generateRecapPreview: (
-    episodes: Array<{ id: string; manifestCid: string; durationMs: number }>
+    episodes: Array<{ id: string; manifestCid: string; durationMs: number }>,
   ): Promise<{ success: boolean; data?: { created: number; skipped: number }; error?: string }> =>
     ipcRenderer.invoke('manifest:generateRecapPreview', episodes),
 
@@ -339,7 +339,7 @@ export const manifestPreload = {
       sourceSize?: number
       transcodedSize?: number
       compressionRatio?: number
-    }
+    },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('manifest:updateEncoding', manifestPath, encoding),
 
@@ -355,7 +355,7 @@ export const manifestPreload = {
       fontCids?: Record<string, string>
       sizes?: Record<string, number>
       metadataCid?: string
-    }
+    },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('manifest:updateMediaCids', manifestPath, options),
 
@@ -370,7 +370,7 @@ export const manifestPreload = {
   /** Полная перестройка аудио/субтитров в манифесте из БД (включая внешние дорожки) */
   rebuildTracksFromDb: (
     manifestPath: string,
-    episodeId: string
+    episodeId: string,
   ): Promise<{ success: boolean; data?: { changed: boolean }; error?: string }> =>
     ipcRenderer.invoke('manifest:rebuildTracksFromDb', manifestPath, episodeId),
 }

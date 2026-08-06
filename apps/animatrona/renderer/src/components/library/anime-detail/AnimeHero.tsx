@@ -92,7 +92,7 @@ function formatTime(seconds: number): string {
 /** Определяет целевой эпизод и информацию для CTA */
 function getPlayTarget(
   episodes: AnimeHeroProps['episodes'],
-  watchProgress: AnimeHeroProps['watchProgress']
+  watchProgress: AnimeHeroProps['watchProgress'],
 ): {
   episodeId: string
   label: string
@@ -187,8 +187,8 @@ export function AnimeHero({
       name={name}
       originalName={originalName}
       posterUrl={posterUrl}
-      posterOverlaySlot={
-        overallProgress > 0 ? (
+      posterOverlaySlot={overallProgress > 0
+        ? (
           <Box position="absolute" bottom={0} left={0} right={0} h="4px" bg="blackAlpha.600" borderBottomRadius="lg">
             <Box
               w={`${overallProgress}%`}
@@ -199,8 +199,8 @@ export function AnimeHero({
               transition="width 0.3s ease-out"
             />
           </Box>
-        ) : undefined
-      }
+        )
+        : undefined}
       badgesSlot={
         <HStack gap={2} flexWrap="wrap" justify={{ base: 'center', sm: 'start' }}>
           {statusInfo && (
@@ -240,32 +240,34 @@ export function AnimeHero({
             {loadedEpisodeCount}
             {episodeCount > 0 && loadedEpisodeCount !== episodeCount && ` / ${episodeCount}`} эп.
           </Text>
-          {totalIpfsSize ? (
-            <>
-              <Text>•</Text>
-              <Tooltip.Root openDelay={300}>
-                <Tooltip.Trigger asChild>
-                  <Text cursor="default">{formatBytes(totalIpfsSize)}</Text>
-                </Tooltip.Trigger>
-                {ipfsSizeBreakdown && (
-                  <Portal>
-                    <Tooltip.Positioner>
-                      <Tooltip.Content>
-                        <VStack align="start" gap={0} fontSize="xs">
-                          {ipfsSizeBreakdown.video > 0 && <Text>Видео: {formatBytes(ipfsSizeBreakdown.video)}</Text>}
-                          {ipfsSizeBreakdown.audio > 0 && <Text>Аудио: {formatBytes(ipfsSizeBreakdown.audio)}</Text>}
-                          {ipfsSizeBreakdown.subtitles > 0 && (
-                            <Text>Субтитры: {formatBytes(ipfsSizeBreakdown.subtitles)}</Text>
-                          )}
-                          {ipfsSizeBreakdown.fonts > 0 && <Text>Шрифты: {formatBytes(ipfsSizeBreakdown.fonts)}</Text>}
-                        </VStack>
-                      </Tooltip.Content>
-                    </Tooltip.Positioner>
-                  </Portal>
-                )}
-              </Tooltip.Root>
-            </>
-          ) : null}
+          {totalIpfsSize
+            ? (
+              <>
+                <Text>•</Text>
+                <Tooltip.Root openDelay={300}>
+                  <Tooltip.Trigger asChild>
+                    <Text cursor="default">{formatBytes(totalIpfsSize)}</Text>
+                  </Tooltip.Trigger>
+                  {ipfsSizeBreakdown && (
+                    <Portal>
+                      <Tooltip.Positioner>
+                        <Tooltip.Content>
+                          <VStack align="start" gap={0} fontSize="xs">
+                            {ipfsSizeBreakdown.video > 0 && <Text>Видео: {formatBytes(ipfsSizeBreakdown.video)}</Text>}
+                            {ipfsSizeBreakdown.audio > 0 && <Text>Аудио: {formatBytes(ipfsSizeBreakdown.audio)}</Text>}
+                            {ipfsSizeBreakdown.subtitles > 0 && (
+                              <Text>Субтитры: {formatBytes(ipfsSizeBreakdown.subtitles)}</Text>
+                            )}
+                            {ipfsSizeBreakdown.fonts > 0 && <Text>Шрифты: {formatBytes(ipfsSizeBreakdown.fonts)}</Text>}
+                          </VStack>
+                        </Tooltip.Content>
+                      </Tooltip.Positioner>
+                    </Portal>
+                  )}
+                </Tooltip.Root>
+              </>
+            )
+            : null}
           {allTagsText && (
             <>
               <Text>•</Text>
@@ -278,23 +280,24 @@ export function AnimeHero({
         <HStack mt={3} gap={2} flexWrap="wrap" justify={{ base: 'center', sm: 'start' }}>
           {ctaSlot ?? (
             <>
-              {playTarget ? (
-                <Button
-                  colorPalette="purple"
-                  size={{ base: 'md', md: 'lg' }}
-                  onClick={() =>
-                    router.push(`/watch/${playTarget.episodeId}${playTarget.isContinue ? '?autoResume=true' : ''}`)
-                  }
-                >
-                  <Icon as={LuPlay} />
-                  {playTarget.label}
-                </Button>
-              ) : (
-                <Button colorPalette="purple" size={{ base: 'md', md: 'lg' }} disabled>
-                  <Icon as={LuPlay} />
-                  Нет эпизодов
-                </Button>
-              )}
+              {playTarget
+                ? (
+                  <Button
+                    colorPalette="purple"
+                    size={{ base: 'md', md: 'lg' }}
+                    onClick={() =>
+                      router.push(`/watch/${playTarget.episodeId}${playTarget.isContinue ? '?autoResume=true' : ''}`)}
+                  >
+                    <Icon as={LuPlay} />
+                    {playTarget.label}
+                  </Button>
+                )
+                : (
+                  <Button colorPalette="purple" size={{ base: 'md', md: 'lg' }} disabled>
+                    <Icon as={LuPlay} />
+                    Нет эпизодов
+                  </Button>
+                )}
 
               {actionMenuProps && <ActionMenu {...actionMenuProps} hasEpisodes={!!episodes && episodes.length > 0} />}
             </>

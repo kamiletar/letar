@@ -101,10 +101,9 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
     }
   }, [])
 
-  const progressPercent =
-    jobStatus?.progress.total && jobStatus.progress.total > 0
-      ? Math.round((jobStatus.progress.current / jobStatus.progress.total) * 100)
-      : 0
+  const progressPercent = jobStatus?.progress.total && jobStatus.progress.total > 0
+    ? Math.round((jobStatus.progress.current / jobStatus.progress.total) * 100)
+    : 0
 
   return (
     <Box mt={6} p={4} borderWidth="1px" borderRadius="lg" bg="bg.panel">

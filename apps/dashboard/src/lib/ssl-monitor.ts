@@ -68,17 +68,15 @@ export async function checkSslCertificates(): Promise<SslCheckResult> {
   }
 
   const worstDays = expiring[0]!.daysUntilExpiry
-  const severity =
-    worstDays < 0
-      ? AlertSeverity.CRITICAL
-      : worstDays <= EXPIRING_CRITICAL_DAYS
-        ? AlertSeverity.ERROR
-        : AlertSeverity.WARNING
+  const severity = worstDays < 0
+    ? AlertSeverity.CRITICAL
+    : worstDays <= EXPIRING_CRITICAL_DAYS
+    ? AlertSeverity.ERROR
+    : AlertSeverity.WARNING
 
-  const title =
-    expiring.length === 1
-      ? `SSL сертификат скоро истекает: ${expiring[0]!.domain}`
-      : `SSL: ${expiring.length} сертификата(ов) требуют внимания`
+  const title = expiring.length === 1
+    ? `SSL сертификат скоро истекает: ${expiring[0]!.domain}`
+    : `SSL: ${expiring.length} сертификата(ов) требуют внимания`
   const message = expiring.map(formatCertLine).join('\n')
 
   const alert = await createAlert(AlertType.SSL_EXPIRING, severity, title, message, {

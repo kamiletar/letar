@@ -307,19 +307,17 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         setSelectedExternalAudio(audio)
         setAudioUrl(getEpisodeAudioUrl(ep.id, audio.id, audio.audioCid))
       }
-      const sub =
-        ep.subtitleTracks.find((t) => isRussianLanguage(t.language) && !isSignsSubtitles(t)) ??
-        ep.subtitleTracks.find((t) => !isSignsSubtitles(t)) ??
-        ep.subtitleTracks[0] ??
-        null
+      const sub = ep.subtitleTracks.find((t) => isRussianLanguage(t.language) && !isSignsSubtitles(t))
+        ?? ep.subtitleTracks.find((t) => !isSignsSubtitles(t))
+        ?? ep.subtitleTracks[0]
+        ?? null
       setSelectedSubtitle(sub)
       setSubtitlesEnabled(true)
     } else {
-      const audio =
-        ep.audioTracks.find((t) => !isOriginalAudio(t) && t.isDefault) ??
-        ep.audioTracks.find((t) => !isOriginalAudio(t)) ??
-        ep.audioTracks[0] ??
-        null
+      const audio = ep.audioTracks.find((t) => !isOriginalAudio(t) && t.isDefault)
+        ?? ep.audioTracks.find((t) => !isOriginalAudio(t))
+        ?? ep.audioTracks[0]
+        ?? null
       if (audio?.audioCid) {
         setSelectedExternalAudio(audio)
         setAudioUrl(getEpisodeAudioUrl(ep.id, audio.id, audio.audioCid))
@@ -390,10 +388,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
             } else {
               // Автовыбор аудио: сохранённый индекс → isDefault → первый
               if (ep.audioTracks.length > 0) {
-                const preferredTrack =
-                  preferredAudioIndex !== undefined && preferredAudioIndex < ep.audioTracks.length
-                    ? ep.audioTracks[preferredAudioIndex]
-                    : undefined
+                const preferredTrack = preferredAudioIndex !== undefined && preferredAudioIndex < ep.audioTracks.length
+                  ? ep.audioTracks[preferredAudioIndex]
+                  : undefined
                 const defaultTrack = preferredTrack || ep.audioTracks.find((t) => t.isDefault) || ep.audioTracks[0]
                 if (defaultTrack?.audioCid) {
                   setSelectedExternalAudio(defaultTrack)
@@ -407,8 +404,8 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                   preferredSubtitleIndex !== undefined && preferredSubtitleIndex < ep.subtitleTracks.length
                     ? ep.subtitleTracks[preferredSubtitleIndex]
                     : undefined
-                const selectedTrack =
-                  preferredSub || (ep.subtitleTracks.length > 1 ? ep.subtitleTracks[1] : ep.subtitleTracks[0])
+                const selectedTrack = preferredSub
+                  || (ep.subtitleTracks.length > 1 ? ep.subtitleTracks[1] : ep.subtitleTracks[0])
                 setSelectedSubtitle(selectedTrack)
               }
             }
@@ -454,11 +451,11 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
 
       // Показать NextEpisodeOverlay за 30 сек до конца
       if (
-        duration > 0 &&
-        duration - data.currentTime <= NEXT_EPISODE_THRESHOLD &&
-        nextEpisode &&
-        !showNextEpisodeOverlay &&
-        !nextEpisodeCancelled
+        duration > 0
+        && duration - data.currentTime <= NEXT_EPISODE_THRESHOLD
+        && nextEpisode
+        && !showNextEpisodeOverlay
+        && !nextEpisodeCancelled
       ) {
         setShowNextEpisodeOverlay(true)
       }
@@ -468,9 +465,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         const ENDING_KEYS = ['ed', 'ending', 'outro', 'credits', 'эндинг', 'титры']
         const inEndingChapter = chapters.some(
           (ch) =>
-            data.currentTime >= ch.startTime &&
-            data.currentTime < ch.endTime &&
-            ENDING_KEYS.some((k) => ch.title.toLowerCase().includes(k))
+            data.currentTime >= ch.startTime
+            && data.currentTime < ch.endTime
+            && ENDING_KEYS.some((k) => ch.title.toLowerCase().includes(k)),
         )
         if (inEndingChapter) {
           episodeCompletedRef.current = true
@@ -480,7 +477,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         }
       }
     },
-    [duration, nextEpisode, showNextEpisodeOverlay, nextEpisodeCancelled, chapters, episodeId]
+    [duration, nextEpisode, showNextEpisodeOverlay, nextEpisodeCancelled, chapters, episodeId],
   )
 
   // Навигация
@@ -492,7 +489,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     (ep: Episode) => {
       navigation.replace('Player', { animeId, episodeId: ep.id })
     },
-    [navigation, animeId]
+    [navigation, animeId],
   )
 
   // Обработчики плеера
@@ -535,7 +532,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         setShowNextEpisodeOverlay(true)
       }
     },
-    [handleSeek, nextEpisode, duration]
+    [handleSeek, nextEpisode, duration],
   )
 
   // Управление пультом (D-pad remote control)
@@ -551,8 +548,8 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         onRewind: () => handleSeek(Math.max(0, currentTime - 30)),
         onFastForward: () => handleSeek(Math.min(duration, currentTime + 30)),
       }),
-      [currentTime, duration, systemVolume, setSystemVolume, handleSeek]
-    )
+      [currentTime, duration, systemVolume, setSystemVolume, handleSeek],
+    ),
   )
 
   // Выбор аудиодорожки
@@ -571,7 +568,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
       }
       setShowAudioMenu(false)
     },
-    [currentTime, episode, animeId, setAudioTrackIndex]
+    [currentTime, episode, animeId, setAudioTrackIndex],
   )
 
   // Выбор субтитров
@@ -586,7 +583,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         setSubtitleTrackIndex(animeId, trackIndex)
       }
     },
-    [episode, animeId, setSubtitleTrackIndex]
+    [episode, animeId, setSubtitleTrackIndex],
   )
 
   const getSubtitleDisplayName = useCallback((track: SubtitleTrack): string => {
@@ -729,27 +726,29 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
           {/* Единый контейнер — точно по размеру видео, центрируется zoomWrapper'ом */}
           <View style={videoStyle}>
             {/* Видео рендерится ТОЛЬКО после решения пользователя в ResumeOverlay */}
-            {videoUrl && userMadeResumeDecision ? (
-              <SyncVideoPlayer
-                ref={playerRef}
-                videoSource={videoUrl}
-                audioSource={audioUrl}
-                paused={!isPlaying}
-                volume={volume}
-                volumeBoost={volumeBoost}
-                muted={false}
-                resizeMode={resizeMode}
-                rate={playbackSpeed}
-                style={StyleSheet.absoluteFill}
-                onLoad={handleLoad}
-                onProgress={handleProgress}
-                onError={handleError}
-                onEnd={handleEnd}
-                onTap={handleVideoTap}
-              />
-            ) : (
-              !videoUrl && <Text style={styles.statusText}>URL видео не найден</Text>
-            )}
+            {videoUrl && userMadeResumeDecision
+              ? (
+                <SyncVideoPlayer
+                  ref={playerRef}
+                  videoSource={videoUrl}
+                  audioSource={audioUrl}
+                  paused={!isPlaying}
+                  volume={volume}
+                  volumeBoost={volumeBoost}
+                  muted={false}
+                  resizeMode={resizeMode}
+                  rate={playbackSpeed}
+                  style={StyleSheet.absoluteFill}
+                  onLoad={handleLoad}
+                  onProgress={handleProgress}
+                  onError={handleError}
+                  onEnd={handleEnd}
+                  onTap={handleVideoTap}
+                />
+              )
+              : (
+                !videoUrl && <Text style={styles.statusText}>URL видео не найден</Text>
+              )}
 
             {/* ASS субтитры — скрываем в PiP (нечитаемы) */}
             {subtitlesEnabled && assContent && videoLoaded && !pip.isInPipMode && (
@@ -870,11 +869,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                     }}
                     disabled={!episode || episode.subtitleTracks.length === 0}
                   >
-                    {subtitlesEnabled ? (
-                      <Captions size={22} color={episode?.subtitleTracks.length ? '#FFFFFF' : '#666'} />
-                    ) : (
-                      <CaptionsOff size={22} color="rgba(255,255,255,0.5)" />
-                    )}
+                    {subtitlesEnabled
+                      ? <Captions size={22} color={episode?.subtitleTracks.length ? '#FFFFFF' : '#666'} />
+                      : <CaptionsOff size={22} color="rgba(255,255,255,0.5)" />}
                   </TouchableOpacity>
 
                   {/* Аудио */}
@@ -923,11 +920,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                       playerRef.current?.setResizeMode(newMode)
                     }}
                   >
-                    {resizeMode === 'contain' ? (
-                      <Maximize2 size={22} color="#FFFFFF" />
-                    ) : (
-                      <Minimize2 size={22} color="#FFFFFF" />
-                    )}
+                    {resizeMode === 'contain'
+                      ? <Maximize2 size={22} color="#FFFFFF" />
+                      : <Minimize2 size={22} color="#FFFFFF" />}
                   </TouchableOpacity>
                 </View>
 
@@ -967,11 +962,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                       setIsPlaying(!isPlaying)
                     }}
                   >
-                    {isPlaying ? (
-                      <Pause size={28} color="#FFFFFF" />
-                    ) : (
-                      <Play size={28} color="#FFFFFF" style={{ marginLeft: 3 }} />
-                    )}
+                    {isPlaying
+                      ? <Pause size={28} color="#FFFFFF" />
+                      : <Play size={28} color="#FFFFFF" style={{ marginLeft: 3 }} />}
                   </TouchableOpacity>
 
                   {/* +10 сек */}
@@ -1011,16 +1004,17 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                       setShowSpeedMenu(true)
                     }}
                   >
-                    {playbackSpeed === 1.0 ? (
-                      <Gauge size={22} color="#FFFFFF" />
-                    ) : (
-                      <Text style={styles.vlcSpeedText}>{playbackSpeed}x</Text>
-                    )}
+                    {playbackSpeed === 1.0
+                      ? <Gauge size={22} color="#FFFFFF" />
+                      : <Text style={styles.vlcSpeedText}>{playbackSpeed}x</Text>}
                   </TouchableOpacity>
 
                   {/* PiP */}
                   {pip.isPipAvailable && (
-                    <TouchableOpacity style={styles.vlcButton} onPress={() => pip.enterPipMode()}>
+                    <TouchableOpacity
+                      style={styles.vlcButton}
+                      onPress={() => pip.enterPipMode()}
+                    >
                       <PictureInPicture2 size={22} color="#FFFFFF" />
                     </TouchableOpacity>
                   )}

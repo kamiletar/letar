@@ -28,7 +28,8 @@ export function createInvitationEmailHtml(params: InvitationTemplateParams): str
 
   let content = `<p style="margin: 0 0 20px; font-size: 16px;">Здравствуйте!</p>`
 
-  let inviteText = `<strong>${inviterName}</strong> приглашает вас присоединиться к <strong>${organizationName}</strong>`
+  let inviteText =
+    `<strong>${inviterName}</strong> приглашает вас присоединиться к <strong>${organizationName}</strong>`
   if (role) {
     inviteText += ` в роли <strong>${role}</strong>`
   }

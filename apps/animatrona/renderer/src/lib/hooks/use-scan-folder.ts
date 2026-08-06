@@ -151,7 +151,7 @@ export function useScanFolder<T extends BaseScannedFile>(options: UseScanFolderO
         setIsScanning(false)
       }
     },
-    [parseFile, getInitialSelection, sortFiles]
+    [parseFile, getInitialSelection, sortFiles],
   )
 
   /**

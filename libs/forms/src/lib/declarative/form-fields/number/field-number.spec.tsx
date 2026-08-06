@@ -18,7 +18,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toBeInTheDocument()
@@ -30,7 +30,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ quantity: 1 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="quantity" label="Количество" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Количество')).toBeInTheDocument()
@@ -42,7 +42,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ amount: undefined }} onSubmit={vi.fn()}>
             <Form.Field.Number name="amount" placeholder="Введите сумму" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByPlaceholderText('Введите сумму')).toBeInTheDocument()
@@ -54,7 +54,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: 42 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toHaveValue('42')
@@ -66,7 +66,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // NumberInput.IncrementTrigger и DecrementTrigger должны быть в DOM
@@ -81,7 +81,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ age: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="age" min={0} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Chakra NumberInput устанавливает min через data-scope
@@ -95,7 +95,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ percent: 50 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="percent" max={100} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = screen.getByRole('spinbutton')
@@ -108,7 +108,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ price: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="price" step={0.01} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = screen.getByRole('spinbutton')
@@ -123,7 +123,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toBeDisabled()
@@ -135,7 +135,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: 0 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" label="Count" required />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('*')).toBeInTheDocument()
@@ -149,7 +149,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ count: undefined }} onSubmit={vi.fn()}>
             <Form.Field.Number name="count" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toHaveValue('')
@@ -163,7 +163,7 @@ describe('FieldNumber', () => {
           <Form initialValue={{ quantity: 1 }} onSubmit={vi.fn()}>
             <Form.Field.Number name="quantity" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('spinbutton')).toHaveAttribute('data-field-name', 'quantity')

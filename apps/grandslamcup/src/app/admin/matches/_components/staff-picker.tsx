@@ -62,7 +62,7 @@ export function StaffPicker({ matchId, field, currentUser }: StaffPickerProps) {
         }
       })
     },
-    [role]
+    [role],
   )
 
   const handleSelect = (userId: string | null) => {

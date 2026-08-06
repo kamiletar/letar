@@ -102,7 +102,7 @@ function openScorerDB(): Promise<IDBDatabase> {
 }
 
 function getAllFromStore(
-  store: IDBObjectStore
+  store: IDBObjectStore,
 ): Promise<Array<{ id: string; matchId: string; [key: string]: unknown }>> {
   return new Promise((resolve, reject) => {
     const request = store.getAll()

@@ -76,7 +76,7 @@ export default function ProfileEditorPage() {
         onSuccess: () => {
           router.push('/settings')
         },
-      }
+      },
     )
   }
 
@@ -88,7 +88,7 @@ export default function ProfileEditorPage() {
           onSuccess: () => {
             router.push('/settings')
           },
-        }
+        },
       )
     }
   }
@@ -161,29 +161,31 @@ export default function ProfileEditorPage() {
                 Назад
               </Button>
               <HStack gap={2}>
-                {isReadOnly ? (
-                  <>
-                    <Button variant="outline" onClick={handleReset} disabled={isResetting}>
-                      <Icon as={LuSettings} mr={2} />
-                      {isResetting ? 'Сброс...' : 'Сбросить'}
-                    </Button>
-                    <Button colorPalette="purple" onClick={handleDuplicate} disabled={isDuplicating}>
-                      <Icon as={LuCopy} mr={2} />
-                      {isDuplicating ? 'Копирование...' : 'Создать копию'}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outline" colorPalette="red" onClick={handleDelete} disabled={isDeleting}>
-                      <Icon as={LuTrash2} mr={2} />
-                      Удалить
-                    </Button>
-                    <AnimatronaForm.Button.Submit colorPalette="purple" disabled={isUpdating}>
-                      <Icon as={LuCheck} mr={2} />
-                      {isUpdating ? 'Сохранение...' : 'Сохранить'}
-                    </AnimatronaForm.Button.Submit>
-                  </>
-                )}
+                {isReadOnly
+                  ? (
+                    <>
+                      <Button variant="outline" onClick={handleReset} disabled={isResetting}>
+                        <Icon as={LuSettings} mr={2} />
+                        {isResetting ? 'Сброс...' : 'Сбросить'}
+                      </Button>
+                      <Button colorPalette="purple" onClick={handleDuplicate} disabled={isDuplicating}>
+                        <Icon as={LuCopy} mr={2} />
+                        {isDuplicating ? 'Копирование...' : 'Создать копию'}
+                      </Button>
+                    </>
+                  )
+                  : (
+                    <>
+                      <Button variant="outline" colorPalette="red" onClick={handleDelete} disabled={isDeleting}>
+                        <Icon as={LuTrash2} mr={2} />
+                        Удалить
+                      </Button>
+                      <AnimatronaForm.Button.Submit colorPalette="purple" disabled={isUpdating}>
+                        <Icon as={LuCheck} mr={2} />
+                        {isUpdating ? 'Сохранение...' : 'Сохранить'}
+                      </AnimatronaForm.Button.Submit>
+                    </>
+                  )}
               </HStack>
             </HStack>
 

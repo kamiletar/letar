@@ -47,10 +47,12 @@ async function getTelegramSettings() {
 /**
  * Создать клиент Telegram если настройки валидны (с кэшированием)
  */
-async function createClientIfEnabled(): Promise<{
-  client: TelegramClient
-  chatId: string
-} | null> {
+async function createClientIfEnabled(): Promise<
+  {
+    client: TelegramClient
+    chatId: string
+  } | null
+> {
   // Проверяем кэш
   if (cachedConfig && Date.now() < cachedConfig.expiresAt) {
     return cachedConfig

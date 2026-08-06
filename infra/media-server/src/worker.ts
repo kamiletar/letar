@@ -111,7 +111,7 @@ const worker = new Worker<TranscodeJob>(
   {
     connection: { url: config.redisUrl },
     concurrency: config.workerConcurrency,
-  }
+  },
 )
 
 worker.on('failed', (job, err) => {

@@ -161,7 +161,7 @@ import { DialogContent, DialogRoot, DialogTrigger } from '@chakra-ui/react'
 
 ```tsx
 import { Dialog, Portal } from '@chakra-ui/react'
-;<Dialog.Root>
+<Dialog.Root>
   <Dialog.Trigger>...</Dialog.Trigger>
 </Dialog.Root>
 ```
@@ -299,7 +299,7 @@ import { OnlyFor } from './_components/only-for';
 ```tsx
 import { Button } from '@chakra-ui/react'
 import Link from 'next/link'
-;<Button asChild colorPalette="fg" size="lg">
+<Button asChild colorPalette="fg" size="lg">
   <Link href="/auth/signin">Войти</Link>
 </Button>
 ```
@@ -680,7 +680,7 @@ export const buttonRecipe = defineRecipe({
 
 ```tsx
 import { PhotoGallery } from '@letar/ui'
-;<PhotoGallery
+<PhotoGallery
   photos={photos.map((p, i) => ({
     src: `/api/files/${slug}/${p.filename}`,
     alt: `${name} — фото ${i + 1}`,
@@ -962,7 +962,7 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 
 ```tsx
 import { ImageMagnifier } from '@letar/ui'
-;<ImageMagnifier
+<ImageMagnifier
   src="/demo/poster-fragment.webp" // полный файл 1:1 — его показывает лупа
   placeholderSrc="/demo/poster-fragment-far.webp" // лёгкая копия для первого кадра
   naturalWidth={3200}

@@ -167,12 +167,12 @@ interface HookContext {
 ### Получение данных из headers
 
 ```typescript
-handler:;
-;async (ctx) => {
+handler: ;
+;(async (ctx) => {
   const ip = ctx.headers.get('x-forwarded-for') || 'unknown'
   const userAgent = ctx.headers.get('user-agent')
   const authorization = ctx.headers.get('authorization')
-}
+})
 ```
 
 ---
@@ -185,34 +185,34 @@ handler:;
 
 ```typescript
 // Один путь
-matcher:;
-;(ctx) => ctx.path === '/sign-in/email'
+matcher: ;
+;((ctx) => ctx.path === '/sign-in/email')
 
 // Несколько путей
-matcher:;
-;(ctx) => ['/sign-in/email', '/sign-up/email'].includes(ctx.path)
+matcher: ;
+;((ctx) => ['/sign-in/email', '/sign-up/email'].includes(ctx.path))
 
 // По префиксу
-matcher:;
-;(ctx) => ctx.path.startsWith('/sign-in')
+matcher: ;
+;((ctx) => ctx.path.startsWith('/sign-in'))
 
 // Regex
-matcher:;
-;(ctx) => /^\/api\/auth/.test(ctx.path)
+matcher: ;
+;((ctx) => /^\/api\/auth/.test(ctx.path))
 ```
 
 ### По методу
 
 ```typescript
-matcher:;
-;(ctx) => ctx.method === 'POST'
+matcher: ;
+;((ctx) => ctx.method === 'POST')
 ```
 
 ### Комбинация
 
 ```typescript
-matcher:;
-;(ctx) => ctx.path === '/sign-in/email' && ctx.method === 'POST'
+matcher: ;
+;((ctx) => ctx.path === '/sign-in/email' && ctx.method === 'POST')
 ```
 
 ---
@@ -267,8 +267,8 @@ throw new APIError('BAD_REQUEST', {
 ```typescript
 import { deleteCookie, getCookie, setCookie } from 'better-auth/cookies'
 
-handler:;
-;async (ctx) => {
+handler: ;
+;(async (ctx) => {
   // Получить cookie
   const value = getCookie(ctx, 'my-cookie')
 
@@ -282,7 +282,7 @@ handler:;
 
   // Удалить cookie
   deleteCookie(ctx, 'my-cookie')
-}
+})
 ```
 
 ---
@@ -454,12 +454,12 @@ hooks: {
 Все хуки могут быть асинхронными:
 
 ```typescript
-handler:;
-;async (ctx) => {
+handler: ;
+;(async (ctx) => {
   // Асинхронные операции
   await someAsyncOperation()
   await anotherAsyncOperation()
-}
+})
 ```
 
 ---

@@ -149,9 +149,9 @@ export function Header() {
                         onSignOut={signOut}
                         onClose={() => setDrawerOpen(false)}
                         profileHref="/profile"
-                        extraItems={
-                          isAdmin ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }] : []
-                        }
+                        extraItems={isAdmin
+                          ? [{ value: 'admin', label: 'Админ', href: '/admin', icon: LuSettings }]
+                          : []}
                       />
                     </VStack>
                   </Drawer.Body>

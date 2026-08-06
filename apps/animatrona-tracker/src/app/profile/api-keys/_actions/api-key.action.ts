@@ -21,7 +21,7 @@ const CreateKeySchema = z
  * Возвращает ПОЛНЫЙ ключ только один раз — при создании
  */
 export async function createApiKey(
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: true; key: string; id: string } | { success: false; error: string }> {
   const session = await getSession()
   if (!session?.user) {

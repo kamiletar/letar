@@ -84,7 +84,7 @@ export function EntityPhotoUploader({
         if (inputRef.current) inputRef.current.value = ''
       }
     },
-    [entityType, entityId, router]
+    [entityType, entityId, router],
   )
 
   /** Обработка выбора файла */
@@ -124,7 +124,7 @@ export function EntityPhotoUploader({
       setCropImageSrc(null)
       uploadFile(blob, pendingFileName)
     },
-    [uploadFile, pendingFileName]
+    [uploadFile, pendingFileName],
   )
 
   /** Отмена кропа */
@@ -175,13 +175,13 @@ export function EntityPhotoUploader({
         transition="border-color 0.15s"
         onClick={() => !uploading && inputRef.current?.click()}
       >
-        {photoUrl ? (
-          <Image src={photoUrl} alt={label ?? 'Фото'} fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
-        ) : (
-          <Flex align="center" justify="center" h="full" bg="bg.subtle">
-            {placeholder}
-          </Flex>
-        )}
+        {photoUrl
+          ? <Image src={photoUrl} alt={label ?? 'Фото'} fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
+          : (
+            <Flex align="center" justify="center" h="full" bg="bg.subtle">
+              {placeholder}
+            </Flex>
+          )}
 
         {/* Оверлей */}
         <Flex
@@ -194,9 +194,7 @@ export function EntityPhotoUploader({
           opacity={uploading ? 1 : 0}
           transition="opacity 0.2s"
         >
-          {uploading ? (
-            <Spinner color="white" size="md" />
-          ) : (
+          {uploading ? <Spinner color="white" size="md" /> : (
             <Text fontSize="xs" color="white" fontWeight="medium">
               {photoUrl ? 'Заменить' : 'Загрузить'}
             </Text>

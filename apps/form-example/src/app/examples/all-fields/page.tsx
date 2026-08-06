@@ -276,8 +276,7 @@ export default function AllFieldsPage() {
             name="cascadeCity"
             dependsOn="country"
             loadOptions={async (parentValue: unknown) =>
-              cityByCountry[parentValue as string] ?? ([] as { value: string; label: string }[])
-            }
+              cityByCountry[parentValue as string] ?? ([] as { value: string; label: string }[])}
           />
 
           <Separator />

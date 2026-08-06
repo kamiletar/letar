@@ -51,7 +51,7 @@ export interface RutrackerImportResult {
  */
 async function findCorrectSeasonViaRelated(
   malShikimoriId: number,
-  torrent: RutrackerTorrentInfo
+  torrent: RutrackerTorrentInfo,
 ): Promise<RutrackerImportResult | null> {
   const withRelated = await getAnimeWithRelated(malShikimoriId)
   if (!withRelated?.related?.length) {

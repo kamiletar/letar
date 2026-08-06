@@ -155,11 +155,9 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
                   <Text
                     fontSize="2xl"
                     fontWeight="bold"
-                    color={
-                      vmafProgress.lastVmaf >= targetVmaf - 0.5 && vmafProgress.lastVmaf <= targetVmaf + 0.5
-                        ? 'green.400'
-                        : 'yellow.300'
-                    }
+                    color={vmafProgress.lastVmaf >= targetVmaf - 0.5 && vmafProgress.lastVmaf <= targetVmaf + 0.5
+                      ? 'green.400'
+                      : 'yellow.300'}
                   >
                     {vmafProgress.lastVmaf.toFixed(1)}
                   </Text>
@@ -193,13 +191,11 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
                       fontSize="sm"
                     >
                       <HStack gap={2}>
-                        {isOptimal ? (
-                          <Icon as={LuCheck} color="green.400" boxSize={4} />
-                        ) : direction === 'up' ? (
-                          <Icon as={LuTrendingUp} color="orange.400" boxSize={4} />
-                        ) : (
-                          <Icon as={LuTrendingDown} color="blue.400" boxSize={4} />
-                        )}
+                        {isOptimal
+                          ? <Icon as={LuCheck} color="green.400" boxSize={4} />
+                          : direction === 'up'
+                          ? <Icon as={LuTrendingUp} color="orange.400" boxSize={4} />
+                          : <Icon as={LuTrendingDown} color="blue.400" boxSize={4} />}
                         <Text color={isOptimal ? 'green.300' : 'yellow.300'}>CQ {iter.cq}</Text>
                         <Text color="fg.muted">→</Text>
                         <Text fontWeight="medium" color={isOptimal ? 'green.400' : 'yellow.300'}>

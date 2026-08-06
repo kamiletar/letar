@@ -182,10 +182,10 @@ async function loadAdminData(animeId: string): Promise<AnimeAdminData> {
   return {
     pinnedOn: animeWithPin?.pinnedOn
       ? {
-          ...animeWithPin.pinnedOn,
-          usedBytes: Number(animeWithPin.pinnedOn.usedBytes),
-          capacityBytes: Number(animeWithPin.pinnedOn.capacityBytes),
-        }
+        ...animeWithPin.pinnedOn,
+        usedBytes: Number(animeWithPin.pinnedOn.usedBytes),
+        capacityBytes: Number(animeWithPin.pinnedOn.capacityBytes),
+      }
       : null,
     viewers: libraryItems.map((item) => ({
       userId: item.userId,
@@ -216,8 +216,9 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
   }
 
   // Определяем slug для URL: PUBLISHED → shikimoriId, остальные → directoryCid
-  const animeSlug =
-    anime.status === 'PUBLISHED' && anime.shikimoriId ? String(anime.shikimoriId) : (anime.directoryCid ?? anime.id)
+  const animeSlug = anime.status === 'PUBLISHED' && anime.shikimoriId
+    ? String(anime.shikimoriId)
+    : (anime.directoryCid ?? anime.id)
 
   // Параллельная загрузка: манифест из IPFS + libraryMap из БД + похожие аниме + комментарии + сиды
   const db = getEnhancedPrisma(session?.user)

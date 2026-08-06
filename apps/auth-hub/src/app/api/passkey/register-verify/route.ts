@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const passkeyData = await verifyPasskeyRegistration(
       session.user.id,
       body.response as Parameters<typeof verifyPasskeyRegistration>[1],
-      body.name
+      body.name,
     )
     await prisma.passkey.create({ data: passkeyData })
     return NextResponse.json({ verified: true })

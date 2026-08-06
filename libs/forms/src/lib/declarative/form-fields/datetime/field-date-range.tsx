@@ -239,7 +239,11 @@ export const FieldDateRange = createField<DateRangeFieldProps, DateRangeValue>({
                 <Menu.Positioner>
                   <Menu.Content>
                     {presets.map((preset) => (
-                      <Menu.Item key={preset} value={preset} onClick={() => handlePreset(preset)}>
+                      <Menu.Item
+                        key={preset}
+                        value={preset}
+                        onClick={() => handlePreset(preset)}
+                      >
                         {getPresetLabel(preset)}
                       </Menu.Item>
                     ))}

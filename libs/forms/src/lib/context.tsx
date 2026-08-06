@@ -96,12 +96,9 @@ export function useTypedFormContext<TFormData extends object>() {
        * Subscribe to a specific field.
        * Returns a selector for use in form.Subscribe.
        */
-      field:
-        <K extends keyof TFormData>(name: K) =>
-        (state: { values: unknown }) =>
-          (state.values as TFormData)[name],
+      field: <K extends keyof TFormData>(name: K) => (state: { values: unknown }) => (state.values as TFormData)[name],
     }),
-    [rawForm]
+    [rawForm],
   )
 }
 
@@ -135,7 +132,7 @@ export function useTypedFormSubscribe<TFormData extends object>() {
   const form = useFormContext()
 
   const TypedSubscribe = useMemo(() => {
-    return function TypedFormSubscribe<TSelected>({
+    return function TypedFormSubscribe<TSelected,>({
       selector,
       children,
     }: TypedFormSubscribeProps<TFormData, TSelected>) {

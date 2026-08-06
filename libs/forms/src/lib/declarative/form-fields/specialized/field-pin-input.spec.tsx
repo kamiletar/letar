@@ -17,7 +17,7 @@ describe('FieldPinInput', () => {
           <Form initialValue={{ pin: '' }} onSubmit={vi.fn()}>
             <Form.Field.PinInput name="pin" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')
@@ -31,7 +31,7 @@ describe('FieldPinInput', () => {
           <Form initialValue={{ pin: '' }} onSubmit={vi.fn()}>
             <Form.Field.PinInput name="pin" label="Введите PIN" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Введите PIN')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('FieldPinInput', () => {
           <Form initialValue={{ pin: '' }} onSubmit={vi.fn()}>
             <Form.Field.PinInput name="pin" count={6} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')
@@ -58,7 +58,7 @@ describe('FieldPinInput', () => {
           <Form initialValue={{ pin: '' }} onSubmit={vi.fn()}>
             <Form.Field.PinInput name="pin" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')
@@ -75,7 +75,7 @@ describe('FieldPinInput', () => {
           <Form initialValue={{ pin: '1234' }} onSubmit={vi.fn()}>
             <Form.Field.PinInput name="pin" count={4} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const inputs = screen.getAllByRole('textbox')

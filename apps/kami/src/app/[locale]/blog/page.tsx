@@ -57,93 +57,95 @@ export default async function BlogPage({ params }: Props) {
           </VStack>
 
           {/* Список статей */}
-          {sortedPosts.length === 0 ? (
-            <Box textAlign="center" py={12}>
-              <Text color="fg.subtle">{l('Статей пока нет', 'No posts yet')}</Text>
-            </Box>
-          ) : (
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-              {sortedPosts.map((post) => (
-                <Link key={post.slug} href={`/blog/${post.slug}/`}>
-                  <Box
-                    p={6}
-                    borderRadius="xl"
-                    bg="bg.panel"
-                    border="1px solid"
-                    borderColor="border.subtle"
-                    _hover={{
-                      borderColor: 'fg.500',
-                      transform: 'translateY(-4px)',
-                      boxShadow: GLOW.cardShadowFull,
-                      '& .card-arrow': {
-                        transform: 'translateX(4px)',
-                        opacity: 1,
-                      },
-                    }}
-                    transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                    h="full"
-                    position="relative"
-                    overflow="hidden"
-                  >
-                    {/* Стрелка при hover */}
-                    <Icon
-                      className="card-arrow"
-                      position="absolute"
-                      right={4}
-                      top="50%"
-                      transform="translateY(-50%)"
-                      opacity={0}
-                      transition="all 0.3s"
-                      color="fg.500"
-                      boxSize={5}
+          {sortedPosts.length === 0
+            ? (
+              <Box textAlign="center" py={12}>
+                <Text color="fg.subtle">{l('Статей пока нет', 'No posts yet')}</Text>
+              </Box>
+            )
+            : (
+              <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
+                {sortedPosts.map((post) => (
+                  <Link key={post.slug} href={`/blog/${post.slug}/`}>
+                    <Box
+                      p={6}
+                      borderRadius="xl"
+                      bg="bg.panel"
+                      border="1px solid"
+                      borderColor="border.subtle"
+                      _hover={{
+                        borderColor: 'fg.500',
+                        transform: 'translateY(-4px)',
+                        boxShadow: GLOW.cardShadowFull,
+                        '& .card-arrow': {
+                          transform: 'translateX(4px)',
+                          opacity: 1,
+                        },
+                      }}
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      h="full"
+                      position="relative"
+                      overflow="hidden"
                     >
-                      <ArrowRight />
-                    </Icon>
+                      {/* Стрелка при hover */}
+                      <Icon
+                        className="card-arrow"
+                        position="absolute"
+                        right={4}
+                        top="50%"
+                        transform="translateY(-50%)"
+                        opacity={0}
+                        transition="all 0.3s"
+                        color="fg.500"
+                        boxSize={5}
+                      >
+                        <ArrowRight />
+                      </Icon>
 
-                    {/* Featured бейдж */}
-                    {post.entry.featured && (
-                      <Badge position="absolute" top={4} right={4} colorPalette="fg" variant="solid">
-                        Featured
-                      </Badge>
-                    )}
-
-                    <VStack align="start" gap={3} pr={8}>
-                      <Heading as="h2" fontSize="xl" lineClamp={2}>
-                        {l(post.entry.title, post.entry.titleEn)}
-                      </Heading>
-
-                      <Text fontSize="sm" color="fg.subtle" lineClamp={3}>
-                        {l(post.entry.description, post.entry.descriptionEn)}
-                      </Text>
-
-                      {/* Теги */}
-                      {post.entry.tags && post.entry.tags.length > 0 && (
-                        <HStack gap={2} flexWrap="wrap">
-                          {post.entry.tags.slice(0, 3).map((tag) => (
-                            <Badge key={tag} variant="subtle" colorPalette="gray" size="sm">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </HStack>
+                      {/* Featured бейдж */}
+                      {post.entry.featured && (
+                        <Badge position="absolute" top={4} right={4} colorPalette="fg" variant="solid">
+                          Featured
+                        </Badge>
                       )}
 
-                      {/* Дата */}
-                      <HStack gap={2} color="fg.subtle" fontSize="sm">
-                        <Calendar size={14} />
-                        <Text>
-                          {new Date(post.entry.publishedAt || '').toLocaleDateString(l('ru-RU', 'en-US'), {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
+                      <VStack align="start" gap={3} pr={8}>
+                        <Heading as="h2" fontSize="xl" lineClamp={2}>
+                          {l(post.entry.title, post.entry.titleEn)}
+                        </Heading>
+
+                        <Text fontSize="sm" color="fg.subtle" lineClamp={3}>
+                          {l(post.entry.description, post.entry.descriptionEn)}
                         </Text>
-                      </HStack>
-                    </VStack>
-                  </Box>
-                </Link>
-              ))}
-            </SimpleGrid>
-          )}
+
+                        {/* Теги */}
+                        {post.entry.tags && post.entry.tags.length > 0 && (
+                          <HStack gap={2} flexWrap="wrap">
+                            {post.entry.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} variant="subtle" colorPalette="gray" size="sm">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </HStack>
+                        )}
+
+                        {/* Дата */}
+                        <HStack gap={2} color="fg.subtle" fontSize="sm">
+                          <Calendar size={14} />
+                          <Text>
+                            {new Date(post.entry.publishedAt || '').toLocaleDateString(l('ru-RU', 'en-US'), {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </Text>
+                        </HStack>
+                      </VStack>
+                    </Box>
+                  </Link>
+                ))}
+              </SimpleGrid>
+            )}
         </VStack>
       </Container>
     </Box>

@@ -53,9 +53,7 @@ function ProductPage({ product }) {
 function StaticList({ items }) {
   return (
     <ul>
-      {items.map((i) => (
-        <li key={i.id}>{i.name}</li>
-      ))}
+      {items.map((i) => <li key={i.id}>{i.name}</li>)}
     </ul>
   )
 }
@@ -64,14 +62,12 @@ function StaticList({ items }) {
 function StaticList({ items }) {
   return (
     <ul>
-      {items.map((i) => (
-        <li key={i.id}>{i.name}</li>
-      ))}
+      {items.map((i) => <li key={i.id}>{i.name}</li>)}
     </ul>
   )
 } // ✅ 'use client' только когда нужны хуки/события
 
-;('use client')
+'use client'
 function InteractiveList({ items }) {
   const [selected, setSelected] = useState<string | null>(null)
   return (
@@ -192,7 +188,7 @@ async function createProduct(data) {
 } // ✅ После: выделено в _actions/
 // _actions/create-product.ts
 
-;('use server')
+'use server'
 
 import { getEnhancedPrisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'

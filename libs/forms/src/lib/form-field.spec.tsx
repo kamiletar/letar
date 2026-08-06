@@ -12,7 +12,7 @@ describe('FormField', () => {
     render(
       <FormField name="email">
         <TestComponent />
-      </FormField>
+      </FormField>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('email')
@@ -29,7 +29,7 @@ describe('FormField', () => {
         <FormField name="email">
           <TestComponent />
         </FormField>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('user.email')
@@ -63,7 +63,7 @@ describe('FormField', () => {
         <FormField name="email">
           <TestComponent />
         </FormField>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('original')).toHaveTextContent('email')
@@ -75,7 +75,7 @@ describe('FormField', () => {
         <FormGroup name="address">
           <FormField name="city">{({ name }) => <span data-testid="name">{name}</span>}</FormField>
         </FormGroup>
-      </FormGroup>
+      </FormGroup>,
     )
 
     expect(screen.getByTestId('name')).toHaveTextContent('user.address.city')

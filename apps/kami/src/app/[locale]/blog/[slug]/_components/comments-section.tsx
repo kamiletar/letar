@@ -51,39 +51,43 @@ export function CommentsSection({ postSlug, comments, locale }: CommentsSectionP
       </HStack>
 
       {/* Форма добавления комментария */}
-      {session?.user ? (
-        <Card.Root>
-          <Card.Body>
-            <CommentForm postSlug={postSlug} />
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <Card.Root>
-          <Card.Body>
-            <Text color="fg.muted">
-              {t('loginToComment')}{' '}
-              <Link href={`/${locale}/auth/signin`}>
-                <Text as="span" color="fg" fontWeight="medium">
-                  {t('signIn')}
-                </Text>
-              </Link>
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      )}
+      {session?.user
+        ? (
+          <Card.Root>
+            <Card.Body>
+              <CommentForm postSlug={postSlug} />
+            </Card.Body>
+          </Card.Root>
+        )
+        : (
+          <Card.Root>
+            <Card.Body>
+              <Text color="fg.muted">
+                {t('loginToComment')}{' '}
+                <Link href={`/${locale}/auth/signin`}>
+                  <Text as="span" color="fg" fontWeight="medium">
+                    {t('signIn')}
+                  </Text>
+                </Link>
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        )}
 
       {/* Список комментариев */}
-      {comments.length === 0 ? (
-        <Text color="fg.muted" textAlign="center" py={8}>
-          {t('noComments')}
-        </Text>
-      ) : (
-        <VStack gap={4} align="stretch">
-          {comments.map((comment) => (
-            <CommentCard key={comment.id} comment={comment} postSlug={postSlug} locale={locale} />
-          ))}
-        </VStack>
-      )}
+      {comments.length === 0
+        ? (
+          <Text color="fg.muted" textAlign="center" py={8}>
+            {t('noComments')}
+          </Text>
+        )
+        : (
+          <VStack gap={4} align="stretch">
+            {comments.map((comment) => (
+              <CommentCard key={comment.id} comment={comment} postSlug={postSlug} locale={locale} />
+            ))}
+          </VStack>
+        )}
     </VStack>
   )
 }
@@ -155,7 +159,11 @@ const CommentCard = memo(function CommentCard({ comment, postSlug, locale, isRep
 
               <HStack gap={1}>
                 {!isReply && session?.user && (
-                  <Button variant="ghost" size="xs" onClick={() => setShowReplyForm(!showReplyForm)}>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => setShowReplyForm(!showReplyForm)}
+                  >
                     <Icon boxSize={4}>
                       <Reply />
                     </Icon>

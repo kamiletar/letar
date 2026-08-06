@@ -157,20 +157,20 @@ export function AnimeHero({
           )}
         </HStack>
       }
-      tagsSlot={
-        tagsText ? (
+      tagsSlot={tagsText
+        ? (
           <Text color="fg.muted" fontSize="sm" lineClamp={1}>
             {tagsText}
           </Text>
-        ) : undefined
-      }
-      ctaSlot={
-        ctaButton ? (
+        )
+        : undefined}
+      ctaSlot={ctaButton
+        ? (
           <HStack mt={3} gap={2} flexWrap="wrap" justify={{ base: 'center', sm: 'start' }}>
             {ctaButton}
           </HStack>
-        ) : undefined
-      }
+        )
+        : undefined}
     />
   )
 }

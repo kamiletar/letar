@@ -51,7 +51,7 @@ export function TVAnimeScreen({ navigation, route }: Props): React.JSX.Element {
         episodeId: episode.id,
       })
     },
-    [animeId, navigation]
+    [animeId, navigation],
   )
 
   // Загрузка
@@ -142,7 +142,11 @@ export function TVAnimeScreen({ navigation, route }: Props): React.JSX.Element {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.episodesList}
           renderItem={({ item, index }) => (
-            <EpisodeItem episode={item} onPress={() => handleEpisodePress(item)} hasTVPreferredFocus={index === 0} />
+            <EpisodeItem
+              episode={item}
+              onPress={() => handleEpisodePress(item)}
+              hasTVPreferredFocus={index === 0}
+            />
           )}
         />
       </View>
@@ -165,8 +169,9 @@ function EpisodeItem({
   // Прогресс просмотра
   const progress = episode.progress
   const isWatched = progress?.completed
-  const progressPercent =
-    progress && episode.durationMs ? (progress.currentTime / (episode.durationMs / 1000)) * 100 : 0
+  const progressPercent = progress && episode.durationMs
+    ? (progress.currentTime / (episode.durationMs / 1000)) * 100
+    : 0
 
   return (
     <Animated.View style={[styles.episodeItemWrapper, { transform: [{ scale }] }]}>

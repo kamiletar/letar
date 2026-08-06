@@ -122,14 +122,16 @@ export const FieldColorPicker = createField<ColorPickerFieldProps, string>({
 
           {resolved.label && (
             <ColorPicker.Label>
-              {resolved.tooltip ? (
-                <HStack gap={1}>
-                  <span>{resolved.label}</span>
-                  <FieldTooltip {...resolved.tooltip} />
-                </HStack>
-              ) : (
-                resolved.label
-              )}
+              {resolved.tooltip
+                ? (
+                  <HStack gap={1}>
+                    <span>{resolved.label}</span>
+                    <FieldTooltip {...resolved.tooltip} />
+                  </HStack>
+                )
+                : (
+                  resolved.label
+                )}
               {resolved.required && <Field.RequiredIndicator />}
             </ColorPicker.Label>
           )}

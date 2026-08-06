@@ -84,7 +84,7 @@ describe('Ре-рендеры: форма из 10 полей', () => {
             </tracker.Track>
           ))}
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const input = screen.getAllByRole('textbox')[0]
@@ -112,7 +112,7 @@ describe('Ре-рендеры: форма из 20 полей', () => {
             </tracker.Track>
           ))}
         </Form>
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     const input = screen.getAllByRole('textbox')[0]

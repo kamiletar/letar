@@ -65,7 +65,7 @@ export interface CreateActionConfig<TSchema extends z.ZodSchema> {
  * @returns Async функция создания
  */
 export function createCreateAction<TSchema extends z.ZodSchema>(
-  config: CreateActionConfig<TSchema>
+  config: CreateActionConfig<TSchema>,
 ): (data: z.infer<TSchema>) => Promise<MutationResult> {
   const { model, schema, redirectPath, entityName, uniqueField, uniqueErrorMessage, transformData } = config
 
@@ -81,7 +81,7 @@ export function createCreateAction<TSchema extends z.ZodSchema>(
     if (!parsed.success) {
       console.warn(
         `[DEBUG create-action-factory] model=${model} validation failed:`,
-        JSON.stringify(parsed.error.flatten())
+        JSON.stringify(parsed.error.flatten()),
       )
       return { success: false, error: 'Некорректные данные' }
     }

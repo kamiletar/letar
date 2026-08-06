@@ -133,7 +133,7 @@ export async function batchDeleteAudioTracks(trackIds: string[]): Promise<{ coun
  */
 export async function batchUpdateAudioTracks(
   trackIds: string[],
-  data: { language?: string; dubGroup?: string | null }
+  data: { language?: string; dubGroup?: string | null },
 ): Promise<{ count: number }> {
   return prisma.audioTrack.updateMany({
     where: { id: { in: trackIds } },

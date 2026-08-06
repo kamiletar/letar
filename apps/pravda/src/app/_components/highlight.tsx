@@ -88,7 +88,7 @@ export const Highlight = memo(function Highlight({
       resultParts.push(
         <Mark key={start} bg="accent.subtle" color="accent.fg" px={0.5} borderRadius="sm">
           {visibleText.slice(start, end + 1)}
-        </Mark>
+        </Mark>,
       )
       lastEnd = end + 1
     }

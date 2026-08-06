@@ -49,7 +49,12 @@ export function SearchInput({
         </Box>
       </Box>
       {showClear && value && (
-        <IconButton aria-label="Очистить поиск" variant="ghost" size="sm" onClick={() => onChange('')}>
+        <IconButton
+          aria-label="Очистить поиск"
+          variant="ghost"
+          size="sm"
+          onClick={() => onChange('')}
+        >
           <LuX />
         </IconButton>
       )}

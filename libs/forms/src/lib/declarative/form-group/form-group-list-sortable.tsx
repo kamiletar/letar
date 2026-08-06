@@ -77,7 +77,7 @@ export function SortableWrapper({ items, onReorder, children }: SortableWrapperP
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   )
 
   const handleDragEnd = (event: DragEndEvent) => {

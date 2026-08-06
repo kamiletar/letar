@@ -36,7 +36,7 @@ export interface IpcResult<T = unknown> {
  */
 export function createValidatedHandler<TSchema extends z.ZodType, TResult = unknown>(
   schema: TSchema,
-  handler: (data: z.infer<TSchema>, event: IpcMainInvokeEvent) => Promise<TResult>
+  handler: (data: z.infer<TSchema>, event: IpcMainInvokeEvent) => Promise<TResult>,
 ): (event: IpcMainInvokeEvent, data: unknown) => Promise<IpcResult<TResult>> {
   return async (event: IpcMainInvokeEvent, data: unknown): Promise<IpcResult<TResult>> => {
     // Валидация входных данных
@@ -77,7 +77,7 @@ export function createValidatedHandler<TSchema extends z.ZodType, TResult = unkn
  */
 export function createValidatedAction<TSchema extends z.ZodType>(
   schema: TSchema,
-  handler: (data: z.infer<TSchema>, event: IpcMainInvokeEvent) => Promise<void>
+  handler: (data: z.infer<TSchema>, event: IpcMainInvokeEvent) => Promise<void>,
 ): (event: IpcMainInvokeEvent, data: unknown) => Promise<IpcResult<void>> {
   return createValidatedHandler(schema, handler)
 }
@@ -96,7 +96,7 @@ export const safePathSchema = z
       const normalized = path.replace(/\\/g, '/')
       return !normalized.includes('../') && !normalized.includes('./')
     },
-    { message: 'Path traversal detected' }
+    { message: 'Path traversal detected' },
   )
 
 /** Абсолютный путь (должен начинаться с буквы диска или /) */
@@ -106,7 +106,7 @@ export const absolutePathSchema = safePathSchema.refine(
     // Unix: /...
     return /^([A-Za-z]:|\\\\|\/)/u.test(path)
   },
-  { message: 'Path must be absolute' }
+  { message: 'Path must be absolute' },
 )
 
 /** Положительное целое число */
@@ -167,7 +167,7 @@ export const mergeSchema = z.object({
         language: z.string().optional(),
         title: z.string().optional(),
         default: z.boolean().optional(),
-      })
+      }),
     )
     .optional(),
   subtitleTracks: z
@@ -177,7 +177,7 @@ export const mergeSchema = z.object({
         language: z.string().optional(),
         title: z.string().optional(),
         default: z.boolean().optional(),
-      })
+      }),
     )
     .optional(),
   fonts: z.array(absolutePathSchema).optional(),

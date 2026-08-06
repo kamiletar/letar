@@ -81,9 +81,7 @@ function ParticipantRow({ participant, hostPosition }: ParticipantRowProps) {
     <HStack px={4} py={2} gap={3} _hover={{ bg: 'bg.subtle' }} transition="background 0.15s">
       {/* Аватар */}
       <Avatar.Root size="sm">
-        {participant.avatarUrl ? (
-          <Avatar.Image src={participant.avatarUrl} />
-        ) : (
+        {participant.avatarUrl ? <Avatar.Image src={participant.avatarUrl} /> : (
           <Avatar.Fallback>
             <LuUser />
           </Avatar.Fallback>
@@ -104,15 +102,17 @@ function ParticipantRow({ participant, hostPosition }: ParticipantRowProps) {
       </VStack>
 
       {/* Статус готовности */}
-      {participant.isReady ? (
-        <Badge colorPalette="green" variant="subtle" size="sm">
-          Готов
-        </Badge>
-      ) : (
-        <Badge colorPalette="gray" variant="subtle" size="sm">
-          Ожидание
-        </Badge>
-      )}
+      {participant.isReady
+        ? (
+          <Badge colorPalette="green" variant="subtle" size="sm">
+            Готов
+          </Badge>
+        )
+        : (
+          <Badge colorPalette="gray" variant="subtle" size="sm">
+            Ожидание
+          </Badge>
+        )}
     </HStack>
   )
 }

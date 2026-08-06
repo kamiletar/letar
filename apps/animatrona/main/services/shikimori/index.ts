@@ -5,7 +5,7 @@
 
 export { getAnimeRestData } from './anime-api'
 export { downloadPoster, getAnimeDetails, getAnimeExtended, getAnimeWithRelated, searchAnime } from './client'
-export { SHIKIMORI_BROWSER_HEADERS, acquireShikimoriSlot, isShikimoriHost } from './throttle'
+export { acquireShikimoriSlot, isShikimoriHost, SHIKIMORI_BROWSER_HEADERS } from './throttle'
 export type {
   PosterDownloadResult,
   ShikimoriAnimeDetails,

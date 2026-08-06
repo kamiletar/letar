@@ -46,69 +46,69 @@ export const auth = createAuth({
   // OAuth провайдеры (настроены ОДИН РАЗ для всех приложений)
   socialProviders: {
     // GitHub
-    ...(process.env.AUTH_GITHUB_ID &&
-      process.env.AUTH_GITHUB_SECRET && {
-        github: {
-          clientId: process.env.AUTH_GITHUB_ID,
-          clientSecret: process.env.AUTH_GITHUB_SECRET,
-        },
-      }),
+    ...(process.env.AUTH_GITHUB_ID
+      && process.env.AUTH_GITHUB_SECRET && {
+      github: {
+        clientId: process.env.AUTH_GITHUB_ID,
+        clientSecret: process.env.AUTH_GITHUB_SECRET,
+      },
+    }),
 
     // Google
-    ...(process.env.AUTH_GOOGLE_ID &&
-      process.env.AUTH_GOOGLE_SECRET && {
-        google: {
-          clientId: process.env.AUTH_GOOGLE_ID,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET,
-        },
-      }),
+    ...(process.env.AUTH_GOOGLE_ID
+      && process.env.AUTH_GOOGLE_SECRET && {
+      google: {
+        clientId: process.env.AUTH_GOOGLE_ID,
+        clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      },
+    }),
 
     // Facebook
-    ...(process.env.AUTH_FACEBOOK_ID &&
-      process.env.AUTH_FACEBOOK_SECRET && {
-        facebook: {
-          clientId: process.env.AUTH_FACEBOOK_ID,
-          clientSecret: process.env.AUTH_FACEBOOK_SECRET,
-        },
-      }),
+    ...(process.env.AUTH_FACEBOOK_ID
+      && process.env.AUTH_FACEBOOK_SECRET && {
+      facebook: {
+        clientId: process.env.AUTH_FACEBOOK_ID,
+        clientSecret: process.env.AUTH_FACEBOOK_SECRET,
+      },
+    }),
 
     // VK (ВКонтакте)
-    ...(process.env.AUTH_VK_ID &&
-      process.env.AUTH_VK_SECRET && {
-        vk: {
-          clientId: process.env.AUTH_VK_ID,
-          clientSecret: process.env.AUTH_VK_SECRET,
-          getUserInfo: async (tokens) => {
-            const accessToken = tokens.accessToken
-            if (!accessToken) {
-              throw new Error('VK: no access token')
-            }
-            const userId = (tokens.raw as { user_id?: number })?.user_id
-            const response = await fetch(
-              `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`
-            )
-            const data = await response.json()
-            const user = data.response?.[0]
+    ...(process.env.AUTH_VK_ID
+      && process.env.AUTH_VK_SECRET && {
+      vk: {
+        clientId: process.env.AUTH_VK_ID,
+        clientSecret: process.env.AUTH_VK_SECRET,
+        getUserInfo: async (tokens) => {
+          const accessToken = tokens.accessToken
+          if (!accessToken) {
+            throw new Error('VK: no access token')
+          }
+          const userId = (tokens.raw as { user_id?: number })?.user_id
+          const response = await fetch(
+            `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`,
+          )
+          const data = await response.json()
+          const user = data.response?.[0]
 
-            if (!user) {
-              throw new Error('VK user not found')
-            }
+          if (!user) {
+            throw new Error('VK user not found')
+          }
 
-            const email = (tokens.raw as { email?: string })?.email
+          const email = (tokens.raw as { email?: string })?.email
 
-            return {
-              user: {
-                id: String(user.id),
-                name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
-                email: email || `${user.id}@vk.com`,
-                image: user.photo_200,
-                emailVerified: !!email,
-              },
-              data: user,
-            }
-          },
+          return {
+            user: {
+              id: String(user.id),
+              name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
+              email: email || `${user.id}@vk.com`,
+              image: user.photo_200,
+              emailVerified: !!email,
+            },
+            data: user,
+          }
         },
-      }),
+      },
+    }),
   },
 
   // Дополнительные плагины поверх стандартных hub-provider
@@ -134,36 +134,35 @@ export const auth = createAuth({
 
     // Yandex через genericOAuth
     genericOAuth({
-      config:
-        process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
-          ? [
-              {
-                providerId: 'yandex',
-                clientId: process.env.AUTH_YANDEX_ID,
-                clientSecret: process.env.AUTH_YANDEX_SECRET,
-                authorizationUrl: 'https://oauth.yandex.ru/authorize',
-                tokenUrl: 'https://oauth.yandex.ru/token',
-                scopes: ['login:email', 'login:info', 'login:avatar'],
-                getUserInfo: async (tokens) => {
-                  const response = await fetch('https://login.yandex.ru/info', {
-                    headers: {
-                      Authorization: `OAuth ${tokens.accessToken}`,
-                    },
-                  })
-                  const data = await response.json()
-                  return {
-                    id: data.id,
-                    name: data.display_name || data.real_name || data.login,
-                    email: data.default_email,
-                    image: data.default_avatar_id
-                      ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
-                      : undefined,
-                    emailVerified: true,
-                  }
+      config: process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
+        ? [
+          {
+            providerId: 'yandex',
+            clientId: process.env.AUTH_YANDEX_ID,
+            clientSecret: process.env.AUTH_YANDEX_SECRET,
+            authorizationUrl: 'https://oauth.yandex.ru/authorize',
+            tokenUrl: 'https://oauth.yandex.ru/token',
+            scopes: ['login:email', 'login:info', 'login:avatar'],
+            getUserInfo: async (tokens) => {
+              const response = await fetch('https://login.yandex.ru/info', {
+                headers: {
+                  Authorization: `OAuth ${tokens.accessToken}`,
                 },
-              },
-            ]
-          : [],
+              })
+              const data = await response.json()
+              return {
+                id: data.id,
+                name: data.display_name || data.real_name || data.login,
+                email: data.default_email,
+                image: data.default_avatar_id
+                  ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
+                  : undefined,
+                emailVerified: true,
+              }
+            },
+          },
+        ]
+        : [],
     }),
 
     // Passkeys / WebAuthn (Этап 6.5 PLAN.md)

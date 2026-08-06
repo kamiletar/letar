@@ -64,7 +64,7 @@ export function DrumPads({ pads, selectedIndex, activePads, onSelect, onHit, mid
         onHit(index, 0.85)
       }
     },
-    [pads, onSelect, onHit, midiLearn]
+    [pads, onSelect, onHit, midiLearn],
   )
 
   useEffect(() => {

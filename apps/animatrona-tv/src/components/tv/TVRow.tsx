@@ -60,7 +60,7 @@ export function TVRow({
         />
       )
     },
-    [onItemPress, hasTVPreferredFocus, focusedItemId]
+    [onItemPress, hasTVPreferredFocus, focusedItemId],
   )
 
   if (items.length === 0) {

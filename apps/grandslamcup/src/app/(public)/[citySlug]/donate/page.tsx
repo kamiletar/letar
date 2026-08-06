@@ -57,36 +57,38 @@ export default async function CityDonatePage({ params }: { params: Params }) {
         </Text>
       </VStack>
 
-      {links.length === 0 ? (
-        <EmptyState>
-          <Text color="fg.muted">Ссылки для пожертвований в {city.name} скоро появятся</Text>
-        </EmptyState>
-      ) : (
-        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
-          {links.map((link) => (
-            <Card.Root key={link.id}>
-              <Card.Body>
-                <VStack gap={3} align="start">
-                  <Heading size="md">{link.name}</Heading>
-                  {link.description && (
-                    <Text fontSize="sm" color="fg.muted">
-                      {link.description}
-                    </Text>
-                  )}
-                  <Box asChild>
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
-                      <Button colorPalette="brand" size="sm" w="full">
-                        <LuExternalLink size={16} />
-                        Перейти
-                      </Button>
-                    </a>
-                  </Box>
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </Grid>
-      )}
+      {links.length === 0
+        ? (
+          <EmptyState>
+            <Text color="fg.muted">Ссылки для пожертвований в {city.name} скоро появятся</Text>
+          </EmptyState>
+        )
+        : (
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+            {links.map((link) => (
+              <Card.Root key={link.id}>
+                <Card.Body>
+                  <VStack gap={3} align="start">
+                    <Heading size="md">{link.name}</Heading>
+                    {link.description && (
+                      <Text fontSize="sm" color="fg.muted">
+                        {link.description}
+                      </Text>
+                    )}
+                    <Box asChild>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer">
+                        <Button colorPalette="brand" size="sm" w="full">
+                          <LuExternalLink size={16} />
+                          Перейти
+                        </Button>
+                      </a>
+                    </Box>
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
+            ))}
+          </Grid>
+        )}
     </VStack>
   )
 }

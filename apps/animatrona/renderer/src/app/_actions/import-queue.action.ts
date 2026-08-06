@@ -69,7 +69,7 @@ export async function createImportQueueItem(data: Prisma.ImportQueueItemCreateIn
  */
 export async function updateImportQueueItem(
   id: string,
-  data: Prisma.ImportQueueItemUpdateInput
+  data: Prisma.ImportQueueItemUpdateInput,
 ): Promise<ImportQueueItem> {
   return prisma.importQueueItem.update({
     where: { id },
@@ -83,7 +83,7 @@ export async function updateImportQueueItem(
 export async function updateImportQueueItemStatus(
   id: string,
   status: ImportQueueItemStatus,
-  error?: string
+  error?: string,
 ): Promise<ImportQueueItem> {
   const data: Prisma.ImportQueueItemUpdateInput = { status }
 
@@ -110,7 +110,7 @@ export async function updateImportQueueItemStatus(
 export async function updateImportQueueItemProgress(
   id: string,
   progress: number,
-  currentFileName?: string
+  currentFileName?: string,
 ): Promise<ImportQueueItem> {
   return prisma.importQueueItem.update({
     where: { id },
@@ -127,7 +127,7 @@ export async function updateImportQueueItemProgress(
 export async function saveImportQueueItemResults(
   id: string,
   createdAnimeId: string,
-  createdAnimeFolder: string
+  createdAnimeFolder: string,
 ): Promise<ImportQueueItem> {
   return prisma.importQueueItem.update({
     where: { id },

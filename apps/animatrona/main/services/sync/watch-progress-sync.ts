@@ -214,7 +214,7 @@ export class WatchProgressSync extends EventEmitter {
       volume?: number
       selectedAudioTrackId?: string | null
       selectedSubtitleTrackId?: string | null
-    }
+    },
   ): Promise<WatchProgress> {
     const prisma = getPrismaClient()
 
@@ -244,7 +244,7 @@ export class WatchProgressSync extends EventEmitter {
             lastWatchedAt: new Date(),
           },
         }),
-      { context: 'sync:saveProgress' }
+      { context: 'sync:saveProgress' },
     )
 
     // Отправляем друзьям
@@ -452,7 +452,7 @@ export class WatchProgressSync extends EventEmitter {
               lastWatchedAt: remoteDate,
             },
           }),
-        { context: 'sync:mergeRemoteProgress' }
+        { context: 'sync:mergeRemoteProgress' },
       )
 
       log.info('Применено обновление от друга', {

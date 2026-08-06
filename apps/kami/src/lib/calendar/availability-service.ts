@@ -59,7 +59,7 @@ export async function getBookedSlots(startDate: Date, endDate: Date) {
 export function generateSlotsForDay(
   date: Date,
   rule: AvailabilityRule,
-  bookedSlots: Array<{ startAt: Date; endAt: Date }>
+  bookedSlots: Array<{ startAt: Date; endAt: Date }>,
 ): TimeSlot[] {
   const slots: TimeSlot[] = []
 

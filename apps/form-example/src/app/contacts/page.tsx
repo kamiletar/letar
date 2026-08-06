@@ -21,48 +21,50 @@ export default async function ContactsPage() {
         </Button>
       </HStack>
 
-      {contacts.length === 0 ? (
-        <Card.Root>
-          <Card.Body>
-            <Text color="fg.muted" textAlign="center" py={8}>
-              No messages yet. Send your first contact form!
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <Stack gap={3}>
-          {contacts.map(
-            (contact: {
-              id: string
-              name: string
-              email: string
-              subject: string
-              message: string
-              createdAt: Date
-            }) => (
-              <Card.Root key={contact.id} variant="outline">
-                <Card.Body>
-                  <HStack justify="space-between" align="start">
-                    <Stack gap={1}>
-                      <HStack>
-                        <Text fontWeight="medium">{contact.name}</Text>
-                        <Badge>{contact.subject}</Badge>
-                      </HStack>
-                      <Text fontSize="sm" color="fg.muted">
-                        {contact.email}
+      {contacts.length === 0
+        ? (
+          <Card.Root>
+            <Card.Body>
+              <Text color="fg.muted" textAlign="center" py={8}>
+                No messages yet. Send your first contact form!
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        )
+        : (
+          <Stack gap={3}>
+            {contacts.map(
+              (contact: {
+                id: string
+                name: string
+                email: string
+                subject: string
+                message: string
+                createdAt: Date
+              }) => (
+                <Card.Root key={contact.id} variant="outline">
+                  <Card.Body>
+                    <HStack justify="space-between" align="start">
+                      <Stack gap={1}>
+                        <HStack>
+                          <Text fontWeight="medium">{contact.name}</Text>
+                          <Badge>{contact.subject}</Badge>
+                        </HStack>
+                        <Text fontSize="sm" color="fg.muted">
+                          {contact.email}
+                        </Text>
+                        <Text fontSize="sm">{contact.message}</Text>
+                      </Stack>
+                      <Text fontSize="xs" color="fg.muted">
+                        {new Date(contact.createdAt).toLocaleDateString()}
                       </Text>
-                      <Text fontSize="sm">{contact.message}</Text>
-                    </Stack>
-                    <Text fontSize="xs" color="fg.muted">
-                      {new Date(contact.createdAt).toLocaleDateString()}
-                    </Text>
-                  </HStack>
-                </Card.Body>
-              </Card.Root>
-            )
-          )}
-        </Stack>
-      )}
+                    </HStack>
+                  </Card.Body>
+                </Card.Root>
+              ),
+            )}
+          </Stack>
+        )}
     </Stack>
   )
 }

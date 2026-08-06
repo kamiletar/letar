@@ -168,20 +168,18 @@ export const SystemHistoryChart = () => {
   })
 
   // Combine data for multi-line chart
-  const combinedData =
-    data?.data.cpu.map((point, index) => ({
-      time: point.time,
-      timestamp: point.timestamp,
-      cpu: point.value,
-      memory: data.data.memory[index]?.value ?? 0,
-      disk: data.data.disk[index]?.value ?? 0,
-    })) ?? []
+  const combinedData = data?.data.cpu.map((point, index) => ({
+    time: point.time,
+    timestamp: point.timestamp,
+    cpu: point.value,
+    memory: data.data.memory[index]?.value ?? 0,
+    disk: data.data.disk[index]?.value ?? 0,
+  })) ?? []
 
   // Sample data for display if too many points
-  const displayData =
-    combinedData.length > 100
-      ? combinedData.filter((_, i) => i % Math.ceil(combinedData.length / 100) === 0)
-      : combinedData
+  const displayData = combinedData.length > 100
+    ? combinedData.filter((_, i) => i % Math.ceil(combinedData.length / 100) === 0)
+    : combinedData
 
   const getTierLabel = (tier: string) => {
     switch (tier) {
@@ -245,114 +243,120 @@ export const SystemHistoryChart = () => {
 
           {/* Chart */}
           <Box h="300px" position="relative">
-            {isLoading ? (
-              <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
-                <Spinner size="lg" color="brand" />
-              </Box>
-            ) : error ? (
-              <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
-                <Text color="fg.error">Ошибка загрузки данных</Text>
-              </Box>
-            ) : displayData.length === 0 ? (
-              <Box
-                position="absolute"
-                inset={0}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexDirection="column"
-                gap={2}
-              >
-                <Icon boxSize={12} color="brand.subtle">
-                  <LuCalendar />
-                </Icon>
-                <Text color="brand.muted">Нет данных за выбранный период</Text>
-                <Text color="brand.subtle" fontSize="sm">
-                  Данные начнут появляться после запуска мониторинга
-                </Text>
-              </Box>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={displayData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="cpuHistoryGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={cpuColor} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={cpuColor} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="memoryHistoryGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={memoryColor} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={memoryColor} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="diskHistoryGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={diskColor} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={diskColor} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                  <XAxis
-                    dataKey="time"
-                    stroke={axisColor}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    interval="preserveStartEnd"
-                    minTickGap={50}
-                  />
-                  <YAxis
-                    stroke={axisColor}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                    width={45}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend
-                    verticalAlign="top"
-                    height={36}
-                    formatter={(value) => {
-                      const labels: Record<string, string> = {
-                        cpu: 'CPU',
-                        memory: 'Память',
-                        disk: 'Диск',
-                      }
-                      return <span style={{ color: axisColor }}>{labels[value] || value}</span>
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="cpu"
-                    name="cpu"
-                    stroke={cpuColor}
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#cpuHistoryGradient)"
-                    isAnimationActive={false}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="memory"
-                    name="memory"
-                    stroke={memoryColor}
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#memoryHistoryGradient)"
-                    isAnimationActive={false}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="disk"
-                    name="disk"
-                    stroke={diskColor}
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#diskHistoryGradient)"
-                    isAnimationActive={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            {isLoading
+              ? (
+                <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
+                  <Spinner size="lg" color="brand" />
+                </Box>
+              )
+              : error
+              ? (
+                <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
+                  <Text color="fg.error">Ошибка загрузки данных</Text>
+                </Box>
+              )
+              : displayData.length === 0
+              ? (
+                <Box
+                  position="absolute"
+                  inset={0}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexDirection="column"
+                  gap={2}
+                >
+                  <Icon boxSize={12} color="brand.subtle">
+                    <LuCalendar />
+                  </Icon>
+                  <Text color="brand.muted">Нет данных за выбранный период</Text>
+                  <Text color="brand.subtle" fontSize="sm">
+                    Данные начнут появляться после запуска мониторинга
+                  </Text>
+                </Box>
+              )
+              : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={displayData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="cpuHistoryGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={cpuColor} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={cpuColor} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="memoryHistoryGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={memoryColor} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={memoryColor} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="diskHistoryGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={diskColor} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={diskColor} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                    <XAxis
+                      dataKey="time"
+                      stroke={axisColor}
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                      minTickGap={50}
+                    />
+                    <YAxis
+                      stroke={axisColor}
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                      width={45}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend
+                      verticalAlign="top"
+                      height={36}
+                      formatter={(value) => {
+                        const labels: Record<string, string> = {
+                          cpu: 'CPU',
+                          memory: 'Память',
+                          disk: 'Диск',
+                        }
+                        return <span style={{ color: axisColor }}>{labels[value] || value}</span>
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="cpu"
+                      name="cpu"
+                      stroke={cpuColor}
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#cpuHistoryGradient)"
+                      isAnimationActive={false}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="memory"
+                      name="memory"
+                      stroke={memoryColor}
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#memoryHistoryGradient)"
+                      isAnimationActive={false}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="disk"
+                      name="disk"
+                      stroke={diskColor}
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#diskHistoryGradient)"
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
           </Box>
 
           {/* Time Range Info */}

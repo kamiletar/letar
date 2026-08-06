@@ -112,7 +112,8 @@ export async function runBackupFreshnessCheck(): Promise<BackupFreshnessCheckRes
       type: 'BACKUP_FAILED',
       severity: 'ERROR',
       title: `Бэкап Maddy устарел (${ageHours.toFixed(1)} ч)`,
-      message: `Самый свежий файл — ${newest.name}, старше порога ${MAX_AGE_HOURS} ч. Проверить cron/SSH-ключ на mail-сервере (см. PLAN.md Этап 0.3, инцидент 2026-07-28).`,
+      message:
+        `Самый свежий файл — ${newest.name}, старше порога ${MAX_AGE_HOURS} ч. Проверить cron/SSH-ключ на mail-сервере (см. PLAN.md Этап 0.3, инцидент 2026-07-28).`,
       metadata: { jobId: 'maddy-backup-freshness-check', backupDir: BACKUP_DIR, newestFile: newest.name, ageHours },
     })
     alerted = true

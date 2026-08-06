@@ -19,7 +19,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" label="Name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" label="Имя пользователя" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Имя пользователя')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" placeholder="Введите имя" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByPlaceholderText('Введите имя')).toBeInTheDocument()
@@ -55,7 +55,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: 'John' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveValue('John')
@@ -69,7 +69,7 @@ describe('FieldString', () => {
           <Form initialValue={{ email: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="email" type="email" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('type', 'email')
@@ -81,7 +81,7 @@ describe('FieldString', () => {
           <Form initialValue={{ website: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="website" type="url" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('type', 'url')
@@ -93,7 +93,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('type', 'text')
@@ -107,7 +107,7 @@ describe('FieldString', () => {
           <Form initialValue={{ title: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="title" maxLength={50} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('maxLength', '50')
@@ -119,7 +119,7 @@ describe('FieldString', () => {
           <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="password" minLength={8} />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('minLength', '8')
@@ -131,7 +131,7 @@ describe('FieldString', () => {
           <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="code" pattern="[A-Z]{3}" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('pattern', '[A-Z]{3}')
@@ -145,7 +145,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" disabled />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toBeDisabled()
@@ -157,7 +157,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" label="Name" required />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('*')).toBeInTheDocument()
@@ -171,7 +171,7 @@ describe('FieldString', () => {
           <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="name" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const input = screen.getByRole('textbox')
@@ -188,7 +188,7 @@ describe('FieldString', () => {
           <Form initialValue={{ username: '' }} onSubmit={vi.fn()}>
             <Form.Field.String name="username" />
           </Form>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByRole('textbox')).toHaveAttribute('data-field-name', 'username')

@@ -8,6 +8,6 @@ import { NextResponse } from 'next/server'
 export async function POST() {
   return NextResponse.json(
     { error: 'Per-database backup not yet available via agent API. Use agent backup endpoint.' },
-    { status: 501 }
+    { status: 501 },
   )
 }

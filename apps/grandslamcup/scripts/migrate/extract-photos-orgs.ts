@@ -114,13 +114,13 @@ function extractOrganizers(messages: TgMessage[], city: string): Organizer[] {
 
     // Посты-представления тренеров с ролью "тренер" и фото
     if (
-      m.photo &&
-      /тренер команды|играющий тренер|неиграющий тренер/i.test(text) &&
-      text.length > 20 &&
-      text.length < 500
+      m.photo
+      && /тренер команды|играющий тренер|неиграющий тренер/i.test(text)
+      && text.length > 20
+      && text.length < 500
     ) {
       const nameMatch = text.match(
-        /(?:играющий |неиграющий )?тренер(?:\s+команды)?\s*[«""]?[^»""]*[»""]?\s*[–—-]\s*(.+?)(?:\.|$|\n)/i
+        /(?:играющий |неиграющий )?тренер(?:\s+команды)?\s*[«""]?[^»""]*[»""]?\s*[–—-]\s*(.+?)(?:\.|$|\n)/i,
       )
       if (nameMatch) {
         // Это тренер, не организатор — пропускаем (уже в profiles)
@@ -195,7 +195,7 @@ function extractTeamPhotos(messages: TgMessage[]): TeamPhoto[] {
       let label = ''
       const teamMatch = text.match(/[Кк]оманда\s*[«""]?([^»""]+?)[»""]?\s*[\n.!]/i)
       const trainerMatch = text.match(
-        /(?:играющий |неиграющий )?тренер(?:\s+команды)?\s*[«""]?([^»""]+?)[»""]?\s*[–—-]\s*(.+?)(?:\.|$|\n)/i
+        /(?:играющий |неиграющий )?тренер(?:\s+команды)?\s*[«""]?([^»""]+?)[»""]?\s*[–—-]\s*(.+?)(?:\.|$|\n)/i,
       )
 
       if (teamMatch) {
@@ -225,7 +225,7 @@ function extractTeamPhotos(messages: TgMessage[]): TeamPhoto[] {
 
 function extractTeamPair(text: string): string | null {
   const match = text.match(
-    /(?:встретились|играли|матч[ае]?)\s+(?:команды\s+)?[«""]?(.+?)[»""]?\s+(?:и|vs|—|–|-)\s+[«""]?(.+?)[»""]?(?:\s*[.!\n])/i
+    /(?:встретились|играли|матч[ае]?)\s+(?:команды\s+)?[«""]?(.+?)[»""]?\s+(?:и|vs|—|–|-)\s+[«""]?(.+?)[»""]?(?:\s*[.!\n])/i,
   )
   if (match) {
     return `${match[1].trim()} vs ${match[2].trim()}`

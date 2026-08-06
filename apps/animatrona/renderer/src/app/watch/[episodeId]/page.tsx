@@ -200,7 +200,7 @@ export default function WatchPage({ params }: WatchPageProps) {
       // Синхронизируем с global video store для mini-player
       globalVideo.handleGlobalTimeUpdate(time, duration)
     },
-    [chapterEditor, progress, globalVideo]
+    [chapterEditor, progress, globalVideo],
   )
 
   // Обработчик ошибки видео
@@ -313,9 +313,9 @@ export default function WatchPage({ params }: WatchPageProps) {
             <HStack gap={2}>
               {/* Кнопка переключения режима: озвучка ↔ оригинал */}
               <Tooltip
-                content={
-                  effectivePreference === 'RUSSIAN_DUB' ? 'Режим: Озвучка + надписи' : 'Режим: Оригинал + субтитры'
-                }
+                content={effectivePreference === 'RUSSIAN_DUB'
+                  ? 'Режим: Озвучка + надписи'
+                  : 'Режим: Оригинал + субтитры'}
               >
                 <IconButton
                   aria-label="Режим дорожек"
@@ -334,15 +334,15 @@ export default function WatchPage({ params }: WatchPageProps) {
                 </IconButton>
               </Tooltip>
               <Tooltip
-                content={
-                  autoSkip.autoSkipEnabled
-                    ? 'Пропускать всё (OP/ED/Recap/Preview)'
-                    : autoSkip.settings?.skipOpening || autoSkip.settings?.skipEnding
-                      ? `Пропускать: ${[autoSkip.settings?.skipOpening && 'OP', autoSkip.settings?.skipEnding && 'ED']
-                          .filter(Boolean)
-                          .join(', ')}`
-                      : 'Автопропуск выключен'
-                }
+                content={autoSkip.autoSkipEnabled
+                  ? 'Пропускать всё (OP/ED/Recap/Preview)'
+                  : autoSkip.settings?.skipOpening || autoSkip.settings?.skipEnding
+                  ? `Пропускать: ${
+                    [autoSkip.settings?.skipOpening && 'OP', autoSkip.settings?.skipEnding && 'ED']
+                      .filter(Boolean)
+                      .join(', ')
+                  }`
+                  : 'Автопропуск выключен'}
               >
                 <IconButton
                   aria-label="Автопропуск"

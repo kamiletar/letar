@@ -22,7 +22,7 @@ export interface ExternalLinkEntry {
  */
 export function buildExternalLinks(
   ids?: AnimeManifestExternalIds | null,
-  dbShikimoriId?: number | null
+  dbShikimoriId?: number | null,
 ): ExternalLinkEntry[] {
   const links: ExternalLinkEntry[] = []
 

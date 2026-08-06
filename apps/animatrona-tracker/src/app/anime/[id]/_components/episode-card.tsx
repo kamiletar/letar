@@ -92,7 +92,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         setLightboxOpen(true)
       }
     },
-    [currentIndex, screenshotCids.length]
+    [currentIndex, screenshotCids.length],
   )
 
   // Открыть диалог тех. инфо
@@ -113,7 +113,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         src: getIpfsUrl(cid),
         alt: `Эпизод ${number} — кадр ${i + 1}`,
       })),
-    [screenshotCids, number]
+    [screenshotCids, number],
   )
 
   return (
@@ -126,13 +126,11 @@ export const EpisodeCard = memo(function EpisodeCard({
         isCompleted={isCompleted}
         opacity={isLocked ? 0.6 : 1}
         hoverBorderColor={isLocked ? 'yellow.500' : 'purple.500'}
-        thumbnailSlot={
-          thumbnailUrl ? (
-            <Image src={thumbnailUrl} alt={`Эпизод ${number}`} loading="lazy" w="100%" h="100%" objectFit="cover" />
-          ) : undefined
-        }
-        overlaySlot={
-          isLocked && thumbnailUrl ? (
+        thumbnailSlot={thumbnailUrl
+          ? <Image src={thumbnailUrl} alt={`Эпизод ${number}`} loading="lazy" w="100%" h="100%" objectFit="cover" />
+          : undefined}
+        overlaySlot={isLocked && thumbnailUrl
+          ? (
             <Box
               position="absolute"
               inset={0}
@@ -143,7 +141,9 @@ export const EpisodeCard = memo(function EpisodeCard({
             >
               <Icon as={LuLock} boxSize={8} color="white" />
             </Box>
-          ) : !isLocked && isHovering && thumbnailUrl ? (
+          )
+          : !isLocked && isHovering && thumbnailUrl
+          ? (
             <Box
               position="absolute"
               inset={0}
@@ -188,8 +188,8 @@ export const EpisodeCard = memo(function EpisodeCard({
                 </IconButton>
               )}
             </Box>
-          ) : undefined
-        }
+          )
+          : undefined}
         wrapper={(children) => (
           <Box onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
             <Link href={href} style={{ textDecoration: 'none' }}>

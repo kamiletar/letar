@@ -22,7 +22,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           success: false,
           error: 'Alert not found',
         },
-        { status: 404 }
+        { status: 404 },
       )
     }
   } catch (error) {
@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

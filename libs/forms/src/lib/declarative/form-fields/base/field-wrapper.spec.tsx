@@ -32,7 +32,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="name">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Имя пользователя')).toBeInTheDocument()
@@ -44,7 +44,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={baseResolved} hasError={false} errorMessage="" fullPath="name">
             <Input data-testid="input" />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByTestId('input')).toBeInTheDocument()
@@ -62,7 +62,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="email">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Chakra UI добавляет "*" для required полей
@@ -81,7 +81,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="name">
             <Input data-testid="input" />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const fieldRoot = screen.getByRole('group')
@@ -98,7 +98,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="name">
             <Input data-testid="input" />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const fieldRoot = screen.getByRole('group')
@@ -115,7 +115,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={true} errorMessage="Неверный email" fullPath="email">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Неверный email')).toBeInTheDocument()
@@ -129,7 +129,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={true} errorMessage="Ошибка" fullPath="email">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       const fieldRoot = screen.getByRole('group')
@@ -146,7 +146,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="password">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Минимум 8 символов')).toBeInTheDocument()
@@ -164,7 +164,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={true} errorMessage="Ошибка валидации" fullPath="password">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByText('Ошибка валидации')).toBeInTheDocument()
@@ -181,7 +181,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="name">
             <Input data-testid="custom-input" />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByTestId('custom-input')).toBeInTheDocument()
@@ -198,7 +198,7 @@ describe('FieldWrapper', () => {
               <Input data-testid="input-2" />
             </div>
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       expect(screen.getByTestId('wrapper')).toBeInTheDocument()
@@ -220,7 +220,7 @@ describe('FieldWrapper', () => {
           <FieldWrapper resolved={resolved} hasError={false} errorMessage="" fullPath="field">
             <Input />
           </FieldWrapper>
-        </TestWrapper>
+        </TestWrapper>,
       )
 
       // Tooltip иконка должна быть рядом с label

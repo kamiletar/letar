@@ -40,7 +40,7 @@ export async function moderateOneAnime(
   db: ReturnType<typeof getEnhancedPrisma>,
   id: string,
   action: ModerationAction,
-  logParams?: ModerationLogParams
+  logParams?: ModerationLogParams,
 ): Promise<ModerationResult> {
   try {
     // Одобрить замену: новое → PUBLISHED, старое → HIDDEN
@@ -92,15 +92,15 @@ export async function moderateOneAnime(
           data: { animeId: id },
         })
         console.warn(
-          `[moderation] Мигрировано ${migratedItems.length} UserLibraryItem с ${animeToApprove.replacesAnimeId} → ${id}`
+          `[moderation] Мигрировано ${migratedItems.length} UserLibraryItem с ${animeToApprove.replacesAnimeId} → ${id}`,
         )
       }
 
       // Записываем CidHistory если directoryCid изменился (для cleanup-old-pins)
       if (
-        oldAnime?.directoryCid &&
-        animeToApprove.directoryCid &&
-        oldAnime.directoryCid !== animeToApprove.directoryCid
+        oldAnime?.directoryCid
+        && animeToApprove.directoryCid
+        && oldAnime.directoryCid !== animeToApprove.directoryCid
       ) {
         await db.cidHistory.create({
           data: {
@@ -213,6 +213,6 @@ async function invalidateAnimeCache(): Promise<void> {
     'anime:library-map',
     'anime:*:similar',
     'leaderboard:all',
-    'api:anime:*'
+    'api:anime:*',
   )
 }

@@ -48,7 +48,7 @@ export function registerIntroDetectorHandlers(): void {
           event.sender.send(
             'introDetector:progress',
             Math.round((i / episodes.length) * 30),
-            `downloading ${i + 1}/${episodes.length}`
+            `downloading ${i + 1}/${episodes.length}`,
           )
 
           const localPath = await manager.downloadFromIpfs(ep.audioCid, `ep-${ep.id}.opus`)
@@ -73,6 +73,6 @@ export function registerIntroDetectorHandlers(): void {
         // Всегда удаляем временные файлы
         await manager.cleanup()
       }
-    }
+    },
   )
 }

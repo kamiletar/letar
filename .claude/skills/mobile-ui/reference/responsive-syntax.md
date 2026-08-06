@@ -126,7 +126,7 @@ function MyComponent() {
 // Укажи fallback для SSR (когда window недоступен)
 const isMobile = useBreakpointValue(
   { base: true, md: false },
-  { fallback: 'md' } // На сервере считаем desktop
+  { fallback: 'md' }, // На сервере считаем desktop
 )
 ```
 

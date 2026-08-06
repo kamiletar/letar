@@ -105,7 +105,7 @@ function scanForDataMatrix(imageData: { data: Uint8ClampedArray; width: number; 
 async function renderPageToImageData(
   pdfDoc: PDFDocumentProxy,
   pageNum: number,
-  scale: number
+  scale: number,
 ): Promise<{ data: Uint8ClampedArray; width: number; height: number }> {
   const page = await pdfDoc.getPage(pageNum)
   const viewport = page.getViewport({ scale })
@@ -222,11 +222,11 @@ export function isPDFFile(filename: string): boolean {
 export function isPDFBuffer(buffer: Buffer | Uint8Array): boolean {
   // PDF начинается с %PDF-
   return (
-    buffer.length >= 5 &&
-    buffer[0] === 0x25 && // %
-    buffer[1] === 0x50 && // P
-    buffer[2] === 0x44 && // D
-    buffer[3] === 0x46 && // F
-    buffer[4] === 0x2d // -
+    buffer.length >= 5
+    && buffer[0] === 0x25 // %
+    && buffer[1] === 0x50 // P
+    && buffer[2] === 0x44 // D
+    && buffer[3] === 0x46 // F
+    && buffer[4] === 0x2d // -
   )
 }

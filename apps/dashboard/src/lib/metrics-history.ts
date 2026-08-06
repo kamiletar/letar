@@ -72,7 +72,7 @@ export async function addMetricPoint(
   cpu: number,
   memory: number,
   memoryUsed?: number,
-  memoryLimit?: number
+  memoryLimit?: number,
 ): Promise<boolean> {
   const history = await loadMetricsHistory(appName)
   const now = Date.now()

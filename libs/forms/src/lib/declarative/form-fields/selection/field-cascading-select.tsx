@@ -31,7 +31,7 @@ export interface CascadingSelectFieldProps<TParent = string, TValue = string> ex
    * @returns Promise with options array or object with options
    */
   loadOptions: (
-    parentValue: TParent | undefined
+    parentValue: TParent | undefined,
   ) => Promise<BaseOption<TValue>[]> | Promise<CascadingSelectLoadResult<TValue>>
   /**
    * Initial options (shown before parent value is selected)
@@ -164,7 +164,7 @@ function CascadingSelectContent<TParent = string, TValue = string>({
         itemToString: getOptionLabel,
         itemToValue: (item) => item.value as string,
       }),
-    [options]
+    [options],
   )
 
   return (
@@ -266,7 +266,7 @@ function CascadingSelectContent<TParent = string, TValue = string>({
  * ```
  */
 export function FieldCascadingSelect<TParent = string, TValue = string>(
-  props: CascadingSelectFieldProps<TParent, TValue>
+  props: CascadingSelectFieldProps<TParent, TValue>,
 ): ReactElement {
   const {
     name,

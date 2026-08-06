@@ -963,7 +963,7 @@
 //   .
 //   That's all there is to it!
 'use strict'
-var SubtitlesOctopus = function (options) {
+var SubtitlesOctopus = function(options) {
   var supportsWebAssembly = false
   try {
     if (typeof WebAssembly === 'object' && typeof WebAssembly.instantiate === 'function') {
@@ -1008,7 +1008,7 @@ var SubtitlesOctopus = function (options) {
   self.timeOffset = options.timeOffset || 0 // Time offset would be applied to currentTime from video (option)
 
   self.hasAlphaBug = false
-  ;(function () {
+  ;(function() {
     if (typeof ImageData.prototype.constructor === 'function') {
       try {
         // try actually calling ImageData, as on some browsers it's reported
@@ -1023,7 +1023,7 @@ var SubtitlesOctopus = function (options) {
     var canvas = document.createElement('canvas')
     var ctx = canvas.getContext('2d')
 
-    window.ImageData = function () {
+    window.ImageData = function() {
       var i = 0
       if (arguments[0] instanceof Uint8ClampedArray) {
         var data = arguments[i++]
@@ -1037,7 +1037,7 @@ var SubtitlesOctopus = function (options) {
     }
   })()
 
-  self.workerError = function (error) {
+  self.workerError = function(error) {
     console.error('Worker error: ', error)
     if (self.onErrorEvent) {
       self.onErrorEvent(error)
@@ -1049,7 +1049,7 @@ var SubtitlesOctopus = function (options) {
   }
 
   // Not tested for repeated usage yet
-  self.init = function () {
+  self.init = function() {
     if (!window.Worker) {
       self.workerError('worker not supported')
       return
@@ -1086,7 +1086,7 @@ var SubtitlesOctopus = function (options) {
     })
   }
 
-  self.createCanvas = function () {
+  self.createCanvas = function() {
     if (!self.canvas) {
       if (self.video) {
         self.isOurCanvas = true
@@ -1168,7 +1168,7 @@ var SubtitlesOctopus = function (options) {
     self.resize()
   }
 
-  self.setVideo = function (video) {
+  self.setVideo = function(video) {
     self.video = video
     if (self.video) {
       self.video.addEventListener('timeupdate', onTimeUpdate, false)
@@ -1199,7 +1199,7 @@ var SubtitlesOctopus = function (options) {
     }
   }
 
-  self.getVideoPosition = function () {
+  self.getVideoPosition = function() {
     var videoRatio = self.video.videoWidth / self.video.videoHeight
     var width = self.video.offsetWidth,
       height = self.video.offsetHeight
@@ -1220,7 +1220,7 @@ var SubtitlesOctopus = function (options) {
     }
   }
 
-  self.setSubUrl = function (subUrl) {
+  self.setSubUrl = function(subUrl) {
     self.subUrl = subUrl
   }
 
@@ -1248,15 +1248,15 @@ var SubtitlesOctopus = function (options) {
       var blendTime = data.blendTime
       if (typeof blendTime !== 'undefined') {
         console.log(
-          'render: ' +
-            Math.round(data.spentTime - blendTime) +
-            ' ms, blend: ' +
-            Math.round(blendTime) +
-            ' ms, draw: ' +
-            drawTime +
-            ' ms; TOTAL=' +
-            Math.round(data.spentTime + drawTime) +
-            ' ms'
+          'render: '
+            + Math.round(data.spentTime - blendTime)
+            + ' ms, blend: '
+            + Math.round(blendTime)
+            + ' ms, draw: '
+            + drawTime
+            + ' ms; TOTAL='
+            + Math.round(data.spentTime + drawTime)
+            + ' ms',
         )
       } else {
         console.log(Math.round(data.spentTime) + ' ms (+ ' + drawTime + ' ms draw)')
@@ -1279,14 +1279,14 @@ var SubtitlesOctopus = function (options) {
     if (self.debug) {
       var drawTime = Math.round(performance.now() - beforeDrawTime)
       console.log(
-        data.bitmaps.length +
-          ' bitmaps, libass: ' +
-          Math.round(data.libassTime) +
-          'ms, decode: ' +
-          Math.round(data.decodeTime) +
-          'ms, draw: ' +
-          drawTime +
-          'ms'
+        data.bitmaps.length
+          + ' bitmaps, libass: '
+          + Math.round(data.libassTime)
+          + 'ms, decode: '
+          + Math.round(data.decodeTime)
+          + 'ms, draw: '
+          + drawTime
+          + 'ms',
       )
       self.renderStart = performance.now()
     }
@@ -1294,7 +1294,7 @@ var SubtitlesOctopus = function (options) {
 
   self.workerActive = false
   self.frameId = 0
-  self.onWorkerMessage = function (event) {
+  self.onWorkerMessage = function(event) {
     // dump('\nclient got ' + JSON.stringify(event.data).substr(0, 150) + '\n');
     if (!self.workerActive) {
       self.workerActive = true
@@ -1428,7 +1428,7 @@ var SubtitlesOctopus = function (options) {
     return { width: width, height: height }
   }
 
-  self.resize = function (width, height, top, left) {
+  self.resize = function(width, height, top, left) {
     var videoSize = null
     top = top || 0
     left = left || 0
@@ -1449,10 +1449,10 @@ var SubtitlesOctopus = function (options) {
     }
 
     if (
-      self.canvas.width != width ||
-      self.canvas.height != height ||
-      self.canvas.style.top != top ||
-      self.canvas.style.left != left
+      self.canvas.width != width
+      || self.canvas.height != height
+      || self.canvas.style.top != top
+      || self.canvas.style.left != left
     ) {
       self.canvas.width = width
       self.canvas.height = height
@@ -1476,21 +1476,21 @@ var SubtitlesOctopus = function (options) {
     }
   }
 
-  self.resizeWithTimeout = function () {
+  self.resizeWithTimeout = function() {
     self.resize()
     // Проверяем workerActive перед отложенным resize (fix для React Strict Mode)
-    setTimeout(function () {
+    setTimeout(function() {
       if (self.workerActive) self.resize()
     }, 100)
   }
 
-  self.runBenchmark = function () {
+  self.runBenchmark = function() {
     self.worker.postMessage({
       target: 'runBenchmark',
     })
   }
 
-  self.customMessage = function (data, options) {
+  self.customMessage = function(data, options) {
     options = options || {}
     self.worker.postMessage({
       target: 'custom',
@@ -1499,28 +1499,28 @@ var SubtitlesOctopus = function (options) {
     })
   }
 
-  self.setCurrentTime = function (currentTime) {
+  self.setCurrentTime = function(currentTime) {
     self.worker.postMessage({
       target: 'video',
       currentTime: currentTime,
     })
   }
 
-  self.setTrackByUrl = function (url) {
+  self.setTrackByUrl = function(url) {
     self.worker.postMessage({
       target: 'set-track-by-url',
       url: url,
     })
   }
 
-  self.setTrack = function (content) {
+  self.setTrack = function(content) {
     self.worker.postMessage({
       target: 'set-track',
       content: content,
     })
   }
 
-  self.freeTrack = function (content) {
+  self.freeTrack = function(content) {
     self.worker.postMessage({
       target: 'free-track',
     })
@@ -1528,7 +1528,7 @@ var SubtitlesOctopus = function (options) {
 
   self.render = self.setCurrentTime
 
-  self.setIsPaused = function (isPaused, currentTime) {
+  self.setIsPaused = function(isPaused, currentTime) {
     self.worker.postMessage({
       target: 'video',
       isPaused: isPaused,
@@ -1536,14 +1536,14 @@ var SubtitlesOctopus = function (options) {
     })
   }
 
-  self.setRate = function (rate) {
+  self.setRate = function(rate) {
     self.worker.postMessage({
       target: 'video',
       rate: rate,
     })
   }
 
-  self.dispose = function () {
+  self.dispose = function() {
     self.worker.postMessage({
       target: 'destroy',
     })
@@ -1586,15 +1586,15 @@ var SubtitlesOctopus = function (options) {
     self.onReadyEvent = null
   }
 
-  self.fetchFromWorker = function (workerOptions, onSuccess, onError) {
+  self.fetchFromWorker = function(workerOptions, onSuccess, onError) {
     try {
       var target = workerOptions['target']
 
-      var timeout = setTimeout(function () {
+      var timeout = setTimeout(function() {
         reject(Error('Error: Timeout while try to fetch ' + target))
       }, 5000)
 
-      var resolve = function (event) {
+      var resolve = function(event) {
         if (event.data.target == target) {
           onSuccess(event.data)
           self.worker.removeEventListener('message', resolve)
@@ -1603,7 +1603,7 @@ var SubtitlesOctopus = function (options) {
         }
       }
 
-      var reject = function (event) {
+      var reject = function(event) {
         onError(event)
         self.worker.removeEventListener('message', resolve)
         self.worker.removeEventListener('error', reject)
@@ -1619,26 +1619,26 @@ var SubtitlesOctopus = function (options) {
     }
   }
 
-  self.createEvent = function (event) {
+  self.createEvent = function(event) {
     self.worker.postMessage({
       target: 'create-event',
       event: event,
     })
   }
 
-  self.getEvents = function (onSuccess, onError) {
+  self.getEvents = function(onSuccess, onError) {
     self.fetchFromWorker(
       {
         target: 'get-events',
       },
-      function (data) {
+      function(data) {
         onSuccess(data.events)
       },
-      onError
+      onError,
     )
   }
 
-  self.setEvent = function (event, index) {
+  self.setEvent = function(event, index) {
     self.worker.postMessage({
       target: 'set-event',
       event: event,
@@ -1646,33 +1646,33 @@ var SubtitlesOctopus = function (options) {
     })
   }
 
-  self.removeEvent = function (index) {
+  self.removeEvent = function(index) {
     self.worker.postMessage({
       target: 'remove-event',
       index: index,
     })
   }
 
-  self.createStyle = function (style) {
+  self.createStyle = function(style) {
     self.worker.postMessage({
       target: 'create-style',
       style: style,
     })
   }
 
-  self.getStyles = function (onSuccess, onError) {
+  self.getStyles = function(onSuccess, onError) {
     self.fetchFromWorker(
       {
         target: 'get-styles',
       },
-      function (data) {
+      function(data) {
         onSuccess(data.styles)
       },
-      onError
+      onError,
     )
   }
 
-  self.setStyle = function (style, index) {
+  self.setStyle = function(style, index) {
     self.worker.postMessage({
       target: 'set-style',
       style: style,
@@ -1680,7 +1680,7 @@ var SubtitlesOctopus = function (options) {
     })
   }
 
-  self.removeStyle = function (index) {
+  self.removeStyle = function(index) {
     self.worker.postMessage({
       target: 'remove-style',
       index: index,

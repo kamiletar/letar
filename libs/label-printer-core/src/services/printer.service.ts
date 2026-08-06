@@ -109,7 +109,7 @@ export interface IPrinterService {
 export function createPrinterService(
   config: PrinterConfig,
   labelConfig: LabelConfig,
-  behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean }
+  behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean },
 ): IPrinterService {
   const logger = Logger.getInstance()
 

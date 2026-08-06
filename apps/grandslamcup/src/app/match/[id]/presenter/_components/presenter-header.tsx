@@ -69,9 +69,11 @@ export function PresenterHeader({
         </Box>
         <HStack gap={2} flexShrink={0}>
           <Badge
-            colorPalette={
-              connectionStatus === 'connected' ? 'green' : connectionStatus === 'connecting' ? 'yellow' : 'red'
-            }
+            colorPalette={connectionStatus === 'connected'
+              ? 'green'
+              : connectionStatus === 'connecting'
+              ? 'yellow'
+              : 'red'}
             size="sm"
           >
             {connectionStatus === 'connected' ? '●' : connectionStatus === 'connecting' ? '○' : '✕'}

@@ -124,10 +124,10 @@ export function UpdateDrawer() {
                   {updateStatus === 'available'
                     ? 'Доступно'
                     : updateStatus === 'downloading'
-                      ? 'Загрузка'
-                      : updateStatus === 'downloaded'
-                        ? 'Готово'
-                        : 'Готово к установке'}
+                    ? 'Загрузка'
+                    : updateStatus === 'downloaded'
+                    ? 'Готово'
+                    : 'Готово к установке'}
                 </Badge>
               </HStack>
 
@@ -193,50 +193,56 @@ export function UpdateDrawer() {
                 Что нового
               </Text>
 
-              {isLoadingChangelog ? (
-                <VStack align="stretch" gap="2">
-                  <Skeleton height="20px" />
-                  <Skeleton height="20px" />
-                  <Skeleton height="20px" />
-                </VStack>
-              ) : changelog ? (
-                <Box
-                  fontSize="sm"
-                  lineHeight="relaxed"
-                  css={{
-                    '& h1, & h2, & h3': {
-                      fontWeight: 'semibold',
-                      marginTop: '1rem',
-                      marginBottom: '0.5rem',
-                    },
-                    '& ul, & ol': {
-                      paddingLeft: '1.5rem',
-                    },
-                    '& li': {
-                      marginBottom: '0.25rem',
-                    },
-                    '& p': {
-                      marginBottom: '0.5rem',
-                    },
-                    '& code': {
-                      backgroundColor: 'var(--chakra-colors-bg-muted)',
-                      padding: '0.125rem 0.25rem',
-                      borderRadius: '0.25rem',
-                      fontSize: '0.875em',
-                    },
-                  }}
-                >
-                  <ReactMarkdown>{changelog}</ReactMarkdown>
-                </Box>
-              ) : releaseNotes ? (
-                <Box fontSize="sm" color="fg.muted">
-                  <ReactMarkdown>{releaseNotes}</ReactMarkdown>
-                </Box>
-              ) : (
-                <Text fontSize="sm" color="fg.muted">
-                  Исправления ошибок и улучшения производительности
-                </Text>
-              )}
+              {isLoadingChangelog
+                ? (
+                  <VStack align="stretch" gap="2">
+                    <Skeleton height="20px" />
+                    <Skeleton height="20px" />
+                    <Skeleton height="20px" />
+                  </VStack>
+                )
+                : changelog
+                ? (
+                  <Box
+                    fontSize="sm"
+                    lineHeight="relaxed"
+                    css={{
+                      '& h1, & h2, & h3': {
+                        fontWeight: 'semibold',
+                        marginTop: '1rem',
+                        marginBottom: '0.5rem',
+                      },
+                      '& ul, & ol': {
+                        paddingLeft: '1.5rem',
+                      },
+                      '& li': {
+                        marginBottom: '0.25rem',
+                      },
+                      '& p': {
+                        marginBottom: '0.5rem',
+                      },
+                      '& code': {
+                        backgroundColor: 'var(--chakra-colors-bg-muted)',
+                        padding: '0.125rem 0.25rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.875em',
+                      },
+                    }}
+                  >
+                    <ReactMarkdown>{changelog}</ReactMarkdown>
+                  </Box>
+                )
+                : releaseNotes
+                ? (
+                  <Box fontSize="sm" color="fg.muted">
+                    <ReactMarkdown>{releaseNotes}</ReactMarkdown>
+                  </Box>
+                )
+                : (
+                  <Text fontSize="sm" color="fg.muted">
+                    Исправления ошибок и улучшения производительности
+                  </Text>
+                )}
             </Stack>
           </VStack>
         </DrawerBody>
@@ -273,8 +279,8 @@ export function UpdateDrawer() {
               )}
 
               {/* Установить */}
-              {(updateStatus === 'downloaded' ||
-                (updateStatus !== 'available' && updateStatus !== 'downloading' && updateStatus !== 'checking')) && (
+              {(updateStatus === 'downloaded'
+                || (updateStatus !== 'available' && updateStatus !== 'downloading' && updateStatus !== 'checking')) && (
                 <Button colorPalette="purple" onClick={handleInstall}>
                   Установить сейчас
                 </Button>

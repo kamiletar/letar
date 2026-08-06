@@ -7,7 +7,7 @@
 import { Badge, Box, HStack, IconButton, Text } from '@chakra-ui/react'
 import type { ManifestAudioTrack, ManifestSubtitleTrack } from '@letar/animatrona-types'
 import { useCallback, useState } from 'react'
-import { LuVolume2 as AudioIcon, LuCaptions as SubtitleIcon } from 'react-icons/lu'
+import { LuCaptions as SubtitleIcon, LuVolume2 as AudioIcon } from 'react-icons/lu'
 
 /** Проверяет, являются ли субтитры "надписями" (signs) */
 function isSignsSubtitle(track: { title: string; dubGroup?: string }): boolean {

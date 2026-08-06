@@ -28,11 +28,13 @@ interface AudienceClientProps {
 
 export function AudienceClient({ match }: AudienceClientProps) {
   const { isTelegram, initData: telegramInitData } = useTelegramWebApp()
-  const [currentPerformer, setCurrentPerformer] = useState<{
-    performanceId: string
-    playerName: string
-    teamName: string
-  } | null>(null)
+  const [currentPerformer, setCurrentPerformer] = useState<
+    {
+      performanceId: string
+      playerName: string
+      teamName: string
+    } | null
+  >(null)
   const [votedPerformances, setVotedPerformances] = useState<Set<string>>(new Set())
   const [matchStatus, setMatchStatus] = useState(match.status)
 
@@ -61,14 +63,13 @@ export function AudienceClient({ match }: AudienceClientProps) {
 
   // Также берём текущего из SSE state
   const ssePerformer = matchState?.currentPerformances?.[matchState.currentPerformerIndex]
-  const performer =
-    currentPerformer ??
-    (ssePerformer
+  const performer = currentPerformer
+    ?? (ssePerformer
       ? {
-          performanceId: ssePerformer.performanceId,
-          playerName: ssePerformer.playerName,
-          teamName: ssePerformer.teamName,
-        }
+        performanceId: ssePerformer.performanceId,
+        playerName: ssePerformer.playerName,
+        teamName: ssePerformer.teamName,
+      }
       : null)
 
   const hasVoted = performer ? votedPerformances.has(performer.performanceId) : false

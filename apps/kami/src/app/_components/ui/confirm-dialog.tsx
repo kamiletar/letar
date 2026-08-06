@@ -103,7 +103,7 @@ export function useConfirmDialog() {
       state.colorPalette,
       handleCancel,
       handleConfirm,
-    ]
+    ],
   )
 
   return { confirm, ConfirmDialog: ConfirmDialogComponent }

@@ -32,8 +32,9 @@ const throttledProgressBroadcast = createThrottledBroadcaster<TranscodeProgressE
 export function registerTranscodeQueueHandlers(): void {
   // Подписываемся на события менеджера и транслируем их в renderer
   transcodeManager.on('progress', (id, progress) => throttledProgressBroadcast(id, progress))
-  transcodeManager.on('statusChange', (id, status, error) =>
-    broadcastToWindows('transcode:statusChange', id, status, error)
+  transcodeManager.on(
+    'statusChange',
+    (id, status, error) => broadcastToWindows('transcode:statusChange', id, status, error),
   )
   transcodeManager.on('queueChange', (queue) => broadcastToWindows('transcode:queueChange', queue))
   transcodeManager.on('processingStarted', () => broadcastToWindows('transcode:processingStarted'))
@@ -42,8 +43,9 @@ export function registerTranscodeQueueHandlers(): void {
   // === Handlers ===
 
   // Добавить файл в очередь
-  createHandler('transcode:addToQueue', (filePath: string, settings?: PerFileTranscodeSettings) =>
-    transcodeManager.addToQueue(filePath, settings)
+  createHandler(
+    'transcode:addToQueue',
+    (filePath: string, settings?: PerFileTranscodeSettings) => transcodeManager.addToQueue(filePath, settings),
   )
 
   // Удалить из очереди
@@ -67,8 +69,9 @@ export function registerTranscodeQueueHandlers(): void {
   createHandler('transcode:reorderQueue', (orderedIds: string[]) => transcodeManager.reorderQueue(orderedIds))
 
   // Обновить настройки элемента
-  createHandler('transcode:updateSettings', (id: string, settings: PerFileTranscodeSettings) =>
-    transcodeManager.updateSettings(id, settings)
+  createHandler(
+    'transcode:updateSettings',
+    (id: string, settings: PerFileTranscodeSettings) => transcodeManager.updateSettings(id, settings),
   )
 
   // Получить текущую очередь
@@ -78,8 +81,9 @@ export function registerTranscodeQueueHandlers(): void {
   createHandler('transcode:getItem', (id: string) => transcodeManager.getItem(id))
 
   // Анализировать элемент
-  createHandler('transcode:analyzeItem', (id: string, demuxResult: DemuxResult) =>
-    transcodeManager.analyzeItem(id, demuxResult)
+  createHandler(
+    'transcode:analyzeItem',
+    (id: string, demuxResult: DemuxResult) => transcodeManager.analyzeItem(id, demuxResult),
   )
 
   // Проверить возможность паузы
@@ -92,7 +96,8 @@ export function registerTranscodeQueueHandlers(): void {
   createHandler('transcode:resumeAll', () => transcodeManager.resumeAll())
 
   // Установить путь к библиотеке
-  createHandler('transcode:setLibraryPath', (libraryPath: string) =>
-    transcodeManager.setDefaultLibraryPath(libraryPath)
+  createHandler(
+    'transcode:setLibraryPath',
+    (libraryPath: string) => transcodeManager.setDefaultLibraryPath(libraryPath),
   )
 }

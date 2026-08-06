@@ -117,7 +117,7 @@ export const bonusPreload = {
   spend: (
     amount: number,
     description: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<{
     success: boolean
     data?: { success: boolean; error?: string; transaction?: BonusTransaction; newBalance?: number }
@@ -128,8 +128,9 @@ export const bonusPreload = {
   reset: (): Promise<{ success: boolean; data?: BonusPoints; error?: string }> => ipcRenderer.invoke('bonus:reset'),
 
   /** Подписка на изменение баланса */
-  onBalanceChanged:
-    on<[{ oldBalance: number; newBalance: number; transaction: BonusTransaction }]>('bonus:balanceChanged'),
+  onBalanceChanged: on<[{ oldBalance: number; newBalance: number; transaction: BonusTransaction }]>(
+    'bonus:balanceChanged',
+  ),
 
   /** Подписка на заработок очков */
   onPointsEarned: on<[{ amount: number; type: string; description: string }]>('bonus:pointsEarned'),

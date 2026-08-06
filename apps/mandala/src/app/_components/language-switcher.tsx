@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
       router.replace(
         // @ts-expect-error -- params типизация
         { pathname, params },
-        { locale: newLocale }
+        { locale: newLocale },
       )
     })
   }

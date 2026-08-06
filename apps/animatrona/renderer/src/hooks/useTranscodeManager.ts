@@ -150,7 +150,7 @@ export function useTranscodeManager() {
 
       return results
     },
-    [addToQueue]
+    [addToQueue],
   )
 
   /** Удалить из очереди */
@@ -293,7 +293,7 @@ export function useTranscodeManager() {
 
       return reorderQueue(newOrder.map((item) => item.id))
     },
-    [state.queue, reorderQueue]
+    [state.queue, reorderQueue],
   )
 
   /** Переместить элемент вниз */
@@ -309,7 +309,7 @@ export function useTranscodeManager() {
 
       return reorderQueue(newOrder.map((item) => item.id))
     },
-    [state.queue, reorderQueue]
+    [state.queue, reorderQueue],
   )
 
   // === Вычисляемые значения ===
@@ -317,13 +317,13 @@ export function useTranscodeManager() {
   /** Элементы в ожидании */
   const pendingItems = useMemo(
     () => state.queue.filter((item) => item.status === 'pending' || item.status === 'ready'),
-    [state.queue]
+    [state.queue],
   )
 
   /** Элементы в процессе */
   const activeItems = useMemo(
     () => state.queue.filter((item) => item.status === 'transcoding' || item.status === 'analyzing'),
-    [state.queue]
+    [state.queue],
   )
 
   /** Элементы на паузе */
@@ -338,7 +338,7 @@ export function useTranscodeManager() {
   /** Текущий обрабатываемый элемент */
   const currentItem = useMemo(
     () => state.queue.find((item) => item.status === 'transcoding' || item.status === 'analyzing'),
-    [state.queue]
+    [state.queue],
   )
 
   /** Общий прогресс (0-100) */
@@ -358,7 +358,7 @@ export function useTranscodeManager() {
   /** Есть ли элементы для обработки */
   const hasItemsToProcess = useMemo(
     () => pendingItems.length > 0 || pausedItems.length > 0,
-    [pendingItems.length, pausedItems.length]
+    [pendingItems.length, pausedItems.length],
   )
 
   return {

@@ -82,7 +82,7 @@ export async function GET(_request: NextRequest) {
   }
 
   const items = Array.from(animeMap.values()).sort(
-    (a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime()
+    (a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime(),
   )
 
   return NextResponse.json({ data: items, total: items.length })

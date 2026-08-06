@@ -27,7 +27,7 @@ function triggerKickOrTom(
   dest: AudioNode,
   synth: DrumPadSynth,
   velocity: number,
-  now: number
+  now: number,
 ): void {
   const baseFreq = midiToFreq(synth.pitch)
   const sweepMult = 1 + synth.tone * 4
@@ -56,7 +56,7 @@ function triggerSnare(
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
   velocity: number,
-  now: number
+  now: number,
 ): void {
   const baseFreq = midiToFreq(synth.pitch)
   const vel = velocityScale(velocity)
@@ -133,7 +133,7 @@ function triggerClap(
   noiseBuffer: AudioBuffer,
   synth: DrumPadSynth,
   velocity: number,
-  now: number
+  now: number,
 ): void {
   const vel = velocityScale(velocity)
 
@@ -175,7 +175,7 @@ function triggerSample(
   buffer: AudioBuffer,
   sample: DrumPadSample,
   velocity: number,
-  now: number
+  now: number,
 ): void {
   const src = ctx.createBufferSource()
   src.buffer = buffer

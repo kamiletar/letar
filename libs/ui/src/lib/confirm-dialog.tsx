@@ -160,13 +160,13 @@ export function ConfirmDialog({
 
             {description && (
               <Dialog.Body>
-                {typeof description === 'string' ? (
-                  <Text color="fg.muted">{description}</Text>
-                ) : (
-                  <VStack align="stretch" gap={2}>
-                    {description}
-                  </VStack>
-                )}
+                {typeof description === 'string'
+                  ? <Text color="fg.muted">{description}</Text>
+                  : (
+                    <VStack align="stretch" gap={2}>
+                      {description}
+                    </VStack>
+                  )}
               </Dialog.Body>
             )}
 

@@ -59,7 +59,7 @@ interface QuizResultsProps {
 function getWarnings(
   scores: Record<PersonalityTypeCode, number>,
   isRu: boolean,
-  showClinical: boolean
+  showClinical: boolean,
 ): { type: 'info' | 'warning'; message: string }[] {
   const warnings: { type: 'info' | 'warning'; message: string }[] = []
 
@@ -72,8 +72,8 @@ function getWarnings(
           ? 'Высокий балл по шкале биполярного расстройства. Баллы по шкалам NAR, BOR, HIS, ANT могут быть завышены из-за маниакальных/депрессивных эпизодов. Рекомендуется клиническая оценка.'
           : 'High bipolar scale score. NAR, BOR, HIS, ANT scores may be inflated due to manic/depressive episodes. Clinical evaluation is recommended.'
         : isRu
-          ? 'Заметна выраженная переменчивость настроения. В такие периоды баллы по эмоциональным шкалам могут быть выше обычного — учитывайте это, читая результат.'
-          : 'Pronounced mood variability is present. During such periods, scores on emotional scales may be higher than usual — keep this in mind when reading the result.',
+        ? 'Заметна выраженная переменчивость настроения. В такие периоды баллы по эмоциональным шкалам могут быть выше обычного — учитывайте это, читая результат.'
+        : 'Pronounced mood variability is present. During such periods, scores on emotional scales may be higher than usual — keep this in mind when reading the result.',
     })
   }
 
@@ -136,24 +136,24 @@ export function QuizResults({
           value: scores[type.code] ?? 0,
         }
       }),
-    [scores, isRu]
+    [scores, isRu],
   )
 
   const comparisonData = useMemo(
     () =>
       averagedScores
         ? PERSONALITY_TYPES.map((type) => {
-            const label = isRu ? type.label : type.labelEn
-            const archetype = isRu ? type.archetype : type.archetypeEn
-            return {
-              type: type.code,
-              label: `${label} ${archetype}`,
-              clinicalLabel: isRu ? type.clinical : type.clinicalEn,
-              value: averagedScores[type.code] ?? 0,
-            }
-          })
+          const label = isRu ? type.label : type.labelEn
+          const archetype = isRu ? type.archetype : type.archetypeEn
+          return {
+            type: type.code,
+            label: `${label} ${archetype}`,
+            clinicalLabel: isRu ? type.clinical : type.clinicalEn,
+            value: averagedScores[type.code] ?? 0,
+          }
+        })
         : undefined,
-    [averagedScores, isRu]
+    [averagedScores, isRu],
   )
 
   // Предупреждения BAR-фильтра (клиническая лексика — только психологу)
@@ -344,23 +344,25 @@ export function QuizResults({
 
         {/* Действия */}
         <VStack gap={3}>
-          {onContinue && progress && progress.availableCount > 0 ? (
-            <>
-              <Button size="lg" colorPalette="blue" onClick={onContinue}>
-                <LuArrowRight />
-                {isRu
-                  ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
-                  : `Answer ${Math.min(50, progress.availableCount)} more questions`}
+          {onContinue && progress && progress.availableCount > 0
+            ? (
+              <>
+                <Button size="lg" colorPalette="blue" onClick={onContinue}>
+                  <LuArrowRight />
+                  {isRu
+                    ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
+                    : `Answer ${Math.min(50, progress.availableCount)} more questions`}
+                </Button>
+                <Button size="md" variant="ghost" onClick={onRestart}>
+                  {isRu ? 'Вернуться на главную' : 'Back to main'}
+                </Button>
+              </>
+            )
+            : (
+              <Button size="lg" colorPalette="blue" onClick={onRestart}>
+                {t('results.retake')}
               </Button>
-              <Button size="md" variant="ghost" onClick={onRestart}>
-                {isRu ? 'Вернуться на главную' : 'Back to main'}
-              </Button>
-            </>
-          ) : (
-            <Button size="lg" colorPalette="blue" onClick={onRestart}>
-              {t('results.retake')}
-            </Button>
-          )}
+            )}
           {/* Поделиться результатом (5.4) */}
           <ShareResultButton shareText={t('shareText')} shareTitle={t('results.title')} size="md" />
           {/* Сокращённый дисклеймер */}
@@ -384,7 +386,7 @@ function LowConfidenceWarnings({
   isRu: boolean
 }) {
   const lowScales = PERSONALITY_TYPES.filter(
-    (type) => confidence[type.code] === 'insufficient' || confidence[type.code] === 'low'
+    (type) => confidence[type.code] === 'insufficient' || confidence[type.code] === 'low',
   )
 
   if (lowScales.length === 0) {

@@ -185,7 +185,7 @@ describe('RutrackerDownloadOrchestrator', () => {
 
       expect(mockTorrentService.add).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ downloadPath: '/custom/path' })
+        expect.objectContaining({ downloadPath: '/custom/path' }),
       )
     })
 
@@ -199,7 +199,7 @@ describe('RutrackerDownloadOrchestrator', () => {
 
       expect(mockTorrentService.add).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ sequential: true })
+        expect.objectContaining({ sequential: true }),
       )
     })
   })

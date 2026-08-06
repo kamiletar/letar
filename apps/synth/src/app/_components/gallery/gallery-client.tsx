@@ -50,7 +50,7 @@ export function GalleryClient({ patches }: GalleryClientProps) {
         })
         .finally(() => setRenderingId(null))
     },
-    [audioUrls]
+    [audioUrls],
   )
 
   const handleShare = useCallback((id: string) => {
@@ -72,7 +72,8 @@ export function GalleryClient({ patches }: GalleryClientProps) {
 
             <Heading size="xl">Витрина патчей</Heading>
             <Text color="fg.muted" fontSize="sm">
-              Патчи, опубликованные автором — с прослушиванием прямо в браузере (детерминированный офлайн-рендер, см.{' '}
+              Патчи, опубликованные автором — с прослушиванием прямо в браузере (детерминированный офлайн-рендер, см.
+              {' '}
               PLAN.md).
             </Text>
 
