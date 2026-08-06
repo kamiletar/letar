@@ -16,5 +16,8 @@ export default defineConfig({
     },
     clearMocks: true,
     restoreMocks: true,
+    // Библиотека не содержит TS-кода (только .zmodel-фрагменты, см. src/index.ts) — тестировать
+    // нечего, и это не должно считаться падением `nx test`.
+    passWithNoTests: true,
   },
 })
