@@ -42,7 +42,22 @@
     "yarn.lock",
     "pnpm-lock.yaml",
     "bun.lock",
-    "bun.lockb"
+    "bun.lockb",
+    ".claude/worktrees",
+    ".claude/private",
+    "apps/aboi",
+    "apps/aboi-e2e",
+    "apps/aprel8008",
+    "apps/domwellbes",
+    "apps/domwellbes-e2e",
+    "apps/driving-school",
+    "apps/driving-school-e2e",
+    "apps/dsperevod",
+    "apps/poster-microtext-desktop",
+    "apps/studio",
+    "apps/studio-e2e",
+    "apps/svoichuzhie",
+    "libs/driving-school-db"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.3.wasm",
