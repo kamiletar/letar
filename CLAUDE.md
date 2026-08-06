@@ -59,9 +59,12 @@ chmod +x .git/hooks/pre-commit
 Их таргет `format` запускает dprint с `cwd` внутри submodule, а `excludes` корневого
 `dprint.json` в таком запуске не применяются — они сопоставляются относительно каталога конфига,
 а обход идёт от `cwd`. С 2026-08-06 у каждого submodule свой `dprint.json` с теми же правилами,
-поэтому прогон даёт **ноль изменений** — но файлы он всё равно трогает. Ограничивай прогон
-своими проектами; список — `nx show projects --with-target format`. Замер и разбор —
-[dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
+поэтому прогон даёт **ноль изменений** — но файлы он всё равно трогает. Поэтому голая форма без
+`--projects`/`--exclude` **блокируется хуком** `.claude/hooks/validate-bash.js`; там же блокируется
+встроенная команда Nx для форматирования (она запускает Prettier мимо dprint). Список проектов с
+таргетом — `nx show projects --with-target format`. Прогон по всему публичному репо, если
+действительно нужен, — `dprint fmt` из корня: у него `cwd` в корне, поэтому `excludes` работают.
+Замер и разбор — [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
 
 ⚠️ Это НЕ то же самое, что голое `nx format` (без `run-many -t`) — та встроенная команда Nx
 запускает Prettier, конфликтующий с dprint (правки друг друга откатывают, ломает markdown в
