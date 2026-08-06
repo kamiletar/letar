@@ -1,5 +1,6 @@
 import { ALL_LOCALES, routing, RTL_LOCALES } from '@/i18n/routing'
 import { UmamiScript } from '@letar/analytics'
+import { isProductionDomain } from '@letar/seo'
 import { CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
@@ -15,6 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['cyrillic', 'latin', 'latin-ext', 'greek', 'vietnamese'],
   variable: '--font-mono',
 })
+
+const PRODUCTION_URL = 'https://time.letar.best'
 
 type Props = {
   children: ReactNode
@@ -38,7 +41,9 @@ export async function generateMetadata(_props: Props): Promise<Metadata> {
   return {
     title: metadata.title,
     description: metadata.description,
-    robots: { index: true, follow: true },
+    metadataBase: new URL(PRODUCTION_URL),
+    // Раньше было захардкожено index: true — индексировался и staging (PLAN-INFRA.md §33)
+    robots: { index: isProductionDomain(PRODUCTION_URL), follow: isProductionDomain(PRODUCTION_URL) },
     alternates: { languages },
   }
 }

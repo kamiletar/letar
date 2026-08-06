@@ -11,7 +11,8 @@
       "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
       "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
       "@letar/email": ["../../libs/email/src/index.ts"],
-      "@letar/number-words": ["../../libs/number-words/src/index.ts"]
+      "@letar/number-words": ["../../libs/number-words/src/index.ts"],
+      "@letar/seo": ["../../libs/seo/src/index.ts"]
     }
   },
   "references": [
@@ -35,6 +36,9 @@
     },
     {
       "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/seo"
     }
   ]
 }

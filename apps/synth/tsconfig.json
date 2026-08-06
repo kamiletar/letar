@@ -22,7 +22,8 @@
       "@/*": ["./src/*"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
-      "@letar/ui": ["../../libs/ui/src/index.ts"]
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
+      "@letar/seo": ["../../libs/seo/src/index.ts"]
     },
     "types": [],
     "noUncheckedSideEffectImports": false,
@@ -34,6 +35,7 @@
     { "path": "./tsconfig.spec.json" },
     { "path": "../../libs/analytics" },
     { "path": "../../libs/chakra-provider" },
-    { "path": "../../libs/ui" }
+    { "path": "../../libs/ui" },
+    { "path": "../../libs/seo" }
   ]
 }

@@ -10,7 +10,8 @@
       "@letar/auth",
       "@letar/email",
       "@letar/number-words",
-      "@letar/consent"
+      "@letar/consent",
+      "@letar/seo"
     ]
   }
 }

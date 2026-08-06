@@ -4,7 +4,10 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import './globals.css'
 
+const PRODUCTION_URL = 'https://forms.letar.best'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(PRODUCTION_URL),
   title: {
     template: '%s | @letar/forms',
     default: '@letar/forms — Declarative Form Components for React',
