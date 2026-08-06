@@ -124,6 +124,16 @@ git push                        # пуш в публичный letar
 - ❌ **НЕ добавляй пути submodule в корневой `.gitignore`** — Nx уважает gitignore при сканировании проектов и приватные проекты исчезнут из `nx show projects` / `nx affected`. Submodule в Git хранится как gitlink (SHA), физически working tree не закоммитится в родительский репо без `.gitignore` страховки.
 - ❌ **НЕ добавляй `src/generated/` в .gitignore submodule** если эта папка раньше была tracked (например, `libs/driving-school-db/src/generated/prisma/` — это типы Prisma, должны быть в репо).
 
+### ⚠️ Заводишь worktree внутри submodule — проверь его `dprint.json`
+
+Тот же принцип «корневой конфиг не действует на вложенный независимый git-репозиторий»
+применяется не только к `.gitignore`, но и к `dprint.json`: если submodule-приложение получит
+собственный `git worktree`, корневой `dprint.json` летара про этот worktree ничего не знает — его
+`excludes` перечисляют только submodule-пути летара, не внутренности submodule. Прогон `dprint
+fmt` без scope внутри такого submodule обойдёт worktree как обычную директорию. Подробности и
+инцидент, из-за которого это задокументировано, —
+[dprint-worktree-submodule-scope.md](/.claude/docs/dprint-worktree-submodule-scope.md).
+
 ### ⚠️ Каждому submodule нужен СВОЙ `.gitignore`
 
 Корневой `.gitignore` монорепо **не действует** на вложенный независимый git-репозиторий.
