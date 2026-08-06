@@ -68,6 +68,31 @@ bun x prisma migrate deploy
   намеренно блокирует уничтожение БД агентом без явного подтверждения в чате.
   Флага `--skip-seed` больше нет.
 
+## ⚠️ Turbopack-кэш переживает `zenstack:generate` и рестарт dev-сервера
+
+Если `next dev --turbopack` был запущен **до** изменения `schema.zmodel` и последующих
+`nx zenstack:generate <app>` + `nx db:migrate <app>`, сервер продолжает валидировать Server
+Actions против устаревшего скомпилированного валидатора ZenStackClient.
+
+**Симптом:** `prisma.<model>.create()`/`.update()` падает с `Invalid create args for model "X":
+Validation error: Unrecognized keys: "newField1", "newField2" at "data"` — хотя
+`src/generated/schema.ts`/`schema.prisma` уже содержат новые поля, а миграция применена к БД.
+
+**НЕ помогает:** обычный HMR/Fast Refresh, и даже полный рестарт dev-процесса (`preview_stop` +
+`preview_start` / `Ctrl+C` + `nx dev <app>`) — ошибка повторяется с тем же digest.
+
+**Помогает:** удалить `apps/<app>/.next` **перед** перезапуском dev-сервера:
+
+```bash
+rm -rf apps/<app>/.next
+```
+
+Turbopack хранит персистентный дисковый кэш скомпилированных server-модулей, который не
+инвалидируется при изменении файлов, сгенерированных вне обычного watch-скоупа
+(`src/generated/*` пишет отдельный CLI-процесс `prisma generate`, не сам dev-сервер).
+
+Разобрано подробнее в `apps/studio/PLAN_COMPLETED.md` (запись про Гант-диаграмму, 2026-08-06).
+
 ## Структура schema.zmodel
 
 ```prisma
