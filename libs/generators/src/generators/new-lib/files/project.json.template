@@ -78,6 +78,31 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "dependsOn": ["oxlint"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/<%= name %>"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/<%= name %>"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
     }
   }
 }
