@@ -2534,9 +2534,9 @@ insertions/deletions сбалансированы во всех (напр. `driv
 excludes, submodule/worktree не затронуты (проверено после прогона: 0 изменений в каждом из 11
 submodule-приложений и в обоих worktree). `dprint check` по всему репозиторию — зелёный.
 
-**Не восстановлено:** возможная потеря WIP в worktree `jovial-bhabha-baae8b`
-(`claude/suspicious-nightingale-21116c`) — см. выше, статус неизвестен, ждёт ответа
-владельца/агента.
+**Закрыто владельцем (2026-08-06):** WIP в worktree `jovial-bhabha-baae8b`
+(`claude/suspicious-nightingale-21116c`) признан не важным — можно было удалять. Worktree и
+локальная ветка удалены. Ветка не была запушена в origin, поэтому удаление окончательное.
 
 ---
 
