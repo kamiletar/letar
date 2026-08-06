@@ -4,7 +4,7 @@ services:
     container_name: dashboard-db
     restart: always
     ports:
-      - '5436:5432' # Порт 5436 для dashboard (5432=premium, 5433=imot, 5434=mandala, 5435=umami)
+      - '127.0.0.1:5436:5432' # Порт 5436 для dashboard (5432=premium, 5433=imot, 5434=mandala, 5435=umami)
     volumes:
       - dashboard-db-data:/var/lib/postgresql/data
     environment:

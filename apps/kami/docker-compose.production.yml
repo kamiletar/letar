@@ -11,7 +11,7 @@ services:
     volumes:
       - kami_postgres_data:/var/lib/postgresql/data
     ports:
-      - '5437:5432' # Порт 5437 для kami (5432=premium, 5433=imot, 5434=mandala, 5435=umami, 5436=dashboard)
+      - '127.0.0.1:5437:5432' # Порт 5437 для kami (5432=premium, 5433=imot, 5434=mandala, 5435=umami, 5436=dashboard)
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U lena_user -d lena_kami']
       interval: 10s

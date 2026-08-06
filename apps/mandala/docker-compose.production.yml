@@ -11,7 +11,7 @@ services:
     volumes:
       - mandala_postgres_data:/var/lib/postgresql/data
     ports:
-      - '5434:5432' # Порт 5434 для mandala (5432=premium, 5433=imot)
+      - '127.0.0.1:5434:5432' # Порт 5434 для mandala (5432=premium, 5433=imot)
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U lena_user -d mandala']
       interval: 10s

@@ -17,7 +17,12 @@ services:
     pid: host
     privileged: true
     ports:
-      - '3100:3100'
+      # Только loopback (§49): агент privileged + docker.sock + ~/.ssh + все .env.docker —
+      # самая ценная мишень на сервере, публиковать её в интернет нельзя.
+      # Потребители не страдают: dashboard ходит по имени контейнера через kami-network
+      # (LOCAL_AGENT_HOST: dashboard-agent), deploy-mcp — через SSH-туннель
+      # `ssh -L <port>:localhost:3100`, который резолвит localhost уже на самом сервере.
+      - '127.0.0.1:3100:3100'
     env_file:
       - .env.docker
     environment:

@@ -11,7 +11,7 @@ services:
     volumes:
       - auth_hub_postgres_data:/var/lib/postgresql/data
     ports:
-      - '5440:5432'
+      - '127.0.0.1:5440:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U lena_user -d lena_auth']
       interval: 10s
