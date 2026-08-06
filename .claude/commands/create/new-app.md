@@ -20,6 +20,8 @@
 nx g @letar/generators:new-app <name>
 # с явным портом/именем/описанием/приватностью:
 nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё приложение" --private
+# с ZenStack/Prisma-каркасом (нужна БД с первого дня):
+nx g @letar/generators:new-app <name> --withDb
 ```
 
 Генератор раскладывает весь чистый каркас (Next.js App Router + Chakra UI v3 + MDX): `.env` (PORT),
@@ -37,6 +39,11 @@ nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё прил
 
 Каркас **осознанно минимален** — без БД, форм, аутентификации, PWA, cookie-баннера. Это отправная точка,
 а не копия эталонов ниже.
+
+**`--withDb`** добавляет только ZenStack/Prisma-инфраструктуру (`prisma.config.ts`, `schema.zmodel`-заготовку
+без моделей, `zenstack:generate`/`db:*` таргеты) — см.
+[libs/generators/README.md § --withDb](/libs/generators/README.md#new-app). Формы и аутентификацию это
+не подключает — они отдельные шаги (`.claude/docs/forms.md`, `.claude/docs/auth.md`).
 
 ## Эталонные приложения (для более сложных фич)
 

@@ -201,3 +201,6 @@ apps/animatrona-tv/screen-*.png
 # были биты (.Codex/ вместо .claude/, починено 2026-08-04), содержимое дублирует CLAUDE.md.
 # Не коммитим, пока владелец не решит финальный формат файла.
 AGENTS.md
+
+# Codex CLI local data
+.codex/

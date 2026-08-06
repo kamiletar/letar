@@ -49,6 +49,59 @@ const { isAccepted } = useOfflineConsent('<app>-offline-consent')
 > - **Safari fallback**: `online` event + ручная кнопка + `setInterval` polling
 > - Очередь операций в IndexedDB, batch sync через API endpoint
 
+## ⚠️ Background Sync не может вызвать Server Action напрямую
+
+**Ограничение:** обработчик `sync`-события в Service Worker умеет делать только `fetch()` —
+обычный HTTP-запрос. Он не может импортировать и вызвать функцию, помеченную `'use server'`.
+Next.js Server Actions работают через специальный RSC-протокол (POST с служебными заголовками,
+привязка к серверному action-ID), который построен для вызова из React-дерева самого приложения,
+а не из независимого воркера без доступа к этому рантайму.
+
+**Когда это всплывает:** любая офлайн-очередь мутаций, которую должны уметь реплеить одновременно
+и обычный клиент (когда пользователь вернулся на вкладку и вызвал `online`-событие), и сам SW
+(Background Sync, вкладка может быть закрыта). Если бизнес-логика мутации уже написана как Server
+Action — напрямую переиспользовать её из SW не получится.
+
+**Решение — отдельный Route Handler как HTTP-фасад:**
+
+1. Заводится обычный `route.ts` (например, `/api/<feature>/offline-sync`), который принимает
+   тот же payload, что и очередь в IndexedDB, и отдаёт JSON.
+2. Бизнес-логику **не дублируют** внутри Server Action — её выносят в переиспользуемые функции
+   в `lib/`, и уже их вызывают **и** из Server Action (обычный путь из UI), **и** из нового
+   Route Handler (путь из SW/офлайн-очереди).
+3. Авторизация внутри Route Handler пишется заново, вручную — и это не дублирование ради
+   дублирования, а обязательное отличие: если Server Action использует хелпер вида
+   `requireX()`, который при отсутствии сессии делает `redirect(...)`, то в HTTP-контексте это
+   ломает контракт. Клиент (или SW), вызвавший `fetch()` и ожидающий `401 { error }` в JSON,
+   получит вместо этого редирект-ответ, который не распарсится как ожидаемая структура.
+   Route Handler должен сам проверить сессию и вручную вернуть `NextResponse.json({ error }, { status: 401 })`.
+
+**Псевдокод:**
+
+```typescript
+// _actions/feature.action.ts — обычный путь из UI
+'use server'
+export async function updateFeatureAction(input: Input) {
+  await requireUser() // redirect() при отсутствии сессии — ок, вызывается из RSC-дерева
+  return applyFeatureUpdate(input) // общая бизнес-логика
+}
+
+// api/feature/offline-sync/route.ts — путь из SW / офлайн-очереди
+export async function POST(request: Request) {
+  const user = await getCurrentUser() // без redirect
+  if (!user) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+  const input = await request.json()
+  const result = await applyFeatureUpdate(input) // та же общая функция
+  return NextResponse.json(result)
+}
+```
+
+Клиентская очередь (IndexedDB, например через `idb-keyval`) хранит операции и в обоих сценариях
+шлёт их на этот HTTP-эндпоинт: либо сама вкладка по событию `online`, либо SW по `sync`-событию
+(Chromium) — оба пути сходятся в одном Route Handler, а не в Server Action.
+
 ## Обзор
 
 Приложение `premium-rosstil` использует PWA (Progressive Web App) архитектуру для работы в оффлайн режиме.

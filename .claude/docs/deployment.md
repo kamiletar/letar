@@ -212,7 +212,18 @@ proxy_read_timeout 86400s;
 
 **Проблема:** IP-диапазоны `api.telegram.org` (149.154.x, 91.108.x) заблокированы провайдером ДЦ на s1/s2 — как для хостовых процессов, так и для Docker контейнеров.
 
-**Решение:** обратный прокси на **mail сервере (193.37.68.73)** через Nginx Proxy Manager.
+**Решение:** обратный прокси на **mail сервере (31.56.180.161, `mail.letar.best`)** через Nginx Proxy Manager.
+
+⚠️ **2026-07-30:** обнаружено, что этот раздел документировал только план — сама NPM на mail
+сервере фактически не была развёрнута (там крутились только Maddy и animatrona-relay, порты
+80/443 не были даже открыты в UFW), а IP в этом файле указывал на несуществующий/устаревший адрес
+`193.37.68.73`. Из-за этого `dashboard` после деплоя падал в цикл `ConnectTimeoutError` при
+отправке Telegram-уведомлений — DNS `tg-proxy.letar.best` резолвился в правильный сервер, но там
+физически некому было слушать 443. Поднято по факту в этот же день: NPM в `/root/nginx-proxy-manager`
+на mail сервере (не в git — сервер отдельный от `kami-network`/деплоя летар), `ufw allow 80,443,81`,
+proxy hosts созданы через API NPM (`POST /api/nginx/proxy-hosts` + `/api/nginx/certificates`, не
+через UI). Бэкап настроен по образцу `/opt/maddy/backup.sh` — `/opt/npm-backup.sh` на mail сервере,
+cron `30 3 * * *`, ротация 14 дней, rsync на s2 в `/home/deploy/letar/backups/nginx-proxy-manager-mail/`.
 
 ### Домены прокси
 
@@ -249,13 +260,26 @@ const bot = new Bot(token, { client: { apiRoot: process.env.TELEGRAM_API_ROOT } 
 
 ### Nginx конфиг (mail сервер)
 
-Конфиг хранится в `/root/nginx-proxy-manager/data/nginx/custom/http.conf` на mail сервере.
-При добавлении нового webhook-приложения — добавить location в этот файл.
+Не файл `http.conf`, а обычные Proxy Hosts NPM (админка `http://31.56.180.161:81`, креды в
+KeePassXC):
+
+- `tg-proxy.letar.best` — Proxy Host, forward `https://api.telegram.org:443`, SSL forced.
+- `tg-in.letar.best` — Proxy Host с Custom Location per-приложение. Каждый webhook-путь
+  (`/grandslamcup/<секрет>` и т.д.) — отдельная запись в "Custom Locations" с
+  `advanced_config`, который делает `rewrite ^/<путь>/.*$ /api/telegram/webhook break;` перед
+  `proxy_pass` на `https://<app>.letar.best`. **При добавлении нового webhook-приложения** —
+  добавить новую Custom Location через UI или `PUT /api/nginx/proxy-hosts/<id>` (id узнать через
+  `GET /api/nginx/proxy-hosts`), не редактировать nginx-конфиг руками.
 
 ### Кто использует
 
+- `apps/dashboard` — `TELEGRAM_API_ROOT` для Telegram-уведомлений (первый реальный потребитель,
+  на котором 2026-07-30 обнаружилось, что прокси не был поднят)
 - `apps/grandslamcup` — `TELEGRAM_API_ROOT` + `TELEGRAM_WEBHOOK_URL=https://tg-in.letar.best/grandslamcup/...`
 - `infra/canary` — `TELEGRAM_API_ROOT` для алертов
+- `apps/mandala`, `apps/driving-school`, `apps/svoichuzhie`, `apps/auth-hub` — `TELEGRAM_API_ROOT`
+  в `docker-compose.production.yml`, ещё не подтверждено, что реально слали уведомления до
+  2026-07-30 (прокси до этого момента физически не существовал)
 
 ## Docker-based деплой (Next.js приложения)
 
@@ -591,31 +615,31 @@ services:
 
 ### Таблица портов (актуально 2026-06-20, синхронизировано с `docker ps`)
 
-| Приложение           | Внешний порт                                                                       | Внутренний порт | Сервер |
-| -------------------- | ---------------------------------------------------------------------------------- | --------------- | ------ |
-| premium-rosstil      | 3000                                                                               | 3000            | s2     |
-| imot                 | 3001                                                                               | 3001            | s2     |
-| dashboard            | 3002                                                                               | 3002            | s2     |
-| driving-school       | 3003–3004                                                                          | 3003–3004       | s2     |
-| kami                 | 3005                                                                               | 3005            | s2     |
-| pravda               | 3007                                                                               | 3007            | s2     |
-| animatrona-landing   | 3008                                                                               | 3008            | s2     |
-| umami                | 3009                                                                               | 3000            | s2     |
-| auth-hub             | 3010                                                                               | 3010            | s2     |
-| kami-key-the-landing | 3011                                                                               | 3011            | s2     |
-| archetest            | 3012                                                                               | 3012            | s2     |
-| time                 | 3013                                                                               | 3013            | s2     |
-| letar-landing        | 3015                                                                               | 3015            | s2     |
-| grandslamcup         | 3016                                                                               | 3016            | s2     |
-| aira-web             | 3017                                                                               | 3017            | s2     |
-| grandslamcup-staging | 3018                                                                               | 3016            | s2     |
-| aboi                 | 3019                                                                               | 3018            | s2     |
-| form-docs            | 3020                                                                               | 3020            | s2     |
-| svoichuzhie          | 3021                                                                               | 3021            | s2     |
-| form-example         | 3022                                                                               | 3022            | s2     |
-| aprel8008            | 3023                                                                               | 3023            | s2     |
-| mandala              | 3025                                                                               | 3004            | s2     |
-| animatrona-tracker   | 3026                                                                               | 3010            | s2     |
+| Приложение           | Внешний порт                                                                      | Внутренний порт | Сервер |
+| -------------------- | --------------------------------------------------------------------------------- | --------------- | ------ |
+| premium-rosstil      | 3000                                                                              | 3000            | s2     |
+| imot                 | 3001                                                                              | 3001            | s2     |
+| dashboard            | 3002                                                                              | 3002            | s2     |
+| driving-school       | 3003–3004                                                                         | 3003–3004       | s2     |
+| kami                 | 3005                                                                              | 3005            | s2     |
+| pravda               | 3007                                                                              | 3007            | s2     |
+| animatrona-landing   | 3008                                                                              | 3008            | s2     |
+| umami                | 3009                                                                              | 3000            | s2     |
+| auth-hub             | 3010                                                                              | 3010            | s2     |
+| kami-key-the-landing | 3011                                                                              | 3011            | s2     |
+| archetest            | 3012                                                                              | 3012            | s2     |
+| time                 | 3013                                                                              | 3013            | s2     |
+| letar-landing        | 3015                                                                              | 3015            | s2     |
+| grandslamcup         | 3016                                                                              | 3016            | s2     |
+| aira-web             | 3017                                                                              | 3017            | s2     |
+| grandslamcup-staging | 3018                                                                              | 3016            | s2     |
+| aboi                 | 3019                                                                              | 3018            | s2     |
+| form-docs            | 3020                                                                              | 3020            | s2     |
+| svoichuzhie          | 3021                                                                              | 3021            | s2     |
+| form-example         | 3022                                                                              | 3022            | s2     |
+| aprel8008            | 3023                                                                              | 3023            | s2     |
+| mandala              | 3025                                                                              | 3004            | s2     |
+| animatrona-tracker   | 3026                                                                              | 3010            | s2     |
 | dsperevod            | ⚠️ **КОНФЛИКТ** — занял 3021 (svoichuzhie). Нужно назначить свободный порт (3027+) | 3019            | s2     |
 
 ### Свободные порты (s2)

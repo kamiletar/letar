@@ -14,7 +14,7 @@
 
 | Тип | Имя                 | Значение                                              |
 | --- | ------------------- | ----------------------------------------------------- |
-| A   | mail                | 193.37.68.73                                          |
+| A   | mail                | 31.56.180.161                                         |
 | MX  | @                   | mail.letar.best (приоритет 10)                        |
 | TXT | @                   | `v=spf1 a:mail.letar.best ~all`                       |
 | TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ>`                            |
@@ -85,7 +85,7 @@ dig TXT _dmarc.letar.best
 dig MX letar.best
 
 # PTR (обратная запись)
-dig -x 193.37.68.73
+dig -x 31.56.180.161
 ```
 
 ## SPF синтаксис
