@@ -3467,13 +3467,15 @@ time, studio, aprel8008, domwellbes) деплой на s2 не запускал 
   `zod`, который использует сама либа (4.3.6). Точный пин `"1.29.0"` (по образцу `deploy-mcp`/
   `studio-time-mcp`) + `bun install` — типы снова совпадают.
 
-⚠️ **16 других либ ещё держат тот же узкий `include`** в `tsconfig.spec.json`, что было причиной
-`TS6307` у первых трёх (`auth`, `consent`, `electron-storage`, `email`, `format-utils`, `forms`,
-`generators`, `github-releases`, `infra-config`, `mcp-server-kit`, `number-words`, `pin-auth`,
-`redis-client`, `seo`, `studio-time-mcp`, `zenstack-fragments`) — сейчас у них либо явный
-typecheck-таргет, минующий аггрегированный `tsconfig.json` (как `auth`/`form-mcp` до этой
-сессии), либо просто нет ещё spec-файла с межфайловым импортом, который бы вскрыл баг. Латентный,
-не проявившийся риск — см. предложение по общему пресету в конце сессии (не применялось).
+✅ **Латентный риск в 16 других либах закрыт тем же днём** (`auth`, `consent`,
+`electron-storage`, `email`, `format-utils`, `forms`, `generators`, `github-releases`,
+`infra-config`, `mcp-server-kit`, `number-words`, `pin-auth`, `redis-client`, `seo`,
+`studio-time-mcp`, `zenstack-fragments`) — держали тот же узкий `include`, что был причиной
+`TS6307` у первых трёх, просто ещё не проявили его (либо explicit typecheck-таргет минует
+аггрегированный `tsconfig.json`, либо не было spec-файла с межфайловым импортом). Расширен
+`include` до `src/**/*.ts` во всех 16. Заодно починен источник дрейфа — шаблон генератора
+`libs/generators/src/generators/new-lib/files/tsconfig.spec.json.template` воспроизводил тот же
+узкий `include`, каждая новая либа унаследовала бы баг заново.
 
 **Все 47 либ монорепо теперь зелёные на `nx typecheck`** — soft-gate Step 2.45 прошёл впервые
 целиком без предупреждений.
