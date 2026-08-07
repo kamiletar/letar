@@ -2691,8 +2691,11 @@ cron и SSH-ключ для rsync на s2. Проверка «через ~2 не
 
 - [x] `apps/aboi/tsconfig.json` — `TS6059` на `libs/forms` закрыт **2026-08-07 (GrayMoose)** как
       часть более широкой правки: см. §43.1 ниже.
-- [ ] `apps/form-docs/tsconfig.json` расширяет `tsconfig.base.json` напрямую вместо общего
-      `tsconfig.next-app.json` — похоже на дрейф конфигурации, не входил в скоуп.
+- [x] `apps/form-docs/tsconfig.json` расширял `tsconfig.base.json` напрямую вместо общего
+      `tsconfig.next-app.json` — закрыто **2026-08-07 (SunnyLake)**, переведён на пресет
+      (`extends` + `paths` без дубля + расширенный `include` под Fumadocs `.source/`/
+      `source.config.ts`). `typecheck:tsgo` и `nx build` проходят чисто. Детали —
+      `.claude/docs/tsconfig-presets.md` §«form-docs — 20-е приложение на пресете».
 - [ ] `apps/animatrona` — build-таргет не прогонялся (тяжёлый: скачивание ffmpeg/fpcalc +
       упаковка), только typecheck.
 - [ ] Ротация версии `nx.json`/`targetDefaults` с `dependsOn: ["^typecheck"]` (Вариант Б из

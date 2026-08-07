@@ -1,38 +1,24 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "plugins": [{ "name": "next" }],
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
-    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
       "@/.source/*": ["./.source/*"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/forms/analytics": ["../../libs/forms/src/lib/analytics/index.ts"],
-      "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/seo": ["../../libs/seo/src/index.ts"]
-    },
-    "ignoreDeprecations": "6.0"
+    }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.mjs",
-    "next-env.d.ts",
     ".next/types/**/*.ts",
-    ".source/docs.ts",
-    ".source/server.ts"
-  ],
-  "exclude": ["node_modules", ".next", "dist"]
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "source.config.ts",
+    ".source/**/*.ts"
+  ]
 }
