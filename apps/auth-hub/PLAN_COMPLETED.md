@@ -2,6 +2,23 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## 0.7.3 → 0.7.4: убраны references на libs из tsconfig.json — хрупкий TS6305 редирект (2026-08-07)
+
+`references` на `libs/consent`, `libs/email`, `libs/auth`, `libs/chakra-provider`,
+`libs/analytics`, `libs/ui`, `libs/forms` вели на solution-конфиг библиотек — TypeScript брал
+последний подпроект из их `references` (`tsconfig.spec.json`), чей output (`out-tsc/spec/`) не
+собирается ни одним Nx-таргетом → `TS6305` + каскад `TS7006`. Образец фикса — `dashboard-agent`
+(0.11.1, `885ceaf2`), механика — `.claude/rules/libs.md`.
+
+Убраны все `references` на `libs/*` (оставлен `./tsconfig.spec.json`). Приложение расширяет
+`tsconfig.next-app.json` (`outDir` без явного `rootDir`) — после удаления `references`
+TypeScript инферил `rootDir` слишком узко и падал `TS6059`; фикс — явный override
+`"rootDir": "../.."`. `nx typecheck:tsgo auth-hub` теперь полностью чист (пропали и 2
+`TS7006`, бывшие следствием того же каскада `any`). `nx build auth-hub` падает на
+`AUTH_ENCRYPTION_KEY обязателен в production` — это pre-existing локальная нехватка секрета
+(см. `.claude/rules/env-files.md`), TypeScript-фаза самого билда прошла чисто, не связано с
+этой правкой.
+
 ## Сессия 2026-07-30 (день) — сверка плана с кодом, закрытие инцидента prod-500, деплой-запрос v0.7.3
 
 Сессия без изменений кода: аудит состояния, документация, координация.
