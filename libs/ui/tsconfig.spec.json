@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "rootDir": "."
+  },
+  "include": ["vitest.config.ts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx"]
+}

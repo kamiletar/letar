@@ -79,6 +79,13 @@
       "executor": "@nx/eslint:lint",
       "dependsOn": ["oxlint"],
       "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/ui/vitest.config.ts"
+      }
     }
   }
 }
