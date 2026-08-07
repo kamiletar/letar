@@ -854,51 +854,65 @@ nx e2e animatrona-e2e -- --grep "Import"
 
 ### Инфраструктура
 
-| Сервис         | Контейнер            | Порт на хосте        |
-| -------------- | -------------------- | -------------------- |
-| PostgreSQL E2E | `e2e-postgres`       | 5499                 |
-| Redis E2E      | `e2e-redis`          | 6380                 |
-| Репозиторий    | `/home/deploy/letar` | —                    |
-| Playwright     | Chromium headless    | установлен глобально |
+| Сервис         | Контейнер            | Порт на хосте        | Статус                   |
+| -------------- | -------------------- | -------------------- | ------------------------ |
+| PostgreSQL E2E | `e2e-postgres`       | 5499                 | ⛔ остановлен 2026-08-07 |
+| Redis E2E      | `e2e-redis`          | 6380                 | живой, требует пароль    |
+| Репозиторий    | `/home/deploy/letar` | —                    | —                        |
+| Playwright     | Chromium headless    | установлен глобально | —                        |
 
-Compose-файл: `/opt/e2e-infra/docker-compose.yml`
+Compose-файл: `/opt/e2e-infra/docker-compose.yml`.
 
-### Подключение и запуск
+⚠️ **Этот файл лежит вне git** — конфиг живого сервиса существует в одном экземпляре на одной
+машине, без ревью и без восстановления из репозитория. Известный пробел, PLAN-INFRA §53.
 
-```bash
-ssh deploy@188.127.235.141
+`e2e-redis` **требует пароль** (`--requirepass` в `command:` того же compose-файла). Строка
+подключения — `redis://:<пароль>@172.17.0.1:6380`, пароль берётся из `.env.staging` приложения.
+Беспарольный `redis://172.17.0.1:6380` не сработает.
 
-# Запуск конкретного shard
-cd /home/deploy/letar
-nx e2e driving-school-e2e -- --project=shard-core
+⚠️ **Не переводи `e2e-redis` на `127.0.0.1`.** Staging-контейнеры ходят в него через хост-гейтвей
+`172.17.0.1`, loopback-привязка их отрежет. На s3 этот приём вообще неприменим — защиту держит
+default-deny в `DOCKER-USER`/`INPUT` (см. [firewall.md](/.claude/docs/firewall.md), PLAN-INFRA §49).
 
-# Полный прогон всех приложений
-nx run-many --target=e2e --parallel=3
+### Запуск — через `run_e2e`, а не по SSH
+
+Прогон запускает `dashboard-agent` на s3 (`POST /api/e2e/run`, обёртка — `run_e2e` в `deploy-mcp`).
+Он передаёт `BASE_URL=https://<app>-stage.s3.letar.best`, и Playwright бьёт **в поднятый
+staging-контейнер приложения**, а не в локально стартующий `nx dev`.
+
 ```
+run_e2e({ app: "<app>", baseUrl: "https://<app>-stage.s3.letar.best" })
+```
+
+Держится это на `webServer.reuseExistingServer: true` в каждом `playwright.config.ts` (есть у всех
+23 сьютов): раз `baseURL` уже отвечает, свой dev-сервер Playwright не поднимает.
+
+⚠️ **Потеря `BASE_URL` не роняет прогон, а делает его ложным.** Без переменной Playwright молча
+поднимает `nx dev` против локальной БД, тесты зеленеют — но проверяют не то. Прецеденты: `aboi`
+2026-07-19 (ложный localhost-прогон дал совсем другой набор отказов) и регрессия `--preserve-env`
+в `sudo -u deploy` 2026-07-11. Подробнее — раздел «⛔ `nx e2e <app>-e2e` зависает намертво…» выше.
 
 ### Настройка нового приложения для E2E
 
-1. **Создать E2E базу данных:**
+Каркас сьюта генерируется, руками его собирать не нужно:
 
 ```bash
-docker exec e2e-postgres psql -U e2e -d postgres -c "CREATE DATABASE e2e_<app>;"
+nx g @letar/generators:e2e-suite <app>
 ```
 
-2. **Создать `.env.local`** в директории приложения:
+Дальше приложению нужен **свой staging-контур на s3** — `docker-compose.staging.yml` с собственной
+БД (порты 5454+) и `.env.staging`. Образец — любое уже подключённое приложение, например
+`apps/archetest/docker-compose.staging.yml`.
 
-```bash
-# apps/<app>/.env.local
-DATABASE_URL="postgresql://e2e:e2e@localhost:5499/e2e_<app>?schema=public"
-AUTH_SECRET="$(openssl rand -base64 32)"
-BETTER_AUTH_URL=http://localhost:<port>
-ADMIN_EMAIL=admin@e2e.test
-```
+⛔ **Схема «одна общая e2e-БД на 5499 + `.env.local`» больше не применяется.** Так было до перехода
+на staging-контур: приложение поднималось на s3 через `nx dev` и ходило в общий `e2e-postgres`.
+Схема плоха тем, что тестировала dev-сборку вместо той, что поедет в прод, и делила состояние между
+приложениями. Сам `e2e-postgres` остановлен 2026-08-07 (PLAN-INFRA §53) — 24 дня без единого
+обращения. Если увидишь в `.env.local` строку вида `postgresql://e2e:e2e@localhost:5499/...` — это
+остаток той схемы, а не рабочая настройка.
 
-3. **Применить миграции:**
-
-```bash
-nx db:migrate <app>
-```
+> `DEV_SESSION_TOKEN` при этом **общий для всех приложений**, а не свой на каждое — см. раздел ниже,
+> это отдельная и до сих пор актуальная грабля.
 
 ### Особенности s3-ранера
 
