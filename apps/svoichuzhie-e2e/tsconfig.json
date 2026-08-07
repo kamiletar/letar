@@ -2,10 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "allowJs": true,
-    "outDir": "out-tsc/playwright",
+    "composite": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
     "sourceMap": false,
     "ignoreDeprecations": "6.0",
-    "rootDir": ".",
     "paths": {
       "@letar/e2e-testing": ["../../libs/e2e-testing/src/index.ts"]
     }
@@ -20,10 +21,5 @@
     "src/**/*.test.js",
     "src/**/*.d.ts"
   ],
-  "exclude": ["out-tsc", "test-output", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs"],
-  "references": [
-    {
-      "path": "../../libs/e2e-testing"
-    }
-  ]
+  "exclude": ["out-tsc", "test-output", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs"]
 }
