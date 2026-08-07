@@ -11,10 +11,34 @@ services:
       # Внутренний 3007 — nginx отдаёт статический экспорт (см. Dockerfile.production, без
       # Next.js/БД/auth). Хостовый 3028 — следующий свободный после mandala(3024)/
       # svoichuzhie(3025)/aprel8008(3026)/dsperevod(3027). Подтвердить перед первым деплоем.
+      #
+      # Публикация на хост оставлена намеренно, хотя маршрут уже идёт через Traefik: через неё
+      # ходит NPM, и это путь отката пилота (PLAN-INFRA.md §48 M1b). Убрать — после M2.
       - '3028:3007'
+    networks:
+      - default
+      - traefik-network
+    labels:
+      # Маршрут описан здесь, а не в SQLite внутри NPM, — ради этого и затевался §48.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.pravda-stage.rule: 'Host(`pravda-stage.s3.letar.best`)'
+      traefik.http.routers.pravda-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
+      # только использует. Свой резолвер здесь заказал бы точечный сертификат на это имя и
+      # упёрся бы в закрытую регистрацию acme-dns (`404`). Разбор — infra/traefik/README.md.
+      traefik.http.routers.pravda-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
+      traefik.http.services.pravda-stage.loadbalancer.server.port: '3007'
     healthcheck:
       test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3007/ || exit 1']
       interval: 5s
       timeout: 3s
       retries: 30
       start_period: 15s
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
+    external: true
