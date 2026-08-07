@@ -2,6 +2,17 @@
 
 Детальное описание реализованных функций.
 
+## `tsconfig.json`: убраны `references` на библиотеки — TS6305 (2026-08-07)
+
+Тот же баг, что в `dashboard-agent` (0.11.1, `.claude/rules/libs.md` § «Тот же редирект под
+обычным `tsc`»): `references` на `../../libs/*` вели на solution-конфиг библиотек и редиректили
+на `tsconfig.spec.json`, давая вечный `TS6305`. Массив `references` убран целиком (своего
+`tsconfig.spec.json` в файле не было). Побочных `TS6059` здесь не возникло — `rootDir` не
+потребовался.
+
+Проверено: `nx typecheck:tsgo animatrona-landing --skip-nx-cache` — было 5 ошибок TS6305, стало 0.
+`nx build animatrona-landing` — зелёный.
+
 ## v0.4.0 — 2026-07-28 (152-ФЗ: минимальное cookie-уведомление)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8). Только Umami-аналитика, без
