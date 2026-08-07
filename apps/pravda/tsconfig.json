@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "${configDir}/../..",
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "paths": {
       "@/*": ["./src/*"],
@@ -13,18 +14,6 @@
   "references": [
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/hooks"
-    },
-    {
-      "path": "../../libs/analytics"
     }
   ]
 }

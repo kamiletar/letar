@@ -1,5 +1,15 @@
 # Pravda - Выполненные задачи
 
+## tsconfig.json — убраны `references` на `libs/*`, добавлен явный `rootDir` (2026-08-07)
+
+Убраны 4 ссылки (`chakra-provider`, `ui`, `hooks`, `analytics`) из `references` — тот же хрупкий
+редирект, что чинили в `dashboard-agent` (0.11.1, `.claude/rules/libs.md`). После удаления
+всплыл `TS6059`: `pravda` наследует через `tsconfig.next-app.json` → `tsconfig.base.json`
+`composite: true`, а composite-режим требует, чтобы `rootDir` содержал все файлы программы;
+TypeScript вычисляет `rootDir` по `include`-паттернам приложения, не видя в них `libs/*`. Фикс —
+явный `"rootDir": "${configDir}/../.."` в `apps/pravda/tsconfig.json`. `nx typecheck:tsgo` и
+`nx build` зелёные.
+
 ## Фаза 1: Инициализация
 
 ### v0.0.1 — Инициализация проекта (2025-12-28)
