@@ -10,8 +10,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -26,8 +24,6 @@
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/*.spec.ts", "src/**/*.test.ts"],
   "references": [
-    { "path": "./tsconfig.spec.json" },
-    { "path": "../../libs/email" },
-    { "path": "../../libs/redis-client" }
+    { "path": "./tsconfig.spec.json" }
   ]
 }
