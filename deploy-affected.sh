@@ -1187,6 +1187,12 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
   if [ -n "$NPM_CONTAINER" ]; then
     echo -e "${GREEN}✅ Nginx reloaded successfully (container: ${NPM_CONTAINER})${NC}"
     phase_marker nginx-reload ok
+  elif docker ps --format '{{.Names}}' 2> /dev/null | grep -qx traefik; then
+    # Сервер уже за Traefik (PLAN-INFRA.md §48). Reload'а не существует как понятия: Traefik
+    # слушает docker-сокет и подхватывает новый контейнер сам. Отмечать это как fail нельзя —
+    # провалившаяся фаза на каждом деплое приучает не смотреть на провалившиеся фазы.
+    echo -e "${GREEN}✅ Traefik подхватит контейнер сам (nginx reload не требуется)${NC}"
+    phase_marker nginx-reload ok
   else
     echo -e "${YELLOW}⚠️  Could not reload Nginx (container may not exist on this server)${NC}"
     phase_marker nginx-reload fail
