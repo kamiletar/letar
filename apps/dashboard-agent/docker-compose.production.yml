@@ -58,6 +58,12 @@ services:
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
       # SSH ключи для git remote операций
       - ~/.ssh:/root/.ssh:ro
+      # Файл аккаунтов lego для acme-dns — лежит ВНЕ workspace, поэтому отдельной строкой.
+      # Нужен бэкапу acme-dns (lib/acme-dns-backup.ts, PLAN-INFRA.md §48): восстановить этот
+      # файл нельзя, а без него встанет продление всех сертификатов зоны.
+      # Монтируется каталог, а не файл: bind одиночного файла ломается, если потребитель
+      # его перезапишет (lego так делает). Только чтение — агент его не меняет.
+      - /home/deploy/lego:/home/deploy/lego:ro
       # Secrets от всех приложений (для подключения к БД)
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/archetest/.env.docker:/secrets/archetest.env:ro

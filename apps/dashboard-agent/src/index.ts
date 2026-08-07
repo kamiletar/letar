@@ -23,6 +23,7 @@ import { authMiddleware } from './lib/auth'
 import { rehydrateExecutionLogsFromRedis, startScheduler } from './lib/cron'
 import { startHistoryCollection } from './lib/history'
 import { ipWhitelistMiddleware } from './lib/ip-whitelist'
+import { acmeDnsRoutes } from './routes/acme-dns'
 import { appsRoutes } from './routes/apps'
 import { backupFreshnessRoutes } from './routes/backup-freshness'
 import { cronRoutes } from './routes/cron'
@@ -105,6 +106,7 @@ async function main(): Promise<void> {
   await fastify.register(e2eRoutes)
   await fastify.register(databaseRoutes)
   await fastify.register(nginxRoutes)
+  await fastify.register(acmeDnsRoutes)
   await fastify.register(cronRoutes)
   await fastify.register(gitRoutes)
   await fastify.register(envRoutes)

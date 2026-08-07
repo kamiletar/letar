@@ -274,6 +274,28 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'acme-dns-backup-s2',
+    name: 'acme-dns Backup S2',
+    app: 'dashboard-agent',
+    endpoint: '/api/acme-dns/backup',
+    schedule: '30 3 * * *',
+    description:
+      'Бэкап acme-dns на s2 (база выданных поддоменов + файл аккаунтов lego). От сервиса зависит продление ВСЕХ сертификатов зоны, а файл аккаунтов невосстановим — PLAN-INFRA.md §48',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'acme-dns-backup-freshness-check',
+    name: 'acme-dns Backup Freshness Check',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/acme-dns-backup-freshness-check',
+    schedule: '15 */6 * * *',
+    description:
+      'Проверка свежести бэкапа acme-dns (§48): алерт BACKUP_FAILED, если самый новый acme-dns_*.tar.gz старше 30ч. Сам бэкап делает агент, но молчаливый отказ tar/прав на файл аккаунтов выглядел бы как «всё хорошо» до ближайшего продления сертификата',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'health-check',
     name: 'Health Check (CPU/память/диск/контейнеры/БД)',
     app: 'dashboard-agent',
