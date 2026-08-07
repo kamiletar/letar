@@ -110,10 +110,14 @@ ${baseURL}/api/auth/oauth2/callback/${providerId}
 
 ### Подключённые приложения
 
-| Приложение | clientId         | Домен                          |
-| ---------- | ---------------- | ------------------------------ |
-| archetest  | `archetest-prod` | archetest.letar.best           |
-| aprel8008  | `aprel8008-prod` | aprel8008.ru (только `/admin`) |
+| Приложение | clientId         | Домен                                         |
+| ---------- | ---------------- | --------------------------------------------- |
+| archetest  | `archetest-prod` | archetest.letar.best                          |
+| aprel8008  | `aprel8008-prod` | собственный домен, только `/admin` — см. ниже |
+
+> Домены приложений на собственных коммерческих доменах в публичный репозиторий не выносим
+> ([public-repo-hygiene.md](/.claude/rules/public-repo-hygiene.md)) — полный список
+> «приложение → домен» в приватных доках, `.claude/private/INFRA-PROXY-HOSTS.md`.
 
 ### Ключевые файлы
 

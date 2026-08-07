@@ -218,7 +218,8 @@ location = /manifest.webmanifest {
 
 ### Driving School (WebSocket/чат)
 
-В Advanced tab для `направа.рф` добавить:
+В Advanced tab хоста, который форвардит на `driving-school-app` (домен — в приватных доках,
+`.claude/private/INFRA-PROXY-HOSTS.md`), добавить:
 
 ```nginx
 proxy_http_version 1.1;
