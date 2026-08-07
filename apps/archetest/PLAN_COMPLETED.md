@@ -1,8 +1,31 @@
 # Выполненные задачи: Archetest
 
-> **Версия:** 0.27.0 | **Обновлено:** 2026-07-29
+> **Версия:** 0.27.1 | **Обновлено:** 2026-08-07
 >
 > **Основной план:** [PLAN.md](./PLAN.md)
+
+---
+
+## Убраны references на libs из tsconfig.json — хрупкий TS6305 редирект (v0.27.1, 2026-08-07)
+
+**Проблема:** `references` на `libs/consent`, `libs/auth`, `libs/forms`, `libs/analytics`,
+`libs/chakra-provider`, `libs/hooks`, `libs/ui` в `apps/archetest/tsconfig.json` вели на
+solution-конфиг каждой библиотеки — TypeScript брал последний подпроект из его собственного
+`references` (`tsconfig.lib.json`/`tsconfig.spec.json`) как цель редиректа. У части библиотек
+последним оказывался `tsconfig.spec.json`, чей output (`out-tsc/spec/`) не собирается ни одним
+Nx-таргетом → вечный `TS6305` + каскад `TS7006`/`TS2305` (модуль библиотеки становится `any`).
+Образец фикса — `dashboard-agent` (0.11.1, коммит `885ceaf2`), подробности механики —
+`.claude/rules/libs.md`.
+
+**Решение:** удалены все элементы `references`, ссылающиеся на `libs/*` (оставлен только
+`./tsconfig.spec.json`). Т.к. приложение расширяет общий пресет `tsconfig.next-app.json`
+(`outDir` задан, `rootDir` не задан явно), после удаления `references` TypeScript начал
+инферить `rootDir` слишком узко (только `apps/archetest`) и падать с `TS6059` на любом импорте
+из `libs/*`. В отличие от `dashboard-agent` (собственный tsconfig без `extends`, там `rootDir`
+просто убирался), здесь `outDir` из пресета убрать локально нельзя — фикс через явный override
+`"rootDir": "../.."` в `apps/archetest/tsconfig.json`, расширяющий допустимый корень до
+монорепо. `nx typecheck:tsgo archetest` и `nx build archetest` чисты (одна оставшаяся
+`TS7006` в `professional-lead-form.tsx:37` — не новая, была и до правки).
 
 ---
 

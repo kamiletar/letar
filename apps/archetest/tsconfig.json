@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],
@@ -16,28 +17,7 @@
   },
   "references": [
     {
-      "path": "../../libs/consent"
-    },
-    {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/hooks"
-    },
-    {
-      "path": "../../libs/ui"
     }
   ]
 }
