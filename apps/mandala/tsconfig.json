@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "${configDir}/../..",
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
@@ -26,43 +27,7 @@
   },
   "references": [
     {
-      "path": "../../libs/consent"
-    },
-    {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/query-provider"
-    },
-    {
-      "path": "../../libs/hooks"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/pin-auth"
-    },
-    {
-      "path": "../../libs/email"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/admin-ui"
-    },
-    {
-      "path": "../../libs/format-utils"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/image-upload"
     }
   ]
 }

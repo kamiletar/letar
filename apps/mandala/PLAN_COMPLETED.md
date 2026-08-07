@@ -972,4 +972,17 @@ Prisma/ZenStack-клиента) — вынесен в `createImageRepository()`.
 
 ---
 
-**Последнее обновление:** 2026-08-05
+### tsconfig.json — убраны `references` на `libs/*`, добавлен явный `rootDir` (2026-08-07)
+
+Убраны 13 ссылок на `../../libs/*` из `references` — тот же хрупкий редирект на
+`tsconfig.spec.json`/`out-tsc/spec`, что чинили в `dashboard-agent` (0.11.1,
+`.claude/rules/libs.md`). После удаления всплыл `TS6059`: `mandala` наследует через
+`tsconfig.next-app.json` → `tsconfig.base.json` `composite: true`, а composite-режим требует,
+чтобы `rootDir` содержал все файлы программы; TypeScript вычисляет `rootDir` по
+`include`-паттернам приложения, не видя в них `libs/*`. Фикс — явный
+`"rootDir": "${configDir}/../.."` в `apps/mandala/tsconfig.json`. `nx typecheck:tsgo` и
+`nx build mandala` зелёные.
+
+---
+
+**Последнее обновление:** 2026-08-07
