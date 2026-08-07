@@ -50,7 +50,7 @@ export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 10_000)
 
-    await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,6 +61,22 @@ export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
     })
 
     clearTimeout(timeout)
+
+    // Результат обязан быть проверен: это последний сторож в цепочке, и молчать ему нельзя.
+    // Раньше ответ игнорировался — не-2xx уходил в тишину, неотличимую от успеха. Именно так
+    // выглядела восьмидневная тишина §52: провалы cron были, а `CRON_FAILED` не появился ни разу,
+    // и по логам нельзя было отличить «alert не отправляли» от «отправили, но его отвергли».
+    if (!response.ok) {
+      let body = ''
+      try {
+        body = (await response.text()).slice(0, 500)
+      } catch {
+        // Тело недоступно — статуса всё равно достаточно, чтобы отличить отказ от тишины
+      }
+      console.error(
+        `[DashboardAlert] dashboard отверг alert ${alert.type}: HTTP ${response.status} ${response.statusText}. Ответ: ${body}`,
+      )
+    }
   } catch (error) {
     console.error('[DashboardAlert] Не удалось отправить alert в dashboard:', error)
   }
