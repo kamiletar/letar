@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "${configDir}/../..",
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "types": ["node"],
     "paths": {
@@ -29,34 +30,7 @@
   ],
   "references": [
     {
-      "path": "../../libs/consent"
-    },
-    {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/email"
-    },
-    {
-      "path": "../../libs/yandex-metrika"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/image-upload"
     }
   ]
 }

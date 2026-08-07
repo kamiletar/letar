@@ -1,5 +1,22 @@
 # Выполненные задачи — Kami
 
+## tsconfig.json — убраны `references` на `libs/*`, добавлен явный `rootDir` (2026-08-07)
+
+Убраны 10 ссылок на `../../libs/*` из `references` (тот же хрупкий редирект на
+`tsconfig.spec.json`/`out-tsc/spec`, что чинили в `dashboard-agent` 0.11.1 — см.
+`.claude/rules/libs.md`). После удаления `references` библиотеки резолвятся напрямую по
+исходникам через `paths`, что и обнажило второй слой проблемы: `kami` наследует `outDir` из
+общего `tsconfig.next-app.json`, а через цепочку `tsconfig.base.json` — ещё и `composite: true`.
+Composite-режим требует, чтобы `rootDir` содержал ВСЕ файлы программы, а TypeScript вычисляет его
+по `include`-паттернам приложения (только `apps/kami/src`), не по фактически включённым файлам —
+поэтому любой файл из `libs/*`, попавший в программу напрямую (без project reference), даёт
+`TS6059: File is not under 'rootDir'`. Фикс — явный override `"rootDir": "${configDir}/../.."` в
+`apps/kami/tsconfig.json`, расширяющий rootDir до корня монорепо. `declaration`/`outDir` не
+трогали — `noEmit: true`, реальную сборку делает `next build`. `nx typecheck:tsgo kami` зелёный;
+`nx build kami` падает на несвязанной проблеме (`ECONNRESET` к `api.github.com` — нет сети в
+песочнице для Keystatic GitHub-хранилища, см. `.claude/rules/env-files.md` про `NODE_ENV`), не
+регрессия от этой правки.
+
 ## Локальный `nx build kami` разблокирован: недостающие env-переменные Keystatic (2026-08-05)
 
 `nx build kami` падал на этапе Collecting page data — сначала из-за Turbopack-трейсинга ФС в
