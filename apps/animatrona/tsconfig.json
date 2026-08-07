@@ -54,7 +54,8 @@
     "../../libs/animatrona-utils/src/**/*.ts",
     "../../libs/animatrona-ui/src/**/*.ts",
     "../../libs/animatrona-ui/src/**/*.tsx",
-    "../../libs/electron-storage/src/**/*.ts"
+    "../../libs/electron-storage/src/**/*.ts",
+    "../../libs/hooks/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -70,18 +71,6 @@
   "references": [
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/animatrona-utils"
-    },
-    {
-      "path": "../../libs/animatrona-types"
-    },
-    {
-      "path": "../../libs/electron-storage"
-    },
-    {
-      "path": "../../libs/hooks"
     }
   ]
 }

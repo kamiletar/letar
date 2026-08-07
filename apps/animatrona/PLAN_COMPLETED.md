@@ -6,6 +6,24 @@
 
 ---
 
+## `tsconfig.json`: убраны `references` на библиотеки — TS6305/TS6059/TS6307 (2026-08-07)
+
+Тот же баг и фикс, что в `dashboard-agent` (0.11.1, `.claude/rules/libs.md` § «Тот же редирект
+под обычным `tsc`»): `references` на `../../libs/animatrona-utils`, `animatrona-types`,
+`electron-storage`, `hooks` вели на solution-конфиг библиотек и редиректили на
+`tsconfig.spec.json`, давая вечный `TS6305`. Оставлена только `./tsconfig.spec.json`.
+
+Два побочных эффекта:
+
+1. `@letar/hooks` резолвился только через снятый project reference, а не через `include` (в
+   отличие от остальных библиотек, уже подключённых по «смешанной модели» через
+   `../../libs/X/src/**/*.ts`) — без reference давал `TS6307: File is not listed within the file
+   list`. Фикс — добавлен `../../libs/hooks/src/**/*.ts` в `include`, тем же паттерном.
+2. `TS6059: not under rootDir` не потребовал отдельного фикса — `rootDir` в этом файле не задан.
+
+Проверено: `nx typecheck:tsgo animatrona --skip-nx-cache` — было 24 ошибки (TS6305 + TS7006),
+стало 0.
+
 ## v0.55.16 — Infinite scroll: надёжный триггер подгрузки (sentinel + IntersectionObserver) (2026-07-29)
 
 **Как обнаружено:** пользователь проверил v0.55.15 и сообщил, что дальше первой страницы список
