@@ -7,6 +7,7 @@ import CronParser from 'cron-parser'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import * as cron from 'node-cron'
 import { getAppUrl } from './app-registry'
+import { getAppCronSecret } from './app-secrets'
 import { postDashboardAlert } from './dashboard-alert'
 import { getRedis } from './redis'
 import { type CronServer, getCurrentServer, SERVER_APPS } from './server-config'
@@ -614,10 +615,25 @@ export async function executeJob(job: CronJob): Promise<CronExecutionLog> {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 60000)
 
+    // Секрет берётся у ПРИЛОЖЕНИЯ, к которому идём, а не у агента: `CRON_SECRET` у каждого
+    // приложения свой (PLAN-INFRA.md §52). Раньше здесь стоял единый секрет агента с откатом
+    // на литерал `'default-cron-secret'` — из-за него все задачи к приложениям с несовпавшим
+    // секретом месяцами падали с 401, неотличимым от настоящей проблемы авторизации.
+    const cronSecret = getAppCronSecret(job.app)
+    if (!cronSecret) {
+      // Осознанно не шлём запрос вовсе. Запрос с заведомо неверным секретом вернул бы 401 и
+      // спрятал бы настоящую причину — «секрет негде взять» — за кодом ответа приложения.
+      throw new Error(
+        `CRON_SECRET для приложения «${job.app}» недоступен: нет ключа в /secrets/${job.app}.env `
+          + `(проверь volume-маунт в docker-compose.production.yml агента и наличие CRON_SECRET `
+          + `в .env.docker приложения). Запрос не отправлен.`,
+      )
+    }
+
     // Определяем заголовки авторизации
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-Cron-Secret': process.env.CRON_SECRET || 'default-cron-secret',
+      'X-Cron-Secret': cronSecret,
     }
 
     // Для внутренних вызовов dashboard-agent добавляем AGENT_TOKEN

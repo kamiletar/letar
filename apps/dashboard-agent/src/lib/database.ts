@@ -3,8 +3,8 @@
  * Функции для работы с PostgreSQL базами данных
  */
 
-import { existsSync, readFileSync } from 'fs'
 import { Client } from 'pg'
+import { parseEnvFile } from './app-secrets'
 import { getContainers } from './docker'
 import { getCurrentServer, SERVER_APPS } from './server-config'
 
@@ -217,56 +217,8 @@ export interface DatabaseStatsResult {
   error?: string
 }
 
-// Кэш для распарсенных .env файлов
-const envCache = new Map<string, Record<string, string>>()
-
-/**
- * Парсит .env файл и возвращает объект с переменными
- */
-function parseEnvFile(filePath: string): Record<string, string> {
-  if (envCache.has(filePath)) {
-    return envCache.get(filePath)!
-  }
-
-  const result: Record<string, string> = {}
-
-  if (!existsSync(filePath)) {
-    console.warn(`Secrets file not found: ${filePath}`)
-    return result
-  }
-
-  try {
-    const content = readFileSync(filePath, 'utf-8')
-    const lines = content.split('\n')
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || trimmed.startsWith('#')) {
-        continue
-      }
-
-      const eqIndex = trimmed.indexOf('=')
-      if (eqIndex === -1) {
-        continue
-      }
-
-      const key = trimmed.substring(0, eqIndex).trim()
-      let value = trimmed.substring(eqIndex + 1).trim()
-
-      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-        value = value.slice(1, -1)
-      }
-
-      result[key] = value
-    }
-
-    envCache.set(filePath, result)
-  } catch (error) {
-    console.error(`Error parsing env file ${filePath}:`, error)
-  }
-
-  return result
-}
+// Парсер `.env` переехал в `app-secrets.ts` — там же живёт чтение CRON_SECRET приложений
+// (PLAN-INFRA.md §52). Две копии парсера означали бы и два независимых кэша одного файла.
 
 /**
  * Получает конфигурацию БД для приложения

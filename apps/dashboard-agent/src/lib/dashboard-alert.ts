@@ -5,6 +5,7 @@
  */
 
 import { getAppUrl } from './app-registry'
+import { getAppCronSecret } from './app-secrets'
 
 export type DashboardAlertType =
   | 'CPU_HIGH'
@@ -34,6 +35,17 @@ export interface DashboardAlert {
  */
 export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
   try {
+    // Секрет `dashboard`, а не агента (PLAN-INFRA.md §52). Совпадение этих двух значений на
+    // сегодня — историческая случайность, полагаться на неё нельзя: ротация секрета в dashboard
+    // оборвала бы канал алертов целиком, причём молча — ошибки отсюда только логируются.
+    const cronSecret = getAppCronSecret('dashboard')
+    if (!cronSecret) {
+      console.error(
+        '[DashboardAlert] CRON_SECRET для dashboard недоступен (/secrets/dashboard.env) — alert не отправлен',
+      )
+      return
+    }
+
     const url = getAppUrl('dashboard', '/api/alerts')
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 10_000)
@@ -42,7 +54,7 @@ export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Cron-Secret': process.env.CRON_SECRET || 'default-cron-secret',
+        'X-Cron-Secret': cronSecret,
       },
       body: JSON.stringify(alert),
       signal: controller.signal,
