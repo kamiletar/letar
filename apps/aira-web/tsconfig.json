@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
@@ -9,22 +10,5 @@
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/github-releases": ["../../libs/github-releases/src/index.ts"]
     }
-  },
-  "references": [
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/hooks"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/github-releases"
-    }
-  ]
+  }
 }
