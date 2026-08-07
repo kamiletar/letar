@@ -1,5 +1,26 @@
 # Выполненные задачи — Animatrona Tracker
 
+## `tsconfig.json`: убраны `references` на библиотеки — TS6305/TS6059 (2026-08-07)
+
+Тот же баг и фикс, что в `dashboard-agent` (0.11.1, `.claude/rules/libs.md` § «Тот же редирект
+под обычным `tsc`»): `references` на `../../libs/*` вели на solution-конфиг библиотек и
+редиректили на `tsconfig.spec.json`, давая вечный `TS6305`. Массив `references` убран целиком.
+
+Два побочных эффекта:
+
+1. `TS6059: not under rootDir` для путей-алиасов на библиотеки — фикс `"rootDir": "../.."`.
+2. Приложение и так использует «смешанную модель» (часть библиотек инлайнится напрямую через
+   `include: ["../../libs/X/src/**/*.ts"]`) — без `references` эти glob'ы стали пропускать
+   `*.spec.ts(x)` библиотек прямо в основную программу (раньше их отсекал сам механизм project
+   references), дав ~650 сторонних ошибок компиляции тестовых файлов. Фикс — добавить
+   `../../libs/**/*.spec.ts(x)` и `*.test.ts(x)` в `exclude`, аналогично тому, что уже было для
+   `src/**` самого приложения.
+
+Проверено: `nx typecheck:tsgo animatrona-tracker --skip-nx-cache` — было 40 ошибок TS6059, стало 0.
+`nx build animatrona-tracker` падает на `ECONNREFUSED 127.0.0.1:5439` при пререндере — не связано
+с этой правкой, в песочнице агента нет локального Postgres (порт закрыт, проверено `Test-NetConnection`),
+воспроизводится независимо от tsconfig.
+
 ## Turbopack по умолчанию + Chakra/next-themes — риск гидратации (2026-08-04)
 
 Аудит по мотивам находки в `apps/mandala` ([доки](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):

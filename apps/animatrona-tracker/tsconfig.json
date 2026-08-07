@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
     "types": ["node"],
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],
@@ -60,44 +61,10 @@
     "src/generated/**/*.js",
     "src/generated/**/*.mjs",
     "src/generated/**/runtime/**/*",
-    "src/generated/src/**/*"
-  ],
-  "references": [
-    {
-      "path": "../../libs/consent"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/video-player-react"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/animatrona-franchise-graph"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/animatrona-utils"
-    },
-    {
-      "path": "../../libs/animatrona-ui"
-    },
-    {
-      "path": "../../libs/animatrona-types"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/query-provider"
-    },
-    {
-      "path": "../../libs/redis-client"
-    }
+    "src/generated/src/**/*",
+    "../../libs/**/*.spec.ts",
+    "../../libs/**/*.spec.tsx",
+    "../../libs/**/*.test.ts",
+    "../../libs/**/*.test.tsx"
   ]
 }
