@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
     "types": ["node"],
-    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],

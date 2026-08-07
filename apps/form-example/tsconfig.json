@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],

@@ -15,6 +15,7 @@
     "declarationMap": false,
     "emitDeclarationOnly": false,
     "incremental": true,
+    "rootDir": "${configDir}/../..",
     "outDir": "${configDir}/dist",
     "tsBuildInfoFile": "${configDir}/dist/tsconfig.tsbuildinfo",
     "allowJs": true,

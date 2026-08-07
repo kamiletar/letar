@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "rootDir": "${configDir}/../..",
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],

@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
