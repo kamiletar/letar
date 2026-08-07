@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "types": [],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
     "jsx": "react-jsx",
     "paths": {
       "@letar/animatrona-utils": ["../animatrona-utils/src/index.ts"]
