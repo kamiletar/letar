@@ -3648,6 +3648,57 @@ time, studio, aprel8008, domwellbes) деплой на s2 не запускал 
 **Все 47 либ монорепо теперь зелёные на `nx typecheck`** — soft-gate Step 2.45 прошёл впервые
 целиком без предупреждений.
 
+### Дополнение 2026-08-06/07: полное покрытие тестами 20 либ без таргета `test`
+
+Отдельный аудит (не про typecheck, про `nx test`) нашёл, что из 46 либ только 26 имели таргет
+`test` вообще. Все 20 без него — либо не имели vitest-инфраструктуры никогда, либо она была
+сломана молча (`@letar/query-provider` ссылался в `project.json` на несуществующий
+`vitest.config.ts`, реальный файл — `.mts`; `@letar/zenstack-fragments` — `passWithNoTests`
+не был выставлен, хотя либа принципиально не содержит TS-кода, только `.zmodel`-фрагменты).
+
+Полное покрытие всех 20 — тремя волнами параллельных агентов:
+
+- **Волна 1** (Node/pure-logic, без DOM): `demo-protection`, `validation-utils`, `e2e-testing`,
+  `animatrona-utils`, `animatrona-franchise-graph`, `animatrona-shared`, `cdek`,
+  `video-player-core`, `zenstack-form-plugin`, `form-mcp`, `letar-consultant` — 11 либ,
+  ~400 тестов. 4 либы намеренно пропущены (нет юнит-тестируемой логики): `driving-school-db`
+  (сгенерированный Prisma-код), `animatrona-types` (чистые типы), `exoplayer-ass`/
+  `exoplayer-sync` (React Native native-bridge, нужен RN test-runtime).
+- **Волна 2/3** (React-компоненты, `environment: jsdom` + `@testing-library/react`, по образцу
+  `apps/aira-web`): `analytics` (8), `animatrona-ui` (26), `@letar/admin-ui` (128), `@letar/ui`
+  (243), `@letar/video-player-react` (220) — 625 тестов, 83 файла компонентов/хуков/утилит.
+
+**Системная находка, повторившаяся во всех React-либах:** корневой `tsconfig.base.json` даёт
+только `"lib": ["es2022"]` — без DOM-типов. Каждой React-либе, которая раньше не типизировала
+тестовый код, понадобилось добавить `"lib": ["dom", "dom.iterable", "esnext"]` в свой
+`tsconfig.json` — иначе `tsc --build`/`tsgo` падает на `document`/`window`/`HTMLElement`/
+`querySelector`/`getComputedStyle` ("Property does not exist" / "Cannot find name"), хотя
+рантайм (vitest+jsdom) их резолвит нормально. Не единичный случай — воспроизвелось у
+`animatrona-ui`, `admin-ui`, `ui`, `video-player-react` независимо.
+
+**Другая системная находка:** `getComputedStyle()` в jsdom не резолвит Chakra/emotion CSS-in-JS
+классы (стили из `w`/`bg`/позиционирующих пропсов) — jsdom не умеет парсить семантические
+CSS-токены Chakra v3, выдаёт `Could not parse CSS stylesheet` и возвращает дефолты. Тесты,
+проверяющие такие значения, ищут через `className`/grep по `document.head.innerHTML`, а не
+`getComputedStyle`/`container.innerHTML.toContain(...)`. Отдельно — React 19 хостит
+`<script async src=...>` как Resource в `document.head`, а не в `container` рендера, и не
+убирает его между тестами (дедуп по документу) — искать нужно по уникальному атрибуту.
+
+**Реальные баги в продакшен-коде, найденные попутно (не исправлялись, зафиксированы для
+отдельного решения):**
+
+- `form-mcp`: `buildDirectiveRegistry` мутирует module-level `KNOWN_DIRECTIVES` in place вместо
+  клонирования — повторный `createFormMcpServer()` в одном процессе видит протёкшие описания.
+- `video-player-core`: `toMediaUrl('file:///unix/path')` теряет ведущий слэш (`slice(8)`).
+- `letar-consultant`: `formatChunksForPrompt` теряет номер строки при `startLine === 0`
+  (falsy-проверка вместо `!= null`).
+- `cdek`: `ensureCdekWebhook` трактует ошибку чтения списка вебхуков как «списка нет» и всё
+  равно создаёт новый — риск дубликата при сетевом сбое.
+- `@letar/ui`: `CookieBanner` — обработчик повторного открытия настроек регистрируется только
+  если согласие уже было в `localStorage` на момент монтирования; если согласия ещё нет, эффект
+  выходит раньше `addEventListener` — пользователь, только что давший согласие, не может
+  переоткрыть настройки cookie без перезагрузки страницы.
+
 ---
 
 ## §45 — Аудит «падающих не по своей вине» `nx build` на чистом чекауте ✅ ЗАКРЫТО (2026-08-06)
