@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
     "types": ["node"],
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/auth": ["../../libs/auth/src/index.ts"],
@@ -16,30 +17,6 @@
   "references": [
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/query-provider"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/api-server"
-    },
-    {
-      "path": "../../libs/infra-config"
     }
   ]
 }

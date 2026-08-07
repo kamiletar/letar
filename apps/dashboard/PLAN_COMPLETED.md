@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич.
 
+## 1.23.0 → 1.23.1: убраны references на libs из tsconfig.json — хрупкий TS6305 редирект (2026-08-07)
+
+`references` на `libs/auth`, `libs/query-provider`, `libs/chakra-provider`, `libs/analytics`,
+`libs/forms`, `libs/ui`, `libs/api-server`, `libs/infra-config` вели на solution-конфиг
+библиотек — TypeScript брал последний подпроект из их `references` (`tsconfig.spec.json`),
+чей output (`out-tsc/spec/`) не собирается ни одним Nx-таргетом → `TS6305`. Образец фикса —
+`dashboard-agent` (0.11.1, `885ceaf2`), механика — `.claude/rules/libs.md`.
+
+Убраны все `references` на `libs/*` (оставлен `./tsconfig.spec.json`). Приложение расширяет
+`tsconfig.next-app.json` — после удаления `references` TypeScript инферил `rootDir` слишком
+узко и падал `TS6059`; фикс — явный override `"rootDir": "../.."`. `nx typecheck:tsgo
+dashboard` и `nx build dashboard` полностью чисты.
+
 ## Turbopack по умолчанию + Chakra/next-themes — риск гидратации (2026-08-04)
 
 Аудит по мотивам находки в `apps/mandala` ([доки](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):
