@@ -4063,8 +4063,10 @@ _Подготовка на серверах (запрос отправлен Bla
       скоуп по хосту). Каталог `700`, файл `600`. Владелец — `deploy`, **не** `root`: у `deploy` на
       s3 нет `sudo`, и добывать root не нужно — см. разбор ниже
 - [x] Файл basicAuth дашборда — пароль **только** `openssl rand`, не придумывать
-      ([security.md](/.claude/rules/security.md)); `auth/` в `.gitignore`. Пароль лежит на s3 в
-      `/home/deploy/traefik-dashboard-password.txt` (`600`), **владельцу перенести в KeePassXC**
+      ([security.md](/.claude/rules/security.md)); `auth/` в `.gitignore`. Пароль перенесён
+      владельцем в KeePassXC 2026-08-07, временный файл на s3 удаляется (`shred -u`) — работает
+      bcrypt-хэш в `auth/dashboard-users`, само значение серверу больше не нужно. Понадобится
+      сменить — новый `openssl rand` + `htpasswd`, а не поиск старого
 
 #### Находка этапа A: API NPM на s2 молча встаёт, чинится только рестартом (2026-08-07)
 
