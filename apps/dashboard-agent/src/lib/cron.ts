@@ -185,7 +185,13 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     name: 'Database Backup (s2)',
     app: 'dashboard-agent',
     endpoint: '/api/database/backup',
-    schedule: '0 2 * * *',
+    // ⚠️ `0 4`, а не `0 2`: до 2026-08-07 здесь стояло `0 2 * * *`, но на проде задача давно
+    // выполняется в 4:00 — расписание сдвинули через API/UI, а обратно в git оно не попало
+    // (`0 4 * * *` не встречается ни в одном коммите). Код разъезжался с фактом минимум с
+    // 2026-07-10 и вводил в заблуждение всех, кто его читал. Приведено к реальному значению.
+    // Разъезд возможен потому, что merge при старте не синхронизирует `schedule` — PLAN-INFRA.md §56.
+    // В 3:00 идут бэкап nginx и чистка логов, в 3:30 — acme-dns, так что 4:00 разводит их по времени.
+    schedule: '0 4 * * *',
     description: 'Автоматический бэкап всех БД на s2 из APP_CONFIG (см. database.ts)',
     enabled: true,
     server: 's2',
@@ -217,6 +223,42 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     schedule: '*/15 * * * *',
     description:
       'Канареечный round-trip доставки email (Этап 0.7): SMTP-отправка через canary@letar.best + IMAP-проверка внутренней и внешней ноги',
+    enabled: true,
+    server: 's2',
+  },
+  // ⚠️ Три записи ниже (`studio-send-reminders`, `studio-recurring-invoices`,
+  // `dashboard-heartbeat`) до 2026-08-07 существовали ТОЛЬКО в `cron-jobs.json` на s2 — их завели
+  // прямо на сервере, минуя git (PLAN-INFRA.md §56). Перенесены сюда точь-в-точь со значениями с
+  // прода, включая расписания. Опасность была не в том, что они «лишние», а в том, что они
+  // работают: пропади файл на сервере — агент поднялся бы, отработал задачи из кода и промолчал,
+  // а у studio молча перестали бы уходить напоминания об оплате и выставляться счета.
+  {
+    id: 'studio-send-reminders',
+    name: 'Payment Reminders (studio)',
+    app: 'studio',
+    endpoint: '/api/cron/send-reminders',
+    schedule: '0 9 * * *',
+    description: 'Напоминания об оплате: за 3 дня до срока + просроченные счета',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'studio-recurring-invoices',
+    name: 'Recurring Invoices (studio)',
+    app: 'studio',
+    endpoint: '/api/cron/recurring-invoices',
+    schedule: '0 8 * * *',
+    description: 'Автовыставление абонентских счетов (RecurringInvoice) по наступившим nextRunAt',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'dashboard-heartbeat',
+    name: 'Heartbeat (dashboard)',
+    app: 'dashboard',
+    endpoint: '/api/cron/heartbeat',
+    schedule: '0 21 * * *',
+    description: 'Если за 24ч не было ни одного Alert — уведомление в Telegram о живости канала',
     enabled: true,
     server: 's2',
   },
