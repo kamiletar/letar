@@ -1399,3 +1399,16 @@ _(зафиксировать после `nx format/lint/typecheck`)_
 ### Термины, введённые в разговоре (для будущего `JOURNAL.md`)
 
 тембр · ADSR · оператор/несущая/модулятор · cutoff/резонанс · velocity · transient · реверберация/пространство · Reese-бас · спатиализация (HRTF). Дневник стартует в Фазе 1, когда появятся первые звуки.
+
+### 2026-08-07 — `tsconfig.json`: убраны references на libs/* (TS6305 + каскад TS7006)
+
+Тот же баг, что чинили в `dashboard-agent` (публичный коммит `885ceaf2`). 4 `references` на
+`../../libs/<name>` (`analytics`, `chakra-provider`, `ui`, `seo`) вели на solution-конфиг
+библиотек, редиректящий в `out-tsc/spec/`, не собираемый ни одним Nx-таргетом — на чистом HEAD
+`typecheck:tsgo` показывал 5 ошибок каскадом.
+
+Убраны все 4 `references` на библиотеки (оставлен только `./tsconfig.spec.json`). В отличие от
+`studio`/`svoichuzhie`, здесь `rootDir`/`outDir` не заданы вовсе (нет `outDir`, `noEmit: true`
+напрямую в собственном `tsconfig.json`) — `TS6059` не возник, доп. правка не нужна.
+
+После фикса `typecheck:tsgo` и `nx build synth` — оба зелёные, 0 ошибок.
