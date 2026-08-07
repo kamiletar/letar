@@ -61,8 +61,14 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@auth.letar.best}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Letar Auth}
-      # Redis (rate-limit secondaryStorage)
-      REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}
+      # Redis (rate-limit secondaryStorage).
+      # ⛔ Без `:-` дефолта намеренно (PLAN-INFRA §53). `letar-redis` требует пароль с §37, а
+      # беспарольный дефолт `redis://letar-redis:6379` fails open: не долети переменная (новый
+      # сервер, восстановление из бэкапа, перегенерация env) — приложение молча пошло бы в Redis
+      # без пароля и получило NOAUTH. Для auth-hub это буквально симптом §37: отказ
+      # secondaryStorage → 500 на всех роутах better-auth. Пустое значение безопаснее:
+      # `process.env.REDIS_URL &&` в src/lib/auth.ts даёт явную деградацию в memory.
+      REDIS_URL: ${REDIS_URL}
       # Analytics
       NEXT_PUBLIC_APP_URL: https://auth.letar.best
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL}

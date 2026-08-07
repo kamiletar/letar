@@ -35,7 +35,9 @@ services:
       # Персистентность deploy-истории между рестартами контейнера (см. lib/redis.ts,
       # routes/deploy.ts). Опционально — без Redis деплой продолжает работать в
       # чистом in-memory режиме (graceful degradation).
-      REDIS_URL: ${REDIS_URL:-redis://letar-redis:6379}
+      # ⛔ Без `:-` дефолта намеренно (PLAN-INFRA §53) — `letar-redis` требует пароль с §37,
+      # а беспарольный дефолт fails open. Подробный разбор — в auth-hub/docker-compose.production.yml.
+      REDIS_URL: ${REDIS_URL}
       # Этап 0.7 — канареечный мониторинг доставки email (см. lib/email-canary.ts)
       EMAIL_CANARY_SMTP_HOST: ${EMAIL_CANARY_SMTP_HOST}
       EMAIL_CANARY_SMTP_PORT: ${EMAIL_CANARY_SMTP_PORT}
