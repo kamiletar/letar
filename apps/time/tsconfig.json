@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/consent": ["../../libs/consent/src/index.ts"],
@@ -14,31 +15,5 @@
       "@letar/number-words": ["../../libs/number-words/src/index.ts"],
       "@letar/seo": ["../../libs/seo/src/index.ts"]
     }
-  },
-  "references": [
-    {
-      "path": "../../libs/consent"
-    },
-    {
-      "path": "../../libs/auth"
-    },
-    {
-      "path": "../../libs/email"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/number-words"
-    },
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/seo"
-    }
-  ]
+  }
 }

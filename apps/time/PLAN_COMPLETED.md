@@ -158,3 +158,16 @@ bunx playwright test`, минуя зависающий в dev-режиме `nx e
 `/home/deploy/pre-migrate-dumps/`. Разрешено через `prisma migrate resolve --applied
 20260728041249_init` на s2. Повторный деплой прошёл (`exitCode 0`). Подробности — `PLAN-INFRA.md`
 §46.
+
+## 2026-08-07 — `tsconfig.json`: убраны references на libs/* (TS6305 + каскад TS7006)
+
+Тот же баг, что чинили в `dashboard-agent` (публичный коммит `885ceaf2`) и `studio`/`svoichuzhie`
+(та же сессия). 8 `references` на `../../libs/<name>` вели на solution-конфиг библиотек,
+редиректящий в `out-tsc/spec/`, который не собирает ни один Nx-таргет — на чистом HEAD
+`typecheck:tsgo` показывал 15 ошибок каскадом.
+
+Убраны все 8 `references`. Приложение расширяет `tsconfig.next-app.json` — как и в `studio`,
+`outDir` из пресета без явного `rootDir` заставляет tsgo вывести его как каталог приложения,
+поэтому добавлено `"rootDir": "../.."` (корень монорепо).
+
+После фикса `typecheck:tsgo` — 0 ошибок (лучше базовой линии в 15), `nx build time` — зелёный.
