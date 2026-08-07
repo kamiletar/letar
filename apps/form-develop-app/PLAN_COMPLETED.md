@@ -136,6 +136,26 @@
   переведены в блочную форму `if (cond) { return x }`. `--fix` не годится — dprint снимает
   фигурные скобки с однострочного `if` обратно при автоформатировании, конфликтуя с ESLint.
 
+### Фикс `references` на библиотеки в `tsconfig.json` (2026-08-07)
+
+`apps/form-develop-app/tsconfig.json` ссылался на 4 библиотеки (`query-provider`, `forms`,
+`format-utils`, `chakra-provider`) через `references`. Такая ссылка ведёт на solution-конфиг
+библиотеки, TypeScript редиректит на **последний** из его `references` (`tsconfig.spec.json`),
+чей output никем не собирается — `TS6305` + каскад `TS7006`/`TS2305`. Подробности механизма —
+`.claude/rules/libs.md` (раздел «Тот же редирект под обычным `tsc`»), фикс сделан по образцу
+`dashboard-agent` (0.11.1).
+
+- Убран весь блок `references` — приложение уже резолвит библиотеки напрямую через `paths`.
+- После удаления вылез `TS6059: not under 'rootDir'` — приложение расширяет общий пресет
+  `tsconfig.next-app.json`, у которого задан `outDir`, из-за чего TypeScript сам вывел `rootDir`
+  как `apps/form-develop-app` и не принял файлы из `libs/*`. Добавлен явный
+  `"rootDir": "../.."` в `compilerOptions`, чтобы `rootDir` заведомо покрывал и `apps/`, и
+  `libs/`.
+- `nx typecheck:tsgo form-develop-app --skip-nx-cache` — чисто (0 ошибок).
+- `nx build form-develop-app --skip-nx-cache` — TypeScript-стадия проходит («Finished
+  TypeScript»); билд падает на пререндере `/controlled-state-demo` (`formContext only works
+  within a formComponent`) — рантайм-баг демо-страницы, не связан с этой правкой, вне скоупа.
+
 ---
 
-**Последнее обновление:** 2026-08-05
+**Последнее обновление:** 2026-08-07

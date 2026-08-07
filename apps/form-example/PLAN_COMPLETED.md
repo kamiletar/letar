@@ -116,6 +116,21 @@ checkout'е, обходился вручную сгенерированным к
 - 5 новых DX-страниц: analytics, server-errors, undo-redo, readonly, skeleton
 - Интеграция с @letar/forms через tsconfig path alias
 
+### Фикс `references` на библиотеки в `tsconfig.json` (2026-08-07)
+
+`apps/form-example/tsconfig.json` ссылался на 4 библиотеки (`demo-protection`, `analytics`,
+`forms`, `seo`) через `references` — тот же редирект-баг, что в `dashboard-agent` (0.11.1), см.
+`.claude/rules/libs.md`.
+
+- Убран блок `references`, добавлен `"rootDir": "../.."` (тот же приём, что в
+  `form-develop-app` — приложение расширяет `tsconfig.next-app.json` с заданным `outDir`,
+  без явного `rootDir` TypeScript выводил его как `apps/form-example` и отбрасывал файлы `libs/*`
+  с `TS6059`).
+- Базовый прогон (без фикса) — 118 ошибок в 51 файле. После фикса — 11 ошибок, все `TS2339`
+  (`Property 'contact'/'product' does not exist on PrismaClient`) — не связаны с этой правкой,
+  предсуществующее расхождение сгенерированного Prisma-клиента, вне скоупа.
+- `nx build form-example --skip-nx-cache` — успешно.
+
 ---
 
-**Последнее обновление:** 2026-04-04
+**Последнее обновление:** 2026-08-07

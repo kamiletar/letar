@@ -6,6 +6,11 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "plugins": [{ "name": "next" }],
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
       "@/.source/*": ["./.source/*"],
@@ -29,16 +34,5 @@
     ".source/docs.ts",
     ".source/server.ts"
   ],
-  "exclude": ["node_modules", ".next", "dist"],
-  "references": [
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/seo"
-    }
-  ]
+  "exclude": ["node_modules", ".next", "dist"]
 }

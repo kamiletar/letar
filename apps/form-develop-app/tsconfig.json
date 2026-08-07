@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
+    "rootDir": "../..",
     "paths": {
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
@@ -9,19 +10,5 @@
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/zenstack-form-plugin": ["../../libs/zenstack-form-plugin/src/index.ts"]
     }
-  },
-  "references": [
-    {
-      "path": "../../libs/query-provider"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/format-utils"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    }
-  ]
+  }
 }

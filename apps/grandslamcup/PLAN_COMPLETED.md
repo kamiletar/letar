@@ -764,4 +764,23 @@ adapter по образцу `animatrona-tracker/prisma/seed.ts`. Провере�
 
 ---
 
-**Последнее обновление:** 2026-08-04 (фикс `Box as="label"` в `ScorerLineupDialog`; код — v3.38.3)
+### Фикс `references` на библиотеки в `tsconfig.json` (2026-08-07)
+
+`apps/grandslamcup/tsconfig.json` ссылался на 9 библиотек через `references` — тот же
+редирект-баг, что в `dashboard-agent` (0.11.1), см. `.claude/rules/libs.md`.
+
+- Из `references` убраны все 9 ссылок на `libs/*`, оставлена только `./tsconfig.spec.json`.
+- Добавлен `"rootDir": "../.."` — без него после удаления библиотечных `references` вылезал
+  `TS6059: not under 'rootDir'` (тот же механизм, что в `form-develop-app`/`form-example`:
+  приложение расширяет `tsconfig.next-app.json` с заданным `outDir`, TypeScript сам выводил
+  узкий `rootDir`).
+- `nx typecheck:tsgo grandslamcup --skip-nx-cache` — 8 ошибок `TS7006`/`TS7031` в 4 файлах
+  (`city-form.tsx`, `season-form.tsx`, `team-form.tsx`, `venue-form.tsx`) — те же файлы/строки,
+  что и в базовом прогоне до правки, не регрессия.
+- `nx build grandslamcup --skip-nx-cache` — TypeScript-стадия проходит («Compiled successfully»);
+  билд падает на сборе данных страницы `EACCES`/`AggregateError` при обращении к БД во время
+  сбора статических данных — недоступность Postgres в текущем окружении, не связано с правкой.
+
+---
+
+**Последнее обновление:** 2026-08-07

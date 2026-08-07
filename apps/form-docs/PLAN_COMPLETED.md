@@ -56,6 +56,23 @@
   `@typescript-eslint/no-empty-function`.
 - `curly` в `src/app/[lang]/docs/[[...slug]]/page.tsx`.
 
+### Фикс `references` на библиотеки в `tsconfig.json` (2026-08-07)
+
+`apps/form-docs/tsconfig.json` ссылался на 3 библиотеки (`analytics`, `forms`, `seo`) через
+`references` — тот же редирект-баг, что в `dashboard-agent` (0.11.1), см.
+`.claude/rules/libs.md`.
+
+- Убран блок `references`.
+- Приложение расширяет `tsconfig.base.json` напрямую (не `tsconfig.next-app.json`, как большинство
+  Next.js-приложений), поэтому наследует библиотечный режим `composite: true` +
+  `emitDeclarationOnly: true`. После удаления `references` это дало `TS6307: File is not listed
+  within the file list` — composite-режим строго требует явного включения файлов, а `include`
+  приложения не покрывает `libs/*`. Добавлены явные оверрайды в `compilerOptions`: `"composite":
+  false`, `"declaration": false`, `"declarationMap": false`, `"emitDeclarationOnly": false`,
+  `"noEmit": true` — те же значения, что задаёт `tsconfig.next-app.json` для остальных приложений.
+- `nx typecheck:tsgo form-docs --skip-nx-cache` — чисто.
+- `nx build form-docs --skip-nx-cache` — успешно.
+
 ---
 
-**Последнее обновление:** 2026-08-05
+**Последнее обновление:** 2026-08-07
