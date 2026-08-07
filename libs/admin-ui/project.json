@@ -5,6 +5,13 @@
   "sourceRoot": "libs/admin-ui/src",
   "tags": ["scope:shared", "type:ui", "owner:letar"],
   "targets": {
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/admin-ui/vitest.config.ts"
+      }
+    },
     "format": {
       "executor": "nx:run-commands",
       "options": {

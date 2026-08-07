@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "rootDir": ".",
+    "paths": {
+      "@letar/format-utils": ["../format-utils/src/index.ts"]
+    }
+  },
+  "include": ["vitest.config.ts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
+  "references": [
+    {
+      "path": "../format-utils/tsconfig.lib.json"
+    }
+  ]
+}

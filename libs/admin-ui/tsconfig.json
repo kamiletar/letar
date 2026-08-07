@@ -5,9 +5,13 @@
   "references": [
     {
       "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ],
   "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
     "ignoreDeprecations": "6.0"
   }
 }
