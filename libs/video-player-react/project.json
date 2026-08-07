@@ -79,6 +79,16 @@
       "executor": "@nx/eslint:lint",
       "dependsOn": ["oxlint"],
       "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "config": "libs/video-player-react/vitest.config.ts"
+      },
+      "metadata": {
+        "description": "Run unit tests with Vitest",
+        "technologies": ["vitest"]
+      }
     }
   }
 }

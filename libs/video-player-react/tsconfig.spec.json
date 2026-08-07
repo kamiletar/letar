@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "paths": {
+      "@letar/video-player-core": ["../video-player-core/src/index.ts"]
+    }
+  },
+  "include": ["vitest.config.ts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../video-player-core/tsconfig.lib.json"
+    }
+  ]
+}

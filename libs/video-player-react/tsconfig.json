@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "composite": true,
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "lib": ["dom", "dom.iterable", "esnext"]
   },
   "extends": "../../tsconfig.base.json",
   "files": [],
@@ -9,6 +10,9 @@
   "references": [
     {
       "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ]
 }
