@@ -128,7 +128,7 @@ services:
       traefik.docker.network: 'traefik-network'
       traefik.http.routers.<app>-stage.rule: 'Host(`<app>-stage.s3.letar.best`)'
       traefik.http.routers.<app>-stage.entrypoints: 'websecure'
-      traefik.http.routers.<app>-stage.tls.certresolver: 'dns'
+      traefik.http.routers.<app>-stage.tls: 'true'
       traefik.http.services.<app>-stage.loadbalancer.server.port: '3000'
 
 networks:
@@ -139,6 +139,24 @@ networks:
 Сертификат при этом **не выпускается** — домен уже покрыт wildcard `*.s3.letar.best`. Именно
 поэтому исчезает вся возня, которая была с NPM: гонка certbot-лока, `ssl_forced` отдельным `PUT`,
 синхронное ожидание Let's Encrypt внутри HTTP-запроса.
+
+⛔ **`tls: 'true'` — и никакого `tls.certresolver` на роутере приложения.** Роутер с явным
+`certresolver` и без `domains` заказывает отдельный сертификат ровно на своё имя
+(`<app>-stage.s3.letar.best`). Провайдер acme-dns не найдёт под это точечное имя ключа в
+хранилище — там только `s3.letar.best` — полезет регистрировать новый аккаунт и получит `404`,
+потому что регистрация закрыта (и закрыта правильно). Голый `tls: 'true'` наследует настройки
+entrypoint'а `websecure`, где wildcard уже описан, — это и есть нужное поведение.
+
+Симптом, если всё же поставить `certresolver`:
+
+```
+ERR Unable to obtain ACME certificate for domains ... failed to register account:
+response error : status code 404   domains=["<app>-stage.s3.letar.best"]
+```
+
+Ошибка выглядит как проблема доступа к acme-dns, а на деле это неверный label. Поймано на
+дашборде при первом запуске M1b (2026-08-07) — в исходной версии этой инструкции стояло
+`certresolver`, то есть грабля разошлась бы по всем приложениям сразу.
 
 ### WebSocket, SSE и прочее из «Специальных конфигураций» NPM
 

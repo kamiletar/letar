@@ -16,8 +16,17 @@ http:
       service: 'api@internal'
       middlewares:
         - dashboard-auth
-      tls:
-        certResolver: dns
+      # ⚠️ `tls: {}` — ПУСТОЙ, без `certResolver`. Это не небрежность.
+      #
+      # Роутер с явным `certResolver: dns` и без `domains:` заказывает отдельный сертификат
+      # ровно на своё правило Host — здесь на `traefik.s3.letar.best`. Провайдер acme-dns не
+      # найдёт в хранилище ключа под это точечное имя (там только `s3.letar.best`), полезет
+      # регистрировать новый аккаунт и получит `404` — регистрация закрыта, и правильно закрыта.
+      #
+      # Пустой `tls` наследует настройки entrypoint'а `websecure` из traefik.yml, где уже задан
+      # `certResolver: dns` + `domains: s3.letar.best` / `*.s3.letar.best`. Wildcard домен
+      # покрывает, второй сертификат не нужен вовсе.
+      tls: {}
 
   middlewares:
     dashboard-auth:
