@@ -1,5 +1,12 @@
 # Выполненные задачи
 
+## tsconfig.json — убраны `references` на `libs/*` (2026-08-07)
+
+Убраны ссылки на `../../libs/analytics` и `../../libs/ui` из `references` (хрупкий редирект на
+`tsconfig.spec.json`, см. образец фикса `dashboard-agent` 0.11.1,
+`.claude/rules/libs.md`). `references` пустой не остался — ключ был удалён целиком.
+`nx typecheck:tsgo` и `nx build` зелёные.
+
 ## Версия 0.3.0 — 2026-07-28 (152-ФЗ: минимальное cookie-уведомление)
 
 Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8). Только Umami-аналитика, без

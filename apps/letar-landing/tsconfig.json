@@ -28,13 +28,5 @@
     "ignoreDeprecations": "6.0"
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "../../libs/analytics"
-    },
-    {
-      "path": "../../libs/ui"
-    }
-  ]
+  "exclude": ["node_modules"]
 }
