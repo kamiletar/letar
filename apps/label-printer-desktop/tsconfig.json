@@ -59,21 +59,6 @@
   "references": [
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../../libs/forms"
-    },
-    {
-      "path": "../../libs/query-provider"
-    },
-    {
-      "path": "../../libs/chakra-provider"
-    },
-    {
-      "path": "../../libs/label-printer-core"
-    },
-    {
-      "path": "../../libs/electron-storage"
     }
   ]
 }

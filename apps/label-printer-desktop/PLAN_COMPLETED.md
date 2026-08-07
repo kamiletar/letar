@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## tsconfig.json — убраны `references` на `libs/*` (смешанная модель, 2026-08-07)
+
+Убраны 5 ссылок (`forms`, `query-provider`, `chakra-provider`, `label-printer-core`,
+`electron-storage`) из `references` — тот же хрупкий редирект, что в `dashboard-agent` (0.11.1,
+см. `.claude/rules/libs.md`). Оставлена ссылка на `./tsconfig.spec.json` (не библиотека).
+Приложение уже использовало смешанную модель — те же 5 библиотек параллельно инлайнятся через
+`include: ["../../libs/<lib>/src/**/*.ts"]`, это не тронуто. `nx typecheck:tsgo` зелёный (17
+оставшихся ошибок — `TS7006`/`TS2307` на несгенерированные `src/generated/prisma` и
+`src/generated/form-schemas`, не связаны с этой правкой, присутствовали и до неё). `nx build`
+падает раньше typecheck, на шаге `zenstack:generate` (`@zenstackhq/tanstack-query` — конфликт
+версий 3.9.0/2.22.3, нет `exports.main` в `package.json`) — тоже независимая от этой правки,
+предсуществующая проблема окружения.
+
 ## Версия 0.5.x (Unreleased)
 
 ### Фикс антипаттерна `as="label"` в batch/page.tsx
