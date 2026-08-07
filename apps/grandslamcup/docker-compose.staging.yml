@@ -37,6 +37,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - default
+      - traefik-network
+    labels:
+      # Маршрут описан здесь, а не в SQLite внутри NPM, — ради этого и затевался §48.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.grandslamcup-stage.rule: 'Host(`grandslamcup-stage.s3.letar.best`)'
+      traefik.http.routers.grandslamcup-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
+      # только использует. Свой резолвер здесь заказал бы точечный сертификат на это имя и
+      # упёрся бы в закрытую регистрацию acme-dns (`404`). Разбор — infra/traefik/README.md.
+      traefik.http.routers.grandslamcup-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
+      traefik.http.services.grandslamcup-stage.loadbalancer.server.port: '3016'
     healthcheck:
       test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3016/ || exit 1']
       interval: 5s
@@ -46,3 +61,9 @@ services:
 
 volumes:
   grandslamcup-staging-data:
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
+    external: true
