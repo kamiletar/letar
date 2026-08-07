@@ -5662,10 +5662,12 @@ solution-конфиге `tsconfig.json` библиотеки — это выбо
 содержит `{ "path": "../../libs/<name>" }` — экспозиция бага остаётся живой до их обхода.
 Отдельная задача (см. spawn_task той же сессии) — не дублировать здесь.
 
-**Что сделано:** у пяти либ-outlier`ов (`auth`,`contract-generator`,`deploy-engine`,`email`,`label-printer-core`) убраны неиспользуемые`composite`/`noEmit`/`emitDeclarationOnly`/`tsBuildInfoFile`/`exclude`— конфиг теперь не создаёт ложного впечатления, что эти пять как-то
-защищены иначе остальных 34.`nx run-many -t test typecheck`по всем пяти — зелёный после
+**Что сделано:** у пяти либ-outlier'ов (`auth`, `contract-generator`, `deploy-engine`, `email`,
+`label-printer-core`) убраны неиспользуемые `composite`/`noEmit`/`emitDeclarationOnly`/
+`tsBuildInfoFile`/`exclude` — конфиг теперь не создаёт ложного впечатления, что эти пять как-то
+защищены иначе остальных 34. `nx run-many -t test typecheck` по всем пяти — зелёный после
 правки. Унификация в другую сторону (раскатать композит на все 39) не сделана осознанно — она
-ничего не чинит без сопутствующего`tsc --build tsconfig.spec.json` таргета, которого ни у одной
+ничего не чинит без сопутствующего `tsc --build tsconfig.spec.json` таргета, которого ни у одной
 либы нет и заводить его не за чем при живом решении «убрать references у приложений».
 
 ---

@@ -1,14 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true,
     "outDir": "./out-tsc/spec",
-    "tsBuildInfoFile": "./out-tsc/spec/tsconfig.spec.tsbuildinfo",
     "types": ["vitest/globals", "node"],
     "rootDir": "."
   },
-  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["out-tsc", "dist", "node_modules"]
+  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts"]
 }
