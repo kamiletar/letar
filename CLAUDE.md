@@ -20,16 +20,20 @@
 
 **Клонирование с приватными:** `git clone --recurse-submodules git@github.com:kamiletar/letar.git`
 
-**Работа с submodule:** изменяешь код → коммит/пуш внутри submodule → `git add <path> && git commit` в letar для фиксации SHA.
+**Работа с submodule:** изменяешь код → коммит/пуш внутри submodule → `git add <path> && git commit -- <path>` в letar для фиксации SHA.
 
 **Git hooks (установить один раз после клонирования):**
 
 ```bash
-cp scripts/hooks/pre-commit-sops.sh .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+bash scripts/hooks/install.sh
 ```
 
-Хук авто-шифрует `.env.docker` → `.env.docker.enc` перед каждым коммитом (если доступен sops + age-ключ). Подробнее: [secret-manager](/.claude/docs/secret-manager.md).
+Ставит связку из двух хуков: `pre-commit-scope-guard.sh` (блокирует голый `git commit`/`git add -A`,
+затянувший файлы из нескольких несвязанных `apps/*`/`libs/*` — типовая причина, по которой один
+агент коммитит чужую незакоммиченную работу другого; подробнее и обход для легитимных multi-scope
+коммитов — [git.md § Работа в монорепозитории](/.claude/rules/git.md)) и `pre-commit-sops.sh`
+(авто-шифрует `.env.docker` → `.env.docker.enc` перед каждым коммитом, если доступен sops +
+age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md)).
 
 ⚠️ **Не добавляй submodule пути в `.gitignore`** — Nx уважает gitignore и спрячет проекты из графа.
 
