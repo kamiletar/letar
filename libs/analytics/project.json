@@ -33,6 +33,13 @@
     "lint": {
       "dependsOn": ["oxlint"]
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/analytics/vitest.config.ts"
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
