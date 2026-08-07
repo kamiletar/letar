@@ -52,10 +52,19 @@ python3 -c "import json;d=json.load(open('/home/deploy/lego/acme-dns-accounts.js
 scp /tmp/s3-accounts.json deploy@s3.letar.best:/tmp/ && shred -u /tmp/s3-accounts.json
 
 # на s3
-mkdir -p /home/deploy/lego && chown root:root /home/deploy/lego && chmod 700 /home/deploy/lego
+mkdir -p /home/deploy/lego && chmod 700 /home/deploy/lego
 mv /tmp/s3-accounts.json /home/deploy/lego/acme-dns-accounts.json
 chmod 600 /home/deploy/lego/acme-dns-accounts.json
 ```
+
+ℹ️ **Владелец файла на s3 — `deploy`, а не `root`, и добывать root ради этого не нужно.** У
+`deploy` на s3 нет `sudo` (в отличие от s2), но есть доступ к docker-сокету — иначе он не запускал
+бы `docker compose`. Доступ к сокету эквивалентен root: `docker run -v /home/deploy/lego:/x` читает
+файл независимо от того, чей он. То есть `root:root` защищал бы от `deploy` ровно до первой такой
+команды. `700`/`600` от **посторонних** пользователей защищают, и это здесь реальная граница.
+
+Что остаётся правдой: ключ ограничен зоной `s3.letar.best`, поэтому худший случай — сертификат на
+staging-домены, не на прод. Ради этого второй ключ сюда и не кладётся.
 
 ⚠️ В git этот файл не кладём даже зашифрованным — пока. Конвейер `.enc` для инфра-сервисов ещё не
 заведён, см. [§18.8.1](/PLAN-INFRA.md). Как заведётся — перевести сюда, а ручной `scp` убрать:
