@@ -26,6 +26,11 @@ services:
       # NPM-хост с Access List по IP s3 — см. README «Доступ к acme-dns».
       ACME_DNS_API_BASE: 'https://acme-api.letar.best'
       ACME_DNS_STORAGE_PATH: '/acme-data/acme-dns-accounts.json'
+    extra_hosts:
+      # Нужен для сервисов, поднятых с `network_mode: host` (сейчас — `animatrona-pin-queue`,
+      # см. dynamic/pin1.yml). Адрес docker-моста у каждой сети свой, поэтому конкретный
+      # `172.x.x.x` из чужого конфига переиспользовать нельзя — это уже ломало маршрут.
+      - 'host.docker.internal:host-gateway'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/etc/traefik/traefik.yml:ro
