@@ -1,7 +1,7 @@
 /**
  * Pin Queue Poller — отправка CID на удалённые пинеры и проверка статуса
  *
- * Интегрируется с pin-queue сервисом (mail.letar.best:42080).
+ * Интегрируется с pin-queue сервисом (`ipfsstor4.letar.best`, сам сервис на s3).
  * После подтверждения пинирования обновляет PinStatus → PINNED_REMOTE,
  * что позволяет безопасно освобождать место в локальном Kubo.
  *
@@ -18,9 +18,44 @@ import { markAsFailed, markAsPinnedRemote, markAsQueued } from './pin-status-ser
 
 const log = createModuleLogger('PinQueuePoller')
 
-// Настройки pin-queue (из MEMORY.md)
-const PIN_QUEUE_URL = 'http://mail.letar.best:42080'
-const PIN_QUEUE_AUTH = '38de32e136617e39634c74a31d75c3d9e795d6c3fb82b6b75d626bd0bf250f85'
+/**
+ * Адрес pin-queue.
+ *
+ * ⚠️ Раньше здесь стоял `http://mail.letar.best:42080` — **неверный сервер**. Сам сервис живёт на
+ * s3 (PLAN-INFRA.md §57), а на почтовом сервере порт `42080` не слушает никто: перепись хостовых
+ * слушателей mail 2026-08-08 дала `25/465/587/993` (maddy), `80/81/443` (прокси), `4001`/`41080`
+ * (relay), `22`. Публичный вход в pin-queue — `ipfsstor4.letar.best` через прокси на s3.
+ *
+ * Плюс схема была `http`, то есть токен уходил открытым текстом.
+ */
+const PIN_QUEUE_URL = process.env.PIN_QUEUE_URL ?? 'https://ipfsstor4.letar.best'
+
+/**
+ * Токен доступа к pin-queue. Берётся из окружения и **не имеет значения по умолчанию**.
+ *
+ * ⛔ Раньше он был вписан в этот файл строкой. Файл лежит в публичном репозитории с первого
+ * коммита (2026-05-16), поэтому тот токен считается скомпрометированным и подлежит ротации —
+ * удаление из кода само по себе его не отзывает, история остаётся.
+ *
+ * ⚠️ Само по себе вынесение в переменную окружения проблему **не решает**: приложение
+ * распространяется установщиком через GitHub Releases, и любой общий серверный секрет, попавший в
+ * сборку, доступен каждому, кто её скачал. Правильное устройство — не давать клиенту серверный
+ * секрет вовсе (запрос на пиннинг идёт через бэкенд трекера, где сессия пользователя уже есть).
+ * Разбор — PLAN-INFRA.md §61.
+ */
+export function pinQueueAuthToken(): string {
+  const token = process.env.PIN_QUEUE_AUTH_TOKEN
+  if (!token) {
+    // Fail closed: отправлять заведомо неверный токен — значит получить в ответ 401, неотличимый
+    // от настоящей проблемы авторизации, и потерять причину «секрета негде взять» (тот же урок,
+    // что в PLAN-INFRA.md §52).
+    throw new Error(
+      'PIN_QUEUE_AUTH_TOKEN не задан — запрос к pin-queue не отправлен. '
+        + 'Токен выдаётся отдельно и в сборку не зашивается (PLAN-INFRA.md §61).',
+    )
+  }
+  return token
+}
 
 /** Статус возвращаемый pin-queue API */
 type PinQueueStatus = 'pending' | 'pinning' | 'pinned' | 'failed' | 'unknown'
@@ -47,7 +82,7 @@ export async function queueRemotePin(cid: string, name?: string): Promise<void> 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${PIN_QUEUE_AUTH}`,
+      Authorization: `Bearer ${pinQueueAuthToken()}`,
     },
     body: JSON.stringify({ cid, name }),
     signal: AbortSignal.timeout(10_000),
@@ -93,7 +128,7 @@ export async function queueRemotePins(cids: string[], name?: string): Promise<{ 
 export async function checkRemotePinStatus(cid: string): Promise<PinQueueStatusResponse> {
   try {
     const response = await fetch(`${PIN_QUEUE_URL}/api/status?cid=${encodeURIComponent(cid)}`, {
-      headers: { Authorization: `Bearer ${PIN_QUEUE_AUTH}` },
+      headers: { Authorization: `Bearer ${pinQueueAuthToken()}` },
       signal: AbortSignal.timeout(5_000),
     })
 
@@ -183,7 +218,7 @@ export async function checkPinQueueHealth(): Promise<boolean> {
 export async function cancelRemotePin(cid: string): Promise<void> {
   const response = await fetch(`${PIN_QUEUE_URL}/api/pin?cid=${encodeURIComponent(cid)}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${PIN_QUEUE_AUTH}` },
+    headers: { Authorization: `Bearer ${pinQueueAuthToken()}` },
     signal: AbortSignal.timeout(5_000),
   })
 
