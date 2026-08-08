@@ -85,18 +85,30 @@ services:
       traefik.docker.network: 'traefik-network'
       traefik.http.routers.media.rule: 'Host(`media.letar.best`)'
       traefik.http.routers.media.entrypoints: 'websecure'
-      # ⛔ Без `certresolver` — по той же причине, что у staging-приложений: роутер должен брать
-      # готовый сертификат из хранилища, а не заказывать свой.
+      # ⚠️ ЕДИНСТВЕННЫЙ роутер на s3 со своим `certresolver` — и это не отступление от правила
+      # «приложениям резолвер не нужен», а другой случай.
       #
-      # ⚠️ НО в отличие от них, `media.letar.best` НЕ покрыт сертификатом, который есть на s3.
-      # Там лежит wildcard `*.s3.letar.best` и ключ acme-dns только для зоны `s3.letar.best` —
-      # ключ от `letar.best` туда не клали СОЗНАТЕЛЬНО (иначе компрометация staging-сервера
-      # давала бы валидный сертификат на весь продакшен-домен, infra/traefik/README.md).
+      # `media.letar.best` лежит ВНЕ `*.s3.letar.best`, поэтому взять готовый сертификат из
+      # хранилища ему неоткуда — в отличие от staging-доменов, которые все покрыты wildcard'ом.
+      # Ключ зоны `letar.best` на s3 не кладут сознательно: иначе компрометация staging-сервера
+      # давала бы валидный сертификат на весь продакшен-домен (infra/traefik/README.md).
       #
-      # То есть эти label'ы задают маршрутизацию, но сами по себе TLS не решают: до переключения
-      # нужно решение владельца, см. PLAN-INFRA.md §48 M2. Пока NPM жив, ничего не ломается —
-      # он продолжает обслуживать это имя на :443.
+      # Решение владельца 2026-08-08 — отдельный аккаунт acme-dns ровно на это одно имя
+      # (PLAN-INFRA.md §48 M2, вариант 1). Худший случай сжимается с «вся зона» до «одно имя».
+      #
+      # ⛔ Без `domains` — НАМЕРЕННО, и это ровно обратное тому, что нужно дашборду.
+      # Правило одно и то же: имя, на которое заказывается сертификат, обязано СОВПАДАТЬ с
+      # ключом в `acme-dns-accounts.json`. Поиск там точный, без подъёма по иерархии — доказано
+      # нашим же провалом на дашборде (`traefik.s3.letar.best` не нашёл ключ `s3.letar.best` и
+      # получил 404). Здесь Host и ключ совпадают буквально, поэтому подменять имя через
+      # `domains` не нужно.
+      #
+      # ⚠️ Две предпосылки живут ВНЕ git, и без любой из них будет тот самый 404:
+      #   1. ключ `media.letar.best` в `/home/deploy/lego/acme-dns-accounts.json` на s3;
+      #   2. `CNAME _acme-challenge.media.letar.best` → `<fulldomain>` у регистратора.
+      # Порядок и команды — infra/acme-dns/README.md, «Аккаунт на одно имя».
       traefik.http.routers.media.tls: 'true'
+      traefik.http.routers.media.tls.certresolver: 'dns'
       # Порт КОНТЕЙНЕРА, не хостовый
       traefik.http.services.media.loadbalancer.server.port: '80'
     restart: unless-stopped
