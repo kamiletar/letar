@@ -65,12 +65,40 @@ services:
     image: nginx:alpine
     container_name: media-nginx
     ports:
+      # Публикация на хост оставлена намеренно: через неё ходит NPM, и это путь отката,
+      # пока NPM на s3 не остановлен (PLAN-INFRA.md §48 M2).
       - '3101:80'
     volumes:
       - /data/processed:/data/processed:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - kami-network
+      - traefik-network
+    labels:
+      # Маршрут описан здесь, а не в SQLite внутри NPM (PLAN-INFRA.md §48).
+      #
+      # Всё содержательное — HTTP Range, иммутабельный кэш, CORP/CORS, защита от хотлинкинга —
+      # живёт в ./nginx.conf ВНУТРИ этого контейнера, а не в конфиге прокси. NPM здесь работает
+      # тупым пробрасывателем на :3101, поэтому смена прокси эту логику не задевает вообще.
+      # Загрузка видео через прокси не ходит вовсе — она идёт в media-api на другой порт.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.media.rule: 'Host(`media.letar.best`)'
+      traefik.http.routers.media.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — по той же причине, что у staging-приложений: роутер должен брать
+      # готовый сертификат из хранилища, а не заказывать свой.
+      #
+      # ⚠️ НО в отличие от них, `media.letar.best` НЕ покрыт сертификатом, который есть на s3.
+      # Там лежит wildcard `*.s3.letar.best` и ключ acme-dns только для зоны `s3.letar.best` —
+      # ключ от `letar.best` туда не клали СОЗНАТЕЛЬНО (иначе компрометация staging-сервера
+      # давала бы валидный сертификат на весь продакшен-домен, infra/traefik/README.md).
+      #
+      # То есть эти label'ы задают маршрутизацию, но сами по себе TLS не решают: до переключения
+      # нужно решение владельца, см. PLAN-INFRA.md §48 M2. Пока NPM жив, ничего не ломается —
+      # он продолжает обслуживать это имя на :443.
+      traefik.http.routers.media.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый
+      traefik.http.services.media.loadbalancer.server.port: '80'
     restart: unless-stopped
     logging:
       driver: json-file
@@ -80,4 +108,8 @@ services:
 
 networks:
   kami-network:
+    external: true
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
     external: true
