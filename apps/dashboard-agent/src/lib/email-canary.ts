@@ -10,6 +10,11 @@
  *
  * External-нога — опциональна: если `EMAIL_CANARY_EXTERNAL_*` не заданы, просто не проверяется
  * (не роняем internal-проверку из-за отсутствия внешнего ящика).
+ *
+ * ⚠️ Письмо ищется во ВСЕХ папках ящика, а не только во входящих, и найденное в спаме считается
+ * доставленным — с отдельным предупреждением. Проверка только INBOX держала внешнюю ногу красной
+ * 17 дней подряд при полностью исправной почте: Gmail принимал все письма и клал их в спам
+ * (§62 PLAN-INFRA.md).
  */
 
 import { createEmailProvider } from '@letar/email'
@@ -22,6 +27,16 @@ export interface EmailCanaryLegResult {
   ok: boolean
   latencyMs: number | null
   error: string | null
+  /** Папка, в которой нашлось письмо (`null` — не найдено). Не только INBOX, см. §62. */
+  folder?: string | null
+  /** Письмо дошло, но легло в спам — доставка формально есть, до человека письмо не дойдёт. */
+  deliveredToSpam?: boolean
+}
+
+/** Минимум, который нужен от `client.list()`, чтобы отличить спам-папку. */
+export interface MailboxInfo {
+  path: string
+  specialUse?: string
 }
 
 export interface EmailCanaryRunResult {
@@ -34,12 +49,20 @@ export interface EmailCanaryRunResult {
   alertsSent: string[]
 }
 
-interface CanaryLegState {
+export interface CanaryLegState {
   consecutiveFailures: number
-  alerted: boolean
+  /**
+   * При скольки подряд-неудачах уходил последний алерт (`null` — ещё ни разу).
+   * Заменил булев `alerted`: тот взводился однажды и глушил уведомления навсегда (§62).
+   */
+  alertedAtFailures: number | null
+  lastAlertAt: string | null
+  /** Подтвердил ли dashboard приём последнего алерта. `false` → повторяем каждый прогон. */
+  lastAlertDelivered: boolean | null
   lastCheckedAt: string | null
   lastOk: boolean | null
   lastLatencyMs: number | null
+  lastFolder: string | null
 }
 
 interface CanaryRunHistoryEntry {
@@ -59,16 +82,73 @@ const MAX_HISTORY = 30
 const ALERT_THRESHOLD = 3
 const POLL_TIMEOUT_MS = 90_000
 const POLL_INTERVAL_MS = 5_000
+/** Общая часть темы всех канареечных писем — по ней же чистится служебный ящик. */
+const CANARY_SUBJECT_MARKER = '[email-canary]'
+/** Насколько старые канареечные письма удалять из служебного ящика при каждой удачной проверке. */
+const PURGE_OLDER_THAN_MS = 24 * 60 * 60 * 1000
 
-function defaultLegState(): CanaryLegState {
-  return { consecutiveFailures: 0, alerted: false, lastCheckedAt: null, lastOk: null, lastLatencyMs: null }
+export function defaultLegState(): CanaryLegState {
+  return {
+    consecutiveFailures: 0,
+    alertedAtFailures: null,
+    lastAlertAt: null,
+    lastAlertDelivered: null,
+    lastCheckedAt: null,
+    lastOk: null,
+    lastLatencyMs: null,
+    lastFolder: null,
+  }
+}
+
+/**
+ * Спам-папка ящика. Сначала по IMAP special-use — он не зависит от языка интерфейса
+ * (`[Gmail]/Спам`, `Junk E-Mail`, `Bulk Mail` — всё это `\Junk`), потом по имени как запасной путь.
+ */
+export function isSpamMailbox(box: MailboxInfo): boolean {
+  if (box.specialUse === '\\Junk') {
+    return true
+  }
+  return /spam|junk|спам/i.test(box.path)
+}
+
+/**
+ * Нужно ли слать алерт по итогам этого прогона.
+ *
+ * Правило §62: молчание не наступает никогда, пока проблема жива.
+ * - первый раз — при пересечении порога;
+ * - дальше — при каждом удвоении числа неудач (3, 6, 12, 24…), чтобы не спамить, но и не пропадать;
+ * - если прошлый алерт не подтверждён dashboard'ом — повторяем на каждом прогоне, потому что
+ *   «отправили и потеряли» ничем не лучше, чем «не отправляли».
+ */
+export function shouldSendAlert(
+  state: CanaryLegState,
+  result: EmailCanaryLegResult,
+  threshold: number,
+): boolean {
+  if (!result.configured || result.ok) {
+    return false
+  }
+  if (state.consecutiveFailures < threshold) {
+    return false
+  }
+  if (state.alertedAtFailures === null) {
+    return true
+  }
+  if (state.lastAlertDelivered === false) {
+    return true
+  }
+  return state.consecutiveFailures >= state.alertedAtFailures * 2
 }
 
 function loadState(): CanaryState {
   const parsed = loadJsonState<Partial<CanaryState>>(STATE_PATH, {})
   return {
-    internal: parsed.internal ?? defaultLegState(),
-    external: parsed.external ?? defaultLegState(),
+    // Слияние с дефолтом обязательно, а не `?? defaultLegState()`: на диске лежит состояние
+    // старой формы (булев `alerted`, без полей повторного алерта). Без слияния новые поля
+    // остались бы `undefined`, `shouldSendAlert` свалился бы в сравнение с NaN и молчал бы
+    // навсегда — ровно тот отказ, который здесь и чинится (§62).
+    internal: { ...defaultLegState(), ...parsed.internal },
+    external: { ...defaultLegState(), ...parsed.external },
     history: parsed.history ?? [],
   }
 }
@@ -79,8 +159,8 @@ function saveState(state: CanaryState): void {
 
 /**
  * Отправляет письмо-канарейку через SMTP выделенного ящика `canary@letar.best`.
- * Получатель — сам канареечный ящик (internal-нога); внешний ящик (если задан)
- * получает копию через BCC — так обе ноги проверяются одним письмом.
+ * Получателей двое и оба в `To:` — сам канареечный ящик (internal-нога) и внешний ящик,
+ * если задан (external-нога). Одно письмо проверяет обе ноги.
  */
 async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: string | null }> {
   const host = process.env.EMAIL_CANARY_SMTP_HOST || 'mail.letar.best'
@@ -104,10 +184,17 @@ async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: str
     fromName: 'Email Canary',
   })
 
+  // Оба получателя — в `To:`, одним письмом.
+  //
+  // Раньше внешний ящик получал скрытую копию, и это была главная причина, по которой Gmail
+  // клал канарейку в спам: получателя нет ни в `To:`, ни в `Cc:`, тема повторяется каждые 15
+  // минут. 1684 письма подряд ушли в спам, ни одного в INBOX (§62). Адреса служебные, скрывать
+  // их друг от друга незачем.
+  const recipients = externalRecipient ? `${user}, ${externalRecipient}` : user
+
   const result = await provider.sendEmail({
-    to: user,
-    ...(externalRecipient && { bcc: externalRecipient }),
-    subject: `[email-canary] ${token}`,
+    to: recipients,
+    subject: `${CANARY_SUBJECT_MARKER} ${token}`,
     text: `Канареечная проверка доставки email. Токен: ${token}. Отправлено: ${new Date().toISOString()}`,
     html: `<p>Канареечная проверка доставки email. Токен: ${token}. Отправлено: ${new Date().toISOString()}</p>`,
     meta: { type: 'email-canary' },
@@ -116,7 +203,17 @@ async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: str
   return { ok: result.success, error: result.error ?? null }
 }
 
-type WaitResult = { ok: boolean; latencyMs: number | null; error: string | null }
+type WaitResult = {
+  ok: boolean
+  latencyMs: number | null
+  error: string | null
+  folder: string | null
+  deliveredToSpam: boolean
+}
+
+function failedWait(error: string): WaitResult {
+  return { ok: false, latencyMs: null, error, folder: null, deliveredToSpam: false }
+}
 
 /**
  * Ждёт появления письма с токеном в теме во входящих указанного IMAP-ящика.
@@ -138,6 +235,8 @@ async function waitForCanaryMessage(opts: {
   user: string
   password: string
   token: string
+  /** Удалять найденное письмо и старый мусор. Только для служебного ящика, не для чужого. */
+  purge: boolean
 }): Promise<WaitResult> {
   const client = new ImapFlow({
     host: opts.host,
@@ -155,15 +254,13 @@ async function waitForCanaryMessage(opts: {
   const hardDeadlineMs = POLL_TIMEOUT_MS + 15_000
 
   const result = await Promise.race([
-    waitForCanaryMessageInner(client, opts.token, () => clientError),
+    waitForCanaryMessageInner(client, opts.token, opts.purge, () => clientError),
     new Promise<WaitResult>((resolve) => {
       setTimeout(() => {
-        resolve({
-          ok: false,
-          latencyMs: null,
-          error: (clientError as Error | null)?.message
+        resolve(failedWait(
+          (clientError as Error | null)?.message
             ?? `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
-        })
+        ))
       }, hardDeadlineMs)
     }),
   ])
@@ -175,43 +272,151 @@ async function waitForCanaryMessage(opts: {
   return result
 }
 
+interface FoundMessage {
+  folder: string
+  uid: number
+  spam: boolean
+}
+
+/** Папки, которые вообще можно выбрать. `\Noselect` — контейнеры вроде `[Gmail]`, в них не ищут. */
+async function listSelectableMailboxes(client: ImapFlow): Promise<MailboxInfo[]> {
+  const boxes = await client.list()
+  return boxes
+    .filter((box) => !box.flags?.has('\\Noselect'))
+    .map((box) => ({ path: box.path, specialUse: box.specialUse }))
+}
+
+/**
+ * Ищет письмо с токеном в перечисленных папках серверным `SEARCH` по теме.
+ *
+ * Раньше здесь был `fetch({ seen: false })` с перебором конвертов на клиенте — он и ограничивал
+ * поиск одним INBOX, и тянул через сеть все непрочитанные письма ящика. `SEARCH` отдаёт сразу
+ * UID нужного письма, поэтому размер ящика на проверку больше не влияет.
+ */
+async function findTokenInMailboxes(
+  client: ImapFlow,
+  mailboxes: MailboxInfo[],
+  token: string,
+): Promise<FoundMessage | null> {
+  for (const box of mailboxes) {
+    try {
+      const lock = await client.getMailboxLock(box.path, { acquireTimeout: POLL_INTERVAL_MS })
+      try {
+        const uids = await client.search({ subject: token }, { uid: true })
+        if (uids && uids.length > 0) {
+          return { folder: box.path, uid: uids[uids.length - 1], spam: isSpamMailbox(box) }
+        }
+      } finally {
+        lock.release()
+      }
+    } catch {
+      // папка недоступна для выборки (права, гонка с реиндексацией) — она не должна ронять проверку
+    }
+  }
+  return null
+}
+
+/**
+ * Закрывает найденное письмо: помечает прочитанным, а в служебном ящике — удаляет вместе со
+ * старым канареечным мусором.
+ *
+ * ⚠️ Вызывается СТРОГО после того, как поиск завершён и лок отпущен. В прежней версии
+ * `messageFlagsAdd` стоял внутри активного `for await (… client.fetch())`, то есть команда
+ * уходила в соединение, занятое незакрытым FETCH, а следом сразу шли `return` → `logout()`.
+ * Флаг не выставлялся ни разу за 17 дней: 1695 писем, все непрочитанные (§62).
+ */
+async function settleFoundMessage(client: ImapFlow, found: FoundMessage, purge: boolean): Promise<void> {
+  try {
+    const lock = await client.getMailboxLock(found.folder)
+    try {
+      await client.messageFlagsAdd(found.uid, ['\\Seen'], { uid: true })
+
+      if (purge) {
+        await client.messageDelete(found.uid, { uid: true })
+        await purgeOldCanaryMessages(client)
+      }
+    } finally {
+      lock.release()
+    }
+  } catch (error) {
+    // Уборка не влияет на вердикт проверки: письмо дошло — это главное, что канарейка измеряет.
+    console.error('[EmailCanary] не удалось прибрать найденное письмо:', error)
+  }
+}
+
+/**
+ * Чистит служебный ящик от канареечных писем старше суток — вызывается при уже взятом локе.
+ * Без неё ящик рос на 96 писем в день и не чистился ничем: к разбору §62 в нём лежало 1695 писем.
+ */
+async function purgeOldCanaryMessages(client: ImapFlow): Promise<void> {
+  const before = new Date(Date.now() - PURGE_OLDER_THAN_MS)
+  const stale = await client.search({ subject: CANARY_SUBJECT_MARKER, before }, { uid: true })
+  if (stale && stale.length > 0) {
+    await client.messageDelete(stale, { uid: true })
+  }
+}
+
 async function waitForCanaryMessageInner(
   client: ImapFlow,
   token: string,
+  purge: boolean,
   getClientError: () => Error | null,
 ): Promise<WaitResult> {
   const startedAt = Date.now()
 
   try {
     await client.connect()
-    const lock = await client.getMailboxLock('INBOX', { acquireTimeout: POLL_TIMEOUT_MS })
 
-    try {
-      while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
-        const clientError = getClientError()
-        if (clientError) {
-          return { ok: false, latencyMs: null, error: clientError.message }
-        }
-        for await (const message of client.fetch({ seen: false }, { envelope: true, uid: true })) {
-          if (message.envelope?.subject?.includes(token)) {
-            await client.messageFlagsAdd(message.uid, ['\\Seen'], { uid: true })
-            return { ok: true, latencyMs: Date.now() - startedAt, error: null }
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
-      }
+    const all = await listSelectableMailboxes(client)
+    // Каждую итерацию опрашиваем только вероятные папки — INBOX и спам. Полный обход стоит
+    // SELECT+SEARCH на папку, и гонять его каждые 5 секунд по всему ящику незачем.
+    const likely = all.filter((box) => box.path.toUpperCase() === 'INBOX' || isSpamMailbox(box))
+    const priority = likely.length > 0 ? likely : all
+
+    while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
       const clientError = getClientError()
-      return clientError
-        ? { ok: false, latencyMs: null, error: clientError.message }
-        : { ok: false, latencyMs: null, error: `Письмо с токеном не пришло за ${POLL_TIMEOUT_MS}мс` }
-    } finally {
-      await Promise.resolve(lock.release()).catch(() => {
-        // соединение уже могло быть разорвано ошибкой выше — не мешаем вернуть результат
-      })
+      if (clientError) {
+        return failedWait(clientError.message)
+      }
+
+      const found = await findTokenInMailboxes(client, priority, token)
+      if (found) {
+        await settleFoundMessage(client, found, purge)
+        return {
+          ok: true,
+          latencyMs: Date.now() - startedAt,
+          error: null,
+          folder: found.folder,
+          deliveredToSpam: found.spam,
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
     }
+
+    const clientError = getClientError()
+    if (clientError) {
+      return failedWait(clientError.message)
+    }
+
+    // Последний шанс: письмо могло уехать в пользовательскую папку фильтром на стороне провайдера.
+    // Один полный обход в конце дешевле, чем на каждой итерации, и снимает слепоту окончательно.
+    const anywhere = await findTokenInMailboxes(client, all, token)
+    if (anywhere) {
+      await settleFoundMessage(client, anywhere, purge)
+      return {
+        ok: true,
+        latencyMs: Date.now() - startedAt,
+        error: null,
+        folder: anywhere.folder,
+        deliveredToSpam: anywhere.spam,
+      }
+    }
+
+    return failedWait(`Письмо с токеном не пришло за ${POLL_TIMEOUT_MS}мс (проверены все папки)`)
   } catch (error) {
     const reported = getClientError() ?? error
-    return { ok: false, latencyMs: null, error: reported instanceof Error ? reported.message : 'Unknown IMAP error' }
+    return failedWait(reported instanceof Error ? reported.message : 'Unknown IMAP error')
   } finally {
     await client.logout().catch(() => {
       // соединение уже могло быть разорвано ошибкой выше — не мешаем вернуть результат
@@ -235,6 +440,8 @@ async function checkInternalLeg(token: string): Promise<EmailCanaryLegResult> {
     user,
     password,
     token,
+    // Служебный ящик целиком наш — здесь чистим за собой.
+    purge: true,
   })
 
   return { configured: true, ...result }
@@ -257,6 +464,8 @@ async function checkExternalLeg(token: string): Promise<EmailCanaryLegResult> {
     user,
     password,
     token,
+    // Чужой ящик — ничего не удаляем, только помечаем прочитанным.
+    purge: false,
   })
 
   return { configured: true, ...result }
@@ -271,13 +480,28 @@ async function notifyCanaryAlert(
   leg: 'internal' | 'external',
   consecutiveFailures: number,
   detail: string,
-): Promise<void> {
-  await postDashboardAlert({
+): Promise<boolean> {
+  return await postDashboardAlert({
     type: 'CRON_FAILED',
     severity: 'ERROR',
     title: `Email canary: ${consecutiveFailures} подряд неудач (${leg})`,
     message: detail,
     metadata: { jobId: 'email-canary-check', leg, consecutiveFailures },
+  })
+}
+
+/**
+ * Отдельный сигнал: письмо дошло, но легло в спам. Формально доставка есть — до человека письмо
+ * не дойдёт. Именно это состояние 17 дней выглядело как «внешняя нога сломана» (§62).
+ */
+async function notifySpamDelivery(leg: 'internal' | 'external', folder: string): Promise<void> {
+  await postDashboardAlert({
+    type: 'CRON_FAILED',
+    severity: 'WARNING',
+    title: `Email canary: письмо доставлено в спам (${leg})`,
+    message: `Письмо дошло, но попало в папку «${folder}», а не во входящие. `
+      + 'Доставка формально работает, до получателя письмо не дойдёт.',
+    metadata: { jobId: 'email-canary-check', leg, folder, deliveredToSpam: true },
   })
 }
 
@@ -295,20 +519,43 @@ async function updateLegState(
   }
 
   const next: CanaryLegState = {
+    ...state,
     consecutiveFailures: result.ok ? 0 : state.consecutiveFailures + 1,
-    alerted: result.ok ? false : state.alerted,
     lastCheckedAt: new Date().toISOString(),
     lastOk: result.ok,
     lastLatencyMs: result.latencyMs,
+    lastFolder: result.folder ?? null,
   }
 
-  if (!result.ok && next.consecutiveFailures >= ALERT_THRESHOLD && !state.alerted) {
-    await notifyCanaryAlert(leg, next.consecutiveFailures, result.error ?? 'Письмо не дошло за таймаут')
-    next.alerted = true
-    return { state: next, alerted: true }
+  if (result.ok) {
+    // Успех обнуляет историю уведомлений — следующая серия начнётся с чистого листа.
+    next.alertedAtFailures = null
+    next.lastAlertDelivered = null
+
+    if (result.deliveredToSpam && result.folder) {
+      await notifySpamDelivery(leg, result.folder)
+    }
+
+    return { state: next, alerted: false }
   }
 
-  return { state: next, alerted: false }
+  if (!shouldSendAlert(next, result, ALERT_THRESHOLD)) {
+    return { state: next, alerted: false }
+  }
+
+  const delivered = await notifyCanaryAlert(
+    leg,
+    next.consecutiveFailures,
+    result.error ?? 'Письмо не дошло за таймаут',
+  )
+
+  next.alertedAtFailures = next.consecutiveFailures
+  next.lastAlertAt = new Date().toISOString()
+  // Ключевое отличие от прежней версии: пишем ИСХОД отправки, а не факт вызова. Недоставленный
+  // алерт заставит `shouldSendAlert` повторить попытку на следующем же прогоне.
+  next.lastAlertDelivered = delivered
+
+  return { state: next, alerted: delivered }
 }
 
 /**

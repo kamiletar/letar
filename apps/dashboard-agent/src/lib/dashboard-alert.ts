@@ -32,8 +32,13 @@ export interface DashboardAlert {
  * Уведомляет dashboard о проблеме (создаёт Alert, dashboard сам решает — слать ли в Telegram
  * по своим AlertSettings). Ошибки самого уведомления никогда не бросаются наружу — только
  * логируются, чтобы не ронять вызывающую задачу из-за недоступности dashboard.
+ *
+ * Возвращает `true`, только если dashboard подтвердил приём (2xx). Вызывающему это нужно, чтобы
+ * отличить «уведомили» от «попытались уведомить»: §62 — канарейка 17 дней держала в состоянии
+ * `alerted: true`, тогда как в БД dashboard не появилось ни одной записи Alert. Проглоченная
+ * здесь ошибка выглядела снаружи неотличимо от успеха, поэтому повторять было некому.
  */
-export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
+export async function postDashboardAlert(alert: DashboardAlert): Promise<boolean> {
   try {
     // Секрет `dashboard`, а не агента (PLAN-INFRA.md §52). Совпадение этих двух значений на
     // сегодня — историческая случайность, полагаться на неё нельзя: ротация секрета в dashboard
@@ -43,7 +48,7 @@ export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
       console.error(
         '[DashboardAlert] CRON_SECRET для dashboard недоступен (/secrets/dashboard.env) — alert не отправлен',
       )
-      return
+      return false
     }
 
     const url = getAppUrl('dashboard', '/api/alerts')
@@ -76,8 +81,12 @@ export async function postDashboardAlert(alert: DashboardAlert): Promise<void> {
       console.error(
         `[DashboardAlert] dashboard отверг alert ${alert.type}: HTTP ${response.status} ${response.statusText}. Ответ: ${body}`,
       )
+      return false
     }
+
+    return true
   } catch (error) {
     console.error('[DashboardAlert] Не удалось отправить alert в dashboard:', error)
+    return false
   }
 }

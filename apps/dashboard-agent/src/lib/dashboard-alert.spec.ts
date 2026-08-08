@@ -83,8 +83,33 @@ describe('postDashboardAlert', () => {
     writeDashboardSecret()
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connect ECONNREFUSED')))
 
-    await expect(postDashboardAlert(alert)).resolves.toBeUndefined()
+    await expect(postDashboardAlert(alert)).resolves.toBe(false)
     expect(loggedText()).toContain('ECONNREFUSED')
+  })
+
+  /**
+   * Регрессия §62: вызывающий обязан уметь отличить «уведомили» от «попытались уведомить».
+   * Пока функция возвращала void, канарейка записывала `alerted: true` даже когда dashboard
+   * не принял ни одной записи — и повторять было некому.
+   */
+  it('подтверждает доставку только на 2xx', async () => {
+    writeDashboardSecret()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"success":true}', { status: 200 })))
+
+    await expect(postDashboardAlert(alert)).resolves.toBe(true)
+  })
+
+  it('не считает доставленным отвергнутый alert', async () => {
+    writeDashboardSecret()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"error":"Unauthorized"}', { status: 401 })))
+
+    await expect(postDashboardAlert(alert)).resolves.toBe(false)
+  })
+
+  it('не считает доставленным alert, который не отправляли без секрета', async () => {
+    vi.stubGlobal('fetch', vi.fn())
+
+    await expect(postDashboardAlert(alert)).resolves.toBe(false)
   })
 
   it('без секрета dashboard не отправляет запрос вовсе', async () => {
