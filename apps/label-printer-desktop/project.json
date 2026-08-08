@@ -78,7 +78,13 @@
     },
     "zenstack:generate": {
       "command": "zenstack generate --schema apps/label-printer-desktop/schema.zmodel",
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build",
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ]
     },
     "db:template": {
       "command": "bun run scripts/db-template-safe.ts",

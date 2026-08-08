@@ -93,6 +93,12 @@
         "cwd": "apps/grandslamcup",
         "parallel": false
       },
+      "dependsOn": [
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ],
       "cache": true,
       "inputs": ["{projectRoot}/schema.zmodel"],
       "outputs": ["{projectRoot}/src/generated"],

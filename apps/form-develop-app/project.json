@@ -85,6 +85,12 @@
         "command": "zenstack generate",
         "cwd": "apps/form-develop-app"
       },
+      "dependsOn": [
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ],
       "cache": false,
       "metadata": {
         "description": "Generate Prisma schema from ZenStack",

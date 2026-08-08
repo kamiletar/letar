@@ -23,6 +23,12 @@
         "command": "zenstack generate && prisma generate",
         "cwd": "apps/form-example"
       },
+      "dependsOn": [
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ],
       "cache": true,
       "inputs": [
         "{projectRoot}/schema.zmodel",

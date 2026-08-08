@@ -245,7 +245,13 @@
         "cwd": "apps/animatrona",
         "parallel": false
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build",
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ]
     },
     "db:push": {
       "executor": "nx:run-commands",

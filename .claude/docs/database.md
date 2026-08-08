@@ -24,6 +24,46 @@
 
 **Важно:** `zenstack:generate` автоматически запускает `prisma generate`, поэтому отдельный `db:generate` обычно не нужен!
 
+### ⚠️ `zenstack:generate` зависит от собранного `libs/zenstack-form-plugin/dist/`
+
+Приложения, чей `schema.zmodel` подключает `plugin formSchema { provider = '../../libs/zenstack-form-plugin/dist/index.js' ... }`,
+на самом деле грузят **скомпилированный** JS — `dist/` в git не коммитится (build output) и на
+свежем клоне/после `rm -rf dist` его просто нет. Без явной зависимости в графе Nx `zenstack generate`
+падает не с понятной ошибкой, а с криптичным:
+
+```
+Failed to load plugin module "../../libs/zenstack-form-plugin/dist/index.js": Only URLs with a
+scheme in: file, data, and node are supported by the default ESM loader. On Windows, absolute
+paths must be valid file:// URLs. Received protocol 'c:'
+```
+
+Это ESM-лоадер жалуется на попытку импортировать несуществующий файл — реальная причина
+(нет `dist/`) в тексте ошибки не упомянута вовсе.
+
+**Фикс уже применён** в `project.json` каждого приложения, использующего плагин форм: таргет
+`zenstack:generate` несёт `dependsOn` на таргет `build` библиотеки —
+
+```json
+"dependsOn": [
+  {
+    "projects": ["@letar/zenstack-form-plugin"],
+    "target": "build"
+  }
+]
+```
+
+Nx сам соберёт плагин перед генерацией, если `dist/` отсутствует или устарел (таргет `build`
+библиотеки кэшируемый). То же самое добавлено в `libs/generators/src/generators/new-app/files/project.json.template`
+— новые приложения через `nx g @letar/generators:new-app` получают это сразу.
+
+⚠️ `nx:run-commands` — обычный executor без встроенной логики зависимостей, но `dependsOn` в
+`project.json` — это фича самого Nx (граф задач), а не executor'а, поэтому работает одинаково
+для любого таргета независимо от того, что он запускает.
+
+Если заводишь **новое** приложение вручную (не через генератор) или подключаешь форм-плагин к
+уже существующему приложению — не забудь добавить этот `dependsOn` в его `zenstack:generate`
+сам, генератор его не пересоздаст автоматически для уже существующего `project.json`.
+
 ### Функции ZenStack
 
 - **Политики контроля доступа** определяются декораторами `@@allow()` и `@@deny()`
