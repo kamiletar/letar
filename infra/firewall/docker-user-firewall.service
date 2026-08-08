@@ -1,0 +1,13 @@
+[Unit]
+Description=Default-deny DOCKER-USER (+ опционально IPv6 INPUT)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/docker-user-firewall.env
+ExecStart=/usr/local/sbin/docker-user-firewall.sh
+
+[Install]
+WantedBy=multi-user.target
