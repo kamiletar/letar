@@ -2,12 +2,24 @@ import { isAuthError, requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { z } from 'zod/v4'
 
 type Params = Promise<{ serverId: string }>
 
 /**
  * PATCH /api/admin/pin-servers/[serverId]
- * Обновить поля пин-сервера: status (ONLINE ↔ MAINTENANCE), name, capacityBytes.
+ * Обновить поля пин-сервера: status (ONLINE ↔ MAINTENANCE), name, capacityBytes,
+ * apiUrl, pinQueueSecret.
+ *
+ * ⚠️ `apiUrl` и `pinQueueSecret` добавлены 2026-08-08, до этого их нельзя было изменить
+ * НИКАК — ни здесь, ни при создании (`POST` принимает только `authSecret`), ни через UI
+ * (страницы управления пин-серверами нет вовсе). Обнаружено при попытке сделать две штатные
+ * операции: сменить адрес сервера на `pin1.s3.letar.best` и ротировать утёкший токен
+ * (PLAN-INFRA.md §61). Обе упёрлись в отсутствие механизма, а не в отсутствие прав.
+ *
+ * Урок общий: если секрет можно только задать при создании, но нельзя сменить, то его утечка
+ * превращается из инцидента на десять минут в задачу с правкой кода и деплоем. Поле для
+ * секрета обязано иметь путь ротации с самого начала.
  */
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   const auth = await requireAdmin()
@@ -17,7 +29,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   const { serverId } = await params
   const body = await request.json()
-  const { status, name, capacityBytes } = body
+  const { status, name, capacityBytes, apiUrl, pinQueueSecret } = body
 
   const updateData: Record<string, unknown> = {}
 
@@ -40,6 +52,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       return NextResponse.json({ error: 'capacityBytes должен быть неотрицательным числом' }, { status: 400 })
     }
     updateData.capacityBytes = capacityBytes
+  }
+
+  if (apiUrl !== undefined) {
+    const parsedUrl = z.url().safeParse(apiUrl)
+    if (!parsedUrl.success) {
+      return NextResponse.json({ error: 'apiUrl должен быть корректным URL' }, { status: 400 })
+    }
+    updateData.apiUrl = parsedUrl.data
+  }
+
+  if (pinQueueSecret !== undefined) {
+    // `null` — осознанное снятие токена, пустая строка — почти наверняка промах формы.
+    // Различать обязательно: пустой токен превратил бы `if (server.pinQueueSecret)` в DELETE
+    // ниже в «ходить без авторизации», то есть тихо отключил бы её вместо ротации.
+    if (pinQueueSecret !== null && (typeof pinQueueSecret !== 'string' || pinQueueSecret.length === 0)) {
+      return NextResponse.json(
+        { error: 'pinQueueSecret должен быть непустой строкой либо null для снятия' },
+        { status: 400 },
+      )
+    }
+    updateData.pinQueueSecret = pinQueueSecret
   }
 
   if (Object.keys(updateData).length === 0) {
