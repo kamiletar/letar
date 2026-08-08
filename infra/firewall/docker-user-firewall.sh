@@ -18,9 +18,9 @@
 #                          не хостовый — см. .claude/docs/firewall.md про DNAT-переписывание)
 #   UDP_PORTS           — CSV портов по UDP (можно пусто)
 #   ENABLE_IPV6_INPUT    — "1", чтобы также применить default-deny в ip6tables INPUT.
-#                          НЕ включать на сервере, где IPv6 INPUT уже закрыт другим механизмом
-#                          (mail-сервер — ufw с -P INPUT DROP) — школьная ошибка задвоить и
-#                          потерять доступ, если один из двух наборов правил разъедется.
+#                          Сверено с реальными серверами (BlackCove, 2026-08-08, тред
+#                          firewall-versioning): все три сервера, включая mail, применяют этот
+#                          блок — ufw на mail-сервере ему не замена, а независимый слой.
 #   HOST_DENY_TCP_PORTS  — CSV портов, для которых нужен явный DROP в IPv4 INPUT (не DOCKER-USER).
 #                          Нужны сервисам с network_mode: host — их трафик минует FORWARD/DNAT
 #                          Docker'а вообще, поэтому default-deny в DOCKER-USER их не видит и не
@@ -49,7 +49,7 @@ fi
 echo "docker-user-firewall: интерфейс=$EXT_IFACE tcp=$TCP_PORTS udp=${UDP_PORTS:-<нет>} ipv6_input=$ENABLE_IPV6_INPUT host_deny=${HOST_DENY_TCP_PORTS:-<нет>}"
 
 # --- IPv4: DOCKER-USER (FORWARD) ---
-iptables -F DOCKER-USER
+iptables -F DOCKER-USER 2>/dev/null || true
 iptables -A DOCKER-USER -i "$EXT_IFACE" -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
 iptables -A DOCKER-USER -i "$EXT_IFACE" -p tcp -m multiport --dports "$TCP_PORTS" -j RETURN
 if [ -n "$UDP_PORTS" ]; then
@@ -59,7 +59,7 @@ iptables -A DOCKER-USER -i "$EXT_IFACE" -j DROP
 
 # --- IPv6: INPUT — только если явно включено этой конфигурацией ---
 if [ "$ENABLE_IPV6_INPUT" = "1" ]; then
-  ip6tables -F INPUT
+  ip6tables -F INPUT 2>/dev/null || true
   ip6tables -A INPUT -i "$EXT_IFACE" -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
   # NDP + Path MTU Discovery — не «пинг для удобства», без этого IPv6-связность деградирует
   # не сразу и трудновоспроизводимо (.claude/docs/firewall.md, раздел IPv6).
