@@ -19,9 +19,12 @@ export const RELAY_PEER_ID = '12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995Pk
 export const RELAY_REGISTER_URL = 'http://31.56.180.161:41080/register'
 
 /**
- * Production gateway (s2.letar.best)
- * Роль: обслуживает anime.letar.best, получает блоки напрямую от ПК через bitswap
- * Прямое TCP соединение (outbound) обходит NAT — relay не нужен для данных
+ * Gateway (s2, 185.28.85.195) — СПИСАН, узел не существует с июня 2026 (PLAN-INFRA.md §57).
+ * Оставлено как deprecated константа: PeerId используется в KNOWN_PINNER_PEER_IDS
+ * (peer-sync-types.ts) для авто-удаления этого peer из Peering у клиентов со старым конфигом.
+ * НЕ используется в KUBO_CONFIG.Peering — форсированный коннект к мёртвому хосту убран.
+ *
+ * @deprecated используйте синхронизацию из API трекера
  */
 export const GATEWAY_PEER_ID = '12D3KooWJtQXuNd4g5w3fH7bCSj4o4DA1PLBFjRGowiBbf6zqxa6'
 export const GATEWAY_ADDR = '/ip4/185.28.85.195/tcp/42001'
@@ -216,11 +219,7 @@ export const KUBO_CONFIG = {
       // AutoRelay через StaticRelays — единственный путь подключения к relay.
       // Relay monitor восстанавливает при потере.
 
-      // Gateway — прямое TCP/QUIC соединение для bitswap (outbound обходит NAT)
-      {
-        ID: GATEWAY_PEER_ID,
-        Addrs: [GATEWAY_ADDR, '/ip4/185.28.85.195/udp/42001/quic-v1'],
-      },
+      // Gateway (s2) СПИСАН с июня 2026 — не добавляем в Peering, см. комментарий у GATEWAY_PEER_ID.
       // Pinner1 — прямое TCP/QUIC соединение для быстрого пиннинга (outbound обходит NAT)
       {
         ID: PINNER_PEER_ID,

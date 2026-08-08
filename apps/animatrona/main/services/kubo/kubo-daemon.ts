@@ -12,7 +12,7 @@ import path from 'path'
 
 import { createModuleLogger } from '../../utils/logger'
 import { getAvailablePort } from '../../utils/port-finder'
-import { GATEWAY_ADDR, GATEWAY_PEER_ID, KUBO_CONFIG, KUBO_PORTS } from './kubo-config'
+import { KUBO_CONFIG, KUBO_PORTS } from './kubo-config'
 import type { KuboCurrentPorts } from './kubo-types'
 import { getPeerSyncService } from './peer-sync-service'
 import type { PinServer } from './peer-sync-types'
@@ -216,16 +216,8 @@ export async function applyKuboConfig(
 
   const finalBootstrap = [...syncedBootstrap, ...publicBootstrapNodes]
 
-  // Gateway добавляем хардкодом — он не в API трекера (не pin-сервер),
-  // но нужен в Peering для постоянного outbound-соединения (обходит NAT)
-  const gatewayAlreadyInPeering = syncedPeering.some((p) => p.ID === GATEWAY_PEER_ID)
-  if (!gatewayAlreadyInPeering) {
-    syncedPeering.push({
-      ID: GATEWAY_PEER_ID,
-      Addrs: [GATEWAY_ADDR, '/ip4/185.28.85.195/udp/42001/quic-v1'],
-    })
-    log.info('Gateway добавлен в Peering (hardcoded fallback)')
-  }
+  // Gateway (s2) списан с июня 2026 (PLAN-INFRA.md §57) — раньше здесь форсировался
+  // хардкод-коннект к мёртвому хосту на каждом старте демона, до автоочистки reconnect-циклом.
 
   const finalPeering = { Peers: syncedPeering }
 

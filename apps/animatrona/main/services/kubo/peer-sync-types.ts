@@ -88,7 +88,8 @@ export const KNOWN_PINNER_PEER_IDS: ReadonlySet<string> = new Set([
   '12D3KooWP5hrqw8HHXUGaepSSRhsa8isoTAbcnRnKkjgHhWRLxiV',
   // Relay (mail) — в Peering НЕ добавляем, но в whitelist для удаления если вдруг окажется
   '12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA',
-  // Gateway (s2) — актуален
+  // Gateway (s2) — СПИСАН с июня 2026, но остаётся в whitelist для авто-удаления
+  // из Peering у клиентов со старым конфигом (PLAN-INFRA.md §57)
   '12D3KooWJtQXuNd4g5w3fH7bCSj4o4DA1PLBFjRGowiBbf6zqxa6',
   // Pinner4 / Gateway (s3 188.127.235.141) — gateway.letar.best
   '12D3KooWM7KtRLjqRmJzva7Qy5KZzfaLES4Fk8GgnjabbWoo8A52',
