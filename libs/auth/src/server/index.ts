@@ -58,7 +58,7 @@ export type {
 } from './create-auth/types'
 
 // Redis secondaryStorage адаптер (Этап 0.2 PLAN.md — rate-limit персистентность)
-export { createRedisStorage } from './redis-storage'
+export { createRedisStorage, type CreateRedisStorageOptions } from './redis-storage'
 
 // Шифрование at-rest (Этап 8 PLAN.md)
 export {
