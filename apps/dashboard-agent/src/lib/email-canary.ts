@@ -79,7 +79,11 @@ interface CanaryState {
 
 const STATE_PATH = process.env.EMAIL_CANARY_STATE_PATH || '/home/deploy/letar/email-canary-state.json'
 const MAX_HISTORY = 30
-const ALERT_THRESHOLD = 3
+/**
+ * Сколько подряд-неудач до первого алерта. Снижен с 3 до 2 вместе с переводом расписания
+ * на часовой интервал: две неудачи подряд за два часа — уже не сетевая флуктуация.
+ */
+const ALERT_THRESHOLD = 2
 const POLL_TIMEOUT_MS = 90_000
 const POLL_INTERVAL_MS = 5_000
 /** Общая часть темы всех канареечных писем — по ней же чистится служебный ящик. */
