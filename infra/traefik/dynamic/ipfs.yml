@@ -1,0 +1,53 @@
+# ipfs.letar.best + gateway.letar.best — HTTP-шлюз Kubo (PLAN-INFRA.md §48 M2, §57)
+#
+# Два имени, один бэкенд — ровно так они и живут в NPM сегодня (`1.conf` и `2.conf`, оба
+# голым `proxy_pass` на kubo). Traefik воспроизводит текущее поведение один в один, без
+# кеша: кеш был на s2 вместе с узлом `animatrona-gateway`, выведенным из эксплуатации
+# ~17–21 июня 2026.
+#
+# ⚠️ Имена РАЗНЫЕ ПО СМЫСЛУ, хоть сейчас и указывают в одно место (решение владельца §57):
+#   `ipfs.letar.best`    — сам узел (origin). Остаётся на s3 навсегда.
+#   `gateway.letar.best` — публичный кеширующий прокси. Уедет на mail, когда §57 доедет.
+# То есть роутер `gateway` здесь ВРЕМЕННЫЙ. Когда прокси на mail поднимут, проверят снаружи
+# и переставят DNS — снести и этот роутер, и per-name аккаунт acme-dns для `gateway`.
+# Порядок в §57 обязателен и уже нарушался: прокси → проверка снаружи → только потом DNS.
+#
+# Почему file-провайдер, а не label'ы: compose kubo лежит в `/opt/letar-ipfs` на s3, вне git
+# (§60) — метки к нему не прицепить через репозиторий.
+#
+# ⛔ НЕ через `host.docker.internal`, в отличие от соседнего `pin1.yml`. Шлюз публикует
+# `127.0.0.1:8080` на хост, и первый рефлекс — решить, что из контейнера он недоступен и
+# нужен обходной путь. Это неверно: `HostIp` в публикации ограничивает доступ только С ХОСТА
+# снаружи Docker. Внутри сети `letar-ipfs_default` порт живёт на `172.18.0.2:8080` и открыт
+# любому контейнеру в той же сети — тем NPM сейчас и пользуется. Traefik подключён к этой же
+# сети (см. `networks:` в docker-compose.yml рядом), поэтому ходит по имени напрямую.
+# Алиас `kubo` даёт сам compose-стек kubo; второй его алиас — `ipfs`, но берём `kubo`, чтобы
+# имя сервиса не путалось с именем протокола.
+
+http:
+  routers:
+    ipfs:
+      rule: 'Host(`ipfs.letar.best`)'
+      entryPoints:
+        - websecure
+      service: kubo-gateway
+      tls:
+        # ⚠️ Имя ВНЕ wildcard `*.s3.letar.best` — нужен свой сертификат через DNS-01.
+        # `domains` не указываем: ключ в `acme-dns-accounts.json` должен буквально совпасть
+        # с этим Host'ом (`ipfs.letar.best`). Поиск точный, без подъёма по иерархии — на этом
+        # уже провалился роутер дашборда, см. infra/acme-dns/README.md.
+        certResolver: dns
+
+    gateway:
+      rule: 'Host(`gateway.letar.best`)'
+      entryPoints:
+        - websecure
+      service: kubo-gateway
+      tls:
+        certResolver: dns
+
+  services:
+    kubo-gateway:
+      loadBalancer:
+        servers:
+          - url: 'http://kubo:8080'

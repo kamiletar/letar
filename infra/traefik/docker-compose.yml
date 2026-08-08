@@ -40,7 +40,16 @@ services:
       - /home/deploy/lego:/acme-data:ro # учётные данные acme-dns, не в git
     networks:
       - traefik-network
+      # Сеть compose-стека kubo — нужна для маршрутов `ipfs`/`gateway` (dynamic/ipfs.yml).
+      # Подключаемся МЫ к нему, а не наоборот: compose kubo лежит в /opt/letar-ipfs вне git
+      # (§60), правка там не доедет через `git pull`, а этот файл — доедет.
+      - letar-ipfs
 
 networks:
   traefik-network:
     external: true
+  letar-ipfs:
+    external: true
+    # Имя задано стеком kubo (каталог `letar-ipfs` + суффикс compose), поэтому здесь
+    # `name:` обязателен — без него compose искал бы `traefik_letar-ipfs`.
+    name: letar-ipfs_default

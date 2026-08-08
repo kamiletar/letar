@@ -193,18 +193,27 @@ response error : status code 404   domains=["<app>-stage.s3.letar.best"]
 сертификат, обязано совпадать с ключом в `acme-dns-accounts.json` буквально.** Поиск там точный,
 подъёма по иерархии нет.
 
-| Роутер                      | Host                        | Ключ в хранилище   | Что ставить                                     |
-| --------------------------- | --------------------------- | ------------------ | ----------------------------------------------- |
-| приложение (staging)        | `<app>-stage.s3.letar.best` | —                  | `tls: 'true'`, резолвера нет — берёт wildcard   |
-| дашборд (заказчик wildcard) | `traefik.s3.letar.best`     | `s3.letar.best`    | `certResolver` + `domains` (Host ≠ ключ)        |
-| `media-api`                 | `media.letar.best`          | `media.letar.best` | `certresolver`, **без** `domains` (Host = ключ) |
-| `media-v`                   | `media.letar.best` + `/v/`  | —                  | `tls: 'true'` — берёт сертификат соседа         |
+| Роутер                      | Host                        | Ключ в хранилище     | Что ставить                                     |
+| --------------------------- | --------------------------- | -------------------- | ----------------------------------------------- |
+| приложение (staging)        | `<app>-stage.s3.letar.best` | —                    | `tls: 'true'`, резолвера нет — берёт wildcard   |
+| дашборд (заказчик wildcard) | `traefik.s3.letar.best`     | `s3.letar.best`      | `certResolver` + `domains` (Host ≠ ключ)        |
+| `media-api`                 | `media.letar.best`          | `media.letar.best`   | `certresolver`, **без** `domains` (Host = ключ) |
+| `media-v`                   | `media.letar.best` + `/v/`  | —                    | `tls: 'true'` — берёт сертификат соседа         |
+| `ipfs`                      | `ipfs.letar.best`           | `ipfs.letar.best`    | `certResolver`, **без** `domains` (Host = ключ) |
+| `gateway`                   | `gateway.letar.best`        | `gateway.letar.best` | то же самое                                     |
 
-`media.letar.best` — пока единственный обитатель третьей строки: продакшен-имя на staging-сервере,
-вне обоих wildcard'ов. Ему заведён отдельный аккаунт acme-dns ровно на это имя (решение владельца
-2026-08-08, [PLAN-INFRA.md §48 M2](/PLAN-INFRA.md)) — чтобы компрометация s3 давала сертификат на
-одно имя, а не на всю зону `letar.best`. Порядок регистрации —
+Третью строку населяют **три** имени — `media`, `ipfs`, `gateway`: продакшен-имена на
+staging-сервере, вне обоих wildcard'ов. Каждому заведён отдельный аккаунт acme-dns ровно на своё
+имя (решение владельца 2026-08-08, [PLAN-INFRA.md §48 M2](/PLAN-INFRA.md)) — чтобы компрометация s3
+давала сертификат на одно имя, а не на всю зону `letar.best`. Порядок регистрации и объяснение,
+почему именно три аккаунта, а не один общий на три `CNAME`, —
 [infra/acme-dns/README.md](/infra/acme-dns/README.md), раздел «Аккаунт на одно имя».
+
+⚠️ **Три — это весь список, и он сверен, а не прикинут.** Счёт сделан против выгрузки всех 16
+proxy host'ов с живого s3: 12 `*-stage.s3.letar.best` под wildcard, `ipfsstor4.letar.best` уходит
+переименованием в `pin1.s3.letar.best` (то есть заезжает под тот же wildcard), вне остаются ровно
+эти три. Пропущенное имя отвалилось бы **молча**: TLS отдал бы `unrecognized name`, а не понятную
+ошибку — ровно так выглядел инцидент 2026-08-07.
 
 ⚠️ **Не тиражировать эту схему на M3.** На s2 продакшен-имён больше десятка, и заводить каждому
 свой аккаунт + свой `CNAME` у регистратора — ручная работа, которая накапливается и забывается.
