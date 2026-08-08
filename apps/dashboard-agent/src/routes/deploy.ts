@@ -17,6 +17,7 @@ import { applyPhaseLine, computeStalled, type DeployPhase } from '../lib/deploy-
 import { hostExecArgs } from '../lib/host-exec'
 import { getRedis } from '../lib/redis'
 import { getCurrentServer } from '../lib/server-config'
+import { withTimeout } from '../lib/with-timeout'
 import type { ApiResponse } from '../types'
 
 const execAsync = promisify(exec)
@@ -259,7 +260,25 @@ async function runDockerCommand(command: string): Promise<{ stdout: string; stde
 }
 
 export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
-  await rehydrateFromRedis()
+  // ⚠️ Граница по времени обязательна, и вот почему (инцидент 2026-08-08, s3).
+  //
+  // Здесь стоял голый `await rehydrateFromRedis()`. Когда Redis по `REDIS_URL` недоступен,
+  // команда НЕ падает: ioredis держит `enableOfflineQueue: true` и складывает её в очередь до
+  // успешного подключения, а `retryStrategy` в `@letar/redis-client` переподключается бесконечно.
+  // То есть `await` не завершался никогда — и Fastify убивал плагин по своему 10-секундному
+  // таймауту (`AVV_ERR_PLUGIN_EXEC_TIMEOUT`), агент уходил в crash loop.
+  //
+  // Форма отказа тут важнее самого отказа: не «работаем без Redis», как обещает библиотека, а
+  // смерть всего приложения. `try/catch` внутри `rehydrateFromRedis` не помогает — исключения
+  // не происходит вовсе, происходит зависание.
+  //
+  // История деплоев — вещь необязательная (это кеш в памяти, восстанавливаемый из Redis), поэтому
+  // 3 секунды и продолжаем без неё. Терять её неприятно, не подняться — недопустимо.
+  await withTimeout(rehydrateFromRedis(), {
+    ms: 3000,
+    fallback: undefined,
+    label: 'восстановление истории деплоев из Redis',
+  })
 
   /**
    * GET /api/deploy/status — статус деплоя
