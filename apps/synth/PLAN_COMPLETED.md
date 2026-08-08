@@ -1,5 +1,14 @@
 # PLAN_COMPLETED — synth
 
+## 2026-08-08 (техдолг: latent-баг vitest alias для @letar/seo)
+
+`vitest.config.ts` резолвил `@` через `resolve.alias`, но не имел записи для `@letar/seo` — путь
+уже был в `tsconfig.json`, но не в vitest. Latent-баг: тестовых файлов в приложении пока нет, но
+первый же тест, транзитивно тянущий `@letar/seo`, упал бы с «Failed to resolve import
+"@letar/seo"» — та же дыра, что чинили в `apps/aboi` в этой же сессии. Добавлен alias
+`'@letar/seo': fileURLToPath(new URL('../../libs/seo/src', import.meta.url))` по существующему
+паттерну этого файла (в отличие от `apps/aboi`/`apps/time`, здесь `fileURLToPath`, а не `resolve`).
+
 ## Сессия 2026-07-29 (продолжение 21) — Дедуп находок конца сессии 20
 
 ### Что сделано

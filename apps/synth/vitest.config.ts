@@ -5,6 +5,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@letar/seo': fileURLToPath(new URL('../../libs/seo/src', import.meta.url)),
     },
   },
   test: {
