@@ -119,10 +119,129 @@
   сделать `regenerateAll` (или сам билдер) перезапрашивать граф франшизы, если
   `graphUpdatedAt` старше недели, вместо безусловного cache-hit.
 
-  **Порядок действий перед стартом реального перезалива:** (1) `descriptionEn` из пункта выше,
-  (2) фикс staleness графа франшизы, (3) только потом — массовый прогон `regenerateAll` по всей
-  библиотеке. Оба фикса дешёвые сами по себе, дорога именно перезаливка — экономим именно её,
-  а не код.
+  **⚠️ Уточнение (2026-08-08): перезаливка идёт полным реимпортом, не `regenerateAll`.** Это
+  меняет картину. `regenerateAll` пересобирает директорию из того, что **уже** в БД — там
+  работают probe/recovery. Полный реимпорт пишет БД заново, поэтому действует правило:
+  **билдер положит в `directoryCid` только то, что импорт записал в БД.** Аудит выше проверял
+  «билдер → директория». Ниже — вторая половина: «импорт → БД». Там нашлись три блокера.
+
+  ### 🚫 Блокер 1 — путь импорта решает, потеряется ли история просмотра
+
+  Только два входа прокидывают `existingAnimeId` (режим слияния из v0.52.4):
+  страница торрентов (`renderer/src/app/torrents/page.tsx` `handleImport`) и «Добавить эпизоды»
+  на карточке аниме. Там `this.createdAnimeId = null`
+  ([import-service.ts:171](main/services/import/import-service.ts)) — при ошибке аниме не трогают,
+  `Episode.id` переиспользуются, `WatchProgress`/`watchStatus`/`userRating` целы.
+
+  Все остальные входы (`/import`, drag&drop в библиотеку, плеер, `BundleGroupingDialog`) идут
+  как «новый импорт». Но `createAnimeRecord` → `upsertAnime` матчится **по `shikimoriId`**
+  ([import-db.ts:33](main/services/import/import-db.ts)) и возвращает id **существующей** записи,
+  который тут же попадает в `this.createdAnimeId`
+  ([import-service.ts:185](main/services/import/import-service.ts)). Дальше при любой ошибке или
+  отмене cleanup вызывает `db.deleteAnime(this.createdAnimeId)`
+  ([import-service.ts:786](main/services/import/import-service.ts)) — это `prisma.anime.delete`
+  с полным каскадом: `WatchProgress` (обе связи), `Episode`, `AudioTrack`, `SubtitleTrack`,
+  `SubtitleFont`, `Season`, `GenreOnAnime`, `ThemeOnAnime`, `AnimeRelation`, плюс поля самой
+  строки — `watchStatus`, `userRating`, `watchedAt`.
+
+  То есть: реимпорт уже существующего аниме не через торрент-страницу + падение ffmpeg = **аниме
+  исчезает из библиотеки вместе со всей историей просмотра**. Восстановить неоткуда — в IPFS
+  пользовательские данные принципиально не пишутся (`CLAUDE.md`, «Принцип минимума БД»).
+
+  Что делать:
+  - [ ] **Бэкап `%APPDATA%/@letar/animatrona/data/app.db` (+ `-wal`) до первого импорта.**
+        Это единственная страховка.
+  - [ ] Заливать только через страницу торрентов / «Добавить эпизоды».
+  - [ ] Фикс: не ставить `createdAnimeId`, если `upsertAnime` вернул уже существующее аниме
+        (сравнить `createdAt`, либо проверять существование до вызова). Cleanup должен удалять
+        только то, что этот запуск сам и создал.
+
+  ### 🚫 Блокер 2 — старый спрайт перебивает новый (то самое «положили не то»)
+
+  Сброс CID в retranscode-ветке
+  ([import-service.ts:326-339](main/services/import/import-service.ts)) обнуляет
+  `transcodedCid`, `manifestCid`, `ipfsSize`, `thumbnailCids`, `screenshotCids`, `metadataCid` —
+  но **не** `spriteCid`, `vttCid`, `chaptersCid`.
+
+  А билдер читает БД **раньше** манифеста:
+  `if (ep.spriteCid || ep.vttCid)` — [anime-directory-builder.ts:758-762](main/services/ipfs/anime-directory-builder.ts).
+  Свежий спрайт импорт кладёт только в манифест эпизода (в `updateEpisode` полей
+  `spriteCid`/`vttCid` нет вовсе — [import-service.ts:1462](main/services/import/import-service.ts)).
+
+  Итог для аниме, где эти поля когда-то заполнил recovery: в новый `directoryCid` уедет **старый
+  спрайт со старой раздачи**, а свежесгенерированный — не уедет никуда. Если старый CID мёртв,
+  билдер полезет скачивать `video.webm` и пересобирать спрайт заново — впустую, при том что
+  готовый уже лежит в IPFS.
+
+  - [ ] Фикс: добавить `spriteCid`/`vttCid`/`chaptersCid` в сброс retranscode **и** писать
+        `spriteCid`/`vttCid` в `updateEpisode` постпроцесса.
+
+  ### 🚫 Блокер 3 — поля, которые Shikimori отдаёт, а импорт не сохраняет
+
+  `createAnimeRecord` ([import-service.ts:930](main/services/import/import-service.ts)) шлёт
+  `nameEn: null` жёстко, а `synonyms` и `rating` не передаёт вовсе — хотя `upsertAnime` их
+  принимает, а Shikimori отдаёт (`english`, `synonyms`, `score` в `ShikimoriAnimeDetails`).
+  `Episode.name` не заполняется никогда.
+
+  `buildAnimeInfo` берёт эти поля **из БД**, а не из `shikimoriData`
+  ([anime-info-generator.ts:72-97](main/services/anime-info-generator.ts)), поэтому в
+  `meta/info.json` они уедут пустыми, а `meta/episodes.json` — без названий серий. Это ровно тот
+  случай, которого квест и должен избежать: данные были доступны в момент импорта и не попали в
+  раздачу.
+
+  - [ ] Фикс: передавать `nameEn`/`synonyms`/`rating` из `selectedAnime` в `createAnimeRecord`;
+        заполнять `Episode.name`. Дешевле — fallback в `buildAnimeInfo` на `shikimoriData`,
+        но тогда данные останутся только в IPFS, не в БД.
+
+  ### ⚠️ Важное, но не блокирующее
+
+  - **`detectIntros` при импорте работает вхолостую.** Шаг
+    [import-service.ts:549-601](main/services/import/import-service.ts) честно считает главы, но
+    сохраняет их через `updateChaptersInManifest`, а та первым делом читает `Episode.manifestCid`
+    ([chapter-creator.ts:63-72](main/services/chapter-creator.ts)) — которого на этой фазе ещё
+    нет. Ранний `return`, потеря без ошибки. Спасает pre-pass в билдере
+    ([anime-directory-builder.ts:381-521](main/services/ipfs/anime-directory-builder.ts)), но у
+    него два условия: нужно **≥2 эпизода** с живым аудио (фильмы и одиночные серии остаются без
+    глав навсегда) и **ни у одного** эпизода не должно быть живых глав (смешанная раздача, где
+    часть серий имеет главы в контейнере, оставит остальные без них).
+  - **`needsReupload` может сняться, когда не должен.** Условие снятия —
+    [import-service.ts:721-728](main/services/import/import-service.ts), считает `failedCount` от
+    файлов **текущего** entry. Долив 2 серий из 12 через `retryMissingEpisodes` снимет флаг со
+    всего аниме, хотя 10 серий остались на старой раздаче. То же при подтверждении `window.confirm`
+    о расхождении числа серий.
+  - **Осиротевшие эпизоды.** Если в новой раздаче серий меньше, старые `Episode` остаются в БД со
+    старыми мёртвыми CID, их никто не чистит — утянут `contentHealth` в `broken`.
+  - **`updateAnimeManifest` целиком под `log.warn`**
+    ([import-service.ts:1586](main/services/import/import-service.ts)) — импорт вернёт
+    `success: true` у аниме **без `directoryCid`**. После прогона проверять отдельно.
+  - **`rutrackerUrl`/`sourceTorrentCid` заполняются только при импорте со страницы торрентов** —
+    совпадает с Блокером 1 и усиливает его: при заливке «по папкам» папка `source/` не появится
+    вообще ([anime-directory-builder.ts:328](main/services/ipfs/anime-directory-builder.ts)).
+  - **`Franchise.graphCid` не обновляется** (находка предыдущего прохода, см. выше). При реимпорте
+    в существующую БД записи `Franchise` остаются, cache-hit сработает — устаревший граф
+    вморозится в новый `directoryCid`. Актуально и для реимпорта, не только для `regenerateAll`.
+
+  ### ✅ Как проверять результат (иначе проверка соврёт)
+
+  - [ ] Доступность `directoryCid` проверять **через внешний публичный IPFS-гейтвей или второй
+        узел**, а не локальным Kubo. Локально блоки лежат на своей же машине — проверка покажет
+        «всё доступно» при любом состоянии раздачи. Принцип из
+        [verification-pitfalls](/.claude/docs/verification-pitfalls.md): проверять тем же путём,
+        которым ходит настоящий потребитель, и всегда с положительным контролем.
+  - [ ] После прогона — свести по всей библиотеке: `directoryCid IS NOT NULL`, `contentHealth`,
+        `needsReupload`. Не полагаться на «импорт вернул success».
+  - [ ] Открыть `<gateway>/ipfs/<directoryCid>/play/` хотя бы для одного аниме — это и есть
+        проверка, что раздача самодостаточна.
+  - [ ] После массового импорта — «Нормализовать pins» в настройках.
+
+  ### Порядок
+
+  1. Бэкап `app.db`.
+  2. Блокеры 1-3 + `descriptionEn` (пункт выше) + staleness графа франшизы.
+  3. Пробный прогон на **одном** аниме, проверка через внешний гейтвей.
+  4. Только потом — массовый реимпорт.
+
+  Все фиксы дешёвые. Дорога сама перезаливка — экономим её, а не код.
 
 - [ ] **Плеер: фуллскрин по двойному клику и Alt+Enter** (план от 2026-07-30) — сейчас в плеере
       нет быстрого способа развернуть видео на весь экран. Добавить: двойной клик по видео
