@@ -276,7 +276,6 @@ KeePassXC):
 - `apps/dashboard` — `TELEGRAM_API_ROOT` для Telegram-уведомлений (первый реальный потребитель,
   на котором 2026-07-30 обнаружилось, что прокси не был поднят)
 - `apps/grandslamcup` — `TELEGRAM_API_ROOT` + `TELEGRAM_WEBHOOK_URL=https://tg-in.letar.best/grandslamcup/...`
-- `infra/canary` — `TELEGRAM_API_ROOT` для алертов
 - `apps/mandala`, `apps/driving-school`, `apps/svoichuzhie`, `apps/auth-hub` — `TELEGRAM_API_ROOT`
   в `docker-compose.production.yml`, ещё не подтверждено, что реально слали уведомления до
   2026-07-30 (прокси до этого момента физически не существовал)

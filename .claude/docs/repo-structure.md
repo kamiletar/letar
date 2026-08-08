@@ -94,8 +94,6 @@ git commit -m "chore: bump all submodules"
   приватной IPFS-сети (relay/gateway/пиннеры/pin-queue), деплой на конкретные серверы, PeerId
 - [`infra/agent-mail/README.md`](/infra/agent-mail/README.md) — установка сервера координации
   агентов (MCP Agent Mail)
-- [`infra/canary/README.md`](/infra/canary/README.md) — периодический email-мониторинг
-  (Этап 0.7 корневого `PLAN.md`)
 - [`infra/staging/README.md`](/infra/staging/README.md) — синхронизация production БД на
   staging (`sync-db-staging.sh`)
 - [`infra/redis/README.md`](/infra/redis/README.md) — общий Redis-инстанс для нескольких
