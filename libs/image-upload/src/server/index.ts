@@ -13,6 +13,9 @@ export {
   type UploadFileContext,
 } from './serve-uploads'
 
+// === Content-addressed URL для файлов с постоянным именем ===
+export { getVersionedUploadUrl, type VersionedUploadUrlOptions } from './versioned-upload-url'
+
 // === Обработка изображений при загрузке (sharp) ===
 export {
   processUploadImage,

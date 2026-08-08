@@ -43,6 +43,26 @@ GET /api/files/mandalas/anahata.png
 - `Content-Type`: определяется по расширению файла
 - `Cache-Control: public, max-age=31536000, immutable`
 
+### Файлы с постоянным именем и `immutable`-кэш
+
+`immutable` безопасен только тогда, когда URL меняется вместе с содержимым. Загруженные файлы
+обычно получают cuid/хэш в имени, но редакционные изображения иногда перезаписываются под
+постоянным именем (`cover.webp`, `banner.webp`). Такой файл нельзя вставлять в страницу прямым
+неверсионированным URL: браузер вправе показывать старые байты целый год.
+
+Для серверных компонентов и metadata используйте общий helper:
+
+```typescript
+import { getVersionedUploadUrl } from '@letar/image-upload/server/versioned-upload-url'
+
+const coverUrl = getVersionedUploadUrl('content/article-1/cover.webp')
+// → /api/files/content/article-1/cover.webp?v=4a67c2d970be
+```
+
+Helper читает файл при сборке/серверном рендере и добавляет короткий SHA-256 содержимого. При
+изменении файла URL автоматически меняется, поэтому браузер, CDN и сервисы предпросмотра получают
+новую версию. Пока содержимое не менялось, годовой `immutable`-кэш продолжает работать.
+
 ### POST `/api/upload`
 
 Загрузка нового изображения. Требует авторизации (ADMIN).

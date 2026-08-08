@@ -1,6 +1,6 @@
 {
   "name": "@letar/image-upload",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -15,6 +15,11 @@
       "types": "./src/server/index.ts",
       "import": "./src/server/index.ts",
       "default": "./src/server/index.ts"
+    },
+    "./server/versioned-upload-url": {
+      "types": "./src/server/versioned-upload-url.ts",
+      "import": "./src/server/versioned-upload-url.ts",
+      "default": "./src/server/versioned-upload-url.ts"
     },
     "./package.json": "./package.json"
   },
