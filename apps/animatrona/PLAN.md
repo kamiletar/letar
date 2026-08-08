@@ -61,6 +61,69 @@
   крупная задача (перевод всего интерфейса Animatrona и Animatrona Player). Текущая идея —
   только про данные в манифесте, полностью независима и на порядок дешевле.
 
+  **⚠️ Приземлить ДО массового перезалива (см. пункт ниже).** Перезаливка всей библиотеки —
+  дорогой проход (ffmpeg/IPFS на каждое аниме). Если `descriptionEn` появится после — второй
+  такой же дорогой проход только ради одного поля. Делать одним заходом.
+
+- [ ] **Аудит содержимого `directoryCid` перед массовым перезаливом библиотеки** (план от
+      2026-08-08) — вся текущая библиотека помечена `needsReupload` (v0.52.2, раздача через
+      утраченный pinner-сервер), и на неё предстоит настоящий массовый реимпорт/republish.
+      Это дорого и по времени, и по нагрузке на Shikimori/AniList/IPFS — вернуться и доклеить
+      забытое поле для каждого аниме второй раз **не должно случиться**. Прошёлся по каждому
+      `*Cid`-полю в `schema.zmodel` и сверил с тем, что реально попадает в
+      [anime-directory-builder.ts](main/services/ipfs/anime-directory-builder.ts).
+
+  **Подтверждено — всё уже кладётся корректно:**
+  - `Anime.posterCid`/`poster.cid` → `poster.webp` (строки 285-292)
+  - `Anime.animeInfoCid` → `meta/info.json` (300-301)
+  - Под-документы `AnimeManifest` (`episodesCid`/`franchiseGraphCid`/`relationsCid`/
+    `episodePreviewsCid`) → `meta/*.json`, с probe и пропуском мёртвых (304-320)
+  - `Anime.sourceTorrentCid` → `source/source.torrent` + `source.json` (328-351)
+  - `ShikimoriStudio/Person/Character.imageCid` → `images/{studios,persons,characters}/`, с
+    восстановлением через повторную загрузку с Shikimori (353-370)
+  - `Episode.transcodedCid` → `video.webm` — обязателен, отсутствие = жёсткий пропуск эпизода +
+    запись в `missingCids` (не молча, см. фикс v0.52.3)
+  - `AudioTrack.transcodedCid`, `SubtitleTrack.fileCid`, `SubtitleFont.fileCid` → `audio/`,
+    `subs/`, `fonts/` — все потери фиксируются в `missingCids`/`missingFonts` после фикса
+    v0.52.3 (раньше терялись молча из-за SQL-фильтра)
+  - Под-документы эпизода (`encodingCid`/`chaptersCid`/`thumbnailsCid`/`metadataCid`) +
+    `Episode.spriteCid`/`vttCid` → `meta/` и `thumbnails/` эпизода, с регенерацией из
+    `video.webm` при потере
+  - `Episode.screenshotCids`/`thumbnailCids` (JSON-массивы) → `screenshots/`,
+    `thumbnails-img/`, тоже с регенерацией из видео
+
+  **Проверено — НЕ пропуски, намеренно не участвуют в `directoryCid`** (чтобы не перепроверять
+  это заново в следующий раз):
+  - `Anime.trackerPublishedCid` — снимок `directoryCid` на момент последней публикации на
+    трекер, для сравнения «изменилось / не изменилось»; не контент, а бухгалтерия
+  - `DiscoverWatchProgress.posterCid`/`.directoryCid` — денормализованный кэш для истории
+    просмотра из каталога; читает `directoryCid`, не производит его
+  - `Subscription.lastKnownCid` — CID библиотеки **чужого** пира (P2P-подписки), не наш контент
+  - `TorrentDownload.torrentFileCid` — запись очереди скачивания; в `directoryCid` попадает
+    `Anime.sourceTorrentCid` (уже учтён выше), а не это поле
+
+  **⚠️ Новая находка, не пропажа контента — а его незаметное устаревание:**
+  `Franchise.graphCid` никогда не обновляется автоматически. Комментарий у
+  `Franchise.graphUpdatedAt` в `schema.zmodel` обещает «для автообновления раз в неделю», но
+  по факту `graphUpdatedAt` во всём `main/` только **записывается** — в
+  [anime-manifest-generator.ts:418](main/services/anime-manifest-generator.ts) и
+  [anime-importer.ts:444](main/services/anime-importer.ts) — и нигде не **читается** для
+  принятия решения «пора перезапросить». Ветка кеша в
+  [anime-manifest-generator.ts:377-380](main/services/anime-manifest-generator.ts) при наличии
+  `franchise.graphCid` использует его как есть, без проверки возраста. Итог: граф франшизы
+  запрашивается у Shikimori ровно один раз — когда в библиотеку попадает первое аниме этой
+  франшизы — и дальше переиспользуется бессрочно. Если у франшизы с тех пор вышел новый
+  сиквел/фильм/OVA — `relations`/`franchise-graph.json`, который перезаливка вморозит в новый
+  `directoryCid`, будет устаревшим для **всех** аниме этой франшизы, не только для одного.
+  Раз перезаливка и так трогает каждое аниме — дешёвый момент заодно форсировать обновление:
+  сделать `regenerateAll` (или сам билдер) перезапрашивать граф франшизы, если
+  `graphUpdatedAt` старше недели, вместо безусловного cache-hit.
+
+  **Порядок действий перед стартом реального перезалива:** (1) `descriptionEn` из пункта выше,
+  (2) фикс staleness графа франшизы, (3) только потом — массовый прогон `regenerateAll` по всей
+  библиотеке. Оба фикса дешёвые сами по себе, дорога именно перезаливка — экономим именно её,
+  а не код.
+
 - [ ] **Плеер: фуллскрин по двойному клику и Alt+Enter** (план от 2026-07-30) — сейчас в плеере
       нет быстрого способа развернуть видео на весь экран. Добавить: двойной клик по видео
       переключает fullscreen, сочетание Alt+Enter делает то же самое из любого места плеера.
