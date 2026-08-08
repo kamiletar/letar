@@ -2,9 +2,13 @@
  * Тесты проверки свежести бэкапов (Maddy + acme-dns).
  *
  * Проверяется поведение, от которого зависит, узнаем ли мы о молчаливо вставшем бэкапе:
- * выбор самого свежего файла, порог устаревания и дебаунс алерта. Файловая система —
+ * выбор самого свежего файла, порог устаревания и повтор алерта. Файловая система —
  * настоящая (временный каталог), потому что именно её поведение мы и проверяем; замокан
  * только внешний канал алертов и файл состояния.
+ *
+ * Регрессия §62 (перенесена из email-canary.spec.ts): та же пара дефектов была и здесь —
+ * булев `alerted` слался ровно один раз и глушил уведомления навсегда, а факт вызова
+ * `postDashboardAlert` не отличался от факта доставки.
  */
 
 import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
@@ -12,8 +16,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const postDashboardAlert = vi.fn(async () => Promise.resolve())
-let fakeState: { alerted: boolean } = { alerted: false }
+const postDashboardAlert = vi.fn(async () => true)
+let fakeState: Record<string, unknown> = {}
 
 vi.mock('./dashboard-alert', () => ({
   postDashboardAlert: (...args: unknown[]) => postDashboardAlert(...(args as [])),
@@ -21,7 +25,7 @@ vi.mock('./dashboard-alert', () => ({
 
 vi.mock('./json-state-file', () => ({
   loadJsonState: () => fakeState,
-  saveJsonState: (_path: string, state: { alerted: boolean }) => {
+  saveJsonState: (_path: string, state: Record<string, unknown>) => {
     fakeState = state
   },
 }))
@@ -99,7 +103,8 @@ describe('findNewestBackupFile', () => {
 describe('runFreshnessCheck', () => {
   beforeEach(() => {
     postDashboardAlert.mockClear()
-    fakeState = { alerted: false }
+    postDashboardAlert.mockImplementation(async () => true)
+    fakeState = {}
   })
 
   it('свежий бэкап — не stale, алерта нет', async () => {
@@ -115,7 +120,7 @@ describe('runFreshnessCheck', () => {
     rmSync(dir, { recursive: true, force: true })
   })
 
-  it('устаревший бэкап — stale и алерт', async () => {
+  it('устаревший бэкап — stale и алерт с первой же неудачи', async () => {
     const dir = makeTempDir()
     writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
 
@@ -127,28 +132,64 @@ describe('runFreshnessCheck', () => {
     rmSync(dir, { recursive: true, force: true })
   })
 
-  it('повторный прогон при том же провале не шлёт второй алерт (дебаунс)', async () => {
+  // Ядро регрессии, перенесённое из email-canary.spec.ts: раньше здесь навсегда наступала тишина.
+  it('повторяет алерт при удвоении числа неудач, а не молчит навсегда', async () => {
     const dir = makeTempDir()
     writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
 
-    await runFreshnessCheck(targetFor(dir))
+    await runFreshnessCheck(targetFor(dir)) // 1-я неудача — алерт, alertedAtFailures=1
     postDashboardAlert.mockClear()
-    const second = await runFreshnessCheck(targetFor(dir))
+    const second = await runFreshnessCheck(targetFor(dir)) // 2-я — удвоение 1→2, алерт снова
 
     expect(second.stale).toBe(true)
-    expect(second.alerted).toBe(false)
+    expect(second.alerted).toBe(true)
+    expect(postDashboardAlert).toHaveBeenCalledTimes(1)
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('между удвоениями не спамит', async () => {
+    const dir = makeTempDir()
+    writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
+
+    await runFreshnessCheck(targetFor(dir)) // 1 — алерт, alertedAtFailures=1
+    await runFreshnessCheck(targetFor(dir)) // 2 — удвоение, алерт, alertedAtFailures=2
+    postDashboardAlert.mockClear()
+    const third = await runFreshnessCheck(targetFor(dir)) // 3 — не удвоение (3 < 2*2)
+
+    expect(third.stale).toBe(true)
+    expect(third.alerted).toBe(false)
     expect(postDashboardAlert).not.toHaveBeenCalled()
     rmSync(dir, { recursive: true, force: true })
   })
 
-  it('появление свежего файла сбрасывает дебаунс — следующий провал снова алертит', async () => {
+  // Второй механизм молчания §62: «отправили» не значит «дошло».
+  it('повторяет на каждом прогоне, пока прошлый алерт не доставлен', async () => {
     const dir = makeTempDir()
     writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
+
+    postDashboardAlert.mockImplementationOnce(async () => false)
+    const first = await runFreshnessCheck(targetFor(dir))
+    expect(first.alerted).toBe(false) // отправили, но dashboard не подтвердил
+
+    postDashboardAlert.mockClear()
+    postDashboardAlert.mockImplementationOnce(async () => true)
+    const second = await runFreshnessCheck(targetFor(dir)) // 3 < 1*2, но недоставленный алерт важнее
+
+    expect(second.alerted).toBe(true)
+    expect(postDashboardAlert).toHaveBeenCalledTimes(1)
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('появление свежего файла сбрасывает счётчик — следующий провал снова алертит с первой неудачи', async () => {
+    const dir = makeTempDir()
+    writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
+    await runFreshnessCheck(targetFor(dir))
     await runFreshnessCheck(targetFor(dir))
 
     writeBackupFile(dir, 'acme-dns_auto_fresh.tar.gz', 1)
     await runFreshnessCheck(targetFor(dir))
-    expect(fakeState.alerted).toBe(false)
+    expect(fakeState.consecutiveFailures).toBe(0)
+    expect(fakeState.alertedAtFailures).toBeNull()
 
     rmSync(path.join(dir, 'acme-dns_auto_fresh.tar.gz'))
     postDashboardAlert.mockClear()
@@ -186,9 +227,24 @@ describe('runFreshnessCheck', () => {
     writeBackupFile(dir, 'acme-dns_auto.tar.gz', 10)
 
     expect((await runFreshnessCheck(targetFor(dir, 30))).stale).toBe(false)
-    fakeState = { alerted: false }
+    fakeState = {}
     expect((await runFreshnessCheck(targetFor(dir, 5))).stale).toBe(true)
 
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  // Регрессия §62: на диске может лежать состояние старой формы (булев `alerted`, без
+  // счётчика подряд-неудач и подтверждения доставки) — миграция не должна ронять проверку.
+  it('состояние старой формы (`alerted: true`) сливается с дефолтом, а не ломает счётчик', async () => {
+    const dir = makeTempDir()
+    writeBackupFile(dir, 'acme-dns_auto_stale.tar.gz', 50)
+    fakeState = { alerted: true }
+
+    const result = await runFreshnessCheck(targetFor(dir))
+
+    expect(result.stale).toBe(true)
+    expect(result.alerted).toBe(true) // новый эпизод алертит, старая форма его не глушит
+    expect(fakeState.consecutiveFailures).toBe(1)
     rmSync(dir, { recursive: true, force: true })
   })
 })

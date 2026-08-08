@@ -23,6 +23,7 @@
  */
 
 import { existsSync, readdirSync, statSync } from 'node:fs'
+import { shouldRepeatAlert } from './alert-policy'
 import { postDashboardAlert } from './dashboard-alert'
 import { loadJsonState, saveJsonState } from './json-state-file'
 
@@ -51,7 +52,28 @@ export interface BackupFreshnessCheckResult {
 }
 
 interface FreshnessState {
-  alerted: boolean
+  /** Подряд-неудачные прогоны (файлов нет ИЛИ самый свежий устарел). Сбрасывается на 0 при успехе. */
+  consecutiveFailures: number
+  /**
+   * При скольки подряд-неудачах уходил последний алерт (`null` — ещё ни разу).
+   * Заменил булев `alerted`: тот взводился однажды и глушил уведомления навсегда, даже пока
+   * бэкап продолжал стареть дальше — та же ошибка, что была в email-канарейке (§62).
+   */
+  alertedAtFailures: number | null
+  /** Подтвердил ли dashboard приём последнего алерта. `false` → повторяем на следующем прогоне. */
+  lastAlertDelivered: boolean | null
+}
+
+/**
+ * Алерт шлётся сразу на первую же подряд-неудачу (в отличие от email-канарейки, которая ждёт
+ * `ALERT_THRESHOLD` подряд-неудач) — эта проверка и так гоняется раз в 6 часов, а не раз в час,
+ * ждать вторую неудачу означало бы узнать о стухшем бэкапе только через 12 часов после первого
+ * симптома. Дальше — то же удвоение, что у email-канарейки: 1, 2, 4, 8… подряд-неудач.
+ */
+const ALERT_THRESHOLD = 1
+
+function defaultFreshnessState(): FreshnessState {
+  return { consecutiveFailures: 0, alertedAtFailures: null, lastAlertDelivered: null }
 }
 
 /**
@@ -111,17 +133,25 @@ export function findNewestBackupFile(dir: string, pattern: RegExp): { name: stri
 /**
  * Один прогон проверки одной цели.
  *
- * Алертит через `BACKUP_FAILED` с дебаунсом: один алерт на непрерывный эпизод устаревания,
- * сбрасывается при появлении свежего файла — тот же паттерн, что `email-canary.ts`.
+ * Алертит через `BACKUP_FAILED` с повтором вместо разового флага — тот же паттерн, что
+ * `email-canary.ts` (`shouldRepeatAlert`): молчание не наступает никогда, пока бэкап стухший.
+ * Сбрасывается целиком при появлении свежего файла.
  */
 export async function runFreshnessCheck(target: FreshnessTarget): Promise<BackupFreshnessCheckResult> {
   const checkedAt = new Date().toISOString()
-  const prevState = loadJsonState<FreshnessState>(target.statePath, { alerted: false })
+  const prevState: FreshnessState = {
+    // Слияние с дефолтом обязательно, а не подстановка целиком: на диске может лежать
+    // состояние старой формы (булев `alerted`, без счётчика и подтверждения доставки).
+    // Без слияния новые поля остались бы `undefined`, и `shouldRepeatAlert` свалился бы
+    // в сравнение с NaN — тот же отказ, что уже разобран и починен в email-canary.ts (§62).
+    ...defaultFreshnessState(),
+    ...loadJsonState<Partial<FreshnessState>>(target.statePath, {}),
+  }
 
   if (!existsSync(target.backupDir)) {
-    // Отсутствие каталога — это тоже провал, но алерт не шлём: каталог может ещё не быть
-    // создан первым прогоном бэкапа. Провал вернётся вызывающему как error и попадёт
-    // в лог cron-задачи.
+    // Отсутствие каталога — это тоже провал, но алерт не шлём и состояние не трогаем: каталог
+    // может ещё не быть создан первым прогоном бэкапа. Провал вернётся вызывающему как error
+    // и попадёт в лог cron-задачи.
     return {
       checkedAt,
       backupDir: target.backupDir,
@@ -135,56 +165,76 @@ export async function runFreshnessCheck(target: FreshnessTarget): Promise<Backup
 
   const newest = findNewestBackupFile(target.backupDir, target.filenamePattern)
 
+  let newestFileAgeHours: number | null = null
+  let stale: boolean
+  let error: string | null = null
+  let alertTitle: string
+  let alertMessage: string
+  let alertMetadata: Record<string, unknown>
+
   if (!newest) {
-    const detail = `В ${target.backupDir} нет ни одного файла, подходящего под ${target.filenamePattern}`
-    let alerted = false
-    if (!prevState.alerted) {
-      await postDashboardAlert({
-        type: 'BACKUP_FAILED',
-        severity: 'ERROR',
-        title: `Бэкап ${target.label}: файлов не найдено`,
-        message: `${detail}. ${target.hint}`,
-        metadata: { jobId: target.jobId, backupDir: target.backupDir },
-      })
-      alerted = true
-    }
-    saveJsonState(target.statePath, { alerted: true }, 'BackupFreshness')
+    stale = true
+    error = `В ${target.backupDir} нет ни одного файла, подходящего под ${target.filenamePattern}`
+    alertTitle = `Бэкап ${target.label}: файлов не найдено`
+    alertMessage = `${error}. ${target.hint}`
+    alertMetadata = { jobId: target.jobId, backupDir: target.backupDir }
+  } else {
+    const hours = ageInHours(newest.mtimeMs, Date.now())
+    newestFileAgeHours = hours
+    stale = hours > target.maxAgeHours
+    alertTitle = `Бэкап ${target.label} устарел (${hours.toFixed(1)} ч)`
+    alertMessage = `Самый свежий файл — ${newest.name}, старше порога ${target.maxAgeHours} ч. ${target.hint}`
+    alertMetadata = { jobId: target.jobId, backupDir: target.backupDir, newestFile: newest.name, ageHours: hours }
+  }
+
+  if (!stale) {
+    // Успех обнуляет историю уведомлений — следующий эпизод начнётся с чистого листа.
+    saveJsonState(target.statePath, defaultFreshnessState(), 'BackupFreshness')
     return {
       checkedAt,
       backupDir: target.backupDir,
-      newestFile: null,
-      newestFileAgeHours: null,
-      stale: true,
-      alerted,
-      error: detail,
+      newestFile: newest?.name ?? null,
+      newestFileAgeHours,
+      stale: false,
+      alerted: false,
+      error: null,
     }
   }
 
-  const hours = ageInHours(newest.mtimeMs, Date.now())
-  const stale = hours > target.maxAgeHours
+  const consecutiveFailures = prevState.consecutiveFailures + 1
+  const shouldAlert = shouldRepeatAlert(
+    { alertedAtCount: prevState.alertedAtFailures, lastAlertDelivered: prevState.lastAlertDelivered },
+    consecutiveFailures,
+    ALERT_THRESHOLD,
+  )
 
   let alerted = false
-  if (stale && !prevState.alerted) {
-    await postDashboardAlert({
+  let nextState: FreshnessState = { ...prevState, consecutiveFailures }
+
+  if (shouldAlert) {
+    // Записываем ИСХОД отправки, а не факт вызова — недоставленный алерт заставит
+    // `shouldRepeatAlert` повторить попытку на следующем же прогоне.
+    const delivered = await postDashboardAlert({
       type: 'BACKUP_FAILED',
       severity: 'ERROR',
-      title: `Бэкап ${target.label} устарел (${hours.toFixed(1)} ч)`,
-      message: `Самый свежий файл — ${newest.name}, старше порога ${target.maxAgeHours} ч. ${target.hint}`,
-      metadata: { jobId: target.jobId, backupDir: target.backupDir, newestFile: newest.name, ageHours: hours },
+      title: alertTitle,
+      message: alertMessage,
+      metadata: alertMetadata,
     })
-    alerted = true
+    alerted = delivered
+    nextState = { ...nextState, alertedAtFailures: consecutiveFailures, lastAlertDelivered: delivered }
   }
 
-  saveJsonState(target.statePath, { alerted: stale }, 'BackupFreshness')
+  saveJsonState(target.statePath, nextState, 'BackupFreshness')
 
   return {
     checkedAt,
     backupDir: target.backupDir,
-    newestFile: newest.name,
-    newestFileAgeHours: hours,
-    stale,
+    newestFile: newest?.name ?? null,
+    newestFileAgeHours,
+    stale: true,
     alerted,
-    error: null,
+    error,
   }
 }
 

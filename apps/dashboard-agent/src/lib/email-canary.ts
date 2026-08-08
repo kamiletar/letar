@@ -19,6 +19,7 @@
 
 import { createEmailProvider } from '@letar/email'
 import { ImapFlow } from 'imapflow'
+import { shouldRepeatAlert } from './alert-policy'
 import { postDashboardAlert } from './dashboard-alert'
 import { loadJsonState, saveJsonState } from './json-state-file'
 
@@ -132,16 +133,11 @@ export function shouldSendAlert(
   if (!result.configured || result.ok) {
     return false
   }
-  if (state.consecutiveFailures < threshold) {
-    return false
-  }
-  if (state.alertedAtFailures === null) {
-    return true
-  }
-  if (state.lastAlertDelivered === false) {
-    return true
-  }
-  return state.consecutiveFailures >= state.alertedAtFailures * 2
+  return shouldRepeatAlert(
+    { alertedAtCount: state.alertedAtFailures, lastAlertDelivered: state.lastAlertDelivered },
+    state.consecutiveFailures,
+    threshold,
+  )
 }
 
 function loadState(): CanaryState {
