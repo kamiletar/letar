@@ -70,8 +70,18 @@ docker exec animatrona-pinner3 ipfs swarm peers
 curl http://localhost:42080/health   # pin-queue healthcheck
 ```
 
+## ⛔ Реальный прод на s3 живёт вне git
+
+Работающий контейнер `animatrona-pin-queue` на s3 поднят не из этого файла, а из
+`/opt/pin-queue/` — ручной копии исходников от 18 июня, без `.git` вообще. Правки в этом
+`docker-compose.yml` не доезжают до прода сами по себе — нужен отдельный шаг деплоя на сервер
+вручную (через BlackCove). Перепись и план перевода на git —
+[PLAN-INFRA.md §60](/PLAN-INFRA.md).
+
 ## Связанные узлы
 
 `infra/animatrona-relay/README.md` (relay), `infra/animatrona-gateway/` (gateway),
-`infra/animatrona-pinner/` (pinner1), `infra/animatrona-pin-queue/` (сам сервис pin-queue,
-здесь используется как build-зависимость). Общий дизайн сети — корневой `PLAN.md` §15.4.
+`infra/animatrona-pinner/` (pinner1 — на 2026-08-08 не существует физически, см.
+[§57](/PLAN-INFRA.md), удаление каталога отслеживается там же), `infra/animatrona-pin-queue/`
+(сам сервис pin-queue, здесь используется как build-зависимость). Общий дизайн сети — корневой
+`PLAN.md` §15.4.

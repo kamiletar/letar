@@ -69,6 +69,19 @@ docker logs -f animatrona-pin-queue
 curl http://localhost:42080/health
 ```
 
+## ⛔ Реальный прод на s3 живёт вне git
+
+Работающий контейнер `animatrona-pin-queue` на s3 поднят не из этого каталога и не из
+`animatrona-pinner3/docker-compose.yml`, а из `/opt/pin-queue/` — ручной копии исходников от
+18 июня, без `.git` вообще. `git pull` в `letar` его не затрагивает. Перепись и план перевода на
+git — [PLAN-INFRA.md §60](/PLAN-INFRA.md). Правка любого файла в этом каталоге требует отдельного
+шага деплоя на сервер вручную (через BlackCove), не «запушил — применилось».
+
+⚠️ Раздел «Установка (отдельный деплой, напр. рядом с pinner1)» ниже описывает схему, для которой
+на 2026-08-08 не подтверждено, что она когда-либо реально использовалась: pinner1 на
+`mail.letar.best` не существует (владелец подтвердил, [§57](/PLAN-INFRA.md)). См. вопрос
+владельцу/BlackCove — [PLAN-INFRA.md §63](/PLAN-INFRA.md).
+
 ## Связанные узлы
 
 `infra/animatrona-pinner/README.md`, `infra/animatrona-pinner3/README.md` — деплойменты, в
