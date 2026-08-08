@@ -25,8 +25,12 @@
   узел сети с ручным патчем конфига поверх стандартного `ipfs config` (остальные параметры —
   через `ipfs config --json`)
 - **RAM:** Kubo 3GB из 4GB (место для pin-queue, Caddy, системы)
-- **Pin-Queue:** собирается из `../animatrona-pin-queue` (build context), host network, зависит
-  от healthcheck Kubo
+- **Pin-Queue:** документирован как собираемый из `../animatrona-pin-queue` (build context), host
+  network, зависит от healthcheck Kubo — но на 2026-08-08 подтверждено, что этот сервис ни разу
+  фактически не разворачивался (образ `animatrona-pinner3-pin-queue:latest` собран только сегодня,
+  контейнер из него никогда не поднимался). Реальный работающий на s3 pin-queue — отдельный
+  standalone-деплой `/opt/pin-queue` из `infra/animatrona-pin-queue/`, см.
+  [§63](/PLAN-INFRA.md)
 
 ## Установка на новый сервер
 
@@ -42,7 +46,9 @@ bash setup.sh
 2. Запускает Kubo, настраивает routing/provide/GC/storage/swarm/bitswap/peering/bootstrap/API
    auth/CORS
 3. Останавливает Kubo, патчит datastore на PebbleDS (см. выше), перезапускает
-4. Собирает и запускает `pin-queue` (`docker compose up -d --build pin-queue`)
+4. Собирает и запускает `pin-queue` (`docker compose up -d --build pin-queue`) — ⚠️ этот шаг
+   документирован, но на реальном s3 не выполнялся: там pin-queue развёрнут отдельно, standalone
+   (см. предупреждение выше и [§63](/PLAN-INFRA.md))
 5. Регистрируется на relay (`POST /register`)
 
 **После `setup.sh` — HTTPS и полный bootstrap:**
