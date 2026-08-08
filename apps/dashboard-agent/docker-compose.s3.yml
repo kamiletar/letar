@@ -66,6 +66,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # Git репозиторий (deploy-affected.sh запускается на хосте через nsenter)
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
+      # Файл аккаунтов lego — лежит ВНЕ workspace, поэтому отдельной строкой.
+      #
+      # Нужен для бэкапа секретов Traefik (`traefik-backup.ts`, PLAN-INFRA.md §48 M2): здесь
+      # три per-name аккаунта acme-dns (media/ipfs/gateway), и их потеря невосстановима без
+      # владельца — регистрация закрыта, новый аккаунт даст новые fulldomain и потребует
+      # переделать три CNAME у регистратора.
+      #
+      # ⚠️ Забыть эту строку — получать «нечего бэкапить» на каждом прогоне. Именно поэтому
+      # источник в бэкапе обязательный, а не опциональный: молчаливо пустой архив выглядел бы
+      # как защита. Только чтение — агент этот файл не меняет.
+      - /home/deploy/lego:/home/deploy/lego:ro
     networks:
       - kami-network
     healthcheck:

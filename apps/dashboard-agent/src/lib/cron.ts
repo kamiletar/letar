@@ -343,6 +343,28 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'traefik-backup-s3',
+    name: 'Traefik Secrets Backup S3',
+    app: 'dashboard-agent',
+    endpoint: '/api/traefik/backup',
+    schedule: '45 3 * * *',
+    description:
+      'Бэкап секретов Traefik на s3 (три per-name аккаунта acme-dns + acme.json + basicAuth). Заведён после переезда s3 на Traefik: до него на s3 действительно нечего было бэкапить, теперь там лежит невосстановимое — PLAN-INFRA.md §48 M2',
+    enabled: true,
+    server: 's3',
+  },
+  {
+    id: 'traefik-backup-freshness-check',
+    name: 'Traefik Backup Freshness Check (s3)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/traefik-backup-freshness-check',
+    schedule: '30 */6 * * *',
+    description:
+      'Проверка свежести бэкапа Traefik на s3: алерт BACKUP_FAILED, если самый новый traefik_*.tar.gz старше 30ч. Отдельно от acme-dns-проверки — другой сервер, и свежий архив на s2 не должен закрывать отсутствие архива на s3',
+    enabled: true,
+    server: 's3',
+  },
+  {
     id: 'health-check',
     name: 'Health Check (CPU/память/диск/контейнеры/БД)',
     app: 'dashboard-agent',

@@ -110,6 +110,28 @@ export function acmeDnsTarget(): FreshnessTarget {
 }
 
 /**
+ * Цель «бэкап секретов Traefik на s3» — архив создаёт сам агент, см. `traefik-backup.ts`.
+ *
+ * ⚠️ Отдельная цель, а не расширение `acmeDnsTarget()`: это **другой сервер**. Там s2 и база
+ * acme-dns, здесь s3 и файл аккаунтов с тремя per-name аккаунтами. Одна проверка на две машины
+ * дала бы ложное «свежо»: свежий архив на s2 закрывал бы отсутствие архива на s3.
+ */
+export function traefikTarget(): FreshnessTarget {
+  return {
+    jobId: 'traefik-backup-freshness-check',
+    label: 'Traefik (s3)',
+    backupDir: process.env.TRAEFIK_BACKUP_DIR || '/home/deploy/letar/backups/traefik',
+    statePath: process.env.TRAEFIK_BACKUP_STATE_PATH || '/home/deploy/letar/traefik-backup-freshness-state.json',
+    maxAgeHours: Number(process.env.TRAEFIK_BACKUP_MAX_AGE_HOURS) || 30,
+    filenamePattern: /^traefik_.*\.tar\.gz$/,
+    hint: 'Проверить cron-задачу traefik-backup-s3 и монтирование /home/deploy/lego в контейнер агента на s3. '
+      + 'В архиве три per-name аккаунта acme-dns (media/ipfs/gateway) — их потеря невосстановима без владельца: '
+      + 'регистрация закрыта, новый аккаунт даст новые fulldomain и потребует переделать три CNAME у регистратора '
+      + '— PLAN-INFRA.md §48 M2.',
+  }
+}
+
+/**
  * Возраст файла в часах. Вынесено отдельно, потому что это единственное место, где
  * решается «устарел или нет», и его надо уметь проверить без файловой системы и без часов.
  */
@@ -246,4 +268,9 @@ export async function runBackupFreshnessCheck(): Promise<BackupFreshnessCheckRes
 /** Прогон проверки бэкапа acme-dns — вызывается роутом `/api/cron/acme-dns-backup-freshness-check` */
 export async function runAcmeDnsBackupFreshnessCheck(): Promise<BackupFreshnessCheckResult> {
   return runFreshnessCheck(acmeDnsTarget())
+}
+
+/** Прогон проверки бэкапа Traefik на s3 — роут `/api/cron/traefik-backup-freshness-check` */
+export async function runTraefikBackupFreshnessCheck(): Promise<BackupFreshnessCheckResult> {
+  return runFreshnessCheck(traefikTarget())
 }

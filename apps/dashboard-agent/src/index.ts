@@ -40,6 +40,7 @@ import { logScanRoutes } from './routes/log-scan'
 import { metricsRoutes } from './routes/metrics'
 import { nginxRoutes } from './routes/nginx'
 import { systemRoutes } from './routes/system'
+import { traefikRoutes } from './routes/traefik'
 
 const PORT = parseInt(process.env.PORT || '3100', 10)
 const HOST = process.env.HOST || '0.0.0.0'
@@ -107,6 +108,7 @@ async function main(): Promise<void> {
   await fastify.register(databaseRoutes)
   await fastify.register(nginxRoutes)
   await fastify.register(acmeDnsRoutes)
+  await fastify.register(traefikRoutes)
   await fastify.register(cronRoutes)
   await fastify.register(gitRoutes)
   await fastify.register(envRoutes)
