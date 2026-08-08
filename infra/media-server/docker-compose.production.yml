@@ -19,6 +19,30 @@ services:
         condition: service_healthy
     networks:
       - kami-network
+      - traefik-network
+    labels:
+      # ⚠️ Корневой маршрут `media.letar.best` — СЮДА, в API, а не в nginx.
+      #
+      # У этого имени два backend'а, и это выяснилось только из живого `.conf` NPM (2026-08-08):
+      # `location /` → `:3100` (этот сервис), `location /v/` → `:3101` (media-nginx). Раньше в
+      # плане было записано обратное — «загрузка через прокси не ходит вовсе». Неверно: ходит,
+      # именно через корневой location, отсюда и `client_max_body_size 20g` в конфиге NPM.
+      #
+      # Разметить только раздачу означало бы 404 на всём, что не под `/v/`: у media-nginx нет
+      # `location /` вообще (см. nginx.conf рядом), он отдаёт только `/v/` и `/nginx-health`.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.media-api.rule: 'Host(`media.letar.best`)'
+      traefik.http.routers.media-api.entrypoints: 'websecure'
+      # Приоритет проставлен явно, хотя по длине правила `media-v` победил бы и так. Полагаться
+      # на неявную длину здесь нельзя: любое удлинение этого правила молча перевернуло бы порядок,
+      # и загрузка начала бы уходить в раздачу.
+      traefik.http.routers.media-api.priority: '10'
+      # Заказчик сертификата — этот роутер (второй берёт готовый из хранилища), см. длинный
+      # комментарий у сервиса nginx ниже.
+      traefik.http.routers.media-api.tls: 'true'
+      traefik.http.routers.media-api.tls.certresolver: 'dns'
+      traefik.http.services.media-api.loadbalancer.server.port: '3100'
     restart: unless-stopped
     logging:
       driver: json-file
@@ -77,14 +101,15 @@ services:
     labels:
       # Маршрут описан здесь, а не в SQLite внутри NPM (PLAN-INFRA.md §48).
       #
-      # Всё содержательное — HTTP Range, иммутабельный кэш, CORP/CORS, защита от хотлинкинга —
-      # живёт в ./nginx.conf ВНУТРИ этого контейнера, а не в конфиге прокси. NPM здесь работает
-      # тупым пробрасывателем на :3101, поэтому смена прокси эту логику не задевает вообще.
-      # Загрузка видео через прокси не ходит вовсе — она идёт в media-api на другой порт.
+      # Раздача — только `/v/`. Всё содержательное (HTTP Range, иммутабельный кэш, CORP/CORS,
+      # защита от хотлинкинга) живёт в ./nginx.conf ВНУТРИ этого контейнера. NPM дублировал
+      # CORS-заголовки поверх ответа сверху; после переезда дубли пропадут, останется по одному
+      # экземпляру — то есть станет строго корректнее, а не хуже.
       traefik.enable: 'true'
       traefik.docker.network: 'traefik-network'
-      traefik.http.routers.media.rule: 'Host(`media.letar.best`)'
-      traefik.http.routers.media.entrypoints: 'websecure'
+      traefik.http.routers.media-v.rule: 'Host(`media.letar.best`) && PathPrefix(`/v/`)'
+      traefik.http.routers.media-v.entrypoints: 'websecure'
+      traefik.http.routers.media-v.priority: '20'
       # ⚠️ ЕДИНСТВЕННЫЙ роутер на s3 со своим `certresolver` — и это не отступление от правила
       # «приложениям резолвер не нужен», а другой случай.
       #
@@ -107,10 +132,12 @@ services:
       #   1. ключ `media.letar.best` в `/home/deploy/lego/acme-dns-accounts.json` на s3;
       #   2. `CNAME _acme-challenge.media.letar.best` → `<fulldomain>` у регистратора.
       # Порядок и команды — infra/acme-dns/README.md, «Аккаунт на одно имя».
-      traefik.http.routers.media.tls: 'true'
-      traefik.http.routers.media.tls.certresolver: 'dns'
+      #
+      # Сам `certresolver` стоит на роутере `media-api` (сервис выше) — заказчик нужен один,
+      # второй роутер берёт уже выпущенный сертификат из хранилища по совпадению имени.
+      traefik.http.routers.media-v.tls: 'true'
       # Порт КОНТЕЙНЕРА, не хостовый
-      traefik.http.services.media.loadbalancer.server.port: '80'
+      traefik.http.services.media-v.loadbalancer.server.port: '80'
     restart: unless-stopped
     logging:
       driver: json-file
