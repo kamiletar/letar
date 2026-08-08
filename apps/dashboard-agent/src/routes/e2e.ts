@@ -45,6 +45,7 @@ interface E2eRun {
   app: string
   project?: string
   grep?: string
+  workers?: number
   startTime?: string
   endTime?: string
   exitCode?: number | null
@@ -155,7 +156,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * POST /api/e2e/run — запускает `nx e2e <app>-e2e` против staging-контейнера
-   * Body: { app: string; baseUrl: string; project?: string; grep?: string }
+   * Body: { app: string; baseUrl: string; project?: string; grep?: string; workers?: number }
    * baseUrl — куда бить: ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
    * НЕ `http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов,
    * а если он окажется недостижим, Playwright молча поднимет свой dev-сервер и результат прогона
@@ -165,14 +166,19 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
    * grep — передаётся в `playwright test --grep` (имя файла/спека/название теста, подстрока
    * или regex) для точечного прогона вместо всего набора — экономит время (2026-07-22:
    * запрос точечной проверки /admin/products гонял все 123 теста за отсутствием фильтра).
+   * workers — передаётся в `playwright test --workers`. Без него — дефолт Playwright (все ядра).
+   * Полный параллелизм (несколько браузеров × несколько воркеров) создаёт ресурсную перегрузку
+   * на общем staging-контейнере — CPU-bound шаги (scrypt-хеширование пароля, WebRTC/geolocation
+   * таймауты) флейкуют при полном параллелизме и стабильно проходят при `workers=1` (aboi,
+   * 2026-08-08). `1` — не гарантированный дефолт для всех приложений, задаётся по запросу.
    *
    * Асинхронный: возвращает runId сразу, клиент опрашивает /api/e2e/status.
    * По завершении пишет `.last-e2e-status/<app>.json` — читается warn-gate'ом deploy_app(production).
    */
-  fastify.post<{ Body: { app: string; baseUrl: string; project?: string; grep?: string } }>(
+  fastify.post<{ Body: { app: string; baseUrl: string; project?: string; grep?: string; workers?: number } }>(
     '/api/e2e/run',
     async (request): Promise<ApiResponse<{ runId: string; app: string; started: boolean }>> => {
-      const { app, baseUrl, project, grep } = request.body
+      const { app, baseUrl, project, grep, workers } = request.body
 
       if (!app) {
         return { success: false, error: 'App name is required', timestamp: new Date().toISOString() }
@@ -198,6 +204,15 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       }
+      // workers тоже интерполируется в shell-строку — числовая проверка убирает риск инъекции
+      // без regex-эквилибристики. Верхняя граница 16 — щедрый потолок, реальные раннеры s3 меньше.
+      if (workers !== undefined && (!Number.isInteger(workers) || workers < 1 || workers > 16)) {
+        return {
+          success: false,
+          error: 'Invalid workers value (целое число от 1 до 16)',
+          timestamp: new Date().toISOString(),
+        }
+      }
 
       // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
       if (getCurrentServer() !== 's3') {
@@ -212,11 +227,11 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         return { success: false, error: 'Другой e2e-прогон уже выполняется', timestamp: new Date().toISOString() }
       }
 
-      const run = createRun({ running: true, app, project, grep, startTime: new Date().toISOString() })
+      const run = createRun({ running: true, app, project, grep, workers, startTime: new Date().toISOString() })
       appendOutput(
         run,
-        `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${
-          grep ? ` (grep=${grep})` : ''
+        `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${grep ? ` (grep=${grep})` : ''}${
+          workers !== undefined ? ` (workers=${workers})` : ''
         } against ${baseUrl}`,
       )
 
@@ -236,7 +251,11 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // одинарных кавычек в nxCommand ниже (`bash -c '${e2eCommand}'`) — одинарная кавычка здесь
       // преждевременно закрыла бы ту внешнюю обёртку. Deny-лист выше уже исключает `"` из grep,
       // так что вложенные двойные кавычки безопасны.
-      const extraArgs = [project ? `--project=${project}` : '', grep ? `--grep "${grep}"` : '']
+      const extraArgs = [
+        project ? `--project=${project}` : '',
+        grep ? `--grep "${grep}"` : '',
+        workers !== undefined ? `--workers=${workers}` : '',
+      ]
         .filter(Boolean)
         .join(' ')
       const e2eCommand = `cd ${REPO_PATH} && bunx nx e2e ${app}-e2e${extraArgs ? ` -- ${extraArgs}` : ''}`

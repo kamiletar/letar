@@ -374,13 +374,25 @@ export function createDeployMcpServer(): McpServer {
           'Точечный прогон вместо всего набора: имя файла-спека (например "03-admin-products.admin.spec.ts") '
             + 'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор.',
         ),
+      workers: z
+        .number()
+        .int()
+        .min(1)
+        .max(16)
+        .optional()
+        .describe(
+          'Передаётся в `playwright test --workers`. Без него — дефолт Playwright (все ядра). '
+            + 'Полный параллелизм создаёт ресурсную перегрузку на общем staging-контейнере — CPU-bound '
+            + 'шаги (scrypt-хеширование, geolocation-таймауты) флейкуют при полном параллелизме и стабильно '
+            + 'проходят при workers=1 (aboi, 2026-08-08). Используй при подозрении на ресурсный флейк.',
+        ),
     },
-    async ({ app, baseUrl, project, grep }) => {
+    async ({ app, baseUrl, project, grep, workers }) => {
       try {
         const res = await agentRequest('s3', {
           method: 'POST',
           path: '/api/e2e/run',
-          body: { app, baseUrl, project, grep },
+          body: { app, baseUrl, project, grep, workers },
         })
         if (!res.success) {
           return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
