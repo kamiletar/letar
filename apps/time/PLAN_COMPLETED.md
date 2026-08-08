@@ -1,5 +1,13 @@
 # Time — Выполненные задачи
 
+## 2026-08-08 (техдолг: latent-баг vitest alias для @letar/seo)
+
+`vitest.config.ts` резолвил `@` через `resolve.alias`, но не имел записи для `@letar/seo` — путь
+уже был в `tsconfig.json`, но не в vitest. Latent-баг: тестовых файлов в приложении пока нет, но
+первый же тест, транзитивно тянущий `@letar/seo` (например через `robots.ts`), упал бы с «Failed
+to resolve import "@letar/seo"» — та же дыра, что чинили в `apps/aboi` в этой же сессии. Добавлен
+alias `'@letar/seo': resolve(__dirname, '../../libs/seo/src')` по образцу `apps/aboi/vitest.config.ts`.
+
 ## 2026-08-06 (SEO-гейт индексации, сессия по инфра-трекам PLAN-INFRA.md §33)
 
 Часть кросс-приложенческого захода по `PLAN-INFRA.md` §33 (SEO-фундамент для приложений без

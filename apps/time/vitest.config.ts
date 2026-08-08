@@ -24,6 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@letar/seo': resolve(__dirname, '../../libs/seo/src'),
     },
   },
 })
