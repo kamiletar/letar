@@ -23,6 +23,10 @@ import (
 )
 
 type config struct {
+	// Интерфейс, на котором слушает HTTP API. По умолчанию 127.0.0.1 — наружу не выставляем.
+	// Сервис работает в network_mode: host, поэтому пустое значение (`:PORT`) означало бы
+	// «все интерфейсы», то есть открытый из интернета порт, минуя DOCKER-USER.
+	BindAddr      string
 	HTTPPort      int
 	KuboAPIURL    string
 	KuboAuthToken string
@@ -169,7 +173,7 @@ func main() {
 	})
 
 	// Запуск HTTP сервера
-	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
+	addr := fmt.Sprintf("%s:%d", cfg.BindAddr, cfg.HTTPPort)
 	server := &http.Server{Addr: addr, Handler: mux}
 
 	go func() {
@@ -229,6 +233,7 @@ func loadConfig() config {
 	}
 
 	return config{
+		BindAddr:      envStr("BIND_ADDR", "127.0.0.1"),
 		HTTPPort:      envInt("HTTP_PORT", 8080),
 		KuboAPIURL:    envStr("KUBO_API_URL", "http://localhost:5011"),
 		KuboAuthToken: envStr("KUBO_AUTH_TOKEN", ""),

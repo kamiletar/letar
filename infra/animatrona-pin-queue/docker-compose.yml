@@ -8,6 +8,11 @@ services:
     volumes:
       - queue_data:/data
     environment:
+      # ⛔ Только loopback. При network_mode: host слушатель на всех интерфейсах открыт из
+      # интернета напрямую — DOCKER-USER такой трафик не видит, он идёт в INPUT.
+      # Так и было до 2026-08-08: `*:42080` отвечал снаружи, /health отдавал peer ID Kubo без
+      # токена. Разбор — PLAN-INFRA.md §57.
+      BIND_ADDR: '127.0.0.1'
       HTTP_PORT: '42080'
       KUBO_API_URL: 'http://localhost:5011'
       KUBO_AUTH_TOKEN: '${KUBO_AUTH_TOKEN}'
