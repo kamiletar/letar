@@ -4,6 +4,63 @@
 
 ## Черновик (новые идеи)
 
+- [ ] **AniList как источник английского описания (`descriptionEn`) в AnimeInfo/directoryCid**
+      (план от 2026-08-08) — идея: раз в раздаче уже бывают английские аудиодорожки и субтитры,
+      логично класть в `directoryCid` и английское описание — манифест должен быть
+      самодостаточен для любого зрителя, не только русскоязычного.
+
+  **Уточнение по ходу обсуждения:** у Shikimori GraphQL (`ShikimoriAnimeDetails`/`Extended` в
+  [types.ts](main/services/shikimori/types.ts)) есть только одно поле `description`/
+  `descriptionHtml` — оно уже переводное (русское или смешанное), отдельного английского
+  synopsis там нет. `english`-поле у Shikimori — это только название, не описание. Источник
+  реального английского synopsis — **AniList** (`Media.description`, англоязычный по своей
+  природе, не перевод).
+
+  **Матчинг с AniList — уже готов, ничего чинить не нужно.** Обсуждали переход с `shikimoriId`
+  на `malId` как более «каноничный» ключ — решили **не переезжать**: `shikimoriId` зашит по всей
+  архитектуре как первичный ключ (`Anime.shikimoriId @unique`, `AnimeRelation.targetShikimoriId`,
+  `Genre/Theme.shikimoriId`, стабильный ключ графа франшизы, throttle/матчинг с Rutracker), а
+  Shikimori — функциональный источник данных первого порядка (русские переводы — основная
+  аудитория Rutracker русскоязычная; граф связей/франшиз; роли персонажей/стаффа через REST),
+  чего у официального MAL API нет и не будет без отдельной OAuth-регистрации приложения.
+  Вместо переезда — `extractExternalIds()` в
+  [shikimori-mapper.ts:217-260](main/services/shikimori-mapper.ts) уже вытаскивает из внешних
+  ссылок самого Shikimori **настоящие** `AnimeManifestExternalIds.mal` и `.anilist` (парсит
+  `myanimelist.net/anime/{id}` и `anilist.co/anime/{id}` из `shikimoriData.externalLinks`, не
+  предполагая равенство ID). Это уже точный мост к AniList — искать по `id: externalIds.anilist`
+  когда есть прямая ссылка, иначе фоллбэк на `idMal: externalIds.mal`.
+
+  **План реализации:**
+  1. `libs/animatrona-types/src/anime-info.ts` — добавить `AnimeInfo.descriptionEn?: string`
+     рядом с существующим `description` (секция «Описание»).
+  2. Новый `main/services/anilist/` (по образцу `main/services/shikimori/`, но сильно проще —
+     один REST/GraphQL-эндпоинт `https://graphql.anilist.co`, один запрос):
+     - `types.ts` — `AniListMedia { id, idMal, description }`.
+     - `client.ts` — `getAniListDescription({ anilistId?, malId? })`, GraphQL-запрос
+       `Media(id: $id, idMal: $idMal, type: ANIME) { id idMal description(asHtml: false) }`,
+       глобальный `fetch` (не `net.fetch` — та же причина TUN-VPN/TLS-отпечатка, что и у
+       Shikimori, см. комментарий у `GRAPHQL_ENDPOINTS` в
+       [shikimori/client.ts:47-61](main/services/shikimori/client.ts)), простой inline-throttle
+       (AniList degraded rate limit ~30 req/min → минимум 2.1с между запросами, без отдельного
+       `throttle.ts` — потребитель один, в отличие от Shikimori с тремя разными клиентами).
+       In-memory кэш как у `getAnimeExtended` (TTL, не персистентный).
+     - Ошибки — non-fatal (`try/catch` + `log.warn`), как источник Shikimori REST в
+       `anime-info-generator.ts` — отсутствие AniList-данных не должно ронять генерацию
+       AnimeInfo целиком.
+  3. Вызов — **внутри `buildAnimeInfo()`** в
+     [anime-info-generator.ts:32-121](main/services/anime-info-generator.ts), не в двух местах
+     вызова (`generateAnimeInfo()` и `anime-manifest-generator.ts:299`) по отдельности —
+     `buildAnimeInfo` уже получает готовый `externalIds` в параметрах, значит там единственная
+     точка, где нужно дёрнуть AniList и положить `descriptionEn` в результат.
+  4. `AnimeManifestExternalIds.anilist` (уже существует в
+     [anime-manifest.ts:69](../../libs/animatrona-types/src/anime-manifest.ts)) — заодно
+     заполнять из ответа AniList `id`, если Shikimori своей ссылки на AniList не дал, а AniList
+     нашёлся по `idMal` (обратное обогащение).
+
+  **Не путать с §14 (мультиязычность UI, ru+en через i18next)** — это отдельная, гораздо более
+  крупная задача (перевод всего интерфейса Animatrona и Animatrona Player). Текущая идея —
+  только про данные в манифесте, полностью независима и на порядок дешевле.
+
 - [ ] **Плеер: фуллскрин по двойному клику и Alt+Enter** (план от 2026-07-30) — сейчас в плеере
       нет быстрого способа развернуть видео на весь экран. Добавить: двойной клик по видео
       переключает fullscreen, сочетание Alt+Enter делает то же самое из любого места плеера.
