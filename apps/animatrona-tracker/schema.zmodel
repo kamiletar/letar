@@ -712,13 +712,18 @@ model PinServer {
   peerId      String?
 
   /// Bearer-токен для авторизации Kubo API (API.Authorizations)
-  authSecret  String?
+  /// ⛔ Никогда не читается через enhanced-клиент: строку целиком разрешает читать любому
+  /// `@@allow('read', status == ONLINE)` ниже (клиентам нужны peerId/swarmAddrs для bootstrap),
+  /// и без этого запрета секрет уезжал бы вместе с ними. Серверный код берёт его сырым
+  /// `prisma`. PLAN-INFRA.md §61.
+  authSecret  String?   @deny('read', true)
 
   /// URL pin-queue сервиса (если есть). Используется вместо прямого Kubo API.
   pinQueueUrl String?
 
   /// Bearer-токен для pin-queue сервиса
-  pinQueueSecret String?
+  /// ⛔ См. комментарий у authSecret — тот же запрет и по той же причине.
+  pinQueueSecret String? @deny('read', true)
 
   /// Статус сервера
   status      PinServerStatus @default(ONLINE)
