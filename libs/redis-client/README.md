@@ -33,12 +33,35 @@ export interface CreateRedisClientOptions {
   fallbackUrl?: string
   /** Подавить console.error/console.warn при ошибках подключения. */
   silent?: boolean
-  /** Доп. опции ioredis поверх дефолтных (maxRetriesPerRequest, lazyConnect, retryStrategy). */
+  /** Доп. опции ioredis поверх дефолтных (maxRetriesPerRequest, enableOfflineQueue, lazyConnect, retryStrategy). */
   redisOptions?: RedisOptions
   /** Префикс для лога, например '[redis:svoichuzhie]'. */
   logPrefix?: string
 }
 ```
+
+### ⚠️ `enableOfflineQueue: false` по умолчанию — fail-fast, а не зависание
+
+Дефолт ioredis (`enableOfflineQueue: true` + бесконечный `retryStrategy`) означает, что команда,
+отправленная при недоступном Redis, **не падает и не зависает с таймаутом** — она ждёт
+переподключения бесконечно. `await` на такой команде не завершается никогда, и это не ловится
+`maxRetriesPerRequest` (он не про время ожидания очереди). Ровно так 2026-08-08 `dashboard-agent`
+ушёл в crash loop на s3 — подробности в `apps/dashboard-agent/src/lib/with-timeout.ts` и
+`PLAN-INFRA.md` §66.
+
+Эта библиотека переопределяет дефолт на `enableOfflineQueue: false`: при недоступном Redis команда
+отклоняется немедленно («Stream isn't writeable»), а не зависает. Все текущие потребители уже
+оборачивают Redis-вызовы в `try/catch` с fail-open/no-op фоллбэком — для них это строго лучше
+зависания и ничего не ломает. Цена — короткий разрыв соединения больше не переживается прозрачно
+(команда, посланная во время реконнекта, падает вместо тихого ожидания в очереди); если конкретному
+потребителю нужна старая семантика — `redisOptions: { enableOfflineQueue: true }`.
+
+⚠️ **Эта настройка не влияет на `createRedisStorage` из `@letar/auth`** (хранилище сессий/rate-limit
+Better Auth) — оно не использует эту библиотеку и создаёт свой независимый инстанс `ioredis` с
+дефолтными настройками ioredis. Тот же класс риска (недоступный Redis → зависание вместо ошибки)
+там не устранён; Better Auth вызывает `secondaryStorage.get/set` без своего `try/catch`, так что
+зависший Redis-вызов там сейчас вешает обработку сессии целиком. Отдельная задача, не входит в эту
+библиотеку — см. `PLAN-INFRA.md` §66.
 
 ### Пример: приложение со своим набором хелперов поверх клиента
 

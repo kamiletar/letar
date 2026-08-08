@@ -36,4 +36,16 @@ describe('createRedisClient', () => {
     const getRedisB = createRedisClient({ envVar: ENV_VAR })
     expect(getRedisA()).not.toBe(getRedisB())
   })
+
+  it('по умолчанию отключает офлайн-очередь ioredis (fail-fast вместо зависания при недоступном Redis)', () => {
+    process.env[ENV_VAR] = 'redis://localhost:6379'
+    const getRedis = createRedisClient({ envVar: ENV_VAR })
+    expect(getRedis()?.options.enableOfflineQueue).toBe(false)
+  })
+
+  it('redisOptions.enableOfflineQueue переопределяет дефолт', () => {
+    process.env[ENV_VAR] = 'redis://localhost:6379'
+    const getRedis = createRedisClient({ envVar: ENV_VAR, redisOptions: { enableOfflineQueue: true } })
+    expect(getRedis()?.options.enableOfflineQueue).toBe(true)
+  })
 })
