@@ -36,6 +36,13 @@ services:
     volumes:
       - queue_data:/data
     environment:
+      # ⛔ Только loopback. При network_mode: host слушатель на всех интерфейсах открыт из
+      # интернета напрямую — DOCKER-USER такой трафик не фильтрует, он идёт в INPUT.
+      # До 2026-08-08 здесь этой строки не было: `*:42080` отвечал снаружи, а `/health` отдавал
+      # peer ID Kubo без токена. Разбор — PLAN-INFRA.md §57.
+      # ⚠️ Дублируется с ../animatrona-pin-queue/docker-compose.yml намеренно: на s3 сервис
+      # поднимается ИЗ ЭТОГО файла, соседний там не применяется вообще.
+      BIND_ADDR: '127.0.0.1'
       HTTP_PORT: '42080'
       KUBO_API_URL: 'http://localhost:5001'
       KUBO_AUTH_TOKEN: '${KUBO_AUTH_TOKEN}'
