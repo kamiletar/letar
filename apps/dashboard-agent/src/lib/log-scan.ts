@@ -119,9 +119,10 @@ export async function runLogScan(): Promise<LogScanResult> {
     const newLines = lines.filter((line) => line.timestamp > lastSeenAt)
     const errorLines = newLines.filter((line) => ERROR_PATTERN.test(line.text))
 
+    let delivered = true
     if (errorLines.length > 0) {
       const sample = errorLines.slice(0, MAX_SAMPLE_LINES).map((l) => l.text)
-      await postDashboardAlert({
+      delivered = await postDashboardAlert({
         type: 'CRON_FAILED',
         severity: 'WARNING',
         title: `Ошибки в логах: ${container.name} (${errorLines.length})`,
@@ -131,7 +132,10 @@ export async function runLogScan(): Promise<LogScanResult> {
       alertsTriggered.push(container.name)
     }
 
-    if (newLines.length > 0) {
+    // Недоставленный алерт (§62) не должен продвигать курсор — иначе строки с ошибками,
+    // о которых так и не узнал dashboard, больше никогда не попадут в "новые" и попытка
+    // не повторится.
+    if (newLines.length > 0 && delivered) {
       state.lastSeenAt[container.name] = newLines[newLines.length - 1].timestamp
     }
   }

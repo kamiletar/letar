@@ -98,18 +98,26 @@ async function checkMetricThresholds(state: HealthCheckState): Promise<{
     const wasAlerted = state.metricsAlerted[check.key] ?? false
     const isOver = check.value > check.threshold
 
-    if (isOver && !wasAlerted) {
-      await postDashboardAlert({
-        type: check.type,
-        severity: 'WARNING',
-        title: `${check.label}: ${check.value.toFixed(1)}% (порог ${check.threshold}%)`,
-        message: `${check.label} превысил порог ${check.threshold}% — текущее значение ${check.value.toFixed(1)}%.`,
-        metadata: { jobId: 'health-check', metric: check.key, value: check.value, threshold: check.threshold },
-      })
-      triggered.push(check.type)
+    if (!isOver) {
+      state.metricsAlerted[check.key] = false
+      continue
     }
 
-    state.metricsAlerted[check.key] = isOver
+    if (wasAlerted) {
+      continue
+    }
+
+    const delivered = await postDashboardAlert({
+      type: check.type,
+      severity: 'WARNING',
+      title: `${check.label}: ${check.value.toFixed(1)}% (порог ${check.threshold}%)`,
+      message: `${check.label} превысил порог ${check.threshold}% — текущее значение ${check.value.toFixed(1)}%.`,
+      metadata: { jobId: 'health-check', metric: check.key, value: check.value, threshold: check.threshold },
+    })
+    triggered.push(check.type)
+    // Как в email-canary (§62): пишем ИСХОД отправки, а не факт вызова. Недоставленный алерт
+    // оставляет `wasAlerted` false — следующий прогон, пока метрика всё ещё над порогом, повторит попытку.
+    state.metricsAlerted[check.key] = delivered
   }
 
   return {
@@ -145,6 +153,8 @@ async function checkContainers(state: HealthCheckState): Promise<string[]> {
     const wasRunning = prevState === 'running'
 
     if (container.state === 'restarting') {
+      // Не дебаунсится — каждый прогон алертит заново, пока crash-loop не закончится, поэтому
+      // недоставленная попытка и так будет повторена на следующем прогоне без доп. состояния.
       await postDashboardAlert({
         type: 'CONTAINER_RESTARTED',
         severity: 'WARNING',
@@ -154,8 +164,9 @@ async function checkContainers(state: HealthCheckState): Promise<string[]> {
         metadata: { jobId: 'health-check', container: container.name, status: container.status },
       })
       triggered.push('CONTAINER_RESTARTED')
+      state.containerStates[container.name] = container.state
     } else if (wasRunning && container.state !== 'running') {
-      await postDashboardAlert({
+      const delivered = await postDashboardAlert({
         type: 'CONTAINER_DOWN',
         severity: 'ERROR',
         title: `Контейнер остановлен: ${container.name}`,
@@ -168,9 +179,14 @@ async function checkContainers(state: HealthCheckState): Promise<string[]> {
         },
       })
       triggered.push('CONTAINER_DOWN')
+      // Недоставленный алерт (§62) не должен продвигать состояние: следующий прогон должен
+      // снова увидеть переход running → не-running и повторить попытку.
+      if (delivered) {
+        state.containerStates[container.name] = container.state
+      }
+    } else {
+      state.containerStates[container.name] = container.state
     }
-
-    state.containerStates[container.name] = container.state
   }
 
   // Контейнеры, пропавшие из списка (удалены) — чистим их состояние, чтобы не копить мусор в файле.
@@ -202,19 +218,25 @@ async function checkDatabases(state: HealthCheckState): Promise<string[]> {
     const isDown = status.containerStatus.running && !status.connectionOk
     const wasAlerted = state.databaseAlerted[status.name] ?? false
 
-    if (isDown && !wasAlerted) {
-      await postDashboardAlert({
-        type: 'DATABASE_DOWN',
-        severity: 'ERROR',
-        title: `БД недоступна: ${status.name}`,
-        message:
-          `Контейнер ${status.containerStatus.containerName} запущен, но подключение к БД ${status.database} не удалось.`,
-        metadata: { jobId: 'health-check', app: status.name, host: status.host, port: status.port },
-      })
-      triggered.push('DATABASE_DOWN')
+    if (!isDown) {
+      state.databaseAlerted[status.name] = false
+      continue
     }
 
-    state.databaseAlerted[status.name] = isDown
+    if (wasAlerted) {
+      continue
+    }
+
+    const delivered = await postDashboardAlert({
+      type: 'DATABASE_DOWN',
+      severity: 'ERROR',
+      title: `БД недоступна: ${status.name}`,
+      message:
+        `Контейнер ${status.containerStatus.containerName} запущен, но подключение к БД ${status.database} не удалось.`,
+      metadata: { jobId: 'health-check', app: status.name, host: status.host, port: status.port },
+    })
+    triggered.push('DATABASE_DOWN')
+    state.databaseAlerted[status.name] = delivered
   }
 
   return triggered
