@@ -7343,13 +7343,17 @@ Redis», а смерть приложения.
       (`internal-adapter.mjs`) вызывает `secondaryStorage.get/set` без своего `try/catch`, так что
       зависший вызов вешает обработку сессии целиком, а не деградирует. Отдельная, ещё не начатая
       задача — см. пункт ниже.
-- [ ] `createRedisStorage` (`@letar/auth`) — тот же класс риска, отдельная реализация, не
-      затронута фиксом выше. Нужно решить: либо тоже `enableOfflineQueue: false` +
-      `maxRetriesPerRequest` там же, либо явный `try/catch`/таймаут вокруг каждого
-      `secondaryStorage.get/set` на стороне `@letar/auth` (Better Auth сам не защищает эти вызовы).
-      Потребители сейчас: `auth-hub`, `kami`, `svoichuzhie` (все — только когда `REDIS_URL` задан;
-      в dev без него Better Auth уходит на memory-storage). Не делать без прогона на живом auth-flow
-      — это авторизация в проде.
+- [x] `createRedisStorage` (`@letar/auth`) — закрыто (2026-08-08, `libs/auth` 0.11.4). Выбран
+      второй вариант: явный таймаут (2с по умолчанию, `CreateRedisStorageOptions.timeoutMs`) +
+      `try/catch` вокруг каждого `get/set/delete`, а не `enableOfflineQueue: false` в самом
+      клиенте — потому что при `secondaryStorage` без `session.storeSessionInDatabase` (текущий
+      конфиг во всех трёх потребителей) сессия хранится **только** в Redis, а не кэшируется поверх
+      БД, и это меняет цену ошибки: `get` на таймауте/ошибке возвращает `null` (штатный для Better
+      Auth cache-miss — не новый отказ), `set`/`delete` — best-effort без исключения. Заодно добавлен
+      `redis.on('error', ...)` — раньше необработанное событие `error` от ioredis валило бы процесс
+      отдельно от вопроса таймаута. Потребители: `auth-hub`, `kami`, `svoichuzhie` (только при
+      заданном `REDIS_URL`; в dev без него Better Auth уходит на memory-storage) — сигнатура вызова
+      не изменилась, `timeoutMs` опционален, разворачивать на проде можно без правок в приложениях.
 
 ### 2. ⛔ ОТКРЫТО: `deploy-affected.sh` не знает про `docker-compose.s3.yml`
 
