@@ -50,11 +50,11 @@ export interface DocumentFieldConfig {
  * - Realtime валидация
  */
 export function createDocumentField(config: DocumentFieldConfig) {
-  return createField<DocumentFieldProps, string>({
+  return createField<DocumentFieldProps, string, { maskRef: (element: HTMLInputElement | null) => void }>({
     displayName: config.displayName,
 
-    render: ({ field, resolved, hasError, errorMessage }): ReactElement => {
-      // Маска через ref callback
+    // useFieldState вызывается ДО form.Field (hooks-safe), в отличие от render callback
+    useFieldState: () => {
       const maskRef = useCallback((element: HTMLInputElement | null) => {
         if (!element) return
         withMask(config.mask, {
@@ -64,6 +64,10 @@ export function createDocumentField(config: DocumentFieldConfig) {
         })(element)
       }, [])
 
+      return { maskRef }
+    },
+
+    render: ({ field, resolved, hasError, errorMessage, fieldState }): ReactElement => {
       // Дополнительная валидация (контрольная сумма)
       const customError = config.validate ? config.validate(String(field.state.value ?? '')) : undefined
       const showError = hasError || !!customError
@@ -75,7 +79,7 @@ export function createDocumentField(config: DocumentFieldConfig) {
 
           <InputGroup startElement={<Icon color="fg.muted">{config.icon}</Icon>}>
             <Input
-              ref={maskRef}
+              ref={fieldState.maskRef}
               value={String(field.state.value ?? '')}
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}

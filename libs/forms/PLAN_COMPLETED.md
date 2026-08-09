@@ -1,5 +1,20 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-09 — Техдолг: rules-of-hooks в document-field-base.tsx (не false-positive)
+
+- **`createDocumentField`** (`document/document-field-base.tsx`, используется FieldInn/FieldOgrn/
+  FieldBik/FieldSnils/FieldKpp) вызывал `useCallback` прямо в теле render-callback, переданного в
+  `createField()` — та же категория нарушения Rules of Hooks, что и в `FieldDataGrid`
+  (2026-07-07, см. запись ниже), только для одной хук-функции (`maskRef`), а не пяти.
+- Запись от 2026-07-07 называла это «известным false-positive» — неверно: `oxlint`
+  (`react-hooks(rules-of-hooks)`) указывал на реальную проблему, просто раньше её не чинили.
+- Фикс — по паттерну "Field with local state" из JSDoc `create-field.tsx`: `maskRef` вынесен в
+  `useFieldState` (второй параметр `createField()`, вызывается ДО `form.Field`, hooks-safe),
+  наружу передаётся через `fieldState.maskRef`.
+- Верификация: `nx lint forms` — `rules-of-hooks` для файла ушла (остались только
+  предсуществующие `curly`, не в скоупе этой правки); `nx test forms` — зелёный; публичный API
+  `createDocumentField`/`DocumentFieldConfig` не менялся.
+
 ## 2026-07-08 — Стратегия дистрибуции (Фаза 7) + Clean Architecture
 
 Планировочная сессия (без изменений кода). Определено направление распространения `@letar/forms`
