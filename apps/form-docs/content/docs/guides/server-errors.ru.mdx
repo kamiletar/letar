@@ -31,6 +31,55 @@ import { applyServerErrors, mapServerErrors } from '@letar/forms'
 </Form>
 ```
 
+## С декларативным `<Form>`
+
+Пример выше использует низкоуровневый `useAppForm` — там `form` доступен напрямую из замыкания. Декларативная обёртка (`createForm()` → `<Form onSubmit={(data) => ...}>`) устроена иначе: её `onSubmit` получает только `data`, без инстанса формы, а обработка ошибок вынесена в `middleware.onError` — туда попадает то, что бросил сам `onSubmit`/Server Action (`FormSimple` перехватывает исключение и вызывает `middleware.onError`, см. `libs/forms/src/lib/declarative/form-root/form-simple.tsx`).
+
+Чтобы применить `mapServerErrors`/`applyServerErrors` в этом случае, нужен доступ к инстансу формы снаружи `onSubmit` — для этого `useFormRef()`:
+
+```tsx
+import { applyServerErrors, mapServerErrors, useFormRef } from '@letar/forms'
+
+function MaterialForm() {
+  const formRef = useFormRef()
+
+  async function handleSubmit(data: MaterialFormData) {
+    // Server Action просто бросает ошибку (Prisma/ZenStack/Error) — оборачивать вручную не нужно
+    await createMaterial(data)
+  }
+
+  return (
+    <Form
+      schema={MaterialSchema}
+      initialValue={initialValue}
+      onSubmit={handleSubmit}
+      formRef={formRef}
+      middleware={{
+        onError: (error) => {
+          const mapped = mapServerErrors(error, {
+            fieldMap: { sku: { field: 'sku', message: 'Такой артикул уже используется' } },
+          })
+          if (formRef.current) {
+            applyServerErrors(formRef.current, mapped)
+          }
+        },
+      }}
+    >
+      <Form.Errors />
+      <Form.Field.String name="sku" />
+      <Form.Button.Submit>Сохранить</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+Ключевые моменты:
+
+- `formRef` передаётся в `<Form>` **и** используется внутри `middleware.onError` — без него `applyServerErrors` некуда применять ошибки.
+- Server Action, вызываемый из `onSubmit`, не должен ловить и оборачивать ошибку сам — `mapServerErrors` умеет разбирать «сырые» Prisma/ZenStack/Zod исключения.
+- Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
+- Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
+
 ## Поддерживаемые форматы
 
 | Формат            | Пример                                                  | Результат                                |

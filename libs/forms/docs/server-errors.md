@@ -131,6 +131,55 @@ applyServerErrors(form, mapped)
 // formErrors → form.setErrorMap({ onSubmit: '...' })
 ```
 
+## С декларативным `<Form>`
+
+Пример выше использует низкоуровневый `useAppForm` — там `form` доступен напрямую из замыкания. Декларативная обёртка (`createForm()` → `<Form onSubmit={(data) => ...}>`) устроена иначе: её `onSubmit` получает только `data`, без инстанса формы, а обработка ошибок вынесена в `middleware.onError` — туда попадает то, что бросил сам `onSubmit`/Server Action (`FormSimple` перехватывает исключение и вызывает `middleware.onError`, см. `libs/forms/src/lib/declarative/form-root/form-simple.tsx`).
+
+Чтобы применить `mapServerErrors`/`applyServerErrors` в этом случае, нужен доступ к инстансу формы снаружи `onSubmit` — для этого `useFormRef()`:
+
+```tsx
+import { applyServerErrors, mapServerErrors, useFormRef } from '@letar/forms'
+
+function MaterialForm() {
+  const formRef = useFormRef()
+
+  async function handleSubmit(data: MaterialFormData) {
+    // Server Action просто бросает ошибку (Prisma/ZenStack/Error) — оборачивать вручную не нужно
+    await createMaterial(data)
+  }
+
+  return (
+    <DomWellbesForm
+      schema={MaterialSchema}
+      initialValue={initialValue}
+      onSubmit={handleSubmit}
+      formRef={formRef}
+      middleware={{
+        onError: (error) => {
+          const mapped = mapServerErrors(error, {
+            fieldMap: { sku: { field: 'sku', message: 'Такой артикул уже используется' } },
+          })
+          if (formRef.current) {
+            applyServerErrors(formRef.current, mapped)
+          }
+        },
+      }}
+    >
+      <DomWellbesForm.Errors />
+      <DomWellbesForm.Field.String name="sku" />
+      <DomWellbesForm.Button.Submit>Сохранить</DomWellbesForm.Button.Submit>
+    </DomWellbesForm>
+  )
+}
+```
+
+Ключевые моменты:
+
+- `formRef` передаётся в `<Form>` **и** используется внутри `middleware.onError` — без него `applyServerErrors` некуда применять ошибки.
+- Server Action, вызываемый из `onSubmit`, не должен ловить и оборачивать ошибку сам — `mapServerErrors` умеет разбирать «сырые» Prisma/ZenStack/Zod исключения; лишний try/catch в самом Server Action только всё усложнит.
+- Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
+- Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
+
 ## fieldMap — кастомный маппинг
 
 Ключи fieldMap:
