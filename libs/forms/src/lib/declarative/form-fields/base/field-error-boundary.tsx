@@ -1,7 +1,7 @@
 'use client'
 
-import { Box, Text } from '@chakra-ui/react'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { chakraUIKit } from './uikit-chakra'
 
 interface FieldErrorBoundaryProps {
   /** Имя поля для отображения в сообщении об ошибке */
@@ -37,13 +37,9 @@ export class FieldErrorBoundary extends Component<FieldErrorBoundaryProps, Field
 
   override render(): ReactNode {
     if (this.state.hasError) {
-      return (
-        <Box p={3} borderWidth="1px" borderColor="red.500" borderRadius="md" bg="red.50" _dark={{ bg: 'red.950' }}>
-          <Text color="red.600" _dark={{ color: 'red.300' }} fontSize="sm">
-            Ошибка в поле &quot;{this.props.fieldName}&quot;: {this.state.error?.message}
-          </Text>
-        </Box>
-      )
+      // Внешний вид fallback'а — деталь UI-адаптера (Фаза 7.3): раньше здесь были зашиты
+      // Chakra-токены (red.500/red.50 + _dark), теперь их владелец — реализация контракта.
+      return <chakraUIKit.ErrorFallback fieldName={this.props.fieldName} message={this.state.error?.message} />
     }
 
     return this.props.children

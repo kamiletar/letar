@@ -4,6 +4,43 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.5.0] - 2026-08-09
+
+### Changed
+
+- **UIKit-контракт расширен и доведён до композиционного слоя (Фаза 7.3, шаги 1-2).** Аудит
+  перед стартом shadcn-скина показал, что Этап 4 Фазы 7.1 закрыл только слой контролов: сборка
+  формы ниже уровня поля по-прежнему импортировала Chakra напрямую, в обход контракта. Найдено
+  9 таких точек; закрыты пять из них — `FieldWrapper`, `FieldErrorBoundary`, `FieldLabel` и обе
+  кнопки массива (`Form.Group.List.Button.Add`/`.Remove`) теперь рендерят через
+  `chakraUIKit`, а не через собственные импорты Chakra.
+- **Стилевые детали убраны из контракта в адаптер.** Два места протаскивали конкретные
+  Chakra-токены сквозь границу: `FieldWrapper` красил рамку через `css`-проп
+  (`borderColor: 'blue.200'`), кнопка удаления несла `colorPalette="red"`. Заменены на
+  семантику — `validating?: boolean` у `FieldRoot` и `tone: 'danger'` у кнопок; как это
+  выглядит, решает реализация контракта.
+- **`useGroupedOptions` расслоён.** Хук смешивал чистую группировку опций с построением
+  `createListCollection` — рантайм-структуры Ark UI. Логика группировки вынесена в
+  `@letar/forms-core/uikit` (`groupOptions`, `hasGroups`, `getOptionLabel` — framework-free,
+  12 тестов), построение коллекции остаётся деталью Chakra-адаптера. Это была протечка на
+  уровне **данных**, а не рендера: shadcn-скин не имеет `createListCollection` вовсе, и
+  подменить её примитивом UIKit было невозможно.
+
+### Added
+
+- Новые примитивы контракта: `Tooltip`, `RequiredIndicator`, `ErrorFallback`, расширенные
+  `Button`/`IconButton` (`type`/`variant`/`size`/`tone`), тип `UIKitTone`.
+- `libs/forms-core/src/lib/uikit/group-options.ts` + 12 тестов.
+- Тесты на `FieldErrorBoundary` (4) — компонент не был покрыт вовсе, хотя именно он решает,
+  увидит ли пользователь сломанное поле или потерю всей формы.
+
+### Notes
+
+- Публичный API `@letar/forms` не изменился — правки внутренние.
+- Оставшиеся точки связанности композиционного слоя (`create-field.tsx` с его дефолтным
+  `FieldError`-хелпером, `field-tooltip.tsx`, `selection-field-label.tsx`) ждут решения по
+  размещению React-слоя — см. `PLAN.md`, Фаза 7.3.
+
 ## [1.4.9] - 2026-08-09
 
 ### Fixed

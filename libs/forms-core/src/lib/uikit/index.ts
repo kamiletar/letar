@@ -4,6 +4,7 @@ export type {
   UIKitCheckboxProps,
   UIKitComboboxProps,
   UIKitCorePrimitives,
+  UIKitErrorFallbackProps,
   UIKitExtendedPrimitives,
   UIKitFieldErrorProps,
   UIKitFieldLabelProps,
@@ -17,8 +18,16 @@ export type {
   UIKitPinInputProps,
   UIKitRadioGroupProps,
   UIKitRadioOption,
+  UIKitRequiredIndicatorProps,
   UIKitSegmentGroupProps,
   UIKitSelectOption,
   UIKitSelectProps,
   UIKitTextProps,
+  UIKitTone,
+  UIKitTooltipProps,
 } from './types'
+
+// Pure grouping logic for selection fields — the framework-free half of the old
+// `use-grouped-options` hook (its other half built an Ark UI collection, an adapter detail).
+export { getOptionLabel, groupOptions, hasGroups } from './group-options'
+export type { GroupableLike } from './group-options'

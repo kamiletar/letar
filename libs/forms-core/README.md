@@ -66,14 +66,44 @@ const chakraUIKit: UIKit<ReactNode> = {
 - `FieldRoot`, `FieldLabel`, `FieldError`
 - `Input`, `Checkbox`, `Select`
 
+Добавлены в Фазе 7.3 и реализованы Chakra-адаптером — их потребляет композиционный слой
+(обёртка поля, error boundary, кнопки массивов), а не сами поля:
+
+- `Tooltip`, `RequiredIndicator`, `ErrorFallback`
+- `Button`, `IconButton` (с `type`/`variant`/`size`/`tone`)
+
 Типизированы, но пока без реализации (`UIKitExtendedPrimitives`, `Partial` в составе `UIKit`) —
 добавляются по мере миграции соответствующего поля, а не заранее:
 
 - `NumberInput`, `NativeSelect`, `Combobox`, `RadioGroup`, `SegmentGroup`, `PinInput`
-- Layout: `Box`, `HStack`, `VStack`, `Text`, `Button`, `IconButton`
+- Layout: `Box`, `HStack`, `VStack`, `Text`
 
 Это осознанно неполное покрытие — цель Этапа 4 была доказать, что граница работает на
 представительной выборке (текстовое/бинарное/выборное поле), а не переписать все 56 полей за раз.
+
+### Контракт описывает намерение, а не оформление
+
+Правило, выведенное из двух реальных протечек, найденных в Фазе 7.3:
+
+- `FieldWrapper` подсвечивал поле во время async-валидации `css`-пропом с Chakra-токенами
+  (`borderColor: 'blue.200'`) → стало состояние `validating?: boolean` у `FieldRoot`.
+- Кнопка удаления элемента массива несла `colorPalette="red"` → стало `tone: 'danger'`
+  (тип `UIKitTone`), которое Chakra-адаптер сам переводит в `colorPalette`, а shadcn перевёл бы
+  в `variant="destructive"`.
+
+Если в пропе примитива появляется название цвета, размера или токена конкретной UI-библиотеки —
+граница уже протекла, даже когда типы сходятся.
+
+### Группировка опций — протечка на уровне данных
+
+`groupOptions` / `hasGroups` / `getOptionLabel` (тот же subpath `./uikit`) — чистая логика
+группировки опций для `Select`/`Combobox`/`Listbox`. Вынесена из хука `useGroupedOptions`
+(`libs/forms`), который смешивал её с построением `createListCollection` — рантайм-структуры
+Ark UI.
+
+Это другой класс протечки, чем импорт компонента: у shadcn нет `createListCollection` вовсе,
+поэтому подменить её реализацией примитива нельзя — коллекцию строит адаптер, а ядро отдаёт
+только сгруппированные данные.
 
 ## Команды
 

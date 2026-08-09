@@ -1,19 +1,33 @@
 'use client'
 
 import {
+  Box,
+  Button as ChakraButton,
   Checkbox,
   createListCollection,
   Field,
   HStack,
+  IconButton as ChakraIconButton,
   Input as ChakraInput,
   Portal,
   Select as ChakraSelect,
+  Text,
 } from '@chakra-ui/react'
-import type { UIKit } from '@letar/forms-core/uikit'
+import type { UIKitCorePrimitives, UIKitExtendedPrimitives, UIKitTone } from '@letar/forms-core/uikit'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
 import { FieldError } from './create-field'
 import { FieldLabel } from './field-label'
+import { FieldTooltip } from './field-tooltip'
+
+/**
+ * Maps the contract's semantic tone onto Chakra's colour system. The contract deliberately
+ * says *what the button means* (`danger`), not what colour it is — shadcn maps the same tone
+ * to `variant="destructive"` instead.
+ */
+function toneToColorPalette(tone: UIKitTone | undefined): string | undefined {
+  return tone === 'danger' ? 'red' : undefined
+}
 
 /**
  * Chakra implementation of the `UIKit` contract from `forms-core`.
@@ -26,17 +40,40 @@ import { FieldLabel } from './field-label'
  * Only the core primitives (see `UIKitCorePrimitives` in forms-core) are implemented — this is
  * a proof of the seam on 3 fields (String, Checkbox, Select), not a rewrite of all 56.
  */
-export const chakraUIKit: UIKit<ReactNode> = {
-  FieldRoot({ invalid, required, disabled, readOnly, children }) {
+
+/**
+ * Extended primitives this adapter actually implements. Listed explicitly (instead of typing the
+ * whole object as `UIKit`, whose extended half is `Partial`) so consumers can render them as
+ * plain JSX — `<chakraUIKit.Button>` rather than `chakraUIKit.Button?.({...})`. Calling a
+ * component as a function skips its fiber, which silently breaks the moment an implementation
+ * needs a hook; the narrower type keeps callers on the JSX path.
+ */
+type ImplementedExtendedPrimitives = 'Tooltip' | 'RequiredIndicator' | 'ErrorFallback' | 'Button' | 'IconButton'
+
+export type ChakraUIKit =
+  & UIKitCorePrimitives<ReactNode>
+  & Required<Pick<UIKitExtendedPrimitives<ReactNode>, ImplementedExtendedPrimitives>>
+
+export const chakraUIKit: ChakraUIKit = {
+  FieldRoot({ invalid, required, disabled, readOnly, validating, children }) {
     return (
-      <Field.Root invalid={invalid} required={required} disabled={disabled} readOnly={readOnly}>
+      <Field.Root
+        invalid={invalid}
+        required={required}
+        disabled={disabled}
+        readOnly={readOnly}
+        data-validating={validating || undefined}
+        css={validating
+          ? { '& input, & textarea, & select': { borderColor: 'blue.200', _focus: { borderColor: 'blue.400' } } }
+          : undefined}
+      >
         {children}
       </Field.Root>
     )
   },
 
-  FieldLabel({ label, required }) {
-    return <FieldLabel label={label} required={required} />
+  FieldLabel({ label, required, tooltip }) {
+    return <FieldLabel label={label} required={required} tooltip={tooltip} />
   },
 
   FieldError({ hasError, errorMessage, helperText, isValidating }) {
@@ -164,6 +201,61 @@ export const chakraUIKit: UIKit<ReactNode> = {
           </ChakraSelect.Positioner>
         </Portal>
       </ChakraSelect.Root>
+    )
+  },
+
+  // === Extended primitives (Фаза 7.3) ===
+  // Added when the composition-layer audit found Chakra wired in below the field level:
+  // error boundaries, list buttons and tooltips all reached for Chakra directly, bypassing
+  // the contract established in Этап 4.
+
+  Tooltip(props) {
+    return <FieldTooltip {...props} />
+  },
+
+  RequiredIndicator() {
+    return <Field.RequiredIndicator />
+  },
+
+  ErrorFallback({ fieldName, message }) {
+    return (
+      <Box p={3} borderWidth="1px" borderColor="red.500" borderRadius="md" bg="red.50" _dark={{ bg: 'red.950' }}>
+        <Text color="red.600" _dark={{ color: 'red.300' }} fontSize="sm">
+          Ошибка в поле &quot;{fieldName}&quot;: {message}
+        </Text>
+      </Box>
+    )
+  },
+
+  Button({ children, onClick, disabled, loading, type, variant, size, tone }) {
+    return (
+      <ChakraButton
+        type={type ?? 'button'}
+        onClick={onClick}
+        disabled={disabled}
+        loading={loading}
+        variant={(variant as 'outline' | 'solid' | 'ghost' | 'subtle') ?? 'outline'}
+        size={(size as 'xs' | 'sm' | 'md' | 'lg') ?? 'sm'}
+        colorPalette={toneToColorPalette(tone)}
+      >
+        {children}
+      </ChakraButton>
+    )
+  },
+
+  IconButton({ children, onClick, disabled, type, variant, size, tone, ...rest }) {
+    return (
+      <ChakraIconButton
+        type={type ?? 'button'}
+        onClick={onClick}
+        disabled={disabled}
+        variant={(variant as 'outline' | 'solid' | 'ghost' | 'subtle') ?? 'outline'}
+        size={(size as 'xs' | 'sm' | 'md' | 'lg') ?? 'sm'}
+        colorPalette={toneToColorPalette(tone)}
+        aria-label={rest['aria-label']}
+      >
+        {children}
+      </ChakraIconButton>
     )
   },
 }

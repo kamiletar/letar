@@ -1093,6 +1093,45 @@ React, а React-адаптер зависит от абстракций ядра
       - Полный отчёт — в тред `forms-phase7-1-core-split` (agent-mail).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».
+      🔄 **В работе с 2026-08-09 (forms-dev), но переосмыслена по ходу.** Аудит перед стартом
+      показал: Этап 4 Фазы 7.1 закрыл только слой **контролов**, а сборка формы ниже уровня поля
+      по-прежнему шла мимо контракта. Пока это не исправлено, shadcn-скин не может быть тонким —
+      ему пришлось бы либо тянуть Chakra транзитивно через `@letar/forms`, либо дублировать всю
+      form-wiring логику. Решение Ками — вариант (а): расширять слои, а не дублировать.
+      - ✅ **Шаг 1 (аудит) закрыт.** Найдено 9 точек связанности композиционного слоя. Важная
+      поправка к первоначальной оценке: `createForm()`, `form-context`, `form-root`
+      (`FormSimple`/`FormWithApi`), `form-group-declarative`, `form-group-list-declarative` и
+      большая часть `form-fields/base/` (`base-field`, `use-resolved-field-props`, `field-utils`,
+      `use-debounce`, `use-async-search`, `use-async-field-validation`, `autocomplete-map`) —
+      **уже Chakra-free**, вопреки опасению, что «composition завязан на Chakra целиком».
+      Объём потребителей: `createField` — 38 файлов, `FieldLabel` — 27, `FieldWrapper` — 13.
+      - ✅ **Шаг 2 (расширение контракта) закрыт** — v1.5.0 / forms-core v0.2.0. Добавлены
+      примитивы `Tooltip`/`RequiredIndicator`/`ErrorFallback` + расширенные `Button`/`IconButton`;
+      на контракт переведены `FieldWrapper`, `FieldErrorBoundary`, `FieldLabel` и обе кнопки
+      массива. 754/754 теста зелёные (было 750 — +12 на `groupOptions`, +4 на
+      `FieldErrorBoundary`, который вообще не был покрыт), оба негативных контроля пройдены,
+      Add/Remove и `tone: 'danger'` проверены живым кликом в Chromium на `form-develop-app`.
+      - **Две находки, каждая — отдельный класс протечки:**
+      1. **Стилевые токены сквозь границу.** `FieldWrapper` красил рамку `css`-пропом
+      (`borderColor: 'blue.200'`), кнопка удаления несла `colorPalette="red"` — типы сходились,
+      но конкретная UI-библиотека протекала насквозь. Заменено семантикой: `validating?: boolean`
+      у `FieldRoot`, `tone: 'danger'` у кнопок. Правило записано в `libs/forms-core/README.md`.
+      2. **Протечка на уровне ДАННЫХ, а не рендера.** `useGroupedOptions` возвращал
+      `createListCollection` — рантайм-структуру Ark UI, обязательную как проп `collection` для
+      `Select`/`Combobox`/`Listbox`. Примитивом UIKit это не подменяется: у shadcn такой функции
+      нет вовсе. Чистая группировка вынесена в `@letar/forms-core/uikit`
+      (`groupOptions`/`hasGroups`/`getOptionLabel`), построение коллекции осталось адаптеру.
+      - 🔴 **Шаги 3-5 заблокированы вопросом размещения React-слоя.** Инструкция «перенести
+      `createField`/`createForm`/form-context в `forms-core`» невыполнима как написана: это React
+      (хуки, JSX, `@tanstack/react-form`), а `forms-core` защищён от React двумя независимыми
+      механизмами (`depConstraints` для `type:core` + `no-restricted-imports` на
+      `**/forms-core/src/**/*.ts`), поставленными намеренно по решению Ками 2026-07-08
+      («не импортирует ни один фреймворк — а точка»). Предложен третий пакет
+      **`@letar/forms-react`** (React + TanStack Form, UI-library-free) между ядром и скинами —
+      ждёт подтверждения координатора/Ками. Тред `forms-phase7-1-core-split`.
+      - Осталось вне контракта до этого решения: `create-field.tsx` (дефолтный
+      `FieldError`-хелпер на `Field.HelperText`/`ErrorText`/`Spinner`), `field-tooltip.tsx`,
+      `selection-field-label.tsx`.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).

@@ -1,10 +1,8 @@
 'use client'
 
-import { Field } from '@chakra-ui/react'
 import { memo, type ReactElement, type ReactNode } from 'react'
 import type { ResolvedFieldProps } from './create-field'
-import { FieldError } from './create-field'
-import { FieldLabel } from './field-label'
+import { chakraUIKit } from './uikit-chakra'
 
 export interface FieldWrapperProps {
   /** Resolved props from createField */
@@ -57,25 +55,25 @@ export const FieldWrapper = memo(function FieldWrapper({
   isValidating,
   children,
 }: FieldWrapperProps): ReactElement {
+  // Вся вёрстка обёртки идёт через UIKit-контракт (Фаза 7.3). Состояние «идёт async-валидация»
+  // передаётся семантическим флагом `validating`, а не css-пропом с Chakra-токенами
+  // (`blue.200`/`blue.400`, как было раньше) — как это выглядит, решает адаптер.
   return (
-    <Field.Root
+    <chakraUIKit.FieldRoot
       invalid={hasError}
       required={resolved.required}
       disabled={resolved.disabled}
       readOnly={resolved.readOnly}
-      data-validating={isValidating || undefined}
-      css={isValidating
-        ? { '& input, & textarea, & select': { borderColor: 'blue.200', _focus: { borderColor: 'blue.400' } } }
-        : undefined}
+      validating={isValidating}
     >
-      <FieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
+      <chakraUIKit.FieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
       {children}
-      <FieldError
+      <chakraUIKit.FieldError
         hasError={hasError}
         errorMessage={errorMessage}
         helperText={resolved.helperText}
         isValidating={isValidating}
       />
-    </Field.Root>
+    </chakraUIKit.FieldRoot>
   )
 })

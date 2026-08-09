@@ -5,6 +5,10 @@ import type { ReactElement, ReactNode } from 'react'
 import type { FieldTooltipMeta } from '../../types'
 import { FieldTooltip } from './field-tooltip'
 
+// Примечание (Фаза 7.3): этот файл — Chakra-реализация примитива `FieldLabel` из UIKit-контракта,
+// поэтому прямой импорт Chakra здесь легитимен, как и в `uikit-chakra.tsx`. Поля контракт
+// потребляют через `chakraUIKit.FieldLabel`, а не отсюда напрямую.
+
 export interface FieldLabelProps {
   /** Label text (can be ReactNode for complex labels with links) */
   label?: ReactNode

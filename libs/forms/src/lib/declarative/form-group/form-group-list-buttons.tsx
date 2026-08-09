@@ -1,8 +1,15 @@
 'use client'
 
-import { Button, IconButton } from '@chakra-ui/react'
 import type { ReactElement, ReactNode } from 'react'
+import { chakraUIKit } from '../form-fields/base/uikit-chakra'
 import { useFormGroupListContext, useFormGroupListItemContext } from './form-group-list-context'
+
+/**
+ * Кнопки массива идут через UIKit-контракт, а не через прямой импорт Chakra (Фаза 7.3).
+ * Здесь это особенно заметно на `tone`: раньше кнопка удаления несла `colorPalette="red"` —
+ * цвет конкретной UI-библиотеки; теперь она объявляет намерение (`tone: 'danger'`), а как оно
+ * выглядит, решает адаптер.
+ */
 
 export interface ListButtonAddProps {
   /** Button text (default: "+") */
@@ -53,23 +60,16 @@ export function ListButtonAdd({ children, defaultValue = {}, disabled }: ListBut
 
   if (children) {
     return (
-      <Button type="button" onClick={handleAdd} variant="outline" size="sm" disabled={isDisabled}>
+      <chakraUIKit.Button type="button" onClick={handleAdd} disabled={isDisabled}>
         {children}
-      </Button>
+      </chakraUIKit.Button>
     )
   }
 
   return (
-    <IconButton
-      type="button"
-      onClick={handleAdd}
-      variant="outline"
-      size="sm"
-      aria-label="Add item"
-      disabled={isDisabled}
-    >
+    <chakraUIKit.IconButton type="button" onClick={handleAdd} disabled={isDisabled} aria-label="Add item">
       +
-    </IconButton>
+    </chakraUIKit.IconButton>
   )
 }
 
@@ -113,23 +113,21 @@ export function ListButtonRemove({ children, disabled }: ListButtonRemoveProps):
 
   if (children) {
     return (
-      <Button type="button" onClick={handleRemove} variant="outline" size="sm" colorPalette="red" disabled={isDisabled}>
+      <chakraUIKit.Button type="button" onClick={handleRemove} disabled={isDisabled} tone="danger">
         {children}
-      </Button>
+      </chakraUIKit.Button>
     )
   }
 
   return (
-    <IconButton
+    <chakraUIKit.IconButton
       type="button"
       onClick={handleRemove}
-      variant="outline"
-      size="sm"
-      colorPalette="red"
-      aria-label="Remove item"
       disabled={isDisabled}
+      tone="danger"
+      aria-label="Remove item"
     >
       x
-    </IconButton>
+    </chakraUIKit.IconButton>
   )
 }
