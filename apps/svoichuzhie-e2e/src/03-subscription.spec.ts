@@ -1,37 +1,5 @@
-import { expect, type Locator, test } from '@playwright/test'
-
-/**
- * `.fill()` иногда не долетает до controlled-инпута под нагрузкой (staging — холодный
- * контейнер, гидратация может не успеть отработать между fill и следующим действием, значение
- * откатывается на пустое) — тот же класс проблемы, что задокументирован для aboi
- * (email-verification.spec.ts). Retry идемпотентен для .fill(), в отличие от toggle-клика.
- */
-async function fillStable(locator: Locator, value: string) {
-  await expect(async () => {
-    await locator.fill(value)
-    await expect(locator).toHaveValue(value)
-  }).toPass({ timeout: 10_000 })
-}
-
-/**
- * НЕ гонка — реальный баг компонента, найден и подтверждён на staging трейсом (BlackCove,
- * 2026-08-09). Zag.js-машина чекбокса (`@letar/forms` FieldCheckbox → Chakra v3 Checkbox.Root)
- * вешает обработчик toggle конкретно на `[data-part="control"]` (визуальный квадратик), а не
- * полагается на нативное поведение браузера «клик по `<label>` → клик по связанному `<input>`».
- * Клик по `<label data-part="root">` целиком — в т.ч. по тексту согласия — НЕ переключает
- * чекбокс вообще, ни разу, ни у Playwright, ни у живого пользователя. Реальный клик по тексту
- * "Согласен(на)..." (интуитивно ожидаемое поведение для `<label>`) молча не работает — заведено
- * отдельным репортом `@letar/forms` (форма-координатор), здесь — обход на уровне теста: кликаем
- * по `[data-part="control"]`, не по `label`.
- */
-async function checkStable(controlLocator: Locator, checkboxLocator: Locator) {
-  await expect(async () => {
-    if (!(await checkboxLocator.isChecked())) {
-      await controlLocator.click()
-    }
-    await expect(checkboxLocator).toBeChecked()
-  }).toPass({ timeout: 15_000 })
-}
+import { checkWithHydrationRetry, fillWithHydrationRetry } from '@letar/e2e-testing'
+import { expect, test } from '@playwright/test'
 
 test.describe('03 — Подписка на новости', () => {
   test('форма подписки в footer принимает email', async ({ page }) => {
@@ -48,19 +16,20 @@ test.describe('03 — Подписка на новости', () => {
     }
 
     const uniqueEmail = `e2e-sub-${Date.now()}@test.local`
-    await fillStable(emailInput, uniqueEmail)
+    await fillWithHydrationRetry(emailInput, uniqueEmail)
 
     // Форма требует согласие на ПДн — Chakra UI checkbox. Клик именно по [data-part="control"]
-    // (визуальный квадратик), не по <label> целиком — см. комментарий у checkStable.
+    // (визуальный квадратик), не по <label> целиком — см. комментарий у checkWithHydrationRetry
+    // в @letar/e2e-testing.
     const consentControl = footer.locator('[data-part="control"]').first()
     const consentCheckbox = footer.locator('input[type="checkbox"]').first()
     if (await consentCheckbox.count()) {
-      await checkStable(consentControl, consentCheckbox)
+      await checkWithHydrationRetry(consentControl, consentCheckbox)
     }
 
     // Переподтверждаем email прямо перед сабмитом — на случай если клик по чекбоксу вызвал
-    // ре-рендер, откативший значение (см. комментарий у fillStable).
-    await fillStable(emailInput, uniqueEmail)
+    // ре-рендер, откативший значение.
+    await fillWithHydrationRetry(emailInput, uniqueEmail)
 
     const submitBtn = footer.locator('button[type="submit"]')
     await submitBtn.click()
