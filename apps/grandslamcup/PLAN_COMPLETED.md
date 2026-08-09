@@ -784,3 +784,743 @@ adapter по образцу `animatrona-tracker/prisma/seed.ts`. Провере�
 ---
 
 **Последнее обновление:** 2026-08-07
+
+---
+
+# Наследие: ТЗ Кубка Большого Слэма (КБС) — завершённые фазы
+
+> Перенесено из PLAN.md: 2026-08-09. Раздел "Наследие: ТЗ КБС" в PLAN.md описывает исходное
+> ТЗ турнира до пивота на `resentiment`; ниже — те его части, которые полностью реализованы.
+> Активные/незакрытые части КБС (Фазы 9–15 — не начаты, Фаза 6 Группы D/E/F, Фаза 5 п.33/37-хвост,
+> раздел 11 Swiss Bracket — спроектирован, но не реализован) остались в PLAN.md.
+
+## Фаза 8 — Альбомы стихов поэта
+
+> Источник: задача 2026-05-16. Поэт может объединять свои стихи в именованные альбомы с обложкой.
+
+### Контекст и мотивация
+
+Сейчас стихи поэта отображаются плоским списком на странице профиля. Альбомы дают возможность группировать стихи по темам, периодам или подборкам — с визуальной обложкой и датой публикации.
+
+---
+
+### Техническое задание
+
+#### База данных (schema.zmodel)
+
+**Новая модель `Album`:**
+
+```zmodel
+model Album {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  coverImage  String?                          // путь к файлу, сервится через /api/files/
+  publishedAt DateTime?                        // null = черновик
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  playerId    String
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  albumPoems  AlbumPoem[]
+
+  @@index([playerId])
+  @@index([playerId, publishedAt])
+  @@allow('read', publishedAt != null || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+```
+
+**Новая pivot-модель `AlbumPoem` (стих в альбоме):**
+
+```zmodel
+model AlbumPoem {
+  id        String @id @default(cuid())
+  albumId   String
+  poemId    String
+  sortOrder Int    @default(0)
+  album     Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  poem      Poem   @relation(fields: [poemId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, poemId])
+  @@index([albumId, sortOrder])
+  @@allow('read', album.publishedAt != null || (auth() != null && album.player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && album.player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+```
+
+**Изменения в существующих моделях:**
+
+- `Player` — добавить `albums Album[]`
+- `Poem` — добавить `albumPoems AlbumPoem[]`
+
+**Slug альбома** генерируется через `transliterate(title)` + суффикс `-YYYYMM` при коллизии.
+
+**Миграция:** `nx db:migrate grandslamcup -- --name add_album`
+
+---
+
+#### Публичный UI (страница поэта)
+
+**Где:** `apps/grandslamcup/src/app/(public)/[citySlug]/players/[slug]/page.tsx`
+
+**Что изменить:**
+
+- В Prisma-запрос добавить `albums: { where: { publishedAt: { not: null } }, orderBy: { publishedAt: 'desc' }, take: 4, select: { id, title, slug, coverImage, publishedAt, _count: { albumPoems } } }` + `_count: { albums: true }` для подсчёта всех альбомов и `_count: { poems: true }` для подсчёта стихов без альбома (через `NOT albumPoems.some`)
+- Вставить `<PlayerAlbumsList>` **перед** `<PlayerPoemsList>` (альбомы вверху секции)
+- Черновики на публичном профиле не показываются; управление черновиками — только через `/my/poems`
+
+**Сетка постеров на профиле поэта:**
+
+На странице поэта отображается одна горизонтальная сетка квадратных плиток. Максимум 6 плиток, с переносом на мобиле:
+
+| Плитка                | Условие показа                                          | Содержимое                             |
+| --------------------- | ------------------------------------------------------- | -------------------------------------- |
+| Альбом × 4 (макс)     | Есть опубликованные альбомы                             | Обложка + год + название               |
+| **«Разное»**          | Есть стихи, не входящие ни в один опубликованный альбом | Иконка + «Разное» + «N стихов»         |
+| **«Все альбомы (N)»** | Количество опубликованных альбомов > 4                  | Иконка-стрелка + «Все альбомы» + число |
+
+Плитка **«Разное»** — ссылка на якорь `#poems` (плоский список стихов ниже на той же странице). Название «Разное» отражает стихи вне альбомов — звучит нейтрально и по-человечески, не технически.
+
+Плитка **«Все альбомы»** — ссылка на страницу `/{citySlug}/players/{slug}/albums` (список всех альбомов поэта). Появляется только если альбомов строго больше 4.
+
+**Примеры раскладки:**
+
+```
+// 5+ альбомов, есть свободные стихи:
+[Альбом 1] [Альбом 2] [Альбом 3] [Альбом 4] [Разное] [Все альбомы (7)]
+
+// 2 альбома, есть свободные стихи:
+[Альбом 1] [Альбом 2] [Разное]
+
+// 4 альбома, нет свободных стихов:
+[Альбом 1] [Альбом 2] [Альбом 3] [Альбом 4]
+
+// Нет альбомов, есть стихи:
+[Разное]   ← секция «Альбомы» не показывается, остаётся только PlayerPoemsList
+```
+
+**Внешний вид постера альбома:**
+
+- `aspectRatio="1"` (квадратный), адаптивная ширина через CSS grid
+- `Next.js Image` для обложки, иконка `LuBookOpen` как плейсхолдер если нет
+- Под изображением: год из `publishedAt` (серый, мелкий) + название (жирное)
+- Hover: `translateY(-2px)` + тень
+
+**Плитка «Разное»:** нейтральный фон, иконка `LuScrollText`, текст «Разное» крупно + «N стихов» мелко снизу. Ссылка на `#poems`.
+
+**Плитка «Все альбомы»:** нейтральный фон, иконка `LuLayoutGrid`, «Все альбомы» крупно + «(N)» в скобках. Ссылка на `/{citySlug}/players/{slug}/albums`.
+
+**Стихи без альбома** остаются в `PlayerPoemsList` без изменений (плоский список с якорем `id="poems"` ниже по странице). Стихи в альбоме не скрываются из плоского списка.
+
+**Новый роут** для полного списка альбомов: `/{citySlug}/players/{slug}/albums` — простая страница со всеми опубликованными альбомами поэта в сетке постеров (без ограничения в 4).
+
+---
+
+#### Страница альбома
+
+**Новые роуты (создать оба):**
+
+- `apps/grandslamcup/src/app/(public)/[citySlug]/players/[slug]/albums/[albumSlug]/page.tsx`
+- `apps/grandslamcup/src/app/(public)/players/[slug]/albums/[albumSlug]/page.tsx` (дубль без citySlug — редирект на версию с городом, по аналогии с `/players/[slug]/poems/[poemSlug]`)
+
+**Содержимое страницы альбома:**
+
+- Hero: обложка (широкий баннер или квадратная превью), заголовок альбома, год публикации, имя поэта
+- Список стихов с нумерацией и ссылками на `/{citySlug}/players/{slug}/poems/{poemSlug}`
+- `generateMetadata` с OG-данными
+
+**Компонент:** `albums/[albumSlug]/_components/album-poem-item.tsx` (Server Component) — строка стихотворения в списке.
+
+---
+
+#### Управление альбомами (личный кабинет)
+
+**Новый раздел:** `apps/grandslamcup/src/app/my/poems/`
+
+Страницы:
+
+| Путь                              | Файл                                      | Описание                                        |
+| --------------------------------- | ----------------------------------------- | ----------------------------------------------- |
+| `/my/poems`                       | `my/poems/page.tsx`                       | Хаб управления: список стихов + список альбомов |
+| `/my/poems/albums/new`            | `my/poems/albums/new/page.tsx`            | Форма создания альбома                          |
+| `/my/poems/albums/[albumId]/edit` | `my/poems/albums/[albumId]/edit/page.tsx` | Редактирование альбома + состав стихов          |
+
+Все страницы защищены `requirePoet()` с редиректом.
+
+**Компоненты:**
+
+| Файл                                  | Тип    | Пропсы                                    | Назначение                                                                              |
+| ------------------------------------- | ------ | ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| `_components/albums-list.tsx`         | Client | `{ albums: AlbumListItem[], playerId }`   | Список альбомов: обложка, название, статус, кнопки «Ред.», «Удалить», toggle публикации |
+| `_components/album-form.tsx`          | Client | `{ albumId?, initialData?, playerPoems }` | Форма создания/редактирования: title + upload обложки (с превью) + publishedAt          |
+| `_components/album-poem-selector.tsx` | Client | `{ albumId, albumPoems, allPoems }`       | Два столбца «В альбоме» / «Все стихи», drag-n-drop порядка                              |
+
+---
+
+#### API: загрузка обложки
+
+**Новый роут:** `apps/grandslamcup/src/app/api/upload/album-cover/route.ts`
+
+- `POST multipart/form-data` с полями `file` (изображение) и опциональным `albumId`
+- Авторизация через `requirePoetAction()`, проверка `album.playerId === poet.playerId`
+- Ресайз через sharp (квадратная обрезка 800×800 или сохранение соотношения — уточнить)
+- Сохранение в `uploads/albums/{albumId}/cover-{timestamp}.webp`
+- Если `albumId` передан — сохранить путь в `Album.coverImage` и удалить старую обложку
+- Вернуть `{ success: true, path, url }`
+
+**Подход для нового альбома (albumId ещё не существует):**
+
+1. Загрузить обложку → получить временный `path` (`uploads/albums/temp/...`)
+2. Передать `path` в `createAlbumAction` как `coverImage`
+3. В action — переместить файл в `uploads/albums/{newAlbumId}/`
+
+---
+
+#### Server Actions
+
+**Файл:** `apps/grandslamcup/src/app/my/poems/_actions/album.action.ts`
+
+| Action                      | Сигнатура                                                                           | Описание                                    |
+| --------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------- |
+| `createAlbumAction`         | `(input: { title, coverImage?, publishedAt? })` → `ActionResult<{ albumId, slug }>` | Создать альбом, переместить обложку из temp |
+| `updateAlbumAction`         | `(input: { albumId, title, coverImage?, publishedAt? })` → `ActionResult`           | Обновить метаданные                         |
+| `deleteAlbumAction`         | `(albumId)` → `ActionResult`                                                        | Удалить альбом (стихи остаются)             |
+| `toggleAlbumPublishAction`  | `(albumId)` → `ActionResult<{ publishedAt }>`                                       | Поставить/убрать `publishedAt = now()`      |
+| `addPoemToAlbumAction`      | `(input: { albumId, poemId })` → `ActionResult`                                     | Добавить стих в альбом                      |
+| `removePoemFromAlbumAction` | `(input: { albumId, poemId })` → `ActionResult`                                     | Убрать стих из альбома                      |
+| `reorderAlbumPoemsAction`   | `(input: { albumId, poemIds: string[] })` → `ActionResult`                          | Переупорядочить стихи (транзакция)          |
+
+Каждый action вызывает `revalidatePath` для `/my/poems` и публичной страницы альбома.
+
+---
+
+#### Admin
+
+**Изменить:** `apps/grandslamcup/src/app/admin/players/[id]/page.tsx`
+
+- Добавить в Prisma-запрос: `albums: { select: { id, title, publishedAt, _count: { albumPoems } } }`
+- Добавить секцию «Альбомы» после секции «Стихи»
+
+**Новый компонент:** `apps/grandslamcup/src/app/admin/players/[id]/_components/player-albums-admin.tsx`
+
+- Server Component с внутренними кнопками-ссылками
+- Таблица: название | кол-во стихов | статус (опубликован/черновик) | дата | ссылка на редактирование
+
+---
+
+#### Типы
+
+**Файл:** `apps/grandslamcup/src/app/my/poems/_types/album.types.ts`
+
+```typescript
+export interface AlbumListItem {
+  id: string
+  title: string
+  slug: string
+  coverImage: string | null
+  publishedAt: Date | null
+  _count: { albumPoems: number }
+}
+
+export interface PoemOption {
+  id: string
+  title: string
+  slug: string
+  published: boolean
+}
+
+export interface AlbumFormData {
+  title: string
+  coverImage: string | null
+  publishedAt: string | null // ISO string
+}
+```
+
+---
+
+#### Структура новых файлов
+
+```
+apps/grandslamcup/
+├── schema.zmodel                                             [ИЗМЕНИТЬ]
+│
+└── src/app/
+    ├── api/upload/album-cover/route.ts                       [СОЗДАТЬ]
+    │
+    ├── (public)/[citySlug]/players/[slug]/
+    │   ├── page.tsx                                          [ИЗМЕНИТЬ]
+    │   ├── albums/[albumSlug]/
+    │   │   ├── page.tsx                                      [СОЗДАТЬ]
+    │   │   └── _components/album-poem-item.tsx               [СОЗДАТЬ]
+    │   └── _components/
+    │       ├── player-albums-list.tsx                        [СОЗДАТЬ]
+    │       └── album-poster.tsx                              [СОЗДАТЬ]
+    │
+    ├── (public)/players/[slug]/albums/[albumSlug]/
+    │   └── page.tsx                                          [СОЗДАТЬ] (redirect)
+    │
+    ├── my/poems/
+    │   ├── page.tsx                                          [СОЗДАТЬ]
+    │   ├── albums/new/page.tsx                               [СОЗДАТЬ]
+    │   ├── albums/[albumId]/edit/page.tsx                    [СОЗДАТЬ]
+    │   ├── _actions/album.action.ts                          [СОЗДАТЬ]
+    │   ├── _components/
+    │   │   ├── album-form.tsx                                [СОЗДАТЬ]
+    │   │   ├── albums-list.tsx                               [СОЗДАТЬ]
+    │   │   └── album-poem-selector.tsx                       [СОЗДАТЬ]
+    │   └── _types/album.types.ts                             [СОЗДАТЬ]
+    │
+    └── admin/players/[id]/
+        ├── page.tsx                                          [ИЗМЕНИТЬ]
+        └── _components/player-albums-admin.tsx               [СОЗДАТЬ]
+```
+
+---
+
+### Задачи (чеклист) — ✅ ВЫПОЛНЕНО 2026-05-17 (v3.35.0)
+
+#### Фаза 1: База данных
+
+- [x] Добавить модели `Album` и `AlbumPoem` в `schema.zmodel`
+- [x] Добавить `albums Album[]` в `Player`, `albumPoems AlbumPoem[]` в `Poem`
+- [x] `nx zenstack:generate grandslamcup`
+- [x] `nx db:migrate grandslamcup -- --name add_album`
+
+#### Фаза 2: API загрузки обложки
+
+- [x] `apps/grandslamcup/src/app/api/upload/album-cover/route.ts`
+
+#### Фаза 3: Server Actions
+
+- [x] `my/poems/_actions/album.action.ts` (9 actions)
+- [x] `my/poems/_types/album.types.ts`
+
+#### Фаза 4: Публичный UI
+
+- [x] `_components/album-poster.tsx` (Client Component)
+- [x] `_components/player-albums-list.tsx` (Server Component)
+- [x] `albums/[albumSlug]/page.tsx` с `generateMetadata`
+- [x] `albums/[albumSlug]/_components/album-poem-item.tsx`
+- [x] Обновить `[slug]/page.tsx` — добавить загрузку альбомов
+- [x] `(public)/players/[slug]/albums/[albumSlug]/page.tsx` (редирект-дубль)
+- [x] `(public)/[citySlug]/players/[slug]/albums/page.tsx` (все альбомы)
+
+#### Фаза 5: Управление в /my/poems
+
+- [x] `my/poems/page.tsx`
+- [x] `_components/album-form.tsx`
+- [x] `_components/albums-list.tsx`
+- [x] `_components/album-poem-selector.tsx`
+- [x] `_components/album-cover-upload.tsx`
+- [x] `my/poems/albums/new/page.tsx`
+- [x] `my/poems/albums/[albumId]/edit/page.tsx`
+
+#### Фаза 6: Admin
+
+- [x] Обновить `admin/players/[id]/page.tsx` — секция альбомов в карточке
+
+#### Фаза 7: Качество
+
+- [x] `nx typecheck:tsgo grandslamcup` — 0 ошибок в новых файлах
+- [x] `nx lint grandslamcup` — eslint --fix curly (44 → 0) + dprint format
+- [x] `PlayerPoemsList`: добавить `id="poems"` для якоря плитки «Разное»
+- [x] `prisma/seed.ts` + `db:seed` target
+
+---
+
+
+---
+
+## Фаза 6 — Обратная связь 2026-04-10 (v3.22.0+)
+
+> Источник: заметки пользователя, `C:\Users\Kami\Desktop\КБС.md`, после прогона матча в СПб.
+
+### Группа A — Критические production-баги
+
+1. ~~**404 на `/admin/matches/[id]/edit`**~~ ✅ v3.23.0 — удалена ссылка «Редактировать матч» из desktop- и mobile-вариантов таблицы `matches-client.tsx`. Редактирование оценок остаётся через `EditScoresButton` на детальной странице. Полноценный edit-роут — в скоупе Группы C.
+
+2. ~~**Страница поэта в админке падает**~~ ✅ v3.23.0 — убрано `pendingUserId: true` из `include` в `admin/players/[id]/page.tsx:37`. Это скалярное поле, а не relation.
+
+3. ~~**Протокол матча вешает ошибку**~~ ✅ v3.23.0 — в Next.js 16 Server Component не может иметь inline `onClick`. Кнопка печати вынесена в client-компонент `protocol/_components/print-button.tsx`. Добавлен `protocol/error.tsx`.
+
+4. ~~**Модал «Карточка» появляется за пределами экрана**~~ ✅ v3.23.0 — `card-dialog.tsx` переписан с устаревшей `<DialogRoot><DialogContent>` на compound `Dialog.Root → Portal → Dialog.Backdrop → Dialog.Positioner → Dialog.Content`.
+
+5. ~~**Push-уведомления: «не удалось подписаться»**~~ ✅ v3.23.0 — добавлены `res.ok` проверки на клиенте (`push-subscribe-button.tsx`), серверный `route.ts` обёрнут в try/catch с осмысленными ошибками. При ошибке сервера клиент откатывает браузерную подписку.
+
+6. ~~**Неверные статусы матчей 1 марта**~~ ✅ v3.23.0 — `getDisplayStatus` существовала в `match-status.ts`, но **нигде не использовалась в UI**. Заменено на `getDisplayStatus(match)` в 6 местах: `matches-client.tsx` (desktop+mobile), `match-hero-admin.tsx`, `(public)/matches/[id]`, `(public)/[citySlug]/matches/[id]`, `match-card.tsx`, `opengraph-image.tsx`, `coach/matches/page.tsx`. Локальные дубли `STATUS_LABEL`/`STATUS_COLOR` удалены в пользу общих `matchStatusLabels`/`matchStatusColors`.
+
+### Группа B — UX счетовода / ведущего / тренера
+
+7. ~~**Личные кабинеты счетовода и ведущего в меню пользователя**~~ ✅ v3.24.0 — `/api/auth/me` возвращает `isScorer`/`isPresenter`, `UserMenu` показывает пункты «Кабинет счетовода» / «Кабинет ведущего» только для назначенных. Созданы страницы `/my/scorer-matches` и `/my/presenter-matches` с секциями LIVE/предстоящие/прошедшие.
+
+8. ~~**Полный ручной контроль счетовода**~~ ✅ v3.24.0 — добавлены 2 server action: `forceCompleteVotingAction` (завершение голосования с неполным жюри, гибкий подсчёт adjusted) и `updatePerformanceScoresAction` (редактирование оценок уже подсчитанного выступления + пересчёт счёта матча). UI в `vote-panel.tsx`: кнопка «Завершить с неполным жюри» во время фаз голосования + `ScoreEditorDialog` (✏ рядом с каждым выступлением в истории).
+
+9. ~~**Быстрый ввод оценок — кликабельные блоки 1-5**~~ ✅ v3.24.0 — новый компонент `scorer-vote-input.tsx`: 5 колонок по одному на судью, в каждой блоки 1-5 с цветом судьи (`JUDGE_COLORS`). Использует существующий `enterManualVoteAction`. Колонка блокируется когда судья проголосовал. Показывается в `vote-panel.tsx` во время TEXT_VOTING/DELIVERY_VOTING.
+
+10. ~~**Большой таймер ведущего на весь экран**~~ ✅ v3.24.0 — новый компонент `fullscreen-timer.tsx`: `position:fixed inset:0 bg:black`, цифры через `clamp(6rem, 30vw, 40rem)`, обратный отсчёт 3:00 → 0:00 → «+» для превышения. Крупные кнопки старт/стоп/сброс. Кнопка «Таймер на весь экран» в `presenter-client.tsx`, выход по ESC или кнопке.
+
+11. ~~**Ведущий умеет работать без скорера**~~ ❌ **отменено 2026-04-10** — Скорер всегда присутствует на матче. У ведущего узкоспециализированный интерфейс только для него самого (таймер, жеребьёвка, отвод судей, подсказки залу). Скорер может работать один (ведущий подаёт знаки аналогово) или оба с интерфейсами — тогда часть ведущего автоматизируется. Улучшения интерфейса ведущего пойдут отдельной задачей, не через дублирование функционала скорера.
+
+12. ~~**Счетовод может заявить состав за команду**~~ ✅ v3.24.0 — новый server action `submitScorerLineupAction` с проверкой `match.scorerUserId === currentUser.id || isAdmin` (без 6-часового окна). В `scorer-client.tsx` секция «Составы команд» с двумя карточками и кнопкой «Заявить состав» / «Изменить состав». Новый диалог `scorer-lineup-dialog.tsx` с чекбоксами из roster команды (5-8 игроков). `page.tsx` загружает `roster` для обеих команд.
+
+13. ~~**Кабинет тренера — расширить редактирование команды**~~ ✅ v3.24.0 — `/coach/page.tsx` теперь показывает `<EditTeamButton>` рядом с именем команды (видна только для `coach.role === 'COACH'`, не для ASSISTANT_COACH). Добавлено отображение description команды под заголовком. Переиспользует существующий диалог редактирования.
+
+### Группа C — Пошаговый пайплайн проведения матча
+
+14. ~~**Редизайн интерфейса скорера как последовательного workflow**~~ ✅ v3.25.0 — реализован 11-шаговый wizard в `apps/grandslamcup/src/app/match/[id]/score/_components/wizard/`. Ключевое архитектурное решение: wizard state **вычисляемый** через `computeWizardStep(match, matchState)` — нет локальной machine, просто реактивное отображение текущего состояния матча. При любом SSE event wizard автоматически перерисовывается на нужный шаг.
+
+    **Реализованные шаги:**
+    1. ✅ START_MATCH — большая кнопка старта + проверка составов
+    2. ✅ SELECT_JURY — QR + 5 слотов с цветами + ручное назначение
+    3. ✅ COIN_FLIP — две карточки команд + кнопка жеребьёвки
+    4. ✅ PERFORMER_PICK — ожидание тренера + fallback ручного выбора
+    5. ✅ TEXT_VOTING — имя + таймер + ScorerVoteInput + кнопка force-complete
+    6. ✅ DELIVERY_VOTING — тот же компонент с prop dimension
+    7. ✅ PAIR_RESULTS — разбор пары (отброс min/max) + победитель
+    8. ✅ HALF_SUMMARY — итоги тайма, топ-3, таблица всех пар
+    9. ✅ INTERMISSION — перерыв с таймером
+    10. Объединено с 11 → финальный экран
+    11. ✅ VICTORY_POEM — выбор поэта команды-победителя
+    12. ✅ MATCH_FINISHED — финальный счёт + MVP + ссылки
+
+    **Стратегия отката:** `?mode=classic` → возврат к старому `scorer-client.tsx` (не трогался, остаётся для emergency).
+
+15. ~~**Поле «победное стихотворение» в модели Match**~~ ✅ v3.25.0 — добавлено `Match.victoryPoemPlayerId: String?` с relation `victoryPoemPlayer Player?`. Миграция `add_victory_poem`. Используется в шаге VICTORY_POEM + отображается в MATCH_FINISHED.
+
+
+---
+
+## Фаза 5 — Обратная связь и доработки (v2.7.0+)
+
+> Источник: фидбек от Морены Лабутиной (зам. тренера) и организаторов, 2026-04-06
+
+### Группа A — Баги и критические исправления
+
+1. ~~**Тренер не может редактировать профили игроков с привязанной учёткой**~~ ✅ v2.8.0
+
+2. ~~**Метка "ASSISTANT_COACH" отображается как raw enum**~~ ✅ v2.8.0
+
+3. ~~**На мобиле в админке не листается таблица вправо**~~ ✅ v2.7.0
+
+4. ~~**Поля ввода не видны на тёмной теме**~~ ✅ v2.7.0
+
+5. ~~**Команда "СТИХИ НАРОДА" → 404**~~ ✅ v2.8.0 (redirect на правильный город)
+
+6. ~~**Нет отступа логотипа от шапки на мобиле (главная)**~~ ✅ v2.8.0
+
+7. ~~**Прошедшие матчи остаются в статусе SCHEDULED**~~ ✅ v2.8.0 (псевдостатус PAST_SCHEDULED)
+
+### Группа B — Роли и модель команды
+
+8. ~~**Рефакторинг ролей в команде**~~ ✅ v3.6.0
+   - Ограничение 1 COACH на команду (5 проверок), фильтрация неиграющих на паблике
+
+9. ~~**Счетовод и ведущий — новые роли**~~ ✅ v3.6.0
+   - Назначение в админке (dropdown), страницы `/presenters` и `/scorers`
+
+10. ~~**Привязка поэта к учётке — улучшение UX**~~ ✅ v2.9.0
+    - Кнопка "Это я" на публичной странице поэта → заявка с модерацией (pendingUserId)
+    - ✅ UI одобрения в модерации — диалог подтверждения с аватаром, данными пользователя, причиной отказа (v3.18.0)
+
+### Группа C — Расширенная статистика
+
+11. ~~**Рейтинговая таблица поэтов**~~ ✅ v3.0.0
+    - Колонки "Всего" и "Лучший", сортировка по суммарному баллу
+    - ✅ График динамики балл��в (recharts) + таблица ��стории соперников (v3.18.0)
+
+12. ~~**Расширенная статистика поэта**~~ ✅ v3.0.0
+    - Карточки, тридцатки, процент побед, ср. время, метка "Дебют"
+
+13. ~~**Статистика в кабинете тренера**~~ ✅ v3.0.0
+    - W/D/L, очки, средний балл, топ-3 перформера
+
+14. ~~**Карточки на страницах поэтов и команд**~~ ✅ v3.0.0
+    - Поэт: badge в hero. Команда: суммарные + предупреждение о дисквалификации
+
+15. ~~**Реестр дисквалифицированных поэтов**~~ ✅ v3.10.0
+    - Чтение чужих стихов → минимальные оценки (1) + дисквалификация на сезон
+    - ✅ Админка `/admin/suspensions` — управление отстранениями, создание с поиском поэта
+    - ✅ Кнопка "Плагиат" в деталях матча `/admin/matches/[id]` — обнуление оценок + дисквалификация
+    - ✅ Публичный реестр `/[citySlug]/suspensions` — "Чтение чужих стихов", "До конца сезона"
+    - ✅ Проверка при формировании заявки — дисквалифицированные не допускаются
+
+### Группа D — Кликабельность и навигация
+
+16. ~~**Ссылки в таблицах и списках**~~ ✅ v3.1.0
+    - Кабинет тренера, roster, матч — все имена кликабельны
+
+17. ~~**Бесконечная загрузка для списков**~~ ✅ v3.6.0
+    - "Показать ещё" для поэтов и команд (server-side pagination)
+
+18. ~~**Индикация загрузки**~~ ✅ v3.1.0
+    - TopLoader + loading.tsx для match, profile, sign-in
+
+19. ~~**Активный матч в расписании**~~ ✅ v3.1.0
+    - LIVE матчи в отдельной секции "Сейчас идёт", не попадают в прошедшие
+
+### Группа E — Кабинет тренера (доработки)
+
+20. ~~**Ближайшие матчи и мотивация заполнить состав**~~ ✅ v3.2.0
+    - CTA "Заявить состав" на дашборде, предупреждения по времени
+    - ✅ Push-уведомления за день до матча — модель PushSubscription, web-push API, кнопка подписки в хедере, cron endpoint (v3.18.0)
+
+21. ~~**Заявки — упрощение**~~ ✅ v2.9.0
+    - Тренер добавляет игроков мгновенно, модерация только для трансферов
+
+22. ~~**Товарищеские матчи**~~ ✅ v3.2.0 → v3.7.0 → v3.17.0 (challenge workflow)
+    - Организатор создаёт через `/admin/matches/create`
+    - ✅ Заявка от тренера: модель FriendlyMatchRequest, `/coach/friendly`, модерация `/admin/moderation/friendly`
+    - ✅ v3.17.0: Workflow «Тренер → Соперник → Админ» — тренер-соперник принимает/отклоняет вызов перед модерацией
+
+23. ~~**Заявка состава на матч из кабинета тренера**~~ ✅ v3.2.0
+    - `/coach/matches/[id]/lineup` — выбор 5-8 игроков, предзаполнение
+    - Отображение в Telegram-афише с гиперссылками на профили
+
+### Группа F — Telegram-бот
+
+24. ~~**Бот для публикации в канал Telegram**~~ ✅ v3.14.0
+    - ✅ Модель TelegramConfig (глобальный токен) + City.telegramChatId (канал города)
+    - ✅ Кнопки "Анонс", "Итог тайма", "Результат" в админке матча
+    - ✅ Афиша: составы, ведущий, счетовод, ссылки на профили, Яндекс.Карты
+    - ✅ Метка 🆕 для дебютантов, товарищеские с другим заголовком
+    - ✅ Промежуточные итоги по таймам, финальный результат с MVP и карточками
+    - ✅ /admin/settings — настройки бота (токен, тест, вкл/выкл)
+    - ✅ API cron: `/api/telegram/weekly` и `/api/telegram/today`
+    - TODO: Настроить cron на сервере после деплоя — согласовать расписание с организаторами
+      - `GET /api/telegram/weekly?secret=CRON_SECRET` — еженедельное расписание (предложение: пн 09:00 МСК)
+      - `GET /api/telegram/today?secret=CRON_SECRET` — утреннее напоминание (предложение: ежедневно 09:00 МСК)
+      - `GET /api/push/match-reminder?secret=CRON_SECRET` — push за день до матча (предложение: ежедневно 17:00 МСК)
+    - ✅ Постер (satori→PNG) для анонсов и результатов — автоматически с sendPhoto (v3.18.0)
+
+### Группа G — Пайплайн матча (ревизия)
+
+25. **Детальная ревизия пайплайна проведения матча** (в процессе)
+    - Создание матча организатором: команды, время, место, счетовод, ведущий
+    - Тренеры заявляют составы через кабинет
+    - После заполнения — матч можно опубликовать в Telegram
+    - ~~**Интерфейс тренера:** выбор кто выходит, статус игроков (не играл / 1-й тайм / оба), **отвод судьи**~~ ✅ v3.11.0
+    - ~~**Интерфейс ведущего:** жеребьёвка, опция "разрешён ли отвод судьи"~~ ✅ v3.12.0
+    - ~~**Интерфейс судьи:** изменение голоса до финального подсчёта, cookie-блокировка для 2-го тайма~~ ✅ v3.12.0
+    - ~~**Интерфейс счетовода (оффлайн):** полная работа без интернета (предзагрузка составов → IndexedDB), ввод оценок вручную, публикация при восстановлении связи~~ ✅ v3.13.0
+    - ~~**Интерфейс проектора:** экран перерыва с донатами, "оставить подарок на баре"~~ ✅ v3.12.0
+    - Нет возможности добавить новый матч из админки — ✅ уже есть `/admin/matches/create`
+    - ~~Нет ручного ввода/редактирования оценок и итогов в админке — добавить~~ ✅ v3.12.0
+    - ~~Фильтры матчей в админке по городу и статусу~~ ✅ v3.12.0
+
+### Группа H — Личный кабинет поэта
+
+26. ~~**Личный кабинет поэта**~~ ✅ v3.3.0
+    - `/poet` — дашборд, профиль, стихи. Модель Poem с CRUD.
+
+27. ~~**Ссылка на Ключницу в профиле**~~ ✅ v3.3.0
+    - Ссылка "Настройки аккаунта" в `/poet/profile`
+
+### Группа I — Фотографии
+
+28. ~~**Увеличить лимит загрузки до 15 МБ + ресайз**~~ ✅ v3.4.0
+    - 15 МБ лимит, sharp ресайз до 1920px, аватары 400x400
+
+29. ~~**Кадрирование 1:1 для фото профиля поэта**~~ ✅ v3.4.0
+    - react-easy-crop (круглый, aspect 1:1) в EntityPhotoUploader
+
+### Группа J — Прочее
+
+30. ~~**Объединение дублей профилей поэтов**~~ ✅ v3.7.0
+    - Пример: "Судаков Павел" и "Паша Судаков" — один человек
+    - ✅ `/admin/players/merge` — поиск, preview переносимых данных, транзакционное объединение с проверкой unique constraints
+
+31. ~~**История команд поэта**~~ ✅ v3.6.0
+    - Timeline на профиле поэта: сезон, команда, лига, роль, даты
+
+32. ~~**Мобильная админка — полная проверка**~~ ✅ v3.21.0
+    - ✅ 3 shared-компонента: AdminResponsiveList, AdminCard, AdminActionsMenu
+    - ✅ 14 таблиц → карточки на mobile (< md): Cities, Venues, Seasons, Teams, Players, Matches, Moderation, Friendly, Claims, Suspensions, Users, News, Donate
+    - ✅ Фикс search/filter overflow: minW="200px" → minW="0", dropdown w={{ base: '100%', sm: '200px' }}
+    - ✅ Action-кнопки → ⋮ меню на mobile через AdminActionsMenu
+    - ✅ Шапка: «КБС Админ» на mobile, имя пользователя скрыто на < md
+    - ✅ Desktop-вид без изменений — переключение через display={{ base, md }}
+
+33. **Трансляция матча на сайте (вопрос)**
+    - Возможность встраивания стрима (YouTube/VK Live) на страницу матча
+    - Требует уточнения у организатора
+
+34. ~~**Новости и Поддержать — привязка к городу**~~ ✅ v3.6.0
+    - cityId на NewsPost/DonateLink, городские роуты, header/footer ссылки, выбор города в админке
+
+35. ~~**Привязка поэт↔пользователь из админки**~~ ✅ v3.9.0
+    - `/admin/players/[id]`: секция привязки — привязать по email, отвязать, одобрить/отклонить заявку "Это я"
+    - `/admin/users/[id]`: секция привязки — поиск поэта по имени с debounce, привязка, отвязка
+    - `/admin/moderation/claims`: страница модерации заявок "Это я" (pendingUserId)
+    - Кнопка "Привязка профилей" с badge на странице модерации
+
+### Группа K — Инфраструктура
+
+36. ~~**Staging-окружение gsc-test.letar.best**~~ ✅ (устарело, s1 выведен из эксплуатации
+    2026-06-20 — см. пункт 37 ниже, полностью заменено новым пайплайном на s3)
+    - ✅ `docker-compose.staging.yml` — отдельные контейнеры на s1 (порты 5453/3016)
+    - ✅ `.env.staging.example` — шаблон переменных
+    - ✅ `--staging` флаг в `deploy-affected.sh` (compose, env, image tag)
+    - ✅ `infra/staging/sync-db-staging.sh` — pg_dump/restore prod→staging
+    - ✅ SSH s1→s2 настроен для скрипта синхронизации
+    - ✅ OIDC redirect URI в `auth-hub/src/lib/auth.ts` (trustedClients)
+    - ✅ `robots.ts` запрещает индексацию staging-доменов
+    - ✅ Зарегистрирован в Dashboard (DeployedApp на s1)
+    - Workflow: `./deploy-affected.sh --app grandslamcup --staging` → проверка → prod
+
+37. ~~**Staging-пайплайн на s3, HTTPS-домен, deploy-mcp e2e-gate (§18 Сессия D)**~~ ✅ 2026-07-11
+    - ✅ Домен `grandslamcup-stage.s3.letar.best` (один лейбл — под существующий DNS wildcard
+      `*.s3 CNAME s3.letar.best`), NPM proxy host на s3 + Let's Encrypt HTTP-01
+    - ✅ `.env.staging` на s3 — `OIDC_CLIENT_SECRET` тот же, что у прод-клиента `grandslamcup-prod`
+      (не отдельный секрет), redirect URI зарегистрирован в auth-hub seed.ts
+    - ✅ Данные — анонимизированный снепшот прода (`scripts/anonymize-staging-db.ts`), не пустая
+      БД: `pg_dump` без Account/Session/Verification/consentLog/PushSubscription →
+      `pg_restore --data-only` → анонимизация User/RosterApplication
+    - ✅ `deploy_app({target:"staging"})` → `run_e2e` → `e2e_status` через deploy-mcp — первый
+      живой прогон end-to-end (нашёл и починил баг раннера в dashboard-agent, не в grandslamcup)
+    - ~~⚠️ Гипотеза «нет активного сезона» (3/28 passed)~~ ❌ **не подтвердилась** — настоящая
+      причина: `anonymize-staging-db.ts` анонимизировал служебный e2e-fixture
+      `admin@grandslamcup.ru`, ломая весь admin-пласт тестов. ✅ Исправлено — email исключён из
+      анонимизации.
+    - ✅ **Alt-баг подтверждён и исправлен** — `getByAltText('Grand Slam Cup')` резолвился в
+      header+hero на `/` (оба легитимны для доступности), тест теперь скоупит через
+      `page.locator('header')`.
+    - ✅ **`01-public.spec.ts` обновлён под мультигород** — `/` это city-selector без меню
+      (`buildNavItems` возвращает `[]` на root), секции дашборда живут только на `/[citySlug]` —
+      тесты теперь делают `goto('/spb')` перед проверкой.
+    - ✅ **Снепшот пересобран с фиксом → 18/28 passed** (было 3/28). Попутно найдены и починены
+      BlackCove: (1) в `.env.staging` не было `DATABASE_URL` — скрипты подхватывали закоммиченный
+      dev `.env` (прод-порт 5453) → `ECONNREFUSED`; (2) **🔴 критично** — `POSTGRES_PASSWORD` через
+      `openssl rand -base64 32` содержал `+`/`/`/`=`, ломавшие парсинг `DATABASE_URL` при
+      интерполяции в `docker-compose.staging.yml` → **все страницы staging отдавали 500** с самого
+      первого деплоя (прогон 3/28 шёл на неработающем приложении, не на «недостающих данных») —
+      перегенерирован через `openssl rand -hex 32` (без спецсимволов; для чего угодно, что
+      интерполируется в connection string — `-hex`, не `-base64`).
+    - ⚠️ **Осталось 10/28, разбито по категориям:**
+      - **7 — все `03-admin.spec.ts`.** ✅ **Три архитектурных бага найдены и закрыты системно
+        (не только в grandslamcup), см. корневой `PLAN.md` §18 Сессии №58–60:**
+        1. `/api/auth/dev-session` проверял `NODE_ENV === 'production'`, структурно сломано на
+           любом production-билде (staging тоже). Вынесено в `createDevSessionRoute`
+           (`@letar/auth/server`) с двойной защитой `ALLOW_DEV_SESSION`+`DEV_SESSION_TOKEN`.
+        2. Редирект строился от `request.url`, резолвящегося в bind-адрес контейнера `0.0.0.0` —
+           браузер получал `ERR_CONNECTION_REFUSED` при валидной cookie. Base URL теперь
+           резолвится из `x-forwarded-host`/`host` заголовков.
+        3. Cookie ставилась под именем `better-auth.session_token` без `__Secure-` префикса —
+           Better Auth сам требует этот префикс + атрибут `Secure`, когда `BETTER_AUTH_URL`
+           начинается с `https://` (staging/prod), и не находил сессию под другим именем.
+           Новая опция `useSecureCookies` в фабрике решает это по умолчанию.
+           `@letar/auth` 0.7.0 → 0.8.2. `global-setup.ts` больше не доверяет `waitForURL`-паттерну —
+           проверяет факт установки cookie. Паттерн задокументирован в `.claude/docs/e2e-testing.md`
+           для тиража на будущие staging-e2e приложения (§18.6).
+        4. `dashboard-agent` `run_e2e` не переключался на пользователя `deploy` перед `nx e2e` —
+           root-owned `.nx`/`test-output` блокировали последующие деплои/прогоны (`EACCES`).
+           Фикс через `sudo -u deploy -H`, следом регрессия — голый `sudo` сбрасывал `BASE_URL`/
+           `DEV_SESSION_TOKEN`, чинилось `--preserve-env=BASE_URL,DEV_SESSION_TOKEN`.
+           `dashboard-agent` 0.7.2 → 0.7.4.
+        5. `apps/grandslamcup-e2e/src/global-setup.ts` искал cookie `better-auth.session_token`
+           без учёта `__Secure-` префикса из п.3 — заменено на поиск по суффиксу
+           (`cookie.name.endsWith(...)`). Поправлено BlackCove напрямую, коммит `50d72bc`.
+           **✅ Закрыто 2026-07-11 — 24/28 passed**, `[Global Setup] Admin авторизован` подтверждён.
+      - **Осталось 4/28, все тестовые, не инфраструктура (staging-пайплайн деплоя/e2e сам по себе
+        закрыт и стабилен — см. выше, доделывать нужно только тесты):**
+        1. `01-public.spec.ts` — «переход на Расписание»: `strict mode violation`, локатор ссылки
+           совпадает одновременно с header- и footer-навигацией.
+        2. `01-public.spec.ts` — «Ближайшие матчи» не рендерится на `/spb`: вероятно, в
+           анонимизированном снепшоте нет матчей с датой в будущем относительно текущего времени
+           сервера. Не разобрано глубже (нужно проверить данные снепшота или сгенерировать
+           тестовый матч в будущем).
+        3. `03-admin.spec.ts` — «список городов загружается»: `strict mode violation`,
+           `getByText('Санкт-Петербург')` совпадает и с `<p>`, и с `<td>` в таблице.
+        4. `03-admin.spec.ts` — «список сезонов загружается»: та же природа,
+           `getByText('КБС СПб Сезон 1')` совпадает и с `<p>`, и с `<td>`.
+        - **➡️ Следующая задача (владелец `grandslamcup-e2e`):** сузить локаторы в пп. 1, 3, 4
+          через `page.locator('header')`/`page.locator('table')`/`data-testid` (по аналогии с уже
+          применённым фиксом alt-текста логотипа); по п. 2 — проверить/дополнить данные снепшота.
+          Не блокирует staging-пайплайн — можно делать в любое время.
+    - Подробности процесса — корневой `PLAN.md` §18 (Сессии №55–61), `apps/dashboard-agent/
+PLAN_COMPLETED.md` v0.7.4, тред agent-mail `grandslamcup-staging-pilot`.
+
+---
+
+
+---
+
+## 10. Фазы реализации
+
+### Фаза 1 — MVP
+
+1. ~~Создание приложения в монорепо~~ ✅ v0.1.0
+2. ~~Модель данных (schema.zmodel)~~ ✅ v0.2.0
+3. ~~Auth (суперадмин + организаторы + тренеры)~~ ✅ v0.1.0
+4. ~~Админка: сезоны, команды, игроки, стадионы, матчи~~ ✅ v0.3.0 + v0.4.0
+5. ~~**Живой скоринг: судьи на телефонах + скорер** (Phase 1 MVP)~~ ✅ v0.5.0
+6. ~~Таймер с вибрацией + отмена голосования + таймаут судей + экран ведущего (Phase 2)~~ ✅ v0.6.0
+7. ~~MVP матча (автоматически)~~ ✅ v0.7.0
+8. ~~Публичная часть: таблицы, расписание, профили команд, результаты матчей~~ ✅ v0.7.0
+9. ~~Шаринг результатов (OG-карточки для Telegram/VK)~~ ✅ v0.7.1
+10. ~~Миграция данных с Tilda~~ ✅ v1.4.0 (итерация 1 — СПб из HTML)
+    ~~10b. Миграция данных из Telegram (итерация 2 — СПб + Москва из AI-экстракции)~~ ✅ v1.5.0
+11. ~~Деплой~~ ✅ v2.7.0
+
+### Фаза 2 — Расширение
+
+1. ~~Кабинет тренера (заявки на матч, управление составом)~~ ✅ v0.8.0
+2. Уведомления тренерам (email / Telegram — за день до матча)
+3. ~~Регистрация команд / заявки / трансферы~~ ✅ v1.0.0
+4. ~~Личный зачёт поэтов (рейтинги, профили)~~ ✅ v0.9.0
+5. ~~Экран для проектора (`/match/[id]/live`)~~ ✅ v0.9.0
+6. ~~Зрительское голосование (народное жюри)~~ ✅ v0.9.0
+7. ~~Защита от повторных судей + аналитика судейства~~ ✅ v0.9.0
+8. ~~Протокол матча (PDF)~~ ✅ v0.9.0
+9. ~~Страницы стадионов с картой~~ ✅ v0.8.0
+10. ~~iCal-экспорт расписания~~ ✅ v0.9.0
+
+### Фаза 3 — КБС-Москва 2026
+
+1. ~~Универсальная турнирная модель (ROUND_ROBIN + SWISS)~~ ✅ v1.2.0
+2. ~~Швейцарская система (генерация раундов)~~ ✅ v1.2.0
+3. ~~Double Elimination плей-офф (сетка 16 команд)~~ ✅ v1.2.0
+4. ~~Обновлённые карточки (2 жёлтых=красная, диссы, отстранения)~~ ✅ v1.2.0
+5. ~~Заместитель тренера (ASSISTANT_COACH)~~ ✅ v1.2.0
+6. ~~Тай-брейк при ничьей (11-я пара)~~ ✅ v1.2.0
+7. ~~Интеграция карточек в live scoring (автоматическая красная при 2 жёлтых)~~ ✅ v1.6.0
+8. ~~Автопродвижение в сетке (победитель → следующий слот)~~ ✅ v1.6.0
+9. ~~Обновление standings для SWISS формата (W-L запись)~~ ✅ v1.6.0
+
+### Фаза 4 — Улучшения
+
+1. ~~Новостная лента / блог (обзоры матчей)~~ ✅ v1.3.0
+2. ~~Фото привязанные к матчам~~ ✅ v1.1.0
+3. Telegram-бот (уведомления о матчах, результаты, расписание)
+4. ~~Донаты / призовой фонд~~ ✅ v1.3.0
+5. ~~PWA~~ ✅ v1.3.0
+6. ~~Mobile UX аудит: hamburger menu, error.tsx в public routes, touch targets в admin~~ ✅ v1.7.0
+7. ~~E2E тесты (Playwright, 28 тестов)~~ ✅ v1.7.0
+8. ~~Swiss Bracket визуализация (CS2 Major стиль)~~ ✅ v2.1.0
+9. ~~Редизайн публичных страниц (hero, таблицы, карточки, header, footer)~~ ✅ v2.3.0
+10. ~~Управление пользователями — список, назначение организаторов городов, роли~~ ✅ v2.6.0
+11. ~~Мобильная доступность админки — overflowX таблицы, touch targets, responsive диалоги, dark theme borders~~ ✅ v2.7.0
+
+### E2E тесты — покрытие
+
+| Файл                       | Кол-во | Покрытие                                       |
+| -------------------------- | ------ | ---------------------------------------------- |
+| `01-public.spec.ts`        | 10     | Главная, логотип, секции, навигация            |
+| `02-standings.spec.ts`     | 6      | Round-Robin, Swiss W-L, badge, переключение    |
+| `03-admin.spec.ts`         | 8      | Auth redirect, дашборд, sidebar, CRUD страницы |
+| `04-teams-players.spec.ts` | 4      | Профили команд, поэты, расписание              |
+| **Итого**                  | **28** | Публичные + admin + auth                       |
+
+**Запуск:** `nx e2e grandslamcup-e2e -- --project=chromium`
+**Auth:** `/api/auth/dev-session` (dev-only, описано ниже)
+
+---
+
+
+---
+
+## 13. Технический долг / инфра (2026-06)
+
+- [x] **OIDC `offline_access` scope** — добавлен в `src/lib/auth.ts` → refresh_token теперь сохраняется в `account` (2026-06-26)
+- [x] **MobileAuthSection** — самодельная auth-секция в `mobile-drawer.tsx` заменена на `MobileAuthSection` из `@letar/ui` (2026-06-26)
