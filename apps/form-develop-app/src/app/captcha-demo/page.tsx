@@ -5,7 +5,10 @@ import { DemoPageLayout } from '../_components'
 
 export default function CaptchaDemoPage() {
   return (
-    <DemoPageLayout title="Form.Captcha" description="CAPTCHA виджет — Turnstile, reCAPTCHA, hCaptcha">
+    <DemoPageLayout
+      title="Form.Captcha"
+      description="CAPTCHA виджет — Turnstile, reCAPTCHA, hCaptcha, Yandex SmartCaptcha"
+    >
       <VStack gap={8} align="stretch">
         <Box>
           <Heading size="md" mb={3}>
@@ -54,6 +57,9 @@ const result = await verifyCaptcha(token, {
             </Text>
             <Text>
               <strong>hcaptcha</strong> — hCaptcha
+            </Text>
+            <Text>
+              <strong>smartcaptcha</strong> — Yandex SmartCaptcha (данные обрабатываются в РФ, для 152-ФЗ)
             </Text>
           </VStack>
         </Box>

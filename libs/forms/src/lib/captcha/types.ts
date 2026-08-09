@@ -1,5 +1,5 @@
 /** Поддерживаемые провайдеры CAPTCHA */
-export type CaptchaProvider = 'turnstile' | 'recaptcha' | 'hcaptcha'
+export type CaptchaProvider = 'turnstile' | 'recaptcha' | 'hcaptcha' | 'smartcaptcha'
 
 /** Тема виджета CAPTCHA */
 export type CaptchaTheme = 'auto' | 'light' | 'dark'

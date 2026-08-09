@@ -27,7 +27,7 @@ export default function CaptchaDemoPage() {
         <Stack gap={6}>
           <Heading size="xl">CAPTCHA Demo</Heading>
           <Text color="fg.muted">
-            Form with CAPTCHA protection. Supports Cloudflare Turnstile, reCAPTCHA, and hCaptcha.
+            Form with CAPTCHA protection. Supports Cloudflare Turnstile, reCAPTCHA, hCaptcha, and Yandex SmartCaptcha.
           </Text>
           <Text color="fg.subtle" fontSize="sm">
             Note: CAPTCHA requires a valid site key. This demo shows the form layout — configure your provider in

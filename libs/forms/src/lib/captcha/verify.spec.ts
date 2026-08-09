@@ -107,4 +107,66 @@ describe('verifyCaptcha', () => {
     const result = await verifyCaptcha('token', baseOptions)
     expect(result.challengeTs).toBe('2026-01-01T00:00:00Z')
   })
+
+  describe('smartcaptcha', () => {
+    const smartOptions = { provider: 'smartcaptcha' as const, secretKey: 'test-secret' }
+
+    it('должен вызвать SmartCaptcha URL', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'ok', message: '', host: 'example.com' }),
+      })
+
+      await verifyCaptcha('token', smartOptions)
+      expect(mockFetch).toHaveBeenCalledWith('https://smartcaptcha.cloud.yandex.ru/validate', expect.anything())
+    })
+
+    it('должен отправлять secret+token+ip (не response/remoteip как у остальных)', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'ok', message: '' }),
+      })
+
+      await verifyCaptcha('my-token', { ...smartOptions, remoteIp: '1.2.3.4' })
+
+      const body = mockFetch.mock.calls[0][1].body as string
+      expect(body).toContain('token=my-token')
+      expect(body).toContain('ip=1.2.3.4')
+      expect(body).not.toContain('response=')
+      expect(body).not.toContain('remoteip=')
+    })
+
+    it('status="ok" → success=true, host пробрасывается в hostname', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'ok', message: '', host: 'example.com' }),
+      })
+
+      const result = await verifyCaptcha('token', smartOptions)
+      expect(result.success).toBe(true)
+      expect(result.hostname).toBe('example.com')
+    })
+
+    it('status="failed" → success=false, message пробрасывается в errorCodes', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'failed', message: 'Invalid or expired Token.' }),
+      })
+
+      const result = await verifyCaptcha('bad-token', smartOptions)
+      expect(result.success).toBe(false)
+      expect(result.errorCodes).toContain('Invalid or expired Token.')
+    })
+
+    it('status="failed" без message (это человек, а не ошибка запроса) → errorCodes не заполнен', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'failed', message: '' }),
+      })
+
+      const result = await verifyCaptcha('token', smartOptions)
+      expect(result.success).toBe(false)
+      expect(result.errorCodes).toBeUndefined()
+    })
+  })
 })

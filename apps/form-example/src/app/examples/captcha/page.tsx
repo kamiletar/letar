@@ -8,8 +8,8 @@ export default function CaptchaExamplePage() {
       <Stack gap={2}>
         <Heading size="xl">CAPTCHA</Heading>
         <Text color="fg.muted">
-          Protect forms with Cloudflare Turnstile, Google reCAPTCHA, or hCaptcha. Requires a real siteKey from the
-          provider.
+          Protect forms with Cloudflare Turnstile, Google reCAPTCHA, hCaptcha, or Yandex SmartCaptcha. Requires a real
+          siteKey from the provider.
         </Text>
       </Stack>
 

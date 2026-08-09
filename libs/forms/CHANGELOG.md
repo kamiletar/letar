@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.5] - 2026-08-09
+
+### Added
+
+- **Провайдер Yandex SmartCaptcha для `Form.Captcha`.** Запрошено для `svoichuzhie` (152-ФЗ —
+  Turnstile/reCAPTCHA/hCaptcha отправляют IP и телеметрию браузера на зарубежные серверы,
+  SmartCaptcha хранит данные в РФ). `provider="smartcaptcha"` + новый файл
+  `captcha/providers/smartcaptcha.tsx` (лениво грузит `smartcaptcha.cloud.yandex.ru/captcha.js`,
+  тот же паттерн explicit-render, что у `hcaptcha.tsx`). Серверная верификация через
+  `verifyCaptcha({ provider: 'smartcaptcha', ... })` — нормализует нестандартный формат ответа
+  SmartCaptcha (`{status, message, host}` вместо `{success, 'error-codes', hostname}`) и другие
+  имена полей запроса (`secret`+`token`+`ip` вместо `secret`+`response`+`remoteip`) под общий
+  `CaptchaVerifyResult`, прозрачно для потребителя.
+
 ## [1.4.4] - 2026-08-09
 
 ### Fixed

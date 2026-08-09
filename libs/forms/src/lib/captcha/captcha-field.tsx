@@ -11,6 +11,7 @@ const providers: Record<CaptchaProvider, ReturnType<typeof lazy>> = {
   turnstile: lazy(() => import('./providers/turnstile').then((m) => ({ default: m.TurnstileProvider }))),
   recaptcha: lazy(() => import('./providers/recaptcha').then((m) => ({ default: m.RecaptchaProvider }))),
   hcaptcha: lazy(() => import('./providers/hcaptcha').then((m) => ({ default: m.HcaptchaProvider }))),
+  smartcaptcha: lazy(() => import('./providers/smartcaptcha').then((m) => ({ default: m.SmartCaptchaProvider }))),
 }
 
 /**

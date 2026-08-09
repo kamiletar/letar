@@ -558,13 +558,38 @@ function CityField() {
 
 ## Form.Captcha — Защита от ботов (v0.77.0+)
 
-CAPTCHA интеграция (Cloudflare Turnstile, reCAPTCHA, hCaptcha):
+CAPTCHA интеграция (Cloudflare Turnstile, reCAPTCHA, hCaptcha, Yandex SmartCaptcha):
 
 ```tsx
 <Form.Captcha provider="turnstile" siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} />
 ```
 
 Значение токена автоматически добавляется в form state. Серверная верификация через `verifyCaptchaToken()`.
+
+### Yandex SmartCaptcha (v1.4.4+)
+
+Для приложений, где данные не должны покидать РФ (152-ФЗ) — Turnstile/reCAPTCHA/hCaptcha
+передают IP и телеметрию браузера на зарубежные серверы, SmartCaptcha хранит их в РФ:
+
+```tsx
+<Form.Captcha provider="smartcaptcha" siteKey={process.env.NEXT_PUBLIC_SMARTCAPTCHA_SITE_KEY} />
+```
+
+```typescript
+// Server Action
+import { verifyCaptcha } from '@letar/forms/captcha/server'
+
+const result = await verifyCaptcha(token, {
+  provider: 'smartcaptcha',
+  secretKey: process.env.SMARTCAPTCHA_SECRET_KEY!,
+})
+```
+
+⚠️ У SmartCaptcha другой формат ответа сервера верификации (`{ status: 'ok' | 'failed', message,
+host }` вместо `{ success, 'error-codes', hostname }`) и другие имена полей запроса (`secret` +
+`token` + `ip` вместо `secret` + `response` + `remoteip`) — `verifyCaptcha()` нормализует это
+прозрачно, возвращаемый `CaptchaVerifyResult` одинаковый для всех провайдеров. Тема виджета
+(`theme`) SmartCaptcha не поддерживает — параметр принимается, но игнорируется.
 
 ---
 
